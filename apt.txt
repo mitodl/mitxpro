@@ -1,0 +1,6 @@
+# Core requirements
+git
+curl
+libjpeg-dev
+zlib1g-dev
+net-tools

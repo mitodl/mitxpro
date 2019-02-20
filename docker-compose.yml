@@ -1,0 +1,83 @@
+version: '2.1'
+services:
+  db:
+    image: postgres
+    ports:
+      - "5432"
+
+  redis:
+    image: redis
+    ports:
+      - "6379"
+
+  nginx:
+    image: nginx
+    ports:
+      - "8053:8053"
+    links:
+      - web
+
+  python:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: /bin/true
+    environment:
+      DEBUG: 'False'
+      NODE_ENV: 'production'
+      DEV_ENV: 'True'  # necessary to have nginx connect to web container
+      PORT: 8051
+      COVERAGE_DIR: htmlcov
+      DATABASE_URL: postgres://postgres@db:5432/postgres
+      MITXPRO_SECURE_SSL_REDIRECT: 'False'
+      MITXPRO_DB_DISABLE_SSL: 'True'
+      ELASTICSEARCH_URL: elastic:9200
+      CELERY_TASK_ALWAYS_EAGER: 'False'
+      CELERY_BROKER_URL: redis://redis:6379/4
+      CELERY_RESULT_BACKEND: redis://redis:6379/4
+      DOCKER_HOST: ${DOCKER_HOST:-missing}
+      WEBPACK_DEV_SERVER_HOST: ${WEBPACK_DEV_SERVER_HOST:-localhost}
+    env_file: .env
+
+  web:
+    image: mitxpro_python
+    extends:
+      service: python
+    command: >
+      /bin/bash -c '
+      sleep 3 &&
+      python3 manage.py collectstatic --noinput &&
+      python3 manage.py migrate --noinput &&
+      uwsgi uwsgi.ini'
+    ports:
+      - "8051:8051"
+    links:
+      - db
+      - redis
+
+  watch:
+    build:
+      context: .
+      dockerfile: Dockerfile-node
+    working_dir: /src
+    command: >
+      /bin/bash -c './webpack_dev_server.sh --install'
+    ports:
+      - "8052:8052"
+    environment:
+      NODE_ENV: 'production'
+      DOCKER_HOST: ${DOCKER_HOST:-missing}
+      CONTAINER_NAME: 'watch'
+    env_file: .env
+
+  celery:
+    image: mitxpro_python
+    extends:
+      service: python
+    command: >
+      /bin/bash -c '
+      sleep 3;
+      celery -A mitxpro.celery:app worker -B -l ${MITXPRO_LOG_LEVEL:-INFO}'
+    links:
+      - db
+      - redis

@@ -1,0 +1,18 @@
+[ignore]
+.*/node_modules/fbjs/.*
+.*/node_modules/draft-js/.*
+.*/node_modules/draftjs-utils/.*
+.*/node_modules/react-event-listener/src/index.js
+.*.git/.*
+
+[include]
+./static/js
+
+[libs]
+./static/js/flow/declarations.js
+./flow-typed/npm/
+
+[options]
+esproposal.class_static_fields=enable
+esproposal.class_instance_fields=enable
+suppress_comment= \\(.\\|\n\\)*\\$FlowFixMe

@@ -1,0 +1,145 @@
+{
+  "addons": [
+    "heroku-postgresql:hobby-dev",
+    "newrelic:wayne",
+    "rediscloud:30"
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-python"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-pgbouncer"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nginx"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-apt"
+    }
+  ],
+  "description": " ",
+  "env": {
+    "AWS_ACCESS_KEY_ID": {
+      "description": "AWS Access Key for S3 storage."
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "description": "AWS Secret Key for S3 storage."
+    },
+    "AWS_STORAGE_BUCKET_NAME": {
+      "description": "S3 Bucket name."
+    },
+    "GA_TRACKING_ID": {
+      "description": "Google analytics tracking ID",
+      "required": false
+    },
+    "MAILGUN_URL": {
+      "description": "The URL for communicating with Mailgun"
+    },
+    "MAILGUN_KEY": {
+      "description": "The token for authenticating against the Mailgun API"
+    },
+    "MAILGUN_BATCH_CHUNK_SIZE": {
+      "description": "Maximum number of emails to send in a batch",
+      "required": false
+    },
+    "MAILGUN_FROM_EMAIL": {
+      "description": "Email which mail comes from"
+    },
+    "MAILGUN_BCC_TO_EMAIL": {
+      "description": "Email address used with bcc email"
+    },
+    "MITXPRO_ADMIN_EMAIL": {
+      "description": "E-mail to send 500 reports to."
+    },
+    "MITXPRO_DB_CONN_MAX_AGE": {
+      "value": "0"
+    },
+    "MITXPRO_DB_DISABLE_SSL": {
+      "value": "true"
+    },
+    "MITXPRO_EMAIL_HOST": {
+      "description": "Outgoing e-mail settings"
+    },
+    "MITXPRO_EMAIL_PASSWORD": {
+      "description": "Outgoing e-mail settings"
+    },
+    "MITXPRO_EMAIL_PORT": {
+      "description": "Outgoing e-mail settings",
+      "value": "587"
+    },
+    "MITXPRO_EMAIL_TLS": {
+      "description": "Outgoing e-mail settings",
+      "value": "True"
+    },
+    "MITXPRO_EMAIL_USER": {
+      "description": "Outgoing e-mail settings"
+    },
+    "MITXPRO_ENVIRONMENT": {
+      "description": "The execution environment that the app is in (e.g. dev, staging, prod)"
+    },
+    "MITXPRO_FROM_EMAIL": {
+      "description": "E-mail to use for the from field"
+    },
+    "MITXPRO_LOG_LEVEL": {
+      "description": "The logging level for the application",
+      "required": true,
+      "value": "INFO"
+    },
+    "MITXPRO_SECURE_SSL_REDIRECT": {
+      "description": "Application-level SSL redirect setting.",
+      "required": false,
+      "value": "True"
+    },
+    "MITXPRO_SUPPORT_EMAIL": {
+      "description": "Email address listed for customer support"
+    },
+    "MITXPRO_USE_S3": {
+      "description": "Use S3 for storage backend (required on Heroku)",
+      "value": "True"
+    },
+    "NEW_RELIC_APP_NAME": {
+      "description": "Application identifier in New Relic."
+    },
+    "NODE_MODULES_CACHE": {
+      "description": "If false, disables the node_modules cache to fix yarn install",
+      "value": "false"
+    },
+    "PGBOUNCER_DEFAULT_POOL_SIZE": {
+      "value": "50"
+    },
+    "PGBOUNCER_MIN_POOL_SIZE": {
+      "value": "5"
+    },
+    "SECRET_KEY": {
+      "description": "Django secret key.",
+      "generator": "secret"
+    },
+    "SENTRY_DSN": {
+      "description": "The connection settings for Sentry"
+    },
+    "SENTRY_LOG_LEVEL": {
+      "description": "The log level for Sentry",
+      "required": false
+    },
+    "STATUS_TOKEN": {
+      "description": "Token to access the status API."
+    }
+  },
+  "keywords": [
+    "Django",
+    "Python",
+    "MIT",
+    "Office of Digital Learning"
+  ],
+  "name": "mitxpro",
+  "repository": "https://github.com/mitodl/mitxpro",
+  "scripts": {
+    "postdeploy": "./manage.py migrate --noinput"
+  },
+  "success_url": "/",
+  "website": "https://github.com/mitodl/mitxpro"
+}

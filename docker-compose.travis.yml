@@ -1,0 +1,26 @@
+version: '2.1'
+services:
+  python:
+    build:
+      context: .
+      # TODO: upload dockerfile first then uncomment this line
+      # dockerfile: ./travis/Dockerfile-travis-web
+      dockerfile: ./Dockerfile
+
+  web:
+    build:
+      context: .
+      # TODO: upload dockerfile first then uncomment this line
+      # dockerfile: ./travis/Dockerfile-travis-web
+      dockerfile: ./Dockerfile
+
+  celery:
+    build:
+      context: .
+      # TODO: upload dockerfile first then uncomment this line
+      # dockerfile: ./travis/Dockerfile-travis-web
+      dockerfile: ./Dockerfile
+    environment:
+      # for celery, to avoid ImproperlyConfigured
+      MAILGUN_URL: 'http://fake.example.com'
+      MAILGUN_KEY: 'fake'
