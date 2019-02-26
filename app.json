@@ -37,10 +37,12 @@
       "required": false
     },
     "MAILGUN_URL": {
-      "description": "The URL for communicating with Mailgun"
+      "description": "The URL for communicating with Mailgun",
+      "required": false
     },
     "MAILGUN_KEY": {
-      "description": "The token for authenticating against the Mailgun API"
+      "description": "The token for authenticating against the Mailgun API",
+      "required": false
     },
     "MAILGUN_BATCH_CHUNK_SIZE": {
       "description": "Maximum number of emails to send in a batch",

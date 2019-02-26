@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.conf.urls import include
+from django.conf.urls import include, url
 from django.contrib import admin
 from django.urls import path
 
@@ -26,6 +26,8 @@ urlpatterns = [
     path("status/", include("server_status.urls")),
     # Example view
     path("", index, name="mitxpro-index"),
+    #
+    url(r"^api/coursework/", include("courses.urls")),
 ]
 
 if settings.DEBUG:

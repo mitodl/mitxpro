@@ -3,7 +3,7 @@ import React from "react"
 import { Route } from "react-router"
 import type { Match } from "react-router"
 
-import CheckboxPage from "./CheckboxPage"
+import CourseDashboardPage from "./CourseDashboardPage"
 
 export default class App extends React.Component<*, void> {
   props: {
@@ -13,7 +13,7 @@ export default class App extends React.Component<*, void> {
   render() {
     return (
       <div className="app">
-        <Route path="/" component={CheckboxPage} />
+        <Route exact path="/" component={CourseDashboardPage} />
       </div>
     )
   }

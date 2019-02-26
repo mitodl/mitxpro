@@ -6,6 +6,21 @@ import R from "ramda"
 
 import { S, parseJSON, filterE } from "./sanctuary"
 
+const coursesRequest = (force = false) => ({
+  url:    "/api/courseware/courses/",
+  update: {
+    courses: (prev, next) => {
+      return next
+    },
+  },
+  transform: (responseJson) => {
+    courses
+  },
+  force
+})
+
+//--------
+
 export function getCookie(name: string): string | null {
   let cookieValue = null
 
