@@ -49,11 +49,18 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "server_status",
+    "oauth2_provider",
+    "rest_framework",
     "raven.contrib.django.raven_compat",
     # Put our apps after this point
     "mitxpro",
     "courses",
+    "users",
 )
+
+# configure a custom user model
+AUTH_USER_MODEL = "users.User"
+
 
 DISABLE_WEBPACK_LOADER_STATS = get_bool("DISABLE_WEBPACK_LOADER_STATS", False)
 if not DISABLE_WEBPACK_LOADER_STATS:
@@ -63,6 +70,7 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "oauth2_provider.middleware.OAuth2TokenMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -318,6 +326,33 @@ CACHES = {
         "LOCATION": CELERY_BROKER_URL,
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
     },
+}
+
+AUTHENTICATION_BACKENDS = (
+    "oauth2_provider.backends.OAuth2Backend",
+    "django.contrib.auth.backends.ModelBackend",
+)
+
+
+#
+OAUTH2_PROVIDER = {
+    # this is the list of available scopes
+    "SCOPES": {
+        "read": "Read scope",
+        "write": "Write scope",
+        "user:read": "Can read user and profile data",
+    }
+}
+DEFAULT_SCOPES = ["user:read"]
+
+
+# DRF configuration
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.SessionAuthentication",
+        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 
 

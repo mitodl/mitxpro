@@ -27,6 +27,7 @@ services:
       NODE_ENV: 'production'
       DEV_ENV: 'True'  # necessary to have nginx connect to web container
       PORT: 8051
+      SECRET_KEY: local_unsafe_key
       COVERAGE_DIR: htmlcov
       DATABASE_URL: postgres://postgres@db:5432/postgres
       MITXPRO_SECURE_SSL_REDIRECT: 'False'

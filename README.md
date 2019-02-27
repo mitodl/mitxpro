@@ -10,11 +10,9 @@ mitxpro follows the same [initial setup steps outlined in the common ODL web app
 Run through those steps **including the addition of `/etc/hosts` aliases and the optional step for running the
 `createsuperuser` command**.
 
-### Running tests
+### Configure xPro and Open edX
 
-Unlike our other web applications this project is not using tox. To run tests locally, run this command instead:
-
-    docker-compose run --rm web pytest
+See [Configure Open edX](docs/configure_open_edx.md)
 
 # Optional Setup
 
@@ -24,7 +22,7 @@ for running the app
 ### Running the app in a notebook
 
 This repo includes a config for running a [Jupyter notebook](https://jupyter.org/) in a
-Docker container. This enables you to do in a Jupyter notebook anything you might 
+Docker container. This enables you to do in a Jupyter notebook anything you might
 otherwise do in a Django shell. To get started:
 
 - Copy the example file
@@ -57,6 +55,12 @@ otherwise do in a Django shell. To get started:
 - Navigate to the `.ipynb` file that you created and click it to run the notebook
 - Execute the first block to confirm it's working properly (click inside the block
   and press Shift+Enter)
-  
-From there, you should be able to run code snippets with a live Django app just like you 
+
+From there, you should be able to run code snippets with a live Django app just like you
 would in a Django shell.
+
+### Running tests
+
+Unlike our other web applications this project is not using tox. To run tests locally, run this command instead:
+
+    docker-compose run --rm web pytest
