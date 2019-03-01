@@ -42,14 +42,17 @@ item to the basket.
 
 Whether or not we want to use django-oscar, we will need models like these (using django-oscar names here):
  - `Order` for an instance of a purchase
- - `Basket` for a user's shopping cart. This should be connected to `Order`.
+ - `Basket` for a user's shopping cart. This should be connected to `Order` and also `User` for
+ the user who is making the purchase.
  - `Line` for an item in an `Basket`
+ - `Receipt` to store CyberSource post-back information. Foreign key to `Order`.
  - `Product` to represent a purchasable item. In MicroMasters we skip this and 
  instead set the course key in the `Line` directly but should have this object
  to provide future flexibility and to let us decouple the price and the course information.
- - `Voucher` to describe a coupon and how it can be used. A foreign key to `Basket` can be used
- to indicate that a user wants to use the coupon for the purchase.
- - `Receipt` to store CyberSource post-back information.
+ - `Voucher` to describe a coupon and how it can be used. This should have a field to store the coupon code.
+ - `VoucherBasket` to connect `Voucher` with `Basket` to describe where a coupon is being redeemed.
+ - `PurchaseOrder` to store notes and other information about a purchase order. Foreign key to `Order`.
+ 
  
 And maybe something for purchase orders as well? We need some way to distinguish those from
 CyberSource purchases.
