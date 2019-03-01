@@ -1,7 +1,10 @@
 // @flow
 import { combineReducers } from "redux"
-import type { Action } from "../flow/reduxTypes"
+import { entitiesReducer, queriesReducer } from "redux-query"
+
 import { UPDATE_CHECKBOX } from "../actions"
+
+import type { Action } from "../flow/reduxTypes"
 
 export type CheckboxType = {
   checked: boolean
@@ -26,5 +29,7 @@ export const checkbox = (
 }
 
 export default combineReducers({
-  checkbox
+  checkbox: checkbox,
+  entities: entitiesReducer,
+  queries:  queriesReducer
 })

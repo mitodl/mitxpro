@@ -26,6 +26,7 @@ urlpatterns = [
     path("status/", include("server_status.urls")),
     # Example view
     path("", index, name="mitxpro-index"),
+    url(r"^courses.*$", index, name="mitxpro-index"),
     #
     url(r"^api/coursework/", include("courses.urls")),
 ]

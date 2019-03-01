@@ -52,8 +52,8 @@ INSTALLED_APPS = (
     "raven.contrib.django.raven_compat",
     # Put our apps after this point
     "mitxpro",
-    # Add 'library' app for testing purposes
-    "courses"
+    "courses",
+    "seed",
 )
 
 DISABLE_WEBPACK_LOADER_STATS = get_bool("DISABLE_WEBPACK_LOADER_STATS", False)

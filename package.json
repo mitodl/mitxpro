@@ -68,6 +68,7 @@
     "redux-actions": "^2.2.1",
     "redux-asserts": "^0.0.10",
     "redux-logger": "^3.0.6",
+    "redux-query": "^2.3.1",
     "redux-thunk": "^2.2.0",
     "sanctuary": "^0.13.2",
     "sass-lint": "^1.10.2",

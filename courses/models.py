@@ -19,7 +19,7 @@ class Program(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     thumbnail = models.ImageField(null=True, blank=True)
-    readable_id = models.CharField(max_length=255)
+    readable_id = models.CharField(null=True, max_length=255)
     live = models.BooleanField(default=False)
     source = models.CharField(
         max_length=15,
@@ -32,18 +32,21 @@ class Program(models.Model):
 
 
 class Course(models.Model):
-    program = models.ForeignKey(Program, on_delete=models.CASCADE)
-    position_in_program = models.PositiveSmallIntegerField()
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, null=True)
+    position_in_program = models.PositiveSmallIntegerField(null=True)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     thumbnail = models.ImageField(null=True, blank=True)
-    readable_id = models.CharField(max_length=255)
+    readable_id = models.CharField(null=True, max_length=255)
     live = models.BooleanField(default=False)
     source = models.CharField(
         max_length=15,
         choices=VALID_PLATFORM_CHOICES,
         null=True
     )
+
+    class Meta:
+        ordering = ('program', 'title', )
 
     def __str__(self):
         return self.title
@@ -53,11 +56,11 @@ class CourseRun(models.Model):
     course = models.ForeignKey(Course, null=True, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     courseware_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
-    courseware_url = models.URLField(blank=True, null=True)
-    start_date = models.DateTimeField(blank=True, null=True, db_index=True)
-    end_date = models.DateTimeField(blank=True, null=True, db_index=True)
-    enrollment_start = models.DateTimeField(blank=True, null=True, db_index=True)
-    enrollment_end = models.DateTimeField(blank=True, null=True, db_index=True)
+    courseware_url = models.URLField(null=True)
+    start_date = models.DateTimeField(null=True, db_index=True)
+    end_date = models.DateTimeField(null=True, db_index=True)
+    enrollment_start = models.DateTimeField(null=True, db_index=True)
+    enrollment_end = models.DateTimeField(null=True, db_index=True)
     live = models.BooleanField(default=False)
     platform = models.CharField(
         max_length=15,

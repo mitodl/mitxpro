@@ -6,17 +6,90 @@ import R from "ramda"
 
 import { S, parseJSON, filterE } from "./sanctuary"
 
-const coursesRequest = (force = false) => ({
-  url:    "/api/courseware/courses/",
+export const coursesRequest = (force = false) => ({
+  url:    "/api/coursework/courses/",
   update: {
     courses: (prev, next) => {
       return next
     },
   },
   transform: (responseJson) => {
-    courses
+    // The response is a list of serialized courses. This turns it into an object mapping
+    // the course id to the full serialized object: {[course.id]: [course]}
+    return {
+      courses: R.fromPairs(
+        responseJson.map((course) => (
+          [course.id, course]
+        ))
+      )
+    }
   },
   force
+})
+
+export const deleteCourseRequest = (courseId) => ({
+  url: `/api/coursework/courses/${courseId}/`,
+  update:  {
+    courses: (prev, next) => {
+      return R.omit(
+        [next._toDelete],
+        prev
+      )
+    },
+  },
+  transform: () => {
+    return {
+      courses: {
+        _toDelete: String(courseId)
+      }
+    }
+  },
+  options: {
+    method: "DELETE"
+  }
+})
+
+export const courseRequest = (courseId, force = false) => ({
+  url: `/api/coursework/courses/${courseId}/`,
+  update: {
+    course: (prev, next) => {
+      return next
+    },
+  },
+  transform: (responseJson) => {
+    return { course: responseJson }
+  },
+  force
+})
+
+export const updateCourseRequest = (courseId, payload) => ({
+  url: `/api/coursework/courses/${courseId}/`,
+  body: payload,
+  update: {
+    course: (prev, next) => {
+      return next
+    },
+    courses: (prev, next) => {
+      return R.merge(
+        prev,
+        next._toUpdate
+      )
+    }
+  },
+  transform: (responseJson) => {
+    const course = responseJson
+    return {
+      course: course,
+      courses: {
+        _toUpdate: {
+          [course.id]: course
+        }
+      }
+    }
+  },
+  options: {
+    method: "PATCH"
+  }
 })
 
 //--------
