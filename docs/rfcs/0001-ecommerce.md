@@ -41,7 +41,8 @@ item to the basket.
 ##### Recommendation
 
 Whether or not we want to use django-oscar, we will need models like these (using django-oscar names here):
- - `Order` for an instance of a purchase
+ - `Order` for an instance of a purchase. This should have a `type` field to distinguish purchase orders
+ and end user purchases.
  - `Basket` for a user's shopping cart. This should be connected to `Order` and also `User` for
  the user who is making the purchase.
  - `Line` for an item in an `Basket`
@@ -49,15 +50,18 @@ Whether or not we want to use django-oscar, we will need models like these (usin
  - `Product` to represent a purchasable item. In MicroMasters we skip this and 
  instead set the course key in the `Line` directly but should have this object
  to provide future flexibility and to let us decouple the price and the course information.
- - `Voucher` to describe a coupon and how it can be used. This should have a field to store the coupon code.
- - `VoucherBasket` to connect `Voucher` with `Basket` to describe where a coupon is being redeemed.
+ - `Coupon` to describe a coupon and how it can be used. This should have at least a field to store the coupon code
+and the number of allowed redemptions if a coupon code can be used by multiple users or multiple times.
+ - `CouponBasket` to connect `Coupon` with `Basket` to describe where a coupon is being redeemed.
  - `PurchaseOrder` to store notes and other information about a purchase order. Foreign key to `Order`.
- 
- 
-And maybe something for purchase orders as well? We need some way to distinguish those from
-CyberSource purchases.
+A future RFC will define this further.
 
-Do we need audit tables? If so I think we can do this similar to how we did it for MicroMasters.
+These tables will have audit tables to record changes in an append-only JSON format similar to
+how audit tables are implemented in MicroMasters: `Order`, `Coupon`, `PurchaseOrder`, `Product`. The
+`Order` audit table will also save `Basket` and `Line` data which is related to the `Order`, similar to how this works in MicroMasters.
+
+Note that since these audit tables are implemented in Python, we will need to be careful about updating them
+with `save_and_log` in whatever interface or view that is provided to edit the tables.
 
 #### django-oscar
 
@@ -71,7 +75,8 @@ they also have a lot of code which is written on top of django-oscar to handle t
 
 ##### Recommendation
 
-???
+We decided to not use django-oscar because it doesn't provide enough additional functionality
+over writing our own models and logic like we did in MicroMasters.
 
 #### Purchase Orders
 
@@ -86,8 +91,7 @@ order information so that they don't manipulate these models directly.
 
 ##### Recommendation
 
-If we roll our own we should use the Django admin for this. django-oscar probably has an interface
-for this already though I'm not familiar with it.
+A future RFC will define the models and interface for adding purchase orders.
 
 #### Coupons
 
@@ -123,10 +127,10 @@ creates a `RedeemedCoupon` to mark that the user is intending to make use of the
 CyberSource posts back with the success message, this marks the `Order` as fulfilled and also
 marks the `Coupon` as having been used. The logic for figuring out if, when and where a coupon
 can be used is in `ecommerce.api`.
- 
+
 ##### Recommendation
 
-Whatever coupon system we use or come up with, we should assume one coupon per purchase and that
+Whatever coupon system we use or come up with, we should assume one coupon per basket and that
 every coupon has a coupon code. This greatly simplifies the logic and workflow. If a user
 has two coupons to choose from they would need to determine which is best for their particular
 purchase.
