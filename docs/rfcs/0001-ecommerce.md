@@ -135,7 +135,7 @@ every coupon has a coupon code. This greatly simplifies the logic and workflow. 
 has two coupons to choose from they would need to determine which is best for their particular
 purchase.
 
-We also may need to support support automatic discounts in the future
+We also may need to support automatic discounts in the future
 based on arbitrary criteria, to be defined. It would be ideal to support this use case using
 coupons, given to the user and used explicitly like other coupons.
  
