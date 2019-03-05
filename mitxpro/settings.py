@@ -52,6 +52,7 @@ INSTALLED_APPS = (
     "raven.contrib.django.raven_compat",
     # Put our apps after this point
     "mitxpro",
+    "courses",
 )
 
 DISABLE_WEBPACK_LOADER_STATS = get_bool("DISABLE_WEBPACK_LOADER_STATS", False)
@@ -339,4 +340,4 @@ if DEBUG:
     # it needs to be enabled before other middlewares
     MIDDLEWARE = ("debug_toolbar.middleware.DebugToolbarMiddleware",) + MIDDLEWARE
 
-MANDATORY_SETTINGS = ["MAILGUN_SENDER_DOMAIN", "MAILGUN_KEY"]
+MANDATORY_SETTINGS = []

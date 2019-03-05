@@ -1,6 +1,8 @@
 """mitxpro utilities"""
 from enum import auto, Flag
 import logging
+import datetime
+import pytz
 
 from django.conf import settings
 
@@ -17,6 +19,15 @@ class FeatureFlag(Flag):
     """
 
     EXAMPLE_FEATURE = auto()
+
+
+def now_in_utc():
+    """
+    Get the current time in UTC
+    Returns:
+        datetime.datetime: A datetime object for the current time
+    """
+    return datetime.datetime.now(tz=pytz.UTC)
 
 
 def webpack_dev_server_host(request):

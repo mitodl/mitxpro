@@ -6,6 +6,7 @@ django-server-status==0.5.0
 django-webpack-loader==0.5.0
 ipython
 newrelic
+Pillow
 psycopg2==2.7.3.2
 raven
 redis==2.10.6
