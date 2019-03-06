@@ -3,6 +3,7 @@ black==18.9b0
 bpython
 codecov
 django-debug-toolbar
+factory_boy
 ipdb
 nplusone>=0.8.1
 pdbpp
