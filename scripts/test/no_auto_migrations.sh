@@ -10,7 +10,7 @@ fail() {
 }
 
 # search for auto migrations excluded the preexisting one
-find */migrations/*_auto_*.py | grep -v "20170113_2133" > "$TMPFILE"
+find */migrations/*_auto_*.py > "$TMPFILE"
 
 if [[ $(cat "$TMPFILE" | wc -l) -ne 0 ]]
 then
