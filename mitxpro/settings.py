@@ -60,12 +60,28 @@ INSTALLED_APPS = (
     "rest_framework",
     "anymail",
     "raven.contrib.django.raven_compat",
+    # WAGTAIL
+    'wagtail.contrib.forms',
+    'wagtail.contrib.redirects',
+    'wagtail.contrib.table_block',
+    'wagtail.embeds',
+    'wagtail.sites',
+    'wagtail.users',
+    'wagtail.snippets',
+    'wagtail.documents',
+    'wagtail.images',
+    'wagtail.search',
+    'wagtail.admin',
+    'wagtail.core',
+    'modelcluster',
+    'taggit',
     # Put our apps after this point
     "mitxpro",
     "authentication",
     "courses",
     "mail",
     "users",
+    "cms",
     # must be after "users" to pick up custom user model
     "compat",
     "hijack",
@@ -87,6 +103,8 @@ MIDDLEWARE = (
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "wagtail.core.middleware.SiteMiddleware",
+    "wagtail.contrib.redirects.middleware.RedirectMiddleware",
 )
 
 # enable the nplusone profiler only in debug mode
@@ -238,6 +256,11 @@ if CLOUDFRONT_DIST:
         "https://{dist}.cloudfront.net".format(dist=CLOUDFRONT_DIST), STATIC_URL
     )
 
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
 STATIC_ROOT = "staticfiles"
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
@@ -373,6 +396,8 @@ REACT_GA_DEBUG = get_bool("REACT_GA_DEBUG", False)
 RECAPTCHA_SITE_KEY = get_string("RECAPTCHA_SITE_KEY", "")
 RECAPTCHA_SECRET_KEY = get_string("RECAPTCHA_SECRET_KEY", "")
 
+WAGTAIL_SITE_NAME = "MITxPRO"
+
 MEDIA_ROOT = get_string("MEDIA_ROOT", "/var/media/")
 MEDIA_URL = "/media/"
 MITXPRO_USE_S3 = get_bool("MITXPRO_USE_S3", False)
@@ -393,10 +418,6 @@ if MITXPRO_USE_S3:
     if CLOUDFRONT_DIST:
         AWS_S3_CUSTOM_DOMAIN = "{dist}.cloudfront.net".format(dist=CLOUDFRONT_DIST)
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto.S3BotoStorage"
-else:
-    # by default use django.core.files.storage.FileSystemStorage with
-    # overwrite feature
-    DEFAULT_FILE_STORAGE = "storages.backends.overwrite.OverwriteStorage"
 
 # Celery
 USE_CELERY = True
