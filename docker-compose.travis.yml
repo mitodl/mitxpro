@@ -7,8 +7,8 @@ services:
       # dockerfile: ./travis/Dockerfile-travis-web
       dockerfile: ./Dockerfile
     environment:
-      CELERY_TASK_ALWAYS_EAGER: True
-      SECRET_KEY: not_very_secret_key
+      CELERY_TASK_ALWAYS_EAGER: 'True'
+      SECRET_KEY: 'not_very_secret_key'
 
   web:
     build:
@@ -17,8 +17,8 @@ services:
       # dockerfile: ./travis/Dockerfile-travis-web
       dockerfile: ./Dockerfile
     environment:
-      CELERY_TASK_ALWAYS_EAGER: True
-      SECRET_KEY: not_very_secret_key
+      CELERY_TASK_ALWAYS_EAGER: 'True'
+      SECRET_KEY: 'not_very_secret_key'
 
   celery:
     build:
@@ -30,5 +30,5 @@ services:
       # for celery, to avoid ImproperlyConfigured
       MAILGUN_URL: 'http://fake.example.com'
       MAILGUN_KEY: 'fake'
-      CELERY_TASK_ALWAYS_EAGER: True
-      SECRET_KEY: not_very_secret_key
+      CELERY_TASK_ALWAYS_EAGER: 'True'
+      SECRET_KEY: 'not_very_secret_key'
