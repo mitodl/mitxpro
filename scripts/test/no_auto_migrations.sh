@@ -1,20 +1,17 @@
 #!/bin/bash
 
-TMPFILE=$(mktemp)
+MIGRATIONS_OUTPUT=
+
 fail() {
     echo "Error: migrations with generated names exist"
-    echo
-    cat "$TMPFILE"
-    rm "$TMPFILE"
+    echo $MIGRATIONS_OUTPUT
     exit 1
 }
 
 # search for auto migrations excluded the preexisting one
-find */migrations/*_auto_*.py > "$TMPFILE"
+MIGRATIONS_OUTPUT="$(find */migrations/*_auto_*.py 2> /dev/null)"
 
-if [[ $(cat "$TMPFILE" | wc -l) -ne 0 ]]
+if [[ $MIGRATIONS_OUTPUT != "" ]]
 then
     fail
-else
-    rm "$TMPFILE"
 fi
