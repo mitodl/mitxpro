@@ -10,6 +10,12 @@ mitxpro follows the same [initial setup steps outlined in the common ODL web app
 Run through those steps **including the addition of `/etc/hosts` aliases and the optional step for running the
 `createsuperuser` command**.
 
+### Running tests
+
+Unlike our other web applications this project is not using tox. To run tests locally, run this command instead:
+
+    docker-compose run --rm web pytest
+
 # Optional Setup
 
 Described below are some setup steps that are not strictly necessary
