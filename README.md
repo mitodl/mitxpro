@@ -14,7 +14,7 @@ Run through those steps **including the addition of `/etc/hosts` aliases and the
 
 Unlike our other web applications this project is not using tox. To run tests locally, run this command instead:
 
-    docker-compose run web pytest
+    docker-compose run --rm web pytest
 
 # Optional Setup
 
