@@ -55,6 +55,9 @@
     "MITXPRO_ADMIN_EMAIL": {
       "description": "E-mail to send 500 reports to."
     },
+    "MITXPRO_BASE_URL": {
+      "description": "Base url for the application in the format PROTOCOL://HOSTNAME[:PORT]"
+    },
     "MITXPRO_DB_CONN_MAX_AGE": {
       "value": "0"
     },

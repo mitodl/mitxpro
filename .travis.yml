@@ -5,6 +5,7 @@ matrix:
       install:
         - env | grep TRAVIS > .env
         - env | grep CI >> .env
+        - env | grep MITXPRO_BASE_URL >> .env
       script: docker-compose -f docker-compose.yml -f docker-compose.travis.yml run web /src/travis/python_tests.sh
       services:
         - docker

@@ -16,6 +16,10 @@ VERSION = "0.0.0"
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+SITE_BASE_URL = get_string("MITXPRO_BASE_URL", None)
+if not SITE_BASE_URL:
+    raise ImproperlyConfigured("MITXPRO_BASE_URL is not set")
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_string("SECRET_KEY", None)
 
@@ -51,10 +55,12 @@ INSTALLED_APPS = (
     "server_status",
     "oauth2_provider",
     "rest_framework",
+    "anymail",
     "raven.contrib.django.raven_compat",
     # Put our apps after this point
     "mitxpro",
     "courses",
+    "mail",
     "users",
 )
 
@@ -139,7 +145,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
@@ -181,6 +186,14 @@ MAILGUN_RECIPIENT_OVERRIDE = get_string("MAILGUN_RECIPIENT_OVERRIDE", None)
 MAILGUN_FROM_EMAIL = get_string("MAILGUN_FROM_EMAIL", "no-reply@example.com")
 MAILGUN_BCC_TO_EMAIL = get_string("MAILGUN_BCC_TO_EMAIL", "no-reply@example.com")
 
+NOTIFICATION_EMAIL_BACKEND = get_string(
+    "MITXPRO_NOTIFICATION_EMAIL_BACKEND", "anymail.backends.mailgun.EmailBackend"
+)
+
+ANYMAIL = {
+    "MAILGUN_API_KEY": MAILGUN_KEY,
+    "MAILGUN_SENDER_DOMAIN": MAILGUN_SENDER_DOMAIN,
+}
 
 # e-mail configurable admins
 ADMIN_EMAIL = get_string("MITXPRO_ADMIN_EMAIL", "")
@@ -354,6 +367,20 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
+}
+
+# Relative URL to be used by Djoser for the link in the password reset email
+# (see: http://djoser.readthedocs.io/en/stable/settings.html#password-reset-confirm-url)
+PASSWORD_RESET_CONFIRM_URL = "password_reset/confirm/{uid}/{token}/"
+
+# Djoser library settings (see: http://djoser.readthedocs.io/en/stable/settings.html)
+DJOSER = {
+    "PASSWORD_RESET_CONFIRM_URL": PASSWORD_RESET_CONFIRM_URL,
+    "SET_PASSWORD_RETYPE": False,
+    "LOGOUT_ON_PASSWORD_CHANGE": False,
+    "PASSWORD_RESET_CONFIRM_RETYPE": True,
+    "PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND": True,
+    "EMAIL": {"password_reset": "authentication.views.CustomPasswordResetEmail"},
 }
 
 

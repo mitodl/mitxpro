@@ -16,6 +16,7 @@ import semantic_version
 REQUIRED_SETTINGS = {
     "MAILGUN_SENDER_DOMAIN": "mailgun.fake.domain",
     "MAILGUN_KEY": "fake_mailgun_key",
+    "MITXPRO_BASE_URL": "http://localhost:8053",
 }
 
 

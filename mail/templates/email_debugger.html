@@ -1,0 +1,91 @@
+<html>
+<head>
+  <title>Email Debugger</title>
+  <style type="text/css">
+    pre {
+      white-space: pre-wrap;       /* Since CSS 2.1 */
+      white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+      white-space: -pre-wrap;      /* Opera 4-6 */
+      white-space: -o-pre-wrap;    /* Opera 7 */
+      word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    }
+  </style>
+  <script type="text/javascript">
+  (function() {
+    document.addEventListener("DOMContentLoaded", function() {
+      document.querySelector('form').addEventListener('submit', function(event) {
+        // Set up our HTTP request
+        event.preventDefault();
+        var form = event.target;
+        var data = new FormData(form);
+        fetch(new Request(form.action, {
+          'method': form.method,
+          'body': data
+        })).then(function (response) {
+          response.json().then(function(res) {
+            var output = document.getElementById('output');
+            var error = document.getElementById('error');
+
+            // reset display styles
+            output.style.display = 'none';
+            error.style.display = 'none';
+
+            // Process our return data
+            if (response.status >= 200 && response.status < 300) {
+              // show the output and u
+              output.style.display = 'block';
+
+              // update
+              document.getElementById('subject').innerHTML = res.subject;
+              var iframe = document.getElementById('html-body')
+              iframe.contentWindow.document.write(res.html_body);
+              iframe.contentWindow.document.close();
+              iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';
+              document.getElementById('text-body').innerHTML = res.text_body;
+            } else {
+              // show the error and update it
+              error.style.display = 'block';
+              error.innerHTML = res.error;
+            }
+          });
+
+        });
+      });
+    });
+  })();
+</script>
+</head>
+<body>
+  <form method="POST" action="{% url 'email-debugger' %}">
+    {{ form }}
+    <span id="error" style="color: red; display: none;"></span>
+    <button type="submit">Render</button>
+  </form>
+
+  <table id="output" border="1" cellpadding="10" cellspacing="0" style="display: none;">
+    <tr>
+      <td width="10%">Subject:</td>
+      <td width="90%"><span id="subject"></span></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        HTML Body:
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" cellpadding="0">
+        <iframe id="html-body" frameborder="0" scrolling="no" width="100%"></iframe>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        Plaintext Body:
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"><pre id="text-body"></pre></td>
+    </tr>
+  </table>
+
+</body>
+</html>

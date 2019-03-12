@@ -30,6 +30,7 @@ services:
       SECRET_KEY: local_unsafe_key
       COVERAGE_DIR: htmlcov
       DATABASE_URL: postgres://postgres@db:5432/postgres
+      MITXPRO_BASE_URL: http://xpro.odl.local:8053
       MITXPRO_SECURE_SSL_REDIRECT: 'False'
       MITXPRO_DB_DISABLE_SSL: 'True'
       ELASTICSEARCH_URL: elastic:9200
