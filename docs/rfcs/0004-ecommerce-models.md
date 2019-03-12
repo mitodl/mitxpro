@@ -16,7 +16,9 @@ this separately when the purchase is made.
 
 #### ProductVersion
 
-.
+A `ProductVersion` is implemented as an audit table of `Product`. It stores the serialized
+representation of the `Product` as a JSONField. This model is append-only; it should never
+be edited and rows should never be deleted.
 
 #### Basket
 
