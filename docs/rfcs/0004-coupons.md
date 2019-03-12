@@ -13,31 +13,31 @@ in when they enroll in a course, whether it is currently running or will run soo
 
 Coupons may have a percent discount. There is no fixed discount use case at the moment.
 
-##### Cart
+##### Basket
 
-There can only be one coupon per cart, and a user may add only one course or one program
-to a cart. This simplifies the UX and means we don't need to consider how multiple coupons
-can conflict.
+There can only be one coupon per basket, and a user may add at most only one course run,
+course, or program to a basket. This simplifies the UX and means we don't need to consider
+how multiple coupons can conflict.
 
 Users ultimately purchase course runs. In the UI when a user buys a course it will add the
-next course run to the cart. When a user buys a program it will add the next course run 
-for each course to the cart.
+next course run to the basket. When a user buys a program it will add the next course run 
+for each course to the basket.
 
 ##### Coupon target
 
 Coupons may apply to programs, courses, or course runs. The logic for what targets a coupon
 is redeemable for is different from MicroMasters.
 
-TODO: skip course run coupons for now given no use case?
-
-A program coupon is redeemable only if
-all courses for the program are in the cart. If a course was missing from the cart, maybe
-because the program is nearing end of life and one of the courses is not enrollable anymore, then the
-program coupon would not be redeemable.
+A program coupon is redeemable only if all courses for the program are in the basket. If a course
+was missing from the basket, maybe because the program is nearing end of life and one of
+the courses is not enrollable anymore, then the program coupon would not be redeemable at all.
   
-A course coupon would be redeemable only for the next course run for that course.
+A course coupon would be redeemable only for the next course run for that course. It may have 
+multiple courses where it can be redeemed.
 
-Note that the UI will not include a cart, the cart will only be in the backend. The end user
+A course run coupon is redeemable only for the particular course run.
+
+Note: The UI will not include a basket, the basket will only be in the backend. The end user
 will only be able to buy one course or one program at a time, and can apply only one coupon.
 This should simplify the UX for redeeming coupons.
 
@@ -45,6 +45,13 @@ This should simplify the UX for redeeming coupons.
 
 Coupons have a limited number of total redemptions. They cannot be unlimited to ensure that
 there's a cap on the number of discounts applied.
+However this could be a very high number, higher than is likely to ever be redeemed.
+
+TODO: Does this sound right? If the number is actually unlimited we should handle it that way.
+
+A coupon will also have a limited number of redemptions per user. Most coupons will only allow
+one redemption per user. Automatic program discounts will have the number of redemptions per user
+be the same as the total number of redemptions.
 
 A coupon may be used by any number of users as long as there are redemptions left.
 
@@ -52,6 +59,8 @@ A coupon may be used by any number of users as long as there are redemptions lef
 
 Coupons can be enabled or disabled via a field, or enabled only for a certain period of time.
 If a coupon was not enabled at the time of purchase it would not be redeemable for anything.
+
+A coupon may also become invalid if the related product is not available anymore.
 
 ### Use cases
 
@@ -62,12 +71,15 @@ with the coupon code. It is a percent discount for one course.
 
 ##### Named coupons
 
-A coupon is distributed widely with a special name, for example `MARCHMADNESS15` to get 15%
-off. The coupon could be used by an unlimited number of users and has a very high number of
+A coupon is distributed widely to the general public with a special name,
+for example `MARCHMADNESS15` to get 15% off. The coupon would have a very high number of
 redemptions.
 
-TODO: would this kind of coupon apply to any course in a program, or would each course
-get its own coupon code?
+The admin would select the courses which this coupon would apply to. The coupon would work
+with any of these courses, but the user would only be able to redeem the coupon for one of the courses.
+The coupon would not be redeemable for that user for the second time.
+
+TODO: any fear of users making separate accounts to redeem the coupon twice?
 
 ##### Automatic program discount
 
@@ -86,5 +98,5 @@ similar tables, and `Order` audit information should include what coupons were r
 purchase.
 
 In addition to keeping track of coupons, we also need to keep track of the information
-provided when coupons are created, for example the PO number. Ideally the admin should
+provided when coupons are created, for example the PO number. The admin should
 use a form to create coupons which validates this record keeping.
