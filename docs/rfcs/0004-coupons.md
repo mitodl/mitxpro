@@ -11,11 +11,7 @@ in when they enroll in a course, whether it is currently running or will run soo
 
 ##### Discount
 
-Coupons may have a percent discount or a fixed discount.
-
-TODO: should we only do percent discount because there is no use case for fixed right now?
-We should think about the UX, whether we want to display 15% off or $50 off even if both
-are same for a course. 
+Coupons may have a percent discount. There is no fixed discount use case at the moment.
 
 ##### Cart
 
