@@ -14,6 +14,10 @@ refer to any Django model instance. An admin user should be able to edit
 `description` or `price` without affecting any previous purchase, so we need to also store
 this separately when the purchase is made.
 
+#### ProductVersion
+
+.
+
 #### Basket
 
 A `Basket` has foreign keys to an `Order` and a `User`. The `User` foreign key must always exist.
