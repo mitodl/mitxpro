@@ -13,7 +13,9 @@ from wagtail.images.blocks import ImageChooserBlock
 
 
 class ProductPage(Page):
-
+    """
+    Abstract product page
+    """
     class Meta:
         abstract = True
 
@@ -68,6 +70,9 @@ class ProgramPage(ProductPage):
 
 
 class CoursePage(ProductPage):
+    """
+    CMS page representing a Course
+    """
 
     template = "cms/product_page.html"
 

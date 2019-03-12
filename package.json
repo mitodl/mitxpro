@@ -81,7 +81,7 @@
     "webpack-hot-middleware": "^2.18.2"
   },
   "engines": {
-    "node": "10.15.2",
+    "node": "10.15.0",
     "yarn": "1.13.0"
   },
   "scripts": {
