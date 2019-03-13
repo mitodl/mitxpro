@@ -1,18 +1,25 @@
 /* global require:false, module:false */
+import R from "ramda"
 import { compose, createStore, applyMiddleware } from "redux"
-import thunkMiddleware from "redux-thunk"
 import { createLogger } from "redux-logger"
+import { queryMiddleware } from "redux-query"
 
 import rootReducer from "../reducers"
 
+// Setup middleware
+const COMMON_MIDDLEWARE = [
+  queryMiddleware(R.prop("queries"), R.prop("entities"))
+]
+
+// Store factory configuration
 let createStoreWithMiddleware
 if (process.env.NODE_ENV !== "production") {
   createStoreWithMiddleware = compose(
-    applyMiddleware(thunkMiddleware, createLogger()),
+    applyMiddleware(...COMMON_MIDDLEWARE, createLogger()),
     window.devToolsExtension ? window.devToolsExtension() : f => f
   )(createStore)
 } else {
-  createStoreWithMiddleware = compose(applyMiddleware(thunkMiddleware))(
+  createStoreWithMiddleware = compose(applyMiddleware(...COMMON_MIDDLEWARE))(
     createStore
   )
 }

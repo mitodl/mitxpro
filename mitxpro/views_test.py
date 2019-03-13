@@ -14,7 +14,6 @@ def test_index_view(client):
     """Verify the index view is as expected"""
     response = client.get(reverse("mitxpro-index"))
     assert response.status_code == 200
-    assert b"Hi, I'm mitxpro" in response.content
 
 
 def test_webpack_url(mocker, settings, client):
