@@ -1,8 +1,7 @@
 """Project conftest"""
+# pylint: disable=wildcard-import, unused-wildcard-import
 import pytest
-
-# pylint: disable=wildcard-import,unused-wildcard-import
-from fixtures.user import *
+from fixtures.common import *
 
 
 @pytest.fixture(autouse=True)
