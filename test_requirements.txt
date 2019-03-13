@@ -4,6 +4,7 @@ bpython
 codecov
 django-debug-toolbar
 factory_boy
+faker
 ipdb
 nplusone>=0.8.1
 pdbpp

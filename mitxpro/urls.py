@@ -33,6 +33,7 @@ urlpatterns = [
         include((base_urlpatterns, "oauth2_provider"), namespace="oauth2_provider"),
     ),
     path("", include("django.contrib.auth.urls")),
+    path("", include("courses.urls")),
     path("", include("users.urls")),
     # Example view
     re_path(r"^$", index, name="mitxpro-index"),
