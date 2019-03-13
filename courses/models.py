@@ -47,10 +47,10 @@ class CourseRun(TimestampedModel):
     title = models.CharField(max_length=255)
     courseware_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
     courseware_url = models.URLField(null=True)
-    start_date = models.DateTimeField(null=True, db_index=True)
-    end_date = models.DateTimeField(null=True, db_index=True)
-    enrollment_start = models.DateTimeField(null=True, db_index=True)
-    enrollment_end = models.DateTimeField(null=True, db_index=True)
+    start_date = models.DateTimeField(null=True, blank=True, db_index=True)
+    end_date = models.DateTimeField(null=True, blank=True, db_index=True)
+    enrollment_start = models.DateTimeField(null=True, blank=True, db_index=True)
+    enrollment_end = models.DateTimeField(null=True, blank=True, db_index=True)
     live = models.BooleanField(default=False)
 
     def __str__(self):
