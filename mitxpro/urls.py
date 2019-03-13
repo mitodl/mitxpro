@@ -32,10 +32,24 @@ urlpatterns = [
         "oauth2/",
         include((base_urlpatterns, "oauth2_provider"), namespace="oauth2_provider"),
     ),
+    path("hijack/", include("hijack.urls")),
     path("", include("django.contrib.auth.urls")),
+    path("", include("social_django.urls", namespace="social")),
+    path("", include("authentication.urls")),
     path("", include("courses.urls")),
     path("", include("users.urls")),
-    # Example view
+    # named routes mapped to the react app
+    path("login/", index, name="login"),
+    path("signup/", index, name="signup"),
+    path("signup/confirm/", index, name="register-confirm"),
+    path("account/inactive/", index, name="account-inactive"),
+    path("password_reset/", index, name="password-reset"),
+    re_path(
+        r"^password_reset/confirm/(?P<uid>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$",
+        index,
+        name="password-reset-confirm",
+    ),
+    path("terms-and-conditions/", index, name="terms-and-conditions"),
     re_path(r"^$", index, name="mitxpro-index"),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

@@ -1,18 +1,24 @@
 """Tests for user models"""
 import pytest
+import ulid
 
 from users.models import User
 
 pytestmark = pytest.mark.django_db
 
 
+@pytest.mark.parametrize("username", [None, "user1"])
 @pytest.mark.parametrize("password", [None, "pass"])
-def test_create_user(password):
+def test_create_user(username, password):
     """Test creating a user"""
     email = "uSer@EXAMPLE.com"
     name = "Jane Doe"
-    user = User.objects.create_user(email=email, name=name, password=password)
+    user = User.objects.create_user(username, email=email, name=name, password=password)
 
+    if username is not None:
+        assert user.username == username
+    else:
+        assert isinstance(ulid.parse(user.username), ulid.ULID)
     assert user.email == "uSer@example.com"
     assert user.name == name
     assert user.get_full_name() == name
@@ -23,13 +29,20 @@ def test_create_user(password):
         assert user.check_password(password)
 
 
+@pytest.mark.parametrize("username", [None, "user1"])
 @pytest.mark.parametrize("password", [None, "pass"])
-def test_create_superuser(password):
+def test_create_superuser(username, password):
     """Test creating a user"""
     email = "uSer@EXAMPLE.com"
     name = "Jane Doe"
-    user = User.objects.create_superuser(email=email, name=name, password=password)
+    user = User.objects.create_superuser(
+        username, email=email, name=name, password=password
+    )
 
+    if username is not None:
+        assert user.username == username
+    else:
+        assert isinstance(ulid.parse(user.username), ulid.ULID)
     assert user.email == "uSer@example.com"
     assert user.name == name
     assert user.get_full_name() == name
@@ -52,5 +65,9 @@ def test_create_superuser_error(kwargs):
     """Test creating a user"""
     with pytest.raises(ValueError):
         User.objects.create_superuser(
-            email="uSer@EXAMPLE.com", name="Jane Doe", password="abc", **kwargs
+            username=None,
+            email="uSer@EXAMPLE.com",
+            name="Jane Doe",
+            password="abc",
+            **kwargs,
         )

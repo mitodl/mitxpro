@@ -18,6 +18,6 @@ pytest-env
 pytest-pep8
 pytest-mock
 pytest-pylint==0.12.3
-pytest-lazy-fixture==0.4.2
+pytest-lazy-fixture==0.5.1
 safety
 semantic-version

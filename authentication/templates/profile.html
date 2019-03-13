@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block content %}
+<div id="login-page">
+  <h2>Profile</h2>
+  <form method="post" action="{% url 'social:complete' 'email' %}">
+    {% csrf_token %}
+    <input type="hidden" name="partial_token" value="{{ partial_token }}">
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+  </form>
+  <br>
+</div>
+{% endblock %}

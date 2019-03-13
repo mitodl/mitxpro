@@ -15,6 +15,9 @@ decorator==4.3.2          # via ipython, traitlets
 defusedxml==0.5.0         # via python3-openid, social-auth-core
 dj-database-url==0.4.2
 django-anymail[mailgun]==3.0
+django-compat==1.0.15     # via django-hijack, django-hijack-admin
+django-hijack-admin==2.1.10
+django-hijack==2.1.10
 django-oauth-toolkit==1.2.0
 django-redis==4.7.0
 django-server-status==0.5.0
@@ -47,8 +50,8 @@ raven==6.10.0
 redis==2.10.6
 requests-oauthlib==1.2.0  # via social-auth-core
 requests==2.21.0
-six==1.12.0               # via django-anymail, django-server-status, html5lib, prompt-toolkit, social-auth-app-django, social-auth-core, traitlets
-social-auth-app-django==2.1.0
+six==1.12.0               # via django-anymail, django-compat, django-server-status, html5lib, prompt-toolkit, social-auth-app-django, social-auth-core, traitlets
+social-auth-app-django==3.1.0
 social-auth-core==3.1.0   # via social-auth-app-django
 traitlets==4.3.2          # via ipython
 ulid-py==0.0.9
