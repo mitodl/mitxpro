@@ -61,20 +61,20 @@ INSTALLED_APPS = (
     "anymail",
     "raven.contrib.django.raven_compat",
     # WAGTAIL
-    'wagtail.contrib.forms',
-    'wagtail.contrib.redirects',
-    'wagtail.contrib.table_block',
-    'wagtail.embeds',
-    'wagtail.sites',
-    'wagtail.users',
-    'wagtail.snippets',
-    'wagtail.documents',
-    'wagtail.images',
-    'wagtail.search',
-    'wagtail.admin',
-    'wagtail.core',
-    'modelcluster',
-    'taggit',
+    "wagtail.contrib.forms",
+    "wagtail.contrib.redirects",
+    "wagtail.contrib.table_block",
+    "wagtail.embeds",
+    "wagtail.sites",
+    "wagtail.users",
+    "wagtail.snippets",
+    "wagtail.documents",
+    "wagtail.images",
+    "wagtail.search",
+    "wagtail.admin",
+    "wagtail.core",
+    "modelcluster",
+    "taggit",
     # Put our apps after this point
     "mitxpro",
     "authentication",
@@ -257,8 +257,8 @@ if CLOUDFRONT_DIST:
     )
 
 STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 ]
 
 STATIC_ROOT = "staticfiles"

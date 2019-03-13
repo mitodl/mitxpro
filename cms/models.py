@@ -16,12 +16,12 @@ class ProductPage(Page):
     """
     Abstract product page
     """
+
     class Meta:
         abstract = True
 
     description = RichTextField(
-        blank=True,
-        help_text='The description shown on the program page'
+        blank=True, help_text="The description shown on the program page"
     )
 
     thumbnail_image = models.ForeignKey(
@@ -29,21 +29,24 @@ class ProductPage(Page):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+',
-        help_text='Thumbnail size must be at least 690x530 pixels.'
-
+        related_name="+",
+        help_text="Thumbnail size must be at least 690x530 pixels.",
     )
-    content = StreamField([
-        ('heading', blocks.CharBlock(classname="full title")),
-        ('paragraph', blocks.RichTextBlock()),
-        ('image', ImageChooserBlock()),
-        ('raw_html', RawHTMLBlock()),
-    ], blank=True, help_text='The content of this tab on the program page')
+    content = StreamField(
+        [
+            ("heading", blocks.CharBlock(classname="full title")),
+            ("paragraph", blocks.RichTextBlock()),
+            ("image", ImageChooserBlock()),
+            ("raw_html", RawHTMLBlock()),
+        ],
+        blank=True,
+        help_text="The content of this tab on the program page",
+    )
 
     content_panels = Page.content_panels + [
-        FieldPanel('description', classname="full"),
-        FieldPanel('thumbnail_image'),
-        StreamFieldPanel('content'),
+        FieldPanel("description", classname="full"),
+        FieldPanel("thumbnail_image"),
+        StreamFieldPanel("content"),
     ]
 
     def get_context(self, request, *args, **kwargs):
@@ -56,17 +59,16 @@ class ProgramPage(ProductPage):
     """
     CMS page representing the a Program
     """
+
     template = "cms/product_page.html"
 
     program = models.OneToOneField(
-        'courses.Program',
+        "courses.Program",
         null=True,
         on_delete=models.SET_NULL,
-        help_text='The program for this page',
+        help_text="The program for this page",
     )
-    content_panels = ProductPage.content_panels + [
-        FieldPanel('program'),
-    ]
+    content_panels = ProductPage.content_panels + [FieldPanel("program")]
 
 
 class CoursePage(ProductPage):
@@ -77,11 +79,9 @@ class CoursePage(ProductPage):
     template = "cms/product_page.html"
 
     course = models.OneToOneField(
-        'courses.Course',
+        "courses.Course",
         null=True,
         on_delete=models.SET_NULL,
-        help_text='The course for this page',
+        help_text="The course for this page",
     )
-    content_panels = ProductPage.content_panels + [
-        FieldPanel('course'),
-    ]
+    content_panels = ProductPage.content_panels + [FieldPanel("course")]

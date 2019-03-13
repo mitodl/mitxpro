@@ -12,38 +12,132 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('wagtailcore', '0041_group_collection_permissions_verbose_name_plural'),
-        ('courses', '0001_create_course_models'),
-        ('wagtailimages', '0001_squashed_0021'),
+        ("wagtailcore", "0041_group_collection_permissions_verbose_name_plural"),
+        ("courses", "0001_create_course_models"),
+        ("wagtailimages", "0001_squashed_0021"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CoursePage',
+            name="CoursePage",
             fields=[
-                ('page_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='wagtailcore.Page')),
-                ('description', wagtail.core.fields.RichTextField(blank=True, help_text='The description shown on the program page')),
-                ('content', wagtail.core.fields.StreamField([('heading', wagtail.core.blocks.CharBlock(classname='full title')), ('paragraph', wagtail.core.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('raw_html', wagtail.core.blocks.RawHTMLBlock())], blank=True, help_text='The content of this tab on the program page')),
-                ('course', models.OneToOneField(help_text='The course for this page', null=True, on_delete=django.db.models.deletion.SET_NULL, to='courses.Course')),
-                ('thumbnail_image', models.ForeignKey(blank=True, help_text='Thumbnail size must be at least 690x530 pixels.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='wagtailimages.Image')),
+                (
+                    "page_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="wagtailcore.Page",
+                    ),
+                ),
+                (
+                    "description",
+                    wagtail.core.fields.RichTextField(
+                        blank=True,
+                        help_text="The description shown on the program page",
+                    ),
+                ),
+                (
+                    "content",
+                    wagtail.core.fields.StreamField(
+                        [
+                            (
+                                "heading",
+                                wagtail.core.blocks.CharBlock(classname="full title"),
+                            ),
+                            ("paragraph", wagtail.core.blocks.RichTextBlock()),
+                            ("image", wagtail.images.blocks.ImageChooserBlock()),
+                            ("raw_html", wagtail.core.blocks.RawHTMLBlock()),
+                        ],
+                        blank=True,
+                        help_text="The content of this tab on the program page",
+                    ),
+                ),
+                (
+                    "course",
+                    models.OneToOneField(
+                        help_text="The course for this page",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="courses.Course",
+                    ),
+                ),
+                (
+                    "thumbnail_image",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Thumbnail size must be at least 690x530 pixels.",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="wagtailimages.Image",
+                    ),
+                ),
             ],
-            options={
-                'abstract': False,
-            },
-            bases=('wagtailcore.page',),
+            options={"abstract": False},
+            bases=("wagtailcore.page",),
         ),
         migrations.CreateModel(
-            name='ProgramPage',
+            name="ProgramPage",
             fields=[
-                ('page_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='wagtailcore.Page')),
-                ('description', wagtail.core.fields.RichTextField(blank=True, help_text='The description shown on the program page')),
-                ('content', wagtail.core.fields.StreamField([('heading', wagtail.core.blocks.CharBlock(classname='full title')), ('paragraph', wagtail.core.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('raw_html', wagtail.core.blocks.RawHTMLBlock())], blank=True, help_text='The content of this tab on the program page')),
-                ('program', models.OneToOneField(help_text='The program for this page', null=True, on_delete=django.db.models.deletion.SET_NULL, to='courses.Program')),
-                ('thumbnail_image', models.ForeignKey(blank=True, help_text='Thumbnail size must be at least 690x530 pixels.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='wagtailimages.Image')),
+                (
+                    "page_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="wagtailcore.Page",
+                    ),
+                ),
+                (
+                    "description",
+                    wagtail.core.fields.RichTextField(
+                        blank=True,
+                        help_text="The description shown on the program page",
+                    ),
+                ),
+                (
+                    "content",
+                    wagtail.core.fields.StreamField(
+                        [
+                            (
+                                "heading",
+                                wagtail.core.blocks.CharBlock(classname="full title"),
+                            ),
+                            ("paragraph", wagtail.core.blocks.RichTextBlock()),
+                            ("image", wagtail.images.blocks.ImageChooserBlock()),
+                            ("raw_html", wagtail.core.blocks.RawHTMLBlock()),
+                        ],
+                        blank=True,
+                        help_text="The content of this tab on the program page",
+                    ),
+                ),
+                (
+                    "program",
+                    models.OneToOneField(
+                        help_text="The program for this page",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="courses.Program",
+                    ),
+                ),
+                (
+                    "thumbnail_image",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Thumbnail size must be at least 690x530 pixels.",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="wagtailimages.Image",
+                    ),
+                ),
             ],
-            options={
-                'abstract': False,
-            },
-            bases=('wagtailcore.page',),
+            options={"abstract": False},
+            bases=("wagtailcore.page",),
         ),
     ]
