@@ -45,7 +45,7 @@ A `Line` is an item in an `Order`. It has a foreign key to the `Order` and to `P
 is also a `quantity` field.
 
 A basket may have at most one coupon, but for future flexibility this is a many to many relation.
-See `CouponUsage` below.
+See `CouponRedemption` below.
 
 #### CouponInvoice
 
@@ -99,9 +99,9 @@ A `CouponSelection` is a link from a `Coupon` to `Basket` describing the intent 
 redeem the coupon on checkout. For right now there should be only
 one `CouponSelection` per `Basket` because only one coupon is allowed per purchase.
 
-#### CouponUsage
+#### CouponRedemption
 
-A `CouponUsage` is a link from a `CouponVersion` to an `Order` describing a coupon which was used
+A `CouponRedemption` is a link from a `CouponVersion` to an `Order` describing a coupon which was used
 in a purchase. Note that because `Order` may not be fulfilled, application code should check
 the `Order` status in order to see whether the `Coupon` was actually redeemed or if a redemption
 was just attempted.
@@ -114,7 +114,7 @@ fulfills the `Order`, the coupon would be used twice where it could be used only
 
 The `OrderAudit` table will store append-only information about every change made to `Order`. It
 stores this information in a JSONField with information serialized from the `Order`, all related `Line`s
-and any `CouponUsage` linked to it. There should be enough information to have a complete
+and any `CouponRedemption` linked to it. There should be enough information to have a complete
 representation of the order for reporting purposes.
 
 #### Receipt
@@ -141,7 +141,7 @@ is valid then adds a `CouponSelection` attaching the `Basket` to the `Coupon` ma
 
 The user types in their credit card number and clicks the checkout button.
 An `Order` is created. `Line` instances are created matching each `BasketItem` but with a link
-to `ProductVersion` instead of `Product`, the most recent instance. `CouponUsage` is created
+to `ProductVersion` instead of `Product`, the most recent instance. `CouponRedemption` is created
 linking `CouponVersion` to `Order`, after first checking that redemption is allowed.
 
 The REST API returns some information in a dict, with most fields signed so the user
