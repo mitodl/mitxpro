@@ -44,7 +44,7 @@ class TestSettings(TestCase):
             settings_vars = self.reload_settings()
             self.assertNotEqual(
                 settings_vars.get("DEFAULT_FILE_STORAGE"),
-                "storages.backends.s3boto.S3BotoStorage",
+                "storages.backends.s3boto3.S3Boto3Storage",
             )
 
         with self.assertRaises(ImproperlyConfigured):
@@ -66,7 +66,7 @@ class TestSettings(TestCase):
             settings_vars = self.reload_settings()
             self.assertEqual(
                 settings_vars.get("DEFAULT_FILE_STORAGE"),
-                "storages.backends.s3boto.S3BotoStorage",
+                "storages.backends.s3boto3.S3Boto3Storage",
             )
 
     def test_admin_settings(self):

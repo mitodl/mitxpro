@@ -417,7 +417,7 @@ if MITXPRO_USE_S3 and (
 if MITXPRO_USE_S3:
     if CLOUDFRONT_DIST:
         AWS_S3_CUSTOM_DOMAIN = "{dist}.cloudfront.net".format(dist=CLOUDFRONT_DIST)
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto.S3BotoStorage"
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 # Celery
 USE_CELERY = True
