@@ -1,8 +1,8 @@
 const { babelSharedLoader } = require("../../webpack.config.shared")
 
-babelSharedLoader.query.presets = ["env", "react"]
+babelSharedLoader.query.presets = ["@babel/env", "@babel/preset-react"]
 
-require("babel-polyfill")
+require("@babel/polyfill")
 
 // window and global must be defined here before React is imported
 require("jsdom-global")(undefined, {
@@ -20,4 +20,4 @@ Object.defineProperty(window, "location", {
   }
 })
 
-require("babel-register")(babelSharedLoader.query)
+require("@babel/register")(babelSharedLoader.query)

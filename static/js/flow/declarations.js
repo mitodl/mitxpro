@@ -9,6 +9,7 @@ declare var SETTINGS: {
   sentry_dsn: string,
   release_version: string,
   environment: string,
+  gaTrackingID: ?string
 };
 
 // mocha

@@ -5,7 +5,7 @@ var devMiddleware = require('webpack-dev-middleware');
 var hotMiddleware = require('webpack-hot-middleware');
 var minimist = require('minimist');
 
-var makeDevConfig = require('./webpack.config.dev');
+var { makeDevConfig } = require('./webpack.config.dev');
 
 const { host, port } = minimist(process.argv.slice(2));
 
@@ -26,7 +26,7 @@ app.use(devMiddleware(compiler, {
 
 app.use(hotMiddleware(compiler));
 
-app.listen(8052, (err) => {
+app.listen(port, (err) => {
   if (err) {
     return console.error(err)
   }

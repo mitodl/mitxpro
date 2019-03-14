@@ -37,7 +37,6 @@ urlpatterns = [
         include((base_urlpatterns, "oauth2_provider"), namespace="oauth2_provider"),
     ),
     path("hijack/", include("hijack.urls")),
-    path("", include("django.contrib.auth.urls")),
     path("", include("social_django.urls", namespace="social")),
     path("", include("authentication.urls")),
     path("", include("courses.urls")),

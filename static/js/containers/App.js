@@ -1,17 +1,38 @@
 // @flow
 import React from "react"
-import { Route } from "react-router"
+import { Switch, Route } from "react-router"
+import urljoin from "url-join"
+
+import { routes } from "../lib/urls"
+
+import Header from "../components/Header"
+
+import HomePage from "./pages/HomePage"
+import LoginPage from "./pages/LoginPage"
+
 import type { Match } from "react-router"
 
-export default class App extends React.Component<*, void> {
-  props: {
-    match: Match
-  }
+type Props = {
+  match: Match
+}
 
+export default class App extends React.Component<Props, void> {
   render() {
+    const { match } = this.props
     return (
       <div className="app">
-        <Route path="/" render={() => <h1>MIT xPro</h1>} />
+        <Header />
+        <Switch>
+          <Route
+            exact
+            path={`${match.url}${routes.home}`}
+            component={HomePage}
+          />
+          <Route
+            path={urljoin(match.url, String(routes.login))}
+            component={LoginPage}
+          />
+        </Switch>
       </div>
     )
   }

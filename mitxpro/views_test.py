@@ -24,10 +24,10 @@ def test_webpack_url(mocker, settings, client):
     settings.USE_WEBPACK_DEV_SERVER = False
     get_bundle = mocker.patch("mitxpro.templatetags.render_bundle._get_bundle")
 
-    response = client.get(reverse("mitxpro-index"))
+    response = client.get(reverse("login"))
 
-    bundles = [bundle[0][1] for bundle in get_bundle.call_args_list]
-    assert set(bundles) == {"common", "style"}
+    bundles = {bundle[0][1] for bundle in get_bundle.call_args_list}
+    assert bundles == {"root", "style"}
     js_settings = json.loads(response.context["js_settings_json"])
     assert js_settings == {
         "gaTrackingID": "fake",
