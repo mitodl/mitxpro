@@ -77,8 +77,6 @@ The admin would select the courses which this coupon would apply to. The coupon 
 with any of these courses, but the user would only be able to redeem the coupon for one of the courses.
 The coupon would not be redeemable for that user for the second time.
 
-TODO: any fear of users making separate accounts to redeem the coupon twice?
-
 ##### Automatic program discount
 
 A user buys a program and gets 15% off per course. The coupon is automatically
