@@ -59,3 +59,17 @@ def now_in_utc():
         datetime.datetime: A datetime object for the current time
     """
     return datetime.datetime.now(tz=pytz.UTC)
+
+
+def dict_without_keys(d, *omitkeys):
+    """
+    Returns a copy of a dict without the specified keys
+
+    Args:
+        d (dict): A dict that to omit keys from
+        *omitkeys: Variable length list of keys to omit
+
+    Returns:
+        dict: A dict with omitted keys
+    """
+    return {key: d[key] for key in d.keys() if key not in omitkeys}
