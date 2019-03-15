@@ -26,10 +26,11 @@ SECRET_KEY = get_string("SECRET_KEY", None)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_bool("DEBUG", False)
 
+ENVIRONMENT = get_string("MITXPRO_ENVIRONMENT", "dev")
+
 ALLOWED_HOSTS = ["*"]
 
 SECURE_SSL_REDIRECT = get_bool("MITXPRO_SECURE_SSL_REDIRECT", True)
-
 
 WEBPACK_LOADER = {
     "DEFAULT": {
@@ -46,7 +47,6 @@ WEBPACK_LOADER = {
 AUTH_USER_MODEL = "users.User"
 
 # Application definition
-
 INSTALLED_APPS = (
     "django.contrib.admin",
     "django.contrib.auth",
@@ -71,6 +71,9 @@ INSTALLED_APPS = (
     "hijack",
     "hijack_admin",
 )
+# Only include the seed data app if this isn't running in prod
+if ENVIRONMENT not in ("production", "prod"):
+    INSTALLED_APPS += ("localdev.seed",)
 
 
 DISABLE_WEBPACK_LOADER_STATS = get_bool("DISABLE_WEBPACK_LOADER_STATS", False)
@@ -355,7 +358,6 @@ LOGGING = {
 }
 
 # Sentry
-ENVIRONMENT = get_string("MITXPRO_ENVIRONMENT", "dev")
 SENTRY_CLIENT = "raven.contrib.django.raven_compat.DjangoClient"
 RAVEN_CONFIG = {
     "dsn": get_string("SENTRY_DSN", ""),

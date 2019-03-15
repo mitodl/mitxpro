@@ -25,8 +25,10 @@ class Program(TimestampedModel):
 class Course(TimestampedModel):
     """Model for a course"""
 
-    program = models.ForeignKey(Program, on_delete=models.CASCADE, null=True)
-    position_in_program = models.PositiveSmallIntegerField(null=True)
+    program = models.ForeignKey(
+        Program, on_delete=models.CASCADE, null=True, blank=True
+    )
+    position_in_program = models.PositiveSmallIntegerField(null=True, blank=True)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     thumbnail = models.ImageField(null=True, blank=True)
