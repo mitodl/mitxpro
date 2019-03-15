@@ -64,8 +64,8 @@ A coupon may also become invalid if the related product is not available anymore
 
 #### One time use coupons
 
-We ask the admin page to generate 1000 coupons for a course and we email learners individually
-with the coupon code. It is a percent discount for one course.
+An admin generates 1000 coupons for a course and we email learners individually
+with the coupon code for that user. It is a percent discount for one course, course run, or program.
 
 ##### Named coupons
 
