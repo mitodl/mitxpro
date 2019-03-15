@@ -47,8 +47,6 @@ Coupons have a limited number of total redemptions. They cannot be unlimited to 
 there's a cap on the number of discounts applied.
 However this could be a very high number, higher than is likely to ever be redeemed.
 
-TODO: Does this sound right? If the number is actually unlimited we should handle it that way.
-
 A coupon will also have a limited number of redemptions per user. Most coupons will only allow
 one redemption per user. Automatic program discounts will have the number of redemptions per user
 be the same as the total number of redemptions.
