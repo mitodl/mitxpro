@@ -195,3 +195,22 @@ def test_delete_course_run(user_drf_client, course_runs):
     assert resp.status_code == HTTP_204_NO_CONTENT
     with pytest.raises(CourseRun.DoesNotExist):
         course_run.refresh_from_db()
+
+
+def test_course_catalog_view(client):
+    """
+    Test that the course catalog view fetches live programs/courses and serializes
+    them for the catalog template.
+    """
+    program = ProgramFactory.create(live=True)
+    course_in_program = CourseFactory.create(program=program, live=True)
+    course_no_program = CourseFactory.create(no_program=True, live=True)
+    CourseFactory.create(no_program=True, live=False)
+    exp_courseware_objects = [
+        ProgramSerializer(program).data,
+        CourseSerializer(course_in_program).data,
+        CourseSerializer(course_no_program).data,
+    ]
+    resp = client.get(reverse("mitxpro-index"))
+    assert resp.templates[0].name == "catalog.html"
+    assert list(resp.context["courseware_objects"]) == exp_courseware_objects

@@ -1,8 +1,6 @@
-// Layout goes here
+@import "node_modules/@material/layout-grid/dist/mdc.layout-grid";
+@import "catalog";
 
-// Fake style to confirm that webpack dev server works
-h1 {
-  border-radius: 25px;
-  border: 2px solid blue;
-  padding: 2px;
+body {
+  font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
 }

@@ -1,17 +1,16 @@
+{% load static hijack_tags raven render_bundle %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     {% spaceless %}
-    {% load static hijack_tags %}
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% load raven %}
     <link rel="icon" href="{% static 'images/favicon.ico' %}" />
-    {% load raven %}
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" />
     <script type="text/javascript">
     var SETTINGS = {{ js_settings_json|safe }};
     </script>
-    {% load render_bundle %}
     {% render_bundle 'common' %}
     {% render_bundle 'style' %}
     <title>{% block title %}{% endblock %}</title>

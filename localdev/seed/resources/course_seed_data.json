@@ -41,6 +41,7 @@
                 {
                     "title": "Systems Engineering - Spring 2020",
                     "courseware_id": "course-v1:MITx+sys+eng+B2+Jan_2020",
+                    "courseware_url": "https://mitxpro.mit.edu/courses/course-v1:MITxPRO+SysEngx2+1T2019/about",
                     "end_date": "2020-05-15T00:00:00+00:00",
                     "start_date": "2020-01-15T00:00:00+00:00",
                     "enrollment_end": "2020-01-29T00:00:00+00:00"
@@ -57,6 +58,7 @@
                 {
                     "title": "Systems Engineering - Fall 2020",
                     "courseware_id": "course-v1:MITx+sys+eng+B3+Aug_2020",
+                    "courseware_url": "https://mitxpro.mit.edu/courses/course-v1:MITxPRO+SysEngx3+1T2019/about",
                     "start_date": "2020-08-15T00:00:00+00:00",
                     "end_date": "2020-12-15T00:00:00+00:00",
                     "enrollment_end": "2020-08-29T00:00:00+00:00"
@@ -255,7 +257,8 @@
             "course_runs": [
                 {
                     "title": "Quantitative Methods - August 2019",
-                    "courseware_id": "course-v1:MITx+Quantitative+Aug_2019",
+                    "courseware_id": "course-v1:MITxPRO+SysEngx4+1T2019",
+                    "courseware_url": "https://mitxpro.mit.edu/courses/course-v1:MITxPRO+SysEngx4+1T2019/about",
                     "enrollment_start": "2019-08-15T00:00:00+00:00",
                     "end_date": "2019-12-15T00:00:00+00:00",
                     "start_date": "2019-08-15T00:00:00+00:00",
@@ -269,7 +272,23 @@
             "course_runs": [
                 {
                     "title": "Quantum Computing - August 2019",
-                    "courseware_id": "course-v1:MITx+Quantum+Aug_2019",
+                    "courseware_id": "course-v1:MITxPRO+QCx1+2T2019",
+                    "courseware_url": "https://mitxpro.mit.edu/courses/course-v1:MITxPRO+QCx1+2T2019/about",
+                    "enrollment_start": "2019-08-15T00:00:00+00:00",
+                    "end_date": "2019-12-15T00:00:00+00:00",
+                    "start_date": "2019-08-15T00:00:00+00:00",
+                    "enrollment_end": "2019-08-29T00:00:00+00:00"
+                }
+            ]
+        },
+        {
+            "title": "Introduction to Not-Live Courses",
+            "description": "A course that is not live.",
+            "live": false,
+            "course_runs": [
+                {
+                    "title": "Not-Live Courses - August 2019",
+                    "courseware_id": "course-v1:MITxPRO+notlive+2T2019",
                     "enrollment_start": "2019-08-15T00:00:00+00:00",
                     "end_date": "2019-12-15T00:00:00+00:00",
                     "start_date": "2019-08-15T00:00:00+00:00",

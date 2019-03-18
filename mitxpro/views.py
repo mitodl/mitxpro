@@ -10,11 +10,11 @@ from raven.contrib.django.raven_compat.models import client as sentry
 from mitxpro.templatetags.render_bundle import public_path
 
 
-def index(request):
+def get_js_settings_context(request):
     """
-    The index view. Display available programs
+    Returns the template context key/value needed for templates that render
+    JS settings as JSON.
     """
-
     js_settings = {
         "gaTrackingID": settings.GA_TRACKING_ID,
         "environment": settings.ENVIRONMENT,
@@ -22,7 +22,11 @@ def index(request):
         "release_version": settings.VERSION,
         "sentry_dsn": sentry.get_public_dsn(),
     }
+    return {"js_settings_json": json.dumps(js_settings)}
 
-    return render(
-        request, "index.html", context={"js_settings_json": json.dumps(js_settings)}
-    )
+
+def index(request):
+    """
+    The index view
+    """
+    return render(request, "index.html", context=get_js_settings_context(request))
