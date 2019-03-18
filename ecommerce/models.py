@@ -213,7 +213,7 @@ class CouponVersion(TimestampedModel):
 
     def __str__(self):
         """Description for CouponVersion"""
-        return f"CouponVersion {self.coupon_code} for {self.invoice_version}"
+        return f"CouponVersion {self.coupon.coupon_code} for {self.invoice_version}"
 
 
 class CouponEligibility(TimestampedModel):
