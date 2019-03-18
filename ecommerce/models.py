@@ -77,7 +77,7 @@ class BasketItem(TimestampedModel):
 
     def __str__(self):
         """Description of BasketItem"""
-        return f"BasketItem of product {self.product} (qty: {self.quantity}"
+        return f"BasketItem of product {self.product} (qty: {self.quantity})"
 
 
 class Order(TimestampedModel, AuditableModel):
