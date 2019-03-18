@@ -203,7 +203,10 @@ class CouponInvoiceVersion(TimestampedModel):
 
 
 class Coupon(TimestampedModel):
-    """Represents a coupon code"""
+    """
+    Represents a coupon with a code. The latest CouponVersion for this instance is the source of truth for
+    coupon information. Since the coupon_code is the identifier for the coupon, this should never be changed.
+    """
 
     coupon_code = models.CharField(max_length=50)
     invoice = models.ForeignKey(CouponInvoice, on_delete=models.PROTECT)
@@ -214,7 +217,10 @@ class Coupon(TimestampedModel):
 
 
 class CouponVersion(TimestampedModel):
-    """An append-only table for coupon codes"""
+    """
+    An append-only table for coupon codes. This should contain any mutable information specific to a coupon
+    (at the moment this is only a link to a corresponding CouponInvoiceVersion).
+    """
 
     coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
     invoice_version = models.ForeignKey(CouponInvoiceVersion, on_delete=models.PROTECT)
@@ -226,7 +232,8 @@ class CouponVersion(TimestampedModel):
 
 class CouponEligibility(TimestampedModel):
     """
-    A link from a coupon to product which the coupon would apply to
+    A link from a coupon to product which the coupon would apply to. There may be many coupons
+    which could apply to a product, or a coupon can be valid for many different products.
     """
 
     coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
@@ -239,7 +246,8 @@ class CouponEligibility(TimestampedModel):
 
 class CouponSelection(TimestampedModel):
     """
-    A link from a coupon to a basket
+    A link from a Coupon to a Basket the coupon is being used with. At the moment there should only be one
+    coupon per basket but this is a many to many table for future flexibility.
     """
 
     coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
@@ -252,7 +260,8 @@ class CouponSelection(TimestampedModel):
 
 class CouponRedemption(TimestampedModel):
     """
-    A link from a coupon to an order
+    A link from a CouponVersion to an Order. This indicates that a coupon has been used (if the order is fulfilled)
+    or that it is intended to be used soon.
     """
 
     coupon_version = models.ForeignKey(CouponVersion, on_delete=models.PROTECT)
@@ -265,7 +274,8 @@ class CouponRedemption(TimestampedModel):
 
 class Receipt(TimestampedModel):
     """
-    The contents of the message from CyberSource about an Order fulfillment or cancellation
+    The contents of the message from CyberSource about an Order fulfillment or cancellation. The order
+    should always exist but it's nullable in case there is a problem matching the CyberSource response to the order.
     """
 
     order = models.ForeignKey(Order, null=True, on_delete=models.PROTECT)
