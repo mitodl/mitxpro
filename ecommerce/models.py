@@ -143,7 +143,7 @@ class Line(TimestampedModel):
 
     def __str__(self):
         """Description for Line"""
-        return f"Line for order #{self.order.id}, {self.quantity} {self.product_version}(s)"
+        return f"Line for order #{self.order.id}, {self.product_version} (qty: {self.quantity})"
 
 
 class CouponInvoice(TimestampedModel):
