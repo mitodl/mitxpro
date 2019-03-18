@@ -10,7 +10,8 @@ from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 
 class Product(TimestampedModel):
     """
-    Representation of a purchasable product.
+    Representation of a purchasable product. There is a GenericForeignKey to a CourseRun, Course, or Program.
+    Other about the product like price is stored in ProductVersion.
     """
 
     content_type = models.ForeignKey(
@@ -32,7 +33,8 @@ class Product(TimestampedModel):
 
 class ProductVersion(TimestampedModel):
     """
-    An append-only table for Product, keeping track of the parts of a product which are editable.
+    An append-only table for Product, storing information that might be
+    updated in the future like price or description.
     """
 
     product = models.ForeignKey(
@@ -51,7 +53,8 @@ class ProductVersion(TimestampedModel):
 
 class Basket(TimestampedModel):
     """
-    Represents a User's basket
+    Represents a User's basket. A Basket is made up of BasketItems. Each Basket is assigned to one user and
+    it is reused for each checkout.
     """
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
@@ -63,7 +66,7 @@ class Basket(TimestampedModel):
 
 class BasketItem(TimestampedModel):
     """
-    Represents a product in a user's basket
+    Represents one or more products in a user's basket.
     """
 
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
@@ -79,7 +82,8 @@ class BasketItem(TimestampedModel):
 
 class Order(TimestampedModel, AuditableModel):
     """
-    An order containing information for a purchase.
+    An order containing information for a purchase. Orders which are fulfilled represent successful
+    completion of a purchase and are the source of truth for this information.
     """
 
     FULFILLED = "fulfilled"
@@ -117,7 +121,8 @@ class Order(TimestampedModel, AuditableModel):
 
 class OrderAudit(AuditModel):
     """
-    Audit model for Order
+    Audit model for Order. This table is only meant for recordkeeping purposes. The serialized
+    orders will also include information from any related tables.
     """
 
     order = models.ForeignKey(Order, null=True, on_delete=models.PROTECT)
@@ -143,7 +148,8 @@ class Line(TimestampedModel):
 
 class CouponInvoice(TimestampedModel):
     """
-    Model for a coupon.
+    Information about creation of one or more coupons. Most information will go in CouponInvoiceVersion.
+    tag should be a string which never changes and is unique for the coupon invoice.
     """
 
     tag = models.TextField(unique=True)
@@ -154,7 +160,10 @@ class CouponInvoice(TimestampedModel):
 
 
 class CouponInvoiceVersion(TimestampedModel):
-    """An append-only table for CouponInvoice information"""
+    """
+    An append-only table for CouponInvoice information. Invoice information is stored here and the latest version
+    for a particular invoice is the source of truth for this information.
+    """
 
     PROMO = "promo"
     SINGLE_USE = "single-use"
@@ -184,7 +193,6 @@ class CouponInvoiceVersion(TimestampedModel):
         blank=True,
         help_text="If set, the coupons will not be redeemable before this time",
     )
-    tag = models.TextField()
 
     class Meta:
         indexes = [models.Index(fields=["created_on"])]
