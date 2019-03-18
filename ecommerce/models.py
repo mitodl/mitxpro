@@ -143,10 +143,7 @@ class Line(TimestampedModel):
 
 class CouponInvoice(TimestampedModel):
     """
-    Model for a coupon. This stores the discount for the coupon and other information about how it should be redeemed.
-
-    When a coupon is redeemed by a purchaser the counter on this object is decremented
-    and a UserCoupon object is created for that particular purchaser.
+    Model for a coupon.
     """
 
     tag = models.TextField(unique=True)
@@ -211,7 +208,7 @@ class Coupon(TimestampedModel):
 class CouponVersion(TimestampedModel):
     """An append-only table for coupon codes"""
 
-    coupon_code = models.CharField(max_length=50)
+    coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
     invoice_version = models.ForeignKey(CouponInvoiceVersion, on_delete=models.PROTECT)
 
     def __str__(self):
