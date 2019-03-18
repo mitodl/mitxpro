@@ -79,12 +79,11 @@ The coupon would not be redeemable for that user for the second time.
 
 ##### Automatic program discount
 
-A user buys a program and gets 15% off per course. The coupon is automatically
-applied at checkout. They will not be able to apply a second coupon on top of this.
+A user buys a program and gets 15% off for each course. The coupon is automatically
+applied at checkout. The user may still apply another coupon at their preference but it would
+replace the automatic coupon, it would not combine with it.
 
-The UX for this should work fine because we only plan to actually provide coupons for
-individual courses. So there would not be a coupon that would work for a program level discount,
-other than the one automatically applied.
+TODO: how should the UI work for this case?
 
 ### Reporting
 
