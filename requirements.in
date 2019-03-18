@@ -1,6 +1,6 @@
 beautifulsoup4==4.6.0
 celery==4.2.0
-boto==2.49.0
+boto3==1.9.115
 dj-database-url==0.4.2
 django==2.1.7
 django-anymail[mailgun]==3.*
