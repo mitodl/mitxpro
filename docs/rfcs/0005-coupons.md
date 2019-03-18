@@ -83,7 +83,9 @@ A user buys a program and gets 15% off for each course. The coupon is automatica
 applied at checkout. The user may still apply another coupon at their preference but it would
 replace the automatic coupon, it would not combine with it.
 
-TODO: how should the UI work for this case?
+The UI will show the automatic coupon differently than a manually applied coupon. For the automatic
+coupon case it will show the coupon being applied and a text field with text explaining to the user
+that the coupon would replace the automatic one.
 
 ### Reporting
 
