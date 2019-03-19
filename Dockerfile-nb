@@ -1,4 +1,4 @@
-FROM open_discussions_python
+FROM mitxpro_python
 
 USER root
 

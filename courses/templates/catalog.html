@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}MIT xPro | Course Catalog{% endblock %}
+
+{% block content %}
+<div class="course-catalog">
+  <h1>Explore MIT's online courses for professionals</h1>
+  <div class="catalog-body mdc-layout-grid">
+    <div class="mdc-layout-grid__inner">
+    {% for courseware_object in courseware_objects %}
+      <div
+          class="course-card mdc-layout-grid__cell mdc-layout-grid__cell--span-4"
+          role="region"
+          aria-label="{{ courseware_object.title }}"
+      >
+        <header>
+          <div class="cover-image">
+            <img src="{% static default_image_path %}" alt="Preview image">
+          </div>
+        </header>
+        <section class="course-info">
+          <h5 class="organization">MIT xPRO</h5>
+          <h3 class="title">{{ courseware_object.title }}</h3>
+        </section>
+      </div>
+    {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

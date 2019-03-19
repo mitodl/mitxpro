@@ -1,10 +1,9 @@
 {% extends "base.html" %}
-{% load i18n static %}
+{% load i18n static render_bundle %}
 
 {% block title %}{% trans "mitxpro" %}{% endblock %}
 
 {% block content %}
 <div id="container"></div>
-{% load render_bundle %}
 {% render_bundle 'root' %}
 {% endblock %}

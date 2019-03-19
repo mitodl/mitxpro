@@ -79,7 +79,14 @@ class SeedDataLoader:
         if existing_obj:
             self.seed_result.add_existing(existing_obj)
             return existing_obj
-        serialized = serializer_cls(data={**data, field_name: adjusted_value})
+        serialized = serializer_cls(
+            data={
+                # Set 'live' to True for seeded objects by default
+                "live": True,
+                **data,
+                field_name: adjusted_value,
+            }
+        )
         serialized.is_valid(raise_exception=True)
         added_obj = serialized.save()
         self.seed_result.add_created(added_obj)

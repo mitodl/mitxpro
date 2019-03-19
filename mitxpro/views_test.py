@@ -27,7 +27,7 @@ def test_webpack_url(mocker, settings, client):
     response = client.get(reverse("mitxpro-index"))
 
     bundles = [bundle[0][1] for bundle in get_bundle.call_args_list]
-    assert set(bundles) == {"common", "root", "style"}
+    assert set(bundles) == {"common", "style"}
     js_settings = json.loads(response.context["js_settings_json"])
     assert js_settings == {
         "gaTrackingID": "fake",
