@@ -2,7 +2,7 @@
 /* global SETTINGS:false, fetch: false */
 // For mocking purposes we need to use 'fetch' defined as a global instead of importing as a local.
 import "isomorphic-fetch"
-import R from "ramda"
+import * as R from "ramda"
 
 import { S, parseJSON, filterE } from "./sanctuary"
 

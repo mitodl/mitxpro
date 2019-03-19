@@ -9,6 +9,7 @@ import Header from "../components/Header"
 
 import HomePage from "./pages/HomePage"
 import LoginPage from "./pages/LoginPage"
+import RegisterPages from "./pages/register/RegisterPages"
 
 import type { Match } from "react-router"
 
@@ -29,8 +30,13 @@ export default class App extends React.Component<Props, void> {
             component={HomePage}
           />
           <Route
-            path={urljoin(match.url, String(routes.login))}
+            exact
+            path={urljoin(match.url, routes.login)}
             component={LoginPage}
+          />
+          <Route
+            path={urljoin(match.url, String(routes.register))}
+            component={RegisterPages}
           />
         </Switch>
       </div>

@@ -15,13 +15,24 @@ export type AuthStates =
 
 export type AuthFlow = "register" | "login"
 
-export type AuthResponse = {
+export type AuthResponseRaw = {
   partial_token: ?string,
   flow:          AuthFlow,
   state:         AuthStates,
   errors:        Array<string>,
   redirect_url:  ?string,
   extra_data: {
+    name?: string
+  }
+}
+
+export type AuthResponse = {
+  partialToken: ?string,
+  flow:          AuthFlow,
+  state:         AuthStates,
+  errors:        Array<string>,
+  redirectUrl:  ?string,
+  extraData: {
     name?: string
   }
 }

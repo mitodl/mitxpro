@@ -518,4 +518,4 @@ if DEBUG:
     # it needs to be enabled before other middlewares
     MIDDLEWARE = ("debug_toolbar.middleware.DebugToolbarMiddleware",) + MIDDLEWARE
 
-MANDATORY_SETTINGS = []
+MANDATORY_SETTINGS = ["MAILGUN_SENDER_DOMAIN", "MAILGUN_KEY"]

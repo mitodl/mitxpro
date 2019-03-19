@@ -12,8 +12,19 @@ describe("Header component", () => {
     assert.equal(
       shallow(<Header />)
         .find("Link")
+        .at(0)
         .props().to,
       routes.login
+    )
+  })
+
+  it("has a link to register", () => {
+    assert.equal(
+      shallow(<Header />)
+        .find("Link")
+        .at(1)
+        .props().to,
+      routes.register.begin
     )
   })
 })

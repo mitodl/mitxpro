@@ -7,7 +7,14 @@ import { routes } from "../lib/urls"
 
 const Header = () => (
   <div>
-    <Link to={routes.login}>Login</Link>
+    <ul>
+      <li>
+        <Link to={routes.login}>Login</Link>
+      </li>
+      <li>
+        <Link to={routes.register.begin}>Register</Link>
+      </li>
+    </ul>
   </div>
 )
 

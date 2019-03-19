@@ -50,14 +50,19 @@ class LoginPage extends React.Component<Props, State> {
     /* eslint-disable camelcase */
     try {
       const {
-        body: { state, partial_token, errors, extra_data }
-      }: { body: AuthResponse } = await loginEmail(email, nextUrl)
+        body: {
+          state,
+          partialToken,
+          errors,
+          extraData: { name }
+        }
+      } = await loginEmail(email, nextUrl)
 
       if (state === STATE_LOGIN_PASSWORD) {
         this.setState({
-          step:         STEP_PASSWORD,
-          partialToken: partial_token,
-          name:         extra_data.name
+          step: STEP_PASSWORD,
+          name,
+          partialToken
         })
       } else if (errors.length > 0) {
         setErrors({
@@ -81,11 +86,11 @@ class LoginPage extends React.Component<Props, State> {
     /* eslint-disable camelcase */
     try {
       const {
-        body: { state, redirect_url, errors }
+        body: { state, redirectUrl, errors }
       }: { body: AuthResponse } = await loginPassword(password, partialToken)
 
       if (state === STATE_SUCCESS) {
-        history.push(redirect_url || routes.home)
+        history.push(redirectUrl || routes.home)
       } else if (errors.length > 0) {
         setErrors({
           password: errors[0]

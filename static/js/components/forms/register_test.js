@@ -4,11 +4,11 @@ import sinon from "sinon"
 import { assert } from "chai"
 import { shallow } from "enzyme"
 
-import { LoginEmailForm, LoginPasswordForm } from "./login"
+import { RegisterEmailForm, RegisterProfileForm } from "./register"
 
 import { findFormikFieldByName } from "../../lib/test_utils"
 
-describe("Login forms", () => {
+describe("Register forms", () => {
   let sandbox, onSubmitStub
 
   beforeEach(() => {
@@ -16,8 +16,9 @@ describe("Login forms", () => {
     onSubmitStub = sandbox.stub()
   })
 
-  describe("LoginEmailForm", () => {
-    const renderForm = () => shallow(<LoginEmailForm onSubmit={onSubmitStub} />)
+  describe("RegisterEmailForm", () => {
+    const renderForm = () =>
+      shallow(<RegisterEmailForm onSubmit={onSubmitStub} />)
 
     it("passes onSubmit to Formik", () => {
       const wrapper = renderForm()
@@ -34,9 +35,9 @@ describe("Login forms", () => {
     })
   })
 
-  describe("LoginPasswordForm", () => {
+  describe("RegisterProfileForm", () => {
     const renderForm = () =>
-      shallow(<LoginPasswordForm onSubmit={onSubmitStub} />)
+      shallow(<RegisterProfileForm onSubmit={onSubmitStub} />)
 
     it("passes onSubmit to Formik", () => {
       const wrapper = renderForm()
@@ -48,6 +49,7 @@ describe("Login forms", () => {
       const wrapper = renderForm()
 
       const form = wrapper.find("Formik").dive()
+      assert.ok(findFormikFieldByName(form, "name").exists())
       assert.ok(findFormikFieldByName(form, "password").exists())
       assert.ok(form.find("button[type='submit']").exists())
     })

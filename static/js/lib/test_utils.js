@@ -16,3 +16,8 @@ export const assertIsJust = (m: Maybe, val: any) => {
   assert(m.isJust, `should be Just(${val}), is ${m}`)
   assert.deepEqual(m.value, val)
 }
+
+export const findFormikFieldByName = (wrapper: any, name: string) =>
+  wrapper
+    .find("FormikConnect(FieldInner)")
+    .filterWhere(node => node.prop("name") === name)

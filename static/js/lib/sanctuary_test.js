@@ -1,6 +1,6 @@
 // @flow
 import { assert } from "chai"
-import R from "ramda"
+import * as R from "ramda"
 
 import {
   S,

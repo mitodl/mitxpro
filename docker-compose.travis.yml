@@ -9,6 +9,8 @@ services:
     environment:
       CELERY_TASK_ALWAYS_EAGER: 'True'
       SECRET_KEY: 'not_very_secret_key'
+      MAILGUN_SENDER_DOMAIN: 'other.fake.site'
+      MAILGUN_KEY: 'fake_mailgun_key'
 
   web:
     build:
@@ -19,6 +21,8 @@ services:
     environment:
       CELERY_TASK_ALWAYS_EAGER: 'True'
       SECRET_KEY: 'not_very_secret_key'
+      MAILGUN_SENDER_DOMAIN: 'other.fake.site'
+      MAILGUN_KEY: 'fake_mailgun_key'
 
   celery:
     build:

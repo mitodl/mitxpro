@@ -1,5 +1,5 @@
 // @flow
-import R from "ramda"
+import * as R from "ramda"
 import { create, env } from "sanctuary"
 
 export const S = create({ checkTypes: false, env: env })

@@ -1,5 +1,5 @@
 /* global require:false, module:false */
-import R from "ramda"
+import { prop } from "ramda"
 import { compose, createStore, applyMiddleware } from "redux"
 import { createLogger } from "redux-logger"
 import { queryMiddleware } from "redux-query"
@@ -7,9 +7,7 @@ import { queryMiddleware } from "redux-query"
 import rootReducer from "../reducers"
 
 // Setup middleware
-const COMMON_MIDDLEWARE = [
-  queryMiddleware(R.prop("queries"), R.prop("entities"))
-]
+const COMMON_MIDDLEWARE = [queryMiddleware(prop("queries"), prop("entities"))]
 
 // Store factory configuration
 let createStoreWithMiddleware
