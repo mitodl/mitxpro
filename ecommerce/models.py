@@ -177,7 +177,7 @@ class CouponInvoiceVersion(TimestampedModel):
     COUPON_TYPES = [PROMO, SINGLE_USE]
 
     invoice = models.ForeignKey(CouponInvoice, on_delete=models.PROTECT)
-
+    automatic = models.BooleanField(default=False)
     coupon_type = models.CharField(
         choices=[(_type, _type) for _type in COUPON_TYPES], max_length=30
     )
@@ -216,6 +216,7 @@ class Coupon(TimestampedModel):
 
     coupon_code = models.CharField(max_length=50)
     invoice = models.ForeignKey(CouponInvoice, on_delete=models.PROTECT)
+    enabled = models.BooleanField(default=True)
 
     def __str__(self):
         """Description for Coupon"""

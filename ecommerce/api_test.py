@@ -2,10 +2,15 @@
 Test for ecommerce functions
 """
 from base64 import b64encode
+from collections import namedtuple
+from decimal import Decimal
+from datetime import datetime, timedelta
+from types import SimpleNamespace
 import hashlib
 import hmac
 
 import pytest
+import pytz
 
 from courses.factories import CourseFactory, ProgramFactory
 from ecommerce.api import (
@@ -14,16 +19,41 @@ from ecommerce.api import (
     ISO_8601_FORMAT,
     make_reference_id,
 )
-from ecommerce.factories import LineFactory, OrderFactory
+from ecommerce.api import (
+    get_eligible_coupons,
+    get_valid_coupon_versions,
+    best_coupon_version,
+    discount_price,
+)
+from ecommerce.factories import (
+    BasketItemFactory,
+    CouponInvoiceVersionFactory,
+    CouponFactory,
+    CouponEligibilityFactory,
+    CouponInvoiceFactory,
+    CouponVersionFactory,
+    LineFactory,
+    ProductVersionFactory,
+    CouponRedemptionFactory,
+    OrderFactory,
+)
 from mitxpro.utils import now_in_utc
 
-
 pytestmark = pytest.mark.django_db
+
+# pylint: disable=redefined-outer-name
 
 CYBERSOURCE_ACCESS_KEY = "access"
 CYBERSOURCE_PROFILE_ID = "profile"
 CYBERSOURCE_SECURITY_KEY = "security"
 CYBERSOURCE_REFERENCE_PREFIX = "prefix"
+
+
+CouponGroup = namedtuple(
+    "CouponGroup",
+    ["coupon", "coupon_version", "invoice", "invoice_version"],
+    verbose=True,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -35,6 +65,57 @@ def cybersource_settings(settings):
     settings.CYBERSOURCE_PROFILE_ID = CYBERSOURCE_PROFILE_ID
     settings.CYBERSOURCE_SECURITY_KEY = CYBERSOURCE_SECURITY_KEY
     settings.CYBERSOURCE_REFERENCE_PREFIX = CYBERSOURCE_REFERENCE_PREFIX
+
+
+@pytest.fixture()
+def basket_and_coupons():
+    """
+    Sample basket and coupon
+    """
+    basket_item = BasketItemFactory()
+
+    # Some prices for the basket item product
+    ProductVersionFactory(product=basket_item.product, price=Decimal(15.00))
+    product_version = ProductVersionFactory(
+        product=basket_item.product, price=Decimal(25.00)
+    )
+
+    invoice_worst = CouponInvoiceFactory()
+    invoice_best = CouponInvoiceFactory()
+    coupon_worst = CouponFactory(invoice=invoice_worst, coupon_code="WORST")
+    coupon_best = CouponFactory(invoice=invoice_best, coupon_code="BEST")
+
+    # Coupon invoice for worst coupon, with lowest discount
+    civ_worst = CouponInvoiceVersionFactory(
+        invoice=invoice_worst, amount=Decimal(0.1), automatic=True
+    )
+    # Coupon invoice for best coupon, with highest discount
+    civ_best_old = CouponInvoiceVersionFactory(
+        invoice=invoice_best, amount=Decimal(0.5)
+    )
+    # Coupon invoice for best coupon, more recent than previous so takes precedence
+    civ_best = CouponInvoiceVersionFactory(invoice=invoice_best, amount=Decimal(0.4))
+
+    # Coupon version for worst coupon
+    cv_worst = CouponVersionFactory(invoice_version=civ_worst, coupon=coupon_worst)
+    # Coupon version for best coupon
+    CouponVersionFactory(invoice_version=civ_best_old, coupon=coupon_best)
+    # Most recent coupon version for best coupon
+    cv_best = CouponVersionFactory(invoice_version=civ_best, coupon=coupon_best)
+
+    # Both best and worst coupons eligible for the product
+    CouponEligibilityFactory(coupon=coupon_best, product=basket_item.product)
+    CouponEligibilityFactory(coupon=coupon_worst, product=basket_item.product)
+
+    coupongroup_worst = CouponGroup(coupon_worst, cv_worst, invoice_worst, civ_worst)
+    coupongroup_best = CouponGroup(coupon_best, cv_best, invoice_best, civ_best)
+
+    return SimpleNamespace(
+        basket_item=basket_item,
+        product_version=product_version,
+        coupongroup_best=coupongroup_best,
+        coupongroup_worst=coupongroup_worst,
+    )
 
 
 def test_valid_signature():
@@ -133,5 +214,161 @@ def test_make_reference_id():
     """
     order = OrderFactory.create()
     assert f"MITXPRO-{CYBERSOURCE_REFERENCE_PREFIX}-{order.id}" == make_reference_id(
-        order
+        order)
+
+def test_get_eligible_coupons(basket_and_coupons):
+    """
+    Verify that only eligible coupons for a product are returned
+    """
+    other_coupon = CouponFactory.create()
+    eligible_coupons = list(
+        get_eligible_coupons(basket_and_coupons.basket_item.product)
+    )
+    expected_coupons = [
+        c.coupon.id
+        for c in [
+            basket_and_coupons.coupongroup_best,
+            basket_and_coupons.coupongroup_worst,
+        ]
+    ]
+    assert sorted(expected_coupons) == sorted(eligible_coupons)
+    assert other_coupon.id not in eligible_coupons
+
+
+def test_get_eligible_coupons_with_code(basket_and_coupons):
+    """
+    Verify that only eligible coupons for a product that match a specified code are returned
+    """
+    eligible_coupons = list(
+        get_eligible_coupons(
+            basket_and_coupons.basket_item.product,
+            code=basket_and_coupons.coupongroup_worst.coupon.coupon_code,
+        )
+    )
+    assert basket_and_coupons.coupongroup_worst.coupon.id in eligible_coupons
+    assert basket_and_coupons.coupongroup_best.coupon.id not in eligible_coupons
+    invalid_code_coupons = get_eligible_coupons(
+        basket_and_coupons.basket_item.product, code="invalid_test_coupon_code"
+    )
+    assert not invalid_code_coupons
+
+
+@pytest.mark.parametrize("auto_only", [True, False])
+def test_get_valid_coupon_versions(basket_and_coupons, auto_only):
+    """
+    Verify that the correct valid CouponInvoiceVersions are returned for a list of coupons
+    """
+    coupon_ids = [
+        c.coupon.id
+        for c in [
+            basket_and_coupons.coupongroup_best,
+            basket_and_coupons.coupongroup_worst,
+        ]
+    ]
+    best_versions = get_valid_coupon_versions(
+        coupon_ids, basket_and_coupons.basket_item.basket.user, auto_only
+    )
+    expected_versions = [basket_and_coupons.coupongroup_worst.coupon_version]
+    if not auto_only:
+        expected_versions.append(basket_and_coupons.coupongroup_best.coupon_version)
+    assert list(set(best_versions) - set(expected_versions)) == []
+
+
+def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):
+    """
+    Verify that expired or future CouponInvoiceVersions are not returned for a list of coupons
+    """
+    coupon_ids = [
+        c.coupon.id
+        for c in [
+            basket_and_coupons.coupongroup_best,
+            basket_and_coupons.coupongroup_worst,
+        ]
+    ]
+
+    today = datetime.now(tz=pytz.UTC)
+    civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.invoice_version
+    civ_worst.activation_date = today + timedelta(days=1)
+    civ_worst.save()
+    civ_best = basket_and_coupons.coupongroup_best.coupon_version.invoice_version
+    civ_best.expiration_date = today - timedelta(days=1)
+    civ_best.save()
+
+    best_versions = get_valid_coupon_versions(
+        coupon_ids, basket_and_coupons.basket_item.basket.user
+    )
+    assert best_versions == []
+
+
+def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons):
+    """
+    Verify that CouponInvoiceVersions that have exceeded redemption limits are not returned
+    """
+    coupon_ids = [
+        c.coupon.id
+        for c in [
+            basket_and_coupons.coupongroup_best,
+            basket_and_coupons.coupongroup_worst,
+        ]
+    ]
+
+    civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.invoice_version
+    civ_worst.max_redemptions = 1
+    civ_worst.save()
+    CouponRedemptionFactory(
+        coupon_version=basket_and_coupons.coupongroup_worst.coupon_version
+    )
+
+    civ_best = basket_and_coupons.coupongroup_best.coupon_version.invoice_version
+    civ_best.max_redemptions_per_user = 1
+    civ_best.save()
+    CouponRedemptionFactory(
+        coupon_version=basket_and_coupons.coupongroup_best.coupon_version,
+        order=OrderFactory(purchaser=basket_and_coupons.basket_item.basket.user),
+    )
+
+    best_versions = get_valid_coupon_versions(
+        coupon_ids, basket_and_coupons.basket_item.basket.user
+    )
+    assert best_versions == []
+
+
+@pytest.mark.parametrize("auto_only", [True, False])
+def test_get_best_coupon_version(basket_and_coupons, auto_only):
+    """
+    Verify that the CouponInvoiceVersion with the best price is returned for a bucket based on auto filter
+    """
+    best_cv = best_coupon_version(
+        basket_and_coupons.basket_item.basket, auto_only=auto_only
+    )
+    if auto_only:
+        assert best_cv == basket_and_coupons.coupongroup_worst.coupon_version
+    else:
+        assert best_cv == basket_and_coupons.coupongroup_best.coupon_version
+
+
+@pytest.mark.parametrize("code", ["WORST", None])
+def test_get_best_coupon_version_by_code(basket_and_coupons, code):
+    """
+    Verify that the CouponInvoiceVersion with the best price is returned for a bucket based on coupon code
+    """
+    best_cv = best_coupon_version(
+        basket_and_coupons.basket_item.basket, auto_only=False, code=code
+    )
+    if code:
+        assert best_cv == basket_and_coupons.coupongroup_worst.coupon_version
+    else:
+        assert best_cv == basket_and_coupons.coupongroup_best.coupon_version
+
+
+def test_discount_price(basket_and_coupons):
+    """
+    Verify that the discount price is correctly calculated
+    """
+    coupon_version = basket_and_coupons.coupongroup_best.coupon_version
+    price = basket_and_coupons.product_version.price
+    discount = coupon_version.invoice_version.amount
+    assert (
+        discount_price(coupon_version, basket_and_coupons.basket_item.product)
+        == price * discount
     )

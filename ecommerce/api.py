@@ -2,6 +2,8 @@
 Functions for ecommerce
 """
 from base64 import b64encode
+from datetime import datetime
+from decimal import Decimal
 import hashlib
 import hmac
 import logging
@@ -10,6 +12,16 @@ import uuid
 from django.conf import settings
 
 from mitxpro.utils import now_in_utc
+
+
+import pytz
+from django.db.models import Q
+
+from ecommerce.models import (
+    CouponEligibility,
+    CouponVersion,
+    CouponRedemption,
+)
 
 ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 log = logging.getLogger(__name__)
@@ -102,4 +114,119 @@ def make_reference_id(order):
     """
     return (
         f"{_REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}-{order.id}"
+
+
+def get_valid_coupon_versions(coupons, user, auto_only=False):
+    """
+    Given a list of coupons, determine which of them are valid based on invoice version dates and redemptions.
+
+    Args:
+        coupons (QuerySet of coupons): List of coupons to filter for validity
+        auto_only (bool): Whether or not to filter by is_automatic=True
+
+    Returns:
+        list of CouponVersion ids: CouponVersion ids sorted by discount, highest first.
+    """
+    valid_coupons = []
+    now = datetime.now(tz=pytz.UTC)
+
+    # Get the ids of the latest coupon versions
+    cv_latest = (
+        CouponVersion.objects.select_related()
+        .filter(coupon__in=coupons)
+        .order_by("coupon", "-created_on")
+        .distinct("coupon")
+        .values_list("pk")
+    )
+
+    # filter by expiration and activation dates
+    query = (
+        CouponVersion.objects.select_related()
+        .filter(pk__in=cv_latest)
+        .filter(
+            Q(invoice_version__expiration_date__gte=now)
+            | Q(invoice_version__expiration_date__isnull=True)
+        )
+        .filter(
+            Q(invoice_version__activation_date__lte=now)
+            | Q(invoice_version__activation_date__isnull=True)
+        )
+    )
+
+    if auto_only:
+        query = query.filter(invoice_version__automatic=True)
+
+    # filter by redemption counts
+    for cv in query:
+        redemptions_global = CouponRedemption.objects.filter(coupon_version=cv)
+        redemptions_user = redemptions_global.filter(order__purchaser=user)
+        if (
+            cv.invoice_version.max_redemptions > redemptions_global.count()
+            and cv.invoice_version.max_redemptions_per_user > redemptions_user.count()
+        ):
+            valid_coupons.append(cv)
+    return sorted(valid_coupons, key=lambda x: x.invoice_version.amount, reverse=True)
+
+
+def get_eligible_coupons(product, code=None):
+    """
+    Return the eligible coupon ids for a product.
+
+    Args:
+        product (Product): product to filter CouponEligibility by
+        code (str): A coupon code to filter by
+
+    Returns:
+        QuerySet: list of coupon ids that can be used with the products.
+    """
+    query = CouponEligibility.objects.select_related("coupon").filter(
+        product=product, coupon__enabled=True
+    )
+    if code:
+        query = query.filter(coupon__coupon_code=code)
+
+    return query.values_list("coupon", flat=True)
+
+
+def best_coupon_version(basket, auto_only=False, code=None):
+    """
+    Get the eligible coupons for the basket product.
+    Assumes that the basket only contains one product.
+
+    Args:
+        basket (Basket): the basket Object
+        auto_only (bool): Only retrieve `is_automatic` Coupons
+        code (str): A coupon code to filter by
+
+    Returns:
+        CouponVersion: the CouponVersion with the highest discount, or None
+    """
+
+    basket_products = basket.basketitems.values_list("product", flat=True)
+    if basket_products:
+        # Assumption: there is only one product in basket if not empty
+        product_coupons = get_eligible_coupons(basket_products[0], code=code)
+        if product_coupons:
+            validated_versions = get_valid_coupon_versions(
+                product_coupons, basket.user, auto_only
+            )
+            if validated_versions:
+                return validated_versions[0]
+    return None
+
+
+def discount_price(coupon_version, product):
+    """
+    Determine the new discounted price for a product after the coupon discount is applied
+
+    Args:
+        coupon_version (CouponVersion): the CouponVersion object
+        product: (Product): the Product object
+
+    Returns:
+        Decimal: the discounted price for the Product
+    """
+    return Decimal(
+        coupon_version.invoice_version.amount
+        * product.productversions.order_by("-created_on").first().price
     )
