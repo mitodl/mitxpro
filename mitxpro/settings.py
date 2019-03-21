@@ -82,6 +82,7 @@ INSTALLED_APPS = (
     "mail",
     "users",
     "cms",
+    "courseware",
     # must be after "users" to pick up custom user model
     "compat",
     "hijack",
