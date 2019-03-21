@@ -3,7 +3,8 @@ import datetime
 
 import pytz
 
-from mitxpro.utils import now_in_utc, is_near_now, dict_without_keys
+from ecommerce.models import Order
+from mitxpro.utils import get_field_names, now_in_utc, is_near_now, dict_without_keys
 
 
 def test_now_in_utc():
@@ -33,3 +34,15 @@ def test_dict_without_keys():
     assert dict_without_keys(d, "a") == {"b": 2, "c": 3}
     assert dict_without_keys(d, "a", "b") == {"c": 3}
     assert dict_without_keys(d, "doesnt_exist") == d
+
+
+def test_get_field_names():
+    """
+    Assert that get_field_names does not include related fields
+    """
+    assert set(get_field_names(Order)) == {
+        "purchaser",
+        "status",
+        "created_on",
+        "updated_on",
+    }

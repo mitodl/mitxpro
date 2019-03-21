@@ -6,6 +6,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
+from mitxpro.utils import serialize_model_object
 
 
 class Product(TimestampedModel):
@@ -116,7 +117,12 @@ class Order(TimestampedModel, AuditableModel):
         """
         Get a serialized representation of the Order and any attached Basket and Lines
         """
-        raise NotImplementedError
+        data = serialize_model_object(self)
+        data["lines"] = [serialize_model_object(line) for line in self.lines.all()]
+        data["coupons"] = [
+            serialize_model_object(coupon) for coupon in self.couponredemption_set.all()
+        ]
+        return data
 
 
 class OrderAudit(AuditModel):
