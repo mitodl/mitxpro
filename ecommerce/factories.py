@@ -165,4 +165,3 @@ class ReceiptFactory(DjangoModelFactory):
 
     class Meta:
         model = models.Receipt
-

@@ -2,7 +2,6 @@
 Functions for ecommerce
 """
 from base64 import b64encode
-from datetime import datetime
 from decimal import Decimal
 import hashlib
 import hmac
@@ -10,18 +9,10 @@ import logging
 import uuid
 
 from django.conf import settings
-
-from mitxpro.utils import now_in_utc
-
-
-import pytz
 from django.db.models import Q
 
-from ecommerce.models import (
-    CouponEligibility,
-    CouponVersion,
-    CouponRedemption,
-)
+from ecommerce.models import CouponEligibility, CouponVersion, CouponRedemption
+from mitxpro.utils import now_in_utc
 
 ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 log = logging.getLogger(__name__)
@@ -114,6 +105,7 @@ def make_reference_id(order):
     """
     return (
         f"{_REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}-{order.id}"
+    )
 
 
 def get_valid_coupon_versions(coupons, user, auto_only=False):
@@ -128,7 +120,7 @@ def get_valid_coupon_versions(coupons, user, auto_only=False):
         list of CouponVersion ids: CouponVersion ids sorted by discount, highest first.
     """
     valid_coupons = []
-    now = datetime.now(tz=pytz.UTC)
+    now = now_in_utc()
 
     # Get the ids of the latest coupon versions
     cv_latest = (

@@ -214,7 +214,9 @@ def test_make_reference_id():
     """
     order = OrderFactory.create()
     assert f"MITXPRO-{CYBERSOURCE_REFERENCE_PREFIX}-{order.id}" == make_reference_id(
-        order)
+        order
+    )
+
 
 def test_get_eligible_coupons(basket_and_coupons):
     """
