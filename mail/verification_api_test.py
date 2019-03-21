@@ -11,7 +11,6 @@ from mitxpro.test_utils import any_instance_of
 pytestmark = [pytest.mark.django_db]
 
 
-@pytest.mark.skip
 def test_send_verification_email(mocker, rf):
     """Test that send_verification_email sends an email with the link in it"""
     from social_core.backends.email import EmailAuth

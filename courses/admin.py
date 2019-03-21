@@ -16,7 +16,7 @@ class ProgramAdmin(admin.ModelAdmin):
 
 
 class CourseAdmin(admin.ModelAdmin):
-    """Admin for Program"""
+    """Admin for Course"""
 
     model = Course
     search_fields = ["title", "description"]
@@ -24,7 +24,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 
 class CourseRunAdmin(admin.ModelAdmin):
-    """Admin for Program"""
+    """Admin for CourseRun"""
 
     model = CourseRun
     search_fields = ["title", "courseware_id"]

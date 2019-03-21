@@ -40,6 +40,7 @@ urlpatterns = [
     path("", include("social_django.urls", namespace="social")),
     path("", include("authentication.urls")),
     path("", include("courses.urls")),
+    path("", include("courseware.urls")),
     path("", include("users.urls")),
     # named routes mapped to the react app
     path("login/", index, name="login"),

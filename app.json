@@ -118,6 +118,12 @@
     "OPENEDX_API_BASE_URL": {
       "description": "The base URL for the Open edX API"
     },
+    "OPENEDX_API_CLIENT_ID": {
+      "description": "The OAuth2 client id to connect to Open edX with"
+    },
+    "OPENEDX_API_CLIENT_SECRET": {
+      "description": "The OAuth2 client secret to connect to Open edX with"
+    },
     "OPENEDX_BASE_REDIRECT_URL": {
       "description": "The base redirect URL for an OAuth Application for the Open edX API",
       "required": false

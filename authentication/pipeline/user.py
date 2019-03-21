@@ -4,7 +4,6 @@ from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
 from social_core.pipeline.partial import partial
 from social_core.pipeline.user import create_user
-from django.db import transaction
 
 from authentication.exceptions import (
     InvalidPasswordException,
@@ -94,18 +93,15 @@ def create_user_via_email(
     if "name" not in data or "password" not in data:
         raise RequirePasswordAndProfileException(backend, current_partial)
 
-    with transaction.atomic():
-        create_user_retval = create_user(
-            strategy, details=details or {}, backend=backend, *args, **kwargs
-        )
-        if not create_user_retval:
-            return
-        user = create_user_retval["user"]
-        user.name = data["name"]
-        user.set_password(data["password"])
-        user.save()
-
-    return {"user": user}
+    return create_user(
+        strategy,
+        details=details or {},
+        backend=backend,
+        name=data["name"],
+        password=data["password"],
+        *args,
+        **kwargs,
+    )
 
 
 @partial

@@ -5,6 +5,7 @@ codecov
 django-debug-toolbar
 factory_boy
 faker
+freezegun
 ipdb
 nplusone>=0.8.1
 pdbpp
@@ -19,5 +20,6 @@ pytest-pep8
 pytest-mock
 pytest-pylint==0.12.3
 pytest-lazy-fixture==0.5.1
+responses
 safety
 semantic-version

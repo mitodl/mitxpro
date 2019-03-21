@@ -19,6 +19,9 @@ class CoursewareUser(TimestampedModel):
         help_text="Indicates whether a corresponding user has been created on the courseware platform",
     )
 
+    def __str__(self):
+        return f"CoursewareUser for {self.user} in {self.platform}"
+
     class Meta:
         unique_together = ("user", "platform")
 
@@ -31,6 +34,9 @@ class OpenEdxApiAuth(TimestampedModel):
     refresh_token = models.CharField(max_length=128)
     access_token = models.CharField(null=True, max_length=128)
     access_token_expires_on = models.DateTimeField(null=True)
+
+    def __str__(self):
+        return f"OpenEdxApiAuth for {self.user}"
 
     class Meta:
         index_together = ("user", "access_token_expires_on")

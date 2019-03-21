@@ -1,23 +1,7 @@
-version: '2.1'
+version: '3.6'
 services:
-  python:
-    build:
-      context: .
-      # TODO: upload dockerfile first then uncomment this line
-      # dockerfile: ./travis/Dockerfile-travis-web
-      dockerfile: ./Dockerfile
-    environment:
-      CELERY_TASK_ALWAYS_EAGER: 'True'
-      SECRET_KEY: 'not_very_secret_key'
-      MAILGUN_SENDER_DOMAIN: 'other.fake.site'
-      MAILGUN_KEY: 'fake_mailgun_key'
 
   web:
-    build:
-      context: .
-      # TODO: upload dockerfile first then uncomment this line
-      # dockerfile: ./travis/Dockerfile-travis-web
-      dockerfile: ./Dockerfile
     environment:
       CELERY_TASK_ALWAYS_EAGER: 'True'
       SECRET_KEY: 'not_very_secret_key'
@@ -25,11 +9,6 @@ services:
       MAILGUN_KEY: 'fake_mailgun_key'
 
   celery:
-    build:
-      context: .
-      # TODO: upload dockerfile first then uncomment this line
-      # dockerfile: ./travis/Dockerfile-travis-web
-      dockerfile: ./Dockerfile
     environment:
       # for celery, to avoid ImproperlyConfigured
       MAILGUN_SENDER_DOMAIN: 'other.fake.site'

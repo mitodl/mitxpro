@@ -1,16 +1,34 @@
-version: '2.1'
+version: '3.6'
+
+x-environment:
+  &py-environment
+  DEBUG: 'False'
+  NODE_ENV: 'production'
+  DEV_ENV: 'True'  # necessary to have nginx connect to web container
+  SECRET_KEY: local_unsafe_key
+  COVERAGE_DIR: htmlcov
+  DATABASE_URL: postgres://postgres@db:5432/postgres
+  MITXPRO_BASE_URL: http://xpro.odl.local:8053
+  MITXPRO_SECURE_SSL_REDIRECT: 'False'
+  MITXPRO_DB_DISABLE_SSL: 'True'
+  ELASTICSEARCH_URL: elastic:9200
+  CELERY_TASK_ALWAYS_EAGER: 'False'
+  CELERY_BROKER_URL: redis://redis:6379/4
+  CELERY_RESULT_BACKEND: redis://redis:6379/4
+  DOCKER_HOST: ${DOCKER_HOST:-missing}
+  WEBPACK_DEV_SERVER_HOST: ${WEBPACK_DEV_SERVER_HOST:-localhost}
+
 services:
   notebook:
     build:
       context: .
       dockerfile: Dockerfile-nb
-    extends:
-      file: docker-compose.yml
-      service: python
     volumes:
       - .:/src
     environment:
+      << : *py-environment
       BASE_DJANGO_APP_NAME: mitxpro
+    env_file: .env
     command: >
       /bin/bash -c '
       sleep 3 &&

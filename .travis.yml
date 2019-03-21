@@ -1,4 +1,8 @@
 sudo: false
+
+# xenial for newer docker-compose https://blog.travis-ci.com/2018-11-08-xenial-release
+dist: xenial
+
 matrix:
   include:
     - language: ruby

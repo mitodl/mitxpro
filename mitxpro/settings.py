@@ -185,8 +185,6 @@ AUTHENTICATION_BACKENDS = (
     "guardian.backends.ObjectPermissionBackend",
 )
 
-SOCIAL_AUTH_STRATEGY = "authentication.strategy.OpenDiscussionsStrategy"
-
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = "login-complete"
 SOCIAL_AUTH_LOGIN_ERROR_URL = "login"
 SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS = [urlparse(SITE_BASE_URL).netloc]
@@ -199,6 +197,8 @@ SOCIAL_AUTH_MICROMASTERS_LOGIN_URL = get_string(
 # Email backend settings
 SOCIAL_AUTH_EMAIL_FORM_URL = "login"
 SOCIAL_AUTH_EMAIL_FORM_HTML = "login.html"
+
+SOCIAL_AUTH_EMAIL_USER_FIELDS = ["username", "email", "name", "password"]
 
 
 # Only validate emails for the email backend
@@ -501,6 +501,8 @@ OPENEDX_BASE_REDIRECT_URL = get_string(
     "OPENEDX_BASE_REDIRECT_URL", OPENEDX_API_BASE_URL
 )
 OPENEDX_TOKEN_EXPIRES_HOURS = get_int("OPENEDX_TOKEN_EXPIRES_HOURS", 1000)
+OPENEDX_API_CLIENT_ID = get_string("OPENEDX_API_CLIENT_ID", None)
+OPENEDX_API_CLIENT_SECRET = get_string("OPENEDX_API_CLIENT_SECRET", None)
 
 
 # features flags

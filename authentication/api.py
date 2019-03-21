@@ -1,27 +1,27 @@
 """Authentication api"""
-from django.contrib.auth import get_user_model
+from importlib import import_module
 
-User = get_user_model()
+from django.conf import settings
+from django.contrib.auth import SESSION_KEY, BACKEND_SESSION_KEY, HASH_SESSION_KEY
 
 
-def create_user(username, email, user_extra=None):
+def create_user_session(user):
     """
-    Ensures the user exists
+    Creates a new session for the user based on the configured session engine
 
     Args:
-        email (str): the user's email
+        user(User): the user for which to create a session
 
     Returns:
-        User: the user
+        SessionBase: the created session
     """
-    defaults = {}
+    SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 
-    if user_extra is not None:
-        defaults.update(user_extra)
+    session = SessionStore()
 
-    # this takes priority over a passed in value
-    defaults.update({"username": username})
+    session[SESSION_KEY] = user._meta.pk.value_to_string(user)
+    session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"
+    session[HASH_SESSION_KEY] = user.get_session_auth_hash()
+    session.save()
 
-    user, _ = User.objects.get_or_create(email=email, defaults=defaults)
-
-    return user
+    return session

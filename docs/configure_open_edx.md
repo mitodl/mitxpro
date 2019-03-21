@@ -30,6 +30,11 @@ In xPro:
 
 - go to `/admin/oauth2_provider/application/` and create a new application with these settings selected:
   - `Redirect uris`: `http://<EDX_HOSTNAME>:18000/auth/complete/mitxpro-oauth2/`
+    - _[OSX users]_ You will need redirect uris for both the local edX host alias and for `host.docker.internal`. This value should be:
+    ```shell
+    http://edx.odl.local:18000/auth/complete/mitxpro-oauth2/
+    http://host.docker.internal:18000/auth/complete/mitxpro-oauth2/
+    ```
   - `Client type`: "Confidential"
   - `Authorization grant type`: "Authorization code"
   - `Skip authorization`: checked
@@ -83,3 +88,18 @@ mitxpro-oauth2`
     - `EXTERNAL_XPRO_HOST` will depend on your OS, but it needs to be resolvable within the edx container
         - Linux users: The gateway IP of the docker-compose networking setup for xPro as found via `docker network inspect mitxpro_default`
         - OSX users: Use `host.docker.internal`
+
+
+
+#### Configure Open edX to support OAuth2 authentication from xPro
+
+  - In Open edX:
+    - go to `/admin/oauth2_provider/application/` and create a new application with these settings selected:
+      - `Redirect uris`: `http://xpro.odl.local:8053/login/_private/complete`
+      - `Client type`: "Confidential"
+      - `Authorization grant type`: "Authorization code"
+      - `Skip authorization`: checked
+      - Other values are arbitrary but be sure to fill them all out. Save the client id and secret for later
+  - In xPro:
+    - Set `OPENEDX_API_CLIENT_ID` to the client id
+    - Set `OPENEDX_API_CLIENT_SECRET` to the client secret
