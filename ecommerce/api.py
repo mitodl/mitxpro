@@ -59,7 +59,7 @@ def generate_cybersource_sa_payload(order):
     for i, line in enumerate(order.lines.all()):
         product_version = line.product_version
         line_items[f"item_{i}_code"] = str(product_version.product.content_type)
-        line_items[f"item_{i}_name"] = product_version.description
+        line_items[f"item_{i}_name"] = str(product_version.description)[:254]
         line_items[f"item_{i}_quantity"] = line.quantity
         line_items[f"item_{i}_sku"] = product_version.product.content_object.id
         line_items[f"item_{i}_tax_amount"] = "0"
