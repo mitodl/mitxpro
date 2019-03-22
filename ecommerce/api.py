@@ -11,7 +11,12 @@ import uuid
 from django.conf import settings
 from django.db.models import Q
 
-from ecommerce.models import CouponEligibility, CouponVersion, CouponRedemption
+from ecommerce.models import (
+    CouponEligibility,
+    CouponVersion,
+    CouponRedemption,
+    CouponSelection,
+)
 from mitxpro.utils import now_in_utc
 
 ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -222,3 +227,41 @@ def discount_price(coupon_version, product):
         coupon_version.invoice_version.amount
         * product.productversions.order_by("-created_on").first().price
     )
+
+
+def select_coupon(coupon_version, basket):
+    """
+    Apply a coupon to a basket by creating/updating the CouponSelection for that basket.
+    Assumes there should be only one CouponSelection per basket.
+
+    Args:
+        coupon_version (CouponVersion): a CouponVersion object
+        basket: (Basket): a Basket object
+
+    Returns:
+        CouponSelection: a coupon selection object
+
+    """
+    coupon_selection, _ = CouponSelection.objects.update_or_create(
+        basket=basket, defaults={"coupon": coupon_version.coupon}
+    )
+    return coupon_selection
+
+
+def redeem_coupon(coupon_version, order):
+    """
+    Redeem a coupon for an order by creating/updating the CouponRedemption for that order.
+    Assumes there should only be one CouponRedemption per order.
+
+    Args:
+        coupon_version (CouponVersion): a CouponVersion object
+        order: (Order): an Order object
+
+    Returns:
+        CouponRedemption: a CouponRedemption object
+
+    """
+    coupon_redemption, _ = CouponRedemption.objects.update_or_create(
+        order=order, defaults={"coupon_version": coupon_version}
+    )
+    return coupon_redemption

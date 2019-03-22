@@ -18,6 +18,8 @@ from ecommerce.api import (
     generate_cybersource_sa_signature,
     ISO_8601_FORMAT,
     make_reference_id,
+    select_coupon,
+    redeem_coupon,
 )
 from ecommerce.api import (
     get_eligible_coupons,
@@ -374,3 +376,37 @@ def test_discount_price(basket_and_coupons):
         discount_price(coupon_version, basket_and_coupons.basket_item.product)
         == price * discount
     )
+
+
+def test_apply_coupon(basket_and_coupons):
+    """
+    Verify that a CouponSelection is created or updated
+    """
+    basket = basket_and_coupons.basket_item.basket
+    best_coupon_version = basket_and_coupons.coupongroup_best.coupon_version
+    worst_coupon_version = basket_and_coupons.coupongroup_worst.coupon_version
+    new_selection = select_coupon(best_coupon_version, basket)
+    assert new_selection.basket == basket
+    assert new_selection.coupon == best_coupon_version.coupon
+
+    updated_selection = select_coupon(worst_coupon_version, basket)
+    assert updated_selection.basket == new_selection.basket
+    assert updated_selection.coupon == worst_coupon_version.coupon
+    assert updated_selection.pk == new_selection.pk
+
+
+def test_redeem_coupon(basket_and_coupons):
+    """
+    Verify that a CouponRedemption is created or updated
+    """
+    order = OrderFactory()
+    best_coupon_version = basket_and_coupons.coupongroup_best.coupon_version
+    worst_coupon_version = basket_and_coupons.coupongroup_worst.coupon_version
+    new_redemption = redeem_coupon(best_coupon_version, order)
+    assert new_redemption.order == order
+    assert new_redemption.coupon_version == best_coupon_version
+
+    updated_redemption = redeem_coupon(worst_coupon_version, order)
+    assert updated_redemption.order == new_redemption.order
+    assert updated_redemption.coupon_version == worst_coupon_version
+    assert updated_redemption.pk == new_redemption.pk
