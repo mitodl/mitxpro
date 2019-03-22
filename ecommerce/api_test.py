@@ -402,10 +402,9 @@ def test_discount_price(basket_and_coupons):
     coupon_version = basket_and_coupons.coupongroup_best.coupon_version
     price = basket_and_coupons.product_version.price
     discount = coupon_version.invoice_version.amount
-    assert (
-        discount_price(coupon_version, basket_and_coupons.basket_item.product)
-        == price * discount
-    )
+    assert discount_price(
+        coupon_version, basket_and_coupons.basket_item.product
+    ) == price * (1 - discount)
 
 
 def test_apply_coupon(basket_and_coupons):

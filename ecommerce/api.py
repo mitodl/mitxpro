@@ -224,7 +224,7 @@ def discount_price(coupon_version, product):
         Decimal: the discounted price for the Product
     """
     return Decimal(
-        coupon_version.invoice_version.amount
+        (1 - coupon_version.invoice_version.amount)
         * product.productversions.order_by("-created_on").first().price
     )
 
