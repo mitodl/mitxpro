@@ -115,14 +115,14 @@ def make_reference_id(order):
 
 def get_valid_coupon_versions(coupons, user, auto_only=False):
     """
-    Given a list of coupons, determine which of them are valid based on invoice version dates and redemptions.
+    Given a list of coupon ids, determine which of them are valid based on invoice version dates and redemptions.
 
     Args:
-        coupons (QuerySet of coupons): List of coupons to filter for validity
-        auto_only (bool): Whether or not to filter by is_automatic=True
+        coupons (QuerySet of coupon ids): List of coupons to filter for validity
+        auto_only (bool): Whether or not to filter by automatic=True
 
     Returns:
-        list of CouponVersion ids: CouponVersion ids sorted by discount, highest first.
+        list of CouponVersion: CouponVersion objects sorted by discount, highest first.
     """
     valid_coupons = []
     now = now_in_utc()
@@ -174,7 +174,7 @@ def get_eligible_coupons(product, code=None):
         code (str): A coupon code to filter by
 
     Returns:
-        QuerySet: list of coupon ids that can be used with the products.
+        TimestampedModelQuerySet: list of coupon ids that can be used with the products.
     """
     query = CouponEligibility.objects.select_related("coupon").filter(
         product=product, coupon__enabled=True
@@ -192,7 +192,7 @@ def best_coupon_version(basket, auto_only=False, code=None):
 
     Args:
         basket (Basket): the basket Object
-        auto_only (bool): Only retrieve `is_automatic` Coupons
+        auto_only (bool): Only retrieve `automatic` Coupons
         code (str): A coupon code to filter by
 
     Returns:
