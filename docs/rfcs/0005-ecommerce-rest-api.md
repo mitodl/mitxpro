@@ -25,10 +25,25 @@ A response would look like
         {
             "id": 3,  // this is ProductVersion.id, not Product.id
             "description": "Supply Chain Management",
-            "price": "67.89"
+            "price": "67.89",
+            "type": "program",
+            "course_runs": [
+                {
+                    "title": "Supply Chain Analytics",
+                    "courseware_id": "course_id",
+                    "courseware_url": "course_url",
+                    "start_date": "iso8601 date here",
+                    "end_date": "iso8601 date here",
+                }
+            ]
         },
         ...
     ]
+
+The `course_runs` field is used to provide the UI with more information to show
+to the user about what they're buying. A product which is a program bundle would
+have multiple course runs listed, one per course, showing the course run which
+the user would be enrolled in.
 
 
 ### /api/basket/
@@ -45,7 +60,7 @@ A response would look like
             {
                 "id": 3,  // this is ProductVersion.id, not Product.id
                 "description": "Supply Chain Management",
-                "price": "67.89"
+                ...and so on. See /api/products above for full schema.
             }
         ],
         "coupons": [
@@ -75,6 +90,9 @@ pass validation. This could happen if the coupon code was valid when it was bein
 added to the basket but it was not valid by the time of checkout. A product may also
 have its validity changed, preventing checkout from working.
 
+Whatever the request data sent to PATCH, if the response is a success it will contain
+the same updated data which GET would return.
+
 TODO: what happens if a basket becomes invalid over time? I think this is somewhat rare
 but we should figure out how to handle it. We can just clear the basket but I don't know when
 we should do this validation.
@@ -87,7 +105,7 @@ A user could clear a basket by patching:
         "items": [],
         "coupons": []
     }
-    
+
 They could clear just the items in the basket:
 
     {
@@ -103,9 +121,13 @@ A user could clear only the coupon:
     {
         "coupons": []
     }
+
+However, if there is an automatic coupon which can be applied, it will be automatically
+added to the basket even when `coupons` is explicitly set to an empty list.
     
 
-##### Add item to basket    
+##### Add item to basket
+
 A user could update the basket to have one item by patching:
 
     {
@@ -120,9 +142,13 @@ Here the coupon is not one of the keys so it would be left as is. However the vi
 will revalidate the coupon to make sure it can be applied to the new item list. If this
 validation fails a 400 response is returned and the basket is left unchanged.
 
-Also note that there is no way to incrementally add items to a basket, leaving existing
+Also note:
+ - There is no way to incrementally add items to a basket, leaving existing
 items unchanged. The frontend will need to send the complete new list with `id` attributes
 for each product. However in practice we will not have more than one item in a basket.
+ - At the moment a user can purchase only one item at a time. This will be validated
+ on the backend.
+
 
 ##### Add coupon to basket
 
