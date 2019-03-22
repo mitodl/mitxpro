@@ -439,7 +439,7 @@ CELERY_TIMEZONE = "UTC"
 
 # Hijack
 HIJACK_ALLOW_GET_REQUESTS = True
-HIJACK_LOGOUT_REDIRECT_URL = "/admin/auth/user"
+HIJACK_LOGOUT_REDIRECT_URL = "/admin/users/user"
 HIJACK_REGISTER_ADMIN = False
 
 # django cache back-ends
