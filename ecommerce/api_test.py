@@ -19,12 +19,13 @@ from ecommerce.api import (
     make_reference_id,
     select_coupon,
     redeem_coupon,
+    get_product_price,
 )
 from ecommerce.api import (
     get_eligible_coupons,
     get_valid_coupon_versions,
-    best_coupon_version,
-    discount_price,
+    best_coupon_for_basket,
+    get_discount_price,
 )
 from ecommerce.factories import (
     BasketItemFactory,
@@ -338,11 +339,11 @@ def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons):
 
 
 @pytest.mark.parametrize("auto_only", [True, False])
-def test_get_best_coupon_version(basket_and_coupons, auto_only):
+def test_get_best_coupon_for_basket(basket_and_coupons, auto_only):
     """
     Verify that the CouponInvoiceVersion with the best price is returned for a bucket based on auto filter
     """
-    best_cv = best_coupon_version(
+    best_cv = best_coupon_for_basket(
         basket_and_coupons.basket_item.basket, auto_only=auto_only
     )
     if auto_only:
@@ -352,11 +353,11 @@ def test_get_best_coupon_version(basket_and_coupons, auto_only):
 
 
 @pytest.mark.parametrize("code", ["WORST", None])
-def test_get_best_coupon_version_by_code(basket_and_coupons, code):
+def test_get_best_coupon_for_basket_by_code(basket_and_coupons, code):
     """
     Verify that the CouponInvoiceVersion with the best price is returned for a bucket based on coupon code
     """
-    best_cv = best_coupon_version(
+    best_cv = best_coupon_for_basket(
         basket_and_coupons.basket_item.basket, auto_only=False, code=code
     )
     if code:
@@ -365,23 +366,23 @@ def test_get_best_coupon_version_by_code(basket_and_coupons, code):
         assert best_cv == basket_and_coupons.coupongroup_best.coupon_version
 
 
-def test_get_best_coupon_version_empty_basket():
+def test_get_best_coupon_for_basket_empty_basket():
     """
     Verify that the best_coupon_version() returns None if the basket has no product
     """
-    assert best_coupon_version(BasketFactory()) is None
+    assert best_coupon_for_basket(BasketFactory()) is None
 
 
-def test_get_best_coupon_version_no_coupons():
+def test_get_best_coupon_for_basket_no_coupons():
     """
     Verify that best_coupon_version() returns None if the product has no coupons
     """
     basket_item = BasketItemFactory()
     ProductVersionFactory(product=basket_item.product, price=Decimal(25.00))
-    assert best_coupon_version(basket_item.basket) is None
+    assert best_coupon_for_basket(basket_item.basket) is None
 
 
-def test_get_best_coupon_version_no_valid_coupons(basket_and_coupons):
+def test_get_best_coupon_for_basket_no_valid_coupons(basket_and_coupons):
     """
     Verify that best_coupon_version() returns None if the product coupons are invalid
     """
@@ -391,7 +392,8 @@ def test_get_best_coupon_version_no_valid_coupons(basket_and_coupons):
     civ_worst.save()
 
     assert (
-        best_coupon_version(basket_and_coupons.basket_item.basket, code="WORST") is None
+        best_coupon_for_basket(basket_and_coupons.basket_item.basket, code="WORST")
+        is None
     )
 
 
@@ -402,7 +404,7 @@ def test_discount_price(basket_and_coupons):
     coupon_version = basket_and_coupons.coupongroup_best.coupon_version
     price = basket_and_coupons.product_version.price
     discount = coupon_version.invoice_version.amount
-    assert discount_price(
+    assert get_discount_price(
         coupon_version, basket_and_coupons.basket_item.product
     ) == price * (1 - discount)
 
@@ -439,3 +441,15 @@ def test_redeem_coupon(basket_and_coupons):
     assert updated_redemption.order == new_redemption.order
     assert updated_redemption.coupon_version == worst_coupon_version
     assert updated_redemption.pk == new_redemption.pk
+
+
+def test_get_product_price(basket_and_coupons):
+    """
+    Verify that the correct price for a product is returned
+    """
+    expected_price = (
+        basket_and_coupons.basket_item.product.productversions.order_by("-created_on")
+        .first()
+        .price
+    )
+    assert expected_price == get_product_price(basket_and_coupons.basket_item.product)

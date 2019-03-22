@@ -167,7 +167,8 @@ def get_valid_coupon_versions(coupons, user, auto_only=False):
 
 def get_eligible_coupons(product, code=None):
     """
-    Return the eligible coupon ids for a product.
+    Return the eligible coupon ids for a product.  This may include both valid and invalid coupons.
+    Invalid coupons should be filtered out with the get_valid_coupon_versions function.
 
     Args:
         product (Product): product to filter CouponEligibility by
@@ -185,10 +186,10 @@ def get_eligible_coupons(product, code=None):
     return query.values_list("coupon", flat=True)
 
 
-def best_coupon_version(basket, auto_only=False, code=None):
+def best_coupon_for_basket(basket, auto_only=False, code=None):
     """
-    Get the eligible coupons for the basket product.
-    Assumes that the basket only contains one product.
+    Get the best eligible coupon for the basket.
+    Assumes that the basket only contains one item/product.
 
     Args:
         basket (Basket): the basket Object
@@ -198,21 +199,48 @@ def best_coupon_version(basket, auto_only=False, code=None):
     Returns:
         CouponVersion: the CouponVersion with the highest discount, or None
     """
-
-    basket_products = basket.basketitems.values_list("product", flat=True)
-    if basket_products:
-        # Assumption: there is only one product in basket if not empty
-        product_coupons = get_eligible_coupons(basket_products[0], code=code)
-        if product_coupons:
-            validated_versions = get_valid_coupon_versions(
-                product_coupons, basket.user, auto_only
-            )
-            if validated_versions:
-                return validated_versions[0]
+    basket_item = basket.basketitems.first()
+    if basket_item:
+        return best_coupon_for_product(
+            basket_item.product, basket.user, auto_only=auto_only, code=code
+        )
     return None
 
 
-def discount_price(coupon_version, product):
+def best_coupon_for_product(product, user, auto_only=False, code=None):
+    """
+    Get the best eligible coupon for a product and user.
+
+    Args:
+        product (Product): the Product Object
+        auto_only (bool): Only retrieve `automatic` Coupons
+        code (str): A coupon code to filter by
+
+    Returns:
+        CouponVersion: the CouponVersion with the highest product discount, or None
+    """
+    product_coupons = get_eligible_coupons(product, code=code)
+    if product_coupons:
+        validated_versions = get_valid_coupon_versions(product_coupons, user, auto_only)
+        if validated_versions:
+            return validated_versions[0]
+    return None
+
+
+def get_product_price(product):
+    """
+    Retrieve the price for the latest version of a product
+
+    Args:
+        product (Product): A product object
+
+    Returns:
+        Decimal: the price of a product
+    """
+    return product.productversions.order_by("-created_on").first().price
+
+
+def get_discount_price(coupon_version, product):
     """
     Determine the new discounted price for a product after the coupon discount is applied
 
@@ -224,8 +252,7 @@ def discount_price(coupon_version, product):
         Decimal: the discounted price for the Product
     """
     return Decimal(
-        (1 - coupon_version.invoice_version.amount)
-        * product.productversions.order_by("-created_on").first().price
+        (1 - coupon_version.invoice_version.amount) * get_product_price(product)
     )
 
 
