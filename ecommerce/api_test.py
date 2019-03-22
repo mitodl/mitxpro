@@ -4,13 +4,12 @@ Test for ecommerce functions
 from base64 import b64encode
 from collections import namedtuple
 from decimal import Decimal
-from datetime import datetime, timedelta
+from datetime import timedelta
 from types import SimpleNamespace
 import hashlib
 import hmac
 
 import pytest
-import pytz
 
 from courses.factories import CourseFactory, ProgramFactory
 from ecommerce.api import (
@@ -38,6 +37,7 @@ from ecommerce.factories import (
     ProductVersionFactory,
     CouponRedemptionFactory,
     OrderFactory,
+    BasketFactory,
 )
 from mitxpro.utils import now_in_utc
 
@@ -290,7 +290,7 @@ def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):
         ]
     ]
 
-    today = datetime.now(tz=pytz.UTC)
+    today = now_in_utc()
     civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.invoice_version
     civ_worst.activation_date = today + timedelta(days=1)
     civ_worst.save()
@@ -363,6 +363,36 @@ def test_get_best_coupon_version_by_code(basket_and_coupons, code):
         assert best_cv == basket_and_coupons.coupongroup_worst.coupon_version
     else:
         assert best_cv == basket_and_coupons.coupongroup_best.coupon_version
+
+
+def test_get_best_coupon_version_empty_basket():
+    """
+    Verify that the best_coupon_version() returns None if the basket has no product
+    """
+    assert best_coupon_version(BasketFactory()) is None
+
+
+def test_get_best_coupon_version_no_coupons():
+    """
+    Verify that best_coupon_version() returns None if the product has no coupons
+    """
+    basket_item = BasketItemFactory()
+    ProductVersionFactory(product=basket_item.product, price=Decimal(25.00))
+    assert best_coupon_version(basket_item.basket) is None
+
+
+def test_get_best_coupon_version_no_valid_coupons(basket_and_coupons):
+    """
+    Verify that best_coupon_version() returns None if the product coupons are invalid
+    """
+    today = now_in_utc()
+    civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.invoice_version
+    civ_worst.activation_date = today + timedelta(days=1)
+    civ_worst.save()
+
+    assert (
+        best_coupon_version(basket_and_coupons.basket_item.basket, code="WORST") is None
+    )
 
 
 def test_discount_price(basket_and_coupons):
