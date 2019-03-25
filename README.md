@@ -12,7 +12,38 @@ Run through those steps **including the addition of `/etc/hosts` aliases and the
 
 ### Configure xPro and Open edX
 
-See [Configure Open edX](docs/configure_open_edx.md)
+1. See [Configure Open edX](docs/configure_open_edx.md)
+1. Add an alias to `/etc/hosts` for Open edX. We have standardized this alias
+  to `edx.odl.local`. Your `/etc/hosts` entry should look like this:
+    
+    ```
+    127.0.0.1       edx.odl.local
+    ```
+
+### Add settings values
+
+Add the following settings in your `.env` file:
+
+```
+MAILGUN_RECIPIENT_OVERRIDE=<your email address>
+
+# Ask a fellow developer for these values 
+MAILGUN_SENDER_DOMAIN=
+MAILGUN_URL=
+MAILGUN_KEY=
+```
+
+OS-specific settings to add to your `.env` file:
+
+```
+### Linux
+# EDX_IP should be something like 172.22.0.1
+OPENEDX_API_BASE_URL=http://$EDX_IP:18000
+
+### OSX
+OPENEDX_API_BASE_URL=http://docker.for.mac.localhost:18000
+OPENEDX_BASE_REDIRECT_URL=http://edx.odl.local:18000
+```
 
 # Optional Setup
 

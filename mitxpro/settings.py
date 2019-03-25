@@ -461,8 +461,6 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
 )
 
-
-#
 OAUTH2_PROVIDER = {
     # this is the list of available scopes
     "SCOPES": {
@@ -498,6 +496,14 @@ DJOSER = {
     "EMAIL": {"password_reset": "authentication.views.CustomPasswordResetEmail"},
 }
 
+MITXPRO_OAUTH_PROVIDER = "mitxpro-oauth2"
+OPENEDX_OAUTH_APP_NAME = get_string("OPENEDX_OAUTH_APP_NAME", "edx-oauth-app")
+OPENEDX_API_BASE_URL = get_string("OPENEDX_API_BASE_URL", "http://edx.odl.local:18000")
+OPENEDX_BASE_REDIRECT_URL = get_string(
+    "OPENEDX_BASE_REDIRECT_URL", OPENEDX_API_BASE_URL
+)
+OPENEDX_TOKEN_EXPIRES_HOURS = get_int("OPENEDX_TOKEN_EXPIRES_HOURS", 1000)
+
 
 # features flags
 def get_all_config_keys():
@@ -518,4 +524,9 @@ if DEBUG:
     # it needs to be enabled before other middlewares
     MIDDLEWARE = ("debug_toolbar.middleware.DebugToolbarMiddleware",) + MIDDLEWARE
 
-MANDATORY_SETTINGS = ["MAILGUN_SENDER_DOMAIN", "MAILGUN_KEY"]
+MANDATORY_SETTINGS = [
+    "MAILGUN_SENDER_DOMAIN",
+    "MAILGUN_KEY",
+    "OPENEDX_OAUTH_APP_NAME",
+    "OPENEDX_API_BASE_URL",
+]

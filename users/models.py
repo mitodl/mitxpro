@@ -5,6 +5,7 @@ from django.db import models
 import ulid
 
 from mitxpro.models import TimestampedModel
+from courseware.tasks import create_edx_user_from_id
 
 
 class UserManager(BaseUserManager):
@@ -22,6 +23,7 @@ class UserManager(BaseUserManager):
         user = self.model(**fields)
         user.set_password(password)
         user.save(using=self._db)
+        create_edx_user_from_id.delay(user.id)
         return user
 
     def create_user(self, username, email=None, password=None, **extra_fields):

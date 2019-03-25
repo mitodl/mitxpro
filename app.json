@@ -92,6 +92,10 @@
       "required": true,
       "value": "INFO"
     },
+    "OPENEDX_OAUTH_APP_NAME": {
+      "description": "The 'name' value for the Open edX OAuth Application",
+      "value": "edx-oauth-app"
+    },
     "MITXPRO_SECURE_SSL_REDIRECT": {
       "description": "Application-level SSL redirect setting.",
       "required": false,
@@ -110,6 +114,17 @@
     "NODE_MODULES_CACHE": {
       "description": "If false, disables the node_modules cache to fix yarn install",
       "value": "false"
+    },
+    "OPENEDX_API_BASE_URL": {
+      "description": "The base URL for the Open edX API",
+    },
+    "OPENEDX_BASE_REDIRECT_URL": {
+      "description": "The base redirect URL for an OAuth Application for the Open edX API",
+      "required": false
+    },
+    "OPENEDX_TOKEN_EXPIRES_HOURS": {
+      "description": "The number of hours until an access token for the Open edX API expires",
+      "required": false
     },
     "PGBOUNCER_DEFAULT_POOL_SIZE": {
       "value": "50"
