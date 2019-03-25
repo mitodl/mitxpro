@@ -30,7 +30,7 @@ In xPro:
 
 - go to `/admin/oauth2_provider/application/` and create a new application with these settings selected:
   - `Redirect uris`: `http://<EDX_HOSTNAME>:18000/auth/complete/mitxpro-oauth2/`
-  - `Client type`: "Confidental"
+  - `Client type`: "Confidential"
   - `Authorization grant type`: "Authorization code"
   - `Skip authorization`: checked
   - Other values are arbitrary but be sure to fill them all out. Save the client id and secret for later
@@ -62,7 +62,7 @@ In Open edX (derived from instructions [here](https://edx.readthedocs.io/project
     }
     ```
 - `make lms-restart` to pick up the configuration changes
-- Login to django-admin, go to `http://<EDX_HOSTNAME>:8000/admin/third_party_auth/oauth2providerconfig/`, and create a new config:
+- Login to django-admin, go to `http://<EDX_HOSTNAME>:18000/admin/third_party_auth/oauth2providerconfig/`, and create a new config:
   - Select the default example site
   - The slug field **MUST** match the `Backend.name`, which for us is `
 mitxpro-oauth2`
