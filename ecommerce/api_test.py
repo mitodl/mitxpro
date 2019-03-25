@@ -2,10 +2,8 @@
 Test for ecommerce functions
 """
 from base64 import b64encode
-from collections import namedtuple
 from decimal import Decimal
 from datetime import timedelta
-from types import SimpleNamespace
 import hashlib
 import hmac
 
@@ -13,25 +11,25 @@ import pytest
 
 from courses.factories import CourseFactory, ProgramFactory
 from ecommerce.api import (
+    create_unfulfilled_order,
     generate_cybersource_sa_payload,
     generate_cybersource_sa_signature,
+    get_latest_coupon_version,
+    get_latest_product_version,
     ISO_8601_FORMAT,
     make_reference_id,
     select_coupon,
     redeem_coupon,
-    get_product_price,
-)
-from ecommerce.api import (
-    get_valid_coupon_versions,
     best_coupon_for_basket,
     get_discount_price,
+    get_new_order_by_reference_number,
+    get_product_price,
+    get_product_version_price_with_discount,
+    get_valid_coupon_versions,
 )
+from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
     BasketItemFactory,
-    CouponInvoiceVersionFactory,
-    CouponFactory,
-    CouponEligibilityFactory,
-    CouponInvoiceFactory,
     CouponVersionFactory,
     LineFactory,
     ProductVersionFactory,
@@ -39,7 +37,7 @@ from ecommerce.factories import (
     OrderFactory,
     BasketFactory,
 )
-from ecommerce.models import Order
+from ecommerce.models import CouponSelection, CouponRedemption, Order, OrderAudit
 from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
@@ -52,13 +50,6 @@ CYBERSOURCE_SECURITY_KEY = "security"
 CYBERSOURCE_REFERENCE_PREFIX = "prefix"
 
 
-CouponGroup = namedtuple(
-    "CouponGroup",
-    ["coupon", "coupon_version", "invoice", "invoice_version"],
-    verbose=True,
-)
-
-
 @pytest.fixture(autouse=True)
 def cybersource_settings(settings):
     """
@@ -68,57 +59,6 @@ def cybersource_settings(settings):
     settings.CYBERSOURCE_PROFILE_ID = CYBERSOURCE_PROFILE_ID
     settings.CYBERSOURCE_SECURITY_KEY = CYBERSOURCE_SECURITY_KEY
     settings.CYBERSOURCE_REFERENCE_PREFIX = CYBERSOURCE_REFERENCE_PREFIX
-
-
-@pytest.fixture()
-def basket_and_coupons():
-    """
-    Sample basket and coupon
-    """
-    basket_item = BasketItemFactory()
-
-    # Some prices for the basket item product
-    ProductVersionFactory(product=basket_item.product, price=Decimal(15.00))
-    product_version = ProductVersionFactory(
-        product=basket_item.product, price=Decimal(25.00)
-    )
-
-    invoice_worst = CouponInvoiceFactory()
-    invoice_best = CouponInvoiceFactory()
-    coupon_worst = CouponFactory(invoice=invoice_worst, coupon_code="WORST")
-    coupon_best = CouponFactory(invoice=invoice_best, coupon_code="BEST")
-
-    # Coupon invoice for worst coupon, with lowest discount
-    civ_worst = CouponInvoiceVersionFactory(
-        invoice=invoice_worst, amount=Decimal(0.1), automatic=True
-    )
-    # Coupon invoice for best coupon, with highest discount
-    civ_best_old = CouponInvoiceVersionFactory(
-        invoice=invoice_best, amount=Decimal(0.5)
-    )
-    # Coupon invoice for best coupon, more recent than previous so takes precedence
-    civ_best = CouponInvoiceVersionFactory(invoice=invoice_best, amount=Decimal(0.4))
-
-    # Coupon version for worst coupon
-    cv_worst = CouponVersionFactory(invoice_version=civ_worst, coupon=coupon_worst)
-    # Coupon version for best coupon
-    CouponVersionFactory(invoice_version=civ_best_old, coupon=coupon_best)
-    # Most recent coupon version for best coupon
-    cv_best = CouponVersionFactory(invoice_version=civ_best, coupon=coupon_best)
-
-    # Both best and worst coupons eligible for the product
-    CouponEligibilityFactory(coupon=coupon_best, product=basket_item.product)
-    CouponEligibilityFactory(coupon=coupon_worst, product=basket_item.product)
-
-    coupongroup_worst = CouponGroup(coupon_worst, cv_worst, invoice_worst, civ_worst)
-    coupongroup_best = CouponGroup(coupon_best, cv_best, invoice_best, civ_best)
-
-    return SimpleNamespace(
-        basket_item=basket_item,
-        product_version=product_version,
-        coupongroup_best=coupongroup_best,
-        coupongroup_worst=coupongroup_worst,
-    )
 
 
 def test_valid_signature():
@@ -167,7 +107,8 @@ def test_signed_payload(mocker):
         autospec=True,
         return_value=mocker.MagicMock(hex=transaction_uuid),
     )
-    payload = generate_cybersource_sa_payload(order)
+    base_url = "https://example.com/base_url/"
+    payload = generate_cybersource_sa_payload(order, base_url)
     signature = payload.pop("signature")
     assert generate_cybersource_sa_signature(payload) == signature
     signed_field_names = payload["signed_field_names"].split(",")
@@ -201,6 +142,8 @@ def test_signed_payload(mocker):
         "line_item_count": 3,
         "locale": "en-us",
         "reference_number": make_reference_id(order),
+        "override_custom_cancel_page": base_url,
+        "override_custom_receipt_page": base_url,
         "profile_id": CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now.strftime(ISO_8601_FORMAT),
         "signed_field_names": ",".join(signed_field_names),
@@ -407,3 +350,143 @@ def test_get_product_price(basket_and_coupons):
         .price
     )
     assert expected_price == get_product_price(basket_and_coupons.basket_item.product)
+
+
+@pytest.mark.parametrize("has_coupon", [True, False])
+def test_get_product_version_price_with_discount(has_coupon, basket_and_coupons):
+    """
+    get_product_version_price_with_discount should check if the coupon exists and if so calculate price based on its
+    discount.
+    """
+    product_version = basket_and_coupons.basket_item.product.productversions.order_by(
+        "-created_on"
+    ).first()
+    product_price = product_version.price
+
+    coupon_version = basket_and_coupons.coupongroup_best.coupon_version
+    discount = coupon_version.invoice_version.amount
+    price = get_product_version_price_with_discount(
+        coupon_version=coupon_version if has_coupon else None,
+        product_version=product_version,
+    )
+    if has_coupon:
+        assert price == product_price * (1 - discount)
+    else:
+        assert price == product_price
+
+
+def test_get_new_order_by_reference_number(basket_and_coupons):
+    """
+    get_new_order_by_reference_number returns an Order with status created
+    """
+    user = basket_and_coupons.basket_item.basket.user
+    order = create_unfulfilled_order(user)
+    same_order = get_new_order_by_reference_number(make_reference_id(order))
+    assert same_order.id == order.id
+
+
+def test_parse():
+    """
+    Test parse errors are handled well
+    """
+    with pytest.raises(ParseException) as ex:
+        get_new_order_by_reference_number("XYZ-1-3")
+    assert ex.value.args[0] == "Reference number must start with MITXPRO-"
+
+    with pytest.raises(ParseException) as ex:
+        get_new_order_by_reference_number("MITXPRO-no_dashes_here")
+    assert ex.value.args[0] == "Unable to find order number in reference number"
+
+    with pytest.raises(ParseException) as ex:
+        get_new_order_by_reference_number("MITXPRO-something-NaN")
+    assert ex.value.args[0] == "Unable to parse order number"
+
+    with pytest.raises(ParseException) as ex:
+        get_new_order_by_reference_number("MITXPRO-not_matching-3")
+    assert ex.value.args[0] == "CyberSource prefix doesn't match"
+
+
+def test_status(basket_and_coupons):
+    """
+    get_order_by_reference_number should only get orders with status=CREATED
+    """
+    user = basket_and_coupons.basket_item.basket.user
+    order = create_unfulfilled_order(user)
+
+    order.status = Order.FAILED
+    order.save()
+
+    with pytest.raises(EcommerceException) as ex:
+        # change order number to something not likely to already exist in database
+        order.id = 98_765_432
+        assert not Order.objects.filter(id=order.id).exists()
+        get_new_order_by_reference_number(make_reference_id(order))
+    assert ex.value.args[0] == f"Unable to find order {order.id}"
+
+
+@pytest.mark.parametrize("has_coupon", [True, False])
+def test_create_order(
+    has_coupon, basket_and_coupons
+):  # pylint: disable=too-many-locals
+    """
+    Create Order from a purchasable course
+    """
+    coupon = basket_and_coupons.coupongroup_best.coupon
+    basket = basket_and_coupons.basket_item.basket
+    user = basket.user
+    if has_coupon:
+        CouponSelection.objects.create(coupon=coupon, basket=basket)
+
+    order = create_unfulfilled_order(user)
+    assert Order.objects.count() == 1
+    assert order.status == Order.CREATED
+    assert order.purchaser == user
+
+    assert order.lines.count() == 1
+    line = order.lines.first()
+    assert line.product_version == get_latest_product_version(
+        basket_and_coupons.basket_item.product
+    )
+    assert line.quantity == basket_and_coupons.basket_item.quantity
+
+    assert OrderAudit.objects.count() == 1
+    order_audit = OrderAudit.objects.first()
+    assert order_audit.order == order
+    assert order_audit.data_after == order.to_dict()
+
+    # data_before only has updated_on different, since we only call save_and_log
+    # after Order is already created
+    data_before = order_audit.data_before
+    dict_before = order.to_dict()
+    del data_before["updated_on"]
+    del dict_before["updated_on"]
+    assert data_before == dict_before
+
+    if has_coupon:
+        assert (
+            CouponRedemption.objects.filter(
+                order=order,
+                coupon_version=basket_and_coupons.coupongroup_best.coupon_version,
+            ).count()
+            == 1
+        )
+    else:
+        assert CouponRedemption.objects.count() == 0
+
+
+def test_get_latest_coupon_version():
+    """
+    get_latest_coupon_version should return the most recent CouponVersion for a coupon
+    """
+    earlier = CouponVersionFactory.create()
+    later = CouponVersionFactory.create(coupon=earlier.coupon)
+    assert get_latest_coupon_version(earlier.coupon) == later
+
+
+def test_get_latest_product_version():
+    """
+    get_latest_product_version should return the most recent ProductVersion for a product
+    """
+    earlier = ProductVersionFactory.create()
+    later = ProductVersionFactory.create(product=earlier.product)
+    assert get_latest_product_version(earlier.product) == later

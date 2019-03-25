@@ -11,11 +11,14 @@ from django.conf import settings
 from django.db.models import Q
 from django.db import transaction
 
+from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.models import (
+    Basket,
     CouponEligibility,
     CouponVersion,
     CouponRedemption,
     CouponSelection,
+    Line,
     Order,
 )
 from mitxpro.utils import now_in_utc
@@ -48,11 +51,12 @@ def generate_cybersource_sa_signature(payload):
     return b64encode(digest).decode("utf-8")
 
 
-def generate_cybersource_sa_payload(order):
+def generate_cybersource_sa_payload(order, base_url):
     """
     Generates a payload dict to send to CyberSource for Secure Acceptance
     Args:
         order (Order): An order
+        base_url (str): The base URL to be used by Cybersource to redirect the user after completion of the purchase
     Returns:
         dict: the payload to send to CyberSource via Secure Acceptance
     """
@@ -63,6 +67,11 @@ def generate_cybersource_sa_payload(order):
     # length of 255. At the moment none of these fields should go over that, due to database
     # constraints or other reasons
 
+    coupon_redemption = CouponRedemption.objects.filter(order=order).first()
+    coupon_version = (
+        coupon_redemption.coupon_version if coupon_redemption is not None else None
+    )
+
     line_items = {}
     total = 0
     for i, line in enumerate(order.lines.all()):
@@ -72,7 +81,11 @@ def generate_cybersource_sa_payload(order):
         line_items[f"item_{i}_quantity"] = line.quantity
         line_items[f"item_{i}_sku"] = product_version.product.content_object.id
         line_items[f"item_{i}_tax_amount"] = "0"
-        line_items[f"item_{i}_unit_price"] = str(product_version.price)
+        line_items[f"item_{i}_unit_price"] = str(
+            get_product_version_price_with_discount(
+                coupon_version=coupon_version, product_version=product_version
+            )
+        )
 
         total += product_version.price
 
@@ -84,6 +97,8 @@ def generate_cybersource_sa_payload(order):
         "locale": "en-us",
         **line_items,
         "line_item_count": order.lines.count(),
+        "override_custom_cancel_page": base_url,
+        "override_custom_receipt_page": base_url,
         "reference_number": make_reference_id(order),
         "profile_id": settings.CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now_in_utc().strftime(ISO_8601_FORMAT),
@@ -223,6 +238,32 @@ def best_coupon_for_product(product, user, auto_only=False, code=None):
     return None
 
 
+def get_latest_coupon_version(coupon):
+    """
+    Get the most recent CouponVersion for a coupon
+
+    Args:
+        coupon (Coupon): A coupon object
+
+    Returns:
+        CouponVersion: The CouponVersion for the coupon
+    """
+    return coupon.couponversion_set.order_by("-created_on").first()
+
+
+def get_latest_product_version(product):
+    """
+    Get the most recent ProductVersion for a product
+
+    Args:
+        product (Product): A product object
+
+    Returns:
+        ProductVersion: The ProductVersion for the product
+    """
+    return product.productversions.order_by("-created_on").first()
+
+
 def get_product_price(product):
     """
     Retrieve the price for the latest version of a product
@@ -233,7 +274,7 @@ def get_product_price(product):
     Returns:
         Decimal: the price of a product
     """
-    return product.productversions.order_by("-created_on").first().price
+    return get_latest_product_version(product).price
 
 
 def get_discount_price(coupon_version, product):
@@ -242,12 +283,32 @@ def get_discount_price(coupon_version, product):
 
     Args:
         coupon_version (CouponVersion): the CouponVersion object
-        product: (Product): the Product object
+        product (Product): the Product object
 
     Returns:
         Decimal: the discounted price for the Product
     """
-    return (1 - coupon_version.invoice_version.amount) * get_product_price(product)
+    return get_product_version_price_with_discount(
+        coupon_version=coupon_version,
+        product_version=get_latest_product_version(product),
+    )
+
+
+def get_product_version_price_with_discount(*, coupon_version, product_version):
+    """
+    Determine the new discounted price for a product after the coupon discount is applied
+
+    Args:
+        coupon_version (CouponVersion): the CouponVersion object
+        product_version (ProductVersion): the ProductVersion object
+
+    Returns:
+        Decimal: the discounted price for the Product
+    """
+    price = product_version.price
+    if coupon_version:
+        price *= 1 - coupon_version.invoice_version.amount
+    return price
 
 
 def select_coupon(coupon_version, basket):
@@ -257,7 +318,7 @@ def select_coupon(coupon_version, basket):
 
     Args:
         coupon_version (CouponVersion): a CouponVersion object
-        basket: (Basket): a Basket object
+        basket (Basket): a Basket object
 
     Returns:
         CouponSelection: a coupon selection object
@@ -286,3 +347,88 @@ def redeem_coupon(coupon_version, order):
         order=order, defaults={"coupon_version": coupon_version}
     )
     return coupon_redemption
+
+
+def get_new_order_by_reference_number(reference_number):
+    """
+    Parse a reference number received from CyberSource and lookup the corresponding Order.
+    Args:
+        reference_number (str):
+            A string which contains the order id and the instance which generated it
+    Returns:
+        Order:
+            An order
+    """
+    if not reference_number.startswith(_REFERENCE_NUMBER_PREFIX):
+        raise ParseException(
+            "Reference number must start with {}".format(_REFERENCE_NUMBER_PREFIX)
+        )
+    reference_number = reference_number[len(_REFERENCE_NUMBER_PREFIX) :]
+
+    try:
+        order_id_pos = reference_number.rindex("-")
+    except ValueError:
+        raise ParseException("Unable to find order number in reference number")
+
+    try:
+        order_id = int(reference_number[order_id_pos + 1 :])
+    except ValueError:
+        raise ParseException("Unable to parse order number")
+
+    prefix = reference_number[:order_id_pos]
+    if prefix != settings.CYBERSOURCE_REFERENCE_PREFIX:
+        log.error(
+            "CyberSource prefix doesn't match: %s != %s",
+            prefix,
+            settings.CYBERSOURCE_REFERENCE_PREFIX,
+        )
+        raise ParseException("CyberSource prefix doesn't match")
+
+    try:
+        return Order.objects.get(id=order_id)
+    except Order.DoesNotExist:
+        raise EcommerceException("Unable to find order {}".format(order_id))
+
+
+def enroll_user_on_success(order):  # pylint: disable=unused-argument
+    """
+    Check if the order is successful, then enroll the user
+
+    Args:
+        order (Order):
+            An order
+    """
+    # TBD: will be implemented later
+
+
+@transaction.atomic
+def create_unfulfilled_order(user):
+    """
+    Create a new Order which is not fulfilled for a purchasable course run. If course run is not purchasable,
+    it raises an Http404.
+
+    Args:
+        user (User):
+            The purchaser of the course run
+
+    Returns:
+        Order: A newly created Order for the CourseRun with the given course_id
+    """
+    # Note: validation is assumed to already have happen when the basket is being modified
+    basket, _ = Basket.objects.get_or_create(user=user)
+
+    order = Order.objects.create(status=Order.CREATED, purchaser=user)
+
+    for basket_item in basket.basketitems.all():
+        product_version = get_latest_product_version(basket_item.product)
+        Line.objects.create(
+            order=order, product_version=product_version, quantity=basket_item.quantity
+        )
+
+    for coupon_selection in basket.couponselection_set.all():
+        coupon = coupon_selection.coupon
+        CouponRedemption.objects.create(
+            order=order, coupon_version=get_latest_coupon_version(coupon)
+        )
+    order.save_and_log(user)
+    return order
