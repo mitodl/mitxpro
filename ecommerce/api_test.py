@@ -234,7 +234,7 @@ def test_get_valid_coupon_versions(basket_and_coupons, auto_only):
     expected_versions = [basket_and_coupons.coupongroup_worst.coupon_version]
     if not auto_only:
         expected_versions.append(basket_and_coupons.coupongroup_best.coupon_version)
-    assert list(set(best_versions) - set(expected_versions)) == []
+    assert set(best_versions) == set(expected_versions)
 
 
 def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):
