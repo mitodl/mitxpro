@@ -116,7 +116,7 @@
       "value": "false"
     },
     "OPENEDX_API_BASE_URL": {
-      "description": "The base URL for the Open edX API",
+      "description": "The base URL for the Open edX API"
     },
     "OPENEDX_BASE_REDIRECT_URL": {
       "description": "The base redirect URL for an OAuth Application for the Open edX API",
