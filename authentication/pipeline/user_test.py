@@ -1,6 +1,9 @@
 """Tests of user pipeline actions"""
+# pylint: disable=redefined-outer-name
+
 from django.contrib.sessions.middleware import SessionMiddleware
 import pytest
+from social_core.backends.email import EmailAuth
 from social_django.utils import load_strategy, load_backend
 
 from users.factories import UserFactory
@@ -10,8 +13,25 @@ from authentication.exceptions import (
     RequirePasswordException,
     RequireRegistrationException,
     RequirePasswordAndProfileException,
+    UnexpectedExistingUserException,
 )
 from authentication.utils import SocialAuthState
+
+
+@pytest.fixture
+def mock_email_backend(mocker):
+    """Fixture that returns a fake EmailAuth backend object"""
+    backend = mocker.Mock()
+    backend.name = "email"
+    return backend
+
+
+@pytest.fixture
+def mock_create_user_strategy(mocker):
+    """Fixture that returns a valid strategy for create_user_via_email"""
+    strategy = mocker.Mock()
+    strategy.request_data.return_value = {"name": "Jane Doe", "password": "password1"}
+    return strategy
 
 
 def validate_email_auth_request_not_email_backend(mocker):
@@ -172,17 +192,20 @@ def test_user_password_not_exists(rf):
         ("notemail", None),
         ("notemail", SocialAuthState.FLOW_REGISTER),
         ("notemail", SocialAuthState.FLOW_LOGIN),
-        ("email", None),
-        ("email", SocialAuthState.FLOW_LOGIN),
+        (EmailAuth.name, None),
+        (EmailAuth.name, SocialAuthState.FLOW_LOGIN),
     ],
 )
-def test_validate_require_password_and_name_via_email_exit(mocker, backend_name, flow):
-    """Tests that require_password_and_name_via_email returns if not using the email backend"""
+def test_create_user_via_email_exit(mocker, backend_name, flow):
+    """
+    Tests that create_user_via_email returns if not using the email backend and attempting the
+    'register' step of the auth flow
+    """
     mock_strategy = mocker.Mock()
     mock_backend = mocker.Mock()
     mock_backend.name = backend_name
     assert (
-        user_actions.require_password_and_name_via_email(
+        user_actions.create_user_via_email(
             mock_strategy, mock_backend, pipeline_index=0, flow=flow
         )
         == {}
@@ -192,62 +215,73 @@ def test_validate_require_password_and_name_via_email_exit(mocker, backend_name,
 
 
 @pytest.mark.django_db
-def test_validate_require_password_and_name_via_email(mocker):
-    """Tests that require_password_and_name_via_email processes the request"""
-    user = UserFactory.create(name="")
-    mock_strategy = mocker.Mock()
-    mock_strategy.request_data.return_value = {
-        "name": "Jane Doe",
-        "password": "password1",
-    }
-    mock_backend = mocker.Mock()
-    mock_backend.name = "email"
-    response = user_actions.require_password_and_name_via_email(
-        mock_strategy,
-        mock_backend,
+def test_create_user_via_email(
+    mocker, user, mock_email_backend, mock_create_user_strategy
+):
+    """
+    Tests that create_user_via_email creates a user via social_core.pipeline.user.create_user
+    and sets a name and password
+    """
+    patch_create_user = mocker.patch(
+        "authentication.pipeline.user.create_user", return_value={"user": user}
+    )
+    response = user_actions.create_user_via_email(
+        mock_create_user_strategy,
+        mock_email_backend,
         pipeline_index=0,
-        user=user,
         flow=SocialAuthState.FLOW_REGISTER,
     )
     assert response == {"user": user}
-    assert response["user"].name == "Jane Doe"
+    assert response["user"].name == mock_create_user_strategy.request_data()["name"]
+    assert response["user"].password is not None
+    patch_create_user.assert_called_once()
 
 
 @pytest.mark.django_db
-def test_validate_require_password_and_name_via_email_no_data(mocker):
-    """Tests that require_password_and_name_via_email raises an error if no data for name and password provided"""
-    user = UserFactory.create(name="")
+def test_create_user_via_email_failed_create_exit(
+    mocker, mock_email_backend, mock_create_user_strategy
+):
+    """
+    Tests that create_user_via_email exits if social_core.pipeline.user.create_user
+    does not return a user object
+    """
+    mocker.patch("authentication.pipeline.user.create_user", return_value=None)
+    response = user_actions.create_user_via_email(
+        mock_create_user_strategy,
+        mock_email_backend,
+        pipeline_index=0,
+        flow=SocialAuthState.FLOW_REGISTER,
+    )
+    assert response == {}
+
+
+@pytest.mark.django_db
+def test_create_user_via_email_no_data(mocker, mock_email_backend):
+    """Tests that create_user_via_email raises an error if no data for name and password provided"""
     mock_strategy = mocker.Mock()
     mock_strategy.request_data.return_value = {}
-    mock_backend = mocker.Mock()
-    mock_backend.name = "email"
     with pytest.raises(RequirePasswordAndProfileException):
-        user_actions.require_password_and_name_via_email(
+        user_actions.create_user_via_email(
             mock_strategy,
-            mock_backend,
+            mock_email_backend,
             pipeline_index=0,
-            user=user,
             flow=SocialAuthState.FLOW_REGISTER,
         )
 
 
 @pytest.mark.django_db
-def test_validate_require_password_and_name_via_email_password_set(mocker):
-    """Tests that require_password_and_name_via_email works if profile and password already set and no data"""
-    user = UserFactory()
-    user.set_password("abc123")
-    user.save()
-    mock_strategy = mocker.Mock()
-    mock_strategy.request_data.return_value = {}
-    mock_backend = mocker.Mock()
-    mock_backend.name = "email"
-    assert user_actions.require_password_and_name_via_email(
-        mock_strategy,
-        mock_backend,
-        pipeline_index=0,
-        user=user,
-        flow=SocialAuthState.FLOW_REGISTER,
-    ) == {"user": user}
+def test_create_user_via_email_existing_user_raises(
+    user, mock_email_backend, mock_create_user_strategy
+):
+    """Tests that create_user_via_email raises an error if a user already exists in the pipeline"""
+    with pytest.raises(UnexpectedExistingUserException):
+        user_actions.create_user_via_email(
+            mock_create_user_strategy,
+            mock_email_backend,
+            user=user,
+            pipeline_index=0,
+            flow=SocialAuthState.FLOW_REGISTER,
+        )
 
 
 @pytest.mark.parametrize("hijacked", [True, False])

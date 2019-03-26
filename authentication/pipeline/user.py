@@ -3,12 +3,15 @@ import ulid
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
 from social_core.pipeline.partial import partial
+from social_core.pipeline.user import create_user
+from django.db import transaction
 
 from authentication.exceptions import (
     InvalidPasswordException,
     RequirePasswordException,
     RequirePasswordAndProfileException,
     RequireRegistrationException,
+    UnexpectedExistingUserException,
 )
 from authentication.utils import SocialAuthState
 
@@ -58,16 +61,23 @@ def get_username(
 
 
 @partial
-def require_password_and_name_via_email(
-    strategy, backend, user=None, flow=None, current_partial=None, *args, **kwargs
-):  # pylint: disable=unused-argument
+def create_user_via_email(
+    strategy,
+    backend,
+    user=None,
+    flow=None,
+    current_partial=None,
+    details=None,
+    *args,
+    **kwargs,
+):  # pylint: disable=too-many-arguments
     """
-    Sets a new user's password and name
-
+    Creates a new user if needed and sets the password and name.
     Args:
         strategy (social_django.strategy.DjangoStrategy): the strategy used to authenticate
         backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
         user (User): the current user
+        details (dict): Dict of user details
         flow (str): the type of flow (login or register)
         current_partial (Partial): the partial for the step in the pipeline
 
@@ -77,18 +87,23 @@ def require_password_and_name_via_email(
     if backend.name != EmailAuth.name or flow != SocialAuthState.FLOW_REGISTER:
         return {}
 
+    if user is not None:
+        raise UnexpectedExistingUserException(backend, current_partial)
+
     data = strategy.request_data()
+    if "name" not in data or "password" not in data:
+        raise RequirePasswordAndProfileException(backend, current_partial)
 
-    if "name" in data:
+    with transaction.atomic():
+        create_user_retval = create_user(
+            strategy, details=details or {}, backend=backend, *args, **kwargs
+        )
+        if not create_user_retval:
+            return
+        user = create_user_retval["user"]
         user.name = data["name"]
-        user.save()
-
-    if "password" in data:
         user.set_password(data["password"])
         user.save()
-
-    if not user.password or not user.name:
-        raise RequirePasswordAndProfileException(backend, current_partial)
 
     return {"user": user}
 
