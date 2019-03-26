@@ -57,5 +57,9 @@ class RequirePasswordAndProfileException(PartialException):
         return "Password and profile need to be filled out"
 
 
+class UnexpectedExistingUserException(PartialException):
+    """Raised if a user already exists but shouldn't in the given pipeline step"""
+
+
 class UserMissingSocialAuthException(Exception):
     """Raised if the user doesn't have a social auth"""
