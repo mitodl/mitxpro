@@ -15,7 +15,7 @@ Run through those steps **including the addition of `/etc/hosts` aliases and the
 1. See [Configure Open edX](docs/configure_open_edx.md)
 1. Add an alias to `/etc/hosts` for Open edX. We have standardized this alias
   to `edx.odl.local`. Your `/etc/hosts` entry should look like this:
-    
+
     ```
     127.0.0.1       edx.odl.local
     ```
@@ -27,9 +27,8 @@ Add the following settings in your `.env` file:
 ```
 MAILGUN_RECIPIENT_OVERRIDE=<your email address>
 
-# Ask a fellow developer for these values 
+# Ask a fellow developer for these values
 MAILGUN_SENDER_DOMAIN=
-MAILGUN_URL=
 MAILGUN_KEY=
 ```
 

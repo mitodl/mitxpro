@@ -32,7 +32,7 @@ services:
       dockerfile: ./Dockerfile
     environment:
       # for celery, to avoid ImproperlyConfigured
-      MAILGUN_URL: 'http://fake.example.com'
+      MAILGUN_SENDER_DOMAIN: 'other.fake.site'
       MAILGUN_KEY: 'fake'
       CELERY_TASK_ALWAYS_EAGER: 'True'
       SECRET_KEY: 'not_very_secret_key'

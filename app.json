@@ -36,11 +36,11 @@
       "description": "Google analytics tracking ID",
       "required": false
     },
-    "MAILGUN_URL": {
-      "description": "The URL for communicating with Mailgun"
-    },
     "MAILGUN_KEY": {
       "description": "The token for authenticating against the Mailgun API"
+    },
+    "MAILGUN_SENDER_DOMAIN": {
+      "description": "The domain to send mailgun email through"
     },
     "MAILGUN_BATCH_CHUNK_SIZE": {
       "description": "Maximum number of emails to send in a batch",
