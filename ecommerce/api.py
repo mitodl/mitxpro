@@ -2,7 +2,6 @@
 Functions for ecommerce
 """
 from base64 import b64encode
-from decimal import Decimal
 import hashlib
 import hmac
 import logging
@@ -10,12 +9,14 @@ import uuid
 
 from django.conf import settings
 from django.db.models import Q
+from django.db import transaction
 
 from ecommerce.models import (
     CouponEligibility,
     CouponVersion,
     CouponRedemption,
     CouponSelection,
+    Order,
 )
 from mitxpro.utils import now_in_utc
 
@@ -113,13 +114,15 @@ def make_reference_id(order):
     )
 
 
-def get_valid_coupon_versions(coupons, user, auto_only=False):
+def get_valid_coupon_versions(product, user, auto_only=False, code=None):
     """
     Given a list of coupon ids, determine which of them are valid based on invoice version dates and redemptions.
 
     Args:
-        coupons (QuerySet of coupon ids): List of coupons to filter for validity
+        product (Product): product to filter CouponEligibility by
+        user (User): User of coupons
         auto_only (bool): Whether or not to filter by automatic=True
+        code (str): A coupon code to filter by
 
     Returns:
         list of CouponVersion: CouponVersion objects sorted by discount, highest first.
@@ -127,63 +130,57 @@ def get_valid_coupon_versions(coupons, user, auto_only=False):
     valid_coupons = []
     now = now_in_utc()
 
-    # Get the ids of the latest coupon versions
-    cv_latest = (
-        CouponVersion.objects.select_related()
-        .filter(coupon__in=coupons)
-        .order_by("coupon", "-created_on")
-        .distinct("coupon")
-        .values_list("pk")
-    )
+    with transaction.atomic():
+        # Get the ids of the latest coupon versions
+        product_coupon_query = CouponEligibility.objects.select_related(
+            "coupon"
+        ).filter(product=product, coupon__enabled=True)
+        if code:
+            product_coupon_query = product_coupon_query.filter(coupon__coupon_code=code)
 
-    # filter by expiration and activation dates
-    query = (
-        CouponVersion.objects.select_related()
-        .filter(pk__in=cv_latest)
-        .filter(
-            Q(invoice_version__expiration_date__gte=now)
-            | Q(invoice_version__expiration_date__isnull=True)
+        cv_latest = (
+            CouponVersion.objects.select_related("coupon")
+            .filter(coupon__in=product_coupon_query.values_list("coupon", flat=True))
+            .order_by("coupon", "-created_on")
+            .distinct("coupon")
+            .values_list("pk")
         )
-        .filter(
-            Q(invoice_version__activation_date__lte=now)
-            | Q(invoice_version__activation_date__isnull=True)
+
+        # filter by expiration and activation dates
+        query = (
+            CouponVersion.objects.select_related("invoice_version")
+            .filter(pk__in=cv_latest)
+            .filter(
+                Q(invoice_version__expiration_date__gte=now)
+                | Q(invoice_version__expiration_date__isnull=True)
+            )
+            .filter(
+                Q(invoice_version__activation_date__lte=now)
+                | Q(invoice_version__activation_date__isnull=True)
+            )
         )
-    )
 
-    if auto_only:
-        query = query.filter(invoice_version__automatic=True)
+        if auto_only:
+            query = query.filter(invoice_version__automatic=True)
 
-    # filter by redemption counts
-    for cv in query:
-        redemptions_global = CouponRedemption.objects.filter(coupon_version=cv)
-        redemptions_user = redemptions_global.filter(order__purchaser=user)
-        if (
-            cv.invoice_version.max_redemptions > redemptions_global.count()
-            and cv.invoice_version.max_redemptions_per_user > redemptions_user.count()
-        ):
-            valid_coupons.append(cv)
-    return sorted(valid_coupons, key=lambda x: x.invoice_version.amount, reverse=True)
-
-
-def get_eligible_coupons(product, code=None):
-    """
-    Return the eligible coupon ids for a product.  This may include both valid and invalid coupons.
-    Invalid coupons should be filtered out with the get_valid_coupon_versions function.
-
-    Args:
-        product (Product): product to filter CouponEligibility by
-        code (str): A coupon code to filter by
-
-    Returns:
-        TimestampedModelQuerySet: list of coupon ids that can be used with the products.
-    """
-    query = CouponEligibility.objects.select_related("coupon").filter(
-        product=product, coupon__enabled=True
-    )
-    if code:
-        query = query.filter(coupon__coupon_code=code)
-
-    return query.values_list("coupon", flat=True)
+        # filter by redemption counts
+        for coupon_version in query:
+            redemptions_global = (
+                CouponRedemption.objects.select_related("coupon_version", "order")
+                .filter(coupon_version=coupon_version)
+                .filter(order__status=Order.FULFILLED)
+            )
+            redemptions_user = redemptions_global.filter(order__purchaser=user)
+            if (
+                coupon_version.invoice_version.max_redemptions
+                > redemptions_global.count()
+                and coupon_version.invoice_version.max_redemptions_per_user
+                > redemptions_user.count()
+            ):
+                valid_coupons.append(coupon_version)
+        return sorted(
+            valid_coupons, key=lambda x: x.invoice_version.amount, reverse=True
+        )
 
 
 def best_coupon_for_basket(basket, auto_only=False, code=None):
@@ -213,17 +210,16 @@ def best_coupon_for_product(product, user, auto_only=False, code=None):
 
     Args:
         product (Product): the Product Object
+        user (User): The user buying the product
         auto_only (bool): Only retrieve `automatic` Coupons
         code (str): A coupon code to filter by
 
     Returns:
         CouponVersion: the CouponVersion with the highest product discount, or None
     """
-    product_coupons = get_eligible_coupons(product, code=code)
-    if product_coupons:
-        validated_versions = get_valid_coupon_versions(product_coupons, user, auto_only)
-        if validated_versions:
-            return validated_versions[0]
+    validated_versions = get_valid_coupon_versions(product, user, auto_only, code=code)
+    if validated_versions:
+        return validated_versions[0]
     return None
 
 
@@ -251,9 +247,7 @@ def get_discount_price(coupon_version, product):
     Returns:
         Decimal: the discounted price for the Product
     """
-    return Decimal(
-        (1 - coupon_version.invoice_version.amount) * get_product_price(product)
-    )
+    return (1 - coupon_version.invoice_version.amount) * get_product_price(product)
 
 
 def select_coupon(coupon_version, basket):

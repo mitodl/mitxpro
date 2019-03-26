@@ -22,7 +22,6 @@ from ecommerce.api import (
     get_product_price,
 )
 from ecommerce.api import (
-    get_eligible_coupons,
     get_valid_coupon_versions,
     best_coupon_for_basket,
     get_discount_price,
@@ -40,6 +39,7 @@ from ecommerce.factories import (
     OrderFactory,
     BasketFactory,
 )
+from ecommerce.models import Order
 from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
@@ -221,57 +221,15 @@ def test_make_reference_id():
     )
 
 
-def test_get_eligible_coupons(basket_and_coupons):
-    """
-    Verify that only eligible coupons for a product are returned
-    """
-    other_coupon = CouponFactory.create()
-    eligible_coupons = list(
-        get_eligible_coupons(basket_and_coupons.basket_item.product)
-    )
-    expected_coupons = [
-        c.coupon.id
-        for c in [
-            basket_and_coupons.coupongroup_best,
-            basket_and_coupons.coupongroup_worst,
-        ]
-    ]
-    assert sorted(expected_coupons) == sorted(eligible_coupons)
-    assert other_coupon.id not in eligible_coupons
-
-
-def test_get_eligible_coupons_with_code(basket_and_coupons):
-    """
-    Verify that only eligible coupons for a product that match a specified code are returned
-    """
-    eligible_coupons = list(
-        get_eligible_coupons(
-            basket_and_coupons.basket_item.product,
-            code=basket_and_coupons.coupongroup_worst.coupon.coupon_code,
-        )
-    )
-    assert basket_and_coupons.coupongroup_worst.coupon.id in eligible_coupons
-    assert basket_and_coupons.coupongroup_best.coupon.id not in eligible_coupons
-    invalid_code_coupons = get_eligible_coupons(
-        basket_and_coupons.basket_item.product, code="invalid_test_coupon_code"
-    )
-    assert not invalid_code_coupons
-
-
 @pytest.mark.parametrize("auto_only", [True, False])
 def test_get_valid_coupon_versions(basket_and_coupons, auto_only):
     """
     Verify that the correct valid CouponInvoiceVersions are returned for a list of coupons
     """
-    coupon_ids = [
-        c.coupon.id
-        for c in [
-            basket_and_coupons.coupongroup_best,
-            basket_and_coupons.coupongroup_worst,
-        ]
-    ]
     best_versions = get_valid_coupon_versions(
-        coupon_ids, basket_and_coupons.basket_item.basket.user, auto_only
+        basket_and_coupons.basket_item.product,
+        basket_and_coupons.basket_item.basket.user,
+        auto_only,
     )
     expected_versions = [basket_and_coupons.coupongroup_worst.coupon_version]
     if not auto_only:
@@ -283,14 +241,6 @@ def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):
     """
     Verify that expired or future CouponInvoiceVersions are not returned for a list of coupons
     """
-    coupon_ids = [
-        c.coupon.id
-        for c in [
-            basket_and_coupons.coupongroup_best,
-            basket_and_coupons.coupongroup_worst,
-        ]
-    ]
-
     today = now_in_utc()
     civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.invoice_version
     civ_worst.activation_date = today + timedelta(days=1)
@@ -300,28 +250,23 @@ def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):
     civ_best.save()
 
     best_versions = get_valid_coupon_versions(
-        coupon_ids, basket_and_coupons.basket_item.basket.user
+        basket_and_coupons.basket_item.product,
+        basket_and_coupons.basket_item.basket.user,
     )
     assert best_versions == []
 
 
-def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons):
+@pytest.mark.parametrize("order_status", [Order.FULFILLED, Order.FAILED])
+def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons, order_status):
     """
     Verify that CouponInvoiceVersions that have exceeded redemption limits are not returned
     """
-    coupon_ids = [
-        c.coupon.id
-        for c in [
-            basket_and_coupons.coupongroup_best,
-            basket_and_coupons.coupongroup_worst,
-        ]
-    ]
-
     civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.invoice_version
     civ_worst.max_redemptions = 1
     civ_worst.save()
     CouponRedemptionFactory(
-        coupon_version=basket_and_coupons.coupongroup_worst.coupon_version
+        coupon_version=basket_and_coupons.coupongroup_worst.coupon_version,
+        order=OrderFactory(status=order_status),
     )
 
     civ_best = basket_and_coupons.coupongroup_best.coupon_version.invoice_version
@@ -329,13 +274,22 @@ def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons):
     civ_best.save()
     CouponRedemptionFactory(
         coupon_version=basket_and_coupons.coupongroup_best.coupon_version,
-        order=OrderFactory(purchaser=basket_and_coupons.basket_item.basket.user),
+        order=OrderFactory(
+            purchaser=basket_and_coupons.basket_item.basket.user, status=order_status
+        ),
     )
 
     best_versions = get_valid_coupon_versions(
-        coupon_ids, basket_and_coupons.basket_item.basket.user
+        basket_and_coupons.basket_item.product,
+        basket_and_coupons.basket_item.basket.user,
     )
-    assert best_versions == []
+    if order_status == Order.FULFILLED:
+        assert best_versions == []
+    else:
+        assert best_versions == [
+            basket_and_coupons.coupongroup_best.coupon_version,
+            basket_and_coupons.coupongroup_worst.coupon_version,
+        ]
 
 
 @pytest.mark.parametrize("auto_only", [True, False])
