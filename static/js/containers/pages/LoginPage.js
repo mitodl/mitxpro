@@ -49,14 +49,13 @@ class LoginPage extends React.Component<Props, State> {
 
     /* eslint-disable camelcase */
     try {
+      const result = await loginEmail(email, nextUrl)
       const {
-        body: {
-          state,
-          partialToken,
-          errors,
-          extraData: { name }
-        }
-      } = await loginEmail(email, nextUrl)
+        state,
+        partialToken,
+        errors,
+        extraData: { name }
+      } = result.transformed.auth
 
       if (state === STATE_LOGIN_PASSWORD) {
         this.setState({
