@@ -9,6 +9,13 @@ require("jsdom-global")(undefined, {
   url: "http://fake/"
 })
 
+const { polyfill } = require("raf")
+polyfill(global)
+polyfill(window)
+
+// polyfill for the web crypto module
+window.crypto = require("@trust/webcrypto")
+
 // We need to explicitly change the URL when window.location is used
 const changeURL = require("jsdom/lib/old-api").changeURL
 Object.defineProperty(window, "location", {

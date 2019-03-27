@@ -5,6 +5,7 @@ import json
 
 from django.urls import reverse
 import pytest
+from rest_framework import status
 
 
 pytestmark = [pytest.mark.django_db]
@@ -34,5 +35,24 @@ def test_webpack_url(mocker, settings, client):
         "public_path": "/static/bundles/",
         "environment": settings.ENVIRONMENT,
         "sentry_dsn": None,
+        "release_version": settings.VERSION,
+    }
+
+
+def test_app_context(settings, client):
+    """Tests the app context API"""
+    settings.GA_TRACKING_ID = "fake"
+    settings.ENVIRONMENT = "test"
+    settings.VERSION = "4.5.6"
+    settings.USE_WEBPACK_DEV_SERVER = False
+
+    response = client.get(reverse("api-app_context"))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {
+        "features": {},
+        "ga_tracking_id": "fake",
+        "public_path": "/static/bundles/",
+        "environment": settings.ENVIRONMENT,
         "release_version": settings.VERSION,
     }

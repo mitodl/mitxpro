@@ -5,14 +5,12 @@ import { connect } from "react-redux"
 import { mutateAsync, requestAsync } from "redux-query"
 import { createStructuredSelector } from "reselect"
 
-import auth from "../../../lib/queries/auth"
+import auth, { authSelector } from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
 import { STATE_SUCCESS } from "../../../lib/auth"
 
-import { qsPartialTokenSelector } from "../../../lib/selectors"
-
-import { RegisterProfileForm } from "../../../components/forms/register"
+import { LoginPasswordForm } from "../../../components/forms/login"
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
@@ -21,40 +19,52 @@ import type { AuthResponse, User } from "../../../flow/authTypes"
 type Props = {
   location: Location,
   history: RouterHistory,
-  params: { partialToken: string },
-  registerDetails: (
-    name: string,
+  auth: AuthResponse,
+  loginPassword: (
     password: string,
     partialToken: string
   ) => Promise<Response<AuthResponse>>,
   getCurrentUser: () => Promise<Response<User>>
 }
 
-class RegisterProfilePage extends React.Component<Props> {
-  async onSubmit({ name, password }, { setSubmitting, setErrors }) {
+class LoginPasswordPage extends React.Component<Props> {
+  componentDidMount() {
     const {
-      registerDetails,
-      getCurrentUser,
-      params: { partialToken },
-      history
+      history,
+      auth: { partialToken }
     } = this.props
+
+    if (!partialToken) {
+      // if there's no partialToken in the state
+      // this page was navigated to directly and login needs to be started over
+      history.push(routes.login.begin)
+    }
+  }
+
+  async onSubmit({ password }, { setSubmitting, setErrors }) {
+    const {
+      loginPassword,
+      getCurrentUser,
+      history,
+      auth: { partialToken }
+    } = this.props
+
+    if (!partialToken) {
+      throw Error("Invalid state: password page with no partialToken")
+    }
 
     /* eslint-disable camelcase */
     try {
       const {
-        body: { state, errors }
-      }: { body: AuthResponse } = await registerDetails(
-        name,
-        password,
-        partialToken
-      )
+        body: { state, redirectUrl, errors }
+      }: { body: AuthResponse } = await loginPassword(password, partialToken)
 
       if (state === STATE_SUCCESS) {
         await getCurrentUser()
-        history.push(routes.home)
+        history.push(redirectUrl || routes.home)
       } else if (errors.length > 0) {
         setErrors({
-          email: errors[0]
+          password: errors[0]
         })
       }
     } finally {
@@ -64,23 +74,27 @@ class RegisterProfilePage extends React.Component<Props> {
   }
 
   render() {
+    const {
+      auth: {
+        extraData: { name }
+      }
+    } = this.props
+
     return (
       <div>
-        <RegisterProfileForm onSubmit={this.onSubmit.bind(this)} />
+        <p>Logging in as {name}</p>
+        <LoginPasswordForm onSubmit={this.onSubmit.bind(this)} />
       </div>
     )
   }
 }
 
 const mapStateToProps = createStructuredSelector({
-  params: createStructuredSelector({ partialToken: qsPartialTokenSelector })
+  auth: authSelector
 })
 
-const registerDetails = (
-  name: string,
-  password: string,
-  partialToken: string
-) => mutateAsync(auth.registerDetailsMutation(name, password, partialToken))
+const loginPassword = (password: string, partialToken: string) =>
+  mutateAsync(auth.loginPasswordMutation(password, partialToken))
 
 const getCurrentUser = () =>
   requestAsync({
@@ -89,7 +103,7 @@ const getCurrentUser = () =>
   })
 
 const mapDispatchToProps = {
-  registerDetails,
+  loginPassword,
   getCurrentUser
 }
 
@@ -98,4 +112,4 @@ export default compose(
     mapStateToProps,
     mapDispatchToProps
   )
-)(RegisterProfilePage)
+)(LoginPasswordPage)

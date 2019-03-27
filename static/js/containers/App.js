@@ -1,28 +1,41 @@
 // @flow
 import React from "react"
+import { compose } from "redux"
+import { connect } from "react-redux"
 import { Switch, Route } from "react-router"
+import { connectRequest } from "redux-query"
+import { createStructuredSelector } from "reselect"
 import urljoin from "url-join"
 
+import users, { currentUserSelector } from "../lib/queries/users"
 import { routes } from "../lib/urls"
 
 import Header from "../components/Header"
 
 import HomePage from "./pages/HomePage"
-import LoginPage from "./pages/LoginPage"
+import LoginPages from "./pages/login/LoginPages"
 import RegisterPages from "./pages/register/RegisterPages"
 
 import type { Match } from "react-router"
+import type { CurrentUser } from "../flow/authTypes"
 
 type Props = {
-  match: Match
+  match: Match,
+  currentUser: ?CurrentUser
 }
 
-export default class App extends React.Component<Props, void> {
+class App extends React.Component<Props, void> {
   render() {
-    const { match } = this.props
+    const { match, currentUser } = this.props
+
+    if (!currentUser) {
+      // application is still loading
+      return <div className="app" />
+    }
+
     return (
       <div className="app">
-        <Header />
+        <Header currentUser={currentUser} />
         <Switch>
           <Route
             exact
@@ -30,9 +43,8 @@ export default class App extends React.Component<Props, void> {
             component={HomePage}
           />
           <Route
-            exact
-            path={urljoin(match.url, routes.login)}
-            component={LoginPage}
+            path={urljoin(match.url, String(routes.login))}
+            component={LoginPages}
           />
           <Route
             path={urljoin(match.url, String(routes.register))}
@@ -43,3 +55,14 @@ export default class App extends React.Component<Props, void> {
     )
   }
 }
+
+const mapStateToProps = createStructuredSelector({
+  currentUser: currentUserSelector
+})
+
+const mapPropsToConfig = () => [users.currentUserQuery()]
+
+export default compose(
+  connect(mapStateToProps),
+  connectRequest(mapPropsToConfig)
+)(App)

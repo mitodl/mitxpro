@@ -6,7 +6,10 @@ import json
 from django.conf import settings
 from django.shortcuts import render
 from raven.contrib.django.raven_compat.models import client as sentry
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
+from mitxpro.serializers import AppContextSerializer
 from mitxpro.templatetags.render_bundle import public_path
 
 
@@ -30,3 +33,13 @@ def index(request):
     The index view
     """
     return render(request, "index.html", context=get_js_settings_context(request))
+
+
+class AppContextView(APIView):
+    """Renders the user context as JSON"""
+
+    permission_classes = []
+
+    def get(self, request, *args, **kwargs):
+        """Read-only access"""
+        return Response(AppContextSerializer(request).data)

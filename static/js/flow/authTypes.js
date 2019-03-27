@@ -36,3 +36,24 @@ export type AuthResponse = {
     name?: string
   }
 }
+
+export type User = {
+    id: number,
+    username: string,
+    email: string,
+    name: string,
+    created_on: string,
+    updated_on: string
+}
+
+export type AnonymousUser = {
+  is_anonymous: true,
+  is_authenticated: false,
+}
+
+export type LoggedInUser = {
+  is_anonymous: false,
+  is_authenticated: true,
+} & User
+
+export type CurrentUser = AnonymousUser | LoggedInUser

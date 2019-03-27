@@ -122,6 +122,7 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 LOGIN_REDIRECT_URL = "/"
 LOGIN_URL = "/"
 LOGIN_ERROR_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 
 ROOT_URLCONF = "mitxpro.urls"
 

@@ -1,16 +1,15 @@
 // @flow
 /* eslint-disable no-unused-vars */
-declare var SETTINGS: {
+
+declare type Settings = {
   public_path: string,
-  FEATURES: {
-    [key: string]: boolean,
-  },
   reactGaDebug: string,
   sentry_dsn: string,
   release_version: string,
   environment: string,
   gaTrackingID: ?string
-};
+}
+declare var SETTINGS: Settings;
 
 // mocha
 declare var it: Function;

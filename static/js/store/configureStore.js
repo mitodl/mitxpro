@@ -14,7 +14,9 @@ let createStoreWithMiddleware
 if (process.env.NODE_ENV !== "production") {
   createStoreWithMiddleware = compose(
     applyMiddleware(...COMMON_MIDDLEWARE, createLogger()),
-    window.devToolsExtension ? window.devToolsExtension() : f => f
+    window.__REDUX_DEVTOOLS_EXTENSION__
+      ? window.__REDUX_DEVTOOLS_EXTENSION__()
+      : f => f
   )(createStore)
 } else {
   createStoreWithMiddleware = compose(applyMiddleware(...COMMON_MIDDLEWARE))(
