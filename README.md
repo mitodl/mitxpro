@@ -94,3 +94,13 @@ would in a Django shell.
 Unlike our other web applications this project is not using tox. To run tests locally, run this command instead:
 
     docker-compose run --rm web pytest
+    
+### Seed data
+
+Seed data can be generated via management command. It's designed to be idempotent, so running it multiple times should not create multiple sets of data.
+
+```
+docker-compose run --rm web ./manage.py seed_data
+# To delete seed data
+docker-compose run --rm web ./manage.py seed_data --delete
+```
