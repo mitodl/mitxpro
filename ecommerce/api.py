@@ -277,23 +277,6 @@ def get_product_price(product):
     return get_latest_product_version(product).price
 
 
-def get_discount_price(coupon_version, product):
-    """
-    Determine the new discounted price for a product after the coupon discount is applied
-
-    Args:
-        coupon_version (CouponVersion): the CouponVersion object
-        product (Product): the Product object
-
-    Returns:
-        Decimal: the discounted price for the Product
-    """
-    return get_product_version_price_with_discount(
-        coupon_version=coupon_version,
-        product_version=get_latest_product_version(product),
-    )
-
-
 def get_product_version_price_with_discount(*, coupon_version, product_version):
     """
     Determine the new discounted price for a product after the coupon discount is applied

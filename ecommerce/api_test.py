@@ -21,7 +21,6 @@ from ecommerce.api import (
     select_coupon,
     redeem_coupon,
     best_coupon_for_basket,
-    get_discount_price,
     get_new_order_by_reference_number,
     get_product_price,
     get_product_version_price_with_discount,
@@ -292,18 +291,6 @@ def test_get_best_coupon_for_basket_no_valid_coupons(basket_and_coupons):
         best_coupon_for_basket(basket_and_coupons.basket_item.basket, code="WORST")
         is None
     )
-
-
-def test_discount_price(basket_and_coupons):
-    """
-    Verify that the discount price is correctly calculated
-    """
-    coupon_version = basket_and_coupons.coupongroup_best.coupon_version
-    price = basket_and_coupons.product_version.price
-    discount = coupon_version.invoice_version.amount
-    assert get_discount_price(
-        coupon_version, basket_and_coupons.basket_item.product
-    ) == price * (1 - discount)
 
 
 def test_apply_coupon(basket_and_coupons):
