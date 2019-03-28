@@ -387,15 +387,15 @@ def enroll_user_on_success(order):  # pylint: disable=unused-argument
 @transaction.atomic
 def create_unfulfilled_order(user):
     """
-    Create a new Order which is not fulfilled for a purchasable course run. If course run is not purchasable,
-    it raises an Http404.
+    Create a new Order which is not fulfilled for a purchasable Product. Note that validation should
+    be done in the basket REST API so the validation is not done here (different from MicroMasters).
 
     Args:
         user (User):
-            The purchaser of the course run
+            The purchaser
 
     Returns:
-        Order: A newly created Order for the CourseRun with the given course_id
+        Order: A newly created Order for the Product in the basket
     """
     # Note: validation is assumed to already have happen when the basket is being modified
     basket, _ = Basket.objects.get_or_create(user=user)

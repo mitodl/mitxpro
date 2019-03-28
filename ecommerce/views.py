@@ -35,11 +35,8 @@ class CheckoutView(APIView):
 
     def post(self, request, *args, **kwargs):
         """
-        If the course run is part of a financial aid program, create a new unfulfilled Order
+        Create a new unfulfilled Order from the user's basket
         and return information used to submit to CyberSource.
-
-        If the program does not have financial aid, this will return a URL to let the user
-        pay for the course on edX.
         """
 
         base_url = request.build_absolute_uri("/")
