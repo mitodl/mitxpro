@@ -372,36 +372,30 @@ def test_get_new_order_by_reference_number(basket_and_coupons):
     assert same_order.id == order.id
 
 
-def test_parse():
+@pytest.mark.parametrize(
+    "reference_number, error",
+    [
+        ("XYZ-1-3", "Reference number must start with MITXPRO-"),
+        ("MITXPRO-no_dashes_here", "Unable to find order number in reference number"),
+        ("MITXPRO-something-NaN", "Unable to parse order number"),
+        ("MITXPRO-not_matching-3", "CyberSource prefix doesn't match"),
+    ],
+)
+def test_get_new_order_by_reference_number_parse_error(reference_number, error):
     """
     Test parse errors are handled well
     """
     with pytest.raises(ParseException) as ex:
-        get_new_order_by_reference_number("XYZ-1-3")
-    assert ex.value.args[0] == "Reference number must start with MITXPRO-"
-
-    with pytest.raises(ParseException) as ex:
-        get_new_order_by_reference_number("MITXPRO-no_dashes_here")
-    assert ex.value.args[0] == "Unable to find order number in reference number"
-
-    with pytest.raises(ParseException) as ex:
-        get_new_order_by_reference_number("MITXPRO-something-NaN")
-    assert ex.value.args[0] == "Unable to parse order number"
-
-    with pytest.raises(ParseException) as ex:
-        get_new_order_by_reference_number("MITXPRO-not_matching-3")
-    assert ex.value.args[0] == "CyberSource prefix doesn't match"
+        get_new_order_by_reference_number(reference_number=reference_number)
+    assert ex.value.args[0] == error
 
 
-def test_status(basket_and_coupons):
+def test_get_new_order_by_reference_number_missing(basket_and_coupons):
     """
-    get_order_by_reference_number should only get orders with status=CREATED
+    get_new_order_by_reference_number should error when the Order id is not found
     """
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
-
-    order.status = Order.FAILED
-    order.save()
 
     with pytest.raises(EcommerceException) as ex:
         # change order number to something not likely to already exist in database
