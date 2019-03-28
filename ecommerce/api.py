@@ -410,9 +410,6 @@ def create_unfulfilled_order(user):
 
     for coupon_selection in basket.couponselection_set.all():
         coupon = coupon_selection.coupon
-        redeem_coupon(
-            coupon_version=get_latest_coupon_version(coupon),
-            order=order,
-        )
+        redeem_coupon(coupon_version=get_latest_coupon_version(coupon), order=order)
     order.save_and_log(user)
     return order
