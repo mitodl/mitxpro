@@ -129,6 +129,19 @@ def make_reference_id(order):
     )
 
 
+def latest_coupon_version(coupon):
+    """
+    Get the most recent CouponVersion for a coupon
+
+    Args:
+        coupon (Coupon): A coupon object
+
+    Returns:
+        CouponVersion: The CouponVersion for the coupon
+    """
+    return coupon.couponversion_set.order_by("-created_on").first()
+
+
 def get_valid_coupon_versions(product, user, auto_only=False, code=None):
     """
     Given a list of coupon ids, determine which of them are valid based on invoice version dates and redemptions.
@@ -238,20 +251,7 @@ def best_coupon_for_product(product, user, auto_only=False, code=None):
     return None
 
 
-def get_latest_coupon_version(coupon):
-    """
-    Get the most recent CouponVersion for a coupon
-
-    Args:
-        coupon (Coupon): A coupon object
-
-    Returns:
-        CouponVersion: The CouponVersion for the coupon
-    """
-    return coupon.couponversion_set.order_by("-created_on").first()
-
-
-def get_latest_product_version(product):
+def latest_product_version(product):
     """
     Get the most recent ProductVersion for a product
 
@@ -274,7 +274,7 @@ def get_product_price(product):
     Returns:
         Decimal: the price of a product
     """
-    return get_latest_product_version(product).price
+    return latest_product_version(product).price
 
 
 def get_product_version_price_with_discount(*, coupon_version, product_version):
@@ -403,13 +403,13 @@ def create_unfulfilled_order(user):
     order = Order.objects.create(status=Order.CREATED, purchaser=user)
 
     for basket_item in basket.basketitems.all():
-        product_version = get_latest_product_version(basket_item.product)
+        product_version = latest_product_version(basket_item.product)
         Line.objects.create(
             order=order, product_version=product_version, quantity=basket_item.quantity
         )
 
     for coupon_selection in basket.couponselection_set.all():
         coupon = coupon_selection.coupon
-        redeem_coupon(coupon_version=get_latest_coupon_version(coupon), order=order)
+        redeem_coupon(coupon_version=latest_coupon_version(coupon), order=order)
     order.save_and_log(user)
     return order

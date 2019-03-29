@@ -14,8 +14,8 @@ from ecommerce.api import (
     create_unfulfilled_order,
     generate_cybersource_sa_payload,
     generate_cybersource_sa_signature,
-    get_latest_coupon_version,
-    get_latest_product_version,
+    latest_coupon_version,
+    latest_product_version,
     ISO_8601_FORMAT,
     make_reference_id,
     select_coupon,
@@ -425,7 +425,7 @@ def test_create_order(
 
     assert order.lines.count() == 1
     line = order.lines.first()
-    assert line.product_version == get_latest_product_version(
+    assert line.product_version == latest_product_version(
         basket_and_coupons.basket_item.product
     )
     assert line.quantity == basket_and_coupons.basket_item.quantity
@@ -461,7 +461,7 @@ def test_get_latest_coupon_version():
     """
     earlier = CouponVersionFactory.create()
     later = CouponVersionFactory.create(coupon=earlier.coupon)
-    assert get_latest_coupon_version(earlier.coupon) == later
+    assert latest_coupon_version(earlier.coupon) == later
 
 
 def test_get_latest_product_version():
@@ -470,4 +470,4 @@ def test_get_latest_product_version():
     """
     earlier = ProductVersionFactory.create()
     later = ProductVersionFactory.create(product=earlier.product)
-    assert get_latest_product_version(earlier.product) == later
+    assert latest_product_version(earlier.product) == later
