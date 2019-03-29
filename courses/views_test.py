@@ -166,7 +166,7 @@ def test_create_course_run(user_drf_client, course_runs):
         {
             "title": "New CourseRun Title",
             "courseware_id": "new-courserun-id",
-            "courseware_url": "http://example.com",
+            "courseware_url_path": "http://example.com",
         }
     )
     request_url = reverse("course_runs_api-list")
@@ -206,11 +206,20 @@ def test_course_catalog_view(client):
     course_in_program = CourseFactory.create(program=program, live=True)
     course_no_program = CourseFactory.create(no_program=True, live=True)
     CourseFactory.create(no_program=True, live=False)
-    exp_courseware_objects = [
-        ProgramSerializer(program).data,
-        CourseSerializer(course_in_program).data,
-        CourseSerializer(course_no_program).data,
-    ]
+    exp_programs = [program]
+    exp_courses = [course_in_program, course_no_program]
     resp = client.get(reverse("mitxpro-index"))
     assert resp.templates[0].name == "catalog.html"
-    assert list(resp.context["courseware_objects"]) == exp_courseware_objects
+    assert list(resp.context["programs"]) == exp_programs
+    assert list(resp.context["courses"]) == exp_courses
+
+
+def test_course_view(client, user):
+    """
+    Test that the course detail view has the right context
+    """
+    course = CourseFactory.create(live=True)
+    client.force_login(user)
+    resp = client.get(reverse("course-detail", kwargs={"pk": course.id}))
+    assert resp.context["course"] == course
+    assert resp.context["user"] == user

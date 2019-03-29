@@ -16,6 +16,18 @@
     ],
     "courses": [
         {
+            "title": "edX Demonstration Course",
+            "description": "Demo course",
+            "course_runs": [
+                {
+                    "title": "edX Demonstration Course - Spring 2013",
+                    "courseware_id": "course-v1:edX+DemoX+Demo_Course",
+                    "courseware_url_path": "/courses/course-v1:edX+DemoX+Demo_Course",
+                    "start_date": "2013-02-05T00:00:00+00:00"
+                }
+            ]
+        },
+        {
             "program": "Systems Engineering",
             "title": "Architecture of Complex Systems",
             "position_in_program": 1,
@@ -41,7 +53,7 @@
                 {
                     "title": "Systems Engineering - Spring 2020",
                     "courseware_id": "course-v1:MITx+sys+eng+B2+Jan_2020",
-                    "courseware_url": "https://mitxpro.mit.edu/courses/course-v1:MITxPRO+SysEngx2+1T2019/about",
+                    "courseware_url_path": "/courses/course-v1:MITxPRO+SysEngx2+1T2019/about",
                     "end_date": "2020-05-15T00:00:00+00:00",
                     "start_date": "2020-01-15T00:00:00+00:00",
                     "enrollment_end": "2020-01-29T00:00:00+00:00"
@@ -58,7 +70,7 @@
                 {
                     "title": "Systems Engineering - Fall 2020",
                     "courseware_id": "course-v1:MITx+sys+eng+B3+Aug_2020",
-                    "courseware_url": "https://mitxpro.mit.edu/courses/course-v1:MITxPRO+SysEngx3+1T2019/about",
+                    "courseware_url_path": "/courses/course-v1:MITxPRO+SysEngx3+1T2019/about",
                     "start_date": "2020-08-15T00:00:00+00:00",
                     "end_date": "2020-12-15T00:00:00+00:00",
                     "enrollment_end": "2020-08-29T00:00:00+00:00"
@@ -258,7 +270,7 @@
                 {
                     "title": "Quantitative Methods - August 2019",
                     "courseware_id": "course-v1:MITxPRO+SysEngx4+1T2019",
-                    "courseware_url": "https://mitxpro.mit.edu/courses/course-v1:MITxPRO+SysEngx4+1T2019/about",
+                    "courseware_url_path": "/courses/course-v1:MITxPRO+SysEngx4+1T2019/about",
                     "enrollment_start": "2019-08-15T00:00:00+00:00",
                     "end_date": "2019-12-15T00:00:00+00:00",
                     "start_date": "2019-08-15T00:00:00+00:00",
@@ -273,7 +285,7 @@
                 {
                     "title": "Quantum Computing - August 2019",
                     "courseware_id": "course-v1:MITxPRO+QCx1+2T2019",
-                    "courseware_url": "https://mitxpro.mit.edu/courses/course-v1:MITxPRO+QCx1+2T2019/about",
+                    "courseware_url_path": "/courses/course-v1:MITxPRO+QCx1+2T2019/about",
                     "enrollment_start": "2019-08-15T00:00:00+00:00",
                     "end_date": "2019-12-15T00:00:00+00:00",
                     "start_date": "2019-08-15T00:00:00+00:00",

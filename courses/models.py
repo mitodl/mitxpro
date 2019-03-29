@@ -5,6 +5,7 @@ import logging
 from django.db import models
 
 from mitxpro.models import TimestampedModel
+from courseware.utils import edx_redirect_url
 
 log = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class CourseRun(TimestampedModel):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     courseware_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
-    courseware_url = models.URLField(null=True)
+    courseware_url_path = models.CharField(max_length=500, blank=True, null=True)
     start_date = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True, db_index=True)
     enrollment_start = models.DateTimeField(null=True, blank=True, db_index=True)
@@ -73,3 +74,17 @@ class CourseRun(TimestampedModel):
 
     def __str__(self):
         return self.title
+
+    @property
+    def courseware_url(self):
+        """
+        Full URL for this CourseRun as it exists in the courseware
+
+        Returns:
+            str or None: Full URL or None
+        """
+        return (
+            edx_redirect_url(self.courseware_url_path)
+            if self.courseware_url_path
+            else None
+        )

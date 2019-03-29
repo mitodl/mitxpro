@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}MIT xPro | {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="course-detail">
+  <h1>{{ course.title }}</h1>
+  <h3>{{ course.description }}</h3>
+  <h3>Course Runs:</h3>
+  {% for course_run in course.courserun_set.all %}
+    <div style="background-color: {% cycle "#eee" "#fff" %}; padding: 10px;">
+      <h4 style="margin: 0 0 10px 0; padding: 0;">
+        {% if course_run.courseware_url %}
+            &#11016;
+            <a
+              href="{{ course_run.courseware_url }}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ course_run.title }}
+            </a>
+        {% else %}
+          {{ course_run.title }}
+        {% endif %}
+      </h4>
+      {% if course_run.courseware_url and user.is_authenticated %}
+        <form method="post" action="{% url "course-enrollments" course_run_id=course_run.id %}">
+          {% csrf_token %}
+          <input type="submit" value="Enroll in course" />
+        </form>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

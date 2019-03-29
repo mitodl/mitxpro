@@ -45,7 +45,7 @@ class CourseRunFactory(DjangoModelFactory):
     courseware_id = factory.Sequence(
         lambda number: "course:/v{}/{}".format(number, FAKE.slug())
     )
-    courseware_url = factory.Faker("uri")
+    courseware_url_path = factory.Faker("uri")
     start_date = factory.Faker(
         "date_time_this_month", before_now=True, after_now=False, tzinfo=pytz.utc
     )
