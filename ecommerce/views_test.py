@@ -476,13 +476,18 @@ def test_patch_basket_update_valid_product_invalid_coupon_auto(
     assert CouponSelection.objects.get(basket=basket).coupon == auto_coupon
 
 
+@pytest.mark.parametrize("has_coupon", [True, False])
 def test_patch_basket_update_valid_product_invalid_coupon_no_auto(
-    basket_client, basket_and_coupons
+    basket_client, basket_and_coupons, has_coupon
 ):
     """ Test that product is updated and invalid coupon removed """
     basket = basket_and_coupons.basket
     product_version = ProductVersionFactory()
 
+    if not has_coupon:
+        basket.couponselection_set.all().delete()
+    else:
+        assert basket.couponselection_set.first() is not None
     data = {"items": [{"id": product_version.id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK

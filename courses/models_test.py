@@ -30,16 +30,13 @@ def test_courseware_url(settings):
     assert course_run_no_path.courseware_url is None
 
 
-@pytest.mark.parametrize("expected", [True, False])
-def test_course_run_past(expected):
+@pytest.mark.parametrize("end_days,expected", [[-1, True], [1, False], [None, False]])
+def test_course_run_past(end_days, expected):
     """
     Test that CourseRun.is_past returns the expected boolean value
     """
     now = now_in_utc()
-    if expected is True:
-        end_date = now - timedelta(days=1)
-    else:
-        end_date = now + timedelta(days=1)
+    end_date = None if end_days is None else (now + timedelta(days=end_days))
     assert CourseRunFactory.create(end_date=end_date).is_past is expected
 
 
