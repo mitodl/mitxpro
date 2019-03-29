@@ -2,7 +2,11 @@
 import logging
 
 from django.conf import settings
+from django.db import transaction
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
@@ -14,11 +18,16 @@ from ecommerce.api import (
     generate_cybersource_sa_payload,
     get_new_order_by_reference_number,
     get_product_version_price_with_discount,
+    best_coupon_for_product,
+    get_valid_coupon_versions,
+    latest_product_version,
+    latest_coupon_version,
 )
 from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
 from ecommerce.exceptions import EcommerceException
-from ecommerce.models import Order, Receipt
+from ecommerce.models import Basket, CouponSelection, ProductVersion, Order, Receipt
 from ecommerce.permissions import IsSignedByCyberSource
+from ecommerce.serializers import BasketSerializer
 
 
 log = logging.getLogger(__name__)
@@ -135,3 +144,145 @@ class OrderFulfillmentView(APIView):
                 # TBD: send an email for the error?
         # The response does not matter to CyberSource
         return Response(status=HTTP_200_OK)
+
+
+class BasketView(APIView):
+    """ API view for viewing and updating a basket """
+
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (SessionAuthentication,)
+
+    def get(self, request, *args, **kwargs):
+        """ View a basket """
+        basket = get_object_or_404(Basket, user=request.user)
+        return Response(
+            status=status.HTTP_200_OK, data=BasketSerializer(instance=basket).data
+        )
+
+    def patch(self, request, *args, **kwargs):
+        """ Update a basket """
+        basket = get_object_or_404(Basket, user=request.user)
+        items = request.data.get("items")
+        coupons = request.data.get("coupons")
+
+        if items is not None or coupons is not None:
+            try:
+                product_version = _update_items(basket, items)
+                coupon_version = _update_coupons(basket, product_version, coupons)
+                if product_version:
+                    # Update basket items and coupon selection
+                    with transaction.atomic():
+                        if items is not None:
+                            basket_item = basket.basketitems.first()
+                            basket_item.product = product_version.product
+                            basket_item.save()
+                        if coupon_version:
+                            CouponSelection.objects.update_or_create(
+                                basket=basket,
+                                defaults={"coupon": coupon_version.coupon},
+                            )
+                        else:
+                            basket.couponselection_set.all().delete()
+                else:
+                    # Remove everything from basket
+                    with transaction.atomic():
+                        basket.basketitems.all().delete()
+                        basket.couponselection_set.all().delete()
+                return Response(
+                    status=status.HTTP_200_OK,
+                    data=BasketSerializer(instance=basket).data,
+                )
+            except ValidationError as be:
+                error = be.detail
+        else:
+            error = "Invalid request"
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST,
+            data=dict(BasketSerializer(instance=basket).data, **{"errors": error}),
+        )
+
+
+def _update_items(basket, items):
+    """
+    Helper function to determine if the basket item should be updated, removed, or kept as is.
+
+    Args:
+        basket (Basket): the basket to update
+        items (list of JSON objects): Basket items to update, or clear if empty list, or leave as is if None
+
+    Returns:
+        ProductVersion: ProductVersion object to assign to basket, if any.
+
+    """
+    if items:
+        if len(items) > 1:
+            raise ValidationError("Basket cannot contain more than one item")
+        # Item updated
+        product_version_id = items[0].get("id")
+        if product_version_id is None:
+            raise ValidationError("Invalid request")
+        try:
+            product_version = ProductVersion.objects.get(id=product_version_id)
+        except ProductVersion.DoesNotExist:
+            raise ValidationError(
+                "Invalid product version id {}".format(items[0]["id"])
+            )
+    elif items is not None:
+        # Item removed
+        product_version = None
+    else:
+        # Item has not changed
+        product_version = latest_product_version(basket.basketitems.first().product)
+    return product_version
+
+
+def _update_coupons(basket, product_version, coupons):
+    """
+    Helper function to determine if the basket coupon should be updated, removed, or kept as is.
+
+    Args:
+        basket (Basket): the basket to update
+        product_version (ProductVersion): the product version coupon should apply to
+        coupons (list of JSON objects): Basket coupons to update, or clear if empty list, or leave as is if None
+
+    Returns:
+        CouponVersion: CouponVersion object to assign to basket, if any.
+
+    """
+    if not product_version:
+        # No product, so clear coupon too
+        return None
+
+    if coupons:
+        if len(coupons) > 1:
+            raise ValidationError("Basket cannot contain more than one coupon")
+        coupon_code = coupons[0].get("code")
+        if coupon_code is None:
+            raise ValidationError("Invalid request")
+
+        # Check if the coupon is valid for the product
+        coupon_version = best_coupon_for_product(
+            product_version.product, basket.user, code=coupon_code
+        )
+        if coupon_version is None:
+            raise ValidationError("Coupon code {} is invalid".format(coupon_code))
+    elif coupons is not None:
+        # Coupon was cleared, get the best available auto coupon for the product instead
+        coupon_version = best_coupon_for_product(
+            product_version.product, basket.user, auto_only=True
+        )
+    else:
+        # coupon was not changed, make sure it is still valid; if not, replace with best auto coupon if any.
+        coupon_selection = basket.couponselection_set.first()
+        if coupon_selection:
+            coupon_version = latest_coupon_version(coupon_selection.coupon)
+        else:
+            coupon_version = None
+        valid_coupon_versions = get_valid_coupon_versions(
+            product_version.product, basket.user
+        )
+        if coupon_version is None or coupon_version not in valid_coupon_versions:
+            coupon_version = best_coupon_for_product(
+                product_version.product, basket.user, auto_only=True
+            )
+    return coupon_version

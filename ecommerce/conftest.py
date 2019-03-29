@@ -13,8 +13,8 @@ from ecommerce.factories import (
     CouponInvoiceVersionFactory,
     CouponVersionFactory,
     ProductVersionFactory,
+    CouponSelectionFactory,
 )
-
 
 CouponGroup = namedtuple(
     "CouponGroup",
@@ -63,10 +63,14 @@ def basket_and_coupons():
     CouponEligibilityFactory(coupon=coupon_best, product=basket_item.product)
     CouponEligibilityFactory(coupon=coupon_worst, product=basket_item.product)
 
+    # Apply one of the coupons to the basket
+    CouponSelectionFactory.create(basket=basket_item.basket, coupon=coupon_best)
+
     coupongroup_worst = CouponGroup(coupon_worst, cv_worst, invoice_worst, civ_worst)
     coupongroup_best = CouponGroup(coupon_best, cv_best, invoice_best, civ_best)
 
     return SimpleNamespace(
+        basket=basket_item.basket,
         basket_item=basket_item,
         product_version=product_version,
         coupongroup_best=coupongroup_best,
