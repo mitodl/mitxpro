@@ -16,7 +16,6 @@ from ecommerce.api import (
     generate_cybersource_sa_signature,
     ISO_8601_FORMAT,
     make_reference_id,
-    select_coupon,
     redeem_coupon,
     best_coupon_for_basket,
     get_new_order_by_reference_number,
@@ -28,13 +27,13 @@ from ecommerce.api import (
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
+    BasketFactory,
     BasketItemFactory,
+    CouponRedemptionFactory,
     CouponVersionFactory,
     LineFactory,
-    ProductVersionFactory,
-    CouponRedemptionFactory,
     OrderFactory,
-    BasketFactory,
+    ProductVersionFactory,
 )
 from ecommerce.models import CouponSelection, CouponRedemption, Order, OrderAudit
 from mitxpro.utils import now_in_utc
@@ -306,21 +305,17 @@ def test_latest_coupon_version(basket_and_coupons):
     assert latest_coupon_version(coupon) == new_version
 
 
-def test_apply_coupon(basket_and_coupons):
+def test_discount_price(basket_and_coupons):
     """
-    Verify that a CouponSelection is created or updated
+    Verify that the most recent coupon version is returned
     """
-    basket = basket_and_coupons.basket_item.basket
-    best_coupon_version = basket_and_coupons.coupongroup_best.coupon_version
-    worst_coupon_version = basket_and_coupons.coupongroup_worst.coupon_version
-    new_selection = select_coupon(best_coupon_version, basket)
-    assert new_selection.basket == basket
-    assert new_selection.coupon == best_coupon_version.coupon
-
-    updated_selection = select_coupon(worst_coupon_version, basket)
-    assert updated_selection.basket == new_selection.basket
-    assert updated_selection.coupon == worst_coupon_version.coupon
-    assert updated_selection.pk == new_selection.pk
+    coupon = basket_and_coupons.coupongroup_best.coupon
+    assert (
+        latest_coupon_version(coupon)
+        == basket_and_coupons.coupongroup_best.coupon_version
+    )
+    new_version = CouponVersionFactory.create(coupon=coupon)
+    assert latest_coupon_version(coupon) == new_version
 
 
 def test_redeem_coupon(basket_and_coupons):
@@ -437,6 +432,7 @@ def test_create_order(
     """
     coupon = basket_and_coupons.coupongroup_best.coupon
     basket = basket_and_coupons.basket_item.basket
+    basket.couponselection_set.all().delete()
     user = basket.user
     if has_coupon:
         CouponSelection.objects.create(coupon=coupon, basket=basket)

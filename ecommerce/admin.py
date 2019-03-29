@@ -1,7 +1,19 @@
 """admin classes for ecommerce"""
 from django.contrib import admin
 
-from ecommerce.models import Line, Order, OrderAudit, Receipt
+from ecommerce.models import (
+    Line,
+    Order,
+    OrderAudit,
+    Receipt,
+    Coupon,
+    CouponVersion,
+    CouponInvoiceVersion,
+    CouponInvoice,
+    CouponSelection,
+    CouponEligibility,
+    CouponRedemption,
+)
 from mitxpro.utils import get_field_names
 
 
@@ -68,7 +80,74 @@ class ReceiptAdmin(admin.ModelAdmin):
         return False
 
 
+class CouponInvoiceVersionInline(admin.StackedInline):
+    """Admin Inline for CouponInvoiceVersion objects"""
+
+    model = CouponInvoiceVersion
+    extra = 1
+    show_change_link = True
+
+
+class CouponVersionInline(admin.StackedInline):
+    """Admin Inline for CouponVersion objects"""
+
+    model = CouponVersion
+    extra = 1
+    show_change_link = True
+
+
+class CouponAdmin(admin.ModelAdmin):
+    """Admin for Coupons"""
+
+    model = Coupon
+    inlines = [CouponVersionInline]
+
+
+class CouponInvoiceAdmin(admin.ModelAdmin):
+    """Admin for CouponInvoices"""
+
+    model = CouponInvoice
+    inlines = [CouponInvoiceVersionInline]
+
+
+class CouponInvoiceVersionAdmin(admin.ModelAdmin):
+    """Admin for CouponInvoiceVersions"""
+
+    model = CouponInvoiceVersion
+
+
+class CouponVersionAdmin(admin.ModelAdmin):
+    """Admin for CouponVersions"""
+
+    model = CouponVersion
+
+
+class CouponSelectionAdmin(admin.ModelAdmin):
+    """Admin for CouponSelections"""
+
+    model = CouponSelection
+
+
+class CouponEligibilityAdmin(admin.ModelAdmin):
+    """Admin for CouponEligibilitys"""
+
+    model = CouponEligibility
+
+
+class CouponRedemptionAdmin(admin.ModelAdmin):
+    """Admin for CouponRedemptions"""
+
+    model = CouponRedemption
+
+
 admin.site.register(Line, LineAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderAudit, OrderAuditAdmin)
 admin.site.register(Receipt, ReceiptAdmin)
+admin.site.register(Coupon, CouponAdmin)
+admin.site.register(CouponVersion, CouponVersionAdmin)
+admin.site.register(CouponInvoice, CouponInvoiceAdmin)
+admin.site.register(CouponInvoiceVersion, CouponInvoiceVersionAdmin)
+admin.site.register(CouponSelection, CouponSelectionAdmin)
+admin.site.register(CouponEligibility, CouponEligibilityAdmin)
+admin.site.register(CouponRedemption, CouponRedemptionAdmin)

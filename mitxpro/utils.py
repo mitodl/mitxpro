@@ -107,3 +107,13 @@ def get_field_names(model):
         for field in model._meta.get_fields()
         if not field.auto_created  # pylint: disable=protected-access
     ]
+
+
+def first_matching_item(iterable, predicate):
+    """
+    Gets the first item in an iterable that matches a predicate (or None if nothing matches)
+
+    Returns:
+        Matching item or None
+    """
+    return next(filter(predicate, iterable), None)

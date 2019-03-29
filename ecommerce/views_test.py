@@ -1,15 +1,23 @@
 """ecommerce tests for views"""
+import json
+
 from django.urls import reverse
 import faker
 import pytest
 import rest_framework.status as status  # pylint: disable=useless-import-alias
+from rest_framework.renderers import JSONRenderer
 from rest_framework.test import APIClient
 
 from ecommerce.api import create_unfulfilled_order, make_reference_id
 from ecommerce.exceptions import EcommerceException
-from ecommerce.factories import LineFactory
-from ecommerce.models import Order, OrderAudit, Receipt
-
+from ecommerce.factories import (
+    CouponEligibilityFactory,
+    LineFactory,
+    ProductVersionFactory,
+)
+from ecommerce.models import CouponSelection, Order, OrderAudit, Receipt
+from ecommerce.serializers import BasketSerializer
+from users.factories import UserFactory
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_REFERENCE_PREFIX = "fake"
@@ -18,7 +26,23 @@ CYBERSOURCE_PROFILE_ID = "profile"
 CYBERSOURCE_SECURITY_KEY = "security"
 FAKE = faker.Factory.create()
 
+
 pytestmark = pytest.mark.django_db
+# pylint: disable=redefined-outer-name,unused-argument
+
+
+def render_json(serializer):
+    """
+    Convert serializer data to a JSON object.
+
+    Args:
+        serializer (Serializer): a serializer instance
+
+    Returns:
+        Object: a JSON object
+
+    """
+    return json.loads(JSONRenderer().render(serializer.data))
 
 
 @pytest.fixture(autouse=True)
@@ -301,3 +325,207 @@ def test_no_permission(basket_client, mocker):
     )
     resp = basket_client.post(reverse("order-fulfillment"), data={})
     assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_get_basket(basket_client, basket_and_coupons):
+    """Test the view that handles a get request for basket"""
+    basket = basket_and_coupons.basket
+
+    resp = basket_client.get(reverse("basket_api"))
+    program_data = resp.json()
+    assert program_data == render_json(BasketSerializer(instance=basket))
+
+
+def test_get_basket_wrong_user(basket_and_coupons):
+    """Test that the view returns a 404 on get if basket is not for user"""
+    client = APIClient()
+    client.force_authenticate(user=UserFactory.create())
+    resp = client.get(reverse("basket_api"))
+    assert resp.status_code == 404
+
+
+def test_patch_basket_wrong_user(basket_and_coupons):
+    """Test that the view returns a 404 on patch if basket is not for user"""
+    client = APIClient()
+    client.force_authenticate(user=UserFactory.create())
+    resp = client.patch(reverse("basket_api"))
+    assert resp.status_code == 404
+
+
+def test_patch_basket_multiple_products(basket_client, basket_and_coupons):
+    """ Test that an update with multiple products is rejected """
+    data = {"items": [{"id": 10}, {"id": 11}]}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    resp_data = resp.json()
+    assert "Basket cannot contain more than one item" in resp_data.get("errors")
+
+
+def test_patch_basket_multiple_coupons(basket_client, basket_and_coupons):
+    """ Test that an update with multiple coupons is rejected """
+    data = {"coupons": [{"code": "FOO"}, {"code": "BAR"}]}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    resp_data = resp.json()
+    assert "Basket cannot contain more than one coupon" in resp_data.get("errors")
+
+
+def test_patch_basket_update_coupon_valid(basket_client, basket_and_coupons):
+    """ Test that a valid coupon is successfully applied to the basket """
+    basket = basket_and_coupons.basket
+    original_coupon = basket_and_coupons.coupongroup_best.coupon
+    original_basket = BasketSerializer(basket).data
+    assert original_basket.get("coupons")[0].get("code") == original_coupon.coupon_code
+    new_code = basket_and_coupons.coupongroup_worst.coupon.coupon_code
+    data = {"coupons": [{"code": new_code}]}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    resp_data = resp.json()
+    assert resp_data.get("items") == original_basket.get("items")
+    assert CouponSelection.objects.get(basket=basket).coupon.coupon_code == new_code
+    assert len(resp_data.get("coupons")) == 1
+    assert resp_data.get("coupons")[0].get("code") == new_code
+
+
+def test_patch_basket_update_coupon_invalid(basket_client, basket_and_coupons):
+    """ Test that an invalid coupon is rejected"""
+    bad_code = "FAKE_CODE"
+    data = {"coupons": [{"code": bad_code}]}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    resp_data = resp.json()
+    assert "Coupon code {} is invalid".format(bad_code) in resp_data.get("errors")
+
+
+def test_patch_basket_clear_coupon_auto(basket_client, basket_and_coupons):
+    """ Test that an auto coupon is applied to basket when it exists and coupons cleared """
+    basket = basket_and_coupons.basket
+    auto_coupon = basket_and_coupons.coupongroup_worst.coupon
+    original_basket = render_json(BasketSerializer(instance=basket))
+
+    data = {"coupons": []}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    resp_data = resp.json()
+    assert resp_data.get("coupons") == [
+        {
+            "code": auto_coupon.coupon_code,
+            "amount": basket_and_coupons.coupongroup_worst.invoice_version.amount,
+            "targets": [basket_and_coupons.product_version.id],
+        }
+    ]
+    assert resp_data.get("items") == original_basket.get("items")
+    assert CouponSelection.objects.get(basket=basket).coupon == auto_coupon
+
+
+def test_patch_basket_clear_coupon_no_auto(basket_client, basket_and_coupons):
+    """ Test that all coupons are cleared from basket  """
+    basket = basket_and_coupons.basket
+
+    auto_coupon_invoice = basket_and_coupons.coupongroup_worst.invoice_version
+    auto_coupon_invoice.automatic = False
+    auto_coupon_invoice.save()
+
+    original_basket = BasketSerializer(instance=basket).data
+    assert len(original_basket.get("coupons")) == 1
+
+    data = {"coupons": []}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    resp_data = resp.json()
+    assert resp_data.get("coupons") == []
+    assert resp_data.get("items") == original_basket.get("items")
+    assert CouponSelection.objects.filter(basket=basket).first() is None
+
+
+def test_patch_basket_update_valid_product_valid_coupon(
+    basket_client, basket_and_coupons
+):
+    """ Test that product is updated and coupon remains the same """
+    basket = basket_and_coupons.basket
+    best_coupon = basket_and_coupons.coupongroup_best.coupon
+
+    product_version = ProductVersionFactory()
+    CouponEligibilityFactory(product=product_version.product, coupon=best_coupon)
+
+    data = {"items": [{"id": product_version.id}]}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    resp_data = resp.json()
+    assert resp_data.get("items")[0].get("id") == product_version.id
+    assert resp_data.get("coupons")[0].get("code") == best_coupon.coupon_code
+    assert CouponSelection.objects.get(basket=basket).coupon == best_coupon
+
+
+def test_patch_basket_update_valid_product_invalid_coupon_auto(
+    basket_client, basket_and_coupons
+):
+    """ Test that product is updated and invalid coupon replaced with auto coupon """
+    basket = basket_and_coupons.basket
+    auto_coupon = basket_and_coupons.coupongroup_worst.coupon
+
+    product_version = ProductVersionFactory()
+    CouponEligibilityFactory(product=product_version.product, coupon=auto_coupon)
+
+    data = {"items": [{"id": product_version.id}]}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    resp_data = resp.json()
+    assert resp_data.get("items")[0].get("id") == product_version.id
+    assert resp_data.get("coupons")[0].get("code") == auto_coupon.coupon_code
+    assert CouponSelection.objects.get(basket=basket).coupon == auto_coupon
+
+
+def test_patch_basket_update_valid_product_invalid_coupon_no_auto(
+    basket_client, basket_and_coupons
+):
+    """ Test that product is updated and invalid coupon removed """
+    basket = basket_and_coupons.basket
+    product_version = ProductVersionFactory()
+
+    data = {"items": [{"id": product_version.id}]}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    resp_data = resp.json()
+    assert resp_data.get("items")[0].get("id") == product_version.id
+    assert resp_data.get("coupons") == []
+    assert CouponSelection.objects.filter(basket=basket).first() is None
+
+
+def test_patch_basket_update_invalid_product(basket_client, basket_and_coupons):
+    """ Test that invalid product id is rejected with no changes to basket """
+    bad_id = 9999
+    data = {"items": [{"id": bad_id}]}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    resp_data = resp.json()
+    assert "Invalid product version id {}".format(bad_id) in resp_data.get("errors")
+
+
+@pytest.mark.parametrize("section", ["items", "coupons"])
+def test_patch_basket_update_invalid_data(basket_client, basket_and_coupons, section):
+    """ Test that invalid product data is rejected with no changes to basket """
+    data = dict()
+    data[section] = [{"foo": "bar"}]
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    resp_data = resp.json()
+    assert "Invalid request" in resp_data.get("errors")
+
+
+@pytest.mark.parametrize("data", [{"items": [], "coupons": []}, {"items": []}])
+def test_patch_basket_clear_product(basket_client, basket_and_coupons, data):
+    """ Test that both product and coupon are cleared  """
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    resp_data = resp.json()
+    assert resp_data.get("coupons") == []
+    assert resp_data.get("items") == []
+
+
+def test_patch_basket_nodata(basket_client, basket_and_coupons):
+    """ Test that a patch request with no items or coupons keys is invalidated  """
+    resp = basket_client.patch(reverse("basket_api"), type="json", data={})
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    resp_data = resp.json()
+    assert "Invalid request" in resp_data.get("errors")

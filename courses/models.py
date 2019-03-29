@@ -4,8 +4,9 @@ Course models
 import logging
 from django.db import models
 
-from mitxpro.models import TimestampedModel
 from courseware.utils import edx_redirect_url
+from mitxpro.models import TimestampedModel
+from mitxpro.utils import now_in_utc, first_matching_item
 
 log = logging.getLogger(__name__)
 
@@ -35,6 +36,19 @@ class Course(TimestampedModel):
     thumbnail = models.ImageField(null=True, blank=True)
     readable_id = models.CharField(null=True, max_length=255)
     live = models.BooleanField(default=False)
+
+    @property
+    def first_unexpired_run(self):
+        """
+        Gets the first unexpired CourseRun associated with this Course
+
+        Returns:
+            CourseRun or None: An unexpired course run
+        """
+        return first_matching_item(
+            self.courserun_set.all().order_by("start_date"),
+            lambda course_run: course_run.is_unexpired,
+        )
 
     class Meta:
         ordering = ("program", "title")
@@ -71,6 +85,44 @@ class CourseRun(TimestampedModel):
     enrollment_start = models.DateTimeField(null=True, blank=True, db_index=True)
     enrollment_end = models.DateTimeField(null=True, blank=True, db_index=True)
     live = models.BooleanField(default=False)
+
+    @property
+    def is_past(self):
+        """
+        Checks if the course run in the past
+
+        Returns:
+            boolean: True if course run has ended
+
+        """
+        if not self.end_date:
+            return False
+        return self.end_date < now_in_utc()
+
+    @property
+    def is_not_beyond_enrollment(self):
+        """
+        Checks if the course is not beyond its enrollment period
+
+
+        Returns:
+            boolean: True if enrollment period has not ended
+        """
+        now = now_in_utc()
+        return (
+            self.enrollment_end is None
+            and (self.end_date is None or self.end_date > now)
+        ) or (self.enrollment_end is not None and self.enrollment_end > now)
+
+    @property
+    def is_unexpired(self):
+        """
+        Checks if the course is not expired
+
+        Returns:
+            boolean: True if course is not expired
+        """
+        return not self.is_past and self.is_not_beyond_enrollment
 
     def __str__(self):
         return self.title
