@@ -32,6 +32,21 @@
     "AWS_STORAGE_BUCKET_NAME": {
       "description": "S3 Bucket name."
     },
+    "CYBERSOURCE_ACCESS_KEY": {
+      "description": "CyberSource Access Key"
+    },
+    "CYBERSOURCE_PROFILE_ID": {
+      "description": "CyberSource Profile ID"
+    },
+    "CYBERSOURCE_REFERENCE_PREFIX": {
+      "description": "a string prefix to identify the application in CyberSource transactions"
+    },
+    "CYBERSOURCE_SECURE_ACCEPTANCE_URL": {
+      "description": "CyberSource API endpoint"
+    },
+    "CYBERSOURCE_SECURITY_KEY": {
+      "description": "CyberSource API key"
+    },
     "GA_TRACKING_ID": {
       "description": "Google analytics tracking ID",
       "required": false
