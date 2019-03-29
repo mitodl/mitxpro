@@ -9,11 +9,17 @@ from django.db import transaction
 from django.shortcuts import reverse
 from oauth2_provider.models import Application, AccessToken
 from oauthlib.common import generate_token
+from edx_api.client import EdxApi
 
 from authentication import api as auth_api
-from courseware.exceptions import OpenEdXOAuth2Error, CoursewareUserCreateError
+from courseware.exceptions import (
+    OpenEdXOAuth2Error,
+    CoursewareUserCreateError,
+    NoEdxApiAuthError,
+)
 from courseware.models import CoursewareUser, OpenEdxApiAuth
 from courseware.constants import PLATFORM_EDX
+from courseware.utils import edx_url
 from mitxpro.utils import now_in_utc
 
 
@@ -26,11 +32,6 @@ OPENEDX_OAUTH2_ACCESS_TOKEN_PATH = "/oauth2/access_token"
 OPENEDX_OAUTH2_SCOPES = ["read", "write"]
 OPENEDX_OAUTH2_ACCESS_TOKEN_PARAM = "code"
 OPENEDX_OAUTH2_ACCESS_TOKEN_EXPIRY_MARGIN_SECONDS = 10
-
-
-def edx_url(path):
-    """Returns the full url to the provided path"""
-    return urljoin(settings.OPENEDX_API_BASE_URL, path)
 
 
 def create_edx_user(user):
@@ -205,4 +206,43 @@ def refresh_edx_api_auth(user):
             client_id=settings.OPENEDX_API_CLIENT_ID,
             client_secret=settings.OPENEDX_API_CLIENT_SECRET,
         ),
+    )
+
+
+def get_edx_api_client(user):
+    """
+    Gets an edx api client instance for the user
+
+    Args:
+        user (users.models.User): A user object
+
+    Returns:
+         EdxApi: edx api client instance
+    """
+    try:
+        auth = refresh_edx_api_auth(user)
+    except OpenEdxApiAuth.DoesNotExist:
+        raise NoEdxApiAuthError(
+            "{} does not have an associated OpenEdxApiAuth".format(str(user))
+        )
+    return EdxApi({"access_token": auth.access_token}, settings.OPENEDX_API_BASE_URL)
+
+
+def enroll_in_edx_course_run(user, course_run):
+    """
+    Enrolls a user in an edx course run
+
+    Args:
+        user (users.models.User): The user to enroll
+        course_run (CourseRun): The course run to enroll in
+
+    Returns:
+        edx_api.enrollments.models.Enrollment: The results of enrollment via the edx API client
+
+    Raises:
+        requests.exceptions.HTTPError: Raised if the underlying HTTP request fails
+    """
+    edx_client = get_edx_api_client(user)
+    return edx_client.enrollments.create_audit_student_enrollment(
+        course_run.courseware_id
     )

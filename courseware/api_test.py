@@ -11,7 +11,14 @@ from freezegun import freeze_time
 import responses
 from rest_framework import status
 
-from courseware.api import create_edx_user, create_edx_auth_token, refresh_edx_api_auth
+from courses.factories import CourseRunFactory
+from courseware.api import (
+    create_edx_user,
+    create_edx_auth_token,
+    refresh_edx_api_auth,
+    get_edx_api_client,
+    enroll_in_edx_course_run,
+)
 from courseware.constants import PLATFORM_EDX
 from courseware.exceptions import CoursewareUserCreateError
 from courseware.factories import OpenEdxApiAuthFactory
@@ -172,4 +179,28 @@ def test_refresh_edx_api_auth(settings):
     # plus expires_in, minutes 10 seconds
     assert auth.access_token_expires_on == now_in_utc() + timedelta(
         minutes=59, seconds=50
+    )
+
+
+def test_get_edx_api_client(mocker, settings, user):
+    """Tests that get_edx_api_client returns an EdxApi client"""
+    settings.OPENEDX_API_BASE_URL = "http://example.com"
+    auth = OpenEdxApiAuthFactory.build(user=user)
+    mock_refresh = mocker.patch(
+        "courseware.api.refresh_edx_api_auth", return_value=auth
+    )
+    client = get_edx_api_client(user)
+    assert client.credentials["access_token"] == auth.access_token
+    assert client.base_url == settings.OPENEDX_API_BASE_URL
+    mock_refresh.assert_called_with(user)
+
+
+def test_enroll_in_edx_course_run(mocker, user):
+    """Tests that enroll_in_edx_course_run uses the EdxApi client to enroll in a course run"""
+    mock_client = mocker.MagicMock()
+    mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+    course_run = CourseRunFactory.build()
+    enroll_in_edx_course_run(user, course_run)
+    mock_client.enrollments.create_audit_student_enrollment.assert_called_with(
+        course_run.courseware_id
     )

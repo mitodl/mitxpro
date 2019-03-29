@@ -25,7 +25,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.core import urls as wagtail_urls
 
 from mitxpro.views import index
-from courses.views import course_catalog
+from courses.views import CourseCatalogView
 
 
 urlpatterns = [
@@ -54,7 +54,7 @@ urlpatterns = [
         name="password-reset-confirm",
     ),
     path("terms-and-conditions/", index, name="terms-and-conditions"),
-    re_path(r"^$", course_catalog, name="mitxpro-index"),
+    re_path(r"^$", CourseCatalogView.as_view(), name="mitxpro-index"),
     # Wagtail
     re_path(r"^cms/", include(wagtailadmin_urls)),
     re_path(r"^documents/", include(wagtaildocs_urls)),
