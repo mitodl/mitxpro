@@ -14,8 +14,6 @@ from ecommerce.api import (
     create_unfulfilled_order,
     generate_cybersource_sa_payload,
     generate_cybersource_sa_signature,
-    latest_coupon_version,
-    latest_product_version,
     ISO_8601_FORMAT,
     make_reference_id,
     select_coupon,
@@ -25,6 +23,8 @@ from ecommerce.api import (
     get_product_price,
     get_product_version_price_with_discount,
     get_valid_coupon_versions,
+    latest_product_version,
+    latest_coupon_version,
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -293,6 +293,19 @@ def test_get_best_coupon_for_basket_no_valid_coupons(basket_and_coupons):
     )
 
 
+def test_latest_coupon_version(basket_and_coupons):
+    """
+    Verify that the most recent coupon version is returned
+    """
+    coupon = basket_and_coupons.coupongroup_best.coupon
+    assert (
+        latest_coupon_version(coupon)
+        == basket_and_coupons.coupongroup_best.coupon_version
+    )
+    new_version = CouponVersionFactory.create(coupon=coupon)
+    assert latest_coupon_version(coupon) == new_version
+
+
 def test_apply_coupon(basket_and_coupons):
     """
     Verify that a CouponSelection is created or updated
@@ -325,6 +338,16 @@ def test_redeem_coupon(basket_and_coupons):
     assert updated_redemption.order == new_redemption.order
     assert updated_redemption.coupon_version == worst_coupon_version
     assert updated_redemption.pk == new_redemption.pk
+
+
+def test_latest_product_version(basket_and_coupons):
+    """
+    Verify that the most recent product version is returned
+    """
+    product = basket_and_coupons.basket_item.product
+    assert latest_product_version(product) == basket_and_coupons.product_version
+    new_version = ProductVersionFactory.create(product=product)
+    assert latest_product_version(product) == new_version
 
 
 def test_get_product_price(basket_and_coupons):
@@ -453,21 +476,3 @@ def test_create_order(
         )
     else:
         assert CouponRedemption.objects.count() == 0
-
-
-def test_get_latest_coupon_version():
-    """
-    get_latest_coupon_version should return the most recent CouponVersion for a coupon
-    """
-    earlier = CouponVersionFactory.create()
-    later = CouponVersionFactory.create(coupon=earlier.coupon)
-    assert latest_coupon_version(earlier.coupon) == later
-
-
-def test_get_latest_product_version():
-    """
-    get_latest_product_version should return the most recent ProductVersion for a product
-    """
-    earlier = ProductVersionFactory.create()
-    later = ProductVersionFactory.create(product=earlier.product)
-    assert latest_product_version(earlier.product) == later
