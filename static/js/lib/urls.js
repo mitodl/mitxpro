@@ -19,5 +19,7 @@ export const routes = {
     begin:   "",
     confirm: "confirm/",
     details: "details/"
-  })
+  }),
+
+  checkout: "/checkout/"
 }

@@ -33,6 +33,7 @@
     "chai-as-promised": "^7.1.1",
     "codecov": "^2.2.0",
     "css-loader": "^0.28.4",
+    "decimal.js-light": "^2.5.0",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
     "eslint": "^5.15.2",

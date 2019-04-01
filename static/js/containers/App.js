@@ -12,6 +12,7 @@ import { routes } from "../lib/urls"
 
 import TopAppBar from "../components/TopAppBar"
 
+import CheckoutPage from "./pages/CheckoutPage"
 import HomePage from "./pages/HomePage"
 import LoginPages from "./pages/login/LoginPages"
 import RegisterPages from "./pages/register/RegisterPages"
@@ -49,6 +50,10 @@ class App extends React.Component<Props, void> {
           <Route
             path={urljoin(match.url, String(routes.register))}
             component={RegisterPages}
+          />
+          <Route
+            path={urljoin(match.url, routes.checkout)}
+            component={CheckoutPage}
           />
         </Switch>
       </div>

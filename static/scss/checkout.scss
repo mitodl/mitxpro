@@ -1,0 +1,14 @@
+.checkout-page {
+  margin: 100px;
+
+  .row {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .description {
+    margin-left: 10px;
+  }
+}
