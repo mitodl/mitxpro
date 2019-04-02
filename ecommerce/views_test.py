@@ -15,7 +15,7 @@ from ecommerce.factories import (
     LineFactory,
     ProductVersionFactory,
 )
-from ecommerce.models import CouponSelection, Order, OrderAudit, Receipt
+from ecommerce.models import Basket, CouponSelection, Order, OrderAudit, Receipt
 from ecommerce.serializers import BasketSerializer
 from users.factories import UserFactory
 
@@ -336,20 +336,27 @@ def test_get_basket(basket_client, basket_and_coupons):
     assert program_data == render_json(BasketSerializer(instance=basket))
 
 
-def test_get_basket_wrong_user(basket_and_coupons):
-    """Test that the view returns a 404 on get if basket is not for user"""
+def test_get_basket_new_user(basket_and_coupons):
+    """Test that the view creates a basket returns a 200 if a user doesn't already have a basket"""
     client = APIClient()
-    client.force_authenticate(user=UserFactory.create())
+    user = UserFactory.create()
+    client.force_authenticate(user=user)
+    assert Basket.objects.filter(user=user).exists() is False
     resp = client.get(reverse("basket_api"))
-    assert resp.status_code == 404
+    assert resp.status_code == 200
+    assert Basket.objects.count() == 2
+    assert Basket.objects.filter(user=user).exists() is True
 
 
-def test_patch_basket_wrong_user(basket_and_coupons):
-    """Test that the view returns a 404 on patch if basket is not for user"""
+def test_patch_basket_new_user(basket_and_coupons):
+    """Test that the view creates a basket and patches it basket does not already exist for user"""
     client = APIClient()
-    client.force_authenticate(user=UserFactory.create())
-    resp = client.patch(reverse("basket_api"))
-    assert resp.status_code == 404
+    user = UserFactory.create()
+    client.force_authenticate(user=user)
+    assert Basket.objects.filter(user=user).exists() is False
+    resp = client.patch(reverse("basket_api"), {"items": []})
+    assert resp.status_code == 200
+    assert Basket.objects.filter(user=user).exists() is True
 
 
 def test_patch_basket_multiple_products(basket_client, basket_and_coupons):

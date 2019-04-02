@@ -43,7 +43,6 @@ urlpatterns = [
     path("", include("courseware.urls")),
     path("", include("ecommerce.urls")),
     path("", include("users.urls")),
-    path("", include("ecommerce.urls")),
     # named routes mapped to the react app
     path("login/", index, name="login"),
     path("signup/", index, name="signup"),
