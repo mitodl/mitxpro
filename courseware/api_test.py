@@ -15,9 +15,10 @@ from courses.factories import CourseRunFactory
 from courseware.api import (
     create_edx_user,
     create_edx_auth_token,
-    refresh_edx_api_auth,
+    get_valid_edx_api_auth,
     get_edx_api_client,
     enroll_in_edx_course_run,
+    OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS,
 )
 from courseware.constants import PLATFORM_EDX
 from courseware.exceptions import CoursewareUserCreateError
@@ -148,11 +149,26 @@ def test_create_edx_auth_token(settings, user):
 
 @responses.activate
 @freeze_time("2019-03-24 11:50:36")
-def test_refresh_edx_api_auth(settings):
-    """Tests refresh_edx_api_auth makes the expected incantations to create a OpenEdxApiAuth"""
+def test_get_valid_edx_api_auth_unexpired():
+    """Tests get_valid_edx_api_auth returns the current record if it is valid long enough"""
+    auth = OpenEdxApiAuthFactory.create()
+
+    updated_auth = get_valid_edx_api_auth(auth.user)
+
+    assert updated_auth is not None
+    assert updated_auth.refresh_token == auth.refresh_token
+    assert updated_auth.access_token == auth.access_token
+    assert updated_auth.access_token_expires_on == auth.access_token_expires_on
+
+
+@responses.activate
+@freeze_time("2019-03-24 11:50:36")
+def test_get_valid_edx_api_auth_expired(settings):
+    """Tests get_valid_edx_api_auth fetches and updates the auth credentials if expired"""
     auth = OpenEdxApiAuthFactory.create(expired=True)
     refresh_token = "abc123"
     access_token = "def456"
+
     responses.add(
         responses.POST,
         f"{settings.OPENEDX_API_BASE_URL}/oauth2/access_token",
@@ -162,8 +178,9 @@ def test_refresh_edx_api_auth(settings):
         status=status.HTTP_200_OK,
     )
 
-    refresh_edx_api_auth(auth.user)
+    updated_auth = get_valid_edx_api_auth(auth.user)
 
+    assert updated_auth is not None
     assert len(responses.calls) == 1
     assert dict(parse_qsl(responses.calls[0].request.body)) == dict(
         refresh_token=auth.refresh_token,
@@ -172,12 +189,10 @@ def test_refresh_edx_api_auth(settings):
         client_secret=settings.OPENEDX_API_CLIENT_SECRET,
     )
 
-    auth.refresh_from_db()
-
-    assert auth.refresh_token == refresh_token
-    assert auth.access_token == access_token
+    assert updated_auth.refresh_token == refresh_token
+    assert updated_auth.access_token == access_token
     # plus expires_in, minutes 10 seconds
-    assert auth.access_token_expires_on == now_in_utc() + timedelta(
+    assert updated_auth.access_token_expires_on == now_in_utc() + timedelta(
         minutes=59, seconds=50
     )
 
@@ -187,12 +202,14 @@ def test_get_edx_api_client(mocker, settings, user):
     settings.OPENEDX_API_BASE_URL = "http://example.com"
     auth = OpenEdxApiAuthFactory.build(user=user)
     mock_refresh = mocker.patch(
-        "courseware.api.refresh_edx_api_auth", return_value=auth
+        "courseware.api.get_valid_edx_api_auth", return_value=auth
     )
     client = get_edx_api_client(user)
     assert client.credentials["access_token"] == auth.access_token
     assert client.base_url == settings.OPENEDX_API_BASE_URL
-    mock_refresh.assert_called_with(user)
+    mock_refresh.assert_called_with(
+        user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS
+    )
 
 
 def test_enroll_in_edx_course_run(mocker, user):

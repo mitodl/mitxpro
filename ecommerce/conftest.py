@@ -19,9 +19,7 @@ from ecommerce.factories import (
 )
 
 CouponGroup = namedtuple(
-    "CouponGroup",
-    ["coupon", "coupon_version", "payment", "payment_version"],
-    verbose=True,
+    "CouponGroup", ["coupon", "coupon_version", "payment", "payment_version"]
 )
 
 

@@ -33,6 +33,9 @@ OPENEDX_OAUTH2_SCOPES = ["read", "write"]
 OPENEDX_OAUTH2_ACCESS_TOKEN_PARAM = "code"
 OPENEDX_OAUTH2_ACCESS_TOKEN_EXPIRY_MARGIN_SECONDS = 10
 
+OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS = 60
+OPENEDX_AUTH_MAX_TTL_IN_SECONDS = 60 * 60
+
 
 def create_edx_user(user):
     """Makes a request to create an equivalent user in Open edX"""
@@ -171,6 +174,7 @@ def _create_tokens_and_update_auth(auth, params):
 
     result = resp.json()
 
+    # artificially reduce the expiry window since to cover
     expires_in = (
         result["expires_in"] - OPENEDX_OAUTH2_ACCESS_TOKEN_EXPIRY_MARGIN_SECONDS
     )
@@ -182,21 +186,51 @@ def _create_tokens_and_update_auth(auth, params):
     return auth
 
 
-@transaction.atomic
-def refresh_edx_api_auth(user):
+def get_valid_edx_api_auth(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS):
     """
-    Updates the api tokens for the given user
+    Returns a valid api auth, possibly refreshing the tokens
 
     Args:
-        user (users.models.User): the user to update auth for
+        user (users.models.User): the user to get an auth for
+        ttl_in_seconds (int): how long the auth credentials need to remain
+                              unexpired without needing a refresh (in seconds)
 
     Returns:
         auth:
             updated OpenEdxApiAuth
     """
+    assert (
+        ttl_in_seconds < OPENEDX_AUTH_MAX_TTL_IN_SECONDS
+    ), f"ttl_in_seconds must be less than {OPENEDX_AUTH_MAX_TTL_IN_SECONDS}"
 
-    auth = OpenEdxApiAuth.objects.select_for_update().get(user=user)
+    expires_after = now_in_utc() + timedelta(seconds=ttl_in_seconds)
+    auth = OpenEdxApiAuth.objects.filter(
+        user=user, access_token_expires_on__gt=expires_after
+    ).first()
+    if not auth:
+        # if the auth was no longer valid, try to update it
+        with transaction.atomic():
+            auth = OpenEdxApiAuth.objects.select_for_update().get(user=user)
+            # check again once we have an exclusive lock, something else may have refreshed it for us
+            if auth.access_token_expires_on > expires_after:
+                return auth
+            # it's still invalid, so refresh it now
+            return _refresh_edx_api_auth(auth)
+    # got a valid auth on first attempt
+    return auth
 
+
+def _refresh_edx_api_auth(auth):
+    """
+    Updates the api tokens for the given auth
+
+    Args:
+        auth (courseware.models.OpenEdxApiAuth): the auth to update
+
+    Returns:
+        auth:
+            updated OpenEdxApiAuth
+    """
     # Note: this is subject to thundering herd problems, we should address this at some point
     return _create_tokens_and_update_auth(
         auth,
@@ -209,18 +243,19 @@ def refresh_edx_api_auth(user):
     )
 
 
-def get_edx_api_client(user):
+def get_edx_api_client(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS):
     """
     Gets an edx api client instance for the user
 
     Args:
         user (users.models.User): A user object
+        ttl_in_seconds (int): number of seconds the auth credentials for this client should still be valid
 
     Returns:
          EdxApi: edx api client instance
     """
     try:
-        auth = refresh_edx_api_auth(user)
+        auth = get_valid_edx_api_auth(user, ttl_in_seconds=ttl_in_seconds)
     except OpenEdxApiAuth.DoesNotExist:
         raise NoEdxApiAuthError(
             "{} does not have an associated OpenEdxApiAuth".format(str(user))
