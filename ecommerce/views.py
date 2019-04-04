@@ -6,7 +6,6 @@ from django.db import transaction
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
@@ -154,14 +153,14 @@ class BasketView(APIView):
 
     def get(self, request, *args, **kwargs):
         """ View a basket """
-        basket = get_object_or_404(Basket, user=request.user)
+        basket, _ = Basket.objects.get_or_create(user=request.user)
         return Response(
             status=status.HTTP_200_OK, data=BasketSerializer(instance=basket).data
         )
 
     def patch(self, request, *args, **kwargs):
         """ Update a basket """
-        basket = get_object_or_404(Basket, user=request.user)
+        basket, _ = Basket.objects.get_or_create(user=request.user)
         items = request.data.get("items")
         coupons = request.data.get("coupons")
 

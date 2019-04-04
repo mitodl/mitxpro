@@ -1,7 +1,8 @@
 """ ecommerce serializers """
+from django.templatetags.static import static
 from rest_framework import serializers
 
-from courses.models import Course
+from courses.models import Course, CourseRun
 from courses.serializers import CourseRunSerializer
 from ecommerce import models
 from ecommerce.api import latest_product_version, latest_coupon_version
@@ -12,6 +13,7 @@ class ProductVersionSerializer(serializers.ModelSerializer):
 
     type = serializers.SerializerMethodField()
     course_runs = serializers.SerializerMethodField()
+    thumbnail_url = serializers.SerializerMethodField()
 
     def get_type(self, instance):
         """ Return the product version type """
@@ -33,8 +35,21 @@ class ProductVersionSerializer(serializers.ModelSerializer):
             CourseRunSerializer(instance=course_run).data for course_run in course_runs
         ]
 
+    def get_thumbnail_url(self, instance):
+        """Return the thumbnail for the course or program"""
+        content_object = instance.product.content_object
+        if isinstance(content_object, CourseRun):
+            thumbnail = content_object.course.thumbnail
+        else:
+            thumbnail = content_object.thumbnail
+
+        if thumbnail:
+            return thumbnail.url
+        else:
+            return static("images/mit-dome.png")
+
     class Meta:
-        fields = ["id", "price", "description", "type", "course_runs"]
+        fields = ["id", "price", "description", "type", "course_runs", "thumbnail_url"]
         model = models.ProductVersion
 
 
