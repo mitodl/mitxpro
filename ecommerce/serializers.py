@@ -3,20 +3,22 @@ import pytz
 from django.templatetags.static import static
 from rest_framework import serializers
 from rest_framework.fields import IntegerField
+from rest_framework.validators import UniqueValidator
 
 from courses.models import Course, CourseRun
 from courses.serializers import CourseRunSerializer
 from ecommerce import models
 from ecommerce.api import latest_product_version, latest_coupon_version
-from ecommerce.models import CouponPayment, CouponInvoiceVersion
+from ecommerce.models import CouponPayment, CouponInvoiceVersion, CouponInvoice, Coupon
 
 
 class DateTimeTzField(serializers.DateTimeField):
     """ Custom timezone-aware DateTime serializer field """
 
     def to_representation(self, value):
-        value = pytz.UTC.localize(value)
-        return super(DateTimeTzField, self).to_representation(value)
+        return super(DateTimeTzField, self).to_representation(
+            value.replace(tzinfo=pytz.UTC)
+        )
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -150,14 +152,6 @@ class BasketSerializer(serializers.ModelSerializer):
         model = models.Basket
 
 
-class CouponSerializer(serializers.ModelSerializer):
-    """ Serializer for coupons """
-
-    class Meta:
-        fields = "__all__"
-        model = models.Coupon
-
-
 class CouponInvoiceSerializer(serializers.ModelSerializer):
     """ Serializer for coupon invoices """
 
@@ -176,28 +170,12 @@ class CouponInvoiceVersionSerializer(serializers.ModelSerializer):
         model = models.CouponInvoiceVersion
 
 
-class CouponVersionSerializer(serializers.ModelSerializer):
-    """ Serializer for coupon versions """
-
-    coupon = CouponSerializer()
-    invoice_version = CouponInvoiceVersionSerializer()
-
-    class Meta:
-        fields = "__all__"
-        model = models.CouponVersion
-
-
-class CouponEligibilitySerializer(serializers.ModelSerializer):
-    """ Serializer for coupon eligibilities """
-
-    coupon = CouponSerializer()
-    product = ProductSerializer()
-
-
 class BaseCouponSerializer(serializers.Serializer):
     """ Base serializer for coupon creation data """
 
-    tag = serializers.CharField()
+    tag = serializers.CharField(
+        validators=[UniqueValidator(queryset=CouponInvoice.objects.all())]
+    )
     amount = serializers.DecimalField(decimal_places=2, max_digits=20)
     automatic = serializers.BooleanField(default=False)
     activation_date = DateTimeTzField()
@@ -224,7 +202,9 @@ class SingleUseCouponSerializer(BaseCouponSerializer):
 class PromoCouponSerializer(BaseCouponSerializer):
     """ Serializer for creating promo coupons """
 
-    coupon_code = serializers.CharField(max_length=50)
+    coupon_code = serializers.CharField(
+        max_length=50, validators=[UniqueValidator(queryset=Coupon.objects.all())]
+    )
     payment_id = serializers.CharField(allow_null=True)
 
 
