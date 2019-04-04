@@ -9,6 +9,14 @@ from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 
 
+class Company(TimestampedModel):
+    """
+    A company that purchases bulk seats/coupons
+    """
+
+    name = models.CharField(max_length=512, unique=True)
+
+
 class Product(TimestampedModel):
     """
     Representation of a purchasable product. There is a GenericForeignKey to a CourseRun, Course, or Program.
@@ -277,6 +285,31 @@ class CouponRedemption(TimestampedModel):
     def __str__(self):
         """Description of CouponRedemption"""
         return f"CouponRedemption for order {self.order}, coupon version {self.coupon_version}"
+
+
+class CouponPayment(TimestampedModel):
+    """
+    The company and payment details for a coupon.
+    """
+
+    PAYMENT_CC = "credit_card"
+    PAYMENT_PO = "purchase_order"
+    PAYMENT_TYPES = [PAYMENT_CC, PAYMENT_PO]
+    invoice_version = models.ForeignKey(CouponInvoiceVersion, on_delete=models.PROTECT)
+    company = models.ForeignKey(
+        Company, on_delete=models.PROTECT, null=True, blank=True
+    )
+    payment_type = models.CharField(
+        max_length=128,
+        choices=[(paytype, paytype) for paytype in PAYMENT_TYPES],
+        null=True,
+        blank=True,
+    )
+    payment_id = models.CharField(max_length=256, null=True, blank=True)
+
+    def __str__(self):
+        """Description of CouponPayment"""
+        return f"CouponPayment for coupon invoice version {self.invoice_version}"
 
 
 class Receipt(TimestampedModel):

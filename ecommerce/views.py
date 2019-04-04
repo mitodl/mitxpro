@@ -1,15 +1,18 @@
 """Views for ecommerce"""
 import logging
+from uuid import uuid4
 
 from django.conf import settings
 from django.db import transaction
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 
 from ecommerce.api import (
     create_unfulfilled_order,
@@ -24,12 +27,38 @@ from ecommerce.api import (
 )
 from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
 from ecommerce.exceptions import EcommerceException
-from ecommerce.models import Basket, CouponSelection, ProductVersion, Order, Receipt
+from ecommerce.models import (
+    Basket,
+    CouponSelection,
+    ProductVersion,
+    Order,
+    Receipt,
+    CouponInvoice,
+    CouponInvoiceVersion,
+    Coupon,
+    CouponVersion,
+    CouponEligibility,
+    Product,
+    CouponPayment,
+    Company,
+)
 from ecommerce.permissions import IsSignedByCyberSource
-from ecommerce.serializers import BasketSerializer
-
+from ecommerce.serializers import (
+    BasketSerializer,
+    SingleUseCouponSerializer,
+    PromoCouponSerializer,
+    CouponOrderSerializer,
+    ProductSerializer,
+)
 
 log = logging.getLogger(__name__)
+
+
+class ProductViewSet(ModelViewSet):
+    """API view set for Products"""
+
+    serializer_class = ProductSerializer
+    queryset = Product.objects.all()
 
 
 class CheckoutView(APIView):
@@ -199,6 +228,82 @@ class BasketView(APIView):
             status=status.HTTP_400_BAD_REQUEST,
             data=dict(BasketSerializer(instance=basket).data, **{"errors": error}),
         )
+
+
+class CouponView(APIView):
+    """
+    Admin view for creating coupon(s)
+    """
+
+    permission_classes = (IsAdminUser,)
+    authentication_classes = (SessionAuthentication,)
+
+    def post(self, request, *args, **kwargs):
+        """ Create coupon(s) and related objects """
+        # Determine what kind of coupon this is.
+        if request.data.get("coupon_type") == CouponInvoiceVersion.SINGLE_USE:
+            coupon_serializer = SingleUseCouponSerializer(data=request.data)
+        else:
+            coupon_serializer = PromoCouponSerializer(data=request.data)
+        if coupon_serializer.is_valid():
+            coupon_data = coupon_serializer.validated_data
+            try:
+                with transaction.atomic():
+                    invoice = CouponInvoice.objects.create(
+                        tag=coupon_serializer.validated_data.get("tag")
+                    )
+                    invoice_version = CouponInvoiceVersion.objects.create(
+                        invoice=invoice,
+                        automatic=coupon_data.get("automatic", False),
+                        activation_date=coupon_data.get("activation_date"),
+                        expiration_date=coupon_data.get("expiration_date"),
+                        amount=coupon_data.get("amount"),
+                        num_coupon_codes=coupon_data.get("num_coupon_codes"),
+                        coupon_type=coupon_data.get("coupon_type"),
+                        max_redemptions=coupon_data.get("max_redemptions", 1),
+                        max_redemptions_per_user=1,
+                    )
+                    for coupon in range(coupon_data.get("num_coupon_codes")):
+                        coupon = Coupon.objects.create(
+                            coupon_code=coupon_data.get("coupon_code", uuid4().hex),
+                            invoice=invoice,
+                        )
+                        CouponVersion.objects.create(
+                            coupon=coupon, invoice_version=invoice_version
+                        )
+                        for product_id in coupon_data.get("products"):
+                            CouponEligibility.objects.create(
+                                coupon=coupon, product_id=product_id
+                            )
+                    company, _ = Company.objects.get_or_create(
+                        name=coupon_data.get("company")
+                    )
+                    coupon_payment = CouponPayment.objects.create(
+                        invoice_version=invoice_version,
+                        company=company,
+                        payment_type=coupon_data.get("payment_type"),
+                        order_number=coupon_data.get("payment_id"),
+                    )
+            except Exception as e:  # pylint:disable=broad-except
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data={"errors": [{e.__class__.__name__: str(e)}]},
+                )
+            return Response(
+                status=status.HTTP_200_OK,
+                data=CouponOrderSerializer(instance=coupon_payment).data,
+            )
+        else:
+            # Return error code
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={
+                    "errors": [
+                        {key: str(error[0])}
+                        for (key, error) in coupon_serializer.errors.items()
+                    ]
+                },
+            )
 
 
 def _update_items(basket, items):
