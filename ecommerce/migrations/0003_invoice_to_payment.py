@@ -6,88 +6,160 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('ecommerce', '0002_coupon_additional_fields'),
-    ]
+    dependencies = [("ecommerce", "0002_coupon_additional_fields")]
 
     operations = [
         migrations.CreateModel(
-            name='Company',
+            name="Company",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=512, unique=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=512, unique=True)),
             ],
-            options={
-                'abstract': False,
-            },
+            options={"abstract": False},
         ),
         migrations.CreateModel(
-            name='CouponPayment',
+            name="CouponPayment",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=256, unique=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=256, unique=True)),
             ],
-            options={
-                'abstract': False,
-            },
+            options={"abstract": False},
         ),
         migrations.CreateModel(
-            name='CouponPaymentVersion',
+            name="CouponPaymentVersion",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('tag', models.CharField(blank=True, max_length=256, null=True)),
-                ('automatic', models.BooleanField(default=False)),
-                ('coupon_type', models.CharField(choices=[('promo', 'promo'), ('single-use', 'single-use')], max_length=30)),
-                ('num_coupon_codes', models.PositiveIntegerField()),
-                ('max_redemptions', models.PositiveIntegerField()),
-                ('max_redemptions_per_user', models.PositiveIntegerField()),
-                ('amount', models.DecimalField(decimal_places=2, help_text='Percent discount for a coupon. Between 0 and 1.', max_digits=20)),
-                ('expiration_date', models.DateTimeField(blank=True, help_text='If set, the coupons will not be redeemable after this time', null=True)),
-                ('activation_date', models.DateTimeField(blank=True, help_text='If set, the coupons will not be redeemable before this time', null=True)),
-                ('payment_type', models.CharField(blank=True, choices=[('credit_card', 'credit_card'), ('purchase_order', 'purchase_order'), ('maketing', 'maketing'), ('sales', 'sales')], max_length=128, null=True)),
-                ('payment_transaction', models.CharField(blank=True, max_length=256, null=True)),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='ecommerce.Company')),
-                ('payment', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='ecommerce.CouponPayment')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("tag", models.CharField(blank=True, max_length=256, null=True)),
+                ("automatic", models.BooleanField(default=False)),
+                (
+                    "coupon_type",
+                    models.CharField(
+                        choices=[("promo", "promo"), ("single-use", "single-use")],
+                        max_length=30,
+                    ),
+                ),
+                ("num_coupon_codes", models.PositiveIntegerField()),
+                ("max_redemptions", models.PositiveIntegerField()),
+                ("max_redemptions_per_user", models.PositiveIntegerField()),
+                (
+                    "amount",
+                    models.DecimalField(
+                        decimal_places=2,
+                        help_text="Percent discount for a coupon. Between 0 and 1.",
+                        max_digits=20,
+                    ),
+                ),
+                (
+                    "expiration_date",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="If set, the coupons will not be redeemable after this time",
+                        null=True,
+                    ),
+                ),
+                (
+                    "activation_date",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="If set, the coupons will not be redeemable before this time",
+                        null=True,
+                    ),
+                ),
+                (
+                    "payment_type",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("credit_card", "credit_card"),
+                            ("purchase_order", "purchase_order"),
+                            ("maketing", "maketing"),
+                            ("sales", "sales"),
+                        ],
+                        max_length=128,
+                        null=True,
+                    ),
+                ),
+                (
+                    "payment_transaction",
+                    models.CharField(blank=True, max_length=256, null=True),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="ecommerce.Company",
+                    ),
+                ),
+                (
+                    "payment",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="ecommerce.CouponPayment",
+                    ),
+                ),
             ],
         ),
-        migrations.RemoveField(
-            model_name='couponinvoiceversion',
-            name='invoice',
-        ),
-        migrations.RemoveField(
-            model_name='coupon',
-            name='invoice',
-        ),
-        migrations.RemoveField(
-            model_name='couponversion',
-            name='invoice_version',
-        ),
-        migrations.DeleteModel(
-            name='CouponInvoice',
-        ),
-        migrations.DeleteModel(
-            name='CouponInvoiceVersion',
-        ),
+        migrations.RemoveField(model_name="couponinvoiceversion", name="invoice"),
+        migrations.RemoveField(model_name="coupon", name="invoice"),
+        migrations.RemoveField(model_name="couponversion", name="invoice_version"),
+        migrations.DeleteModel(name="CouponInvoice"),
+        migrations.DeleteModel(name="CouponInvoiceVersion"),
         migrations.AddField(
-            model_name='coupon',
-            name='payment',
-            field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.PROTECT, to='ecommerce.CouponPayment'),
+            model_name="coupon",
+            name="payment",
+            field=models.ForeignKey(
+                default=None,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="ecommerce.CouponPayment",
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='couponversion',
-            name='payment_version',
-            field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.PROTECT, to='ecommerce.CouponPaymentVersion'),
+            model_name="couponversion",
+            name="payment_version",
+            field=models.ForeignKey(
+                default=None,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="ecommerce.CouponPaymentVersion",
+            ),
             preserve_default=False,
         ),
         migrations.AddIndex(
-            model_name='couponpaymentversion',
-            index=models.Index(fields=['created_on'], name='ecommerce_c_created_0948e4_idx'),
+            model_name="couponpaymentversion",
+            index=models.Index(
+                fields=["created_on"], name="ecommerce_c_created_0948e4_idx"
+            ),
         ),
     ]
