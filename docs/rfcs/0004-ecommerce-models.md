@@ -47,9 +47,9 @@ is also a `quantity` field.
 A basket may have at most one coupon, but for future flexibility this is a many to many relation.
 See `CouponRedemption` below.
 
-#### CouponInvoice
+#### CouponPayment
 
-A `CouponInvoice` represents the information provided by an admin when they create coupons
+A `CouponPayment` represents the information provided by an admin when they create coupons
 through the admin interface. For example:
  - type of coupon (single use coupon code or multi use promo code)
  - number of coupon codes to generate
@@ -61,26 +61,26 @@ through the admin interface. For example:
  - percent off
  - products the coupon can be used with (link via `CouponEligibility` to `Product`)
 
-`CouponInvoice` instances should not be edited because they are the source of truth for discounts.
+`CouponPayment` instances should not be edited because they are the source of truth for discounts.
 If an admin user needs to make changes they should
 change `enabled` to `false` for each `Coupon` and then create new coupons with the changes.
 
-#### CouponInvoiceVersion
+#### CouponPaymentVersion
 
-A `CouponInvoiceVersion` is an audit table for `CouponInvoice`. This is also used as the source
+A `CouponPaymentVersion` is an audit table for `CouponPayment`. This is also used as the source
 of truth for coupon information since this table will not be edited.
 
-TODO: Store data in JSONField or duplicate fields like in `CouponInvoice`?
+TODO: Store data in JSONField or duplicate fields like in `CouponPayment`?
 
 #### Coupon
 
-A `Coupon` represents a coupon code and has a foreign key to the `CouponInvoice`.
+A `Coupon` represents a coupon code and has a foreign key to the `CouponPayment`.
 A single `Coupon` could be used by many people
-and redeemed many times, depending on the redemption limitations described in `CouponInvoice`.
+and redeemed many times, depending on the redemption limitations described in `CouponPayment`.
 
 #### CouponVersion
 
-This is an audit table for `Coupon`. It has a foreign key to `CouponInvoiceVersion`. There won't
+This is an audit table for `Coupon`. It has a foreign key to `CouponPaymentVersion`. There won't
 be a JSONField storing data since there is just the coupon code field and the foreign key.
 
 #### CouponEligibility
@@ -125,8 +125,8 @@ If this is missing or invalid the `Receipt` should still be created for debuggin
 
 ## Workflow 
 
-An admin creates 100 coupons through the admin interface. A `CouponInvoice` is created for this info
-as well as a `CouponInvoiceVersion`. 100 `Coupon` instances are created with links to `CouponInvoice`.
+An admin creates 100 coupons through the admin interface. A `CouponPayment` is created for this info
+as well as a `CouponPaymentVersion`. 100 `Coupon` instances are created with links to `CouponPayment`.
 100 `CouponVersion`s are also created, one for each `Coupon`.
 
 Later, a user clicks on a button to purchase a program or course. This sends a message to our REST API to

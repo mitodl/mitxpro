@@ -77,21 +77,21 @@ class LineFactory(DjangoModelFactory):
         model = models.Line
 
 
-class CouponInvoiceFactory(DjangoModelFactory):
-    """Factory for CouponInvoice"""
+class CouponPaymentFactory(DjangoModelFactory):
+    """Factory for CouponPayment"""
 
-    tag = fuzzy.FuzzyText()
+    name = fuzzy.FuzzyText()
 
     class Meta:
-        model = models.CouponInvoice
+        model = models.CouponPayment
 
 
-class CouponInvoiceVersionFactory(DjangoModelFactory):
-    """Factory for CouponInvoiceVersion"""
+class CouponPaymentVersionFactory(DjangoModelFactory):
+    """Factory for CouponPaymentVersion"""
 
-    invoice = SubFactory(CouponInvoiceFactory)
-
-    coupon_type = fuzzy.FuzzyChoice(models.CouponInvoiceVersion.COUPON_TYPES)
+    payment = SubFactory(CouponPaymentFactory)
+    tag = fuzzy.FuzzyText()
+    coupon_type = fuzzy.FuzzyChoice(models.CouponPaymentVersion.COUPON_TYPES)
     num_coupon_codes = fuzzy.FuzzyInteger(1, 10)
     max_redemptions = fuzzy.FuzzyInteger(1, 10)
     max_redemptions_per_user = fuzzy.FuzzyInteger(1, 3)
@@ -104,14 +104,14 @@ class CouponInvoiceVersionFactory(DjangoModelFactory):
     )
 
     class Meta:
-        model = models.CouponInvoiceVersion
+        model = models.CouponPaymentVersion
 
 
 class CouponFactory(DjangoModelFactory):
     """Factory for Coupon"""
 
     coupon_code = fuzzy.FuzzyText()
-    invoice = SubFactory(CouponInvoiceFactory)
+    payment = SubFactory(CouponPaymentFactory)
 
     class Meta:
         model = models.Coupon
@@ -121,7 +121,7 @@ class CouponVersionFactory(DjangoModelFactory):
     """Factory for CouponVersion"""
 
     coupon = SubFactory(CouponFactory)
-    invoice_version = SubFactory(CouponInvoiceVersionFactory)
+    payment_version = SubFactory(CouponPaymentVersionFactory)
 
     class Meta:
         model = models.CouponVersion

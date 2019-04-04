@@ -1,9 +1,12 @@
 """Views for ecommerce"""
+import csv
 import logging
 from uuid import uuid4
 
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.http import HttpResponse
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -33,13 +36,12 @@ from ecommerce.models import (
     ProductVersion,
     Order,
     Receipt,
-    CouponInvoice,
-    CouponInvoiceVersion,
+    CouponPayment,
+    CouponPaymentVersion,
     Coupon,
     CouponVersion,
     CouponEligibility,
     Product,
-    CouponPayment,
     Company,
 )
 from ecommerce.permissions import IsSignedByCyberSource
@@ -47,8 +49,8 @@ from ecommerce.serializers import (
     BasketSerializer,
     SingleUseCouponSerializer,
     PromoCouponSerializer,
-    CouponOrderSerializer,
     ProductSerializer,
+    CouponPaymentVersionSerializer,
 )
 
 log = logging.getLogger(__name__)
@@ -241,7 +243,7 @@ class CouponView(APIView):
     def post(self, request, *args, **kwargs):
         """ Create coupon(s) and related objects """
         # Determine what kind of coupon this is.
-        if request.data.get("coupon_type") == CouponInvoiceVersion.SINGLE_USE:
+        if request.data.get("coupon_type") == CouponPaymentVersion.SINGLE_USE:
             coupon_serializer = SingleUseCouponSerializer(data=request.data)
         else:
             coupon_serializer = PromoCouponSerializer(data=request.data)
@@ -249,11 +251,16 @@ class CouponView(APIView):
             coupon_data = coupon_serializer.validated_data
             try:
                 with transaction.atomic():
-                    invoice = CouponInvoice.objects.create(
-                        tag=coupon_serializer.validated_data.get("tag")
+                    company, _ = Company.objects.get_or_create(
+                        name=coupon_data.get("company")
                     )
-                    invoice_version = CouponInvoiceVersion.objects.create(
-                        invoice=invoice,
+                    payment = CouponPayment.objects.create(
+                        name=coupon_serializer.validated_data.get("name")
+                    )
+                    payment_version = CouponPaymentVersion.objects.create(
+                        payment=payment,
+                        company=company,
+                        tag=coupon_data.get("tag"),
                         automatic=coupon_data.get("automatic", False),
                         activation_date=coupon_data.get("activation_date"),
                         expiration_date=coupon_data.get("expiration_date"),
@@ -262,28 +269,21 @@ class CouponView(APIView):
                         coupon_type=coupon_data.get("coupon_type"),
                         max_redemptions=coupon_data.get("max_redemptions", 1),
                         max_redemptions_per_user=1,
+                        payment_type=coupon_data.get("payment_type"),
+                        payment_transaction=coupon_data.get("payment_transaction"),
                     )
                     for coupon in range(coupon_data.get("num_coupon_codes")):
                         coupon = Coupon.objects.create(
                             coupon_code=coupon_data.get("coupon_code", uuid4().hex),
-                            invoice=invoice,
+                            payment=payment,
                         )
                         CouponVersion.objects.create(
-                            coupon=coupon, invoice_version=invoice_version
+                            coupon=coupon, payment_version=payment_version
                         )
                         for product_id in coupon_data.get("products"):
                             CouponEligibility.objects.create(
                                 coupon=coupon, product_id=product_id
                             )
-                    company, _ = Company.objects.get_or_create(
-                        name=coupon_data.get("company")
-                    )
-                    coupon_payment = CouponPayment.objects.create(
-                        invoice_version=invoice_version,
-                        company=company,
-                        payment_type=coupon_data.get("payment_type"),
-                        payment_id=coupon_data.get("payment_id"),
-                    )
             except Exception as e:  # pylint:disable=broad-except
                 return Response(
                     status=status.HTTP_400_BAD_REQUEST,
@@ -291,7 +291,7 @@ class CouponView(APIView):
                 )
             return Response(
                 status=status.HTTP_200_OK,
-                data=CouponOrderSerializer(instance=coupon_payment).data,
+                data=CouponPaymentVersionSerializer(instance=payment_version).data,
             )
         else:
             # Return error code
@@ -390,3 +390,22 @@ def _update_coupons(basket, product_version, coupons):
                 product_version.product, basket.user, auto_only=True
             )
     return coupon_version
+
+
+def coupon_code_csv_view(request, version_id):
+    """View for returning a csv file of coupon codes"""
+    if not (request.user and request.user.is_staff):
+        raise PermissionDenied
+    coupon_payment_version = get_object_or_404(
+        CouponPaymentVersion, id=version_id
+    )
+    response = HttpResponse(content_type="text/csv")
+    response[
+        "Content-Disposition"
+    ] = 'attachment; filename="coupon_codes_{}.csv"'.format(version_id)
+    writer = csv.writer(response)
+    for coupon_code in coupon_payment_version.couponversion_set.values_list(
+        "coupon__coupon_code", flat=True
+    ):
+        writer.writerow([coupon_code])
+    return response

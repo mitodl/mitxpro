@@ -165,7 +165,7 @@ def test_make_reference_id():
 @pytest.mark.parametrize("auto_only", [True, False])
 def test_get_valid_coupon_versions(basket_and_coupons, auto_only):
     """
-    Verify that the correct valid CouponInvoiceVersions are returned for a list of coupons
+    Verify that the correct valid CouponPaymentVersions are returned for a list of coupons
     """
     best_versions = get_valid_coupon_versions(
         basket_and_coupons.basket_item.product,
@@ -180,13 +180,13 @@ def test_get_valid_coupon_versions(basket_and_coupons, auto_only):
 
 def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):
     """
-    Verify that expired or future CouponInvoiceVersions are not returned for a list of coupons
+    Verify that expired or future CouponPaymentVersions are not returned for a list of coupons
     """
     today = now_in_utc()
-    civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.invoice_version
+    civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.payment_version
     civ_worst.activation_date = today + timedelta(days=1)
     civ_worst.save()
-    civ_best = basket_and_coupons.coupongroup_best.coupon_version.invoice_version
+    civ_best = basket_and_coupons.coupongroup_best.coupon_version.payment_version
     civ_best.expiration_date = today - timedelta(days=1)
     civ_best.save()
 
@@ -200,9 +200,9 @@ def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):
 @pytest.mark.parametrize("order_status", [Order.FULFILLED, Order.FAILED])
 def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons, order_status):
     """
-    Verify that CouponInvoiceVersions that have exceeded redemption limits are not returned
+    Verify that CouponPaymentVersions that have exceeded redemption limits are not returned
     """
-    civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.invoice_version
+    civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.payment_version
     civ_worst.max_redemptions = 1
     civ_worst.save()
     CouponRedemptionFactory(
@@ -210,7 +210,7 @@ def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons, order_statu
         order=OrderFactory(status=order_status),
     )
 
-    civ_best = basket_and_coupons.coupongroup_best.coupon_version.invoice_version
+    civ_best = basket_and_coupons.coupongroup_best.coupon_version.payment_version
     civ_best.max_redemptions_per_user = 1
     civ_best.save()
     CouponRedemptionFactory(
@@ -236,7 +236,7 @@ def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons, order_statu
 @pytest.mark.parametrize("auto_only", [True, False])
 def test_get_best_coupon_for_basket(basket_and_coupons, auto_only):
     """
-    Verify that the CouponInvoiceVersion with the best price is returned for a bucket based on auto filter
+    Verify that the CouponPaymentVersion with the best price is returned for a bucket based on auto filter
     """
     best_cv = best_coupon_for_basket(
         basket_and_coupons.basket_item.basket, auto_only=auto_only
@@ -250,7 +250,7 @@ def test_get_best_coupon_for_basket(basket_and_coupons, auto_only):
 @pytest.mark.parametrize("code", ["WORST", None])
 def test_get_best_coupon_for_basket_by_code(basket_and_coupons, code):
     """
-    Verify that the CouponInvoiceVersion with the best price is returned for a bucket based on coupon code
+    Verify that the CouponPaymentVersion with the best price is returned for a bucket based on coupon code
     """
     best_cv = best_coupon_for_basket(
         basket_and_coupons.basket_item.basket, auto_only=False, code=code
@@ -282,7 +282,7 @@ def test_get_best_coupon_for_basket_no_valid_coupons(basket_and_coupons):
     Verify that best_coupon_version() returns None if the product coupons are invalid
     """
     today = now_in_utc()
-    civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.invoice_version
+    civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.payment_version
     civ_worst.activation_date = today + timedelta(days=1)
     civ_worst.save()
 
@@ -369,7 +369,7 @@ def test_get_product_version_price_with_discount(has_coupon, basket_and_coupons)
     product_price = product_version.price
 
     coupon_version = basket_and_coupons.coupongroup_best.coupon_version
-    discount = coupon_version.invoice_version.amount
+    discount = coupon_version.payment_version.amount
     price = get_product_version_price_with_discount(
         coupon_version=coupon_version if has_coupon else None,
         product_version=product_version,

@@ -8,6 +8,7 @@ from ecommerce.views import (
     OrderFulfillmentView,
     CouponView,
     ProductViewSet,
+    coupon_code_csv_view,
 )
 
 router = SimpleRouter()
@@ -23,4 +24,9 @@ urlpatterns = [
     ),
     url(r"^api/basket/$", BasketView.as_view(), name="basket_api"),
     url(r"^api/coupons/$", CouponView.as_view(), name="coupon_api"),
+    url(
+        r"^couponpayment/codes/(?P<version_id>[0-9]+)",
+        coupon_code_csv_view,
+        name="coupons_csv",
+    ),
 ]

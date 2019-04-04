@@ -9,8 +9,8 @@ from ecommerce.factories import (
     BasketItemFactory,
     CouponEligibilityFactory,
     CouponFactory,
-    CouponInvoiceFactory,
-    CouponInvoiceVersionFactory,
+    CouponPaymentFactory,
+    CouponPaymentVersionFactory,
     CouponVersionFactory,
     ProductVersionFactory,
     CouponSelectionFactory,
@@ -18,7 +18,7 @@ from ecommerce.factories import (
 
 CouponGroup = namedtuple(
     "CouponGroup",
-    ["coupon", "coupon_version", "invoice", "invoice_version"],
+    ["coupon", "coupon_version", "payment", "payment_version"],
     verbose=True,
 )
 
@@ -36,28 +36,28 @@ def basket_and_coupons():
         product=basket_item.product, price=Decimal(25.00)
     )
 
-    invoice_worst = CouponInvoiceFactory()
-    invoice_best = CouponInvoiceFactory()
-    coupon_worst = CouponFactory(invoice=invoice_worst, coupon_code="WORST")
-    coupon_best = CouponFactory(invoice=invoice_best, coupon_code="BEST")
+    payment_worst = CouponPaymentFactory()
+    payment_best = CouponPaymentFactory()
+    coupon_worst = CouponFactory(payment=payment_worst, coupon_code="WORST")
+    coupon_best = CouponFactory(payment=payment_best, coupon_code="BEST")
 
-    # Coupon invoice for worst coupon, with lowest discount
-    civ_worst = CouponInvoiceVersionFactory(
-        invoice=invoice_worst, amount=Decimal(0.1), automatic=True
+    # Coupon payment for worst coupon, with lowest discount
+    civ_worst = CouponPaymentVersionFactory(
+        payment=payment_worst, amount=Decimal(0.1), automatic=True
     )
-    # Coupon invoice for best coupon, with highest discount
-    civ_best_old = CouponInvoiceVersionFactory(
-        invoice=invoice_best, amount=Decimal(0.5)
+    # Coupon payment for best coupon, with highest discount
+    civ_best_old = CouponPaymentVersionFactory(
+        payment=payment_best, amount=Decimal(0.5)
     )
-    # Coupon invoice for best coupon, more recent than previous so takes precedence
-    civ_best = CouponInvoiceVersionFactory(invoice=invoice_best, amount=Decimal(0.4))
+    # Coupon payment for best coupon, more recent than previous so takes precedence
+    civ_best = CouponPaymentVersionFactory(payment=payment_best, amount=Decimal(0.4))
 
     # Coupon version for worst coupon
-    cv_worst = CouponVersionFactory(invoice_version=civ_worst, coupon=coupon_worst)
+    cv_worst = CouponVersionFactory(payment_version=civ_worst, coupon=coupon_worst)
     # Coupon version for best coupon
-    CouponVersionFactory(invoice_version=civ_best_old, coupon=coupon_best)
+    CouponVersionFactory(payment_version=civ_best_old, coupon=coupon_best)
     # Most recent coupon version for best coupon
-    cv_best = CouponVersionFactory(invoice_version=civ_best, coupon=coupon_best)
+    cv_best = CouponVersionFactory(payment_version=civ_best, coupon=coupon_best)
 
     # Both best and worst coupons eligible for the product
     CouponEligibilityFactory(coupon=coupon_best, product=basket_item.product)
@@ -66,8 +66,8 @@ def basket_and_coupons():
     # Apply one of the coupons to the basket
     CouponSelectionFactory.create(basket=basket_item.basket, coupon=coupon_best)
 
-    coupongroup_worst = CouponGroup(coupon_worst, cv_worst, invoice_worst, civ_worst)
-    coupongroup_best = CouponGroup(coupon_best, cv_best, invoice_best, civ_best)
+    coupongroup_worst = CouponGroup(coupon_worst, cv_worst, payment_worst, civ_worst)
+    coupongroup_best = CouponGroup(coupon_best, cv_best, payment_best, civ_best)
 
     return SimpleNamespace(
         basket=basket_item.basket,

@@ -9,7 +9,7 @@ from courses.models import Course, CourseRun
 from courses.serializers import CourseRunSerializer
 from ecommerce import models
 from ecommerce.api import latest_product_version, latest_coupon_version
-from ecommerce.models import CouponPayment, CouponInvoiceVersion, CouponInvoice, Coupon
+from ecommerce.models import CouponPaymentVersion, CouponPayment, Coupon
 
 
 class DateTimeTzField(serializers.DateTimeField):
@@ -100,7 +100,7 @@ class CouponSelectionSerializer(serializers.ModelSerializer):
 
     def get_amount(self, instance):
         """ Get the coupon discount amount """
-        return latest_coupon_version(instance.coupon).invoice_version.amount
+        return latest_coupon_version(instance.coupon).payment_version.amount
 
     def get_targets(self, instance):
         """ Get the product version id(s) in the basket the coupon applies to"""
@@ -152,30 +152,32 @@ class BasketSerializer(serializers.ModelSerializer):
         model = models.Basket
 
 
-class CouponInvoiceSerializer(serializers.ModelSerializer):
-    """ Serializer for coupon invoices """
+class CouponPaymentSerializer(serializers.ModelSerializer):
+    """ Serializer for coupon payments """
 
     class Meta:
         fields = "__all__"
-        model = models.CouponInvoice
+        model = models.CouponPayment
 
 
-class CouponInvoiceVersionSerializer(serializers.ModelSerializer):
-    """ Serializer for coupon invoice versions """
+class CouponPaymentVersionSerializer(serializers.ModelSerializer):
+    """ Serializer for coupon payment versions """
 
-    invoice = CouponInvoiceSerializer()
+    payment = CouponPaymentSerializer()
 
     class Meta:
         fields = "__all__"
-        model = models.CouponInvoiceVersion
+        model = models.CouponPaymentVersion
 
 
 class BaseCouponSerializer(serializers.Serializer):
     """ Base serializer for coupon creation data """
 
-    tag = serializers.CharField(
-        validators=[UniqueValidator(queryset=CouponInvoice.objects.all())]
+    name = serializers.CharField(
+        max_length=256,
+        validators=[UniqueValidator(queryset=CouponPayment.objects.all())],
     )
+    tag = serializers.CharField(max_length=256, allow_null=True)
     amount = serializers.DecimalField(decimal_places=2, max_digits=20)
     automatic = serializers.BooleanField(default=False)
     activation_date = DateTimeTzField()
@@ -184,19 +186,19 @@ class BaseCouponSerializer(serializers.Serializer):
     max_redemptions = serializers.IntegerField(default=1)
     max_redemptions_per_user = serializers.IntegerField(default=1)
     coupon_type = serializers.ChoiceField(
-        choices=[(_type, _type) for _type in CouponInvoiceVersion.COUPON_TYPES]
+        choices=[(_type, _type) for _type in CouponPaymentVersion.COUPON_TYPES]
     )
     num_coupon_codes = serializers.IntegerField(default=1)
     company = serializers.CharField(max_length=512, allow_null=False)
     payment_type = serializers.ChoiceField(
-        choices=[(_type, _type) for _type in CouponPayment.PAYMENT_TYPES]
+        choices=[(_type, _type) for _type in CouponPaymentVersion.PAYMENT_TYPES]
     )
 
 
 class SingleUseCouponSerializer(BaseCouponSerializer):
     """ Serializer for creating single-use coupons """
 
-    payment_id = serializers.CharField(allow_null=False)
+    payment_transaction = serializers.CharField(allow_null=False)
 
 
 class PromoCouponSerializer(BaseCouponSerializer):
@@ -205,14 +207,4 @@ class PromoCouponSerializer(BaseCouponSerializer):
     coupon_code = serializers.CharField(
         max_length=50, validators=[UniqueValidator(queryset=Coupon.objects.all())]
     )
-    payment_id = serializers.CharField(allow_null=True)
-
-
-class CouponOrderSerializer(serializers.ModelSerializer):
-    """ Serializer for coupon orders """
-
-    invoice_version = CouponInvoiceVersionSerializer()
-
-    class Meta:
-        model = models.CouponPayment
-        fields = "__all__"
+    payment_transaction = serializers.CharField(allow_null=True)
