@@ -1,4 +1,5 @@
 """ ecommerce serializers """
+import pytz
 from django.templatetags.static import static
 from rest_framework import serializers
 from rest_framework.fields import IntegerField
@@ -8,6 +9,14 @@ from courses.serializers import CourseRunSerializer
 from ecommerce import models
 from ecommerce.api import latest_product_version, latest_coupon_version
 from ecommerce.models import CouponPayment, CouponInvoiceVersion
+
+
+class DateTimeTzField(serializers.DateTimeField):
+    """ Custom timezone-aware DateTime serializer field """
+
+    def to_representation(self, value):
+        value = pytz.UTC.localize(value)
+        return super(DateTimeTzField, self).to_representation(value)
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -191,11 +200,11 @@ class BaseCouponSerializer(serializers.Serializer):
     tag = serializers.CharField()
     amount = serializers.DecimalField(decimal_places=2, max_digits=20)
     automatic = serializers.BooleanField(default=False)
-    activation_date = serializers.DateTimeField()
-    expiration_date = serializers.DateTimeField()
+    activation_date = DateTimeTzField()
+    expiration_date = DateTimeTzField()
     products = serializers.ListField(child=IntegerField())
-    max_redemptions = serializers.IntegerField()
-    max_redemptions_per_user = serializers.IntegerField()
+    max_redemptions = serializers.IntegerField(default=1)
+    max_redemptions_per_user = serializers.IntegerField(default=1)
     coupon_type = serializers.ChoiceField(
         choices=[(_type, _type) for _type in CouponInvoiceVersion.COUPON_TYPES]
     )

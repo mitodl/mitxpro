@@ -282,7 +282,7 @@ class CouponView(APIView):
                         invoice_version=invoice_version,
                         company=company,
                         payment_type=coupon_data.get("payment_type"),
-                        order_number=coupon_data.get("payment_id"),
+                        payment_id=coupon_data.get("payment_id"),
                     )
             except Exception as e:  # pylint:disable=broad-except
                 return Response(
