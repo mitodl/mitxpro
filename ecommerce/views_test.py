@@ -17,7 +17,6 @@ from ecommerce.factories import (
 )
 from ecommerce.models import Basket, CouponSelection, Order, OrderAudit, Receipt
 from ecommerce.serializers import BasketSerializer
-from users.factories import UserFactory
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_REFERENCE_PREFIX = "fake"
