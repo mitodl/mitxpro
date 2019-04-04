@@ -336,25 +336,19 @@ def test_get_basket(basket_client, basket_and_coupons):
     assert program_data == render_json(BasketSerializer(instance=basket))
 
 
-def test_get_basket_new_user(basket_and_coupons):
+def test_get_basket_new_user(basket_and_coupons, user, user_drf_client):
     """Test that the view creates a basket returns a 200 if a user doesn't already have a basket"""
-    client = APIClient()
-    user = UserFactory.create()
-    client.force_authenticate(user=user)
     assert Basket.objects.filter(user=user).exists() is False
-    resp = client.get(reverse("basket_api"))
+    resp = user_drf_client.get(reverse("basket_api"))
     assert resp.status_code == 200
     assert Basket.objects.count() == 2
     assert Basket.objects.filter(user=user).exists() is True
 
 
-def test_patch_basket_new_user(basket_and_coupons):
+def test_patch_basket_new_user(basket_and_coupons, user, user_drf_client):
     """Test that the view creates a basket and patches it basket does not already exist for user"""
-    client = APIClient()
-    user = UserFactory.create()
-    client.force_authenticate(user=user)
     assert Basket.objects.filter(user=user).exists() is False
-    resp = client.patch(reverse("basket_api"), {"items": []})
+    resp = user_drf_client.patch(reverse("basket_api"), {"items": []})
     assert resp.status_code == 200
     assert Basket.objects.filter(user=user).exists() is True
 

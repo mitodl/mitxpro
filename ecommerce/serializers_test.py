@@ -30,7 +30,7 @@ def test_serialize_basket_product_version_course_run():
         "price": str(round(product_version.price, 2)),
         "type": product_version.product.content_type.model,
         "course_runs": [CourseRunSerializer(course_run).data],
-        "thumbnail": "/static/images/mit-dome.png",
+        "thumbnail_url": "/static/images/mit-dome.png",
     }
 
 
@@ -47,7 +47,7 @@ def test_serialize_basket_product_version_course():
         "price": str(round(product_version.price, 2)),
         "type": product_version.product.content_type.model,
         "course_runs": [CourseRunSerializer(course.first_unexpired_run).data],
-        "thumbnail": "/static/images/mit-dome.png",
+        "thumbnail_url": "/static/images/mit-dome.png",
     }
 
 
@@ -68,7 +68,7 @@ def test_serialize_basket_product_version_program():
         "course_runs": [
             CourseRunSerializer(course.first_unexpired_run).data for course in courses
         ],
-        "thumbnail": "/static/images/mit-dome.png",
+        "thumbnail_url": "/static/images/mit-dome.png",
     }
 
 
@@ -78,7 +78,7 @@ def test_basket_thumbnail_courserun(basket_and_coupons):
     run = CourseRunFactory.create(course__thumbnail=image)
     product_version = ProductVersionFactory.create(product__content_object=run)
     data = ProductVersionSerializer(product_version).data
-    assert data["thumbnail"] == "/media/abcde"
+    assert data["thumbnail_url"] == "/media/abcde"
 
 
 def test_basket_thumbnail_course(basket_and_coupons):
@@ -87,7 +87,7 @@ def test_basket_thumbnail_course(basket_and_coupons):
     run = CourseFactory.create(thumbnail=image)
     product_version = ProductVersionFactory.create(product__content_object=run)
     data = ProductVersionSerializer(product_version).data
-    assert data["thumbnail"] == "/media/abcde"
+    assert data["thumbnail_url"] == "/media/abcde"
 
 
 def test_basket_thumbnail_program(basket_and_coupons):
@@ -96,7 +96,7 @@ def test_basket_thumbnail_program(basket_and_coupons):
     run = ProgramFactory.create(thumbnail=image)
     product_version = ProductVersionFactory.create(product__content_object=run)
     data = ProductVersionSerializer(product_version).data
-    assert data["thumbnail"] == "/media/abcde"
+    assert data["thumbnail_url"] == "/media/abcde"
 
 
 def test_serialize_basket_coupon_selection(basket_and_coupons):
