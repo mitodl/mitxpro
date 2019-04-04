@@ -185,7 +185,9 @@ class CouponPaymentVersion(TimestampedModel):
 
     PAYMENT_CC = "credit_card"
     PAYMENT_PO = "purchase_order"
-    PAYMENT_TYPES = [PAYMENT_CC, PAYMENT_PO]
+    PAYMENT_MKT = "maketing"
+    PAYMENT_SALE = "sales"
+    PAYMENT_TYPES = [PAYMENT_CC, PAYMENT_PO, PAYMENT_MKT, PAYMENT_SALE]
 
     tag = models.CharField(max_length=256, null=True, blank=True)
     payment = models.ForeignKey(CouponPayment, on_delete=models.PROTECT)

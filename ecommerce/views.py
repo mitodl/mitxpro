@@ -1,21 +1,15 @@
 """Views for ecommerce"""
-import csv
 import logging
-from uuid import uuid4
 
 from django.conf import settings
-from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.http import HttpResponse
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
 
 from ecommerce.api import (
     create_unfulfilled_order,
@@ -30,37 +24,12 @@ from ecommerce.api import (
 )
 from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
 from ecommerce.exceptions import EcommerceException
-from ecommerce.models import (
-    Basket,
-    CouponSelection,
-    ProductVersion,
-    Order,
-    Receipt,
-    CouponPayment,
-    CouponPaymentVersion,
-    Coupon,
-    CouponVersion,
-    CouponEligibility,
-    Product,
-    Company,
-)
+from ecommerce.models import Basket, CouponSelection, ProductVersion, Order, Receipt
 from ecommerce.permissions import IsSignedByCyberSource
-from ecommerce.serializers import (
-    BasketSerializer,
-    SingleUseCouponSerializer,
-    PromoCouponSerializer,
-    ProductSerializer,
-    CouponPaymentVersionSerializer,
-)
+from ecommerce.serializers import BasketSerializer
+
 
 log = logging.getLogger(__name__)
-
-
-class ProductViewSet(ModelViewSet):
-    """API view set for Products"""
-
-    serializer_class = ProductSerializer
-    queryset = Product.objects.all()
 
 
 class CheckoutView(APIView):
@@ -232,80 +201,6 @@ class BasketView(APIView):
         )
 
 
-class CouponView(APIView):
-    """
-    Admin view for creating coupon(s)
-    """
-
-    permission_classes = (IsAdminUser,)
-    authentication_classes = (SessionAuthentication,)
-
-    def post(self, request, *args, **kwargs):
-        """ Create coupon(s) and related objects """
-        # Determine what kind of coupon this is.
-        if request.data.get("coupon_type") == CouponPaymentVersion.SINGLE_USE:
-            coupon_serializer = SingleUseCouponSerializer(data=request.data)
-        else:
-            coupon_serializer = PromoCouponSerializer(data=request.data)
-        if coupon_serializer.is_valid():
-            coupon_data = coupon_serializer.validated_data
-            try:
-                with transaction.atomic():
-                    company, _ = Company.objects.get_or_create(
-                        name=coupon_data.get("company")
-                    )
-                    payment = CouponPayment.objects.create(
-                        name=coupon_serializer.validated_data.get("name")
-                    )
-                    payment_version = CouponPaymentVersion.objects.create(
-                        payment=payment,
-                        company=company,
-                        tag=coupon_data.get("tag"),
-                        automatic=coupon_data.get("automatic", False),
-                        activation_date=coupon_data.get("activation_date"),
-                        expiration_date=coupon_data.get("expiration_date"),
-                        amount=coupon_data.get("amount"),
-                        num_coupon_codes=coupon_data.get("num_coupon_codes"),
-                        coupon_type=coupon_data.get("coupon_type"),
-                        max_redemptions=coupon_data.get("max_redemptions", 1),
-                        max_redemptions_per_user=1,
-                        payment_type=coupon_data.get("payment_type"),
-                        payment_transaction=coupon_data.get("payment_transaction"),
-                    )
-                    for coupon in range(coupon_data.get("num_coupon_codes")):
-                        coupon = Coupon.objects.create(
-                            coupon_code=coupon_data.get("coupon_code", uuid4().hex),
-                            payment=payment,
-                        )
-                        CouponVersion.objects.create(
-                            coupon=coupon, payment_version=payment_version
-                        )
-                        for product_id in coupon_data.get("products"):
-                            CouponEligibility.objects.create(
-                                coupon=coupon, product_id=product_id
-                            )
-            except Exception as e:  # pylint:disable=broad-except
-                return Response(
-                    status=status.HTTP_400_BAD_REQUEST,
-                    data={"errors": [{e.__class__.__name__: str(e)}]},
-                )
-            return Response(
-                status=status.HTTP_200_OK,
-                data=CouponPaymentVersionSerializer(instance=payment_version).data,
-            )
-        else:
-            # Return error code
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={
-                    "errors": [
-                        {key: str(error[0])}
-                        for (key, error) in coupon_serializer.errors.items()
-                    ]
-                },
-            )
-
-
 def _update_items(basket, items):
     """
     Helper function to determine if the basket item should be updated, removed, or kept as is.
@@ -390,22 +285,3 @@ def _update_coupons(basket, product_version, coupons):
                 product_version.product, basket.user, auto_only=True
             )
     return coupon_version
-
-
-def coupon_code_csv_view(request, version_id):
-    """View for returning a csv file of coupon codes"""
-    if not (request.user and request.user.is_staff):
-        raise PermissionDenied
-    coupon_payment_version = get_object_or_404(
-        CouponPaymentVersion, id=version_id
-    )
-    response = HttpResponse(content_type="text/csv")
-    response[
-        "Content-Disposition"
-    ] = 'attachment; filename="coupon_codes_{}.csv"'.format(version_id)
-    writer = csv.writer(response)
-    for coupon_code in coupon_payment_version.couponversion_set.values_list(
-        "coupon__coupon_code", flat=True
-    ):
-        writer.writerow([coupon_code])
-    return response
