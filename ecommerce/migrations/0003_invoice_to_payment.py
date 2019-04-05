@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
                 choices=[
                     ("credit_card", "credit_card"),
                     ("purchase_order", "purchase_order"),
-                    ("maketing", "maketing"),
+                    ("marketing", "marketing"),
                     ("sales", "sales"),
                 ],
                 max_length=128,

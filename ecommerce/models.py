@@ -16,6 +16,10 @@ class Company(TimestampedModel):
 
     name = models.CharField(max_length=512, unique=True)
 
+    def __str__(self):
+        """Description for Company"""
+        return f"Company {self.name}"
+
 
 class Product(TimestampedModel):
     """
@@ -185,7 +189,7 @@ class CouponPaymentVersion(TimestampedModel):
 
     PAYMENT_CC = "credit_card"
     PAYMENT_PO = "purchase_order"
-    PAYMENT_MKT = "maketing"
+    PAYMENT_MKT = "marketing"
     PAYMENT_SALE = "sales"
     PAYMENT_TYPES = [PAYMENT_CC, PAYMENT_PO, PAYMENT_MKT, PAYMENT_SALE]
 
