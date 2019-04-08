@@ -561,7 +561,8 @@ def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     assert model_version.payment_transaction == data.get("payment_transaction")
     assert Company.objects.filter(name=data.get("company")).first() is not None
     assert (
-        CouponEligibility.objects.filter(product__in=data.get("products")).count() == 15
+        CouponEligibility.objects.filter(product__in=data.get("product_ids")).count()
+        == 15
     )
 
 
@@ -581,15 +582,20 @@ def test_post_promo_coupon(admin_drf_client, promo_coupon_json):
     )
     assert Company.objects.filter(name=data.get("company")).first() is not None
     assert (
-        CouponEligibility.objects.filter(product__in=data.get("products")).count() == 3
+        CouponEligibility.objects.filter(product__in=data.get("product_ids")).count()
+        == 3
     )
 
 
 @pytest.mark.parametrize(
     "attribute,bad_value,error",
     [
-        ["products", [9999], "Product with id 9999 does not exist"],
-        ["products", [], "At least one product must be selected"],
+        [
+            "product_ids",
+            [9998, 9999],
+            "Product with id(s) 9998,9999 could not be found",
+        ],
+        ["product_ids", [], "At least one product must be selected"],
         ["name", "AlreadyExists", "This field must be unique."],
         ["coupon_code", "AlreadyExists", "This field must be unique."],
     ],
@@ -664,9 +670,9 @@ def test_coupon_csv_view(admin_client, admin_drf_client, single_use_coupon_json)
     )
 
 
-def test_coupon_csv_view_forbidden(client):
+def test_coupon_csv_view_forbidden(user_client):
     """ Test that a regular user cannot access a csv download URL """
-    response = client.get(reverse("coupons_csv", kwargs={"version_id": 1}))
+    response = user_client.get(reverse("coupons_csv", kwargs={"version_id": 1}))
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 

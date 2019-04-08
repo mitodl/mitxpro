@@ -1,7 +1,6 @@
 """Views for ecommerce"""
 import csv
 import logging
-from uuid import uuid4
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -36,13 +35,8 @@ from ecommerce.models import (
     ProductVersion,
     Order,
     Receipt,
-    CouponPayment,
     CouponPaymentVersion,
-    Coupon,
-    CouponVersion,
-    CouponEligibility,
     Product,
-    Company,
 )
 from ecommerce.permissions import IsSignedByCyberSource
 from ecommerce.serializers import (
@@ -248,44 +242,7 @@ class CouponView(APIView):
         else:
             coupon_serializer = PromoCouponSerializer(data=request.data)
         if coupon_serializer.is_valid():
-            coupon_data = coupon_serializer.validated_data
-            with transaction.atomic():
-                if coupon_data.get("company"):
-                    company, _ = Company.objects.get_or_create(
-                        name=coupon_data.get("company")
-                    )
-                else:
-                    company = None
-                payment = CouponPayment.objects.create(
-                    name=coupon_serializer.validated_data.get("name")
-                )
-                payment_version = CouponPaymentVersion.objects.create(
-                    payment=payment,
-                    company=company,
-                    tag=coupon_data.get("tag"),
-                    automatic=coupon_data.get("automatic", False),
-                    activation_date=coupon_data.get("activation_date"),
-                    expiration_date=coupon_data.get("expiration_date"),
-                    amount=coupon_data.get("amount"),
-                    num_coupon_codes=coupon_data.get("num_coupon_codes"),
-                    coupon_type=coupon_data.get("coupon_type"),
-                    max_redemptions=coupon_data.get("max_redemptions", 1),
-                    max_redemptions_per_user=1,
-                    payment_type=coupon_data.get("payment_type"),
-                    payment_transaction=coupon_data.get("payment_transaction"),
-                )
-                for coupon in range(coupon_data.get("num_coupon_codes")):
-                    coupon = Coupon.objects.create(
-                        coupon_code=coupon_data.get("coupon_code", uuid4().hex),
-                        payment=payment,
-                    )
-                    CouponVersion.objects.create(
-                        coupon=coupon, payment_version=payment_version
-                    )
-                    for product_id in coupon_data.get("products"):
-                        CouponEligibility.objects.create(
-                            coupon=coupon, product_id=product_id
-                        )
+            payment_version = coupon_serializer.save()
             return Response(
                 status=status.HTTP_200_OK,
                 data=CouponPaymentVersionSerializer(instance=payment_version).data,

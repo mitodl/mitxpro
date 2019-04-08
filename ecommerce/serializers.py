@@ -1,25 +1,26 @@
 """ ecommerce serializers """
-import pytz
+from uuid import uuid4
+
+from django.db import transaction
 from django.templatetags.static import static
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import IntegerField
+from rest_framework.fields import IntegerField, DateTimeField
 from rest_framework.validators import UniqueValidator
 
 from courses.models import Course, CourseRun
 from courses.serializers import CourseRunSerializer
 from ecommerce import models
 from ecommerce.api import latest_product_version, latest_coupon_version
-from ecommerce.models import CouponPaymentVersion, CouponPayment, Coupon, Product
-
-
-class DateTimeTzField(serializers.DateTimeField):
-    """ Custom timezone-aware DateTime serializer field """
-
-    def to_representation(self, value):
-        return super(DateTimeTzField, self).to_representation(
-            value.replace(tzinfo=pytz.UTC)
-        )
+from ecommerce.models import (
+    CouponPaymentVersion,
+    CouponPayment,
+    Coupon,
+    Product,
+    Company,
+    CouponVersion,
+    CouponEligibility,
+)
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -181,27 +182,71 @@ class BaseCouponSerializer(serializers.Serializer):
     tag = serializers.CharField(max_length=256, allow_null=True, required=False)
     amount = serializers.DecimalField(decimal_places=2, max_digits=20)
     automatic = serializers.BooleanField(default=False)
-    activation_date = DateTimeTzField()
-    expiration_date = DateTimeTzField()
-    products = serializers.ListField(child=IntegerField())
+    activation_date = DateTimeField()
+    expiration_date = DateTimeField()
+    product_ids = serializers.ListField(child=IntegerField())
     max_redemptions = serializers.IntegerField(default=1)
     max_redemptions_per_user = serializers.IntegerField(default=1)
     coupon_type = serializers.ChoiceField(
-        choices=[(_type, _type) for _type in CouponPaymentVersion.COUPON_TYPES]
+        choices=set(
+            zip(CouponPaymentVersion.COUPON_TYPES, CouponPaymentVersion.COUPON_TYPES)
+        )
     )
     num_coupon_codes = serializers.IntegerField(default=1)
     company = serializers.CharField(max_length=512, allow_null=True, required=False)
 
-    def validate_products(self, value):
-        """ Determine if the products field is valid """
-        if not value:
+    def validate_product_ids(self, value):
+        """ Determine if the product_ids field is valid """
+        if not value or len(value) == 0:
             raise ValidationError("At least one product must be selected")
-        for product_id in value:
-            if Product.objects.filter(id=product_id).exists() is False:
-                raise ValidationError(
-                    "Product with id {} does not exist".format(product_id)
+        products_missing = set(value) - set(
+            Product.objects.filter(id__in=value).values_list("id", flat=True)
+        )
+        if products_missing:
+            raise ValidationError(
+                "Product with id(s) {} could not be found".format(
+                    ",".join(str(pid) for pid in products_missing)
                 )
+            )
         return value
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            if validated_data.get("company"):
+                company, _ = Company.objects.get_or_create(
+                    name=validated_data.get("company")
+                )
+            else:
+                company = None
+            payment = CouponPayment.objects.create(name=validated_data.get("name"))
+            payment_version = CouponPaymentVersion.objects.create(
+                payment=payment,
+                company=company,
+                tag=validated_data.get("tag"),
+                automatic=validated_data.get("automatic", False),
+                activation_date=validated_data.get("activation_date"),
+                expiration_date=validated_data.get("expiration_date"),
+                amount=validated_data.get("amount"),
+                num_coupon_codes=validated_data.get("num_coupon_codes"),
+                coupon_type=validated_data.get("coupon_type"),
+                max_redemptions=validated_data.get("max_redemptions", 1),
+                max_redemptions_per_user=1,
+                payment_type=validated_data.get("payment_type"),
+                payment_transaction=validated_data.get("payment_transaction"),
+            )
+            for coupon in range(validated_data.get("num_coupon_codes")):
+                coupon = Coupon.objects.create(
+                    coupon_code=validated_data.get("coupon_code", uuid4().hex),
+                    payment=payment,
+                )
+                CouponVersion.objects.create(
+                    coupon=coupon, payment_version=payment_version
+                )
+                for product_id in validated_data.get("product_ids"):
+                    CouponEligibility.objects.create(
+                        coupon=coupon, product_id=product_id
+                    )
+            return payment_version
 
 
 class SingleUseCouponSerializer(BaseCouponSerializer):

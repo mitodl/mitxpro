@@ -102,7 +102,7 @@ def promo_coupon_json(coupon_product_ids):
         "company": "Test Corp",
         "payment_type": "purchase_order",
         "payment_transaction": "fake_transaction_num",
-        "products": coupon_product_ids,
+        "product_ids": coupon_product_ids,
     }
 
 
@@ -121,5 +121,5 @@ def single_use_coupon_json(coupon_product_ids):
         "company": "Test Corp",
         "payment_type": "credit_card",
         "payment_transaction": "fake_transaction_num",
-        "products": coupon_product_ids,
+        "product_ids": coupon_product_ids,
     }

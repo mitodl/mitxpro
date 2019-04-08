@@ -144,7 +144,7 @@ def test_serialize_coupon_single_use(
         "company": "Acme Corp.",
         "payment_type": "credit_card",
         "payment_transaction": ("fake123" if has_payment_transaction else None),
-        "products": (coupon_product_ids if has_products else []),
+        "product_ids": (coupon_product_ids if has_products else []),
     }
     serializer = SingleUseCouponSerializer(data=data)
     assert serializer.is_valid() is (has_payment_transaction and has_products)
@@ -169,7 +169,7 @@ def test_serialize_coupon_promo(
         "company": "Acme Corp.",
         "payment_type": "credit_card",
         "payment_transaction": ("fake123" if has_payment_transaction else None),
-        "products": (coupon_product_ids if has_products else []),
+        "product_ids": (coupon_product_ids if has_products else []),
     }
     serializer = PromoCouponSerializer(data=data)
     assert serializer.is_valid() is (has_coupon_code and has_products)
