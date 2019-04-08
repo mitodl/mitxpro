@@ -156,7 +156,7 @@ def test_serialize_coupon_single_use(
 def test_serialize_coupon_promo(
     coupon_product_ids, has_payment_transaction, has_coupon_code, has_products
 ):
-    """ Test the SingleUseCouponSerializer """
+    """ Test the PromoCouponSerializer """
     data = {
         "name": "FAKETAG",
         "tag": None,
@@ -165,7 +165,6 @@ def test_serialize_coupon_promo(
         "activation_date": "2018-01-01T00:00:00Z",
         "expiration_date": "2019-12-31T00:00:00Z",
         "amount": 0.75,
-        "num_coupon_codes": 2,
         "coupon_type": "promo",
         "company": "Acme Corp.",
         "payment_type": "credit_card",

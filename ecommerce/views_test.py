@@ -597,7 +597,7 @@ def test_post_promo_coupon(admin_drf_client, promo_coupon_json):
 def test_create_promo_coupon_bad_product(
     admin_drf_client, promo_coupon_json, attribute, bad_value, error
 ):
-    """ Test that an error is returned if the product for a coupon does not exist """
+    """ Test that an error is returned if submitted coupon data is invalid  """
     CouponPaymentFactory.create(name="AlreadyExists")
     CouponFactory.create(coupon_code="AlreadyExists")
     data = promo_coupon_json
