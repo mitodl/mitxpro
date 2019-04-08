@@ -12,7 +12,7 @@ import { STATE_SUCCESS } from "../../../lib/auth"
 
 import { qsPartialTokenSelector } from "../../../lib/selectors"
 
-import { RegisterProfileForm } from "../../../components/forms/register"
+import RegisterDetailsForm from "../../../components/forms/RegisterDetailsForm"
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
@@ -66,7 +66,7 @@ class RegisterProfilePage extends React.Component<Props> {
   render() {
     return (
       <div>
-        <RegisterProfileForm onSubmit={this.onSubmit.bind(this)} />
+        <RegisterDetailsForm onSubmit={this.onSubmit.bind(this)} />
       </div>
     )
   }

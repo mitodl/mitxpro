@@ -20,14 +20,14 @@ export const LoginEmailForm = ({ onSubmit }: LoginEmailFormProps) => (
     onSubmit={onSubmit}
     validationSchema={emailValidation}
     initialValues={{ email: "" }}
-    render={({ isSubmitting }) => (
+    render={({ isSubmitting, isValid }) => (
       <Form>
         <label htmlFor="email">
           Email
           <Field type="email" name="email" />
         </label>
         <ErrorMessage name="email" component="div" />
-        <button type="submit" disabled={isSubmitting}>
+        <button type="submit" disabled={isSubmitting || !isValid}>
           Next
         </button>
       </Form>
@@ -51,14 +51,14 @@ export const LoginPasswordForm = ({ onSubmit }: LoginPasswordFormProps) => (
     onSubmit={onSubmit}
     validationSchema={passwordValidation}
     initialValues={{ password: "" }}
-    render={({ isSubmitting }) => (
+    render={({ isSubmitting, isValid }) => (
       <Form>
         <label htmlFor="password">
           Password
           <Field type="password" name="password" />
         </label>
         <ErrorMessage name="password" component="div" />
-        <button type="submit" disabled={isSubmitting}>
+        <button type="submit" disabled={isSubmitting || !isValid}>
           Login
         </button>
       </Form>

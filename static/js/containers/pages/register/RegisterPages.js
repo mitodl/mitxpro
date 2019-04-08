@@ -6,7 +6,7 @@ import { routes } from "../../../lib/urls"
 
 import RegisterEmailPage from "./RegisterEmailPage"
 import RegisterConfirmPage from "./RegisterConfirmPage"
-import RegisterProfilePage from "./RegisterProfilePage"
+import RegisterDetailsPage from "./RegisterDetailsPage"
 
 const RegisterPages = () => (
   <Switch>
@@ -18,8 +18,8 @@ const RegisterPages = () => (
     />
     <Route
       exact
-      path={routes.register.profile}
-      component={RegisterProfilePage}
+      path={routes.register.details}
+      component={RegisterDetailsPage}
     />
     <Redirect to={routes.register.begin} />
   </Switch>

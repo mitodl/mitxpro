@@ -2,6 +2,7 @@
 import React from "react"
 import { compose } from "redux"
 import { connect } from "react-redux"
+import { Link } from "react-router-dom"
 import { mutateAsync, connectRequest } from "redux-query"
 import qs from "query-string"
 import { path } from "ramda"
@@ -9,7 +10,7 @@ import { createStructuredSelector } from "reselect"
 
 import queries from "../../../lib/queries"
 import { routes } from "../../../lib/urls"
-import { STATE_REGISTER_DETAILS } from "../../../lib/auth"
+import { STATE_REGISTER_DETAILS, STATE_INVALID_EMAIL } from "../../../lib/auth"
 
 import { authSelector } from "../../../lib/queries/auth"
 import {
@@ -40,11 +41,22 @@ class RegisterProfilePage extends React.Component<Props> {
       const params = qs.stringify({
         partial_token: auth.partialToken
       })
-      history.push(`${routes.register.profile}?${params}`)
+      history.push(`${routes.register.details}?${params}`)
     }
   }
 
   render() {
+    const { auth } = this.props
+
+    if (auth && auth.state === STATE_INVALID_EMAIL) {
+      return (
+        <div>
+          <p>No confirmation code was provided or it has expired.</p>
+          <Link to={routes.register.begin}>Click here</Link> to register again.
+        </div>
+      )
+    }
+
     return (
       <div>
         <p>Confirming...</p>

@@ -11,7 +11,7 @@ import { STATE_REGISTER_CONFIRM_SENT } from "../../../lib/auth"
 
 import { qsNextSelector } from "../../../lib/selectors"
 
-import { RegisterEmailForm } from "../../../components/forms/register"
+import RegisterEmailForm from "../../../components/forms/RegisterEmailForm"
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
