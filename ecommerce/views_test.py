@@ -410,7 +410,7 @@ def test_patch_basket_clear_coupon_auto(basket_client, basket_and_coupons):
     assert resp_data.get("coupons") == [
         {
             "code": auto_coupon.coupon_code,
-            "amount": basket_and_coupons.coupongroup_worst.invoice_version.amount,
+            "amount": basket_and_coupons.coupongroup_worst.payment_version.amount,
             "targets": [basket_and_coupons.product_version.id],
         }
     ]
@@ -422,9 +422,9 @@ def test_patch_basket_clear_coupon_no_auto(basket_client, basket_and_coupons):
     """ Test that all coupons are cleared from basket  """
     basket = basket_and_coupons.basket
 
-    auto_coupon_invoice = basket_and_coupons.coupongroup_worst.invoice_version
-    auto_coupon_invoice.automatic = False
-    auto_coupon_invoice.save()
+    auto_coupon_payment = basket_and_coupons.coupongroup_worst.payment_version
+    auto_coupon_payment.automatic = False
+    auto_coupon_payment.save()
 
     original_basket = BasketSerializer(instance=basket).data
     assert len(original_basket.get("coupons")) == 1

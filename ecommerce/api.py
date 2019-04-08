@@ -144,7 +144,7 @@ def latest_coupon_version(coupon):
 
 def get_valid_coupon_versions(product, user, auto_only=False, code=None):
     """
-    Given a list of coupon ids, determine which of them are valid based on invoice version dates and redemptions.
+    Given a list of coupon ids, determine which of them are valid based on payment version dates and redemptions.
 
     Args:
         product (Product): product to filter CouponEligibility by
@@ -176,20 +176,20 @@ def get_valid_coupon_versions(product, user, auto_only=False, code=None):
 
         # filter by expiration and activation dates
         query = (
-            CouponVersion.objects.select_related("invoice_version")
+            CouponVersion.objects.select_related("payment_version")
             .filter(pk__in=cv_latest)
             .filter(
-                Q(invoice_version__expiration_date__gte=now)
-                | Q(invoice_version__expiration_date__isnull=True)
+                Q(payment_version__expiration_date__gte=now)
+                | Q(payment_version__expiration_date__isnull=True)
             )
             .filter(
-                Q(invoice_version__activation_date__lte=now)
-                | Q(invoice_version__activation_date__isnull=True)
+                Q(payment_version__activation_date__lte=now)
+                | Q(payment_version__activation_date__isnull=True)
             )
         )
 
         if auto_only:
-            query = query.filter(invoice_version__automatic=True)
+            query = query.filter(payment_version__automatic=True)
 
         # filter by redemption counts
         for coupon_version in query:
@@ -200,14 +200,14 @@ def get_valid_coupon_versions(product, user, auto_only=False, code=None):
             )
             redemptions_user = redemptions_global.filter(order__purchaser=user)
             if (
-                coupon_version.invoice_version.max_redemptions
+                coupon_version.payment_version.max_redemptions
                 > redemptions_global.count()
-                and coupon_version.invoice_version.max_redemptions_per_user
+                and coupon_version.payment_version.max_redemptions_per_user
                 > redemptions_user.count()
             ):
                 valid_coupons.append(coupon_version)
         return sorted(
-            valid_coupons, key=lambda x: x.invoice_version.amount, reverse=True
+            valid_coupons, key=lambda x: x.payment_version.amount, reverse=True
         )
 
 
@@ -290,7 +290,7 @@ def get_product_version_price_with_discount(*, coupon_version, product_version):
     """
     price = product_version.price
     if coupon_version:
-        price *= 1 - coupon_version.invoice_version.amount
+        price *= 1 - coupon_version.payment_version.amount
     return price
 
 

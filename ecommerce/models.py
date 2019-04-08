@@ -9,6 +9,18 @@ from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 
 
+class Company(TimestampedModel):
+    """
+    A company that purchases bulk seats/coupons
+    """
+
+    name = models.CharField(max_length=512, unique=True)
+
+    def __str__(self):
+        """Description for Company"""
+        return f"Company {self.name}"
+
+
 class Product(TimestampedModel):
     """
     Representation of a purchasable product. There is a GenericForeignKey to a CourseRun, Course, or Program.
@@ -152,31 +164,37 @@ class Line(TimestampedModel):
         return f"Line for order #{self.order.id}, {self.product_version} (qty: {self.quantity})"
 
 
-class CouponInvoice(TimestampedModel):
+class CouponPayment(TimestampedModel):
     """
-    Information about creation of one or more coupons. Most information will go in CouponInvoiceVersion.
-    tag should be a string which never changes and is unique for the coupon invoice.
+    Information about creation of one or more coupons. Most information will go in CouponPaymentVersion.
+    name should be a string which never changes and is unique for the coupon payment.
     """
 
-    tag = models.TextField(unique=True)
+    name = models.CharField(max_length=256, unique=True)
 
     def __str__(self):
-        """Description for CouponInvoice"""
-        return f"CouponInvoice {self.tag}"
+        """Description for CouponPayment"""
+        return f"CouponPayment {self.name}"
 
 
-class CouponInvoiceVersion(TimestampedModel):
+class CouponPaymentVersion(TimestampedModel):
     """
-    An append-only table for CouponInvoice information. Invoice information is stored here and the latest version
-    for a particular invoice is the source of truth for this information.
+    An append-only table for CouponPayment information. Payment information and coupon details are stored here
+    and the latest version for a particular payment is the source of truth for this information.
     """
 
     PROMO = "promo"
     SINGLE_USE = "single-use"
-
     COUPON_TYPES = [PROMO, SINGLE_USE]
 
-    invoice = models.ForeignKey(CouponInvoice, on_delete=models.PROTECT)
+    PAYMENT_CC = "credit_card"
+    PAYMENT_PO = "purchase_order"
+    PAYMENT_MKT = "marketing"
+    PAYMENT_SALE = "sales"
+    PAYMENT_TYPES = [PAYMENT_CC, PAYMENT_PO, PAYMENT_MKT, PAYMENT_SALE]
+
+    tag = models.CharField(max_length=256, null=True, blank=True)
+    payment = models.ForeignKey(CouponPayment, on_delete=models.PROTECT)
     automatic = models.BooleanField(default=False)
     coupon_type = models.CharField(
         choices=[(_type, _type) for _type in COUPON_TYPES], max_length=30
@@ -199,13 +217,23 @@ class CouponInvoiceVersion(TimestampedModel):
         blank=True,
         help_text="If set, the coupons will not be redeemable before this time",
     )
+    company = models.ForeignKey(
+        Company, on_delete=models.PROTECT, null=True, blank=True
+    )
+    payment_type = models.CharField(
+        max_length=128,
+        choices=[(paytype, paytype) for paytype in PAYMENT_TYPES],
+        null=True,
+        blank=True,
+    )
+    payment_transaction = models.CharField(max_length=256, null=True, blank=True)
 
     class Meta:
         indexes = [models.Index(fields=["created_on"])]
 
     def __str__(self):
-        """Description for CouponInvoiceVersion"""
-        return f"CouponInvoiceVersion for {self.num_coupon_codes} of type {self.coupon_type}"
+        """Description for CouponPaymentVersion"""
+        return f"CouponPaymentVersion for {self.num_coupon_codes} of type {self.coupon_type}"
 
 
 class Coupon(TimestampedModel):
@@ -215,26 +243,26 @@ class Coupon(TimestampedModel):
     """
 
     coupon_code = models.CharField(max_length=50)
-    invoice = models.ForeignKey(CouponInvoice, on_delete=models.PROTECT)
+    payment = models.ForeignKey(CouponPayment, on_delete=models.PROTECT)
     enabled = models.BooleanField(default=True)
 
     def __str__(self):
         """Description for Coupon"""
-        return f"Coupon {self.coupon_code} for {self.invoice}"
+        return f"Coupon {self.coupon_code} for {self.payment}"
 
 
 class CouponVersion(TimestampedModel):
     """
     An append-only table for coupon codes. This should contain any mutable information specific to a coupon
-    (at the moment this is only a link to a corresponding CouponInvoiceVersion).
+    (at the moment this is only a link to a corresponding CouponPaymentVersion).
     """
 
     coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
-    invoice_version = models.ForeignKey(CouponInvoiceVersion, on_delete=models.PROTECT)
+    payment_version = models.ForeignKey(CouponPaymentVersion, on_delete=models.PROTECT)
 
     def __str__(self):
         """Description for CouponVersion"""
-        return f"CouponVersion {self.coupon.coupon_code} for {self.invoice_version}"
+        return f"CouponVersion {self.coupon.coupon_code} for {self.payment_version}"
 
 
 class CouponEligibility(TimestampedModel):
