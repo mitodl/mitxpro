@@ -6,7 +6,7 @@ In order to create user accounts in Open edX and permit authentication from xPro
 
 #### Setup Open edX Devstack
 
-Follow devstack's [README instructions](https://github.com/edx/devstack#getting-started) to get a functional devstack instance running.
+Follow devstack's [README instructions](https://github.com/edx/devstack#getting-started) to get a functional devstack instance running. Ensure you are on at least the ironwood version at a minimum (e.g. `export OPENEDX_RELEASE=ironwood.master`)
 
 #### Install `social-auth-mitxpro` in LMS
 
@@ -23,6 +23,20 @@ There are two options for this:
 - In devstack, run `make lms-shell` and within that shell `pip install social-auth-mitxpro-$VERSION.tar.gz`
   - To update to a new development version without having to actually bump the package version, simply `pip uninstall social-auth-mitxpro`, then install again
 
+#### Install `mitxpro-openedx-extensions` in LMS
+
+There are two options for this:
+
+##### Install via pip
+
+- `pip install mitxpro-openedx-extensions`
+
+##### Install from local Build
+
+- Checkout the [mitxpro-openedx-extensions](https://github.com/mitodl/mitxpro-openedx-extensions) project and build the package per the project instructions
+- Copy the `mitxpro-openedx-extensions-$VERSION.tar.gz` file into devstack's `edx-platform` directory
+- In devstack, run `make lms-shell` and within that shell `pip install mitxpro-openedx-extensions-$VERSION.tar.gz`
+  - To update to a new development version without having to actually bump the package version, simply `pip uninstall -y mitxpro-openedx-extensions`, then install again
 
 #### Configure xPro as a OAuth provider for Open edX
 
@@ -48,7 +62,16 @@ In Open edX (derived from instructions [here](https://edx.readthedocs.io/project
       ...
       "FEATURES": {
         ...
+        "ALLOW_PUBLIC_ACCOUNT_CREATION": true,
+        "ENABLE_COMBINED_LOGIN_REGISTRATION": true,
         "ENABLE_THIRD_PARTY_AUTH": true,
+        "ENABLE_OAUTH2_PROVIDER": true,
+        ...
+      },
+      ...
+      "REGISTRATION_EXTRA_FIELDS": {
+        ...
+        "country": "hidden",
         ...
       },
       ...
@@ -71,6 +94,7 @@ In Open edX (derived from instructions [here](https://edx.readthedocs.io/project
   - Select the default example site
   - The slug field **MUST** match the `Backend.name`, which for us is `
 mitxpro-oauth2`
+  - Client Id should be the client id from the xPro Django Oauth Toolkit Application
   - Check the following checkboxes:
     - Skip hinted login dialog
     - Skip registration form
@@ -94,7 +118,7 @@ mitxpro-oauth2`
 #### Configure Open edX to support OAuth2 authentication from xPro
 
   - In Open edX:
-    - go to `/admin/oauth2_provider/application/` and create a new application with these settings selected:
+    - go to `/admin/oauth2_provider/application/` and verify that an application named 'edx-oauth-app' exists with these settings:
       - `Redirect uris`: `http://xpro.odl.local:8053/login/_private/complete`
       - `Client type`: "Confidential"
       - `Authorization grant type`: "Authorization code"
