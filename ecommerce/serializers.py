@@ -5,7 +5,6 @@ from django.db import transaction
 from django.templatetags.static import static
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import IntegerField, DateTimeField
 from rest_framework.validators import UniqueValidator
 
 from courses.models import Course, CourseRun
@@ -182,9 +181,9 @@ class BaseCouponSerializer(serializers.Serializer):
     tag = serializers.CharField(max_length=256, allow_null=True, required=False)
     amount = serializers.DecimalField(decimal_places=2, max_digits=20)
     automatic = serializers.BooleanField(default=False)
-    activation_date = DateTimeField()
-    expiration_date = DateTimeField()
-    product_ids = serializers.ListField(child=IntegerField())
+    activation_date = serializers.DateTimeField()
+    expiration_date = serializers.DateTimeField()
+    product_ids = serializers.ListField(child=serializers.IntegerField())
     max_redemptions = serializers.IntegerField(default=1)
     max_redemptions_per_user = serializers.IntegerField(default=1)
     coupon_type = serializers.ChoiceField(
