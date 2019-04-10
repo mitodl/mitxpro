@@ -5,6 +5,8 @@ from types import SimpleNamespace
 
 import pytest
 
+# pylint:disable=redefined-outer-name
+
 from ecommerce.factories import (
     BasketItemFactory,
     CouponEligibilityFactory,
@@ -76,3 +78,48 @@ def basket_and_coupons():
         coupongroup_best=coupongroup_best,
         coupongroup_worst=coupongroup_worst,
     )
+
+
+@pytest.fixture
+def coupon_product_ids():
+    """ Product ids for creating coupons """
+    product_versions = ProductVersionFactory.create_batch(3)
+    return [product_version.product.id for product_version in product_versions]
+
+
+@pytest.fixture
+def promo_coupon_json(coupon_product_ids):
+    """ JSON for creating a promo coupon """
+    return {
+        "tag": None,
+        "name": "TEST NAME 2",
+        "automatic": True,
+        "activation_date": "2018-01-01T00:00:00Z",
+        "expiration_date": "2019-12-31T00:00:00Z",
+        "amount": 0.75,
+        "coupon_code": "TESTPROMOCODE",
+        "coupon_type": "promo",
+        "company": "Test Corp",
+        "payment_type": "purchase_order",
+        "payment_transaction": "fake_transaction_num",
+        "product_ids": coupon_product_ids,
+    }
+
+
+@pytest.fixture
+def single_use_coupon_json(coupon_product_ids):
+    """JSON for creating a batch of single-use coupons"""
+    return {
+        "tag": "TEST TAG 1",
+        "name": "TEST NAME 1",
+        "automatic": True,
+        "activation_date": "2018-01-01T00:00:00Z",
+        "expiration_date": "2019-12-31T00:00:00Z",
+        "amount": 0.75,
+        "num_coupon_codes": 5,
+        "coupon_type": "single-use",
+        "company": "Test Corp",
+        "payment_type": "credit_card",
+        "payment_transaction": "fake_transaction_num",
+        "product_ids": coupon_product_ids,
+    }

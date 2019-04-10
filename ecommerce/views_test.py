@@ -14,9 +14,21 @@ from ecommerce.factories import (
     CouponEligibilityFactory,
     LineFactory,
     ProductVersionFactory,
+    CouponFactory,
+    CouponPaymentFactory,
 )
-from ecommerce.models import Basket, CouponSelection, Order, OrderAudit, Receipt
-from ecommerce.serializers import BasketSerializer
+from ecommerce.models import (
+    Basket,
+    CouponSelection,
+    Order,
+    OrderAudit,
+    Receipt,
+    CouponPaymentVersion,
+    Company,
+    CouponEligibility,
+    Product,
+)
+from ecommerce.serializers import BasketSerializer, ProductSerializer
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_REFERENCE_PREFIX = "fake"
@@ -534,3 +546,166 @@ def test_patch_basket_nodata(basket_client, basket_and_coupons):
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
     assert "Invalid request" in resp_data.get("errors")
+
+
+def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
+    """ Test that the correct model objects are created for a batch of single-use coupons """
+    data = single_use_coupon_json
+    resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    model_version = CouponPaymentVersion.objects.get(id=resp.json().get("id"))
+    assert model_version.couponversion_set.count() == 5
+    assert model_version.payment.coupon_set.count() == 5
+    assert model_version.amount == data.get("amount")
+    assert model_version.coupon_type == "single-use"
+    assert model_version.payment_transaction == data.get("payment_transaction")
+    assert Company.objects.filter(name=data.get("company")).first() is not None
+    assert (
+        CouponEligibility.objects.filter(product__in=data.get("product_ids")).count()
+        == 15
+    )
+
+
+def test_post_promo_coupon(admin_drf_client, promo_coupon_json):
+    """ Test that the correct model objects are created for a promo coupon """
+    data = promo_coupon_json
+    resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    model_version = CouponPaymentVersion.objects.get(id=resp.json().get("id"))
+    assert model_version.couponversion_set.count() == 1
+    assert model_version.payment.coupon_set.count() == 1
+    assert model_version.amount == data.get("amount")
+    assert model_version.coupon_type == "promo"
+    assert model_version.payment_transaction == data.get("payment_transaction")
+    assert model_version.payment.coupon_set.first().coupon_code == data.get(
+        "coupon_code"
+    )
+    assert Company.objects.filter(name=data.get("company")).first() is not None
+    assert (
+        CouponEligibility.objects.filter(product__in=data.get("product_ids")).count()
+        == 3
+    )
+
+
+@pytest.mark.parametrize(
+    "attribute,bad_value,error",
+    [
+        [
+            "product_ids",
+            [9998, 9999],
+            "Product with id(s) 9998,9999 could not be found",
+        ],
+        ["product_ids", [], "At least one product must be selected"],
+        ["name", "AlreadyExists", "This field must be unique."],
+        ["coupon_code", "AlreadyExists", "This field must be unique."],
+    ],
+)
+def test_create_promo_coupon_bad_product(
+    admin_drf_client, promo_coupon_json, attribute, bad_value, error
+):
+    """ Test that an error is returned if submitted coupon data is invalid  """
+    CouponPaymentFactory.create(name="AlreadyExists")
+    CouponFactory.create(coupon_code="AlreadyExists")
+    data = promo_coupon_json
+    data[attribute] = bad_value
+    resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json().get("errors")[0].get(attribute) == error
+
+
+def test_create_promo_coupon_no_payment_info(admin_drf_client, promo_coupon_json):
+    """ Test that a promo CouponPaymentVersion can be created without payment info """
+    data = promo_coupon_json
+    payment_attrs = ("company", "payment_type", "payment_transaction")
+    for attr in payment_attrs:
+        data.pop(attr)
+    resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    cpv = CouponPaymentVersion.objects.get(id=resp.json().get("id"))
+    for attr in payment_attrs:
+        assert getattr(cpv, attr) is None
+
+
+def test_create_singleuse_coupon_no_payment_info(
+    admin_drf_client, single_use_coupon_json
+):
+    """ Test that a single-use CouponPaymentVersion cannot be created without payment type, transaction info """
+    data = single_use_coupon_json
+    payment_attrs = ("company", "payment_type", "payment_transaction")
+    for attr in payment_attrs:
+        data[attr] = None
+    resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert {"payment_transaction": "This field may not be null."} in resp.json().get(
+        "errors"
+    )
+    assert {"payment_type": "This field may not be null."} in resp.json().get("errors")
+
+
+def test_create_coupon_permission(user_drf_client, promo_coupon_json):
+    """ Test that non-admins cannot create coupons """
+    data = promo_coupon_json
+    resp = user_drf_client.post(reverse("coupon_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_coupon_csv_view(admin_client, admin_drf_client, single_use_coupon_json):
+    """ Test that a valid csv response is returned for a CouponPaymentVersion """
+    data = single_use_coupon_json
+    api_response = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
+    cpv = CouponPaymentVersion.objects.get(id=api_response.json().get("id"))
+    csv_response = admin_client.get(
+        reverse("coupons_csv", kwargs={"version_id": cpv.id})
+    )
+    assert csv_response.status_code == 200
+    assert (
+        csv_response.content
+        == b"\r\n".join(
+            [
+                bytes(cv.coupon.coupon_code, encoding="utf8")
+                for cv in cpv.couponversion_set.all()
+            ]
+        )
+        + b"\r\n"
+    )
+
+
+def test_coupon_csv_view_forbidden(user_client):
+    """ Test that a regular user cannot access a csv download URL """
+    response = user_client.get(reverse("coupons_csv", kwargs={"version_id": 1}))
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_coupon_csv_view_404(admin_client):
+    """ Test that a 404 is returned for a CouponPaymentVersion that does not exist"""
+    response = admin_client.get(reverse("coupons_csv", kwargs={"version_id": 9999}))
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_products_viewset_list(user_drf_client, coupon_product_ids):
+    """ Test that the ProductViewSet returns all products """
+    response = user_drf_client.get(reverse("products_api-list"))
+    assert response.status_code == status.HTTP_200_OK
+    products = response.json()
+    assert {product.get("id") for product in products} == set(coupon_product_ids)
+    for product in products:
+        assert (
+            product
+            == ProductSerializer(
+                instance=Product.objects.get(id=product.get("id"))
+            ).data
+        )
+
+
+def test_products_viewset_detail(user_drf_client, coupon_product_ids):
+    """ Test that the ProductViewSet returns details for a product """
+    response = user_drf_client.get(
+        reverse("products_api-detail", kwargs={"pk": coupon_product_ids[0]})
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert (
+        response.json()
+        == ProductSerializer(
+            instance=Product.objects.get(id=coupon_product_ids[0])
+        ).data
+    )
