@@ -44,8 +44,8 @@ class LoginPasswordPage extends React.Component<Props> {
   async onSubmit({ password }, { setSubmitting, setErrors }) {
     const {
       loginPassword,
-      getCurrentUser,
-      history,
+      // getCurrentUser,
+      // history,
       auth: { partialToken }
     } = this.props
 
@@ -53,15 +53,15 @@ class LoginPasswordPage extends React.Component<Props> {
       throw Error("Invalid state: password page with no partialToken")
     }
 
-    /* eslint-disable camelcase */
     try {
       const {
         body: { state, redirectUrl, errors }
       }: { body: AuthResponse } = await loginPassword(password, partialToken)
 
       if (state === STATE_SUCCESS) {
-        await getCurrentUser()
-        history.push(redirectUrl || routes.home)
+        // await getCurrentUser()
+        // history.push(redirectUrl || routes.home)
+        window.location.href = redirectUrl || routes.root
       } else if (errors.length > 0) {
         setErrors({
           password: errors[0]
@@ -70,7 +70,6 @@ class LoginPasswordPage extends React.Component<Props> {
     } finally {
       setSubmitting(false)
     }
-    /* eslint-enable camelcase */
   }
 
   render() {

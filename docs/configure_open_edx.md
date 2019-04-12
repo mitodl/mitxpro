@@ -103,3 +103,14 @@ mitxpro-oauth2`
   - In xPro:
     - Set `OPENEDX_API_CLIENT_ID` to the client id
     - Set `OPENEDX_API_CLIENT_SECRET` to the client secret
+
+
+#### Configure Logout
+
+  - In Open edX, configure `settings.IDA_LOGOUT_URI_LIST` to be a list including the full url to `<protocol>://<hostname>[:<port>]/logout` in xPro
+    - For devstack, this means modifying the value in `edx-platform/lms/envs/devstack.py` to include `http://xpro.odl.local:8053/logout`
+    - For production, this setting can go in `lms.env.json` under the key `IDA_LOGOUT_URI_LIST` as a JSON array of with that string in it
+
+  - xPro:
+    - Set `LOGOUT_REDIRECT_URL` to the full path to the edx `/logout` view.
+      - For local development this will be `http://<EDX_HOSTNAME>:18000/logout`

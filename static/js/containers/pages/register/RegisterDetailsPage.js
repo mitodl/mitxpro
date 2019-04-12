@@ -34,12 +34,11 @@ class RegisterProfilePage extends React.Component<Props> {
   async onSubmit({ name, password }, { setSubmitting, setErrors }) {
     const {
       registerDetails,
-      getCurrentUser,
-      params: { partialToken },
-      history
+      // getCurrentUser,
+      params: { partialToken }
+      // history
     } = this.props
 
-    /* eslint-disable camelcase */
     try {
       const {
         body: { state, errors }
@@ -50,8 +49,9 @@ class RegisterProfilePage extends React.Component<Props> {
       )
 
       if (state === STATE_SUCCESS) {
-        await getCurrentUser()
-        history.push(routes.home)
+        // await getCurrentUser()
+        // history.push(routes.home)
+        window.location.href = routes.root
       } else if (errors.length > 0) {
         setErrors({
           email: errors[0]
@@ -60,7 +60,6 @@ class RegisterProfilePage extends React.Component<Props> {
     } finally {
       setSubmitting(false)
     }
-    /* eslint-enable camelcase */
   }
 
   render() {

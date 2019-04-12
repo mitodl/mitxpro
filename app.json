@@ -51,6 +51,10 @@
       "description": "Google analytics tracking ID",
       "required": false
     },
+    "LOGOUT_REDIRECT_URL": {
+      "description": "Url to redirect to after logout, typically Open edX's own logout url",
+      "required": false
+    },
     "MAILGUN_KEY": {
       "description": "The token for authenticating against the Mailgun API"
     },

@@ -120,9 +120,9 @@ if DEBUG:
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 LOGIN_REDIRECT_URL = "/"
-LOGIN_URL = "/"
-LOGIN_ERROR_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
+LOGIN_URL = "/login"
+LOGIN_ERROR_URL = "/login"
+LOGOUT_REDIRECT_URL = get_string("LOGOUT_REDIRECT_URL", "/")
 
 ROOT_URLCONF = "mitxpro.urls"
 
@@ -186,7 +186,6 @@ AUTHENTICATION_BACKENDS = (
     "guardian.backends.ObjectPermissionBackend",
 )
 
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = "login-complete"
 SOCIAL_AUTH_LOGIN_ERROR_URL = "login"
 SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS = [urlparse(SITE_BASE_URL).netloc]
 
