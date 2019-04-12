@@ -10,7 +10,7 @@ import urljoin from "url-join"
 import users, { currentUserSelector } from "../lib/queries/users"
 import { routes } from "../lib/urls"
 
-import Header from "../components/Header"
+import TopAppBar from "../components/TopAppBar"
 
 import HomePage from "./pages/HomePage"
 import LoginPages from "./pages/login/LoginPages"
@@ -35,7 +35,7 @@ class App extends React.Component<Props, void> {
 
     return (
       <div className="app">
-        <Header currentUser={currentUser} />
+        <TopAppBar currentUser={currentUser} />
         <Switch>
           <Route
             exact

@@ -1,6 +1,3 @@
-require("react-hot-loader/patch")
-/* global SETTINGS:false */
-__webpack_public_path__ = SETTINGS.public_path // eslint-disable-line no-undef, camelcase
 import React from "react"
 import ReactDOM from "react-dom"
 import { AppContainer } from "react-hot-loader"
@@ -8,8 +5,15 @@ import { createBrowserHistory } from "history"
 
 import configureStore from "../store/configureStore"
 import Router, { routes } from "../Router"
+import { AppTypeContext, SPA_APP_CONTEXT } from "../contextDefinitions"
 
 import Raven from "raven-js"
+// Object.entries polyfill
+import entries from "object.entries"
+
+require("react-hot-loader/patch")
+/* global SETTINGS:false */
+__webpack_public_path__ = SETTINGS.public_path // eslint-disable-line no-undef, camelcase
 
 Raven.config(SETTINGS.sentry_dsn, {
   release:     SETTINGS.release_version,
@@ -18,8 +22,6 @@ Raven.config(SETTINGS.sentry_dsn, {
 
 window.Raven = Raven
 
-// Object.entries polyfill
-import entries from "object.entries"
 if (!Object.entries) {
   entries.shim()
 }
@@ -32,9 +34,11 @@ const renderApp = Component => {
   const history = createBrowserHistory()
   ReactDOM.render(
     <AppContainer>
-      <Component history={history} store={store}>
-        {routes}
-      </Component>
+      <AppTypeContext.Provider value={SPA_APP_CONTEXT}>
+        <Component history={history} store={store}>
+          {routes}
+        </Component>
+      </AppTypeContext.Provider>
     </AppContainer>,
     rootEl
   )

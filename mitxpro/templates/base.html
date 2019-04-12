@@ -21,6 +21,8 @@
   </head>
   <body class="{% block bodyclass %}{% endblock %}">
     {% hijack_notification %}
+    {% block headercontent %}
+    {% endblock %}
     {% block content %}
     {% endblock %}
   </body>
