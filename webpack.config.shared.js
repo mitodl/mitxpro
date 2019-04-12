@@ -5,6 +5,7 @@ module.exports = {
   config: {
     entry: {
       root:  ["@babel/polyfill", "./static/js/entry/root"],
+      header:  ["@babel/polyfill", "./static/js/entry/header"],
       style: "./static/js/entry/style"
     },
     module: {
