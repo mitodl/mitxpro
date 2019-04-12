@@ -34,7 +34,7 @@
         {% if object_type == "program" %}
           <li>
             <strong>Number of Courses:</strong>
-            {{ courseware_object.course_set.count }}
+            {{ courseware_object.courses.count }}
           </li>
         {% endif %}
         {% if courseware_object.duration %}
@@ -78,7 +78,7 @@
               {% endif %}
               {% if object_type == "program" %}
                 <ul class="program-course-links">
-                {% for course in program.course_set.all %}
+                {% for course in program.courses.all %}
                   <li>
                     <a href="{% url "course-detail" pk=course.id %}">
                       {{ course.title }}

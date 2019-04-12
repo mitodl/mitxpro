@@ -6,12 +6,12 @@ import pytest
 
 from cms.factories import CoursePageFactory, ProgramPageFactory
 from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
-from courses.models import CourseRun
-from courses.serializers import CourseRunSerializer
+from courses.models import Course
+from courses.serializers import CourseSerializer
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import round_half_up
 from ecommerce.factories import ProductVersionFactory, ProductFactory, CompanyFactory
-from ecommerce.models import CouponSelection, Product
+from ecommerce.models import CouponSelection, Product, CourseRunSelection
 from ecommerce.serializers import (
     ProductVersionSerializer,
     CouponSelectionSerializer,
@@ -26,26 +26,10 @@ from ecommerce.serializers import (
 pytestmark = [pytest.mark.django_db]
 
 
-def test_serialize_basket_product_version_course_run():
-    """Test ProductVersion serialization for a CourseRun"""
-    course_run = CourseRunFactory.create()
-    product_version = ProductVersionFactory.create(
-        product=ProductFactory(content_object=course_run)
-    )
-    data = ProductVersionSerializer(product_version).data
-    assert data == {
-        "id": product_version.id,
-        "description": product_version.description,
-        "price": str(round_half_up(product_version.price)),
-        "type": product_version.product.content_type.model,
-        "course_runs": [CourseRunSerializer(course_run).data],
-        "thumbnail_url": "/static/images/mit-dome.png",
-    }
-
-
 def test_serialize_basket_product_version_course():
     """Test ProductVersion serialization for a Course"""
     course = CourseFactory.create()
+    CourseRunFactory.create_batch(3, course=course)
     product_version = ProductVersionFactory.create(
         product=ProductFactory(content_object=course)
     )
@@ -55,7 +39,7 @@ def test_serialize_basket_product_version_course():
         "description": product_version.description,
         "price": str(round_half_up(product_version.price)),
         "type": product_version.product.content_type.model,
-        "course_runs": [CourseRunSerializer(course.first_unexpired_run).data],
+        "courses": [CourseSerializer(course).data],
         "thumbnail_url": "/static/images/mit-dome.png",
     }
 
@@ -74,28 +58,9 @@ def test_serialize_basket_product_version_program():
         "description": product_version.description,
         "price": str(round_half_up(product_version.price)),
         "type": product_version.product.content_type.model,
-        "course_runs": [
-            CourseRunSerializer(course.first_unexpired_run).data for course in courses
-        ],
+        "courses": [CourseSerializer(course).data for course in courses],
         "thumbnail_url": "/static/images/mit-dome.png",
     }
-
-
-def test_basket_thumbnail_courserun(basket_and_coupons):
-    """Basket thumbnail should be serialized for a course run"""
-    thumbnail_filename = "abcde.jpg"
-    run = CourseRunFactory.create()
-    course_page = CoursePageFactory.create(
-        course=run.course, thumbnail_image__file__filename=thumbnail_filename
-    )
-    product_version = ProductVersionFactory.create(product__content_object=run)
-    data = ProductVersionSerializer(product_version).data
-    assert (
-        data["thumbnail_url"]
-        == course_page.thumbnail_image.get_rendition(
-            CATALOG_COURSE_IMG_WAGTAIL_FILL
-        ).url
-    )
 
 
 def test_basket_thumbnail_course(basket_and_coupons):
@@ -147,9 +112,15 @@ def test_serialize_basket(basket_and_coupons):
     """Test Basket serialization"""
     basket = basket_and_coupons.basket
     selection = CouponSelection.objects.get(basket=basket)
+    run = CourseRunSelection.objects.get(basket=basket).run
     data = BasketSerializer(basket).data
     assert data == {
-        "items": [ProductVersionSerializer(basket_and_coupons.product_version).data],
+        "items": [
+            {
+                **ProductVersionSerializer(basket_and_coupons.product_version).data,
+                "run_ids": [run.id],
+            }
+        ],
         "coupons": [CouponSelectionSerializer(selection).data],
     }
 
@@ -224,10 +195,10 @@ def test_serialize_coupon_payment_version_serializer(basket_and_coupons):
 def test_serialize_product(coupon_product_ids):
     """ Test that ProductSerializer has correct data """
     product = Product.objects.get(id=coupon_product_ids[0])
-    course_run = CourseRun.objects.get(id=product.object_id)
+    course = Course.objects.get(id=product.object_id)
     serialized_data = ProductSerializer(instance=product).data
-    assert serialized_data.get("title") == course_run.title
-    assert serialized_data.get("product_type") == "courserun"
+    assert serialized_data.get("title") == course.title
+    assert serialized_data.get("product_type") == "course"
     assert serialized_data.get("id") == product.id
 
 

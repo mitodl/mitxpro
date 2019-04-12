@@ -16,6 +16,7 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from courses.models import Course, CourseRun, Program
 from ecommerce.api import (
     create_unfulfilled_order,
     enroll_user_on_success,
@@ -38,6 +39,8 @@ from ecommerce.models import (
     Product,
     ProductVersion,
     Receipt,
+    CourseRunSelection,
+    CourseRunEnrollment,
 )
 from ecommerce.permissions import IsSignedByCyberSource
 from ecommerce.serializers import (
@@ -195,6 +198,7 @@ class BasketView(APIView):
             status=status.HTTP_200_OK, data=BasketSerializer(instance=basket).data
         )
 
+    # pylint: disable=too-many-locals
     def patch(self, request, *args, **kwargs):
         """ Update a basket """
         basket, _ = Basket.objects.get_or_create(user=request.user)
@@ -203,15 +207,22 @@ class BasketView(APIView):
 
         if items is not None or coupons is not None:
             try:
-                product_version = _update_items(basket, items)
+                product_version, runs = _update_items(basket, items)
                 coupon_version = _update_coupons(basket, product_version, coupons)
                 if product_version:
                     # Update basket items and coupon selection
                     with transaction.atomic():
-                        if items is not None:
-                            basket_item = basket.basketitems.first()
-                            basket_item.product = product_version.product
-                            basket_item.save()
+                        basket_item = basket.basketitems.first()
+                        basket_item.product = product_version.product
+                        basket_item.save()
+
+                        if runs is not None:
+                            CourseRunSelection.objects.filter(basket=basket).delete()
+                            for run in runs:
+                                CourseRunSelection.objects.create(
+                                    basket=basket, run=run
+                                )
+
                         if coupon_version:
                             CouponSelection.objects.update_or_create(
                                 basket=basket,
@@ -270,6 +281,7 @@ class CouponView(APIView):
         )
 
 
+# pylint: disable=too-many-branches
 def _update_items(basket, items):
     """
     Helper function to determine if the basket item should be updated, removed, or kept as is.
@@ -279,29 +291,64 @@ def _update_items(basket, items):
         items (list of JSON objects): Basket items to update, or clear if empty list, or leave as is if None
 
     Returns:
-        ProductVersion: ProductVersion object to assign to basket, if any.
+        tuple: ProductVersion object to assign to basket, if any, and a list of CourseRun
 
     """
     if items:
         if len(items) > 1:
             raise ValidationError("Basket cannot contain more than one item")
         # Item updated
-        product_version_id = items[0].get("id")
+        item = items[0]
+        product_version_id = item.get("id")
+        run_ids = item.get("run_ids")
+
         if product_version_id is None:
             raise ValidationError("Invalid request")
         try:
             product_version = ProductVersion.objects.get(id=product_version_id)
         except ProductVersion.DoesNotExist:
-            raise ValidationError(
-                "Invalid product version id {}".format(items[0]["id"])
-            )
+            raise ValidationError(f"Invalid product version id {product_version_id}")
+
+        if run_ids is not None:
+            content_object = product_version.product.content_object
+            runs_for_product = CourseRun.objects.filter(id__in=run_ids)
+            if isinstance(content_object, Course):
+                runs_for_product = runs_for_product.filter(course=content_object)
+            elif isinstance(content_object, Program):
+                runs_for_product = runs_for_product.filter(
+                    course__program=content_object
+                )
+            else:
+                raise ValidationError(
+                    f"Unknown content_object for {product_version.product}"
+                )
+
+            runs_for_product_lookup = {run.id: run for run in runs_for_product}
+
+            run_ids = set(run_ids)
+            for run_id in run_ids:
+                if run_id not in runs_for_product_lookup:
+                    raise ValidationError(f"Unable to find run with id {run_id}")
+
+            courses_for_product = set(runs_for_product.values_list("course", flat=True))
+            if len(courses_for_product) < len(run_ids):
+                raise ValidationError("Only one run per course can be selected")
+
+            if CourseRunEnrollment.objects.filter(run_id__in=run_ids).exists():
+                raise ValidationError("User has already enrolled in run")
+
+            runs = runs_for_product
+        else:
+            runs = None
     elif items is not None:
         # Item removed
         product_version = None
+        runs = None
     else:
         # Item has not changed
         product_version = latest_product_version(basket.basketitems.first().product)
-    return product_version
+        runs = list(CourseRun.objects.filter(courserunselection__basket=basket))
+    return product_version, runs
 
 
 def _update_coupons(basket, product_version, coupons):

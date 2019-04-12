@@ -148,11 +148,11 @@ class Program(TimestampedModel, PageProperties):
     @property
     def next_run_date(self):
         """Gets the start date of the next CourseRun if one exists"""
-        # NOTE: This is implemented with min() and course_set.all() to allow for prefetch_related
+        # NOTE: This is implemented with min() and courses.all() to allow for prefetch_related
         #   optimization. You can get the desired start_date with a filtered and sorted query, but
         #   that would run a new query even if prefetch_related was used.
         return min(
-            filter(None, [course.next_run_date for course in self.course_set.all()]),
+            filter(None, [course.next_run_date for course in self.courses.all()]),
             default=None,
         )
 
@@ -176,7 +176,7 @@ class Course(TimestampedModel, PageProperties):
 
     objects = CourseManager()
     program = models.ForeignKey(
-        Program, on_delete=models.CASCADE, null=True, blank=True
+        Program, on_delete=models.CASCADE, null=True, blank=True, related_name="courses"
     )
     position_in_program = models.PositiveSmallIntegerField(null=True, blank=True)
     title = models.CharField(max_length=255)
@@ -193,13 +193,13 @@ class Course(TimestampedModel, PageProperties):
     def next_run_date(self):
         """Gets the start date of the next CourseRun if one exists"""
         now = now_in_utc()
-        # NOTE: This is implemented with min() and courserun_set.all() to allow for prefetch_related
+        # NOTE: This is implemented with min() and courseruns.all() to allow for prefetch_related
         #   optimization. You can get the desired start_date with a filtered and sorted query, but
         #   that would run a new query even if prefetch_related was used.
         return min(
             (
                 course_run.start_date
-                for course_run in self.courserun_set.all()
+                for course_run in self.courseruns.all()
                 if course_run.start_date > now
             ),
             default=None,
@@ -225,7 +225,7 @@ class Course(TimestampedModel, PageProperties):
             CourseRun or None: An unexpired course run
         """
         return first_matching_item(
-            self.courserun_set.all().order_by("start_date"),
+            self.courseruns.all().order_by("start_date"),
             lambda course_run: course_run.is_unexpired,
         )
 
@@ -241,7 +241,7 @@ class Course(TimestampedModel, PageProperties):
         #    provided), easily fixed, and the resulting bug would be very minor.
         if self.program and not self.position_in_program:
             last_position = (
-                self.program.course_set.order_by("-position_in_program")
+                self.program.courses.order_by("-position_in_program")
                 .values_list("position_in_program", flat=True)
                 .first()
             )
@@ -255,7 +255,9 @@ class Course(TimestampedModel, PageProperties):
 class CourseRun(TimestampedModel):
     """Model for a single run/instance of a course"""
 
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name="courseruns"
+    )
     title = models.CharField(max_length=255)
     courseware_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
     courseware_url_path = models.CharField(max_length=500, blank=True, null=True)

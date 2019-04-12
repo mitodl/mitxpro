@@ -7,9 +7,9 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
-from courses.models import Course, CourseRun
-from courses.serializers import CourseRunSerializer
+from courses.models import Course
 from courses.constants import DEFAULT_COURSE_IMG_PATH
+from courses.serializers import CourseSerializer
 from ecommerce import models
 from ecommerce.api import latest_product_version, latest_coupon_version
 
@@ -47,40 +47,35 @@ class ProductVersionSerializer(serializers.ModelSerializer):
     """ ProductVersion serializer for viewing/updating items in basket """
 
     type = serializers.SerializerMethodField()
-    course_runs = serializers.SerializerMethodField()
+    courses = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
 
     def get_type(self, instance):
         """ Return the product version type """
         return instance.product.content_type.model
 
-    def get_course_runs(self, instance):
+    def get_courses(self, instance):
         """ Return the course runs in the product """
-        course_runs = []
-        if instance.product.content_type.model == "courserun":
-            course_runs.append(instance.product.content_object)
-        elif instance.product.content_type.model == "course":
-            course_runs.append(instance.product.content_object.first_unexpired_run)
-        elif instance.product.content_type.model == "program":
-            for course in Course.objects.filter(
+        model = instance.product.content_type.model
+        if model == "course":
+            courses = [instance.product.content_object]
+        elif model == "program":
+            courses = Course.objects.filter(
                 program=instance.product.content_object
-            ):
-                course_runs.append(course.first_unexpired_run)
-        return [
-            CourseRunSerializer(instance=course_run).data for course_run in course_runs
-        ]
+            ).order_by("position_in_program")
+        else:
+            raise ValueError(f"Unexpected product for {model}")
+
+        return [CourseSerializer(course).data for course in courses]
 
     def get_thumbnail_url(self, instance):
         """Return the thumbnail for the course or program"""
         content_object = instance.product.content_object
-        if isinstance(content_object, CourseRun):
-            catalog_image_url = content_object.course.catalog_image_url
-        else:
-            catalog_image_url = content_object.catalog_image_url
+        catalog_image_url = content_object.catalog_image_url
         return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
     class Meta:
-        fields = ["id", "price", "description", "type", "course_runs", "thumbnail_url"]
+        fields = ["id", "price", "description", "type", "courses", "thumbnail_url"]
         model = models.ProductVersion
 
 
@@ -132,7 +127,16 @@ class BasketSerializer(serializers.ModelSerializer):
     def get_items(self, instance):
         """ Get the basket items """
         return [
-            ProductVersionSerializer(instance=latest_product_version(item.product)).data
+            {
+                **ProductVersionSerializer(
+                    instance=latest_product_version(item.product)
+                ).data,
+                "run_ids": list(
+                    models.CourseRunSelection.objects.filter(
+                        basket=instance
+                    ).values_list("run", flat=True)
+                ),
+            }
             for item in instance.basketitems.all()
         ]
 
