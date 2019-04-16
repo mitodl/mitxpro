@@ -71,13 +71,13 @@ export class CheckoutPage extends React.Component<Props, State> {
     }
 
     const item = basket.items[0]
-    const coupon = item
-      ? basket.coupons.find(coupon => coupon.targets.includes(item.id))
-      : null
-
     if (!item) {
       return <div>No item in basket</div>
     }
+
+    const coupon = basket.coupons.find(coupon =>
+      coupon.targets.includes(item.id)
+    )
 
     return (
       <div className="checkout-page">
