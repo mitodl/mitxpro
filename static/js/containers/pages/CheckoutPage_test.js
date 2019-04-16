@@ -143,6 +143,18 @@ describe("CheckoutPage", () => {
     await inner.find("button.checkout").prop("onClick")()
     sinon.assert.calledWith(createFormStub, url, payload)
     sinon.assert.calledWith(submitStub)
+    sinon.assert.calledWith(
+      helper.handleRequestStub,
+      "/api/checkout/",
+      "POST",
+      {
+        body:    undefined,
+        headers: {
+          "X-CSRFTOKEN": null
+        },
+        credentials: undefined
+      }
+    )
   })
 
   it("displays no items if there are none in the basket", async () => {
