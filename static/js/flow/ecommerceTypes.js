@@ -5,7 +5,8 @@ import type { CourseRun } from "./courseTypes"
 export type CheckoutResponse = {
   url: string,
   payload: CheckoutPayload,
-  method?: ?string
+  method?: ?string,
+  errors?: string|Array<string>
 };
 
 export type CheckoutPayload = {
