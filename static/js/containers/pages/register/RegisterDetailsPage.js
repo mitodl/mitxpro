@@ -34,9 +34,7 @@ class RegisterProfilePage extends React.Component<Props> {
   async onSubmit({ name, password }, { setSubmitting, setErrors }) {
     const {
       registerDetails,
-      // getCurrentUser,
       params: { partialToken }
-      // history
     } = this.props
 
     try {
@@ -49,8 +47,6 @@ class RegisterProfilePage extends React.Component<Props> {
       )
 
       if (state === STATE_SUCCESS) {
-        // await getCurrentUser()
-        // history.push(routes.home)
         window.location.href = routes.root
       } else if (errors.length > 0) {
         setErrors({
