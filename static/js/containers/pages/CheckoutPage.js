@@ -5,8 +5,12 @@ import { connectRequest, mutateAsync } from "redux-query"
 import { compose } from "redux"
 
 import queries from "../../lib/queries"
-import { calculatePrice, formatPrice } from "../../lib/ecommerce"
-import { createForm } from "../../lib/form"
+import {
+  calculateDiscount,
+  calculatePrice,
+  formatPrice
+} from "../../lib/ecommerce"
+import { createCyberSourceForm } from "../../lib/form"
 
 import type { Response } from "redux-query"
 import type {
@@ -33,7 +37,7 @@ export class CheckoutPage extends React.Component<Props, State> {
 
     const response = await checkout()
     const { url, payload } = response.body
-    const form = createForm(url, payload)
+    const form = createCyberSourceForm(url, payload)
     const body: HTMLElement = (document.querySelector("body"): any)
     body.appendChild(form)
     form.submit()
@@ -91,7 +95,7 @@ export class CheckoutPage extends React.Component<Props, State> {
         <div className="row price-row">Price {formatPrice(item.price)}</div>
         {coupon ? (
           <div className="row discount-row">
-            Discount applied {formatPrice(item.price * coupon.amount)}
+            Discount applied {formatPrice(calculateDiscount(item, coupon))}
           </div>
         ) : null}
         <div className="row">Coupon (optional)</div>

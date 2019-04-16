@@ -6,7 +6,11 @@ import CheckoutPage, { CheckoutPage as InnerCheckoutPage } from "./CheckoutPage"
 import * as formFuncs from "../../lib/form"
 import IntegrationTestHelper from "../../util/integration_test_helper"
 import { makeBasketResponse, makeCoupon } from "../../factories/ecommerce"
-import { calculatePrice, formatPrice } from "../../lib/ecommerce"
+import {
+  calculateDiscount,
+  calculatePrice,
+  formatPrice
+} from "../../lib/ecommerce"
 
 describe("CheckoutPage", () => {
   let helper, renderPage, basket
@@ -55,7 +59,9 @@ describe("CheckoutPage", () => {
       if (hasCoupon) {
         assert.equal(
           inner.find(".discount-row").text(),
-          `Discount applied ${formatPrice(basketItem.price * coupon.amount)}`
+          `Discount applied ${formatPrice(
+            calculateDiscount(basketItem, coupon)
+          )}`
         )
       } else {
         assert.isFalse(inner.find(".discount-row").exists())
@@ -132,7 +138,7 @@ describe("CheckoutPage", () => {
     // $FlowFixMe: need to overwrite this function to mock it
     form.submit = submitStub
     const createFormStub = helper.sandbox
-      .stub(formFuncs, "createForm")
+      .stub(formFuncs, "createCyberSourceForm")
       .returns(form)
     await inner.find("button.checkout").prop("onClick")()
     sinon.assert.calledWith(createFormStub, url, payload)

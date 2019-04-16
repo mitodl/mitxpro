@@ -6,7 +6,7 @@ import type { CheckoutPayload } from "../flow/ecommerceTypes"
  * @param url the url for the form action
  * @param payload Each key value pair will become an input field
  */
-export function createForm(
+export function createCyberSourceForm(
   url: string,
   payload: CheckoutPayload
 ): HTMLFormElement {

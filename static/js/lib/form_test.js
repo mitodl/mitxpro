@@ -2,12 +2,12 @@
 import { assert } from "chai"
 
 import { CYBERSOURCE_CHECKOUT_RESPONSE } from "./test_constants"
-import { createForm } from "./form"
+import { createCyberSourceForm } from "./form"
 
 describe("form functions", () => {
   it("creates a form with hidden values corresponding to the payload", () => {
     const { url, payload } = CYBERSOURCE_CHECKOUT_RESPONSE
-    const form = createForm(url, payload)
+    const form = createCyberSourceForm(url, payload)
 
     const clone = { ...payload }
     for (const hidden of form.querySelectorAll("input[type=hidden]")) {
