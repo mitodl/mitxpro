@@ -19,7 +19,6 @@ export default {
   }),
   basketQuery: () => ({
     url:       "/api/basket/",
-    queryKey:  "get basket",
     transform: (json: BasketResponse) => ({
       basket: json
     }),

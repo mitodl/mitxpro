@@ -96,6 +96,8 @@ describe("CheckoutPage", () => {
     inner.find(".coupon-code-row input").prop("onChange")(event)
     assert.equal(inner.state().couponCode, couponCode)
   })
+
+  //
   ;[true, false].forEach(hasCouponCode => {
     it(`${hasCouponCode ? "submits" : "clears"} the coupon code`, async () => {
       const { inner } = await renderPage()
@@ -120,6 +122,22 @@ describe("CheckoutPage", () => {
         }
       )
     })
+  })
+
+  it("tries to submit the coupon code but receives an error message", async () => {
+    const { inner } = await renderPage()
+    const errors = "Unknown error"
+    helper.handleRequestStub.returns({
+      status: 400,
+      body:   {
+        errors
+      }
+    })
+    await inner.find("form").prop("onSubmit")({
+      preventDefault: helper.sandbox.stub()
+    })
+
+    assert.equal(inner.state().errors, errors)
   })
 
   it("checks out", async () => {

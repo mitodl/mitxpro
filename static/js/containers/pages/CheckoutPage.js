@@ -25,11 +25,13 @@ type Props = {
   updateBasket: (payload: BasketPayload) => Promise<*>
 }
 type State = {
-  couponCode: string | null
+  couponCode: string | null,
+  errors: string | Array<string> | null
 }
 export class CheckoutPage extends React.Component<Props, State> {
   state = {
-    couponCode: null
+    couponCode: null,
+    errors:     null
   }
 
   submit = async () => {
@@ -55,7 +57,7 @@ export class CheckoutPage extends React.Component<Props, State> {
 
     e.preventDefault()
 
-    await updateBasket({
+    const response = await updateBasket({
       coupons: couponCode
         ? [
           {
@@ -64,11 +66,13 @@ export class CheckoutPage extends React.Component<Props, State> {
         ]
         : []
     })
+    const errors = response.status !== 200 ? response.body.errors : null
+    this.setState({ errors })
   }
 
   render() {
     const { basket } = this.props
-    const { couponCode } = this.state
+    const { couponCode, errors } = this.state
 
     if (!basket) {
       return null
@@ -103,7 +107,9 @@ export class CheckoutPage extends React.Component<Props, State> {
           <form onSubmit={this.submitCoupon}>
             <input
               type="text"
-              value={couponCode !== null ? couponCode : coupon && coupon.code}
+              value={
+                (couponCode !== null ? couponCode : coupon && coupon.code) || ""
+              }
               onChange={this.updateCouponCode}
             />
             <button type="submit">Update</button>
@@ -112,6 +118,7 @@ export class CheckoutPage extends React.Component<Props, State> {
         <div className="row total-row">
           Total {formatPrice(calculatePrice(item, coupon))}
         </div>
+        {errors ? <div className="error">Error: {errors}</div> : null}
         <button className="checkout" onClick={this.submit}>
           Place your order
         </button>
