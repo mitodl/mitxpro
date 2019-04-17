@@ -1,57 +1,166 @@
+$standard-padding: 25px;
+$text-link-color: rgb(163, 31, 52);
+
 h1, h2, h3, h4, h5 {
   -webkit-font-smoothing: antialiased; // sass-lint:disable-line no-vendor-prefixes
 }
 
 .course-catalog {
-  background-color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ffffff;
 
-  h1 {
-    padding: 10px 0;
-    margin: 0;
+  header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
     text-align: center;
-    font-size: 24px;
-    font-weight: 400;
-    color: rgb(100, 100, 100);
+    padding: 30px 0;
+
+    h1, h3 {
+      padding: 0;
+      margin: 0;
+      max-width: 700px;
+    }
+
+    h1 {
+      font-size: 34px;
+      padding-bottom: 15px;
+    }
+
+    h3 {
+      font-size: 26px;
+      font-weight: 400;
+    }
   }
 }
 
-.course-catalog .mdc-layout-grid {
-  max-width: 73.125rem;
+.course-catalog .catalog-body {
+  max-width: 850px;
 
-  .course-card {
+  .catalog-card {
     background-color: #fff;
     box-sizing: border-box;
-    border: 1px solid #bebebe;
-    border-bottom: 3px solid #126f9a;
     box-shadow: 0 1px 10px 0 rgba(0,0,0,0.125), inset 0 0 0 1px rgba(255,255,255,0.75);
+    border: 1px solid #bebebe;
+    margin-bottom: 50px;
 
-    header .cover-image {
-      overflow: hidden;
+    .top {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #bebebe;
+      box-shadow: 0 7px 6px -6px rgba(0,0,0,0.125);
+      padding: $standard-padding $standard-padding 0 $standard-padding;
 
-      img {
-        max-width: 100%;
-        width: 100%;
-        height: auto;
+      .cover-image,
+      .top-level-details,
+      .offering-type {
+        flex: 1;
+        padding-bottom: $standard-padding;
+      }
+
+      .cover-image {
+        max-width: calc(275px + #{$standard-padding});
+      }
+
+      .top-level-details {
+        min-width: 175px;
+        max-width: 400px;
+      }
+
+      .offering-type {
+        flex-grow: 0;
       }
     }
 
-    .course-info {
-      padding: 15px;
-      height: 125px;
+    .cover-image {
+      .cover-image-frame {
+        display: flex;
+        justify-content: center;
+        overflow: hidden;
+        height: 155px;
+        max-width: 275px;
+        border-radius: 10px;
+        margin: 0 $standard-padding 0 0;
 
-      h5 {
+        img {
+          height: 155px;
+        }
+      }
+    }
+
+    .top-level-details {
+      h3, ul li {
         padding: 0;
-        margin: 0 0 10px 0;
-        font-size: 14px;
-        font-weight: 400;
       }
 
       h3 {
-        padding: 0 0 0 5px;
+        padding-bottom: 15px;
         margin: 0;
         font-size: 20px;
         font-weight: 400;
-        color: rgb(163, 31, 52);
+        color: #000000;
+
+        a:link, a:visited {
+          color: $text-link-color;
+          text-decoration: none;
+        }
+      }
+
+      ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        color: #909090;
+
+        li {
+          padding-bottom: 10px;
+
+          strong {
+            font-weight: 500;
+          }
+        }
+      }
+    }
+
+    .offering-type {
+      label {
+        display: inline-block;
+        padding: 7px;
+        border: 1px solid #dedede;
+        border-radius: 5px;
+        box-shadow: 0 1px 5px 0 rgba(0,0,0,0.125), inset 0 0 0 1px rgba(255,255,255,0.75);
+        color: #48d1cc;
+        font-weight: 500;
+        font-size: 12px;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+    }
+
+    .bottom {
+      padding: 15px $standard-padding;
+
+      .collapsible-menu {
+        cursor: pointer;
+      }
+
+      .details-body {
+        padding: 0 0 10px 20px;
+
+        ul.program-course-links {
+          list-style-type: none;
+          margin: 0;
+          padding: 0;
+
+          a:link, a:visited {
+            color: $text-link-color;
+          }
+        }
       }
     }
   }

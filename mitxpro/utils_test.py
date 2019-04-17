@@ -4,7 +4,13 @@ import datetime
 import pytz
 
 from ecommerce.models import Order
-from mitxpro.utils import get_field_names, now_in_utc, is_near_now, dict_without_keys
+from mitxpro.utils import (
+    get_field_names,
+    now_in_utc,
+    is_near_now,
+    dict_without_keys,
+    filter_dict_by_key_set,
+)
 
 
 def test_now_in_utc():
@@ -34,6 +40,16 @@ def test_dict_without_keys():
     assert dict_without_keys(d, "a") == {"b": 2, "c": 3}
     assert dict_without_keys(d, "a", "b") == {"c": 3}
     assert dict_without_keys(d, "doesnt_exist") == d
+
+
+def test_filter_dict_by_key_set():
+    """
+    Test that filter_dict_by_key_set returns a dict with only the given keys
+    """
+    d = {"a": 1, "b": 2, "c": 3, "d": 4}
+    assert filter_dict_by_key_set(d, {"a", "c"}) == {"a": 1, "c": 3}
+    assert filter_dict_by_key_set(d, {"a", "c", "nonsense"}) == {"a": 1, "c": 3}
+    assert filter_dict_by_key_set(d, {"nonsense"}) == {}
 
 
 def test_get_field_names():

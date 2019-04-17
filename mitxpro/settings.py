@@ -54,6 +54,7 @@ INSTALLED_APPS = (
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.humanize",
     "social_django",
     "server_status",
     "oauth2_provider",

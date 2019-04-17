@@ -28,7 +28,7 @@ const TopAppBar = ({ currentUser }: Props) => (
             <strong className="user-name">{currentUser.name}</strong>
             <a
               href={routes.logout}
-              className="link-button"
+              className="link-button red"
               aria-label="Log Out"
             >
               Log Out
@@ -38,14 +38,14 @@ const TopAppBar = ({ currentUser }: Props) => (
           <React.Fragment>
             <MixedLink
               dest={routes.login.begin}
-              className="link-button"
+              className="link-button red"
               aria-label="Login"
             >
               Login
             </MixedLink>
             <MixedLink
               dest={routes.register.begin}
-              className="link-button"
+              className="link-button red"
               aria-label="Login"
             >
               Register

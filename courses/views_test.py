@@ -2,6 +2,7 @@
 Tests for course views
 """
 # pylint: disable=unused-argument, redefined-outer-name
+import operator as op
 import pytest
 from django.urls import reverse
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
@@ -35,7 +36,7 @@ def course_runs():
 def test_get_programs(user_drf_client, programs):
     """Test the view that handles requests for all Programs"""
     resp = user_drf_client.get(reverse("programs_api-list"))
-    programs_data = resp.json()
+    programs_data = sorted(resp.json(), key=op.itemgetter("id"))
     assert len(programs_data) == len(programs)
     for program, program_data in zip(programs, programs_data):
         assert program_data == ProgramSerializer(program).data
@@ -56,7 +57,6 @@ def test_create_program(user_drf_client, programs):
     program = programs[0]
     program_data = ProgramSerializer(program).data
     del program_data["id"]
-    del program_data["thumbnail"]
     program_data["title"] = "New Program Title"
     request_url = reverse("programs_api-list")
     resp = user_drf_client.post(request_url, program_data)
@@ -108,7 +108,6 @@ def test_create_course(user_drf_client, courses):
     course = courses[0]
     course_data = CourseSerializer(course).data
     del course_data["id"]
-    del course_data["thumbnail"]
     course_data["title"] = "New Course Title"
     request_url = reverse("courses_api-list")
     resp = user_drf_client.post(request_url, course_data)

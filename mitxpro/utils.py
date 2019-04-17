@@ -77,6 +77,11 @@ def dict_without_keys(d, *omitkeys):
     return {key: d[key] for key in d.keys() if key not in omitkeys}
 
 
+def filter_dict_by_key_set(dict_to_filter, key_set):
+    """Takes a dictionary and returns a copy with only the keys that exist in the given set"""
+    return {key: dict_to_filter[key] for key in dict_to_filter.keys() if key in key_set}
+
+
 def serialize_model_object(obj):
     """
     Serialize model into a dict representable as JSON

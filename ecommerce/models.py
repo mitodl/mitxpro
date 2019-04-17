@@ -39,6 +39,11 @@ class Product(TimestampedModel):
     class Meta:
         unique_together = ("content_type", "object_id")
 
+    @property
+    def latest_version(self):
+        """Gets the most recently created ProductVersion associated with this Product"""
+        return self.productversions.order_by("-created_on").first()
+
     def __str__(self):
         """Description of a product"""
         return f"Product for {self.content_object}"

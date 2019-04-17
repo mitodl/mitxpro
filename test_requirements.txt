@@ -23,3 +23,4 @@ pytest-lazy-fixture==0.5.1
 responses
 safety
 semantic-version
+wagtail-factories

@@ -2,22 +2,22 @@
     "programs": [
         {
             "title": "Systems Engineering",
-            "description": "A four-course online program leading to a Professional Certificate from the Massachusetts Institute of Technology.",
+            "description": "<p>A four-course online program leading to a Professional Certificate from the Massachusetts Institute of Technology.</p>",
             "readable_id": "SysEngx"
         },
         {
             "title": "Digital Learning",
-            "description": "Learn stuff about digital learning."
+            "description": "<p>Learn stuff about digital learning.</p>"
         },
         {
             "title": "Analog Learning",
-            "description": "Learn stuff about analog learning."
+            "description": "<p>Learn stuff about analog learning.</p>"
         }
     ],
     "courses": [
         {
             "title": "edX Demonstration Course",
-            "description": "Demo course",
+            "description": "<p>This is edX's demo course</p>",
             "course_runs": [
                 {
                     "title": "edX Demonstration Course - Spring 2013",
@@ -31,7 +31,7 @@
             "program": "Systems Engineering",
             "title": "Architecture of Complex Systems",
             "position_in_program": 1,
-            "description": "Course 1 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program.",
+            "description": "<p>Course 1 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program.</p>",
             "readable_id": "SysEngxB1",
             "course_runs": [
                 {
@@ -48,7 +48,7 @@
             "program": "Systems Engineering",
             "title": "Models in Engineering",
             "position_in_program": 2,
-            "description": "Course 2 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.",
+            "description": "<p>Course 2 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.</p>",
             "readable_id": "SysEngxB2",
             "course_runs": [
                 {
@@ -65,7 +65,7 @@
             "program": "Systems Engineering",
             "title": "Model-Based Systems Engineering: Documentation and Analysis",
             "position_in_program": 3,
-            "description": "Course 3 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.",
+            "description": "<p>Course 3 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.</p>",
             "readable_id": "SysEngxB3",
             "course_runs": [
                 {
@@ -82,14 +82,21 @@
             "program": "Digital Learning",
             "title": "Digital Learning 100",
             "position_in_program": 1,
-            "description": "An introductory course to Digital Learning",
+            "description": "<p>An introductory course to Digital Learning</p>",
             "course_runs": [
                 {
-                    "title": "Digital Learning 100 - August 2016",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+100+Aug_2016",
-                    "start_date": "2016-08-15T00:00:00+00:00",
-                    "end_date": "2016-12-15T00:00:00+00:00",
-                    "enrollment_end": "2016-08-29T00:00:00+00:00"
+                    "title": "Digital Learning 100 - August 2021",
+                    "courseware_id": "course-v1:MITx+Digital+Learning+100+Aug_2021",
+                    "start_date": "2021-08-15T00:00:00+00:00",
+                    "end_date": "2021-12-15T00:00:00+00:00",
+                    "enrollment_end": "2021-08-29T00:00:00+00:00"
+                },
+                {
+                    "title": "Digital Learning 100 - August 2020",
+                    "courseware_id": "course-v1:MITx+Digital+Learning+100+Aug_2020",
+                    "start_date": "2020-08-15T00:00:00+00:00",
+                    "end_date": "2020-12-15T00:00:00+00:00",
+                    "enrollment_end": "2020-08-29T00:00:00+00:00"
                 },
                 {
                     "title": "Digital Learning 100 - January 2016",
@@ -111,7 +118,7 @@
             "program": "Digital Learning",
             "title": "Digital Learning 200",
             "position_in_program": 2,
-            "description": "A more advanced course in Digital Learning",
+            "description": "<p>A more advanced course in Digital Learning</p>",
             "course_runs": [
                 {
                     "title": "Digital Learning 200 - August 2016",
@@ -140,7 +147,7 @@
             "program": "Digital Learning",
             "title": "Digital Learning 300",
             "position_in_program": 3,
-            "description": "The most advancedest course in Digital Learning",
+            "description": "<p>The most advancedest course in Digital Learning</p>",
             "course_runs": [
                 {
                     "title": "Digital Learning 300 - August 2016",
@@ -172,7 +179,7 @@
             "program": "Analog Learning",
             "title": "Analog Learning 100",
             "position_in_program": 1,
-            "description": "An introductory course to Analog Learning",
+            "description": "<p>An introductory course to Analog Learning</p>",
             "course_runs": [
                 {
                     "title": "Analog Learning 100 - August 2016",
@@ -204,7 +211,7 @@
             "program": "Analog Learning",
             "title": "Analog Learning 200",
             "position_in_program": 2,
-            "description": "A more advanced course in Analog Learning",
+            "description": "<p>A more advanced course in Analog Learning</p>",
             "course_runs": [
                 {
                     "title": "Analog Learning 200 - August 2016",
@@ -236,7 +243,7 @@
             "program": "Analog Learning",
             "title": "Analog Learning 300",
             "position_in_program": 3,
-            "description": "The most advancedest course in Analog Learning",
+            "description": "<p>The most advancedest course in Analog Learning</p>",
             "course_runs": [
                 {
                     "title": "Analog Learning 300 - August 2016",
@@ -266,7 +273,7 @@
         },
         {
             "title": "Quantitative Methods in Systems Engineering",
-            "description": "The course where the methods are quantitative and the systems are engineered.",
+            "description": "<p>The course where the methods are quantitative and the systems are engineered.</p>",
             "course_runs": [
                 {
                     "title": "Quantitative Methods - August 2019",
@@ -281,7 +288,7 @@
         },
         {
             "title": "Introduction to Quantum Computing",
-            "description": "An introduction to a type of computing, and that type of computing is quantum.",
+            "description": "<p>An introduction to a type of computing, and that type of computing is quantum.</p>",
             "course_runs": [
                 {
                     "title": "Quantum Computing - August 2019",
@@ -296,7 +303,7 @@
         },
         {
             "title": "Introduction to Not-Live Courses",
-            "description": "A course that is not live.",
+            "description": "<p>A course that is not live.</p>",
             "live": false,
             "course_runs": [
                 {

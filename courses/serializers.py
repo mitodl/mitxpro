@@ -12,7 +12,6 @@ class ProgramSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Program
         fields = "__all__"
-        extra_fields = {"thumbnail": {"readonly": True}}
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -21,7 +20,6 @@ class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Course
         fields = "__all__"
-        extra_fields = {"thumbnail": {"readonly": True}}
 
 
 class CourseRunSerializer(serializers.ModelSerializer):
