@@ -431,7 +431,7 @@ def test_patch_basket_clear_coupon_auto(basket_client, basket_and_coupons):
     assert resp_data.get("coupons") == [
         {
             "code": auto_coupon.coupon_code,
-            "amount": basket_and_coupons.coupongroup_worst.payment_version.amount,
+            "amount": str(basket_and_coupons.coupongroup_worst.payment_version.amount),
             "targets": [basket_and_coupons.product_version.id],
         }
     ]

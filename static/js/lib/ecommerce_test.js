@@ -1,6 +1,6 @@
 // @flow
 import { assert } from "chai"
-import _ from "lodash"
+import Decimal from "decimal.js-light"
 
 import { makeItem, makeCoupon } from "../factories/ecommerce"
 import { calculatePrice, formatPrice } from "./ecommerce"
@@ -8,25 +8,26 @@ import { calculatePrice, formatPrice } from "./ecommerce"
 describe("ecommerce", () => {
   describe("calculatePrice", () => {
     it("calculates the price of an item", () => {
-      const item = makeItem()
-      assert.equal(calculatePrice(item), _.round(parseFloat(item.price), 2))
+      const item = {
+        ...makeItem(),
+        price: "123.45"
+      }
+      assert.equal(calculatePrice(item), item.price)
     })
 
     it("calculates a price of an item including the coupon", () => {
-      const item = makeItem()
-      const coupon = makeCoupon(item)
-      assert.equal(
-        calculatePrice(item, coupon),
-        _.round(parseFloat(item.price) * (1 - coupon.amount), 2)
-      )
-    })
-
-    it("rounds the output", () => {
       const item = {
         ...makeItem(),
-        price: "123.456"
+        price: "123.45"
       }
-      assert.equal(calculatePrice(item), 123.46)
+      const coupon = {
+        ...makeCoupon(item),
+        amount: "0.5"
+      }
+      assert.equal(
+        calculatePrice(item, coupon).toString(),
+        new Decimal("61.72").toString()
+      )
     })
   })
 

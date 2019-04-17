@@ -45,11 +45,11 @@ def basket_and_coupons():
 
     # Coupon payment for worst coupon, with lowest discount
     civ_worst = CouponPaymentVersionFactory(
-        payment=payment_worst, amount=Decimal(0.1), automatic=True
+        payment=payment_worst, amount=Decimal("0.10"), automatic=True
     )
     # Coupon payment for best coupon, with highest discount
     civ_best_old = CouponPaymentVersionFactory(
-        payment=payment_best, amount=Decimal(0.5)
+        payment=payment_best, amount=Decimal("0.50")
     )
     # Coupon payment for best coupon, more recent than previous so takes precedence
     civ_best = CouponPaymentVersionFactory(payment=payment_best, amount=Decimal(0.4))

@@ -407,20 +407,17 @@ def test_get_product_version_price_with_discount(has_coupon, basket_and_coupons)
     product_version = basket_and_coupons.basket_item.product.productversions.order_by(
         "-created_on"
     ).first()
-    product_price = product_version.price
+    product_version.price = Decimal("123.45")
+    product_version.save()
 
     coupon_version = basket_and_coupons.coupongroup_best.coupon_version
     # Make sure to test that we round the results
-    coupon_version.payment_version.amount += Decimal(0.123_456)
-    discount = coupon_version.payment_version.amount
+    coupon_version.payment_version.amount = Decimal("0.5")
     price = get_product_version_price_with_discount(
         coupon_version=coupon_version if has_coupon else None,
         product_version=product_version,
     )
-    if has_coupon:
-        assert price == round(product_price * (1 - discount), 2)
-    else:
-        assert price == product_price
+    assert price == (Decimal("61.72") if has_coupon else Decimal("123.45"))
 
 
 def test_get_new_order_by_reference_number(basket_and_coupons):

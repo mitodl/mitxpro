@@ -2,6 +2,7 @@
 Functions for ecommerce
 """
 from base64 import b64encode
+import decimal
 import hashlib
 import hmac
 import logging
@@ -284,6 +285,20 @@ def get_product_price(product):
     return latest_product_version(product).price
 
 
+def round_half_up(number):
+    """
+    Round a decimal number using the ROUND_HALF_UP rule so we match what decimal.js does by default.
+
+    Args:
+        number (decimal.Decimal): A decimal number
+
+    Returns:
+        decimal.Decimal:
+            A rounded decimal number
+    """
+    return number.quantize(decimal.Decimal("0.01"), rounding=decimal.ROUND_HALF_UP)
+
+
 def get_product_version_price_with_discount(*, coupon_version, product_version):
     """
     Determine the new discounted price for a product after the coupon discount is applied
@@ -303,8 +318,10 @@ def get_product_version_price_with_discount(*, coupon_version, product_version):
             product__productversions=product_version,
         ).exists()
     ):
-        price *= 1 - coupon_version.payment_version.amount
-    return round(price, 2)
+        discount = round_half_up(coupon_version.payment_version.amount * price)
+    else:
+        discount = 0
+    return price - discount
 
 
 def redeem_coupon(coupon_version, order):

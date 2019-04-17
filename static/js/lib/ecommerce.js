@@ -1,23 +1,23 @@
 // @flow
-import _ from "lodash"
 import Decimal from "decimal.js-light"
 
 import type { BasketItem, Coupon } from "../flow/ecommerceTypes"
 
-export const calculateDiscount = (item: BasketItem, coupon: ?Coupon) => {
+export const calculateDiscount = (
+  item: BasketItem,
+  coupon: ?Coupon
+): Decimal => {
   if (coupon && coupon.targets.includes(item.id)) {
-    const amount = parseFloat(coupon.amount)
-    return amount * parseFloat(item.price)
+    return new Decimal(coupon.amount)
+      .times(new Decimal(item.price))
+      .toFixed(2, Decimal.ROUND_HALF_UP)
   }
 
-  return 0
+  return new Decimal(0)
 }
 
-export const calculatePrice = (item: BasketItem, coupon: ?Coupon): Decimal => {
-  const discount = calculateDiscount(item, coupon)
-  const discountedPrice = parseFloat(item.price) - discount
-  return _.round(discountedPrice, 2)
-}
+export const calculatePrice = (item: BasketItem, coupon: ?Coupon): Decimal =>
+  new Decimal(item.price).minus(calculateDiscount(item, coupon))
 
 export const formatPrice = (price: ?string | number | Decimal): string => {
   if (price === null || price === undefined) {
