@@ -1,6 +1,7 @@
 """Course views"""
 from rest_framework import viewsets, status
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Prefetch
 from django.views.generic import ListView, DetailView, CreateView
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -8,6 +9,7 @@ from requests.exceptions import HTTPError
 
 from courses.models import Program, Course, CourseRun
 from courses.serializers import ProgramSerializer, CourseSerializer, CourseRunSerializer
+from courses.constants import DEFAULT_COURSE_IMG_PATH
 from courseware.api import enroll_in_edx_course_run
 from courseware.utils import edx_redirect_url
 from mitxpro.views import get_js_settings_context
@@ -17,14 +19,14 @@ class ProgramViewSet(viewsets.ModelViewSet):
     """API view set for Programs"""
 
     serializer_class = ProgramSerializer
-    queryset = Program.objects.all()
+    queryset = Program.objects.select_related("programpage").all()
 
 
 class CourseViewSet(viewsets.ModelViewSet):
     """API view set for Courses"""
 
     serializer_class = CourseSerializer
-    queryset = Course.objects.all()
+    queryset = Course.objects.select_related("coursepage").all()
 
 
 class CourseRunViewSet(viewsets.ModelViewSet):
@@ -40,8 +42,23 @@ class CourseCatalogView(ListView):
     template_name = "catalog.html"
 
     def get_queryset(self):
-        programs_qset = Program.objects.filter(live=True)
-        courses_qset = Course.objects.filter(live=True).order_by("id")
+        sorted_courserun_qset = CourseRun.objects.order_by("start_date")
+        programs_qset = (
+            Program.objects.live()
+            .select_related("programpage")
+            .order_by("id")
+            .all()
+            .prefetch_related(
+                Prefetch("course_set__courserun_set", queryset=sorted_courserun_qset)
+            )
+        )
+        courses_qset = (
+            Course.objects.live()
+            .select_related("coursepage")
+            .order_by("id")
+            .all()
+            .prefetch_related(Prefetch("courserun_set", queryset=sorted_courserun_qset))
+        )
         return {"programs": programs_qset, "courses": courses_qset}
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -52,7 +69,7 @@ class CourseCatalogView(ListView):
             **get_js_settings_context(self.request),
             "programs": object_list["programs"],
             "courses": object_list["courses"],
-            "default_image_path": "images/mit-dome.png",
+            "default_image_path": DEFAULT_COURSE_IMG_PATH,
         }
 
 

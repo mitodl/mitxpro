@@ -3,22 +3,108 @@ Course models
 """
 import logging
 from django.db import models
+from django.contrib.contenttypes.fields import GenericRelation
 
+from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from courseware.utils import edx_redirect_url
+from ecommerce.models import Product
 from mitxpro.models import TimestampedModel
 from mitxpro.utils import now_in_utc, first_matching_item
 
 log = logging.getLogger(__name__)
 
 
+class ProgramQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
+    def live(self):
+        """Applies a filter for Programs with live=True"""
+        return self.filter(live=True)
+
+
+class ProgramManager(models.Manager):  # pylint: disable=missing-docstring
+    def get_queryset(self):
+        """Manager queryset"""
+        return ProgramQuerySet(self.model, using=self._db)
+
+    def live(self):
+        """Returns a queryset of Programs with live=True"""
+        return self.get_queryset().live()
+
+
+class CourseQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
+    def live(self):
+        """Applies a filter for Courses with live=True"""
+        return self.filter(live=True)
+
+
+class CourseManager(models.Manager):  # pylint: disable=missing-docstring
+    def get_queryset(self):
+        """Manager queryset"""
+        return CourseQuerySet(self.model, using=self._db)
+
+    def live(self):
+        """Returns a queryset of Courses with live=True"""
+        return self.get_queryset().live()
+
+
 class Program(TimestampedModel):
     """Model for a course program"""
 
+    objects = ProgramManager()
     title = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
-    thumbnail = models.ImageField(null=True, blank=True)
     readable_id = models.CharField(null=True, max_length=255)
     live = models.BooleanField(default=False)
+    products = GenericRelation(Product, related_query_name="programs")
+
+    @property
+    def page(self):
+        """Gets the associated ProgramPage"""
+        return getattr(self, "programpage", None)
+
+    @property
+    def thumbnail_image(self):
+        """Gets the thumbnail_image from the associated Page if it exists"""
+        return self.page.thumbnail_image if self.page else None
+
+    @property
+    def catalog_image_url(self):
+        """Gets the url for the thumbnail image as it appears in the catalog (if that image exists)"""
+        return (
+            self.thumbnail_image.get_rendition(CATALOG_COURSE_IMG_WAGTAIL_FILL).url
+            if self.thumbnail_image
+            else None
+        )
+
+    @property
+    def description(self):
+        """Gets the description from the associated Page if it exists"""
+        return self.page.description if self.page else None
+
+    @property
+    def duration(self):
+        """Gets the duration from the associated Page if it exists"""
+        return self.page.duration if self.page else None
+
+    @property
+    def next_run_date(self):
+        """Gets the start date of the next CourseRun if one exists"""
+        # NOTE: This is implemented with min() and course_set.all() to allow for prefetch_related
+        #   optimization. You can get the desired start_date with a filtered and sorted query, but
+        #   that would run a new query even if prefetch_related was used.
+        return min(
+            filter(None, [course.next_run_date for course in self.course_set.all()]),
+            default=None,
+        )
+
+    @property
+    def current_price(self):
+        """Gets the price if it exists"""
+        product = self.products.first()
+        if not product:
+            return None
+        latest_version = product.latest_version
+        if not latest_version:
+            return None
+        return latest_version.price
 
     def __str__(self):
         return self.title
@@ -27,15 +113,71 @@ class Program(TimestampedModel):
 class Course(TimestampedModel):
     """Model for a course"""
 
+    objects = CourseManager()
     program = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=True, blank=True
     )
     position_in_program = models.PositiveSmallIntegerField(null=True, blank=True)
     title = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
-    thumbnail = models.ImageField(null=True, blank=True)
     readable_id = models.CharField(null=True, max_length=255)
     live = models.BooleanField(default=False)
+    products = GenericRelation(Product, related_query_name="courses")
+
+    @property
+    def page(self):
+        """Gets the associated CoursePage"""
+        return getattr(self, "coursepage", None)
+
+    @property
+    def thumbnail_image(self):
+        """Gets the thumbnail_image from the associated Page if it exists"""
+        return self.page.thumbnail_image if self.page else None
+
+    @property
+    def catalog_image_url(self):
+        """Gets the url for the thumbnail image as it appears in the catalog (if that image exists)"""
+        return (
+            self.thumbnail_image.get_rendition(CATALOG_COURSE_IMG_WAGTAIL_FILL).url
+            if self.thumbnail_image
+            else None
+        )
+
+    @property
+    def description(self):
+        """Gets the description from the associated Page if it exists"""
+        return self.page.description if self.page else None
+
+    @property
+    def duration(self):
+        """Gets the duration from the associated Page if it exists"""
+        return self.page.duration if self.page else None
+
+    @property
+    def next_run_date(self):
+        """Gets the start date of the next CourseRun if one exists"""
+        now = now_in_utc()
+        # NOTE: This is implemented with min() and courserun_set.all() to allow for prefetch_related
+        #   optimization. You can get the desired start_date with a filtered and sorted query, but
+        #   that would run a new query even if prefetch_related was used.
+        return min(
+            (
+                course_run.start_date
+                for course_run in self.courserun_set.all()
+                if course_run.start_date > now
+            ),
+            default=None,
+        )
+
+    @property
+    def current_price(self):
+        """Gets the price if it exists"""
+        product = self.products.first()
+        if not product:
+            return None
+        latest_version = product.latest_version
+        if not latest_version:
+            return None
+        return latest_version.price
 
     @property
     def first_unexpired_run(self):
@@ -124,9 +266,6 @@ class CourseRun(TimestampedModel):
         """
         return not self.is_past and self.is_not_beyond_enrollment
 
-    def __str__(self):
-        return self.title
-
     @property
     def courseware_url(self):
         """
@@ -140,3 +279,6 @@ class CourseRun(TimestampedModel):
             if self.courseware_url_path
             else None
         )
+
+    def __str__(self):
+        return self.title

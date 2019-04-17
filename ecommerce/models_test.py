@@ -2,7 +2,12 @@
 import pytest
 
 from courses.factories import CourseFactory, CourseRunFactory, ProgramFactory
-from ecommerce.factories import CouponRedemptionFactory, LineFactory
+from ecommerce.factories import (
+    CouponRedemptionFactory,
+    LineFactory,
+    ProductFactory,
+    ProductVersionFactory,
+)
 from ecommerce.models import OrderAudit
 from mitxpro.utils import serialize_model_object
 from users.factories import UserFactory
@@ -45,3 +50,14 @@ def test_order_audit(has_user):
             for coupon in order.couponredemption_set.all()
         ],
     }
+
+
+def test_latest_version():
+    """
+    The latest_version property should return the latest product version
+    """
+    versions_to_create = 4
+    product = ProductFactory.create()
+    versions = ProductVersionFactory.create_batch(versions_to_create, product=product)
+    # Latest version should be the most recently created
+    assert product.latest_version == versions[versions_to_create - 1]

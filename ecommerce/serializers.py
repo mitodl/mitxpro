@@ -9,6 +9,7 @@ from rest_framework.validators import UniqueValidator
 
 from courses.models import Course, CourseRun
 from courses.serializers import CourseRunSerializer
+from courses.constants import DEFAULT_COURSE_IMG_PATH
 from ecommerce import models
 from ecommerce.api import latest_product_version, latest_coupon_version
 from ecommerce.models import (
@@ -74,14 +75,10 @@ class ProductVersionSerializer(serializers.ModelSerializer):
         """Return the thumbnail for the course or program"""
         content_object = instance.product.content_object
         if isinstance(content_object, CourseRun):
-            thumbnail = content_object.course.thumbnail
+            catalog_image_url = content_object.course.catalog_image_url
         else:
-            thumbnail = content_object.thumbnail
-
-        if thumbnail:
-            return thumbnail.url
-        else:
-            return static("images/mit-dome.png")
+            catalog_image_url = content_object.catalog_image_url
+        return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
     class Meta:
         fields = ["id", "price", "description", "type", "course_runs", "thumbnail_url"]

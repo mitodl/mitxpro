@@ -23,7 +23,12 @@ class ProductPage(Page):
     description = RichTextField(
         blank=True, help_text="The description shown on the program page"
     )
-
+    duration = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True,
+        help_text="A short description indicating how long it takes to complete (e.g. '4 weeks')",
+    )
     thumbnail_image = models.ForeignKey(
         Image,
         null=True,
@@ -44,6 +49,7 @@ class ProductPage(Page):
     )
 
     content_panels = Page.content_panels + [
+        FieldPanel("duration"),
         FieldPanel("description", classname="full"),
         FieldPanel("thumbnail_image"),
         StreamFieldPanel("content"),
@@ -68,7 +74,7 @@ class ProgramPage(ProductPage):
         on_delete=models.SET_NULL,
         help_text="The program for this page",
     )
-    content_panels = ProductPage.content_panels + [FieldPanel("program")]
+    content_panels = [FieldPanel("program")] + ProductPage.content_panels
 
 
 class CoursePage(ProductPage):
@@ -84,4 +90,4 @@ class CoursePage(ProductPage):
         on_delete=models.SET_NULL,
         help_text="The course for this page",
     )
-    content_panels = ProductPage.content_panels + [FieldPanel("course")]
+    content_panels = [FieldPanel("course")] + ProductPage.content_panels

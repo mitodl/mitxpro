@@ -4,9 +4,11 @@ Tests for ecommerce serializers
 # pylint: disable=unused-argument, redefined-outer-name
 import pytest
 
+from cms.factories import CoursePageFactory, ProgramPageFactory
 from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
 from courses.models import CourseRun
 from courses.serializers import CourseRunSerializer
+from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.factories import ProductVersionFactory, ProductFactory
 from ecommerce.models import CouponSelection, Product
 from ecommerce.serializers import (
@@ -18,6 +20,7 @@ from ecommerce.serializers import (
     CouponPaymentVersionSerializer,
     ProductSerializer,
 )
+
 
 pytestmark = [pytest.mark.django_db]
 
@@ -78,30 +81,54 @@ def test_serialize_basket_product_version_program():
 
 
 def test_basket_thumbnail_courserun(basket_and_coupons):
-    """Basket thumbnail should have """
-    image = "abcde"
-    run = CourseRunFactory.create(course__thumbnail=image)
+    """Basket thumbnail should be serialized for a course run"""
+    thumbnail_filename = "abcde.jpg"
+    run = CourseRunFactory.create()
+    course_page = CoursePageFactory.create(
+        course=run.course, thumbnail_image__file__filename=thumbnail_filename
+    )
     product_version = ProductVersionFactory.create(product__content_object=run)
     data = ProductVersionSerializer(product_version).data
-    assert data["thumbnail_url"] == "/media/abcde"
+    assert (
+        data["thumbnail_url"]
+        == course_page.thumbnail_image.get_rendition(
+            CATALOG_COURSE_IMG_WAGTAIL_FILL
+        ).url
+    )
 
 
 def test_basket_thumbnail_course(basket_and_coupons):
-    """Basket thumbnail should have """
-    image = "abcde"
-    run = CourseFactory.create(thumbnail=image)
-    product_version = ProductVersionFactory.create(product__content_object=run)
+    """Basket thumbnail should be serialized for a course"""
+    thumbnail_filename = "abcde.jpg"
+    course_page = CoursePageFactory.create(
+        thumbnail_image__file__filename=thumbnail_filename
+    )
+    course = course_page.course
+    product_version = ProductVersionFactory.create(product__content_object=course)
     data = ProductVersionSerializer(product_version).data
-    assert data["thumbnail_url"] == "/media/abcde"
+    assert (
+        data["thumbnail_url"]
+        == course_page.thumbnail_image.get_rendition(
+            CATALOG_COURSE_IMG_WAGTAIL_FILL
+        ).url
+    )
 
 
 def test_basket_thumbnail_program(basket_and_coupons):
-    """Basket thumbnail should have """
-    image = "abcde"
-    run = ProgramFactory.create(thumbnail=image)
-    product_version = ProductVersionFactory.create(product__content_object=run)
+    """Basket thumbnail should be serialized for a program"""
+    thumbnail_filename = "abcde.jpg"
+    program_page = ProgramPageFactory.create(
+        thumbnail_image__file__filename=thumbnail_filename
+    )
+    program = program_page.program
+    product_version = ProductVersionFactory.create(product__content_object=program)
     data = ProductVersionSerializer(product_version).data
-    assert data["thumbnail_url"] == "/media/abcde"
+    assert (
+        data["thumbnail_url"]
+        == program_page.thumbnail_image.get_rendition(
+            CATALOG_COURSE_IMG_WAGTAIL_FILL
+        ).url
+    )
 
 
 def test_serialize_basket_coupon_selection(basket_and_coupons):

@@ -14,7 +14,6 @@ class ProgramFactory(DjangoModelFactory):
     """Factory for Programs"""
 
     title = fuzzy.FuzzyText(prefix="Program ")
-    description = fuzzy.FuzzyText()
     live = factory.Faker("boolean")
 
     class Meta:
@@ -27,7 +26,6 @@ class CourseFactory(DjangoModelFactory):
     program = factory.SubFactory(ProgramFactory)
     position_in_program = factory.Sequence(lambda n: n)
     title = fuzzy.FuzzyText(prefix="Course ")
-    description = fuzzy.FuzzyText()
     live = factory.Faker("boolean")
 
     class Meta:
@@ -62,3 +60,8 @@ class CourseRunFactory(DjangoModelFactory):
 
     class Meta:
         model = CourseRun
+
+    class Params:
+        past_start = factory.Trait(
+            start_date=factory.Faker("past_datetime", tzinfo=pytz.utc)
+        )

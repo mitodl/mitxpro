@@ -5,16 +5,17 @@
 
 {% block content %}
 <div class="course-catalog">
-  <h1>Explore MIT's online courses for professionals</h1>
-  <div class="catalog-body mdc-layout-grid">
-    <div class="mdc-layout-grid__inner">
+  <header>
+    <h1>MIT xPRO &mdash; Professional Development, The MIT Way</h1>
+    <h3>Explore MIT's courses for game-changing professionals</h3>
+  </header>
+  <section class="catalog-body">
     {% for program in programs %}
-      {% include "catalog_card.html" with courseware_object=program object_type="program" default_image_path=default_image_path %}
+      {% include "catalog_card.html" with courseware_object=program object_type="program" %}
     {% endfor %}
     {% for course in courses %}
-      {% include "catalog_card.html" with courseware_object=course object_type="course" default_image_path=default_image_path %}
+      {% include "catalog_card.html" with courseware_object=course object_type="course" %}
     {% endfor %}
-    </div>
-  </div>
+  </section>
 </div>
 {% endblock %}

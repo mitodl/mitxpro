@@ -1,0 +1,41 @@
+// Adapted from an example on alligator.io (https://alligator.io/css/collapsible/)
+
+.wrap-collapsible {
+  margin-bottom: 0;
+}
+
+input[type='checkbox'] {
+  display: none;
+}
+
+.lbl-toggle {
+  display: block;
+  cursor: pointer;
+  transition: all 0.25s ease-out;
+}
+
+.lbl-toggle::before {
+  content: "\FF0B";
+  display: inline-block;
+  vertical-align: middle;
+  padding-bottom: 2px;
+}
+
+.toggle:checked + .lbl-toggle::before {
+  content: "\FF0D";
+}
+
+.collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .25s ease-in-out;
+}
+
+.toggle:checked + .lbl-toggle + .collapsible-content {
+  max-height: 350px;
+}
+
+.toggle:checked + .lbl-toggle {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}

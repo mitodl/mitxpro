@@ -16,9 +16,7 @@ def test_serialize_program():
     data = ProgramSerializer(program).data
     assert data == {
         "title": program.title,
-        "description": program.description,
         "readable_id": program.readable_id,
-        "thumbnail": program.thumbnail,
         "live": program.live,
         "id": program.id,
         "created_on": drf_datetime(program.created_on),
@@ -28,12 +26,7 @@ def test_serialize_program():
 
 def test_deserialize_program():
     """Test Program deserialization"""
-    data = {
-        "title": "Some Title",
-        "description": "Some Description",
-        "readable_id": "some-id",
-        "live": True,
-    }
+    data = {"title": "Some Title", "readable_id": "some-id", "live": True}
     serializer = ProgramSerializer(data=data)
     is_valid = serializer.is_valid(raise_exception=True)
     assert is_valid is True
@@ -46,9 +39,7 @@ def test_serialize_course():
     data = CourseSerializer(course).data
     assert data == {
         "title": course.title,
-        "description": course.description,
         "readable_id": course.readable_id,
-        "thumbnail": course.thumbnail,
         "live": course.live,
         "position_in_program": None,
         "program": None,
@@ -66,7 +57,6 @@ def test_deserialize_course():
         "program": program.id,
         "position_in_program": 1,
         "title": "Some Title",
-        "description": "Some Description",
         "readable_id": "some-id",
         "live": True,
     }
