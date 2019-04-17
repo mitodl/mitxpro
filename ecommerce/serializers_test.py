@@ -138,9 +138,7 @@ def test_serialize_basket_coupon_selection(basket_and_coupons):
     data = CouponSelectionSerializer(selection).data
     assert data == {
         "code": selection.coupon.coupon_code,
-        "amount": str(
-            round_half_up(basket_and_coupons.coupongroup_best.payment_version.amount)
-        ),
+        "amount": str(basket_and_coupons.coupongroup_best.payment_version.amount),
         "targets": [basket_and_coupons.product_version.id],
     }
 

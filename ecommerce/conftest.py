@@ -52,7 +52,7 @@ def basket_and_coupons():
         payment=payment_best, amount=Decimal("0.50")
     )
     # Coupon payment for best coupon, more recent than previous so takes precedence
-    civ_best = CouponPaymentVersionFactory(payment=payment_best, amount=Decimal(0.4))
+    civ_best = CouponPaymentVersionFactory(payment=payment_best, amount=Decimal("0.40"))
 
     # Coupon version for worst coupon
     cv_worst = CouponVersionFactory(payment_version=civ_worst, coupon=coupon_worst)
