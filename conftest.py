@@ -1,6 +1,8 @@
 """Project conftest"""
 # pylint: disable=wildcard-import,unused-wildcard-import
+import os
 import shutil
+
 import pytest
 from django.conf import settings
 
@@ -23,4 +25,5 @@ def clean_up_files():
     effectively deleting any files that were created by factories over the course of the test suite.
     """
     yield
-    shutil.rmtree(TEST_MEDIA_ROOT)
+    if os.path.exists(TEST_MEDIA_ROOT):
+        shutil.rmtree(TEST_MEDIA_ROOT)
