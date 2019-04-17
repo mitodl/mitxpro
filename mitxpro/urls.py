@@ -48,6 +48,7 @@ urlpatterns = [
     path("login/password/", index, name="login-password"),
     path("signup/", index, name="signup"),
     path("signup/details/", index, name="signup-details"),
+    path("checkout/", index, name="checkout-page"),
     path("signup/confirm/", index, name="register-confirm"),
     path("account/inactive/", index, name="account-inactive"),
     # social django needs to be here to preempt the login

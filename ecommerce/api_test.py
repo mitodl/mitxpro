@@ -152,6 +152,47 @@ def test_signed_payload(mocker):
     now_mock.assert_called_once_with()
 
 
+def test_payload_overrides():
+    """No overrides should be provided if the link is not https"""
+    order = OrderFactory.create()
+    payload = generate_cybersource_sa_payload(order, "http://base_url")
+    assert "override_custom_cancel_page" not in payload
+    assert "override_custom_receipt_page" not in payload
+
+
+def test_payload_coupons():
+    """Coupon discounts should be factored into the total"""
+    line1 = LineFactory.create()
+    line2 = LineFactory.create(
+        order=line1.order,
+        product_version__product__content_object=CourseFactory.create(),
+    )
+    order = line1.order
+    username = "username"
+    order.purchaser.username = username
+    order.purchaser.save()
+
+    coupon_version = CouponVersionFactory.create()
+    # Coupon only eligible for line2, not line1
+    CouponRedemption.objects.create(coupon_version=coupon_version, order=order)
+
+    payload = generate_cybersource_sa_payload(order, "base")
+    signature = payload.pop("signature")
+    assert generate_cybersource_sa_signature(payload) == signature
+    signed_field_names = payload["signed_field_names"].split(",")
+    assert signed_field_names == sorted(payload.keys())
+
+    total_price = sum(
+        get_product_version_price_with_discount(
+            product_version=line.product_version, coupon_version=coupon_version
+        )
+        for line in [line1, line2]
+    )
+    assert payload["amount"] == str(total_price)
+    assert payload["item_0_unit_price"] == str(line1.product_version.price)
+    assert payload["item_1_unit_price"] == str(line2.product_version.price)
+
+
 def test_make_reference_id():
     """
     make_reference_id should concatenate the reference prefix and the order id
@@ -366,18 +407,17 @@ def test_get_product_version_price_with_discount(has_coupon, basket_and_coupons)
     product_version = basket_and_coupons.basket_item.product.productversions.order_by(
         "-created_on"
     ).first()
-    product_price = product_version.price
+    product_version.price = Decimal("123.45")
+    product_version.save()
 
     coupon_version = basket_and_coupons.coupongroup_best.coupon_version
-    discount = coupon_version.payment_version.amount
+    # Make sure to test that we round the results
+    coupon_version.payment_version.amount = Decimal("0.5")
     price = get_product_version_price_with_discount(
         coupon_version=coupon_version if has_coupon else None,
         product_version=product_version,
     )
-    if has_coupon:
-        assert price == product_price * (1 - discount)
-    else:
-        assert price == product_price
+    assert price == (Decimal("61.72") if has_coupon else Decimal("123.45"))
 
 
 def test_get_new_order_by_reference_number(basket_and_coupons):

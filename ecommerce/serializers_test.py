@@ -9,6 +9,7 @@ from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
 from courses.models import CourseRun
 from courses.serializers import CourseRunSerializer
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
+from ecommerce.api import round_half_up
 from ecommerce.factories import ProductVersionFactory, ProductFactory
 from ecommerce.models import CouponSelection, Product
 from ecommerce.serializers import (
@@ -35,7 +36,7 @@ def test_serialize_basket_product_version_course_run():
     assert data == {
         "id": product_version.id,
         "description": product_version.description,
-        "price": str(round(product_version.price, 2)),
+        "price": str(round_half_up(product_version.price)),
         "type": product_version.product.content_type.model,
         "course_runs": [CourseRunSerializer(course_run).data],
         "thumbnail_url": "/static/images/mit-dome.png",
@@ -52,7 +53,7 @@ def test_serialize_basket_product_version_course():
     assert data == {
         "id": product_version.id,
         "description": product_version.description,
-        "price": str(round(product_version.price, 2)),
+        "price": str(round_half_up(product_version.price)),
         "type": product_version.product.content_type.model,
         "course_runs": [CourseRunSerializer(course.first_unexpired_run).data],
         "thumbnail_url": "/static/images/mit-dome.png",
@@ -71,7 +72,7 @@ def test_serialize_basket_product_version_program():
     assert data == {
         "id": product_version.id,
         "description": product_version.description,
-        "price": str(round(product_version.price, 2)),
+        "price": str(round_half_up(product_version.price)),
         "type": product_version.product.content_type.model,
         "course_runs": [
             CourseRunSerializer(course.first_unexpired_run).data for course in courses
@@ -137,7 +138,7 @@ def test_serialize_basket_coupon_selection(basket_and_coupons):
     data = CouponSelectionSerializer(selection).data
     assert data == {
         "code": selection.coupon.coupon_code,
-        "amount": round(basket_and_coupons.coupongroup_best.payment_version.amount, 2),
+        "amount": str(basket_and_coupons.coupongroup_best.payment_version.amount),
         "targets": [basket_and_coupons.product_version.id],
     }
 

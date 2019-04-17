@@ -373,6 +373,15 @@ def test_patch_basket_multiple_products(basket_client, basket_and_coupons):
     assert "Basket cannot contain more than one item" in resp_data.get("errors")
 
 
+def test_patch_basket_invalid_coupon_format(basket_client, basket_and_coupons):
+    """Test that an update with an invalid format is rejected"""
+    resp = basket_client.patch(
+        reverse("basket_api"), type="json", data={"coupons": ["coupon code"]}
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json().get("errors") == ["Invalid request"]
+
+
 def test_patch_basket_multiple_coupons(basket_client, basket_and_coupons):
     """ Test that an update with multiple coupons is rejected """
     data = {"coupons": [{"code": "FOO"}, {"code": "BAR"}]}
@@ -422,7 +431,7 @@ def test_patch_basket_clear_coupon_auto(basket_client, basket_and_coupons):
     assert resp_data.get("coupons") == [
         {
             "code": auto_coupon.coupon_code,
-            "amount": basket_and_coupons.coupongroup_worst.payment_version.amount,
+            "amount": str(basket_and_coupons.coupongroup_worst.payment_version.amount),
             "targets": [basket_and_coupons.product_version.id],
         }
     ]

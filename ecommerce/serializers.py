@@ -98,7 +98,8 @@ class CouponSelectionSerializer(serializers.ModelSerializer):
 
     def get_amount(self, instance):
         """ Get the coupon discount amount """
-        return latest_coupon_version(instance.coupon).payment_version.amount
+        # decimal fields should be represented as strings to prevent floating point parsing problems
+        return str(latest_coupon_version(instance.coupon).payment_version.amount)
 
     def get_targets(self, instance):
         """ Get the product version id(s) in the basket the coupon applies to"""

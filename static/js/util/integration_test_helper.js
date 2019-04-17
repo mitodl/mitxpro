@@ -1,33 +1,23 @@
 /* global SETTINGS: false */
 import React from "react"
-import { mount } from "enzyme"
+import R from "ramda"
+import { shallow } from "enzyme"
 import sinon from "sinon"
 import { createMemoryHistory } from "history"
-import configureTestStore from "redux-asserts"
 
-import Router, { routes } from "../Router"
-import rootReducer from "../reducers"
-import type { Action } from "../flow/reduxTypes"
-import type { TestStore } from "../flow/reduxTypes"
+import configureStoreMain from "../store/configureStore"
+
 import type { Sandbox } from "../flow/sinonTypes"
+import * as networkInterfaceFuncs from "../store/network_interface"
 
 export default class IntegrationTestHelper {
-  listenForActions: (a: Array<string>, f: Function) => Promise<*>
-  dispatchThen: (a: Action) => Promise<*>
   sandbox: Sandbox
-  store: TestStore
   browserHistory: History
+  actions: Array<any>
 
   constructor() {
     this.sandbox = sinon.createSandbox({})
-    this.store = configureTestStore((...args) => {
-      // uncomment to listen on dispatched actions
-      // console.log(args);
-      return rootReducer(...args)
-    })
-
-    this.listenForActions = this.store.createListenForActions()
-    this.dispatchThen = this.store.createDispatchThen()
+    this.actions = []
 
     this.scrollIntoViewStub = this.sandbox.stub()
     window.HTMLDivElement.prototype.scrollIntoView = this.scrollIntoViewStub
@@ -37,49 +27,97 @@ export default class IntegrationTestHelper {
     this.browserHistory.listen(url => {
       this.currentLocation = url
     })
+
+    const defaultResponse = {
+      body:   {},
+      status: 200
+    }
+    this.handleRequestStub = this.sandbox.stub().returns(defaultResponse)
+    this.sandbox
+      .stub(networkInterfaceFuncs, "makeRequest")
+      .callsFake((url, method, options) => ({
+        execute: callback => {
+          const response = this.handleRequestStub(url, method, options)
+          const err = null
+          const resStatus = (response && response.status) || 0
+          const resBody = (response && response.body) || undefined
+          const resText = (response && response.text) || undefined
+          const resHeaders = (response && response.header) || undefined
+
+          callback(err, resStatus, resBody, resText, resHeaders)
+        },
+        abort: () => {
+          throw new Error("Aborts currently unhandled")
+        }
+      }))
   }
 
   cleanup() {
+    this.actions = []
     this.sandbox.restore()
   }
 
-  /**
-   * Renders the components using the given URL.
-   * @param url {String} The react-router URL
-   * @param typesToAssert {Array<String>|null} A list of redux actions to listen for.
-   * If null, actions types for the success case is assumed.
-   * @returns {Promise<*>} A promise which provides [wrapper, div] on success
-   */
-  renderComponent(
-    url: string = "/",
-    typesToAssert: Array<string> | null = null
-  ): Promise<*> {
-    let expectedTypes = []
-    if (typesToAssert === null) {
-      expectedTypes = []
-    } else {
-      expectedTypes = typesToAssert
-    }
-
-    let wrapper, div
-
-    return this.listenForActions(expectedTypes, () => {
-      this.browserHistory.push(url)
-      div = document.createElement("div")
-      div.setAttribute("id", "integration_test_div")
-      document.body.appendChild(div)
-      wrapper = mount(
-        <div>
-          <Router history={this.browserHistory} store={this.store}>
-            {routes}
-          </Router>
-        </div>,
+  configureHOCRenderer(
+    WrappedComponent: Class<React.Component<*, *>>,
+    InnerComponent: Class<React.Component<*, *>>,
+    defaultState: Object,
+    defaultProps = {}
+  ) {
+    const history = this.browserHistory
+    return async (
+      extraState = {},
+      extraProps = {
+        history
+      }
+    ) => {
+      const initialState = R.mergeDeepRight(defaultState, extraState)
+      const store = configureStoreMain(initialState)
+      const wrapper = await shallow(
+        <WrappedComponent
+          store={store}
+          dispatch={store.dispatch}
+          {...defaultProps}
+          {...extraProps}
+        />,
         {
-          attachTo: div
+          context: {
+            // TODO: should be removed in the near future after upgrading enzyme
+            store
+          }
         }
       )
-    }).then(() => {
-      return Promise.resolve([wrapper, div])
-    })
+
+      // just a little convenience method
+      store.getLastAction = function() {
+        const actions = this.getActions()
+        return actions[actions.length - 1]
+      }
+
+      // dive through layers of HOCs until we reach the desired inner component
+      let inner = wrapper
+      while (!inner.is(InnerComponent)) {
+        // determine the type before we dive
+        const cls = inner.type()
+        if (InnerComponent === cls.WrappedComponent) {
+          break
+        }
+
+        // shallow render this component
+        inner = await inner.dive()
+
+        // if it defines WrappedComponent, find() that so we skip over any intermediaries
+        if (
+          cls &&
+          cls.hasOwnProperty("WrappedComponent") &&
+          inner.find(cls.WrappedComponent).length
+        ) {
+          inner = inner.find(cls.WrappedComponent)
+        }
+      }
+      // one more time to shallow render the InnerComponent
+      inner = await inner.dive()
+
+      return { wrapper, inner, store }
+    }
   }
 }

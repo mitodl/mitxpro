@@ -312,7 +312,10 @@ def _update_coupons(basket, product_version, coupons):
     if coupons:
         if len(coupons) > 1:
             raise ValidationError("Basket cannot contain more than one coupon")
-        coupon_code = coupons[0].get("code")
+        coupon = coupons[0]
+        if not isinstance(coupon, dict):
+            raise ValidationError("Invalid request")
+        coupon_code = coupon.get("code")
         if coupon_code is None:
             raise ValidationError("Invalid request")
 

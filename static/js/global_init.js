@@ -8,6 +8,7 @@ configure({ adapter: new Adapter() })
 const _createSettings = () => ({})
 
 global.SETTINGS = _createSettings()
+global.TESTING = true
 
 // polyfill for Object.entries
 import entries from "object.entries"

@@ -2,6 +2,7 @@
 Functions for ecommerce
 """
 from base64 import b64encode
+import decimal
 import hashlib
 import hmac
 import logging
@@ -17,7 +18,6 @@ from ecommerce.models import (
     CouponEligibility,
     CouponVersion,
     CouponRedemption,
-    CouponSelection,
     Line,
     Order,
 )
@@ -76,18 +76,27 @@ def generate_cybersource_sa_payload(order, base_url):
     total = 0
     for i, line in enumerate(order.lines.all()):
         product_version = line.product_version
+        unit_price = get_product_version_price_with_discount(
+            coupon_version=coupon_version, product_version=product_version
+        )
         line_items[f"item_{i}_code"] = str(product_version.product.content_type)
         line_items[f"item_{i}_name"] = str(product_version.description)[:254]
         line_items[f"item_{i}_quantity"] = line.quantity
         line_items[f"item_{i}_sku"] = product_version.product.content_object.id
         line_items[f"item_{i}_tax_amount"] = "0"
-        line_items[f"item_{i}_unit_price"] = str(
-            get_product_version_price_with_discount(
-                coupon_version=coupon_version, product_version=product_version
-            )
-        )
+        line_items[f"item_{i}_unit_price"] = str(unit_price)
 
-        total += product_version.price
+        total += unit_price
+
+    # CyberSource requires that these links be https
+    overrides = (
+        {
+            "override_custom_cancel_page": base_url,
+            "override_custom_receipt_page": base_url,
+        }
+        if base_url.startswith("https://")
+        else {}
+    )
 
     payload = {
         "access_key": settings.CYBERSOURCE_ACCESS_KEY,
@@ -97,11 +106,10 @@ def generate_cybersource_sa_payload(order, base_url):
         "locale": "en-us",
         **line_items,
         "line_item_count": order.lines.count(),
-        "override_custom_cancel_page": base_url,
-        "override_custom_receipt_page": base_url,
         "reference_number": make_reference_id(order),
         "profile_id": settings.CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now_in_utc().strftime(ISO_8601_FORMAT),
+        **overrides,
         "transaction_type": "sale",
         "transaction_uuid": uuid.uuid4().hex,
         "unsigned_field_names": "",
@@ -277,6 +285,20 @@ def get_product_price(product):
     return latest_product_version(product).price
 
 
+def round_half_up(number):
+    """
+    Round a decimal number using the ROUND_HALF_UP rule so we match what decimal.js does by default.
+
+    Args:
+        number (decimal.Decimal): A decimal number
+
+    Returns:
+        decimal.Decimal:
+            A rounded decimal number
+    """
+    return number.quantize(decimal.Decimal("0.01"), rounding=decimal.ROUND_HALF_UP)
+
+
 def get_product_version_price_with_discount(*, coupon_version, product_version):
     """
     Determine the new discounted price for a product after the coupon discount is applied
@@ -289,28 +311,17 @@ def get_product_version_price_with_discount(*, coupon_version, product_version):
         Decimal: the discounted price for the Product
     """
     price = product_version.price
-    if coupon_version:
-        price *= 1 - coupon_version.payment_version.amount
-    return price
-
-
-def select_coupon(coupon_version, basket):
-    """
-    Apply a coupon to a basket by creating/updating the CouponSelection for that basket.
-    Assumes there should be only one CouponSelection per basket.
-
-    Args:
-        coupon_version (CouponVersion): a CouponVersion object
-        basket (Basket): a Basket object
-
-    Returns:
-        CouponSelection: a coupon selection object
-
-    """
-    coupon_selection, _ = CouponSelection.objects.update_or_create(
-        basket=basket, defaults={"coupon": coupon_version.coupon}
-    )
-    return coupon_selection
+    if (
+        coupon_version
+        and CouponEligibility.objects.filter(
+            coupon__couponversion=coupon_version,
+            product__productversions=product_version,
+        ).exists()
+    ):
+        discount = round_half_up(coupon_version.payment_version.amount * price)
+    else:
+        discount = 0
+    return price - discount
 
 
 def redeem_coupon(coupon_version, order):
