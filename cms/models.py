@@ -49,6 +49,12 @@ class ProductPage(Page):
         related_name="+",
         help_text="Background image size must be at least 1900x650 pixels.",
     )
+    time_commitment = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text="A short description indicating about the time commitments.",
+    )
     thumbnail_image = models.ForeignKey(
         Image,
         null=True,
@@ -69,10 +75,11 @@ class ProductPage(Page):
     )
 
     content_panels = Page.content_panels + [
-        FieldPanel("duration"),
         FieldPanel("subhead"),
         FieldPanel("video_title"),
         FieldPanel("video_url"),
+        FieldPanel("duration"),
+        FieldPanel("time_commitment"),
         FieldPanel("description", classname="full"),
         FieldPanel("background_image"),
         FieldPanel("thumbnail_image"),

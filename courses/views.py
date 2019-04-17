@@ -76,7 +76,7 @@ class CourseCatalogView(ListView):
 class CourseView(DetailView):
     """Course view"""
 
-    queryset = Course.objects.prefetch_related("courseruns").all()
+    model = Course
     template_name = "course_detail.html"
 
     def get_context_data(self, **kwargs):

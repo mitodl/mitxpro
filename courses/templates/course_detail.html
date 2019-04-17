@@ -19,28 +19,65 @@
 {% endblock %}
 
 {% block content %}
-<div class="header-block">
-  <div class="container header-container">
-    {% if course.program %}
-      <h5 class="program-position">Course {{ course.position_in_program }} of {{ course.program.num_courses }} in {{ course.program.title }}</h5>
-    {% endif %}
-    <div class="row">
-      <div class="col-lg-7">
-        <div class="header-title">
-          <h1>{{ course.display_title }}</h1>
-          <h2>{{ course.subhead }}</h2>
+<div class="content-wrapper">
+    <div class="header-block">
+      <div class="container header-container">
+        {% if course.program %}
+          <h5 class="program-position">Course {{ course.position_in_program }} of {{ course.program.num_courses }} in {{ course.program.title }}</h5>
+        {% endif %}
+        <div class="row">
+          <div class="col-lg-7">
+            <div class="header-title">
+              <h1>{{ course.display_title }}</h1>
+              <h2>{{ course.subhead }}</h2>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            {% if course.video_url %}
+              <video controls>
+                <source src="{{ course.video_url }}">
+                Your browser does not support HTML5 video.
+              </video>
+              <div class="video-caption">{{ course.video_title|safe }}</div>
+            {% endif %}
+          </div>
         </div>
       </div>
-      <div class="col-lg-5">
-        {% if course.video_url %}
-          <video controls>
-            <source src="{{ course.video_url }}">
-            Your browser does not support HTML5 video.
-          </video>
-          <div class="video-caption">{{ course.video_title|safe }}</div>
-        {% endif %}
-      </div>
     </div>
-  </div>
+    <div class="tiles-block">
+          <div class="container">
+            <ul class="tiles-list">
+              {% if course.next_run_date %}
+                  <li>
+                    <span class="title">START DATE</span>
+                    <span class="text">{{ course.next_run_date|date:"F j, Y" }}</span>
+                    <span class="link"><a href="#">More Dates</a></span>  {# TODO Need to do in separate story#}
+                  </li>
+            {% endif %}
+            {% if course.time_commitment %}
+                <li>
+                    <span class="title">TIME COMMITMENT</span>
+                    <span class="text">{{ course.time_commitment }}</span>
+                </li>
+            {% endif %}
+            {% if course.duration %}
+                  <li>
+                    <span class="title">DURATION</span>
+                    <span class="text">{{ course.duration }}</span>
+                  </li>
+            {% endif %}
+            <li>
+                <span class="title">FORMAT</span>
+                <span class="text">Online</span>
+            </li>
+            {% if course.current_price %}
+                <li>
+                    <span class="title">PRICE</span>
+                    <span class="text">${{ course.current_price }}</span>
+                </li>
+            {% endif %}
+            </ul>
+          </div>
+        </div>
 </div>
 {% endblock %}
