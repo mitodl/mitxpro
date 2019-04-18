@@ -2,93 +2,131 @@
 import { assert } from "chai"
 import * as sinon from "sinon"
 
-import { CreateCouponPage } from "./CreateCouponPage"
-import { configureShallowRenderer } from "../../lib/test_utils"
+import CreateCouponPage, {
+  CreateCouponPage as InnerCreateCouponPage
+} from "./CreateCouponPage"
 import {
+  makeCompany,
   makeCouponPaymentVersion,
   makeProduct
 } from "../../factories/ecommerce"
+import { COUPON_TYPE_PROMO } from "../../constants"
+import IntegrationTestHelper from "../../util/integration_test_helper"
 
 describe("CreateCouponPage", () => {
-  let sandbox,
+  let helper,
     products,
+    companies,
     renderCreateCouponPage,
     setSubmittingStub,
     setErrorsStub
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox()
+    helper = new IntegrationTestHelper()
     products = [
       makeProduct("courserun"),
       makeProduct("course"),
       makeProduct("program")
     ]
-    setSubmittingStub = sandbox.stub()
-    setErrorsStub = sandbox.stub()
-    renderCreateCouponPage = configureShallowRenderer(CreateCouponPage, {
-      products: products
-    })
+    companies = [makeCompany(), makeCompany]
+    setSubmittingStub = helper.sandbox.stub()
+    setErrorsStub = helper.sandbox.stub()
+    renderCreateCouponPage = helper.configureHOCRenderer(
+      CreateCouponPage,
+      InnerCreateCouponPage,
+      {
+        entities: {
+          products,
+          companies
+        }
+      },
+      {}
+    )
   })
 
   afterEach(() => {
-    sandbox.restore()
+    helper.cleanup()
   })
 
-  it("displays a coupon form on the page", () => {
-    const wrapper = renderCreateCouponPage()
-    assert.isTrue(wrapper.find("CouponForm").exists())
+  it("displays a coupon form on the page", async () => {
+    const { inner } = await renderCreateCouponPage()
+    assert.isTrue(inner.find("CouponForm").exists())
   })
 
   it("displays a promo coupon success message on the page", async () => {
     const newCoupon = makeCouponPaymentVersion(true)
-    const wrapper = renderCreateCouponPage({ newCoupon })
-    await wrapper.instance().setState({ created: true })
+    const { inner } = await renderCreateCouponPage({
+      entities: {
+        coupons: { [newCoupon.id]: newCoupon }
+      }
+    })
+    await inner.instance().setState({ couponId: newCoupon.id })
     assert.equal(
-      wrapper.find(".coupon-success-div").text(),
+      inner.find(".coupon-success-div").text(),
       `Coupon "${newCoupon.payment.name}" successfully created.`
     )
   })
 
   it("displays a single-use coupon success message/link on the page", async () => {
     const newCoupon = makeCouponPaymentVersion(false)
-    const wrapper = renderCreateCouponPage({ newCoupon })
-    await wrapper.instance().setState({ created: true })
+    const { inner } = await renderCreateCouponPage({
+      entities: {
+        coupons: { [newCoupon.id]: newCoupon }
+      }
+    })
+    await inner.instance().setState({ couponId: newCoupon.id })
     assert.equal(
-      wrapper
+      inner
         .find(".coupon-success-div")
         .find("a")
         .prop("href"),
       `/couponcodes/${newCoupon.id}`
     )
     assert.equal(
-      wrapper.find(".coupon-success-div").text(),
+      inner.find(".coupon-success-div").text(),
       `Download coupon codes for "${newCoupon.payment.name}"`
     )
   })
 
-  it("sets state.created to true if submission is successful", async () => {
-    const testCouponData = { products: [products[0]] }
-    const createCouponStub = sandbox
-      .stub()
-      .returns({ transformed: makeCouponPaymentVersion() })
-    const instance = renderCreateCouponPage({
-      createCoupon: createCouponStub
-    }).instance()
-    await instance.onSubmit(testCouponData, {
+  it("sets state.couponId to new coupon id if submission is successful", async () => {
+    const testCouponData = {
+      coupon_type:     COUPON_TYPE_PROMO,
+      products:        [products[0]],
+      max_redemptions: 100,
+      coupon_code:     "HALFOFF",
+      amount:          50
+    }
+    const newCoupon = makeCouponPaymentVersion()
+    helper.handleRequestStub.returns({
+      body:        newCoupon,
+      transformed: { coupons: { [newCoupon.id]: newCoupon } }
+    })
+    const { inner } = await renderCreateCouponPage(
+      {},
+      {
+        createCoupon: helper.handleRequestStub
+      }
+    )
+
+    await inner.instance().onSubmit(testCouponData, {
       setSubmitting: setSubmittingStub,
       setErrors:     setErrorsStub
     })
-    sinon.assert.calledWith(createCouponStub, {
-      product_ids: [products[0].id],
-      ...testCouponData
-    })
     sinon.assert.calledWith(setSubmittingStub, false)
-    assert.isTrue(instance.state.created)
+    sinon.assert.notCalled(setErrorsStub)
+    sinon.assert.calledWith(helper.handleRequestStub, "/api/coupons/", "POST", {
+      body:    testCouponData,
+      headers: {
+        "X-CSRFTOKEN": null
+      },
+      credentials: undefined
+    })
+    assert.equal(inner.state().couponId, newCoupon.id)
   })
 
-  it("sets state.created to false and sets errors if submission is unsuccessful", async () => {
+  it("sets errors if submission is unsuccessful", async () => {
     const testCouponData = { products: [] }
-    const createCouponStub = sandbox.stub().returns({
+    helper.handleRequestStub.returns({
       body: {
         errors: [
           { products: "Must select a product" },
@@ -96,70 +134,24 @@ describe("CreateCouponPage", () => {
         ]
       }
     })
-    const instance = renderCreateCouponPage({
-      createCoupon: createCouponStub
-    }).instance()
-    await instance.onSubmit(testCouponData, {
+    const { inner } = await renderCreateCouponPage()
+    await inner.instance().onSubmit(testCouponData, {
       setSubmitting: setSubmittingStub,
       setErrors:     setErrorsStub
     })
-    sinon.assert.calledWith(createCouponStub, testCouponData)
     sinon.assert.calledWith(setSubmittingStub, false)
     sinon.assert.calledWith(setErrorsStub, {
       products: "Must select a product",
       name:     "Must be unique"
     })
-    assert.isFalse(instance.state.created)
+    assert.isTrue(inner.instance().state.couponId === null)
   })
 
-  it("toggleCouponType() changes state.isPromo", async () => {
-    const instance = renderCreateCouponPage().instance()
-    assert.isFalse(instance.state.isPromo)
-    await instance.toggleCouponType()
-    assert.isTrue(instance.state.isPromo)
-    await instance.toggleCouponType()
-    assert.isFalse(instance.state.isPromo)
-  })
-
-  it("toggleProductType() clears selectedProducts and sets product type", async () => {
-    const instance = renderCreateCouponPage().instance()
-    await instance.setState({ selectedProducts: [products[0].id] })
-    assert.deepEqual(instance.state.selectedProducts, [products[0].id])
-    assert.equal(instance.state.productType, "courserun")
-    instance.toggleProductType({ target: { value: "program" } })
-    assert.equal(instance.state.productType, "program")
-    assert.deepEqual(instance.state.selectedProducts, [])
-  })
-
-  //
-  ;["courserun", "program", "course"].forEach(productType => {
-    it(`filterProducts() correctly filters products by product type ${productType}`, async () => {
-      const instance = renderCreateCouponPage().instance()
-      await instance.setState({ productType })
-      const filteredProducts = instance.filterProducts()
-      assert.equal(filteredProducts.length, 1)
-      filteredProducts.forEach(product => {
-        assert.equal(product.product_type, productType)
-        assert.isTrue(products.includes(product))
-      })
-    })
-  })
-
-  it("selectProducts() correctly sets state.products", () => {
-    const wrapper = renderCreateCouponPage()
-    const selectedProducts = [products[1], products[2]]
-    wrapper.instance().selectProducts(selectedProducts)
-    assert.deepEqual(
-      wrapper.instance().state.selectedProducts,
-      selectedProducts
-    )
-  })
-
-  it("clearSuccess() changes state.created and clears state.selectedProducts", () => {
-    const instance = renderCreateCouponPage().instance()
-    instance.setState({ created: true, products: products })
-    instance.clearSuccess()
-    assert.isFalse(instance.state.created)
-    assert.deepEqual(instance.state.selectedProducts, [])
+  it("clearSuccess() changes state.couponId", async () => {
+    const { inner } = await renderCreateCouponPage()
+    inner.instance().setState({ couponId: 99 })
+    assert.equal(inner.state().couponId, 99)
+    inner.instance().clearSuccess()
+    assert.equal(inner.state().couponId, null)
   })
 })

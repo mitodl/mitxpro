@@ -52,9 +52,3 @@ export const getComponentWithContext = (
   const inner = outer.props().children(context)
   return { inner, outer }
 }
-
-export const configureShallowRenderer = (
-  Component: Class<React.Component<*, *>> | Function,
-  defaultProps: Object
-) => (extraProps: Object = {}) =>
-  shallow(<Component {...defaultProps} {...extraProps} />)

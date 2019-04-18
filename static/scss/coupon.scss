@@ -11,6 +11,10 @@
     padding-right: 10px;
   }
 
+  input[type='checkbox']   {
+    display: unset;
+  }
+
   .block {
 
     .DayPickerInput {

@@ -6,29 +6,20 @@ import { mount } from "enzyme"
 import wait from "waait"
 
 import { CouponForm } from "./CouponForm"
+import { COUPON_TYPE_PROMO } from "../../constants"
+import { makeCompany, makeProduct } from "../../factories/ecommerce"
 import {
   findFormikFieldByName,
   findFormikErrorByName
 } from "../../lib/test_utils"
-import { makeCompany, makeProduct } from "../../factories/ecommerce"
 
 describe("CouponForm", () => {
-  let sandbox,
-    onSubmitStub,
-    selectProductsStub,
-    toggleProductStub,
-    toggleFormStub
+  let sandbox, onSubmitStub
 
-  const renderForm = (isPromo: boolean = false) =>
+  const renderForm = () =>
     mount(
       <CouponForm
         onSubmit={onSubmitStub}
-        selectProducts={selectProductsStub}
-        toggleForm={toggleFormStub}
-        toggleProduct={toggleProductStub}
-        selectedProducts={[]}
-        productType="courserun"
-        isPromo={isPromo}
         products={[makeProduct(), makeProduct()]}
         companies={[makeCompany(), makeCompany()]}
       />
@@ -37,9 +28,6 @@ describe("CouponForm", () => {
   beforeEach(() => {
     sandbox = sinon.createSandbox()
     onSubmitStub = sandbox.stub()
-    selectProductsStub = sandbox.stub()
-    toggleProductStub = sandbox.stub()
-    toggleFormStub = sandbox.stub()
   })
 
   it("passes onSubmit to Formik", () => {
@@ -62,12 +50,12 @@ describe("CouponForm", () => {
     ["name", "", "Coupon name is required"],
     ["name", "Valid_name", null],
     ["name", "Invalid name", "Only letters, numbers, and underscores allowed"],
-    ["amount", "", "Percentage discount is required"],
-    ["amount", "0.5", "Must be at least 1"],
-    ["amount", "-1", "Must be at least 1"],
-    ["amount", "200", "Must be at most 100"],
-    ["amount", "1", null],
-    ["amount", "100", null]
+    ["discount", "", "Percentage discount is required"],
+    ["discount", "0.5", "Must be at least 1"],
+    ["discount", "-1", "Must be at least 1"],
+    ["discount", "200", "Must be at most 100"],
+    ["discount", "1", null],
+    ["discount", "100", null]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value
@@ -146,14 +134,6 @@ describe("CouponForm", () => {
       "product_type"
     ).at(1)
     courseProductChoice.simulate("click")
-    sinon.assert.calledWith(toggleProductStub)
-  })
-
-  it(`calls toggleForm() when the coupon type is changed`, async () => {
-    const wrapper = renderForm()
-    const couponTypeChoice = findFormikFieldByName(wrapper, "coupon_type").at(1)
-    couponTypeChoice.simulate("click")
-    sinon.assert.calledWith(toggleFormStub)
   })
 
   //
@@ -187,24 +167,39 @@ describe("CouponForm", () => {
 
   //
   ;[
-    ["", "Coupon code is required"],
-    ["VALIDCODE", null],
-    ["INVALID CODE", "Only letters, numbers, and underscores allowed"]
-  ].forEach(([value, errorMessage]) => {
-    it(`validates the field name=coupon_code, value="${value}" and expects error=${JSON.stringify(
+    ["coupon_code", "", "Coupon code is required"],
+    ["coupon_code", "VALIDCODE", null],
+    [
+      "coupon_code",
+      "INVALID CODE",
+      "Only letters, numbers, and underscores allowed"
+    ],
+    ["max_redemptions", "", "Number required"],
+    ["max_redemptions", "-10", "Must be at least 1"],
+    ["max_redemptions", "10000", null]
+  ].forEach(([name, value, errorMessage]) => {
+    it(`validates the field name=${name}, value="${value}" and expects error=${JSON.stringify(
       errorMessage
     )} for promo coupons`, async () => {
-      const wrapper = renderForm(true)
-      const input = wrapper.find(`input[name="coupon_code"]`)
+      const wrapper = renderForm()
+      findFormikFieldByName(wrapper, "coupon_type")
+        .at(1)
+        .simulate("change", {
+          persist: () => {},
+          target:  { name: "coupon_type", value: COUPON_TYPE_PROMO }
+        })
+      await wait()
+      wrapper.update()
+      const input = findFormikFieldByName(wrapper, name)
       input.simulate("change", {
         persist: () => {},
-        target:  { name: "coupon_code", value: value }
+        target:  { name, value }
       })
       input.simulate("blur")
       await wait()
       wrapper.update()
       assert.deepEqual(
-        findFormikErrorByName(wrapper, "coupon_code").text(),
+        findFormikErrorByName(wrapper, name).text(),
         errorMessage
       )
     })

@@ -14,18 +14,17 @@ import type {
   CouponPaymentVersion,
   Product
 } from "../../flow/ecommerceTypes"
+import { createStructuredSelector } from "reselect"
+import { COUPON_TYPE_SINGLE_USE } from "../../constants"
 
 type State = {
-  isPromo: boolean,
-  selectedProducts: Array<Product>,
-  productType: string,
-  created: boolean
+  couponId: ?string
 }
 
 type StateProps = {|
   products: Array<Product>,
   companies: Array<Company>,
-  newCoupon: CouponPaymentVersion
+  coupons: Map<string, CouponPaymentVersion>
 |}
 
 type DispatchProps = {|
@@ -41,74 +40,55 @@ export class CreateCouponPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
-      isPromo:          false,
-      productType:      "courserun",
-      selectedProducts: [],
-      created:          false
+      couponId: null
     }
   }
-  onSubmit = async (coupon: Object, { setSubmitting, setErrors }: Object) => {
+  onSubmit = async (
+    couponData: Object,
+    { setSubmitting, setErrors }: Object
+  ) => {
     const { createCoupon } = this.props
-    coupon.product_ids = coupon.products.map(product => product.id)
-    if (coupon.coupon_type === "single-use") {
-      coupon.max_redemptions = coupon.num_coupon_codes
+    couponData.product_ids = couponData.products.map(product => product.id)
+    if (couponData.coupon_type === COUPON_TYPE_SINGLE_USE) {
+      couponData.max_redemptions = couponData.num_coupon_codes
     } else {
-      coupon.num_coupon_codes = 1
+      couponData.num_coupon_codes = 1
     }
-    coupon.amount = coupon.amount / 100
+    couponData.amount = couponData.discount / 100
     try {
-      const result = await createCoupon(coupon)
-      if (result && result.transformed) {
-        this.setState({ created: true })
+      const result = await createCoupon(couponData)
+      if (result.body && result.body.id) {
+        this.setState({ couponId: result.body.id })
       } else if (result.body && result.body.errors) {
         setErrors(_.merge({}, ...result.body.errors))
-        this.setState({ created: false })
+        this.clearSuccess()
       }
     } finally {
       setSubmitting(false)
     }
   }
 
-  toggleCouponType = async () => {
-    const { isPromo } = this.state
-    await this.setState({ isPromo: !isPromo })
-  }
-
-  toggleProductType = async (event: Object) => {
-    await this.setState({
-      productType:      event.target.value,
-      selectedProducts: []
-    })
-  }
-
   clearSuccess = async () => {
-    await this.setState({ created: false, selectedProducts: [] })
-  }
-
-  filterProducts = () => {
-    const { productType } = this.state
-    const { products } = this.props
-    return _.filter(products, { product_type: productType })
-  }
-
-  selectProducts = async (value: any) => {
-    await this.setState({ selectedProducts: value })
+    await this.setState({ couponId: null })
   }
 
   render() {
-    const { isPromo, productType, selectedProducts, created } = this.state
-    const { newCoupon, companies } = this.props
+    const { couponId } = this.state
+    const { coupons, companies, products } = this.props
+    // $FlowFixMe: flow doesn't like coupons[couponId] but it works fine
+    const newCoupon = coupons && couponId ? coupons[couponId] : null
     return (
       <div className="coupon-creation-div">
         <h3>Create a coupon</h3>
-        {created && newCoupon ? (
+        {newCoupon ? (
           <div className="coupon-success-div">
             {newCoupon.coupon_type === "promo" ? (
               <span>{`Coupon "${
                 newCoupon.payment.name
               }" successfully created.`}</span>
             ) : (
-              <a href={`/couponcodes/${newCoupon.id}`}>
+              // $FlowFixMe: couponId will never be null here
+              <a href={`/couponcodes/${couponId}`}>
                 {`Download coupon codes for "${newCoupon.payment.name}"`}
               </a>
             )}
@@ -123,14 +103,8 @@ export class CreateCouponPage extends React.Component<Props, State> {
         ) : (
           <CouponForm
             onSubmit={this.onSubmit}
-            toggleForm={this.toggleCouponType}
-            toggleProduct={this.toggleProductType}
-            isPromo={isPromo}
-            productType={productType}
-            products={this.filterProducts()}
+            products={products}
             companies={companies}
-            selectProducts={this.selectProducts}
-            selectedProducts={selectedProducts}
           />
         )}
       </div>
@@ -139,17 +113,17 @@ export class CreateCouponPage extends React.Component<Props, State> {
 }
 
 const createCoupon = (coupon: Object) =>
-  mutateAsync(queries.ecommerce.newCouponMutation(coupon))
+  mutateAsync(queries.ecommerce.couponsMutation(coupon))
 
 const mapPropsToConfig = () => [
   queries.ecommerce.productsQuery(),
   queries.ecommerce.companiesQuery()
 ]
 
-const mapStateToProps = (state: Object): StateProps => ({
-  products:  queries.ecommerce.productsSelector(state),
-  companies: queries.ecommerce.companiesSelector(state),
-  newCoupon: queries.ecommerce.newCouponSelector(state)
+const mapStateToProps = createStructuredSelector({
+  products:  queries.ecommerce.productsSelector,
+  companies: queries.ecommerce.companiesSelector,
+  coupons:   queries.ecommerce.couponsSelector
 })
 
 const mapDispatchToProps = {

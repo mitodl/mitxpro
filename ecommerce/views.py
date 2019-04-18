@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from ecommerce.api import (
     create_unfulfilled_order,
@@ -52,7 +52,7 @@ from ecommerce.serializers import (
 log = logging.getLogger(__name__)
 
 
-class ProductViewSet(ModelViewSet):
+class ProductViewSet(ReadOnlyModelViewSet):
     """API view set for Products"""
 
     serializer_class = ProductSerializer

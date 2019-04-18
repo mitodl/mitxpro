@@ -256,7 +256,12 @@ class SingleUseCouponSerializer(BaseCouponSerializer):
     num_coupon_codes = serializers.IntegerField(required=True)
     payment_transaction = serializers.CharField(max_length=256)
     payment_type = serializers.ChoiceField(
-        choices=[(_type, _type) for _type in models.CouponPaymentVersion.PAYMENT_TYPES]
+        choices=set(
+            zip(
+                models.CouponPaymentVersion.PAYMENT_TYPES,
+                models.CouponPaymentVersion.PAYMENT_TYPES,
+            )
+        )
     )
 
 
@@ -272,7 +277,12 @@ class PromoCouponSerializer(BaseCouponSerializer):
         max_length=256, allow_null=True, required=False, allow_blank=True
     )
     payment_type = serializers.ChoiceField(
-        choices=[(_type, _type) for _type in models.CouponPaymentVersion.PAYMENT_TYPES],
+        choices=set(
+            zip(
+                models.CouponPaymentVersion.PAYMENT_TYPES,
+                models.CouponPaymentVersion.PAYMENT_TYPES,
+            )
+        ),
         allow_null=True,
         allow_blank=True,
         required=False,

@@ -72,20 +72,22 @@ export default {
       companies: (prev: Array<Company>, next: Array<Company>) => next
     }
   }),
-  newCouponSelector: pathOr(null, ["entities", "newCoupon"]),
-  newCouponMutation: (coupon: Object) => ({
+  couponsSelector: pathOr(null, ["entities", "coupons"]),
+  couponsMutation: (coupon: Object) => ({
     url:       "/api/coupons/",
     body:      coupon,
-    transform: (json: CouponPaymentVersion) => ({
-      newCoupon: json
+    transform: (coupon: CouponPaymentVersion) => ({
+      coupons: {
+        [coupon.id]: coupon
+      }
     }),
     update: {
-      newCoupon: (
-        prevNewCoupon: CouponPaymentVersion,
-        nextNewCoupon: CouponPaymentVersion
+      coupons: (
+        prevCoupons: { [string]: CouponPaymentVersion },
+        nextCoupons: { [string]: CouponPaymentVersion }
       ) => ({
-        ...prevNewCoupon,
-        ...nextNewCoupon
+        ...prevCoupons,
+        ...nextCoupons
       })
     },
     options: {
