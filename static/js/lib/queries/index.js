@@ -5,6 +5,6 @@ import users from "./users"
 
 export default {
   auth,
-  users,
-  ecommerce
+  ecommerce,
+  users
 }

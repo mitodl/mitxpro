@@ -16,6 +16,15 @@ from users.factories import UserFactory
 FAKE = faker.Factory.create()
 
 
+class CompanyFactory(DjangoModelFactory):
+    """Factory for Company"""
+
+    name = fuzzy.FuzzyText()
+
+    class Meta:
+        model = models.Company
+
+
 class ProductFactory(DjangoModelFactory):
     """Factory for Product"""
 

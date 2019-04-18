@@ -7204,6 +7204,13 @@ react-addons-shallow-compare@^15.6.0:
     fbjs "^0.8.4"
     object-assign "^4.1.0"
 
+react-day-picker@^7.3.0:
+  version "7.3.0"
+  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-7.3.0.tgz#59b6d4e19d274650c79dcf49fbcce2637313467d"
+  integrity sha512-t2kz0Zy4P5U4qwU5YhsBq2QGmypP8L/u+89TSnuD0h4dYKSEDQArFPWfin9gv8erV1ciR1Wzr485TMaYnI7FTw==
+  dependencies:
+    prop-types "^15.6.2"
+
 react-dom@^16.8.4:
   version "16.8.4"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.8.4.tgz#1061a8e01a2b3b0c8160037441c3bf00a0e3bc48"
@@ -7255,6 +7262,11 @@ react-is@^16.8.6:
 react-lifecycles-compat@^3.0.0, react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
+
+react-picky@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/react-picky/-/react-picky-4.2.0.tgz#9e425a518c1afa24578223d23afc1d849afc4fa4"
+  integrity sha512-LW6qmxYaWYmHmkfgHSiMI+R0SfYbjEXJ8sqVkvzUOTmGD2/LzaT6AdswWZLU1qguz2iS+0JxwuGq9YZlY8MSKg==
 
 react-redux@^5.0.5:
   version "5.1.1"

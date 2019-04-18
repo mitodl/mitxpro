@@ -1,7 +1,21 @@
 // @flow
+import { pathOr, objOf } from "ramda"
+
 import { getCookie } from "../api"
 
+import type {
+  Company,
+  CouponPaymentVersion,
+  Product
+} from "../../flow/ecommerceTypes"
+
 import type { BasketResponse } from "../../flow/ecommerceTypes"
+
+const DEFAULT_POST_OPTIONS = {
+  headers: {
+    "X-CSRFTOKEN": getCookie("csrftoken")
+  }
+}
 
 export default {
   checkoutMutation: () => ({
@@ -10,11 +24,8 @@ export default {
       checkout: () => null
     },
     options: {
-      method:  "POST",
-      force:   true,
-      headers: {
-        "X-CSRFTOKEN": getCookie("csrftoken")
-      }
+      force: true,
+      ...DEFAULT_POST_OPTIONS
     }
   }),
   basketQuery: () => ({
@@ -38,11 +49,47 @@ export default {
       ...payload
     },
     options: {
-      method:  "PATCH",
-      force:   true,
-      headers: {
-        "X-CSRFTOKEN": getCookie("csrftoken")
-      }
+      method: "PATCH",
+      force:  true,
+      ...DEFAULT_POST_OPTIONS
+    }
+  }),
+  productsSelector: pathOr(null, ["entities", "products"]),
+  productsQuery:    () => ({
+    url:       "/api/products/",
+    transform: (json: Array<Product>) => ({
+      products: json
+    }),
+    update: {
+      products: (prev: Array<Product>, next: Array<Product>) => next
+    }
+  }),
+  companiesSelector: pathOr(null, ["entities", "companies"]),
+  companiesQuery:    () => ({
+    url:       "/api/companies/",
+    transform: (json: Array<Company>) => objOf("companies", json),
+    update:    {
+      companies: (prev: Array<Company>, next: Array<Company>) => next
+    }
+  }),
+  newCouponSelector: pathOr(null, ["entities", "newCoupon"]),
+  newCouponMutation: (coupon: Object) => ({
+    url:       "/api/coupons/",
+    body:      coupon,
+    transform: (json: CouponPaymentVersion) => ({
+      newCoupon: json
+    }),
+    update: {
+      newCoupon: (
+        prevNewCoupon: CouponPaymentVersion,
+        nextNewCoupon: CouponPaymentVersion
+      ) => ({
+        ...prevNewCoupon,
+        ...nextNewCoupon
+      })
+    },
+    options: {
+      ...DEFAULT_POST_OPTIONS
     }
   })
 }

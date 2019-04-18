@@ -17,6 +17,12 @@ def test_index_view(client):
     assert response.status_code == 200
 
 
+def test_restricted_view(client, admin_client):
+    """Verify the restricted view is only available to admins"""
+    assert client.get(reverse("ecommerce-admin")).status_code == 403
+    assert admin_client.get(reverse("ecommerce-admin")).status_code == 200
+
+
 def test_webpack_url(mocker, settings, client):
     """Verify that webpack bundle src shows up in production"""
     settings.GA_TRACKING_ID = "fake"

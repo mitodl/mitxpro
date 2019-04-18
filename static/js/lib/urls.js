@@ -9,6 +9,8 @@ export const routes = {
   home:   "/dashboard/",
   logout: "/logout/",
 
+  coupons: "/ecommerce/admin/coupons/",
+
   // authentication related routes
   login: include("/login/", {
     begin:    "",
