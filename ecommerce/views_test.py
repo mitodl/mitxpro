@@ -624,7 +624,9 @@ def test_patch_basket_invalid_run(basket_client, basket_and_coupons, is_program)
         data={"items": [{"id": product_version.id, "run_ids": [other_run.id]}]},
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp.json()["errors"] == [f"Unable to find run with id {other_run.id}"]
+    assert resp.json()["errors"] == [
+        f"Unable to find run(s) with id(s) {{{other_run.id}}}"
+    ]
 
 
 def test_patch_basket_multiple_runs_for_course(basket_client, basket_and_coupons):

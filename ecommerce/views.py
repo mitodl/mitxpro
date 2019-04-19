@@ -325,12 +325,13 @@ def _update_items(basket, items):
                     f"Unknown content_object for {product_version.product}"
                 )
 
-            runs_for_product_lookup = {run.id: run for run in runs_for_product}
+            run_ids_for_product = {run.id for run in runs_for_product}
 
-            run_ids = set(run_ids)
-            for run_id in run_ids:
-                if run_id not in runs_for_product_lookup:
-                    raise ValidationError(f"Unable to find run with id {run_id}")
+            missing_run_ids = set(run_ids) - run_ids_for_product
+            if missing_run_ids:
+                raise ValidationError(
+                    f"Unable to find run(s) with id(s) {missing_run_ids}"
+                )
 
             courses_for_product = set(runs_for_product.values_list("course", flat=True))
             if len(courses_for_product) < len(run_ids):
