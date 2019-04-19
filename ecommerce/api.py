@@ -18,8 +18,11 @@ from ecommerce.models import (
     CouponEligibility,
     CouponVersion,
     CouponRedemption,
+    DataConsentAgreement,
+    DataConsentUser,
     Line,
     Order,
+    CouponSelection,
 )
 from mitxpro.utils import now_in_utc
 
@@ -148,6 +151,19 @@ def latest_coupon_version(coupon):
         CouponVersion: The CouponVersion for the coupon
     """
     return coupon.couponversion_set.order_by("-created_on").first()
+
+
+def latest_coupon_payment_version(coupon):
+    """
+    Get the most recent CouponPaymentVersion for a coupon
+
+    Args:
+        coupon (Coupon): A coupon object
+
+    Returns:
+        CouponPaymentVersion: The latest CouponPaymentVersion for the coupon
+    """
+    return coupon.payment.couponpaymentversion_set.order_by("-created_on").first()
 
 
 def get_valid_coupon_versions(product, user, auto_only=False, code=None):
@@ -424,3 +440,83 @@ def create_unfulfilled_order(user):
         redeem_coupon(coupon_version=latest_coupon_version(coupon), order=order)
     order.save_and_log(user)
     return order
+
+
+def get_product_courses(product):
+    """
+    Get all courses for a product
+
+    Args:
+        product(Product): The product to retrieve courses for
+
+    Returns:
+        list of Course: list of Courses associated with the Product
+
+    """
+    courses = []
+    if product.content_type.model == "courserun":
+        courses.append(product.content_object.course)
+    elif product.content_type.model == "course":
+        courses.append(product.content_object)
+    elif product.content_type.model == "program":
+        courses = product.content_object.course_set.all()
+    return courses
+
+
+def get_required_agreements(basket):
+    """
+    Get all the DataConsentAgreements required for a basket
+
+    Args:
+        basket(Basket): A basket to check for required & unsigned DataConsentAgreements
+
+    Returns:
+        list of DataConsentAgreement: required DataConsentAgreements
+    """
+    companies = [
+        latest_coupon_payment_version(selection.coupon).company
+        for selection in CouponSelection.objects.prefetch_related("coupon").filter(
+            basket=basket
+        )
+    ]
+
+    if not companies:
+        return []
+    courses = [
+        course
+        for courselist in [
+            get_product_courses(item.product) for item in basket.basketitems.all()
+        ]
+        for course in courselist
+    ]
+
+    agreements = (
+        DataConsentAgreement.objects.select_related("company")
+        .prefetch_related("courses")
+        .filter(company__in=companies)
+        .filter(courses__in=courses)
+        .distinct()
+    )
+
+    return [
+        agreement for agreement in agreements if not is_signed(agreement, basket.user)
+    ]
+
+
+def is_signed(agreement, user):
+    """
+    Determine if a user has signed an agreement
+
+    Args:
+        agreement (DataConsentAgreement): a DataConsentAgreement
+        user (User): a user
+
+    Returns:
+        boolean True if agreement was signed by user
+    """
+    return (
+        DataConsentUser.objects.select_related("user", "agreement")
+        .filter(user=user)
+        .filter(consent_date__isnull=False)
+        .filter(agreement=agreement)
+    ).exists()

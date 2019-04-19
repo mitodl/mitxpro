@@ -6,6 +6,7 @@ from decimal import Decimal
 from datetime import timedelta
 import hashlib
 import hmac
+from types import SimpleNamespace
 
 import pytest
 
@@ -24,6 +25,9 @@ from ecommerce.api import (
     get_valid_coupon_versions,
     latest_product_version,
     latest_coupon_version,
+    get_required_agreements,
+    get_product_courses,
+    is_signed,
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -34,9 +38,18 @@ from ecommerce.factories import (
     LineFactory,
     OrderFactory,
     ProductVersionFactory,
+    ProductFactory,
+    CouponPaymentVersionFactory,
+    CompanyFactory,
+    DataConsentAgreementFactory,
+    DataConsentUserFactory,
+    CouponFactory,
+    CouponEligibilityFactory,
+    CouponSelectionFactory,
 )
 from ecommerce.models import CouponSelection, CouponRedemption, Order, OrderAudit
 from mitxpro.utils import now_in_utc
+from users.factories import UserFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -57,6 +70,31 @@ def cybersource_settings(settings):
     settings.CYBERSOURCE_PROFILE_ID = CYBERSOURCE_PROFILE_ID
     settings.CYBERSOURCE_SECURITY_KEY = CYBERSOURCE_SECURITY_KEY
     settings.CYBERSOURCE_REFERENCE_PREFIX = CYBERSOURCE_REFERENCE_PREFIX
+
+
+@pytest.fixture
+def basket_and_agreement():
+    """
+    Sample basket and data consent agreement
+    """
+    program = ProgramFactory.create()
+    CourseFactory.create_batch(5, program=program)
+    product = ProductFactory.create(content_object=program)
+    basket_item = BasketItemFactory(product=product, quantity=1)
+    company = CompanyFactory.create()
+    coupon = CouponFactory()
+    CouponPaymentVersionFactory(
+        payment=coupon.payment, amount=Decimal("0.40"), company=company
+    )
+    CouponEligibilityFactory(coupon=coupon, product=product)
+    CouponSelectionFactory.create(basket=basket_item.basket, coupon=coupon)
+    return SimpleNamespace(
+        agreement=DataConsentAgreementFactory(
+            courses=program.course_set.all(), company=company
+        ),
+        basket=basket_item.basket,
+        product=product,
+    )
 
 
 def test_valid_signature():
@@ -512,3 +550,53 @@ def test_create_order(
         )
     else:
         assert CouponRedemption.objects.count() == 0
+
+
+def test_get_product_courses():
+    """
+    Verify that the correct list of courses for a product is returned
+    """
+    program = ProgramFactory.create()
+    CourseFactory.create_batch(5, program=program)
+    courserun_product = ProductFactory.create()
+    course_product = ProductFactory.create(content_object=CourseFactory.create())
+    program_product = ProductFactory.create(content_object=program)
+    assert get_product_courses(courserun_product) == [
+        courserun_product.content_object.course
+    ]
+    assert get_product_courses(course_product) == [course_product.content_object]
+    assert list(get_product_courses(program_product)) == list(
+        program_product.content_object.course_set.all()
+    )
+
+
+def test_get_required_agreements(basket_and_agreement):
+    """
+    Verify that the correct list of DataConsentAgreements is returned for a basket
+    """
+    assert list(get_required_agreements(basket_and_agreement.basket)) == [
+        basket_and_agreement.agreement
+    ]
+    DataConsentUserFactory.create(
+        agreement=basket_and_agreement.agreement,
+        consent_date=now_in_utc(),
+        user=basket_and_agreement.basket.user,
+    )
+    assert list(get_required_agreements(basket_and_agreement.basket)) == []
+
+
+def test_is_signed(basket_and_agreement):
+    """
+    Verify that the correct boolean is returned for is_signed function
+    """
+    agreement = basket_and_agreement.agreement
+    signed_user = DataConsentUserFactory.create(
+        agreement=agreement, consent_date=now_in_utc()
+    ).user
+    unsigned_user_1 = DataConsentUserFactory.create(
+        agreement=agreement, consent_date=None
+    ).user
+    unsigned_user_2 = UserFactory.create()
+    assert is_signed(agreement, signed_user) is True
+    assert is_signed(agreement, unsigned_user_1) is False
+    assert is_signed(agreement, unsigned_user_2) is False

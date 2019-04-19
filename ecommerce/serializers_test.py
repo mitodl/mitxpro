@@ -122,6 +122,7 @@ def test_serialize_basket(basket_and_coupons):
             }
         ],
         "coupons": [CouponSelectionSerializer(selection).data],
+        "agreements": [],
     }
 
 

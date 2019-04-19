@@ -3,13 +3,16 @@ Factories for ecommerce models
 """
 from datetime import timezone
 
+import factory
 from factory import fuzzy, Faker, LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory
 import faker
 
 from courses.factories import CourseFactory
 from ecommerce import models
+from ecommerce.models import DataConsentAgreement, DataConsentUser
 from ecommerce.test_utils import gen_fake_receipt_data
+from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
 
 
@@ -174,3 +177,35 @@ class ReceiptFactory(DjangoModelFactory):
 
     class Meta:
         model = models.Receipt
+
+
+class DataConsentAgreementFactory(DjangoModelFactory):
+    """Factory for DataConsentAgreement"""
+
+    content = fuzzy.FuzzyText()
+    company = SubFactory(CompanyFactory)
+
+    @factory.post_generation
+    # pylint: disable=unused-argument
+    def courses(self, create, extracted, **kwargs):
+        """Create courses for DCA"""
+        if not create:
+            return
+
+        if extracted:
+            for course in extracted:
+                self.courses.add(course)
+
+    class Meta:
+        model = DataConsentAgreement
+
+
+class DataConsentUserFactory(DjangoModelFactory):
+    """Factory for DataConsentUser"""
+
+    user = SubFactory(UserFactory)
+    agreement = SubFactory(DataConsentAgreementFactory)
+    consent_date = fuzzy.FuzzyDateTime(start_dt=now_in_utc())
+
+    class Meta:
+        model = DataConsentUser

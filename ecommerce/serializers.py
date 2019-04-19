@@ -16,6 +16,7 @@ from ecommerce.api import (
     get_valid_coupon_versions,
     latest_coupon_version,
     latest_product_version,
+    get_required_agreements
 )
 from mitxpro.serializers import WriteableSerializerMethodField
 
@@ -127,8 +128,9 @@ class CouponSelectionSerializer(serializers.ModelSerializer):
 class BasketSerializer(serializers.ModelSerializer):
     """Basket model serializer"""
 
-    items = WriteableSerializerMethodField()
-    coupons = WriteableSerializerMethodField()
+    items = serializers.SerializerMethodField()
+    coupons = serializers.SerializerMethodField()
+    agreements = serializers.SerializerMethodField()
 
     def get_items(self, instance):
         """ Get the basket items """
@@ -332,8 +334,12 @@ class BasketSerializer(serializers.ModelSerializer):
         """Can't do much validation here since we don't have the product version id"""
         return {"coupons": coupons}
 
+    def get_agreements(self, instance):
+        """ Get the basket unsigned data consent agreements """
+        return [agreement.id for agreement in get_required_agreements(instance)]
+
     class Meta:
-        fields = ["items", "coupons"]
+        fields = ["items", "coupons", "agreements"]
         model = models.Basket
 
 
