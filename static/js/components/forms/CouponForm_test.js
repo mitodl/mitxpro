@@ -1,6 +1,7 @@
 // @flow
 import React from "react"
 import sinon from "sinon"
+import moment from "moment"
 import { assert } from "chai"
 import { mount } from "enzyme"
 import wait from "waait"
@@ -85,8 +86,14 @@ describe("CouponForm", () => {
     ["activation_date", 0, "", "Valid activation date required"],
     ["expiration_date", 1, "bad_date", "Valid expiration date required"],
     ["activation_date", 0, "bad_date", "Valid activation date required"],
-    ["expiration_date", 1, "2019-04-11T19:54:33.391Z", null],
-    ["activation_date", 0, "2020-04-11T19:54:33.391Z", null]
+    [
+      "expiration_date",
+      1,
+      moment().format("YYYY-MM-DD"),
+      "Date cannot be less than activation date"
+    ],
+    ["activation_date", 0, moment().format("YYYY-MM-DD"), null],
+    ["activation_date", 0, "2001-01-01T00:00:00Z", "Date cannot be in the past"]
   ].forEach(([name, idx, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value

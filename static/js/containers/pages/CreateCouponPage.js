@@ -1,6 +1,6 @@
 // @flow
 import React from "react"
-import _ from "lodash"
+import { mergeAll } from "ramda"
 import { connectRequest, mutateAsync } from "redux-query"
 import { compose } from "redux"
 import { connect } from "react-redux"
@@ -60,8 +60,7 @@ export class CreateCouponPage extends React.Component<Props, State> {
       if (result.body && result.body.id) {
         this.setState({ couponId: result.body.id })
       } else if (result.body && result.body.errors) {
-        setErrors(_.merge({}, ...result.body.errors))
-        this.clearSuccess()
+        setErrors(mergeAll(result.body.errors))
       }
     } finally {
       setSubmitting(false)

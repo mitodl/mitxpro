@@ -1,12 +1,19 @@
 // @flow
 import React from "react"
-import _ from "lodash"
+import moment from "moment"
 import Picky from "react-picky"
+import { filter, pathSatisfies, equals } from "ramda"
 import DayPickerInput from "react-day-picker/DayPickerInput"
 import { Formik, Field, Form, ErrorMessage } from "formik"
 import * as yup from "yup"
 
-import { COUPON_TYPE_PROMO, COUPON_TYPE_SINGLE_USE } from "../../constants"
+import {
+  COUPON_TYPE_PROMO,
+  COUPON_TYPE_SINGLE_USE,
+  PRODUCT_TYPE_COURSE,
+  PRODUCT_TYPE_COURSERUN,
+  PRODUCT_TYPE_PROGRAM
+} from "../../constants"
 import { isPromo } from "../../lib/ecommerce"
 
 import type { Company, Product } from "../../flow/ecommerceTypes"
@@ -24,9 +31,15 @@ const couponValidations = yup.object().shape({
     .matches(/^\w+$/, "Only letters, numbers, and underscores allowed"),
   coupon_type:     yup.string().required("Coupon type is required"),
   products:        yup.array().min(1, "${min} or more products must be selected"),
-  activation_date: yup.date().required("Valid activation date required"),
-  expiration_date: yup.date().required("Valid expiration date required"),
-  discount:        yup
+  activation_date: yup
+    .date()
+    .min(moment().format("YYYY-MM-DD"), "Date cannot be in the past")
+    .required("Valid activation date required"),
+  expiration_date: yup
+    .date()
+    .min(yup.ref("activation_date"), "Date cannot be less than activation date")
+    .required("Valid expiration date required"),
+  discount: yup
     .number()
     .required("Percentage discount is required")
     .min(1, "Must be at least ${min}")
@@ -72,7 +85,7 @@ export const CouponForm = ({
     validationSchema={couponValidations}
     initialValues={{
       coupon_type:         COUPON_TYPE_SINGLE_USE,
-      product_type:        "courserun",
+      product_type:        PRODUCT_TYPE_COURSERUN,
       products:            [],
       num_coupon_codes:    1,
       max_redemptions:     1000000,
@@ -210,34 +223,34 @@ export const CouponForm = ({
           <Field
             type="radio"
             name="product_type"
-            value="program"
+            value={PRODUCT_TYPE_PROGRAM}
             onClick={evt => {
               setFieldValue("product_type", evt.target.value)
               setFieldValue("products", [])
             }}
-            checked={values.product_type === "program"}
+            checked={values.product_type === PRODUCT_TYPE_PROGRAM}
           />
           Programs
           <Field
             type="radio"
             name="product_type"
-            value="course"
+            value={PRODUCT_TYPE_COURSE}
             onClick={evt => {
               setFieldValue("product_type", evt.target.value)
               setFieldValue("products", [])
             }}
-            checked={values.product_type === "course"}
+            checked={values.product_type === PRODUCT_TYPE_COURSE}
           />
           Courses
           <Field
             type="radio"
             name="product_type"
-            value="courserun"
+            value={PRODUCT_TYPE_COURSERUN}
             onClick={evt => {
               setFieldValue("product_type", evt.target.value)
               setFieldValue("products", [])
             }}
-            checked={values.product_type === "courserun"}
+            checked={values.product_type === PRODUCT_TYPE_COURSERUN}
           />
           Course runs
         </div>
@@ -247,7 +260,10 @@ export const CouponForm = ({
             name="products"
             valueKey="id"
             labelKey="title"
-            options={_.filter(products, { product_type: values.product_type })}
+            options={filter(
+              pathSatisfies(equals(values.product_type), ["product_type"]),
+              products || []
+            )}
             value={values.products}
             open={true}
             multiple={true}

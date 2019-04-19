@@ -1,6 +1,7 @@
 // @flow
 import type { Decimal } from "decimal.js-light"
 import type { CourseRun } from "./courseTypes"
+import {PRODUCT_TYPE_COURSE, PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM} from "../constants"
 
 export type CheckoutResponse = {
   url: string,
@@ -28,7 +29,7 @@ export type CheckoutPayload = {
 };
 
 export type BasketItem = {
-  type: "courserun" | "course" | "program",
+  type: PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_COURSE | PRODUCT_TYPE_PROGRAM,
   course_runs: Array<CourseRun>,
   thumbnail_url: string,
   price: Decimal,

@@ -1,5 +1,6 @@
 // @flow
 import Decimal from "decimal.js-light"
+import { equals } from "ramda"
 
 import type { BasketItem, Coupon } from "../flow/ecommerceTypes"
 import { COUPON_TYPE_PROMO } from "../constants"
@@ -35,5 +36,4 @@ export const formatPrice = (price: ?string | number | Decimal): string => {
   }
 }
 
-export const isPromo = (couponType: string): boolean =>
-  couponType === COUPON_TYPE_PROMO
+export const isPromo = equals(COUPON_TYPE_PROMO)

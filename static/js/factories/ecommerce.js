@@ -14,11 +14,20 @@ import type {
   Company,
   Product
 } from "../flow/ecommerceTypes"
+import {
+  PRODUCT_TYPE_COURSE,
+  PRODUCT_TYPE_COURSERUN,
+  PRODUCT_TYPE_PROGRAM
+} from "../constants"
 
 const genBasketItemId = incrementer()
 
 export const makeItem = (): BasketItem => ({
-  type:          casual.random_element(["courserun", "course", "program"]),
+  type: casual.random_element([
+    PRODUCT_TYPE_COURSERUN,
+    PRODUCT_TYPE_COURSE,
+    PRODUCT_TYPE_PROGRAM
+  ]),
   course_runs:   R.range(0, 4).map(() => makeCourseRun()),
   // $FlowFixMe: flow doesn't understand generators well
   id:            genBasketItemId.next().value,
@@ -39,12 +48,18 @@ export const makeBasketResponse = (): BasketResponse => ({
 })
 
 const genProductId = incrementer()
-export const makeProduct = (productType: string = "courserun"): Product => ({
+export const makeProduct = (
+  productType: string = PRODUCT_TYPE_COURSERUN
+): Product => ({
   // $FlowFixMe
   id:           genProductId.next().value,
   product_type: productType
     ? productType
-    : casual.random_element(["courserun", "course", "program"]),
+    : casual.random_element([
+      PRODUCT_TYPE_COURSERUN,
+      PRODUCT_TYPE_COURSE,
+      PRODUCT_TYPE_PROGRAM
+    ]),
   title:        casual.word,
   object_id:    casual.number,
   content_type: casual.number,
