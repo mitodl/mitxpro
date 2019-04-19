@@ -7,7 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
-from courses.models import Course
+from courses.models import Course, Program
 from courses.constants import DEFAULT_COURSE_IMG_PATH
 from courses.serializers import CourseSerializer
 from ecommerce import models
@@ -56,15 +56,15 @@ class ProductVersionSerializer(serializers.ModelSerializer):
 
     def get_courses(self, instance):
         """ Return the course runs in the product """
-        model = instance.product.content_type.model
-        if model == "course":
+        model_class = instance.product.content_type.model_class()
+        if model_class is Course:
             courses = [instance.product.content_object]
-        elif model == "program":
+        elif model_class is Program:
             courses = Course.objects.filter(
                 program=instance.product.content_object
             ).order_by("position_in_program")
         else:
-            raise ValueError(f"Unexpected product for {model}")
+            raise ValueError(f"Unexpected product for {model_class}")
 
         return [CourseSerializer(course).data for course in courses]
 
