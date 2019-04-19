@@ -55,7 +55,12 @@ describe("CouponForm", () => {
     ["discount", "-1", "Must be at least 1"],
     ["discount", "200", "Must be at most 100"],
     ["discount", "1", null],
-    ["discount", "100", null]
+    ["discount", "100", null],
+    ["payment_transaction", "", "Payment transaction is required"],
+    ["payment_transaction", "number", null],
+    ["num_coupon_codes", "", "Number required"],
+    ["num_coupon_codes", "0", "Must be at least 1"],
+    ["num_coupon_codes", "2", null]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value
@@ -127,25 +132,11 @@ describe("CouponForm", () => {
     })
   })
 
-  it(`calls toggleProduct() when the product type is changed`, async () => {
-    const wrapper = renderForm()
-    const courseProductChoice = findFormikFieldByName(
-      wrapper,
-      "product_type"
-    ).at(1)
-    courseProductChoice.simulate("click")
-  })
-
   //
   ;[
-    ["payment_type", "select", "", "Payment type is required"],
-    ["payment_type", "select", "credit_card", null],
-    ["payment_transaction", "input", "", "Payment transaction is required"],
-    ["payment_transaction", "input", "number", null],
-    ["num_coupon_codes", "input", "", "Number required"],
-    ["num_coupon_codes", "input", "0", "Must be at least 1"],
-    ["num_coupon_codes", "input", "2", null]
-  ].forEach(([name, tag, value, errorMessage]) => {
+    ["payment_type", "", "Payment type is required"],
+    ["payment_type", "credit_card", null]
+  ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value
     )} and expects error=${JSON.stringify(
@@ -153,7 +144,7 @@ describe("CouponForm", () => {
     )} for single-use coupons`, async () => {
       const wrapper = renderForm()
       wrapper.find(`input[value="single-use"]`).simulate("click")
-      const input = wrapper.find(`${tag}[name="${name}"]`)
+      const input = wrapper.find(`select[name="${name}"]`)
       input.simulate("change", { persist: () => {}, target: { name, value } })
       input.simulate("blur")
       await wait()

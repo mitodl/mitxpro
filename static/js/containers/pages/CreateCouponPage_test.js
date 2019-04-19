@@ -28,7 +28,7 @@ describe("CreateCouponPage", () => {
       makeProduct("course"),
       makeProduct("program")
     ]
-    companies = [makeCompany(), makeCompany]
+    companies = [makeCompany(), makeCompany()]
     setSubmittingStub = helper.sandbox.stub()
     setErrorsStub = helper.sandbox.stub()
     renderCreateCouponPage = helper.configureHOCRenderer(

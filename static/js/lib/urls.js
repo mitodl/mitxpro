@@ -9,8 +9,6 @@ export const routes = {
   home:   "/dashboard/",
   logout: "/logout/",
 
-  coupons: "/ecommerce/admin/coupons/",
-
   // authentication related routes
   login: include("/login/", {
     begin:    "",
@@ -23,5 +21,6 @@ export const routes = {
     details: "details/"
   }),
 
-  checkout: "/checkout/"
+  checkout: "/checkout/",
+  coupons:  "/ecommerce/admin/coupons/"
 }

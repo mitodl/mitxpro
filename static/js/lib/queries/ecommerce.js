@@ -4,12 +4,11 @@ import { pathOr, objOf } from "ramda"
 import { getCookie } from "../api"
 
 import type {
+  BasketResponse,
   Company,
   CouponPaymentVersion,
   Product
 } from "../../flow/ecommerceTypes"
-
-import type { BasketResponse } from "../../flow/ecommerceTypes"
 
 const DEFAULT_POST_OPTIONS = {
   headers: {
