@@ -34,6 +34,7 @@ from ecommerce.models import (
     Basket,
     Company,
     CouponPaymentVersion,
+    BasketItem,
     CouponSelection,
     Order,
     Product,
@@ -212,9 +213,10 @@ class BasketView(APIView):
                 if product_version:
                     # Update basket items and coupon selection
                     with transaction.atomic():
-                        basket_item = basket.basketitems.first()
-                        basket_item.product = product_version.product
-                        basket_item.save()
+                        basket.basketitems.all().delete()
+                        BasketItem.objects.create(
+                            product=product_version.product, quantity=1, basket=basket
+                        )
 
                         if runs is not None:
                             CourseRunSelection.objects.filter(basket=basket).delete()

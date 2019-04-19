@@ -21,6 +21,7 @@ from ecommerce.factories import (
 )
 from ecommerce.models import (
     Basket,
+    BasketItem,
     CouponSelection,
     Order,
     OrderAudit,
@@ -365,6 +366,17 @@ def test_patch_basket_new_user(basket_and_coupons, user, user_drf_client):
     resp = user_drf_client.patch(reverse("basket_api"), {"items": []})
     assert resp.status_code == 200
     assert Basket.objects.filter(user=user).exists() is True
+
+
+def test_patch_basket_new_item(basket_client, basket_and_coupons):
+    """Test that a user can add an item to their basket"""
+    data = {"items": [{"id": basket_and_coupons.product_version.id}]}
+    BasketItem.objects.all().delete()  # clear the basket first
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json() == render_json(
+        BasketSerializer(instance=basket_and_coupons.basket)
+    )
 
 
 def test_patch_basket_multiple_products(basket_client, basket_and_coupons):
