@@ -24,6 +24,27 @@ class CourseRunSerializer(serializers.ModelSerializer):
         ]
 
 
+def _get_thumbnail_url(page):
+    """
+    Get the thumbnail URL or else return a default image URL.
+
+    Args:
+        page (cms.models.ProductPage): A product page
+
+    Returns:
+        str:
+            A page URL
+    """
+    return (
+        page.thumbnail_image.file.url
+        if page
+        and page.thumbnail_image
+        and page.thumbnail_image.file
+        and page.thumbnail_image.file.url
+        else static("images/mit-dome.png")
+    )
+
+
 class CourseSerializer(serializers.ModelSerializer):
     """Course model serializer"""
 
@@ -32,14 +53,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_thumbnail_url(self, instance):
         """Thumbnail URL"""
-        return (
-            instance.page.thumbnail_image.file.url
-            if instance.page
-            and instance.page.thumbnail_image
-            and instance.page.thumbnail_image.file
-            and instance.page.thumbnail_image.file.url
-            else static("images/mit-dome.png")
-        )
+        return _get_thumbnail_url(instance.page)
 
     class Meta:
         model = models.Course
@@ -61,14 +75,7 @@ class ProgramSerializer(serializers.ModelSerializer):
 
     def get_thumbnail_url(self, instance):
         """Thumbnail URL"""
-        return (
-            instance.page.thumbnail_image.file.url
-            if instance.page
-            and instance.page.thumbnail_image
-            and instance.page.thumbnail_image.file
-            and instance.page.thumbnail_image.file.url
-            else static("images/mit-dome.png")
-        )
+        return _get_thumbnail_url(instance.page)
 
     class Meta:
         model = models.Program
