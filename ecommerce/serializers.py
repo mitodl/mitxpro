@@ -19,16 +19,10 @@ from ecommerce.api import (
 )
 from ecommerce.models import (
     BasketItem,
-    CouponPaymentVersion,
-    CouponPayment,
     CourseRunEnrollment,
     CourseRunSelection,
     CouponSelection,
-    Coupon,
-    Product,
-    Company,
     CouponVersion,
-    CouponEligibility,
     ProductVersion,
 )
 from mitxpro.serializers import WriteableSerializerMethodField

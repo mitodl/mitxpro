@@ -27,14 +27,9 @@ from ecommerce.models import (
     Basket,
     Company,
     CouponPaymentVersion,
-    BasketItem,
-    CouponSelection,
     Order,
     Product,
-    ProductVersion,
     Receipt,
-    CourseRunSelection,
-    CourseRunEnrollment,
 )
 from ecommerce.permissions import IsSignedByCyberSource
 from ecommerce.serializers import (
