@@ -385,7 +385,7 @@ def test_patch_basket_multiple_products(basket_client, basket_and_coupons):
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert "Basket cannot contain more than one item" in resp_data.get("errors")
+    assert "Basket cannot contain more than one item" in resp_data["errors"]["items"]
 
 
 def test_patch_basket_invalid_coupon_format(basket_client, basket_and_coupons):
@@ -540,7 +540,9 @@ def test_patch_basket_update_invalid_product(basket_client, basket_and_coupons):
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert "Invalid product version id {}".format(bad_id) in resp_data.get("errors")
+    assert (
+        "Invalid product version id {}".format(bad_id) in resp_data["errors"]["items"]
+    )
 
 
 @pytest.mark.parametrize("section", ["items", "coupons"])
@@ -551,7 +553,9 @@ def test_patch_basket_update_invalid_data(basket_client, basket_and_coupons, sec
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert "Invalid request" in resp_data.get("errors")
+    assert "Invalid request" in (
+        resp_data["errors"] if section == "coupons" else resp_data["errors"]["items"]
+    )
 
 
 @pytest.mark.parametrize("data", [{"items": [], "coupons": []}, {"items": []}])

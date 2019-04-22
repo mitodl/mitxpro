@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from django.db import transaction
 from django.templatetags.static import static
-from rest_framework import serializers, status
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
@@ -170,6 +170,35 @@ class BasketSerializer(serializers.ModelSerializer):
         ]
 
     @classmethod
+    def _get_runs_for_product(cls, *, product_version, run_ids):
+        """Helper function to get and validate selected runs in a product"""
+        content_object = product_version.product.content_object
+        runs_for_product = CourseRun.objects.filter(id__in=run_ids)
+        if isinstance(content_object, Course):
+            runs_for_product = runs_for_product.filter(course=content_object)
+        elif isinstance(content_object, Program):
+            runs_for_product = runs_for_product.filter(course__program=content_object)
+        else:
+            raise ValidationError(
+                f"Unknown content_object for {product_version.product}"
+            )
+
+        run_ids_for_product = {run.id for run in runs_for_product}
+
+        missing_run_ids = set(run_ids) - run_ids_for_product
+        if missing_run_ids:
+            raise ValidationError(f"Unable to find run(s) with id(s) {missing_run_ids}")
+
+        courses_for_product = set(runs_for_product.values_list("course", flat=True))
+        if len(courses_for_product) < len(run_ids):
+            raise ValidationError("Only one run per course can be selected")
+
+        if CourseRunEnrollment.objects.filter(run_id__in=run_ids).exists():
+            raise ValidationError("User has already enrolled in run")
+
+        return runs_for_product
+
+    @classmethod
     def _update_items(cls, basket, items):
         """
         Helper function to determine if the basket item should be updated, removed, or kept as is.
@@ -183,54 +212,16 @@ class BasketSerializer(serializers.ModelSerializer):
 
         """
         if items:
-            if len(items) > 1:
-                raise ValidationError("Basket cannot contain more than one item")
             # Item updated
             item = items[0]
             product_version_id = item.get("id")
             run_ids = item.get("run_ids")
 
-            if product_version_id is None:
-                raise ValidationError("Invalid request")
-            try:
-                product_version = ProductVersion.objects.get(id=product_version_id)
-            except ProductVersion.DoesNotExist:
-                raise ValidationError(
-                    f"Invalid product version id {product_version_id}"
-                )
-
+            product_version = ProductVersion.objects.get(id=product_version_id)
             if run_ids is not None:
-                content_object = product_version.product.content_object
-                runs_for_product = CourseRun.objects.filter(id__in=run_ids)
-                if isinstance(content_object, Course):
-                    runs_for_product = runs_for_product.filter(course=content_object)
-                elif isinstance(content_object, Program):
-                    runs_for_product = runs_for_product.filter(
-                        course__program=content_object
-                    )
-                else:
-                    raise ValidationError(
-                        f"Unknown content_object for {product_version.product}"
-                    )
-
-                run_ids_for_product = {run.id for run in runs_for_product}
-
-                missing_run_ids = set(run_ids) - run_ids_for_product
-                if missing_run_ids:
-                    raise ValidationError(
-                        f"Unable to find run(s) with id(s) {missing_run_ids}"
-                    )
-
-                courses_for_product = set(
-                    runs_for_product.values_list("course", flat=True)
+                runs = cls._get_runs_for_product(
+                    product_version=product_version, run_ids=run_ids
                 )
-                if len(courses_for_product) < len(run_ids):
-                    raise ValidationError("Only one run per course can be selected")
-
-                if CourseRunEnrollment.objects.filter(run_id__in=run_ids).exists():
-                    raise ValidationError("User has already enrolled in run")
-
-                runs = runs_for_product
             else:
                 runs = None
         elif items is not None:
@@ -335,9 +326,24 @@ class BasketSerializer(serializers.ModelSerializer):
         return instance
 
     def validate_items(self, items):
+        """Validate some basic things about items"""
+        if items:
+            if len(items) > 1:
+                raise ValidationError("Basket cannot contain more than one item")
+            item = items[0]
+            product_version_id = item.get("id")
+
+            if product_version_id is None:
+                raise ValidationError("Invalid request")
+            if not ProductVersion.objects.filter(id=product_version_id).exists():
+                raise ValidationError(
+                    f"Invalid product version id {product_version_id}"
+                )
+
         return {"items": items}
 
     def validate_coupons(self, coupons):
+        """Can't do much validation here since we don't have the product version id"""
         return {"coupons": coupons}
 
     class Meta:

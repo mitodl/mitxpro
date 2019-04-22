@@ -4,11 +4,9 @@ import logging
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.db import transaction
 from django.http import HttpResponse
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -16,7 +14,6 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from courses.models import Course, CourseRun, Program
 from ecommerce.api import (
     create_unfulfilled_order,
     enroll_user_on_success,
