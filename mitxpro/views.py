@@ -4,6 +4,7 @@ mitxpro views
 import json
 
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
 from raven.contrib.django.raven_compat.models import client as sentry
 from rest_framework.views import APIView
@@ -32,6 +33,15 @@ def index(request):
     """
     The index view
     """
+    return render(request, "index.html", context=get_js_settings_context(request))
+
+
+def restricted(request):
+    """
+    Views restricted to admins
+    """
+    if not (request.user and request.user.is_staff):
+        raise PermissionDenied
     return render(request, "index.html", context=get_js_settings_context(request))
 
 

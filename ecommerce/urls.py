@@ -9,10 +9,12 @@ from ecommerce.views import (
     CouponView,
     ProductViewSet,
     coupon_code_csv_view,
+    CompanyViewSet,
 )
 
 router = SimpleRouter()
 router.register(r"products", ProductViewSet, basename="products_api")
+router.register(r"companies", CompanyViewSet, basename="companies_api")
 
 urlpatterns = [
     re_path(r"^api/", include(router.urls)),

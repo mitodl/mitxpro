@@ -12,15 +12,14 @@ from courses.serializers import CourseRunSerializer
 from courses.constants import DEFAULT_COURSE_IMG_PATH
 from ecommerce import models
 from ecommerce.api import latest_product_version, latest_coupon_version
-from ecommerce.models import (
-    CouponPaymentVersion,
-    CouponPayment,
-    Coupon,
-    Product,
-    Company,
-    CouponVersion,
-    CouponEligibility,
-)
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    """ Company Serializer """
+
+    class Meta:
+        fields = "__all__"
+        model = models.Company
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -163,6 +162,7 @@ class CouponPaymentVersionSerializer(serializers.ModelSerializer):
     """ Serializer for coupon payment versions """
 
     payment = CouponPaymentSerializer()
+    company = CompanySerializer()
 
     class Meta:
         fields = "__all__"
@@ -174,7 +174,7 @@ class BaseCouponSerializer(serializers.Serializer):
 
     name = serializers.CharField(
         max_length=256,
-        validators=[UniqueValidator(queryset=CouponPayment.objects.all())],
+        validators=[UniqueValidator(queryset=models.CouponPayment.objects.all())],
     )
     tag = serializers.CharField(max_length=256, allow_null=True, required=False)
     amount = serializers.DecimalField(decimal_places=2, max_digits=20)
@@ -186,18 +186,22 @@ class BaseCouponSerializer(serializers.Serializer):
     max_redemptions_per_user = serializers.IntegerField(default=1)
     coupon_type = serializers.ChoiceField(
         choices=set(
-            zip(CouponPaymentVersion.COUPON_TYPES, CouponPaymentVersion.COUPON_TYPES)
+            zip(
+                models.CouponPaymentVersion.COUPON_TYPES,
+                models.CouponPaymentVersion.COUPON_TYPES,
+            )
         )
     )
-    num_coupon_codes = serializers.IntegerField(default=1)
-    company = serializers.CharField(max_length=512, allow_null=True, required=False)
+    company = serializers.CharField(
+        max_length=512, allow_null=True, allow_blank=True, required=False
+    )
 
     def validate_product_ids(self, value):
         """ Determine if the product_ids field is valid """
         if not value or len(value) == 0:
             raise ValidationError("At least one product must be selected")
         products_missing = set(value) - set(
-            Product.objects.filter(id__in=value).values_list("id", flat=True)
+            models.Product.objects.filter(id__in=value).values_list("id", flat=True)
         )
         if products_missing:
             raise ValidationError(
@@ -210,13 +214,13 @@ class BaseCouponSerializer(serializers.Serializer):
     def create(self, validated_data):
         with transaction.atomic():
             if validated_data.get("company"):
-                company, _ = Company.objects.get_or_create(
-                    name=validated_data.get("company")
-                )
+                company = models.Company.objects.get(id=validated_data.get("company"))
             else:
                 company = None
-            payment = CouponPayment.objects.create(name=validated_data.get("name"))
-            payment_version = CouponPaymentVersion.objects.create(
+            payment = models.CouponPayment.objects.create(
+                name=validated_data.get("name")
+            )
+            payment_version = models.CouponPaymentVersion.objects.create(
                 payment=payment,
                 company=company,
                 tag=validated_data.get("tag"),
@@ -232,15 +236,15 @@ class BaseCouponSerializer(serializers.Serializer):
                 payment_transaction=validated_data.get("payment_transaction"),
             )
             for coupon in range(validated_data.get("num_coupon_codes")):
-                coupon = Coupon.objects.create(
+                coupon = models.Coupon.objects.create(
                     coupon_code=validated_data.get("coupon_code", uuid4().hex),
                     payment=payment,
                 )
-                CouponVersion.objects.create(
+                models.CouponVersion.objects.create(
                     coupon=coupon, payment_version=payment_version
                 )
                 for product_id in validated_data.get("product_ids"):
-                    CouponEligibility.objects.create(
+                    models.CouponEligibility.objects.create(
                         coupon=coupon, product_id=product_id
                     )
             return payment_version
@@ -249,23 +253,37 @@ class BaseCouponSerializer(serializers.Serializer):
 class SingleUseCouponSerializer(BaseCouponSerializer):
     """ Serializer for creating single-use coupons """
 
+    num_coupon_codes = serializers.IntegerField(required=True)
     payment_transaction = serializers.CharField(max_length=256)
     payment_type = serializers.ChoiceField(
-        choices=[(_type, _type) for _type in CouponPaymentVersion.PAYMENT_TYPES]
+        choices=set(
+            zip(
+                models.CouponPaymentVersion.PAYMENT_TYPES,
+                models.CouponPaymentVersion.PAYMENT_TYPES,
+            )
+        )
     )
 
 
 class PromoCouponSerializer(BaseCouponSerializer):
     """ Serializer for creating promo coupons """
 
+    num_coupon_codes = serializers.IntegerField(default=1, required=False)
     coupon_code = serializers.CharField(
-        max_length=50, validators=[UniqueValidator(queryset=Coupon.objects.all())]
+        max_length=50,
+        validators=[UniqueValidator(queryset=models.Coupon.objects.all())],
     )
     payment_transaction = serializers.CharField(
-        max_length=256, allow_null=True, required=False
+        max_length=256, allow_null=True, required=False, allow_blank=True
     )
     payment_type = serializers.ChoiceField(
-        choices=[(_type, _type) for _type in CouponPaymentVersion.PAYMENT_TYPES],
+        choices=set(
+            zip(
+                models.CouponPaymentVersion.PAYMENT_TYPES,
+                models.CouponPaymentVersion.PAYMENT_TYPES,
+            )
+        ),
         allow_null=True,
+        allow_blank=True,
         required=False,
     )

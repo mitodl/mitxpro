@@ -21,5 +21,6 @@ export const routes = {
     details: "details/"
   }),
 
-  checkout: "/checkout/"
+  checkout: "/checkout/",
+  coupons:  "/ecommerce/admin/coupons/"
 }

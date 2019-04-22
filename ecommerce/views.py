@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from ecommerce.api import (
     create_unfulfilled_order,
@@ -31,30 +31,42 @@ from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISIO
 from ecommerce.exceptions import EcommerceException
 from ecommerce.models import (
     Basket,
-    CouponSelection,
-    ProductVersion,
-    Order,
-    Receipt,
+    Company,
     CouponPaymentVersion,
+    CouponSelection,
+    Order,
     Product,
+    ProductVersion,
+    Receipt,
 )
 from ecommerce.permissions import IsSignedByCyberSource
 from ecommerce.serializers import (
     BasketSerializer,
-    SingleUseCouponSerializer,
-    PromoCouponSerializer,
-    ProductSerializer,
     CouponPaymentVersionSerializer,
+    CompanySerializer,
+    ProductSerializer,
+    PromoCouponSerializer,
+    SingleUseCouponSerializer,
 )
 
 log = logging.getLogger(__name__)
 
 
-class ProductViewSet(ModelViewSet):
+class ProductViewSet(ReadOnlyModelViewSet):
     """API view set for Products"""
 
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
+
+
+class CompanyViewSet(ReadOnlyModelViewSet):
+    """API view set for Companies"""
+
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (SessionAuthentication,)
+
+    serializer_class = CompanySerializer
+    queryset = Company.objects.all()
 
 
 class CheckoutView(APIView):
@@ -355,7 +367,9 @@ def coupon_code_csv_view(request, version_id):
     response = HttpResponse(content_type="text/csv")
     response[
         "Content-Disposition"
-    ] = 'attachment; filename="coupon_codes_{}.csv"'.format(version_id)
+    ] = 'attachment; filename="coupon_codes_{}.csv"'.format(
+        coupon_payment_version.payment.name
+    )
     writer = csv.writer(response)
     for coupon_code in coupon_payment_version.couponversion_set.values_list(
         "coupon__coupon_code", flat=True

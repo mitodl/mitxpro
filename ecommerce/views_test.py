@@ -16,6 +16,7 @@ from ecommerce.factories import (
     ProductVersionFactory,
     CouponFactory,
     CouponPaymentFactory,
+    CompanyFactory,
 )
 from ecommerce.models import (
     Basket,
@@ -28,7 +29,7 @@ from ecommerce.models import (
     CouponEligibility,
     Product,
 )
-from ecommerce.serializers import BasketSerializer, ProductSerializer
+from ecommerce.serializers import BasketSerializer, ProductSerializer, CompanySerializer
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_REFERENCE_PREFIX = "fake"
@@ -568,7 +569,7 @@ def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     assert model_version.amount == data.get("amount")
     assert model_version.coupon_type == "single-use"
     assert model_version.payment_transaction == data.get("payment_transaction")
-    assert Company.objects.filter(name=data.get("company")).first() is not None
+    assert Company.objects.filter(id=data.get("company")).first() is not None
     assert (
         CouponEligibility.objects.filter(product__in=data.get("product_ids")).count()
         == 15
@@ -589,7 +590,7 @@ def test_post_promo_coupon(admin_drf_client, promo_coupon_json):
     assert model_version.payment.coupon_set.first().coupon_code == data.get(
         "coupon_code"
     )
-    assert Company.objects.filter(name=data.get("company")).first() is not None
+    assert Company.objects.filter(id=data.get("company")).first() is not None
     assert (
         CouponEligibility.objects.filter(product__in=data.get("product_ids")).count()
         == 3
@@ -718,3 +719,45 @@ def test_products_viewset_detail(user_drf_client, coupon_product_ids):
             instance=Product.objects.get(id=coupon_product_ids[0])
         ).data
     )
+
+
+def test_products_viewset_post_forbidden(admin_drf_client):
+    """ Test that post requests to the products API viewset is not allowed"""
+    response = admin_drf_client.post(reverse("products_api-list"), data={})
+    assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
+
+
+def test_companies_viewset_list(user_drf_client):
+    """ Test that the CompanyViewSet returns all companies """
+    companies = CompanyFactory.create_batch(3)
+    response = user_drf_client.get(reverse("companies_api-list"))
+    assert response.status_code == status.HTTP_200_OK
+    companies_list = response.json()
+    assert {company.get("id") for company in companies_list} == {
+        company.id for company in companies
+    }
+    for company in companies_list:
+        assert company == CompanySerializer(instance=company).data
+
+
+def test_companies_viewset_detail(user_drf_client):
+    """ Test that the CompanyViewSet returns details for a company """
+    company = CompanyFactory.create()
+    response = user_drf_client.get(
+        reverse("companies_api-detail", kwargs={"pk": company.id})
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == CompanySerializer(instance=company).data
+
+
+def test_companies_viewset_forbidden():
+    """ Test that an anonymous user cannot access the companies list """
+    client = APIClient()
+    response = client.get(reverse("companies_api-list"))
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_companies_viewset_post_forbidden(admin_drf_client):
+    """ Test that post requests to the companies API viewset is not allowed"""
+    response = admin_drf_client.post(reverse("companies_api-list"), data={})
+    assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED

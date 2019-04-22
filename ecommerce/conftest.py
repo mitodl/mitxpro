@@ -14,8 +14,9 @@ from ecommerce.factories import (
     CouponPaymentFactory,
     CouponPaymentVersionFactory,
     CouponVersionFactory,
-    ProductVersionFactory,
     CouponSelectionFactory,
+    CompanyFactory,
+    ProductVersionFactory,
 )
 
 CouponGroup = namedtuple(
@@ -97,7 +98,7 @@ def promo_coupon_json(coupon_product_ids):
         "amount": 0.75,
         "coupon_code": "TESTPROMOCODE",
         "coupon_type": "promo",
-        "company": "Test Corp",
+        "company": CompanyFactory.create().id,
         "payment_type": "purchase_order",
         "payment_transaction": "fake_transaction_num",
         "product_ids": coupon_product_ids,
@@ -116,7 +117,7 @@ def single_use_coupon_json(coupon_product_ids):
         "amount": 0.75,
         "num_coupon_codes": 5,
         "coupon_type": "single-use",
-        "company": "Test Corp",
+        "company": CompanyFactory.create().id,
         "payment_type": "credit_card",
         "payment_transaction": "fake_transaction_num",
         "product_ids": coupon_product_ids,

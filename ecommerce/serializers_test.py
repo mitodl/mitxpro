@@ -10,7 +10,7 @@ from courses.models import CourseRun
 from courses.serializers import CourseRunSerializer
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import round_half_up
-from ecommerce.factories import ProductVersionFactory, ProductFactory
+from ecommerce.factories import ProductVersionFactory, ProductFactory, CompanyFactory
 from ecommerce.models import CouponSelection, Product
 from ecommerce.serializers import (
     ProductVersionSerializer,
@@ -20,8 +20,8 @@ from ecommerce.serializers import (
     PromoCouponSerializer,
     CouponPaymentVersionSerializer,
     ProductSerializer,
+    CompanySerializer,
 )
-
 
 pytestmark = [pytest.mark.django_db]
 
@@ -229,3 +229,11 @@ def test_serialize_product(coupon_product_ids):
     assert serialized_data.get("title") == course_run.title
     assert serialized_data.get("product_type") == "courserun"
     assert serialized_data.get("id") == product.id
+
+
+def test_serialize_company():
+    """ Test that CompanySerializer has correct data """
+    company = CompanyFactory.create()
+    serialized_data = CompanySerializer(instance=company).data
+    assert serialized_data.get("name") == company.name
+    assert serialized_data.get("id") == company.id

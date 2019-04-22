@@ -1,0 +1,52 @@
+.coupon-creation-div {
+  margin: 0px 50px;
+}
+
+.coupon-form {
+
+  margin: 25px 50px;
+
+  div {
+    padding-bottom: 20px;
+    padding-right: 10px;
+  }
+
+  input[type='checkbox']   {
+    display: unset;
+  }
+
+  .block {
+
+    .DayPickerInput {
+      display: block;
+    }
+
+    input {
+      display: block;
+    }
+
+    select {
+      display: block;
+    }
+  }
+
+  .flex {
+    display: flex;
+  }
+
+  .product-selection {
+    height: 250px;
+  }
+
+  .picky {
+    max-width: 600px;
+  }
+
+  .picky__dropdown {
+    z-index: unset;
+  }
+
+  .error {
+    color: red;
+  }
+}
