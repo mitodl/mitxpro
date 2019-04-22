@@ -3,15 +3,35 @@ from uuid import uuid4
 
 from django.db import transaction
 from django.templatetags.static import static
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
-from courses.models import Course, Program
+from courses.models import Course, CourseRun, Program
 from courses.constants import DEFAULT_COURSE_IMG_PATH
 from courses.serializers import CourseSerializer
 from ecommerce import models
-from ecommerce.api import latest_product_version, latest_coupon_version
+from ecommerce.api import (
+    best_coupon_for_product,
+    get_valid_coupon_versions,
+    latest_coupon_version,
+    latest_product_version,
+)
+from ecommerce.models import (
+    BasketItem,
+    CouponPaymentVersion,
+    CouponPayment,
+    CourseRunEnrollment,
+    CourseRunSelection,
+    CouponSelection,
+    Coupon,
+    Product,
+    Company,
+    CouponVersion,
+    CouponEligibility,
+    ProductVersion,
+)
+from mitxpro.serializers import WriteableSerializerMethodField
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -121,8 +141,8 @@ class CouponSelectionSerializer(serializers.ModelSerializer):
 class BasketSerializer(serializers.ModelSerializer):
     """Basket model serializer"""
 
-    items = serializers.SerializerMethodField()
-    coupons = serializers.SerializerMethodField()
+    items = WriteableSerializerMethodField()
+    coupons = WriteableSerializerMethodField()
 
     def get_items(self, instance):
         """ Get the basket items """
@@ -148,6 +168,177 @@ class BasketSerializer(serializers.ModelSerializer):
                 basket=instance
             )
         ]
+
+    @classmethod
+    def _update_items(cls, basket, items):
+        """
+        Helper function to determine if the basket item should be updated, removed, or kept as is.
+
+        Args:
+            basket (Basket): the basket to update
+            items (list of JSON objects): Basket items to update, or clear if empty list, or leave as is if None
+
+        Returns:
+            tuple: ProductVersion object to assign to basket, if any, and a list of CourseRun
+
+        """
+        if items:
+            if len(items) > 1:
+                raise ValidationError("Basket cannot contain more than one item")
+            # Item updated
+            item = items[0]
+            product_version_id = item.get("id")
+            run_ids = item.get("run_ids")
+
+            if product_version_id is None:
+                raise ValidationError("Invalid request")
+            try:
+                product_version = ProductVersion.objects.get(id=product_version_id)
+            except ProductVersion.DoesNotExist:
+                raise ValidationError(
+                    f"Invalid product version id {product_version_id}"
+                )
+
+            if run_ids is not None:
+                content_object = product_version.product.content_object
+                runs_for_product = CourseRun.objects.filter(id__in=run_ids)
+                if isinstance(content_object, Course):
+                    runs_for_product = runs_for_product.filter(course=content_object)
+                elif isinstance(content_object, Program):
+                    runs_for_product = runs_for_product.filter(
+                        course__program=content_object
+                    )
+                else:
+                    raise ValidationError(
+                        f"Unknown content_object for {product_version.product}"
+                    )
+
+                run_ids_for_product = {run.id for run in runs_for_product}
+
+                missing_run_ids = set(run_ids) - run_ids_for_product
+                if missing_run_ids:
+                    raise ValidationError(
+                        f"Unable to find run(s) with id(s) {missing_run_ids}"
+                    )
+
+                courses_for_product = set(
+                    runs_for_product.values_list("course", flat=True)
+                )
+                if len(courses_for_product) < len(run_ids):
+                    raise ValidationError("Only one run per course can be selected")
+
+                if CourseRunEnrollment.objects.filter(run_id__in=run_ids).exists():
+                    raise ValidationError("User has already enrolled in run")
+
+                runs = runs_for_product
+            else:
+                runs = None
+        elif items is not None:
+            # Item removed
+            product_version = None
+            runs = None
+        else:
+            # Item has not changed
+            product_version = latest_product_version(basket.basketitems.first().product)
+            runs = list(CourseRun.objects.filter(courserunselection__basket=basket))
+        return product_version, runs
+
+    @classmethod
+    def _update_coupons(cls, basket, product_version, coupons):
+        """
+        Helper function to determine if the basket coupon should be updated, removed, or kept as is.
+
+        Args:
+            basket (Basket): the basket to update
+            product_version (ProductVersion): the product version coupon should apply to
+            coupons (list of JSON objects): Basket coupons to update, or clear if empty list, or leave as is if None
+
+        Returns:
+            CouponVersion: CouponVersion object to assign to basket, if any.
+
+        """
+        if not product_version:
+            # No product, so clear coupon too
+            return None
+
+        if coupons:
+            if len(coupons) > 1:
+                raise ValidationError("Basket cannot contain more than one coupon")
+            coupon = coupons[0]
+            if not isinstance(coupon, dict):
+                raise ValidationError("Invalid request")
+            coupon_code = coupon.get("code")
+            if coupon_code is None:
+                raise ValidationError("Invalid request")
+
+            # Check if the coupon is valid for the product
+            coupon_version = best_coupon_for_product(
+                product_version.product, basket.user, code=coupon_code
+            )
+            if coupon_version is None:
+                raise ValidationError("Coupon code {} is invalid".format(coupon_code))
+        elif coupons is not None:
+            # Coupon was cleared, get the best available auto coupon for the product instead
+            coupon_version = best_coupon_for_product(
+                product_version.product, basket.user, auto_only=True
+            )
+        else:
+            # coupon was not changed, make sure it is still valid; if not, replace with best auto coupon if any.
+            coupon_selection = basket.couponselection_set.first()
+            if coupon_selection:
+                coupon_version = latest_coupon_version(coupon_selection.coupon)
+            else:
+                coupon_version = None
+            valid_coupon_versions = get_valid_coupon_versions(
+                product_version.product, basket.user
+            )
+            if coupon_version is None or coupon_version not in valid_coupon_versions:
+                coupon_version = best_coupon_for_product(
+                    product_version.product, basket.user, auto_only=True
+                )
+        return coupon_version
+
+    def update(self, instance, validated_data):
+        items = validated_data.get("items")
+        coupons = validated_data.get("coupons")
+        basket = instance
+
+        if items is None and coupons is None:
+            raise ValidationError("Invalid request")
+
+        product_version, runs = self._update_items(basket, items)
+        coupon_version = self._update_coupons(basket, product_version, coupons)
+        if product_version:
+            # Update basket items and coupon selection
+            with transaction.atomic():
+                basket.basketitems.all().delete()
+                BasketItem.objects.create(
+                    product=product_version.product, quantity=1, basket=basket
+                )
+
+                if runs is not None:
+                    CourseRunSelection.objects.filter(basket=basket).delete()
+                    for run in runs:
+                        CourseRunSelection.objects.create(basket=basket, run=run)
+
+                if coupon_version:
+                    CouponSelection.objects.update_or_create(
+                        basket=basket, defaults={"coupon": coupon_version.coupon}
+                    )
+                else:
+                    basket.couponselection_set.all().delete()
+        else:
+            # Remove everything from basket
+            with transaction.atomic():
+                basket.basketitems.all().delete()
+                basket.couponselection_set.all().delete()
+        return instance
+
+    def validate_items(self, items):
+        return {"items": items}
+
+    def validate_coupons(self, coupons):
+        return {"coupons": coupons}
 
     class Meta:
         fields = ["items", "coupons"]
