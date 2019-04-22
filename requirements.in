@@ -19,6 +19,7 @@ ipython
 newrelic
 Pillow
 psycopg2==2.7.3.2
+pycountry==18.12.8
 raven
 redis==3.2.1
 requests

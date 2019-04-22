@@ -4,7 +4,35 @@ from django.contrib.auth.admin import UserAdmin as ContribUserAdmin
 from django.utils.translation import gettext_lazy as _
 from hijack_admin.admin import HijackUserAdminMixin
 
-from users.models import User
+from users.models import LegalAddress, User
+
+
+class UserLegalAddressInline(admin.StackedInline):
+    """Admin view for the legal address"""
+
+    model = LegalAddress
+    classes = ["collapse"]
+
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    ("first_name", "last_name"),
+                    "street_address_1",
+                    "street_address_2",
+                    "street_address_3",
+                    "street_address_4",
+                    "street_address_5",
+                    ("city", "state", "postal_code"),
+                    "country",
+                )
+            },
+        ),
+    )
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class UserAdmin(ContribUserAdmin, HijackUserAdminMixin):
@@ -12,7 +40,7 @@ class UserAdmin(ContribUserAdmin, HijackUserAdminMixin):
 
     fieldsets = (
         (None, {"fields": ("username", "password")}),
-        (_("Personal info"), {"fields": ("name", "email")}),
+        (_("Personal Info"), {"fields": ("name", "email")}),
         (
             _("Permissions"),
             {
@@ -22,7 +50,8 @@ class UserAdmin(ContribUserAdmin, HijackUserAdminMixin):
                     "is_superuser",
                     "groups",
                     "user_permissions",
-                )
+                ),
+                "classes": ["collapse"],
             },
         ),
     )
@@ -31,6 +60,7 @@ class UserAdmin(ContribUserAdmin, HijackUserAdminMixin):
     search_fields = ("username", "name", "email")
     ordering = ("email",)
     readonly_fields = ("username",)
+    inlines = [UserLegalAddressInline]
 
 
 admin.site.register(User, UserAdmin)

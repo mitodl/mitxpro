@@ -8,6 +8,17 @@ from mitxpro.models import TimestampedModel
 from courseware.tasks import create_edx_user_from_id
 
 
+def _post_create_user(user):
+    """
+    Create records related to the user
+
+    Args:
+        user (users.models.User): the user that was just created
+    """
+    LegalAddress.objects.create(user=user)
+    create_edx_user_from_id.delay(user.id)
+
+
 class UserManager(BaseUserManager):
     """User manager for custom user model"""
 
@@ -23,7 +34,7 @@ class UserManager(BaseUserManager):
         user = self.model(**fields)
         user.set_password(password)
         user.save(using=self._db)
-        create_edx_user_from_id.delay(user.id)
+        _post_create_user(user)
         return user
 
     def create_user(self, username, email=None, password=None, **extra_fields):
@@ -72,3 +83,29 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
     def get_full_name(self):
         """Returns the user's fullname"""
         return self.name
+
+
+class LegalAddress(TimestampedModel):
+    """A user's legal address, used for SDN compliance"""
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    first_name = models.CharField(max_length=60, blank=True)
+    last_name = models.CharField(max_length=60, blank=True)
+
+    street_address_1 = models.CharField(max_length=60, blank=True)
+    street_address_2 = models.CharField(max_length=60, blank=True)
+    street_address_3 = models.CharField(max_length=60, blank=True)
+    street_address_4 = models.CharField(max_length=60, blank=True)
+    street_address_5 = models.CharField(max_length=60, blank=True)
+
+    city = models.CharField(max_length=50, blank=True)
+    country = models.CharField(max_length=2, blank=True)  # ISO-3166-1
+
+    # only required in the US/CA
+    state_or_territory = models.CharField(max_length=6, blank=True)  # ISO 3166-2
+    postal_code = models.CharField(max_length=10, blank=True)
+
+    def __str__(self):
+        """Str representation for the legal address"""
+        return f"Legal address for {self.user}"

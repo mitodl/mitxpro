@@ -3,7 +3,7 @@
 import pytest
 import ulid
 
-from users.models import User
+from users.models import LegalAddress, User
 
 pytestmark = pytest.mark.django_db
 
@@ -43,6 +43,8 @@ def test_create_user(
     if password is not None:
         assert user.check_password(password)
     patch_create_edx_user_task.delay.assert_called_once_with(user.id)
+
+    assert LegalAddress.objects.filter(user=user).exists()
 
 
 @pytest.mark.parametrize(
