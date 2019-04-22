@@ -153,19 +153,6 @@ def latest_coupon_version(coupon):
     return coupon.couponversion_set.order_by("-created_on").first()
 
 
-def latest_coupon_payment_version(coupon):
-    """
-    Get the most recent CouponPaymentVersion for a coupon
-
-    Args:
-        coupon (Coupon): A coupon object
-
-    Returns:
-        CouponPaymentVersion: The latest CouponPaymentVersion for the coupon
-    """
-    return coupon.payment.couponpaymentversion_set.order_by("-created_on").first()
-
-
 def get_valid_coupon_versions(product, user, auto_only=False, code=None):
     """
     Given a list of coupon ids, determine which of them are valid based on payment version dates and redemptions.
@@ -477,7 +464,7 @@ def get_data_consents(basket):
         CouponSelection.objects.prefetch_related("coupon").filter(basket=basket).first()
     )
     if coupon_selection:
-        company = latest_coupon_payment_version(coupon_selection.coupon).company
+        company = latest_coupon_version(coupon_selection.coupon).payment_version.company
 
         if company:
             courses = [
