@@ -6,7 +6,6 @@ from decimal import Decimal
 from datetime import timedelta
 import hashlib
 import hmac
-from types import SimpleNamespace
 
 import pytest
 
@@ -39,13 +38,7 @@ from ecommerce.factories import (
     OrderFactory,
     ProductVersionFactory,
     ProductFactory,
-    CouponPaymentVersionFactory,
-    CompanyFactory,
-    DataConsentAgreementFactory,
     DataConsentUserFactory,
-    CouponFactory,
-    CouponEligibilityFactory,
-    CouponSelectionFactory,
 )
 from ecommerce.models import CouponSelection, CouponRedemption, Order, OrderAudit
 from mitxpro.utils import now_in_utc
@@ -70,31 +63,6 @@ def cybersource_settings(settings):
     settings.CYBERSOURCE_PROFILE_ID = CYBERSOURCE_PROFILE_ID
     settings.CYBERSOURCE_SECURITY_KEY = CYBERSOURCE_SECURITY_KEY
     settings.CYBERSOURCE_REFERENCE_PREFIX = CYBERSOURCE_REFERENCE_PREFIX
-
-
-@pytest.fixture
-def basket_and_agreement():
-    """
-    Sample basket and data consent agreement
-    """
-    program = ProgramFactory.create()
-    CourseFactory.create_batch(5, program=program)
-    product = ProductFactory.create(content_object=program)
-    basket_item = BasketItemFactory(product=product, quantity=1)
-    company = CompanyFactory.create()
-    coupon = CouponFactory()
-    CouponPaymentVersionFactory(
-        payment=coupon.payment, amount=Decimal("0.40"), company=company
-    )
-    CouponEligibilityFactory(coupon=coupon, product=product)
-    CouponSelectionFactory.create(basket=basket_item.basket, coupon=coupon)
-    return SimpleNamespace(
-        agreement=DataConsentAgreementFactory(
-            courses=program.course_set.all(), company=company
-        ),
-        basket=basket_item.basket,
-        product=product,
-    )
 
 
 def test_valid_signature():

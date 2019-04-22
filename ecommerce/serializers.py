@@ -16,7 +16,7 @@ from ecommerce.api import (
     get_valid_coupon_versions,
     latest_coupon_version,
     latest_product_version,
-    get_required_agreements
+    get_required_agreements,
 )
 from mitxpro.serializers import WriteableSerializerMethodField
 

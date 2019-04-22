@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("courses", "0005_remove_desc_and_thumbnail_fields"),
-        ("ecommerce", "0003_invoice_to_payment"),
+        ("ecommerce", "0004_course_run_links"),
     ]
 
     operations = [

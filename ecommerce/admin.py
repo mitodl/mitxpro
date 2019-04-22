@@ -15,6 +15,8 @@ from ecommerce.models import (
     CouponRedemption,
     Product,
     ProductVersion,
+    DataConsentAgreement,
+    DataConsentUser,
 )
 from mitxpro.utils import get_field_names
 
@@ -154,6 +156,34 @@ class ProductVersionAdmin(admin.ModelAdmin):
     model = ProductVersion
 
 
+class DataConsentUserAdmin(admin.ModelAdmin):
+    """Admin for DataConsentAgreement"""
+
+    list_display = ("id", "user", "created_on")
+    search_fields = ("user__username", "user__email")
+
+    model = DataConsentUser
+
+
+class DataConsentUserInline(admin.StackedInline):
+    """Admin Inline for DataConsentUser objects"""
+
+    model = DataConsentUser
+    extra = 1
+    show_change_link = True
+
+
+class DataConsentAgreementAdmin(admin.ModelAdmin):
+    """Admin for DataConsentAgreement"""
+
+    list_filter = ("company",)
+    list_display = ("id", "company", "created_on")
+    search_fields = ("company", "content")
+    inlines = [DataConsentUserInline]
+
+    model = DataConsentAgreement
+
+
 admin.site.register(Line, LineAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderAudit, OrderAuditAdmin)
@@ -167,3 +197,5 @@ admin.site.register(CouponPaymentVersion, CouponPaymentVersionAdmin)
 admin.site.register(CouponSelection, CouponSelectionAdmin)
 admin.site.register(CouponEligibility, CouponEligibilityAdmin)
 admin.site.register(CouponRedemption, CouponRedemptionAdmin)
+admin.site.register(DataConsentAgreement, DataConsentAgreementAdmin)
+admin.site.register(DataConsentUser, DataConsentUserAdmin)
