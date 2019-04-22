@@ -95,12 +95,14 @@ def basket_and_agreement():
     program = ProgramFactory.create()
     CourseFactory.create_batch(5, program=program)
     product = ProductFactory.create(content_object=program)
+    ProductVersionFactory(product=product, price=Decimal(15.00))
     basket_item = BasketItemFactory(product=product, quantity=1)
     company = CompanyFactory.create()
-    coupon = CouponFactory()
-    CouponPaymentVersionFactory(
+    coupon = CouponFactory(payment=CouponPaymentFactory())
+    payment_version = CouponPaymentVersionFactory(
         payment=coupon.payment, amount=Decimal("0.40"), company=company
     )
+    CouponVersionFactory(payment_version=payment_version, coupon=coupon)
     CouponEligibilityFactory(coupon=coupon, product=product)
     CouponSelectionFactory.create(basket=basket_item.basket, coupon=coupon)
     return SimpleNamespace(
@@ -109,6 +111,7 @@ def basket_and_agreement():
         ),
         basket=basket_item.basket,
         product=product,
+        coupon=coupon,
     )
 
 

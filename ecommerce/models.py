@@ -360,7 +360,7 @@ class DataConsentAgreement(TimestampedModel):
     """
 
     content = models.TextField()
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.PROTECT)
     courses = models.ManyToManyField("courses.Course")
 
     def __str__(self):
@@ -372,8 +372,9 @@ class DataConsentUser(TimestampedModel):
     User required to sign an agreement, and the signing date if any.
     """
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    agreement = models.ForeignKey(DataConsentAgreement, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    agreement = models.ForeignKey(DataConsentAgreement, on_delete=models.PROTECT)
+    coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
     consent_date = models.DateTimeField(null=True)
 
     def __str__(self):

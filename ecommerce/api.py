@@ -463,60 +463,48 @@ def get_product_courses(product):
     return courses
 
 
-def get_required_agreements(basket):
+def get_data_consents(basket):
     """
-    Get all the DataConsentAgreements required for a basket
+    Get all the DataConsentUser objects associated with the user and product course(s) in a basket
 
     Args:
         basket(Basket): A basket to check for required & unsigned DataConsentAgreements
 
     Returns:
-        list of DataConsentAgreement: required DataConsentAgreements
+        list of DataConsentUser:  DataConsentUser objects
     """
-    companies = [
-        latest_coupon_payment_version(selection.coupon).company
-        for selection in CouponSelection.objects.prefetch_related("coupon").filter(
-            basket=basket
-        )
-    ]
-
-    if not companies:
-        return []
-    courses = [
-        course
-        for courselist in [
-            get_product_courses(item.product) for item in basket.basketitems.all()
-        ]
-        for course in courselist
-    ]
-
-    agreements = (
-        DataConsentAgreement.objects.select_related("company")
-        .prefetch_related("courses")
-        .filter(company__in=companies)
-        .filter(courses__in=courses)
-        .distinct()
+    coupon_selection = (
+        CouponSelection.objects.prefetch_related("coupon").filter(basket=basket).first()
     )
+    if coupon_selection:
+        company = latest_coupon_payment_version(coupon_selection.coupon).company
 
-    return [
-        agreement for agreement in agreements if not is_signed(agreement, basket.user)
-    ]
+        if company:
+            courses = [
+                course
+                for courselist in [
+                    get_product_courses(item.product)
+                    for item in basket.basketitems.all()
+                ]
+                for course in courselist
+            ]
 
+            agreements = (
+                DataConsentAgreement.objects.select_related("company")
+                .prefetch_related("courses")
+                .filter(company=company)
+                .filter(courses__in=courses)
+                .distinct()
+            )
 
-def is_signed(agreement, user):
-    """
-    Determine if a user has signed an agreement
+            data_consents = [
+                DataConsentUser.objects.get_or_create(
+                    user=basket.user,
+                    agreement=agreement,
+                    coupon=coupon_selection.coupon,
+                )[0]
+                for agreement in agreements
+            ]
 
-    Args:
-        agreement (DataConsentAgreement): a DataConsentAgreement
-        user (User): a user
-
-    Returns:
-        boolean True if agreement was signed by user
-    """
-    return (
-        DataConsentUser.objects.select_related("user", "agreement")
-        .filter(user=user)
-        .filter(consent_date__isnull=False)
-        .filter(agreement=agreement)
-    ).exists()
+            return data_consents
+    return []

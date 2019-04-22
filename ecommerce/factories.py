@@ -205,6 +205,7 @@ class DataConsentUserFactory(DjangoModelFactory):
 
     user = SubFactory(UserFactory)
     agreement = SubFactory(DataConsentAgreementFactory)
+    coupon = SubFactory(CouponFactory)
     consent_date = fuzzy.FuzzyDateTime(start_dt=now_in_utc())
 
     class Meta:

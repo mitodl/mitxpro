@@ -24,9 +24,8 @@ from ecommerce.api import (
     get_valid_coupon_versions,
     latest_product_version,
     latest_coupon_version,
-    get_required_agreements,
     get_product_courses,
-    is_signed,
+    get_data_consents,
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -38,11 +37,15 @@ from ecommerce.factories import (
     OrderFactory,
     ProductVersionFactory,
     ProductFactory,
-    DataConsentUserFactory,
 )
-from ecommerce.models import CouponSelection, CouponRedemption, Order, OrderAudit
+from ecommerce.models import (
+    CouponSelection,
+    CouponRedemption,
+    Order,
+    OrderAudit,
+    DataConsentUser,
+)
 from mitxpro.utils import now_in_utc
-from users.factories import UserFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -538,33 +541,15 @@ def test_get_product_courses():
     )
 
 
-def test_get_required_agreements(basket_and_agreement):
+def test_get_data_consents(basket_and_coupons, basket_and_agreement):
     """
-    Verify that the correct list of DataConsentAgreements is returned for a basket
+    Verify that the correct list of DataConsentUsers is returned for a basket
     """
-    assert list(get_required_agreements(basket_and_agreement.basket)) == [
-        basket_and_agreement.agreement
+    assert list(get_data_consents(basket_and_coupons.basket)) == []
+    assert list(get_data_consents(basket_and_agreement.basket)) == [
+        DataConsentUser.objects.get(
+            agreement=basket_and_agreement.agreement,
+            user=basket_and_agreement.basket.user,
+            coupon=basket_and_agreement.coupon,
+        )
     ]
-    DataConsentUserFactory.create(
-        agreement=basket_and_agreement.agreement,
-        consent_date=now_in_utc(),
-        user=basket_and_agreement.basket.user,
-    )
-    assert list(get_required_agreements(basket_and_agreement.basket)) == []
-
-
-def test_is_signed(basket_and_agreement):
-    """
-    Verify that the correct boolean is returned for is_signed function
-    """
-    agreement = basket_and_agreement.agreement
-    signed_user = DataConsentUserFactory.create(
-        agreement=agreement, consent_date=now_in_utc()
-    ).user
-    unsigned_user_1 = DataConsentUserFactory.create(
-        agreement=agreement, consent_date=None
-    ).user
-    unsigned_user_2 = UserFactory.create()
-    assert is_signed(agreement, signed_user) is True
-    assert is_signed(agreement, unsigned_user_1) is False
-    assert is_signed(agreement, unsigned_user_2) is False
