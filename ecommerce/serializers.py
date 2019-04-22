@@ -17,14 +17,6 @@ from ecommerce.api import (
     latest_coupon_version,
     latest_product_version,
 )
-from ecommerce.models import (
-    BasketItem,
-    CourseRunEnrollment,
-    CourseRunSelection,
-    CouponSelection,
-    CouponVersion,
-    ProductVersion,
-)
 from mitxpro.serializers import WriteableSerializerMethodField
 
 
@@ -187,7 +179,7 @@ class BasketSerializer(serializers.ModelSerializer):
         if len(courses_for_product) < len(run_ids):
             raise ValidationError("Only one run per course can be selected")
 
-        if CourseRunEnrollment.objects.filter(run_id__in=run_ids).exists():
+        if models.CourseRunEnrollment.objects.filter(run_id__in=run_ids).exists():
             raise ValidationError("User has already enrolled in run")
 
         return runs_for_product
@@ -211,7 +203,7 @@ class BasketSerializer(serializers.ModelSerializer):
             product_version_id = item.get("id")
             run_ids = item.get("run_ids")
 
-            product_version = ProductVersion.objects.get(id=product_version_id)
+            product_version = models.ProductVersion.objects.get(id=product_version_id)
             if run_ids is not None:
                 runs = cls._get_runs_for_product(
                     product_version=product_version, run_ids=run_ids
@@ -297,17 +289,17 @@ class BasketSerializer(serializers.ModelSerializer):
             # Update basket items and coupon selection
             with transaction.atomic():
                 basket.basketitems.all().delete()
-                BasketItem.objects.create(
+                models.BasketItem.objects.create(
                     product=product_version.product, quantity=1, basket=basket
                 )
 
                 if runs is not None:
-                    CourseRunSelection.objects.filter(basket=basket).delete()
+                    models.CourseRunSelection.objects.filter(basket=basket).delete()
                     for run in runs:
-                        CourseRunSelection.objects.create(basket=basket, run=run)
+                        models.CourseRunSelection.objects.create(basket=basket, run=run)
 
                 if coupon_version:
-                    CouponSelection.objects.update_or_create(
+                    models.CouponSelection.objects.update_or_create(
                         basket=basket, defaults={"coupon": coupon_version.coupon}
                     )
                 else:
@@ -329,7 +321,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
             if product_version_id is None:
                 raise ValidationError("Invalid request")
-            if not ProductVersion.objects.filter(id=product_version_id).exists():
+            if not models.ProductVersion.objects.filter(id=product_version_id).exists():
                 raise ValidationError(
                     f"Invalid product version id {product_version_id}"
                 )
