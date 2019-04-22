@@ -107,7 +107,7 @@ def basket_and_agreement():
     CouponSelectionFactory.create(basket=basket_item.basket, coupon=coupon)
     return SimpleNamespace(
         agreement=DataConsentAgreementFactory(
-            courses=program.course_set.all(), company=company
+            courses=program.courses.all(), company=company
         ),
         basket=basket_item.basket,
         product=product,

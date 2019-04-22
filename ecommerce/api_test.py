@@ -537,7 +537,7 @@ def test_get_product_courses():
     ]
     assert get_product_courses(course_product) == [course_product.content_object]
     assert list(get_product_courses(program_product)) == list(
-        program_product.content_object.course_set.all()
+        program_product.content_object.courses.all()
     )
 
 

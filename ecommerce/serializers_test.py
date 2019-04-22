@@ -11,7 +11,12 @@ from courses.serializers import CourseSerializer
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import round_half_up
 from ecommerce.factories import ProductVersionFactory, ProductFactory, CompanyFactory
-from ecommerce.models import CouponSelection, Product, CourseRunSelection, DataConsentUser
+from ecommerce.models import (
+    CouponSelection,
+    Product,
+    CourseRunSelection,
+    DataConsentUser,
+)
 from ecommerce.serializers import (
     ProductVersionSerializer,
     CouponSelectionSerializer,

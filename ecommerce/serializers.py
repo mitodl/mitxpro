@@ -5,10 +5,9 @@ from datetime import datetime
 import pytz
 from django.db import transaction
 from django.templatetags.static import static
-from rest_framework import serializers, status
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
-from rest_framework.response import Response
 
 from courses.models import Course, CourseRun, Program
 from courses.constants import DEFAULT_COURSE_IMG_PATH
@@ -21,7 +20,6 @@ from ecommerce.api import (
     latest_product_version,
     get_data_consents,
 )
-from ecommerce.models import DataConsentUser
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -289,16 +287,11 @@ class BasketSerializer(serializers.ModelSerializer):
         if data_consents is not None:
             try:
                 for consent_id in data_consents:
-                    data_consent_user = DataConsentUser.objects.get(id=consent_id)
+                    data_consent_user = models.DataConsentUser.objects.get(id=consent_id)
                     data_consent_user.consent_date = datetime.now(tz=pytz.UTC)
                     data_consent_user.save()
-                return Response(
-                    status=status.HTTP_200_OK,
-                    data=BasketSerializer(instance=basket).data,
-                )
-            except DataConsentUser.DoesNotExist:
+            except models.DataConsentUser.DoesNotExist:
                 raise ValidationError("data consent does not exist")
-
         elif items is None and coupons is None:
             raise ValidationError("Invalid request")
         else:
@@ -315,7 +308,9 @@ class BasketSerializer(serializers.ModelSerializer):
                     if runs is not None:
                         models.CourseRunSelection.objects.filter(basket=basket).delete()
                         for run in runs:
-                            models.CourseRunSelection.objects.create(basket=basket, run=run)
+                            models.CourseRunSelection.objects.create(
+                                basket=basket, run=run
+                            )
 
                     if coupon_version:
                         models.CouponSelection.objects.update_or_create(

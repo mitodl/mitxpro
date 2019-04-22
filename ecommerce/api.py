@@ -459,7 +459,7 @@ def get_product_courses(product):
     elif product.content_type.model == "course":
         courses.append(product.content_object)
     elif product.content_type.model == "program":
-        courses = product.content_object.course_set.all()
+        courses = product.content_object.courses.all()
     return courses
 
 

@@ -367,6 +367,7 @@ def test_patch_basket_new_user(basket_and_coupons, user, user_drf_client):
     """Test that the view creates a basket and patches it basket does not already exist for user"""
     assert Basket.objects.filter(user=user).exists() is False
     resp = user_drf_client.patch(reverse("basket_api"), {"items": []})
+    assert resp.json() == []
     assert resp.status_code == 200
     assert Basket.objects.filter(user=user).exists() is True
 
