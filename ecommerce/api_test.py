@@ -6,8 +6,10 @@ from decimal import Decimal
 from datetime import timedelta
 import hashlib
 import hmac
-import factory
+from unittest.mock import PropertyMock
 
+import factory
+from rest_framework.exceptions import ValidationError
 import pytest
 
 from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
@@ -27,12 +29,14 @@ from ecommerce.api import (
     latest_coupon_version,
     get_product_courses,
     get_available_bulk_product_coupons,
+    validate_basket_for_checkout,
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
     BasketFactory,
     BasketItemFactory,
     CouponRedemptionFactory,
+    CouponSelectionFactory,
     CouponVersionFactory,
     LineFactory,
     OrderFactory,
@@ -41,7 +45,17 @@ from ecommerce.factories import (
     CouponEligibilityFactory,
     BulkEnrollmentDeliveryFactory,
 )
-from ecommerce.models import CouponSelection, CouponRedemption, Order, OrderAudit
+from ecommerce.models import (
+    BasketItem,
+    Coupon,
+    CouponSelection,
+    CouponRedemption,
+    CourseRunEnrollment,
+    CourseRunSelection,
+    Order,
+    OrderAudit,
+    Product,
+)
 from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
@@ -126,7 +140,7 @@ def test_signed_payload(mocker):
         "amount": str(total_price),
         "consumer_id": username,
         "currency": "USD",
-        "item_0_code": "course",
+        "item_0_code": "course run",
         "item_0_name": line1.product_version.description,
         "item_0_quantity": line1.quantity,
         "item_0_sku": line1.product_version.product.content_object.id,
@@ -526,9 +540,9 @@ def test_get_product_courses():
     Verify that the correct list of courses for a product is returned
     """
     program = ProgramFactory.create()
-    CourseFactory.create_batch(5, program=program)
+    courses = CourseFactory.create_batch(5, program=program)
     courserun_product = ProductFactory.create(content_object=CourseRunFactory.create())
-    course_product = ProductFactory.create()
+    course_product = ProductFactory.create(content_object=courses[0])
     program_product = ProductFactory.create(content_object=program)
     assert get_product_courses(courserun_product) == [
         courserun_product.content_object.course
@@ -568,3 +582,128 @@ def test_get_available_bulk_product_coupons():
     )
     assert available_qset.count() == 2
     assert list(available_qset) == [first_product_coupon, additional_product_coupons[0]]
+
+
+def test_validate_basket_all_good(basket_and_coupons):
+    """If everything is valid no exception should be raised"""
+    assert validate_basket_for_checkout(basket_and_coupons.basket) is None
+
+
+def test_validate_basket_no_item(basket_and_coupons):
+    """An empty basket should be rejected"""
+    BasketItem.objects.all().delete()
+    with pytest.raises(ValidationError) as ex:
+        validate_basket_for_checkout(basket_and_coupons.basket)
+    assert ex.value.args[0] == "No items in basket, cannot checkout"
+
+
+def test_validate_basket_two_items(basket_and_coupons):
+    """An empty basket should be rejected"""
+    BasketItem.objects.create(
+        product=Product.objects.first(), quantity=1, basket=basket_and_coupons.basket
+    )
+    # We don't raise ValidationError here since this should have been caught in BasketSerializer already
+    with pytest.raises(BasketItem.MultipleObjectsReturned):
+        validate_basket_for_checkout(basket_and_coupons.basket)
+
+
+def test_validate_basket_two_coupons(basket_and_coupons):
+    """A basket cannot have two coupons"""
+    CouponSelectionFactory.create(basket=basket_and_coupons.basket)
+    # We don't raise ValidationError here since this should have been caught in BasketSerializer already
+    with pytest.raises(Coupon.MultipleObjectsReturned):
+        validate_basket_for_checkout(basket_and_coupons.basket)
+
+
+def test_validate_basket_invalid_coupon(mocker, basket_and_coupons):
+    """An invalid coupon should be rejected in the basket"""
+    patched = mocker.patch(
+        "ecommerce.api.get_valid_coupon_versions", return_value=False
+    )
+    with pytest.raises(ValidationError) as ex:
+        validate_basket_for_checkout(basket_and_coupons.basket)
+    assert ex.value.args[0] == "Coupon is not valid for product"
+    patched.assert_called_once_with(
+        product=basket_and_coupons.product_version.product,
+        user=basket_and_coupons.basket.user,
+    )
+
+
+def test_validate_basket_different_product(basket_and_coupons):
+    """All course run selections should be linked to the product being purchased"""
+    CourseRunSelection.objects.create(
+        run=CourseRunFactory.create(), basket=basket_and_coupons.basket
+    )
+    with pytest.raises(ValidationError) as ex:
+        validate_basket_for_checkout(basket_and_coupons.basket)
+    assert (
+        ex.value.args[0] == "Some runs present in basket which are not part of product"
+    )
+
+
+def test_validate_basket_already_enrolled(basket_and_coupons):
+    """
+    User should not be able to purchase a product if they are
+    already enrolled in even one of the runs for that product.
+    """
+    CourseRunSelection.objects.all().delete()
+    program = ProgramFactory.create()
+    runs = [CourseRunFactory.create(course__program=program) for _ in range(4)]
+
+    product = basket_and_coupons.product_version.product
+    product.content_object = program
+    product.save()
+
+    order = OrderFactory.create(
+        purchaser=basket_and_coupons.basket.user, status=Order.FULFILLED
+    )
+    CourseRunEnrollment.objects.create(order=order, run=runs[2])
+
+    with pytest.raises(ValidationError) as ex:
+        validate_basket_for_checkout(basket_and_coupons.basket)
+    assert ex.value.args[0] == "User is already enrolled in one or more runs in basket"
+
+
+def test_validate_basket_two_runs_for_a_course(basket_and_coupons):
+    """
+    User should not be able to be enrolled in two runs for the same course
+    """
+    CourseRunSelection.objects.all().delete()
+    program = ProgramFactory.create()
+    course = CourseFactory.create(program=program)
+    runs = [CourseRunFactory.create(course=course) for _ in range(4)]
+
+    product = basket_and_coupons.product_version.product
+    product.content_object = program
+    product.save()
+
+    for run in runs:
+        CourseRunSelection.objects.create(run=run, basket=basket_and_coupons.basket)
+
+    with pytest.raises(ValidationError) as ex:
+        validate_basket_for_checkout(basket_and_coupons.basket)
+
+    assert ex.value.args[0] == "Two or more runs assigned for a single course"
+
+
+def test_validate_basket_course_without_run_selection(basket_and_coupons):
+    """
+    Each course in a basket must have a run selected
+    """
+    CourseRunSelection.objects.all().delete()
+    with pytest.raises(ValidationError) as ex:
+        validate_basket_for_checkout(basket_and_coupons.basket)
+    assert ex.value.args[0] == "One or more courses do not have a course run selection"
+
+
+def test_validate_basket_run_expired(mocker, basket_and_coupons):
+    """
+    Each run selected must be valid
+    """
+    patched = mocker.patch(
+        "courses.models.CourseRun.is_unexpired", new_callable=PropertyMock
+    )
+    patched.return_value = False
+    with pytest.raises(ValidationError) as ex:
+        validate_basket_for_checkout(basket_and_coupons.basket)
+    assert ex.value.args[0] == f"Run {basket_and_coupons.run.id} is expired"

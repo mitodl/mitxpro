@@ -32,7 +32,7 @@ class Product(TimestampedModel):
         ContentType,
         on_delete=models.PROTECT,
         null=True,
-        help_text="content_object is a link to either a Course or a Program",
+        help_text="content_object is a link to either a CourseRun or a Program",
     )
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
@@ -44,6 +44,19 @@ class Product(TimestampedModel):
     def latest_version(self):
         """Gets the most recently created ProductVersion associated with this Product"""
         return self.productversions.order_by("-created_on").first()
+
+    @property
+    def run_queryset(self):
+        """Get a queryset for the runs related to the the product"""
+        from courses.models import CourseRun
+
+        if self.content_type.model == "courserun":
+            # This looks strange since we just filtered by id but we want to make sure they overlap
+            return CourseRun.objects.filter(id=self.object_id)
+        elif self.content_type.model == "program":
+            return CourseRun.objects.filter(course__program__id=self.object_id)
+        else:
+            raise ValueError(f"Unexpected content type for {self.content_type.model}")
 
     def __str__(self):
         """Description of a product"""
@@ -111,7 +124,6 @@ class Order(TimestampedModel, AuditableModel):
     REFUNDED = "refunded"
 
     STATUSES = [CREATED, FULFILLED, FAILED, REFUNDED]
-    FULFILLED_STATUSES = [FULFILLED]
 
     purchaser = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders"

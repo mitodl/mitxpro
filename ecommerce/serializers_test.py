@@ -7,7 +7,6 @@ import pytest
 from mitxpro.test_utils import any_instance_of
 from cms.factories import CoursePageFactory, ProgramPageFactory
 from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
-from courses.models import Course
 from courses.serializers import CourseSerializer
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import round_half_up
@@ -49,12 +48,11 @@ pytestmark = [pytest.mark.django_db]
 datetime_format = "%Y-%m-%dT%H:%M:%SZ"
 
 
-def test_serialize_basket_product_version_course():
+def test_serialize_basket_product_version_courserun():
     """Test ProductVersion serialization for a Course"""
-    course = CourseFactory.create()
-    CourseRunFactory.create_batch(3, course=course)
+    courserun = CourseRunFactory.create()
     product_version = ProductVersionFactory.create(
-        product=ProductFactory(content_object=course)
+        product=ProductFactory(content_object=courserun)
     )
     data = ProductVersionSerializer(product_version).data
     assert data == {
@@ -62,7 +60,7 @@ def test_serialize_basket_product_version_course():
         "description": product_version.description,
         "price": str(round_half_up(product_version.price)),
         "type": product_version.product.content_type.model,
-        "courses": [CourseSerializer(course).data],
+        "courses": [CourseSerializer(courserun.course).data],
         "thumbnail_url": "/static/images/mit-dome.png",
     }
 
@@ -86,14 +84,14 @@ def test_serialize_basket_product_version_program():
     }
 
 
-def test_basket_thumbnail_course(basket_and_coupons):
-    """Basket thumbnail should be serialized for a course"""
+def test_basket_thumbnail_courserun(basket_and_coupons):
+    """Basket thumbnail should be serialized for a courserun"""
     thumbnail_filename = "abcde.jpg"
     course_page = CoursePageFactory.create(
         thumbnail_image__file__filename=thumbnail_filename
     )
-    course = course_page.course
-    product_version = ProductVersionFactory.create(product__content_object=course)
+    run = CourseRunFactory.create(course=course_page.course)
+    product_version = ProductVersionFactory.create(product__content_object=run)
     data = ProductVersionSerializer(product_version).data
     assert (
         data["thumbnail_url"]
@@ -281,10 +279,10 @@ def test_current_coupon_payment_version_serializer():
 def test_serialize_product(coupon_product_ids):
     """ Test that ProductSerializer has correct data """
     product = Product.objects.get(id=coupon_product_ids[0])
-    course = Course.objects.get(id=product.object_id)
+    run = product.content_object
     serialized_data = ProductSerializer(instance=product).data
-    assert serialized_data.get("title") == course.title
-    assert serialized_data.get("product_type") == "course"
+    assert serialized_data.get("title") == run.title
+    assert serialized_data.get("product_type") == "courserun"
     assert serialized_data.get("id") == product.id
 
 
@@ -301,7 +299,6 @@ def test_serialize_data_consent_user():
     consent_user = DataConsentUserFactory.create()
     serialized_data = DataConsentUserSerializer(instance=consent_user).data
     assert serialized_data.get("id") == consent_user.id
-    assert serialized_data.get("user") == consent_user.user.id
     assert serialized_data.get("agreement") == consent_user.agreement.id
     assert serialized_data.get("coupon") == consent_user.coupon.id
 

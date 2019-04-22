@@ -33,6 +33,7 @@ from ecommerce.models import (
     Receipt,
     CouponPaymentVersion,
     CourseRunEnrollment,
+    CourseRunSelection,
     Company,
     CouponEligibility,
     Product,
@@ -141,7 +142,7 @@ def test_zero_price_checkout(basket_client, mocker, basket_and_coupons):
     """
     user = basket_and_coupons.basket_item.basket.user
     order = LineFactory.create(
-        order__status=Order.CREATED, product_version__price=0
+        order__status=Order.CREATED, product_version__price=0, order__purchaser=user
     ).order
     create_mock = mocker.patch(
         "ecommerce.views.create_unfulfilled_order", autospec=True, return_value=order
@@ -159,6 +160,9 @@ def test_zero_price_checkout(basket_client, mocker, basket_and_coupons):
 
     assert enroll_user_mock.call_count == 1
     assert enroll_user_mock.call_args[0] == (order,)
+    assert BasketItem.objects.filter(basket__user=user).count() == 0
+    assert CourseRunSelection.objects.filter(basket__user=user).count() == 0
+    assert CouponSelection.objects.filter(basket__user=user).count() == 0
 
 
 def test_zero_price_checkout_failed_enroll(basket_client, mocker, basket_and_coupons):
@@ -222,6 +226,10 @@ def test_order_fulfilled(basket_client, mocker, basket_and_coupons):
     assert order_audit.order == order
     assert order_audit.data_before == data_before
     assert order_audit.data_after == order.to_dict()
+
+    assert BasketItem.objects.filter(basket__user=user).count() == 0
+    assert CourseRunSelection.objects.filter(basket__user=user).count() == 0
+    assert CouponSelection.objects.filter(basket__user=user).count() == 0
 
 
 def test_missing_fields(basket_client, mocker):
@@ -572,12 +580,15 @@ def test_patch_basket_update_invalid_data(basket_client, basket_and_coupons, sec
 
 @pytest.mark.parametrize("data", [{"items": [], "coupons": []}, {"items": []}])
 def test_patch_basket_clear_product(basket_client, basket_and_coupons, data):
-    """ Test that both product and coupon are cleared  """
+    """ Test that product, coupon, and runs are cleared  """
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     resp_data = resp.json()
     assert resp_data.get("coupons") == []
     assert resp_data.get("items") == []
+    assert BasketItem.objects.count() == 0
+    assert CourseRunSelection.objects.count() == 0
+    assert CourseRunEnrollment.objects.count() == 0
 
 
 def test_patch_basket_nodata(basket_client, basket_and_coupons):
@@ -623,7 +634,7 @@ def test_patch_basket_invalid_run(basket_client, basket_and_coupons, is_program)
     product_version = basket_and_coupons.product_version
     product = product_version.product
     run = CourseRunFactory.create()
-    product.content_object = run.course.program if is_program else run.course
+    product.content_object = run.course.program if is_program else run
     product.save()
 
     # If the product is a course, create a new run on a different course which is invalid.
@@ -631,7 +642,9 @@ def test_patch_basket_invalid_run(basket_client, basket_and_coupons, is_program)
     other_run = (
         CourseRunFactory.create()
         if is_program
-        else CourseRunFactory.create(course__program=product.content_object.program)
+        else CourseRunFactory.create(
+            course__program=product.content_object.course.program
+        )
     )
 
     resp = basket_client.patch(
@@ -648,7 +661,7 @@ def test_patch_basket_invalid_run(basket_client, basket_and_coupons, is_program)
 def test_patch_basket_multiple_runs_for_course(basket_client, basket_and_coupons):
     """A patch request for multiple runs for a course should result in a 400 error"""
     product_version = basket_and_coupons.product_version
-    course = product_version.product.content_object
+    course = product_version.product.content_object.course
     run1 = basket_and_coupons.run
     run2 = CourseRunFactory.create(course=course)
 
@@ -658,7 +671,7 @@ def test_patch_basket_multiple_runs_for_course(basket_client, basket_and_coupons
         data={"items": [{"id": product_version.id, "run_ids": [run1.id, run2.id]}]},
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp.json()["errors"] == ["Only one run per course can be selected"]
+    assert resp.json()["errors"] == [f"Unable to find run(s) with id(s) {{{run2.id}}}"]
 
 
 def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):

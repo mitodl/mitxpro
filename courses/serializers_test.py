@@ -29,10 +29,13 @@ def test_serialize_program():
     }
 
 
-def test_serialize_course():
+@pytest.mark.parametrize("with_runs", [True, False])
+def test_serialize_course(with_runs):
     """Test Course serialization"""
     run = CourseRunFactory.create(course__no_program=True)
     course = run.course
+    if not with_runs:
+        course.courseruns.all().delete()
     page = CoursePageFactory.create(course=course)
     data = CourseSerializer(course).data
     assert data == {
@@ -40,8 +43,9 @@ def test_serialize_course():
         "description": course.description,
         "readable_id": course.readable_id,
         "id": course.id,
-        "courseruns": [CourseRunSerializer(run).data],
+        "courseruns": [CourseRunSerializer(run).data] if with_runs else [],
         "thumbnail_url": page.thumbnail_image.file.url,
+        "next_run_id": course.first_unexpired_run.id if with_runs else None,
     }
 
 

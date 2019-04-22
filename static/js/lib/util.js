@@ -15,6 +15,7 @@ import {
 } from "ramda"
 import { truncate as _truncate } from "lodash"
 import qs from "query-string"
+import { assert } from "chai"
 
 /**
  * Returns a promise which resolves after a number of milliseconds have elapsed
@@ -109,4 +110,20 @@ export const objectToFormData = (object: Object) => {
     }
   })
   return formData
+}
+
+export const assertRaises = async (
+  asyncFunc: Function,
+  expectedMessage: string
+) => {
+  let exception
+  try {
+    await asyncFunc()
+  } catch (ex) {
+    exception = ex
+  }
+  if (!exception) {
+    throw new Error("No exception caught")
+  }
+  assert.equal(exception.message, expectedMessage)
 }

@@ -1,17 +1,11 @@
 """Course views"""
-from rest_framework import viewsets, status
-from django.contrib.auth.mixins import LoginRequiredMixin
+from rest_framework import viewsets
 from django.db.models import Prefetch
-from django.views.generic import ListView, DetailView, CreateView
-from django.http import HttpResponse
-from django.shortcuts import redirect
-from requests.exceptions import HTTPError
+from django.views.generic import ListView, DetailView
 
 from courses.models import Program, Course, CourseRun
 from courses.serializers import ProgramSerializer, CourseSerializer, CourseRunSerializer
 from courses.constants import DEFAULT_COURSE_IMG_PATH
-from courseware.api import enroll_in_edx_course_run
-from courseware.utils import edx_redirect_url
 from mitxpro.views import get_js_settings_context
 
 
@@ -85,24 +79,3 @@ class CourseView(DetailView):
             **get_js_settings_context(self.request),
             "user": self.request.user,
         }
-
-
-class CourseRunEnrollmentsView(LoginRequiredMixin, CreateView):
-    """Course enrollments view"""
-
-    def post(self, request, *args, **kwargs):
-        course_run_id = kwargs["course_run_id"]
-        try:
-            course_run = CourseRun.objects.get(pk=course_run_id)
-        except CourseRun.DoesNotExist:
-            return HttpResponse(
-                content={"error": "Course Run {} does not exist".format(course_run_id)},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        try:
-            enroll_in_edx_course_run(request.user, course_run)
-        except HTTPError as ex:
-            return HttpResponse(
-                content=ex.response.content, status=ex.response.status_code
-            )
-        return redirect(edx_redirect_url(course_run.courseware_url_path))

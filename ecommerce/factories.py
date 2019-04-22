@@ -7,7 +7,7 @@ from factory import fuzzy, Faker, LazyAttribute, SubFactory, post_generation
 from factory.django import DjangoModelFactory
 import faker
 
-from courses.factories import CourseFactory
+from courses.factories import CourseRunFactory
 from ecommerce import models
 from ecommerce.test_utils import gen_fake_receipt_data
 from mitxpro.utils import now_in_utc
@@ -29,7 +29,7 @@ class CompanyFactory(DjangoModelFactory):
 class ProductFactory(DjangoModelFactory):
     """Factory for Product"""
 
-    content_object = SubFactory(CourseFactory)
+    content_object = SubFactory(CourseRunFactory)
 
     class Meta:
         model = models.Product
