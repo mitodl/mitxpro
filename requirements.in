@@ -20,7 +20,7 @@ newrelic
 Pillow
 psycopg2==2.7.3.2
 raven
-redis==2.10.6
+redis==3.2.1
 requests
 social-auth-app-django==3.1.0
 ulid-py
