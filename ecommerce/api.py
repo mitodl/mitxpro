@@ -460,38 +460,41 @@ def get_data_consents(basket):
     Returns:
         list of DataConsentUser:  DataConsentUser objects
     """
-    coupon_selection = (
-        CouponSelection.objects.prefetch_related("coupon").filter(basket=basket).first()
+    data_consents = []
+    coupon_selections = CouponSelection.objects.prefetch_related("coupon").filter(
+        basket=basket
     )
-    if coupon_selection:
-        company = latest_coupon_version(coupon_selection.coupon).payment_version.company
-
-        if company:
-            courses = [
-                course
-                for courselist in [
-                    get_product_courses(item.product)
-                    for item in basket.basketitems.all()
-                ]
-                for course in courselist
+    if coupon_selections:
+        courses = [
+            course
+            for courselist in [
+                get_product_courses(item.product) for item in basket.basketitems.all()
             ]
+            for course in courselist
+        ]
 
-            agreements = (
-                DataConsentAgreement.objects.select_related("company")
-                .prefetch_related("courses")
-                .filter(company=company)
-                .filter(courses__in=courses)
-                .distinct()
-            )
+        for coupon_selection in coupon_selections:
+            company = latest_coupon_version(
+                coupon_selection.coupon
+            ).payment_version.company
+            if company:
+                agreements = (
+                    DataConsentAgreement.objects.select_related("company")
+                    .prefetch_related("courses")
+                    .filter(company=company)
+                    .filter(courses__in=courses)
+                    .distinct()
+                )
 
-            data_consents = [
-                DataConsentUser.objects.get_or_create(
-                    user=basket.user,
-                    agreement=agreement,
-                    coupon=coupon_selection.coupon,
-                )[0]
-                for agreement in agreements
-            ]
+                data_consents.extend(
+                    [
+                        DataConsentUser.objects.get_or_create(
+                            user=basket.user,
+                            agreement=agreement,
+                            coupon=coupon_selection.coupon,
+                        )[0]
+                        for agreement in agreements
+                    ]
+                )
 
-            return data_consents
-    return []
+    return data_consents
