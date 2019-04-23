@@ -18,11 +18,8 @@ from ecommerce.models import (
     CouponEligibility,
     CouponVersion,
     CouponRedemption,
-    DataConsentAgreement,
-    DataConsentUser,
     Line,
     Order,
-    CouponSelection,
 )
 from mitxpro.utils import now_in_utc
 
@@ -441,60 +438,8 @@ def get_product_courses(product):
 
     """
     courses = []
-    if product.content_type.model == "courserun":
-        courses.append(product.content_object.course)
-    elif product.content_type.model == "course":
+    if product.content_type.model == "course":
         courses.append(product.content_object)
     elif product.content_type.model == "program":
         courses = product.content_object.courses.all()
     return courses
-
-
-def get_data_consents(basket):
-    """
-    Get all the DataConsentUser objects associated with the user and product course(s) in a basket
-
-    Args:
-        basket(Basket): A basket to check for required & unsigned DataConsentAgreements
-
-    Returns:
-        list of DataConsentUser:  DataConsentUser objects
-    """
-    data_consents = []
-    coupon_selections = CouponSelection.objects.prefetch_related("coupon").filter(
-        basket=basket
-    )
-    if coupon_selections:
-        courses = [
-            course
-            for courselist in [
-                get_product_courses(item.product) for item in basket.basketitems.all()
-            ]
-            for course in courselist
-        ]
-
-        for coupon_selection in coupon_selections:
-            company = latest_coupon_version(
-                coupon_selection.coupon
-            ).payment_version.company
-            if company:
-                agreements = (
-                    DataConsentAgreement.objects.select_related("company")
-                    .prefetch_related("courses")
-                    .filter(company=company)
-                    .filter(courses__in=courses)
-                    .distinct()
-                )
-
-                data_consents.extend(
-                    [
-                        DataConsentUser.objects.get_or_create(
-                            user=basket.user,
-                            agreement=agreement,
-                            coupon=coupon_selection.coupon,
-                        )[0]
-                        for agreement in agreements
-                    ]
-                )
-
-    return data_consents

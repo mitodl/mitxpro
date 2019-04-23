@@ -25,7 +25,6 @@ from ecommerce.api import (
     latest_product_version,
     latest_coupon_version,
     get_product_courses,
-    get_data_consents,
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -43,7 +42,6 @@ from ecommerce.models import (
     CouponRedemption,
     Order,
     OrderAudit,
-    DataConsentUser,
 )
 from mitxpro.utils import now_in_utc
 
@@ -529,27 +527,9 @@ def test_get_product_courses():
     """
     program = ProgramFactory.create()
     CourseFactory.create_batch(5, program=program)
-    courserun_product = ProductFactory.create()
     course_product = ProductFactory.create(content_object=CourseFactory.create())
     program_product = ProductFactory.create(content_object=program)
-    assert get_product_courses(courserun_product) == [
-        courserun_product.content_object.course
-    ]
     assert get_product_courses(course_product) == [course_product.content_object]
     assert list(get_product_courses(program_product)) == list(
         program_product.content_object.courses.all()
     )
-
-
-def test_get_data_consents(basket_and_coupons, basket_and_agreement):
-    """
-    Verify that the correct list of DataConsentUsers is returned for a basket
-    """
-    assert list(get_data_consents(basket_and_coupons.basket)) == []
-    assert list(get_data_consents(basket_and_agreement.basket)) == [
-        DataConsentUser.objects.get(
-            agreement=basket_and_agreement.agreement,
-            user=basket_and_agreement.basket.user,
-            coupon=basket_and_agreement.coupon,
-        )
-    ]

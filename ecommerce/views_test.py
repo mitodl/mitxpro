@@ -367,7 +367,6 @@ def test_patch_basket_new_user(basket_and_coupons, user, user_drf_client):
     """Test that the view creates a basket and patches it basket does not already exist for user"""
     assert Basket.objects.filter(user=user).exists() is False
     resp = user_drf_client.patch(reverse("basket_api"), {"items": []})
-    assert resp.json() == []
     assert resp.status_code == 200
     assert Basket.objects.filter(user=user).exists() is True
 
@@ -672,7 +671,7 @@ def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
     assert resp.json()["errors"] == ["User has already enrolled in run"]
 
 
-def test_get_basket_data_consents(basket_and_agreement):
+def test_patch_basket_data_consents(basket_and_agreement):
     """ Test that a patch request with DataConsentUser ids updates those objects with consent dates  """
     user = basket_and_agreement.basket.user
     client = APIClient()
