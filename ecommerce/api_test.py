@@ -119,7 +119,7 @@ def test_signed_payload(mocker):
         "amount": str(total_price),
         "consumer_id": username,
         "currency": "USD",
-        "item_0_code": "course run",
+        "item_0_code": "course",
         "item_0_name": line1.product_version.description,
         "item_0_quantity": line1.quantity,
         "item_0_sku": line1.product_version.product.content_object.id,

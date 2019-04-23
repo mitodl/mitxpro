@@ -15,21 +15,21 @@ from courseware.utils import edx_redirect_url
 from mitxpro.views import get_js_settings_context
 
 
-class ProgramViewSet(viewsets.ModelViewSet):
+class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for Programs"""
 
     serializer_class = ProgramSerializer
     queryset = Program.objects.select_related("programpage").all()
 
 
-class CourseViewSet(viewsets.ModelViewSet):
+class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for Courses"""
 
     serializer_class = CourseSerializer
     queryset = Course.objects.select_related("coursepage").all()
 
 
-class CourseRunViewSet(viewsets.ModelViewSet):
+class CourseRunViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for CourseRuns"""
 
     serializer_class = CourseRunSerializer
@@ -49,7 +49,7 @@ class CourseCatalogView(ListView):
             .order_by("id")
             .all()
             .prefetch_related(
-                Prefetch("course_set__courserun_set", queryset=sorted_courserun_qset)
+                Prefetch("courses__courseruns", queryset=sorted_courserun_qset)
             )
         )
         courses_qset = (
@@ -57,7 +57,7 @@ class CourseCatalogView(ListView):
             .select_related("coursepage")
             .order_by("id")
             .all()
-            .prefetch_related(Prefetch("courserun_set", queryset=sorted_courserun_qset))
+            .prefetch_related(Prefetch("courseruns", queryset=sorted_courserun_qset))
         )
         return {"programs": programs_qset, "courses": courses_qset}
 
@@ -76,7 +76,7 @@ class CourseCatalogView(ListView):
 class CourseView(DetailView):
     """Course view"""
 
-    queryset = Course.objects.prefetch_related("courserun_set").all()
+    queryset = Course.objects.prefetch_related("courseruns").all()
     template_name = "course_detail.html"
 
     def get_context_data(self, **kwargs):

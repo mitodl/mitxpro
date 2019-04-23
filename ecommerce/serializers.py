@@ -7,11 +7,17 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
-from courses.models import Course, CourseRun
-from courses.serializers import CourseRunSerializer
+from courses.models import Course, CourseRun, Program
 from courses.constants import DEFAULT_COURSE_IMG_PATH
+from courses.serializers import CourseSerializer
 from ecommerce import models
-from ecommerce.api import latest_product_version, latest_coupon_version
+from ecommerce.api import (
+    best_coupon_for_product,
+    get_valid_coupon_versions,
+    latest_coupon_version,
+    latest_product_version,
+)
+from mitxpro.serializers import WriteableSerializerMethodField
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -47,40 +53,35 @@ class ProductVersionSerializer(serializers.ModelSerializer):
     """ ProductVersion serializer for viewing/updating items in basket """
 
     type = serializers.SerializerMethodField()
-    course_runs = serializers.SerializerMethodField()
+    courses = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
 
     def get_type(self, instance):
         """ Return the product version type """
         return instance.product.content_type.model
 
-    def get_course_runs(self, instance):
+    def get_courses(self, instance):
         """ Return the course runs in the product """
-        course_runs = []
-        if instance.product.content_type.model == "courserun":
-            course_runs.append(instance.product.content_object)
-        elif instance.product.content_type.model == "course":
-            course_runs.append(instance.product.content_object.first_unexpired_run)
-        elif instance.product.content_type.model == "program":
-            for course in Course.objects.filter(
+        model_class = instance.product.content_type.model_class()
+        if model_class is Course:
+            courses = [instance.product.content_object]
+        elif model_class is Program:
+            courses = Course.objects.filter(
                 program=instance.product.content_object
-            ):
-                course_runs.append(course.first_unexpired_run)
-        return [
-            CourseRunSerializer(instance=course_run).data for course_run in course_runs
-        ]
+            ).order_by("position_in_program")
+        else:
+            raise ValueError(f"Unexpected product for {model_class}")
+
+        return [CourseSerializer(course).data for course in courses]
 
     def get_thumbnail_url(self, instance):
         """Return the thumbnail for the course or program"""
         content_object = instance.product.content_object
-        if isinstance(content_object, CourseRun):
-            catalog_image_url = content_object.course.catalog_image_url
-        else:
-            catalog_image_url = content_object.catalog_image_url
+        catalog_image_url = content_object.catalog_image_url
         return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
     class Meta:
-        fields = ["id", "price", "description", "type", "course_runs", "thumbnail_url"]
+        fields = ["id", "price", "description", "type", "courses", "thumbnail_url"]
         model = models.ProductVersion
 
 
@@ -126,13 +127,22 @@ class CouponSelectionSerializer(serializers.ModelSerializer):
 class BasketSerializer(serializers.ModelSerializer):
     """Basket model serializer"""
 
-    items = serializers.SerializerMethodField()
-    coupons = serializers.SerializerMethodField()
+    items = WriteableSerializerMethodField()
+    coupons = WriteableSerializerMethodField()
 
     def get_items(self, instance):
         """ Get the basket items """
         return [
-            ProductVersionSerializer(instance=latest_product_version(item.product)).data
+            {
+                **ProductVersionSerializer(
+                    instance=latest_product_version(item.product)
+                ).data,
+                "run_ids": list(
+                    models.CourseRunSelection.objects.filter(
+                        basket=instance
+                    ).values_list("run", flat=True)
+                ),
+            }
             for item in instance.basketitems.all()
         ]
 
@@ -144,6 +154,183 @@ class BasketSerializer(serializers.ModelSerializer):
                 basket=instance
             )
         ]
+
+    @classmethod
+    def _get_runs_for_product(cls, *, product_version, run_ids):
+        """Helper function to get and validate selected runs in a product"""
+        content_object = product_version.product.content_object
+        runs_for_product = CourseRun.objects.filter(id__in=run_ids)
+        if isinstance(content_object, Course):
+            runs_for_product = runs_for_product.filter(course=content_object)
+        elif isinstance(content_object, Program):
+            runs_for_product = runs_for_product.filter(course__program=content_object)
+        else:
+            raise ValidationError(
+                f"Unknown content_object for {product_version.product}"
+            )
+
+        run_ids_for_product = {run.id for run in runs_for_product}
+
+        missing_run_ids = set(run_ids) - run_ids_for_product
+        if missing_run_ids:
+            raise ValidationError(f"Unable to find run(s) with id(s) {missing_run_ids}")
+
+        courses_for_product = set(runs_for_product.values_list("course", flat=True))
+        if len(courses_for_product) < len(run_ids):
+            raise ValidationError("Only one run per course can be selected")
+
+        if models.CourseRunEnrollment.objects.filter(run_id__in=run_ids).exists():
+            raise ValidationError("User has already enrolled in run")
+
+        return runs_for_product
+
+    @classmethod
+    def _update_items(cls, basket, items):
+        """
+        Helper function to determine if the basket item should be updated, removed, or kept as is.
+
+        Args:
+            basket (Basket): the basket to update
+            items (list of JSON objects): Basket items to update, or clear if empty list, or leave as is if None
+
+        Returns:
+            tuple: ProductVersion object to assign to basket, if any, and a list of CourseRun
+
+        """
+        if items:
+            # Item updated
+            item = items[0]
+            product_version_id = item.get("id")
+            run_ids = item.get("run_ids")
+
+            product_version = models.ProductVersion.objects.get(id=product_version_id)
+            if run_ids is not None:
+                runs = cls._get_runs_for_product(
+                    product_version=product_version, run_ids=run_ids
+                )
+            else:
+                runs = None
+        elif items is not None:
+            # Item removed
+            product_version = None
+            runs = None
+        else:
+            # Item has not changed
+            product_version = latest_product_version(basket.basketitems.first().product)
+            runs = list(CourseRun.objects.filter(courserunselection__basket=basket))
+        return product_version, runs
+
+    @classmethod
+    def _update_coupons(cls, basket, product_version, coupons):
+        """
+        Helper function to determine if the basket coupon should be updated, removed, or kept as is.
+
+        Args:
+            basket (Basket): the basket to update
+            product_version (ProductVersion): the product version coupon should apply to
+            coupons (list of JSON objects): Basket coupons to update, or clear if empty list, or leave as is if None
+
+        Returns:
+            CouponVersion: CouponVersion object to assign to basket, if any.
+
+        """
+        if not product_version:
+            # No product, so clear coupon too
+            return None
+
+        if coupons:
+            if len(coupons) > 1:
+                raise ValidationError("Basket cannot contain more than one coupon")
+            coupon = coupons[0]
+            if not isinstance(coupon, dict):
+                raise ValidationError("Invalid request")
+            coupon_code = coupon.get("code")
+            if coupon_code is None:
+                raise ValidationError("Invalid request")
+
+            # Check if the coupon is valid for the product
+            coupon_version = best_coupon_for_product(
+                product_version.product, basket.user, code=coupon_code
+            )
+            if coupon_version is None:
+                raise ValidationError("Coupon code {} is invalid".format(coupon_code))
+        elif coupons is not None:
+            # Coupon was cleared, get the best available auto coupon for the product instead
+            coupon_version = best_coupon_for_product(
+                product_version.product, basket.user, auto_only=True
+            )
+        else:
+            # coupon was not changed, make sure it is still valid; if not, replace with best auto coupon if any.
+            coupon_selection = basket.couponselection_set.first()
+            if coupon_selection:
+                coupon_version = latest_coupon_version(coupon_selection.coupon)
+            else:
+                coupon_version = None
+            valid_coupon_versions = get_valid_coupon_versions(
+                product_version.product, basket.user
+            )
+            if coupon_version is None or coupon_version not in valid_coupon_versions:
+                coupon_version = best_coupon_for_product(
+                    product_version.product, basket.user, auto_only=True
+                )
+        return coupon_version
+
+    def update(self, instance, validated_data):
+        items = validated_data.get("items")
+        coupons = validated_data.get("coupons")
+        basket = instance
+
+        if items is None and coupons is None:
+            raise ValidationError("Invalid request")
+
+        product_version, runs = self._update_items(basket, items)
+        coupon_version = self._update_coupons(basket, product_version, coupons)
+        if product_version:
+            # Update basket items and coupon selection
+            with transaction.atomic():
+                basket.basketitems.all().delete()
+                models.BasketItem.objects.create(
+                    product=product_version.product, quantity=1, basket=basket
+                )
+
+                if runs is not None:
+                    models.CourseRunSelection.objects.filter(basket=basket).delete()
+                    for run in runs:
+                        models.CourseRunSelection.objects.create(basket=basket, run=run)
+
+                if coupon_version:
+                    models.CouponSelection.objects.update_or_create(
+                        basket=basket, defaults={"coupon": coupon_version.coupon}
+                    )
+                else:
+                    basket.couponselection_set.all().delete()
+        else:
+            # Remove everything from basket
+            with transaction.atomic():
+                basket.basketitems.all().delete()
+                basket.couponselection_set.all().delete()
+        return instance
+
+    def validate_items(self, items):
+        """Validate some basic things about items"""
+        if items:
+            if len(items) > 1:
+                raise ValidationError("Basket cannot contain more than one item")
+            item = items[0]
+            product_version_id = item.get("id")
+
+            if product_version_id is None:
+                raise ValidationError("Invalid request")
+            if not models.ProductVersion.objects.filter(id=product_version_id).exists():
+                raise ValidationError(
+                    f"Invalid product version id {product_version_id}"
+                )
+
+        return {"items": items}
+
+    def validate_coupons(self, coupons):
+        """Can't do much validation here since we don't have the product version id"""
+        return {"coupons": coupons}
 
     class Meta:
         fields = ["items", "coupons"]

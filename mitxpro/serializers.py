@@ -33,3 +33,16 @@ class AppContextSerializer(serializers.Serializer):
     def get_public_path(self, request):
         """Returns the public_path"""
         return public_path(request)
+
+
+class WriteableSerializerMethodField(serializers.SerializerMethodField):
+    """
+    A SerializerMethodField which has been marked as not read_only so that submitted data passed validation.
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.read_only = False
+
+    def to_internal_value(self, data):
+        return data

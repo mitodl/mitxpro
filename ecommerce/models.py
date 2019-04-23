@@ -23,7 +23,7 @@ class Company(TimestampedModel):
 
 class Product(TimestampedModel):
     """
-    Representation of a purchasable product. There is a GenericForeignKey to a CourseRun, Course, or Program.
+    Representation of a purchasable product. There is a GenericForeignKey to a Course or Program.
     Other about the product like price is stored in ProductVersion.
     """
 
@@ -31,7 +31,7 @@ class Product(TimestampedModel):
         ContentType,
         on_delete=models.PROTECT,
         null=True,
-        help_text="content_object is a link to either a Course, CourseRun, or a Program",
+        help_text="content_object is a link to either a Course or a Program",
     )
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
@@ -327,3 +327,27 @@ class Receipt(TimestampedModel):
             return f"Receipt for order {self.order.id}"
         else:
             return "Receipt with no attached order"
+
+
+class CourseRunSelection(TimestampedModel):
+    """
+    Link between Basket and CourseRun.
+    """
+
+    basket = models.ForeignKey(Basket, on_delete=models.PROTECT)
+    run = models.ForeignKey("courses.CourseRun", on_delete=models.PROTECT)
+
+    def __str__(self):
+        return f"CourseRunSelection for {self.basket} and {self.run}"
+
+
+class CourseRunEnrollment(TimestampedModel):
+    """
+    Link between Order and CourseRun, indicating what a user should be enrolled in
+    """
+
+    order = models.ForeignKey(Order, on_delete=models.PROTECT)
+    run = models.ForeignKey("courses.CourseRun", on_delete=models.PROTECT)
+
+    def __str__(self):
+        return f"CourseRunEnrollment for {self.order} and {self.run}"

@@ -478,6 +478,7 @@ REST_FRAMEWORK = {
         "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "EXCEPTION_HANDLER": "mitxpro.exceptions.exception_handler",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 

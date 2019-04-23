@@ -7,6 +7,7 @@ import pytest
 
 # pylint:disable=redefined-outer-name
 
+from courses.factories import CourseRunFactory
 from ecommerce.factories import (
     BasketItemFactory,
     CouponEligibilityFactory,
@@ -18,6 +19,7 @@ from ecommerce.factories import (
     CompanyFactory,
     ProductVersionFactory,
 )
+from ecommerce.models import CourseRunSelection
 
 CouponGroup = namedtuple(
     "CouponGroup", ["coupon", "coupon_version", "payment", "payment_version"]
@@ -36,6 +38,9 @@ def basket_and_coupons():
     product_version = ProductVersionFactory(
         product=basket_item.product, price=Decimal(25.00)
     )
+
+    run = CourseRunFactory.create(course=basket_item.product.content_object)
+    CourseRunSelection.objects.create(run=run, basket=basket_item.basket)
 
     payment_worst = CouponPaymentFactory()
     payment_best = CouponPaymentFactory()
@@ -76,6 +81,7 @@ def basket_and_coupons():
         product_version=product_version,
         coupongroup_best=coupongroup_best,
         coupongroup_worst=coupongroup_worst,
+        run=run,
     )
 
 

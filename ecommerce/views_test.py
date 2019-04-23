@@ -8,6 +8,7 @@ import rest_framework.status as status  # pylint: disable=useless-import-alias
 from rest_framework.renderers import JSONRenderer
 from rest_framework.test import APIClient
 
+from courses.factories import CourseRunFactory
 from ecommerce.api import create_unfulfilled_order, make_reference_id
 from ecommerce.exceptions import EcommerceException
 from ecommerce.factories import (
@@ -20,11 +21,13 @@ from ecommerce.factories import (
 )
 from ecommerce.models import (
     Basket,
+    BasketItem,
     CouponSelection,
     Order,
     OrderAudit,
     Receipt,
     CouponPaymentVersion,
+    CourseRunEnrollment,
     Company,
     CouponEligibility,
     Product,
@@ -365,13 +368,24 @@ def test_patch_basket_new_user(basket_and_coupons, user, user_drf_client):
     assert Basket.objects.filter(user=user).exists() is True
 
 
+def test_patch_basket_new_item(basket_client, basket_and_coupons):
+    """Test that a user can add an item to their basket"""
+    data = {"items": [{"id": basket_and_coupons.product_version.id}]}
+    BasketItem.objects.all().delete()  # clear the basket first
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json() == render_json(
+        BasketSerializer(instance=basket_and_coupons.basket)
+    )
+
+
 def test_patch_basket_multiple_products(basket_client, basket_and_coupons):
     """ Test that an update with multiple products is rejected """
     data = {"items": [{"id": 10}, {"id": 11}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert "Basket cannot contain more than one item" in resp_data.get("errors")
+    assert "Basket cannot contain more than one item" in resp_data["errors"]["items"]
 
 
 def test_patch_basket_invalid_coupon_format(basket_client, basket_and_coupons):
@@ -526,7 +540,9 @@ def test_patch_basket_update_invalid_product(basket_client, basket_and_coupons):
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert "Invalid product version id {}".format(bad_id) in resp_data.get("errors")
+    assert (
+        "Invalid product version id {}".format(bad_id) in resp_data["errors"]["items"]
+    )
 
 
 @pytest.mark.parametrize("section", ["items", "coupons"])
@@ -537,7 +553,9 @@ def test_patch_basket_update_invalid_data(basket_client, basket_and_coupons, sec
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert "Invalid request" in resp_data.get("errors")
+    assert "Invalid request" in (
+        resp_data["errors"] if section == "coupons" else resp_data["errors"]["items"]
+    )
 
 
 @pytest.mark.parametrize("data", [{"items": [], "coupons": []}, {"items": []}])
@@ -556,6 +574,98 @@ def test_patch_basket_nodata(basket_client, basket_and_coupons):
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
     assert "Invalid request" in resp_data.get("errors")
+
+
+@pytest.mark.parametrize("add_new_runs", [True, False])
+def test_patch_basket_update_runs(basket_client, basket_and_coupons, add_new_runs):
+    """A patch request with run ids should update and replace the existing run ids for that item"""
+    product_version = basket_and_coupons.product_version
+    product = product_version.product
+    run1 = CourseRunFactory.create()
+    run2 = CourseRunFactory.create(course__program=run1.course.program)
+    product.content_object = run1.course.program
+    product.save()
+
+    resp = basket_client.patch(
+        reverse("basket_api"),
+        type="json",
+        data={
+            "items": [
+                {
+                    "id": product_version.id,
+                    "run_ids": [run1.id, run2.id] if add_new_runs else [],
+                }
+            ]
+        },
+    )
+    assert resp.status_code == status.HTTP_200_OK
+    resp_data = resp.json()
+    assert sorted(resp_data["items"][0]["run_ids"]) == sorted(
+        [run1.id, run2.id] if add_new_runs else []
+    )
+
+
+@pytest.mark.parametrize("is_program", [True, False])
+def test_patch_basket_invalid_run(basket_client, basket_and_coupons, is_program):
+    """A patch request with an run for a different product should result in a 400 error"""
+    product_version = basket_and_coupons.product_version
+    product = product_version.product
+    run = CourseRunFactory.create()
+    product.content_object = run.course.program if is_program else run.course
+    product.save()
+
+    # If the product is a course, create a new run on a different course which is invalid.
+    # If the product is a program, create a new run on a different program.
+    other_run = (
+        CourseRunFactory.create()
+        if is_program
+        else CourseRunFactory.create(course__program=product.content_object.program)
+    )
+
+    resp = basket_client.patch(
+        reverse("basket_api"),
+        type="json",
+        data={"items": [{"id": product_version.id, "run_ids": [other_run.id]}]},
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json()["errors"] == [
+        f"Unable to find run(s) with id(s) {{{other_run.id}}}"
+    ]
+
+
+def test_patch_basket_multiple_runs_for_course(basket_client, basket_and_coupons):
+    """A patch request for multiple runs for a course should result in a 400 error"""
+    product_version = basket_and_coupons.product_version
+    course = product_version.product.content_object
+    run1 = basket_and_coupons.run
+    run2 = CourseRunFactory.create(course=course)
+
+    resp = basket_client.patch(
+        reverse("basket_api"),
+        type="json",
+        data={"items": [{"id": product_version.id, "run_ids": [run1.id, run2.id]}]},
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json()["errors"] == ["Only one run per course can be selected"]
+
+
+def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
+    """A patch request for a run for a course that the user has already enrolled in should result in a 400 error"""
+    run = basket_and_coupons.run
+    order = LineFactory.create(order__status=Order.FULFILLED).order
+    CourseRunEnrollment.objects.create(run=run, order=order)
+
+    resp = basket_client.patch(
+        reverse("basket_api"),
+        type="json",
+        data={
+            "items": [
+                {"id": basket_and_coupons.product_version.id, "run_ids": [run.id]}
+            ]
+        },
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json()["errors"] == ["User has already enrolled in run"]
 
 
 def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):

@@ -8,7 +8,11 @@ from wagtail.core.models import Page
 from django.conf import settings
 
 from courses.models import Program, Course, CourseRun
-from courses.serializers import ProgramSerializer, CourseSerializer, CourseRunSerializer
+from localdev.seed.serializers import (
+    ProgramSerializer,
+    CourseSerializer,
+    CourseRunSerializer,
+)
 from mitxpro.utils import dict_without_keys, filter_dict_by_key_set, get_field_names
 from cms.models import ProgramPage, CoursePage
 
