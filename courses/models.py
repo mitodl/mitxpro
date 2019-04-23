@@ -5,7 +5,7 @@ import logging
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 
-from cms.models import LearningOutcomesPage
+from cms.models import LearningOutcomesPage, LearningTechniquesPage
 from courses.constants import (
     CATALOG_COURSE_IMG_WAGTAIL_FILL,
     COURSE_BG_IMG_WAGTAIL_FILL,
@@ -140,6 +140,18 @@ class PageProperties(models.Model):
             )
             if learning_outcomes:
                 return learning_outcomes.specific
+
+        return None
+
+    @property
+    def techniques(self):
+        """Gets the learning techniques from the associated Page children if it exists"""
+        if self.page:
+            learning_techniques = (
+                self.page.get_children().type(LearningTechniquesPage).first()
+            )
+            if learning_techniques:
+                return learning_techniques.specific
 
         return None
 

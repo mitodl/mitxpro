@@ -11,9 +11,10 @@ from cms.factories import (
     ProgramPageFactory,
     CoursePageFactory,
     LearningOutcomesPageFactory,
+    LearningTechniquesPageFactory,
 )
 
-from cms.models import LearningOutcomesPage
+from cms.models import LearningOutcomesPage, LearningTechniquesPage
 from mitxpro.utils import now_in_utc
 
 pytestmark = [pytest.mark.django_db]
@@ -113,6 +114,33 @@ def test_program_page_properties():
         assert block.block_type == "outcome"
         assert block.value == "benefit"
     assert not LearningOutcomesPage.can_create_at(program_page)
+
+
+def test_program_learning_techniques():
+    """
+    ProgramPage related subpages should return expected values if they exist
+    ProgramPage related LearningTechniquesPage should return expected values if it exists
+    """
+    program = ProgramFactory.create()
+
+    program_page = ProgramPageFactory.create(
+        program=program, description="<p>desc</p>", duration="1 week"
+    )
+
+    assert LearningTechniquesPage.can_create_at(program_page)
+    learning_techniques_page = LearningTechniquesPageFactory(
+        parent=program_page,
+        technique_items__0__techniques__heading="heading",
+        technique_items__0__techniques__sub_heading="sub_heading",
+        technique_items__0__techniques__image__title="image-title",
+    )
+    assert learning_techniques_page.get_parent() == program_page
+    for (
+        technique
+    ) in learning_techniques_page.technique_items:  # pylint: disable=not-an-iterable
+        assert technique.value.get("heading") == "heading"
+        assert technique.value.get("sub_heading") == "sub_heading"
+        assert technique.value.get("image").title == "image-title"
 
 
 def test_courseware_url(settings):
@@ -251,7 +279,6 @@ def test_course_page_properties():
     assert course.background_image is None
     assert course.background_image_url is None
     assert course.background_image_mobile_url is None
-    assert course.outcomes is None
     course_page = CoursePageFactory.create(
         course=course,
         title="<p>page title</p>",
@@ -286,3 +313,28 @@ def test_course_page_properties():
         assert block.value == "benefit"
     assert course.outcomes == learning_outcomes_page
     assert not LearningOutcomesPage.can_create_at(course_page)
+
+
+def test_course_learning_techniques():
+    """
+    CoursePage related subpages should return expected values if they exist
+    CoursePage related LearningTechniquesPage should return expected values if it exists
+    """
+    course = CourseFactory.create()
+
+    course_page = CoursePageFactory.create(course=course)
+
+    assert LearningTechniquesPage.can_create_at(course_page)
+    learning_techniques_page = LearningTechniquesPageFactory(
+        parent=course_page,
+        technique_items__0__techniques__heading="heading",
+        technique_items__0__techniques__sub_heading="sub_heading",
+        technique_items__0__techniques__image__title="image-title",
+    )
+    assert learning_techniques_page.get_parent() == course_page
+    for (
+        technique
+    ) in learning_techniques_page.technique_items:  # pylint: disable=not-an-iterable
+        assert technique.value.get("heading") == "heading"
+        assert technique.value.get("sub_heading") == "sub_heading"
+        assert technique.value.get("image").title == "image-title"
