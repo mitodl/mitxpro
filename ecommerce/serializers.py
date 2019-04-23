@@ -390,11 +390,15 @@ class BasketSerializer(serializers.ModelSerializer):
 
     def validate_data_consents(self, data_consents):
         """Validate that DataConsentUser objects exist"""
+        invalid_consent_ids = []
         for consent_id in data_consents:
             if not models.DataConsentUser.objects.filter(id=consent_id).exists():
-                raise ValidationError(f"Invalid data consent id {consent_id}")
-
-            return {"data_consents": data_consents}
+                invalid_consent_ids.append(consent_id)
+        if invalid_consent_ids:
+            raise ValidationError(
+                f"Invalid data consent id {','.join([str(consent_id) for consent_id in invalid_consent_ids])}"
+            )
+        return {"data_consents": data_consents}
 
     class Meta:
         fields = ["items", "coupons", "data_consents"]

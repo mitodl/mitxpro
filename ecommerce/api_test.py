@@ -37,12 +37,7 @@ from ecommerce.factories import (
     ProductVersionFactory,
     ProductFactory,
 )
-from ecommerce.models import (
-    CouponSelection,
-    CouponRedemption,
-    Order,
-    OrderAudit,
-)
+from ecommerce.models import CouponSelection, CouponRedemption, Order, OrderAudit
 from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db

@@ -10,7 +10,6 @@ import faker
 
 from courses.factories import CourseFactory
 from ecommerce import models
-from ecommerce.models import DataConsentAgreement, DataConsentUser
 from ecommerce.test_utils import gen_fake_receipt_data
 from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
@@ -197,7 +196,7 @@ class DataConsentAgreementFactory(DjangoModelFactory):
                 self.courses.add(course)
 
     class Meta:
-        model = DataConsentAgreement
+        model = models.DataConsentAgreement
 
 
 class DataConsentUserFactory(DjangoModelFactory):
@@ -209,4 +208,4 @@ class DataConsentUserFactory(DjangoModelFactory):
     consent_date = fuzzy.FuzzyDateTime(start_dt=now_in_utc())
 
     class Meta:
-        model = DataConsentUser
+        model = models.DataConsentUser

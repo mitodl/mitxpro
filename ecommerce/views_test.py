@@ -690,6 +690,20 @@ def test_patch_basket_data_consents(basket_and_agreement):
     ).strftime("%Y-%m-%dT00:00:00Z")
 
 
+def test_patch_basket_bad_data_consents(basket_and_agreement):
+    """ Test that a patch request with bad DataConsentUser raises a validation error  """
+    user = basket_and_agreement.basket.user
+    client = APIClient()
+    client.force_authenticate(user=user)
+    resp = client.patch(
+        reverse("basket_api"), type="json", data={"data_consents": [9998, 9999]}
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json().get("errors") == {
+        "data_consents": ["Invalid data consent id 9998,9999"]
+    }
+
+
 def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     """ Test that the correct model objects are created for a batch of single-use coupons """
     data = single_use_coupon_json
