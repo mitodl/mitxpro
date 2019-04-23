@@ -3,7 +3,6 @@ import ulid
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
 from social_core.pipeline.partial import partial
-from social_core.pipeline.user import create_user
 
 from authentication.exceptions import (
     InvalidPasswordException,
@@ -90,18 +89,10 @@ def create_user_via_email(
         raise UnexpectedExistingUserException(backend, current_partial)
 
     data = strategy.request_data()
-    if "name" not in data or "password" not in data:
+    if any([field not in data for field in ["name", "password", "legal_address"]]):
         raise RequirePasswordAndProfileException(backend, current_partial)
 
-    return create_user(
-        strategy,
-        details=details or {},
-        backend=backend,
-        name=data["name"],
-        password=data["password"],
-        *args,
-        **kwargs,
-    )
+    return user
 
 
 @partial

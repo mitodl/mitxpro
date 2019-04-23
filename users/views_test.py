@@ -6,6 +6,22 @@ from rest_framework import status
 from mitxpro.test_utils import drf_datetime
 
 
+def test_cannot_create_user(client):
+    """Verify the api to create a user is nonexistent"""
+    resp = user_client.post(reverse("users_api"), data={"name": "Name"})
+
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_cannot_update_user(user_client, user):
+    """Verify the api to update a user is nonexistent"""
+    resp = user_client.patch(
+        reverse("users_api-detail", kwargs={"pk": user.id}), data={"name": "Name"}
+    )
+
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+
+
 def test_get_user_by_id(user_client, user):
     """Test that user can request their own user by id"""
     resp = user_client.get(reverse("users_api-detail", kwargs={"pk": user.id}))
