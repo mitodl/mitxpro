@@ -24,6 +24,20 @@ def test_program_course_auto_position():
     assert second_course.position_in_program == 2
 
 
+def test_program_num_courses():
+    """
+    Program should return number of courses associated with it
+    """
+    program = ProgramFactory.create()
+    assert program.num_courses == 0
+
+    CourseFactory.create(program=program)
+    assert program.num_courses == 1
+
+    CourseFactory.create(program=program)
+    assert program.num_courses == 2
+
+
 def test_program_next_run_date():
     """
     next_run_date should return the date of the CourseRun with the nearest future start date
@@ -204,10 +218,29 @@ def test_course_page_properties():
     Wagtail-page-related properties should return expected values if the Wagtail page exists
     """
     course = CourseFactory.create()
+    assert course.display_title is None
+    assert course.subhead is None
     assert course.description is None
     assert course.duration is None
+    assert course.video_title is None
+    assert course.video_url is None
+    assert course.background_image is None
+    assert course.background_image_url is None
+    assert course.background_image_mobile_url is None
     CoursePageFactory.create(
-        course=course, description="<p>desc</p>", duration="1 week"
+        course=course,
+        title="<p>page title</p>",
+        subhead="subhead",
+        description="<p>desc</p>",
+        duration="1 week",
+        video_title="<p>title</p>",
+        video_url="http://test.com/mock.mp4",
+        background_image__title="background-image",
     )
+    assert course.display_title == "<p>page title</p>"
+    assert course.subhead == "subhead"
     assert course.description == "<p>desc</p>"
     assert course.duration == "1 week"
+    assert course.video_title == "<p>title</p>"
+    assert course.video_url == "http://test.com/mock.mp4"
+    assert course.background_image.title == "background-image"

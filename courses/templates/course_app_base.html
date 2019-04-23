@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load render_bundle %}
 
+{% block extrahead %}
+  <link href="https://fonts.googleapis.com/css?family=Rajdhani:300,400,500,600,700" rel="stylesheet">
+{% endblock %}
+
 {% block headercontent %}
   <div id="header"></div>
   {% render_bundle 'header' %}

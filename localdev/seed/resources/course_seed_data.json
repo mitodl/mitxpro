@@ -2,15 +2,18 @@
     "programs": [
         {
             "title": "Systems Engineering",
+            "subhead": "A four-course online program leading to a Professional Certificate from the Massachusetts Institute of Technology.",
             "description": "<p>A four-course online program leading to a Professional Certificate from the Massachusetts Institute of Technology.</p>",
             "readable_id": "SysEngx"
         },
         {
             "title": "Digital Learning",
+            "subhead": "Learn stuff about digital learning.",
             "description": "<p>Learn stuff about digital learning.</p>"
         },
         {
             "title": "Analog Learning",
+            "subhead": "Learn stuff about analog learning.",
             "description": "<p>Learn stuff about analog learning.</p>"
         }
     ],
@@ -18,6 +21,7 @@
         {
             "title": "edX Demonstration Course",
             "description": "<p>This is edX's demo course</p>",
+            "subhead": "This is edX's demo course",
             "course_runs": [
                 {
                     "title": "edX Demonstration Course - Spring 2013",
@@ -30,6 +34,7 @@
         {
             "program": "Systems Engineering",
             "title": "Architecture of Complex Systems",
+            "subhead": "Course 1 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program.",
             "position_in_program": 1,
             "description": "<p>Course 1 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program.</p>",
             "readable_id": "SysEngxB1",
@@ -47,6 +52,7 @@
         {
             "program": "Systems Engineering",
             "title": "Models in Engineering",
+            "subhead": "Course 2 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.",
             "position_in_program": 2,
             "description": "<p>Course 2 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.</p>",
             "readable_id": "SysEngxB2",
@@ -64,6 +70,7 @@
         {
             "program": "Systems Engineering",
             "title": "Model-Based Systems Engineering: Documentation and Analysis",
+            "subhead": "Course 3 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.",
             "position_in_program": 3,
             "description": "<p>Course 3 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.</p>",
             "readable_id": "SysEngxB3",
@@ -81,6 +88,7 @@
         {
             "program": "Digital Learning",
             "title": "Digital Learning 100",
+            "subhead": "An introductory course to Digital Learning",
             "position_in_program": 1,
             "description": "<p>An introductory course to Digital Learning</p>",
             "course_runs": [
@@ -117,6 +125,7 @@
         {
             "program": "Digital Learning",
             "title": "Digital Learning 200",
+            "subhead": "A more advanced course in Digital Learning",
             "position_in_program": 2,
             "description": "<p>A more advanced course in Digital Learning</p>",
             "course_runs": [
@@ -146,6 +155,7 @@
         {
             "program": "Digital Learning",
             "title": "Digital Learning 300",
+            "subhead": "The most advancedest course in Digital Learning",
             "position_in_program": 3,
             "description": "<p>The most advancedest course in Digital Learning</p>",
             "course_runs": [
@@ -178,6 +188,7 @@
         {
             "program": "Analog Learning",
             "title": "Analog Learning 100",
+            "subhead": "An introductory course to Analog Learning",
             "position_in_program": 1,
             "description": "<p>An introductory course to Analog Learning</p>",
             "course_runs": [
@@ -210,6 +221,7 @@
         {
             "program": "Analog Learning",
             "title": "Analog Learning 200",
+            "subhead": "A more advanced course in Analog Learning",
             "position_in_program": 2,
             "description": "<p>A more advanced course in Analog Learning</p>",
             "course_runs": [
@@ -242,6 +254,7 @@
         {
             "program": "Analog Learning",
             "title": "Analog Learning 300",
+            "subhead": "The most advanced course in Analog Learning",
             "position_in_program": 3,
             "description": "<p>The most advancedest course in Analog Learning</p>",
             "course_runs": [
@@ -273,6 +286,7 @@
         },
         {
             "title": "Quantitative Methods in Systems Engineering",
+            "subhead": "The course where the methods are quantitative and the systems are engineered.",
             "description": "<p>The course where the methods are quantitative and the systems are engineered.</p>",
             "course_runs": [
                 {
@@ -288,6 +302,7 @@
         },
         {
             "title": "Introduction to Quantum Computing",
+            "subhead": "An introduction to a type of computing, and that type of computing is quantum.",
             "description": "<p>An introduction to a type of computing, and that type of computing is quantum.</p>",
             "course_runs": [
                 {
@@ -303,6 +318,7 @@
         },
         {
             "title": "Introduction to Not-Live Courses",
+            "subhead": "A course that is not live.",
             "description": "<p>A course that is not live.</p>",
             "live": false,
             "course_runs": [

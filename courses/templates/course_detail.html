@@ -3,34 +3,44 @@
 
 {% block title %}MIT xPro | {{ course.title }}{% endblock %}
 
+{% block extrahead %}
+{{ block.super }}
+<style>
+  .header-block {
+    background-image: url('{{ course.background_image_mobile_url }}');
+  }
+
+  @media screen and (min-width: 1024px) { 
+    .header-block {
+      background-image: url('{{ course.background_image_url }}'); 
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="course-detail">
-  <h1>{{ course.title }}</h1>
-  <h3>{{ course.description }}</h3>
-  <h3>Course Runs:</h3>
-  {% for course_run in course.courserun_set.all %}
-    <div style="background-color: {% cycle "#eee" "#fff" %}; padding: 10px;">
-      <h4 style="margin: 0 0 10px 0; padding: 0;">
-        {% if course_run.courseware_url %}
-            &#11016;
-            <a
-              href="{{ course_run.courseware_url }}"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {{ course_run.title }}
-            </a>
-        {% else %}
-          {{ course_run.title }}
+<div class="header-block">
+  <div class="container header-container">
+    {% if course.program %}
+      <h5 class="program-position">Course {{ course.position_in_program }} of {{ course.program.num_courses }} in {{ course.program.title }}</h5>
+    {% endif %}
+    <div class="row">
+      <div class="col-lg-7">
+        <div class="header-title">
+          <h1>{{ course.display_title }}</h1>
+          <h2>{{ course.subhead }}</h2>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        {% if course.video_url %}
+          <video controls>
+            <source src="{{ course.video_url }}">
+            Your browser does not support HTML5 video.
+          </video>
+          <div class="video-caption">{{ course.video_title|safe }}</div>
         {% endif %}
-      </h4>
-      {% if course_run.courseware_url and user.is_authenticated %}
-        <form method="post" action="{% url "course-enrollments" course_run_id=course_run.id %}">
-          {% csrf_token %}
-          <input type="submit" value="Enroll in course" />
-        </form>
-      {% endif %}
+      </div>
     </div>
-  {% endfor %}
+  </div>
 </div>
 {% endblock %}

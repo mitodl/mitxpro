@@ -1,0 +1,73 @@
+// sass-lint:disable mixins-before-declarations
+.header-block {
+  background-size: cover;
+  background-position: 50% 50%;
+}
+
+.header-container {
+  color: white;
+  padding: 85px 0;
+
+  .program-position {
+    font-size: 20px;
+    line-height: 22px;
+    margin: 0 15px 10px;
+    font-weight: 500;
+  }
+
+  .header-title {
+    margin: 0 0 30px;
+
+    @include media-breakpoint-up(lg) {
+      margin: 0 15px 0 -15px;
+    }
+
+    h1,
+    h2 {
+      padding: 30px 15px;
+      margin: 0;
+    }
+
+    h1 {
+      background: rgba($primary, 0.8);
+      font-size: 44px;
+      line-height: 50px;
+      font-weight: 500;
+      @include media-breakpoint-up(xl) {
+        font-size: 56px;
+        line-height: 56px;
+      }
+    }
+
+    h2 {
+      background: rgba($gray, 0.8);
+      padding: 25px 15px;
+      font-size: 26px;
+      line-height: 38px;
+      font-weight: 500;
+      margin: 0 0 27px;
+
+      @include media-breakpoint-up(lg) {
+        margin: 0 40px 27px 0;
+      }
+
+      @include media-breakpoint-up(xl) {
+        font-size: 28px;
+        line-height: 38px;
+      }
+    }
+  }
+
+  video {
+    width: 100%;
+    border: 5px solid white;
+    border-radius: 5px;
+    margin: 0 0 20px;
+    display: block;
+  }
+
+  .video-caption {
+    text-align: center;
+    font-size: 18px;
+  }
+}
