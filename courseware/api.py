@@ -36,6 +36,8 @@ OPENEDX_OAUTH2_ACCESS_TOKEN_EXPIRY_MARGIN_SECONDS = 10
 OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS = 60
 OPENEDX_AUTH_MAX_TTL_IN_SECONDS = 60 * 60
 
+ACCESS_TOKEN_HEADER_NAME = "X-Access-Token"
+
 
 def create_edx_user(user):
     """Makes a request to create an equivalent user in Open edX"""
@@ -56,7 +58,12 @@ def create_edx_user(user):
             return
 
         # a non-200 status here will ensure we rollback creation of the CoursewareUser and try again
-        resp = requests.post(
+        req_session = requests.Session()
+        if settings.MITXPRO_REGISTRATION_ACCESS_TOKEN is not None:
+            req_session.headers.update(
+                {ACCESS_TOKEN_HEADER_NAME: settings.MITXPRO_REGISTRATION_ACCESS_TOKEN}
+            )
+        resp = req_session.post(
             edx_url(OPENEDX_REGISTER_USER_PATH),
             data=dict(
                 username=user.username,

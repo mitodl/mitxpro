@@ -2,7 +2,6 @@
 # pylint: disable=redefined-outer-name
 
 from datetime import timedelta
-from types import SimpleNamespace
 from urllib.parse import parse_qsl
 
 import pytest
@@ -19,56 +18,59 @@ from courseware.api import (
     get_edx_api_client,
     enroll_in_edx_course_run,
     OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS,
+    ACCESS_TOKEN_HEADER_NAME,
 )
 from courseware.constants import PLATFORM_EDX
 from courseware.exceptions import CoursewareUserCreateError
 from courseware.factories import OpenEdxApiAuthFactory
 from courseware.models import CoursewareUser, OpenEdxApiAuth
-from mitxpro.test_utils import MockResponse
 from mitxpro.utils import now_in_utc
 
 pytestmark = [pytest.mark.django_db]
 
 
 @pytest.fixture()
-def scenario(settings, mocker):
+def application(settings):
     """Test data and settings needed for create_edx_user tests"""
     settings.OPENEDX_OAUTH_APP_NAME = "test_app_name"
     settings.OPENEDX_API_BASE_URL = "http://example.com"
     settings.MITXPRO_OAUTH_PROVIDER = "test_provider"
-    mocked_post = mocker.patch("courseware.api.requests.post")
-    application = Application.objects.create(
+    settings.MITXPRO_REGISTRATION_ACCESS_TOKEN = "access_token"
+    return Application.objects.create(
         name=settings.OPENEDX_OAUTH_APP_NAME,
         user=None,
         client_type="confidential",
         authorization_grant_type="authorization-code",
         skip_authorization=True,
     )
-    return SimpleNamespace(mocked_post=mocked_post, application=application)
 
 
-def test_create_edx_user(user, settings, scenario):
+@responses.activate
+def test_create_edx_user(user, settings, application):
     """Test that create_edx_user makes a request to create an edX user"""
-    scenario.mocked_post.return_value = MockResponse(
-        content='{"success": true}', status_code=status.HTTP_200_OK
+    responses.add(
+        responses.POST,
+        f"{settings.OPENEDX_API_BASE_URL}/user_api/v1/account/registration/",
+        json=dict(success=True),
+        status=status.HTTP_200_OK,
     )
 
     create_edx_user(user)
 
     # An AccessToken should be created during execution
-    created_access_token = AccessToken.objects.get(application=scenario.application)
+    created_access_token = AccessToken.objects.get(application=application)
     assert (
-        scenario.mocked_post.call_args[0][0]
-        == "http://example.com/user_api/v1/account/registration/"
+        responses.calls[0].request.headers[ACCESS_TOKEN_HEADER_NAME]
+        == settings.MITXPRO_REGISTRATION_ACCESS_TOKEN
     )
-    assert scenario.mocked_post.call_args[1]["data"] == {
+    assert dict(parse_qsl(responses.calls[0].request.body)) == {
         "username": user.username,
         "email": user.email,
         "name": user.name,
         "provider": settings.MITXPRO_OAUTH_PROVIDER,
         "access_token": created_access_token.token,
         "country": "US",
-        "honor_code": True,
+        "honor_code": "True",
     }
     assert (
         CoursewareUser.objects.filter(
@@ -78,10 +80,15 @@ def test_create_edx_user(user, settings, scenario):
     )
 
 
-def test_create_edx_user_conflict(user, scenario):
+@responses.activate
+@pytest.mark.usefixtures("application")
+def test_create_edx_user_conflict(settings, user):
     """Test that create_edx_user handles a 409 response from the edX API"""
-    scenario.mocked_post.return_value = MockResponse(
-        content='{"username": "exists"}', status_code=status.HTTP_409_CONFLICT
+    responses.add(
+        responses.POST,
+        f"{settings.OPENEDX_API_BASE_URL}/user_api/v1/account/registration/",
+        json=dict(username="exists"),
+        status=status.HTTP_409_CONFLICT,
     )
 
     with pytest.raises(CoursewareUserCreateError):
