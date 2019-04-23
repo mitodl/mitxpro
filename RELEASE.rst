@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.1.1
+-------------
+
+- Added a test to verify app.json
+- Update basket API to handle courses (#154)
+- Update redis (#172)
+- Add Course Page Header
+- Upgrade some dependencies (#167)
+
 Version 0.1.0 (Released April 23, 2019)
 -------------
 
