@@ -143,7 +143,7 @@ class Program(TimestampedModel, PageProperties):
     @property
     def num_courses(self):
         """Gets the number of courses in this program"""
-        return self.course_set.count()
+        return self.courses.count()
 
     @property
     def next_run_date(self):
