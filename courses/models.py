@@ -5,6 +5,7 @@ import logging
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 
+from cms.models import LearningOutcomesPage
 from courses.constants import (
     CATALOG_COURSE_IMG_WAGTAIL_FILL,
     COURSE_BG_IMG_WAGTAIL_FILL,
@@ -129,6 +130,18 @@ class PageProperties(models.Model):
     def time_commitment(self):
         """Gets the duration from the associated Page if it exists"""
         return self.page.time_commitment if self.page else None
+
+    @property
+    def outcomes(self):
+        """Gets the learning outcomes from the associated Page children if it exists"""
+        if self.page:
+            learning_outcomes = (
+                self.page.get_children().type(LearningOutcomesPage).first()
+            )
+            if learning_outcomes:
+                return learning_outcomes.specific
+
+        return None
 
 
 class Program(TimestampedModel, PageProperties):

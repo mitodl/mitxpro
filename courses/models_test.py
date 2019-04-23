@@ -1,12 +1,19 @@
 """Tests for course models"""
 from datetime import timedelta
 
+import json
 import pytest
 import factory
 
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from ecommerce.factories import ProductFactory, ProductVersionFactory
-from cms.factories import ProgramPageFactory, CoursePageFactory
+from cms.factories import (
+    ProgramPageFactory,
+    CoursePageFactory,
+    LearningOutcomesPageFactory,
+)
+
+from cms.models import LearningOutcomesPage
 from mitxpro.utils import now_in_utc
 
 pytestmark = [pytest.mark.django_db]
@@ -84,11 +91,28 @@ def test_program_page_properties():
     program = ProgramFactory.create()
     assert program.description is None
     assert program.duration is None
-    ProgramPageFactory.create(
+    assert program.outcomes is None
+    program_page = ProgramPageFactory.create(
         program=program, description="<p>desc</p>", duration="1 week"
     )
     assert program.description == "<p>desc</p>"
     assert program.duration == "1 week"
+    assert LearningOutcomesPage.can_create_at(program_page)
+
+    learning_outcomes_page = LearningOutcomesPageFactory(
+        parent=program_page,
+        heading="heading",
+        sub_heading="subheading",
+        outcome_items=json.dumps([{"type": "outcome", "value": "benefit"}]),
+    )
+    assert learning_outcomes_page.get_parent() == program_page
+    assert learning_outcomes_page.heading == "heading"
+    for (
+        block
+    ) in learning_outcomes_page.outcome_items:  # pylint: disable=not-an-iterable
+        assert block.block_type == "outcome"
+        assert block.value == "benefit"
+    assert not LearningOutcomesPage.can_create_at(program_page)
 
 
 def test_courseware_url(settings):
@@ -227,7 +251,8 @@ def test_course_page_properties():
     assert course.background_image is None
     assert course.background_image_url is None
     assert course.background_image_mobile_url is None
-    CoursePageFactory.create(
+    assert course.outcomes is None
+    course_page = CoursePageFactory.create(
         course=course,
         title="<p>page title</p>",
         subhead="subhead",
@@ -244,3 +269,20 @@ def test_course_page_properties():
     assert course.video_title == "<p>title</p>"
     assert course.video_url == "http://test.com/mock.mp4"
     assert course.background_image.title == "background-image"
+    assert LearningOutcomesPage.can_create_at(course_page)
+
+    learning_outcomes_page = LearningOutcomesPageFactory(
+        parent=course_page,
+        heading="heading",
+        sub_heading="subheading",
+        outcome_items=json.dumps([{"type": "outcome", "value": "benefit"}]),
+    )
+    assert learning_outcomes_page.get_parent() == course_page
+    assert learning_outcomes_page.heading == "heading"
+    for (
+        block
+    ) in learning_outcomes_page.outcome_items:  # pylint: disable=not-an-iterable
+        assert block.block_type == "outcome"
+        assert block.value == "benefit"
+    assert course.outcomes == learning_outcomes_page
+    assert not LearningOutcomesPage.can_create_at(course_page)

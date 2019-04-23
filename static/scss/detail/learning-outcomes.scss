@@ -1,0 +1,55 @@
+// sass-lint:disable mixins-before-declarations
+@import "common";
+
+.learning-outcomes-block {
+  background: white url('#{$static-path}/images/dotted-bg.png') repeat-x 0 0;
+  padding: 50px 0;
+
+  .learning-header {
+    margin: 0 auto;
+    max-width: 1000px;
+    text-align: center;
+  }
+
+  h1 {
+    max-width: 700px;
+    margin: 0 auto 20px;
+    color: $red;
+  }
+
+  h3 {
+    margin: 0 0 30px;
+  }
+
+  .learning-outcomes-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    letter-spacing: -.32em;
+    overflow: hidden;
+    @include media-breakpoint-up(md) {
+      margin: 0 -45px;
+    }
+
+    li {
+      letter-spacing: normal;
+      padding: 15px 0;
+      font-size: 24px;
+      line-height: 28px;
+      color: $light-gray;
+      border-top: 1px solid  $light-gray;
+      margin: -1px 0 0;
+      font-weight: 600;
+
+      @include media-breakpoint-up(md) {
+        width: calc(50% - 90px);
+        display: inline-block;
+        vertical-align: top;
+        margin: -1px 45px 0;
+      }
+      @include media-breakpoint-up(lg) {
+        width: calc(33.33% - 90px);
+      }
+    }
+  }
+}
