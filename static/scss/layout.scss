@@ -1,14 +1,17 @@
+@import "variables";
 @import "node_modules/@material/layout-grid/dist/mdc.layout-grid";
 @import "node_modules/@material/top-app-bar/dist/mdc.top-app-bar";
 @import "node_modules/react-picky/dist/picky";
 @import "node_modules/react-day-picker/lib/style";
+@import "node_modules/bootstrap/scss/bootstrap";
 @import "common";
 @import "top-app-bar";
 @import "collapsible";
 @import "catalog";
 @import "checkout";
+@import "detail/header";
 
 body {
-  font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-family: Rajdhani,"Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
   margin: 0;
 }

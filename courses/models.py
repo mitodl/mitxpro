@@ -5,7 +5,11 @@ import logging
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 
-from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
+from courses.constants import (
+    CATALOG_COURSE_IMG_WAGTAIL_FILL,
+    COURSE_BG_IMG_WAGTAIL_FILL,
+    COURSE_BG_IMG_MOBILE_WAGTAIL_FILL,
+)
 from courseware.utils import edx_redirect_url
 from ecommerce.models import Product
 from mitxpro.models import TimestampedModel
@@ -46,7 +50,83 @@ class CourseManager(models.Manager):  # pylint: disable=missing-docstring
         return self.get_queryset().live()
 
 
-class Program(TimestampedModel):
+class PageProperties(models.Model):
+    """
+    Common properties for product pages
+    """
+
+    class Meta:
+        abstract = True
+
+    @property
+    def display_title(self):
+        """Gets the title from the associated Page if it exists"""
+        return self.page.title if self.page else None
+
+    @property
+    def subhead(self):
+        """Gets the subhead from the associated Page if it exists"""
+        return self.page.subhead if self.page else None
+
+    @property
+    def background_image(self):
+        """Gets the background_image from the associated Page if it exists"""
+        return self.page.background_image if self.page else None
+
+    @property
+    def thumbnail_image(self):
+        """Gets the thumbnail_image from the associated Page if it exists"""
+        return self.page.thumbnail_image if self.page else None
+
+    @property
+    def background_image_url(self):
+        """Gets the url for the background image (if that image exists)"""
+        return (
+            self.background_image.get_rendition(COURSE_BG_IMG_WAGTAIL_FILL).url
+            if self.background_image
+            else None
+        )
+
+    @property
+    def background_image_mobile_url(self):
+        """Gets the url for the background image (if that image exists)"""
+        return (
+            self.background_image.get_rendition(COURSE_BG_IMG_MOBILE_WAGTAIL_FILL).url
+            if self.background_image
+            else None
+        )
+
+    @property
+    def catalog_image_url(self):
+        """Gets the url for the thumbnail image as it appears in the catalog (if that image exists)"""
+        return (
+            self.thumbnail_image.get_rendition(CATALOG_COURSE_IMG_WAGTAIL_FILL).url
+            if self.thumbnail_image
+            else None
+        )
+
+    @property
+    def video_title(self):
+        """Get the video_title from the associated Page if it exists"""
+        return self.page.video_title if self.page else None
+
+    @property
+    def video_url(self):
+        """Gets the video_url from the associated Page if it exists"""
+        return self.page.video_url if self.page else None
+
+    @property
+    def description(self):
+        """Gets the description from the associated Page if it exists"""
+        return self.page.description if self.page else None
+
+    @property
+    def duration(self):
+        """Gets the duration from the associated Page if it exists"""
+        return self.page.duration if self.page else None
+
+
+class Program(TimestampedModel, PageProperties):
     """Model for a course program"""
 
     objects = ProgramManager()
@@ -61,28 +141,9 @@ class Program(TimestampedModel):
         return getattr(self, "programpage", None)
 
     @property
-    def thumbnail_image(self):
-        """Gets the thumbnail_image from the associated Page if it exists"""
-        return self.page.thumbnail_image if self.page else None
-
-    @property
-    def catalog_image_url(self):
-        """Gets the url for the thumbnail image as it appears in the catalog (if that image exists)"""
-        return (
-            self.thumbnail_image.get_rendition(CATALOG_COURSE_IMG_WAGTAIL_FILL).url
-            if self.thumbnail_image
-            else None
-        )
-
-    @property
-    def description(self):
-        """Gets the description from the associated Page if it exists"""
-        return self.page.description if self.page else None
-
-    @property
-    def duration(self):
-        """Gets the duration from the associated Page if it exists"""
-        return self.page.duration if self.page else None
+    def num_courses(self):
+        """Gets the number of courses in this program"""
+        return self.course_set.count()
 
     @property
     def next_run_date(self):
@@ -110,7 +171,7 @@ class Program(TimestampedModel):
         return self.title
 
 
-class Course(TimestampedModel):
+class Course(TimestampedModel, PageProperties):
     """Model for a course"""
 
     objects = CourseManager()
@@ -127,30 +188,6 @@ class Course(TimestampedModel):
     def page(self):
         """Gets the associated CoursePage"""
         return getattr(self, "coursepage", None)
-
-    @property
-    def thumbnail_image(self):
-        """Gets the thumbnail_image from the associated Page if it exists"""
-        return self.page.thumbnail_image if self.page else None
-
-    @property
-    def catalog_image_url(self):
-        """Gets the url for the thumbnail image as it appears in the catalog (if that image exists)"""
-        return (
-            self.thumbnail_image.get_rendition(CATALOG_COURSE_IMG_WAGTAIL_FILL).url
-            if self.thumbnail_image
-            else None
-        )
-
-    @property
-    def description(self):
-        """Gets the description from the associated Page if it exists"""
-        return self.page.description if self.page else None
-
-    @property
-    def duration(self):
-        """Gets the duration from the associated Page if it exists"""
-        return self.page.duration if self.page else None
 
     @property
     def next_run_date(self):

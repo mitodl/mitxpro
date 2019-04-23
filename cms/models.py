@@ -23,11 +23,31 @@ class ProductPage(Page):
     description = RichTextField(
         blank=True, help_text="The description shown on the program page"
     )
+    subhead = models.CharField(
+        max_length=255,
+        help_text="A short subheading to appear below the title on the program/course page",
+    )
+    video_title = RichTextField(
+        blank=True, help_text="The title to be displayed for the program/course video"
+    )
+    video_url = models.URLField(
+        null=True,
+        blank=True,
+        help_text="URL to the video to be displayed for this program/course",
+    )
     duration = models.CharField(
         max_length=50,
         null=True,
         blank=True,
         help_text="A short description indicating how long it takes to complete (e.g. '4 weeks')",
+    )
+    background_image = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Background image size must be at least 1900x650 pixels.",
     )
     thumbnail_image = models.ForeignKey(
         Image,
@@ -50,7 +70,11 @@ class ProductPage(Page):
 
     content_panels = Page.content_panels + [
         FieldPanel("duration"),
+        FieldPanel("subhead"),
+        FieldPanel("video_title"),
+        FieldPanel("video_url"),
         FieldPanel("description", classname="full"),
+        FieldPanel("background_image"),
         FieldPanel("thumbnail_image"),
         StreamFieldPanel("content"),
     ]
