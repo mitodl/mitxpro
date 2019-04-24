@@ -437,9 +437,7 @@ def get_product_courses(product):
         list of Course: list of Courses associated with the Product
 
     """
-    courses = []
     if product.content_type.model == "course":
-        courses.append(product.content_object)
+        return [product.content_object]
     elif product.content_type.model == "program":
-        courses = product.content_object.courses.all()
-    return courses
+        return product.content_object.courses.all()
