@@ -3,8 +3,7 @@ Factories for ecommerce models
 """
 from datetime import timezone
 
-import factory
-from factory import fuzzy, Faker, LazyAttribute, SubFactory
+from factory import fuzzy, Faker, LazyAttribute, SubFactory, post_generation
 from factory.django import DjangoModelFactory
 import faker
 
@@ -184,7 +183,7 @@ class DataConsentAgreementFactory(DjangoModelFactory):
     content = fuzzy.FuzzyText()
     company = SubFactory(CompanyFactory)
 
-    @factory.post_generation
+    @post_generation
     # pylint: disable=unused-argument
     def courses(self, create, extracted, **kwargs):
         """Create courses for DCA"""
