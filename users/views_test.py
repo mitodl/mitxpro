@@ -6,20 +6,21 @@ from rest_framework import status
 from mitxpro.test_utils import drf_datetime
 
 
+@pytest.mark.django_db
 def test_cannot_create_user(client):
     """Verify the api to create a user is nonexistent"""
-    resp = user_client.post(reverse("users_api"), data={"name": "Name"})
+    resp = client.post("/api/users/", data={"name": "Name"})
 
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_cannot_update_user(user_client, user):
-    """Verify the api to update a user is nonexistent"""
+    """Verify the api to update a user is doesn't accept the verb"""
     resp = user_client.patch(
         reverse("users_api-detail", kwargs={"pk": user.id}), data={"name": "Name"}
     )
 
-    assert resp.status_code == status.HTTP_404_NOT_FOUND
+    assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
 def test_get_user_by_id(user_client, user):
@@ -50,7 +51,7 @@ def test_get_user_by_me(client, user, is_anonymous):
     assert resp.status_code == status.HTTP_200_OK
     assert (
         resp.json()
-        == {"id": None, "username": "", "is_anonymous": True, "is_authenticated": False}
+        == {"id": None, "username": "", "email": None, "is_anonymous": True, "is_authenticated": False}
         if is_anonymous
         else {
             "id": user.id,
