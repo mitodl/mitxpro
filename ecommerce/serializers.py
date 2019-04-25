@@ -164,14 +164,10 @@ class BasketSerializer(serializers.ModelSerializer):
         data_consents = []
         coupon_selections = models.CouponSelection.objects.filter(basket=instance)
         if coupon_selections:
-            courses = [
-                course
-                for courselist in [
-                    get_product_courses(item.product)
-                    for item in instance.basketitems.all()
-                ]
-                for course in courselist
+            courselists = [
+                get_product_courses(item.product) for item in instance.basketitems.all()
             ]
+            courses = [course for courselist in courselists for course in courselist]
 
             for coupon_selection in coupon_selections:
                 company = latest_coupon_version(
@@ -179,9 +175,7 @@ class BasketSerializer(serializers.ModelSerializer):
                 ).payment_version.company
                 if company:
                     agreements = (
-                        models.DataConsentAgreement.objects.select_related("company")
-                        .prefetch_related("courses")
-                        .filter(company=company)
+                        models.DataConsentAgreement.objects.filter(company=company)
                         .filter(courses__in=courses)
                         .distinct()
                     )
@@ -333,9 +327,9 @@ class BasketSerializer(serializers.ModelSerializer):
 
         product_version, runs = self._update_items(basket, items)
         coupon_version = self._update_coupons(basket, product_version, coupons)
-        if product_version:
-            # Update basket items and coupon selection
-            with transaction.atomic():
+        with transaction.atomic():
+            if product_version:
+                # Update basket items and coupon selection
                 basket.basketitems.all().delete()
                 models.BasketItem.objects.create(
                     product=product_version.product, quantity=1, basket=basket
@@ -352,18 +346,16 @@ class BasketSerializer(serializers.ModelSerializer):
                     )
                 else:
                     basket.couponselection_set.all().delete()
-        else:
-            # Remove everything from basket
-            with transaction.atomic():
+            else:
+                # Remove everything from basket
                 basket.basketitems.all().delete()
                 basket.couponselection_set.all().delete()
 
-        if data_consents is not None:
-            sign_date = datetime.now(tz=pytz.UTC)
-            for consent_id in data_consents:
-                data_consent_user = models.DataConsentUser.objects.get(id=consent_id)
-                data_consent_user.consent_date = sign_date
-                data_consent_user.save()
+            if data_consents is not None:
+                sign_date = datetime.now(tz=pytz.UTC)
+                models.DataConsentUser.objects.filter(id__in=data_consents).update(
+                    consent_date=sign_date
+                )
 
         return instance
 
@@ -390,10 +382,12 @@ class BasketSerializer(serializers.ModelSerializer):
 
     def validate_data_consents(self, data_consents):
         """Validate that DataConsentUser objects exist"""
-        invalid_consent_ids = []
-        for consent_id in data_consents:
-            if not models.DataConsentUser.objects.filter(id=consent_id).exists():
-                invalid_consent_ids.append(consent_id)
+        valid_consent_ids = set(
+            models.DataConsentUser.objects.filter(id__in=data_consents).values_list(
+                "id", flat=True
+            )
+        )
+        invalid_consent_ids = set(data_consents) - valid_consent_ids
         if invalid_consent_ids:
             raise ValidationError(
                 f"Invalid data consent id {','.join([str(consent_id) for consent_id in invalid_consent_ids])}"

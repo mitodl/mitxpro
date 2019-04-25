@@ -526,5 +526,5 @@ def test_get_product_courses():
     program_product = ProductFactory.create(content_object=program)
     assert get_product_courses(course_product) == [course_product.content_object]
     assert list(get_product_courses(program_product)) == list(
-        program_product.content_object.courses.all()
+        program_product.content_object.courses.all().order_by("position_in_program")
     )

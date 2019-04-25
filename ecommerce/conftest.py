@@ -95,7 +95,7 @@ def basket_and_agreement():
     program = ProgramFactory.create()
     CourseFactory.create_batch(5, program=program)
     product = ProductFactory.create(content_object=program)
-    ProductVersionFactory(product=product, price=Decimal(15.00))
+    ProductVersionFactory(product=product, price=Decimal("15.00"))
     basket_item = BasketItemFactory(product=product, quantity=1)
     company = CompanyFactory.create()
     coupon = CouponFactory(payment=CouponPaymentFactory())

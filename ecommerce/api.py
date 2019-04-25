@@ -440,4 +440,6 @@ def get_product_courses(product):
     if product.content_type.model == "course":
         return [product.content_object]
     elif product.content_type.model == "program":
-        return product.content_object.courses.all()
+        return list(
+            product.content_object.courses.all().order_by("position_in_program")
+        )

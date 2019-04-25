@@ -157,7 +157,7 @@ class ProductVersionAdmin(admin.ModelAdmin):
 
 
 class DataConsentUserAdmin(admin.ModelAdmin):
-    """Admin for DataConsentAgreement"""
+    """Admin for DataConsentUser"""
 
     list_display = ("id", "user", "created_on")
     search_fields = ("user__username", "user__email")
