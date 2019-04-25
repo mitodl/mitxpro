@@ -8,13 +8,17 @@
   @include media-breakpoint-up(lg) {
     background-position: 0 100%;
   }
+
+  .container {
+    padding: 0;
+  }
 }
 
 
 .tiles-list {
   letter-spacing: -.32em;
-  margin: 0 -8px;
-  padding: 0;
+  margin: 0;
+  padding: 0 7px;
   list-style: none;
   text-align: center;
 
