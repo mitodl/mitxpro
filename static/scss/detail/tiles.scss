@@ -1,8 +1,11 @@
 // sass-lint:disable mixins-before-declarations
 
+.container {
+  padding: 0
+}
+
 .tiles-block {
-  width: 100%;
-  padding: 32px 0;
+  padding: 32px 7px;
   background: $tiles-background url('#{$static-path}/images/tiles-bg.png') repeat-x 0 100%;
   min-height: 200px;
   @include media-breakpoint-up(lg) {
@@ -13,7 +16,6 @@
 
 .tiles-list {
   letter-spacing: -.32em;
-  margin: 0 -8px;
   padding: 0;
   list-style: none;
   text-align: center;
@@ -75,13 +77,11 @@
     }
   }
 
-  .link {
+  .dates-link {
     display: block;
     font-size: 18px;
     line-height: 22px;
-    color: $tile-color-gray;
     font-weight: 500;
-    text-align: center;
 
     a {
       color: $red;

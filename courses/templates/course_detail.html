@@ -45,39 +45,39 @@
       </div>
     </div>
     <div class="tiles-block">
-          <div class="container">
+        <div class="container">
             <ul class="tiles-list">
-              {% if course.next_run_date %}
-                  <li>
-                    <span class="title">START DATE</span>
-                    <span class="text">{{ course.next_run_date|date:"F j, Y" }}</span>
-                    <span class="link"><a href="#">More Dates</a></span>  {# TODO Need to do in separate story#}
-                  </li>
-            {% endif %}
-            {% if course.time_commitment %}
+                {% if course.next_run_date %}
+                    <li>
+                        <span class="title">START DATE</span>
+                        <span class="text">{{ course.next_run_date|date:"F j, Y" }}</span>
+                        <span class="dates-link"><a href="#">More Dates</a></span>  {# TODO Need to do in separate story#}
+                    </li>
+                {% endif %}
+                {% if course.time_commitment %}
+                    <li>
+                        <span class="title">TIME COMMITMENT</span>
+                        <span class="text">{{ course.time_commitment }}</span>
+                    </li>
+                {% endif %}
+                {% if course.duration %}
+                    <li>
+                        <span class="title">DURATION</span>
+                        <span class="text">{{ course.duration }}</span>
+                    </li>
+                {% endif %}
                 <li>
-                    <span class="title">TIME COMMITMENT</span>
-                    <span class="text">{{ course.time_commitment }}</span>
+                    <span class="title">FORMAT</span>
+                    <span class="text">Online</span>
                 </li>
-            {% endif %}
-            {% if course.duration %}
-                  <li>
-                    <span class="title">DURATION</span>
-                    <span class="text">{{ course.duration }}</span>
-                  </li>
-            {% endif %}
-            <li>
-                <span class="title">FORMAT</span>
-                <span class="text">Online</span>
-            </li>
-            {% if course.current_price %}
-                <li>
-                    <span class="title">PRICE</span>
-                    <span class="text">${{ course.current_price }}</span>
-                </li>
-            {% endif %}
+                {% if course.current_price %}
+                    <li>
+                        <span class="title">PRICE</span>
+                        <span class="text">${{ course.current_price }}</span>
+                    </li>
+                {% endif %}
             </ul>
-          </div>
         </div>
+    </div>
 </div>
 {% endblock %}
