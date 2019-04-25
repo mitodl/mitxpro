@@ -125,6 +125,11 @@ class PageProperties(models.Model):
         """Gets the duration from the associated Page if it exists"""
         return self.page.duration if self.page else None
 
+    @property
+    def time_commitment(self):
+        """Gets the duration from the associated Page if it exists"""
+        return self.page.time_commitment if self.page else None
+
 
 class Program(TimestampedModel, PageProperties):
     """Model for a course program"""

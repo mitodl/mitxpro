@@ -14,6 +14,7 @@ from ecommerce.models import (
     CouponEligibility,
     CouponRedemption,
     Product,
+    ProductVersion,
 )
 from mitxpro.utils import get_field_names
 
@@ -147,11 +148,18 @@ class ProductAdmin(admin.ModelAdmin):
     model = Product
 
 
+class ProductVersionAdmin(admin.ModelAdmin):
+    """Admin for ProductVersion"""
+
+    model = ProductVersion
+
+
 admin.site.register(Line, LineAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderAudit, OrderAuditAdmin)
 admin.site.register(Receipt, ReceiptAdmin)
 admin.site.register(Product, ProductAdmin)
+admin.site.register(ProductVersion, ProductVersionAdmin)
 admin.site.register(Coupon, CouponAdmin)
 admin.site.register(CouponVersion, CouponVersionAdmin)
 admin.site.register(CouponPayment, CouponPaymentAdmin)
