@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.1.2
+Version 0.1.2 (Released April 26, 2019)
 -------------
 
 - Added model for LegalAddress
