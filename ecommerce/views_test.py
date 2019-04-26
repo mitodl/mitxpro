@@ -1,6 +1,8 @@
 """ecommerce tests for views"""
 import json
+from datetime import datetime
 
+import pytz
 from django.urls import reverse
 import faker
 import pytest
@@ -31,6 +33,7 @@ from ecommerce.models import (
     Company,
     CouponEligibility,
     Product,
+    DataConsentUser,
 )
 from ecommerce.serializers import BasketSerializer, ProductSerializer, CompanySerializer
 
@@ -666,6 +669,39 @@ def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     assert resp.json()["errors"] == ["User has already enrolled in run"]
+
+
+def test_patch_basket_data_consents(basket_and_agreement):
+    """ Test that a patch request with DataConsentUser ids updates those objects with consent dates  """
+    user = basket_and_agreement.basket.user
+    client = APIClient()
+    client.force_authenticate(user=user)
+    consent_user = DataConsentUser.objects.create(
+        agreement=basket_and_agreement.agreement,
+        user=basket_and_agreement.basket.user,
+        coupon=basket_and_agreement.coupon,
+    )
+    resp = client.patch(
+        reverse("basket_api"), type="json", data={"data_consents": [consent_user.id]}
+    )
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json().get("data_consents")[0].get("consent_date") >= datetime.now(
+        tz=pytz.UTC
+    ).strftime("%Y-%m-%dT00:00:00Z")
+
+
+def test_patch_basket_bad_data_consents(basket_and_agreement):
+    """ Test that a patch request with bad DataConsentUser raises a validation error  """
+    user = basket_and_agreement.basket.user
+    client = APIClient()
+    client.force_authenticate(user=user)
+    resp = client.patch(
+        reverse("basket_api"), type="json", data={"data_consents": [9998, 9999]}
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json().get("errors") == {
+        "data_consents": ["Invalid data consent id 9998,9999"]
+    }
 
 
 def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):

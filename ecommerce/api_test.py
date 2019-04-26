@@ -9,7 +9,7 @@ import hmac
 
 import pytest
 
-from courses.factories import CourseFactory, ProgramFactory
+from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
 from ecommerce.api import (
     create_unfulfilled_order,
     generate_cybersource_sa_payload,
@@ -24,6 +24,7 @@ from ecommerce.api import (
     get_valid_coupon_versions,
     latest_product_version,
     latest_coupon_version,
+    get_product_courses,
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -34,6 +35,7 @@ from ecommerce.factories import (
     LineFactory,
     OrderFactory,
     ProductVersionFactory,
+    ProductFactory,
 )
 from ecommerce.models import CouponSelection, CouponRedemption, Order, OrderAudit
 from mitxpro.utils import now_in_utc
@@ -512,3 +514,21 @@ def test_create_order(
         )
     else:
         assert CouponRedemption.objects.count() == 0
+
+
+def test_get_product_courses():
+    """
+    Verify that the correct list of courses for a product is returned
+    """
+    program = ProgramFactory.create()
+    CourseFactory.create_batch(5, program=program)
+    courserun_product = ProductFactory.create(content_object=CourseRunFactory.create())
+    course_product = ProductFactory.create()
+    program_product = ProductFactory.create(content_object=program)
+    assert get_product_courses(courserun_product) == [
+        courserun_product.content_object.course
+    ]
+    assert get_product_courses(course_product) == [course_product.content_object]
+    assert list(get_product_courses(program_product)) == list(
+        program_product.content_object.courses.all().order_by("position_in_program")
+    )

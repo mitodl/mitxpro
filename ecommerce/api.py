@@ -424,3 +424,24 @@ def create_unfulfilled_order(user):
         redeem_coupon(coupon_version=latest_coupon_version(coupon), order=order)
     order.save_and_log(user)
     return order
+
+
+def get_product_courses(product):
+    """
+    Get all courses for a product
+
+    Args:
+        product(Product): The product to retrieve courses for
+
+    Returns:
+        list of Course: list of Courses associated with the Product
+
+    """
+    if product.content_type.model == "courserun":
+        return [product.content_object.course]
+    elif product.content_type.model == "course":
+        return [product.content_object]
+    elif product.content_type.model == "program":
+        return list(
+            product.content_object.courses.all().order_by("position_in_program")
+        )

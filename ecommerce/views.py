@@ -10,7 +10,6 @@ from rest_framework import status
 from rest_framework.generics import get_object_or_404, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
@@ -141,7 +140,7 @@ class OrderFulfillmentView(APIView):
         decision = request.data["decision"]
         if order.status == Order.FAILED and decision == CYBERSOURCE_DECISION_CANCEL:
             # This is a duplicate message, ignore since it's already handled
-            return Response(status=HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
         elif order.status != Order.CREATED:
             raise EcommerceException(
                 "Order {} is expected to have status 'created'".format(order.id)
@@ -171,7 +170,7 @@ class OrderFulfillmentView(APIView):
                 )
                 # TBD: send an email for the error?
         # The response does not matter to CyberSource
-        return Response(status=HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
 
 
 class BasketView(RetrieveUpdateAPIView):

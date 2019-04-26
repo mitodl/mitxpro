@@ -1,6 +1,8 @@
 """ ecommerce serializers """
 from uuid import uuid4
+from datetime import datetime
 
+import pytz
 from django.db import transaction
 from django.templatetags.static import static
 from rest_framework import serializers
@@ -16,6 +18,7 @@ from ecommerce.api import (
     get_valid_coupon_versions,
     latest_coupon_version,
     latest_product_version,
+    get_product_courses,
 )
 from mitxpro.serializers import WriteableSerializerMethodField
 
@@ -129,6 +132,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
     items = WriteableSerializerMethodField()
     coupons = WriteableSerializerMethodField()
+    data_consents = WriteableSerializerMethodField()
 
     def get_items(self, instance):
         """ Get the basket items """
@@ -154,6 +158,39 @@ class BasketSerializer(serializers.ModelSerializer):
                 basket=instance
             )
         ]
+
+    def get_data_consents(self, instance):
+        """ Get the DataConsentUser objects associated with the basket via coupon and product"""
+        data_consents = []
+        coupon_selections = models.CouponSelection.objects.filter(basket=instance)
+        if coupon_selections:
+            courselists = [
+                get_product_courses(item.product) for item in instance.basketitems.all()
+            ]
+            courses = [course for courselist in courselists for course in courselist]
+
+            for coupon_selection in coupon_selections:
+                company = latest_coupon_version(
+                    coupon_selection.coupon
+                ).payment_version.company
+                if company:
+                    agreements = (
+                        models.DataConsentAgreement.objects.filter(company=company)
+                        .filter(courses__in=courses)
+                        .distinct()
+                    )
+
+                    data_consents.extend(
+                        [
+                            models.DataConsentUser.objects.get_or_create(
+                                user=instance.user,
+                                agreement=agreement,
+                                coupon=coupon_selection.coupon,
+                            )[0]
+                            for agreement in agreements
+                        ]
+                    )
+        return DataConsentUserSerializer(instance=data_consents, many=True).data
 
     @classmethod
     def _get_runs_for_product(cls, *, product_version, run_ids):
@@ -278,16 +315,17 @@ class BasketSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         items = validated_data.get("items")
         coupons = validated_data.get("coupons")
+        data_consents = validated_data.get("data_consents")
         basket = instance
 
-        if items is None and coupons is None:
+        if items is None and coupons is None and data_consents is None:
             raise ValidationError("Invalid request")
 
         product_version, runs = self._update_items(basket, items)
         coupon_version = self._update_coupons(basket, product_version, coupons)
-        if product_version:
-            # Update basket items and coupon selection
-            with transaction.atomic():
+        with transaction.atomic():
+            if product_version:
+                # Update basket items and coupon selection
                 basket.basketitems.all().delete()
                 models.BasketItem.objects.create(
                     product=product_version.product, quantity=1, basket=basket
@@ -304,11 +342,17 @@ class BasketSerializer(serializers.ModelSerializer):
                     )
                 else:
                     basket.couponselection_set.all().delete()
-        else:
-            # Remove everything from basket
-            with transaction.atomic():
+            else:
+                # Remove everything from basket
                 basket.basketitems.all().delete()
                 basket.couponselection_set.all().delete()
+
+            if data_consents is not None:
+                sign_date = datetime.now(tz=pytz.UTC)
+                models.DataConsentUser.objects.filter(id__in=data_consents).update(
+                    consent_date=sign_date
+                )
+
         return instance
 
     def validate_items(self, items):
@@ -332,8 +376,22 @@ class BasketSerializer(serializers.ModelSerializer):
         """Can't do much validation here since we don't have the product version id"""
         return {"coupons": coupons}
 
+    def validate_data_consents(self, data_consents):
+        """Validate that DataConsentUser objects exist"""
+        valid_consent_ids = set(
+            models.DataConsentUser.objects.filter(id__in=data_consents).values_list(
+                "id", flat=True
+            )
+        )
+        invalid_consent_ids = set(data_consents) - valid_consent_ids
+        if invalid_consent_ids:
+            raise ValidationError(
+                f"Invalid data consent id {','.join([str(consent_id) for consent_id in invalid_consent_ids])}"
+            )
+        return {"data_consents": data_consents}
+
     class Meta:
-        fields = ["items", "coupons"]
+        fields = ["items", "coupons", "data_consents"]
         model = models.Basket
 
 
@@ -474,3 +532,11 @@ class PromoCouponSerializer(BaseCouponSerializer):
         allow_blank=True,
         required=False,
     )
+
+
+class DataConsentUserSerializer(serializers.ModelSerializer):
+    """ Serializer for DataConsentUsers """
+
+    class Meta:
+        fields = "__all__"
+        model = models.DataConsentUser

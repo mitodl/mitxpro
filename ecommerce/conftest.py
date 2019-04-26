@@ -7,7 +7,7 @@ import pytest
 
 # pylint:disable=redefined-outer-name
 
-from courses.factories import CourseRunFactory
+from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from ecommerce.factories import (
     BasketItemFactory,
     CouponEligibilityFactory,
@@ -18,6 +18,8 @@ from ecommerce.factories import (
     CouponSelectionFactory,
     CompanyFactory,
     ProductVersionFactory,
+    ProductFactory,
+    DataConsentAgreementFactory,
 )
 from ecommerce.models import CourseRunSelection
 
@@ -82,6 +84,34 @@ def basket_and_coupons():
         coupongroup_best=coupongroup_best,
         coupongroup_worst=coupongroup_worst,
         run=run,
+    )
+
+
+@pytest.fixture
+def basket_and_agreement():
+    """
+    Sample basket and data consent agreement
+    """
+    program = ProgramFactory.create()
+    CourseFactory.create_batch(5, program=program)
+    product = ProductFactory.create(content_object=program)
+    ProductVersionFactory(product=product, price=Decimal("15.00"))
+    basket_item = BasketItemFactory(product=product, quantity=1)
+    company = CompanyFactory.create()
+    coupon = CouponFactory(payment=CouponPaymentFactory())
+    payment_version = CouponPaymentVersionFactory(
+        payment=coupon.payment, amount=Decimal("0.40"), company=company
+    )
+    CouponVersionFactory(payment_version=payment_version, coupon=coupon)
+    CouponEligibilityFactory(coupon=coupon, product=product)
+    CouponSelectionFactory.create(basket=basket_item.basket, coupon=coupon)
+    return SimpleNamespace(
+        agreement=DataConsentAgreementFactory(
+            courses=program.courses.all(), company=company
+        ),
+        basket=basket_item.basket,
+        product=product,
+        coupon=coupon,
     )
 
 

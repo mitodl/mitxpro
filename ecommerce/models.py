@@ -7,6 +7,7 @@ from django.db import models
 
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
+from users.models import User
 
 
 class Company(TimestampedModel):
@@ -351,3 +352,30 @@ class CourseRunEnrollment(TimestampedModel):
 
     def __str__(self):
         return f"CourseRunEnrollment for {self.order} and {self.run}"
+
+
+class DataConsentAgreement(TimestampedModel):
+    """
+    Data consent agreement for a company and course(s)
+    """
+
+    content = models.TextField()
+    company = models.ForeignKey(Company, on_delete=models.PROTECT)
+    courses = models.ManyToManyField("courses.Course")
+
+    def __str__(self):
+        return f"DataConsentAgreement for {self.company.name}, products {','.join([str(course.id) for course in self.courses.all()])}"
+
+
+class DataConsentUser(TimestampedModel):
+    """
+    User required to sign an agreement, and the signing date if any.
+    """
+
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    agreement = models.ForeignKey(DataConsentAgreement, on_delete=models.PROTECT)
+    coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
+    consent_date = models.DateTimeField(null=True)
+
+    def __str__(self):
+        return f"DataConsentUser {self.user} for {self.agreement}, consent date {self.consent_date}"

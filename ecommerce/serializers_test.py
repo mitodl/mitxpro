@@ -10,8 +10,18 @@ from courses.models import Course
 from courses.serializers import CourseSerializer
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import round_half_up
-from ecommerce.factories import ProductVersionFactory, ProductFactory, CompanyFactory
-from ecommerce.models import CouponSelection, Product, CourseRunSelection
+from ecommerce.factories import (
+    ProductVersionFactory,
+    ProductFactory,
+    CompanyFactory,
+    DataConsentUserFactory,
+)
+from ecommerce.models import (
+    CouponSelection,
+    Product,
+    CourseRunSelection,
+    DataConsentUser,
+)
 from ecommerce.serializers import (
     ProductVersionSerializer,
     CouponSelectionSerializer,
@@ -21,6 +31,7 @@ from ecommerce.serializers import (
     CouponPaymentVersionSerializer,
     ProductSerializer,
     CompanySerializer,
+    DataConsentUserSerializer,
 )
 
 pytestmark = [pytest.mark.django_db]
@@ -108,6 +119,22 @@ def test_serialize_basket_coupon_selection(basket_and_coupons):
     }
 
 
+def test_serialize_basket_data_consents(basket_and_agreement):
+    """Test DataConsentUser serialization inside basket"""
+    basket = basket_and_agreement.basket
+    serialized_basket = BasketSerializer(basket_and_agreement.basket).data
+    data_consent_user = DataConsentUser.objects.get(
+        agreement=basket_and_agreement.agreement, user=basket.user
+    )
+    assert data_consent_user.coupon.id == serialized_basket.get("data_consents")[0].get(
+        "coupon"
+    )
+    assert data_consent_user.agreement.id == serialized_basket.get("data_consents")[
+        0
+    ].get("agreement")
+    assert data_consent_user.consent_date is None
+
+
 def test_serialize_basket(basket_and_coupons):
     """Test Basket serialization"""
     basket = basket_and_coupons.basket
@@ -122,6 +149,7 @@ def test_serialize_basket(basket_and_coupons):
             }
         ],
         "coupons": [CouponSelectionSerializer(selection).data],
+        "data_consents": [],
     }
 
 
@@ -208,3 +236,13 @@ def test_serialize_company():
     serialized_data = CompanySerializer(instance=company).data
     assert serialized_data.get("name") == company.name
     assert serialized_data.get("id") == company.id
+
+
+def test_serialize_data_consent_user():
+    """ Test that DataConsentUserSerializer has correct data """
+    consent_user = DataConsentUserFactory.create()
+    serialized_data = DataConsentUserSerializer(instance=consent_user).data
+    assert serialized_data.get("id") == consent_user.id
+    assert serialized_data.get("user") == consent_user.user.id
+    assert serialized_data.get("agreement") == consent_user.agreement.id
+    assert serialized_data.get("coupon") == consent_user.coupon.id
