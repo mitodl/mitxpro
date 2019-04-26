@@ -190,11 +190,7 @@ class BasketSerializer(serializers.ModelSerializer):
                             for agreement in agreements
                         ]
                     )
-
-        return [
-            DataConsentUserSerializer(instance=consent).data
-            for consent in data_consents
-        ]
+        return DataConsentUserSerializer(instance=data_consents, many=True).data
 
     @classmethod
     def _get_runs_for_product(cls, *, product_version, run_ids):

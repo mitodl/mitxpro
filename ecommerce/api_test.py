@@ -9,7 +9,7 @@ import hmac
 
 import pytest
 
-from courses.factories import CourseFactory, ProgramFactory
+from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
 from ecommerce.api import (
     create_unfulfilled_order,
     generate_cybersource_sa_payload,
@@ -522,8 +522,10 @@ def test_get_product_courses():
     """
     program = ProgramFactory.create()
     CourseFactory.create_batch(5, program=program)
-    course_product = ProductFactory.create(content_object=CourseFactory.create())
+    courserun_product = ProductFactory.create(content_object=CourseRunFactory.create())
+    course_product = ProductFactory.create()
     program_product = ProductFactory.create(content_object=program)
+    assert get_product_courses(courserun_product) == [courserun_product.content_object.course]
     assert get_product_courses(course_product) == [course_product.content_object]
     assert list(get_product_courses(program_product)) == list(
         program_product.content_object.courses.all().order_by("position_in_program")
