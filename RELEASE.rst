@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.1.2 (Released April 26, 2019)
+-------------
+
+- Added model for LegalAddress
+- Added X-Access-Token header to protect registration API
+
 Version 0.1.1 (Released April 25, 2019)
 -------------
 
