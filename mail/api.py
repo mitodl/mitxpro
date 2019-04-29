@@ -69,6 +69,11 @@ def can_email_user(user):
     return bool(user.email)
 
 
+def get_base_context():
+    """Returns a dict of context variables that are needed in all emails"""
+    return {"base_url": settings.SITE_BASE_URL, "site_name": settings.SITE_NAME}
+
+
 def context_for_user(*, user=None, extra_context=None):
     """
     Returns an email context for the given user
@@ -80,8 +85,7 @@ def context_for_user(*, user=None, extra_context=None):
     Returns:
         dict: the context for this user
     """
-
-    context = {"base_url": settings.SITE_BASE_URL}
+    context = get_base_context()
 
     if user:
         context.update({"user": user})
@@ -133,29 +137,93 @@ def render_email_templates(template_name, context):
 
 def messages_for_recipients(recipients_and_contexts, template_name):
     """
-    Creates the messages to the recipients using the templates
+    Creates message objects for a set of recipients with user-specific context in each message.
 
     Args:
         recipients_and_contexts (list of (str, dict)): list of users and their contexts as a dict
         template_name (str): name of the template, this should match a directory in mail/templates
 
     Yields:
-        EmailMultiAlternatives: email message with rendered content
+        django.core.mail.EmailMultiAlternatives: email message with rendered content
     """
     with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
         for recipient, context in recipients_and_contexts:
-            subject, text_body, html_body = render_email_templates(
-                template_name, context
-            )
-            msg = AnymailMessage(
-                subject=subject,
-                body=text_body,
-                to=[recipient],
-                from_email=settings.MAILGUN_FROM_EMAIL,
+            yield build_message(
                 connection=connection,
+                template_name=template_name,
+                recipient=recipient,
+                context=context,
             )
-            msg.attach_alternative(html_body, "text/html")
-            yield msg
+
+
+def build_messages(template_name, recipients, extra_context):
+    """
+    Creates message objects for a set of recipients with the same context in each message.
+
+    Args:
+        template_name (str): name of the template, this should match a directory in mail/templates
+        recipients (iterable of str): Iterable of user email addresses
+        extra_context (dict or None): A dict of context variables to pass into the template (in addition
+            to the base context variables)
+
+    Yields:
+        django.core.mail.EmailMultiAlternatives: email message with rendered content
+    """
+    context = {**get_base_context(), **(extra_context or {})}
+    with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
+        for recipient in recipients:
+            yield build_message(
+                connection=connection,
+                template_name=template_name,
+                recipient=recipient,
+                context=context,
+            )
+
+
+def build_user_specific_messages(template_name, recipients_and_contexts):
+    """
+    Creates message objects for a set of recipients with a specific context for each recipient in each message.
+
+    Args:
+        template_name (str): name of the template, this should match a directory in mail/templates
+        recipients_and_contexts (iterable of (str, dict)): Iterable of users and their contexts as a dict
+
+    Yields:
+        django.core.mail.EmailMultiAlternatives: email message with rendered content
+    """
+    with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
+        for recipient, context in recipients_and_contexts:
+            yield build_message(
+                connection=connection,
+                template_name=template_name,
+                recipient=recipient,
+                context={**get_base_context(), **(context or {})},
+            )
+
+
+def build_message(connection, template_name, recipient, context):
+    """
+    Creates a message object
+
+    Args:
+        connection: An instance of the email backend class (return value of django.core.mail.get_connection)
+        template_name (str): name of the template, this should match a directory in mail/templates
+        recipient (str): Recipient email address
+        context (dict or None): A dict of context variables
+
+    Returns:
+        django.core.mail.EmailMultiAlternatives: email message with rendered content
+    """
+    subject, text_body, html_body = render_email_templates(template_name, context or {})
+    msg = AnymailMessage(
+        subject=subject,
+        body=text_body,
+        to=[recipient],
+        from_email=settings.MAILGUN_FROM_EMAIL,
+        connection=connection,
+    )
+    msg.attach_alternative(html_body, "text/html")
+    return msg
 
 
 def send_messages(messages):
@@ -163,7 +231,7 @@ def send_messages(messages):
     Sends the messages and logs any exceptions
 
     Args:
-        messages (list of EmailMultiAlternatives): list of messages to send
+        messages (list of django.core.mail.EmailMultiAlternatives): list of messages to send
     """
     for msg in messages:
         try:

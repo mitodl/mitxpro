@@ -1,6 +1,7 @@
 """ecommerce tests for views"""
 import json
 from datetime import datetime
+from types import SimpleNamespace
 
 import pytz
 from django.urls import reverse
@@ -9,6 +10,7 @@ import pytest
 import rest_framework.status as status  # pylint: disable=useless-import-alias
 from rest_framework.renderers import JSONRenderer
 from rest_framework.test import APIClient
+import factory
 
 from courses.factories import CourseRunFactory
 from ecommerce.api import create_unfulfilled_order, make_reference_id
@@ -19,6 +21,7 @@ from ecommerce.factories import (
     ProductVersionFactory,
     CouponFactory,
     CouponPaymentFactory,
+    CouponPaymentVersionFactory,
     CompanyFactory,
 )
 from ecommerce.models import (
@@ -35,7 +38,13 @@ from ecommerce.models import (
     Product,
     DataConsentUser,
 )
-from ecommerce.serializers import BasketSerializer, ProductSerializer, CompanySerializer
+from ecommerce.serializers import (
+    BasketSerializer,
+    ProductSerializer,
+    CompanySerializer,
+    CurrentCouponPaymentSerializer,
+)
+from mitxpro.test_utils import create_tempfile_csv
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_REFERENCE_PREFIX = "fake"
@@ -46,7 +55,7 @@ FAKE = faker.Factory.create()
 
 
 pytestmark = pytest.mark.django_db
-# pylint: disable=redefined-outer-name,unused-argument
+# pylint: disable=redefined-outer-name,unused-argument,too-many-lines
 
 
 def render_json(serializer):
@@ -907,3 +916,147 @@ def test_companies_viewset_post_forbidden(admin_drf_client):
     """ Test that post requests to the companies API viewset is not allowed"""
     response = admin_drf_client.post(reverse("companies_api-list"), data={})
     assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
+
+
+def test_bulk_enroll_coupon_list_view(admin_drf_client):
+    """ Test that BulkEnrollCouponListView returns CouponEligibility objects"""
+    coupons = CouponFactory.create_batch(
+        3, enabled=factory.Iterator([True, True, False])
+    )
+    # Create a 100% coupon
+    full_coupon_payment_version = CouponPaymentVersionFactory.create(
+        amount=1,
+        payment=coupons[0].payment,
+        coupon_type=CouponPaymentVersion.SINGLE_USE,
+    )
+    # Create another 100% coupon, then deprecate it with a newer 50% version
+    CouponPaymentVersionFactory.create_batch(
+        2,
+        amount=factory.Iterator([1, 0.5]),
+        payment=coupons[1].payment,
+        coupon_type=CouponPaymentVersion.SINGLE_USE,
+    )
+    # Create another 100% coupon with a disabled Coupon
+    CouponPaymentVersionFactory.create(
+        amount=1,
+        payment=coupons[2].payment,
+        coupon_type=CouponPaymentVersion.SINGLE_USE,
+    )
+    product_coupons = CouponEligibilityFactory.create_batch(
+        3, coupon=factory.Iterator(coupons)
+    )
+    # Apply the full price coupon payment to an additional product
+    product_coupons.insert(1, CouponEligibilityFactory.create(coupon=coupons[0]))
+    api_url = reverse("bulk_coupons_api")
+
+    response = admin_drf_client.get(api_url)
+
+    assert len(response.data) == 1
+    assert len(response.data[0]["products"]) == 2
+    assert response.data == [
+        {
+            **CurrentCouponPaymentSerializer(full_coupon_payment_version.payment).data,
+            "products": ProductSerializer(
+                [product_coupon.product for product_coupon in product_coupons[0:2]],
+                many=True,
+            ).data,
+        }
+    ]
+
+
+class TestBulkEnrollmentSubmitView:
+    """Tests for BulkEnrollmentSubmitView"""
+
+    @pytest.fixture()
+    def scenario(self, mocker):
+        """Fixtures needed for view test cases"""
+        url = reverse("bulk_enroll_submit_api")
+        patched_send_emails = mocker.patch("ecommerce.views.send_bulk_enroll_emails")
+        patched_available_product_coupons = mocker.patch(
+            "ecommerce.views.get_available_bulk_product_coupons"
+        )
+        emails = ["a@b.com", "c@d.com", "e@f.com"]
+        # Make each email into a single-element list to represent a csv with one email per row
+        user_csv = create_tempfile_csv([[email] for email in emails])
+        return SimpleNamespace(
+            patched_send_emails=patched_send_emails,
+            patched_available_product_coupons=patched_available_product_coupons,
+            emails=emails,
+            num_emails=len(emails),
+            user_csv=user_csv,
+            url=url,
+        )
+
+    def test_bulk_enroll_submit_view(self, mocker, admin_drf_client, scenario):
+        """Test that BulkEnrollmentSubmitView sends an enrollment email to a set of recipients in a CSV"""
+        coupon_payment_version = CouponPaymentVersionFactory.create(
+            num_coupon_codes=scenario.num_emails + 1
+        )
+        available_coupons = CouponEligibilityFactory.create_batch(
+            scenario.num_emails + 1
+        )
+        scenario.patched_available_product_coupons.return_value = mocker.Mock(
+            count=mocker.Mock(return_value=len(available_coupons)),
+            all=mocker.Mock(return_value=available_coupons),
+        )
+        product_id = 1
+        coupon_payment_id = coupon_payment_version.payment.id
+
+        response = admin_drf_client.post(
+            scenario.url,
+            data={
+                "product_id": product_id,
+                "coupon_payment_id": coupon_payment_id,
+                "users_file": scenario.user_csv,
+            },
+            format="multipart",
+        )
+
+        assert response.data == {"emails": scenario.emails}
+        scenario.patched_available_product_coupons.assert_called_once_with(
+            coupon_payment_id, product_id
+        )
+        scenario.patched_send_emails.assert_called_once_with(
+            scenario.emails, available_coupons
+        )
+
+    @pytest.mark.parametrize(
+        "num_codes,unsent_coupon_count,expected_error",
+        [
+            [0, 10, "The given coupon has 0 code(s) available"],
+            [10, 0, "Only 0 coupon(s) left that have not already been sent to users"],
+        ],
+    )
+    def test_bulk_enroll_submit_view_errors(
+        self,
+        mocker,
+        admin_drf_client,
+        scenario,
+        num_codes,
+        unsent_coupon_count,
+        expected_error,
+    ):  # pylint: disable=too-many-arguments
+        """Test that BulkEnrollmentSubmitView returns errors when not enough product coupons are available"""
+        coupon_payment_version = CouponPaymentVersionFactory.create(
+            num_coupon_codes=num_codes
+        )
+        scenario.patched_available_product_coupons.return_value = mocker.Mock(
+            count=mocker.Mock(return_value=unsent_coupon_count)
+        )
+        product_id = 1
+        coupon_payment_id = coupon_payment_version.payment.id
+
+        response = admin_drf_client.post(
+            scenario.url,
+            data={
+                "product_id": product_id,
+                "coupon_payment_id": coupon_payment_id,
+                "users_file": scenario.user_csv,
+            },
+            format="multipart",
+        )
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        resp_data = response.json()
+        assert isinstance(resp_data.get("errors"), list)
+        assert expected_error in resp_data["errors"][0]["users_file"]

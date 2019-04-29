@@ -1,13 +1,24 @@
 // @flow
 import Decimal from "decimal.js-light"
+import * as R from "ramda"
 import { equals } from "ramda"
 
-import type { BasketItem, Coupon } from "../flow/ecommerceTypes"
-import { COUPON_TYPE_PROMO } from "../constants"
+import type {
+  BasketItem,
+  CouponSelection,
+  ProductMap,
+  BulkCouponPayment
+} from "../flow/ecommerceTypes"
+import {
+  COUPON_TYPE_PROMO,
+  PRODUCT_TYPE_COURSE,
+  PRODUCT_TYPE_COURSERUN,
+  PRODUCT_TYPE_PROGRAM
+} from "../constants"
 
 export const calculateDiscount = (
   item: BasketItem,
-  coupon: ?Coupon
+  coupon: ?CouponSelection
 ): Decimal => {
   if (coupon && coupon.targets.includes(item.id)) {
     return new Decimal(coupon.amount)
@@ -18,8 +29,10 @@ export const calculateDiscount = (
   return new Decimal(0)
 }
 
-export const calculatePrice = (item: BasketItem, coupon: ?Coupon): Decimal =>
-  new Decimal(item.price).minus(calculateDiscount(item, coupon))
+export const calculatePrice = (
+  item: BasketItem,
+  coupon: ?CouponSelection
+): Decimal => new Decimal(item.price).minus(calculateDiscount(item, coupon))
 
 export const formatPrice = (price: ?string | number | Decimal): string => {
   if (price === null || price === undefined) {
@@ -37,3 +50,18 @@ export const formatPrice = (price: ?string | number | Decimal): string => {
 }
 
 export const isPromo = equals(COUPON_TYPE_PROMO)
+
+export const createProductMap = (
+  bulkCouponPayments: Array<BulkCouponPayment>
+): ProductMap =>
+  R.compose(
+    R.mergeRight({
+      [PRODUCT_TYPE_PROGRAM]:   [],
+      [PRODUCT_TYPE_COURSE]:    [],
+      [PRODUCT_TYPE_COURSERUN]: []
+    }),
+    R.groupBy(R.prop("product_type")),
+    R.uniqBy(R.prop("id")),
+    R.flatten,
+    R.pluck("products")
+  )(bulkCouponPayments)

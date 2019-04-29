@@ -5,6 +5,9 @@ import logging
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
+from django.shortcuts import redirect
+from django.urls import reverse
+from django.views.decorators.http import require_http_methods
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
 from rest_framework.generics import get_object_or_404, RetrieveUpdateAPIView
@@ -19,7 +22,10 @@ from ecommerce.api import (
     generate_cybersource_sa_payload,
     get_new_order_by_reference_number,
     get_product_version_price_with_discount,
+    get_full_price_coupon_product_set,
+    get_available_bulk_product_coupons,
 )
+from ecommerce.mail_api import send_bulk_enroll_emails
 from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
 from ecommerce.exceptions import EcommerceException
 from ecommerce.models import (
@@ -29,16 +35,19 @@ from ecommerce.models import (
     Order,
     Product,
     Receipt,
+    CouponPayment,
 )
 from ecommerce.permissions import IsSignedByCyberSource
 from ecommerce.serializers import (
     BasketSerializer,
-    CouponPaymentVersionSerializer,
+    CouponPaymentVersionDetailSerializer,
     CompanySerializer,
     ProductSerializer,
     PromoCouponSerializer,
     SingleUseCouponSerializer,
+    CurrentCouponPaymentSerializer,
 )
+
 
 log = logging.getLogger(__name__)
 
@@ -186,9 +195,85 @@ class BasketView(RetrieveUpdateAPIView):
         return basket
 
 
-class CouponView(APIView):
+class BulkEnrollCouponListView(APIView):
     """
-    Admin view for creating coupon(s)
+    Admin view for fetching coupons that can be used for bulk enrollment
+    """
+
+    permission_classes = (IsAdminUser,)
+    authentication_classes = (SessionAuthentication,)
+
+    def get(self, request, *args, **kwargs):  # pylint: disable=missing-docstring
+        serialized = [
+            {
+                **CurrentCouponPaymentSerializer(coupon_payment).data,
+                "products": ProductSerializer(
+                    (product_coupon.product for product_coupon in product_coupons),
+                    many=True,
+                ).data,
+            }
+            for coupon_payment, product_coupons in get_full_price_coupon_product_set()
+        ]
+
+        return Response(status=status.HTTP_200_OK, data=serialized)
+
+
+class BulkEnrollmentSubmitView(APIView):
+    """
+    Admin view for submitting bulk enrollment requests
+    """
+
+    permission_classes = (IsAdminUser,)
+    authentication_classes = (SessionAuthentication,)
+
+    def post(self, request, *args, **kwargs):
+        """View to send an enrollment email to all users in an uploaded csv file"""
+        product_id = int(request.data["product_id"])
+        coupon_payment_id = int(request.data["coupon_payment_id"])
+        coupon_payment = CouponPayment.objects.get(pk=coupon_payment_id)
+
+        # Extract emails of users to enroll from the uploaded user csv file
+        users_file = request.data["users_file"]
+        reader = csv.reader(users_file.read().decode("utf-8").splitlines())
+        emails = [email_row[0] for email_row in reader]
+
+        available_product_coupons = get_available_bulk_product_coupons(
+            coupon_payment_id, product_id
+        )
+
+        coupon_limit_error = ""
+        if len(emails) > coupon_payment.latest_version.num_coupon_codes:
+            coupon_limit_error = "The given coupon has {} code(s) available, but {} users were submitted".format(
+                coupon_payment.latest_version.num_coupon_codes, len(emails)
+            )
+        elif len(emails) > available_product_coupons.count():
+            coupon_limit_error = "Only {} coupon(s) left that have not already been sent to users, but {} users were submitted".format(
+                available_product_coupons.count(), len(emails)
+            )
+
+        if coupon_limit_error:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"errors": [{"users_file": coupon_limit_error}]},
+            )
+
+        send_bulk_enroll_emails(emails, available_product_coupons.all())
+
+        return Response(status=status.HTTP_200_OK, data={"emails": emails})
+
+
+@require_http_methods(["GET"])
+def anon_enrollment_view(request):
+    """View to handle an anonymous user enrolling in a course via coupon code"""
+    # pylint: disable=fixme
+    # TODO: Actual enrollment implementation (issue #111)
+    log.info(request.GET.dict())
+    return redirect(reverse("mitxpro-index"))
+
+
+class CouponListView(APIView):
+    """
+    Admin view for CRUD operations on coupons
     """
 
     permission_classes = (IsAdminUser,)
@@ -205,7 +290,9 @@ class CouponView(APIView):
             payment_version = coupon_serializer.save()
             return Response(
                 status=status.HTTP_200_OK,
-                data=CouponPaymentVersionSerializer(instance=payment_version).data,
+                data=CouponPaymentVersionDetailSerializer(
+                    instance=payment_version
+                ).data,
             )
         return Response(
             status=status.HTTP_400_BAD_REQUEST,

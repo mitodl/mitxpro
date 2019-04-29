@@ -7,7 +7,18 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
 from mail import api
+from mail.constants import EMAIL_VERIFICATION, EMAIL_PW_RESET, EMAIL_BULK_ENROLL
 from mail.forms import EmailDebuggerForm
+
+
+EMAIL_DEBUG_EXTRA_CONTEXT = {
+    EMAIL_PW_RESET: {"uid": "abc-def", "token": "abc-def"},
+    EMAIL_VERIFICATION: {"confirmation_url": "http://www.example.com/confirm/url"},
+    EMAIL_BULK_ENROLL: {
+        "enrollable_title": "Dummy Course Title",
+        "enrollment_url": "http://www.example.com/enroll?course_id=1234",
+    },
+}
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -35,13 +46,10 @@ class EmailDebuggerView(View):
             return JsonResponse({"error": "invalid input"})
 
         email_type = form.cleaned_data["email_type"]
-        context = {"base_url": settings.SITE_BASE_URL, "anon_token": "abc123"}
+        context = {"base_url": settings.SITE_BASE_URL, "site_name": settings.SITE_NAME}
 
-        # static, dummy data
-        if email_type == "password_reset":
-            context.update({"uid": "abc-def", "token": "abc-def"})
-        elif email_type == "verification":
-            context.update({"confirmation_url": "http://www.example.com/comfirm/url"})
+        email_extra_context = EMAIL_DEBUG_EXTRA_CONTEXT.get(email_type, {})
+        context.update(email_extra_context)
 
         subject, text_body, html_body = api.render_email_templates(email_type, context)
 

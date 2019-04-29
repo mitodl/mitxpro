@@ -42,6 +42,7 @@ urlpatterns = [
     path("", include("courseware.urls")),
     path("", include("ecommerce.urls")),
     path("", include("users.urls")),
+    path("", include("mail.urls")),
     path("api/app_context", AppContextView.as_view(), name="api-app_context"),
     # named routes mapped to the react app
     path("login/", index, name="login"),
@@ -51,6 +52,7 @@ urlpatterns = [
     path("checkout/", index, name="checkout-page"),
     path("signup/confirm/", index, name="register-confirm"),
     path("account/inactive/", index, name="account-inactive"),
+    re_path(r"^ecommerce/admin/", restricted, name="ecommerce-admin"),
     # social django needs to be here to preempt the login
     path("", include("social_django.urls", namespace="social")),
     path("password_reset/", index, name="password-reset"),
@@ -65,7 +67,6 @@ urlpatterns = [
     # Wagtail
     re_path(r"^cms/", include(wagtailadmin_urls)),
     re_path(r"^documents/", include(wagtaildocs_urls)),
-    re_path(r"ecommerce/admin/", restricted, name="ecommerce-admin"),
     path("", include(wagtail_urls)),
 ] + (
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

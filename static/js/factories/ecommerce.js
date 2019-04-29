@@ -8,11 +8,12 @@ import { incrementer } from "./util"
 import type {
   BasketItem,
   BasketResponse,
-  Coupon,
+  CouponSelection,
   CouponPayment,
   CouponPaymentVersion,
   Company,
-  Product
+  Product,
+  BulkCouponPayment
 } from "../flow/ecommerceTypes"
 import {
   PRODUCT_TYPE_COURSE,
@@ -36,7 +37,7 @@ export const makeItem = (): BasketItem => ({
   thumbnail_url: casual.url
 })
 
-export const makeCoupon = (item: ?BasketItem): Coupon => ({
+export const makeCouponSelection = (item: ?BasketItem): CouponSelection => ({
   code:    casual.word,
   amount:  String(casual.double(0, 1)),
   targets: item ? [item.id] : []
@@ -44,7 +45,7 @@ export const makeCoupon = (item: ?BasketItem): Coupon => ({
 
 export const makeBasketResponse = (): BasketResponse => ({
   items:   [makeItem()],
-  coupons: [makeCoupon()]
+  coupons: [makeCouponSelection()]
 })
 
 const genProductId = incrementer()
@@ -63,6 +64,7 @@ export const makeProduct = (
   title:        casual.word,
   object_id:    casual.number,
   content_type: casual.number,
+  text_id:      casual.word,
   created_on:   casual.moment.format(),
   updated_on:   casual.moment.format()
 })
@@ -111,4 +113,15 @@ export const makeCouponPaymentVersion = (
   company:             casual.word,
   created_on:          casual.moment.format(),
   updated_on:          casual.moment.format()
+})
+
+const genBulkCouponPaymentId = incrementer()
+export const makeBulkCouponPayment = (): BulkCouponPayment => ({
+  // $FlowFixMe
+  id:         genBulkCouponPaymentId.next().value,
+  name:       casual.word,
+  version:    makeCouponPaymentVersion(),
+  products:   [makeProduct()],
+  created_on: casual.moment.format(),
+  updated_on: casual.moment.format()
 })

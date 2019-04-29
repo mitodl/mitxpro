@@ -178,6 +178,16 @@ class CouponPayment(TimestampedModel):
 
     name = models.CharField(max_length=256, unique=True)
 
+    @property
+    def latest_version(self):
+        """
+        Gets the most recently created CouponPaymentVersion associated with this CouponPayment
+
+        Returns:
+            CouponPaymentVersion: The latest CouponPaymentVersion
+        """
+        return self.versions.order_by("-created_on").first()
+
     def __str__(self):
         """Description for CouponPayment"""
         return f"CouponPayment {self.name}"
@@ -200,7 +210,9 @@ class CouponPaymentVersion(TimestampedModel):
     PAYMENT_TYPES = [PAYMENT_CC, PAYMENT_PO, PAYMENT_MKT, PAYMENT_SALE]
 
     tag = models.CharField(max_length=256, null=True, blank=True)
-    payment = models.ForeignKey(CouponPayment, on_delete=models.PROTECT)
+    payment = models.ForeignKey(
+        CouponPayment, on_delete=models.PROTECT, related_name="versions"
+    )
     automatic = models.BooleanField(default=False)
     coupon_type = models.CharField(
         choices=[(_type, _type) for _type in COUPON_TYPES], max_length=30
@@ -263,7 +275,9 @@ class CouponVersion(TimestampedModel):
     (at the moment this is only a link to a corresponding CouponPaymentVersion).
     """
 
-    coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
+    coupon = models.ForeignKey(
+        Coupon, on_delete=models.PROTECT, related_name="versions"
+    )
     payment_version = models.ForeignKey(CouponPaymentVersion, on_delete=models.PROTECT)
 
     def __str__(self):
@@ -379,3 +393,12 @@ class DataConsentUser(TimestampedModel):
 
     def __str__(self):
         return f"DataConsentUser {self.user} for {self.agreement}, consent date {self.consent_date}"
+
+
+class BulkEnrollmentDelivery(TimestampedModel):
+    """
+    Record of the delivery of a bulk enrollment email
+    """
+
+    email = models.EmailField(blank=False)
+    product_coupon = models.ForeignKey(CouponEligibility, on_delete=models.PROTECT)

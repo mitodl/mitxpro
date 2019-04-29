@@ -4,6 +4,7 @@ Tests for ecommerce serializers
 # pylint: disable=unused-argument, redefined-outer-name
 import pytest
 
+from mitxpro.test_utils import any_instance_of
 from cms.factories import CoursePageFactory, ProgramPageFactory
 from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
 from courses.models import Course
@@ -15,6 +16,10 @@ from ecommerce.factories import (
     ProductFactory,
     CompanyFactory,
     DataConsentUserFactory,
+    CouponFactory,
+    CouponEligibilityFactory,
+    CouponPaymentVersionFactory,
+    CouponPaymentFactory,
 )
 from ecommerce.models import (
     CouponSelection,
@@ -28,13 +33,20 @@ from ecommerce.serializers import (
     BasketSerializer,
     SingleUseCouponSerializer,
     PromoCouponSerializer,
+    CouponPaymentVersionDetailSerializer,
     CouponPaymentVersionSerializer,
+    CouponPaymentSerializer,
+    CurrentCouponPaymentSerializer,
     ProductSerializer,
     CompanySerializer,
     DataConsentUserSerializer,
+    CouponSerializer,
+    ProductCouponSerializer,
 )
 
 pytestmark = [pytest.mark.django_db]
+
+datetime_format = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def test_serialize_basket_product_version_course():
@@ -203,8 +215,8 @@ def test_serialize_coupon_promo(
 
 
 def test_serialize_coupon_payment_version_serializer(basket_and_coupons):
-    """ Test that the CouponPaymentVersionSerializer has correct data """
-    serializer = CouponPaymentVersionSerializer(
+    """ Test that the CouponPaymentVersionDetailSerializer has correct data """
+    serializer = CouponPaymentVersionDetailSerializer(
         instance=basket_and_coupons.coupongroup_best.payment_version
     )
     for attr in ("automatic", "coupon_type", "num_coupon_codes", "max_redemptions"):
@@ -214,10 +226,56 @@ def test_serialize_coupon_payment_version_serializer(basket_and_coupons):
     for attr in ("activation_date", "expiration_date"):
         assert serializer.data.get(attr) == getattr(
             basket_and_coupons.coupongroup_best.payment_version, attr
-        ).strftime("%Y-%m-%dT%H:%M:%SZ")
+        ).strftime(datetime_format)
     assert serializer.data.get("amount") == "{0:.2}".format(
         basket_and_coupons.coupongroup_best.payment_version.amount
     )
+
+
+def test_coupon_payment_serializer():
+    """ Test that the CouponPaymentSerializer has correct data """
+    payment = CouponPaymentFactory.build()
+    serialized = CouponPaymentSerializer(payment).data
+    assert serialized == {
+        "name": payment.name,
+        "created_on": None,
+        "updated_on": None,
+        "id": None,
+    }
+
+
+def test_coupon_payment_version_serializer():
+    """ Test that the CouponPaymentVersionSerializer has correct data """
+    payment_version = CouponPaymentVersionFactory.create()
+    serialized = CouponPaymentVersionSerializer(payment_version).data
+    assert serialized == {
+        "tag": payment_version.tag,
+        "automatic": payment_version.automatic,
+        "coupon_type": payment_version.coupon_type,
+        "num_coupon_codes": payment_version.num_coupon_codes,
+        "max_redemptions": payment_version.max_redemptions,
+        "max_redemptions_per_user": payment_version.max_redemptions_per_user,
+        "amount": str(payment_version.amount),
+        "expiration_date": payment_version.expiration_date.strftime(datetime_format),
+        "activation_date": payment_version.activation_date.strftime(datetime_format),
+        "payment_type": payment_version.payment_type,
+        "payment_transaction": payment_version.payment_transaction,
+        "company": payment_version.company.id,
+        "payment": payment_version.payment.id,
+        "id": payment_version.id,
+        "created_on": any_instance_of(str),
+        "updated_on": any_instance_of(str),
+    }
+
+
+def test_current_coupon_payment_version_serializer():
+    """ Test that the CurrentCouponPaymentSerializer has correct data """
+    payment_version = CouponPaymentVersionFactory.create()
+    serialized = CurrentCouponPaymentSerializer(instance=payment_version.payment).data
+    assert serialized == {
+        **CouponPaymentSerializer(payment_version.payment).data,
+        "version": CouponPaymentVersionSerializer(payment_version).data,
+    }
 
 
 def test_serialize_product(coupon_product_ids):
@@ -246,3 +304,28 @@ def test_serialize_data_consent_user():
     assert serialized_data.get("user") == consent_user.user.id
     assert serialized_data.get("agreement") == consent_user.agreement.id
     assert serialized_data.get("coupon") == consent_user.coupon.id
+
+
+def test_serialize_coupon():
+    """Test that CouponSerializer produces the correct serialized data"""
+    name = "Some Coupon"
+    code = "1234"
+    coupon = CouponFactory.build(payment__name=name, coupon_code=code, enabled=True)
+    serialized_data = CouponSerializer(instance=coupon).data
+    assert serialized_data == {
+        "id": None,
+        "name": name,
+        "coupon_code": code,
+        "enabled": True,
+    }
+
+
+def test_serialize_product_coupon():
+    """Test that ProductCouponSerializer produces the correct serialized data"""
+    product_coupon = CouponEligibilityFactory.create()
+    serialized_data = ProductCouponSerializer(instance=product_coupon).data
+    assert serialized_data == {
+        "id": product_coupon.id,
+        "coupon": CouponSerializer(instance=product_coupon.coupon).data,
+        "product": ProductSerializer(instance=product_coupon.product).data,
+    }
