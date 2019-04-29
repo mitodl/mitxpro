@@ -22,5 +22,10 @@ export const routes = {
   }),
 
   checkout: "/checkout/",
-  coupons:  "/ecommerce/admin/coupons/"
+
+  ecommerceAdmin: include("/ecommerce/admin/", {
+    index:      "",
+    bulkEnroll: "enroll/",
+    coupons:    "coupons/"
+  })
 }

@@ -5,7 +5,10 @@ import sinon from "sinon"
 import CheckoutPage, { CheckoutPage as InnerCheckoutPage } from "./CheckoutPage"
 import * as formFuncs from "../../lib/form"
 import IntegrationTestHelper from "../../util/integration_test_helper"
-import { makeBasketResponse, makeCoupon } from "../../factories/ecommerce"
+import {
+  makeBasketResponse,
+  makeCouponSelection
+} from "../../factories/ecommerce"
 import {
   calculateDiscount,
   calculatePrice,
@@ -39,7 +42,7 @@ describe("CheckoutPage", () => {
       hasCoupon ? "with" : "without"
     } a coupon`, async () => {
       const basketItem = basket.items[0]
-      const coupon = makeCoupon()
+      const coupon = makeCouponSelection()
       basket.coupons = [coupon]
       if (hasCoupon) {
         coupon.targets = [basketItem.id]

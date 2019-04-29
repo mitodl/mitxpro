@@ -5,17 +5,17 @@ import { connectRequest, mutateAsync } from "redux-query"
 import { compose } from "redux"
 import { connect } from "react-redux"
 
-import { CouponForm } from "../../components/forms/CouponForm"
-import queries from "../../lib/queries"
+import { CouponForm } from "../../../components/forms/CouponForm"
+import queries from "../../../lib/queries"
 
 import type { Response } from "redux-query"
 import type {
   Company,
   CouponPaymentVersion,
   Product
-} from "../../flow/ecommerceTypes"
+} from "../../../flow/ecommerceTypes"
 import { createStructuredSelector } from "reselect"
-import { COUPON_TYPE_SINGLE_USE } from "../../constants"
+import { COUPON_TYPE_SINGLE_USE } from "../../../constants"
 
 type State = {
   couponId: ?string
@@ -77,8 +77,8 @@ export class CreateCouponPage extends React.Component<Props, State> {
     // $FlowFixMe: flow doesn't like coupons[couponId] but it works fine
     const newCoupon = coupons && couponId ? coupons[couponId] : null
     return (
-      <div className="coupon-creation-div">
-        <h3>Create a coupon</h3>
+      <div className="ecommerce-admin-body">
+        <h3>Create a Coupon</h3>
         {newCoupon ? (
           <div className="coupon-success-div">
             {newCoupon.coupon_type === "promo" ? (

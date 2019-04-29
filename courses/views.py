@@ -19,14 +19,14 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for Programs"""
 
     serializer_class = ProgramSerializer
-    queryset = Program.objects.select_related("programpage").all()
+    queryset = Program.objects.all()
 
 
 class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for Courses"""
 
     serializer_class = CourseSerializer
-    queryset = Course.objects.select_related("coursepage").all()
+    queryset = Course.objects.all()
 
 
 class CourseRunViewSet(viewsets.ReadOnlyModelViewSet):

@@ -4,8 +4,12 @@ import json
 from contextlib import contextmanager
 import traceback
 from unittest.mock import Mock
+import csv
+import tempfile
 
 import pytest
+
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 def any_instance_of(*cls):
@@ -78,3 +82,25 @@ class PickleableMock(Mock):
     def __reduce__(self):
         """Required method for being pickleable"""
         return (Mock, ())
+
+
+def create_tempfile_csv(rows_iter):
+    """
+    Creates a temporary CSV file for use in testing file upload views
+
+    Args:
+        rows_iter (iterable of lists): An iterable of lists of strings representing the csv values.
+            Example: [["a","b","c"], ["d","e","f"]] --> CSV contents: "a,b,c\nd,e,f"
+
+    Returns:
+        SimpleUploadedFile: A temporary CSV file with the given contents
+    """
+    f = tempfile.NamedTemporaryFile(suffix=".csv", delete=False)
+    with open(f.name, "w", encoding="utf8", newline="") as f:
+        writer = csv.writer(f, delimiter=",")
+        for row in rows_iter:
+            writer.writerow(row)
+    with open(f.name, "r") as user_csv:
+        return SimpleUploadedFile(
+            f.name, user_csv.read().encode("utf8"), content_type="application/csv"
+        )

@@ -4,8 +4,7 @@ from urllib.parse import quote_plus
 from django.urls import reverse
 
 from mail import api
-
-VERIFICATION_TEMPLATE_NAME = "verification"
+from mail.constants import EMAIL_VERIFICATION
 
 
 def send_verification_email(
@@ -35,7 +34,7 @@ def send_verification_email(
                         api.context_for_user(extra_context={"confirmation_url": url}),
                     )
                 ],
-                VERIFICATION_TEMPLATE_NAME,
+                EMAIL_VERIFICATION,
             )
         )
     )

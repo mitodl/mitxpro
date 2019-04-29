@@ -37,7 +37,7 @@ export type BasketItem = {
   id: number,
 }
 
-export type Coupon = {
+export type CouponSelection = {
   code: string,
   amount: Decimal,
   targets: Array<number>
@@ -45,7 +45,7 @@ export type Coupon = {
 
 export type BasketResponse = {
   items: Array<BasketItem>,
-  coupons: Array<Coupon>
+  coupons: Array<CouponSelection>
 }
 
 export type BasketPayload = {
@@ -86,6 +86,14 @@ export type CouponPaymentVersion = {
   company: ?Company
 }
 
+export type Coupon = {
+  name: string,
+  coupon_code: string,
+  enabled: boolean,
+  created_on: Date,
+  updated_on: Date
+}
+
 export type Product = {
   id: number,
   title: string,
@@ -93,5 +101,24 @@ export type Product = {
   created_on: Date,
   updated_on: Date,
   object_id: number,
-  content_type: number
+  content_type: number,
+}
+
+export type ProductMap = {
+  [PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_COURSE | PRODUCT_TYPE_PROGRAM]: Array<Product>,
+}
+
+export type BulkCouponPayment = {
+  id: number,
+  name: string,
+  version: CouponPaymentVersion,
+  products: Array<Product>,
+  created_on: Date,
+  updated_on: Date
+}
+
+export type BulkCouponPaymentsResponse = Array<BulkCouponPayment>
+
+export type BulkCouponSendResponse = {
+  emails: Array<string>
 }

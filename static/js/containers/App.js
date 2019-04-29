@@ -16,7 +16,7 @@ import CheckoutPage from "./pages/CheckoutPage"
 import HomePage from "./pages/HomePage"
 import LoginPages from "./pages/login/LoginPages"
 import RegisterPages from "./pages/register/RegisterPages"
-import CouponCreationPage from "./pages/CreateCouponPage"
+import EcommerceAdminPages from "./pages/admin/EcommerceAdminPages"
 
 import type { Match } from "react-router"
 import type { CurrentUser } from "../flow/authTypes"
@@ -57,8 +57,8 @@ class App extends React.Component<Props, void> {
             component={CheckoutPage}
           />
           <Route
-            path={urljoin(match.url, String(routes.coupons))}
-            component={CouponCreationPage}
+            path={urljoin(match.url, String(routes.ecommerceAdmin))}
+            component={EcommerceAdminPages}
           />
         </Switch>
       </div>

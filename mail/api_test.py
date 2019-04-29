@@ -3,11 +3,13 @@ from email.utils import formataddr
 import pytest
 
 from mail.api import (
+    get_base_context,
     context_for_user,
     safe_format_recipients,
     render_email_templates,
     send_messages,
     messages_for_recipients,
+    build_messages,
 )
 from users.factories import UserFactory
 
@@ -46,6 +48,7 @@ def test_context_for_user(settings, test_user, extra_context):
 
     assert context_for_user(user=test_user, extra_context=extra_context) == {
         "base_url": settings.SITE_BASE_URL,
+        "site_name": settings.SITE_NAME,
         **(extra_context or {}),
         **user_ctx,
     }
@@ -93,6 +96,29 @@ def test_messages_for_recipients():
     for user, msg in zip(users, messages):
         assert user.email in str(msg.to[0])
         assert msg.subject == "Welcome {}".format(user.name)
+
+
+def test_build_messages(mocker):
+    """
+    Tests that build_messages creates message objects for a set of recipients with the correct context
+    """
+    mock_msg = mocker.Mock()
+    patched_msg_class = mocker.patch("mail.api.AnymailMessage", return_value=mock_msg)
+    patched_render = mocker.patch(
+        "mail.api.render_email_templates",
+        return_value=("subject", "text body", "<p>html body</p>"),
+    )
+
+    template_name = "sample"
+    recipients = ["a@b.com", "c@d.com"]
+    extra_context = {"extra": "context"}
+    messages = list(build_messages(template_name, recipients, extra_context))
+    assert patched_render.call_args[0] == (
+        template_name,
+        {**extra_context, **get_base_context()},
+    )
+    assert patched_msg_class.call_count == len(recipients)
+    assert messages == [mock_msg] * len(recipients)
 
 
 def test_send_message(mailoutbox):

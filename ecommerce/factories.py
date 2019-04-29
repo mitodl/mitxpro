@@ -106,6 +106,7 @@ class CouponPaymentVersionFactory(DjangoModelFactory):
     max_redemptions = fuzzy.FuzzyInteger(1, 10)
     max_redemptions_per_user = fuzzy.FuzzyInteger(1, 3)
     amount = fuzzy.FuzzyDecimal(0, 1)
+    company = SubFactory(CompanyFactory)
     activation_date = Faker(
         "date_time_this_year", before_now=True, after_now=False, tzinfo=timezone.utc
     )
@@ -208,3 +209,13 @@ class DataConsentUserFactory(DjangoModelFactory):
 
     class Meta:
         model = models.DataConsentUser
+
+
+class BulkEnrollmentDeliveryFactory(DjangoModelFactory):
+    """Factory for BulkEnrollmentDelivery"""
+
+    email = fuzzy.FuzzyText(suffix="@example.com")
+    product_coupon = SubFactory(CouponEligibilityFactory)
+
+    class Meta:
+        model = models.BulkEnrollmentDelivery

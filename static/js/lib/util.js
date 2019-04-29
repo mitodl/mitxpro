@@ -1,17 +1,17 @@
 // @flow
 /* global SETTINGS:false */
 import {
-  isEmpty,
-  trim,
-  defaultTo,
-  view,
-  lensPath,
-  either,
   all,
-  curry,
   complement,
   compose,
-  isNil
+  curry,
+  defaultTo,
+  either,
+  isEmpty,
+  isNil,
+  lensPath,
+  trim,
+  view
 } from "ramda"
 import { truncate as _truncate } from "lodash"
 import qs from "query-string"
@@ -98,3 +98,15 @@ export function* incrementer(): Generator<number, *, *> {
 
 export const toArray = (obj: any) =>
   Array.isArray(obj) ? obj : obj ? [obj] : undefined
+
+export const objectToFormData = (object: Object) => {
+  const formData = new FormData()
+
+  Object.entries(object).forEach(([k, v]) => {
+    if (!isNil(v)) {
+      // $FlowFixMe: flow things that 'v' here can only be a Blob or File
+      formData.append(k, v)
+    }
+  })
+  return formData
+}

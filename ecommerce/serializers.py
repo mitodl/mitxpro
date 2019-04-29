@@ -127,6 +127,31 @@ class CouponSelectionSerializer(serializers.ModelSerializer):
         model = models.CouponSelection
 
 
+class CouponSerializer(serializers.ModelSerializer):
+    """Coupon serializer"""
+
+    name = serializers.SerializerMethodField()
+
+    def get_name(self, instance):
+        """Get the 'name' property of the associated CouponPayment"""
+        return instance.payment.name
+
+    class Meta:
+        exclude = ("payment", "created_on", "updated_on")
+        model = models.Coupon
+
+
+class ProductCouponSerializer(serializers.ModelSerializer):
+    """CouponEligibility serializer"""
+
+    product = ProductSerializer()
+    coupon = CouponSerializer()
+
+    class Meta:
+        exclude = ("created_on", "updated_on")
+        model = models.CouponEligibility
+
+
 class BasketSerializer(serializers.ModelSerializer):
     """Basket model serializer"""
 
@@ -403,8 +428,30 @@ class CouponPaymentSerializer(serializers.ModelSerializer):
         model = models.CouponPayment
 
 
+class CurrentCouponPaymentSerializer(serializers.ModelSerializer):
+    """ Serializer for coupon payments with their most recent version """
+
+    version = serializers.SerializerMethodField()
+
+    def get_version(self, instance):
+        """ Serializes the most recent associated CouponPaymentVersion """
+        return CouponPaymentVersionSerializer(instance.latest_version).data
+
+    class Meta:
+        fields = "__all__"
+        model = models.CouponPayment
+
+
 class CouponPaymentVersionSerializer(serializers.ModelSerializer):
     """ Serializer for coupon payment versions """
+
+    class Meta:
+        fields = "__all__"
+        model = models.CouponPaymentVersion
+
+
+class CouponPaymentVersionDetailSerializer(serializers.ModelSerializer):
+    """ Serializer for coupon payment versions and related objects """
 
     payment = CouponPaymentSerializer()
     company = CompanySerializer()

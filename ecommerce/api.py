@@ -9,7 +9,7 @@ import logging
 import uuid
 
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, Max, F, Count
 from django.db import transaction
 
 from ecommerce.exceptions import EcommerceException, ParseException
@@ -18,6 +18,8 @@ from ecommerce.models import (
     CouponEligibility,
     CouponVersion,
     CouponRedemption,
+    CouponPayment,
+    CouponPaymentVersion,
     Line,
     Order,
 )
@@ -147,7 +149,7 @@ def latest_coupon_version(coupon):
     Returns:
         CouponVersion: The CouponVersion for the coupon
     """
-    return coupon.couponversion_set.order_by("-created_on").first()
+    return coupon.versions.order_by("-created_on").first()
 
 
 def get_valid_coupon_versions(product, user, auto_only=False, code=None):
@@ -314,8 +316,7 @@ def get_product_version_price_with_discount(*, coupon_version, product_version):
     if (
         coupon_version
         and CouponEligibility.objects.filter(
-            coupon__couponversion=coupon_version,
-            product__productversions=product_version,
+            coupon__versions=coupon_version, product__productversions=product_version
         ).exists()
     ):
         discount = round_half_up(coupon_version.payment_version.amount * price)
@@ -445,3 +446,53 @@ def get_product_courses(product):
         return list(
             product.content_object.courses.all().order_by("position_in_program")
         )
+
+
+def get_full_price_coupon_product_set():
+    """
+    Queries the database for CouponPayments that give a 100% off discount and returns those
+    CouponPayments in a tuple with the Product that they apply to.
+
+    Returns:
+        iterable of tuple(CouponPayment, CouponEligibility): An iterable of CouponPayments paired with the
+            CouponEligibility objects associated with them
+    """
+    full_coupon_payments = CouponPayment.objects.annotate(
+        max_created_on=Max("versions__created_on")
+    ).filter(
+        versions__coupon_type=CouponPaymentVersion.SINGLE_USE,
+        max_created_on=F("versions__created_on"),
+        versions__amount=1,
+    )
+    for coupon_payment in full_coupon_payments:
+        product_coupons = (
+            CouponEligibility.objects.select_related("product")
+            .filter(coupon__enabled=True, coupon__payment=coupon_payment)
+            .distinct("product")
+        )
+        if product_coupons.exists():
+            yield coupon_payment, product_coupons
+
+
+def get_available_bulk_product_coupons(coupon_payment_id, product_id):
+    """
+    Queries the database for bulk enrollment product coupons that haven't already been sent to other users
+
+    Args:
+        coupon_payment_id (int): Id for a CouponPayment
+        product_id (int): Id for a Product
+
+    Returns:
+        CouponEligibility queryset: Product coupons that can be used for bulk enrollment
+    """
+    return (
+        CouponEligibility.objects.select_related("product")
+        .select_related("coupon__payment")
+        .annotate(deliveries=Count("bulkenrollmentdelivery"))
+        .filter(
+            coupon__enabled=True,
+            coupon__payment=coupon_payment_id,
+            product__id=product_id,
+            deliveries=0,
+        )
+    )

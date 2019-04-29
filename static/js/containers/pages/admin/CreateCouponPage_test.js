@@ -9,9 +9,9 @@ import {
   makeCompany,
   makeCouponPaymentVersion,
   makeProduct
-} from "../../factories/ecommerce"
-import { COUPON_TYPE_PROMO } from "../../constants"
-import IntegrationTestHelper from "../../util/integration_test_helper"
+} from "../../../factories/ecommerce"
+import { COUPON_TYPE_PROMO } from "../../../constants"
+import IntegrationTestHelper from "../../../util/integration_test_helper"
 
 describe("CreateCouponPage", () => {
   let helper,

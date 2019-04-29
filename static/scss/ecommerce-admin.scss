@@ -1,0 +1,63 @@
+.ecommerce-admin-body {
+  margin: 0 50px;
+
+  form {
+    margin: 25px 50px;
+  }
+
+  .error {
+    color: red;
+  }
+
+  .success {
+    color: green;
+  }
+}
+
+.bulk-enrollment-form {
+  section {
+    padding: 15px 0;
+  }
+}
+
+.coupon-form {
+  div {
+    padding-bottom: 20px;
+    padding-right: 10px;
+  }
+
+  input[type='checkbox']   {
+    display: unset;
+  }
+
+  .block {
+
+    .DayPickerInput {
+      display: block;
+    }
+
+    input {
+      display: block;
+    }
+
+    select {
+      display: block;
+    }
+  }
+
+  .flex {
+    display: flex;
+  }
+
+  .product-selection {
+    height: 250px;
+  }
+
+  .picky {
+    max-width: 600px;
+  }
+
+  .picky__dropdown {
+    z-index: unset;
+  }
+}

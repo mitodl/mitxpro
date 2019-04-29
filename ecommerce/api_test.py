@@ -6,6 +6,7 @@ from decimal import Decimal
 from datetime import timedelta
 import hashlib
 import hmac
+import factory
 
 import pytest
 
@@ -25,6 +26,7 @@ from ecommerce.api import (
     latest_product_version,
     latest_coupon_version,
     get_product_courses,
+    get_available_bulk_product_coupons,
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -36,11 +38,14 @@ from ecommerce.factories import (
     OrderFactory,
     ProductVersionFactory,
     ProductFactory,
+    CouponEligibilityFactory,
+    BulkEnrollmentDeliveryFactory,
 )
 from ecommerce.models import CouponSelection, CouponRedemption, Order, OrderAudit
 from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
+lazy = pytest.lazy_fixture
 
 # pylint: disable=redefined-outer-name
 
@@ -532,3 +537,34 @@ def test_get_product_courses():
     assert list(get_product_courses(program_product)) == list(
         program_product.content_object.courses.all().order_by("position_in_program")
     )
+
+
+def test_get_available_bulk_product_coupons():
+    """
+    get_available_bulk_product_coupons should return a queryset of CouponEligibility objects that can be sent out in
+    bulk enrollment invitations
+    """
+    first_product_coupon = CouponEligibilityFactory.create(coupon__enabled=True)
+    # Create more valid product coupons that apply to the same payment and product
+    additional_product_coupons = CouponEligibilityFactory.create_batch(
+        3,
+        coupon__enabled=True,
+        coupon__payment=first_product_coupon.coupon.payment,
+        product=first_product_coupon.product,
+    )
+    # Create existing deliveries for the last two, rendering them invalid
+    BulkEnrollmentDeliveryFactory.create_batch(
+        2, product_coupon=factory.Iterator(additional_product_coupons[1:])
+    )
+    # Create another product coupon that should not be valid due to it not being enabled
+    CouponEligibilityFactory.create(
+        coupon__enabled=False,
+        coupon__payment=first_product_coupon.coupon.payment,
+        product=first_product_coupon.product,
+    )
+
+    available_qset = get_available_bulk_product_coupons(
+        first_product_coupon.coupon.payment.id, first_product_coupon.product.id
+    )
+    assert available_qset.count() == 2
+    assert list(available_qset) == [first_product_coupon, additional_product_coupons[0]]

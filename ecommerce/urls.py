@@ -6,10 +6,13 @@ from ecommerce.views import (
     BasketView,
     CheckoutView,
     OrderFulfillmentView,
-    CouponView,
+    CouponListView,
+    BulkEnrollCouponListView,
+    BulkEnrollmentSubmitView,
     ProductViewSet,
     coupon_code_csv_view,
     CompanyViewSet,
+    anon_enrollment_view,
 )
 
 router = SimpleRouter()
@@ -25,8 +28,19 @@ urlpatterns = [
         name="order-fulfillment",
     ),
     url(r"^api/basket/$", BasketView.as_view(), name="basket_api"),
-    url(r"^api/coupons/$", CouponView.as_view(), name="coupon_api"),
+    url(r"^api/coupons/$", CouponListView.as_view(), name="coupon_api"),
     url(
         r"^couponcodes/(?P<version_id>[0-9]+)", coupon_code_csv_view, name="coupons_csv"
     ),
+    re_path(
+        r"^api/bulk_coupons/$",
+        BulkEnrollCouponListView.as_view(),
+        name="bulk_coupons_api",
+    ),
+    re_path(
+        r"^api/bulk_enroll/$",
+        BulkEnrollmentSubmitView.as_view(),
+        name="bulk_enroll_submit_api",
+    ),
+    re_path(r"^enroll/", anon_enrollment_view, name="anon-enrollment"),
 ]

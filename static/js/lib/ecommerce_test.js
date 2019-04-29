@@ -2,8 +2,18 @@
 import { assert } from "chai"
 import Decimal from "decimal.js-light"
 
-import { makeItem, makeCoupon } from "../factories/ecommerce"
-import { calculatePrice, formatPrice } from "./ecommerce"
+import {
+  makeItem,
+  makeCouponSelection,
+  makeBulkCouponPayment,
+  makeProduct
+} from "../factories/ecommerce"
+import { calculatePrice, formatPrice, createProductMap } from "./ecommerce"
+import {
+  PRODUCT_TYPE_COURSE,
+  PRODUCT_TYPE_COURSERUN,
+  PRODUCT_TYPE_PROGRAM
+} from "../constants"
 
 describe("ecommerce", () => {
   describe("calculatePrice", () => {
@@ -21,7 +31,7 @@ describe("ecommerce", () => {
         price: "123.45"
       }
       const coupon = {
-        ...makeCoupon(item),
+        ...makeCouponSelection(item),
         amount: "0.5"
       }
       assert.equal(
@@ -44,6 +54,30 @@ describe("ecommerce", () => {
     it("returns an empty string if null or undefined", () => {
       assert.equal(formatPrice(null), "")
       assert.equal(formatPrice(undefined), "")
+    })
+  })
+
+  describe("createProductMap", () => {
+    it("creates a map of product type to a list of matching products", () => {
+      const firstPayment = makeBulkCouponPayment(),
+        secondPayment = makeBulkCouponPayment(),
+        firstProduct = makeProduct(),
+        secondProduct = makeProduct(),
+        thirdProduct = makeProduct()
+
+      firstProduct.product_type = PRODUCT_TYPE_COURSE
+      secondProduct.product_type = PRODUCT_TYPE_COURSE
+      thirdProduct.product_type = PRODUCT_TYPE_PROGRAM
+
+      firstPayment.products = [firstProduct, secondProduct]
+      secondPayment.products = [firstProduct, thirdProduct]
+      const bulkCouponPayments = [firstPayment, secondPayment]
+
+      assert.deepEqual(createProductMap(bulkCouponPayments), {
+        [PRODUCT_TYPE_COURSE]:    [firstProduct, secondProduct],
+        [PRODUCT_TYPE_PROGRAM]:   [thirdProduct],
+        [PRODUCT_TYPE_COURSERUN]: []
+      })
     })
   })
 })
