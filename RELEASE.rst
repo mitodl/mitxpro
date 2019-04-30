@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.2.0
+Version 0.2.0 (Released April 30, 2019)
 -------------
 
 - Added admin-only bulk enrollment form
