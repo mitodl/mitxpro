@@ -12,6 +12,7 @@ from authentication.exceptions import (
     UnexpectedExistingUserException,
 )
 from authentication.utils import SocialAuthState
+from users.serializers import UserSerializer
 
 # pylint: disable=keyword-arg-before-vararg
 
@@ -60,15 +61,8 @@ def get_username(
 
 @partial
 def create_user_via_email(
-    strategy,
-    backend,
-    user=None,
-    flow=None,
-    current_partial=None,
-    details=None,
-    *args,
-    **kwargs,
-):  # pylint: disable=too-many-arguments
+    strategy, backend, user=None, flow=None, current_partial=None, *args, **kwargs
+):  # pylint: disable=too-many-arguments, unused-arguments
     """
     Creates a new user if needed and sets the password and name.
     Args:
@@ -89,10 +83,16 @@ def create_user_via_email(
         raise UnexpectedExistingUserException(backend, current_partial)
 
     data = strategy.request_data()
-    if any([field not in data for field in ["name", "password", "legal_address"]]):
-        raise RequirePasswordAndProfileException(backend, current_partial)
 
-    return user
+    # use the serializerto validate this
+    serializer = UserSerializer(data=data)
+
+    if not serializer.is_valid():
+        raise RequirePasswordAndProfileException(
+            backend, current_partial, errors=serializer.errors
+        )
+
+    return serializer.save()
 
 
 @partial

@@ -17,8 +17,9 @@ class RequireProviderException(AuthException):
 class PartialException(AuthException):
     """Partial pipeline exception"""
 
-    def __init__(self, backend, partial):
+    def __init__(self, backend, partial, errors=None):
         self.partial = partial
+        self.errors = errors
         super().__init__(backend)
 
 

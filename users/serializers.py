@@ -13,6 +13,8 @@ US_POSTAL_RE = re.compile(r"[0-9]{5}(-[0-9]{4})")
 CA_POSTAL_RE = re.compile(r"[0-9][A-Z][0-9] [A-Z][0-9][A-Z]", flags=re.I)
 
 
+
+
 class LegalAddressSerializer(serializers.ModelSerializer):
     """Serializer for legal address"""
 
@@ -21,11 +23,7 @@ class LegalAddressSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(max_length=60)
     last_name = serializers.CharField(max_length=60)
 
-    street_address_1 = serializers.CharField(max_length=60)
-    street_address_2 = serializers.CharField(max_length=60)
-    street_address_3 = serializers.CharField(max_length=60)
-    street_address_4 = serializers.CharField(max_length=60)
-    street_address_5 = serializers.CharField(max_length=60)
+    street_address = WriteableSerializerMethodField()
 
     city = serializers.CharField(max_length=50)
     country = serializers.CharField(max_length=2)
@@ -36,6 +34,28 @@ class LegalAddressSerializer(serializers.ModelSerializer):
 
     created_on = serializers.DateTimeField(read_only=True)
     updated_on = serializers.DateTimeField(read_only=True)
+
+    def validate_street_address(self, value):
+        """Validates an incoming street address list"""
+        if not value or not isinstance(value, list):
+            raise serializers.ValidationError("street_address must be a list of street lines")
+        if len(value) > 5:
+            raise serializers.ValidationError("street_address list must be 5 items or less")
+        if any([len(line) > 60 for line in value]):
+            raise serializers.ValidationError("street_address lines must be 60 characters or less")
+        return {f"street_address_{idx}": line for line, idx in enumerate(value)}
+
+    def get_street_address(self, instance):
+        """Return the list of street address lines"""
+        return [
+            line for line in [
+                instance.street_address_1,
+                instance.street_address_2,
+                instance.street_address_3,
+                instance.street_address_4,
+                instance.street_address_5,
+            ] if line
+        ]
 
     def validate(self, attrs):
         """Validate the entire object"""
@@ -52,19 +72,29 @@ class LegalAddressSerializer(serializers.ModelSerializer):
         state_or_territory = pycountry.subdivisions.get(code=state_or_territory_code)
 
         if state_or_territory is None:
-            errors["state_or_territory"].append(f"{state_or_territory_code} is not a valid state or territory code")
+            errors["state_or_territory"].append(
+                f"{state_or_territory_code} is not a valid state or territory code"
+            )
         if state_or_territory.country is not country:
-            errors["state_or_territory"].append(f"{state_or_territory.name} is not a valid state or territory of {country.name}")
+            errors["state_or_territory"].append(
+                f"{state_or_territory.name} is not a valid state or territory of {country.name}"
+            )
 
         postal_code = attrs.get("postal_code", None)
         if country.code in ["US", "CA"]:
             if not postal_code:
-                errors["postal_code"].append(f"Postal Code is required for {country.name}")
+                errors["postal_code"].append(
+                    f"Postal Code is required for {country.name}"
+                )
             else:
                 if country.code == "US" and not US_POSTAL_RE.match(postal_code):
-                    errors["postal_code"].append(f"Postal Code must be in the format 'NNNNN' or 'NNNNN-NNNNN'")
+                    errors["postal_code"].append(
+                        f"Postal Code must be in the format 'NNNNN' or 'NNNNN-NNNNN'"
+                    )
                 elif country.code == "CA" and not CA_POSTAL_RE.match(postal_code):
-                    errors["postal_code"].append(f"Postal Code must be in the format 'ANA NAN'")
+                    errors["postal_code"].append(
+                        f"Postal Code must be in the format 'ANA NAN'"
+                    )
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -73,6 +103,25 @@ class LegalAddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LegalAddress
+        fields = (
+            "first_name",
+            "last_name",
+            "street_address",
+            "city",
+            "state_or_territory",
+            "country",
+            "postal_code",
+            "created_on",
+            "updated_on",
+        )
+
+
+class PublicUserSerializer(serializers.ModelSerializer):
+    """Serializer for public user data"""
+
+    class Meta:
+        model = User
+        fields = ("id", "username", "name", "created_on", "updated_on")
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -81,9 +130,7 @@ class UserSerializer(serializers.ModelSerializer):
     # password is explicitly write_only
     password = serializers.CharField(write_only=True)
     email = WriteableSerializerMethodField()
-
-    # NOTE: legal_address not returned in rendered response for now because we
-    #       don't want to expose this until we have the time to do it correctly
+    legal_address = LegalAddressSerializer()
 
     def validate_email(self, value):
         """Empty validation function, but this is required for WriteableSerializerMethodField"""
@@ -137,6 +184,7 @@ class UserSerializer(serializers.ModelSerializer):
             "name",
             "email",
             "password",
+            "legal_address",
             "is_anonymous",
             "is_authenticated",
             "created_on",

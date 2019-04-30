@@ -31,10 +31,7 @@ def test_get_user_by_id(user_client, user):
     assert resp.json() == {
         "id": user.id,
         "username": user.username,
-        "email": user.email,
         "name": user.name,
-        "is_anonymous": False,
-        "is_authenticated": True,
         "created_on": drf_datetime(user.created_on),
         "updated_on": drf_datetime(user.updated_on),
     }
@@ -51,13 +48,28 @@ def test_get_user_by_me(client, user, is_anonymous):
     assert resp.status_code == status.HTTP_200_OK
     assert (
         resp.json()
-        == {"id": None, "username": "", "email": None, "is_anonymous": True, "is_authenticated": False}
+        == {
+            "id": None,
+            "username": "",
+            "email": None,
+            "is_anonymous": True,
+            "is_authenticated": False,
+        }
         if is_anonymous
         else {
             "id": user.id,
             "username": user.username,
             "email": user.email,
             "name": user.name,
+            "legal_address": {
+                "first_name": user.legal_address.first_name,
+                "last_name": user.legal_address.last_name,
+                "street_address": [user.legal_address.street_address_1]
+                "city": user.legal_address.city,
+                "state_or_territory": user.legal_address.state_or_territory,
+                "country": user.legal_address.country,
+                "postal_code": user.legal_address.postal_code,
+            },
             "is_anonymous": False,
             "is_authenticated": True,
             "created_on": drf_datetime(user.created_on),

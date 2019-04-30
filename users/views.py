@@ -4,14 +4,14 @@ from rest_framework import mixins, viewsets
 
 from mitxpro.permissions import UserIsOwnerPermission
 from users.models import User
-from users.serializers import UserSerializer
+from users.serializers import PublicUserSerializer, UserSerializer
 
 
 class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """User retrieve viewsets"""
 
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = PublicUserSerializer
     permission_classes = [IsAuthenticatedOrTokenHasScope, UserIsOwnerPermission]
     required_scopes = ["user"]
 
