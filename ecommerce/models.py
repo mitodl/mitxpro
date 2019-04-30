@@ -294,6 +294,9 @@ class CouponEligibility(TimestampedModel):
     coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
 
+    class Meta:
+        unique_together = ("coupon", "product")
+
     def __str__(self):
         """Description of CouponProduct"""
         return f"CouponProduct for product {self.product}, coupon {self.coupon}"
@@ -308,6 +311,9 @@ class CouponSelection(TimestampedModel):
     coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
     basket = models.ForeignKey(Basket, on_delete=models.PROTECT)
 
+    class Meta:
+        unique_together = ("coupon", "basket")
+
     def __str__(self):
         """Description of CouponSelection"""
         return f"CouponSelection for basket {self.basket}, coupon {self.coupon}"
@@ -321,6 +327,9 @@ class CouponRedemption(TimestampedModel):
 
     coupon_version = models.ForeignKey(CouponVersion, on_delete=models.PROTECT)
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = ("coupon_version", "order")
 
     def __str__(self):
         """Description of CouponRedemption"""
@@ -352,6 +361,9 @@ class CourseRunSelection(TimestampedModel):
     basket = models.ForeignKey(Basket, on_delete=models.PROTECT)
     run = models.ForeignKey("courses.CourseRun", on_delete=models.PROTECT)
 
+    class Meta:
+        unique_together = ("basket", "run")
+
     def __str__(self):
         return f"CourseRunSelection for {self.basket} and {self.run}"
 
@@ -363,6 +375,9 @@ class CourseRunEnrollment(TimestampedModel):
 
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
     run = models.ForeignKey("courses.CourseRun", on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = ("order", "run")
 
     def __str__(self):
         return f"CourseRunEnrollment for {self.order} and {self.run}"
