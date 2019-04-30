@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
 status=0
 
+echohighlight() {
+  echo -e "\033[1;92m$@\e[0m"
+}
+
 function run_test {
+    echohighlight "[TEST SUITE] $@"
     "$@"
     local test_status=$?
     if [ $test_status -ne 0 ]; then
         status=$test_status
     fi
+    echo ""
     return $status
 }
 
