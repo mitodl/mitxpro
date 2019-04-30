@@ -2,7 +2,7 @@
 status=0
 
 echohighlight() {
-  echo -e "\033[1;92m$@\e[0m"
+  echo -e "\x1b[32;1m$@\x1b[0m"
 }
 
 function run_test {
