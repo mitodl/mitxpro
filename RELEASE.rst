@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.2.0 (Released April 30, 2019)
+-------------
+
+- Added admin-only bulk enrollment form
+- Data consent agreement models and API functions (#163)
+- -
+- changes after suggestion
+- changes after suggestion
+- Add the tiles on course detail page.
+
 Version 0.1.2 (Released April 26, 2019)
 -------------
 
