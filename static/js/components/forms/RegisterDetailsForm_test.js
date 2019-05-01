@@ -15,8 +15,14 @@ import {
 describe("RegisterDetailsForm", () => {
   let sandbox, onSubmitStub
 
+  const countries = [
+    {"code": "US", "name": "United States", "states": [{"code": "US-CO", "name": "Colorado"}, {"code": "US-MA", "name": "Massachusetts"}]},
+    {"code": "CA", "name": "Canada", "states": [{"code": "CA-QC", "name": "Quebec"}, {"code": "CA-NS", "name": "Nova Scotia"}]},
+    {"code": "FR", "name": "France", "states": []}
+  ]
+
   const renderForm = () =>
-    mount(<RegisterDetailsForm onSubmit={onSubmitStub} />)
+    mount(<RegisterDetailsForm onSubmit={onSubmitStub} countries={countries}/>)
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
@@ -40,11 +46,11 @@ describe("RegisterDetailsForm", () => {
 
   //
   ;[
-    ["password", "", "password is a required field"],
-    ["password", "pass", "password must be at least 8 characters"],
-    ["password", "passwor", "password must be at least 8 characters"],
+    ["password", "", "Password is a required field"],
+    ["password", "pass", "Password must be at least 8 characters"],
+    ["password", "passwor", "Password must be at least 8 characters"],
     ["password", "password", null],
-    ["name", "", "name is a required field"],
+    ["name", "", "Name is a required field"],
     ["name", "Jane", null]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(

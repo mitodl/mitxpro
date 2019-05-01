@@ -1,7 +1,7 @@
 // @flow
-import { nthArg, objOf } from "ramda"
+import { nthArg, objOf, pathOr } from "ramda"
 
-import type { CurrentUser } from "../../flow/authTypes"
+import type { CurrentUser, Country } from "../../flow/authTypes"
 
 export const currentUserSelector = (state: any): ?CurrentUser =>
   state.entities.currentUser
@@ -21,5 +21,13 @@ export default {
     url:       "/api/users/me",
     transform: transformCurrentUser,
     update:    updateResult
+  }),
+  countriesSelector: pathOr(null, ["entities", "countries"]),
+  countriesQuery:    () => ({
+    url:       "/api/countries/",
+    transform: (json: Array<Country>) => objOf("countries", json),
+    update:    {
+      countries: (prev: Array<Country>, next: Array<Country>) => next
+    }
   })
 }
