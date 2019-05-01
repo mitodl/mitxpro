@@ -2,7 +2,7 @@
 import factory
 import wagtail_factories
 
-from cms.models import ProgramPage, CoursePage
+from cms.models import ProgramPage, CoursePage, LearningOutcomesPage
 from courses.factories import ProgramFactory, CourseFactory
 
 
@@ -27,3 +27,14 @@ class CoursePageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = CoursePage
+
+
+class LearningOutcomesPageFactory(wagtail_factories.PageFactory):
+    """LearningOutcomesPage factory class"""
+
+    heading = factory.fuzzy.FuzzyText(prefix="heading ")
+    sub_heading = factory.fuzzy.FuzzyText(prefix="Sub-heading ")
+    outcome_items = factory.SubFactory(wagtail_factories.StreamFieldFactory)
+
+    class Meta:
+        model = LearningOutcomesPage

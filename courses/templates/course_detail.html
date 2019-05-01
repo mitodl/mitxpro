@@ -79,5 +79,20 @@
             </ul>
         </div>
     </div>
+ {% if course.outcomes %}
+     <div class="learning-outcomes-block">
+         <div class="container">
+             <div class="learning-header">
+                 <h1>{{ course.outcomes.heading | safe }}</h1>
+                 <h3>{{ course.outcomes.sub_heading | safe }}</h3>
+             </div>
+             <ul class="learning-outcomes-list">
+                 {% for outcome in course.outcomes.outcome_items %}
+                     <li>{{ outcome }}</li>
+                 {% endfor %}
+             </ul>
+         </div>
+     </div>
+ {% endif %}
 </div>
 {% endblock %}
