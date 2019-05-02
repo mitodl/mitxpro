@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.2.2
+Version 0.2.2 (Released May 02, 2019)
 -------------
 
 - CMS page design - What You will learn
