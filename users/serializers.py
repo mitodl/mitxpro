@@ -22,7 +22,6 @@ class LegalAddressSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(max_length=60)
 
     street_address = WriteableSerializerMethodField()
-
     city = serializers.CharField(max_length=50)
     country = serializers.CharField(max_length=2)
 
@@ -112,11 +111,23 @@ class LegalAddressSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "street_address",
+            "street_address_1",
+            "street_address_2",
+            "street_address_3",
+            "street_address_4",
+            "street_address_5",
             "city",
             "state_or_territory",
             "country",
             "postal_code",
         )
+        extra_kwargs = {
+            "street_address_1": {"write_only": True},
+            "street_address_2": {"write_only": True},
+            "street_address_3": {"write_only": True},
+            "street_address_4": {"write_only": True},
+            "street_address_5": {"write_only": True},
+        }
 
 
 class PublicUserSerializer(serializers.ModelSerializer):
