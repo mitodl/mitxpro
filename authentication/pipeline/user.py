@@ -3,7 +3,6 @@ import ulid
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
 from social_core.pipeline.partial import partial
-from social_core.pipeline.user import create_user
 
 from authentication.exceptions import (
     InvalidPasswordException,
@@ -13,8 +12,7 @@ from authentication.exceptions import (
     UnexpectedExistingUserException,
 )
 from authentication.utils import SocialAuthState
-from users.models import LegalAddress
-from users.serializers import UserSerializer, LegalAddressSerializer
+from users.serializers import UserSerializer
 
 
 # pylint: disable=keyword-arg-before-vararg
@@ -64,15 +62,8 @@ def get_username(
 
 @partial
 def create_user_via_email(
-    strategy,
-    backend,
-    user=None,
-    flow=None,
-    current_partial=None,
-    details=None,
-    *args,
-    **kwargs,
-):  # pylint: disable=too-many-arguments
+    strategy, backend, user=None, flow=None, current_partial=None, *args, **kwargs
+):  # pylint: disable=too-many-arguments,unused-argument
     """
     Creates a new user if needed and sets the password and name.
     Args:
@@ -91,10 +82,9 @@ def create_user_via_email(
 
     if user is not None:
         raise UnexpectedExistingUserException(backend, current_partial)
-
-    data = strategy.request_data()
-    data["username"] = kwargs.get("username")
-    data["email"] = kwargs.get("uid")
+    data = strategy.request_data().copy()
+    data["username"] = kwargs.get("username", kwargs.get("details", {}).get("username"))
+    data["email"] = kwargs.get("uid", kwargs.get("details", {}).get("email"))
 
     if "name" not in data or "password" not in data:
         raise RequirePasswordAndProfileException(backend, current_partial)
@@ -105,10 +95,7 @@ def create_user_via_email(
         raise RequirePasswordAndProfileException(
             backend, current_partial, errors=serializer.errors
         )
-    return {
-        "is_new": True,
-        "user": serializer.save()
-    }
+    return {"is_new": True, "user": serializer.save()}
 
 
 @partial

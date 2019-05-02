@@ -23,7 +23,6 @@ from authentication.exceptions import (
 )
 from authentication.utils import SocialAuthState
 
-
 PARTIAL_PIPELINE_TOKEN_KEY = "partial_pipeline_token"
 
 log = logging.getLogger()

@@ -1,5 +1,5 @@
 """User views"""
-import pycountry as pycountry
+import pycountry
 from oauth2_provider.contrib.rest_framework import IsAuthenticatedOrTokenHasScope
 from rest_framework import mixins, viewsets
 from rest_framework.generics import ListAPIView
@@ -32,13 +32,17 @@ class CurrentUserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericView
 
 
 class CountriesStatesView(ListAPIView):
+    """Retrieve viewset of countries, with states/provinces for US and Canada"""
+
     permission_classes = []
     serializer_class = CountrySerializer
 
     def get_queryset(self):
         """Get generator for countries/states list"""
-        country_code = self.kwargs.get('country_code', None)
+        country_code = self.kwargs.get("country_code", None)
         if country_code:
-            return sorted(list(pycountry.subdivisions.get(country_code=country_code)), key=lambda state: state.name)
+            return sorted(
+                list(pycountry.subdivisions.get(country_code=country_code)),
+                key=lambda state: state.name,
+            )
         return sorted(list(pycountry.countries), key=lambda country: country.name)
-

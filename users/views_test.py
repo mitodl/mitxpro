@@ -52,6 +52,7 @@ def test_get_user_by_me(client, user, is_anonymous):
             "id": None,
             "username": "",
             "email": None,
+            "legal_address": None,
             "is_anonymous": True,
             "is_authenticated": False,
         }
@@ -64,7 +65,7 @@ def test_get_user_by_me(client, user, is_anonymous):
             "legal_address": {
                 "first_name": user.legal_address.first_name,
                 "last_name": user.legal_address.last_name,
-                "street_address": [user.legal_address.street_address_1]
+                "street_address": [user.legal_address.street_address_1],
                 "city": user.legal_address.city,
                 "state_or_territory": user.legal_address.state_or_territory,
                 "country": user.legal_address.country,

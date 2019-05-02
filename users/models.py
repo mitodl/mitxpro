@@ -88,7 +88,9 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
 class LegalAddress(TimestampedModel):
     """A user's legal address, used for SDN compliance"""
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="legal_address")
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="legal_address"
+    )
 
     first_name = models.CharField(max_length=60, blank=True)
     last_name = models.CharField(max_length=60, blank=True)

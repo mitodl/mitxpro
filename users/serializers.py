@@ -30,29 +30,34 @@ class LegalAddressSerializer(serializers.ModelSerializer):
     state_or_territory = serializers.CharField(max_length=255, allow_blank=True)
     postal_code = serializers.CharField(max_length=10, allow_blank=True)
 
-    created_on = serializers.DateTimeField(read_only=True)
-    updated_on = serializers.DateTimeField(read_only=True)
-
     def validate_street_address(self, value):
         """Validates an incoming street address list"""
         if not value or not isinstance(value, list):
-            raise serializers.ValidationError("street_address must be a list of street lines")
+            raise serializers.ValidationError(
+                "street_address must be a list of street lines"
+            )
         if len(value) > 5:
-            raise serializers.ValidationError("street_address list must be 5 items or less")
+            raise serializers.ValidationError(
+                "street_address list must be 5 items or less"
+            )
         if any([len(line) > 60 for line in value]):
-            raise serializers.ValidationError("street_address lines must be 60 characters or less")
+            raise serializers.ValidationError(
+                "street_address lines must be 60 characters or less"
+            )
         return {f"street_address_{idx+1}": line for idx, line in enumerate(value)}
 
     def get_street_address(self, instance):
         """Return the list of street address lines"""
         return [
-            line for line in [
+            line
+            for line in [
                 instance.street_address_1,
                 instance.street_address_2,
                 instance.street_address_3,
                 instance.street_address_4,
                 instance.street_address_5,
-            ] if line
+            ]
+            if line
         ]
 
     def validate(self, attrs):
@@ -69,7 +74,9 @@ class LegalAddressSerializer(serializers.ModelSerializer):
         postal_code = attrs.get("postal_code", None)
         if country.alpha_2 in ["US", "CA"]:
             state_or_territory_code = attrs["state_or_territory"]
-            state_or_territory = pycountry.subdivisions.get(code=state_or_territory_code)
+            state_or_territory = pycountry.subdivisions.get(
+                code=state_or_territory_code
+            )
 
             if state_or_territory is None:
                 errors["state_or_territory"].append(
@@ -105,17 +112,10 @@ class LegalAddressSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "street_address",
-            "street_address_1",
-            "street_address_2",
-            "street_address_3",
-            "street_address_4",
-            "street_address_5",
             "city",
             "state_or_territory",
             "country",
             "postal_code",
-            "created_on",
-            "updated_on",
         )
 
 
@@ -166,9 +166,12 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
         # this side-effects such that user.legal_address is updated in-place
-        legal_address = LegalAddressSerializer(user.legal_address, data=legal_address_data)
-        if legal_address.is_valid():
-            legal_address.save()
+        if legal_address_data:
+            legal_address = LegalAddressSerializer(
+                user.legal_address, data=legal_address_data
+            )
+            if legal_address.is_valid():
+                legal_address.save()
 
         return user
 
@@ -215,29 +218,36 @@ class UserSerializer(serializers.ModelSerializer):
 
 class StateProvinceSerializer(serializers.Serializer):
     """ Serializer for pycountry states/provinces"""
+
     code = serializers.CharField()
     name = serializers.CharField()
 
 
 class CountrySerializer(serializers.Serializer):
     """ Serializer for pycountry countries, with states for US/CA"""
+
     code = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     states = serializers.SerializerMethodField()
 
     def get_code(self, instance):
+        """ Get the country alpha_2 code """
         return instance.alpha_2
 
     def get_name(self, instance):
+        """ Get the country name (common name preferred if available)"""
         if hasattr(instance, "common_name"):
             return instance.common_name
         return instance.name
 
     def get_states(self, instance):
+        """ Get a list of states/provinces if USA or Canada """
         if instance.alpha_2 in ("US", "CA"):
             return StateProvinceSerializer(
-                instance=sorted(list(pycountry.subdivisions.get(country_code=instance.alpha_2)), key=lambda state: state.name),
-                many=True
+                instance=sorted(
+                    list(pycountry.subdivisions.get(country_code=instance.alpha_2)),
+                    key=lambda state: state.name,
+                ),
+                many=True,
             ).data
         return []
-

@@ -16,7 +16,12 @@ import RegisterDetailsForm from "../../../components/forms/RegisterDetailsForm"
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
-import type { AuthResponse, LegalAddress, User, Country } from "../../../flow/authTypes"
+import type {
+  AuthResponse,
+  LegalAddress,
+  User,
+  Country
+} from "../../../flow/authTypes"
 
 type RegisterProps = {|
   location: Location,

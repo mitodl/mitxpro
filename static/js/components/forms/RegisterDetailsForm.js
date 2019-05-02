@@ -60,18 +60,14 @@ const detailsValidation = yup.object().shape({
       .label("Zip/Postal Code")
       .when("country", (country, schema) => {
         if (country === US_ALPHA_2) {
-          return schema
-            .required()
-            .matches(US_POSTAL_CODE_REGEX, {
-              message:
-                "Postal Code must be formatted as either 'NNNNN' or 'NNNNN-NNNN'"
-            })
+          return schema.required().matches(US_POSTAL_CODE_REGEX, {
+            message:
+              "Postal Code must be formatted as either 'NNNNN' or 'NNNNN-NNNN'"
+          })
         } else if (country === CA_ALPHA_2) {
-          return schema
-            .required()
-            .matches(CA_POSTAL_CODE_REGEX, {
-              message: "Postal Code must be formatted as 'ANA NAN'"
-            })
+          return schema.required().matches(CA_POSTAL_CODE_REGEX, {
+            message: "Postal Code must be formatted as 'ANA NAN'"
+          })
         }
       })
   })
@@ -239,7 +235,7 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
           <Field type="hidden" name="legal_address.postal_code" value="" />
         )}
         <button type="submit" disabled={isSubmitting || !isValid}>
-          {`${isValid}`}
+          Continue
         </button>
       </Form>
     )}
