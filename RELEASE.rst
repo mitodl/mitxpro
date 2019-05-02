@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.2.1 (Released May 02, 2019)
+-------------
+
+- Add unique constraints to some models which link other models together (#204)
+- Added test script detail to Travis output
+
 Version 0.2.0 (Released April 30, 2019)
 -------------
 
