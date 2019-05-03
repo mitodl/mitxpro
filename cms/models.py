@@ -4,14 +4,20 @@ Page models for the CMS
 from django.db import models
 from django.utils.text import slugify
 
-from wagtail.admin.edit_handlers import FieldPanel, StreamFieldPanel
+from wagtail.admin.edit_handlers import (
+    FieldPanel,
+    MultiFieldPanel,
+    StreamFieldPanel,
+    InlinePanel,
+)
 from wagtail.core import blocks
-from wagtail.core.models import Page
+from wagtail.core.models import Orderable, Page
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.blocks import RawHTMLBlock
 from wagtail.images.models import Image
 from wagtail.images.blocks import ImageChooserBlock
 
+from modelcluster.fields import ParentalKey
 from .blocks import LearningTechniqueBlock
 
 
@@ -71,7 +77,7 @@ class LearningOutcomesPage(CourseProgramChildPage):
         # autogenerate a unique slug so we don't hit a ValidationError
         self.title = "Learning Outcomes"
         self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
-        super().save(*args, **kwargs)
+        super(LearningOutcomesPage, self).save(*args, **kwargs)
 
 
 class LearningTechniquesPage(CourseProgramChildPage):
@@ -169,7 +175,11 @@ class ProductPage(Page):
         StreamFieldPanel("content"),
     ]
 
-    subpage_types = ["LearningOutcomesPage", "LearningTechniquesPage"]
+    subpage_types = [
+        "LearningOutcomesPage",
+        "LearningTechniquesPage",
+        "FrequentlyAskedQuestionPage",
+    ]
 
     def get_context(self, request, *args, **kwargs):
         context = super(ProductPage, self).get_context(request)
@@ -209,3 +219,35 @@ class CoursePage(ProductPage):
     )
 
     content_panels = [FieldPanel("course")] + ProductPage.content_panels
+
+
+class FrequentlyAskedQuestionPage(CourseProgramChildPage):
+    """
+    FAQs page for program/course
+    """
+
+    content_panels = [InlinePanel("faqs", label="Frequently Asked Questions")]
+
+    def save(self, *args, **kwargs):
+        # autogenerate a unique slug so we don't hit a ValidationError
+        self.title = "Frequently Asked Questions"
+        self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
+        super().save(*args, **kwargs)
+
+
+class FrequentlyAskedQuestion(Orderable):
+    """
+    FAQs for the program/course page
+    """
+
+    faqs_page = ParentalKey(FrequentlyAskedQuestionPage, related_name="faqs", null=True)
+    question = models.TextField()
+    answer = RichTextField()
+
+    content_panels = [
+        MultiFieldPanel(
+            [FieldPanel("question"), FieldPanel("answer")],
+            heading="Frequently Asked Questions",
+            classname="collapsible",
+        )
+    ]

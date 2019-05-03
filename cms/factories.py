@@ -1,5 +1,6 @@
 """Wagtail page factories"""
 import factory
+from factory.django import DjangoModelFactory
 import wagtail_factories
 
 from cms.models import (
@@ -7,6 +8,8 @@ from cms.models import (
     CoursePage,
     LearningOutcomesPage,
     LearningTechniquesPage,
+    FrequentlyAskedQuestion,
+    FrequentlyAskedQuestionPage,
 )
 from cms.blocks import LearningTechniqueBlock
 from courses.factories import ProgramFactory, CourseFactory
@@ -66,3 +69,21 @@ class LearningTechniquesPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = LearningTechniquesPage
+
+
+class FrequentlyAskedQuestionPageFactory(wagtail_factories.PageFactory):
+    """ FrequentlyAskedQuestionPage factory class"""
+
+    class Meta:
+        model = FrequentlyAskedQuestionPage
+
+
+class FrequentlyAskedQuestionFactory(DjangoModelFactory):
+    """FrequentlyAskedQuestion factory class"""
+
+    faqs_page = factory.SubFactory(FrequentlyAskedQuestionPageFactory)
+    question = factory.fuzzy.FuzzyText(prefix="question: ")
+    answer = factory.fuzzy.FuzzyText(prefix="answer: ")
+
+    class Meta:
+        model = FrequentlyAskedQuestion

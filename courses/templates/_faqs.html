@@ -1,0 +1,36 @@
+<div class="faqs-block">
+  <div class="container">
+    <div class="faq-head">
+      <h1>FAQS</h1>
+      <h3>Please review the following frequently asked questions before enrolling. Don’t see your question
+        here? Please contact our team at <a href="mailto:mitxpro@mit.edu">mitxpro@mit.edu</a>.</h3>
+    </div>
+    <ul id="accordion">
+      <!--TODO currently we are limiting results to 5 and hide extra FAQs.-->
+      {% for faq in course.faqs %}
+      <li class="card {% if forloop.counter > 5 %}extra-faq d-none{% endif %}">
+        <div class="card-header" id="heading-{{ forloop.counter }}">
+          <button class="btn btn-link uppercase {% if not forloop.first %}collapsed{% endif %}" data-toggle="collapse"
+                  data-target="#collapse-{{ forloop.counter }}"
+                  aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                  aria-controls="collapse-{{ forloop.counter }}">
+            {{ faq.question }}
+          </button>
+        </div>
+
+        <div id="collapse-{{ forloop.counter }}" class="collapse {% if forloop.first %}show{% endif %}"
+             aria-labelledby="heading-{{ forloop.counter }}"
+             data-parent="#accordion">
+          <div class="card-body">
+            {{ faq.answer | safe }}
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    <!--TODO related to above todo, we will load more faqs on button click-->
+    {% if course.faqs|length > 5 %}
+    <a href="#" class="readmore uppercase"><span class="readmore-text">Read</span> More FAQs</a>
+    {% endif %}
+  </div>
+</div>
