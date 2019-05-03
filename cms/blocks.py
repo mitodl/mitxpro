@@ -16,3 +16,11 @@ class LearningTechniqueBlock(blocks.StructBlock):
 
     class Meta:
         icon = "plus"
+
+
+class TermsOfServicesBlock(blocks.StructBlock):
+    """
+    A custom block for terms of services.
+    """
+    heading = blocks.CharBlock(max_length=100)
+    detail = blocks.RichTextBlock()

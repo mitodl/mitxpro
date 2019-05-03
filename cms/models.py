@@ -18,7 +18,7 @@ from wagtail.images.models import Image
 from wagtail.images.blocks import ImageChooserBlock
 
 from modelcluster.fields import ParentalKey
-from .blocks import LearningTechniqueBlock
+from .blocks import LearningTechniqueBlock, TermsOfServicesBlock
 
 
 class CourseProgramChildPage(Page):
@@ -333,3 +333,20 @@ class FrequentlyAskedQuestion(Orderable):
             classname="collapsible",
         )
     ]
+
+
+class TermsOfServicesPage(Page):
+    term_of_service = StreamField(
+        [("tos", TermsOfServicesBlock())],
+        blank=False,
+        help_text="Enter detail of term of service.",
+    )
+
+    content_panels = [StreamFieldPanel("term_of_service")]
+
+    # def get_context(self, request, *args, **kwargs):
+    #     context = super(TermsOfServicesPage, self).get_context(request)
+    #     context["title"] = self.title
+    #
+    #     import pdb; pdb.set_trace()
+    #     return context
