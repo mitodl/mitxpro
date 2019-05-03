@@ -14,6 +14,9 @@ RUN apt-get install -y $(grep -vE "^\s*#" apt.txt  | tr "\n" " ")
 # Add repo needed for postgres 9.6 and install it
 RUN apt-get update && apt-get install libpq-dev postgresql-client-9.6 -y
 
+# Install dependencies for PyPI package `pdftotext`
+RUN apt-get install -y build-essential libpoppler-cpp-dev pkg-config python-dev
+
 # pip
 RUN curl --silent --location https://bootstrap.pypa.io/get-pip.py | python3 -
 

@@ -46,6 +46,7 @@ kombu==4.5.0              # via celery, django-server-status
 newrelic==4.18.0.118
 oauthlib==3.0.1           # via django-oauth-toolkit, requests-oauthlib, social-auth-core
 parso==0.4.0              # via jedi
+pdftotext==2.1.1
 pexpect==4.7.0            # via ipython
 pickleshare==0.7.5        # via ipython
 pillow==5.4.1

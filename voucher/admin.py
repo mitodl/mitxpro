@@ -1,0 +1,3 @@
+"""
+Admin bindings for voucher
+"""

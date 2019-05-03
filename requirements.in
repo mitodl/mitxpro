@@ -17,6 +17,7 @@ html5lib==0.999999999
 django-storages==1.7.1
 ipython
 newrelic
+pdftotext
 Pillow
 psycopg2==2.7.3.2
 pycountry==18.12.8
