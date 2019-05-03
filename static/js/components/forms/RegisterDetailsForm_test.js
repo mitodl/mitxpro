@@ -63,9 +63,16 @@ describe("RegisterDetailsForm", () => {
     ["password", "", "Password is a required field"],
     ["password", "pass", "Password must be at least 8 characters"],
     ["password", "passwor", "Password must be at least 8 characters"],
-    ["password", "password", null],
-    ["name", "", "Name is a required field"],
-    ["name", "Jane", null]
+    ["password", "password123", null],
+    [
+      "password",
+      "password",
+      "Password must contain at least one letter and number"
+    ],
+    ["name", "", "Legal Name is a required field"],
+    ["name", "Jane", null],
+    ["legal_address.city", "Cambridge", null],
+    ["legal_address.city", "", "City is a required field"]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value
@@ -82,5 +89,108 @@ describe("RegisterDetailsForm", () => {
         errorMessage
       )
     })
+  })
+
+  //
+  ;[["US", "FR"], ["CA", "GB"]].forEach(([countryState, countryNoState]) => {
+    it(`validates that state & postal_code required for ${countryState} but not ${countryNoState}`, async () => {
+      const wrapper = renderForm()
+      // Select country requiring state and zipcode
+      const country = wrapper.find(`select[name="legal_address.country"]`)
+      country.simulate("change", {
+        persist: () => {},
+        target:  { name: "legal_address.country", value: countryState }
+      })
+      country.simulate("blur")
+      await wait()
+      wrapper.update()
+      const stateTerritory = wrapper.find(
+        `select[name="legal_address.state_or_territory"]`
+      )
+      assert.isTrue(stateTerritory.exists())
+      stateTerritory.simulate("change", {
+        persist: () => {},
+        target:  { name: "legal_address.state_or_territory", value: "" }
+      })
+      stateTerritory.simulate("blur")
+      await wait()
+      wrapper.update()
+      const postalCode = wrapper.find(`input[name="legal_address.postal_code"]`)
+      assert.isTrue(postalCode.exists())
+      postalCode.simulate("change", {
+        persist: () => {},
+        target:  { name: "legal_address.postalCode", value: "" }
+      })
+      postalCode.simulate("blur")
+      await wait()
+      wrapper.update()
+      assert.deepEqual(
+        findFormikErrorByName(
+          wrapper,
+          "legal_address.state_or_territory"
+        ).text(),
+        'State/Territory must match the following: "/[A-Z]{2}-[A-Z]{2,3}/"'
+      )
+      assert.deepEqual(
+        findFormikErrorByName(wrapper, "legal_address.postal_code").text(),
+        countryState === "US"
+          ? "Postal Code must be formatted as either 'NNNNN' or 'NNNNN-NNNN'"
+          : "Postal Code must be formatted as 'ANA NAN'"
+      )
+
+      // Select country not requiring state and zipcode
+      country.simulate("change", {
+        persist: () => {},
+        target:  { name: "legal_address.country", value: countryNoState }
+      })
+      country.simulate("blur")
+      await wait()
+      wrapper.update()
+      assert.isFalse(
+        findFormikErrorByName(
+          wrapper,
+          "legal_address.state_or_territory"
+        ).exists()
+      )
+      assert.isFalse(
+        findFormikErrorByName(wrapper, "legal_address.postal_code").exists()
+      )
+    })
+  })
+
+  it(`validates that additional street address lines are created on request`, async () => {
+    const wrapper = renderForm()
+    assert.isTrue(
+      wrapper.find(`input[name="legal_address.street_address[2]"]`).exists()
+    )
+    assert.isFalse(
+      wrapper.find(`input[name="legal_address.street_address[3]"]`).exists()
+    )
+    const moreStreets = wrapper.find(".additional-street")
+    moreStreets.simulate("click")
+    assert.isTrue(
+      wrapper.find(`input[name="legal_address.street_address[3]"]`).exists()
+    )
+    moreStreets.simulate("click")
+    assert.isTrue(
+      wrapper.find(`input[name="legal_address.street_address[4]"]`).exists()
+    )
+    assert.isFalse(wrapper.find(".additional-street").exists())
+  })
+
+  it(`validates that street address[0] is required`, async () => {
+    const wrapper = renderForm()
+    const street = wrapper.find(`input[name="legal_address.street_address[0]"]`)
+    street.simulate("change", {
+      persist: () => {},
+      target:  { name: "legal_address.street_address[0]", value: "" }
+    })
+    street.simulate("blur")
+    await wait()
+    wrapper.update()
+    assert.deepEqual(
+      findFormikErrorByName(wrapper, "legal_address.street_address").text(),
+      "Street address is a required field"
+    )
   })
 })

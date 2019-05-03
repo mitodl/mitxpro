@@ -39,10 +39,4 @@ class CountriesStatesView(ListAPIView):
 
     def get_queryset(self):
         """Get generator for countries/states list"""
-        country_code = self.kwargs.get("country_code", None)
-        if country_code:
-            return sorted(
-                list(pycountry.subdivisions.get(country_code=country_code)),
-                key=lambda state: state.name,
-            )
         return sorted(list(pycountry.countries), key=lambda country: country.name)

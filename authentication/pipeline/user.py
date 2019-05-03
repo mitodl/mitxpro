@@ -84,7 +84,7 @@ def create_user_via_email(
         raise UnexpectedExistingUserException(backend, current_partial)
     data = strategy.request_data().copy()
     data["username"] = kwargs.get("username", kwargs.get("details", {}).get("username"))
-    data["email"] = kwargs.get("uid", kwargs.get("details", {}).get("email"))
+    data["email"] = kwargs.get("email", kwargs.get("details", {}).get("email"))
 
     if "name" not in data or "password" not in data:
         raise RequirePasswordAndProfileException(backend, current_partial)

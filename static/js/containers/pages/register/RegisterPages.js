@@ -10,7 +10,6 @@ import RegisterDetailsPage from "./RegisterDetailsPage"
 
 const RegisterPages = () => (
   <React.Fragment>
-    <h3>Register</h3>
     <Switch>
       <Route exact path={routes.register.begin} component={RegisterEmailPage} />
       <Route

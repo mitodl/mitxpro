@@ -67,21 +67,18 @@ class LegalAddressSerializer(serializers.ModelSerializer):
         # allow ourselves to return as much error information at once for user
         errors = defaultdict(list)
 
-        if country is None:
-            errors["country"].append(f"{country_code} is not a valid country code")
-
         postal_code = attrs.get("postal_code", None)
-        if country.alpha_2 in ["US", "CA"]:
+        if country and country.alpha_2 in ["US", "CA"]:
             state_or_territory_code = attrs["state_or_territory"]
             state_or_territory = pycountry.subdivisions.get(
                 code=state_or_territory_code
             )
 
-            if state_or_territory is None:
+            if not state_or_territory:
                 errors["state_or_territory"].append(
-                    f"{state_or_territory_code} is not a valid state or territory code"
+                    f"State/territory is required for {country.name}"
                 )
-            if state_or_territory.country is not country:
+            elif state_or_territory.country is not country:
                 errors["state_or_territory"].append(
                     f"{state_or_territory.name} is not a valid state or territory of {country.name}"
                 )
@@ -194,9 +191,11 @@ class UserSerializer(serializers.ModelSerializer):
 
         if legal_address_data:
             # this side-effects such that instance.legal_address is updated in-place
-            LegalAddressSerializer(
+            address_serializer = LegalAddressSerializer(
                 instance.legal_address, data=legal_address_data
-            ).save()
+            )
+            if address_serializer.is_valid(raise_exception=True):
+                address_serializer.save()
 
         # save() will be called in super().update()
         if password is not None:

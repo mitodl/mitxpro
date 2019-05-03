@@ -14,3 +14,20 @@ a.link-button {
     color: #ffffff;
   }
 }
+
+.form-error {
+  color: $red;
+}
+
+.align-text-right {
+  text-align: right
+}
+
+.gray-text {
+  color: $gray;
+}
+
+.btn-light-blue {
+  background-color: $light-blue !important;
+  border-color: $light-blue !important;
+}

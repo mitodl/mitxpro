@@ -22,6 +22,7 @@ import type {
   User,
   Country
 } from "../../../flow/authTypes"
+import { Link } from "react-router-dom"
 
 type RegisterProps = {|
   location: Location,
@@ -81,11 +82,23 @@ class RegisterProfilePage extends React.Component<Props> {
   render() {
     const { countries } = this.props
     return (
-      <div>
-        <RegisterDetailsForm
-          onSubmit={this.onSubmit.bind(this)}
-          countries={countries}
-        />
+      <div className="registration-form">
+        <div className="form-group row">
+          <h3 className="col-8">Create an Account</h3>
+          <h5 className="col-4 align-text-right gray-text">Step 1 of 2</h5>
+        </div>
+        <div className="form-group row">
+          <div className="col">Already have an MITxPro account?</div>
+          <div className="col">
+            <Link to={routes.login.begin}>Click here</Link>
+          </div>
+        </div>
+        <div className="inner-form">
+          <RegisterDetailsForm
+            onSubmit={this.onSubmit.bind(this)}
+            countries={countries}
+          />
+        </div>
       </div>
     )
   }
