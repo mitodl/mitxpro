@@ -4,3 +4,5 @@ curl
 libjpeg-dev
 zlib1g-dev
 net-tools
+pkg-config
+libpoppler-cpp-dev

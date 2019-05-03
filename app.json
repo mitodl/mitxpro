@@ -6,6 +6,9 @@
   ],
   "buildpacks": [
     {
+      "url": "https://github.com/heroku/heroku-buildpack-apt"
+    },
+    {
       "url": "https://github.com/heroku/heroku-buildpack-nodejs"
     },
     {
@@ -16,9 +19,6 @@
     },
     {
       "url": "https://github.com/heroku/heroku-buildpack-nginx"
-    },
-    {
-      "url": "https://github.com/heroku/heroku-buildpack-apt"
     }
   ],
   "description": " ",
@@ -67,9 +67,6 @@
     },
     "MAILGUN_FROM_EMAIL": {
       "description": "Email which mail comes from"
-    },
-    "MAILGUN_BCC_TO_EMAIL": {
-      "description": "Email address used with bcc email"
     },
     "MITXPRO_ADMIN_EMAIL": {
       "description": "E-mail to send 500 reports to."

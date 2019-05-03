@@ -11,11 +11,12 @@ RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN apt-get update
 RUN apt-get install -y $(grep -vE "^\s*#" apt.txt  | tr "\n" " ")
 
+#############################################
+# NOTE: if you need to add a package dependency that is required in all envs, please add it to apt.txt
+#############################################
+
 # Add repo needed for postgres 9.6 and install it
 RUN apt-get update && apt-get install libpq-dev postgresql-client-9.6 -y
-
-# Install dependencies for PyPI package `pdftotext`
-RUN apt-get install -y build-essential libpoppler-cpp-dev pkg-config python-dev
 
 # pip
 RUN curl --silent --location https://bootstrap.pypa.io/get-pip.py | python3 -
