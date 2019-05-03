@@ -101,7 +101,9 @@ def test_validate_optional_country_data(sample_address):
 def test_update_user_serializer(user, sample_address):
     """ Test that a UserSerializer can be updated properly """
     serializer = UserSerializer(
-        instance=user, data={"password": "AgJw0123", "legal_address": sample_address}, partial=True
+        instance=user,
+        data={"password": "AgJw0123", "legal_address": sample_address},
+        partial=True,
     )
     assert serializer.is_valid()
     serializer.save()
