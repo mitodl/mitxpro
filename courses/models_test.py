@@ -14,12 +14,14 @@ from cms.factories import (
     LearningTechniquesPageFactory,
     FrequentlyAskedQuestionFactory,
     FrequentlyAskedQuestionPageFactory,
+    ForTeamsPageFactory,
 )
 
 from cms.models import (
     LearningOutcomesPage,
     LearningTechniquesPage,
     FrequentlyAskedQuestionPage,
+    ForTeamsPage,
 )
 from mitxpro.utils import now_in_utc
 
@@ -98,12 +100,33 @@ def test_program_page_properties():
     program = ProgramFactory.create()
     assert program.description is None
     assert program.duration is None
-    assert program.outcomes is None
-    program_page = ProgramPageFactory.create(
-        program=program, description="<p>desc</p>", duration="1 week"
+    ProgramPageFactory.create(
+        program=program,
+        title="<p>page title</p>",
+        subhead="subhead",
+        description="<p>desc</p>",
+        duration="1 week",
+        video_title="<p>title</p>",
+        video_url="http://test.com/mock.mp4",
+        background_image__title="background-image",
     )
+    assert program.display_title == "<p>page title</p>"
+    assert program.subhead == "subhead"
     assert program.description == "<p>desc</p>"
     assert program.duration == "1 week"
+    assert program.video_title == "<p>title</p>"
+    assert program.video_url == "http://test.com/mock.mp4"
+    assert program.background_image.title == "background-image"
+
+
+def test_program_learning_outcomes():
+    """
+    ProgramPage related LearningOutcomesPage should return expected values if it exists
+    """
+    program = ProgramFactory.create()
+    program_page = ProgramPageFactory.create(program=program)
+
+    assert program.outcomes is None
     assert LearningOutcomesPage.can_create_at(program_page)
 
     learning_outcomes_page = LearningOutcomesPageFactory(
@@ -120,6 +143,28 @@ def test_program_page_properties():
         assert block.block_type == "outcome"
         assert block.value == "benefit"
     assert not LearningOutcomesPage.can_create_at(program_page)
+
+
+def test_program_for_teams():
+    """
+    ProgramPage related ForTeamsPage should return expected values if it exists
+    """
+    program = ProgramFactory.create()
+    program_page = ProgramPageFactory.create(program=program)
+
+    assert program.for_teams is None
+    assert ForTeamsPage.can_create_at(program_page)
+    teams_page = ForTeamsPageFactory.create(
+        parent=program_page,
+        content="<p>content</p>",
+        switch_layout=True,
+        action_title="Action Title",
+    )
+    assert program.for_teams == teams_page
+    assert teams_page.action_title == "Action Title"
+    assert teams_page.content == "<p>content</p>"
+    assert teams_page.switch_layout
+    assert not ForTeamsPage.can_create_at(program_page)
 
 
 def test_program_learning_techniques():
@@ -302,6 +347,16 @@ def test_course_page_properties():
     assert course.video_title == "<p>title</p>"
     assert course.video_url == "http://test.com/mock.mp4"
     assert course.background_image.title == "background-image"
+
+
+def test_course_learning_outcomes():
+    """
+    CoursePage related LearningOutcomesPage should return expected values if it exists
+    """
+    course = CourseFactory.create()
+    course_page = CoursePageFactory.create(course=course)
+
+    assert course.outcomes is None
     assert LearningOutcomesPage.can_create_at(course_page)
 
     learning_outcomes_page = LearningOutcomesPageFactory(
@@ -374,3 +429,46 @@ def test_program_page_faq_property():
 
     assert faqs_page.get_parent() is program_page
     assert list(program.faqs) == [faq]
+
+
+def test_course_for_teams():
+    """
+    The ForTeams property should return expected values if associated with a course
+    """
+    course = CourseFactory.create()
+    assert course.for_teams is None
+
+    course_page = CoursePageFactory.create(course=course)
+    assert ForTeamsPage.can_create_at(course_page)
+    teams_page = ForTeamsPageFactory.create(
+        parent=course_page,
+        content="<p>content</p>",
+        switch_layout=True,
+        action_title="Action Title",
+    )
+    assert course.for_teams is teams_page
+    assert teams_page.action_title == "Action Title"
+    assert teams_page.content == "<p>content</p>"
+    assert teams_page.switch_layout
+
+
+def test_program_for_teams():
+    """
+    The ForTeams property should return expected values if associated with a program
+    """
+    program = CourseFactory.create()
+    assert program.for_teams is None
+
+    program_page = ProgramPageFactory.create(program=program)
+    assert ForTeamsPage.can_create_at(program_page)
+    teams_page = ForTeamsPageFactory.create(
+        parent=program_page,
+        content="<p>content</p>",
+        switch_layout=True,
+        action_title="Action Title",
+    )
+    assert program.for_teams is teams_page
+    assert teams_page.action_title == "Action Title"
+    assert teams_page.content == "<p>content</p>"
+    assert teams_page.switch_layout
+    assert not ForTeamsPage.can_create_at(course_page)

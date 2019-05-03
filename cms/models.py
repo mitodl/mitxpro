@@ -97,6 +97,40 @@ class LearningTechniquesPage(CourseProgramChildPage):
     def save(self, *args, **kwargs):
         # auto generate a unique slug so we don't hit a ValidationError
         self.title = "Learning Techniques"
+
+
+class ForTeamsPage(CourseProgramChildPage):
+    """
+    CMS Page representing a "For Teams" section in a course/program page
+    """
+
+    content = RichTextField(help_text="The content shown in the section")
+    action_title = models.CharField(
+        max_length=255, help_text="The text to show on the call to action button"
+    )
+    switch_layout = models.BooleanField(
+        blank=True,
+        default=False,
+        help_text="When checked, switches the position of the image and content, i.e. image on left and content on right.",
+    )
+    image = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Image size must be at least 750x505 pixels.",
+    )
+    content_panels = [
+        FieldPanel("content"),
+        FieldPanel("action_title"),
+        FieldPanel("switch_layout"),
+        FieldPanel("image"),
+    ]
+
+    def save(self, *args, **kwargs):
+        # autogenerate a unique slug so we don't hit a ValidationError
+        self.title = "For Teams"
         self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
         super().save(*args, **kwargs)
 
@@ -179,6 +213,7 @@ class ProductPage(Page):
         "LearningOutcomesPage",
         "LearningTechniquesPage",
         "FrequentlyAskedQuestionPage",
+        "ForTeamsPage",
     ]
 
     def get_context(self, request, *args, **kwargs):

@@ -1,0 +1,85 @@
+// sass-lint:disable mixins-before-declarations
+.for-teams-block {
+  width: 100%;
+  padding: 100px 0 50px;
+  background: white url(/static/images/for-teams-bg.png) repeat-x 0 100%;
+  min-height: 400px;
+  overflow: hidden;
+  position: relative;
+  color: black;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 500;
+
+  [class^="col-"],
+  [class*=" col-"],
+  .container {
+    @include media-breakpoint-up(lg) {
+      position: static;
+      min-height: 505px;
+    }
+  }
+
+  .stick-left {
+    left: 0;
+  }
+
+  .action-button {
+    font-size: x-large;
+  }
+
+  .img-holder {
+    padding: 40px 0 0;
+    @include media-breakpoint-up(lg) {
+      position: absolute;
+      right: 0;
+      top: 100px;
+      width: calc(41.66667% - 40px);
+      padding: 0;
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      @include media-breakpoint-up(lg) {
+        height: 505px;
+        object-fit: cover;
+      }
+    }
+  }
+
+  h1 {
+    font-size: 40px;
+    line-height: 45px;
+    color: $red;
+    font-weight: 600;
+    margin: 0 0 10px;
+    text-transform: uppercase;
+    @include media-breakpoint-up(lg) {
+      margin: 0 0 40px;
+    }
+  }
+
+  p {
+    margin: 0 0 30px;
+  }
+
+  .enrol-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      font-size: 20px;
+      line-height: 28px;
+      padding: 20px 0;
+      font-weight: 500;
+      border-top: 1px solid rgba(white, 0.2);
+
+      &:first-child {
+        border: none;
+      }
+    }
+  }
+}
