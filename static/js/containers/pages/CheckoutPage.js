@@ -22,6 +22,13 @@ import type {
 } from "../../flow/ecommerceTypes"
 
 export const calcSelectedRunIds = (item: BasketItem): { [number]: number } => {
+  if (item.type === "courserun") {
+    const course = item.courses[0]
+    return {
+      [course.id]: item.object_id
+    }
+  }
+
   const courseLookup = {}
   for (const course of item.courses) {
     for (const run of course.courseruns) {
@@ -145,6 +152,55 @@ export class CheckoutPage extends React.Component<Props, State> {
   // $FlowFixMe
   checkout = (...args) => this.handleErrors(this.props.checkout(...args))
 
+  renderBasketItem = (item: BasketItem) => {
+    const selectedRunIds = this.getSelectedRunIds(item)
+    if (item.type === "program") {
+      return (
+        <React.Fragment>
+          <div className="row">
+            You are about to purchase the following program
+          </div>
+          {item.courses.map(course => (
+            <div className="row course-row" key={course.id}>
+              <img src={course.thumbnail_url} alt={course.title} />
+              <div className="title-column">
+                <div className="title">{course.title}</div>
+                <select
+                  className="run-selector"
+                  onChange={this.updateSelectedRun(course.id)}
+                  value={selectedRunIds[course.id] || ""}
+                >
+                  <option value={null} key={"null"}>
+                    Select a course run
+                  </option>
+                  {course.courseruns.map(run => (
+                    <option value={run.id} key={run.id}>
+                      {run.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          ))}
+        </React.Fragment>
+      )
+    } else {
+      return (
+        <React.Fragment>
+          <div className="row">
+            You are about to purchase the following program
+          </div>
+          <div className="row course-row">
+            <img src={item.thumbnail_url} alt={item.description} />
+            <div className="title-column">
+              <div className="title">{item.description}</div>
+            </div>
+          </div>
+        </React.Fragment>
+      )
+    }
+  }
+
   render() {
     const { basket } = this.props
     const { couponCode, errors } = this.state
@@ -162,36 +218,9 @@ export class CheckoutPage extends React.Component<Props, State> {
       coupon.targets.includes(item.id)
     )
 
-    const selectedRunIds = this.getSelectedRunIds(item)
     return (
       <div className="checkout-page">
-        <div className="row">
-          You are about to purchase the following {item.type}
-        </div>
-        {item.courses.map(course => (
-          <div className="row course-row" key={course.id}>
-            <img src={course.thumbnail_url} alt={course.title} />
-            <div className="title-column">
-              <div className="title">{course.title}</div>
-              {item.type === "courserun" ? null : (
-                <select
-                  className="run-selector"
-                  onChange={this.updateSelectedRun(course.id)}
-                  value={selectedRunIds[course.id] || ""}
-                >
-                  <option value={null} key={"null"}>
-                    Select a course run
-                  </option>
-                  {course.courseruns.map(run => (
-                    <option value={run.id} key={run.id}>
-                      {run.title}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-          </div>
-        ))}
+        {this.renderBasketItem(item)}
         <div className="row price-row">Price {formatPrice(item.price)}</div>
         {coupon ? (
           <div className="row discount-row">

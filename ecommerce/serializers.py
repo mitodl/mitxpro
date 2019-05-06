@@ -56,12 +56,17 @@ class ProductVersionSerializer(serializers.ModelSerializer):
     """ ProductVersion serializer for viewing/updating items in basket """
 
     type = serializers.SerializerMethodField()
+    object_id = serializers.SerializerMethodField()
     courses = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
 
     def get_type(self, instance):
         """ Return the product version type """
         return instance.product.content_type.model
+
+    def get_object_id(self, instance):
+        """Return the object id for the product"""
+        return instance.product.object_id
 
     def get_courses(self, instance):
         """ Return the courses in the product """
@@ -89,7 +94,15 @@ class ProductVersionSerializer(serializers.ModelSerializer):
         return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
     class Meta:
-        fields = ["id", "price", "description", "type", "courses", "thumbnail_url"]
+        fields = [
+            "id",
+            "price",
+            "description",
+            "type",
+            "courses",
+            "thumbnail_url",
+            "object_id",
+        ]
         model = models.ProductVersion
 
 
