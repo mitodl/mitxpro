@@ -12,6 +12,10 @@ const CA_ALPHA_2 = "CA"
 
 const US_POSTAL_CODE_REGEX = /[0-9]{5}(-[0-9]{4}){0,1}/
 const CA_POSTAL_CODE_REGEX = /[0-9][A-Z][0-9] [A-Z][0-9][A-Z]/
+const COUNTRIES_REQUIRING_POSTAL_CODE = [US_ALPHA_2, CA_ALPHA_2]
+const COUNTRIES_REQUIRING_STATE = [US_ALPHA_2, CA_ALPHA_2]
+
+const ADDRESS_LINES_MAX = 5
 
 const detailsValidation = yup.object().shape({
   name: yup
@@ -44,14 +48,14 @@ const detailsValidation = yup.object().shape({
       .label("Street address")
       .of(yup.string().max(60))
       .min(1)
-      .max(5)
+      .max(ADDRESS_LINES_MAX)
       .compact()
       .required(),
     state_or_territory: yup
       .mixed()
       .label("State/Territory")
       .when("country", {
-        is:   includes(__, [US_ALPHA_2, CA_ALPHA_2]),
+        is:   includes(__, COUNTRIES_REQUIRING_STATE),
         then: yup
           .string()
           .required()
@@ -180,12 +184,13 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
                   </div>
                 ))}
                 {values.legal_address.street_address.length < 5 ? (
-                  <div
+                  <button
+                    type="button"
                     className="additional-street"
                     onClick={() => arrayHelpers.push("")}
                   >
                     Add additional line
-                  </div>
+                  </button>
                 ) : null}
               </div>
             )}
@@ -217,7 +222,7 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
           </Field>
           <ErrorMessage name="legal_address.country" component={FormError} />
         </div>
-        {includes(values.legal_address.country, [US_ALPHA_2, CA_ALPHA_2]) ? (
+        {includes(values.legal_address.country, COUNTRIES_REQUIRING_STATE) ? (
           <div className="form-group">
             <label className="font-weight-bold">State/Province*</label>
             <Field
@@ -252,25 +257,28 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
           />
           <ErrorMessage name="legal_address.city" component={FormError} />
         </div>
-        {includes(values.legal_address.country, [US_ALPHA_2, CA_ALPHA_2]) ? (
-          <div className="form-group">
-            <label
-              htmlFor="legal_address.postal_code"
-              className="font-weight-bold"
-            >
+        {includes(
+          values.legal_address.country,
+          COUNTRIES_REQUIRING_POSTAL_CODE
+        ) ? (
+            <div className="form-group">
+              <label
+                htmlFor="legal_address.postal_code"
+                className="font-weight-bold"
+              >
               Zip/Postal Code*
-            </label>
-            <Field
-              type="text"
-              name="legal_address.postal_code"
-              className="form-control"
-            />
-            <ErrorMessage
-              name="legal_address.postal_code"
-              component={FormError}
-            />
-          </div>
-        ) : null}
+              </label>
+              <Field
+                type="text"
+                name="legal_address.postal_code"
+                className="form-control"
+              />
+              <ErrorMessage
+                name="legal_address.postal_code"
+                component={FormError}
+              />
+            </div>
+          ) : null}
         <div className="row justify-content-end">
           <div className="row justify-content-end">
             <button

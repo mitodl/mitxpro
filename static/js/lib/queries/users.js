@@ -25,7 +25,7 @@ export default {
   countriesSelector: pathOr(null, ["entities", "countries"]),
   countriesQuery:    () => ({
     url:       "/api/countries/",
-    transform: (json: Array<Country>) => objOf("countries", json),
+    transform: objOf("countries"),
     update:    {
       countries: (prev: Array<Country>, next: Array<Country>) => next
     }

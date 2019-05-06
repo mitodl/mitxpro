@@ -82,7 +82,7 @@ def test_get_user_by_me(client, user, is_anonymous):
 @pytest.mark.django_db
 def test_countries_states_view(client):
     """Test that a list of countries and states is returned"""
-    resp = client.get(reverse("countries-api"))
+    resp = client.get(reverse("countries_api-list"))
     countries = {country["code"]: country for country in resp.json()}
     assert len(countries.get("US").get("states")) > 50
     assert {"code": "CA-QC", "name": "Quebec"} in countries.get("CA").get("states")

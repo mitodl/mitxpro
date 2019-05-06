@@ -2,7 +2,7 @@
 import pycountry
 from oauth2_provider.contrib.rest_framework import IsAuthenticatedOrTokenHasScope
 from rest_framework import mixins, viewsets
-from rest_framework.generics import ListAPIView
+from rest_framework.response import Response
 
 from mitxpro.permissions import UserIsOwnerPermission
 from users.models import User
@@ -31,12 +31,13 @@ class CurrentUserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericView
         return self.request.user
 
 
-class CountriesStatesView(ListAPIView):
+class CountriesStatesViewSet(viewsets.ViewSet):
     """Retrieve viewset of countries, with states/provinces for US and Canada"""
 
     permission_classes = []
-    serializer_class = CountrySerializer
 
-    def get_queryset(self):
+    def list(self, request):  # pylint:disable=unused-argument
         """Get generator for countries/states list"""
-        return sorted(list(pycountry.countries), key=lambda country: country.name)
+        queryset = sorted(list(pycountry.countries), key=lambda country: country.name)
+        serializer = CountrySerializer(queryset, many=True)
+        return Response(serializer.data)
