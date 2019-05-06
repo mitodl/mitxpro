@@ -6,6 +6,7 @@ export const getNextParam = (search: string) => qs.parse(search).next || "/"
 
 export const routes = {
   root:      "/",
+  catalog:   "/catalog/",
   dashboard: "/dashboard/",
   logout:    "/logout/",
 

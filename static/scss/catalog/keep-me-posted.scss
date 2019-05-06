@@ -1,0 +1,57 @@
+.posted-block {
+  width: 100%;
+  padding: 75px 0;
+  background: url('#{$static-path}/images/bg-contact.jpg') repeat-x 50% 50%;
+  min-height: 200px;
+  background-size: cover;
+  position: relative;
+
+  &:after {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    content: '';
+    height: 10px;
+    background: linear-gradient(to right, rgba(61,189,191,1) 0%,rgba(241,186,70,1) 100%);
+  }
+
+  h1 {
+    color: white;
+    margin: 0 0 50px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .posted-form {
+    margin: 0 auto;
+    max-width: 720px;
+    padding: 10px 15px;
+
+    input[type="text"], input[type="email"] {
+      width: 100%;
+      margin: 0 0 30px;
+      font-family: inherit;
+      font-weight: 500;
+      border-radius: 5px;
+      border: none;
+      font-size: 18px;
+      line-height: 26px;
+      height: 46px;
+      padding: 10px 15px;
+      outline: none;
+    }
+
+    .btn {
+      width: 230px;
+      height: 60px;
+      font-size: larger;
+      font-weight: 500;
+      margin: 0 auto 20px;
+      display: block;
+      font-family: inherit;
+      position: relative;
+      top: 20px;
+    }
+  }
+}

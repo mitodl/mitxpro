@@ -8,9 +8,13 @@
 @import "common";
 @import "top-app-bar";
 @import "collapsible";
-@import "catalog";
+@import "catalog/body";
+@import "catalog/keep-me-posted";
+@import "catalog/banner";
+@import "catalog/tabs";
 @import "checkout";
 @import "icomoon";
+@import "footer";
 @import "slick";
 @import "dashboard";
 @import "detail/header";
