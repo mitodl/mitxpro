@@ -113,9 +113,8 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
     }) => (
       <Form>
         <div className="form-group">
-          <label htmlFor="name" className="row">
-            <div className="col-4 font-weight-bold">Legal Name*</div>
-            <div className="col-8">(Name to appear on printed certificate)</div>
+          <label htmlFor="legal_address.last_name" className="font-weight-bold">
+            Legal Name*
           </label>
           <Field type="text" name="name" className="form-control" />
           <ErrorMessage name="name" component={FormError} />
@@ -159,9 +158,8 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
         </div>
         <div className="form-group">
           {/* LegalAddress fields */}
-          <label htmlFor="legal_address.street_address" className="row">
-            <div className="col-4 font-weight-bold">Street Address*</div>
-            <div className="col-8">(To send printed certificate)</div>
+          <label htmlFor="legal_address.last_name" className="font-weight-bold">
+            Street Address*
           </label>
           <FieldArray
             name="legal_address.street_address"
