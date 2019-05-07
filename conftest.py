@@ -8,6 +8,7 @@ from django.conf import settings
 
 from fixtures.common import *
 from fixtures.autouse import *
+from fixtures.cybersource import *
 
 
 TEST_MEDIA_ROOT = "/var/media/test_media_root"

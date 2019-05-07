@@ -2,6 +2,7 @@
 # pylint: disable=unused-argument, redefined-outer-name
 
 import pytest
+import responses
 from django.test.client import Client
 from rest_framework.test import APIClient
 
@@ -32,7 +33,14 @@ def user_drf_client(user):
 
 @pytest.fixture
 def admin_drf_client(admin_user):
-    """ DRF API test client with admin user """
+    """DRF API test client with admin user """
     client = APIClient()
     client.force_authenticate(user=admin_user)
     return client
+
+
+@pytest.fixture
+def mocked_responses():
+    """Mocked responses for requests library"""
+    with responses.RequestsMock() as rsps:
+        yield rsps

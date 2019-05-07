@@ -8,7 +8,8 @@ declare type Settings = {
   release_version: string,
   environment: string,
   gaTrackingID: ?string,
-  recaptchaKey: ?string
+  recaptchaKey: ?string,
+  support_email: string,
 }
 declare var SETTINGS: Settings;
 

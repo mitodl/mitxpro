@@ -83,6 +83,7 @@ INSTALLED_APPS = (
     "mail",
     "users",
     "cms",
+    "compliance",
     "courseware",
     # must be after "users" to pick up custom user model
     "compat",
@@ -242,10 +243,14 @@ SOCIAL_AUTH_PIPELINE = (
     "authentication.pipeline.user.get_username",
     # Create a user if one doesn't exist, and require a password and name
     "authentication.pipeline.user.create_user_via_email",
+    # verify the user against export compliance
+    "authentication.pipeline.compliance.verify_exports_compliance",
     # Create a profile
     "authentication.pipeline.user.create_profile",
     # Create the record that associates the social account with the user.
     "social_core.pipeline.social_auth.associate_user",
+    # activate the user
+    "authentication.pipeline.user.activate_user",
     # Populate the extra_data field in the social record with the values
     # specified by settings (and the default ones like access_token, etc).
     "social_core.pipeline.social_auth.load_extra_data",
@@ -289,14 +294,17 @@ EMAIL_PORT = get_int("MITXPRO_EMAIL_PORT", 25)
 EMAIL_HOST_USER = get_string("MITXPRO_EMAIL_USER", "")
 EMAIL_HOST_PASSWORD = get_string("MITXPRO_EMAIL_PASSWORD", "")
 EMAIL_USE_TLS = get_bool("MITXPRO_EMAIL_TLS", False)
-EMAIL_SUPPORT = get_string("MITXPRO_SUPPORT_EMAIL", "support@example.com")
+EMAIL_SUPPORT = get_string(
+    "MITXPRO_SUPPORT_EMAIL",
+    get_string("MAILGUN_RECIPIENT_OVERRIDE", "support@localhost"),
+)
 DEFAULT_FROM_EMAIL = get_string("MITXPRO_FROM_EMAIL", "webmaster@localhost")
 
 MAILGUN_SENDER_DOMAIN = get_string("MAILGUN_SENDER_DOMAIN", None)
 MAILGUN_KEY = get_string("MAILGUN_KEY", None)
 MAILGUN_BATCH_CHUNK_SIZE = get_int("MAILGUN_BATCH_CHUNK_SIZE", 1000)
 MAILGUN_RECIPIENT_OVERRIDE = get_string("MAILGUN_RECIPIENT_OVERRIDE", None)
-MAILGUN_FROM_EMAIL = get_string("MAILGUN_FROM_EMAIL", "no-reply@example.com")
+MAILGUN_FROM_EMAIL = get_string("MAILGUN_FROM_EMAIL", "no-reply@localhost")
 
 NOTIFICATION_EMAIL_BACKEND = get_string(
     "MITXPRO_NOTIFICATION_EMAIL_BACKEND", "anymail.backends.mailgun.EmailBackend"
@@ -549,6 +557,21 @@ CYBERSOURCE_SECURE_ACCEPTANCE_URL = get_string(
 )
 CYBERSOURCE_PROFILE_ID = get_string("CYBERSOURCE_PROFILE_ID", None)
 CYBERSOURCE_REFERENCE_PREFIX = get_string("CYBERSOURCE_REFERENCE_PREFIX", None)
+CYBERSOURCE_WSDL_URL = get_string("CYBERSOURCE_WSDL_URL", None)
+CYBERSOURCE_MERCHANT_ID = get_string("CYBERSOURCE_MERCHANT_ID", None)
+CYBERSOURCE_TRANSACTION_KEY = get_string("CYBERSOURCE_TRANSACTION_KEY", None)
+CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY = get_string(
+    "CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY", None
+)
+CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR = get_string(
+    "CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR", "AND"
+)
+CYBERSOURCE_EXPORT_SERVICE_ADDRESS_WEIGHT = get_string(
+    "CYBERSOURCE_EXPORT_SERVICE_ADDRESS_WEIGHT", "high"
+)
+CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT = get_string(
+    "CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT", "high"
+)
 
 # Voucher keys for PDF parsing
 VOUCHER_DOMESTIC_DATE_KEY = get_string("VOUCHER_DOMESTIC_DATE_KEY", None)

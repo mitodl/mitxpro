@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
 import { compose } from "redux"
 import { connect } from "react-redux"
@@ -10,7 +11,11 @@ import qs from "query-string"
 import auth from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
-import { STATE_REGISTER_EXTRA_DETAILS } from "../../../lib/auth"
+import {
+  STATE_REGISTER_EXTRA_DETAILS,
+  STATE_USER_BLOCKED,
+  STATE_ERROR_TEMPORARY
+} from "../../../lib/auth"
 import queries from "../../../lib/queries"
 import { qsPartialTokenSelector } from "../../../lib/selectors"
 
@@ -21,6 +26,7 @@ import type { Response } from "redux-query"
 import type {
   AuthResponse,
   AuthResponseRaw,
+  AuthStates,
   LegalAddress,
   User,
   Country
@@ -34,6 +40,10 @@ type RegisterProps = {|
 
 type StateProps = {|
   countries: Array<Country>
+|}
+
+type State = {|
+  authState: ?AuthStates
 |}
 
 type DispatchProps = {|
@@ -52,7 +62,14 @@ type Props = {|
   ...DispatchProps
 |}
 
-class RegisterProfilePage extends React.Component<Props> {
+class RegisterProfilePage extends React.Component<Props, State> {
+  constructor(props) {
+    super(props)
+    this.state = {
+      authState: null
+    }
+  }
+
   async onSubmit(detailsData, { setSubmitting, setErrors }) {
     const {
       history,
@@ -75,6 +92,13 @@ class RegisterProfilePage extends React.Component<Props> {
           partial_token
         })
         history.push(`${routes.register.extra}?${params}`)
+      } else if (
+        state === STATE_USER_BLOCKED ||
+        state === STATE_ERROR_TEMPORARY
+      ) {
+        this.setState({
+          authState: state
+        })
       } else if (errors.length > 0) {
         setErrors({
           email: errors[0]
@@ -85,8 +109,33 @@ class RegisterProfilePage extends React.Component<Props> {
     }
   }
 
+  renderAuthState(authState: AuthStates) {
+    switch (authState) {
+    case STATE_USER_BLOCKED:
+      return (
+        <div>
+            Sorry, we cannot create an account for you at this time. Please
+            contact us at{" "}
+          <a href={`mailto:${SETTINGS.support_email}`}>
+            {SETTINGS.support_email}
+          </a>
+        </div>
+      )
+    case STATE_ERROR_TEMPORARY:
+      return (
+        <div>
+            Unable to complete registration at this time, please try again
+            later.
+        </div>
+      )
+    default:
+      return <div>Unknown error, plase contact support</div>
+    }
+  }
+
   render() {
     const { countries } = this.props
+    const { authState } = this.state
     return (
       <div className="registration-form">
         <div className="form-group row">
@@ -99,12 +148,16 @@ class RegisterProfilePage extends React.Component<Props> {
             <Link to={routes.login.begin}>Click here</Link>
           </div>
         </div>
-        <div className="inner-form">
-          <RegisterDetailsForm
-            onSubmit={this.onSubmit.bind(this)}
-            countries={countries}
-          />
-        </div>
+        {authState ? (
+          this.renderAuthState(authState)
+        ) : (
+          <div className="inner-form">
+            <RegisterDetailsForm
+              onSubmit={this.onSubmit.bind(this)}
+              countries={countries}
+            />
+          </div>
+        )}
       </div>
     )
   }

@@ -1,16 +1,41 @@
 """Tests for authentication views"""
 # pylint: disable=redefined-outer-name
+from contextlib import contextmanager, ExitStack
+from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.auth import get_user, get_user_model
+from django.core import mail
+from django.db import transaction
 from django.urls import reverse
+from django.test import Client, override_settings
 import factory
+from faker import Faker
+from hypothesis import settings as hypothesis_settings, strategies as st, Verbosity
+from hypothesis.stateful import (
+    consumes,
+    precondition,
+    rule,
+    Bundle,
+    RuleBasedStateMachine,
+    HealthCheck,
+)
+from hypothesis.extra.django import TestCase as HTestCase
 import pytest
+import responses
 from rest_framework import status
 from social_core.backends.email import EmailAuth
 
 from authentication.serializers import PARTIAL_PIPELINE_TOKEN_KEY
 from authentication.utils import SocialAuthState
-from users.factories import UserSocialAuthFactory
+from compliance.constants import RESULT_DENIED, RESULT_SUCCESS
+from compliance.models import ExportsInquiryLog
+from compliance.test_utils import (
+    get_cybersource_test_settings,
+    mock_cybersource_wsdl,
+    mock_cybersource_wsdl_operation,
+)
+from users.factories import UserFactory, UserSocialAuthFactory
 from mitxpro.test_utils import any_instance_of, MockResponse
 
 pytestmark = [pytest.mark.django_db]
@@ -19,6 +44,8 @@ NEW_EMAIL = "test@example.com"
 NEXT_URL = "/next/url"
 
 User = get_user_model()
+
+fake = Faker()
 
 
 @pytest.fixture
@@ -49,7 +76,7 @@ def assert_api_call(
         "redirect_url": None,
         "extra_data": {},
         "state": None,
-        "provider": None,
+        "provider": EmailAuth.name,
         "flow": None,
         "partial_token": any_instance_of(str),
     }
@@ -68,233 +95,238 @@ def mock_email_send(mocker):
     yield mocker.patch("mail.verification_api.send_verification_email")
 
 
-@pytest.fixture()
-def mock_recaptcha_success(mocker):
-    """ Mock Google recaptcha request"""
-    yield mocker.patch(
+@contextmanager
+def export_check_response(response_name):
+    """Context manager for configuring export check responses"""
+    with override_settings(
+        **get_cybersource_test_settings()
+    ), responses.RequestsMock() as mocked_responses:
+        mock_cybersource_wsdl(mocked_responses, settings)
+        mock_cybersource_wsdl_operation(mocked_responses, response_name)
+        yield
+
+
+class AuthStateMachine(RuleBasedStateMachine):
+    """
+    State machine for auth flows
+
+    How to understand this code:
+
+    This code exercises our social auth APIs, which is basically a graph of nodes and edges that the user traverses.
+    You can understand the bundles defined below to be the nodes and the methods of this class to be the edges.
+
+    If you add a new state to the auth flows, create a new bundle to represent that state and define
+    methods to define transitions into and (optionally) out of that state.
+    """
+
+    ConfirmationSentAuthStates = Bundle("confirmation-sent")
+    ConfirmationRedeemedAuthStates = Bundle("confirmation-redeemed")
+    RegisterExtraDetailsAuthStates = Bundle("register-details-extra")
+
+    LoginPasswordAuthStates = Bundle("login-password")
+
+    recaptcha_patcher = patch(
         "authentication.views.requests.post",
         return_value=MockResponse(
             content='{"success": true}', status_code=status.HTTP_200_OK
         ),
     )
-
-
-@pytest.fixture()
-def mock_recaptcha_failure(mocker):
-    """ Mock Google recaptcha request"""
-    yield mocker.patch(
-        "authentication.views.requests.post",
-        return_value=MockResponse(
-            content='{"success": false, "error-codes": ["bad-request"]}',
-            status_code=status.HTTP_200_OK,
-        ),
+    email_send_patcher = patch(
+        "mail.verification_api.send_verification_email", autospec=True
     )
 
+    def __init__(self):
+        """Setup the machine"""
+        super().__init__()
+        # wrap the execution in a django transaction, similar to django's TestCase
+        self.atomic = transaction.atomic()
+        self.atomic.__enter__()
 
-@pytest.fixture()
-def login_email_exists(client, email_user):
-    """Yield a function for this step"""
+        # wrap the execution in a patch()
+        self.mock_email_send = self.email_send_patcher.start()
 
-    def run_step(last_result):  # pylint: disable=unused-argument
-        """Run the step"""
-        return assert_api_call(
-            client,
-            "psa-login-email",
-            {
-                "flow": SocialAuthState.FLOW_LOGIN,
-                "email": email_user.email,
-                "next": NEXT_URL,
-            },
-            {
-                "flow": SocialAuthState.FLOW_LOGIN,
-                "provider": EmailAuth.name,
-                "state": SocialAuthState.STATE_LOGIN_PASSWORD,
-                "extra_data": {"name": email_user.name},
-            },
+        # django test client
+        self.client = Client()
+
+        # shared data
+        self.email = fake.email()
+        self.user = None
+
+        # track whether we've hit an action that starts a flow or not
+        self.flow_started = False
+
+    def teardown(self):
+        """Cleanup from a run"""
+        # clear the mailbox
+        del mail.outbox[:]
+
+        # stop the patch
+        self.email_send_patcher.stop()
+
+        # end the transaction with a rollback to cleanup any state
+        transaction.set_rollback(True)
+        self.atomic.__exit__(None, None, None)
+
+    def create_existing_user(self):
+        """Create an existing user"""
+        self.user = UserFactory.create(email=self.email)
+        UserSocialAuthFactory.create(
+            user=self.user, provider=EmailAuth.name, uid=self.user.email
         )
 
-    yield run_step
+    @rule(
+        target=ConfirmationSentAuthStates,
+        recaptcha_enabled=st.sampled_from([True, False]),
+    )
+    @precondition(lambda self: not self.flow_started)
+    def register_email_not_exists(self, recaptcha_enabled):
+        """Register email not exists"""
+        self.flow_started = True
 
+        with ExitStack() as stack:
+            mock_recaptcha_success = None
+            if recaptcha_enabled:
+                mock_recaptcha_success = stack.enter_context(self.recaptcha_patcher)
+                stack.enter_context(override_settings(**{"RECAPTCHA_SITE_KEY": "fake"}))
+            result = assert_api_call(
+                self.client,
+                "psa-register-email",
+                {
+                    "flow": SocialAuthState.FLOW_REGISTER,
+                    "email": self.email,
+                    **({"recaptcha": "fake"} if recaptcha_enabled else {}),
+                },
+                {
+                    "flow": SocialAuthState.FLOW_REGISTER,
+                    "partial_token": None,
+                    "state": SocialAuthState.STATE_REGISTER_CONFIRM_SENT,
+                },
+            )
+            self.mock_email_send.assert_called_once()
+            if mock_recaptcha_success:
+                mock_recaptcha_success.assert_called_once()
+            return result
 
-@pytest.fixture()
-def login_email_next(client, email_user):
-    """Yield a function for this step"""
+    @rule(
+        target=LoginPasswordAuthStates, recaptcha_enabled=st.sampled_from([True, False])
+    )
+    @precondition(lambda self: not self.flow_started)
+    def register_email_exists(self, recaptcha_enabled):
+        """Register email exists"""
+        self.flow_started = True
+        self.create_existing_user()
 
-    def run_step(last_result):  # pylint: disable=unused-argument
-        """Run the step"""
-        return assert_api_call(
-            client,
+        with ExitStack() as stack:
+            mock_recaptcha_success = None
+            if recaptcha_enabled:
+                mock_recaptcha_success = stack.enter_context(self.recaptcha_patcher)
+                stack.enter_context(override_settings(**{"RECAPTCHA_SITE_KEY": "fake"}))
+
+            result = assert_api_call(
+                self.client,
+                "psa-register-email",
+                {
+                    "flow": SocialAuthState.FLOW_REGISTER,
+                    "email": self.email,
+                    "next": NEXT_URL,
+                    **({"recaptcha": "fake"} if recaptcha_enabled else {}),
+                },
+                {
+                    "flow": SocialAuthState.FLOW_REGISTER,
+                    "state": SocialAuthState.STATE_LOGIN_PASSWORD,
+                    "errors": ["Password is required to login"],
+                },
+            )
+            self.mock_email_send.assert_not_called()
+            if mock_recaptcha_success:
+                mock_recaptcha_success.assert_called_once()
+            return result
+
+    @rule()
+    @precondition(lambda self: not self.flow_started)
+    def register_email_not_exists_with_recaptcha_invalid(self):
+        """Yield a function for this step"""
+        self.flow_started = True
+        with patch(
+            "authentication.views.requests.post",
+            return_value=MockResponse(
+                content='{"success": false, "error-codes": ["bad-request"]}',
+                status_code=status.HTTP_200_OK,
+            ),
+        ) as mock_recaptcha_failure, override_settings(
+            **{"RECAPTCHA_SITE_KEY": "fakse"}
+        ):
+            assert_api_call(
+                self.client,
+                "psa-register-email",
+                {
+                    "flow": SocialAuthState.FLOW_REGISTER,
+                    "email": NEW_EMAIL,
+                    "recaptcha": "fake",
+                },
+                {"error-codes": ["bad-request"], "success": False},
+                expect_status=status.HTTP_400_BAD_REQUEST,
+                use_defaults=False,
+            )
+            mock_recaptcha_failure.assert_called_once()
+            self.mock_email_send.assert_not_called()
+
+    @rule()
+    @precondition(lambda self: not self.flow_started)
+    def login_email_not_exists(self):
+        """Login for an email that doesn't exist"""
+        self.flow_started = True
+        assert_api_call(
+            self.client,
             "psa-login-email",
-            {
-                "flow": SocialAuthState.FLOW_LOGIN,
-                "email": email_user.email,
-                "next": NEXT_URL,
-            },
-            {
-                "flow": SocialAuthState.FLOW_LOGIN,
-                "provider": EmailAuth.name,
-                "state": SocialAuthState.STATE_LOGIN_PASSWORD,
-                "extra_data": {"name": email_user.name},
-            },
-        )
-
-    yield run_step
-
-
-@pytest.fixture()
-def register_email_exists(client, user, mock_email_send):
-    """Yield a function for this step"""
-
-    def run_step(last_result):  # pylint: disable=unused-argument
-        """Run the step"""
-        result = assert_api_call(
-            client,
-            "psa-register-email",
-            {
-                "flow": SocialAuthState.FLOW_REGISTER,
-                "email": user.email,
-                "next": NEXT_URL,
-            },
-            {
-                "errors": ["Password is required to login"],
-                "flow": SocialAuthState.FLOW_REGISTER,
-                "provider": EmailAuth.name,
-                "state": SocialAuthState.STATE_LOGIN_PASSWORD,
-            },
-        )
-        mock_email_send.assert_not_called()
-        return result
-
-    yield run_step
-
-
-@pytest.fixture()
-def login_email_not_exists(client):
-    """Yield a function for this step"""
-
-    def run_step(last_result):  # pylint: disable=unused-argument
-        """Run the step"""
-        result = assert_api_call(
-            client,
-            "psa-login-email",
-            {"flow": SocialAuthState.FLOW_LOGIN, "email": NEW_EMAIL},
+            {"flow": SocialAuthState.FLOW_LOGIN, "email": self.email},
             {
                 "errors": ["Couldn't find your account"],
                 "flow": SocialAuthState.FLOW_LOGIN,
-                "provider": EmailAuth.name,
                 "partial_token": None,
                 "state": SocialAuthState.STATE_ERROR,
             },
         )
-        assert User.objects.filter(email=NEW_EMAIL).exists() is False
-        return result
+        assert User.objects.filter(email=self.email).exists() is False
 
-    yield run_step
+    @rule(target=LoginPasswordAuthStates)
+    @precondition(lambda self: not self.flow_started)
+    def login_email_exists(self):
+        """Login with a user that exists"""
+        self.flow_started = True
+        self.create_existing_user()
 
-
-@pytest.fixture()
-def register_email_not_exists(client, mock_email_send):
-    """Yield a function for this step"""
-
-    def run_step(last_result):  # pylint: disable=unused-argument
-        """Run the step"""
-        result = assert_api_call(
-            client,
-            "psa-register-email",
-            {"flow": SocialAuthState.FLOW_REGISTER, "email": NEW_EMAIL},
-            {
-                "flow": SocialAuthState.FLOW_REGISTER,
-                "provider": EmailAuth.name,
-                "partial_token": None,
-                "state": SocialAuthState.STATE_REGISTER_CONFIRM_SENT,
-            },
-        )
-        mock_email_send.assert_called_once()
-        assert User.objects.filter(email=NEW_EMAIL).exists() is False
-        return result
-
-    yield run_step
-
-
-@pytest.fixture()
-def register_email_not_exists_with_recaptcha(
-    settings, client, mock_email_send, mock_recaptcha_success
-):
-    """Yield a function for this step"""
-
-    def run_step(last_result):  # pylint: disable=unused-argument
-        """Run the step"""
-        settings.RECAPTCHA_SITE_KEY = "fake"
-        result = assert_api_call(
-            client,
-            "psa-register-email",
-            {
-                "flow": SocialAuthState.FLOW_REGISTER,
-                "email": NEW_EMAIL,
-                "recaptcha": "fake",
-            },
-            {
-                "flow": SocialAuthState.FLOW_REGISTER,
-                "provider": EmailAuth.name,
-                "partial_token": None,
-                "state": SocialAuthState.STATE_REGISTER_CONFIRM_SENT,
-            },
-        )
-        mock_recaptcha_success.assert_called_once()
-        mock_email_send.assert_called_once()
-        return result
-
-    yield run_step
-
-
-@pytest.fixture()
-def register_email_not_exists_with_recaptcha_invalid(
-    settings, client, mock_email_send, mock_recaptcha_failure
-):
-    """Yield a function for this step"""
-
-    def run_step(last_result):  # pylint: disable=unused-argument
-        """Run the step"""
-        settings.RECAPTCHA_SITE_KEY = "fake"
-        result = assert_api_call(
-            client,
-            "psa-register-email",
-            {
-                "flow": SocialAuthState.FLOW_REGISTER,
-                "email": NEW_EMAIL,
-                "recaptcha": "fake",
-            },
-            {"error-codes": ["bad-request"], "success": False},
-            expect_status=status.HTTP_400_BAD_REQUEST,
-            use_defaults=False,
-        )
-        mock_recaptcha_failure.assert_called_once()
-        mock_email_send.assert_not_called()
-        return result
-
-    yield run_step
-
-
-@pytest.fixture()
-def login_password_valid(client, user):
-    """Yield a function for this step"""
-    password = "password1"
-
-    def run_step(last_result):
-        """Run the step"""
-        user.set_password(password)
-        user.save()
         return assert_api_call(
-            client,
-            "psa-login-password",
+            self.client,
+            "psa-login-email",
             {
                 "flow": SocialAuthState.FLOW_LOGIN,
-                "partial_token": last_result["partial_token"],
+                "email": self.user.email,
+                "next": NEXT_URL,
+            },
+            {
+                "flow": SocialAuthState.FLOW_LOGIN,
+                "state": SocialAuthState.STATE_LOGIN_PASSWORD,
+                "extra_data": {"name": self.user.name},
+            },
+        )
+
+    @rule(auth_state=consumes(LoginPasswordAuthStates))
+    def login_password_valid(self, auth_state):
+        """Login with an invalid password"""
+        password = "password123"
+        self.user.set_password(password)
+        self.user.save()
+        assert_api_call(
+            self.client,
+            "psa-login-password",
+            {
+                "flow": auth_state["flow"],
+                "partial_token": auth_state["partial_token"],
                 "password": password,
             },
             {
-                "flow": SocialAuthState.FLOW_LOGIN,
-                "provider": EmailAuth.name,
+                "flow": auth_state["flow"],
                 "redirect_url": NEXT_URL,
                 "partial_token": None,
                 "state": SocialAuthState.STATE_SUCCESS,
@@ -302,130 +334,104 @@ def login_password_valid(client, user):
             expect_authenticated=True,
         )
 
-    yield run_step
-
-
-@pytest.fixture()
-def login_password_user_inactive(client, user):
-    """Yield a function for this step"""
-    password = "password1"
-
-    def run_step(last_result):
-        """Run the step"""
-        user.is_active = False
-        user.set_password(password)
-        user.save()
+    @rule(target=LoginPasswordAuthStates, auth_state=consumes(LoginPasswordAuthStates))
+    def login_password_invalid(self, auth_state):
+        """Login with an invalid password"""
+        self.user.set_password("password1")
+        self.user.save()
         return assert_api_call(
-            client,
+            self.client,
             "psa-login-password",
             {
-                "flow": SocialAuthState.FLOW_LOGIN,
-                "partial_token": last_result["partial_token"],
+                "flow": auth_state["flow"],
+                "partial_token": auth_state["partial_token"],
+                "password": "invalidpass",
+            },
+            {
+                "errors": ["Unable to login with that email and password combination"],
+                "flow": auth_state["flow"],
+                "state": SocialAuthState.STATE_ERROR,
+            },
+        )
+
+    @rule(auth_state=consumes(LoginPasswordAuthStates))
+    def login_password_user_inactive(self, auth_state):
+        """Login for an inactive user"""
+        password = "password1"
+
+        self.user.is_active = False
+        self.user.set_password(password)
+        self.user.save()
+
+        assert_api_call(
+            self.client,
+            "psa-login-password",
+            {
+                "flow": auth_state["flow"],
+                "partial_token": auth_state["partial_token"],
                 "password": password,
             },
             {
-                "flow": SocialAuthState.FLOW_LOGIN,
-                "provider": EmailAuth.name,
+                "flow": auth_state["flow"],
                 "partial_token": None,
                 "state": SocialAuthState.STATE_INACTIVE,
             },
         )
 
-    yield run_step
-
-
-@pytest.fixture()
-def login_password_invalid(client, user):
-    """Yield a function for this step"""
-
-    def run_step(last_result):
-        """Run the step"""
-        user.set_password("password1")
-        user.save()
+    @rule(
+        target=ConfirmationRedeemedAuthStates,
+        auth_state=consumes(ConfirmationSentAuthStates),
+    )
+    def redeem_confirmation_code(self, auth_state):
+        """Redeem a registration confirmation code"""
+        _, _, code, partial_token = self.mock_email_send.call_args[0]
         return assert_api_call(
-            client,
-            "psa-login-password",
-            {
-                "flow": SocialAuthState.FLOW_LOGIN,
-                "partial_token": last_result["partial_token"],
-                "password": "invalidpass",
-            },
-            {
-                "errors": ["Unable to login with that email and password combination"],
-                "flow": SocialAuthState.FLOW_LOGIN,
-                "provider": EmailAuth.name,
-                "state": SocialAuthState.STATE_ERROR,
-            },
-        )
-
-    yield run_step
-
-
-@pytest.fixture()
-def redeem_confirmation_code(client, mock_email_send):
-    """Yield a function for this step"""
-
-    def run_step(last_result):  # pylint: disable=unused-argument
-        """Run the step"""
-        _, _, code, partial_token = mock_email_send.call_args[0]
-        return assert_api_call(
-            client,
+            self.client,
             "psa-register-confirm",
             {
-                "flow": SocialAuthState.FLOW_REGISTER,
+                "flow": auth_state["flow"],
                 "verification_code": code.code,
                 "partial_token": partial_token,
             },
             {
-                "flow": SocialAuthState.FLOW_REGISTER,
-                "provider": EmailAuth.name,
+                "flow": auth_state["flow"],
                 "state": SocialAuthState.STATE_REGISTER_DETAILS,
             },
         )
 
-    yield run_step
-
-
-@pytest.fixture()
-def redeem_confirmation_code_twice(client, mock_email_send):
-    """Yield a function for this step"""
-
-    def run_step(last_result):  # pylint: disable=unused-argument
-        """Run the step"""
-        _, _, code, partial_token = mock_email_send.call_args[0]
-        return assert_api_call(
-            client,
+    @rule(auth_state=consumes(ConfirmationRedeemedAuthStates))
+    def redeem_confirmation_code_twice(self, auth_state):
+        """Redeeming a code twice should fail"""
+        _, _, code, partial_token = self.mock_email_send.call_args[0]
+        assert_api_call(
+            self.client,
             "psa-register-confirm",
             {
-                "flow": SocialAuthState.FLOW_REGISTER,
+                "flow": auth_state["flow"],
                 "verification_code": code.code,
                 "partial_token": partial_token,
             },
             {
                 "errors": [],
-                "flow": SocialAuthState.FLOW_REGISTER,
-                "provider": EmailAuth.name,
+                "flow": auth_state["flow"],
                 "redirect_url": None,
                 "partial_token": None,
                 "state": SocialAuthState.STATE_INVALID_EMAIL,
             },
         )
 
-    yield run_step
-
-
-@pytest.fixture()
-def register_user_details(client):
-    """Yield a function for this step"""
-
-    def run_step(last_result):
-        """Run the step"""
+    @rule(
+        target=RegisterExtraDetailsAuthStates,
+        auth_state=consumes(ConfirmationRedeemedAuthStates),
+    )
+    def register_details(self, auth_state):
+        """Complete the register confirmation details page"""
         return assert_api_call(
-            client,
+            self.client,
             "psa-register-details",
             {
-                "flow": SocialAuthState.FLOW_REGISTER,
-                "partial_token": last_result["partial_token"],
+                "flow": auth_state["flow"],
+                "partial_token": auth_state["partial_token"],
                 "password": "password1",
                 "name": "Sally Smith",
                 "legal_address": {
@@ -439,85 +445,162 @@ def register_user_details(client):
                 },
             },
             {
-                "flow": SocialAuthState.FLOW_REGISTER,
-                "provider": EmailAuth.name,
+                "flow": auth_state["flow"],
                 "state": SocialAuthState.STATE_REGISTER_EXTRA_DETAILS,
             },
-            expect_authenticated=False,
         )
 
-    yield run_step
+    @rule(
+        target=RegisterExtraDetailsAuthStates,
+        auth_state=consumes(ConfirmationRedeemedAuthStates),
+    )
+    def register_details_export_success(self, auth_state):
+        """Complete the register confirmation details page with exports enabled"""
+        with export_check_response("100_success"):
+            result = assert_api_call(
+                self.client,
+                "psa-register-details",
+                {
+                    "flow": auth_state["flow"],
+                    "partial_token": auth_state["partial_token"],
+                    "password": "password1",
+                    "name": "Sally Smith",
+                    "legal_address": {
+                        "first_name": "Sally",
+                        "last_name": "Smith",
+                        "street_address": ["Main Street"],
+                        "country": "US",
+                        "state_or_territory": "US-CO",
+                        "city": "Boulder",
+                        "postal_code": "02183",
+                    },
+                },
+                {
+                    "flow": auth_state["flow"],
+                    "state": SocialAuthState.STATE_REGISTER_EXTRA_DETAILS,
+                },
+            )
+            assert ExportsInquiryLog.objects.filter(user__email=self.email).exists()
+            assert (
+                ExportsInquiryLog.objects.get(user__email=self.email).computed_result
+                == RESULT_SUCCESS
+            )
+            assert len(mail.outbox) == 0
 
+            return result
 
-@pytest.fixture()
-def register_user_extra_details(client):
-    """Yield a function for this step"""
+    @rule(auth_state=consumes(ConfirmationRedeemedAuthStates))
+    def register_details_export_reject(self, auth_state):
+        """Complete the register confirmation details page with exports enabled"""
+        with export_check_response("700_reject"):
+            assert_api_call(
+                self.client,
+                "psa-register-details",
+                {
+                    "flow": auth_state["flow"],
+                    "partial_token": auth_state["partial_token"],
+                    "password": "password1",
+                    "name": "Sally Smith",
+                    "legal_address": {
+                        "first_name": "Sally",
+                        "last_name": "Smith",
+                        "street_address": ["Main Street"],
+                        "country": "US",
+                        "state_or_territory": "US-CO",
+                        "city": "Boulder",
+                        "postal_code": "02183",
+                    },
+                },
+                {
+                    "flow": auth_state["flow"],
+                    "partial_token": None,
+                    "errors": [
+                        "Unable to complete registration, please contact support"
+                    ],
+                    "state": SocialAuthState.STATE_USER_BLOCKED,
+                },
+            )
+            assert ExportsInquiryLog.objects.filter(user__email=self.email).exists()
+            assert (
+                ExportsInquiryLog.objects.get(user__email=self.email).computed_result
+                == RESULT_DENIED
+            )
+            assert len(mail.outbox) == 1
 
-    def run_step(last_result):
-        """Run the step"""
-        return assert_api_call(
-            client,
+    @rule(auth_state=consumes(ConfirmationRedeemedAuthStates))
+    def register_details_export_temporary_error(self, auth_state):
+        """Complete the register confirmation details page with exports raising a temporary error"""
+        with override_settings(**get_cybersource_test_settings()), patch(
+            "authentication.pipeline.compliance.api.verify_user_with_exports",
+            side_effect=Exception("register_details_export_temporary_error"),
+        ):
+            assert_api_call(
+                self.client,
+                "psa-register-details",
+                {
+                    "flow": auth_state["flow"],
+                    "partial_token": auth_state["partial_token"],
+                    "password": "password1",
+                    "name": "Sally Smith",
+                    "legal_address": {
+                        "first_name": "Sally",
+                        "last_name": "Smith",
+                        "street_address": ["Main Street"],
+                        "country": "US",
+                        "state_or_territory": "US-CO",
+                        "city": "Boulder",
+                        "postal_code": "02183",
+                    },
+                },
+                {
+                    "flow": auth_state["flow"],
+                    "partial_token": None,
+                    "errors": [
+                        "Unable to register at this time, please try again later"
+                    ],
+                    "state": SocialAuthState.STATE_ERROR_TEMPORARY,
+                },
+            )
+            assert not ExportsInquiryLog.objects.filter(user__email=self.email).exists()
+            assert len(mail.outbox) == 0
+
+    @rule(auth_state=consumes(RegisterExtraDetailsAuthStates))
+    def register_user_extra_details(self, auth_state):
+        """Complete the user's extra details"""
+        assert_api_call(
+            Client(),
             "psa-register-extra",
             {
-                "flow": SocialAuthState.FLOW_REGISTER,
-                "partial_token": last_result["partial_token"],
+                "flow": auth_state["flow"],
+                "partial_token": auth_state["partial_token"],
                 "gender": "f",
                 "birth_year": "2000",
                 "company": "MIT",
                 "job_title": "QA Manager",
             },
             {
-                "flow": SocialAuthState.FLOW_REGISTER,
-                "provider": EmailAuth.name,
+                "flow": auth_state["flow"],
                 "state": SocialAuthState.STATE_SUCCESS,
                 "partial_token": None,
             },
             expect_authenticated=True,
         )
 
-    yield run_step
 
-
-@pytest.mark.betamax
-@pytest.mark.usefixture("mock_email_send")
-@pytest.mark.parametrize(
-    "steps",
-    [
-        ["login_email_exists", "login_password_valid"],
-        ["login_email_exists", "login_password_invalid"],
-        ["login_email_exists", "login_password_user_inactive"],
-        ["login_email_not_exists"],
-        ["register_email_exists", "login_password_valid"],
-        ["register_email_exists", "login_password_invalid"],
-        [
-            "register_email_not_exists",
-            "redeem_confirmation_code",
-            "register_user_details",
-            "register_user_extra_details",
-        ],
-        [
-            "register_email_not_exists_with_recaptcha",
-            "redeem_confirmation_code",
-            "register_user_details",
-            "register_user_extra_details",
-        ],
-        [
-            "register_email_not_exists",
-            "redeem_confirmation_code",
-            "redeem_confirmation_code_twice",
-        ],
-        ["register_email_not_exists_with_recaptcha_invalid"],
-    ],
-    ids=lambda arg: "->".join(arg) if isinstance(arg, list) else None,
+AuthStateMachine.TestCase.settings = hypothesis_settings(
+    max_examples=100,
+    stateful_step_count=10,
+    deadline=None,
+    verbosity=Verbosity.normal,
+    suppress_health_check=[HealthCheck.filter_too_much],
 )
-def test_login_register_flows(request, steps):
-    """Walk the steps and assert expected results"""
-    last_result = None
-    for fixture_name in steps:
-        assert_step = request.getfixturevalue(fixture_name)
-        last_result = assert_step(last_result)
 
 
+class AuthStateTestCase(HTestCase, AuthStateMachine.TestCase):
+    """TestCase for AuthStateMachine"""
+
+
+@pytest.mark.usefixtures("mock_email_send")
 def test_new_register_no_session_partial(client):
     """
     When a user registers for the first time and a verification email is sent, the partial
@@ -530,7 +613,6 @@ def test_new_register_no_session_partial(client):
         {"flow": SocialAuthState.FLOW_REGISTER, "email": NEW_EMAIL},
         {
             "flow": SocialAuthState.FLOW_REGISTER,
-            "provider": EmailAuth.name,
             "partial_token": None,
             "state": SocialAuthState.STATE_REGISTER_CONFIRM_SENT,
         },

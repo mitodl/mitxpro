@@ -35,8 +35,16 @@
     "CYBERSOURCE_ACCESS_KEY": {
       "description": "CyberSource Access Key"
     },
+    "CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY": {
+      "description": "The public key to encrypt export results with for our own security purposes. Should be a base64 encoded NaCl public key.",
+      "required": false
+    },
     "CYBERSOURCE_PROFILE_ID": {
       "description": "CyberSource Profile ID"
+    },
+    "CYBERSOURCE_MERCHANT_ID": {
+      "description": "The cybersource merchant id",
+      "required": false
     },
     "CYBERSOURCE_REFERENCE_PREFIX": {
       "description": "a string prefix to identify the application in CyberSource transactions"
@@ -46,6 +54,14 @@
     },
     "CYBERSOURCE_SECURITY_KEY": {
       "description": "CyberSource API key"
+    },
+    "CYBERSOURCE_TRANSACTION_KEY": {
+      "description": "The cybersource transaction key",
+      "required": false
+    },
+    "CYBERSOURCE_WSDL_URL": {
+      "description": "The URL to the cybersource WSDL",
+      "required": false
     },
     "GA_TRACKING_ID": {
       "description": "Google analytics tracking ID",

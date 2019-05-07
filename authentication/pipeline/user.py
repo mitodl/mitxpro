@@ -14,6 +14,8 @@ from authentication.exceptions import (
     UnexpectedExistingUserException,
 )
 from authentication.utils import SocialAuthState
+
+from compliance import api as compliance_api
 from users.serializers import UserSerializer, ProfileSerializer
 
 # pylint: disable=keyword-arg-before-vararg
@@ -176,10 +178,34 @@ def forbid_hijack(strategy, backend, **kwargs):  # pylint: disable=unused-argume
     Args:
         strategy (social_django.strategy.DjangoStrategy): the strategy used to authenticate
         backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
-        user (User): the current user
-        flow (str): the type of flow (login or register)
     """
     # As first step in pipeline, stop a hijacking admin from going any further
     if strategy.session_get("is_hijacked_user"):
         raise AuthException("You are hijacking another user, don't try to login again")
+    return {}
+
+
+def activate_user(
+    strategy, backend, user=None, is_new=False, **kwargs
+):  # pylint: disable=unused-argument
+    """
+    Activate the user's account if they passed export controls
+
+    Args:
+        strategy (social_django.strategy.DjangoStrategy): the strategy used to authenticate
+        backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
+        user (User): the current user
+    """
+    if user.is_active or not is_new:
+        return {}
+
+    export_inquiry = user.exports_inquiries.order_by("-created_on").first()
+
+    # if the user has an export inquiry that is considered successful, activate them
+    if not compliance_api.is_exports_verification_enabled() or (
+        export_inquiry is not None and export_inquiry.is_success
+    ):
+        user.is_active = True
+        user.save()
+
     return {}

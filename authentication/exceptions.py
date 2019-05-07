@@ -76,5 +76,13 @@ class UnexpectedExistingUserException(PartialException):
     """Raised if a user already exists but shouldn't in the given pipeline step"""
 
 
+class UserExportBlockedException(AuthException):
+    """The user is blocked for export reasons from continuing to sign up"""
+
+
+class UserTryAgainLaterException(AuthException):
+    """The user should try to register again later"""
+
+
 class UserMissingSocialAuthException(Exception):
     """Raised if the user doesn't have a social auth"""

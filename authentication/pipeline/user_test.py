@@ -18,6 +18,8 @@ from authentication.exceptions import (
     RequireUserException,
 )
 from authentication.utils import SocialAuthState
+from compliance.constants import RESULT_SUCCESS, RESULT_DENIED, RESULT_UNKNOWN
+from compliance.factories import ExportsInquiryLogFactory
 
 
 @pytest.fixture
@@ -371,3 +373,35 @@ def test_forbid_hijack(mocker, hijacked):
             user_actions.forbid_hijack(*args, **kwargs)
     else:
         assert user_actions.forbid_hijack(*args, **kwargs) == {}
+
+
+@pytest.mark.parametrize("is_active", [True, False])
+@pytest.mark.parametrize("is_new", [True, False])
+@pytest.mark.parametrize(
+    "is_enabled, has_inquiry, computed_result, expected",
+    [
+        [True, True, RESULT_SUCCESS, True],  # feature enabled, result is success
+        [True, True, RESULT_DENIED, False],  # feature enabled, result is denied
+        [True, True, RESULT_UNKNOWN, False],  # feature enabled, result is unknown
+        [False, False, None, True],  # feature disabled
+        [True, False, None, False],  # feature enabled, no result
+    ],
+)
+def test_activate_user(
+    mocker, user, is_active, is_new, is_enabled, has_inquiry, computed_result, expected
+):  # pylint: disable=too-many-arguments
+    """Test that activate_user takes the correct action"""
+    user.is_active = is_active
+    if has_inquiry:
+        ExportsInquiryLogFactory.create(user=user, computed_result=computed_result)
+
+    mocker.patch(
+        "authentication.pipeline.user.compliance_api.is_exports_verification_enabled",
+        return_value=is_enabled,
+    )
+
+    assert user_actions.activate_user(None, None, user=user, is_new=is_new) == {}
+
+    if not user.is_active and is_new:
+        # only if the user is inactive and just registered
+        assert user.is_active is expected

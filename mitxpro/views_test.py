@@ -29,6 +29,7 @@ def test_webpack_url(mocker, settings, client):
     settings.GA_TRACKING_ID = "fake"
     settings.ENVIRONMENT = "test"
     settings.VERSION = "4.5.6"
+    settings.EMAIL_SUPPORT = "support@text.com"
     settings.USE_WEBPACK_DEV_SERVER = False
     settings.RECAPTCHA_SITE_KEY = "fake_key"
     get_bundle = mocker.patch("mitxpro.templatetags.render_bundle._get_bundle")
@@ -45,6 +46,7 @@ def test_webpack_url(mocker, settings, client):
         "sentry_dsn": None,
         "release_version": settings.VERSION,
         "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
+        "support_email": settings.EMAIL_SUPPORT,
     }
 
 

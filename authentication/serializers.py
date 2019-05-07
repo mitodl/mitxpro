@@ -21,6 +21,8 @@ from authentication.exceptions import (
     RequireProviderException,
     RequireRegistrationException,
     RequireProfileException,
+    UserExportBlockedException,
+    UserTryAgainLaterException,
 )
 from authentication.utils import SocialAuthState
 
@@ -284,6 +286,17 @@ class RegisterDetailsSerializer(SocialAuthSerializer):
             result = SocialAuthState(
                 SocialAuthState.STATE_REGISTER_EXTRA_DETAILS, partial=exc.partial
             )
+        except UserExportBlockedException:
+            result = SocialAuthState(
+                SocialAuthState.STATE_USER_BLOCKED,
+                errors=["Unable to complete registration, please contact support"],
+            )
+        except UserTryAgainLaterException:
+            result = SocialAuthState(
+                SocialAuthState.STATE_ERROR_TEMPORARY,
+                errors=["Unable to register at this time, please try again later"],
+            )
+
         return result
 
 

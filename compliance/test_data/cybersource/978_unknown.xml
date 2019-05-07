@@ -1,0 +1,21 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+   <soap:Header>
+      <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+         <wsu:Timestamp wsu:Id="Timestamp-789887928" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+            <wsu:Created>2019-05-09T18:21:31.312Z</wsu:Created>
+         </wsu:Timestamp>
+      </wsse:Security>
+   </soap:Header>
+   <soap:Body>
+      <c:replyMessage xmlns:c="urn:schemas-cybersource-com:transaction-data-1.154">
+         <c:merchantReferenceCode>example</c:merchantReferenceCode>
+         <c:requestID>123</c:requestID>
+         <c:decision>SUCCESS</c:decision>
+         <c:reasonCode>978</c:reasonCode>
+         <c:requestToken>TOKEN</c:requestToken>
+         <c:exportReply>
+            <c:reasonCode>978</c:reasonCode>
+         </c:exportReply>
+      </c:replyMessage>
+   </soap:Body>
+</soap:Envelope>

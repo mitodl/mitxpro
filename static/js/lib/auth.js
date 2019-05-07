@@ -8,9 +8,11 @@ export const FLOW_REGISTER = "register"
 export const FLOW_LOGIN = "login"
 
 export const STATE_ERROR = "error"
+export const STATE_ERROR_TEMPORARY = "error-temporary"
 export const STATE_SUCCESS = "success"
 export const STATE_INACTIVE = "inactive"
 export const STATE_INVALID_EMAIL = "invalid-email"
+export const STATE_USER_BLOCKED = "user-blocked"
 
 export const STATE_LOGIN_EMAIL = "login/email"
 export const STATE_LOGIN_PASSWORD = "login/password"

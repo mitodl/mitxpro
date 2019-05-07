@@ -9,10 +9,10 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.mark.parametrize(
-    "create_func,exp_staff,exp_superuser",
+    "create_func,exp_staff,exp_superuser,exp_is_active",
     [
-        [User.objects.create_user, False, False],
-        [User.objects.create_superuser, True, True],
+        [User.objects.create_user, False, False, False],
+        [User.objects.create_superuser, True, True, True],
     ],
 )
 @pytest.mark.parametrize("username", [None, "user1"])
@@ -21,10 +21,11 @@ def test_create_user(
     create_func,
     exp_staff,
     exp_superuser,
+    exp_is_active,
     username,
     password,
     patch_create_edx_user_task,
-):
+):  # pylint: disable=too-many-arguments
     """Test creating a user"""
     email = "uSer@EXAMPLE.com"
     name = "Jane Doe"
@@ -39,7 +40,7 @@ def test_create_user(
     assert user.get_full_name() == name
     assert user.is_staff is exp_staff
     assert user.is_superuser is exp_superuser
-    assert user.is_active is True
+    assert user.is_active is exp_is_active
     if password is not None:
         assert user.check_password(password)
     patch_create_edx_user_task.delay.assert_called_once_with(user.id)

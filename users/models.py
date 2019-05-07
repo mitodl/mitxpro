@@ -79,6 +79,7 @@ class UserManager(BaseUserManager):
         """Create a superuser"""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
 
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Superuser must have is_staff=True.")
@@ -107,7 +108,7 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
         default=False, help_text="The user can access the admin site"
     )
     is_active = models.BooleanField(
-        default=True, help_text="The user account is active"
+        default=False, help_text="The user account is active"
     )
 
     objects = UserManager()

@@ -15,6 +15,8 @@ class UserFactory(DjangoModelFactory):
     email = FuzzyText(suffix="@example.com")
     name = Faker("name")
 
+    is_active = True
+
     legal_address = RelatedFactory("users.factories.LegalAddressFactory", "user")
 
     class Meta:

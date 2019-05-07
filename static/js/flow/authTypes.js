@@ -4,7 +4,10 @@
 export type AuthStates =
   | "success"
   | "inactive"
+  | "invalid-email"
+  | "user-blocked"
   | "error"
+  | "error-temporary"
   | "login/email"
   | "login/password"
   | "login/provider"

@@ -24,8 +24,10 @@ class SocialAuthState:
     # end states
     STATE_SUCCESS = "success"
     STATE_ERROR = "error"
+    STATE_ERROR_TEMPORARY = "error-temporary"
     STATE_INACTIVE = "inactive"
     STATE_INVALID_EMAIL = "invalid-email"
+    STATE_USER_BLOCKED = "user-blocked"
 
     def __init__(
         self,
