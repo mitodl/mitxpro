@@ -11,6 +11,7 @@ from cms.models import (
     FrequentlyAskedQuestion,
     FrequentlyAskedQuestionPage,
     ForTeamsPage,
+    WhoShouldEnrollPage,
 )
 from cms.blocks import LearningTechniqueBlock
 from courses.factories import ProgramFactory, CourseFactory
@@ -99,3 +100,13 @@ class ForTeamsPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = ForTeamsPage
+
+
+class WhoShouldEnrollPageFactory(wagtail_factories.PageFactory):
+    """WhoShouldEnrollPage factory class"""
+
+    image = factory.SubFactory(wagtail_factories.ImageFactory)
+    content = factory.SubFactory(wagtail_factories.StreamFieldFactory)
+
+    class Meta:
+        model = WhoShouldEnrollPage

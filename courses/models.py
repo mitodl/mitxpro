@@ -11,6 +11,7 @@ from cms.models import (
     FrequentlyAskedQuestion,
     FrequentlyAskedQuestionPage,
     ForTeamsPage,
+    WhoShouldEnrollPage,
 )
 from courses.constants import (
     CATALOG_COURSE_IMG_WAGTAIL_FILL,
@@ -176,6 +177,15 @@ class PageProperties(models.Model):
 
         faqs_page = self.page.get_children().type(FrequentlyAskedQuestionPage).first()
         return FrequentlyAskedQuestion.objects.filter(faqs_page=faqs_page)
+
+    @property
+    def who_should_enroll(self):
+        """Gets the WhoShouldEnroll associated child page from the associated Page if it exists"""
+        if self.page:
+            child = self.page.get_children().type(WhoShouldEnrollPage).first()
+            if child:
+                return child.specific
+        return None
 
 
 class Program(TimestampedModel, PageProperties):

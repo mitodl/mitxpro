@@ -135,6 +135,52 @@ class ForTeamsPage(CourseProgramChildPage):
         super().save(*args, **kwargs)
 
 
+class WhoShouldEnrollPage(CourseProgramChildPage):
+    """
+    Who should enroll child page for "Who Should Enroll" section.
+    """
+
+    subpage_types = []
+
+    image = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Image size must be at least 870x500 pixels.",
+    )
+    content = StreamField(
+        [
+            (
+                "item",
+                blocks.RichTextBlock(
+                    icon="plus", features=["bold", "italic", "ol", "ul"]
+                ),
+            )
+        ],
+        blank=False,
+        help_text='Contents of the "Who Should Enroll" section.',
+    )
+    switch_layout = models.BooleanField(
+        blank=True,
+        default=False,
+        help_text="Switch image to the left and content to the right",
+    )
+
+    content_panels = [
+        StreamFieldPanel("content"),
+        FieldPanel("image"),
+        FieldPanel("switch_layout"),
+    ]
+
+    def save(self, *args, **kwargs):
+        # autogenerate a unique slug so we don't hit a ValidationError
+        self.title = "Who Should Enroll"
+        self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
+        super().save(*args, **kwargs)
+
+
 class ProductPage(Page):
     """
     Abstract product page
@@ -214,6 +260,7 @@ class ProductPage(Page):
         "LearningTechniquesPage",
         "FrequentlyAskedQuestionPage",
         "ForTeamsPage",
+        "WhoShouldEnrollPage",
     ]
 
     def get_context(self, request, *args, **kwargs):
