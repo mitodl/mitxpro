@@ -11,7 +11,7 @@ const US_ALPHA_2 = "US"
 const CA_ALPHA_2 = "CA"
 
 const US_POSTAL_CODE_REGEX = /[0-9]{5}(-[0-9]{4}){0,1}/
-const CA_POSTAL_CODE_REGEX = /[0-9][A-Z][0-9] [A-Z][0-9][A-Z]/
+const CA_POSTAL_CODE_REGEX = /[A-Z][0-9][A-Z] [0-9][A-Z][0-9]/
 const COUNTRIES_REQUIRING_POSTAL_CODE = [US_ALPHA_2, CA_ALPHA_2]
 const COUNTRIES_REQUIRING_STATE = [US_ALPHA_2, CA_ALPHA_2]
 
@@ -56,10 +56,7 @@ const detailsValidation = yup.object().shape({
       .label("State/Territory")
       .when("country", {
         is:   includes(__, COUNTRIES_REQUIRING_STATE),
-        then: yup
-          .string()
-          .required()
-          .matches(/[A-Z]{2}-[A-Z]{2,3}/)
+        then: yup.string().required()
       }),
     country: yup
       .string()
@@ -173,7 +170,7 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
                   <div key={index}>
                     <Field
                       name={`legal_address.street_address[${index}]`}
-                      className="form-control row-inner"
+                      className={`form-control ${index > 0 ? "row-inner" : ""}`}
                     />
                     {index === 0 ? (
                       <ErrorMessage

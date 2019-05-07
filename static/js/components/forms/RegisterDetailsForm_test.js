@@ -129,7 +129,7 @@ describe("RegisterDetailsForm", () => {
           wrapper,
           "legal_address.state_or_territory"
         ).text(),
-        'State/Territory must match the following: "/[A-Z]{2}-[A-Z]{2,3}/"'
+        "State/Territory is a required field"
       )
       assert.deepEqual(
         findFormikErrorByName(wrapper, "legal_address.postal_code").text(),
