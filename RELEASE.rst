@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.3.0 (Released May 07, 2019)
+-------------
+
+- Move deps into apt.txt so heroku installs them too
+- Create new django app and utils for voucher pdf parsing
+- update docker compose for local debugging
+- Updated travis script section ANSI colors
+
 Version 0.2.2 (Released May 02, 2019)
 -------------
 
