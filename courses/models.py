@@ -10,6 +10,7 @@ from cms.models import (
     LearningTechniquesPage,
     FrequentlyAskedQuestion,
     FrequentlyAskedQuestionPage,
+    ForTeamsPage,
 )
 from courses.constants import (
     CATALOG_COURSE_IMG_WAGTAIL_FILL,
@@ -146,6 +147,13 @@ class PageProperties(models.Model):
             if learning_outcomes:
                 return learning_outcomes.specific
 
+    @property
+    def for_teams(self):
+        """Gets the ForTeams associated child page from the associate Page if it exists"""
+        if self.page:
+            child = self.page.get_children().type(ForTeamsPage).first()
+            if child:
+                return child.specific
         return None
 
     @property

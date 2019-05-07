@@ -10,6 +10,7 @@ from cms.models import (
     LearningTechniquesPage,
     FrequentlyAskedQuestion,
     FrequentlyAskedQuestionPage,
+    ForTeamsPage,
 )
 from cms.blocks import LearningTechniqueBlock
 from courses.factories import ProgramFactory, CourseFactory
@@ -21,6 +22,7 @@ class ProgramPageFactory(wagtail_factories.PageFactory):
     program = factory.SubFactory(ProgramFactory)
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    background_image = factory.SubFactory(wagtail_factories.ImageFactory)
 
     class Meta:
         model = ProgramPage
@@ -87,3 +89,13 @@ class FrequentlyAskedQuestionFactory(DjangoModelFactory):
 
     class Meta:
         model = FrequentlyAskedQuestion
+
+
+class ForTeamsPageFactory(wagtail_factories.PageFactory):
+    """ForTeamsPage factory class"""
+
+    content = factory.fuzzy.FuzzyText(prefix="Content ")
+    action_title = factory.fuzzy.FuzzyText(prefix="Action title ")
+
+    class Meta:
+        model = ForTeamsPage
