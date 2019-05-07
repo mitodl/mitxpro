@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.3.0
+Version 0.3.0 (Released May 07, 2019)
 -------------
 
 - Move deps into apt.txt so heroku installs them too
