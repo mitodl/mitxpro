@@ -5,7 +5,12 @@ import logging
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 
-from cms.models import LearningOutcomesPage, LearningTechniquesPage
+from cms.models import (
+    LearningOutcomesPage,
+    LearningTechniquesPage,
+    FrequentlyAskedQuestion,
+    FrequentlyAskedQuestionPage,
+)
 from courses.constants import (
     CATALOG_COURSE_IMG_WAGTAIL_FILL,
     COURSE_BG_IMG_WAGTAIL_FILL,
@@ -154,6 +159,15 @@ class PageProperties(models.Model):
                 return learning_techniques.specific
 
         return None
+
+    @property
+    def faqs(self):
+        """Gets the faqs related to product if exists."""
+        if not self.page:
+            return
+
+        faqs_page = self.page.get_children().type(FrequentlyAskedQuestionPage).first()
+        return FrequentlyAskedQuestion.objects.filter(faqs_page=faqs_page)
 
 
 class Program(TimestampedModel, PageProperties):

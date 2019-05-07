@@ -12,9 +12,15 @@ from cms.factories import (
     CoursePageFactory,
     LearningOutcomesPageFactory,
     LearningTechniquesPageFactory,
+    FrequentlyAskedQuestionFactory,
+    FrequentlyAskedQuestionPageFactory,
 )
 
-from cms.models import LearningOutcomesPage, LearningTechniquesPage
+from cms.models import (
+    LearningOutcomesPage,
+    LearningTechniquesPage,
+    FrequentlyAskedQuestionPage,
+)
 from mitxpro.utils import now_in_utc
 
 pytestmark = [pytest.mark.django_db]
@@ -338,3 +344,33 @@ def test_course_learning_techniques():
         assert technique.value.get("heading") == "heading"
         assert technique.value.get("sub_heading") == "sub_heading"
         assert technique.value.get("image").title == "image-title"
+
+
+def test_course_page_faq_property():
+    """ Faqs property should return list of faqs related to given course."""
+    course = CourseFactory.create()
+    assert course.faqs is None
+
+    course_page = CoursePageFactory.create(course=course)
+    assert FrequentlyAskedQuestionPage.can_create_at(course_page)
+
+    faqs_page = FrequentlyAskedQuestionPageFactory.create(parent=course_page)
+    faq = FrequentlyAskedQuestionFactory.create(faqs_page=faqs_page)
+
+    assert faqs_page.get_parent() is course_page
+    assert list(course.faqs) == [faq]
+
+
+def test_program_page_faq_property():
+    """ Faqs property should return list of faqs related to given program."""
+    program = ProgramFactory.create()
+    assert program.faqs is None
+
+    program_page = ProgramPageFactory.create(program=program)
+    assert FrequentlyAskedQuestionPage.can_create_at(program_page)
+
+    faqs_page = FrequentlyAskedQuestionPageFactory.create(parent=program_page)
+    faq = FrequentlyAskedQuestionFactory.create(faqs_page=faqs_page)
+
+    assert faqs_page.get_parent() is program_page
+    assert list(program.faqs) == [faq]
