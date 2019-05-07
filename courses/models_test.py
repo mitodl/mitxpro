@@ -15,6 +15,7 @@ from cms.factories import (
     FrequentlyAskedQuestionFactory,
     FrequentlyAskedQuestionPageFactory,
     ForTeamsPageFactory,
+    WhoShouldEnrollPageFactory,
 )
 
 from cms.models import (
@@ -22,6 +23,7 @@ from cms.models import (
     LearningTechniquesPage,
     FrequentlyAskedQuestionPage,
     ForTeamsPage,
+    WhoShouldEnrollPage,
 )
 from mitxpro.utils import now_in_utc
 
@@ -142,7 +144,35 @@ def test_program_learning_outcomes():
     ) in learning_outcomes_page.outcome_items:  # pylint: disable=not-an-iterable
         assert block.block_type == "outcome"
         assert block.value == "benefit"
+    assert program.outcomes == learning_outcomes_page
     assert not LearningOutcomesPage.can_create_at(program_page)
+
+
+def test_program_who_should_enroll():
+    """
+    ProgramPage related WhoShouldEnrollPage should return expected values if it exists
+    """
+    program = ProgramFactory.create()
+    program_page = ProgramPageFactory.create(program=program)
+
+    assert program.who_should_enroll is None
+    assert WhoShouldEnrollPage.can_create_at(program_page)
+    who_should_enroll_page = WhoShouldEnrollPageFactory.create(
+        parent=program_page,
+        content=json.dumps(
+            [
+                {"type": "item", "value": "<p>item</p>"},
+                {"type": "item", "value": "<p>item</p>"},
+            ]
+        ),
+    )
+    assert who_should_enroll_page.get_parent() == program_page
+    assert len(who_should_enroll_page.content) == 2
+    for block in who_should_enroll_page.content:  # pylint: disable=not-an-iterable
+        assert block.block_type == "item"
+        assert block.value.source == "<p>item</p>"
+    assert program.who_should_enroll == who_should_enroll_page
+    assert not WhoShouldEnrollPage.can_create_at(program_page)
 
 
 def test_program_learning_techniques():

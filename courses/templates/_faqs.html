@@ -10,7 +10,7 @@
       {% for faq in course.faqs %}
       <li class="card {% if forloop.counter > 5 %}extra-faq d-none{% endif %}">
         <div class="card-header" id="heading-{{ forloop.counter }}">
-          <button class="btn btn-link uppercase {% if not forloop.first %}collapsed{% endif %}" data-toggle="collapse"
+          <button class="btn btn-link text-uppercase {% if not forloop.first %}collapsed{% endif %}" data-toggle="collapse"
                   data-target="#collapse-{{ forloop.counter }}"
                   aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
                   aria-controls="collapse-{{ forloop.counter }}">
@@ -30,7 +30,7 @@
     </ul>
     <!--TODO related to above todo, we will load more faqs on button click-->
     {% if course.faqs|length > 5 %}
-    <a href="#" class="readmore uppercase"><span class="readmore-text">Read</span> More FAQs</a>
+    <a href="#" class="readmore text-uppercase"><span class="readmore-text">Read</span> More FAQs</a>
     {% endif %}
   </div>
 </div>
