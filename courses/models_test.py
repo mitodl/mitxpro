@@ -145,28 +145,6 @@ def test_program_learning_outcomes():
     assert not LearningOutcomesPage.can_create_at(program_page)
 
 
-def test_program_for_teams():
-    """
-    ProgramPage related ForTeamsPage should return expected values if it exists
-    """
-    program = ProgramFactory.create()
-    program_page = ProgramPageFactory.create(program=program)
-
-    assert program.for_teams is None
-    assert ForTeamsPage.can_create_at(program_page)
-    teams_page = ForTeamsPageFactory.create(
-        parent=program_page,
-        content="<p>content</p>",
-        switch_layout=True,
-        action_title="Action Title",
-    )
-    assert program.for_teams == teams_page
-    assert teams_page.action_title == "Action Title"
-    assert teams_page.content == "<p>content</p>"
-    assert teams_page.switch_layout
-    assert not ForTeamsPage.can_create_at(program_page)
-
-
 def test_program_learning_techniques():
     """
     ProgramPage related subpages should return expected values if they exist
@@ -330,7 +308,7 @@ def test_course_page_properties():
     assert course.background_image is None
     assert course.background_image_url is None
     assert course.background_image_mobile_url is None
-    course_page = CoursePageFactory.create(
+    CoursePageFactory.create(
         course=course,
         title="<p>page title</p>",
         subhead="subhead",
@@ -446,7 +424,7 @@ def test_course_for_teams():
         switch_layout=True,
         action_title="Action Title",
     )
-    assert course.for_teams is teams_page
+    assert course.for_teams == teams_page
     assert teams_page.action_title == "Action Title"
     assert teams_page.content == "<p>content</p>"
     assert teams_page.switch_layout
@@ -456,7 +434,7 @@ def test_program_for_teams():
     """
     The ForTeams property should return expected values if associated with a program
     """
-    program = CourseFactory.create()
+    program = ProgramFactory.create()
     assert program.for_teams is None
 
     program_page = ProgramPageFactory.create(program=program)
@@ -467,8 +445,8 @@ def test_program_for_teams():
         switch_layout=True,
         action_title="Action Title",
     )
-    assert program.for_teams is teams_page
+    assert program.for_teams == teams_page
     assert teams_page.action_title == "Action Title"
     assert teams_page.content == "<p>content</p>"
     assert teams_page.switch_layout
-    assert not ForTeamsPage.can_create_at(course_page)
+    assert not ForTeamsPage.can_create_at(program_page)
