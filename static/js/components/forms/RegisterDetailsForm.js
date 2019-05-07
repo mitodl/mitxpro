@@ -183,15 +183,16 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
                     ) : null}
                   </div>
                 ))}
-                {values.legal_address.street_address.length < 5 ? (
-                  <button
-                    type="button"
-                    className="additional-street"
-                    onClick={() => arrayHelpers.push("")}
-                  >
+                {values.legal_address.street_address.length <
+                ADDRESS_LINES_MAX ? (
+                    <button
+                      type="button"
+                      className="additional-street"
+                      onClick={() => arrayHelpers.push("")}
+                    >
                     Add additional line
-                  </button>
-                ) : null}
+                    </button>
+                  ) : null}
               </div>
             )}
           />
