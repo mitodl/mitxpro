@@ -12,6 +12,8 @@ from wagtail.core.blocks import RawHTMLBlock
 from wagtail.images.models import Image
 from wagtail.images.blocks import ImageChooserBlock
 
+from .blocks import LearningTechniqueBlock
+
 
 class CourseProgramChildPage(Page):
     """
@@ -69,7 +71,28 @@ class LearningOutcomesPage(CourseProgramChildPage):
         # autogenerate a unique slug so we don't hit a ValidationError
         self.title = "Learning Outcomes"
         self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
-        super(LearningOutcomesPage, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
+
+
+class LearningTechniquesPage(CourseProgramChildPage):
+    """
+    Teaching techniques page for learning.
+    """
+
+    subpage_types = []
+    technique_items = StreamField(
+        [("techniques", LearningTechniqueBlock())],
+        blank=False,
+        help_text="Enter detail about how you'll learn.",
+    )
+
+    content_panels = [StreamFieldPanel("technique_items")]
+
+    def save(self, *args, **kwargs):
+        # auto generate a unique slug so we don't hit a ValidationError
+        self.title = "Learning Techniques"
+        self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
+        super().save(*args, **kwargs)
 
 
 class ProductPage(Page):
@@ -146,7 +169,7 @@ class ProductPage(Page):
         StreamFieldPanel("content"),
     ]
 
-    subpage_types = ["LearningOutcomesPage"]
+    subpage_types = ["LearningOutcomesPage", "LearningTechniquesPage"]
 
     def get_context(self, request, *args, **kwargs):
         context = super(ProductPage, self).get_context(request)

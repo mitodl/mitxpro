@@ -1,0 +1,66 @@
+// sass-lint:disable mixins-before-declarations
+@import "common";
+
+.learning-techniques-block {
+
+  h1 {
+    text-align: center;
+    font-size: 40px;
+    line-height: 44px;
+    margin: 0 0 50px;
+    color: $primary;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+}
+
+.learning-techniques-list {
+  margin: 0;
+  // This is here to hide the outer list item borders
+  overflow: hidden;
+  padding: 0;
+  list-style: none;
+  letter-spacing: -.32em;
+  position: relative;
+
+  @include media-breakpoint-up(md) {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  li {
+    padding: 20px 35px;
+    margin: 0 0 -1px;
+    letter-spacing: normal;
+    border-bottom: 1px solid $detail-grid-border-color;
+    text-align: center;
+    color: black;
+
+    @include media-breakpoint-up(md) {
+      margin: 0 0 -1px -1px;
+      width: 50%;
+      border-left: 1px solid $detail-grid-border-color;
+    }
+
+    @include media-breakpoint-up(lg) {
+      width: 33.33%;
+    }
+
+    .img-holder {
+      min-height: 110px;
+      margin: 0 0 15px;
+
+    }
+  }
+
+  h3 {
+    margin: 0 0 10px;
+    color: $blue;  // it's an override of a bootstrap-provided variable.
+    text-transform: uppercase;
+  }
+
+  h4 {
+    margin: 0;
+  }
+
+}

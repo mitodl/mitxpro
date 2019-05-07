@@ -2,7 +2,13 @@
 import factory
 import wagtail_factories
 
-from cms.models import ProgramPage, CoursePage, LearningOutcomesPage
+from cms.models import (
+    ProgramPage,
+    CoursePage,
+    LearningOutcomesPage,
+    LearningTechniquesPage,
+)
+from cms.blocks import LearningTechniqueBlock
 from courses.factories import ProgramFactory, CourseFactory
 
 
@@ -38,3 +44,25 @@ class LearningOutcomesPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = LearningOutcomesPage
+
+
+class LearningTechniquesItemFactory(wagtail_factories.StructBlockFactory):
+    """LearningTechniquesItem factory class"""
+
+    heading = factory.fuzzy.FuzzyText(prefix="heading ")
+    sub_heading = factory.fuzzy.FuzzyText(prefix="Sub-heading ")
+    image = factory.SubFactory(wagtail_factories.ImageFactory)
+
+    class Meta:
+        model = LearningTechniqueBlock
+
+
+class LearningTechniquesPageFactory(wagtail_factories.PageFactory):
+    """LearningTechniquesPage factory class"""
+
+    technique_items = wagtail_factories.StreamFieldFactory(
+        {"techniques": LearningTechniquesItemFactory}
+    )
+
+    class Meta:
+        model = LearningTechniquesPage
