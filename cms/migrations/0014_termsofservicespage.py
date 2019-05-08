@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("wagtailcore", "0041_group_collection_permissions_verbose_name_plural"),
-        ("cms", "0012_who_should_enroll_subpage"),
+        ("cms", "0013_courses_in_program_subpage"),
     ]
 
     operations = [
