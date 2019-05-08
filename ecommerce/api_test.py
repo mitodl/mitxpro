@@ -584,8 +584,11 @@ def test_get_available_bulk_product_coupons():
     assert list(available_qset) == [first_product_coupon, additional_product_coupons[0]]
 
 
-def test_validate_basket_all_good(basket_and_coupons):
+@pytest.mark.parametrize("has_coupon", [True, False])
+def test_validate_basket_all_good(basket_and_coupons, has_coupon):
     """If everything is valid no exception should be raised"""
+    if not has_coupon:
+        CouponSelection.objects.all().delete()
     assert validate_basket_for_checkout(basket_and_coupons.basket) is None
 
 
