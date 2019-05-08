@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load render_bundle wagtailcore_tags %}
+
+{% block headercontent %}
+<div id="header"></div>
+{% render_bundle 'header' %}
+{% endblock %}
+
+{% block content %}
+
+  <div class="tos-banner">
+    <div class="container">
+      <h1 class="text-uppercase">{{ page.heading }}</h1>
+      <h2>{{ page.sub_heading }}</h2>
+    </div>
+  </div>
+
+<div class="container tos-container">
+  <div class="row">
+    <div class="col-md-3">
+      <ul class="tos-list">
+        {% for block in page.term_of_service %}
+          <li class="item">
+            <a class="text-capitalize" href="#{{ block.value.heading|slugify }}">{{ block.value.heading }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="col-md-9">
+      {% for block in page.term_of_service %}
+        <h2 class="text-uppercase" id="{{ block.value.heading|slugify }}">{{ block.value.heading }}:</h2>
+        <p>{{ block.value.detail }}</p>
+        <a href="#" class="back-to-top">Back to top</a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
