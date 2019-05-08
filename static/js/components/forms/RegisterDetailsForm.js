@@ -15,7 +15,7 @@ const CA_POSTAL_CODE_REGEX = /[A-Z][0-9][A-Z] [0-9][A-Z][0-9]/
 const COUNTRIES_REQUIRING_POSTAL_CODE = [US_ALPHA_2, CA_ALPHA_2]
 const COUNTRIES_REQUIRING_STATE = [US_ALPHA_2, CA_ALPHA_2]
 
-const ADDRESS_LINES_MAX = 5
+const ADDRESS_LINES_MAX = 4
 
 const detailsValidation = yup.object().shape({
   name: yup
@@ -92,7 +92,7 @@ const INITIAL_VALUES = {
   legal_address: {
     first_name:         "",
     last_name:          "",
-    street_address:     ["", "", ""],
+    street_address:     ["", ""],
     city:               "",
     country:            "",
     state_or_territory: "",
