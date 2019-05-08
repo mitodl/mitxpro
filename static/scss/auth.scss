@@ -1,0 +1,26 @@
+.registration-form {
+  @include media-breakpoint-down(sm)  {
+    padding: 20px 72px;
+  }
+
+  @include media-breakpoint-down(xs)  {
+    padding: 5px 5px;
+  }
+
+  background-color: $very-light-gray;
+  max-width: 800px;
+  margin: auto;
+  padding: 40px 145px;
+
+  .row-inner {
+    margin-top: 20px;
+  }
+
+  .additional-street {
+    cursor: pointer;
+    color: $light-blue;
+    font-style: italic;
+    border: none;
+    background: none;
+  }
+}

@@ -1,7 +1,6 @@
 """Tests of user pipeline actions"""
 # pylint: disable=redefined-outer-name
 
-from django.contrib.auth import get_user_model
 from django.contrib.sessions.middleware import SessionMiddleware
 import pytest
 from social_core.backends.email import EmailAuth
@@ -40,8 +39,19 @@ def mock_email_backend(mocker, backend_settings):
 def mock_create_user_strategy(mocker):
     """Fixture that returns a valid strategy for create_user_via_email"""
     strategy = mocker.Mock()
-    strategy.create_user = get_user_model().objects.create_user
-    strategy.request_data.return_value = {"name": "Jane Doe", "password": "password1"}
+    strategy.request_data.return_value = {
+        "name": "Jane Doe",
+        "password": "password1",
+        "legal_address": {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "street_address_1": "1 Main st",
+            "city": "Boston",
+            "state_or_territory": "US-MA",
+            "country": "US",
+            "postal_code": "02101",
+        },
+    }
     return strategy
 
 
@@ -228,7 +238,7 @@ def test_create_user_via_email_exit(mocker, backend_name, flow):
 @pytest.mark.django_db
 def test_create_user_via_email(mock_email_backend, mock_create_user_strategy):
     """
-    Tests that create_user_via_email creates a user via social_core.pipeline.user.create_user
+    Tests that create_user_via_email creates a user via social_core.pipeline.user.create_user_via_email
     and sets a name and password
     """
     username = "abc"
@@ -247,24 +257,6 @@ def test_create_user_via_email(mock_email_backend, mock_create_user_strategy):
     assert response["user"].check_password(
         mock_create_user_strategy.request_data()["password"]
     )
-
-
-@pytest.mark.django_db
-def test_create_user_via_email_failed_create_exit(
-    mocker, mock_email_backend, mock_create_user_strategy
-):
-    """
-    Tests that create_user_via_email exits if social_core.pipeline.user.create_user
-    does not return a user object
-    """
-    mocker.patch("authentication.pipeline.user.create_user", return_value=None)
-    response = user_actions.create_user_via_email(
-        mock_create_user_strategy,
-        mock_email_backend,
-        pipeline_index=0,
-        flow=SocialAuthState.FLOW_REGISTER,
-    )
-    assert response == {}
 
 
 @pytest.mark.django_db

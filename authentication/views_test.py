@@ -41,7 +41,7 @@ def assert_api_call(
     """Run the API call and perform basic assertions"""
     assert bool(get_user(client).is_authenticated) is False
 
-    response = client.post(reverse(url), payload)
+    response = client.post(reverse(url), payload, content_type="application/json")
     actual = response.json()
 
     defaults = {
@@ -428,6 +428,15 @@ def register_user_details(client):
                 "partial_token": last_result["partial_token"],
                 "password": "password1",
                 "name": "Sally Smith",
+                "legal_address": {
+                    "first_name": "Sally",
+                    "last_name": "Smith",
+                    "street_address": ["Main Street"],
+                    "country": "US",
+                    "state_or_territory": "US-CO",
+                    "city": "Boulder",
+                    "postal_code": "02183",
+                },
             },
             {
                 "flow": SocialAuthState.FLOW_REGISTER,

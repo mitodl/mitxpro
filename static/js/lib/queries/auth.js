@@ -2,7 +2,11 @@
 import { nthArg } from "ramda"
 import { FLOW_LOGIN, FLOW_REGISTER } from "../auth"
 
-import type { AuthResponse, AuthResponseRaw } from "../../flow/authTypes"
+import type {
+  AuthResponse,
+  AuthResponseRaw,
+  LegalAddress
+} from "../../flow/authTypes"
 
 export const authSelector = (state: any) => state.entities.auth
 
@@ -68,10 +72,17 @@ export default {
   registerDetailsMutation: (
     name: string,
     password: string,
+    legalAddress: LegalAddress,
     partialToken: string
   ) => ({
     ...DEFAULT_OPTIONS,
     url:  "/api/register/details/",
-    body: { name, password, flow: FLOW_REGISTER, partial_token: partialToken }
+    body: {
+      name,
+      password,
+      legal_address: legalAddress,
+      flow:          FLOW_REGISTER,
+      partial_token: partialToken
+    }
   })
 }

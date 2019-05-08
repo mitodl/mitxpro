@@ -24,7 +24,7 @@ class UserLegalAddressInline(admin.StackedInline):
                     "street_address_3",
                     "street_address_4",
                     "street_address_5",
-                    ("city", "state", "postal_code"),
+                    ("city", "state_or_territory", "postal_code"),
                     "country",
                 )
             },

@@ -57,3 +57,23 @@ export type LoggedInUser = {
 } & User
 
 export type CurrentUser = AnonymousUser | LoggedInUser
+
+export type StateOrTerritory = {
+  name: string,
+  code: string
+}
+
+export type Country = {
+  name:   string,
+  code:   string,
+  states: Array<StateOrTerritory>
+}
+
+export type LegalAddress = {
+  first_name: string,
+  last_name: string,
+  street_address: Array<string>,
+  country: string,
+  state_or_territory?: string,
+  postal_code?: string
+}
