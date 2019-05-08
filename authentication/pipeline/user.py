@@ -1,4 +1,6 @@
 """Auth pipline functions for email authentication"""
+import logging
+
 import ulid
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
@@ -7,13 +9,15 @@ from social_core.pipeline.partial import partial
 from authentication.exceptions import (
     InvalidPasswordException,
     RequirePasswordException,
-    RequirePasswordAndProfileException,
+    RequirePasswordAndAddressException,
     RequireRegistrationException,
     UnexpectedExistingUserException,
+    RequireProfileException,
 )
 from authentication.utils import SocialAuthState
-from users.serializers import UserSerializer
+from users.serializers import UserSerializer, ProfileSerializer
 
+log = logging.getLogger()
 
 # pylint: disable=keyword-arg-before-vararg
 
@@ -75,7 +79,7 @@ def create_user_via_email(
         current_partial (Partial): the partial for the step in the pipeline
 
     Raises:
-        RequirePasswordAndProfileException: if the user hasn't set password or name
+        RequirePasswordAndAddressException: if the user hasn't set password or name
     """
     if backend.name != EmailAuth.name or flow != SocialAuthState.FLOW_REGISTER:
         return {}
@@ -87,15 +91,49 @@ def create_user_via_email(
     data["email"] = kwargs.get("email", kwargs.get("details", {}).get("email"))
 
     if "name" not in data or "password" not in data:
-        raise RequirePasswordAndProfileException(backend, current_partial)
+        raise RequirePasswordAndAddressException(backend, current_partial)
 
     serializer = UserSerializer(data=data)
 
     if not serializer.is_valid():
-        raise RequirePasswordAndProfileException(
+        raise RequirePasswordAndAddressException(
             backend, current_partial, errors=serializer.errors
         )
     return {"is_new": True, "user": serializer.save()}
+
+
+@partial
+def create_profile_via_email(
+    strategy, backend, user=None, flow=None, current_partial=None, *args, **kwargs
+):  # pylint: disable=too-many-arguments,unused-argument
+    """
+    Creates a new profile for the user
+    Args:
+        strategy (social_django.strategy.DjangoStrategy): the strategy used to authenticate
+        backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
+        user (User): the current user
+        flow (str): the type of flow (login or register)
+        current_partial (Partial): the partial for the step in the pipeline
+
+    Raises:
+        RequireProfileException: if the profile data is missing
+    """
+    if backend.name != EmailAuth.name or flow != SocialAuthState.FLOW_REGISTER:
+        return {}
+
+    data = strategy.request_data().copy()
+    if "birth_year" not in data:
+        raise RequireProfileException(backend, current_partial)
+
+    data["user"] = user.id
+
+    serializer = ProfileSerializer(data=data)
+    if not serializer.is_valid():
+        raise RequireProfileException(
+            backend, current_partial, errors=serializer.errors
+        )
+    serializer.save()
+    return {}
 
 
 @partial

@@ -49,9 +49,10 @@ urlpatterns = [
     path("login/password/", index, name="login-password"),
     path("signup/", index, name="signup"),
     path("signup/details/", index, name="signup-details"),
-    path("checkout/", index, name="checkout-page"),
+    path("signup/extra/", index, name="signup-extra"),
     path("signup/confirm/", index, name="register-confirm"),
     path("account/inactive/", index, name="account-inactive"),
+    path("checkout/", index, name="checkout-page"),
     re_path(r"^ecommerce/admin/", restricted, name="ecommerce-admin"),
     # social django needs to be here to preempt the login
     path("", include("social_django.urls", namespace="social")),

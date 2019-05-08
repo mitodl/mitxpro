@@ -20,6 +20,7 @@ export const STATE_REGISTER_EMAIL = "register/email"
 export const STATE_REGISTER_CONFIRM_SENT = "register/confirm-sent"
 export const STATE_REGISTER_CONFIRM = "register/confirm"
 export const STATE_REGISTER_DETAILS = "register/details"
+export const STATE_REGISTER_EXTRA_DETAILS = "register/extra"
 
 export const generateLoginRedirectUrl = () => {
   const { pathname, search, hash } = window.location

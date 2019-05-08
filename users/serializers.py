@@ -7,7 +7,7 @@ import pycountry
 from rest_framework import serializers
 
 from mitxpro.serializers import WriteableSerializerMethodField
-from users.models import LegalAddress, User
+from users.models import LegalAddress, User, Profile
 
 US_POSTAL_RE = re.compile(r"[0-9]{5}(-[0-9]{4}){0,1}")
 CA_POSTAL_RE = re.compile(r"[0-9][A-Z][0-9] [A-Z][0-9][A-Z]", flags=re.I)
@@ -224,6 +224,29 @@ class UserSerializer(serializers.ModelSerializer):
             "created_on",
             "updated_on",
         )
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    """Serializer for Profile """
+
+    class Meta:
+        model = Profile
+        fields = (
+            "id",
+            "user",
+            "birth_year",
+            "gender",
+            "company",
+            "company_size",
+            "industry",
+            "job_title",
+            "job_function",
+            "years_experience",
+            "leadership_level",
+            "created_on",
+            "updated_on",
+        )
+        read_only_fields = ("created_on", "updated_on")
 
 
 class StateProvinceSerializer(serializers.Serializer):

@@ -1,6 +1,6 @@
 """User url routes"""
 from django.conf.urls import include
-from django.urls import path
+from django.urls import path, re_path
 from rest_framework import routers
 
 from users.views import (

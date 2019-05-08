@@ -12,6 +12,7 @@ from authentication.views import (
     CustomPasswordResetView,
     CustomPasswordResetConfirmView,
     CustomSetPasswordView,
+    RegisterExtraDetailsView,
 )
 
 
@@ -28,6 +29,11 @@ urlpatterns = [
         "api/register/details/",
         RegisterDetailsView.as_view(),
         name="psa-register-details",
+    ),
+    path(
+        "api/register/extra/",
+        RegisterExtraDetailsView.as_view(),
+        name="psa-register-extra",
     ),
     path(
         "api/password_reset/",

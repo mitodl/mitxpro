@@ -19,6 +19,7 @@ class SocialAuthState:
     STATE_REGISTER_CONFIRM_SENT = "register/confirm-sent"
     STATE_REGISTER_CONFIRM = "register/confirm"
     STATE_REGISTER_DETAILS = "register/details"
+    STATE_REGISTER_EXTRA_DETAILS = "register/extra"
 
     # end states
     STATE_SUCCESS = "success"

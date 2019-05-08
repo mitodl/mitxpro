@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin as ContribUserAdmin
 from django.utils.translation import gettext_lazy as _
 from hijack_admin.admin import HijackUserAdminMixin
 
-from users.models import LegalAddress, User
+from users.models import LegalAddress, User, Profile
 
 
 class UserLegalAddressInline(admin.StackedInline):
@@ -35,6 +35,16 @@ class UserLegalAddressInline(admin.StackedInline):
         return False
 
 
+class UserProfileInline(admin.StackedInline):
+    """Admin view for the profile"""
+
+    model = Profile
+    classes = ["collapse"]
+
+    def has_delete_permission(self, request, obj=None):
+        return True
+
+
 class UserAdmin(ContribUserAdmin, HijackUserAdminMixin):
     """Admin views for user"""
 
@@ -60,7 +70,7 @@ class UserAdmin(ContribUserAdmin, HijackUserAdminMixin):
     search_fields = ("username", "name", "email")
     ordering = ("email",)
     readonly_fields = ("username",)
-    inlines = [UserLegalAddressInline]
+    inlines = [UserLegalAddressInline, UserProfileInline]
 
 
 admin.site.register(User, UserAdmin)

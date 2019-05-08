@@ -17,9 +17,10 @@ from rest_framework import serializers
 from authentication.exceptions import (
     InvalidPasswordException,
     RequirePasswordException,
-    RequirePasswordAndProfileException,
+    RequirePasswordAndAddressException,
     RequireProviderException,
     RequireRegistrationException,
+    RequireProfileException,
 )
 from authentication.utils import SocialAuthState
 
@@ -262,7 +263,7 @@ class RegisterConfirmSerializer(SocialAuthSerializer):
         """Try to 'save' the request"""
         try:
             result = super()._authenticate(SocialAuthState.FLOW_REGISTER)
-        except RequirePasswordAndProfileException as exc:
+        except RequirePasswordAndAddressException as exc:
             result = SocialAuthState(
                 SocialAuthState.STATE_REGISTER_DETAILS, partial=exc.partial
             )
@@ -274,6 +275,38 @@ class RegisterDetailsSerializer(SocialAuthSerializer):
 
     password = serializers.CharField(min_length=8, write_only=True)
     name = serializers.CharField(write_only=True)
+
+    def create(self, validated_data):
+        """Try to 'save' the request"""
+        try:
+            result = super()._authenticate(SocialAuthState.FLOW_REGISTER)
+        except RequireProfileException as exc:
+            result = SocialAuthState(
+                SocialAuthState.STATE_REGISTER_EXTRA_DETAILS, partial=exc.partial
+            )
+        return result
+
+
+class RegisterExtraDetailsSerializer(SocialAuthSerializer):
+    """Serializer for registration details"""
+
+    gender = serializers.CharField(write_only=True)
+    birth_year = serializers.CharField(write_only=True)
+    company = serializers.CharField(write_only=True)
+    job_title = serializers.CharField(write_only=True)
+    industry = serializers.CharField(write_only=True, allow_blank=True, required=False)
+    job_function = serializers.CharField(
+        write_only=True, allow_blank=True, required=False
+    )
+    years_experience = serializers.CharField(
+        write_only=True, allow_blank=True, required=False
+    )
+    company_size = serializers.CharField(
+        write_only=True, allow_blank=True, required=False
+    )
+    leadership_level = serializers.CharField(
+        write_only=True, allow_blank=True, required=False
+    )
 
     def create(self, validated_data):
         """Try to 'save' the request"""

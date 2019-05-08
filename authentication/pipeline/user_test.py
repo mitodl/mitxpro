@@ -12,8 +12,9 @@ from authentication.exceptions import (
     InvalidPasswordException,
     RequirePasswordException,
     RequireRegistrationException,
-    RequirePasswordAndProfileException,
+    RequirePasswordAndAddressException,
     UnexpectedExistingUserException,
+    RequireProfileException,
 )
 from authentication.utils import SocialAuthState
 
@@ -52,6 +53,22 @@ def mock_create_user_strategy(mocker):
             "postal_code": "02101",
         },
     }
+<<<<<<< HEAD
+=======
+    return strategy
+
+
+@pytest.fixture
+def mock_create_profile_strategy(mocker):
+    """Fixture that returns a valid strategy for create_profile_via_email"""
+    strategy = mocker.Mock()
+    strategy.request_data.return_value = {
+        "gender": "f",
+        "birth_year": "2000",
+        "company": "MIT",
+        "job_title": "QA Tester",
+    }
+>>>>>>> Registration form step 2
     return strategy
 
 
@@ -264,7 +281,7 @@ def test_create_user_via_email_no_data(mocker, mock_email_backend):
     """Tests that create_user_via_email raises an error if no data for name and password provided"""
     mock_strategy = mocker.Mock()
     mock_strategy.request_data.return_value = {}
-    with pytest.raises(RequirePasswordAndProfileException):
+    with pytest.raises(RequirePasswordAndAddressException):
         user_actions.create_user_via_email(
             mock_strategy,
             mock_email_backend,
@@ -283,6 +300,43 @@ def test_create_user_via_email_existing_user_raises(
             mock_create_user_strategy,
             mock_email_backend,
             user=user,
+            pipeline_index=0,
+            flow=SocialAuthState.FLOW_REGISTER,
+        )
+
+
+@pytest.mark.django_db
+def test_create_profile_via_email(
+    mock_email_backend, mock_create_profile_strategy, user
+):
+    """
+    Tests that create_profile_via_email creates a profile
+    """
+    response = user_actions.create_profile_via_email(
+        mock_create_profile_strategy,
+        mock_email_backend,
+        user=user,
+        pipeline_index=0,
+        flow=SocialAuthState.FLOW_REGISTER,
+    )
+    assert response == {}
+    assert user.profile.gender == mock_create_profile_strategy.request_data().get(
+        "gender"
+    )
+    assert user.profile.company == mock_create_profile_strategy.request_data().get(
+        "company"
+    )
+
+
+@pytest.mark.django_db
+def test_create_profile_via_email_no_data(mocker, mock_email_backend):
+    """Tests that create_profile_via_email raises an error if no data for name and password provided"""
+    mock_strategy = mocker.Mock()
+    mock_strategy.request_data.return_value = {}
+    with pytest.raises(RequireProfileException):
+        user_actions.create_profile_via_email(
+            mock_strategy,
+            mock_email_backend,
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,
         )

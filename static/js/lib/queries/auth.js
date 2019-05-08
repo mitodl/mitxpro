@@ -5,7 +5,7 @@ import { FLOW_LOGIN, FLOW_REGISTER } from "../auth"
 import type {
   AuthResponse,
   AuthResponseRaw,
-  LegalAddress
+  LegalAddress, UserProfile
 } from "../../flow/authTypes"
 
 export const authSelector = (state: any) => state.entities.auth
@@ -83,6 +83,19 @@ export default {
       legal_address: legalAddress,
       flow:          FLOW_REGISTER,
       partial_token: partialToken
+    }
+  }),
+
+  registerExtraDetailsMutation: (
+    profileData: UserProfile,
+    partialToken: string
+  ) => ({
+    ...DEFAULT_OPTIONS,
+    url:  "/api/register/extra/",
+    body: {
+      flow:          FLOW_REGISTER,
+      partial_token: partialToken,
+      ...profileData
     }
   })
 }

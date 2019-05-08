@@ -16,6 +16,10 @@
     margin-top: 20px;
   }
 
+  .dotted {
+    border-bottom: 2px dashed #8a8b8c;
+  }
+
   .additional-street {
     cursor: pointer;
     color: $light-blue;

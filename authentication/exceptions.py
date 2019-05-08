@@ -51,11 +51,18 @@ class RequirePasswordException(PartialException):
         return "Password is required to login"
 
 
-class RequirePasswordAndProfileException(PartialException):
-    """Authentication requires a password and profile"""
+class RequirePasswordAndAddressException(PartialException):
+    """Authentication requires a password and address"""
 
     def __str__(self):
-        return "Password and profile need to be filled out"
+        return "Password and address need to be filled out"
+
+
+class RequireProfileException(PartialException):
+    """Authentication requires a profile"""
+
+    def __str__(self):
+        return "Profile needs to be filled out"
 
 
 class UnexpectedExistingUserException(PartialException):
@@ -64,3 +71,7 @@ class UnexpectedExistingUserException(PartialException):
 
 class UserMissingSocialAuthException(Exception):
     """Raised if the user doesn't have a social auth"""
+
+
+class RequireUserException(Exception):
+    """Profile requires a user"""

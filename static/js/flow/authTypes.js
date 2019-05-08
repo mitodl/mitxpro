@@ -12,6 +12,7 @@ export type AuthStates =
   | "register/confirm-sent"
   | "register/confirm"
   | "register/details"
+  | "register/extra"
 
 export type AuthFlow = "register" | "login"
 
@@ -76,4 +77,15 @@ export type LegalAddress = {
   country: string,
   state_or_territory?: string,
   postal_code?: string
+}
+
+export type UserProfile = {
+  gender: string,
+  birth_year: number,
+  company: string,
+  industry: ?string,
+  job_title: string,
+  job_function: ?string,
+  years_experience: ?number,
+  leadership_level: ?string
 }
