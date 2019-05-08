@@ -353,6 +353,6 @@ class TermsOfServicesPage(Page):
 
     def get_context(self, request, *args, **kwargs):
         context = super(TermsOfServicesPage, self).get_context(request)
-        context.update(** get_js_settings_context(request))
+        context.update(**get_js_settings_context(request))
 
         return context
