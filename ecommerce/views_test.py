@@ -658,20 +658,40 @@ def test_patch_basket_invalid_run(basket_client, basket_and_coupons, is_program)
     ]
 
 
-def test_patch_basket_multiple_runs_for_course(basket_client, basket_and_coupons):
+@pytest.mark.parametrize("multiple_for_program", [True, False])
+def test_patch_basket_multiple_runs(
+    basket_client, basket_and_coupons, multiple_for_program
+):
     """A patch request for multiple runs for a course should result in a 400 error"""
+    # Make basket item product a program, and select two runs for the basket
     product_version = basket_and_coupons.product_version
-    course = product_version.product.content_object.course
+    product = product_version.product
+    course = product.content_object.course
+    program = course.program
+    product.content_object = program
+    product.save()
+
     run1 = basket_and_coupons.run
-    run2 = CourseRunFactory.create(course=course)
+    if multiple_for_program:
+        run2 = CourseRunFactory.create(course__program=program)
+    else:
+        run2 = CourseRunFactory.create(course=course)
 
     resp = basket_client.patch(
         reverse("basket_api"),
         type="json",
         data={"items": [{"id": product_version.id, "run_ids": [run1.id, run2.id]}]},
     )
-    assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp.json()["errors"] == [f"Unable to find run(s) with id(s) {{{run2.id}}}"]
+    if multiple_for_program:
+        assert resp.status_code == status.HTTP_200_OK
+        assert sorted(
+            CourseRunSelection.objects.filter(
+                basket=basket_and_coupons.basket
+            ).values_list("run", flat=True)
+        ) == sorted([run1.id, run2.id])
+    else:
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert resp.json()["errors"] == ["Only one run per course can be selected"]
 
 
 def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
