@@ -161,19 +161,19 @@ describe("RegisterDetailsForm", () => {
   it(`validates that additional street address lines are created on request`, async () => {
     const wrapper = renderForm()
     assert.isTrue(
-      wrapper.find(`input[name="legal_address.street_address[2]"]`).exists()
+      wrapper.find(`input[name="legal_address.street_address[1]"]`).exists()
     )
     assert.isFalse(
-      wrapper.find(`input[name="legal_address.street_address[3]"]`).exists()
+      wrapper.find(`input[name="legal_address.street_address[2]"]`).exists()
     )
     const moreStreets = wrapper.find(".additional-street")
     moreStreets.simulate("click")
     assert.isTrue(
-      wrapper.find(`input[name="legal_address.street_address[3]"]`).exists()
+      wrapper.find(`input[name="legal_address.street_address[2]"]`).exists()
     )
     moreStreets.simulate("click")
     assert.isTrue(
-      wrapper.find(`input[name="legal_address.street_address[4]"]`).exists()
+      wrapper.find(`input[name="legal_address.street_address[3]"]`).exists()
     )
     assert.isFalse(wrapper.find(".additional-street").exists())
   })
