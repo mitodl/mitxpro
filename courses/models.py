@@ -12,6 +12,7 @@ from cms.models import (
     FrequentlyAskedQuestionPage,
     ForTeamsPage,
     WhoShouldEnrollPage,
+    CoursesInProgramPage,
 )
 from courses.constants import (
     CATALOG_COURSE_IMG_WAGTAIL_FILL,
@@ -138,36 +139,29 @@ class PageProperties(models.Model):
         """Gets the duration from the associated Page if it exists"""
         return self.page.time_commitment if self.page else None
 
+    def _get_child_page_of_type(self, cls):
+        """Gets the first child page of the given type from the associated Page if it exists"""
+        if not self.page:
+            return None
+        child = self.page.get_children().type(cls).first()
+        if child:
+            return child.specific
+        return None
+
     @property
     def outcomes(self):
         """Gets the learning outcomes from the associated Page children if it exists"""
-        if self.page:
-            learning_outcomes = (
-                self.page.get_children().type(LearningOutcomesPage).first()
-            )
-            if learning_outcomes:
-                return learning_outcomes.specific
+        return self._get_child_page_of_type(LearningOutcomesPage)
 
     @property
     def for_teams(self):
         """Gets the ForTeams associated child page from the associate Page if it exists"""
-        if self.page:
-            child = self.page.get_children().type(ForTeamsPage).first()
-            if child:
-                return child.specific
-        return None
+        return self._get_child_page_of_type(ForTeamsPage)
 
     @property
     def techniques(self):
         """Gets the learning techniques from the associated Page children if it exists"""
-        if self.page:
-            learning_techniques = (
-                self.page.get_children().type(LearningTechniquesPage).first()
-            )
-            if learning_techniques:
-                return learning_techniques.specific
-
-        return None
+        return self._get_child_page_of_type(LearningTechniquesPage)
 
     @property
     def faqs(self):
@@ -175,17 +169,13 @@ class PageProperties(models.Model):
         if not self.page:
             return
 
-        faqs_page = self.page.get_children().type(FrequentlyAskedQuestionPage).first()
+        faqs_page = self._get_child_page_of_type(FrequentlyAskedQuestionPage)
         return FrequentlyAskedQuestion.objects.filter(faqs_page=faqs_page)
 
     @property
     def who_should_enroll(self):
         """Gets the WhoShouldEnroll associated child page from the associated Page if it exists"""
-        if self.page:
-            child = self.page.get_children().type(WhoShouldEnrollPage).first()
-            if child:
-                return child.specific
-        return None
+        return self._get_child_page_of_type(WhoShouldEnrollPage)
 
 
 class Program(TimestampedModel, PageProperties):
@@ -228,6 +218,11 @@ class Program(TimestampedModel, PageProperties):
         if not latest_version:
             return None
         return latest_version.price
+
+    @property
+    def course_lineup(self):
+        """Gets the CoursesInProgram subpage if associated with this program"""
+        return self._get_child_page_of_type(CoursesInProgramPage)
 
     def __str__(self):
         return self.title

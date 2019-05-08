@@ -20,149 +20,21 @@
 
 {% block scripts %}
   {{ block.super }}
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
   <script src="{% static 'js/course_detail.js' %}"></script>
 {% endblock %}
 
 {% block content %}
 <div>
-    <div class="header-block">
-      <div class="container header-container">
-        {% if course.program %}
-          <h5 class="program-position">Course {{ course.position_in_program }} of {{ course.program.num_courses }} in {{ course.program.title }}</h5>
-        {% endif %}
-        <div class="row">
-          <div class="col-lg-7">
-            <div class="header-title">
-              <h1>{{ course.display_title }}</h1>
-              <h2>{{ course.subhead }}</h2>
-            </div>
-          </div>
-          <div class="col-lg-5">
-            {% if course.video_url %}
-              <video controls>
-                <source src="{{ course.video_url }}">
-                Your browser does not support HTML5 video.
-              </video>
-              <div class="video-caption">{{ course.video_title|safe }}</div>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="tiles-block">
-        <div class="container">
-            <ul class="tiles-list">
-                {% if course.next_run_date %}
-                    <li>
-                        <span class="title">START DATE</span>
-                        <span class="text">{{ course.next_run_date|date:"F j, Y" }}</span>
-                        <span class="dates-link"><a href="#">More Dates</a></span>  {# TODO Need to do in separate story#}
-                    </li>
-                {% endif %}
-                {% if course.time_commitment %}
-                    <li>
-                        <span class="title">TIME COMMITMENT</span>
-                        <span class="text">{{ course.time_commitment }}</span>
-                    </li>
-                {% endif %}
-                {% if course.duration %}
-                    <li>
-                        <span class="title">DURATION</span>
-                        <span class="text">{{ course.duration }}</span>
-                    </li>
-                {% endif %}
-                <li>
-                    <span class="title">FORMAT</span>
-                    <span class="text">Online</span>
-                </li>
-                {% if course.current_price %}
-                    <li>
-                        <span class="title">PRICE</span>
-                        <span class="text">${{ course.current_price }}</span>
-                    </li>
-                {% endif %}
-            </ul>
-        </div>
-    </div>
-    {% if course.outcomes %}
-        <div class="learning-outcomes-block section-spacing">
-             <div class="container">
-                 <div class="learning-header">
-                     <h1>{{ course.outcomes.heading | safe }}</h1>
-                     <h2>{{ course.outcomes.sub_heading | safe }}</h2>
-                 </div>
-                 <ul class="learning-outcomes-list">
-                     {% for outcome in course.outcomes.outcome_items %}
-                         <li>{{ outcome }}</li>
-                     {% endfor %}
-                 </ul>
-             </div>
-        </div>
+    {% include "partials/hero.html" with obj=course %}
+    {% include "partials/metadata-tiles.html" %}
+    {% if course.outcomes %} {% include "partials/learning-outcomes.html" %} {% endif %}
+    {% if course.who_should_enroll %} {% include "partials/target-audience.html" %} {% endif %}
+    {% if course.techniques %} {% include "partials/learning-techniques.html" %} {% endif %}
+    {% if course.program and course.program.course_lineup %}
+      {% include "partials/course-carousel.html" with program=course.program %}
     {% endif %}
-    {% if course.who_should_enroll %}
-      <div class="who-should-enroll-block">
-        <div class="container">
-          <div class="row">
-            <div class="col-lg-6 {% if course.who_should_enroll.switch_layout %}order-2{% endif %}">
-              <h1 class="text-uppercase">Who Should Enroll</h1>
-              <ul class="item-list">
-                {% for item in course.who_should_enroll.content %}
-                  <li>{{ item }}</li>
-                {% endfor %}
-              </ul>
-            </div>
-            <div class="col-lg-6">
-              {% if course.who_should_enroll.image %}
-                <div class="img-holder {% if course.who_should_enroll.switch_layout %}stick-left{% endif %}">
-                  {% image course.who_should_enroll.image fill-870x500 %}
-                </div>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-      </div>
-    {% endif %}
-    {% if course.techniques %}
-        <div class="container learning-techniques-block section-spacing">
-            <h1>How You’ll Learn</h1>
-            <ul class="learning-techniques-list">
-                {% for technique in course.techniques.technique_items %}
-                    <li>
-                        <div class="img-holder">
-                            {% image technique.value.image height-110 format-png %}
-                        </div>
-                        <h3>{{ technique.value.heading }}</h3>
-                        <h4>{{ technique.value.sub_heading }}</h4>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-    {% if course.faqs %} {% include "_faqs.html" %} {% endif %}
-
+    {% if course.faqs %} {% include "partials/faqs.html" %} {% endif %}
+    {% if course.for_teams %} {% include "partials/for-teams.html" %} {% endif %}
 </div>
-{% if course.for_teams %}
-  <div class="for-teams-block">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-7 {% if course.for_teams.switch_layout %}order-2{% endif %}">
-          <h1>For Teams</h1>
-          {{ course.for_teams.content|safe }}
-          <a href="#" class="btn btn-primary text-uppercase px-5 py-2 action-button">{{ course.for_teams.action_title }}</a>
-        </div>
-        <div class="col-lg-5">
-          <div class="img-holder {% if course.for_teams.switch_layout %}stick-left{% endif %}">
-            {% if course.for_teams.image %}
-              {% image course.for_teams.image fill-750x505 %}
-            {% else %}
-              <img src="{% static 'images/default-for-teams-image.jpg' %}" alt="For Teams">
-            {% endif%}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-{% endif %}
 {% endblock %}

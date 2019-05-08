@@ -16,6 +16,7 @@ from cms.factories import (
     FrequentlyAskedQuestionPageFactory,
     ForTeamsPageFactory,
     WhoShouldEnrollPageFactory,
+    CoursesInProgramPageFactory,
 )
 
 from cms.models import (
@@ -24,6 +25,7 @@ from cms.models import (
     FrequentlyAskedQuestionPage,
     ForTeamsPage,
     WhoShouldEnrollPage,
+    CoursesInProgramPage,
 )
 from mitxpro.utils import now_in_utc
 
@@ -480,3 +482,20 @@ def test_program_for_teams():
     assert teams_page.content == "<p>content</p>"
     assert teams_page.switch_layout
     assert not ForTeamsPage.can_create_at(program_page)
+
+
+def test_program_course_lineup():
+    """
+    course_lineup property should return expected values if associated with a program
+    """
+    program = ProgramFactory.create()
+    assert program.course_lineup is None
+
+    program_page = ProgramPageFactory.create(program=program)
+    assert CoursesInProgramPage.can_create_at(program_page)
+    courses_page = CoursesInProgramPageFactory.create(
+        parent=program_page, heading="heading", body="<p>body</p>"
+    )
+    assert program.course_lineup == courses_page
+    assert courses_page.heading == "heading"
+    assert courses_page.body == "<p>body</p>"

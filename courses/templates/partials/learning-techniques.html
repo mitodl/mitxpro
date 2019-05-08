@@ -1,0 +1,15 @@
+{% load wagtailimages_tags %}
+<div class="container learning-techniques-block section-spacing">
+  <h1>How You’ll Learn</h1>
+  <ul class="learning-techniques-list">
+    {% for technique in course.techniques.technique_items %}
+      <li>
+        <div class="img-holder">
+          {% image technique.value.image height-110 format-png %}
+        </div>
+        <h3>{{ technique.value.heading }}</h3>
+        <h4>{{ technique.value.sub_heading }}</h4>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
