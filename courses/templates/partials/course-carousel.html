@@ -1,0 +1,27 @@
+{% load static wagtailimages_tags %}
+<div class="course-in-program">
+  <div class="container">
+    <div class="head">
+      <h1 class="text-uppercase">{{ program.course_lineup.heading }}</h1>
+      {{ program.course_lineup.body|safe }}
+    </div>
+    <div class="course-slider">
+      {% for child_course in program.courses.all %}
+        <div class="slide">
+          <div class="slide-holder">
+            {% if child_course.thumbnail_image %}
+              {% image child_course.thumbnail_image fill-480x275 as course_image %}
+              <img src="{{ course_image.url }}" alt="{{ child_course.display_title }}">
+            {% else %}
+              <img src="{% static 'images/mit-dome.png' %}" alt="{{ child_course.display_title }}">
+            {% endif %}
+            <h2>{{ child_course.display_title }}</h2>
+            <p>{{ child_course.subhead }}</p>
+            <a href="{% url "course-detail" pk=child_course.id %}" class="read-more text-uppercase">view course</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <a href="#" class="btn btn-primary">View Full Program</a>
+  </div>
+</div>

@@ -1,0 +1,116 @@
+// sass-lint:disable mixins-before-declarations
+.course-in-program {
+  width: 100%;
+  padding: 100px 0 50px;
+  background: white url("#{$static-path}/images/course-carousel-bg.jpg") no-repeat 50% 50%;
+  min-height: 400px;
+  overflow: hidden;
+  position: relative;
+  color: black;
+  background-size: cover;
+
+  &:after {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    content: "";
+    height: 10px;
+    background: linear-gradient(
+      to right,
+      rgba(61, 189, 191, 1) 0%,
+      rgba(241, 186, 70, 1) 100%
+    );
+  }
+
+  .head {
+    text-align: center;
+    padding: 0 0 20px;
+
+    h3 {
+      margin: 0 0 20px;
+    }
+  }
+
+  h1 {
+    color: $primary;
+    margin: 0 0 10px;
+
+    @include media-breakpoint-up(lg) {
+      margin: 0 0 15px;
+    }
+  }
+
+  .btn {
+    position: relative;
+    transform: translateX(-50%);
+    left: 50%;
+  }
+}
+
+.course-slider {
+  position: relative;
+  margin: 0 -15px 50px;
+
+  &:after {
+    display: block;
+    clear: both;
+    content: "";
+  }
+
+  .slide {
+    float: left;
+    width: 33.333%;
+    padding: 0 15px;
+  }
+
+  .slide-holder {
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-size: 20px;
+    line-height: 28px;
+    color: $gray;
+
+    @include media-breakpoint-up(md) {
+      text-align: left;
+    }
+  }
+
+  img {
+    width: 100%;
+    display: block;
+    margin: 0 0 15px;
+  }
+
+  h2 {
+    margin: 0 0 20px;
+    line-height: 30px;
+    color: black;
+  }
+
+  p {
+    margin: 0 0 10px;
+    min-height: 89px;
+  }
+
+  .read-more {
+    font-size: 18px;
+    line-height: 24px;
+    display: inline-block;
+    vertical-align: top;
+    font-weight: 600;
+    color: $primary;
+
+    &:after {
+      content: "\e902";
+      font-family: icomoon;
+      display: inline-block;
+      vertical-align: top;
+      line-height: 24px;
+      margin: 0 0 0 10px;
+    }
+  }
+}

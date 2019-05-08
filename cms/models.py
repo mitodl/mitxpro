@@ -42,6 +42,12 @@ class CourseProgramChildPage(Page):
             and parent.get_children().type(cls).count() == 0
         )
 
+    def save(self, *args, **kwargs):
+        # autogenerate a unique slug so we don't hit a ValidationError
+        self.title = self.__class__._meta.verbose_name.title()
+        self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
+        super().save(*args, **kwargs)
+
 
 class LearningOutcomesPage(CourseProgramChildPage):
     """
@@ -73,12 +79,6 @@ class LearningOutcomesPage(CourseProgramChildPage):
         StreamFieldPanel("outcome_items"),
     ]
 
-    def save(self, *args, **kwargs):
-        # autogenerate a unique slug so we don't hit a ValidationError
-        self.title = "Learning Outcomes"
-        self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
-        super(LearningOutcomesPage, self).save(*args, **kwargs)
-
 
 class LearningTechniquesPage(CourseProgramChildPage):
     """
@@ -93,10 +93,6 @@ class LearningTechniquesPage(CourseProgramChildPage):
     )
 
     content_panels = [StreamFieldPanel("technique_items")]
-
-    def save(self, *args, **kwargs):
-        # auto generate a unique slug so we don't hit a ValidationError
-        self.title = "Learning Techniques"
 
 
 class ForTeamsPage(CourseProgramChildPage):
@@ -127,12 +123,6 @@ class ForTeamsPage(CourseProgramChildPage):
         FieldPanel("switch_layout"),
         FieldPanel("image"),
     ]
-
-    def save(self, *args, **kwargs):
-        # autogenerate a unique slug so we don't hit a ValidationError
-        self.title = "For Teams"
-        self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
-        super().save(*args, **kwargs)
 
 
 class WhoShouldEnrollPage(CourseProgramChildPage):
@@ -174,11 +164,24 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
         FieldPanel("switch_layout"),
     ]
 
-    def save(self, *args, **kwargs):
-        # autogenerate a unique slug so we don't hit a ValidationError
-        self.title = "Who Should Enroll"
-        self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
-        super().save(*args, **kwargs)
+
+class CoursesInProgramPage(CourseProgramChildPage):
+    """
+    CMS Page representing a "Courses in Program" section in a program
+    """
+
+    # We need this to be only under a program page
+    parent_page_types = ["ProgramPage"]
+
+    heading = models.CharField(
+        max_length=255, help_text="The heading to show in this section"
+    )
+    body = RichTextField(
+        help_text="The content to show above course carousel",
+        features=["bold", "italic", "ol", "ul", "h2", "h3", "h4"],
+    )
+
+    content_panels = [FieldPanel("heading"), FieldPanel("body")]
 
 
 class ProductPage(Page):
@@ -261,6 +264,7 @@ class ProductPage(Page):
         "FrequentlyAskedQuestionPage",
         "ForTeamsPage",
         "WhoShouldEnrollPage",
+        "CoursesInProgramPage",
     ]
 
     def get_context(self, request, *args, **kwargs):

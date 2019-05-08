@@ -12,6 +12,7 @@ from cms.models import (
     FrequentlyAskedQuestionPage,
     ForTeamsPage,
     WhoShouldEnrollPage,
+    CoursesInProgramPage,
 )
 from cms.blocks import LearningTechniqueBlock
 from courses.factories import ProgramFactory, CourseFactory
@@ -110,3 +111,13 @@ class WhoShouldEnrollPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = WhoShouldEnrollPage
+
+
+class CoursesInProgramPageFactory(wagtail_factories.PageFactory):
+    """CoursesInProgramPage factory class"""
+
+    heading = factory.fuzzy.FuzzyText(prefix="Heading ")
+    body = factory.fuzzy.FuzzyText(prefix="Body ")
+
+    class Meta:
+        model = CoursesInProgramPage
