@@ -1,5 +1,5 @@
 // @flow
-import * as R from "ramda"
+import { range } from "ramda"
 import casual from "casual-browserify"
 
 import type { Course, CourseRun } from "../flow/courseTypes"
@@ -21,5 +21,5 @@ export const makeCourse = (): Course => ({
   description:   casual.text,
   thumbnail_url: casual.url,
   readable_id:   casual.text,
-  courseruns:    R.range(0, 3).map(() => makeCourseRun())
+  courseruns:    range(0, 3).map(() => makeCourseRun())
 })

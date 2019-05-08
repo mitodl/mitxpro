@@ -1,6 +1,6 @@
 // @flow
 import casual from "casual-browserify"
-import * as R from "ramda"
+import { range } from "ramda"
 
 import { makeCourse } from "./course"
 import { incrementer } from "./util"
@@ -25,7 +25,7 @@ const genBasketItemId = incrementer()
 const genNextObjectId = incrementer()
 
 export const makeItem = (): BasketItem => {
-  const courses = R.range(0, 4).map(() => makeCourse())
+  const courses = range(0, 4).map(() => makeCourse())
   const runIds = courses.map(course => course.courseruns[0].id)
 
   return {
