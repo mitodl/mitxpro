@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.3.1
+-------------
+
+- Course run selection UI, various backend changes (#186)
+- Registration detail form - Step 1 (#211)
+- fix migration dependency after merge (#230)
+- #223 add TOS page in CMS (#224)
+- #147 Product Page: Courses Carousel
+- #143 Product Page: Who Should Enroll
+- For Teams Section (#148) (#189)
+- Add faqs section (#220)
+- CMS page design - What You will learn
+
 Version 0.3.0 (Released May 07, 2019)
 -------------
 
