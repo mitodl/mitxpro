@@ -18,6 +18,8 @@ from wagtail.images.models import Image
 from wagtail.images.blocks import ImageChooserBlock
 
 from modelcluster.fields import ParentalKey
+
+from mitxpro.views import get_js_settings_context
 from .blocks import LearningTechniqueBlock, TermsOfServicesBlock
 
 
@@ -336,6 +338,11 @@ class FrequentlyAskedQuestion(Orderable):
 
 
 class TermsOfServicesPage(Page):
+    """
+    Terms of Service page
+    """
+
+    template = "../../mitxpro/templates/terms_of_services.html"
     term_of_service = StreamField(
         [("tos", TermsOfServicesBlock())],
         blank=False,
@@ -344,9 +351,8 @@ class TermsOfServicesPage(Page):
 
     content_panels = [StreamFieldPanel("term_of_service")]
 
-    # def get_context(self, request, *args, **kwargs):
-    #     context = super(TermsOfServicesPage, self).get_context(request)
-    #     context["title"] = self.title
-    #
-    #     import pdb; pdb.set_trace()
-    #     return context
+    def get_context(self, request, *args, **kwargs):
+        context = super(TermsOfServicesPage, self).get_context(request)
+        context.update(** get_js_settings_context(request))
+
+        return context
