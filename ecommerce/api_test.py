@@ -626,6 +626,7 @@ def test_validate_basket_invalid_coupon(mocker, basket_and_coupons):
     patched.assert_called_once_with(
         product=basket_and_coupons.product_version.product,
         user=basket_and_coupons.basket.user,
+        code=basket_and_coupons.coupongroup_best.coupon.coupon_code,
     )
 
 

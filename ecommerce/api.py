@@ -526,7 +526,7 @@ def validate_basket_for_checkout(basket):
 
     # Coupon must be valid for the product
     if coupon is not None:
-        if not get_valid_coupon_versions(product=product, user=basket.user):
+        if not get_valid_coupon_versions(product=product, user=basket.user, code=coupon.coupon_code):
             raise ValidationError("Coupon is not valid for product")
 
     # Basket item runs must be linked to the basket item product
