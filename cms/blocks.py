@@ -18,9 +18,9 @@ class LearningTechniqueBlock(blocks.StructBlock):
         icon = "plus"
 
 
-class TermsOfServicesBlock(blocks.StructBlock):
+class ResourceBlock(blocks.StructBlock):
     """
-    A custom block for terms of services.
+    A custom block for resource pages.
     """
 
     heading = blocks.CharBlock(max_length=100)
