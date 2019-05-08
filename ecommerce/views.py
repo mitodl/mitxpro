@@ -4,6 +4,7 @@ import logging
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -115,9 +116,10 @@ class CheckoutView(APIView):
                 )
 
             # clear the basket
-            BasketItem.objects.filter(basket__user=order.purchaser).delete()
-            CourseRunSelection.objects.filter(basket__user=order.purchaser).delete()
-            CouponSelection.objects.filter(basket__user=order.purchaser).delete()
+            with transaction.atomic():
+                BasketItem.objects.filter(basket__user=order.purchaser).delete()
+                CourseRunSelection.objects.filter(basket__user=order.purchaser).delete()
+                CouponSelection.objects.filter(basket__user=order.purchaser).delete()
 
             # This redirects the user to our order success page
             payload = {}
@@ -188,9 +190,10 @@ class OrderFulfillmentView(APIView):
                 )
 
             # clear the basket
-            BasketItem.objects.filter(basket__user=order.purchaser).delete()
-            CourseRunSelection.objects.filter(basket__user=order.purchaser).delete()
-            CouponSelection.objects.filter(basket__user=order.purchaser).delete()
+            with transaction.atomic():
+                BasketItem.objects.filter(basket__user=order.purchaser).delete()
+                CourseRunSelection.objects.filter(basket__user=order.purchaser).delete()
+                CouponSelection.objects.filter(basket__user=order.purchaser).delete()
 
         # The response does not matter to CyberSource
         return Response(status=status.HTTP_200_OK)
