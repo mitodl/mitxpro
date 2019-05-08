@@ -188,7 +188,7 @@ export class CheckoutPage extends React.Component<Props, State> {
       return (
         <React.Fragment>
           <div className="row">
-            You are about to purchase the following program
+            You are about to purchase the following course run
           </div>
           <div className="row course-row">
             <img src={item.thumbnail_url} alt={item.description} />

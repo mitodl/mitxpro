@@ -47,6 +47,7 @@ describe("CheckoutPage", () => {
       hasCoupon ? "with" : "without"
     } a coupon`, async () => {
       const basketItem = basket.items[0]
+      basketItem.type = "program"
       const coupon = makeCouponSelection()
       basket.coupons = [coupon]
       if (hasCoupon) {
@@ -56,6 +57,13 @@ describe("CheckoutPage", () => {
       }
       const { inner } = await renderPage()
 
+      assert.equal(
+        inner
+          .find(".row")
+          .first()
+          .text(),
+        "You are about to purchase the following program"
+      )
       assert.equal(inner.find(".course-row").length, basketItem.courses.length)
       basketItem.courses.forEach((course, i) => {
         const courseRow = inner.find(".course-row").at(i)
@@ -84,6 +92,26 @@ describe("CheckoutPage", () => {
         `Total ${formatPrice(calculatePrice(basketItem, coupon))}`
       )
     })
+  })
+
+  it("renders a course run basket item", async () => {
+    const basketItem = basket.items[0]
+    basketItem.type = "courserun"
+
+    const { inner } = await renderPage()
+
+    assert.equal(
+      inner
+        .find(".row")
+        .first()
+        .text(),
+      "You are about to purchase the following course run"
+    )
+    assert.equal(inner.find(".course-row").length, 1)
+
+    assert.equal(inner.find("img").prop("src"), basketItem.thumbnail_url)
+    assert.equal(inner.find("img").prop("alt"), basketItem.description)
+    assert.equal(inner.find(".title").text(), basketItem.description)
   })
 
   it("displays the coupon code", async () => {

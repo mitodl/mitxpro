@@ -35,7 +35,7 @@ export type BasketItem = {
   description: string,
   object_id: number,
   id: number,
-  run_ids: Array<number>
+  run_ids: Array<number>,
 }
 
 export type CouponSelection = {

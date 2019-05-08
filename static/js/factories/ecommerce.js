@@ -22,6 +22,7 @@ import {
 } from "../constants"
 
 const genBasketItemId = incrementer()
+const genNextObjectId = incrementer()
 
 export const makeItem = (): BasketItem => {
   const courses = R.range(0, 4).map(() => makeCourse())
@@ -35,7 +36,9 @@ export const makeItem = (): BasketItem => {
     description:   casual.text,
     price:         String(casual.double(0, 100)),
     thumbnail_url: casual.url,
-    run_ids:       runIds
+    run_ids:       runIds,
+    // $FlowFixMe: flow doesn't understand generators well
+    object_id:     genNextObjectId.next().value
   }
 }
 
