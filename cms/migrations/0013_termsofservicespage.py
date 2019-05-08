@@ -9,22 +9,63 @@ import wagtail.core.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wagtailcore', '0041_group_collection_permissions_verbose_name_plural'),
-        ('cms', '0012_who_should_enroll_subpage'),
+        ("wagtailcore", "0041_group_collection_permissions_verbose_name_plural"),
+        ("cms", "0012_who_should_enroll_subpage"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TermsOfServicesPage',
+            name="TermsOfServicesPage",
             fields=[
-                ('page_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='wagtailcore.Page')),
-                ('heading', models.CharField(help_text='Heading of the resource page.', max_length=250)),
-                ('sub_heading', models.CharField(help_text='Sub heading of the resource page.', max_length=250, null=True)),
-                ('term_of_service', wagtail.core.fields.StreamField([('content', wagtail.core.blocks.StructBlock([('heading', wagtail.core.blocks.CharBlock(max_length=100)), ('detail', wagtail.core.blocks.RichTextBlock())]))], help_text='Enter detail of term of service.')),
+                (
+                    "page_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="wagtailcore.Page",
+                    ),
+                ),
+                (
+                    "heading",
+                    models.CharField(
+                        help_text="Heading of the resource page.", max_length=250
+                    ),
+                ),
+                (
+                    "sub_heading",
+                    models.CharField(
+                        help_text="Sub heading of the resource page.",
+                        max_length=250,
+                        null=True,
+                    ),
+                ),
+                (
+                    "term_of_service",
+                    wagtail.core.fields.StreamField(
+                        [
+                            (
+                                "content",
+                                wagtail.core.blocks.StructBlock(
+                                    [
+                                        (
+                                            "heading",
+                                            wagtail.core.blocks.CharBlock(
+                                                max_length=100
+                                            ),
+                                        ),
+                                        ("detail", wagtail.core.blocks.RichTextBlock()),
+                                    ]
+                                ),
+                            )
+                        ],
+                        help_text="Enter detail of term of service.",
+                    ),
+                ),
             ],
-            options={
-                'abstract': False,
-            },
-            bases=('wagtailcore.page',),
-        ),
+            options={"abstract": False},
+            bases=("wagtailcore.page",),
+        )
     ]

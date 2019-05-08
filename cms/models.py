@@ -349,9 +349,7 @@ class ResourcePage(Page):
     promote_panels = []
 
     heading = models.CharField(
-        max_length=250,
-        blank=False,
-        help_text="Heading of the resource page.",
+        max_length=250, blank=False, help_text="Heading of the resource page."
     )
     sub_heading = models.CharField(
         max_length=250,
@@ -360,10 +358,7 @@ class ResourcePage(Page):
         help_text="Sub heading of the resource page.",
     )
 
-    content_panels = [
-        FieldPanel("heading"),
-        FieldPanel("sub_heading"),
-    ]
+    content_panels = [FieldPanel("heading"), FieldPanel("sub_heading")]
 
     def get_context(self, request, *args, **kwargs):
         context = super(ResourcePage, self).get_context(request)
