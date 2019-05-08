@@ -356,3 +356,9 @@ class TermsOfServicesPage(Page):
         context.update(**get_js_settings_context(request))
 
         return context
+
+    def save(self, *args, **kwargs):
+        # autogenerate a unique slug so we don't hit a ValidationError
+        self.title = "Terms of Services "
+        self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
+        super().save(*args, **kwargs)
