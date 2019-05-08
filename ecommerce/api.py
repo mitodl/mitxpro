@@ -11,15 +11,21 @@ import uuid
 from django.conf import settings
 from django.db.models import Q, Max, F, Count
 from django.db import transaction
+from rest_framework.exceptions import ValidationError
 
+from courses.models import Course, CourseRun
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.models import (
     Basket,
+    BasketItem,
+    Coupon,
     CouponEligibility,
     CouponVersion,
     CouponRedemption,
     CouponPayment,
     CouponPaymentVersion,
+    CourseRunEnrollment,
+    CourseRunSelection,
     Line,
     Order,
 )
@@ -496,3 +502,73 @@ def get_available_bulk_product_coupons(coupon_payment_id, product_id):
             deliveries=0,
         )
     )
+
+
+def validate_basket_for_checkout(basket):
+    """
+    Validate basket for checkout
+
+    Args:
+        basket (Basket): A user's basket
+    """
+    # Only one basket item allowed
+    try:
+        basket_item = BasketItem.objects.get(basket=basket)
+    except BasketItem.DoesNotExist:
+        raise ValidationError("No items in basket, cannot checkout")
+
+    product = basket_item.product
+    # No more than one coupon allowed
+    try:
+        coupon = Coupon.objects.get(couponselection__basket=basket)
+    except Coupon.DoesNotExist:
+        coupon = None
+
+    # Coupon must be valid for the product
+    if coupon is not None:
+        if not get_valid_coupon_versions(
+            product=product, user=basket.user, code=coupon.coupon_code
+        ):
+            raise ValidationError("Coupon is not valid for product")
+
+    # Basket item runs must be linked to the basket item product
+    run_queryset = product.run_queryset
+    if (
+        CourseRunSelection.objects.filter(basket=basket)
+        .exclude(run__in=run_queryset)
+        .exists()
+    ):
+        raise ValidationError(
+            "Some runs present in basket which are not part of product"
+        )
+
+    # User must not already be enrolled in a course run covered by the product
+    if CourseRunEnrollment.objects.filter(
+        order__purchaser=basket.user,
+        order__status=Order.FULFILLED,
+        run__in=run_queryset,
+    ).exists():
+        raise ValidationError("User is already enrolled in one or more runs in basket")
+
+    # User must have selected one run id for each course in basket
+    runs = list(CourseRun.objects.filter(courserunselection__basket=basket))
+    courses_runs = {}
+    for run in runs:
+        if run.course_id not in courses_runs:
+            courses_runs[run.course_id] = run.id
+        elif courses_runs[run.course_id] != run.id:
+            raise ValidationError("Two or more runs assigned for a single course")
+
+    if (
+        len(courses_runs)
+        != Course.objects.filter(courseruns__id__in=run_queryset).distinct().count()
+    ):
+        # This is != but it could be < because the > case should be covered in previous clauses.
+        # The user can only select more courses than a product has if they are selecting runs outside
+        # of the product, which we checked above.
+        raise ValidationError("One or more courses do not have a course run selection")
+
+    # All run ids must be purchasable and enrollable by user
+    for run in runs:
+        if not run.is_unexpired:
+            raise ValidationError(f"Run {run.id} is expired")

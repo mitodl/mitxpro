@@ -50,10 +50,16 @@ class CourseSerializer(serializers.ModelSerializer):
 
     thumbnail_url = serializers.SerializerMethodField()
     courseruns = CourseRunSerializer(many=True, read_only=True)
+    next_run_id = serializers.SerializerMethodField()
 
     def get_thumbnail_url(self, instance):
         """Thumbnail URL"""
         return _get_thumbnail_url(instance.page)
+
+    def get_next_run_id(self, instance):
+        """Get next run id"""
+        run = instance.first_unexpired_run
+        return run.id if run is not None else None
 
     class Meta:
         model = models.Course
@@ -64,6 +70,7 @@ class CourseSerializer(serializers.ModelSerializer):
             "thumbnail_url",
             "readable_id",
             "courseruns",
+            "next_run_id",
         ]
 
 

@@ -4,6 +4,7 @@ import sinon from "sinon"
 import { assert } from "chai"
 
 import {
+  assertRaises,
   wait,
   enumerate,
   isEmptyText,
@@ -145,6 +146,42 @@ describe("utility functions", () => {
       ].forEach(([inputArr, expectedStr]) => {
         assert.deepEqual(spaceSeparated(inputArr), expectedStr)
       })
+    })
+  })
+
+  describe("assertRaises", () => {
+    it("should assert raising an exception", async () => {
+      const message = "a message"
+      await assertRaises(async () => {
+        throw new Error(message)
+      }, message)
+    })
+
+    it("should raise an error if an exception was not raised", async () => {
+      const expectedMessage = "No exception caught"
+      let exception
+      try {
+        await assertRaises(async () => {}, "")
+      } catch (ex) {
+        exception = ex
+      }
+
+      // $FlowFixMe
+      assert.equal(exception.message, expectedMessage)
+    })
+
+    it("should raise an error if the exception has the wrong message", async () => {
+      let exception
+      try {
+        await assertRaises(async () => {
+          throw new Error("other message")
+        }, "")
+      } catch (ex) {
+        exception = ex
+      }
+
+      // $FlowFixMe
+      assert.equal(exception.message, "expected 'other message' to equal ''")
     })
   })
 })

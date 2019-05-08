@@ -56,6 +56,7 @@ class ProductVersionSerializer(serializers.ModelSerializer):
     """ ProductVersion serializer for viewing/updating items in basket """
 
     type = serializers.SerializerMethodField()
+    object_id = serializers.SerializerMethodField()
     courses = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
 
@@ -63,11 +64,15 @@ class ProductVersionSerializer(serializers.ModelSerializer):
         """ Return the product version type """
         return instance.product.content_type.model
 
+    def get_object_id(self, instance):
+        """Return the object id for the product"""
+        return instance.product.object_id
+
     def get_courses(self, instance):
-        """ Return the course runs in the product """
+        """ Return the courses in the product """
         model_class = instance.product.content_type.model_class()
-        if model_class is Course:
-            courses = [instance.product.content_object]
+        if model_class is CourseRun:
+            courses = [instance.product.content_object.course]
         elif model_class is Program:
             courses = Course.objects.filter(
                 program=instance.product.content_object
@@ -78,13 +83,26 @@ class ProductVersionSerializer(serializers.ModelSerializer):
         return [CourseSerializer(course).data for course in courses]
 
     def get_thumbnail_url(self, instance):
-        """Return the thumbnail for the course or program"""
+        """Return the thumbnail for the courserun or program"""
         content_object = instance.product.content_object
-        catalog_image_url = content_object.catalog_image_url
+        if isinstance(content_object, Program):
+            catalog_image_url = content_object.catalog_image_url
+        elif isinstance(content_object, CourseRun):
+            catalog_image_url = content_object.course.catalog_image_url
+        else:
+            raise ValueError(f"Unexpected product {content_object}")
         return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
     class Meta:
-        fields = ["id", "price", "description", "type", "courses", "thumbnail_url"]
+        fields = [
+            "id",
+            "price",
+            "description",
+            "type",
+            "courses",
+            "thumbnail_url",
+            "object_id",
+        ]
         model = models.ProductVersion
 
 
@@ -220,26 +238,21 @@ class BasketSerializer(serializers.ModelSerializer):
     @classmethod
     def _get_runs_for_product(cls, *, product_version, run_ids):
         """Helper function to get and validate selected runs in a product"""
-        content_object = product_version.product.content_object
-        runs_for_product = CourseRun.objects.filter(id__in=run_ids)
-        if isinstance(content_object, Course):
-            runs_for_product = runs_for_product.filter(course=content_object)
-        elif isinstance(content_object, Program):
-            runs_for_product = runs_for_product.filter(course__program=content_object)
-        else:
-            raise ValidationError(
-                f"Unknown content_object for {product_version.product}"
-            )
-
+        runs_for_product = list(
+            product_version.product.run_queryset.filter(id__in=run_ids)
+        )
         run_ids_for_product = {run.id for run in runs_for_product}
 
         missing_run_ids = set(run_ids) - run_ids_for_product
         if missing_run_ids:
             raise ValidationError(f"Unable to find run(s) with id(s) {missing_run_ids}")
 
-        courses_for_product = set(runs_for_product.values_list("course", flat=True))
-        if len(courses_for_product) < len(run_ids):
-            raise ValidationError("Only one run per course can be selected")
+        courses_for_product = {}
+        for run in runs_for_product:
+            if run.course_id not in courses_for_product:
+                courses_for_product[run.course_id] = run.id
+            elif courses_for_product[run.course_id] != run.id:
+                raise ValidationError("Only one run per course can be selected")
 
         if models.CourseRunEnrollment.objects.filter(run_id__in=run_ids).exists():
             raise ValidationError("User has already enrolled in run")
@@ -371,6 +384,7 @@ class BasketSerializer(serializers.ModelSerializer):
                 # Remove everything from basket
                 basket.basketitems.all().delete()
                 basket.couponselection_set.all().delete()
+                basket.courserunselection_set.all().delete()
 
             if data_consents is not None:
                 sign_date = datetime.now(tz=pytz.UTC)
@@ -398,7 +412,10 @@ class BasketSerializer(serializers.ModelSerializer):
         return {"items": items}
 
     def validate_coupons(self, coupons):
-        """Can't do much validation here since we don't have the product version id"""
+        """
+        Can't do much validation at this point since we don't have the product version id. Instead
+        this is done above in _update_coupons.
+        """
         return {"coupons": coupons}
 
     def validate_data_consents(self, data_consents):
@@ -585,5 +602,5 @@ class DataConsentUserSerializer(serializers.ModelSerializer):
     """ Serializer for DataConsentUsers """
 
     class Meta:
-        fields = "__all__"
+        fields = ["agreement", "coupon", "consent_date", "id"]
         model = models.DataConsentUser

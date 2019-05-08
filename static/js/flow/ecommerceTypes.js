@@ -1,6 +1,5 @@
 // @flow
-import type { Decimal } from "decimal.js-light"
-import type { CourseRun } from "./courseTypes"
+import type { Course } from "./courseTypes"
 import {PRODUCT_TYPE_COURSE, PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM} from "../constants"
 
 export type CheckoutResponse = {
@@ -30,26 +29,41 @@ export type CheckoutPayload = {
 
 export type BasketItem = {
   type: PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_COURSE | PRODUCT_TYPE_PROGRAM,
-  course_runs: Array<CourseRun>,
+  courses: Array<Course>,
   thumbnail_url: string,
-  price: Decimal,
+  price: string,
   description: string,
+  object_id: number,
   id: number,
+  run_ids: Array<number>,
 }
 
 export type CouponSelection = {
   code: string,
-  amount: Decimal,
+  amount: string,
   targets: Array<number>
+}
+
+export type DataConsentUser = {
+  agreement: number,
+  coupon: number,
+  consent_data: string,
+  id: number,
 }
 
 export type BasketResponse = {
   items: Array<BasketItem>,
-  coupons: Array<CouponSelection>
+  coupons: Array<CouponSelection>,
+  data_consents: Array<DataConsentUser>
+}
+
+type BasketItemPayload = {
+  id: number,
+  run_ids?: Array<number>,
 }
 
 export type BasketPayload = {
-  items?: Array<{ id: number }>,
+  items?: Array<BasketItemPayload>,
   coupons?: Array<{ code: string }>
 }
 

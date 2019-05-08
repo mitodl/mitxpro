@@ -15,9 +15,4 @@ urlpatterns = [
     re_path(
         r"^courses/(?P<pk>[\d]+)/$", views.CourseView.as_view(), name="course-detail"
     ),
-    re_path(
-        r"^course_runs/(?P<course_run_id>[\d]+)/enrollments/$",
-        views.CourseRunEnrollmentsView.as_view(),
-        name="course-enrollments",
-    ),
 ]

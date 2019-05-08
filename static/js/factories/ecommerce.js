@@ -1,8 +1,8 @@
 // @flow
 import casual from "casual-browserify"
-import R from "ramda"
+import { range } from "ramda"
 
-import { makeCourseRun } from "./course"
+import { makeCourse } from "./course"
 import { incrementer } from "./util"
 
 import type {
@@ -22,20 +22,25 @@ import {
 } from "../constants"
 
 const genBasketItemId = incrementer()
+const genNextObjectId = incrementer()
 
-export const makeItem = (): BasketItem => ({
-  type: casual.random_element([
-    PRODUCT_TYPE_COURSERUN,
-    PRODUCT_TYPE_COURSE,
-    PRODUCT_TYPE_PROGRAM
-  ]),
-  course_runs:   R.range(0, 4).map(() => makeCourseRun()),
-  // $FlowFixMe: flow doesn't understand generators well
-  id:            genBasketItemId.next().value,
-  description:   casual.text,
-  price:         String(casual.double(0, 100)),
-  thumbnail_url: casual.url
-})
+export const makeItem = (): BasketItem => {
+  const courses = range(0, 4).map(() => makeCourse())
+  const runIds = courses.map(course => course.courseruns[0].id)
+
+  return {
+    type:          casual.random_element([PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM]),
+    courses:       courses,
+    // $FlowFixMe: flow doesn't understand generators well
+    id:            genBasketItemId.next().value,
+    description:   casual.text,
+    price:         String(casual.double(0, 100)),
+    thumbnail_url: casual.url,
+    run_ids:       runIds,
+    // $FlowFixMe: flow doesn't understand generators well
+    object_id:     genNextObjectId.next().value
+  }
+}
 
 export const makeCouponSelection = (item: ?BasketItem): CouponSelection => ({
   code:    casual.word,
@@ -43,10 +48,14 @@ export const makeCouponSelection = (item: ?BasketItem): CouponSelection => ({
   targets: item ? [item.id] : []
 })
 
-export const makeBasketResponse = (): BasketResponse => ({
-  items:   [makeItem()],
-  coupons: [makeCouponSelection()]
-})
+export const makeBasketResponse = (): BasketResponse => {
+  const item = makeItem()
+  return {
+    items:         [item],
+    coupons:       [makeCouponSelection(item)],
+    data_consents: []
+  }
+}
 
 const genProductId = incrementer()
 export const makeProduct = (
