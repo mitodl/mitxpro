@@ -277,7 +277,7 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
               />
             </div>
           ) : null}
-        <div className="row justify-content-end">
+        <div className="row-inner  justify-content-end">
           <div className="row justify-content-end">
             <button
               type="submit"

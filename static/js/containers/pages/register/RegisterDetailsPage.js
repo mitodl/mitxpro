@@ -94,8 +94,8 @@ class RegisterProfilePage extends React.Component<Props> {
           <h5 className="col-4 align-text-right gray-text">Step 1 of 2</h5>
         </div>
         <div className="form-group row">
-          <div className="col">Already have an MITxPro account?</div>
           <div className="col">
+            Already have an MITxPro account?{" "}
             <Link to={routes.login.begin}>Click here</Link>
           </div>
         </div>

@@ -191,7 +191,7 @@ const RegisterExtraDetailsForm = ({ onSubmit }: Props) => (
           </div>
         </div>
 
-        <div className="row justify-content-end">
+        <div className="row-inner justify-content-end">
           <div className="row justify-content-end">
             <button
               type="submit"
