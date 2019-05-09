@@ -13,8 +13,9 @@ from cms.models import (
     ForTeamsPage,
     WhoShouldEnrollPage,
     CoursesInProgramPage,
+    ResourcePage,
 )
-from cms.blocks import LearningTechniqueBlock
+from cms.blocks import LearningTechniqueBlock, ResourceBlock
 from courses.factories import ProgramFactory, CourseFactory
 
 
@@ -121,3 +122,23 @@ class CoursesInProgramPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = CoursesInProgramPage
+
+
+class ResourceBlockFactory(wagtail_factories.StructBlockFactory):
+    """ResourceBlock factory class"""
+
+    heading = factory.fuzzy.FuzzyText(prefix="Heading ")
+    detail = factory.fuzzy.FuzzyText(prefix="Detail ")
+
+    class Meta:
+        model = ResourceBlock
+
+
+class ResourcePageFactory(wagtail_factories.PageFactory):
+    """ResourcePage factory class"""
+
+    sub_heading = factory.fuzzy.FuzzyText(prefix="Sub heading ")
+    content = wagtail_factories.StreamFieldFactory({"content": ResourceBlockFactory})
+
+    class Meta:
+        model = ResourcePage

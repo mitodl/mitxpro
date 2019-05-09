@@ -1,6 +1,8 @@
 """
 Page models for the CMS
 """
+import itertools
+
 from django.db import models
 from django.utils.text import slugify
 
@@ -369,8 +371,6 @@ class ResourcePage(Page):
         StreamFieldPanel("content"),
     ]
 
-    unique_together = ["title", "sub_heading"]
-
     def get_context(self, request, *args, **kwargs):
         context = super(ResourcePage, self).get_context(request)
         context.update(**get_js_settings_context(request))
@@ -379,5 +379,13 @@ class ResourcePage(Page):
 
     def save(self, *args, **kwargs):
         # autogenerate a unique slug so we don't hit a ValidationError
-        self.slug = slugify("{}-{}".format(self.title, self.sub_heading))
+        self.slug = original_slug = slugify(self.title)
+
+        # Generally we won't have resource pages with same title,
+        # To handle edge case where title is exactly same as already added page.
+        for x in itertools.count(1):
+            if not ResourcePage.objects.filter(slug=self.slug).exists():
+                break
+            self.slug = "%s-%d" % (original_slug, x)
+
         super().save(*args, **kwargs)
