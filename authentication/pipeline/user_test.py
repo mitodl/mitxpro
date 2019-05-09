@@ -15,6 +15,7 @@ from authentication.exceptions import (
     RequirePasswordAndAddressException,
     UnexpectedExistingUserException,
     RequireProfileException,
+    RequireUserException,
 )
 from authentication.utils import SocialAuthState
 
@@ -53,8 +54,6 @@ def mock_create_user_strategy(mocker):
             "postal_code": "02101",
         },
     }
-<<<<<<< HEAD
-=======
     return strategy
 
 
@@ -68,7 +67,6 @@ def mock_create_profile_strategy(mocker):
         "company": "MIT",
         "job_title": "QA Tester",
     }
->>>>>>> Registration form step 2
     return strategy
 
 
@@ -336,6 +334,20 @@ def test_create_profile_via_email_no_data(mocker, mock_email_backend):
     with pytest.raises(RequireProfileException):
         user_actions.create_profile_via_email(
             mock_strategy,
+            mock_email_backend,
+            pipeline_index=0,
+            flow=SocialAuthState.FLOW_REGISTER,
+        )
+
+
+@pytest.mark.django_db
+def test_create_profile_via_email_no_user_raises(
+    mock_email_backend, mock_create_profile_strategy
+):
+    """Tests that create_profile_via_email raises an error if user is None in the pipeline"""
+    with pytest.raises(RequireUserException):
+        user_actions.create_profile_via_email(
+            mock_create_profile_strategy,
             mock_email_backend,
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,

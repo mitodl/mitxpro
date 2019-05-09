@@ -1,5 +1,4 @@
 """Auth pipline functions for email authentication"""
-import logging
 
 import ulid
 from social_core.backends.email import EmailAuth
@@ -10,14 +9,13 @@ from authentication.exceptions import (
     InvalidPasswordException,
     RequirePasswordException,
     RequirePasswordAndAddressException,
+    RequireProfileException,
     RequireRegistrationException,
     UnexpectedExistingUserException,
-    RequireProfileException,
+    RequireUserException,
 )
 from authentication.utils import SocialAuthState
 from users.serializers import UserSerializer, ProfileSerializer
-
-log = logging.getLogger()
 
 # pylint: disable=keyword-arg-before-vararg
 
@@ -124,6 +122,9 @@ def create_profile_via_email(
     data = strategy.request_data().copy()
     if "birth_year" not in data:
         raise RequireProfileException(backend, current_partial)
+
+    if user is None:
+        raise RequireUserException(backend, current_partial)
 
     data["user"] = user.id
 

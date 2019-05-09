@@ -65,13 +65,13 @@ class RequireProfileException(PartialException):
         return "Profile needs to be filled out"
 
 
+class RequireUserException(Exception):
+    """Profile requires a user"""
+
+
 class UnexpectedExistingUserException(PartialException):
     """Raised if a user already exists but shouldn't in the given pipeline step"""
 
 
 class UserMissingSocialAuthException(Exception):
     """Raised if the user doesn't have a social auth"""
-
-
-class RequireUserException(Exception):
-    """Profile requires a user"""

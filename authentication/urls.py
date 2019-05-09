@@ -8,11 +8,11 @@ from authentication.views import (
     RegisterEmailView,
     RegisterConfirmView,
     RegisterDetailsView,
+    RegisterExtraDetailsView,
     get_social_auth_types,
     CustomPasswordResetView,
     CustomPasswordResetConfirmView,
     CustomSetPasswordView,
-    RegisterExtraDetailsView,
 )
 
 

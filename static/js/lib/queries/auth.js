@@ -5,7 +5,8 @@ import { FLOW_LOGIN, FLOW_REGISTER } from "../auth"
 import type {
   AuthResponse,
   AuthResponseRaw,
-  LegalAddress, UserProfile
+  LegalAddress,
+  UserProfile
 } from "../../flow/authTypes"
 
 export const authSelector = (state: any) => state.entities.auth

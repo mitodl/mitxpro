@@ -10,7 +10,7 @@ import qs from "query-string"
 import auth from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
-import {STATE_REGISTER_EXTRA_DETAILS} from "../../../lib/auth"
+import { STATE_REGISTER_EXTRA_DETAILS } from "../../../lib/auth"
 import queries from "../../../lib/queries"
 import { qsPartialTokenSelector } from "../../../lib/selectors"
 
@@ -20,6 +20,7 @@ import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
 import type {
   AuthResponse,
+  AuthResponseRaw,
   LegalAddress,
   User,
   Country
@@ -56,7 +57,7 @@ class RegisterProfilePage extends React.Component<Props> {
     const {
       history,
       registerDetails,
-      params
+      params: { partialToken }
     } = this.props
 
     try {
@@ -66,7 +67,7 @@ class RegisterProfilePage extends React.Component<Props> {
         detailsData.name,
         detailsData.password,
         detailsData.legal_address,
-        params.partialToken
+        partialToken
       )
 
       if (state === STATE_REGISTER_EXTRA_DETAILS) {

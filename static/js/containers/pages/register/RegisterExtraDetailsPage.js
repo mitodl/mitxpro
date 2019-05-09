@@ -8,7 +8,7 @@ import { createStructuredSelector } from "reselect"
 import auth from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
-import {STATE_SUCCESS} from "../../../lib/auth"
+import { STATE_SUCCESS } from "../../../lib/auth"
 import queries from "../../../lib/queries"
 import { qsPartialTokenSelector } from "../../../lib/selectors"
 
@@ -16,12 +16,8 @@ import RegisterExtraDetailsForm from "../../../components/forms/RegisterExtraDet
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
-import type {
-  AuthResponse,
-  User, UserProfile,
-} from "../../../flow/authTypes"
+import type { AuthResponse, User, UserProfile } from "../../../flow/authTypes"
 import { Link } from "react-router-dom"
-
 
 type RegisterProps = {|
   location: Location,
@@ -41,7 +37,6 @@ type Props = {|
   ...RegisterProps,
   ...DispatchProps
 |}
-
 
 class RegisterExtraDetailsPage extends React.Component<Props> {
   async onSubmit(profileData, { setSubmitting, setErrors }) {
@@ -84,9 +79,7 @@ class RegisterExtraDetailsPage extends React.Component<Props> {
           </div>
         </div>
         <div className="inner-form">
-          <RegisterExtraDetailsForm
-            onSubmit={this.onSubmit.bind(this)}
-          />
+          <RegisterExtraDetailsForm onSubmit={this.onSubmit.bind(this)} />
         </div>
       </div>
     )
@@ -103,10 +96,7 @@ const mapPropsToConfig = () => [queries.users.countriesQuery()]
 const registerExtraDetailsPage = (
   profileData: UserProfile,
   partialToken: string
-) =>
-  mutateAsync(
-    auth.registerExtraDetailsMutation(profileData, partialToken)
-  )
+) => mutateAsync(auth.registerExtraDetailsMutation(profileData, partialToken))
 
 const getCurrentUser = () =>
   requestAsync({
