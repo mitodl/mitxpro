@@ -7,7 +7,7 @@ html {
 .resource-banner {
   width: 100%;
   padding: 75px 0;
-  background: rgba(53, 53, 53, .97) url(/static/images/banner-bg.png) repeat-x 0 0;
+  background: rgba(53, 53, 53, .97) url("$static-path/images/banner-bg.png") repeat-x 0 0;
   min-height: 200px;
 
   .container {

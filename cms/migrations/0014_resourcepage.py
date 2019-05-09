@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
                                 ),
                             )
                         ],
-                        help_text="Enter detail of content.",
+                        help_text="Enter details of content.",
                     ),
                 ),
             ],

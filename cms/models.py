@@ -363,7 +363,7 @@ class ResourcePage(Page):
     content = StreamField(
         [("content", ResourceBlock())],
         blank=False,
-        help_text="Enter detail of content.",
+        help_text="Enter details of content.",
     )
 
     content_panels = Page.content_panels + [
