@@ -241,7 +241,7 @@ SOCIAL_AUTH_PIPELINE = (
     "authentication.pipeline.user.get_username",
     # Create a user if one doesn't exist, and require a password and name
     "authentication.pipeline.user.create_user_via_email",
-    # # Create a profile
+    # Create a profile
     "authentication.pipeline.user.create_profile_via_email",
     # Create the record that associates the social account with the user.
     "social_core.pipeline.social_auth.associate_user",
