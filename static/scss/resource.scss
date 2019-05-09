@@ -4,7 +4,7 @@ html {
   scroll-behavior: smooth;
 }
 
-.tos-banner {
+.resource-banner {
   width: 100%;
   padding: 75px 0;
   background: rgba(53, 53, 53, .97) url(/static/images/banner-bg.png) repeat-x 0 0;
@@ -39,14 +39,14 @@ html {
   }
 }
 
-.tos-container {
+.resource-container {
 
   h2 {
     color: $blue;
     margin-top: 50px;
   }
 
-  .tos-list {
+  .resource-list {
     list-style: none;
     margin-top: 50px;
     padding-left: 0;
