@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.3.2
+-------------
+
+- Redirect users to /dashboard after CyberSource checkout (#234)
+- make generic resource page in wagtail (#238)
+
 Version 0.3.1 (Released May 09, 2019)
 -------------
 
