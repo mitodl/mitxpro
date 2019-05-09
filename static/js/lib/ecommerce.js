@@ -2,6 +2,7 @@
 import Decimal from "decimal.js-light"
 import * as R from "ramda"
 import { equals } from "ramda"
+import moment from "moment"
 
 import type {
   BasketItem,
@@ -15,6 +16,7 @@ import {
   PRODUCT_TYPE_COURSERUN,
   PRODUCT_TYPE_PROGRAM
 } from "../constants"
+import type { CourseRun } from "../flow/courseTypes"
 
 export const calculateDiscount = (
   item: BasketItem,
@@ -48,6 +50,12 @@ export const formatPrice = (price: ?string | number | Decimal): string => {
     return `$${formattedPrice}`
   }
 }
+
+const formatDateForRun = (dateString: ?string) =>
+  dateString ? moment(dateString).format("ll") : "?"
+
+export const formatRunTitle = (run: CourseRun) =>
+  `${formatDateForRun(run.start_date)} - ${formatDateForRun(run.end_date)}`
 
 export const isPromo = equals(COUPON_TYPE_PROMO)
 

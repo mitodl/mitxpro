@@ -1,18 +1,170 @@
 .checkout-page {
-  margin: 100px;
+  margin: 0 auto;
+  max-width: 1000px;
+  background-color: #f5f5f5;
+  font-weight: 600;
+  padding-top: 50px;
+  padding-bottom: 50px;
 
-  .row {
-    margin: 20px 0;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+  @include media-breakpoint-up (lg) {
+    padding-left: 40px;
+    padding-right: 40px;
   }
 
-  .title-column {
-    margin-left: 10px;
+  .header {
+    hr {
+      margin-bottom: 35px;
+    }
+  }
+
+  .page-title {
+    font-size: 28px;
+    padding-bottom: 10px;
+  }
+
+  .purchase-text {
+    margin: 15px 0;
+  }
+
+  .item-type {
+    color: #45bebf;
+    font-size: 28px;
+  }
+
+  .item-row {
+    display: flex;
+    flex-direction: row;
+    margin: 20px 0;
+
+    .item-column {
+      min-width: 85px;
+      max-width: 85px;
+      height: auto;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      img {
+        width: 100%;
+        height: auto;
+      }
+
+      @include media-breakpoint-up (lg) {
+        min-width: 200px;
+        max-width: 200px;
+      }
+    }
+
+    .title-column {
+      margin: 25px 20px;
+      width: 100%;
+
+      select {
+        font-size: 16px;
+        width: 100%;
+
+        @include media-breakpoint-up(lg) {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+
+  .enrollment-input {
+    margin: 20px 0;
+  }
+
+  .order-summary-container {
+    @include media-breakpoint-down(lg) {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .order-summary {
+      background-color: white;
+      padding: 25px;
+      margin-bottom: 25px;
+
+      .title {
+        color: #8c8d8e;
+        font-size: 24px;
+        margin-bottom: 25px;
+      }
+
+      .price-row,.discount-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        font-size: 24px;
+      }
+
+      .discount-row {
+        margin-top: 10px;
+        color: $primary;
+      }
+
+      .total-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        font-size: 28px;
+        margin-top: 25px;
+      }
+
+      hr {
+        border: 0 none;
+        border-top: 4px dashed lightgrey;
+
+        @include media-breakpoint-up(lg) {
+          margin-top: 75px;
+        }
+      }
+    }
   }
 
   .error {
-    color: red;
+    color: $primary;
+  }
+
+  button {
+    color: white;
+    font-weight: 600;
+    border: 0;
+  }
+
+  .checkout-button {
+    background-color: $primary;
+    font-size: 28px;
+    padding: 15px 0;
+    width: 100%;
+  }
+
+  .enrollment-row {
+    margin-top: 50px;
+  }
+
+  .coupon-code-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    input {
+      border: 1px solid #cccccc;
+      border-radius: 0;
+      height: 40px;
+      width: 100%;
+    }
+
+    .apply-button {
+      background-color: $light-blue;
+      margin-left: 15px;
+      padding: 5px 15px;
+
+      @include media-breakpoint-up(lg) {
+        margin-left: 30px;
+        padding: 5px 50px;
+      }
+    }
   }
 }

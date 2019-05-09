@@ -1,6 +1,7 @@
 // @flow
 import { assert } from "chai"
 import Decimal from "decimal.js-light"
+import moment from "moment"
 
 import {
   makeItem,
@@ -8,12 +9,18 @@ import {
   makeBulkCouponPayment,
   makeProduct
 } from "../factories/ecommerce"
-import { calculatePrice, formatPrice, createProductMap } from "./ecommerce"
+import {
+  calculatePrice,
+  formatPrice,
+  formatRunTitle,
+  createProductMap
+} from "./ecommerce"
 import {
   PRODUCT_TYPE_COURSE,
   PRODUCT_TYPE_COURSERUN,
   PRODUCT_TYPE_PROGRAM
 } from "../constants"
+import { makeCourseRun } from "../factories/course"
 
 describe("ecommerce", () => {
   describe("calculatePrice", () => {
@@ -78,6 +85,27 @@ describe("ecommerce", () => {
         [PRODUCT_TYPE_PROGRAM]:   [thirdProduct],
         [PRODUCT_TYPE_COURSERUN]: []
       })
+    })
+  })
+
+  describe("formatRunTitle", () => {
+    it("creates text based on the run's dates", () => {
+      const run = makeCourseRun()
+      assert.equal(
+        formatRunTitle(run),
+        `${moment(run.start_date).format("ll")} - ${moment(run.end_date).format(
+          "ll"
+        )}`
+      )
+    })
+
+    it("swaps out missing pieces with a question mark", () => {
+      const run = {
+        ...makeCourseRun(),
+        start_date: null,
+        end_date:   null
+      }
+      assert.equal(formatRunTitle(run), "? - ?")
     })
   })
 })
