@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.3.1
+Version 0.3.1 (Released May 09, 2019)
 -------------
 
 - Course run selection UI, various backend changes (#186)
