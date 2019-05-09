@@ -1,7 +1,9 @@
+""" Tests for cms pages. """
+
 import json
 import pytest
 
-from cms.factories import ResourcePageFactory, ResourceBlockFactory
+from cms.factories import ResourcePageFactory
 
 pytestmark = [pytest.mark.django_db]
 
@@ -41,4 +43,4 @@ def test_resource_page_unique_slug():
     """
     page = ResourcePageFactory(title="title of the page")
     another_page = ResourcePageFactory(title="title of the page")
-    assert not page.slug == another_page.slug
+    assert page.slug != another_page.slug
