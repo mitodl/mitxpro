@@ -6,6 +6,7 @@ import decimal
 import hashlib
 import hmac
 import logging
+from urllib.parse import urljoin
 import uuid
 
 from django.conf import settings
@@ -96,16 +97,6 @@ def generate_cybersource_sa_payload(order, base_url):
 
         total += unit_price
 
-    # CyberSource requires that these links be https
-    overrides = (
-        {
-            "override_custom_cancel_page": base_url,
-            "override_custom_receipt_page": base_url,
-        }
-        if base_url.startswith("https://")
-        else {}
-    )
-
     payload = {
         "access_key": settings.CYBERSOURCE_ACCESS_KEY,
         "amount": str(total),
@@ -117,7 +108,7 @@ def generate_cybersource_sa_payload(order, base_url):
         "reference_number": make_reference_id(order),
         "profile_id": settings.CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now_in_utc().strftime(ISO_8601_FORMAT),
-        **overrides,
+        "override_custom_receipt_page": urljoin(base_url, "dashboard/"),
         "transaction_type": "sale",
         "transaction_uuid": uuid.uuid4().hex,
         "unsigned_field_names": "",

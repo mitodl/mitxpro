@@ -6,6 +6,7 @@ from decimal import Decimal
 from datetime import timedelta
 import hashlib
 import hmac
+from urllib.parse import urljoin
 from unittest.mock import PropertyMock
 
 import factory
@@ -161,8 +162,7 @@ def test_signed_payload(mocker):
         "line_item_count": 3,
         "locale": "en-us",
         "reference_number": make_reference_id(order),
-        "override_custom_cancel_page": base_url,
-        "override_custom_receipt_page": base_url,
+        "override_custom_receipt_page": urljoin(base_url, "dashboard/"),
         "profile_id": CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now.strftime(ISO_8601_FORMAT),
         "signed_field_names": ",".join(signed_field_names),
@@ -171,14 +171,6 @@ def test_signed_payload(mocker):
         "unsigned_field_names": "",
     }
     now_mock.assert_called_once_with()
-
-
-def test_payload_overrides():
-    """No overrides should be provided if the link is not https"""
-    order = OrderFactory.create()
-    payload = generate_cybersource_sa_payload(order, "http://base_url")
-    assert "override_custom_cancel_page" not in payload
-    assert "override_custom_receipt_page" not in payload
 
 
 def test_payload_coupons():
