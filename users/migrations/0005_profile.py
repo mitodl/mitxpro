@@ -9,6 +9,24 @@ class Migration(migrations.Migration):
 
     dependencies = [("users", "0004_user_legaladdress")]
 
+    def add_profiles(apps, schema_editor):
+        """ Create profiles for all existing test users, with some defaults for required fields"""
+        User = apps.get_model("users", "User")
+        Profile = apps.get_model("users", "Profile")
+
+        for user in User.objects.all().iterator():
+            Profile.objects.create(
+                user=user,
+                gender="o",
+                birth_year="2000",
+                company="MIT",
+                job_title="Employee",
+            )
+
+    def remove_profiles(apps, schema_editor):
+        Profile = apps.get_model("users", "Profile")
+        Profile.objects.all().delete()
+
     operations = [
         migrations.CreateModel(
             name="Profile",
@@ -85,5 +103,6 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={"abstract": False},
-        )
+        ),
+        migrations.RunPython(add_profiles, remove_profiles),
     ]
