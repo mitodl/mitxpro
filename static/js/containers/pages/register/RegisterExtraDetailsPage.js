@@ -2,14 +2,14 @@
 import React from "react"
 import { compose } from "redux"
 import { connect } from "react-redux"
-import { connectRequest, mutateAsync, requestAsync } from "redux-query"
+import { Link } from "react-router-dom"
+import { mutateAsync, requestAsync } from "redux-query"
 import { createStructuredSelector } from "reselect"
 
+import { STATE_SUCCESS } from "../../../lib/auth"
 import auth from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
-import { STATE_SUCCESS } from "../../../lib/auth"
-import queries from "../../../lib/queries"
 import { qsPartialTokenSelector } from "../../../lib/selectors"
 
 import RegisterExtraDetailsForm from "../../../components/forms/RegisterExtraDetailsForm"
@@ -17,7 +17,6 @@ import RegisterExtraDetailsForm from "../../../components/forms/RegisterExtraDet
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
 import type { AuthResponse, User, UserProfile } from "../../../flow/authTypes"
-import { Link } from "react-router-dom"
 
 type RegisterProps = {|
   location: Location,
@@ -87,11 +86,8 @@ class RegisterExtraDetailsPage extends React.Component<Props> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  params:    createStructuredSelector({ partialToken: qsPartialTokenSelector }),
-  countries: queries.users.countriesSelector
+  params: createStructuredSelector({ partialToken: qsPartialTokenSelector })
 })
-
-const mapPropsToConfig = () => [queries.users.countriesQuery()]
 
 const registerExtraDetailsPage = (
   profileData: UserProfile,
@@ -113,6 +109,5 @@ export default compose(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  ),
-  connectRequest(mapPropsToConfig)
+  )
 )(RegisterExtraDetailsPage)

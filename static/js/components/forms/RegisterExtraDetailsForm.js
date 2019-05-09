@@ -4,6 +4,7 @@ import * as yup from "yup"
 import { range, reverse } from "ramda"
 import moment from "moment"
 import { Formik, Field, Form, ErrorMessage } from "formik"
+
 import FormError from "./FormError"
 import {
   EMPLOYMENT_INDUSTRY,

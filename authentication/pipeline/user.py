@@ -1,5 +1,4 @@
 """Auth pipline functions for email authentication"""
-
 import ulid
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
@@ -10,9 +9,9 @@ from authentication.exceptions import (
     RequirePasswordException,
     RequirePasswordAndAddressException,
     RequireProfileException,
+    RequireUserException,
     RequireRegistrationException,
     UnexpectedExistingUserException,
-    RequireUserException,
 )
 from authentication.utils import SocialAuthState
 from users.serializers import UserSerializer, ProfileSerializer
