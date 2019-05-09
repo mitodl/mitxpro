@@ -162,7 +162,7 @@ def test_signed_payload(mocker):
         "line_item_count": 3,
         "locale": "en-us",
         "reference_number": make_reference_id(order),
-        "override_custom_receipt_page": urljoin(base_url, "dashboard"),
+        "override_custom_receipt_page": urljoin(base_url, "dashboard/"),
         "profile_id": CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now.strftime(ISO_8601_FORMAT),
         "signed_field_names": ",".join(signed_field_names),

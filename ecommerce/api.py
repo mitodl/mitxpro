@@ -108,7 +108,7 @@ def generate_cybersource_sa_payload(order, base_url):
         "reference_number": make_reference_id(order),
         "profile_id": settings.CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now_in_utc().strftime(ISO_8601_FORMAT),
-        "override_custom_receipt_page": urljoin(base_url, "dashboard"),
+        "override_custom_receipt_page": urljoin(base_url, "dashboard/"),
         "transaction_type": "sale",
         "transaction_uuid": uuid.uuid4().hex,
         "unsigned_field_names": "",
