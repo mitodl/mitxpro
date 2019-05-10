@@ -41,3 +41,17 @@ class UserTestimonialBlock(blocks.StructBlock):
         blank=True, null=True, help_text="The image to display on the testimonial"
     )
     quote = blocks.TextBlock(help_text="The quote that appears on the testimonial.")
+
+
+class FacultyBlock(blocks.StructBlock):
+    """
+    Block class that defines a faculty member
+    """
+
+    name = blocks.CharBlock(max_length=100, help_text="Name of the faculty member.")
+    image = ImageChooserBlock(
+        help_text="Profile image size must be at least 300x300 pixels."
+    )
+    description = blocks.RichTextBlock(
+        help_text="A brief description about the faculty member."
+    )

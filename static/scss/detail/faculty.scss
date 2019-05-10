@@ -1,0 +1,106 @@
+// sass-lint:disable mixins-before-declarations
+.faculty-block {
+  width: 100%;
+  padding: 100px 0 50px;
+  background: black url("#{$static-path}/images/faculty-bg.jpg") no-repeat 50% 0;
+  min-height: 400px;
+  overflow: hidden;
+  position: relative;
+  color: black;
+  background-size: cover;
+
+  .head {
+    text-align: center;
+    padding: 0 0 80px;
+    color: white;
+
+    h3 {
+      margin: 0 0 20px;
+    }
+  }
+
+  h1 {
+    margin: 0 0 10px;
+    text-transform: uppercase;
+    color: $yellow;
+    @include media-breakpoint-up(lg) {
+      margin: 0 0 25px;
+    }
+  }
+}
+
+.faculty-slider {
+  position: relative;
+  margin: 0 -15px;
+
+  &:after {
+    display: block;
+    clear: both;
+    content: "";
+  }
+
+  .slide {
+    float: left;
+    width: 33.333%;
+    padding: 0 30px;
+    @include media-breakpoint-up(xl) {
+      padding: 0 60px;
+    }
+  }
+
+  .slick-list {
+    overflow: hidden;
+    margin: 0 -15px;
+    @include media-breakpoint-up(xl) {
+      margin: 0 -45px;
+    }
+  }
+
+  .slide-holder {
+    background: white;
+    padding: 0 0 10px;
+    border-radius: 5px;
+    box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-size: 20px;
+    line-height: 26px;
+    overflow: hidden;
+    font-weight: 500;
+  }
+
+  img {
+    width: 100%;
+    display: block;
+    margin: 0 auto 20px;
+  }
+
+  h2 {
+    margin: 0 0 20px;
+    font-size: 28px;
+    line-height: 28px;
+    font-weight: 500;
+    color: $yellow;
+  }
+
+  .text-holder {
+    overflow-y: auto;
+    height: 78px;
+    padding: 0 10px;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .slick-prev,
+  .slick-next {
+    @include media-breakpoint-up(md) {
+      background: #6b6b6b;
+      color: $white;
+
+      &:hover {
+        background: $primary;
+      }
+    }
+  }
+}

@@ -15,8 +15,14 @@ from cms.models import (
     CoursesInProgramPage,
     ResourcePage,
     UserTestimonialsPage,
+    FacultyMembersPage,
 )
-from cms.blocks import LearningTechniqueBlock, ResourceBlock, UserTestimonialBlock
+from cms.blocks import (
+    LearningTechniqueBlock,
+    ResourceBlock,
+    UserTestimonialBlock,
+    FacultyBlock,
+)
 from courses.factories import ProgramFactory, CourseFactory
 
 
@@ -170,3 +176,25 @@ class UserTestimonialsPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = UserTestimonialsPage
+
+
+class FacultyBlockFactory(wagtail_factories.StructBlockFactory):
+    """FacultyBlock factory class"""
+
+    name = factory.fuzzy.FuzzyText(prefix="faculty ")
+    image = factory.SubFactory(wagtail_factories.ImageFactory)
+    description = factory.fuzzy.FuzzyText(prefix="description ")
+
+    class Meta:
+        model = FacultyBlock
+
+
+class FacultyMembersPageFactory(wagtail_factories.PageFactory):
+    """FacultyMembersPage factory class"""
+
+    heading = factory.fuzzy.FuzzyText(prefix="heading ")
+    subhead = factory.fuzzy.FuzzyText(prefix="subhead ")
+    members = wagtail_factories.StreamFieldFactory(FacultyBlockFactory)
+
+    class Meta:
+        model = FacultyMembersPage

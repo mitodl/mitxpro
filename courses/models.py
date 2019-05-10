@@ -15,6 +15,7 @@ from cms.models import (
     WhoShouldEnrollPage,
     CoursesInProgramPage,
     UserTestimonialsPage,
+    FacultyMembersPage,
 )
 from courses.constants import (
     CATALOG_COURSE_IMG_WAGTAIL_FILL,
@@ -166,6 +167,11 @@ class PageProperties(models.Model):
     def techniques(self):
         """Gets the learning techniques from the associated Page children if it exists"""
         return self._get_child_page_of_type(LearningTechniquesPage)
+
+    @property
+    def faculty(self):
+        """Gets the faculty members from the associated child page if it exists"""
+        return self._get_child_page_of_type(FacultyMembersPage)
 
     @property
     def faqs(self):

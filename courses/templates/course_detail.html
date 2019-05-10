@@ -32,11 +32,11 @@
     {% if course.who_should_enroll %} {% include "partials/target-audience.html" %} {% endif %}
     {% if course.techniques %} {% include "partials/learning-techniques.html" %} {% endif %}
     {% if course.testimonials %} {% include "partials/testimonial-carousel.html" with testimonials=course.testimonials %} {% endif %}
+    {% if course.faculty %} {% include "partials/faculty-carousel.html" %} {% endif %}
     {% if course.program and course.program.course_lineup %}
       {% include "partials/course-carousel.html" with program=course.program %}
     {% endif %}
     {% if course.for_teams %} {% include "partials/for-teams.html" %} {% endif %}
     {% if course.faqs %} {% include "partials/faqs.html" %} {% endif %}
-
 </div>
 {% endblock %}
