@@ -12,6 +12,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.test import APIClient
 import factory
 
+from courses.models import CourseRunEnrollment
 from courses.factories import CourseRunFactory
 from ecommerce.api import create_unfulfilled_order, make_reference_id
 from ecommerce.exceptions import EcommerceException
@@ -32,7 +33,6 @@ from ecommerce.models import (
     OrderAudit,
     Receipt,
     CouponPaymentVersion,
-    CourseRunEnrollment,
     CourseRunSelection,
     Company,
     CouponEligibility,
@@ -588,7 +588,6 @@ def test_patch_basket_clear_product(basket_client, basket_and_coupons, data):
     assert resp_data.get("items") == []
     assert BasketItem.objects.count() == 0
     assert CourseRunSelection.objects.count() == 0
-    assert CourseRunEnrollment.objects.count() == 0
 
 
 def test_patch_basket_nodata(basket_client, basket_and_coupons):
@@ -698,7 +697,7 @@ def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
     """A patch request for a run for a course that the user has already enrolled in should result in a 400 error"""
     run = basket_and_coupons.run
     order = LineFactory.create(order__status=Order.FULFILLED).order
-    CourseRunEnrollment.objects.create(run=run, order=order)
+    CourseRunEnrollment.objects.create(run=run, user=order.purchaser)
 
     resp = basket_client.patch(
         reverse("basket_api"),

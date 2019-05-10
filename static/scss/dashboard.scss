@@ -1,0 +1,175 @@
+// sass-lint:disable mixins-before-declarations
+@import "common";
+
+.user-dashboard {
+  padding: 40px 10%;
+
+  .header {
+    padding-right: 0;
+
+    @include media-breakpoint-down(sm) {
+      padding: 0;
+    }
+  }
+
+  h1 {
+    padding-bottom: 30px;
+    font-weight: 600;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+
+    @include media-breakpoint-down(sm) {
+      font-size: 1.25rem;
+    }
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $navy-blue;
+    border-bottom: 1px solid $detail-grid-border-color;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+  }
+
+  h5 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+}
+
+.user-dashboard,
+.collapse-toggle {
+  font-size: 20px;
+  font-weight: 600;
+
+  @include media-breakpoint-down(sm) {
+    font-size: 16px;
+  }
+}
+
+.program-enrollment,
+.non-program-course-enrollments > .course-enrollment {
+  margin-bottom: 15px;
+}
+
+.program-image-column,
+.course-image-column {
+  img {
+    display: block;
+    width: 100%;
+  }
+
+  @include media-breakpoint-down(sm) {
+    padding: 0;
+  }
+}
+
+.program-detail-column,
+.non-program-course-enrollments .course-detail-column {
+  padding: 15px;
+  border: 1px solid #b4b4b4;
+}
+
+.course-detail-column {
+  .status {
+    text-align: left;
+
+    @include media-breakpoint-up(lg) {
+      text-align: right;
+    }
+  }
+}
+
+.program-enrollment {
+  .program-courses {
+    hr {
+      margin-left: 10px;
+      margin-right: 10px;
+      border-color: $detail-grid-border-color;
+    }
+
+    .program-course {
+      width: 100%;
+    }
+
+    .course-enrollment {
+      margin-top: 15px;
+      margin-bottom: 15px;
+
+      h2 {
+        font-size: 20px;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .program-detail-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .collapse-toggle {
+    padding: 0;
+    margin: 0;
+    border: none;
+    background-color: white;
+    color: $gray;
+    text-decoration: none;
+
+    &:hover, &:active, &:focus {
+      color: $gray !important;
+      background-color: inherit !important;
+      outline: none !important;
+      text-decoration: none;
+      border: none;
+      box-shadow: none;
+    }
+  }
+
+  .expand-control {
+    text-align: right;
+
+    button {
+      background: url(/static/images/expand_more.svg) center right no-repeat;
+      padding-right: 24px;
+
+      &.expanded {
+        background-image: url(/static/images/expand_less.svg);
+      }
+    }
+  }
+}
+
+.program-enrollment.row,
+.course-enrollment.row {
+  position: relative;
+
+  .text-ribbon {
+    position: absolute;
+    width: 130px;
+    height: 40px;
+    top: 25px;
+    right: 0;
+
+    .text {
+      padding-left: 7px;
+    }
+
+    svg {
+      width: 130px;
+    }
+
+    &.program svg {
+      fill: $navy-blue;
+    }
+
+    &.course svg {
+      fill: $primary;
+    }
+  }
+}

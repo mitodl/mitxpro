@@ -81,6 +81,7 @@
     "react-router": "^4.1.1",
     "react-router-dom": "^4.1.1",
     "react-test-renderer": "^16.8.4",
+    "reactstrap": "^8.0.0",
     "redux": "^3.7.2",
     "redux-actions": "^2.2.1",
     "redux-asserts": "^0.0.10",

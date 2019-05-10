@@ -380,21 +380,6 @@ class CourseRunSelection(TimestampedModel):
         return f"CourseRunSelection for {self.basket} and {self.run}"
 
 
-class CourseRunEnrollment(TimestampedModel):
-    """
-    Link between Order and CourseRun, indicating what a user should be enrolled in
-    """
-
-    order = models.ForeignKey(Order, on_delete=models.PROTECT)
-    run = models.ForeignKey("courses.CourseRun", on_delete=models.PROTECT)
-
-    class Meta:
-        unique_together = ("order", "run")
-
-    def __str__(self):
-        return f"CourseRunEnrollment for {self.order} and {self.run}"
-
-
 class DataConsentAgreement(TimestampedModel):
     """
     Data consent agreement for a company and course(s)

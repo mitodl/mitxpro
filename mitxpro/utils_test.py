@@ -10,6 +10,7 @@ from mitxpro.utils import (
     is_near_now,
     dict_without_keys,
     filter_dict_by_key_set,
+    partition,
 )
 
 
@@ -62,3 +63,17 @@ def test_get_field_names():
         "created_on",
         "updated_on",
     }
+
+
+def test_partition():
+    """
+    Assert that partition splits an iterable into two iterables according to a condition
+    """
+    nums = [1, 2, 1, 3, 1, 4, 0, None, None]
+    not_ones, ones = partition(nums, lambda n: n == 1)
+    assert list(not_ones) == [2, 3, 4, 0, None, None]
+    assert list(ones) == [1, 1, 1]
+    # The default predicate is the standard Python bool() function
+    falsey, truthy = partition(nums)
+    assert list(falsey) == [0, None, None]
+    assert list(truthy) == [1, 2, 1, 3, 1, 4]

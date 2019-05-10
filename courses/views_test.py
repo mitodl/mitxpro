@@ -5,10 +5,11 @@ Tests for course views
 import operator as op
 import pytest
 from django.urls import reverse
-from rest_framework.status import HTTP_405_METHOD_NOT_ALLOWED
+from rest_framework import status
 
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from courses.serializers import ProgramSerializer, CourseSerializer, CourseRunSerializer
+from courses.api import UserEnrollments
 
 
 pytestmark = [pytest.mark.django_db]
@@ -59,7 +60,7 @@ def test_create_program(user_drf_client, programs):
     program_data["title"] = "New Program Title"
     request_url = reverse("programs_api-list")
     resp = user_drf_client.post(request_url, program_data)
-    assert resp.status_code == HTTP_405_METHOD_NOT_ALLOWED
+    assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
 def test_patch_program(user_drf_client, programs):
@@ -67,7 +68,7 @@ def test_patch_program(user_drf_client, programs):
     program = programs[0]
     request_url = reverse("programs_api-detail", kwargs={"pk": program.id})
     resp = user_drf_client.patch(request_url, {"title": "New Program Title"})
-    assert resp.status_code == HTTP_405_METHOD_NOT_ALLOWED
+    assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
 def test_delete_program(user_drf_client, programs):
@@ -76,7 +77,7 @@ def test_delete_program(user_drf_client, programs):
     resp = user_drf_client.delete(
         reverse("programs_api-detail", kwargs={"pk": program.id})
     )
-    assert resp.status_code == HTTP_405_METHOD_NOT_ALLOWED
+    assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
 def test_get_courses(user_drf_client, courses):
@@ -104,7 +105,7 @@ def test_create_course(user_drf_client, courses):
     course_data["title"] = "New Course Title"
     request_url = reverse("courses_api-list")
     resp = user_drf_client.post(request_url, course_data)
-    assert resp.status_code == HTTP_405_METHOD_NOT_ALLOWED
+    assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
 def test_patch_course(user_drf_client, courses):
@@ -112,7 +113,7 @@ def test_patch_course(user_drf_client, courses):
     course = courses[0]
     request_url = reverse("courses_api-detail", kwargs={"pk": course.id})
     resp = user_drf_client.patch(request_url, {"title": "New Course Title"})
-    assert resp.status_code == HTTP_405_METHOD_NOT_ALLOWED
+    assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
 def test_delete_course(user_drf_client, courses):
@@ -121,7 +122,7 @@ def test_delete_course(user_drf_client, courses):
     resp = user_drf_client.delete(
         reverse("courses_api-detail", kwargs={"pk": course.id})
     )
-    assert resp.status_code == HTTP_405_METHOD_NOT_ALLOWED
+    assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
 def test_get_course_runs(user_drf_client, course_runs):
@@ -157,7 +158,7 @@ def test_create_course_run(user_drf_client, course_runs):
     )
     request_url = reverse("course_runs_api-list")
     resp = user_drf_client.post(request_url, course_run_data)
-    assert resp.status_code == HTTP_405_METHOD_NOT_ALLOWED
+    assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
 def test_patch_course_run(user_drf_client, course_runs):
@@ -165,7 +166,7 @@ def test_patch_course_run(user_drf_client, course_runs):
     course_run = course_runs[0]
     request_url = reverse("course_runs_api-detail", kwargs={"pk": course_run.id})
     resp = user_drf_client.patch(request_url, {"title": "New CourseRun Title"})
-    assert resp.status_code == HTTP_405_METHOD_NOT_ALLOWED
+    assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
 def test_delete_course_run(user_drf_client, course_runs):
@@ -174,7 +175,7 @@ def test_delete_course_run(user_drf_client, course_runs):
     resp = user_drf_client.delete(
         reverse("course_runs_api-detail", kwargs={"pk": course_run.id})
     )
-    assert resp.status_code == HTTP_405_METHOD_NOT_ALLOWED
+    assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
 def test_course_catalog_view(client):
@@ -203,3 +204,34 @@ def test_course_view(client, user):
     resp = client.get(reverse("course-detail", kwargs={"pk": course.id}))
     assert resp.context["course"] == course
     assert resp.context["user"] == user
+
+
+def test_user_enrollments_view(mocker, client, user):
+    """
+    Test that UserEnrollmentsView returns serialized information about a user's enrollments
+    """
+    user_enrollments = UserEnrollments(
+        programs=[], program_runs=[], non_program_runs=[]
+    )
+    patched_get_user_enrollments = mocker.patch(
+        "courses.views.get_user_enrollments", return_value=user_enrollments
+    )
+    patched_program_enroll_serializer = mocker.patch(
+        "courses.views.ProgramEnrollmentSerializer",
+        return_value=mocker.Mock(data=[{"program": "enrollment"}]),
+    )
+    patched_course_enroll_serializer = mocker.patch(
+        "courses.views.CourseRunEnrollmentSerializer",
+        return_value=mocker.Mock(data=[{"courserun": "enrollment"}]),
+    )
+
+    client.force_login(user)
+    resp = client.get(reverse("user-enrollments"))
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json() == {
+        "program_enrollments": [{"program": "enrollment"}],
+        "course_run_enrollments": [{"courserun": "enrollment"}],
+    }
+    patched_get_user_enrollments.assert_called_with(user)
+    patched_program_enroll_serializer.assert_called_once()
+    patched_course_enroll_serializer.assert_called_once()

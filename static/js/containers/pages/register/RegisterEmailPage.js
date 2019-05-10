@@ -41,7 +41,7 @@ class RegisterEmailPage extends React.Component<Props> {
       }: { body: AuthResponse } = await registerEmail(email, next)
 
       if (state === STATE_REGISTER_CONFIRM_SENT) {
-        history.push(routes.home)
+        history.push(routes.dashboard)
       } else if (errors.length > 0) {
         setErrors({
           email: errors[0]

@@ -1,10 +1,22 @@
 """Course views"""
-from rest_framework import viewsets
+
+from rest_framework import viewsets, status
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.db.models import Prefetch
 from django.views.generic import ListView, DetailView
 
 from courses.models import Program, Course, CourseRun
-from courses.serializers import ProgramSerializer, CourseSerializer, CourseRunSerializer
+from courses.api import get_user_enrollments
+from courses.serializers import (
+    ProgramSerializer,
+    CourseSerializer,
+    CourseRunSerializer,
+    CourseRunEnrollmentSerializer,
+    ProgramEnrollmentSerializer,
+)
 from courses.constants import DEFAULT_COURSE_IMG_PATH
 from mitxpro.views import get_js_settings_context
 
@@ -79,3 +91,33 @@ class CourseView(DetailView):
             **get_js_settings_context(self.request),
             "user": self.request.user,
         }
+
+
+class UserEnrollmentsView(APIView):
+    """
+    View for user program/course enrollments
+    """
+
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        """Read-only access"""
+        user = request.user
+        user_enrollments = get_user_enrollments(user)
+
+        return Response(
+            status=status.HTTP_200_OK,
+            data={
+                "program_enrollments": ProgramEnrollmentSerializer(
+                    user_enrollments.programs,
+                    many=True,
+                    context={
+                        "course_run_enrollments": list(user_enrollments.program_runs)
+                    },
+                ).data,
+                "course_run_enrollments": CourseRunEnrollmentSerializer(
+                    user_enrollments.non_program_runs, many=True
+                ).data,
+            },
+        )

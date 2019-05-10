@@ -1,14 +1,12 @@
 // @flow
-import { pathOr, nthArg } from "ramda"
+import { pathOr } from "ramda"
 
+import { nextState } from "./util"
 import { getCookie } from "../api"
 import { objectToFormData } from "../util"
 import { createProductMap } from "../ecommerce"
 
 import type { BulkCouponPaymentsResponse } from "../../flow/ecommerceTypes"
-
-// replace the previous state with the next state without merging
-const nextState = nthArg(1)
 
 export default {
   bulkCouponPaymentsSelector: pathOr(null, ["entities", "bulkCouponPayments"]),

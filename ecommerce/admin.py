@@ -17,6 +17,7 @@ from ecommerce.models import (
     ProductVersion,
     DataConsentAgreement,
     DataConsentUser,
+    Company,
 )
 from mitxpro.utils import get_field_names
 
@@ -182,6 +183,12 @@ class DataConsentAgreementAdmin(admin.ModelAdmin):
     inlines = [DataConsentUserInline]
 
     model = DataConsentAgreement
+
+
+class CompanyAdmin(admin.ModelAdmin):
+    """Admin for Company"""
+
+    model = Company
 
 
 admin.site.register(Line, LineAdmin)

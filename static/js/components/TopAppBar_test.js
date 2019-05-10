@@ -16,7 +16,7 @@ describe("TopAppBar component", () => {
         shallow(<TopAppBar currentUser={user} />)
           .find("MixedLink")
           .at(0)
-          .props().dest,
+          .prop("dest"),
         routes.login
       )
     })
@@ -26,7 +26,7 @@ describe("TopAppBar component", () => {
         shallow(<TopAppBar currentUser={user} />)
           .find("MixedLink")
           .at(1)
-          .props().dest,
+          .prop("dest"),
         routes.register.begin
       )
     })
@@ -34,14 +34,14 @@ describe("TopAppBar component", () => {
   describe("for logged in users", () => {
     const user = makeUser()
 
-    it("shows the logged in user", () => {
-      assert.equal(
-        shallow(<TopAppBar currentUser={user} />)
-          .find(".user-name")
-          .at(0)
-          .text(),
-        user.name
-      )
+    it("shows a link to the user dashboard", () => {
+      const dashLink = shallow(<TopAppBar currentUser={user} />)
+        .find(".dashboard-link")
+        .at(0)
+        .find("MixedLink")
+        .at(0)
+      assert.equal(dashLink.prop("children"), "Dashboard")
+      assert.equal(dashLink.prop("dest"), routes.dashboard)
     })
 
     it("has a link to logout", () => {
@@ -49,7 +49,7 @@ describe("TopAppBar component", () => {
         shallow(<TopAppBar currentUser={user} />)
           .find(".link-section a")
           .at(0)
-          .props().href,
+          .prop("href"),
         routes.logout
       )
     })

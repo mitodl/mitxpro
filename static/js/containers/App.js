@@ -11,9 +11,10 @@ import users, { currentUserSelector } from "../lib/queries/users"
 import { routes } from "../lib/urls"
 
 import TopAppBar from "../components/TopAppBar"
+import PrivateRoute from "../components/PrivateRoute"
 
 import CheckoutPage from "./pages/CheckoutPage"
-import HomePage from "./pages/HomePage"
+import DashboardPage from "./pages/DashboardPage"
 import LoginPages from "./pages/login/LoginPages"
 import RegisterPages from "./pages/register/RegisterPages"
 import EcommerceAdminPages from "./pages/admin/EcommerceAdminPages"
@@ -39,10 +40,10 @@ class App extends React.Component<Props, void> {
       <div className="app">
         <TopAppBar currentUser={currentUser} />
         <Switch>
-          <Route
+          <PrivateRoute
             exact
-            path={`${match.url}${routes.home}`}
-            component={HomePage}
+            path={urljoin(match.url, routes.dashboard)}
+            component={DashboardPage}
           />
           <Route
             path={urljoin(match.url, String(routes.login))}

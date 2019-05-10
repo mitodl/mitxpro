@@ -3,6 +3,7 @@ import datetime
 from enum import auto, Flag
 import json
 import logging
+import itertools
 
 from django.conf import settings
 from django.core.serializers import serialize
@@ -122,3 +123,18 @@ def first_matching_item(iterable, predicate):
         Matching item or None
     """
     return next(filter(predicate, iterable), None)
+
+
+def partition(items, predicate=bool):
+    """
+    Partitions an iterable into two different iterables - the first does not match the given condition, and the second
+    does match the given condition.
+
+    Args:
+        items (iterable): An iterable of items to partition
+        predicate (function): A function that takes each item and returns True or False
+    Returns:
+        tuple of iterables: An iterable of non-matching items, paired with an iterable of matching items
+    """
+    a, b = itertools.tee((predicate(item), item) for item in items)
+    return ((item for pred, item in a if not pred), (item for pred, item in b if pred))

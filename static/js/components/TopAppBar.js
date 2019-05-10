@@ -25,7 +25,11 @@ const TopAppBar = ({ currentUser }: Props) => (
       <section className="mdc-top-app-bar__section mdc-top-app-bar__section--align-end link-section">
         {currentUser.is_authenticated ? (
           <React.Fragment>
-            <strong className="user-name">{currentUser.name}</strong>
+            <strong className="dashboard-link">
+              <MixedLink dest={routes.dashboard} aria-label="Dashboard link">
+                Dashboard
+              </MixedLink>
+            </strong>
             <a
               href={routes.logout}
               className="link-button red"
@@ -46,7 +50,7 @@ const TopAppBar = ({ currentUser }: Props) => (
             <MixedLink
               dest={routes.register.begin}
               className="link-button red"
-              aria-label="Login"
+              aria-label="Register"
             >
               Register
             </MixedLink>

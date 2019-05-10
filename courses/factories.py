@@ -2,10 +2,12 @@
 import pytz
 import faker
 import factory
-from factory import fuzzy
+from factory import fuzzy, SubFactory
 from factory.django import DjangoModelFactory
 
-from .models import Program, Course, CourseRun
+from users.factories import UserFactory
+
+from .models import Program, Course, CourseRun, ProgramEnrollment, CourseRunEnrollment
 
 FAKE = faker.Factory.create()
 
@@ -65,3 +67,23 @@ class CourseRunFactory(DjangoModelFactory):
         past_start = factory.Trait(
             start_date=factory.Faker("past_datetime", tzinfo=pytz.utc)
         )
+
+
+class CourseRunEnrollmentFactory(DjangoModelFactory):
+    """Factory for CourseRunEnrollment"""
+
+    user = SubFactory(UserFactory)
+    run = SubFactory(CourseRunFactory)
+
+    class Meta:
+        model = CourseRunEnrollment
+
+
+class ProgramEnrollmentFactory(DjangoModelFactory):
+    """Factory for ProgramEnrollment"""
+
+    user = SubFactory(UserFactory)
+    program = SubFactory(ProgramFactory)
+
+    class Meta:
+        model = ProgramEnrollment

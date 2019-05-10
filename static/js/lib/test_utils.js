@@ -52,3 +52,9 @@ export const getComponentWithContext = (
   const inner = outer.props().children(context)
   return { inner, outer }
 }
+
+export const shouldIf = (tf: boolean) => (tf ? "should" : "should not")
+
+export const shouldIfGt0 = (num: number) => shouldIf(num > 0)
+
+export const isIf = (tf: boolean) => (tf ? "is" : "is not")

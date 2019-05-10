@@ -63,7 +63,7 @@ urlpatterns = [
     ),
     path("terms-and-conditions/", index, name="terms-and-conditions"),
     re_path(r"^$", CourseCatalogView.as_view(), name="mitxpro-index"),
-    path("dashboard/", index, name="dashboard"),
+    re_path(r"^dashboard/", index, name="user-dashboard"),
     # Wagtail
     re_path(r"^cms/", include(wagtailadmin_urls)),
     re_path(r"^documents/", include(wagtaildocs_urls)),

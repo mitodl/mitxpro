@@ -1,7 +1,6 @@
 """Ecommerce mail API tests"""
 import pytest
 
-from ecommerce.api_test import lazy
 from ecommerce.factories import (
     CouponPaymentVersionFactory,
     CouponEligibilityFactory,
@@ -9,6 +8,8 @@ from ecommerce.factories import (
 )
 from ecommerce.mail_api import send_bulk_enroll_emails
 from mail.constants import EMAIL_BULK_ENROLL
+
+lazy = pytest.lazy_fixture
 
 
 @pytest.mark.django_db
