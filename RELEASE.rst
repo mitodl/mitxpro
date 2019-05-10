@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.3.2
+Version 0.3.2 (Released May 10, 2019)
 -------------
 
 - Redirect users to /dashboard after CyberSource checkout (#234)
