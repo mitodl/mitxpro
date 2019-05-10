@@ -609,3 +609,21 @@ def _assert_faculty_members(obj):
         assert block.block_type == "member"
         assert block.value["name"] == "Test Faculty"
         assert block.value["description"].source == "<p>description</p>"
+
+
+def test_course_unexpired_runs():
+    """unexpired_runs should return expected value"""
+    course = CourseFactory.create()
+    now = now_in_utc()
+    start_dates = [now, now + timedelta(days=-3)]
+    end_dates = [now + timedelta(hours=1), now + timedelta(days=-2)]
+    CourseRunFactory.create_batch(
+        2,
+        course=course,
+        start_date=factory.Iterator(start_dates),
+        end_date=factory.Iterator(end_dates),
+    )
+    assert len(course.unexpired_runs) == 1
+    course_run = course.unexpired_runs[0]
+    assert course_run.start_date == start_dates[0]
+    assert course_run.end_date == end_dates[0]
