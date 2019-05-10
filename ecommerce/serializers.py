@@ -9,7 +9,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
-from courses.models import Course, CourseRun, Program
+from courses.models import Course, CourseRun, Program, CourseRunEnrollment
 from courses.constants import DEFAULT_COURSE_IMG_PATH
 from courses.serializers import CourseSerializer
 from ecommerce import models
@@ -254,7 +254,7 @@ class BasketSerializer(serializers.ModelSerializer):
             elif courses_for_product[run.course_id] != run.id:
                 raise ValidationError("Only one run per course can be selected")
 
-        if models.CourseRunEnrollment.objects.filter(run_id__in=run_ids).exists():
+        if CourseRunEnrollment.objects.filter(run_id__in=run_ids).exists():
             raise ValidationError("User has already enrolled in run")
 
         return runs_for_product

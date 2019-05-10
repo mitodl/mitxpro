@@ -7,23 +7,6 @@ from rest_framework import serializers
 from courses import models
 
 
-class CourseRunSerializer(serializers.ModelSerializer):
-    """CourseRun model serializer"""
-
-    class Meta:
-        model = models.CourseRun
-        fields = [
-            "title",
-            "start_date",
-            "end_date",
-            "enrollment_start",
-            "enrollment_end",
-            "courseware_url_path",
-            "courseware_id",
-            "id",
-        ]
-
-
 def _get_thumbnail_url(page):
     """
     Get the thumbnail URL or else return a default image URL.
@@ -45,8 +28,39 @@ def _get_thumbnail_url(page):
     )
 
 
+class BaseCourseSerializer(serializers.ModelSerializer):
+    """Basic course model serializer"""
+
+    thumbnail_url = serializers.SerializerMethodField()
+
+    def get_thumbnail_url(self, instance):
+        """Thumbnail URL"""
+        return _get_thumbnail_url(instance.page)
+
+    class Meta:
+        model = models.Course
+        fields = ["id", "title", "description", "thumbnail_url", "readable_id"]
+
+
+class CourseRunSerializer(serializers.ModelSerializer):
+    """CourseRun model serializer"""
+
+    class Meta:
+        model = models.CourseRun
+        fields = [
+            "title",
+            "start_date",
+            "end_date",
+            "enrollment_start",
+            "enrollment_end",
+            "courseware_url",
+            "courseware_id",
+            "id",
+        ]
+
+
 class CourseSerializer(serializers.ModelSerializer):
-    """Course model serializer"""
+    """Course model serializer - also serializes child course runs"""
 
     thumbnail_url = serializers.SerializerMethodField()
     courseruns = CourseRunSerializer(many=True, read_only=True)
@@ -74,6 +88,40 @@ class CourseSerializer(serializers.ModelSerializer):
         ]
 
 
+class CourseRunDetailSerializer(serializers.ModelSerializer):
+    """CourseRun model serializer - also serializes the parent Course"""
+
+    course = BaseCourseSerializer(read_only=True)
+
+    class Meta:
+        model = models.CourseRun
+        fields = [
+            "course",
+            "title",
+            "start_date",
+            "end_date",
+            "enrollment_start",
+            "enrollment_end",
+            "courseware_url",
+            "courseware_id",
+            "id",
+        ]
+
+
+class BaseProgramSerializer(serializers.ModelSerializer):
+    """Basic program model serializer"""
+
+    thumbnail_url = serializers.SerializerMethodField()
+
+    def get_thumbnail_url(self, instance):
+        """Thumbnail URL"""
+        return _get_thumbnail_url(instance.page)
+
+    class Meta:
+        model = models.Program
+        fields = ["title", "description", "thumbnail_url", "readable_id", "id"]
+
+
 class ProgramSerializer(serializers.ModelSerializer):
     """Program model serializer"""
 
@@ -94,3 +142,44 @@ class ProgramSerializer(serializers.ModelSerializer):
             "id",
             "courses",
         ]
+
+
+class CourseRunEnrollmentSerializer(serializers.ModelSerializer):
+    """CourseRunEnrollment model serializer"""
+
+    run = CourseRunDetailSerializer(read_only=True)
+
+    class Meta:
+        model = models.CourseRunEnrollment
+        fields = ["run"]
+
+
+class ProgramEnrollmentSerializer(serializers.ModelSerializer):
+    """ProgramEnrollmentSerializer model serializer"""
+
+    program = BaseProgramSerializer(read_only=True)
+    course_run_enrollments = serializers.SerializerMethodField()
+
+    def __init__(self, *args, **kwargs):
+        assert (
+            "context" in kwargs and "course_run_enrollments" in kwargs["context"]
+        ), "An iterable of course run enrollments must be passed in the context (key: course_run_enrollments)"
+        super().__init__(*args, **kwargs)
+
+    def get_course_run_enrollments(self, instance):
+        """Returns a serialized list of course run enrollments that belong to this program (in position order)"""
+        return CourseRunEnrollmentSerializer(
+            sorted(
+                (
+                    enrollment
+                    for enrollment in self.context["course_run_enrollments"]
+                    if enrollment.run.course.program_id == instance.program.id
+                ),
+                key=lambda enrollment: enrollment.run.course.position_in_program,
+            ),
+            many=True,
+        ).data
+
+    class Meta:
+        model = models.ProgramEnrollment
+        fields = ["id", "program", "course_run_enrollments"]

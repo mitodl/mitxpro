@@ -16,6 +16,10 @@ import {
 import { truncate as _truncate } from "lodash"
 import qs from "query-string"
 import { assert } from "chai"
+import * as R from "ramda"
+import moment from "moment"
+
+import type Moment from "moment"
 
 /**
  * Returns a promise which resolves after a number of milliseconds have elapsed
@@ -127,3 +131,30 @@ export const assertRaises = async (
   }
   assert.equal(exception.message, expectedMessage)
 }
+
+// Example return values: "January 1, 2019", "December 31, 2019"
+export const formatPrettyDate = (momentDate: Moment) =>
+  momentDate.format("MMMM D, YYYY")
+
+export const firstItem = R.view(R.lensIndex(0))
+
+export const secondItem = R.view(R.lensIndex(1))
+
+export const parseDateString = (dateString: ?string): ?Moment =>
+  emptyOrNil(dateString) ? undefined : moment(dateString)
+
+const getDateExtreme = R.curry(
+  (compareFunc: Function, momentDates: Array<?Moment>): ?Moment => {
+    const filteredDates = R.reject(R.isNil, momentDates)
+    if (filteredDates.length === 0) {
+      return null
+    }
+    return R.compose(
+      moment,
+      R.apply(compareFunc)
+    )(filteredDates)
+  }
+)
+
+export const getMinDate = getDateExtreme(Math.min)
+export const getMaxDate = getDateExtreme(Math.max)

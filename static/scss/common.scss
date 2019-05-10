@@ -31,3 +31,27 @@ a.link-button {
   background-color: $light-blue !important;
   border-color: $light-blue !important;
 }
+
+.text-ribbon {
+  position: relative;
+  width: 160px;
+  height: 40px;
+
+  svg {
+    width: 160px;
+    height: 40px;
+    -webkit-filter: drop-shadow(-1px 2px 2px rgba(0, 0, 0, 0.4)); // sass-lint:disable-line no-vendor-prefixes
+    filter: drop-shadow(-1px 2px 2px rgba(0, 0, 0, 0.4));
+    fill: black;
+  }
+
+  .text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    line-height: 40px;
+    text-align: center;
+    color: white;
+  }
+}

@@ -178,6 +178,16 @@ class ReceiptFactory(DjangoModelFactory):
         model = models.Receipt
 
 
+class CourseRunSelectionFactory(DjangoModelFactory):
+    """Factory for CourseRunSelection"""
+
+    basket = SubFactory(BasketFactory)
+    run = SubFactory(CourseRunFactory)
+
+    class Meta:
+        model = models.CourseRunSelection
+
+
 class DataConsentAgreementFactory(DjangoModelFactory):
     """Factory for DataConsentAgreement"""
 

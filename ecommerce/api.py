@@ -14,7 +14,12 @@ from django.db.models import Q, Max, F, Count
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
-from courses.models import Course, CourseRun
+from courses.constants import (
+    CONTENT_TYPE_MODEL_PROGRAM,
+    CONTENT_TYPE_MODEL_COURSE,
+    CONTENT_TYPE_MODEL_COURSERUN,
+)
+from courses.models import Course, CourseRun, CourseRunEnrollment, ProgramEnrollment
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.models import (
     Basket,
@@ -25,7 +30,6 @@ from ecommerce.models import (
     CouponRedemption,
     CouponPayment,
     CouponPaymentVersion,
-    CourseRunEnrollment,
     CourseRunSelection,
     Line,
     Order,
@@ -384,13 +388,27 @@ def get_new_order_by_reference_number(reference_number):
 
 def enroll_user_on_success(order):  # pylint: disable=unused-argument
     """
-    Check if the order is successful, then enroll the user
+    Check if the order is successful, then enroll the user and create local records of their
+    enrollments.
 
     Args:
-        order (Order):
-            An order
+        order (Order): An order
     """
-    # TBD: will be implemented later
+    basket = order.purchaser.basket
+    runs = CourseRun.objects.filter(courserunselection__basket=basket)
+    # pylint: disable=fixme
+    # TODO: Actually enroll the user in the given course runs on Open edX
+    for run in runs:
+        CourseRunEnrollment.objects.get_or_create(user=order.purchaser, run=run)
+    for line in order.lines.all():
+        if (
+            line.product_version.product.content_type.model
+            == CONTENT_TYPE_MODEL_PROGRAM
+        ):
+            ProgramEnrollment.objects.get_or_create(
+                user=order.purchaser,
+                program=line.product_version.product.content_object,
+            )
 
 
 @transaction.atomic
@@ -435,11 +453,11 @@ def get_product_courses(product):
         list of Course: list of Courses associated with the Product
 
     """
-    if product.content_type.model == "courserun":
+    if product.content_type.model == CONTENT_TYPE_MODEL_COURSERUN:
         return [product.content_object.course]
-    elif product.content_type.model == "course":
+    elif product.content_type.model == CONTENT_TYPE_MODEL_COURSE:
         return [product.content_object]
-    elif product.content_type.model == "program":
+    elif product.content_type.model == CONTENT_TYPE_MODEL_PROGRAM:
         return list(
             product.content_object.courses.all().order_by("position_in_program")
         )
@@ -535,9 +553,7 @@ def validate_basket_for_checkout(basket):
 
     # User must not already be enrolled in a course run covered by the product
     if CourseRunEnrollment.objects.filter(
-        order__purchaser=basket.user,
-        order__status=Order.FULFILLED,
-        run__in=run_queryset,
+        user=basket.user, run__in=run_queryset
     ).exists():
         raise ValidationError("User is already enrolled in one or more runs in basket")
 

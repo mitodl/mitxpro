@@ -2,6 +2,7 @@
 /* global SETTINGS:false */
 import sinon from "sinon"
 import { assert } from "chai"
+import moment from "moment"
 
 import {
   assertRaises,
@@ -13,7 +14,12 @@ import {
   truncate,
   getTokenFromUrl,
   makeUUID,
-  spaceSeparated
+  spaceSeparated,
+  formatPrettyDate,
+  firstItem,
+  secondItem,
+  getMinDate,
+  getMaxDate
 } from "./util"
 
 describe("utility functions", () => {
@@ -182,6 +188,42 @@ describe("utility functions", () => {
 
       // $FlowFixMe
       assert.equal(exception.message, "expected 'other message' to equal ''")
+    })
+  })
+
+  it("formatPrettyDate should return a formatted moment date", () => {
+    moment.locale("en")
+    const momentDate = moment("2019-01-01T00:00:00.000000Z")
+    assert.equal(formatPrettyDate(momentDate), "January 1, 2019")
+  })
+
+  it("firstItem should return the first item of an array", () => {
+    assert.equal(firstItem([1, 2, 3]), 1)
+    assert.isUndefined(firstItem([]))
+  })
+
+  it("secondItem should return the second item of an array", () => {
+    assert.equal(secondItem([1, 2, 3]), 2)
+    assert.isUndefined(secondItem([]))
+  })
+
+  describe("dateFunction", () => {
+    const futureDate = moment().add(7, "days"),
+      pastDate = moment().add(-7, "days"),
+      now = moment()
+
+    it("getMinDate returns the earliest date of a list of dates or null", () => {
+      let dates = [futureDate, pastDate, now, now, undefined, null]
+      assert.equal(getMinDate(dates).toISOString(), pastDate.toISOString())
+      dates = [null, undefined]
+      assert.isNull(getMinDate(dates))
+    })
+
+    it("getMaxDate returns the latest date of a list of dates or null", () => {
+      let dates = [futureDate, pastDate, now, now, undefined, null]
+      assert.equal(getMaxDate(dates).toISOString(), futureDate.toISOString())
+      dates = [null, undefined]
+      assert.isNull(getMaxDate(dates))
     })
   })
 })

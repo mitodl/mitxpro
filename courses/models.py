@@ -3,6 +3,7 @@ Course models
 """
 import logging
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericRelation
 
 from cms.models import (
@@ -23,6 +24,8 @@ from courseware.utils import edx_redirect_url
 from ecommerce.models import Product
 from mitxpro.models import TimestampedModel
 from mitxpro.utils import now_in_utc, first_matching_item
+
+User = get_user_model()
 
 log = logging.getLogger(__name__)
 
@@ -378,3 +381,33 @@ class CourseRun(TimestampedModel):
 
     def __str__(self):
         return self.title
+
+
+class CourseRunEnrollment(TimestampedModel):
+    """
+    Link between User and CourseRun indicating a user's enrollment
+    """
+
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    run = models.ForeignKey("courses.CourseRun", on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = ("user", "run")
+
+    def __str__(self):
+        return f"CourseRunEnrollment for {self.user} and {self.run}"
+
+
+class ProgramEnrollment(TimestampedModel):
+    """
+    Link between User and Program indicating a user's enrollment
+    """
+
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    program = models.ForeignKey("courses.Program", on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = ("user", "program")
+
+    def __str__(self):
+        return f"ProgramEnrollment for {self.user} and {self.program}"

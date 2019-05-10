@@ -13,6 +13,11 @@ router.register(r"course_runs", views.CourseRunViewSet, basename="course_runs_ap
 urlpatterns = [
     re_path(r"^api/", include(router.urls)),
     re_path(
+        r"^api/enrollments/",
+        views.UserEnrollmentsView.as_view(),
+        name="user-enrollments",
+    ),
+    re_path(
         r"^courses/(?P<pk>[\d]+)/$", views.CourseView.as_view(), name="course-detail"
     ),
 ]

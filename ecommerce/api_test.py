@@ -13,6 +13,7 @@ import factory
 from rest_framework.exceptions import ValidationError
 import pytest
 
+from courses.models import CourseRunEnrollment, ProgramEnrollment
 from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
 from ecommerce.api import (
     create_unfulfilled_order,
@@ -31,6 +32,7 @@ from ecommerce.api import (
     get_product_courses,
     get_available_bulk_product_coupons,
     validate_basket_for_checkout,
+    enroll_user_on_success,
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -43,6 +45,7 @@ from ecommerce.factories import (
     OrderFactory,
     ProductVersionFactory,
     ProductFactory,
+    CourseRunSelectionFactory,
     CouponEligibilityFactory,
     BulkEnrollmentDeliveryFactory,
 )
@@ -51,7 +54,6 @@ from ecommerce.models import (
     Coupon,
     CouponSelection,
     CouponRedemption,
-    CourseRunEnrollment,
     CourseRunSelection,
     Order,
     OrderAudit,
@@ -653,7 +655,7 @@ def test_validate_basket_already_enrolled(basket_and_coupons):
     order = OrderFactory.create(
         purchaser=basket_and_coupons.basket.user, status=Order.FULFILLED
     )
-    CourseRunEnrollment.objects.create(order=order, run=runs[2])
+    CourseRunEnrollment.objects.create(user=order.purchaser, run=runs[2])
 
     with pytest.raises(ValidationError) as ex:
         validate_basket_for_checkout(basket_and_coupons.basket)
@@ -703,3 +705,32 @@ def test_validate_basket_run_expired(mocker, basket_and_coupons):
     with pytest.raises(ValidationError) as ex:
         validate_basket_for_checkout(basket_and_coupons.basket)
     assert ex.value.args[0] == f"Run {basket_and_coupons.run.id} is expired"
+
+
+def test_enroll_user_on_success(user):
+    """
+    Test that enroll_user_on_success creates objects that represent a user's enrollment
+    in course runs and programs
+    """
+    order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
+    basket = BasketFactory.create(user=user)
+    run_selections = CourseRunSelectionFactory.create_batch(2, basket=basket)
+    program = ProgramFactory.create()
+    LineFactory.create_batch(
+        3,
+        order=order,
+        product_version__product__content_object=factory.Iterator(
+            [selection.run for selection in run_selections] + [program]
+        ),
+    )
+
+    enroll_user_on_success(order)
+    created_program_enrollments = ProgramEnrollment.objects.all()
+    assert len(created_program_enrollments) == 1
+    assert created_program_enrollments[0].program == program
+    assert created_program_enrollments[0].user == user
+    created_course_run_enrollments = CourseRunEnrollment.objects.order_by("pk").all()
+    assert len(created_course_run_enrollments) == len(run_selections)
+    assert [
+        run_enrollment.run for run_enrollment in created_course_run_enrollments
+    ] == [selection.run for selection in run_selections]
