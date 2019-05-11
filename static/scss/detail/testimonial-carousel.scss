@@ -1,0 +1,147 @@
+// sass-lint:disable mixins-before-declarations
+.learners-block {
+  padding: 100px 0 50px;
+  background: white url("#{$static-path}/images/testimonial-carousel-bg.jpg") no-repeat 50% 0;
+  min-height: 400px;
+  overflow: hidden;
+  position: relative;
+  color: black;
+  background-size: cover;
+
+  &:after {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    content: "";
+    height: 10px;
+    background: linear-gradient(
+      to right,
+      rgba(61, 189, 191, 1) 0%,
+      rgba(241, 186, 70, 1) 100%
+    );
+  }
+
+  .head {
+    text-align: center;
+    padding: 0 0 80px;
+
+    h3 {
+      margin: 0 0 20px;
+    }
+  }
+
+  h1 {
+    color: $primary;
+    margin: 0 0 10px;
+    text-transform: uppercase;
+
+    @include media-breakpoint-up(lg) {
+      margin: 0 0 25px;
+    }
+  }
+}
+
+.learners-slider {
+  position: relative;
+  margin: 0 -15px;
+
+  &:after {
+    display: block;
+    clear: both;
+    content: "";
+  }
+
+  .slide {
+    float: left;
+    width: 33.333%;
+    padding: 0 15px;
+    opacity: 0.3;
+
+    &.slick-active {
+      opacity: 1;
+    }
+  }
+
+  .slick-list {
+    overflow: visible;
+  }
+
+  .slide-holder {
+    background: white;
+    padding: 5px 20px 20px;
+    border-radius: 5px;
+    box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-size: 28px;
+    line-height: 34px;
+
+    @include media-breakpoint-up(md) {
+      text-align: left;
+    }
+  }
+
+  img {
+    width: 75px;
+    display: block;
+    border-radius: 50%;
+    margin: -25px auto 15px;
+    box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  h2 {
+    margin: 0 0 7px;
+    font-size: 18px;
+    line-height: 25px;
+    font-weight: 600;
+    color: $light-gray;
+    min-height: 50px;
+  }
+
+  p {
+    margin: 0 0 20px;
+    letter-spacing: -0.5px;
+
+    &:after {
+      content: "”";
+    }
+
+    &:before {
+      content: "“";
+    }
+  }
+
+  .read-more {
+    font-size: 18px;
+    line-height: 24px;
+    display: inline-block;
+    vertical-align: top;
+    font-weight: 600;
+    text-transform: uppercase;
+
+    &:after {
+      content: "\e902";
+      font-family: icomoon;
+      display: inline-block;
+      vertical-align: top;
+      line-height: 24px;
+      margin: 0 0 0 10px;
+    }
+  }
+}
+
+.headshot-image {
+  box-shadow: 0em 0.05em 0.5em rgba(0, 0, 0, 0.35);
+  border-width: 3px !important;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: $light-gray;
+}
+
+.quote-container {
+  max-height: 50vh;
+  overflow: auto;
+}

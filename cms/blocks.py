@@ -25,3 +25,19 @@ class ResourceBlock(blocks.StructBlock):
 
     heading = blocks.CharBlock(max_length=100)
     detail = blocks.RichTextBlock()
+
+
+# Cannot name TestimonialBlock otherwise pytest will try to pick up as a test
+class UserTestimonialBlock(blocks.StructBlock):
+    """
+    Custom block to represent a testimonial
+    """
+
+    name = blocks.CharBlock(max_length=100, help_text="Name of the attestant.")
+    title = blocks.CharBlock(
+        max_length=255, help_text="The title to display after the name."
+    )
+    image = ImageChooserBlock(
+        blank=True, null=True, help_text="The image to display on the testimonial"
+    )
+    quote = blocks.TextBlock(help_text="The quote that appears on the testimonial.")

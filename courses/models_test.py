@@ -17,6 +17,7 @@ from cms.factories import (
     ForTeamsPageFactory,
     WhoShouldEnrollPageFactory,
     CoursesInProgramPageFactory,
+    UserTestimonialsPageFactory,
 )
 
 from cms.models import (
@@ -26,6 +27,7 @@ from cms.models import (
     ForTeamsPage,
     WhoShouldEnrollPage,
     CoursesInProgramPage,
+    UserTestimonialsPage,
 )
 from mitxpro.utils import now_in_utc
 
@@ -499,3 +501,59 @@ def test_program_course_lineup():
     assert program.course_lineup == courses_page
     assert courses_page.heading == "heading"
     assert courses_page.body == "<p>body</p>"
+
+
+def test_course_testimonials():
+    """
+    testimonials property should return expected value if associated with a course
+    """
+    course = CourseFactory.create()
+    assert course.testimonials is None
+
+    course_page = CoursePageFactory.create(course=course)
+    assert UserTestimonialsPage.can_create_at(course_page)
+    testimonials_page = UserTestimonialsPageFactory.create(
+        parent=course_page,
+        heading="heading",
+        subhead="subhead",
+        items__0__testimonial__name="name",
+        items__0__testimonial__title="title",
+        items__0__testimonial__image__title="image",
+        items__0__testimonial__quote="quote",
+    )
+    assert course.testimonials == testimonials_page
+    assert testimonials_page.heading == "heading"
+    assert testimonials_page.subhead == "subhead"
+    for testimonial in testimonials_page.items:  # pylint: disable=not-an-iterable
+        assert testimonial.value.get("name") == "name"
+        assert testimonial.value.get("title") == "title"
+        assert testimonial.value.get("image").title == "image"
+        assert testimonial.value.get("quote") == "quote"
+
+
+def test_program_testimonials():
+    """
+    testimonials property should return expected value if associated with a program
+    """
+    program = ProgramFactory.create()
+    assert program.testimonials is None
+
+    program_page = ProgramPageFactory.create(program=program)
+    assert UserTestimonialsPage.can_create_at(program_page)
+    testimonials_page = UserTestimonialsPageFactory.create(
+        parent=program_page,
+        heading="heading",
+        subhead="subhead",
+        items__0__testimonial__name="name",
+        items__0__testimonial__title="title",
+        items__0__testimonial__image__title="image",
+        items__0__testimonial__quote="quote",
+    )
+    assert program.testimonials == testimonials_page
+    assert testimonials_page.heading == "heading"
+    assert testimonials_page.subhead == "subhead"
+    for testimonial in testimonials_page.items:  # pylint: disable=not-an-iterable
+        assert testimonial.value.get("name") == "name"
+        assert testimonial.value.get("title") == "title"
+        assert testimonial.value.get("image").title == "image"
+        assert testimonial.value.get("quote") == "quote"

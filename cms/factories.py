@@ -14,8 +14,9 @@ from cms.models import (
     WhoShouldEnrollPage,
     CoursesInProgramPage,
     ResourcePage,
+    UserTestimonialsPage,
 )
-from cms.blocks import LearningTechniqueBlock, ResourceBlock
+from cms.blocks import LearningTechniqueBlock, ResourceBlock, UserTestimonialBlock
 from courses.factories import ProgramFactory, CourseFactory
 
 
@@ -142,3 +143,30 @@ class ResourcePageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = ResourcePage
+
+
+# Cannot name TestimonialBlockFactory otherwise pytest will try to pick up as a test
+class UserTestimonialBlockFactory(wagtail_factories.StructBlockFactory):
+    """UserTestimonialBlock factory class"""
+
+    name = factory.fuzzy.FuzzyText(prefix="name ")
+    title = factory.fuzzy.FuzzyText(prefix="title ")
+    image = factory.SubFactory(wagtail_factories.ImageFactory)
+    quote = factory.fuzzy.FuzzyText(prefix="quote ")
+
+    class Meta:
+        model = UserTestimonialBlock
+
+
+# Cannot name TestimonialPageFactory otherwise pytest will try to pick up as a test
+class UserTestimonialsPageFactory(wagtail_factories.PageFactory):
+    """UserTestimonialsPage factory class"""
+
+    heading = factory.fuzzy.FuzzyText(prefix="heading ")
+    subhead = factory.fuzzy.FuzzyText(prefix="subhead ")
+    items = wagtail_factories.StreamFieldFactory(
+        {"testimonial": UserTestimonialBlockFactory}
+    )
+
+    class Meta:
+        model = UserTestimonialsPage

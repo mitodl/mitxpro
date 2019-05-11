@@ -27,7 +27,7 @@
       {% if course.current_price %}
         <li>
           <span class="title">PRICE</span>
-          <span class="text">${{ course.current_price }}</span>
+          <span class="text">${{ course.current_price|floatformat:"0" }}</span>
         </li>
       {% endif %}
     </ul>

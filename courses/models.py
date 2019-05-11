@@ -14,6 +14,7 @@ from cms.models import (
     ForTeamsPage,
     WhoShouldEnrollPage,
     CoursesInProgramPage,
+    UserTestimonialsPage,
 )
 from courses.constants import (
     CATALOG_COURSE_IMG_WAGTAIL_FILL,
@@ -174,6 +175,11 @@ class PageProperties(models.Model):
 
         faqs_page = self._get_child_page_of_type(FrequentlyAskedQuestionPage)
         return FrequentlyAskedQuestion.objects.filter(faqs_page=faqs_page)
+
+    @property
+    def testimonials(self):
+        """Gets the testimonials related to product if they exist"""
+        return self._get_child_page_of_type(UserTestimonialsPage)
 
     @property
     def who_should_enroll(self):
