@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.4.0
+-------------
+
+- Catalog page design update
+- Tasawer/fix build (#262)
+- Added user dashboard
+
 Version 0.3.2 (Released May 10, 2019)
 -------------
 
