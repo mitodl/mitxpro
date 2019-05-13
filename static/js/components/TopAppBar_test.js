@@ -47,7 +47,7 @@ describe("TopAppBar component", () => {
     it("has a link to logout", () => {
       assert.equal(
         shallow(<TopAppBar currentUser={user} />)
-          .find(".link-section a")
+          .find(".link-section a.button")
           .at(0)
           .prop("href"),
         routes.logout

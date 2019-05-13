@@ -9,6 +9,8 @@
     <link rel="icon" href="{% static 'images/favicon.ico' %}" />
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" />
     <link href="https://fonts.googleapis.com/css?family=Rajdhani:300,400,500,600,700" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
     <script type="text/javascript">
     var SETTINGS = {{ js_settings_json|safe }};
     </script>
@@ -25,8 +27,17 @@
     {% block headercontent %}
     {% endblock %}
     {% block content %}
+        {% block banner %}
+        {% endblock %}
+    {% endblock %}
+    {% block contact-us %}
+    {% endblock %}
+    {% block footer %}
+        {% include "footer.html" %}
     {% endblock %}
     {% block scripts %}
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
     {% endblock %}
   </body>
 </html>

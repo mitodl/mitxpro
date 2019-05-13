@@ -1,31 +1,123 @@
-.mdc-top-app-bar {
+// sass-lint:disable mixins-before-declarations
+
+.header-holder {
+  background: white;
+  padding: 20px 0;
   position: relative;
-  background: #ffffff;
-  color: #000000;
-  font-size: 14px;
+  z-index: 99;
 
-  .link-button {
-    white-space: nowrap;
-  }
-
-  .logo-section {
-    padding-right: 10px;
-
-    img.site-logo {
-      height: 48px;
+  .container {
+    &:after {
+      clear: both;
+      content: '';
+      display: block;
     }
   }
 
-  .link-section > * {
-    margin-left: 15px;
+  .logo-section {
+    float: left;
+    width: 170px;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+}
+
+.sub-nav {
+  float: right;
+  padding: 5px 0;
+  position: static;
+  display: block;
+  margin: 0;
+  min-height: 0;
+
+  .collapse.in {
+    display: block !important;
+  }
+}
+
+#nav {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  letter-spacing: -.32em;
+
+  @include media-breakpoint-down(sm) {
+    position: absolute;
+    left: 0;
+    background: white;
+    top: 100%;
+    width: 100%;
+    margin: 1px 0 0;
   }
 
-  .link-section {
-    .dashboard-link {
-      display: inline-block;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+  li {
+    letter-spacing: normal;
+    display: inline-block;
+    vertical-align: top;
+    font-size: 18px;
+    line-height: 25px;
+    font-weight: 500;
+    padding: 0 0 0 10px;
+
+    @include media-breakpoint-down(sm) {
+      padding: 10px 0 10px 10px;
+    }
+
+    a {
+      padding: 5px 10px;
+      color: black;
+      text-decoration: none;
+      display: block;
+
+      &:hover {
+        color: $primary;
+      }
+
+      &.button {
+        background: $primary;
+        color: white;
+
+        &:hover {
+          background: black;
+        }
+      }
+    }
+  }
+}
+
+.navbar-toggler.nav-opener {
+  border: 1px solid $primary;
+  border-radius: 2px;
+  color: $primary;
+  margin: 5px 0 0;
+  padding: 8px 6px 6px;
+
+  @include media-breakpoint-up(sm) {
+    display: none;
+  }
+
+  .navbar-toggler-icon {
+    width: 18px;
+    height: 15px;
+    display: inline-block;
+    border: 1px solid $primary;
+    border-width: 2px 0;
+    position: relative;
+    margin: -2px 5px 0 0;
+    vertical-align: top;
+
+    &:after {
+      position: absolute;
+      left: 0;
+      right: 0;
+      content: "";
+      top: 50%;
+      border-top: 2px solid $primary;
+      margin: -1px 0 0;
     }
   }
 }

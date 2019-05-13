@@ -1,3 +1,5 @@
+// sass-lint:disable mixins-before-declarations
+
 $standard-padding: 25px;
 $text-link-color: rgb(163, 31, 52);
 
@@ -44,17 +46,24 @@ h1, h2, h3, h4, h5 {
     background-color: #fff;
     box-sizing: border-box;
     box-shadow: 0 1px 10px 0 rgba(0,0,0,0.125), inset 0 0 0 1px rgba(255,255,255,0.75);
-    border: 1px solid #bebebe;
     margin-bottom: 50px;
+    border-radius: 5px;
+
+    .lbl-toggle {
+      font-size: 20px;
+      color: $blue;
+      font-weight: 500;
+    }
 
     .top {
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      border-bottom: 1px solid #bebebe;
       box-shadow: 0 7px 6px -6px rgba(0,0,0,0.125);
       padding: $standard-padding $standard-padding 0 $standard-padding;
+      @include media-breakpoint-up(md) {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
 
       .cover-image,
       .top-level-details,
@@ -85,7 +94,10 @@ h1, h2, h3, h4, h5 {
         height: 155px;
         max-width: 275px;
         border-radius: 10px;
-        margin: 0 $standard-padding 0 0;
+        margin: 0 auto;
+        @include media-breakpoint-up(md) {
+          margin: 0 $standard-padding 0 0;
+        }
 
         img {
           height: 155px;
@@ -101,9 +113,10 @@ h1, h2, h3, h4, h5 {
       h3 {
         padding-bottom: 15px;
         margin: 0;
-        font-size: 20px;
-        font-weight: 400;
-        color: #000000;
+        font-weight: 600;
+        font-size: 22px;
+        line-height: 32px;
+        color: $primary;
 
         a:link, a:visited {
           color: $text-link-color;
@@ -115,14 +128,17 @@ h1, h2, h3, h4, h5 {
         list-style-type: none;
         margin: 0;
         padding: 0;
-        color: #909090;
+        color: $catalog_text;
+        font-size: 20px;
+        line-height: 26px;
+        font-weight: 500;
+
+        strong {
+          font-weight: 600;
+        }
 
         li {
           padding-bottom: 10px;
-
-          strong {
-            font-weight: 500;
-          }
         }
       }
     }
@@ -130,8 +146,8 @@ h1, h2, h3, h4, h5 {
     .offering-type {
       label {
         display: inline-block;
-        padding: 7px;
-        border: 1px solid #dedede;
+        padding: 0 10px;
+        border: 1px solid $gray-200;
         border-radius: 5px;
         box-shadow: 0 1px 5px 0 rgba(0,0,0,0.125), inset 0 0 0 1px rgba(255,255,255,0.75);
         color: #48d1cc;
@@ -152,10 +168,26 @@ h1, h2, h3, h4, h5 {
       .details-body {
         padding: 0 0 10px 20px;
 
+        a.link-button {
+          border: 1px solid $primary;
+          border-radius: 5px;
+          padding: 5px 10px;
+          text-transform: uppercase;
+        }
+
         ul.program-course-links {
           list-style-type: none;
-          margin: 0;
+          margin: 0 0 15px;
           padding: 0;
+
+          a {
+
+            &:after {
+              font-family: icomoon;
+              content: '\e901';
+              font-size: 12px;
+            }
+          }
 
           a:link, a:visited {
             color: $text-link-color;
