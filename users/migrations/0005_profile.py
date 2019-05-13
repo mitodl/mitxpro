@@ -23,10 +23,6 @@ class Migration(migrations.Migration):
                 job_title="Employee",
             )
 
-    def remove_profiles(apps, schema_editor):
-        Profile = apps.get_model("users", "Profile")
-        Profile.objects.all().delete()
-
     operations = [
         migrations.CreateModel(
             name="Profile",
@@ -104,5 +100,5 @@ class Migration(migrations.Migration):
             ],
             options={"abstract": False},
         ),
-        migrations.RunPython(add_profiles, remove_profiles),
+        migrations.RunPython(add_profiles, reverse_code=migrations.RunPython.noop),
     ]
