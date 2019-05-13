@@ -3,7 +3,7 @@ black==18.9b0
 bpython
 codecov
 django-debug-toolbar
-factory_boy
+factory_boy==2.11.1
 faker
 freezegun
 ipdb
@@ -12,7 +12,7 @@ pdbpp
 pip-tools
 pylint==2.1.1
 pylint-django==2.0.2
-pytest
+pytest==4.4.1
 pytest-cov>=2.6.1
 pytest-django
 pytest-env
