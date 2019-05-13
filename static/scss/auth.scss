@@ -12,6 +12,11 @@
   margin: auto;
   padding: 40px 145px;
 
+  .form-control {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
   .row-inner {
     margin-top: 20px;
   }

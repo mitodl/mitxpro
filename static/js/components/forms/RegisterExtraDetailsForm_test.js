@@ -41,8 +41,10 @@ describe("RegisterExtraDetailsForm", () => {
   //
   ;[
     ["company", "", "Company is a required field"],
+    ["company", "  ", "Company is a required field"],
     ["company", "MIT", null],
     ["job_title", "", "Job Title is a required field"],
+    ["job_title", "  ", "Job Title is a required field"],
     ["job_title", "QA Tester", null]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(

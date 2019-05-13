@@ -28,10 +28,12 @@ const extraDetailsValidation = yup.object().shape({
   company: yup
     .string()
     .label("Company")
+    .trim()
     .required(),
   job_title: yup
     .string()
     .label("Job Title")
+    .trim()
     .required()
 })
 
