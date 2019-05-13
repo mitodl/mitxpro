@@ -154,12 +154,12 @@ class Profile(TimestampedModel):
     birth_year = models.IntegerField()
 
     company = models.CharField(max_length=128)
+    job_title = models.CharField(max_length=128)
+    industry = models.CharField(max_length=60, blank=True)
+    job_function = models.CharField(max_length=60, blank=True)
     company_size = models.IntegerField(
         null=True, blank=True, choices=COMPANY_SIZE_CHOICES
     )
-    industry = models.CharField(max_length=60, blank=True)
-    job_title = models.CharField(max_length=128)
-    job_function = models.CharField(max_length=60, blank=True)
     years_experience = models.IntegerField(
         null=True, blank=True, choices=YRS_EXPERIENCE_CHOICES
     )

@@ -51,7 +51,7 @@ class RequirePasswordException(PartialException):
         return "Password is required to login"
 
 
-class RequirePasswordAndAddressException(PartialException):
+class RequirePasswordAndPersonalInfoException(PartialException):
     """Authentication requires a password and address"""
 
     def __str__(self):

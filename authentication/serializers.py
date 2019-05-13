@@ -17,7 +17,7 @@ from rest_framework import serializers
 from authentication.exceptions import (
     InvalidPasswordException,
     RequirePasswordException,
-    RequirePasswordAndAddressException,
+    RequirePasswordAndPersonalInfoException,
     RequireProviderException,
     RequireRegistrationException,
     RequireProfileException,
@@ -263,7 +263,7 @@ class RegisterConfirmSerializer(SocialAuthSerializer):
         """Try to 'save' the request"""
         try:
             result = super()._authenticate(SocialAuthState.FLOW_REGISTER)
-        except RequirePasswordAndAddressException as exc:
+        except RequirePasswordAndPersonalInfoException as exc:
             result = SocialAuthState(
                 SocialAuthState.STATE_REGISTER_DETAILS, partial=exc.partial
             )

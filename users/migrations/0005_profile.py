@@ -51,6 +51,9 @@ class Migration(migrations.Migration):
                 ),
                 ("birth_year", models.IntegerField()),
                 ("company", models.CharField(max_length=128)),
+                ("job_title", models.CharField(max_length=128)),
+                ("industry", models.CharField(blank=True, max_length=60)),
+                ("job_function", models.CharField(blank=True, max_length=60)),
                 (
                     "company_size",
                     models.IntegerField(
@@ -68,9 +71,6 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                ("industry", models.CharField(blank=True, max_length=60)),
-                ("job_title", models.CharField(max_length=128)),
-                ("job_function", models.CharField(blank=True, max_length=60)),
                 (
                     "years_experience",
                     models.IntegerField(
