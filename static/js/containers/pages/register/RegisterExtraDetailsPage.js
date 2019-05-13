@@ -69,7 +69,7 @@ class RegisterExtraDetailsPage extends React.Component<Props> {
       <div className="registration-form">
         <div className="form-group row">
           <h3 className="col-8">Create an Account</h3>
-          <h5 className="col-4 align-text-right gray-text">Step 2 of 2</h5>
+          <h4 className="col-4 align-text-right gray-text">Step 2 of 2</h4>
         </div>
         <div className="form-group row">
           <div className="col">
