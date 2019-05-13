@@ -105,13 +105,7 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
     onSubmit={onSubmit}
     validationSchema={detailsValidation}
     initialValues={INITIAL_VALUES}
-    render={({
-      isSubmitting,
-      setFieldValue,
-      setFieldTouched,
-      isValid,
-      values
-    }) => (
+    render={({ isSubmitting, setFieldValue, setFieldTouched, values }) => (
       <Form>
         <div className="form-group">
           <label htmlFor="legal_address.last_name" className="font-weight-bold">
@@ -281,7 +275,7 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
           <div className="row justify-content-end">
             <button
               type="submit"
-              disabled={isSubmitting || !isValid}
+              disabled={isSubmitting}
               className="btn btn-primary btn-light-blue"
             >
               Continue

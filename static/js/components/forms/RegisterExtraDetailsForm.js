@@ -51,7 +51,7 @@ const RegisterExtraDetailsForm = ({ onSubmit }: Props) => (
     onSubmit={onSubmit}
     validationSchema={extraDetailsValidation}
     initialValues={INITIAL_VALUES}
-    render={({ isSubmitting, isValid }) => (
+    render={({ isSubmitting }) => (
       <Form>
         <div className="form-group">
           <div className="row">
@@ -195,7 +195,7 @@ const RegisterExtraDetailsForm = ({ onSubmit }: Props) => (
           <div className="row justify-content-end">
             <button
               type="submit"
-              disabled={isSubmitting || !isValid}
+              disabled={isSubmitting}
               className="btn btn-primary btn-light-blue"
             >
               Continue
