@@ -2,7 +2,7 @@
 <div class="container learning-techniques-block section-spacing">
   <h1>How You’ll Learn</h1>
   <ul class="learning-techniques-list">
-    {% for technique in course.techniques.technique_items %}
+    {% for technique in page.techniques.technique_items %}
       <li>
         <div class="img-holder">
           {% image technique.value.image height-110 format-png %}

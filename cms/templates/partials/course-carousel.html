@@ -1,4 +1,4 @@
-{% load static wagtailimages_tags %}
+{% load static wagtailimages_tags wagtailcore_tags %}
 <div class="course-in-program">
   <div class="container">
     <div class="head">
@@ -17,7 +17,7 @@
             {% endif %}
             <h2>{{ child_course.display_title }}</h2>
             <p>{{ child_course.subhead }}</p>
-            <a href="{% url "course-detail" pk=child_course.id %}" class="read-more text-uppercase">view course</a>
+            <a href="{% pageurl child_course.page %}" class="read-more text-uppercase">view course</a>
           </div>
         </div>
       {% endfor %}

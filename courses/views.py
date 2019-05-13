@@ -40,6 +40,7 @@ class CourseCatalogView(ListView):
         programs_qset = (
             Program.objects.live()
             .select_related("programpage")
+            .exclude(programpage=None)
             .order_by("id")
             .all()
             .prefetch_related(
@@ -49,6 +50,7 @@ class CourseCatalogView(ListView):
         courses_qset = (
             Course.objects.live()
             .select_related("coursepage")
+            .exclude(coursepage=None)
             .order_by("id")
             .all()
             .prefetch_related(Prefetch("courseruns", queryset=sorted_courserun_qset))
@@ -64,18 +66,4 @@ class CourseCatalogView(ListView):
             "programs": object_list["programs"],
             "courses": object_list["courses"],
             "default_image_path": DEFAULT_COURSE_IMG_PATH,
-        }
-
-
-class CourseView(DetailView):
-    """Course view"""
-
-    model = Course
-    template_name = "course_detail.html"
-
-    def get_context_data(self, **kwargs):
-        return {
-            **super().get_context_data(**kwargs),
-            **get_js_settings_context(self.request),
-            "user": self.request.user,
         }

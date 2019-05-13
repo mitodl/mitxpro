@@ -7,7 +7,7 @@
     </div>
     <ul id="accordion">
       <!--TODO currently we are limiting results to 5 and hide extra FAQs.-->
-      {% for faq in course.faqs %}
+      {% for faq in page.faqs %}
       <li class="card {% if forloop.counter > 5 %}extra-faq d-none{% endif %}">
         <div class="card-header" id="heading-{{ forloop.counter }}">
           <button class="btn btn-link text-uppercase {% if not forloop.first %}collapsed{% endif %}" data-toggle="collapse"
@@ -29,7 +29,7 @@
       {% endfor %}
     </ul>
     <!--TODO related to above todo, we will load more faqs on button click-->
-    {% if course.faqs|length > 5 %}
+    {% if page.faqs|length > 5 %}
     <a href="#" class="readmore text-uppercase"><span class="readmore-text">Read</span> More FAQs</a>
     {% endif %}
   </div>

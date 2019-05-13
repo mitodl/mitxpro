@@ -6,9 +6,11 @@ import operator as op
 import pytest
 from django.urls import reverse
 from rest_framework.status import HTTP_405_METHOD_NOT_ALLOWED
+import factory
 
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from courses.serializers import ProgramSerializer, CourseSerializer, CourseRunSerializer
+from cms.factories import ProgramPageFactory, CoursePageFactory
 
 
 pytestmark = [pytest.mark.django_db]
@@ -185,21 +187,19 @@ def test_course_catalog_view(client):
     program = ProgramFactory.create(live=True)
     course_in_program = CourseFactory.create(program=program, live=True)
     course_no_program = CourseFactory.create(no_program=True, live=True)
+    # Create a not-live Course
     CourseFactory.create(no_program=True, live=False)
+    # Create a live Course that will not have an associated Page
+    CourseFactory.create(no_program=True, live=True)
+    # Create Pages for the items we want to appear in the catalog
+    ProgramPageFactory.create(program=program)
+    CoursePageFactory.create_batch(
+        2, course=factory.Iterator([course_in_program, course_no_program])
+    )
+
     exp_programs = [program]
     exp_courses = [course_in_program, course_no_program]
     resp = client.get(reverse("mitxpro-index"))
     assert resp.templates[0].name == "catalog.html"
     assert list(resp.context["programs"]) == exp_programs
     assert list(resp.context["courses"]) == exp_courses
-
-
-def test_course_view(client, user):
-    """
-    Test that the course detail view has the right context
-    """
-    course = CourseFactory.create(live=True)
-    client.force_login(user)
-    resp = client.get(reverse("course-detail", kwargs={"pk": course.id}))
-    assert resp.context["course"] == course
-    assert resp.context["user"] == user

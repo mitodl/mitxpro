@@ -1,0 +1,40 @@
+{% extends "django_rendered_base.html" %}
+{% load static wagtailimages_tags %}
+
+{% block title %}MIT xPro | {{ course.title }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+  .header-block {
+    background-image: url('{{ page.background_image_mobile_url }}');
+  }
+
+  @media screen and (min-width: 1024px) {
+    .header-block {
+      background-image: url('{{ page.background_image_url }}');
+    }
+  }
+</style>
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+  <script type="text/javascript" src="{% static 'js/course_detail.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div>
+    {% include "partials/hero.html" with obj=page.course %}
+    {% include "partials/metadata-tiles.html" %}
+    {% if page.outcomes %} {% include "partials/learning-outcomes.html" %} {% endif %}
+    {% if page.who_should_enroll %} {% include "partials/target-audience.html" %} {% endif %}
+    {% if page.techniques %} {% include "partials/learning-techniques.html" %} {% endif %}
+    {% if page.course.program and page.course.program.course_lineup %}
+      {% include "partials/course-carousel.html" with program=page.course.program %}
+    {% endif %}
+    {% if page.faqs %} {% include "partials/faqs.html" %} {% endif %}
+    {% if page.for_teams %} {% include "partials/for-teams.html" %} {% endif %}
+</div>
+{% endblock %}

@@ -1,4 +1,4 @@
-{% load static humanize wagtailimages_tags %}
+{% load static humanize wagtailimages_tags wagtailcore_tags %}
 <div
     class="catalog-card"
     role="region"
@@ -16,8 +16,8 @@
     </div>
     <div class="top-level-details">
       <h3 class="title">
-        {% if object_type == "course" %}
-          <a href="{% url "course-detail" pk=courseware_object.id %}">
+        {% if object_type == "course"  %}
+          <a href="{% pageurl courseware_object.page %}">
             {{ courseware_object.title }}
           </a>
         {% else %}
@@ -80,7 +80,7 @@
                 <ul class="program-course-links">
                 {% for course in program.courses.all %}
                   <li>
-                    <a href="{% url "course-detail" pk=course.id %}">
+                    <a href="{% pageurl course.page %}">
                       {{ course.title }}
                     </a>
                   </li>
@@ -88,7 +88,7 @@
                 </ul>
               {% endif %}
               {% if object_type == "course" %}
-                <a href="{% url "course-detail" pk=courseware_object.id %}" class="link-button red">
+                <a href="{% pageurl courseware_object.page %}" class="link-button red">
                   View Course
                 </a>
               {% endif %}

@@ -1,11 +1,11 @@
 <div class="learning-outcomes-block section-spacing">
   <div class="container">
     <div class="learning-header">
-      <h1>{{ course.outcomes.heading | safe }}</h1>
-      <h2>{{ course.outcomes.sub_heading | safe }}</h2>
+      <h1>{{ page.outcomes.heading | safe }}</h1>
+      <h2>{{ page.outcomes.sub_heading | safe }}</h2>
     </div>
     <ul class="learning-outcomes-list">
-      {% for outcome in course.outcomes.outcome_items %}
+      {% for outcome in page.outcomes.outcome_items %}
         <li>{{ outcome }}</li>
       {% endfor %}
     </ul>

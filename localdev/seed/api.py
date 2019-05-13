@@ -14,20 +14,12 @@ from localdev.seed.serializers import (
     CourseRunSerializer,
 )
 from mitxpro.utils import dict_without_keys, filter_dict_by_key_set, get_field_names
-from cms.models import ProgramPage, CoursePage
+from cms.models import ProgramPage, CoursePage, get_top_level_wagtail_page
 
 
 COURSE_SEED_FILE_PATH = os.path.join(
     settings.BASE_DIR, "localdev/seed/resources/course_seed_data.json"
 )
-
-
-def get_top_level_wagtail_page():
-    """
-    The Wagtail CMS (at least in our usage) has one root page at depth 1, and one page at depth 2. All pages that we
-    create in Wagtail are added as children to the page at depth 2.
-    """
-    return Page.objects.get(depth=2)
 
 
 def delete_wagtail_pages(page_cls, filter_dict):

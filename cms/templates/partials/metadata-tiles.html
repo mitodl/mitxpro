@@ -1,33 +1,33 @@
 <div class="tiles-block">
   <div class="container">
     <ul class="tiles-list">
-      {% if course.next_run_date %}
+      {% if page.course.next_run_date %}
         <li>
           <span class="title">START DATE</span>
-          <span class="text">{{ course.next_run_date|date:"F j, Y" }}</span>
+          <span class="text">{{ page.course.next_run_date|date:"F j, Y" }}</span>
           <span class="dates-link"><a href="#">More Dates</a></span>  {# TODO Need to do in separate story#}
         </li>
       {% endif %}
-      {% if course.time_commitment %}
+      {% if page.time_commitment %}
         <li>
           <span class="title">TIME COMMITMENT</span>
-          <span class="text">{{ course.time_commitment }}</span>
+          <span class="text">{{ page.time_commitment }}</span>
         </li>
       {% endif %}
-      {% if course.duration %}
+      {% if page.duration %}
         <li>
           <span class="title">DURATION</span>
-          <span class="text">{{ course.duration }}</span>
+          <span class="text">{{ page.duration }}</span>
         </li>
       {% endif %}
       <li>
         <span class="title">FORMAT</span>
         <span class="text">Online</span>
       </li>
-      {% if course.current_price %}
+      {% if page.course.current_price %}
         <li>
           <span class="title">PRICE</span>
-          <span class="text">${{ course.current_price }}</span>
+          <span class="text">${{ page.course.current_price }}</span>
         </li>
       {% endif %}
     </ul>

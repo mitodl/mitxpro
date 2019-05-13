@@ -10,9 +10,4 @@ router.register(r"programs", views.ProgramViewSet, basename="programs_api")
 router.register(r"courses", views.CourseViewSet, basename="courses_api")
 router.register(r"course_runs", views.CourseRunViewSet, basename="course_runs_api")
 
-urlpatterns = [
-    re_path(r"^api/", include(router.urls)),
-    re_path(
-        r"^courses/(?P<pk>[\d]+)/$", views.CourseView.as_view(), name="course-detail"
-    ),
-]
+urlpatterns = [re_path(r"^api/", include(router.urls))]

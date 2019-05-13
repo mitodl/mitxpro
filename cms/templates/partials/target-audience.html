@@ -2,18 +2,18 @@
 <div class="who-should-enroll-block">
   <div class="container">
     <div class="row">
-      <div class="col-lg-6 {% if course.who_should_enroll.switch_layout %}order-2{% endif %}">
+      <div class="col-lg-6 {% if page.who_should_enroll.switch_layout %}order-2{% endif %}">
         <h1 class="text-uppercase">Who Should Enroll</h1>
         <ul class="item-list">
-          {% for item in course.who_should_enroll.content %}
+          {% for item in page.who_should_enroll.content %}
             <li>{{ item }}</li>
           {% endfor %}
         </ul>
       </div>
       <div class="col-lg-6">
-        {% if course.who_should_enroll.image %}
-          <div class="img-holder {% if course.who_should_enroll.switch_layout %}stick-left{% endif %}">
-            {% image course.who_should_enroll.image fill-870x500 %}
+        {% if page.who_should_enroll.image %}
+          <div class="img-holder {% if page.who_should_enroll.switch_layout %}stick-left{% endif %}">
+            {% image page.who_should_enroll.image fill-870x500 %}
           </div>
         {% endif %}
       </div>
