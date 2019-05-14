@@ -22,7 +22,12 @@ from wagtail.images.blocks import ImageChooserBlock
 from modelcluster.fields import ParentalKey
 
 from mitxpro.views import get_js_settings_context
-from .blocks import LearningTechniqueBlock, ResourceBlock, UserTestimonialBlock
+from cms.blocks import (
+    LearningTechniqueBlock,
+    ResourceBlock,
+    UserTestimonialBlock,
+    FacultyBlock,
+)
 
 
 class CourseProgramChildPage(Page):
@@ -215,6 +220,30 @@ class CoursesInProgramPage(CourseProgramChildPage):
     content_panels = [FieldPanel("heading"), FieldPanel("body")]
 
 
+class FacultyMembersPage(CourseProgramChildPage):
+    """
+    FacultyMembersPage representing a "Your MIT Faculty" section on a product page
+    """
+
+    heading = models.CharField(
+        max_length=255,
+        help_text="The heading to display for this section on the product page.",
+    )
+    subhead = models.CharField(
+        max_length=255,
+        help_text="The subhead to display for this section on the product page.",
+    )
+    members = StreamField(
+        [("member", FacultyBlock())],
+        help_text="The faculty members to display on this page",
+    )
+    content_panels = [
+        FieldPanel("heading"),
+        FieldPanel("subhead"),
+        StreamFieldPanel("members"),
+    ]
+
+
 class ProductPage(Page):
     """
     Abstract product page
@@ -297,6 +326,7 @@ class ProductPage(Page):
         "WhoShouldEnrollPage",
         "CoursesInProgramPage",
         "UserTestimonialsPage",
+        "FacultyMembersPage",
     ]
 
     def get_context(self, request, *args, **kwargs):

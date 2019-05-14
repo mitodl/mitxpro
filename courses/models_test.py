@@ -18,6 +18,7 @@ from cms.factories import (
     WhoShouldEnrollPageFactory,
     CoursesInProgramPageFactory,
     UserTestimonialsPageFactory,
+    FacultyMembersPageFactory,
 )
 
 from cms.models import (
@@ -204,6 +205,20 @@ def test_program_learning_techniques():
         assert technique.value.get("heading") == "heading"
         assert technique.value.get("sub_heading") == "sub_heading"
         assert technique.value.get("image").title == "image-title"
+
+
+def test_program_faculty_subpage():
+    """
+    FacultyMembersPage should return expected values if associated with program
+    """
+    program = ProgramFactory.create()
+    program_page = ProgramPageFactory.create(program=program)
+
+    assert not program.faculty
+    FacultyMembersPageFactory.create(
+        parent=program_page, members=json.dumps(_get_faculty_members())
+    )
+    _assert_faculty_members(program)
 
 
 def test_courseware_url(settings):
@@ -557,3 +572,40 @@ def test_program_testimonials():
         assert testimonial.value.get("title") == "title"
         assert testimonial.value.get("image").title == "image"
         assert testimonial.value.get("quote") == "quote"
+
+
+def test_course_faculty_subpage():
+    """
+    FacultyMembersPage should return expected values if associated with course
+    """
+    course = CourseFactory.create()
+    course_page = CoursePageFactory.create(course=course)
+
+    assert not course.faculty
+    FacultyMembersPageFactory.create(
+        parent=course_page, members=json.dumps(_get_faculty_members())
+    )
+    _assert_faculty_members(course)
+
+
+def _get_faculty_members():
+    """Provides a `faculty` property instantiation data"""
+    return [
+        {
+            "type": "member",
+            "value": {"name": "Test Faculty", "description": "<p>description</p>"},
+        },
+        {
+            "type": "member",
+            "value": {"name": "Test Faculty", "description": "<p>description</p>"},
+        },
+    ]
+
+
+def _assert_faculty_members(obj):
+    """Verifies `faculty` property returns expected value"""
+    assert obj.faculty
+    for block in obj.faculty.members:
+        assert block.block_type == "member"
+        assert block.value["name"] == "Test Faculty"
+        assert block.value["description"].source == "<p>description</p>"

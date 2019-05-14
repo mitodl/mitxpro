@@ -1,0 +1,23 @@
+{% load wagtailimages_tags %}
+<div class="faculty-block">
+  <div class="container">
+    <div class="head">
+      <h1 class="text-uppercase">{{ course.faculty.heading }}</h1>
+      <h3>{{ course.faculty.subhead }}</h3>
+    </div>
+    <div class="faculty-slider">
+      {% for member in course.faculty.members %}
+        <div class="slide">
+          <div class="slide-holder">
+            {% image member.value.image fill-300x300 as faculty_image %}
+            <img src="{{ faculty_image.url }}" alt="{{ member.value.name }}">
+            <h2>{{ member.value.name }}</h2>
+            <div class="text-holder">
+              {{ member.value.description|safe }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
