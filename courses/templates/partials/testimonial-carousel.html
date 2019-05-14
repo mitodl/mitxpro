@@ -1,0 +1,49 @@
+{% load wagtailimages_tags wagtailcore_tags %}
+<div class="learners-block">
+  <div class="container">
+    <div class="head">
+      <h1>{{ testimonials.heading }}</h1>
+      <h3>{{ testimonials.subhead }}</h3>
+    </div>
+    <div class="learners-slider">
+      {% for testimonial in testimonials.items %}
+      <div class="slide">
+        <div class="slide-holder">
+          {% if testimonial.value.image %}
+            {% image testimonial.value.image fill-75x75 %}
+          {% endif %}
+          <h2>{{ testimonial.value.name }}, {{ testimonial.value.title }}</h2>
+          <p>{{ testimonial.value.quote|truncatechars:150 }}</p>
+          <a data-toggle="modal" href="#testimonial-{{ forloop.counter }}" class="read-more">Continue Reading</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% for testimonial in testimonials.items %}
+    <div class="modal fade" id="testimonial-{{ forloop.counter }}" role="dialog">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="container no-gutters px-0">
+              <div class="d-flex flex-row-reverse">
+                <a class="text-dark" href="testimonial-{{ forloop.counter }}" data-dismiss="modal"><span class="icon-close-outline" aria-hidden="true"></span></a>
+              </div>
+            </div>
+            <div class="container px-4">
+              <div class="row py-2">
+                {% image testimonial.value.image fill-100x100 class="border rounded-circle headshot-image" %}
+              </div>
+              <div class="row mb-4">
+                <h2 class="modal-title text-uppercase">{{ testimonial.value.name }}, {{ testimonial.value.title }}</h2>
+              </div>
+              <div class="row quote-container">
+                <p>{{ testimonial.value.quote }}</p>        
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>

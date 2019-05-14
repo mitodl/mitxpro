@@ -22,7 +22,7 @@ from wagtail.images.blocks import ImageChooserBlock
 from modelcluster.fields import ParentalKey
 
 from mitxpro.views import get_js_settings_context
-from .blocks import LearningTechniqueBlock, ResourceBlock
+from .blocks import LearningTechniqueBlock, ResourceBlock, UserTestimonialBlock
 
 
 class CourseProgramChildPage(Page):
@@ -51,6 +51,33 @@ class CourseProgramChildPage(Page):
         self.title = self.__class__._meta.verbose_name.title()
         self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
         super().save(*args, **kwargs)
+
+
+# Cannot name TestimonialPage otherwise pytest will try to pick up as a test
+class UserTestimonialsPage(CourseProgramChildPage):
+    """
+    Page that holds testimonials for a product
+    """
+
+    heading = models.CharField(
+        max_length=255, help_text="The heading to display on this section."
+    )
+    subhead = models.CharField(
+        max_length=255, help_text="Subhead to display below the heading."
+    )
+    items = StreamField(
+        [("testimonial", UserTestimonialBlock())],
+        blank=False,
+        help_text="Add testimonials to display in this section.",
+    )
+    content_panels = [
+        FieldPanel("heading"),
+        FieldPanel("subhead"),
+        StreamFieldPanel("items"),
+    ]
+
+    class Meta:
+        verbose_name = "Testimonials Page"
 
 
 class LearningOutcomesPage(CourseProgramChildPage):
@@ -269,6 +296,7 @@ class ProductPage(Page):
         "ForTeamsPage",
         "WhoShouldEnrollPage",
         "CoursesInProgramPage",
+        "UserTestimonialsPage",
     ]
 
     def get_context(self, request, *args, **kwargs):
