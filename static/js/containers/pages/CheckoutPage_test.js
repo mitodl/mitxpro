@@ -18,7 +18,7 @@ import {
   formatPrice,
   formatRunTitle
 } from "../../lib/ecommerce"
-import { assertRaises } from "../../lib/util"
+import { assertRaises, wait } from "../../lib/util"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 
 describe("CheckoutPage", () => {
@@ -36,7 +36,9 @@ describe("CheckoutPage", () => {
           basket
         }
       },
-      {}
+      {
+        location: {}
+      }
     )
   })
 
@@ -102,6 +104,132 @@ describe("CheckoutPage", () => {
     assert.equal(inner.find("img").prop("alt"), basketItem.description)
     assert.equal(inner.find(".item-row .title").text(), basketItem.description)
   })
+  ;[true, false].forEach(hasError => {
+    it(`updates the basket with a product id from the query parameter${
+      hasError ? ", but an error is returned" : ""
+    }`, async () => {
+      const productId = 4567
+      if (hasError) {
+        helper.handleRequestStub.withArgs("/api/basket/", "PATCH").returns({
+          status: 400,
+          body:   {
+            errors: "error"
+          }
+        })
+      }
+      const { inner } = await renderPage(
+        {},
+        {
+          location: {
+            search: `product=${productId}`
+          }
+        }
+      )
+
+      sinon.assert.calledWith(
+        helper.handleRequestStub,
+        "/api/basket/",
+        "PATCH",
+        {
+          body:        { items: [{ id: productId }] },
+          credentials: undefined,
+          headers:     {
+            "X-CSRFTOKEN": null
+          }
+        }
+      )
+      assert.equal(inner.state().errors, hasError ? "error" : null)
+    })
+  })
+
+  //
+  ;[[true, false], [true, true], [false, false], [false, true]].forEach(
+    ([hasValidProductId, hasValidCoupon]) => {
+      it(`updates the basket with a ${
+        hasValidProductId ? "" : "in"
+      }valid product id and a ${
+        hasValidCoupon ? "" : "in"
+      }valid coupon code from the query parameter`, async () => {
+        const couponCode = "codeforcoupon"
+        const productId = 12345
+        const couponPayload = {
+          body:        { coupons: [{ code: couponCode }] },
+          credentials: undefined,
+          headers:     {
+            "X-CSRFTOKEN": null
+          }
+        }
+        const productPayload = {
+          body:        { items: [{ id: productId }] },
+          credentials: undefined,
+          headers:     {
+            "X-CSRFTOKEN": null
+          }
+        }
+
+        if (!hasValidProductId) {
+          helper.handleRequestStub
+            .withArgs("/api/basket/", "PATCH", productPayload)
+            .returns({
+              status: 400,
+              body:   {
+                errors: "product error"
+              }
+            })
+        }
+        if (!hasValidCoupon) {
+          helper.handleRequestStub
+            .withArgs("/api/basket/", "PATCH", couponPayload)
+            .returns({
+              status: 400,
+              body:   {
+                errors: "coupon error"
+              }
+            })
+        }
+        const { inner } = await renderPage(
+          {},
+          {
+            location: {
+              search: `product=${productId}&code=${couponCode}`
+            }
+          }
+        )
+        // wait for componentDidMount to resolve
+        await wait(15)
+        sinon.assert.calledWith(
+          helper.handleRequestStub,
+          "/api/basket/",
+          "PATCH",
+          productPayload
+        )
+        if (hasValidProductId) {
+          sinon.assert.calledWith(
+            helper.handleRequestStub,
+            "/api/basket/",
+            "PATCH",
+            couponPayload
+          )
+        } else {
+          sinon.assert.neverCalledWith(
+            helper.handleRequestStub,
+            "/api/basket/",
+            "PATCH",
+            couponPayload
+          )
+        }
+
+        assert.equal(
+          inner.state().errors,
+          !hasValidProductId
+            ? "product error"
+            : !hasValidCoupon
+              ? "coupon error"
+              : null
+        )
+      })
+    }
+  )
 
   it("displays the coupon code", async () => {
     const { inner } = await renderPage()
@@ -167,10 +295,7 @@ describe("CheckoutPage", () => {
     })
 
     assert.equal(inner.state().errors, errors)
-    assert.equal(
-      inner.find(".enrollment-input .error").text(),
-      "Error: Unknown error"
-    )
+    assert.equal(inner.find(".enrollment-input .error").text(), "Unknown error")
     assert.isTrue(inner.find(".enrollment-input input.error-border").exists())
   })
 
