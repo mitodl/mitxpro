@@ -3,6 +3,7 @@ Test end to end django views.
 """
 import json
 
+from django.test import Client
 from django.urls import reverse
 import pytest
 from rest_framework import status
@@ -62,3 +63,12 @@ def test_app_context(settings, client):
         "environment": settings.ENVIRONMENT,
         "release_version": settings.VERSION,
     }
+
+
+@pytest.mark.parametrize("verb", ["get", "post"])
+def test_dashboard(verb):
+    """Anonymous users should be able to POST to the dashboard and see the same content as a GET"""
+    client = Client(enforce_csrf_checks=True)
+    method = getattr(client, verb)
+    response = method(reverse("user-dashboard"))
+    assert response.status_code == status.HTTP_200_OK
