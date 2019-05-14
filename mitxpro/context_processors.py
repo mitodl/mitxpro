@@ -4,6 +4,7 @@ context processors for bootcamp
 from django.conf import settings
 
 # pylint: disable=unused-argument
+from cms.models import NotificationPage
 
 
 def api_keys(request):
@@ -12,3 +13,10 @@ def api_keys(request):
     IDs and secret keys for the various APIs used in this project.
     """
     return {"APIKEYS": {"GA_TRACKING_ID": settings.GA_TRACKING_ID}}
+
+
+def notifications(request):
+    """
+    Pass notifications to template context.
+    """
+    return {"notifications": NotificationPage.objects.filter(is_enabled=True)}

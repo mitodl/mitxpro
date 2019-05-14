@@ -142,6 +142,7 @@ TEMPLATES = [
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
                 "mitxpro.context_processors.api_keys",
+                "mitxpro.context_processors.notifications",
             ]
         },
     }
