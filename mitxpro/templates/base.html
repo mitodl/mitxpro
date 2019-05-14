@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="{% static 'images/favicon.ico' %}" />
+    {% include "partials/gtm_head.html" %}
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" />
     <link href="https://fonts.googleapis.com/css?family=Rajdhani:300,400,500,600,700" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" rel="stylesheet"/>
@@ -23,6 +24,7 @@
     {% endspaceless %}
   </head>
   <body class="{% block bodyclass %}{% endblock %}">
+    {% include "partials/gtm_body.html" %}
     {% hijack_notification %}
     {% block headercontent %}
     {% endblock %}
