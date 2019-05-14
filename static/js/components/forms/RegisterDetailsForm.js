@@ -21,6 +21,7 @@ const detailsValidation = yup.object().shape({
   name: yup
     .string()
     .label("Legal Name")
+    .trim()
     .required(),
   password: yup
     .string()
@@ -34,14 +35,17 @@ const detailsValidation = yup.object().shape({
     first_name: yup
       .string()
       .label("First Name")
+      .trim()
       .required(),
     last_name: yup
       .string()
       .label("Last Name")
+      .trim()
       .required(),
     city: yup
       .string()
       .label("City")
+      .trim()
       .required(),
     street_address: yup
       .array()
@@ -66,6 +70,7 @@ const detailsValidation = yup.object().shape({
     postal_code: yup
       .string()
       .label("Zip/Postal Code")
+      .trim()
       .when("country", (country, schema) => {
         if (country === US_ALPHA_2) {
           return schema.required().matches(US_POSTAL_CODE_REGEX, {
@@ -105,13 +110,7 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
     onSubmit={onSubmit}
     validationSchema={detailsValidation}
     initialValues={INITIAL_VALUES}
-    render={({
-      isSubmitting,
-      setFieldValue,
-      setFieldTouched,
-      isValid,
-      values
-    }) => (
+    render={({ isSubmitting, setFieldValue, setFieldTouched, values }) => (
       <Form>
         <div className="form-group">
           <label htmlFor="legal_address.last_name" className="font-weight-bold">
@@ -277,11 +276,11 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
               />
             </div>
           ) : null}
-        <div className="row justify-content-end">
+        <div className="row-inner  justify-content-end">
           <div className="row justify-content-end">
             <button
               type="submit"
-              disabled={isSubmitting || !isValid}
+              disabled={isSubmitting}
               className="btn btn-primary btn-light-blue"
             >
               Continue

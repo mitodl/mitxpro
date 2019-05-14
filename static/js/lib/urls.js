@@ -19,7 +19,8 @@ export const routes = {
   register: include("/signup/", {
     begin:   "",
     confirm: "confirm/",
-    details: "details/"
+    details: "details/",
+    extra:   "extra/"
   }),
 
   checkout: "/checkout/",

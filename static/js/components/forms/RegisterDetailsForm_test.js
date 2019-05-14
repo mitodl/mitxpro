@@ -70,9 +70,11 @@ describe("RegisterDetailsForm", () => {
       "Password must contain at least one letter and number"
     ],
     ["name", "", "Legal Name is a required field"],
+    ["name", "  ", "Legal Name is a required field"],
     ["name", "Jane", null],
     ["legal_address.city", "Cambridge", null],
-    ["legal_address.city", "", "City is a required field"]
+    ["legal_address.city", "", "City is a required field"],
+    ["legal_address.city", "  ", "City is a required field"]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value

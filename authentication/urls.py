@@ -8,6 +8,7 @@ from authentication.views import (
     RegisterEmailView,
     RegisterConfirmView,
     RegisterDetailsView,
+    RegisterExtraDetailsView,
     get_social_auth_types,
     CustomPasswordResetView,
     CustomPasswordResetConfirmView,
@@ -28,6 +29,11 @@ urlpatterns = [
         "api/register/details/",
         RegisterDetailsView.as_view(),
         name="psa-register-details",
+    ),
+    path(
+        "api/register/extra/",
+        RegisterExtraDetailsView.as_view(),
+        name="psa-register-extra",
     ),
     path(
         "api/password_reset/",

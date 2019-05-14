@@ -441,8 +441,36 @@ def register_user_details(client):
             {
                 "flow": SocialAuthState.FLOW_REGISTER,
                 "provider": EmailAuth.name,
-                "partial_token": None,
+                "state": SocialAuthState.STATE_REGISTER_EXTRA_DETAILS,
+            },
+            expect_authenticated=False,
+        )
+
+    yield run_step
+
+
+@pytest.fixture()
+def register_user_extra_details(client):
+    """Yield a function for this step"""
+
+    def run_step(last_result):
+        """Run the step"""
+        return assert_api_call(
+            client,
+            "psa-register-extra",
+            {
+                "flow": SocialAuthState.FLOW_REGISTER,
+                "partial_token": last_result["partial_token"],
+                "gender": "f",
+                "birth_year": "2000",
+                "company": "MIT",
+                "job_title": "QA Manager",
+            },
+            {
+                "flow": SocialAuthState.FLOW_REGISTER,
+                "provider": EmailAuth.name,
                 "state": SocialAuthState.STATE_SUCCESS,
+                "partial_token": None,
             },
             expect_authenticated=True,
         )
@@ -465,11 +493,13 @@ def register_user_details(client):
             "register_email_not_exists",
             "redeem_confirmation_code",
             "register_user_details",
+            "register_user_extra_details",
         ],
         [
             "register_email_not_exists_with_recaptcha",
             "redeem_confirmation_code",
             "register_user_details",
+            "register_user_extra_details",
         ],
         [
             "register_email_not_exists",

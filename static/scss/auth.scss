@@ -12,8 +12,22 @@
   margin: auto;
   padding: 40px 145px;
 
+  .form-control {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
   .row-inner {
     margin-top: 20px;
+  }
+
+  .col {
+    align-self: flex-start;
+  }
+
+  .dotted {
+    border-bottom: 2px dashed #8a8b8c;
+    margin-top: 25px;
   }
 
   .additional-street {

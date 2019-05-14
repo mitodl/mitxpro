@@ -7,6 +7,7 @@ import { routes } from "../../../lib/urls"
 import RegisterEmailPage from "./RegisterEmailPage"
 import RegisterConfirmPage from "./RegisterConfirmPage"
 import RegisterDetailsPage from "./RegisterDetailsPage"
+import RegisterExtraDetailsPage from "./RegisterExtraDetailsPage"
 
 const RegisterPages = () => (
   <React.Fragment>
@@ -16,6 +17,11 @@ const RegisterPages = () => (
         exact
         path={routes.register.confirm}
         component={RegisterConfirmPage}
+      />
+      <Route
+        exact
+        path={routes.register.extra}
+        component={RegisterExtraDetailsPage}
       />
       <Route
         exact

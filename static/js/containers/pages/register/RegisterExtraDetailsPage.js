@@ -3,28 +3,20 @@ import React from "react"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { Link } from "react-router-dom"
-import { connectRequest, mutateAsync, requestAsync } from "redux-query"
+import { mutateAsync, requestAsync } from "redux-query"
 import { createStructuredSelector } from "reselect"
-import qs from "query-string"
 
+import { STATE_SUCCESS } from "../../../lib/auth"
 import auth from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
-import { STATE_REGISTER_EXTRA_DETAILS } from "../../../lib/auth"
-import queries from "../../../lib/queries"
 import { qsPartialTokenSelector } from "../../../lib/selectors"
 
-import RegisterDetailsForm from "../../../components/forms/RegisterDetailsForm"
+import RegisterExtraDetailsForm from "../../../components/forms/RegisterExtraDetailsForm"
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
-import type {
-  AuthResponse,
-  AuthResponseRaw,
-  LegalAddress,
-  User,
-  Country
-} from "../../../flow/authTypes"
+import type { AuthResponse, User, UserProfile } from "../../../flow/authTypes"
 
 type RegisterProps = {|
   location: Location,
@@ -32,15 +24,9 @@ type RegisterProps = {|
   params: { partialToken: string }
 |}
 
-type StateProps = {|
-  countries: Array<Country>
-|}
-
 type DispatchProps = {|
-  registerDetails: (
-    name: string,
-    password: string,
-    legalAddress: LegalAddress,
+  registerExtraDetails: (
+    profileData: UserProfile,
     partialToken: string
   ) => Promise<Response<AuthResponse>>,
   getCurrentUser: () => Promise<Response<User>>
@@ -48,33 +34,26 @@ type DispatchProps = {|
 
 type Props = {|
   ...RegisterProps,
-  ...StateProps,
   ...DispatchProps
 |}
 
-class RegisterProfilePage extends React.Component<Props> {
-  async onSubmit(detailsData, { setSubmitting, setErrors }) {
+class RegisterExtraDetailsPage extends React.Component<Props> {
+  async onSubmit(profileData, { setSubmitting, setErrors }) {
     const {
-      history,
-      registerDetails,
+      registerExtraDetails,
       params: { partialToken }
     } = this.props
 
     try {
       const {
-        body: { state, errors, partial_token } // eslint-disable-line camelcase
-      }: { body: AuthResponseRaw } = await registerDetails(
-        detailsData.name,
-        detailsData.password,
-        detailsData.legal_address,
+        body: { state, errors }
+      }: { body: AuthResponse } = await registerExtraDetails(
+        profileData,
         partialToken
       )
 
-      if (state === STATE_REGISTER_EXTRA_DETAILS) {
-        const params = qs.stringify({
-          partial_token
-        })
-        history.push(`${routes.register.extra}?${params}`)
+      if (state === STATE_SUCCESS) {
+        window.location.href = routes.root
       } else if (errors.length > 0) {
         setErrors({
           email: errors[0]
@@ -86,12 +65,11 @@ class RegisterProfilePage extends React.Component<Props> {
   }
 
   render() {
-    const { countries } = this.props
     return (
       <div className="registration-form">
         <div className="form-group row">
           <h3 className="col-8">Create an Account</h3>
-          <h4 className="col-4 align-text-right gray-text">Step 1 of 2</h4>
+          <h4 className="col-4 align-text-right gray-text">Step 2 of 2</h4>
         </div>
         <div className="form-group row">
           <div className="col">
@@ -100,10 +78,7 @@ class RegisterProfilePage extends React.Component<Props> {
           </div>
         </div>
         <div className="inner-form">
-          <RegisterDetailsForm
-            onSubmit={this.onSubmit.bind(this)}
-            countries={countries}
-          />
+          <RegisterExtraDetailsForm onSubmit={this.onSubmit.bind(this)} />
         </div>
       </div>
     )
@@ -111,21 +86,13 @@ class RegisterProfilePage extends React.Component<Props> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  params:    createStructuredSelector({ partialToken: qsPartialTokenSelector }),
-  countries: queries.users.countriesSelector
+  params: createStructuredSelector({ partialToken: qsPartialTokenSelector })
 })
 
-const mapPropsToConfig = () => [queries.users.countriesQuery()]
-
-const registerDetails = (
-  name: string,
-  password: string,
-  legalAddress: LegalAddress,
+const registerExtraDetailsPage = (
+  profileData: UserProfile,
   partialToken: string
-) =>
-  mutateAsync(
-    auth.registerDetailsMutation(name, password, legalAddress, partialToken)
-  )
+) => mutateAsync(auth.registerExtraDetailsMutation(profileData, partialToken))
 
 const getCurrentUser = () =>
   requestAsync({
@@ -134,7 +101,7 @@ const getCurrentUser = () =>
   })
 
 const mapDispatchToProps = {
-  registerDetails,
+  registerExtraDetails: registerExtraDetailsPage,
   getCurrentUser
 }
 
@@ -142,6 +109,5 @@ export default compose(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  ),
-  connectRequest(mapPropsToConfig)
-)(RegisterProfilePage)
+  )
+)(RegisterExtraDetailsPage)

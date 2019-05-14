@@ -7,13 +7,14 @@ from social_core.pipeline.partial import partial
 from authentication.exceptions import (
     InvalidPasswordException,
     RequirePasswordException,
-    RequirePasswordAndProfileException,
+    RequirePasswordAndPersonalInfoException,
+    RequireProfileException,
+    RequireUserException,
     RequireRegistrationException,
     UnexpectedExistingUserException,
 )
 from authentication.utils import SocialAuthState
-from users.serializers import UserSerializer
-
+from users.serializers import UserSerializer, ProfileSerializer
 
 # pylint: disable=keyword-arg-before-vararg
 
@@ -75,7 +76,7 @@ def create_user_via_email(
         current_partial (Partial): the partial for the step in the pipeline
 
     Raises:
-        RequirePasswordAndProfileException: if the user hasn't set password or name
+        RequirePasswordAndPersonalInfoException: if the user hasn't set password or name
     """
     if backend.name != EmailAuth.name or flow != SocialAuthState.FLOW_REGISTER:
         return {}
@@ -87,15 +88,49 @@ def create_user_via_email(
     data["email"] = kwargs.get("email", kwargs.get("details", {}).get("email"))
 
     if "name" not in data or "password" not in data:
-        raise RequirePasswordAndProfileException(backend, current_partial)
+        raise RequirePasswordAndPersonalInfoException(backend, current_partial)
 
     serializer = UserSerializer(data=data)
 
     if not serializer.is_valid():
-        raise RequirePasswordAndProfileException(
+        raise RequirePasswordAndPersonalInfoException(
             backend, current_partial, errors=serializer.errors
         )
     return {"is_new": True, "user": serializer.save()}
+
+
+@partial
+def create_profile(
+    strategy, backend, user=None, flow=None, current_partial=None, *args, **kwargs
+):  # pylint: disable=too-many-arguments,unused-argument
+    """
+    Creates a new profile for the user
+    Args:
+        strategy (social_django.strategy.DjangoStrategy): the strategy used to authenticate
+        backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
+        user (User): the current user
+        flow (str): the type of flow (login or register)
+        current_partial (Partial): the partial for the step in the pipeline
+
+    Raises:
+        RequireProfileException: if the profile data is missing or invalid
+    """
+    if backend.name != EmailAuth.name or flow != SocialAuthState.FLOW_REGISTER:
+        return {}
+
+    if user is None:
+        raise RequireUserException(backend, current_partial)
+
+    data = strategy.request_data().copy()
+    data["user"] = user.id
+
+    serializer = ProfileSerializer(data=data)
+    if not serializer.is_valid():
+        raise RequireProfileException(
+            backend, current_partial, errors=serializer.errors
+        )
+    serializer.save()
+    return {}
 
 
 @partial

@@ -29,6 +29,7 @@ from authentication.serializers import (
     RegisterEmailSerializer,
     RegisterConfirmSerializer,
     RegisterDetailsSerializer,
+    RegisterExtraDetailsSerializer,
 )
 from authentication.utils import load_drf_strategy
 from mail.api import render_email_templates, send_messages
@@ -119,6 +120,14 @@ class RegisterDetailsView(SocialAuthAPIView):
     def get_serializer_cls(self):
         """Return the serializer cls"""
         return RegisterDetailsSerializer
+
+
+class RegisterExtraDetailsView(SocialAuthAPIView):
+    """Email registration extra details view"""
+
+    def get_serializer_cls(self):
+        """Return the serializer cls"""
+        return RegisterExtraDetailsSerializer
 
 
 @api_view(["GET"])
