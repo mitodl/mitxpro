@@ -5,6 +5,7 @@ import json
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from raven.contrib.django.raven_compat.models import client as sentry
 from rest_framework.views import APIView
@@ -29,6 +30,7 @@ def get_js_settings_context(request):
     return {"js_settings_json": json.dumps(js_settings)}
 
 
+@csrf_exempt
 def index(request):
     """
     The index view
