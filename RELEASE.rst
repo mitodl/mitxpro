@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.4.0
+Version 0.4.0 (Released May 14, 2019)
 -------------
 
 - Catalog page design update
