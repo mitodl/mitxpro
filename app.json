@@ -51,6 +51,9 @@
       "description": "Google analytics tracking ID",
       "required": false
     },
+    "HUBSPOT_API_KEY": {
+      "required": false
+    },
     "LOGOUT_REDIRECT_URL": {
       "description": "Url to redirect to after logout, typically Open edX's own logout url",
       "required": false
