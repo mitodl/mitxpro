@@ -407,9 +407,10 @@ class DataConsentUser(TimestampedModel):
         return f"DataConsentUser {self.user} for {self.agreement}, consent date {self.consent_date}"
 
 
-class BulkEnrollmentDelivery(TimestampedModel):
+class ProductCouponAssignment(TimestampedModel):
     """
-    Record of the delivery of a bulk enrollment email
+    Records the assignment of a product coupon to an email address (in other words, the given
+    product coupon can only be redeemed by a User with the given email address)
     """
 
     email = models.EmailField(blank=False)

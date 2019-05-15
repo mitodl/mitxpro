@@ -503,12 +503,12 @@ def get_available_bulk_product_coupons(coupon_payment_id, product_id):
     return (
         CouponEligibility.objects.select_related("product")
         .select_related("coupon__payment")
-        .annotate(deliveries=Count("bulkenrollmentdelivery"))
+        .annotate(existing_assignments=Count("productcouponassignment"))
         .filter(
             coupon__enabled=True,
             coupon__payment=coupon_payment_id,
             product__id=product_id,
-            deliveries=0,
+            existing_assignments=0,
         )
     )
 

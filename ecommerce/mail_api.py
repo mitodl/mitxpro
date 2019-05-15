@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from mail import api
 from mail.constants import EMAIL_BULK_ENROLL
-from ecommerce.models import BulkEnrollmentDelivery
+from ecommerce.models import ProductCouponAssignment
 
 
 def get_bulk_enroll_email_context(product_coupon):
@@ -45,7 +45,7 @@ def send_bulk_enroll_emails(recipients, product_coupon_iter):
             one-by-one to the given recipients
 
     Returns:
-        list of BulkEnrollmentDelivery: Created BulkEnrollmentDelivery objects that represent a bulk enrollment email
+        list of ProductCouponAssignment: Created ProductCouponAssignment objects that represent a bulk enrollment email
             sent to a recipient
     """
     # We will loop over pairs of recipients and product coupons twice, so create 2 generators
@@ -63,7 +63,7 @@ def send_bulk_enroll_emails(recipients, product_coupon_iter):
         )
     )
     return [
-        BulkEnrollmentDelivery.objects.create(
+        ProductCouponAssignment.objects.create(
             email=recipient, product_coupon=product_coupon
         )
         for recipient, product_coupon in recipient_product_coupon_iter2

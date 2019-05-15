@@ -221,11 +221,11 @@ class DataConsentUserFactory(DjangoModelFactory):
         model = models.DataConsentUser
 
 
-class BulkEnrollmentDeliveryFactory(DjangoModelFactory):
-    """Factory for BulkEnrollmentDelivery"""
+class ProductCouponAssignmentFactory(DjangoModelFactory):
+    """Factory for ProductCouponAssignment"""
 
     email = fuzzy.FuzzyText(suffix="@example.com")
     product_coupon = SubFactory(CouponEligibilityFactory)
 
     class Meta:
-        model = models.BulkEnrollmentDelivery
+        model = models.ProductCouponAssignment
