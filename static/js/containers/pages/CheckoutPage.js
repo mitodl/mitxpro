@@ -186,16 +186,14 @@ export class CheckoutPage extends React.Component<Props, State> {
       )
     } else {
       return (
-        <React.Fragment>
-          <div className="item-row">
-            <div className="item-column">
-              <img src={item.thumbnail_url} alt={item.description} />
-            </div>
-            <div className="title-column">
-              <div className="title">{item.description}</div>
-            </div>
+        <div className="item-row">
+          <div className="item-column">
+            <img src={item.thumbnail_url} alt={item.description} />
           </div>
-        </React.Fragment>
+          <div className="title-column">
+            <div className="title">{item.description}</div>
+          </div>
+        </div>
       )
     }
   }
