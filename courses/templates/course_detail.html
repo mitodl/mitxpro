@@ -28,6 +28,7 @@
 <div>
     {% include "partials/hero.html" with obj=course %}
     {% include "partials/metadata-tiles.html" %}
+    {% include "partials/subnav.html" with product=course %}
     {% if course.outcomes %} {% include "partials/learning-outcomes.html" %} {% endif %}
     {% if course.who_should_enroll %} {% include "partials/target-audience.html" %} {% endif %}
     {% if course.techniques %} {% include "partials/learning-techniques.html" %} {% endif %}

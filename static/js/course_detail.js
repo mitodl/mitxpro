@@ -17,6 +17,19 @@ $(document).ready(function() {
         <div class="popover-body"></div> \
       </div>'
   });
+
+  $("body").scrollspy({ target: "#subNavBar", offset: 70 });
+
+  $(window).on("activate.bs.scrollspy", function(e, obj) {
+    $("#subNavBarSelector").text(
+      $(`.navbar-nav>li>a[href='${obj.relatedTarget}']`).text()
+    );
+  });
+
+  $(".navbar-nav>li>a").on("click", function() {
+    $(".navbar-collapse.show").removeClass("show");
+    $(".navbar-toggler").addClass("collapsed");
+  });
 });
 
 $(".course-slider").slick({
