@@ -159,8 +159,8 @@ export class CheckoutPage extends React.Component<Props, State> {
       return (
         <React.Fragment>
           {item.courses.map(course => (
-            <div className="item-row" key={course.id}>
-              <div className="item-column">
+            <div className="flex-row item-row" key={course.id}>
+              <div className="flex-row item-column">
                 <img src={course.thumbnail_url} alt={course.title} />
               </div>
               <div className="title-column">
@@ -186,8 +186,8 @@ export class CheckoutPage extends React.Component<Props, State> {
       )
     } else {
       return (
-        <div className="item-row">
-          <div className="item-column">
+        <div className="flex-row item-row">
+          <div className="flex-row item-column">
             <img src={item.thumbnail_url} alt={item.description} />
           </div>
           <div className="title-column">
@@ -240,7 +240,7 @@ export class CheckoutPage extends React.Component<Props, State> {
                 Enrollment / Promotional Code
               </div>
               <form onSubmit={this.submitCoupon}>
-                <div className="coupon-code-row">
+                <div className="flex-row coupon-code-row">
                   <input
                     type="text"
                     value={
@@ -265,18 +265,18 @@ export class CheckoutPage extends React.Component<Props, State> {
           <div className="col-lg-4 order-summary-container">
             <div className="order-summary">
               <div className="title">Order Summary</div>
-              <div className="price-row">
+              <div className="flex-row price-row">
                 <span>Price:</span>
                 <span>{formatPrice(item.price)}</span>
               </div>
               {coupon ? (
-                <div className="discount-row">
+                <div className="flex-row discount-row">
                   <span>Discount:</span>
                   <span>{formatPrice(calculateDiscount(item, coupon))}</span>
                 </div>
               ) : null}
               <hr />
-              <div className="total-row">
+              <div className="flex-row total-row">
                 <span>Total:</span>
                 <span>{formatPrice(calculatePrice(item, coupon))}</span>
               </div>

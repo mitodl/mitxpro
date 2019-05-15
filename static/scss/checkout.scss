@@ -31,18 +31,20 @@
     font-size: 28px;
   }
 
-  .item-row {
+  .flex-row {
     display: flex;
     flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .item-row {
     margin: 20px 0;
 
     .item-column {
       min-width: 85px;
       max-width: 85px;
       height: auto;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
 
       img {
         width: 100%;
@@ -92,9 +94,6 @@
       }
 
       .price-row,.discount-row {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
         font-size: 24px;
       }
 
@@ -104,9 +103,6 @@
       }
 
       .total-row {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
         font-size: 28px;
         margin-top: 25px;
       }
@@ -144,11 +140,6 @@
   }
 
   .coupon-code-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-
     input {
       border: 1px solid #cccccc;
       border-radius: 0;
