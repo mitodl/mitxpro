@@ -31,7 +31,7 @@ def test_sync_without_api_key():
 def test_sync_new_user_with_hubspot():
     """Test syncing a new user with hubspot"""
     user = UserFactory.create()
-    response = sync_user_with_hubspot(user)
+    response = sync_user_with_hubspot(user, api_key='demo')
     assert response is not None
     assert response.status_code == 200
     data = json.loads(response.text)
