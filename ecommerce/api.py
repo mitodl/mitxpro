@@ -191,6 +191,11 @@ def get_valid_coupon_versions(
             payment_version__amount=decimal.Decimal(1)
         )
 
+    if auto_only:
+        coupon_version_subquery = coupon_version_subquery.filter(
+            payment_version__automatic=True
+        )
+
     if company is not None:
         coupon_version_subquery = coupon_version_subquery.filter(
             payment_version__company=company
@@ -235,10 +240,7 @@ def get_valid_coupon_versions(
         .exclude(global_redemptions__gte=F("payment_version__max_redemptions"))
     )
 
-    if auto_only:
-        query = query.filter(payment_version__automatic=True)
-
-    return list(query.order_by("-payment_version__amount"))
+    return query.order_by("-payment_version__amount")
 
 
 def best_coupon_for_product(product, user, auto_only=False, code=None):
