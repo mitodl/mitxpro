@@ -28,6 +28,12 @@ def test_make_hubspot_contact_update(user):
             assert getattr(user.profile, key) == prop['value']
 
 
+def test_sync_without_api_key():
+    """Test that the sync function return None if HUBSPOT_API_KEY does not have a value"""
+    assert sync_user_with_hubspot(None, api_key=None) is None
+    assert sync_users_batch_with_hubspot(None, api_key=None) is None
+
+
 @pytest.mark.django_db
 def test_sync_new_user_with_hubspot():
     """Test syncing a new user with hubspot"""
