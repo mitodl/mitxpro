@@ -417,9 +417,9 @@ def enroll_user_on_success(order):  # pylint: disable=unused-argument
 
 def get_company_affiliation(order):
     """ Get a company affiliated with an order via coupon """
-    coupon_version = CouponRedemption.objects.filter(order=order).last()
-    if coupon_version:
-        return coupon_version.payment_version.company
+    redemption = CouponRedemption.objects.filter(order=order).last()
+    if redemption:
+        return redemption.coupon_version.payment_version.company
     return None
 
 

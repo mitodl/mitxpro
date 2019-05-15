@@ -713,6 +713,7 @@ def test_enroll_user_on_success(user):
     in course runs and programs
     """
     order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
+    redemption = CouponRedemptionFactory.create(order=order)
     basket = BasketFactory.create(user=user)
     run_selections = CourseRunSelectionFactory.create_batch(2, basket=basket)
     program = ProgramFactory.create()
@@ -729,6 +730,10 @@ def test_enroll_user_on_success(user):
     assert len(created_program_enrollments) == 1
     assert created_program_enrollments[0].program == program
     assert created_program_enrollments[0].user == user
+    assert (
+        created_program_enrollments[0].company
+        == redemption.coupon_version.payment_version.company
+    )
     created_course_run_enrollments = CourseRunEnrollment.objects.order_by("pk").all()
     assert len(created_course_run_enrollments) == len(run_selections)
     assert [

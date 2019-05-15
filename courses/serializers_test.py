@@ -22,6 +22,7 @@ from courses.serializers import (
     CourseRunEnrollmentSerializer,
     ProgramEnrollmentSerializer,
 )
+from ecommerce.serializers import CompanySerializer
 from mitxpro.test_utils import drf_datetime
 
 
@@ -132,7 +133,8 @@ def test_serialize_course_run_enrollments():
     course_run_enrollment = CourseRunEnrollmentFactory.create()
     serialized_data = CourseRunEnrollmentSerializer(course_run_enrollment).data
     assert serialized_data == {
-        "run": CourseRunDetailSerializer(course_run_enrollment.run).data
+        "run": CourseRunDetailSerializer(course_run_enrollment.run).data,
+        "company": CompanySerializer(course_run_enrollment.company).data,
     }
 
 
@@ -158,6 +160,7 @@ def test_serialize_program_enrollments():
     assert serialized_data == {
         "id": program_enrollment.id,
         "program": BaseProgramSerializer(program).data,
+        "company": CompanySerializer(program_enrollment.company).data,
         # Only enrollments for the given program should be serialized, and they should be
         # sorted by position in program.
         "course_run_enrollments": CourseRunEnrollmentSerializer(

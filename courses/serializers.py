@@ -147,18 +147,24 @@ class ProgramSerializer(serializers.ModelSerializer):
 class CourseRunEnrollmentSerializer(serializers.ModelSerializer):
     """CourseRunEnrollment model serializer"""
 
+    from ecommerce.serializers import CompanySerializer
+
     run = CourseRunDetailSerializer(read_only=True)
+    company = CompanySerializer(read_only=True)
 
     class Meta:
         model = models.CourseRunEnrollment
-        fields = ["run"]
+        fields = ["run", "company"]
 
 
 class ProgramEnrollmentSerializer(serializers.ModelSerializer):
     """ProgramEnrollmentSerializer model serializer"""
 
+    from ecommerce.serializers import CompanySerializer
+
     program = BaseProgramSerializer(read_only=True)
     course_run_enrollments = serializers.SerializerMethodField()
+    company = CompanySerializer(read_only=True)
 
     def __init__(self, *args, **kwargs):
         assert (
@@ -182,4 +188,4 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ProgramEnrollment
-        fields = ["id", "program", "course_run_enrollments"]
+        fields = ["id", "program", "course_run_enrollments", "company"]
