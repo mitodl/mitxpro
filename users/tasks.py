@@ -5,9 +5,10 @@ import json
 
 import requests
 from django.conf import settings
+from rest_framework import status
 
 from mitxpro.celery import app
-
+from users.exceptions import HubspotUserSyncError
 
 HUBSPOT_API_BASE_URL = "https://api.hubapi.com"
 
@@ -21,7 +22,18 @@ hubspot_property_mapping = {
 
 
 def map_hubspot_property(user, key, mapping):
-    """Translate user database fields into Hubspot contact properties based on the above mapping"""
+    """
+    Map a user to a hubspot contact dict
+    :param user: user object to map
+    :param key: property name in hubspot
+    :param mapping: dict containing model and field to find value, optionally contains 'default'
+    :return: dictionary in the form expected by hubspot api:
+        { 'properties': [
+            {'property': 'property_name',
+            'value': value},
+            ...]
+        }
+    """
     prop = {
         "property": key,
         "value": mapping["default"] if "default" in mapping else "",
@@ -61,7 +73,11 @@ def sync_users_batch_with_hubspot(users_batch, api_key=settings.HUBSPOT_API_KEY)
     data = json.dumps(contacts)
     headers = {"Content-Type": "application/json"}
 
-    return requests.post(url=url, data=data, headers=headers)
+    response = requests.post(url=url, data=data, headers=headers)
+    if response.status_code != status.HTTP_202_ACCEPTED:
+        raise HubspotUserSyncError(
+            f"Error syncing MITxPro users with Hubspot, got status_code={response.status_code}"
+        )
 
 
 @app.task()
@@ -75,4 +91,8 @@ def sync_user_with_hubspot(user, api_key=settings.HUBSPOT_API_KEY):
     data = json.dumps(make_hubspot_contact_update(user))
     headers = {"Content-Type": "application/json"}
 
-    return requests.post(url=url, data=data, headers=headers)
+    response = requests.post(url=url, data=data, headers=headers)
+    if response.status_code != status.HTTP_200_OK:
+        raise HubspotUserSyncError(
+            f"Error syncing MITxPro users with Hubspot, got status_code={response.status_code}"
+        )

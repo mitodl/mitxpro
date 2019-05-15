@@ -1,7 +1,10 @@
 """Users tasks tests"""
+# pylint: disable=redefined-outer-name
 import json
+from unittest.mock import Mock
 
 import pytest
+from rest_framework import status
 
 from users.factories import UserFactory
 from users.models import User
@@ -10,11 +13,31 @@ from users.tasks import (
     sync_user_with_hubspot,
     sync_users_batch_with_hubspot,
     hubspot_property_mapping,
+    HUBSPOT_API_BASE_URL,
 )
 
 
-def test_make_hubspot_contact_update(user):
+@pytest.fixture()
+def hubspot_200_response(mocker):
+    """Mock a 200 response from Hubspot for successful user update"""
+    yield mocker.patch(
+        "users.tasks.requests.post", return_value=Mock(status_code=status.HTTP_200_OK)
+    )
+
+
+@pytest.fixture()
+def hubspot_202_response(mocker):
+    """Mock a 202 response from Hubspot for successful user batch update"""
+    yield mocker.patch(
+        "users.tasks.requests.post",
+        return_value=Mock(status_code=status.HTTP_202_ACCEPTED),
+    )
+
+
+@pytest.mark.django_db
+def test_make_hubspot_contact_update():
     """Test that make_hubspot_update creates an appropriate update out of the user"""
+    user = UserFactory.create()
     update = make_hubspot_contact_update(user)
     assert update["email"] == user.email
     for prop in update["properties"]:
@@ -27,41 +50,34 @@ def test_make_hubspot_contact_update(user):
 
 def test_sync_without_api_key():
     """Test that the sync function return None if HUBSPOT_API_KEY does not have a value"""
-    assert sync_user_with_hubspot(None, api_key=None) is None
-    assert sync_users_batch_with_hubspot(None, api_key=None) is None
+    sync_user_with_hubspot(None, api_key=None)
+    sync_users_batch_with_hubspot(None, api_key=None)
 
 
 @pytest.mark.django_db
-def test_sync_new_user_with_hubspot():
+def test_sync_user_with_hubspot(hubspot_200_response):
     """Test syncing a new user with hubspot"""
     user = UserFactory.create()
-    response = sync_user_with_hubspot(user, api_key="demo")
-    assert response is not None
-    assert response.status_code == 200
-    data = json.loads(response.text)
-    assert "vid" in data
-    assert data["isNew"]
+    sync_user_with_hubspot(user, api_key="key")
+    hubspot_200_response.assert_called_once_with(
+        data=json.dumps(make_hubspot_contact_update(user)),
+        headers={"Content-Type": "application/json"},
+        url=f"{HUBSPOT_API_BASE_URL}/contacts/v1/contact/createOrUpdate/email/{user.email}?hapikey=key",
+    )
 
 
 @pytest.mark.django_db
-def test_sync_existing_user_with_hubspot():
-    """Test syncing an existing user with hubspot"""
-    user = UserFactory.create(email="tester123@hubspot.com")
-    response = sync_user_with_hubspot(user, api_key="demo")
-    assert response is not None
-    assert response.status_code == 200
-    data = json.loads(response.text)
-    assert "vid" in data
-    assert not data["isNew"]
-
-
-@pytest.mark.django_db
-def test_sync_users_batch_with_hubspot():
+def test_sync_users_batch_with_hubspot(hubspot_202_response):
     """Test syncing a group of users"""
     UserFactory.create()
     UserFactory.create()
     UserFactory.create()
 
-    response = sync_users_batch_with_hubspot(User.objects.all(), api_key="demo")
-    assert response is not None
-    assert response.status_code == 202
+    sync_users_batch_with_hubspot(User.objects.all(), api_key="key")
+    hubspot_202_response.assert_called_once_with(
+        data=json.dumps(
+            [make_hubspot_contact_update(user) for user in User.objects.all()]
+        ),
+        headers={"Content-Type": "application/json"},
+        url=f"{HUBSPOT_API_BASE_URL}/contacts/v1/contact/batch/?hapikey=key",
+    )
