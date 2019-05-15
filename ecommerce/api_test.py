@@ -707,13 +707,15 @@ def test_validate_basket_run_expired(mocker, basket_and_coupons):
     assert ex.value.args[0] == f"Run {basket_and_coupons.run.id} is expired"
 
 
-def test_enroll_user_on_success(user):
+@pytest.mark.parametrize("has_redemption", [True, False])
+def test_enroll_user_on_success(user, has_redemption):
     """
     Test that enroll_user_on_success creates objects that represent a user's enrollment
     in course runs and programs
     """
     order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
-    redemption = CouponRedemptionFactory.create(order=order)
+    if has_redemption:
+        redemption = CouponRedemptionFactory.create(order=order)
     basket = BasketFactory.create(user=user)
     run_selections = CourseRunSelectionFactory.create_batch(2, basket=basket)
     program = ProgramFactory.create()
@@ -730,10 +732,11 @@ def test_enroll_user_on_success(user):
     assert len(created_program_enrollments) == 1
     assert created_program_enrollments[0].program == program
     assert created_program_enrollments[0].user == user
-    assert (
-        created_program_enrollments[0].company
-        == redemption.coupon_version.payment_version.company
-    )
+    if has_redemption:
+        assert (
+            created_program_enrollments[0].company
+            == redemption.coupon_version.payment_version.company
+        )
     created_course_run_enrollments = CourseRunEnrollment.objects.order_by("pk").all()
     assert len(created_course_run_enrollments) == len(run_selections)
     assert [
