@@ -153,7 +153,7 @@ describe("CheckoutPage", () => {
     })
   })
 
-  it.only("tries to submit the coupon code but receives an error message", async () => {
+  it("tries to submit the coupon code but receives an error message", async () => {
     const { inner } = await renderPage()
     const errors = "Unknown error"
     helper.handleRequestStub.withArgs("/api/basket/", "PATCH").returns({
