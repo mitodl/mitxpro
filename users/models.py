@@ -116,10 +116,6 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
     def get_full_name(self):
         """Returns the user's fullname"""
         return self.name
-    #
-    # def save(self, *args, **kwargs):
-    #     sync_user_with_hubspot.delay(self)
-    #     super().save(*args, **kwargs)
 
 
 class LegalAddress(TimestampedModel):

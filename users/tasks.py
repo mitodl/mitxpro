@@ -1,6 +1,8 @@
 """
 User tasks
 """
+import json
+
 import requests
 from django.conf import settings
 
@@ -18,9 +20,10 @@ def make_hubspot_contact_update(user):
         "email": user.email,
         "properties": [
             {
-                "property": "name",
+                "property": "firstname",
                 "value": user.name,
             },
+            # This code is waiting on PR #236
             # {
             #     "property": "company",
             #     "value": user.profile.company,
@@ -38,39 +41,28 @@ def make_hubspot_contact_update(user):
 
 
 @app.task()
-def sync_users_batch_with_hubspot(users_batch):
+def sync_users_batch_with_hubspot(users_batch, api_key=settings.HUBSPOT_API_KEY):
     """
     Sync a batch of users with hubspot
     """
-    api_key = settings.HUBSPOT_API_KEY
-    if not api_key:
-        return
     contacts = []
     for user in users_batch:
-        if not hasattr(user, 'profile'):
-            continue
-
         contacts.append(make_hubspot_contact_update(user))
 
-    response = requests.post(
-            f'{HUBSPOT_API_BASE_URL}/contacts/v1/contact/batch/?hapikey={api_key}',
-            contacts,
-            format='json'
-        )
-    # print(response)
+    url = f'{HUBSPOT_API_BASE_URL}/contacts/v1/contact/batch/?hapikey={api_key}'
+    data = json.dumps(contacts)
+    headers = {'Content-Type': 'application/json'}
+
+    return requests.post(url=url, data=data, headers=headers)
 
 
 @app.task()
-def sync_user_with_hubspot(user):
+def sync_user_with_hubspot(user, api_key=settings.HUBSPOT_API_KEY):
     """
     Sync a batch of users with hubspot
     """
-    api_key = settings.HUBSPOT_API_KEY
-    if not api_key:
-        return
+    url = f'{HUBSPOT_API_BASE_URL}/contacts/v1/contact/createOrUpdate/email/{user.email}?hapikey={api_key}'
+    data = json.dumps(make_hubspot_contact_update(user))
+    headers = {'Content-Type': 'application/json'}
 
-    response = requests.post(
-        f'{HUBSPOT_API_BASE_URL}/contacts/v1/contact/email/{user.email}/profile?hapikey={api_key}',
-        make_hubspot_contact_update(user),
-    )
-    # print(response)
+    return requests.post(url=url, data=data, headers=headers)
