@@ -47,7 +47,7 @@ from ecommerce.factories import (
     ProductFactory,
     CourseRunSelectionFactory,
     CouponEligibilityFactory,
-    BulkEnrollmentDeliveryFactory,
+    ProductCouponAssignmentFactory,
 )
 from ecommerce.models import (
     BasketItem,
@@ -561,7 +561,7 @@ def test_get_available_bulk_product_coupons():
         product=first_product_coupon.product,
     )
     # Create existing deliveries for the last two, rendering them invalid
-    BulkEnrollmentDeliveryFactory.create_batch(
+    ProductCouponAssignmentFactory.create_batch(
         2, product_coupon=factory.Iterator(additional_product_coupons[1:])
     )
     # Create another product coupon that should not be valid due to it not being enabled
