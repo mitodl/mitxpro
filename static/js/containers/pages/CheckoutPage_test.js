@@ -153,7 +153,7 @@ describe("CheckoutPage", () => {
     })
   })
 
-  it("tries to submit the coupon code but receives an error message", async () => {
+  it.only("tries to submit the coupon code but receives an error message", async () => {
     const { inner } = await renderPage()
     const errors = "Unknown error"
     helper.handleRequestStub.withArgs("/api/basket/", "PATCH").returns({
@@ -167,6 +167,11 @@ describe("CheckoutPage", () => {
     })
 
     assert.equal(inner.state().errors, errors)
+    assert.equal(
+      inner.find(".enrollment-input .error").text(),
+      "Error: Unknown error"
+    )
+    assert.isTrue(inner.find(".enrollment-input input.error-border").exists())
   })
 
   it("checks out", async () => {
