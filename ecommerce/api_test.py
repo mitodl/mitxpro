@@ -35,6 +35,7 @@ from ecommerce.api import (
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
+    BasketFactory,
     CouponRedemptionFactory,
     CouponSelectionFactory,
     CouponVersionFactory,
