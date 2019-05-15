@@ -1,4 +1,4 @@
-FROM mitxpro_python
+FROM mitxpro_web
 
 USER root
 
