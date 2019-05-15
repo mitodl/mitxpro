@@ -32,6 +32,7 @@ def test_sync_new_user_with_hubspot():
     """Test syncing a new user with hubspot"""
     user = UserFactory.create()
     response = sync_user_with_hubspot(user)
+    assert response is not None
     assert response.status_code == 200
     data = json.loads(response.text)
     assert 'vid' in data
@@ -43,6 +44,7 @@ def test_sync_existing_user_with_hubspot():
     """Test syncing an existing user with hubspot"""
     user = UserFactory.create(email='tester123@hubspot.com')
     response = sync_user_with_hubspot(user, api_key='demo')
+    assert response is not None
     assert response.status_code == 200
     data = json.loads(response.text)
     assert 'vid' in data
@@ -57,4 +59,5 @@ def test_sync_users_batch_with_hubspot():
     UserFactory.create()
 
     response = sync_users_batch_with_hubspot(User.objects.all(), api_key='demo')
+    assert response is not None
     assert response.status_code == 202
