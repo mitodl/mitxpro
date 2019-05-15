@@ -402,7 +402,9 @@ class CourseRunEnrollment(TimestampedModel):
 
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     run = models.ForeignKey("courses.CourseRun", on_delete=models.PROTECT)
-    company = models.ForeignKey("ecommerce.Company", null=True, on_delete=models.PROTECT)
+    company = models.ForeignKey(
+        "ecommerce.Company", null=True, on_delete=models.PROTECT
+    )
 
     class Meta:
         unique_together = ("user", "run")
@@ -418,7 +420,9 @@ class ProgramEnrollment(TimestampedModel):
 
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     program = models.ForeignKey("courses.Program", on_delete=models.PROTECT)
-    company = models.ForeignKey("ecommerce.Company", null=True, on_delete=models.PROTECT)
+    company = models.ForeignKey(
+        "ecommerce.Company", null=True, on_delete=models.PROTECT
+    )
 
     class Meta:
         unique_together = ("user", "program")

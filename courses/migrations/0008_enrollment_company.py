@@ -8,29 +8,38 @@ from ecommerce.api import get_company_affiliation
 
 
 class Migration(migrations.Migration):
-
     def update_companies(apps, schema_editor):
         CourseRunEnrollment = apps.get_model("courses", "CourseRunEnrollment")
         ProgramEnrollment = apps.get_model("courses", "ProgramEnrollment")
-        for enrollment in chain(CourseRunEnrollment.objects.all(), ProgramEnrollment.objects.all()):
+        for enrollment in chain(
+            CourseRunEnrollment.objects.all(), ProgramEnrollment.objects.all()
+        ):
             enrollment.company = get_company_affiliation(enrollment.order)
             enrollment.save()
 
     dependencies = [
-        ('ecommerce', '0010_remove_ecommerce_course_run_enrollment'),
-        ('courses', '0007_add_enrollment_models'),
+        ("ecommerce", "0010_remove_ecommerce_course_run_enrollment"),
+        ("courses", "0007_add_enrollment_models"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='courserunenrollment',
-            name='company',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='ecommerce.Company'),
+            model_name="courserunenrollment",
+            name="company",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="ecommerce.Company",
+            ),
         ),
         migrations.AddField(
-            model_name='programenrollment',
-            name='company',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='ecommerce.Company'),
+            model_name="programenrollment",
+            name="company",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="ecommerce.Company",
+            ),
         ),
-        migrations.RunPython(update_companies, reverse_code=migrations.RunPython.noop)
+        migrations.RunPython(update_companies, reverse_code=migrations.RunPython.noop),
     ]
