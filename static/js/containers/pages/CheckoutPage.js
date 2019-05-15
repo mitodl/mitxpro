@@ -276,7 +276,7 @@ export class CheckoutPage extends React.Component<Props, State> {
                   <span>{formatPrice(calculateDiscount(item, coupon))}</span>
                 </div>
               ) : null}
-              <hr />
+              <div className="bar" />
               <div className="flex-row total-row">
                 <span>Total:</span>
                 <span>{formatPrice(calculatePrice(item, coupon))}</span>

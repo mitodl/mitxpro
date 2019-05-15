@@ -144,13 +144,19 @@
         margin-top: 25px;
       }
 
-      hr {
+      .bar {
         @include media-breakpoint-up(lg) {
+          background-size: 24px 1px;
           margin-top: 75px;
         }
 
-        border: 0 none;
-        border-top: 4px dashed lightgrey;
+        height: 1px;
+        width: 100%;
+        background-image: linear-gradient(to right, black 50%, rgba(255,255,255,0) 0%);
+        background-position: bottom;
+        background-size: 10px 1px;
+        background-repeat: repeat-x;
+        margin-top: 25px;
       }
     }
   }
