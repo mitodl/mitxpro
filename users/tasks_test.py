@@ -5,15 +5,8 @@ import pytest
 
 from users.factories import UserFactory
 from users.models import User
-from users.tasks import make_hubspot_contact_update, sync_user_with_hubspot, sync_users_batch_with_hubspot
-
-
-hubspot_property_mapping = {
-    "firstname": ("user", "name"),
-    "company": ("profile", "company"),
-    "jobtitle": ("profile", "job_title"),
-    "gender": ("profile", "gender"),
-}
+from users.tasks import make_hubspot_contact_update, sync_user_with_hubspot, sync_users_batch_with_hubspot, \
+    hubspot_property_mapping
 
 
 def test_make_hubspot_contact_update(user):
