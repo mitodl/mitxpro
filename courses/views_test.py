@@ -189,7 +189,7 @@ def test_course_catalog_view(client):
     CourseFactory.create(no_program=True, live=False)
     exp_programs = [program]
     exp_courses = [course_in_program, course_no_program]
-    resp = client.get(reverse("mitxpro-index"))
+    resp = client.get(reverse("mitxpro-catalog"))
     assert resp.templates[0].name == "catalog.html"
     assert list(resp.context["programs"]) == exp_programs
     assert list(resp.context["courses"]) == exp_courses

@@ -31,6 +31,16 @@ export class DashboardPage extends React.Component<Props, State> {
     collapseVisible: {}
   }
 
+  enrollmentsExist = (): boolean => {
+    const { enrollments } = this.props
+
+    return (
+      enrollments &&
+      (enrollments.program_enrollments.length > 0 ||
+        enrollments.course_run_enrollments.length > 0)
+    )
+  }
+
   onCollapseToggle = (programEnrollmentId: number): void => {
     this.setState({
       collapseVisible: {
@@ -160,12 +170,18 @@ export class DashboardPage extends React.Component<Props, State> {
   render() {
     const { enrollments } = this.props
 
+    const enrollmentsExist = this.enrollmentsExist()
+
     return (
       <div className="user-dashboard container-fluid">
         <div className="row">
           <div className="header col-12">
             <h1>Dashboard</h1>
-            <h3>Courses and Programs</h3>
+            {enrollmentsExist ? (
+              <h3>Courses and Programs</h3>
+            ) : (
+              <h2>You are not yet enrolled in any courses or programs.</h2>
+            )}
           </div>
         </div>
         {enrollments ? (

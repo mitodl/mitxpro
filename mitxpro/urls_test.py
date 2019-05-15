@@ -9,4 +9,4 @@ class URLTests(TestCase):
 
     def test_urls(self):
         """Make sure URLs match with resolved names"""
-        assert reverse("mitxpro-index") == "/catalog/"
+        assert reverse("mitxpro-catalog") == "/catalog/"
