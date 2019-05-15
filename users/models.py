@@ -6,6 +6,7 @@ import ulid
 
 from mitxpro.models import TimestampedModel
 from courseware.tasks import create_edx_user_from_id
+
 # from users.tasks import sync_user_with_hubspot
 
 # Defined in edX UserProfile model
