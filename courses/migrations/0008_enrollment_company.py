@@ -4,18 +4,11 @@ from itertools import chain
 from django.db import migrations, models
 import django.db.models.deletion
 
+from courses.constants import CONTENT_TYPE_MODEL_PROGRAM, CONTENT_TYPE_MODEL_COURSERUN
 from ecommerce.api import get_company_affiliation
 
 
 class Migration(migrations.Migration):
-    def update_companies(apps, schema_editor):
-        CourseRunEnrollment = apps.get_model("courses", "CourseRunEnrollment")
-        ProgramEnrollment = apps.get_model("courses", "ProgramEnrollment")
-        for enrollment in chain(
-            CourseRunEnrollment.objects.all(), ProgramEnrollment.objects.all()
-        ):
-            enrollment.company = get_company_affiliation(enrollment.order)
-            enrollment.save()
 
     dependencies = [
         ("ecommerce", "0010_remove_ecommerce_course_run_enrollment"),
@@ -41,5 +34,4 @@ class Migration(migrations.Migration):
                 to="ecommerce.Company",
             ),
         ),
-        migrations.RunPython(update_companies, reverse_code=migrations.RunPython.noop),
     ]

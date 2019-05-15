@@ -401,7 +401,7 @@ def enroll_user_on_success(order):  # pylint: disable=unused-argument
     company = get_company_affiliation(order)
     for run in runs:
         CourseRunEnrollment.objects.get_or_create(
-            user=order.purchaser, run=run, company=company
+            user=order.purchaser, run=run, defaults={"company": company}
         )
     for line in order.lines.all():
         if (
@@ -411,7 +411,7 @@ def enroll_user_on_success(order):  # pylint: disable=unused-argument
             ProgramEnrollment.objects.get_or_create(
                 user=order.purchaser,
                 program=line.product_version.product.content_object,
-                company=company,
+                defaults={"company": company},
             )
 
 
