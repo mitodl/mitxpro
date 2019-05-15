@@ -74,6 +74,38 @@
 
   .enrollment-input {
     margin: 20px 0;
+
+    .enrollment-row {
+      margin-top: 50px;
+    }
+
+    .error {
+      color: $primary;
+    }
+
+    .coupon-code-row {
+      input {
+        border: 1px solid #cccccc;
+        border-radius: 0;
+        height: 40px;
+        width: 100%;
+      }
+
+      .error-border {
+        border: 1px solid $primary;
+      }
+
+      .apply-button {
+        @include media-breakpoint-up(lg) {
+          margin-left: 30px;
+          padding: 5px 50px;
+        }
+
+        background-color: $light-blue;
+        margin-left: 15px;
+        padding: 5px 15px;
+      }
+    }
   }
 
   .order-summary-container {
@@ -118,10 +150,6 @@
     }
   }
 
-  .error {
-    color: $primary;
-  }
-
   button {
     color: white;
     font-weight: 600;
@@ -133,29 +161,5 @@
     font-size: 28px;
     padding: 15px 0;
     width: 100%;
-  }
-
-  .enrollment-row {
-    margin-top: 50px;
-  }
-
-  .coupon-code-row {
-    input {
-      border: 1px solid #cccccc;
-      border-radius: 0;
-      height: 40px;
-      width: 100%;
-    }
-
-    .apply-button {
-      @include media-breakpoint-up(lg) {
-        margin-left: 30px;
-        padding: 5px 50px;
-      }
-
-      background-color: $light-blue;
-      margin-left: 15px;
-      padding: 5px 15px;
-    }
   }
 }

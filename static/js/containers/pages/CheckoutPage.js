@@ -243,6 +243,7 @@ export class CheckoutPage extends React.Component<Props, State> {
                 <div className="flex-row coupon-code-row">
                   <input
                     type="text"
+                    className={errors ? "error-border" : ""}
                     value={
                       (couponCode !== null
                         ? couponCode
