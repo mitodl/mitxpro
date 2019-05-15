@@ -96,7 +96,7 @@ describe("CheckoutPage", () => {
 
     const { inner } = await renderPage()
 
-    assert.equal(inner.find(".item-type").text(), "Courses")
+    assert.equal(inner.find(".item-type").text(), "Course")
     assert.equal(inner.find(".item-row").length, 1)
     assert.equal(inner.find("img").prop("src"), basketItem.thumbnail_url)
     assert.equal(inner.find("img").prop("alt"), basketItem.description)

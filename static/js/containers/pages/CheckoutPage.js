@@ -224,7 +224,7 @@ export class CheckoutPage extends React.Component<Props, State> {
               You are about to purchase the following:
             </div>
             <div className="item-type">
-              {item.type === "program" ? "Program" : "Courses"}
+              {item.type === "program" ? "Program" : "Course"}
             </div>
             <hr />
             {item.type === "program" ? (
