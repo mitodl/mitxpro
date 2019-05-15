@@ -9,7 +9,8 @@ import queries from "../../lib/queries"
 import {
   calculateDiscount,
   calculatePrice,
-  formatPrice
+  formatPrice,
+  formatRunTitle
 } from "../../lib/ecommerce"
 import { createCyberSourceForm } from "../../lib/form"
 
@@ -157,12 +158,11 @@ export class CheckoutPage extends React.Component<Props, State> {
     if (item.type === "program") {
       return (
         <React.Fragment>
-          <div className="row">
-            You are about to purchase the following program
-          </div>
           {item.courses.map(course => (
-            <div className="row course-row" key={course.id}>
-              <img src={course.thumbnail_url} alt={course.title} />
+            <div className="flex-row item-row" key={course.id}>
+              <div className="flex-row item-column">
+                <img src={course.thumbnail_url} alt={course.title} />
+              </div>
               <div className="title-column">
                 <div className="title">{course.title}</div>
                 <select
@@ -175,7 +175,7 @@ export class CheckoutPage extends React.Component<Props, State> {
                   </option>
                   {course.courseruns.map(run => (
                     <option value={run.id} key={run.id}>
-                      {run.title}
+                      {formatRunTitle(run)}
                     </option>
                   ))}
                 </select>
@@ -186,17 +186,14 @@ export class CheckoutPage extends React.Component<Props, State> {
       )
     } else {
       return (
-        <React.Fragment>
-          <div className="row">
-            You are about to purchase the following course run
-          </div>
-          <div className="row course-row">
+        <div className="flex-row item-row">
+          <div className="flex-row item-column">
             <img src={item.thumbnail_url} alt={item.description} />
-            <div className="title-column">
-              <div className="title">{item.description}</div>
-            </div>
           </div>
-        </React.Fragment>
+          <div className="title-column">
+            <div className="title">{item.description}</div>
+          </div>
+        </div>
       )
     }
   }
@@ -219,34 +216,82 @@ export class CheckoutPage extends React.Component<Props, State> {
     )
 
     return (
-      <div className="checkout-page">
-        {this.renderBasketItem(item)}
-        <div className="row price-row">Price {formatPrice(item.price)}</div>
-        {coupon ? (
-          <div className="row discount-row">
-            Discount applied {formatPrice(calculateDiscount(item, coupon))}
+      <div className="checkout-page container">
+        <div className="row header">
+          <div className="col-12">
+            <div className="page-title">Checkout</div>
+            <div className="purchase-text">
+              You are about to purchase the following:
+            </div>
+            <div className="item-type">
+              {item.type === "program" ? "Program" : "Course"}
+            </div>
+            <hr />
+            {item.type === "program" ? (
+              <span className="description">{item.description}</span>
+            ) : null}
           </div>
-        ) : null}
-        <div className="row">Coupon (optional)</div>
-        <div className="row coupon-code-row">
-          <form onSubmit={this.submitCoupon}>
-            <input
-              type="text"
-              value={
-                (couponCode !== null ? couponCode : coupon && coupon.code) || ""
-              }
-              onChange={this.updateCouponCode}
-            />
-            <button type="submit">Update</button>
-          </form>
         </div>
-        <div className="row total-row">
-          Total {formatPrice(calculatePrice(item, coupon))}
+        <div className="row">
+          <div className="col-lg-7">
+            {this.renderBasketItem(item)}
+            <div className="enrollment-input">
+              <div className="enrollment-row">
+                Enrollment / Promotional Code
+              </div>
+              <form onSubmit={this.submitCoupon}>
+                <div className="flex-row coupon-code-row">
+                  <input
+                    type="text"
+                    className={errors ? "error-border" : ""}
+                    value={
+                      (couponCode !== null
+                        ? couponCode
+                        : coupon && coupon.code) || ""
+                    }
+                    onChange={this.updateCouponCode}
+                  />
+                  <button
+                    className="apply-button"
+                    type="button"
+                    onClick={this.submitCoupon}
+                  >
+                    Apply
+                  </button>
+                </div>
+                {errors ? <div className="error">Error: {errors}</div> : null}
+              </form>
+            </div>
+          </div>
+          <div className="col-lg-5 order-summary-container">
+            <div className="order-summary">
+              <div className="title">Order Summary</div>
+              <div className="flex-row price-row">
+                <span>Price:</span>
+                <span>{formatPrice(item.price)}</span>
+              </div>
+              {coupon ? (
+                <div className="flex-row discount-row">
+                  <span>Discount:</span>
+                  <span>{formatPrice(calculateDiscount(item, coupon))}</span>
+                </div>
+              ) : null}
+              <div className="bar" />
+              <div className="flex-row total-row">
+                <span>Total:</span>
+                <span>{formatPrice(calculatePrice(item, coupon))}</span>
+              </div>
+            </div>
+          </div>
         </div>
-        {errors ? <div className="error">Error: {errors}</div> : null}
-        <button className="checkout" onClick={this.submit}>
-          Place your order
-        </button>
+        <div className="row">
+          <div className="col-lg-7" />
+          <div className="col-lg-5">
+            <button className="checkout-button" onClick={this.submit}>
+              Place your order
+            </button>
+          </div>
+        </div>
       </div>
     )
   }

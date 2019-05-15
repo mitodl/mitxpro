@@ -15,7 +15,8 @@ import {
 import {
   calculateDiscount,
   calculatePrice,
-  formatPrice
+  formatPrice,
+  formatRunTitle
 } from "../../lib/ecommerce"
 import { assertRaises } from "../../lib/util"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
@@ -56,32 +57,27 @@ describe("CheckoutPage", () => {
         coupon.targets = [-123]
       }
       const { inner } = await renderPage()
-
+      assert.equal(inner.find(".item-type").text(), "Program")
       assert.equal(
-        inner
-          .find(".row")
-          .first()
-          .text(),
-        "You are about to purchase the following program"
+        inner.find(".header .description").text(),
+        basketItem.description
       )
-      assert.equal(inner.find(".course-row").length, basketItem.courses.length)
+      assert.equal(inner.find(".item-row").length, basketItem.courses.length)
       basketItem.courses.forEach((course, i) => {
-        const courseRow = inner.find(".course-row").at(i)
+        const courseRow = inner.find(".item-row").at(i)
         assert.equal(courseRow.find("img").prop("src"), course.thumbnail_url)
         assert.equal(courseRow.find("img").prop("alt"), course.title)
         assert.equal(courseRow.find(".title").text(), course.title)
       })
       assert.equal(
         inner.find(".price-row").text(),
-        `Price ${formatPrice(basketItem.price)}`
+        `Price:${formatPrice(basketItem.price)}`
       )
 
       if (hasCoupon) {
         assert.equal(
           inner.find(".discount-row").text(),
-          `Discount applied ${formatPrice(
-            calculateDiscount(basketItem, coupon)
-          )}`
+          `Discount:${formatPrice(calculateDiscount(basketItem, coupon))}`
         )
       } else {
         assert.isFalse(inner.find(".discount-row").exists())
@@ -89,7 +85,7 @@ describe("CheckoutPage", () => {
 
       assert.equal(
         inner.find(".total-row").text(),
-        `Total ${formatPrice(calculatePrice(basketItem, coupon))}`
+        `Total:${formatPrice(calculatePrice(basketItem, coupon))}`
       )
     })
   })
@@ -100,18 +96,11 @@ describe("CheckoutPage", () => {
 
     const { inner } = await renderPage()
 
-    assert.equal(
-      inner
-        .find(".row")
-        .first()
-        .text(),
-      "You are about to purchase the following course run"
-    )
-    assert.equal(inner.find(".course-row").length, 1)
-
+    assert.equal(inner.find(".item-type").text(), "Course")
+    assert.equal(inner.find(".item-row").length, 1)
     assert.equal(inner.find("img").prop("src"), basketItem.thumbnail_url)
     assert.equal(inner.find("img").prop("alt"), basketItem.description)
-    assert.equal(inner.find(".title").text(), basketItem.description)
+    assert.equal(inner.find(".item-row .title").text(), basketItem.description)
   })
 
   it("displays the coupon code", async () => {
@@ -178,6 +167,11 @@ describe("CheckoutPage", () => {
     })
 
     assert.equal(inner.state().errors, errors)
+    assert.equal(
+      inner.find(".enrollment-input .error").text(),
+      "Error: Unknown error"
+    )
+    assert.isTrue(inner.find(".enrollment-input input.error-border").exists())
   })
 
   it("checks out", async () => {
@@ -198,7 +192,7 @@ describe("CheckoutPage", () => {
     const createFormStub = helper.sandbox
       .stub(formFuncs, "createCyberSourceForm")
       .returns(form)
-    await inner.find("button.checkout").prop("onClick")()
+    await inner.find(".checkout-button").prop("onClick")()
     sinon.assert.calledWith(createFormStub, url, payload)
     sinon.assert.calledWith(submitStub)
     sinon.assert.calledWith(
@@ -249,7 +243,7 @@ describe("CheckoutPage", () => {
     const form = document.createElement("form")
     // $FlowFixMe: need to overwrite this function to mock it
     form.submit = submitStub
-    await inner.find("button.checkout").prop("onClick")()
+    await inner.find(".checkout-button").prop("onClick")()
 
     const basketItem = basket.items[0]
     sinon.assert.calledWith(helper.handleRequestStub, "/api/basket/", "PATCH", {
@@ -287,7 +281,7 @@ describe("CheckoutPage", () => {
     form.submit = submitStub
 
     await assertRaises(async () => {
-      await inner.find("button.checkout").prop("onClick")()
+      await inner.find(".checkout-button").prop("onClick")()
     }, "Received error from request")
     assert.deepEqual(inner.state().errors, errors)
   })
@@ -307,7 +301,7 @@ describe("CheckoutPage", () => {
     // $FlowFixMe: need to overwrite this function to mock it
     form.submit = submitStub
     await assertRaises(async () => {
-      await inner.find("button.checkout").prop("onClick")()
+      await inner.find(".checkout-button").prop("onClick")()
     }, "Received error from request")
   })
 
@@ -386,7 +380,7 @@ describe("CheckoutPage", () => {
       runs.forEach((run, j) => {
         const runOption = select.find("option").at(j + 1)
         assert.equal(runOption.prop("value"), run.id)
-        assert.equal(runOption.text(), run.title)
+        assert.equal(runOption.text(), formatRunTitle(run))
       })
     })
   })
