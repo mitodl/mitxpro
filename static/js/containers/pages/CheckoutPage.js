@@ -233,7 +233,7 @@ export class CheckoutPage extends React.Component<Props, State> {
           </div>
         </div>
         <div className="row">
-          <div className="col-lg-8">
+          <div className="col-lg-7">
             {this.renderBasketItem(item)}
             <div className="enrollment-input">
               <div className="enrollment-row">
@@ -263,7 +263,7 @@ export class CheckoutPage extends React.Component<Props, State> {
               </form>
             </div>
           </div>
-          <div className="col-lg-4 order-summary-container">
+          <div className="col-lg-5 order-summary-container">
             <div className="order-summary">
               <div className="title">Order Summary</div>
               <div className="flex-row price-row">
@@ -285,8 +285,8 @@ export class CheckoutPage extends React.Component<Props, State> {
           </div>
         </div>
         <div className="row">
-          <div className="col-lg-8" />
-          <div className="col-lg-4">
+          <div className="col-lg-7" />
+          <div className="col-lg-5">
             <button className="checkout-button" onClick={this.submit}>
               Place your order
             </button>
