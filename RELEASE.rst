@@ -1,6 +1,22 @@
 Release Notes
 =============
 
+Version 0.4.1
+-------------
+
+- Issue #294 Fix Header Navbar Structure
+- Additional kwargs, better efficiency for get_valid_coupon_versions query (#243)
+- #161 Product Page: More Dates
+- Styling for checkout page (#265)
+- Renamed BulkEnrollmentDelivery to ProductCouponAssignment
+- Misc improvements - fixed dashboard style regressions, handled empty dashboard, added rule to serve course catalog at root route, added enrollment admin classes
+- Registration form - Step 2 (#236)
+- Don't check CSRF token for index pages (#280)
+- #146 Product Page: Faculty Carousel
+- #145 Product Page: Learners Carousel
+- add google analytics (#261)
+- fix static path of banner image (#260)
+
 Version 0.4.0 (Released May 14, 2019)
 -------------
 
