@@ -70,6 +70,24 @@ describe("DashboardPage", () => {
     )
   })
 
+  it("shows a message if the user has no enrollments", async () => {
+    const { inner } = await renderPage({
+      entities: {
+        enrollments: {
+          program_enrollments:    [],
+          course_run_enrollments: []
+        }
+      }
+    })
+
+    const header = inner.find(".user-dashboard .header")
+    assert.isTrue(header.exists())
+    assert.include(
+      header.text(),
+      "You are not yet enrolled in any courses or programs"
+    )
+  })
+
   it("shows specific date information", async () => {
     const { inner } = await renderPage()
     sinon.assert.calledWith(
