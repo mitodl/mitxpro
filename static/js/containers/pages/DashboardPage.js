@@ -177,11 +177,12 @@ export class DashboardPage extends React.Component<Props, State> {
         <div className="row">
           <div className="header col-12">
             <h1>Dashboard</h1>
-            {enrollmentsExist ? (
-              <h3>Courses and Programs</h3>
-            ) : (
-              <h2>You are not yet enrolled in any courses or programs.</h2>
-            )}
+            {enrollments &&
+              (enrollmentsExist ? (
+                <h3>Courses and Programs</h3>
+              ) : (
+                <h2>You are not yet enrolled in any courses or programs.</h2>
+              ))}
           </div>
         </div>
         {enrollments ? (

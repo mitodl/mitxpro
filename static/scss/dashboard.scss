@@ -18,17 +18,17 @@
   }
 
   h2 {
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 600;
-    line-height: 2.75rem;
+    line-height: 2rem;
 
     @include media-breakpoint-down(sm) {
-      font-size: 1.6rem;
+      font-size: 1.25rem;
     }
   }
 
   h3 {
-    font-size: 1.75rem;
+    font-size: 1.25rem;
     font-weight: 600;
     color: $navy-blue;
     border-bottom: 1px solid $detail-grid-border-color;
@@ -42,13 +42,17 @@
   }
 }
 
+.text-ribbon,
 .user-dashboard,
 .collapse-toggle {
-  font-size: 2rem;
+  font-size: 1.25rem;
   font-weight: 600;
+}
 
+.user-dashboard,
+.collapse-toggle {
   @include media-breakpoint-down(sm) {
-    font-size: 1.6rem;
+    font-size: 1rem;
   }
 }
 
@@ -151,6 +155,7 @@
     height: 40px;
     top: 25px;
     right: 0;
+    z-index: 10;
 
     .text {
       padding-left: 7px;
