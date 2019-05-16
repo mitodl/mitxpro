@@ -2,6 +2,8 @@
 Tests for ecommerce serializers
 """
 # pylint: disable=unused-argument, redefined-outer-name
+from decimal import Decimal
+
 import pytest
 
 from mitxpro.test_utils import any_instance_of
@@ -227,8 +229,9 @@ def test_serialize_coupon_payment_version_serializer(basket_and_coupons):
         assert serializer.data.get(attr) == getattr(
             basket_and_coupons.coupongroup_best.payment_version, attr
         ).strftime(datetime_format)
-    assert serializer.data.get("amount") == "{0:.2}".format(
-        basket_and_coupons.coupongroup_best.payment_version.amount
+    assert (
+        Decimal(serializer.data.get("amount"))
+        == basket_and_coupons.coupongroup_best.payment_version.amount
     )
 
 

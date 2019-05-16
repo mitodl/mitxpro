@@ -10,7 +10,7 @@ from urllib.parse import urljoin
 import uuid
 
 from django.conf import settings
-from django.db.models import Q, Max, F, Count
+from django.db.models import Q, Max, F, Count, Subquery
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
@@ -153,7 +153,9 @@ def latest_coupon_version(coupon):
     return coupon.versions.order_by("-created_on").first()
 
 
-def get_valid_coupon_versions(product, user, auto_only=False, code=None):
+def get_valid_coupon_versions(
+    product, user, auto_only=False, code=None, full_discount=False, company=None
+):  # pylint:disable=too-many-arguments
     """
     Given a list of coupon ids, determine which of them are valid based on payment version dates and redemptions.
 
@@ -162,85 +164,83 @@ def get_valid_coupon_versions(product, user, auto_only=False, code=None):
         user (User): User of coupons
         auto_only (bool): Whether or not to filter by automatic=True
         code (str): A coupon code to filter by
+        full_discount (bool): If true, only include 100% off coupons
+        company (Company): a company to filter by
 
     Returns:
         list of CouponVersion: CouponVersion objects sorted by discount, highest first.
     """
-    valid_coupons = []
     now = now_in_utc()
 
-    with transaction.atomic():
-        # Get the ids of the latest coupon versions
-        product_coupon_query = CouponEligibility.objects.select_related(
-            "coupon"
-        ).filter(product=product, coupon__enabled=True)
-        if code:
-            product_coupon_query = product_coupon_query.filter(coupon__coupon_code=code)
-
-        cv_latest = (
-            CouponVersion.objects.select_related("coupon")
-            .filter(coupon__in=product_coupon_query.values_list("coupon", flat=True))
-            .order_by("coupon", "-created_on")
-            .distinct("coupon")
-            .values_list("pk")
+    # Get enabled coupons eligible for the product
+    product_coupon_subquery = CouponEligibility.objects.select_related("coupon").filter(
+        product=product, coupon__enabled=True
+    )
+    if code:
+        product_coupon_subquery = product_coupon_subquery.filter(
+            coupon__coupon_code=code
         )
 
-        # filter by expiration and activation dates
-        query = (
-            CouponVersion.objects.select_related("payment_version")
-            .filter(pk__in=cv_latest)
-            .filter(
-                Q(payment_version__expiration_date__gte=now)
-                | Q(payment_version__expiration_date__isnull=True)
+    # Get the latest versions for product coupons
+    coupon_version_subquery = CouponVersion.objects.filter(
+        coupon__in=Subquery(product_coupon_subquery.values_list("coupon", flat=True))
+    )
+
+    if full_discount:
+        coupon_version_subquery = coupon_version_subquery.filter(
+            payment_version__amount=decimal.Decimal(1)
+        )
+
+    if auto_only:
+        coupon_version_subquery = coupon_version_subquery.filter(
+            payment_version__automatic=True
+        )
+
+    if company is not None:
+        coupon_version_subquery = coupon_version_subquery.filter(
+            payment_version__company=company
+        )
+
+    coupon_version_subquery = coupon_version_subquery.order_by(
+        "coupon", "-created_on"
+    ).distinct("coupon")
+
+    # Exclude versions with too many redemptions or active dates outside of today.
+    query = (
+        CouponVersion.objects.select_related("coupon", "payment_version")
+        .filter(pk__in=Subquery(coupon_version_subquery.values_list("pk", flat=True)))
+        .filter(
+            Q(payment_version__expiration_date__gte=now)
+            | Q(payment_version__expiration_date__isnull=True)
+        )
+        .filter(
+            Q(payment_version__activation_date__lte=now)
+            | Q(payment_version__activation_date__isnull=True)
+        )
+        .annotate(
+            user_redemptions=(
+                Count(
+                    "couponredemption",
+                    filter=(
+                        Q(couponredemption__order__purchaser=user)
+                        & Q(couponredemption__order__status=Order.FULFILLED)
+                    ),
+                )
             )
-            .filter(
-                Q(payment_version__activation_date__lte=now)
-                | Q(payment_version__activation_date__isnull=True)
+        )
+        .annotate(
+            global_redemptions=(
+                Count(
+                    "couponredemption",
+                    filter=(Q(couponredemption__order__status=Order.FULFILLED)),
+                )
             )
         )
+        .exclude(user_redemptions__gte=F("payment_version__max_redemptions_per_user"))
+        .exclude(global_redemptions__gte=F("payment_version__max_redemptions"))
+    )
 
-        if auto_only:
-            query = query.filter(payment_version__automatic=True)
-
-        # filter by redemption counts
-        for coupon_version in query:
-            redemptions_global = (
-                CouponRedemption.objects.select_related("coupon_version", "order")
-                .filter(coupon_version=coupon_version)
-                .filter(order__status=Order.FULFILLED)
-            )
-            redemptions_user = redemptions_global.filter(order__purchaser=user)
-            if (
-                coupon_version.payment_version.max_redemptions
-                > redemptions_global.count()
-                and coupon_version.payment_version.max_redemptions_per_user
-                > redemptions_user.count()
-            ):
-                valid_coupons.append(coupon_version)
-        return sorted(
-            valid_coupons, key=lambda x: x.payment_version.amount, reverse=True
-        )
-
-
-def best_coupon_for_basket(basket, auto_only=False, code=None):
-    """
-    Get the best eligible coupon for the basket.
-    Assumes that the basket only contains one item/product.
-
-    Args:
-        basket (Basket): the basket Object
-        auto_only (bool): Only retrieve `automatic` Coupons
-        code (str): A coupon code to filter by
-
-    Returns:
-        CouponVersion: the CouponVersion with the highest discount, or None
-    """
-    basket_item = basket.basketitems.first()
-    if basket_item:
-        return best_coupon_for_product(
-            basket_item.product, basket.user, auto_only=auto_only, code=code
-        )
-    return None
+    return query.order_by("-payment_version__amount")
 
 
 def best_coupon_for_product(product, user, auto_only=False, code=None):

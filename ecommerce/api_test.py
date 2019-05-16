@@ -22,7 +22,6 @@ from ecommerce.api import (
     ISO_8601_FORMAT,
     make_reference_id,
     redeem_coupon,
-    best_coupon_for_basket,
     get_new_order_by_reference_number,
     get_product_price,
     get_product_version_price_with_discount,
@@ -37,7 +36,6 @@ from ecommerce.api import (
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
     BasketFactory,
-    BasketItemFactory,
     CouponRedemptionFactory,
     CouponSelectionFactory,
     CouponVersionFactory,
@@ -223,10 +221,12 @@ def test_get_valid_coupon_versions(basket_and_coupons, auto_only):
     """
     Verify that the correct valid CouponPaymentVersions are returned for a list of coupons
     """
-    best_versions = get_valid_coupon_versions(
-        basket_and_coupons.basket_item.product,
-        basket_and_coupons.basket_item.basket.user,
-        auto_only,
+    best_versions = list(
+        get_valid_coupon_versions(
+            basket_and_coupons.basket_item.product,
+            basket_and_coupons.basket_item.basket.user,
+            auto_only,
+        )
     )
     expected_versions = [basket_and_coupons.coupongroup_worst.coupon_version]
     if not auto_only:
@@ -246,11 +246,37 @@ def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):
     civ_best.expiration_date = today - timedelta(days=1)
     civ_best.save()
 
-    best_versions = get_valid_coupon_versions(
-        basket_and_coupons.basket_item.product,
-        basket_and_coupons.basket_item.basket.user,
+    best_versions = list(
+        get_valid_coupon_versions(
+            basket_and_coupons.basket_item.product,
+            basket_and_coupons.basket_item.basket.user,
+        )
     )
     assert best_versions == []
+
+
+def test_get_valid_coupon_versions_full_discount(basket_and_coupons):
+    """Verify that only 100% coupons are returned if full_discount kwarg is True"""
+    assert list(
+        get_valid_coupon_versions(
+            basket_and_coupons.basket_item.product,
+            basket_and_coupons.basket_item.basket.user,
+            full_discount=True,
+        )
+    ) == [basket_and_coupons.coupongroup_best.coupon_version]
+    assert basket_and_coupons.coupongroup_best.payment_version.amount == Decimal(1.0)
+
+
+def test_get_valid_coupon_versions_by_company(basket_and_coupons):
+    """Verify that valid coupons are filtered by company"""
+    company = basket_and_coupons.coupongroup_worst.payment_version.company
+    assert list(
+        get_valid_coupon_versions(
+            basket_and_coupons.basket_item.product,
+            basket_and_coupons.basket_item.basket.user,
+            company=company,
+        )
+    ) == [basket_and_coupons.coupongroup_worst.coupon_version]
 
 
 @pytest.mark.parametrize("order_status", [Order.FULFILLED, Order.FAILED])
@@ -276,9 +302,11 @@ def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons, order_statu
         ),
     )
 
-    best_versions = get_valid_coupon_versions(
-        basket_and_coupons.basket_item.product,
-        basket_and_coupons.basket_item.basket.user,
+    best_versions = list(
+        get_valid_coupon_versions(
+            basket_and_coupons.basket_item.product,
+            basket_and_coupons.basket_item.basket.user,
+        )
     )
     if order_status == Order.FULFILLED:
         assert best_versions == []
@@ -287,65 +315,6 @@ def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons, order_statu
             basket_and_coupons.coupongroup_best.coupon_version,
             basket_and_coupons.coupongroup_worst.coupon_version,
         ]
-
-
-@pytest.mark.parametrize("auto_only", [True, False])
-def test_get_best_coupon_for_basket(basket_and_coupons, auto_only):
-    """
-    Verify that the CouponPaymentVersion with the best price is returned for a bucket based on auto filter
-    """
-    best_cv = best_coupon_for_basket(
-        basket_and_coupons.basket_item.basket, auto_only=auto_only
-    )
-    if auto_only:
-        assert best_cv == basket_and_coupons.coupongroup_worst.coupon_version
-    else:
-        assert best_cv == basket_and_coupons.coupongroup_best.coupon_version
-
-
-@pytest.mark.parametrize("code", ["WORST", None])
-def test_get_best_coupon_for_basket_by_code(basket_and_coupons, code):
-    """
-    Verify that the CouponPaymentVersion with the best price is returned for a bucket based on coupon code
-    """
-    best_cv = best_coupon_for_basket(
-        basket_and_coupons.basket_item.basket, auto_only=False, code=code
-    )
-    if code:
-        assert best_cv == basket_and_coupons.coupongroup_worst.coupon_version
-    else:
-        assert best_cv == basket_and_coupons.coupongroup_best.coupon_version
-
-
-def test_get_best_coupon_for_basket_empty_basket():
-    """
-    Verify that the best_coupon_version() returns None if the basket has no product
-    """
-    assert best_coupon_for_basket(BasketFactory()) is None
-
-
-def test_get_best_coupon_for_basket_no_coupons():
-    """
-    Verify that best_coupon_version() returns None if the product has no coupons
-    """
-    basket_item = BasketItemFactory()
-    ProductVersionFactory(product=basket_item.product, price=Decimal(25.00))
-    assert best_coupon_for_basket(basket_item.basket) is None
-
-
-def test_get_best_coupon_for_basket_no_valid_coupons(basket_and_coupons):
-    """
-    Verify that best_coupon_version() returns None if the product coupons are invalid
-    """
-    today = now_in_utc()
-    civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.payment_version
-    civ_worst.activation_date = today + timedelta(days=1)
-    civ_worst.save()
-
-    assert (
-        best_coupon_for_basket(basket_and_coupons.basket_item.basket, code="WORST")
-        is None
-    )
 
 
 def test_latest_coupon_version(basket_and_coupons):

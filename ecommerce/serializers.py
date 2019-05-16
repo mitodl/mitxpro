@@ -544,18 +544,28 @@ class BaseCouponSerializer(serializers.Serializer):
                 payment_type=validated_data.get("payment_type"),
                 payment_transaction=validated_data.get("payment_transaction"),
             )
-            for coupon in range(validated_data.get("num_coupon_codes")):
-                coupon = models.Coupon.objects.create(
+
+            eligibilities = []
+
+            coupons = [
+                models.Coupon(
                     coupon_code=validated_data.get("coupon_code", uuid4().hex),
                     payment=payment,
                 )
-                models.CouponVersion.objects.create(
-                    coupon=coupon, payment_version=payment_version
-                )
-                for product_id in validated_data.get("product_ids"):
-                    models.CouponEligibility.objects.create(
-                        coupon=coupon, product_id=product_id
-                    )
+                for _ in range(validated_data.get("num_coupon_codes"))
+            ]
+            coupon_objs = models.Coupon.objects.bulk_create(coupons)
+            versions = [
+                models.CouponVersion(coupon=obj, payment_version=payment_version)
+                for obj in coupon_objs
+            ]
+            eligibilities = [
+                models.CouponEligibility(coupon=obj, product_id=product_id)
+                for obj in coupon_objs
+                for product_id in validated_data.get("product_ids")
+            ]
+            models.CouponVersion.objects.bulk_create(versions)
+            models.CouponEligibility.objects.bulk_create(eligibilities)
             return payment_version
 
 
