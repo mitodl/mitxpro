@@ -1,3 +1,4 @@
+// sass-lint:disable mixins-before-declarations
 .posted-block {
   width: 100%;
   padding: 75px 0;
@@ -23,13 +24,72 @@
     text-align: center;
   }
 
-  .posted-form {
+  form {
     margin: 0 auto;
-    max-width: 720px;
-    padding: 10px 15px;
+    max-width: 880px;
+
+    fieldset {
+      max-width: 100%;
+      position: relative;
+
+      &.form-columns-2 {
+
+        .input {
+          margin: 0;
+        }
+
+        .hs-form-field {
+          padding: 0 15px;
+          position: relative;
+
+          @include media-breakpoint-down(sm) {
+            padding: 0;
+            width: 100%;
+          }
+        }
+      }
+
+      &.form-columns-1 {
+
+        .hs_email {
+          padding: 0 15px;
+          width: 100%;
+
+          @include media-breakpoint-down(sm) {
+            padding: 0;
+          }
+        }
+
+        .input {
+          margin: 0;
+        }
+
+        .hs-input {
+          width: 100%;
+        }
+
+        .legal-consent-container {
+          padding: 0 15px;
+          color: white;
+
+          @include media-breakpoint-down(sm) {
+            padding: 0;
+          }
+        }
+      }
+    }
+
+    .hs_error_rollup {
+      display: none;
+    }
+
+    label {
+      color: white;
+      display: none;
+    }
 
     input[type="text"], input[type="email"] {
-      width: 100%;
+      width: 100% !important;
       margin: 0 0 30px;
       font-family: inherit;
       font-weight: 500;
@@ -42,9 +102,9 @@
       outline: none;
     }
 
-    .btn {
+    input[type="submit"] {
       width: 230px;
-      height: 60px;
+      height: 70px;
       font-size: larger;
       font-weight: 500;
       margin: 0 auto 20px;
@@ -52,6 +112,55 @@
       font-family: inherit;
       position: relative;
       top: 20px;
+      border: none;
+      color: white;
+      background: $primary;
+      border-radius: 0.25rem;
+      outline: none;
+      padding: 5px 10px;
     }
+  }
+
+  .hs-error-msgs {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    position: absolute;
+    bottom: 0;
+    left: 15px;
+    right: 15px;
+
+    @include media-breakpoint-down(sm) {
+      left: 0;
+      right: 0;
+    }
+
+    label {
+      color: $primary;
+      display: block;
+      line-height: 25px;
+      margin: 0;
+    }
+  }
+}
+
+.submitted-message {
+  margin-left: 200px;
+  color: $blue;
+  font-family: Rajdhani;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 4.95px;
+  line-height: 30px;
+  text-align: center;
+  width: 675px;
+
+  p:nth-child(2) {
+    color: white;
+  }
+
+  @include media-breakpoint-down(lg) {
+    margin: 0;
+    width: auto;
   }
 }
