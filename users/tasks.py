@@ -9,7 +9,6 @@ from rest_framework import status
 
 from mitxpro.celery import app
 from users.exceptions import HubspotUserSyncError
-from users.models import User
 
 HUBSPOT_API_BASE_URL = "https://api.hubapi.com"
 
@@ -64,6 +63,8 @@ def sync_users_batch_with_hubspot(user_ids_batch, api_key=settings.HUBSPOT_API_K
     """
     if not api_key:
         return
+    from users.models import User
+
     contacts = []
     for user_id in user_ids_batch:
         user = User.objects.get(id=user_id)
@@ -87,6 +88,8 @@ def sync_user_with_hubspot(user_id, api_key=settings.HUBSPOT_API_KEY):
     """
     if not api_key:
         return
+    from users.models import User
+
     user = User.objects.get(id=user_id)
     url = f"{HUBSPOT_API_BASE_URL}/contacts/v1/contact/createOrUpdate/email/{user.email}?hapikey={api_key}"
     data = json.dumps(make_hubspot_contact_update(user))

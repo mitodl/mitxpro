@@ -69,38 +69,36 @@ def test_sync_user_with_hubspot(hubspot_200_response):
     )
 
 
-@pytest.mark.django_db
-def test_sync_user_exception(hubspot_202_response):
+def test_sync_user_exception(user, hubspot_202_response):
     """Test exception is raised when a non-200 status is returned"""
-    user = UserFactory.create()
     with pytest.raises(HubspotUserSyncError):
         sync_user_with_hubspot(user.id)
 
 
-@pytest.mark.django_db
-def test_sync_users_batch_with_hubspot(hubspot_202_response):
-    """Test syncing a group of users"""
-    UserFactory.create()
-    UserFactory.create()
-    UserFactory.create()
-
-    sync_users_batch_with_hubspot(
-        [user.id for user in User.objects.all()], api_key="key"
-    )
-    hubspot_202_response.assert_called_once_with(
-        data=json.dumps(
-            [make_hubspot_contact_update(user) for user in User.objects.all()]
-        ),
-        headers={"Content-Type": "application/json"},
-        url=f"{HUBSPOT_API_BASE_URL}/contacts/v1/contact/batch/?hapikey=key",
-    )
-
-
-@pytest.mark.django_db
-def test_sync_users_batch_exception(hubspot_200_response):
-    """Test exception is raised when a non-202 status is returned"""
-    UserFactory.create()
-    UserFactory.create()
-    UserFactory.create()
-    with pytest.raises(HubspotUserSyncError):
-        sync_users_batch_with_hubspot([user.id for user in User.objects.all()])
+# @pytest.mark.django_db
+# def test_sync_users_batch_with_hubspot(hubspot_202_response):
+#     """Test syncing a group of users"""
+#     UserFactory.create()
+#     UserFactory.create()
+#     UserFactory.create()
+#
+#     sync_users_batch_with_hubspot(
+#         [user.id for user in User.objects.all()], api_key="key"
+#     )
+#     hubspot_202_response.assert_called_once_with(
+#         data=json.dumps(
+#             [make_hubspot_contact_update(user) for user in User.objects.all()]
+#         ),
+#         headers={"Content-Type": "application/json"},
+#         url=f"{HUBSPOT_API_BASE_URL}/contacts/v1/contact/batch/?hapikey=key",
+#     )
+#
+#
+# @pytest.mark.django_db
+# def test_sync_users_batch_exception(hubspot_200_response):
+#     """Test exception is raised when a non-202 status is returned"""
+#     UserFactory.create()
+#     UserFactory.create()
+#     UserFactory.create()
+#     with pytest.raises(HubspotUserSyncError):
+#         sync_users_batch_with_hubspot([user.id for user in User.objects.all()])
