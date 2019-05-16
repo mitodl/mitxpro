@@ -153,6 +153,21 @@ describe("CheckoutPage", () => {
     })
   })
 
+  it("submits the coupon code currently in the basket if there is none in the state", async () => {
+    const { inner } = await renderPage()
+    const code = basket.coupons[0].code
+    await inner.find(".apply-button").prop("onClick")({
+      preventDefault: helper.sandbox.stub()
+    })
+    sinon.assert.calledWith(helper.handleRequestStub, "/api/basket/", "PATCH", {
+      body:        { coupons: [{ code: code }] },
+      credentials: undefined,
+      headers:     {
+        "X-CSRFTOKEN": null
+      }
+    })
+  })
+
   it("tries to submit the coupon code but receives an error message", async () => {
     const { inner } = await renderPage()
     const errors = "Unknown error"
