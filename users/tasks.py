@@ -9,6 +9,7 @@ from rest_framework import status
 
 from mitxpro.celery import app
 from users.exceptions import HubspotUserSyncError
+from users.models import User
 
 HUBSPOT_API_BASE_URL = "https://api.hubapi.com"
 
@@ -23,25 +24,23 @@ hubspot_property_mapping = {
 
 def map_hubspot_property(user, key, mapping):
     """
-    Map a user to a hubspot contact dict
-    :param user: user object to map
-    :param key: property name in hubspot
-    :param mapping: dict containing model and field to find value, optionally contains 'default'
-    :return: dictionary in the form expected by hubspot api:
-        { 'properties': [
-            {'property': 'property_name',
-            'value': value},
-            ...]
-        }
+    Translate user database fields into Hubspot contact properties based on the above mapping
+    Args:
+        user (User): a users.models.User object
+        key (str): name of a contact property
+        mapping (dict): contact properties map
+    Returns:
+        dict: a hubspot property map for the specified key
     """
     prop = {
         "property": key,
         "value": mapping["default"] if "default" in mapping else "",
     }
-    if mapping["model"] == "profile" and hasattr(user, "profile"):
-        prop["value"] = getattr(user.profile, mapping["field"])
-    elif mapping["model"] == "user":
+    if mapping["model"] == "user":
         prop["value"] = getattr(user, mapping["field"])
+    else:
+        if hasattr(user, mapping["model"]):
+            prop["value"] = getattr(getattr(user, mapping["model"]), mapping["field"])
     return prop
 
 
@@ -59,14 +58,15 @@ def make_hubspot_contact_update(user):
 
 
 @app.task()
-def sync_users_batch_with_hubspot(users_batch, api_key=settings.HUBSPOT_API_KEY):
+def sync_users_batch_with_hubspot(user_ids_batch, api_key=settings.HUBSPOT_API_KEY):
     """
     Sync a batch of users with hubspot
     """
     if not api_key:
         return
     contacts = []
-    for user in users_batch:
+    for user_id in user_ids_batch:
+        user = User.objects.get(id=user_id)
         contacts.append(make_hubspot_contact_update(user))
 
     url = f"{HUBSPOT_API_BASE_URL}/contacts/v1/contact/batch/?hapikey={api_key}"
@@ -81,12 +81,13 @@ def sync_users_batch_with_hubspot(users_batch, api_key=settings.HUBSPOT_API_KEY)
 
 
 @app.task()
-def sync_user_with_hubspot(user, api_key=settings.HUBSPOT_API_KEY):
+def sync_user_with_hubspot(user_id, api_key=settings.HUBSPOT_API_KEY):
     """
     Sync a batch of users with hubspot
     """
     if not api_key:
         return
+    user = User.objects.get(id=user_id)
     url = f"{HUBSPOT_API_BASE_URL}/contacts/v1/contact/createOrUpdate/email/{user.email}?hapikey={api_key}"
     data = json.dumps(make_hubspot_contact_update(user))
     headers = {"Content-Type": "application/json"}

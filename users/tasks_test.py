@@ -1,11 +1,14 @@
 """Users tasks tests"""
 # pylint: disable=redefined-outer-name
+# pylint: disable=unused-argument
+
 import json
 from unittest.mock import Mock
 
 import pytest
 from rest_framework import status
 
+from users.exceptions import HubspotUserSyncError
 from users.factories import UserFactory
 from users.models import User
 from users.tasks import (
@@ -58,12 +61,20 @@ def test_sync_without_api_key():
 def test_sync_user_with_hubspot(hubspot_200_response):
     """Test syncing a new user with hubspot"""
     user = UserFactory.create()
-    sync_user_with_hubspot(user, api_key="key")
+    sync_user_with_hubspot(user.id, api_key="key")
     hubspot_200_response.assert_called_once_with(
         data=json.dumps(make_hubspot_contact_update(user)),
         headers={"Content-Type": "application/json"},
         url=f"{HUBSPOT_API_BASE_URL}/contacts/v1/contact/createOrUpdate/email/{user.email}?hapikey=key",
     )
+
+
+@pytest.mark.django_db
+def test_sync_user_exception(hubspot_202_response):
+    """Test exception is raised when a non-200 status is returned"""
+    user = UserFactory.create()
+    with pytest.raises(HubspotUserSyncError):
+        sync_user_with_hubspot(user.id)
 
 
 @pytest.mark.django_db
@@ -73,7 +84,9 @@ def test_sync_users_batch_with_hubspot(hubspot_202_response):
     UserFactory.create()
     UserFactory.create()
 
-    sync_users_batch_with_hubspot(User.objects.all(), api_key="key")
+    sync_users_batch_with_hubspot(
+        [user.id for user in User.objects.all()], api_key="key"
+    )
     hubspot_202_response.assert_called_once_with(
         data=json.dumps(
             [make_hubspot_contact_update(user) for user in User.objects.all()]
@@ -81,3 +94,13 @@ def test_sync_users_batch_with_hubspot(hubspot_202_response):
         headers={"Content-Type": "application/json"},
         url=f"{HUBSPOT_API_BASE_URL}/contacts/v1/contact/batch/?hapikey=key",
     )
+
+
+@pytest.mark.django_db
+def test_sync_users_batch_exception(hubspot_200_response):
+    """Test exception is raised when a non-202 status is returned"""
+    UserFactory.create()
+    UserFactory.create()
+    UserFactory.create()
+    with pytest.raises(HubspotUserSyncError):
+        sync_users_batch_with_hubspot([user.id for user in User.objects.all()])
