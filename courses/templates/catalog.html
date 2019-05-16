@@ -3,11 +3,6 @@
 
 {% block title %}MIT xPro | Course Catalog{% endblock %}
 
-{% block scripts %}
-  {{ block.super }}
-  <script src="{% static 'js/catalog.js' %}"></script>
-{% endblock %}
-
 {% block content %}
 <div class="course-catalog">
     {% block banner %}
@@ -22,20 +17,17 @@
         <div class="container">
             <ul class="nav nav-tabs" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active" data-toggle="tab" href="#all" role="tab"
-                        aria-controls="all" aria-selected="true">All</a>
+                    <a class="nav-link active" id="all-tab" data-toggle="tab" href="#all" role="tab" aria-controls="all" aria-selected="true">All</a>
                 </li>
                 <li class="nav-item">
-                    <a id= "program" class="nav-link" data-toggle="tab" href="#programs" role="tab"
-                        aria-controls="programs" aria-selected="false">programs</a>
+                    <a id="programs-tab" class="nav-link" data-toggle="tab" href="#programs" role="tab" aria-controls="programs" aria-selected="false">programs</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#courses" role="tab"
-                        aria-controls="courses" aria-selected="false">Courses</a>
+                    <a class="nav-link" data-toggle="tab" id="courses-tab" href="#courses" role="tab" aria-controls="courses" aria-selected="false">Courses</a>
                 </li>
             </ul>
             <div class="tab-content">
-                <div class="tab-pane catalog-body active" id="all" role="tabpanel" aria-labelledby="all-tab">
+                <div class="tab-pane catalog-body fade in show active" id="all" role="tabpanel" aria-labelledby="all-tab">
                     <h1>FEATURED</h1>
                     {% for program in programs %}
                         {% include "catalog_card.html" with courseware_object=program object_type="program" tab="all" %}
@@ -44,13 +36,13 @@
                         {% include "catalog_card.html" with courseware_object=course object_type="course" tab="all"%}
                     {% endfor %}
                 </div>
-                <div class="tab-pane catalog-body" id="programs" role="tabpanel" aria-labelledby="programs-tab">
+                <div class="tab-pane catalog-body fade" id="programs" role="tabpanel" aria-labelledby="programs-tab">
                     <h1>PROGRAMS</h1>
                     {% for program in programs %}
                         {% include "catalog_card.html" with courseware_object=program object_type="program" tab="program" %}
                     {% endfor %}
                 </div>
-                <div class="tab-pane catalog-body" id="courses" role="tabpanel" aria-labelledby="courses-tab">
+                <div class="tab-pane catalog-body fade" id="courses" role="tabpanel" aria-labelledby="courses-tab">
                     <h1>COURSES</h1>
                     {% for course in courses %}
                         {% include "catalog_card.html" with courseware_object=course object_type="course" tab="course" %}

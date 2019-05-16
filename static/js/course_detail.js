@@ -8,6 +8,15 @@ $(document).ready(function() {
     $("li.extra-faq").toggleClass("d-none");
     $readmoreText.text($readmoreText.text() === "Hide" ? "Read" : "Hide");
   });
+
+  $(".dates-tooltip").popover({
+    template:
+      '<div class="popover" role="tooltip"> \
+        <div class="arrow"></div> \
+        <div class="popover-header py-2 px-0 mx-5"></div> \
+        <div class="popover-body"></div> \
+      </div>'
+  });
 });
 
 $(".course-slider").slick({

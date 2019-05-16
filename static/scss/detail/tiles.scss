@@ -2,7 +2,7 @@
 
 .tiles-block {
   padding: 32px 0px;
-  background: $tiles-background url('#{$static-path}/images/tiles-bg.png') repeat-x 0 100%;
+  background: $tiles-background url("#{$static-path}/images/tiles-bg.png") repeat-x 0 100%;
   min-height: 200px;
 
   @include media-breakpoint-up(lg) {
@@ -14,9 +14,8 @@
   }
 }
 
-
 .tiles-list {
-  letter-spacing: -.32em;
+  letter-spacing: -0.32em;
   margin: 0;
   padding: 0 7px;
   list-style: none;
@@ -55,7 +54,7 @@
       top: 100%;
       border-bottom: 1px solid $primary;
       width: 100px;
-      content: '';
+      content: "";
       margin: 0 0 0 -50px;
     }
   }
@@ -94,6 +93,30 @@
       &:hover {
         text-decoration: none;
       }
+    }
+  }
+}
+
+.popover {
+  font-family: Rajdhani, "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-weight: 600;
+  max-width: 100% !important;
+
+  .popover-header {
+    background-color: white;
+    color: $primary;
+    font-size: larger;
+    text-align: center;
+    border-bottom: 1px solid $primary;
+  }
+
+  .popover-body {
+    text-align: center;
+
+    .date-link {
+      font-weight: 600;
+      font-size: large;
+      color: $blue;
     }
   }
 }

@@ -2,6 +2,7 @@
 Course models
 """
 import logging
+import operator as op
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericRelation
@@ -299,6 +300,18 @@ class Course(TimestampedModel, PageProperties):
         return first_matching_item(
             self.courseruns.all().order_by("start_date"),
             lambda course_run: course_run.is_unexpired,
+        )
+
+    @property
+    def unexpired_runs(self):
+        """
+        Gets all the unexpired CourseRuns associated with this Course
+        """
+        return list(
+            filter(
+                op.attrgetter("is_unexpired"),
+                self.courseruns.all().order_by("start_date"),
+            )
         )
 
     class Meta:
