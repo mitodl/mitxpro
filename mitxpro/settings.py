@@ -112,6 +112,7 @@ MIDDLEWARE = (
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "wagtail.core.middleware.SiteMiddleware",
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",
+    "mitxpro.middleware.BannerNotificationMiddleware",
 )
 
 # enable the nplusone profiler only in debug mode
@@ -142,7 +143,6 @@ TEMPLATES = [
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
                 "mitxpro.context_processors.api_keys",
-                "mitxpro.context_processors.notifications",
             ]
         },
     }

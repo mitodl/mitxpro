@@ -461,16 +461,7 @@ class NotificationPage(Page):
         help_text="Message that will be shown as notification.",
     )
 
-    is_enabled = models.BooleanField(
-        default=False,
-        blank=True,
-        help_text="It will determine if notification is enabled/disabled."
-    )
-
-    content_panels = [
-        FieldPanel("notification"),
-        FieldPanel("is_enabled"),
-    ]
+    content_panels = [FieldPanel("notification")]
 
     def save(self, *args, **kwargs):
         # autogenerate a unique slug so we don't hit a ValidationError

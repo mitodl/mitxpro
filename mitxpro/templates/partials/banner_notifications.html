@@ -1,0 +1,8 @@
+<div class="site-wide-notifications">
+  {% for notification in request.session.notifications %}
+  <div class="alert">
+    <a href="#" class="close-alert"></a>
+    {{ notification }}
+  </div>
+  {% endfor %}
+</div>
