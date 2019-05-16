@@ -696,8 +696,8 @@ def test_patch_basket_multiple_runs(
 def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
     """A patch request for a run for a course that the user has already enrolled in should result in a 400 error"""
     run = basket_and_coupons.run
-    order = LineFactory.create(order__status=Order.FULFILLED).order
-    CourseRunEnrollment.objects.create(run=run, user=order.purchaser)
+    LineFactory.create(order__status=Order.FULFILLED)
+    CourseRunEnrollment.objects.create(run=run, user=basket_and_coupons.basket.user)
 
     resp = basket_client.patch(
         reverse("basket_api"),
@@ -710,6 +710,24 @@ def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     assert resp.json()["errors"] == ["User has already enrolled in run"]
+
+
+def test_patch_basket__another_user_enrolled(basket_client, basket_and_coupons):
+    """A patch request for a run for a course that another user has already enrolled in should succeed"""
+    run = basket_and_coupons.run
+    order = LineFactory.create(order__status=Order.FULFILLED).order
+    CourseRunEnrollment.objects.create(run=run, user=order.purchaser)
+
+    resp = basket_client.patch(
+        reverse("basket_api"),
+        type="json",
+        data={
+            "items": [
+                {"id": basket_and_coupons.product_version.id, "run_ids": [run.id]}
+            ]
+        },
+    )
+    assert resp.status_code == status.HTTP_200_OK
 
 
 def test_patch_basket_data_consents(basket_and_agreement):

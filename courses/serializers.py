@@ -5,6 +5,7 @@ from django.templatetags.static import static
 from rest_framework import serializers
 
 from courses import models
+from ecommerce.serializers import CompanySerializer
 
 
 def _get_thumbnail_url(page):
@@ -147,8 +148,6 @@ class ProgramSerializer(serializers.ModelSerializer):
 class CourseRunEnrollmentSerializer(serializers.ModelSerializer):
     """CourseRunEnrollment model serializer"""
 
-    from ecommerce.serializers import CompanySerializer
-
     run = CourseRunDetailSerializer(read_only=True)
     company = CompanySerializer(read_only=True)
 
@@ -159,8 +158,6 @@ class CourseRunEnrollmentSerializer(serializers.ModelSerializer):
 
 class ProgramEnrollmentSerializer(serializers.ModelSerializer):
     """ProgramEnrollmentSerializer model serializer"""
-
-    from ecommerce.serializers import CompanySerializer
 
     program = BaseProgramSerializer(read_only=True)
     course_run_enrollments = serializers.SerializerMethodField()
