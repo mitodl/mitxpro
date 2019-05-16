@@ -1,59 +1,18 @@
 // sass-lint:disable mixins-before-declarations
 
 .header-holder {
-  background: white;
-  padding: 20px 0;
-  position: relative;
-  z-index: 99;
+  padding: 20px 0px;
 
-  .container {
-    &:after {
-      clear: both;
-      content: '';
-      display: block;
-    }
+  @include media-breakpoint-down(md) {
+    max-width: 100%;
   }
 
-  .logo-section {
-    float: left;
-    width: 170px;
-
-    img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
+  .navbar {
+    padding: 0;
   }
 }
 
-.sub-nav {
-  float: right;
-  padding: 5px 0;
-  position: static;
-  display: block;
-  margin: 0;
-  min-height: 0;
-
-  .collapse.in {
-    display: block !important;
-  }
-}
-
-#nav {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  letter-spacing: -.32em;
-
-  @include media-breakpoint-down(sm) {
-    position: absolute;
-    left: 0;
-    background: white;
-    top: 100%;
-    width: 100%;
-    margin: 1px 0 0;
-  }
-
+.navbar-collapse {
   li {
     letter-spacing: normal;
     display: inline-block;
@@ -62,10 +21,6 @@
     line-height: 25px;
     font-weight: 500;
     padding: 0 0 0 10px;
-
-    @include media-breakpoint-down(sm) {
-      padding: 10px 0 10px 10px;
-    }
 
     a {
       padding: 5px 10px;
@@ -89,16 +44,22 @@
   }
 }
 
+.navbar-collapse.collapsing,
+.navbar-collapse.show {
+  display: flex;
+}
+
+.site-logo {
+  width: 154px;
+  height: auto;
+}
+
 .navbar-toggler.nav-opener {
   border: 1px solid $primary;
   border-radius: 2px;
   color: $primary;
   margin: 5px 0 0;
   padding: 8px 6px 6px;
-
-  @include media-breakpoint-up(sm) {
-    display: none;
-  }
 
   .navbar-toggler-icon {
     width: 18px;

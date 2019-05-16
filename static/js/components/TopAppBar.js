@@ -13,16 +13,14 @@ type Props = {
 const TopAppBar = ({ currentUser }: Props) => (
   <header className="header-holder">
     <div className="container">
-      <div className="logo-section">
-        <a href={routes.root}>
+      <nav className="sub-nav navbar navbar-expand-md link-section">
+        <a href={routes.root} className="navbar-brand">
           <img
             src="/static/images/mitx-pro-logo.png"
             className="site-logo"
             alt="MIT xPRO"
           />
         </a>
-      </div>
-      <nav className="sub-nav navbar navbar-toggleable-sm link-section">
         <button
           className="navbar-toggler nav-opener"
           type="button"
@@ -35,7 +33,10 @@ const TopAppBar = ({ currentUser }: Props) => (
           <span className="navbar-toggler-icon" />
           Menu
         </button>
-        <ul id="nav" className="collapse navbar-collapse">
+        <ul
+          id="nav"
+          className="collapse navbar-collapse px-0 justify-content-end"
+        >
           <li>
             <a href={routes.catalog} className="" aria-label="catalog">
               Catalog
