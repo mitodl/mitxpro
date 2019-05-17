@@ -7,7 +7,8 @@ declare type Settings = {
   sentry_dsn: string,
   release_version: string,
   environment: string,
-  gaTrackingID: ?string
+  gaTrackingID: ?string,
+  recaptchaKey: ?string
 }
 declare var SETTINGS: Settings;
 

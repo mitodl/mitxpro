@@ -30,6 +30,7 @@ def test_webpack_url(mocker, settings, client):
     settings.ENVIRONMENT = "test"
     settings.VERSION = "4.5.6"
     settings.USE_WEBPACK_DEV_SERVER = False
+    settings.RECAPTCHA_SITE_KEY = "fake_key"
     get_bundle = mocker.patch("mitxpro.templatetags.render_bundle._get_bundle")
 
     response = client.get(reverse("login"))
@@ -43,6 +44,7 @@ def test_webpack_url(mocker, settings, client):
         "environment": settings.ENVIRONMENT,
         "sentry_dsn": None,
         "release_version": settings.VERSION,
+        "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
     }
 
 

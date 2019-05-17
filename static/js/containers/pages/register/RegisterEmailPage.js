@@ -23,12 +23,13 @@ type Props = {
   params: { next: string },
   registerEmail: (
     email: string,
+    recaptcha: ?string,
     next: ?string
   ) => Promise<Response<AuthResponse>>
 }
 
 class RegisterEmailPage extends React.Component<Props> {
-  async onSubmit({ email }, { setSubmitting, setErrors }) {
+  async onSubmit({ email, recaptcha }, { setSubmitting, setErrors }) {
     const {
       registerEmail,
       params: { next },
@@ -38,7 +39,7 @@ class RegisterEmailPage extends React.Component<Props> {
     try {
       const {
         body: { state, errors }
-      }: { body: AuthResponse } = await registerEmail(email, next)
+      }: { body: AuthResponse } = await registerEmail(email, recaptcha, next)
 
       if (state === STATE_REGISTER_CONFIRM_SENT) {
         history.push(routes.dashboard)
@@ -67,8 +68,8 @@ const mapStateToProps = createStructuredSelector({
   })
 })
 
-const registerEmail = (email: string, nextUrl: ?string) =>
-  mutateAsync(queries.auth.registerEmailMutation(email, nextUrl))
+const registerEmail = (email: string, recaptcha: ?string, nextUrl: ?string) =>
+  mutateAsync(queries.auth.registerEmailMutation(email, recaptcha, nextUrl))
 
 const mapDispatchToProps = {
   registerEmail

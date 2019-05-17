@@ -54,10 +54,14 @@ export default {
     body: { password, partial_token: partialToken, flow: FLOW_LOGIN }
   }),
 
-  registerEmailMutation: (email: string, next: ?string) => ({
+  registerEmailMutation: (
+    email: string,
+    recaptcha: ?string,
+    next: ?string
+  ) => ({
     ...DEFAULT_OPTIONS,
     url:  "/api/register/email/",
-    body: { email, next, flow: FLOW_REGISTER }
+    body: { email, recaptcha, next, flow: FLOW_REGISTER }
   }),
 
   registerConfirmEmailMutation: (code: string, partialToken: string) => ({

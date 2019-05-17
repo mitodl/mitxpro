@@ -25,6 +25,7 @@ def get_js_settings_context(request):
         "environment": settings.ENVIRONMENT,
         "public_path": public_path(request),
         "release_version": settings.VERSION,
+        "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
         "sentry_dsn": sentry.get_public_dsn(),
     }
     return {"js_settings_json": json.dumps(js_settings)}
