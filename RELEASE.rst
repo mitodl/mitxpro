@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.4.1
+Version 0.4.1 (Released May 17, 2019)
 -------------
 
 - Issue #294 Fix Header Navbar Structure
