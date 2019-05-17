@@ -32,6 +32,10 @@ As a member of the marketing team, I'd like to be able to post a message that wi
 
 - Add view `MarkNotificationViewed` to add entry in `UserNotification`, once user clicked on `close` button on notification.
 
+###### Open Questions:
+   - Do we want to show these notifications to anonymous users? In that case saving state in model won't work.
+   - Do we want show notification to set of users or upon particular condition?
+
 ##### Frontend changes
 
  - Use Bootstrap's [Toast](https://getbootstrap.com/docs/4.2/components/toasts/#placement) component to show notification to user.
