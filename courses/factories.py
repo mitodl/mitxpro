@@ -2,14 +2,24 @@
 import pytz
 import faker
 import factory
-from factory import fuzzy, SubFactory
+from factory import fuzzy, SubFactory, Trait
 from factory.django import DjangoModelFactory
 
+from ecommerce.models import Company
 from users.factories import UserFactory
 
 from .models import Program, Course, CourseRun, ProgramEnrollment, CourseRunEnrollment
 
 FAKE = faker.Factory.create()
+
+
+class CompanyFactory(DjangoModelFactory):
+    """Factory for Company"""
+
+    name = factory.Faker("company")
+
+    class Meta:
+        model = Company
 
 
 class ProgramFactory(DjangoModelFactory):
@@ -75,6 +85,9 @@ class CourseRunEnrollmentFactory(DjangoModelFactory):
     user = SubFactory(UserFactory)
     run = SubFactory(CourseRunFactory)
 
+    class Params:
+        has_company_affiliation = Trait(company=SubFactory(CompanyFactory))
+
     class Meta:
         model = CourseRunEnrollment
 
@@ -84,6 +97,9 @@ class ProgramEnrollmentFactory(DjangoModelFactory):
 
     user = SubFactory(UserFactory)
     program = SubFactory(ProgramFactory)
+
+    class Params:
+        has_company_affiliation = Trait(company=SubFactory(CompanyFactory))
 
     class Meta:
         model = ProgramEnrollment

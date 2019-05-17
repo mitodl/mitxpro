@@ -398,8 +398,11 @@ def enroll_user_on_success(order):  # pylint: disable=unused-argument
     runs = CourseRun.objects.filter(courserunselection__basket=basket)
     # pylint: disable=fixme
     # TODO: Actually enroll the user in the given course runs on Open edX
+    company = get_company_affiliation(order)
     for run in runs:
-        CourseRunEnrollment.objects.get_or_create(user=order.purchaser, run=run)
+        CourseRunEnrollment.objects.get_or_create(
+            user=order.purchaser, run=run, defaults={"company": company}
+        )
     for line in order.lines.all():
         if (
             line.product_version.product.content_type.model
@@ -408,7 +411,16 @@ def enroll_user_on_success(order):  # pylint: disable=unused-argument
             ProgramEnrollment.objects.get_or_create(
                 user=order.purchaser,
                 program=line.product_version.product.content_object,
+                defaults={"company": company},
             )
+
+
+def get_company_affiliation(order):
+    """ Get a company affiliated with an order via coupon """
+    redemption = CouponRedemption.objects.filter(order=order).last()
+    if redemption:
+        return redemption.coupon_version.payment_version.company
+    return None
 
 
 @transaction.atomic

@@ -22,6 +22,7 @@ from courses.serializers import (
     CourseRunEnrollmentSerializer,
     ProgramEnrollmentSerializer,
 )
+from ecommerce.serializers import CompanySerializer
 from mitxpro.test_utils import drf_datetime
 
 
@@ -127,12 +128,20 @@ def test_serialize_course_run_detail():
     }
 
 
-def test_serialize_course_run_enrollments():
+@pytest.mark.parametrize("has_company", [True, False])
+def test_serialize_course_run_enrollments(has_company):
     """Test that CourseRunEnrollmentSerializer has correct data"""
-    course_run_enrollment = CourseRunEnrollmentFactory.create()
+    course_run_enrollment = CourseRunEnrollmentFactory.create(
+        has_company_affiliation=has_company
+    )
     serialized_data = CourseRunEnrollmentSerializer(course_run_enrollment).data
     assert serialized_data == {
-        "run": CourseRunDetailSerializer(course_run_enrollment.run).data
+        "run": CourseRunDetailSerializer(course_run_enrollment.run).data,
+        "company": (
+            CompanySerializer(course_run_enrollment.company).data
+            if has_company
+            else None
+        ),
     }
 
 
@@ -143,7 +152,8 @@ def test_serialize_program_enrollments_assert():
         ProgramEnrollmentSerializer(program_enrollment)
 
 
-def test_serialize_program_enrollments():
+@pytest.mark.parametrize("has_company", [True, False])
+def test_serialize_program_enrollments(has_company):
     """Test that ProgramEnrollmentSerializer has correct data"""
     program = ProgramFactory.create()
     course_run_enrollments = CourseRunEnrollmentFactory.create_batch(
@@ -151,13 +161,18 @@ def test_serialize_program_enrollments():
         run__course__program=factory.Iterator([program, program, None]),
         run__course__position_in_program=factory.Iterator([2, 1, None]),
     )
-    program_enrollment = ProgramEnrollmentFactory.create(program=program)
+    program_enrollment = ProgramEnrollmentFactory.create(
+        program=program, has_company_affiliation=has_company
+    )
     serialized_data = ProgramEnrollmentSerializer(
         program_enrollment, context={"course_run_enrollments": course_run_enrollments}
     ).data
     assert serialized_data == {
         "id": program_enrollment.id,
         "program": BaseProgramSerializer(program).data,
+        "company": (
+            CompanySerializer(program_enrollment.company).data if has_company else None
+        ),
         # Only enrollments for the given program should be serialized, and they should be
         # sorted by position in program.
         "course_run_enrollments": CourseRunEnrollmentSerializer(

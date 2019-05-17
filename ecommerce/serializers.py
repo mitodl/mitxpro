@@ -11,7 +11,6 @@ from rest_framework.validators import UniqueValidator
 
 from courses.models import Course, CourseRun, Program, CourseRunEnrollment
 from courses.constants import DEFAULT_COURSE_IMG_PATH
-from courses.serializers import CourseSerializer
 from ecommerce import models
 from ecommerce.api import (
     best_coupon_for_product,
@@ -70,6 +69,8 @@ class ProductVersionSerializer(serializers.ModelSerializer):
 
     def get_courses(self, instance):
         """ Return the courses in the product """
+        from courses.serializers import CourseSerializer
+
         model_class = instance.product.content_type.model_class()
         if model_class is CourseRun:
             courses = [instance.product.content_object.course]
@@ -236,7 +237,7 @@ class BasketSerializer(serializers.ModelSerializer):
         return DataConsentUserSerializer(instance=data_consents, many=True).data
 
     @classmethod
-    def _get_runs_for_product(cls, *, product_version, run_ids):
+    def _get_runs_for_product(cls, *, product_version, run_ids, user):
         """Helper function to get and validate selected runs in a product"""
         runs_for_product = list(
             product_version.product.run_queryset.filter(id__in=run_ids)
@@ -254,7 +255,7 @@ class BasketSerializer(serializers.ModelSerializer):
             elif courses_for_product[run.course_id] != run.id:
                 raise ValidationError("Only one run per course can be selected")
 
-        if CourseRunEnrollment.objects.filter(run_id__in=run_ids).exists():
+        if CourseRunEnrollment.objects.filter(user=user, run_id__in=run_ids).exists():
             raise ValidationError("User has already enrolled in run")
 
         return runs_for_product
@@ -281,7 +282,7 @@ class BasketSerializer(serializers.ModelSerializer):
             product_version = models.ProductVersion.objects.get(id=product_version_id)
             if run_ids is not None:
                 runs = cls._get_runs_for_product(
-                    product_version=product_version, run_ids=run_ids
+                    product_version=product_version, run_ids=run_ids, user=basket.user
                 )
             else:
                 runs = None
