@@ -82,16 +82,11 @@ class CourseRunFactory(DjangoModelFactory):
 class CourseRunEnrollmentFactory(DjangoModelFactory):
     """Factory for CourseRunEnrollment"""
 
-    class Params:
-        has_company_affiliation = Trait(company=SubFactory(CompanyFactory))
-
     user = SubFactory(UserFactory)
     run = SubFactory(CourseRunFactory)
-    company = factory.Maybe(
-        "has_company_affiliation",
-        yes_declaration=SubFactory(CompanyFactory),
-        no_declaration=None,
-    )
+
+    class Params:
+        has_company_affiliation = Trait(company=SubFactory(CompanyFactory))
 
     class Meta:
         model = CourseRunEnrollment
@@ -100,16 +95,11 @@ class CourseRunEnrollmentFactory(DjangoModelFactory):
 class ProgramEnrollmentFactory(DjangoModelFactory):
     """Factory for ProgramEnrollment"""
 
-    class Params:
-        has_company_affiliation = Trait(company=SubFactory(CompanyFactory))
-
     user = SubFactory(UserFactory)
     program = SubFactory(ProgramFactory)
-    company = factory.Maybe(
-        "has_company_affiliation",
-        yes_declaration=SubFactory(CompanyFactory),
-        no_declaration=None,
-    )
+
+    class Params:
+        has_company_affiliation = Trait(company=SubFactory(CompanyFactory))
 
     class Meta:
         model = ProgramEnrollment
