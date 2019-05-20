@@ -3,7 +3,7 @@
 import json
 import pytest
 
-from cms.factories import ResourcePageFactory
+from cms.factories import ResourcePageFactory, SiteNotificationFactory
 
 pytestmark = [pytest.mark.django_db]
 
@@ -44,3 +44,13 @@ def test_resource_page_unique_slug():
     page = ResourcePageFactory(title="title of the page")
     another_page = ResourcePageFactory(title="title of the page")
     assert page.slug != another_page.slug
+
+
+def test_notification_snippet():
+    """
+    Verify that user can create site notification using cms.
+    """
+    message_text = "<p>hello this is a test notification</p>"
+    notification = SiteNotificationFactory(message=message_text)
+
+    assert str(notification) == message_text

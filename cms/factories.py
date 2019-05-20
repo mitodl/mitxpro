@@ -16,6 +16,7 @@ from cms.models import (
     ResourcePage,
     UserTestimonialsPage,
     FacultyMembersPage,
+    SiteNotification,
 )
 from cms.blocks import (
     LearningTechniqueBlock,
@@ -198,3 +199,12 @@ class FacultyMembersPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = FacultyMembersPage
+
+
+class SiteNotificationFactory(DjangoModelFactory):
+    """SiteNotification factory class"""
+
+    message = factory.fuzzy.FuzzyText(prefix="message ")
+
+    class Meta:
+        model = SiteNotification

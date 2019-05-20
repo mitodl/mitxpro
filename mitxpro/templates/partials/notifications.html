@@ -1,0 +1,8 @@
+<div class="notifications d-none">
+  {% if notification %}
+    <div class="notification" data-notification-id="{{ notification.id }}">
+      <a href="#" class="close-notification"></a>
+      {{ notification|safe }}
+    </div>
+  {% endif %}
+</div>

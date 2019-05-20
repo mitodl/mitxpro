@@ -1,0 +1,18 @@
+.notifications {
+  background: $primary;
+  text-align: center;
+  color: white;
+
+  .close-notification {
+    text-decoration: none;
+    color: white;
+    float: right;
+    margin-right: 10px;
+
+    &:after {
+      content: "\e906";
+      font-family: icomoon;
+      margin-left: 10px;
+   }
+ }
+}
