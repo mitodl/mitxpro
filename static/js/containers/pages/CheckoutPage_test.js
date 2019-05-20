@@ -168,6 +168,31 @@ describe("CheckoutPage", () => {
     })
   })
 
+  it("clears the state after submitting the basket", async () => {
+    const { inner } = await renderPage()
+    const couponCode = "coupon code"
+    inner.setState({
+      errors:       "errors",
+      selectedRuns: ["runs"],
+      couponCode:   couponCode
+    })
+    await inner.find(".apply-button").prop("onClick")({
+      preventDefault: helper.sandbox.stub()
+    })
+    sinon.assert.calledWith(helper.handleRequestStub, "/api/basket/", "PATCH", {
+      body:        { coupons: [{ code: couponCode }] },
+      credentials: undefined,
+      headers:     {
+        "X-CSRFTOKEN": null
+      }
+    })
+    assert.deepEqual(inner.state(), {
+      couponCode:   null,
+      errors:       null,
+      selectedRuns: null
+    })
+  })
+
   it("tries to submit the coupon code but receives an error message", async () => {
     const { inner } = await renderPage()
     const errors = "Unknown error"
@@ -177,9 +202,11 @@ describe("CheckoutPage", () => {
         errors
       }
     })
-    await inner.find("form").prop("onSubmit")({
-      preventDefault: helper.sandbox.stub()
-    })
+    await assertRaises(async () => {
+      await inner.find("form").prop("onSubmit")({
+        preventDefault: helper.sandbox.stub()
+      })
+    }, "Received error from request")
 
     assert.equal(inner.state().errors, errors)
     assert.equal(

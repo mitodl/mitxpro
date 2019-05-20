@@ -70,6 +70,14 @@ export class CheckoutPage extends React.Component<Props, State> {
       this.setState({ errors: response.body.errors })
       throw new Error("Received error from request")
     }
+
+    // clear state so the state from the basket is used
+    this.setState({
+      couponCode:   null,
+      selectedRuns: null,
+      errors:       null
+    })
+
     return response
   }
 
@@ -151,12 +159,11 @@ export class CheckoutPage extends React.Component<Props, State> {
   }
 
   submitCoupon = async (e: Event) => {
-    const { updateBasket } = this.props
     const couponCode = this.getCouponCode()
 
     e.preventDefault()
 
-    const response = await updateBasket({
+    await this.updateBasket({
       coupons: couponCode
         ? [
           {
@@ -165,8 +172,6 @@ export class CheckoutPage extends React.Component<Props, State> {
         ]
         : []
     })
-    const errors = response.status !== 200 ? response.body.errors : null
-    this.setState({ errors })
   }
 
   // $FlowFixMe
