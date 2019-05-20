@@ -8,7 +8,12 @@ As a member of the marketing team, I'd like to be able to post a message that wi
 
 - Brief description of the plan for adding, editing and removing the site-wide notification (see options below)
 - CMS user can add, edit and remove banner message through Wagtail. Or, if that is difficult, admin user can add, edit and remove banner message through the django admin
-- User can dismiss the banner by clicking on the X. It should stay hidden for the rest of the session
+- User can dismiss the banner by clicking on the X. It should stay hidden for the rest of the session.
+
+##### Out of scope (Will do in future)
+
+- Date range between which the content should be displayed
+- Ensure that only one site wide notification can be displayed at once (@pdpinch I'm guessing we want this to avoid overwhelming the user?)
 
 ##### Designs and Mockups
 - See, for example, [InVision](https://impactbnd.invisionapp.com/share/4TQEESTEYMZ#/screens/345573039)
@@ -18,28 +23,17 @@ As a member of the marketing team, I'd like to be able to post a message that wi
 
 ##### Backend changes
 
-- Add `NotificationPage` in wagtail with following field
+- Add snippet `SiteNotification` in wagtail with following field
     - notification
 
-- Add `UserNotification` model to save user's viewed state against notification.
-    - notification_id
-    - user_id
+- Add templatetag to render notifications.
+- Add templatetag in base.html
 
-- Add contextprocessor to pass notification to templates. 
-    - Filter all live notifications from `NotificationPage`
-    - Filter notifications which are not viewed by user from `UserNotification`,
-    - If notification(s) are available, show them to users
-
-- Add view `MarkNotificationViewed` to add entry in `UserNotification`, once user clicked on `close` button on notification.
-
-###### Open Questions:
-   - Do we want to show these notifications to anonymous users? In that case saving state in model won't work.
-   - Do we want show notification to set of users or upon particular condition?
 
 ##### Frontend changes
 
- - Use Bootstrap's [Toast](https://getbootstrap.com/docs/4.2/components/toasts/#placement) component to show notification to user.
- - When user click on `close` button, AJAX request will be sent to `MarkNotificationViewed` to mark notification viewed in the db.
+ - Use `sessionStorage` to save state of the User.
+ - Show notification only when `notificationDisplayed` value is `null` in `sessionStorage`.
  
 #### Security Considerations
 Only authenticated and authorized user can access `MarkNotificationViewed`
