@@ -6,6 +6,7 @@ import operator as op
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericRelation
+from django.urls import reverse
 
 from cms.models import (
     LearningOutcomesPage,
@@ -240,6 +241,20 @@ class Program(TimestampedModel, PageProperties):
         """Gets the CoursesInProgram subpage if associated with this program"""
         return self._get_child_page_of_type(CoursesInProgramPage)
 
+    @property
+    def url(self):
+        """
+        Gets the URL for this resource
+        """
+        return NotImplementedError()
+
+    @property
+    def type_name(self):
+        """
+        Gets the descriptive word for the type of this resource
+        """
+        return "program"
+
     def __str__(self):
         return self.title
 
@@ -313,6 +328,20 @@ class Course(TimestampedModel, PageProperties):
                 self.courseruns.all().order_by("start_date"),
             )
         )
+
+    @property
+    def url(self):
+        """
+        Gets the URL for this resource
+        """
+        return reverse("course-detail", kwargs={"pk": self.pk})
+
+    @property
+    def type_name(self):
+        """
+        Gets the descriptive word for the type of this resource
+        """
+        return "course"
 
     class Meta:
         ordering = ("program", "title")

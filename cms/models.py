@@ -53,7 +53,8 @@ class CourseProgramChildPage(Page):
 
     def save(self, *args, **kwargs):
         # autogenerate a unique slug so we don't hit a ValidationError
-        self.title = self.__class__._meta.verbose_name.title()
+        if not self.title:
+            self.title = self.__class__._meta.verbose_name.title()
         self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
         super().save(*args, **kwargs)
 
@@ -82,7 +83,7 @@ class UserTestimonialsPage(CourseProgramChildPage):
     ]
 
     class Meta:
-        verbose_name = "Testimonials Page"
+        verbose_name = "Testimonials Section"
 
 
 class LearningOutcomesPage(CourseProgramChildPage):
@@ -128,7 +129,10 @@ class LearningTechniquesPage(CourseProgramChildPage):
         help_text="Enter detail about how you'll learn.",
     )
 
-    content_panels = [StreamFieldPanel("technique_items")]
+    class Meta:
+        verbose_name = "Icon Grid"
+
+    content_panels = [FieldPanel("title"), StreamFieldPanel("technique_items")]
 
 
 class ForTeamsPage(CourseProgramChildPage):
@@ -153,7 +157,12 @@ class ForTeamsPage(CourseProgramChildPage):
         related_name="+",
         help_text="Image size must be at least 750x505 pixels.",
     )
+
+    class Meta:
+        verbose_name = "Text-Image Section"
+
     content_panels = [
+        FieldPanel("title"),
         FieldPanel("content"),
         FieldPanel("action_title"),
         FieldPanel("switch_layout"),
