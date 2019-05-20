@@ -11,10 +11,9 @@ import {
   calculateDiscount,
   calculatePrice,
   formatPrice,
-  formatRunTitle,
-  formatErrors
+  formatRunTitle
 } from "../../lib/ecommerce"
-import { createCyberSourceForm } from "../../lib/form"
+import { createCyberSourceForm, formatErrors } from "../../lib/form"
 
 import type { Response } from "redux-query"
 import type { Location } from "react-router"
