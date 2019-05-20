@@ -1,5 +1,4 @@
 // @flow
-import React from "react"
 import Decimal from "decimal.js-light"
 import * as R from "ramda"
 import { equals } from "ramda"
