@@ -212,21 +212,14 @@ describe("CheckoutPage", () => {
           "PATCH",
           productPayload
         )
-        if (hasValidProductId) {
-          sinon.assert.calledWith(
-            helper.handleRequestStub,
+        assert.equal(
+          helper.handleRequestStub.calledWith(
             "/api/basket/",
             "PATCH",
             couponPayload
-          )
-        } else {
-          sinon.assert.neverCalledWith(
-            helper.handleRequestStub,
-            "/api/basket/",
-            "PATCH",
-            couponPayload
-          )
-        }
+          ),
+          hasValidProductId
+        )
 
         assert.equal(inner.state().errors, expError)
       })
