@@ -58,24 +58,6 @@ const formatDateForRun = (dateString: ?string) =>
 export const formatRunTitle = (run: CourseRun) =>
   `${formatDateForRun(run.start_date)} - ${formatDateForRun(run.end_date)}`
 
-export const formatErrors = (errors: string | Object) => {
-  if (!errors) {
-    return null
-  }
-
-  let errorString
-  if (typeof errors === "object") {
-    if (errors.items) {
-      errorString = errors.items[0]
-    } else {
-      errorString = errors[0]
-    }
-  } else {
-    errorString = errors
-  }
-  return <div className="error">{errorString}</div>
-}
-
 export const isPromo = equals(COUPON_TYPE_PROMO)
 
 export const createProductMap = (

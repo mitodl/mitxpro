@@ -1,5 +1,6 @@
 // @flow
 import type { CheckoutPayload } from "../flow/ecommerceTypes"
+import React from "react"
 
 /**
  * Creates a POST form with hidden input fields
@@ -24,4 +25,24 @@ export function createCyberSourceForm(
     form.appendChild(input)
   }
   return form
+}
+
+export const formatErrors = (
+  errors: string | Object | null
+): React$Element<*> | null => {
+  if (!errors) {
+    return null
+  }
+
+  let errorString
+  if (typeof errors === "object") {
+    if (errors.items) {
+      errorString = errors.items[0]
+    } else {
+      errorString = errors[0]
+    }
+  } else {
+    errorString = errors
+  }
+  return <div className="error">{errorString}</div>
 }

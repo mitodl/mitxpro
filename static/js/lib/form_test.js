@@ -1,8 +1,9 @@
 // @flow
 import { assert } from "chai"
+import { shallow } from "enzyme"
 
 import { CYBERSOURCE_CHECKOUT_RESPONSE } from "./test_constants"
-import { createCyberSourceForm } from "./form"
+import { createCyberSourceForm, formatErrors } from "./form"
 
 describe("form functions", () => {
   it("creates a form with hidden values corresponding to the payload", () => {
@@ -22,5 +23,28 @@ describe("form functions", () => {
     assert.deepEqual(clone, {})
     assert.equal(form.getAttribute("action"), url)
     assert.equal(form.getAttribute("method"), "post")
+  })
+
+  describe("formatErrors", () => {
+    it("should return null if there is no error", () => {
+      assert.isNull(formatErrors(null))
+    })
+
+    it("should return a div with the error string if the error is a string", () => {
+      const wrapper = shallow(formatErrors("error"))
+      assert.equal(wrapper.find(".error").text(), "error")
+    })
+
+    it("should return the first item in the items in the error object if it has items", () => {
+      const error = { items: ["error"] }
+      const wrapper = shallow(formatErrors(error))
+      assert.equal(wrapper.find(".error").text(), "error")
+    })
+
+    it("should return the first item in the error if there is no 'items'", () => {
+      const error = ["error"]
+      const wrapper = shallow(formatErrors(error))
+      assert.equal(wrapper.find(".error").text(), "error")
+    })
   })
 })
