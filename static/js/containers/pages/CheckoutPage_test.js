@@ -142,31 +142,40 @@ describe("CheckoutPage", () => {
     })
   })
 
-  //
-  ;[[true, false], [true, true], [false, false], [false, true]].forEach(
-    ([hasValidProductId, hasValidCoupon]) => {
+  describe("mount", () => {
+    const productError = "product error",
+      couponError = "coupon error",
+      couponCode = "codeforcoupon",
+      productId = 12345
+    let couponPayload, productPayload
+
+    beforeEach(() => {
+      couponPayload = {
+        body:        { coupons: [{ code: couponCode }] },
+        credentials: undefined,
+        headers:     {
+          "X-CSRFTOKEN": null
+        }
+      }
+      productPayload = {
+        body:        { items: [{ id: productId }] },
+        credentials: undefined,
+        headers:     {
+          "X-CSRFTOKEN": null
+        }
+      }
+    })
+    ;[
+      [true, false, couponError],
+      [true, true, null],
+      [false, false, productError],
+      [false, true, productError]
+    ].forEach(([hasValidProductId, hasValidCoupon, expError]) => {
       it(`updates the basket with a ${
         hasValidProductId ? "" : "in"
       }valid product id and a ${
         hasValidCoupon ? "" : "in"
       }valid coupon code from the query parameter`, async () => {
-        const couponCode = "codeforcoupon"
-        const productId = 12345
-        const couponPayload = {
-          body:        { coupons: [{ code: couponCode }] },
-          credentials: undefined,
-          headers:     {
-            "X-CSRFTOKEN": null
-          }
-        }
-        const productPayload = {
-          body:        { items: [{ id: productId }] },
-          credentials: undefined,
-          headers:     {
-            "X-CSRFTOKEN": null
-          }
-        }
-
         if (!hasValidProductId) {
           helper.handleRequestStub
             .withArgs("/api/basket/", "PATCH", productPayload)
@@ -196,7 +205,7 @@ describe("CheckoutPage", () => {
           }
         )
         // wait for componentDidMount to resolve
-        await wait(15)
+        await wait(0)
         sinon.assert.calledWith(
           helper.handleRequestStub,
           "/api/basket/",
@@ -219,17 +228,10 @@ describe("CheckoutPage", () => {
           )
         }
 
-        assert.equal(
-          inner.state().errors,
-          !hasValidProductId
-            ? "product error"
-            : !hasValidCoupon
-              ? "coupon error"
-              : null
-        )
+        assert.equal(inner.state().errors, expError)
       })
-    }
-  )
+    })
+  })
 
   it("displays the coupon code", async () => {
     const { inner } = await renderPage()
