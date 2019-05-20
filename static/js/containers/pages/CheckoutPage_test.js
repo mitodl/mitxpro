@@ -18,7 +18,7 @@ import {
   formatPrice,
   formatRunTitle
 } from "../../lib/ecommerce"
-import { assertRaises, wait } from "../../lib/util"
+import { assertRaises } from "../../lib/util"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 
 describe("CheckoutPage", () => {
@@ -205,7 +205,7 @@ describe("CheckoutPage", () => {
           }
         )
         // wait for componentDidMount to resolve
-        await wait(0)
+        await Promise.resolve()
         sinon.assert.calledWith(
           helper.handleRequestStub,
           "/api/basket/",
