@@ -1,6 +1,6 @@
 // @flow
 import React from "react"
-import * as R from "ramda"
+import { curry } from "ramda"
 import { connect } from "react-redux"
 import { connectRequest, mutateAsync } from "redux-query"
 import { compose } from "redux"
@@ -70,6 +70,14 @@ export class CheckoutPage extends React.Component<Props, State> {
       this.setState({ errors: response.body.errors })
       throw new Error("Received error from request")
     }
+
+    // clear state so the state from the basket is used
+    this.setState({
+      couponCode:   null,
+      selectedRuns: null,
+      errors:       null
+    })
+
     return response
   }
 
@@ -117,7 +125,7 @@ export class CheckoutPage extends React.Component<Props, State> {
     })
   }
 
-  updateSelectedRun = R.curry((courseId: number, event: any) => {
+  updateSelectedRun = curry((courseId: number, event: any) => {
     const { selectedRuns } = this.state
     const runId = parseInt(event.target.value)
     this.setState({
@@ -128,13 +136,34 @@ export class CheckoutPage extends React.Component<Props, State> {
     })
   })
 
-  submitCoupon = async (e: Event) => {
-    const { updateBasket } = this.props
+  getCouponCode = (): string => {
+    const { basket } = this.props
     const { couponCode } = this.state
+
+    if (couponCode !== null) {
+      return couponCode
+    }
+    if (!basket) {
+      return ""
+    }
+
+    const item = basket.items[0]
+    if (!item) {
+      return ""
+    }
+
+    const coupon = basket.coupons.find(coupon =>
+      coupon.targets.includes(item.id)
+    )
+    return (coupon && coupon.code) || ""
+  }
+
+  submitCoupon = async (e: Event) => {
+    const couponCode = this.getCouponCode()
 
     e.preventDefault()
 
-    const response = await updateBasket({
+    await this.updateBasket({
       coupons: couponCode
         ? [
           {
@@ -143,8 +172,6 @@ export class CheckoutPage extends React.Component<Props, State> {
         ]
         : []
     })
-    const errors = response.status !== 200 ? response.body.errors : null
-    this.setState({ errors })
   }
 
   // $FlowFixMe
@@ -200,7 +227,7 @@ export class CheckoutPage extends React.Component<Props, State> {
 
   render() {
     const { basket } = this.props
-    const { couponCode, errors } = this.state
+    const { errors } = this.state
 
     if (!basket) {
       return null
@@ -244,11 +271,7 @@ export class CheckoutPage extends React.Component<Props, State> {
                   <input
                     type="text"
                     className={errors ? "error-border" : ""}
-                    value={
-                      (couponCode !== null
-                        ? couponCode
-                        : coupon && coupon.code) || ""
-                    }
+                    value={this.getCouponCode()}
                     onChange={this.updateCouponCode}
                   />
                   <button
