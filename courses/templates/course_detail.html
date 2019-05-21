@@ -31,13 +31,15 @@
     {% include "partials/subnav.html" with product=course %}
     {% if course.outcomes %} {% include "partials/learning-outcomes.html" %} {% endif %}
     {% if course.who_should_enroll %} {% include "partials/target-audience.html" %} {% endif %}
-    {% if course.techniques %} {% include "partials/learning-techniques.html" %} {% endif %}
-    {% if course.testimonials %} {% include "partials/testimonial-carousel.html" with testimonials=course.testimonials %} {% endif %}
+    {% if course.techniques %} {% include "partials/learning-techniques.html" with page=course.techniques %} {% endif %}
+    {% if course.testimonials %} {% include "partials/testimonial-carousel.html" with page=course.testimonials %} {% endif %}
     {% if course.faculty %} {% include "partials/faculty-carousel.html" %} {% endif %}
     {% if course.program and course.program.course_lineup %}
-      {% include "partials/course-carousel.html" with program=course.program %}
+      {% with courseware_objects=course.program.courses.all page=course.program.course_lineup %}
+        {% include "partials/course-carousel.html" with button_title="View Full Program" button_url="#" %}
+      {% endwith %}
     {% endif %}
-    {% if course.for_teams %} {% include "partials/for-teams.html" %} {% endif %}
+    {% if course.for_teams %} {% include "partials/for-teams.html" with page=course.for_teams %} {% endif %}
     {% if course.faqs %} {% include "partials/faqs.html" %} {% endif %}
 </div>
 {% endblock %}

@@ -2,11 +2,11 @@
 <div id="testimonials" class="learners-block">
   <div class="container">
     <div class="head">
-      <h1>{{ testimonials.heading }}</h1>
-      <h3>{{ testimonials.subhead }}</h3>
+      <h1>{{ page.heading }}</h1>
+      <h3>{{ page.subhead }}</h3>
     </div>
     <div class="learners-slider">
-      {% for testimonial in testimonials.items %}
+      {% for testimonial in page.items %}
       <div class="slide">
         <div class="slide-holder">
           {% if testimonial.value.image %}
@@ -20,7 +20,7 @@
       {% endfor %}
     </div>
   </div>
-  {% for testimonial in testimonials.items %}
+  {% for testimonial in page.items %}
     <div class="modal fade" id="testimonial-{{ forloop.counter }}" role="dialog">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
