@@ -8,6 +8,7 @@ from rest_framework import serializers
 
 from mitxpro.serializers import WriteableSerializerMethodField
 from users.models import LegalAddress, User, Profile
+from ecommerce.task_helpers import sync_hubspot_user
 
 US_POSTAL_RE = re.compile(r"[0-9]{5}(-[0-9]{4}){0,1}")
 CA_POSTAL_RE = re.compile(r"[0-9][A-Z][0-9] [A-Z][0-9][A-Z]", flags=re.I)
@@ -210,7 +211,7 @@ class UserSerializer(serializers.ModelSerializer):
             profile = ProfileSerializer(user.profile, data=profile_data)
             if profile.is_valid():
                 profile.save()
-
+        sync_hubspot_user(user)
         return user
 
     @transaction.atomic
@@ -239,7 +240,9 @@ class UserSerializer(serializers.ModelSerializer):
         if password is not None:
             instance.set_password(password)
 
-        return super().update(instance, validated_data)
+        user = super().update(instance, validated_data)
+        sync_hubspot_user(user)
+        return user
 
     class Meta:
         model = User

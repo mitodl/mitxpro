@@ -8,6 +8,12 @@ from users.serializers import LegalAddressSerializer, UserSerializer
 
 
 @pytest.fixture()
+def mock_user_sync(mocker):
+    """ Yield a mock hubspot update task for contacts """
+    yield mocker.patch("ecommerce.tasks.sync_contact_with_hubspot.delay")
+
+
+@pytest.fixture()
 def sample_address():
     """ Return a legal address"""
     return {
@@ -98,8 +104,12 @@ def test_validate_optional_country_data(sample_address):
     assert LegalAddressSerializer(data=sample_address).is_valid()
 
 
-def test_update_user_serializer(user, sample_address):
-    """ Test that a UserSerializer can be updated properly """
+@pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
+def test_update_user_serializer(
+    mock_user_sync, settings, user, sample_address, hubspot_api_key
+):
+    """ Test that a UserSerializer can be updated properly and hubspot sync called if appropriate """
+    settings.HUBSPOT_API_KEY = hubspot_api_key
     serializer = UserSerializer(
         instance=user,
         data={"password": "AgJw0123", "legal_address": sample_address},
@@ -108,3 +118,31 @@ def test_update_user_serializer(user, sample_address):
     assert serializer.is_valid()
     serializer.save()
     assert user.legal_address.street_address_1 == sample_address.get("street_address_1")
+    if hubspot_api_key is not None:
+        mock_user_sync.assert_called_with(user.id)
+    else:
+        mock_user_sync.assert_not_called()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
+def test_create_user_serializer(
+    mock_user_sync, settings, sample_address, hubspot_api_key
+):
+    """ Test that a UserSerializer can be created properly and hubspot sync called if appropriate """
+    settings.HUBSPOT_API_KEY = hubspot_api_key
+    serializer = UserSerializer(
+        data={
+            "username": "fakename",
+            "email": "fake@fake.edu",
+            "password": "fake",
+            "legal_address": sample_address,
+        }
+    )
+
+    assert serializer.is_valid()
+    user = serializer.save()
+    if hubspot_api_key is not None:
+        mock_user_sync.assert_called_with(user.id)
+    else:
+        mock_user_sync.assert_not_called()

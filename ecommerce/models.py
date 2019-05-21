@@ -8,6 +8,7 @@ from django.db import models
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 from users.models import User
+from ecommerce import task_helpers
 
 
 class Company(TimestampedModel):
@@ -77,6 +78,10 @@ class ProductVersion(TimestampedModel):
 
     class Meta:
         indexes = [models.Index(fields=["created_on"])]
+
+    def save(self, *args, **kwargs):  # pylint:disable=arguments-differ
+        super(ProductVersion, self).save(*args, **kwargs)
+        task_helpers.sync_hubspot_product(self)
 
     def __str__(self):
         """Description of a ProductVersion"""
@@ -154,6 +159,10 @@ class Order(TimestampedModel, AuditableModel):
         ]
         return data
 
+    def save(self, *args, **kwargs):  # pylint:disable=arguments-differ
+        super(Order, self).save(*args, **kwargs)
+        task_helpers.sync_hubspot_deal(self)
+
 
 class OrderAudit(AuditModel):
     """
@@ -176,6 +185,10 @@ class Line(TimestampedModel):
     order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name="lines")
     product_version = models.ForeignKey(ProductVersion, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField()
+
+    def save(self, *args, **kwargs):  # pylint:disable=arguments-differ
+        super(Line, self).save(*args, **kwargs)
+        task_helpers.sync_hubspot_line(self)
 
     def __str__(self):
         """Description for Line"""
