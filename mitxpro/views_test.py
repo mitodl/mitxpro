@@ -37,7 +37,7 @@ def test_webpack_url(mocker, settings, client):
     response = client.get(reverse("login"))
 
     bundles = {bundle[0][1] for bundle in get_bundle.call_args_list}
-    assert bundles == {"header", "root", "style"}
+    assert bundles == {"root", "style"}
     js_settings = json.loads(response.context["js_settings_json"])
     assert js_settings == {
         "gaTrackingID": "fake",

@@ -1,5 +1,10 @@
 {% extends "base.html" %}
-{% load wagtailcore_tags %}
+{% load render_bundle wagtailcore_tags %}
+
+{% block headercontent %}
+<div id="header"></div>
+{% render_bundle 'header' %}
+{% endblock %}
 
 {% block content %}
 
