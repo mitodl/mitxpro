@@ -3,6 +3,8 @@
 # pylint: disable=redefined-outer-name
 import pytest
 from lxml import etree
+from nacl.encoding import Base64Encoder
+from nacl.public import SealedBox
 
 from compliance import api
 from compliance.constants import (
@@ -11,6 +13,7 @@ from compliance.constants import (
     RESULT_UNKNOWN,
     TEMPORARY_FAILURE_REASON_CODES,
 )
+from compliance.models import ExportsInquiryLog
 
 
 @pytest.mark.usefixtures("cybersource_settings")
@@ -25,6 +28,26 @@ def test_is_exports_verification_disabled(settings, key):
     """Test that is_exports_verification_enabled is false if a setting is missing"""
     setattr(settings, key, None)
     assert api.is_exports_verification_enabled() is False
+
+
+@pytest.mark.usefixtures("cybersource_settings")
+def test_log_exports_inquiry(mocker, cybersource_private_key, user):
+    """Test that log_exports_inquiry correctly stores the result"""
+    last_sent = {"envelope": etree.Element("sent")}
+    last_received = {"envelope": etree.Element("received")}
+    mock_response = mocker.Mock(
+        reasonCode="100", exportReply=mocker.Mock(infoCode="102")
+    )
+    log = api.log_exports_inquiry(user, mock_response, last_sent, last_received)
+
+    assert log.user == user
+    assert log.reason_code == 100
+    assert log.info_code == "102"
+
+    box = SealedBox(cybersource_private_key)
+
+    assert box.decrypt(log.encrypted_request, encoder=Base64Encoder) == b"<sent/>"
+    assert box.decrypt(log.encrypted_response, encoder=Base64Encoder) == b"<received/>"
 
 
 @pytest.mark.parametrize(
@@ -44,6 +67,8 @@ def test_verify_user_with_exports(
     result = api.verify_user_with_exports(user)
 
     assert result.computed_result == expected_result
+
+    assert ExportsInquiryLog.objects.filter(user=user).exists()
 
 
 @pytest.mark.usefixtures("cybersource_settings")
@@ -67,3 +92,5 @@ def test_verify_user_with_exports_temporary_errors(mocker, user, reason_code):
     mock_log.error.assert_called_once_with(
         "Unable to verify exports controls, received reasonCode: %s", reason_code
     )
+
+    assert not ExportsInquiryLog.objects.filter(user=user).exists()

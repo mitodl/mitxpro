@@ -124,14 +124,18 @@ def log_exports_inquiry(user, response, last_sent, last_received):
     info_code = response.exportReply.infoCode
 
     box = SealedBox(get_encryption_public_key())
+    encrypted_request = box.encrypt(xml_request, encoder=Base64Encoder).decode("ascii")
+    encrypted_response = box.encrypt(xml_response, encoder=Base64Encoder).decode(
+        "ascii"
+    )
 
     return ExportsInquiryLog.objects.create(
         user=user,
         computed_result=compute_result_from_codes(reason_code, info_code),
         reason_code=reason_code,
         info_code=info_code,
-        encrypted_request=box.encrypt(xml_request),
-        encrypted_response=box.encrypt(xml_response),
+        encrypted_request=encrypted_request,
+        encrypted_response=encrypted_response,
     )
 
 
