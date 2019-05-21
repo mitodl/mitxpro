@@ -2,8 +2,9 @@
 import React from "react"
 import { curry } from "ramda"
 import { connect } from "react-redux"
-import { connectRequest, mutateAsync } from "redux-query"
+import { mutateAsync, requestAsync } from "redux-query"
 import { compose } from "redux"
+import queryString from "query-string"
 
 import queries from "../../lib/queries"
 import {
@@ -12,9 +13,10 @@ import {
   formatPrice,
   formatRunTitle
 } from "../../lib/ecommerce"
-import { createCyberSourceForm } from "../../lib/form"
+import { createCyberSourceForm, formatErrors } from "../../lib/form"
 
 import type { Response } from "redux-query"
+import type { Location } from "react-router"
 import type {
   BasketResponse,
   BasketPayload,
@@ -50,6 +52,8 @@ export const calcSelectedRunIds = (item: BasketItem): { [number]: number } => {
 type Props = {
   basket: ?BasketResponse,
   checkout: () => Promise<Response<CheckoutResponse>>,
+  fetchBasket: () => Promise<*>,
+  location: Location,
   updateBasket: (payload: BasketPayload) => Promise<*>
 }
 type State = {
@@ -62,6 +66,30 @@ export class CheckoutPage extends React.Component<Props, State> {
     couponCode:   null,
     selectedRuns: null,
     errors:       null
+  }
+
+  componentDidMount = async () => {
+    const {
+      fetchBasket,
+      location: { search }
+    } = this.props
+    const params = queryString.parse(search)
+    const productId = parseInt(params.product)
+    if (!productId) {
+      await fetchBasket()
+      return
+    }
+
+    try {
+      await this.updateBasket({ items: [{ id: productId }] })
+
+      const couponCode = params.code
+      if (couponCode) {
+        await this.updateBasket({ coupons: [{ code: couponCode }] })
+      }
+    } catch (_) {
+      // prevent complaints about unresolved promises
+    }
   }
 
   handleErrors = async (responsePromise: Promise<*>) => {
@@ -229,13 +257,14 @@ export class CheckoutPage extends React.Component<Props, State> {
     const { basket } = this.props
     const { errors } = this.state
 
-    if (!basket) {
-      return null
-    }
-
-    const item = basket.items[0]
-    if (!item) {
-      return <div>No item in basket</div>
+    const item = basket && basket.items[0]
+    if (!basket || !item) {
+      return (
+        <div className="checkout-page">
+          No item in basket
+          {formatErrors(errors)}
+        </div>
+      )
     }
 
     const coupon = basket.coupons.find(coupon =>
@@ -282,7 +311,7 @@ export class CheckoutPage extends React.Component<Props, State> {
                     Apply
                   </button>
                 </div>
-                {errors ? <div className="error">Error: {errors}</div> : null}
+                {formatErrors(errors)}
               </form>
             </div>
           </div>
@@ -325,15 +354,14 @@ const mapStateToProps = state => ({
 })
 const mapDispatchToProps = dispatch => ({
   checkout:     () => dispatch(mutateAsync(queries.ecommerce.checkoutMutation())),
+  fetchBasket:  () => dispatch(requestAsync(queries.ecommerce.basketQuery())),
   updateBasket: payload =>
     dispatch(mutateAsync(queries.ecommerce.basketMutation(payload)))
 })
-const mapPropsToConfigs = () => [queries.ecommerce.basketQuery()]
 
 export default compose(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  ),
-  connectRequest(mapPropsToConfigs)
+  )
 )(CheckoutPage)

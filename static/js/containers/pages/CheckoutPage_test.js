@@ -36,7 +36,9 @@ describe("CheckoutPage", () => {
           basket
         }
       },
-      {}
+      {
+        location: {}
+      }
     )
   })
 
@@ -101,6 +103,127 @@ describe("CheckoutPage", () => {
     assert.equal(inner.find("img").prop("src"), basketItem.thumbnail_url)
     assert.equal(inner.find("img").prop("alt"), basketItem.description)
     assert.equal(inner.find(".item-row .title").text(), basketItem.description)
+  })
+  ;[true, false].forEach(hasError => {
+    it(`updates the basket with a product id from the query parameter${
+      hasError ? ", but an error is returned" : ""
+    }`, async () => {
+      const productId = 4567
+      if (hasError) {
+        helper.handleRequestStub.withArgs("/api/basket/", "PATCH").returns({
+          status: 400,
+          body:   {
+            errors: "error"
+          }
+        })
+      }
+      const { inner } = await renderPage(
+        {},
+        {
+          location: {
+            search: `product=${productId}`
+          }
+        }
+      )
+
+      sinon.assert.calledWith(
+        helper.handleRequestStub,
+        "/api/basket/",
+        "PATCH",
+        {
+          body:        { items: [{ id: productId }] },
+          credentials: undefined,
+          headers:     {
+            "X-CSRFTOKEN": null
+          }
+        }
+      )
+      assert.equal(inner.state().errors, hasError ? "error" : null)
+    })
+  })
+
+  describe("mount", () => {
+    const productError = "product error",
+      couponError = "coupon error",
+      couponCode = "codeforcoupon",
+      productId = 12345
+    let couponPayload, productPayload
+
+    beforeEach(() => {
+      couponPayload = {
+        body:        { coupons: [{ code: couponCode }] },
+        credentials: undefined,
+        headers:     {
+          "X-CSRFTOKEN": null
+        }
+      }
+      productPayload = {
+        body:        { items: [{ id: productId }] },
+        credentials: undefined,
+        headers:     {
+          "X-CSRFTOKEN": null
+        }
+      }
+    })
+    ;[
+      [true, false, couponError],
+      [true, true, null],
+      [false, false, productError],
+      [false, true, productError]
+    ].forEach(([hasValidProductId, hasValidCoupon, expError]) => {
+      it(`updates the basket with a ${
+        hasValidProductId ? "" : "in"
+      }valid product id and a ${
+        hasValidCoupon ? "" : "in"
+      }valid coupon code from the query parameter`, async () => {
+        if (!hasValidProductId) {
+          helper.handleRequestStub
+            .withArgs("/api/basket/", "PATCH", productPayload)
+            .returns({
+              status: 400,
+              body:   {
+                errors: "product error"
+              }
+            })
+        }
+        if (!hasValidCoupon) {
+          helper.handleRequestStub
+            .withArgs("/api/basket/", "PATCH", couponPayload)
+            .returns({
+              status: 400,
+              body:   {
+                errors: "coupon error"
+              }
+            })
+        }
+        const { inner } = await renderPage(
+          {},
+          {
+            location: {
+              search: `product=${productId}&code=${couponCode}`
+            }
+          }
+        )
+        // wait for componentDidMount to resolve
+        await Promise.resolve()
+        sinon.assert.calledWith(
+          helper.handleRequestStub,
+          "/api/basket/",
+          "PATCH",
+          productPayload
+        )
+        assert.equal(
+          helper.handleRequestStub.calledWith(
+            "/api/basket/",
+            "PATCH",
+            couponPayload
+          ),
+          hasValidProductId
+        )
+
+        assert.equal(inner.state().errors, expError)
+      })
+    })
   })
 
   it("displays the coupon code", async () => {
@@ -209,10 +332,7 @@ describe("CheckoutPage", () => {
     }, "Received error from request")
 
     assert.equal(inner.state().errors, errors)
-    assert.equal(
-      inner.find(".enrollment-input .error").text(),
-      "Error: Unknown error"
-    )
+    assert.equal(inner.find(".enrollment-input .error").text(), "Unknown error")
     assert.isTrue(inner.find(".enrollment-input input.error-border").exists())
   })
 
