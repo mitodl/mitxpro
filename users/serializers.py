@@ -127,105 +127,6 @@ class LegalAddressSerializer(serializers.ModelSerializer):
         }
 
 
-class PublicUserSerializer(serializers.ModelSerializer):
-    """Serializer for public user data"""
-
-    class Meta:
-        model = User
-        fields = ("id", "username", "name", "created_on", "updated_on")
-
-
-class UserSerializer(serializers.ModelSerializer):
-    """Serializer for users"""
-
-    # password is explicitly write_only
-    password = serializers.CharField(write_only=True)
-    email = WriteableSerializerMethodField()
-    username = WriteableSerializerMethodField()
-    legal_address = LegalAddressSerializer(allow_null=True)
-
-    def validate_email(self, value):
-        """Empty validation function, but this is required for WriteableSerializerMethodField"""
-        return {"email": value}
-
-    def validate_username(self, value):
-        """Empty validation function, but this is required for WriteableSerializerMethodField"""
-        return {"username": value}
-
-    def get_email(self, instance):
-        """Returns the email or None in the case of AnonymousUser"""
-        return getattr(instance, "email", None)
-
-    def get_username(self, instance):
-        """Returns the username or None in the case of AnonymousUser"""
-        return getattr(instance, "username", None)
-
-    @transaction.atomic
-    def create(self, validated_data):
-        """Create a new user"""
-        legal_address_data = validated_data.pop("legal_address")
-
-        username = validated_data.pop("username")
-        email = validated_data.pop("email")
-        password = validated_data.pop("password")
-
-        user = User.objects.create_user(
-            username, email=email, password=password, **validated_data
-        )
-
-        # this side-effects such that user.legal_address is updated in-place
-        if legal_address_data:
-            legal_address = LegalAddressSerializer(
-                user.legal_address, data=legal_address_data
-            )
-            if legal_address.is_valid():
-                legal_address.save()
-
-        return user
-
-    @transaction.atomic
-    def update(self, instance, validated_data):
-        """Update an existing user"""
-        legal_address_data = validated_data.pop("legal_address", None)
-        password = validated_data.pop("password", None)
-
-        if legal_address_data:
-            # this side-effects such that instance.legal_address is updated in-place
-            address_serializer = LegalAddressSerializer(
-                instance.legal_address, data=legal_address_data
-            )
-            if address_serializer.is_valid(raise_exception=True):
-                address_serializer.save()
-
-        # save() will be called in super().update()
-        if password is not None:
-            instance.set_password(password)
-
-        return super().update(instance, validated_data)
-
-    class Meta:
-        model = User
-        fields = (
-            "id",
-            "username",
-            "name",
-            "email",
-            "password",
-            "legal_address",
-            "is_anonymous",
-            "is_authenticated",
-            "created_on",
-            "updated_on",
-        )
-        read_only_fields = (
-            "username",
-            "is_anonymous",
-            "is_authenticated",
-            "created_on",
-            "updated_on",
-        )
-
-
 class ProfileSerializer(serializers.ModelSerializer):
     """Serializer for Profile """
 
@@ -247,6 +148,121 @@ class ProfileSerializer(serializers.ModelSerializer):
             "updated_on",
         )
         read_only_fields = ("created_on", "updated_on")
+
+
+class PublicUserSerializer(serializers.ModelSerializer):
+    """Serializer for public user data"""
+
+    class Meta:
+        model = User
+        fields = ("id", "username", "name", "created_on", "updated_on")
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Serializer for users"""
+
+    # password is explicitly write_only
+    password = serializers.CharField(write_only=True)
+    email = WriteableSerializerMethodField()
+    username = WriteableSerializerMethodField()
+    legal_address = LegalAddressSerializer(allow_null=True)
+    profile = ProfileSerializer(allow_null=True, required=False)
+
+    def validate_email(self, value):
+        """Empty validation function, but this is required for WriteableSerializerMethodField"""
+        return {"email": value}
+
+    def validate_username(self, value):
+        """Empty validation function, but this is required for WriteableSerializerMethodField"""
+        return {"username": value}
+
+    def get_email(self, instance):
+        """Returns the email or None in the case of AnonymousUser"""
+        return getattr(instance, "email", None)
+
+    def get_username(self, instance):
+        """Returns the username or None in the case of AnonymousUser"""
+        return getattr(instance, "username", None)
+
+    @transaction.atomic
+    def create(self, validated_data):
+        """Create a new user"""
+        legal_address_data = validated_data.pop("legal_address")
+        profile_data = validated_data.pop("profile", None)
+
+        username = validated_data.pop("username")
+        email = validated_data.pop("email")
+        password = validated_data.pop("password")
+
+        user = User.objects.create_user(
+            username, email=email, password=password, **validated_data
+        )
+
+        # this side-effects such that user.legal_address and user.profile are updated in-place
+        if legal_address_data:
+            legal_address = LegalAddressSerializer(
+                user.legal_address, data=legal_address_data
+            )
+            if legal_address.is_valid():
+                legal_address.save()
+
+        if profile_data:
+            profile = ProfileSerializer(user.profile, data=profile_data)
+            if profile.is_valid():
+                profile.save()
+
+        return user
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        """Update an existing user"""
+        legal_address_data = validated_data.pop("legal_address", None)
+        profile_data = validated_data.pop("profile", None)
+        password = validated_data.pop("password", None)
+
+        # this side-effects such that user.legal_address and user.profile are updated in-place
+        if legal_address_data:
+            address_serializer = LegalAddressSerializer(
+                instance.legal_address, data=legal_address_data
+            )
+            if address_serializer.is_valid(raise_exception=True):
+                address_serializer.save()
+
+        if profile_data:
+            profile_serializer = LegalAddressSerializer(
+                instance.profile, data=profile_data
+            )
+            if profile_serializer.is_valid(raise_exception=True):
+                profile_serializer.save()
+
+        # save() will be called in super().update()
+        if password is not None:
+            instance.set_password(password)
+
+        return super().update(instance, validated_data)
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "username",
+            "name",
+            "email",
+            "password",
+            "legal_address",
+            "profile",
+            "is_anonymous",
+            "is_authenticated",
+            "created_on",
+            "updated_on",
+        )
+        read_only_fields = (
+            "username",
+            "is_anonymous",
+            "is_authenticated",
+            "created_on",
+            "updated_on",
+        )
 
 
 class StateProvinceSerializer(serializers.Serializer):

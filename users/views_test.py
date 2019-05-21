@@ -55,6 +55,7 @@ def test_get_user_by_me(client, user, is_anonymous):
             "legal_address": None,
             "is_anonymous": True,
             "is_authenticated": False,
+            "profile": None,
         }
         if is_anonymous
         else {
