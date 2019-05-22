@@ -284,6 +284,19 @@ def test_course_run_unexpired(end_days, enroll_days, expected):
     )
 
 
+def test_course_run_current_price():
+    """
+    current_price should return the price of the latest product version if it exists
+    """
+    run = CourseRunFactory.create()
+    assert run.current_price is None
+    price = 10
+    ProductVersionFactory.create(
+        product=ProductFactory(content_object=run), price=price
+    )
+    assert run.current_price == price
+
+
 def test_course_first_unexpired_run():
     """
     Test that the first unexpired run of a course is returned
@@ -318,19 +331,6 @@ def test_course_next_run_date():
         2, course=course, start_date=factory.Iterator(future_dates)
     )
     assert course.next_run_date == future_dates[0]
-
-
-def test_course_current_price():
-    """
-    current_price should return the price of the latest product version if it exists
-    """
-    course = CourseFactory.create()
-    assert course.current_price is None
-    price = 10
-    ProductVersionFactory.create(
-        product=ProductFactory(content_object=course), price=price
-    )
-    assert course.current_price == price
 
 
 def test_course_page():

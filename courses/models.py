@@ -270,7 +270,6 @@ class Course(TimestampedModel, PageProperties):
     title = models.CharField(max_length=255)
     readable_id = models.CharField(null=True, max_length=255)
     live = models.BooleanField(default=False)
-    products = GenericRelation(Product, related_query_name="courses")
 
     @property
     def page(self):
@@ -292,17 +291,6 @@ class Course(TimestampedModel, PageProperties):
             ),
             default=None,
         )
-
-    @property
-    def current_price(self):
-        """Gets the price if it exists"""
-        product = self.products.first()
-        if not product:
-            return None
-        latest_version = product.latest_version
-        if not latest_version:
-            return None
-        return latest_version.price
 
     @property
     def first_unexpired_run(self):
@@ -380,6 +368,7 @@ class CourseRun(TimestampedModel):
     enrollment_start = models.DateTimeField(null=True, blank=True, db_index=True)
     enrollment_end = models.DateTimeField(null=True, blank=True, db_index=True)
     live = models.BooleanField(default=False)
+    products = GenericRelation(Product, related_query_name="courses")
 
     @property
     def is_past(self):
@@ -432,6 +421,17 @@ class CourseRun(TimestampedModel):
             if self.courseware_url_path
             else None
         )
+
+    @property
+    def current_price(self):
+        """Gets the price if it exists"""
+        product = self.products.first()
+        if not product:
+            return None
+        latest_version = product.latest_version
+        if not latest_version:
+            return None
+        return latest_version.price
 
     def __str__(self):
         return self.title
