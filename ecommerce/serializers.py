@@ -18,7 +18,10 @@ from ecommerce.api import (
     latest_coupon_version,
     latest_product_version,
     get_product_courses,
+    get_product_version_price_with_discount,
+    round_half_up,
 )
+from ecommerce.models import CouponVersion, CouponRedemption, ProductVersion
 from mitxpro.serializers import WriteableSerializerMethodField
 
 
@@ -30,11 +33,88 @@ class CompanySerializer(serializers.ModelSerializer):
         model = models.Company
 
 
+class LineSerializer(serializers.ModelSerializer):
+    """ Line Serializer """
+
+    class Meta:
+        fields = "__all__"
+        model = models.Line
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    """ Order Serializer """
+
+    close_date = serializers.SerializerMethodField(allow_null=True)
+    amount = serializers.SerializerMethodField()
+    discount_amount = serializers.SerializerMethodField()
+    coupon_code = serializers.SerializerMethodField(allow_null=True)
+    line_items = serializers.SerializerMethodField()
+
+    def get_close_date(self, instance):
+        """ Return the fulfilled date if any """
+        if instance.status == models.Order.FULFILLED:
+            return int(instance.updated_on.timestamp())
+
+    def get_amount(self, instance):
+        """ Get the amount paid after discount """
+        return get_product_version_price_with_discount(
+            coupon_version=CouponVersion.objects.filter(
+                id__in=CouponRedemption.objects.filter(order=instance).values_list(
+                    "coupon_version__id", flat=True
+                )
+            ).first(),
+            product_version=ProductVersion.objects.filter(
+                id__in=instance.lines.values_list("product_version", flat=True)
+            ).first(),
+        ).to_eng_string()
+
+    def get_coupon_code(self, instance):
+        """ Get the coupon code used for the order if any """
+        redemption = CouponRedemption.objects.filter(order=instance).first()
+        if redemption:
+            return redemption.coupon_version.coupon.coupon_code
+
+    def get_discount_amount(self, instance):
+        """ Get the discount amount if any """
+        coupon_version = CouponVersion.objects.filter(
+            id__in=CouponRedemption.objects.filter(order=instance).values_list(
+                "coupon_version__id", flat=True
+            )
+        ).first()
+        if not coupon_version:
+            return 0
+
+        product_version = ProductVersion.objects.filter(
+            id__in=instance.lines.values_list("product_version", flat=True)
+        ).first()
+
+        return round_half_up(
+            coupon_version.payment_version.amount * product_version.price
+        ).to_eng_string()
+
+    def get_line_items(self, instance):
+        return [line.id for line in instance.lines.all()]
+
+    class Meta:
+        fields = (
+            "id",
+            "amount",
+            "discount_amount",
+            "close_date",
+            "coupon_code",
+            "line_items",
+            "purchaser",
+            "status",
+        )
+        model = models.Order
+
+
 class ProductSerializer(serializers.ModelSerializer):
     """ Product Serializer """
 
     title = serializers.SerializerMethodField()
     product_type = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
 
     def get_title(self, instance):
         """ Return the product title """
@@ -45,6 +125,10 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_product_type(self, instance):
         """ Return the product type """
         return instance.content_type.model
+
+    def get_price(self, instance):
+        """Return the latest product version price"""
+        return instance.latest_version.price.to_eng_string()
 
     class Meta:
         fields = "__all__"
