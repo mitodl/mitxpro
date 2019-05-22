@@ -15,8 +15,8 @@
               Enroll Now
             </a>
           {% elif enrolled and courseware_url %}
-            <a class="enroll-button" href="{{ courseware_url }}">
-              View Course
+            <a class="enroll-button" href="{% url "user-dashboard" %}">
+              View Dashboard
             </a>
           {% endif %}
         </div>

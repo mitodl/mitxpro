@@ -246,7 +246,7 @@ def test_course_view(
             url = f'{reverse("checkout-page")}?product={product_version_id}'
             has_button = True
         if is_enrolled and has_unexpired_run:
-            url = run.courseware_url
+            url = reverse("user-dashboard")
             has_button = True
 
     assert (
