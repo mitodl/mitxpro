@@ -12,6 +12,7 @@ import { routes } from "../lib/urls"
 
 import TopAppBar from "../components/TopAppBar"
 import PrivateRoute from "../components/PrivateRoute"
+import NotificationContainer from "../components/NotificationContainer"
 
 import CheckoutPage from "./pages/CheckoutPage"
 import DashboardPage from "./pages/DashboardPage"
@@ -39,6 +40,7 @@ class App extends React.Component<Props, void> {
     return (
       <div className="app">
         <TopAppBar currentUser={currentUser} />
+        <NotificationContainer />
         <Switch>
           <PrivateRoute
             exact

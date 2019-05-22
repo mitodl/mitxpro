@@ -5,10 +5,10 @@ import { connect } from "react-redux"
 import { mutateAsync } from "redux-query"
 import { createStructuredSelector } from "reselect"
 
+import { addUserNotification } from "../../../actions"
 import queries from "../../../lib/queries"
 import { routes } from "../../../lib/urls"
 import { STATE_REGISTER_CONFIRM_SENT } from "../../../lib/auth"
-
 import { qsNextSelector } from "../../../lib/selectors"
 
 import RegisterEmailForm from "../../../components/forms/RegisterEmailForm"
@@ -25,12 +25,17 @@ type Props = {
     email: string,
     recaptcha: ?string,
     next: ?string
-  ) => Promise<Response<AuthResponse>>
+  ) => Promise<Response<AuthResponse>>,
+  addUserNotification: Function
 }
+
+const emailNotificationText = (email: string): string =>
+  `We sent an email to ${email}. Please validate your address to continue.`
 
 class RegisterEmailPage extends React.Component<Props> {
   async onSubmit({ email, recaptcha }, { setSubmitting, setErrors }) {
     const {
+      addUserNotification,
       registerEmail,
       params: { next },
       history
@@ -42,7 +47,8 @@ class RegisterEmailPage extends React.Component<Props> {
       }: { body: AuthResponse } = await registerEmail(email, recaptcha, next)
 
       if (state === STATE_REGISTER_CONFIRM_SENT) {
-        history.push(routes.dashboard)
+        addUserNotification(emailNotificationText(email))
+        history.push(routes.login.begin)
       } else if (errors.length > 0) {
         setErrors({
           email: errors[0]
@@ -55,8 +61,15 @@ class RegisterEmailPage extends React.Component<Props> {
 
   render() {
     return (
-      <div>
-        <RegisterEmailForm onSubmit={this.onSubmit.bind(this)} />
+      <div className="container auth-page">
+        <div className="row">
+          <h1 className="col-12">Sign Up</h1>
+        </div>
+        <div className="auth-form auth-card card-shadow row">
+          <div className="col-12">
+            <RegisterEmailForm onSubmit={this.onSubmit.bind(this)} />
+          </div>
+        </div>
       </div>
     )
   }
@@ -72,7 +85,8 @@ const registerEmail = (email: string, recaptcha: ?string, nextUrl: ?string) =>
   mutateAsync(queries.auth.registerEmailMutation(email, recaptcha, nextUrl))
 
 const mapDispatchToProps = {
-  registerEmail
+  registerEmail,
+  addUserNotification
 }
 
 export default compose(

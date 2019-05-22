@@ -1,3 +1,33 @@
+body {
+  line-height: 28px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+h1 {
+  font-size: 40px;
+  line-height: 44px;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 28px;
+  line-height: 38px;
+  font-weight: 500;
+}
+
+h3 {
+  font-size: 26px;
+  line-height: 26px;
+  font-weight: 600;
+}
+
+h4 {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 500;
+}
+
 a.link-button {
   display: inline-block;
   padding: 10px;
@@ -54,5 +84,23 @@ a.link-button {
     line-height: 40px;
     text-align: center;
     color: white;
+  }
+}
+
+.card-shadow {
+  -webkit-box-shadow: -4px 5px 8px 0px rgba(204,204,204,0.8); // sass-lint:disable-line no-vendor-prefixes
+  -moz-box-shadow: -4px 5px 8px 0px rgba(204,204,204,0.8); // sass-lint:disable-line no-vendor-prefixes
+  box-shadow: -4px 5px 8px 0px rgba(204,204,204,0.8);
+}
+
+.notifications {
+  .alert.alert-info {
+    background-color: #355b6b;
+    color: white;
+
+    .close {
+      color: #fff;
+      opacity: 1;
+    }
   }
 }

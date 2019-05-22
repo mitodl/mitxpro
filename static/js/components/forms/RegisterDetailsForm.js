@@ -5,7 +5,8 @@ import { __, includes, find, propEq } from "ramda"
 
 import { Formik, Field, Form, ErrorMessage, FieldArray } from "formik"
 import type { Country } from "../../flow/authTypes"
-import FormError from "./FormError"
+import FormError from "./elements/FormError"
+import { newPasswordValidationShape } from "../../lib/form"
 
 const US_ALPHA_2 = "US"
 const CA_ALPHA_2 = "CA"
@@ -23,14 +24,7 @@ const detailsValidation = yup.object().shape({
     .label("Legal Name")
     .trim()
     .required(),
-  password: yup
-    .string()
-    .label("Password")
-    .required()
-    .min(8)
-    .matches(/^(?=.*[0-9])(?=.*[a-zA-Z]).*$/, {
-      message: "Password must contain at least one letter and number"
-    }),
+  password:      newPasswordValidationShape,
   legal_address: yup.object().shape({
     first_name: yup
       .string()
@@ -276,16 +270,15 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
               />
             </div>
           ) : null}
-        <div className="row-inner  justify-content-end">
-          <div className="row justify-content-end">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="btn btn-primary btn-light-blue"
-            >
-              Continue
-            </button>
-          </div>
+
+        <div className="row submit-row no-gutters justify-content-end">
+          <button
+            type="submit"
+            className="btn btn-primary btn-light-blue"
+            disabled={isSubmitting}
+          >
+            Continue
+          </button>
         </div>
       </Form>
     )}

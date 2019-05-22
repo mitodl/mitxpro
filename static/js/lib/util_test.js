@@ -19,7 +19,10 @@ import {
   firstItem,
   secondItem,
   getMinDate,
-  getMaxDate
+  getMaxDate,
+  newSetWith,
+  newSetWithout,
+  timeoutPromise
 } from "./util"
 
 describe("utility functions", () => {
@@ -205,6 +208,26 @@ describe("utility functions", () => {
   it("secondItem should return the second item of an array", () => {
     assert.equal(secondItem([1, 2, 3]), 2)
     assert.isUndefined(secondItem([]))
+  })
+
+  it("newSetWith returns a set with an additional item", () => {
+    const set = new Set([1, 2, 3])
+    assert.deepEqual(newSetWith(set, 3), set)
+    assert.deepEqual(newSetWith(set, 4), new Set([1, 2, 3, 4]))
+  })
+
+  it("newSetWithout returns a set without a specified item", () => {
+    const set = new Set([1, 2, 3])
+    assert.deepEqual(newSetWithout(set, 3), new Set([1, 2]))
+    assert.deepEqual(newSetWithout(set, 4), set)
+  })
+
+  it("timeoutPromise returns a Promise that executes a function after a delay then resolves", async () => {
+    const func = sinon.stub()
+    const promise = timeoutPromise(func, 10)
+    sinon.assert.callCount(func, 0)
+    await promise
+    sinon.assert.callCount(func, 1)
   })
 
   describe("dateFunction", () => {

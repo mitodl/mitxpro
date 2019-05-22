@@ -158,3 +158,30 @@ const getDateExtreme = R.curry(
 
 export const getMinDate = getDateExtreme(Math.min)
 export const getMaxDate = getDateExtreme(Math.max)
+
+export const newSetWith = (set: Set<*>, valueToAdd: any): Set<*> => {
+  const newSet = new Set(set)
+  newSet.add(valueToAdd)
+  return newSet
+}
+
+export const newSetWithout = (set: Set<*>, valueToDelete: any): Set<*> => {
+  const newSet = new Set(set)
+  newSet.delete(valueToDelete)
+  return newSet
+}
+
+/**
+ * Returns a Promise that executes a function after a given number of milliseconds then resolves
+ */
+export const timeoutPromise = (
+  funcToExecute: Function,
+  timeoutMs: number
+): Promise<*> => {
+  return new Promise(resolve =>
+    setTimeout(() => {
+      funcToExecute()
+      resolve()
+    }, timeoutMs)
+  )
+}
