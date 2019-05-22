@@ -48,18 +48,21 @@ class RegisterProfilePage extends React.Component<Props> {
   render() {
     const { auth } = this.props
 
-    if (auth && auth.state === STATE_INVALID_EMAIL) {
-      return (
-        <div>
-          <p>No confirmation code was provided or it has expired.</p>
-          <Link to={routes.register.begin}>Click here</Link> to register again.
-        </div>
-      )
-    }
-
     return (
-      <div>
-        <p>Confirming...</p>
+      <div className="container auth-page">
+        <div className="row">
+          <div className="col">
+            {auth && auth.state === STATE_INVALID_EMAIL ? (
+              <React.Fragment>
+                <p>No confirmation code was provided or it has expired.</p>
+                <Link to={routes.register.begin}>Click here</Link> to register
+                again.
+              </React.Fragment>
+            ) : (
+              <p>Confirming...</p>
+            )}
+          </div>
+        </div>
       </div>
     )
   }

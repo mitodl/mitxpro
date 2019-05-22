@@ -136,28 +136,39 @@ class RegisterProfilePage extends React.Component<Props, State> {
   render() {
     const { countries } = this.props
     const { authState } = this.state
+
     return (
-      <div className="registration-form">
-        <div className="form-group row">
-          <h3 className="col-8">Create an Account</h3>
-          <h4 className="col-4 align-text-right gray-text">Step 1 of 2</h4>
-        </div>
-        <div className="form-group row">
-          <div className="col">
-            Already have an MITxPro account?{" "}
-            <Link to={routes.login.begin}>Click here</Link>
+      <div className="container auth-page registration-page">
+        <div className="auth-header row d-flex flex-row align-items-center justify-content-between flex-nowrap">
+          <div className="col-auto flex-shrink-1">
+            <h1>Create an Account</h1>
+          </div>
+          <div className="col-auto align-text-right gray-text">
+            <h4>Step 1 of 2</h4>
           </div>
         </div>
-        {authState ? (
-          this.renderAuthState(authState)
-        ) : (
-          <div className="inner-form">
-            <RegisterDetailsForm
-              onSubmit={this.onSubmit.bind(this)}
-              countries={countries}
-            />
+        <div className="auth-card card-shadow row">
+          <div className="container">
+            <div className="row">
+              <div className="col-12 form-group">
+                Already have an MITxPro account?{" "}
+                <Link to={routes.login.begin}>Click here</Link>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-12 auth-form">
+                {authState ? (
+                  this.renderAuthState(authState)
+                ) : (
+                  <RegisterDetailsForm
+                    onSubmit={this.onSubmit.bind(this)}
+                    countries={countries}
+                  />
+                )}
+              </div>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     )
   }

@@ -1,22 +1,69 @@
-.registration-form {
+.auth-page {
+  max-width: 600px;
+  padding-top: 15px;
+  padding-bottom: 35px;
+
+  &.registration-page {
+    max-width: 800px;
+  }
+
+  h1 {
+    @include media-breakpoint-down(xs) {
+      font-size: 28px;
+    }
+
+    letter-spacing: 0.06em;
+  }
+
+  h4 {
+    @include media-breakpoint-down(xs) {
+      font-size: 16px;
+    }
+  }
+}
+
+.auth-card {
   @include media-breakpoint-down(sm)  {
-    padding: 20px 72px;
+    padding: 20px;
   }
 
   @include media-breakpoint-down(xs)  {
-    padding: 5px 5px;
+    padding: 15px 0;
   }
 
   background-color: $very-light-gray;
-  max-width: 800px;
-  margin: auto;
-  padding: 40px 145px;
+  border-width: 7px 0 0 0;
+  border-style: solid;
+  border-image-source: linear-gradient(90deg, #43bebc, #ebbb47);
+  border-image-slice: 1;
+  padding: 40px;
+}
 
+.auth-form {
   .form-control {
     font-size: inherit;
     font-weight: inherit;
   }
 
+  .form-error {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .errored {
+    border: 2px solid $red;
+  }
+
+  label {
+    font-weight: 600;
+  }
+
+  .submit-row {
+    margin-top: 25px;
+  }
+}
+
+.registration-page .auth-form {
   .row-inner {
     margin-top: 20px;
   }

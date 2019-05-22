@@ -5,7 +5,7 @@ import { range, reverse } from "ramda"
 import moment from "moment"
 import { Formik, Field, Form, ErrorMessage } from "formik"
 
-import FormError from "./FormError"
+import FormError from "./elements/FormError"
 import {
   EMPLOYMENT_INDUSTRY,
   EMPLOYMENT_FUNCTION,
@@ -193,16 +193,14 @@ const RegisterExtraDetailsForm = ({ onSubmit }: Props) => (
           </div>
         </div>
 
-        <div className="row-inner justify-content-end">
-          <div className="row justify-content-end">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="btn btn-primary btn-light-blue"
-            >
-              Continue
-            </button>
-          </div>
+        <div className="row submit-row no-gutters justify-content-end">
+          <button
+            type="submit"
+            className="btn btn-primary btn-light-blue"
+            disabled={isSubmitting}
+          >
+            Continue
+          </button>
         </div>
       </Form>
     )}

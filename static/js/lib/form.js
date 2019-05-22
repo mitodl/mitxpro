@@ -1,6 +1,8 @@
 // @flow
-import type { CheckoutPayload } from "../flow/ecommerceTypes"
 import React from "react"
+import * as yup from "yup"
+
+import type { CheckoutPayload } from "../flow/ecommerceTypes"
 
 /**
  * Creates a POST form with hidden input fields
@@ -46,3 +48,22 @@ export const formatErrors = (
   }
   return <div className="error">{errorString}</div>
 }
+
+export const emailValidationShape = yup
+  .string()
+  .label("Email")
+  .required()
+  .email("Invalid email")
+
+export const passwordValidationShape = yup
+  .string()
+  .label("Password")
+  .required()
+  .min(8)
+
+export const newPasswordValidationShape = passwordValidationShape.matches(
+  /^(?=.*[0-9])(?=.*[a-zA-Z]).*$/,
+  {
+    message: "Password must contain at least one letter and number"
+  }
+)

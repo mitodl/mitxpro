@@ -10,7 +10,7 @@ import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
 import { STATE_SUCCESS } from "../../../lib/auth"
 
-import { LoginPasswordForm } from "../../../components/forms/login"
+import LoginPasswordForm from "../../../components/forms/LoginPasswordForm"
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
@@ -29,12 +29,9 @@ type Props = {
 
 class LoginPasswordPage extends React.Component<Props> {
   componentDidMount() {
-    const {
-      history,
-      auth: { partialToken }
-    } = this.props
+    const { history, auth } = this.props
 
-    if (!partialToken) {
+    if (!auth || !auth.partialToken) {
       // if there's no partialToken in the state
       // this page was navigated to directly and login needs to be started over
       history.push(routes.login.begin)
@@ -57,7 +54,7 @@ class LoginPasswordPage extends React.Component<Props> {
       }: { body: AuthResponse } = await loginPassword(password, partialToken)
 
       if (state === STATE_SUCCESS) {
-        window.location.href = redirectUrl || routes.root
+        window.location.href = redirectUrl || routes.dashboard
       } else if (errors.length > 0) {
         setErrors({
           password: errors[0]
@@ -69,16 +66,29 @@ class LoginPasswordPage extends React.Component<Props> {
   }
 
   render() {
-    const {
-      auth: {
-        extraData: { name }
-      }
-    } = this.props
+    const { auth } = this.props
+
+    if (!auth) {
+      return <div />
+    }
+
+    const name = auth.extraData.name
 
     return (
-      <div>
-        <p>Logging in as {name}</p>
-        <LoginPasswordForm onSubmit={this.onSubmit.bind(this)} />
+      <div className="container auth-page">
+        <div className="row auth-header">
+          <h1 className="col-12">Login</h1>
+        </div>
+        <div className="row auth-card card-shadow auth-form">
+          {name && (
+            <div className="col-12">
+              <p>Logging in as {name}</p>
+            </div>
+          )}
+          <div className="col-12">
+            <LoginPasswordForm onSubmit={this.onSubmit.bind(this)} />
+          </div>
+        </div>
       </div>
     )
   }

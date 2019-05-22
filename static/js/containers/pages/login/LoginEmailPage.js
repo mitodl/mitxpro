@@ -8,7 +8,7 @@ import auth from "../../../lib/queries/auth"
 import { routes, getNextParam } from "../../../lib/urls"
 import { STATE_LOGIN_PASSWORD } from "../../../lib/auth"
 
-import { LoginEmailForm } from "../../../components/forms/login"
+import EmailForm from "../../../components/forms/EmailForm"
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
@@ -45,8 +45,15 @@ class LoginEmailPage extends React.Component<Props> {
 
   render() {
     return (
-      <div>
-        <LoginEmailForm onSubmit={this.onSubmit.bind(this)} />
+      <div className="container auth-page">
+        <div className="row auth-header">
+          <h1 className="col-12">Login</h1>
+        </div>
+        <div className="row auth-card card-shadow auth-form">
+          <div className="col-12">
+            <EmailForm onSubmit={this.onSubmit.bind(this)} />
+          </div>
+        </div>
       </div>
     )
   }

@@ -71,3 +71,11 @@
     font-size: 18px;
   }
 }
+
+.notifications {
+  .alert {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+  }
+}
