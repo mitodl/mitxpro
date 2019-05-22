@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.5.1
+-------------
+
+- Fixed encrypted response getting ascii-escaped
+- add feature site nofication through cms (#309)
+- Added hubspot ecommerce bridge (#276)
+- Move Header Bundle back to Original Location
+- Use query parameters when loading checkout page (#283)
+- Fix coupon apply button bug (#296)
+- Added SDN compliance api and data model
+- Convert Sections to Generic
+
 Version 0.5.0 (Released May 22, 2019)
 -------------
 
