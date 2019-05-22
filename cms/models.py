@@ -18,7 +18,7 @@ from wagtail.core.blocks import RawHTMLBlock, PageChooserBlock
 from wagtail.images.models import Image
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.snippets.models import register_snippet
-
+from wagtailmetadata.models import MetadataPageMixin
 
 from modelcluster.fields import ParentalKey
 
@@ -391,7 +391,7 @@ class HomePage(Page):
         return context
 
 
-class ProductPage(Page):
+class ProductPage(MetadataPageMixin, Page):
     """
     Abstract product page
     """
