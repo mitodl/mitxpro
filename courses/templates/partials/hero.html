@@ -9,6 +9,17 @@
           <h1>{{ obj.display_title }}</h1>
           <h2>{{ obj.subhead }}</h2>
         </div>
+        <div>
+          {% if not enrolled and product_version_id %}
+            <a class="enroll-button" href="{% url "checkout-page" %}?product={{ product_version_id }}">
+              Enroll Now
+            </a>
+          {% elif enrolled and courseware_url %}
+            <a class="enroll-button" href="{% url "user-dashboard" %}">
+              View Dashboard
+            </a>
+          {% endif %}
+        </div>
       </div>
       <div class="col-lg-5">
         {% if obj.video_url %}

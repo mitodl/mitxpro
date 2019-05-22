@@ -58,6 +58,15 @@
     }
   }
 
+  .enroll-button {
+    margin: 0;
+    border-radius: 5px;
+    background-color: $primary;
+    color: white;
+    padding: 20px 40px;
+    text-transform: uppercase;
+  }
+
   video {
     width: 100%;
     border: 5px solid white;
