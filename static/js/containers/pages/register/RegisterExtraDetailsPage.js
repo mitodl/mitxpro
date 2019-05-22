@@ -16,7 +16,7 @@ import RegisterExtraDetailsForm from "../../../components/forms/RegisterExtraDet
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
-import type {AuthResponse, ProfileForm, User} from "../../../flow/authTypes"
+import type { AuthResponse, ProfileForm, User } from "../../../flow/authTypes"
 
 type RegisterProps = {|
   location: Location,
