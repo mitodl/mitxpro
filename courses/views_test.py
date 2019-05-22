@@ -202,6 +202,7 @@ def test_course_catalog_view(client):
     assert list(resp.context["courses"]) == exp_courses
 
 
+# pylint: disable=too-many-arguments
 @pytest.mark.parametrize("is_enrolled", [True, False])
 @pytest.mark.parametrize("has_unexpired_run", [True, False])
 @pytest.mark.parametrize("has_product", [True, False])
