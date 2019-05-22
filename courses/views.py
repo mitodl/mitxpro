@@ -90,15 +90,20 @@ class CourseView(DetailView):
         run = course.first_unexpired_run
         product = run.products.first() if run else None
         product_version = product.latest_version if product else None
-        enrolled = CourseRunEnrollment.objects.filter(
-            user=self.request.user, run=run
-        ).exists()
+        is_anonymous = self.request.user.is_anonymous
+        enrolled = (
+            CourseRunEnrollment.objects.filter(user=self.request.user, run=run).exists()
+            if run and not is_anonymous
+            else False
+        )
 
         return {
             **super().get_context_data(**kwargs),
             **get_js_settings_context(self.request),
             "courseware_url": run.courseware_url if run else None,
-            "product_version_id": product_version.id if product_version else None,
+            "product_version_id": product_version.id
+            if (product_version and not is_anonymous)
+            else None,
             "enrolled": enrolled,
             "user": self.request.user,
         }

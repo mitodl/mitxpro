@@ -4,6 +4,7 @@ Tests for course views
 # pylint: disable=unused-argument, redefined-outer-name
 import operator as op
 import pytest
+from django.contrib.auth.models import AnonymousUser
 from django.urls import reverse
 from rest_framework import status
 
@@ -204,7 +205,10 @@ def test_course_catalog_view(client):
 @pytest.mark.parametrize("is_enrolled", [True, False])
 @pytest.mark.parametrize("has_unexpired_run", [True, False])
 @pytest.mark.parametrize("has_product", [True, False])
-def test_course_view(client, user, is_enrolled, has_unexpired_run, has_product):
+@pytest.mark.parametrize("is_anonymous", [True, False])
+def test_course_view(
+    client, user, is_enrolled, has_unexpired_run, has_product, is_anonymous
+):
     """
     Test that the course detail view has the right context and shows the right HTML for the enroll/view button
     """
@@ -222,22 +226,28 @@ def test_course_view(client, user, is_enrolled, has_unexpired_run, has_product):
     if is_enrolled and has_unexpired_run:
         CourseRunEnrollment.objects.create(user=user, run=run)
 
-    client.force_login(user)
+    if not is_anonymous:
+        client.force_login(user)
     resp = client.get(reverse("course-detail", kwargs={"pk": course.id}))
     assert resp.context["course"] == course
-    assert resp.context["user"] == user
+    assert resp.context["user"] == user if not is_anonymous else AnonymousUser()
     assert resp.context["courseware_url"] == (run.courseware_url if run else None)
-    assert resp.context["product_version_id"] == product_version_id
-    assert resp.context["enrolled"] == (is_enrolled and has_unexpired_run)
+    assert resp.context["product_version_id"] == (
+        product_version_id if not is_anonymous else None
+    )
+    assert resp.context["enrolled"] == (
+        is_enrolled and has_unexpired_run and not is_anonymous
+    )
 
     has_button = False
     url = ""  # make linter happy
-    if not is_enrolled and has_product and has_unexpired_run:
-        url = f'{reverse("checkout-page")}?product={product_version_id}'
-        has_button = True
-    if is_enrolled and has_unexpired_run:
-        url = run.courseware_url
-        has_button = True
+    if not is_anonymous:
+        if not is_enrolled and has_product and has_unexpired_run:
+            url = f'{reverse("checkout-page")}?product={product_version_id}'
+            has_button = True
+        if is_enrolled and has_unexpired_run:
+            url = run.courseware_url
+            has_button = True
 
     assert (
         f'<a class="enroll-button" href="{url}">'.encode("utf-8") in resp.content
