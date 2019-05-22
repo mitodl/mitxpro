@@ -128,7 +128,10 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_price(self, instance):
         """Return the latest product version price"""
-        return instance.latest_version.price.to_eng_string()
+        product_version = instance.latest_version
+        if product_version:
+            return product_version.price.to_eng_string()
+        return "0.00"
 
     class Meta:
         fields = "__all__"
