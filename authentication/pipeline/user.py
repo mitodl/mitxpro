@@ -1,4 +1,6 @@
 """Auth pipline functions for email authentication"""
+import logging
+
 import ulid
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
@@ -20,6 +22,8 @@ from ecommerce.task_helpers import sync_hubspot_user
 from users.serializers import UserSerializer, ProfileSerializer
 
 # pylint: disable=keyword-arg-before-vararg
+
+log = logging.getLogger()
 
 
 def validate_email_auth_request(
@@ -96,6 +100,7 @@ def create_user_via_email(
     serializer = UserSerializer(data=data)
 
     if not serializer.is_valid():
+        log.error(serializer.errors)
         raise RequirePasswordAndPersonalInfoException(
             backend, current_partial, errors=serializer.errors
         )

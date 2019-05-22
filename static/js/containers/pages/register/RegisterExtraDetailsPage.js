@@ -16,7 +16,7 @@ import RegisterExtraDetailsForm from "../../../components/forms/RegisterExtraDet
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
-import type { AuthResponse, User, UserProfile } from "../../../flow/authTypes"
+import type {AuthResponse, ProfileForm, User} from "../../../flow/authTypes"
 
 type RegisterProps = {|
   location: Location,
@@ -26,7 +26,7 @@ type RegisterProps = {|
 
 type DispatchProps = {|
   registerExtraDetails: (
-    profileData: UserProfile,
+    profileData: ProfileForm,
     partialToken: string
   ) => Promise<Response<AuthResponse>>,
   getCurrentUser: () => Promise<Response<User>>
@@ -99,10 +99,8 @@ const mapStateToProps = createStructuredSelector({
   params: createStructuredSelector({ partialToken: qsPartialTokenSelector })
 })
 
-const registerExtraDetailsPage = (
-  profileData: UserProfile,
-  partialToken: string
-) => mutateAsync(auth.registerExtraDetailsMutation(profileData, partialToken))
+const registerExtraDetails = (profileData: ProfileForm, partialToken: string) =>
+  mutateAsync(auth.registerExtraDetailsMutation(profileData, partialToken))
 
 const getCurrentUser = () =>
   requestAsync({
@@ -111,7 +109,7 @@ const getCurrentUser = () =>
   })
 
 const mapDispatchToProps = {
-  registerExtraDetails: registerExtraDetailsPage,
+  registerExtraDetails: registerExtraDetails,
   getCurrentUser
 }
 

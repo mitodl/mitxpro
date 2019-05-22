@@ -33,19 +33,19 @@ describe("RegisterExtraDetailsForm", () => {
     const wrapper = renderForm()
 
     const form = wrapper.find("Formik")
-    assert.ok(findFormikFieldByName(form, "birth_year").exists())
-    assert.ok(findFormikFieldByName(form, "company_size").exists())
+    assert.ok(findFormikFieldByName(form, "profile.birth_year").exists())
+    assert.ok(findFormikFieldByName(form, "profile.company_size").exists())
     assert.ok(form.find("button[type='submit']").exists())
   })
 
   //
   ;[
-    ["company", "", "Company is a required field"],
-    ["company", "  ", "Company is a required field"],
-    ["company", "MIT", null],
-    ["job_title", "", "Job Title is a required field"],
-    ["job_title", "  ", "Job Title is a required field"],
-    ["job_title", "QA Tester", null]
+    ["profile.company", "", "Company is a required field"],
+    ["profile.company", "  ", "Company is a required field"],
+    ["profile.company", "MIT", null],
+    ["profile.job_title", "", "Job Title is a required field"],
+    ["profile.job_title", "  ", "Job Title is a required field"],
+    ["profile.job_title", "QA Tester", null]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value
@@ -66,10 +66,10 @@ describe("RegisterExtraDetailsForm", () => {
 
   //
   ;[
-    ["gender", "", "Gender is a required field"],
-    ["gender", "f", null],
-    ["birth_year", "", "Birth Year is a required field"],
-    ["birth_year", "2000", null]
+    ["profile.gender", "", "Gender is a required field"],
+    ["profile.gender", "f", null],
+    ["profile.birth_year", "", "Birth Year is a required field"],
+    ["profile.birth_year", "2000", null]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value

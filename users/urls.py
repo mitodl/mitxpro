@@ -7,6 +7,7 @@ from users.views import (
     UserRetrieveViewSet,
     CurrentUserRetrieveViewSet,
     CountriesStatesViewSet,
+    CurrentUserUpdateViewSet,
 )
 
 router = routers.DefaultRouter()
@@ -18,6 +19,11 @@ urlpatterns = [
         "api/users/me",
         CurrentUserRetrieveViewSet.as_view({"get": "retrieve"}),
         name="users_api-me",
+    ),
+    path(
+        "api/profile/edit/",
+        CurrentUserUpdateViewSet.as_view({"patch": "update", "get": "retrieve"}),
+        name="users_api-update",
     ),
     path("api/", include(router.urls)),
 ]

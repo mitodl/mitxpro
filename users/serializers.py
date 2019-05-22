@@ -151,6 +151,24 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ("created_on", "updated_on")
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    """Serializer for Profile within UserSerializer"""
+
+    class Meta:
+        model = Profile
+        fields = (
+            "birth_year",
+            "gender",
+            "company",
+            "company_size",
+            "industry",
+            "job_title",
+            "job_function",
+            "years_experience",
+            "leadership_level",
+        )
+
+
 class PublicUserSerializer(serializers.ModelSerializer):
     """Serializer for public user data"""
 
@@ -163,11 +181,11 @@ class UserSerializer(serializers.ModelSerializer):
     """Serializer for users"""
 
     # password is explicitly write_only
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, required=False)
     email = WriteableSerializerMethodField()
     username = WriteableSerializerMethodField()
     legal_address = LegalAddressSerializer(allow_null=True)
-    profile = ProfileSerializer(allow_null=True, required=False)
+    profile = UserProfileSerializer(allow_null=True, required=False)
 
     def validate_email(self, value):
         """Empty validation function, but this is required for WriteableSerializerMethodField"""
@@ -208,7 +226,7 @@ class UserSerializer(serializers.ModelSerializer):
                 legal_address.save()
 
         if profile_data:
-            profile = ProfileSerializer(user.profile, data=profile_data)
+            profile = UserProfileSerializer(user.profile, data=profile_data)
             if profile.is_valid():
                 profile.save()
         sync_hubspot_user(user)
@@ -230,7 +248,9 @@ class UserSerializer(serializers.ModelSerializer):
                 address_serializer.save()
 
         if profile_data:
-            profile_serializer = ProfileSerializer(instance.profile, data=profile_data)
+            profile_serializer = UserProfileSerializer(
+                instance.profile, data=profile_data
+            )
             if profile_serializer.is_valid(raise_exception=True):
                 profile_serializer.save()
 

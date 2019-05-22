@@ -47,7 +47,9 @@ export type User = {
     email: string,
     name: string,
     created_on: string,
-    updated_on: string
+    updated_on: string,
+    profile: ?UserProfile,
+    legal_address: ?LegalAddress
 }
 
 export type AnonymousUser = {
@@ -90,5 +92,17 @@ export type UserProfile = {
   job_title: string,
   job_function: ?string,
   years_experience: ?number,
+  company_size: ?number,
   leadership_level: ?string
+}
+
+export type ProfileForm = {
+  profile: UserProfile
+}
+
+export type UserProfileForm = {
+    email: string,
+    name: string,
+    legal_address: ?LegalAddress,
+    profile: ?UserProfile
 }
