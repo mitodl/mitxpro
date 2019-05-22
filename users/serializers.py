@@ -230,9 +230,7 @@ class UserSerializer(serializers.ModelSerializer):
                 address_serializer.save()
 
         if profile_data:
-            profile_serializer = LegalAddressSerializer(
-                instance.profile, data=profile_data
-            )
+            profile_serializer = ProfileSerializer(instance.profile, data=profile_data)
             if profile_serializer.is_valid(raise_exception=True):
                 profile_serializer.save()
 

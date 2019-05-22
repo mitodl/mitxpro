@@ -80,7 +80,7 @@ class ProductVersion(TimestampedModel):
         indexes = [models.Index(fields=["created_on"])]
 
     def save(self, *args, **kwargs):  # pylint:disable=arguments-differ
-        super(ProductVersion, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
         task_helpers.sync_hubspot_product(self)
 
     def __str__(self):
@@ -160,7 +160,7 @@ class Order(TimestampedModel, AuditableModel):
         return data
 
     def save(self, *args, **kwargs):  # pylint:disable=arguments-differ
-        super(Order, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
         task_helpers.sync_hubspot_deal(self)
 
 
@@ -187,7 +187,7 @@ class Line(TimestampedModel):
     quantity = models.PositiveIntegerField()
 
     def save(self, *args, **kwargs):  # pylint:disable=arguments-differ
-        super(Line, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
         task_helpers.sync_hubspot_line(self)
 
     def __str__(self):
