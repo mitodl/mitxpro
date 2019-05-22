@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.5.0 (Released May 22, 2019)
+-------------
+
+- Added recaptcha to register page
+- add resource page background image (#304)
+- Track enrollment company (#287)
+- Fixed dashboard styling again
+- #193 Product Page: Subnav
+- Updated notebook Dockerfile to be based off correct image
+
 Version 0.4.1 (Released May 17, 2019)
 -------------
 
