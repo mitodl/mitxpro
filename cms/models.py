@@ -18,6 +18,8 @@ from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.blocks import RawHTMLBlock
 from wagtail.images.models import Image
 from wagtail.images.blocks import ImageChooserBlock
+from wagtail.snippets.models import register_snippet
+
 
 from modelcluster.fields import ParentalKey
 
@@ -456,3 +458,17 @@ class ResourcePage(Page):
             self.slug = "%s-%d" % (original_slug, x)
 
         super().save(*args, **kwargs)
+
+
+@register_snippet
+class SiteNotification(models.Model):
+    """ Snippet model for showing site notifications. """
+
+    message = RichTextField(
+        max_length=255, features=["bold", "italic", "link", "document-link"]
+    )
+
+    panels = [FieldPanel("message")]
+
+    def __str__(self):
+        return self.message
