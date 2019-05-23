@@ -52,7 +52,7 @@ from ecommerce.serializers import (
     SingleUseCouponSerializer,
     CurrentCouponPaymentSerializer,
 )
-from ecommerce.task_helpers import sync_hubspot_deal
+from hubspot.task_helpers import sync_hubspot_deal
 
 log = logging.getLogger(__name__)
 

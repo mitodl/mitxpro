@@ -16,7 +16,7 @@ from authentication.exceptions import (
 from authentication.utils import SocialAuthState
 
 from compliance import api as compliance_api
-from ecommerce.task_helpers import sync_hubspot_user
+from hubspot.task_helpers import sync_hubspot_user
 from users.serializers import UserSerializer, ProfileSerializer
 
 # pylint: disable=keyword-arg-before-vararg

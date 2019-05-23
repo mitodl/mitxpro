@@ -3,7 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from ecommerce.models import ProductVersion, Line
-from ecommerce.task_helpers import sync_hubspot_product, sync_hubspot_line
+from hubspot.task_helpers import sync_hubspot_product, sync_hubspot_line
 
 
 @receiver(post_save, sender=ProductVersion, dispatch_uid="product_post_save")

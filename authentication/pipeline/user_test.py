@@ -319,7 +319,7 @@ def test_create_profile(
     Tests that create_profile creates a profile
     """
     settings.HUBSPOT_API_KEY = hubspot_key
-    mock_user_sync = mocker.patch("ecommerce.tasks.sync_contact_with_hubspot.delay")
+    mock_user_sync = mocker.patch("hubspot.tasks.sync_contact_with_hubspot.delay")
     response = user_actions.create_profile(
         mock_create_profile_strategy,
         mock_email_backend,
