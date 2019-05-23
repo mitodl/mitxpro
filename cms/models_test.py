@@ -37,15 +37,6 @@ def test_resource_page():
         assert block.value["detail"].source == "details of introduction"
 
 
-def test_resource_page_unique_slug():
-    """
-    Verify that if user creates pages with same title, there slug would be auto generated uniquely.
-    """
-    page = ResourcePageFactory(title="title of the page")
-    another_page = ResourcePageFactory(title="title of the page")
-    assert page.slug != another_page.slug
-
-
 def test_notification_snippet():
     """
     Verify that user can create site notification using cms.

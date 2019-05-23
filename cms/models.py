@@ -1,7 +1,6 @@
 """
 Page models for the CMS
 """
-import itertools
 
 from django.db import models
 from django.utils.text import slugify
