@@ -8,7 +8,7 @@ import pytest
 from faker import Faker
 from django.conf import settings
 
-from ecommerce.hubspot_api import (
+from hubspot.api import (
     send_hubspot_request,
     HUBSPOT_API_BASE_URL,
     make_sync_message,
@@ -47,9 +47,7 @@ def test_send_hubspot_request(mocker, request_method, endpoint, api_url, expecte
 
     # Include hapikey when generating url to match request call against
     full_query_params = {"param": value, "hapikey": settings.HUBSPOT_API_KEY}
-    mock_request = mocker.patch(
-        f"ecommerce.hubspot_api.requests.{request_method.lower()}"
-    )
+    mock_request = mocker.patch(f"hubspot.api.requests.{request_method.lower()}")
     url_params = urlencode(full_query_params)
     url = f"{expected_url}?{url_params}"
     if request_method == "GET":

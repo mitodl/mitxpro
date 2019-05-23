@@ -5,7 +5,7 @@ and Line Items
 import json
 from django.core.management import BaseCommand
 
-from ecommerce.hubspot_api import send_hubspot_request
+from hubspot.api import send_hubspot_request
 
 # Hubspot ecommerce settings define which hubspot properties are mapped with which
 # local properties when objects are synced.

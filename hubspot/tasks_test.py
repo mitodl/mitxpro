@@ -1,5 +1,5 @@
 """
-Tests for ecommerce tasks
+Tests for hubspot tasks
 """
 # pylint: disable=redefined-outer-name
 from unittest.mock import ANY
@@ -9,13 +9,13 @@ import pytest
 from faker import Faker
 
 from ecommerce.factories import ProductFactory, OrderFactory, LineFactory
-from ecommerce.hubspot_api import (
+from hubspot.api import (
     make_contact_sync_message,
     make_product_sync_message,
     make_deal_sync_message,
     make_line_item_sync_message,
 )
-from ecommerce.tasks import (
+from hubspot.tasks import (
     sync_contact_with_hubspot,
     HUBSPOT_SYNC_URL,
     sync_product_with_hubspot,
@@ -30,7 +30,7 @@ fake = Faker()
 @pytest.fixture
 def mock_hubspot_request(mocker):
     """Mock the send hubspot request method"""
-    yield mocker.patch("ecommerce.tasks.send_hubspot_request")
+    yield mocker.patch("hubspot.tasks.send_hubspot_request")
 
 
 @pytest.mark.django_db

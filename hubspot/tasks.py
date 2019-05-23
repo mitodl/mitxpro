@@ -1,7 +1,7 @@
 """
-Ecommerce tasks
+Hubspot tasks
 """
-from ecommerce.hubspot_api import (
+from hubspot.api import (
     send_hubspot_request,
     make_contact_sync_message,
     make_product_sync_message,
