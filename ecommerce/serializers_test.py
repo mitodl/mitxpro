@@ -371,7 +371,7 @@ def test_serialize_order(status):
         "coupon_code": None,
         "company": None,
         "b2b": False,
-        "line_items": [LineSerializer(instance=line).data],
+        "lines": [LineSerializer(instance=line).data],
     }
 
 
@@ -400,5 +400,5 @@ def test_serialize_order_with_coupon():
         "coupon_code": coupon_redemption.coupon_version.coupon.coupon_code,
         "company": coupon_redemption.coupon_version.payment_version.company.id,
         "b2b": True,
-        "line_items": [LineSerializer(instance=line).data],
+        "lines": [LineSerializer(instance=line).data],
     }
