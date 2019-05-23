@@ -33,82 +33,6 @@ class CompanySerializer(serializers.ModelSerializer):
         model = models.Company
 
 
-class LineSerializer(serializers.ModelSerializer):
-    """ Line Serializer """
-
-    class Meta:
-        fields = "__all__"
-        model = models.Line
-
-
-class OrderSerializer(serializers.ModelSerializer):
-    """ Order Serializer """
-
-    close_date = serializers.SerializerMethodField(allow_null=True)
-    amount = serializers.SerializerMethodField()
-    discount_amount = serializers.SerializerMethodField()
-    coupon_code = serializers.SerializerMethodField(allow_null=True)
-    line_items = serializers.SerializerMethodField()
-
-    def get_close_date(self, instance):
-        """ Return the fulfilled date if any """
-        if instance.status == models.Order.FULFILLED:
-            return int(instance.updated_on.timestamp())
-
-    def get_amount(self, instance):
-        """ Get the amount paid after discount """
-        return get_product_version_price_with_discount(
-            coupon_version=CouponVersion.objects.filter(
-                id__in=CouponRedemption.objects.filter(order=instance).values_list(
-                    "coupon_version__id", flat=True
-                )
-            ).first(),
-            product_version=ProductVersion.objects.filter(
-                id__in=instance.lines.values_list("product_version", flat=True)
-            ).first(),
-        ).to_eng_string()
-
-    def get_coupon_code(self, instance):
-        """ Get the coupon code used for the order if any """
-        redemption = CouponRedemption.objects.filter(order=instance).first()
-        if redemption:
-            return redemption.coupon_version.coupon.coupon_code
-
-    def get_discount_amount(self, instance):
-        """ Get the discount amount if any """
-        coupon_version = CouponVersion.objects.filter(
-            id__in=CouponRedemption.objects.filter(order=instance).values_list(
-                "coupon_version__id", flat=True
-            )
-        ).first()
-        if not coupon_version:
-            return 0
-
-        product_version = ProductVersion.objects.filter(
-            id__in=instance.lines.values_list("product_version", flat=True)
-        ).first()
-
-        return round_half_up(
-            coupon_version.payment_version.amount * product_version.price
-        ).to_eng_string()
-
-    def get_line_items(self, instance):
-        return [line.id for line in instance.lines.all()]
-
-    class Meta:
-        fields = (
-            "id",
-            "amount",
-            "discount_amount",
-            "close_date",
-            "coupon_code",
-            "line_items",
-            "purchaser",
-            "status",
-        )
-        model = models.Order
-
-
 class ProductSerializer(serializers.ModelSerializer):
     """ Product Serializer """
 
@@ -192,6 +116,113 @@ class ProductVersionSerializer(serializers.ModelSerializer):
             "object_id",
         ]
         model = models.ProductVersion
+
+
+class LineSerializer(serializers.ModelSerializer):
+    """ Line Serializer """
+
+    product = serializers.SerializerMethodField()
+
+    def get_product(self, instance):
+        """ Get the line product id"""
+        return instance.product_version.product.id
+
+    class Meta:
+        fields = ("id", "product")
+        model = models.Line
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    """ Order Serializer """
+
+    close_date = serializers.SerializerMethodField(allow_null=True)
+    amount = serializers.SerializerMethodField()
+    discount_amount = serializers.SerializerMethodField()
+    coupon_code = serializers.SerializerMethodField(allow_null=True)
+    company = serializers.SerializerMethodField(allow_null=True)
+    line_items = serializers.SerializerMethodField()
+    b2b = serializers.SerializerMethodField()
+
+    def get_close_date(self, instance):
+        """ Return the fulfilled date if any """
+        if instance.status == models.Order.FULFILLED:
+            return instance.updated_on.timestamp() * 100
+
+    def get_amount(self, instance):
+        """ Get the amount paid after discount """
+        return get_product_version_price_with_discount(
+            coupon_version=CouponVersion.objects.filter(
+                id__in=CouponRedemption.objects.filter(order=instance).values_list(
+                    "coupon_version__id", flat=True
+                )
+            ).first(),
+            product_version=ProductVersion.objects.filter(
+                id__in=instance.lines.values_list("product_version", flat=True)
+            ).first(),
+        ).to_eng_string()
+
+    def get_coupon_code(self, instance):
+        """ Get the coupon code used for the order if any """
+        redemption = CouponRedemption.objects.filter(order=instance).first()
+        if redemption:
+            return redemption.coupon_version.coupon.coupon_code
+
+    def get_discount_amount(self, instance):
+        """ Get the discount amount if any """
+        coupon_version = CouponVersion.objects.filter(
+            id__in=CouponRedemption.objects.filter(order=instance).values_list(
+                "coupon_version__id", flat=True
+            )
+        ).first()
+        if not coupon_version:
+            return 0
+
+        product_version = ProductVersion.objects.filter(
+            id__in=instance.lines.values_list("product_version", flat=True)
+        ).first()
+
+        return round_half_up(
+            coupon_version.payment_version.amount * product_version.price
+        ).to_eng_string()
+
+    def get_line_items(self, instance):
+        """ Get the list of line items"""
+        return [LineSerializer(line).data for line in instance.lines.all()]
+
+    def get_company(self, instance):
+        """ Get the company name if any """
+        redemption = CouponRedemption.objects.filter(order=instance).last()
+        if redemption:
+            company = redemption.coupon_version.payment_version.company
+            if company:
+                return company.name
+
+    def get_b2b(self, instance):
+        """ Determine if this is a B2B order """
+        redemption = CouponRedemption.objects.filter(order=instance).last()
+        if redemption:
+            company = redemption.coupon_version.payment_version.company
+            transaction_id = (
+                redemption.coupon_version.payment_version.payment_transaction
+            )
+            if company or transaction_id:
+                return True
+            return False
+
+    class Meta:
+        fields = (
+            "id",
+            "amount",
+            "discount_amount",
+            "close_date",
+            "coupon_code",
+            "line_items",
+            "purchaser",
+            "status",
+            "company",
+            "b2b",
+        )
+        model = models.Order
 
 
 class CouponSelectionSerializer(serializers.ModelSerializer):
