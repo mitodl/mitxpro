@@ -145,6 +145,7 @@ class OrderSerializer(serializers.ModelSerializer):
     b2b = serializers.SerializerMethodField()
 
     def get_name(self, instance):
+        """ Return the deal name """
         return f"XPRO-ORDER-{instance.id}"
 
     def get_close_date(self, instance):
