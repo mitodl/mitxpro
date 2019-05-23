@@ -20,30 +20,50 @@ VERSION = "0.12.0"
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SITE_BASE_URL = get_string("MITXPRO_BASE_URL", None)
-if not SITE_BASE_URL:
-    raise ImproperlyConfigured("MITXPRO_BASE_URL is not set")
+SITE_BASE_URL = get_string(
+    "MITXPRO_BASE_URL",
+    None,
+    description="Base url for the application in the format PROTOCOL://HOSTNAME[:PORT]",
+    required=True,
+)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = get_string("SECRET_KEY", None)
+SECRET_KEY = get_string(
+    "SECRET_KEY", None, description="Django secret key.", required=True
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_bool("DEBUG", False)
+DEBUG = get_bool("DEBUG", False, dev_only=True)
 
-ENVIRONMENT = get_string("MITXPRO_ENVIRONMENT", "dev")
+ENVIRONMENT = get_string(
+    "MITXPRO_ENVIRONMENT",
+    "dev",
+    description="The execution environment that the app is in (e.g. dev, staging, prod)",
+    required=True,
+)
 
 ALLOWED_HOSTS = ["*"]
 
-SECURE_SSL_REDIRECT = get_bool("MITXPRO_SECURE_SSL_REDIRECT", True)
+SECURE_SSL_REDIRECT = get_bool(
+    "MITXPRO_SECURE_SSL_REDIRECT",
+    True,
+    description="Application-level SSL redirect setting.",
+)
 
 HUBSPOT_CONFIG = {
     "HUBSPOT_NEW_COURSES_FORM_GUID": get_string(
-        "HUBSPOT_NEW_COURSES_FORM_GUID", "b9220dc1-4e48-4097-8539-9f2907f18b1e"
+        "HUBSPOT_NEW_COURSES_FORM_GUID",
+        "b9220dc1-4e48-4097-8539-9f2907f18b1e",
+        description="Form guid over hub spot for new courses email subscription form.",
     ),
     "HUBSPOT_FOOTER_FORM_GUID": get_string(
-        "HUBSPOT_FOOTER_FORM_GUID", "ff810010-c33c-4e99-9285-32d283fbc816"
+        "HUBSPOT_FOOTER_FORM_GUID",
+        "ff810010-c33c-4e99-9285-32d283fbc816",
+        description="Form guid over hub spot for footer block.",
     ),
-    "HUBSPOT_PORTAL_ID": get_string("HUBSPOT_PORTAL_ID", "5890463"),
+    "HUBSPOT_PORTAL_ID": get_string(
+        "HUBSPOT_PORTAL_ID", "5890463", description="Hub spot portal id."
+    ),
 }
 
 WEBPACK_LOADER = {
@@ -57,7 +77,9 @@ WEBPACK_LOADER = {
     }
 }
 
-SITE_ID = get_string("MITXPRO_SITE_ID", 1)
+SITE_ID = get_string(
+    "MITXPRO_SITE_ID", 1, description="The default site id for django sites framework"
+)
 
 # configure a custom user model
 AUTH_USER_MODEL = "users.User"
@@ -117,7 +139,9 @@ if ENVIRONMENT not in ("production", "prod"):
     INSTALLED_APPS += ("localdev.seed",)
 
 
-DISABLE_WEBPACK_LOADER_STATS = get_bool("DISABLE_WEBPACK_LOADER_STATS", False)
+DISABLE_WEBPACK_LOADER_STATS = get_bool(
+    "DISABLE_WEBPACK_LOADER_STATS", False, dev_only=True
+)
 if not DISABLE_WEBPACK_LOADER_STATS:
     INSTALLED_APPS += ("webpack_loader",)
 
@@ -145,7 +169,11 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 LOGIN_REDIRECT_URL = "/"
 LOGIN_URL = "/signin"
 LOGIN_ERROR_URL = "/signin"
-LOGOUT_REDIRECT_URL = get_string("LOGOUT_REDIRECT_URL", "/")
+LOGOUT_REDIRECT_URL = get_string(
+    "LOGOUT_REDIRECT_URL",
+    "/",
+    description="Url to redirect to after logout, typically Open edX's own logout url",
+)
 
 ROOT_URLCONF = "mitxpro.urls"
 
@@ -176,12 +204,23 @@ WSGI_APPLICATION = "mitxpro.wsgi.application"
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 DEFAULT_DATABASE_CONFIG = dj_database_url.parse(
     get_string(
-        "DATABASE_URL", "sqlite:///{0}".format(os.path.join(BASE_DIR, "db.sqlite3"))
+        "DATABASE_URL",
+        "sqlite:///{0}".format(os.path.join(BASE_DIR, "db.sqlite3")),
+        description="The connection url to the Postgres database",
+        required=True,
     )
 )
-DEFAULT_DATABASE_CONFIG["CONN_MAX_AGE"] = get_int("MITXPRO_DB_CONN_MAX_AGE", 0)
+DEFAULT_DATABASE_CONFIG["CONN_MAX_AGE"] = get_int(
+    "MITXPRO_DB_CONN_MAX_AGE",
+    0,
+    description="Maximum age of connection to Postgres in seconds",
+)
 
-if get_bool("MITXPRO_DB_DISABLE_SSL", False):
+if get_bool(
+    "MITXPRO_DB_DISABLE_SSL",
+    False,
+    description="Disables SSL to postgres if set to True",
+):
     DEFAULT_DATABASE_CONFIG["OPTIONS"] = {}
 else:
     DEFAULT_DATABASE_CONFIG["OPTIONS"] = {"sslmode": "require"}
@@ -203,7 +242,11 @@ USE_TZ = True
 
 # django-robots
 ROBOTS_USE_HOST = False
-ROBOTS_CACHE_TIMEOUT = get_int("ROBOTS_CACHE_TIMEOUT", 60 * 60 * 24)
+ROBOTS_CACHE_TIMEOUT = get_int(
+    "ROBOTS_CACHE_TIMEOUT",
+    60 * 60 * 24,
+    description="How long the robots.txt file should be cached",
+)
 
 # social auth
 AUTHENTICATION_BACKENDS = (
@@ -217,11 +260,6 @@ AUTHENTICATION_BACKENDS = (
 
 SOCIAL_AUTH_LOGIN_ERROR_URL = "login"
 SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS = [urlparse(SITE_BASE_URL).netloc]
-
-# Micromasters backend settings
-SOCIAL_AUTH_MICROMASTERS_LOGIN_URL = get_string(
-    "SOCIAL_AUTH_MICROMASTERS_LOGIN_URL", None
-)
 
 # Email backend settings
 SOCIAL_AUTH_EMAIL_FORM_URL = "login"
@@ -305,9 +343,11 @@ STATIC_ROOT = "staticfiles"
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
 # Request files from the webpack dev server
-USE_WEBPACK_DEV_SERVER = get_bool("MITXPRO_USE_WEBPACK_DEV_SERVER", False)
-WEBPACK_DEV_SERVER_HOST = get_string("WEBPACK_DEV_SERVER_HOST", "")
-WEBPACK_DEV_SERVER_PORT = get_int("WEBPACK_DEV_SERVER_PORT", 8052)
+USE_WEBPACK_DEV_SERVER = get_bool(
+    "MITXPRO_USE_WEBPACK_DEV_SERVER", False, dev_only=True
+)
+WEBPACK_DEV_SERVER_HOST = get_string("WEBPACK_DEV_SERVER_HOST", "", dev_only=True)
+WEBPACK_DEV_SERVER_PORT = get_int("WEBPACK_DEV_SERVER_PORT", 8052, dev_only=True)
 
 # Important to define this so DEBUG works properly
 INTERNAL_IPS = (get_string("HOST_IP", "127.0.0.1"),)
@@ -316,22 +356,62 @@ INTERNAL_IPS = (get_string("HOST_IP", "127.0.0.1"),)
 EMAIL_BACKEND = get_string(
     "MITXPRO_EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
 )
-EMAIL_HOST = get_string("MITXPRO_EMAIL_HOST", "localhost")
-EMAIL_PORT = get_int("MITXPRO_EMAIL_PORT", 25)
-EMAIL_HOST_USER = get_string("MITXPRO_EMAIL_USER", "")
-EMAIL_HOST_PASSWORD = get_string("MITXPRO_EMAIL_PASSWORD", "")
-EMAIL_USE_TLS = get_bool("MITXPRO_EMAIL_TLS", False)
+EMAIL_HOST = get_string(
+    "MITXPRO_EMAIL_HOST", "localhost", description="Outgoing e-mail hostname"
+)
+EMAIL_PORT = get_int("MITXPRO_EMAIL_PORT", 25, description="Outgoing e-mail port")
+EMAIL_HOST_USER = get_string(
+    "MITXPRO_EMAIL_USER", "", description="Outgoing e-mail auth username"
+)
+EMAIL_HOST_PASSWORD = get_string(
+    "MITXPRO_EMAIL_PASSWORD", "", description="Outgoing e-mail auth password"
+)
+EMAIL_USE_TLS = get_bool(
+    "MITXPRO_EMAIL_TLS", False, description="Outgoing e-mail TLS setting"
+)
+
+MITXPRO_REPLY_TO_ADDRESS = get_string(
+    "MITXPRO_REPLY_TO_ADDRESS",
+    "webmaster@localhost",
+    description="E-mail to use for reply-to address of emails",
+)
+
+
+DEFAULT_FROM_EMAIL = get_string(
+    "MITXPRO_FROM_EMAIL",
+    "webmaster@localhost",
+    description="E-mail to use for the from field",
+)
+
+MAILGUN_SENDER_DOMAIN = get_string(
+    "MAILGUN_SENDER_DOMAIN",
+    None,
+    description="The domain to send mailgun email through",
+    required=True,
+)
+MAILGUN_KEY = get_string(
+    "MAILGUN_KEY",
+    None,
+    description="The token for authenticating against the Mailgun API",
+    required=True,
+)
+MAILGUN_BATCH_CHUNK_SIZE = get_int(
+    "MAILGUN_BATCH_CHUNK_SIZE",
+    1000,
+    description="Maximum number of emails to send in a batch",
+)
+MAILGUN_RECIPIENT_OVERRIDE = get_string("MAILGUN_RECIPIENT_OVERRIDE", None)
+MAILGUN_FROM_EMAIL = get_string(
+    "MAILGUN_FROM_EMAIL",
+    "no-reply@localhost",
+    description="Email which mail comes from",
+)
+
 EMAIL_SUPPORT = get_string(
     "MITXPRO_SUPPORT_EMAIL",
-    get_string("MAILGUN_RECIPIENT_OVERRIDE", "support@localhost"),
+    MAILGUN_RECIPIENT_OVERRIDE or "support@localhost",
+    description="Email address listed for customer support",
 )
-MITXPRO_REPLY_TO_ADDRESS = get_string("MITXPRO_REPLY_TO_ADDRESS", "webmaster@localhost")
-
-MAILGUN_SENDER_DOMAIN = get_string("MAILGUN_SENDER_DOMAIN", None)
-MAILGUN_KEY = get_string("MAILGUN_KEY", None)
-MAILGUN_BATCH_CHUNK_SIZE = get_int("MAILGUN_BATCH_CHUNK_SIZE", 1000)
-MAILGUN_RECIPIENT_OVERRIDE = get_string("MAILGUN_RECIPIENT_OVERRIDE", None)
-MAILGUN_FROM_EMAIL = get_string("MAILGUN_FROM_EMAIL", "no-reply@localhost")
 
 NOTIFICATION_EMAIL_BACKEND = get_string(
     "MITXPRO_NOTIFICATION_EMAIL_BACKEND", "anymail.backends.mailgun.EmailBackend"
@@ -343,16 +423,25 @@ ANYMAIL = {
 }
 
 # e-mail configurable admins
-ADMIN_EMAIL = get_string("MITXPRO_ADMIN_EMAIL", "")
+ADMIN_EMAIL = get_string(
+    "MITXPRO_ADMIN_EMAIL",
+    "",
+    description="E-mail to send 500 reports to.",
+    required=True,
+)
 if ADMIN_EMAIL != "":
     ADMINS = (("Admins", ADMIN_EMAIL),)
 else:
     ADMINS = ()
 
 # Logging configuration
-LOG_LEVEL = get_string("MITXPRO_LOG_LEVEL", "INFO")
-DJANGO_LOG_LEVEL = get_string("DJANGO_LOG_LEVEL", "INFO")
-SENTRY_LOG_LEVEL = get_string("SENTRY_LOG_LEVEL", "ERROR")
+LOG_LEVEL = get_string("MITXPRO_LOG_LEVEL", "INFO", description="The log level default")
+DJANGO_LOG_LEVEL = get_string(
+    "DJANGO_LOG_LEVEL", "INFO", description="The log level for django"
+)
+SENTRY_LOG_LEVEL = get_string(
+    "SENTRY_LOG_LEVEL", "ERROR", description="The log level for Sentry"
+)
 
 # For logging to a remote syslog host
 LOG_HOST = get_string("MITXPRO_LOG_HOST", "localhost")
@@ -415,7 +504,7 @@ LOGGING = {
 
 # Sentry
 sentry_sdk.init(
-    dsn=get_string("SENTRY_DSN", ""),
+    dsn=get_string("SENTRY_DSN", "", description="The connection settings for Sentry"),
     environment=ENVIRONMENT,
     release=VERSION,
     integrations=[
@@ -426,24 +515,45 @@ sentry_sdk.init(
 )
 
 # server-status
-STATUS_TOKEN = get_string("STATUS_TOKEN", "")
+STATUS_TOKEN = get_string(
+    "STATUS_TOKEN", "", description="Token to access the status API."
+)
 HEALTH_CHECK = ["CELERY", "REDIS", "POSTGRES"]
 
-GA_TRACKING_ID = get_string("GA_TRACKING_ID", "")
+GA_TRACKING_ID = get_string(
+    "GA_TRACKING_ID", "", description="Google analytics tracking ID"
+)
 REACT_GA_DEBUG = get_bool("REACT_GA_DEBUG", False)
 
-RECAPTCHA_SITE_KEY = get_string("RECAPTCHA_SITE_KEY", "")
-RECAPTCHA_SECRET_KEY = get_string("RECAPTCHA_SECRET_KEY", "")
+RECAPTCHA_SITE_KEY = get_string(
+    "RECAPTCHA_SITE_KEY", "", description="The ReCaptcha site key"
+)
+RECAPTCHA_SECRET_KEY = get_string(
+    "RECAPTCHA_SECRET_KEY", "", description="The ReCaptcha secret key"
+)
 
-SITE_NAME = "MIT xPRO"
+SITE_NAME = get_string(
+    "SITE_NAME", "MIT xPRO", description="Name of the site. e.g MIT xPRO"
+)
 WAGTAIL_SITE_NAME = SITE_NAME
 
 MEDIA_ROOT = get_string("MEDIA_ROOT", "/var/media/")
 MEDIA_URL = "/media/"
-MITXPRO_USE_S3 = get_bool("MITXPRO_USE_S3", False)
-AWS_ACCESS_KEY_ID = get_string("AWS_ACCESS_KEY_ID", None)
-AWS_SECRET_ACCESS_KEY = get_string("AWS_SECRET_ACCESS_KEY", None)
-AWS_STORAGE_BUCKET_NAME = get_string("AWS_STORAGE_BUCKET_NAME", None)
+MITXPRO_USE_S3 = get_bool(
+    "MITXPRO_USE_S3",
+    False,
+    description="Use S3 for storage backend (required on Heroku)",
+)
+
+AWS_ACCESS_KEY_ID = get_string(
+    "AWS_ACCESS_KEY_ID", None, description="AWS Access Key for S3 storage."
+)
+AWS_SECRET_ACCESS_KEY = get_string(
+    "AWS_SECRET_ACCESS_KEY", None, description="AWS Secret Key for S3 storage."
+)
+AWS_STORAGE_BUCKET_NAME = get_string(
+    "AWS_STORAGE_BUCKET_NAME", None, description="S3 Bucket name."
+)
 AWS_QUERYSTRING_AUTH = get_string("AWS_QUERYSTRING_AUTH", None)
 # Provide nice validation of the configuration
 if MITXPRO_USE_S3 and (
@@ -461,11 +571,20 @@ if MITXPRO_USE_S3:
 
 # Celery
 USE_CELERY = True
-CELERY_BROKER_URL = get_string("CELERY_BROKER_URL", get_string("REDISCLOUD_URL", None))
-CELERY_RESULT_BACKEND = get_string(
-    "CELERY_RESULT_BACKEND", get_string("REDISCLOUD_URL", None)
+REDISCLOUD_URL = get_string(
+    "REDISCLOUD_URL", None, description="RedisCloud connection url"
 )
-CELERY_TASK_ALWAYS_EAGER = get_bool("CELERY_TASK_ALWAYS_EAGER", False)
+CELERY_BROKER_URL = get_string(
+    "CELERY_BROKER_URL",
+    REDISCLOUD_URL,
+    description="Where celery should get tasks, default is REDISCLOUD_URL",
+)
+CELERY_RESULT_BACKEND = get_string(
+    "CELERY_RESULT_BACKEND",
+    REDISCLOUD_URL,
+    description="Where celery should put task results, default is REDISCLOUD_URL",
+)
+CELERY_TASK_ALWAYS_EAGER = get_bool("CELERY_TASK_ALWAYS_EAGER", False, dev_only=True)
 CELERY_TASK_EAGER_PROPAGATES = get_bool("CELERY_TASK_EAGER_PROPAGATES", True)
 
 CELERY_TASK_SERIALIZER = "json"
@@ -475,7 +594,11 @@ CELERY_TIMEZONE = "UTC"
 CELERY_BEAT_SCHEDULE = {
     "check-hubspot-api-errors": {
         "task": "hubspot.tasks.check_hubspot_api_errors",
-        "schedule": get_int("HUBSPOT_ERROR_CHECK_FREQUENCY", 600),
+        "schedule": get_int(
+            "HUBSPOT_ERROR_CHECK_FREQUENCY",
+            600,
+            description="How many seconds between Hubspot API error checks",
+        ),
     }
 }
 
@@ -541,17 +664,45 @@ DJOSER = {
 }
 
 MITXPRO_OAUTH_PROVIDER = "mitxpro-oauth2"
-OPENEDX_OAUTH_APP_NAME = get_string("OPENEDX_OAUTH_APP_NAME", "edx-oauth-app")
-OPENEDX_API_BASE_URL = get_string("OPENEDX_API_BASE_URL", "http://edx.odl.local:18000")
-OPENEDX_BASE_REDIRECT_URL = get_string(
-    "OPENEDX_BASE_REDIRECT_URL", OPENEDX_API_BASE_URL
+OPENEDX_OAUTH_APP_NAME = get_string(
+    "OPENEDX_OAUTH_APP_NAME",
+    "edx-oauth-app",
+    required=True,
+    description="The 'name' value for the Open edX OAuth Application",
 )
-OPENEDX_TOKEN_EXPIRES_HOURS = get_int("OPENEDX_TOKEN_EXPIRES_HOURS", 1000)
-OPENEDX_API_CLIENT_ID = get_string("OPENEDX_API_CLIENT_ID", None)
-OPENEDX_API_CLIENT_SECRET = get_string("OPENEDX_API_CLIENT_SECRET", None)
+OPENEDX_API_BASE_URL = get_string(
+    "OPENEDX_API_BASE_URL",
+    "http://edx.odl.local:18000",
+    description="The base URL for the Open edX API",
+    required=True,
+)
+OPENEDX_BASE_REDIRECT_URL = get_string(
+    "OPENEDX_BASE_REDIRECT_URL",
+    OPENEDX_API_BASE_URL,
+    description="The base redirect URL for an OAuth Application for the Open edX API",
+)
+OPENEDX_TOKEN_EXPIRES_HOURS = get_int(
+    "OPENEDX_TOKEN_EXPIRES_HOURS",
+    1000,
+    description="The number of hours until an access token for the Open edX API expires",
+)
+OPENEDX_API_CLIENT_ID = get_string(
+    "OPENEDX_API_CLIENT_ID",
+    None,
+    description="The OAuth2 client id to connect to Open edX with",
+    required=True,
+)
+OPENEDX_API_CLIENT_SECRET = get_string(
+    "OPENEDX_API_CLIENT_SECRET",
+    None,
+    description="The OAuth2 client secret to connect to Open edX with",
+    required=True,
+)
 
 MITXPRO_REGISTRATION_ACCESS_TOKEN = get_string(
-    "MITXPRO_REGISTRATION_ACCESS_TOKEN", None
+    "MITXPRO_REGISTRATION_ACCESS_TOKEN",
+    None,
+    description="Access token to secure Open edX registration API with",
 )
 
 
@@ -574,39 +725,58 @@ if DEBUG:
     # it needs to be enabled before other middlewares
     MIDDLEWARE = ("debug_toolbar.middleware.DebugToolbarMiddleware",) + MIDDLEWARE
 
-MANDATORY_SETTINGS = [
-    "MAILGUN_SENDER_DOMAIN",
-    "MAILGUN_KEY",
-    "OPENEDX_OAUTH_APP_NAME",
-    "OPENEDX_API_BASE_URL",
-]
-
 # Cybersource
-CYBERSOURCE_ACCESS_KEY = get_string("CYBERSOURCE_ACCESS_KEY", None)
-CYBERSOURCE_SECURITY_KEY = get_string("CYBERSOURCE_SECURITY_KEY", None)
-CYBERSOURCE_SECURE_ACCEPTANCE_URL = get_string(
-    "CYBERSOURCE_SECURE_ACCEPTANCE_URL", None
+CYBERSOURCE_ACCESS_KEY = get_string(
+    "CYBERSOURCE_ACCESS_KEY", None, description="CyberSource Access Key"
 )
-CYBERSOURCE_PROFILE_ID = get_string("CYBERSOURCE_PROFILE_ID", None)
-CYBERSOURCE_REFERENCE_PREFIX = get_string("CYBERSOURCE_REFERENCE_PREFIX", None)
-CYBERSOURCE_WSDL_URL = get_string("CYBERSOURCE_WSDL_URL", None)
-CYBERSOURCE_MERCHANT_ID = get_string("CYBERSOURCE_MERCHANT_ID", None)
-CYBERSOURCE_TRANSACTION_KEY = get_string("CYBERSOURCE_TRANSACTION_KEY", None)
+CYBERSOURCE_SECURITY_KEY = get_string(
+    "CYBERSOURCE_SECURITY_KEY", None, description="CyberSource API key"
+)
+CYBERSOURCE_SECURE_ACCEPTANCE_URL = get_string(
+    "CYBERSOURCE_SECURE_ACCEPTANCE_URL", None, description="CyberSource API endpoint"
+)
+CYBERSOURCE_PROFILE_ID = get_string(
+    "CYBERSOURCE_PROFILE_ID", None, description="CyberSource Profile ID"
+)
+CYBERSOURCE_REFERENCE_PREFIX = get_string(
+    "CYBERSOURCE_REFERENCE_PREFIX",
+    None,
+    description="a string prefix to identify the application in CyberSource transactions",
+)
+CYBERSOURCE_WSDL_URL = get_string(
+    "CYBERSOURCE_WSDL_URL", None, description="The URL to the cybersource WSDL"
+)
+CYBERSOURCE_MERCHANT_ID = get_string(
+    "CYBERSOURCE_MERCHANT_ID", None, description="The cybersource merchant id"
+)
+CYBERSOURCE_TRANSACTION_KEY = get_string(
+    "CYBERSOURCE_TRANSACTION_KEY", None, description="The cybersource transaction key"
+)
 CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY = get_string(
-    "CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY", None
+    "CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY",
+    None,
+    description="The public key to encrypt export results with for our own security purposes. Should be a base64 encoded NaCl public key.",
 )
 CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR = get_string(
-    "CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR", "AND"
+    "CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR",
+    "AND",
+    description="Whether just the name or the name and address should be used in exports verification. Refer to Cybersource docs.",
 )
 CYBERSOURCE_EXPORT_SERVICE_ADDRESS_WEIGHT = get_string(
-    "CYBERSOURCE_EXPORT_SERVICE_ADDRESS_WEIGHT", "high"
+    "CYBERSOURCE_EXPORT_SERVICE_ADDRESS_WEIGHT",
+    "high",
+    description="The weight of the address in determining whether a user passes exports checks. Refer to Cybersource docs.",
 )
 CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT = get_string(
-    "CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT", "high"
+    "CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT",
+    "high",
+    description="The weight of the name in determining whether a user passes exports checks. Refer to Cybersource docs.",
 )
 
 CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS = get_string(
-    "CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS", None
+    "CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS",
+    None,
+    description="Additional sanctions lists to validate for exports. Refer to Cybersource docs.",
 )
 
 # Voucher keys for PDF parsing
@@ -635,8 +805,10 @@ VOUCHER_INTERNATIONAL_COURSE_NUMBER_KEY = get_string(
 VOUCHER_COMPANY_ID = get_int("VOUCHER_COMPANY_ID", None)
 
 # Hubspot sync settings
-HUBSPOT_API_KEY = get_string("HUBSPOT_API_KEY", None)
-HUBSPOT_ID_PREFIX = get_string("HUBSPOT_ID_PREFIX", "xpronew")
+HUBSPOT_API_KEY = get_string("HUBSPOT_API_KEY", None, description="API key for Hubspot")
+HUBSPOT_ID_PREFIX = get_string(
+    "HUBSPOT_ID_PREFIX", "xpronew", description="Hub spot id prefix."
+)
 
 
 WAGTAILEMBEDS_FINDERS = [

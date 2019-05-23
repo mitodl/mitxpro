@@ -1,5 +1,8 @@
 """Functions reading and parsing environment variables"""
+import json
 import os
+from collections import namedtuple
+from functools import wraps
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -8,36 +11,82 @@ class EnvironmentVariableParseException(ImproperlyConfigured):
     """Environment variable was not parsed correctly"""
 
 
-def get_string(name, default):
+EnvVariable = namedtuple(
+    "EnvVariable", ["name", "default", "description", "required", "dev_only", "value"]
+)
+
+
+def var_parser(parser_func):
     """
-    Get an environment variable as a string.
+    Decorator to create a var parser func
 
     Args:
-        name (str): An environment variable name
-        default (str): The default value to use if the environment variable doesn't exist.
-
-    Returns:
-        str:
-            The environment variable value, or the default
+        parser_func (callable):
+            a function that takes one argument which will be the raw value and
+            returns a parsed value or raises an error
     """
-    return os.environ.get(name, default)
+
+    # pylint: disable=too-many-arguments
+    @wraps(parser_func)
+    def wrapper(self, name, default, description=None, required=False, dev_only=False):
+        """
+        Get an environment variable
+
+        Args:
+            name (str): An environment variable name
+            default (str): The default value to use if the environment variable doesn't exist.
+            description (str): The description of how this variable is used
+            required (bool): Whether this variable is required at runtime
+            dev_only (bool): Whether this variable is only applicable in dev environments
+
+        Raises:
+            ValueError:
+                If the environment variable args are incorrect
+
+        Returns:
+            any:
+                The raw environment variable value
+        """
+        configured_envs = self._configured_vars  # pylint: disable=protected-access
+        environ = self._env  # pylint: disable=protected-access
+
+        if name in configured_envs:
+            raise ValueError(f"Environment variable '{name}' was used more than once")
+
+        value = environ.get(name, default)
+
+        # attempt to parse the value before we store it in configured_envs
+        # this ensures that get_any works since we don't store the various parse attempts until one succeeds
+        value = parser_func(name, value, default)
+
+        configured_envs[name] = EnvVariable(
+            name, default, description, required, dev_only, value
+        )
+
+        return value
+
+    return wrapper
 
 
-def get_bool(name, default):
+def parse_bool(name, value, default):  # pylint: disable=unused-argument
     """
-    Get an environment variable as a boolean.
+    Attempts to parse a bool
 
-    Args:
-        name (str): An environment variable name
-        default (bool): The default value to use if the environment variable doesn't exist.
+    Arguments:
+        value (str or bool):
+            the value as either an unparsed string or a bool in case of a default value
+
+    Raises:
+        EnvironmentVariableParseException:
+            raised if the value wasn't parsable
 
     Returns:
         bool:
-            The environment variable value parsed as a bool
+            parsed value
     """
-    value = os.environ.get(name)
-    if value is None:
-        return default
+
+    if isinstance(value, bool):
+        return value
 
     parsed_value = value.lower()
     if parsed_value == "true":
@@ -52,21 +101,25 @@ def get_bool(name, default):
     )
 
 
-def get_int(name, default):
+def parse_int(name, value, default):
     """
-    Get an environment variable as an int.
+    Attempts to parse a int
 
-    Args:
-        name (str): An environment variable name
-        default (int): The default value to use if the environment variable doesn't exist.
+    Arguments:
+        value (str or int):
+            the value as either an unparsed string or an int in case of a default value
+
+    Raises:
+        EnvironmentVariableParseException:
+            raised if the value wasn't parsable
 
     Returns:
         int:
-            The environment variable value parsed as an int
+            parsed value
     """
-    value = os.environ.get(name)
-    if value is None:
-        return default
+
+    if isinstance(value, int) or (value is None and default is None):
+        return value
 
     try:
         parsed_value = int(value)
@@ -80,22 +133,124 @@ def get_int(name, default):
     return parsed_value
 
 
-def get_any(name, default):
+def parse_str(name, value, default):  # pylint: disable=unused-argument
     """
-    Get an environment variable as a bool, int, or a string.
+    Parses a str (identity function)
 
-    Args:
-        name (str): An environment variable name
-        default (any): The default value to use if the environment variable doesn't exist.
+    Arguments:
+        value (str):
+            the value as either a str
 
     Returns:
-        any:
-            The environment variable value parsed as a bool, int, or a string
+        str:
+            parsed value
     """
-    try:
-        return get_bool(name, default)
-    except EnvironmentVariableParseException:
+    return value
+
+
+def parse_any(name, value, default):
+    """
+    Attempts to parse an environment variable as a bool, int, or a string
+
+    Arguments:
+        value (bool or int or str):
+            the value as either an unparsed string or a default value
+
+    Raises:
+        EnvironmentVariableParseException:
+            raised if the value wasn't parsable at all
+
+    Returns:
+        int or bool or str:
+            the environment variable value parsed as a bool, int, or a string
+    """
+    # attempt to parse the var in this order of parsers
+    for parser in [parse_bool, parse_int, parse_str]:
         try:
-            return get_int(name, default)
+            return parser(name, value, default)
         except EnvironmentVariableParseException:
-            return get_string(name, default)
+            continue
+
+
+class EnvParser:
+    """Stateful tracker for environment variable parsing"""
+
+    def __init__(self):
+        self.reload()
+
+    def reload(self):
+        """Reloads the environment"""
+        self._env = dict(os.environ)
+        self._configured_vars = {}
+
+    def validate(self):
+        """
+        Validates the current configuration
+
+        Raises:
+            ImproperlyConfigured:
+                If any settings are missing
+        """
+        missing_settings = []
+
+        for env_var in self._configured_vars.values():
+            if env_var.required and env_var.value in (None, ""):
+                missing_settings.append(env_var.name)
+
+        if missing_settings:
+            raise ImproperlyConfigured(
+                "The following settings are missing: {}".format(
+                    ", ".join(missing_settings)
+                )
+            )
+
+    def list_environment_vars(self):
+        """
+        Get the list of EnvVariables
+
+        Returns:
+            list of EnvVariable:
+                the list of available env vars
+        """
+        return self._configured_vars.values()
+
+    get_string = var_parser(parse_str)
+    get_bool = var_parser(parse_bool)
+    get_int = var_parser(parse_int)
+    get_any = var_parser(parse_any)
+
+
+env = EnvParser()
+
+# methods below are our exported module interface
+get_string = env.get_string
+get_int = env.get_int
+get_bool = env.get_bool
+get_any = env.get_any
+validate = env.validate
+list_environment_vars = env.list_environment_vars
+
+
+def generate_app_json():
+    """
+    Generate a new app.json data structure in-memory using app.base.json and settings.py
+
+    Returns:
+        dict:
+            object that can be serialized to JSON for app.json
+    """
+    with open("app.base.json") as app_template_json:
+        config = json.load(app_template_json)
+
+    for env_var in list_environment_vars():
+        if env_var.dev_only:
+            continue
+
+        if env_var.name not in config["env"]:
+            config["env"][env_var.name] = {}
+
+        config["env"][env_var.name].update(
+            {"description": env_var.description, "required": env_var.required}
+        )
+
+    return config
