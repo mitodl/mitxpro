@@ -135,6 +135,7 @@ class LineSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     """ Order Serializer """
 
+    name = serializers.SerializerMethodField()
     close_date = serializers.SerializerMethodField(allow_null=True)
     amount = serializers.SerializerMethodField()
     discount_amount = serializers.SerializerMethodField()
@@ -143,29 +144,27 @@ class OrderSerializer(serializers.ModelSerializer):
     line_items = serializers.SerializerMethodField()
     b2b = serializers.SerializerMethodField()
 
+    def get_name(self, instance):
+        return f"XPRO-ORDER-{instance.id}"
+
     def get_close_date(self, instance):
-        """ Return the fulfilled date if any """
+        """ Return the updated_on date (as a timestamp in milliseconds) if fulfilled """
         if instance.status == models.Order.FULFILLED:
-            return instance.updated_on.timestamp() * 100
+            return int(instance.updated_on.timestamp() * 100)
 
     def get_amount(self, instance):
         """ Get the amount paid after discount """
+        product_version = ProductVersion.objects.filter(
+            id__in=instance.lines.values_list("product_version", flat=True)
+        ).first()
+        coupon_version = CouponVersion.objects.filter(
+            id__in=CouponRedemption.objects.filter(order=instance).values_list(
+                "coupon_version__id", flat=True
+            )
+        ).first()
         return get_product_version_price_with_discount(
-            coupon_version=CouponVersion.objects.filter(
-                id__in=CouponRedemption.objects.filter(order=instance).values_list(
-                    "coupon_version__id", flat=True
-                )
-            ).first(),
-            product_version=ProductVersion.objects.filter(
-                id__in=instance.lines.values_list("product_version", flat=True)
-            ).first(),
+            coupon_version=coupon_version, product_version=product_version
         ).to_eng_string()
-
-    def get_coupon_code(self, instance):
-        """ Get the coupon code used for the order if any """
-        redemption = CouponRedemption.objects.filter(order=instance).first()
-        if redemption:
-            return redemption.coupon_version.coupon.coupon_code
 
     def get_discount_amount(self, instance):
         """ Get the discount amount if any """
@@ -175,7 +174,7 @@ class OrderSerializer(serializers.ModelSerializer):
             )
         ).first()
         if not coupon_version:
-            return 0
+            return "0.00"
 
         product_version = ProductVersion.objects.filter(
             id__in=instance.lines.values_list("product_version", flat=True)
@@ -190,16 +189,22 @@ class OrderSerializer(serializers.ModelSerializer):
         return [LineSerializer(line).data for line in instance.lines.all()]
 
     def get_company(self, instance):
-        """ Get the company name if any """
+        """ Get the company id if any """
         redemption = CouponRedemption.objects.filter(order=instance).last()
         if redemption:
             company = redemption.coupon_version.payment_version.company
             if company:
-                return company.name
+                return company.id
+
+    def get_coupon_code(self, instance):
+        """ Get the coupon code used for the order if any """
+        redemption = CouponRedemption.objects.filter(order=instance).first()
+        if redemption:
+            return redemption.coupon_version.coupon.coupon_code
 
     def get_b2b(self, instance):
         """ Determine if this is a B2B order """
-        redemption = CouponRedemption.objects.filter(order=instance).last()
+        redemption = CouponRedemption.objects.filter(order=instance).first()
         if redemption:
             company = redemption.coupon_version.payment_version.company
             transaction_id = (
@@ -207,11 +212,12 @@ class OrderSerializer(serializers.ModelSerializer):
             )
             if company or transaction_id:
                 return True
-            return False
+        return False
 
     class Meta:
         fields = (
             "id",
+            "name",
             "amount",
             "discount_amount",
             "close_date",

@@ -132,11 +132,4 @@ def make_product_sync_message(product_id):
     Returns:
         dict containing serializable sync-message data
     """
-    from ecommerce.models import Product
-    from ecommerce.serializers import ProductSerializer
-
-    product = Product.objects.get(id=product_id)
-    properties = ProductSerializer(product).data
-    properties.pop("created_on")
-    properties.pop("updated_on")
-    return make_sync_message(product.id, properties)
+    return make_sync_message(product_id, {})
