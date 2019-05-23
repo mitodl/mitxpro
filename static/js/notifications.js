@@ -16,10 +16,14 @@ $(document).ready(function() {
 });
 
 function renderSiteNotification() {
-  const notificationId = $(".notification")
-    .data("notification-id")
-    .toString();
-  if (localStorage.getItem("dismissedNotification") !== notificationId) {
-    $(".notifications").removeClass("d-none");
+  const notificationId = $(".notification").data("notification-id");
+
+  if (notificationId) {
+    if (
+      localStorage.getItem("dismissedNotification") !==
+      notificationId.toString()
+    ) {
+      $(".notifications").removeClass("d-none");
+    }
   }
 }
