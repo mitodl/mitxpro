@@ -3,6 +3,7 @@ Validate that our settings functions work
 """
 
 import importlib
+import json
 import sys
 from unittest import mock
 
@@ -12,6 +13,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 import semantic_version
 
+from mitxpro import envs
 
 REQUIRED_SETTINGS = {
     "MAILGUN_SENDER_DOMAIN": "mailgun.fake.domain",
@@ -20,8 +22,20 @@ REQUIRED_SETTINGS = {
 }
 
 
+def cleanup_settings():
+    """Cleanup settings after a test"""
+    envs.env.reload()
+    importlib.reload(sys.modules["mitxpro.settings"])
+
+
 class TestSettings(TestCase):
     """Validate that settings work as expected."""
+
+    def patch_settings(self, values):
+        """Patch the cached settings loaded by EnvParser"""
+        with mock.patch.dict("os.environ", values, clear=True):
+            envs.env.reload()
+        return self.reload_settings()
 
     def reload_settings(self):
         """
@@ -32,60 +46,52 @@ class TestSettings(TestCase):
         """
         importlib.reload(sys.modules["mitxpro.settings"])
         # Restore settings to original settings after test
-        self.addCleanup(importlib.reload, sys.modules["mitxpro.settings"])
+        self.addCleanup(cleanup_settings)
         return vars(sys.modules["mitxpro.settings"])
 
     def test_s3_settings(self):
         """Verify that we enable and configure S3 with a variable"""
         # Unset, we don't do S3
-        with mock.patch.dict(
-            "os.environ", {**REQUIRED_SETTINGS, "MITXPRO_USE_S3": "False"}, clear=True
-        ):
-            settings_vars = self.reload_settings()
-            self.assertNotEqual(
-                settings_vars.get("DEFAULT_FILE_STORAGE"),
-                "storages.backends.s3boto3.S3Boto3Storage",
-            )
+        settings_vars = self.patch_settings(
+            {**REQUIRED_SETTINGS, "MITXPRO_USE_S3": "False"}
+        )
+        self.assertNotEqual(
+            settings_vars.get("DEFAULT_FILE_STORAGE"),
+            "storages.backends.s3boto3.S3Boto3Storage",
+        )
 
         with self.assertRaises(ImproperlyConfigured):
-            with mock.patch.dict("os.environ", {"MITXPRO_USE_S3": "True"}, clear=True):
-                self.reload_settings()
+            self.patch_settings({"MITXPRO_USE_S3": "True"})
 
         # Verify it all works with it enabled and configured 'properly'
-        with mock.patch.dict(
-            "os.environ",
+        settings_vars = self.patch_settings(
             {
                 **REQUIRED_SETTINGS,
                 "MITXPRO_USE_S3": "True",
                 "AWS_ACCESS_KEY_ID": "1",
                 "AWS_SECRET_ACCESS_KEY": "2",
                 "AWS_STORAGE_BUCKET_NAME": "3",
-            },
-            clear=True,
-        ):
-            settings_vars = self.reload_settings()
-            self.assertEqual(
-                settings_vars.get("DEFAULT_FILE_STORAGE"),
-                "storages.backends.s3boto3.S3Boto3Storage",
-            )
+            }
+        )
+        self.assertEqual(
+            settings_vars.get("DEFAULT_FILE_STORAGE"),
+            "storages.backends.s3boto3.S3Boto3Storage",
+        )
 
     def test_admin_settings(self):
         """Verify that we configure email with environment variable"""
 
-        with mock.patch.dict(
-            "os.environ", {**REQUIRED_SETTINGS, "MITXPRO_ADMIN_EMAIL": ""}, clear=True
-        ):
-            settings_vars = self.reload_settings()
-            self.assertFalse(settings_vars.get("ADMINS", False))
+        settings_vars = self.patch_settings(
+            {**REQUIRED_SETTINGS, "MITXPRO_ADMIN_EMAIL": ""}
+        )
+        self.assertFalse(settings_vars.get("ADMINS", False))
 
         test_admin_email = "cuddle_bunnies@example.com"
-        with mock.patch.dict(
-            "os.environ",
-            {**REQUIRED_SETTINGS, "MITXPRO_ADMIN_EMAIL": test_admin_email},
-            clear=True,
-        ):
-            settings_vars = self.reload_settings()
-            self.assertEqual((("Admins", test_admin_email),), settings_vars["ADMINS"])
+        settings_vars = self.patch_settings(
+            {**REQUIRED_SETTINGS, "MITXPRO_ADMIN_EMAIL": test_admin_email}
+        )
+        self.assertEqual((("Admins", test_admin_email),), settings_vars["ADMINS"])
+
         # Manually set ADMIN to our test setting and verify e-mail
         # goes where we expect
         settings.ADMINS = (("Admins", test_admin_email),)
@@ -96,31 +102,24 @@ class TestSettings(TestCase):
         """Verify that we can enable/disable database SSL with a var"""
 
         # Check default state is SSL on
-        with mock.patch.dict("os.environ", REQUIRED_SETTINGS, clear=True):
-            settings_vars = self.reload_settings()
-            self.assertEqual(
-                settings_vars["DATABASES"]["default"]["OPTIONS"], {"sslmode": "require"}
-            )
+        settings_vars = self.patch_settings(REQUIRED_SETTINGS)
+        self.assertEqual(
+            settings_vars["DATABASES"]["default"]["OPTIONS"], {"sslmode": "require"}
+        )
 
         # Check enabling the setting explicitly
-        with mock.patch.dict(
-            "os.environ",
-            {**REQUIRED_SETTINGS, "MITXPRO_DB_DISABLE_SSL": "True"},
-            clear=True,
-        ):
-            settings_vars = self.reload_settings()
-            self.assertEqual(settings_vars["DATABASES"]["default"]["OPTIONS"], {})
+        settings_vars = self.patch_settings(
+            {**REQUIRED_SETTINGS, "MITXPRO_DB_DISABLE_SSL": "True"}
+        )
+        self.assertEqual(settings_vars["DATABASES"]["default"]["OPTIONS"], {})
 
         # Disable it
-        with mock.patch.dict(
-            "os.environ",
-            {**REQUIRED_SETTINGS, "MITXPRO_DB_DISABLE_SSL": "False"},
-            clear=True,
-        ):
-            settings_vars = self.reload_settings()
-            self.assertEqual(
-                settings_vars["DATABASES"]["default"]["OPTIONS"], {"sslmode": "require"}
-            )
+        settings_vars = self.patch_settings(
+            {**REQUIRED_SETTINGS, "MITXPRO_DB_DISABLE_SSL": "False"}
+        )
+        self.assertEqual(
+            settings_vars["DATABASES"]["default"]["OPTIONS"], {"sslmode": "require"}
+        )
 
     @staticmethod
     def test_semantic_version():
@@ -128,3 +127,20 @@ class TestSettings(TestCase):
         Verify that we have a semantic compatible version.
         """
         semantic_version.Version(settings.VERSION)
+
+    @staticmethod
+    def test_app_json_modified():
+        """
+        generate_app_json should return a dictionary of JSON config for app.json
+        """
+        from mitxpro.envs import generate_app_json
+
+        with open("app.json") as app_json_file:
+            app_json = app_json_file.read()
+
+        generated_app_json = generate_app_json()
+
+        # pytest will print the difference
+        assert app_json == json.dumps(
+            generated_app_json, sort_keys=True, indent=2
+        ), "Generated app.json does not match the app.json file. Please use the 'generate_app_json' management command to update app.json"

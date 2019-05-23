@@ -11,6 +11,7 @@ x-environment:
   MITXPRO_BASE_URL: http://xpro.odl.local:8053
   MITXPRO_SECURE_SSL_REDIRECT: 'False'
   MITXPRO_DB_DISABLE_SSL: 'True'
+  MITXPRO_ADMIN_EMAIL: admin@localhost
   ELASTICSEARCH_URL: elastic:9200
   CELERY_TASK_ALWAYS_EAGER: 'False'
   CELERY_BROKER_URL: redis://redis:6379/4

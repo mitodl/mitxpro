@@ -24,19 +24,39 @@
   "description": " ",
   "env": {
     "AWS_ACCESS_KEY_ID": {
-      "description": "AWS Access Key for S3 storage."
+      "description": "AWS Access Key for S3 storage.",
+      "required": false
+    },
+    "AWS_QUERYSTRING_AUTH": {
+      "description": null,
+      "required": false
     },
     "AWS_SECRET_ACCESS_KEY": {
-      "description": "AWS Secret Key for S3 storage."
+      "description": "AWS Secret Key for S3 storage.",
+      "required": false
     },
     "AWS_STORAGE_BUCKET_NAME": {
-      "description": "S3 Bucket name."
+      "description": "S3 Bucket name.",
+      "required": false
+    },
+    "CELERY_BROKER_URL": {
+      "description": "Where celery should get tasks, default is REDISCLOUD_URL",
+      "required": false
+    },
+    "CELERY_RESULT_BACKEND": {
+      "description": "Where celery should put task results, default is REDISCLOUD_URL",
+      "required": false
+    },
+    "CELERY_TASK_EAGER_PROPAGATES": {
+      "description": null,
+      "required": false
+    },
+    "CLOUDFRONT_DIST": {
+      "description": null,
+      "required": false
     },
     "CYBERSOURCE_ACCESS_KEY": {
-      "description": "CyberSource Access Key"
-    },
-    "CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS": {
-      "description": "Additional sanctions lists to validate for exports. Refer to Cybersource docs.",
+      "description": "CyberSource Access Key",
       "required": false
     },
     "CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR": {
@@ -51,25 +71,33 @@
       "description": "The weight of the name in determining whether a user passes exports checks. Refer to Cybersource docs.",
       "required": false
     },
+    "CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS": {
+      "description": "Additional sanctions lists to validate for exports. Refer to Cybersource docs.",
+      "required": false
+    },
     "CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY": {
       "description": "The public key to encrypt export results with for our own security purposes. Should be a base64 encoded NaCl public key.",
       "required": false
-    },
-    "CYBERSOURCE_PROFILE_ID": {
-      "description": "CyberSource Profile ID"
     },
     "CYBERSOURCE_MERCHANT_ID": {
       "description": "The cybersource merchant id",
       "required": false
     },
+    "CYBERSOURCE_PROFILE_ID": {
+      "description": "CyberSource Profile ID",
+      "required": false
+    },
     "CYBERSOURCE_REFERENCE_PREFIX": {
-      "description": "a string prefix to identify the application in CyberSource transactions"
+      "description": "a string prefix to identify the application in CyberSource transactions",
+      "required": false
     },
     "CYBERSOURCE_SECURE_ACCEPTANCE_URL": {
-      "description": "CyberSource API endpoint"
+      "description": "CyberSource API endpoint",
+      "required": false
     },
     "CYBERSOURCE_SECURITY_KEY": {
-      "description": "CyberSource API key"
+      "description": "CyberSource API key",
+      "required": false
     },
     "CYBERSOURCE_TRANSACTION_KEY": {
       "description": "The cybersource transaction key",
@@ -79,8 +107,20 @@
       "description": "The URL to the cybersource WSDL",
       "required": false
     },
+    "DATABASE_URL": {
+      "description": "The connection url to the Postgres database",
+      "required": true
+    },
+    "DJANGO_LOG_LEVEL": {
+      "description": "The log level for django",
+      "required": false
+    },
     "GA_TRACKING_ID": {
       "description": "Google analytics tracking ID",
+      "required": false
+    },
+    "HOST_IP": {
+      "description": null,
       "required": false
     },
     "HUBSPOT_API_KEY": {
@@ -91,98 +131,153 @@
       "description": "How many seconds between Hubspot API error checks",
       "required": false
     },
+    "HUBSPOT_FOOTER_FORM_GUID": {
+      "description": "Form guid over hub spot for footer block.",
+      "required": false
+    },
+    "HUBSPOT_ID_PREFIX": {
+      "description": "Hub spot id prefix.",
+      "required": false
+    },
+    "HUBSPOT_NEW_COURSES_FORM_GUID": {
+      "description": "Form guid over hub spot for new courses email subscription form.",
+      "required": false
+    },
+    "HUBSPOT_PORTAL_ID": {
+      "description": "Hub spot portal id.",
+      "required": false
+    },
     "LOGOUT_REDIRECT_URL": {
       "description": "Url to redirect to after logout, typically Open edX's own logout url",
       "required": false
-    },
-    "MAILGUN_KEY": {
-      "description": "The token for authenticating against the Mailgun API"
-    },
-    "MAILGUN_SENDER_DOMAIN": {
-      "description": "The domain to send mailgun email through"
     },
     "MAILGUN_BATCH_CHUNK_SIZE": {
       "description": "Maximum number of emails to send in a batch",
       "required": false
     },
     "MAILGUN_FROM_EMAIL": {
-      "description": "Email which mail comes from"
+      "description": "Email which mail comes from",
+      "required": false
+    },
+    "MAILGUN_KEY": {
+      "description": "The token for authenticating against the Mailgun API",
+      "required": true
+    },
+    "MAILGUN_RECIPIENT_OVERRIDE": {
+      "description": null,
+      "required": false
+    },
+    "MAILGUN_SENDER_DOMAIN": {
+      "description": "The domain to send mailgun email through",
+      "required": true
+    },
+    "MEDIA_ROOT": {
+      "description": null,
+      "required": false
     },
     "MITXPRO_ADMIN_EMAIL": {
-      "description": "E-mail to send 500 reports to."
+      "description": "E-mail to send 500 reports to.",
+      "required": true
     },
     "MITXPRO_BASE_URL": {
-      "description": "Base url for the application in the format PROTOCOL://HOSTNAME[:PORT]"
+      "description": "Base url for the application in the format PROTOCOL://HOSTNAME[:PORT]",
+      "required": true
     },
     "MITXPRO_DB_CONN_MAX_AGE": {
-      "value": "0"
+      "description": "Maximum age of connection to Postgres in seconds",
+      "required": false
     },
     "MITXPRO_DB_DISABLE_SSL": {
-      "value": "true"
+      "description": "Disables SSL to postgres if set to True",
+      "required": false
+    },
+    "MITXPRO_EMAIL_BACKEND": {
+      "description": null,
+      "required": false
     },
     "MITXPRO_EMAIL_HOST": {
-      "description": "Outgoing e-mail settings"
+      "description": "Outgoing e-mail hostname",
+      "required": false
     },
     "MITXPRO_EMAIL_PASSWORD": {
-      "description": "Outgoing e-mail settings"
+      "description": "Outgoing e-mail auth password",
+      "required": false
     },
     "MITXPRO_EMAIL_PORT": {
-      "description": "Outgoing e-mail settings",
-      "value": "587"
+      "description": "Outgoing e-mail port",
+      "required": false
     },
     "MITXPRO_EMAIL_TLS": {
-      "description": "Outgoing e-mail settings",
-      "value": "True"
+      "description": "Outgoing e-mail TLS setting",
+      "required": false
     },
     "MITXPRO_EMAIL_USER": {
-      "description": "Outgoing e-mail settings"
+      "description": "Outgoing e-mail auth username",
+      "required": false
     },
     "MITXPRO_ENVIRONMENT": {
-      "description": "The execution environment that the app is in (e.g. dev, staging, prod)"
+      "description": "The execution environment that the app is in (e.g. dev, staging, prod)",
+      "required": true
     },
-    "MITXPRO_REPLY_TO_ADDRESS": {
-      "description": "E-mail to use for reply-to address of emails"
+    "MITXPRO_FEATURES_PREFIX": {
+      "description": null,
+      "required": false
+    },
+    "MITXPRO_FROM_EMAIL": {
+      "description": "E-mail to use for the from field",
+      "required": false
+    },
+    "MITXPRO_LOG_HOST": {
+      "description": null,
+      "required": false
+    },
+    "MITXPRO_LOG_HOST_PORT": {
+      "description": null,
+      "required": false
     },
     "MITXPRO_LOG_LEVEL": {
-      "description": "The logging level for the application",
-      "required": true,
-      "value": "INFO"
+      "description": "The log level default",
+      "required": false
+    },
+    "MITXPRO_NOTIFICATION_EMAIL_BACKEND": {
+      "description": null,
+      "required": false
     },
     "MITXPRO_REGISTRATION_ACCESS_TOKEN": {
       "description": "Access token to secure Open edX registration API with",
       "required": false
     },
+    "MITXPRO_REPLY_TO_ADDRESS": {
+      "description": "E-mail to use for reply-to address of emails",
+      "required": false
+    },
     "MITXPRO_SECURE_SSL_REDIRECT": {
       "description": "Application-level SSL redirect setting.",
-      "required": false,
-      "value": "True"
+      "required": false
     },
     "MITXPRO_SITE_ID": {
       "description": "The default site id for django sites framework",
       "required": false
     },
     "MITXPRO_SUPPORT_EMAIL": {
-      "description": "Email address listed for customer support"
+      "description": "Email address listed for customer support",
+      "required": false
     },
     "MITXPRO_USE_S3": {
       "description": "Use S3 for storage backend (required on Heroku)",
-      "value": "True"
-    },
-    "NEW_RELIC_APP_NAME": {
-      "description": "Application identifier in New Relic."
-    },
-    "NODE_MODULES_CACHE": {
-      "description": "If false, disables the node_modules cache to fix yarn install",
-      "value": "false"
+      "required": false
     },
     "OPENEDX_API_BASE_URL": {
-      "description": "The base URL for the Open edX API"
+      "description": "The base URL for the Open edX API",
+      "required": true
     },
     "OPENEDX_API_CLIENT_ID": {
-      "description": "The OAuth2 client id to connect to Open edX with"
+      "description": "The OAuth2 client id to connect to Open edX with",
+      "required": true
     },
     "OPENEDX_API_CLIENT_SECRET": {
-      "description": "The OAuth2 client secret to connect to Open edX with"
+      "description": "The OAuth2 client secret to connect to Open edX with",
+      "required": true
     },
     "OPENEDX_BASE_REDIRECT_URL": {
       "description": "The base redirect URL for an OAuth Application for the Open edX API",
@@ -190,7 +285,7 @@
     },
     "OPENEDX_OAUTH_APP_NAME": {
       "description": "The 'name' value for the Open edX OAuth Application",
-      "value": "edx-oauth-app"
+      "required": true
     },
     "OPENEDX_TOKEN_EXPIRES_HOURS": {
       "description": "The number of hours until an access token for the Open edX API expires",
@@ -200,7 +295,23 @@
       "value": "50"
     },
     "PGBOUNCER_MIN_POOL_SIZE": {
-      "value": "5"
+      "value": "50"
+    },
+    "REACT_GA_DEBUG": {
+      "description": null,
+      "required": false
+    },
+    "RECAPTCHA_SECRET_KEY": {
+      "description": "The ReCaptcha secret key",
+      "required": false
+    },
+    "RECAPTCHA_SITE_KEY": {
+      "description": "The ReCaptcha site key",
+      "required": false
+    },
+    "REDISCLOUD_URL": {
+      "description": "RedisCloud connection url",
+      "required": false
     },
     "ROBOTS_CACHE_TIMEOUT": {
       "description": "How long the robots.txt file should be cached",
@@ -208,85 +319,76 @@
     },
     "SECRET_KEY": {
       "description": "Django secret key.",
-      "generator": "secret"
+      "generator": "secret",
+      "required": true
     },
     "SENTRY_DSN": {
-      "description": "The connection settings for Sentry"
+      "description": "The connection settings for Sentry",
+      "required": false
     },
     "SENTRY_LOG_LEVEL": {
       "description": "The log level for Sentry",
       "required": false
     },
     "SITE_NAME": {
-      "description": "Name of the site. e.g MIT xPRO"
+      "description": "Name of the site. e.g MIT xPRO",
+      "required": false
     },
     "STATUS_TOKEN": {
-      "description": "Token to access the status API."
+      "description": "Token to access the status API.",
+      "required": false
     },
     "VOUCHER_COMPANY_ID": {
+      "description": null,
       "required": false
     },
     "VOUCHER_DOMESTIC_AMOUNT_KEY": {
+      "description": null,
       "required": false
     },
     "VOUCHER_DOMESTIC_COURSE_KEY": {
+      "description": null,
       "required": false
     },
     "VOUCHER_DOMESTIC_CREDITS_KEY": {
+      "description": null,
       "required": false
     },
     "VOUCHER_DOMESTIC_DATES_KEY": {
+      "description": null,
       "required": false
     },
     "VOUCHER_DOMESTIC_EMPLOYEE_ID_KEY": {
+      "description": null,
       "required": false
     },
     "VOUCHER_DOMESTIC_EMPLOYEE_KEY": {
+      "description": null,
       "required": false
     },
     "VOUCHER_DOMESTIC_KEY": {
+      "description": null,
       "required": false
     },
     "VOUCHER_INTERNATIONAL_COURSE_NAME_KEY": {
+      "description": null,
       "required": false
     },
     "VOUCHER_INTERNATIONAL_COURSE_NUMBER_KEY": {
+      "description": null,
       "required": false
     },
     "VOUCHER_INTERNATIONAL_DATES_KEY": {
+      "description": null,
       "required": false
     },
     "VOUCHER_INTERNATIONAL_EMPLOYEE_ID_KEY": {
+      "description": null,
       "required": false
     },
     "VOUCHER_INTERNATIONAL_EMPLOYEE_KEY": {
+      "description": null,
       "required": false
-    },
-    "VOUCHER_INTERNATIONAL_PROGRAM_KEY": {
-      "required": false
-    },
-    "VOUCHER_INTERNATIONAL_SCHOOL_KEY": {
-      "required": false
-    },
-    "HUBSPOT_NEW_COURSES_FORM_GUID": {
-      "description": "Form guid over hub spot for new courses email subscription form.",
-      "required": false,
-      "value": "ad5d54e5-5ca9-4255-9c17-fa222e0a9b82"
-    },
-    "HUBSPOT_FOOTER_FORM_GUID": {
-      "description": "Form guid over hub spot for footer block.",
-      "required": false,
-      "value": "6f7e46ec-f757-43a4-b109-597210df0f75"
-    },
-    "HUBSPOT_PORTAL_ID": {
-      "description": "Hub spot portal id.",
-      "required": false,
-      "value": "4994459"
-    },
-    "HUBSPOT_ID_PREFIX": {
-      "description": "Hub spot id prefix.",
-      "required": false,
-      "value": "xpronew"
     }
   },
   "keywords": [

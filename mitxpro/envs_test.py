@@ -1,15 +1,7 @@
 """Tests for environment variable parsing functions"""
-from unittest.mock import patch
-
 import pytest
 
-from mitxpro.envs import (
-    EnvironmentVariableParseException,
-    get_any,
-    get_bool,
-    get_int,
-    get_string,
-)
+from mitxpro import envs
 
 
 FAKE_ENVIRONS = {
@@ -25,6 +17,13 @@ FAKE_ENVIRONS = {
     "list_of_int": "[3,4,5]",
     "list_of_str": '["x", "y", \'z\']',
 }
+
+
+@pytest.fixture(autouse=True)
+def clean_env(mocker):
+    """Clean the configured environment variables before a test"""
+    mocker.patch.dict("os.environ", FAKE_ENVIRONS, clear=True)
+    envs.env.reload()
 
 
 def test_get_any():
@@ -44,61 +43,57 @@ def test_get_any():
         "list_of_int": "[3,4,5]",
         "list_of_str": '["x", "y", \'z\']',
     }
-    with patch("mitxpro.envs.os", environ=FAKE_ENVIRONS):
-        for key, value in expected.items():
-            assert get_any(key, "default") == value
-        assert get_any("missing", "default") == "default"
+    for key, value in expected.items():
+        assert envs.get_any(key, "default") == value
+    assert envs.get_any("missing", "default") == "default"
 
 
 def test_get_string():
     """
     get_string should get the string from the environment variable
     """
-    with patch("mitxpro.envs.os", environ=FAKE_ENVIRONS):
-        for key, value in FAKE_ENVIRONS.items():
-            assert get_string(key, "default") == value
-        assert get_string("missing", "default") == "default"
-        assert get_string("missing", "default") == "default"
+    for key, value in FAKE_ENVIRONS.items():
+        assert envs.get_string(key, "default") == value
+    assert envs.get_string("missing", "default") == "default"
 
 
 def test_get_int():
     """
     get_int should get the int from the environment variable, or raise an exception if it's not parseable as an int
     """
-    with patch("mitxpro.envs.os", environ=FAKE_ENVIRONS):
-        assert get_int("positive", 1234) == 123
-        assert get_int("negative", 1234) == -456
-        assert get_int("zero", 1234) == 0
+    assert envs.get_int("positive", 1234) == 123
+    assert envs.get_int("negative", 1234) == -456
+    assert envs.get_int("zero", 1234) == 0
 
-        for key, value in FAKE_ENVIRONS.items():
-            if key not in ("positive", "negative", "zero"):
-                with pytest.raises(EnvironmentVariableParseException) as ex:
-                    get_int(key, 1234)
-                assert ex.value.args[
-                    0
-                ] == "Expected value in {key}={value} to be an int".format(
-                    key=key, value=value
-                )
+    for key, value in FAKE_ENVIRONS.items():
+        if key not in ("positive", "negative", "zero"):
+            with pytest.raises(envs.EnvironmentVariableParseException) as ex:
+                envs.get_int(key, 1234)
+            assert ex.value.args[
+                0
+            ] == "Expected value in {key}={value} to be an int".format(
+                key=key, value=value
+            )
 
-        assert get_int("missing", "default") == "default"
+    assert envs.get_int("missing", 1_234_567_890) == 1_234_567_890
 
 
 def test_get_bool():
     """
     get_bool should get the bool from the environment variable, or raise an exception if it's not parseable as a bool
     """
-    with patch("mitxpro.envs.os", environ=FAKE_ENVIRONS):
-        assert get_bool("true", 1234) is True
-        assert get_bool("false", 1234) is False
+    assert envs.get_bool("true", 1234) is True
+    assert envs.get_bool("false", 1234) is False
 
-        for key, value in FAKE_ENVIRONS.items():
-            if key not in ("true", "false"):
-                with pytest.raises(EnvironmentVariableParseException) as ex:
-                    get_bool(key, 1234)
-                assert ex.value.args[
-                    0
-                ] == "Expected value in {key}={value} to be a boolean".format(
-                    key=key, value=value
-                )
+    for key, value in FAKE_ENVIRONS.items():
+        if key not in ("true", "false"):
+            with pytest.raises(envs.EnvironmentVariableParseException) as ex:
+                envs.get_bool(key, 1234)
+            assert ex.value.args[
+                0
+            ] == "Expected value in {key}={value} to be a boolean".format(
+                key=key, value=value
+            )
 
-        assert get_int("missing", "default") == "default"
+    assert envs.get_bool("missing_true", True) is True
+    assert envs.get_bool("missing_false", False) is False
