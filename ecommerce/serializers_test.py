@@ -364,7 +364,7 @@ def test_serialize_order(status):
         "amount": line.product_version.price.to_eng_string(),
         "discount_amount": "0.00",
         "close_date": (
-            int(order.updated_on.timestamp() * 100)
+            int(order.updated_on.timestamp() * 1000)
             if status == Order.FULFILLED
             else None
         ),
@@ -393,7 +393,7 @@ def test_serialize_order_with_coupon():
         "amount": line.product_version.price.to_eng_string(),
         "discount_amount": discount.to_eng_string(),
         "close_date": (
-            int(order.updated_on.timestamp() * 100)
+            int(order.updated_on.timestamp() * 1000)
             if order.status == Order.FULFILLED
             else None
         ),

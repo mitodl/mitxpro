@@ -151,7 +151,7 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_close_date(self, instance):
         """ Return the updated_on date (as a timestamp in milliseconds) if fulfilled """
         if instance.status == models.Order.FULFILLED:
-            return int(instance.updated_on.timestamp() * 100)
+            return int(instance.updated_on.timestamp() * 1000)
 
     def get_amount(self, instance):
         """ Get the amount paid after discount """
