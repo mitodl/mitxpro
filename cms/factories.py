@@ -17,6 +17,7 @@ from cms.models import (
     UserTestimonialsPage,
     FacultyMembersPage,
     SiteNotification,
+    HomePage,
 )
 from cms.blocks import (
     LearningTechniqueBlock,
@@ -208,3 +209,12 @@ class SiteNotificationFactory(DjangoModelFactory):
 
     class Meta:
         model = SiteNotification
+
+
+class HomePageFactory(wagtail_factories.PageFactory):
+    """HomePage factory class"""
+
+    title = factory.fuzzy.FuzzyText(prefix="Home ")
+
+    class Meta:
+        model = HomePage

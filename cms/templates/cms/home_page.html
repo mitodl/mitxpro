@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% load static render_bundle %}
+
+{% block title %}MIT xPro{% endblock %}
+
+{% block headercontent %}
+<div id="header"></div>
+{% render_bundle 'header' %}
+{% endblock %}
+
+
+{% block scripts %}
+  {{ block.super }}
+  <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+  <script src="{% static 'js/home_page.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+  {% if page.upcoming_courseware %} {% include "partials/course-carousel.html" with page=page.upcoming_courseware courseware_objects=courses %} {% endif %}
+  {% if page.learning_experience %} {% include "partials/learning-techniques.html" with page=page.learning_experience %} {% endif %}
+  {% if page.testimonials %} {% include "partials/testimonial-carousel.html" with page=page.testimonials %} {% endif %}
+  {% if page.inquiry_section %} {% include "partials/for-teams.html" with page=page.inquiry_section %} {% endif %}
+{% endblock %}
