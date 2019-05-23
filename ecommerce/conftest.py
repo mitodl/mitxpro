@@ -158,3 +158,13 @@ def single_use_coupon_json(coupon_product_ids):
         "payment_transaction": "fake_transaction_num",
         "product_ids": coupon_product_ids,
     }
+
+
+@pytest.fixture
+def mock_hubspot_syncs(mocker):
+    """Mock the sync_deal_with_hubspot task"""
+    return SimpleNamespace(
+        order=mocker.patch("ecommerce.tasks.sync_deal_with_hubspot.delay"),
+        line=mocker.patch("ecommerce.tasks.sync_line_item_with_hubspot.delay"),
+        product=mocker.patch("ecommerce.tasks.sync_product_with_hubspot.delay"),
+    )

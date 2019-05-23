@@ -404,14 +404,22 @@ def test_get_product_version_price_with_discount(has_coupon, basket_and_coupons)
     assert price == (Decimal("61.72") if has_coupon else Decimal("123.45"))
 
 
-def test_get_new_order_by_reference_number(basket_and_coupons):
+@pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
+def test_get_new_order_by_reference_number(
+    basket_and_coupons, mock_hubspot_syncs, settings, hubspot_api_key
+):
     """
     get_new_order_by_reference_number returns an Order with status created
     """
+    settings.HUBSPOT_API_KEY = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
     same_order = get_new_order_by_reference_number(make_reference_id(order))
     assert same_order.id == order.id
+    if hubspot_api_key:
+        assert mock_hubspot_syncs.order.called_with(order.id)
+    else:
+        assert mock_hubspot_syncs.order.not_called()
 
 
 @pytest.mark.parametrize(
@@ -447,13 +455,15 @@ def test_get_new_order_by_reference_number_missing(basket_and_coupons):
     assert ex.value.args[0] == f"Unable to find order {order.id}"
 
 
+@pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
 @pytest.mark.parametrize("has_coupon", [True, False])
 def test_create_order(
-    has_coupon, basket_and_coupons
+    has_coupon, basket_and_coupons, settings, hubspot_api_key, mock_hubspot_syncs
 ):  # pylint: disable=too-many-locals
     """
     Create Order from a purchasable course
     """
+    settings.HUBSPOT_API_KEY = hubspot_api_key
     coupon = basket_and_coupons.coupongroup_best.coupon
     basket = basket_and_coupons.basket_item.basket
     basket.couponselection_set.all().delete()
@@ -496,6 +506,11 @@ def test_create_order(
         )
     else:
         assert CouponRedemption.objects.count() == 0
+
+    if hubspot_api_key:
+        assert mock_hubspot_syncs.order.called_with(order.id)
+    else:
+        assert mock_hubspot_syncs.order.not_called()
 
 
 def test_get_product_courses():

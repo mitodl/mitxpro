@@ -1,12 +1,12 @@
 """Factory for Users"""
 import string
 
-from factory import Faker, SubFactory, RelatedFactory
+from factory import Faker, SubFactory, RelatedFactory, fuzzy
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText
 from social_django.models import UserSocialAuth
 
-from users.models import LegalAddress, User
+from users.models import LegalAddress, Profile, User, GENDER_CHOICES
 
 
 class UserFactory(DjangoModelFactory):
@@ -51,3 +51,17 @@ class LegalAddressFactory(DjangoModelFactory):
 
     class Meta:
         model = LegalAddress
+
+
+class ProfileFactory(DjangoModelFactory):
+    """Factory for Profile"""
+
+    user = SubFactory("users.factories.UserFactory")
+
+    gender = fuzzy.FuzzyChoice(choices=[gender[0] for gender in GENDER_CHOICES])
+    birth_year = Faker("year")
+    company = Faker("company")
+    job_title = Faker("word")
+
+    class Meta:
+        model = Profile

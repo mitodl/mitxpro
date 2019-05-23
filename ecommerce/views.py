@@ -52,7 +52,7 @@ from ecommerce.serializers import (
     SingleUseCouponSerializer,
     CurrentCouponPaymentSerializer,
 )
-
+from ecommerce.task_helpers import sync_hubspot_deal
 
 log = logging.getLogger(__name__)
 
@@ -105,6 +105,7 @@ class CheckoutView(APIView):
             # If price is $0, don't bother going to CyberSource, just mark as fulfilled
             order.status = Order.FULFILLED
             order.save_and_log(request.user)
+            sync_hubspot_deal(order)
 
             try:
                 enroll_user_on_success(order)
@@ -178,6 +179,7 @@ class OrderFulfillmentView(APIView):
         else:
             order.status = Order.FULFILLED
         order.save_and_log(None)
+        sync_hubspot_deal(order)
 
         if order.status == Order.FULFILLED:
             try:

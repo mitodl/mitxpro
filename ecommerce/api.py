@@ -34,6 +34,7 @@ from ecommerce.models import (
     Line,
     Order,
 )
+from ecommerce.task_helpers import sync_hubspot_deal
 from mitxpro.utils import now_in_utc
 
 ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -451,6 +452,7 @@ def create_unfulfilled_order(user):
         coupon = coupon_selection.coupon
         redeem_coupon(coupon_version=latest_coupon_version(coupon), order=order)
     order.save_and_log(user)
+    sync_hubspot_deal(order)
     return order
 
 

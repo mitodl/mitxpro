@@ -306,10 +306,20 @@ def test_create_user_via_email_existing_user_raises(
 
 
 @pytest.mark.django_db
-def test_create_profile(mock_email_backend, mock_create_profile_strategy, user):
+@pytest.mark.parametrize("hubspot_key", [None, "fake-key"])
+def test_create_profile(
+    mock_email_backend,
+    mock_create_profile_strategy,
+    user,
+    hubspot_key,
+    settings,
+    mocker,
+):  # pylint:disable=too-many-arguments
     """
     Tests that create_profile creates a profile
     """
+    settings.HUBSPOT_API_KEY = hubspot_key
+    mock_user_sync = mocker.patch("ecommerce.tasks.sync_contact_with_hubspot.delay")
     response = user_actions.create_profile(
         mock_create_profile_strategy,
         mock_email_backend,
@@ -324,6 +334,10 @@ def test_create_profile(mock_email_backend, mock_create_profile_strategy, user):
     assert user.profile.company == mock_create_profile_strategy.request_data().get(
         "company"
     )
+    if hubspot_key is not None:
+        mock_user_sync.assert_called_with(user.id)
+    else:
+        mock_user_sync.assert_not_called()
 
 
 @pytest.mark.django_db

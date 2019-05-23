@@ -16,6 +16,7 @@ from authentication.exceptions import (
 from authentication.utils import SocialAuthState
 
 from compliance import api as compliance_api
+from ecommerce.task_helpers import sync_hubspot_user
 from users.serializers import UserSerializer, ProfileSerializer
 
 # pylint: disable=keyword-arg-before-vararg
@@ -132,6 +133,7 @@ def create_profile(
             backend, current_partial, errors=serializer.errors
         )
     serializer.save()
+    sync_hubspot_user(user)
     return {}
 
 

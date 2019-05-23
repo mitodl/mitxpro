@@ -136,10 +136,19 @@ def test_creates_order(basket_client, mocker, basket_and_coupons):
     assert generate_mock.call_args[0] == (order, "http://testserver/")
 
 
-def test_zero_price_checkout(basket_client, mocker, basket_and_coupons):
+@pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
+def test_zero_price_checkout(
+    basket_client,
+    mocker,
+    basket_and_coupons,
+    mock_hubspot_syncs,
+    settings,
+    hubspot_api_key,
+):  # pylint:disable=too-many-arguments
     """
     If the order total is $0, we should just fulfill the order and direct the user to our order receipt page
     """
+    settings.HUBSPOT_API_KEY = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
     order = LineFactory.create(
         order__status=Order.CREATED, product_version__price=0, order__purchaser=user
@@ -163,6 +172,10 @@ def test_zero_price_checkout(basket_client, mocker, basket_and_coupons):
     assert BasketItem.objects.filter(basket__user=user).count() == 0
     assert CourseRunSelection.objects.filter(basket__user=user).count() == 0
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
+    if hubspot_api_key:
+        assert mock_hubspot_syncs.order.called_with(order.id)
+    else:
+        assert mock_hubspot_syncs.order.not_called()
 
 
 def test_zero_price_checkout_failed_enroll(basket_client, mocker, basket_and_coupons):
@@ -192,10 +205,19 @@ def test_zero_price_checkout_failed_enroll(basket_client, mocker, basket_and_cou
     assert enroll_user_mock.call_args[0] == (order,)
 
 
-def test_order_fulfilled(basket_client, mocker, basket_and_coupons):
+@pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
+def test_order_fulfilled(
+    basket_client,
+    mocker,
+    basket_and_coupons,
+    hubspot_api_key,
+    mock_hubspot_syncs,
+    settings,
+):  # pylint:disable=too-many-arguments
     """
     Test the happy case
     """
+    settings.HUBSPOT_API_KEY = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
     data_before = order.to_dict()
@@ -230,6 +252,11 @@ def test_order_fulfilled(basket_client, mocker, basket_and_coupons):
     assert BasketItem.objects.filter(basket__user=user).count() == 0
     assert CourseRunSelection.objects.filter(basket__user=user).count() == 0
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
+
+    if hubspot_api_key:
+        assert mock_hubspot_syncs.order.called_with(order.id)
+    else:
+        assert mock_hubspot_syncs.order.not_called()
 
 
 def test_missing_fields(basket_client, mocker):
