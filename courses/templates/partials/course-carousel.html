@@ -3,7 +3,7 @@
   <div class="container">
     <div class="head">
       <h1 class="text-uppercase">{{ page.heading }}</h1>
-      {{ page.body|safe }}
+      {% if page.body %}{{ page.body|safe }}{% endif %}
     </div>
     <div class="course-slider">
       {% for courseware_object in courseware_objects %}

@@ -14,7 +14,7 @@ pytestmark = [pytest.mark.django_db]
 
 def test_index_view(client):
     """Verify the index view is as expected"""
-    response = client.get(reverse("mitxpro-index"))
+    response = client.get(reverse("wagtail_serve", args=[""]))
     assert response.status_code == 200
 
 

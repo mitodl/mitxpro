@@ -285,7 +285,7 @@ def anon_enrollment_view(request):
     # pylint: disable=fixme
     # TODO: Actual enrollment implementation (issue #111)
     log.info(request.GET.dict())
-    return redirect(reverse("mitxpro-index"))
+    return redirect(reverse("wagtail_serve", args=[""]))
 
 
 class CouponListView(APIView):
