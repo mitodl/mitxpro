@@ -46,8 +46,10 @@ export default {
   }),
   editProfileMutation: (profileData: UserProfileForm) => ({
     ...DEFAULT_OPTIONS,
-    url:  "/api/profile/edit/",
-    body: {
+    transform: transformCurrentUser,
+    update:    updateResult,
+    url:       "/api/profile/edit/",
+    body:      {
       ...profileData
     }
   })
