@@ -97,16 +97,18 @@ def test_home_page_inquiry_section():
     """
     home_page = HomePageFactory.create()
     assert not home_page.inquiry_section
-    teams_page = ForTeamsPageFactory.create(
+    inquiry_page = ForTeamsPageFactory.create(
         parent=home_page,
         content="<p>content</p>",
         switch_layout=True,
+        dark_theme=True,
         action_title="Action Title",
     )
-    assert home_page.inquiry_section == teams_page
-    assert teams_page.action_title == "Action Title"
-    assert teams_page.content == "<p>content</p>"
-    assert teams_page.switch_layout
+    assert home_page.inquiry_section == inquiry_page
+    assert inquiry_page.action_title == "Action Title"
+    assert inquiry_page.content == "<p>content</p>"
+    assert inquiry_page.switch_layout
+    assert inquiry_page.dark_theme
 
 
 def test_home_page_upcoming_courseware():

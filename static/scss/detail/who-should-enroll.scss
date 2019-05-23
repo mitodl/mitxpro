@@ -1,6 +1,4 @@
 // sass-lint:disable mixins-before-declarations
-$dark-bg-heading-blue: #3dbdbf;
-$darker-grey-bg: #2c2a29;
 
 .who-should-enroll-block {
   padding: 150px 0 50px;
@@ -68,7 +66,7 @@ $darker-grey-bg: #2c2a29;
   }
 
   h1 {
-    color: $dark-bg-heading-blue;
+    color: $blue;
     margin: 0 0 10px;
 
     @include media-breakpoint-up(lg) {
