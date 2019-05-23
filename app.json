@@ -35,6 +35,22 @@
     "CYBERSOURCE_ACCESS_KEY": {
       "description": "CyberSource Access Key"
     },
+    "CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS": {
+      "description": "Additional sanctions lists to validate for exports. Refer to Cybersource docs.",
+      "required": false
+    },
+    "CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR": {
+      "description": "Whether just the name or the name and address should be used in exports verification. Refer to Cybersource docs.",
+      "required": false
+    },
+    "CYBERSOURCE_EXPORT_SERVICE_ADDRESS_WEIGHT": {
+      "description": "The weight of the address in determining whether a user passes exports checks. Refer to Cybersource docs.",
+      "required": false
+    },
+    "CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT": {
+      "description": "The weight of the name in determining whether a user passes exports checks. Refer to Cybersource docs.",
+      "required": false
+    },
     "CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY": {
       "description": "The public key to encrypt export results with for our own security purposes. Should be a base64 encoded NaCl public key.",
       "required": false

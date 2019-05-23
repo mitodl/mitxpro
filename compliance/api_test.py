@@ -76,7 +76,7 @@ def test_verify_user_with_exports(
 def test_verify_user_with_exports_temporary_errors(mocker, user, reason_code):
     """Verify no result is recorded if the nature of the error is temporary"""
     mock_log = mocker.patch("compliance.api.log")
-    #
+
     mock_client = mocker.Mock()
     mock_client.service.runTransaction.return_value.reasonCode = str(reason_code)
     # create a history with some dummy lxml objects
@@ -94,3 +94,34 @@ def test_verify_user_with_exports_temporary_errors(mocker, user, reason_code):
     )
 
     assert not ExportsInquiryLog.objects.filter(user=user).exists()
+
+
+@pytest.mark.parametrize(
+    "sanctions_lists, expect_passed", [[None, False], ["", False], ["OFAC", True]]
+)
+def test_verify_user_with_exports_sanctions_lists(
+    mocker, user, cybersource_settings, sanctions_lists, expect_passed
+):
+    """Verify the sanctions list is passed only if it is configured"""
+    cybersource_settings.CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS = sanctions_lists
+
+    mock_client = mocker.Mock()
+    mock_client.service.runTransaction.return_value.reasonCode = "100"
+    mock_client.service.runTransaction.return_value.exportReply.infoCode = 100
+    # create a history with some dummy lxml objects
+    mock_history = mocker.Mock(
+        last_sent={"envelope": etree.Element("sent")},
+        last_received={"envelope": etree.Element("received")},
+    )
+    with mocker.patch(
+        "compliance.api.get_cybersource_client",
+        return_value=(mock_client, mock_history),
+    ):
+        api.verify_user_with_exports(user)
+
+    payload = mock_client.service.runTransaction.call_args[1]
+
+    if expect_passed:
+        assert payload["exportService"]["sanctionsLists"] == sanctions_lists
+    else:
+        assert "sanctionsLists" not in payload["exportService"]

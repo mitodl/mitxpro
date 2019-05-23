@@ -192,6 +192,12 @@ def verify_user_with_exports(user):
             "nameWeight": settings.CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT,
         },
     }
+
+    sanctions_lists = settings.CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS
+
+    if sanctions_lists:
+        payload["exportService"]["sanctionsLists"] = sanctions_lists
+
     response = client.service.runTransaction(**payload)
 
     return log_exports_inquiry(user, response, history.last_sent, history.last_received)
