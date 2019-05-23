@@ -19,6 +19,7 @@ from ecommerce.models import (
     DataConsentUser,
     Company,
 )
+from ecommerce.task_helpers import sync_hubspot_deal
 from mitxpro.utils import get_field_names
 
 
@@ -57,6 +58,7 @@ class OrderAdmin(admin.ModelAdmin):
         Saves object and logs change to object
         """
         obj.save_and_log(request.user)
+        sync_hubspot_deal(obj)
 
 
 class OrderAuditAdmin(admin.ModelAdmin):

@@ -80,19 +80,17 @@ def test_run_queryset(is_program):
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
-def test_hubspot_syncs(mocker, settings, hubspot_api_key):
+def test_hubspot_syncs(mock_hubspot_syncs, settings, hubspot_api_key):
     """ Test that hubspot sync tasks are called only if API key is set"""
-    mock_order_sync = mocker.patch("ecommerce.tasks.sync_deal_with_hubspot.delay")
-    mock_line_sync = mocker.patch("ecommerce.tasks.sync_line_item_with_hubspot.delay")
-    mock_product_sync = mocker.patch("ecommerce.tasks.sync_product_with_hubspot.delay")
     settings.HUBSPOT_API_KEY = hubspot_api_key
     order = OrderFactory.create()
+    order.save_and_log(None)
     if hubspot_api_key is not None:
-        mock_order_sync.assert_called_with(order.id)
         for line in order.lines.all():
-            mock_line_sync.assert_called_with(line.id)
-            mock_product_sync.assert_called_with(line.product_version.product.id)
+            mock_hubspot_syncs.line.assert_called_with(line.id)
+            mock_hubspot_syncs.product.assert_called_with(
+                line.product_version.product.id
+            )
     else:
-        mock_order_sync.assert_not_called()
-        mock_line_sync.assert_not_called()
-        mock_product_sync.assert_not_called()
+        mock_hubspot_syncs.line.assert_not_called()
+        mock_hubspot_syncs.product.assert_not_called()

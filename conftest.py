@@ -28,9 +28,3 @@ def clean_up_files():
     yield
     if os.path.exists(TEST_MEDIA_ROOT):
         shutil.rmtree(TEST_MEDIA_ROOT)
-
-
-@pytest.fixture(autouse=True)
-def disable_hubspot_api():
-    """Sets the HUBSPOT_API_KEY to None by default"""
-    settings.HUBSPOT_API_KEY = None

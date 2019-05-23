@@ -17,12 +17,12 @@ def sync_hubspot_user(user):
 
 def sync_hubspot_deal(order):
     """
-    Trigger celery task to sync an order to Hubspot
+    Trigger celery task to sync an order to Hubspot if it has lines
 
     Args:
         order (Order): The order to sync
     """
-    if settings.HUBSPOT_API_KEY:
+    if settings.HUBSPOT_API_KEY and order.lines.first() is not None:
         tasks.sync_deal_with_hubspot.delay(order.id)
 
 

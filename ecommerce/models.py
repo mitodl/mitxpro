@@ -159,10 +159,6 @@ class Order(TimestampedModel, AuditableModel):
         ]
         return data
 
-    def save(self, *args, **kwargs):  # pylint:disable=arguments-differ
-        super().save(*args, **kwargs)
-        task_helpers.sync_hubspot_deal(self)
-
 
 class OrderAudit(AuditModel):
     """
