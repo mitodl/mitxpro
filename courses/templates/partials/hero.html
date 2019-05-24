@@ -1,15 +1,19 @@
 <div class="header-block">
   <div class="container header-container">
-    {% if obj.program %}
-      <h5 class="program-position">Course {{ obj.position_in_program }} of {{ obj.program.num_courses }} in {{ obj.program.title }}</h5>
+    {% if page.background_video_url %}
+      <video autoplay muted loop class="background-video" id="background-video" data-source="{{ page.background_video_url }}">
+      </video>
+    {% endif %}
+    {% if page.course.program %}
+      <h5 class="program-position">Course {{ page.course.position_in_program }} of {{ page.course.program.num_courses }} in {{ page.course.program.page.title }}</h5>
     {% endif %}
     <div class="row">
       <div class="col-lg-7">
         <div class="header-title">
-          <h1>{{ obj.display_title }}</h1>
-          <h2>{{ obj.subhead }}</h2>
+          <h1>{{ page.title }}</h1>
+          <h2>{{ page.subhead }}</h2>
         </div>
-        <div>
+        <div class="mt-5">
           {% if not enrolled and product_version_id %}
             <a class="enroll-button" href="{% url "checkout-page" %}?product={{ product_version_id }}">
               Enroll Now
@@ -19,15 +23,18 @@
               View Dashboard
             </a>
           {% endif %}
+          {% if action_title and action_url %}
+            <a class="enroll-button" href="{{ action_url }}">{{ action_title }}</a>
+          {% endif %}
         </div>
       </div>
       <div class="col-lg-5">
-        {% if obj.video_url %}
-          <video controls>
-            <source src="{{ obj.video_url }}">
+        {% if page.video_url %}
+          <video class="promo-video" controls>
+            <source src="{{ page.video_url }}">
             Your browser does not support HTML5 video.
           </video>
-          <div class="video-caption">{{ obj.video_title|safe }}</div>
+          <div class="video-caption">{{ page.video_title|safe }}</div>
         {% endif %}
       </div>
     </div>
