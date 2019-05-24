@@ -1,5 +1,5 @@
 {% extends "course_app_base.html" %}
-{% load static wagtailimages_tags %}
+{% load static wagtailcore_tags wagtailimages_tags %}
 
 {% block title %}MIT xPro | {{ course.title }}{% endblock %}
 
@@ -37,8 +37,9 @@
     {% if course.testimonials %} {% include "partials/testimonial-carousel.html" with page=course.testimonials %} {% endif %}
     {% if course.faculty %} {% include "partials/faculty-carousel.html" %} {% endif %}
     {% if course.program and course.program.course_lineup %}
-      {% with courseware_objects=course.program.courses.all page=course.program.course_lineup %}
-        {% include "partials/course-carousel.html" with button_title="View Full Program" button_url="#" %}
+      {% with courseware_pages=course.program.page.course_pages page=course.program.course_lineup %}
+      {% pageurl course.program.page as program_url %}
+        {% include "partials/course-carousel.html" with button_title="View Full Program" button_url=program_url %}
       {% endwith %}
     {% endif %}
     {% if course.for_teams %} {% include "partials/for-teams.html" with page=course.for_teams %} {% endif %}

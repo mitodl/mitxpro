@@ -128,6 +128,7 @@ class CoursesInProgramPageFactory(wagtail_factories.PageFactory):
 
     heading = factory.fuzzy.FuzzyText(prefix="Heading ")
     body = factory.fuzzy.FuzzyText(prefix="Body ")
+    contents = wagtail_factories.StreamFieldFactory({"item": CoursePageFactory})
 
     class Meta:
         model = CoursesInProgramPage
