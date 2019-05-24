@@ -25,6 +25,7 @@
     {% endspaceless %}
   </head>
   <body class="{% block bodyclass %}{% endblock %}">
+  <div class="main-panel">
     {% include "partials/gtm_body.html" %}
     {% hijack_notification %}
     {% latest_notification %}
@@ -36,6 +37,7 @@
     {% endblock %}
     {% block contact-us %}
     {% endblock %}
+  </div>
     {% block footer %}
         {% include "footer.html" %}
     {% endblock %}
