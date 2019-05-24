@@ -1,6 +1,22 @@
 Release Notes
 =============
 
+Version 0.5.2
+-------------
+
+- #252 Home Page: Upcoming Courses
+- Added workers to pgbouncer
+- #250 #251: Home Page Header
+- #258 Home Page: Inquire Now
+- Trigger hubspot celery tasks where appropriate (#317)
+- updated the footer and added links
+- #323 Home Page Base
+- allow marketing user to add/edit slug for resource pages (#350)
+- fix error in console when no notificaiton available (#351)
+- Updated login/registration styling
+- Enroll/View Dashboard button (#336)
+- add support of hub spot subscription.
+
 Version 0.5.1 (Released May 24, 2019)
 -------------
 
