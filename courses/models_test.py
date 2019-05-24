@@ -471,12 +471,14 @@ def test_course_for_teams():
         parent=course_page,
         content="<p>content</p>",
         switch_layout=True,
+        dark_theme=True,
         action_title="Action Title",
     )
     assert course.for_teams == teams_page
     assert teams_page.action_title == "Action Title"
     assert teams_page.content == "<p>content</p>"
     assert teams_page.switch_layout
+    assert teams_page.dark_theme
 
 
 def test_program_for_teams():
@@ -492,12 +494,14 @@ def test_program_for_teams():
         parent=program_page,
         content="<p>content</p>",
         switch_layout=True,
+        dark_theme=True,
         action_title="Action Title",
     )
     assert program.for_teams == teams_page
     assert teams_page.action_title == "Action Title"
     assert teams_page.content == "<p>content</p>"
     assert teams_page.switch_layout
+    assert teams_page.dark_theme
     assert not ForTeamsPage.can_create_at(program_page)
 
 

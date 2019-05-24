@@ -145,6 +145,11 @@ class ForTeamsPage(CourseProgramChildPage):
     action_title = models.CharField(
         max_length=255, help_text="The text to show on the call to action button"
     )
+    dark_theme = models.BooleanField(
+        blank=True,
+        default=False,
+        help_text="When checked, switches to dark theme (light text on dark background).",
+    )
     switch_layout = models.BooleanField(
         blank=True,
         default=False,
@@ -166,6 +171,7 @@ class ForTeamsPage(CourseProgramChildPage):
         FieldPanel("title"),
         FieldPanel("content"),
         FieldPanel("action_title"),
+        FieldPanel("dark_theme"),
         FieldPanel("switch_layout"),
         FieldPanel("image"),
     ]
