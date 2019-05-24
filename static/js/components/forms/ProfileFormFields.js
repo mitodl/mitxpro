@@ -12,7 +12,7 @@ import {
   EMPLOYMENT_SIZE
 } from "../../constants"
 import FormError from "./elements/FormError"
-import {newPasswordValidationShape} from "../../lib/form"
+import { newPasswordValidationShape } from "../../lib/form"
 
 const US_ALPHA_2 = "US"
 const CA_ALPHA_2 = "CA"

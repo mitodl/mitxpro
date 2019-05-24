@@ -34,8 +34,8 @@ type Props = {|
   ...ProfileProps
 |}
 
-class EditProfilePage extends React.Component<Props> {
-  async onSubmit(profileData, { setSubmitting, setErrors }) {
+export class EditProfilePage extends React.Component<Props> {
+  async onSubmit(profileData: User, { setSubmitting, setErrors }: Object) {
     const { editProfile, history } = this.props
 
     try {
@@ -58,16 +58,24 @@ class EditProfilePage extends React.Component<Props> {
   render() {
     const { countries, currentUser } = this.props
     return (
-      <div className="registration-form">
-        <div className="form-group row">
-          <h3 className="col-8">Edit Profile</h3>
+      <div className="container auth-page registration-page">
+        <div className="auth-header row d-flex  align-items-center justify-content-between flex-nowrap">
+          <div className="col-auto flex-shrink-1">
+            <h1>Edit Profile</h1>
+          </div>
         </div>
-        <div className="inner-form">
-          <EditProfileForm
-            countries={countries}
-            user={currentUser}
-            onSubmit={this.onSubmit.bind(this)}
-          />
+        <div className="auth-card card-shadow row">
+          <div className="container">
+            <div className="row">
+              <div className="col-12 auth-form">
+                <EditProfileForm
+                  countries={countries}
+                  user={currentUser}
+                  onSubmit={this.onSubmit.bind(this)}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )

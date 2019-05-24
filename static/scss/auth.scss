@@ -71,12 +71,12 @@
   .col {
     align-self: flex-start;
   }
+}
 
-  .additional-street {
-    cursor: pointer;
-    color: $light-blue;
-    font-style: italic;
-    border: none;
-    background: none;
-  }
+.additional-street {
+  cursor: pointer;
+  color: $light-blue;
+  font-style: italic;
+  border: none;
+  background: none;
 }

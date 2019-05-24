@@ -41,6 +41,27 @@ export type AuthResponse = {
   }
 }
 
+export type LegalAddress = {
+  first_name: string,
+  last_name: string,
+  street_address: Array<string>,
+  country: string,
+  state_or_territory?: string,
+  postal_code?: string
+}
+
+export type UserProfile = {
+  gender: string,
+  birth_year: number,
+  company: string,
+  industry: ?string,
+  job_title: string,
+  job_function: ?string,
+  years_experience: ?number,
+  company_size: ?number,
+  leadership_level: ?string
+}
+
 export type User = {
     id: number,
     username: string,
@@ -73,27 +94,6 @@ export type Country = {
   name:   string,
   code:   string,
   states: Array<StateOrTerritory>
-}
-
-export type LegalAddress = {
-  first_name: string,
-  last_name: string,
-  street_address: Array<string>,
-  country: string,
-  state_or_territory?: string,
-  postal_code?: string
-}
-
-export type UserProfile = {
-  gender: string,
-  birth_year: number,
-  company: string,
-  industry: ?string,
-  job_title: string,
-  job_function: ?string,
-  years_experience: ?number,
-  company_size: ?number,
-  leadership_level: ?string
 }
 
 export type ProfileForm = {

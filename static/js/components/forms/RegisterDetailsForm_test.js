@@ -11,29 +11,12 @@ import {
   findFormikFieldByName,
   findFormikErrorByName
 } from "../../lib/test_utils"
+import { makeCountries } from "../../factories/user"
 
 describe("RegisterDetailsForm", () => {
   let sandbox, onSubmitStub
 
-  const countries = [
-    {
-      code:   "US",
-      name:   "United States",
-      states: [
-        { code: "US-CO", name: "Colorado" },
-        { code: "US-MA", name: "Massachusetts" }
-      ]
-    },
-    {
-      code:   "CA",
-      name:   "Canada",
-      states: [
-        { code: "CA-QC", name: "Quebec" },
-        { code: "CA-NS", name: "Nova Scotia" }
-      ]
-    },
-    { code: "FR", name: "France", states: [] }
-  ]
+  const countries = makeCountries()
 
   const renderForm = () =>
     mount(<RegisterDetailsForm onSubmit={onSubmitStub} countries={countries} />)
