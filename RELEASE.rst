@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.5.1
+Version 0.5.1 (Released May 24, 2019)
 -------------
 
 - Fixed encrypted response getting ascii-escaped
