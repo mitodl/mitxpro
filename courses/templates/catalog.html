@@ -54,5 +54,8 @@
 </div>
 {% endblock %}
 {% block contact-us %}
-    {% include "contact_us.html" %}
+    {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
+        {% include "subscription.html" %}
+    {% endif %}
 {% endblock %}
+

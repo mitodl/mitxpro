@@ -241,6 +241,16 @@
     },
     "VOUCHER_INTERNATIONAL_SCHOOL_KEY": {
       "required": false
+    },
+    "HUBSPOT_NEW_COURSES_FORM_GUID": {
+      "description": "Form guid over hub spot for new courses email subscription form.",
+      "required": false,
+      "value": "ad5d54e5-5ca9-4255-9c17-fa222e0a9b82"
+    },
+    "HUBSPOT_PORTAL_ID": {
+      "description": "Hub spot portal id.",
+      "required": false,
+      "value": "4994459"
     }
   },
   "keywords": [
