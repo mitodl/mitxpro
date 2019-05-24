@@ -8,7 +8,7 @@ from rest_framework import serializers
 
 from mitxpro.serializers import WriteableSerializerMethodField
 from users.models import LegalAddress, User, Profile
-from ecommerce.task_helpers import sync_hubspot_user
+from hubspot.task_helpers import sync_hubspot_user
 
 US_POSTAL_RE = re.compile(r"[0-9]{5}(-[0-9]{4}){0,1}")
 CA_POSTAL_RE = re.compile(r"[0-9][A-Z][0-9] [A-Z][0-9][A-Z]", flags=re.I)

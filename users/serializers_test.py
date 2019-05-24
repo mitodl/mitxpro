@@ -10,7 +10,7 @@ from users.serializers import LegalAddressSerializer, UserSerializer
 @pytest.fixture()
 def mock_user_sync(mocker):
     """ Yield a mock hubspot update task for contacts """
-    yield mocker.patch("ecommerce.tasks.sync_contact_with_hubspot.delay")
+    yield mocker.patch("hubspot.tasks.sync_contact_with_hubspot.delay")
 
 
 @pytest.fixture()

@@ -1,7 +1,7 @@
 """ Task helper functions for ecommerce """
 from django.conf import settings
 
-from ecommerce import tasks
+from hubspot import tasks
 
 
 def sync_hubspot_user(user):

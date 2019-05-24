@@ -34,7 +34,7 @@ from ecommerce.models import (
     Line,
     Order,
 )
-from ecommerce.task_helpers import sync_hubspot_deal
+from hubspot.task_helpers import sync_hubspot_deal
 from mitxpro.utils import now_in_utc
 
 ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"

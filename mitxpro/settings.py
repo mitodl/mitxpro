@@ -98,6 +98,7 @@ INSTALLED_APPS = (
     "hijack_admin",
     "ecommerce",
     "voucher",
+    "hubspot",
 )
 # Only include the seed data app if this isn't running in prod
 if ENVIRONMENT not in ("production", "prod"):
