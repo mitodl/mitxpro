@@ -2,6 +2,7 @@
 /*eslint semi: ["error", "always"]*/
 
 $(document).ready(function() {
+  // FAQs
   $("body").on("click", ".readmore", function(e) {
     const $readmoreText = $(this).find(".readmore-text");
     e.preventDefault();
@@ -9,6 +10,7 @@ $(document).ready(function() {
     $readmoreText.text($readmoreText.text() === "Hide" ? "Read" : "Hide");
   });
 
+  // More Dates
   $(".dates-tooltip").popover({
     template:
       '<div class="popover" role="tooltip"> \
@@ -18,6 +20,7 @@ $(document).ready(function() {
       </div>'
   });
 
+  // Navigation Bar
   $("body").scrollspy({ target: "#subNavBar", offset: 70 });
 
   $(window).on("activate.bs.scrollspy", function(e, obj) {
@@ -32,6 +35,7 @@ $(document).ready(function() {
   });
 });
 
+// Courseware carousel
 $(".course-slider").slick({
   slidesToShow:   3,
   slidesToScroll: 1,
@@ -64,6 +68,7 @@ $(".course-slider").slick({
   ]
 });
 
+// Faculty carousel
 $(".faculty-slider").slick({
   slidesToShow:   3,
   slidesToScroll: 1,
@@ -98,6 +103,7 @@ $(".faculty-slider").slick({
   ]
 });
 
+// Testimonials carousel
 $(".learners-slider").slick({
   slidesToShow:   3,
   slidesToScroll: 1,

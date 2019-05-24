@@ -21,12 +21,14 @@
 {% block scripts %}
   {{ block.super }}
   <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script src="{% static 'js/course_detail.js' %}"></script>
+  <script src="{% static 'js/hero.js' %}"></script>
 {% endblock %}
 
 {% block content %}
 <div>
-    {% include "partials/hero.html" with obj=course %}
+    {% include "partials/hero.html" with page=course.page %}
     {% include "partials/metadata-tiles.html" %}
     {% include "partials/subnav.html" with product=course %}
     {% if course.outcomes %} {% include "partials/learning-outcomes.html" %} {% endif %}

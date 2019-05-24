@@ -2,6 +2,20 @@
 .header-block {
   background-size: cover;
   background-position: 50% 50%;
+  position: relative;
+  overflow: hidden;
+
+  .background-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: 0;
+    transform: translateX(-50%) translateY(-50%);
+  }
 }
 
 .header-container {
@@ -67,7 +81,7 @@
     text-transform: uppercase;
   }
 
-  video {
+  .promo-video {
     width: 100%;
     border: 5px solid white;
     border-radius: 5px;

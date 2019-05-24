@@ -58,8 +58,9 @@ def test_home_page():
     """
     Verify that home page is created
     """
-    page = HomePageFactory.create(title="Home Page")
+    page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
     assert page.title == "Home Page"
+    assert page.subhead == "<p>subhead</p>"
 
 
 def test_home_page_testimonials():

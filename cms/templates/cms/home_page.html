@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load static render_bundle %}
+{% load static wagtailimages_tags render_bundle %}
 
 {% block title %}MIT xPro{% endblock %}
 
@@ -9,14 +9,33 @@
 {% render_bundle 'header' %}
 {% endblock %}
 
+{% block extrahead %}
+  {{ block.super }}
+  <style>
+    .header-block {
+      {% image page.background_image fill-1024x768 as background_image %}
+      background-image: url('{{ background_image.url }}');
+    }
+
+    @media screen and (min-width: 1024px) { 
+      .header-block {
+        {% image page.background_image fill-1920x1080 as background_image %}
+        background-image: url('{{ background_image.url }}'); 
+      }
+    }
+  </style>
+{% endblock %}
 
 {% block scripts %}
   {{ block.super }}
   <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script src="{% static 'js/home_page.js' %}"></script>
+  <script src="{% static 'js/hero.js' %}"></script>
 {% endblock %}
 
 {% block content %}
+  {% include "partials/hero.html" with action_title="Watch Now" action_url="#" %}
   {% if page.upcoming_courseware %} {% include "partials/course-carousel.html" with page=page.upcoming_courseware courseware_objects=courses %} {% endif %}
   {% if page.learning_experience %} {% include "partials/learning-techniques.html" with page=page.learning_experience %} {% endif %}
   {% if page.testimonials %} {% include "partials/testimonial-carousel.html" with page=page.testimonials %} {% endif %}

@@ -215,6 +215,7 @@ class HomePageFactory(wagtail_factories.PageFactory):
     """HomePage factory class"""
 
     title = factory.fuzzy.FuzzyText(prefix="Home ")
+    subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
 
     class Meta:
         model = HomePage
