@@ -10,7 +10,11 @@ from cms.factories import (
     UserTestimonialsPageFactory,
     CoursesInProgramPageFactory,
     HomePageFactory,
+    ProgramPageFactory,
+    CoursePageFactory,
 )
+
+from courses.factories import CourseFactory
 
 pytestmark = [pytest.mark.django_db]
 
@@ -52,6 +56,25 @@ def test_notification_snippet():
     notification = SiteNotificationFactory(message=message_text)
 
     assert str(notification) == message_text
+
+
+def test_course_page_program_page():
+    """
+    Verify `program_page` property from the course page returns expected value
+    """
+    program_page = ProgramPageFactory.create()
+    course_page = CoursePageFactory.create(course__program=program_page.program)
+    assert course_page.program_page == program_page
+
+
+def test_program_page_course_pages():
+    """
+    Verify `course_pages` property from the program page returns expected value
+    """
+    program_page = ProgramPageFactory.create()
+    assert list(program_page.course_pages) == []
+    course_page = CoursePageFactory.create(course__program=program_page.program)
+    assert list(program_page.course_pages) == [course_page]
 
 
 def test_home_page():
@@ -118,10 +141,16 @@ def test_home_page_upcoming_courseware():
     """
     home_page = HomePageFactory.create()
     assert not home_page.upcoming_courseware
-
-    courses_page = CoursesInProgramPageFactory.create(
-        parent=home_page, heading="heading", body="<p>body</p>"
+    course = CourseFactory.create()
+    carousel_page = CoursesInProgramPageFactory.create(
+        parent=home_page,
+        heading="heading",
+        body="<p>body</p>",
+        override_contents=True,
+        contents__0__item__course=course,
     )
-    assert home_page.upcoming_courseware == courses_page
-    assert courses_page.heading == "heading"
-    assert courses_page.body == "<p>body</p>"
+    assert home_page.upcoming_courseware == carousel_page
+    assert carousel_page.heading == "heading"
+    assert carousel_page.body == "<p>body</p>"
+    assert carousel_page.override_contents
+    assert carousel_page.content_pages == [course.page]

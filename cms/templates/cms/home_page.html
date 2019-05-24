@@ -36,7 +36,10 @@
 
 {% block content %}
   {% include "partials/hero.html" with action_title="Watch Now" action_url="#" %}
-  {% if page.upcoming_courseware %} {% include "partials/course-carousel.html" with page=page.upcoming_courseware courseware_objects=courses %} {% endif %}
+  {% if page.upcoming_courseware %} 
+    {% url 'mitxpro-catalog' as catalog_url %}
+    {% include "partials/course-carousel.html" with page=page.upcoming_courseware button_title="View All" button_url=catalog_url %}
+  {% endif %}
   {% if page.learning_experience %} {% include "partials/learning-techniques.html" with page=page.learning_experience %} {% endif %}
   {% if page.testimonials %} {% include "partials/testimonial-carousel.html" with page=page.testimonials %} {% endif %}
   {% if page.inquiry_section %} {% include "partials/for-teams.html" with page=page.inquiry_section %} {% endif %}

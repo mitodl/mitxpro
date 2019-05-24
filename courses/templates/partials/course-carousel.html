@@ -1,4 +1,4 @@
-{% load static wagtailimages_tags %}
+{% load static wagtailcore_tags wagtailimages_tags %}
 <div id="courseLineup" class="course-in-program">
   <div class="container">
     <div class="head">
@@ -6,24 +6,14 @@
       {% if page.body %}{{ page.body|safe }}{% endif %}
     </div>
     <div class="course-slider">
-      {% for courseware_object in courseware_objects %}
-        <div class="slide">
-          <div class="slide-holder">
-            {% if courseware_object.thumbnail_image %}
-              {% image courseware_object.thumbnail_image fill-480x275 as course_image %}
-              <img src="{{ course_image.url }}" alt="{{ courseware_object.display_title }}">
-            {% else %}
-              <img src="{% static 'images/mit-dome.png' %}" alt="{{ courseware_object.display_title }}">
-            {% endif %}
-            <h2>{{ courseware_object.display_title }}</h2>
-            <p>{{ courseware_object.subhead }}</p>
-            <a href="{{ courseware_object.url }}" class="read-more text-uppercase">view {{ courseware_object.type_name }}</a>
-          </div>
-        </div>
-      {% endfor %}
+      {% if page.override_contents %}
+        {% include "partials/courseware-carousel-base.html" with pages=page.content_pages %}
+      {% else %}
+        {% include "partials/courseware-carousel-base.html" with pages=courseware_pages %}
+      {% endif  %}
     </div>
     {% if button_title and button_url %}
-      <a href="{{ button_url }}" class="btn btn-primary">{{ button_title }}</a>
+      <a href="{{ button_url }}" target="_blank" class="btn btn-primary px-5">{{ button_title }}</a>
     {% endif %}
   </div>
 </div>

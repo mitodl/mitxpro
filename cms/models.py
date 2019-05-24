@@ -14,7 +14,7 @@ from wagtail.admin.edit_handlers import (
 from wagtail.core import blocks
 from wagtail.core.models import Orderable, Page
 from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.blocks import RawHTMLBlock
+from wagtail.core.blocks import RawHTMLBlock, PageChooserBlock
 from wagtail.images.models import Image
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.snippets.models import register_snippet
@@ -240,11 +240,44 @@ class CoursesInProgramPage(CourseProgramChildPage):
         blank=True,
         null=True,
     )
+    override_contents = models.BooleanField(
+        blank=True,
+        default=False,
+        help_text="Manually select contents below. Otherwise displays all courses associated with the program.",
+    )
+    contents = StreamField(
+        [
+            (
+                "item",
+                PageChooserBlock(
+                    required=False, target_model=["cms.CoursePage", "cms.ProgramPage"]
+                ),
+            )
+        ],
+        help_text="The courseware to display in this carousel",
+        blank=True,
+    )
+
+    @property
+    def content_pages(self):
+        """
+        Extracts all the pages out of the `contents` stream into a list
+        """
+        pages = []
+        for block in self.contents:  # pylint: disable=not-an-iterable
+            if block.value:
+                pages.append(block.value.specific)
+        return pages
 
     class Meta:
         verbose_name = "Courseware Carousel"
 
-    content_panels = [FieldPanel("heading"), FieldPanel("body")]
+    content_panels = [
+        FieldPanel("heading"),
+        FieldPanel("body"),
+        FieldPanel("override_contents"),
+        StreamFieldPanel("contents"),
+    ]
 
 
 class FacultyMembersPage(CourseProgramChildPage):
@@ -351,19 +384,9 @@ class HomePage(Page):
         super().save(*args, **kwargs)
 
     def get_context(self, request, *args, **kwargs):
-        from courses.models import Program
-
         context = super().get_context(request)
         context.update(**get_js_settings_context(request))
 
-        # This just a test to populate the "Upcoming Courses and Programs"
-        # carousel. Actual implementation for this will come later
-        courses = (
-            Program.objects.get(title="SEED Digital Learning").courses.all()
-            if Program.objects.exists()
-            else []
-        )
-        context.update(courses=courses)
         return context
 
 
@@ -462,6 +485,11 @@ class ProductPage(Page):
         context["title"] = self.title
         return context
 
+    def _get_child_page_of_type(self, cls):
+        """Gets the first child page of the given type if it exists"""
+        child = self.get_children().type(cls).first()
+        return child.specific if child else None
+
 
 class ProgramPage(ProductPage):
     """
@@ -479,6 +507,14 @@ class ProgramPage(ProductPage):
 
     content_panels = [FieldPanel("program")] + ProductPage.content_panels
 
+    @property
+    def course_pages(self):
+        """
+        Gets a list of pages (CoursePage) of all the courses associated with this program
+        """
+        courses = self.program.courses.all()
+        return CoursePage.objects.filter(course_id__in=courses)
+
 
 class CoursePage(ProductPage):
     """
@@ -495,6 +531,13 @@ class CoursePage(ProductPage):
     )
 
     content_panels = [FieldPanel("course")] + ProductPage.content_panels
+
+    @property
+    def program_page(self):
+        """
+        Gets the program page associated with this course, if it exists
+        """
+        return self.course.program.page if self.course and self.course.program else None
 
 
 class FrequentlyAskedQuestionPage(CourseProgramChildPage):
