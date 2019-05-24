@@ -343,6 +343,7 @@ class HomePage(Page):
         "LearningTechniquesPage",
         "UserTestimonialsPage",
         "ForTeamsPage",
+        "ResourcePage",
     ]
 
     def _get_child_page_of_type(self, cls):
