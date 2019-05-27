@@ -1,0 +1,59 @@
+// sass-lint:disable mixins-before-declarations
+.tv-block {
+  padding: 90px 0;
+  background: white url("#{$static-path}/images/transparent-pixels-bg.png") repeat-x 0 100%;
+  position: relative;
+  color: black;
+  text-align: center;
+
+  @include media-breakpoint-up(lg) {
+    text-align: left;
+  }
+
+  .video-holder {
+    padding: 20px 0 0;
+
+    @include media-breakpoint-up(lg) {
+      padding: 20px 0 0 50px;
+    }
+
+    video {
+      width: 100%;
+      border: 5px solid $gray;
+      border-radius: 5px;
+      margin: 0 0 20px;
+      display: block;
+    }
+  }
+
+  .action-button {
+    font-size: x-large;
+  }
+
+  .video-caption {
+    display: block;
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  h1 {
+    color: $primary;
+    margin: 0 0 50px;
+    text-align: center;
+  }
+}
+
+.tv-block.dark-theme {
+  background: $darker-grey-bg url("#{$static-path}/images/transparent-pixels-bg.png") repeat-x 0 100%;
+  color: white;
+
+  h1 {
+    color: $blue;
+  }
+
+  .video-holder video {
+    border: 5px solid white;
+  }
+}

@@ -66,6 +66,8 @@
   }
 
   .slide-holder {
+    height: 100%;
+    position: relative;
     background: white;
     padding: 15px;
     border-radius: 5px;
@@ -98,6 +100,8 @@
   }
 
   .read-more {
+    position: absolute;
+    bottom: 5px;
     font-size: 18px;
     line-height: 24px;
     display: inline-block;
