@@ -12,6 +12,7 @@ from cms.factories import (
     HomePageFactory,
     ProgramPageFactory,
     CoursePageFactory,
+    TextVideoSectionFactory,
 )
 
 from courses.factories import CourseFactory
@@ -154,3 +155,25 @@ def test_home_page_upcoming_courseware():
     assert carousel_page.body == "<p>body</p>"
     assert carousel_page.override_contents
     assert carousel_page.content_pages == [course.page]
+
+
+def test_home_page_about_mit_xpro():
+    """
+    about_mit_xpro property should return expected values
+    """
+    home_page = HomePageFactory.create()
+    assert not home_page.about_mit_xpro
+    about_page = TextVideoSectionFactory.create(
+        parent=home_page,
+        content="<p>content</p>",
+        switch_layout=True,
+        dark_theme=True,
+        action_title="Action Title",
+        video_url="http://test.com/abcd",
+    )
+    assert home_page.about_mit_xpro == about_page
+    assert about_page.action_title == "Action Title"
+    assert about_page.content == "<p>content</p>"
+    assert about_page.video_url == "http://test.com/abcd"
+    assert about_page.switch_layout
+    assert about_page.dark_theme

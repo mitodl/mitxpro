@@ -36,6 +36,7 @@
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script src="{% static 'js/home_page.js' %}"></script>
   <script src="{% static 'js/hero.js' %}"></script>
+  <script src="{% static 'js/text_video_section.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -44,6 +45,7 @@
     {% url 'mitxpro-catalog' as catalog_url %}
     {% include "partials/course-carousel.html" with page=page.upcoming_courseware button_title="View All" button_url=catalog_url %}
   {% endif %}
+  {% if page.about_mit_xpro %} {% include "partials/text-video-section.html" with page=page.about_mit_xpro %} {% endif %}
   {% if page.learning_experience %} {% include "partials/learning-techniques.html" with page=page.learning_experience %} {% endif %}
   {% if page.testimonials %} {% include "partials/testimonial-carousel.html" with page=page.testimonials %} {% endif %}
   {% if page.inquiry_section %} {% include "partials/for-teams.html" with page=page.inquiry_section %} {% endif %}

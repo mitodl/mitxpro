@@ -183,6 +183,50 @@ class ForTeamsPage(CourseProgramChildPage):
     ]
 
 
+class TextVideoSection(CourseProgramChildPage):
+    """
+    CMS Page representing a text-video section such as the "About MIT xPRO" section on the home page
+    """
+
+    content = RichTextField(help_text="The content shown in the section")
+    action_title = models.CharField(
+        null=True,
+        blank=True,
+        max_length=255,
+        help_text="The text to show on the call to action button",
+    )
+    action_url = models.URLField(
+        null=True,
+        blank=True,
+        help_text="The URL to go to when the action button is clicked.",
+    )
+    dark_theme = models.BooleanField(
+        blank=True,
+        default=False,
+        help_text="When checked, switches to dark theme (light text on dark background).",
+    )
+    switch_layout = models.BooleanField(
+        blank=True,
+        default=False,
+        help_text="When checked, switches the position of the content and video, i.e. video on left and content on right.",
+    )
+    video_url = models.URLField(
+        null=True,
+        blank=True,
+        help_text="The URL of the video to display. Must be an HLS video URL.",
+    )
+
+    content_panels = [
+        FieldPanel("title"),
+        FieldPanel("content"),
+        FieldPanel("video_url"),
+        FieldPanel("action_title"),
+        FieldPanel("action_url"),
+        FieldPanel("dark_theme"),
+        FieldPanel("switch_layout"),
+    ]
+
+
 class WhoShouldEnrollPage(CourseProgramChildPage):
     """
     Who should enroll child page for "Who Should Enroll" section.
@@ -340,6 +384,7 @@ class HomePage(MetadataPageMixin, Page):
         "LearningTechniquesPage",
         "UserTestimonialsPage",
         "ForTeamsPage",
+        "TextVideoSection",
         "ResourcePage",
     ]
 
@@ -375,6 +420,13 @@ class HomePage(MetadataPageMixin, Page):
         Gets the "inquire now" section subpage
         """
         return self._get_child_page_of_type(ForTeamsPage)
+
+    @property
+    def about_mit_xpro(self):
+        """
+        Gets the "about mit xpro" section subpage
+        """
+        return self._get_child_page_of_type(TextVideoSection)
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request)

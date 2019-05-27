@@ -18,6 +18,7 @@ from cms.models import (
     FacultyMembersPage,
     SiteNotification,
     HomePage,
+    TextVideoSection,
 )
 from cms.blocks import (
     LearningTechniqueBlock,
@@ -111,6 +112,17 @@ class ForTeamsPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = ForTeamsPage
+
+
+class TextVideoSectionFactory(wagtail_factories.PageFactory):
+    """TextVideoSection factory class"""
+
+    content = factory.fuzzy.FuzzyText(prefix="Content ")
+    action_title = factory.fuzzy.FuzzyText(prefix="Action title ")
+    video_url = factory.fuzzy.FuzzyText(prefix="http://test.org/")
+
+    class Meta:
+        model = TextVideoSection
 
 
 class WhoShouldEnrollPageFactory(wagtail_factories.PageFactory):
