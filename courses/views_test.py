@@ -8,6 +8,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.urls import reverse
 from rest_framework import status
 
+from cms.factories import CoursePageFactory
 from courses.factories import (
     ProgramFactory,
     CourseFactory,
@@ -214,6 +215,10 @@ def test_course_view(
     Test that the course detail view has the right context and shows the right HTML for the enroll/view button
     """
     course = CourseFactory.create(live=True)
+
+    # coursepage required for loading seo metadata
+    CoursePageFactory.create(course=course)
+
     if has_unexpired_run:
         run = CourseRunFactory.create(course=course)
     else:

@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 
-{% load static wagtailimages_tags render_bundle %}
+{% load static wagtailimages_tags wagtailmetadata_tags render_bundle %}
 
 {% block title %}MIT xPro{% endblock %}
+
+{% block seohead %}
+    {% meta_tags %}
+{% endblock%}
 
 {% block headercontent %}
 <div id="header"></div>
@@ -17,10 +21,10 @@
       background-image: url('{{ background_image.url }}');
     }
 
-    @media screen and (min-width: 1024px) { 
+    @media screen and (min-width: 1024px) {
       .header-block {
         {% image page.background_image fill-1920x1080 as background_image %}
-        background-image: url('{{ background_image.url }}'); 
+        background-image: url('{{ background_image.url }}');
       }
     }
   </style>
@@ -36,7 +40,7 @@
 
 {% block content %}
   {% include "partials/hero.html" with action_title="Watch Now" action_url="#" %}
-  {% if page.upcoming_courseware %} 
+  {% if page.upcoming_courseware %}
     {% url 'mitxpro-catalog' as catalog_url %}
     {% include "partials/course-carousel.html" with page=page.upcoming_courseware button_title="View All" button_url=catalog_url %}
   {% endif %}

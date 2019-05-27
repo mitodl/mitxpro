@@ -1,7 +1,14 @@
 {% extends "course_app_base.html" %}
-{% load static wagtailcore_tags wagtailimages_tags %}
+{% load static wagtailcore_tags wagtailimages_tags wagtailmetadata_tags %}
+
 
 {% block title %}MIT xPro | {{ course.title }}{% endblock %}
+
+{% block seohead %}
+  {% if course.page %}
+    {% meta_tags course.page %}
+  {% endif %}
+{% endblock%}
 
 {% block extrahead %}
 {{ block.super }}
