@@ -5,21 +5,23 @@
         <li>
           <span class="title">START DATE</span>
           <span class="text">{{ course.next_run_date|date:"F j, Y" }}</span>
-          <span class="dates-link">
-            <a class="dates-tooltip" id="datesPopover" data-trigger="focus" href="#" onClick="event.preventDefault();"
-              data-toggle="popover" data-html="true" data-placement="auto" title="More dates available for this course"
-              data-content="
-                <div>
-                  <p>Click below to enroll in one of these dates</p>
-                </div>
-                {% for course_run in course.unexpired_runs %}
+          {% if course.unexpired_runs|length > 1 %}
+            <span class="dates-link">
+              <a class="dates-tooltip" id="datesPopover" data-trigger="focus" href="#" onClick="event.preventDefault();"
+                data-toggle="popover" data-html="true" data-placement="auto" title="More dates available for this course"
+                data-content="
                   <div>
-                    <a class='date-link' href='#' data-id='{{ course_run.id }}'>Start Date {{ course_run.start_date|date:'F j, Y' }}</a>
+                    <p>Click below to enroll in one of these dates</p>
                   </div>
-                {% endfor %}">
-              More Dates
-            </a>
-          </span>
+                  {% for course_run in course.unexpired_runs %}
+                    <div>
+                      <a class='date-link' href='#' data-id='{{ course_run.id }}'>Start Date {{ course_run.start_date|date:'F j, Y' }}</a>
+                    </div>
+                  {% endfor %}">
+                More Dates
+              </a>
+            </span>
+          {% endif %}
         </li>
       {% endif %}
       {% if course.time_commitment %}
