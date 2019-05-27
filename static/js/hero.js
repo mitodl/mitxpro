@@ -28,4 +28,21 @@ $(document).ready(function() {
       });
     }
   }
+
+  // The action button is supposed to scroll to and play a video element
+  // which exists in another section, which is why we need to check for
+  // its existence before we try anything.
+  $("#actionButton").on("click", function(event) {
+    event.preventDefault();
+
+    const aboutVideo = $("#tv-video").get(0);
+
+    if (aboutVideo) {
+      aboutVideo.scrollIntoView({
+        behavior: "smooth",
+        block:    "center"
+      });
+      aboutVideo.play();
+    }
+  });
 });
