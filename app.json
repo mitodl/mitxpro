@@ -68,6 +68,11 @@
       "required": false
     },
     "HUBSPOT_API_KEY": {
+      "description": "API key for Hubspot",
+      "required": false
+    },
+    "HUBSPOT_ERROR_CHECK_FREQUENCY": {
+      "description": "How many seconds between Hubspot API error checks",
       "required": false
     },
     "LOGOUT_REDIRECT_URL": {
