@@ -1,6 +1,4 @@
 """Auth pipline functions for email authentication"""
-import logging
-
 import ulid
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
