@@ -1,8 +1,8 @@
-import * as yup from "yup"
-import { __, find, includes, propEq, range, reverse } from "ramda"
-import { ErrorMessage, Field, FieldArray } from "formik"
 import React from "react"
 import moment from "moment"
+import { __, find, includes, propEq, range, reverse } from "ramda"
+import { ErrorMessage, Field, FieldArray } from "formik"
+import * as yup from "yup"
 
 import {
   EMPLOYMENT_EXPERIENCE,
@@ -24,7 +24,7 @@ const COUNTRIES_REQUIRING_STATE = [US_ALPHA_2, CA_ALPHA_2]
 
 const ADDRESS_LINES_MAX = 4
 
-export const primaryDetailsValidation = {
+export const legalAddressValidation = {
   name: yup
     .string()
     .label("Legal Name")
@@ -89,7 +89,7 @@ export const passwordValidation = {
   password: newPasswordValidationShape
 }
 
-export const extraDetailsValidation = {
+export const profileValidation = {
   profile: yup.object().shape({
     gender: yup
       .string()

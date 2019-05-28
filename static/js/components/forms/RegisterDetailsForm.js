@@ -6,7 +6,7 @@ import { mergeDeepRight } from "ramda"
 
 import {
   passwordValidation,
-  primaryDetailsValidation,
+  legalAddressValidation,
   renderLegalAddressFields
 } from "./ProfileFormFields"
 
@@ -36,7 +36,7 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
     onSubmit={onSubmit}
     validationSchema={yup
       .object()
-      .shape(mergeDeepRight(primaryDetailsValidation, passwordValidation))}
+      .shape(mergeDeepRight(legalAddressValidation, passwordValidation))}
     initialValues={INITIAL_VALUES}
     render={({ isSubmitting, setFieldValue, setFieldTouched, values }) => (
       <Form>

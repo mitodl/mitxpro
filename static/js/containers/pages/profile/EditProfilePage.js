@@ -11,12 +11,12 @@ import queries from "../../../lib/queries"
 import EditProfileForm from "../../../components/forms/EditProfileForm"
 
 import type { Response } from "redux-query"
-import type { Country, User } from "../../../flow/authTypes"
+import type { Country, CurrentUser, User } from "../../../flow/authTypes"
 import type { RouterHistory } from "react-router"
 
 type StateProps = {|
   countries: Array<Country>,
-  currentUser: User
+  currentUser: CurrentUser
 |}
 
 type DispatchProps = {|
@@ -68,11 +68,17 @@ export class EditProfilePage extends React.Component<Props> {
           <div className="container">
             <div className="row">
               <div className="col-12 auth-form">
-                <EditProfileForm
-                  countries={countries}
-                  user={currentUser}
-                  onSubmit={this.onSubmit.bind(this)}
-                />
+                {currentUser.is_authenticated ? (
+                  <EditProfileForm
+                    countries={countries}
+                    user={currentUser}
+                    onSubmit={this.onSubmit.bind(this)}
+                  />
+                ) : (
+                  <div className="row">
+                    You must be logged in to edit your profile.
+                  </div>
+                )}
               </div>
             </div>
           </div>

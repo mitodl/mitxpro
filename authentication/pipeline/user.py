@@ -23,8 +23,6 @@ from users.serializers import UserSerializer, ProfileSerializer
 
 # pylint: disable=keyword-arg-before-vararg
 
-log = logging.getLogger()
-
 
 def validate_email_auth_request(
     strategy, backend, user=None, *args, **kwargs
@@ -100,7 +98,6 @@ def create_user_via_email(
     serializer = UserSerializer(data=data)
 
     if not serializer.is_valid():
-        log.error(serializer.errors)
         raise RequirePasswordAndPersonalInfoException(
             backend, current_partial, errors=serializer.errors
         )

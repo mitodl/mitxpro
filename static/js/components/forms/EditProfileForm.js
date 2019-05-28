@@ -1,11 +1,12 @@
 // @flow
 import React from "react"
 import { Formik, Form } from "formik"
-import * as yup from "yup"
 import { mergeDeepRight } from "ramda"
+import * as yup from "yup"
+
 import {
-  extraDetailsValidation,
-  primaryDetailsValidation,
+  profileValidation,
+  legalAddressValidation,
   renderProfileFields,
   renderLegalAddressFields
 } from "./ProfileFormFields"
@@ -30,7 +31,7 @@ const EditProfileForm = ({ onSubmit, countries, user }: Props) => (
     onSubmit={onSubmit}
     validationSchema={yup
       .object()
-      .shape(mergeDeepRight(primaryDetailsValidation, extraDetailsValidation))}
+      .shape(mergeDeepRight(legalAddressValidation, profileValidation))}
     initialValues={getInitialValues(user)}
     render={({ isSubmitting, setFieldValue, setFieldTouched, values }) => (
       <Form>

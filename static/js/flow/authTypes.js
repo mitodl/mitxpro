@@ -50,7 +50,7 @@ export type LegalAddress = {
   postal_code?: string
 }
 
-export type UserProfile = {
+export type Profile = {
   gender: string,
   birth_year: number,
   company: string,
@@ -69,7 +69,7 @@ export type User = {
     name: string,
     created_on: string,
     updated_on: string,
-    profile: ?UserProfile,
+    profile: ?Profile,
     legal_address: ?LegalAddress
 }
 
@@ -97,12 +97,12 @@ export type Country = {
 }
 
 export type ProfileForm = {
-  profile: UserProfile
+  profile: Profile
 }
 
 export type UserProfileForm = {
     email: string,
     name: string,
     legal_address: ?LegalAddress,
-    profile: ?UserProfile
+    profile: ?Profile
 }
