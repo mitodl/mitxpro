@@ -1,5 +1,5 @@
 ---
-labels: bug
+labels: Bug
 name: "Bug Report"
 about: "Something isn't quite right"
 ---

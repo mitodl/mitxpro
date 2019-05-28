@@ -18,6 +18,7 @@ about: "Regular Pull Request"
 - [ ] Settings
   - [ ] New settings are documented and present in `app.json`
   - [ ] New settings have reasonable development defaults, if applicable
+  - [ ] Opened issue for DevOps regarding necessary configuration changes to deployed environments
 
 #### What are the relevant tickets?
 (Required)
