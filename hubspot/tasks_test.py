@@ -62,7 +62,7 @@ error_response_json = {
 @pytest.fixture
 def mock_logger(mocker):
     """ Mock the logger """
-    yield mocker.patch("hubspot.tasks.log.exception")
+    yield mocker.patch("hubspot.tasks.log.error")
 
 
 @pytest.fixture

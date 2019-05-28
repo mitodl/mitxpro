@@ -75,7 +75,7 @@ def check_hubspot_api_errors():
                     obj_id=error.get("integratorObjectId", "N/A"),
                     details=error.get("details", ""),
                 )
-                log.exception(msg)
+                log.error(msg)
             else:
                 caught_up = True
                 break
