@@ -11,7 +11,7 @@ from hubspot.api import (
     make_line_item_sync_message,
     get_sync_errors,
 )
-from hubspot.models import HubspotErrorTimestamp
+from hubspot.models import HubspotErrorCheck
 from mitxpro.celery import app
 from mitxpro.utils import now_in_utc
 
@@ -56,7 +56,7 @@ def sync_line_item_with_hubspot(line_id):
 def check_hubspot_api_errors():
     """Check for and log any errors that occurred since the last time this was run"""
     offset = 0
-    last_check, _ = HubspotErrorTimestamp.objects.get_or_create(
+    last_check, _ = HubspotErrorCheck.objects.get_or_create(
         defaults={"checked_on": now_in_utc()}
     )
     last_timestamp = int(last_check.checked_on.timestamp() * 1000)

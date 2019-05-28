@@ -2,9 +2,9 @@
 from django.db import models
 
 
-class HubspotErrorTimestamp(models.Model):
+class HubspotErrorCheck(models.Model):
     """
-    Store the timestamp of the most recent Hubspot API error.
+    Store the datetime of the most recent Hubspot API error check.
     """
 
     checked_on = models.DateTimeField()

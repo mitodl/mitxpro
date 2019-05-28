@@ -17,8 +17,8 @@ from hubspot.api import (
     make_deal_sync_message,
     make_line_item_sync_message,
 )
-from hubspot.factories import HubspotErrorTimestampFactory
-from hubspot.models import HubspotErrorTimestamp
+from hubspot.factories import HubspotErrorCheckFactory
+from hubspot.models import HubspotErrorCheck
 from hubspot.tasks import (
     sync_contact_with_hubspot,
     HUBSPOT_SYNC_URL,
@@ -122,21 +122,21 @@ def test_sync_line_item_with_hubspot(mock_hubspot_request):
 
 
 def test_sync_errors_first_run(mock_hubspot_errors, mock_logger):
-    """Test that HubspotErrorTimestamp is created on 1st run and nothing is logged"""
+    """Test that HubspotErrorCheck is created on 1st run and nothing is logged"""
     mock_hubspot_errors.return_value.json.side_effect = [
         error_response_json,
         {"results": []},
     ]
-    assert HubspotErrorTimestamp.objects.count() == 0
+    assert HubspotErrorCheck.objects.count() == 0
     check_hubspot_api_errors()
-    assert HubspotErrorTimestamp.objects.count() == 1
+    assert HubspotErrorCheck.objects.count() == 1
     assert mock_hubspot_errors.call_count == 1
     assert mock_logger.call_count == 0
 
 
 def test_sync_errors_new_errors(mock_hubspot_errors, mock_logger):
     """Test that errors more recent than last checked_on date are logged"""
-    last_check = HubspotErrorTimestampFactory.create(
+    last_check = HubspotErrorCheckFactory.create(
         checked_on=datetime(2015, 1, 1, tzinfo=pytz.utc)
     )
     mock_hubspot_errors.return_value.json.side_effect = [
@@ -146,12 +146,12 @@ def test_sync_errors_new_errors(mock_hubspot_errors, mock_logger):
     check_hubspot_api_errors()
     assert mock_hubspot_errors.call_count == 2
     assert mock_logger.call_count == len(error_response_json.get("results"))
-    assert HubspotErrorTimestamp.objects.first().checked_on > last_check.checked_on
+    assert HubspotErrorCheck.objects.first().checked_on > last_check.checked_on
 
 
 def test_sync_errors_some_errors(mock_hubspot_errors, mock_logger):
     """Test that errors less recent than last checked_on date are not logged"""
-    last_check = HubspotErrorTimestampFactory.create(
+    last_check = HubspotErrorCheckFactory.create(
         checked_on=datetime(2019, 5, 22, tzinfo=pytz.utc)
     )
     mock_hubspot_errors.return_value.json.side_effect = [
@@ -161,4 +161,4 @@ def test_sync_errors_some_errors(mock_hubspot_errors, mock_logger):
     check_hubspot_api_errors()
     assert mock_hubspot_errors.call_count == 1
     assert mock_logger.call_count == 1
-    assert HubspotErrorTimestamp.objects.first().checked_on > last_check.checked_on
+    assert HubspotErrorCheck.objects.first().checked_on > last_check.checked_on
