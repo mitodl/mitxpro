@@ -11,7 +11,6 @@ from rest_framework import status
 from wagtail.core.models import Site
 
 from cms.factories import CoursePageFactory, ProgramPageFactory
-from cms.models import CourseIndexPage
 from courses.api import UserEnrollments
 from courses.factories import (
     CourseFactory,
