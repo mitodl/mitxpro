@@ -3,22 +3,24 @@ Tests for course views
 """
 # pylint: disable=unused-argument, redefined-outer-name
 import operator as op
+
 import pytest
 from django.contrib.auth.models import AnonymousUser
 from django.urls import reverse
 from rest_framework import status
+from wagtail.core.models import Site
 
-from cms.factories import CoursePageFactory
+from cms.factories import CoursePageFactory, ProgramPageFactory
+from cms.models import CourseIndexPage
+from courses.api import UserEnrollments
 from courses.factories import (
-    ProgramFactory,
     CourseFactory,
     CourseRunEnrollment,
     CourseRunFactory,
+    ProgramFactory,
 )
-from courses.serializers import ProgramSerializer, CourseSerializer, CourseRunSerializer
-from courses.api import UserEnrollments
+from courses.serializers import CourseRunSerializer, CourseSerializer, ProgramSerializer
 from ecommerce.factories import ProductFactory, ProductVersionFactory
-
 
 pytestmark = [pytest.mark.django_db]
 
@@ -192,8 +194,14 @@ def test_course_catalog_view(client):
     them for the catalog template.
     """
     program = ProgramFactory.create(live=True)
+
     course_in_program = CourseFactory.create(program=program, live=True)
     course_no_program = CourseFactory.create(no_program=True, live=True)
+
+    # Required because catalog now excludes Programs and Courses that do not have a page
+    ProgramPageFactory.create(program=program)
+    CoursePageFactory.create(course=course_in_program)
+    CoursePageFactory.create(course=course_no_program)
     CourseFactory.create(no_program=True, live=False)
     exp_programs = [program]
     exp_courses = [course_in_program, course_no_program]
@@ -215,9 +223,10 @@ def test_course_view(
     Test that the course detail view has the right context and shows the right HTML for the enroll/view button
     """
     course = CourseFactory.create(live=True)
-
     # coursepage required for loading seo metadata
-    CoursePageFactory.create(course=course)
+    CoursePageFactory.create(
+        course=course, parent=Site.objects.get(is_default_site=True).root_page
+    )
 
     if has_unexpired_run:
         run = CourseRunFactory.create(course=course)
@@ -234,7 +243,7 @@ def test_course_view(
 
     if not is_anonymous:
         client.force_login(user)
-    resp = client.get(reverse("course-detail", kwargs={"pk": course.id}))
+    resp = client.get(course.page.get_url())
     assert resp.context["course"] == course
     assert resp.context["user"] == user if not is_anonymous else AnonymousUser()
     assert resp.context["courseware_url"] == (run.courseware_url if run else None)

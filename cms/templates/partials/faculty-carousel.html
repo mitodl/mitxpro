@@ -2,11 +2,11 @@
 <div id="faculty" class="faculty-block">
   <div class="container">
     <div class="head">
-      <h1 class="text-uppercase">{{ course.faculty.heading }}</h1>
-      <h3>{{ course.faculty.subhead }}</h3>
+      <h1 class="text-uppercase">{{ page.heading }}</h1>
+      <h3>{{ page.subhead }}</h3>
     </div>
     <div class="faculty-slider">
-      {% for member in course.faculty.members %}
+      {% for member in page.members %}
         <div class="slide">
           <div class="slide-holder">
             {% image member.value.image fill-300x300 as faculty_image %}

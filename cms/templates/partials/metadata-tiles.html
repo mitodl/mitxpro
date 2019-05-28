@@ -1,11 +1,11 @@
 <div class="tiles-block">
   <div class="container">
     <ul class="tiles-list">
-      {% if course.next_run_date %}
+      {% if page.product.next_run_date %}
         <li>
           <span class="title">START DATE</span>
-          <span class="text">{{ course.next_run_date|date:"F j, Y" }}</span>
-          {% if course.unexpired_runs|length > 1 %}
+          <span class="text">{{ page.product.next_run_date|date:"F j, Y" }}</span>
+          {% if page.product.unexpired_runs|length > 1 %}
             <span class="dates-link">
               <a class="dates-tooltip" id="datesPopover" data-trigger="focus" href="#" onClick="event.preventDefault();"
                 data-toggle="popover" data-html="true" data-placement="auto" title="More dates available for this course"
@@ -13,7 +13,7 @@
                   <div>
                     <p>Click below to enroll in one of these dates</p>
                   </div>
-                  {% for course_run in course.unexpired_runs %}
+                  {% for course_run in page.product.unexpired_runs %}
                     <div>
                       <a class='date-link' href='#' data-id='{{ course_run.id }}'>Start Date {{ course_run.start_date|date:'F j, Y' }}</a>
                     </div>
@@ -24,26 +24,26 @@
           {% endif %}
         </li>
       {% endif %}
-      {% if course.time_commitment %}
+      {% if page.time_commitment %}
         <li>
           <span class="title">TIME COMMITMENT</span>
-          <span class="text">{{ course.time_commitment }}</span>
+          <span class="text">{{ page.time_commitment }}</span>
         </li>
       {% endif %}
-      {% if course.duration %}
+      {% if page.duration %}
         <li>
           <span class="title">DURATION</span>
-          <span class="text">{{ course.duration }}</span>
+          <span class="text">{{ page.duration }}</span>
         </li>
       {% endif %}
       <li>
         <span class="title">FORMAT</span>
         <span class="text">Online</span>
       </li>
-      {% if course.current_price %}
+      {% if page.product.current_price %}
         <li>
           <span class="title">PRICE</span>
-          <span class="text">${{ course.current_price|floatformat:"0" }}</span>
+          <span class="text">${{ page.product.current_price|floatformat:"0" }}</span>
         </li>
       {% endif %}
     </ul>

@@ -17,7 +17,4 @@ urlpatterns = [
         views.UserEnrollmentsView.as_view(),
         name="user-enrollments",
     ),
-    re_path(
-        r"^courses/(?P<pk>[\d]+)/$", views.CourseView.as_view(), name="course-detail"
-    ),
 ]

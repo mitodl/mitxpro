@@ -30,22 +30,22 @@
                 <div class="tab-pane catalog-body fade in show active" id="all" role="tabpanel" aria-labelledby="all-tab">
                     <h1>FEATURED</h1>
                     {% for program in programs %}
-                        {% include "catalog_card.html" with courseware_object=program object_type="program" tab="all" %}
+                        {% include "catalog_card.html" with courseware_page=program.page object_type="program" tab="all" %}
                     {% endfor %}
                     {% for course in courses %}
-                        {% include "catalog_card.html" with courseware_object=course object_type="course" tab="all"%}
+                        {% include "catalog_card.html" with courseware_page=course.page object_type="course" tab="all"%}
                     {% endfor %}
                 </div>
                 <div class="tab-pane catalog-body fade" id="programs" role="tabpanel" aria-labelledby="programs-tab">
                     <h1>PROGRAMS</h1>
                     {% for program in programs %}
-                        {% include "catalog_card.html" with courseware_object=program object_type="program" tab="program" %}
+                        {% include "catalog_card.html" with courseware_page=program.page object_type="program" tab="program" %}
                     {% endfor %}
                 </div>
                 <div class="tab-pane catalog-body fade" id="courses" role="tabpanel" aria-labelledby="courses-tab">
                     <h1>COURSES</h1>
                     {% for course in courses %}
-                        {% include "catalog_card.html" with courseware_object=course object_type="course" tab="course" %}
+                        {% include "catalog_card.html" with courseware_page=course.page object_type="course" tab="course" %}
                     {% endfor %}
                 </div>
             </div>

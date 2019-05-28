@@ -33,10 +33,15 @@ class BaseCourseSerializer(serializers.ModelSerializer):
     """Basic course model serializer"""
 
     thumbnail_url = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
 
     def get_thumbnail_url(self, instance):
         """Thumbnail URL"""
         return _get_thumbnail_url(instance.page)
+
+    def get_description(self, instance):
+        """Description"""
+        return instance.page.description if instance.page else None
 
     class Meta:
         model = models.Course
@@ -64,6 +69,7 @@ class CourseSerializer(serializers.ModelSerializer):
     """Course model serializer - also serializes child course runs"""
 
     thumbnail_url = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
     courseruns = CourseRunSerializer(many=True, read_only=True)
     next_run_id = serializers.SerializerMethodField()
 
@@ -75,6 +81,10 @@ class CourseSerializer(serializers.ModelSerializer):
         """Get next run id"""
         run = instance.first_unexpired_run
         return run.id if run is not None else None
+
+    def get_description(self, instance):
+        """Description"""
+        return instance.page.description if instance.page else None
 
     class Meta:
         model = models.Course
@@ -113,10 +123,15 @@ class BaseProgramSerializer(serializers.ModelSerializer):
     """Basic program model serializer"""
 
     thumbnail_url = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
 
     def get_thumbnail_url(self, instance):
         """Thumbnail URL"""
         return _get_thumbnail_url(instance.page)
+
+    def get_description(self, instance):
+        """Description"""
+        return instance.page.description if instance.page else None
 
     class Meta:
         model = models.Program
@@ -127,11 +142,16 @@ class ProgramSerializer(serializers.ModelSerializer):
     """Program model serializer"""
 
     thumbnail_url = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
     courses = CourseSerializer(many=True, read_only=True)
 
     def get_thumbnail_url(self, instance):
         """Thumbnail URL"""
         return _get_thumbnail_url(instance.page)
+
+    def get_description(self, instance):
+        """Description"""
+        return instance.page.description if instance.page else None
 
     class Meta:
         model = models.Program

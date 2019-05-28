@@ -22,6 +22,27 @@ from ecommerce.api import (
 from mitxpro.serializers import WriteableSerializerMethodField
 
 
+def _get_thumbnail_url(page):
+    """
+    Get the thumbnail URL or else return a default image URL.
+
+    Args:
+        page (cms.models.ProductPage): A product page
+
+    Returns:
+        str:
+            A page URL
+    """
+    return (
+        page.thumbnail_image.file.url
+        if page
+        and page.thumbnail_image
+        and page.thumbnail_image.file
+        and page.thumbnail_image.file.url
+        else static("images/mit-dome.png")
+    )
+
+
 class CompanySerializer(serializers.ModelSerializer):
     """ Company Serializer """
 

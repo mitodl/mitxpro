@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static wagtailcore_tags wagtailimages_tags wagtailmetadata_tags render_bundle %}
+
+
+{% block title %}MIT xPro | {{ page.title }}{% endblock %}
+
+{% block seohead %}
+    {% meta_tags page %}
+{% endblock%}
+
+{% block headercontent %}
+  <div id="header"></div>
+  {% render_bundle 'header' %}
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <style>
+    .header-block {
+      {% image page.background_image fill-1024x768 as background_image %}
+      background-image: url('{{ background_image.url }}');
+    }
+
+    @media screen and (min-width: 1024px) {
+      .header-block {
+        {% image page.background_image fill-1920x1080 as background_image %}
+        background-image: url('{{ background_image.url }}');
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="{% static 'js/course_detail.js' %}"></script>
+  <script src="{% static 'js/hero.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div>
+    {% include "partials/hero.html" %}
+    {% include "partials/metadata-tiles.html" %}
+    {% include "partials/subnav.html" with product=page.product %}
+    {% if page.outcomes %} {% include "partials/learning-outcomes.html" with page=page.outcomes %} {% endif %}
+    {% if page.who_should_enroll %} {% include "partials/target-audience.html" with page=page.who_should_enroll %} {% endif %}
+    {% if page.techniques %} {% include "partials/learning-techniques.html" with page=page.techniques %} {% endif %}
+    {% if page.testimonials %} {% include "partials/testimonial-carousel.html" with page=page.testimonials %} {% endif %}
+    {% if page.faculty %} {% include "partials/faculty-carousel.html" with page=page.faculty %} {% endif %}
+    {% if page.course_lineup and page.course_pages %}
+      {% with program_page=page.program_page courseware_pages=page.course_pages page=page.course_lineup %}
+        {% pageurl program_page as program_url %}
+        {% include "partials/course-carousel.html" with button_title="View Full Program" button_url=program_url %}
+      {% endwith %}
+    {% endif %}
+    {% if page.for_teams %} {% include "partials/for-teams.html" with page=page.for_teams %} {% endif %}
+    {% if page.faqs %} {% include "partials/faqs.html" with faqs=page.faqs %} {% endif %}
+</div>
+{% endblock %}
