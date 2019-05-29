@@ -3,6 +3,7 @@ import os
 import json
 from collections import defaultdict
 from types import SimpleNamespace
+
 from wagtail.core.models import Page
 
 from django.conf import settings
@@ -14,11 +15,10 @@ from localdev.seed.serializers import (
     CourseRunSerializer,
 )
 from mitxpro.utils import dict_without_keys, filter_dict_by_key_set, get_field_names
-from cms.models import ProgramPage, CoursePage
+from cms.models import ProgramPage, CoursePage, ResourcePage
 
-
-COURSE_SEED_FILE_PATH = os.path.join(
-    settings.BASE_DIR, "localdev/seed/resources/course_seed_data.json"
+SEED_DATA_FILE_PATH = os.path.join(
+    settings.BASE_DIR, "localdev/seed/resources/seed_data.json"
 )
 
 
@@ -203,8 +203,36 @@ class SeedDataLoader:
         self.seed_result.add_deleted(deleted_type_counts)
         return deleted_count, deleted_type_counts
 
+    def _create_cms_resource_page(self, resource_page):
+        """ Create resource pages in CMS if they don't exists."""
+        existing_obj = ResourcePage.objects.filter(slug=resource_page["slug"]).first()
+        if existing_obj:
+            self.seed_result.add_existing(existing_obj)
+            return
+
+        page_obj = ResourcePage(
+            title=resource_page["title"],
+            sub_heading=resource_page["sub_heading"],
+            content=json.dumps(resource_page["content"]),
+            slug=resource_page["slug"],
+        )
+        added_obj = get_top_level_wagtail_page().add_child(instance=page_obj)
+        self.seed_result.add_created(added_obj)
+
+    def _delete_cms_resource_page(self, resource_page):
+        """Delete resource pages from CMS."""
+        existing_obj = ResourcePage.objects.filter(slug=resource_page["slug"]).first()
+
+        if not existing_obj:
+            return 0, {}
+
+        __, deleted_type_counts = delete_wagtail_pages(
+            ResourcePage, {"slug": existing_obj.slug}
+        )
+        self.seed_result.add_deleted(deleted_type_counts)
+
     def create_seed_data(self, raw_data):
-        """Idempotently creates seed data based on raw course data and returns results"""
+        """Idempotently creates seed data based on raw data and returns results"""
         self.seed_result = SeedResult()
         for raw_program_data in raw_data["programs"]:
             # Create the Program and associated ProgramPage
@@ -233,19 +261,25 @@ class SeedDataLoader:
                 self._deserialize(
                     CourseRunSerializer, {**raw_course_run_data, "course": course.id}
                 )
+
+        for resource_page in raw_data["resource_pages"]:
+            self._create_cms_resource_page(resource_page)
+
         return self.seed_result
 
-    def delete_seed_data(self, raw_course_data):
+    def delete_seed_data(self, raw_data):
         """Deletes seed data based on raw course data"""
         self.seed_result = SeedResult()
-        for course_data in raw_course_data["courses"]:
+        for course_data in raw_data["courses"]:
             self._delete(Course, course_data)
-        for program_data in raw_course_data["programs"]:
+        for program_data in raw_data["programs"]:
             self._delete(Program, program_data)
+        for resource_page in raw_data["resource_pages"]:
+            self._delete_cms_resource_page(resource_page)
         return self.seed_result
 
 
-def get_raw_course_data_from_file():
-    """Loads raw course data from our seed data file"""
-    with open(COURSE_SEED_FILE_PATH) as f:
+def get_raw_seed_data_from_file():
+    """Loads raw seed data from our seed data file"""
+    with open(SEED_DATA_FILE_PATH) as f:
         return json.loads(f.read())

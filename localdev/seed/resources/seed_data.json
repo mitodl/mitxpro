@@ -44,7 +44,7 @@
                 {
                     "title": "Systems Engineering - Fall 2019",
                     "courseware_id": "course-v1:TestX+SysEngxB1+1T2019",
-                    "courseware_url_path": "/courses/course-v1:TestX+SysEngxB1+1T2019/course/", 
+                    "courseware_url_path": "/courses/course-v1:TestX+SysEngxB1+1T2019/course/",
                     "start_date": "2019-08-15T00:00:00+00:00",
                     "end_date": "2019-12-15T00:00:00+00:00",
                     "enrollment_end": "2019-08-29T00:00:00+00:00"
@@ -340,6 +340,71 @@
                     "end_date": "2019-12-15T00:00:00+00:00",
                     "start_date": "2019-08-15T00:00:00+00:00",
                     "enrollment_end": "2019-08-29T00:00:00+00:00"
+                }
+            ]
+        }
+    ],
+    "resource_pages": [
+        {
+            "title": "Terms of service",
+            "sub_heading": "Sub heading of terms of service",
+            "slug": "terms-of-service",
+            "content": [
+                {
+                    "type": "content",
+                    "value": {
+                        "heading": "Introduction",
+                        "detail": "This is a sample data for terms of services, you can edit through cms under resources pages."
+                    }
+                },
+                {
+                    "type": "content",
+                    "value": {
+                        "heading": "User accounts and authority",
+                        "detail": "We care about the confidentiality and security of your personal information. Please see our Privacy Policy for more information about what information about you we collect and how we use that information."
+                    }
+                }
+            ]
+        },
+        {
+            "title": "Privacy policy",
+            "sub_heading": "Sub heading of privacy policy",
+            "slug": "privacy-policy",
+            "content": [
+                {
+                    "type": "content",
+                    "value": {
+                        "heading": "Introduction",
+                        "detail": "This is a sample data for privacy policy, you can edit through cms under resources pages."
+                    }
+                },
+                {
+                    "type": "content",
+                    "value": {
+                        "heading": "What personal information we collect",
+                        "detail": "Data Processors, on behalf of MIT xPRO, collect, use, store and transfer different kinds of personal information (hereinafter “Personal Information”) about you, which we have grouped together as Biographic information, Contact information and Usernames and information posted by you to our forums."
+                    }
+                }
+            ]
+        },
+        {
+            "title": "Honor code",
+            "sub_heading": "Sub heading of honor code",
+            "slug": "honor-code",
+            "content": [
+                {
+                    "type": "content",
+                    "value": {
+                        "heading": "Introduction",
+                        "detail": "This is a sample data for honor code, you can edit through cms under resources pages."
+                    }
+                },
+                {
+                    "type": "content",
+                    "value": {
+                        "heading": "Changing the honor code",
+                        "detail": "Please note that we review and may make changes to this Honor Code from time to time. Any changes to this Honor Code will be effective immediately upon posting on this page, with an updated effective date. By accessing the Site after any changes have been made, you signify your agreement on a prospective basis to the modified Honor Code. Be sure to return to this page periodically to ensure familiarity with the most current version of this Honor Code."
+                    }
                 }
             ]
         }
