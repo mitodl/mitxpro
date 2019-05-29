@@ -27,7 +27,7 @@ type Props = {
   auth: ?AuthResponse
 }
 
-class RegisterProfilePage extends React.Component<Props> {
+class RegisterConfirmPage extends React.Component<Props> {
   componentDidUpdate(prevProps) {
     const { auth, history } = this.props
     const prevState = path(["auth", "state"], prevProps)
@@ -85,4 +85,4 @@ const mapPropsToConfig = ({ params: { verificationCode, partialToken } }) =>
 export default compose(
   connect(mapStateToProps),
   connectRequest(mapPropsToConfig)
-)(RegisterProfilePage)
+)(RegisterConfirmPage)

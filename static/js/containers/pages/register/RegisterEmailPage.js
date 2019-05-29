@@ -8,7 +8,10 @@ import { createStructuredSelector } from "reselect"
 import { addUserNotification } from "../../../actions"
 import queries from "../../../lib/queries"
 import { routes } from "../../../lib/urls"
-import { STATE_REGISTER_CONFIRM_SENT } from "../../../lib/auth"
+import {
+  STATE_REGISTER_CONFIRM_SENT,
+  STATE_LOGIN_PASSWORD
+} from "../../../lib/auth"
 import { qsNextSelector } from "../../../lib/selectors"
 
 import RegisterEmailForm from "../../../components/forms/RegisterEmailForm"
@@ -16,6 +19,7 @@ import RegisterEmailForm from "../../../components/forms/RegisterEmailForm"
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
 import type { AuthResponse } from "../../../flow/authTypes"
+import type { RegisterEmailValues } from "../../../components/forms/RegisterEmailForm"
 
 type Props = {
   location: Location,
@@ -32,8 +36,11 @@ type Props = {
 const emailNotificationText = (email: string): string =>
   `We sent an email to ${email}. Please validate your address to continue.`
 
-class RegisterEmailPage extends React.Component<Props> {
-  async onSubmit({ email, recaptcha }, { setSubmitting, setErrors }) {
+export class RegisterEmailPage extends React.Component<Props> {
+  async onSubmit(
+    { email, recaptcha }: RegisterEmailValues,
+    { setSubmitting, setErrors }: any
+  ) {
     const {
       addUserNotification,
       registerEmail,
@@ -49,6 +56,8 @@ class RegisterEmailPage extends React.Component<Props> {
       if (state === STATE_REGISTER_CONFIRM_SENT) {
         addUserNotification(emailNotificationText(email))
         history.push(routes.login.begin)
+      } else if (state === STATE_LOGIN_PASSWORD) {
+        history.push(routes.login.password)
       } else if (errors.length > 0) {
         setErrors({
           email: errors[0]

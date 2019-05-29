@@ -62,7 +62,7 @@ type Props = {|
   ...DispatchProps
 |}
 
-class RegisterProfilePage extends React.Component<Props, State> {
+class RegisterDetailsPage extends React.Component<Props, State> {
   constructor(props) {
     super(props)
     this.state = {
@@ -208,4 +208,4 @@ export default compose(
     mapDispatchToProps
   ),
   connectRequest(mapPropsToConfig)
-)(RegisterProfilePage)
+)(RegisterDetailsPage)

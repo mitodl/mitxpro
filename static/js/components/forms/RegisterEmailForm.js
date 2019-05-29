@@ -21,6 +21,11 @@ type Props = {
   onSubmit: Function
 }
 
+export type RegisterEmailValues = {
+  email: string,
+  recaptcha: ?string
+}
+
 const RegisterEmailForm = ({ onSubmit }: Props) => (
   <Formik
     onSubmit={onSubmit}
