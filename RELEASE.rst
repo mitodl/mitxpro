@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.5.2
+Version 0.5.2 (Released May 29, 2019)
 -------------
 
 - #252 Home Page: Upcoming Courses
