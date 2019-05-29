@@ -348,6 +348,23 @@ class FacultyMembersPage(CourseProgramChildPage):
     ]
 
 
+class ImageCarouselPage(CourseProgramChildPage):
+    """
+    Page that holds image carousel.
+    """
+
+    images = StreamField(
+        [("image", ImageChooserBlock(help_text="Choose an image to upload."))],
+        blank=False,
+        help_text="Add images for this section.",
+    )
+
+    content_panels = Page.content_panels + [StreamFieldPanel("images")]
+
+    class Meta:
+        verbose_name = "Image Carousel"
+
+
 class HomePage(MetadataPageMixin, Page):
     """
     CMS Page representing the home/root route
@@ -386,6 +403,7 @@ class HomePage(MetadataPageMixin, Page):
         "ForTeamsPage",
         "TextVideoSection",
         "ResourcePage",
+        "ImageCarouselPage",
     ]
 
     def _get_child_page_of_type(self, cls):
@@ -427,6 +445,13 @@ class HomePage(MetadataPageMixin, Page):
         Gets the "about mit xpro" section subpage
         """
         return self._get_child_page_of_type(TextVideoSection)
+
+    @property
+    def image_carousel_section(self):
+        """
+        Gets the "image carousel" section sub page.
+        """
+        return self._get_child_page_of_type(ImageCarouselPage)
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request)

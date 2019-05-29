@@ -16,6 +16,7 @@ from cms.models import (
     ResourcePage,
     UserTestimonialsPage,
     FacultyMembersPage,
+    ImageCarouselPage,
     SiteNotification,
     HomePage,
     TextVideoSection,
@@ -222,6 +223,18 @@ class SiteNotificationFactory(DjangoModelFactory):
 
     class Meta:
         model = SiteNotification
+
+
+class ImageCarouselPageFactory(wagtail_factories.PageFactory):
+    """ImageCarouselPage factory class"""
+
+    title = factory.fuzzy.FuzzyText(prefix="title")
+    images = wagtail_factories.StreamFieldFactory(
+        {"image": wagtail_factories.ImageChooserBlockFactory}
+    )
+
+    class Meta:
+        model = ImageCarouselPage
 
 
 class HomePageFactory(wagtail_factories.PageFactory):

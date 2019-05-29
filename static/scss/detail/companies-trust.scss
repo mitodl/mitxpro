@@ -1,0 +1,66 @@
+// sass-lint:disable mixins-before-declarations
+
+.companies-trust-block {
+  padding: 90px 0 80px;
+  background: white url('#{$static-path}/images/countries-trust-bg.png') repeat-x 0 0;
+  position: relative;
+  text-align: center;
+
+  @include media-breakpoint-up(lg) {
+    text-align: left;
+  }
+
+  h1 {
+    color: $primary;
+    margin: 0 0 50px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+}
+
+.logos-slider {
+
+  .img-holder {
+    min-height: 100px;
+    text-align: center;
+    padding: 0 10px;
+    letter-spacing: -.32em;
+
+    &:after {
+      display: inline-block;
+      vertical-align: middle;
+      content: '';
+      width: 2px;
+      margin: -2px;
+      height: 100px;
+    }
+
+    img {
+      display: inline-block;
+      max-width: 100%;
+      height: auto;
+      vertical-align: middle;
+    }
+  }
+
+  .slick-prev, .slick-next {
+    display: none !important;
+  }
+
+  .slick-dots li {
+
+    &.slick-active {
+
+      button {
+        background: $primary;
+      }
+    }
+
+    button {
+
+      &:hover {
+        background: $primary;
+      }
+    }
+  }
+}

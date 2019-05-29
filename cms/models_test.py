@@ -13,6 +13,7 @@ from cms.factories import (
     ProgramPageFactory,
     CoursePageFactory,
     TextVideoSectionFactory,
+    ImageCarouselPageFactory,
 )
 
 from courses.factories import CourseFactory
@@ -177,3 +178,23 @@ def test_home_page_about_mit_xpro():
     assert about_page.video_url == "http://test.com/abcd"
     assert about_page.switch_layout
     assert about_page.dark_theme
+
+
+def test_image_carousel_section():
+    """
+    image_carousel_section property should return expected values.
+    """
+    home_page = HomePageFactory.create()
+    assert not home_page.image_carousel_section
+    image_carousel_page = ImageCarouselPageFactory.create(
+        parent=home_page,
+        title="title",
+        images__0__image__image__title="image-title-0",
+        images__1__image__image__title="image-title-1",
+        images__2__image__image__title="image-title-2",
+        images__3__image__image__title="image-title-3",
+    )
+    assert home_page.image_carousel_section == image_carousel_page
+    assert image_carousel_page.title == "title"
+    for index, image in enumerate(image_carousel_page.images):
+        assert image.value.title == "image-title-{}".format(index)
