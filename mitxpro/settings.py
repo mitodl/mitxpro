@@ -36,6 +36,9 @@ HUBSPOT_CONFIG = {
     "HUBSPOT_NEW_COURSES_FORM_GUID": get_string(
         "HUBSPOT_NEW_COURSES_FORM_GUID", "b9220dc1-4e48-4097-8539-9f2907f18b1e"
     ),
+    "HUBSPOT_FOOTER_FORM_GUID": get_string(
+        "HUBSPOT_FOOTER_FORM_GUID", "ff810010-c33c-4e99-9285-32d283fbc816"
+    ),
     "HUBSPOT_PORTAL_ID": get_string("HUBSPOT_PORTAL_ID", "5890463"),
 }
 
@@ -152,6 +155,7 @@ TEMPLATES = [
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
                 "mitxpro.context_processors.api_keys",
+                "mitxpro.context_processors.configuration_context",
             ]
         },
     }

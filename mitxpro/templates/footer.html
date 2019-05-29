@@ -40,10 +40,15 @@
                     <li><a href="/about-us/" target="_blank">About Us</a></li>
                     <li><a href="/blog/" target="_blank">Blog</a></li>
                 </ul>
-                <form action="#" class="subscription-form">
-                    <input type="email" placeholder="Sign Up for Email Updates">
-                    <button type="submit" class="icon-arrow-circle-right"></button>
-                </form>
+                <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2-legacy.js"></script>
+                <![endif]-->
+                <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2.js"></script>
+                <script>
+                    hbspt.forms.create({
+                        portalId: '{{ hubspot_portal_id }}',
+                        formId: '{{ hubspot_footer_form_guid }}'
+                    });
+                </script>
             </div>
         </div>
         <ul class="footer-sub-nav">

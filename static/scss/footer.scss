@@ -160,13 +160,19 @@
     }
   }
 
-  .subscription-form {
+  .hbspt-form {
+
     @include media-breakpoint-up(md) {
       float: left;
-      margin: 0 0 0 55px;
+      margin: 0 0 0 65px;
+      width: 208px;
     }
 
-    input[type="email"] {
+    label, .hs_error_rollup {
+      display: none;
+    }
+
+    .hs-form input[type="email"] {
       border: none;
       border-bottom: 1px solid $footer-border;
       background: none;
@@ -176,23 +182,64 @@
       line-height: 30px;
       outline: none;
       font-family: inherit;
+      width: 100%;
+    }
+
+    .hs_email {
       display: inline-block;
       vertical-align: top;
       width: calc(100% - 43px);
       margin: 0 10px 0 0;
-
       @include media-breakpoint-up(md) {
         width: 180px;
       }
     }
 
-    button {
+    .hs_submit {
+      display: inline-block;
+      vertical-align: top;
+      margin: 6px 0 0;
+      line-height: 0;
+    }
+
+    .hs-form .hs-button {
       color: white;
-      background: none;
+      background: url("#{$static-path}/images/arrow-circle-right.svg") no-repeat;
+      background-size: 18px 18px;
       border: none;
       padding: 0;
       opacity: .7;
+      width: 18px;
+      height: 18px;
       cursor: pointer;
+      text-indent: -9999px;
+      overflow: hidden;
+    }
+
+    .submitted-message {
+      margin-left: 0;
+      color: $blue;
+      font-family: Rajdhani;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+      line-height: 14px;
+      text-align: center;
+      width: auto;
+      padding: 10px 0 0;
+    }
+
+    .no-list {
+      margin: 0;
+      padding: 5px 0 0;
+      list-style: none;
+
+      label {
+        display: block;
+        font-size: 12px;
+        line-height: 15px;
+        color: $primary;
+      }
     }
   }
 
