@@ -368,7 +368,7 @@ class CourseRun(TimestampedModel):
     enrollment_start = models.DateTimeField(null=True, blank=True, db_index=True)
     enrollment_end = models.DateTimeField(null=True, blank=True, db_index=True)
     live = models.BooleanField(default=False)
-    products = GenericRelation(Product, related_query_name="courses")
+    products = GenericRelation(Product, related_query_name="courseruns")
 
     @property
     def is_past(self):
@@ -447,6 +447,14 @@ class CourseRunEnrollment(TimestampedModel):
     company = models.ForeignKey(
         "ecommerce.Company", null=True, on_delete=models.PROTECT
     )
+    edx_enrolled = models.BooleanField(
+        default=False,
+        help_text="Indicates whether or not the request succeeded to enroll via the edX API",
+    )
+    active = models.BooleanField(
+        default=True,
+        help_text="Indicates whether or not this enrollment should be considered active",
+    )
 
     class Meta:
         unique_together = ("user", "run")
@@ -464,6 +472,10 @@ class ProgramEnrollment(TimestampedModel):
     program = models.ForeignKey("courses.Program", on_delete=models.PROTECT)
     company = models.ForeignKey(
         "ecommerce.Company", null=True, on_delete=models.PROTECT
+    )
+    active = models.BooleanField(
+        default=True,
+        help_text="Indicates whether or not this enrollment should be considered active",
     )
 
     class Meta:

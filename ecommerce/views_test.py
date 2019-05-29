@@ -157,7 +157,7 @@ def test_zero_price_checkout(
         "ecommerce.views.create_unfulfilled_order", autospec=True, return_value=order
     )
     enroll_user_mock = mocker.patch(
-        "ecommerce.views.enroll_user_on_success", autospec=True
+        "ecommerce.api.enroll_user_in_order_items", autospec=True
     )
     resp = basket_client.post(reverse("checkout"))
 
@@ -176,33 +176,6 @@ def test_zero_price_checkout(
         assert mock_hubspot_syncs.order.called_with(order.id)
     else:
         assert mock_hubspot_syncs.order.not_called()
-
-
-def test_zero_price_checkout_failed_enroll(basket_client, mocker, basket_and_coupons):
-    """
-    If we do a $0 checkout but the enrollment fails, we should send an email but leave the order as fulfilled
-    """
-    user = basket_and_coupons.basket_item.basket.user
-
-    order = LineFactory.create(
-        order__status=Order.CREATED, product_version__price=0
-    ).order
-    create_mock = mocker.patch(
-        "ecommerce.views.create_unfulfilled_order", autospec=True, return_value=order
-    )
-    enroll_user_mock = mocker.patch(
-        "ecommerce.views.enroll_user_on_success", side_effect=KeyError
-    )
-    resp = basket_client.post(reverse("checkout"))
-
-    assert resp.status_code == status.HTTP_200_OK
-    assert resp.json() == {"payload": {}, "url": "http://testserver/", "method": "GET"}
-
-    assert create_mock.call_count == 1
-    assert create_mock.call_args[0] == (user,)
-
-    assert enroll_user_mock.call_count == 1
-    assert enroll_user_mock.call_args[0] == (order,)
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
@@ -232,7 +205,9 @@ def test_order_fulfilled(
     mocker.patch(
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )
-    enroll_user = mocker.patch("ecommerce.views.enroll_user_on_success", autospec=True)
+    enroll_user = mocker.patch(
+        "ecommerce.api.enroll_user_in_order_items", autospec=True
+    )
     resp = basket_client.post(reverse("order-fulfillment"), data=data)
 
     assert len(resp.content) == 0
@@ -282,32 +257,6 @@ def test_missing_fields(basket_client, mocker):
     assert Order.objects.count() == 0
     assert Receipt.objects.count() == 1
     assert Receipt.objects.first().data == data
-
-
-def test_failed_enroll(basket_client, mocker, basket_and_coupons):
-    """
-    If we fail to enroll in edX, the order status should be fulfilled but an error email should be sent
-    """
-    user = basket_and_coupons.basket_item.basket.user
-    order = create_unfulfilled_order(user)
-
-    data = {}
-    for _ in range(5):
-        data[FAKE.text()] = FAKE.text()
-
-    data["req_reference_number"] = make_reference_id(order)
-    data["decision"] = "ACCEPT"
-
-    mocker.patch(
-        "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
-    )
-    mocker.patch("ecommerce.views.enroll_user_on_success", side_effect=KeyError)
-    basket_client.post(reverse("order-fulfillment"), data=data)
-
-    assert Order.objects.count() == 1
-    # An enrollment failure should not prevent the order from being fulfilled
-    order = Order.objects.first()
-    assert order.status == Order.FULFILLED
 
 
 @pytest.mark.parametrize("decision", ["CANCEL", "something else"])

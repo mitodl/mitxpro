@@ -4,7 +4,6 @@ import logging
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -19,24 +18,21 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from ecommerce.api import (
     create_unfulfilled_order,
-    enroll_user_on_success,
     generate_cybersource_sa_payload,
     get_new_order_by_reference_number,
     get_product_version_price_with_discount,
     get_full_price_coupon_product_set,
     get_available_bulk_product_coupons,
     validate_basket_for_checkout,
+    complete_order,
 )
 from ecommerce.mail_api import send_bulk_enroll_emails
 from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
 from ecommerce.exceptions import EcommerceException
 from ecommerce.models import (
     Basket,
-    BasketItem,
     Company,
     CouponPaymentVersion,
-    CouponSelection,
-    CourseRunSelection,
     Order,
     Product,
     Receipt,
@@ -107,20 +103,7 @@ class CheckoutView(APIView):
             order.save_and_log(request.user)
             sync_hubspot_deal(order)
 
-            try:
-                enroll_user_on_success(order)
-            except:  # pylint: disable=bare-except
-                log.exception(
-                    "Error occurred when enrolling user in one or more courses for order %s. "
-                    "See other errors above for more info.",
-                    order,
-                )
-
-            # clear the basket
-            with transaction.atomic():
-                BasketItem.objects.filter(basket__user=order.purchaser).delete()
-                CourseRunSelection.objects.filter(basket__user=order.purchaser).delete()
-                CouponSelection.objects.filter(basket__user=order.purchaser).delete()
+            complete_order(order)
 
             # This redirects the user to our order success page
             payload = {}
@@ -182,20 +165,7 @@ class OrderFulfillmentView(APIView):
         sync_hubspot_deal(order)
 
         if order.status == Order.FULFILLED:
-            try:
-                enroll_user_on_success(order)
-            except:  # pylint: disable=bare-except
-                log.exception(
-                    "Error occurred when enrolling user in one or more courses for order %s. "
-                    "See other errors above for more info.",
-                    order,
-                )
-
-            # clear the basket
-            with transaction.atomic():
-                BasketItem.objects.filter(basket__user=order.purchaser).delete()
-                CourseRunSelection.objects.filter(basket__user=order.purchaser).delete()
-                CouponSelection.objects.filter(basket__user=order.purchaser).delete()
+            complete_order(order)
 
         # The response does not matter to CyberSource
         return Response(status=status.HTTP_200_OK)
