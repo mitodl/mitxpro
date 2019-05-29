@@ -2,7 +2,7 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-from localdev.seed.api import SeedDataLoader, get_raw_course_data_from_file
+from localdev.seed.api import SeedDataLoader, get_raw_seed_data_from_file
 
 User = get_user_model()
 
@@ -24,11 +24,11 @@ class Command(BaseCommand):
         """Handle command execution"""
         delete = options["delete"]
         seed_data_loader = SeedDataLoader()
-        raw_course_data = get_raw_course_data_from_file()
+        raw_seed_data = get_raw_seed_data_from_file()
         results = (
-            seed_data_loader.create_seed_data(raw_course_data)
+            seed_data_loader.create_seed_data(raw_seed_data)
             if not delete
-            else seed_data_loader.delete_seed_data(raw_course_data)
+            else seed_data_loader.delete_seed_data(raw_seed_data)
         )
 
         if not any(results.report.values()):
