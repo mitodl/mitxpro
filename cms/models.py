@@ -590,10 +590,11 @@ class ProductPage(MetadataPageMixin, Page):
     ]
 
     def get_context(self, request, *args, **kwargs):
-        context = super(ProductPage, self).get_context(request)
-        context.update(**get_js_settings_context(request))
-        context["title"] = self.title
-        return context
+        return {
+            **super().get_context(request, *args, **kwargs),
+            **get_js_settings_context(request),
+            "title": self.title,
+        }
 
     def _get_child_page_of_type(self, cls):
         """Gets the first child page of the given type if it exists"""
@@ -716,10 +717,11 @@ class CoursePage(ProductPage):
         """
         Gets a list of pages (CoursePage) of all the courses from the associated program
         """
-        if not self.program_page:
-            return []
-        courses = self.program_page.program.courses.all()
-        return CoursePage.objects.filter(course_id__in=courses)
+        return (
+            CoursePage.objects.filter(course__program=self.course.program)
+            if self.course.program
+            else []
+        )
 
     @property
     def product(self):

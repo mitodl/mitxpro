@@ -21,19 +21,30 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Handle command execution"""
         delete = options["revert"]
-        site = Site.objects.get(is_default_site=True)
+        site = Site.objects.filter(is_default_site=True).first()
         if not site:
-            print(
-                "No site setup. Please configure a default site before running this command"
+            self.stderr.write(
+                self.style.ERROR(
+                    "No default site setup. Please configure a default site before running this command."
+                )
             )
-            return
+            exit(1)
+
+        home_page = site.root_page
+        if not home_page:
+            self.stderr.write(
+                self.style.ERROR(
+                    "No root (home) page set up for default site. Please configure a root (home) page for the default site before running this command."
+                )
+            )
+            exit(1)
 
         if not delete:
             course_index = CourseIndexPage.objects.first()
 
             if not course_index:
                 course_index = CourseIndexPage(title="Courses")
-                site.root_page.add_child(instance=course_index)
+                home_page.add_child(instance=course_index)
                 self.stdout.write(self.style.SUCCESS("Course index page created."))
 
             for course_page in CoursePage.objects.all():
@@ -46,7 +57,7 @@ class Command(BaseCommand):
 
             if not program_index:
                 program_index = ProgramIndexPage(title="Programs")
-                site.root_page.add_child(instance=program_index)
+                home_page.add_child(instance=program_index)
                 self.stdout.write(self.style.SUCCESS("Program index page created."))
 
             for program_page in ProgramPage.objects.all():
@@ -58,7 +69,7 @@ class Command(BaseCommand):
             course_index = CourseIndexPage.objects.first()
             if course_index:
                 for page in course_index.get_children():
-                    page.move(site.root_page, "last-child")
+                    page.move(home_page, "last-child")
                 self.stdout.write(
                     self.style.SUCCESS("Course pages moved under homepage.")
                 )
@@ -69,7 +80,7 @@ class Command(BaseCommand):
             program_index = ProgramIndexPage.objects.first()
             if program_index:
                 for page in program_index.get_children():
-                    page.move(site.root_page, "last-child")
+                    page.move(home_page, "last-child")
                 self.stdout.write(
                     self.style.SUCCESS("Program pages moved under homepage.")
                 )

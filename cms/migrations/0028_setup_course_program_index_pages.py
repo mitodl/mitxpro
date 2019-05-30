@@ -28,12 +28,23 @@ def delete_wagtail_pages(specific_page_cls, filter_dict=None):
     )
 
 
-def get_top_level_wagtail_page():
+def get_home_page(apps):
     """
-    The Wagtail CMS (at least in our usage) has one root page at depth 1, and one page at depth 2. All pages that we
-    create in Wagtail are added as children to the page at depth 2.
+    Importing the Site model from the registry means if we access the root page from this
+    model we will get an instance of the Page with only the basic model methods so we simply extract
+    the ID of the page and hand it to the Page model imported directly.
     """
-    return Page.objects.get(depth=2)
+    Site = apps.get_model("wagtailcore", "Site")
+    site = Site.objects.filter(is_default_site=True).first()
+    if not site:
+        raise Exception(
+            "A default site is not set up. Please setup a default site before running this migration"
+        )
+    if not site.root_page:
+        raise Exception(
+            "No root (home) page set up. Please setup a root (home) page for the default site before running this migration"
+        )
+    return Page.objects.get(id=site.root_page.id)
 
 
 def create_index_pages_and_nest_detail(apps, schema_editor):
@@ -46,17 +57,17 @@ def create_index_pages_and_nest_detail(apps, schema_editor):
     CoursePage = apps.get_model("cms", "CoursePage")
     ProgramPage = apps.get_model("cms", "ProgramPage")
 
-    # Default home page
-    top_level_page = get_top_level_wagtail_page()
+    # Home page
+    home_page = get_home_page(apps)
 
     course_index = CourseIndexPage.objects.first()
     if not course_index:
         page_obj = CourseIndexPage(**COURSE_INDEX_PAGE_PROPERTIES)
-        course_index = top_level_page.add_child(instance=page_obj)
+        course_index = home_page.add_child(instance=page_obj)
     program_index = ProgramIndexPage.objects.first()
     if not program_index:
         page_obj = ProgramIndexPage(**PROGRAM_INDEX_PAGE_PROPERTIES)
-        program_index = top_level_page.add_child(instance=page_obj)
+        program_index = home_page.add_child(instance=page_obj)
     # Move course/program detail pages to be children of the course/program index pages
     for page_id in CoursePage.objects.values_list("id", flat=True):
         page = Page.objects.get(id=page_id)
@@ -75,17 +86,17 @@ def unnest_detail_and_delete_index_pages(apps, schema_editor):
     CoursePage = apps.get_model("cms", "CoursePage")
     ProgramPage = apps.get_model("cms", "ProgramPage")
 
-    # Move course/program detail pages to be children of the top-level page
-    top_level_page = get_top_level_wagtail_page()
-    top_level_child_ids = [child.id for child in top_level_page.get_children()]
+    # Move course/program detail pages to be children of the home page
+    home_page = get_home_page(apps)
+    top_level_child_ids = [child.id for child in home_page.get_children()]
     for page_id in CoursePage.objects.values_list("id", flat=True):
         if page_id not in top_level_child_ids:
             page = Page.objects.get(id=page_id)
-            page.move(top_level_page, "last-child")
+            page.move(home_page, "last-child")
     for page_id in ProgramPage.objects.values_list("id", flat=True):
         if page_id not in top_level_child_ids:
             page = Page.objects.get(id=page_id)
-            page.move(top_level_page, "last-child")
+            page.move(home_page, "last-child")
     # Remove the course/program index pages
     delete_wagtail_pages(ProgramIndexPage)
     delete_wagtail_pages(CourseIndexPage)
