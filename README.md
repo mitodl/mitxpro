@@ -44,6 +44,14 @@ OPENEDX_API_BASE_URL=http://docker.for.mac.localhost:18000
 OPENEDX_BASE_REDIRECT_URL=http://edx.odl.local:18000
 ```
 
+### Create Homepage
+Go to `/cms/pages/` in your local deployment and create a `Home Page` type page at the root of the site.
+Then go to `CMS Admin > Settings > Sites > (default site)` and set this page as the "Root page" of the site.
+Go back to `/cms/pages/` and move any existing pages under the new home page (only if you already have some pages in the CMS).
+Finally, delete the default Wagtail home page titled "Welcome to your new Wagtail site!"
+
+**Note:** This step should be done before using the database seed command otherwise you will have to manually move every page under the new homepage. 
+
 # Optional Setup
 
 Described below are some setup steps that are not strictly necessary
