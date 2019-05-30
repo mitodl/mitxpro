@@ -18,22 +18,10 @@ class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     required_scopes = ["user"]
 
 
-class CurrentUserUpdateViewSet(
+class CurrentUserRetrieveUpdateViewSet(
     mixins.UpdateModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
-    """ User update viewset """
-
-    serializer_class = UserSerializer
-    permission_classes = [IsAuthenticatedOrTokenHasScope, UserIsOwnerPermission]
-
-    def get_object(self):
-        """Returns the current request user"""
-        # NOTE: this may be a logged in or anonymous user
-        return self.request.user
-
-
-class CurrentUserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
-    """User retrieve viewsets for the current user"""
+    """User retrieve and update viewsets for the current user"""
 
     # NOTE: this is a separate viewset from UserRetrieveViewSet because of the differences in permission requirements
     serializer_class = UserSerializer

@@ -15,7 +15,7 @@ import type { Country, CurrentUser, User } from "../../../flow/authTypes"
 import type { RouterHistory } from "react-router"
 
 type StateProps = {|
-  countries: Array<Country>,
+  countries: ?Array<Country>,
   currentUser: CurrentUser
 |}
 
@@ -57,7 +57,7 @@ export class EditProfilePage extends React.Component<Props> {
 
   render() {
     const { countries, currentUser } = this.props
-    return (
+    return countries ? (
       <div className="container auth-page registration-page">
         <div className="auth-header row d-flex  align-items-center justify-content-between flex-nowrap">
           <div className="col-auto flex-shrink-1">
@@ -84,7 +84,7 @@ export class EditProfilePage extends React.Component<Props> {
           </div>
         </div>
       </div>
-    )
+    ) : null
   }
 }
 

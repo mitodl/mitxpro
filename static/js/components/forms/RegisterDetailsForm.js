@@ -1,13 +1,11 @@
 // @flow
 import React from "react"
 import { Formik, Form } from "formik"
-import * as yup from "yup"
-import { mergeDeepRight } from "ramda"
 
 import {
   passwordValidation,
   legalAddressValidation,
-  renderLegalAddressFields
+  LegalAddressFields
 } from "./ProfileFormFields"
 
 import type { Country } from "../../flow/authTypes"
@@ -34,19 +32,17 @@ const INITIAL_VALUES = {
 const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
   <Formik
     onSubmit={onSubmit}
-    validationSchema={yup
-      .object()
-      .shape(mergeDeepRight(legalAddressValidation, passwordValidation))}
+    validationSchema={legalAddressValidation.concat(passwordValidation)}
     initialValues={INITIAL_VALUES}
     render={({ isSubmitting, setFieldValue, setFieldTouched, values }) => (
       <Form>
-        {renderLegalAddressFields(
-          countries,
-          setFieldValue,
-          setFieldTouched,
-          values,
-          true
-        )}
+        <LegalAddressFields
+          countries={countries}
+          setFieldValue={setFieldValue}
+          setFieldTouched={setFieldTouched}
+          values={values}
+          includePassword={true}
+        />
         <div className="row submit-row no-gutters justify-content-end">
           <button
             type="submit"

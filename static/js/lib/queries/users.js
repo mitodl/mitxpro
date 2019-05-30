@@ -48,7 +48,7 @@ export default {
     ...DEFAULT_OPTIONS,
     transform: transformCurrentUser,
     update:    updateResult,
-    url:       "/api/profile/edit/",
+    url:       "/api/users/me",
     body:      {
       ...profileData
     }

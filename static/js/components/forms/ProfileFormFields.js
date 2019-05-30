@@ -23,8 +23,9 @@ const COUNTRIES_REQUIRING_POSTAL_CODE = [US_ALPHA_2, CA_ALPHA_2]
 const COUNTRIES_REQUIRING_STATE = [US_ALPHA_2, CA_ALPHA_2]
 
 const ADDRESS_LINES_MAX = 4
+const seedYear = moment().year()
 
-export const legalAddressValidation = {
+export const legalAddressValidation = yup.object().shape({
   name: yup
     .string()
     .label("Legal Name")
@@ -83,13 +84,13 @@ export const legalAddressValidation = {
         }
       })
   })
-}
+})
 
-export const passwordValidation = {
+export const passwordValidation = yup.object().shape({
   password: newPasswordValidationShape
-}
+})
 
-export const profileValidation = {
+export const profileValidation = yup.object().shape({
   profile: yup.object().shape({
     gender: yup
       .string()
@@ -110,336 +111,329 @@ export const profileValidation = {
       .trim()
       .required()
   })
+})
+
+type LegalAddressProps = {
+  countries: Array<Country>,
+  setFieldValue: Function,
+  setFieldTouched: Function,
+  values: Object,
+  includePassword: boolean
 }
 
-export function renderLegalAddressFields(
+export const LegalAddressFields = ({
   countries,
   setFieldValue,
   setFieldTouched,
   values,
   includePassword
-) {
-  return (
-    <React.Fragment>
+}: LegalAddressProps) => (
+  <React.Fragment>
+    <div className="form-group">
+      <label htmlFor="legal_address.last_name" className="font-weight-bold">
+        Legal Name*
+      </label>
+      <Field type="text" name="name" className="form-control" />
+      <ErrorMessage name="name" component={FormError} />
+    </div>
+    <div className="form-group">
+      <label htmlFor="legal_address.first_name" className="row">
+        <div className="col-4 font-weight-bold">First Name*</div>
+        <div className="col-8">(Name that will appear on emails)</div>
+      </label>
+      <Field
+        type="text"
+        name="legal_address.first_name"
+        className="form-control"
+      />
+      <ErrorMessage name="legal_address.first_name" component={FormError} />
+    </div>
+    <div className="form-group">
+      <label htmlFor="legal_address.last_name" className="font-weight-bold">
+        Last Name*
+      </label>
+      <Field
+        type="text"
+        name="legal_address.last_name"
+        className="form-control"
+      />
+      <ErrorMessage name="legal_address.last_name" component={FormError} />
+    </div>
+    {includePassword ? (
       <div className="form-group">
-        <label htmlFor="legal_address.last_name" className="font-weight-bold">
-          Legal Name*
+        <label htmlFor="password" className="font-weight-bold">
+          Password*
         </label>
-        <Field type="text" name="name" className="form-control" />
-        <ErrorMessage name="name" component={FormError} />
-      </div>
-      <div className="form-group">
-        <label htmlFor="legal_address.first_name" className="row">
-          <div className="col-4 font-weight-bold">First Name*</div>
-          <div className="col-8">(Name that will appear on emails)</div>
-        </label>
-        <Field
-          type="text"
-          name="legal_address.first_name"
-          className="form-control"
-        />
-        <ErrorMessage name="legal_address.first_name" component={FormError} />
-      </div>
-      <div className="form-group">
-        <label htmlFor="legal_address.last_name" className="font-weight-bold">
-          Last Name*
-        </label>
-        <Field
-          type="text"
-          name="legal_address.last_name"
-          className="form-control"
-        />
-        <ErrorMessage name="legal_address.last_name" component={FormError} />
-      </div>
-      {includePassword ? (
-        <div className="form-group">
-          <label htmlFor="password" className="font-weight-bold">
-            Password*
-          </label>
-          <Field type="password" name="password" className="form-control" />
-          <ErrorMessage name="password" component={FormError} />
-          <div className="label-secondary">
-            Password must contain:
-            <ul>
-              <li>at least 8 characters</li>
-              <li>at least 1 number and 1 letter</li>
-            </ul>
-          </div>
+        <Field type="password" name="password" className="form-control" />
+        <ErrorMessage name="password" component={FormError} />
+        <div className="label-secondary">
+          Password must contain:
+          <ul>
+            <li>at least 8 characters</li>
+            <li>at least 1 number and 1 letter</li>
+          </ul>
         </div>
-      ) : null}
-      <div className="form-group">
-        {/* LegalAddress fields */}
-        <label htmlFor="legal_address.last_name" className="font-weight-bold">
-          Street Address*
-        </label>
-        <FieldArray
-          name="legal_address.street_address"
-          render={arrayHelpers => (
-            <div>
-              {values.legal_address.street_address.map((line, index) => (
-                <div key={index}>
-                  <Field
-                    name={`legal_address.street_address[${index}]`}
-                    className={`form-control ${index > 0 ? "row-inner" : ""}`}
-                  />
-                  {index === 0 ? (
-                    <ErrorMessage
-                      name="legal_address.street_address"
-                      component={FormError}
-                    />
-                  ) : null}
-                </div>
-              ))}
-              {values.legal_address.street_address.length <
-              ADDRESS_LINES_MAX ? (
-                  <button
-                    type="button"
-                    className="additional-street"
-                    onClick={() => arrayHelpers.push("")}
-                  >
-                  Add additional line
-                  </button>
-                ) : null}
-            </div>
-          )}
-        />
       </div>
+    ) : null}
+    <div className="form-group">
+      {/* LegalAddress fields */}
+      <label htmlFor="legal_address.last_name" className="font-weight-bold">
+        Street Address*
+      </label>
+      <FieldArray
+        name="legal_address.street_address"
+        render={arrayHelpers => (
+          <div>
+            {values.legal_address.street_address.map((line, index) => (
+              <div key={index}>
+                <Field
+                  name={`legal_address.street_address[${index}]`}
+                  className={`form-control ${index > 0 ? "row-inner" : ""}`}
+                />
+                {index === 0 ? (
+                  <ErrorMessage
+                    name="legal_address.street_address"
+                    component={FormError}
+                  />
+                ) : null}
+              </div>
+            ))}
+            {values.legal_address.street_address.length < ADDRESS_LINES_MAX ? (
+              <button
+                type="button"
+                className="additional-street"
+                onClick={() => arrayHelpers.push("")}
+              >
+                Add additional line
+              </button>
+            ) : null}
+          </div>
+        )}
+      />
+    </div>
+    <div className="form-group">
+      <label className="font-weight-bold">Country*</label>
+      <Field
+        component="select"
+        name="legal_address.country"
+        className="form-control"
+        onChange={e => {
+          setFieldValue("legal_address.country", e.target.value)
+          setFieldTouched("legal_address.country")
+          if (!includes(e.target.value, [US_ALPHA_2, CA_ALPHA_2])) {
+            setFieldValue("legal_address.state_or_territory", "")
+            setFieldValue("legal_address.postal_code", "")
+          }
+        }}
+      >
+        <option value="">-----</option>
+        {countries
+          ? countries.map((country, i) => (
+            <option key={i} value={country.code}>
+              {country.name}
+            </option>
+          ))
+          : null}
+      </Field>
+      <ErrorMessage name="legal_address.country" component={FormError} />
+    </div>
+    {includes(values.legal_address.country, COUNTRIES_REQUIRING_STATE) ? (
       <div className="form-group">
-        <label className="font-weight-bold">Country*</label>
+        <label className="font-weight-bold">State/Province*</label>
         <Field
           component="select"
-          name="legal_address.country"
+          name="legal_address.state_or_territory"
           className="form-control"
-          onChange={e => {
-            setFieldValue("legal_address.country", e.target.value)
-            setFieldTouched("legal_address.country")
-            if (!includes(e.target.value, [US_ALPHA_2, CA_ALPHA_2])) {
-              setFieldValue("legal_address.state_or_territory", "")
-              setFieldValue("legal_address.postal_code", "")
-            }
-          }}
         >
           <option value="">-----</option>
-          {countries
-            ? countries.map((country, i) => (
-              <option key={i} value={country.code}>
-                {country.name}
-              </option>
-            ))
-            : null}
+          {find(
+            propEq("code", values.legal_address.country),
+            countries
+          ).states.map((state, i) => (
+            <option key={i} value={state.code}>
+              {state.name}
+            </option>
+          ))}
         </Field>
-        <ErrorMessage name="legal_address.country" component={FormError} />
+        <ErrorMessage
+          name="legal_address.state_or_territory"
+          component={FormError}
+        />
       </div>
-      {includes(values.legal_address.country, COUNTRIES_REQUIRING_STATE) ? (
-        <div className="form-group">
-          <label className="font-weight-bold">State/Province*</label>
+    ) : null}
+    <div className="form-group">
+      <label htmlFor="legal_address.city" className="font-weight-bold">
+        City*
+      </label>
+      <Field type="text" name="legal_address.city" className="form-control" />
+      <ErrorMessage name="legal_address.city" component={FormError} />
+    </div>
+    {includes(values.legal_address.country, COUNTRIES_REQUIRING_POSTAL_CODE) ? (
+      <div className="form-group">
+        <label htmlFor="legal_address.postal_code" className="font-weight-bold">
+          Zip/Postal Code*
+        </label>
+        <Field
+          type="text"
+          name="legal_address.postal_code"
+          className="form-control"
+        />
+        <ErrorMessage name="legal_address.postal_code" component={FormError} />
+      </div>
+    ) : null}
+  </React.Fragment>
+)
+
+export const ProfileFields = () => (
+  <React.Fragment>
+    <div className="form-group">
+      <div className="row">
+        <div className="col">
+          <label htmlFor="profile.gender" className="font-weight-bold">
+            Gender*
+          </label>
+
           <Field
             component="select"
-            name="legal_address.state_or_territory"
+            name="profile.gender"
             className="form-control"
           >
             <option value="">-----</option>
-            {find(
-              propEq("code", values.legal_address.country),
-              countries
-            ).states.map((state, i) => (
-              <option key={i} value={state.code}>
-                {state.name}
+            <option value="f">Female</option>
+            <option value="m">Male</option>
+            <option value="o">Other / Prefer not to say</option>
+          </Field>
+          <ErrorMessage name="profile.gender" component={FormError} />
+        </div>
+        <div className="col">
+          <label htmlFor="profile.birth_year" className="font-weight-bold">
+            Year of Birth*
+          </label>
+          <Field
+            component="select"
+            name="profile.birth_year"
+            className="form-control"
+          >
+            <option value="">-----</option>
+            {reverse(range(seedYear - 120, seedYear - 14)).map((year, i) => (
+              <option key={i} value={year}>
+                {year}
               </option>
             ))}
           </Field>
-          <ErrorMessage
-            name="legal_address.state_or_territory"
-            component={FormError}
-          />
-        </div>
-      ) : null}
-      <div className="form-group">
-        <label htmlFor="legal_address.city" className="font-weight-bold">
-          City*
-        </label>
-        <Field type="text" name="legal_address.city" className="form-control" />
-        <ErrorMessage name="legal_address.city" component={FormError} />
-      </div>
-      {includes(
-        values.legal_address.country,
-        COUNTRIES_REQUIRING_POSTAL_CODE
-      ) ? (
-          <div className="form-group">
-            <label
-              htmlFor="legal_address.postal_code"
-              className="font-weight-bold"
-            >
-            Zip/Postal Code*
-            </label>
-            <Field
-              type="text"
-              name="legal_address.postal_code"
-              className="form-control"
-            />
-            <ErrorMessage
-              name="legal_address.postal_code"
-              component={FormError}
-            />
-          </div>
-        ) : null}
-    </React.Fragment>
-  )
-}
-
-export function renderProfileFields() {
-  const seedYear = moment().year()
-  return (
-    <React.Fragment>
-      <div className="form-group">
-        <div className="row">
-          <div className="col">
-            <label htmlFor="profile.gender" className="font-weight-bold">
-              Gender*
-            </label>
-
-            <Field
-              component="select"
-              name="profile.gender"
-              className="form-control"
-            >
-              <option value="">-----</option>
-              <option value="f">Female</option>
-              <option value="m">Male</option>
-              <option value="o">Other / Prefer not to say</option>
-            </Field>
-            <ErrorMessage name="profile.gender" component={FormError} />
-          </div>
-          <div className="col">
-            <label htmlFor="profile.birth_year" className="font-weight-bold">
-              Year of Birth*
-            </label>
-            <Field
-              component="select"
-              name="profile.birth_year"
-              className="form-control"
-            >
-              <option value="">-----</option>
-              {reverse(range(seedYear - 120, seedYear - 14)).map((year, i) => (
-                <option key={i} value={year}>
-                  {year}
-                </option>
-              ))}
-            </Field>
-            <ErrorMessage name="profile.birth_year" component={FormError} />
-          </div>
+          <ErrorMessage name="profile.birth_year" component={FormError} />
         </div>
       </div>
-      <div className="form-group">
-        <label htmlFor="profile.company" className="font-weight-bold">
-          Company*
-        </label>
-        <Field type="text" name="profile.company" className="form-control" />
-        <ErrorMessage name="profile.company" component={FormError} />
-      </div>
-      <div className="form-group">
-        <label htmlFor="profile.job_title" className="font-weight-bold">
-          Job Title*
-        </label>
-        <Field type="text" name="profile.job_title" className="form-control" />
-        <ErrorMessage name="profile.job_title" component={FormError} />
-      </div>
-      <div className="form-group dotted" />
-      <div className="form-group">
-        <label htmlFor="profile.industry" className="font-weight-bold">
-          Industry
-        </label>
-        <Field
-          component="select"
-          name="profile.industry"
-          className="form-control"
-        >
-          <option value="">-----</option>
-          {EMPLOYMENT_INDUSTRY.map((industry, i) => (
-            <option key={i} value={industry}>
-              {industry}
-            </option>
-          ))}
-        </Field>
-      </div>
-      <div className="form-group">
-        <label htmlFor="profile.job_function" className="font-weight-bold">
-          Job Function
-        </label>
-        <Field
-          component="select"
-          name="profile.job_function"
-          className="form-control"
-        >
-          <option value="">-----</option>
-          {EMPLOYMENT_FUNCTION.map((jobFunction, i) => (
-            <option key={i} value={jobFunction}>
-              {jobFunction}
-            </option>
-          ))}
-        </Field>
-      </div>
-      <div className="form-group">
-        <label htmlFor="profile.company_size" className="font-weight-bold">
-          Company Size
-        </label>
-        <Field
-          component="select"
-          name="profile.company_size"
-          className="form-control"
-        >
-          <option value="">-----</option>
-          {EMPLOYMENT_SIZE.map(([value, label], i) => (
-            <option key={i} value={value}>
-              {label}
-            </option>
-          ))}
-        </Field>
-      </div>
-      <div className="form-group">
-        <div className="row">
-          <div className="col">
-            <label
-              htmlFor="profile.years_experience"
-              className="font-weight-bold"
-            >
-              Years of Work Experience
-            </label>
-            <Field
-              component="select"
-              name="profile.years_experience"
-              className="form-control"
-            >
-              <option value="">-----</option>
-              {EMPLOYMENT_EXPERIENCE.map(([value, label], i) => (
-                <option key={i} value={value}>
-                  {label}
-                </option>
-              ))}
-            </Field>
-          </div>
-          <div className="col">
-            <label
-              htmlFor="profile.leadership_level"
-              className="font-weight-bold"
-            >
-              Leadership Level
-            </label>
-            <Field
-              component="select"
-              name="profile.leadership_level"
-              className="form-control"
-            >
-              <option value="">-----</option>
-              {EMPLOYMENT_LEVEL.map((level, i) => (
-                <option key={i} value={level}>
-                  {level}
-                </option>
-              ))}
-            </Field>
-          </div>
+    </div>
+    <div className="form-group">
+      <label htmlFor="profile.company" className="font-weight-bold">
+        Company*
+      </label>
+      <Field type="text" name="profile.company" className="form-control" />
+      <ErrorMessage name="profile.company" component={FormError} />
+    </div>
+    <div className="form-group">
+      <label htmlFor="profile.job_title" className="font-weight-bold">
+        Job Title*
+      </label>
+      <Field type="text" name="profile.job_title" className="form-control" />
+      <ErrorMessage name="profile.job_title" component={FormError} />
+    </div>
+    <div className="form-group dotted" />
+    <div className="form-group">
+      <label htmlFor="profile.industry" className="font-weight-bold">
+        Industry
+      </label>
+      <Field
+        component="select"
+        name="profile.industry"
+        className="form-control"
+      >
+        <option value="">-----</option>
+        {EMPLOYMENT_INDUSTRY.map((industry, i) => (
+          <option key={i} value={industry}>
+            {industry}
+          </option>
+        ))}
+      </Field>
+    </div>
+    <div className="form-group">
+      <label htmlFor="profile.job_function" className="font-weight-bold">
+        Job Function
+      </label>
+      <Field
+        component="select"
+        name="profile.job_function"
+        className="form-control"
+      >
+        <option value="">-----</option>
+        {EMPLOYMENT_FUNCTION.map((jobFunction, i) => (
+          <option key={i} value={jobFunction}>
+            {jobFunction}
+          </option>
+        ))}
+      </Field>
+    </div>
+    <div className="form-group">
+      <label htmlFor="profile.company_size" className="font-weight-bold">
+        Company Size
+      </label>
+      <Field
+        component="select"
+        name="profile.company_size"
+        className="form-control"
+      >
+        <option value="">-----</option>
+        {EMPLOYMENT_SIZE.map(([value, label], i) => (
+          <option key={i} value={value}>
+            {label}
+          </option>
+        ))}
+      </Field>
+    </div>
+    <div className="form-group">
+      <div className="row">
+        <div className="col">
+          <label
+            htmlFor="profile.years_experience"
+            className="font-weight-bold"
+          >
+            Years of Work Experience
+          </label>
+          <Field
+            component="select"
+            name="profile.years_experience"
+            className="form-control"
+          >
+            <option value="">-----</option>
+            {EMPLOYMENT_EXPERIENCE.map(([value, label], i) => (
+              <option key={i} value={value}>
+                {label}
+              </option>
+            ))}
+          </Field>
+        </div>
+        <div className="col">
+          <label
+            htmlFor="profile.leadership_level"
+            className="font-weight-bold"
+          >
+            Leadership Level
+          </label>
+          <Field
+            component="select"
+            name="profile.leadership_level"
+            className="form-control"
+          >
+            <option value="">-----</option>
+            {EMPLOYMENT_LEVEL.map((level, i) => (
+              <option key={i} value={level}>
+                {level}
+              </option>
+            ))}
+          </Field>
         </div>
       </div>
-    </React.Fragment>
-  )
-}
+    </div>
+  </React.Fragment>
+)

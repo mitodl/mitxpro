@@ -1,14 +1,12 @@
 // @flow
 import React from "react"
 import { Formik, Form } from "formik"
-import { mergeDeepRight } from "ramda"
-import * as yup from "yup"
 
 import {
   profileValidation,
   legalAddressValidation,
-  renderProfileFields,
-  renderLegalAddressFields
+  LegalAddressFields,
+  ProfileFields
 } from "./ProfileFormFields"
 
 import type { Country, User } from "../../flow/authTypes"
@@ -29,23 +27,19 @@ const getInitialValues = (user: User) => ({
 const EditProfileForm = ({ onSubmit, countries, user }: Props) => (
   <Formik
     onSubmit={onSubmit}
-    validationSchema={yup
-      .object()
-      .shape(mergeDeepRight(legalAddressValidation, profileValidation))}
+    validationSchema={legalAddressValidation.concat(profileValidation)}
     initialValues={getInitialValues(user)}
     render={({ isSubmitting, setFieldValue, setFieldTouched, values }) => (
       <Form>
-        {countries
-          ? renderLegalAddressFields(
-            countries,
-            setFieldValue,
-            setFieldTouched,
-            values,
-            false
-          )
-          : null}
-        {renderProfileFields()}
-        <div className="row-inner  justify-content-end">
+        <LegalAddressFields
+          countries={countries}
+          setFieldValue={setFieldValue}
+          setFieldTouched={setFieldTouched}
+          values={values}
+          includePassword={false}
+        />
+        <ProfileFields />
+        <div className="row-inner justify-content-end">
           <div className="row justify-content-end">
             <button
               type="submit"

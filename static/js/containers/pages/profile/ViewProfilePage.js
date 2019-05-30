@@ -138,6 +138,12 @@ export class ViewProfilePage extends React.Component<Props> {
                     <div className="col">{currentUser.profile.job_title}</div>
                   </div>
                   <div className="row">
+                    <div className="col">Job Function</div>
+                    <div className="col">
+                      {currentUser.profile.job_function}
+                    </div>
+                  </div>
+                  <div className="row">
                     <div className="col">Industry</div>
                     <div className="col">{currentUser.profile.industry}</div>
                   </div>

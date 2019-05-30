@@ -5,9 +5,8 @@ from rest_framework import routers
 
 from users.views import (
     UserRetrieveViewSet,
-    CurrentUserRetrieveViewSet,
+    CurrentUserRetrieveUpdateViewSet,
     CountriesStatesViewSet,
-    CurrentUserUpdateViewSet,
 )
 
 router = routers.DefaultRouter()
@@ -17,13 +16,10 @@ router.register(r"countries", CountriesStatesViewSet, basename="countries_api")
 urlpatterns = [
     path(
         "api/users/me",
-        CurrentUserRetrieveViewSet.as_view({"get": "retrieve"}),
+        CurrentUserRetrieveUpdateViewSet.as_view(
+            {"patch": "update", "get": "retrieve"}
+        ),
         name="users_api-me",
-    ),
-    path(
-        "api/profile/edit/",
-        CurrentUserUpdateViewSet.as_view({"patch": "update", "get": "retrieve"}),
-        name="users_api-update",
     ),
     path("api/", include(router.urls)),
 ]

@@ -1,9 +1,8 @@
 // @flow
 import React from "react"
 import { Formik, Form } from "formik"
-import * as yup from "yup"
 
-import { profileValidation, renderProfileFields } from "./ProfileFormFields"
+import { ProfileFields, profileValidation } from "./ProfileFormFields"
 
 type Props = {
   onSubmit: Function
@@ -21,11 +20,11 @@ const INITIAL_VALUES = {
 const RegisterExtraDetailsForm = ({ onSubmit }: Props) => (
   <Formik
     onSubmit={onSubmit}
-    validationSchema={yup.object().shape(profileValidation)}
+    validationSchema={profileValidation}
     initialValues={INITIAL_VALUES}
     render={({ isSubmitting }) => (
       <Form>
-        {renderProfileFields()}
+        <ProfileFields />
         <div className="row submit-row no-gutters justify-content-end">
           <button
             type="submit"
