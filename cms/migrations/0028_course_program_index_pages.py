@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("wagtailcore", "0041_group_collection_permissions_verbose_name_plural"),
-        ("cms", "0026_text_video_section"),
+        ("cms", "0027_imagecarouselpage"),
     ]
 
     operations = [

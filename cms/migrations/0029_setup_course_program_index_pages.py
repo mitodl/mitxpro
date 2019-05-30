@@ -104,7 +104,7 @@ def unnest_detail_and_delete_index_pages(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [("cms", "0027_course_program_index_pages")]
+    dependencies = [("cms", "0028_course_program_index_pages")]
 
     operations = [
         migrations.RunPython(
