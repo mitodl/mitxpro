@@ -1,6 +1,20 @@
 Release Notes
 =============
 
+Version 0.6.0 (Released May 30, 2019)
+-------------
+
+- Fix footer placement
+- fix
+- initial changes for companies slider
+- Added sanctionsLists to the exports request if it is set
+- #257: Home Page: Watch Video Button
+- #257 Homepage: About MIT xPRO
+- fix if only one date available (#382)
+- SEO metadata for product pages (#334)
+- Additional serializers for hubspot (#347)
+- #352 Fix: Set HomePage as Parent of ResourcePage
+
 Version 0.5.2 (Released May 29, 2019)
 -------------
 
