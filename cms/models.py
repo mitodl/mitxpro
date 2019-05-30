@@ -4,31 +4,68 @@ Page models for the CMS
 
 from django.db import models
 from django.utils.text import slugify
-
+from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import (
     FieldPanel,
+    InlinePanel,
     MultiFieldPanel,
     StreamFieldPanel,
-    InlinePanel,
 )
 from wagtail.core import blocks
-from wagtail.core.models import Orderable, Page
+from wagtail.core.blocks import PageChooserBlock, RawHTMLBlock
 from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.blocks import RawHTMLBlock, PageChooserBlock
-from wagtail.images.models import Image
+from wagtail.core.models import Orderable, Page
 from wagtail.images.blocks import ImageChooserBlock
+from wagtail.images.models import Image
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
-from modelcluster.fields import ParentalKey
-
-from mitxpro.views import get_js_settings_context
 from cms.blocks import (
+    FacultyBlock,
     LearningTechniqueBlock,
     ResourceBlock,
     UserTestimonialBlock,
-    FacultyBlock,
 )
+from mitxpro.views import get_js_settings_context
+
+
+class CourseObjectIndexPage:
+    """
+    A placeholder class to group courseware object pages as children.
+    This class logically acts as no more than a "folder" to organize
+    pages and add parent slug segment to the page url.
+    """
+
+    parent_page_types = ["HomePage"]
+
+    @classmethod
+    def can_create_at(cls, parent):
+        """
+        You can only create one of these pages under the home page.
+        The parent is limited via the `parent_page_type` list.
+        """
+        return (
+            super().can_create_at(parent)
+            and not parent.get_children().type(cls).exists()
+        )
+
+
+class CourseIndexPage(CourseObjectIndexPage, Page):
+    """
+    A placeholder page to group all the courses under it as well
+    as consequently add /courses/ to the course page urls
+    """
+
+    slug = "courses"
+
+
+class ProgramIndexPage(CourseObjectIndexPage, Page):
+    """
+    A placeholder page to group all the programs under it as well
+    as consequently add /programs/ to the program page urls
+    """
+
+    slug = "programs"
 
 
 class CourseProgramChildPage(Page):
@@ -370,6 +407,8 @@ class HomePage(MetadataPageMixin, Page):
     CMS Page representing the home/root route
     """
 
+    template = "home_page.html"
+
     subhead = models.CharField(
         max_length=255,
         help_text="The subhead to display in the hero section on the home page.",
@@ -395,8 +434,8 @@ class HomePage(MetadataPageMixin, Page):
     ]
 
     subpage_types = [
-        "CoursePage",
-        "ProgramPage",
+        "CourseIndexPage",
+        "ProgramIndexPage",
         "CoursesInProgramPage",
         "LearningTechniquesPage",
         "UserTestimonialsPage",
@@ -551,14 +590,52 @@ class ProductPage(MetadataPageMixin, Page):
     ]
 
     def get_context(self, request, *args, **kwargs):
-        context = super(ProductPage, self).get_context(request)
-        context["title"] = self.title
-        return context
+        return {
+            **super().get_context(request, *args, **kwargs),
+            **get_js_settings_context(request),
+            "title": self.title,
+        }
 
     def _get_child_page_of_type(self, cls):
         """Gets the first child page of the given type if it exists"""
         child = self.get_children().type(cls).first()
         return child.specific if child else None
+
+    @property
+    def outcomes(self):
+        """Gets the learning outcomes child page"""
+        return self._get_child_page_of_type(LearningOutcomesPage)
+
+    @property
+    def who_should_enroll(self):
+        """Gets the who should enroll child page"""
+        return self._get_child_page_of_type(WhoShouldEnrollPage)
+
+    @property
+    def techniques(self):
+        """Gets the learning techniques child page"""
+        return self._get_child_page_of_type(LearningTechniquesPage)
+
+    @property
+    def testimonials(self):
+        """Gets the testimonials carousel child page"""
+        return self._get_child_page_of_type(UserTestimonialsPage)
+
+    @property
+    def faculty(self):
+        """Gets the faculty carousel page"""
+        return self._get_child_page_of_type(FacultyMembersPage)
+
+    @property
+    def for_teams(self):
+        """Gets the for teams section child page"""
+        return self._get_child_page_of_type(ForTeamsPage)
+
+    @property
+    def faqs(self):
+        """Gets the FAQs list from FAQs child page"""
+        faqs_page = self._get_child_page_of_type(FrequentlyAskedQuestionPage)
+        return FrequentlyAskedQuestion.objects.filter(faqs_page=faqs_page)
 
 
 class ProgramPage(ProductPage):
@@ -566,7 +643,9 @@ class ProgramPage(ProductPage):
     CMS page representing the a Program
     """
 
-    template = "cms/product_page.html"
+    template = "product_page.html"
+
+    parent_page_types = ["ProgramIndexPage"]
 
     program = models.OneToOneField(
         "courses.Program",
@@ -578,6 +657,13 @@ class ProgramPage(ProductPage):
     content_panels = [FieldPanel("program")] + ProductPage.content_panels
 
     @property
+    def program_page(self):
+        """
+        Just here for uniformity in model API for templates
+        """
+        return self
+
+    @property
     def course_pages(self):
         """
         Gets a list of pages (CoursePage) of all the courses associated with this program
@@ -585,13 +671,25 @@ class ProgramPage(ProductPage):
         courses = self.program.courses.all()
         return CoursePage.objects.filter(course_id__in=courses)
 
+    @property
+    def course_lineup(self):
+        """Gets the course carousel page"""
+        return self._get_child_page_of_type(CoursesInProgramPage)
+
+    @property
+    def product(self):
+        """Gets the product associated with this page"""
+        return self.program
+
 
 class CoursePage(ProductPage):
     """
     CMS page representing a Course
     """
 
-    template = "cms/product_page.html"
+    template = "product_page.html"
+
+    parent_page_types = ["CourseIndexPage"]
 
     course = models.OneToOneField(
         "courses.Course",
@@ -607,7 +705,55 @@ class CoursePage(ProductPage):
         """
         Gets the program page associated with this course, if it exists
         """
-        return self.course.program.page if self.course and self.course.program else None
+        return self.course.program.page if self.course.program else None
+
+    @property
+    def course_lineup(self):
+        """Gets the course carousel page"""
+        return self.program_page.course_lineup if self.program_page else None
+
+    @property
+    def course_pages(self):
+        """
+        Gets a list of pages (CoursePage) of all the courses from the associated program
+        """
+        return (
+            CoursePage.objects.filter(course__program=self.course.program)
+            if self.course.program
+            else []
+        )
+
+    @property
+    def product(self):
+        """Gets the product associated with this page"""
+        return self.course
+
+    def get_context(self, request, *args, **kwargs):
+        # Hits a circular import at the top of the module
+        from courses.models import CourseRunEnrollment
+
+        course = self.course
+        run = course.first_unexpired_run
+        product = run.products.first() if run else None
+        product_version = product.latest_version if product else None
+        is_anonymous = request.user.is_anonymous
+        enrolled = (
+            CourseRunEnrollment.objects.filter(user=request.user, run=run).exists()
+            if run and not is_anonymous
+            else False
+        )
+
+        return {
+            **super().get_context(request, **kwargs),
+            **get_js_settings_context(request),
+            "courseware_url": run.courseware_url if run else None,
+            "product_version_id": product_version.id
+            if (product_version and not is_anonymous)
+            else None,
+            "enrolled": enrolled,
+            "user": request.user,
+            "course": course,
+        }
 
 
 class FrequentlyAskedQuestionPage(CourseProgramChildPage):

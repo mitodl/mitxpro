@@ -39,7 +39,7 @@ def test_base_program_serializer():
         "title": program.title,
         "readable_id": program.readable_id,
         "id": program.id,
-        "description": program.description,
+        "description": page.description,
         "thumbnail_url": page.thumbnail_image.file.url,
     }
 
@@ -54,7 +54,7 @@ def test_serialize_program():
         "title": program.title,
         "readable_id": program.readable_id,
         "id": program.id,
-        "description": program.description,
+        "description": page.description,
         "courses": [CourseSerializer(run.course).data],
         "thumbnail_url": page.thumbnail_image.file.url,
     }
@@ -68,7 +68,7 @@ def test_base_course_serializer():
     data = BaseCourseSerializer(course).data
     assert data == {
         "title": course.title,
-        "description": course.description,
+        "description": page.description,
         "readable_id": course.readable_id,
         "id": course.id,
         "thumbnail_url": page.thumbnail_image.file.url,
@@ -86,7 +86,7 @@ def test_serialize_course(with_runs):
     data = CourseSerializer(course).data
     assert data == {
         "title": course.title,
-        "description": course.description,
+        "description": page.description,
         "readable_id": course.readable_id,
         "id": course.id,
         "courseruns": [CourseRunSerializer(run).data] if with_runs else [],

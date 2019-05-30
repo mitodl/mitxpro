@@ -6,9 +6,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.conf import settings
 from django.db.models import Prefetch
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView
 
-from courses.models import Program, Course, CourseRun, CourseRunEnrollment
+from courses.models import Program, Course, CourseRun
 from courses.api import get_user_enrollments
 from courses.serializers import (
     ProgramSerializer,
@@ -52,6 +52,7 @@ class CourseCatalogView(ListView):
         programs_qset = (
             Program.objects.live()
             .select_related("programpage")
+            .exclude(programpage=None)
             .order_by("id")
             .all()
             .prefetch_related(
@@ -61,6 +62,7 @@ class CourseCatalogView(ListView):
         courses_qset = (
             Course.objects.live()
             .select_related("coursepage")
+            .exclude(coursepage=None)
             .order_by("id")
             .all()
             .prefetch_related(Prefetch("courseruns", queryset=sorted_courserun_qset))
@@ -80,36 +82,6 @@ class CourseCatalogView(ListView):
             "hubspot_new_courses_form_guid": settings.HUBSPOT_CONFIG.get(
                 "HUBSPOT_NEW_COURSES_FORM_GUID"
             ),
-        }
-
-
-class CourseView(DetailView):
-    """Course view"""
-
-    model = Course
-    template_name = "course_detail.html"
-
-    def get_context_data(self, **kwargs):
-        course = self.object
-        run = course.first_unexpired_run
-        product = run.products.first() if run else None
-        product_version = product.latest_version if product else None
-        is_anonymous = self.request.user.is_anonymous
-        enrolled = (
-            CourseRunEnrollment.objects.filter(user=self.request.user, run=run).exists()
-            if run and not is_anonymous
-            else False
-        )
-
-        return {
-            **super().get_context_data(**kwargs),
-            **get_js_settings_context(self.request),
-            "courseware_url": run.courseware_url if run else None,
-            "product_version_id": product_version.id
-            if (product_version and not is_anonymous)
-            else None,
-            "enrolled": enrolled,
-            "user": self.request.user,
         }
 
 

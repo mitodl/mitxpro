@@ -6,19 +6,7 @@ import operator as op
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericRelation
-from django.urls import reverse
 
-from cms.models import (
-    LearningOutcomesPage,
-    LearningTechniquesPage,
-    FrequentlyAskedQuestion,
-    FrequentlyAskedQuestionPage,
-    ForTeamsPage,
-    WhoShouldEnrollPage,
-    CoursesInProgramPage,
-    UserTestimonialsPage,
-    FacultyMembersPage,
-)
 from courses.constants import (
     CATALOG_COURSE_IMG_WAGTAIL_FILL,
     COURSE_BG_IMG_WAGTAIL_FILL,
@@ -75,26 +63,6 @@ class PageProperties(models.Model):
         abstract = True
 
     @property
-    def display_title(self):
-        """Gets the title from the associated Page if it exists"""
-        return self.page.title if self.page else None
-
-    @property
-    def subhead(self):
-        """Gets the subhead from the associated Page if it exists"""
-        return self.page.subhead if self.page else None
-
-    @property
-    def background_image(self):
-        """Gets the background_image from the associated Page if it exists"""
-        return self.page.background_image if self.page else None
-
-    @property
-    def thumbnail_image(self):
-        """Gets the thumbnail_image from the associated Page if it exists"""
-        return self.page.thumbnail_image if self.page else None
-
-    @property
     def background_image_url(self):
         """Gets the url for the background image (if that image exists)"""
         return (
@@ -116,83 +84,10 @@ class PageProperties(models.Model):
     def catalog_image_url(self):
         """Gets the url for the thumbnail image as it appears in the catalog (if that image exists)"""
         return (
-            self.thumbnail_image.get_rendition(CATALOG_COURSE_IMG_WAGTAIL_FILL).url
-            if self.thumbnail_image
+            self.page.thumbnail_image.get_rendition(CATALOG_COURSE_IMG_WAGTAIL_FILL).url
+            if self.page and self.page.thumbnail_image
             else None
         )
-
-    @property
-    def video_title(self):
-        """Get the video_title from the associated Page if it exists"""
-        return self.page.video_title if self.page else None
-
-    @property
-    def video_url(self):
-        """Gets the video_url from the associated Page if it exists"""
-        return self.page.video_url if self.page else None
-
-    @property
-    def description(self):
-        """Gets the description from the associated Page if it exists"""
-        return self.page.description if self.page else None
-
-    @property
-    def duration(self):
-        """Gets the duration from the associated Page if it exists"""
-        return self.page.duration if self.page else None
-
-    @property
-    def time_commitment(self):
-        """Gets the duration from the associated Page if it exists"""
-        return self.page.time_commitment if self.page else None
-
-    def _get_child_page_of_type(self, cls):
-        """Gets the first child page of the given type from the associated Page if it exists"""
-        if not self.page:
-            return None
-        child = self.page.get_children().type(cls).first()
-        if child:
-            return child.specific
-        return None
-
-    @property
-    def outcomes(self):
-        """Gets the learning outcomes from the associated Page children if it exists"""
-        return self._get_child_page_of_type(LearningOutcomesPage)
-
-    @property
-    def for_teams(self):
-        """Gets the ForTeams associated child page from the associate Page if it exists"""
-        return self._get_child_page_of_type(ForTeamsPage)
-
-    @property
-    def techniques(self):
-        """Gets the learning techniques from the associated Page children if it exists"""
-        return self._get_child_page_of_type(LearningTechniquesPage)
-
-    @property
-    def faculty(self):
-        """Gets the faculty members from the associated child page if it exists"""
-        return self._get_child_page_of_type(FacultyMembersPage)
-
-    @property
-    def faqs(self):
-        """Gets the faqs related to product if exists."""
-        if not self.page:
-            return
-
-        faqs_page = self._get_child_page_of_type(FrequentlyAskedQuestionPage)
-        return FrequentlyAskedQuestion.objects.filter(faqs_page=faqs_page)
-
-    @property
-    def testimonials(self):
-        """Gets the testimonials related to product if they exist"""
-        return self._get_child_page_of_type(UserTestimonialsPage)
-
-    @property
-    def who_should_enroll(self):
-        """Gets the WhoShouldEnroll associated child page from the associated Page if it exists"""
-        return self._get_child_page_of_type(WhoShouldEnrollPage)
 
 
 class Program(TimestampedModel, PageProperties):
@@ -235,25 +130,6 @@ class Program(TimestampedModel, PageProperties):
         if not latest_version:
             return None
         return latest_version.price
-
-    @property
-    def course_lineup(self):
-        """Gets the CoursesInProgram subpage if associated with this program"""
-        return self._get_child_page_of_type(CoursesInProgramPage)
-
-    @property
-    def url(self):
-        """
-        Gets the URL for this resource
-        """
-        return NotImplementedError()
-
-    @property
-    def type_name(self):
-        """
-        Gets the descriptive word for the type of this resource
-        """
-        return "program"
 
     def __str__(self):
         return self.title
@@ -316,20 +192,6 @@ class Course(TimestampedModel, PageProperties):
                 self.courseruns.all().order_by("start_date"),
             )
         )
-
-    @property
-    def url(self):
-        """
-        Gets the URL for this resource
-        """
-        return reverse("course-detail", kwargs={"pk": self.pk})
-
-    @property
-    def type_name(self):
-        """
-        Gets the descriptive word for the type of this resource
-        """
-        return "course"
 
     class Meta:
         ordering = ("program", "title")
