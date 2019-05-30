@@ -270,21 +270,23 @@ def get_edx_api_client(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS)
     return EdxApi({"access_token": auth.access_token}, settings.OPENEDX_API_BASE_URL)
 
 
-def enroll_in_edx_course_run(user, course_run):
+def enroll_in_edx_course_runs(user, course_runs):
     """
     Enrolls a user in an edx course run
 
     Args:
         user (users.models.User): The user to enroll
-        course_run (CourseRun): The course run to enroll in
+        course_runs (iterable of CourseRun): The course runs to enroll in
 
     Returns:
-        edx_api.enrollments.models.Enrollment: The results of enrollment via the edx API client
+        list of edx_api.enrollments.models.Enrollment:
+            The results of enrollments via the edx API client
 
     Raises:
         requests.exceptions.HTTPError: Raised if the underlying HTTP request fails
     """
     edx_client = get_edx_api_client(user)
-    return edx_client.enrollments.create_audit_student_enrollment(
-        course_run.courseware_id
-    )
+    return [
+        edx_client.enrollments.create_audit_student_enrollment(course_run.courseware_id)
+        for course_run in course_runs
+    ]

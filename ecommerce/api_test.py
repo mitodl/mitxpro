@@ -8,6 +8,7 @@ import hashlib
 import hmac
 from urllib.parse import urljoin
 from unittest.mock import PropertyMock
+from requests.exceptions import HTTPError
 
 import factory
 from rest_framework.exceptions import ValidationError
@@ -31,7 +32,8 @@ from ecommerce.api import (
     get_product_courses,
     get_available_bulk_product_coupons,
     validate_basket_for_checkout,
-    enroll_user_on_success,
+    complete_order,
+    enroll_user_in_order_items,
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -691,12 +693,32 @@ def test_validate_basket_run_expired(mocker, basket_and_coupons):
     assert ex.value.args[0] == f"Run {basket_and_coupons.run.id} is expired"
 
 
-@pytest.mark.parametrize("has_redemption", [True, False])
-def test_enroll_user_on_success(user, has_redemption):
+def test_complete_order(mocker, user, basket_and_coupons):
     """
-    Test that enroll_user_on_success creates objects that represent a user's enrollment
+    Test that complete_order enrolls a user in the items in their order and clears out checkout-related objects
+    """
+    patched_enroll = mocker.patch("ecommerce.api.enroll_user_in_order_items")
+    basket_and_coupons.basket.user = user
+    basket_and_coupons.basket.save()
+    assert BasketItem.objects.filter(basket__user=user).count() > 0
+    assert CourseRunSelection.objects.filter(basket__user=user).count() > 0
+    assert CouponSelection.objects.filter(basket__user=user).count() > 0
+    order = OrderFactory.create(purchaser=user, status=Order.CREATED)
+
+    complete_order(order)
+    patched_enroll.assert_called_once_with(order)
+    assert BasketItem.objects.filter(basket__user=user).count() == 0
+    assert CourseRunSelection.objects.filter(basket__user=user).count() == 0
+    assert CouponSelection.objects.filter(basket__user=user).count() == 0
+
+
+@pytest.mark.parametrize("has_redemption", [True, False])
+def test_enroll_user_in_order_items(mocker, user, has_redemption):
+    """
+    Test that enroll_user_in_order_items creates objects that represent a user's enrollment
     in course runs and programs
     """
+    patched_enroll = mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
     order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
     if has_redemption:
         redemption = CouponRedemptionFactory.create(order=order)
@@ -711,7 +733,7 @@ def test_enroll_user_on_success(user, has_redemption):
         ),
     )
 
-    enroll_user_on_success(order)
+    enroll_user_in_order_items(order)
     created_program_enrollments = ProgramEnrollment.objects.all()
     assert len(created_program_enrollments) == 1
     assert created_program_enrollments[0].program == program
@@ -722,7 +744,31 @@ def test_enroll_user_on_success(user, has_redemption):
             == redemption.coupon_version.payment_version.company
         )
     created_course_run_enrollments = CourseRunEnrollment.objects.order_by("pk").all()
-    assert len(created_course_run_enrollments) == len(run_selections)
-    assert [
+    course_runs = [
         run_enrollment.run for run_enrollment in created_course_run_enrollments
-    ] == [selection.run for selection in run_selections]
+    ]
+    assert len(created_course_run_enrollments) == len(run_selections)
+    assert course_runs == [selection.run for selection in run_selections]
+    enroll_args = patched_enroll.call_args[0]
+    assert enroll_args[0] == user
+    assert set(enroll_args[1]) == set(course_runs)
+
+
+def test_enroll_user_in_order_items_api_fail(mocker, user):
+    """
+    Test that enroll_user_in_order_items logs a message and still creates local enrollment records
+    when the edX API request fails
+    """
+    patched_enroll_in_runs = mocker.patch(
+        "ecommerce.api.enroll_in_edx_course_runs",
+        side_effect=HTTPError(response=mocker.Mock(content=mocker.Mock())),
+    )
+    order = OrderFactory.build(purchaser=user, status=Order.FULFILLED)
+    basket = BasketFactory.create(user=user)
+    CourseRunSelectionFactory.create_batch(2, basket=basket)
+
+    enroll_user_in_order_items(order)
+    assert (
+        CourseRunEnrollment.objects.filter(user=user, edx_enrolled=False).count() == 2
+    )
+    patched_enroll_in_runs.assert_called_once()

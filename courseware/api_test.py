@@ -16,7 +16,7 @@ from courseware.api import (
     create_edx_auth_token,
     get_valid_edx_api_auth,
     get_edx_api_client,
-    enroll_in_edx_course_run,
+    enroll_in_edx_course_runs,
     OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS,
     ACCESS_TOKEN_HEADER_NAME,
 )
@@ -219,12 +219,15 @@ def test_get_edx_api_client(mocker, settings, user):
     )
 
 
-def test_enroll_in_edx_course_run(mocker, user):
-    """Tests that enroll_in_edx_course_run uses the EdxApi client to enroll in a course run"""
+def test_enroll_in_edx_course_runs(mocker, user):
+    """Tests that enroll_in_edx_course_runs uses the EdxApi client to enroll in course runs"""
     mock_client = mocker.MagicMock()
     mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
-    course_run = CourseRunFactory.build()
-    enroll_in_edx_course_run(user, course_run)
-    mock_client.enrollments.create_audit_student_enrollment.assert_called_with(
-        course_run.courseware_id
+    course_runs = CourseRunFactory.build_batch(2)
+    enroll_in_edx_course_runs(user, course_runs)
+    mock_client.enrollments.create_audit_student_enrollment.assert_any_call(
+        course_runs[0].courseware_id
+    )
+    mock_client.enrollments.create_audit_student_enrollment.assert_any_call(
+        course_runs[1].courseware_id
     )

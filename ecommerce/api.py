@@ -13,6 +13,7 @@ from django.conf import settings
 from django.db.models import Q, Max, F, Count, Subquery
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
+from requests.exceptions import HTTPError
 
 from courses.constants import (
     CONTENT_TYPE_MODEL_PROGRAM,
@@ -20,6 +21,7 @@ from courses.constants import (
     CONTENT_TYPE_MODEL_COURSERUN,
 )
 from courses.models import Course, CourseRun, CourseRunEnrollment, ProgramEnrollment
+from courseware.api import enroll_in_edx_course_runs
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.models import (
     Basket,
@@ -30,6 +32,7 @@ from ecommerce.models import (
     CouponRedemption,
     CouponPayment,
     CouponPaymentVersion,
+    CouponSelection,
     CourseRunSelection,
     Line,
     Order,
@@ -387,9 +390,26 @@ def get_new_order_by_reference_number(reference_number):
         raise EcommerceException("Unable to find order {}".format(order_id))
 
 
-def enroll_user_on_success(order):  # pylint: disable=unused-argument
+def complete_order(order):
     """
-    Check if the order is successful, then enroll the user and create local records of their
+    Enrolls a user in all items associated with their Order and gets rid of checkout-related objects
+    so that the user starts fresh next time they go through ecommerce.
+
+    Args:
+        order (Order): A fulfilled order
+    """
+    enroll_user_in_order_items(order)
+
+    # clear the basket
+    with transaction.atomic():
+        BasketItem.objects.filter(basket__user=order.purchaser).delete()
+        CourseRunSelection.objects.filter(basket__user=order.purchaser).delete()
+        CouponSelection.objects.filter(basket__user=order.purchaser).delete()
+
+
+def enroll_user_in_order_items(order):
+    """
+    Enroll the user in the CourseRuns associated with their Order, and create local records of their
     enrollments.
 
     Args:
@@ -397,23 +417,40 @@ def enroll_user_on_success(order):  # pylint: disable=unused-argument
     """
     basket = order.purchaser.basket
     runs = CourseRun.objects.filter(courserunselection__basket=basket)
-    # pylint: disable=fixme
-    # TODO: Actually enroll the user in the given course runs on Open edX
+    programs = get_order_programs(order)
     company = get_company_affiliation(order)
+
+    try:
+        enroll_in_edx_course_runs(order.purchaser, runs)
+        edx_request_success = True
+    except HTTPError as exc:
+        log.exception(
+            "edX API enrollment failure for user %s (order id: %s, run ids: %s, response: %s)",
+            order.purchaser.username,
+            order.id,
+            str([run.id for run in runs]),
+            exc.response.content.decode("utf-8"),
+        )
+        edx_request_success = False
+    except Exception:  # pylint: disable=broad-except
+        log.exception(
+            "Unexpected edX enrollment for user %s (order id: %s, run ids: %s)",
+            order.purchaser.username,
+            order.id,
+            str([run.id for run in runs]),
+        )
+        edx_request_success = False
+
     for run in runs:
         CourseRunEnrollment.objects.get_or_create(
-            user=order.purchaser, run=run, defaults={"company": company}
+            user=order.purchaser,
+            run=run,
+            defaults=dict(company=company, edx_enrolled=edx_request_success),
         )
-    for line in order.lines.all():
-        if (
-            line.product_version.product.content_type.model
-            == CONTENT_TYPE_MODEL_PROGRAM
-        ):
-            ProgramEnrollment.objects.get_or_create(
-                user=order.purchaser,
-                program=line.product_version.product.content_object,
-                defaults={"company": company},
-            )
+    for program in programs:
+        ProgramEnrollment.objects.get_or_create(
+            user=order.purchaser, program=program, defaults=dict(company=company)
+        )
 
 
 def get_company_affiliation(order):
@@ -422,6 +459,23 @@ def get_company_affiliation(order):
     if redemption:
         return redemption.coupon_version.payment_version.company
     return None
+
+
+def get_order_programs(order):
+    """
+    Returns all Programs in an Order
+
+    Args:
+        order (Order): An order
+
+    Returns:
+        list of Program: A list of Programs that were purchased in the order
+    """
+    return [
+        line.product_version.product.content_object
+        for line in order.lines.select_related("product_version__product").all()
+        if line.product_version.product.content_type.model == CONTENT_TYPE_MODEL_PROGRAM
+    ]
 
 
 @transaction.atomic
