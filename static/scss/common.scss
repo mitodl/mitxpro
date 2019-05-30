@@ -104,3 +104,34 @@ a.link-button {
     }
   }
 }
+
+.profile-container {
+  @include media-breakpoint-down(sm)  {
+    padding: 20px 40px;
+  }
+
+  @include media-breakpoint-down(xs)  {
+    padding: 20px 20px;
+  }
+
+  background-color: $very-light-gray;
+  max-width: 840px;
+  margin: auto;
+
+  .auth-form {
+    .row {
+      margin-top: 20px;
+    }
+  }
+}
+
+.profile {
+  background: url(/static/images/user.svg) left no-repeat;
+  height: 120px;
+  width: 120px;
+}
+
+.dotted {
+  border-bottom: 2px dashed #8a8b8c;
+  margin-top: 25px;
+}

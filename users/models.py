@@ -7,7 +7,7 @@ import ulid
 from mitxpro.models import TimestampedModel
 from courseware.tasks import create_edx_user_from_id
 
-# Defined in edX UserProfile model
+# Defined in edX Profile model
 MALE = "m"
 FEMALE = "f"
 OTHER = "o"

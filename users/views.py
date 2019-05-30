@@ -18,8 +18,10 @@ class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     required_scopes = ["user"]
 
 
-class CurrentUserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
-    """User retrieve viewsets for the current user"""
+class CurrentUserRetrieveUpdateViewSet(
+    mixins.UpdateModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """User retrieve and update viewsets for the current user"""
 
     # NOTE: this is a separate viewset from UserRetrieveViewSet because of the differences in permission requirements
     serializer_class = UserSerializer

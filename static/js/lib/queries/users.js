@@ -1,7 +1,12 @@
 // @flow
 import { nthArg, objOf, pathOr } from "ramda"
 
-import type { CurrentUser, Country } from "../../flow/authTypes"
+import type {
+  CurrentUser,
+  Country,
+  UserProfileForm
+} from "../../flow/authTypes"
+import { getCookie } from "../api"
 
 export const currentUserSelector = (state: any): ?CurrentUser =>
   state.entities.currentUser
@@ -16,6 +21,15 @@ const updateResult = {
   currentUser: nextState
 }
 
+const DEFAULT_OPTIONS = {
+  options: {
+    method:  "PATCH",
+    headers: {
+      "X-CSRFTOKEN": getCookie("csrftoken")
+    }
+  }
+}
+
 export default {
   currentUserQuery: () => ({
     url:       "/api/users/me",
@@ -28,6 +42,15 @@ export default {
     transform: objOf("countries"),
     update:    {
       countries: (prev: Array<Country>, next: Array<Country>) => next
+    }
+  }),
+  editProfileMutation: (profileData: UserProfileForm) => ({
+    ...DEFAULT_OPTIONS,
+    transform: transformCurrentUser,
+    update:    updateResult,
+    url:       "/api/users/me",
+    body:      {
+      ...profileData
     }
   })
 }

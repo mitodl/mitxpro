@@ -12,6 +12,12 @@ export const PRODUCT_TYPE_LABELS = {
   [PRODUCT_TYPE_COURSERUN]: "Course Run"
 }
 
+export const GENDER_CHOICES = [
+  ["m", "Male"],
+  ["f", "Female"],
+  ["o", "Other/Prefer Not to Say"]
+]
+
 export const EMPLOYMENT_INDUSTRY = [
   "Association, Nonprofit Organization, NGO",
   "Business and Professional Services",

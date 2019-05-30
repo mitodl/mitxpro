@@ -6,7 +6,7 @@ import type {
   AuthResponse,
   AuthResponseRaw,
   LegalAddress,
-  UserProfile
+  ProfileForm
 } from "../../flow/authTypes"
 
 export const authSelector = (state: any) => state.entities.auth
@@ -92,7 +92,7 @@ export default {
   }),
 
   registerExtraDetailsMutation: (
-    profileData: UserProfile,
+    profileData: ProfileForm,
     partialToken: string
   ) => ({
     ...DEFAULT_OPTIONS,
@@ -100,7 +100,7 @@ export default {
     body: {
       flow:          FLOW_REGISTER,
       partial_token: partialToken,
-      ...profileData
+      ...profileData.profile
     }
   })
 }

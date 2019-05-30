@@ -23,6 +23,11 @@ export const routes = {
     extra:   "extra/"
   }),
 
+  profile: include("/profile/", {
+    view:   "",
+    update: "edit/"
+  }),
+
   checkout: "/checkout/",
 
   ecommerceAdmin: include("/ecommerce/admin/", {

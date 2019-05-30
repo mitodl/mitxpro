@@ -5,7 +5,7 @@ from rest_framework import routers
 
 from users.views import (
     UserRetrieveViewSet,
-    CurrentUserRetrieveViewSet,
+    CurrentUserRetrieveUpdateViewSet,
     CountriesStatesViewSet,
 )
 
@@ -16,7 +16,9 @@ router.register(r"countries", CountriesStatesViewSet, basename="countries_api")
 urlpatterns = [
     path(
         "api/users/me",
-        CurrentUserRetrieveViewSet.as_view({"get": "retrieve"}),
+        CurrentUserRetrieveUpdateViewSet.as_view(
+            {"patch": "update", "get": "retrieve"}
+        ),
         name="users_api-me",
     ),
     path("api/", include(router.urls)),

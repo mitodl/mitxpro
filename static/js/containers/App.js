@@ -22,6 +22,7 @@ import EcommerceAdminPages from "./pages/admin/EcommerceAdminPages"
 
 import type { Match } from "react-router"
 import type { CurrentUser } from "../flow/authTypes"
+import ProfilePages from "./pages/profile/ProfilePages"
 
 type Props = {
   match: Match,
@@ -62,6 +63,10 @@ class App extends React.Component<Props, void> {
           <Route
             path={urljoin(match.url, String(routes.ecommerceAdmin))}
             component={EcommerceAdminPages}
+          />
+          <Route
+            path={urljoin(match.url, String(routes.profile))}
+            component={ProfilePages}
           />
         </Switch>
       </div>

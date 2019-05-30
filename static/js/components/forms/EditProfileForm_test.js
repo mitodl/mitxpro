@@ -5,18 +5,27 @@ import { assert } from "chai"
 import { mount } from "enzyme"
 import wait from "waait"
 
-import RegisterExtraDetailsForm from "./RegisterExtraDetailsForm"
-
+import EditProfileForm from "./EditProfileForm"
 import {
   findFormikFieldByName,
   findFormikErrorByName
 } from "../../lib/test_utils"
+import { makeCountries, makeUser } from "../../factories/user"
 
-describe("RegisterExtraDetailsForm", () => {
+describe("EditProfileForm", () => {
   let sandbox, onSubmitStub
 
+  const countries = makeCountries()
+  const user = makeUser()
+
   const renderForm = () =>
-    mount(<RegisterExtraDetailsForm onSubmit={onSubmitStub} />)
+    mount(
+      <EditProfileForm
+        onSubmit={onSubmitStub}
+        countries={countries}
+        user={user}
+      />
+    )
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
@@ -31,15 +40,39 @@ describe("RegisterExtraDetailsForm", () => {
 
   it("renders the form", () => {
     const wrapper = renderForm()
-
     const form = wrapper.find("Formik")
+    assert.ok(findFormikFieldByName(form, "name").exists())
+    assert.isNotOk(findFormikFieldByName(form, "password").exists())
     assert.ok(findFormikFieldByName(form, "profile.birth_year").exists())
     assert.ok(findFormikFieldByName(form, "profile.company_size").exists())
+    assert.ok(findFormikFieldByName(form, "legal_address.city").exists())
     assert.ok(form.find("button[type='submit']").exists())
+  })
+
+  it(`validates that street address[0] is required`, async () => {
+    const wrapper = renderForm()
+    const street = wrapper.find(`input[name="legal_address.street_address[0]"]`)
+    street.simulate("change", {
+      persist: () => {},
+      target:  { name: "legal_address.street_address[0]", value: "" }
+    })
+    street.simulate("blur")
+    await wait()
+    wrapper.update()
+    assert.deepEqual(
+      findFormikErrorByName(wrapper, "legal_address.street_address").text(),
+      "Street address is a required field"
+    )
   })
 
   //
   ;[
+    ["legal_address.first_name", "", "First Name is a required field"],
+    ["legal_address.first_name", "  ", "First Name is a required field"],
+    ["legal_address.first_name", "Jane", null],
+    ["legal_address.last_name", "", "Last Name is a required field"],
+    ["legal_address.last_name", "  ", "Last Name is a required field"],
+    ["legal_address.last_name", "Doe", null],
     ["profile.company", "", "Company is a required field"],
     ["profile.company", "  ", "Company is a required field"],
     ["profile.company", "MIT", null],
