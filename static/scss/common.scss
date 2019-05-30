@@ -117,10 +117,11 @@ a.link-button {
   background-color: $very-light-gray;
   max-width: 840px;
   margin: auto;
-  padding: 40px 80px;
 
-  .row {
-    margin-top: 20px;
+  .auth-form {
+    .row {
+      margin-top: 20px;
+    }
   }
 }
 
