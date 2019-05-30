@@ -128,7 +128,6 @@ export class ViewProfilePage extends React.Component<Props> {
                       </div>
                     </div>
                   ) : null}
-                  <div className="form-group dotted" />
                   <div className="row">
                     <div className="col">Company</div>
                     <div className="col">{currentUser.profile.company}</div>
@@ -137,15 +136,16 @@ export class ViewProfilePage extends React.Component<Props> {
                     <div className="col">Job Title</div>
                     <div className="col">{currentUser.profile.job_title}</div>
                   </div>
+                  <div className="form-group dotted" />
+                  <div className="row">
+                    <div className="col">Industry</div>
+                    <div className="col">{currentUser.profile.industry}</div>
+                  </div>
                   <div className="row">
                     <div className="col">Job Function</div>
                     <div className="col">
                       {currentUser.profile.job_function}
                     </div>
-                  </div>
-                  <div className="row">
-                    <div className="col">Industry</div>
-                    <div className="col">{currentUser.profile.industry}</div>
                   </div>
                   <div className="row">
                     <div className="col">Years of Work Experience</div>
