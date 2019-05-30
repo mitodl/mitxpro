@@ -102,5 +102,25 @@ export default {
       partial_token: partialToken,
       ...profileData.profile
     }
+  }),
+
+  forgotPasswordMutation: (email: string) => ({
+    url:  "/api/password_reset/",
+    body: { email }
+  }),
+
+  forgotPasswordConfirmMutation: (
+    newPassword: string,
+    reNewPassword: string,
+    token: string,
+    uid: string
+  ) => ({
+    url:  "/api/password_reset/confirm/",
+    body: {
+      new_password:    newPassword,
+      re_new_password: reNewPassword,
+      token,
+      uid
+    }
   })
 }

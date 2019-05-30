@@ -12,7 +12,7 @@ import {
   EMPLOYMENT_SIZE
 } from "../../constants"
 import FormError from "./elements/FormError"
-import { newPasswordValidationShape } from "../../lib/form"
+import { newPasswordFieldValidation } from "../../lib/validation"
 
 const US_ALPHA_2 = "US"
 const CA_ALPHA_2 = "CA"
@@ -87,7 +87,7 @@ export const legalAddressValidation = yup.object().shape({
 })
 
 export const passwordValidation = yup.object().shape({
-  password: newPasswordValidationShape
+  password: newPasswordFieldValidation
 })
 
 export const profileValidation = yup.object().shape({

@@ -19,7 +19,7 @@ import RegisterEmailForm from "../../../components/forms/RegisterEmailForm"
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
 import type { AuthResponse } from "../../../flow/authTypes"
-import type { RegisterEmailValues } from "../../../components/forms/RegisterEmailForm"
+import type { RegisterEmailFormValues } from "../../../components/forms/RegisterEmailForm"
 
 type Props = {
   location: Location,
@@ -38,7 +38,7 @@ const emailNotificationText = (email: string): string =>
 
 export class RegisterEmailPage extends React.Component<Props> {
   async onSubmit(
-    { email, recaptcha }: RegisterEmailValues,
+    { email, recaptcha }: RegisterEmailFormValues,
     { setSubmitting, setErrors }: any
   ) {
     const {

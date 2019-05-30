@@ -8,10 +8,10 @@ import { Formik, Field, Form, ErrorMessage } from "formik"
 import ScaledRecaptcha from "../ScaledRecaptcha"
 import { EmailInput } from "./elements/inputs"
 import FormError from "./elements/FormError"
-import { emailValidationShape } from "../../lib/form"
+import { emailFieldValidation } from "../../lib/validation"
 
 const emailValidation = yup.object().shape({
-  email:     emailValidationShape,
+  email:     emailFieldValidation,
   recaptcha: SETTINGS.recaptchaKey
     ? yup.string().required("Please verify you're not a robot")
     : yup.mixed().notRequired()
@@ -21,7 +21,7 @@ type Props = {
   onSubmit: Function
 }
 
-export type RegisterEmailValues = {
+export type RegisterEmailFormValues = {
   email: string,
   recaptcha: ?string
 }

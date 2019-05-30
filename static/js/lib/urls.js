@@ -13,7 +13,11 @@ export const routes = {
   // authentication related routes
   login: include("/login/", {
     begin:    "",
-    password: "password/"
+    password: "password/",
+    forgot:   include("forgot-password/", {
+      begin:   "",
+      confirm: "confirm/:uid/:token/"
+    })
   }),
 
   register: include("/signup/", {

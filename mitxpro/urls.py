@@ -47,6 +47,12 @@ urlpatterns = [
     # named routes mapped to the react app
     path("login/", index, name="login"),
     path("login/password/", index, name="login-password"),
+    re_path(r"^login/forgot-password/$", index, name="password-reset"),
+    re_path(
+        r"^login/forgot-password/confirm/(?P<uid>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$",
+        index,
+        name="password-reset-confirm",
+    ),
     path("signup/", index, name="signup"),
     path("signup/details/", index, name="signup-details"),
     path("signup/extra/", index, name="signup-extra"),
@@ -58,12 +64,6 @@ urlpatterns = [
     re_path(r"^ecommerce/admin/", restricted, name="ecommerce-admin"),
     # social django needs to be here to preempt the login
     path("", include("social_django.urls", namespace="social")),
-    path("password_reset/", index, name="password-reset"),
-    re_path(
-        r"^password_reset/confirm/(?P<uid>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$",
-        index,
-        name="password-reset-confirm",
-    ),
     path("terms-and-conditions/", index, name="terms-and-conditions"),
     re_path(r"^catalog/", CourseCatalogView.as_view(), name="mitxpro-catalog"),
     re_path(r"^dashboard/", index, name="user-dashboard"),

@@ -33,7 +33,7 @@ def get_js_settings_context(request):
 
 
 @csrf_exempt
-def index(request):
+def index(request, **kwargs):  # pylint: disable=unused-argument
     """
     The index view
     """

@@ -3,13 +3,15 @@ import React from "react"
 import * as yup from "yup"
 
 import { Formik, Field, Form, ErrorMessage } from "formik"
+import { Link } from "react-router-dom"
 
 import FormError from "./elements/FormError"
 import { PasswordInput } from "./elements/inputs"
-import { passwordValidationShape } from "../../lib/form"
+import { passwordFieldValidation } from "../../lib/validation"
+import { routes } from "../../lib/urls"
 
 const passwordValidation = yup.object().shape({
-  password: passwordValidationShape
+  password: passwordFieldValidation
 })
 
 type LoginPasswordFormProps = {
@@ -31,6 +33,11 @@ const LoginPasswordForm = ({ onSubmit }: LoginPasswordFormProps) => (
             component={PasswordInput}
           />
           <ErrorMessage name="password" component={FormError} />
+        </div>
+        <div className="form-group">
+          <Link to={routes.login.forgot.begin} className="link-light-blue">
+            Forgot Password?
+          </Link>
         </div>
         <div className="row submit-row no-gutters justify-content-end">
           <button

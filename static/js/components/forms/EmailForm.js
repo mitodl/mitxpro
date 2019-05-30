@@ -6,14 +6,18 @@ import { Formik, Field, Form, ErrorMessage } from "formik"
 
 import FormError from "./elements/FormError"
 import { EmailInput } from "./elements/inputs"
-import { emailValidationShape } from "../../lib/form"
+import { emailFieldValidation } from "../../lib/validation"
 
 const emailValidation = yup.object().shape({
-  email: emailValidationShape
+  email: emailFieldValidation
 })
 
 type EmailFormProps = {
   onSubmit: Function
+}
+
+export type EmailFormValues = {
+  email: string
 }
 
 const EmailForm = ({ onSubmit }: EmailFormProps) => (

@@ -63,6 +63,12 @@ a.link-button {
   font-size: 20px;
 }
 
+.link-light-blue {
+  &, &:hover, &:visited, &:active {
+    color: $light-blue;
+  }
+}
+
 .text-ribbon {
   position: relative;
   width: 160px;
