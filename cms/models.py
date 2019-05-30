@@ -705,7 +705,7 @@ class CoursePage(ProductPage):
         """
         Gets the program page associated with this course, if it exists
         """
-        return self.course.program.page if self.course.program.page else None
+        return self.course.program.page if self.course.program else None
 
     @property
     def course_lineup(self):
