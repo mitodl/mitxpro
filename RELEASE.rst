@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.6.0
+Version 0.6.0 (Released May 30, 2019)
 -------------
 
 - Fix footer placement
