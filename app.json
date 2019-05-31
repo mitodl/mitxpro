@@ -271,6 +271,11 @@
       "description": "Hub spot portal id.",
       "required": false,
       "value": "4994459"
+    },
+    "HUBSPOT_ID_PREFIX": {
+      "description": "Hub spot id prefix.",
+      "required": false,
+      "value": "xpronew"
     }
   },
   "keywords": [

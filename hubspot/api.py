@@ -75,7 +75,7 @@ def make_sync_message(object_id, properties):
         if properties[key] is None:
             properties[key] = ""
     return {
-        "integratorObjectId": str(object_id),
+        "integratorObjectId": "{}-{}".format(settings.HUBSPOT_ID_PREFIX, object_id),
         "action": "UPSERT",
         "changeOccurredTimestamp": hubspot_timestamp(now_in_utc()),
         "propertyNameToValues": dict(properties),
@@ -122,16 +122,32 @@ def get_sync_errors(limit=200, offset=0):
         errors = paged_sync_errors(limit, offset)
 
 
+def get_sync_status(object_type, object_id):
+    """
+    Get errors that have occurred during sync
+    Args:
+        object_type (STRING): "CONTACT", "DEAL", "PRODUCT", "LINE_ITEM"
+        object_id (Int): The internal django ID of the object to check
+    Returns:
+        HTML response including sync status
+    """
+    response = send_hubspot_request(
+        str(object_id), f"/extensions/ecomm/v1/sync-status/{object_type.upper()}", "GET"
+    )
+    response.raise_for_status()
+    return response
+
+
 def make_contact_sync_message(user_id):
     """
     Create the body of a sync message for a contact. This will flatten the contained LegalAddress and Profile
     serialized data into one larger serializable dict
 
     Args:
-        user_id (ObjectID): ID of user to sync contact with
+        user_id (int): User id
 
     Returns:
-        dict: serializable sync-message data
+        list: dict containing serializable sync-message data
     """
     from users.models import User
     from users.serializers import UserSerializer
@@ -141,7 +157,7 @@ def make_contact_sync_message(user_id):
     properties.update(properties.pop("legal_address") or {})
     properties.update(properties.pop("profile") or {})
     properties["street_address"] = "\n".join(properties.pop("street_address"))
-    return make_sync_message(user.id, properties)
+    return [make_sync_message(user.id, properties)]
 
 
 def make_deal_sync_message(order_id):
@@ -152,9 +168,16 @@ def make_deal_sync_message(order_id):
         order_id (int): Order id
 
     Returns:
-        dict: serializable sync-message data for deals (orders)
+        list: dict containing serializable sync-message data for deals (orders)
     """
-    return make_sync_message(order_id, {})
+    from ecommerce.models import Order
+    from hubspot.serializers import OrderToDealSerializer
+
+    order = Order.objects.get(id=order_id)
+    properties = OrderToDealSerializer(order).data
+    properties.pop("lines")
+
+    return [make_sync_message(order_id, properties)]
 
 
 def make_line_item_sync_message(line_id):
@@ -165,9 +188,14 @@ def make_line_item_sync_message(line_id):
         line_id (int): Line id
 
     Returns:
-        dict: serializable sync-message data for lines
+        list: dict containing serializable sync-message data for lines
     """
-    return make_sync_message(line_id, {})
+    from ecommerce.models import Line
+    from hubspot.serializers import LineSerializer
+
+    line = Line.objects.get(id=line_id)
+    properties = LineSerializer(line).data
+    return [make_sync_message(line_id, properties)]
 
 
 def make_product_sync_message(product_id):
@@ -178,6 +206,11 @@ def make_product_sync_message(product_id):
         product_id (int): Product id
 
     Returns:
-        dict: serializable sync-message data for products
+        list: dict containing serializable sync-message data for products
     """
-    return make_sync_message(product_id, {})
+    from ecommerce.models import Product
+    from hubspot.serializers import ProductSerializer
+
+    product = Product.objects.get(id=product_id)
+    properties = ProductSerializer(product).data
+    return [make_sync_message(product_id, properties)]

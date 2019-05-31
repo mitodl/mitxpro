@@ -13,7 +13,12 @@ from ecommerce.factories import (
     ProductVersionFactory,
 )
 from ecommerce.models import Product, Order
-from hubspot.serializers import ProductSerializer, LineSerializer, OrderToDealSerializer
+from hubspot.serializers import (
+    ProductSerializer,
+    LineSerializer,
+    OrderToDealSerializer,
+    ORDER_STATUS_MAPPING,
+)
 
 pytestmark = [pytest.mark.django_db]
 
@@ -28,6 +33,7 @@ def test_serialize_product():
     assert serialized_data.get("product_type") == "courserun"
     assert serialized_data.get("id") == product.id
     assert serialized_data.get("price") == product.latest_version.price.to_eng_string()
+    assert serialized_data.get("description") == product.latest_version.description
 
 
 def test_serialize_line():
@@ -37,6 +43,8 @@ def test_serialize_line():
     assert serialized_data == {
         "id": line.id,
         "product": line.product_version.product.id,
+        "order": line.order_id,
+        "quantity": line.quantity,
     }
 
 
@@ -50,7 +58,7 @@ def test_serialize_order(status):
         "id": order.id,
         "name": f"XPRO-ORDER-{order.id}",
         "purchaser": order.purchaser.id,
-        "status": status,
+        "status": ORDER_STATUS_MAPPING[status],
         "amount": line.product_version.price.to_eng_string(),
         "discount_amount": "0.00",
         "close_date": (
@@ -79,7 +87,7 @@ def test_serialize_order_with_coupon():
         "id": order.id,
         "name": f"XPRO-ORDER-{order.id}",
         "purchaser": order.purchaser.id,
-        "status": order.status,
+        "status": ORDER_STATUS_MAPPING[order.status],
         "amount": line.product_version.price.to_eng_string(),
         "discount_amount": discount.to_eng_string(),
         "close_date": (
@@ -88,7 +96,7 @@ def test_serialize_order_with_coupon():
             else None
         ),
         "coupon_code": coupon_redemption.coupon_version.coupon.coupon_code,
-        "company": coupon_redemption.coupon_version.payment_version.company.id,
+        "company": coupon_redemption.coupon_version.payment_version.company.name,
         "b2b": True,
         "lines": [LineSerializer(instance=line).data],
     }

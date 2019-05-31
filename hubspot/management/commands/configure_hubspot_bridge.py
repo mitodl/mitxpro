@@ -15,11 +15,6 @@ HUBSPOT_ECOMMERCE_SETTINGS = {
     "productSyncSettings": {
         "properties": [
             {
-                "propertyName": "created_on",
-                "targetHubspotProperty": "createdate",
-                "dataType": "DATETIME",
-            },
-            {
                 "propertyName": "title",
                 "targetHubspotProperty": "name",
                 "dataType": "STRING",
@@ -133,13 +128,66 @@ HUBSPOT_ECOMMERCE_SETTINGS = {
     "dealSyncSettings": {
         "properties": [
             {
+                "propertyName": "name",
+                "targetHubspotProperty": "dealname",
+                "dataType": "STRING",
+            },
+            {
+                "propertyName": "amount",
+                "targetHubspotProperty": "amount",
+                "dataType": "NUMBER",
+            },
+            {
+                "propertyName": "discount_amount",
+                "targetHubspotProperty": "ip__ecomm_bridge__discount_amount",
+                "dataType": "NUMBER",
+            },
+            {
+                "propertyName": "close_date",
+                "targetHubspotProperty": "closedate",
+                "dataType": "STRING",
+            },
+            {
+                "propertyName": "coupon_code",
+                "targetHubspotProperty": "coupon_code",
+                "dataType": "NUMBER",
+            },
+            {
+                "propertyName": "purchaser",
+                "targetHubspotProperty": "hs_assoc__contact_ids",
+                "dataType": "STRING",
+            },
+            {
                 "propertyName": "status",
                 "targetHubspotProperty": "dealstage",
                 "dataType": "STRING",
-            }
+            },
+            {
+                "propertyName": "company",
+                "targetHubspotProperty": "company",
+                "dataType": "STRING",
+            },
         ]
     },
-    "lineItemSyncSettings": {"properties": []},
+    "lineItemSyncSettings": {
+        "properties": [
+            {
+                "propertyName": "order",
+                "targetHubspotProperty": "hs_assoc__deal_id",
+                "dataType": "STRING",
+            },
+            {
+                "propertyName": "product",
+                "targetHubspotProperty": "hs_assoc__product_id",
+                "dataType": "STRING",
+            },
+            {
+                "propertyName": "quantity",
+                "targetHubspotProperty": "quantity",
+                "dataType": "NUMBER",
+            },
+        ]
+    },
 }
 
 HUBSPOT_INSTALL_PATH = "/extensions/ecomm/v1/installs"
