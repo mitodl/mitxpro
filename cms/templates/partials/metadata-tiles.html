@@ -40,10 +40,11 @@
         <span class="title">FORMAT</span>
         <span class="text">Online</span>
       </li>
-      {% if page.product.current_price %}
+      {% firstof page.product.first_unexpired_run.current_price or page.product.current_price as price%}
+      {% if price %}
         <li>
           <span class="title">PRICE</span>
-          <span class="text">${{ page.product.current_price|floatformat:"0" }}</span>
+          <span class="text">${{ price|floatformat:"0" }}</span>
         </li>
       {% endif %}
     </ul>
