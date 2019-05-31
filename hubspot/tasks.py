@@ -10,6 +10,7 @@ from hubspot.api import (
     make_deal_sync_message,
     make_line_item_sync_message,
     get_sync_errors,
+    hubspot_timestamp,
 )
 from hubspot.models import HubspotErrorCheck
 from mitxpro.celery import app
@@ -55,32 +56,20 @@ def sync_line_item_with_hubspot(line_id):
 @app.task
 def check_hubspot_api_errors():
     """Check for and log any errors that occurred since the last time this was run"""
-    offset = 0
     last_check, _ = HubspotErrorCheck.objects.get_or_create(
         defaults={"checked_on": now_in_utc()}
     )
-    last_timestamp = int(last_check.checked_on.timestamp() * 1000)
-    caught_up = False
-    while not caught_up:
-        resp = get_sync_errors(limit=200, offset=offset)
-        resp.raise_for_status()
-        errors = resp.json().get("results", [])
-
-        if not errors:
-            caught_up = True
-        for error in errors:
-            if error.get("errorTimestamp") > last_timestamp:
-                msg = "Hubspot error for {obj_type} id {obj_id}: {details}".format(
-                    obj_type=error.get("objectType", "N/A"),
-                    obj_id=error.get("integratorObjectId", "N/A"),
-                    details=error.get("details", ""),
-                )
-                log.error(msg)
-            else:
-                caught_up = True
-                break
-        if errors and not caught_up:
-            offset += 200
+    last_timestamp = hubspot_timestamp(last_check.checked_on)
+    for error in get_sync_errors():
+        if error.get("errorTimestamp") > last_timestamp:
+            msg = "Hubspot error for {obj_type} id {obj_id}: {details}".format(
+                obj_type=error.get("objectType", "N/A"),
+                obj_id=error.get("integratorObjectId", "N/A"),
+                details=error.get("details", ""),
+            )
+            log.error(msg)
+        else:
+            break
 
     last_check.checked_on = now_in_utc()
     last_check.save()
