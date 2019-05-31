@@ -4,7 +4,6 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.conf import settings
 from django.db.models import Prefetch
 from django.views.generic import ListView
 
@@ -78,10 +77,6 @@ class CourseCatalogView(ListView):
             "programs": object_list["programs"],
             "courses": object_list["courses"],
             "default_image_path": DEFAULT_COURSE_IMG_PATH,
-            "hubspot_portal_id": settings.HUBSPOT_CONFIG.get("HUBSPOT_PORTAL_ID"),
-            "hubspot_new_courses_form_guid": settings.HUBSPOT_CONFIG.get(
-                "HUBSPOT_NEW_COURSES_FORM_GUID"
-            ),
         }
 
 

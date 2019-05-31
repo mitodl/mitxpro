@@ -263,6 +263,11 @@
       "required": false,
       "value": "ad5d54e5-5ca9-4255-9c17-fa222e0a9b82"
     },
+    "HUBSPOT_FOOTER_FORM_GUID": {
+      "description": "Form guid over hub spot for footer block.",
+      "required": false,
+      "value": "6f7e46ec-f757-43a4-b109-597210df0f75"
+    },
     "HUBSPOT_PORTAL_ID": {
       "description": "Hub spot portal id.",
       "required": false,
