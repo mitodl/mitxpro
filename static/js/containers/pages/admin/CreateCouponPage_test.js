@@ -10,7 +10,7 @@ import {
   makeCouponPaymentVersion,
   makeProduct
 } from "../../../factories/ecommerce"
-import { COUPON_TYPE_PROMO } from "../../../constants"
+import { COUPON_TYPE_PROMO, COUPON_TYPE_SINGLE_USE } from "../../../constants"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 
 describe("CreateCouponPage", () => {
@@ -122,6 +122,35 @@ describe("CreateCouponPage", () => {
       credentials: undefined
     })
     assert.equal(inner.state().couponId, newCoupon.id)
+  })
+
+  it("sets max_redemptions to 1 if coupon type is single-use", async () => {
+    const testCouponData = {
+      coupon_type:      COUPON_TYPE_SINGLE_USE,
+      products:         [products[0]],
+      num_coupon_codes: 100,
+      amount:           50
+    }
+    const { inner } = await renderCreateCouponPage(
+      {},
+      {
+        createCoupon: helper.handleRequestStub
+      }
+    )
+    await inner.instance().onSubmit(testCouponData, {
+      setSubmitting: setSubmittingStub,
+      setErrors:     setErrorsStub
+    })
+    sinon.assert.calledWith(helper.handleRequestStub, "/api/coupons/", "POST", {
+      body: {
+        max_redemptions: 1,
+        ...testCouponData
+      },
+      headers: {
+        "X-CSRFTOKEN": null
+      },
+      credentials: undefined
+    })
   })
 
   it("sets errors if submission is unsuccessful", async () => {
