@@ -34,7 +34,7 @@ django-templated-mail==1.1.1  # via djoser
 django-treebeard==4.3     # via wagtail
 django-webpack-loader==0.5.0
 django==2.1.7
-djangorestframework==3.9.1
+djangorestframework==3.9.4
 djoser==1.5.1
 docutils==0.14            # via botocore
 draftjs-exporter==2.1.5   # via wagtail
