@@ -51,3 +51,9 @@
   {% if page.inquiry_section %} {% include "partials/for-teams.html" with page=page.inquiry_section %} {% endif %}
   {% if page.image_carousel_section %} {% include "partials/companies-trust.html" with page=page.image_carousel_section %} {% endif %}
 {% endblock %}
+{% block contact-us %}
+    {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
+        {% include "subscription.html" %}
+    {% endif %}
+{% endblock %}
+
