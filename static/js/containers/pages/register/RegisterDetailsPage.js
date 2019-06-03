@@ -4,29 +4,30 @@ import React from "react"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { Link } from "react-router-dom"
+import { isEmpty } from "ramda"
 import { connectRequest, mutateAsync, requestAsync } from "redux-query"
 import { createStructuredSelector } from "reselect"
 import qs from "query-string"
 
 import auth from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
-import { routes } from "../../../lib/urls"
+import { routes, RedirectToRegister } from "../../../lib/urls"
 import {
   STATE_REGISTER_EXTRA_DETAILS,
   STATE_USER_BLOCKED,
-  STATE_ERROR_TEMPORARY
+  STATE_ERROR
 } from "../../../lib/auth"
 import queries from "../../../lib/queries"
 import { qsPartialTokenSelector } from "../../../lib/selectors"
 
 import RegisterDetailsForm from "../../../components/forms/RegisterDetailsForm"
+import withRequiredQueryParams from "../../../hoc/withRequiredQueryParams"
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
 import type {
   AuthResponse,
   AuthResponseRaw,
-  AuthStates,
   LegalAddress,
   User,
   Country
@@ -40,10 +41,6 @@ type RegisterProps = {|
 
 type StateProps = {|
   countries: Array<Country>
-|}
-
-type State = {|
-  authState: ?AuthStates
 |}
 
 type DispatchProps = {|
@@ -62,15 +59,8 @@ type Props = {|
   ...DispatchProps
 |}
 
-class RegisterDetailsPage extends React.Component<Props, State> {
-  constructor(props) {
-    super(props)
-    this.state = {
-      authState: null
-    }
-  }
-
-  async onSubmit(detailsData, { setSubmitting, setErrors }) {
+export class RegisterDetailsPage extends React.Component<Props> {
+  async onSubmit(detailsData: any, { setSubmitting, setErrors }: any) {
     const {
       history,
       registerDetails,
@@ -92,50 +82,28 @@ class RegisterDetailsPage extends React.Component<Props, State> {
           partial_token
         })
         history.push(`${routes.register.extra}?${params}`)
-      } else if (
-        state === STATE_USER_BLOCKED ||
-        state === STATE_ERROR_TEMPORARY
-      ) {
-        this.setState({
-          authState: state
-        })
-      } else if (errors.length > 0) {
+      } else if (state === STATE_USER_BLOCKED) {
+        const params = !isEmpty(errors)
+          ? qs.stringify({
+            error: errors[0]
+          })
+          : ""
+        history.push(`${routes.register.denied}?${params}`)
+      } else if (state === STATE_ERROR && errors.length > 0) {
         setErrors({
-          email: errors[0]
+          name: errors[0]
         })
+      } else {
+        // otherwise we're in some kind of error state, explicit or otherwise
+        history.push(routes.register.error)
       }
     } finally {
       setSubmitting(false)
     }
   }
 
-  renderAuthState(authState: AuthStates) {
-    switch (authState) {
-    case STATE_USER_BLOCKED:
-      return (
-        <div>
-            Sorry, we cannot create an account for you at this time. Please
-            contact us at{" "}
-          <a href={`mailto:${SETTINGS.support_email}`}>
-            {SETTINGS.support_email}
-          </a>
-        </div>
-      )
-    case STATE_ERROR_TEMPORARY:
-      return (
-        <div>
-            Unable to complete registration at this time, please try again
-            later.
-        </div>
-      )
-    default:
-      return <div>Unknown error, plase contact support</div>
-    }
-  }
-
   render() {
     const { countries } = this.props
-    const { authState } = this.state
 
     return (
       <div className="container auth-page registration-page">
@@ -157,14 +125,10 @@ class RegisterDetailsPage extends React.Component<Props, State> {
             </div>
             <div className="row">
               <div className="col-12 auth-form">
-                {authState ? (
-                  this.renderAuthState(authState)
-                ) : (
-                  <RegisterDetailsForm
-                    onSubmit={this.onSubmit.bind(this)}
-                    countries={countries}
-                  />
-                )}
+                <RegisterDetailsForm
+                  onSubmit={this.onSubmit.bind(this)}
+                  countries={countries}
+                />
               </div>
             </div>
           </div>
@@ -203,6 +167,7 @@ const mapDispatchToProps = {
 }
 
 export default compose(
+  withRequiredQueryParams(["partial_token"], RedirectToRegister),
   connect(
     mapStateToProps,
     mapDispatchToProps

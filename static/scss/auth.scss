@@ -80,3 +80,13 @@
   border: none;
   background: none;
 }
+
+.register-error-icon {
+  margin: 0 auto 15px;
+
+  background-image: url(/static/images/icon-warning.svg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  width: 50px;
+  height: 50px;
+}

@@ -9,10 +9,11 @@ import { createStructuredSelector } from "reselect"
 import { STATE_SUCCESS } from "../../../lib/auth"
 import auth from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
-import { routes } from "../../../lib/urls"
+import { routes, RedirectToRegister } from "../../../lib/urls"
 import { qsPartialTokenSelector } from "../../../lib/selectors"
 
 import RegisterExtraDetailsForm from "../../../components/forms/RegisterExtraDetailsForm"
+import withRequiredQueryParams from "../../../hoc/withRequiredQueryParams"
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
@@ -114,6 +115,7 @@ const mapDispatchToProps = {
 }
 
 export default compose(
+  withRequiredQueryParams(["partial_token"], RedirectToRegister),
   connect(
     mapStateToProps,
     mapDispatchToProps

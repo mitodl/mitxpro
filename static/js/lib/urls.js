@@ -1,5 +1,7 @@
 // @flow
+import React from "react"
 import { include } from "named-urls"
+import { Redirect } from "react-router-dom"
 import qs from "query-string"
 
 export const getNextParam = (search: string) => qs.parse(search).next || "/"
@@ -24,7 +26,9 @@ export const routes = {
     begin:   "",
     confirm: "confirm/",
     details: "details/",
-    extra:   "extra/"
+    error:   "error/",
+    extra:   "extra/",
+    denied:  "denied/"
   }),
 
   profile: include("/profile/", {
@@ -40,3 +44,7 @@ export const routes = {
     coupons:    "coupons/"
   })
 }
+
+export const createRedirectTo = (path: string) => () => <Redirect to={path} />
+
+export const RedirectToRegister = createRedirectTo(routes.register.begin)

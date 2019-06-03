@@ -79,6 +79,10 @@ class UnexpectedExistingUserException(PartialException):
 class UserExportBlockedException(AuthException):
     """The user is blocked for export reasons from continuing to sign up"""
 
+    def __init__(self, backend, reason_code):
+        super().__init__(backend)
+        self.reason_code = reason_code
+
 
 class UserTryAgainLaterException(AuthException):
     """The user should try to register again later"""

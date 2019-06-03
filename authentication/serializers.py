@@ -139,6 +139,11 @@ class SocialAuthSerializer(serializers.Serializer):
             )
         except InvalidEmail:
             result = SocialAuthState(SocialAuthState.STATE_INVALID_EMAIL)
+        except UserExportBlockedException as exc:
+            result = SocialAuthState(
+                SocialAuthState.STATE_USER_BLOCKED,
+                errors=[f"Error code: CS_{exc.reason_code}"],
+            )
         except AuthException as exc:
             log.exception("Received unexpected AuthException")
             result = SocialAuthState(SocialAuthState.STATE_ERROR, errors=[str(exc)])
@@ -285,11 +290,6 @@ class RegisterDetailsSerializer(SocialAuthSerializer):
         except RequireProfileException as exc:
             result = SocialAuthState(
                 SocialAuthState.STATE_REGISTER_EXTRA_DETAILS, partial=exc.partial
-            )
-        except UserExportBlockedException:
-            result = SocialAuthState(
-                SocialAuthState.STATE_USER_BLOCKED,
-                errors=["Unable to complete registration, please contact support"],
             )
         except UserTryAgainLaterException:
             result = SocialAuthState(

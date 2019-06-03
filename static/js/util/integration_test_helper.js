@@ -10,23 +10,31 @@ import configureStoreMain from "../store/configureStore"
 import type { Sandbox } from "../flow/sinonTypes"
 import * as networkInterfaceFuncs from "../store/network_interface"
 
+async function componentRenderer(
+  extraState = {},
+  extraProps = {}
+) {
+
+}
+
+componentRenderer.withMemoryRouter = () => {
+
+}
+
+
+
 export default class IntegrationTestHelper {
   sandbox: Sandbox
   browserHistory: History
-  actions: Array<any>
 
   constructor() {
     this.sandbox = sinon.createSandbox({})
-    this.actions = []
 
     this.scrollIntoViewStub = this.sandbox.stub()
     window.HTMLDivElement.prototype.scrollIntoView = this.scrollIntoViewStub
     window.HTMLFieldSetElement.prototype.scrollIntoView = this.scrollIntoViewStub
-    this.browserHistory = createMemoryHistory()
-    this.currentLocation = null
-    this.browserHistory.listen(url => {
-      this.currentLocation = url
-    })
+
+    this.configureBrowserHistory()
 
     const defaultResponse = {
       body:   {},
@@ -52,33 +60,55 @@ export default class IntegrationTestHelper {
       }))
   }
 
+  configureBrowserHistory(config: ?Object) {
+    this.currentLocation = null
+    this.browserHistory = createMemoryHistory(config)
+    this.browserHistory.listen(url => {
+      this.currentLocation = url
+    })
+  }
+
   cleanup() {
-    this.actions = []
     this.sandbox.restore()
+  }
+
+  createRenderer(
+    WrappedComponent: Class<React.Component<*, *>>,
+    InnerComponent: ?Class<React.Component<*, *>>
+  ) {
+
   }
 
   configureHOCRenderer(
     WrappedComponent: Class<React.Component<*, *>>,
     InnerComponent: Class<React.Component<*, *>>,
     defaultState: Object,
-    defaultProps = {}
+    defaultProps = {},
+    useRouter = false
   ) {
     const history = this.browserHistory
     return async (
       extraState = {},
-      extraProps = {
-        history
-      }
+      extraProps = {}
     ) => {
       const initialState = R.mergeDeepRight(defaultState, extraState)
       const store = configureStoreMain(initialState)
-      const wrapper = await shallow(
+      let component = (
         <WrappedComponent
           store={store}
           dispatch={store.dispatch}
           {...defaultProps}
           {...extraProps}
-        />,
+        />
+      )
+
+      // wrap the component in a router
+      if (useRouter) {
+        component = <Router history={history}>{component}</Router>
+      }
+
+      const wrapper = await shallow(
+        component,
         {
           context: {
             // TODO: should be removed in the near future after upgrading enzyme

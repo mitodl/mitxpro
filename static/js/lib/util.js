@@ -2,6 +2,7 @@
 /* global SETTINGS:false */
 import {
   all,
+  any,
   complement,
   compose,
   curry,
@@ -10,7 +11,9 @@ import {
   isEmpty,
   isNil,
   lensPath,
+  pickAll,
   trim,
+  values,
   view
 } from "ramda"
 import { truncate as _truncate } from "lodash"
@@ -89,6 +92,14 @@ export const removeTrailingSlash = (str: string) =>
 
 export const emptyOrNil = either(isEmpty, isNil)
 export const allEmptyOrNil = all(emptyOrNil)
+
+/* Returns true if any of the provided keys are empty or nil */
+export const anyKeyEmptyOrNil = (keys: Array<string>, obj: { [string]: any }) =>
+  compose(
+    any(emptyOrNil),
+    values,
+    pickAll(keys)
+  )(obj)
 
 export const spaceSeparated = (strings: Array<?string>): string =>
   strings.filter(str => str).join(" ")

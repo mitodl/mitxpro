@@ -514,9 +514,7 @@ class AuthStateMachine(RuleBasedStateMachine):
                 {
                     "flow": auth_state["flow"],
                     "partial_token": None,
-                    "errors": [
-                        "Unable to complete registration, please contact support"
-                    ],
+                    "errors": ["Error code: CS_700"],
                     "state": SocialAuthState.STATE_USER_BLOCKED,
                 },
             )
