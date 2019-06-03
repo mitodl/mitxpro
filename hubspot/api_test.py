@@ -105,7 +105,7 @@ def test_make_contact_sync_message(user):
 def test_get_sync_errors(mock_hubspot_errors, offset):
     """Test that paging works for get_sync_errors"""
     limit = 2
-    errors = list(get_sync_errors(limit, offset))
+    errors = list(get_sync_errors(1_498_727_887_000, limit, offset))
     assert len(errors) == 4
     mock_hubspot_errors.assert_any_call(limit, offset)
     mock_hubspot_errors.assert_any_call(limit, offset + limit)

@@ -100,18 +100,18 @@ def test_sync_errors_first_run(mock_hubspot_errors, mock_logger):
 
 
 @pytest.mark.parametrize(
-    "last_check_dt,expected_errors",
+    "last_check_dt,expected_errors,call_count",
     [
-        [datetime(2015, 1, 1, tzinfo=pytz.utc), 2],
-        [datetime(2019, 5, 22, tzinfo=pytz.utc), 1],
+        [datetime(2015, 1, 1, tzinfo=pytz.utc), 4, 3],
+        [datetime(2019, 5, 22, tzinfo=pytz.utc), 1, 1],
     ],
 )
 def test_sync_errors_new_errors(
-    mock_hubspot_errors, mock_logger, last_check_dt, expected_errors
+    mock_hubspot_errors, mock_logger, last_check_dt, expected_errors, call_count
 ):
     """Test that errors more recent than last checked_on date are logged"""
     last_check = HubspotErrorCheckFactory.create(checked_on=last_check_dt)
     check_hubspot_api_errors()
-    mock_hubspot_errors.assert_called_once()
+    assert mock_hubspot_errors.call_count == call_count
     assert mock_logger.call_count == expected_errors
     assert HubspotErrorCheck.objects.first().checked_on > last_check.checked_on
