@@ -1,6 +1,26 @@
 Release Notes
 =============
 
+Version 0.7.0
+-------------
+
+- Implemented bulk enrollment checkout
+- Bump djangorestframework from 3.9.1 to 3.9.4 (#414)
+- Added template for config change request and PR checkbox
+- Bumped drf version
+- Integrate HubSpot in HomePage
+- add seed resource pages in cms
+- Feedback
+- Rebase + Migration Conflict Fixes
+- Feedback
+- Removed unused import
+- #155 Integrate Wagtail Routing
+- View/edit profile pages (#346)
+- Added support for redirect on register existing email
+- Add hubspot form in footer
+- #383 Add Home Page Instructions to Readme
+- Enroll user in edX course runs on order success
+
 Version 0.6.0 (Released May 30, 2019)
 -------------
 
