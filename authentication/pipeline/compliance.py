@@ -63,7 +63,7 @@ def verify_exports_compliance(
             log.exception(
                 "Exception sending email to support regarding export compliance check failure"
             )
-        raise UserExportBlockedException(backend)
+        raise UserExportBlockedException(backend, export_inquiry.reason_code)
     elif export_inquiry.is_unknown:
         raise AuthException("Unable to authenticate, please contact support")
 

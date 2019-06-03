@@ -8,6 +8,8 @@ import RegisterEmailPage from "./RegisterEmailPage"
 import RegisterConfirmPage from "./RegisterConfirmPage"
 import RegisterDetailsPage from "./RegisterDetailsPage"
 import RegisterExtraDetailsPage from "./RegisterExtraDetailsPage"
+import RegisterDeniedPage from "./RegisterDeniedPage"
+import RegisterErrorPage from "./RegisterErrorPage"
 
 const RegisterPages = () => (
   <React.Fragment>
@@ -25,8 +27,14 @@ const RegisterPages = () => (
       />
       <Route
         exact
-        path={routes.register.profile}
+        path={routes.register.details}
         component={RegisterDetailsPage}
+      />
+      <Route exact path={routes.register.error} component={RegisterErrorPage} />
+      <Route
+        exact
+        path={routes.register.denied}
+        component={RegisterDeniedPage}
       />
       <Redirect to={routes.register.begin} />
     </Switch>

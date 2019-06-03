@@ -24,7 +24,9 @@ export const routes = {
     begin:   "",
     confirm: "confirm/",
     details: "details/",
-    extra:   "extra/"
+    error:   "error/",
+    extra:   "extra/",
+    denied:  "denied/"
   }),
 
   profile: include("/profile/", {

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 73 139.76">
+  <defs>
+    <style>.a,.b,.c{fill:none;}.b{clip-rule:evenodd;}.c{fill-rule:evenodd;}.d{clip-path:url(#a);}.e{clip-path:url(#b);}.f{isolation:isolate;}.g{clip-path:url(#c);}.h{clip-path:url(#d);}.i{clip-path:url(#e);}.j{fill:#a41f35;}.k{clip-path:url(#k);}.l{clip-path:url(#l);}.m{clip-path:url(#m);}.n{clip-path:url(#n);}.o{clip-path:url(#o);}</style>
+    <clipPath id="a" transform="translate(4 82.04)">
+      <rect class="a" x="9" y="-77.04" width="55" height="51.76"/>
+    </clipPath>
+    <clipPath id="b" transform="translate(4 82.04)">
+      <rect class="a" x="-672" y="-399.04" width="1401" height="852"/>
+    </clipPath>
+    <clipPath id="c" transform="translate(4 82.04)">
+      <rect class="a" x="8" y="-77.04" width="57" height="52"/>
+    </clipPath>
+    <clipPath id="d" transform="translate(4 82.04)">
+      <path class="b" d="M63.59-30.35l-24-44.86a3.45,3.45,0,0,0-3-1.83h0a3.44,3.44,0,0,0-3,1.83L9.41-30.35a3.46,3.46,0,0,0,.08,3.4,3.47,3.47,0,0,0,3,1.68H60.54a3.47,3.47,0,0,0,3-1.68A3.46,3.46,0,0,0,63.59-30.35Zm-27-1.82a3.45,3.45,0,0,1-3.45-3.45,3.45,3.45,0,0,1,3.45-3.46A3.46,3.46,0,0,1,40-35.62,3.46,3.46,0,0,1,36.55-32.17ZM40-45.92a3.45,3.45,0,0,1-3.45,3.45,3.45,3.45,0,0,1-3.46-3.45V-59.73a3.46,3.46,0,0,1,3.46-3.45A3.46,3.46,0,0,1,40-59.73Z"/>
+    </clipPath>
+    <clipPath id="e" transform="translate(4 82.04)">
+      <rect class="a" x="9" y="-77.04" width="55" height="52"/>
+    </clipPath>
+    <clipPath id="k" transform="translate(4 82.04)">
+      <rect class="a" x="1" y="0.96" width="55" height="51.76"/>
+    </clipPath>
+    <clipPath id="l" transform="translate(4 82.04)"><rect class="a" x="-17" y="-12.04" width="90" height="78"/></clipPath>
+    <clipPath id="m" transform="translate(4 82.04)"><rect class="a" y="0.96" width="57" height="52"/></clipPath>
+    <clipPath id="n" transform="translate(4 82.04)"><path class="b" d="M55.59,47.65,31.6,2.79a3.45,3.45,0,0,0-3-1.83h0a3.44,3.44,0,0,0-3,1.83L1.41,47.65a3.45,3.45,0,0,0,3.05,5.08H52.54a3.45,3.45,0,0,0,3.05-5.08Zm-27-1.82A3.46,3.46,0,1,1,32,42.38,3.45,3.45,0,0,1,28.55,45.83ZM32,32.08a3.46,3.46,0,0,1-6.91,0V18.27a3.46,3.46,0,0,1,6.91,0Z"/></clipPath>
+    <clipPath id="o" transform="translate(4 82.04)"><rect class="a" x="1" y="0.96" width="55" height="52"/></clipPath>
+  </defs>
+  <title>Warning_Icon</title>
+  <g class="d"><g class="e"><g class="f"><g class="g"><g class="h"><g class="i">
+    <rect class="j" x="8" width="65" height="61.76"/>
+  </g></g></g></g></g></g>
+</svg>
