@@ -6,20 +6,21 @@ import CheckoutPage, {
   CheckoutPage as InnerCheckoutPage,
   calcSelectedRunIds
 } from "./CheckoutPage"
+import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 import * as formFuncs from "../../lib/form"
-import IntegrationTestHelper from "../../util/integration_test_helper"
-import {
-  makeBasketResponse,
-  makeCouponSelection
-} from "../../factories/ecommerce"
 import {
   calculateDiscount,
   calculatePrice,
   formatPrice,
   formatRunTitle
 } from "../../lib/ecommerce"
+import IntegrationTestHelper from "../../util/integration_test_helper"
+import {
+  makeBasketResponse,
+  makeCouponSelection
+} from "../../factories/ecommerce"
 import { assertRaises } from "../../lib/util"
-import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
+import { shouldIf } from "../../lib/test_utils"
 
 describe("CheckoutPage", () => {
   let helper, renderPage, basket
@@ -95,8 +96,6 @@ describe("CheckoutPage", () => {
   it("renders a course run basket item", async () => {
     basket = makeBasketResponse(PRODUCT_TYPE_COURSERUN)
     const basketItem = basket.items[0]
-    basketItem.type = "courserun"
-
     const { inner } = await renderPage({
       entities: {
         basket
@@ -525,12 +524,57 @@ describe("CheckoutPage", () => {
       course_3: "run_3"
     })
   })
+  //
+  ;[true, false].forEach(isCourseRun => {
+    it(`selecting a course run ${shouldIf(
+      isCourseRun
+    )} update the product`, async () => {
+      basket = makeBasketResponse(
+        isCourseRun ? PRODUCT_TYPE_COURSERUN : PRODUCT_TYPE_PROGRAM
+      )
+      const { inner } = await renderPage({
+        entities: {
+          basket
+        }
+      })
+      const runSelect = inner.find("select").at(0)
+      const runOption = runSelect.find("option").at(1)
 
-  it("does show a select for course run product", async () => {
-    basket.items[0].type = PRODUCT_TYPE_COURSERUN
-    const { inner } = await renderPage()
-    const firstCourse = inner.find(".item-row").at(0)
-    assert.equal(firstCourse.find("select").length, 1)
+      await runSelect.prop("onChange")({
+        target: { value: runOption.prop("value") }
+      })
+
+      const requestData = {
+        body: {
+          items: [
+            {
+              id:      basket.items[0].courses[0].courseruns[0].product_id,
+              run_ids: []
+            }
+          ]
+        },
+        headers: {
+          "X-CSRFTOKEN": null
+        },
+        credentials: undefined
+      }
+
+      if (isCourseRun) {
+        sinon.assert.calledWith(
+          helper.handleRequestStub,
+          "/api/basket/",
+          "PATCH",
+          requestData
+        )
+      } else {
+        sinon.assert.neverCalledWith(
+          helper.handleRequestStub,
+          "/api/basket/",
+          "PATCH",
+          requestData
+        )
+      }
+    })
   })
 
   it("shows a select with options for a program product, and updates a run", async () => {

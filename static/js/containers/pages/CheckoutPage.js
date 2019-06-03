@@ -23,6 +23,7 @@ import type {
   CheckoutResponse,
   BasketItem
 } from "../../flow/ecommerceTypes"
+import { PRODUCT_TYPE_COURSERUN } from "../../constants"
 
 export const calcSelectedRunIds = (item: BasketItem): { [number]: number } => {
   if (item.type === "courserun") {
@@ -165,7 +166,7 @@ export class CheckoutPage extends React.Component<Props, State> {
         }
       })
 
-      if (basket && item.type === "courserun") {
+      if (basket && item.type === PRODUCT_TYPE_COURSERUN) {
         const course = item.courses[0]
         const selectedRun = find(propEq("id", runId), course.courseruns)
         if (selectedRun && selectedRun.product_id) {
