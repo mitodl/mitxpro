@@ -4,7 +4,8 @@ import { assert } from "chai"
 import {
   qsPartialTokenSelector,
   qsNextSelector,
-  qsVerificationCodeSelector
+  qsVerificationCodeSelector,
+  qsErrorSelector
 } from "./selectors"
 
 describe("selector utils", () => {
@@ -65,6 +66,20 @@ describe("selector utils", () => {
     it("should return '/' if no next param", () => {
       assert.equal(qsNextSelector({}, makeSearchProps("abc=123")), "/")
       assert.equal(qsNextSelector({}, makeSearchProps("")), "/")
+    })
+  })
+
+  describe("qsErrorSelector", () => {
+    it("should return the error param", () => {
+      assert.equal(
+        qsErrorSelector({}, makeSearchProps("abc=123&error=codevalue")),
+        "codevalue"
+      )
+    })
+
+    it("should return undefined if no error param", () => {
+      assert.isUndefined(qsErrorSelector({}, makeSearchProps("abc=123")))
+      assert.isUndefined(qsErrorSelector({}, makeSearchProps("")))
     })
   })
 })

@@ -20,3 +20,4 @@ export const qsVerificationCodeSelector = createParamSelector(
   "verification_code"
 )
 export const qsNextSelector = createParamSelector("next", "/")
+export const qsErrorSelector = createParamSelector("error")

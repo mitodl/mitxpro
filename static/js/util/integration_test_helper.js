@@ -64,18 +64,14 @@ export default class IntegrationTestHelper {
     defaultProps = {}
   ) {
     const history = this.browserHistory
-    return async (
-      extraState = {},
-      extraProps = {
-        history
-      }
-    ) => {
+    return async (extraState = {}, extraProps = {}) => {
       const initialState = R.mergeDeepRight(defaultState, extraState)
       const store = configureStoreMain(initialState)
       const wrapper = await shallow(
         <WrappedComponent
           store={store}
           dispatch={store.dispatch}
+          history={history}
           {...defaultProps}
           {...extraProps}
         />,
