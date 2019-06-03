@@ -60,13 +60,16 @@ def check_hubspot_api_errors():
         defaults={"checked_on": now_in_utc()}
     )
     last_timestamp = hubspot_timestamp(last_check.checked_on)
-    for error in get_sync_errors(last_timestamp):
-        msg = "Hubspot error for {obj_type} id {obj_id}: {details}".format(
-            obj_type=error.get("objectType", "N/A"),
-            obj_id=error.get("integratorObjectId", "N/A"),
-            details=error.get("details", ""),
-        )
-        log.error(msg)
+    for error in get_sync_errors():
+        if error.get("errorTimestamp") > last_timestamp:
+            msg = "Hubspot error for {obj_type} id {obj_id}: {details}".format(
+                obj_type=error.get("objectType", "N/A"),
+                obj_id=error.get("integratorObjectId", "N/A"),
+                details=error.get("details", ""),
+            )
+            log.error(msg)
+        else:
+            break
 
     last_check.checked_on = now_in_utc()
     last_check.save()

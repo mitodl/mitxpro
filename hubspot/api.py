@@ -103,7 +103,7 @@ def paged_sync_errors(limit=200, offset=0):
     return response.json().get("results", [])
 
 
-def get_sync_errors(timestamp, limit=200, offset=0):
+def get_sync_errors(limit=200, offset=0):
     """
     Yield hubspot errors
 
@@ -116,17 +116,10 @@ def get_sync_errors(timestamp, limit=200, offset=0):
         dict : error in JSON format
     """
     errors = paged_sync_errors(limit, offset)
-    caught_up = False
-    while len(errors) > 0 and not caught_up:
-        for error in errors:
-            if error.get("errorTimestamp") > timestamp:
-                yield error
-            else:
-                caught_up = True
-                break
-        if not caught_up:
-            offset += limit
-            errors = paged_sync_errors(limit, offset)
+    while len(errors) > 0:
+        yield from errors
+        offset += limit
+        errors = paged_sync_errors(limit, offset)
 
 
 def make_contact_sync_message(user_id):
