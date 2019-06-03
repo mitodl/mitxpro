@@ -18,6 +18,7 @@ from ecommerce.models import (
     DataConsentAgreement,
     DataConsentUser,
     Company,
+    ProductCouponAssignment,
 )
 from hubspot.task_helpers import sync_hubspot_deal
 from mitxpro.utils import get_field_names
@@ -193,6 +194,12 @@ class CompanyAdmin(admin.ModelAdmin):
     model = Company
 
 
+class ProductCouponAssignmentAdmin(admin.ModelAdmin):
+    """Admin for ProductCouponAssignment"""
+
+    model = ProductCouponAssignment
+
+
 admin.site.register(Line, LineAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderAudit, OrderAuditAdmin)
@@ -208,3 +215,4 @@ admin.site.register(CouponEligibility, CouponEligibilityAdmin)
 admin.site.register(CouponRedemption, CouponRedemptionAdmin)
 admin.site.register(DataConsentAgreement, DataConsentAgreementAdmin)
 admin.site.register(DataConsentUser, DataConsentUserAdmin)
+admin.site.register(ProductCouponAssignment, ProductCouponAssignmentAdmin)

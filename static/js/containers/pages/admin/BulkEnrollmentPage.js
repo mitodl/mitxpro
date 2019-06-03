@@ -4,9 +4,11 @@ import { connect } from "react-redux"
 import { connectRequest, mutateAsync } from "redux-query"
 import { compose } from "redux"
 import { createStructuredSelector } from "reselect"
+import { Link } from "react-router-dom"
 
 import { BulkEnrollmentForm } from "../../../components/forms/BulkEnrollmentForm"
 import queries from "../../../lib/queries"
+import { routes } from "../../../lib/urls"
 
 import type { Response } from "redux-query"
 import type {
@@ -61,6 +63,9 @@ export class BulkEnrollmentPage extends React.Component<Props, State> {
 
     return (
       <div className="ecommerce-admin-body">
+        <p>
+          <Link to={routes.ecommerceAdmin.index}>Back to Ecommerce Admin</Link>
+        </p>
         <h3>Bulk Enrollments</h3>
         {bulkCouponPayments.length === 0 ? (
           <div className="error">

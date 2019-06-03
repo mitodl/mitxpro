@@ -15,11 +15,7 @@ import {
   formatRunTitle,
   createProductMap
 } from "./ecommerce"
-import {
-  PRODUCT_TYPE_COURSE,
-  PRODUCT_TYPE_COURSERUN,
-  PRODUCT_TYPE_PROGRAM
-} from "../constants"
+import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
 import { makeCourseRun } from "../factories/course"
 
 describe("ecommerce", () => {
@@ -72,8 +68,8 @@ describe("ecommerce", () => {
         secondProduct = makeProduct(),
         thirdProduct = makeProduct()
 
-      firstProduct.product_type = PRODUCT_TYPE_COURSE
-      secondProduct.product_type = PRODUCT_TYPE_COURSE
+      firstProduct.product_type = PRODUCT_TYPE_COURSERUN
+      secondProduct.product_type = PRODUCT_TYPE_COURSERUN
       thirdProduct.product_type = PRODUCT_TYPE_PROGRAM
 
       firstPayment.products = [firstProduct, secondProduct]
@@ -81,9 +77,12 @@ describe("ecommerce", () => {
       const bulkCouponPayments = [firstPayment, secondPayment]
 
       assert.deepEqual(createProductMap(bulkCouponPayments), {
-        [PRODUCT_TYPE_COURSE]:    [firstProduct, secondProduct],
-        [PRODUCT_TYPE_PROGRAM]:   [thirdProduct],
-        [PRODUCT_TYPE_COURSERUN]: []
+        [PRODUCT_TYPE_COURSERUN]: [firstProduct, secondProduct],
+        [PRODUCT_TYPE_PROGRAM]:   [thirdProduct]
+      })
+      assert.deepEqual(createProductMap([firstPayment]), {
+        [PRODUCT_TYPE_COURSERUN]: [firstProduct, secondProduct],
+        [PRODUCT_TYPE_PROGRAM]:   []
       })
     })
   })

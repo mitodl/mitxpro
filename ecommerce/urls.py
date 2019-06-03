@@ -12,7 +12,6 @@ from ecommerce.views import (
     ProductViewSet,
     coupon_code_csv_view,
     CompanyViewSet,
-    anon_enrollment_view,
 )
 
 router = SimpleRouter()
@@ -42,5 +41,4 @@ urlpatterns = [
         BulkEnrollmentSubmitView.as_view(),
         name="bulk_enroll_submit_api",
     ),
-    re_path(r"^enroll/", anon_enrollment_view, name="anon-enrollment"),
 ]

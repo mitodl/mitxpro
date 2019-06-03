@@ -712,6 +712,25 @@ def test_complete_order(mocker, user, basket_and_coupons):
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
 
 
+def test_complete_order_coupon_assignments(mocker, user, basket_and_coupons):
+    """
+    Test that complete_order sets relevant product assignments to redeemed
+    """
+    mocker.patch("ecommerce.api.enroll_user_in_order_items")
+    basket_and_coupons.basket.user = user
+    basket_and_coupons.basket.save()
+    order = OrderFactory.create(purchaser=user, status=Order.CREATED)
+    coupon_redemption = CouponRedemptionFactory.create(order=order)
+    coupon_assignment = ProductCouponAssignmentFactory.create(
+        email=order.purchaser.email,
+        product_coupon__coupon=coupon_redemption.coupon_version.coupon,
+    )
+
+    complete_order(order)
+    coupon_assignment.refresh_from_db()
+    assert coupon_assignment.redeemed is True
+
+
 @pytest.mark.parametrize("has_redemption", [True, False])
 def test_enroll_user_in_order_items(mocker, user, has_redemption):
     """

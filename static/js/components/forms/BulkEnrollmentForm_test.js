@@ -8,7 +8,7 @@ import { BulkEnrollmentForm } from "./BulkEnrollmentForm"
 import { makeBulkCouponPayment, makeProduct } from "../../factories/ecommerce"
 import { findFormikFieldByName } from "../../lib/test_utils"
 import { createProductMap } from "../../lib/ecommerce"
-import { PRODUCT_TYPE_PROGRAM, PRODUCT_TYPE_COURSE } from "../../constants"
+import { PRODUCT_TYPE_PROGRAM, PRODUCT_TYPE_COURSERUN } from "../../constants"
 
 describe("BulkEnrollment", () => {
   let sandbox, submitRequestStub, bulkCouponPayments, productMap
@@ -27,8 +27,8 @@ describe("BulkEnrollment", () => {
       secondProduct = makeProduct(),
       thirdProduct = makeProduct()
 
-    firstProduct.product_type = PRODUCT_TYPE_COURSE
-    secondProduct.product_type = PRODUCT_TYPE_COURSE
+    firstProduct.product_type = PRODUCT_TYPE_COURSERUN
+    secondProduct.product_type = PRODUCT_TYPE_COURSERUN
     thirdProduct.product_type = PRODUCT_TYPE_PROGRAM
 
     firstPayment.products = [firstProduct, secondProduct]

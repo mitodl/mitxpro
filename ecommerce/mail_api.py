@@ -14,10 +14,10 @@ def get_bulk_enroll_email_context(product_coupon):
     """Gets the bulk enrollment email template context for one CouponEligibility object"""
     enrollment_url = "?".join(
         [
-            urljoin(settings.SITE_BASE_URL, reverse("anon-enrollment")),
+            urljoin(settings.SITE_BASE_URL, reverse("checkout-page")),
             urlencode(
                 {
-                    "product": product_coupon.product.id,
+                    "product": product_coupon.product.latest_version.id,
                     "code": product_coupon.coupon.coupon_code,
                 }
             ),
