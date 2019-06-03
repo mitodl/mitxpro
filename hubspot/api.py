@@ -108,6 +108,7 @@ def get_sync_errors(timestamp, limit=200, offset=0):
     Yield hubspot errors
 
     Args:
+        timestamp (int): The timestamp of the last error check
         limit (int): The number of errors to be returned
         offset (int): The index of the first error to be returned
 
