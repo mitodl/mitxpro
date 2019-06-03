@@ -415,3 +415,4 @@ class ProductCouponAssignment(TimestampedModel):
 
     email = models.EmailField(blank=False)
     product_coupon = models.ForeignKey(CouponEligibility, on_delete=models.PROTECT)
+    redeemed = models.BooleanField(default=False)

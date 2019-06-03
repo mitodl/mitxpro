@@ -34,6 +34,7 @@ from ecommerce.models import (
     CouponPaymentVersion,
     CouponSelection,
     CourseRunSelection,
+    ProductCouponAssignment,
     Line,
     Order,
 )
@@ -399,6 +400,22 @@ def complete_order(order):
         order (Order): A fulfilled order
     """
     enroll_user_in_order_items(order)
+
+    # If this order included assigned coupons, update them to indicate that they're redeemed
+    order_coupon_ids = order.couponredemption_set.values_list(
+        "coupon_version__coupon__id", flat=True
+    )
+    if order_coupon_ids:
+        updated_count = ProductCouponAssignment.objects.filter(
+            email=order.purchaser.email, product_coupon__coupon__in=order_coupon_ids
+        ).update(redeemed=True)
+        if updated_count:
+            log.info(
+                "Set %s coupon assignment(s) to redeemed (user: %s, coupon ids: %s)",
+                updated_count,
+                order.purchaser.email,
+                str(order_coupon_ids),
+            )
 
     # clear the basket
     with transaction.atomic():

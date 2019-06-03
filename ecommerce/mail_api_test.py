@@ -4,6 +4,7 @@ import pytest
 from ecommerce.factories import (
     CouponPaymentVersionFactory,
     CouponEligibilityFactory,
+    ProductVersionFactory,
     CompanyFactory,
 )
 from ecommerce.mail_api import send_bulk_enroll_emails
@@ -30,16 +31,17 @@ def test_send_bulk_enroll_emails(mocker, settings, test_company):
     settings.SITE_BASE_URL = "http://test.com/"
     email = "a@b.com"
     payment_version = CouponPaymentVersionFactory.create(company=test_company)
+    product_version = ProductVersionFactory.create()
     product_coupon = CouponEligibilityFactory.create(
-        coupon__payment=payment_version.payment
+        coupon__payment=payment_version.payment, product=product_version.product
     )
 
     expected_qs = "product={}&code={}".format(
-        product_coupon.product.id, product_coupon.coupon.coupon_code
+        product_version.id, product_coupon.coupon.coupon_code
     )
     expected_context = {
         "enrollable_title": product_coupon.product.content_object.title,
-        "enrollment_url": "http://test.com/enroll/?{}".format(expected_qs),
+        "enrollment_url": "http://test.com/checkout/?{}".format(expected_qs),
         "company_name": test_company.name if test_company else None,
     }
 

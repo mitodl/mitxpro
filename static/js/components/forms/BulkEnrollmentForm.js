@@ -5,12 +5,7 @@ import { Formik, Field, Form } from "formik"
 import * as yup from "yup"
 
 import { RadioButtonGroup, RadioButton } from "../input/radio"
-import {
-  PRODUCT_TYPE_PROGRAM,
-  PRODUCT_TYPE_COURSE,
-  PRODUCT_TYPE_COURSERUN,
-  PRODUCT_TYPE_LABELS
-} from "../../constants"
+import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_LABELS } from "../../constants"
 
 import type {
   BulkCouponPayment,
@@ -111,8 +106,8 @@ export class BulkEnrollmentForm extends React.Component<
     const { successResponseData } = this.state
     const { productMap } = this.props
 
-    const initialProductType = PRODUCT_TYPE_COURSE
-    const initialProductId = getFirstId(productMap[PRODUCT_TYPE_COURSE])
+    const initialProductType = PRODUCT_TYPE_COURSERUN
+    const initialProductId = getFirstId(productMap[PRODUCT_TYPE_COURSERUN])
     const initialCouponPaymentId = getFirstId(
       this.getBulkCouponsForProduct(initialProductId)
     )
@@ -149,13 +144,9 @@ export class BulkEnrollmentForm extends React.Component<
             <section>
               <div>Product type:</div>
               <RadioButtonGroup>
-                {[
-                  PRODUCT_TYPE_COURSE,
-                  PRODUCT_TYPE_COURSERUN,
-                  PRODUCT_TYPE_PROGRAM
-                ].map((productType, i) => (
+                {Object.keys(PRODUCT_TYPE_LABELS).map(productType => (
                   <Field
-                    key={i}
+                    key={productType}
                     component={RadioButton}
                     name="product_type"
                     id={productType}

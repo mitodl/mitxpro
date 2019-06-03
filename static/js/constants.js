@@ -7,9 +7,8 @@ export const PRODUCT_TYPE_PROGRAM = "program"
 export const PRODUCT_TYPE_COURSE = "course"
 export const PRODUCT_TYPE_COURSERUN = "courserun"
 export const PRODUCT_TYPE_LABELS = {
-  [PRODUCT_TYPE_PROGRAM]:   "Program",
-  [PRODUCT_TYPE_COURSE]:    "Course",
-  [PRODUCT_TYPE_COURSERUN]: "Course Run"
+  [PRODUCT_TYPE_COURSERUN]: "Course Run",
+  [PRODUCT_TYPE_PROGRAM]:   "Program"
 }
 
 export const GENDER_CHOICES = [

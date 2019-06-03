@@ -5,9 +5,6 @@ import logging
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
-from django.shortcuts import redirect
-from django.urls import reverse
-from django.views.decorators.http import require_http_methods
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
 from rest_framework.generics import get_object_or_404, RetrieveUpdateAPIView
@@ -249,15 +246,6 @@ class BulkEnrollmentSubmitView(APIView):
         send_bulk_enroll_emails(emails, available_product_coupons.all())
 
         return Response(status=status.HTTP_200_OK, data={"emails": emails})
-
-
-@require_http_methods(["GET"])
-def anon_enrollment_view(request):
-    """View to handle an anonymous user enrolling in a course via coupon code"""
-    # pylint: disable=fixme
-    # TODO: Actual enrollment implementation (issue #111)
-    log.info(request.GET.dict())
-    return redirect(reverse("wagtail_serve", args=[""]))
 
 
 class CouponListView(APIView):

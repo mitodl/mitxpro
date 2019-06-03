@@ -12,7 +12,6 @@ import type {
 } from "../flow/ecommerceTypes"
 import {
   COUPON_TYPE_PROMO,
-  PRODUCT_TYPE_COURSE,
   PRODUCT_TYPE_COURSERUN,
   PRODUCT_TYPE_PROGRAM
 } from "../constants"
@@ -65,7 +64,6 @@ export const createProductMap = (
   R.compose(
     R.mergeRight({
       [PRODUCT_TYPE_PROGRAM]:   [],
-      [PRODUCT_TYPE_COURSE]:    [],
       [PRODUCT_TYPE_COURSERUN]: []
     }),
     R.groupBy(R.prop("product_type")),
