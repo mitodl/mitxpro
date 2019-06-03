@@ -51,6 +51,13 @@ class BaseCourseSerializer(serializers.ModelSerializer):
 class CourseRunSerializer(serializers.ModelSerializer):
     """CourseRun model serializer"""
 
+    product_id = serializers.SerializerMethodField()
+
+    def get_product_id(self, instance):
+        """ Get the product id for a course run """
+        product = instance.products.first()
+        return product.id if product else None
+
     class Meta:
         model = models.CourseRun
         fields = [
@@ -62,6 +69,7 @@ class CourseRunSerializer(serializers.ModelSerializer):
             "courseware_url",
             "courseware_id",
             "id",
+            "product_id",
         ]
 
 

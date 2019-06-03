@@ -25,7 +25,7 @@ describe("CheckoutPage", () => {
   let helper, renderPage, basket
 
   beforeEach(() => {
-    basket = makeBasketResponse()
+    basket = makeBasketResponse(PRODUCT_TYPE_PROGRAM)
 
     helper = new IntegrationTestHelper()
     renderPage = helper.configureHOCRenderer(
@@ -93,16 +93,29 @@ describe("CheckoutPage", () => {
   })
 
   it("renders a course run basket item", async () => {
+    basket = makeBasketResponse(PRODUCT_TYPE_COURSERUN)
     const basketItem = basket.items[0]
     basketItem.type = "courserun"
 
-    const { inner } = await renderPage()
+    const { inner } = await renderPage({
+      entities: {
+        basket
+      }
+    })
 
     assert.equal(inner.find(".item-type").text(), "Course")
     assert.equal(inner.find(".item-row").length, 1)
-    assert.equal(inner.find("img").prop("src"), basketItem.thumbnail_url)
-    assert.equal(inner.find("img").prop("alt"), basketItem.description)
-    assert.equal(inner.find(".item-row .title").text(), basketItem.description)
+
+    const courseRow = inner.find(".item-row").at(0)
+    assert.equal(
+      courseRow.find("img").prop("src"),
+      basketItem.courses[0].thumbnail_url
+    )
+    assert.equal(courseRow.find("img").prop("alt"), basketItem.courses[0].title)
+    assert.equal(
+      courseRow.find(".item-row .title").text(),
+      basketItem.courses[0].title
+    )
   })
   ;[true, false].forEach(hasError => {
     it(`updates the basket with a product id from the query parameter${
@@ -513,18 +526,21 @@ describe("CheckoutPage", () => {
     })
   })
 
-  it("does not show a select for course run product", async () => {
+  it("does show a select for course run product", async () => {
     basket.items[0].type = PRODUCT_TYPE_COURSERUN
     const { inner } = await renderPage()
-    assert.equal(inner.find("select").length, 0)
+    const firstCourse = inner.find(".item-row").at(0)
+    assert.equal(firstCourse.find("select").length, 1)
   })
 
   it("shows a select with options for a program product, and updates a run", async () => {
     const item = basket.items[0]
-    item.type = PRODUCT_TYPE_PROGRAM
     const { inner } = await renderPage()
     assert.equal(inner.find("select").length, basket.items[0].courses.length)
     item.courses.forEach((course, i) => {
+      const courseRow = inner.find(".item-row").at(i)
+      assert.equal(courseRow.find(".title").text(), course.title)
+
       const select = inner.find("select").at(i)
 
       const runId = calcSelectedRunIds(item)[course.id]

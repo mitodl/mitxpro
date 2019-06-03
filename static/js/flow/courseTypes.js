@@ -7,7 +7,8 @@ export type CourseRun = {
   enrollment_end: ?string,
   courseware_url: ?string,
   courseware_id: string,
-  id: number
+  id: number,
+  product_id: ?number
 }
 
 export type BaseCourse = {

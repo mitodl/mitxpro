@@ -1,6 +1,6 @@
 // @flow
 import React from "react"
-import { curry } from "ramda"
+import { curry, find, propEq } from "ramda"
 import { connect } from "react-redux"
 import { mutateAsync, requestAsync } from "redux-query"
 import { compose } from "redux"
@@ -153,16 +153,40 @@ export class CheckoutPage extends React.Component<Props, State> {
     })
   }
 
-  updateSelectedRun = curry((courseId: number, event: any) => {
-    const { selectedRuns } = this.state
-    const runId = parseInt(event.target.value)
-    this.setState({
-      selectedRuns: {
-        ...selectedRuns,
-        [courseId]: runId
+  updateSelectedRun = curry(
+    async (item: BasketItem, courseId: number, event: any) => {
+      const { selectedRuns } = this.state
+      const { basket } = this.props
+      const runId = parseInt(event.target.value)
+      this.setState({
+        selectedRuns: {
+          ...selectedRuns,
+          [courseId]: runId
+        }
+      })
+
+      if (basket && item.type === "courserun") {
+        const course = item.courses[0]
+        const selectedRun = find(propEq("id", runId), course.courseruns)
+        if (selectedRun && selectedRun.product_id) {
+          // update basket with selected runs
+          await this.updateBasket({
+            items: basket.items.map(basketItem => ({
+              id:
+                basketItem.id === item.id
+                  ? selectedRun.product_id
+                  : basketItem.id,
+              // $FlowFixMe: flow doesn't understand that Object.values will return an array of number here
+              run_ids:
+                basketItem.id === item.id
+                  ? []
+                  : Object.values(this.getSelectedRunIds(basketItem))
+            }))
+          })
+        }
       }
-    })
-  })
+    }
+  )
 
   getCouponCode = (): string => {
     const { basket } = this.props
@@ -210,47 +234,36 @@ export class CheckoutPage extends React.Component<Props, State> {
 
   renderBasketItem = (item: BasketItem) => {
     const selectedRunIds = this.getSelectedRunIds(item)
-    if (item.type === "program") {
-      return (
-        <React.Fragment>
-          {item.courses.map(course => (
-            <div className="flex-row item-row" key={course.id}>
-              <div className="flex-row item-column">
-                <img src={course.thumbnail_url} alt={course.title} />
-              </div>
-              <div className="title-column">
-                <div className="title">{course.title}</div>
-                <select
-                  className="run-selector"
-                  onChange={this.updateSelectedRun(course.id)}
-                  value={selectedRunIds[course.id] || ""}
-                >
-                  <option value={null} key={"null"}>
-                    Select a course run
-                  </option>
-                  {course.courseruns.map(run => (
+    return (
+      <React.Fragment>
+        {item.courses.map(course => (
+          <div className="flex-row item-row" key={course.id}>
+            <div className="flex-row item-column">
+              <img src={course.thumbnail_url} alt={course.title} />
+            </div>
+            <div className="title-column">
+              <div className="title">{course.title}</div>
+              <select
+                className="run-selector"
+                onChange={this.updateSelectedRun(item, course.id)}
+                value={selectedRunIds[course.id] || ""}
+              >
+                <option value={null} key={"null"}>
+                  Select a course run
+                </option>
+                {course.courseruns.map(run =>
+                  run.product_id ? (
                     <option value={run.id} key={run.id}>
                       {formatRunTitle(run)}
                     </option>
-                  ))}
-                </select>
-              </div>
+                  ) : null
+                )}
+              </select>
             </div>
-          ))}
-        </React.Fragment>
-      )
-    } else {
-      return (
-        <div className="flex-row item-row">
-          <div className="flex-row item-column">
-            <img src={item.thumbnail_url} alt={item.description} />
           </div>
-          <div className="title-column">
-            <div className="title">{item.description}</div>
-          </div>
-        </div>
-      )
-    }
+        ))}
+      </React.Fragment>
+    )
   }
 
   render() {
