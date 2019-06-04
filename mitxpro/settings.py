@@ -460,6 +460,13 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TIMEZONE = "UTC"
+CELERY_BEAT_SCHEDULE = {
+    "check-hubspot-api-errors": {
+        "task": "hubspot.tasks.check_hubspot_api_errors",
+        "schedule": get_int("HUBSPOT_ERROR_CHECK_FREQUENCY", 600),
+    }
+}
+
 
 # Hijack
 HIJACK_ALLOW_GET_REQUESTS = True

@@ -2,9 +2,11 @@
 Tests for hubspot tasks
 """
 # pylint: disable=redefined-outer-name
+from datetime import datetime
 from unittest.mock import ANY
 
 import pytest
+import pytz
 
 from faker import Faker
 
@@ -15,25 +17,35 @@ from hubspot.api import (
     make_deal_sync_message,
     make_line_item_sync_message,
 )
+from hubspot.factories import HubspotErrorCheckFactory
+from hubspot.models import HubspotErrorCheck
 from hubspot.tasks import (
     sync_contact_with_hubspot,
     HUBSPOT_SYNC_URL,
     sync_product_with_hubspot,
     sync_deal_with_hubspot,
     sync_line_item_with_hubspot,
+    check_hubspot_api_errors,
 )
 from users.factories import UserFactory
+
+pytestmark = [pytest.mark.django_db]
 
 fake = Faker()
 
 
 @pytest.fixture
+def mock_logger(mocker):
+    """ Mock the logger """
+    yield mocker.patch("hubspot.tasks.log.error")
+
+
+@pytest.fixture
 def mock_hubspot_request(mocker):
     """Mock the send hubspot request method"""
-    yield mocker.patch("hubspot.tasks.send_hubspot_request")
+    yield mocker.patch("hubspot.tasks.send_hubspot_request", autospec=True)
 
 
-@pytest.mark.django_db
 def test_sync_contact_with_hubspot(mock_hubspot_request):
     """Test that send_hubspot_request is called properly for a CONTACT sync"""
     user = UserFactory.create()
@@ -45,7 +57,6 @@ def test_sync_contact_with_hubspot(mock_hubspot_request):
     )
 
 
-@pytest.mark.django_db
 def test_sync_product_with_hubspot(mock_hubspot_request):
     """Test that send_hubspot_request is called properly for a PRODUCT sync"""
     product = ProductFactory.create()
@@ -57,7 +68,6 @@ def test_sync_product_with_hubspot(mock_hubspot_request):
     )
 
 
-@pytest.mark.django_db
 def test_sync_deal_with_hubspot(mock_hubspot_request):
     """Test that send_hubspot_request is called properly for a DEAL sync"""
     order = OrderFactory.create()
@@ -69,7 +79,6 @@ def test_sync_deal_with_hubspot(mock_hubspot_request):
     )
 
 
-@pytest.mark.django_db
 def test_sync_line_item_with_hubspot(mock_hubspot_request):
     """Test that send_hubspot_request is called properly for a LINE_ITEM sync"""
     line = LineFactory.create()
@@ -79,3 +88,30 @@ def test_sync_line_item_with_hubspot(mock_hubspot_request):
     mock_hubspot_request.assert_called_once_with(
         "LINE_ITEM", HUBSPOT_SYNC_URL, "PUT", body=body
     )
+
+
+def test_sync_errors_first_run(mock_hubspot_errors, mock_logger):
+    """Test that HubspotErrorCheck is created on 1st run and nothing is logged"""
+    assert HubspotErrorCheck.objects.count() == 0
+    check_hubspot_api_errors()
+    assert HubspotErrorCheck.objects.count() == 1
+    assert mock_hubspot_errors.call_count == 1
+    assert mock_logger.call_count == 0
+
+
+@pytest.mark.parametrize(
+    "last_check_dt,expected_errors,call_count",
+    [
+        [datetime(2015, 1, 1, tzinfo=pytz.utc), 4, 3],
+        [datetime(2019, 5, 22, tzinfo=pytz.utc), 1, 1],
+    ],
+)
+def test_sync_errors_new_errors(
+    mock_hubspot_errors, mock_logger, last_check_dt, expected_errors, call_count
+):
+    """Test that errors more recent than last checked_on date are logged"""
+    last_check = HubspotErrorCheckFactory.create(checked_on=last_check_dt)
+    check_hubspot_api_errors()
+    assert mock_hubspot_errors.call_count == call_count
+    assert mock_logger.call_count == expected_errors
+    assert HubspotErrorCheck.objects.first().checked_on > last_check.checked_on
