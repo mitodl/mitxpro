@@ -167,22 +167,18 @@ export class CheckoutPage extends React.Component<Props, State> {
       })
 
       if (basket && item.type === PRODUCT_TYPE_COURSERUN) {
-        const course = item.courses[0]
-        const selectedRun = find(propEq("id", runId), course.courseruns)
+        const selectedRun = find(
+          propEq("id", runId),
+          item.courses[0].courseruns
+        )
         if (selectedRun && selectedRun.product_id) {
-          // update basket with selected runs
           await this.updateBasket({
-            items: basket.items.map(basketItem => ({
-              id:
-                basketItem.id === item.id
-                  ? selectedRun.product_id
-                  : basketItem.id,
-              // $FlowFixMe: flow doesn't understand that Object.values will return an array of number here
-              run_ids:
-                basketItem.id === item.id
-                  ? []
-                  : Object.values(this.getSelectedRunIds(basketItem))
-            }))
+            items: [
+              {
+                id:      selectedRun.product_id,
+                run_ids: []
+              }
+            ]
           })
         }
       }
