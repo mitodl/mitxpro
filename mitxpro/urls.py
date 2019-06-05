@@ -25,7 +25,6 @@ from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.core import urls as wagtail_urls
 
 from mitxpro.views import index, restricted, AppContextView
-from courses.views import CourseCatalogView
 
 
 urlpatterns = [
@@ -65,7 +64,6 @@ urlpatterns = [
     # social django needs to be here to preempt the login
     path("", include("social_django.urls", namespace="social")),
     path("terms-and-conditions/", index, name="terms-and-conditions"),
-    re_path(r"^catalog/", CourseCatalogView.as_view(), name="mitxpro-catalog"),
     re_path(r"^dashboard/", index, name="user-dashboard"),
     # Wagtail
     re_path(r"^cms/", include(wagtailadmin_urls)),

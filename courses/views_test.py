@@ -11,6 +11,7 @@ from rest_framework import status
 from wagtail.core.models import Site
 
 from cms.factories import CoursePageFactory, ProgramPageFactory
+from cms.models import CatalogPage
 from courses.api import UserEnrollments
 from courses.factories import (
     CourseFactory,
@@ -22,6 +23,22 @@ from courses.serializers import CourseRunSerializer, CourseSerializer, ProgramSe
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 
 pytestmark = [pytest.mark.django_db]
+
+
+@pytest.fixture()
+def home_page():
+    """Fixture for the home page"""
+    return Site.objects.get(is_default_site=True).root_page
+
+
+@pytest.fixture()
+def catalog_page(home_page):
+    """Fixture for the catalog page"""
+    catalog_page = CatalogPage.objects.first()
+    if not catalog_page:
+        catalog_page = CatalogPage(title="Catalog", slug="catalog")
+        catalog_page = home_page.add_child(catalog_page, "last-child")
+    return catalog_page
 
 
 @pytest.fixture()
@@ -187,27 +204,28 @@ def test_delete_course_run(user_drf_client, course_runs):
     assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
-def test_course_catalog_view(client):
+def test_course_catalog_view(client, catalog_page):
     """
     Test that the course catalog view fetches live programs/courses and serializes
     them for the catalog template.
     """
     program = ProgramFactory.create(live=True)
 
-    course_in_program = CourseFactory.create(program=program, live=True)
-    course_no_program = CourseFactory.create(no_program=True, live=True)
-
-    # Required because catalog now excludes Programs and Courses that do not have a page
-    ProgramPageFactory.create(program=program)
-    CoursePageFactory.create(course=course_in_program)
-    CoursePageFactory.create(course=course_no_program)
+    program_page = ProgramPageFactory.create(program=program)
+    course_page_in_program = CoursePageFactory.create(
+        course__program=program, course__live=True
+    )
+    course_page_no_program = CoursePageFactory.create(
+        course__no_program=True, course__live=True
+    )
     CourseFactory.create(no_program=True, live=False)
-    exp_programs = [program]
-    exp_courses = [course_in_program, course_no_program]
-    resp = client.get(reverse("mitxpro-catalog"))
-    assert resp.templates[0].name == "catalog.html"
-    assert list(resp.context["programs"]) == exp_programs
-    assert list(resp.context["courses"]) == exp_courses
+    exp_program_pages = [program_page]
+    exp_course_pages = [course_page_in_program, course_page_no_program]
+
+    resp = client.get(catalog_page.get_url())
+    assert resp.templates[0].name == "catalog_page.html"
+    assert list(resp.context["program_pages"]) == exp_program_pages
+    assert list(resp.context["course_pages"]) == exp_course_pages
 
 
 # pylint: disable=too-many-arguments
@@ -216,16 +234,14 @@ def test_course_catalog_view(client):
 @pytest.mark.parametrize("has_product", [True, False])
 @pytest.mark.parametrize("is_anonymous", [True, False])
 def test_course_view(
-    client, user, is_enrolled, has_unexpired_run, has_product, is_anonymous
+    client, user, home_page, is_enrolled, has_unexpired_run, has_product, is_anonymous
 ):
     """
     Test that the course detail view has the right context and shows the right HTML for the enroll/view button
     """
     course = CourseFactory.create(live=True)
     # coursepage required for loading seo metadata
-    CoursePageFactory.create(
-        course=course, parent=Site.objects.get(is_default_site=True).root_page
-    )
+    CoursePageFactory.create(course=course, parent=home_page)
 
     if has_unexpired_run:
         run = CourseRunFactory.create(course=course)

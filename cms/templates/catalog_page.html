@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% load static wagtailimages_tags wagtailmetadata_tags render_bundle %}
+
+{% block title %}Catalog | MIT xPro{% endblock %}
+
+{% block headercontent %}
+  <div id="header"></div>
+  {% render_bundle 'header' %}
+{% endblock %}
+
+{% block content %}
+  <div class="course-catalog">
+    {% block banner %}
+      <div class="sub-banner">
+        <div class="container">
+          <h1>MIT xPRO—Professional Development, the MIT Way</h1>
+          <h2>Explore MIT's courses for game-changing professionals</h2>
+        </div>
+      </div>
+    {% endblock %}
+      <div class="tab-block">
+          <div class="container">
+            <ul class="nav nav-tabs" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active" id="all-tab" data-toggle="tab" href="#all" role="tab" aria-controls="all" aria-selected="true">All</a>
+              </li>
+              <li class="nav-item">
+                <a id="programs-tab" class="nav-link" data-toggle="tab" href="#programs" role="tab" aria-controls="programs" aria-selected="false">programs</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" id="courses-tab" href="#courses" role="tab" aria-controls="courses" aria-selected="false">Courses</a>
+              </li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane catalog-body fade in show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+                <h1>FEATURED</h1>
+                {% for program_page in program_pages %}
+                    {% include "partials/catalog-card.html" with courseware_page=program_page object_type="program" tab="all" %}
+                {% endfor %}
+                {% for course_page in course_pages %}
+                    {% include "partials/catalog-card.html" with courseware_page=course_page object_type="course" tab="all"%}
+                {% endfor %}
+              </div>
+              <div class="tab-pane catalog-body fade" id="programs" role="tabpanel" aria-labelledby="programs-tab">
+                <h1>PROGRAMS</h1>
+                {% for program_page in program_pages %}
+                    {% include "partials/catalog-card.html" with courseware_page=program_page object_type="program" tab="program" %}
+                {% endfor %}
+              </div>
+              <div class="tab-pane catalog-body fade" id="courses" role="tabpanel" aria-labelledby="courses-tab">
+                <h1>COURSES</h1>
+                {% for course_page in course_pages %}
+                    {% include "partials/catalog-card.html" with courseware_page=course_page object_type="course" tab="course" %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+      </div>
+  </div>
+{% endblock %}
+
+{% block contact-us %}
+  {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
+    {% include "subscription.html" %}
+  {% endif %}
+{% endblock %}
