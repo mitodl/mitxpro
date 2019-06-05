@@ -2,7 +2,9 @@
 Page models for the CMS
 """
 
+from django.conf import settings
 from django.db import models
+from django.db.models import Prefetch
 from django.utils.text import slugify
 from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import (
@@ -20,6 +22,7 @@ from wagtail.images.models import Image
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
+from courses.constants import DEFAULT_COURSE_IMG_PATH
 from cms.blocks import (
     FacultyBlock,
     LearningTechniqueBlock,
@@ -66,6 +69,63 @@ class ProgramIndexPage(CourseObjectIndexPage, Page):
     """
 
     slug = "programs"
+
+
+class CatalogPage(Page):
+    """
+    A placeholder page object for the catalog page
+    """
+
+    template = "catalog_page.html"
+
+    parent_page_types = ["HomePage"]
+
+    @classmethod
+    def can_create_at(cls, parent):
+        """
+        You can only create one catalog page under the home page.
+        The parent is limited via the `parent_page_type` list.
+        """
+        return (
+            super().can_create_at(parent)
+            and not parent.get_children().type(cls).exists()
+        )
+
+    slug = "catalog"
+
+    def get_context(self, request, *args, **kwargs):
+        """
+        Populate the context with live programs, courses and programs + courses
+        """
+        # Circular import hit when moved to the top of the module
+        from courses.models import CourseRun
+
+        sorted_courserun_qset = CourseRun.objects.order_by("start_date")
+        program_pages = (
+            ProgramPage.objects.live()
+            .order_by("id")
+            .prefetch_related(
+                Prefetch("program__courses__courseruns", queryset=sorted_courserun_qset)
+            )
+        )
+        course_pages = (
+            CoursePage.objects.live()
+            .order_by("id")
+            .prefetch_related(
+                Prefetch("course__courseruns", queryset=sorted_courserun_qset)
+            )
+        )
+        return dict(
+            **super().get_context(request),
+            **get_js_settings_context(request),
+            program_pages=program_pages,
+            course_pages=course_pages,
+            default_image_path=DEFAULT_COURSE_IMG_PATH,
+            hubspot_portal_id=settings.HUBSPOT_CONFIG.get("HUBSPOT_PORTAL_ID"),
+            hubspot_new_courses_form_guid=settings.HUBSPOT_CONFIG.get(
+                "HUBSPOT_NEW_COURSES_FORM_GUID"
+            ),
+        )
 
 
 class CourseProgramChildPage(Page):
@@ -493,10 +553,11 @@ class HomePage(MetadataPageMixin, Page):
         return self._get_child_page_of_type(ImageCarouselPage)
 
     def get_context(self, request, *args, **kwargs):
-        context = super().get_context(request)
-        context.update(**get_js_settings_context(request))
-
-        return context
+        return {
+            **super().get_context(request),
+            **get_js_settings_context(request),
+            "catalog_page": CatalogPage.objects.first(),
+        }
 
 
 class ProductPage(MetadataPageMixin, Page):

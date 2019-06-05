@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load static wagtailimages_tags wagtailmetadata_tags render_bundle %}
+{% load static wagtailcore_tags wagtailimages_tags wagtailmetadata_tags render_bundle %}
 
 {% block title %}MIT xPro{% endblock %}
 
@@ -42,7 +42,7 @@
 {% block content %}
   {% include "partials/hero.html" with action_title="Watch Now" action_url="#" %}
   {% if page.upcoming_courseware %}
-    {% url 'mitxpro-catalog' as catalog_url %}
+    {% pageurl catalog_page as catalog_url %}
     {% include "partials/course-carousel.html" with page=page.upcoming_courseware button_title="View All" button_url=catalog_url %}
   {% endif %}
   {% if page.about_mit_xpro %} {% include "partials/text-video-section.html" with page=page.about_mit_xpro %} {% endif %}

@@ -20,6 +20,7 @@ from cms.models import (
     SiteNotification,
     HomePage,
     TextVideoSection,
+    CatalogPage,
 )
 from cms.blocks import (
     LearningTechniqueBlock,
@@ -28,6 +29,13 @@ from cms.blocks import (
     FacultyBlock,
 )
 from courses.factories import ProgramFactory, CourseFactory
+
+
+class CatalogPageFactory(wagtail_factories.PageFactory):
+    """CatalogPage factory class"""
+
+    class Meta:
+        model = CatalogPage
 
 
 class ProgramPageFactory(wagtail_factories.PageFactory):
