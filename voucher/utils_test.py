@@ -1,9 +1,14 @@
 """Tests for utils.py"""
+import json
+from datetime import datetime
 from unittest.mock import patch
 
 import pytest
+import pytz
 
-from voucher.utils import read_pdf
+from courses.factories import CourseRunFactory
+from voucher.factories import VoucherFactory
+from voucher.utils import read_pdf, get_current_voucher, get_eligible_coupon_choices
 
 pytestmark = [pytest.mark.django_db]
 
@@ -35,11 +40,13 @@ def test_pdf_parsing_domestic(settings):
     with open("voucher/.test/domestic_voucher.pdf", "rb") as pdf_file:
         values = read_pdf(pdf_file)
         expected_values = {
-            "BEMSID": "1234567",
+            "employee_id": "1234567",
             "voucher_id": "299152-01",
-            "course_start_date": "04/30/2018",
-            "class_module_number": "AMxB",
-            "class_module_title": "Additive Manufacturing for Innovative Design and Production",
+            "course_start_date_input": datetime.strptime(
+                "04/30/2018", "%m/%d/%Y"
+            ).date(),
+            "course_id_input": "AMxB",
+            "course_title_input": "Additive Manufacturing for Innovative Design and Production",
             "employee_name": "Stark, Anthony E",
         }
         assert values == expected_values
@@ -51,11 +58,13 @@ def test_pdf_parsing_domestic_offset_credits(settings):
     with open("voucher/.test/domestic_voucher_test_credits.pdf", "rb") as pdf_file:
         values = read_pdf(pdf_file)
         expected_values = {
-            "BEMSID": "1234567",
+            "employee_id": "1234567",
             "voucher_id": "291510-03",
-            "course_start_date": "04/09/2018",
-            "class_module_number": "SysEngxB3",
-            "class_module_title": "Model-Based  Systems Engineering: Documentation and Analysis",
+            "course_start_date_input": datetime.strptime(
+                "04/09/2018", "%m/%d/%Y"
+            ).date(),
+            "course_id_input": "SysEngxB3",
+            "course_title_input": "Model-Based  Systems Engineering: Documentation and Analysis",
             "employee_name": "Stark, Anthony E",
         }
         assert values == expected_values
@@ -67,11 +76,13 @@ def test_pdf_parsing_international(settings):
     with open("voucher/.test/international_voucher.pdf", "rb") as pdf_file:
         values = read_pdf(pdf_file)
         expected_values = {
-            "BEMSID": "7654321",
+            "employee_id": "7654321",
             "voucher_id": None,
-            "course_start_date": "9-Apr-2018",
-            "class_module_number": "SysEngBx3",
-            "class_module_title": "Model-Based Systems Engineering",
+            "course_start_date_input": datetime.strptime(
+                "9-Apr-2018", "%d-%b-%Y"
+            ).date(),
+            "course_id_input": "SysEngBx3",
+            "course_title_input": "Model-Based Systems Engineering",
             "employee_name": 'STEVENS, ERIK "KILLMONGER"',
         }
         assert values == expected_values
@@ -82,4 +93,123 @@ def test_parse_not_pdf(mock_logger, settings):
     """Test that pdf parsing correctly throws an error when handed something that isn't a PDF"""
     setup_pdf_parsing(settings)
     read_pdf("abc")
-    mock_logger.error.assert_called_with("Could not parse PDF")
+    mock_logger.exception.assert_called_with("Could not parse PDF")
+
+
+def test_get_current_voucher(user):
+    """
+    Test that get_current_voucher returns the most recently updated voucher for a user
+    """
+    assert get_current_voucher(user) is None
+    voucher1 = VoucherFactory(user=user)
+    assert get_current_voucher(user) == voucher1
+    voucher2 = VoucherFactory(user=user)
+    assert get_current_voucher(user) == voucher2
+    voucher1.uploaded = datetime.now(tz=pytz.UTC)
+    voucher1.save()
+    assert get_current_voucher(user) == voucher1
+
+
+# Test match_courses_to_voucher
+@patch("voucher.utils.log")
+def test_multiple_exact_course_match(mock_logger, voucher_and_user):
+    """
+    Test match_courses_to_voucher logs an error on multiple exact matches
+    """
+    voucher = voucher_and_user.voucher
+    CourseRunFactory(
+        start_date=datetime.combine(
+            voucher.course_start_date_input, datetime.min.time(), tzinfo=pytz.UTC
+        ),
+        course__readable_id=voucher.course_id_input,
+        course__title=voucher.course_title_input,
+    )
+    CourseRunFactory(
+        start_date=datetime.combine(
+            voucher.course_start_date_input, datetime.min.time(), tzinfo=pytz.UTC
+        ),
+        course__readable_id=voucher.course_id_input,
+        course__title=voucher.course_title_input,
+    )
+
+    assert len(get_eligible_coupon_choices(voucher)) == 0
+    mock_logger.error.assert_called_once_with(
+        "Found multiple exact CourseRun matches for voucher %s", voucher.id
+    )
+
+
+def test_no_course_matches(voucher_and_user):
+    """
+    Test match_courses_to_voucher return an empty queryset on no course matches
+    """
+    voucher = voucher_and_user.voucher
+    assert len(get_eligible_coupon_choices(voucher)) == 0
+
+
+@patch("voucher.utils.log")
+def test_partial_course_matches_without_coupons(
+    mock_logger, voucher_and_partial_matches, settings
+):
+    """
+    Test match_courses_to_voucher logs an error if there are partial matches with no coupons
+    """
+    context = voucher_and_partial_matches
+    voucher = context.voucher
+    settings.VOUCHER_COMPANY_ID = context.company.id
+    assert len(get_eligible_coupon_choices(voucher)) == 0
+    mock_logger.error.assert_called_once_with(
+        "Found no valid coupons for matches for voucher %s", voucher.id
+    )
+
+
+@patch("voucher.utils.log")
+def test_exact_course_match_without_coupon(
+    mock_logger, voucher_and_exact_match, settings
+):
+    """
+    Test match_courses_to_voucher logs an error if there is an exact match with no coupons
+    """
+    context = voucher_and_exact_match
+    voucher = context.voucher
+    settings.VOUCHER_COMPANY_ID = context.company.id
+    assert len(get_eligible_coupon_choices(voucher)) == 0
+    mock_logger.error.assert_called_once_with(
+        "Found no valid coupons for matches for voucher %s", voucher.id
+    )
+
+
+def test_partial_course_matches(voucher_and_partial_matches_with_coupons, settings):
+    """
+    Test match_courses_to_voucher returns correct eligible choices when there are partial matches
+    """
+    context = voucher_and_partial_matches_with_coupons
+    voucher = context.voucher
+    settings.VOUCHER_COMPANY_ID = context.company.id
+    eligible_coupons = get_eligible_coupon_choices(voucher)
+    assert len(eligible_coupons) == len(context.coupon_eligibility_list)
+    product_ids = [product.id for product in context.products]
+    coupon_ids = [
+        coupon_version.coupon.id for coupon_version in context.coupon_versions
+    ]
+    titles = [match.title for match in context.partial_matches]
+    for eligible_coupon in eligible_coupons:
+        product_id, coupon_id = json.loads(eligible_coupon[0])
+        assert product_id in product_ids
+        assert coupon_id in coupon_ids
+        assert eligible_coupon[1] in titles
+
+
+def test_exact_course_match(voucher_and_exact_match_with_coupon, settings):
+    """
+    Test match_courses_to_voucher returns correct eligible choices when there is an exact match
+    """
+    context = voucher_and_exact_match_with_coupon
+    voucher = context.voucher
+    settings.VOUCHER_COMPANY_ID = context.company.id
+    eligible_coupons = get_eligible_coupon_choices(voucher)
+    assert len(eligible_coupons) == 1
+    eligible_coupon = eligible_coupons[0]
+    assert eligible_coupon[1] == context.exact_match.title
+    product_id, coupon_id = json.loads(eligible_coupon[0])
+    assert product_id == context.product.id
+    assert coupon_id == context.coupon_version.coupon.id

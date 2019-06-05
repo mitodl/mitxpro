@@ -1,0 +1,18 @@
+{% extends "course_app_base.html" %}
+{% load static %}
+
+{% block title %}MIT xPro | Boeing Enroll{% endblock %}
+
+{% block content %}
+  <div class="container voucher-container">
+    <h1>Boeing employee enrollment page</h1>
+    <p>Please upload your voucher to enroll in our courses</p>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <br>
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+{% endblock content %}

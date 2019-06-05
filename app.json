@@ -212,6 +212,9 @@
     "STATUS_TOKEN": {
       "description": "Token to access the status API."
     },
+    "VOUCHER_COMPANY_ID": {
+      "required": false
+    },
     "VOUCHER_DOMESTIC_AMOUNT_KEY": {
       "required": false
     },
@@ -219,9 +222,6 @@
       "required": false
     },
     "VOUCHER_DOMESTIC_CREDITS_KEY": {
-      "required": false
-    },
-    "VOUCHER_DOMESTIC_DATE_KEY": {
       "required": false
     },
     "VOUCHER_DOMESTIC_DATES_KEY": {
@@ -234,12 +234,6 @@
       "required": false
     },
     "VOUCHER_DOMESTIC_KEY": {
-      "required": false
-    },
-    "VOUCHER_INTERNATIONAL_AMOUNT_KEY": {
-      "required": false
-    },
-    "VOUCHER_INTERNATIONAL_COURSE_KEY": {
       "required": false
     },
     "VOUCHER_INTERNATIONAL_COURSE_NAME_KEY": {

@@ -222,6 +222,7 @@ class CourseRun(TimestampedModel):
     course = models.ForeignKey(
         Course, on_delete=models.CASCADE, related_name="courseruns"
     )
+    product = GenericRelation(Product, related_query_name="course_run")
     title = models.CharField(max_length=255)
     courseware_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
     courseware_url_path = models.CharField(max_length=500, blank=True, null=True)
