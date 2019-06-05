@@ -246,9 +246,7 @@ def test_course_view(
     assert resp.context["course"] == course
     assert resp.context["user"] == user if not is_anonymous else AnonymousUser()
     assert resp.context["courseware_url"] == (run.courseware_url if run else None)
-    assert resp.context["product_id"] == (
-        product_id if not is_anonymous else None
-    )
+    assert resp.context["product_id"] == (product_id if not is_anonymous else None)
     assert resp.context["enrolled"] == (
         is_enrolled and has_unexpired_run and not is_anonymous
     )

@@ -536,9 +536,7 @@ def test_patch_basket_update_invalid_product(basket_client, basket_and_coupons):
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert (
-        "Invalid product id {}".format(bad_id) in resp_data["errors"]["items"]
-    )
+    assert "Invalid product id {}".format(bad_id) in resp_data["errors"]["items"]
 
 
 @pytest.mark.parametrize("section", ["items", "coupons"])
@@ -680,7 +678,10 @@ def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
         type="json",
         data={
             "items": [
-                {"id": basket_and_coupons.product_version.product.id, "run_ids": [run.id]}
+                {
+                    "id": basket_and_coupons.product_version.product.id,
+                    "run_ids": [run.id],
+                }
             ]
         },
     )
@@ -699,7 +700,10 @@ def test_patch_basket__another_user_enrolled(basket_client, basket_and_coupons):
         type="json",
         data={
             "items": [
-                {"id": basket_and_coupons.product_version.product.id, "run_ids": [run.id]}
+                {
+                    "id": basket_and_coupons.product_version.product.id,
+                    "run_ids": [run.id],
+                }
             ]
         },
     )

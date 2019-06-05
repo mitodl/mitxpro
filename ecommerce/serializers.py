@@ -245,9 +245,7 @@ class BasketSerializer(serializers.ModelSerializer):
     @classmethod
     def _get_runs_for_product(cls, *, product, run_ids, user):
         """Helper function to get and validate selected runs in a product"""
-        runs_for_product = list(
-            product.run_queryset.filter(id__in=run_ids)
-        )
+        runs_for_product = list(product.run_queryset.filter(id__in=run_ids))
         run_ids_for_product = {run.id for run in runs_for_product}
 
         missing_run_ids = set(run_ids) - run_ids_for_product
@@ -411,10 +409,10 @@ class BasketSerializer(serializers.ModelSerializer):
 
             if product_id is None:
                 raise ValidationError("Invalid request")
-            if not models.ProductVersion.objects.filter(product__id=product_id).exists():
-                raise ValidationError(
-                    f"Invalid product id {product_id}"
-                )
+            if not models.ProductVersion.objects.filter(
+                product__id=product_id
+            ).exists():
+                raise ValidationError(f"Invalid product id {product_id}")
 
         return {"items": items}
 
