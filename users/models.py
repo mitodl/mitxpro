@@ -1,7 +1,10 @@
 """User models"""
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import gettext_lazy as _
+import pycountry
 import ulid
 
 from mitxpro.models import TimestampedModel
@@ -118,6 +121,40 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
         return self.name
 
 
+def validate_iso_3166_1_code(value):
+    """
+    Verify the value is a known subdivision
+
+    Args:
+        value (str): the code value
+
+    Raises:
+        ValidationError: raised if not a valid code
+    """
+    if pycountry.countries.get(alpha_2=value) is None:
+        raise ValidationError(
+            _("%(value)s is not a valid ISO 3166-1 country code"),
+            params={"value": value},
+        )
+
+
+def validate_iso_3166_2_code(value):
+    """
+    Verify the value is a known subdivision
+
+    Args:
+        value (str): the code value
+
+    Raises:
+        ValidationError: raised if not a valid code
+    """
+    if pycountry.subdivisions.get(code=value) is None:
+        raise ValidationError(
+            _("%(value)s is not a valid ISO 3166-2 subdivision code"),
+            params={"value": value},
+        )
+
+
 class LegalAddress(TimestampedModel):
     """A user's legal address, used for SDN compliance"""
 
@@ -135,10 +172,14 @@ class LegalAddress(TimestampedModel):
     street_address_5 = models.CharField(max_length=60, blank=True)
 
     city = models.CharField(max_length=50, blank=True)
-    country = models.CharField(max_length=2, blank=True)  # ISO-3166-1
+    country = models.CharField(
+        max_length=2, blank=True, validators=[validate_iso_3166_1_code]
+    )  # ISO-3166-1
 
     # only required in the US/CA
-    state_or_territory = models.CharField(max_length=6, blank=True)  # ISO 3166-2
+    state_or_territory = models.CharField(
+        max_length=6, blank=True, validators=[validate_iso_3166_2_code]
+    )  # ISO 3166-2
     postal_code = models.CharField(max_length=10, blank=True)
 
     def __str__(self):

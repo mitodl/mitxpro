@@ -1,5 +1,6 @@
 """Tests for user models"""
 # pylint: disable=too-many-arguments, redefined-outer-name
+from django.core.exceptions import ValidationError
 import pytest
 import ulid
 
@@ -66,3 +67,28 @@ def test_create_superuser_error(kwargs):
             password="abc",
             **kwargs,
         )
+
+
+@pytest.mark.parametrize(
+    "field, value, is_valid",
+    [
+        ["country", "US", True],
+        ["country", "United States", False],
+        ["state_or_territory", "US-MA", True],
+        ["state_or_territory", "MA", False],
+        ["state_or_territory", "Massachusets", False],
+    ],
+)
+def test_legal_address_validation(field, value, is_valid):
+    """Verify legal address validation"""
+    address = LegalAddress()
+
+    setattr(address, field, value)
+
+    with pytest.raises(ValidationError) as exc:
+        address.clean_fields()
+
+    if is_valid:
+        assert field not in exc.value.error_dict
+    else:
+        assert field in exc.value.error_dict
