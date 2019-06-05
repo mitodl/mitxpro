@@ -747,7 +747,7 @@ class CoursePage(ProductPage):
             **super().get_context(request, **kwargs),
             **get_js_settings_context(request),
             "courseware_url": run.courseware_url if run else None,
-            "product_version_id": product_version.id
+            "product_id": product.id
             if (product_version and not is_anonymous)
             else None,
             "enrolled": enrolled,

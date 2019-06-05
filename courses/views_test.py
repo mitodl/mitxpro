@@ -232,11 +232,11 @@ def test_course_view(
     else:
         run = None
     if has_product and has_unexpired_run:
-        product_version_id = ProductVersionFactory.create(
+        product_id = ProductVersionFactory.create(
             product=ProductFactory(content_object=run)
-        ).id
+        ).product.id
     else:
-        product_version_id = None
+        product_id = None
     if is_enrolled and has_unexpired_run:
         CourseRunEnrollment.objects.create(user=user, run=run)
 
@@ -246,8 +246,8 @@ def test_course_view(
     assert resp.context["course"] == course
     assert resp.context["user"] == user if not is_anonymous else AnonymousUser()
     assert resp.context["courseware_url"] == (run.courseware_url if run else None)
-    assert resp.context["product_version_id"] == (
-        product_version_id if not is_anonymous else None
+    assert resp.context["product_id"] == (
+        product_id if not is_anonymous else None
     )
     assert resp.context["enrolled"] == (
         is_enrolled and has_unexpired_run and not is_anonymous
@@ -257,7 +257,7 @@ def test_course_view(
     url = ""  # make linter happy
     if not is_anonymous:
         if not is_enrolled and has_product and has_unexpired_run:
-            url = f'{reverse("checkout-page")}?product={product_version_id}'
+            url = f'{reverse("checkout-page")}?product={product_id}'
             has_button = True
         if is_enrolled and has_unexpired_run:
             url = reverse("user-dashboard")

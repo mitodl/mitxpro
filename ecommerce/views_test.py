@@ -366,7 +366,7 @@ def test_patch_basket_new_user(basket_and_coupons, user, user_drf_client):
 
 def test_patch_basket_new_item(basket_client, basket_and_coupons):
     """Test that a user can add an item to their basket"""
-    data = {"items": [{"id": basket_and_coupons.product_version.id}]}
+    data = {"items": [{"id": basket_and_coupons.product_version.product.id}]}
     BasketItem.objects.all().delete()  # clear the basket first
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
@@ -480,7 +480,7 @@ def test_patch_basket_update_valid_product_valid_coupon(
     product_version = ProductVersionFactory()
     CouponEligibilityFactory(product=product_version.product, coupon=best_coupon)
 
-    data = {"items": [{"id": product_version.id}]}
+    data = {"items": [{"id": product_version.product.id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     resp_data = resp.json()
@@ -499,7 +499,7 @@ def test_patch_basket_update_valid_product_invalid_coupon_auto(
     product_version = ProductVersionFactory()
     CouponEligibilityFactory(product=product_version.product, coupon=auto_coupon)
 
-    data = {"items": [{"id": product_version.id}]}
+    data = {"items": [{"id": product_version.product.id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     resp_data = resp.json()
@@ -520,7 +520,7 @@ def test_patch_basket_update_valid_product_invalid_coupon_no_auto(
         basket.couponselection_set.all().delete()
     else:
         assert basket.couponselection_set.first() is not None
-    data = {"items": [{"id": product_version.id}]}
+    data = {"items": [{"id": product_version.product.id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     resp_data = resp.json()
@@ -537,7 +537,7 @@ def test_patch_basket_update_invalid_product(basket_client, basket_and_coupons):
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
     assert (
-        "Invalid product version id {}".format(bad_id) in resp_data["errors"]["items"]
+        "Invalid product id {}".format(bad_id) in resp_data["errors"]["items"]
     )
 
 
@@ -590,7 +590,7 @@ def test_patch_basket_update_runs(basket_client, basket_and_coupons, add_new_run
         data={
             "items": [
                 {
-                    "id": product_version.id,
+                    "id": product.id,
                     "run_ids": [run1.id, run2.id] if add_new_runs else [],
                 }
             ]
@@ -625,7 +625,7 @@ def test_patch_basket_invalid_run(basket_client, basket_and_coupons, is_program)
     resp = basket_client.patch(
         reverse("basket_api"),
         type="json",
-        data={"items": [{"id": product_version.id, "run_ids": [other_run.id]}]},
+        data={"items": [{"id": product.id, "run_ids": [other_run.id]}]},
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     assert resp.json()["errors"] == [
@@ -655,7 +655,7 @@ def test_patch_basket_multiple_runs(
     resp = basket_client.patch(
         reverse("basket_api"),
         type="json",
-        data={"items": [{"id": product_version.id, "run_ids": [run1.id, run2.id]}]},
+        data={"items": [{"id": product.id, "run_ids": [run1.id, run2.id]}]},
     )
     if multiple_for_program:
         assert resp.status_code == status.HTTP_200_OK
@@ -680,7 +680,7 @@ def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
         type="json",
         data={
             "items": [
-                {"id": basket_and_coupons.product_version.id, "run_ids": [run.id]}
+                {"id": basket_and_coupons.product_version.product.id, "run_ids": [run.id]}
             ]
         },
     )
@@ -699,7 +699,7 @@ def test_patch_basket__another_user_enrolled(basket_client, basket_and_coupons):
         type="json",
         data={
             "items": [
-                {"id": basket_and_coupons.product_version.id, "run_ids": [run.id]}
+                {"id": basket_and_coupons.product_version.product.id, "run_ids": [run.id]}
             ]
         },
     )

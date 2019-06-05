@@ -34,6 +34,7 @@ export type BasketItem = {
   price: string,
   description: string,
   object_id: number,
+  product_id: number,
   id: number,
   run_ids: Array<number>,
 }

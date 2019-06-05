@@ -14,8 +14,8 @@
           <h2>{{ page.subhead }}</h2>
         </div>
         <div class="mt-5">
-          {% if not enrolled and product_version_id %}
-            <a class="enroll-button" href="{% url "checkout-page" %}?product={{ product_version_id }}">
+          {% if not enrolled and product_id %}
+            <a class="enroll-button" href="{% url "checkout-page" %}?product={{ product_id }}">
               Enroll Now
             </a>
           {% elif enrolled and courseware_url %}
