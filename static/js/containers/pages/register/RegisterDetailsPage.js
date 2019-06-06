@@ -167,7 +167,7 @@ const mapDispatchToProps = {
 }
 
 export default compose(
-  withRequiredQueryParams(["partial_token"], RedirectToRegister),
+  // withRequiredQueryParams(["partial_token"], RedirectToRegister),
   connect(
     mapStateToProps,
     mapDispatchToProps
