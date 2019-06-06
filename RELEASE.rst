@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.7.1
+-------------
+
+- Add voucher app for course voucher upload and processing
+- #157 Serve Catalog Page from Wagtail
+- Added forgot password UI
+- Check for Hubspot API errors (#396)
+
 Version 0.7.0 (Released June 06, 2019)
 -------------
 
