@@ -13,6 +13,7 @@ from ecommerce.factories import (
     ProductVersionFactory,
 )
 from ecommerce.models import Product, Order
+from hubspot.api import format_hubspot_id
 from hubspot.serializers import (
     ProductSerializer,
     LineSerializer,
@@ -42,8 +43,8 @@ def test_serialize_line():
     serialized_data = LineSerializer(instance=line).data
     assert serialized_data == {
         "id": line.id,
-        "product": line.product_version.product.id,
-        "order": line.order_id,
+        "product": format_hubspot_id(line.product_version.product.id),
+        "order": format_hubspot_id(line.order_id),
         "quantity": line.quantity,
     }
 

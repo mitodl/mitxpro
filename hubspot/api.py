@@ -3,6 +3,8 @@ Hubspot Ecommerce Bridge API sync utilities
 
 https://developers.hubspot.com/docs/methods/ecomm-bridge/ecomm-bridge-overview
 """
+import logging
+import re
 from urllib.parse import urljoin, urlencode
 import requests
 from django.conf import settings
@@ -10,6 +12,8 @@ from django.conf import settings
 from mitxpro.utils import now_in_utc
 
 HUBSPOT_API_BASE_URL = "https://api.hubapi.com"
+
+log = logging.getLogger()
 
 
 def hubspot_timestamp(dt):
@@ -23,6 +27,31 @@ def hubspot_timestamp(dt):
         int: The timestamp in milliseconds
     """
     return int(dt.timestamp() * 1000)
+
+
+def format_hubspot_id(object_id):
+    """
+    Return a formatted Hubspot ID for an object
+    Args:
+        object_id(int): The object id
+
+    Returns:
+        str: The hubspot id
+    """
+    return "{}-{}".format(settings.HUBSPOT_ID_PREFIX, object_id)
+
+
+def parse_hubspot_id(hubspot_id):
+    """
+    Return an object ID parsed from a hubspot ID
+    Args:
+        hubspot_id(str): The formatted hubspot ID
+
+    Returns:
+        int: The object ID or None
+    """
+    match = re.compile(fr"{settings.HUBSPOT_ID_PREFIX}-(\d+)").match(hubspot_id)
+    return int(match.group(1)) if match else None
 
 
 def send_hubspot_request(
@@ -75,7 +104,7 @@ def make_sync_message(object_id, properties):
         if properties[key] is None:
             properties[key] = ""
     return {
-        "integratorObjectId": "{}-{}".format(settings.HUBSPOT_ID_PREFIX, object_id),
+        "integratorObjectId": format_hubspot_id(object_id),
         "action": "UPSERT",
         "changeOccurredTimestamp": hubspot_timestamp(now_in_utc()),
         "propertyNameToValues": dict(properties),
@@ -132,10 +161,32 @@ def get_sync_status(object_type, object_id):
         HTML response including sync status
     """
     response = send_hubspot_request(
-        str(object_id), f"/extensions/ecomm/v1/sync-status/{object_type.upper()}", "GET"
+        format_hubspot_id(object_id),
+        f"/extensions/ecomm/v1/sync-status/{object_type.upper()}",
+        "GET",
     )
     response.raise_for_status()
-    return response
+    return response.json()
+
+
+def exists_in_hubspot(object_type, object_id):
+    """
+    Check if object exists in hubspot by looking for the presence of a hubspot ID
+
+    Args:
+        object_type (str): The hubspot object_type
+        object_id (ID): The ID of the object to check
+    Return:
+        boolean: True if the object exists
+    """
+    try:
+        sync_status = get_sync_status(object_type, object_id)
+    except requests.HTTPError as sync_status_error:
+        if sync_status_error.response.status_code != 400:
+            log.error(sync_status_error)
+        return False
+    else:
+        return sync_status["hubspotId"] is not None
 
 
 def make_contact_sync_message(user_id):
@@ -156,7 +207,8 @@ def make_contact_sync_message(user_id):
     properties = UserSerializer(user).data
     properties.update(properties.pop("legal_address") or {})
     properties.update(properties.pop("profile") or {})
-    properties["street_address"] = "\n".join(properties.pop("street_address"))
+    if "street_address" in properties:
+        properties["street_address"] = "\n".join(properties.pop("street_address"))
     return [make_sync_message(user.id, properties)]
 
 

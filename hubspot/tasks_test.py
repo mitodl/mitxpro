@@ -2,23 +2,22 @@
 Tests for hubspot tasks
 """
 # pylint: disable=redefined-outer-name
-from datetime import datetime
 from unittest.mock import ANY
 
 import pytest
-import pytz
 
 from faker import Faker
 
-from ecommerce.factories import ProductFactory, LineFactory
+from ecommerce.factories import ProductFactory, LineFactory, OrderFactory
 from hubspot.api import (
     make_contact_sync_message,
     make_product_sync_message,
     make_deal_sync_message,
     make_line_item_sync_message,
 )
-from hubspot.factories import HubspotErrorCheckFactory
-from hubspot.models import HubspotErrorCheck
+from hubspot.conftest import TIMESTAMPS, FAKE_OBJECT_ID
+from hubspot.factories import HubspotErrorCheckFactory, HubspotLineResyncFactory
+from hubspot.models import HubspotErrorCheck, HubspotLineResync
 from hubspot.tasks import (
     sync_contact_with_hubspot,
     HUBSPOT_SYNC_URL,
@@ -26,6 +25,7 @@ from hubspot.tasks import (
     sync_deal_with_hubspot,
     sync_line_item_with_hubspot,
     check_hubspot_api_errors,
+    retry_invalid_line_associations,
 )
 from users.factories import UserFactory
 
@@ -63,13 +63,9 @@ def test_sync_product_with_hubspot(mock_hubspot_request):
 
 
 def test_sync_deal_with_hubspot(
-    mocker, mock_hubspot_request, mocked_celery, hubspot_order
+    mock_sync_line, mock_hubspot_request, mocked_celery, hubspot_order
 ):
     """Test that send_hubspot_request is called properly for a DEAL sync"""
-    sync_line_mock = mocker.patch(
-        "hubspot.tasks.sync_line_item_with_hubspot", autospec=True
-    )
-
     with pytest.raises(mocked_celery.replace_exception_class):
         sync_deal_with_hubspot.delay(hubspot_order.id)
     assert mocked_celery.group.call_count == 1
@@ -80,8 +76,8 @@ def test_sync_deal_with_hubspot(
         "DEAL", HUBSPOT_SYNC_URL, "PUT", body=body
     )
 
-    assert sync_line_mock.si.call_count == 1
-    sync_line_mock.si.assert_any_call(hubspot_order.lines.first().id)
+    assert mock_sync_line.si.call_count == 1
+    mock_sync_line.si.assert_any_call(hubspot_order.lines.first().id)
 
     assert mocked_celery.replace.call_count == 1
     assert mocked_celery.replace.call_args[0][1] == mocked_celery.chain.return_value
@@ -109,10 +105,7 @@ def test_sync_errors_first_run(mock_hubspot_errors, mock_logger):
 
 @pytest.mark.parametrize(
     "last_check_dt,expected_errors,call_count",
-    [
-        [datetime(2015, 1, 1, tzinfo=pytz.utc), 4, 3],
-        [datetime(2019, 5, 22, tzinfo=pytz.utc), 1, 1],
-    ],
+    [[TIMESTAMPS[0], 4, 3], [TIMESTAMPS[6], 1, 1]],
 )
 def test_sync_errors_new_errors(
     mock_hubspot_errors, mock_logger, last_check_dt, expected_errors, call_count
@@ -123,3 +116,34 @@ def test_sync_errors_new_errors(
     assert mock_hubspot_errors.call_count == call_count
     assert mock_logger.call_count == expected_errors
     assert HubspotErrorCheck.objects.first().checked_on > last_check.checked_on
+
+
+@pytest.mark.parametrize("model_that_exists", ["LINE_ITEM", "DEAL"])
+def test_retry_invalid_line_associations(mocker, mock_sync_line, model_that_exists):
+    """Test that line's are resynced if associated deals exists in hubspot"""
+    mock_exists_in_hubspot = mocker.patch(
+        "hubspot.tasks.exists_in_hubspot",
+        side_effect=(lambda object_type, _: object_type == model_that_exists),
+    )
+    HubspotLineResyncFactory.create_batch(3)
+    assert HubspotLineResync.objects.count() == 3
+    retry_invalid_line_associations()
+    if model_that_exists == "LINE_ITEM":
+        assert mock_exists_in_hubspot.call_count == 3
+        assert HubspotLineResync.objects.count() == 0
+    else:
+        assert mock_exists_in_hubspot.call_count == 6
+        assert mock_sync_line.call_count == 3
+
+
+def test_create_hubspot_line_resync(mock_hubspot_line_error, mock_retry_lines):
+    """Test that lines are re-synced if the error is INVALID_ASSOCIATION_PROPERTY and the order has since been synced"""
+    HubspotErrorCheckFactory.create(checked_on=TIMESTAMPS[0])
+    order = OrderFactory(id=FAKE_OBJECT_ID)
+    line = LineFactory(order=order, id=FAKE_OBJECT_ID)
+    check_hubspot_api_errors()
+
+    assert mock_hubspot_line_error.call_count == 2
+    assert mock_retry_lines.call_count == 1
+    assert HubspotLineResync.objects.count() == 1
+    assert HubspotLineResync.objects.first().line == line

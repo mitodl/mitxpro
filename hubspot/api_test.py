@@ -5,8 +5,10 @@ Hubspot API tests
 from urllib.parse import urlencode
 
 import pytest
-from faker import Faker
+from django.http import HttpResponse
 from django.conf import settings
+from faker import Faker
+from requests import HTTPError
 
 from ecommerce.factories import LineFactory, ProductFactory
 from hubspot.api import (
@@ -18,6 +20,7 @@ from hubspot.api import (
     make_line_item_sync_message,
     make_product_sync_message,
     get_sync_errors,
+    exists_in_hubspot,
 )
 from hubspot.serializers import OrderToDealSerializer, LineSerializer, ProductSerializer
 from mitxpro.test_utils import any_instance_of
@@ -113,6 +116,23 @@ def test_get_sync_errors(mock_hubspot_errors, offset):
     mock_hubspot_errors.assert_any_call(limit, offset)
     mock_hubspot_errors.assert_any_call(limit, offset + limit)
     mock_hubspot_errors.assert_any_call(limit, offset + limit * 2)
+
+
+@pytest.mark.parametrize(
+    "sync_status, exists",
+    [
+        [HTTPError(response=HttpResponse(status=400)), False],
+        [[{"hubspotId": None}], False],
+        [[{"hubspotId": 3}], True],
+    ],
+)
+def test_exists_in_hubspot(mocker, sync_status, exists):
+    """Test that exists_in_hubspot return True if an object has a hubspot ID and False otherwise"""
+    mock_get_sync_status = mocker.patch(
+        "hubspot.api.get_sync_status", side_effect=sync_status
+    )
+    assert exists_in_hubspot("OBJECT", 1) == exists
+    mock_get_sync_status.assert_called_once_with("OBJECT", 1)
 
 
 @pytest.mark.django_db
