@@ -1,6 +1,6 @@
 /* global SETTINGS: false */
 import React from "react"
-import {mergeDeepRight, isUndefined} from "ramda"
+import { mergeDeepRight, isNil } from "ramda"
 import { shallow } from "enzyme"
 import sinon from "sinon"
 import { Router } from "react-router-dom"
@@ -10,7 +10,6 @@ import configureStoreMain from "../store/configureStore"
 
 import type { Sandbox } from "../flow/sinonTypes"
 import * as networkInterfaceFuncs from "../store/network_interface"
-
 
 type RendererState = { [string]: any }
 type RendererProps = { [string]: any }
@@ -26,11 +25,11 @@ type RendererConfig = {
 
 const rendererDefaults: RendererConfig = {
   wrappedComponent: undefined,
-  innerComponent: undefined,
-  history: undefined,
-  useRouter: false,
-  state: {},
-  props: {}
+  innerComponent:   undefined,
+  history:          undefined,
+  useRouter:        false,
+  state:            {},
+  props:            {}
 }
 
 const createHistory = (historyConfig: ?any) => {
@@ -47,7 +46,10 @@ const createStore = (state: any) => {
   return store
 }
 
-const findInnerComponent = async (wrapper: any, InnerComponent: Class<React.Component<*, *>>) => {
+const findInnerComponent = async (
+  wrapper: any,
+  InnerComponent: Class<React.Component<*, *>>
+) => {
   // dive through layers of HOCs until we reach the desired inner component
   let inner = wrapper
   while (!inner.is(InnerComponent)) {
@@ -56,7 +58,8 @@ const findInnerComponent = async (wrapper: any, InnerComponent: Class<React.Comp
     if (
       cls &&
       cls.hasOwnProperty("WrappedComponent") &&
-      InnerComponent === cls.WrappedComponent) {
+      InnerComponent === cls.WrappedComponent
+    ) {
       break
     }
 
@@ -88,7 +91,7 @@ class ComponentRenderer {
   }
 
   withHistory(newHistory: ?History) {
-    const { history, ...config} = this.config
+    const { history, ...config } = this.config
     return new ComponentRenderer({
       ...config,
       history: newHistory || history || this.createHistory()
@@ -98,74 +101,72 @@ class ComponentRenderer {
   withConfiguredHistory(historyConfig: any) {
     return new ComponentRenderer({
       ...this.config,
-      history: createHistory(historyConfig),
+      history: createHistory(historyConfig)
     })
   }
 
   withInnerComponent(InnerComponent: Class<React.Component<*, *>>) {
-      return new ComponentRenderer({
-        ...this.config,
-        InnerComponent
-      })
+    return new ComponentRenderer({
+      ...this.config,
+      InnerComponent
+    })
   }
 
   withRouter() {
-    const { history, ...config} = this.config
+    const { history, ...config } = this.config
     return new ComponentRenderer({
       ...config,
-      history: history || this.createHistory(),
-      useRouter: true,
+      history:   history || this.createHistory(),
+      useRouter: true
     })
   }
 
   withState(newState: RendererState) {
-      const {state, ...config} = this.config
-      return new ComponentRenderer({
-        ...config,
-        state: mergeDeepRight(state, newState)
-      })
+    const { state, ...config } = this.config
+    return new ComponentRenderer({
+      ...config,
+      state: mergeDeepRight(state, newState)
+    })
   }
 
   withProps(newProps: RendererProps) {
-      const {props, ...config} = this.config
-      return new ComponentRenderer({
-        ...config,
-        props: mergeDeepRight(props, newProps)
-      })
+    const { props, ...config } = this.config
+    return new ComponentRenderer({
+      ...config,
+      props: mergeDeepRight(props, newProps)
+    })
   }
 
   async render() {
-    const { WrappedComponent, InnerComponent, history, useRouter, props, state } = this.config
+    const {
+      WrappedComponent,
+      InnerComponent,
+      history,
+      useRouter,
+      props,
+      state
+    } = this.config
 
     const store = createStore(state)
 
     let component = (
-      <WrappedComponent
-        store={store}
-        dispatch={store.dispatch}
-        {...props}
-      />
+      <WrappedComponent store={store} dispatch={store.dispatch} {...props} />
     )
 
     if (useRouter) {
-      component = (
-        <Router history={history}>
-          {compoment}
-        </Router>
-      )
+      component = <Router history={history}>{compoment}</Router>
     }
 
-    let wrapper = await shallow(
-      component,
-      {
-        context: {
-          // TODO: should be removed in the near future after upgrading enzyme
-          store
-        }
+    const wrapper = await shallow(component, {
+      context: {
+        // TODO: should be removed in the near future after upgrading enzyme
+        store
       }
-    )
+    })
 
-    const inner = !isUndefined(InnerComponent) ? findInnerComponent(wrapper, InnerComponent) : null
+    const inner = !isNil(InnerComponent)
+      ? await findInnerComponent(wrapper, InnerComponent)
+      : null
 
     // return a smart object that raises errors if you try to access things you didn't configure
     return {
@@ -173,25 +174,27 @@ class ComponentRenderer {
       store,
       get inner() {
         if (!inner) {
-          throw Error("Renderer is not configured with an InnerComponent, call withInnerComponent()")
+          throw Error(
+            "Renderer is not configured with an InnerComponent, call withInnerComponent()"
+          )
         }
         return inner
       },
       get history() {
         if (!history) {
-          throw Error("Renderer is not configured with history, call one of withHistory(), withConfiguredHistory(), or withRouter()")
+          throw Error(
+            "Renderer is not configured with history, call one of withHistory(), withConfiguredHistory(), or withRouter()"
+          )
         }
         return history
       }
     }
-
   }
 }
 
-export const createComponentRenderer = (WrappedComponent: Class<React.Component<*, *>>) => (
-  new ComponentRenderer({ WrappedComponent })
-)
-
+export const createComponentRenderer = (
+  WrappedComponent: Class<React.Component<*, *>>
+) => new ComponentRenderer({ WrappedComponent })
 
 export default class IntegrationTestHelper {
   sandbox: Sandbox
@@ -244,33 +247,16 @@ export default class IntegrationTestHelper {
     defaultState: Object,
     defaultProps = {}
   ) {
-    const history = this.browserHistory
-    return async (
-      extraState = {},
-      extraProps = {}
-    ) => {
-      const initialState = mergeDeepRight(defaultState, extraState)
-      const store = createStore(initialState)
+    const renderer = createComponentRenderer(WrappedComponent)
+      .withInnerComponent(InnerComponent)
+      .withHistory(this.browserHistory)
+      .withState(defaultState)
+      .withProps(defaultProps)
 
-      let wrapper = await shallow(
-        <WrappedComponent
-          store={store}
-          dispatch={store.dispatch}
-          history={history}
-          {...defaultProps}
-          {...extraProps}
-        />,
-        {
-          context: {
-            // TODO: should be removed in the near future after upgrading enzyme
-            store
-          }
-        }
-      )
-
-      const inner = findInnerComponent(wrapper, InnerComponent)
-
-      return { wrapper, inner, store }
-    }
+    return async (extraState = {}, extraProps = {}) =>
+      await renderer
+        .withState(extraState)
+        .withProps(extraProps)
+        .render()
   }
 }

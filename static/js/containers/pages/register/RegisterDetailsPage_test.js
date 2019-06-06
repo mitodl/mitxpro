@@ -34,9 +34,7 @@ describe("RegisterDetailsPage", () => {
   beforeEach(() => {
     helper = new IntegrationTestHelper()
     helper.configureBrowserHistory({
-      initialEntries: [
-        `/?partial_token=${partialToken}`
-      ]
+      initialEntries: [`/?partial_token=${partialToken}`]
     })
 
     setSubmittingStub = helper.sandbox.stub()
