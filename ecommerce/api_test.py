@@ -60,6 +60,8 @@ from ecommerce.models import (
     Product,
 )
 from mitxpro.utils import now_in_utc
+from voucher.factories import VoucherFactory
+from voucher.models import Voucher
 
 pytestmark = pytest.mark.django_db
 lazy = pytest.lazy_fixture
@@ -771,6 +773,34 @@ def test_enroll_user_in_order_items(mocker, user, has_redemption):
     enroll_args = patched_enroll.call_args[0]
     assert enroll_args[0] == user
     assert set(enroll_args[1]) == set(course_runs)
+
+
+def test_enroll_user_in_order_items_with_voucher(mocker, user):
+    """
+    Test that enroll_user_in_order_items attaches the enrollment to a voucher if a suitable one exists
+    """
+    patched_enroll = mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
+    order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
+    basket = BasketFactory.create(user=user)
+    run_selection = CourseRunSelectionFactory.create(basket=basket)
+    product = ProductFactory.create(content_object=run_selection.run)
+    LineFactory(order=order, product_version__product=product)
+    voucher = VoucherFactory(
+        user=user,
+        product=product,
+        coupon=CouponEligibilityFactory.create(product=product).coupon,
+    )
+    CouponRedemptionFactory.create(coupon_version__coupon=voucher.coupon)
+
+    enroll_user_in_order_items(order)
+    assert patched_enroll.call_count == 1
+
+    created_course_run_enrollments = CourseRunEnrollment.objects.order_by("pk").all()
+    assert created_course_run_enrollments.count() == 1
+    assert (
+        Voucher.objects.get(id=voucher.id).enrollment
+        == created_course_run_enrollments.first()
+    )
 
 
 def test_enroll_user_in_order_items_api_fail(mocker, user):
