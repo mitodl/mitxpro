@@ -156,7 +156,7 @@ def make_contact_sync_message(user_id):
     properties = UserSerializer(user).data
     properties.update(properties.pop("legal_address") or {})
     properties.update(properties.pop("profile") or {})
-    if 'street_address' in properties:
+    if "street_address" in properties:
         properties["street_address"] = "\n".join(properties.pop("street_address"))
     return [make_sync_message(user.id, properties)]
 
