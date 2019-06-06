@@ -609,7 +609,7 @@ def validate_basket_for_checkout(basket):
     try:
         basket_item = BasketItem.objects.get(basket=basket)
     except BasketItem.DoesNotExist:
-        raise ValidationError("No items in basket, cannot checkout")
+        raise ValidationError({"items": "No items in basket, cannot checkout"})
 
     product = basket_item.product
     # No more than one coupon allowed
@@ -623,7 +623,7 @@ def validate_basket_for_checkout(basket):
         if not get_valid_coupon_versions(
             product=product, user=basket.user, code=coupon.coupon_code
         ):
-            raise ValidationError("Coupon is not valid for product")
+            raise ValidationError({"coupons": "Coupon is not valid for product"})
 
     # Basket item runs must be linked to the basket item product
     run_queryset = product.run_queryset
@@ -633,14 +633,16 @@ def validate_basket_for_checkout(basket):
         .exists()
     ):
         raise ValidationError(
-            "Some runs present in basket which are not part of product"
+            {"runs": "Some runs present in basket which are not part of product"}
         )
 
     # User must not already be enrolled in a course run covered by the product
     if CourseRunEnrollment.objects.filter(
         user=basket.user, run__in=run_queryset
     ).exists():
-        raise ValidationError("User is already enrolled in one or more runs in basket")
+        raise ValidationError(
+            {"runs": "User is already enrolled in one or more runs in basket"}
+        )
 
     # User must have selected one run id for each course in basket
     runs = list(CourseRun.objects.filter(courserunselection__basket=basket))
@@ -649,7 +651,9 @@ def validate_basket_for_checkout(basket):
         if run.course_id not in courses_runs:
             courses_runs[run.course_id] = run.id
         elif courses_runs[run.course_id] != run.id:
-            raise ValidationError("Two or more runs assigned for a single course")
+            raise ValidationError(
+                {"runs": "Two or more runs assigned for a single course"}
+            )
 
     if (
         len(courses_runs)
@@ -658,9 +662,9 @@ def validate_basket_for_checkout(basket):
         # This is != but it could be < because the > case should be covered in previous clauses.
         # The user can only select more courses than a product has if they are selecting runs outside
         # of the product, which we checked above.
-        raise ValidationError("Each course must have a course run selection")
+        raise ValidationError({"runs": "Each course must have a course run selection"})
 
     # All run ids must be purchasable and enrollable by user
     for run in runs:
         if not run.is_unexpired:
-            raise ValidationError(f"Run {run.id} is expired")
+            raise ValidationError({"runs": f"Run {run.id} is expired"})

@@ -1,6 +1,6 @@
 // @flow
 import type { Course } from "./courseTypes"
-import {PRODUCT_TYPE_COURSE, PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM} from "../constants"
+import {PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM} from "../constants"
 
 export type CheckoutResponse = {
   url: string,
@@ -28,7 +28,7 @@ export type CheckoutPayload = {
 };
 
 export type BasketItem = {
-  type: PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_COURSE | PRODUCT_TYPE_PROGRAM,
+  type: PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM,
   courses: Array<Course>,
   thumbnail_url: string,
   price: string,
@@ -120,7 +120,7 @@ export type Product = {
 }
 
 export type ProductMap = {
-  [PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_COURSE | PRODUCT_TYPE_PROGRAM]: Array<Product>,
+  [PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM]: Array<Product>,
 }
 
 export type BulkCouponPayment = {

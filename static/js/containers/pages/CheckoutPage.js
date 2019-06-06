@@ -1,18 +1,13 @@
 // @flow
 import React from "react"
-import { curry, find, propEq } from "ramda"
 import { connect } from "react-redux"
 import { mutateAsync, requestAsync } from "redux-query"
 import { compose } from "redux"
 import queryString from "query-string"
 
+import { CheckoutForm } from "../../components/forms/CheckoutForm"
+
 import queries from "../../lib/queries"
-import {
-  calculateDiscount,
-  calculatePrice,
-  formatPrice,
-  formatRunTitle
-} from "../../lib/ecommerce"
 import { createCyberSourceForm, formatErrors } from "../../lib/form"
 
 import type { Response } from "redux-query"
@@ -23,7 +18,23 @@ import type {
   CheckoutResponse,
   BasketItem
 } from "../../flow/ecommerceTypes"
-import { PRODUCT_TYPE_COURSERUN } from "../../constants"
+import type {
+  Actions,
+  SetFieldError,
+  Values
+} from "../../components/forms/CheckoutForm"
+
+type Props = {
+  basket: ?BasketResponse,
+  checkout: () => Promise<Response<CheckoutResponse>>,
+  fetchBasket: () => Promise<*>,
+  location: Location,
+  updateBasket: (payload: BasketPayload) => Promise<*>
+}
+type State = {
+  appliedInitialCoupon: false,
+  errors: null
+}
 
 export const calcSelectedRunIds = (item: BasketItem): { [number]: number } => {
   if (item.type === "courserun") {
@@ -50,75 +61,43 @@ export const calcSelectedRunIds = (item: BasketItem): { [number]: number } => {
   return selectedRunIds
 }
 
-type Props = {
-  basket: ?BasketResponse,
-  checkout: () => Promise<Response<CheckoutResponse>>,
-  fetchBasket: () => Promise<*>,
-  location: Location,
-  updateBasket: (payload: BasketPayload) => Promise<*>
-}
-type State = {
-  couponCode: string | null,
-  errors: string | Array<string> | null,
-  selectedRuns: { [number]: { [number]: number } } | null
-}
 export class CheckoutPage extends React.Component<Props, State> {
   state = {
-    couponCode:   null,
-    selectedRuns: null,
-    errors:       null
+    appliedInitialCoupon: false,
+    errors:               null
   }
 
-  componentDidMount = async () => {
+  getQueryParams = () => {
     const {
-      fetchBasket,
       location: { search }
     } = this.props
     const params = queryString.parse(search)
-    const productId = parseInt(params.product)
+    return {
+      productId:  parseInt(params.product),
+      couponCode: params.code
+    }
+  }
+
+  componentDidMount = async () => {
+    const { fetchBasket, updateBasket } = this.props
+    const { productId } = this.getQueryParams()
     if (!productId) {
       await fetchBasket()
       return
     }
 
-    try {
-      await this.updateBasket({ items: [{ id: productId }] })
-
-      const couponCode = params.code
-      if (couponCode) {
-        await this.updateBasket({ coupons: [{ code: couponCode }] })
+    const basketResponse = await updateBasket({ items: [{ id: productId }] })
+    if (basketResponse.status !== 200) {
+      if (basketResponse.body.errors) {
+        this.setState({
+          errors: basketResponse.body.errors
+        })
       }
-    } catch (_) {
-      // prevent complaints about unresolved promises
     }
   }
 
-  handleErrors = async (responsePromise: Promise<*>) => {
-    const response = await responsePromise
-    if (response.body.errors) {
-      this.setState({ errors: response.body.errors })
-      throw new Error("Received error from request")
-    }
-
-    // clear state so the state from the basket is used
-    this.setState({
-      couponCode:   null,
-      selectedRuns: null,
-      errors:       null
-    })
-
-    return response
-  }
-
-  getSelectedRunIds = (item: BasketItem): { [number]: number } => {
-    return {
-      ...calcSelectedRunIds(item),
-      ...this.state.selectedRuns
-    }
-  }
-
-  submit = async () => {
-    const { basket } = this.props
+  submit = async (values: Values, actions: Actions) => {
+    const { basket, updateBasket, checkout } = this.props
 
     if (!basket) {
       // if there is no basket there shouldn't be any submit button rendered
@@ -126,93 +105,48 @@ export class CheckoutPage extends React.Component<Props, State> {
     }
 
     // update basket with selected runs
-    await this.updateBasket({
+    const basketPayload = {
       items: basket.items.map(item => ({
         id:      item.product_id,
         // $FlowFixMe: flow doesn't understand that Object.values will return an array of number here
-        run_ids: Object.values(this.getSelectedRunIds(item))
-      }))
-    })
-
-    const {
-      body: { url, payload, method }
-    } = await this.checkout()
-
-    if (method === "GET") {
-      window.location = url
-    } else {
-      const form = createCyberSourceForm(url, payload)
-      const body: HTMLElement = (document.querySelector("body"): any)
-      body.appendChild(form)
-      form.submit()
+        run_ids: Object.values(values.runs).map(runId => parseInt(runId))
+      })),
+      coupons: values.couponCode ? [{ code: values.couponCode }] : []
     }
-  }
-
-  updateCouponCode = (event: any) => {
-    this.setState({
-      couponCode: event.target.value
-    })
-  }
-
-  updateSelectedRun = curry(
-    async (item: BasketItem, courseId: number, event: any) => {
-      const { selectedRuns } = this.state
-      const { basket } = this.props
-      const runId = parseInt(event.target.value)
-      this.setState({
-        selectedRuns: {
-          ...selectedRuns,
-          [courseId]: runId
+    try {
+      const basketResponse = await updateBasket(basketPayload)
+      if (basketResponse.status !== 200) {
+        if (basketResponse.body.errors) {
+          actions.setErrors(basketResponse.body.errors)
         }
-      })
-
-      if (basket && item.type === PRODUCT_TYPE_COURSERUN) {
-        const selectedRun = find(
-          propEq("id", runId),
-          item.courses[0].courseruns
-        )
-        if (selectedRun && selectedRun.product_id) {
-          await this.updateBasket({
-            items: [
-              {
-                id:      selectedRun.product_id,
-                run_ids: []
-              }
-            ]
-          })
-        }
+        return
       }
-    }
-  )
 
-  getCouponCode = (): string => {
-    const { basket } = this.props
-    const { couponCode } = this.state
+      const checkoutResponse = await checkout()
+      if (checkoutResponse.status !== 200) {
+        if (checkoutResponse.body.errors) {
+          actions.setErrors(checkoutResponse.body.errors)
+        }
+        return
+      }
 
-    if (couponCode !== null) {
-      return couponCode
+      const { method, url, payload } = checkoutResponse.body
+      if (method === "GET") {
+        window.location = url
+      } else {
+        const form = createCyberSourceForm(url, payload)
+        const body: HTMLElement = (document.querySelector("body"): any)
+        body.appendChild(form)
+        form.submit()
+      }
+    } finally {
+      actions.setSubmitting(false)
     }
-    if (!basket) {
-      return ""
-    }
-
-    const item = basket.items[0]
-    if (!item) {
-      return ""
-    }
-
-    const coupon = basket.coupons.find(coupon =>
-      coupon.targets.includes(item.id)
-    )
-    return (coupon && coupon.code) || ""
   }
 
-  submitCoupon = async (e: Event) => {
-    const couponCode = this.getCouponCode()
-
-    e.preventDefault()
-
-    await this.updateBasket({
+  submitCoupon = async (couponCode: ?string, setFieldError: SetFieldError) => {
+    const { updateBasket } = this.props
+    const response = await updateBasket({
       coupons: couponCode
         ? [
           {
@@ -221,45 +155,9 @@ export class CheckoutPage extends React.Component<Props, State> {
         ]
         : []
     })
-  }
-
-  // $FlowFixMe
-  updateBasket = (...args) =>
-    this.handleErrors(this.props.updateBasket(...args))
-  // $FlowFixMe
-  checkout = (...args) => this.handleErrors(this.props.checkout(...args))
-
-  renderBasketItem = (item: BasketItem) => {
-    const selectedRunIds = this.getSelectedRunIds(item)
-    return (
-      <React.Fragment>
-        {item.courses.map(course => (
-          <div className="flex-row item-row" key={course.id}>
-            <div className="flex-row item-column">
-              <img src={course.thumbnail_url} alt={course.title} />
-            </div>
-            <div className="title-column">
-              <div className="title">{course.title}</div>
-              <select
-                className="run-selector"
-                onChange={this.updateSelectedRun(item, course.id)}
-                value={selectedRunIds[course.id] || ""}
-              >
-                <option value={null} key={"null"}>
-                  Select a course run
-                </option>
-                {course.courseruns.map(run =>
-                  run.product_id ? (
-                    <option value={run.id} key={run.id}>
-                      {formatRunTitle(run)}
-                    </option>
-                  ) : null
-                )}
-              </select>
-            </div>
-          </div>
-        ))}
-      </React.Fragment>
+    setFieldError(
+      "coupons",
+      response.body.errors ? response.body.errors.coupons : undefined
     )
   }
 
@@ -280,81 +178,18 @@ export class CheckoutPage extends React.Component<Props, State> {
     const coupon = basket.coupons.find(coupon =>
       coupon.targets.includes(item.id)
     )
+    const { couponCode } = this.getQueryParams()
+    const selectedRuns = calcSelectedRunIds(item)
 
     return (
-      <div className="checkout-page container">
-        <div className="row header">
-          <div className="col-12">
-            <div className="page-title">Checkout</div>
-            <div className="purchase-text">
-              You are about to purchase the following:
-            </div>
-            <div className="item-type">
-              {item.type === "program" ? "Program" : "Course"}
-            </div>
-            <hr />
-            {item.type === "program" ? (
-              <span className="description">{item.description}</span>
-            ) : null}
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-lg-7">
-            {this.renderBasketItem(item)}
-            <div className="enrollment-input">
-              <div className="enrollment-row">
-                Enrollment / Promotional Code
-              </div>
-              <form onSubmit={this.submitCoupon}>
-                <div className="flex-row coupon-code-row">
-                  <input
-                    type="text"
-                    className={errors ? "error-border" : ""}
-                    value={this.getCouponCode()}
-                    onChange={this.updateCouponCode}
-                  />
-                  <button
-                    className="apply-button"
-                    type="button"
-                    onClick={this.submitCoupon}
-                  >
-                    Apply
-                  </button>
-                </div>
-                {formatErrors(errors)}
-              </form>
-            </div>
-          </div>
-          <div className="col-lg-5 order-summary-container">
-            <div className="order-summary">
-              <div className="title">Order Summary</div>
-              <div className="flex-row price-row">
-                <span>Price:</span>
-                <span>{formatPrice(item.price)}</span>
-              </div>
-              {coupon ? (
-                <div className="flex-row discount-row">
-                  <span>Discount:</span>
-                  <span>{formatPrice(calculateDiscount(item, coupon))}</span>
-                </div>
-              ) : null}
-              <div className="bar" />
-              <div className="flex-row total-row">
-                <span>Total:</span>
-                <span>{formatPrice(calculatePrice(item, coupon))}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-lg-7" />
-          <div className="col-lg-5">
-            <button className="checkout-button" onClick={this.submit}>
-              Place your order
-            </button>
-          </div>
-        </div>
-      </div>
+      <CheckoutForm
+        item={item}
+        coupon={coupon}
+        couponCode={couponCode}
+        selectedRuns={selectedRuns}
+        submitCoupon={this.submitCoupon}
+        onSubmit={this.submit}
+      />
     )
   }
 }

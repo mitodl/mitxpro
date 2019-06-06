@@ -390,7 +390,7 @@ def test_patch_basket_invalid_coupon_format(basket_client, basket_and_coupons):
         reverse("basket_api"), type="json", data={"coupons": ["coupon code"]}
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp.json().get("errors") == ["Invalid request"]
+    assert resp.json().get("errors") == {"coupons": "Invalid request"}
 
 
 def test_patch_basket_multiple_coupons(basket_client, basket_and_coupons):
@@ -399,7 +399,9 @@ def test_patch_basket_multiple_coupons(basket_client, basket_and_coupons):
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert "Basket cannot contain more than one coupon" in resp_data.get("errors")
+    assert (
+        resp_data["errors"]["coupons"] == "Basket cannot contain more than one coupon"
+    )
 
 
 def test_patch_basket_update_coupon_valid(basket_client, basket_and_coupons):
@@ -426,7 +428,7 @@ def test_patch_basket_update_coupon_invalid(basket_client, basket_and_coupons):
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert "Coupon code {} is invalid".format(bad_code) in resp_data.get("errors")
+    assert resp_data["errors"]["coupons"] == f"Coupon code {bad_code} is invalid"
 
 
 def test_patch_basket_clear_coupon_auto(basket_client, basket_and_coupons):
@@ -547,9 +549,7 @@ def test_patch_basket_update_invalid_data(basket_client, basket_and_coupons, sec
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert "Invalid request" in (
-        resp_data["errors"] if section == "coupons" else resp_data["errors"]["items"]
-    )
+    assert "Invalid request" in resp_data["errors"][section]
 
 
 @pytest.mark.parametrize("data", [{"items": [], "coupons": []}, {"items": []}])
@@ -629,11 +629,13 @@ def test_patch_basket_invalid_run(
         data={"items": [{"id": product.id, "run_ids": [other_run_id]}]},
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp.json()["errors"] == [
-        f"Unable to find run(s) with id(s) {{{other_run_id}}}"
-        if is_selected
-        else "Each course must have a course run selection"
-    ]
+    assert resp.json()["errors"] == {
+        "runs": (
+            f"Unable to find run(s) with id(s) {{{other_run_id}}}"
+            if is_selected
+            else "Each course must have a course run selection"
+        )
+    }
 
 
 @pytest.mark.parametrize("multiple_for_program", [True, False])
@@ -669,7 +671,9 @@ def test_patch_basket_multiple_runs(
         ) == sorted([run1.id, run2.id])
     else:
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
-        assert resp.json()["errors"] == ["Only one run per course can be selected"]
+        assert resp.json()["errors"] == {
+            "runs": "Only one run per course can be selected"
+        }
 
 
 def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
@@ -691,7 +695,7 @@ def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
         },
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp.json()["errors"] == ["User has already enrolled in run"]
+    assert resp.json()["errors"] == {"runs": "User has already enrolled in run"}
 
 
 def test_patch_basket__another_user_enrolled(basket_client, basket_and_coupons):

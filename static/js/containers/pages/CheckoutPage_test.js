@@ -3,24 +3,14 @@ import { assert } from "chai"
 import sinon from "sinon"
 
 import CheckoutPage, {
-  CheckoutPage as InnerCheckoutPage,
-  calcSelectedRunIds
+  calcSelectedRunIds,
+  CheckoutPage as InnerCheckoutPage
 } from "./CheckoutPage"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 import * as formFuncs from "../../lib/form"
-import {
-  calculateDiscount,
-  calculatePrice,
-  formatPrice,
-  formatRunTitle
-} from "../../lib/ecommerce"
 import IntegrationTestHelper from "../../util/integration_test_helper"
-import {
-  makeBasketResponse,
-  makeCouponSelection
-} from "../../factories/ecommerce"
-import { assertRaises } from "../../lib/util"
-import { shouldIf } from "../../lib/test_utils"
+import { makeBasketResponse } from "../../factories/ecommerce"
+import { PRODUCT_TYPE_PROGRAM } from "../../constants"
 
 describe("CheckoutPage", () => {
   let helper, renderPage, basket
@@ -46,76 +36,8 @@ describe("CheckoutPage", () => {
   afterEach(() => {
     helper.cleanup()
   })
-  ;[true, false].forEach(hasCoupon => {
-    it(`shows your basket ${
-      hasCoupon ? "with" : "without"
-    } a coupon`, async () => {
-      const basketItem = basket.items[0]
-      basketItem.type = "program"
-      const coupon = makeCouponSelection()
-      basket.coupons = [coupon]
-      if (hasCoupon) {
-        coupon.targets = [basketItem.id]
-      } else {
-        coupon.targets = [-123]
-      }
-      const { inner } = await renderPage()
-      assert.equal(inner.find(".item-type").text(), "Program")
-      assert.equal(
-        inner.find(".header .description").text(),
-        basketItem.description
-      )
-      assert.equal(inner.find(".item-row").length, basketItem.courses.length)
-      basketItem.courses.forEach((course, i) => {
-        const courseRow = inner.find(".item-row").at(i)
-        assert.equal(courseRow.find("img").prop("src"), course.thumbnail_url)
-        assert.equal(courseRow.find("img").prop("alt"), course.title)
-        assert.equal(courseRow.find(".title").text(), course.title)
-      })
-      assert.equal(
-        inner.find(".price-row").text(),
-        `Price:${formatPrice(basketItem.price)}`
-      )
 
-      if (hasCoupon) {
-        assert.equal(
-          inner.find(".discount-row").text(),
-          `Discount:${formatPrice(calculateDiscount(basketItem, coupon))}`
-        )
-      } else {
-        assert.isFalse(inner.find(".discount-row").exists())
-      }
-
-      assert.equal(
-        inner.find(".total-row").text(),
-        `Total:${formatPrice(calculatePrice(basketItem, coupon))}`
-      )
-    })
-  })
-
-  it("renders a course run basket item", async () => {
-    basket = makeBasketResponse(PRODUCT_TYPE_COURSERUN)
-    const basketItem = basket.items[0]
-    const { inner } = await renderPage({
-      entities: {
-        basket
-      }
-    })
-
-    assert.equal(inner.find(".item-type").text(), "Course")
-    assert.equal(inner.find(".item-row").length, 1)
-
-    const courseRow = inner.find(".item-row").at(0)
-    assert.equal(
-      courseRow.find("img").prop("src"),
-      basketItem.courses[0].thumbnail_url
-    )
-    assert.equal(courseRow.find("img").prop("alt"), basketItem.courses[0].title)
-    assert.equal(
-      courseRow.find(".item-row .title").text(),
-      basketItem.courses[0].title
-    )
-  })
+  //
   ;[true, false].forEach(hasError => {
     it(`updates the basket with a product id from the query parameter${
       hasError ? ", but an error is returned" : ""
@@ -154,198 +76,50 @@ describe("CheckoutPage", () => {
     })
   })
 
-  describe("mount", () => {
-    const productError = "product error",
-      couponError = "coupon error",
-      couponCode = "codeforcoupon",
-      productId = 12345
-    let couponPayload, productPayload
-
-    beforeEach(() => {
-      couponPayload = {
-        body:        { coupons: [{ code: couponCode }] },
-        credentials: undefined,
-        headers:     {
-          "X-CSRFTOKEN": null
+  it("shows the coupon code from the query parameter", async () => {
+    const code = "xyzzy"
+    const { inner } = await renderPage(
+      {},
+      {
+        location: {
+          search: `product=4567&code=${code}`
         }
       }
-      productPayload = {
-        body:        { items: [{ id: productId }] },
-        credentials: undefined,
-        headers:     {
-          "X-CSRFTOKEN": null
-        }
-      }
-    })
-    ;[
-      [true, false, couponError],
-      [true, true, null],
-      [false, false, productError],
-      [false, true, productError]
-    ].forEach(([hasValidProductId, hasValidCoupon, expError]) => {
-      it(`updates the basket with a ${
-        hasValidProductId ? "" : "in"
-      }valid product id and a ${
-        hasValidCoupon ? "" : "in"
-      }valid coupon code from the query parameter`, async () => {
-        if (!hasValidProductId) {
-          helper.handleRequestStub
-            .withArgs("/api/basket/", "PATCH", productPayload)
-            .returns({
-              status: 400,
-              body:   {
-                errors: "product error"
-              }
-            })
-        }
-        if (!hasValidCoupon) {
-          helper.handleRequestStub
-            .withArgs("/api/basket/", "PATCH", couponPayload)
-            .returns({
-              status: 400,
-              body:   {
-                errors: "coupon error"
-              }
-            })
-        }
-        const { inner } = await renderPage(
-          {},
-          {
-            location: {
-              search: `product=${productId}&code=${couponCode}`
-            }
-          }
-        )
-        // wait for componentDidMount to resolve
-        await Promise.resolve()
-        sinon.assert.calledWith(
-          helper.handleRequestStub,
-          "/api/basket/",
-          "PATCH",
-          productPayload
-        )
-        assert.equal(
-          helper.handleRequestStub.calledWith(
-            "/api/basket/",
-            "PATCH",
-            couponPayload
-          ),
-          hasValidProductId
-        )
-
-        assert.equal(inner.state().errors, expError)
-      })
-    })
+    )
+    assert.equal(inner.find("CheckoutForm").prop("couponCode"), code)
   })
 
-  it("displays the coupon code", async () => {
-    const { inner } = await renderPage()
-    const couponCode = "a coupon code"
-    inner.setState({
-      couponCode
-    })
-    inner.update()
-    assert.equal(inner.find(".coupon-code-row input").prop("value"), couponCode)
-  })
-
-  it("updates the coupon code", async () => {
-    const { inner } = await renderPage()
-    const couponCode = "a coupon code"
-    const event = {
-      target: {
-        value: couponCode
-      },
-      preventDefault: helper.sandbox.stub()
-    }
-    inner.find(".coupon-code-row input").prop("onChange")(event)
-    assert.equal(inner.state().couponCode, couponCode)
-  })
-
-  //
+  it("submits the coupon code", async () => {})
   ;[true, false].forEach(hasCouponCode => {
-    it(`${hasCouponCode ? "submits" : "clears"} the coupon code`, async () => {
-      const { inner } = await renderPage()
-      const couponCode = "code"
-      inner.setState({
-        couponCode: hasCouponCode ? couponCode : ""
-      })
-
-      inner.find("form").prop("onSubmit")({
-        preventDefault: helper.sandbox.stub()
-      })
-      sinon.assert.calledWith(
-        helper.handleRequestStub,
-        "/api/basket/",
-        "PATCH",
-        {
-          body:    { coupons: hasCouponCode ? [{ code: couponCode }] : [] },
-          headers: {
-            "X-CSRFTOKEN": null
-          },
-          credentials: undefined
+    [true, false].forEach(hasError => {
+      it(`tries to submit ${hasCouponCode ? "an empty " : ""}the coupon code${
+        hasError ? " but receives an error message" : ""
+      }`, async () => {
+        const setFieldError = helper.sandbox.stub()
+        const couponError = "coupon error"
+        if (hasError) {
+          helper.handleRequestStub.withArgs("/api/basket/", "PATCH").returns({
+            status: 400,
+            body:   {
+              errors: {
+                coupons: couponError
+              }
+            }
+          })
         }
-      )
-    })
-  })
-
-  it("submits the coupon code currently in the basket if there is none in the state", async () => {
-    const { inner } = await renderPage()
-    const code = basket.coupons[0].code
-    await inner.find(".apply-button").prop("onClick")({
-      preventDefault: helper.sandbox.stub()
-    })
-    sinon.assert.calledWith(helper.handleRequestStub, "/api/basket/", "PATCH", {
-      body:        { coupons: [{ code: code }] },
-      credentials: undefined,
-      headers:     {
-        "X-CSRFTOKEN": null
-      }
-    })
-  })
-
-  it("clears the state after submitting the basket", async () => {
-    const { inner } = await renderPage()
-    const couponCode = "coupon code"
-    inner.setState({
-      errors:       "errors",
-      selectedRuns: ["runs"],
-      couponCode:   couponCode
-    })
-    await inner.find(".apply-button").prop("onClick")({
-      preventDefault: helper.sandbox.stub()
-    })
-    sinon.assert.calledWith(helper.handleRequestStub, "/api/basket/", "PATCH", {
-      body:        { coupons: [{ code: couponCode }] },
-      credentials: undefined,
-      headers:     {
-        "X-CSRFTOKEN": null
-      }
-    })
-    assert.deepEqual(inner.state(), {
-      couponCode:   null,
-      errors:       null,
-      selectedRuns: null
-    })
-  })
-
-  it("tries to submit the coupon code but receives an error message", async () => {
-    const { inner } = await renderPage()
-    const errors = "Unknown error"
-    helper.handleRequestStub.withArgs("/api/basket/", "PATCH").returns({
-      status: 400,
-      body:   {
-        errors
-      }
-    })
-    await assertRaises(async () => {
-      await inner.find("form").prop("onSubmit")({
-        preventDefault: helper.sandbox.stub()
+        const { inner } = await renderPage()
+        const couponCode = hasCouponCode ? "xyz" : ""
+        await inner.find("CheckoutForm").prop("submitCoupon")(
+          couponCode,
+          setFieldError
+        )
+        sinon.assert.calledWith(
+          setFieldError,
+          "coupons",
+          hasError ? couponError : undefined
+        )
       })
-    }, "Received error from request")
-
-    assert.equal(inner.state().errors, errors)
-    assert.equal(inner.find(".enrollment-input .error").text(), "Unknown error")
-    assert.isTrue(inner.find(".enrollment-input input.error-border").exists())
+    })
   })
 
   it("checks out", async () => {
@@ -357,7 +131,8 @@ describe("CheckoutPage", () => {
       body: {
         url,
         payload
-      }
+      },
+      status: 200
     })
     const submitStub = helper.sandbox.stub()
     const form = document.createElement("form")
@@ -366,7 +141,12 @@ describe("CheckoutPage", () => {
     const createFormStub = helper.sandbox
       .stub(formFuncs, "createCyberSourceForm")
       .returns(form)
-    await inner.find(".checkout-button").prop("onClick")()
+    const values = { runs: {} }
+    const actions = {
+      setSubmitting: helper.sandbox.stub(),
+      setErrors:     helper.sandbox.stub()
+    }
+    await inner.find("CheckoutForm").prop("onSubmit")(values, actions)
     sinon.assert.calledWith(createFormStub, url, payload)
     sinon.assert.calledWith(submitStub)
     sinon.assert.calledWith(
@@ -388,17 +168,18 @@ describe("CheckoutPage", () => {
         items: [
           {
             id:      basketItem.product_id,
-            run_ids: Object.values(
-              inner.instance().getSelectedRunIds(basketItem)
-            )
+            run_ids: []
           }
-        ]
+        ],
+        coupons: []
       },
       headers: {
         "X-CSRFTOKEN": null
       },
       credentials: undefined
     })
+    sinon.assert.calledWith(actions.setSubmitting, false)
+    sinon.assert.notCalled(actions.setErrors)
   })
 
   it("checks out and redirects to a location instead of submitting a form", async () => {
@@ -411,13 +192,19 @@ describe("CheckoutPage", () => {
         url,
         payload,
         method: "GET"
-      }
+      },
+      status: 200
     })
     const submitStub = helper.sandbox.stub()
     const form = document.createElement("form")
     // $FlowFixMe: need to overwrite this function to mock it
     form.submit = submitStub
-    await inner.find(".checkout-button").prop("onClick")()
+    const actions = {
+      setSubmitting: helper.sandbox.stub(),
+      setErrors:     helper.sandbox.stub()
+    }
+    const values = { runs: {} }
+    await inner.find("CheckoutForm").prop("onSubmit")(values, actions)
 
     const basketItem = basket.items[0]
     sinon.assert.calledWith(helper.handleRequestStub, "/api/basket/", "PATCH", {
@@ -425,17 +212,18 @@ describe("CheckoutPage", () => {
         items: [
           {
             id:      basketItem.product_id,
-            run_ids: Object.values(
-              inner.instance().getSelectedRunIds(basketItem)
-            )
+            run_ids: []
           }
-        ]
+        ],
+        coupons: []
       },
       headers: {
         "X-CSRFTOKEN": null
       },
       credentials: undefined
     })
+    sinon.assert.notCalled(actions.setErrors)
+    sinon.assert.calledWith(actions.setSubmitting, false)
     assert.isTrue(window.location.toString().endsWith(url))
   })
 
@@ -454,150 +242,82 @@ describe("CheckoutPage", () => {
     // $FlowFixMe: need to overwrite this function to mock it
     form.submit = submitStub
 
-    await assertRaises(async () => {
-      await inner.find(".checkout-button").prop("onClick")()
-    }, "Received error from request")
-    assert.deepEqual(inner.state().errors, errors)
-  })
-
-  it("fails to check out because checkout API failed to validate", async () => {
-    const { inner } = await renderPage()
-
-    const errors = ["some error"]
-    helper.handleRequestStub.withArgs("/api/checkout/", "POST").returns({
-      status: 400,
-      body:   {
-        errors
+    const runId = 123
+    const values = {
+      runs: {
+        [basket.items[0].courses[0].id]: runId
+      }
+    }
+    const actions = {
+      setSubmitting: helper.sandbox.stub(),
+      setErrors:     helper.sandbox.stub()
+    }
+    await inner.find("CheckoutForm").prop("onSubmit")(values, actions)
+    sinon.assert.calledWith(actions.setErrors, errors)
+    sinon.assert.calledWith(actions.setSubmitting, false)
+    assert.equal(submitStub.callCount, 0)
+    sinon.assert.notCalled(submitStub)
+    sinon.assert.calledWith(helper.handleRequestStub, "/api/basket/", "PATCH", {
+      body: {
+        items:   [{ id: basket.items[0].product_id, run_ids: [runId] }],
+        coupons: []
+      },
+      credentials: undefined,
+      headers:     {
+        "X-CSRFTOKEN": null
       }
     })
-    const submitStub = helper.sandbox.stub()
-    const form = document.createElement("form")
-    // $FlowFixMe: need to overwrite this function to mock it
-    form.submit = submitStub
-    await assertRaises(async () => {
-      await inner.find(".checkout-button").prop("onClick")()
-    }, "Received error from request")
+    assert.isFalse(helper.handleRequestStub.calledWith("/api/checkout/"))
   })
+  ;[true, false].forEach(hasCoupon => {
+    it(`fails to check out because checkout API failed to validate${
+      hasCoupon ? " with a coupon" : ""
+    }`, async () => {
+      const { inner } = await renderPage()
 
-  it("gets selected runs", async () => {
-    const { inner } = await renderPage()
-    const item = {
-      courses: [
-        {
-          id:         "course_1",
-          courseruns: [
-            {
-              id: "run_1a"
-            },
-            {
-              id: "run_1b"
-            }
-          ]
+      const errors = ["some error"]
+      helper.handleRequestStub.withArgs("/api/checkout/", "POST").returns({
+        status: 400,
+        body:   {
+          errors
+        }
+      })
+      const submitStub = helper.sandbox.stub()
+      const form = document.createElement("form")
+      // $FlowFixMe: need to overwrite this function to mock it
+      form.submit = submitStub
+      const runId = 123
+      const code = "code"
+      const values = {
+        runs: {
+          [basket.items[0].courses[0].id]: runId
         },
-        {
-          id:         "course_2",
-          courseruns: [
-            {
-              id: "run_2a"
-            },
-            {
-              id: "run_2b"
-            }
-          ]
-        }
-      ],
-      run_ids: ["run_2a", "run_1b"],
-      price:   "123.45"
-    }
-    // $FlowFixMe
-    basket.items = [item]
-    inner.setState({
-      selectedRuns: {
-        course_3: "run_3",
-        course_2: "run_2b"
+        couponCode: hasCoupon ? code : ""
       }
-    })
-
-    assert.deepEqual(inner.instance().getSelectedRunIds(item), {
-      course_1: "run_1b",
-      course_2: "run_2b",
-      course_3: "run_3"
-    })
-  })
-
-  //
-  ;[[PRODUCT_TYPE_COURSERUN, true], [PRODUCT_TYPE_PROGRAM, false]].forEach(
-    ([productType, shouldUpdate]) => {
-      it(`changing course run for ${productType} product type ${shouldIf(
-        shouldUpdate
-      )} update the product`, async () => {
-        basket = makeBasketResponse(productType)
-        const { inner } = await renderPage({
-          entities: {
-            basket
-          }
-        })
-        const runSelect = inner.find(".run-selector").at(0)
-        const runOption = runSelect.find("option").at(1)
-
-        await runSelect.prop("onChange")({
-          target: { value: runOption.prop("value") }
-        })
-
-        const requestData = {
+      const actions = {
+        setSubmitting: helper.sandbox.stub(),
+        setErrors:     helper.sandbox.stub()
+      }
+      await inner.find("CheckoutForm").prop("onSubmit")(values, actions)
+      sinon.assert.calledWith(actions.setErrors, errors)
+      sinon.assert.calledWith(actions.setSubmitting, false)
+      sinon.assert.notCalled(submitStub)
+      sinon.assert.calledWith(
+        helper.handleRequestStub,
+        "/api/basket/",
+        "PATCH",
+        {
           body: {
-            items: [
-              {
-                id:      basket.items[0].courses[0].courseruns[0].product_id,
-                run_ids: []
-              }
-            ]
+            items:   [{ id: basket.items[0].product_id, run_ids: [runId] }],
+            coupons: hasCoupon ? [{ code: code }] : []
           },
-          headers: {
+          credentials: undefined,
+          headers:     {
             "X-CSRFTOKEN": null
-          },
-          credentials: undefined
+          }
         }
-
-        assert.equal(
-          helper.handleRequestStub.calledWith(
-            "/api/basket/",
-            "PATCH",
-            requestData
-          ),
-          shouldUpdate
-        )
-      })
-    }
-  )
-
-  it("shows a select with options for a program product, and updates a run", async () => {
-    const item = basket.items[0]
-    const { inner } = await renderPage()
-    assert.equal(inner.find("select").length, basket.items[0].courses.length)
-    item.courses.forEach((course, i) => {
-      const courseRow = inner.find(".item-row").at(i)
-      assert.equal(courseRow.find(".title").text(), course.title)
-
-      const select = inner.find("select").at(i)
-
-      const runId = calcSelectedRunIds(item)[course.id]
-      assert.equal(select.prop("value"), runId || "")
-
-      const runs = course.courseruns
-      assert.equal(select.find("option").length, runs.length + 1)
-      const firstOption = select.find("option").at(0)
-      assert.equal(firstOption.prop("value"), null)
-      assert.equal(firstOption.text(), "Select a course run")
-
-      select.prop(select.prop("onChange")({ target: { value: "345" } }))
-      assert.equal(inner.state().selectedRuns[course.id], 345)
-
-      runs.forEach((run, j) => {
-        const runOption = select.find("option").at(j + 1)
-        assert.equal(runOption.prop("value"), run.id)
-        assert.equal(runOption.text(), formatRunTitle(run))
-      })
+      )
+      sinon.assert.calledWith(helper.handleRequestStub, "/api/checkout/")
     })
   })
 
@@ -605,5 +325,23 @@ describe("CheckoutPage", () => {
     basket.items = []
     const { inner } = await renderPage()
     assert.equal(inner.text(), "No item in basket")
+  })
+
+  describe("calcSelectedRunIds", () => {
+    it("calculates selected run ids from a basket item", () => {
+      const item = basket.items[0]
+      item.type = PRODUCT_TYPE_PROGRAM
+      const expected = {}
+      for (const runId of item.run_ids) {
+        for (const course of item.courses) {
+          for (const run of course.courseruns) {
+            if (run.id === runId) {
+              expected[course.id] = run.id
+            }
+          }
+        }
+      }
+      assert.deepEqual(calcSelectedRunIds(item), expected)
+    })
   })
 })

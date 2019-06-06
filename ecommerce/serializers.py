@@ -245,17 +245,21 @@ class BasketSerializer(serializers.ModelSerializer):
 
         missing_run_ids = set(run_ids) - run_ids_for_product
         if missing_run_ids:
-            raise ValidationError(f"Unable to find run(s) with id(s) {missing_run_ids}")
+            raise ValidationError(
+                {"runs": f"Unable to find run(s) with id(s) {missing_run_ids}"}
+            )
 
         courses_for_product = {}
         for run in runs_for_product:
             if run.course_id not in courses_for_product:
                 courses_for_product[run.course_id] = run.id
             elif courses_for_product[run.course_id] != run.id:
-                raise ValidationError("Only one run per course can be selected")
+                raise ValidationError(
+                    {"runs": "Only one run per course can be selected"}
+                )
 
         if CourseRunEnrollment.objects.filter(user=user, run_id__in=run_ids).exists():
-            raise ValidationError("User has already enrolled in run")
+            raise ValidationError({"runs": "User has already enrolled in run"})
 
         return runs_for_product
 
@@ -315,20 +319,24 @@ class BasketSerializer(serializers.ModelSerializer):
         product_version = product.latest_version
         if coupons:
             if len(coupons) > 1:
-                raise ValidationError("Basket cannot contain more than one coupon")
+                raise ValidationError(
+                    {"coupons": "Basket cannot contain more than one coupon"}
+                )
             coupon = coupons[0]
             if not isinstance(coupon, dict):
-                raise ValidationError("Invalid request")
+                raise ValidationError({"coupons": "Invalid request"})
             coupon_code = coupon.get("code")
             if coupon_code is None:
-                raise ValidationError("Invalid request")
+                raise ValidationError({"coupons": "Invalid request"})
 
             # Check if the coupon is valid for the product
             coupon_version = best_coupon_for_product(
                 product_version.product, basket.user, code=coupon_code
             )
             if coupon_version is None:
-                raise ValidationError("Coupon code {} is invalid".format(coupon_code))
+                raise ValidationError(
+                    {"coupons": "Coupon code {} is invalid".format(coupon_code)}
+                )
         elif coupons is not None:
             # Coupon was cleared, get the best available auto coupon for the product instead
             coupon_version = best_coupon_for_product(
