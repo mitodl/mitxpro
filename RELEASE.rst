@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.7.0
+Version 0.7.0 (Released June 06, 2019)
 -------------
 
 - Implemented bulk enrollment checkout
