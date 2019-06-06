@@ -1,3 +1,7 @@
+"""
+Management command to sync all Users, Orders, Products, and Lines with Hubspot
+and Line Items
+"""
 from django.core.management import BaseCommand
 from requests import HTTPError
 
@@ -25,6 +29,14 @@ class Command(BaseCommand):
 
     @staticmethod
     def bulk_sync_model(model, make_object_sync_message, object_type):
+        """
+        Sync all database objects of a certain type with hubspot
+        Args:
+            model (Class) class to sync with hubspot
+            make_object_sync_message (function) function that takes an objectID and
+                returns a sync message for that model
+            object_type (str) one of "CONTACT", "DEAL", "PRODUCT", "LINE_ITEM"
+        """
         sync_messages = [
             make_object_sync_message(obj.id) for obj in model.objects.all()
         ]
@@ -44,26 +56,41 @@ class Command(BaseCommand):
                 )
 
     def sync_contacts(self):
+        """
+        Sync all users with contacts in hubspot
+        """
         print("  Syncing users with hubspot contacts...")
         self.bulk_sync_model(User, make_contact_sync_message, "CONTACT")
         print("  Finished")
 
     def sync_products(self):
+        """
+        Sync all products with products in hubspot
+        """
         print("  Syncing products with hubspot products...")
         self.bulk_sync_model(Product, make_product_sync_message, "PRODUCT")
         print("  Finished")
 
     def sync_deals(self):
+        """
+        Sync all orders with deals in hubspot
+        """
         print("  Syncing orders with hubspot deals...")
         self.bulk_sync_model(Order, make_deal_sync_message, "DEAL")
         print("  Finished")
 
     def sync_line_items(self):
+        """
+        Sync all lines with line_items in hubspot
+        """
         print("  Syncing lines with hubspot line items...")
         self.bulk_sync_model(Line, make_line_item_sync_message, "LINE_ITEM")
         print("  Finished")
 
     def sync_all(self):
+        """
+        Sync all Users, Orders, Products, and Lines with Hubspot.
+        """
         self.sync_contacts()
         self.sync_products()
         self.sync_deals()
@@ -103,7 +130,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print("Syncing with hubspot...")
-        print(options)
         if not (
             options["sync_contacts"]
             or options["sync_products"]
