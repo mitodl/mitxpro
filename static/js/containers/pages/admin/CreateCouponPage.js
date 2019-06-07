@@ -52,7 +52,7 @@ export class CreateCouponPage extends React.Component<Props, State> {
     const { createCoupon } = this.props
     couponData.product_ids = couponData.products.map(product => product.id)
     if (couponData.coupon_type === COUPON_TYPE_SINGLE_USE) {
-      couponData.max_redemptions = couponData.num_coupon_codes
+      couponData.max_redemptions = 1
     } else {
       couponData.num_coupon_codes = 1
     }

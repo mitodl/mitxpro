@@ -10,7 +10,6 @@ import * as yup from "yup"
 import {
   COUPON_TYPE_PROMO,
   COUPON_TYPE_SINGLE_USE,
-  PRODUCT_TYPE_COURSE,
   PRODUCT_TYPE_COURSERUN,
   PRODUCT_TYPE_PROGRAM
 } from "../../constants"
@@ -231,17 +230,6 @@ export const CouponForm = ({
             checked={values.product_type === PRODUCT_TYPE_PROGRAM}
           />
           Programs
-          <Field
-            type="radio"
-            name="product_type"
-            value={PRODUCT_TYPE_COURSE}
-            onClick={evt => {
-              setFieldValue("product_type", evt.target.value)
-              setFieldValue("products", [])
-            }}
-            checked={values.product_type === PRODUCT_TYPE_COURSE}
-          />
-          Courses
           <Field
             type="radio"
             name="product_type"
