@@ -37,7 +37,7 @@ def test_send_bulk_enroll_emails(mocker, settings, test_company):
     )
 
     expected_qs = "product={}&code={}".format(
-        product_version.id, product_coupon.coupon.coupon_code
+        product_version.product.id, product_coupon.coupon.coupon_code
     )
     expected_context = {
         "enrollable_title": product_coupon.product.content_object.title,

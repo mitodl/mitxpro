@@ -375,7 +375,7 @@ describe("CheckoutPage", () => {
       body: {
         items: [
           {
-            id:      basketItem.id,
+            id:      basketItem.product_id,
             run_ids: Object.values(
               inner.instance().getSelectedRunIds(basketItem)
             )
@@ -412,7 +412,7 @@ describe("CheckoutPage", () => {
       body: {
         items: [
           {
-            id:      basketItem.id,
+            id:      basketItem.product_id,
             run_ids: Object.values(
               inner.instance().getSelectedRunIds(basketItem)
             )

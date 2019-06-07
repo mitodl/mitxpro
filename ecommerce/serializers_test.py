@@ -65,6 +65,7 @@ def test_serialize_basket_product_version_courserun():
         "courses": [CourseSerializer(courserun.course).data],
         "thumbnail_url": "/static/images/mit-dome.png",
         "object_id": product_version.product.object_id,
+        "product_id": product_version.product.id,
     }
 
 
@@ -85,6 +86,7 @@ def test_serialize_basket_product_version_program():
         "courses": [CourseSerializer(course).data for course in courses],
         "thumbnail_url": "/static/images/mit-dome.png",
         "object_id": product_version.product.object_id,
+        "product_id": product_version.product.id,
     }
 
 

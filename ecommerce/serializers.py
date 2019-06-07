@@ -55,17 +55,14 @@ class ProductVersionSerializer(serializers.ModelSerializer):
     """ ProductVersion serializer for viewing/updating items in basket """
 
     type = serializers.SerializerMethodField()
-    object_id = serializers.SerializerMethodField()
+    object_id = serializers.IntegerField(source="product.object_id", read_only=True)
+    product_id = serializers.IntegerField(source="product.id", read_only=True)
     courses = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
 
     def get_type(self, instance):
         """ Return the product version type """
         return instance.product.content_type.model
-
-    def get_object_id(self, instance):
-        """Return the object id for the product"""
-        return instance.product.object_id
 
     def get_courses(self, instance):
         """ Return the courses in the product """
@@ -103,6 +100,7 @@ class ProductVersionSerializer(serializers.ModelSerializer):
             "courses",
             "thumbnail_url",
             "object_id",
+            "product_id",
         ]
         model = models.ProductVersion
 
@@ -237,11 +235,9 @@ class BasketSerializer(serializers.ModelSerializer):
         return DataConsentUserSerializer(instance=data_consents, many=True).data
 
     @classmethod
-    def _get_runs_for_product(cls, *, product_version, run_ids, user):
+    def _get_runs_for_product(cls, *, product, run_ids, user):
         """Helper function to get and validate selected runs in a product"""
-        runs_for_product = list(
-            product_version.product.run_queryset.filter(id__in=run_ids)
-        )
+        runs_for_product = list(product.run_queryset.filter(id__in=run_ids))
         run_ids_for_product = {run.id for run in runs_for_product}
 
         missing_run_ids = set(run_ids) - run_ids_for_product
@@ -270,50 +266,50 @@ class BasketSerializer(serializers.ModelSerializer):
             items (list of JSON objects): Basket items to update, or clear if empty list, or leave as is if None
 
         Returns:
-            tuple: ProductVersion object to assign to basket, if any, and a list of CourseRun
+            tuple: Product object to assign to basket, if any, and a list of CourseRun
 
         """
         if items:
             # Item updated
             item = items[0]
-            product_version_id = item.get("id")
+            product_id = item.get("id")
             run_ids = item.get("run_ids")
-
-            product_version = models.ProductVersion.objects.get(id=product_version_id)
+            product = models.Product.objects.get(id=product_id)
             if run_ids is not None:
                 runs = cls._get_runs_for_product(
-                    product_version=product_version, run_ids=run_ids, user=basket.user
+                    product=product, run_ids=run_ids, user=basket.user
                 )
             else:
                 runs = None
         elif items is not None:
             # Item removed
-            product_version = None
+            product = None
             runs = None
         else:
             # Item has not changed
-            product_version = latest_product_version(basket.basketitems.first().product)
+            product = basket.basketitems.first().product
             runs = list(CourseRun.objects.filter(courserunselection__basket=basket))
-        return product_version, runs
+        return product, runs
 
     @classmethod
-    def _update_coupons(cls, basket, product_version, coupons):
+    def _update_coupons(cls, basket, product, coupons):
         """
         Helper function to determine if the basket coupon should be updated, removed, or kept as is.
 
         Args:
             basket (Basket): the basket to update
-            product_version (ProductVersion): the product version coupon should apply to
+            product (Product): the product coupon should apply to
             coupons (list of JSON objects): Basket coupons to update, or clear if empty list, or leave as is if None
 
         Returns:
             CouponVersion: CouponVersion object to assign to basket, if any.
 
         """
-        if not product_version:
+        if not product:
             # No product, so clear coupon too
             return None
 
+        product_version = product.latest_version
         if coupons:
             if len(coupons) > 1:
                 raise ValidationError("Basket cannot contain more than one coupon")
@@ -360,14 +356,14 @@ class BasketSerializer(serializers.ModelSerializer):
         if items is None and coupons is None and data_consents is None:
             raise ValidationError("Invalid request")
 
-        product_version, runs = self._update_items(basket, items)
-        coupon_version = self._update_coupons(basket, product_version, coupons)
+        product, runs = self._update_items(basket, items)
+        coupon_version = self._update_coupons(basket, product, coupons)
         with transaction.atomic():
-            if product_version:
+            if product:
                 # Update basket items and coupon selection
                 basket.basketitems.all().delete()
                 models.BasketItem.objects.create(
-                    product=product_version.product, quantity=1, basket=basket
+                    product=product, quantity=1, basket=basket
                 )
 
                 if runs is not None:
@@ -401,14 +397,14 @@ class BasketSerializer(serializers.ModelSerializer):
             if len(items) > 1:
                 raise ValidationError("Basket cannot contain more than one item")
             item = items[0]
-            product_version_id = item.get("id")
+            product_id = item.get("id")
 
-            if product_version_id is None:
+            if product_id is None:
                 raise ValidationError("Invalid request")
-            if not models.ProductVersion.objects.filter(id=product_version_id).exists():
-                raise ValidationError(
-                    f"Invalid product version id {product_version_id}"
-                )
+            if not models.ProductVersion.objects.filter(
+                product__id=product_id
+            ).exists():
+                raise ValidationError(f"Invalid product id {product_id}")
 
         return {"items": items}
 

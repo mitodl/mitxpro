@@ -23,6 +23,7 @@ import {
 
 const genBasketItemId = incrementer()
 const genNextObjectId = incrementer()
+const genProductId = incrementer()
 
 export const makeItem = (): BasketItem => {
   const courses = range(0, 4).map(() => makeCourse())
@@ -38,7 +39,9 @@ export const makeItem = (): BasketItem => {
     thumbnail_url: casual.url,
     run_ids:       runIds,
     // $FlowFixMe: flow doesn't understand generators well
-    object_id:     genNextObjectId.next().value
+    object_id:     genNextObjectId.next().value,
+    // $FlowFixMe: flow doesn't understand generators well
+    product_id:    genProductId.next().value
   }
 }
 
@@ -57,7 +60,6 @@ export const makeBasketResponse = (): BasketResponse => {
   }
 }
 
-const genProductId = incrementer()
 export const makeProduct = (
   productType: string = PRODUCT_TYPE_COURSERUN
 ): Product => ({

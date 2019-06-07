@@ -17,7 +17,7 @@ def get_bulk_enroll_email_context(product_coupon):
             urljoin(settings.SITE_BASE_URL, reverse("checkout-page")),
             urlencode(
                 {
-                    "product": product_coupon.product.latest_version.id,
+                    "product": product_coupon.product.id,
                     "code": product_coupon.coupon.coupon_code,
                 }
             ),

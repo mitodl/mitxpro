@@ -127,7 +127,7 @@ export class CheckoutPage extends React.Component<Props, State> {
     // update basket with selected runs
     await this.updateBasket({
       items: basket.items.map(item => ({
-        id:      item.id,
+        id:      item.product_id,
         // $FlowFixMe: flow doesn't understand that Object.values will return an array of number here
         run_ids: Object.values(this.getSelectedRunIds(item))
       }))
