@@ -55,8 +55,8 @@ class ProductVersionSerializer(serializers.ModelSerializer):
     """ ProductVersion serializer for viewing/updating items in basket """
 
     type = serializers.SerializerMethodField()
-    object_id = serializers.SerializerMethodField()
-    product_id = serializers.SerializerMethodField()
+    object_id = serializers.IntegerField(source="product.object_id", read_only=True)
+    product_id = serializers.IntegerField(source="product.id", read_only=True)
     courses = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
 
