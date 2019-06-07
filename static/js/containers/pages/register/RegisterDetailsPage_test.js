@@ -5,7 +5,7 @@ import sinon from "sinon"
 import RegisterDetailsPage, {
   RegisterDetailsPage as InnerRegisterDetailsPage
 } from "./RegisterDetailsPage"
-import IntegrationTestHelper from "../../../util/integration_test_helper"
+import IntegrationTestHelper, { createComponentRenderer} from "../../../util/integration_test_helper"
 import {
   STATE_REGISTER_EXTRA_DETAILS,
   STATE_USER_BLOCKED,
@@ -29,41 +29,34 @@ describe("RegisterDetailsPage", () => {
     partial_token: partialToken,
     ...detailsData
   }
-  let helper, renderPage, setSubmittingStub, setErrorsStub
+  const renderer = createComponentRenderer(RegisterDetailsPage)
+    .withConfiguredHistory({
+      initialEntries: [`/?partial_token=${partialToken}`]
+    })
+    .withRouter()
+  const hocRenderer = renderer.withInnerComponent(InnerRegisterDetailsPage)
+
+  let helper, setSubmittingStub, setErrorsStub
 
   beforeEach(() => {
     helper = new IntegrationTestHelper()
-    helper.configureBrowserHistory({
-      initialEntries: [`/?partial_token=${partialToken}`]
-    })
 
     setSubmittingStub = helper.sandbox.stub()
     setErrorsStub = helper.sandbox.stub()
-
-    renderPage = helper.configureHOCRenderer(
-      RegisterDetailsPage,
-      InnerRegisterDetailsPage,
-      {},
-      {
-        location: {
-          search: `?partial_token=${partialToken}`
-        }
-      }
-    )
   })
 
   afterEach(() => {
     helper.cleanup()
   })
 
-  it("displays a form", async () => {
-    const { inner } = await renderPage()
+  it.only("displays a form", async () => {
+    const { inner } = await hocRenderer.render()
 
     assert.ok(inner.find("RegisterDetailsForm").exists())
   })
 
   it("handles onSubmit for an error response", async () => {
-    const { inner } = await renderPage()
+    const { inner, history } = await hocRenderer.render()
     const error = "error message"
 
     helper.handleRequestStub.returns({
@@ -87,7 +80,7 @@ describe("RegisterDetailsPage", () => {
       { body, headers: undefined, credentials: undefined }
     )
 
-    assert.lengthOf(helper.browserHistory, 1)
+    assert.lengthOf(history, 1)
     sinon.assert.calledWith(setErrorsStub, {
       name: error
     })
@@ -113,7 +106,7 @@ describe("RegisterDetailsPage", () => {
     [STATE_USER_BLOCKED, [], routes.register.denied, ""]
   ].forEach(([state, errors, pathname, search]) => {
     it("redirects to ${pathname} when it receives auth state ${state}", async () => {
-      const { inner } = await renderPage()
+      const { inner, history } = await hocRenderer.render()
 
       helper.handleRequestStub.returns({
         body: {
@@ -137,8 +130,8 @@ describe("RegisterDetailsPage", () => {
         { body, headers: undefined, credentials: undefined }
       )
 
-      assert.lengthOf(helper.browserHistory, 2)
-      assert.include(helper.browserHistory.location, {
+      assert.lengthOf(history, 2)
+      assert.include(history.location, {
         pathname,
         search
       })

@@ -16,9 +16,9 @@ const withRequiredParams = curry(
       static WrappedComponent: Class<React.Component<*, *>>
 
       render() {
-        const { params } = this.props
+        const { location } = this.props
 
-        if (anyKeyEmptyOrNil(requiredParams, params || {})) {
+        if (anyKeyEmptyOrNil(requiredParams, qs.parse(location.search))) {
           return <ErrorComponent />
         }
 

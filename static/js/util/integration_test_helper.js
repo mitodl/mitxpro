@@ -3,7 +3,7 @@ import React from "react"
 import { mergeDeepRight, isNil } from "ramda"
 import { shallow } from "enzyme"
 import sinon from "sinon"
-import { Router } from "react-router-dom"
+import { Router, withRouter } from "react-router-dom"
 import { createMemoryHistory } from "history"
 
 import configureStoreMain from "../store/configureStore"
@@ -54,6 +54,9 @@ const findInnerComponent = async (
   let inner = wrapper
   while (!inner.is(InnerComponent)) {
     // determine the type before we dive
+
+
+    console.log(inner.type())
     const cls = inner.type()
     if (
       cls &&
@@ -75,9 +78,12 @@ const findInnerComponent = async (
       inner = inner.find(cls.WrappedComponent)
     }
   }
+
   console.log(inner.type())
   // one more time to shallow render the InnerComponent
   inner = await inner.dive()
+
+  console.log(inner.type())
 
   return inner
 }
@@ -94,7 +100,7 @@ class ComponentRenderer {
     const { history, ...config } = this.config
     return new ComponentRenderer({
       ...config,
-      history: newHistory || history || this.createHistory()
+      history: newHistory || history || createHistory()
     })
   }
 
@@ -116,7 +122,7 @@ class ComponentRenderer {
     const { history, ...config } = this.config
     return new ComponentRenderer({
       ...config,
-      history:   history || this.createHistory(),
+      history:   history || createHistory(),
       useRouter: true
     })
   }
@@ -149,20 +155,29 @@ class ComponentRenderer {
 
     const store = createStore(state)
 
-    let component = (
-      <WrappedComponent store={store} dispatch={store.dispatch} {...props} />
-    )
+
+    let component
 
     if (useRouter) {
-      component = <Router history={history}>{compoment}</Router>
+      const RoutedComponent = withRouter(WrappedComponent)
+      component = (
+        <Router history={history}>
+          <RoutedComponent store={store} dispatch={store.dispatch} {...props} />
+        </Router>
+      )
+    } else {
+      component = (
+        <WrappedComponent store={store} dispatch={store.dispatch} history={history} {...props} />
+      )
     }
 
-    const wrapper = await shallow(component, {
+    let wrapper = await shallow(component, {
       context: {
         // TODO: should be removed in the near future after upgrading enzyme
-        store
+        store,
       }
     })
+
 
     const inner = !isNil(InnerComponent)
       ? await findInnerComponent(wrapper, InnerComponent)
