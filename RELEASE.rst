@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.7.2
+-------------
+
+- Accept product id, not product version id, on checkout page (#429)
+- Added register error and denied pages
+- Added validation for legal address fields that need it
+- Add company to django admin (#445)
+- max_redemptions should be 1 for single-use coupons (#417)
+
 Version 0.7.1 (Released June 07, 2019)
 -------------
 
