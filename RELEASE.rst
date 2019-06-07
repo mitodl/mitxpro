@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.7.1
+Version 0.7.1 (Released June 07, 2019)
 -------------
 
 - Add voucher app for course voucher upload and processing
