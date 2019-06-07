@@ -64,14 +64,6 @@ class ProductVersionSerializer(serializers.ModelSerializer):
         """ Return the product version type """
         return instance.product.content_type.model
 
-    def get_object_id(self, instance):
-        """Return the object id for the product"""
-        return instance.product.object_id
-
-    def get_product_id(self, instance):
-        """Return the id for the product"""
-        return instance.product.id
-
     def get_courses(self, instance):
         """ Return the courses in the product """
         from courses.serializers import CourseSerializer
