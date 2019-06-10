@@ -15,7 +15,7 @@
                   </div>
                   {% for course_run in page.product.unexpired_runs %}
                     <div>
-                      <a class='date-link' href='#' data-id='{{ course_run.id }}'>Start Date {{ course_run.start_date|date:'F j, Y' }}</a>
+                      <a class='date-link' href='{% url 'checkout-page' %}?product={{ course_run.products.first.id }}' data-id='{{ course_run.id }}'>Start Date {{ course_run.start_date|date:'F j, Y' }}</a>
                     </div>
                   {% endfor %}">
                 More Dates

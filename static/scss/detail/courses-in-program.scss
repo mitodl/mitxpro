@@ -60,6 +60,7 @@
   }
 
   .slide {
+    cursor: pointer;
     float: left;
     width: 33.333%;
     padding: 0 15px;
@@ -88,7 +89,9 @@
     margin: 0 0 15px;
   }
 
-  h2 {
+  .title {
+    font-size: 28px;
+    font-weight: 500;
     margin: 0 0 20px;
     line-height: 30px;
     color: black;
