@@ -55,8 +55,7 @@ class CourseRunSerializer(serializers.ModelSerializer):
 
     def get_product_id(self, instance):
         """ Get the product id for a course run """
-        product = instance.products.first()
-        return product.id if product else None
+        return instance.products.values_list("id", flat=True).first()
 
     class Meta:
         model = models.CourseRun

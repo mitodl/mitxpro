@@ -524,58 +524,52 @@ describe("CheckoutPage", () => {
       course_3: "run_3"
     })
   })
+
   //
-  ;[true, false].forEach(isCourseRun => {
-    it(`selecting a course run ${shouldIf(
-      isCourseRun
-    )} update the product`, async () => {
-      basket = makeBasketResponse(
-        isCourseRun ? PRODUCT_TYPE_COURSERUN : PRODUCT_TYPE_PROGRAM
-      )
-      const { inner } = await renderPage({
-        entities: {
-          basket
+  ;[[PRODUCT_TYPE_COURSERUN, true], [PRODUCT_TYPE_PROGRAM, false]].forEach(
+    ([productType, shouldUpdate]) => {
+      it(`changing course run for ${productType} product type ${shouldIf(
+        shouldUpdate
+      )} update the product`, async () => {
+        basket = makeBasketResponse(productType)
+        const { inner } = await renderPage({
+          entities: {
+            basket
+          }
+        })
+        const runSelect = inner.find(".run-selector").at(0)
+        const runOption = runSelect.find("option").at(1)
+
+        await runSelect.prop("onChange")({
+          target: { value: runOption.prop("value") }
+        })
+
+        const requestData = {
+          body: {
+            items: [
+              {
+                id:      basket.items[0].courses[0].courseruns[0].product_id,
+                run_ids: []
+              }
+            ]
+          },
+          headers: {
+            "X-CSRFTOKEN": null
+          },
+          credentials: undefined
         }
-      })
-      const runSelect = inner.find("select").at(0)
-      const runOption = runSelect.find("option").at(1)
 
-      await runSelect.prop("onChange")({
-        target: { value: runOption.prop("value") }
-      })
-
-      const requestData = {
-        body: {
-          items: [
-            {
-              id:      basket.items[0].courses[0].courseruns[0].product_id,
-              run_ids: []
-            }
-          ]
-        },
-        headers: {
-          "X-CSRFTOKEN": null
-        },
-        credentials: undefined
-      }
-
-      if (isCourseRun) {
-        sinon.assert.calledWith(
-          helper.handleRequestStub,
-          "/api/basket/",
-          "PATCH",
-          requestData
+        assert.equal(
+          helper.handleRequestStub.calledWith(
+            "/api/basket/",
+            "PATCH",
+            requestData
+          ),
+          shouldUpdate
         )
-      } else {
-        sinon.assert.neverCalledWith(
-          helper.handleRequestStub,
-          "/api/basket/",
-          "PATCH",
-          requestData
-        )
-      }
-    })
-  })
+      })
+    }
+  )
 
   it("shows a select with options for a program product, and updates a run", async () => {
     const item = basket.items[0]

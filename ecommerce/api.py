@@ -658,7 +658,7 @@ def validate_basket_for_checkout(basket):
         # This is != but it could be < because the > case should be covered in previous clauses.
         # The user can only select more courses than a product has if they are selecting runs outside
         # of the product, which we checked above.
-        raise ValidationError("One or more courses do not have a course run selection")
+        raise ValidationError("Each course must have a course run selection")
 
     # All run ids must be purchasable and enrollable by user
     for run in runs:

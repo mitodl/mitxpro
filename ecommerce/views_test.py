@@ -601,8 +601,11 @@ def test_patch_basket_update_runs(basket_client, basket_and_coupons, add_new_run
     )
 
 
+@pytest.mark.parametrize("is_selected", [True, False])
 @pytest.mark.parametrize("is_program", [True, False])
-def test_patch_basket_invalid_run(basket_client, basket_and_coupons, is_program):
+def test_patch_basket_invalid_run(
+    basket_client, basket_and_coupons, is_program, is_selected
+):
     """A patch request with an run for a different product should result in a 400 error"""
     product_version = basket_and_coupons.product_version
     product = product_version.product
@@ -612,22 +615,28 @@ def test_patch_basket_invalid_run(basket_client, basket_and_coupons, is_program)
 
     # If the product is a course, create a new run on a different course which is invalid.
     # If the product is a program, create a new run on a different program.
-    other_run = (
-        CourseRunFactory.create()
-        if is_program
-        else CourseRunFactory.create(
-            course__program=product.content_object.course.program
-        )
+    other_run_id = (
+        (
+            CourseRunFactory.create()
+            if is_program
+            else CourseRunFactory.create(
+                course__program=product.content_object.course.program
+            )
+        ).id
+        if is_selected
+        else None
     )
 
     resp = basket_client.patch(
         reverse("basket_api"),
         type="json",
-        data={"items": [{"id": product.id, "run_ids": [other_run.id]}]},
+        data={"items": [{"id": product.id, "run_ids": [other_run_id]}]},
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     assert resp.json()["errors"] == [
-        f"Unable to find run(s) with id(s) {{{other_run.id}}}"
+        f"Unable to find run(s) with id(s) {{{other_run_id}}}"
+        if is_selected
+        else "Each course must have a course run selection"
     ]
 
 
