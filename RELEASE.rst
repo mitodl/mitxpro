@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.7.2
+Version 0.7.2 (Released June 10, 2019)
 -------------
 
 - Accept product id, not product version id, on checkout page (#429)
