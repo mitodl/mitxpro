@@ -60,7 +60,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
 class CompanyViewSet(ReadOnlyModelViewSet):
     """API view set for Companies"""
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     authentication_classes = (SessionAuthentication,)
 
     serializer_class = CompanySerializer

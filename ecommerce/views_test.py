@@ -46,6 +46,7 @@ from ecommerce.serializers import (
     CurrentCouponPaymentSerializer,
 )
 from mitxpro.test_utils import create_tempfile_csv
+from users.factories import UserFactory
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_REFERENCE_PREFIX = "fake"
@@ -715,9 +716,10 @@ def test_patch_basket__another_user_enrolled(basket_client, basket_and_coupons):
     assert resp.status_code == status.HTTP_200_OK
 
 
-def test_patch_basket_data_consents(basket_and_agreement):
+@pytest.mark.parametrize("as_owner", [True, False])
+def test_patch_basket_data_consents(basket_and_agreement, as_owner):
     """ Test that a patch request with DataConsentUser ids updates those objects with consent dates  """
-    user = basket_and_agreement.basket.user
+    user = basket_and_agreement.basket.user if as_owner else UserFactory.create()
     client = APIClient()
     client.force_authenticate(user=user)
     consent_user = DataConsentUser.objects.create(
@@ -729,9 +731,16 @@ def test_patch_basket_data_consents(basket_and_agreement):
         reverse("basket_api"), type="json", data={"data_consents": [consent_user.id]}
     )
     assert resp.status_code == status.HTTP_200_OK
-    assert resp.json().get("data_consents")[0].get("consent_date") >= datetime.now(
-        tz=pytz.UTC
-    ).strftime("%Y-%m-%dT00:00:00Z")
+    assert (
+        DataConsentUser.objects.filter(consent_date__isnull=not as_owner).exists()
+        is True
+    )
+    if as_owner:
+        assert resp.json()["data_consents"][0]["consent_date"] >= datetime.now(
+            tz=pytz.UTC
+        ).strftime("%Y-%m-%dT00:00:00Z")
+    else:
+        assert resp.json()["data_consents"] == []
 
 
 def test_patch_basket_bad_data_consents(basket_and_agreement):
@@ -917,10 +926,10 @@ def test_products_viewset_post_forbidden(admin_drf_client):
     assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
-def test_companies_viewset_list(user_drf_client):
+def test_companies_viewset_list(admin_drf_client):
     """ Test that the CompanyViewSet returns all companies """
     companies = CompanyFactory.create_batch(3)
-    response = user_drf_client.get(reverse("companies_api-list"))
+    response = admin_drf_client.get(reverse("companies_api-list"))
     assert response.status_code == status.HTTP_200_OK
     companies_list = response.json()
     assert {company.get("id") for company in companies_list} == {
@@ -930,10 +939,10 @@ def test_companies_viewset_list(user_drf_client):
         assert company == CompanySerializer(instance=company).data
 
 
-def test_companies_viewset_detail(user_drf_client):
+def test_companies_viewset_detail(admin_drf_client):
     """ Test that the CompanyViewSet returns details for a company """
     company = CompanyFactory.create()
-    response = user_drf_client.get(
+    response = admin_drf_client.get(
         reverse("companies_api-detail", kwargs={"pk": company.id})
     )
     assert response.status_code == status.HTTP_200_OK
@@ -944,6 +953,12 @@ def test_companies_viewset_forbidden():
     """ Test that an anonymous user cannot access the companies list """
     client = APIClient()
     response = client.get(reverse("companies_api-list"))
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_companies_viewset_not_staff(user_drf_client):
+    """Test that a user who is not staff cannot access the companies list"""
+    response = user_drf_client.get(reverse("companies_api-list"))
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
