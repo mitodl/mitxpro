@@ -101,6 +101,7 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
         </React.Fragment>
       )
     } else {
+      const course = item.courses[0]
       return (
         <div className="flex-row item-row">
           <div className="flex-row item-column">
@@ -115,11 +116,18 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
               validate={validateRuns(item.courses[0], values)}
               onChange={e => {
                 if (e.target.value) {
-                  updateProduct(e.target.value, setFieldError)
+                  updateProduct(parseInt(e.target.value), setFieldError)
                 }
               }}
             >
-
+              <option value={""} key={"null"}>
+                Select a course run
+              </option>
+              {course.courseruns.map(run => (
+                <option value={run.product_id} key={run.id}>
+                  {formatRunTitle(run)}
+                </option>
+              ))}
             </Field>
           </div>
         </div>
