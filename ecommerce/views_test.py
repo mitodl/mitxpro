@@ -615,17 +615,13 @@ def test_patch_basket_invalid_run(
 
     # If the product is a course, create a new run on a different course which is invalid.
     # If the product is a program, create a new run on a different program.
-    other_run_id = (
-        (
-            CourseRunFactory.create()
-            if is_program
-            else CourseRunFactory.create(
-                course__program=product.content_object.course.program
-            )
-        ).id
-        if is_selected
-        else None
+    course_run_params = (
+        dict(course__program=product.content_object.course.program)
+        if not is_program
+        else {}
     )
+    other_course_run = CourseRunFactory.create(**course_run_params)
+    other_run_id = other_course_run.id if is_selected else None
 
     resp = basket_client.patch(
         reverse("basket_api"),
