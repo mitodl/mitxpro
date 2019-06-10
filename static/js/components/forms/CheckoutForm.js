@@ -123,10 +123,10 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
               <option value={""} key={"null"}>
                 Select a course run
               </option>
-              {course.courseruns.map(run => (
+              {course.courseruns.map(run => ( run.product_id ?
                 <option value={run.product_id} key={run.id}>
                   {formatRunTitle(run)}
-                </option>
+                </option> : null
               ))}
             </Field>
           </div>
@@ -246,6 +246,7 @@ export class CheckoutForm extends React.Component<OuterProps> {
           couponCode: couponCode || (coupon ? coupon.code : ""),
           runs:       selectedRuns
         }}
+        enableReinitialize={true}
         render={props => (
           <InnerCheckoutForm
             {...props}
