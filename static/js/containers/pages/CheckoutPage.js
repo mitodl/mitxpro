@@ -161,6 +161,17 @@ export class CheckoutPage extends React.Component<Props, State> {
     )
   }
 
+  updateProduct = async (productId: number, setFieldError: SetFieldError) => {
+    const { updateBasket } = this.props
+    const response = await updateBasket({
+      items: [{id: productId}]
+    })
+    setFieldError(
+      "runs",
+      response.body.errors ? response.body.errors.runs : undefined
+    )
+  }
+
   render() {
     const { basket } = this.props
     const { errors } = this.state
@@ -189,6 +200,7 @@ export class CheckoutPage extends React.Component<Props, State> {
         selectedRuns={selectedRuns}
         submitCoupon={this.submitCoupon}
         onSubmit={this.submit}
+        updateProduct={this.updateProduct}
       />
     )
   }

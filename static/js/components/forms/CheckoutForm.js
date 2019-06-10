@@ -14,6 +14,7 @@ import type { BasketItem, CouponSelection } from "../../flow/ecommerceTypes"
 import type { Course } from "../../flow/courseTypes"
 
 export type SetFieldError = (fieldName: string, fieldValue: any) => void
+export type UpdateProduct = (productId: number, setFieldError: SetFieldError) => Promise<void>
 export type Values = {
   runs: { [number]: string },
   couponCode: ?string
@@ -35,7 +36,8 @@ type CommonProps = {
   submitCoupon: (
     couponCode: ?string,
     setFieldError: SetFieldError
-  ) => Promise<void>
+  ) => Promise<void>,
+  updateProduct: UpdateProduct
 }
 type OuterProps = CommonProps & {
   couponCode: ?string,
@@ -60,54 +62,69 @@ const validateRuns = (course: Course, values: Values) => (): ?string => {
   return undefined
 }
 
-const renderBasketItem = (item: BasketItem, values: Values) => {
-  if (item.type === "program") {
-    return (
-      <React.Fragment>
-        {item.courses.map(course => (
-          <div className="flex-row item-row" key={course.id}>
-            <div className="flex-row item-column">
-              <img src={course.thumbnail_url} alt={course.title} />
-            </div>
-            <div className="title-column">
-              <div className="title">{course.title}</div>
-              <Field
-                component="select"
-                name={`runs.${course.id}`}
-                className="run-selector"
-                validate={validateRuns(course, values)}
-              >
-                <option value={""} key={"null"}>
-                  Select a course run
-                </option>
-                {course.courseruns.map(run => (
-                  <option value={run.id} key={run.id}>
-                    {formatRunTitle(run)}
-                  </option>
-                ))}
-              </Field>
-            </div>
-          </div>
-        ))}
-      </React.Fragment>
-    )
-  } else {
-    return (
-      <div className="flex-row item-row">
-        <div className="flex-row item-column">
-          <img src={item.thumbnail_url} alt={item.description} />
-        </div>
-        <div className="title-column">
-          <div className="title">{item.description}</div>
-        </div>
-      </div>
-    )
-  }
-}
-
 class InnerCheckoutForm extends React.Component<InnerProps> {
   componentDidMount() {
     this.props.onMount()
+  }
+
+  renderBasketItem = () => {
+    const { item, values, setFieldError, updateProduct } = this.props
+
+    if (item.type === "program") {
+      return (
+        <React.Fragment>
+          {item.courses.map(course => (
+            <div className="flex-row item-row" key={course.id}>
+              <div className="flex-row item-column">
+                <img src={course.thumbnail_url} alt={course.title} />
+              </div>
+              <div className="title-column">
+                <div className="title">{course.title}</div>
+                <Field
+                  component="select"
+                  name={`runs.${course.id}`}
+                  className="run-selector"
+                  validate={validateRuns(course, values)}
+                >
+                  <option value={""} key={"null"}>
+                    Select a course run
+                  </option>
+                  {course.courseruns.map(run => (
+                    <option value={run.id} key={run.id}>
+                      {formatRunTitle(run)}
+                    </option>
+                  ))}
+                </Field>
+              </div>
+            </div>
+          ))}
+        </React.Fragment>
+      )
+    } else {
+      return (
+        <div className="flex-row item-row">
+          <div className="flex-row item-column">
+            <img src={item.thumbnail_url} alt={item.description} />
+          </div>
+          <div className="title-column">
+            <div className="title">{item.description}</div>
+            <Field
+              component="select"
+              name={`runs`}
+              className="run-selector"
+              validate={validateRuns(item.courses[0], values)}
+              onChange={e => {
+                if (e.target.value) {
+                  updateProduct(e.target.value, setFieldError)
+                }
+              }}
+            >
+
+            </Field>
+          </div>
+        </div>
+      )
+    }
   }
 
   render() {
@@ -138,7 +155,7 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
         </div>
         <div className="row">
           <div className="col-lg-7">
-            {renderBasketItem(item, values)}
+            {this.renderBasketItem()}
             {formatErrors(errors.runs)}
             <div className="enrollment-input">
               <div className="enrollment-row">
@@ -210,7 +227,8 @@ export class CheckoutForm extends React.Component<OuterProps> {
       couponCode,
       item,
       selectedRuns,
-      submitCoupon
+      submitCoupon,
+      updateProduct
     } = this.props
 
     return (
@@ -227,6 +245,7 @@ export class CheckoutForm extends React.Component<OuterProps> {
             coupon={coupon}
             onSubmit={onSubmit}
             submitCoupon={submitCoupon}
+            updateProduct={updateProduct}
             onMount={() => {
               // only submit if there is a couponCode query parameter,
               // and if it's different than one in the existing coupon
