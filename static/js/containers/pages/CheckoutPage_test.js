@@ -122,64 +122,75 @@ describe("CheckoutPage", () => {
     })
   })
 
-  it("checks out", async () => {
-    const { inner } = await renderPage()
+  //
+  ;[true, false].forEach(hasDataConsent => {
+    it(`checks out ${
+      hasDataConsent ? "with" : "without"
+    } data consent`, async () => {
+      const { inner } = await renderPage()
 
-    const url = "/api/checkout/"
-    const payload = { pay: "load" }
-    helper.handleRequestStub.withArgs("/api/checkout/", "POST").returns({
-      body: {
-        url,
-        payload
-      },
-      status: 200
-    })
-    const submitStub = helper.sandbox.stub()
-    const form = document.createElement("form")
-    // $FlowFixMe: need to overwrite this function to mock it
-    form.submit = submitStub
-    const createFormStub = helper.sandbox
-      .stub(formFuncs, "createCyberSourceForm")
-      .returns(form)
-    const values = { runs: {} }
-    const actions = {
-      setSubmitting: helper.sandbox.stub(),
-      setErrors:     helper.sandbox.stub()
-    }
-    await inner.find("CheckoutForm").prop("onSubmit")(values, actions)
-    sinon.assert.calledWith(createFormStub, url, payload)
-    sinon.assert.calledWith(submitStub)
-    sinon.assert.calledWith(
-      helper.handleRequestStub,
-      "/api/checkout/",
-      "POST",
-      {
-        body:    undefined,
-        headers: {
-          "X-CSRFTOKEN": null
+      const url = "/api/checkout/"
+      const payload = { pay: "load" }
+      helper.handleRequestStub.withArgs("/api/checkout/", "POST").returns({
+        body: {
+          url,
+          payload
         },
-        credentials: undefined
+        status: 200
+      })
+      const submitStub = helper.sandbox.stub()
+      const form = document.createElement("form")
+      // $FlowFixMe: need to overwrite this function to mock it
+      form.submit = submitStub
+      const createFormStub = helper.sandbox
+        .stub(formFuncs, "createCyberSourceForm")
+        .returns(form)
+      const values = { runs: {}, dataConsent: hasDataConsent }
+      const actions = {
+        setSubmitting: helper.sandbox.stub(),
+        setErrors:     helper.sandbox.stub()
       }
-    )
+      await inner.find("CheckoutForm").prop("onSubmit")(values, actions)
+      sinon.assert.calledWith(createFormStub, url, payload)
+      sinon.assert.calledWith(submitStub)
+      sinon.assert.calledWith(
+        helper.handleRequestStub,
+        "/api/checkout/",
+        "POST",
+        {
+          body:    undefined,
+          headers: {
+            "X-CSRFTOKEN": null
+          },
+          credentials: undefined
+        }
+      )
 
-    const basketItem = basket.items[0]
-    sinon.assert.calledWith(helper.handleRequestStub, "/api/basket/", "PATCH", {
-      body: {
-        items: [
-          {
-            id:      basketItem.product_id,
-            run_ids: []
-          }
-        ],
-        coupons: []
-      },
-      headers: {
-        "X-CSRFTOKEN": null
-      },
-      credentials: undefined
+      const basketItem = basket.items[0]
+      sinon.assert.calledWith(
+        helper.handleRequestStub,
+        "/api/basket/",
+        "PATCH",
+        {
+          body: {
+            items: [
+              {
+                id:      basketItem.product_id,
+                run_ids: []
+              }
+            ],
+            coupons:       [],
+            data_consents: hasDataConsent ? [basket.data_consents[0].id] : []
+          },
+          headers: {
+            "X-CSRFTOKEN": null
+          },
+          credentials: undefined
+        }
+      )
+      sinon.assert.calledWith(actions.setSubmitting, false)
+      sinon.assert.notCalled(actions.setErrors)
     })
-    sinon.assert.calledWith(actions.setSubmitting, false)
-    sinon.assert.notCalled(actions.setErrors)
   })
 
   it("checks out and redirects to a location instead of submitting a form", async () => {
@@ -215,7 +226,8 @@ describe("CheckoutPage", () => {
             run_ids: []
           }
         ],
-        coupons: []
+        coupons:       [],
+        data_consents: []
       },
       headers: {
         "X-CSRFTOKEN": null
@@ -259,8 +271,9 @@ describe("CheckoutPage", () => {
     sinon.assert.notCalled(submitStub)
     sinon.assert.calledWith(helper.handleRequestStub, "/api/basket/", "PATCH", {
       body: {
-        items:   [{ id: basket.items[0].product_id, run_ids: [runId] }],
-        coupons: []
+        items:         [{ id: basket.items[0].product_id, run_ids: [runId] }],
+        coupons:       [],
+        data_consents: []
       },
       credentials: undefined,
       headers:     {
@@ -308,8 +321,9 @@ describe("CheckoutPage", () => {
         "PATCH",
         {
           body: {
-            items:   [{ id: basket.items[0].product_id, run_ids: [runId] }],
-            coupons: hasCoupon ? [{ code: code }] : []
+            items:         [{ id: basket.items[0].product_id, run_ids: [runId] }],
+            coupons:       hasCoupon ? [{ code: code }] : [],
+            data_consents: []
           },
           credentials: undefined,
           headers:     {

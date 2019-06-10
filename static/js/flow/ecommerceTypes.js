@@ -46,10 +46,10 @@ export type CouponSelection = {
 }
 
 export type DataConsentUser = {
-  agreement: number,
-  coupon: number,
-  consent_data: string,
+  consent_date: string,
+  consent_text: string,
   id: number,
+  company: Company
 }
 
 export type BasketResponse = {
@@ -65,14 +65,13 @@ type BasketItemPayload = {
 
 export type BasketPayload = {
   items?: Array<BasketItemPayload>,
-  coupons?: Array<{ code: string }>
+  coupons?: Array<{ code: string }>,
+  data_consents?: Array<number>
 }
 
 export type Company = {
   id: number,
   name: string,
-  created_on: Date,
-  updated_on: Date,
 }
 
 export type CouponPayment = {
