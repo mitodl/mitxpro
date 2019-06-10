@@ -137,6 +137,7 @@ class Program(TimestampedModel, PageProperties):
         return min(
             filter(None, [course.first_unexpired_run for course in self.courses.all()]),
             default=None,
+            key=lambda run: run.start_date,
         )
 
     def __str__(self):
