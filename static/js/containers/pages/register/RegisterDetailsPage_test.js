@@ -5,7 +5,9 @@ import sinon from "sinon"
 import RegisterDetailsPage, {
   RegisterDetailsPage as InnerRegisterDetailsPage
 } from "./RegisterDetailsPage"
-import IntegrationTestHelper, { createComponentRenderer} from "../../../util/integration_test_helper"
+import IntegrationTestHelper, {
+  createComponentRenderer
+} from "../../../util/integration_test_helper"
 import {
   STATE_REGISTER_EXTRA_DETAILS,
   STATE_USER_BLOCKED,
@@ -29,11 +31,11 @@ describe("RegisterDetailsPage", () => {
     partial_token: partialToken,
     ...detailsData
   }
-  const renderer = createComponentRenderer(RegisterDetailsPage)
-    .withConfiguredHistory({
-      initialEntries: [`/?partial_token=${partialToken}`]
-    })
-    .withRouter()
+  const renderer = createComponentRenderer(
+    RegisterDetailsPage
+  ).withConfiguredHistory({
+    initialEntries: [`/?partial_token=${partialToken}`]
+  })
   const hocRenderer = renderer.withInnerComponent(InnerRegisterDetailsPage)
 
   let helper, setSubmittingStub, setErrorsStub
@@ -51,6 +53,8 @@ describe("RegisterDetailsPage", () => {
 
   it.only("displays a form", async () => {
     const { inner } = await hocRenderer.render()
+
+    console.log(inner.html())
 
     assert.ok(inner.find("RegisterDetailsForm").exists())
   })

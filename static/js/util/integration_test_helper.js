@@ -1,14 +1,16 @@
 /* global SETTINGS: false */
 import React from "react"
 import { mergeDeepRight, isNil } from "ramda"
-import { shallow } from "enzyme"
+import { shallow, mount } from "enzyme"
 import sinon from "sinon"
-import { Router, withRouter } from "react-router-dom"
+import { Router, withRouter, Route } from "react-router-dom"
+import { Provider } from "react-redux"
 import { createMemoryHistory } from "history"
 
 import configureStoreMain from "../store/configureStore"
 
 import type { Sandbox } from "../flow/sinonTypes"
+import type { Store } from "redux"
 import * as networkInterfaceFuncs from "../store/network_interface"
 
 type RendererState = { [string]: any }
@@ -18,7 +20,6 @@ type RendererConfig = {
   WrappedComponent: Class<React.Component<*, *>>,
   InnerComponent: ?Class<React.Component<*, *>>,
   history: History,
-  useRouter: boolean,
   defaultState: RendererState,
   defaultProps: RendererProps
 }
@@ -27,7 +28,6 @@ const rendererDefaults: RendererConfig = {
   wrappedComponent: undefined,
   innerComponent:   undefined,
   history:          undefined,
-  useRouter:        false,
   state:            {},
   props:            {}
 }
@@ -55,8 +55,6 @@ const findInnerComponent = async (
   while (!inner.is(InnerComponent)) {
     // determine the type before we dive
 
-
-    console.log(inner.type())
     const cls = inner.type()
     if (
       cls &&
@@ -79,11 +77,8 @@ const findInnerComponent = async (
     }
   }
 
-  console.log(inner.type())
   // one more time to shallow render the InnerComponent
   inner = await inner.dive()
-
-  console.log(inner.type())
 
   return inner
 }
@@ -100,7 +95,7 @@ class ComponentRenderer {
     const { history, ...config } = this.config
     return new ComponentRenderer({
       ...config,
-      history: newHistory || history || createHistory()
+      history: newHistory || history || this.createHistory()
     })
   }
 
@@ -115,15 +110,6 @@ class ComponentRenderer {
     return new ComponentRenderer({
       ...this.config,
       InnerComponent
-    })
-  }
-
-  withRouter() {
-    const { history, ...config } = this.config
-    return new ComponentRenderer({
-      ...config,
-      history:   history || createHistory(),
-      useRouter: true
     })
   }
 
@@ -148,37 +134,38 @@ class ComponentRenderer {
       WrappedComponent,
       InnerComponent,
       history,
-      useRouter,
       props,
       state
     } = this.config
 
-    const store = createStore(state)
-
-
-    let component
-
-    if (useRouter) {
-      const RoutedComponent = withRouter(WrappedComponent)
-      component = (
-        <Router history={history}>
-          <RoutedComponent store={store} dispatch={store.dispatch} {...props} />
-        </Router>
-      )
-    } else {
-      component = (
-        <WrappedComponent store={store} dispatch={store.dispatch} history={history} {...props} />
+    const wrappingComponent = ({ children }) => {
+      return (
+        <Provider store={store}>
+          {history ? (
+            <Router history={history}>
+              <Route path="/" render={props => {
+                console.log(children)
+                console.log(props)
+                return React.Children.map(children, child => React.cloneElement(child, props))
+              }}/>
+            </Router>
+          ) : (
+            children
+          )}
+        </Provider>
       )
     }
 
-    let wrapper = await shallow(component, {
+    const store = createStore(state)
+    const options = {
       context: {
-        // TODO: should be removed in the near future after upgrading enzyme
-        store,
-      }
-    })
+        history,
+        store
+      },
+      wrappingComponent
+    }
 
-
+    const wrapper = await shallow(<WrappedComponent {...props} />, options)
     const inner = !isNil(InnerComponent)
       ? await findInnerComponent(wrapper, InnerComponent)
       : null
