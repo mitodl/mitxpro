@@ -16,6 +16,8 @@ import type {
 } from "../flow/courseTypes"
 
 const genCourseRunId = incrementer()
+const genProductId = incrementer()
+
 export const makeCourseRun = (): CourseRun => ({
   title:            casual.text,
   start_date:       casual.moment.add(2, "M").format(),
@@ -25,7 +27,8 @@ export const makeCourseRun = (): CourseRun => ({
   courseware_url:   casual.url,
   courseware_id:    casual.word,
   // $FlowFixMe
-  id:               genCourseRunId.next().value
+  id:               genCourseRunId.next().value,
+  product_id:       genProductId.next().value
 })
 
 const genCourseId = incrementer()

@@ -25,12 +25,16 @@ const genBasketItemId = incrementer()
 const genNextObjectId = incrementer()
 const genProductId = incrementer()
 
-export const makeItem = (): BasketItem => {
-  const courses = range(0, 4).map(() => makeCourse())
+export const makeItem = (itemType: ?string): BasketItem => {
+  const basketItemType =
+    itemType ||
+    casual.random_element([PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM])
+  const numCourses = basketItemType === PRODUCT_TYPE_COURSERUN ? 1 : 4
+  const courses = range(0, numCourses).map(() => makeCourse())
   const runIds = courses.map(course => course.courseruns[0].id)
 
   return {
-    type:          casual.random_element([PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM]),
+    type:          basketItemType,
     courses:       courses,
     // $FlowFixMe: flow doesn't understand generators well
     id:            genBasketItemId.next().value,
@@ -51,8 +55,8 @@ export const makeCouponSelection = (item: ?BasketItem): CouponSelection => ({
   targets: item ? [item.id] : []
 })
 
-export const makeBasketResponse = (): BasketResponse => {
-  const item = makeItem()
+export const makeBasketResponse = (itemType: ?string): BasketResponse => {
+  const item = makeItem(itemType)
   return {
     items:         [item],
     coupons:       [makeCouponSelection(item)],

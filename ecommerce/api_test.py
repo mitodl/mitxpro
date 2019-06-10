@@ -677,7 +677,7 @@ def test_validate_basket_course_without_run_selection(basket_and_coupons):
     CourseRunSelection.objects.all().delete()
     with pytest.raises(ValidationError) as ex:
         validate_basket_for_checkout(basket_and_coupons.basket)
-    assert ex.value.args[0] == "One or more courses do not have a course run selection"
+    assert ex.value.args[0] == "Each course must have a course run selection"
 
 
 def test_validate_basket_run_expired(mocker, basket_and_coupons):
