@@ -131,6 +131,15 @@ class Program(TimestampedModel, PageProperties):
             return None
         return latest_version.price
 
+    @property
+    def first_unexpired_run(self):
+        """Gets the earliest unexpired CourseRun if one exists"""
+        return min(
+            filter(None, [course.first_unexpired_run for course in self.courses.all()]),
+            default=None,
+            key=lambda run: run.start_date,
+        )
+
     def __str__(self):
         return self.title
 

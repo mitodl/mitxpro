@@ -173,6 +173,32 @@ def test_course_first_unexpired_run():
     assert course.first_unexpired_run == first_run
 
 
+def test_program_first_unexpired_run():
+    """
+    Test that the first unexpired run of a program is returned
+    """
+    program = ProgramFactory()
+    course = CourseFactory.create(program=program)
+    now = now_in_utc()
+    end_date = now + timedelta(days=100)
+    enr_end_date = now + timedelta(days=100)
+    first_run = CourseRunFactory.create(
+        start_date=now, course=course, end_date=end_date, enrollment_end=enr_end_date
+    )
+
+    # create another course and course run in program
+    another_course = CourseFactory.create(program=program)
+    second_run = CourseRunFactory.create(
+        start_date=now + timedelta(days=50),
+        course=another_course,
+        end_date=end_date,
+        enrollment_end=enr_end_date,
+    )
+
+    assert first_run.start_date < second_run.start_date
+    assert program.first_unexpired_run == first_run
+
+
 def test_course_next_run_date():
     """
     next_run_date should return the date of the CourseRun with the nearest future start date

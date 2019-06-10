@@ -1,10 +1,10 @@
 <div class="tiles-block">
   <div class="container">
     <ul class="tiles-list">
-      {% if page.product.next_run_date %}
+      {% if page.product.first_unexpired_run.start_date %}
         <li>
           <span class="title">START DATE</span>
-          <span class="text">{{ page.product.next_run_date|date:"F j, Y" }}</span>
+          <span class="text">{{ page.product.first_unexpired_run.start_date|date:"F j, Y" }}</span>
           {% if page.product.unexpired_runs|length > 1 %}
             <span class="dates-link">
               <a class="dates-tooltip" id="datesPopover" data-trigger="focus" href="#" onClick="event.preventDefault();"
@@ -40,10 +40,11 @@
         <span class="title">FORMAT</span>
         <span class="text">Online</span>
       </li>
-      {% if page.product.current_price %}
+      {% firstof page.product.current_price page.product.first_unexpired_run.current_price as price %}
+      {% if price %}
         <li>
           <span class="title">PRICE</span>
-          <span class="text">${{ page.product.current_price|floatformat:"0" }}</span>
+          <span class="text">${{ price|floatformat:"0" }}</span>
         </li>
       {% endif %}
     </ul>
