@@ -144,6 +144,10 @@ class SocialAuthSerializer(serializers.Serializer):
                 SocialAuthState.STATE_USER_BLOCKED,
                 errors=[f"Error code: CS_{exc.reason_code}"],
             )
+        except RequireProfileException as exc:
+            result = SocialAuthState(
+                SocialAuthState.STATE_REGISTER_EXTRA_DETAILS, partial=exc.partial
+            )
         except AuthException as exc:
             log.exception("Received unexpected AuthException")
             result = SocialAuthState(SocialAuthState.STATE_ERROR, errors=[str(exc)])
@@ -287,10 +291,6 @@ class RegisterDetailsSerializer(SocialAuthSerializer):
         """Try to 'save' the request"""
         try:
             result = super()._authenticate(SocialAuthState.FLOW_REGISTER)
-        except RequireProfileException as exc:
-            result = SocialAuthState(
-                SocialAuthState.STATE_REGISTER_EXTRA_DETAILS, partial=exc.partial
-            )
         except UserTryAgainLaterException:
             result = SocialAuthState(
                 SocialAuthState.STATE_ERROR_TEMPORARY,

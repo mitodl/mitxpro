@@ -130,13 +130,6 @@ export const LegalAddressFields = ({
 }: LegalAddressProps) => (
   <React.Fragment>
     <div className="form-group">
-      <label htmlFor="legal_address.last_name" className="font-weight-bold">
-        Legal Name*
-      </label>
-      <Field type="text" name="name" className="form-control" />
-      <ErrorMessage name="name" component={FormError} />
-    </div>
-    <div className="form-group">
       <label htmlFor="legal_address.first_name" className="row">
         <div className="col-4 font-weight-bold">First Name*</div>
         <div className="col-8">(Name that will appear on emails)</div>
@@ -158,6 +151,14 @@ export const LegalAddressFields = ({
         className="form-control"
       />
       <ErrorMessage name="legal_address.last_name" component={FormError} />
+    </div>
+    <div className="form-group">
+      <label htmlFor="legal_address.last_name" className="row">
+        <div className="col-4 font-weight-bold">Full Name*</div>
+        <div className="col-8">(As it will appear in your certificate)</div>
+      </label>
+      <Field type="text" name="name" className="form-control" />
+      <ErrorMessage name="name" component={FormError} />
     </div>
     {includePassword ? (
       <div className="form-group">

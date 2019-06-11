@@ -11,7 +11,7 @@ export const routes = {
   logout:    "/logout/",
 
   // authentication related routes
-  login: include("/login/", {
+  login: include("/signin/", {
     begin:    "",
     password: "password/",
     forgot:   include("forgot-password/", {
@@ -20,7 +20,7 @@ export const routes = {
     })
   }),
 
-  register: include("/signup/", {
+  register: include("/create-account/", {
     begin:   "",
     confirm: "confirm/",
     details: "details/",
