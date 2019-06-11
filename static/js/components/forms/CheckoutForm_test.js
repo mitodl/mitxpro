@@ -24,7 +24,8 @@ describe("CheckoutForm", () => {
     coupon,
     couponCode,
     basketItem,
-    submitCouponStub
+    submitCouponStub,
+    updateProductStub
 
   beforeEach(() => {
     basket = makeBasketResponse()
@@ -34,6 +35,7 @@ describe("CheckoutForm", () => {
     sandbox = sinon.createSandbox()
     onSubmitStub = sandbox.stub()
     submitCouponStub = sandbox.stub()
+    updateProductStub = sandbox.stub()
   })
 
   afterEach(() => {
@@ -49,6 +51,7 @@ describe("CheckoutForm", () => {
         item={basketItem}
         submitCoupon={submitCouponStub}
         selectedRuns={{}}
+        updateProduct={updateProductStub}
         {...props}
       />
     )

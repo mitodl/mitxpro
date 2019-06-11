@@ -6,11 +6,11 @@ import CheckoutPage, {
   calcSelectedRunIds,
   CheckoutPage as InnerCheckoutPage
 } from "./CheckoutPage"
-import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
+
+import { PRODUCT_TYPE_PROGRAM } from "../../constants"
+import { makeBasketResponse } from "../../factories/ecommerce"
 import * as formFuncs from "../../lib/form"
 import IntegrationTestHelper from "../../util/integration_test_helper"
-import { makeBasketResponse } from "../../factories/ecommerce"
-import { PRODUCT_TYPE_PROGRAM } from "../../constants"
 
 describe("CheckoutPage", () => {
   let helper, renderPage, basket

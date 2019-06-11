@@ -127,7 +127,9 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
                 const run = course.courseruns.find(
                   run => run.id === selectedRunId
                 )
-                updateProduct(run.product_id, run.id, setFieldError)
+                if (run && run.product_id) {
+                  updateProduct(run.product_id, run.id, setFieldError)
+                }
               }}
             >
               <option value={""} key={"null"}>
