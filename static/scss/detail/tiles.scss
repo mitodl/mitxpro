@@ -20,6 +20,9 @@
   padding: 0 7px;
   list-style: none;
   text-align: center;
+  @include media-breakpoint-up(lg) {
+    display: flex;
+  }
 
   li {
     letter-spacing: normal;
@@ -61,19 +64,19 @@
 
   .text {
     display: block;
-    font-size: 48px;
+    font-size: 40px;
     line-height: 50px;
     color: $light-gray;
     font-weight: 600;
     text-align: center;
 
     @include media-breakpoint-up(lg) {
-      font-size: 38px;
+      font-size: 30px;
       line-height: 50px;
     }
 
     @include media-breakpoint-up(xl) {
-      font-size: 48px;
+      font-size: 40px;
       line-height: 50px;
     }
   }
