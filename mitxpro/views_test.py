@@ -47,6 +47,7 @@ def test_webpack_url(mocker, settings, client):
         "release_version": settings.VERSION,
         "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
         "support_email": settings.EMAIL_SUPPORT,
+        "site_name": settings.SITE_NAME,
     }
 
 
