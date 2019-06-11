@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.8.0 (Released June 11, 2019)
+-------------
+
+- Always show course run selections (#420)
+- Fix missing price on product page (#409)
+
 Version 0.7.2 (Released June 10, 2019)
 -------------
 
