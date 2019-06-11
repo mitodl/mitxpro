@@ -3,7 +3,7 @@ import { mount } from "enzyme/build"
 import React from "react"
 import { assert } from "chai"
 import sinon from "sinon"
-import { Field, Formik } from "formik"
+import { Formik } from "formik"
 
 import { CheckoutForm } from "./CheckoutForm"
 

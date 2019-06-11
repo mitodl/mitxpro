@@ -11,7 +11,6 @@ import {
 } from "../../lib/ecommerce"
 
 import type { BasketItem, CouponSelection } from "../../flow/ecommerceTypes"
-import type { Course } from "../../flow/courseTypes"
 
 export type SetFieldError = (fieldName: string, fieldValue: any) => void
 export type UpdateProduct = (
@@ -60,7 +59,7 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
   }
 
   renderBasketItem = () => {
-    const { item, values, setFieldError, updateProduct } = this.props
+    const { item, setFieldError, updateProduct } = this.props
 
     if (item.type === "program") {
       return (
@@ -228,7 +227,7 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
 }
 
 export class CheckoutForm extends React.Component<OuterProps> {
-  validate = values => {
+  validate = (values: Values) => {
     const { item } = this.props
     const selectedRuns = values.runs
 
