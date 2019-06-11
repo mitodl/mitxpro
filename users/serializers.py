@@ -1,17 +1,22 @@
 """User serializers"""
 from collections import defaultdict
+import logging
 import re
 
 from django.db import transaction
 import pycountry
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
+from mail import verification_api
 from mitxpro.serializers import WriteableSerializerMethodField
-from users.models import LegalAddress, User, Profile
+from users.models import LegalAddress, User, Profile, ChangeEmailRequest
 from hubspot.task_helpers import sync_hubspot_user
 
 US_POSTAL_RE = re.compile(r"[0-9]{5}(-[0-9]{4}){0,1}")
 CA_POSTAL_RE = re.compile(r"[0-9][A-Z][0-9] [A-Z][0-9][A-Z]", flags=re.I)
+
+log = logging.getLogger()
 
 
 class LegalAddressSerializer(serializers.ModelSerializer):
@@ -235,6 +240,8 @@ class UserSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def update(self, instance, validated_data):
         """Update an existing user"""
+        if "email" in validated_data:
+            raise serializers.ValidationError({"email": "Cannot change email"})
         legal_address_data = validated_data.pop("legal_address", None)
         profile_data = validated_data.pop("profile", None)
         password = validated_data.pop("password", None)
@@ -284,17 +291,94 @@ class UserSerializer(serializers.ModelSerializer):
             "created_on",
             "updated_on",
         )
+        action_extra_kwargs = {"create": {"email": {"read_only": False}}}
+
+
+class ChangeEmailRequestCreateSerializer(serializers.ModelSerializer):
+    """Serializer for starting a user email change"""
+
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    new_email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        """Validate the change request"""
+        # verify no other user has this email address
+        errors = {}
+
+        user = attrs["user"]
+        new_email = attrs["new_email"]
+        password = attrs.pop("password")
+
+        if user.email == new_email:
+            # verify the user isn't trying to change their email to their current one
+            # this would indicate a programming error on the frontend if this request is allowed
+            errors["email"] = "Provided email address is same as your current one"
+        elif User.objects.filter(email=new_email).exists():
+            errors["email"] = "Invalid email address"
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        # verify the password verifies for the current user
+        if not user.check_password(password):
+            raise PermissionDenied("Invalid Password")
+
+        return attrs
+
+    def create(self, validated_data):
+        """Create the email change request"""
+        change_request = super().create(validated_data)
+
+        verification_api.send_verify_email_change_email(
+            self.context["request"], change_request
+        )
+
+        return change_request
+
+    class Meta:
+        model = ChangeEmailRequest
+
+        fields = ("user", "new_email", "password")
+
+
+class ChangeEmailRequestUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for confirming a user email change"""
+
+    confirmed = serializers.BooleanField()
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        """Updates an email change request"""
+        if User.objects.filter(email=instance.new_email).exists():
+            log.debug("User '{}' tried to change email address to one already in use")
+            raise serializers.ValidationError("Unable to change email")
+
+        result = super().update(instance, validated_data)
+
+        # change request has been confirmed
+        if result.confirmed:
+            user = result.user
+            user.email = result.new_email
+            user.save()
+
+        return result
+
+    class Meta:
+        model = ChangeEmailRequest
+
+        fields = ("confirmed",)
 
 
 class StateProvinceSerializer(serializers.Serializer):
-    """ Serializer for pycountry states/provinces"""
+    """Serializer for pycountry states/provinces"""
 
     code = serializers.CharField()
     name = serializers.CharField()
 
 
 class CountrySerializer(serializers.Serializer):
-    """ Serializer for pycountry countries, with states for US/CA"""
+    """Serializer for pycountry countries, with states for US/CA"""
 
     code = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()

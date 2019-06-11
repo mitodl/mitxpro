@@ -2,11 +2,20 @@
 import pycountry
 from oauth2_provider.contrib.rest_framework import IsAuthenticatedOrTokenHasScope
 from rest_framework import mixins, viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from mitxpro.permissions import UserIsOwnerPermission
-from users.models import User
-from users.serializers import PublicUserSerializer, UserSerializer, CountrySerializer
+from mitxpro.serializers import EmptySerializer
+from mitxpro.utils import now_in_utc
+from users.models import User, ChangeEmailRequest
+from users.serializers import (
+    PublicUserSerializer,
+    UserSerializer,
+    CountrySerializer,
+    ChangeEmailRequestCreateSerializer,
+    ChangeEmailRequestUpdateSerializer,
+)
 
 
 class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -43,3 +52,33 @@ class CountriesStatesViewSet(viewsets.ViewSet):
         queryset = sorted(list(pycountry.countries), key=lambda country: country.name)
         serializer = CountrySerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class ChangeEmailRequestViewSet(
+    mixins.UpdateModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet
+):
+    """Viewset for creating and updating email change requests"""
+
+    serializer_class = ChangeEmailRequestCreateSerializer
+    lookup_field = "code"
+
+    def get_permissions(self):
+        permission_classes = []
+        if self.action == "create":
+            permission_classes = [IsAuthenticated]
+
+        return [permission() for permission in permission_classes]
+
+    def get_queryset(self):
+        """Rerturn a queryset of valid pending requests"""
+        return ChangeEmailRequest.objects.filter(
+            expires_on__gt=now_in_utc(), confirmed=False
+        )
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return ChangeEmailRequestCreateSerializer
+        elif self.action == "partial_update":
+            return ChangeEmailRequestUpdateSerializer
+        else:
+            return EmptySerializer

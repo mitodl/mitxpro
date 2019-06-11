@@ -7,10 +7,14 @@ from users.views import (
     UserRetrieveViewSet,
     CurrentUserRetrieveUpdateViewSet,
     CountriesStatesViewSet,
+    ChangeEmailRequestViewSet,
 )
 
 router = routers.DefaultRouter()
 router.register(r"users", UserRetrieveViewSet, basename="users_api")
+router.register(
+    r"change-emails", ChangeEmailRequestViewSet, basename="change_email_api"
+)
 router.register(r"countries", CountriesStatesViewSet, basename="countries_api")
 
 urlpatterns = [
