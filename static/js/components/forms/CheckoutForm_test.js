@@ -206,37 +206,46 @@ describe("CheckoutForm", () => {
     })
     sinon.assert.notCalled(submitCouponStub)
   })
+  ;[PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM].forEach(type => {
+    it(`shows a select with options for a product, and updates a ${type} run`, async () => {
+      basketItem.type = type
+      if (type === PRODUCT_TYPE_COURSERUN) {
+        basketItem.courses = [basketItem.courses[0]]
+      }
+      const selectedRuns = calcSelectedRunIds(basketItem)
+      const inner = await renderForm({
+        selectedRuns
+      })
+      assert.equal(inner.find("select").length, basketItem.courses.length)
+      basketItem.courses.forEach((course, i) => {
+        const select = inner.find("select").at(i)
 
-  it("does not show a select for course run product", async () => {
-    basket.items[0].type = PRODUCT_TYPE_COURSERUN
-    const inner = await renderForm()
-    assert.equal(inner.find("select").length, 0)
-  })
+        const runId = selectedRuns[course.id]
+        assert.equal(select.prop("value"), runId)
 
-  it("shows a select with options for a program product, and updates a run", async () => {
-    basketItem.type = PRODUCT_TYPE_PROGRAM
-    const selectedRuns = calcSelectedRunIds(basketItem)
-    const inner = await renderForm({
-      selectedRuns
-    })
-    assert.equal(inner.find("select").length, basketItem.courses.length)
-    basketItem.courses.forEach((course, i) => {
-      const select = inner.find("select").at(i)
+        const runs = course.courseruns
+        assert.equal(select.find("option").length, runs.length + 1)
+        const firstOption = select.find("option").at(0)
+        assert.equal(firstOption.prop("value"), "")
+        assert.equal(firstOption.text(), "Select a course run")
 
-      const runId = selectedRuns[course.id]
-      assert.equal(select.prop("value"), runId)
-
-      const runs = course.courseruns
-      assert.equal(select.find("option").length, runs.length + 1)
-      const firstOption = select.find("option").at(0)
-      assert.equal(firstOption.prop("value"), "")
-      assert.equal(firstOption.text(), "Select a course run")
-
-      runs.forEach((run, j) => {
-        const runOption = select.find("option").at(j + 1)
-        assert.equal(runOption.prop("value"), run.id)
-        assert.equal(runOption.text(), formatRunTitle(run))
+        runs.forEach((run, j) => {
+          const runOption = select.find("option").at(j + 1)
+          assert.equal(runOption.prop("value"), run.id)
+          assert.equal(runOption.text(), formatRunTitle(run))
+        })
       })
     })
+  })
+
+  it("updates the product when the course run select is changed", async () => {
+    basketItem.type = PRODUCT_TYPE_COURSERUN
+    basketItem.courses = [basketItem.courses[0]]
+    const run = basketItem.courses[0].courseruns[1]
+
+    const inner = await renderForm()
+
+    inner.find("select").prop("onChange")({ target: { value: String(run.id) } })
+    sinon.assert.calledWith(updateProductStub, run.product_id, run.id)
   })
 })
