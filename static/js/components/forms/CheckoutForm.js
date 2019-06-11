@@ -54,18 +54,6 @@ type InnerProps = CommonProps &
     onMount: () => void
   }
 
-const validateRuns = (course: Course, values: Values) => (): ?string => {
-  const selectedRuns = values.runs
-
-  if (course.id) {
-    if (!selectedRuns[course.id]) {
-      return `No run selected for ${course.title}`
-    }
-  }
-
-  return undefined
-}
-
 class InnerCheckoutForm extends React.Component<InnerProps> {
   componentDidMount() {
     this.props.onMount()
@@ -88,7 +76,6 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
                   component="select"
                   name={`runs.${course.id}`}
                   className="run-selector"
-                  validate={validateRuns(course, values)}
                 >
                   <option value={""} key={"null"}>
                     Select a course run
@@ -117,7 +104,6 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
               component="select"
               name={`runs.${course.id}`}
               className="run-selector"
-              validate={validateRuns(course, values)}
               onChange={e => {
                 if (!e.target.value) {
                   return
@@ -160,7 +146,6 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
     } = this.props
     return (
       <Form className="checkout-page container">
-        {JSON.stringify(values)}
         <div className="row header">
           <div className="col-12">
             <div className="page-title">Checkout</div>
@@ -243,6 +228,26 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
 }
 
 export class CheckoutForm extends React.Component<OuterProps> {
+  validate = values => {
+    const { item } = this.props
+    const selectedRuns = values.runs
+
+    const missingCourses = []
+    for (const course of item.courses) {
+      if (!selectedRuns[course.id]) {
+        missingCourses.push(course.title)
+      }
+    }
+
+    if (missingCourses.length) {
+      return {
+        runs: `No run selected for ${missingCourses.join(", ")}`
+      }
+    }
+
+    return {}
+  }
+
   render() {
     const {
       onSubmit,
@@ -262,6 +267,7 @@ export class CheckoutForm extends React.Component<OuterProps> {
           runs:       selectedRuns
         }}
         enableReinitialize={true}
+        validate={this.validate}
         render={props => (
           <InnerCheckoutForm
             {...props}

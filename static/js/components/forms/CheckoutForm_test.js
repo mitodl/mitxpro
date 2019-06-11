@@ -3,7 +3,7 @@ import { mount } from "enzyme/build"
 import React from "react"
 import { assert } from "chai"
 import sinon from "sinon"
-import { Field } from "formik"
+import { Field, Formik } from "formik"
 
 import { CheckoutForm } from "./CheckoutForm"
 
@@ -122,16 +122,18 @@ describe("CheckoutForm", () => {
       const inner = await renderForm({
         selectedRuns: runs
       })
-      const fields = inner.find(".title-column").find(Field)
-      basketItem.courses.forEach((course, i) => {
-        const field = fields.at(i)
-        const result = field.prop("validate")()
-        if (hasRuns) {
-          assert.isUndefined(result)
-        } else {
-          assert.equal(result, `No run selected for ${course.title}`)
-        }
-      })
+      const errors = inner.find(Formik).prop("validate")({ runs })
+
+      assert.deepEqual(
+        errors,
+        hasRuns
+          ? {}
+          : {
+            runs: `No run selected for ${basketItem.courses
+              .map(course => course.title)
+              .join(", ")}`
+          }
+      )
     })
   })
 
