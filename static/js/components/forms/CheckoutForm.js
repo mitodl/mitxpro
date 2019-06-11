@@ -59,7 +59,7 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
   }
 
   renderBasketItem = () => {
-    const { item, setFieldError, updateProduct } = this.props
+    const { item, values, setFieldError, setValues, updateProduct } = this.props
 
     if (item.type === "program") {
       return (
@@ -104,6 +104,14 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
               name={`runs.${course.id}`}
               className="run-selector"
               onChange={e => {
+                setValues({
+                  ...values,
+                  runs: {
+                    ...values.runs,
+                    [course.id]: e.target.value
+                  }
+                })
+
                 if (!e.target.value) {
                   return
                 }
