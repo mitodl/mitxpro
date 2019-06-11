@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.8.1
+-------------
+
+- Expand hubspot settings to sync deal, line, product
+- update email template (#487)
+- update styling of metadata tiles (#476)
+- #428 #447 #448
+
 Version 0.8.0 (Released June 11, 2019)
 -------------
 
