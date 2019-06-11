@@ -118,7 +118,7 @@ export class RegisterDetailsPage extends React.Component<Props> {
           <div className="container">
             <div className="row">
               <div className="col-12 form-group">
-                Already have an MITxPro account?{" "}
+                {`Already have an ${SETTINGS.site_name} account? `}
                 <Link to={routes.login.begin}>Click here</Link>
               </div>
             </div>
