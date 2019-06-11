@@ -458,12 +458,32 @@ def enroll_user_in_order_items(order):
         )
         edx_request_success = False
 
+    voucher = (
+        order.purchaser.vouchers.filter(
+            product_id__in=order.lines.all().values_list(
+                "product_version__product__id", flat=True
+            )
+        )
+        .order_by("uploaded")
+        .last()
+    )
+    voucher_target = None
+    if (
+        voucher
+        and voucher.is_redeemed()
+        and voucher.product is not None
+        and voucher.enrollment is None
+    ):
+        voucher_target = voucher.product.content_object
     for run in runs:
-        CourseRunEnrollment.objects.get_or_create(
+        enrollment, _ = CourseRunEnrollment.objects.get_or_create(
             user=order.purchaser,
             run=run,
             defaults=dict(company=company, edx_enrolled=edx_request_success),
         )
+        if voucher_target == run:
+            voucher.enrollment = enrollment
+            voucher.save()
     for program in programs:
         ProgramEnrollment.objects.get_or_create(
             user=order.purchaser, program=program, defaults=dict(company=company)
