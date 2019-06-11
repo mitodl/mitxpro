@@ -238,7 +238,9 @@ class BasketSerializer(serializers.ModelSerializer):
     def _get_runs_for_product(cls, *, product, run_ids, user):
         """Helper function to get and validate selected runs in a product"""
         if None in run_ids:
-            raise ValidationError("Each course must have a course run selection")
+            raise ValidationError(
+                {"runs": "Each course must have a course run selection"}
+            )
 
         runs_for_product = list(product.run_queryset.filter(id__in=run_ids))
         run_ids_for_product = {run.id for run in runs_for_product}
