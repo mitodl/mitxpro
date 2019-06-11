@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.8.0
+Version 0.8.0 (Released June 11, 2019)
 -------------
 
 - Always show course run selections (#420)
