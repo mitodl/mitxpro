@@ -209,6 +209,9 @@
       "description": "The log level for Sentry",
       "required": false
     },
+    "SITE_NAME": {
+      "description": "Name of the site. e.g MIT xPRO"
+    },
     "STATUS_TOKEN": {
       "description": "Token to access the status API."
     },
