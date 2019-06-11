@@ -10,7 +10,7 @@ import pytz
 
 from faker import Faker
 
-from ecommerce.factories import ProductFactory, OrderFactory, LineFactory
+from ecommerce.factories import ProductFactory, LineFactory
 from hubspot.api import (
     make_contact_sync_message,
     make_product_sync_message,
@@ -35,12 +35,6 @@ fake = Faker()
 
 
 @pytest.fixture
-def mock_logger(mocker):
-    """ Mock the logger """
-    yield mocker.patch("hubspot.tasks.log.error")
-
-
-@pytest.fixture
 def mock_hubspot_request(mocker):
     """Mock the send hubspot request method"""
     yield mocker.patch("hubspot.tasks.send_hubspot_request", autospec=True)
@@ -50,7 +44,7 @@ def test_sync_contact_with_hubspot(mock_hubspot_request):
     """Test that send_hubspot_request is called properly for a CONTACT sync"""
     user = UserFactory.create()
     sync_contact_with_hubspot(user.id)
-    body = [make_contact_sync_message(user.id)]
+    body = make_contact_sync_message(user.id)
     body[0]["changeOccurredTimestamp"] = ANY
     mock_hubspot_request.assert_called_once_with(
         "CONTACT", HUBSPOT_SYNC_URL, "PUT", body=body
@@ -61,29 +55,43 @@ def test_sync_product_with_hubspot(mock_hubspot_request):
     """Test that send_hubspot_request is called properly for a PRODUCT sync"""
     product = ProductFactory.create()
     sync_product_with_hubspot(product.id)
-    body = [make_product_sync_message(product.id)]
+    body = make_product_sync_message(product.id)
     body[0]["changeOccurredTimestamp"] = ANY
     mock_hubspot_request.assert_called_once_with(
         "PRODUCT", HUBSPOT_SYNC_URL, "PUT", body=body
     )
 
 
-def test_sync_deal_with_hubspot(mock_hubspot_request):
+def test_sync_deal_with_hubspot(
+    mocker, mock_hubspot_request, mocked_celery, hubspot_order
+):
     """Test that send_hubspot_request is called properly for a DEAL sync"""
-    order = OrderFactory.create()
-    sync_deal_with_hubspot(order.id)
-    body = [make_deal_sync_message(order.id)]
+    sync_line_mock = mocker.patch(
+        "hubspot.tasks.sync_line_item_with_hubspot", autospec=True
+    )
+
+    with pytest.raises(mocked_celery.replace_exception_class):
+        sync_deal_with_hubspot.delay(hubspot_order.id)
+    assert mocked_celery.group.call_count == 1
+
+    body = make_deal_sync_message(hubspot_order.id)
     body[0]["changeOccurredTimestamp"] = ANY
     mock_hubspot_request.assert_called_once_with(
         "DEAL", HUBSPOT_SYNC_URL, "PUT", body=body
     )
+
+    assert sync_line_mock.si.call_count == 1
+    sync_line_mock.si.assert_any_call(hubspot_order.lines.first().id)
+
+    assert mocked_celery.replace.call_count == 1
+    assert mocked_celery.replace.call_args[0][1] == mocked_celery.chain.return_value
 
 
 def test_sync_line_item_with_hubspot(mock_hubspot_request):
     """Test that send_hubspot_request is called properly for a LINE_ITEM sync"""
     line = LineFactory.create()
     sync_line_item_with_hubspot(line.id)
-    body = [make_line_item_sync_message(line.id)]
+    body = make_line_item_sync_message(line.id)
     body[0]["changeOccurredTimestamp"] = ANY
     mock_hubspot_request.assert_called_once_with(
         "LINE_ITEM", HUBSPOT_SYNC_URL, "PUT", body=body

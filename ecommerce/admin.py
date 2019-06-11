@@ -20,6 +20,8 @@ from ecommerce.models import (
     Company,
     ProductCouponAssignment,
 )
+import ecommerce.signals  # pylint:disable=unused-import
+
 from hubspot.task_helpers import sync_hubspot_deal
 from mitxpro.utils import get_field_names
 

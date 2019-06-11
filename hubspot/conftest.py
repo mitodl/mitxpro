@@ -1,5 +1,9 @@
-"""fixtures for hubspot tests"""
+"""
+Fixtures for hubspot tests
+"""
+from types import SimpleNamespace
 import pytest
+from ecommerce import factories
 
 error_response_json = [
     {
@@ -52,3 +56,46 @@ def mock_hubspot_errors(mocker):
         "hubspot.api.paged_sync_errors",
         side_effect=[error_response_json[0:2], error_response_json[2:]],
     )
+
+
+@pytest.fixture()
+def mocked_celery(mocker):
+    """Mock object that patches certain celery functions"""
+    exception_class = TabError
+    replace_mock = mocker.patch(
+        "celery.app.task.Task.replace", autospec=True, side_effect=exception_class
+    )
+    group_mock = mocker.patch("celery.group", autospec=True)
+    chain_mock = mocker.patch("celery.chain", autospec=True)
+
+    yield SimpleNamespace(
+        replace=replace_mock,
+        group=group_mock,
+        chain=chain_mock,
+        replace_exception_class=exception_class,
+    )
+
+
+@pytest.fixture
+def mock_logger(mocker):
+    """ Mock the logger """
+    yield mocker.patch("hubspot.tasks.log.error")
+
+
+@pytest.fixture
+def mock_hubspot_request(mocker):
+    """Mock the send hubspot request method"""
+    yield mocker.patch("hubspot.tasks.send_hubspot_request")
+
+
+@pytest.fixture
+def hubspot_order():
+    """ Return an order for testing with hubspot"""
+    order = factories.OrderFactory()
+    product_version = factories.ProductVersionFactory()
+    company = factories.CompanyFactory()
+    payment_version = factories.CouponPaymentVersionFactory(company=company)
+    coupon_version = factories.CouponVersionFactory(payment_version=payment_version)
+    factories.LineFactory(order=order, product_version=product_version)
+    factories.CouponRedemptionFactory(order=order, coupon_version=coupon_version)
+    return order

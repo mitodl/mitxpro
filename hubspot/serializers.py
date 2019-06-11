@@ -6,13 +6,21 @@ from ecommerce.api import get_product_version_price_with_discount, round_half_up
 from ecommerce.models import CouponVersion, ProductVersion, CouponRedemption
 
 
+ORDER_STATUS_MAPPING = {
+    models.Order.FULFILLED: "processed",
+    models.Order.FAILED: "checkout_completed",
+    models.Order.CREATED: "checkout_completed",
+    models.Order.REFUNDED: "processed",
+}
+
+
 class LineSerializer(serializers.ModelSerializer):
     """ Line Serializer for Hubspot """
 
     product = serializers.IntegerField(source="product_version.product.id")
 
     class Meta:
-        fields = ("id", "product")
+        fields = ("id", "product", "order", "quantity")
         model = models.Line
 
 
@@ -20,6 +28,7 @@ class OrderToDealSerializer(serializers.ModelSerializer):
     """ Order/Deal Serializer for Hubspot """
 
     name = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
     close_date = serializers.SerializerMethodField(allow_null=True)
     amount = serializers.SerializerMethodField()
     discount_amount = serializers.SerializerMethodField()
@@ -58,6 +67,10 @@ class OrderToDealSerializer(serializers.ModelSerializer):
         """ Return the order/deal name """
         return f"XPRO-ORDER-{instance.id}"
 
+    def get_status(self, instance):
+        """ Return the status mapped to the hubspot equivalent """
+        return ORDER_STATUS_MAPPING[instance.status]
+
     def get_close_date(self, instance):
         """ Return the updated_on date (as a timestamp in milliseconds) if fulfilled """
         if instance.status == models.Order.FULFILLED:
@@ -88,7 +101,7 @@ class OrderToDealSerializer(serializers.ModelSerializer):
         if redemption:
             company = redemption.coupon_version.payment_version.company
             if company:
-                return company.id
+                return company.name
 
     def get_coupon_code(self, instance):
         """ Get the coupon code used for the order if any """
@@ -131,6 +144,7 @@ class ProductSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
     product_type = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
 
     def get_title(self, instance):
         """ Return the product title """
@@ -148,6 +162,13 @@ class ProductSerializer(serializers.ModelSerializer):
         if product_version:
             return product_version.price.to_eng_string()
         return "0.00"
+
+    def get_description(self, instance):
+        """Return the latest product version description"""
+        product_version = instance.latest_version
+        if product_version:
+            return product_version.description
+        return ""
 
     class Meta:
         fields = "__all__"
