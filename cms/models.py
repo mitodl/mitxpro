@@ -742,6 +742,29 @@ class ProgramPage(ProductPage):
         """Gets the product associated with this page"""
         return self.program
 
+    def get_context(self, request, *args, **kwargs):
+        # Hits a circular import at the top of the module
+        from courses.models import ProgramEnrollment
+
+        program = self.program
+        product = program.products.first() if program else None
+        is_anonymous = request.user.is_anonymous
+        enrolled = (
+            ProgramEnrollment.objects.filter(
+                user=request.user, program=program
+            ).exists()
+            if program and not is_anonymous
+            else False
+        )
+
+        return {
+            **super().get_context(request, **kwargs),
+            **get_js_settings_context(request),
+            "product_id": product.id if product else None,
+            "enrolled": enrolled,
+            "user": request.user,
+        }
+
 
 class CoursePage(ProductPage):
     """
@@ -796,7 +819,6 @@ class CoursePage(ProductPage):
         course = self.course
         run = course.first_unexpired_run
         product = run.products.first() if run else None
-        product_version = product.latest_version if product else None
         is_anonymous = request.user.is_anonymous
         enrolled = (
             CourseRunEnrollment.objects.filter(user=request.user, run=run).exists()
@@ -807,13 +829,9 @@ class CoursePage(ProductPage):
         return {
             **super().get_context(request, **kwargs),
             **get_js_settings_context(request),
-            "courseware_url": run.courseware_url if run else None,
-            "product_id": product.id
-            if (product_version and not is_anonymous)
-            else None,
+            "product_id": product.id if product else None,
             "enrolled": enrolled,
             "user": request.user,
-            "course": course,
         }
 
 

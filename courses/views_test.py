@@ -13,12 +13,8 @@ from wagtail.core.models import Site
 from cms.factories import CoursePageFactory, ProgramPageFactory
 from cms.models import CatalogPage
 from courses.api import UserEnrollments
-from courses.factories import (
-    CourseFactory,
-    CourseRunEnrollment,
-    CourseRunFactory,
-    ProgramFactory,
-)
+from courses.factories import CourseFactory, CourseRunFactory, ProgramFactory
+from courses.models import CourseRunEnrollment, ProgramEnrollment
 from courses.serializers import CourseRunSerializer, CourseSerializer, ProgramSerializer
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 
@@ -259,10 +255,8 @@ def test_course_view(
     if not is_anonymous:
         client.force_login(user)
     resp = client.get(course.page.get_url())
-    assert resp.context["course"] == course
     assert resp.context["user"] == user if not is_anonymous else AnonymousUser()
-    assert resp.context["courseware_url"] == (run.courseware_url if run else None)
-    assert resp.context["product_id"] == (product_id if not is_anonymous else None)
+    assert resp.context["product_id"] == product_id
     assert resp.context["enrolled"] == (
         is_enrolled and has_unexpired_run and not is_anonymous
     )
@@ -274,6 +268,48 @@ def test_course_view(
             url = f'{reverse("checkout-page")}?product={product_id}'
             has_button = True
         if is_enrolled and has_unexpired_run:
+            url = reverse("user-dashboard")
+            has_button = True
+
+    assert (
+        f'<a class="enroll-button" href="{url}">'.encode("utf-8") in resp.content
+    ) is has_button
+
+
+@pytest.mark.parametrize("is_enrolled", [True, False])
+@pytest.mark.parametrize("has_product", [True, False])
+@pytest.mark.parametrize("is_anonymous", [True, False])
+def test_program_view(client, user, home_page, is_enrolled, has_product, is_anonymous):
+    """
+    Test that the course detail view has the right context and shows the right HTML for the enroll/view button
+    """
+    program = ProgramFactory.create(live=True)
+    # coursepage required for loading seo metadata
+    ProgramPageFactory.create(program=program, parent=home_page)
+
+    if has_product:
+        product_id = ProductVersionFactory.create(
+            product=ProductFactory(content_object=program)
+        ).product.id
+    else:
+        product_id = None
+    if is_enrolled:
+        ProgramEnrollment.objects.create(user=user, program=program)
+
+    if not is_anonymous:
+        client.force_login(user)
+    resp = client.get(program.page.get_url())
+    assert resp.context["user"] == user if not is_anonymous else AnonymousUser()
+    assert resp.context["product_id"] == product_id
+    assert resp.context["enrolled"] == (is_enrolled and not is_anonymous)
+
+    has_button = False
+    url = ""  # make linter happy
+    if not is_anonymous:
+        if not is_enrolled and has_product:
+            url = f'{reverse("checkout-page")}?product={product_id}'
+            has_button = True
+        if is_enrolled:
             url = reverse("user-dashboard")
             has_button = True
 
