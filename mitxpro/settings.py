@@ -11,7 +11,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 from mitxpro.envs import get_any, get_bool, get_int, get_string
 
-VERSION = "0.7.2"
+VERSION = "0.8.0"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
