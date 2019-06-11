@@ -926,10 +926,10 @@ def test_products_viewset_post_forbidden(admin_drf_client):
     assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
-def test_companies_viewset_list(admin_drf_client):
+def test_companies_viewset_list(user_drf_client):
     """ Test that the CompanyViewSet returns all companies """
     companies = CompanyFactory.create_batch(3)
-    response = admin_drf_client.get(reverse("companies_api-list"))
+    response = user_drf_client.get(reverse("companies_api-list"))
     assert response.status_code == status.HTTP_200_OK
     companies_list = response.json()
     assert {company.get("id") for company in companies_list} == {
@@ -939,10 +939,10 @@ def test_companies_viewset_list(admin_drf_client):
         assert company == CompanySerializer(instance=company).data
 
 
-def test_companies_viewset_detail(admin_drf_client):
+def test_companies_viewset_detail(user_drf_client):
     """ Test that the CompanyViewSet returns details for a company """
     company = CompanyFactory.create()
-    response = admin_drf_client.get(
+    response = user_drf_client.get(
         reverse("companies_api-detail", kwargs={"pk": company.id})
     )
     assert response.status_code == status.HTTP_200_OK
@@ -953,12 +953,6 @@ def test_companies_viewset_forbidden():
     """ Test that an anonymous user cannot access the companies list """
     client = APIClient()
     response = client.get(reverse("companies_api-list"))
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-
-
-def test_companies_viewset_not_staff(user_drf_client):
-    """Test that a user who is not staff cannot access the companies list"""
-    response = user_drf_client.get(reverse("companies_api-list"))
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
