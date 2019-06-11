@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n %}
 
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -239,7 +239,7 @@
 	            <tr>
 	                <td style="padding: 20px;">
                       {% block logo %}
-                      <img src="{% static 'images/mitx-pro-logo.png' %}" width="160" height="80" alt="{{ site_name }}" style="height: auto; background: #ffffff; font-family: sans-serif; font-size: 15px; line-height: 15px; color: #A31F34; margin-bottom: -10px;  margin-right: 10px;"/>
+                      <img src="{{ base_url }}/static/images/mitx-pro-logo.png' %}" width="160" height="80" alt="{{ site_name }}" style="height: auto; background: #ffffff; font-family: sans-serif; font-size: 15px; line-height: 15px; color: #A31F34; margin-bottom: -10px;  margin-right: 10px;"/>
                       {% endblock %}
 	                </td>
 	            </tr>

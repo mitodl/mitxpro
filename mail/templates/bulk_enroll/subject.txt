@@ -1,1 +1,1 @@
-Complete your MITxPRO Enrollment
+Complete your {{ site_name }} Enrollment
