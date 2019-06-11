@@ -14,7 +14,11 @@ import type { BasketItem, CouponSelection } from "../../flow/ecommerceTypes"
 import type { Course } from "../../flow/courseTypes"
 
 export type SetFieldError = (fieldName: string, fieldValue: any) => void
-export type UpdateProduct = (productId: number, setFieldError: SetFieldError) => Promise<void>
+export type UpdateProduct = (
+  productId: number,
+  runId: number,
+  setFieldError: SetFieldError
+) => Promise<void>
 export type Values = {
   runs: { [number]: string },
   couponCode: ?string
@@ -111,23 +115,31 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
             <div className="title">{item.description}</div>
             <Field
               component="select"
-              name={`runs`}
+              name={`runs.${course.id}`}
               className="run-selector"
-              validate={validateRuns(item.courses[0], values)}
+              validate={validateRuns(course, values)}
               onChange={e => {
-                if (e.target.value) {
-                  updateProduct(parseInt(e.target.value), setFieldError)
+                if (!e.target.value) {
+                  return
                 }
+
+                const selectedRunId = parseInt(e.target.value)
+                const run = course.courseruns.find(
+                  run => run.id === selectedRunId
+                )
+                updateProduct(run.product_id, run.id, setFieldError)
               }}
             >
               <option value={""} key={"null"}>
                 Select a course run
               </option>
-              {course.courseruns.map(run => ( run.product_id ?
-                <option value={run.product_id} key={run.id}>
-                  {formatRunTitle(run)}
-                </option> : null
-              ))}
+              {course.courseruns.map(run =>
+                run.product_id ? (
+                  <option value={run.id} key={run.id}>
+                    {formatRunTitle(run)}
+                  </option>
+                ) : null
+              )}
             </Field>
           </div>
         </div>
@@ -146,6 +158,7 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
     } = this.props
     return (
       <Form className="checkout-page container">
+        {JSON.stringify(values)}
         <div className="row header">
           <div className="col-12">
             <div className="page-title">Checkout</div>

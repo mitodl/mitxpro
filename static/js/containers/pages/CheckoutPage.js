@@ -161,10 +161,14 @@ export class CheckoutPage extends React.Component<Props, State> {
     )
   }
 
-  updateProduct = async (productId: number, setFieldError: SetFieldError) => {
+  updateProduct = async (
+    productId: number,
+    runId: number,
+    setFieldError: SetFieldError
+  ) => {
     const { updateBasket } = this.props
     const response = await updateBasket({
-      items: [{id: productId}]
+      items: [{ id: productId, run_ids: runId ? [runId] : [] }]
     })
     setFieldError(
       "runs",
