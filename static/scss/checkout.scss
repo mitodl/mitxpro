@@ -83,10 +83,6 @@
       margin-top: 50px;
     }
 
-    .error {
-      color: $primary;
-    }
-
     .coupon-code-row {
       input {
         border: 1px solid #cccccc;
@@ -159,6 +155,10 @@
         margin-top: 25px;
       }
     }
+  }
+
+  .error {
+    color: $primary;
   }
 
   button {

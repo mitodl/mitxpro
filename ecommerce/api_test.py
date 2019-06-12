@@ -579,7 +579,7 @@ def test_validate_basket_no_item(basket_and_coupons):
     BasketItem.objects.all().delete()
     with pytest.raises(ValidationError) as ex:
         validate_basket_for_checkout(basket_and_coupons.basket)
-    assert ex.value.args[0] == "No items in basket, cannot checkout"
+    assert ex.value.args[0]["items"] == "No items in basket, cannot checkout"
 
 
 def test_validate_basket_two_items(basket_and_coupons):
@@ -607,7 +607,7 @@ def test_validate_basket_invalid_coupon(mocker, basket_and_coupons):
     )
     with pytest.raises(ValidationError) as ex:
         validate_basket_for_checkout(basket_and_coupons.basket)
-    assert ex.value.args[0] == "Coupon is not valid for product"
+    assert ex.value.args[0]["coupons"] == "Coupon is not valid for product"
     patched.assert_called_once_with(
         product=basket_and_coupons.product_version.product,
         user=basket_and_coupons.basket.user,
@@ -623,7 +623,8 @@ def test_validate_basket_different_product(basket_and_coupons):
     with pytest.raises(ValidationError) as ex:
         validate_basket_for_checkout(basket_and_coupons.basket)
     assert (
-        ex.value.args[0] == "Some runs present in basket which are not part of product"
+        ex.value.args[0]["runs"]
+        == "Some runs present in basket which are not part of product"
     )
 
 
@@ -647,7 +648,10 @@ def test_validate_basket_already_enrolled(basket_and_coupons):
 
     with pytest.raises(ValidationError) as ex:
         validate_basket_for_checkout(basket_and_coupons.basket)
-    assert ex.value.args[0] == "User is already enrolled in one or more runs in basket"
+    assert (
+        ex.value.args[0]["runs"]
+        == "User is already enrolled in one or more runs in basket"
+    )
 
 
 def test_validate_basket_two_runs_for_a_course(basket_and_coupons):
@@ -669,7 +673,7 @@ def test_validate_basket_two_runs_for_a_course(basket_and_coupons):
     with pytest.raises(ValidationError) as ex:
         validate_basket_for_checkout(basket_and_coupons.basket)
 
-    assert ex.value.args[0] == "Two or more runs assigned for a single course"
+    assert ex.value.args[0]["runs"] == "Two or more runs assigned for a single course"
 
 
 def test_validate_basket_course_without_run_selection(basket_and_coupons):
@@ -679,7 +683,7 @@ def test_validate_basket_course_without_run_selection(basket_and_coupons):
     CourseRunSelection.objects.all().delete()
     with pytest.raises(ValidationError) as ex:
         validate_basket_for_checkout(basket_and_coupons.basket)
-    assert ex.value.args[0] == "Each course must have a course run selection"
+    assert ex.value.args[0]["runs"] == "Each course must have a course run selection"
 
 
 def test_validate_basket_run_expired(mocker, basket_and_coupons):
@@ -692,7 +696,7 @@ def test_validate_basket_run_expired(mocker, basket_and_coupons):
     patched.return_value = False
     with pytest.raises(ValidationError) as ex:
         validate_basket_for_checkout(basket_and_coupons.basket)
-    assert ex.value.args[0] == f"Run {basket_and_coupons.run.id} is expired"
+    assert ex.value.args[0]["runs"] == f"Run {basket_and_coupons.run.id} is expired"
 
 
 def test_complete_order(mocker, user, basket_and_coupons):

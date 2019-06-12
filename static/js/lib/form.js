@@ -37,13 +37,10 @@ export const formatErrors = (
 
   let errorString
   if (typeof errors === "object") {
-    if (errors.items) {
-      errorString = errors.items[0]
-    } else {
-      errorString = errors[0]
-    }
+    errorString = Object.values(errors).filter(error => error)[0]
   } else {
     errorString = errors
   }
+  // $FlowFixMe
   return <div className="error">{errorString}</div>
 }
