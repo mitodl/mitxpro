@@ -1,6 +1,26 @@
 Release Notes
 =============
 
+Version 0.8.2
+-------------
+
+- Added unused coupon reminder alert
+- Add enroll/view dashboard button on program page (#495)
+- Refactor checkout page to use formik (#435)
+- #407 Slick dot should not appear when no scroll
+- Fix site  MIT xPRO name everywhere (#488)
+- Prevent end users from patching other data consents (#480)
+- Disable autoplay/infinite on logos carousel
+- replace cost with price.
+- #469 Testimonial Carousel Read More Link
+- #510 Courseware carousel links not working
+- #470 Product page: Subnav scroll fix
+- #472 Program Page: don't show "view full program"
+- #504 Enroll Now Button Overlapped
+- #477 Disable infinite scroll on carousels
+- #499 Clicking on Continue Reading Leads to 404
+- Store information on voucher redemption and enrollment
+
 Version 0.8.1 (Released June 12, 2019)
 -------------
 
