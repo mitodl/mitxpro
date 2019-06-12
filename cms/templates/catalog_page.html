@@ -2,7 +2,7 @@
 
 {% load static wagtailimages_tags wagtailmetadata_tags render_bundle %}
 
-{% block title %}Catalog | MIT xPro{% endblock %}
+{% block title %}Catalog | {{ site_name }}{% endblock %}
 
 {% block headercontent %}
   <div id="header"></div>
@@ -14,7 +14,7 @@
     {% block banner %}
       <div class="sub-banner">
         <div class="container">
-          <h1>MIT xPRO—Professional Development, the MIT Way</h1>
+          <h1>{{ site_name }}—Professional Development, the MIT Way</h1>
           <h2>Explore MIT's courses for game-changing professionals</h2>
         </div>
       </div>

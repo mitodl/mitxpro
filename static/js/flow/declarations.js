@@ -10,6 +10,7 @@ declare type Settings = {
   gaTrackingID: ?string,
   recaptchaKey: ?string,
   support_email: string,
+  site_name: string,
 }
 declare var SETTINGS: Settings;
 

@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
 
 import { routes } from "../lib/urls"
@@ -18,7 +19,7 @@ const TopAppBar = ({ currentUser }: Props) => (
           <img
             src="/static/images/mitx-pro-logo.png"
             className="site-logo"
-            alt="MIT xPRO"
+            alt={SETTINGS.site_name}
           />
         </a>
         <button

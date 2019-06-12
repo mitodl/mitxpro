@@ -28,6 +28,7 @@ def get_js_settings_context(request):
         "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
         "sentry_dsn": sentry.get_public_dsn(),
         "support_email": settings.EMAIL_SUPPORT,
+        "site_name": settings.SITE_NAME,
     }
     return {"js_settings_json": json.dumps(js_settings)}
 
