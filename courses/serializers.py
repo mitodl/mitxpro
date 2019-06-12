@@ -77,7 +77,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     thumbnail_url = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
-    courseruns = CourseRunSerializer(many=True, read_only=True)
+    courseruns = serializers.SerializerMethodField()
     next_run_id = serializers.SerializerMethodField()
 
     def get_thumbnail_url(self, instance):
@@ -92,6 +92,15 @@ class CourseSerializer(serializers.ModelSerializer):
     def get_description(self, instance):
         """Description"""
         return instance.page.description if instance.page else None
+
+    def get_courseruns(self, instance):
+        """Unexpired and unenrolled course runs"""
+        if hasattr(self.context.get("request"), "user"):
+            user = self.context["request"].user
+            active_runs = instance.available_runs(user)
+        else:
+            active_runs = instance.unexpired_runs
+        return [CourseRunSerializer(instance=run).data for run in active_runs]
 
     class Meta:
         model = models.Course

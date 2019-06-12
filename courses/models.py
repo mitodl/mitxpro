@@ -202,6 +202,20 @@ class Course(TimestampedModel, PageProperties):
             )
         )
 
+    def available_runs(self, user):
+        """
+        Get all unexpired and unenrolled runs for a Course
+
+        Args:
+            user (users.models.User): The user to check available runs for.
+
+        Returns:
+            list of CourseRun: Unexpired and unenrolled Course runs
+
+        """
+        enrolled_runs = user.courserunenrollment_set.filter(run__course=self)
+        return [run for run in self.unexpired_runs if run not in enrolled_runs]
+
     class Meta:
         ordering = ("program", "title")
 
