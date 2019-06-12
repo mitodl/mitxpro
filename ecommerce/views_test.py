@@ -46,6 +46,7 @@ from ecommerce.serializers import (
     CurrentCouponPaymentSerializer,
 )
 from mitxpro.test_utils import create_tempfile_csv
+from users.factories import UserFactory
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_REFERENCE_PREFIX = "fake"
@@ -715,9 +716,10 @@ def test_patch_basket__another_user_enrolled(basket_client, basket_and_coupons):
     assert resp.status_code == status.HTTP_200_OK
 
 
-def test_patch_basket_data_consents(basket_and_agreement):
+@pytest.mark.parametrize("as_owner", [True, False])
+def test_patch_basket_data_consents(basket_and_agreement, as_owner):
     """ Test that a patch request with DataConsentUser ids updates those objects with consent dates  """
-    user = basket_and_agreement.basket.user
+    user = basket_and_agreement.basket.user if as_owner else UserFactory.create()
     client = APIClient()
     client.force_authenticate(user=user)
     consent_user = DataConsentUser.objects.create(
@@ -729,9 +731,16 @@ def test_patch_basket_data_consents(basket_and_agreement):
         reverse("basket_api"), type="json", data={"data_consents": [consent_user.id]}
     )
     assert resp.status_code == status.HTTP_200_OK
-    assert resp.json().get("data_consents")[0].get("consent_date") >= datetime.now(
-        tz=pytz.UTC
-    ).strftime("%Y-%m-%dT00:00:00Z")
+    assert (
+        DataConsentUser.objects.filter(consent_date__isnull=not as_owner).exists()
+        is True
+    )
+    if as_owner:
+        assert resp.json()["data_consents"][0]["consent_date"] >= datetime.now(
+            tz=pytz.UTC
+        ).strftime("%Y-%m-%dT00:00:00Z")
+    else:
+        assert resp.json()["data_consents"] == []
 
 
 def test_patch_basket_bad_data_consents(basket_and_agreement):

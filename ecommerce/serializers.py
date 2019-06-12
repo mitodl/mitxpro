@@ -290,7 +290,8 @@ class BasketSerializer(serializers.ModelSerializer):
             runs = None
         else:
             # Item has not changed
-            product = basket.basketitems.first().product
+            basket_item = basket.basketitems.first()
+            product = basket_item.product if basket_item else None
             runs = list(CourseRun.objects.filter(courserunselection__basket=basket))
         return product, runs
 
@@ -388,9 +389,9 @@ class BasketSerializer(serializers.ModelSerializer):
 
             if data_consents is not None:
                 sign_date = datetime.now(tz=pytz.UTC)
-                models.DataConsentUser.objects.filter(id__in=data_consents).update(
-                    consent_date=sign_date
-                )
+                models.DataConsentUser.objects.filter(
+                    id__in=data_consents, user=basket.user
+                ).update(consent_date=sign_date)
 
         return instance
 
