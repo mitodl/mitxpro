@@ -4,7 +4,7 @@ $(".course-slider").slick({
   slidesToShow:   3,
   slidesToScroll: 1,
   dots:           false,
-  infinite:       true,
+  infinite:       false,
   autoplay:       false,
   responsive:     [
     {
