@@ -94,7 +94,6 @@
     font-weight: 500;
     margin: 0 0 20px;
     line-height: 30px;
-    color: black;
   }
 
   p {
@@ -102,6 +101,7 @@
     min-height: 89px;
     color: $light-gray;
     padding-bottom: 40px;
+    padding-top: 20px;
   }
 
   .read-more {
