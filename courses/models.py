@@ -204,7 +204,7 @@ class Course(TimestampedModel, PageProperties):
 
     def available_runs(self, user):
         """
-        Get all unexpired and unenrolled runs for a Course
+        Get all enrollable runs for a Course that a user has not already enrolled in.
 
         Args:
             user (users.models.User): The user to check available runs for.
@@ -213,8 +213,10 @@ class Course(TimestampedModel, PageProperties):
             list of CourseRun: Unexpired and unenrolled Course runs
 
         """
-        enrolled_runs = user.courserunenrollment_set.filter(run__course=self)
-        return [run for run in self.unexpired_runs if run not in enrolled_runs]
+        enrolled_runs = user.courserunenrollment_set.filter(
+            run__course=self
+        ).values_list("run__id", flat=True)
+        return [run for run in self.unexpired_runs if run.id not in enrolled_runs]
 
     class Meta:
         ordering = ("program", "title")
@@ -276,13 +278,14 @@ class CourseRun(TimestampedModel):
 
 
         Returns:
-            boolean: True if enrollment period has not ended
+            boolean: True if enrollment period has begun but not ended
         """
         now = now_in_utc()
         return (
-            self.enrollment_end is None
-            and (self.end_date is None or self.end_date > now)
-        ) or (self.enrollment_end is not None and self.enrollment_end > now)
+            (self.end_date is None or self.end_date > now)
+            and (self.enrollment_end is None or self.enrollment_end > now)
+            and (self.enrollment_start is None or self.enrollment_start <= now)
+        )
 
     @property
     def is_unexpired(self):
