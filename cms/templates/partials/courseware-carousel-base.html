@@ -8,7 +8,7 @@
       {% else %}
         <img src="{% static 'images/mit-dome.png' %}" alt="{{ courseware_page.title }}">
       {% endif %}
-      <a class="title">{{ courseware_page.title }}</a>
+      <a class="title" href="{% pageurl courseware_page %}">{{ courseware_page.title }}</a>
       <p>{{ courseware_page.subhead }}</p>
       <a href="{% pageurl courseware_page %}" class="read-more text-uppercase mt-2 mb-2">view detail</a>
     </div>
