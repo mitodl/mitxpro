@@ -20,8 +20,13 @@ $(document).ready(function() {
       </div>'
   });
 
+  const navbar = $("#subNavBarContainer");
+
   // Navigation Bar
-  $("body").scrollspy({ target: "#subNavBar", offset: 70 });
+  $("body").scrollspy({
+    target: "#subNavBar",
+    offset: navbar.outerHeight() + 5.0
+  });
 
   $(window).on("activate.bs.scrollspy", function(e, obj) {
     $("#subNavBarSelector").text(
@@ -29,7 +34,13 @@ $(document).ready(function() {
     );
   });
 
-  $(".navbar-nav>li>a").on("click", function() {
+  $(".navbar-nav>li>a").on("click", function(event) {
+    event.preventDefault();
+
+    const target = $($(this).attr("href"));
+
+    window.scrollTo(0, target.offset().top - navbar.outerHeight());
+
     $(".navbar-collapse.show").removeClass("show");
     $(".navbar-toggler").addClass("collapsed");
   });
