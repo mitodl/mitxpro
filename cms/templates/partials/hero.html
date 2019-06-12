@@ -14,14 +14,16 @@
           <h2>{{ page.subhead }}</h2>
         </div>
         <div class="mt-5 mb-5">
-          {% if not enrolled and product_id %}
-            <a class="enroll-button" href="{% url "checkout-page" %}?product={{ product_id }}">
-              Enroll Now
-            </a>
-          {% elif enrolled and courseware_url %}
-            <a class="enroll-button" href="{% url "user-dashboard" %}">
-              View Dashboard
-            </a>
+          {% if not user.is_anonymous %}
+            {% if not enrolled and product_id %}
+              <a class="enroll-button" href="{% url "checkout-page" %}?product={{ product_id }}">
+                Enroll Now
+              </a>
+            {% elif enrolled %}
+              <a class="enroll-button" href="{% url "user-dashboard" %}">
+                Enrolled
+              </a>
+            {% endif %}
           {% endif %}
           {% if action_title and action_url %}
             <a id="actionButton" class="enroll-button" href="{{ action_url }}">{{ action_title }}</a>
