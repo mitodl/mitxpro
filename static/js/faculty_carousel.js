@@ -1,9 +1,11 @@
 /*eslint-env jquery*/
 /*eslint semi: ["error", "always"]*/
+const numFacultySlides = $(".faculty-slider .slide").length;
+
 $(".faculty-slider").slick({
   slidesToShow:   3,
   slidesToScroll: 1,
-  dots:           true,
+  dots:           numFacultySlides > 3,
   infinite:       false,
   autoplay:       false,
   responsive:     [
@@ -12,22 +14,23 @@ $(".faculty-slider").slick({
       settings:   {
         slidesToShow:   3,
         slidesToScroll: 3,
-        infinite:       false,
-        dots:           true
+        dots:           numFacultySlides > 3
       }
     },
     {
       breakpoint: 992,
       settings:   {
         slidesToShow:   2,
-        slidesToScroll: 1
+        slidesToScroll: 1,
+        dots:           numFacultySlides > 2
       }
     },
     {
       breakpoint: 767,
       settings:   {
         slidesToShow:   1,
-        slidesToScroll: 1
+        slidesToScroll: 1,
+        dots:           numFacultySlides > 1
       }
     }
   ]

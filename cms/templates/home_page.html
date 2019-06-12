@@ -34,11 +34,11 @@
   {{ block.super }}
   <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <script src="{% static 'js/home_page.js' %}"></script>
   <script src="{% static 'js/hero.js' %}"></script>
   <script src="{% static 'js/testimonials_carousel.js' %}"></script>
   <script src="{% static 'js/courseware_carousel.js' %}"></script>
   <script src="{% static 'js/text_video_section.js' %}"></script>
+  <script src="{% static 'js/image_carousel.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -51,7 +51,7 @@
   {% if page.learning_experience %} {% include "partials/learning-techniques.html" with page=page.learning_experience %} {% endif %}
   {% if page.testimonials %} {% include "partials/testimonial-carousel.html" with page=page.testimonials %} {% endif %}
   {% if page.inquiry_section %} {% include "partials/for-teams.html" with page=page.inquiry_section %} {% endif %}
-  {% if page.image_carousel_section %} {% include "partials/companies-trust.html" with page=page.image_carousel_section %} {% endif %}
+  {% if page.image_carousel_section %} {% include "partials/image-carousel.html" with page=page.image_carousel_section %} {% endif %}
 {% endblock %}
 {% block contact-us %}
     {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
