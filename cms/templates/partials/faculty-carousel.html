@@ -1,4 +1,4 @@
-{% load wagtailimages_tags %}
+{% load wagtailcore_tags wagtailimages_tags %}
 <div id="faculty" class="faculty-block">
   <div class="container">
     <div class="head">
@@ -13,7 +13,7 @@
             <img src="{{ faculty_image.url }}" alt="{{ member.value.name }}">
             <h2>{{ member.value.name }}</h2>
             <div class="text-holder">
-              {{ member.value.description|safe }}
+              {{ member.value.description|richtext }}
             </div>
           </div>
         </div>
