@@ -292,6 +292,12 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                 Place your order
               </button>
               {formatErrors(errors.items)}
+              <div className="submit-links">
+                By placing my order I agree to the{" "}
+                <a href="/terms-of-service/">Terms of Service</a>,{" "}
+                <a href="/honor-code/">Refund Policy</a>, and{" "}
+                <a href="/privacy-policy/">Privacy Policy</a>.
+              </div>
             </div>
           </div>
         </Form>

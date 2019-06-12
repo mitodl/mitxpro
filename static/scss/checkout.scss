@@ -193,6 +193,14 @@
   input[type='checkbox']   {
     display: unset;
   }
+
+  .submit-links {
+    margin-top: 10px;
+
+    a, a:hover {
+      color: $light-blue;
+    }
+  }
 }
 
 .data-consent-modal {
