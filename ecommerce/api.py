@@ -688,3 +688,52 @@ def validate_basket_for_checkout(basket):
     for run in runs:
         if not run.is_unexpired:
             raise ValidationError({"runs": f"Run {run.id} is expired"})
+
+
+def fetch_and_serialize_unused_coupons(user):
+    """
+    Fetches any unredeemed coupons assigned to a user and returns serialized coupon information
+
+    Args:
+        user (User): A user
+    Returns:
+        list: A list of dicts that represent an unreedeemed coupon, e.g.:
+            {
+                "coupon_code": "abcdef012345,
+                "product_id": 123,
+                "expiration_date": "2050-01-01T00:00:00.000000Z"
+            }
+    """
+    unused_product_coupon_ids = ProductCouponAssignment.objects.filter(
+        email=user.email, redeemed=False
+    ).values_list("product_coupon", flat=True)
+    if not unused_product_coupon_ids:
+        return []
+
+    now = now_in_utc()
+    coupons_data = (
+        CouponEligibility.objects.filter(id__in=unused_product_coupon_ids)
+        .select_related("coupon__payment")
+        .annotate(max_created_on=Max("coupon__payment__versions__created_on"))
+        .filter(max_created_on=F("coupon__payment__versions__created_on"))
+        .filter(
+            Q(coupon__payment__versions__expiration_date=None)
+            | Q(coupon__payment__versions__expiration_date__gt=now)
+        )
+        .order_by("coupon__payment__versions__expiration_date")
+        .values(
+            "product__id",
+            "coupon__payment__versions__expiration_date",
+            "coupon__coupon_code",
+        )
+    )
+    return [
+        {
+            "coupon_code": coupon_data["coupon__coupon_code"],
+            "product_id": coupon_data["product__id"],
+            "expiration_date": coupon_data[
+                "coupon__payment__versions__expiration_date"
+            ],
+        }
+        for coupon_data in coupons_data
+    ]

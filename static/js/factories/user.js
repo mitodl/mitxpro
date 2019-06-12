@@ -3,13 +3,24 @@ import casual from "casual-browserify"
 
 import { incrementer } from "../lib/util"
 
-import type { AnonymousUser, LoggedInUser } from "../flow/authTypes"
+import type {
+  AnonymousUser,
+  LoggedInUser,
+  UnusedCoupon
+} from "../flow/authTypes"
 
 const incr = incrementer()
 
 export const makeAnonymousUser = (): AnonymousUser => ({
   is_anonymous:     true,
   is_authenticated: false
+})
+
+export const makeUnusedCoupon = (): UnusedCoupon => ({
+  // $FlowFixMe: Flow thinks incr.next().value may be undefined, but it won't ever be
+  product_id:      incr.next().value,
+  coupon_code:     casual.word,
+  expiration_date: casual.moment.format()
 })
 
 export const makeUser = (username: ?string): LoggedInUser => ({
@@ -42,7 +53,8 @@ export const makeUser = (username: ?string): LoggedInUser => ({
     state_or_territory: "US-MA",
     country:            "US",
     postal_code:        "02090"
-  }
+  },
+  unused_coupons: []
 })
 
 export const makeCountries = () => [

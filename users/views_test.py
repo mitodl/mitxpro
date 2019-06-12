@@ -38,17 +38,21 @@ def test_get_user_by_id(user_client, user):
 
 
 @pytest.mark.parametrize("is_anonymous", [True, False])
-def test_get_user_by_me(client, user, is_anonymous):
+def test_get_user_by_me(mocker, client, user, is_anonymous):
     """Test that user can request their own user by the 'me' alias"""
     if not is_anonymous:
         client.force_login(user)
 
+    patched_unused_coupon_api = mocker.patch(
+        "users.views.fetch_and_serialize_unused_coupons",
+        return_value=[{"serialized": "data"}],
+    )
     resp = client.get(reverse("users_api-me"))
 
     assert resp.status_code == status.HTTP_200_OK
-    assert (
-        resp.json()
-        == {
+
+    if is_anonymous:
+        assert resp.json() == {
             "id": None,
             "username": "",
             "email": None,
@@ -57,8 +61,9 @@ def test_get_user_by_me(client, user, is_anonymous):
             "is_authenticated": False,
             "profile": None,
         }
-        if is_anonymous
-        else {
+        patched_unused_coupon_api.assert_not_called()
+    else:
+        assert resp.json() == {
             "id": user.id,
             "username": user.username,
             "email": user.email,
@@ -72,12 +77,14 @@ def test_get_user_by_me(client, user, is_anonymous):
                 "country": user.legal_address.country,
                 "postal_code": user.legal_address.postal_code,
             },
+            "profile": None,
+            "unused_coupons": patched_unused_coupon_api.return_value,
             "is_anonymous": False,
             "is_authenticated": True,
             "created_on": drf_datetime(user.created_on),
             "updated_on": drf_datetime(user.updated_on),
         }
-    )
+        patched_unused_coupon_api.assert_called_with(user)
 
 
 @pytest.mark.django_db

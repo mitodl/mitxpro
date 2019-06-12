@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from mitxpro.permissions import UserIsOwnerPermission
 from users.models import User
 from users.serializers import PublicUserSerializer, UserSerializer, CountrySerializer
+from ecommerce.api import fetch_and_serialize_unused_coupons
 
 
 class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -31,6 +32,18 @@ class CurrentUserRetrieveUpdateViewSet(
         """Returns the current request user"""
         # NOTE: this may be a logged in or anonymous user
         return self.request.user
+
+    def retrieve(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(user)
+        if user.is_anonymous:
+            return Response(serializer.data)
+        return Response(
+            {
+                **serializer.data,
+                "unused_coupons": fetch_and_serialize_unused_coupons(user),
+            }
+        )
 
 
 class CountriesStatesViewSet(viewsets.ViewSet):

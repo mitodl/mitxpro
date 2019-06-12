@@ -13,6 +13,7 @@ import {
   STATE_LOGIN_PASSWORD
 } from "../../../lib/auth"
 import { qsNextSelector } from "../../../lib/selectors"
+import { ALERT_TYPE_TEXT } from "../../../constants"
 
 import RegisterEmailForm from "../../../components/forms/RegisterEmailForm"
 
@@ -54,7 +55,14 @@ export class RegisterEmailPage extends React.Component<Props> {
       }: { body: AuthResponse } = await registerEmail(email, recaptcha, next)
 
       if (state === STATE_REGISTER_CONFIRM_SENT) {
-        addUserNotification(emailNotificationText(email))
+        addUserNotification({
+          "email-sent": {
+            type:  ALERT_TYPE_TEXT,
+            props: {
+              text: emailNotificationText(email)
+            }
+          }
+        })
         history.push(routes.login.begin)
       } else if (state === STATE_LOGIN_PASSWORD) {
         history.push(routes.login.password)

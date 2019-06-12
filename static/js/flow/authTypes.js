@@ -50,6 +50,12 @@ export type LegalAddress = {
   postal_code?: string
 }
 
+export type UnusedCoupon = {
+  coupon_code: string,
+  product_id: number,
+  expiration_date: string
+}
+
 export type Profile = {
   gender: string,
   birth_year: number,
@@ -70,7 +76,8 @@ export type User = {
     created_on: string,
     updated_on: string,
     profile: ?Profile,
-    legal_address: ?LegalAddress
+    legal_address: ?LegalAddress,
+    unused_coupons: Array<UnusedCoupon>
 }
 
 export type AnonymousUser = {

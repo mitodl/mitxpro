@@ -7,6 +7,7 @@ import LoginForgotPasswordConfirmPage, {
 } from "./LoginForgotPasswordConfirmPage"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import { routes } from "../../../lib/urls"
+import { ALERT_TYPE_TEXT } from "../../../constants"
 
 describe("LoginForgotPasswordConfirmPage", () => {
   const newPassword = "pass1"
@@ -93,9 +94,14 @@ describe("LoginForgotPasswordConfirmPage", () => {
       sinon.assert.calledWith(setSubmittingStub, false)
 
       const { ui } = store.getState()
-
-      assert.lengthOf(ui.userNotifications, 1)
-      assert.include(ui.userNotifications, expectedMessage)
+      assert.deepEqual(ui.userNotifications, {
+        "forgot-password-confirm": {
+          type:  ALERT_TYPE_TEXT,
+          props: {
+            text: expectedMessage
+          }
+        }
+      })
     })
   })
 })

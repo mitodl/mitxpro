@@ -7,6 +7,7 @@ import { mutateAsync } from "redux-query"
 import { addUserNotification } from "../../../actions"
 import auth from "../../../lib/queries/auth"
 import { routes } from "../../../lib/urls"
+import { ALERT_TYPE_TEXT } from "../../../constants"
 
 import EmailForm from "../../../components/forms/EmailForm"
 
@@ -29,7 +30,14 @@ export class LoginForgotPasswordPage extends React.Component<Props> {
     try {
       await forgotPassword(email)
 
-      addUserNotification(passwordResetText(email))
+      addUserNotification({
+        "forgot-password-sent": {
+          type:  ALERT_TYPE_TEXT,
+          props: {
+            text: passwordResetText(email)
+          }
+        }
+      })
       history.push(routes.login.begin)
     } finally {
       setSubmitting(false)

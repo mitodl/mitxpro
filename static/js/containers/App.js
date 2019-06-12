@@ -9,27 +9,57 @@ import urljoin from "url-join"
 
 import users, { currentUserSelector } from "../lib/queries/users"
 import { routes } from "../lib/urls"
+import { addUserNotification } from "../actions"
+import { ALERT_TYPE_UNUSED_COUPON } from "../constants"
 
-import TopAppBar from "../components/TopAppBar"
+import Header from "../components/Header"
 import PrivateRoute from "../components/PrivateRoute"
-import NotificationContainer from "../components/NotificationContainer"
 
 import CheckoutPage from "./pages/CheckoutPage"
 import DashboardPage from "./pages/DashboardPage"
 import LoginPages from "./pages/login/LoginPages"
 import RegisterPages from "./pages/register/RegisterPages"
 import EcommerceAdminPages from "./pages/admin/EcommerceAdminPages"
-
-import type { Match } from "react-router"
-import type { CurrentUser } from "../flow/authTypes"
 import ProfilePages from "./pages/profile/ProfilePages"
+
+import type { Match, Location } from "react-router"
+import type { CurrentUser } from "../flow/authTypes"
 
 type Props = {
   match: Match,
-  currentUser: ?CurrentUser
+  location: Location,
+  currentUser: ?CurrentUser,
+  addUserNotification: Function
 }
 
-class App extends React.Component<Props, void> {
+export class App extends React.Component<Props, void> {
+  componentDidUpdate(prevProps: Props) {
+    if (this.shouldShowUnusedCouponAlert(prevProps, this.props)) {
+      const { currentUser, addUserNotification } = this.props
+      // $FlowFixMe: currentUser cannot be undefined or is_anonymous=true
+      const unusedCoupon = currentUser.unused_coupons[0]
+      addUserNotification({
+        "unused-coupon": {
+          type:  ALERT_TYPE_UNUSED_COUPON,
+          props: {
+            productId:  unusedCoupon.product_id,
+            couponCode: unusedCoupon.coupon_code
+          }
+        }
+      })
+    }
+  }
+
+  shouldShowUnusedCouponAlert = (prevProps: Props, props: Props): ?boolean =>
+    props.currentUser &&
+    !props.currentUser.is_anonymous &&
+    props.currentUser.unused_coupons.length > 0 &&
+    // The user has just been loaded and the user is not currently on the checkout page
+    ((!prevProps.currentUser && props.location.pathname !== routes.checkout) ||
+      // The user just changed from the checkout page to another page
+      (prevProps.location.pathname !== props.location.pathname &&
+        prevProps.location.pathname === routes.checkout))
+
   render() {
     const { match, currentUser } = this.props
 
@@ -40,8 +70,7 @@ class App extends React.Component<Props, void> {
 
     return (
       <div className="app">
-        <TopAppBar currentUser={currentUser} />
-        <NotificationContainer />
+        <Header currentUser={currentUser} />
         <Switch>
           <PrivateRoute
             exact
@@ -78,9 +107,16 @@ const mapStateToProps = createStructuredSelector({
   currentUser: currentUserSelector
 })
 
+const mapDispatchToProps = {
+  addUserNotification
+}
+
 const mapPropsToConfig = () => [users.currentUserQuery()]
 
 export default compose(
-  connect(mapStateToProps),
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  ),
   connectRequest(mapPropsToConfig)
 )(App)

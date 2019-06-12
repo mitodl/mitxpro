@@ -1,13 +1,29 @@
 // @flow
 import { assert } from "chai"
+import { omit } from "ramda"
 
 import NotificationContainer, {
   NotificationContainer as InnerNotificationContainer
 } from "./NotificationContainer"
+import { TextNotification, UnusedCouponNotification } from "./notifications"
+import { ALERT_TYPE_TEXT, ALERT_TYPE_UNUSED_COUPON } from "../constants"
 import IntegrationTestHelper from "../util/integration_test_helper"
 
 describe("NotificationContainer component", () => {
-  const messages = ["some message", "some other message"]
+  const messages = {
+    message1: {
+      type:  ALERT_TYPE_TEXT,
+      props: { text: "derp" }
+    },
+    message2: {
+      type:  ALERT_TYPE_UNUSED_COUPON,
+      props: {
+        productId:  1,
+        couponCode: "code"
+      }
+    }
+  }
+
   let helper, render
 
   beforeEach(() => {
@@ -17,7 +33,7 @@ describe("NotificationContainer component", () => {
       InnerNotificationContainer,
       {
         ui: {
-          userNotifications: new Set()
+          userNotifications: {}
         }
       },
       {}
@@ -28,16 +44,16 @@ describe("NotificationContainer component", () => {
     helper.cleanup()
   })
 
-  it("has a link to login", async () => {
+  it("shows notifications", async () => {
     const { inner } = await render({
       ui: {
-        userNotifications: new Set(messages)
+        userNotifications: messages
       }
     })
     const alerts = inner.find("Alert")
-    assert.lengthOf(alerts, messages.length)
-    assert.equal(alerts.at(0).prop("children"), messages[0])
-    assert.equal(alerts.at(1).prop("children"), messages[1])
+    assert.lengthOf(alerts, Object.keys(messages).length)
+    assert.equal(alerts.at(0).prop("children").type, TextNotification)
+    assert.equal(alerts.at(1).prop("children").type, UnusedCouponNotification)
   })
 
   it("hides a message when it's dismissed, then removes it from global state", async () => {
@@ -45,7 +61,7 @@ describe("NotificationContainer component", () => {
     const { inner, wrapper } = await render(
       {
         ui: {
-          userNotifications: new Set(messages)
+          userNotifications: messages
         }
       },
       { messageRemoveDelayMs: delayMs }
@@ -53,12 +69,15 @@ describe("NotificationContainer component", () => {
     const alert = inner.find("Alert").at(0)
     const timeoutPromise = alert.prop("toggle")()
     assert.deepEqual(inner.state(), {
-      hiddenNotifications: new Set([messages[0]])
+      hiddenNotifications: new Set(["message1"])
     })
 
     await timeoutPromise
     wrapper.update()
-    assert.deepEqual(wrapper.prop("userNotifications"), new Set([messages[1]]))
+    assert.deepEqual(
+      wrapper.prop("userNotifications"),
+      omit(["message1"], messages)
+    )
     assert.deepEqual(inner.state(), { hiddenNotifications: new Set() })
   })
 })
