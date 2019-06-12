@@ -7,6 +7,7 @@ import LoginForgotPasswordPage, {
 } from "./LoginForgotPasswordPage"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import { routes } from "../../../lib/urls"
+import { ALERT_TYPE_TEXT } from "../../../constants"
 
 describe("LoginForgotPasswordPage", () => {
   const email = "email@example.com"
@@ -68,10 +69,13 @@ describe("LoginForgotPasswordPage", () => {
 
     const { ui } = store.getState()
 
-    assert.lengthOf(ui.userNotifications, 1)
-    assert.include(
-      ui.userNotifications,
-      `If an account with the email "${email}" exists, an email has been sent with a password reset link.`
-    )
+    assert.deepEqual(ui.userNotifications, {
+      "forgot-password-sent": {
+        type:  ALERT_TYPE_TEXT,
+        props: {
+          text: `If an account with the email "${email}" exists, an email has been sent with a password reset link.`
+        }
+      }
+    })
   })
 })

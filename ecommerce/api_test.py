@@ -34,6 +34,7 @@ from ecommerce.api import (
     validate_basket_for_checkout,
     complete_order,
     enroll_user_in_order_items,
+    fetch_and_serialize_unused_coupons,
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -41,6 +42,8 @@ from ecommerce.factories import (
     CouponRedemptionFactory,
     CouponSelectionFactory,
     CouponVersionFactory,
+    CouponFactory,
+    CouponPaymentVersionFactory,
     LineFactory,
     OrderFactory,
     ProductVersionFactory,
@@ -825,3 +828,59 @@ def test_enroll_user_in_order_items_api_fail(mocker, user):
         CourseRunEnrollment.objects.filter(user=user, edx_enrolled=False).count() == 2
     )
     patched_enroll_in_runs.assert_called_once()
+
+
+def test_fetch_and_serialize_unused_coupons_empty(user):
+    """
+    Test that fetch_and_serialize_unused_coupons returns an empty list for users
+    that have no unredeemed coupon assignments
+    """
+    ProductCouponAssignmentFactory.create(email=user.email, redeemed=True)
+    unused_coupons = fetch_and_serialize_unused_coupons(user)
+    assert unused_coupons == []
+
+
+def test_fetch_and_serialize_unused_coupons(user):
+    """
+    Test that fetch_and_serialize_unused_coupons returns an serialized coupon assignments
+    if those coupons are the most recent versions and are unexpired
+    """
+    now = now_in_utc()
+    future = now + timedelta(days=5)
+    past = now - timedelta(days=5)
+
+    coupons = CouponFactory.create_batch(2)
+    # Create 3 payment versions – the first 2 will apply to the same coupon, and the
+    # first will be the most up-to-date version for the coupon. The last payment version
+    # will be set to expired.
+    payment_versions = CouponPaymentVersionFactory.create_batch(
+        3,
+        expiration_date=factory.Iterator([future, future, past]),
+        created_on=factory.Iterator([future, past, future]),
+        payment=factory.Iterator(
+            [coupons[0].payment, coupons[0].payment, coupons[1].payment]
+        ),
+    )
+    product_coupons = CouponEligibilityFactory.create_batch(
+        2, coupon=factory.Iterator(coupons)
+    )
+    expected_payment_version = payment_versions[0]
+    expected_product_coupon = product_coupons[0]
+
+    # Create assignments for the user and set all to be unredeemed/unused
+    ProductCouponAssignmentFactory.create_batch(
+        len(product_coupons),
+        email=user.email,
+        redeemed=False,
+        product_coupon=factory.Iterator(product_coupons),
+    )
+
+    unused_coupons = fetch_and_serialize_unused_coupons(user)
+
+    assert unused_coupons == [
+        {
+            "coupon_code": expected_product_coupon.coupon.coupon_code,
+            "product_id": expected_product_coupon.product.id,
+            "expiration_date": expected_payment_version.expiration_date,
+        }
+    ]

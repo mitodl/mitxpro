@@ -1,8 +1,31 @@
 .notifications {
-  background: $primary;
-  text-align: center;
-  color: white;
+  .alert {
+    margin-bottom: 0;
 
+    &.alert-info {
+      background-color: #126f9a;
+      color: white;
+
+      a.alert-link, .close {
+        color: white;
+      }
+
+      a.alert-link {
+        font-weight: inherit;
+        text-decoration: underline;
+
+        &:hover {
+          font-weight: 700;
+        }
+      }
+
+      .close {
+        opacity: 1;
+      }
+    }
+  }
+
+  // Django-rendered implementation
   .close-notification {
     text-decoration: none;
     color: white;

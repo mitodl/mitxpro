@@ -99,18 +99,6 @@ a.link-button {
   box-shadow: -4px 5px 8px 0px rgba(204,204,204,0.8);
 }
 
-.notifications {
-  .alert.alert-info {
-    background-color: #355b6b;
-    color: white;
-
-    .close {
-      color: #fff;
-      opacity: 1;
-    }
-  }
-}
-
 .profile-container {
   @include media-breakpoint-down(sm)  {
     padding: 20px 40px;

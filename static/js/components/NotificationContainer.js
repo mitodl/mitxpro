@@ -7,13 +7,16 @@ import { Alert } from "reactstrap"
 
 import { removeUserNotification } from "../actions"
 import { newSetWith, newSetWithout, timeoutPromise } from "../lib/util"
+import { notificationTypeMap } from "./notifications"
+
+import type { UserNotificationMapping } from "../reducers/notifications"
 
 const DEFAULT_REMOVE_DELAY_MS = 1000
 
 type Props = {
-  userNotifications: Array<string>,
-  messageRemoveDelayMs?: number,
-  removeUserNotification: Function
+  userNotifications: UserNotificationMapping,
+  removeUserNotification: Function,
+  messageRemoveDelayMs?: number
 }
 
 type State = {
@@ -25,7 +28,7 @@ export class NotificationContainer extends React.Component<Props, State> {
     hiddenNotifications: new Set()
   }
 
-  onDismiss = (notificationText: string) => {
+  onDismiss = (notificationKey: string) => {
     const { removeUserNotification, messageRemoveDelayMs } = this.props
     const { hiddenNotifications } = this.state
 
@@ -34,15 +37,12 @@ export class NotificationContainer extends React.Component<Props, State> {
     // The message could be simply removed from the global state to get rid of it, but the
     // local state and the delay gives the Alert a chance to animate the message out.
     this.setState({
-      hiddenNotifications: newSetWith(hiddenNotifications, notificationText)
+      hiddenNotifications: newSetWith(hiddenNotifications, notificationKey)
     })
     return timeoutPromise(() => {
-      removeUserNotification(notificationText)
+      removeUserNotification(notificationKey)
       this.setState({
-        hiddenNotifications: newSetWithout(
-          hiddenNotifications,
-          notificationText
-        )
+        hiddenNotifications: newSetWithout(hiddenNotifications, notificationKey)
       })
     }, messageRemoveDelayMs || DEFAULT_REMOVE_DELAY_MS)
   }
@@ -53,18 +53,24 @@ export class NotificationContainer extends React.Component<Props, State> {
 
     return (
       <div className="notifications">
-        {Array.from(userNotifications).map((notificationText, i) => (
-          <Alert
-            key={i}
-            color="info"
-            className="rounded-0 border-0"
-            isOpen={!hiddenNotifications.has(notificationText)}
-            toggle={partial(this.onDismiss, [notificationText])}
-            fade={true}
-          >
-            {notificationText}
-          </Alert>
-        ))}
+        {Object.keys(userNotifications).map((notificationKey, i) => {
+          const dismiss = partial(this.onDismiss, [notificationKey])
+          const notification = userNotifications[notificationKey]
+          const AlertBodyComponent = notificationTypeMap[notification.type]
+
+          return (
+            <Alert
+              key={i}
+              color="info"
+              className="rounded-0 border-0"
+              isOpen={!hiddenNotifications.has(notificationKey)}
+              toggle={dismiss}
+              fade={true}
+            >
+              <AlertBodyComponent dismiss={dismiss} {...notification.props} />
+            </Alert>
+          )
+        })}
       </div>
     )
   }

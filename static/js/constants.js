@@ -94,3 +94,6 @@ export const EMPLOYMENT_LEVEL = [
   "Other",
   "Prefer not to say"
 ]
+
+export const ALERT_TYPE_TEXT = "text"
+export const ALERT_TYPE_UNUSED_COUPON = "unused-coupon"

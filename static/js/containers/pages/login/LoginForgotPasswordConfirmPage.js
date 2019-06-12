@@ -7,6 +7,7 @@ import { mutateAsync } from "redux-query"
 import { addUserNotification } from "../../../actions"
 import auth from "../../../lib/queries/auth"
 import { routes } from "../../../lib/urls"
+import { ALERT_TYPE_TEXT } from "../../../constants"
 
 import ChangePasswordForm from "../../../components/forms/ChangePasswordForm"
 
@@ -51,17 +52,26 @@ export class LoginForgotPasswordConfirmPage extends React.Component<Props> {
         uid
       )
 
+      let alertText, redirectRoute
       if (response.status === 200) {
-        addUserNotification(
+        alertText =
           "Your password has been updated, you may use it to login now."
-        )
-        history.push(routes.login.begin)
+        redirectRoute = routes.login.begin
       } else {
-        addUserNotification(
+        alertText =
           "Unable to reset your password with that link, please try again."
-        )
-        history.push(routes.login.forgot.begin)
+        redirectRoute = routes.login.forgot.begin
       }
+
+      addUserNotification({
+        "forgot-password-confirm": {
+          type:  ALERT_TYPE_TEXT,
+          props: {
+            text: alertText
+          }
+        }
+      })
+      history.push(redirectRoute)
     } finally {
       setSubmitting(false)
     }

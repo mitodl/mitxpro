@@ -12,6 +12,7 @@ import {
   STATE_ERROR
 } from "../../../lib/auth"
 import { routes } from "../../../lib/urls"
+import { ALERT_TYPE_TEXT } from "../../../constants"
 
 describe("RegisterEmailPage", () => {
   const email = "email@example.com"
@@ -125,10 +126,13 @@ describe("RegisterEmailPage", () => {
 
     const { ui } = store.getState()
 
-    assert.lengthOf(ui.userNotifications, 1)
-    assert.include(
-      ui.userNotifications,
-      `We sent an email to ${email}. Please validate your address to continue.`
-    )
+    assert.deepEqual(ui.userNotifications, {
+      "email-sent": {
+        type:  ALERT_TYPE_TEXT,
+        props: {
+          text: `We sent an email to ${email}. Please validate your address to continue.`
+        }
+      }
+    })
   })
 })
