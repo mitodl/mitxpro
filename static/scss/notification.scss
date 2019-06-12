@@ -26,6 +26,12 @@
   }
 
   // Django-rendered implementation
+  .notification {
+    background: $primary;
+    text-align: center;
+    color: white;
+  }
+
   .close-notification {
     text-decoration: none;
     color: white;
