@@ -28,31 +28,31 @@ class Command(BaseCommand):
     )
 
     @staticmethod
-    def bulk_sync_model(model, make_object_sync_message, object_type):
+    def bulk_sync_model(objects, make_object_sync_message, object_type):
         """
         Sync all database objects of a certain type with hubspot
         Args:
-            model (Class) class to sync with hubspot
+            objects (iterable) objects to sync
             make_object_sync_message (function) function that takes an objectID and
                 returns a sync message for that model
             object_type (str) one of "CONTACT", "DEAL", "PRODUCT", "LINE_ITEM"
         """
-        sync_messages = [
-            make_object_sync_message(obj.id) for obj in model.objects.all()
-        ]
+        sync_messages = [make_object_sync_message(obj.id)[0] for obj in objects]
         while len(sync_messages) > 0:
             staged_messages = sync_messages[0:200]
             sync_messages = sync_messages[200:]
 
             print("    Sending sync message...")
+            response = send_hubspot_request(
+                object_type, HUBSPOT_SYNC_URL, "PUT", body=staged_messages
+            )
             try:
-                response = send_hubspot_request(
-                    object_type, HUBSPOT_SYNC_URL, "PUT", body=staged_messages
-                )
                 response.raise_for_status()
-            except HTTPError as error:
+            except HTTPError:
                 print(
-                    f"    Sync message failed with status {error.request.status_code}"
+                    "    Sync message failed with status {} and message {}".format(
+                        response.status_code, response.json().get("message")
+                    )
                 )
 
     def sync_contacts(self):
@@ -60,7 +60,7 @@ class Command(BaseCommand):
         Sync all users with contacts in hubspot
         """
         print("  Syncing users with hubspot contacts...")
-        self.bulk_sync_model(User, make_contact_sync_message, "CONTACT")
+        self.bulk_sync_model(User.objects.all(), make_contact_sync_message, "CONTACT")
         print("  Finished")
 
     def sync_products(self):
@@ -68,7 +68,10 @@ class Command(BaseCommand):
         Sync all products with products in hubspot
         """
         print("  Syncing products with hubspot products...")
-        self.bulk_sync_model(Product, make_product_sync_message, "PRODUCT")
+        # products = [product for product in Product.objects.all() if product.latest_version is not None]
+        self.bulk_sync_model(
+            Product.objects.all(), make_product_sync_message, "PRODUCT"
+        )
         print("  Finished")
 
     def sync_deals(self):
@@ -76,7 +79,7 @@ class Command(BaseCommand):
         Sync all orders with deals in hubspot
         """
         print("  Syncing orders with hubspot deals...")
-        self.bulk_sync_model(Order, make_deal_sync_message, "DEAL")
+        self.bulk_sync_model(Order.objects.all(), make_deal_sync_message, "DEAL")
         print("  Finished")
 
     def sync_line_items(self):
@@ -84,7 +87,9 @@ class Command(BaseCommand):
         Sync all lines with line_items in hubspot
         """
         print("  Syncing lines with hubspot line items...")
-        self.bulk_sync_model(Line, make_line_item_sync_message, "LINE_ITEM")
+        self.bulk_sync_model(
+            Line.objects.all(), make_line_item_sync_message, "LINE_ITEM"
+        )
         print("  Finished")
 
     def sync_all(self):
