@@ -1,29 +1,35 @@
 /*eslint-env jquery*/
 /*eslint semi: ["error", "always"]*/
+const numLogoSlides = $(".logos-slider .slide").length;
+
 $(".logos-slider").slick({
   slidesToShow:   6,
   slidesToScroll: 3,
-  dots:           true,
   infinite:       false,
   autoplay:       false,
+  dots:           numLogoSlides > 6,
   autoplaySpeed:  2000,
   responsive:     [
     {
       breakpoint: 1200,
       settings:   {
-        slidesToShow: 4
+        slidesToShow: 4,
+        dots:         numLogoSlides > 4
       }
     },
     {
       breakpoint: 992,
       settings:   {
-        slidesToShow: 3
+        slidesToShow: 3,
+        dots:         numLogoSlides > 3
       }
     },
     {
       breakpoint: 767,
       settings:   {
-        slidesToShow: 2
+        slidesToShow:   2,
+        slidesToScroll: 2,
+        dots:           numLogoSlides > 2
       }
     }
   ]
