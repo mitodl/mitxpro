@@ -26,4 +26,5 @@ def configuration_context(request):
         "hubspot_footer_form_guid": settings.HUBSPOT_CONFIG.get(
             "HUBSPOT_FOOTER_FORM_GUID"
         ),
+        "site_name": settings.SITE_NAME,
     }

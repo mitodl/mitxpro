@@ -41,7 +41,7 @@ export class ViewProfilePage extends React.Component<Props> {
           <div className="col-auto flex-shrink-1">
             <h1>Profile</h1>
           </div>
-          <div>Build your profile on MIT xPro.</div>
+          <div>{`Build your profile on ${ SETTINGS.site_name}`}.</div>
         </div>
         <div className="auth-card card-shadow row">
           <div className="container profile-container ">
