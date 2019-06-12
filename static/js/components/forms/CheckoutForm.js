@@ -25,7 +25,8 @@ export type Values = {
 export type Actions = {
   setFieldError: SetFieldError,
   setErrors: (errors: Object) => void,
-  setSubmitting: (submitting: boolean) => void
+  setSubmitting: (submitting: boolean) => void,
+  setValues: (values: Values) => void
 }
 type Errors = {
   runs?: string,
