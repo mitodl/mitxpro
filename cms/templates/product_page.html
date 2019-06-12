@@ -52,9 +52,13 @@
     {% if page.testimonials %} {% include "partials/testimonial-carousel.html" with page=page.testimonials %} {% endif %}
     {% if page.faculty %} {% include "partials/faculty-carousel.html" with page=page.faculty %} {% endif %}
     {% if page.course_lineup and page.course_pages %}
-      {% with program_page=page.program_page courseware_pages=page.course_pages page=page.course_lineup %}
+      {% with program_page=page.program_page courseware_pages=page.course_pages %}
         {% pageurl program_page as program_url %}
-        {% include "partials/course-carousel.html" with button_title="View Full Program" button_url=program_url %}
+        {% if page.program %}
+          {% include "partials/course-carousel.html" with page=page.course_lineup %}
+        {% else %}
+          {% include "partials/course-carousel.html" with page=page.course_lineup button_title="View Full Program" button_url=program_url %}
+        {% endif %}
       {% endwith %}
     {% endif %}
     {% if page.for_teams %} {% include "partials/for-teams.html" with page=page.for_teams %} {% endif %}
