@@ -14,7 +14,9 @@
           {% endif %}
           <h2>{{ testimonial.value.name }}, {{ testimonial.value.title }}</h2>
           <p>{{ testimonial.value.quote|truncatechars:150 }}</p>
-          <a data-toggle="modal" href="#testimonial-{{ forloop.counter }}" class="read-more">Continue Reading</a>
+            {% if testimonial.value.quote|length > 150 %}
+              <a data-toggle="modal" href="#testimonial-{{ forloop.counter }}" class="read-more">Continue Reading</a>
+            {% endif %}
         </div>
       </div>
       {% endfor %}
