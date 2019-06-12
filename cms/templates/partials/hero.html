@@ -30,9 +30,7 @@
       </div>
       <div class="col-lg-5">
         {% if page.video_url %}
-          <video class="promo-video" controls>
-            <source src="{{ page.video_url }}">
-            Your browser does not support HTML5 video.
+          <video class="promo-video" id="promo-video" data-source="{{ page.video_url }}" controls>
           </video>
           <div class="video-caption">{{ page.video_title|safe }}</div>
         {% endif %}
