@@ -31,7 +31,7 @@ $(".course-slider").slick({
   ]
 });
 
-$(".slide").on("click", function() {
+$(".course-slider .slide").on("click", function() {
   const targetUrl = $(this).data("url");
   window.location.href = targetUrl;
 });
