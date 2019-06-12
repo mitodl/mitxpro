@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.8.1
+Version 0.8.1 (Released June 12, 2019)
 -------------
 
 - Expand hubspot settings to sync deal, line, product
