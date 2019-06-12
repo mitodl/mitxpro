@@ -4,8 +4,8 @@ $(".logos-slider").slick({
   slidesToShow:   6,
   slidesToScroll: 3,
   dots:           true,
-  infinite:       true,
-  autoplay:       true,
+  infinite:       false,
+  autoplay:       false,
   autoplaySpeed:  2000,
   responsive:     [
     {
