@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.8.2
+Version 0.8.2 (Released June 13, 2019)
 -------------
 
 - Added unused coupon reminder alert
