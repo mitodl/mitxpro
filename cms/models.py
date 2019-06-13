@@ -507,7 +507,7 @@ class HomePage(MetadataPageMixin, Page):
 
     def _get_child_page_of_type(self, cls):
         """Gets the first child page of the given type if it exists"""
-        child = self.get_children().type(cls).first()
+        child = self.get_children().type(cls).live().first()
         return child.specific if child else None
 
     @property
@@ -659,7 +659,7 @@ class ProductPage(MetadataPageMixin, Page):
 
     def _get_child_page_of_type(self, cls):
         """Gets the first child page of the given type if it exists"""
-        child = self.get_children().type(cls).first()
+        child = self.get_children().type(cls).live().first()
         return child.specific if child else None
 
     @property
