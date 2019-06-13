@@ -94,21 +94,22 @@
     font-weight: 500;
     margin: 0 0 20px;
     line-height: 30px;
-    color: black;
   }
 
   p {
     margin: 0 0 10px;
     min-height: 89px;
+    padding-bottom: 40px;
+    padding-top: 20px;
+    text-align: start;
   }
 
-  .read-more {
+  .detail-link {
     position: absolute;
-    bottom: 5px;
+    bottom: 20px;
+    left: 15px;
     font-size: 18px;
     line-height: 24px;
-    display: inline-block;
-    vertical-align: top;
     font-weight: 600;
     color: $primary;
 
