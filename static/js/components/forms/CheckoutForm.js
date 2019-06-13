@@ -243,7 +243,12 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
               {dataConsent ? (
                 <div>
                   <div className="data-consent-row">
-                    <Field type="checkbox" name="dataConsent" value={true} />
+                    <Field
+                      type="checkbox"
+                      name="dataConsent"
+                      value={true}
+                      checked={values.dataConsent}
+                    />
                     <span>
                       *By checking this box, I give my consent to MIT to
                       disclose data to {dataConsent.company.name}. View the{" "}
@@ -355,10 +360,12 @@ export class CheckoutForm extends React.Component<OuterProps> {
       <Formik
         onSubmit={onSubmit}
         initialValues={{
-          couponCode: couponCode || (coupon ? coupon.code : ""),
-          runs:       selectedRuns
+          couponCode:  couponCode || (coupon ? coupon.code : ""),
+          runs:        selectedRuns,
+          dataConsent: false
         }}
         validate={this.validate}
+        enableReinitialize={true}
         render={props => (
           <InnerCheckoutForm
             {...props}
