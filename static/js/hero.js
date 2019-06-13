@@ -2,19 +2,20 @@
 /*eslint semi: ["error", "always"]*/
 /* global Hls */
 
-$(document).ready(function() {
-  // Background cover video in header
-  const video = $("#background-video").get(0);
+function configureHlsVideo(selector, autoplay = false) {
+  const video = $(selector).get(0);
 
   if (video) {
-    const videoUrl = $("#background-video").data("source");
+    const videoUrl = $(selector).data("source");
     if (Hls.isSupported()) {
       const hls = new Hls();
       hls.loadSource(videoUrl);
       hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, function() {
-        video.play();
-      });
+      if (autoplay) {
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+          video.play();
+        });
+      }
     }
     // hls.js is not supported on platforms that do not have Media Source Extensions (MSE) enabled.
     // When the browser has built-in HLS support (check using `canPlayType`), we can provide an HLS manifest (i.e. .m3u8 URL) directly to the video element throught the `src` property.
@@ -23,11 +24,21 @@ $(document).ready(function() {
     // white-list before a 'canplay' event will be emitted; the last video event that can be reliably listened-for when the URL is not on the white-list is 'loadedmetadata'.
     else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = videoUrl;
-      video.addEventListener("loadedmetadata", function() {
-        video.play();
-      });
+      if (autoplay) {
+        video.addEventListener("loadedmetadata", function() {
+          video.play();
+        });
+      }
     }
   }
+}
+
+$(document).ready(function() {
+  // Background cover video in header on home page
+  configureHlsVideo("#background-video", true);
+
+  // Promo video in header on product detail page
+  configureHlsVideo("#promo-video");
 
   // The action button is supposed to scroll to and play a video element
   // which exists in another section, which is why we need to check for
