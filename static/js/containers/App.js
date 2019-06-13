@@ -85,7 +85,7 @@ export class App extends React.Component<Props, void> {
             path={urljoin(match.url, String(routes.register))}
             component={RegisterPages}
           />
-          <Route
+          <PrivateRoute
             path={urljoin(match.url, routes.checkout)}
             component={CheckoutPage}
           />
