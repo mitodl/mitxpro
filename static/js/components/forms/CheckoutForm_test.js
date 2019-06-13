@@ -313,6 +313,7 @@ describe("CheckoutForm", () => {
         item={basketItem}
         onMount={sandbox.stub()}
         updateProduct={updateProductStub}
+        values={{}}
       />
     )
     const toggle = inner.find(".data-consent-row a").prop("onClick")
@@ -341,6 +342,7 @@ describe("CheckoutForm", () => {
             item={basketItem}
             onMount={sandbox.stub()}
             updateProduct={updateProductStub}
+            values={{}}
           />
         )
         inner.setState({ dataSharingModalVisibility: modalVisible })
