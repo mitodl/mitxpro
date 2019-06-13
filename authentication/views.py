@@ -168,6 +168,7 @@ class CustomPasswordResetEmail(DjoserPasswordResetEmail):
                 to=to,
                 from_email=settings.MAILGUN_FROM_EMAIL,
                 connection=connection,
+                headers={"Reply-To": settings.MITXPRO_REPLY_TO_ADDRESS},
             )
             msg.attach_alternative(html_body, "text/html")
             send_messages([msg])

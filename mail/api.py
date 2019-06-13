@@ -221,6 +221,7 @@ def build_message(connection, template_name, recipient, context):
         to=[recipient],
         from_email=settings.MAILGUN_FROM_EMAIL,
         connection=connection,
+        headers={"Reply-To": settings.MITXPRO_REPLY_TO_ADDRESS},
     )
     msg.attach_alternative(html_body, "text/html")
     return msg
