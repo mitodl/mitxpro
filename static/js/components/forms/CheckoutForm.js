@@ -358,7 +358,6 @@ export class CheckoutForm extends React.Component<OuterProps> {
           couponCode: couponCode || (coupon ? coupon.code : ""),
           runs:       selectedRuns
         }}
-        enableReinitialize={true}
         validate={this.validate}
         render={props => (
           <InnerCheckoutForm
