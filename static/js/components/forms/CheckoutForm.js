@@ -189,7 +189,6 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
     }
 
     const dataConsent = basket.data_consents[0]
-    console.log("values", values)
 
     return (
       <React.Fragment>
