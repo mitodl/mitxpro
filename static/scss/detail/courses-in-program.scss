@@ -104,16 +104,14 @@
     text-align: start;
   }
 
-  .read-more {
+  .detail-link {
     position: absolute;
     bottom: 20px;
     left: 15px;
     font-size: 18px;
     line-height: 24px;
-    display: inline-block;
-    vertical-align: top;
     font-weight: 600;
-    color: $blue;
+    color: $primary;
 
     &:after {
       content: "\e902";
