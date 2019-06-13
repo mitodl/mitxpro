@@ -1,5 +1,31 @@
 // sass-lint:disable mixins-before-declarations
 
+.tooltip {
+  .tooltip-inner {
+    box-shadow: 0 0.05rem 0.55rem 0.1rem rgba(0, 0, 0, 0.25);
+    color: black;
+    background-color: $gray-bg;
+    font-size: 18px;
+    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    max-width: 300px;
+  }
+
+  $combinations: ("left", 2px, 0px) ("top", 0px, 2px) ("right", -2px, 0px) ("bottom", 0px, -2px);
+
+  @each $position, $h-offset, $v-offset in $combinations {
+    &.bs-tooltip-#{$position} {
+      .arrow {
+        filter: drop-shadow($h-offset $v-offset 1px rgba(0, 0, 0, 0.125));
+      }
+
+      .arrow::before {
+        border-#{$position}-color: $gray-bg;
+      }
+    }
+  }
+}
+
 .tab-block {
   width: 100%;
   padding: 0 0 75px;
@@ -12,7 +38,7 @@
     left: 0;
     top: 40px;
     right: 0;
-    content: '';
+    content: "";
     height: 360px;
     background: linear-gradient(to top, $gray-85, $tile-background);
   }
@@ -35,7 +61,7 @@
     text-align: center;
     border: none;
     display: block;
-    letter-spacing: -.32em;
+    letter-spacing: -0.32em;
     position: relative;
     z-index: 2;
 

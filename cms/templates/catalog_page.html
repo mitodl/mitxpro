@@ -9,6 +9,11 @@
   {% render_bundle 'header' %}
 {% endblock %}
 
+{% block scripts %}
+  {{ block.super }}
+  <script src="{% static 'js/tooltip.js' %}"></script>
+{% endblock %}
+
 {% block content %}
   <div class="course-catalog">
     {% block banner %}
@@ -25,10 +30,10 @@
               <li class="nav-item">
                 <a class="nav-link active" id="all-tab" data-toggle="tab" href="#all" role="tab" aria-controls="all" aria-selected="true">All</a>
               </li>
-              <li class="nav-item">
+              <li class="nav-item" data-toggle="tooltip" title="Multi-course offerings" data-trigger="hover" data-placement="auto">
                 <a id="programs-tab" class="nav-link" data-toggle="tab" href="#programs" role="tab" aria-controls="programs" aria-selected="false">programs</a>
               </li>
-              <li class="nav-item">
+              <li class="nav-item" data-toggle="tooltip" title="Single course offerings" data-trigger="hover" data-placement="auto">
                 <a class="nav-link" data-toggle="tab" id="courses-tab" href="#courses" role="tab" aria-controls="courses" aria-selected="false">Courses</a>
               </li>
             </ul>
