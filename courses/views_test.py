@@ -276,6 +276,10 @@ def test_course_view(
     assert (
         f'<a class="enroll-button" href="{url}">'.encode("utf-8") in resp.content
     ) is has_button
+    assert (
+        "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")
+        in resp.content
+    ) is is_anonymous
 
 
 @pytest.mark.parametrize("is_enrolled", [True, False])
@@ -318,6 +322,10 @@ def test_program_view(client, user, home_page, is_enrolled, has_product, is_anon
     assert (
         f'<a class="enroll-button" href="{url}">'.encode("utf-8") in resp.content
     ) is has_button
+    assert (
+        "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")
+        in resp.content
+    ) is is_anonymous
 
 
 def test_user_enrollments_view(mocker, client, user):

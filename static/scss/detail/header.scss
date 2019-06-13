@@ -1,9 +1,12 @@
 // sass-lint:disable mixins-before-declarations
+#header {
+  background-color: white;
+}
+
 .header-block {
   background-size: cover;
   background-position: 50% 50%;
   position: relative;
-  overflow: hidden;
 
   .background-video {
     position: absolute;
@@ -13,7 +16,7 @@
     min-height: 100%;
     width: auto;
     height: auto;
-    z-index: 0;
+    z-index: -10;
     transform: translateX(-50%) translateY(-50%);
   }
 }
@@ -79,6 +82,75 @@
     color: white;
     padding: 20px 40px;
     text-transform: uppercase;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .enroll-dropdown {
+    .dropdown-toggle::after {
+      display: none;
+    }
+
+    .login-popup {
+      max-width: 350px;
+      margin-left: 20px;
+      margin-right: 20px;
+      padding: 20px;
+      font-weight: 600;
+      font-size: 20px;
+
+      .close-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 5px;
+        margin: 20px 7px 0 0;
+        font-size: 72px;
+        font-weight: 300;
+        background-color: #fff !important;
+        color: #000;
+        min-width: unset;
+        height: unset;
+        cursor: pointer;
+      }
+
+      h4 {
+        font-weight: 700;
+        font-size: 22px;
+      }
+
+      .popup-buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-top: 20px;
+
+        .link-button {
+          border: 2px solid $light-blue;
+          border-radius: 10px;
+          font-weight: 600;
+          font-size: 24px;
+
+          &.sign-in-link {
+            color: white;
+            background-color: $light-blue;
+          }
+
+          &.create-account-link {
+            color: black;
+          }
+        }
+      }
+    }
+
+    .triangle {
+      width: 15px;
+      height: 15px;
+      position: absolute;
+      top: -7px;
+      background: white;
+      transform: rotate(45deg);
+    }
   }
 
   .promo-video {
