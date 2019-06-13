@@ -1,0 +1,42 @@
+// sass-lint:disable mixins-before-declarations
+.text-block {
+  width: 100%;
+  padding: 100px 0 50px;
+  background: white url("#{$static-path}/images/transparent-pixels-bg.png") repeat-x 0 100%;
+  min-height: 400px;
+  overflow: hidden;
+  position: relative;
+  color: black;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 500;
+
+  .action-button {
+    font-size: x-large;
+  }
+
+  h1 {
+    font-size: 40px;
+    line-height: 45px;
+    color: $primary;
+    font-weight: 600;
+    margin: 0 0 10px;
+    @include media-breakpoint-up(lg) {
+      margin: 0 0 40px;
+    }
+  }
+
+  p {
+    margin: 0 0 30px;
+  }
+}
+
+// Dark theme
+.text-block.dark-theme {
+  background: $darker-grey-bg url("#{$static-path}/images/transparent-pixels-bg.png") repeat-x 0 100%;
+  color: white;
+
+  h1 {
+    color: white;
+  }
+}
