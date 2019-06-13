@@ -20,6 +20,7 @@ from cms.factories import (
     FrequentlyAskedQuestionFactory,
     LearningOutcomesPageFactory,
     WhoShouldEnrollPageFactory,
+    TextSectionFactory,
 )
 
 from cms.models import (
@@ -560,3 +561,38 @@ def test_program_page_who_should_enroll():
         assert block.value.source == "<p>item</p>"
     assert program_page.who_should_enroll == who_should_enroll_page
     assert not WhoShouldEnrollPage.can_create_at(program_page)
+
+
+def test_course_page_propel_career():
+    """
+    The propel_career property should return expected values if associated with a CoursePage
+    """
+    course_page = CoursePageFactory.create()
+    propel_career_page = TextSectionFactory.create(
+        parent=course_page,
+        content="<p>content</p>",
+        dark_theme=True,
+        action_title="Action Title",
+    )
+    assert course_page.propel_career == propel_career_page
+    assert propel_career_page.action_title == "Action Title"
+    assert propel_career_page.action_url
+    assert propel_career_page.content == "<p>content</p>"
+    assert propel_career_page.dark_theme
+
+
+def test_program_page_propel_career():
+    """
+    The propel_career property should return expected values if associated with a ProgramPage
+    """
+    program_page = ProgramPageFactory.create()
+    propel_career_page = TextSectionFactory.create(
+        parent=program_page,
+        content="<p>content</p>",
+        dark_theme=True,
+        action_title="Action Title",
+    )
+    assert program_page.propel_career == propel_career_page
+    assert propel_career_page.action_title == "Action Title"
+    assert propel_career_page.content == "<p>content</p>"
+    assert propel_career_page.dark_theme

@@ -1,6 +1,7 @@
 """Wagtail page factories"""
 import factory
 from factory.django import DjangoModelFactory
+from faker.providers import internet
 import wagtail_factories
 
 from cms.models import (
@@ -21,6 +22,7 @@ from cms.models import (
     HomePage,
     TextVideoSection,
     CatalogPage,
+    TextSection,
 )
 from cms.blocks import (
     LearningTechniqueBlock,
@@ -29,6 +31,8 @@ from cms.blocks import (
     FacultyBlock,
 )
 from courses.factories import ProgramFactory, CourseFactory
+
+factory.Faker.add_provider(internet)
 
 
 class CatalogPageFactory(wagtail_factories.PageFactory):
@@ -121,6 +125,17 @@ class ForTeamsPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = ForTeamsPage
+
+
+class TextSectionFactory(wagtail_factories.PageFactory):
+    """TextSection factory class"""
+
+    content = factory.fuzzy.FuzzyText(prefix="Content ")
+    action_title = factory.fuzzy.FuzzyText(prefix="Action title ")
+    action_url = factory.Faker("uri")
+
+    class Meta:
+        model = TextSection
 
 
 class TextVideoSectionFactory(wagtail_factories.PageFactory):

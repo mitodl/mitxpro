@@ -280,6 +280,38 @@ class ForTeamsPage(CourseProgramChildPage):
     ]
 
 
+class TextSection(CourseProgramChildPage):
+    """
+    CMS Page representing a text section, for example the "Propel your career" section in a course/program page
+    """
+
+    content = RichTextField(help_text="The content shown in the section")
+    action_title = models.CharField(
+        null=True,
+        blank=True,
+        max_length=255,
+        help_text="The text to show on the call to action button. Note: action button is visible only when both url and title are configured.",
+    )
+    action_url = models.URLField(
+        null=True,
+        blank=True,
+        help_text="The URL to go to when the action button is clicked. Note: action button is visible only when both url and title are configured.",
+    )
+    dark_theme = models.BooleanField(
+        blank=True,
+        default=False,
+        help_text="When checked, switches to dark theme (light text on dark background).",
+    )
+
+    content_panels = [
+        FieldPanel("title"),
+        FieldPanel("content"),
+        FieldPanel("action_title"),
+        FieldPanel("action_url"),
+        FieldPanel("dark_theme"),
+    ]
+
+
 class TextVideoSection(CourseProgramChildPage):
     """
     CMS Page representing a text-video section such as the "About MIT xPRO" section on the home page
@@ -648,6 +680,7 @@ class ProductPage(MetadataPageMixin, Page):
         "CoursesInProgramPage",
         "UserTestimonialsPage",
         "FacultyMembersPage",
+        "TextSection",
     ]
 
     def get_context(self, request, *args, **kwargs):
@@ -697,6 +730,11 @@ class ProductPage(MetadataPageMixin, Page):
         """Gets the FAQs list from FAQs child page"""
         faqs_page = self._get_child_page_of_type(FrequentlyAskedQuestionPage)
         return FrequentlyAskedQuestion.objects.filter(faqs_page=faqs_page)
+
+    @property
+    def propel_career(self):
+        """Gets the propel your career section child page"""
+        return self._get_child_page_of_type(TextSection)
 
 
 class ProgramPage(ProductPage):
