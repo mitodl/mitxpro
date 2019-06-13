@@ -3,7 +3,7 @@ import { mount, shallow } from "enzyme/build"
 import React from "react"
 import { assert } from "chai"
 import sinon from "sinon"
-import { Formik } from "formik"
+import { Formik, Field } from "formik"
 import { Modal, ModalHeader } from "reactstrap"
 
 import { CheckoutForm, InnerCheckoutForm } from "./CheckoutForm"
@@ -253,6 +253,8 @@ describe("CheckoutForm", () => {
     inner.find("select").prop("onChange")({ target: { value: String(run.id) } })
     sinon.assert.calledWith(updateProductStub, run.product_id, run.id)
   })
+
+  //
   ;[true, false].forEach(hasDataConsent => {
     it(`${
       hasDataConsent ? "has" : "doesn't have"
@@ -273,6 +275,32 @@ describe("CheckoutForm", () => {
         assert.isTrue(inner.text().includes(expected))
       }
     })
+  })
+
+  it("passes the appropriate checked value for the the data consent checkbox", async () => {
+    for (const checked of [true, false]) {
+      const inner = shallow(
+        // $FlowFixMe
+        <InnerCheckoutForm
+          onSubmit={onSubmitStub}
+          basket={basket}
+          errors={{}}
+          item={basketItem}
+          onMount={sandbox.stub()}
+          updateProduct={updateProductStub}
+          values={{
+            dataConsent: checked
+          }}
+        />
+      )
+      assert.equal(
+        inner
+          .find(".data-consent-row")
+          .find(Field)
+          .prop("checked"),
+        checked
+      )
+    }
   })
 
   it("toggles the data consent modal", async () => {
