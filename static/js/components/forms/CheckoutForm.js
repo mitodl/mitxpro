@@ -1,6 +1,9 @@
 // @flow
 import React from "react"
 import { Formik, Field, Form } from "formik"
+import { Modal, ModalHeader, ModalBody } from "reactstrap"
+
+import Markdown from "../Markdown"
 
 import { formatErrors } from "../../lib/form"
 import {
@@ -10,7 +13,11 @@ import {
   formatRunTitle
 } from "../../lib/ecommerce"
 
-import type { BasketItem, CouponSelection } from "../../flow/ecommerceTypes"
+import type {
+  BasketItem,
+  BasketResponse,
+  CouponSelection
+} from "../../flow/ecommerceTypes"
 
 export type SetFieldError = (fieldName: string, fieldValue: any) => void
 export type UpdateProduct = (
@@ -20,7 +27,8 @@ export type UpdateProduct = (
 ) => Promise<void>
 export type Values = {
   runs: { [number]: string },
-  couponCode: ?string
+  couponCode: ?string,
+  dataConsent: boolean
 }
 export type Actions = {
   setFieldError: SetFieldError,
@@ -31,10 +39,12 @@ export type Actions = {
 type Errors = {
   runs?: string,
   coupons?: string,
-  items?: string
+  items?: string,
+  dataConsent?: string
 }
 type CommonProps = {
   item: BasketItem,
+  basket: BasketResponse,
   coupon: ?CouponSelection,
   onSubmit: (Values, Actions) => Promise<void>,
   submitCoupon: (
@@ -45,7 +55,8 @@ type CommonProps = {
 }
 type OuterProps = CommonProps & {
   couponCode: ?string,
-  selectedRuns: Object
+  selectedRuns: Object,
+  basket: BasketResponse
 }
 type InnerProps = CommonProps &
   Actions & {
@@ -54,7 +65,18 @@ type InnerProps = CommonProps &
     onMount: () => void
   }
 
-class InnerCheckoutForm extends React.Component<InnerProps> {
+type InnerState = {
+  dataSharingModalVisibility: boolean
+}
+
+export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
+  constructor(props: InnerProps) {
+    super(props)
+    this.state = {
+      dataSharingModalVisibility: false
+    }
+  }
+
   componentDidMount() {
     this.props.onMount()
   }
@@ -143,8 +165,16 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
     }
   }
 
+  toggleDataSharingModalVisibility = () => {
+    const { dataSharingModalVisibility } = this.state
+    this.setState({
+      dataSharingModalVisibility: !dataSharingModalVisibility
+    })
+  }
+
   render() {
     const {
+      basket,
       errors,
       values,
       setFieldError,
@@ -152,92 +182,142 @@ class InnerCheckoutForm extends React.Component<InnerProps> {
       coupon,
       submitCoupon
     } = this.props
+    const { dataSharingModalVisibility } = this.state
+
+    if (!basket) {
+      return null
+    }
+
+    const dataConsent = basket.data_consents[0]
+
     return (
-      <Form className="checkout-page container">
-        <div className="row header">
-          <div className="col-12">
-            <div className="page-title">Checkout</div>
-            <div className="purchase-text">
-              You are about to purchase the following:
-            </div>
-            <div className="item-type">
-              {item.type === "program" ? "Program" : "Course"}
-            </div>
-            <hr />
-            {item.type === "program" ? (
-              <span className="description">{item.description}</span>
-            ) : null}
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-lg-7">
-            {this.renderBasketItem()}
-            {formatErrors(errors.runs)}
-            <div className="enrollment-input">
-              <div className="enrollment-row">
-                Enrollment / Promotional Code
+      <React.Fragment>
+        <Form className="checkout-page container">
+          <div className="row header">
+            <div className="col-12">
+              <div className="page-title">Checkout</div>
+              <div className="purchase-text">
+                You are about to purchase the following:
               </div>
-              <div className="flex-row coupon-code-row">
-                <Field
-                  type="text"
-                  name="couponCode"
-                  className="coupon-code-entry"
-                  onKeyDown={event => {
-                    if (event.key === "Enter") {
-                      event.preventDefault()
+              <div className="item-type">
+                {item.type === "program" ? "Program" : "Course"}
+              </div>
+              <hr />
+              {item.type === "program" ? (
+                <span className="description">{item.description}</span>
+              ) : null}
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-lg-7">
+              {this.renderBasketItem()}
+              {formatErrors(errors.runs)}
+              <div className="enrollment-input">
+                <div className="enrollment-row">
+                  Enrollment / Promotional Code
+                </div>
+                <div className="flex-row coupon-code-row">
+                  <Field
+                    type="text"
+                    name="couponCode"
+                    className="coupon-code-entry"
+                    onKeyDown={event => {
+                      if (event.key === "Enter") {
+                        event.preventDefault()
+                        submitCoupon(values.couponCode, setFieldError)
+                      }
+                    }}
+                  />
+                  <button
+                    className="apply-button"
+                    type="button"
+                    onClick={() =>
                       submitCoupon(values.couponCode, setFieldError)
                     }
-                  }}
-                />
-                <button
-                  className="apply-button"
-                  type="button"
-                  onClick={() => submitCoupon(values.couponCode, setFieldError)}
-                >
-                  Apply
-                </button>
+                  >
+                    Apply
+                  </button>
+                </div>
+                {formatErrors(errors.coupons)}
               </div>
-              {formatErrors(errors.coupons)}
-            </div>
-          </div>
-          <div className="col-lg-5 order-summary-container">
-            <div className="order-summary">
-              <div className="title">Order Summary</div>
-              <div className="flex-row price-row">
-                <span>Price:</span>
-                <span>{formatPrice(item.price)}</span>
-              </div>
-              {coupon ? (
-                <div className="flex-row discount-row">
-                  <span>Discount:</span>
-                  <span>{formatPrice(calculateDiscount(item, coupon))}</span>
+              {dataConsent ? (
+                <div>
+                  <div className="data-consent-row">
+                    <Field
+                      type="checkbox"
+                      name="dataConsent"
+                      value={true}
+                      checked={values.dataConsent}
+                    />
+                    <span>
+                      *By checking this box, I give my consent to MIT to
+                      disclose data to {dataConsent.company.name}. View the{" "}
+                      <a
+                        onClick={() => this.toggleDataSharingModalVisibility()}
+                      >
+                        Data Sharing Policy
+                      </a>
+                      .
+                    </span>
+                  </div>
+                  {formatErrors(errors.dataConsent)}
                 </div>
               ) : null}
-              <div className="bar" />
-              <div className="flex-row total-row">
-                <span>Total:</span>
-                <span>{formatPrice(calculatePrice(item, coupon))}</span>
+            </div>
+            <div className="col-lg-5 order-summary-container">
+              <div className="order-summary">
+                <div className="title">Order Summary</div>
+                <div className="flex-row price-row">
+                  <span>Price:</span>
+                  <span>{formatPrice(item.price)}</span>
+                </div>
+                {coupon ? (
+                  <div className="flex-row discount-row">
+                    <span>Discount:</span>
+                    <span>{formatPrice(calculateDiscount(item, coupon))}</span>
+                  </div>
+                ) : null}
+                <div className="bar" />
+                <div className="flex-row total-row">
+                  <span>Total:</span>
+                  <span>{formatPrice(calculatePrice(item, coupon))}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div className="row">
-          <div className="col-lg-7" />
-          <div className="col-lg-5">
-            <button className="checkout-button" type="submit">
-              Place your order
-            </button>
-            {formatErrors(errors.items)}
+          <div className="row">
+            <div className="col-lg-7" />
+            <div className="col-lg-5">
+              <button className="checkout-button" type="submit">
+                Place your order
+              </button>
+              {formatErrors(errors.items)}
+            </div>
           </div>
-        </div>
-      </Form>
+        </Form>
+        {dataConsent ? (
+          <Modal
+            isOpen={dataSharingModalVisibility}
+            toggle={this.toggleDataSharingModalVisibility}
+            className="data-consent-modal"
+          >
+            <ModalHeader toggle={this.toggleDataSharingModalVisibility}>
+              Data Sharing Policy
+            </ModalHeader>
+            <ModalBody>
+              <Markdown source={dataConsent.consent_text} />
+            </ModalBody>
+          </Modal>
+        ) : null}
+      </React.Fragment>
     )
   }
 }
 
 export class CheckoutForm extends React.Component<OuterProps> {
   validate = (values: Values) => {
-    const { item } = this.props
+    const { basket, item } = this.props
+    const errors = {}
     const selectedRuns = values.runs
 
     const missingCourses = []
@@ -248,16 +328,25 @@ export class CheckoutForm extends React.Component<OuterProps> {
     }
 
     if (missingCourses.length) {
-      return {
-        runs: `No run selected for ${missingCourses.join(", ")}`
+      errors.runs = `No run selected for ${missingCourses.join(", ")}`
+    }
+
+    if (basket) {
+      const dataConsent = basket.data_consents[0]
+      if (dataConsent && !dataConsent.consent_date) {
+        if (!values.dataConsent) {
+          errors.dataConsent =
+            "User must consent to the Data Sharing Policy to use the coupon."
+        }
       }
     }
 
-    return {}
+    return errors
   }
 
   render() {
     const {
+      basket,
       onSubmit,
       coupon,
       couponCode,
@@ -271,14 +360,16 @@ export class CheckoutForm extends React.Component<OuterProps> {
       <Formik
         onSubmit={onSubmit}
         initialValues={{
-          couponCode: couponCode || (coupon ? coupon.code : ""),
-          runs:       selectedRuns
+          couponCode:  couponCode || (coupon ? coupon.code : ""),
+          runs:        selectedRuns,
+          dataConsent: false
         }}
-        enableReinitialize={true}
         validate={this.validate}
+        enableReinitialize={true}
         render={props => (
           <InnerCheckoutForm
             {...props}
+            basket={basket}
             item={item}
             coupon={coupon}
             onSubmit={onSubmit}
@@ -293,8 +384,6 @@ export class CheckoutForm extends React.Component<OuterProps> {
             }}
           />
         )}
-        item={item}
-        coupon={coupon}
       />
     )
   }

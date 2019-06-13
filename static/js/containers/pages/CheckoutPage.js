@@ -111,7 +111,8 @@ export class CheckoutPage extends React.Component<Props, State> {
         // $FlowFixMe: flow doesn't understand that Object.values will return an array of number here
         run_ids: Object.values(values.runs).map(runId => parseInt(runId))
       })),
-      coupons: values.couponCode ? [{ code: values.couponCode }] : []
+      coupons:       values.couponCode ? [{ code: values.couponCode }] : [],
+      data_consents: values.dataConsent ? [basket.data_consents[0].id] : []
     }
     try {
       const basketResponse = await updateBasket(basketPayload)
@@ -199,6 +200,7 @@ export class CheckoutPage extends React.Component<Props, State> {
     return (
       <CheckoutForm
         item={item}
+        basket={basket}
         coupon={coupon}
         couponCode={couponCode}
         selectedRuns={selectedRuns}

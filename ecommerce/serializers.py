@@ -26,7 +26,7 @@ class CompanySerializer(serializers.ModelSerializer):
     """ Company Serializer """
 
     class Meta:
-        fields = "__all__"
+        fields = ["id", "name"]
         model = models.Company
 
 
@@ -622,6 +622,17 @@ class PromoCouponSerializer(BaseCouponSerializer):
 class DataConsentUserSerializer(serializers.ModelSerializer):
     """ Serializer for DataConsentUsers """
 
+    company = serializers.SerializerMethodField()
+    consent_text = serializers.SerializerMethodField()
+
+    def get_company(self, instance):
+        """Get serialized company version"""
+        return CompanySerializer(instance.agreement.company).data
+
+    def get_consent_text(self, instance):
+        """Get text for the agreement"""
+        return instance.agreement.content
+
     class Meta:
-        fields = ["agreement", "coupon", "consent_date", "id"]
+        fields = ["consent_date", "id", "company", "consent_text"]
         model = models.DataConsentUser

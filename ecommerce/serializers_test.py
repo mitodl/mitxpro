@@ -48,6 +48,7 @@ from ecommerce.serializers import (
 pytestmark = [pytest.mark.django_db]
 
 datetime_format = "%Y-%m-%dT%H:%M:%SZ"
+datetime_millis_format = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 def test_serialize_basket_product_version_courserun():
@@ -142,13 +143,16 @@ def test_serialize_basket_data_consents(basket_and_agreement):
     data_consent_user = DataConsentUser.objects.get(
         agreement=basket_and_agreement.agreement, user=basket.user
     )
-    assert data_consent_user.coupon.id == serialized_basket.get("data_consents")[0].get(
-        "coupon"
-    )
-    assert data_consent_user.agreement.id == serialized_basket.get("data_consents")[
-        0
-    ].get("agreement")
-    assert data_consent_user.consent_date is None
+    assert len(serialized_basket["data_consents"]) == 1
+    serialized_data_consent = serialized_basket["data_consents"][0]
+    assert serialized_data_consent == {
+        "id": data_consent_user.id,
+        "company": CompanySerializer(
+            instance=basket_and_agreement.agreement.company
+        ).data,
+        "consent_date": None,
+        "consent_text": basket_and_agreement.agreement.content,
+    }
 
 
 def test_serialize_basket(basket_and_coupons):
@@ -297,17 +301,19 @@ def test_serialize_company():
     """ Test that CompanySerializer has correct data """
     company = CompanyFactory.create()
     serialized_data = CompanySerializer(instance=company).data
-    assert serialized_data.get("name") == company.name
-    assert serialized_data.get("id") == company.id
+    assert serialized_data == {"id": company.id, "name": company.name}
 
 
 def test_serialize_data_consent_user():
     """ Test that DataConsentUserSerializer has correct data """
     consent_user = DataConsentUserFactory.create()
     serialized_data = DataConsentUserSerializer(instance=consent_user).data
-    assert serialized_data.get("id") == consent_user.id
-    assert serialized_data.get("agreement") == consent_user.agreement.id
-    assert serialized_data.get("coupon") == consent_user.coupon.id
+    assert serialized_data == {
+        "id": consent_user.id,
+        "company": CompanySerializer(instance=consent_user.agreement.company).data,
+        "consent_date": consent_user.consent_date.strftime(datetime_millis_format),
+        "consent_text": consent_user.agreement.content,
+    }
 
 
 def test_serialize_coupon():

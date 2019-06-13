@@ -8,22 +8,29 @@ import { incrementer } from "./util"
 import type {
   BasketItem,
   BasketResponse,
+  BulkCouponPayment,
   CouponSelection,
   CouponPayment,
   CouponPaymentVersion,
   Company,
-  Product,
-  BulkCouponPayment
+  DataConsentUser,
+  Product
 } from "../flow/ecommerceTypes"
-import {
-  PRODUCT_TYPE_COURSE,
-  PRODUCT_TYPE_COURSERUN,
-  PRODUCT_TYPE_PROGRAM
-} from "../constants"
+import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
 
 const genBasketItemId = incrementer()
 const genNextObjectId = incrementer()
 const genProductId = incrementer()
+
+const genDataConsentUserId = incrementer()
+
+export const makeDataConsent = (): DataConsentUser => ({
+  // $FlowFixMe: flow doesn't understand generators well
+  id:           genDataConsentUserId.next().value,
+  company:      makeCompany(),
+  consent_date: casual.moment.format(),
+  consent_text: casual.text
+})
 
 export const makeItem = (itemType: ?string): BasketItem => {
   const basketItemType =
@@ -60,7 +67,7 @@ export const makeBasketResponse = (itemType: ?string): BasketResponse => {
   return {
     items:         [item],
     coupons:       [makeCouponSelection(item)],
-    data_consents: []
+    data_consents: [makeDataConsent()]
   }
 }
 
@@ -71,11 +78,7 @@ export const makeProduct = (
   id:           genProductId.next().value,
   product_type: productType
     ? productType
-    : casual.random_element([
-      PRODUCT_TYPE_COURSERUN,
-      PRODUCT_TYPE_COURSE,
-      PRODUCT_TYPE_PROGRAM
-    ]),
+    : casual.random_element([PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM]),
   title:        casual.word,
   object_id:    casual.number,
   content_type: casual.number,

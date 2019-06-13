@@ -1,11 +1,13 @@
 // @flow
-import { mount } from "enzyme/build"
+import { mount, shallow } from "enzyme/build"
 import React from "react"
 import { assert } from "chai"
 import sinon from "sinon"
-import { Formik } from "formik"
+import { Formik, Field } from "formik"
+import { Modal, ModalHeader } from "reactstrap"
 
-import { CheckoutForm } from "./CheckoutForm"
+import { CheckoutForm, InnerCheckoutForm } from "./CheckoutForm"
+import Markdown from "../Markdown"
 
 import { makeBasketResponse } from "../../factories/ecommerce"
 import {
@@ -48,6 +50,7 @@ describe("CheckoutForm", () => {
         onSubmit={onSubmitStub}
         coupon={coupon}
         couponCode={couponCode}
+        basket={basket}
         item={basketItem}
         submitCoupon={submitCouponStub}
         selectedRuns={{}}
@@ -249,5 +252,115 @@ describe("CheckoutForm", () => {
 
     inner.find("select").prop("onChange")({ target: { value: String(run.id) } })
     sinon.assert.calledWith(updateProductStub, run.product_id, run.id)
+  })
+
+  //
+  ;[true, false].forEach(hasDataConsent => {
+    it(`${
+      hasDataConsent ? "has" : "doesn't have"
+    } a data consent checkbox`, async () => {
+      if (!hasDataConsent) {
+        basket.data_consents = []
+      }
+
+      const inner = await renderForm()
+      assert.equal(
+        inner.find(".data-consent-row").length,
+        hasDataConsent ? 1 : 0
+      )
+      if (hasDataConsent) {
+        const expected = `*By checking this box, I give my consent to MIT to disclose data to ${
+          basket.data_consents[0].company.name
+        }.`
+        assert.isTrue(inner.text().includes(expected))
+      }
+    })
+  })
+
+  it("passes the appropriate checked value for the the data consent checkbox", async () => {
+    for (const checked of [true, false]) {
+      const inner = shallow(
+        // $FlowFixMe
+        <InnerCheckoutForm
+          onSubmit={onSubmitStub}
+          basket={basket}
+          errors={{}}
+          item={basketItem}
+          onMount={sandbox.stub()}
+          updateProduct={updateProductStub}
+          values={{
+            dataConsent: checked
+          }}
+        />
+      )
+      assert.equal(
+        inner
+          .find(".data-consent-row")
+          .find(Field)
+          .prop("checked"),
+        checked
+      )
+    }
+  })
+
+  it("toggles the data consent modal", async () => {
+    const inner = shallow(
+      // $FlowFixMe
+      <InnerCheckoutForm
+        onSubmit={onSubmitStub}
+        basket={basket}
+        errors={{}}
+        item={basketItem}
+        onMount={sandbox.stub()}
+        updateProduct={updateProductStub}
+        values={{}}
+      />
+    )
+    const toggle = inner.find(".data-consent-row a").prop("onClick")
+    assert.isFalse(inner.state().dataSharingModalVisibility)
+    toggle()
+    assert.isTrue(inner.state().dataSharingModalVisibility)
+    toggle()
+    assert.isFalse(inner.state().dataSharingModalVisibility)
+  })
+  ;[true, false].forEach(hasDataConsent => {
+    [true, false].forEach(modalVisible => {
+      it(`${
+        hasDataConsent ? "has" : "doesn't have"
+      } the data consent modal and the modal is ${
+        modalVisible ? "" : "in"
+      }visible`, async () => {
+        if (!hasDataConsent) {
+          basket.data_consents = []
+        }
+        const inner = shallow(
+          // $FlowFixMe
+          <InnerCheckoutForm
+            onSubmit={onSubmitStub}
+            basket={basket}
+            errors={{}}
+            item={basketItem}
+            onMount={sandbox.stub()}
+            updateProduct={updateProductStub}
+            values={{}}
+          />
+        )
+        inner.setState({ dataSharingModalVisibility: modalVisible })
+
+        if (!hasDataConsent) {
+          assert.isFalse(inner.find(Modal).exists())
+        } else {
+          assert.equal(inner.find(Modal).prop("isOpen"), modalVisible)
+          inner.find(Modal).prop("toggle")()
+          assert.equal(inner.state().dataSharingModalVisibility, !modalVisible)
+          inner.find(ModalHeader).prop("toggle")()
+          assert.equal(inner.state().dataSharingModalVisibility, modalVisible)
+          assert.equal(
+            inner.find(Markdown).prop("source"),
+            basket.data_consents[0].consent_text
+          )
+        }
+      })
+    })
   })
 })
