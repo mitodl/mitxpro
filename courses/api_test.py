@@ -31,13 +31,19 @@ def test_get_user_enrollments(user):
 
     user_enrollments = get_user_enrollments(user)
     assert list(user_enrollments.programs) == [program_enrollment]
-    assert sorted(list(user_enrollments.program_runs), key=key_func) == sorted([
-        run_enrollment
-        for run_enrollment in course_run_enrollments
-        if run_enrollment.run in program_course_runs
-    ], key=key_func)
-    assert sorted(list(user_enrollments.non_program_runs), key=key_func) == sorted([
-        run_enrollment
-        for run_enrollment in course_run_enrollments
-        if run_enrollment.run in non_program_course_runs
-    ], key=key_func)
+    assert sorted(list(user_enrollments.program_runs), key=key_func) == sorted(
+        [
+            run_enrollment
+            for run_enrollment in course_run_enrollments
+            if run_enrollment.run in program_course_runs
+        ],
+        key=key_func,
+    )
+    assert sorted(list(user_enrollments.non_program_runs), key=key_func) == sorted(
+        [
+            run_enrollment
+            for run_enrollment in course_run_enrollments
+            if run_enrollment.run in non_program_course_runs
+        ],
+        key=key_func,
+    )

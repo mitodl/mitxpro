@@ -104,7 +104,7 @@ def test_serialize_course(mocker, with_runs, with_request_user):
         enrollment.delete()
         course.courseruns.all().delete()
     page = CoursePageFactory.create(course=course)
-    course_serializer = CourseSerializer(instance=course, context=context)
+    data = CourseSerializer(instance=course, context=context).data
 
     expected_runs = []
     if with_runs:
@@ -113,7 +113,7 @@ def test_serialize_course(mocker, with_runs, with_request_user):
             expected_runs.append(enrolled_run)
     expected_runs.sort(key=lambda run: run.start_date)
 
-    assert course_serializer.data == {
+    assert data == {
         "title": course.title,
         "description": page.description,
         "readable_id": course.readable_id,
