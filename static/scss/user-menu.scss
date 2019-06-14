@@ -1,0 +1,79 @@
+.profile-image {
+  border-radius: 100%;
+  background-color: #579cf9;
+  color: #fff;
+  width: 34px;
+  height: 34px;
+  overflow: hidden;
+}
+
+.dropdown-toggle {
+  &:after {
+    margin-left: -0.5em !important;
+    vertical-align: -0.5em !important;
+  }
+}
+
+.collapsed.dropdown-toggle::after {
+    border-top: 0.3em solid transparent;
+    border-left: 0.3em solid;
+    border-bottom: 0.3em solid transparent;
+    border-right: 0;
+    vertical-align: unset;
+}
+
+.dropdown-menu {
+  background-color: #f1f1f1;
+  box-shadow: -5px 5px 10px grey;
+  border-color: #f1f1f1;
+  border-radius: 5px;
+  right: 0px;
+  left: unset;
+
+  .dropdown-divider {
+    border-top: 1px dashed $black;
+    margin: 16px 25px;
+  }
+
+  .dropdown-item {
+    display: flex;
+    margin-top: 10px;
+    align-items: center;
+
+    .dropdown-icon {
+      margin-right: 20px;
+    }
+
+    a {
+      font-family: Roboto;
+      font-size: 14px;
+      font-weight: 500;
+      color: $black;
+      line-height: 14px;
+    }
+  }
+}
+
+.icon-profile {
+  background: url(/static/images/profile.png) left no-repeat;
+  height: 20px;
+  width: 20px;
+}
+
+.icon-settings {
+  background: url(/static/images/settings.png) left no-repeat;
+  height: 20px;
+  width: 20px;
+}
+
+.icon-dashboard {
+  background: url(/static/images/dashboard.png) left no-repeat;
+  height: 20px;
+  width: 20px;
+}
+
+.icon-logout {
+  background: url(/static/images/logout.png) left no-repeat;
+  height: 20px;
+  width: 24px;
+}

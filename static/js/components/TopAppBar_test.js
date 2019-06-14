@@ -30,27 +30,39 @@ describe("TopAppBar component", () => {
         routes.register.begin
       )
     })
+
+    it("has a button to collapse the menu", () => {
+      assert.isOk(
+        shallow(<TopAppBar currentUser={user} />)
+          .find("button")
+          .exists()
+      )
+    })
   })
   describe("for logged in users", () => {
     const user = makeUser()
 
-    it("shows a link to the user dashboard", () => {
-      const dashLink = shallow(<TopAppBar currentUser={user} />)
-        .find(".dashboard-link")
-        .at(0)
-        .find("MixedLink")
-        .at(0)
-      assert.equal(dashLink.prop("children"), "Dashboard")
-      assert.equal(dashLink.prop("dest"), routes.dashboard)
+    it("has a UserMenu component", () => {
+      assert.isOk(
+        shallow(<TopAppBar currentUser={user} />)
+          .find("UserMenu")
+          .exists()
+      )
     })
 
-    it("has a link to logout", () => {
-      assert.equal(
+    it("does not have a button to collapse the menu", () => {
+      assert.isNotOk(
         shallow(<TopAppBar currentUser={user} />)
-          .find(".link-section a.button")
-          .at(0)
-          .prop("href"),
-        routes.logout
+          .find("button")
+          .exists()
+      )
+    })
+
+    it("does not have MixedLink's for login/registration", () => {
+      assert.isNotOk(
+        shallow(<TopAppBar currentUser={user} />)
+          .find("MixedLink")
+          .exists()
       )
     })
   })

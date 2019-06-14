@@ -50,7 +50,7 @@ export class ViewProfilePage extends React.Component<Props> {
               {currentUser.is_authenticated ? (
                 <div className="col-12 auth-form">
                   <div className="row">
-                    <div className="col-2 profile" />
+                    <div className="col-2 profile icon-120" />
                     <div className="col-10 d-flex align-items-center">
                       <h3 className="align-middle">
                         {currentUser.legal_address.first_name}{" "}

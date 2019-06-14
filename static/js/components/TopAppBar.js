@@ -6,6 +6,7 @@ import { routes } from "../lib/urls"
 import MixedLink from "./MixedLink"
 
 import type { CurrentUser } from "../flow/authTypes"
+import UserMenu from "./UserMenu"
 
 type Props = {
   currentUser: CurrentUser
@@ -24,21 +25,25 @@ const TopAppBar = ({ currentUser }: Props) => (
             alt={SETTINGS.site_name}
           />
         </div>
-        <button
-          className="navbar-toggler nav-opener"
-          type="button"
-          data-toggle="collapse"
-          data-target="#nav"
-          aria-controls="nav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon" />
-          Menu
-        </button>
+        {currentUser.is_authenticated ? null : (
+          <button
+            className="navbar-toggler nav-opener"
+            type="button"
+            data-toggle="collapse"
+            data-target="#nav"
+            aria-controls="nav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon" />
+            Menu
+          </button>
+        )}
         <ul
           id="nav"
-          className="collapse navbar-collapse px-0 justify-content-end"
+          className={`${
+            currentUser.is_authenticated ? "" : "collapse"
+          } navbar-collapse px-0 justify-content-end`}
         >
           <li>
             <a href={routes.catalog} className="" aria-label="catalog">
@@ -46,23 +51,9 @@ const TopAppBar = ({ currentUser }: Props) => (
             </a>
           </li>
           {currentUser.is_authenticated ? (
-            <React.Fragment>
-              <li>
-                <strong className="dashboard-link">
-                  <MixedLink
-                    dest={routes.dashboard}
-                    aria-label="Dashboard link"
-                  >
-                    Dashboard
-                  </MixedLink>
-                </strong>
-              </li>
-              <li>
-                <a href={routes.logout} className="button" aria-label="Log Out">
-                  Sign Out
-                </a>
-              </li>
-            </React.Fragment>
+            <li>
+              <UserMenu currentUser={currentUser} />
+            </li>
           ) : (
             <React.Fragment>
               <li>
