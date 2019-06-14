@@ -173,7 +173,7 @@ export class DashboardPage extends React.Component<Props, State> {
     const enrollmentsExist = this.enrollmentsExist()
 
     return (
-      <div className="user-dashboard container-fluid">
+      <div className="user-dashboard container">
         <div className="row">
           <div className="header col-12">
             <h1>Dashboard</h1>
