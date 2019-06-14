@@ -15,7 +15,11 @@ type Props = {
 const TopAppBar = ({ currentUser }: Props) => (
   <header className="header-holder">
     <div className="container">
-      <nav className="sub-nav navbar navbar-expand-md link-section">
+      <nav
+        className={`sub-nav navbar navbar-expand-md link-section ${
+          currentUser.is_authenticated ? "nowrap" : ""
+        }`}
+      >
         <div className="navbar-brand">
           <a href="https://web.mit.edu/" className="mit-link" />
           <a href={routes.root} className="xpro-link" />
