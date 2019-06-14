@@ -253,6 +253,7 @@ def read_pdf(pdf_file):
                 if not values.get(getattr(settings, key)):
                     return None
             return {
+                "pdf": pdf_file,
                 "employee_id": values.get(
                     settings.VOUCHER_INTERNATIONAL_EMPLOYEE_ID_KEY
                 ),
@@ -277,6 +278,7 @@ def read_pdf(pdf_file):
                 if not values.get(getattr(settings, key)):
                     return None
             return {
+                "pdf": pdf_file,
                 "employee_id": values.get(settings.VOUCHER_DOMESTIC_EMPLOYEE_ID_KEY),
                 "voucher_id": values.get(settings.VOUCHER_DOMESTIC_KEY),
                 "course_start_date_input": datetime.strptime(

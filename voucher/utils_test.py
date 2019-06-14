@@ -40,6 +40,7 @@ def test_pdf_parsing_domestic(settings):
     with open("voucher/.test/domestic_voucher.pdf", "rb") as pdf_file:
         values = read_pdf(pdf_file)
         expected_values = {
+            "pdf": pdf_file,
             "employee_id": "1234567",
             "voucher_id": "299152-01",
             "course_start_date_input": datetime.strptime(
@@ -58,6 +59,7 @@ def test_pdf_parsing_domestic_offset_credits(settings):
     with open("voucher/.test/domestic_voucher_test_credits.pdf", "rb") as pdf_file:
         values = read_pdf(pdf_file)
         expected_values = {
+            "pdf": pdf_file,
             "employee_id": "1234567",
             "voucher_id": "291510-03",
             "course_start_date_input": datetime.strptime(
@@ -76,6 +78,7 @@ def test_pdf_parsing_international(settings):
     with open("voucher/.test/international_voucher.pdf", "rb") as pdf_file:
         values = read_pdf(pdf_file)
         expected_values = {
+            "pdf": pdf_file,
             "employee_id": "7654321",
             "voucher_id": None,
             "course_start_date_input": datetime.strptime(
