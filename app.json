@@ -140,8 +140,8 @@
     "MITXPRO_ENVIRONMENT": {
       "description": "The execution environment that the app is in (e.g. dev, staging, prod)"
     },
-    "MITXPRO_FROM_EMAIL": {
-      "description": "E-mail to use for the from field"
+    "MITXPRO_REPLY_TO_ADDRESS": {
+      "description": "E-mail to use for reply-to address of emails"
     },
     "MITXPRO_LOG_LEVEL": {
       "description": "The logging level for the application",

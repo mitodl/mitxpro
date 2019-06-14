@@ -311,7 +311,7 @@ EMAIL_SUPPORT = get_string(
     "MITXPRO_SUPPORT_EMAIL",
     get_string("MAILGUN_RECIPIENT_OVERRIDE", "support@localhost"),
 )
-DEFAULT_FROM_EMAIL = get_string("MITXPRO_FROM_EMAIL", "webmaster@localhost")
+MITXPRO_REPLY_TO_ADDRESS = get_string("MITXPRO_REPLY_TO_ADDRESS", "webmaster@localhost")
 
 MAILGUN_SENDER_DOMAIN = get_string("MAILGUN_SENDER_DOMAIN", None)
 MAILGUN_KEY = get_string("MAILGUN_KEY", None)
