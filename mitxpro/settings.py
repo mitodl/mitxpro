@@ -103,6 +103,7 @@ INSTALLED_APPS = (
     "ecommerce",
     "voucher",
     "hubspot",
+    "django_simple_cookie_consent",
 )
 # Only include the seed data app if this isn't running in prod
 if ENVIRONMENT not in ("production", "prod"):

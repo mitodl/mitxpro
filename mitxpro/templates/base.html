@@ -1,5 +1,5 @@
 {% load static hijack_tags raven render_bundle %}
-{% load wagtailcore_tags render_notification %}
+{% load wagtailcore_tags render_notification django_simple_cookie_consent_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -21,6 +21,7 @@
     <title>{% block title %}{% endblock %}</title>
     <meta name="description" content="{% block description %}{% endblock %}">
     <meta name="keywords" content="{% block keywords %}{% endblock %}">
+    {% display_cookie_consent %}
     {% block extrahead %}
     {% endblock %}
     {% endspaceless %}
