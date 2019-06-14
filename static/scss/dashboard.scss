@@ -2,13 +2,13 @@
 @import "common";
 
 .user-dashboard {
-  padding: 40px 10%;
+  padding: 40px 10px;
 
   .header {
     padding-right: 0;
 
     @include media-breakpoint-down(sm) {
-      padding: 0;
+      padding: 15px;
     }
   }
 
