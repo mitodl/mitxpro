@@ -14,8 +14,8 @@ from courses.constants import (
 )
 from courseware.utils import edx_redirect_url
 from ecommerce.models import Product
-from mitxpro.models import TimestampedModel
-from mitxpro.utils import now_in_utc, first_matching_item
+from mitxpro.models import TimestampedModel, AuditableModel, AuditModel
+from mitxpro.utils import now_in_utc, first_matching_item, serialize_model_object
 
 User = get_user_model()
 
@@ -309,7 +309,7 @@ class CourseRun(TimestampedModel):
         return self.title
 
 
-class CourseRunEnrollment(TimestampedModel):
+class CourseRunEnrollment(TimestampedModel, AuditableModel):
     """
     Link between User and CourseRun indicating a user's enrollment
     """
@@ -331,11 +331,30 @@ class CourseRunEnrollment(TimestampedModel):
     class Meta:
         unique_together = ("user", "run")
 
+    @classmethod
+    def get_audit_class(cls):
+        return CourseRunEnrollmentAudit
+
+    def to_dict(self):
+        return serialize_model_object(self)
+
     def __str__(self):
         return f"CourseRunEnrollment for {self.user} and {self.run}"
 
 
-class ProgramEnrollment(TimestampedModel):
+class CourseRunEnrollmentAudit(AuditModel):
+    """Audit table for CourseRunEnrollment"""
+
+    enrollment = models.ForeignKey(
+        CourseRunEnrollment, null=True, on_delete=models.PROTECT
+    )
+
+    @classmethod
+    def get_related_field_name(cls):
+        return "enrollment"
+
+
+class ProgramEnrollment(TimestampedModel, AuditableModel):
     """
     Link between User and Program indicating a user's enrollment
     """
@@ -353,5 +372,24 @@ class ProgramEnrollment(TimestampedModel):
     class Meta:
         unique_together = ("user", "program")
 
+    @classmethod
+    def get_audit_class(cls):
+        return ProgramEnrollmentAudit
+
+    def to_dict(self):
+        return serialize_model_object(self)
+
     def __str__(self):
         return f"ProgramEnrollment for {self.user} and {self.program}"
+
+
+class ProgramEnrollmentAudit(AuditModel):
+    """Audit table for ProgramEnrollment"""
+
+    enrollment = models.ForeignKey(
+        ProgramEnrollment, null=True, on_delete=models.PROTECT
+    )
+
+    @classmethod
+    def get_related_field_name(cls):
+        return "enrollment"
