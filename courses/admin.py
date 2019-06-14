@@ -36,11 +36,23 @@ class ProgramEnrollmentAdmin(admin.ModelAdmin):
 
     model = ProgramEnrollment
 
+    def save_model(self, request, obj, form, change):
+        """
+        Saves object and logs change to object
+        """
+        obj.save_and_log(request.user)
+
 
 class CourseRunEnrollmentAdmin(admin.ModelAdmin):
     """Admin for CourseRunEnrollment"""
 
     model = CourseRunEnrollment
+
+    def save_model(self, request, obj, form, change):
+        """
+        Saves object and logs change to object
+        """
+        obj.save_and_log(request.user)
 
 
 admin.site.register(Program, ProgramAdmin)
