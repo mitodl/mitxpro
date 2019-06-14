@@ -26,9 +26,6 @@
     list-style: none;
     letter-spacing: -.32em;
     overflow: hidden;
-    @include media-breakpoint-up(md) {
-      margin: 0 -45px;
-    }
 
     li {
       letter-spacing: normal;
@@ -41,13 +38,12 @@
       font-weight: 600;
 
       @include media-breakpoint-up(md) {
-        width: calc(50% - 90px);
+        width: calc(50% - 45px);
         display: inline-block;
         vertical-align: top;
-        margin: -1px 45px 0;
       }
       @include media-breakpoint-up(lg) {
-        width: calc(33.33% - 90px);
+        width: calc(33.33% - 45px);
       }
     }
   }
