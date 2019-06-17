@@ -646,7 +646,7 @@ class ProductPage(MetadataPageMixin, Page):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="+",
-        help_text="Thumbnail size must be at least 690x530 pixels.",
+        help_text="Thumbnail size must be at least 550x310 pixels.",
     )
     content = StreamField(
         [
