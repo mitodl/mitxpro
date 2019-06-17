@@ -157,28 +157,30 @@ def test_serialize_basket_data_consents(basket_and_agreement, mock_context):
         "company": CompanySerializer(
             instance=basket_and_agreement.agreement.company
         ).data,
-        "consent_date": None,
+        "consent_date": data_consent_user.consent_date.strftime(datetime_millis_format),
         "consent_text": basket_and_agreement.agreement.content,
     }
 
 
-def test_serialize_basket(basket_and_coupons, mock_context):
+def test_serialize_basket(basket_and_agreement, mock_context):
     """Test Basket serialization"""
-    basket = basket_and_coupons.basket
+    basket = basket_and_agreement.basket
     selection = CouponSelection.objects.get(basket=basket)
     run = CourseRunSelection.objects.get(basket=basket).run
+    data_consent = DataConsentUser.objects.get(user=basket.user)
     data = BasketSerializer(instance=basket, context=mock_context).data
     assert data == {
         "items": [
             {
                 **ProductVersionSerializer(
-                    instance=basket_and_coupons.product_version, context=mock_context
+                    instance=basket_and_agreement.product.latest_version,
+                    context=mock_context,
                 ).data,
                 "run_ids": [run.id],
             }
         ],
         "coupons": [CouponSelectionSerializer(selection).data],
-        "data_consents": [],
+        "data_consents": [DataConsentUserSerializer(data_consent).data],
     }
 
 

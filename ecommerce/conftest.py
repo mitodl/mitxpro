@@ -7,7 +7,6 @@ import pytest
 
 # pylint:disable=redefined-outer-name
 
-from courses.factories import ProgramFactory, CourseFactory
 from ecommerce.factories import (
     BasketItemFactory,
     CouponEligibilityFactory,
@@ -17,8 +16,8 @@ from ecommerce.factories import (
     CouponVersionFactory,
     CouponSelectionFactory,
     CompanyFactory,
+    DataConsentUserFactory,
     ProductVersionFactory,
-    ProductFactory,
     DataConsentAgreementFactory,
 )
 from ecommerce.models import CourseRunSelection
@@ -88,30 +87,22 @@ def basket_and_coupons():
 
 
 @pytest.fixture
-def basket_and_agreement():
+def basket_and_agreement(basket_and_coupons):
     """
     Sample basket and data consent agreement
     """
-    program = ProgramFactory.create()
-    CourseFactory.create_batch(5, program=program)
-    product = ProductFactory.create(content_object=program)
-    ProductVersionFactory(product=product, price=Decimal("15.00"))
-    basket_item = BasketItemFactory(product=product, quantity=1)
-    company = CompanyFactory.create()
-    coupon = CouponFactory(payment=CouponPaymentFactory())
-    payment_version = CouponPaymentVersionFactory(
-        payment=coupon.payment, amount=Decimal("0.40"), company=company
+    basket_item = basket_and_coupons.basket_item
+    product = basket_and_coupons.product_version.product
+    coupon = basket_and_coupons.coupongroup_best.coupon
+    company = coupon.payment.latest_version.company
+    agreement = DataConsentAgreementFactory(
+        courses=[basket_and_coupons.run.course], company=company
     )
-    CouponVersionFactory(payment_version=payment_version, coupon=coupon)
-    CouponEligibilityFactory(coupon=coupon, product=product)
-    CouponSelectionFactory.create(basket=basket_item.basket, coupon=coupon)
+    DataConsentUserFactory.create(
+        user=basket_item.basket.user, agreement=agreement, coupon=coupon
+    )
     return SimpleNamespace(
-        agreement=DataConsentAgreementFactory(
-            courses=program.courses.all(), company=company
-        ),
-        basket=basket_item.basket,
-        product=product,
-        coupon=coupon,
+        agreement=agreement, basket=basket_item.basket, product=product, coupon=coupon
     )
 
 

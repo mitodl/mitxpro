@@ -286,7 +286,21 @@ class BasketSerializer(serializers.ModelSerializer):
             product_id = item.get("product_id")
             run_ids = item.get("run_ids")
             product = models.Product.objects.get(id=product_id)
+            previous_product = models.Product.objects.filter(
+                basketitem__basket=basket
+            ).first()
+
             if run_ids is not None:
+                runs = cls._get_runs_for_product(
+                    product=product, run_ids=run_ids, user=basket.user
+                )
+            elif previous_product is not None and product_id == previous_product.id:
+                # User is updating basket item to the same item as before
+                run_ids = list(
+                    models.CourseRunSelection.objects.filter(basket=basket).values_list(
+                        "run", flat=True
+                    )
+                )
                 runs = cls._get_runs_for_product(
                     product=product, run_ids=run_ids, user=basket.user
                 )
@@ -386,6 +400,8 @@ class BasketSerializer(serializers.ModelSerializer):
                     models.CourseRunSelection.objects.filter(basket=basket).delete()
                     for run in runs:
                         models.CourseRunSelection.objects.create(basket=basket, run=run)
+                else:
+                    models.CourseRunSelection.objects.filter(basket=basket).delete()
 
                 if coupon_version:
                     models.CouponSelection.objects.update_or_create(

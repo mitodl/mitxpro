@@ -43,7 +43,9 @@ from ecommerce.serializers import (
     BasketSerializer,
     ProductSerializer,
     CompanySerializer,
+    CouponSelectionSerializer,
     CurrentCouponPaymentSerializer,
+    DataConsentUserSerializer,
 )
 from mitxpro.test_utils import create_tempfile_csv
 from users.factories import UserFactory
@@ -378,6 +380,45 @@ def test_patch_basket_new_item(basket_client, basket_and_coupons, mock_context):
     )
 
 
+def test_patch_basket_replace_item(basket_client, basket_and_agreement):
+    """If a user changes the item in the basket it should clear away old selected runs and coupons"""
+    new_product = ProductVersionFactory.create().product
+    data = {"items": [{"id": new_product.id}]}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    items = resp.json()["items"]
+    assert len(items) == 1
+    assert items[0]["product_id"] == new_product.id
+    assert items[0]["run_ids"] == []
+    assert resp.json()["data_consents"] == []
+    assert resp.json()["coupons"] == []
+
+    assert CourseRunSelection.objects.count() == 0
+    assert CouponSelection.objects.count() == 0
+
+
+def test_patch_basket_replace_item_with_same(basket_client, basket_and_agreement):
+    """
+    If a user changes the item in the basket but it's the same as the old product,
+    the same runs and coupons should be selected as before
+    """
+    data = {"items": [{"id": basket_and_agreement.product.id}]}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    items = resp.json()["items"]
+    assert len(items) == 1
+    assert items[0]["product_id"] == basket_and_agreement.product.id
+    assert items[0]["run_ids"] == list(
+        CourseRunSelection.objects.values_list("run", flat=True)
+    )
+    dcu = DataConsentUser.objects.get(user=basket_and_agreement.basket.user)
+    assert resp.json()["data_consents"] == [DataConsentUserSerializer(dcu).data]
+    selection = CouponSelection.objects.get(
+        basket=basket_and_agreement.basket, coupon=basket_and_agreement.coupon
+    )
+    assert resp.json()["coupons"] == [CouponSelectionSerializer(selection).data]
+
+
 def test_patch_basket_multiple_products(basket_client, basket_and_coupons):
     """ Test that an update with multiple products is rejected """
     data = {"items": [{"product_id": 10}, {"product_id": 11}]}
@@ -408,7 +449,7 @@ def test_patch_basket_multiple_coupons(basket_client, basket_and_coupons):
 
 
 def test_patch_basket_update_coupon_valid(
-    basket_client, basket_and_coupons, mock_context
+    basket_client, mock_context, basket_and_coupons, basket_and_agreement
 ):
     """ Test that a valid coupon is successfully applied to the basket """
     basket = basket_and_coupons.basket
@@ -424,6 +465,7 @@ def test_patch_basket_update_coupon_valid(
     assert CouponSelection.objects.get(basket=basket).coupon.coupon_code == new_code
     assert len(resp_data.get("coupons")) == 1
     assert resp_data.get("coupons")[0].get("code") == new_code
+    assert resp_data["data_consents"] == []
 
 
 def test_patch_basket_update_coupon_invalid(basket_client, basket_and_coupons):
@@ -736,11 +778,13 @@ def test_patch_basket_data_consents(basket_and_agreement, as_owner):
     user = basket_and_agreement.basket.user if as_owner else UserFactory.create()
     client = APIClient()
     client.force_authenticate(user=user)
-    consent_user = DataConsentUser.objects.create(
+    consent_user = DataConsentUser.objects.get(
         agreement=basket_and_agreement.agreement,
         user=basket_and_agreement.basket.user,
         coupon=basket_and_agreement.coupon,
     )
+    consent_user.consent_date = None
+    consent_user.save()
     resp = client.patch(
         reverse("basket_api"), type="json", data={"data_consents": [consent_user.id]}
     )
