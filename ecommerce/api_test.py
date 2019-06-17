@@ -746,11 +746,6 @@ def test_enroll_user_in_order_items(mocker, user, has_redemption):
     Test that enroll_user_in_order_items creates objects that represent a user's enrollment
     in course runs and programs
     """
-
-    def sort_func(obj):
-        """Helper function to sort by id"""
-        return obj.id
-
     patched_enroll = mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
     order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
     if has_redemption:
@@ -776,15 +771,14 @@ def test_enroll_user_in_order_items(mocker, user, has_redemption):
             created_program_enrollments[0].company
             == redemption.coupon_version.payment_version.company
         )
-    created_course_run_enrollments = CourseRunEnrollment.objects.order_by("pk").all()
-    course_runs = sorted(
-        [run_enrollment.run for run_enrollment in created_course_run_enrollments],
-        key=sort_func,
-    )
+    created_course_run_enrollments = CourseRunEnrollment.objects.order_by(
+        "run__pk"
+    ).all()
+    course_runs = [
+        run_enrollment.run for run_enrollment in created_course_run_enrollments
+    ]
     assert len(created_course_run_enrollments) == len(run_selections)
-    assert course_runs == sorted(
-        [selection.run for selection in run_selections], key=sort_func
-    )
+    assert course_runs == [selection.run for selection in run_selections]
     enroll_args = patched_enroll.call_args[0]
     assert enroll_args[0] == user
     assert set(enroll_args[1]) == set(course_runs)
