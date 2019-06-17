@@ -39,41 +39,39 @@
     display: flex;
     margin-top: 10px;
     align-items: center;
+    font-family: Roboto;
+    font-size: 14px;
+    font-weight: 500;
+    color: $black;
+    line-height: 14px;
 
     .dropdown-icon {
       margin-right: 20px;
     }
 
-    a {
-      font-family: Roboto;
-      font-size: 14px;
-      font-weight: 500;
-      color: $black;
-      line-height: 14px;
-    }
   }
 }
 
 .icon-profile {
-  background: url(/static/images/profile.png) left no-repeat;
-  height: 20px;
-  width: 20px;
+  background: url(/static/images/icon-user.png) left no-repeat;
+  height: 25px;
+  width: 25px;
 }
 
 .icon-settings {
-  background: url(/static/images/settings.png) left no-repeat;
-  height: 20px;
-  width: 20px;
+  background: url(/static/images/icon-settings.png) left no-repeat;
+  height: 25px;
+  width: 25px;
 }
 
 .icon-dashboard {
-  background: url(/static/images/dashboard.png) left no-repeat;
-  height: 20px;
-  width: 20px;
+  background: url(/static/images/icon-dashboard.png) left no-repeat;
+  height: 25px;
+  width: 25px;
 }
 
 .icon-logout {
-  background: url(/static/images/logout.png) left no-repeat;
-  height: 20px;
-  width: 24px;
+  background: url(/static/images/icon-logout.png) left no-repeat;
+  height: 25px;
+  width: 25px;
 }

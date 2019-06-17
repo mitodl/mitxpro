@@ -1,6 +1,7 @@
 // @flow
 /* global SETTINGS:false */
 import React from "react"
+
 import MixedLink from "./MixedLink"
 import { routes } from "../lib/urls"
 
@@ -29,25 +30,31 @@ const UserMenu = ({ currentUser }: Props) => {
         />
       </div>
       <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <div className="dropdown-item">
+        <MixedLink
+          className="dropdown-item"
+          dest={routes.profile.view}
+          aria-label="Profile"
+        >
           <div className="dropdown-icon icon-21 icon-profile" />
-          <MixedLink dest={routes.profile.view} aria-label="Profile">
-            Profile
-          </MixedLink>
-        </div>
-        <div className="dropdown-item">
+          Profile
+        </MixedLink>
+        <MixedLink
+          className="dropdown-item"
+          dest={routes.dashboard}
+          aria-label="Dashboard"
+        >
           <div className="dropdown-icon icon-dashboard" />
-          <MixedLink dest={routes.dashboard} aria-label="Dashboard">
-            Dashboard
-          </MixedLink>
-        </div>
+          Dashboard
+        </MixedLink>
         <div className="dropdown-divider" />
-        <div className="dropdown-item">
+        <MixedLink
+          className="dropdown-item"
+          dest={routes.logout}
+          aria-label="Sign Out"
+        >
           <div className="dropdown-icon icon-logout" />
-          <MixedLink dest={routes.logout} aria-label="Sign Out">
-            Sign Out
-          </MixedLink>
-        </div>
+          Sign Out
+        </MixedLink>
       </div>
     </div>
   )

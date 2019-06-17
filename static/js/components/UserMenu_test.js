@@ -4,7 +4,6 @@ import { assert } from "chai"
 import { shallow } from "enzyme"
 
 import UserMenu from "./UserMenu"
-
 import { routes } from "../lib/urls"
 import { makeUser } from "../factories/user"
 

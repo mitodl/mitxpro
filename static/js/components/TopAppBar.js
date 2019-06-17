@@ -4,9 +4,9 @@ import React from "react"
 
 import { routes } from "../lib/urls"
 import MixedLink from "./MixedLink"
+import UserMenu from "./UserMenu"
 
 import type { CurrentUser } from "../flow/authTypes"
-import UserMenu from "./UserMenu"
 
 type Props = {
   currentUser: CurrentUser
