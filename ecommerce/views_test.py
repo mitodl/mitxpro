@@ -339,13 +339,15 @@ def test_no_permission(basket_client, mocker):
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_get_basket(basket_client, basket_and_coupons):
+def test_get_basket(basket_client, basket_and_coupons, mock_context):
     """Test the view that handles a get request for basket"""
     basket = basket_and_coupons.basket
 
     resp = basket_client.get(reverse("basket_api"))
     program_data = resp.json()
-    assert program_data == render_json(BasketSerializer(instance=basket))
+    assert program_data == render_json(
+        BasketSerializer(instance=basket, context=mock_context)
+    )
 
 
 def test_get_basket_new_user(basket_and_coupons, user, user_drf_client):
@@ -365,14 +367,14 @@ def test_patch_basket_new_user(basket_and_coupons, user, user_drf_client):
     assert Basket.objects.filter(user=user).exists() is True
 
 
-def test_patch_basket_new_item(basket_client, basket_and_coupons):
+def test_patch_basket_new_item(basket_client, basket_and_coupons, mock_context):
     """Test that a user can add an item to their basket"""
     data = {"items": [{"id": basket_and_coupons.product_version.product.id}]}
     BasketItem.objects.all().delete()  # clear the basket first
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json() == render_json(
-        BasketSerializer(instance=basket_and_coupons.basket)
+        BasketSerializer(instance=basket_and_coupons.basket, context=mock_context)
     )
 
 
@@ -405,11 +407,13 @@ def test_patch_basket_multiple_coupons(basket_client, basket_and_coupons):
     )
 
 
-def test_patch_basket_update_coupon_valid(basket_client, basket_and_coupons):
+def test_patch_basket_update_coupon_valid(
+    basket_client, basket_and_coupons, mock_context
+):
     """ Test that a valid coupon is successfully applied to the basket """
     basket = basket_and_coupons.basket
     original_coupon = basket_and_coupons.coupongroup_best.coupon
-    original_basket = BasketSerializer(basket).data
+    original_basket = BasketSerializer(instance=basket, context=mock_context).data
     assert original_basket.get("coupons")[0].get("code") == original_coupon.coupon_code
     new_code = basket_and_coupons.coupongroup_worst.coupon.coupon_code
     data = {"coupons": [{"code": new_code}]}
@@ -432,11 +436,15 @@ def test_patch_basket_update_coupon_invalid(basket_client, basket_and_coupons):
     assert resp_data["errors"]["coupons"] == f"Coupon code {bad_code} is invalid"
 
 
-def test_patch_basket_clear_coupon_auto(basket_client, basket_and_coupons):
+def test_patch_basket_clear_coupon_auto(
+    basket_client, basket_and_coupons, mock_context
+):
     """ Test that an auto coupon is applied to basket when it exists and coupons cleared """
     basket = basket_and_coupons.basket
     auto_coupon = basket_and_coupons.coupongroup_worst.coupon
-    original_basket = render_json(BasketSerializer(instance=basket))
+    original_basket = render_json(
+        BasketSerializer(instance=basket, context=mock_context)
+    )
 
     data = {"coupons": []}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
@@ -453,7 +461,9 @@ def test_patch_basket_clear_coupon_auto(basket_client, basket_and_coupons):
     assert CouponSelection.objects.get(basket=basket).coupon == auto_coupon
 
 
-def test_patch_basket_clear_coupon_no_auto(basket_client, basket_and_coupons):
+def test_patch_basket_clear_coupon_no_auto(
+    basket_client, basket_and_coupons, mock_context
+):
     """ Test that all coupons are cleared from basket  """
     basket = basket_and_coupons.basket
 
@@ -461,7 +471,7 @@ def test_patch_basket_clear_coupon_no_auto(basket_client, basket_and_coupons):
     auto_coupon_payment.automatic = False
     auto_coupon_payment.save()
 
-    original_basket = BasketSerializer(instance=basket).data
+    original_basket = BasketSerializer(instance=basket, context=mock_context).data
     assert len(original_basket.get("coupons")) == 1
 
     data = {"coupons": []}

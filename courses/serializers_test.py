@@ -27,7 +27,6 @@ from courses.serializers import (
 )
 from ecommerce.serializers import CompanySerializer
 from mitxpro.test_utils import drf_datetime
-from users.factories import UserFactory
 
 pytestmark = [pytest.mark.django_db]
 
@@ -47,18 +46,18 @@ def test_base_program_serializer():
     }
 
 
-def test_serialize_program():
+def test_serialize_program(mock_context):
     """Test Program serialization"""
     run = CourseRunFactory.create()
     program = run.course.program
     page = ProgramPageFactory.create(program=program)
-    data = ProgramSerializer(program).data
+    data = ProgramSerializer(instance=program, context=mock_context).data
     assert data == {
         "title": program.title,
         "readable_id": program.readable_id,
         "id": program.id,
         "description": page.description,
-        "courses": [CourseSerializer(run.course).data],
+        "courses": [CourseSerializer(instance=run.course, context=mock_context).data],
         "thumbnail_url": page.thumbnail_image.file.url,
     }
 
@@ -79,11 +78,9 @@ def test_base_course_serializer():
 
 
 @pytest.mark.parametrize("with_runs", [True, False])
-@pytest.mark.parametrize("with_request_user", [True, False])
-def test_serialize_course(mocker, with_runs, with_request_user):
+def test_serialize_course(mock_context, with_runs):
     """Test Course serialization"""
-    user = UserFactory.create()
-    context = {"request": mocker.Mock(user=user) if with_request_user else None}
+    user = mock_context["request"].user
     course_run = CourseRunFactory.create(course__no_program=True)
     course = course_run.course
 
@@ -104,14 +101,12 @@ def test_serialize_course(mocker, with_runs, with_request_user):
         enrollment.delete()
         course.courseruns.all().delete()
     page = CoursePageFactory.create(course=course)
-    data = CourseSerializer(instance=course, context=context).data
+    data = CourseSerializer(instance=course, context=mock_context).data
 
     expected_runs = []
     if with_runs:
         expected_runs.append(course_run)
-        if not with_request_user:
-            expected_runs.append(enrolled_run)
-    expected_runs.sort(key=lambda run: run.start_date)
+        expected_runs.sort(key=lambda run: run.start_date)
 
     assert data == {
         "title": course.title,
