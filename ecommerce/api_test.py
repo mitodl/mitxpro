@@ -771,7 +771,9 @@ def test_enroll_user_in_order_items(mocker, user, has_redemption):
             created_program_enrollments[0].company
             == redemption.coupon_version.payment_version.company
         )
-    created_course_run_enrollments = CourseRunEnrollment.objects.order_by("pk").all()
+    created_course_run_enrollments = CourseRunEnrollment.objects.order_by(
+        "run__pk"
+    ).all()
     course_runs = [
         run_enrollment.run for run_enrollment in created_course_run_enrollments
     ]
