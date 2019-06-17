@@ -54,6 +54,30 @@
   height: auto;
 }
 
+.navbar-brand {
+  position: relative;
+
+  .mit-link, .xpro-link {
+    position: absolute;
+    z-index: 2;
+    opacity: .5;
+  }
+
+  .mit-link {
+    left: 0;
+    top: 11px;
+    width: 64px;
+    height: 35px;
+  }
+
+  .xpro-link {
+    left: 93px;
+    top: 19px;
+    width: 60px;
+    height: 21px;
+  }
+}
+
 .navbar-toggler.nav-opener {
   border: 1px solid $primary;
   border-radius: 2px;
