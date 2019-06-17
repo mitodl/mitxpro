@@ -15,13 +15,15 @@ const TopAppBar = ({ currentUser }: Props) => (
   <header className="header-holder">
     <div className="container">
       <nav className="sub-nav navbar navbar-expand-md link-section">
-        <a href={routes.root} className="navbar-brand">
+        <div className="navbar-brand">
+          <a href="https://web.mit.edu/" className="mit-link" />
+          <a href={routes.root} className="xpro-link" />
           <img
             src="/static/images/mitx-pro-logo.png"
             className="site-logo"
             alt={SETTINGS.site_name}
           />
-        </a>
+        </div>
         <button
           className="navbar-toggler nav-opener"
           type="button"
