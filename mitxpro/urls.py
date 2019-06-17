@@ -66,7 +66,6 @@ urlpatterns = [
     re_path(r"^ecommerce/admin/", restricted, name="ecommerce-admin"),
     # social django needs to be here to preempt the login
     path("", include("social_django.urls", namespace="social")),
-    path("terms-and-conditions/", index, name="terms-and-conditions"),
     re_path(r"^dashboard/", index, name="user-dashboard"),
     # Wagtail
     re_path(r"^cms/", include(wagtailadmin_urls)),
