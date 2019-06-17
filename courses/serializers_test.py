@@ -2,8 +2,11 @@
 Tests for course serializers
 """
 # pylint: disable=unused-argument, redefined-outer-name
+from datetime import datetime
+
 import factory
 import pytest
+import pytz
 
 from cms.factories import CoursePageFactory, ProgramPageFactory
 from courses.factories import (
@@ -25,7 +28,6 @@ from courses.serializers import (
 from ecommerce.serializers import CompanySerializer
 from mitxpro.test_utils import drf_datetime
 
-
 pytestmark = [pytest.mark.django_db]
 
 
@@ -44,18 +46,18 @@ def test_base_program_serializer():
     }
 
 
-def test_serialize_program():
+def test_serialize_program(mock_context):
     """Test Program serialization"""
     run = CourseRunFactory.create()
     program = run.course.program
     page = ProgramPageFactory.create(program=program)
-    data = ProgramSerializer(program).data
+    data = ProgramSerializer(instance=program, context=mock_context).data
     assert data == {
         "title": program.title,
         "readable_id": program.readable_id,
         "id": program.id,
         "description": page.description,
-        "courses": [CourseSerializer(run.course).data],
+        "courses": [CourseSerializer(instance=run.course, context=mock_context).data],
         "thumbnail_url": page.thumbnail_image.file.url,
     }
 
@@ -76,20 +78,42 @@ def test_base_course_serializer():
 
 
 @pytest.mark.parametrize("with_runs", [True, False])
-def test_serialize_course(with_runs):
+def test_serialize_course(mock_context, with_runs):
     """Test Course serialization"""
-    run = CourseRunFactory.create(course__no_program=True)
-    course = run.course
+    user = mock_context["request"].user
+    course_run = CourseRunFactory.create(course__no_program=True)
+    course = course_run.course
+
+    # Create expired, enrollment_ended, future, and enrolled course runs
+    CourseRunFactory.create(
+        course=course, end_date=datetime(2010, 1, 1, tzinfo=pytz.UTC)
+    )
+    CourseRunFactory.create(
+        course=course, enrollment_end=datetime(2010, 1, 1, tzinfo=pytz.UTC)
+    )
+    CourseRunFactory.create(
+        course=course, enrollment_start=datetime(2119, 1, 1, tzinfo=pytz.UTC)
+    )
+    enrolled_run = CourseRunFactory.create(course=course)
+    enrollment = CourseRunEnrollmentFactory.create(run=enrolled_run, user=user)
+
     if not with_runs:
+        enrollment.delete()
         course.courseruns.all().delete()
     page = CoursePageFactory.create(course=course)
-    data = CourseSerializer(course).data
+    data = CourseSerializer(instance=course, context=mock_context).data
+
+    expected_runs = []
+    if with_runs:
+        expected_runs.append(course_run)
+        expected_runs.sort(key=lambda run: run.start_date)
+
     assert data == {
         "title": course.title,
         "description": page.description,
         "readable_id": course.readable_id,
         "id": course.id,
-        "courseruns": [CourseRunSerializer(run).data] if with_runs else [],
+        "courseruns": [CourseRunSerializer(run).data for run in expected_runs],
         "thumbnail_url": page.thumbnail_image.file.url,
         "next_run_id": course.first_unexpired_run.id if with_runs else None,
     }

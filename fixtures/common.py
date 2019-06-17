@@ -44,3 +44,9 @@ def mocked_responses():
     """Mocked responses for requests library"""
     with responses.RequestsMock() as rsps:
         yield rsps
+
+
+@pytest.fixture
+def mock_context(mocker, user):
+    """Mocked context for serializers"""
+    return {"request": mocker.Mock(user=user)}

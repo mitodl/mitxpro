@@ -51,26 +51,28 @@ datetime_format = "%Y-%m-%dT%H:%M:%SZ"
 datetime_millis_format = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
-def test_serialize_basket_product_version_courserun():
+def test_serialize_basket_product_version_courserun(mock_context):
     """Test ProductVersion serialization for a Course"""
     courserun = CourseRunFactory.create()
     product_version = ProductVersionFactory.create(
         product=ProductFactory(content_object=courserun)
     )
-    data = ProductVersionSerializer(product_version).data
+    data = ProductVersionSerializer(instance=product_version, context=mock_context).data
     assert data == {
         "id": product_version.id,
         "description": product_version.description,
         "price": str(round_half_up(product_version.price)),
         "type": product_version.product.content_type.model,
-        "courses": [CourseSerializer(courserun.course).data],
+        "courses": [
+            CourseSerializer(instance=courserun.course, context=mock_context).data
+        ],
         "thumbnail_url": "/static/images/mit-dome.png",
         "object_id": product_version.product.object_id,
         "product_id": product_version.product.id,
     }
 
 
-def test_serialize_basket_product_version_program():
+def test_serialize_basket_product_version_program(mock_context):
     """Test ProductVersion serialization for a Program"""
     program = ProgramFactory()
     courses = CourseFactory.create_batch(3, program=program)
@@ -78,20 +80,23 @@ def test_serialize_basket_product_version_program():
         product=ProductFactory(content_object=program)
     )
 
-    data = ProductVersionSerializer(product_version).data
+    data = ProductVersionSerializer(instance=product_version, context=mock_context).data
     assert data == {
         "id": product_version.id,
         "description": product_version.description,
         "price": str(round_half_up(product_version.price)),
         "type": product_version.product.content_type.model,
-        "courses": [CourseSerializer(course).data for course in courses],
+        "courses": [
+            CourseSerializer(instance=course, context=mock_context).data
+            for course in courses
+        ],
         "thumbnail_url": "/static/images/mit-dome.png",
         "object_id": product_version.product.object_id,
         "product_id": product_version.product.id,
     }
 
 
-def test_basket_thumbnail_courserun(basket_and_coupons):
+def test_basket_thumbnail_courserun(basket_and_coupons, mock_context):
     """Basket thumbnail should be serialized for a courserun"""
     thumbnail_filename = "abcde.jpg"
     course_page = CoursePageFactory.create(
@@ -99,7 +104,7 @@ def test_basket_thumbnail_courserun(basket_and_coupons):
     )
     run = CourseRunFactory.create(course=course_page.course)
     product_version = ProductVersionFactory.create(product__content_object=run)
-    data = ProductVersionSerializer(product_version).data
+    data = ProductVersionSerializer(instance=product_version, context=mock_context).data
     assert (
         data["thumbnail_url"]
         == course_page.thumbnail_image.get_rendition(
@@ -108,7 +113,7 @@ def test_basket_thumbnail_courserun(basket_and_coupons):
     )
 
 
-def test_basket_thumbnail_program(basket_and_coupons):
+def test_basket_thumbnail_program(basket_and_coupons, mock_context):
     """Basket thumbnail should be serialized for a program"""
     thumbnail_filename = "abcde.jpg"
     program_page = ProgramPageFactory.create(
@@ -116,7 +121,7 @@ def test_basket_thumbnail_program(basket_and_coupons):
     )
     program = program_page.program
     product_version = ProductVersionFactory.create(product__content_object=program)
-    data = ProductVersionSerializer(product_version).data
+    data = ProductVersionSerializer(instance=product_version, context=mock_context).data
     assert (
         data["thumbnail_url"]
         == program_page.thumbnail_image.get_rendition(
@@ -136,10 +141,12 @@ def test_serialize_basket_coupon_selection(basket_and_coupons):
     }
 
 
-def test_serialize_basket_data_consents(basket_and_agreement):
+def test_serialize_basket_data_consents(basket_and_agreement, mock_context):
     """Test DataConsentUser serialization inside basket"""
     basket = basket_and_agreement.basket
-    serialized_basket = BasketSerializer(basket_and_agreement.basket).data
+    serialized_basket = BasketSerializer(
+        instance=basket_and_agreement.basket, context=mock_context
+    ).data
     data_consent_user = DataConsentUser.objects.get(
         agreement=basket_and_agreement.agreement, user=basket.user
     )
@@ -155,16 +162,18 @@ def test_serialize_basket_data_consents(basket_and_agreement):
     }
 
 
-def test_serialize_basket(basket_and_coupons):
+def test_serialize_basket(basket_and_coupons, mock_context):
     """Test Basket serialization"""
     basket = basket_and_coupons.basket
     selection = CouponSelection.objects.get(basket=basket)
     run = CourseRunSelection.objects.get(basket=basket).run
-    data = BasketSerializer(basket).data
+    data = BasketSerializer(instance=basket, context=mock_context).data
     assert data == {
         "items": [
             {
-                **ProductVersionSerializer(basket_and_coupons.product_version).data,
+                **ProductVersionSerializer(
+                    instance=basket_and_coupons.product_version, context=mock_context
+                ).data,
                 "run_ids": [run.id],
             }
         ],

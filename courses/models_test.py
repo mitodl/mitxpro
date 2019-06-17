@@ -5,9 +5,15 @@ import factory
 import pytest
 
 from cms.factories import CoursePageFactory, ProgramPageFactory
-from courses.factories import CourseFactory, CourseRunFactory, ProgramFactory
+from courses.factories import (
+    CourseFactory,
+    CourseRunFactory,
+    ProgramFactory,
+    CourseRunEnrollmentFactory,
+)
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.utils import now_in_utc
+from users.factories import UserFactory
 
 pytestmark = [pytest.mark.django_db]
 
@@ -97,26 +103,38 @@ def test_course_run_past(end_days, expected):
 
 
 @pytest.mark.parametrize(
-    "end_days, enroll_days, expected",
+    "end_days, enroll_start_days, enroll_end_days, expected",
     [
-        [None, None, True],
-        [None, 1, True],
-        [None, -1, False],
-        [1, None, True],
-        [-1, None, False],
-        [1, -1, False],
+        [None, None, None, True],
+        [None, None, 1, True],
+        [None, None, -1, False],
+        [1, None, None, True],
+        [-1, None, None, False],
+        [1, None, -1, False],
+        [None, 1, None, False],
+        [None, -1, None, True],
     ],
 )
-def test_course_run_not_beyond_enrollment(end_days, enroll_days, expected):
+def test_course_run_not_beyond_enrollment(
+    end_days, enroll_start_days, enroll_end_days, expected
+):
     """
     Test that CourseRun.is_beyond_enrollment returns the expected boolean value
     """
     now = now_in_utc()
     end_date = None if end_days is None else now + timedelta(days=end_days)
-    enr_end_date = None if enroll_days is None else now + timedelta(days=enroll_days)
+    enr_end_date = (
+        None if enroll_end_days is None else now + timedelta(days=enroll_end_days)
+    )
+    enr_start_date = (
+        None if enroll_start_days is None else now + timedelta(days=enroll_start_days)
+    )
+
     assert (
         CourseRunFactory.create(
-            end_date=end_date, enrollment_end=enr_end_date
+            end_date=end_date,
+            enrollment_end=enr_end_date,
+            enrollment_start=enr_start_date,
         ).is_not_beyond_enrollment
         is expected
     )
@@ -241,3 +259,14 @@ def test_course_unexpired_runs():
     course_run = course.unexpired_runs[0]
     assert course_run.start_date == start_dates[0]
     assert course_run.end_date == end_dates[0]
+
+
+def test_course_available_runs():
+    """enrolled runs for a user should not be in the list of available runs"""
+    user = UserFactory.create()
+    course = CourseFactory.create()
+    runs = CourseRunFactory.create_batch(2, course=course)
+    runs.sort(key=lambda run: run.start_date)
+    CourseRunEnrollmentFactory.create(run=runs[0], user=user)
+    assert course.available_runs(user) == [runs[1]]
+    assert course.available_runs(UserFactory.create()) == runs

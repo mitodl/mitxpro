@@ -78,7 +78,9 @@ class ProductVersionSerializer(serializers.ModelSerializer):
         else:
             raise ValueError(f"Unexpected product for {model_class}")
 
-        return [CourseSerializer(course).data for course in courses]
+        return [
+            CourseSerializer(course, context=self.context).data for course in courses
+        ]
 
     def get_thumbnail_url(self, instance):
         """Return the thumbnail for the courserun or program"""
@@ -181,7 +183,7 @@ class BasketSerializer(serializers.ModelSerializer):
         return [
             {
                 **ProductVersionSerializer(
-                    instance=latest_product_version(item.product)
+                    instance=latest_product_version(item.product), context=self.context
                 ).data,
                 "run_ids": list(
                     models.CourseRunSelection.objects.filter(

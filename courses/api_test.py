@@ -25,15 +25,25 @@ def test_get_user_enrollments(user):
     )
     program_enrollment = ProgramEnrollmentFactory.create(program=program, user=user)
 
+    def key_func(_run):
+        """ Function for sorting runs by id"""
+        return _run.id
+
     user_enrollments = get_user_enrollments(user)
     assert list(user_enrollments.programs) == [program_enrollment]
-    assert list(user_enrollments.program_runs) == [
-        run_enrollment
-        for run_enrollment in course_run_enrollments
-        if run_enrollment.run in program_course_runs
-    ]
-    assert list(user_enrollments.non_program_runs) == [
-        run_enrollment
-        for run_enrollment in course_run_enrollments
-        if run_enrollment.run in non_program_course_runs
-    ]
+    assert sorted(list(user_enrollments.program_runs), key=key_func) == sorted(
+        [
+            run_enrollment
+            for run_enrollment in course_run_enrollments
+            if run_enrollment.run in program_course_runs
+        ],
+        key=key_func,
+    )
+    assert sorted(list(user_enrollments.non_program_runs), key=key_func) == sorted(
+        [
+            run_enrollment
+            for run_enrollment in course_run_enrollments
+            if run_enrollment.run in non_program_course_runs
+        ],
+        key=key_func,
+    )
