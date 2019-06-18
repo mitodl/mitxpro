@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericRelation
 
 from courses.constants import (
+    ENROLL_CHANGE_STATUS_CHOICES,
     CATALOG_COURSE_IMG_WAGTAIL_FILL,
     COURSE_BG_IMG_WAGTAIL_FILL,
     COURSE_BG_IMG_MOBILE_WAGTAIL_FILL,
@@ -52,6 +53,14 @@ class CourseManager(models.Manager):  # pylint: disable=missing-docstring
     def live(self):
         """Returns a queryset of Courses with live=True"""
         return self.get_queryset().live()
+
+
+class ActiveEnrollmentManager(models.Manager):
+    """Query manager for active enrollment model objects"""
+
+    def get_queryset(self):
+        """Manager queryset"""
+        return super().get_queryset().filter(active=True)
 
 
 class PageProperties(models.Model):
@@ -326,23 +335,50 @@ class CourseRun(TimestampedModel):
         return self.title
 
 
-class CourseRunEnrollment(TimestampedModel, AuditableModel):
-    """
-    Link between User and CourseRun indicating a user's enrollment
-    """
+class EnrollmentModel(TimestampedModel, AuditableModel):
+    """Abstract base model for enrollments"""
+
+    class Meta:
+        abstract = True
 
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    run = models.ForeignKey("courses.CourseRun", on_delete=models.PROTECT)
     company = models.ForeignKey(
         "ecommerce.Company", null=True, on_delete=models.PROTECT
     )
-    edx_enrolled = models.BooleanField(
-        default=False,
-        help_text="Indicates whether or not the request succeeded to enroll via the edX API",
+    change_status = models.CharField(
+        choices=ENROLL_CHANGE_STATUS_CHOICES, max_length=20, null=True, blank=True
     )
     active = models.BooleanField(
         default=True,
         help_text="Indicates whether or not this enrollment should be considered active",
+    )
+
+    objects = ActiveEnrollmentManager()
+    all_objects = models.Manager()
+
+    @classmethod
+    def get_audit_class(cls):
+        raise NotImplementedError
+
+    def to_dict(self):
+        return serialize_model_object(self)
+
+    def reactivate_and_save(self):
+        """Sets an enrollment to be active again and saves it"""
+        self.active = True
+        self.change_status = None
+        return self.save_and_log(self.user)
+
+
+class CourseRunEnrollment(EnrollmentModel):
+    """
+    Link between User and CourseRun indicating a user's enrollment
+    """
+
+    run = models.ForeignKey("courses.CourseRun", on_delete=models.PROTECT)
+    edx_enrolled = models.BooleanField(
+        default=False,
+        help_text="Indicates whether or not the request succeeded to enroll via the edX API",
     )
 
     class Meta:
@@ -351,9 +387,6 @@ class CourseRunEnrollment(TimestampedModel, AuditableModel):
     @classmethod
     def get_audit_class(cls):
         return CourseRunEnrollmentAudit
-
-    def to_dict(self):
-        return serialize_model_object(self)
 
     def __str__(self):
         return f"CourseRunEnrollment for {self.user} and {self.run}"
@@ -371,20 +404,12 @@ class CourseRunEnrollmentAudit(AuditModel):
         return "enrollment"
 
 
-class ProgramEnrollment(TimestampedModel, AuditableModel):
+class ProgramEnrollment(EnrollmentModel):
     """
     Link between User and Program indicating a user's enrollment
     """
 
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
     program = models.ForeignKey("courses.Program", on_delete=models.PROTECT)
-    company = models.ForeignKey(
-        "ecommerce.Company", null=True, on_delete=models.PROTECT
-    )
-    active = models.BooleanField(
-        default=True,
-        help_text="Indicates whether or not this enrollment should be considered active",
-    )
 
     class Meta:
         unique_together = ("user", "program")
@@ -392,9 +417,6 @@ class ProgramEnrollment(TimestampedModel, AuditableModel):
     @classmethod
     def get_audit_class(cls):
         return ProgramEnrollmentAudit
-
-    def to_dict(self):
-        return serialize_model_object(self)
 
     def __str__(self):
         return f"ProgramEnrollment for {self.user} and {self.program}"

@@ -14,8 +14,15 @@ import factory
 from rest_framework.exceptions import ValidationError
 import pytest
 
+from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from courses.models import CourseRunEnrollment, ProgramEnrollment
-from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
+from courses.factories import (
+    CourseFactory,
+    ProgramFactory,
+    CourseRunFactory,
+    CourseRunEnrollmentFactory,
+    ProgramEnrollmentFactory,
+)
 from ecommerce.api import (
     create_unfulfilled_order,
     generate_cybersource_sa_payload,
@@ -810,6 +817,43 @@ def test_enroll_user_in_order_items_with_voucher(mocker, user):
         Voucher.objects.get(id=voucher.id).enrollment
         == created_course_run_enrollments.first()
     )
+
+
+def test_enroll_user_in_order_items_reactivate(mocker, user):
+    """
+    Test that enroll_user_in_order_items attaches the enrollment to a voucher if a suitable one exists
+    """
+    mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
+    order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
+    basket = BasketFactory.create(user=user)
+    run_selections = CourseRunSelectionFactory.create_batch(2, basket=basket)
+    program = ProgramFactory.create()
+    LineFactory.create_batch(
+        3,
+        order=order,
+        product_version__product__content_object=factory.Iterator(
+            [selection.run for selection in run_selections] + [program]
+        ),
+    )
+    # Create inactive enrollments that should be set to active after this method is executed
+    course_run_enrollment = CourseRunEnrollmentFactory.create(
+        active=False,
+        change_status=ENROLL_CHANGE_STATUS_REFUNDED,
+        user=user,
+        run=run_selections[0].run,
+    )
+    program_enrollment = ProgramEnrollmentFactory(
+        active=False,
+        change_status=ENROLL_CHANGE_STATUS_REFUNDED,
+        user=user,
+        program=program,
+    )
+
+    enroll_user_in_order_items(order)
+    course_run_enrollment.refresh_from_db()
+    program_enrollment.refresh_from_db()
+    assert course_run_enrollment.active is True
+    assert program_enrollment.active is True
 
 
 def test_enroll_user_in_order_items_api_fail(mocker, user):

@@ -451,7 +451,7 @@ def enroll_user_in_order_items(order):
         edx_request_success = False
     except Exception:  # pylint: disable=broad-except
         log.exception(
-            "Unexpected edX enrollment for user %s (order id: %s, run ids: %s)",
+            "Unexpected edX enrollment error for user %s (order id: %s, run ids: %s)",
             order.purchaser.username,
             order.id,
             str([run.id for run in runs]),
@@ -475,19 +475,24 @@ def enroll_user_in_order_items(order):
         and voucher.enrollment is None
     ):
         voucher_target = voucher.product.content_object
+
     for run in runs:
-        enrollment, _ = CourseRunEnrollment.objects.get_or_create(
+        enrollment, created = CourseRunEnrollment.all_objects.get_or_create(
             user=order.purchaser,
             run=run,
             defaults=dict(company=company, edx_enrolled=edx_request_success),
         )
+        if not created and not enrollment.active:
+            enrollment.reactivate_and_save()
         if voucher_target == run:
             voucher.enrollment = enrollment
             voucher.save()
     for program in programs:
-        ProgramEnrollment.objects.get_or_create(
+        enrollment, created = ProgramEnrollment.all_objects.get_or_create(
             user=order.purchaser, program=program, defaults=dict(company=company)
         )
+        if not created and not enrollment.active:
+            enrollment.reactivate_and_save()
 
 
 def get_company_affiliation(order):

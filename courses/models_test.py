@@ -10,7 +10,9 @@ from courses.factories import (
     CourseRunFactory,
     ProgramFactory,
     CourseRunEnrollmentFactory,
+    ProgramEnrollmentFactory,
 )
+from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
@@ -270,3 +272,19 @@ def test_course_available_runs():
     CourseRunEnrollmentFactory.create(run=runs[0], user=user)
     assert course.available_runs(user) == [runs[1]]
     assert course.available_runs(UserFactory.create()) == runs
+
+
+def test_reactivate_and_save():
+    """Test that the reactivate_and_save method in enrollment models sets properties and saves"""
+    course_run_enrollment = CourseRunEnrollmentFactory.create(
+        active=False, change_status=ENROLL_CHANGE_STATUS_REFUNDED
+    )
+    program_enrollment = ProgramEnrollmentFactory.create(
+        active=False, change_status=ENROLL_CHANGE_STATUS_REFUNDED
+    )
+    enrollments = [course_run_enrollment, program_enrollment]
+    for enrollment in enrollments:
+        enrollment.reactivate_and_save()
+        enrollment.refresh_from_db()
+        enrollment.active = True
+        enrollment.change_status = None
