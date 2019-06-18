@@ -283,7 +283,7 @@ class BasketSerializer(serializers.ModelSerializer):
         if items:
             # Item updated
             item = items[0]
-            product_id = item.get("id")
+            product_id = item.get("product_id")
             run_ids = item.get("run_ids")
             product = models.Product.objects.get(id=product_id)
             if run_ids is not None:
@@ -413,7 +413,7 @@ class BasketSerializer(serializers.ModelSerializer):
             if len(items) > 1:
                 raise ValidationError("Basket cannot contain more than one item")
             item = items[0]
-            product_id = item.get("id")
+            product_id = item.get("product_id")
 
             if product_id is None:
                 raise ValidationError("Invalid request")
