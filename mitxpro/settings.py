@@ -135,8 +135,8 @@ if DEBUG:
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 LOGIN_REDIRECT_URL = "/"
-LOGIN_URL = "/login"
-LOGIN_ERROR_URL = "/login"
+LOGIN_URL = "/signin"
+LOGIN_ERROR_URL = "/signin"
 LOGOUT_REDIRECT_URL = get_string("LOGOUT_REDIRECT_URL", "/")
 
 ROOT_URLCONF = "mitxpro.urls"
