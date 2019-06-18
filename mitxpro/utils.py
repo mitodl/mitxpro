@@ -7,6 +7,7 @@ import itertools
 
 from django.conf import settings
 from django.core.serializers import serialize
+from django.db import models
 import pytz
 
 
@@ -138,3 +139,17 @@ def partition(items, predicate=bool):
     """
     a, b = itertools.tee((predicate(item), item) for item in items)
     return ((item for pred, item in a if not pred), (item for pred, item in b if pred))
+
+
+class ValidateOnSaveMixin(models.Model):
+    """Mixin that calls field/model validation methods before saving a model object"""
+
+    class Meta:
+        abstract = True
+
+    def save(
+        self, force_insert=False, force_update=False, **kwargs
+    ):  # pylint: disable=arguments-differ
+        if not (force_insert or force_update):
+            self.full_clean()
+        super().save(force_insert=force_insert, force_update=force_update, **kwargs)

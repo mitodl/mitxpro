@@ -138,11 +138,11 @@ def voucher_and_partial_matches(voucher_and_user_client):
 
 
 @pytest.fixture
-def voucher_and_exact_match(voucher_and_partial_matches):
+def voucher_and_exact_match(voucher_and_user_client):
     """
     Returns a voucher with and an exact matching and partial matching CourseRuns
     """
-    voucher = voucher_and_partial_matches.voucher
+    voucher = voucher_and_user_client.voucher
     exact_match = CourseRunFactory(
         start_date=datetime.combine(
             voucher.course_start_date_input, datetime.min.time(), tzinfo=pytz.UTC
@@ -150,7 +150,11 @@ def voucher_and_exact_match(voucher_and_partial_matches):
         course__readable_id=voucher.course_id_input,
         course__title=voucher.course_title_input,
     )
-    return SimpleNamespace(**vars(voucher_and_partial_matches), exact_match=exact_match)
+    return SimpleNamespace(
+        **vars(voucher_and_user_client),
+        company=CompanyFactory(),
+        exact_match=exact_match,
+    )
 
 
 @pytest.fixture
@@ -188,20 +192,13 @@ def voucher_and_partial_matches_with_coupons(voucher_and_partial_matches):
 
 
 @pytest.fixture
-def voucher_and_exact_match_with_coupon(voucher_and_partial_matches_with_coupons):
+def voucher_and_exact_match_with_coupon(voucher_and_exact_match):
     """
     Returns a voucher with exact matching and partial matching CourseRuns and valid coupons
     """
-    context = voucher_and_partial_matches_with_coupons
-    voucher = context.voucher
+    context = voucher_and_exact_match
     company = context.company
-    exact_match = CourseRunFactory(
-        start_date=datetime.combine(
-            voucher.course_start_date_input, datetime.min.time(), tzinfo=pytz.UTC
-        ),
-        course__readable_id=voucher.course_id_input,
-        course__title=voucher.course_title_input,
-    )
+    exact_match = context.exact_match
     product = ProductFactory(content_object=exact_match)
     coupon_eligibility = CouponEligibilityFactory(product=product)
     payment_version = CouponPaymentVersionFactory(amount=1, company=company)
@@ -209,10 +206,9 @@ def voucher_and_exact_match_with_coupon(voucher_and_partial_matches_with_coupons
         coupon=coupon_eligibility.coupon, payment_version=payment_version
     )
     return SimpleNamespace(
-        **vars(voucher_and_partial_matches_with_coupons),
+        **vars(voucher_and_exact_match),
         product=product,
         coupon_eligibility=coupon_eligibility,
-        exact_match=exact_match,
         coupon_version=coupon_version,
         payment_version=payment_version,
     )

@@ -42,17 +42,14 @@ def get_eligible_coupon_choices(voucher):
         course__title__iexact=voucher.course_title_input,
         start_date__date=voucher.course_start_date_input,
     )
-    if course_matches.count() > 1:
-        log.error("Found multiple exact CourseRun matches for voucher %s", voucher.id)
-        return []
-    elif not course_matches:
+    if not course_matches.exists():
         # Try partial matching
         course_matches = CourseRun.objects.filter(
             Q(course__readable_id__exact=voucher.course_id_input)
             | Q(course__title__iexact=voucher.course_title_input)
             | Q(start_date__date=voucher.course_start_date_input)
         )
-    if not course_matches:
+    if not course_matches.exists():
         # No partial matches found
         return []
 

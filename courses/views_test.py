@@ -8,7 +8,6 @@ import pytest
 from django.contrib.auth.models import AnonymousUser
 from django.urls import reverse
 from rest_framework import status
-from wagtail.core.models import Site
 
 from cms.factories import CoursePageFactory, ProgramPageFactory
 from cms.models import CatalogPage
@@ -19,12 +18,6 @@ from courses.serializers import CourseRunSerializer, CourseSerializer, ProgramSe
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 
 pytestmark = [pytest.mark.django_db]
-
-
-@pytest.fixture()
-def home_page():
-    """Fixture for the home page"""
-    return Site.objects.get(is_default_site=True).root_page
 
 
 @pytest.fixture()

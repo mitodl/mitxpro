@@ -5,6 +5,7 @@ import pytest
 import responses
 from django.test.client import Client
 from rest_framework.test import APIClient
+from wagtail.core.models import Site
 
 from users.factories import UserFactory
 
@@ -50,3 +51,15 @@ def mocked_responses():
 def mock_context(mocker, user):
     """Mocked context for serializers"""
     return {"request": mocker.Mock(user=user)}
+
+
+@pytest.fixture()
+def wagtail_site():
+    """Fixture for Wagtail default site"""
+    return Site.objects.get(is_default_site=True)
+
+
+@pytest.fixture()
+def home_page(wagtail_site):
+    """Fixture for the home page"""
+    return wagtail_site.root_page

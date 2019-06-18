@@ -6,7 +6,9 @@ import operator as op
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericRelation
+from django.core.validators import RegexValidator
 
+from cms.urls import detail_path_char_pattern
 from courses.constants import (
     ENROLL_CHANGE_STATUS_CHOICES,
     CATALOG_COURSE_IMG_WAGTAIL_FILL,
@@ -16,7 +18,12 @@ from courses.constants import (
 from courseware.utils import edx_redirect_url
 from ecommerce.models import Product
 from mitxpro.models import TimestampedModel, AuditableModel, AuditModel
-from mitxpro.utils import now_in_utc, first_matching_item, serialize_model_object
+from mitxpro.utils import (
+    now_in_utc,
+    first_matching_item,
+    serialize_model_object,
+    ValidateOnSaveMixin,
+)
 
 User = get_user_model()
 
@@ -99,12 +106,22 @@ class PageProperties(models.Model):
         )
 
 
-class Program(TimestampedModel, PageProperties):
+validate_url_path_field = RegexValidator(
+    r"^[{}]+$".format(detail_path_char_pattern),
+    "This field is used to produce URL paths. It must contain only characters that match this pattern: [{}]".format(
+        detail_path_char_pattern
+    ),
+)
+
+
+class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     """Model for a course program"""
 
     objects = ProgramManager()
     title = models.CharField(max_length=255)
-    readable_id = models.CharField(null=True, max_length=255)
+    readable_id = models.CharField(
+        max_length=255, unique=True, validators=[validate_url_path_field]
+    )
     live = models.BooleanField(default=False)
     products = GenericRelation(Product, related_query_name="programs")
 
@@ -153,7 +170,7 @@ class Program(TimestampedModel, PageProperties):
         return self.title
 
 
-class Course(TimestampedModel, PageProperties):
+class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     """Model for a course"""
 
     objects = CourseManager()
@@ -162,7 +179,9 @@ class Course(TimestampedModel, PageProperties):
     )
     position_in_program = models.PositiveSmallIntegerField(null=True, blank=True)
     title = models.CharField(max_length=255)
-    readable_id = models.CharField(null=True, max_length=255)
+    readable_id = models.CharField(
+        max_length=255, unique=True, validators=[validate_url_path_field]
+    )
     live = models.BooleanField(default=False)
 
     @property

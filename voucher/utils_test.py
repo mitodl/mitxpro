@@ -6,7 +6,6 @@ from unittest.mock import patch
 import pytest
 import pytz
 
-from courses.factories import CourseRunFactory
 from voucher.factories import VoucherFactory
 from voucher.utils import read_pdf, get_current_voucher, get_eligible_coupon_choices
 
@@ -114,33 +113,6 @@ def test_get_current_voucher(user):
 
 
 # Test match_courses_to_voucher
-@patch("voucher.utils.log")
-def test_multiple_exact_course_match(mock_logger, voucher_and_user):
-    """
-    Test match_courses_to_voucher logs an error on multiple exact matches
-    """
-    voucher = voucher_and_user.voucher
-    CourseRunFactory(
-        start_date=datetime.combine(
-            voucher.course_start_date_input, datetime.min.time(), tzinfo=pytz.UTC
-        ),
-        course__readable_id=voucher.course_id_input,
-        course__title=voucher.course_title_input,
-    )
-    CourseRunFactory(
-        start_date=datetime.combine(
-            voucher.course_start_date_input, datetime.min.time(), tzinfo=pytz.UTC
-        ),
-        course__readable_id=voucher.course_id_input,
-        course__title=voucher.course_title_input,
-    )
-
-    assert len(get_eligible_coupon_choices(voucher)) == 0
-    mock_logger.error.assert_called_once_with(
-        "Found multiple exact CourseRun matches for voucher %s", voucher.id
-    )
-
-
 def test_no_course_matches(voucher_and_user):
     """
     Test match_courses_to_voucher return an empty queryset on no course matches
