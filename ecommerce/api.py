@@ -515,7 +515,6 @@ def get_order_programs(order):
     ]
 
 
-@transaction.atomic
 def create_unfulfilled_order(user):
     """
     Create a new Order which is not fulfilled for a purchasable Product. Note that validation should
@@ -528,21 +527,22 @@ def create_unfulfilled_order(user):
     Returns:
         Order: A newly created Order for the Product in the basket
     """
-    # Note: validation is assumed to already have happen when the basket is being modified
-    basket, _ = Basket.objects.get_or_create(user=user)
+    with transaction.atomic():
+        # Note: validation is assumed to already have happen when the basket is being modified
+        basket, _ = Basket.objects.get_or_create(user=user)
 
-    order = Order.objects.create(status=Order.CREATED, purchaser=user)
+        order = Order.objects.create(status=Order.CREATED, purchaser=user)
 
-    for basket_item in basket.basketitems.all():
-        product_version = latest_product_version(basket_item.product)
-        Line.objects.create(
-            order=order, product_version=product_version, quantity=basket_item.quantity
-        )
+        for basket_item in basket.basketitems.all():
+            product_version = latest_product_version(basket_item.product)
+            Line.objects.create(
+                order=order, product_version=product_version, quantity=basket_item.quantity
+            )
 
-    for coupon_selection in basket.couponselection_set.all():
-        coupon = coupon_selection.coupon
-        redeem_coupon(coupon_version=latest_coupon_version(coupon), order=order)
-    order.save_and_log(user)
+        for coupon_selection in basket.couponselection_set.all():
+            coupon = coupon_selection.coupon
+            redeem_coupon(coupon_version=latest_coupon_version(coupon), order=order)
+        order.save_and_log(user)
     sync_hubspot_deal(order)
     return order
 
