@@ -1,11 +1,14 @@
 """
 Page models for the CMS
 """
+# pylint: disable=too-many-lines
+import re
 
 from django.conf import settings
 from django.db import models
 from django.db.models import Prefetch
 from django.utils.text import slugify
+from django.http.response import Http404
 from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import (
     FieldPanel,
@@ -22,6 +25,7 @@ from wagtail.images.models import Image
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
+
 from courses.constants import DEFAULT_COURSE_IMG_PATH
 from cms.blocks import (
     FacultyBlock,
@@ -29,15 +33,19 @@ from cms.blocks import (
     ResourceBlock,
     UserTestimonialBlock,
 )
+from cms.constants import COURSE_INDEX_SLUG, PROGRAM_INDEX_SLUG
 from mitxpro.views import get_js_settings_context
 
 
-class CourseObjectIndexPage:
+class CourseObjectIndexPage(Page):
     """
     A placeholder class to group courseware object pages as children.
     This class logically acts as no more than a "folder" to organize
     pages and add parent slug segment to the page url.
     """
+
+    class Meta:
+        abstract = True
 
     parent_page_types = ["HomePage"]
 
@@ -52,23 +60,51 @@ class CourseObjectIndexPage:
             and not parent.get_children().type(cls).exists()
         )
 
+    def get_child_by_readable_id(self, readable_id):
+        """Fetch a child page by a Program/Course readable_id value"""
+        raise NotImplementedError
 
-class CourseIndexPage(CourseObjectIndexPage, Page):
+    def route(self, request, path_components):
+        if path_components:
+            # request is for a child of this page
+            child_readable_id = path_components[0]
+            remaining_components = path_components[1:]
+
+            try:
+                # Try to find a child by the 'readable_id' of a Program/Course
+                # instead of the page slug (as Wagtail does by default)
+                subpage = self.get_child_by_readable_id(child_readable_id)
+            except Page.DoesNotExist:
+                raise Http404
+
+            return subpage.specific.route(request, remaining_components)
+        return super().route(request, path_components)
+
+
+class CourseIndexPage(CourseObjectIndexPage):
     """
     A placeholder page to group all the courses under it as well
     as consequently add /courses/ to the course page urls
     """
 
-    slug = "courses"
+    slug = COURSE_INDEX_SLUG
+
+    def get_child_by_readable_id(self, readable_id):
+        """Fetch a child page by the related Course's readable_id value"""
+        return self.get_children().get(coursepage__course__readable_id=readable_id)
 
 
-class ProgramIndexPage(CourseObjectIndexPage, Page):
+class ProgramIndexPage(CourseObjectIndexPage):
     """
     A placeholder page to group all the programs under it as well
     as consequently add /programs/ to the program page urls
     """
 
-    slug = "programs"
+    slug = PROGRAM_INDEX_SLUG
+
+    def get_child_by_readable_id(self, readable_id):
+        """Fetch a child page by the related Program's readable_id value"""
+        return self.get_children().get(programpage__program__readable_id=readable_id)
 
 
 class CatalogPage(Page):
@@ -683,6 +719,27 @@ class ProductPage(MetadataPageMixin, Page):
         "TextSection",
     ]
 
+    # Matches the standard page path that Wagtail returns for this page type.
+    slugged_page_path_pattern = re.compile(r"(^.*/)([^/]+)(/?$)")
+
+    def get_url_parts(self, request=None):
+        url_parts = super().get_url_parts(request=request)
+        if not url_parts:
+            return None
+        return (
+            url_parts[0],
+            url_parts[1],
+            # Wagtail generates the 'page_path' part of the url tuple with the
+            # parent page slug followed by this page's slug (e.g.: "/courses/my-page-title").
+            # We want to generate that path with the parent page slug followed by the readable_id
+            # of the Course/Program instead (e.g.: "/courses/course-v1:edX+DemoX+Demo_Course")
+            re.sub(
+                self.slugged_page_path_pattern,
+                r"\1{}\3".format(self.product.readable_id),
+                url_parts[2],
+            ),
+        )
+
     def get_context(self, request, *args, **kwargs):
         return {
             **super().get_context(request, *args, **kwargs),
@@ -694,6 +751,11 @@ class ProductPage(MetadataPageMixin, Page):
         """Gets the first child page of the given type if it exists"""
         child = self.get_children().type(cls).live().first()
         return child.specific if child else None
+
+    @property
+    def product(self):
+        """Returns the courseware object (Course, Program) associated with this page"""
+        raise NotImplementedError
 
     @property
     def outcomes(self):

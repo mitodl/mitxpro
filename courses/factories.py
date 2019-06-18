@@ -26,6 +26,7 @@ class ProgramFactory(DjangoModelFactory):
     """Factory for Programs"""
 
     title = fuzzy.FuzzyText(prefix="Program ")
+    readable_id = factory.Sequence("program-{0}".format)
     live = factory.Faker("boolean")
 
     class Meta:
@@ -38,6 +39,7 @@ class CourseFactory(DjangoModelFactory):
     program = factory.SubFactory(ProgramFactory)
     position_in_program = factory.Sequence(lambda n: n)
     title = fuzzy.FuzzyText(prefix="Course ")
+    readable_id = factory.Sequence("course-{0}".format)
     live = factory.Faker("boolean")
 
     class Meta:

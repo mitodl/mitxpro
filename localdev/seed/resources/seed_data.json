@@ -4,19 +4,19 @@
             "title": "Systems Engineering",
             "subhead": "A four-course online program leading to a Professional Certificate from the Massachusetts Institute of Technology.",
             "description": "<p>A four-course online program leading to a Professional Certificate from the Massachusetts Institute of Technology.</p>",
-            "readable_id": "SysEngx"
+            "readable_id": "program-v1:xPRO+SysEngx"
         },
         {
             "title": "Digital Learning",
             "subhead": "Learn stuff about digital learning.",
             "description": "<p>Learn stuff about digital learning.</p>",
-            "readable_id": "DgtlLearn"
+            "readable_id": "program-v1:xPRO+DgtlLearn"
         },
         {
             "title": "Analog Learning",
             "subhead": "Learn stuff about analog learning.",
             "description": "<p>Learn stuff about analog learning.</p>",
-            "readable_id": "AnlgLearn"
+            "readable_id": "program-v1:xPRO+AnlgLearn"
         }
     ],
     "courses": [
@@ -24,6 +24,7 @@
             "title": "edX Demonstration Course",
             "description": "<p>This is edX's demo course</p>",
             "subhead": "This is edX's demo course",
+            "readable_id": "course-v1:edX+DemoX+Demo_Course",
             "course_runs": [
                 {
                     "title": "edX Demonstration Course - Spring 2013",
@@ -39,7 +40,7 @@
             "subhead": "Course 1 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program.",
             "position_in_program": 1,
             "description": "<p>Course 1 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program.</p>",
-            "readable_id": "SysEngxB1",
+            "readable_id": "course-v1:xPRO+SysEngxB1",
             "course_runs": [
                 {
                     "title": "Systems Engineering - Fall 2019",
@@ -57,7 +58,7 @@
             "subhead": "Course 2 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.",
             "position_in_program": 2,
             "description": "<p>Course 2 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.</p>",
-            "readable_id": "SysEngxB2",
+            "readable_id": "course-v1:xPRO+SysEngxB2",
             "course_runs": [
                 {
                     "title": "Systems Engineering - Spring 2020",
@@ -75,7 +76,7 @@
             "subhead": "Course 3 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.",
             "position_in_program": 3,
             "description": "<p>Course 3 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.</p>",
-            "readable_id": "SysEngxB3",
+            "readable_id": "course-v1:xPRO+SysEngxB3",
             "course_runs": [
                 {
                     "title": "Systems Engineering - Fall 2020",
@@ -88,12 +89,31 @@
             ]
         },
         {
+            "program": "Systems Engineering",
+            "title": "Quantitative Methods in Systems Engineering",
+            "subhead": "Course 4 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.",
+            "position_in_program": 4,
+            "description": "<p>The course where the methods are quantitative and the systems are engineered.</p>",
+            "readable_id": "course-v1:xPRO+SysEngxB4",
+            "course_runs": [
+                {
+                    "title": "Quantitative Methods - August 2019",
+                    "courseware_id": "course-v1:TestX+SysEngxB4+1T2019",
+                    "courseware_url_path": "/courses/course-v1:TestX+SysEngxB4+1T2019/course/",
+                    "enrollment_start": "2019-08-15T00:00:00+00:00",
+                    "end_date": "2019-12-15T00:00:00+00:00",
+                    "start_date": "2019-08-15T00:00:00+00:00",
+                    "enrollment_end": "2019-08-29T00:00:00+00:00"
+                }
+            ]
+        },
+        {
             "program": "Digital Learning",
             "title": "Digital Learning 100",
             "subhead": "An introductory course to Digital Learning",
             "position_in_program": 1,
             "description": "<p>An introductory course to Digital Learning</p>",
-            "readable_id": "DgtlLearn1",
+            "readable_id": "course-v1:xPRO+DgtlLearn1",
             "course_runs": [
                 {
                     "title": "Digital Learning 100 - August 2021",
@@ -131,7 +151,7 @@
             "subhead": "A more advanced course in Digital Learning",
             "position_in_program": 2,
             "description": "<p>A more advanced course in Digital Learning</p>",
-            "readable_id": "DgtlLearn2",
+            "readable_id": "course-v1:xPRO+DgtlLearn2",
             "course_runs": [
                 {
                     "title": "Digital Learning 200 - August 2016",
@@ -162,7 +182,7 @@
             "subhead": "The most advancedest course in Digital Learning",
             "position_in_program": 3,
             "description": "<p>The most advancedest course in Digital Learning</p>",
-            "readable_id": "DgtlLearn3",
+            "readable_id": "course-v1:xPRO+DgtlLearn3",
             "course_runs": [
                 {
                     "title": "Digital Learning 300 - August 2016",
@@ -196,7 +216,7 @@
             "subhead": "An introductory course to Analog Learning",
             "position_in_program": 1,
             "description": "<p>An introductory course to Analog Learning</p>",
-            "readable_id": "AnlgLearn1",
+            "readable_id": "course-v1:xPRO+AnlgLearn1",
             "course_runs": [
                 {
                     "title": "Analog Learning 100 - August 2016",
@@ -230,7 +250,7 @@
             "subhead": "A more advanced course in Analog Learning",
             "position_in_program": 2,
             "description": "<p>A more advanced course in Analog Learning</p>",
-            "readable_id": "AnlgLearn2",
+            "readable_id": "course-v1:xPRO+AnlgLearn2",
             "course_runs": [
                 {
                     "title": "Analog Learning 200 - August 2016",
@@ -264,7 +284,7 @@
             "subhead": "The most advanced course in Analog Learning",
             "position_in_program": 3,
             "description": "<p>The most advancedest course in Analog Learning</p>",
-            "readable_id": "AnlgLearn3",
+            "readable_id": "course-v1:xPRO+AnlgLearn3",
             "course_runs": [
                 {
                     "title": "Analog Learning 300 - August 2016",
@@ -293,27 +313,10 @@
             ]
         },
         {
-            "title": "Quantitative Methods in Systems Engineering",
-            "subhead": "The course where the methods are quantitative and the systems are engineered.",
-            "description": "<p>The course where the methods are quantitative and the systems are engineered.</p>",
-            "readable_id": "QuantSysEngx1",
-            "course_runs": [
-                {
-                    "title": "Quantitative Methods - August 2019",
-                    "courseware_id": "course-v1:TestX+SysEngxB4+1T2019",
-                    "courseware_url_path": "/courses/course-v1:TestX+SysEngxB4+1T2019/course/",
-                    "enrollment_start": "2019-08-15T00:00:00+00:00",
-                    "end_date": "2019-12-15T00:00:00+00:00",
-                    "start_date": "2019-08-15T00:00:00+00:00",
-                    "enrollment_end": "2019-08-29T00:00:00+00:00"
-                }
-            ]
-        },
-        {
             "title": "Introduction to Quantum Computing",
             "subhead": "An introduction to a type of computing, and that type of computing is quantum.",
             "description": "<p>An introduction to a type of computing, and that type of computing is quantum.</p>",
-            "readable_id": "QuantCompx1",
+            "readable_id": "course-v1:xPRO+QuantCompx1",
             "course_runs": [
                 {
                     "title": "Quantum Computing - August 2019",
@@ -330,7 +333,7 @@
             "title": "Introduction to Not-Live Courses",
             "subhead": "A course that is not live.",
             "description": "<p>A course that is not live.</p>",
-            "readable_id": "NotLive1",
+            "readable_id": "course-v1:xPRO+NotLive1",
             "live": false,
             "course_runs": [
                 {

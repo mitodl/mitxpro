@@ -1,10 +1,13 @@
 """Wagtail page factories"""
+from django.core.exceptions import ObjectDoesNotExist
 import factory
 from factory.django import DjangoModelFactory
 from faker.providers import internet
 import wagtail_factories
 
 from cms.models import (
+    ProgramIndexPage,
+    CourseIndexPage,
     ProgramPage,
     CoursePage,
     LearningOutcomesPage,
@@ -45,6 +48,7 @@ class CatalogPageFactory(wagtail_factories.PageFactory):
 class ProgramPageFactory(wagtail_factories.PageFactory):
     """ProgramPage factory class"""
 
+    title = factory.Sequence("Test page - Program {0}".format)
     program = factory.SubFactory(ProgramFactory)
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
@@ -53,10 +57,23 @@ class ProgramPageFactory(wagtail_factories.PageFactory):
     class Meta:
         model = ProgramPage
 
+    @factory.post_generation
+    def post_gen(obj, create, extracted, **kwargs):  # pylint:disable=unused-argument
+        """Post-generation hook"""
+        if create:
+            # Move the created page to be a child of the program index page
+            index_page = ProgramIndexPage.objects.first()
+            if not index_page:
+                raise ObjectDoesNotExist
+            obj.move(index_page, "last-child")
+            obj.refresh_from_db()
+        return obj
+
 
 class CoursePageFactory(wagtail_factories.PageFactory):
     """CoursePage factory class"""
 
+    title = factory.Sequence("Test page - Course {0}".format)
     course = factory.SubFactory(CourseFactory)
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
@@ -64,6 +81,18 @@ class CoursePageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = CoursePage
+
+    @factory.post_generation
+    def post_gen(obj, create, extracted, **kwargs):  # pylint:disable=unused-argument
+        """Post-generation hook"""
+        if create:
+            # Move the created page to be a child of the course index page
+            index_page = CourseIndexPage.objects.first()
+            if not index_page:
+                raise ObjectDoesNotExist
+            obj.move(index_page, "last-child")
+            obj.refresh_from_db()
+        return obj
 
 
 class LearningOutcomesPageFactory(wagtail_factories.PageFactory):

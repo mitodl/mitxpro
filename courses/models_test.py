@@ -3,6 +3,7 @@ from datetime import timedelta
 
 import factory
 import pytest
+from django.core.exceptions import ValidationError
 
 from cms.factories import CoursePageFactory, ProgramPageFactory
 from courses.factories import (
@@ -288,3 +289,45 @@ def test_reactivate_and_save():
         enrollment.refresh_from_db()
         enrollment.active = True
         enrollment.change_status = None
+
+
+@pytest.mark.parametrize(
+    "readable_id_value",
+    ["somevalue", "some-value", "some_value", "some+value", "some:value"],
+)
+def test_readable_id_valid(readable_id_value):
+    """
+    Test that the Program/Course readable_id field accepts valid values, and that
+    validation is performed when a save is attempted.
+    """
+    program = ProgramFactory.build(readable_id=readable_id_value)
+    program.save()
+    assert program.id is not None
+    course = CourseFactory.build(program=None, readable_id=readable_id_value)
+    course.save()
+    assert course.id is not None
+
+
+@pytest.mark.parametrize(
+    "readable_id_value",
+    [
+        "",
+        "some value",
+        "some/value",
+        " somevalue",
+        "somevalue ",
+        "/somevalue",
+        "somevalue/",
+    ],
+)
+def test_readable_id_invalid(readable_id_value):
+    """
+    Test that the Program/Course readable_id field rejects invalid values, and that
+    validation is performed when a save is attempted.
+    """
+    program = ProgramFactory.build(readable_id=readable_id_value)
+    with pytest.raises(ValidationError):
+        program.save()
+    course = CourseFactory.build(program=None, readable_id=readable_id_value)
+    with pytest.raises(ValidationError):
+        course.save()
