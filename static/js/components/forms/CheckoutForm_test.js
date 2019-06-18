@@ -174,6 +174,7 @@ describe("CheckoutForm", () => {
   it("shows the data consent validation error", async () => {
     const errorMessage = "my custom error message"
     const inner = await shallow(
+      // $FlowFixMe
       <InnerCheckoutForm
         basket={basket}
         item={basketItem}
