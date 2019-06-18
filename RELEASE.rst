@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.9.1
+-------------
+
+- Fix login redirect regression
+- Added enrollment change status fields
+- Change basket PATCH to use product_id instead of id (#576)
+- Add popup for anonymous users to login when they want to enroll (#575)
+- Bump django from 2.1.7 to 2.1.9
+- Add links to terms of service, privacy policy, refund policy (#525)
+- Exclude expired and enrolled runs from courserun dropdowns (#524)
+- Layout and wording fixes for register form
+- Ensure order of runs is always the same to avoid test flakiness (#557)
+
 Version 0.9.0 (Released June 18, 2019)
 -------------
 
