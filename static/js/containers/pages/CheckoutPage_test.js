@@ -65,7 +65,7 @@ describe("CheckoutPage", () => {
         "/api/basket/",
         "PATCH",
         {
-          body:        { items: [{ id: productId }] },
+          body:        { items: [{ product_id: productId }] },
           credentials: undefined,
           headers:     {
             "X-CSRFTOKEN": null
@@ -175,8 +175,8 @@ describe("CheckoutPage", () => {
           body: {
             items: [
               {
-                id:      basketItem.product_id,
-                run_ids: []
+                product_id: basketItem.product_id,
+                run_ids:    []
               }
             ],
             coupons:       [],
@@ -222,8 +222,8 @@ describe("CheckoutPage", () => {
       body: {
         items: [
           {
-            id:      basketItem.product_id,
-            run_ids: []
+            product_id: basketItem.product_id,
+            run_ids:    []
           }
         ],
         coupons:       [],
@@ -271,7 +271,7 @@ describe("CheckoutPage", () => {
     sinon.assert.notCalled(submitStub)
     sinon.assert.calledWith(helper.handleRequestStub, "/api/basket/", "PATCH", {
       body: {
-        items:         [{ id: basket.items[0].product_id, run_ids: [runId] }],
+        items:         [{ product_id: basket.items[0].product_id, run_ids: [runId] }],
         coupons:       [],
         data_consents: []
       },
@@ -321,7 +321,9 @@ describe("CheckoutPage", () => {
         "PATCH",
         {
           body: {
-            items:         [{ id: basket.items[0].product_id, run_ids: [runId] }],
+            items: [
+              { product_id: basket.items[0].product_id, run_ids: [runId] }
+            ],
             coupons:       hasCoupon ? [{ code: code }] : [],
             data_consents: []
           },

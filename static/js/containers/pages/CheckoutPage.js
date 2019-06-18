@@ -86,7 +86,9 @@ export class CheckoutPage extends React.Component<Props, State> {
       return
     }
 
-    const basketResponse = await updateBasket({ items: [{ id: productId }] })
+    const basketResponse = await updateBasket({
+      items: [{ product_id: productId }]
+    })
     if (basketResponse.status !== 200) {
       if (basketResponse.body.errors) {
         this.setState({
@@ -107,9 +109,9 @@ export class CheckoutPage extends React.Component<Props, State> {
     // update basket with selected runs
     const basketPayload = {
       items: basket.items.map(item => ({
-        id:      item.product_id,
+        product_id: item.product_id,
         // $FlowFixMe: flow doesn't understand that Object.values will return an array of number here
-        run_ids: Object.values(values.runs).map(runId => parseInt(runId))
+        run_ids:    Object.values(values.runs).map(runId => parseInt(runId))
       })),
       coupons:       values.couponCode ? [{ code: values.couponCode }] : [],
       data_consents: values.dataConsent ? [basket.data_consents[0].id] : []
@@ -169,7 +171,7 @@ export class CheckoutPage extends React.Component<Props, State> {
   ) => {
     const { updateBasket } = this.props
     const response = await updateBasket({
-      items: [{ id: productId, run_ids: runId ? [runId] : [] }]
+      items: [{ product_id: productId, run_ids: runId ? [runId] : [] }]
     })
     setFieldError(
       "runs",
