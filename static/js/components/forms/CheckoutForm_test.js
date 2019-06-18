@@ -129,15 +129,13 @@ describe("CheckoutForm", () => {
       })
       const errors = inner.find(Formik).prop("validate")({ runs })
 
-      assert.deepEqual(
-        errors,
+      assert.equal(
+        errors.runs,
         hasRuns
-          ? {}
-          : {
-            runs: `No run selected for ${basketItem.courses
-              .map(course => course.title)
-              .join(", ")}`
-          }
+          ? undefined
+          : `No run selected for ${basketItem.courses
+            .map(course => course.title)
+            .join(", ")}`
       )
     })
   })
