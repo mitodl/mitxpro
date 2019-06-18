@@ -620,6 +620,7 @@ def get_available_bulk_product_coupons(coupon_payment_id, product_id):
     )
 
 
+# pylint: disable=too-many-branches
 def validate_basket_for_checkout(basket):
     """
     Validate basket for checkout
