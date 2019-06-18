@@ -363,4 +363,20 @@ describe("CheckoutForm", () => {
       })
     })
   })
+
+  it("has links to the privacy policy, terms of service, and the honor code", async () => {
+    const inner = await renderForm()
+
+    const linkPairs = [
+      ["Terms of Service", "/terms-of-service/"],
+      ["Refund Policy", "/honor-code/"],
+      ["Privacy Policy", "/privacy-policy/"]
+    ]
+
+    inner.find(".submit-links a").forEach((linkWrapper, i) => {
+      const [text, url] = linkPairs[i]
+      assert.equal(linkWrapper.text(), text)
+      assert.equal(linkWrapper.prop("href"), url)
+    })
+  })
 })
