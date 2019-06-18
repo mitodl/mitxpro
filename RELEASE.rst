@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.9.0
+Version 0.9.0 (Released June 18, 2019)
 -------------
 
 - fix course image thumbnail (#549)
