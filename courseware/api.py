@@ -43,10 +43,8 @@ def create_edx_user(user):
     """Makes a request to create an equivalent user in Open edX"""
     application = Application.objects.get(name=settings.OPENEDX_OAUTH_APP_NAME)
     expiry_date = now_in_utc() + timedelta(hours=settings.OPENEDX_TOKEN_EXPIRES_HOURS)
-    access_token, _ = AccessToken.objects.update_or_create(
-        user=user,
-        application=application,
-        defaults=dict(token=generate_token(), expires=expiry_date),
+    access_token = AccessToken.objects.create(
+        user=user, application=application, token=generate_token(), expires=expiry_date
     )
 
     with transaction.atomic():

@@ -6,6 +6,7 @@ from urllib.parse import parse_qsl
 
 import pytest
 from oauth2_provider.models import Application, AccessToken
+from oauthlib.common import generate_token
 from freezegun import freeze_time
 import responses
 from rest_framework import status
@@ -46,7 +47,8 @@ def application(settings):
 
 
 @responses.activate
-def test_create_edx_user(user, settings, application):
+@pytest.mark.parametrize("access_token_count", [0, 1, 3])
+def test_create_edx_user(user, settings, application, access_token_count):
     """Test that create_edx_user makes a request to create an edX user"""
     responses.add(
         responses.POST,
@@ -55,10 +57,18 @@ def test_create_edx_user(user, settings, application):
         status=status.HTTP_200_OK,
     )
 
+    for _ in range(access_token_count):
+        AccessToken.objects.create(
+            user=user,
+            application=application,
+            token=generate_token(),
+            expires=now_in_utc() + timedelta(hours=1),
+        )
+
     create_edx_user(user)
 
     # An AccessToken should be created during execution
-    created_access_token = AccessToken.objects.get(application=application)
+    created_access_token = AccessToken.objects.filter(application=application).last()
     assert (
         responses.calls[0].request.headers[ACCESS_TOKEN_HEADER_NAME]
         == settings.MITXPRO_REGISTRATION_ACCESS_TOKEN
