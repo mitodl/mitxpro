@@ -58,6 +58,7 @@ from ecommerce.models import (
     CouponSelection,
     CouponRedemption,
     CourseRunSelection,
+    DataConsentUser,
     Order,
     OrderAudit,
     Product,
@@ -700,6 +701,29 @@ def test_validate_basket_run_expired(mocker, basket_and_coupons):
     with pytest.raises(ValidationError) as ex:
         validate_basket_for_checkout(basket_and_coupons.basket)
     assert ex.value.args[0]["runs"] == f"Run {basket_and_coupons.run.id} is expired"
+
+
+@pytest.mark.parametrize("is_signed", [True, False])
+def test_validate_basket_unsigned_data_consent(basket_and_agreement, is_signed):
+    """
+    All data consent agreements must be signed on checkout
+    """
+    DataConsentUser.objects.create(
+        agreement=basket_and_agreement.agreement,
+        user=basket_and_agreement.basket.user,
+        coupon=basket_and_agreement.coupon,
+        consent_date=(now_in_utc() if is_signed else None),
+    )
+
+    if not is_signed:
+        with pytest.raises(ValidationError) as ex:
+            validate_basket_for_checkout(basket_and_agreement.basket)
+        assert (
+            ex.value.args[0]["data_consents"]
+            == "The data consent agreement has not yet been signed"
+        )
+    else:
+        validate_basket_for_checkout(basket_and_agreement.basket)
 
 
 def test_complete_order(mocker, user, basket_and_coupons):

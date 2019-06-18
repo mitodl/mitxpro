@@ -34,6 +34,8 @@ from ecommerce.models import (
     CouponPaymentVersion,
     CouponSelection,
     CourseRunSelection,
+    DataConsentAgreement,
+    DataConsentUser,
     ProductCouponAssignment,
     Line,
     Order,
@@ -689,6 +691,14 @@ def validate_basket_for_checkout(basket):
         if not run.is_unexpired:
             raise ValidationError({"runs": f"Run {run.id} is expired"})
 
+    # User must have signed any data consent agreements necessary for the basket
+    data_consents = get_or_create_data_consents(basket)
+    for data_consent in data_consents:
+        if data_consent.consent_date is None:
+            raise ValidationError(
+                {"data_consents": "The data consent agreement has not yet been signed"}
+            )
+
 
 def fetch_and_serialize_unused_coupons(user):
     """
@@ -737,3 +747,45 @@ def fetch_and_serialize_unused_coupons(user):
         }
         for coupon_data in coupons_data
     ]
+
+
+def get_or_create_data_consents(basket):
+    """
+    Get or create DataConsentUser objects for a basket.
+
+    Args:
+        basket (Basket): A user's basket
+
+    Returns:
+        list of models.DataConsentUser: A list of data consent agreements
+    """
+    data_consents = []
+    coupon_selections = CouponSelection.objects.filter(basket=basket)
+    if coupon_selections:
+        courselists = [
+            get_product_courses(item.product) for item in basket.basketitems.all()
+        ]
+        courses = [course for courselist in courselists for course in courselist]
+
+        for coupon_selection in coupon_selections:
+            company = latest_coupon_version(
+                coupon_selection.coupon
+            ).payment_version.company
+            if company:
+                agreements = (
+                    DataConsentAgreement.objects.filter(company=company)
+                    .filter(courses__in=courses)
+                    .distinct()
+                )
+
+                data_consents.extend(
+                    [
+                        DataConsentUser.objects.get_or_create(
+                            user=basket.user,
+                            agreement=agreement,
+                            coupon=coupon_selection.coupon,
+                        )[0]
+                        for agreement in agreements
+                    ]
+                )
+    return data_consents
