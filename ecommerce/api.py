@@ -536,7 +536,9 @@ def create_unfulfilled_order(user):
         for basket_item in basket.basketitems.all():
             product_version = latest_product_version(basket_item.product)
             Line.objects.create(
-                order=order, product_version=product_version, quantity=basket_item.quantity
+                order=order,
+                product_version=product_version,
+                quantity=basket_item.quantity,
             )
 
         for coupon_selection in basket.couponselection_set.all():
