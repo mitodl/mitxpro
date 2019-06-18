@@ -36,6 +36,18 @@ class ProgramEnrollmentAdmin(admin.ModelAdmin):
 
     model = ProgramEnrollment
 
+    def get_queryset(self, request):
+        """
+        Overrides base method. A filter was applied to the default queryset, so
+        this method ensures that Django admin uses an unfiltered queryset.
+        """
+        qs = self.model.all_objects.get_queryset()
+        # Code below was copied/pasted from the base method
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        return qs
+
     def save_model(self, request, obj, form, change):
         """
         Saves object and logs change to object
@@ -47,6 +59,18 @@ class CourseRunEnrollmentAdmin(admin.ModelAdmin):
     """Admin for CourseRunEnrollment"""
 
     model = CourseRunEnrollment
+
+    def get_queryset(self, request):
+        """
+        Overrides base method. A filter was applied to the default queryset, so
+        this method ensures that Django admin uses an unfiltered queryset.
+        """
+        qs = self.model.all_objects.get_queryset()
+        # Code below was copied/pasted from the base method
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        return qs
 
     def save_model(self, request, obj, form, change):
         """

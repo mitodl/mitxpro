@@ -24,6 +24,8 @@ def test_get_user_enrollments(user):
         len(all_course_runs), run=factory.Iterator(all_course_runs), user=user
     )
     program_enrollment = ProgramEnrollmentFactory.create(program=program, user=user)
+    # Add a non-active enrollment so we can confirm that it isn't returned
+    CourseRunEnrollmentFactory.create(user=user, active=False)
 
     def key_func(_run):
         """ Function for sorting runs by id"""
