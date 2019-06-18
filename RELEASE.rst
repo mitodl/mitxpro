@@ -1,6 +1,32 @@
 Release Notes
 =============
 
+Version 0.9.0 (Released June 18, 2019)
+-------------
+
+- fix course image thumbnail (#549)
+- - link MIT logo in header to web.mit.edu
+- Save voucher pdf uploads to S3 (#552)
+- Added audit tables for enrollment tables
+- - Align dashboard text
+- #203 Product Page: fix right margin at 768px
+- replace aqua color to more darker color (#529)
+- add reply-to email address in emails (#528)
+- Data consent checkbox (#519)
+- Set checkout page to be accessible only to logged-in users
+- fix
+- #442 Product Page: Propel your career section
+- #448 Courseware: space between text/"view detail"
+- add live filter to subpages of home and product pages (#532)
+- #466 Catalog: display popover on tab hover
+- #468 Footer links should not spawn new tab
+- Feedback from Abdul
+- #450 Change yellow color because of accessibility
+- Fixed site-wide notification styling
+- Standardize button text
+- updated the style.
+- #173 Product page: support HLS video URL in header
+
 Version 0.8.2 (Released June 13, 2019)
 -------------
 
