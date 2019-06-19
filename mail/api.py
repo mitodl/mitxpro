@@ -40,7 +40,7 @@ def safe_format_recipients(recipients):
         recipients (iterable of User): recipient users
 
     Returns:
-        list of (str, User): list of recipient emails to send to
+        list of User: list of users to send to
     """
     if not recipients:
         return []
@@ -156,6 +156,21 @@ def messages_for_recipients(recipients_and_contexts, template_name):
             )
 
 
+def message_for_recipient(recipient, context, template_name):
+    """
+    Creates message object for a recipient with user-specific context in the message.
+
+    Args:
+        recipient (User): recipient user
+        context (dict): context dictionary for the email
+        template_name (str): name of the template, this should match a directory in mail/templates
+
+    Returns:
+        django.core.mail.EmailMultiAlternatives: email message with rendered content
+    """
+    return list(messages_for_recipients([(recipient, context)], template_name))[0]
+
+
 def build_messages(template_name, recipients, extra_context):
     """
     Creates message objects for a set of recipients with the same context in each message.
@@ -239,3 +254,13 @@ def send_messages(messages):
             msg.send()
         except:  # pylint: disable=bare-except
             log.exception("Error sending email '%s' to %s", msg.subject, msg.to)
+
+
+def send_message(message):
+    """
+    Convenience method for sending one message
+
+    Args:
+        message (django.core.mail.EmailMultiAlternatives): message to send
+    """
+    send_messages([message])

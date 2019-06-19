@@ -1,13 +1,16 @@
 """Ecommerce mail API"""
 from urllib.parse import urljoin, urlencode
 import itertools
+import logging
 
 from django.conf import settings
 from django.urls import reverse
 
 from mail import api
-from mail.constants import EMAIL_BULK_ENROLL
+from mail.constants import EMAIL_BULK_ENROLL, EMAIL_COURSE_RUN_ENROLLMENT
 from ecommerce.models import ProductCouponAssignment
+
+log = logging.getLogger()
 
 
 def get_bulk_enroll_email_context(product_coupon):
@@ -68,3 +71,25 @@ def send_bulk_enroll_emails(recipients, product_coupon_iter):
         )
         for recipient, product_coupon in recipient_product_coupon_iter2
     ]
+
+
+def send_course_run_enrollment_email(enrollment):
+    """
+    Notify the user of successful enrollment for a course run
+
+    Args:
+        enrollment (CourseRunEnrollment): the enrollment for which to send the email
+    """
+    try:
+        user = enrollment.user
+        api.send_message(
+            api.message_for_recipient(
+                user.email,
+                api.context_for_user(
+                    user=user, extra_context={"enrollment": enrollment}
+                ),
+                EMAIL_COURSE_RUN_ENROLLMENT,
+            )
+        )
+    except:  # pylint: disable=bare-except
+        log.exception("Error sending enrollment success email")

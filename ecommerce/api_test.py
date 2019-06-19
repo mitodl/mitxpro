@@ -824,6 +824,9 @@ def test_enroll_user_in_order_items(mocker, user, has_redemption):
     in course runs and programs
     """
     patched_enroll = mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
+    patched_send_email = mocker.patch(
+        "ecommerce.mail_api.send_course_run_enrollment_email"
+    )
     order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
     if has_redemption:
         redemption = CouponRedemptionFactory.create(order=order)
@@ -859,6 +862,9 @@ def test_enroll_user_in_order_items(mocker, user, has_redemption):
     enroll_args = patched_enroll.call_args[0]
     assert enroll_args[0] == user
     assert set(enroll_args[1]) == set(course_runs)
+    assert patched_send_email.call_count == len(created_course_run_enrollments)
+    for enrollment in created_course_run_enrollments:
+        patched_send_email.assert_any_call(enrollment)
 
 
 def test_enroll_user_in_order_items_with_voucher(mocker, user):
