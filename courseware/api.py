@@ -272,7 +272,7 @@ def get_edx_api_client(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS)
 
 def enroll_in_edx_course_runs(user, course_runs):
     """
-    Enrolls a user in an edx course run
+    Enrolls a user in edx course runs
 
     Args:
         user (users.models.User): The user to enroll
