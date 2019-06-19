@@ -1,3 +1,5 @@
+{% load wagtailembeds_tags %}
+
 <div class="header-block">
   <div class="container header-container">
     {% if page.background_video_url %}
@@ -63,8 +65,12 @@
       </div>
       <div class="col-lg-5">
         {% if page.video_url %}
-          <video class="promo-video" id="promo-video" data-source="{{ page.video_url }}" controls>
-          </video>
+          {% embed page.video_url as youtube_video %}
+            {% if youtube_video %}
+              <div class="promo-video youtube-video">{{ youtube_video }}</div>
+            {% else %}
+              <video class="promo-video" id="promo-video" data-source="{{ page.video_url }}" controls></video>
+            {% endif %}
           <div class="video-caption">{{ page.video_title|safe }}</div>
         {% endif %}
       </div>

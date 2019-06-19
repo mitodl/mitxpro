@@ -378,7 +378,7 @@ class TextVideoSection(CourseProgramChildPage):
     video_url = models.URLField(
         null=True,
         blank=True,
-        help_text="The URL of the video to display. Must be an HLS video URL.",
+        help_text="The URL of the video to display. It can be an HLS or Youtube video URL.",
     )
 
     content_panels = [
@@ -649,7 +649,7 @@ class ProductPage(MetadataPageMixin, Page):
     video_url = models.URLField(
         null=True,
         blank=True,
-        help_text="URL to the video to be displayed for this program/course. Must be an HLS video URL.",
+        help_text="URL to the video to be displayed for this program/course. It can be an HLS or Youtube video URL.",
     )
     duration = models.CharField(
         max_length=50,
