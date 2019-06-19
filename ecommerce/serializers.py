@@ -396,12 +396,10 @@ class BasketSerializer(serializers.ModelSerializer):
                     product=product, quantity=1, basket=basket
                 )
 
+                models.CourseRunSelection.objects.filter(basket=basket).delete()
                 if runs is not None:
-                    models.CourseRunSelection.objects.filter(basket=basket).delete()
                     for run in runs:
                         models.CourseRunSelection.objects.create(basket=basket, run=run)
-                else:
-                    models.CourseRunSelection.objects.filter(basket=basket).delete()
 
                 if coupon_version:
                     models.CouponSelection.objects.update_or_create(
