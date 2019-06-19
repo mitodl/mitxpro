@@ -159,6 +159,15 @@
     border-radius: 5px;
     margin: 0 0 20px;
     display: block;
+
+    &.youtube-video {
+      height: 260px;
+
+      iframe {
+        height: 250px;
+        width: 100%;
+      }
+    }
   }
 
   .video-caption {

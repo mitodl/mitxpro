@@ -17,12 +17,16 @@
       padding: 20px 0 0 50px;
     }
 
-    video {
+    .tv-video {
       width: 100%;
       border: 5px solid $gray;
       border-radius: 5px;
       margin: 0 0 20px;
       display: block;
+
+      &.youtube-video {
+        height: 280px;
+      }
     }
   }
 
@@ -53,7 +57,7 @@
     color: white;
   }
 
-  .video-holder video {
+  .video-holder .tv-video {
     border: 5px solid white;
   }
 }
