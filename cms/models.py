@@ -564,6 +564,7 @@ class HomePage(MetadataPageMixin, Page):
     subpage_types = [
         "CourseIndexPage",
         "ProgramIndexPage",
+        "CatalogPage",
         "CoursesInProgramPage",
         "LearningTechniquesPage",
         "UserTestimonialsPage",
