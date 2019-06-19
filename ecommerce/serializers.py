@@ -290,17 +290,19 @@ class BasketSerializer(serializers.ModelSerializer):
                 basketitem__basket=basket
             ).first()
 
-            if run_ids is not None:
-                runs = cls._get_runs_for_product(
-                    product=product, run_ids=run_ids, user=basket.user
-                )
-            elif previous_product is not None and product_id == previous_product.id:
+            if (
+                run_ids is None
+                and previous_product is not None
+                and product_id == previous_product.id
+            ):
                 # User is updating basket item to the same item as before
                 run_ids = list(
                     models.CourseRunSelection.objects.filter(basket=basket).values_list(
                         "run", flat=True
                     )
                 )
+
+            if run_ids is not None:
                 runs = cls._get_runs_for_product(
                     product=product, run_ids=run_ids, user=basket.user
                 )

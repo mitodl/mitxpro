@@ -383,7 +383,7 @@ def test_patch_basket_new_item(basket_client, basket_and_coupons, mock_context):
 def test_patch_basket_replace_item(basket_client, basket_and_agreement):
     """If a user changes the item in the basket it should clear away old selected runs and coupons"""
     new_product = ProductVersionFactory.create().product
-    data = {"items": [{"id": new_product.id}]}
+    data = {"items": [{"product_id": new_product.id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     items = resp.json()["items"]
@@ -402,7 +402,7 @@ def test_patch_basket_replace_item_with_same(basket_client, basket_and_agreement
     If a user changes the item in the basket but it's the same as the old product,
     the same runs and coupons should be selected as before
     """
-    data = {"items": [{"id": basket_and_agreement.product.id}]}
+    data = {"items": [{"product_id": basket_and_agreement.product.id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     items = resp.json()["items"]
