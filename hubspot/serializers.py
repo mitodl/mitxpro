@@ -4,7 +4,7 @@ from rest_framework import serializers
 from ecommerce import models
 from ecommerce.api import get_product_version_price_with_discount, round_half_up
 from ecommerce.models import CouponVersion, ProductVersion, CouponRedemption
-
+from hubspot.api import format_hubspot_id
 
 ORDER_STATUS_MAPPING = {
     models.Order.FULFILLED: "processed",
@@ -17,7 +17,16 @@ ORDER_STATUS_MAPPING = {
 class LineSerializer(serializers.ModelSerializer):
     """ Line Serializer for Hubspot """
 
-    product = serializers.IntegerField(source="product_version.product.id")
+    product = serializers.SerializerMethodField()
+    order = serializers.SerializerMethodField()
+
+    def get_order(self, instance):
+        """ Get the order id and return the hubspot deal integratorObject id"""
+        return format_hubspot_id(instance.order.id)
+
+    def get_product(self, instance):
+        """ Get the product id and return the hubspot product integratorObject id"""
+        return format_hubspot_id(instance.product_version.product.id)
 
     class Meta:
         fields = ("id", "product", "order", "quantity")
