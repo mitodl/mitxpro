@@ -1,7 +1,7 @@
 .profile-image {
   border-radius: 100%;
-  background-color: #579cf9;
-  color: #fff;
+  background-color: $cornflower-blue;
+  color: $white;
   width: 34px;
   height: 34px;
   overflow: hidden;
@@ -23,9 +23,9 @@
 }
 
 .dropdown-menu {
-  background-color: #f1f1f1;
+  background-color: $white-smoke;
   box-shadow: -5px 5px 10px grey;
-  border-color: #f1f1f1;
+  border-color: $white-smoke;
   border-radius: 5px;
   right: 0px;
   left: unset;
@@ -53,25 +53,25 @@
 }
 
 .icon-profile {
-  background: url(/static/images/icon-user.png) left no-repeat;
+  background: url("#{$static-path}/images/icon-user.png") left no-repeat;
   height: 25px;
   width: 25px;
 }
 
 .icon-settings {
-  background: url(/static/images/icon-settings.png) left no-repeat;
+  background: url("#{$static-path}/images/icon-settings.png") left no-repeat;
   height: 25px;
   width: 25px;
 }
 
 .icon-dashboard {
-  background: url(/static/images/icon-dashboard.png) left no-repeat;
+  background: url("#{$static-path}/images/icon-dashboard.png") left no-repeat;
   height: 25px;
   width: 25px;
 }
 
 .icon-logout {
-  background: url(/static/images/icon-logout.png) left no-repeat;
+  background: url("#{$static-path}/images/icon-logout.png") left no-repeat;
   height: 25px;
   width: 25px;
 }
