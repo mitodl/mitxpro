@@ -17,7 +17,7 @@ from ecommerce.api import (
     get_valid_coupon_versions,
     latest_coupon_version,
     latest_product_version,
-    get_product_courses,
+    get_or_create_data_consents,
 )
 from mitxpro.serializers import WriteableSerializerMethodField
 
@@ -205,35 +205,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
     def get_data_consents(self, instance):
         """ Get the DataConsentUser objects associated with the basket via coupon and product"""
-        data_consents = []
-        coupon_selections = models.CouponSelection.objects.filter(basket=instance)
-        if coupon_selections:
-            courselists = [
-                get_product_courses(item.product) for item in instance.basketitems.all()
-            ]
-            courses = [course for courselist in courselists for course in courselist]
-
-            for coupon_selection in coupon_selections:
-                company = latest_coupon_version(
-                    coupon_selection.coupon
-                ).payment_version.company
-                if company:
-                    agreements = (
-                        models.DataConsentAgreement.objects.filter(company=company)
-                        .filter(courses__in=courses)
-                        .distinct()
-                    )
-
-                    data_consents.extend(
-                        [
-                            models.DataConsentUser.objects.get_or_create(
-                                user=instance.user,
-                                agreement=agreement,
-                                coupon=coupon_selection.coupon,
-                            )[0]
-                            for agreement in agreements
-                        ]
-                    )
+        data_consents = get_or_create_data_consents(instance)
         return DataConsentUserSerializer(instance=data_consents, many=True).data
 
     @classmethod

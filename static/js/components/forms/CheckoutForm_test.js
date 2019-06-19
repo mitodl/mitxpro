@@ -113,6 +113,8 @@ describe("CheckoutForm", () => {
     assert.equal(inner.find("img").prop("alt"), basketItem.description)
     assert.equal(inner.find(".item-row .title").text(), basketItem.description)
   })
+
+  //
   ;[true, false].forEach(hasRuns => {
     it(`validates ${hasRuns ? "existing" : "present"} runs`, async () => {
       basketItem.type = PRODUCT_TYPE_PROGRAM
@@ -127,17 +129,59 @@ describe("CheckoutForm", () => {
       })
       const errors = inner.find(Formik).prop("validate")({ runs })
 
-      assert.deepEqual(
-        errors,
+      assert.equal(
+        errors.runs,
         hasRuns
-          ? {}
-          : {
-            runs: `No run selected for ${basketItem.courses
-              .map(course => course.title)
-              .join(", ")}`
-          }
+          ? undefined
+          : `No run selected for ${basketItem.courses
+            .map(course => course.title)
+            .join(", ")}`
       )
     })
+  })
+
+  //
+  ;[
+    [true, true, false],
+    [true, false, true],
+    [false, true, false],
+    [false, false, false]
+  ].forEach(([hasDataConsent, checkedDataConsent, shouldHaveError]) => {
+    it(`validates data consent ${
+      hasDataConsent ? "with" : "without"
+    } an agreement, when the user ${
+      checkedDataConsent ? "has" : "hasn't"
+    } checked the box`, async () => {
+      if (!hasDataConsent) {
+        basket.data_consents = []
+      }
+      const inner = await renderForm()
+      const errors = inner.find(Formik).prop("validate")({
+        dataConsent: checkedDataConsent,
+        runs:        {}
+      })
+      assert.equal(
+        errors.data_consents,
+        shouldHaveError
+          ? "User must consent to the Data Sharing Policy to use the coupon."
+          : undefined
+      )
+    })
+  })
+
+  it("shows the data consent validation error", async () => {
+    const errorMessage = "my custom error message"
+    const inner = await shallow(
+      // $FlowFixMe
+      <InnerCheckoutForm
+        basket={basket}
+        item={basketItem}
+        values={{ dataConsent: false }}
+        errors={{ data_consents: errorMessage }}
+        onMount={sandbox.stub()}
+      />
+    )
+    assert.equal(inner.find(".data-consent .error").text(), errorMessage)
   })
 
   //

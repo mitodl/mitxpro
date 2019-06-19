@@ -40,7 +40,7 @@ type Errors = {
   runs?: string,
   coupons?: string,
   items?: string,
-  dataConsent?: string
+  data_consents?: string
 }
 type CommonProps = {
   item: BasketItem,
@@ -241,7 +241,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                 {formatErrors(errors.coupons)}
               </div>
               {dataConsent ? (
-                <div>
+                <div className="data-consent">
                   <div className="data-consent-row">
                     <Field
                       type="checkbox"
@@ -260,7 +260,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                       .
                     </span>
                   </div>
-                  {formatErrors(errors.dataConsent)}
+                  {formatErrors(errors.data_consents)}
                 </div>
               ) : null}
             </div>
@@ -346,14 +346,9 @@ export class CheckoutForm extends React.Component<OuterProps> {
       errors.runs = `No run selected for ${missingCourses.join(", ")}`
     }
 
-    if (basket) {
-      const dataConsent = basket.data_consents[0]
-      if (dataConsent && !dataConsent.consent_date) {
-        if (!values.dataConsent) {
-          errors.dataConsent =
-            "User must consent to the Data Sharing Policy to use the coupon."
-        }
-      }
+    if (basket && basket.data_consents[0] && !values.dataConsent) {
+      errors.data_consents =
+        "User must consent to the Data Sharing Policy to use the coupon."
     }
 
     return errors
