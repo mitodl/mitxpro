@@ -1,4 +1,22 @@
-{% load wagtailembeds_tags %}
+{% load wagtailembeds_tags wagtailimages_tags %}
+
+{% block extrahead %}
+  {% if page.background_image %}
+  <style>
+    .header-block {
+      {% image page.background_image fill-1024x768 as background_image %}
+      background-image: url('{{ background_image.url }}');
+    }
+
+    @media screen and (min-width: 1024px) {
+      .header-block {
+        {% image page.background_image fill-1920x1080 as background_image %}
+        background-image: url('{{ background_image.url }}');
+      }
+    }
+  </style>
+  {% endif %}
+{% endblock %}
 
 <div class="header-block">
   <div class="container header-container">

@@ -13,23 +13,6 @@
 {% render_bundle 'header' %}
 {% endblock %}
 
-{% block extrahead %}
-  {{ block.super }}
-  <style>
-    .header-block {
-      {% image page.background_image fill-1024x768 as background_image %}
-      background-image: url('{{ background_image.url }}');
-    }
-
-    @media screen and (min-width: 1024px) {
-      .header-block {
-        {% image page.background_image fill-1920x1080 as background_image %}
-        background-image: url('{{ background_image.url }}');
-      }
-    }
-  </style>
-{% endblock %}
-
 {% block scripts %}
   {{ block.super }}
   <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
