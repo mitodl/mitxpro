@@ -20,7 +20,13 @@ from courses.constants import (
     CONTENT_TYPE_MODEL_COURSE,
     CONTENT_TYPE_MODEL_COURSERUN,
 )
-from courses.models import Course, CourseRun, CourseRunEnrollment, ProgramEnrollment
+from courses.models import (
+    Course,
+    CourseRun,
+    CourseRunEnrollment,
+    ProgramEnrollment,
+    Program,
+)
 from courseware.api import enroll_in_edx_course_runs
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.models import (
@@ -108,6 +114,37 @@ def generate_cybersource_sa_payload(order, base_url):
 
         total += unit_price
 
+    # At the moment there should only be one line
+    product_version = order.lines.first().product_version
+    product = product_version.product
+    content_object = product.content_object
+
+    merchant_fields = {
+        "merchant_defined_data1": str(product.content_type),
+        "merchant_defined_data2": (
+            (
+                content_object.readable_id
+                if isinstance(content_object, Program)
+                else content_object.courseware_id
+            )
+        ),
+        "merchant_defined_data3": "1",
+    }
+
+    if coupon_version is not None:
+        merchant_fields["merchant_defined_data4"] = coupon_version.coupon.coupon_code
+        merchant_fields["merchant_defined_data5"] = (  # company name
+            coupon_version.payment_version.company.name
+            if coupon_version.payment_version.company
+            else ""
+        )
+        merchant_fields["merchant_defined_data6"] = (
+            coupon_version.payment_version.payment_transaction or ""
+        )
+        merchant_fields["merchant_defined_data7"] = (
+            coupon_version.payment_version.payment_type or ""
+        )
+
     payload = {
         "access_key": settings.CYBERSOURCE_ACCESS_KEY,
         "amount": str(total),
@@ -116,10 +153,12 @@ def generate_cybersource_sa_payload(order, base_url):
         "locale": "en-us",
         **line_items,
         "line_item_count": order.lines.count(),
+        **merchant_fields,
         "reference_number": make_reference_id(order),
         "profile_id": settings.CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now_in_utc().strftime(ISO_8601_FORMAT),
         "override_custom_receipt_page": urljoin(base_url, "dashboard/"),
+        "override_custom_cancel_page": urljoin(base_url, "checkout/"),
         "transaction_type": "sale",
         "transaction_uuid": uuid.uuid4().hex,
         "unsigned_field_names": "",

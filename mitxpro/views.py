@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseNotFound, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from raven.contrib.django.raven_compat.models import client as sentry
 from rest_framework.views import APIView
@@ -40,7 +40,10 @@ def index(request, **kwargs):  # pylint: disable=unused-argument
     """
     The index view
     """
-    return render(request, "index.html", context=get_js_settings_context(request))
+    if request.method == "GET":
+        return render(request, "index.html", context=get_js_settings_context(request))
+    else:
+        return redirect(request.get_full_path())
 
 
 def handler404(request, exception):

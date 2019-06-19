@@ -62,6 +62,7 @@ from ecommerce.factories import (
 from ecommerce.models import (
     BasketItem,
     Coupon,
+    CouponPaymentVersion,
     CouponSelection,
     CouponRedemption,
     CourseRunSelection,
@@ -114,14 +115,22 @@ def test_valid_signature():
     assert b64encode(digest).decode("utf-8") == signature
 
 
-def test_signed_payload(mocker):
+# pylint: disable=too-many-locals
+@pytest.mark.parametrize("has_coupon", [True, False])
+@pytest.mark.parametrize("has_company", [True, False])
+@pytest.mark.parametrize("is_program_product", [True, False])
+def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
     """
     A valid payload should be signed appropriately
     """
-    line1 = LineFactory.create()
+    line1 = LineFactory.create(
+        product_version__product__content_object=ProgramFactory.create()
+        if is_program_product
+        else CourseRunFactory.create()
+    )
     line2 = LineFactory.create(
         order=line1.order,
-        product_version__product__content_object=CourseFactory.create(),
+        product_version__product__content_object=CourseRunFactory.create(),
     )
     line3 = LineFactory.create(
         order=line1.order,
@@ -132,6 +141,18 @@ def test_signed_payload(mocker):
     order.purchaser.username = username
     order.purchaser.save()
     transaction_uuid = "hex"
+
+    payment_transaction_number = "transaction_number"
+    if has_coupon:
+        coupon_version = CouponRedemptionFactory.create(order=order).coupon_version
+        payment_version = coupon_version.payment_version
+        payment_version.payment_type = CouponPaymentVersion.PAYMENT_PO
+        payment_version.payment_transaction = payment_transaction_number
+
+        if not has_company:
+            payment_version.company = None
+
+        payment_version.save()
 
     now = now_in_utc()
 
@@ -151,18 +172,33 @@ def test_signed_payload(mocker):
 
     total_price = sum(line.product_version.price for line in [line1, line2, line3])
 
+    content_object = line1.product_version.product.content_object
+
+    other_merchant_fields = (
+        {
+            "merchant_defined_data4": coupon_version.coupon.coupon_code,
+            "merchant_defined_data5": coupon_version.payment_version.company.name
+            if coupon_version.payment_version.company
+            else "",
+            "merchant_defined_data6": payment_transaction_number,
+            "merchant_defined_data7": CouponPaymentVersion.PAYMENT_PO,
+        }
+        if has_coupon
+        else {}
+    )
+
     assert payload == {
         "access_key": CYBERSOURCE_ACCESS_KEY,
         "amount": str(total_price),
         "consumer_id": username,
         "currency": "USD",
-        "item_0_code": "course run",
+        "item_0_code": "program" if is_program_product else "course run",
         "item_0_name": line1.product_version.description,
         "item_0_quantity": line1.quantity,
         "item_0_sku": line1.product_version.product.content_object.id,
         "item_0_tax_amount": "0",
         "item_0_unit_price": str(line1.product_version.price),
-        "item_1_code": "course",
+        "item_1_code": "course run",
         "item_1_name": line2.product_version.description,
         "item_1_quantity": line2.quantity,
         "item_1_sku": line2.product_version.product.content_object.id,
@@ -178,12 +214,19 @@ def test_signed_payload(mocker):
         "locale": "en-us",
         "reference_number": make_reference_id(order),
         "override_custom_receipt_page": urljoin(base_url, "dashboard/"),
+        "override_custom_cancel_page": urljoin(base_url, "checkout/"),
         "profile_id": CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now.strftime(ISO_8601_FORMAT),
         "signed_field_names": ",".join(signed_field_names),
         "transaction_type": "sale",
         "transaction_uuid": transaction_uuid,
         "unsigned_field_names": "",
+        "merchant_defined_data1": "program" if is_program_product else "course run",
+        "merchant_defined_data2": content_object.readable_id
+        if is_program_product
+        else content_object.courseware_id,
+        "merchant_defined_data3": "1",
+        **other_merchant_fields,
     }
     now_mock.assert_called_once_with()
 
