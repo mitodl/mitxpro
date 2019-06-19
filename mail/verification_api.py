@@ -25,16 +25,10 @@ def send_verification_email(
         quote_plus(partial_token),
     )
 
-    api.send_messages(
-        list(
-            api.messages_for_recipients(
-                [
-                    (
-                        code.email,
-                        api.context_for_user(extra_context={"confirmation_url": url}),
-                    )
-                ],
-                EMAIL_VERIFICATION,
-            )
+    api.send_message(
+        api.message_for_recipient(
+            code.email,
+            api.context_for_user(extra_context={"confirmation_url": url}),
+            EMAIL_VERIFICATION,
         )
     )

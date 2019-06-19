@@ -29,6 +29,7 @@ from courses.models import (
     Program,
 )
 from courseware.api import enroll_in_edx_course_runs
+from ecommerce import mail_api
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.models import (
     Basket,
@@ -537,6 +538,9 @@ def enroll_user_in_order_items(order):
         if voucher_target == run:
             voucher.enrollment = enrollment
             voucher.save()
+        if enrollment.edx_enrolled:
+            mail_api.send_course_run_enrollment_email(enrollment)
+
     for program in programs:
         try:
             enrollment, created = ProgramEnrollment.all_objects.get_or_create(
