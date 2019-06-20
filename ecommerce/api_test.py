@@ -720,7 +720,7 @@ def test_validate_basket_unsigned_data_consent(basket_and_agreement, is_signed):
         user=basket_and_agreement.basket.user,
         coupon=basket_and_agreement.coupon,
     )
-    data_consent.consent_date = (now_in_utc() if is_signed else None)
+    data_consent.consent_date = now_in_utc() if is_signed else None
     data_consent.save()
 
     if not is_signed:
