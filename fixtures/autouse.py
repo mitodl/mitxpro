@@ -3,9 +3,18 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
-def patch_create_edx_user_task(mocker):
-    """Patches the create_edx_user_from_id task that is called after user creation"""
-    patched = mocker.patch("users.models.create_edx_user_from_id")
+def patch_create_courseware_user_signal(request, mocker):
+    """Patches the _create_courseware_user that is called after user creation"""
+    if "no_create_courseware_user_fixture" in request.keywords:
+        return
+    # patch the transaction on_commit so it immediately invokes the callback
+    mocker.patch(
+        "courseware.signals.transaction.on_commit",
+        side_effect=lambda callback: callback(),
+    )
+
+    # patch the method being called
+    patched = mocker.patch("courseware.signals._create_courseware_user")
     return patched
 
 
