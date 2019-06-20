@@ -8,9 +8,7 @@ from courseware import tasks
 @pytest.mark.django_db
 def test_create_edx_user_from_id(mocker):
     """Test that create_edx_user_from_id loads a user and calls the API method to create an edX user"""
-    patch_create_edx_user = mocker.patch("courseware.tasks.create_edx_user")
-    patch_create_edx_auth_token = mocker.patch("courseware.tasks.create_edx_auth_token")
+    patch_create_user = mocker.patch("courseware.tasks.create_user")
     user = UserFactory.create()
     tasks.create_edx_user_from_id.delay(user.id)
-    patch_create_edx_user.assert_called_once_with(user)
-    patch_create_edx_auth_token.assert_called_once_with(user)
+    patch_create_user.assert_called_once_with(user)

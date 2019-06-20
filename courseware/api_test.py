@@ -13,6 +13,7 @@ from rest_framework import status
 
 from courses.factories import CourseRunFactory
 from courseware.api import (
+    create_user,
     create_edx_user,
     create_edx_auth_token,
     get_valid_edx_api_auth,
@@ -44,6 +45,15 @@ def application(settings):
         authorization_grant_type="authorization-code",
         skip_authorization=True,
     )
+
+
+def test_create_user(user, mocker):
+    """Test that create_user calls the correct APIs"""
+    mock_create_edx_user = mocker.patch("courseware.api.create_edx_user")
+    mock_create_edx_auth_token = mocker.patch("courseware.api.create_edx_auth_token")
+    create_user(user)
+    mock_create_edx_user.assert_called_with(user)
+    mock_create_edx_auth_token.assert_called_with(user)
 
 
 @responses.activate

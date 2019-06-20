@@ -10,7 +10,11 @@ from courseware.constants import COURSEWARE_PLATFORM_CHOICES, PLATFORM_EDX
 class CoursewareUser(TimestampedModel):
     """Model representing a User in a courseware platform"""
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="courseware_users",
+    )
     platform = models.CharField(
         max_length=20, choices=COURSEWARE_PLATFORM_CHOICES, default=PLATFORM_EDX
     )
@@ -29,7 +33,11 @@ class CoursewareUser(TimestampedModel):
 class OpenEdxApiAuth(TimestampedModel):
     """Model that stores OAuth2 tokens for authenticating Open edX API calls"""
 
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="openedx_api_auth",
+    )
 
     refresh_token = models.CharField(max_length=128)
     access_token = models.CharField(null=True, max_length=128)

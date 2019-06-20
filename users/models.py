@@ -2,13 +2,12 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 import pycountry
 import ulid
 
 from mitxpro.models import TimestampedModel
-from courseware.tasks import create_edx_user_from_id
 
 # Defined in edX Profile model
 MALE = "m"
@@ -51,7 +50,6 @@ def _post_create_user(user):
         user (users.models.User): the user that was just created
     """
     LegalAddress.objects.create(user=user)
-    create_edx_user_from_id.delay(user.id)
 
 
 class UserManager(BaseUserManager):
@@ -59,6 +57,7 @@ class UserManager(BaseUserManager):
 
     use_in_migrations = True
 
+    @transaction.atomic
     def _create_user(self, username, email, password, **extra_fields):
         """Create and save a user with the given email and password"""
         email = self.normalize_email(email)

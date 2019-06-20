@@ -39,8 +39,24 @@ OPENEDX_AUTH_MAX_TTL_IN_SECONDS = 60 * 60
 ACCESS_TOKEN_HEADER_NAME = "X-Access-Token"
 
 
+def create_user(user):
+    """
+    Creates a user and any related artifacts in the courseware
+
+    Args:
+        user (user.models.User): the application user
+    """
+    create_edx_user(user)
+    create_edx_auth_token(user)
+
+
 def create_edx_user(user):
-    """Makes a request to create an equivalent user in Open edX"""
+    """
+    Makes a request to create an equivalent user in Open edX
+
+    Args:
+        user (user.models.User): the application user
+    """
     application = Application.objects.get(name=settings.OPENEDX_OAUTH_APP_NAME)
     expiry_date = now_in_utc() + timedelta(hours=settings.OPENEDX_TOKEN_EXPIRES_HOURS)
     access_token = AccessToken.objects.create(
@@ -74,8 +90,14 @@ def create_edx_user(user):
         )
         # edX responds with 200 on success, not 201
         if resp.status_code != status.HTTP_200_OK:
+            body = None
+            try:
+                # try to parse json, it could be HTML!
+                body = resp.json()
+            except:  # pylint: disable=bare-except
+                pass
             raise CoursewareUserCreateError(
-                f"Error creating Open edX user, got status_code={resp.status_code}"
+                f"Error creating Open edX user, got status_code={resp.status_code}, body={body}"
             )
 
 
@@ -85,10 +107,10 @@ def create_edx_auth_token(user):
     Creates refresh token for LMS for the user
 
     Args:
-        user(User): the user to create the record for
+        user(user.models.User): the user to create the record for
 
     Returns:
-        OpenEdXAuth: auth model with refresh_token populated
+        courseware.models.OpenEdXAuth: auth model with refresh_token populated
     """
 
     # In order to acquire auth tokens from Open edX we need to perform the following steps:

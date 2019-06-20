@@ -1,6 +1,7 @@
 """Tests for user models"""
 # pylint: disable=too-many-arguments, redefined-outer-name
 from django.core.exceptions import ValidationError
+from django.db import transaction
 import pytest
 import ulid
 
@@ -25,12 +26,13 @@ def test_create_user(
     exp_is_active,
     username,
     password,
-    patch_create_edx_user_task,
+    patch_create_courseware_user_signal,
 ):  # pylint: disable=too-many-arguments
     """Test creating a user"""
     email = "uSer@EXAMPLE.com"
     name = "Jane Doe"
-    user = create_func(username, email=email, name=name, password=password)
+    with transaction.atomic():
+        user = create_func(username, email=email, name=name, password=password)
 
     if username is not None:
         assert user.username == username
@@ -44,7 +46,7 @@ def test_create_user(
     assert user.is_active is exp_is_active
     if password is not None:
         assert user.check_password(password)
-    patch_create_edx_user_task.delay.assert_called_once_with(user.id)
+    patch_create_courseware_user_signal.assert_called_once_with(user)
 
     assert LegalAddress.objects.filter(user=user).exists()
 
