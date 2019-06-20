@@ -3,6 +3,7 @@ Tests for course views
 """
 # pylint: disable=unused-argument, redefined-outer-name
 import operator as op
+from datetime import timedelta
 
 import pytest
 from django.contrib.auth.models import AnonymousUser
@@ -16,6 +17,7 @@ from courses.factories import CourseFactory, CourseRunFactory, ProgramFactory
 from courses.models import CourseRunEnrollment, ProgramEnrollment
 from courses.serializers import CourseRunSerializer, CourseSerializer, ProgramSerializer
 from ecommerce.factories import ProductFactory, ProductVersionFactory
+from mitxpro.utils import now_in_utc
 
 pytestmark = [pytest.mark.django_db]
 
@@ -197,26 +199,37 @@ def test_delete_course_run(user_drf_client, course_runs):
 
 def test_course_catalog_view(client, catalog_page):
     """
-    Test that the course catalog view fetches live programs/courses and serializes
+    Test that the course catalog view fetches live and available programs/courses and serializes
     them for the catalog template.
     """
     program = ProgramFactory.create(live=True)
+    course = CourseFactory.create(program=program, live=True)
+    CourseRunFactory.create(
+        course=course, start_date=(now_in_utc() + timedelta(hours=1)), live=True
+    )
 
     program_page = ProgramPageFactory.create(program=program)
+
     course_page_in_program = CoursePageFactory.create(
-        course__program=program, course__live=True
+        course=course, course__program=program, course__live=True
+    )
+
+    # course without program
+    single_course = CourseFactory.create(live=True)
+    CourseRunFactory.create(
+        course=single_course, start_date=(now_in_utc() + timedelta(hours=1)), live=True
     )
     course_page_no_program = CoursePageFactory.create(
-        course__no_program=True, course__live=True
+        course=single_course, course__no_program=True, course__live=True
     )
-    CourseFactory.create(no_program=True, live=False)
-    exp_program_pages = [program_page]
-    exp_course_pages = [course_page_in_program, course_page_no_program]
+
+    program_pages = [program_page]
+    course_pages = [course_page_in_program, course_page_no_program]
 
     resp = client.get(catalog_page.get_url())
     assert resp.templates[0].name == "catalog_page.html"
-    assert list(resp.context["program_pages"]) == exp_program_pages
-    assert list(resp.context["course_pages"]) == exp_course_pages
+    assert list(resp.context["program_pages"]) == program_pages
+    assert list(resp.context["course_pages"]) == course_pages
 
 
 # pylint: disable=too-many-arguments

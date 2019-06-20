@@ -25,7 +25,6 @@ from wagtail.images.models import Image
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
-
 from courses.constants import DEFAULT_COURSE_IMG_PATH
 from cms.blocks import (
     FacultyBlock,
@@ -34,6 +33,7 @@ from cms.blocks import (
     UserTestimonialBlock,
 )
 from cms.constants import COURSE_INDEX_SLUG, PROGRAM_INDEX_SLUG
+from cms.utils import sort_and_filter_pages
 from mitxpro.views import get_js_settings_context
 
 
@@ -161,8 +161,9 @@ class CatalogPage(Page):
         return dict(
             **super().get_context(request),
             **get_js_settings_context(request),
-            program_pages=program_pages,
-            course_pages=course_pages,
+            all_pages=sort_and_filter_pages(list(program_pages) + list(course_pages)),
+            program_pages=sort_and_filter_pages(program_pages),
+            course_pages=sort_and_filter_pages(course_pages),
             default_image_path=DEFAULT_COURSE_IMG_PATH,
             hubspot_portal_id=settings.HUBSPOT_CONFIG.get("HUBSPOT_PORTAL_ID"),
             hubspot_new_courses_form_guid=settings.HUBSPOT_CONFIG.get(
@@ -812,6 +813,11 @@ class ProductPage(MetadataPageMixin, Page):
     def propel_career(self):
         """Gets the propel your career section child page"""
         return self._get_child_page_of_type(TextSection)
+
+    @property
+    def is_course_page(self):
+        """Gets the product page type, this is used for sorting product pages."""
+        return isinstance(self, CoursePage)
 
 
 class ProgramPage(ProductPage):
