@@ -1,6 +1,20 @@
 Release Notes
 =============
 
+Version 0.9.2
+-------------
+
+- Renumber migration (#613)
+- Make enrollment company blankable in admin (#585)
+- User menu (#560)
+- Validate data consent agreements have been signed (#580)
+- Added enrollment change management commands
+- add CatalogPage as subpage to homepage
+- add support for youtube videos
+- Add hubspot sync all management command and handle line sync errors
+- Move sync_hubspot_deal call out of atomic transaction (#571)
+- Changed wagtail URLs to use course/program readable id
+
 Version 0.9.1 (Released June 20, 2019)
 -------------
 
