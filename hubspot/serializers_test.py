@@ -58,7 +58,7 @@ def test_serialize_order(status):
     assert serialized_data == {
         "id": order.id,
         "name": f"XPRO-ORDER-{order.id}",
-        "purchaser": order.purchaser.id,
+        "purchaser": format_hubspot_id(order.purchaser.id),
         "status": ORDER_STATUS_MAPPING[status],
         "amount": line.product_version.price.to_eng_string(),
         "discount_amount": "0.00",
@@ -87,7 +87,7 @@ def test_serialize_order_with_coupon():
     assert serialized_data == {
         "id": order.id,
         "name": f"XPRO-ORDER-{order.id}",
-        "purchaser": order.purchaser.id,
+        "purchaser": format_hubspot_id(order.purchaser.id),
         "status": ORDER_STATUS_MAPPING[order.status],
         "amount": line.product_version.price.to_eng_string(),
         "discount_amount": discount.to_eng_string(),

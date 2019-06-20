@@ -45,6 +45,7 @@ class OrderToDealSerializer(serializers.ModelSerializer):
     company = serializers.SerializerMethodField(allow_null=True)
     lines = LineSerializer(many=True)
     b2b = serializers.SerializerMethodField()
+    purchaser = serializers.SerializerMethodField()
 
     _coupon_version = None
     _product_version = None
@@ -129,6 +130,10 @@ class OrderToDealSerializer(serializers.ModelSerializer):
             if company or transaction_id:
                 return True
         return False
+
+    def get_purchaser(self, instance):
+        """ Get the Hubspot ID for the purchaser"""
+        return format_hubspot_id(instance.purchaser.id)
 
     class Meta:
         fields = (
