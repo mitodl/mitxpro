@@ -1,0 +1,77 @@
+.profile-image {
+  border-radius: 100%;
+  background-color: $cornflower-blue;
+  color: $white;
+  width: 34px;
+  height: 34px;
+  overflow: hidden;
+}
+
+.dropdown-toggle {
+  &:after {
+    margin-left: -0.5em !important;
+    vertical-align: -0.5em !important;
+  }
+}
+
+.collapsed.dropdown-toggle::after {
+  border-top: 0.3em solid transparent;
+  border-left: 0.3em solid;
+  border-bottom: 0.3em solid transparent;
+  border-right: 0;
+  vertical-align: unset;
+}
+
+.dropdown-menu {
+  background-color: $white-smoke;
+  box-shadow: -5px 5px 10px grey;
+  border-color: $white-smoke;
+  border-radius: 5px;
+  right: 0px;
+  left: unset;
+
+  .dropdown-divider {
+    border-top: 1px dashed $black;
+    margin: 16px 25px;
+  }
+
+  .dropdown-item {
+    display: flex;
+    margin-top: 10px;
+    align-items: center;
+    font-family: Roboto;
+    font-size: 14px;
+    font-weight: 500;
+    color: $black;
+    line-height: 14px;
+
+    .dropdown-icon {
+      margin-right: 20px;
+    }
+
+  }
+}
+
+.icon-profile {
+  background: url("#{$static-path}/images/icon-user.png") left no-repeat;
+  height: 25px;
+  width: 25px;
+}
+
+.icon-settings {
+  background: url("#{$static-path}/images/icon-settings.png") left no-repeat;
+  height: 25px;
+  width: 25px;
+}
+
+.icon-dashboard {
+  background: url("#{$static-path}/images/icon-dashboard.png") left no-repeat;
+  height: 25px;
+  width: 25px;
+}
+
+.icon-logout {
+  background: url("#{$static-path}/images/icon-logout.png") left no-repeat;
+  height: 25px;
+  width: 25px;
+}
