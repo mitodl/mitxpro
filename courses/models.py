@@ -362,7 +362,7 @@ class EnrollmentModel(TimestampedModel, AuditableModel):
 
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     company = models.ForeignKey(
-        "ecommerce.Company", null=True, on_delete=models.PROTECT
+        "ecommerce.Company", null=True, blank=True, on_delete=models.PROTECT
     )
     change_status = models.CharField(
         choices=ENROLL_CHANGE_STATUS_CHOICES, max_length=20, null=True, blank=True
