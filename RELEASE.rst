@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.9.1
+Version 0.9.1 (Released June 20, 2019)
 -------------
 
 - Fix login redirect regression
