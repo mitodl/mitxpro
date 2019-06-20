@@ -715,12 +715,13 @@ def test_validate_basket_unsigned_data_consent(basket_and_agreement, is_signed):
     """
     All data consent agreements must be signed on checkout
     """
-    DataConsentUser.objects.create(
+    data_consent = DataConsentUser.objects.get(
         agreement=basket_and_agreement.agreement,
         user=basket_and_agreement.basket.user,
         coupon=basket_and_agreement.coupon,
-        consent_date=(now_in_utc() if is_signed else None),
     )
+    data_consent.consent_date = now_in_utc() if is_signed else None
+    data_consent.save()
 
     if not is_signed:
         with pytest.raises(ValidationError) as ex:
