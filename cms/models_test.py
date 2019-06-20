@@ -621,3 +621,12 @@ def test_program_page_propel_career():
     assert propel_career_page.action_title == "Action Title"
     assert propel_career_page.content == "<p>content</p>"
     assert propel_career_page.dark_theme
+
+
+def test_is_course_page():
+    """Returns True if object is type of CoursePage"""
+    program_page = ProgramPageFactory.create()
+    course_page = CoursePageFactory.create()
+
+    assert not program_page.is_course_page
+    assert course_page.is_course_page
