@@ -35,7 +35,7 @@ type Props = {
 }
 
 const emailNotificationText = (email: string): string =>
-  `We sent an email to ${email}. Please validate your address to continue.`
+  `We sent an email to ${email}. Please verify your address to continue.`
 
 export class RegisterEmailPage extends React.Component<Props> {
   async onSubmit(
