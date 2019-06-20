@@ -77,7 +77,7 @@ class LoginPasswordPage extends React.Component<Props> {
     return (
       <div className="container auth-page">
         <div className="row auth-header">
-          <h1 className="col-12">Login</h1>
+          <h1 className="col-12">Sign in</h1>
         </div>
         <div className="row auth-card card-shadow auth-form">
           {name && (

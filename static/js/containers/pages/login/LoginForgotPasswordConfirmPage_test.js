@@ -48,7 +48,7 @@ describe("LoginForgotPasswordConfirmPage", () => {
     [
       200,
       routes.login.begin,
-      "Your password has been updated, you may use it to login now."
+      "Your password has been updated, you may use it to sign in now."
     ],
 
     [
