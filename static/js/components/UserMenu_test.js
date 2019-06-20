@@ -33,9 +33,9 @@ describe("UserMenu component", () => {
   it("has a link to logout", () => {
     assert.equal(
       shallow(<UserMenu currentUser={user} />)
-        .find("MixedLink")
-        .at(2)
-        .prop("dest"),
+        .find("a")
+        .at(0)
+        .prop("href"),
       routes.logout
     )
   })
