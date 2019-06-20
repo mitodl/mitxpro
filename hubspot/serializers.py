@@ -13,6 +13,9 @@ ORDER_STATUS_MAPPING = {
     models.Order.REFUNDED: "processed",
 }
 
+ORDER_TYPE_B2B = "B2B"
+ORDER_TYPE_B2C = "B2C"
+
 
 class LineSerializer(serializers.ModelSerializer):
     """ Line Serializer for Hubspot """
@@ -41,15 +44,17 @@ class OrderToDealSerializer(serializers.ModelSerializer):
     close_date = serializers.SerializerMethodField(allow_null=True)
     amount = serializers.SerializerMethodField()
     discount_amount = serializers.SerializerMethodField()
+    discount_percent = serializers.SerializerMethodField()
     coupon_code = serializers.SerializerMethodField(allow_null=True)
     company = serializers.SerializerMethodField(allow_null=True)
     lines = LineSerializer(many=True)
-    b2b = serializers.SerializerMethodField()
     purchaser = serializers.SerializerMethodField()
+    order_type = serializers.SerializerMethodField()
+    payment_type = serializers.SerializerMethodField(allow_null=True)
+    payment_transaction = serializers.SerializerMethodField(allow_null=True)
 
     _coupon_version = None
     _product_version = None
-    _redemption = None
 
     def _get_coupon_version(self, instance):
         """Return the order coupon version"""
@@ -69,9 +74,7 @@ class OrderToDealSerializer(serializers.ModelSerializer):
 
     def _get_redemption(self, instance):
         """Return the order coupon redemption"""
-        if self._redemption is None:
-            self._redemption = CouponRedemption.objects.filter(order=instance).first()
-        return self._redemption
+        return CouponRedemption.objects.filter(order=instance).first()
 
     def get_name(self, instance):
         """ Return the order/deal name """
@@ -105,31 +108,54 @@ class OrderToDealSerializer(serializers.ModelSerializer):
             * self._get_product_version(instance).price
         ).to_eng_string()
 
+    def get_discount_percent(self, instance):
+        """ Get the discount percentage if any """
+
+        coupon_version = self._get_coupon_version(instance)
+        if not coupon_version:
+            return "0"
+
+        return (coupon_version.payment_version.amount * 100).to_eng_string()
+
     def get_company(self, instance):
         """ Get the company id if any """
-        redemption = self._get_redemption(instance)
-        if redemption:
-            company = redemption.coupon_version.payment_version.company
+        coupon_version = self._get_coupon_version(instance)
+        if coupon_version:
+            company = coupon_version.payment_version.company
             if company:
                 return company.name
 
+    def get_payment_type(self, instance):
+        """Get the payment type"""
+        coupon_version = self._get_coupon_version(instance)
+        if coupon_version:
+            payment_type = coupon_version.payment_version.payment_type
+            if payment_type:
+                return payment_type
+
+    def get_payment_transaction(self, instance):
+        """Get the payment transaction id if any"""
+        coupon_version = self._get_coupon_version(instance)
+        if coupon_version:
+            payment_transaction = coupon_version.payment_version.payment_transaction
+            if payment_transaction:
+                return payment_transaction
+
     def get_coupon_code(self, instance):
         """ Get the coupon code used for the order if any """
-        redemption = self._get_redemption(instance)
-        if redemption:
-            return redemption.coupon_version.coupon.coupon_code
+        coupon_version = self._get_coupon_version(instance)
+        if coupon_version:
+            return coupon_version.coupon.coupon_code
 
-    def get_b2b(self, instance):
-        """ Determine if this is a B2B order """
-        redemption = self._get_redemption(instance)
-        if redemption:
-            company = redemption.coupon_version.payment_version.company
-            transaction_id = (
-                redemption.coupon_version.payment_version.payment_transaction
-            )
+    def get_order_type(self, instance):
+        """ Determine if this is a B2B or B2C order """
+        coupon_version = self._get_coupon_version(instance)
+        if coupon_version:
+            company = coupon_version.payment_version.company
+            transaction_id = coupon_version.payment_version.payment_transaction
             if company or transaction_id:
-                return True
-        return False
+                return ORDER_TYPE_B2B
+        return ORDER_TYPE_B2C
 
     def get_purchaser(self, instance):
         """ Get the Hubspot ID for the purchaser"""
@@ -141,13 +167,16 @@ class OrderToDealSerializer(serializers.ModelSerializer):
             "name",
             "amount",
             "discount_amount",
+            "discount_percent",
             "close_date",
             "coupon_code",
             "lines",
             "purchaser",
             "status",
             "company",
-            "b2b",
+            "order_type",
+            "payment_type",
+            "payment_transaction",
         )
         model = models.Order
 
