@@ -6,7 +6,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [("courses", "0011_enrollment_change_status_fields")]
+    dependencies = [("courses", "0013_readable_id_required")]
 
     operations = [
         migrations.AlterField(
