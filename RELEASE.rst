@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.9.2
+Version 0.9.2 (Released June 21, 2019)
 -------------
 
 - Renumber migration (#613)
