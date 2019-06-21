@@ -235,7 +235,7 @@ def test_course_view(
     CoursePageFactory.create(course=course, parent=home_page)
 
     if has_unexpired_run:
-        run = CourseRunFactory.create(course=course)
+        run = CourseRunFactory.create(course=course, live=True)
     else:
         run = None
     if has_product and has_unexpired_run:
