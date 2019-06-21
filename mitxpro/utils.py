@@ -143,6 +143,13 @@ def partition(items, predicate=bool):
 
 
 def send_support_email(subject, message):
+    """
+    Send an email to support.
+
+    Args:
+        subject (str): The email subject.
+        message (str): The email message.
+    """
     try:
         with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
             mail.send_mail(
@@ -152,7 +159,7 @@ def send_support_email(subject, message):
                 [settings.EMAIL_SUPPORT],
                 connection=connection,
             )
-    except Exception:  # pylint: disable=broad-except
+    except:  # pylint: disable=bare-except
         log.exception("Exception sending email to admins regarding enrollment failure")
 
 
