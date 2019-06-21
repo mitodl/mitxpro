@@ -20,13 +20,7 @@ pytestmark = pytest.mark.django_db
 @pytest.mark.parametrize("username", [None, "user1"])
 @pytest.mark.parametrize("password", [None, "pass"])
 def test_create_user(
-    create_func,
-    exp_staff,
-    exp_superuser,
-    exp_is_active,
-    username,
-    password,
-    patch_create_courseware_user_signal,
+    create_func, exp_staff, exp_superuser, exp_is_active, username, password
 ):  # pylint: disable=too-many-arguments
     """Test creating a user"""
     email = "uSer@EXAMPLE.com"
@@ -46,7 +40,6 @@ def test_create_user(
     assert user.is_active is exp_is_active
     if password is not None:
         assert user.check_password(password)
-    patch_create_courseware_user_signal.assert_called_once_with(user)
 
     assert LegalAddress.objects.filter(user=user).exists()
 
