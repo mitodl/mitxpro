@@ -501,7 +501,7 @@ def enroll_user_in_order_items(order):
     for program in programs:
         try:
             enrollment, created = ProgramEnrollment.all_objects.get_or_create(
-                user=order.purchaser, program=program, defaults=dict(company=order)
+                user=order.purchaser, program=program, defaults=dict(company=company)
             )
             if not created and not enrollment.active:
                 enrollment.reactivate_and_save()
@@ -526,7 +526,7 @@ def format_enrollment_message(order, obj, details):
     """
     return (
         "{name}({email}): Order #{order_id}, {error_obj} #{obj_id} ({obj_title})\n\n{details}".format(
-            name=order.purchaser.name,
+            name=order.purchaser.username,
             email=order.purchaser.email,
             order_id=order.id,
             error_obj=("Run" if isinstance(obj, CourseRun) else "Program"),

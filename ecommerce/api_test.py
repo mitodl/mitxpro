@@ -905,8 +905,7 @@ def test_enroll_user_in_order_items_api_fail(mocker, user):
 @pytest.mark.parametrize("enroll_type", ["CourseRun", "Program"])
 def test_enroll_user_in_order_exception(mocker, user, enroll_type):
     """
-    Test that enroll_user_in_order_items logs a message and still creates local enrollment records
-    when the edX API request fails
+    Test that enroll_user_in_order_items sends an email to support if an enrollment fails
     """
     patched_send_support_email = mocker.patch("ecommerce.api.send_support_email")
     mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
@@ -931,7 +930,7 @@ def test_enroll_user_in_order_exception(mocker, user, enroll_type):
 
     patched_send_support_email.assert_called_once()
     assert patched_send_support_email.call_args[0][0] == ENROLL_ERROR_EMAIL_SUBJECT
-    for item in (user.name, user.email, f"Order #{order.id}"):
+    for item in (user.username, user.email, f"Order #{order.id}"):
         assert item in patched_send_support_email.call_args[0][1][0]
 
 
