@@ -291,11 +291,28 @@ describe("CheckoutForm", () => {
     basketItem.type = PRODUCT_TYPE_COURSERUN
     basketItem.courses = [basketItem.courses[0]]
     const run = basketItem.courses[0].courseruns[1]
+    const resetFormStub = sandbox.stub()
 
-    const inner = await renderForm()
+    const inner = await shallow(
+      // $FlowFixMe
+      <InnerCheckoutForm
+        onSubmit={onSubmitStub}
+        basket={basket}
+        errors={{}}
+        item={basketItem}
+        onMount={sandbox.stub()}
+        setValues={sandbox.stub()}
+        resetForm={resetFormStub}
+        updateProduct={updateProductStub}
+        values={{}}
+      />
+    )
 
-    inner.find("select").prop("onChange")({ target: { value: String(run.id) } })
+    await inner
+      .find("FormikConnect(FieldInner)[component='select']")
+      .prop("onChange")({ target: { value: String(run.id) } })
     sinon.assert.calledWith(updateProductStub, run.product_id, run.id)
+    sinon.assert.calledWith(resetFormStub)
   })
 
   //
