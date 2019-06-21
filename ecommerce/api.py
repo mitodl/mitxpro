@@ -6,6 +6,7 @@ import decimal
 import hashlib
 import hmac
 import logging
+from traceback import format_exc
 from urllib.parse import urljoin
 import uuid
 
@@ -41,11 +42,12 @@ from ecommerce.models import (
     Order,
 )
 from hubspot.task_helpers import sync_hubspot_deal
-from mitxpro.utils import now_in_utc
+from mitxpro.utils import now_in_utc, send_support_email
 
-ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 log = logging.getLogger(__name__)
 
+ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
 _REFERENCE_NUMBER_PREFIX = "MITXPRO-"
 
 
@@ -479,22 +481,60 @@ def enroll_user_in_order_items(order):
         voucher_target = voucher.product.content_object
 
     for run in runs:
-        enrollment, created = CourseRunEnrollment.all_objects.get_or_create(
-            user=order.purchaser,
-            run=run,
-            defaults=dict(company=company, edx_enrolled=edx_request_success),
-        )
-        if not created and not enrollment.active:
-            enrollment.reactivate_and_save()
+        try:
+            enrollment, created = CourseRunEnrollment.all_objects.get_or_create(
+                user=order.purchaser,
+                run=run,
+                defaults=dict(company=company, edx_enrolled=edx_request_success),
+            )
+            if not created and not enrollment.active:
+                enrollment.reactivate_and_save()
+        except:  # pylint: disable=bare-except
+            send_support_email(
+                ENROLL_ERROR_EMAIL_SUBJECT,
+                format_enrollment_message(order, run, format_exc()),
+            )
+            raise
         if voucher_target == run:
             voucher.enrollment = enrollment
             voucher.save()
     for program in programs:
-        enrollment, created = ProgramEnrollment.all_objects.get_or_create(
-            user=order.purchaser, program=program, defaults=dict(company=company)
-        )
-        if not created and not enrollment.active:
-            enrollment.reactivate_and_save()
+        try:
+            enrollment, created = ProgramEnrollment.all_objects.get_or_create(
+                user=order.purchaser, program=program, defaults=dict(company=order)
+            )
+            if not created and not enrollment.active:
+                enrollment.reactivate_and_save()
+        except:  # pylint: disable=bare-except
+            send_support_email(
+                ENROLL_ERROR_EMAIL_SUBJECT,
+                format_enrollment_message(order, program, format_exc()),
+            )
+            raise
+
+
+def format_enrollment_message(order, obj, details):
+    """
+    Return a formatted error message for a failed enrollment
+
+    Args:
+        order (Order): the order with a failed enrollment
+        obj (Program or CourseRun): the object that failed enrollment
+
+    Returns:
+        str: The formatted error message
+    """
+    return (
+        "{name}({email}): Order #{order_id}, {error_obj} #{obj_id} ({obj_title})\n\n{details}".format(
+            name=order.purchaser.name,
+            email=order.purchaser.email,
+            order_id=order.id,
+            error_obj=("Run" if isinstance(obj, CourseRun) else "Program"),
+            obj_id=obj.id,
+            obj_title=obj.title,
+            details=details,
+        ),
+    )
 
 
 def get_company_affiliation(order):

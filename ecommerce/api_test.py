@@ -42,6 +42,7 @@ from ecommerce.api import (
     complete_order,
     enroll_user_in_order_items,
     fetch_and_serialize_unused_coupons,
+    ENROLL_ERROR_EMAIL_SUBJECT,
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -899,6 +900,39 @@ def test_enroll_user_in_order_items_api_fail(mocker, user):
         CourseRunEnrollment.objects.filter(user=user, edx_enrolled=False).count() == 2
     )
     patched_enroll_in_runs.assert_called_once()
+
+
+@pytest.mark.parametrize("enroll_type", ["CourseRun", "Program"])
+def test_enroll_user_in_order_exception(mocker, user, enroll_type):
+    """
+    Test that enroll_user_in_order_items logs a message and still creates local enrollment records
+    when the edX API request fails
+    """
+    patched_send_support_email = mocker.patch("ecommerce.api.send_support_email")
+    mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
+    order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
+    basket = BasketFactory.create(user=user)
+    run_selections = CourseRunSelectionFactory.create_batch(2, basket=basket)
+    program = ProgramFactory.create()
+    LineFactory.create_batch(
+        3,
+        order=order,
+        product_version__product__content_object=factory.Iterator(
+            [selection.run for selection in run_selections] + [program]
+        ),
+    )
+    mocker.patch(
+        f"ecommerce.api.{enroll_type}Enrollment.all_objects.get_or_create",
+        side_effect=Exception(),
+    )
+
+    with pytest.raises(Exception):
+        enroll_user_in_order_items(order)
+
+    patched_send_support_email.assert_called_once()
+    assert patched_send_support_email.call_args[0][0] == ENROLL_ERROR_EMAIL_SUBJECT
+    for item in (user.name, user.email, f"Order #{order.id}"):
+        assert item in patched_send_support_email.call_args[0][1][0]
 
 
 def test_fetch_and_serialize_unused_coupons_empty(user):
