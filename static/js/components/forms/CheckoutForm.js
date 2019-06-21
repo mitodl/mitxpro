@@ -34,7 +34,8 @@ export type Actions = {
   setFieldError: SetFieldError,
   setErrors: (errors: Object) => void,
   setSubmitting: (submitting: boolean) => void,
-  setValues: (values: Values) => void
+  setValues: (values: Values) => void,
+  resetForm: () => void
 }
 type Errors = {
   runs?: string,
@@ -82,7 +83,14 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
   }
 
   renderBasketItem = () => {
-    const { item, values, setFieldError, setValues, updateProduct } = this.props
+    const {
+      item,
+      values,
+      setFieldError,
+      setValues,
+      resetForm,
+      updateProduct
+    } = this.props
 
     if (item.type === "program") {
       return (
@@ -126,7 +134,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
               component="select"
               name={`runs.${course.id}`}
               className="run-selector"
-              onChange={e => {
+              onChange={async e => {
                 setValues({
                   ...values,
                   runs: {
@@ -144,7 +152,8 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                   run => run.id === selectedRunId
                 )
                 if (run && run.product_id) {
-                  updateProduct(run.product_id, run.id, setFieldError)
+                  await updateProduct(run.product_id, run.id, setFieldError)
+                  resetForm()
                 }
               }}
             >
@@ -375,7 +384,6 @@ export class CheckoutForm extends React.Component<OuterProps> {
           dataConsent: false
         }}
         validate={this.validate}
-        enableReinitialize={true}
         render={props => (
           <InnerCheckoutForm
             {...props}
