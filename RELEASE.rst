@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.9.4
+-------------
+
+- Proper fix for edx user creation race condition
+- Fixed race conditions around user creation and repair scripts
+- fix styling of youtube video
+- Fixed race condition with AccessToken
+- User hubspot-formatted purchaser id in OrderToDealSerializer (#625)
+- Convert signout MixedLink to regular <a> tag (#621)
+- Fix broken tests for DataConsentUser (#624)
+- Clear runs from basket when selected item changes (#569)
+
 Version 0.9.2 (Released June 21, 2019)
 -------------
 
