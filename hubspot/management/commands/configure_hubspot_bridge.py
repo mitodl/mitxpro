@@ -44,7 +44,7 @@ CUSTOM_ECOMMERCE_PROPERTIES = {
                         "displayOrder": 1,
                         "hidden": False,
                     },
-                ]
+                ],
             },
             {
                 "name": "discount_percent",
@@ -325,25 +325,23 @@ def configure_hubspot_settings():
 
 
 def install_custom_properties():
-    for object_type in CUSTOM_ECOMMERCE_PROPERTIES.keys():
+    """Create or update all custom properties and groups"""
+    for object_type in CUSTOM_ECOMMERCE_PROPERTIES:
         for group in CUSTOM_ECOMMERCE_PROPERTIES[object_type]["groups"]:
-            sync_property_group(
-                object_type, group["name"], group["label"]
-            )
+            sync_property_group(object_type, group["name"], group["label"])
         for obj_property in CUSTOM_ECOMMERCE_PROPERTIES[object_type]["properties"]:
             sync_object_property(object_type, obj_property)
 
 
-
 def uninstall_custom_properties():
-    for object_type in CUSTOM_ECOMMERCE_PROPERTIES.keys():
+    """Delete all custom properties and groups"""
+    for object_type in CUSTOM_ECOMMERCE_PROPERTIES:
         for obj_property in CUSTOM_ECOMMERCE_PROPERTIES[object_type]["properties"]:
             if object_property_exists(object_type, obj_property):
                 delete_object_property(object_type, obj_property)
         for group in CUSTOM_ECOMMERCE_PROPERTIES[object_type]["groups"]:
             if property_group_exists(object_type, group):
                 delete_property_group(object_type, group)
-
 
 
 def get_hubspot_settings():

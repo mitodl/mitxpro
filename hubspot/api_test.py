@@ -24,10 +24,7 @@ test_object_type = "deals"
 @pytest.fixture
 def property_group():
     """ Return sample group JSON """
-    return {
-        "name": "grpup_name",
-        "label": "Group Label"
-    }
+    return {"name": "grpup_name", "label": "Group Label"}
 
 
 @pytest.mark.parametrize("request_method", ["GET", "PUT", "POST"])
@@ -275,12 +272,17 @@ def test_sync_object_property(
             )
         else:
             assert mock_hubspot_api_request.called_with(
-                "", f"/properties/v1/{test_object_type}/properties", "POST", mock_property
+                "",
+                f"/properties/v1/{test_object_type}/properties",
+                "POST",
+                mock_property,
             )
 
 
 @pytest.mark.parametrize("object_exists", [True, False])
-def test_sync_property_group(mocker, mock_hubspot_api_request, object_exists, property_group):
+def test_sync_property_group(
+    mocker, mock_hubspot_api_request, object_exists, property_group
+):
     """sync_object_property should call send_hubspot_request with the correct arguments"""
     mocker.patch("hubspot.api.object_property_exists", return_value=object_exists)
     group_name = property_group["name"]
@@ -303,7 +305,9 @@ def test_delete_property_group(mock_hubspot_api_request, property_group):
     """ delete_property_group should call send_hubspot_request with the correct arguments"""
     api.delete_object_property(test_object_type, property_group["name"])
     assert mock_hubspot_api_request.called_with(
-        f"named/{property_group['name']}", f"/properties/v1/{test_object_type}/groups", "DELETE"
+        f"named/{property_group['name']}",
+        f"/properties/v1/{test_object_type}/groups",
+        "DELETE",
     )
 
 
@@ -311,5 +315,7 @@ def test_delete_object_property(mock_hubspot_api_request, property_group):
     """ delete_object_property should call send_hubspot_request with the correct arguments"""
     api.delete_object_property(test_object_type, property_group["name"])
     assert mock_hubspot_api_request.called_with(
-        f"named/{ property_group['name']}", f"/properties/v1/{test_object_type}/groups", "DELETE"
+        f"named/{ property_group['name']}",
+        f"/properties/v1/{test_object_type}/groups",
+        "DELETE",
     )

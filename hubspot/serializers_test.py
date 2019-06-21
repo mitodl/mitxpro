@@ -19,6 +19,8 @@ from hubspot.serializers import (
     LineSerializer,
     OrderToDealSerializer,
     ORDER_STATUS_MAPPING,
+    ORDER_TYPE_B2C,
+    ORDER_TYPE_B2B,
 )
 
 pytestmark = [pytest.mark.django_db]
@@ -69,7 +71,10 @@ def test_serialize_order(status):
         ),
         "coupon_code": None,
         "company": None,
-        "b2b": False,
+        "payment_type": None,
+        "payment_transaction": None,
+        "discount_percent": "0",
+        "order_type": ORDER_TYPE_B2C,
         "lines": [LineSerializer(instance=line).data],
     }
 
@@ -98,6 +103,11 @@ def test_serialize_order_with_coupon():
         ),
         "coupon_code": coupon_redemption.coupon_version.coupon.coupon_code,
         "company": coupon_redemption.coupon_version.payment_version.company.name,
-        "b2b": True,
+        "order_type": ORDER_TYPE_B2B,
+        "payment_type": coupon_redemption.coupon_version.payment_version.payment_type,
+        "payment_transaction": coupon_redemption.coupon_version.payment_version.payment_transaction,
+        "discount_percent": (
+            coupon_redemption.coupon_version.payment_version.amount * 100
+        ).to_eng_string(),
         "lines": [LineSerializer(instance=line).data],
     }

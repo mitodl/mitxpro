@@ -6,9 +6,9 @@ https://developers.hubspot.com/docs/methods/ecomm-bridge/ecomm-bridge-overview
 import logging
 import re
 from urllib.parse import urljoin, urlencode
+
 import requests
 from django.conf import settings
-from requests import HTTPError
 
 from mitxpro.utils import now_in_utc
 
@@ -288,7 +288,8 @@ def sync_object_property(object_type, property_dict):
     missing_fields = required_fields.difference(property_dict.keys())
     if missing_fields:
         raise KeyError(
-            f"The following property attributes are required: %s", ",".join(missing_fields)
+            f"The following property attributes are required: %s",
+            ",".join(missing_fields),
         )
 
     for key in property_dict.keys():
@@ -305,10 +306,7 @@ def sync_object_property(object_type, property_dict):
         endpoint = ""
 
     response = send_hubspot_request(
-        endpoint,
-        f"/properties/v1/{object_type}/properties",
-        method,
-        body=property_dict,
+        endpoint, f"/properties/v1/{object_type}/properties", method, body=property_dict
     )
     response.raise_for_status()
     return response.json()
@@ -326,9 +324,7 @@ def get_object_property(object_type, property_name):
         dict:  the property attributes
     """
     response = send_hubspot_request(
-        property_name,
-        f"/properties/v1/{object_type}/properties/named"
-        "GET",
+        property_name, f"/properties/v1/{object_type}/properties/named", "GET"
     )
     response.raise_for_status()
     return response.json()
@@ -348,7 +344,7 @@ def object_property_exists(object_type, property_name):
     try:
         get_object_property(object_type, property_name)
         return True
-    except HTTPError:
+    except requests.HTTPError:
         return False
 
 
@@ -386,9 +382,7 @@ def get_property_group(object_type, group_name):
         dict:  The group attributes
     """
     response = send_hubspot_request(
-        group_name,
-        f"/properties/v1/{object_type}/groups/named",
-        "GET",
+        group_name, f"/properties/v1/{object_type}/groups/named", "GET"
     )
     response.raise_for_status()
     return response.json()
@@ -408,7 +402,7 @@ def property_group_exists(object_type, group_name):
     try:
         get_property_group(object_type, group_name)
         return True
-    except HTTPError:
+    except requests.HTTPError:
         return False
 
 
@@ -437,10 +431,7 @@ def sync_property_group(object_type, name, label):
         endpoint = ""
 
     response = send_hubspot_request(
-        endpoint,
-        f"/properties/v1/{object_type}/groups",
-        method,
-        body=body,
+        endpoint, f"/properties/v1/{object_type}/groups", method, body=body
     )
     response.raise_for_status()
     return response.json()
