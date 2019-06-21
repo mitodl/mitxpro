@@ -26,6 +26,11 @@
 
       &.youtube-video {
         height: 280px;
+
+        iframe {
+          width: 100%;
+          height: 100%;
+        }
       }
     }
   }
