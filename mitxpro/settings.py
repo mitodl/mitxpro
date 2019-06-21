@@ -264,6 +264,8 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.associate_user",
     # activate the user
     "authentication.pipeline.user.activate_user",
+    # create the user's edx user and auth
+    "authentication.pipeline.user.create_courseware_user",
     # Populate the extra_data field in the social record with the values
     # specified by settings (and the default ones like access_token, etc).
     "social_core.pipeline.social_auth.load_extra_data",

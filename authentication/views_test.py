@@ -119,6 +119,8 @@ class AuthStateMachine(RuleBasedStateMachine):
     methods to define transitions into and (optionally) out of that state.
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     ConfirmationSentAuthStates = Bundle("confirmation-sent")
     ConfirmationRedeemedAuthStates = Bundle("confirmation-redeemed")
     RegisterExtraDetailsAuthStates = Bundle("register-details-extra")
@@ -134,6 +136,8 @@ class AuthStateMachine(RuleBasedStateMachine):
     email_send_patcher = patch(
         "mail.verification_api.send_verification_email", autospec=True
     )
+    courseware_api_patcher = patch("authentication.pipeline.user.courseware_api")
+    courseware_tasks_patcher = patch("authentication.pipeline.user.courseware_tasks")
 
     def __init__(self):
         """Setup the machine"""
@@ -144,6 +148,8 @@ class AuthStateMachine(RuleBasedStateMachine):
 
         # wrap the execution in a patch()
         self.mock_email_send = self.email_send_patcher.start()
+        self.mock_courseware_api = self.courseware_api_patcher.start()
+        self.mock_courseware_tasks = self.courseware_tasks_patcher.start()
 
         # django test client
         self.client = Client()
@@ -160,8 +166,10 @@ class AuthStateMachine(RuleBasedStateMachine):
         # clear the mailbox
         del mail.outbox[:]
 
-        # stop the patch
+        # stop the patches
         self.email_send_patcher.stop()
+        self.courseware_api_patcher.stop()
+        self.courseware_tasks_patcher.stop()
 
         # end the transaction with a rollback to cleanup any state
         transaction.set_rollback(True)

@@ -1,4 +1,6 @@
-"""Auth pipline functions for email authentication"""
+"""Auth pipline functions for user authentication"""
+import logging
+
 import ulid
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
@@ -16,8 +18,13 @@ from authentication.exceptions import (
 from authentication.utils import SocialAuthState
 
 from compliance import api as compliance_api
+from courseware import api as courseware_api, tasks as courseware_tasks
 from hubspot.task_helpers import sync_hubspot_user
 from users.serializers import UserSerializer, ProfileSerializer
+
+log = logging.getLogger()
+
+CREATE_COURSEWARE_USER_RETRY_DELAY = 60
 
 # pylint: disable=keyword-arg-before-vararg
 
@@ -209,5 +216,30 @@ def activate_user(
     ):
         user.is_active = True
         user.save()
+
+    return {}
+
+
+def create_courseware_user(
+    strategy, backend, user=None, is_new=False, **kwargs
+):  # pylint: disable=unused-argument
+    """
+    Create a user in the courseware, deferring a retry via celery if it fails
+
+    Args:
+        user (users.models.User): the user that was just created
+        is_new (bool): True if the user was just created
+    """
+    if not is_new or not user.is_active:
+        return {}
+
+    try:
+        courseware_api.create_user(user)
+    except Exception:  # pylint: disable=broad-except
+        log.exception("Error creating courseware user records on User create")
+        # try again later
+        courseware_tasks.create_user_from_id.apply_async(
+            (user.id,), countdown=CREATE_COURSEWARE_USER_RETRY_DELAY
+        )
 
     return {}

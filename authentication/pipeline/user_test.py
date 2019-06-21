@@ -419,3 +419,46 @@ def test_activate_user(
     if not user.is_active and is_new:
         # only if the user is inactive and just registered
         assert user.is_active is expected
+
+
+@pytest.mark.parametrize("raises_error", [True, False])
+@pytest.mark.parametrize(
+    "is_active, is_new, creates_records",
+    [
+        [True, True, True],
+        [True, False, False],
+        [False, True, False],
+        [False, False, False],
+    ],
+)
+def test_create_courseware_user(
+    mocker, user, raises_error, is_active, is_new, creates_records
+):  # pylint: disable=too-many-arguments
+    """Test that activate_user takes the correct action"""
+    user.is_active = is_active
+
+    mock_create_user_api = mocker.patch(
+        "authentication.pipeline.user.courseware_api.create_user"
+    )
+    if raises_error:
+        mock_create_user_api.side_effect = Exception("error")
+    mock_create_user_task = mocker.patch(
+        "authentication.pipeline.user.courseware_tasks.create_user_from_id"
+    )
+
+    assert (
+        user_actions.create_courseware_user(None, None, user=user, is_new=is_new) == {}
+    )
+
+    if creates_records:
+        mock_create_user_api.assert_called_once_with(user)
+
+        if raises_error:
+            mock_create_user_task.apply_async.assert_called_once_with(
+                (user.id,), countdown=60
+            )
+        else:
+            mock_create_user_task.apply_async.assert_not_called()
+    else:
+        mock_create_user_api.assert_not_called()
+        mock_create_user_task.apply_async.assert_not_called()
