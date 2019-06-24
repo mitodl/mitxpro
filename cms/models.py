@@ -80,6 +80,13 @@ class CourseObjectIndexPage(Page):
             return subpage.specific.route(request, remaining_components)
         return super().route(request, path_components)
 
+    def serve(self, request, *args, **kwargs):
+        """
+        For index pages we raise a 404 because these pages do not have a template
+        of their own and we do not expect a page to available at their slug.
+        """
+        raise Http404
+
 
 class CourseIndexPage(CourseObjectIndexPage):
     """
@@ -191,6 +198,13 @@ class CourseProgramChildPage(Page):
             self.title = self.__class__._meta.verbose_name.title()
         self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
         super().save(*args, **kwargs)
+
+    def serve(self, request, *args, **kwargs):
+        """
+        As the name suggests these pages are going to be children of some other page. They are not
+        designed to be viewed on their own so we raise a 404 if someone tries to access their slug.
+        """
+        raise Http404
 
 
 # Cannot name TestimonialPage otherwise pytest will try to pick up as a test
