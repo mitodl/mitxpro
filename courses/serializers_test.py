@@ -81,7 +81,7 @@ def test_base_course_serializer():
 def test_serialize_course(mock_context, with_runs):
     """Test Course serialization"""
     user = mock_context["request"].user
-    course_run = CourseRunFactory.create(course__no_program=True)
+    course_run = CourseRunFactory.create(course__no_program=True, live=True)
     course = course_run.course
 
     # Create expired, enrollment_ended, future, and enrolled course runs

@@ -200,7 +200,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             (
                 course_run.start_date
                 for course_run in self.courseruns.all()
-                if course_run.start_date > now
+                if course_run.live and course_run.start_date > now
             ),
             default=None,
         )
@@ -214,7 +214,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             CourseRun or None: An unexpired course run
         """
         return first_matching_item(
-            self.courseruns.all().order_by("start_date"),
+            self.courseruns.filter(live=True).order_by("start_date"),
             lambda course_run: course_run.is_unexpired,
         )
 
@@ -226,7 +226,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         return list(
             filter(
                 op.attrgetter("is_unexpired"),
-                self.courseruns.all().order_by("start_date"),
+                self.courseruns.filter(live=True).order_by("start_date"),
             )
         )
 

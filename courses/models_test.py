@@ -58,7 +58,7 @@ def test_program_next_run_date():
     now = now_in_utc()
     future_dates = [now + timedelta(hours=1), now + timedelta(hours=2)]
     CourseRunFactory.create_batch(
-        2, course__program=program, start_date=factory.Iterator(future_dates)
+        2, course__program=program, start_date=factory.Iterator(future_dates), live=True
     )
     assert program.next_run_date == future_dates[0]
 
@@ -183,7 +183,11 @@ def test_course_first_unexpired_run():
     end_date = now + timedelta(days=100)
     enr_end_date = now + timedelta(days=100)
     first_run = CourseRunFactory.create(
-        start_date=now, course=course, end_date=end_date, enrollment_end=enr_end_date
+        start_date=now,
+        course=course,
+        end_date=end_date,
+        enrollment_end=enr_end_date,
+        live=True,
     )
     CourseRunFactory.create(
         start_date=now + timedelta(days=50),
@@ -204,7 +208,11 @@ def test_program_first_unexpired_run():
     end_date = now + timedelta(days=100)
     enr_end_date = now + timedelta(days=100)
     first_run = CourseRunFactory.create(
-        start_date=now, course=course, end_date=end_date, enrollment_end=enr_end_date
+        start_date=now,
+        course=course,
+        end_date=end_date,
+        enrollment_end=enr_end_date,
+        live=True,
     )
 
     # create another course and course run in program
@@ -231,7 +239,7 @@ def test_course_next_run_date():
     now = now_in_utc()
     future_dates = [now + timedelta(hours=1), now + timedelta(hours=2)]
     CourseRunFactory.create_batch(
-        2, course=course, start_date=factory.Iterator(future_dates)
+        2, course=course, start_date=factory.Iterator(future_dates), live=True
     )
     assert course.next_run_date == future_dates[0]
 
@@ -257,7 +265,14 @@ def test_course_unexpired_runs():
         course=course,
         start_date=factory.Iterator(start_dates),
         end_date=factory.Iterator(end_dates),
+        live=True,
     )
+
+    # Add a run that is not live and shouldn't show up in unexpired list
+    CourseRunFactory.create(
+        course=course, start_date=start_dates[0], end_date=end_dates[0], live=False
+    )
+
     assert len(course.unexpired_runs) == 1
     course_run = course.unexpired_runs[0]
     assert course_run.start_date == start_dates[0]
@@ -268,7 +283,7 @@ def test_course_available_runs():
     """enrolled runs for a user should not be in the list of available runs"""
     user = UserFactory.create()
     course = CourseFactory.create()
-    runs = CourseRunFactory.create_batch(2, course=course)
+    runs = CourseRunFactory.create_batch(2, course=course, live=True)
     runs.sort(key=lambda run: run.start_date)
     CourseRunEnrollmentFactory.create(run=runs[0], user=user)
     assert course.available_runs(user) == [runs[1]]
