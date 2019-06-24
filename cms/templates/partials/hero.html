@@ -17,7 +17,7 @@
         </div>
         <div class="mt-5 mb-5">
           {% if action_title and action_url %}
-            <a id="actionButton" class="enroll-button" href="{{ action_url }}">{{ action_title }}</a>
+            <a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="{{ action_url }}">{{ action_title }}</a>
           {% else %}
             {% if not user.is_anonymous %}
               {% if not enrolled and product_id %}
