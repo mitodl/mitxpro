@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.9.4
+Version 0.9.4 (Released June 24, 2019)
 -------------
 
 - Proper fix for edx user creation race condition
