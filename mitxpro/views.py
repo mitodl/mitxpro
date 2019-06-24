@@ -4,8 +4,10 @@ mitxpro views
 import json
 
 from django.conf import settings
+from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseNotFound, HttpResponseServerError
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
@@ -60,6 +62,11 @@ def handler500(request):
         "500.html", request=request, context=get_js_settings_context(request)
     )
     return HttpResponseServerError(response)
+
+
+def cms_signin_redirect_to_site_signin(request):
+    """Redirect wagtail admin signin to site signin page"""
+    return redirect_to_login(reverse("wagtailadmin_home"), login_url="/signin")
 
 
 def restricted(request):

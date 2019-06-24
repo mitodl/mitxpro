@@ -33,6 +33,14 @@ def test_restricted_view(client, admin_client):
     assert admin_client.get(reverse("ecommerce-admin")).status_code == 200
 
 
+def test_cms_signin_redirect_to_site_signin(client):
+    """
+    Test that the cms/login redirects users to site signin page.
+    """
+    response = client.get("/cms", follow=True)
+    assert response.request["PATH_INFO"] == "/signin/"
+
+
 def test_webpack_url(mocker, settings, client):
     """Verify that webpack bundle src shows up in production"""
     settings.GA_TRACKING_ID = "fake"
