@@ -520,20 +520,19 @@ def format_enrollment_message(order, obj, details):
     Args:
         order (Order): the order with a failed enrollment
         obj (Program or CourseRun): the object that failed enrollment
+        details (str): Details of the error (typically a stack trace)
 
     Returns:
         str: The formatted error message
     """
-    return (
-        "{name}({email}): Order #{order_id}, {error_obj} #{obj_id} ({obj_title})\n\n{details}".format(
-            name=order.purchaser.username,
-            email=order.purchaser.email,
-            order_id=order.id,
-            error_obj=("Run" if isinstance(obj, CourseRun) else "Program"),
-            obj_id=obj.id,
-            obj_title=obj.title,
-            details=details,
-        ),
+    return "{name}({email}): Order #{order_id}, {error_obj} #{obj_id} ({obj_title})\n\n{details}".format(
+        name=order.purchaser.username,
+        email=order.purchaser.email,
+        order_id=order.id,
+        error_obj=("Run" if isinstance(obj, CourseRun) else "Program"),
+        obj_id=obj.id,
+        obj_title=obj.title,
+        details=details,
     )
 
 
