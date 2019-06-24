@@ -30,6 +30,7 @@ from mitxpro.views import (
     AppContextView,
     handler404 as not_found_handler,
     handler500 as server_error_handler,
+    cms_signin_redirect_to_site_signin,
 )
 
 
@@ -74,6 +75,9 @@ urlpatterns = [
     path("", include("social_django.urls", namespace="social")),
     re_path(r"^dashboard/", index, name="user-dashboard"),
     # Wagtail
+    re_path(
+        r"^cms/login", cms_signin_redirect_to_site_signin, name="wagtailadmin_login"
+    ),
     re_path(r"^cms/", include(wagtailadmin_urls)),
     re_path(r"^documents/", include(wagtaildocs_urls)),
     path("robots.txt", include("robots.urls")),
