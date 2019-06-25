@@ -6,6 +6,7 @@ from django.db import transaction
 import pycountry
 from rest_framework import serializers
 
+from ecommerce.api import fetch_and_serialize_unused_coupons
 from mitxpro.serializers import WriteableSerializerMethodField
 from users.models import LegalAddress, User, Profile
 from hubspot.task_helpers import sync_hubspot_user
@@ -186,6 +187,7 @@ class UserSerializer(serializers.ModelSerializer):
     username = WriteableSerializerMethodField()
     legal_address = LegalAddressSerializer(allow_null=True)
     profile = UserProfileSerializer(allow_null=True, required=False)
+    unused_coupons = serializers.SerializerMethodField()
 
     def validate_email(self, value):
         """Empty validation function, but this is required for WriteableSerializerMethodField"""
@@ -202,6 +204,12 @@ class UserSerializer(serializers.ModelSerializer):
     def get_username(self, instance):
         """Returns the username or None in the case of AnonymousUser"""
         return getattr(instance, "username", None)
+
+    def get_unused_coupons(self, instance):
+        """Returns a list of unused coupons"""
+        if not instance.is_anonymous:
+            return fetch_and_serialize_unused_coupons(instance)
+        return []
 
     @transaction.atomic
     def create(self, validated_data):
@@ -276,6 +284,7 @@ class UserSerializer(serializers.ModelSerializer):
             "is_authenticated",
             "created_on",
             "updated_on",
+            "unused_coupons",
         )
         read_only_fields = (
             "username",
@@ -283,6 +292,7 @@ class UserSerializer(serializers.ModelSerializer):
             "is_authenticated",
             "created_on",
             "updated_on",
+            "unused_coupons",
         )
 
 

@@ -44,7 +44,7 @@ def test_get_user_by_me(mocker, client, user, is_anonymous):
         client.force_login(user)
 
     patched_unused_coupon_api = mocker.patch(
-        "users.views.fetch_and_serialize_unused_coupons",
+        "users.serializers.fetch_and_serialize_unused_coupons",
         return_value=[{"serialized": "data"}],
     )
     resp = client.get(reverse("users_api-me"))
@@ -60,6 +60,7 @@ def test_get_user_by_me(mocker, client, user, is_anonymous):
             "is_anonymous": True,
             "is_authenticated": False,
             "profile": None,
+            "unused_coupons": [],
         }
         patched_unused_coupon_api.assert_not_called()
     else:
