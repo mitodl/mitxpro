@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% load static render_bundle %}
+
+{% block title %}{{ site_name }}{% endblock %}
+
+{% block headercontent %}
+  <div id="header"></div>
+  {% render_bundle 'header' %}
+{% endblock %}
+
+
+{% block content %}
+<div class="error-block">
+  <div class="container text-center">
+    <h2><strong>Oops!</strong> it looks like you have encountered an error. We are unable to find the page you are looking for.</h2>
+    <img class="not-found-img" src="{% static 'images/404.png' %}" alt="Page not found">
+    <div class="bottom-holder">
+      <span class="title">Here's a helpful link to get you back on track:</span>
+      <a href="{% url 'wagtail_serve' '' %}" class="btn btn-denim-blue home-link">Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

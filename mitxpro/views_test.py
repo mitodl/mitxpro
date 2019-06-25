@@ -18,6 +18,15 @@ def test_index_view(client):
     assert response.status_code == 200
 
 
+def test_not_found_view(client):
+    """
+    Test that the 404 view fetches correct template.
+    """
+    resp = client.get("/some/not/found/url/")
+    assert resp.templates[0].name == "404.html"
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+
+
 def test_restricted_view(client, admin_client):
     """Verify the restricted view is only available to admins"""
     assert client.get(reverse("ecommerce-admin")).status_code == 403

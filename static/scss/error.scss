@@ -1,0 +1,61 @@
+// sass-lint:disable mixins-before-declarations
+.error-block {
+  min-height: calc(100vh - 98px);
+  background: url(#{$static-path}/images/transparent-pixels-bg.png) repeat-x 50% 100%;
+  border-top: 1px solid black;
+
+  .container {
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+
+  h2 {
+    margin: 0 0 40px;
+    font-size: 18px;
+    font-weight: 600;
+
+    strong {
+      font-size: 39px;
+      font-weight: bold;
+      letter-spacing: 1.39px;
+      margin-right: 10px;
+    }
+  }
+
+  .not-found-img {
+    display: block;
+    margin: 0 auto 10px;
+    width: 330px;
+    @include media-breakpoint-up(md) {
+      width: 596px;
+      margin: 0 auto -106px;
+    }
+  }
+
+  .server-error-img {
+    position: relative;
+    top: 50%;
+    width: 358px;
+  }
+
+  .title {
+    display: block;
+    font-weight: 600;
+    font-size: 16px;
+    margin: 0 0 20px;
+  }
+
+  .bottom-holder {
+
+    @include media-breakpoint-up(md) {
+      padding-right: 75px;
+    }
+
+    .home-link {
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 30px;
+      min-width: 117px;
+    }
+  }
+}

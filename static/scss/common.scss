@@ -63,6 +63,17 @@ a.link-button {
   font-size: 20px;
 }
 
+.btn-denim-blue {
+  background-color: $denim-blue;
+  border-color: $denim-blue;
+  color: white;
+
+  &:hover {
+    color: white !important;
+  }
+}
+
+
 .link-light-blue {
   &, &:hover, &:visited, &:active {
     color: $light-blue;
