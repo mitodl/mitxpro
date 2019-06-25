@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.10.1
+--------------
+
+- #659 Catalog: prices are not displayed for some courses/programs
+- Add redirect for cancellation and certain merchant fields to CyberSource payload (#604)
+- Initial commit
+- Remove texts in footer.
+- Replace "login" with "Sign in"
+- #464 Subnav font style should conform to designs
+- Replace "validate" with "verify"
+
 Version 0.10.0 (Released June 25, 2019)
 --------------
 
