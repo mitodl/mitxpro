@@ -130,7 +130,7 @@ describe("RegisterEmailPage", () => {
       "email-sent": {
         type:  ALERT_TYPE_TEXT,
         props: {
-          text: `We sent an email to ${email}. Please validate your address to continue.`
+          text: `We sent an email to ${email}. Please verify your address to continue.`
         }
       }
     })
