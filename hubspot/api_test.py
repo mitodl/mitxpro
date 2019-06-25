@@ -24,7 +24,7 @@ test_object_type = "deals"
 @pytest.fixture
 def property_group():
     """ Return sample group JSON """
-    return {"name": "grpup_name", "label": "Group Label"}
+    return {"name": "group_name", "label": "Group Label"}
 
 
 @pytest.mark.parametrize("request_method", ["GET", "PUT", "POST"])
