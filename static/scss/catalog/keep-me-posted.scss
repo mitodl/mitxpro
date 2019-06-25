@@ -1,4 +1,4 @@
-// sass-lint:disable mixins-before-declarations
+// sass-lint:disable mixins-before-declarations placeholder-in-extend
 .posted-block {
   width: 100%;
   padding: 75px 0;
@@ -103,20 +103,16 @@
     }
 
     input[type="submit"] {
+      @extend .btn;
+      @extend .btn-primary;
       width: 230px;
       height: 70px;
-      font-size: larger;
-      font-weight: 500;
+      font-size: x-large;
+      font-weight: 400;
       margin: 0 auto 20px;
       display: block;
-      font-family: inherit;
       position: relative;
       top: 20px;
-      border: none;
-      color: white;
-      background: $primary;
-      border-radius: 0.25rem;
-      outline: none;
       padding: 5px 10px;
     }
   }

@@ -4,8 +4,12 @@
   display: block;
   box-shadow: 0 0 13px rgba(0, 0, 0, 0.5);
 
-  .navbar-nav > li > a.active {
-    color: $blue !important;
+  .navbar-nav > li > a {
+    color: black !important;
+
+    &.active {
+      color: $blue !important;
+    }
   }
 
   .navbar-toggler {

@@ -22,7 +22,8 @@ def test_home_page_view(client):
     content = resp.content.decode("utf-8")
 
     assert (
-        f'<a id="actionButton" class="enroll-button" href="#">Watch Now</a>' in content
+        f'<a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="#">Watch Now</a>'
+        in content
     )
     assert reverse("user-dashboard") not in content
     assert reverse("checkout-page") not in content
