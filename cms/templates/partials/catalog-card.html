@@ -17,10 +17,11 @@
                     </a>
             </h3>
             <ul>
-                {% if courseware_page.product.current_price %}
+                {% firstof courseware_page.product.current_price courseware_page.product.first_unexpired_run.current_price as price %}
+                {% if price %}
                     <li>
                         <strong>Price:</strong>
-                        ${{ courseware_page.product.current_price|floatformat:"0"|intcomma }}
+                        ${{ price|floatformat:"0"|intcomma }}
                     </li>
                 {% endif %}
                 {% if object_type == "program" %}
