@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.10.0
+Version 0.10.0 (Released June 25, 2019)
 --------------
 
 - catalog page sorting based on start_date
