@@ -85,4 +85,8 @@ def test_dashboard(verb):
     client = Client(enforce_csrf_checks=True)
     method = getattr(client, verb)
     response = method(reverse("user-dashboard"))
-    assert response.status_code == status.HTTP_200_OK
+    if verb == "get":
+        assert response.status_code == status.HTTP_200_OK
+    else:
+        assert response.status_code == status.HTTP_302_FOUND
+        assert response.url == reverse("user-dashboard")

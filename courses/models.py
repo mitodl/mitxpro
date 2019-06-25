@@ -277,7 +277,7 @@ class CourseRun(TimestampedModel):
     )
     product = GenericRelation(Product, related_query_name="course_run")
     title = models.CharField(max_length=255)
-    courseware_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    courseware_id = models.CharField(max_length=255, unique=True)
     courseware_url_path = models.CharField(max_length=500, blank=True, null=True)
     start_date = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True, db_index=True)
