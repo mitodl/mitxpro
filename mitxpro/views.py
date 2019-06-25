@@ -5,8 +5,10 @@ import json
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseNotFound, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from raven.contrib.django.raven_compat.models import client as sentry
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -39,6 +41,22 @@ def index(request, **kwargs):  # pylint: disable=unused-argument
     The index view
     """
     return render(request, "index.html", context=get_js_settings_context(request))
+
+
+def handler404(request, exception):
+    """404: NOT FOUND ERROR handler"""
+    response = render_to_string(
+        "404.html", request=request, context=get_js_settings_context(request)
+    )
+    return HttpResponseNotFound(response)
+
+
+def handler500(request):
+    """500 INTERNAL SERVER ERROR handler"""
+    response = render_to_string(
+        "500.html", request=request, context=get_js_settings_context(request)
+    )
+    return HttpResponseServerError(response)
 
 
 def restricted(request):

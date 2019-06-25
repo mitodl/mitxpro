@@ -24,7 +24,13 @@ from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.core import urls as wagtail_urls
 
-from mitxpro.views import index, restricted, AppContextView
+from mitxpro.views import (
+    index,
+    restricted,
+    AppContextView,
+    handler404 as not_found_handler,
+    handler500 as server_error_handler,
+)
 
 
 urlpatterns = [
@@ -77,6 +83,9 @@ urlpatterns = [
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 )
+
+handler404 = not_found_handler
+handler500 = server_error_handler
 
 if settings.DEBUG:
     import debug_toolbar  # pylint: disable=wrong-import-position, wrong-import-order
