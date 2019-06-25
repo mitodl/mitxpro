@@ -7,7 +7,7 @@
 amqp==2.4.2               # via kombu
 appdirs==1.4.3            # via zeep
 attrs==19.1.0             # via zeep
-backcall==0.1.0           # via ipython
+backcall==0.1.0
 beautifulsoup4==4.6.0
 billiard==3.5.0.5         # via celery
 boto3==1.9.115
@@ -17,7 +17,7 @@ celery==4.2.0
 certifi==2019.3.9         # via requests
 cffi==1.12.3              # via pynacl
 chardet==3.0.4            # via requests
-decorator==4.4.0          # via ipython, traitlets
+decorator==4.4.0
 defusedxml==0.6.0         # via python3-openid, social-auth-core, zeep
 dj-database-url==0.4.2
 django-anymail[mailgun]==3.0
@@ -42,10 +42,10 @@ edx-api-client==0.6.1
 elasticsearch==7.0.0      # via django-server-status
 html5lib==0.999999999
 idna==2.8                 # via requests
-ipython-genutils==0.2.0   # via traitlets
-ipython==7.4.0
+ipython-genutils==0.2.0
+ipython==7.5.0
 isodate==0.6.0            # via zeep
-jedi==0.13.3              # via ipython
+jedi==0.14.0
 jmespath==0.9.4           # via boto3, botocore
 kombu==4.5.0              # via celery, django-server-status
 lxml==4.3.3               # via zeep
@@ -53,15 +53,15 @@ newrelic==4.18.0.118
 oauthlib==3.0.1           # via django-oauth-toolkit, requests-oauthlib, social-auth-core
 parso==0.4.0              # via jedi
 pdftotext==2.1.1
-pexpect==4.7.0            # via ipython
-pickleshare==0.7.5        # via ipython
+pexpect==4.7.0
+pickleshare==0.7.5
 pillow==5.4.1
-prompt-toolkit==2.0.9     # via ipython
+prompt-toolkit==2.0.9
 psycopg2==2.7.3.2
 ptyprocess==0.6.0         # via pexpect
 pycountry==18.12.8
 pycparser==2.19           # via cffi
-pygments==2.3.1           # via ipython
+pygments==2.4.2
 pyjwt==1.7.1              # via social-auth-core
 pynacl==1.3.0
 python-dateutil==2.5.3    # via botocore, edx-api-client
@@ -76,7 +76,7 @@ s3transfer==0.2.0         # via boto3
 six==1.12.0               # via django-anymail, django-compat, django-server-status, edx-api-client, html5lib, isodate, prompt-toolkit, pynacl, python-dateutil, social-auth-app-django, social-auth-core, traitlets, wagtail, zeep
 social-auth-app-django==3.1.0
 social-auth-core==3.1.0   # via social-auth-app-django
-traitlets==4.3.2          # via ipython
+traitlets==4.3.2
 ulid-py==0.0.9
 unidecode==1.0.23         # via wagtail
 urllib3==1.24.2           # via botocore, elasticsearch, requests
@@ -88,3 +88,6 @@ wcwidth==0.1.7            # via prompt-toolkit
 webencodings==0.5.1       # via html5lib
 willow==1.1               # via wagtail
 zeep==3.3.1
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools==41.0.1        # via html5lib, ipython
