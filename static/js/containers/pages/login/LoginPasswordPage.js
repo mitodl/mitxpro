@@ -50,11 +50,11 @@ class LoginPasswordPage extends React.Component<Props> {
 
     try {
       const {
-        body: { state, redirectUrl, errors }
+        body: { state, redirect_url, errors }
       }: { body: AuthResponse } = await loginPassword(password, partialToken)
 
       if (state === STATE_SUCCESS) {
-        window.location.href = redirectUrl || routes.dashboard
+        window.location.href = redirect_url || routes.dashboard
       } else if (errors.length > 0) {
         setErrors({
           password: errors[0]
