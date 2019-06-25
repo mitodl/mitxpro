@@ -288,8 +288,9 @@ def sync_object_property(object_type, property_dict):
     missing_fields = required_fields.difference(property_dict.keys())
     if missing_fields:
         raise KeyError(
-            f"The following property attributes are required: %s",
-            ",".join(missing_fields),
+            "The following property attributes are required: {}".format(
+                ",".join(missing_fields)
+            )
         )
 
     for key in property_dict.keys():
