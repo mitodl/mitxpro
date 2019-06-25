@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.10.0 (Released June 25, 2019)
+--------------
+
+- catalog page sorting based on start_date
+- #610 TemplateDoesNotExist should raise a 404
+- #615 Add `live` filter to unexpired course runs
+- Remove enableReinitialize, resetForm manually (#637)
+
 Version 0.9.4 (Released June 24, 2019)
 -------------
 
