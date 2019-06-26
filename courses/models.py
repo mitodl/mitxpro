@@ -382,11 +382,17 @@ class EnrollmentModel(TimestampedModel, AuditableModel):
     def to_dict(self):
         return serialize_model_object(self)
 
-    def reactivate_and_save(self):
-        """Sets an enrollment to be active again and saves it"""
+    def deactivate_and_save(self, change_status, no_user=False):
+        """Sets an enrollment to inactive, sets the status, and saves"""
+        self.active = False
+        self.change_status = change_status
+        return self.save_and_log(None if no_user else self.user)
+
+    def reactivate_and_save(self, no_user=False):
+        """Sets an enrollment to be active again and saves"""
         self.active = True
         self.change_status = None
-        return self.save_and_log(self.user)
+        return self.save_and_log(None if no_user else self.user)
 
 
 class CourseRunEnrollment(EnrollmentModel):

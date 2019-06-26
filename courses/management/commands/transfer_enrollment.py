@@ -43,6 +43,7 @@ class Command(EnrollmentChangeCommand):
         to_user = fetch_user(options["to_user"])
         enrollment, enrolled_obj = self.fetch_enrollment(from_user, options)
 
+        new_enrollments = []
         if options["program"]:
             to_user_existing_enrolled_run_ids = CourseRunEnrollment.all_objects.filter(
                 user=to_user, run__course__program=enrolled_obj
@@ -53,47 +54,40 @@ class Command(EnrollmentChangeCommand):
                         str(to_user_existing_enrolled_run_ids)
                     )
                 )
-            # Create the program enrollment
-            ProgramEnrollment.objects.create(
-                user=to_user, program=enrolled_obj, company=enrollment.company
+
+            # Create the program enrollment, and deactivate the existing one
+            new_enrollments.append(
+                ProgramEnrollment.objects.create(
+                    user=to_user, program=enrolled_obj, company=enrollment.company
+                )
             )
-            associated_run_enrollments = CourseRunEnrollment.objects.filter(
+            enrollment.deactivate_and_save(
+                ENROLL_CHANGE_STATUS_TRANSFERRED, no_user=True
+            )
+
+            run_enrollments_to_move = CourseRunEnrollment.objects.filter(
                 user=from_user, run__course__program=enrolled_obj
             )
-            # Create enrollments in all of the same program course runs that the 'from' user
-            # was enrolled in
-            for run_enrollment in associated_run_enrollments:
-                CourseRunEnrollment.objects.create(
-                    user=to_user, run=run_enrollment.run, company=enrollment.company
-                )
-            enrollments_to_deactivate = [enrollment] + list(associated_run_enrollments)
-            runs_to_enroll = [e.run for e in associated_run_enrollments]
         else:
-            CourseRunEnrollment.objects.create(
-                user=to_user, run=enrolled_obj, company=enrollment.company
+            run_enrollments_to_move = [enrollment]
+
+        new_course_run_enrollments = [
+            self.move_course_run_enrollment(
+                run_enrollment, ENROLL_CHANGE_STATUS_TRANSFERRED, to_user=to_user
             )
-            enrollments_to_deactivate = [enrollment]
-            runs_to_enroll = [enrolled_obj]
-
-        for enrollment_to_deactivate in enrollments_to_deactivate:
-            enrollment_to_deactivate.active = False
-            enrollment_to_deactivate.change_status = ENROLL_CHANGE_STATUS_TRANSFERRED
-            enrollment_to_deactivate.save_and_log(None)
-
-        self.stdout.write(
-            "New enrollment record(s) created. Attempting to enroll the user on edX..."
-        )
-        self.enroll_in_edx(to_user, runs_to_enroll)
+            for run_enrollment in run_enrollments_to_move
+        ]
+        new_enrollments.extend(new_course_run_enrollments)
 
         self.stdout.write(
             self.style.SUCCESS(
                 "Transferred enrollment – 'from' user: {} ({}), 'to' user: {} ({})\n"
-                "Enrollment in: {}".format(
+                "Enrollments created: {}".format(
                     from_user.username,
                     from_user.email,
                     to_user.username,
                     to_user.email,
-                    enrolled_obj,
+                    new_enrollments,
                 )
             )
         )

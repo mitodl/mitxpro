@@ -33,12 +33,10 @@ class Command(EnrollmentChangeCommand):
         """Handle command execution"""
         user = fetch_user(options["user"])
         enrollment, enrolled_obj = self.fetch_enrollment(user, options)
-        enrollment.active = False
-        enrollment.change_status = ENROLL_CHANGE_STATUS_REFUNDED
-        enrollment.save_and_log(None)
+        enrollment.deactivate_and_save(ENROLL_CHANGE_STATUS_REFUNDED, no_user=True)
         self.stdout.write(
             self.style.SUCCESS(
-                "Refunded enrollment – id: {}, object: {}\nUser – {} ({})".format(
+                "Refunded enrollment – id: {}, object: {}\nUser: {} ({})".format(
                     enrollment.id,
                     enrolled_obj.title,
                     enrollment.user.username,

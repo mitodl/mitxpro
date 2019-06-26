@@ -91,12 +91,46 @@ class EnrollmentChangeCommand(BaseCommand):
 
         return enrollment, enrolled_obj
 
+    def move_course_run_enrollment(
+        self, existing_enrollment, change_status, to_run=None, to_user=None
+    ):
+        """
+        Helper method for moving a CourseRunEnrollment from one user/run to another. This
+        takes care of creating the new CourseRunEnrollment, deactivating the existing one,
+        and attempting to enroll the 'to' user in the given course run in edX.
+
+        Args:
+            existing_enrollment (CourseRunEnrollment): The enrollment to 'move'
+            change_status (str): The status that will be set on the existing enrollment
+            to_run (CourseRun or None): The course run to use for the new enrollment.
+                If blank, the new enrollment gets the existing enrollment's course run.
+            to_user (User or None): The user to use for the new enrollment.
+                If blank, the new enrollment gets the existing enrollment's user.
+
+        Returns:
+            CourseRunEnrollment: The enrollment record that was created
+        """
+        to_user = to_user or existing_enrollment.user
+        to_run = to_run or existing_enrollment.run
+        to_enrollment = CourseRunEnrollment.objects.create(
+            user=to_user, run=to_run, company=existing_enrollment.company
+        )
+        existing_enrollment.deactivate_and_save(change_status, no_user=True)
+        self.stdout.write(
+            "Current course run enrollment deactivated and new enrollment record created. "
+            "Attempting to enroll the user {} ({}) in {} on edX...".format(
+                to_user.username, to_user.email, to_run.courseware_id
+            )
+        )
+        self.enroll_in_edx(to_user, [to_run])
+        return to_enrollment
+
     def enroll_in_edx(self, user, course_runs):
         """
         Try to perform edX enrollment, but print a message and continue if it fails
 
         Args:
-            user (users.models.User): The user to enroll
+            user (User): The user to enroll
             course_runs (iterable of CourseRun): The course runs to enroll in
         """
         try:
@@ -105,7 +139,7 @@ class EnrollmentChangeCommand(BaseCommand):
             self.stdout.write(
                 self.style.WARNING(
                     "edX enrollment request failed ({}).\nResponse: {}".format(
-                        exc.response.status_code, exc.response.body
+                        exc.response.status_code, exc.response.text
                     )
                 )
             )

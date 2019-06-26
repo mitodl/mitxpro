@@ -67,22 +67,13 @@ class Command(EnrollmentChangeCommand):
                 )
             )
 
-        to_enrollment = CourseRunEnrollment.objects.create(
-            user=user, run=to_run, company=from_enrollment.company
+        to_enrollment = self.move_course_run_enrollment(
+            from_enrollment, change_status=ENROLL_CHANGE_STATUS_DEFERRED, to_run=to_run
         )
-        from_enrollment.active = False
-        from_enrollment.change_status = ENROLL_CHANGE_STATUS_DEFERRED
-        from_enrollment.save_and_log(None)
-
-        self.stdout.write(
-            "Current enrollment deactivated and new enrollment record created. "
-            "Attempting to enroll the user on edX..."
-        )
-        self.enroll_in_edx(user, [to_run])
 
         self.stdout.write(
             self.style.SUCCESS(
-                "Deferred enrollment – 'from' run id: {}, 'to' run id: {}\nUser – {} ({})".format(
+                "Deferred enrollment – 'from' run id: {}, 'to' run id: {}\nUser: {} ({})".format(
                     from_enrollment.run.id,
                     to_enrollment.run.id,
                     user.username,
