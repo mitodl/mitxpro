@@ -6,6 +6,7 @@ import logging
 import itertools
 
 from django.conf import settings
+from django.core import mail
 from django.core.serializers import serialize
 from django.db import models
 import pytz
@@ -139,6 +140,27 @@ def partition(items, predicate=bool):
     """
     a, b = itertools.tee((predicate(item), item) for item in items)
     return ((item for pred, item in a if not pred), (item for pred, item in b if pred))
+
+
+def send_support_email(subject, message):
+    """
+    Send an email to support.
+
+    Args:
+        subject (str): The email subject.
+        message (str): The email message.
+    """
+    try:
+        with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
+            mail.send_mail(
+                subject,
+                message,
+                settings.MAILGUN_FROM_EMAIL,
+                [settings.EMAIL_SUPPORT],
+                connection=connection,
+            )
+    except:  # pylint: disable=bare-except
+        log.exception("Exception sending email to admins regarding enrollment failure")
 
 
 class ValidateOnSaveMixin(models.Model):

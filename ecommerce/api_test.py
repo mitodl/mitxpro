@@ -42,6 +42,8 @@ from ecommerce.api import (
     complete_order,
     enroll_user_in_order_items,
     fetch_and_serialize_unused_coupons,
+    ENROLL_ERROR_EMAIL_SUBJECT,
+    format_enrollment_message,
 )
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -78,7 +80,7 @@ from voucher.models import Voucher
 pytestmark = pytest.mark.django_db
 lazy = pytest.lazy_fixture
 
-# pylint: disable=redefined-outer-name
+# pylint: disable=redefined-outer-name,too-many-lines
 
 CYBERSOURCE_ACCESS_KEY = "access"
 CYBERSOURCE_PROFILE_ID = "profile"
@@ -944,6 +946,38 @@ def test_enroll_user_in_order_items_api_fail(mocker, user):
     patched_enroll_in_runs.assert_called_once()
 
 
+@pytest.mark.parametrize("enroll_type", ["CourseRun", "Program"])
+def test_enroll_user_in_order_exception(mocker, user, enroll_type):
+    """
+    Test that enroll_user_in_order_items sends an email to support if an enrollment fails
+    """
+    patched_send_support_email = mocker.patch("ecommerce.api.send_support_email")
+    mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
+    order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
+    basket = BasketFactory.create(user=user)
+    run_selections = CourseRunSelectionFactory.create_batch(2, basket=basket)
+    program = ProgramFactory.create()
+    LineFactory.create_batch(
+        3,
+        order=order,
+        product_version__product__content_object=factory.Iterator(
+            [selection.run for selection in run_selections] + [program]
+        ),
+    )
+    mocker.patch(
+        f"ecommerce.api.{enroll_type}Enrollment.all_objects.get_or_create",
+        side_effect=Exception(),
+    )
+
+    with pytest.raises(Exception):
+        enroll_user_in_order_items(order)
+
+    patched_send_support_email.assert_called_once()
+    assert patched_send_support_email.call_args[0][0] == ENROLL_ERROR_EMAIL_SUBJECT
+    for item in (user.username, user.email, f"Order #{order.id}"):
+        assert item in patched_send_support_email.call_args[0][1]
+
+
 def test_fetch_and_serialize_unused_coupons_empty(user):
     """
     Test that fetch_and_serialize_unused_coupons returns an empty list for users
@@ -998,3 +1032,27 @@ def test_fetch_and_serialize_unused_coupons(user):
             "expiration_date": expected_payment_version.expiration_date,
         }
     ]
+
+
+@pytest.mark.parametrize("is_program", [True, False])
+def test_format_enrollment_message(is_program):
+    """Test that format_enrollment_message formats a message correctly"""
+    product_object = (
+        ProgramFactory.create() if is_program else CourseRunFactory.create()
+    )
+    product_version = ProductVersionFactory.create(
+        product=ProductFactory.create(content_object=product_object)
+    )
+    order = LineFactory.create(product_version=product_version).order
+    details = "TestException on line 21"
+    assert format_enrollment_message(order, product_object, details) == (
+        "{name}({email}): Order #{order_id}, {error_obj} #{obj_id} ({obj_title})\n\n{details}".format(
+            name=order.purchaser.username,
+            email=order.purchaser.email,
+            order_id=order.id,
+            error_obj=("Program" if is_program else "Run"),
+            obj_id=product_object.id,
+            obj_title=product_object.title,
+            details=details,
+        )
+    )
