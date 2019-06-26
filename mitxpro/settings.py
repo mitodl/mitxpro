@@ -53,6 +53,8 @@ WEBPACK_LOADER = {
     }
 }
 
+SITE_ID = get_string("MITXPRO_SITE_ID", 1)
+
 # configure a custom user model
 AUTH_USER_MODEL = "users.User"
 
@@ -65,6 +67,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "django.contrib.sites",
     "social_django",
     "server_status",
     "oauth2_provider",
@@ -87,6 +90,8 @@ INSTALLED_APPS = (
     "wagtailmetadata",
     "modelcluster",
     "taggit",
+    # django-robots
+    "robots",
     # Put our apps after this point
     "mitxpro",
     "authentication",
@@ -123,6 +128,7 @@ MIDDLEWARE = (
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.contrib.sites.middleware.CurrentSiteMiddleware",
     "wagtail.core.middleware.SiteMiddleware",
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",
 )
@@ -192,6 +198,10 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+# django-robots
+ROBOTS_USE_HOST = False
+ROBOTS_CACHE_TIMEOUT = get_int("ROBOTS_CACHE_TIMEOUT", 60 * 60 * 24)
 
 # social auth
 AUTHENTICATION_BACKENDS = (
