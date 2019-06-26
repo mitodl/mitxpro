@@ -32,6 +32,14 @@ $(".learners-slider").slick({
         slidesToScroll: 1,
         dots:           numTestimonialSlides > 1
       }
+    },
+    {
+      breakpoint: 500,
+      settings:   {
+        slidesToShow:   1,
+        slidesToScroll: 1,
+        dots:           numTestimonialSlides > 1
+      }
     }
   ]
 });
