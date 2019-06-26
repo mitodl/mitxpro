@@ -2,6 +2,7 @@
 import json
 from datetime import datetime
 from types import SimpleNamespace
+from urllib.parse import quote_plus
 
 import pytz
 from django.urls import reverse
@@ -14,7 +15,7 @@ import factory
 
 from courses.models import CourseRunEnrollment
 from courses.factories import CourseRunFactory
-from ecommerce.api import create_unfulfilled_order, make_reference_id
+from ecommerce.api import create_unfulfilled_order, get_readable_id, make_reference_id
 from ecommerce.exceptions import EcommerceException
 from ecommerce.factories import (
     CouponEligibilityFactory,
@@ -163,9 +164,15 @@ def test_zero_price_checkout(
         "ecommerce.api.enroll_user_in_order_items", autospec=True
     )
     resp = basket_client.post(reverse("checkout"))
+    line = order.lines.first()
+    readable_id = get_readable_id(line.product_version.product.content_object)
 
     assert resp.status_code == status.HTTP_200_OK
-    assert resp.json() == {"payload": {}, "url": "http://testserver/", "method": "GET"}
+    assert resp.json() == {
+        "payload": {},
+        "url": f"http://testserver/dashboard/?status=receipt&readable_id={quote_plus(readable_id)}",
+        "method": "GET",
+    }
 
     assert create_mock.call_count == 1
     assert create_mock.call_args[0] == (user,)

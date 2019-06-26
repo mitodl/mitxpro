@@ -7,12 +7,13 @@ import hashlib
 import hmac
 import logging
 from traceback import format_exc
-from urllib.parse import urljoin
+from urllib.parse import quote_plus, urljoin
 import uuid
 
 from django.conf import settings
 from django.db.models import Q, Max, F, Count, Subquery
 from django.db import transaction
+from django.urls import reverse
 from rest_framework.exceptions import ValidationError
 from requests.exceptions import HTTPError
 
@@ -80,6 +81,40 @@ def generate_cybersource_sa_signature(payload):
     return b64encode(digest).decode("utf-8")
 
 
+def make_receipt_url(*, base_url, readable_id):
+    """
+    Generate URL that user is redirected to on successful order
+
+    Args:
+        base_url (str): The base absolute url for the site
+        readable_id (str): Program.readable_id or CourseRun.courseware_id
+    Returns:
+        str:
+            The URL for the order receipt page
+    """
+    dashboard_url = urljoin(base_url, reverse("user-dashboard"))
+    return f"{dashboard_url}?status=receipt&readable_id={quote_plus(readable_id)}"
+
+
+def get_readable_id(run_or_program):
+    """
+    Get the readable id for a course run or a program.
+
+    Args:
+        run_or_program (CourseRun or Program): A course run or a program
+
+    Returns:
+        str: The readable id
+    """
+    if isinstance(run_or_program, CourseRun):
+        return run_or_program.courseware_id
+    elif isinstance(run_or_program, Program):
+        return run_or_program.readable_id
+    else:
+        raise Exception(f"Unexpected object {run_or_program}")
+
+
+# pylint: disable=too-many-locals
 def generate_cybersource_sa_payload(order, base_url):
     """
     Generates a payload dict to send to CyberSource for Secure Acceptance
@@ -121,16 +156,11 @@ def generate_cybersource_sa_payload(order, base_url):
     product_version = order.lines.first().product_version
     product = product_version.product
     content_object = product.content_object
+    readable_id = get_readable_id(content_object)
 
     merchant_fields = {
         "merchant_defined_data1": str(product.content_type),
-        "merchant_defined_data2": (
-            (
-                content_object.readable_id
-                if isinstance(content_object, Program)
-                else content_object.courseware_id
-            )
-        ),
+        "merchant_defined_data2": readable_id,
         "merchant_defined_data3": "1",
     }
 
@@ -160,7 +190,9 @@ def generate_cybersource_sa_payload(order, base_url):
         "reference_number": make_reference_id(order),
         "profile_id": settings.CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now_in_utc().strftime(ISO_8601_FORMAT),
-        "override_custom_receipt_page": urljoin(base_url, "dashboard/"),
+        "override_custom_receipt_page": make_receipt_url(
+            base_url=base_url, readable_id=readable_id
+        ),
         "override_custom_cancel_page": urljoin(base_url, "checkout/"),
         "transaction_type": "sale",
         "transaction_uuid": uuid.uuid4().hex,

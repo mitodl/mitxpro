@@ -20,6 +20,11 @@ import * as R from "ramda"
 import moment from "moment"
 
 import type Moment from "moment"
+import type {
+  CourseRunDetail,
+  Program,
+  UserEnrollments
+} from "../flow/courseTypes"
 
 /**
  * Returns a promise which resolves after a number of milliseconds have elapsed
@@ -184,4 +189,29 @@ export const timeoutPromise = (
       resolve()
     }, timeoutMs)
   )
+}
+
+export const findItemWithReadableId = (
+  enrollments: UserEnrollments,
+  readableId: ?string
+): Program | CourseRunDetail | null => {
+  for (const programEnrollment of enrollments.program_enrollments) {
+    if (readableId === programEnrollment.program.readable_id) {
+      return programEnrollment.program
+    }
+
+    for (const courseRunEnrollment of programEnrollment.course_run_enrollments) {
+      if (readableId === courseRunEnrollment.run.courseware_id) {
+        return courseRunEnrollment.run
+      }
+    }
+  }
+
+  for (const courseRunEnrollment of enrollments.course_run_enrollments) {
+    if (readableId === courseRunEnrollment.run.courseware_id) {
+      return courseRunEnrollment.run
+    }
+  }
+
+  return null
 }

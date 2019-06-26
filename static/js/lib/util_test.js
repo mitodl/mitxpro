@@ -8,6 +8,7 @@ import {
   assertRaises,
   wait,
   enumerate,
+  findItemWithReadableId,
   isEmptyText,
   preventDefaultAndInvoke,
   notNil,
@@ -24,6 +25,7 @@ import {
   newSetWithout,
   timeoutPromise
 } from "./util"
+import { makeUserEnrollments } from "../factories/course"
 
 describe("utility functions", () => {
   it("waits some milliseconds", done => {
@@ -247,6 +249,41 @@ describe("utility functions", () => {
       assert.equal(getMaxDate(dates).toISOString(), futureDate.toISOString())
       dates = [null, undefined]
       assert.isNull(getMaxDate(dates))
+    })
+  })
+
+  describe("findItemWithReadableId", () => {
+    it("finds the readable id for a program", () => {
+      const enrollments = makeUserEnrollments()
+      const program = enrollments.program_enrollments[0].program
+      assert.deepEqual(
+        findItemWithReadableId(enrollments, program.readable_id),
+        program
+      )
+    })
+
+    it("finds the readable id for a course in a program", () => {
+      const enrollments = makeUserEnrollments()
+      const run =
+        enrollments.program_enrollments[0].course_run_enrollments[1].run
+      assert.deepEqual(
+        findItemWithReadableId(enrollments, run.courseware_id),
+        run
+      )
+    })
+
+    it("finds the readable id for a course outside a program", () => {
+      const enrollments = makeUserEnrollments()
+      const run = enrollments.course_run_enrollments[1].run
+      assert.deepEqual(
+        findItemWithReadableId(enrollments, run.courseware_id),
+        run
+      )
+    })
+
+    it("can't find the readable id so it returns null", () => {
+      const enrollments = makeUserEnrollments()
+      assert.isNull(findItemWithReadableId(enrollments, "missing"))
     })
   })
 })
