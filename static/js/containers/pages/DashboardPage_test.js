@@ -2,13 +2,18 @@
 import { assert } from "chai"
 import sinon from "sinon"
 import moment from "moment"
+import { mergeDeepRight } from "ramda"
 
 import DashboardPage, {
   DashboardPage as InnerDashboardPage
 } from "./DashboardPage"
 import { formatPrettyDate } from "../../lib/util"
+import { shouldIf } from "../../lib/test_utils"
 import IntegrationTestHelper from "../../util/integration_test_helper"
-import { makeUserEnrollments } from "../../factories/course"
+import {
+  makeCourseRunEnrollment,
+  makeUserEnrollments
+} from "../../factories/course"
 import * as coursesApi from "../../lib/courses"
 
 describe("DashboardPage", () => {
@@ -133,6 +138,61 @@ describe("DashboardPage", () => {
     inner.update()
     assert.deepEqual(inner.state("collapseVisible"), {
       [programEnrollmentId]: false
+    })
+  })
+  ;[
+    [
+      moment()
+        .add(-5, "days")
+        .format(),
+      "abc",
+      true,
+      "past start date, non-null courseware id"
+    ],
+    [
+      moment()
+        .add(-5, "days")
+        .format(),
+      null,
+      false,
+      "null courseware_url"
+    ],
+    [
+      moment()
+        .add(5, "days")
+        .format(),
+      "abc",
+      false,
+      "future start date"
+    ],
+    [null, "abc", false, "null start date"]
+  ].forEach(([startDate, coursewareUrl, shouldLink, runDescription]) => {
+    it(`${shouldIf(
+      shouldLink
+    )} link to edX if course run has ${runDescription}`, async () => {
+      const userRunEnrollment = mergeDeepRight(makeCourseRunEnrollment(), {
+        run: {
+          courseware_url: coursewareUrl,
+          start_date:     startDate
+        }
+      })
+      const { inner } = await renderPage({
+        entities: {
+          enrollments: {
+            program_enrollments:    [],
+            course_run_enrollments: [userRunEnrollment]
+          }
+        }
+      })
+
+      const courseRunLink = inner.find(".course-enrollment h2 a")
+      assert.equal(courseRunLink.exists(), shouldLink)
+      if (shouldLink) {
+        assert.include(
+          courseRunLink.at(0).text(),
+          userRunEnrollment.run.course.title
+        )
+      }
     })
   })
 })
