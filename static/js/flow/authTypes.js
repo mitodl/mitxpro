@@ -24,7 +24,7 @@ export type AuthResponseRaw = {
   flow:          AuthFlow,
   state:         AuthStates,
   errors:        Array<string>,
-  redirect_url:  ?string,
+  redirectUrl:  ?string,
   extra_data: {
     name?: string
   }
