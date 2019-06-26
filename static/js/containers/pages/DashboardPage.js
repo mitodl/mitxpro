@@ -3,6 +3,7 @@ import React from "react"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { connectRequest } from "redux-query"
+import moment from "moment"
 import { createStructuredSelector } from "reselect"
 import * as R from "ramda"
 import { Collapse, Button } from "reactstrap"
@@ -23,12 +24,17 @@ type Props = {
 }
 
 type State = {
-  collapseVisible: Object
+  collapseVisible: Object,
+  now: moment
 }
 
 export class DashboardPage extends React.Component<Props, State> {
-  state = {
-    collapseVisible: {}
+  constructor() {
+    super()
+    this.state = {
+      collapseVisible: {},
+      now:             moment()
+    }
   }
 
   enrollmentsExist = (): boolean => {
@@ -40,6 +46,11 @@ export class DashboardPage extends React.Component<Props, State> {
         enrollments.course_run_enrollments.length > 0)
     )
   }
+
+  isLinkableCourseRun = ({ run }: CourseRunEnrollment): boolean =>
+    !R.isNil(run.courseware_url) &&
+    !R.isNil(run.start_date) &&
+    moment(run.start_date).isBefore(this.state.now)
 
   onCollapseToggle = (programEnrollmentId: number): void => {
     this.setState({
@@ -63,7 +74,6 @@ export class DashboardPage extends React.Component<Props, State> {
           {!isProgramCourse && (
             <RibbonText text="Course" addedClasses="course" />
           )}
-
           <div className="course-image-column col-12 col-md-3">
             <img
               src={courseRunEnrollment.run.course.thumbnail_url}
@@ -74,7 +84,7 @@ export class DashboardPage extends React.Component<Props, State> {
             <div className="row">
               <div className="col-12 col-md-9">
                 <h2>
-                  {courseRunEnrollment.run.courseware_url ? (
+                  {this.isLinkableCourseRun(courseRunEnrollment) ? (
                     <a
                       href={courseRunEnrollment.run.courseware_url}
                       target="_blank"
