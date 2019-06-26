@@ -13,9 +13,9 @@
   .background-video {
     position: absolute;
     width: 100%;
-    top: 50%;
+    bottom: 0;
     left: 50%;
-    transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(0%);
 
     @include media-breakpoint-down (sm) {
       display: none;

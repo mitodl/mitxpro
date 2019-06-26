@@ -1,8 +1,8 @@
 {% load wagtailembeds_tags wagtailimages_tags %}
 
 {% block extrahead %}
-  {% if page.background_image %}
   <style>
+  {% if page.background_image %}
     .header-block {
       {% image page.background_image fill-768x576 as background_image %}
       background-image: url('{{ background_image.url }}');
@@ -13,9 +13,14 @@
         {% image page.background_image fill-1920x1080 as background_image %}
         background-image: url('{{ background_image.url }}');
       }
+      {% if page.background_video_url %}
+        .header-block {
+          background-image: none;
+        }
+      {% endif %}
     }
-  </style>
   {% endif %}
+  </style>
 {% endblock %}
 
 <div class="header-block">
