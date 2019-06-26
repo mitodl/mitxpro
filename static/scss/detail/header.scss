@@ -1,6 +1,8 @@
 // sass-lint:disable mixins-before-declarations
 #header {
   background-color: white;
+  position: relative;
+  z-index: 1;
 }
 
 .header-block {
@@ -10,14 +12,14 @@
 
   .background-video {
     position: absolute;
-    top: 50%;
+    width: 100%;
+    bottom: 0;
     left: 50%;
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
-    z-index: -10;
-    transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(0%);
+
+    @include media-breakpoint-down (sm) {
+      display: none;
+    }
   }
 }
 
