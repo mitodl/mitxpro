@@ -76,6 +76,7 @@ urlpatterns = [
     # Wagtail
     re_path(r"^cms/", include(wagtailadmin_urls)),
     re_path(r"^documents/", include(wagtaildocs_urls)),
+    path("robots.txt", include("robots.urls")),
     path("", include(wagtail_urls)),
     # Add custom URL patterns that will also serve Wagtail pages
     path("", include("cms.urls")),

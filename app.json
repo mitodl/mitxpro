@@ -157,6 +157,10 @@
       "required": false,
       "value": "True"
     },
+    "MITXPRO_SITE_ID": {
+      "description": "The default site id for django sites framework",
+      "required": false
+    },
     "MITXPRO_SUPPORT_EMAIL": {
       "description": "Email address listed for customer support"
     },
@@ -197,6 +201,10 @@
     },
     "PGBOUNCER_MIN_POOL_SIZE": {
       "value": "5"
+    },
+    "ROBOTS_CACHE_TIMEOUT": {
+      "description": "How long the robots.txt file should be cached",
+      "required": false
     },
     "SECRET_KEY": {
       "description": "Django secret key.",
