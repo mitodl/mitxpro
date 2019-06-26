@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.10.1
+Version 0.10.1 (Released June 26, 2019)
 --------------
 
 - #659 Catalog: prices are not displayed for some courses/programs
