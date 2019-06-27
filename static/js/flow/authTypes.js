@@ -35,7 +35,7 @@ export type AuthResponse = {
   flow:          AuthFlow,
   state:         AuthStates,
   errors:        Array<string>,
-  redirect_url:  ?string,
+  redirectUrl:  ?string,
   extraData: {
     name?: string
   }

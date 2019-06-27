@@ -19,7 +19,7 @@ const transformAuthResult = (
     flow:         result.flow,
     state:        result.state,
     errors:       result.errors,
-    redirect_url: result.redirect_url,
+    redirectUrl:  result.redirect_url,
     extraData:    {
       name: result.extra_data.name
     }
