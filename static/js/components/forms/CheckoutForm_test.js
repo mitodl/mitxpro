@@ -330,7 +330,9 @@ describe("CheckoutForm", () => {
         hasDataConsent ? 1 : 0
       )
       if (hasDataConsent) {
-        const expected = `*By checking this box, I give my consent to MIT to disclose data to ${basket.data_consents[0].company.name}.`
+        const expected = `*By checking this box, I give my consent to MIT to disclose data to ${
+          basket.data_consents[0].company.name
+        }.`
         assert.isTrue(inner.text().includes(expected))
       }
     })
