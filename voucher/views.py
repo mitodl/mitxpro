@@ -122,7 +122,7 @@ class EnrollView(LoginRequiredMixin, View):
         voucher.coupon_id = coupon_id
         voucher.product_id = product_id
         voucher.save()
-        enroll_url = f"/checkout?product={product_id}&code={voucher.coupon.coupon_code}"
+        enroll_url = f"{reverse('checkout-page')}?product={product_id}&code={voucher.coupon.coupon_code}"
         return redirect(enroll_url)
 
 
