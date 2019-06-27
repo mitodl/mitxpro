@@ -14,7 +14,11 @@ import LoginPasswordForm from "../../../components/forms/LoginPasswordForm"
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
-import type { AuthResponse, User } from "../../../flow/authTypes"
+import type {
+  AuthResponse,
+  AuthResponseRaw,
+  User
+} from "../../../flow/authTypes"
 
 type Props = {
   location: Location,
@@ -48,13 +52,14 @@ class LoginPasswordPage extends React.Component<Props> {
       throw Error("Invalid state: password page with no partialToken")
     }
 
+    /* eslint-disable camelcase */
     try {
       const {
-        body: { state, redirectUrl, errors }
-      }: { body: AuthResponse } = await loginPassword(password, partialToken)
+        body: { state, redirect_url, errors }
+      }: { body: AuthResponseRaw } = await loginPassword(password, partialToken)
 
       if (state === STATE_SUCCESS) {
-        window.location.href = redirectUrl || routes.dashboard
+        window.location.href = redirect_url || routes.dashboard
       } else if (errors.length > 0) {
         setErrors({
           password: errors[0]
