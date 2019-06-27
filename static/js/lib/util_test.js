@@ -8,7 +8,7 @@ import {
   assertRaises,
   wait,
   enumerate,
-  findItemWithReadableId,
+  findItemWithTextId,
   isEmptyText,
   preventDefaultAndInvoke,
   notNil,
@@ -252,12 +252,12 @@ describe("utility functions", () => {
     })
   })
 
-  describe("findItemWithReadableId", () => {
+  describe("findItemWithTextId", () => {
     it("finds the readable id for a program", () => {
       const enrollments = makeUserEnrollments()
       const program = enrollments.program_enrollments[0].program
       assert.deepEqual(
-        findItemWithReadableId(enrollments, program.readable_id),
+        findItemWithTextId(enrollments, program.readable_id),
         program
       )
     })
@@ -266,24 +266,18 @@ describe("utility functions", () => {
       const enrollments = makeUserEnrollments()
       const run =
         enrollments.program_enrollments[0].course_run_enrollments[1].run
-      assert.deepEqual(
-        findItemWithReadableId(enrollments, run.courseware_id),
-        run
-      )
+      assert.deepEqual(findItemWithTextId(enrollments, run.courseware_id), run)
     })
 
     it("finds the readable id for a course outside a program", () => {
       const enrollments = makeUserEnrollments()
       const run = enrollments.course_run_enrollments[1].run
-      assert.deepEqual(
-        findItemWithReadableId(enrollments, run.courseware_id),
-        run
-      )
+      assert.deepEqual(findItemWithTextId(enrollments, run.courseware_id), run)
     })
 
     it("can't find the readable id so it returns null", () => {
       const enrollments = makeUserEnrollments()
-      assert.isNull(findItemWithReadableId(enrollments, "missing"))
+      assert.isNull(findItemWithTextId(enrollments, "missing"))
     })
   })
 })

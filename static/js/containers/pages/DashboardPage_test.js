@@ -228,7 +228,7 @@ describe("DashboardPage", () => {
       const program = userEnrollments.program_enrollments[0].program
       const waitStub = helper.sandbox.stub(utilFuncs, "wait")
       const stub = helper.sandbox
-        .stub(utilFuncs, "findItemWithReadableId")
+        .stub(utilFuncs, "findItemWithTextId")
         .returns(program)
       const { inner } = await renderPage(
         {},
@@ -261,7 +261,7 @@ describe("DashboardPage", () => {
           .returns(waitPromise)
         const run = userEnrollments.course_run_enrollments[0].run
         const findStub = helper.sandbox
-          .stub(utilFuncs, "findItemWithReadableId")
+          .stub(utilFuncs, "findItemWithTextId")
           .returns(null)
 
         const { inner } = await renderPage(

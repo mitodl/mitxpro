@@ -13,7 +13,7 @@ import qs from "query-string"
 import { RibbonText } from "../../components/Ribbon"
 import queries from "../../lib/queries"
 import { getDateSummary, programDateRange } from "../../lib/courses"
-import { formatPrettyDate, findItemWithReadableId, wait } from "../../lib/util"
+import { formatPrettyDate, findItemWithTextId, wait } from "../../lib/util"
 
 import type Moment from "moment"
 import type { Location, RouterHistory } from "react-router"
@@ -83,7 +83,7 @@ export class DashboardPage extends React.Component<Props, State> {
       return
     }
 
-    const item = findItemWithReadableId(enrollments, readableId)
+    const item = findItemWithTextId(enrollments, readableId)
     if (item) {
       history.push("/dashboard/")
       this.setState({

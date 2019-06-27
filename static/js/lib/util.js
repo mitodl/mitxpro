@@ -191,24 +191,24 @@ export const timeoutPromise = (
   )
 }
 
-export const findItemWithReadableId = (
+export const findItemWithTextId = (
   enrollments: UserEnrollments,
-  readableId: ?string
+  textId: ?string
 ): Program | CourseRunDetail | null => {
   for (const programEnrollment of enrollments.program_enrollments) {
-    if (readableId === programEnrollment.program.readable_id) {
+    if (textId === programEnrollment.program.readable_id) {
       return programEnrollment.program
     }
 
     for (const courseRunEnrollment of programEnrollment.course_run_enrollments) {
-      if (readableId === courseRunEnrollment.run.courseware_id) {
+      if (textId === courseRunEnrollment.run.courseware_id) {
         return courseRunEnrollment.run
       }
     }
   }
 
   for (const courseRunEnrollment of enrollments.course_run_enrollments) {
-    if (readableId === courseRunEnrollment.run.courseware_id) {
+    if (textId === courseRunEnrollment.run.courseware_id) {
       return courseRunEnrollment.run
     }
   }
