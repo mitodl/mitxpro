@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.10.2 (Released June 27, 2019)
+--------------
+
+- Fix header CSS for video on home page (#603)
+- Removed links for course runs that have not yet started in edX
+- Added course run enrollment email
+- Upgraded deps
+- Get unused coupons in the UserSerializer instead of CurrentUserRetrieveUpdateViewSet (#667)
+- Send email to support when enrollments fail (#634)
+
 Version 0.10.1 (Released June 26, 2019)
 --------------
 
