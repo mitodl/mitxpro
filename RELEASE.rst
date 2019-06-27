@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.10.3
+--------------
+
+- Poll dashboard page for course run/program (#678)
+- links to web.mit.edu should open in a new tab (#689)
+- fix redirect url after signin (#658)
+- Tweak notification CSS to prevent video from displaying over notifications (#688)
+- Added robots.txt via django-robots
+
 Version 0.10.2 (Released June 27, 2019)
 --------------
 
