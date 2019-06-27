@@ -20,6 +20,8 @@ from ecommerce.api import (
     get_product_version_price_with_discount,
     get_full_price_coupon_product_set,
     get_available_bulk_product_coupons,
+    get_readable_id,
+    make_receipt_url,
     validate_basket_for_checkout,
     complete_order,
 )
@@ -94,6 +96,11 @@ class CheckoutView(APIView):
             for line in order.lines.all()
         )
 
+        # Should only have one line per order currently
+        line = order.lines.first()
+
+        readable_id = get_readable_id(line.product_version.product.content_object)
+
         if total_price == 0:
             # If price is $0, don't bother going to CyberSource, just mark as fulfilled
             order.status = Order.FULFILLED
@@ -104,7 +111,7 @@ class CheckoutView(APIView):
 
             # This redirects the user to our order success page
             payload = {}
-            url = base_url
+            url = make_receipt_url(base_url=base_url, readable_id=readable_id)
             method = "GET"
         else:
             # This generates a signed payload which is submitted as an HTML form to CyberSource

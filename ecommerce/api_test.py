@@ -27,6 +27,7 @@ from ecommerce.api import (
     create_unfulfilled_order,
     generate_cybersource_sa_payload,
     generate_cybersource_sa_signature,
+    get_readable_id,
     ISO_8601_FORMAT,
     make_reference_id,
     redeem_coupon,
@@ -36,6 +37,7 @@ from ecommerce.api import (
     get_valid_coupon_versions,
     latest_product_version,
     latest_coupon_version,
+    make_receipt_url,
     get_product_courses,
     get_available_bulk_product_coupons,
     validate_basket_for_checkout,
@@ -117,6 +119,21 @@ def test_valid_signature():
     assert b64encode(digest).decode("utf-8") == signature
 
 
+def test_make_receipt_url():
+    """make_receipt_url should generate a URL for use by users returning from a successful CyberSource payment"""
+    assert (
+        make_receipt_url(base_url="https://mit.edu/", readable_id="a readable id")
+        == "https://mit.edu/dashboard/?status=purchased&purchased=a+readable+id"
+    )
+
+
+def test_get_readable_id():
+    """get_readable_id should get the readable id for a CourseRun or a Program"""
+    run = CourseRunFactory.create()
+    assert get_readable_id(run) == run.courseware_id
+    assert get_readable_id(run.course.program) == run.course.program.readable_id
+
+
 # pylint: disable=too-many-locals
 @pytest.mark.parametrize("has_coupon", [True, False])
 @pytest.mark.parametrize("has_company", [True, False])
@@ -188,6 +205,7 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
         if has_coupon
         else {}
     )
+    readable_id = get_readable_id(line1.product_version.product.content_object)
 
     assert payload == {
         "access_key": CYBERSOURCE_ACCESS_KEY,
@@ -215,7 +233,9 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
         "line_item_count": 3,
         "locale": "en-us",
         "reference_number": make_reference_id(order),
-        "override_custom_receipt_page": urljoin(base_url, "dashboard/"),
+        "override_custom_receipt_page": make_receipt_url(
+            base_url=base_url, readable_id=readable_id
+        ),
         "override_custom_cancel_page": urljoin(base_url, "checkout/"),
         "profile_id": CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now.strftime(ISO_8601_FORMAT),

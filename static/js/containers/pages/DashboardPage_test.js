@@ -1,7 +1,9 @@
+/* global SETTINGS: false */
 // @flow
 import { assert } from "chai"
 import sinon from "sinon"
-import moment from "moment"
+// $FlowFixMe: flow doesn't see fn
+import moment, { fn as momentProto } from "moment"
 import { mergeDeepRight } from "ramda"
 
 import DashboardPage, {
@@ -15,6 +17,7 @@ import {
   makeUserEnrollments
 } from "../../factories/course"
 import * as coursesApi from "../../lib/courses"
+import * as utilFuncs from "../../lib/util"
 
 describe("DashboardPage", () => {
   let helper,
@@ -43,7 +46,11 @@ describe("DashboardPage", () => {
           enrollments: userEnrollments
         }
       },
-      {}
+      {
+        location: {
+          search: ""
+        }
+      }
     )
   })
 
@@ -140,6 +147,8 @@ describe("DashboardPage", () => {
       [programEnrollmentId]: false
     })
   })
+
+  //
   ;[
     [
       moment()
@@ -193,6 +202,100 @@ describe("DashboardPage", () => {
           userRunEnrollment.run.course.title
         )
       }
+    })
+  })
+
+  describe("cybersource redirect", () => {
+    it("shows an alert based on the toastMessage state value", async () => {
+      const { inner } = await renderPage()
+      assert.isFalse(inner.find("Alert").prop("isOpen"))
+      inner.setState({ toastMessage: "hello world", alertType: "info" })
+      assert.isTrue(inner.find("Alert").prop("isOpen"))
+      assert.equal(inner.find("Alert").prop("color"), "info")
+      assert.isTrue(
+        inner
+          .find("Alert")
+          .html()
+          .includes("hello world")
+      )
+      inner.find("Alert").prop("toggle")()
+      assert.isFalse(inner.find("Alert").prop("isOpen"))
+      assert.equal(inner.state().toastMessage, "")
+      assert.equal(inner.state().alertType, "")
+    })
+
+    it("looks up a run or program using the query parameter, and displays the success message", async () => {
+      const program = userEnrollments.program_enrollments[0].program
+      const waitStub = helper.sandbox.stub(utilFuncs, "wait")
+      const stub = helper.sandbox
+        .stub(utilFuncs, "findItemWithTextId")
+        .returns(program)
+      const { inner } = await renderPage(
+        {},
+        {
+          location: {
+            search: "purchased=a+b+c&status=purchased"
+          }
+        }
+      )
+      assert.equal(
+        inner.state().toastMessage,
+        `You are now enrolled in ${program.title}!`
+      )
+      assert.equal(inner.state().alertType, "info")
+      sinon.assert.calledWith(stub, userEnrollments, "a b c")
+      assert.equal(waitStub.callCount, 0)
+    })
+
+    //
+    ;[true, false].forEach(outOfTime => {
+      it(`if a run or program is not immediately found it waits 3 seconds and ${
+        outOfTime ? "errors" : "force reloads"
+      }`, async () => {
+        let waitResolve = null
+        const waitPromise = new Promise(resolve => {
+          waitResolve = resolve
+        })
+        const waitStub = helper.sandbox
+          .stub(utilFuncs, "wait")
+          .returns(waitPromise)
+        const run = userEnrollments.course_run_enrollments[0].run
+        const findStub = helper.sandbox
+          .stub(utilFuncs, "findItemWithTextId")
+          .returns(null)
+
+        const { inner } = await renderPage(
+          {},
+          {
+            location: {
+              search: "purchased=xyz&status=purchased"
+            }
+          }
+        )
+        helper.handleRequestStub.resetHistory()
+
+        sinon.assert.calledWith(waitStub, 3000)
+        helper.sandbox.stub(momentProto, "isBefore").returns(!outOfTime)
+        findStub.returns(run)
+        // $FlowFixMe
+        waitResolve()
+        await waitPromise
+
+        if (outOfTime) {
+          assert.equal(
+            inner.state().toastMessage,
+            `Something went wrong. Please contact support at ${
+              SETTINGS.support_email
+            }.`
+          )
+        } else {
+          sinon.assert.calledWith(
+            helper.handleRequestStub,
+            "/api/enrollments/",
+            "GET"
+          )
+        }
+      })
     })
   })
 })

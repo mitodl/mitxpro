@@ -1,18 +1,22 @@
+/* global SETTINGS: false */
 // @flow
 import React from "react"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { connectRequest } from "redux-query"
-import moment from "moment"
 import { createStructuredSelector } from "reselect"
+import moment from "moment"
 import * as R from "ramda"
-import { Collapse, Button } from "reactstrap"
+import { Alert, Collapse, Button } from "reactstrap"
+import qs from "query-string"
 
 import { RibbonText } from "../../components/Ribbon"
 import queries from "../../lib/queries"
 import { getDateSummary, programDateRange } from "../../lib/courses"
-import { formatPrettyDate } from "../../lib/util"
+import { formatPrettyDate, findItemWithTextId, wait } from "../../lib/util"
 
+import type Moment from "moment"
+import type { Location, RouterHistory } from "react-router"
 import type {
   ProgramEnrollment,
   CourseRunEnrollment,
@@ -20,20 +24,93 @@ import type {
 } from "../../flow/courseTypes"
 
 type Props = {
-  enrollments: UserEnrollments
+  enrollments: UserEnrollments,
+  forceRequest: () => Promise<*>,
+  history: RouterHistory,
+  location: Location
 }
 
 type State = {
   collapseVisible: Object,
-  now: moment
+  now: Moment,
+  timeoutActive: boolean,
+  toastMessage: string,
+  alertType: string
 }
 
+const NUM_MINUTES_TO_POLL = 2
+const NUM_MILLIS_PER_POLL = 3000
+
 export class DashboardPage extends React.Component<Props, State> {
-  constructor() {
-    super()
-    this.state = {
-      collapseVisible: {},
-      now:             moment()
+  state = {
+    collapseVisible: {},
+    now:             moment(),
+    timeoutActive:   false,
+    toastMessage:    "",
+    alertType:       ""
+  }
+
+  componentDidMount() {
+    this.handleOrderStatus()
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    // This is meant to be an identity check, not a deep equality check. This shows whether we received an update
+    // for enrollments based on the forceReload
+    if (prevProps.enrollments !== this.props.enrollments) {
+      this.handleOrderStatus()
+    }
+  }
+
+  handleOrderStatus = () => {
+    const {
+      enrollments,
+      location: { search }
+    } = this.props
+    if (!enrollments) {
+      // wait until we have access to the dashboard
+      return
+    }
+
+    const query = qs.parse(search)
+    if (query.status === "purchased") {
+      this.handleOrderPending(query.purchased)
+    }
+  }
+
+  handleOrderPending = async (readableId: ?string) => {
+    const { enrollments, forceRequest, history } = this.props
+    const { timeoutActive, now: initialTime } = this.state
+
+    if (timeoutActive) {
+      return
+    }
+
+    const item = findItemWithTextId(enrollments, readableId)
+    if (item) {
+      history.push("/dashboard/")
+      this.setState({
+        toastMessage: `You are now enrolled in ${item.title}!`,
+        alertType:    "info"
+      })
+      return
+    }
+
+    this.setState({ timeoutActive: true })
+    await wait(NUM_MILLIS_PER_POLL)
+    this.setState({ timeoutActive: false })
+
+    const deadline = moment(initialTime).add(NUM_MINUTES_TO_POLL, "minutes")
+    const now = moment()
+    if (now.isBefore(deadline)) {
+      await forceRequest()
+    } else {
+      this.setState({
+        toastMessage: `Something went wrong. Please contact support at ${
+          SETTINGS.support_email
+        }.`,
+        alertType: "danger"
+      })
     }
   }
 
@@ -179,39 +256,54 @@ export class DashboardPage extends React.Component<Props, State> {
 
   render() {
     const { enrollments } = this.props
+    const { alertType, toastMessage } = this.state
 
     const enrollmentsExist = this.enrollmentsExist()
 
     return (
-      <div className="user-dashboard container">
-        <div className="row">
-          <div className="header col-12">
-            <h1>Dashboard</h1>
-            {enrollments &&
-              (enrollmentsExist ? (
-                <h3>Courses and Programs</h3>
-              ) : (
-                <h2>You are not yet enrolled in any courses or programs.</h2>
-              ))}
+      <React.Fragment>
+        <div className="user-dashboard container">
+          <div className="row">
+            <Alert
+              color={alertType}
+              isOpen={!!toastMessage}
+              toggle={() =>
+                this.setState({
+                  alertType:    "",
+                  toastMessage: ""
+                })
+              }
+            >
+              {toastMessage}
+            </Alert>
+            <div className="header col-12">
+              <h1>Dashboard</h1>
+              {enrollments &&
+                (enrollmentsExist ? (
+                  <h3>Courses and Programs</h3>
+                ) : (
+                  <h2>You are not yet enrolled in any courses or programs.</h2>
+                ))}
+            </div>
           </div>
+          {enrollments ? (
+            <React.Fragment>
+              <div className="program-enrollments">
+                {enrollments.program_enrollments.map(
+                  this.renderProgramEnrollment
+                )}
+              </div>
+              <div className="non-program-course-enrollments">
+                {enrollments.course_run_enrollments.map(
+                  this.renderCourseEnrollment(false)
+                )}
+              </div>
+            </React.Fragment>
+          ) : (
+            <span>Loading...</span>
+          )}
         </div>
-        {enrollments ? (
-          <React.Fragment>
-            <div className="program-enrollments">
-              {enrollments.program_enrollments.map(
-                this.renderProgramEnrollment
-              )}
-            </div>
-            <div className="non-program-course-enrollments">
-              {enrollments.course_run_enrollments.map(
-                this.renderCourseEnrollment(false)
-              )}
-            </div>
-          </React.Fragment>
-        ) : (
-          <span>Loading...</span>
-        )}
-      </div>
+      </React.Fragment>
     )
   }
 }
