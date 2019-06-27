@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.10.3
+Version 0.10.3 (Released June 27, 2019)
 --------------
 
 - Poll dashboard page for course run/program (#678)
