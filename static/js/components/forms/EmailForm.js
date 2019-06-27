@@ -13,14 +13,15 @@ const emailValidation = yup.object().shape({
 })
 
 type EmailFormProps = {
-  onSubmit: Function
+  onSubmit: Function,
+  children?: React$Element<*>
 }
 
 export type EmailFormValues = {
   email: string
 }
 
-const EmailForm = ({ onSubmit }: EmailFormProps) => (
+const EmailForm = ({ onSubmit, children }: EmailFormProps) => (
   <Formik
     onSubmit={onSubmit}
     validationSchema={emailValidation}
@@ -32,6 +33,7 @@ const EmailForm = ({ onSubmit }: EmailFormProps) => (
           <Field name="email" className="form-control" component={EmailInput} />
           <ErrorMessage name="email" component={FormError} />
         </div>
+        {children && <div className="form-group">{children}</div>}
         <div className="row submit-row no-gutters justify-content-end">
           <button
             type="submit"
