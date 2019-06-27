@@ -21,7 +21,12 @@ const TopAppBar = ({ currentUser }: Props) => (
         }`}
       >
         <div className="navbar-brand">
-          <a href="https://web.mit.edu/" className="mit-link" />
+          <a
+            href="https://web.mit.edu/"
+            rel="noopener noreferrer"
+            target="_blank"
+            className="mit-link"
+          />
           <a href={routes.root} className="xpro-link" />
           <img
             src="/static/images/mitx-pro-logo.png"
