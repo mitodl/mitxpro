@@ -700,6 +700,11 @@ class ProductPage(MetadataPageMixin, Page):
         related_name="+",
         help_text="Thumbnail size must be at least 550x310 pixels.",
     )
+    featured = models.BooleanField(
+        blank=True,
+        default=False,
+        help_text="When checked, product will be shown as featured.",
+    )
     content = StreamField(
         [
             ("heading", blocks.CharBlock(classname="full title")),
@@ -720,6 +725,7 @@ class ProductPage(MetadataPageMixin, Page):
         FieldPanel("description", classname="full"),
         FieldPanel("background_image"),
         FieldPanel("thumbnail_image"),
+        FieldPanel("featured"),
         StreamFieldPanel("content"),
     ]
 
