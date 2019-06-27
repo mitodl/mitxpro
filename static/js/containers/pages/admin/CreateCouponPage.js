@@ -87,9 +87,7 @@ export class CreateCouponPage extends React.Component<Props, State> {
         {newCoupon ? (
           <div className="coupon-success-div">
             {newCoupon.coupon_type === "promo" ? (
-              <span>{`Coupon "${
-                newCoupon.payment.name
-              }" successfully created.`}</span>
+              <span>{`Coupon "${newCoupon.payment.name}" successfully created.`}</span>
             ) : (
               // $FlowFixMe: couponId will never be null here
               <a href={`/couponcodes/${couponId}`}>
