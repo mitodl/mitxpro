@@ -38,6 +38,9 @@ type State = {
   alertType: string
 }
 
+const NUM_MINUTES_TO_POLL = 2
+const NUM_MILLIS_PER_POLL = 3000
+
 export class DashboardPage extends React.Component<Props, State> {
   state = {
     collapseVisible: {},
@@ -94,10 +97,10 @@ export class DashboardPage extends React.Component<Props, State> {
     }
 
     this.setState({ timeoutActive: true })
-    await wait(3000)
+    await wait(NUM_MILLIS_PER_POLL)
     this.setState({ timeoutActive: false })
 
-    const deadline = moment(initialTime).add(2, "minutes")
+    const deadline = moment(initialTime).add(NUM_MINUTES_TO_POLL, "minutes")
     const now = moment()
     if (now.isBefore(deadline)) {
       await forceRequest()
