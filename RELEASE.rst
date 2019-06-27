@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.10.2
+Version 0.10.2 (Released June 27, 2019)
 --------------
 
 - Fix header CSS for video on home page (#603)
