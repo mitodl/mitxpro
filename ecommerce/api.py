@@ -93,7 +93,7 @@ def make_receipt_url(*, base_url, readable_id):
             The URL for the order receipt page
     """
     dashboard_url = urljoin(base_url, reverse("user-dashboard"))
-    return f"{dashboard_url}?status=purchased&readable_id={quote_plus(readable_id)}"
+    return f"{dashboard_url}?status=purchased&purchased={quote_plus(readable_id)}"
 
 
 def get_readable_id(run_or_program):

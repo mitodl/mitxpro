@@ -232,7 +232,7 @@ describe("DashboardPage", () => {
         {},
         {
           location: {
-            search: "readable_id=a+b+c&status=purchased"
+            search: "purchased=a+b+c&status=purchased"
           }
         }
       )
@@ -265,7 +265,7 @@ describe("DashboardPage", () => {
           {},
           {
             location: {
-              search: "readable_id=xyz&status=purchased"
+              search: "purchased=xyz&status=purchased"
             }
           }
         )

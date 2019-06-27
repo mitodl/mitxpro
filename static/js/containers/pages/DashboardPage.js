@@ -69,7 +69,7 @@ export class DashboardPage extends React.Component<Props, State> {
 
     const query = qs.parse(search)
     if (query.status === "purchased") {
-      this.handleOrderPending(query.readable_id)
+      this.handleOrderPending(query.purchased)
     }
   }
 
