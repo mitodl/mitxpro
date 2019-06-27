@@ -56,6 +56,28 @@ describe("NotificationContainer component", () => {
     assert.equal(alerts.at(1).prop("children").type, UnusedCouponNotification)
   })
 
+  //
+  ;[[undefined, "info"], ["danger", "danger"]].forEach(
+    ([color, expectedColor]) => {
+      it(`shows a ${expectedColor} color notification given a ${String(
+        color
+      )} color prop`, async () => {
+        const { inner } = await render({
+          ui: {
+            userNotifications: {
+              aMessage: {
+                type:  ALERT_TYPE_TEXT,
+                color: color,
+                props: { text: "derp" }
+              }
+            }
+          }
+        })
+        assert.equal(inner.find("Alert").prop("color"), expectedColor)
+      })
+    }
+  )
+
   it("hides a message when it's dismissed, then removes it from global state", async () => {
     const delayMs = 5
     const { inner, wrapper } = await render(
