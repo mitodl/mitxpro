@@ -170,7 +170,7 @@ def test_zero_price_checkout(
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json() == {
         "payload": {},
-        "url": f"http://testserver/dashboard/?status=receipt&readable_id={quote_plus(readable_id)}",
+        "url": f"http://testserver/dashboard/?status=purchased&readable_id={quote_plus(readable_id)}",
         "method": "GET",
     }
 

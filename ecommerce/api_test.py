@@ -123,7 +123,7 @@ def test_make_receipt_url():
     """make_receipt_url should generate a URL for use by users returning from a successful CyberSource payment"""
     assert (
         make_receipt_url(base_url="https://mit.edu/", readable_id="a readable id")
-        == "https://mit.edu/dashboard/?status=receipt&readable_id=a+readable+id"
+        == "https://mit.edu/dashboard/?status=purchased&readable_id=a+readable+id"
     )
 
 
