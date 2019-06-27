@@ -209,8 +209,9 @@ describe("DashboardPage", () => {
     it("shows an alert based on the toastMessage state value", async () => {
       const { inner } = await renderPage()
       assert.isFalse(inner.find("Alert").prop("isOpen"))
-      inner.setState({ toastMessage: "hello world" })
+      inner.setState({ toastMessage: "hello world", alertType: "info" })
       assert.isTrue(inner.find("Alert").prop("isOpen"))
+      assert.equal(inner.find("Alert").prop("color"), "info")
       assert.isTrue(
         inner
           .find("Alert")
@@ -220,6 +221,7 @@ describe("DashboardPage", () => {
       inner.find("Alert").prop("toggle")()
       assert.isFalse(inner.find("Alert").prop("isOpen"))
       assert.equal(inner.state().toastMessage, "")
+      assert.equal(inner.state().alertType, "")
     })
 
     it("looks up a run or program using the query parameter, and displays the success message", async () => {
@@ -240,6 +242,7 @@ describe("DashboardPage", () => {
         inner.state().toastMessage,
         `You are now enrolled in ${program.title}!`
       )
+      assert.equal(inner.state().alertType, "info")
       sinon.assert.calledWith(stub, userEnrollments, "a b c")
       assert.equal(waitStub.callCount, 0)
     })

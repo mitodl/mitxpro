@@ -41,8 +41,7 @@
     font-weight: inherit;
   }
 
-  .alert-info {
-    background-color: $light-blue;
+  .alert {
     color: white;
     font-size: 24px;
     font-weight: 600;
@@ -57,6 +56,14 @@
       padding-bottom: 0;
       opacity: 1;
     }
+  }
+
+  .alert-info {
+    background-color: $light-blue;
+  }
+
+  .alert-danger {
+    background-color: $primary;
   }
 }
 

@@ -34,7 +34,8 @@ type State = {
   collapseVisible: Object,
   now: Moment,
   timeoutActive: boolean,
-  toastMessage: string
+  toastMessage: string,
+  alertType: string
 }
 
 export class DashboardPage extends React.Component<Props, State> {
@@ -42,7 +43,8 @@ export class DashboardPage extends React.Component<Props, State> {
     collapseVisible: {},
     now:             moment(),
     timeoutActive:   false,
-    toastMessage:    ""
+    toastMessage:    "",
+    alertType:       ""
   }
 
   componentDidMount() {
@@ -85,7 +87,8 @@ export class DashboardPage extends React.Component<Props, State> {
     if (item) {
       history.push("/dashboard/")
       this.setState({
-        toastMessage: `You are now enrolled in ${item.title}!`
+        toastMessage: `You are now enrolled in ${item.title}!`,
+        alertType:    "info"
       })
       return
     }
@@ -102,7 +105,8 @@ export class DashboardPage extends React.Component<Props, State> {
       this.setState({
         toastMessage: `Something went wrong. Please contact support at ${
           SETTINGS.support_email
-        }.`
+        }.`,
+        alertType: "danger"
       })
     }
   }
@@ -249,7 +253,7 @@ export class DashboardPage extends React.Component<Props, State> {
 
   render() {
     const { enrollments } = this.props
-    const { toastMessage } = this.state
+    const { alertType, toastMessage } = this.state
 
     const enrollmentsExist = this.enrollmentsExist()
 
@@ -258,9 +262,14 @@ export class DashboardPage extends React.Component<Props, State> {
         <div className="user-dashboard container">
           <div className="row">
             <Alert
-              color="info"
+              color={alertType}
               isOpen={!!toastMessage}
-              toggle={() => this.setState({ toastMessage: "" })}
+              toggle={() =>
+                this.setState({
+                  alertType:    "",
+                  toastMessage: ""
+                })
+              }
             >
               {toastMessage}
             </Alert>
