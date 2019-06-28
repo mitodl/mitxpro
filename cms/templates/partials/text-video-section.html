@@ -15,7 +15,7 @@
           <div class="video-holder">
               {% embed page.video_url as youtube_video %}
               {% if youtube_video %}
-                <div class="tv-video youtube-video">{{ youtube_video }}</div>
+                <div class="tv-video youtube-video" id="tv-yt-video">{{ youtube_video }}</div>
               {% else %}
                 <video class="tv-video" id="tv-video" controls data-source="{{ page.video_url }}"></video>
               {% endif %}
