@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.10.5
+--------------
+
+- #704 Watch Now button support for Youtube videos
+
 Version 0.10.4 (Released June 28, 2019)
 --------------
 
