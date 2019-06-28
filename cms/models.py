@@ -159,12 +159,16 @@ class CatalogPage(Page):
                 Prefetch("course__courseruns", queryset=sorted_courserun_qset)
             )
         )
+        featured_product = ProgramPage.objects.filter(
+            featured=True
+        ) or CoursePage.objects.filter(featured=True)
         return dict(
             **super().get_context(request),
             **get_js_settings_context(request),
             all_pages=sort_and_filter_pages(list(program_pages) + list(course_pages)),
             program_pages=sort_and_filter_pages(program_pages),
             course_pages=sort_and_filter_pages(course_pages),
+            featured_product=featured_product.first(),
             default_image_path=DEFAULT_COURSE_IMG_PATH,
             hubspot_portal_id=settings.HUBSPOT_CONFIG.get("HUBSPOT_PORTAL_ID"),
             hubspot_new_courses_form_guid=settings.HUBSPOT_CONFIG.get(
@@ -328,6 +332,11 @@ class ProductPage(MetadataPageMixin, Page):
         related_name="+",
         help_text="Thumbnail size must be at least 550x310 pixels.",
     )
+    featured = models.BooleanField(
+        blank=True,
+        default=False,
+        help_text="When checked, product will be shown as featured.",
+    )
     content = StreamField(
         [
             ("heading", blocks.CharBlock(classname="full title")),
@@ -348,6 +357,7 @@ class ProductPage(MetadataPageMixin, Page):
         FieldPanel("description", classname="full"),
         FieldPanel("background_image"),
         FieldPanel("thumbnail_image"),
+        FieldPanel("featured"),
         StreamFieldPanel("content"),
     ]
 
@@ -395,6 +405,13 @@ class ProductPage(MetadataPageMixin, Page):
         """Gets the first child page of the given type if it exists"""
         child = self.get_children().type(cls).live().first()
         return child.specific if child else None
+
+    def save(self, *args, **kwargs):
+        """If featured is True then set False in any existing product page(s)."""
+        if self.featured:
+            for child_class in ProductPage.__subclasses__():
+                child_class.objects.filter(featured=True).update(featured=False)
+        super(ProductPage, self).save(*args, **kwargs)
 
     @property
     def product(self):

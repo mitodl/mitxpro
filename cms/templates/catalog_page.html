@@ -23,28 +23,31 @@
           <h2>Explore MIT's courses for game-changing professionals</h2>
         </div>
       </div>
-    {% endblock %}
+      {% endblock %}
+      {% if featured_product.program %}
+          {% include "partials/featured_card.html" with courseware_page=featured_product object_type="program" %}
+      {% elif featured_product.course %}
+          {% include "partials/featured_card.html" with courseware_page=featured_product object_type="course"%}
+      {% endif %}
       <div class="tab-block">
           <div class="container">
             <ul class="nav nav-tabs" role="tablist">
               <li class="nav-item">
                 <a class="nav-link active" id="all-tab" data-toggle="tab" href="#all" role="tab" aria-controls="all" aria-selected="true">All</a>
               </li>
-              <li class="nav-item" data-toggle="tooltip" title="Multi-course offerings" data-trigger="hover" data-placement="auto">
+              <li class="nav-item" data-toggle="tooltip" title="Multi-course offerings" data-trigger="hover" data-placement="bottom">
                 <a id="programs-tab" class="nav-link" data-toggle="tab" href="#programs" role="tab" aria-controls="programs" aria-selected="false">programs</a>
               </li>
-              <li class="nav-item" data-toggle="tooltip" title="Single course offerings" data-trigger="hover" data-placement="auto">
+              <li class="nav-item" data-toggle="tooltip" title="Single course offerings" data-trigger="hover" data-placement="bottom">
                 <a class="nav-link" data-toggle="tab" id="courses-tab" href="#courses" role="tab" aria-controls="courses" aria-selected="false">Courses</a>
               </li>
             </ul>
             <div class="tab-content">
               <div class="tab-pane catalog-body fade in show active" id="all" role="tabpanel" aria-labelledby="all-tab">
-                <h1>FEATURED</h1>
                 {% for page in all_pages %}
                   {% if page.program %}
                       {% include "partials/catalog-card.html" with courseware_page=page object_type="program" tab="all" %}
-                  {% endif %}
-                  {% if page.course %}
+                  {% elif page.course %}
                       {% include "partials/catalog-card.html" with courseware_page=page object_type="course" tab="all"%}
                   {% endif %}
                 {% endfor %}

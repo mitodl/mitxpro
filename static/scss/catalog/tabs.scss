@@ -33,16 +33,6 @@
   position: relative;
   margin: -40px 0 0;
 
-  &:after {
-    position: absolute;
-    left: 0;
-    top: 40px;
-    right: 0;
-    content: "";
-    height: 360px;
-    background: linear-gradient(to top, $gray-85, $tile-background);
-  }
-
   .container {
     max-width: 880px;
   }
