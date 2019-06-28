@@ -47,6 +47,9 @@ $(document).ready(function() {
     event.preventDefault();
 
     const aboutVideo = $("#tv-video").get(0);
+    const aboutVideoYoutube = $("#tv-yt-video")
+      .find("iframe")
+      .get(0);
 
     if (aboutVideo) {
       aboutVideo.scrollIntoView({
@@ -54,6 +57,20 @@ $(document).ready(function() {
         block:    "center"
       });
       aboutVideo.play();
+    } else if (aboutVideoYoutube) {
+      aboutVideoYoutube.scrollIntoView({
+        behavior: "smooth",
+        block:    "center"
+      });
+      aboutVideoYoutube.contentWindow.postMessage(
+        JSON.stringify({
+          event: "command",
+          func:  "playVideo"
+        }),
+        "https://www.youtube.com"
+      );
+    } else {
+      console.error("We do not have any supported video elements available."); // eslint-disable-line no-console
     }
   });
 });

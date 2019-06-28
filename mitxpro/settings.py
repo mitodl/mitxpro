@@ -637,3 +637,9 @@ VOUCHER_COMPANY_ID = get_int("VOUCHER_COMPANY_ID", None)
 # Hubspot sync settings
 HUBSPOT_API_KEY = get_string("HUBSPOT_API_KEY", None)
 HUBSPOT_ID_PREFIX = get_string("HUBSPOT_ID_PREFIX", "xpronew")
+
+
+WAGTAILEMBEDS_FINDERS = [
+    {"class": "cms.embeds.YouTubeEmbedFinder"},
+    {"class": "wagtail.embeds.finders.oembed"},
+]
