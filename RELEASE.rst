@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.10.4
+Version 0.10.4 (Released June 28, 2019)
 --------------
 
 - just update the URL
