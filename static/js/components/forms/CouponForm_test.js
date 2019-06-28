@@ -86,14 +86,21 @@ describe("CouponForm", () => {
     ["activation_date", 0, "", "Valid activation date required"],
     ["expiration_date", 1, "bad_date", "Valid expiration date required"],
     ["activation_date", 0, "bad_date", "Valid activation date required"],
+    ["activation_date", 0, "06/27/2019", null],
     [
       "expiration_date",
       1,
-      moment().format("YYYY-MM-DD"),
-      "Date cannot be less than activation date"
+      moment()
+        .add(1, "days")
+        .format("MM/DD/YYYY"),
+      null
     ],
-    ["activation_date", 0, moment().format("YYYY-MM-DD"), null],
-    ["activation_date", 0, "2001-01-01T00:00:00Z", "Date cannot be in the past"]
+    [
+      "expiration_date",
+      1,
+      moment().format("MM/DD/YYYY"),
+      "Expiration date must be after today/activation date"
+    ]
   ].forEach(([name, idx, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value
@@ -113,6 +120,29 @@ describe("CouponForm", () => {
         findFormikErrorByName(wrapper, name).text(),
         errorMessage
       )
+    })
+  })
+
+  //
+  ;[
+    ["activation_date", 0, "06/27/2019", "2019-06-27T00:00:00.000Z"],
+    ["expiration_date", 1, "06/27/2519", "2519-06-27T00:00:00.000Z"]
+  ].forEach(([name, idx, value, formattedDate]) => {
+    it(`converts the field name=${name}, value=${JSON.stringify(
+      value
+    )} to date string ${JSON.stringify(formattedDate)}`, async () => {
+      const wrapper = renderForm()
+      const formik = wrapper.find("Formik").instance()
+      const input = wrapper
+        .find("DayPickerInput")
+        .at(idx)
+        .find("input")
+      input.simulate("click")
+      input.simulate("change", { persist: () => {}, target: { name, value } })
+      input.simulate("blur")
+      await wait()
+      wrapper.update()
+      assert.equal(formik.state.values[name].toISOString(), formattedDate)
     })
   })
 
