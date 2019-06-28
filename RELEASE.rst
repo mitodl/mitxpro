@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.10.4
+--------------
+
+- just update the URL
+- Fixed margin issue with site-wide notifications
+
 Version 0.10.3 (Released June 27, 2019)
 --------------
 
