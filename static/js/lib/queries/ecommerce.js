@@ -18,8 +18,9 @@ const DEFAULT_POST_OPTIONS = {
 
 export default {
   checkoutMutation: () => ({
-    url:    "/api/checkout/",
-    update: {
+    queryKey: "checkoutMutation",
+    url:      "/api/checkout/",
+    update:   {
       checkout: () => null
     },
     options: {
@@ -37,8 +38,9 @@ export default {
     }
   }),
   basketMutation: (payload: BasketResponse) => ({
-    url:    "/api/basket/",
-    update: {
+    queryKey: "basketMutation",
+    url:      "/api/basket/",
+    update:   {
       basket: (prev: BasketResponse, next: BasketResponse) => next
     },
     transform: (json: BasketResponse) => ({
@@ -73,6 +75,7 @@ export default {
   }),
   couponsSelector: pathOr(null, ["entities", "coupons"]),
   couponsMutation: (coupon: Object) => ({
+    queryKey:  "couponsMutation",
     url:       "/api/coupons/",
     body:      coupon,
     transform: (coupon: CouponPaymentVersion) => ({

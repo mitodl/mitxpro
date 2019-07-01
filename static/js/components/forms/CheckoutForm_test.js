@@ -51,6 +51,7 @@ describe("CheckoutForm", () => {
         coupon={coupon}
         couponCode={couponCode}
         basket={basket}
+        mutationPending={false}
         item={basketItem}
         submitCoupon={submitCouponStub}
         selectedRuns={{}}
@@ -441,6 +442,24 @@ describe("CheckoutForm", () => {
       const [text, url] = linkPairs[i]
       assert.equal(linkWrapper.text(), text)
       assert.equal(linkWrapper.prop("href"), url)
+    })
+  })
+
+  //
+  ;[true, false].forEach(mutationPending => {
+    it("disables the apply coupon and checkout buttons while processing", async () => {
+      const inner = await renderForm({
+        mutationPending
+      })
+
+      assert.equal(
+        inner.find(".checkout-button").prop("disabled"),
+        mutationPending
+      )
+      assert.equal(
+        inner.find(".apply-button").prop("disabled"),
+        mutationPending
+      )
     })
   })
 })

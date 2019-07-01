@@ -47,6 +47,7 @@ type CommonProps = {
   item: BasketItem,
   basket: BasketResponse,
   coupon: ?CouponSelection,
+  mutationPending: boolean,
   onSubmit: (Values, Actions) => Promise<void>,
   submitCoupon: (
     couponCode: ?string,
@@ -185,6 +186,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
     const {
       basket,
       errors,
+      mutationPending,
       values,
       setFieldError,
       item,
@@ -240,6 +242,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                   <button
                     className="apply-button"
                     type="button"
+                    disabled={mutationPending}
                     onClick={() =>
                       submitCoupon(values.couponCode, setFieldError)
                     }
@@ -297,7 +300,11 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
           <div className="row">
             <div className="col-lg-7" />
             <div className="col-lg-5">
-              <button className="checkout-button" type="submit">
+              <button
+                className="checkout-button"
+                type="submit"
+                disabled={mutationPending}
+              >
                 Place your order
               </button>
               {formatErrors(errors.items)}
@@ -370,6 +377,7 @@ export class CheckoutForm extends React.Component<OuterProps> {
       coupon,
       couponCode,
       item,
+      mutationPending,
       selectedRuns,
       submitCoupon,
       updateProduct
@@ -390,6 +398,7 @@ export class CheckoutForm extends React.Component<OuterProps> {
             basket={basket}
             item={item}
             coupon={coupon}
+            mutationPending={mutationPending}
             onSubmit={onSubmit}
             submitCoupon={submitCoupon}
             updateProduct={updateProduct}
