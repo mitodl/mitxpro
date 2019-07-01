@@ -28,7 +28,9 @@ describe("EmailForm", () => {
     const wrapper = renderForm()
 
     const form = wrapper.find("Formik").dive()
-    assert.ok(findFormikFieldByName(form, "email").exists())
+    const emailField = findFormikFieldByName(form, "email")
+    assert.ok(emailField.exists())
+    assert.equal(emailField.prop("autoComplete"), "email")
     assert.ok(form.find("button[type='submit']").exists())
   })
 })

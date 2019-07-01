@@ -138,6 +138,7 @@ export const LegalAddressFields = ({
         type="text"
         name="legal_address.first_name"
         className="form-control"
+        autoComplete="given-name"
       />
       <ErrorMessage name="legal_address.first_name" component={FormError} />
     </div>
@@ -149,15 +150,21 @@ export const LegalAddressFields = ({
         type="text"
         name="legal_address.last_name"
         className="form-control"
+        autoComplete="family-name"
       />
       <ErrorMessage name="legal_address.last_name" component={FormError} />
     </div>
     <div className="form-group">
-      <label htmlFor="legal_address.last_name" className="row">
+      <label htmlFor="legal_address.full_name" className="row">
         <div className="col-4 font-weight-bold">Full Name*</div>
         <div className="col-8">(As it will appear in your certificate)</div>
       </label>
-      <Field type="text" name="name" className="form-control" />
+      <Field
+        type="text"
+        name="name"
+        className="form-control"
+        autoComplete="name"
+      />
       <ErrorMessage name="name" component={FormError} />
     </div>
     {includePassword ? (
@@ -178,7 +185,10 @@ export const LegalAddressFields = ({
     ) : null}
     <div className="form-group">
       {/* LegalAddress fields */}
-      <label htmlFor="legal_address.last_name" className="font-weight-bold">
+      <label
+        htmlFor="legal_address.street_address"
+        className="font-weight-bold"
+      >
         Street Address*
       </label>
       <FieldArray
@@ -190,6 +200,7 @@ export const LegalAddressFields = ({
                 <Field
                   name={`legal_address.street_address[${index}]`}
                   className={`form-control ${index > 0 ? "row-inner" : ""}`}
+                  autoComplete={`address-line${index + 1}`}
                 />
                 {index === 0 ? (
                   <ErrorMessage
@@ -213,11 +224,14 @@ export const LegalAddressFields = ({
       />
     </div>
     <div className="form-group">
-      <label className="font-weight-bold">Country*</label>
+      <label htmlFor="legal_address.country" className="font-weight-bold">
+        Country*
+      </label>
       <Field
         component="select"
         name="legal_address.country"
         className="form-control"
+        autoComplete="country"
         onChange={e => {
           setFieldValue("legal_address.country", e.target.value)
           setFieldTouched("legal_address.country")
@@ -245,6 +259,7 @@ export const LegalAddressFields = ({
           component="select"
           name="legal_address.state_or_territory"
           className="form-control"
+          autoComplete="address-level1"
         >
           <option value="">-----</option>
           {find(
@@ -266,7 +281,12 @@ export const LegalAddressFields = ({
       <label htmlFor="legal_address.city" className="font-weight-bold">
         City*
       </label>
-      <Field type="text" name="legal_address.city" className="form-control" />
+      <Field
+        type="text"
+        name="legal_address.city"
+        className="form-control"
+        autoComplete="address-level2"
+      />
       <ErrorMessage name="legal_address.city" component={FormError} />
     </div>
     {includes(values.legal_address.country, COUNTRIES_REQUIRING_POSTAL_CODE) ? (
@@ -278,6 +298,7 @@ export const LegalAddressFields = ({
           type="text"
           name="legal_address.postal_code"
           className="form-control"
+          autoComplete="postal-code"
         />
         <ErrorMessage name="legal_address.postal_code" component={FormError} />
       </div>

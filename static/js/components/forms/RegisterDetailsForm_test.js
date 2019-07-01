@@ -123,6 +123,9 @@ describe("RegisterDetailsForm", () => {
           : "Postal Code must be formatted as 'ANA NAN'"
       )
 
+      // Both postal code and state/territory fields should be visible
+      assert.isNotOk(wrapper.find(".hidden").exists())
+
       // Select country not requiring state and zipcode
       country.simulate("change", {
         persist: () => {},
@@ -131,14 +134,21 @@ describe("RegisterDetailsForm", () => {
       country.simulate("blur")
       await wait()
       wrapper.update()
-      assert.isFalse(
-        findFormikErrorByName(
-          wrapper,
-          "legal_address.state_or_territory"
-        ).exists()
+
+      // Both postal code and state/territory fields should not be visible
+      assert.equal(
+        wrapper
+          .find(`select[name="legal_address.state_or_territory"]`)
+          .parents("div")
+          .prop("className"),
+        "form-group hidden"
       )
-      assert.isFalse(
-        findFormikErrorByName(wrapper, "legal_address.postal_code").exists()
+      assert.equal(
+        wrapper
+          .find(`input[name="legal_address.postal_code"]`)
+          .parents("div")
+          .prop("className"),
+        "form-group hidden"
       )
     })
   })
