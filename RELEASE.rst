@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.11.0
+--------------
+
+- Reordered CMS model definitions
+- Added 'create account' link to sign in page
+
 Version 0.10.5 (Released June 28, 2019)
 --------------
 
