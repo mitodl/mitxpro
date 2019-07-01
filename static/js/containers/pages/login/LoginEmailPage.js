@@ -13,6 +13,7 @@ import EmailForm from "../../../components/forms/EmailForm"
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
 import type { AuthResponse } from "../../../flow/authTypes"
+import { Link } from "react-router-dom"
 
 type Props = {
   location: Location,
@@ -51,7 +52,14 @@ class LoginEmailPage extends React.Component<Props> {
         </div>
         <div className="row auth-card card-shadow auth-form">
           <div className="col-12">
-            <EmailForm onSubmit={this.onSubmit.bind(this)} />
+            <EmailForm onSubmit={this.onSubmit.bind(this)}>
+              <React.Fragment>
+                <span>Don't have an account? </span>
+                <Link to={routes.register.begin} className="link-light-blue">
+                  Create Account
+                </Link>
+              </React.Fragment>
+            </EmailForm>
           </div>
         </div>
       </div>

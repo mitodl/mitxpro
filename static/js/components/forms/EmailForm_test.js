@@ -11,7 +11,13 @@ import { findFormikFieldByName } from "../../lib/test_utils"
 describe("EmailForm", () => {
   let sandbox, onSubmitStub
 
-  const renderForm = () => shallow(<EmailForm onSubmit={onSubmitStub} />)
+  const renderForm = children =>
+    shallow(
+      <EmailForm
+        onSubmit={onSubmitStub}
+        {...(children ? { children: children } : {})}
+      />
+    )
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
@@ -30,5 +36,15 @@ describe("EmailForm", () => {
     const form = wrapper.find("Formik").dive()
     assert.ok(findFormikFieldByName(form, "email").exists())
     assert.ok(form.find("button[type='submit']").exists())
+  })
+
+  it("renders child elements if they are passed in", () => {
+    const wrapper = renderForm(<div id="test-child">child element</div>)
+
+    const form = wrapper.find("Formik").dive()
+    const testChild = form.find("div#test-child")
+    assert.ok(testChild.exists())
+    assert.equal(testChild.at(0).text(), "child element")
+    assert.equal(testChild.parent().prop("className"), "form-group")
   })
 })
