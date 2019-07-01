@@ -123,9 +123,6 @@ describe("RegisterDetailsForm", () => {
           : "Postal Code must be formatted as 'ANA NAN'"
       )
 
-      // Both postal code and state/territory fields should be visible
-      assert.isNotOk(wrapper.find(".hidden").exists())
-
       // Select country not requiring state and zipcode
       country.simulate("change", {
         persist: () => {},
@@ -134,21 +131,14 @@ describe("RegisterDetailsForm", () => {
       country.simulate("blur")
       await wait()
       wrapper.update()
-
-      // Both postal code and state/territory fields should not be visible
-      assert.equal(
-        wrapper
-          .find(`select[name="legal_address.state_or_territory"]`)
-          .parents("div")
-          .prop("className"),
-        "form-group hidden"
+      assert.isFalse(
+        findFormikErrorByName(
+          wrapper,
+          "legal_address.state_or_territory"
+        ).exists()
       )
-      assert.equal(
-        wrapper
-          .find(`input[name="legal_address.postal_code"]`)
-          .parents("div")
-          .prop("className"),
-        "form-group hidden"
+      assert.isFalse(
+        findFormikErrorByName(wrapper, "legal_address.postal_code").exists()
       )
     })
   })
@@ -187,5 +177,24 @@ describe("RegisterDetailsForm", () => {
       findFormikErrorByName(wrapper, "legal_address.street_address").text(),
       "Street address is a required field"
     )
+  })
+
+  //
+  ;[
+    ["name", "name"],
+    ["legal_address.first_name", "given-name"],
+    ["legal_address.last_name", "family-name"],
+    ["legal_address.street_address[0]", "address-line1"],
+    ["legal_address.country", "country"],
+    ["legal_address.city", "address-level2"]
+  ].forEach(([formFieldName, autoCompleteName]) => {
+    it(`validates that autoComplete=${autoCompleteName}  for field ${formFieldName}`, async () => {
+      const wrapper = renderForm()
+      const form = wrapper.find("Formik")
+      assert.equal(
+        findFormikFieldByName(form, formFieldName).prop("autoComplete"),
+        autoCompleteName
+      )
+    })
   })
 })

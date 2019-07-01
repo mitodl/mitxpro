@@ -35,8 +35,10 @@ describe("Register forms", () => {
 
     it("renders the form", () => {
       const { form } = renderForm()
+      const emailField = findFormikFieldByName(form, "email")
 
-      assert.isOk(findFormikFieldByName(form, "email").exists())
+      assert.ok(emailField.exists())
+      assert.equal(emailField.prop("autoComplete"), "email")
       assert.isOk(form.find("button[type='submit']").exists())
     })
 

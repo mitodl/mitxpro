@@ -155,7 +155,7 @@ export const LegalAddressFields = ({
       <ErrorMessage name="legal_address.last_name" component={FormError} />
     </div>
     <div className="form-group">
-      <label htmlFor="legal_address.full_name" className="row">
+      <label htmlFor="name" className="row">
         <div className="col-4 font-weight-bold">Full Name*</div>
         <div className="col-8">(As it will appear in your certificate)</div>
       </label>
