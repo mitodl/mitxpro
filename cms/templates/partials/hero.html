@@ -44,7 +44,7 @@
           {% else %}
             {% if not user.is_anonymous %}
               {% if not enrolled and product_id %}
-                <a class="enroll-button" href="{% url "checkout-page" %}?product={{ product_id }}">
+                <a class="enroll-button" href="{{ checkout_url }}">
                   Enroll Now
                 </a>
               {% elif enrolled %}
@@ -71,10 +71,10 @@
                     </div>
                     <div class="bottom-row">
                       <div class="popup-buttons">
-                        <a class="sign-in-link link-button" href="/signin">
+                        <a class="sign-in-link link-button" href="{% url 'login' %}?next={{ checkout_url|urlencode:'' }}">
                           Sign In
                         </a>
-                        <a class="create-account-link link-button" href="/create-account">
+                        <a class="create-account-link link-button" href="{% url 'signup' %}?next={{ checkout_url|urlencode:'' }}">
                           Create Account
                         </a>
                       </div>

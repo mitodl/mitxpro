@@ -9,6 +9,7 @@ from django.db import models
 from django.db.models import Prefetch
 from django.utils.text import slugify
 from django.http.response import Http404
+from django.shortcuts import reverse
 from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import (
     FieldPanel,
@@ -509,6 +510,9 @@ class ProgramPage(ProductPage):
             **super().get_context(request, **kwargs),
             **get_js_settings_context(request),
             "product_id": product.id if product else None,
+            "checkout_url": f"{reverse('checkout-page')}?product={ product.id }"
+            if product
+            else None,
             "enrolled": enrolled,
             "user": request.user,
         }
@@ -578,6 +582,9 @@ class CoursePage(ProductPage):
             **super().get_context(request, **kwargs),
             **get_js_settings_context(request),
             "product_id": product.id if product else None,
+            "checkout_url": f"{reverse('checkout-page')}?product={ product.id }"
+            if product
+            else None,
             "enrolled": enrolled,
             "user": request.user,
         }

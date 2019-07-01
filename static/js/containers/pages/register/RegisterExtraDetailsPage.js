@@ -17,7 +17,11 @@ import RegisterExtraDetailsForm from "../../../components/forms/RegisterExtraDet
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
-import type { AuthResponse, ProfileForm, User } from "../../../flow/authTypes"
+import type {
+  AuthResponseRaw,
+  ProfileForm,
+  User
+} from "../../../flow/authTypes"
 
 type RegisterProps = {|
   location: Location,
@@ -29,7 +33,7 @@ type DispatchProps = {|
   registerExtraDetails: (
     profileData: ProfileForm,
     partialToken: string
-  ) => Promise<Response<AuthResponse>>,
+  ) => Promise<Response<AuthResponseRaw>>,
   getCurrentUser: () => Promise<Response<User>>
 |}
 
@@ -45,16 +49,17 @@ class RegisterExtraDetailsPage extends React.Component<Props> {
       params: { partialToken }
     } = this.props
 
+    /* eslint-disable camelcase */
     try {
       const {
-        body: { state, errors }
-      }: { body: AuthResponse } = await registerExtraDetails(
+        body: { state, errors, redirect_url }
+      }: { body: AuthResponseRaw } = await registerExtraDetails(
         profileData,
         partialToken
       )
 
       if (state === STATE_SUCCESS) {
-        window.location.href = routes.root
+        window.location.href = redirect_url || routes.dashboard
       } else if (errors.length > 0) {
         setErrors({
           email: errors[0]
