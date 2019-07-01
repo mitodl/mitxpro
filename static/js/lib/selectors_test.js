@@ -64,8 +64,8 @@ describe("selector utils", () => {
     })
 
     it("should return '/' if no next param", () => {
-      assert.equal(qsNextSelector({}, makeSearchProps("abc=123")), "/")
-      assert.equal(qsNextSelector({}, makeSearchProps("")), "/")
+      assert.equal(qsNextSelector({}, makeSearchProps("abc=123")), null)
+      assert.equal(qsNextSelector({}, makeSearchProps("")), null)
     })
   })
 
