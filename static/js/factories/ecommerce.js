@@ -46,6 +46,7 @@ export const makeItem = (itemType: ?string): BasketItem => {
     // $FlowFixMe: flow doesn't understand generators well
     id:            genBasketItemId.next().value,
     description:   casual.text,
+    content_title: casual.text,
     price:         String(casual.double(0, 100)),
     thumbnail_url: casual.url,
     run_ids:       runIds,

@@ -33,6 +33,7 @@ export type BasketItem = {
   thumbnail_url: string,
   price: string,
   description: string,
+  content_title: string,
   object_id: number,
   product_id: number,
   id: number,

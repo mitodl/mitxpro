@@ -126,10 +126,10 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
       return (
         <div className="flex-row item-row">
           <div className="flex-row item-column">
-            <img src={item.thumbnail_url} alt={item.description} />
+            <img src={item.thumbnail_url} alt={item.content_title} />
           </div>
           <div className="title-column">
-            <div className="title">{item.description}</div>
+            <div className="title">{item.content_title}</div>
             <Field
               component="select"
               name={`runs.${course.id}`}
@@ -213,7 +213,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
               </div>
               <hr />
               {item.type === "program" ? (
-                <span className="description">{item.description}</span>
+                <span className="description">{item.content_title}</span>
               ) : null}
             </div>
           </div>
