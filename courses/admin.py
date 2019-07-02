@@ -4,7 +4,16 @@ Admin site bindings for profiles
 
 from django.contrib import admin
 
-from .models import Program, Course, CourseRun, ProgramEnrollment, CourseRunEnrollment
+from mitxpro.utils import get_field_names
+from .models import (
+    Program,
+    Course,
+    CourseRun,
+    ProgramEnrollment,
+    CourseRunEnrollment,
+    ProgramEnrollmentAudit,
+    CourseRunEnrollmentAudit,
+)
 
 
 class ProgramAdmin(admin.ModelAdmin):
@@ -55,6 +64,19 @@ class ProgramEnrollmentAdmin(admin.ModelAdmin):
         obj.save_and_log(request.user)
 
 
+class ProgramEnrollmentAuditAdmin(admin.ModelAdmin):
+    """Admin for ProgramEnrollmentAudit"""
+
+    model = ProgramEnrollmentAudit
+    readonly_fields = get_field_names(ProgramEnrollmentAudit)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 class CourseRunEnrollmentAdmin(admin.ModelAdmin):
     """Admin for CourseRunEnrollment"""
 
@@ -79,8 +101,23 @@ class CourseRunEnrollmentAdmin(admin.ModelAdmin):
         obj.save_and_log(request.user)
 
 
+class CourseRunEnrollmentAuditAdmin(admin.ModelAdmin):
+    """Admin for CourseRunEnrollmentAudit"""
+
+    model = CourseRunEnrollmentAudit
+    readonly_fields = get_field_names(CourseRunEnrollmentAudit)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 admin.site.register(Program, ProgramAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(CourseRun, CourseRunAdmin)
 admin.site.register(ProgramEnrollment, ProgramEnrollmentAdmin)
+admin.site.register(ProgramEnrollmentAudit, ProgramEnrollmentAuditAdmin)
 admin.site.register(CourseRunEnrollment, CourseRunEnrollmentAdmin)
+admin.site.register(CourseRunEnrollmentAudit, CourseRunEnrollmentAuditAdmin)
