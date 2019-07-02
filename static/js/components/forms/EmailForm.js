@@ -30,7 +30,12 @@ const EmailForm = ({ onSubmit, children }: EmailFormProps) => (
       <Form>
         <div className="form-group">
           <label htmlFor="email">Email</label>
-          <Field name="email" className="form-control" component={EmailInput} />
+          <Field
+            name="email"
+            className="form-control"
+            component={EmailInput}
+            autoComplete="email"
+          />
           <ErrorMessage name="email" component={FormError} />
         </div>
         {children && <div className="form-group">{children}</div>}

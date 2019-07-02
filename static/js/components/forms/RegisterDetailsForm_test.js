@@ -178,4 +178,23 @@ describe("RegisterDetailsForm", () => {
       "Street address is a required field"
     )
   })
+
+  //
+  ;[
+    ["name", "name"],
+    ["legal_address.first_name", "given-name"],
+    ["legal_address.last_name", "family-name"],
+    ["legal_address.street_address[0]", "address-line1"],
+    ["legal_address.country", "country"],
+    ["legal_address.city", "address-level2"]
+  ].forEach(([formFieldName, autoCompleteName]) => {
+    it(`validates that autoComplete=${autoCompleteName}  for field ${formFieldName}`, async () => {
+      const wrapper = renderForm()
+      const form = wrapper.find("Formik")
+      assert.equal(
+        findFormikFieldByName(form, formFieldName).prop("autoComplete"),
+        autoCompleteName
+      )
+    })
+  })
 })

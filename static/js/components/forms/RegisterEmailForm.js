@@ -38,7 +38,12 @@ const RegisterEmailForm = ({ onSubmit }: Props) => (
       <Form>
         <div className="form-group">
           <label htmlFor="email">Email</label>
-          <Field name="email" className="form-control" component={EmailInput} />
+          <Field
+            name="email"
+            className="form-control"
+            autoComplete="email"
+            component={EmailInput}
+          />
           <ErrorMessage name="email" component={FormError} />
         </div>
         {SETTINGS.recaptchaKey ? (
