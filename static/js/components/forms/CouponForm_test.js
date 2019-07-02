@@ -20,15 +20,16 @@ import {
 
 describe("CouponForm", () => {
   let sandbox, onSubmitStub
+  const products = [
+    makeProduct(PRODUCT_TYPE_COURSERUN),
+    makeProduct(PRODUCT_TYPE_PROGRAM)
+  ]
 
   const renderForm = () =>
     mount(
       <CouponForm
         onSubmit={onSubmitStub}
-        products={[
-          makeProduct(PRODUCT_TYPE_COURSERUN),
-          makeProduct(PRODUCT_TYPE_PROGRAM)
-        ]}
+        products={products}
         companies={[makeCompany(), makeCompany()]}
       />
     )
@@ -177,20 +178,41 @@ describe("CouponForm", () => {
   })
 
   //
-  ;[PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM, ""].forEach(
-    ([productType]) => {
-      it(`displays correct list of products when productType radio button value="${productType}"`, async () => {
-        const wrapper = renderForm()
-        const formik = wrapper.find("Formik").instance()
-        formik.setFieldValue("product-selection", productType)
-        formik.setFieldTouched("product-selection")
-        await wait()
-        wrapper.update()
-        const options = wrapper.find(".picky").find("option")
-        assert.equal(options.length(), 1)
-      })
-    }
-  )
+  ;[
+    [PRODUCT_TYPE_COURSERUN, [products[0]]],
+    [PRODUCT_TYPE_PROGRAM, [products[1]]],
+    ["", products]
+  ].forEach(([productType, availableProduct]) => {
+    it(`displays correct product checkboxes when productType radio button value="${productType}"`, async () => {
+      const wrapper = renderForm()
+      wrapper
+        .find(`input[name='product_type'][value='${productType}']`)
+        .simulate("click")
+      await wait()
+      wrapper.update()
+      const options = wrapper.find(".picky").find("input[type='checkbox']")
+      assert.equal(
+        options
+          .at(0)
+          .parents()
+          .at(0)
+          .text(),
+        availableProduct[0].title
+      )
+      if (productType === "") {
+        assert.equal(
+          options
+            .at(1)
+            .parents()
+            .at(1)
+            .text(),
+          availableProduct[1].title
+        )
+      } else {
+        assert.isNotOk(options.at(1).exists())
+      }
+    })
+  })
 
   //
   ;[
