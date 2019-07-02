@@ -59,6 +59,7 @@ class ProductVersionSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField(source="product.id", read_only=True)
     courses = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
+    content_title = serializers.SerializerMethodField()
 
     def get_type(self, instance):
         """ Return the product version type """
@@ -93,11 +94,16 @@ class ProductVersionSerializer(serializers.ModelSerializer):
             raise ValueError(f"Unexpected product {content_object}")
         return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
+    def get_content_title(self, instance):
+        """Return the title of the program or course run"""
+        return instance.product.content_object.title
+
     class Meta:
         fields = [
             "id",
             "price",
             "description",
+            "content_title",
             "type",
             "courses",
             "thumbnail_url",

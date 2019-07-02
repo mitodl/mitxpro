@@ -61,6 +61,7 @@ def test_serialize_basket_product_version_courserun(mock_context):
     assert data == {
         "id": product_version.id,
         "description": product_version.description,
+        "content_title": product_version.product.content_object.title,
         "price": str(round_half_up(product_version.price)),
         "type": product_version.product.content_type.model,
         "courses": [
@@ -84,6 +85,7 @@ def test_serialize_basket_product_version_program(mock_context):
     assert data == {
         "id": product_version.id,
         "description": product_version.description,
+        "content_title": product_version.product.content_object.title,
         "price": str(round_half_up(product_version.price)),
         "type": product_version.product.content_type.model,
         "courses": [

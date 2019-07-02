@@ -70,7 +70,7 @@ describe("CheckoutForm", () => {
       assert.equal(inner.find(".item-type").text(), "Program")
       assert.equal(
         inner.find(".header .description").text(),
-        basketItem.description
+        basketItem.content_title
       )
       assert.equal(inner.find(".item-row").length, basketItem.courses.length)
       basketItem.courses.forEach((course, i) => {
@@ -110,8 +110,11 @@ describe("CheckoutForm", () => {
     assert.equal(inner.find(".item-type").text(), "Course")
     assert.equal(inner.find(".item-row").length, 1)
     assert.equal(inner.find("img").prop("src"), basketItem.thumbnail_url)
-    assert.equal(inner.find("img").prop("alt"), basketItem.description)
-    assert.equal(inner.find(".item-row .title").text(), basketItem.description)
+    assert.equal(inner.find("img").prop("alt"), basketItem.content_title)
+    assert.equal(
+      inner.find(".item-row .title").text(),
+      basketItem.content_title
+    )
   })
 
   //
