@@ -18,6 +18,7 @@ import {
 } from "../../lib/ecommerce"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 import { calcSelectedRunIds } from "../../containers/pages/CheckoutPage"
+import { isIf, shouldIf } from "../../lib/test_utils"
 
 describe("CheckoutForm", () => {
   let sandbox,
@@ -447,7 +448,11 @@ describe("CheckoutForm", () => {
 
   //
   ;[true, false].forEach(requestPending => {
-    it("disables the apply coupon and checkout buttons while processing", async () => {
+    it(`${shouldIf(
+      requestPending
+    )} disable submit buttons while the request ${isIf(
+      requestPending
+    )} in progress`, async () => {
       const inner = await renderForm({
         requestPending
       })
