@@ -2,7 +2,7 @@
 import React from "react"
 import moment from "moment"
 import Picky from "react-picky"
-import { filter, pathSatisfies, equals, includes, always, sortBy, prop } from "ramda"
+import { filter, pathSatisfies, equals, always, sortBy, prop } from "ramda"
 import { formatDate, parseDate } from "react-day-picker/moment"
 import DayPickerInput from "react-day-picker/DayPickerInput"
 import { Formik, Field, Form, ErrorMessage } from "formik"
@@ -273,7 +273,9 @@ export const CouponForm = ({
             valueKey="id"
             labelKey="title"
             options={filter(
-              values.product_type ? pathSatisfies(equals(values.product_type), ["product_type"]) : always(true),
+              values.product_type
+                ? pathSatisfies(equals(values.product_type), ["product_type"])
+                : always(true),
               sortBy(prop("title"), products || [])
             )}
             value={values.products}

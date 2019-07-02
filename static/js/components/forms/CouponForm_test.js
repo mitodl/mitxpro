@@ -7,7 +7,11 @@ import { mount } from "enzyme"
 import wait from "waait"
 
 import { CouponForm } from "./CouponForm"
-import { COUPON_TYPE_PROMO } from "../../constants"
+import {
+  COUPON_TYPE_PROMO,
+  PRODUCT_TYPE_COURSERUN,
+  PRODUCT_TYPE_PROGRAM
+} from "../../constants"
 import { makeCompany, makeProduct } from "../../factories/ecommerce"
 import {
   findFormikFieldByName,
@@ -21,7 +25,10 @@ describe("CouponForm", () => {
     mount(
       <CouponForm
         onSubmit={onSubmitStub}
-        products={[makeProduct(), makeProduct()]}
+        products={[
+          makeProduct(PRODUCT_TYPE_COURSERUN),
+          makeProduct(PRODUCT_TYPE_PROGRAM)
+        ]}
         companies={[makeCompany(), makeCompany()]}
       />
     )
@@ -168,6 +175,22 @@ describe("CouponForm", () => {
       )
     })
   })
+
+  //
+  ;[PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM, ""].forEach(
+    ([productType]) => {
+      it(`displays correct list of products when productType radio button value="${productType}"`, async () => {
+        const wrapper = renderForm()
+        const formik = wrapper.find("Formik").instance()
+        formik.setFieldValue("product-selection", productType)
+        formik.setFieldTouched("product-selection")
+        await wait()
+        wrapper.update()
+        const options = wrapper.find(".picky").find("option")
+        assert.equal(options.length(), 1)
+      })
+    }
+  )
 
   //
   ;[
