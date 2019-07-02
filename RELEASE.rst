@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.11.1
+Version 0.11.1 (Released July 02, 2019)
 --------------
 
 - #726 Remove blog link from footer
