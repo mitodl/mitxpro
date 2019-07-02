@@ -206,31 +206,13 @@ describe("DashboardPage", () => {
   })
 
   describe("cybersource redirect", () => {
-    it("shows an alert based on the toastMessage state value", async () => {
-      const { inner } = await renderPage()
-      assert.isFalse(inner.find("Alert").prop("isOpen"))
-      inner.setState({ toastMessage: "hello world", alertType: "info" })
-      assert.isTrue(inner.find("Alert").prop("isOpen"))
-      assert.equal(inner.find("Alert").prop("color"), "info")
-      assert.isTrue(
-        inner
-          .find("Alert")
-          .html()
-          .includes("hello world")
-      )
-      inner.find("Alert").prop("toggle")()
-      assert.isFalse(inner.find("Alert").prop("isOpen"))
-      assert.equal(inner.state().toastMessage, "")
-      assert.equal(inner.state().alertType, "")
-    })
-
     it("looks up a run or program using the query parameter, and displays the success message", async () => {
       const program = userEnrollments.program_enrollments[0].program
       const waitStub = helper.sandbox.stub(utilFuncs, "wait")
       const stub = helper.sandbox
         .stub(utilFuncs, "findItemWithTextId")
         .returns(program)
-      const { inner } = await renderPage(
+      const { store } = await renderPage(
         {},
         {
           location: {
@@ -238,11 +220,14 @@ describe("DashboardPage", () => {
           }
         }
       )
-      assert.equal(
-        inner.state().toastMessage,
-        `You are now enrolled in ${program.title}!`
-      )
-      assert.equal(inner.state().alertType, "info")
+      assert.deepEqual(store.getState().ui.userNotifications, {
+        "order-status": {
+          type:  "text",
+          props: {
+            text: `You are now enrolled in ${program.title}!`
+          }
+        }
+      })
       sinon.assert.calledWith(stub, userEnrollments, "a b c")
       assert.equal(waitStub.callCount, 0)
     })
@@ -264,7 +249,7 @@ describe("DashboardPage", () => {
           .stub(utilFuncs, "findItemWithTextId")
           .returns(null)
 
-        const { inner } = await renderPage(
+        const { store } = await renderPage(
           {},
           {
             location: {
@@ -282,12 +267,17 @@ describe("DashboardPage", () => {
         await waitPromise
 
         if (outOfTime) {
-          assert.equal(
-            inner.state().toastMessage,
-            `Something went wrong. Please contact support at ${
-              SETTINGS.support_email
-            }.`
-          )
+          assert.deepEqual(store.getState().ui.userNotifications, {
+            "order-status": {
+              color: "danger",
+              type:  "text",
+              props: {
+                text: `Something went wrong. Please contact support at ${
+                  SETTINGS.support_email
+                }.`
+              }
+            }
+          })
         } else {
           sinon.assert.calledWith(
             helper.handleRequestStub,

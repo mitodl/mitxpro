@@ -7,10 +7,12 @@ import { connectRequest } from "redux-query"
 import { createStructuredSelector } from "reselect"
 import moment from "moment"
 import * as R from "ramda"
-import { Alert, Collapse, Button } from "reactstrap"
+import { Collapse, Button } from "reactstrap"
 import qs from "query-string"
 
 import { RibbonText } from "../../components/Ribbon"
+
+import { addUserNotification } from "../../actions"
 import queries from "../../lib/queries"
 import { getDateSummary, programDateRange } from "../../lib/courses"
 import { formatPrettyDate, findItemWithTextId, wait } from "../../lib/util"
@@ -22,8 +24,10 @@ import type {
   CourseRunEnrollment,
   UserEnrollments
 } from "../../flow/courseTypes"
+import { ALERT_TYPE_TEXT } from "../../constants"
 
 type Props = {
+  addUserNotification: Function,
   enrollments: UserEnrollments,
   forceRequest: () => Promise<*>,
   history: RouterHistory,
@@ -33,9 +37,7 @@ type Props = {
 type State = {
   collapseVisible: Object,
   now: Moment,
-  timeoutActive: boolean,
-  toastMessage: string,
-  alertType: string
+  timeoutActive: boolean
 }
 
 const NUM_MINUTES_TO_POLL = 2
@@ -45,9 +47,7 @@ export class DashboardPage extends React.Component<Props, State> {
   state = {
     collapseVisible: {},
     now:             moment(),
-    timeoutActive:   false,
-    toastMessage:    "",
-    alertType:       ""
+    timeoutActive:   false
   }
 
   componentDidMount() {
@@ -79,7 +79,12 @@ export class DashboardPage extends React.Component<Props, State> {
   }
 
   handleOrderPending = async (readableId: ?string) => {
-    const { enrollments, forceRequest, history } = this.props
+    const {
+      addUserNotification,
+      enrollments,
+      forceRequest,
+      history
+    } = this.props
     const { timeoutActive, now: initialTime } = this.state
 
     if (timeoutActive) {
@@ -89,9 +94,14 @@ export class DashboardPage extends React.Component<Props, State> {
     const item = findItemWithTextId(enrollments, readableId)
     if (item) {
       history.push("/dashboard/")
-      this.setState({
-        toastMessage: `You are now enrolled in ${item.title}!`,
-        alertType:    "info"
+
+      addUserNotification({
+        "order-status": {
+          type:  ALERT_TYPE_TEXT,
+          props: {
+            text: `You are now enrolled in ${item.title}!`
+          }
+        }
       })
       return
     }
@@ -105,11 +115,16 @@ export class DashboardPage extends React.Component<Props, State> {
     if (now.isBefore(deadline)) {
       await forceRequest()
     } else {
-      this.setState({
-        toastMessage: `Something went wrong. Please contact support at ${
-          SETTINGS.support_email
-        }.`,
-        alertType: "danger"
+      addUserNotification({
+        "order-status": {
+          type:  ALERT_TYPE_TEXT,
+          color: "danger",
+          props: {
+            text: `Something went wrong. Please contact support at ${
+              SETTINGS.support_email
+            }.`
+          }
+        }
       })
     }
   }
@@ -256,7 +271,6 @@ export class DashboardPage extends React.Component<Props, State> {
 
   render() {
     const { enrollments } = this.props
-    const { alertType, toastMessage } = this.state
 
     const enrollmentsExist = this.enrollmentsExist()
 
@@ -264,18 +278,6 @@ export class DashboardPage extends React.Component<Props, State> {
       <React.Fragment>
         <div className="user-dashboard container">
           <div className="row">
-            <Alert
-              color={alertType}
-              isOpen={!!toastMessage}
-              toggle={() =>
-                this.setState({
-                  alertType:    "",
-                  toastMessage: ""
-                })
-              }
-            >
-              {toastMessage}
-            </Alert>
             <div className="header col-12">
               <h1>Dashboard</h1>
               {enrollments &&
@@ -312,9 +314,16 @@ const mapStateToProps = createStructuredSelector({
   enrollments: queries.enrollment.enrollmentsSelector
 })
 
+const mapDispatchToProps = {
+  addUserNotification
+}
+
 const mapPropsToConfigs = () => [queries.enrollment.enrollmentsQuery()]
 
 export default compose(
-  connect(mapStateToProps),
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  ),
   connectRequest(mapPropsToConfigs)
 )(DashboardPage)

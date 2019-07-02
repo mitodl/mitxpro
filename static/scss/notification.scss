@@ -14,8 +14,7 @@
   .alert {
     margin-bottom: 0;
 
-    &.alert-info {
-      background-color: #126f9a;
+    &.alert-info, &.alert-danger {
       color: white;
 
       a.alert-link, .close {
@@ -34,6 +33,14 @@
       .close {
         opacity: 1;
       }
+    }
+
+    &.alert-info {
+      background-color: #126f9a;
+    }
+
+    &.alert-danger {
+      background-color: $primary;
     }
   }
 

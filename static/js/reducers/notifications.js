@@ -15,10 +15,12 @@ export type UnusedCouponNotificationProps = {
 export type UserNotificationSpec =
   | {
       type: ALERT_TYPE_TEXT,
+      color: string,
       props: TextNotificationProps
     }
   | {
       type: ALERT_TYPE_UNUSED_COUPON,
+      color: string,
       props: UnusedCouponNotificationProps
     }
 
