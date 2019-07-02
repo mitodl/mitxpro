@@ -254,7 +254,12 @@ export const LegalAddressFields = ({
     </div>
     {includes(values.legal_address.country, COUNTRIES_REQUIRING_STATE) ? (
       <div className="form-group">
-        <label className="font-weight-bold">State/Province*</label>
+        <label
+          htmlFor="legal_address.state_or_territory"
+          className="font-weight-bold"
+        >
+          State/Province*
+        </label>
         <Field
           component="select"
           name="legal_address.state_or_territory"
