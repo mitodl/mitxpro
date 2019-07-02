@@ -3,7 +3,9 @@
   <div class="container">
     <div class="head">
       <h1>{{ page.heading }}</h1>
-      <h3>{{ page.subhead }}</h3>
+      {% if page.subhead %}
+        <h3>{{ page.subhead }}</h3>
+      {% endif %}
     </div>
     <div class="learners-slider">
       {% for testimonial in page.items %}

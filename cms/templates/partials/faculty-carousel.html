@@ -3,7 +3,9 @@
   <div class="container">
     <div class="head">
       <h1 class="text-uppercase">{{ page.heading }}</h1>
-      <h3>{{ page.subhead }}</h3>
+      {% if page.subhead %}
+        <h3>{{ page.subhead }}</h3>
+      {% endif %}
     </div>
     <div class="faculty-slider">
       {% for member in page.members %}

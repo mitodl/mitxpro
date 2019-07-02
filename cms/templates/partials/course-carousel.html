@@ -3,7 +3,7 @@
   <div class="container">
     <div class="head">
       <h1 class="text-uppercase">{{ page.heading }}</h1>
-      {% if page.body %}{{ page.body|safe }}{% endif %}
+      {% if page.body %}{{ page.body|richtext }}{% endif %}
     </div>
     <div class="course-slider">
       {% if page.override_contents %}

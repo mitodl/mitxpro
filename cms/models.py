@@ -629,7 +629,10 @@ class UserTestimonialsPage(CourseProgramChildPage):
         max_length=255, help_text="The heading to display on this section."
     )
     subhead = models.CharField(
-        max_length=255, help_text="Subhead to display below the heading."
+        null=True,
+        blank=True,
+        max_length=255,
+        help_text="Subhead to display below the heading.",
     )
     items = StreamField(
         [("testimonial", UserTestimonialBlock())],
@@ -660,7 +663,7 @@ class LearningOutcomesPage(CourseProgramChildPage):
     sub_heading = models.CharField(
         max_length=250,
         null=True,
-        blank=False,
+        blank=True,
         help_text="Sub heading for learning outcomes.",
     )
 
@@ -925,6 +928,8 @@ class FacultyMembersPage(CourseProgramChildPage):
         help_text="The heading to display for this section on the product page.",
     )
     subhead = models.CharField(
+        null=True,
+        blank=True,
         max_length=255,
         help_text="The subhead to display for this section on the product page.",
     )
@@ -998,7 +1003,7 @@ class ResourcePage(Page):
     sub_heading = models.CharField(
         max_length=250,
         null=True,
-        blank=False,
+        blank=True,
         help_text="Sub heading of the resource page.",
     )
 
