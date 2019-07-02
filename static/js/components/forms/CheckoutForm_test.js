@@ -51,7 +51,7 @@ describe("CheckoutForm", () => {
         coupon={coupon}
         couponCode={couponCode}
         basket={basket}
-        mutationPending={false}
+        requestPending={false}
         item={basketItem}
         submitCoupon={submitCouponStub}
         selectedRuns={{}}
@@ -446,20 +446,17 @@ describe("CheckoutForm", () => {
   })
 
   //
-  ;[true, false].forEach(mutationPending => {
+  ;[true, false].forEach(requestPending => {
     it("disables the apply coupon and checkout buttons while processing", async () => {
       const inner = await renderForm({
-        mutationPending
+        requestPending
       })
 
       assert.equal(
         inner.find(".checkout-button").prop("disabled"),
-        mutationPending
+        requestPending
       )
-      assert.equal(
-        inner.find(".apply-button").prop("disabled"),
-        mutationPending
-      )
+      assert.equal(inner.find(".apply-button").prop("disabled"), requestPending)
     })
   })
 })

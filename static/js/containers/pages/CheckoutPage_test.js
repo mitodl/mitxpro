@@ -371,7 +371,7 @@ describe("CheckoutPage", () => {
           }
         }
       })
-      assert.isTrue(inner.find("CheckoutForm").prop("mutationPending"))
+      assert.isTrue(inner.find("CheckoutForm").prop("requestPending"))
     })
   })
 })

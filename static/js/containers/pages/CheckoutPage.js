@@ -27,7 +27,7 @@ import type {
 
 type Props = {
   basket: ?BasketResponse,
-  mutationPending: boolean,
+  requestPending: boolean,
   checkout: () => Promise<Response<CheckoutResponse>>,
   fetchBasket: () => Promise<*>,
   location: Location,
@@ -182,7 +182,7 @@ export class CheckoutPage extends React.Component<Props, State> {
   }
 
   render() {
-    const { basket, mutationPending } = this.props
+    const { basket, requestPending } = this.props
     const { errors } = this.state
 
     const item = basket && basket.items[0]
@@ -211,15 +211,15 @@ export class CheckoutPage extends React.Component<Props, State> {
         submitCoupon={this.submitCoupon}
         onSubmit={this.submit}
         updateProduct={this.updateProduct}
-        mutationPending={mutationPending}
+        requestPending={requestPending}
       />
     )
   }
 }
 
 const mapStateToProps = state => ({
-  basket:          state.entities.basket,
-  mutationPending:
+  basket:         state.entities.basket,
+  requestPending:
     pathOr(false, ["queries", "basketMutation", "isPending"], state) ||
     pathOr(false, ["queries", "couponsMutation", "isPending"], state) ||
     pathOr(false, ["queries", "checkoutMutation", "isPending"], state)
