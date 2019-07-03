@@ -55,7 +55,10 @@ class Command(EnrollmentChangeCommand):
                 )
             # Create the program enrollment
             ProgramEnrollment.objects.create(
-                user=to_user, program=enrolled_obj, company=enrollment.company
+                user=to_user,
+                program=enrolled_obj,
+                company=enrollment.company,
+                order=enrollment.order,
             )
             associated_run_enrollments = CourseRunEnrollment.objects.filter(
                 user=from_user, run__course__program=enrolled_obj
@@ -64,13 +67,19 @@ class Command(EnrollmentChangeCommand):
             # was enrolled in
             for run_enrollment in associated_run_enrollments:
                 CourseRunEnrollment.objects.create(
-                    user=to_user, run=run_enrollment.run, company=enrollment.company
+                    user=to_user,
+                    run=run_enrollment.run,
+                    company=enrollment.company,
+                    order=enrollment.order,
                 )
             enrollments_to_deactivate = [enrollment] + list(associated_run_enrollments)
             runs_to_enroll = [e.run for e in associated_run_enrollments]
         else:
             CourseRunEnrollment.objects.create(
-                user=to_user, run=enrolled_obj, company=enrollment.company
+                user=to_user,
+                run=enrolled_obj,
+                company=enrollment.company,
+                order=enrollment.order,
             )
             enrollments_to_deactivate = [enrollment]
             runs_to_enroll = [enrolled_obj]

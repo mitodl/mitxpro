@@ -557,6 +557,7 @@ def enroll_user_in_order_items(order):
             enrollment, created = CourseRunEnrollment.all_objects.get_or_create(
                 user=order.purchaser,
                 run=run,
+                order=order,
                 defaults=dict(company=company, edx_enrolled=edx_request_success),
             )
             if not created and not enrollment.active:
@@ -576,7 +577,10 @@ def enroll_user_in_order_items(order):
     for program in programs:
         try:
             enrollment, created = ProgramEnrollment.all_objects.get_or_create(
-                user=order.purchaser, program=program, defaults=dict(company=company)
+                user=order.purchaser,
+                program=program,
+                order=order,
+                defaults=dict(company=company),
             )
             if not created and not enrollment.active:
                 enrollment.reactivate_and_save()

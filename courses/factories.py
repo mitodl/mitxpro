@@ -86,6 +86,7 @@ class CourseRunEnrollmentFactory(DjangoModelFactory):
 
     user = SubFactory(UserFactory)
     run = SubFactory(CourseRunFactory)
+    order = SubFactory("ecommerce.factories.OrderFactory")
 
     class Params:
         has_company_affiliation = Trait(company=SubFactory(CompanyFactory))
@@ -99,6 +100,7 @@ class ProgramEnrollmentFactory(DjangoModelFactory):
 
     user = SubFactory(UserFactory)
     program = SubFactory(ProgramFactory)
+    order = SubFactory("ecommerce.factories.OrderFactory")
 
     class Params:
         has_company_affiliation = Trait(company=SubFactory(CompanyFactory))

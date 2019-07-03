@@ -13,8 +13,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.test import APIClient
 import factory
 
-from courses.models import CourseRunEnrollment
-from courses.factories import CourseRunFactory
+from courses.factories import CourseRunFactory, CourseRunEnrollmentFactory
 from ecommerce.api import create_unfulfilled_order, get_readable_id, make_reference_id
 from ecommerce.exceptions import EcommerceException
 from ecommerce.factories import (
@@ -739,8 +738,10 @@ def test_patch_basket_multiple_runs(
 def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
     """A patch request for a run for a course that the user has already enrolled in should result in a 400 error"""
     run = basket_and_coupons.run
-    LineFactory.create(order__status=Order.FULFILLED)
-    CourseRunEnrollment.objects.create(run=run, user=basket_and_coupons.basket.user)
+    line = LineFactory.create(order__status=Order.FULFILLED)
+    CourseRunEnrollmentFactory.create(
+        run=run, user=basket_and_coupons.basket.user, order=line.order
+    )
 
     resp = basket_client.patch(
         reverse("basket_api"),
@@ -762,7 +763,7 @@ def test_patch_basket__another_user_enrolled(basket_client, basket_and_coupons):
     """A patch request for a run for a course that another user has already enrolled in should succeed"""
     run = basket_and_coupons.run
     order = LineFactory.create(order__status=Order.FULFILLED).order
-    CourseRunEnrollment.objects.create(run=run, user=order.purchaser)
+    CourseRunEnrollmentFactory.create(run=run, user=order.purchaser, order=order)
 
     resp = basket_client.patch(
         reverse("basket_api"),

@@ -364,6 +364,7 @@ class EnrollmentModel(TimestampedModel, AuditableModel):
     company = models.ForeignKey(
         "ecommerce.Company", null=True, blank=True, on_delete=models.PROTECT
     )
+    order = models.ForeignKey("ecommerce.Order", null=True, on_delete=models.PROTECT)
     change_status = models.CharField(
         choices=ENROLL_CHANGE_STATUS_CHOICES, max_length=20, null=True, blank=True
     )
@@ -401,7 +402,7 @@ class CourseRunEnrollment(EnrollmentModel):
     )
 
     class Meta:
-        unique_together = ("user", "run")
+        unique_together = ("user", "run", "order")
 
     @classmethod
     def get_audit_class(cls):
@@ -431,7 +432,7 @@ class ProgramEnrollment(EnrollmentModel):
     program = models.ForeignKey("courses.Program", on_delete=models.PROTECT)
 
     class Meta:
-        unique_together = ("user", "program")
+        unique_together = ("user", "program", "order")
 
     @classmethod
     def get_audit_class(cls):

@@ -720,7 +720,7 @@ def test_validate_basket_already_enrolled(basket_and_coupons):
     order = OrderFactory.create(
         purchaser=basket_and_coupons.basket.user, status=Order.FULFILLED
     )
-    CourseRunEnrollment.objects.create(user=order.purchaser, run=runs[2])
+    CourseRunEnrollmentFactory.create(order=order, user=order.purchaser, run=runs[2])
 
     with pytest.raises(ValidationError) as ex:
         validate_basket_for_checkout(basket_and_coupons.basket)
@@ -866,6 +866,7 @@ def test_enroll_user_in_order_items(mocker, user, has_redemption):
     assert len(created_program_enrollments) == 1
     assert created_program_enrollments[0].program == program
     assert created_program_enrollments[0].user == user
+    assert created_program_enrollments[0].order == order
     if has_redemption:
         assert (
             created_program_enrollments[0].company
@@ -877,6 +878,8 @@ def test_enroll_user_in_order_items(mocker, user, has_redemption):
     course_runs = [
         run_enrollment.run for run_enrollment in created_course_run_enrollments
     ]
+    for enrollment in created_course_run_enrollments:
+        assert enrollment.order == order
     assert len(created_course_run_enrollments) == len(run_selections)
     assert course_runs == [selection.run for selection in run_selections]
     enroll_args = patched_enroll.call_args[0]
@@ -937,12 +940,14 @@ def test_enroll_user_in_order_items_reactivate(mocker, user):
         change_status=ENROLL_CHANGE_STATUS_REFUNDED,
         user=user,
         run=run_selections[0].run,
+        order=order,
     )
     program_enrollment = ProgramEnrollmentFactory(
         active=False,
         change_status=ENROLL_CHANGE_STATUS_REFUNDED,
         user=user,
         program=program,
+        order=order,
     )
 
     enroll_user_in_order_items(order)
@@ -961,7 +966,7 @@ def test_enroll_user_in_order_items_api_fail(mocker, user):
         "ecommerce.api.enroll_in_edx_course_runs",
         side_effect=HTTPError(response=mocker.Mock(content=mocker.Mock())),
     )
-    order = OrderFactory.build(purchaser=user, status=Order.FULFILLED)
+    order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
     basket = BasketFactory.create(user=user)
     CourseRunSelectionFactory.create_batch(2, basket=basket)
 
