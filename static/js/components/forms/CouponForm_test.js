@@ -190,26 +190,12 @@ describe("CouponForm", () => {
         .simulate("click")
       await wait()
       wrapper.update()
-      const options = wrapper.find(".picky").find("input[type='checkbox']")
-      assert.equal(
-        options
-          .at(0)
-          .parents()
-          .at(0)
-          .text(),
-        availableProduct[0].title
-      )
+      const picky = wrapper.find(".picky")
+      const options = picky.find("input[type='checkbox']")
+      assert.equal(options.at(1).exists(), productType === "")
+      assert.ok(picky.text().includes(availableProduct[0].title))
       if (productType === "") {
-        assert.equal(
-          options
-            .at(1)
-            .parents()
-            .at(1)
-            .text(),
-          availableProduct[1].title
-        )
-      } else {
-        assert.isNotOk(options.at(1).exists())
+        assert.ok(picky.text().includes(availableProduct[1].title))
       }
     })
   })
