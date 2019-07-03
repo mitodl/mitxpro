@@ -68,7 +68,10 @@ class Command(EnrollmentChangeCommand):
             )
 
         to_enrollment = CourseRunEnrollment.objects.create(
-            user=user, run=to_run, company=from_enrollment.company
+            user=user,
+            run=to_run,
+            company=from_enrollment.company,
+            order=from_enrollment.order,
         )
         from_enrollment.active = False
         from_enrollment.change_status = ENROLL_CHANGE_STATUS_DEFERRED

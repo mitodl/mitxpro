@@ -13,8 +13,13 @@ from rest_framework import status
 from cms.factories import CoursePageFactory, ProgramPageFactory
 from cms.models import CatalogPage
 from courses.api import UserEnrollments
-from courses.factories import CourseFactory, CourseRunFactory, ProgramFactory
-from courses.models import CourseRunEnrollment, ProgramEnrollment
+from courses.factories import (
+    CourseFactory,
+    CourseRunFactory,
+    ProgramFactory,
+    CourseRunEnrollmentFactory,
+    ProgramEnrollmentFactory,
+)
 from courses.serializers import CourseRunSerializer, CourseSerializer, ProgramSerializer
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.utils import now_in_utc
@@ -258,7 +263,7 @@ def test_course_view(
     else:
         product_id = None
     if is_enrolled and has_unexpired_run:
-        CourseRunEnrollment.objects.create(user=user, run=run)
+        CourseRunEnrollmentFactory.create(user=user, run=run)
 
     if not is_anonymous:
         client.force_login(user)
@@ -306,7 +311,7 @@ def test_program_view(client, user, home_page, is_enrolled, has_product, is_anon
     else:
         product_id = None
     if is_enrolled:
-        ProgramEnrollment.objects.create(user=user, program=program)
+        ProgramEnrollmentFactory.create(user=user, program=program)
 
     if not is_anonymous:
         client.force_login(user)
