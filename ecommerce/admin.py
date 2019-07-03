@@ -160,6 +160,7 @@ class ProductVersionAdmin(admin.ModelAdmin):
     """Admin for ProductVersion"""
 
     model = ProductVersion
+    readonly_fields = ("text_id",)
 
 
 class DataConsentUserAdmin(admin.ModelAdmin):

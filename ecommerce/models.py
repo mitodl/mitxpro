@@ -1,4 +1,6 @@
 """Models for ecommerce"""
+import logging
+
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -8,6 +10,8 @@ from django.db import models
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 from users.models import User
+
+log = logging.getLogger()
 
 
 class Company(TimestampedModel):
@@ -74,9 +78,20 @@ class ProductVersion(TimestampedModel):
     )
     price = models.DecimalField(decimal_places=2, max_digits=20)
     description = models.TextField()
+    text_id = models.TextField(null=True)
 
     class Meta:
         indexes = [models.Index(fields=["created_on"])]
+
+    def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
+        try:
+            self.text_id = getattr(self.product.content_object, "text_id")
+        except AttributeError:
+            log.error(
+                "The content object for this ProductVersion (%s) does not have a `text_id` property",
+                str(self.id),
+            )
+        super().save(*args, **kwargs)
 
     def __str__(self):
         """Description of a ProductVersion"""
