@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.11.2
+Version 0.11.2 (Released July 03, 2019)
 --------------
 
 - Save order on enrollment objects (#676)
