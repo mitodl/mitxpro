@@ -24,7 +24,18 @@ from ecommerce.models import (
 def get_eligible_products(
     run_filter, product_filter, all_runs="ALL", all_products="ALL XPRO"
 ):
-    """ Determine the products eligible for this coupon"""
+    """
+    Determine the products eligible for this coupon
+
+    Args:
+        run_filter (str): Should be a string that effectively filters products by CourseRun.courseware_id
+        product_filter (str): Should be a string that effectively filters products by Product.text_id
+        all_runs (str): A string indicating that all runs should be included
+        all_products (str): A string indicating that all products should be included
+
+    Returns:
+        iterable of Products matching the filter(s)
+    """
     base_query = Product.objects.all()
     if product_filter != all_products:
         product_filter = ProductVersion.objects.filter(
@@ -40,7 +51,17 @@ def get_eligible_products(
 
 
 def get_active_dates(date_range, forever):
-    """Determine the start and end dates for the coupon"""
+    """
+    Determine the start and end dates for the coupon
+
+    Args:
+        date_range (str): A string representation of a date range
+        forever (str): A string indicating that the coupon expiration date should be far in the future.
+
+    Returns:
+        tuple of datetimes
+
+    """
     if date_range == forever:
         return (
             datetime.combine(datetime.now(), datetime.min.time(), pytz.UTC),
