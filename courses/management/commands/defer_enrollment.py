@@ -56,7 +56,7 @@ class Command(EnrollmentChangeCommand):
                 )
             )
         elif not to_run.is_unexpired:
-            raise CommandError("'To' run is expired")
+            raise CommandError("'to' run is expired")
 
         from_enrollment = CourseRunEnrollment.all_objects.get(user=user, run=from_run)
         if not from_enrollment.active and not options["force"]:
@@ -67,29 +67,15 @@ class Command(EnrollmentChangeCommand):
                 )
             )
 
-        to_enrollment = CourseRunEnrollment.objects.create(
-            user=user,
-            run=to_run,
-            company=from_enrollment.company,
-            order=from_enrollment.order,
+        to_enrollment = self.create_run_enrollment(from_enrollment, to_run=to_run)
+        self.deactivate_run_enrollment(
+            from_enrollment, change_status=ENROLL_CHANGE_STATUS_DEFERRED
         )
-        from_enrollment.active = False
-        from_enrollment.change_status = ENROLL_CHANGE_STATUS_DEFERRED
-        from_enrollment.save_and_log(None)
-
-        self.stdout.write(
-            "Current enrollment deactivated and new enrollment record created. "
-            "Attempting to enroll the user on edX..."
-        )
-        self.enroll_in_edx(user, [to_run])
 
         self.stdout.write(
             self.style.SUCCESS(
-                "Deferred enrollment – 'from' run id: {}, 'to' run id: {}\nUser – {} ({})".format(
-                    from_enrollment.run.id,
-                    to_enrollment.run.id,
-                    user.username,
-                    user.email,
+                "Deferred enrollment for user: {} ({})\nEnrollment created/updated: {}".format(
+                    user.username, user.email, to_enrollment
                 )
             )
         )

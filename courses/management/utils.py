@@ -1,4 +1,5 @@
 """Utility functions/classes for course management commands"""
+from functools import partial
 from requests.exceptions import HTTPError
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ValidationError
@@ -7,6 +8,7 @@ from django.contrib.auth import get_user_model
 
 from courses.models import Program, ProgramEnrollment, CourseRun, CourseRunEnrollment
 from courseware.api import enroll_in_edx_course_runs
+from mitxpro.utils import has_equal_properties
 
 User = get_user_model()
 
@@ -28,6 +30,19 @@ def fetch_user(user_property):
             return User.objects.get(email=user_property)
         except ValidationError:
             return User.objects.get(username=user_property)
+
+
+def create_or_update_enrollment(model_cls, defaults=None, **kwargs):
+    """Creates or updates an enrollment record"""
+    defaults = {**(defaults or {}), "active": True, "change_status": None}
+    enrollment, created = model_cls.all_objects.get_or_create(
+        **kwargs, defaults=dict(**defaults)
+    )
+    if not created and not has_equal_properties(enrollment, defaults):
+        for field_name, field_value in defaults.items():
+            setattr(enrollment, field_name, field_value)
+        enrollment.save_and_log(None)
+    return enrollment
 
 
 class EnrollmentChangeCommand(BaseCommand):
@@ -55,7 +70,7 @@ class EnrollmentChangeCommand(BaseCommand):
             user (User): An enrolled User
             command_options (dict): A dict of command parameters
         Returns:
-             tuple: (ProgramEnrollment, Program) or (CourseRunEnrollment, CourseRun)
+            tuple: (ProgramEnrollment, Program) or (CourseRunEnrollment, CourseRun)
         """
         program_property = command_options["program"]
         run_property = command_options["run"]
@@ -91,12 +106,116 @@ class EnrollmentChangeCommand(BaseCommand):
 
         return enrollment, enrolled_obj
 
+    def deactivate_program_enrollment(self, program_enrollment, change_status):
+        """
+        Helper method to deactivate a ProgramEnrollment
+
+        Args:
+            program_enrollment (ProgramEnrollment): The program enrollment to deactivate
+            change_status (str): The change status to set on the enrollment when deactivating
+        Returns:
+            tuple of ProgramEnrollment, list(CourseRunEnrollment): The deactivated enrollments
+        """
+        program_enrollment.deactivate_and_save(change_status, no_user=True)
+        program_run_enrollments = program_enrollment.get_run_enrollments()
+        return (
+            program_enrollment,
+            list(
+                map(
+                    partial(
+                        self.deactivate_run_enrollment, change_status=change_status
+                    ),
+                    program_run_enrollments,
+                )
+            ),
+        )
+
+    @staticmethod
+    def deactivate_run_enrollment(run_enrollment, change_status):
+        """
+        Helper method to deactivate a CourseRunEnrollment
+
+        Args:
+            run_enrollment (CourseRunEnrollment): The course run enrollment to deactivate
+            change_status (str): The change status to set on the enrollment when deactivating
+        Returns:
+            CourseRunEnrollment: The deactivated enrollment
+        """
+        run_enrollment.deactivate_and_save(change_status, no_user=True)
+        return run_enrollment
+
+    def create_program_enrollment(
+        self, existing_enrollment, to_program=None, to_user=None
+    ):
+        """
+        Helper method to create a new ProgramEnrollment based on an existing enrollment
+
+        Args:
+            existing_enrollment (ProgramEnrollment): An existing program enrollment
+            to_program (Program or None): The program to assign to the new enrollment (if None,
+                the new enrollment will use the existing enrollment's program)
+            to_user (User or None): The user to assign to the program enrollment (if None, the new
+                enrollment will user the existing enrollment's user)
+        Returns:
+            tuple of (ProgramEnrollment, list(CourseRunEnrollment)): The newly created enrollments
+        """
+        to_user = to_user or existing_enrollment.user
+        to_program = to_program or existing_enrollment.program
+        enrollment_params = dict(user=to_user, program=to_program)
+        enrollment_defaults = dict(
+            company=existing_enrollment.company, order=existing_enrollment.order
+        )
+        program_enrollment = create_or_update_enrollment(
+            ProgramEnrollment, defaults=enrollment_defaults, **enrollment_params
+        )
+        existing_run_enrollments = existing_enrollment.get_run_enrollments()
+        return (
+            program_enrollment,
+            list(
+                map(
+                    partial(self.create_run_enrollment, to_user=to_user),
+                    existing_run_enrollments,
+                )
+            ),
+        )
+
+    def create_run_enrollment(self, existing_enrollment, to_run=None, to_user=None):
+        """
+        Helper method to create a CourseRunEnrollment based on an existing enrollment
+
+        Args:
+            existing_enrollment (CourseRunEnrollment): An existing course run enrollment
+            to_run (CourseRun or None): The course run to assign to the new enrollment (if None,
+                the new enrollment will use the existing enrollment's course run)
+            to_user (User or None): The user to assign to the new enrollment (if None, the new
+                enrollment will user the existing enrollment's user)
+        Returns:
+            CourseRunEnrollment: The newly created enrollment
+        """
+        to_user = to_user or existing_enrollment.user
+        to_run = to_run or existing_enrollment.run
+        enrollment_params = dict(user=to_user, run=to_run)
+        enrollment_defaults = dict(
+            company=existing_enrollment.company, order=existing_enrollment.order
+        )
+        run_enrollment = create_or_update_enrollment(
+            CourseRunEnrollment, defaults=enrollment_defaults, **enrollment_params
+        )
+        self.stdout.write(
+            "New course run enrollment record created. "
+            "Attempting to enroll the user {} ({}) in {} on edX...".format(
+                to_user.username, to_user.email, to_run.courseware_id
+            )
+        )
+        self.enroll_in_edx(to_user, [to_run])
+        return run_enrollment
+
     def enroll_in_edx(self, user, course_runs):
         """
         Try to perform edX enrollment, but print a message and continue if it fails
 
         Args:
-            user (users.models.User): The user to enroll
+            user (User): The user to enroll
             course_runs (iterable of CourseRun): The course runs to enroll in
         """
         try:
@@ -105,7 +224,7 @@ class EnrollmentChangeCommand(BaseCommand):
             self.stdout.write(
                 self.style.WARNING(
                     "edX enrollment request failed ({}).\nResponse: {}".format(
-                        exc.response.status_code, exc.response.body
+                        exc.response.status_code, exc.response.text
                     )
                 )
             )
