@@ -276,16 +276,20 @@ def test_course_view(
 
     has_button = False
     url = ""  # make linter happy
+    class_name = ""
     if not is_anonymous:
         if not is_enrolled and has_product and has_unexpired_run:
             url = f'{reverse("checkout-page")}?product={product_id}'
+            class_name = "enroll-now"
             has_button = True
         if is_enrolled and has_unexpired_run:
             url = reverse("user-dashboard")
+            class_name = "enrolled"
             has_button = True
 
     assert (
-        f'<a class="enroll-button" href="{url}">'.encode("utf-8") in resp.content
+        f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")
+        in resp.content
     ) is has_button
     assert (
         "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")
@@ -322,16 +326,20 @@ def test_program_view(client, user, home_page, is_enrolled, has_product, is_anon
 
     has_button = False
     url = ""  # make linter happy
+    class_name = ""
     if not is_anonymous:
         if not is_enrolled and has_product:
             url = f'{reverse("checkout-page")}?product={product_id}'
+            class_name = "enroll-now"
             has_button = True
         if is_enrolled:
             url = reverse("user-dashboard")
+            class_name = "enrolled"
             has_button = True
 
     assert (
-        f'<a class="enroll-button" href="{url}">'.encode("utf-8") in resp.content
+        f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")
+        in resp.content
     ) is has_button
     assert (
         "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")

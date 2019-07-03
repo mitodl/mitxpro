@@ -1,4 +1,4 @@
-{% load wagtailembeds_tags wagtailimages_tags %}
+{% load static wagtailembeds_tags wagtailimages_tags %}
 
 {% block extrahead %}
   <style>
@@ -41,12 +41,14 @@
           {% else %}
             {% if not user.is_anonymous %}
               {% if not enrolled and product_id %}
-                <a class="enroll-button" href="{{ checkout_url }}">
+                <a class="enroll-button enroll-now" href="{{ checkout_url }}">
                   Enroll Now
                 </a>
               {% elif enrolled %}
-                <a class="enroll-button" href="{% url "user-dashboard" %}">
-                  Enrolled
+                <a class="enroll-button enrolled" href="{% url "user-dashboard" %}">
+                  Enrolled <svg class="icon" viewBox="0 0 8 8">
+                    <use xlink:href="{% static "images/iconic/sprite/open-iconic.min.svg" %}#check" class="icon-check"></use>
+                  </svg>
                 </a>
               {% endif %}
             {% else %}
