@@ -393,11 +393,17 @@ class EnrollmentModel(TimestampedModel, AuditableModel):
     def to_dict(self):
         return serialize_model_object(self)
 
-    def reactivate_and_save(self):
-        """Sets an enrollment to be active again and saves it"""
+    def deactivate_and_save(self, change_status, no_user=False):
+        """Sets an enrollment to inactive, sets the status, and saves"""
+        self.active = False
+        self.change_status = change_status
+        return self.save_and_log(None if no_user else self.user)
+
+    def reactivate_and_save(self, no_user=False):
+        """Sets an enrollment to be active again and saves"""
         self.active = True
         self.change_status = None
-        return self.save_and_log(self.user)
+        return self.save_and_log(None if no_user else self.user)
 
 
 class CourseRunEnrollment(EnrollmentModel):
@@ -417,6 +423,20 @@ class CourseRunEnrollment(EnrollmentModel):
     @classmethod
     def get_audit_class(cls):
         return CourseRunEnrollmentAudit
+
+    @classmethod
+    def get_program_run_enrollments(cls, user, program):
+        """
+        Fetches the CourseRunEnrollments associated with a given user and program
+
+        Args:
+            user (User): A user
+            program (Program): A program
+
+        Returns:
+            queryset of CourseRunEnrollment: Course run enrollments associated with a user/program
+        """
+        return cls.objects.filter(user=user, run__course__program=program)
 
     def __str__(self):
         return f"CourseRunEnrollment for {self.user} and {self.run}"
@@ -447,6 +467,17 @@ class ProgramEnrollment(EnrollmentModel):
     @classmethod
     def get_audit_class(cls):
         return ProgramEnrollmentAudit
+
+    def get_run_enrollments(self):
+        """
+        Fetches the CourseRunEnrollments associated with this ProgramEnrollment
+
+        Returns:
+            queryset of CourseRunEnrollment: Associated course run enrollments
+        """
+        return CourseRunEnrollment.get_program_run_enrollments(
+            user=self.user, program=self.program
+        )
 
     def __str__(self):
         return f"ProgramEnrollment for {self.user} and {self.program}"

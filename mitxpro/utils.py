@@ -127,6 +127,20 @@ def first_matching_item(iterable, predicate):
     return next(filter(predicate, iterable), None)
 
 
+def has_equal_properties(obj, property_dict):
+    """
+    Returns True if the given object has the properties indicated by the keys of the given dict, and the values
+    of those properties match the values of the dict
+    """
+    for field, value in property_dict.items():
+        try:
+            if getattr(obj, field) != value:
+                return False
+        except AttributeError:
+            return False
+    return True
+
+
 def partition(items, predicate=bool):
     """
     Partitions an iterable into two different iterables - the first does not match the given condition, and the second

@@ -32,17 +32,25 @@ class Command(EnrollmentChangeCommand):
     def handle(self, *args, **options):
         """Handle command execution"""
         user = fetch_user(options["user"])
-        enrollment, enrolled_obj = self.fetch_enrollment(user, options)
-        enrollment.active = False
-        enrollment.change_status = ENROLL_CHANGE_STATUS_REFUNDED
-        enrollment.save_and_log(None)
+        enrollment, _ = self.fetch_enrollment(user, options)
+        if options["program"]:
+            program_enrollment, run_enrollments = self.deactivate_program_enrollment(
+                enrollment, change_status=ENROLL_CHANGE_STATUS_REFUNDED
+            )
+        else:
+            program_enrollment = None
+            run_enrollments = [
+                self.deactivate_run_enrollment(
+                    enrollment, change_status=ENROLL_CHANGE_STATUS_REFUNDED
+                )
+            ]
+
         self.stdout.write(
             self.style.SUCCESS(
-                "Refunded enrollment – id: {}, object: {}\nUser – {} ({})".format(
-                    enrollment.id,
-                    enrolled_obj.title,
+                "Refunded enrollments for user: {} ({})\nEnrollments affected: {}".format(
                     enrollment.user.username,
                     enrollment.user.email,
+                    list(filter(bool, [program_enrollment] + run_enrollments)),
                 )
             )
         )

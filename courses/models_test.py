@@ -14,6 +14,7 @@ from courses.factories import (
     ProgramEnrollmentFactory,
 )
 from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
+from courses.models import CourseRunEnrollment
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
@@ -306,6 +307,22 @@ def test_reactivate_and_save():
         enrollment.change_status = None
 
 
+def test_deactivate_and_save():
+    """Test that the deactivate_and_save method in enrollment models sets properties and saves"""
+    course_run_enrollment = CourseRunEnrollmentFactory.create(
+        active=True, change_status=None
+    )
+    program_enrollment = ProgramEnrollmentFactory.create(
+        active=True, change_status=None
+    )
+    enrollments = [course_run_enrollment, program_enrollment]
+    for enrollment in enrollments:
+        enrollment.deactivate_and_save(ENROLL_CHANGE_STATUS_REFUNDED)
+        enrollment.refresh_from_db()
+        enrollment.active = False
+        enrollment.change_status = ENROLL_CHANGE_STATUS_REFUNDED
+
+
 @pytest.mark.parametrize(
     "readable_id_value",
     ["somevalue", "some-value", "some_value", "some+value", "some:value"],
@@ -346,3 +363,22 @@ def test_readable_id_invalid(readable_id_value):
     course = CourseFactory.build(program=None, readable_id=readable_id_value)
     with pytest.raises(ValidationError):
         course.save()
+
+
+def test_get_program_run_enrollments(user):
+    """
+    Test that the get_program_run_enrollments helper method for CourseRunEnrollment returns
+    the appropriate course run enrollments for a program
+    """
+    programs = ProgramFactory.create_batch(2)
+    program = programs[0]
+    course_run_enrollments = CourseRunEnrollmentFactory.create_batch(
+        2,
+        user=user,
+        run__course__program=factory.Iterator([program, program, programs[1]]),
+    )
+    expected_run_enrollments = set(course_run_enrollments[0:2])
+    assert (
+        set(CourseRunEnrollment.get_program_run_enrollments(user, program))
+        == expected_run_enrollments
+    )

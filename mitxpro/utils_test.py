@@ -1,5 +1,6 @@
 """Utils tests"""
 import datetime
+from types import SimpleNamespace
 
 import pytz
 
@@ -11,6 +12,7 @@ from mitxpro.utils import (
     dict_without_keys,
     filter_dict_by_key_set,
     partition,
+    has_equal_properties,
 )
 
 
@@ -63,6 +65,18 @@ def test_get_field_names():
         "created_on",
         "updated_on",
     }
+
+
+def test_has_equal_properties():
+    """
+    Assert that has_equal_properties returns True if an object has equivalent properties to a given dict
+    """
+    obj = SimpleNamespace(a=1, b=2, c=3)
+    assert has_equal_properties(obj, {}) is True
+    assert has_equal_properties(obj, dict(a=1, b=2)) is True
+    assert has_equal_properties(obj, dict(a=1, b=2, c=3)) is True
+    assert has_equal_properties(obj, dict(a=2)) is False
+    assert has_equal_properties(obj, dict(d=4)) is False
 
 
 def test_partition():
