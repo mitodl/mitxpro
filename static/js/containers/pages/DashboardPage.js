@@ -14,6 +14,7 @@ import { RibbonText } from "../../components/Ribbon"
 
 import { addUserNotification } from "../../actions"
 import queries from "../../lib/queries"
+import { routes } from "../../lib/urls"
 import { getDateSummary, programDateRange } from "../../lib/courses"
 import { formatPrettyDate, findItemWithTextId, wait } from "../../lib/util"
 
@@ -284,7 +285,14 @@ export class DashboardPage extends React.Component<Props, State> {
                 (enrollmentsExist ? (
                   <h3>Courses and Programs</h3>
                 ) : (
-                  <h2>You are not yet enrolled in any courses or programs.</h2>
+                  <div className="empty-msg">
+                    <h2>
+                      You are not yet enrolled in any courses or programs.
+                    </h2>
+                    <a href={routes.catalog} className="link-button light-blue">
+                      Browse Our Catalog
+                    </a>
+                  </div>
                 ))}
             </div>
           </div>

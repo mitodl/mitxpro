@@ -43,6 +43,12 @@ a.link-button {
     background-color: rgb(163, 31, 52);
     color: #ffffff;
   }
+
+  &.light-blue {
+    border-radius: 5px;
+    background-color: $light-blue;
+    color: #ffffff;
+  }
 }
 
 .form-error {
