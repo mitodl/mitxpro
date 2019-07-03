@@ -88,65 +88,65 @@ class Command(BaseCommand):
             "--csv", type=str, help="The CSV file to import coupons from"
         )
         parser.add_argument(
-            "field-run",
+            "--field-run",
             type=str,
-            nargs="?",
+            dest="field-run",
             default="RUN",
             help="The CSV field for runs",
         )
         parser.add_argument(
-            "field-product",
+            "--field-product",
             type=str,
-            nargs="?",
+            dest="field-product",
             default="COURSE/PROGRAM",
             help="The CSV field for courses/programs",
         )
         parser.add_argument(
-            "field-dates",
+            "--field-dates",
             type=str,
-            nargs="?",
+            dest="field-dates",
             default="ACTIVE DATES",
             help="The CSV field for coupon dates",
         )
         parser.add_argument(
-            "field-tag",
+            "--field-tag",
             type=str,
-            nargs="?",
+            dest="field-tag",
             default="INTENDED FOR",
             help="The CSV field for tags",
         )
         parser.add_argument(
-            "field-discount",
+            "--field-discount",
             type=str,
-            nargs="?",
+            dest="field-discount",
             default="DISCOUNT",
             help="The CSV field for discount amount",
         )
         parser.add_argument(
-            "field-code",
+            "--field-code",
             type=str,
-            nargs="?",
+            dest="field-code",
             default="CODE",
             help="The CSV field for coupon code",
         )
         parser.add_argument(
-            "alltime",
+            "--alltime",
             type=str,
-            nargs="?",
+            dest="alltime",
             default="ALL TIME",
             help="The CSV value that represents all dates",
         )
         parser.add_argument(
-            "allruns",
+            "--allruns",
             type=str,
-            nargs="?",
+            dest="allruns",
             default="ALL",
             help="The CSV value that represents all runs",
         )
         parser.add_argument(
-            "allproducts",
+            "--allproducts",
             type=str,
-            nargs="?",
+            dest="allproducts",
             default="ALL xPRO",
             help="The CSV value that represents all products",
         )
