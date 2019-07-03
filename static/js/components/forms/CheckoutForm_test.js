@@ -18,6 +18,7 @@ import {
 } from "../../lib/ecommerce"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 import { calcSelectedRunIds } from "../../containers/pages/CheckoutPage"
+import { isIf, shouldIf } from "../../lib/test_utils"
 
 describe("CheckoutForm", () => {
   let sandbox,
@@ -51,6 +52,7 @@ describe("CheckoutForm", () => {
         coupon={coupon}
         couponCode={couponCode}
         basket={basket}
+        requestPending={false}
         item={basketItem}
         submitCoupon={submitCouponStub}
         selectedRuns={{}}
@@ -441,6 +443,25 @@ describe("CheckoutForm", () => {
       const [text, url] = linkPairs[i]
       assert.equal(linkWrapper.text(), text)
       assert.equal(linkWrapper.prop("href"), url)
+    })
+  })
+
+  //
+  ;[true, false].forEach(requestPending => {
+    it(`${shouldIf(
+      requestPending
+    )} disable submit buttons while the request ${isIf(
+      requestPending
+    )} in progress`, async () => {
+      const inner = await renderForm({
+        requestPending
+      })
+
+      assert.equal(
+        inner.find(".checkout-button").prop("disabled"),
+        requestPending
+      )
+      assert.equal(inner.find(".apply-button").prop("disabled"), requestPending)
     })
   })
 })

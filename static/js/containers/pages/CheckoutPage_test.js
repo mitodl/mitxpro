@@ -360,4 +360,18 @@ describe("CheckoutPage", () => {
       assert.deepEqual(calcSelectedRunIds(item), expected)
     })
   })
+
+  //
+  ;["basketMutation", "couponsMutation", "checkoutMutation"].forEach(key => {
+    it(`notifies CheckoutForm that a request is ongoing for ${key}`, async () => {
+      const { inner } = await renderPage({
+        queries: {
+          [key]: {
+            isPending: true
+          }
+        }
+      })
+      assert.isTrue(inner.find("CheckoutForm").prop("requestPending"))
+    })
+  })
 })
