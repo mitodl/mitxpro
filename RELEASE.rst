@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.11.2 (Released July 03, 2019)
+--------------
+
+- Save order on enrollment objects (#676)
+- #740 Product Page: Add commas to prices tile
+- #739 Remove contractions from subnav
+- #738 Remove course position label from product page
+- autoComplete attributes for form fields (Chrome) (#730)
+- Use site wide notifications for DashboardPage (#701)
+- Revert "Remove the old PR template that is hiding the new one"
+- Remove the old PR template that is hiding the new one
+- Use program.title and run.title instead of product.description (#724)
+- #715 Make cms subheads optional
+- Added enrollment audit admin classes
+
 Version 0.11.1 (Released July 02, 2019)
 --------------
 
