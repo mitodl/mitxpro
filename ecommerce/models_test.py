@@ -94,3 +94,36 @@ def test_hubspot_syncs(mock_hubspot_syncs, settings, hubspot_api_key):
     else:
         mock_hubspot_syncs.line.assert_not_called()
         mock_hubspot_syncs.product.assert_not_called()
+
+
+def test_product_version_save_text_id_courserun():
+    """ProductVersion.text_id should be set to CourseRun.courseware_id on save"""
+    run = CourseRunFactory.create()
+    product_version = ProductVersionFactory.create(
+        product=ProductFactory.create(content_object=run)
+    )
+    product_version.save()
+    assert product_version.text_id == run.courseware_id
+
+
+def test_product_version_save_text_id_program():
+    """ProductVersion.text_id should be set to Program.readable_id on save"""
+    program = ProgramFactory.create()
+    product_version = ProductVersionFactory.create(
+        product=ProductFactory.create(content_object=program)
+    )
+    product_version.save()
+    assert product_version.text_id == program.readable_id
+
+
+def test_product_version_save_text_id_badproduct(mocker):
+    """ProductVersion.text_id should None if ProductVersion.product is invalid"""
+    mock_log = mocker.patch("ecommerce.models.log")
+    product_version = ProductVersionFactory.create(
+        product=ProductFactory.create(content_object=LineFactory())
+    )
+    product_version.save()
+    assert product_version.text_id is None
+    assert mock_log.called_once_with(
+        f"The content object for this ProductVersion ({product_version.id}) does not have a `text_id` property"
+    )

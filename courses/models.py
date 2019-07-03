@@ -166,6 +166,11 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             key=lambda run: run.start_date,
         )
 
+    @property
+    def text_id(self):
+        """ Gets the readable_id"""
+        return self.readable_id
+
     def __str__(self):
         return self.title
 
@@ -349,6 +354,11 @@ class CourseRun(TimestampedModel):
         if not latest_version:
             return None
         return latest_version.price
+
+    @property
+    def text_id(self):
+        """ Gets the courseware_id"""
+        return self.courseware_id
 
     def __str__(self):
         return self.title
