@@ -151,7 +151,7 @@ class Command(BaseCommand):
             help="The CSV value that represents all products",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # pylint:disable=too-many-locals
         """Run the command"""
         with open(options["csv"]) as csvfile:
             coupon_reader = csv.DictReader(csvfile)
