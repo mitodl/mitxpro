@@ -8,6 +8,8 @@ import qs from "query-string"
 import { path } from "ramda"
 import { createStructuredSelector } from "reselect"
 
+import { addUserNotification } from "../../../actions"
+import { ALERT_TYPE_TEXT } from "../../../constants"
 import queries from "../../../lib/queries"
 import { routes } from "../../../lib/urls"
 import { STATE_REGISTER_DETAILS, STATE_INVALID_EMAIL } from "../../../lib/auth"
@@ -27,9 +29,9 @@ type Props = {
   auth: ?AuthResponse
 }
 
-class RegisterConfirmPage extends React.Component<Props> {
+export class RegisterConfirmPage extends React.Component<Props> {
   componentDidUpdate(prevProps) {
-    const { auth, history } = this.props
+    const { addUserNotification, auth, history } = this.props
     const prevState = path(["auth", "state"], prevProps)
 
     if (
@@ -40,6 +42,15 @@ class RegisterConfirmPage extends React.Component<Props> {
     ) {
       const params = qs.stringify({
         partial_token: auth.partialToken
+      })
+      addUserNotification({
+        "email-verified": {
+          type:  ALERT_TYPE_TEXT,
+          props: {
+            text:
+              "Success! We've verified your email. Please finish your account creation below."
+          }
+        }
       })
       history.push(`${routes.register.details}?${params}`)
     }
@@ -82,7 +93,14 @@ const registerConfirmEmail = (code: string, partialToken: string) =>
 const mapPropsToConfig = ({ params: { verificationCode, partialToken } }) =>
   registerConfirmEmail(verificationCode, partialToken)
 
+const mapDispatchToProps = {
+  addUserNotification
+}
+
 export default compose(
-  connect(mapStateToProps),
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  ),
   connectRequest(mapPropsToConfig)
 )(RegisterConfirmPage)
