@@ -1,3 +1,4 @@
+{% load humanize %}
 <div class="tiles-block">
   <div class="container">
     <ul class="tiles-list">
@@ -44,7 +45,7 @@
       {% if price %}
         <li>
           <span class="title">PRICE</span>
-          <span class="text">${{ price|floatformat:"0" }}</span>
+          <span class="text">${{ price|floatformat:"0"|intcomma }}</span>
         </li>
       {% endif %}
     </ul>
