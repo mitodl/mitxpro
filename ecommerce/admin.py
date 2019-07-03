@@ -124,6 +124,9 @@ class CouponPaymentVersionAdmin(admin.ModelAdmin):
     """Admin for CouponPaymentVersions"""
 
     model = CouponPaymentVersion
+    list_filter = ("company", "tag", "coupon_type")
+    list_display = ("id", "coupon_type", "payment", "amount", "tag", "created_on")
+    search_fields = ("company__name", "payment__name", "tag")
 
 
 class CouponVersionAdmin(admin.ModelAdmin):
