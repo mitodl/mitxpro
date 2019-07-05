@@ -1,6 +1,20 @@
 Release Notes
 =============
 
+Version 0.11.3 (Released July 05, 2019)
+--------------
+
+- Create 'Coupons' group and additional properties for Hubspot deals (#628)
+- Fixed and refactored enrollment commands
+- redirect cms login to site signin
+- Add text_id to ProductVersion (#692)
+- Disable submit button while processing (#725)
+- Fixed catalog login/signup urls
+- Updating wording on the verification email
+- Added catalog link to empty dashboard
+- Update tests
+- Switch hardcoded url to reverse url
+
 Version 0.11.2 (Released July 03, 2019)
 --------------
 
