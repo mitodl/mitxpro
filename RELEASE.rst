@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.11.3
+Version 0.11.3 (Released July 05, 2019)
 --------------
 
 - Create 'Coupons' group and additional properties for Hubspot deals (#628)
