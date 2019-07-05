@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.11.4
+--------------
+
+- fix hardcoded product page url (#768)
+- Do not include unused_coupons field when syncing contacts to hubspot (#766)
+- restyling catalog page to allow featured course (#706)
+
 Version 0.11.3 (Released July 05, 2019)
 --------------
 
