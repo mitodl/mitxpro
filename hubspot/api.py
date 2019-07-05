@@ -6,6 +6,7 @@ https://developers.hubspot.com/docs/methods/ecomm-bridge/ecomm-bridge-overview
 import logging
 import re
 from urllib.parse import urljoin, urlencode
+
 import requests
 from django.conf import settings
 
@@ -87,6 +88,8 @@ def send_hubspot_request(
         return requests.put(url=url, json=body, **kwargs)
     if method == "POST":
         return requests.post(url=url, json=body, **kwargs)
+    if method == "DELETE":
+        return requests.delete(url=url, **kwargs)
 
 
 def make_sync_message(object_id, properties):
@@ -266,3 +269,190 @@ def make_product_sync_message(product_id):
     product = Product.objects.get(id=product_id)
     properties = ProductSerializer(product).data
     return [make_sync_message(product_id, properties)]
+
+
+def sync_object_property(object_type, property_dict):
+    """
+    Create or update a new object property
+
+
+    Args:
+        object_type (str): The object type of the property (ie "deals")
+        property_dict (dict): The attributes of the property
+
+    Returns:
+        dict:  The new/updated property attributes
+    """
+    required_fields = {"name", "label", "groupName"}
+
+    missing_fields = required_fields.difference(property_dict.keys())
+    if missing_fields:
+        raise KeyError(
+            "The following property attributes are required: {}".format(
+                ",".join(missing_fields)
+            )
+        )
+
+    for key in property_dict.keys():
+        if property_dict[key] is None:
+            property_dict[key] = ""
+
+    exists = object_property_exists(object_type, property_dict["name"])
+
+    if exists:
+        method = "PUT"
+        endpoint = f"named/{property_dict['name']}"
+    else:
+        method = "POST"
+        endpoint = ""
+
+    response = send_hubspot_request(
+        endpoint, f"/properties/v1/{object_type}/properties", method, body=property_dict
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def get_object_property(object_type, property_name):
+    """
+    Get a Hubspot object property.
+
+    Args:
+        object_type (str): The object type of the property (ie "deals")
+        property_name (str): The property name
+
+    Returns:
+        dict:  the property attributes
+    """
+    response = send_hubspot_request(
+        property_name, f"/properties/v1/{object_type}/properties/named", "GET"
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def object_property_exists(object_type, property_name):
+    """
+    Return True if the specified property exists, False otherwise
+
+    Args:
+        object_type (str): The object type of the property (ie "deals")
+        property_name (str): The property name
+
+    Returns:
+        boolean:  True if the property exists otherwise False
+    """
+    try:
+        get_object_property(object_type, property_name)
+        return True
+    except requests.HTTPError:
+        return False
+
+
+def delete_object_property(object_type, property_name):
+    """
+    Delete a property from Hubspot
+
+    Args:
+        object_type (str): The object type of the property (ie "deals")
+        property_name (str): The property name
+
+    Returns:
+        dict:  the result of the delete request in JSON format
+    """
+    response = send_hubspot_request(
+        "",
+        "/properties/v1/{}/properties/named/{}".format(
+            object_type.lower(), property_name
+        ),
+        "DELETE",
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def get_property_group(object_type, group_name):
+    """
+    Get a Hubspot property group.
+
+    Args:
+        object_type (str): The object type of the group (ie "deals")
+        group_name (str): The group name
+
+    Returns:
+        dict:  The group attributes
+    """
+    response = send_hubspot_request(
+        group_name, f"/properties/v1/{object_type}/groups/named", "GET"
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def property_group_exists(object_type, group_name):
+    """
+    Return True if the specified group exists (status=200), False otherwise
+
+    Args:
+        object_type (str): The object type of the group (ie "deals")
+        group_name (str): The group name
+
+    Returns:
+        boolean:  True if the group exists otherwise False
+    """
+    try:
+        get_property_group(object_type, group_name)
+        return True
+    except requests.HTTPError:
+        return False
+
+
+def sync_property_group(object_type, name, label):
+    """
+    Create or update a property group for an object type
+
+    Args:
+        object_type (str): The object type of the group (ie "deals")
+        name (str): The group name
+        label (str): The group label
+
+    Returns:
+        dict:  the new/updated group attributes
+
+    """
+    body = {"name": name, "displayName": label}
+
+    exists = property_group_exists(object_type, name)
+
+    if exists:
+        method = "PUT"
+        endpoint = f"named/{name}"
+    else:
+        method = "POST"
+        endpoint = ""
+
+    response = send_hubspot_request(
+        endpoint, f"/properties/v1/{object_type}/groups", method, body=body
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def delete_property_group(object_type, group_name):
+    """
+    Delete a group from Hubspot
+
+    Args:
+        object_type (str): The object type of the group (ie "deals")
+        group_name (str): The group name
+
+    Returns:
+        dict:  The result of the delete command in JSON format
+    """
+    response = send_hubspot_request(
+        "",
+        "/properties/v1/{}/groups/named/{}".format(object_type.lower(), group_name),
+        "DELETE",
+    )
+    response.raise_for_status()
+    return response.json()

@@ -163,6 +163,12 @@ def mock_hubspot_request(mocker):
 
 
 @pytest.fixture
+def mock_hubspot_api_request(mocker):
+    """Mock the send hubspot request method"""
+    yield mocker.patch("hubspot.api.send_hubspot_request")
+
+
+@pytest.fixture
 def hubspot_order():
     """ Return an order for testing with hubspot"""
     order = factories.OrderFactory()
