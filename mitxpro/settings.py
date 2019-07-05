@@ -8,6 +8,10 @@ from urllib.parse import urljoin, urlparse
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
+import sentry_sdk
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 from mitxpro.envs import get_any, get_bool, get_int, get_string
 
@@ -73,7 +77,6 @@ INSTALLED_APPS = (
     "oauth2_provider",
     "rest_framework",
     "anymail",
-    "raven.contrib.django.raven_compat",
     # WAGTAIL
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
@@ -120,7 +123,6 @@ if not DISABLE_WEBPACK_LOADER_STATS:
 
 MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
-    "raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "oauth2_provider.middleware.OAuth2TokenMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -394,36 +396,34 @@ LOGGING = {
             "filters": ["require_debug_false"],
             "class": "django.utils.log.AdminEmailHandler",
         },
-        "sentry": {
-            "level": SENTRY_LOG_LEVEL,
-            "class": "raven.contrib.django.raven_compat.handlers.SentryHandler",
-            "formatter": "verbose",
-        },
     },
     "loggers": {
         "django": {
             "propagate": True,
             "level": DJANGO_LOG_LEVEL,
-            "handlers": ["console", "syslog", "sentry"],
+            "handlers": ["console", "syslog"],
         },
         "django.request": {
             "handlers": ["mail_admins"],
             "level": DJANGO_LOG_LEVEL,
             "propagate": True,
         },
-        "raven": {"level": SENTRY_LOG_LEVEL, "handlers": []},
         "nplusone": {"handlers": ["console"], "level": "ERROR"},
     },
-    "root": {"handlers": ["console", "syslog", "sentry"], "level": LOG_LEVEL},
+    "root": {"handlers": ["console", "syslog"], "level": LOG_LEVEL},
 }
 
 # Sentry
-SENTRY_CLIENT = "raven.contrib.django.raven_compat.DjangoClient"
-RAVEN_CONFIG = {
-    "dsn": get_string("SENTRY_DSN", ""),
-    "environment": ENVIRONMENT,
-    "release": VERSION,
-}
+sentry_sdk.init(
+    dsn=get_string("SENTRY_DSN", ""),
+    environment=ENVIRONMENT,
+    release=VERSION,
+    integrations=[
+        DjangoIntegration(),
+        CeleryIntegration(),
+        LoggingIntegration(level=SENTRY_LOG_LEVEL),
+    ],
+)
 
 # server-status
 STATUS_TOKEN = get_string("STATUS_TOKEN", "")

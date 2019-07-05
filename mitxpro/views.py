@@ -1,6 +1,7 @@
 """
 mitxpro views
 """
+import os
 import json
 
 from django.conf import settings
@@ -11,12 +12,12 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
-from raven.contrib.django.raven_compat.models import client as sentry
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from mitxpro.serializers import AppContextSerializer
 from mitxpro.templatetags.render_bundle import public_path
+from mitxpro.utils import remove_password_from_url
 
 
 def get_js_settings_context(request):
@@ -30,7 +31,7 @@ def get_js_settings_context(request):
         "public_path": public_path(request),
         "release_version": settings.VERSION,
         "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
-        "sentry_dsn": sentry.get_public_dsn(),
+        "sentry_dsn": remove_password_from_url(os.environ.get("SENTRY_DSN", "")),
         "support_email": settings.EMAIL_SUPPORT,
         "site_name": settings.SITE_NAME,
     }

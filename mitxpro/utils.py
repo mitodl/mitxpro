@@ -4,6 +4,7 @@ from enum import auto, Flag
 import json
 import logging
 import itertools
+from urllib.parse import urlparse, urlunparse, ParseResult
 
 from django.conf import settings
 from django.core import mail
@@ -189,3 +190,34 @@ class ValidateOnSaveMixin(models.Model):
         if not (force_insert or force_update):
             self.full_clean()
         super().save(force_insert=force_insert, force_update=force_update, **kwargs)
+
+
+def remove_password_from_url(url):
+    """
+    Remove a password from a URL
+
+    Args:
+        url (str): A URL
+
+    Returns:
+        str: A URL without a password
+    """
+    pieces = urlparse(url)
+    netloc = pieces.netloc
+    userinfo, delimiter, hostinfo = netloc.rpartition("@")
+    if delimiter:
+        username, _, _ = userinfo.partition(":")
+        rejoined_netloc = f"{username}{delimiter}{hostinfo}"
+    else:
+        rejoined_netloc = netloc
+
+    return urlunparse(
+        ParseResult(
+            scheme=pieces.scheme,
+            netloc=rejoined_netloc,
+            path=pieces.path,
+            params=pieces.params,
+            query=pieces.query,
+            fragment=pieces.fragment,
+        )
+    )

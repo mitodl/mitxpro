@@ -2,6 +2,7 @@
 import datetime
 from types import SimpleNamespace
 
+import pytest
 import pytz
 
 from ecommerce.models import Order
@@ -13,6 +14,7 @@ from mitxpro.utils import (
     filter_dict_by_key_set,
     partition,
     has_equal_properties,
+    remove_password_from_url,
 )
 
 
@@ -91,3 +93,16 @@ def test_partition():
     falsey, truthy = partition(nums)
     assert list(falsey) == [0, None, None]
     assert list(truthy) == [1, 2, 1, 3, 1, 4]
+
+
+@pytest.mark.parametrize(
+    "url, expected",
+    [
+        ["", ""],
+        ["http://url.com/url/here#other", "http://url.com/url/here#other"],
+        ["https://user:pass@sentry.io/12345", "https://user@sentry.io/12345"],
+    ],
+)
+def test_remove_password_from_url(url, expected):
+    """Assert that the url is parsed and the password is not present in the returned value, if provided"""
+    assert remove_password_from_url(url) == expected
