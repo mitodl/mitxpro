@@ -19,7 +19,7 @@ $ export OPENEDX_RELEASE=ironwood.master
 $ make dev.clone
 ```
 
-#### Clone and checkout edx-platform.
+#### Clone and checkout edx-platform (if not already).
 ```
 $ git clone https://github.com/mitodl/edx-platform
 $ git checkout xpro/ironwood
@@ -38,7 +38,7 @@ $ make dev.provision
 
 #### Stop your servers
 
-`make dev.stop`
+`make stop`
 
 ### Setup social auth
 
