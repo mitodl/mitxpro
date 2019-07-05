@@ -24,13 +24,14 @@ import type { RouterHistory, Location } from "react-router"
 import type { AuthResponse } from "../../../flow/authTypes"
 
 type Props = {
+  addUserNotification: Function,
   location: Location,
   history: RouterHistory,
   auth: ?AuthResponse
 }
 
 export class RegisterConfirmPage extends React.Component<Props> {
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: Props) {
     const { addUserNotification, auth, history } = this.props
     const prevState = path(["auth", "state"], prevProps)
 
