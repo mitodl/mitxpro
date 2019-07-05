@@ -11,7 +11,7 @@ class CoursewareUserAdmin(admin.ModelAdmin):
     """Admin for CoursewareUser"""
 
     model = CoursewareUser
-    search_fields = ["user", "platform"]
+    search_fields = ["user__username", "user__email", "user__name", "platform"]
     list_filter = ["platform"]
 
 
