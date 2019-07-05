@@ -77,7 +77,7 @@ const couponValidations = yup.object().shape({
 
 const zeroHour = value => {
   if (value instanceof Date) {
-    value.setUTCHours(0, 0, 0, 0)
+    value.setHours(0, 0, 0, 0)
   }
 }
 
