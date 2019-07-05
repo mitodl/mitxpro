@@ -2,7 +2,8 @@
 import React from "react"
 import moment from "moment"
 import Picky from "react-picky"
-import { filter, pathSatisfies, equals } from "ramda"
+import { filter, pathSatisfies, equals, always, sortBy, prop } from "ramda"
+import { formatDate, parseDate } from "react-day-picker/moment"
 import DayPickerInput from "react-day-picker/DayPickerInput"
 import { Formik, Field, Form, ErrorMessage } from "formik"
 import * as yup from "yup"
@@ -30,13 +31,13 @@ const couponValidations = yup.object().shape({
     .matches(/^\w+$/, "Only letters, numbers, and underscores allowed"),
   coupon_type:     yup.string().required("Coupon type is required"),
   products:        yup.array().min(1, "${min} or more products must be selected"),
-  activation_date: yup
-    .date()
-    .min(moment().format("YYYY-MM-DD"), "Date cannot be in the past")
-    .required("Valid activation date required"),
+  activation_date: yup.date().required("Valid activation date required"),
   expiration_date: yup
     .date()
-    .min(yup.ref("activation_date"), "Date cannot be less than activation date")
+    .min(
+      moment.max(yup.ref("activation_date"), moment()),
+      "Expiration date must be after today/activation date"
+    )
     .required("Valid expiration date required"),
   discount: yup
     .number()
@@ -73,6 +74,12 @@ const couponValidations = yup.object().shape({
     then: yup.string().required("Payment type is required")
   })
 })
+
+const zeroHour = value => {
+  if (value instanceof Date) {
+    value.setHours(0, 0, 0, 0)
+  }
+}
 
 export const CouponForm = ({
   onSubmit,
@@ -189,8 +196,11 @@ export const CouponForm = ({
               <DayPickerInput
                 name="activation_date"
                 placeholder="MM/DD/YYYY"
-                format="MM/DD/YYYY"
+                format="L"
+                formatDate={formatDate}
+                parseDate={parseDate}
                 onDayChange={value => {
+                  zeroHour(value)
                   setFieldValue("activation_date", value)
                 }}
                 onDayPickerHide={() => setFieldTouched("activation_date")}
@@ -205,9 +215,12 @@ export const CouponForm = ({
               Valid until*
               <DayPickerInput
                 name="expiration_date"
-                placeholder="DD/MM/YYYY"
-                format="DD/MM/YYYY"
+                placeholder="MM/DD/YYYY"
+                format="L"
+                formatDate={formatDate}
+                parseDate={parseDate}
                 onDayChange={value => {
+                  zeroHour(value)
                   setFieldValue("expiration_date", value)
                 }}
                 onDayPickerHide={() => setFieldTouched("expiration_date")}
@@ -241,6 +254,17 @@ export const CouponForm = ({
             checked={values.product_type === PRODUCT_TYPE_COURSERUN}
           />
           Course runs
+          <Field
+            type="radio"
+            name="product_type"
+            value=""
+            onClick={evt => {
+              setFieldValue("product_type", evt.target.value)
+              setFieldValue("products", [])
+            }}
+            checked={values.product_type === ""}
+          />
+          All products
         </div>
         <ErrorMessage name="products" component="div" />
         <div className="product-selection">
@@ -249,8 +273,10 @@ export const CouponForm = ({
             valueKey="id"
             labelKey="title"
             options={filter(
-              pathSatisfies(equals(values.product_type), ["product_type"]),
-              products || []
+              values.product_type
+                ? pathSatisfies(equals(values.product_type), ["product_type"])
+                : always(true),
+              sortBy(prop("title"), products || [])
             )}
             value={values.products}
             open={true}

@@ -7,7 +7,11 @@ import { mount } from "enzyme"
 import wait from "waait"
 
 import { CouponForm } from "./CouponForm"
-import { COUPON_TYPE_PROMO } from "../../constants"
+import {
+  COUPON_TYPE_PROMO,
+  PRODUCT_TYPE_COURSERUN,
+  PRODUCT_TYPE_PROGRAM
+} from "../../constants"
 import { makeCompany, makeProduct } from "../../factories/ecommerce"
 import {
   findFormikFieldByName,
@@ -16,12 +20,16 @@ import {
 
 describe("CouponForm", () => {
   let sandbox, onSubmitStub
+  const products = [
+    makeProduct(PRODUCT_TYPE_COURSERUN),
+    makeProduct(PRODUCT_TYPE_PROGRAM)
+  ]
 
   const renderForm = () =>
     mount(
       <CouponForm
         onSubmit={onSubmitStub}
-        products={[makeProduct(), makeProduct()]}
+        products={products}
         companies={[makeCompany(), makeCompany()]}
       />
     )
@@ -86,14 +94,21 @@ describe("CouponForm", () => {
     ["activation_date", 0, "", "Valid activation date required"],
     ["expiration_date", 1, "bad_date", "Valid expiration date required"],
     ["activation_date", 0, "bad_date", "Valid activation date required"],
+    ["activation_date", 0, "06/27/2019", null],
     [
       "expiration_date",
       1,
-      moment().format("YYYY-MM-DD"),
-      "Date cannot be less than activation date"
+      moment()
+        .add(1, "days")
+        .format("MM/DD/YYYY"),
+      null
     ],
-    ["activation_date", 0, moment().format("YYYY-MM-DD"), null],
-    ["activation_date", 0, "2001-01-01T00:00:00Z", "Date cannot be in the past"]
+    [
+      "expiration_date",
+      1,
+      moment().format("MM/DD/YYYY"),
+      "Expiration date must be after today/activation date"
+    ]
   ].forEach(([name, idx, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value
@@ -118,6 +133,29 @@ describe("CouponForm", () => {
 
   //
   ;[
+    ["activation_date", 0, "06/27/2019", "2019-06-27T00:00:00.000Z"],
+    ["expiration_date", 1, "06/27/2519", "2519-06-27T00:00:00.000Z"]
+  ].forEach(([name, idx, value, formattedDate]) => {
+    it(`converts the field name=${name}, value=${JSON.stringify(
+      value
+    )} to date string ${JSON.stringify(formattedDate)}`, async () => {
+      const wrapper = renderForm()
+      const formik = wrapper.find("Formik").instance()
+      const input = wrapper
+        .find("DayPickerInput")
+        .at(idx)
+        .find("input")
+      input.simulate("click")
+      input.simulate("change", { persist: () => {}, target: { name, value } })
+      input.simulate("blur")
+      await wait()
+      wrapper.update()
+      assert.equal(formik.state.values[name].toISOString(), formattedDate)
+    })
+  })
+
+  //
+  ;[
     [[], "1 or more products must be selected"],
     [[makeProduct()], null]
   ].forEach(([value, errorMessage]) => {
@@ -136,6 +174,29 @@ describe("CouponForm", () => {
         findFormikErrorByName(wrapper, "products").text(),
         errorMessage
       )
+    })
+  })
+
+  //
+  ;[
+    [PRODUCT_TYPE_COURSERUN, [products[0]]],
+    [PRODUCT_TYPE_PROGRAM, [products[1]]],
+    ["", products]
+  ].forEach(([productType, availableProduct]) => {
+    it(`displays correct product checkboxes when productType radio button value="${productType}"`, async () => {
+      const wrapper = renderForm()
+      wrapper
+        .find(`input[name='product_type'][value='${productType}']`)
+        .simulate("click")
+      await wait()
+      wrapper.update()
+      const picky = wrapper.find(".picky")
+      const options = picky.find("input[type='checkbox']")
+      assert.equal(options.at(1).exists(), productType === "")
+      assert.ok(picky.text().includes(availableProduct[0].title))
+      if (productType === "") {
+        assert.ok(picky.text().includes(availableProduct[1].title))
+      }
     })
   })
 
