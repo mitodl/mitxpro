@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.11.4
+Version 0.11.4 (Released July 05, 2019)
 --------------
 
 - fix hardcoded product page url (#768)
