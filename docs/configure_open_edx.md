@@ -32,6 +32,16 @@ $ make pull
 $ make dev.provision 
 ```
 
+#### Start your servers
+
+`make dev.up`
+
+#### Stop your servers
+
+`make dev.stop`
+
+### Setup social auth
+
 #### Install `social-auth-mitxpro` in LMS
 
 There are two options for this:
