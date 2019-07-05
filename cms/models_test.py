@@ -630,3 +630,24 @@ def test_is_course_page():
 
     assert not program_page.is_course_page
     assert course_page.is_course_page
+
+
+def test_featured_product():
+    """Verify that there will be only one product marked as feature."""
+    program_page = ProgramPageFactory.create(featured=True)
+    another_program_page = ProgramPageFactory.create(featured=True)
+
+    program_page.refresh_from_db()
+    assert not program_page.featured
+    assert another_program_page.featured
+
+    # add and mark course as featured
+    course_page = CoursePageFactory.create(featured=True)
+    another_program_page.refresh_from_db()
+    assert not another_program_page.featured
+    assert course_page.featured
+
+    another_course_page = CoursePageFactory.create(featured=True)
+    course_page.refresh_from_db()
+    assert not course_page.featured
+    assert another_course_page.featured

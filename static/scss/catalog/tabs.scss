@@ -31,17 +31,6 @@
   padding: 0 0 75px;
   min-height: 600px;
   position: relative;
-  margin: -40px 0 0;
-
-  &:after {
-    position: absolute;
-    left: 0;
-    top: 40px;
-    right: 0;
-    content: "";
-    height: 360px;
-    background: linear-gradient(to top, $gray-85, $tile-background);
-  }
 
   .container {
     max-width: 880px;
@@ -58,7 +47,6 @@
   }
 
   .nav-tabs {
-    text-align: center;
     border: none;
     display: block;
     letter-spacing: -0.32em;
@@ -70,14 +58,16 @@
       display: inline-block;
       vertical-align: bottom;
       font-size: 24px;
-      line-height: 40px;
+      line-height: 30px;
       font-weight: 600;
       position: relative;
       text-transform: uppercase;
       float: none;
+      padding: 0 15px 0 0;
 
       @include media-breakpoint-up(md) {
         font-size: 26px;
+        padding: 0 121px 0 0;
       }
 
       &:first-child {
@@ -95,18 +85,12 @@
       a {
         border: none !important;
         background: white;
-        padding: 10px;
-        box-shadow: 7px -16px 20px rgba(0, 0, 0, 0.21);
         z-index: auto;
-        color: $tab-color;
+        color: $blue;
         margin: 0;
-
-        @include media-breakpoint-up(md) {
-          padding: 10px 60px;
-        }
+        padding: 0;
 
         &.active {
-          padding-top: 15px;
           color: $primary;
         }
       }
@@ -116,6 +100,6 @@
   .tab-content {
     position: relative;
     z-index: 9;
-    padding: 50px 0 0;
+    padding: 30px 0 0;
   }
 }
