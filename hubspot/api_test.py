@@ -97,6 +97,7 @@ def test_make_contact_sync_message(user):
     serialized_user.update(serialized_user.pop("legal_address") or {})
     serialized_user.update(serialized_user.pop("profile") or {})
     serialized_user["street_address"] = "\n".join(serialized_user.pop("street_address"))
+    serialized_user.pop("unused_coupons")
     assert contact_sync_message == [
         {
             "integratorObjectId": "{}-{}".format(settings.HUBSPOT_ID_PREFIX, user.id),
