@@ -7,7 +7,7 @@ import configureStore from "../store/configureStore"
 import Router, { routes } from "../Router"
 import { AppTypeContext, SPA_APP_CONTEXT } from "../contextDefinitions"
 
-import Raven from "raven-js"
+import * as Sentry from "@sentry/browser"
 // Object.entries polyfill
 import entries from "object.entries"
 
@@ -15,12 +15,11 @@ require("react-hot-loader/patch")
 /* global SETTINGS:false */
 __webpack_public_path__ = SETTINGS.public_path // eslint-disable-line no-undef, camelcase
 
-Raven.config(SETTINGS.sentry_dsn, {
+Sentry.init({
+  dsn:         SETTINGS.sentry_dsn,
   release:     SETTINGS.release_version,
   environment: SETTINGS.environment
-}).install()
-
-window.Raven = Raven
+})
 
 if (!Object.entries) {
   entries.shim()

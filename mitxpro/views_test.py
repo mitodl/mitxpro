@@ -60,7 +60,7 @@ def test_webpack_url(mocker, settings, client):
         "gaTrackingID": "fake",
         "public_path": "/static/bundles/",
         "environment": settings.ENVIRONMENT,
-        "sentry_dsn": None,
+        "sentry_dsn": "",
         "release_version": settings.VERSION,
         "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
         "support_email": settings.EMAIL_SUPPORT,
