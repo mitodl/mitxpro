@@ -2,7 +2,7 @@ beautifulsoup4==4.6.0
 celery==4.2.0
 boto3==1.9.115
 dj-database-url==0.4.2
-django==2.1.9
+django==2.2.3
 django-anymail[mailgun]==3.*
 django-hijack==2.1.10
 django-hijack-admin==2.1.10
@@ -29,6 +29,6 @@ sentry-sdk
 social-auth-app-django==3.1.0
 ulid-py
 uwsgi
-wagtail==2.4
+wagtail==2.5.1
 wagtail-metadata==2.0.1
 zeep==3.3.1
