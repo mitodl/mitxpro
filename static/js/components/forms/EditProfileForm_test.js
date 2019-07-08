@@ -120,4 +120,36 @@ describe("EditProfileForm", () => {
       )
     })
   })
+
+  //
+  ;[true, false].forEach(hasEmpty => {
+    it(`sets initialValues for the form${
+      hasEmpty ? "with some empty fields" : ""
+    }`, async () => {
+      const keys = [
+        "job_function",
+        "company_size",
+        "leadership_level",
+        "years_experience"
+      ]
+      for (const key of keys) {
+        // $FlowFixMe
+        user.profile[key] = hasEmpty ? null : key
+      }
+      const wrapper = renderForm()
+      const initialValues = wrapper.find("Formik").prop("initialValues")
+      assert.equal(initialValues.name, user.name)
+      assert.equal(initialValues.email, user.email)
+      assert.deepEqual(initialValues.legal_address, user.legal_address)
+
+      Object.keys(initialValues.profile).forEach(key => {
+        if (keys.includes(key)) {
+          assert.equal(initialValues.profile[key], hasEmpty ? "" : key)
+        } else {
+          // $FlowFixMe
+          assert.deepEqual(initialValues.profile[key], user.profile[key])
+        }
+      })
+    })
+  })
 })

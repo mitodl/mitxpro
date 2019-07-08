@@ -1,5 +1,6 @@
 // @flow
 import React from "react"
+import { isNil } from "ramda"
 import { Formik, Form } from "formik"
 
 import {
@@ -21,7 +22,27 @@ const getInitialValues = (user: User) => ({
   name:          user.name,
   email:         user.email,
   legal_address: user.legal_address,
-  profile:       user.profile
+  profile:       {
+    ...user.profile,
+    // Should be null but React complains about null values in form fields. So we need to convert to
+    // string and then back to null on submit.
+    // $FlowFixMe
+    job_function: isNil(user.profile.job_function)
+      ? ""
+      : user.profile.job_function,
+    // $FlowFixMe
+    company_size: isNil(user.profile.company_size)
+      ? ""
+      : user.profile.company_size,
+    // $FlowFixMe
+    leadership_level: isNil(user.profile.leadership_level)
+      ? ""
+      : user.profile.leadership_level,
+    // $FlowFixMe
+    years_experience: isNil(user.profile.years_experience)
+      ? ""
+      : user.profile.years_experience
+  }
 })
 
 const EditProfileForm = ({ onSubmit, countries, user }: Props) => (

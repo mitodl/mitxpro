@@ -38,10 +38,29 @@ export class EditProfilePage extends React.Component<Props> {
   async onSubmit(profileData: User, { setSubmitting, setErrors }: Object) {
     const { editProfile, history } = this.props
 
+    const payload = {
+      ...profileData,
+      ...(profileData.profile
+        ? {
+          profile: {
+            ...profileData.profile,
+            company_size:
+                profileData.profile.company_size === ""
+                  ? null
+                  : profileData.profile.company_size,
+            years_experience:
+                profileData.profile.years_experience === ""
+                  ? null
+                  : profileData.profile.years_experience
+          }
+        }
+        : {})
+    }
+
     try {
       const {
         body: { errors }
-      }: { body: Object } = await editProfile(profileData)
+      }: { body: Object } = await editProfile(payload)
 
       if (errors && errors.length > 0) {
         setErrors({
