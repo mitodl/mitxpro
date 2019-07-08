@@ -6,7 +6,41 @@ In order to create user accounts in Open edX and permit authentication from xPro
 
 #### Setup Open edX Devstack
 
-Follow devstack's [README instructions](https://github.com/edx/devstack#getting-started) to get a functional devstack instance running. Ensure you are on at least the ironwood version at a minimum (e.g. `export OPENEDX_RELEASE=ironwood.master`)
+Following steps are inspired by [edx-devstack](https://github.com/edx/devstack).
+
+#### Clone edx/devstack
+
+```
+$ git clone https://github.com/edx/devstack
+$ cd devstack
+$ git checkout open-release/ironwood.master
+$ make requirements
+$ export OPENEDX_RELEASE=ironwood.master
+$ make dev.clone
+```
+
+#### Clone and checkout edx-platform (if not already).
+```
+$ git clone https://github.com/mitodl/edx-platform
+$ git checkout xpro/ironwood
+```
+
+#### Pull latest images and run provision
+
+```
+$ make pull
+$ make dev.provision 
+```
+
+#### Start your servers
+
+`make dev.up`
+
+#### Stop your servers
+
+`make stop`
+
+### Setup social auth
 
 #### Install `social-auth-mitxpro` in LMS
 
