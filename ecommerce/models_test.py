@@ -102,7 +102,6 @@ def test_product_version_save_text_id_courserun():
     product_version = ProductVersionFactory.create(
         product=ProductFactory.create(content_object=run)
     )
-    product_version.save()
     assert product_version.text_id == run.courseware_id
 
 
@@ -112,7 +111,6 @@ def test_product_version_save_text_id_program():
     product_version = ProductVersionFactory.create(
         product=ProductFactory.create(content_object=program)
     )
-    product_version.save()
     assert product_version.text_id == program.readable_id
 
 
@@ -122,7 +120,6 @@ def test_product_version_save_text_id_badproduct(mocker):
     product_version = ProductVersionFactory.create(
         product=ProductFactory.create(content_object=LineFactory())
     )
-    product_version.save()
     assert product_version.text_id is None
     assert mock_log.called_once_with(
         f"The content object for this ProductVersion ({product_version.id}) does not have a `text_id` property"

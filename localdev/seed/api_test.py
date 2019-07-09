@@ -6,6 +6,7 @@ import pytest
 from courses.models import Program, Course, CourseRun
 from cms.models import ProgramPage, CoursePage, ResourcePage
 from ecommerce.models import Product, ProductVersion
+from ecommerce.test_utils import unprotect_version_tables
 from localdev.seed.api import SeedDataLoader, get_raw_seed_data_from_file
 
 
@@ -69,7 +70,8 @@ def test_seed_and_unseed_data(seeded):
     assert Product.objects.count() == expected_products
     assert ProductVersion.objects.count() == expected_products
 
-    seeded.loader.delete_seed_data(seeded.raw_data)
+    with unprotect_version_tables():
+        seeded.loader.delete_seed_data(seeded.raw_data)
     assert Program.objects.count() == 0
     assert ProgramPage.objects.count() == 0
     assert Course.objects.count() == 0
