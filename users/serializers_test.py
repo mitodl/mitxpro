@@ -96,6 +96,20 @@ def test_validate_postal_code_formats(sample_address, data, error):
     assert str(serializer.errors["postal_code"][0]) == error
 
 
+@pytest.mark.parametrize("postal_code", ["K0M 2K0", "J8R 3P7", "G3G 2B7", "L6L 1C2"])
+def test_valid_ca_postal_codes(sample_address, postal_code):
+    """Test that validator won't show error on valid postal code for CA."""
+
+    import pdb
+
+    pdb.set_trace()
+    sample_address.update(
+        {"country": "CA", "state_or_territory": "CA-BC", "postal_code": postal_code}
+    )
+
+    assert LegalAddressSerializer(data=sample_address).is_valid()
+
+
 def test_validate_optional_country_data(sample_address):
     """Test that state_or_territory and postal_code are optional for other countries besides US/CA"""
     sample_address.update(
