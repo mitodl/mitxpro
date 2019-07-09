@@ -100,9 +100,6 @@ def test_validate_postal_code_formats(sample_address, data, error):
 def test_valid_ca_postal_codes(sample_address, postal_code):
     """Test that validator won't show error on valid postal code for CA."""
 
-    import pdb
-
-    pdb.set_trace()
     sample_address.update(
         {"country": "CA", "state_or_territory": "CA-BC", "postal_code": postal_code}
     )
