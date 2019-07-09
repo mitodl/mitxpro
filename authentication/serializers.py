@@ -148,6 +148,12 @@ class SocialAuthSerializer(serializers.Serializer):
             result = SocialAuthState(
                 SocialAuthState.STATE_REGISTER_EXTRA_DETAILS, partial=exc.partial
             )
+
+        except RequirePasswordAndPersonalInfoException as exc:
+            result = SocialAuthState(
+                SocialAuthState.STATE_REGISTER_DETAILS, partial=exc.partial
+            )
+
         except AuthException as exc:
             log.exception("Received unexpected AuthException")
             result = SocialAuthState(SocialAuthState.STATE_ERROR, errors=[str(exc)])
@@ -272,13 +278,7 @@ class RegisterConfirmSerializer(SocialAuthSerializer):
 
     def create(self, validated_data):
         """Try to 'save' the request"""
-        try:
-            result = super()._authenticate(SocialAuthState.FLOW_REGISTER)
-        except RequirePasswordAndPersonalInfoException as exc:
-            result = SocialAuthState(
-                SocialAuthState.STATE_REGISTER_DETAILS, partial=exc.partial
-            )
-        return result
+        return super()._authenticate(SocialAuthState.FLOW_REGISTER)
 
 
 class RegisterDetailsSerializer(SocialAuthSerializer):
