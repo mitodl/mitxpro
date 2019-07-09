@@ -476,11 +476,12 @@ def test_course_page_learning_outcomes():
     learning_outcomes_page = LearningOutcomesPageFactory(
         parent=course_page,
         heading="heading",
-        sub_heading="subheading",
+        sub_heading="<p>subheading</p>",
         outcome_items=json.dumps([{"type": "outcome", "value": "benefit"}]),
     )
     assert learning_outcomes_page.get_parent() == course_page
     assert learning_outcomes_page.heading == "heading"
+    assert learning_outcomes_page.sub_heading == "<p>subheading</p>"
     for (
         block
     ) in learning_outcomes_page.outcome_items:  # pylint: disable=not-an-iterable

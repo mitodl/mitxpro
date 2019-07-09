@@ -684,11 +684,8 @@ class LearningOutcomesPage(CourseProgramChildPage):
         blank=False,
         help_text="Heading highlighting the learning outcomes generally.",
     )
-    sub_heading = models.CharField(
-        max_length=250,
-        null=True,
-        blank=True,
-        help_text="Sub heading for learning outcomes.",
+    sub_heading = RichTextField(
+        null=True, blank=True, help_text="Sub heading for learning outcomes."
     )
 
     outcome_items = StreamField(
