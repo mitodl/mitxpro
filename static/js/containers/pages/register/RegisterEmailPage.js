@@ -80,7 +80,7 @@ export class RegisterEmailPage extends React.Component<Props> {
     return (
       <div className="container auth-page">
         <div className="row">
-          <h1 className="col-12">Sign Up</h1>
+          <h1 className="col-12">Create Account</h1>
         </div>
         <div className="auth-form auth-card card-shadow row">
           <div className="col-12">
