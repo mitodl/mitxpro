@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.12.0
+--------------
+
+- Tasawer/fix account creation for Canadian users (#787)
+- Upgrade sentry for Python and JS (#771)
+- Add notification when user verifies their email (#760)
+- update edX devstack installation steps. (#762)
+- Coupon form improvements (#737)
+
 Version 0.11.4 (Released July 05, 2019)
 --------------
 
