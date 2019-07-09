@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.12.0
+Version 0.12.0 (Released July 09, 2019)
 --------------
 
 - Tasawer/fix account creation for Canadian users (#787)
