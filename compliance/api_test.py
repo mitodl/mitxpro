@@ -1,6 +1,8 @@
 """Tests for compliance api"""
 
 # pylint: disable=redefined-outer-name
+import time
+
 import pytest
 from lxml import etree
 from nacl.encoding import Base64Encoder
@@ -13,6 +15,7 @@ from compliance.constants import (
     RESULT_UNKNOWN,
     TEMPORARY_FAILURE_REASON_CODES,
 )
+from compliance.factories import ExportsInquiryLogFactory
 from compliance.models import ExportsInquiryLog
 
 
@@ -30,6 +33,23 @@ def test_is_exports_verification_disabled(settings, key):
     assert api.is_exports_verification_enabled() is False
 
 
+def test_decrypt_exports_inquiry(mocker, cybersource_private_key):
+    """Test that decrypt_exports_inquiry can decrypted an encrypted log"""
+    request = b"<sent/>"
+    response = b"<received/>"
+
+    box = SealedBox(cybersource_private_key)
+
+    log = mocker.Mock()
+    log.encrypted_request = box.encrypt(request, encoder=Base64Encoder)
+    log.encrypted_response = box.encrypt(response, encoder=Base64Encoder)
+
+    decrypted = api.decrypt_exports_inquiry(log, cybersource_private_key)
+
+    assert decrypted.request == request
+    assert decrypted.response == response
+
+
 @pytest.mark.usefixtures("cybersource_settings")
 def test_log_exports_inquiry(mocker, cybersource_private_key, user):
     """Test that log_exports_inquiry correctly stores the result"""
@@ -44,10 +64,10 @@ def test_log_exports_inquiry(mocker, cybersource_private_key, user):
     assert log.reason_code == 100
     assert log.info_code == "102"
 
-    box = SealedBox(cybersource_private_key)
+    decrypted = api.decrypt_exports_inquiry(log, cybersource_private_key)
 
-    assert box.decrypt(log.encrypted_request, encoder=Base64Encoder) == b"<sent/>"
-    assert box.decrypt(log.encrypted_response, encoder=Base64Encoder) == b"<received/>"
+    assert decrypted.request == b"<sent/>"
+    assert decrypted.response == b"<received/>"
 
 
 @pytest.mark.parametrize(
@@ -125,3 +145,13 @@ def test_verify_user_with_exports_sanctions_lists(
         assert payload["exportService"]["sanctionsLists"] == sanctions_lists
     else:
         assert "sanctionsLists" not in payload["exportService"]
+
+
+def test_get_latest_export_inquiry(user):
+    """Test that get_latest_export_inquiry returns the latest log entry"""
+    log1 = ExportsInquiryLogFactory.create(user=user)
+    time.sleep(1)  # ensure there's a difference in created_on
+    log2 = ExportsInquiryLogFactory.create(user=user)
+
+    assert log2.created_on > log1.created_on
+    assert api.get_latest_exports_inquiry(user) == log2

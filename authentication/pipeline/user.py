@@ -208,7 +208,7 @@ def activate_user(
     if user.is_active or not is_new:
         return {}
 
-    export_inquiry = user.exports_inquiries.order_by("-created_on").first()
+    export_inquiry = compliance_api.get_latest_exports_inquiry(user)
 
     # if the user has an export inquiry that is considered successful, activate them
     if not compliance_api.is_exports_verification_enabled() or (

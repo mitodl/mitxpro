@@ -1,4 +1,5 @@
 """Compliance API"""
+from collections import namedtuple
 import logging
 
 from django.conf import settings
@@ -21,6 +22,8 @@ from compliance.models import ExportsInquiryLog
 
 
 log = logging.getLogger()
+
+DecryptedLog = namedtuple("DecryptedLog", ["request", "response"])
 
 
 EXPORTS_REQUIRED_KEYS = [
@@ -99,7 +102,7 @@ def log_exports_inquiry(user, response, last_sent, last_received):
         last_received (dict): the raw response received for this call
 
     Returns:
-        ExportsInquiryLog: the generate log record of the exports inquiry
+        ExportsInquiryLog: the generated log record of the exports inquiry
     """
     # render lxml data structures into a string so we can encrypt it
     xml_request = etree.tostring(last_sent["envelope"])
@@ -137,6 +140,32 @@ def log_exports_inquiry(user, response, last_sent, last_received):
         encrypted_request=encrypted_request,
         encrypted_response=encrypted_response,
     )
+
+
+def decrypt_exports_inquiry(exports_inquiry_log, private_key):
+    """
+    Decrypts an exports inquiry log given a private key
+
+    Arguments:
+        exports_inquiry_log (ExportsInquiryLog):
+            log record to decrypt
+        private_key (nacl.public.PrivateKey):
+            the private key to decrypt the request/response with
+
+    Returns:
+        DecryptedLog:
+            the decrypted request and response
+    """
+    box = SealedBox(private_key)
+
+    decrypted_request = box.decrypt(
+        exports_inquiry_log.encrypted_request, encoder=Base64Encoder
+    )
+    decrypted_response = box.decrypt(
+        exports_inquiry_log.encrypted_response, encoder=Base64Encoder
+    )
+
+    return DecryptedLog(decrypted_request, decrypted_response)
 
 
 def get_bill_to_address(user):
@@ -201,3 +230,17 @@ def verify_user_with_exports(user):
     response = client.service.runTransaction(**payload)
 
     return log_exports_inquiry(user, response, history.last_sent, history.last_received)
+
+
+def get_latest_exports_inquiry(user):
+    """
+    Returns the latest exports inquiry for the user
+
+    Args:
+        user (User): the user to find the ExportsInquiryLog for
+
+    Returns:
+        ExportsInquiryLog:
+            the latest record sorted by created_on
+    """
+    return user.exports_inquiries.order_by("-created_on").first()
