@@ -428,6 +428,7 @@ def test_course_page_properties():
         title="<p>page title</p>",
         subhead="subhead",
         description="<p>desc</p>",
+        catalog_details="<p>catalog desc</p>",
         duration="1 week",
         video_title="<p>title</p>",
         video_url="http://test.com/mock.mp4",
@@ -436,6 +437,7 @@ def test_course_page_properties():
     assert course_page.title == "<p>page title</p>"
     assert course_page.subhead == "subhead"
     assert course_page.description == "<p>desc</p>"
+    assert course_page.catalog_details == "<p>catalog desc</p>"
     assert course_page.duration == "1 week"
     assert course_page.video_title == "<p>title</p>"
     assert course_page.video_url == "http://test.com/mock.mp4"
@@ -450,6 +452,7 @@ def test_program_page_properties():
         title="<p>page title</p>",
         subhead="subhead",
         description="<p>desc</p>",
+        catalog_details="<p>catalog desc</p>",
         duration="1 week",
         video_title="<p>title</p>",
         video_url="http://test.com/mock.mp4",
@@ -458,6 +461,7 @@ def test_program_page_properties():
     assert program_page.title == "<p>page title</p>"
     assert program_page.subhead == "subhead"
     assert program_page.description == "<p>desc</p>"
+    assert program_page.catalog_details == "<p>catalog desc</p>"
     assert program_page.duration == "1 week"
     assert program_page.video_title == "<p>title</p>"
     assert program_page.video_url == "http://test.com/mock.mp4"

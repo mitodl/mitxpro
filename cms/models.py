@@ -285,7 +285,11 @@ class ProductPage(MetadataPageMixin, Page):
         abstract = True
 
     description = RichTextField(
-        blank=True, help_text="The description shown on the program page"
+        blank=True, help_text="The description shown on the product page"
+    )
+    catalog_details = RichTextField(
+        blank=True,
+        help_text="The description shown on the catalog page for this product",
     )
     subhead = models.CharField(
         max_length=255,
@@ -355,6 +359,7 @@ class ProductPage(MetadataPageMixin, Page):
         FieldPanel("duration"),
         FieldPanel("time_commitment"),
         FieldPanel("description", classname="full"),
+        FieldPanel("catalog_details", classname="full"),
         FieldPanel("background_image"),
         FieldPanel("thumbnail_image"),
         FieldPanel("featured"),
