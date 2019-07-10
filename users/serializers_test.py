@@ -96,7 +96,7 @@ def test_validate_postal_code_formats(sample_address, data, error):
     assert str(serializer.errors["postal_code"][0]) == error
 
 
-@pytest.mark.parametrize("postal_code", ["K0M 2K0", "J8R 3P7", "G3G 2B7", "L6L 1C2"])
+@pytest.mark.parametrize("postal_code", ["K0M 2K0", "J8R 3P7", "G3G 2B7", "l6l 1c2"])
 def test_valid_ca_postal_codes(sample_address, postal_code):
     """Test that validator won't show error on valid postal code for CA."""
 
