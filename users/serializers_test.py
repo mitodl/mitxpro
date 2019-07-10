@@ -107,6 +107,20 @@ def test_valid_ca_postal_codes(sample_address, postal_code):
     assert LegalAddressSerializer(data=sample_address).is_valid()
 
 
+@pytest.mark.parametrize("postal_code", ["0M0 2K0", "J8R P7Q", "GAG 2B7", "L6L 122"])
+def test_invalid_ca_postal_codes(sample_address, postal_code):
+    """Test that validator will show error on invalid postal code for CA."""
+
+    expected_error = "Postal Code must be in the format 'ANA NAN'"
+    sample_address.update(
+        {"country": "CA", "state_or_territory": "CA-BC", "postal_code": postal_code}
+    )
+
+    serializer = LegalAddressSerializer(data=sample_address)
+    assert serializer.is_valid() is False
+    assert str(serializer.errors["postal_code"][0]) == expected_error
+
+
 def test_validate_optional_country_data(sample_address):
     """Test that state_or_territory and postal_code are optional for other countries besides US/CA"""
     sample_address.update(
