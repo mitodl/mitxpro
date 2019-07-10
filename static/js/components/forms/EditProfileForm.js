@@ -1,6 +1,6 @@
 // @flow
 import React from "react"
-import { isNil } from "ramda"
+import { pathOr } from "ramda"
 import { Formik, Form } from "formik"
 
 import {
@@ -26,22 +26,10 @@ const getInitialValues = (user: User) => ({
     ...user.profile,
     // Should be null but React complains about null values in form fields. So we need to convert to
     // string and then back to null on submit.
-    // $FlowFixMe
-    job_function: isNil(user.profile.job_function)
-      ? ""
-      : user.profile.job_function,
-    // $FlowFixMe
-    company_size: isNil(user.profile.company_size)
-      ? ""
-      : user.profile.company_size,
-    // $FlowFixMe
-    leadership_level: isNil(user.profile.leadership_level)
-      ? ""
-      : user.profile.leadership_level,
-    // $FlowFixMe
-    years_experience: isNil(user.profile.years_experience)
-      ? ""
-      : user.profile.years_experience
+    job_function:     pathOr("", ["job_function"], user.profile),
+    company_size:     pathOr("", ["company_size"], user.profile),
+    leadership_level: pathOr("", ["leadership_level"], user.profile),
+    years_experience: pathOr("", ["years_experience"], user.profile)
   }
 })
 
