@@ -258,11 +258,13 @@ export class DashboardPage extends React.Component<Props, State> {
 
           <div className="expand-control">
             <Button
-              className={`collapse-toggle btn-link shadow-none ${isExpanded &&
-                "expanded"}`}
+              className="collapse-toggle btn-link shadow-none"
               onClick={R.partial(this.onCollapseToggle, [programEnrollment.id])}
             >
               {isExpanded ? <span>Close</span> : <span>View Courses</span>}
+              <i className="material-icons">
+                {isExpanded ? "expand_less" : "expand_more"}
+              </i>
             </Button>
           </div>
         </div>

@@ -41,12 +41,12 @@
           {% else %}
             {% if not user.is_anonymous %}
               {% if not enrolled and product_id %}
-                <a class="enroll-button" href="{{ checkout_url }}">
+                <a class="enroll-button enroll-now" href="{{ checkout_url }}">
                   Enroll Now
                 </a>
               {% elif enrolled %}
-                <a class="enroll-button" href="{% url "user-dashboard" %}">
-                  Enrolled
+                <a class="enroll-button enrolled" href="{% url "user-dashboard" %}">
+                  Enrolled <i class="material-icons">check</i>
                 </a>
               {% endif %}
             {% else %}
