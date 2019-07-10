@@ -17,7 +17,7 @@ const TopAppBar = ({ currentUser }: Props) => (
     <div className="container">
       <nav
         className={`sub-nav navbar navbar-expand-md link-section ${
-          currentUser.is_authenticated ? "nowrap" : ""
+          currentUser.is_authenticated ? "nowrap login" : ""
         }`}
       >
         <div className="navbar-brand">

@@ -16,7 +16,29 @@
   }
 }
 
+.link-section.nowrap.login {
+  ul {
+    @include media-breakpoint-down(md) {
+      margin: 0;
+      text-align: right;
+
+      li {
+        padding: 0;
+
+        a {
+          padding: 5px 0;
+        }
+
+        .dropdown-toggle {
+          padding-right: 0;
+        }
+      }
+    }
+  }
+}
+
 .navbar-collapse {
+
   li {
     letter-spacing: normal;
     display: inline-block;
