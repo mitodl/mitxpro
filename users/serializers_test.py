@@ -107,7 +107,7 @@ def test_valid_ca_postal_codes(sample_address, postal_code):
     assert LegalAddressSerializer(data=sample_address).is_valid()
 
 
-@pytest.mark.parametrize("postal_code", ["0M0 2K0", "J8R P7Q", "GAG 2B7", "L6L 122"])
+@pytest.mark.parametrize("postal_code", ["0M0 2K0", "J8R P7Q", "GAG 2B7", "L6L 122", "K0M-2K0"])
 def test_invalid_ca_postal_codes(sample_address, postal_code):
     """Test that validator will show error on invalid postal code for CA."""
 
