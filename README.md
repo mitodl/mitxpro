@@ -112,3 +112,14 @@ docker-compose run --rm web ./manage.py seed_data
 # To delete seed data
 docker-compose run --rm web ./manage.py seed_data --delete
 ```
+
+### Setup product index pages
+
+Seed data generated in the previous step would create pages directly under the home page. In an update to page routing along the way there has been an hierarchy change where all product pages are required to be under their respective index pages in order to render properly (`CoursePage` under `CourseIndexPage` and `ProgramPage` under `ProgramIndexPage`). The following command can setup your index pages if they are missing and/or the product pages are misplaced. This command is also designed to be idempotent and running it multiple times does not create multiple index pages.
+```
+docker-compose run --rm web ./manage.py setup_index_pages
+```
+#### To revert the change
+```
+docker-compose run --rm web ./manage.py setup_index_pages --revert
+```
