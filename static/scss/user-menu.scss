@@ -7,13 +7,6 @@
   overflow: hidden;
 }
 
-.dropdown-toggle {
-  &:after {
-    margin-left: -0.5em !important;
-    vertical-align: -0.5em !important;
-  }
-}
-
 .collapsed.dropdown-toggle::after {
   border-top: 0.3em solid transparent;
   border-left: 0.3em solid;
