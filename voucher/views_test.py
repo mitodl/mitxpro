@@ -9,6 +9,7 @@ from django.urls import reverse
 import pytest
 
 from ecommerce.factories import CouponVersionFactory, CouponEligibilityFactory
+from users.factories import UserFactory
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
 
@@ -69,6 +70,7 @@ def test_upload_voucher_form_view_voucher_update(
     Test UploadVoucherFormView POST retrieves a voucher if one already exists matching the given voucher values
     """
     values = upload_voucher_form.cleaned_data["voucher"]
+    values["pdf"] = "/vouchers/another_name.pdf"
     voucher = Voucher.objects.create(
         **values, user=upload_voucher_form_view.request.user
     )
@@ -77,6 +79,21 @@ def test_upload_voucher_form_view_voucher_update(
     assert response.url == reverse("voucher:enroll")
     assert Voucher.objects.filter(**values).count() == 1
     assert Voucher.objects.get(**values).uploaded > voucher.uploaded
+
+
+def test_upload_voucher_form_view_voucher_other_user(
+    upload_voucher_form_view, upload_voucher_form
+):
+    """
+    Test UploadVoucherFormView POST does not allow an upload of the same voucher from another user
+    """
+    values = upload_voucher_form.cleaned_data["voucher"]
+    voucher = Voucher.objects.create(**values, user=UserFactory.create())
+    response = upload_voucher_form_view.form_valid(upload_voucher_form)
+    assert response.status_code == 302
+    assert response.url == reverse("voucher:resubmit")
+    assert Voucher.objects.filter(**values).count() == 1
+    assert Voucher.objects.get(**values).uploaded == voucher.uploaded
 
 
 # Test EnrollView routing

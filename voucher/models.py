@@ -6,6 +6,7 @@ from django.db import models
 
 from ecommerce.models import CouponRedemption, CouponVersion
 from mitxpro.models import TimestampedModel
+from voucher.utils import voucher_upload_path
 
 
 class Voucher(TimestampedModel):
@@ -20,7 +21,7 @@ class Voucher(TimestampedModel):
     course_start_date_input = models.DateField()
     course_id_input = models.CharField(max_length=255)
     course_title_input = models.CharField(max_length=255)
-    pdf = models.FileField(upload_to="vouchers/", null=True)
+    pdf = models.FileField(upload_to=voucher_upload_path, null=True)
     uploaded = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="vouchers"

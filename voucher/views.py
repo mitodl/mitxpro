@@ -40,10 +40,23 @@ class UploadVoucherFormView(LoginRequiredMixin, FormView):
         """
         values = form.cleaned_data["voucher"]
         user = self.request.user
-        # Check for an existing voucher
-        old_voucher = Voucher.objects.filter(**values).last()
-        # If a voucher exists, check if it is the same as the uploaded voucher
+        # Check if a matching voucher already exists
+        old_voucher = Voucher.objects.filter(
+            employee_id=values.get("employee_id"),
+            employee_name=values.get("employee_name"),
+            course_start_date_input=values.get("course_start_date_input"),
+            course_id_input=values.get("course_id_input"),
+            course_title_input=values.get("course_title_input"),
+        ).last()
+        # If a voucher exists, make sure it is the same user, and update the upload time
         if old_voucher:
+            if old_voucher.user != user:
+                log.error(
+                    "%s uploaded a voucher previously uploaded by %s",
+                    user.username,
+                    old_voucher.user.username,
+                )
+                return redirect("voucher:resubmit")
             voucher = old_voucher
             voucher.uploaded = datetime.now(tz=pytz.UTC)
             voucher.save()
@@ -57,6 +70,9 @@ class UploadVoucherFormView(LoginRequiredMixin, FormView):
         Redirect to the resubmit page if the voucher couldn't be parsed
         """
         if VOUCHER_PARSE_ERROR in form.errors["voucher"]:
+            log.error(
+                "Voucher uploaded by %s could not be parsed", self.request.user.username
+            )
             return redirect(reverse("voucher:resubmit"))
         return super().form_invalid(form)
 
