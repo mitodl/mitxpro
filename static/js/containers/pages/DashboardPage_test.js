@@ -130,21 +130,37 @@ describe("DashboardPage", () => {
     )
   })
 
-  it("expands and collapses a program courses section", async () => {
-    const { inner } = await renderPage()
-    const collapseToggleBtn = inner
-      .find(".program-enrollment .collapse-toggle")
-      .at(0)
-    collapseToggleBtn.prop("onClick")({})
-    inner.update()
-    const programEnrollmentId = userEnrollments.program_enrollments[0].id
-    assert.deepEqual(inner.state("collapseVisible"), {
-      [programEnrollmentId]: true
-    })
-    collapseToggleBtn.prop("onClick")({})
-    inner.update()
-    assert.deepEqual(inner.state("collapseVisible"), {
-      [programEnrollmentId]: false
+  //
+  ;[true, false].forEach(willExpand => {
+    it(`${
+      willExpand ? "expands" : "collapses"
+    } a program courses section`, async () => {
+      const programEnrollmentId = userEnrollments.program_enrollments[0].id
+      const { inner } = await renderPage()
+      inner.setState({
+        collapseVisible: {
+          [programEnrollmentId]: !willExpand
+        }
+      })
+      assert.equal(
+        inner
+          .find(".expand-control Button")
+          .childAt(0)
+          .text(),
+        willExpand ? "View Courses" : "Close"
+      )
+      assert.equal(
+        inner.find(".expand-control .material-icons").text(),
+        willExpand ? "expand_more" : "expand_less"
+      )
+
+      const collapseToggleBtn = inner
+        .find(".program-enrollment .collapse-toggle")
+        .at(0)
+      collapseToggleBtn.prop("onClick")({})
+      assert.deepEqual(inner.state("collapseVisible"), {
+        [programEnrollmentId]: willExpand
+      })
     })
   })
 

@@ -1,4 +1,4 @@
-{% load static wagtailembeds_tags wagtailimages_tags %}
+{% load wagtailembeds_tags wagtailimages_tags %}
 
 {% block extrahead %}
   <style>
@@ -46,9 +46,7 @@
                 </a>
               {% elif enrolled %}
                 <a class="enroll-button enrolled" href="{% url "user-dashboard" %}">
-                  Enrolled <svg class="icon" viewBox="0 0 8 8">
-                    <use xlink:href="{% static "images/iconic/sprite/open-iconic.min.svg" %}#check" class="icon-check"></use>
-                  </svg>
+                  Enrolled <i class="material-icons">check</i>
                 </a>
               {% endif %}
             {% else %}

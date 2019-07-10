@@ -165,15 +165,12 @@
   }
 
   .expand-control {
-    text-align: right;
+    margin-left: auto;
 
     button {
-      background: url(/static/images/expand_more.svg) center right no-repeat;
-      padding-right: 24px;
-
-      &.expanded {
-        background-image: url(/static/images/expand_less.svg);
-      }
+      display: flex;
+      flex-direction: row;
+      align-items: center;
     }
   }
 }
