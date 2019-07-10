@@ -1,9 +1,10 @@
+{% load wagtailcore_tags %}
 <div id="learningOutcomes" class="learning-outcomes-block section-spacing">
   <div class="container">
     <div class="learning-header">
       <h1>{{ page.heading | safe }}</h1>
       {% if page.sub_heading %}
-        <h2>{{ page.sub_heading | safe }}</h2>
+        {{ page.sub_heading | richtext }}
       {% endif %}
     </div>
     <ul class="learning-outcomes-list d-flex flex-wrap justify-content-between">
