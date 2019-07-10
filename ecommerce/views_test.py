@@ -481,7 +481,10 @@ def test_patch_basket_update_coupon_invalid(basket_client, basket_and_coupons):
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert resp_data["errors"]["coupons"] == f"Coupon code {bad_code} is invalid"
+    assert (
+        resp_data["errors"]["coupons"]
+        == f"Enrollment / Promotional Code {bad_code} is invalid"
+    )
 
 
 def test_patch_basket_clear_coupon_auto(
