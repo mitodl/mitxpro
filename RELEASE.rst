@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.12.1
+Version 0.12.1 (Released July 11, 2019)
 --------------
 
 - Update styling of enrolled button and add a check mark (#757)
