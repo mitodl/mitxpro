@@ -49,7 +49,7 @@ urlpatterns = [
     path("", include("ecommerce.urls")),
     path("", include("users.urls")),
     path("", include("mail.urls")),
-    path("voucher/", include(("voucher.urls", "voucher"))),
+    path("boeing/", include(("voucher.urls", "voucher"))),
     path("api/app_context", AppContextView.as_view(), name="api-app_context"),
     # named routes mapped to the react app
     path("signin/", index, name="login"),
