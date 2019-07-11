@@ -6,14 +6,14 @@ import voucher.utils
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('voucher', '0002_product_and_enrollment_keys'),
-    ]
+    dependencies = [("voucher", "0002_product_and_enrollment_keys")]
 
     operations = [
         migrations.AlterField(
-            model_name='voucher',
-            name='pdf',
-            field=models.FileField(null=True, upload_to=voucher.utils.voucher_upload_path),
-        ),
+            model_name="voucher",
+            name="pdf",
+            field=models.FileField(
+                null=True, upload_to=voucher.utils.voucher_upload_path
+            ),
+        )
     ]
