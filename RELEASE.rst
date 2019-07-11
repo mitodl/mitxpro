@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.12.1 (Released July 11, 2019)
+--------------
+
+- Update styling of enrolled button and add a check mark (#757)
+- Change validation error message to Enrollment / Promotional Code (#797)
+- Coerce fields to and from empty strings to fix React uncontrolled warnings (#781)
+- new background for faculty section (#779)
+- Added config to avoid OSERRORs from uwsgi
+- Fix django admin search for CoursewareUser (#773)
+- fix styling of header link in mobile view (#799)
+- #743 Product page catalog details
+- #800 Update Readme regarding index page setup management command
+- #742 Learning Outcomes subhead convert to richtext
+- fix regex for false positive, add test for invalid codes (#798)
+
 Version 0.12.0 (Released July 09, 2019)
 --------------
 
