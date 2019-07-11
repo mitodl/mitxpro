@@ -142,6 +142,18 @@ def has_equal_properties(obj, property_dict):
     return True
 
 
+def first_or_none(iterable):
+    """
+    Returns the first item in an iterable, or None if the iterable is empty
+
+    Args:
+        iterable (iterable): Some iterable
+    Returns:
+        first item or None
+    """
+    return next((x for x in iterable), None)
+
+
 def partition(items, predicate=bool):
     """
     Partitions an iterable into two different iterables - the first does not match the given condition, and the second

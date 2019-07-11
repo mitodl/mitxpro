@@ -15,6 +15,7 @@ from mitxpro.utils import (
     partition,
     has_equal_properties,
     remove_password_from_url,
+    first_or_none,
 )
 
 
@@ -106,3 +107,13 @@ def test_partition():
 def test_remove_password_from_url(url, expected):
     """Assert that the url is parsed and the password is not present in the returned value, if provided"""
     assert remove_password_from_url(url) == expected
+
+
+def test_first_or_none():
+    """
+    Assert that first_or_none returns the first item in an iterable or None
+    """
+    assert first_or_none([]) is None
+    assert first_or_none(set()) is None
+    assert first_or_none([1, 2, 3]) == 1
+    assert first_or_none(range(1, 5)) == 1
