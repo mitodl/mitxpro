@@ -111,8 +111,8 @@
   font-size: 0;
   line-height: 0;
   border: none;
-  background: $red;
-  color: white;
+  background: white;
+  color: black;
   text-align: center;
   width: 30px;
   height: 30px;
@@ -127,8 +127,6 @@
     width: 50px;
     height: 50px;
     padding: 5px 0;
-    background: white;
-    color: black;
   }
 
   @include media-breakpoint-up(lg) {
