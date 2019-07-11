@@ -4,7 +4,10 @@
             "title": "Systems Engineering",
             "subhead": "A four-course online program leading to a Professional Certificate from the Massachusetts Institute of Technology.",
             "description": "<p>A four-course online program leading to a Professional Certificate from the Massachusetts Institute of Technology.</p>",
-            "readable_id": "program-v1:xPRO+SysEngx"
+            "readable_id": "program-v1:xPRO+SysEngx",
+            "_product": {
+                "price": 2499
+            }
         },
         {
             "title": "Digital Learning",
@@ -29,8 +32,11 @@
                 {
                     "title": "edX Demonstration Course - Spring 2013",
                     "courseware_id": "course-v1:edX+DemoX+Demo_Course",
-                    "courseware_url_path": "/courses/course-v1:edX+DemoX+Demo_Course",
-                    "start_date": "2013-02-05T00:00:00+00:00"
+                    "courseware_url_path": "/courses/course-v1:edX+DemoX+Demo_Course/course/",
+                    "start_date": "2013-02-05T00:00:00+00:00",
+                    "_product": {
+                        "price": 321
+                    }
                 }
             ]
         },
@@ -43,12 +49,15 @@
             "readable_id": "course-v1:xPRO+SysEngxB1",
             "course_runs": [
                 {
-                    "title": "Systems Engineering - Fall 2019",
+                    "title": "Architecture of Complex Systems - Fall 2019",
                     "courseware_id": "course-v1:TestX+SysEngxB1+1T2019",
                     "courseware_url_path": "/courses/course-v1:TestX+SysEngxB1+1T2019/course/",
                     "start_date": "2019-08-15T00:00:00+00:00",
                     "end_date": "2019-12-15T00:00:00+00:00",
-                    "enrollment_end": "2019-08-29T00:00:00+00:00"
+                    "enrollment_end": "2019-08-29T00:00:00+00:00",
+                    "_product": {
+                        "price": 846
+                    }
                 }
             ]
         },
@@ -61,12 +70,15 @@
             "readable_id": "course-v1:xPRO+SysEngxB2",
             "course_runs": [
                 {
-                    "title": "Systems Engineering - Spring 2020",
+                    "title": "Models in Engineering - Spring 2020",
                     "courseware_id": "course-v1:TestX+SysEngxB2+1T2019",
                     "courseware_url_path": "/courses/course-v1:TestX+SysEngxB2+1T2019/course/",
                     "end_date": "2020-05-15T00:00:00+00:00",
                     "start_date": "2020-01-15T00:00:00+00:00",
-                    "enrollment_end": "2020-01-29T00:00:00+00:00"
+                    "enrollment_end": "2020-01-29T00:00:00+00:00",
+                    "_product": {
+                        "price": 848
+                    }
                 }
             ]
         },
@@ -79,12 +91,15 @@
             "readable_id": "course-v1:xPRO+SysEngxB3",
             "course_runs": [
                 {
-                    "title": "Systems Engineering - Fall 2020",
+                    "title": "Model-Based Systems Engineering: Documentation and Analysis - Fall 2020",
                     "courseware_id": "course-v1:TestX+SysEngxB3+1T2019",
                     "courseware_url_path": "/courses/course-v1:TestX+SysEngxB3+1T2019/course/",
                     "start_date": "2020-08-15T00:00:00+00:00",
                     "end_date": "2020-12-15T00:00:00+00:00",
-                    "enrollment_end": "2020-08-29T00:00:00+00:00"
+                    "enrollment_end": "2020-08-29T00:00:00+00:00",
+                    "_product": {
+                        "price": 849
+                    }
                 }
             ]
         },
@@ -97,13 +112,16 @@
             "readable_id": "course-v1:xPRO+SysEngxB4",
             "course_runs": [
                 {
-                    "title": "Quantitative Methods - August 2019",
+                    "title": "Quantitative Methods in Systems Engineering - August 2019",
                     "courseware_id": "course-v1:TestX+SysEngxB4+1T2019",
                     "courseware_url_path": "/courses/course-v1:TestX+SysEngxB4+1T2019/course/",
                     "enrollment_start": "2019-08-15T00:00:00+00:00",
                     "end_date": "2019-12-15T00:00:00+00:00",
                     "start_date": "2019-08-15T00:00:00+00:00",
-                    "enrollment_end": "2019-08-29T00:00:00+00:00"
+                    "enrollment_end": "2019-08-29T00:00:00+00:00",
+                    "_product": {
+                        "price": 847
+                    }
                 }
             ]
         },
@@ -292,7 +310,10 @@
                     "enrollment_start": "2016-08-15T00:00:00+00:00",
                     "end_date": "2016-12-15T00:00:00+00:00",
                     "start_date": "2016-08-15T00:00:00+00:00",
-                    "enrollment_end": "2016-08-29T00:00:00+00:00"
+                    "enrollment_end": "2016-08-29T00:00:00+00:00",
+                    "_product": {
+                        "price": 350
+                    }
                 },
                 {
                     "title": "Analog Learning 300 - January 2016",
@@ -351,7 +372,6 @@
         {
             "title": "Terms of service",
             "sub_heading": "Sub heading of terms of service",
-            "slug": "terms-of-service",
             "content": [
                 {
                     "type": "content",
@@ -372,7 +392,6 @@
         {
             "title": "Privacy policy",
             "sub_heading": "Sub heading of privacy policy",
-            "slug": "privacy-policy",
             "content": [
                 {
                     "type": "content",
@@ -393,7 +412,6 @@
         {
             "title": "Honor code",
             "sub_heading": "Sub heading of honor code",
-            "slug": "honor-code",
             "content": [
                 {
                     "type": "content",
