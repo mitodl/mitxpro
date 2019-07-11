@@ -123,7 +123,7 @@
   cursor: pointer;
 
   @include media-breakpoint-up(md) {
-    left: -15px;
+    left: -25px;
     width: 50px;
     height: 50px;
     padding: 5px 0;
@@ -132,12 +132,15 @@
   }
 
   @include media-breakpoint-up(lg) {
-    left: -30px;
-    width: 70px;
-    height: 70px;
+    width: 50px;
+    height: 50px;
     padding: 15px 0;
   }
-
+  @media (min-width: 1275px) {
+    left: -65px;
+    width: 70px;
+    height: 70px;
+  }
   @media (min-width: 1450px) {
     left: -135px;
   }
@@ -153,6 +156,10 @@
     font-family: icomoon;
     content: "\e900";
     @include media-breakpoint-up(md) {
+      font-size: 22px;
+      line-height: 20px;
+    }
+    @media (min-width: 1275px) {
       font-size: 30px;
       line-height: 40px;
     }
@@ -164,15 +171,14 @@
   right: 0px;
 
   @include media-breakpoint-up(md) {
-    right: -15px;
-  }
-
-  @include media-breakpoint-up(lg) {
-    right: -30px;
+    right: -25px;
   }
 
   &:after {
     content: "\e901";
+  }
+  @media (min-width: 1275px) {
+    right: -65px;
   }
 
   @media (min-width: 1450px) {

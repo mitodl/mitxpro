@@ -21,7 +21,7 @@
 .logos-slider {
 
   .img-holder {
-    min-height: 100px;
+    height: 100%;
     text-align: center;
     padding: 0 10px;
     letter-spacing: -.32em;
@@ -32,7 +32,7 @@
       content: '';
       width: 2px;
       margin: -2px;
-      height: 100px;
+      height: inherit;
     }
 
     img {
