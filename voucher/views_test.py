@@ -51,6 +51,7 @@ def test_upload_voucher_form_view_voucher_create(
     response = upload_voucher_form_view.form_valid(upload_voucher_form)
     assert response.status_code == 302
     assert response.url == reverse("voucher:enroll")
+    assert response.url.startswith("/boeing")
     assert (
         Voucher.objects.filter(**upload_voucher_form.cleaned_data["voucher"]).count()
         == 1
@@ -68,6 +69,7 @@ def test_upload_voucher_form_view_parse_error(
     )
     assert response.status_code == 302
     assert response.url == reverse("voucher:resubmit")
+    assert response.url.startswith("/boeing")
     username = upload_voucher_form_view.request.user.username
     mock_logger.error.assert_any_call(
         "Voucher uploaded by %s could not be parsed", username
@@ -124,6 +126,7 @@ def test_get_enroll_view_with_no_voucher(authenticated_client):
     response = authenticated_client.get(reverse("voucher:enroll"))
     assert response.status_code == 302
     assert response.url == reverse("voucher:upload")
+    assert response.url.startswith("/boeing")
 
 
 def test_get_enroll_view_with_redeemed_voucher(redeemed_voucher_and_user_client):
