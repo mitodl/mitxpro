@@ -1,8 +1,13 @@
 """Management command to change enrollment status"""
 from django.contrib.auth import get_user_model
 
-from courses.management.utils import EnrollmentChangeCommand, fetch_user
+from courses.management.utils import (
+    EnrollmentChangeCommand,
+    fetch_user,
+    enrollment_summaries,
+)
 from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
+from ecommerce.models import Order
 
 User = get_user_model()
 
@@ -14,7 +19,10 @@ class Command(EnrollmentChangeCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--user", type=str, help="The id, email, or username of the enrolled User"
+            "--user",
+            type=str,
+            help="The id, email, or username of the enrolled User",
+            required=True,
         )
         group = parser.add_mutually_exclusive_group()
         group.add_argument(
@@ -33,6 +41,7 @@ class Command(EnrollmentChangeCommand):
         """Handle command execution"""
         user = fetch_user(options["user"])
         enrollment, _ = self.fetch_enrollment(user, options)
+
         if options["program"]:
             program_enrollment, run_enrollments = self.deactivate_program_enrollment(
                 enrollment, change_status=ENROLL_CHANGE_STATUS_REFUNDED
@@ -45,12 +54,23 @@ class Command(EnrollmentChangeCommand):
                 )
             ]
 
-        self.stdout.write(
-            self.style.SUCCESS(
-                "Refunded enrollments for user: {} ({})\nEnrollments affected: {}".format(
-                    enrollment.user.username,
-                    enrollment.user.email,
-                    list(filter(bool, [program_enrollment] + run_enrollments)),
+        success_msg = "Refunded enrollments for user: {} ({})\nEnrollments affected: {}".format(
+            enrollment.user.username,
+            enrollment.user.email,
+            enrollment_summaries(filter(bool, [program_enrollment] + run_enrollments)),
+        )
+
+        if enrollment.order:
+            enrollment.order.status = Order.REFUNDED
+            enrollment.order.save()
+            success_msg += "\nOrder status set to '{}' (order id: {})".format(
+                enrollment.order.status, enrollment.order.id
+            )
+        else:
+            self.stdout.write(
+                self.style.WARNING(
+                    "The given enrollment is not associated with an order, so no order status will be changed."
                 )
             )
-        )
+
+        self.stdout.write(self.style.SUCCESS(success_msg))

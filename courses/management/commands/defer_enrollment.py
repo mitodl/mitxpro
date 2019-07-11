@@ -2,7 +2,11 @@
 from django.core.management.base import CommandError
 from django.contrib.auth import get_user_model
 
-from courses.management.utils import EnrollmentChangeCommand, fetch_user
+from courses.management.utils import (
+    EnrollmentChangeCommand,
+    fetch_user,
+    enrollment_summary,
+)
 from courses.constants import ENROLL_CHANGE_STATUS_DEFERRED
 from courses.models import CourseRun, CourseRunEnrollment
 
@@ -16,17 +20,22 @@ class Command(EnrollmentChangeCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--user", type=str, help="The id, email, or username of the enrolled User"
+            "--user",
+            type=str,
+            help="The id, email, or username of the enrolled User",
+            required=True,
         )
         parser.add_argument(
             "--from-run",
             type=str,
             help="The 'courseware_id' value for an enrolled CourseRun",
+            required=True,
         )
         parser.add_argument(
             "--to-run",
             type=str,
             help="The 'courseware_id' value for the CourseRun that you are deferring to",
+            required=True,
         )
         super().add_arguments(parser)
 
@@ -75,7 +84,7 @@ class Command(EnrollmentChangeCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 "Deferred enrollment for user: {} ({})\nEnrollment created/updated: {}".format(
-                    user.username, user.email, to_enrollment
+                    user.username, user.email, enrollment_summary(to_enrollment)
                 )
             )
         )
