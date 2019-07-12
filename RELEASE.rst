@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.12.2
+Version 0.12.2 (Released July 12, 2019)
 --------------
 
 - Fixed seed data bugs, added products, added deletion command
