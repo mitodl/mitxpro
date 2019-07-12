@@ -11,11 +11,7 @@ from django.utils.text import slugify
 from django.http.response import Http404
 from django.shortcuts import reverse
 from modelcluster.fields import ParentalKey
-from wagtail.admin.edit_handlers import (
-    FieldPanel,
-    InlinePanel,
-    StreamFieldPanel,
-)
+from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
 from wagtail.core import blocks
 from wagtail.core.blocks import PageChooserBlock, RawHTMLBlock
 from wagtail.core.fields import RichTextField, StreamField
