@@ -2,6 +2,8 @@
 import json
 import logging
 from datetime import datetime
+from uuid import uuid4
+
 import pdftotext
 
 from django.conf import settings
@@ -51,6 +53,7 @@ def get_eligible_coupon_choices(voucher):
         )
     if not course_matches.exists():
         # No partial matches found
+        log.error("Found no matching course runs for voucher %s", voucher.id)
         return []
 
     # Check for valid coupon options and return choices
@@ -293,3 +296,17 @@ def read_pdf(pdf_file):
     except Exception:  # pylint: disable=broad-except
         log.exception("Could not parse PDF")
         return None
+
+
+def voucher_upload_path(instance, filename):  # pylint: disable=unused-argument
+    """
+    Make a unique path/name for an uploaded voucher
+
+    Args:
+        instance(Voucher): the Voucher object
+        filename(str): The voucher filename
+
+    Returns:
+        str: The unique filepath for the voucher
+    """
+    return "vouchers/{}_{}".format(uuid4(), filename)

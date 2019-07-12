@@ -1,15 +1,28 @@
 """Tests for utils.py"""
 import json
+import re
 from datetime import datetime
-from unittest.mock import patch
 
 import pytest
 import pytz
 
 from voucher.factories import VoucherFactory
-from voucher.utils import read_pdf, get_current_voucher, get_eligible_coupon_choices
+from voucher.utils import (
+    read_pdf,
+    get_current_voucher,
+    get_eligible_coupon_choices,
+    voucher_upload_path,
+)
+
+# pylint: disable=redefined-outer-name
 
 pytestmark = [pytest.mark.django_db]
+
+
+@pytest.fixture
+def mock_logger(mocker):
+    """ Mock the log """
+    yield mocker.patch("voucher.utils.log")
 
 
 def setup_pdf_parsing(settings):
@@ -90,7 +103,6 @@ def test_pdf_parsing_international(settings):
         assert values == expected_values
 
 
-@patch("voucher.utils.log")
 def test_parse_not_pdf(mock_logger, settings):
     """Test that pdf parsing correctly throws an error when handed something that isn't a PDF"""
     setup_pdf_parsing(settings)
@@ -112,16 +124,17 @@ def test_get_current_voucher(user):
     assert get_current_voucher(user) == voucher1
 
 
-# Test match_courses_to_voucher
-def test_no_course_matches(voucher_and_user):
+def test_no_course_matches(mock_logger, voucher_and_user):
     """
     Test match_courses_to_voucher return an empty queryset on no course matches
     """
     voucher = voucher_and_user.voucher
     assert len(get_eligible_coupon_choices(voucher)) == 0
+    mock_logger.error.assert_called_once_with(
+        "Found no matching course runs for voucher %s", voucher.id
+    )
 
 
-@patch("voucher.utils.log")
 def test_partial_course_matches_without_coupons(
     mock_logger, voucher_and_partial_matches, settings
 ):
@@ -137,7 +150,6 @@ def test_partial_course_matches_without_coupons(
     )
 
 
-@patch("voucher.utils.log")
 def test_exact_course_match_without_coupon(
     mock_logger, voucher_and_exact_match, settings
 ):
@@ -188,3 +200,15 @@ def test_exact_course_match(voucher_and_exact_match_with_coupon, settings):
     product_id, coupon_id = json.loads(eligible_coupon[0])
     assert product_id == context.product.id
     assert coupon_id == context.coupon_version.coupon.id
+
+
+def test_voucher_upload_path(voucher_and_exact_match_with_coupon):
+    """voucher_upload_path returns a unique filename based on original name"""
+    voucher = voucher_and_exact_match_with_coupon.voucher
+    assert (
+        re.match(
+            r"vouchers\/\w{8}\-\w{4}\-\w{4}\-\w{4}-\w{12}_%s" % voucher.pdf.name,
+            voucher_upload_path(voucher, voucher.pdf.name),
+        )
+        is not None
+    )

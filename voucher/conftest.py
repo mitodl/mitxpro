@@ -43,6 +43,7 @@ def upload_voucher_form():
                 "course_id_input": fake.password(),
                 "course_title_input": factory.fuzzy.FuzzyText(prefix="Course ").fuzz(),
                 "employee_name": fake.name(),
+                "pdf": fake.file_name(),
             }
         }
     )

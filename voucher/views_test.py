@@ -3,16 +3,24 @@
 Test voucher views.py
 """
 import json
-from unittest.mock import patch
 
 from django.urls import reverse
 import pytest
 
 from ecommerce.factories import CouponVersionFactory, CouponEligibilityFactory
+from users.factories import UserFactory
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
 
+# pylint: disable=redefined-outer-name
+
 pytestmark = [pytest.mark.django_db]
+
+
+@pytest.fixture
+def mock_logger(mocker):
+    """ Mock the log """
+    yield mocker.patch("voucher.views.log")
 
 
 def test_anonymous_user_permissions(client):
@@ -50,7 +58,7 @@ def test_upload_voucher_form_view_voucher_create(
 
 
 def test_upload_voucher_form_view_parse_error(
-    upload_voucher_form_view, upload_voucher_form_with_parse_error
+    mock_logger, upload_voucher_form_view, upload_voucher_form_with_parse_error
 ):
     """
     Test UploadVoucherFormView POST redirects to resubmit if there is a parsing error
@@ -60,6 +68,10 @@ def test_upload_voucher_form_view_parse_error(
     )
     assert response.status_code == 302
     assert response.url == reverse("voucher:resubmit")
+    username = upload_voucher_form_view.request.user.username
+    mock_logger.error.assert_any_call(
+        "Voucher uploaded by %s could not be parsed", username
+    )
 
 
 def test_upload_voucher_form_view_voucher_update(
@@ -69,17 +81,42 @@ def test_upload_voucher_form_view_voucher_update(
     Test UploadVoucherFormView POST retrieves a voucher if one already exists matching the given voucher values
     """
     values = upload_voucher_form.cleaned_data["voucher"]
+    values["pdf"] = "/vouchers/another_name.pdf"
     voucher = Voucher.objects.create(
         **values, user=upload_voucher_form_view.request.user
     )
     response = upload_voucher_form_view.form_valid(upload_voucher_form)
     assert response.status_code == 302
     assert response.url == reverse("voucher:enroll")
+
+    values.pop("pdf")
     assert Voucher.objects.filter(**values).count() == 1
     assert Voucher.objects.get(**values).uploaded > voucher.uploaded
 
 
-# Test EnrollView routing
+def test_upload_voucher_form_view_voucher_other_user(
+    mock_logger, upload_voucher_form_view, upload_voucher_form
+):
+    """
+    Test UploadVoucherFormView POST does not allow an upload of the same voucher from another user
+    """
+    values = upload_voucher_form.cleaned_data["voucher"]
+    new_user = UserFactory.create()
+    voucher = Voucher.objects.create(**values, user=new_user)
+    response = upload_voucher_form_view.form_valid(upload_voucher_form)
+    assert response.status_code == 302
+    assert response.url == reverse("voucher:resubmit")
+
+    values.pop("pdf")
+    assert Voucher.objects.filter(**values).count() == 1
+    assert Voucher.objects.get(**values).uploaded == voucher.uploaded
+    mock_logger.error.assert_called_once_with(
+        "%s uploaded a voucher previously uploaded by %s",
+        upload_voucher_form_view.request.user.username,
+        new_user.username,
+    )
+
+
 def test_get_enroll_view_with_no_voucher(authenticated_client):
     """
     Test the EnrollView GET method when there is no current voucher for the user
@@ -154,7 +191,6 @@ def test_post_enroll_view_with_coupon_choice(voucher_and_exact_match_with_coupon
     assert Voucher.objects.get(id=voucher.id).coupon == coupon_version.coupon
 
 
-@patch("voucher.views.log")
 def test_post_enroll_view_with_stolen_only_coupon(
     mock_logger, voucher_and_exact_match_with_coupon, settings
 ):
