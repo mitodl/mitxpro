@@ -1,0 +1,60 @@
+.voucher-container {
+  max-width: 800px;
+  margin: auto;
+  font-family: Rajdhani;
+  font-size: 16px;
+
+  .upload-gray {
+    color: $light-gray;
+  }
+
+  a {
+    color: $deep-sky-blue;
+  }
+
+  .voucher-card {
+
+    padding-left: 137px;
+    padding-right: 137px;
+
+    @include media-breakpoint-down(sm)  {
+      padding: 20px;
+    }
+
+    @include media-breakpoint-down(xs)  {
+      padding: 15px 0;
+    }
+
+    background-color: $very-light-gray;
+    border-width: 7px 0 0 0;
+    border-style: solid;
+    border-image-source: linear-gradient(90deg, #43bebc, #ebbb47);
+    border-image-slice: 1;
+    padding: 40px;
+  }
+
+  .voucher-form {
+    .form-control {
+      font-size: inherit;
+      font-weight: inherit;
+    }
+
+    .form-error {
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    .errored {
+      border: 2px solid $red;
+    }
+
+    label {
+      font-weight: 600;
+    }
+
+    .submit-row {
+      margin-top: 25px;
+    }
+  }
+
+}

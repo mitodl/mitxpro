@@ -4,27 +4,24 @@
 {% block title %}{{ site_name }} | Boeing Course Enroll{% endblock %}
 
 {% block content %}
-  <div class="container voucher-container">
-    <h1>Boeing employee enrollment page</h1>
-    {% if eligible_choices|length == 1 %}
-      <p>You're eligible for the following course:</p>
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="hidden" name="coupon_version" value="{{ eligible_choices.0.0 }}">
-        <button type="submit">{{ eligible_choices.0.1 }}</button>
-      </form>
-    {% else %}
-      <p>You're eligible for the following courses:</p>
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <label for="coupon_version">Courses:</label>
-        <select name="coupon_version" id="coupon_version">
-          {% for choice in eligible_choices %}
-            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
-          {% endfor %}
-        </select>
-        <button type="submit">Redeem coupon</button>
-      </form>
-    {% endif %}
-  </div>
+    <div class="container voucher-container">
+        <h1>Boeing employee enrollment page</h1>
+        <div class="voucher-card">
+            <h2>Confirm Course</h2>
+            <hr/>
+            <p>Please confirm this is the course you are trying to enroll in::</p>
+            <form method="post" enctype="multipart/form-data" class="voucher-form ">
+                {% csrf_token %}
+                <select name="coupon_version" id="coupon_version">
+                    {% for choice in eligible_choices %}
+                        <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                    {% endfor %}
+                </select>
+                <hr/>
+                <div class="row justify-content-end">
+                    <button type="submit" class="btn btn-primary btn-light-blue">NEXT</button>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock content %}
