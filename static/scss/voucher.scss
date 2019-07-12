@@ -14,9 +14,6 @@
 
   .voucher-card {
 
-    padding-left: 137px;
-    padding-right: 137px;
-
     @include media-breakpoint-down(sm)  {
       padding: 20px;
     }
@@ -30,13 +27,20 @@
     border-style: solid;
     border-image-source: linear-gradient(90deg, #43bebc, #ebbb47);
     border-image-slice: 1;
-    padding: 40px;
+    padding: 40px 137px;
   }
 
   .voucher-form {
     .form-control {
       font-size: inherit;
       font-weight: inherit;
+    }
+
+
+
+    select {
+      background-color: $white;
+      min-width: 75%;
     }
 
     .form-error {
