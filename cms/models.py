@@ -14,7 +14,6 @@ from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import (
     FieldPanel,
     InlinePanel,
-    MultiFieldPanel,
     StreamFieldPanel,
 )
 from wagtail.core import blocks
