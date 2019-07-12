@@ -9,7 +9,11 @@
           </div>
           <div class="cover-image">
             <div class="cover-image-frame">
-              <img src="/static/images/mit-dome.png" alt="Preview image">
+              {% if courseware_page.thumbnail_image %}
+                {% image courseware_page.thumbnail_image fill-275x155 %}
+              {% else %}
+                <img src="{% static default_image_path %}" alt="Preview image">
+              {% endif %}
             </div>
           </div>
           <div class="top-level-details">
