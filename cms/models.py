@@ -11,12 +11,7 @@ from django.utils.text import slugify
 from django.http.response import Http404
 from django.shortcuts import reverse
 from modelcluster.fields import ParentalKey
-from wagtail.admin.edit_handlers import (
-    FieldPanel,
-    InlinePanel,
-    MultiFieldPanel,
-    StreamFieldPanel,
-)
+from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
 from wagtail.core import blocks
 from wagtail.core.blocks import PageChooserBlock, RawHTMLBlock
 from wagtail.core.fields import RichTextField, StreamField
@@ -1009,14 +1004,6 @@ class FrequentlyAskedQuestion(Orderable):
     faqs_page = ParentalKey(FrequentlyAskedQuestionPage, related_name="faqs", null=True)
     question = models.TextField()
     answer = RichTextField()
-
-    content_panels = [
-        MultiFieldPanel(
-            [FieldPanel("question"), FieldPanel("answer")],
-            heading="Frequently Asked Questions",
-            classname="collapsible",
-        )
-    ]
 
 
 class ResourcePage(Page):
