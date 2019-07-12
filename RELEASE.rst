@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.12.3
+--------------
+
+- Fix typo with command arg
+- Find old vouchers, ensure unique pdf names, add more error logging (#814)
+- #792 Featured Product Card Thumbnail Fix
+- #776 Allow Mixed Case Section Heads and Subheads
+
 Version 0.12.2 (Released July 12, 2019)
 --------------
 
