@@ -1010,14 +1010,6 @@ class FrequentlyAskedQuestion(Orderable):
     question = models.TextField()
     answer = RichTextField()
 
-    content_panels = [
-        MultiFieldPanel(
-            [FieldPanel("question"), FieldPanel("answer")],
-            heading="Frequently Asked Questions",
-            classname="collapsible",
-        )
-    ]
-
 
 class ResourcePage(Page):
     """
