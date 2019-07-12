@@ -32,8 +32,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Run the command"""
 
-        if options["id"]:
-            user = User.objects.get(id=options["id"])
+        if options["user_id"]:
+            user = User.objects.get(id=options["user_id"])
         elif options["username"]:
             user = User.objects.get(username=options["username"])
         elif options["email"]:
