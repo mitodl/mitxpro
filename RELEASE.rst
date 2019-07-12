@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.12.2 (Released July 12, 2019)
+--------------
+
+- Fixed seed data bugs, added products, added deletion command
+- Vouchers for django admin (#813)
+- Added command to decrypt exports inquiry
+- Automate environment variables
+- set the background color of menu
+- fix color of navigational arrows
+- minor scss fixes
+
 Version 0.12.1 (Released July 11, 2019)
 --------------
 
