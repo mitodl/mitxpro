@@ -13,6 +13,33 @@ from mitxpro.utils import has_equal_properties
 User = get_user_model()
 
 
+def enrollment_summary(enrollment):
+    """
+    Returns a string representation of an enrollment for command output
+
+    Args:
+        enrollment (ProgramEnrollment or CourseRunEnrollment): The enrollment
+    Returns:
+        str: A string representation of an enrollment
+    """
+    if isinstance(enrollment, ProgramEnrollment):
+        return "<ProgramEnrollment for {}>".format(enrollment.program.text_id)
+    else:
+        return "<CourseRunEnrollment for {}>".format(enrollment.run.text_id)
+
+
+def enrollment_summaries(enrollments):
+    """
+    Returns a list of string representations of enrollments for command output
+
+    Args:
+        enrollments (iterable of ProgramEnrollment or CourseRunEnrollment): The enrollments
+    Returns:
+        list of str: A list of string representations of enrollments
+    """
+    return list(map(enrollment_summary, enrollments))
+
+
 def fetch_user(user_property):
     """
     Attempts to fetch a user based on several properties

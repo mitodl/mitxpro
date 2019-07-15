@@ -2,7 +2,11 @@
 from django.core.management.base import CommandError
 from django.contrib.auth import get_user_model
 
-from courses.management.utils import EnrollmentChangeCommand, fetch_user
+from courses.management.utils import (
+    EnrollmentChangeCommand,
+    fetch_user,
+    enrollment_summaries,
+)
 from courses.constants import ENROLL_CHANGE_STATUS_TRANSFERRED
 from courses.models import CourseRunEnrollment
 
@@ -19,11 +23,13 @@ class Command(EnrollmentChangeCommand):
             "--from-user",
             type=str,
             help="The id, email, or username of the enrolled User",
+            required=True,
         )
         parser.add_argument(
             "--to-user",
             type=str,
             help="The id, email, or username of the User to whom the enrollment will be transferred",
+            required=True,
         )
         group = parser.add_mutually_exclusive_group()
         group.add_argument(
@@ -79,7 +85,9 @@ class Command(EnrollmentChangeCommand):
                     from_user.email,
                     to_user.username,
                     to_user.email,
-                    list(filter(bool, [new_program_enrollment] + new_run_enrollments)),
+                    enrollment_summaries(
+                        filter(bool, [new_program_enrollment] + new_run_enrollments)
+                    ),
                 )
             )
         )
