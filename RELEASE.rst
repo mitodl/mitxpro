@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.12.3
+Version 0.12.3 (Released July 15, 2019)
 --------------
 
 - Fix typo with command arg
