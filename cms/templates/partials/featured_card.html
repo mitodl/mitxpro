@@ -23,11 +23,15 @@
               </a>
             </h3>
             <ul>
-              {% firstof courseware_page.product.current_price courseware_page.product.first_unexpired_run.current_price as price %}
-              {% if price %}
+              {% if courseware_page.product.current_price %}
               <li>
-                <strong>Price:</strong>
-                ${{ price|floatformat:"0"|intcomma }}
+                  <strong>Price:</strong>
+                  ${{ courseware_page.product.current_price|floatformat:"0"|intcomma }}
+              </li>
+              {% elif courseware_page.is_course_page and courseware_page.product.first_unexpired_run.current_price %}
+              <li>
+                  <strong>Price:</strong>
+                  ${{ courseware_page.product.first_unexpired_run.current_price|floatformat:"0"|intcomma }}
               </li>
               {% endif %}
               {% if object_type == "program" %}
