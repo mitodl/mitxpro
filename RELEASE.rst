@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.13.0
+--------------
+
+- Fixed enrollment commands - set order status, changed output (#794)
+- fix comparison error when there is not start_data for course run (#836)
+- Upgrade Django to 2.2, wagtail to 2.5.1 (#785)
+- Used ImageChooserPanel
+
 Version 0.12.3 (Released July 15, 2019)
 --------------
 
