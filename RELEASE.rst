@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.13.0
+Version 0.13.0 (Released July 15, 2019)
 --------------
 
 - Fixed enrollment commands - set order status, changed output (#794)
