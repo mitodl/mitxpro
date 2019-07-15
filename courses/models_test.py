@@ -234,7 +234,7 @@ def test_course_next_run_date():
     next_run_date should return the date of the CourseRun with the nearest future start date
     """
     course = CourseFactory.create()
-    CourseRunFactory.create_batch(2, course=course, past_start=True)
+    CourseRunFactory.create_batch(2, course=course, past_start=True, live=True)
     assert course.next_run_date is None
 
     now = now_in_utc()

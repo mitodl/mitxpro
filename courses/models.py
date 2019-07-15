@@ -205,7 +205,9 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             (
                 course_run.start_date
                 for course_run in self.courseruns.all()
-                if course_run.live and course_run.start_date > now
+                if course_run.live
+                and course_run.start_date
+                and course_run.start_date > now
             ),
             default=None,
         )
