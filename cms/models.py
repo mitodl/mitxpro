@@ -18,6 +18,7 @@ from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Orderable, Page
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.models import Image
+from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
@@ -762,7 +763,7 @@ class ForTeamsPage(CourseProgramChildPage):
         FieldPanel("action_url"),
         FieldPanel("dark_theme"),
         FieldPanel("switch_layout"),
-        FieldPanel("image"),
+        ImageChooserPanel("image"),
     ]
 
 
@@ -877,7 +878,7 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
 
     content_panels = [
         StreamFieldPanel("content"),
-        FieldPanel("image"),
+        ImageChooserPanel("image"),
         FieldPanel("switch_layout"),
     ]
 
