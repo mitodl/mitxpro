@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.13.2
+--------------
+
+- Update voucher/templates/enroll.html
+- Adjust style and fix typos
+- Change voucher page style
+
 Version 0.13.1 (Released July 15, 2019)
 --------------
 
