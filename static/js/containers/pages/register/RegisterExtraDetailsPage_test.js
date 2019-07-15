@@ -2,48 +2,62 @@
 import { assert } from "chai"
 import sinon from "sinon"
 
-import RegisterDetailsPage, {
-  RegisterDetailsPage as InnerRegisterDetailsPage
-} from "./RegisterDetailsPage"
+import RegisterExtraDetailsPage, {
+  RegisterExtraDetailsPage as InnerRegisterExtraDetailsPage
+} from "./RegisterExtraDetailsPage"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import {
-  STATE_REGISTER_EXTRA_DETAILS,
+  STATE_SUCCESS,
   STATE_USER_BLOCKED,
   STATE_ERROR,
   STATE_ERROR_TEMPORARY,
-  FLOW_REGISTER
+  STATE_REGISTER_EXTRA_DETAILS
 } from "../../../lib/auth"
 import { routes } from "../../../lib/urls"
 import { makeRegisterAuthResponse } from "../../../factories/auth"
 
-describe("RegisterDetailsPage", () => {
-  const detailsData = {
-    name:          "Sally",
-    password:      "password1",
-    legal_address: {
-      address: "main st"
+describe("RegisterExtraDetailsPage", () => {
+  const profileData = {
+    profile: {
+      gender:     "N/A",
+      birth_year: "2000",
+      company:    "Employer",
+      job_title:  "Employee"
     }
   }
-  const partialToken = "partialTokenTestValue"
-  const body = {
-    flow:          FLOW_REGISTER,
-    partial_token: partialToken,
-    ...detailsData
-  }
-  let helper, renderPage, setSubmittingStub, setErrorsStub
+
+  let helper,
+    renderPage,
+    setSubmittingStub,
+    setErrorsStub,
+    body,
+    authResponse,
+    partialToken
 
   beforeEach(() => {
     helper = new IntegrationTestHelper()
+    authResponse = makeRegisterAuthResponse({
+      state: STATE_REGISTER_EXTRA_DETAILS
+    })
+
+    partialToken = authResponse.partial_token
+
+    body = {
+      flow:          authResponse.flow,
+      partial_token: partialToken,
+      ...profileData.profile
+    }
 
     setSubmittingStub = helper.sandbox.stub()
     setErrorsStub = helper.sandbox.stub()
 
     renderPage = helper.configureHOCRenderer(
-      RegisterDetailsPage,
-      InnerRegisterDetailsPage,
+      RegisterExtraDetailsPage,
+      InnerRegisterExtraDetailsPage,
       {},
       {
         location: {
+          // $FlowFixMe: partialToken is not undefined
           search: `?partial_token=${partialToken}`
         }
       }
@@ -57,7 +71,7 @@ describe("RegisterDetailsPage", () => {
   it("displays a form", async () => {
     const { inner } = await renderPage()
 
-    assert.ok(inner.find("RegisterDetailsForm").exists())
+    assert.ok(inner.find("RegisterExtraDetailsForm").exists())
   })
 
   it("handles onSubmit for an error response", async () => {
@@ -74,16 +88,16 @@ describe("RegisterDetailsPage", () => {
       })
     })
 
-    const onSubmit = inner.find("RegisterDetailsForm").prop("onSubmit")
+    const onSubmit = inner.find("RegisterExtraDetailsForm").prop("onSubmit")
 
-    await onSubmit(detailsData, {
+    await onSubmit(profileData, {
       setSubmitting: setSubmittingStub,
       setErrors:     setErrorsStub
     })
 
     sinon.assert.calledWith(
       helper.handleRequestStub,
-      "/api/register/details/",
+      "/api/register/extra/",
       "POST",
       { body, headers: undefined, credentials: undefined }
     )
@@ -93,16 +107,39 @@ describe("RegisterDetailsPage", () => {
     sinon.assert.calledWith(setSubmittingStub, false)
   })
 
+  it(`redirects to /dashboard when it receives auth state ${STATE_SUCCESS}`, async () => {
+    const { inner } = await renderPage()
+
+    helper.handleRequestStub.returns({
+      body: makeRegisterAuthResponse({
+        state:         STATE_SUCCESS,
+        partial_token: undefined
+      })
+    })
+
+    const onSubmit = inner.find("RegisterExtraDetailsForm").prop("onSubmit")
+
+    await onSubmit(profileData, {
+      setSubmitting: setSubmittingStub,
+      setErrors:     setErrorsStub
+    })
+
+    sinon.assert.calledWith(
+      helper.handleRequestStub,
+      "/api/register/extra/",
+      "POST",
+      { body, headers: undefined, credentials: undefined }
+    )
+    assert.equal(window.location.href, `http://fake${routes.dashboard}`)
+
+    sinon.assert.notCalled(setErrorsStub)
+    sinon.assert.calledWith(setSubmittingStub, false)
+  })
+
   //
   ;[
     [STATE_ERROR_TEMPORARY, [], routes.register.error, ""],
     [STATE_ERROR, [], routes.register.error, ""], // cover the case with an error but no  messages
-    [
-      STATE_REGISTER_EXTRA_DETAILS,
-      [],
-      routes.register.extra,
-      "?partial_token=new_partial_token"
-    ],
     [
       STATE_USER_BLOCKED,
       ["error_code"],
@@ -118,25 +155,24 @@ describe("RegisterDetailsPage", () => {
         body: makeRegisterAuthResponse({
           state,
           errors,
-          partial_token: "new_partial_token"
+          partial_token: undefined
         })
       })
 
-      const onSubmit = inner.find("RegisterDetailsForm").prop("onSubmit")
+      const onSubmit = inner.find("RegisterExtraDetailsForm").prop("onSubmit")
 
-      await onSubmit(detailsData, {
+      await onSubmit(profileData, {
         setSubmitting: setSubmittingStub,
         setErrors:     setErrorsStub
       })
 
       sinon.assert.calledWith(
         helper.handleRequestStub,
-        "/api/register/details/",
+        "/api/register/extra/",
         "POST",
         { body, headers: undefined, credentials: undefined }
       )
 
-      assert.lengthOf(helper.browserHistory, 2)
       assert.include(helper.browserHistory.location, {
         pathname,
         search

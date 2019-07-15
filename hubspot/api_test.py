@@ -71,6 +71,20 @@ def test_send_hubspot_request(mocker, request_method, endpoint, api_url, expecte
         mock_request.assert_called_once_with(url=url, json=body)
 
 
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        ({"prop": 1, "blank": None}, {"prop": 1, "blank": ""}),
+        ({"prop": 1}, {"prop": 1}),
+        ({"blank": None}, {"blank": ""}),
+        ({}, {}),
+    ],
+)
+def test_sanitize_properties(value, expected):
+    """Test that sanitize_properties replaces Nones with empty strings"""
+    assert api.sanitize_properties(value) == expected
+
+
 def test_make_sync_message():
     """Test make_sync_message produces a properly formatted sync-message"""
     object_id = fake.pyint()
@@ -101,7 +115,7 @@ def test_make_contact_sync_message(user):
             "integratorObjectId": "{}-{}".format(settings.HUBSPOT_ID_PREFIX, user.id),
             "action": "UPSERT",
             "changeOccurredTimestamp": any_instance_of(int),
-            "propertyNameToValues": serialized_user,
+            "propertyNameToValues": api.sanitize_properties(serialized_user),
         }
     ]
 

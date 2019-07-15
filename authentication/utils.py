@@ -3,7 +3,7 @@ from social_core.utils import get_strategy
 from social_django.utils import STORAGE
 
 
-class SocialAuthState:
+class SocialAuthState:  # pylint: disable=too-many-instance-attributes
     """Social auth state"""
 
     FLOW_REGISTER = "register"
@@ -20,6 +20,7 @@ class SocialAuthState:
     STATE_REGISTER_CONFIRM = "register/confirm"
     STATE_REGISTER_DETAILS = "register/details"
     STATE_REGISTER_EXTRA_DETAILS = "register/extra"
+    STATE_REGISTER_REQUIRED = "register/required"
 
     # end states
     STATE_SUCCESS = "success"
@@ -37,6 +38,7 @@ class SocialAuthState:
         partial=None,
         flow=None,
         errors=None,
+        field_errors=None,
         redirect_url=None,
         user=None,
     ):  # pylint: disable=too-many-arguments
@@ -45,6 +47,7 @@ class SocialAuthState:
         self.flow = flow
         self.provider = provider
         self.errors = errors or []
+        self.field_errors = field_errors or {}
         self.redirect_url = redirect_url
         self.user = user
 

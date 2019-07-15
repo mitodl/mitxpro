@@ -11,7 +11,6 @@ from authentication.exceptions import (
     RequirePasswordException,
     RequirePasswordAndPersonalInfoException,
     RequireProfileException,
-    RequireUserException,
     RequireRegistrationException,
     UnexpectedExistingUserException,
 )
@@ -125,16 +124,12 @@ def create_profile(
     Raises:
         RequireProfileException: if the profile data is missing or invalid
     """
-    if backend.name != EmailAuth.name or flow != SocialAuthState.FLOW_REGISTER:
+    if backend.name != EmailAuth.name or user.profile.is_complete:
         return {}
 
-    if user is None:
-        raise RequireUserException(backend, current_partial)
-
     data = strategy.request_data().copy()
-    data["user"] = user.id
 
-    serializer = ProfileSerializer(data=data)
+    serializer = ProfileSerializer(instance=user.profile, data=data)
     if not serializer.is_valid():
         raise RequireProfileException(
             backend, current_partial, errors=serializer.errors

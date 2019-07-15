@@ -15,7 +15,6 @@ from authentication.exceptions import (
     RequirePasswordAndPersonalInfoException,
     UnexpectedExistingUserException,
     RequireProfileException,
-    RequireUserException,
 )
 from authentication.utils import SocialAuthState
 from compliance.constants import RESULT_SUCCESS, RESULT_DENIED, RESULT_UNKNOWN
@@ -308,16 +307,12 @@ def test_create_user_via_email_existing_user_raises(
 @pytest.mark.django_db
 @pytest.mark.parametrize("hubspot_key", [None, "fake-key"])
 def test_create_profile(
-    mock_email_backend,
-    mock_create_profile_strategy,
-    user,
-    hubspot_key,
-    settings,
-    mocker,
+    mock_email_backend, mock_create_profile_strategy, hubspot_key, settings, mocker
 ):  # pylint:disable=too-many-arguments
     """
     Tests that create_profile creates a profile
     """
+    user = UserFactory.create(profile__incomplete=True)
     settings.HUBSPOT_API_KEY = hubspot_key
     mock_user_sync = mocker.patch("hubspot.tasks.sync_contact_with_hubspot.delay")
     response = user_actions.create_profile(
@@ -341,8 +336,9 @@ def test_create_profile(
 
 
 @pytest.mark.django_db
-def test_create_profile_no_data(mocker, mock_email_backend, user):
+def test_create_profile_no_data(mocker, mock_email_backend):
     """Tests that create_profile raises an error if no data for name and password provided"""
+    user = UserFactory.create(profile__incomplete=True)
     mock_strategy = mocker.Mock()
     mock_strategy.request_data.return_value = {}
     with pytest.raises(RequireProfileException):
@@ -350,20 +346,6 @@ def test_create_profile_no_data(mocker, mock_email_backend, user):
             mock_strategy,
             mock_email_backend,
             user=user,
-            pipeline_index=0,
-            flow=SocialAuthState.FLOW_REGISTER,
-        )
-
-
-@pytest.mark.django_db
-def test_create_profile_no_user_raises(
-    mock_email_backend, mock_create_profile_strategy
-):
-    """Tests that create_profile raises an error if user is None in the pipeline"""
-    with pytest.raises(RequireUserException):
-        user_actions.create_profile(
-            mock_create_profile_strategy,
-            mock_email_backend,
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,
         )

@@ -6,13 +6,17 @@ import { mutateAsync } from "redux-query"
 
 import auth from "../../../lib/queries/auth"
 import { routes, getNextParam } from "../../../lib/urls"
-import { STATE_LOGIN_PASSWORD } from "../../../lib/auth"
+import {
+  STATE_ERROR,
+  STATE_REGISTER_REQUIRED,
+  handleAuthResponse
+} from "../../../lib/auth"
 
 import EmailForm from "../../../components/forms/EmailForm"
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
-import type { AuthResponse } from "../../../flow/authTypes"
+import type { AuthResponse, EmailFormValues } from "../../../flow/authTypes"
 import { Link } from "react-router-dom"
 
 type Props = {
@@ -21,27 +25,28 @@ type Props = {
   loginEmail: (email: string, next: ?string) => Promise<Response<AuthResponse>>
 }
 
-class LoginEmailPage extends React.Component<Props> {
-  async onSubmit({ email }, { setSubmitting, setErrors }) {
+export class LoginEmailPage extends React.Component<Props> {
+  async onSubmit(
+    { email }: EmailFormValues,
+    { setSubmitting, setErrors }: any
+  ) {
     const { loginEmail, location, history } = this.props
     const nextUrl = getNextParam(location.search)
 
-    /* eslint-disable camelcase */
     try {
-      const result = await loginEmail(email, nextUrl)
-      const { state, errors } = result.transformed.auth
+      const { body } = await loginEmail(email, nextUrl)
 
-      if (state === STATE_LOGIN_PASSWORD) {
-        history.push(routes.login.password)
-      } else if (errors.length > 0) {
-        setErrors({
-          email: errors[0]
-        })
-      }
+      handleAuthResponse(history, body, {
+        // eslint-disable-next-line camelcase
+        [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
+          setErrors(field_errors),
+        // eslint-disable-next-line camelcase
+        [STATE_REGISTER_REQUIRED]: ({ field_errors }: AuthResponse) =>
+          setErrors(field_errors)
+      })
     } finally {
       setSubmitting(false)
     }
-    /* eslint-enable camelcase */
   }
 
   render() {

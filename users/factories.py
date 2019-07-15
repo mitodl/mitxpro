@@ -1,7 +1,7 @@
 """Factory for Users"""
 import string
 
-from factory import Faker, SubFactory, RelatedFactory, fuzzy
+from factory import Faker, Trait, SubFactory, RelatedFactory, fuzzy
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText
 from social_django.models import UserSocialAuth
@@ -18,6 +18,7 @@ class UserFactory(DjangoModelFactory):
     is_active = True
 
     legal_address = RelatedFactory("users.factories.LegalAddressFactory", "user")
+    profile = RelatedFactory("users.factories.ProfileFactory", "user")
 
     class Meta:
         model = User
@@ -65,3 +66,6 @@ class ProfileFactory(DjangoModelFactory):
 
     class Meta:
         model = Profile
+
+    class Params:
+        incomplete = Trait(job_title="", company="", gender="", birth_year=None)

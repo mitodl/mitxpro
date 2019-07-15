@@ -7,7 +7,7 @@ import { Link } from "react-router-dom"
 import { mutateAsync, requestAsync } from "redux-query"
 import { createStructuredSelector } from "reselect"
 
-import { STATE_SUCCESS } from "../../../lib/auth"
+import { STATE_ERROR, handleAuthResponse } from "../../../lib/auth"
 import auth from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
@@ -17,11 +17,7 @@ import RegisterExtraDetailsForm from "../../../components/forms/RegisterExtraDet
 
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
-import type {
-  AuthResponseRaw,
-  ProfileForm,
-  User
-} from "../../../flow/authTypes"
+import type { AuthResponse, ProfileForm, User } from "../../../flow/authTypes"
 
 type RegisterProps = {|
   location: Location,
@@ -33,7 +29,7 @@ type DispatchProps = {|
   registerExtraDetails: (
     profileData: ProfileForm,
     partialToken: string
-  ) => Promise<Response<AuthResponseRaw>>,
+  ) => Promise<Response<AuthResponse>>,
   getCurrentUser: () => Promise<Response<User>>
 |}
 
@@ -42,29 +38,22 @@ type Props = {|
   ...DispatchProps
 |}
 
-class RegisterExtraDetailsPage extends React.Component<Props> {
-  async onSubmit(profileData, { setSubmitting, setErrors }) {
+export class RegisterExtraDetailsPage extends React.Component<Props> {
+  async onSubmit(profileData: ProfileForm, { setSubmitting, setErrors }: any) {
     const {
+      history,
       registerExtraDetails,
       params: { partialToken }
     } = this.props
 
-    /* eslint-disable camelcase */
     try {
-      const {
-        body: { state, errors, redirect_url }
-      }: { body: AuthResponseRaw } = await registerExtraDetails(
-        profileData,
-        partialToken
-      )
+      const { body } = await registerExtraDetails(profileData, partialToken)
 
-      if (state === STATE_SUCCESS) {
-        window.location.href = redirect_url || routes.dashboard
-      } else if (errors.length > 0) {
-        setErrors({
-          email: errors[0]
-        })
-      }
+      handleAuthResponse(history, body, {
+        // eslint-disable-next-line camelcase
+        [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
+          setErrors(field_errors)
+      })
     } finally {
       setSubmitting(false)
     }

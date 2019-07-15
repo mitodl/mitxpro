@@ -1,42 +1,25 @@
 // @flow
 import { nthArg } from "ramda"
+
 import { FLOW_LOGIN, FLOW_REGISTER } from "../auth"
 
 import type {
   AuthResponse,
-  AuthResponseRaw,
   LegalAddress,
   ProfileForm
 } from "../../flow/authTypes"
 
 export const authSelector = (state: any) => state.entities.auth
 
-const transformAuthResult = (
-  result: AuthResponseRaw
-): { auth: AuthResponse } => ({
-  auth: {
-    partialToken: result.partial_token,
-    flow:         result.flow,
-    state:        result.state,
-    errors:       result.errors,
-    redirectUrl:  result.redirect_url,
-    extraData:    {
-      name: result.extra_data.name
-    }
-  }
-})
-
-// replace the previous state with the next state without merging
+// uses the next piece of state which is the second argument
 const nextState = nthArg(1)
 
-const updateAuthResult = {
-  auth: nextState
-}
-
 const DEFAULT_OPTIONS = {
-  transform: transformAuthResult,
-  update:    updateAuthResult,
-  options:   {
+  transform: (auth: AuthResponse) => ({ auth }),
+  update:    {
+    auth: nextState
+  },
+  options: {
     method: "POST"
   }
 }
