@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.13.1
+Version 0.13.1 (Released July 15, 2019)
 --------------
 
 - Change URLs for vouchers to /boeing (#822)
