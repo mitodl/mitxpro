@@ -34,9 +34,9 @@ describe("RegisterConfirmPage", () => {
     const { inner, store } = await renderPage({
       entities: {
         auth: {
-          state:        STATE_REGISTER_DETAILS,
-          partialToken: token,
-          extraData:    {
+          state:         STATE_REGISTER_DETAILS,
+          partial_token: token,
+          extra_data:    {
             name: "name"
           }
         }

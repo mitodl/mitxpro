@@ -315,14 +315,15 @@ SOCIAL_AUTH_PIPELINE = (
     "authentication.pipeline.user.create_user_via_email",
     # verify the user against export compliance
     "authentication.pipeline.compliance.verify_exports_compliance",
-    # Create a profile
-    "authentication.pipeline.user.create_profile",
     # Create the record that associates the social account with the user.
     "social_core.pipeline.social_auth.associate_user",
     # activate the user
     "authentication.pipeline.user.activate_user",
     # create the user's edx user and auth
     "authentication.pipeline.user.create_courseware_user",
+    # Create a profile
+    # NOTE: must be after all user records are created and the user is activated
+    "authentication.pipeline.user.create_profile",
     # Populate the extra_data field in the social record with the values
     # specified by settings (and the default ones like access_token, etc).
     "social_core.pipeline.social_auth.load_extra_data",

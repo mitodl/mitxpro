@@ -7,10 +7,11 @@ import { createStructuredSelector } from "reselect"
 
 import { addUserNotification } from "../../../actions"
 import queries from "../../../lib/queries"
-import { routes } from "../../../lib/urls"
 import {
+  STATE_ERROR,
   STATE_REGISTER_CONFIRM_SENT,
-  STATE_LOGIN_PASSWORD
+  STATE_LOGIN_PASSWORD,
+  handleAuthResponse
 } from "../../../lib/auth"
 import { qsNextSelector } from "../../../lib/selectors"
 import { ALERT_TYPE_TEXT } from "../../../constants"
@@ -52,36 +53,34 @@ export class RegisterEmailPage extends React.Component<Props> {
     } = this.props
 
     try {
-      const {
-        body: { state, errors }
-      }: { body: AuthResponse } = await registerEmail(email, recaptcha, next)
+      const { body } = await registerEmail(email, recaptcha, next)
 
-      if (state === STATE_REGISTER_CONFIRM_SENT) {
-        addUserNotification({
-          "email-sent": {
-            type:  ALERT_TYPE_TEXT,
-            props: {
-              text: emailNotificationText(email)
+      handleAuthResponse(history, body, {
+        [STATE_REGISTER_CONFIRM_SENT]: () => {
+          addUserNotification({
+            "email-sent": {
+              type:  ALERT_TYPE_TEXT,
+              props: {
+                text: emailNotificationText(email)
+              }
             }
-          }
-        })
-        history.push(routes.login.begin)
-      } else if (state === STATE_LOGIN_PASSWORD) {
-        addUserNotification({
-          "account-exists": {
-            type:  ALERT_TYPE_TEXT,
-            color: "danger",
-            props: {
-              text: accountExistsNotificationText(email)
+          })
+        },
+        [STATE_LOGIN_PASSWORD]: () => {
+          addUserNotification({
+            "account-exists": {
+              type:  ALERT_TYPE_TEXT,
+              color: "danger",
+              props: {
+                text: accountExistsNotificationText(email)
+              }
             }
-          }
-        })
-        history.push(routes.login.password)
-      } else if (errors.length > 0) {
-        setErrors({
-          email: errors[0]
-        })
-      }
+          })
+        },
+        // eslint-disable-next-line camelcase
+        [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
+          setErrors(field_errors)
+      })
     } finally {
       setSubmitting(false)
     }

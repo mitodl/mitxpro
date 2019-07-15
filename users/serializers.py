@@ -136,7 +136,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = (
             "id",
-            "user",
             "birth_year",
             "gender",
             "company",
@@ -150,6 +149,12 @@ class ProfileSerializer(serializers.ModelSerializer):
             "updated_on",
         )
         read_only_fields = ("created_on", "updated_on")
+        extra_kwargs = {
+            "birth_year": {"allow_null": False, "required": True},
+            "gender": {"allow_blank": False, "required": True},
+            "company": {"allow_blank": False, "required": True},
+            "job_title": {"allow_blank": False, "required": True},
+        }
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -237,7 +242,9 @@ class UserSerializer(serializers.ModelSerializer):
                 profile = UserProfileSerializer(user.profile, data=profile_data)
                 if profile.is_valid():
                     profile.save()
+
         sync_hubspot_user(user)
+
         return user
 
     def update(self, instance, validated_data):

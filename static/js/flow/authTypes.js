@@ -16,29 +16,28 @@ export type AuthStates =
   | "register/confirm"
   | "register/details"
   | "register/extra"
+  | "register/required"
 
 export type AuthFlow = "register" | "login"
 
-export type AuthResponseRaw = {
-  partial_token: ?string,
-  flow:          AuthFlow,
-  state:         AuthStates,
-  errors:        Array<string>,
-  redirect_url:  ?string,
-  extra_data: {
-    name?: string
-  }
+export type AuthErrors = Array<string>
+
+export type AuthFieldErrors = {
+  [string]: string
+}
+
+export type AuthExtraData = {
+  name?: string
 }
 
 export type AuthResponse = {
-  partialToken: ?string,
+  partial_token: ?string,
   flow:          AuthFlow,
   state:         AuthStates,
-  errors:        Array<string>,
-  redirectUrl:  ?string,
-  extraData: {
-    name?: string
-  }
+  errors:        AuthErrors,
+  field_errors:  AuthFieldErrors,
+  redirect_url:  ?string,
+  extra_data:    AuthExtraData
 }
 
 export type LegalAddress = {
@@ -105,6 +104,14 @@ export type Country = {
 
 export type ProfileForm = {
   profile: Profile
+}
+
+export type EmailFormValues = {
+  email: string
+}
+
+export type PasswordFormValues = {
+  password: string
 }
 
 export type UserProfileForm = {

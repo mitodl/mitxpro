@@ -46,6 +46,7 @@ class SocialAuthSerializer(serializers.Serializer):
     provider = serializers.CharField(read_only=True)
     state = serializers.CharField(read_only=True)
     errors = serializers.ListField(read_only=True)
+    field_errors = serializers.DictField(read_only=True)
     redirect_url = serializers.CharField(read_only=True, default=None)
     extra_data = serializers.SerializerMethodField()
 
@@ -148,12 +149,15 @@ class SocialAuthSerializer(serializers.Serializer):
             result = SocialAuthState(
                 SocialAuthState.STATE_REGISTER_EXTRA_DETAILS, partial=exc.partial
             )
-
         except RequirePasswordAndPersonalInfoException as exc:
             result = SocialAuthState(
                 SocialAuthState.STATE_REGISTER_DETAILS, partial=exc.partial
             )
-
+        except UserTryAgainLaterException:
+            result = SocialAuthState(
+                SocialAuthState.STATE_ERROR_TEMPORARY,
+                errors=["Unable to register at this time, please try again later"],
+            )
         except AuthException as exc:
             log.exception("Received unexpected AuthException")
             result = SocialAuthState(SocialAuthState.STATE_ERROR, errors=[str(exc)])
@@ -205,7 +209,8 @@ class LoginEmailSerializer(SocialAuthSerializer):
             result = super()._authenticate(SocialAuthState.FLOW_LOGIN)
         except RequireRegistrationException:
             result = SocialAuthState(
-                SocialAuthState.STATE_ERROR, errors=["Couldn't find your account"]
+                SocialAuthState.STATE_REGISTER_REQUIRED,
+                field_errors={"email": "Couldn't find your account"},
             )
         except RequirePasswordException as exc:
             result = SocialAuthState(
@@ -289,15 +294,7 @@ class RegisterDetailsSerializer(SocialAuthSerializer):
 
     def create(self, validated_data):
         """Try to 'save' the request"""
-        try:
-            result = super()._authenticate(SocialAuthState.FLOW_REGISTER)
-        except UserTryAgainLaterException:
-            result = SocialAuthState(
-                SocialAuthState.STATE_ERROR_TEMPORARY,
-                errors=["Unable to register at this time, please try again later"],
-            )
-
-        return result
+        return super()._authenticate(SocialAuthState.FLOW_REGISTER)
 
 
 class RegisterExtraDetailsSerializer(SocialAuthSerializer):

@@ -65,13 +65,6 @@ class RequireProfileException(PartialException):
         return "Profile needs to be filled out"
 
 
-class RequireUserException(Exception):
-    """Profile requires a user"""
-
-    def __str__(self):
-        return "User is required for profile"
-
-
 class UnexpectedExistingUserException(PartialException):
     """Raised if a user already exists but shouldn't in the given pipeline step"""
 

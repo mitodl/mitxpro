@@ -4,7 +4,6 @@ import { compose } from "redux"
 import { connect } from "react-redux"
 import { Link } from "react-router-dom"
 import { mutateAsync, connectRequest } from "redux-query"
-import qs from "query-string"
 import { path } from "ramda"
 import { createStructuredSelector } from "reselect"
 
@@ -12,7 +11,11 @@ import { addUserNotification } from "../../../actions"
 import { ALERT_TYPE_TEXT } from "../../../constants"
 import queries from "../../../lib/queries"
 import { routes } from "../../../lib/urls"
-import { STATE_REGISTER_DETAILS, STATE_INVALID_EMAIL } from "../../../lib/auth"
+import {
+  STATE_REGISTER_DETAILS,
+  STATE_INVALID_EMAIL,
+  handleAuthResponse
+} from "../../../lib/auth"
 
 import { authSelector } from "../../../lib/queries/auth"
 import {
@@ -35,25 +38,20 @@ export class RegisterConfirmPage extends React.Component<Props> {
     const { addUserNotification, auth, history } = this.props
     const prevState = path(["auth", "state"], prevProps)
 
-    if (
-      auth &&
-      auth.partialToken &&
-      auth.state !== prevState &&
-      auth.state === STATE_REGISTER_DETAILS
-    ) {
-      const params = qs.stringify({
-        partial_token: auth.partialToken
-      })
-      addUserNotification({
-        "email-verified": {
-          type:  ALERT_TYPE_TEXT,
-          props: {
-            text:
-              "Success! We've verified your email. Please finish your account creation below."
-          }
+    if (auth && auth.state !== prevState) {
+      handleAuthResponse(history, auth, {
+        [STATE_REGISTER_DETAILS]: () => {
+          addUserNotification({
+            "email-verified": {
+              type:  ALERT_TYPE_TEXT,
+              props: {
+                text:
+                  "Success! We've verified your email. Please finish your account creation below."
+              }
+            }
+          })
         }
       })
-      history.push(`${routes.register.details}?${params}`)
     }
   }
 

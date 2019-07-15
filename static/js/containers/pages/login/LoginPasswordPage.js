@@ -8,7 +8,7 @@ import { createStructuredSelector } from "reselect"
 import auth, { authSelector } from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
-import { STATE_SUCCESS } from "../../../lib/auth"
+import { STATE_ERROR, handleAuthResponse } from "../../../lib/auth"
 
 import LoginPasswordForm from "../../../components/forms/LoginPasswordForm"
 
@@ -16,8 +16,8 @@ import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
 import type {
   AuthResponse,
-  AuthResponseRaw,
-  User
+  User,
+  PasswordFormValues
 } from "../../../flow/authTypes"
 
 type Props = {
@@ -31,43 +31,43 @@ type Props = {
   getCurrentUser: () => Promise<Response<User>>
 }
 
-class LoginPasswordPage extends React.Component<Props> {
+export class LoginPasswordPage extends React.Component<Props> {
   componentDidMount() {
     const { history, auth } = this.props
 
-    if (!auth || !auth.partialToken) {
+    if (!auth || !auth.partial_token) {
       // if there's no partialToken in the state
       // this page was navigated to directly and login needs to be started over
       history.push(routes.login.begin)
     }
   }
 
-  async onSubmit({ password }, { setSubmitting, setErrors }) {
+  async onSubmit(
+    { password }: PasswordFormValues,
+    { setSubmitting, setErrors }: any
+  ) {
+    /* eslint-disable camelcase */
     const {
       loginPassword,
-      auth: { partialToken }
+      history,
+      auth: { partial_token }
     } = this.props
 
-    if (!partialToken) {
+    if (!partial_token) {
       throw Error("Invalid state: password page with no partialToken")
     }
 
-    /* eslint-disable camelcase */
     try {
-      const {
-        body: { state, redirect_url, errors }
-      }: { body: AuthResponseRaw } = await loginPassword(password, partialToken)
+      const { body } = await loginPassword(password, partial_token)
 
-      if (state === STATE_SUCCESS) {
-        window.location.href = redirect_url || routes.dashboard
-      } else if (errors.length > 0) {
-        setErrors({
-          password: errors[0]
-        })
-      }
+      handleAuthResponse(history, body, {
+        [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
+          setErrors(field_errors)
+      })
     } finally {
       setSubmitting(false)
     }
+    /* eslint-enable camelcase */
   }
 
   render() {
@@ -77,7 +77,7 @@ class LoginPasswordPage extends React.Component<Props> {
       return <div />
     }
 
-    const name = auth.extraData.name
+    const name = auth.extra_data.name
 
     return (
       <div className="container auth-page">

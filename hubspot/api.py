@@ -92,6 +92,24 @@ def send_hubspot_request(
         return requests.delete(url=url, **kwargs)
 
 
+def sanitize_properties(properties):
+    """
+    Ensures we don't pass any invalid values (e.g. nulls) to hubspot_timestamp
+
+    Args:
+        properties (dict):
+            the dict of properties to be sanitized
+
+    Returns:
+        dict:
+            the sanitized dict
+    """
+
+    return {
+        key: value if value is not None else "" for key, value in properties.items()
+    }
+
+
 def make_sync_message(object_id, properties):
     """
     Create data for sync message
@@ -103,14 +121,13 @@ def make_sync_message(object_id, properties):
     Returns:
         dict: serialized sync-message
     """
-    for key in properties.keys():
-        if properties[key] is None:
-            properties[key] = ""
+    properties = sanitize_properties(properties)
+
     return {
         "integratorObjectId": format_hubspot_id(object_id),
         "action": "UPSERT",
         "changeOccurredTimestamp": hubspot_timestamp(now_in_utc()),
-        "propertyNameToValues": dict(properties),
+        "propertyNameToValues": properties,
     }
 
 

@@ -73,6 +73,7 @@ def assert_api_call(
 
     defaults = {
         "errors": [],
+        "field_errors": {},
         "redirect_url": None,
         "extra_data": {},
         "state": None,
@@ -126,6 +127,7 @@ class AuthStateMachine(RuleBasedStateMachine):
     RegisterExtraDetailsAuthStates = Bundle("register-details-extra")
 
     LoginPasswordAuthStates = Bundle("login-password")
+    LoginPasswordAbandonedAuthStates = Bundle("login-password-abandoned")
 
     recaptcha_patcher = patch(
         "authentication.views.requests.post",
@@ -157,6 +159,7 @@ class AuthStateMachine(RuleBasedStateMachine):
         # shared data
         self.email = fake.email()
         self.user = None
+        self.password = "password123"
 
         # track whether we've hit an action that starts a flow or not
         self.flow_started = False
@@ -178,6 +181,8 @@ class AuthStateMachine(RuleBasedStateMachine):
     def create_existing_user(self):
         """Create an existing user"""
         self.user = UserFactory.create(email=self.email)
+        self.user.set_password(self.password)
+        self.user.save()
         UserSocialAuthFactory.create(
             user=self.user, provider=EmailAuth.name, uid=self.user.email
         )
@@ -289,10 +294,10 @@ class AuthStateMachine(RuleBasedStateMachine):
             "psa-login-email",
             {"flow": SocialAuthState.FLOW_LOGIN, "email": self.email},
             {
-                "errors": ["Couldn't find your account"],
+                "field_errors": {"email": "Couldn't find your account"},
                 "flow": SocialAuthState.FLOW_LOGIN,
                 "partial_token": None,
-                "state": SocialAuthState.STATE_ERROR,
+                "state": SocialAuthState.STATE_REGISTER_REQUIRED,
             },
         )
         assert User.objects.filter(email=self.email).exists() is False
@@ -319,19 +324,63 @@ class AuthStateMachine(RuleBasedStateMachine):
             },
         )
 
+    @rule(
+        target=LoginPasswordAbandonedAuthStates,
+        auth_state=consumes(RegisterExtraDetailsAuthStates),
+    )
+    @precondition(lambda self: self.flow_started)
+    def login_email_abandoned(self, auth_state):  # pylint: disable=unused-argument
+        """Login with a user that abandoned the register flow"""
+        # NOTE: This works by "consuming" an extra details auth state,
+        #       but discarding the state and starting a new login.
+        #       It then re-targets the new state into the extra details again.
+        auth_state = None  # assign None to ensure no accidental usage here
+
+        return assert_api_call(
+            self.client,
+            "psa-login-email",
+            {
+                "flow": SocialAuthState.FLOW_LOGIN,
+                "email": self.user.email,
+                "next": NEXT_URL,
+            },
+            {
+                "flow": SocialAuthState.FLOW_LOGIN,
+                "state": SocialAuthState.STATE_LOGIN_PASSWORD,
+                "extra_data": {"name": self.user.name},
+            },
+        )
+
+    @rule(
+        target=RegisterExtraDetailsAuthStates,
+        auth_state=consumes(LoginPasswordAbandonedAuthStates),
+    )
+    def login_password_abandoned(self, auth_state):
+        """Login with an abandoned registration user"""
+        return assert_api_call(
+            self.client,
+            "psa-login-password",
+            {
+                "flow": auth_state["flow"],
+                "partial_token": auth_state["partial_token"],
+                "password": self.password,
+            },
+            {
+                "flow": auth_state["flow"],
+                "state": SocialAuthState.STATE_REGISTER_EXTRA_DETAILS,
+            },
+        )
+
     @rule(auth_state=consumes(LoginPasswordAuthStates))
     def login_password_valid(self, auth_state):
-        """Login with an invalid password"""
-        password = "password123"
-        self.user.set_password(password)
-        self.user.save()
+        """Login with a valid password"""
         assert_api_call(
             self.client,
             "psa-login-password",
             {
                 "flow": auth_state["flow"],
                 "partial_token": auth_state["partial_token"],
-                "password": password,
+                "password": self.password,
             },
             {
                 "flow": auth_state["flow"],
@@ -345,8 +394,6 @@ class AuthStateMachine(RuleBasedStateMachine):
     @rule(target=LoginPasswordAuthStates, auth_state=consumes(LoginPasswordAuthStates))
     def login_password_invalid(self, auth_state):
         """Login with an invalid password"""
-        self.user.set_password("password1")
-        self.user.save()
         return assert_api_call(
             self.client,
             "psa-login-password",
@@ -365,10 +412,7 @@ class AuthStateMachine(RuleBasedStateMachine):
     @rule(auth_state=consumes(LoginPasswordAuthStates))
     def login_password_user_inactive(self, auth_state):
         """Login for an inactive user"""
-        password = "password1"
-
         self.user.is_active = False
-        self.user.set_password(password)
         self.user.save()
 
         assert_api_call(
@@ -377,7 +421,7 @@ class AuthStateMachine(RuleBasedStateMachine):
             {
                 "flow": auth_state["flow"],
                 "partial_token": auth_state["partial_token"],
-                "password": password,
+                "password": self.password,
             },
             {
                 "flow": auth_state["flow"],
@@ -385,6 +429,31 @@ class AuthStateMachine(RuleBasedStateMachine):
                 "state": SocialAuthState.STATE_INACTIVE,
             },
         )
+
+    @rule(auth_state=consumes(LoginPasswordAuthStates))
+    def login_password_exports_temporary_error(self, auth_state):
+        """Login for a user who hasn't been OFAC verified yet"""
+        with override_settings(**get_cybersource_test_settings()), patch(
+            "authentication.pipeline.compliance.api.verify_user_with_exports",
+            side_effect=Exception("register_details_export_temporary_error"),
+        ):
+            assert_api_call(
+                self.client,
+                "psa-login-password",
+                {
+                    "flow": auth_state["flow"],
+                    "partial_token": auth_state["partial_token"],
+                    "password": self.password,
+                },
+                {
+                    "flow": auth_state["flow"],
+                    "partial_token": None,
+                    "state": SocialAuthState.STATE_ERROR_TEMPORARY,
+                    "errors": [
+                        "Unable to register at this time, please try again later"
+                    ],
+                },
+            )
 
     @rule(
         target=ConfirmationRedeemedAuthStates,
@@ -434,13 +503,13 @@ class AuthStateMachine(RuleBasedStateMachine):
     )
     def register_details(self, auth_state):
         """Complete the register confirmation details page"""
-        return assert_api_call(
+        result = assert_api_call(
             self.client,
             "psa-register-details",
             {
                 "flow": auth_state["flow"],
                 "partial_token": auth_state["partial_token"],
-                "password": "password1",
+                "password": self.password,
                 "name": "Sally Smith",
                 "legal_address": {
                     "first_name": "Sally",
@@ -457,6 +526,8 @@ class AuthStateMachine(RuleBasedStateMachine):
                 "state": SocialAuthState.STATE_REGISTER_EXTRA_DETAILS,
             },
         )
+        self.user = User.objects.get(email=self.email)
+        return result
 
     @rule(
         target=RegisterExtraDetailsAuthStates,
@@ -471,7 +542,7 @@ class AuthStateMachine(RuleBasedStateMachine):
                 {
                     "flow": auth_state["flow"],
                     "partial_token": auth_state["partial_token"],
-                    "password": "password1",
+                    "password": self.password,
                     "name": "Sally Smith",
                     "legal_address": {
                         "first_name": "Sally",
@@ -495,6 +566,7 @@ class AuthStateMachine(RuleBasedStateMachine):
             )
             assert len(mail.outbox) == 0
 
+            self.user = User.objects.get(email=self.email)
             return result
 
     @rule(auth_state=consumes(ConfirmationRedeemedAuthStates))
@@ -507,7 +579,7 @@ class AuthStateMachine(RuleBasedStateMachine):
                 {
                     "flow": auth_state["flow"],
                     "partial_token": auth_state["partial_token"],
-                    "password": "password1",
+                    "password": self.password,
                     "name": "Sally Smith",
                     "legal_address": {
                         "first_name": "Sally",
@@ -546,7 +618,7 @@ class AuthStateMachine(RuleBasedStateMachine):
                 {
                     "flow": auth_state["flow"],
                     "partial_token": auth_state["partial_token"],
-                    "password": "password1",
+                    "password": self.password,
                     "name": "Sally Smith",
                     "legal_address": {
                         "first_name": "Sally",
@@ -642,6 +714,7 @@ def test_login_email_error(client, mocker):
     )
     assert response.json() == {
         "errors": [],
+        "field_errors": {},
         "flow": SocialAuthState.FLOW_LOGIN,
         "provider": EmailAuth.name,
         "redirect_url": None,

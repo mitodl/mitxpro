@@ -11,6 +11,7 @@ import {
   STATE_LOGIN_PASSWORD,
   STATE_ERROR
 } from "../../../lib/auth"
+import { makeRegisterAuthResponse } from "../../../factories/auth"
 import { routes } from "../../../lib/urls"
 import { ALERT_TYPE_TEXT } from "../../../constants"
 
@@ -50,13 +51,15 @@ describe("RegisterEmailPage", () => {
 
   it("handles onSubmit for an error response", async () => {
     const { inner } = await renderPage()
-    const error = "error message"
+    const fieldErrors = {
+      email: "error message"
+    }
 
     helper.handleRequestStub.returns({
-      body: {
-        state:  STATE_ERROR,
-        errors: [error]
-      }
+      body: makeRegisterAuthResponse({
+        state:        STATE_ERROR,
+        field_errors: fieldErrors
+      })
     })
 
     const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit")
@@ -67,9 +70,7 @@ describe("RegisterEmailPage", () => {
     )
 
     assert.lengthOf(helper.browserHistory, 1)
-    sinon.assert.calledWith(setErrorsStub, {
-      email: error
-    })
+    sinon.assert.calledWith(setErrorsStub, fieldErrors)
     sinon.assert.calledWith(setSubmittingStub, false)
   })
 
@@ -77,10 +78,9 @@ describe("RegisterEmailPage", () => {
     const { inner, store } = await renderPage()
 
     helper.handleRequestStub.returns({
-      body: {
-        state:  STATE_LOGIN_PASSWORD,
-        errors: []
-      }
+      body: makeRegisterAuthResponse({
+        state: STATE_LOGIN_PASSWORD
+      })
     })
 
     const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit")
@@ -115,10 +115,9 @@ describe("RegisterEmailPage", () => {
     const { inner, store } = await renderPage()
 
     helper.handleRequestStub.returns({
-      body: {
-        state:  STATE_REGISTER_CONFIRM_SENT,
-        errors: []
-      }
+      body: makeRegisterAuthResponse({
+        state: STATE_REGISTER_CONFIRM_SENT
+      })
     })
 
     const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit")

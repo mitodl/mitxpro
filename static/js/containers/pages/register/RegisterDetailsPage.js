@@ -4,19 +4,13 @@ import React from "react"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { Link } from "react-router-dom"
-import { isEmpty } from "ramda"
 import { connectRequest, mutateAsync, requestAsync } from "redux-query"
 import { createStructuredSelector } from "reselect"
-import qs from "query-string"
 
 import auth from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
-import {
-  STATE_REGISTER_EXTRA_DETAILS,
-  STATE_USER_BLOCKED,
-  STATE_ERROR
-} from "../../../lib/auth"
+import { STATE_ERROR, handleAuthResponse } from "../../../lib/auth"
 import queries from "../../../lib/queries"
 import { qsPartialTokenSelector } from "../../../lib/selectors"
 
@@ -26,7 +20,6 @@ import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
 import type {
   AuthResponse,
-  AuthResponseRaw,
   LegalAddress,
   User,
   Country
@@ -67,35 +60,18 @@ export class RegisterDetailsPage extends React.Component<Props> {
     } = this.props
 
     try {
-      const {
-        body: { state, errors, partial_token } // eslint-disable-line camelcase
-      }: { body: AuthResponseRaw } = await registerDetails(
+      const { body } = await registerDetails(
         detailsData.name,
         detailsData.password,
         detailsData.legal_address,
         partialToken
       )
 
-      if (state === STATE_REGISTER_EXTRA_DETAILS) {
-        const params = qs.stringify({
-          partial_token
-        })
-        history.push(`${routes.register.extra}?${params}`)
-      } else if (state === STATE_USER_BLOCKED) {
-        const params = !isEmpty(errors)
-          ? qs.stringify({
-            error: errors[0]
-          })
-          : ""
-        history.push(`${routes.register.denied}?${params}`)
-      } else if (state === STATE_ERROR && errors.length > 0) {
-        setErrors({
-          name: errors[0]
-        })
-      } else {
-        // otherwise we're in some kind of error state, explicit or otherwise
-        history.push(routes.register.error)
-      }
+      handleAuthResponse(history, body, {
+        // eslint-disable-next-line camelcase
+        [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
+          setErrors(field_errors)
+      })
     } finally {
       setSubmitting(false)
     }
