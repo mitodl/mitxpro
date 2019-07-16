@@ -359,6 +359,17 @@ describe("CheckoutPage", () => {
       }
       assert.deepEqual(calcSelectedRunIds(item), expected)
     })
+
+    it("uses the next_run_id for a default selected course run", () => {
+      const item = basket.items[0]
+      item.type = PRODUCT_TYPE_PROGRAM
+      const expected = {}
+      for (const course of item.courses) {
+        expected[course.id] = course.next_run_id
+      }
+      item.run_ids = []
+      assert.deepEqual(calcSelectedRunIds(item), expected)
+    })
   })
 
   //

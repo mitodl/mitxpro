@@ -46,6 +46,13 @@ export const calcSelectedRunIds = (item: BasketItem): { [number]: number } => {
     }
   }
 
+  const selectedRunIds = {}
+  for (const course of item.courses) {
+    if (course.next_run_id) {
+      selectedRunIds[course.id] = course.next_run_id
+    }
+  }
+
   const courseLookup = {}
   for (const course of item.courses) {
     for (const run of course.courseruns) {
@@ -53,7 +60,6 @@ export const calcSelectedRunIds = (item: BasketItem): { [number]: number } => {
     }
   }
 
-  const selectedRunIds = {}
   for (const runId of item.run_ids) {
     const courseId = courseLookup[runId]
 

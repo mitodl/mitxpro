@@ -34,19 +34,25 @@ export const makeCourseRun = (): CourseRun => ({
 })
 
 const genCourseId = incrementer()
-export const makeBaseCourse = (): BaseCourse => ({
+const makeBaseCourse = (nextRunId: ?number): BaseCourse => ({
   // $FlowFixMe
   id:            genCourseId.next().value,
   title:         casual.text,
   description:   casual.text,
   thumbnail_url: casual.url,
-  readable_id:   casual.word
+  readable_id:   casual.word,
+  next_run_id:   nextRunId
 })
 
-export const makeCourse = (): Course => ({
-  ...makeBaseCourse(),
-  courseruns: range(0, 3).map(() => makeCourseRun())
-})
+export const makeCourse = (): Course => {
+  const runs = range(0, 3).map(() => makeCourseRun())
+  const baseCourse = makeBaseCourse(runs[1].id)
+
+  return {
+    ...baseCourse,
+    courseruns: runs
+  }
+}
 
 const genProgramId = incrementer()
 export const makeProgram = (): Program => ({
@@ -58,10 +64,13 @@ export const makeProgram = (): Program => ({
   readable_id:   casual.word.concat(genReadableId.next().value)
 })
 
-export const makeCourseRunDetail = (): CourseRunDetail => ({
-  ...makeCourseRun(),
-  course: makeBaseCourse()
-})
+export const makeCourseRunDetail = (): CourseRunDetail => {
+  const run = makeCourseRun()
+  return {
+    ...makeCourseRun(),
+    course: makeBaseCourse(run.id)
+  }
+}
 
 export const makeCourseRunEnrollment = (): CourseRunEnrollment => ({
   run: makeCourseRunDetail()
