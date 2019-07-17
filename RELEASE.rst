@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.13.3
+Version 0.13.3 (Released July 17, 2019)
 --------------
 
 - change "For Teams" in product subnav to "Enterprise" (#849)
