@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 
 from cms.factories import CoursePageFactory, ProgramPageFactory
 from courses.factories import (
+    CompanyFactory,
     CourseFactory,
     CourseRunFactory,
     ProgramFactory,
@@ -16,6 +17,7 @@ from courses.factories import (
 from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from courses.models import CourseRunEnrollment
 from ecommerce.factories import ProductFactory, ProductVersionFactory
+from mitxpro.test_utils import format_as_iso8601
 from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
 
@@ -381,4 +383,46 @@ def test_get_program_run_enrollments(user):
     assert (
         set(CourseRunEnrollment.get_program_run_enrollments(user, program))
         == expected_run_enrollments
+    )
+
+
+@pytest.mark.parametrize("is_program", [True, False])
+@pytest.mark.parametrize("has_company", [True, False])
+def test_audit(user, is_program, has_company):
+    """Test audit table serialization"""
+    enrollment = (
+        ProgramEnrollmentFactory.create()
+        if is_program
+        else CourseRunEnrollmentFactory.create()
+    )
+    if has_company:
+        enrollment.company = CompanyFactory.create()
+
+    enrollment.save_and_log(user)
+
+    expected = {
+        "active": enrollment.active,
+        "change_status": enrollment.change_status,
+        "created_on": format_as_iso8601(enrollment.created_on),
+        "company": enrollment.company.id if has_company else None,
+        "company_name": enrollment.company.name if has_company else None,
+        "email": enrollment.user.email,
+        "full_name": enrollment.user.name,
+        "id": enrollment.id,
+        "order": enrollment.order.id,
+        "readable_id": enrollment.program.readable_id
+        if is_program
+        else enrollment.run.courseware_id,
+        "updated_on": format_as_iso8601(enrollment.updated_on),
+        "user": enrollment.user.id,
+        "username": enrollment.user.username,
+    }
+    if not is_program:
+        expected["edx_enrolled"] = enrollment.edx_enrolled
+        expected["run"] = enrollment.run.id
+    else:
+        expected["program"] = enrollment.program.id
+    assert (
+        enrollment.get_audit_class().objects.get(enrollment=enrollment).data_after
+        == expected
     )
