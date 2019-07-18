@@ -850,6 +850,12 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
 
     subpage_types = []
 
+    heading = models.CharField(
+        max_length=255,
+        help_text="The heading to show in this section",
+        default="Who Should Enroll",
+    )
+
     image = models.ForeignKey(
         Image,
         null=True,
@@ -877,6 +883,7 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
     )
 
     content_panels = [
+        FieldPanel("heading"),
         StreamFieldPanel("content"),
         ImageChooserPanel("image"),
         FieldPanel("switch_layout"),
