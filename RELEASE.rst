@@ -1,6 +1,28 @@
 Release Notes
 =============
 
+Version 0.13.4 (Released July 17, 2019)
+--------------
+
+- Update some JS dependencies (#829)
+
+Version 0.13.3 (Released July 17, 2019)
+--------------
+
+- change "For Teams" in product subnav to "Enterprise" (#849)
+
+Version 0.13.2 (Released July 16, 2019)
+--------------
+
+- Update voucher/templates/enroll.html
+- Adjust style and fix typos
+- Change voucher page style
+
+Version 0.13.1 (Released July 15, 2019)
+--------------
+
+- Change URLs for vouchers to /boeing (#822)
+
 Version 0.13.0 (Released July 15, 2019)
 --------------
 

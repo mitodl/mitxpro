@@ -4,8 +4,19 @@
 {% block title %}{{ site_name }} | Boeing Course Enroll{% endblock %}
 
 {% block content %}
-  <div class="container voucher-container">
-    <h1>Boeing employee enrollment page</h1>
-    <p>We are sorry but we were not able to complete your enrollment. Please send the voucher as an attachment to <a href="mailto:xpro@mit.edu">xpro@mit.edu</a></p>
-  </div>
+    <div class="container voucher-container">
+        <h1>Boeing employee enrollment page</h1>
+        <div class="voucher-card">
+            <h2>Upload Voucher</h2>
+            <hr/>
+            <p class="form-error">We are sorry but we were not able to complete your enrollment.</p>
+            <p>Please send the voucher as an attachment to:</p>
+            <p>
+                MIT xPRO Customer Support
+                <br/>
+                <a href="mailto:xpro@mit.edu">xpro@mit.edu</a>
+            </p>
+        </div>
+
+    </div>
 {% endblock content %}

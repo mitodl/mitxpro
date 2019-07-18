@@ -15,7 +15,7 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 
 from mitxpro.envs import get_any, get_bool, get_int, get_string
 
-VERSION = "0.13.0"
+VERSION = "0.13.4"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -94,6 +94,7 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "django.contrib.humanize",
     "django.contrib.sites",
+    "django_user_agents",
     "social_django",
     "server_status",
     "oauth2_provider",
@@ -155,6 +156,7 @@ MIDDLEWARE = (
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
+    "django_user_agents.middleware.UserAgentMiddleware",
     "wagtail.core.middleware.SiteMiddleware",
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",
 )
