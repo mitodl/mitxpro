@@ -592,6 +592,16 @@ def test_program_page_who_should_enroll():
     assert program_page.who_should_enroll == who_should_enroll_page
     assert not WhoShouldEnrollPage.can_create_at(program_page)
 
+    # default page hedding
+    assert who_should_enroll_page.heading == "Who Should Enroll"
+
+    # test that it can be modified
+    new_heading = "New heading of the page"
+    who_should_enroll_page.heading = new_heading
+    who_should_enroll_page.save()
+
+    assert who_should_enroll_page.heading == new_heading
+
 
 def test_course_page_propel_career():
     """
