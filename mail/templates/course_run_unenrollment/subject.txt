@@ -1,0 +1,1 @@
+You have been unenrolled in {{ enrollment.run }}

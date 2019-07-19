@@ -1,13 +1,15 @@
 """Utility functions/classes for course management commands"""
 from functools import partial
-from requests.exceptions import HTTPError
-from django.core.management.base import BaseCommand, CommandError
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
-from django.contrib.auth import get_user_model
 
-from courses.models import Program, ProgramEnrollment, CourseRun, CourseRunEnrollment
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.core.management.base import BaseCommand, CommandError
+from django.core.validators import validate_email
+from requests.exceptions import HTTPError
+
+from courses.models import CourseRun, CourseRunEnrollment, Program, ProgramEnrollment
 from courseware.api import enroll_in_edx_course_runs
+from ecommerce import mail_api
 from mitxpro.utils import has_equal_properties
 
 User = get_user_model()
@@ -169,6 +171,7 @@ class EnrollmentChangeCommand(BaseCommand):
             CourseRunEnrollment: The deactivated enrollment
         """
         run_enrollment.deactivate_and_save(change_status, no_user=True)
+        mail_api.send_course_run_unenrollment_email(run_enrollment)
         return run_enrollment
 
     def create_program_enrollment(
@@ -234,7 +237,10 @@ class EnrollmentChangeCommand(BaseCommand):
                 to_user.username, to_user.email, to_run.courseware_id
             )
         )
-        self.enroll_in_edx(to_user, [to_run])
+        enrolled_in_edx = self.enroll_in_edx(to_user, [to_run])
+        if enrolled_in_edx:
+            mail_api.send_course_run_enrollment_email(run_enrollment)
+
         return run_enrollment
 
     def enroll_in_edx(self, user, course_runs):
@@ -244,9 +250,12 @@ class EnrollmentChangeCommand(BaseCommand):
         Args:
             user (User): The user to enroll
             course_runs (iterable of CourseRun): The course runs to enroll in
+
+            :return boolean either the enrollment in edx succeeded or not.
         """
         try:
             enroll_in_edx_course_runs(user, course_runs)
+            return True
         except HTTPError as exc:
             self.stdout.write(
                 self.style.WARNING(
@@ -261,3 +270,5 @@ class EnrollmentChangeCommand(BaseCommand):
                     "Unexpected edX enrollment error.\n{}".format(str(exc))
                 )
             )
+
+        return False
