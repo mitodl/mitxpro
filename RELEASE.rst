@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.13.5 (Released July 19, 2019)
+--------------
+
+- Upgrade Python dependencies (#845)
+- dont load hero banner video on mobile devices
+- - Wrong price for program
+
 Version 0.13.4 (Released July 17, 2019)
 --------------
 
