@@ -1,9 +1,12 @@
 """Tests for ecommerce models"""
+from django.db.utils import IntegrityError
 import pytest
 
 from courses.factories import CourseRunFactory, ProgramFactory
 from ecommerce.factories import (
     CouponRedemptionFactory,
+    CouponPaymentVersionFactory,
+    CouponVersionFactory,
     LineFactory,
     ProductFactory,
     ProductVersionFactory,
@@ -124,3 +127,26 @@ def test_product_version_save_text_id_badproduct(mocker):
     assert mock_log.called_once_with(
         f"The content object for this ProductVersion ({product_version.id}) does not have a `text_id` property"
     )
+
+
+@pytest.mark.parametrize(
+    "factory",
+    [ProductVersionFactory, CouponVersionFactory, CouponPaymentVersionFactory],
+)
+def test_prevent_update(factory):
+    """Check that we prevent updating certain version models"""
+    obj = factory.create()
+    with pytest.raises(IntegrityError):
+        obj.save()
+
+
+@pytest.mark.parametrize(
+    "factory",
+    [ProductVersionFactory, CouponVersionFactory, CouponPaymentVersionFactory],
+)
+def test_prevent_delete(factory):
+    """Check that we prevent deleting certain version models"""
+    obj = factory.create()
+    obj_id = obj.id
+    obj.delete()
+    assert type(obj).objects.filter(id=obj_id).count() == 1
