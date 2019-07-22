@@ -17,7 +17,6 @@ pytest==4.4.1
 pytest-cov>=2.6.1
 pytest-django
 pytest-env
-pytest-pep8
 pytest-mock
 pytest-pylint==0.12.3
 pytest-lazy-fixture==0.5.1
