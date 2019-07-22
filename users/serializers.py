@@ -211,7 +211,6 @@ class UserSerializer(serializers.ModelSerializer):
             return fetch_and_serialize_unused_coupons(instance)
         return []
 
-    @transaction.atomic
     def create(self, validated_data):
         """Create a new user"""
         legal_address_data = validated_data.pop("legal_address")
@@ -221,52 +220,54 @@ class UserSerializer(serializers.ModelSerializer):
         email = validated_data.pop("email")
         password = validated_data.pop("password")
 
-        user = User.objects.create_user(
-            username, email=email, password=password, **validated_data
-        )
-
-        # this side-effects such that user.legal_address and user.profile are updated in-place
-        if legal_address_data:
-            legal_address = LegalAddressSerializer(
-                user.legal_address, data=legal_address_data
+        with transaction.atomic():
+            user = User.objects.create_user(
+                username, email=email, password=password, **validated_data
             )
-            if legal_address.is_valid():
-                legal_address.save()
 
-        if profile_data:
-            profile = UserProfileSerializer(user.profile, data=profile_data)
-            if profile.is_valid():
-                profile.save()
+            # this side-effects such that user.legal_address and user.profile are updated in-place
+            if legal_address_data:
+                legal_address = LegalAddressSerializer(
+                    user.legal_address, data=legal_address_data
+                )
+                if legal_address.is_valid():
+                    legal_address.save()
+
+            if profile_data:
+                profile = UserProfileSerializer(user.profile, data=profile_data)
+                if profile.is_valid():
+                    profile.save()
         sync_hubspot_user(user)
         return user
 
-    @transaction.atomic
     def update(self, instance, validated_data):
         """Update an existing user"""
         legal_address_data = validated_data.pop("legal_address", None)
         profile_data = validated_data.pop("profile", None)
         password = validated_data.pop("password", None)
 
-        # this side-effects such that user.legal_address and user.profile are updated in-place
-        if legal_address_data:
-            address_serializer = LegalAddressSerializer(
-                instance.legal_address, data=legal_address_data
-            )
-            if address_serializer.is_valid(raise_exception=True):
-                address_serializer.save()
+        with transaction.atomic():
+            # this side-effects such that user.legal_address and user.profile are updated in-place
+            if legal_address_data:
+                address_serializer = LegalAddressSerializer(
+                    instance.legal_address, data=legal_address_data
+                )
+                if address_serializer.is_valid(raise_exception=True):
+                    address_serializer.save()
 
-        if profile_data:
-            profile_serializer = UserProfileSerializer(
-                instance.profile, data=profile_data
-            )
-            if profile_serializer.is_valid(raise_exception=True):
-                profile_serializer.save()
+            if profile_data:
+                profile_serializer = UserProfileSerializer(
+                    instance.profile, data=profile_data
+                )
+                if profile_serializer.is_valid(raise_exception=True):
+                    profile_serializer.save()
 
-        # save() will be called in super().update()
-        if password is not None:
-            instance.set_password(password)
+            # save() will be called in super().update()
+            if password is not None:
+                instance.set_password(password)
 
-        user = super().update(instance, validated_data)
+            user = super().update(instance, validated_data)
+
         sync_hubspot_user(user)
         return user
 
