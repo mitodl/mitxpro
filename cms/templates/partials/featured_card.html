@@ -75,8 +75,8 @@
           </label>
           <div id="{{ collapse_id }}" class="collapse">
             <div class="details-body">
-              {% if courseware_page.description %}
-              <div class="description">{{ courseware_page.description|richtext }}</div>
+              {% if courseware_page.catalog_details %}
+                <div class="description">{{ courseware_page.catalog_details|richtext }}</div>
               {% endif %}
               {% if object_type == "program" %}
               <ul class="program-course-links">
