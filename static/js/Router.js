@@ -4,6 +4,7 @@ import { Provider } from "react-redux"
 
 import App from "./containers/App"
 import withTracker from "./util/withTracker"
+import ScrollToTop from "./components/ScrollToTop"
 
 export default class Root extends React.Component {
   props: {
@@ -17,7 +18,9 @@ export default class Root extends React.Component {
     return (
       <div>
         <Provider store={store}>
-          <ReactRouter history={history}>{children}</ReactRouter>
+          <ReactRouter history={history}>
+            <ScrollToTop>{children}</ScrollToTop>
+          </ReactRouter>
         </Provider>
       </div>
     )
