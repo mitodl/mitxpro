@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.13.6
+Version 0.13.6 (Released July 22, 2019)
 --------------
 
 - add heading feidl in who should enroll section
