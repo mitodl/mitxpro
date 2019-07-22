@@ -14,7 +14,12 @@ from rest_framework.test import APIClient
 import factory
 
 from courses.factories import CourseRunFactory, CourseRunEnrollmentFactory
-from ecommerce.api import create_unfulfilled_order, get_readable_id, make_reference_id
+from ecommerce.api import (
+    create_unfulfilled_order,
+    get_readable_id,
+    make_receipt_url,
+    make_reference_id,
+)
 from ecommerce.exceptions import EcommerceException
 from ecommerce.factories import (
     CouponEligibilityFactory,
@@ -135,10 +140,20 @@ def test_creates_order(basket_client, mocker, basket_and_coupons):
         "method": "POST",
     }
 
+    readable_id = get_readable_id(
+        order.lines.first().product_version.product.content_object
+    )
     assert create_mock.call_count == 1
     assert create_mock.call_args[0] == (user,)
     assert generate_mock.call_count == 1
-    assert generate_mock.call_args[0] == (order, "http://testserver/")
+    assert generate_mock.call_args[0] == ()
+    assert generate_mock.call_args[1] == {
+        "order": order,
+        "receipt_url": make_receipt_url(
+            base_url="http://testserver", readable_id=readable_id
+        ),
+        "cancel_url": "http://testserver/checkout/",
+    }
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])

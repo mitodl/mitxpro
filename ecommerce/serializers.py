@@ -1,5 +1,4 @@
 """ ecommerce serializers """
-from uuid import uuid4
 from datetime import datetime
 
 import pytz
@@ -14,6 +13,7 @@ from courses.constants import DEFAULT_COURSE_IMG_PATH
 from ecommerce import models
 from ecommerce.api import (
     best_coupon_for_product,
+    create_coupons,
     get_valid_coupon_versions,
     latest_coupon_version,
     latest_product_version,
@@ -532,52 +532,22 @@ class BaseCouponSerializer(serializers.Serializer):
         return value
 
     def create(self, validated_data):
-        with transaction.atomic():
-            if validated_data.get("company"):
-                company = models.Company.objects.get(id=validated_data.get("company"))
-            else:
-                company = None
-            payment = models.CouponPayment.objects.create(
-                name=validated_data.get("name")
-            )
-            payment_version = models.CouponPaymentVersion.objects.create(
-                payment=payment,
-                company=company,
-                tag=validated_data.get("tag"),
-                automatic=validated_data.get("automatic", False),
-                activation_date=validated_data.get("activation_date"),
-                expiration_date=validated_data.get("expiration_date"),
-                amount=validated_data.get("amount"),
-                num_coupon_codes=validated_data.get("num_coupon_codes"),
-                coupon_type=validated_data.get("coupon_type"),
-                max_redemptions=validated_data.get("max_redemptions", 1),
-                max_redemptions_per_user=1,
-                payment_type=validated_data.get("payment_type"),
-                payment_transaction=validated_data.get("payment_transaction"),
-            )
-
-            eligibilities = []
-
-            coupons = [
-                models.Coupon(
-                    coupon_code=validated_data.get("coupon_code", uuid4().hex),
-                    payment=payment,
-                )
-                for _ in range(validated_data.get("num_coupon_codes"))
-            ]
-            coupon_objs = models.Coupon.objects.bulk_create(coupons)
-            versions = [
-                models.CouponVersion(coupon=obj, payment_version=payment_version)
-                for obj in coupon_objs
-            ]
-            eligibilities = [
-                models.CouponEligibility(coupon=obj, product_id=product_id)
-                for obj in coupon_objs
-                for product_id in validated_data.get("product_ids")
-            ]
-            models.CouponVersion.objects.bulk_create(versions)
-            models.CouponEligibility.objects.bulk_create(eligibilities)
-            return payment_version
+        return create_coupons(
+            company_id=validated_data.get("company"),
+            tag=validated_data.get("tag"),
+            name=validated_data.get("name"),
+            automatic=validated_data.get("automatic", False),
+            activation_date=validated_data.get("activation_date"),
+            expiration_date=validated_data.get("expiration_date"),
+            amount=validated_data.get("amount"),
+            num_coupon_codes=validated_data.get("num_coupon_codes"),
+            coupon_type=validated_data.get("coupon_type"),
+            max_redemptions=validated_data.get("max_redemptions", 1),
+            payment_type=validated_data.get("payment_type"),
+            payment_transaction=validated_data.get("payment_transaction"),
+            coupon_code=validated_data.get("coupon_code"),
+            product_ids=validated_data.get("product_ids"),
+        )
 
 
 class SingleUseCouponSerializer(BaseCouponSerializer):

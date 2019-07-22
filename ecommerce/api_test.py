@@ -6,7 +6,6 @@ from decimal import Decimal
 from datetime import timedelta
 import hashlib
 import hmac
-from urllib.parse import urljoin
 from unittest.mock import PropertyMock
 from requests.exceptions import HTTPError
 
@@ -184,8 +183,11 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
         autospec=True,
         return_value=mocker.MagicMock(hex=transaction_uuid),
     )
-    base_url = "https://example.com/base_url/"
-    payload = generate_cybersource_sa_payload(order, base_url)
+    receipt_url = "https://example.com/base_url/receipt/"
+    cancel_url = "https://example.com/base_url/cancel/"
+    payload = generate_cybersource_sa_payload(
+        order=order, receipt_url=receipt_url, cancel_url=cancel_url
+    )
     signature = payload.pop("signature")
     assert generate_cybersource_sa_signature(payload) == signature
     signed_field_names = payload["signed_field_names"].split(",")
@@ -207,7 +209,6 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
         if has_coupon
         else {}
     )
-    readable_id = get_readable_id(line1.product_version.product.content_object)
 
     assert payload == {
         "access_key": CYBERSOURCE_ACCESS_KEY,
@@ -235,10 +236,8 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
         "line_item_count": 3,
         "locale": "en-us",
         "reference_number": make_reference_id(order),
-        "override_custom_receipt_page": make_receipt_url(
-            base_url=base_url, readable_id=readable_id
-        ),
-        "override_custom_cancel_page": urljoin(base_url, "checkout/"),
+        "override_custom_receipt_page": receipt_url,
+        "override_custom_cancel_page": cancel_url,
         "profile_id": CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now.strftime(ISO_8601_FORMAT),
         "signed_field_names": ",".join(signed_field_names),
@@ -271,7 +270,9 @@ def test_payload_coupons():
     # Coupon only eligible for line2, not line1
     CouponRedemption.objects.create(coupon_version=coupon_version, order=order)
 
-    payload = generate_cybersource_sa_payload(order, "base")
+    payload = generate_cybersource_sa_payload(
+        order=order, receipt_url="receipt", cancel_url="cancel"
+    )
     signature = payload.pop("signature")
     assert generate_cybersource_sa_signature(payload) == signature
     signed_field_names = payload["signed_field_names"].split(",")
@@ -511,16 +512,17 @@ def test_get_new_order_by_reference_number(
 @pytest.mark.parametrize(
     "reference_number, error",
     [
-        ("XYZ-1-3", "Reference number must start with MITXPRO-"),
-        ("MITXPRO-no_dashes_here", "Unable to find order number in reference number"),
-        ("MITXPRO-something-NaN", "Unable to parse order number"),
-        ("MITXPRO-not_matching-3", "CyberSource prefix doesn't match"),
+        ("XYZ-1-3", "Reference number must start with MITXPRO-cyb-prefix-"),
+        ("MITXPRO-cyb-prefix-NaN", "Unable to parse order number"),
     ],
 )
-def test_get_new_order_by_reference_number_parse_error(reference_number, error):
+def test_get_new_order_by_reference_number_parse_error(
+    settings, reference_number, error
+):
     """
     Test parse errors are handled well
     """
+    settings.CYBERSOURCE_REFERENCE_PREFIX = "cyb-prefix"
     with pytest.raises(ParseException) as ex:
         get_new_order_by_reference_number(reference_number=reference_number)
     assert ex.value.args[0] == error

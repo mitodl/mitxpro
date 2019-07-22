@@ -1,6 +1,7 @@
 """Views for ecommerce"""
 import csv
 import logging
+from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -78,7 +79,7 @@ class CheckoutView(APIView):
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # pylint: disable=too-many-locals
         """
         Create a new unfulfilled Order from the user's basket
         and return information used to submit to CyberSource.
@@ -115,7 +116,11 @@ class CheckoutView(APIView):
             method = "GET"
         else:
             # This generates a signed payload which is submitted as an HTML form to CyberSource
-            payload = generate_cybersource_sa_payload(order, base_url)
+            receipt_url = make_receipt_url(base_url=base_url, readable_id=readable_id)
+            cancel_url = urljoin(base_url, "checkout/")
+            payload = generate_cybersource_sa_payload(
+                order=order, receipt_url=receipt_url, cancel_url=cancel_url
+            )
             url = settings.CYBERSOURCE_SECURE_ACCEPTANCE_URL
             method = "POST"
 

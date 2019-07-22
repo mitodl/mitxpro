@@ -35,6 +35,7 @@ from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.models import (
     Basket,
     BasketItem,
+    Company,
     Coupon,
     CouponEligibility,
     CouponVersion,
@@ -59,6 +60,7 @@ ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
 _REFERENCE_NUMBER_PREFIX = "MITXPRO-"
 
 
+# pylint: disable=too-many-lines
 def generate_cybersource_sa_signature(payload):
     """
     Generate an HMAC SHA256 signature for the CyberSource Secure Acceptance payload
@@ -115,12 +117,13 @@ def get_readable_id(run_or_program):
 
 
 # pylint: disable=too-many-locals
-def generate_cybersource_sa_payload(order, base_url):
+def generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
     """
     Generates a payload dict to send to CyberSource for Secure Acceptance
     Args:
         order (Order): An order
-        base_url (str): The base URL to be used by Cybersource to redirect the user after completion of the purchase
+        receipt_url (str): The URL to be used by Cybersource to redirect the user after completion of the purchase
+        cancel_url (str): The URL to be used by Cybersource to redirect the user after they click cancel
     Returns:
         dict: the payload to send to CyberSource via Secure Acceptance
     """
@@ -190,10 +193,8 @@ def generate_cybersource_sa_payload(order, base_url):
         "reference_number": make_reference_id(order),
         "profile_id": settings.CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now_in_utc().strftime(ISO_8601_FORMAT),
-        "override_custom_receipt_page": make_receipt_url(
-            base_url=base_url, readable_id=readable_id
-        ),
-        "override_custom_cancel_page": urljoin(base_url, "checkout/"),
+        "override_custom_receipt_page": receipt_url,
+        "override_custom_cancel_page": cancel_url,
         "transaction_type": "sale",
         "transaction_uuid": uuid.uuid4().hex,
         "unsigned_field_names": "",
@@ -436,35 +437,44 @@ def get_new_order_by_reference_number(reference_number):
         Order:
             An order
     """
-    if not reference_number.startswith(_REFERENCE_NUMBER_PREFIX):
-        raise ParseException(
-            "Reference number must start with {}".format(_REFERENCE_NUMBER_PREFIX)
-        )
-    reference_number = reference_number[len(_REFERENCE_NUMBER_PREFIX) :]
-
-    try:
-        order_id_pos = reference_number.rindex("-")
-    except ValueError:
-        raise ParseException("Unable to find order number in reference number")
-
-    try:
-        order_id = int(reference_number[order_id_pos + 1 :])
-    except ValueError:
-        raise ParseException("Unable to parse order number")
-
-    prefix = reference_number[:order_id_pos]
-    if prefix != settings.CYBERSOURCE_REFERENCE_PREFIX:
-        log.error(
-            "CyberSource prefix doesn't match: %s != %s",
-            prefix,
-            settings.CYBERSOURCE_REFERENCE_PREFIX,
-        )
-        raise ParseException("CyberSource prefix doesn't match")
-
+    order_id = get_new_order_id_by_reference_number(
+        reference_number=reference_number,
+        prefix=f"{_REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
+    )
     try:
         return Order.objects.get(id=order_id)
     except Order.DoesNotExist:
         raise EcommerceException("Unable to find order {}".format(order_id))
+
+
+def get_new_order_id_by_reference_number(*, reference_number, prefix):
+    """
+    Parse a reference number received from CyberSource and return the order id.
+
+    Args:
+        reference_number (str):
+            A string which contains the order id and the instance which generated it
+        prefix (str):
+            The prefix string which is attached to the reference number to distinguish from other
+            reference numbers in other environments.
+
+    Returns:
+        int: An order id
+    """
+    prefix_with_dash = f"{prefix}-"
+    if not reference_number.startswith(prefix_with_dash):
+        log.error(
+            "CyberSource prefix doesn't match: should start with %s but is %s",
+            prefix_with_dash,
+            reference_number,
+        )
+        raise ParseException(f"Reference number must start with {prefix_with_dash}")
+    try:
+        order_id = int(reference_number[len(prefix_with_dash) :])
+    except ValueError:
+        raise ParseException("Unable to parse order number")
+
+    return order_id
 
 
 def complete_order(order):
@@ -915,3 +925,85 @@ def get_or_create_data_consents(basket):
                     ]
                 )
     return data_consents
+
+
+def create_coupons(
+    *,
+    name,
+    product_ids,
+    amount,
+    num_coupon_codes,
+    coupon_type,
+    max_redemptions=1,
+    tag=None,
+    company_id=None,
+    automatic=False,
+    activation_date=None,
+    expiration_date=None,
+    payment_type=None,
+    payment_transaction=None,
+    coupon_code=None,
+):
+    """
+    Create one or more coupons and whatever instances are needed for them.
+
+    Args:
+        name (str): Name of the CouponPayment
+        company_id (int): The id for a Company object
+        tag (str): The tag for the CouponPayment
+        automatic (bool): Whether or not the coupon should be applied automatically
+        activation_date (datetime): The date after which the coupon is valid. If None, the coupon is valid
+        expiration_date (datetime): The date before which the coupon is valid. If None, the coupon never expires
+        amount (decimal.Decimal): The percent of the coupon, between 0 and 1 (inclusive)
+        num_coupon_codes (int): The number of coupon codes which should be created for the CouponPayment
+        coupon_type (str): The type of coupon
+        max_redemptions (int): The number of times a coupon can be redeemed before it becomes invalid
+        payment_type (str): The type of payment
+        payment_transaction (str): The transaction string
+        coupon_code (str):
+            If specified, the coupon code to use when creating the coupon. If not a random one will be generated.
+        product_ids (list of int): A list of product ids
+
+    Returns:
+        CouponPaymentVersion:
+        A CouponPaymentVersion. Other instances will be created at the same time and linked via foreign keys.
+
+    """
+    if company_id:
+        company = Company.objects.get(id=company_id)
+    else:
+        company = None
+    payment = CouponPayment.objects.create(name=name)
+    payment_version = CouponPaymentVersion.objects.create(
+        payment=payment,
+        company=company,
+        tag=tag,
+        automatic=automatic,
+        activation_date=activation_date,
+        expiration_date=expiration_date,
+        amount=amount,
+        num_coupon_codes=num_coupon_codes,
+        coupon_type=coupon_type,
+        max_redemptions=max_redemptions,
+        max_redemptions_per_user=1,
+        payment_type=payment_type,
+        payment_transaction=payment_transaction,
+    )
+
+    coupons = [
+        Coupon(coupon_code=(coupon_code or uuid.uuid4().hex), payment=payment)
+        for _ in range(num_coupon_codes)
+    ]
+    coupon_objs = Coupon.objects.bulk_create(coupons)
+    versions = [
+        CouponVersion(coupon=obj, payment_version=payment_version)
+        for obj in coupon_objs
+    ]
+    eligibilities = [
+        CouponEligibility(coupon=obj, product_id=product_id)
+        for obj in coupon_objs
+        for product_id in product_ids
+    ]
+    CouponVersion.objects.bulk_create(versions)
+    CouponEligibility.objects.bulk_create(eligibilities)
+    return payment_version
