@@ -206,7 +206,7 @@ class ProductVersionInline(admin.StackedInline):
 
 
 class ProductAdmin(admin.ModelAdmin):
-    """Admin for CouponRedemptions"""
+    """Admin for Product"""
 
     model = Product
     inlines = [ProductVersionInline]
