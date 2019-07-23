@@ -447,7 +447,7 @@ class CourseRunEnrollment(EnrollmentModel):
         return cls.objects.filter(user=user, run__course__program=program)
 
     def to_dict(self):
-        return {**super().to_dict(), "readable_id": self.run.courseware_id}
+        return {**super().to_dict(), "text_id": self.run.courseware_id}
 
     def __str__(self):
         return f"CourseRunEnrollment for {self.user} and {self.run}"
@@ -491,7 +491,7 @@ class ProgramEnrollment(EnrollmentModel):
         )
 
     def to_dict(self):
-        return {**super().to_dict(), "readable_id": self.program.readable_id}
+        return {**super().to_dict(), "text_id": self.program.readable_id}
 
     def __str__(self):
         return f"ProgramEnrollment for {self.user} and {self.program}"

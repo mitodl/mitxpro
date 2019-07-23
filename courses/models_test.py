@@ -410,7 +410,7 @@ def test_audit(user, is_program, has_company):
         "full_name": enrollment.user.name,
         "id": enrollment.id,
         "order": enrollment.order.id,
-        "readable_id": enrollment.program.readable_id
+        "text_id": enrollment.program.readable_id
         if is_program
         else enrollment.run.courseware_id,
         "updated_on": format_as_iso8601(enrollment.updated_on),
