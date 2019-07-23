@@ -62,7 +62,7 @@ class Command(EnrollmentChangeCommand):
 
         if enrollment.order:
             enrollment.order.status = Order.REFUNDED
-            enrollment.order.save()
+            enrollment.order.save_and_log(None)
             success_msg += "\nOrder status set to '{}' (order id: {})".format(
                 enrollment.order.status, enrollment.order.id
             )
