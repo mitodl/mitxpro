@@ -75,6 +75,7 @@ from ecommerce.models import (
     OrderAudit,
     Product,
 )
+from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.utils import now_in_utc
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
@@ -163,15 +164,16 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
 
     payment_transaction_number = "transaction_number"
     if has_coupon:
-        coupon_version = CouponRedemptionFactory.create(order=order).coupon_version
-        payment_version = coupon_version.payment_version
-        payment_version.payment_type = CouponPaymentVersion.PAYMENT_PO
-        payment_version.payment_transaction = payment_transaction_number
-
-        if not has_company:
-            payment_version.company = None
-
-        payment_version.save()
+        coupon_version = CouponRedemptionFactory.create(
+            order=order,
+            coupon_version__payment_version__payment_type=CouponPaymentVersion.PAYMENT_PO,
+            coupon_version__payment_version__payment_transaction=payment_transaction_number,
+            **(
+                {"coupon_version__payment_version__company": None}
+                if not has_company
+                else {}
+            ),
+        ).coupon_version
 
     now = now_in_utc()
 
@@ -319,12 +321,13 @@ def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):
     Verify that expired or future CouponPaymentVersions are not returned for a list of coupons
     """
     today = now_in_utc()
-    civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.payment_version
-    civ_worst.activation_date = today + timedelta(days=1)
-    civ_worst.save()
-    civ_best = basket_and_coupons.coupongroup_best.coupon_version.payment_version
-    civ_best.expiration_date = today - timedelta(days=1)
-    civ_best.save()
+    with unprotect_version_tables():
+        civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.payment_version
+        civ_worst.activation_date = today + timedelta(days=1)
+        civ_worst.save()
+        civ_best = basket_and_coupons.coupongroup_best.coupon_version.payment_version
+        civ_best.expiration_date = today - timedelta(days=1)
+        civ_best.save()
 
     best_versions = list(
         get_valid_coupon_versions(
@@ -364,23 +367,25 @@ def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons, order_statu
     """
     Verify that CouponPaymentVersions that have exceeded redemption limits are not returned
     """
-    civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.payment_version
-    civ_worst.max_redemptions = 1
-    civ_worst.save()
-    CouponRedemptionFactory(
-        coupon_version=basket_and_coupons.coupongroup_worst.coupon_version,
-        order=OrderFactory(status=order_status),
-    )
+    with unprotect_version_tables():
+        civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.payment_version
+        civ_worst.max_redemptions = 1
+        civ_worst.save()
+        CouponRedemptionFactory(
+            coupon_version=basket_and_coupons.coupongroup_worst.coupon_version,
+            order=OrderFactory(status=order_status),
+        )
 
-    civ_best = basket_and_coupons.coupongroup_best.coupon_version.payment_version
-    civ_best.max_redemptions_per_user = 1
-    civ_best.save()
-    CouponRedemptionFactory(
-        coupon_version=basket_and_coupons.coupongroup_best.coupon_version,
-        order=OrderFactory(
-            purchaser=basket_and_coupons.basket_item.basket.user, status=order_status
-        ),
-    )
+        civ_best = basket_and_coupons.coupongroup_best.coupon_version.payment_version
+        civ_best.max_redemptions_per_user = 1
+        civ_best.save()
+        CouponRedemptionFactory(
+            coupon_version=basket_and_coupons.coupongroup_best.coupon_version,
+            order=OrderFactory(
+                purchaser=basket_and_coupons.basket_item.basket.user,
+                status=order_status,
+            ),
+        )
 
     best_versions = list(
         get_valid_coupon_versions(
@@ -468,11 +473,12 @@ def test_get_product_version_price_with_discount(has_coupon, basket_and_coupons)
     get_product_version_price_with_discount should check if the coupon exists and if so calculate price based on its
     discount.
     """
-    product_version = basket_and_coupons.basket_item.product.productversions.order_by(
-        "-created_on"
-    ).first()
-    product_version.price = Decimal("123.45")
-    product_version.save()
+    with unprotect_version_tables():
+        product_version = basket_and_coupons.basket_item.product.productversions.order_by(
+            "-created_on"
+        ).first()
+        product_version.price = Decimal("123.45")
+        product_version.save()
 
     coupon_version = basket_and_coupons.coupongroup_best.coupon_version
     # Make sure to test that we round the results

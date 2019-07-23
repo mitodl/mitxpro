@@ -1,9 +1,12 @@
 """Tests for ecommerce models"""
+from django.db.utils import IntegrityError
 import pytest
 
 from courses.factories import CourseRunFactory, ProgramFactory
 from ecommerce.factories import (
     CouponRedemptionFactory,
+    CouponPaymentVersionFactory,
+    CouponVersionFactory,
     LineFactory,
     ProductFactory,
     ProductVersionFactory,
@@ -102,7 +105,6 @@ def test_product_version_save_text_id_courserun():
     product_version = ProductVersionFactory.create(
         product=ProductFactory.create(content_object=run)
     )
-    product_version.save()
     assert product_version.text_id == run.courseware_id
 
 
@@ -112,7 +114,6 @@ def test_product_version_save_text_id_program():
     product_version = ProductVersionFactory.create(
         product=ProductFactory.create(content_object=program)
     )
-    product_version.save()
     assert product_version.text_id == program.readable_id
 
 
@@ -122,8 +123,30 @@ def test_product_version_save_text_id_badproduct(mocker):
     product_version = ProductVersionFactory.create(
         product=ProductFactory.create(content_object=LineFactory())
     )
-    product_version.save()
     assert product_version.text_id is None
     assert mock_log.called_once_with(
         f"The content object for this ProductVersion ({product_version.id}) does not have a `text_id` property"
     )
+
+
+@pytest.mark.parametrize(
+    "factory",
+    [ProductVersionFactory, CouponVersionFactory, CouponPaymentVersionFactory],
+)
+def test_prevent_update(factory):
+    """Check that we prevent updating certain version models"""
+    obj = factory.create()
+    with pytest.raises(IntegrityError):
+        obj.save()
+
+
+@pytest.mark.parametrize(
+    "factory",
+    [ProductVersionFactory, CouponVersionFactory, CouponPaymentVersionFactory],
+)
+def test_prevent_delete(factory):
+    """Check that we prevent deleting certain version models"""
+    obj = factory.create()
+    obj_id = obj.id
+    obj.delete()
+    assert type(obj).objects.filter(id=obj_id).count() == 1

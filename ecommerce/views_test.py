@@ -47,6 +47,7 @@ from ecommerce.serializers import (
     CurrentCouponPaymentSerializer,
     DataConsentUserSerializer,
 )
+from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.test_utils import create_tempfile_csv
 from users.factories import UserFactory
 
@@ -518,9 +519,10 @@ def test_patch_basket_clear_coupon_no_auto(
     """ Test that all coupons are cleared from basket  """
     basket = basket_and_coupons.basket
 
-    auto_coupon_payment = basket_and_coupons.coupongroup_worst.payment_version
-    auto_coupon_payment.automatic = False
-    auto_coupon_payment.save()
+    with unprotect_version_tables():
+        auto_coupon_payment = basket_and_coupons.coupongroup_worst.payment_version
+        auto_coupon_payment.automatic = False
+        auto_coupon_payment.save()
 
     original_basket = BasketSerializer(instance=basket, context=mock_context).data
     assert len(original_basket.get("coupons")) == 1
