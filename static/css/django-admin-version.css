@@ -1,0 +1,3 @@
+input[name="_continue"], input[name="_save"], .historylink {
+    display: none !important;
+}

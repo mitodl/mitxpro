@@ -94,22 +94,31 @@ class CouponPaymentVersionInline(admin.StackedInline):
     """Admin Inline for CouponPaymentVersion objects"""
 
     model = CouponPaymentVersion
-    extra = 1
+    readonly_fields = get_field_names(CouponPaymentVersion)
+    extra = 0
     show_change_link = True
+    can_delete = False
+    ordering = ("-created_on",)
+    min_num = 0
 
 
 class CouponVersionInline(admin.StackedInline):
     """Admin Inline for CouponVersion objects"""
 
     model = CouponVersion
-    extra = 1
+    readonly_fields = get_field_names(CouponVersion)
+    extra = 0
     show_change_link = True
+    can_delete = False
+    ordering = ("-created_on",)
+    min_num = 0
 
 
 class CouponAdmin(admin.ModelAdmin):
     """Admin for Coupons"""
 
     model = Coupon
+    save_on_top = True
     inlines = [CouponVersionInline]
 
 
@@ -117,6 +126,7 @@ class CouponPaymentAdmin(admin.ModelAdmin):
     """Admin for CouponPayments"""
 
     model = CouponPayment
+    save_on_top = True
     inlines = [CouponPaymentVersionInline]
 
 
@@ -124,12 +134,30 @@ class CouponPaymentVersionAdmin(admin.ModelAdmin):
     """Admin for CouponPaymentVersions"""
 
     model = CouponPaymentVersion
+    save_as = True
+    save_as_continue = False
+    save_on_top = True
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    class Media:
+        css = {"all": ("css/django-admin-version.css",)}
 
 
 class CouponVersionAdmin(admin.ModelAdmin):
     """Admin for CouponVersions"""
 
     model = CouponVersion
+    save_as = True
+    save_as_continue = False
+    save_on_top = True
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    class Media:
+        css = {"all": ("css/django-admin-version.css",)}
 
 
 class CouponSelectionAdmin(admin.ModelAdmin):
@@ -150,17 +178,38 @@ class CouponRedemptionAdmin(admin.ModelAdmin):
     model = CouponRedemption
 
 
-class ProductAdmin(admin.ModelAdmin):
-    """Admin for CouponRedemptions"""
-
-    model = Product
-
-
 class ProductVersionAdmin(admin.ModelAdmin):
     """Admin for ProductVersion"""
 
     model = ProductVersion
-    readonly_fields = ("text_id",)
+    save_as = True
+    save_as_continue = False
+    save_on_top = True
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    class Media:
+        css = {"all": ("css/django-admin-version.css",)}
+
+
+class ProductVersionInline(admin.StackedInline):
+    """Inline form for ProductVersion"""
+
+    model = ProductVersion
+    readonly_fields = get_field_names(ProductVersion)
+    extra = 0
+    show_change_link = True
+    can_delete = False
+    ordering = ("-created_on",)
+    min_num = 0
+
+
+class ProductAdmin(admin.ModelAdmin):
+    """Admin for Product"""
+
+    model = Product
+    inlines = [ProductVersionInline]
 
 
 class DataConsentUserAdmin(admin.ModelAdmin):
