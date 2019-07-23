@@ -74,7 +74,7 @@ describe("RegisterEmailPage", () => {
   })
 
   it("handles onSubmit for an existing user password login", async () => {
-    const { inner } = await renderPage()
+    const { inner, store } = await renderPage()
 
     helper.handleRequestStub.returns({
       body: {
@@ -97,6 +97,17 @@ describe("RegisterEmailPage", () => {
     })
     sinon.assert.notCalled(setErrorsStub)
     sinon.assert.calledWith(setSubmittingStub, false)
+
+    const { ui } = store.getState()
+
+    assert.deepEqual(ui.userNotifications, {
+      "account-exists": {
+        type:  ALERT_TYPE_TEXT,
+        props: {
+          text: `You have already have an account with ${email}. Enter password to signin.`
+        }
+      }
+    })
   })
 
   it("handles onSubmit for a confirmation email", async () => {

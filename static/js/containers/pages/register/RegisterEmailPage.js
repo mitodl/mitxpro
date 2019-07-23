@@ -37,6 +37,8 @@ type Props = {
 const emailNotificationText = (email: string): string =>
   `We sent an email to ${email}. Please verify your address to continue.`
 
+const accountExistsNotificationText = (email: string): string =>
+  `You have already have an account with ${email}. Enter password to signin.`
 export class RegisterEmailPage extends React.Component<Props> {
   async onSubmit(
     { email, recaptcha }: RegisterEmailFormValues,
@@ -65,6 +67,14 @@ export class RegisterEmailPage extends React.Component<Props> {
         })
         history.push(routes.login.begin)
       } else if (state === STATE_LOGIN_PASSWORD) {
+        addUserNotification({
+          "account-exists": {
+            type:  ALERT_TYPE_TEXT,
+            props: {
+              text: accountExistsNotificationText(email)
+            }
+          }
+        })
         history.push(routes.login.password)
       } else if (errors.length > 0) {
         setErrors({
