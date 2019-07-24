@@ -234,7 +234,8 @@ class CouponPaymentVersion(TimestampedModel):
     PAYMENT_PO = "purchase_order"
     PAYMENT_MKT = "marketing"
     PAYMENT_SALE = "sales"
-    PAYMENT_TYPES = [PAYMENT_CC, PAYMENT_PO, PAYMENT_MKT, PAYMENT_SALE]
+    PAYMENT_STAFF = "staff"
+    PAYMENT_TYPES = [PAYMENT_CC, PAYMENT_PO, PAYMENT_MKT, PAYMENT_SALE, PAYMENT_STAFF]
 
     tag = models.CharField(max_length=256, null=True, blank=True)
     payment = models.ForeignKey(
