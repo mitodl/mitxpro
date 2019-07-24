@@ -104,3 +104,14 @@ def create_tempfile_csv(rows_iter):
         return SimpleUploadedFile(
             f.name, user_csv.read().encode("utf8"), content_type="application/csv"
         )
+
+
+def format_as_iso8601(time):
+    """Helper function to format datetime with the Z at the end"""
+    # Can't use datetime.isoformat() because format is slightly different from this
+    iso_format = "%Y-%m-%dT%H:%M:%S"
+    formatted_time = time.strftime(iso_format)
+    if time.microsecond:
+        miniseconds_format = ".%f"
+        formatted_time += time.strftime(miniseconds_format)[:4]
+    return formatted_time + "Z"

@@ -393,7 +393,13 @@ class EnrollmentModel(TimestampedModel, AuditableModel):
         raise NotImplementedError
 
     def to_dict(self):
-        return serialize_model_object(self)
+        return {
+            **serialize_model_object(self),
+            "username": self.user.username,
+            "full_name": self.user.name,
+            "email": self.user.email,
+            "company_name": self.company.name if self.company else None,
+        }
 
     def deactivate_and_save(self, change_status, no_user=False):
         """Sets an enrollment to inactive, sets the status, and saves"""
@@ -440,6 +446,9 @@ class CourseRunEnrollment(EnrollmentModel):
         """
         return cls.objects.filter(user=user, run__course__program=program)
 
+    def to_dict(self):
+        return {**super().to_dict(), "text_id": self.run.courseware_id}
+
     def __str__(self):
         return f"CourseRunEnrollment for {self.user} and {self.run}"
 
@@ -480,6 +489,9 @@ class ProgramEnrollment(EnrollmentModel):
         return CourseRunEnrollment.get_program_run_enrollments(
             user=self.user, program=self.program
         )
+
+    def to_dict(self):
+        return {**super().to_dict(), "text_id": self.program.readable_id}
 
     def __str__(self):
         return f"ProgramEnrollment for {self.user} and {self.program}"
