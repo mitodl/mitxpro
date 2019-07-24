@@ -38,7 +38,7 @@ const emailNotificationText = (email: string): string =>
   `We sent an email to ${email}. Please verify your address to continue.`
 
 const accountExistsNotificationText = (email: string): string =>
-  `You have already have an account with ${email}. Enter password to signin.`
+  `You already have an account with ${email}. Enter password to sign in.`
 export class RegisterEmailPage extends React.Component<Props> {
   async onSubmit(
     { email, recaptcha }: RegisterEmailFormValues,
@@ -70,6 +70,7 @@ export class RegisterEmailPage extends React.Component<Props> {
         addUserNotification({
           "account-exists": {
             type:  ALERT_TYPE_TEXT,
+            color: "danger",
             props: {
               text: accountExistsNotificationText(email)
             }
