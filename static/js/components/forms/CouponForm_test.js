@@ -203,7 +203,7 @@ describe("CouponForm", () => {
   //
   ;[
     ["payment_type", "", "Payment type is required"],
-    ["payment_type", "credit_card", null]
+    ["payment_type", "staff", null]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value

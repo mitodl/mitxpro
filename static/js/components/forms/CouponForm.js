@@ -301,6 +301,7 @@ export const CouponForm = ({
                 <option value="purchase_order">Purchase Order</option>
                 <option value="sales">Sales</option>
                 <option value="marketing">Marketing</option>
+                <option value="staff">Staff</option>
               </Field>
             </label>
             <ErrorMessage name="payment_type" component="div" />
