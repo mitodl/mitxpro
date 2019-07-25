@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.14.0 (Released July 25, 2019)
+--------------
+
+- Django admin for version tables (#830)
+- Changed refund command to properly create order audit record
+- Move hubspot contact sync task out of atomic transactions (#891)
+- Add protection rules for ProductVersion, CouponVersion, CouponPaymentVersion (#795)
+- Remove pep8 (#852)
+- Use next_run_id for a default for the checkout page course run selection (#856)
+- #885 Use catalog_details for featured product card
+- disply message when account already exists
+
 Version 0.13.6 (Released July 22, 2019)
 --------------
 
