@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.14.0
+Version 0.14.0 (Released July 25, 2019)
 --------------
 
 - Django admin for version tables (#830)
