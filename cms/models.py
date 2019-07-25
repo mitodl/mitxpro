@@ -13,7 +13,7 @@ from django.shortcuts import reverse
 from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
 from wagtail.core import blocks
-from wagtail.core.blocks import PageChooserBlock, RawHTMLBlock
+from wagtail.core.blocks import PageChooserBlock, RawHTMLBlock, StreamBlock
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Orderable, Page
 from wagtail.core.utils import WAGTAIL_APPEND_SLASH
@@ -30,7 +30,7 @@ from cms.blocks import (
     ResourceBlock,
     UserTestimonialBlock,
 )
-from cms.constants import COURSE_INDEX_SLUG, PROGRAM_INDEX_SLUG
+from cms.constants import COURSE_INDEX_SLUG, PROGRAM_INDEX_SLUG, SIGNATORY_INDEX_SLUG
 from cms.utils import sort_and_filter_pages
 from mitxpro.views import get_js_settings_context
 
@@ -86,6 +86,38 @@ class CourseObjectIndexPage(Page):
         raise Http404
 
 
+class SignatoryObjectIndexPage(Page):
+    """
+    A placeholder class to group signatory object pages as children.
+    This class logically acts as no more than a "folder" to organize
+    pages and add parent slug segment to the page url.
+    """
+
+    class Meta:
+        abstract = True
+
+    parent_page_types = ["HomePage"]
+    subpage_types = ["SignatoryPage"]
+
+    @classmethod
+    def can_create_at(cls, parent):
+        """
+        You can only create one of these pages under the home page.
+        The parent is limited via the `parent_page_type` list.
+        """
+        return (
+            super().can_create_at(parent)
+            and not parent.get_children().type(cls).exists()
+        )
+
+    def serve(self, request, *args, **kwargs):
+        """
+        For index pages we raise a 404 because these pages do not have a template
+        of their own and we do not expect a page to available at their slug.
+        """
+        raise Http404
+
+
 class CourseIndexPage(CourseObjectIndexPage):
     """
     A placeholder page to group all the courses under it as well
@@ -110,6 +142,15 @@ class ProgramIndexPage(CourseObjectIndexPage):
     def get_child_by_readable_id(self, readable_id):
         """Fetch a child page by the related Program's readable_id value"""
         return self.get_children().get(programpage__program__readable_id=readable_id)
+
+
+class SignatoryIndexPage(SignatoryObjectIndexPage):
+    """
+    A placeholder page to group all the signatories under it as well
+    as consequently add /signatories/ to the signatory page urls
+    """
+
+    slug = SIGNATORY_INDEX_SLUG
 
 
 class CatalogPage(Page):
@@ -375,6 +416,7 @@ class ProductPage(MetadataPageMixin, Page):
         "UserTestimonialsPage",
         "FacultyMembersPage",
         "TextSection",
+        "CertificatePage",
     ]
 
     # Matches the standard page path that Wagtail returns for this page type.
@@ -1069,6 +1111,167 @@ class ResourcePage(Page):
         context.update(**get_js_settings_context(request))
 
         return context
+
+
+class SignatoryPage(Page):
+    """ CMS page representing a Signatory. """
+
+    promote_panels = []
+    parent_page_types = [SignatoryIndexPage]
+    subpage_types = []
+
+    name = models.CharField(
+        max_length=250, null=False, blank=False, help_text="Name of the signatory."
+    )
+    title_1 = models.CharField(
+        max_length=250,
+        null=True,
+        blank=True,
+        help_text="Specify signatory first title in organization.",
+    )
+    title_2 = models.CharField(
+        max_length=250,
+        null=True,
+        blank=True,
+        help_text="Specify signatory second title in organization.",
+    )
+    organization = models.CharField(
+        max_length=250,
+        null=True,
+        blank=True,
+        help_text="Specify the organization of signatory.",
+    )
+
+    signature_image = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Signature image size must be at least 150x50 pixels.",
+    )
+
+    class Meta:
+        verbose_name = "Signatory"
+
+    content_panels = [
+        FieldPanel("name"),
+        FieldPanel("title_1"),
+        FieldPanel("title_2"),
+        FieldPanel("organization"),
+        ImageChooserPanel("signature_image"),
+    ]
+
+    def save(self, *args, **kwargs):
+        # auto generate a unique slug so we don't hit a ValidationError
+        if not self.title:
+            self.title = self.__class__._meta.verbose_name.title() + "-" + self.name
+
+        self.slug = slugify("{}-{}".format(self.title, self.id))
+        super().save(*args, **kwargs)
+
+    def serve(self, request, *args, **kwargs):
+        """
+        As the name suggests these pages are going to be children of some other page. They are not
+        designed to be viewed on their own so we raise a 404 if someone tries to access their slug.
+        """
+        raise Http404
+
+
+class CertificatePage(CourseProgramChildPage):
+    """
+    CMS page representing a Certificate.
+    """
+
+    template = "certificate_page.html"
+    parent_page_types = ["CoursePage", "ProgramPage"]
+
+    product_name = models.CharField(
+        max_length=250,
+        null=False,
+        blank=False,
+        help_text="Specify the course/program name.",
+    )
+
+    CEUs = models.CharField(
+        max_length=250,
+        null=True,
+        blank=True,
+        help_text="Optional text field for CEU (continuing education unit).",
+    )
+
+    signatories = StreamField(
+        StreamBlock(
+            [
+                (
+                    "signatory",
+                    PageChooserBlock(required=True, target_model=["cms.SignatoryPage"]),
+                )
+            ],
+            min_num=1,
+            max_num=5,
+        ),
+        help_text="You can choose upto 5 signatories.",
+    )
+
+    content_panels = [
+        FieldPanel("product_name"),
+        FieldPanel("CEUs"),
+        StreamFieldPanel("signatories"),
+    ]
+
+    class Meta:
+        verbose_name = "Certificate"
+
+    def save(self, *args, **kwargs):
+        # auto generate a unique slug so we don't hit a ValidationError
+        self.title = (
+            self.__class__._meta.verbose_name.title()
+            + " For "
+            + self.get_parent().title
+        )
+
+        self.slug = slugify("certificate-{}".format(self.get_parent().id))
+        Page.save(self, *args, **kwargs)
+
+    def serve(self, request, *args, **kwargs):
+        """
+        We need to serve the certificate template for preview.
+        """
+        return Page.serve(self, request, *args, **kwargs)
+
+    @property
+    def signatory_pages(self):
+        """
+        Extracts all the pages out of the `signatories` stream into a list
+        """
+        pages = []
+        for block in self.signatories:  # pylint: disable=not-an-iterable
+            if block.value:
+                pages.append(block.value.specific)
+        return pages
+
+    @property
+    def parent(self):
+        """
+        Get the parent of this page.
+        """
+        return self.get_parent().specific
+
+    def get_context(self, request, *args, **kwargs):
+        preview_context = {}
+
+        if request.is_preview:
+            preview_context = {
+                "learner_name": "Anthony M. Stark",
+                "run": self.parent.product.first_unexpired_run,
+            }
+
+        return {
+            **super().get_context(request, *args, **kwargs),
+            **get_js_settings_context(request),
+            **preview_context,
+        }
 
 
 @register_snippet

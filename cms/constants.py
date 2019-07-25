@@ -2,3 +2,4 @@
 
 COURSE_INDEX_SLUG = "courses"
 PROGRAM_INDEX_SLUG = "programs"
+SIGNATORY_INDEX_SLUG = "signatories"

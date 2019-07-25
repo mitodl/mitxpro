@@ -2,9 +2,17 @@
 from django.core.management.base import BaseCommand
 from wagtail.core.models import Site
 
-from cms.models import CourseIndexPage, CoursePage, ProgramIndexPage, ProgramPage
+from cms.models import (
+    CourseIndexPage,
+    CoursePage,
+    ProgramIndexPage,
+    ProgramPage,
+    SignatoryPage,
+    SignatoryIndexPage,
+)
 
 
+# pylint: disable=too-many-branches
 class Command(BaseCommand):
     """Creates courseware index pages and moves the existing courseware pages under the index pages"""
 
@@ -18,6 +26,7 @@ class Command(BaseCommand):
             help="Delete the index pages and move the courseware pages back under the homepage.",
         )
 
+    # pylint: disable=too-many-statements
     def handle(self, *args, **options):
         """Handle command execution"""
         delete = options["revert"]
@@ -41,6 +50,20 @@ class Command(BaseCommand):
 
         if not delete:
             course_index = CourseIndexPage.objects.first()
+            signatory_index = SignatoryIndexPage.objects.first()
+
+            if not signatory_index:
+                signatory_index = SignatoryIndexPage(title="Signatories")
+                home_page.add_child(instance=signatory_index)
+                self.stdout.write(self.style.SUCCESS("Signatory index page created."))
+
+            for signatory_page in SignatoryPage.objects.all():
+                signatory_page.move(signatory_index, "last-child")
+
+            self.stdout.write(
+                self.style.SUCCESS("Signatories pages moved under index.")
+            )
+            signatory_index.save_revision().publish()
 
             if not course_index:
                 course_index = CourseIndexPage(title="Courses")
@@ -67,6 +90,18 @@ class Command(BaseCommand):
             program_index.save_revision().publish()
         else:
             course_index = CourseIndexPage.objects.first()
+            signatory_index = SignatoryIndexPage.objects.first()
+
+            if signatory_index:
+                for page in signatory_index.get_children():
+                    page.move(home_page, "last-child")
+                self.stdout.write(
+                    self.style.SUCCESS("Signatories pages moved under homepage.")
+                )
+
+                signatory_index.delete()
+                self.stdout.write(self.style.WARNING("Signatory index page removed."))
+
             if course_index:
                 for page in course_index.get_children():
                     page.move(home_page, "last-child")

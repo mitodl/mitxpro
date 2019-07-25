@@ -1,0 +1,127 @@
+// sass-lint:disable mixins-before-declarations
+
+$gray-light: #d9e0e3;
+$text-gray-dark: #6b6969;
+$text-gray-light: #d2d0d1;
+
+.certificate-wrapper {
+  padding: 20px 15px;
+  margin: 20px auto;
+  max-width: 1120px;
+}
+
+.certificate-holder {
+  margin: 0 auto;
+  max-width: 730px;
+}
+
+.certificate {
+  border: 2px solid $gray-light;
+  background: white;
+  padding: 35px 15px 0;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  text-align: center;
+  color: black;
+
+  .certificate-logo {
+    display: block;
+    max-width: 250px;
+    margin: 0 auto 15px;
+
+    img {
+      display: block;
+      width: 100%;
+    }
+  }
+
+  .institute-logo {
+    display: block;
+    max-width: 202px;
+    margin: 0 auto 30px;
+
+    img {
+      display: block;
+      width: 100%;
+    }
+  }
+
+  .certify-text {
+    display: block;
+    font-size: 18px;
+    line-height: 25px;
+    color: $text-gray-dark;
+    font-style: italic;
+  }
+
+  .institute-text {
+    display: block;
+    font-size: 18px;
+    line-height: 25px;
+    color: $text-gray-dark;
+    margin: 0 0 15px;
+  }
+
+  .certify-name {
+    display: block;
+    font-size: 50px;
+    line-height: 60px;
+    font-weight: 600;
+    margin: 0 0 40px;
+  }
+
+  .degree-text {
+    display: block;
+    font-size: 38px;
+    line-height: 45px;
+    font-weight: 600;
+  }
+
+  .success-text {
+    display: block;
+    font-size: 18px;
+    line-height: 25px;
+    color: $text-gray-dark;
+    font-style: italic;
+    margin: 0 0 10px;
+  }
+
+  .award-text {
+    display: block;
+    font-size: 20px;
+    line-height: 25px;
+    margin: 0 0 10px;
+  }
+
+  .certify-by {
+    padding-top: 35px;
+    padding-bottom: 35px;
+    font-size: 12px;
+    line-height: 17px;
+    color: $text-gray-dark;
+
+    .title {
+      color: black;
+      display: block;
+      font-size: 14px;
+      font-weight: bold;
+      margin: 0 0 5px;
+    }
+
+    p {
+      margin: 0 0 5px;
+    }
+  }
+
+  .signature-area {
+    border-bottom: 2px solid $text-gray-light;
+    padding: 0 0 15px;
+    text-align: center;
+    margin: 0 0 15px;
+
+    img {
+      display: inline-block;
+      vertical-align: top;
+      max-width: 80%;
+    }
+  }
+}
