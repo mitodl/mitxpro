@@ -26,6 +26,8 @@ from cms.models import (
     TextVideoSection,
     CatalogPage,
     TextSection,
+    SignatoryPage,
+    CertificatePage,
 )
 from cms.blocks import (
     LearningTechniqueBlock,
@@ -297,3 +299,29 @@ class HomePageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = HomePage
+
+
+class SignatoryPageFactory(wagtail_factories.PageFactory):
+    """SignatoryPage factory class"""
+
+    name = factory.fuzzy.FuzzyText(prefix="Name")
+    title_1 = factory.fuzzy.FuzzyText(prefix="Title_1")
+    title_2 = factory.fuzzy.FuzzyText(prefix="Title_2")
+    organization = factory.fuzzy.FuzzyText(prefix="Organization")
+    signature_image = factory.SubFactory(wagtail_factories.ImageFactory)
+
+    class Meta:
+        model = SignatoryPage
+
+
+class CertificatePageFactory(wagtail_factories.PageFactory):
+    """CertificatePage factory class"""
+
+    product_name = factory.fuzzy.FuzzyText(prefix="product_name")
+    CEUs = factory.fuzzy.FuzzyText(prefix="1.8")
+    signatories = wagtail_factories.StreamFieldFactory(
+        {"signatory": SignatoryPageFactory}
+    )
+
+    class Meta:
+        model = CertificatePage

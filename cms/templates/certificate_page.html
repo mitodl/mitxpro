@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static wagtailimages_tags %}
+
+{% block content %}
+<div class="certificate-wrapper">
+    <div class="certificate">
+        <div class="certificate-holder">
+            <div class="certificate-logo">
+                <img src="{% static 'images/certificates/certificate-mit-logo.png' %}" alt="">
+            </div>
+            <span class="institute-text">Massachusetts Institute of Technology</span>
+            <div class="institute-logo">
+                <img src="{% static 'images/certificates/certificate-logo.png' %}" alt="">
+            </div>
+            <span class="certify-text">This is to certify that</span>
+            <span class="certify-name">{{ learner_name }}</span>
+            <span class="success-text">has successfully completed</span>
+            <span class="degree-text">{{ page.product_name }}</span>
+            {% if page.CEUs %}
+                <span class="award-text">Awarded {{ page.CEUs }} Continuing Eduction Units (CEUs) <br>{{ run.start_date|date:"F j " }} - {{ run.end_date|date }}</span>
+            {% endif %}
+            <div class="row justify-content-center">
+            {% for signatory in page.signatory_pages %}
+                <div class="col-sm-4 certify-by">
+                    <div class="signature-area">
+                        {% image signatory.signature_image fill-150x50 %}
+                    </div>
+                    <span class="title">{{ signatory.name }}</span>
+                    {% if signatory.title_1 %}
+                        <p>{{ signatory.title_1 }}</p>
+                    {% endif %}
+                    {% if signatory.title_2 %}
+                        <p>{{ signatory.title_2 }}</p>
+                    {% endif %}
+                    {% if signatory.organization %}
+                        <p>{{ signatory.organization }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block footer %}
+{% endblock %}
