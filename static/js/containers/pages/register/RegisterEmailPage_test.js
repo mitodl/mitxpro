@@ -103,8 +103,9 @@ describe("RegisterEmailPage", () => {
     assert.deepEqual(ui.userNotifications, {
       "account-exists": {
         type:  ALERT_TYPE_TEXT,
+        color: "danger",
         props: {
-          text: `You have already have an account with ${email}. Enter password to signin.`
+          text: `You already have an account with ${email}. Enter password to sign in.`
         }
       }
     })
