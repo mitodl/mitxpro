@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.14.1
+--------------
+
+- Update audit table serialization for program and course run enrollments (#861)
+- fix styling on account exists message
+
 Version 0.14.0 (Released July 25, 2019)
 --------------
 
