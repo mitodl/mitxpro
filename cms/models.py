@@ -16,6 +16,7 @@ from wagtail.core import blocks
 from wagtail.core.blocks import PageChooserBlock, RawHTMLBlock
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Orderable, Page
+from wagtail.core.utils import WAGTAIL_APPEND_SLASH
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.models import Image
 from wagtail.images.edit_handlers import ImageChooserPanel
@@ -635,6 +636,28 @@ class CourseProgramChildPage(Page):
             self.title = self.__class__._meta.verbose_name.title()
         self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
         super().save(*args, **kwargs)
+
+    def get_url_parts(self, request=None):
+        """
+        Override how the url is generated for course/program child pages
+        """
+        # Verify the page is routable
+        url_parts = super().get_url_parts(request=request)
+
+        if not url_parts:
+            return None
+
+        site_id, site_root, parent_path = self.get_parent().specific.get_url_parts(
+            request=request
+        )
+        page_path = ""
+
+        # Depending on whether we have trailing slashes or not, build the correct path
+        if WAGTAIL_APPEND_SLASH:
+            page_path = "{}{}/".format(parent_path, self.slug)
+        else:
+            page_path = "{}/{}".format(parent_path, self.slug)
+        return (site_id, site_root, page_path)
 
     def serve(self, request, *args, **kwargs):
         """

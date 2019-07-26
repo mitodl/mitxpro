@@ -5,6 +5,7 @@ import pytest
 import factory
 
 from django.urls import resolve
+from wagtail.core.utils import WAGTAIL_APPEND_SLASH
 
 from cms.factories import (
     ResourcePageFactory,
@@ -339,6 +340,49 @@ def test_program_page_testimonials():
         assert testimonial.value.get("title") == "title"
         assert testimonial.value.get("image").title == "image"
         assert testimonial.value.get("quote") == "quote"
+
+
+def test_child_page_unroutable():
+    """
+    Child page should not provide a URL if it unroutable
+    """
+    home_page = HomePageFactory.create()
+    child_page = TextSectionFactory.create(parent=home_page)
+    assert not child_page.get_full_url()
+
+
+def test_program_page_child_page_url():
+    """
+    The live URL of child pages should be of the correct format:
+    <site_root>/programs/<program__readable_id>/<child_page__slug>
+    """
+    program_page = ProgramPageFactory.create(program__readable_id="program:test")
+    child_page = TextSectionFactory.create(parent=program_page)
+
+    program_page_url = program_page.get_full_url()
+    child_page_url = child_page.get_full_url()
+
+    if WAGTAIL_APPEND_SLASH:
+        assert child_page_url == "{}{}/".format(program_page_url, child_page.slug)
+    else:
+        assert child_page_url == "{}/{}".format(program_page_url, child_page.slug)
+
+
+def test_course_page_child_page_url():
+    """
+    The live URL of child pages should be of the correct format:
+    <site_root>/courses/<course__readable_id>/<child_page__slug>
+    """
+    course_page = CoursePageFactory.create(course__readable_id="course:test")
+    child_page = TextSectionFactory.create(parent=course_page)
+
+    course_page_url = course_page.get_full_url()
+    child_page_url = child_page.get_full_url()
+
+    if WAGTAIL_APPEND_SLASH:
+        assert child_page_url == "{}{}/".format(course_page_url, child_page.slug)
+    else:
+        assert child_page_url == "{}/{}".format(course_page_url, child_page.slug)
 
 
 def test_course_page_for_teams():
