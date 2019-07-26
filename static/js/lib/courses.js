@@ -33,10 +33,17 @@ export const getDateSummary = (
     }
   }
   const endDate = parseDateString(courseRunEnrollment.run.end_date)
-  if (endDate && endDate.isAfter(now)) {
-    return {
-      text:       `Ends: ${formatPrettyDate(endDate)}`,
-      inProgress: true
+  if (endDate) {
+    if (endDate.isAfter(now)) {
+      return {
+        text:       `Ends: ${formatPrettyDate(endDate)}`,
+        inProgress: true
+      }
+    } else {
+      return {
+        text:       `Ended: ${formatPrettyDate(endDate)}`,
+        inProgress: false
+      }
     }
   } else if (startDate) {
     return {

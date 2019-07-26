@@ -142,6 +142,16 @@ export class DashboardPage extends React.Component<Props, State> {
     )
   }
 
+  pastEnrollmentsExist = (): boolean => {
+    const { enrollments } = this.props
+
+    return (
+      enrollments &&
+      (enrollments.past_program_enrollments.length > 0 ||
+        enrollments.past_course_run_enrollments.length > 0)
+    )
+  }
+
   isLinkableCourseRun = ({ run }: CourseRunEnrollment): boolean =>
     !R.isNil(run.courseware_url) &&
     !R.isNil(run.start_date) &&
@@ -278,6 +288,7 @@ export class DashboardPage extends React.Component<Props, State> {
     const { enrollments } = this.props
 
     const enrollmentsExist = this.enrollmentsExist()
+    const pastEnrollmentsExist = this.pastEnrollmentsExist()
 
     return (
       <React.Fragment>
@@ -318,6 +329,21 @@ export class DashboardPage extends React.Component<Props, State> {
                     this.renderCourseEnrollment(false)
                   )}
                 </div>
+                {pastEnrollmentsExist ? (
+                  <div className="past-enrollments">
+                    <h3>Past Courses and Programs</h3>
+                    <div className="program-enrollments">
+                      {enrollments.past_program_enrollments.map(
+                        this.renderProgramEnrollment
+                      )}
+                    </div>
+                    <div className="non-program-course-enrollments">
+                      {enrollments.past_course_run_enrollments.map(
+                        this.renderCourseEnrollment(false)
+                      )}
+                    </div>
+                  </div>
+                ) : null}
               </React.Fragment>
             ) : (
               <span>Loading...</span>

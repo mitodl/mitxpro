@@ -86,5 +86,13 @@ export const makeProgramEnrollment = (): ProgramEnrollment => ({
 
 export const makeUserEnrollments = (): UserEnrollments => ({
   program_enrollments:    [makeProgramEnrollment()],
-  course_run_enrollments: [makeCourseRunEnrollment(), makeCourseRunEnrollment()]
+  course_run_enrollments: [
+    makeCourseRunEnrollment(),
+    makeCourseRunEnrollment()
+  ],
+  past_program_enrollments:    [makeProgramEnrollment()],
+  past_course_run_enrollments: [
+    makeCourseRunEnrollment(),
+    makeCourseRunEnrollment()
+  ]
 })

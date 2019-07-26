@@ -48,5 +48,7 @@ export type ProgramEnrollment = {
 
 export type UserEnrollments = {
   program_enrollments: Array<ProgramEnrollment>,
-  course_run_enrollments: Array<CourseRunEnrollment>
+  course_run_enrollments: Array<CourseRunEnrollment>,
+  past_program_enrollments: Array<ProgramEnrollment>,
+  past_course_run_enrollments: Array<CourseRunEnrollment>
 }

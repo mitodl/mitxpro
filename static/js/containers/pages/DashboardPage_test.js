@@ -62,15 +62,19 @@ describe("DashboardPage", () => {
     const { inner } = await renderPage()
     assert.isTrue(inner.find(".user-dashboard").exists())
     const programEnrollments = userEnrollments.program_enrollments
-    const programRunEnrollments =
-      userEnrollments.program_enrollments[0].course_run_enrollments
-    const nonProgramRunEnrollments = userEnrollments.course_run_enrollments
+    const pastProgramEnrollments = userEnrollments.past_program_enrollments
+    const programRunEnrollments = userEnrollments.program_enrollments[0].course_run_enrollments.concat(
+      userEnrollments.past_program_enrollments[0].course_run_enrollments
+    )
+    const nonProgramRunEnrollments = userEnrollments.course_run_enrollments.concat(
+      userEnrollments.past_course_run_enrollments
+    )
     assert.lengthOf(programEnrollments, 1)
-    assert.lengthOf(programRunEnrollments, 2)
-    assert.lengthOf(nonProgramRunEnrollments, 2)
+    assert.lengthOf(programRunEnrollments, 4)
+    assert.lengthOf(nonProgramRunEnrollments, 4)
     assert.lengthOf(
       inner.find(".program-enrollment"),
-      programEnrollments.length
+      programEnrollments.length + pastProgramEnrollments.length
     )
     assert.lengthOf(
       inner.find(".program-enrollments .course-enrollment"),
@@ -109,7 +113,10 @@ describe("DashboardPage", () => {
     sinon.assert.callCount(
       getDateSummaryStub,
       userEnrollments.program_enrollments[0].course_run_enrollments.length +
-        userEnrollments.course_run_enrollments.length
+        userEnrollments.past_program_enrollments[0].course_run_enrollments
+          .length +
+        userEnrollments.course_run_enrollments.length +
+        userEnrollments.past_course_run_enrollments.length
     )
 
     const dates = programDateRangeStub()
@@ -136,7 +143,15 @@ describe("DashboardPage", () => {
       willExpand ? "expands" : "collapses"
     } a program courses section`, async () => {
       const programEnrollmentId = userEnrollments.program_enrollments[0].id
-      const { inner } = await renderPage()
+      const { inner } = await renderPage({
+        entities: {
+          enrollments: {
+            program_enrollments:      userEnrollments.program_enrollments,
+            past_program_enrollments: []
+          }
+        }
+      })
+
       inner.setState({
         collapseVisible: {
           [programEnrollmentId]: !willExpand
@@ -204,8 +219,10 @@ describe("DashboardPage", () => {
       const { inner } = await renderPage({
         entities: {
           enrollments: {
-            program_enrollments:    [],
-            course_run_enrollments: [userRunEnrollment]
+            program_enrollments:         [],
+            past_program_enrollments:    [],
+            course_run_enrollments:      [userRunEnrollment],
+            past_course_run_enrollments: []
           }
         }
       })
