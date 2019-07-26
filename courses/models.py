@@ -167,6 +167,13 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         )
 
     @property
+    def first_course_unexpired_runs(self):
+        """Gets the unexpired course runs for the first (earliest) course in this program"""
+        first_course_run = self.first_unexpired_run
+        if first_course_run:
+            return first_course_run.course.unexpired_runs
+
+    @property
     def text_id(self):
         """ Gets the readable_id"""
         return self.readable_id

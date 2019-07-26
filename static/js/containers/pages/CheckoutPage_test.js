@@ -89,6 +89,25 @@ describe("CheckoutPage", () => {
     assert.equal(inner.find("CheckoutForm").prop("couponCode"), code)
   })
 
+  it("parses the preselect ID from the query parameter and verifies it exists in selected runs", async () => {
+    const course = basket.items[0].courses[0]
+    const courseId = course.id
+    const courseRunId = course.courseruns[0].id
+    const { inner } = await renderPage(
+      {},
+      {
+        location: {
+          search: `product=4567&preselect=${courseRunId}`
+        }
+      }
+    )
+    // Verify that the preselected courseRunId is included against the courseId in selectedRuns
+    assert.equal(
+      inner.find("CheckoutForm").prop("selectedRuns")[courseId],
+      courseRunId
+    )
+  })
+
   it("submits the coupon code", async () => {})
   ;[true, false].forEach(hasCouponCode => {
     [true, false].forEach(hasError => {
