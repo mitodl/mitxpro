@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.14.1
+Version 0.14.1 (Released July 26, 2019)
 --------------
 
 - Update audit table serialization for program and course run enrollments (#861)
