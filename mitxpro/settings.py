@@ -42,6 +42,11 @@ ENVIRONMENT = get_string(
     required=True,
 )
 
+# this is only available to heroku review apps
+HEROKU_APP_NAME = get_string(
+    "HEROKU_APP_NAME", None, description="The name of the review app"
+)
+
 ALLOWED_HOSTS = ["*"]
 
 SECURE_SSL_REDIRECT = get_bool(
@@ -515,6 +520,9 @@ sentry_sdk.init(
         LoggingIntegration(level=SENTRY_LOG_LEVEL),
     ],
 )
+with sentry_sdk.configure_scope() as scope:
+    if HEROKU_APP_NAME:
+        scope.set_tag("review_app_name", HEROKU_APP_NAME)
 
 # server-status
 STATUS_TOKEN = get_string(
