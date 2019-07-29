@@ -165,7 +165,7 @@ class Order(TimestampedModel, AuditableModel):
         from ecommerce.api import get_product_version_price_with_discount
 
         # should be 0 or 1 coupons, and only one line and product
-        coupon = self.couponredemption_set.first()
+        coupon_redemption = self.couponredemption_set.first()
         line = self.lines.first()
 
         return {
@@ -207,8 +207,8 @@ class Order(TimestampedModel, AuditableModel):
             ],
             "total_price": str(
                 get_product_version_price_with_discount(
-                    coupon_version=coupon.coupon_version
-                    if coupon is not None
+                    coupon_version=coupon_redemption.coupon_version
+                    if coupon_redemption is not None
                     else None,
                     product_version=line.product_version,
                 )
