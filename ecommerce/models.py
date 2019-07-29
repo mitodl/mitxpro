@@ -191,15 +191,15 @@ class Order(TimestampedModel, AuditableModel):
             ],
             "coupons": [
                 {
-                    **serialize_model_object(coupon),
+                    **serialize_model_object(coupon_redemption.coupon_version.coupon),
                     "coupon_version_info": {
-                        **serialize_model_object(coupon.coupon_version),
+                        **serialize_model_object(coupon_redemption.coupon_version),
                         "payment_version_info": serialize_model_object(
-                            coupon.coupon_version.payment_version
+                            coupon_redemption.coupon_version.payment_version
                         ),
                     },
                 }
-                for coupon in self.couponredemption_set.all()
+                for coupon_redemption in self.couponredemption_set.all()
             ],
             "run_enrollments": [
                 enrollment.run.courseware_id
@@ -215,6 +215,9 @@ class Order(TimestampedModel, AuditableModel):
                 if line is not None
                 else ""
             ),
+            "receipts": [
+                serialize_model_object(receipt) for receipt in self.receipt_set.all()
+            ],
         }
 
 
