@@ -38,7 +38,10 @@ type State = {
   errors: null
 }
 
-export const calcSelectedRunIds = (item: BasketItem): { [number]: number } => {
+export const calcSelectedRunIds = (
+  item: BasketItem,
+  preselectId: number = 0
+): { [number]: number } => {
   if (item.type === "courserun") {
     const course = item.courses[0]
     return {
@@ -58,6 +61,12 @@ export const calcSelectedRunIds = (item: BasketItem): { [number]: number } => {
     for (const run of course.courseruns) {
       courseLookup[run.id] = course.id
     }
+  }
+
+  // Try to preselect a run if the ID was given
+  if (preselectId) {
+    const courseId = courseLookup[preselectId]
+    selectedRunIds[courseId] = preselectId
   }
 
   for (const runId of item.run_ids) {
@@ -81,8 +90,9 @@ export class CheckoutPage extends React.Component<Props, State> {
     } = this.props
     const params = queryString.parse(search)
     return {
-      productId:  parseInt(params.product),
-      couponCode: params.code
+      productId:   parseInt(params.product),
+      preselectId: parseInt(params.preselect),
+      couponCode:  params.code
     }
   }
 
@@ -204,8 +214,8 @@ export class CheckoutPage extends React.Component<Props, State> {
     const coupon = basket.coupons.find(coupon =>
       coupon.targets.includes(item.id)
     )
-    const { couponCode } = this.getQueryParams()
-    const selectedRuns = calcSelectedRunIds(item)
+    const { couponCode, preselectId } = this.getQueryParams()
+    const selectedRuns = calcSelectedRunIds(item, preselectId)
 
     return (
       <CheckoutForm
