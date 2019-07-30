@@ -71,15 +71,15 @@ def test_order_audit(has_user, has_lines):
         ],
         "coupons": [
             {
-                **serialize_model_object(coupon),
+                **serialize_model_object(coupon_redemption.coupon_version.coupon),
                 "coupon_version_info": {
-                    **serialize_model_object(coupon.coupon_version),
+                    **serialize_model_object(coupon_redemption.coupon_version),
                     "payment_version_info": serialize_model_object(
-                        coupon.coupon_version.payment_version
+                        coupon_redemption.coupon_version.payment_version
                     ),
                 },
             }
-            for coupon in order.couponredemption_set.all()
+            for coupon_redemption in order.couponredemption_set.all()
         ],
         "run_enrollments": [
             enrollment.run.courseware_id
@@ -93,6 +93,9 @@ def test_order_audit(has_user, has_lines):
         )
         if has_lines
         else "",
+        "receipts": [
+            serialize_model_object(receipt) for receipt in order.receipt_set.all()
+        ],
     }
 
 

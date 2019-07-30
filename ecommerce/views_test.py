@@ -49,6 +49,7 @@ from ecommerce.serializers import (
 )
 from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.test_utils import create_tempfile_csv
+from mitxpro.utils import dict_without_keys
 from users.factories import UserFactory
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
@@ -231,8 +232,12 @@ def test_order_fulfilled(
     assert OrderAudit.objects.count() == 2
     order_audit = OrderAudit.objects.last()
     assert order_audit.order == order
-    assert order_audit.data_before == data_before
-    assert order_audit.data_after == order.to_dict()
+    assert dict_without_keys(
+        order_audit.data_before, "updated_on"
+    ) == dict_without_keys(order.to_dict(), "updated_on")
+    assert dict_without_keys(order_audit.data_after, "updated_on") == dict_without_keys(
+        order.to_dict(), "updated_on"
+    )
 
     assert BasketItem.objects.filter(basket__user=user).count() == 0
     assert CourseRunSelection.objects.filter(basket__user=user).count() == 0

@@ -165,13 +165,13 @@ class OrderFulfillmentView(APIView):
                 pass
         else:
             order.status = Order.FULFILLED
-        order.save_and_log(None)
+        order.save()
         sync_hubspot_deal(order)
 
         if order.status == Order.FULFILLED:
             complete_order(order)
 
-        # Save again to log everything to an audit table including enrollments created in complete_order
+        # Save to log everything to an audit table including enrollments created in complete_order
         order.save_and_log(None)
 
         # The response does not matter to CyberSource
