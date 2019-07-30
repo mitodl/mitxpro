@@ -204,7 +204,6 @@ def test_order_fulfilled(
     settings.HUBSPOT_API_KEY = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
-    data_before = order.to_dict()
 
     data = {}
     for _ in range(5):
