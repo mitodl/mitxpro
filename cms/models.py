@@ -144,6 +144,7 @@ class CatalogPage(Page):
         sorted_courserun_qset = CourseRun.objects.order_by("start_date")
         program_pages = (
             ProgramPage.objects.live()
+            .filter(program__live=True)
             .order_by("id")
             .prefetch_related(
                 Prefetch("program__courses__courseruns", queryset=sorted_courserun_qset)
@@ -151,14 +152,15 @@ class CatalogPage(Page):
         )
         course_pages = (
             CoursePage.objects.live()
+            .filter(course__live=True)
             .order_by("id")
             .prefetch_related(
                 Prefetch("course__courseruns", queryset=sorted_courserun_qset)
             )
         )
         featured_product = ProgramPage.objects.filter(
-            featured=True
-        ) or CoursePage.objects.filter(featured=True)
+            featured=True, program__live=True
+        ) or CoursePage.objects.filter(featured=True, course__live=True)
         return dict(
             **super().get_context(request),
             **get_js_settings_context(request),
