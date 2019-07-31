@@ -3,6 +3,7 @@ from django.db.utils import IntegrityError
 import pytest
 
 from courses.factories import CourseRunFactory, ProgramFactory
+from ecommerce.api import get_product_version_price_with_discount
 from ecommerce.factories import (
     CouponRedemptionFactory,
     CouponPaymentVersionFactory,
@@ -21,19 +22,24 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.mark.parametrize("has_user", [True, False])
-def test_order_audit(has_user):
+@pytest.mark.parametrize("has_lines", [True, False])
+def test_order_audit(has_user, has_lines):
     """
     Order.save_and_log() should save the order's information to an audit model.
     """
     coupon_redemption = CouponRedemptionFactory.create()
     order = coupon_redemption.order
     contents = [CourseRunFactory.create(), ProgramFactory.create()]
-    lines = [
-        LineFactory.create(
-            order=order, product_version__product__content_object=content
-        )
-        for content in contents
-    ]
+    lines = (
+        [
+            LineFactory.create(
+                order=order, product_version__product__content_object=content
+            )
+            for content in contents
+        ]
+        if has_lines
+        else []
+    )
 
     assert OrderAudit.objects.count() == 0
     order.save_and_log(UserFactory.create() if has_user else None)
@@ -44,10 +50,51 @@ def test_order_audit(has_user):
 
     assert order_audit.data_after == {
         **serialize_model_object(order),
-        "lines": [serialize_model_object(line) for line in lines],
+        "purchaser_email": order.purchaser.email,
+        "lines": [
+            {
+                **serialize_model_object(line),
+                "product_version_info": {
+                    **serialize_model_object(line.product_version),
+                    "product_info": {
+                        **serialize_model_object(line.product_version.product),
+                        "content_type_string": str(
+                            line.product_version.product.content_type
+                        ),
+                        "content_object": serialize_model_object(
+                            line.product_version.product.content_object
+                        ),
+                    },
+                },
+            }
+            for line in lines
+        ],
         "coupons": [
-            serialize_model_object(coupon)
-            for coupon in order.couponredemption_set.all()
+            {
+                **serialize_model_object(coupon_redemption.coupon_version.coupon),
+                "coupon_version_info": {
+                    **serialize_model_object(coupon_redemption.coupon_version),
+                    "payment_version_info": serialize_model_object(
+                        coupon_redemption.coupon_version.payment_version
+                    ),
+                },
+            }
+            for coupon_redemption in order.couponredemption_set.all()
+        ],
+        "run_enrollments": [
+            enrollment.run.courseware_id
+            for enrollment in order.courserunenrollment_set.all()
+        ],
+        "total_price": str(
+            get_product_version_price_with_discount(
+                product_version=lines[0].product_version,
+                coupon_version=order.couponredemption_set.first().coupon_version,
+            )
+        )
+        if has_lines
+        else "",
+        "receipts": [
+            serialize_model_object(receipt) for receipt in order.receipt_set.all()
         ],
     }
 

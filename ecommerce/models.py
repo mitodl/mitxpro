@@ -162,12 +162,63 @@ class Order(TimestampedModel, AuditableModel):
         """
         Get a serialized representation of the Order and any attached Basket and Lines
         """
-        data = serialize_model_object(self)
-        data["lines"] = [serialize_model_object(line) for line in self.lines.all()]
-        data["coupons"] = [
-            serialize_model_object(coupon) for coupon in self.couponredemption_set.all()
-        ]
-        return data
+        from ecommerce.api import get_product_version_price_with_discount
+
+        # should be 0 or 1 coupons, and only one line and product
+        coupon_redemption = self.couponredemption_set.first()
+        line = self.lines.first()
+
+        return {
+            **serialize_model_object(self),
+            "purchaser_email": self.purchaser.email,
+            "lines": [
+                {
+                    **serialize_model_object(line),
+                    "product_version_info": {
+                        **serialize_model_object(line.product_version),
+                        "product_info": {
+                            **serialize_model_object(line.product_version.product),
+                            "content_type_string": str(
+                                line.product_version.product.content_type
+                            ),
+                            "content_object": serialize_model_object(
+                                line.product_version.product.content_object
+                            ),
+                        },
+                    },
+                }
+                for line in self.lines.all()
+            ],
+            "coupons": [
+                {
+                    **serialize_model_object(coupon_redemption.coupon_version.coupon),
+                    "coupon_version_info": {
+                        **serialize_model_object(coupon_redemption.coupon_version),
+                        "payment_version_info": serialize_model_object(
+                            coupon_redemption.coupon_version.payment_version
+                        ),
+                    },
+                }
+                for coupon_redemption in self.couponredemption_set.all()
+            ],
+            "run_enrollments": [
+                enrollment.run.courseware_id
+                for enrollment in self.courserunenrollment_set.all()
+            ],
+            "total_price": str(
+                get_product_version_price_with_discount(
+                    coupon_version=coupon_redemption.coupon_version
+                    if coupon_redemption is not None
+                    else None,
+                    product_version=line.product_version,
+                )
+                if line is not None
+                else ""
+            ),
+            "receipts": [
+                serialize_model_object(receipt) for receipt in self.receipt_set.all()
+            ],
+        }
 
 
 class OrderAudit(AuditModel):
