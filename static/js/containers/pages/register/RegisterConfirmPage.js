@@ -1,5 +1,8 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
+import DocumentTitle from "react-document-title"
+import { REGISTER_CONFIRM_PAGE_TITLE } from "../../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { Link } from "react-router-dom"
@@ -59,21 +62,25 @@ export class RegisterConfirmPage extends React.Component<Props> {
     const { auth } = this.props
 
     return (
-      <div className="container auth-page">
-        <div className="row">
-          <div className="col">
-            {auth && auth.state === STATE_INVALID_EMAIL ? (
-              <React.Fragment>
-                <p>No confirmation code was provided or it has expired.</p>
-                <Link to={routes.register.begin}>Click here</Link> to register
-                again.
-              </React.Fragment>
-            ) : (
-              <p>Confirming...</p>
-            )}
+      <DocumentTitle
+        title={`${SETTINGS.site_name} | ${REGISTER_CONFIRM_PAGE_TITLE}`}
+      >
+        <div className="container auth-page">
+          <div className="row">
+            <div className="col">
+              {auth && auth.state === STATE_INVALID_EMAIL ? (
+                <React.Fragment>
+                  <p>No confirmation code was provided or it has expired.</p>
+                  <Link to={routes.register.begin}>Click here</Link> to register
+                  again.
+                </React.Fragment>
+              ) : (
+                <p>Confirming...</p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </DocumentTitle>
     )
   }
 }

@@ -1,6 +1,8 @@
 // @flow
 /* global SETTINGS: false */
 import React from "react"
+import DocumentTitle from "react-document-title"
+import { REGISTER_EXTRA_DETAILS_PAGE_TITLE } from "../../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { Link } from "react-router-dom"
@@ -61,31 +63,37 @@ export class RegisterExtraDetailsPage extends React.Component<Props> {
 
   render() {
     return (
-      <div className="container auth-page registration-page">
-        <div className="auth-header row d-flex flex-row align-items-center justify-content-between flex-nowrap">
-          <div className="col-auto flex-shrink-1">
-            <h1>Create an Account</h1>
-          </div>
-          <div className="col-auto align-text-right gray-text">
-            <h4>Step 2 of 2</h4>
-          </div>
-        </div>
-        <div className="auth-card card-shadow row">
-          <div className="container">
-            <div className="row">
-              <div className="col-12 form-group">
-                {`Already have an ${SETTINGS.site_name} account? `}
-                <Link to={routes.login.begin}>Click here</Link>
-              </div>
+      <DocumentTitle
+        title={`${SETTINGS.site_name} | ${REGISTER_EXTRA_DETAILS_PAGE_TITLE}`}
+      >
+        <div className="container auth-page registration-page">
+          <div className="auth-header row d-flex flex-row align-items-center justify-content-between flex-nowrap">
+            <div className="col-auto flex-shrink-1">
+              <h1>Create an Account</h1>
             </div>
-            <div className="row">
-              <div className="col-12 auth-form">
-                <RegisterExtraDetailsForm onSubmit={this.onSubmit.bind(this)} />
-              </div>
+            <div className="col-auto align-text-right gray-text">
+              <h4>Step 2 of 2</h4>
             </div>
           </div>
+          <div className="auth-card card-shadow row">
+            <div className="container">
+              <div className="row">
+                <div className="col-12 form-group">
+                  {`Already have an ${SETTINGS.site_name} account? `}
+                  <Link to={routes.login.begin}>Click here</Link>
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-12 auth-form">
+                  <RegisterExtraDetailsForm
+                    onSubmit={this.onSubmit.bind(this)}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </DocumentTitle>
     )
   }
 }

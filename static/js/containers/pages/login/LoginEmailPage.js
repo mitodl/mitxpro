@@ -1,5 +1,8 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
+import DocumentTitle from "react-document-title"
+import { LOGIN_EMAIL_PAGE_TITLE } from "../../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { mutateAsync } from "redux-query"
@@ -51,23 +54,27 @@ export class LoginEmailPage extends React.Component<Props> {
 
   render() {
     return (
-      <div className="container auth-page">
-        <div className="row auth-header">
-          <h1 className="col-12">Sign in</h1>
-        </div>
-        <div className="row auth-card card-shadow auth-form">
-          <div className="col-12">
-            <EmailForm onSubmit={this.onSubmit.bind(this)}>
-              <React.Fragment>
-                <span>Don't have an account? </span>
-                <Link to={routes.register.begin} className="link-light-blue">
-                  Create Account
-                </Link>
-              </React.Fragment>
-            </EmailForm>
+      <DocumentTitle
+        title={`${SETTINGS.site_name} | ${LOGIN_EMAIL_PAGE_TITLE}`}
+      >
+        <div className="container auth-page">
+          <div className="row auth-header">
+            <h1 className="col-12">Sign in</h1>
+          </div>
+          <div className="row auth-card card-shadow auth-form">
+            <div className="col-12">
+              <EmailForm onSubmit={this.onSubmit.bind(this)}>
+                <React.Fragment>
+                  <span>Don't have an account? </span>
+                  <Link to={routes.register.begin} className="link-light-blue">
+                    Create Account
+                  </Link>
+                </React.Fragment>
+              </EmailForm>
+            </div>
           </div>
         </div>
-      </div>
+      </DocumentTitle>
     )
   }
 }

@@ -1,5 +1,8 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
+import DocumentTitle from "react-document-title"
+import { LOGIN_PASSWORD_PAGE_TITLE } from "../../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { mutateAsync, requestAsync } from "redux-query"
@@ -74,27 +77,37 @@ export class LoginPasswordPage extends React.Component<Props> {
     const { auth } = this.props
 
     if (!auth) {
-      return <div />
+      return (
+        <DocumentTitle
+          title={`${SETTINGS.site_name} | ${LOGIN_PASSWORD_PAGE_TITLE}`}
+        >
+          <div />
+        </DocumentTitle>
+      )
     }
 
     const name = auth.extra_data.name
 
     return (
-      <div className="container auth-page">
-        <div className="row auth-header">
-          <h1 className="col-12">Sign in</h1>
-        </div>
-        <div className="row auth-card card-shadow auth-form">
-          {name && (
+      <DocumentTitle
+        title={`${SETTINGS.site_name} | ${LOGIN_PASSWORD_PAGE_TITLE}`}
+      >
+        <div className="container auth-page">
+          <div className="row auth-header">
+            <h1 className="col-12">Sign in</h1>
+          </div>
+          <div className="row auth-card card-shadow auth-form">
+            {name && (
+              <div className="col-12">
+                <p>Logging in as {name}</p>
+              </div>
+            )}
             <div className="col-12">
-              <p>Logging in as {name}</p>
+              <LoginPasswordForm onSubmit={this.onSubmit.bind(this)} />
             </div>
-          )}
-          <div className="col-12">
-            <LoginPasswordForm onSubmit={this.onSubmit.bind(this)} />
           </div>
         </div>
-      </div>
+      </DocumentTitle>
     )
   }
 }

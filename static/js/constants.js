@@ -97,3 +97,26 @@ export const EMPLOYMENT_LEVEL = [
 
 export const ALERT_TYPE_TEXT = "text"
 export const ALERT_TYPE_UNUSED_COUPON = "unused-coupon"
+
+// HTML title for different pages
+export const CHECKOUT_PAGE_TITLE = "Checkout"
+export const DASHBOARD_PAGE_TITLE = "Dashboard"
+export const BULK_ENROLLMENT_PAGE_TITLE = "Bulk Enrollment"
+export const CREATE_COUPON_PAGE_TITLE = "Create Coupon"
+
+export const LOGIN_EMAIL_PAGE_TITLE = "Sign In"
+export const LOGIN_PASSWORD_PAGE_TITLE = LOGIN_EMAIL_PAGE_TITLE
+
+export const FORGOT_PASSWORD_PAGE_TITLE = "Forgot Password"
+export const FORGOT_PASSWORD_CONFIRM_PAGE_TITLE = FORGOT_PASSWORD_PAGE_TITLE
+
+export const EDIT_PROFILE_PAGE_TITLE = "Edit Profile"
+export const VIEW_PROFILE_PAGE_TITLE = "View Profile"
+
+export const REGISTER_EMAIL_PAGE_TITLE = "Register"
+export const REGISTER_CONFIRM_PAGE_TITLE = REGISTER_EMAIL_PAGE_TITLE
+export const REGISTER_DETAILS_PAGE_TITLE = REGISTER_EMAIL_PAGE_TITLE
+export const REGISTER_EXTRA_DETAILS_PAGE_TITLE = REGISTER_EMAIL_PAGE_TITLE
+
+export const REGISTER_ERROR_PAGE_TITLE = "Registration Error"
+export const REGISTER_DENIED_PAGE_TITLE = REGISTER_ERROR_PAGE_TITLE

@@ -359,7 +359,7 @@ describe("CheckoutPage", () => {
   it("displays no items if there are none in the basket", async () => {
     basket.items = []
     const { inner } = await renderPage()
-    assert.equal(inner.text(), "No item in basket")
+    assert.equal(inner.find(".checkout-page").text(), "No item in basket")
   })
 
   describe("calcSelectedRunIds", () => {

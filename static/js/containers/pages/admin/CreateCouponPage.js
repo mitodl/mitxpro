@@ -1,5 +1,8 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
+import DocumentTitle from "react-document-title"
+import { CREATE_COUPON_PAGE_TITLE } from "../../../constants"
 import { mergeAll } from "ramda"
 import { connectRequest, mutateAsync } from "redux-query"
 import { compose } from "redux"
@@ -45,6 +48,7 @@ export class CreateCouponPage extends React.Component<Props, State> {
       couponId: null
     }
   }
+
   onSubmit = async (
     couponData: Object,
     { setSubmitting, setErrors }: Object
@@ -79,39 +83,45 @@ export class CreateCouponPage extends React.Component<Props, State> {
     // $FlowFixMe: flow doesn't like coupons[couponId] but it works fine
     const newCoupon = coupons && couponId ? coupons[couponId] : null
     return (
-      <div className="ecommerce-admin-body">
-        <p>
-          <Link to={routes.ecommerceAdmin.index}>Back to Ecommerce Admin</Link>
-        </p>
-        <h3>Create a Coupon</h3>
-        {newCoupon ? (
-          <div className="coupon-success-div">
-            {newCoupon.coupon_type === "promo" ? (
-              <span>{`Coupon "${
-                newCoupon.payment.name
-              }" successfully created.`}</span>
-            ) : (
-              // $FlowFixMe: couponId will never be null here
-              <a href={`/couponcodes/${couponId}`}>
-                {`Download coupon codes for "${newCoupon.payment.name}"`}
-              </a>
-            )}
-            <div>
-              <input
-                type="button"
-                value="Generate another coupon"
-                onClick={this.clearSuccess}
-              />
+      <DocumentTitle
+        title={`${SETTINGS.site_name} | ${CREATE_COUPON_PAGE_TITLE}`}
+      >
+        <div className="ecommerce-admin-body">
+          <p>
+            <Link to={routes.ecommerceAdmin.index}>
+              Back to Ecommerce Admin
+            </Link>
+          </p>
+          <h3>Create a Coupon</h3>
+          {newCoupon ? (
+            <div className="coupon-success-div">
+              {newCoupon.coupon_type === "promo" ? (
+                <span>{`Coupon "${
+                  newCoupon.payment.name
+                }" successfully created.`}</span>
+              ) : (
+                // $FlowFixMe: couponId will never be null here
+                <a href={`/couponcodes/${couponId}`}>
+                  {`Download coupon codes for "${newCoupon.payment.name}"`}
+                </a>
+              )}
+              <div>
+                <input
+                  type="button"
+                  value="Generate another coupon"
+                  onClick={this.clearSuccess}
+                />
+              </div>
             </div>
-          </div>
-        ) : (
-          <CouponForm
-            onSubmit={this.onSubmit}
-            products={products}
-            companies={companies}
-          />
-        )}
-      </div>
+          ) : (
+            <CouponForm
+              onSubmit={this.onSubmit}
+              products={products}
+              companies={companies}
+            />
+          )}
+        </div>
+      </DocumentTitle>
     )
   }
 }

@@ -1,5 +1,8 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
+import DocumentTitle from "react-document-title"
+import { CHECKOUT_PAGE_TITLE } from "../../constants"
 import { connect } from "react-redux"
 import { mutateAsync, requestAsync } from "redux-query"
 import { compose } from "redux"
@@ -204,10 +207,12 @@ export class CheckoutPage extends React.Component<Props, State> {
     const item = basket && basket.items[0]
     if (!basket || !item) {
       return (
-        <div className="checkout-page">
-          No item in basket
-          {formatErrors(errors)}
-        </div>
+        <DocumentTitle title={`${SETTINGS.site_name} | ${CHECKOUT_PAGE_TITLE}`}>
+          <div className="checkout-page">
+            No item in basket
+            {formatErrors(errors)}
+          </div>
+        </DocumentTitle>
       )
     }
 
@@ -218,17 +223,19 @@ export class CheckoutPage extends React.Component<Props, State> {
     const selectedRuns = calcSelectedRunIds(item, preselectId)
 
     return (
-      <CheckoutForm
-        item={item}
-        basket={basket}
-        coupon={coupon}
-        couponCode={couponCode}
-        selectedRuns={selectedRuns}
-        submitCoupon={this.submitCoupon}
-        onSubmit={this.submit}
-        updateProduct={this.updateProduct}
-        requestPending={requestPending}
-      />
+      <DocumentTitle title={`${SETTINGS.site_name} | ${CHECKOUT_PAGE_TITLE}`}>
+        <CheckoutForm
+          item={item}
+          basket={basket}
+          coupon={coupon}
+          couponCode={couponCode}
+          selectedRuns={selectedRuns}
+          submitCoupon={this.submitCoupon}
+          onSubmit={this.submit}
+          updateProduct={this.updateProduct}
+          requestPending={requestPending}
+        />
+      </DocumentTitle>
     )
   }
 }

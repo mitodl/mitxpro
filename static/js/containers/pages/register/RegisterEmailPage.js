@@ -1,5 +1,8 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
+import DocumentTitle from "react-document-title"
+import { REGISTER_EMAIL_PAGE_TITLE } from "../../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { mutateAsync } from "redux-query"
@@ -88,16 +91,20 @@ export class RegisterEmailPage extends React.Component<Props> {
 
   render() {
     return (
-      <div className="container auth-page">
-        <div className="row">
-          <h1 className="col-12">Create Account</h1>
-        </div>
-        <div className="auth-form auth-card card-shadow row">
-          <div className="col-12">
-            <RegisterEmailForm onSubmit={this.onSubmit.bind(this)} />
+      <DocumentTitle
+        title={`${SETTINGS.site_name} | ${REGISTER_EMAIL_PAGE_TITLE}`}
+      >
+        <div className="container auth-page">
+          <div className="row">
+            <h1 className="col-12">Create Account</h1>
+          </div>
+          <div className="auth-form auth-card card-shadow row">
+            <div className="col-12">
+              <RegisterEmailForm onSubmit={this.onSubmit.bind(this)} />
+            </div>
           </div>
         </div>
-      </div>
+      </DocumentTitle>
     )
   }
 }

@@ -33,10 +33,20 @@ describe("ViewProfilePage", () => {
   it("renders the page for a logged in user", async () => {
     const { inner } = await renderPage()
     assert.isTrue(inner.find(".submit-row").exists())
-    // $FlowFixMe: user.legal_address is not null
-    assert.isTrue(inner.text().includes(user.legal_address.street_address[0]))
-    // $FlowFixMe: user.profile is not null
-    assert.isTrue(inner.text().includes(user.profile.company))
+    assert.isTrue(
+      inner
+        .find(".auth-page")
+        .text()
+        // $FlowFixMe: user.legal_address is not null
+        .includes(user.legal_address.street_address[0])
+    )
+    assert.isTrue(
+      inner
+        .find(".auth-page")
+        .text()
+        // $FlowFixMe: user.profile is not null
+        .includes(user.profile.company)
+    )
   })
 
   it("renders the page for an anonymous user", async () => {
@@ -47,7 +57,10 @@ describe("ViewProfilePage", () => {
     })
     assert.isFalse(inner.find(".submit-row").exists())
     assert.isTrue(
-      inner.text().includes("You must be logged in to view your profile.")
+      inner
+        .find(".auth-page")
+        .text()
+        .includes("You must be logged in to view your profile.")
     )
   })
 })
