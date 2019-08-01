@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 from uuid import uuid4
 
+import re
 import pdftotext
 
 from django.conf import settings
@@ -14,6 +15,20 @@ from ecommerce.api import get_valid_coupon_versions
 from ecommerce.models import Company
 
 log = logging.getLogger()
+
+
+def remove_extra_spaces(text):
+    """
+    Remove extra spaces from text
+
+    Args:
+        text(str): The text to remove spaces from
+
+    Returns:
+        str: The text with extra spaces removed
+    """
+    if text:
+        return re.sub(r"\s+", " ", text.strip())
 
 
 def get_current_voucher(user):
@@ -39,18 +54,32 @@ def get_eligible_coupon_choices(voucher):
         list of tuple:
             list of ('[<product_id>, <coupon_id>]', <course title>) for an eligible coupon / CourseRun match
     """
-    course_matches = CourseRun.objects.filter(
-        course__readable_id__exact=voucher.course_id_input,
-        course__title__iexact=voucher.course_title_input,
-        start_date__date=voucher.course_start_date_input,
-    )
-    if not course_matches.exists():
+    course_matches = None
+    # Search for an exact match if all inputs exist
+    if voucher.course_id_input and voucher.course_title_input:
+        course_matches = CourseRun.objects.filter(
+            course__readable_id__exact=voucher.course_id_input,
+            course__title__exact=voucher.course_title_input,
+            start_date__date=voucher.course_start_date_input,
+        )
+
+    # Search for partial matches if no exact match was found
+    if course_matches is None or not course_matches.exists():
         # Try partial matching
         course_matches = CourseRun.objects.filter(
-            Q(course__readable_id__exact=voucher.course_id_input)
-            | Q(course__title__iexact=voucher.course_title_input)
+            (
+                Q(course__readable_id__icontains=voucher.course_id_input)
+                if voucher.course_id_input
+                else Q()
+            )
+            | (
+                Q(course__title__icontains=voucher.course_title_input)
+                if voucher.course_title_input
+                else Q()
+            )
             | Q(start_date__date=voucher.course_start_date_input)
         )
+
     if not course_matches.exists():
         # No partial matches found
         log.error("Found no matching course runs for voucher %s", voucher.id)
@@ -252,6 +281,9 @@ def read_pdf(pdf_file):
             for key in international_settings_keys:
                 if not values.get(getattr(settings, key)):
                     return None
+            course_id_input = values.get(
+                settings.VOUCHER_INTERNATIONAL_COURSE_NUMBER_KEY
+            )
             return {
                 "pdf": pdf_file,
                 "employee_id": values.get(
@@ -262,11 +294,11 @@ def read_pdf(pdf_file):
                     values.get(settings.VOUCHER_INTERNATIONAL_DATES_KEY).split(" ")[0],
                     "%d-%b-%Y",
                 ).date(),
-                "course_id_input": values.get(
-                    settings.VOUCHER_INTERNATIONAL_COURSE_NUMBER_KEY
-                ),
-                "course_title_input": values.get(
-                    settings.VOUCHER_INTERNATIONAL_COURSE_NAME_KEY
+                "course_id_input": remove_extra_spaces(course_id_input)
+                if len(course_id_input) >= 3
+                else "",
+                "course_title_input": remove_extra_spaces(
+                    values.get(settings.VOUCHER_INTERNATIONAL_COURSE_NAME_KEY)
                 ),
                 "employee_name": values.get(
                     settings.VOUCHER_INTERNATIONAL_EMPLOYEE_KEY
@@ -277,6 +309,9 @@ def read_pdf(pdf_file):
             for key in domestic_settings_keys:
                 if not values.get(getattr(settings, key)):
                     return None
+            course_id_input = values.get(settings.VOUCHER_DOMESTIC_COURSE_KEY).split(
+                " "
+            )[0]
             return {
                 "pdf": pdf_file,
                 "employee_id": values.get(settings.VOUCHER_DOMESTIC_EMPLOYEE_ID_KEY),
@@ -285,11 +320,13 @@ def read_pdf(pdf_file):
                     values.get(settings.VOUCHER_DOMESTIC_DATES_KEY).split(" ")[0],
                     "%m/%d/%Y",
                 ).date(),
-                "course_id_input": values.get(
-                    settings.VOUCHER_DOMESTIC_COURSE_KEY
-                ).split(" ")[0],
-                "course_title_input": " ".join(
-                    values.get(settings.VOUCHER_DOMESTIC_COURSE_KEY).split(" ")[1:]
+                "course_id_input": remove_extra_spaces(course_id_input)
+                if len(course_id_input) >= 3
+                else "",
+                "course_title_input": remove_extra_spaces(
+                    " ".join(
+                        values.get(settings.VOUCHER_DOMESTIC_COURSE_KEY).split(" ")[1:]
+                    )
                 ),
                 "employee_name": values.get(settings.VOUCHER_DOMESTIC_EMPLOYEE_KEY),
             }

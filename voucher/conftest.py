@@ -131,10 +131,20 @@ def voucher_and_partial_matches(voucher_and_user_client):
     )
     course_run_2 = CourseRunFactory(course__readable_id=voucher.course_id_input)
     course_run_3 = CourseRunFactory(course__title=voucher.course_title_input)
+    course_run_4 = CourseRunFactory(
+        course__readable_id=f"{voucher.course_id_input}-noise"
+    )
+    course_run_5 = CourseRunFactory(course__title=f"{voucher.course_title_input}-noise")
     return SimpleNamespace(
         **vars(voucher_and_user_client),
         company=company,
-        partial_matches=[course_run_1, course_run_2, course_run_3],
+        partial_matches=[
+            course_run_1,
+            course_run_2,
+            course_run_3,
+            course_run_4,
+            course_run_5,
+        ],
     )
 
 

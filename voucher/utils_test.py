@@ -12,6 +12,7 @@ from voucher.utils import (
     get_current_voucher,
     get_eligible_coupon_choices,
     voucher_upload_path,
+    remove_extra_spaces,
 )
 
 # pylint: disable=redefined-outer-name
@@ -46,6 +47,18 @@ def setup_pdf_parsing(settings):
     settings.VOUCHER_INTERNATIONAL_COURSE_NUMBER_KEY = "UNIQUE17"
 
 
+def test_remove_extra_spaces():
+    """Test that remove_extra_spaces properly strips excess spaces"""
+    result = "Hello World"
+    string_1 = "Hello    \n\r\t     World"
+    string_2 = "\n\r\t    Hello World  \n\r\t "
+    string_3 = "  \n  \r   \t    Hello     \n  \r   \t   World    \n  \r   \t  "
+    assert remove_extra_spaces(result) == result
+    assert remove_extra_spaces(string_1) == result
+    assert remove_extra_spaces(string_2) == result
+    assert remove_extra_spaces(string_3) == result
+
+
 def test_pdf_parsing_domestic(settings):
     """Test that pdf parsing correctly parses domestic voucher pdfs"""
     setup_pdf_parsing(settings)
@@ -78,7 +91,7 @@ def test_pdf_parsing_domestic_offset_credits(settings):
                 "04/09/2018", "%m/%d/%Y"
             ).date(),
             "course_id_input": "SysEngxB3",
-            "course_title_input": "Model-Based  Systems Engineering: Documentation and Analysis",
+            "course_title_input": "Model-Based Systems Engineering: Documentation and Analysis",
             "employee_name": "Stark, Anthony E",
         }
         assert values == expected_values
@@ -165,15 +178,10 @@ def test_exact_course_match_without_coupon(
     )
 
 
-def test_partial_course_matches(voucher_and_partial_matches_with_coupons, settings):
+def _test_eligible_coupon_version(eligible_coupons, context):
     """
-    Test match_courses_to_voucher returns correct eligible choices when there are partial matches
+    Test that every eligible coupon exists in the context
     """
-    context = voucher_and_partial_matches_with_coupons
-    voucher = context.voucher
-    settings.VOUCHER_COMPANY_ID = context.company.id
-    eligible_coupons = get_eligible_coupon_choices(voucher)
-    assert len(eligible_coupons) == len(context.coupon_eligibility_list)
     product_ids = [product.id for product in context.products]
     coupon_ids = [
         coupon_version.coupon.id for coupon_version in context.coupon_versions
@@ -184,6 +192,35 @@ def test_partial_course_matches(voucher_and_partial_matches_with_coupons, settin
         assert product_id in product_ids
         assert coupon_id in coupon_ids
         assert eligible_coupon[1] in titles
+
+
+def test_partial_course_matches(voucher_and_partial_matches_with_coupons, settings):
+    """
+    Test match_courses_to_voucher returns correct eligible choices when there are partial matches
+    """
+    context = voucher_and_partial_matches_with_coupons
+    voucher = context.voucher
+    settings.VOUCHER_COMPANY_ID = context.company.id
+    eligible_coupons = get_eligible_coupon_choices(voucher)
+    assert len(eligible_coupons) == len(context.coupon_eligibility_list)
+    _test_eligible_coupon_version(eligible_coupons, context)
+
+
+@pytest.mark.parametrize("empty_field", ["course_id_input", "course_title_input"])
+def test_partial_course_matches_with_missing_inputs(
+    voucher_and_partial_matches_with_coupons, settings, empty_field
+):
+    """
+    Test match_courses_to_voucher returns correct eligible choices when there are partial matches
+    """
+    context = voucher_and_partial_matches_with_coupons
+    voucher = context.voucher
+    setattr(voucher, empty_field, "")
+    settings.VOUCHER_COMPANY_ID = context.company.id
+    eligible_coupons = get_eligible_coupon_choices(voucher)
+    # reduce number of expected matches by the number of matches that depend on the empty search field
+    assert len(eligible_coupons) == len(context.coupon_eligibility_list) - 2
+    _test_eligible_coupon_version(eligible_coupons, context)
 
 
 def test_exact_course_match(voucher_and_exact_match_with_coupon, settings):
