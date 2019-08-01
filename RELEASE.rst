@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.15.0
+Version 0.15.0 (Released August 01, 2019)
 --------------
 
 - Fixed auth flow to support incomplete registrations
