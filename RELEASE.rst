@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.15.0 (Released August 01, 2019)
+--------------
+
+- Fixed auth flow to support incomplete registrations
+- Update JS to fix caniuse-lite warning (#922)
+- #882 display more dates on program page
+- Added tagging for sentry errors to review apps
+- #908 Wagtail admin generated URLs for child pages
+- Add staff payment_type to CouponPaymentVersion (#898)
+
 Version 0.14.1 (Released July 26, 2019)
 --------------
 
