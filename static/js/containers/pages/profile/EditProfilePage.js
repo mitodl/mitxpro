@@ -1,5 +1,8 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
+import DocumentTitle from "react-document-title"
+import { EDIT_PROFILE_PAGE_TITLE } from "../../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { connectRequest, mutateAsync, requestAsync } from "redux-query"
@@ -77,32 +80,36 @@ export class EditProfilePage extends React.Component<Props> {
   render() {
     const { countries, currentUser } = this.props
     return countries ? (
-      <div className="container auth-page registration-page">
-        <div className="auth-header row d-flex  align-items-center justify-content-between flex-nowrap">
-          <div className="col-auto flex-shrink-1">
-            <h1>Edit Profile</h1>
+      <DocumentTitle
+        title={`${SETTINGS.site_name} | ${EDIT_PROFILE_PAGE_TITLE}`}
+      >
+        <div className="container auth-page registration-page">
+          <div className="auth-header row d-flex  align-items-center justify-content-between flex-nowrap">
+            <div className="col-auto flex-shrink-1">
+              <h1>Edit Profile</h1>
+            </div>
           </div>
-        </div>
-        <div className="auth-card card-shadow row">
-          <div className="container">
-            <div className="row">
-              <div className="col-12 auth-form">
-                {currentUser.is_authenticated ? (
-                  <EditProfileForm
-                    countries={countries}
-                    user={currentUser}
-                    onSubmit={this.onSubmit.bind(this)}
-                  />
-                ) : (
-                  <div className="row">
-                    You must be logged in to edit your profile.
-                  </div>
-                )}
+          <div className="auth-card card-shadow row">
+            <div className="container">
+              <div className="row">
+                <div className="col-12 auth-form">
+                  {currentUser.is_authenticated ? (
+                    <EditProfileForm
+                      countries={countries}
+                      user={currentUser}
+                      onSubmit={this.onSubmit.bind(this)}
+                    />
+                  ) : (
+                    <div className="row">
+                      You must be logged in to edit your profile.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </DocumentTitle>
     ) : null
   }
 }

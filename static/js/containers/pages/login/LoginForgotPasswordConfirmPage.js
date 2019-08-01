@@ -1,5 +1,8 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
+import DocumentTitle from "react-document-title"
+import { FORGOT_PASSWORD_CONFIRM_PAGE_TITLE } from "../../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { mutateAsync } from "redux-query"
@@ -79,19 +82,23 @@ export class LoginForgotPasswordConfirmPage extends React.Component<Props> {
 
   render() {
     return (
-      <div className="container auth-page">
-        <div className="row auth-header">
-          <h1 className="col-12">Forgot Password</h1>
-        </div>
-        <div className="row auth-card card-shadow auth-form">
-          <div className="col-12">
-            <p>Enter a new password for your account.</p>
+      <DocumentTitle
+        title={`${SETTINGS.site_name} | ${FORGOT_PASSWORD_CONFIRM_PAGE_TITLE}`}
+      >
+        <div className="container auth-page">
+          <div className="row auth-header">
+            <h1 className="col-12">Forgot Password</h1>
           </div>
-          <div className="col-12">
-            <ChangePasswordForm onSubmit={this.onSubmit.bind(this)} />
+          <div className="row auth-card card-shadow auth-form">
+            <div className="col-12">
+              <p>Enter a new password for your account.</p>
+            </div>
+            <div className="col-12">
+              <ChangePasswordForm onSubmit={this.onSubmit.bind(this)} />
+            </div>
           </div>
         </div>
-      </div>
+      </DocumentTitle>
     )
   }
 }

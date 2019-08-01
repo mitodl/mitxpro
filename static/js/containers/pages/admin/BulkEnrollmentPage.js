@@ -1,5 +1,8 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
+import DocumentTitle from "react-document-title"
+import { BULK_ENROLLMENT_PAGE_TITLE } from "../../../constants"
 import { connect } from "react-redux"
 import { connectRequest, mutateAsync } from "redux-query"
 import { compose } from "redux"
@@ -58,29 +61,41 @@ export class BulkEnrollmentPage extends React.Component<Props, State> {
     const { bulkCouponPayments, bulkCouponProducts } = this.props
 
     if (!bulkCouponPayments) {
-      return <div />
+      return (
+        <DocumentTitle
+          title={`${SETTINGS.site_name} | ${BULK_ENROLLMENT_PAGE_TITLE}`}
+        >
+          <div />
+        </DocumentTitle>
+      )
     }
 
     return (
-      <div className="ecommerce-admin-body">
-        <p>
-          <Link to={routes.ecommerceAdmin.index}>Back to Ecommerce Admin</Link>
-        </p>
-        <h3>Bulk Enrollments</h3>
-        {bulkCouponPayments.length === 0 ? (
-          <div className="error">
-            In order to perform bulk enrollment, there must be 100%-off coupons
-            applied to products, and the coupons must be enabled. None were
-            found.
-          </div>
-        ) : (
-          <BulkEnrollmentForm
-            bulkCouponPayments={bulkCouponPayments}
-            productMap={bulkCouponProducts}
-            submitRequest={this.submitRequest.bind(this)}
-          />
-        )}
-      </div>
+      <DocumentTitle
+        title={`${SETTINGS.site_name} | ${BULK_ENROLLMENT_PAGE_TITLE}`}
+      >
+        <div className="ecommerce-admin-body">
+          <p>
+            <Link to={routes.ecommerceAdmin.index}>
+              Back to Ecommerce Admin
+            </Link>
+          </p>
+          <h3>Bulk Enrollments</h3>
+          {bulkCouponPayments.length === 0 ? (
+            <div className="error">
+              In order to perform bulk enrollment, there must be 100%-off
+              coupons applied to products, and the coupons must be enabled. None
+              were found.
+            </div>
+          ) : (
+            <BulkEnrollmentForm
+              bulkCouponPayments={bulkCouponPayments}
+              productMap={bulkCouponProducts}
+              submitRequest={this.submitRequest.bind(this)}
+            />
+          )}
+        </div>
+      </DocumentTitle>
     )
   }
 }

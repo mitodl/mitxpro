@@ -51,7 +51,10 @@ describe("EditProfilePage", () => {
     })
     assert.isFalse(inner.find("EditProfileForm").exists())
     assert.isTrue(
-      inner.text().includes("You must be logged in to edit your profile.")
+      inner
+        .find(".auth-page")
+        .text()
+        .includes("You must be logged in to edit your profile.")
     )
   })
 

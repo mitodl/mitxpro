@@ -1,6 +1,8 @@
-/* global SETTINGS: false */
 // @flow
+/* global SETTINGS: false */
 import React from "react"
+import DocumentTitle from "react-document-title"
+import { DASHBOARD_PAGE_TITLE } from "../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { connectRequest } from "redux-query"
@@ -279,42 +281,49 @@ export class DashboardPage extends React.Component<Props, State> {
 
     return (
       <React.Fragment>
-        <div className="user-dashboard container">
-          <div className="row">
-            <div className="header col-12">
-              <h1>Dashboard</h1>
-              {enrollments &&
-                (enrollmentsExist ? (
-                  <h3>Courses and Programs</h3>
-                ) : (
-                  <div className="empty-msg">
-                    <h2>
-                      You are not yet enrolled in any courses or programs.
-                    </h2>
-                    <a href={routes.catalog} className="link-button light-blue">
-                      Browse Our Catalog
-                    </a>
-                  </div>
-                ))}
+        <DocumentTitle
+          title={`${SETTINGS.site_name} | ${DASHBOARD_PAGE_TITLE}`}
+        >
+          <div className="user-dashboard container">
+            <div className="row">
+              <div className="header col-12">
+                <h1>Dashboard</h1>
+                {enrollments &&
+                  (enrollmentsExist ? (
+                    <h3>Courses and Programs</h3>
+                  ) : (
+                    <div className="empty-msg">
+                      <h2>
+                        You are not yet enrolled in any courses or programs.
+                      </h2>
+                      <a
+                        href={routes.catalog}
+                        className="link-button light-blue"
+                      >
+                        Browse Our Catalog
+                      </a>
+                    </div>
+                  ))}
+              </div>
             </div>
+            {enrollments ? (
+              <React.Fragment>
+                <div className="program-enrollments">
+                  {enrollments.program_enrollments.map(
+                    this.renderProgramEnrollment
+                  )}
+                </div>
+                <div className="non-program-course-enrollments">
+                  {enrollments.course_run_enrollments.map(
+                    this.renderCourseEnrollment(false)
+                  )}
+                </div>
+              </React.Fragment>
+            ) : (
+              <span>Loading...</span>
+            )}
           </div>
-          {enrollments ? (
-            <React.Fragment>
-              <div className="program-enrollments">
-                {enrollments.program_enrollments.map(
-                  this.renderProgramEnrollment
-                )}
-              </div>
-              <div className="non-program-course-enrollments">
-                {enrollments.course_run_enrollments.map(
-                  this.renderCourseEnrollment(false)
-                )}
-              </div>
-            </React.Fragment>
-          ) : (
-            <span>Loading...</span>
-          )}
-        </div>
+        </DocumentTitle>
       </React.Fragment>
     )
   }
