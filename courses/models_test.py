@@ -71,20 +71,36 @@ def test_program_first_course_unexpired_runs():
     first_course_unexpired_runs should return the unexpired course runs of the earliest course
     """
     program = ProgramFactory.create()
+
+    now = now_in_utc()
+    past_start_dates = [
+        now + timedelta(days=-10),
+        now + timedelta(days=-11),
+        now + timedelta(days=-12),
+    ]
+
+    past_end_dates = [now + timedelta(days=-5), now + timedelta(days=-6)]
+    future_end_dates = [
+        now + timedelta(days=10),
+        now + timedelta(days=11),
+        now + timedelta(days=12),
+    ]
+
     course = CourseFactory.create(live=True, program=program)
+
     CourseRunFactory.create_batch(
         2,
         course=course,
-        end_date__before_now=True,
-        enrollment_start__before_now=True,
-        enrollment_end__before_now=True,
+        start_date=factory.Iterator(past_start_dates),
+        end_date=factory.Iterator(past_end_dates),
         live=True,
     )
     CourseRunFactory.create_batch(
         3,
         course=course,
-        enrollment_start__before_now=True,
-        enrollment_end__after_now=True,
+        start_date=factory.Iterator(past_start_dates),
+        end_date=factory.Iterator(future_end_dates),
+        enrollment_end=factory.Iterator(future_end_dates),
         live=True,
     )
     assert len(program.first_course_unexpired_runs) == 3
