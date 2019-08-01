@@ -46,22 +46,22 @@
               <div class="tab-pane catalog-body fade in show active" id="all" role="tabpanel" aria-labelledby="all-tab">
                 {% for page in all_pages %}
                   {% if page.program %}
-                      {% include "partials/catalog-card.html" with courseware_page=page object_type="program" tab="all" %}
+                      {% include "partials/catalog_card.html" with courseware_page=page object_type="program" tab="all" %}
                   {% elif page.course %}
-                      {% include "partials/catalog-card.html" with courseware_page=page object_type="course" tab="all"%}
+                      {% include "partials/catalog_card.html" with courseware_page=page object_type="course" tab="all"%}
                   {% endif %}
                 {% endfor %}
               </div>
               <div class="tab-pane catalog-body fade" id="programs" role="tabpanel" aria-labelledby="programs-tab">
                 <h1>PROGRAMS</h1>
                 {% for program_page in program_pages %}
-                    {% include "partials/catalog-card.html" with courseware_page=program_page object_type="program" tab="program" %}
+                    {% include "partials/catalog_card.html" with courseware_page=program_page object_type="program" tab="program" %}
                 {% endfor %}
               </div>
               <div class="tab-pane catalog-body fade" id="courses" role="tabpanel" aria-labelledby="courses-tab">
                 <h1>COURSES</h1>
                 {% for course_page in course_pages %}
-                    {% include "partials/catalog-card.html" with courseware_page=course_page object_type="course" tab="course" %}
+                    {% include "partials/catalog_card.html" with courseware_page=course_page object_type="course" tab="course" %}
                 {% endfor %}
               </div>
             </div>
