@@ -54,6 +54,9 @@ log = logging.getLogger(__name__)
 class ProductViewSet(ReadOnlyModelViewSet):
     """API view set for Products"""
 
+    authentication_classes = ()
+    permission_classes = ()
+
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
 

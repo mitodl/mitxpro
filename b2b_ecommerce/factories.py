@@ -4,7 +4,7 @@ from factory import fuzzy
 from factory.django import DjangoModelFactory
 
 from b2b_ecommerce.models import B2BOrder
-from ecommerce.factories import ProductVersionFactory
+from ecommerce.factories import CouponPaymentVersionFactory, ProductVersionFactory
 
 
 class B2BOrderFactory(DjangoModelFactory):
@@ -14,8 +14,9 @@ class B2BOrderFactory(DjangoModelFactory):
     num_seats = fuzzy.FuzzyInteger(low=0, high=1234)
     email = factory.Faker("email")
     per_item_price = fuzzy.FuzzyDecimal(low=1, high=123)
-    total_price = factory.LazyAttribute(lambda obj: obj.per_item_price)
+    total_price = factory.LazyAttribute(lambda obj: obj.per_item_price * obj.num_seats)
     product_version = factory.SubFactory(ProductVersionFactory)
+    coupon_payment_version = factory.SubFactory(CouponPaymentVersionFactory)
 
     class Meta:
         model = B2BOrder

@@ -11,14 +11,13 @@ from cms.factories import CoursePageFactory, ProgramPageFactory
 from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
 from courses.serializers import CourseSerializer
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
-from ecommerce.api import round_half_up
+from ecommerce.api import get_readable_id, round_half_up
 from ecommerce.factories import (
     ProductVersionFactory,
     ProductFactory,
     CompanyFactory,
     DataConsentUserFactory,
     CouponFactory,
-    CouponEligibilityFactory,
     CouponPaymentVersionFactory,
     CouponPaymentFactory,
 )
@@ -42,7 +41,6 @@ from ecommerce.serializers import (
     CompanySerializer,
     DataConsentUserSerializer,
     CouponSerializer,
-    ProductCouponSerializer,
 )
 
 pytestmark = [pytest.mark.django_db]
@@ -70,6 +68,7 @@ def test_serialize_basket_product_version_courserun(mock_context):
         "thumbnail_url": "/static/images/mit-dome.png",
         "object_id": product_version.product.object_id,
         "product_id": product_version.product.id,
+        "readable_id": get_readable_id(product_version.product.content_object),
     }
 
 
@@ -95,6 +94,7 @@ def test_serialize_basket_product_version_program(mock_context):
         "thumbnail_url": "/static/images/mit-dome.png",
         "object_id": product_version.product.object_id,
         "product_id": product_version.product.id,
+        "readable_id": get_readable_id(product_version.product.content_object),
     }
 
 
@@ -340,15 +340,4 @@ def test_serialize_coupon():
         "name": name,
         "coupon_code": code,
         "enabled": True,
-    }
-
-
-def test_serialize_product_coupon():
-    """Test that ProductCouponSerializer produces the correct serialized data"""
-    product_coupon = CouponEligibilityFactory.create()
-    serialized_data = ProductCouponSerializer(instance=product_coupon).data
-    assert serialized_data == {
-        "id": product_coupon.id,
-        "coupon": CouponSerializer(instance=product_coupon.coupon).data,
-        "product": ProductSerializer(instance=product_coupon.product).data,
     }

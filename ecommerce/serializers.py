@@ -14,6 +14,7 @@ from ecommerce import models
 from ecommerce.api import (
     best_coupon_for_product,
     create_coupons,
+    get_readable_id,
     get_valid_coupon_versions,
     latest_coupon_version,
     latest_product_version,
@@ -30,27 +31,6 @@ class CompanySerializer(serializers.ModelSerializer):
         model = models.Company
 
 
-class ProductSerializer(serializers.ModelSerializer):
-    """ Product Serializer """
-
-    title = serializers.SerializerMethodField()
-    product_type = serializers.SerializerMethodField()
-
-    def get_title(self, instance):
-        """ Return the product title """
-        return instance.content_type.get_object_for_this_type(
-            pk=instance.object_id
-        ).title
-
-    def get_product_type(self, instance):
-        """ Return the product type """
-        return instance.content_type.model
-
-    class Meta:
-        fields = "__all__"
-        model = models.Product
-
-
 class ProductVersionSerializer(serializers.ModelSerializer):
     """ ProductVersion serializer for viewing/updating items in basket """
 
@@ -60,6 +40,7 @@ class ProductVersionSerializer(serializers.ModelSerializer):
     courses = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
     content_title = serializers.SerializerMethodField()
+    readable_id = serializers.SerializerMethodField()
 
     def get_type(self, instance):
         """ Return the product version type """
@@ -98,6 +79,10 @@ class ProductVersionSerializer(serializers.ModelSerializer):
         """Return the title of the program or course run"""
         return instance.product.content_object.title
 
+    def get_readable_id(self, instance):
+        """Return the readable_id of the program or course run"""
+        return get_readable_id(instance.product.content_object)
+
     class Meta:
         fields = [
             "id",
@@ -109,8 +94,37 @@ class ProductVersionSerializer(serializers.ModelSerializer):
             "thumbnail_url",
             "object_id",
             "product_id",
+            "readable_id",
         ]
         model = models.ProductVersion
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    """ Product Serializer """
+
+    title = serializers.SerializerMethodField()
+    product_type = serializers.SerializerMethodField()
+    latest_version = serializers.SerializerMethodField()
+
+    def get_title(self, instance):
+        """ Return the product title """
+        return instance.content_type.get_object_for_this_type(
+            pk=instance.object_id
+        ).title
+
+    def get_product_type(self, instance):
+        """ Return the product type """
+        return instance.content_type.model
+
+    def get_latest_version(self, instance):
+        """Serialize and return the latest ProductVersion for the Product"""
+        return ProductVersionSerializer(
+            instance.latest_version, context={**self.context, "show_all_runs": True}
+        ).data
+
+    class Meta:
+        fields = ["id", "title", "product_type", "latest_version"]
+        model = models.Product
 
 
 class CouponSelectionSerializer(serializers.ModelSerializer):
@@ -164,17 +178,6 @@ class CouponSerializer(serializers.ModelSerializer):
     class Meta:
         exclude = ("payment", "created_on", "updated_on")
         model = models.Coupon
-
-
-class ProductCouponSerializer(serializers.ModelSerializer):
-    """CouponEligibility serializer"""
-
-    product = ProductSerializer()
-    coupon = CouponSerializer()
-
-    class Meta:
-        exclude = ("created_on", "updated_on")
-        model = models.CouponEligibility
 
 
 class BasketSerializer(serializers.ModelSerializer):

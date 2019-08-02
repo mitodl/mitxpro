@@ -1,9 +1,11 @@
 """Views for business to business ecommerce"""
 
+import csv
 import logging
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlencode
 
 from django.conf import settings
+from django.http.response import HttpResponse
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -14,8 +16,9 @@ from rest_framework.views import APIView
 from b2b_ecommerce.api import complete_b2b_order, generate_b2b_cybersource_sa_payload
 from b2b_ecommerce.models import B2BOrder, B2BReceipt
 from ecommerce.api import determine_order_status_change
-from ecommerce.models import ProductVersion
+from ecommerce.models import ProductVersion, Coupon
 from ecommerce.permissions import IsSignedByCyberSource
+from ecommerce.serializers import ProductVersionSerializer
 
 
 log = logging.getLogger(__name__)
@@ -56,10 +59,14 @@ class B2BCheckoutView(APIView):
             email=email,
             product_version=product_version,
             total_price=total_price,
-            per_item_price=total_price,
+            per_item_price=product_version.price,
         )
 
-        receipt_url = urljoin(base_url, reverse("bulk-enrollment-code-receipt"))
+        receipt_url = (
+            f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?'
+            f'{urlencode({"hash": str(order.unique_id)})}'
+        )
+        cancel_url = urljoin(base_url, reverse("bulk-enrollment-code"))
         if total_price == 0:
             # If price is $0, don't bother going to CyberSource, just mark as fulfilled
             order.status = B2BOrder.FULFILLED
@@ -75,7 +82,7 @@ class B2BCheckoutView(APIView):
         else:
             # This generates a signed payload which is submitted as an HTML form to CyberSource
             payload = generate_b2b_cybersource_sa_payload(
-                order=order, receipt_url=receipt_url, cancel_url=base_url
+                order=order, receipt_url=receipt_url, cancel_url=cancel_url
             )
             url = settings.CYBERSOURCE_SECURE_ACCEPTANCE_URL
             method = "POST"
@@ -122,3 +129,64 @@ class B2BOrderFulfillmentView(APIView):
 
         # The response does not matter to CyberSource
         return Response(status=status.HTTP_200_OK)
+
+
+class B2BOrderStatusView(APIView):
+    """
+    View to retrieve information about an order to display the receipt.
+    """
+
+    authentication_classes = ()
+    permission_classes = ()
+
+    def get(self, request, *args, **kwargs):
+        """Return B2B order status and other information about the order needed to display the receipt"""
+        try:
+            order_hash = request.query_params["hash"]
+        except KeyError:
+            raise ValidationError("Missing query parameter hash")
+        order = get_object_or_404(B2BOrder, unique_id=order_hash)
+
+        return Response(
+            data={
+                "status": order.status,
+                "num_seats": order.num_seats,
+                "total_price": str(order.total_price),
+                "item_price": str(order.per_item_price),
+                "product_version": ProductVersionSerializer(
+                    order.product_version, context={"show_all_runs": True}
+                ).data,
+                "email": order.email,
+            }
+        )
+
+
+class B2BEnrollmentCodesView(APIView):
+    """
+    View to export a CSV of coupon codes for download
+    """
+
+    authentication_classes = ()
+    permission_classes = ()
+
+    def get(self, request, *args, **kwargs):
+        """Create a CSV with enrollment codes"""
+        try:
+            order_hash = request.GET["hash"]
+        except KeyError:
+            raise ValidationError("Missing query parameter hash")
+        order = get_object_or_404(B2BOrder, unique_id=order_hash)
+
+        response = HttpResponse(content_type="text/csv")
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename="enrollmentcodes-{order_hash}.csv"'
+
+        writer = csv.writer(response)
+
+        for code in Coupon.objects.filter(
+            versions__payment_version__b2border=order
+        ).values_list("coupon_code", flat=True):
+            writer.writerow([code])
+
+        return response
