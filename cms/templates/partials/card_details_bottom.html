@@ -1,0 +1,39 @@
+{% load static humanize wagtailcore_tags wagtailimages_tags %}
+
+<div class="bottom">
+  {% with page_id=courseware_page.pk|stringformat:"i" %}
+  {% with collapse_id="collapsible_"|add:card_type|add:"_"|add:page_id collapse_input_id="collapse_"|add:card_type|add:"_"|add:page_id %}
+  <input type="checkbox" class="toggle" id="{{ collapse_input_id }}" data-target="#{{ collapse_id }}"
+         data-toggle="collapse"/>
+  <label for="{{ collapse_input_id }}" class="lbl-toggle">
+    Details
+  </label>
+  <div id="{{ collapse_id }}" class="collapse">
+    <div class="details-body">
+      {% if courseware_page.catalog_details %}
+      <div class="description">{{ courseware_page.catalog_details|richtext }}</div>
+      {% endif %}
+      {% if object_type == "program" %}
+      <ul class="program-course-links">
+        {% for course_page in courseware_page.course_pages %}
+        <li>
+          <a href="{% pageurl course_page %}">
+            {{ course_page.title }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      <a href="{% pageurl courseware_page %}" class="link-button">
+        View Program
+      </a>
+      {% endif %}
+      {% if object_type == "course" %}
+      <a href="{% pageurl courseware_page %}" class="link-button">
+        View Course
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endwith %}
+  {% endwith %}
+</div>

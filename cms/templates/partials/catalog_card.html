@@ -1,0 +1,7 @@
+{% load static humanize wagtailcore_tags wagtailimages_tags %}
+<div class="catalog-card" role="region" aria-label="{{ courseware_page.title }}">
+    <div class="top">
+        {% include "partials/card_details_top.html" %}
+    </div>
+    {% include "partials/card_details_bottom.html" with card_type=tab %}
+</div>
