@@ -40,5 +40,10 @@ export const routes = {
     index:      "",
     bulkEnroll: "enroll/",
     coupons:    "coupons/"
+  }),
+
+  ecommerceBulk: include("/ecommerce/bulk/", {
+    bulkPurchase: "",
+    receipt:      "receipt/"
   })
 }

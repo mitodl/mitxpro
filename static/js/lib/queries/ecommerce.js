@@ -4,10 +4,12 @@ import { pathOr, objOf } from "ramda"
 import { getCookie } from "../api"
 
 import type {
+  B2BOrderStatus,
   BasketResponse,
+  BulkCheckoutPayload,
   Company,
   CouponPaymentVersion,
-  Product
+  ProductDetail
 } from "../../flow/ecommerceTypes"
 
 const DEFAULT_POST_OPTIONS = {
@@ -58,11 +60,11 @@ export default {
   productsSelector: pathOr(null, ["entities", "products"]),
   productsQuery:    () => ({
     url:       "/api/products/",
-    transform: (json: Array<Product>) => ({
+    transform: (json: Array<ProductDetail>) => ({
       products: json
     }),
     update: {
-      products: (prev: Array<Product>, next: Array<Product>) => next
+      products: (prev: Array<ProductDetail>, next: Array<ProductDetail>) => next
     }
   }),
   companiesSelector: pathOr(null, ["entities", "companies"]),
@@ -94,6 +96,30 @@ export default {
     },
     options: {
       ...DEFAULT_POST_OPTIONS
+    }
+  }),
+  b2bCheckoutMutation: (payload: BulkCheckoutPayload) => ({
+    queryKey: "b2bCheckoutMutation",
+    url:      "/api/b2b/checkout/",
+    update:   {
+      b2b_checkout: () => null
+    },
+    body: {
+      ...payload
+    },
+    options: {
+      force: true,
+      ...DEFAULT_POST_OPTIONS
+    }
+  }),
+  b2bOrderStatus: (orderHash: string) => ({
+    queryKey:  "b2bOrderStatus",
+    url:       `/api/b2b/orders/${orderHash}/status/`,
+    transform: (json: B2BOrderStatus) => ({
+      b2b_order_status: json
+    }),
+    update: {
+      b2b_order_status: (prev: B2BOrderStatus, next: B2BOrderStatus) => next
     }
   })
 }

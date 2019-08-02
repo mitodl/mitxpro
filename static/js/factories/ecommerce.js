@@ -14,7 +14,8 @@ import type {
   CouponPaymentVersion,
   Company,
   DataConsentUser,
-  Product
+  ProductDetail,
+  B2BOrderStatus
 } from "../flow/ecommerceTypes"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
 
@@ -53,7 +54,8 @@ export const makeItem = (itemType: ?string): BasketItem => {
     // $FlowFixMe: flow doesn't understand generators well
     object_id:     genNextObjectId.next().value,
     // $FlowFixMe: flow doesn't understand generators well
-    product_id:    genProductId.next().value
+    product_id:    genProductId.next().value,
+    readable_id:   casual.text
   }
 }
 
@@ -74,19 +76,26 @@ export const makeBasketResponse = (itemType: ?string): BasketResponse => {
 
 export const makeProduct = (
   productType: string = PRODUCT_TYPE_COURSERUN
-): Product => ({
-  // $FlowFixMe
-  id:           genProductId.next().value,
-  product_type: productType
-    ? productType
-    : casual.random_element([PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM]),
-  title:        casual.word,
-  object_id:    casual.number,
-  content_type: casual.number,
-  text_id:      casual.word,
-  created_on:   casual.moment.format(),
-  updated_on:   casual.moment.format()
-})
+): ProductDetail => {
+  productType =
+    productType ||
+    casual.random_element([PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM])
+  const contentType =
+    productType === PRODUCT_TYPE_COURSERUN ? "courserun" : "program"
+
+  return {
+    // $FlowFixMe
+    id:             genProductId.next().value,
+    product_type:   productType,
+    content_type:   contentType,
+    title:          casual.word,
+    object_id:      casual.integer(0, 99999),
+    text_id:        casual.word,
+    created_on:     casual.moment.format(),
+    updated_on:     casual.moment.format(),
+    latest_version: makeItem(productType)
+  }
+}
 
 const genCompanyId = incrementer()
 export const makeCompany = (): Company => ({
@@ -116,8 +125,8 @@ export const makeCouponPaymentVersion = (
   tag:                      casual.word,
   automatic:                false,
   coupon_type:              isPromo ? "promo" : "single-use",
-  num_coupon_codes:         casual.number,
-  max_redemptions:          casual.number,
+  num_coupon_codes:         casual.integer(0, 15),
+  max_redemptions:          casual.integer(0, 15),
   max_redemptions_per_user: 1,
   amount:                   casual.random,
   activation_date:          casual.date,
@@ -144,3 +153,17 @@ export const makeBulkCouponPayment = (): BulkCouponPayment => ({
   created_on: casual.moment.format(),
   updated_on: casual.moment.format()
 })
+
+export const makeB2BOrderStatus = (): B2BOrderStatus => {
+  const itemPrice = casual.integer(0, 1000)
+  const numSeats = casual.integer(0, 1000)
+
+  return {
+    status:          casual.random_element(["fulfilled", "created"]),
+    num_seats:       numSeats,
+    item_price:      String(itemPrice),
+    total_price:     String(itemPrice * numSeats),
+    email:           casual.email,
+    product_version: makeProduct().latest_version
+  }
+}
