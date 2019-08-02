@@ -235,7 +235,9 @@ class LoginPasswordSerializer(SocialAuthSerializer):
             result = super()._authenticate(SocialAuthState.FLOW_LOGIN)
         except InvalidPasswordException as exc:
             result = SocialAuthState(
-                SocialAuthState.STATE_ERROR, partial=exc.partial, errors=[str(exc)]
+                SocialAuthState.STATE_ERROR,
+                partial=exc.partial,
+                field_errors={"password": str(exc)},
             )
         return result
 

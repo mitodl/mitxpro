@@ -403,7 +403,9 @@ class AuthStateMachine(RuleBasedStateMachine):
                 "password": "invalidpass",
             },
             {
-                "errors": ["Unable to login with that email and password combination"],
+                "field_errors": {
+                    "password": "Unable to login with that email and password combination"
+                },
                 "flow": auth_state["flow"],
                 "state": SocialAuthState.STATE_ERROR,
             },
