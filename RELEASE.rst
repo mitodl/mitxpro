@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.15.1
+Version 0.15.1 (Released August 02, 2019)
 --------------
 
 - Added explicit buffer size to uWSGI for cookie size issues
