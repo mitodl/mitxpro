@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.15.2
+--------------
+
+- Make voucher search more fuzzy and robust
+
 Version 0.15.1 (Released August 02, 2019)
 --------------
 
