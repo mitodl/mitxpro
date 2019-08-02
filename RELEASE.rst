@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.15.1
+--------------
+
+- Added explicit buffer size to uWSGI for cookie size issues
+- remove redudant code
+- js dependencies updated
+- #929 Test fixes for program more dates
+- Add more information to OrderAudit (#896)
+- #679 Set an HTML title on React pages
+- #914 Inactive products should not show on catalog
+- #783 React should scroll to top on page load
+
 Version 0.15.0 (Released August 01, 2019)
 --------------
 
