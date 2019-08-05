@@ -6,31 +6,17 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 
 from b2b_ecommerce.constants import REFERENCE_NUMBER_PREFIX
-from ecommerce.models import CouponPaymentVersion, ProductVersion
+from ecommerce.models import CouponPaymentVersion, ProductVersion, OrderAbstract
 from mitxpro.models import AuditModel, AuditableModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 
 
-class B2BOrder(TimestampedModel, AuditableModel):
+class B2BOrder(OrderAbstract, AuditableModel):
     """
     An order containing information for the purchase of enrollment codes by businesses or other bulk purchasers.
     Orders which are fulfilled represent successful completion of a purchase and are the source of truth
     for this information.
     """
-
-    FULFILLED = "fulfilled"
-    FAILED = "failed"
-    CREATED = "created"
-    REFUNDED = "refunded"
-
-    STATUSES = [CREATED, FULFILLED, FAILED, REFUNDED]
-
-    status = models.CharField(
-        choices=[(status, status) for status in STATUSES],
-        default=CREATED,
-        max_length=30,
-        db_index=True,
-    )
     num_seats = models.PositiveIntegerField()
     email = models.EmailField()
     product_version = models.ForeignKey(ProductVersion, on_delete=models.PROTECT)

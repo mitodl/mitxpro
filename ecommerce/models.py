@@ -128,11 +128,31 @@ class BasketItem(TimestampedModel):
         return f"BasketItem of product {self.product} (qty: {self.quantity})"
 
 
-class Order(TimestampedModel, AuditableModel):
+class OrderManager(models.Manager):
     """
-    An order containing information for a purchase. Orders which are fulfilled represent successful
-    completion of a purchase and are the source of truth for this information.
+    Add a function to filter on reference id
     """
+
+    def filter_by_reference_number(self, reference_number):
+        """
+        Look up the order id for the reference number and add a filter to the queryset for it.
+
+        Args:
+            reference_number (str): A reference number, a string passed with the Cybersource payload
+        Returns:
+            django.db.models.Queryset: A queryset
+        """
+        order_id = get_new_order_id_by_reference_number(
+            reference_number=reference_number,
+            prefix=f"{REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
+        )
+        return self.filter(
+            order_id=order_id
+        )
+
+
+class OrderAbstract(TimestampedModel):
+    """An abstract model representing an order"""
 
     FULFILLED = "fulfilled"
     FAILED = "failed"
@@ -141,14 +161,27 @@ class Order(TimestampedModel, AuditableModel):
 
     STATUSES = [CREATED, FULFILLED, FAILED, REFUNDED]
 
-    purchaser = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders"
-    )
     status = models.CharField(
         choices=[(status, status) for status in STATUSES],
         default=CREATED,
         max_length=30,
         db_index=True,
+    )
+
+    objects = OrderManager()
+
+    class Meta:
+        abstract = True
+
+
+class Order(OrderAbstract, AuditableModel):
+    """
+    An order containing information for a purchase. Orders which are fulfilled represent successful
+    completion of a purchase and are the source of truth for this information.
+    """
+
+    purchaser = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders"
     )
 
     @property
