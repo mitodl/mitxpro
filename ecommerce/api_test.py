@@ -29,7 +29,7 @@ from ecommerce.api import (
     get_readable_id,
     ISO_8601_FORMAT,
     redeem_coupon,
-    get_new_order_by_reference_number,
+    get_new_order_id_by_reference_number,
     get_product_price,
     get_product_version_price_with_discount,
     get_valid_coupon_versions,
@@ -45,7 +45,7 @@ from ecommerce.api import (
     ENROLL_ERROR_EMAIL_SUBJECT,
     format_enrollment_message,
 )
-from ecommerce.exceptions import EcommerceException, ParseException
+from ecommerce.exceptions import ParseException
 from ecommerce.factories import (
     BasketFactory,
     CouponRedemptionFactory,
@@ -481,16 +481,16 @@ def test_get_product_version_price_with_discount(has_coupon, basket_and_coupons)
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
-def test_get_new_order_by_reference_number(
+def test_filter_by_reference_number(
     basket_and_coupons, mock_hubspot_syncs, settings, hubspot_api_key
 ):
     """
-    get_new_order_by_reference_number returns an Order with status created
+    filter_by_reference_number returns an Order with status created
     """
     settings.HUBSPOT_API_KEY = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
-    same_order = get_new_order_by_reference_number(order.reference_id)
+    same_order = Order.objects.filter_by_reference_number(order.reference_id).first()
     assert same_order.id == order.id
     if hubspot_api_key:
         assert mock_hubspot_syncs.order.called_with(order.id)
@@ -505,31 +505,31 @@ def test_get_new_order_by_reference_number(
         ("MITXPRO-cyb-prefix-NaN", "Unable to parse order number"),
     ],
 )
-def test_get_new_order_by_reference_number_parse_error(
-    settings, reference_number, error
-):
+def test_get_new_order_id_by_reference_number_parse_error(reference_number, error):
     """
     Test parse errors are handled well
     """
-    settings.CYBERSOURCE_REFERENCE_PREFIX = "cyb-prefix"
     with pytest.raises(ParseException) as ex:
-        get_new_order_by_reference_number(reference_number=reference_number)
+        get_new_order_id_by_reference_number(
+            reference_number=reference_number, prefix="MITXPRO-cyb-prefix"
+        )
     assert ex.value.args[0] == error
 
+    # The same parse error for filter_by_reference_id should result in an empty queryset with no exception thrown
+    assert Order.objects.filter_by_reference_number(reference_number).count() == 0
 
-def test_get_new_order_by_reference_number_missing(basket_and_coupons):
+
+def test_filter_by_reference_number_missing(basket_and_coupons):
     """
-    get_new_order_by_reference_number should error when the Order id is not found
+    filter_by_reference_number should return an empty queryset if the order id is missing
     """
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
 
-    with pytest.raises(EcommerceException) as ex:
-        # change order number to something not likely to already exist in database
-        order.id = 98_765_432
-        assert not Order.objects.filter(id=order.id).exists()
-        get_new_order_by_reference_number(order.reference_id)
-    assert ex.value.args[0] == f"Unable to find order {order.id}"
+    # change order number to something not likely to already exist in database
+    order.id = 98_765_432
+    assert not Order.objects.filter(id=order.id).exists()
+    assert not Order.objects.filter_by_reference_number(order.reference_id).exists()
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])

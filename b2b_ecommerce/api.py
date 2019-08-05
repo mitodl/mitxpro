@@ -5,37 +5,13 @@ import uuid
 from django.conf import settings
 from django.db import transaction
 
-from b2b_ecommerce.constants import REFERENCE_NUMBER_PREFIX
-from b2b_ecommerce.models import B2BOrder
 from ecommerce.api import (
     create_coupons,
-    get_new_order_id_by_reference_number,
     generate_cybersource_sa_signature,
     ISO_8601_FORMAT,
 )
-from ecommerce.exceptions import EcommerceException
 from ecommerce.models import CouponPaymentVersion
 from mitxpro.utils import now_in_utc
-
-
-def get_new_b2b_order_by_reference_number(reference_number):
-    """
-    Parse a reference number received from CyberSource and lookup the corresponding Order.
-    Args:
-        reference_number (str):
-            A string which contains the order id and the instance which generated it
-    Returns:
-        Order:
-            An order
-    """
-    order_id = get_new_order_id_by_reference_number(
-        reference_number=reference_number,
-        prefix=f"{REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
-    )
-    try:
-        return B2BOrder.objects.get(id=order_id)
-    except B2BOrder.DoesNotExist:
-        raise EcommerceException("Unable to find order {}".format(order_id))
 
 
 def complete_b2b_order(order):

@@ -31,8 +31,7 @@ from courses.models import (
 )
 from courseware.api import enroll_in_edx_course_runs
 from ecommerce import mail_api
-from ecommerce.constants import REFERENCE_NUMBER_PREFIX
-from ecommerce.exceptions import EcommerceException, ParseException
+from ecommerce.exceptions import ParseException
 from ecommerce.models import (
     Basket,
     BasketItem,
@@ -410,26 +409,6 @@ def redeem_coupon(coupon_version, order):
         order=order, defaults={"coupon_version": coupon_version}
     )
     return coupon_redemption
-
-
-def get_new_order_by_reference_number(reference_number):
-    """
-    Parse a reference number received from CyberSource and lookup the corresponding Order.
-    Args:
-        reference_number (str):
-            A string which contains the order id and the instance which generated it
-    Returns:
-        Order:
-            An order
-    """
-    order_id = get_new_order_id_by_reference_number(
-        reference_number=reference_number,
-        prefix=f"{REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
-    )
-    try:
-        return Order.objects.get(id=order_id)
-    except Order.DoesNotExist:
-        raise EcommerceException("Unable to find order {}".format(order_id))
 
 
 def get_new_order_id_by_reference_number(*, reference_number, prefix):

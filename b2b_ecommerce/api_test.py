@@ -4,12 +4,10 @@ import pytest
 from b2b_ecommerce.api import (
     generate_b2b_cybersource_sa_payload,
     generate_cybersource_sa_signature,
-    get_new_b2b_order_by_reference_number,
 )
 from b2b_ecommerce.factories import B2BOrderFactory
 from b2b_ecommerce.models import B2BOrder
 from ecommerce.api import ISO_8601_FORMAT
-from ecommerce.exceptions import EcommerceException, ParseException
 from mitxpro.utils import now_in_utc
 
 
@@ -38,41 +36,8 @@ def test_get_new_b2b_order_by_reference_number():
     get_new_order_by_reference_number returns an Order with status created
     """
     order = B2BOrderFactory.create(status=B2BOrder.CREATED)
-    same_order = get_new_b2b_order_by_reference_number(order.reference_id)
+    same_order = B2BOrder.objects.filter_by_reference_number(order.reference_id).first()
     assert same_order.id == order.id
-
-
-@pytest.mark.parametrize(
-    "reference_number, error",
-    [
-        ("XYZ-1-3", "Reference number must start with XPRO-ENROLLMENT-cyb-prefix-"),
-        ("XPRO-ENROLLMENT-cyb-prefix-NaN", "Unable to parse order number"),
-    ],
-)
-def test_get_new_order_by_reference_number_parse_error(
-    settings, reference_number, error
-):
-    """
-    Test parse errors are handled well
-    """
-    settings.CYBERSOURCE_REFERENCE_PREFIX = "cyb-prefix"
-    with pytest.raises(ParseException) as ex:
-        get_new_b2b_order_by_reference_number(reference_number=reference_number)
-    assert ex.value.args[0] == error
-
-
-def test_get_new_order_by_reference_number_missing():
-    """
-    get_new_order_by_reference_number should error when the Order id is not found
-    """
-    order = B2BOrderFactory.create(status=B2BOrder.CREATED)
-
-    with pytest.raises(EcommerceException) as ex:
-        # change order number to something not likely to already exist in database
-        order.id = 98_765_432
-        assert not B2BOrder.objects.filter(id=order.id).exists()
-        get_new_b2b_order_by_reference_number(order.reference_id)
-    assert ex.value.args[0] == f"Unable to find order {order.id}"
 
 
 def test_signed_payload(mocker):

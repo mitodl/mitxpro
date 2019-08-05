@@ -11,11 +11,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from b2b_ecommerce.api import (
-    complete_b2b_order,
-    generate_b2b_cybersource_sa_payload,
-    get_new_b2b_order_by_reference_number,
-)
+from b2b_ecommerce.api import complete_b2b_order, generate_b2b_cybersource_sa_payload
 from b2b_ecommerce.models import B2BOrder, B2BReceipt
 from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
 from ecommerce.exceptions import EcommerceException
@@ -106,7 +102,7 @@ class B2BOrderFulfillmentView(APIView):
 
         # Link the order with the receipt if we can parse it
         reference_number = request.data["req_reference_number"]
-        order = get_new_b2b_order_by_reference_number(reference_number)
+        order = B2BOrder.objects.filter_by_reference_number(reference_number).first()
         receipt.order = order
         receipt.save()
 

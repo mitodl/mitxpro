@@ -8,6 +8,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 
 from ecommerce.constants import REFERENCE_NUMBER_PREFIX
+from ecommerce.exceptions import ParseException
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 from users.models import User
@@ -133,6 +134,16 @@ class OrderManager(models.Manager):
     Add a function to filter on reference id
     """
 
+    def __init__(self, reference_number_prefix):
+        """
+        Override constructor to set reference_number_prefix
+
+        Args:
+             reference_number_prefix (str): Prefix used to differentiate reference numbers used with CyberSource
+        """
+        super().__init__()
+        self.reference_number_prefix = reference_number_prefix
+
     def filter_by_reference_number(self, reference_number):
         """
         Look up the order id for the reference number and add a filter to the queryset for it.
@@ -142,13 +153,18 @@ class OrderManager(models.Manager):
         Returns:
             django.db.models.Queryset: A queryset
         """
-        order_id = get_new_order_id_by_reference_number(
-            reference_number=reference_number,
-            prefix=f"{REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
-        )
-        return self.filter(
-            order_id=order_id
-        )
+        from ecommerce.api import get_new_order_id_by_reference_number
+
+        try:
+            order_id = get_new_order_id_by_reference_number(
+                reference_number=reference_number,
+                prefix=f"{self.reference_number_prefix}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
+            )
+        except ParseException:
+            log.exception("Unexpected reference number")
+            order_id = None
+
+        return self.filter(id=order_id)
 
 
 class OrderAbstract(TimestampedModel):
@@ -168,8 +184,6 @@ class OrderAbstract(TimestampedModel):
         db_index=True,
     )
 
-    objects = OrderManager()
-
     class Meta:
         abstract = True
 
@@ -183,6 +197,8 @@ class Order(OrderAbstract, AuditableModel):
     purchaser = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders"
     )
+
+    objects = OrderManager(REFERENCE_NUMBER_PREFIX)
 
     @property
     def reference_id(self):

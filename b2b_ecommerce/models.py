@@ -6,7 +6,12 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 
 from b2b_ecommerce.constants import REFERENCE_NUMBER_PREFIX
-from ecommerce.models import CouponPaymentVersion, ProductVersion, OrderAbstract
+from ecommerce.models import (
+    CouponPaymentVersion,
+    ProductVersion,
+    OrderAbstract,
+    OrderManager,
+)
 from mitxpro.models import AuditModel, AuditableModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 
@@ -17,6 +22,7 @@ class B2BOrder(OrderAbstract, AuditableModel):
     Orders which are fulfilled represent successful completion of a purchase and are the source of truth
     for this information.
     """
+
     num_seats = models.PositiveIntegerField()
     email = models.EmailField()
     product_version = models.ForeignKey(ProductVersion, on_delete=models.PROTECT)
@@ -26,6 +32,8 @@ class B2BOrder(OrderAbstract, AuditableModel):
     coupon_payment_version = models.ForeignKey(
         CouponPaymentVersion, null=True, on_delete=models.PROTECT
     )
+
+    objects = OrderManager(REFERENCE_NUMBER_PREFIX)
 
     @property
     def reference_id(self):

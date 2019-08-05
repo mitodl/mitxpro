@@ -17,7 +17,6 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from ecommerce.api import (
     create_unfulfilled_order,
     generate_cybersource_sa_payload,
-    get_new_order_by_reference_number,
     get_product_version_price_with_discount,
     get_full_price_coupon_product_set,
     get_available_bulk_product_coupons,
@@ -146,7 +145,7 @@ class OrderFulfillmentView(APIView):
 
         # Link the order with the receipt if we can parse it
         reference_number = request.data["req_reference_number"]
-        order = get_new_order_by_reference_number(reference_number)
+        order = Order.objects.filter_by_reference_number(reference_number).first()
         receipt.order = order
         receipt.save()
 
