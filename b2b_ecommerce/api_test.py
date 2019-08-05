@@ -108,7 +108,6 @@ def test_signed_payload(mocker):
     assert payload == {
         "access_key": CYBERSOURCE_ACCESS_KEY,
         "amount": str(total_price),
-        "consumer_id": order.email,
         "currency": "USD",
         "item_0_code": "enrollment_code",
         "item_0_name": f"Enrollment codes for {product_version.description}"[:254],

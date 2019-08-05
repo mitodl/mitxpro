@@ -94,7 +94,6 @@ def generate_b2b_cybersource_sa_payload(*, order, receipt_url, cancel_url):
     payload = {
         "access_key": settings.CYBERSOURCE_ACCESS_KEY,
         "amount": str(price),
-        "consumer_id": order.email,
         "currency": "USD",
         "locale": "en-us",
         **line_items,
