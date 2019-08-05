@@ -54,7 +54,11 @@ export class EditProfilePage extends React.Component<Props> {
             years_experience:
                 profileData.profile.years_experience === ""
                   ? null
-                  : profileData.profile.years_experience
+                  : profileData.profile.years_experience,
+            highest_education:
+                profileData.profile.highest_education === ""
+                  ? null
+                  : profileData.profile.highest_education
           }
         }
         : {})

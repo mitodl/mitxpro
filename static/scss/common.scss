@@ -67,6 +67,10 @@ a.link-button {
   background-color: $light-blue !important;
   border-color: $light-blue !important;
   font-size: 20px;
+
+  &.btn-profile-submit {
+    margin-top: 12px;
+  }
 }
 
 .btn-denim-blue {

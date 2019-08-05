@@ -87,6 +87,7 @@ def test_get_user_by_me(mocker, client, user, is_anonymous):
                 "leadership_level": user.profile.leadership_level,
                 "job_function": user.profile.job_function,
                 "years_experience": user.profile.years_experience,
+                "highest_education": user.profile.highest_education,
                 "industry": user.profile.industry,
             },
             "unused_coupons": patched_unused_coupon_api.return_value,

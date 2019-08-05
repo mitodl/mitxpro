@@ -68,6 +68,8 @@ describe("EditProfilePage", () => {
         user.profile.company_size = hasEmptyFields ? "" : 50
         // $FlowFixMe
         user.profile.years_experience = hasEmptyFields ? "" : 5
+        // $FlowFixMe
+        user.profile.highest_education = hasEmptyFields ? "" : "Doctorate"
 
         const { inner } = await renderPage()
         const setSubmitting = helper.sandbox.stub()
@@ -97,6 +99,8 @@ describe("EditProfilePage", () => {
           expectedPayload.profile.company_size = null
           // $FlowFixMe
           expectedPayload.profile.years_experience = null
+          // $FlowFixMe
+          expectedPayload.profile.highest_education = null
         }
 
         sinon.assert.calledWith(

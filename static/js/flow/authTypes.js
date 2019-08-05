@@ -64,7 +64,8 @@ export type Profile = {
   job_function: ?string,
   years_experience: ?number,
   company_size: ?number,
-  leadership_level: ?string
+  leadership_level: ?string,
+  highest_education: ?string
 }
 
 export type User = {

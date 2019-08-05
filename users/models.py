@@ -41,6 +41,22 @@ YRS_EXPERIENCE_CHOICES = (
     (0, "Prefer not to say"),
 )
 
+HIGHEST_EDUCATION_CHOICES = (
+    (None, "----"),
+    ("Doctorate", "Doctorate"),
+    ("Master's or professional degree", "Master's or professional degree"),
+    ("Bachelor's degree", "Bachelor's degree"),
+    ("Associate degree", "Associate degree"),
+    ("Secondary/high school", "Secondary/high school"),
+    (
+        "Junior secondary/junior high/middle school",
+        "Junior secondary/junior high/middle school",
+    ),
+    ("Elementary/primary school", "Elementary/primary school"),
+    ("No formal education", "No formal education"),
+    ("Other education", "Other education"),
+)
+
 
 def _post_create_user(user):
     """
@@ -212,6 +228,9 @@ class Profile(TimestampedModel):
         null=True, blank=True, choices=YRS_EXPERIENCE_CHOICES
     )
     leadership_level = models.CharField(max_length=60, blank=True, default="")
+    highest_education = models.CharField(
+        max_length=60, blank=True, default="", choices=HIGHEST_EDUCATION_CHOICES
+    )
 
     @property
     def is_complete(self):

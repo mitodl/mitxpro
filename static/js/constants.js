@@ -95,6 +95,18 @@ export const EMPLOYMENT_LEVEL = [
   "Prefer not to say"
 ]
 
+export const HIGHEST_EDUCATION_CHOICES = [
+  "Doctorate",
+  "Master's or professional degree",
+  "Bachelor's degree",
+  "Associate degree",
+  "Secondary/high school",
+  "Junior secondary/junior high/middle school",
+  "Elementary/primary school",
+  "No formal education",
+  "Other education"
+]
+
 export const ALERT_TYPE_TEXT = "text"
 export const ALERT_TYPE_UNUSED_COUPON = "unused-coupon"
 
