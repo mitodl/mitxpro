@@ -20,7 +20,7 @@ class ProgramAdmin(admin.ModelAdmin):
     """Admin for Program"""
 
     model = Program
-    search_fields = ["title", "description"]
+    search_fields = ["title"]
     list_filter = ["live"]
 
 
@@ -28,7 +28,7 @@ class CourseAdmin(admin.ModelAdmin):
     """Admin for Course"""
 
     model = Course
-    search_fields = ["title", "description"]
+    search_fields = ["title"]
     list_filter = ["live", "program"]
 
 
