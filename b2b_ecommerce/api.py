@@ -5,6 +5,7 @@ import uuid
 from django.conf import settings
 from django.db import transaction
 
+from b2b_ecommerce.constants import REFERENCE_NUMBER_PREFIX
 from b2b_ecommerce.models import B2BOrder
 from ecommerce.api import (
     create_coupons,
@@ -15,24 +16,6 @@ from ecommerce.api import (
 from ecommerce.exceptions import EcommerceException
 from ecommerce.models import CouponPaymentVersion
 from mitxpro.utils import now_in_utc
-
-
-_REFERENCE_NUMBER_PREFIX = "XPRO-ENROLLMENT-"
-
-
-def make_b2b_reference_id(order):
-    """
-    Make a reference id
-    Args:
-        order (B2BOrder):
-            An order
-    Returns:
-        str:
-            A reference number for use with CyberSource to keep track of orders
-    """
-    return (
-        f"{_REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}-{order.id}"
-    )
 
 
 def get_new_b2b_order_by_reference_number(reference_number):
@@ -47,7 +30,7 @@ def get_new_b2b_order_by_reference_number(reference_number):
     """
     order_id = get_new_order_id_by_reference_number(
         reference_number=reference_number,
-        prefix=f"{_REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
+        prefix=f"{REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
     )
     try:
         return B2BOrder.objects.get(id=order_id)
@@ -116,7 +99,7 @@ def generate_b2b_cybersource_sa_payload(*, order, receipt_url, cancel_url):
         "locale": "en-us",
         **line_items,
         "line_item_count": 1,
-        "reference_number": make_b2b_reference_id(order),
+        "reference_number": order.reference_id,
         "profile_id": settings.CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now_in_utc().strftime(ISO_8601_FORMAT),
         "override_custom_receipt_page": receipt_url,

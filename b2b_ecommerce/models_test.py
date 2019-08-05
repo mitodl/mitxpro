@@ -1,6 +1,7 @@
 """models for b2b_ecommerce"""
 import pytest
 
+from b2b_ecommerce.constants import REFERENCE_NUMBER_PREFIX
 from b2b_ecommerce.factories import B2BOrderFactory
 from b2b_ecommerce.models import B2BOrderAudit
 from mitxpro.utils import serialize_model_object
@@ -37,3 +38,17 @@ def test_b2b_order_audit():
             serialize_model_object(receipt) for receipt in order.b2breceipt_set.all()
         ],
     }
+
+
+def test_reference_id(settings):
+    """
+    order.reference_id should concatenate the reference prefix and the order id
+    """
+    cybersource_prefix = "cyb-prefix"
+    settings.CYBERSOURCE_REFERENCE_PREFIX = cybersource_prefix
+
+    order = B2BOrderFactory.create()
+    assert (
+        f"{REFERENCE_NUMBER_PREFIX}{cybersource_prefix}-{order.id}"
+        == order.reference_id
+    )

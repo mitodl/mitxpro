@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
+from ecommerce.constants import REFERENCE_NUMBER_PREFIX
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 from users.models import User
@@ -149,6 +150,11 @@ class Order(TimestampedModel, AuditableModel):
         max_length=30,
         db_index=True,
     )
+
+    @property
+    def reference_id(self):
+        """Create a string with the order id and a unique prefix so we can lookup the order during order fulfillment"""
+        return f"{REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}-{self.id}"
 
     def __str__(self):
         """Description for Order"""

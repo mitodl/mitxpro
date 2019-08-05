@@ -31,6 +31,7 @@ from courses.models import (
 )
 from courseware.api import enroll_in_edx_course_runs
 from ecommerce import mail_api
+from ecommerce.constants import REFERENCE_NUMBER_PREFIX
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.models import (
     Basket,
@@ -57,7 +58,6 @@ log = logging.getLogger(__name__)
 
 ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
-_REFERENCE_NUMBER_PREFIX = "MITXPRO-"
 
 
 # pylint: disable=too-many-lines
@@ -190,7 +190,7 @@ def generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
         **line_items,
         "line_item_count": order.lines.count(),
         **merchant_fields,
-        "reference_number": make_reference_id(order),
+        "reference_number": order.reference_id,
         "profile_id": settings.CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now_in_utc().strftime(ISO_8601_FORMAT),
         "override_custom_receipt_page": receipt_url,
@@ -205,21 +205,6 @@ def generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
     payload["signature"] = generate_cybersource_sa_signature(payload)
 
     return payload
-
-
-def make_reference_id(order):
-    """
-    Make a reference id
-    Args:
-        order (Order):
-            An order
-    Returns:
-        str:
-            A reference number for use with CyberSource to keep track of orders
-    """
-    return (
-        f"{_REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}-{order.id}"
-    )
 
 
 def latest_coupon_version(coupon):
@@ -439,7 +424,7 @@ def get_new_order_by_reference_number(reference_number):
     """
     order_id = get_new_order_id_by_reference_number(
         reference_number=reference_number,
-        prefix=f"{_REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
+        prefix=f"{REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
     )
     try:
         return Order.objects.get(id=order_id)

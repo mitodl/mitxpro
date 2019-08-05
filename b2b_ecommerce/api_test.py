@@ -5,7 +5,6 @@ from b2b_ecommerce.api import (
     generate_b2b_cybersource_sa_payload,
     generate_cybersource_sa_signature,
     get_new_b2b_order_by_reference_number,
-    make_b2b_reference_id,
 )
 from b2b_ecommerce.factories import B2BOrderFactory
 from b2b_ecommerce.models import B2BOrder
@@ -39,7 +38,7 @@ def test_get_new_b2b_order_by_reference_number():
     get_new_order_by_reference_number returns an Order with status created
     """
     order = B2BOrderFactory.create(status=B2BOrder.CREATED)
-    same_order = get_new_b2b_order_by_reference_number(make_b2b_reference_id(order))
+    same_order = get_new_b2b_order_by_reference_number(order.reference_id)
     assert same_order.id == order.id
 
 
@@ -72,7 +71,7 @@ def test_get_new_order_by_reference_number_missing():
         # change order number to something not likely to already exist in database
         order.id = 98_765_432
         assert not B2BOrder.objects.filter(id=order.id).exists()
-        get_new_b2b_order_by_reference_number(make_b2b_reference_id(order))
+        get_new_b2b_order_by_reference_number(order.reference_id)
     assert ex.value.args[0] == f"Unable to find order {order.id}"
 
 
@@ -119,7 +118,7 @@ def test_signed_payload(mocker):
         "item_0_unit_price": str(total_price),
         "line_item_count": 1,
         "locale": "en-us",
-        "reference_number": make_b2b_reference_id(order),
+        "reference_number": order.reference_id,
         "override_custom_receipt_page": receipt_url,
         "override_custom_cancel_page": cancel_url,
         "profile_id": CYBERSOURCE_PROFILE_ID,

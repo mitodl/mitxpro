@@ -28,7 +28,6 @@ from ecommerce.api import (
     generate_cybersource_sa_signature,
     get_readable_id,
     ISO_8601_FORMAT,
-    make_reference_id,
     redeem_coupon,
     get_new_order_by_reference_number,
     get_product_price,
@@ -235,7 +234,7 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
         "item_2_unit_price": str(line3.product_version.price),
         "line_item_count": 3,
         "locale": "en-us",
-        "reference_number": make_reference_id(order),
+        "reference_number": order.reference_id,
         "override_custom_receipt_page": receipt_url,
         "override_custom_cancel_page": cancel_url,
         "profile_id": CYBERSOURCE_PROFILE_ID,
@@ -287,16 +286,6 @@ def test_payload_coupons():
     assert payload["amount"] == str(total_price)
     assert payload["item_0_unit_price"] == str(line1.product_version.price)
     assert payload["item_1_unit_price"] == str(line2.product_version.price)
-
-
-def test_make_reference_id():
-    """
-    make_reference_id should concatenate the reference prefix and the order id
-    """
-    order = OrderFactory.create()
-    assert f"MITXPRO-{CYBERSOURCE_REFERENCE_PREFIX}-{order.id}" == make_reference_id(
-        order
-    )
 
 
 @pytest.mark.parametrize("auto_only", [True, False])
@@ -501,7 +490,7 @@ def test_get_new_order_by_reference_number(
     settings.HUBSPOT_API_KEY = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
-    same_order = get_new_order_by_reference_number(make_reference_id(order))
+    same_order = get_new_order_by_reference_number(order.reference_id)
     assert same_order.id == order.id
     if hubspot_api_key:
         assert mock_hubspot_syncs.order.called_with(order.id)
@@ -539,7 +528,7 @@ def test_get_new_order_by_reference_number_missing(basket_and_coupons):
         # change order number to something not likely to already exist in database
         order.id = 98_765_432
         assert not Order.objects.filter(id=order.id).exists()
-        get_new_order_by_reference_number(make_reference_id(order))
+        get_new_order_by_reference_number(order.reference_id)
     assert ex.value.args[0] == f"Unable to find order {order.id}"
 
 

@@ -1,9 +1,11 @@
 """Models for business to business ecommerce"""
 import uuid
 
+from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
+from b2b_ecommerce.constants import REFERENCE_NUMBER_PREFIX
 from ecommerce.models import CouponPaymentVersion, ProductVersion
 from mitxpro.models import AuditModel, AuditableModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
@@ -38,6 +40,11 @@ class B2BOrder(TimestampedModel, AuditableModel):
     coupon_payment_version = models.ForeignKey(
         CouponPaymentVersion, null=True, on_delete=models.PROTECT
     )
+
+    @property
+    def reference_id(self):
+        """Create a string with the order id and a unique prefix so we can lookup the order during order fulfillment"""
+        return f"{REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}-{self.id}"
 
     def __str__(self):
         """Description for CouponOrder"""

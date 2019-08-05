@@ -4,6 +4,7 @@ import pytest
 
 from courses.factories import CourseRunFactory, ProgramFactory
 from ecommerce.api import get_product_version_price_with_discount
+from ecommerce.constants import REFERENCE_NUMBER_PREFIX
 from ecommerce.factories import (
     CouponRedemptionFactory,
     CouponPaymentVersionFactory,
@@ -197,3 +198,17 @@ def test_prevent_delete(factory):
     obj_id = obj.id
     obj.delete()
     assert type(obj).objects.filter(id=obj_id).count() == 1
+
+
+def test_reference_id(settings):
+    """
+    order.reference_id should concatenate the reference prefix and the order id
+    """
+    cybersource_prefix = "cyb-prefix"
+    settings.CYBERSOURCE_REFERENCE_PREFIX = cybersource_prefix
+
+    order = OrderFactory.create()
+    assert (
+        f"{REFERENCE_NUMBER_PREFIX}{cybersource_prefix}-{order.id}"
+        == order.reference_id
+    )
