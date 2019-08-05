@@ -1,8 +1,10 @@
 """Models for business to business ecommerce"""
+import uuid
+
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
-from ecommerce.models import CouponPayment, ProductVersion
+from ecommerce.models import CouponPaymentVersion, ProductVersion
 from mitxpro.models import AuditModel, AuditableModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 
@@ -32,6 +34,10 @@ class B2BOrder(TimestampedModel, AuditableModel):
     product_version = models.ForeignKey(ProductVersion, on_delete=models.PROTECT)
     per_item_price = models.DecimalField(decimal_places=2, max_digits=20)
     total_price = models.DecimalField(decimal_places=2, max_digits=20)
+    unique_id = models.UUIDField(default=uuid.uuid4)
+    coupon_payment_version = models.ForeignKey(
+        CouponPaymentVersion, null=True, on_delete=models.PROTECT
+    )
 
     def __str__(self):
         """Description for CouponOrder"""
@@ -93,17 +99,3 @@ class B2BReceipt(TimestampedModel):
             return f"B2BReceipt for order {self.order.id}"
         else:
             return "B2BReceipt with no attached order"
-
-
-class B2BOrderCouponPayment(TimestampedModel):
-    """
-    A link between a CouponPayment and a B2BOrder purchase which paid for it.
-    """
-
-    order = models.ForeignKey(B2BOrder, null=True, on_delete=models.PROTECT)
-    coupon_payment = models.ForeignKey(
-        CouponPayment, null=True, on_delete=models.PROTECT
-    )
-
-    def __str__(self):
-        return f"B2BOrderCouponPayment for order {self.order.id} paying for {self.coupon_payment}"

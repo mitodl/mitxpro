@@ -5,7 +5,7 @@ import uuid
 from django.conf import settings
 from django.db import transaction
 
-from b2b_ecommerce.models import B2BOrder, B2BOrderCouponPayment
+from b2b_ecommerce.models import B2BOrder
 from ecommerce.api import (
     create_coupons,
     get_new_order_id_by_reference_number,
@@ -71,9 +71,8 @@ def complete_b2b_order(order):
             num_coupon_codes=order.num_seats,
             coupon_type=CouponPaymentVersion.SINGLE_USE,
         )
-        B2BOrderCouponPayment.objects.create(
-            coupon_payment=payment_version.payment, order=order
-        )
+        order.coupon_payment_version = payment_version
+        order.save()
 
 
 def generate_b2b_cybersource_sa_payload(*, order, receipt_url, cancel_url):

@@ -130,10 +130,12 @@ class B2BOrderFulfillmentView(APIView):
                 pass
         else:
             order.status = B2BOrder.FULFILLED
-        order.save_and_log(None)
 
         if order.status == B2BOrder.FULFILLED:
             complete_b2b_order(order)
+
+        # Save to log everything to an audit table including enrollments created in complete_order
+        order.save_and_log(None)
 
         # The response does not matter to CyberSource
         return Response(status=status.HTTP_200_OK)
