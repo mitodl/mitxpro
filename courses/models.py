@@ -435,6 +435,11 @@ class CourseRunEnrollment(EnrollmentModel):
     class Meta:
         unique_together = ("user", "run", "order")
 
+    @property
+    def is_ended(self):
+        """Return True, if run associated with enrollment is ended."""
+        return self.run.is_past
+
     @classmethod
     def get_audit_class(cls):
         return CourseRunEnrollmentAudit
@@ -481,6 +486,11 @@ class ProgramEnrollment(EnrollmentModel):
 
     class Meta:
         unique_together = ("user", "program", "order")
+
+    @property
+    def is_ended(self):
+        """Return True, if runs associated with enrollment are ended."""
+        return all(enrollment.run.is_past for enrollment in self.get_run_enrollments())
 
     @classmethod
     def get_audit_class(cls):

@@ -352,7 +352,11 @@ def test_user_enrollments_view(mocker, client, user):
     Test that UserEnrollmentsView returns serialized information about a user's enrollments
     """
     user_enrollments = UserEnrollments(
-        programs=[], program_runs=[], non_program_runs=[]
+        programs=[],
+        past_programs=[],
+        program_runs=[],
+        non_program_runs=[],
+        past_non_program_runs=[],
     )
     patched_get_user_enrollments = mocker.patch(
         "courses.views.get_user_enrollments", return_value=user_enrollments
@@ -372,7 +376,10 @@ def test_user_enrollments_view(mocker, client, user):
     assert resp.json() == {
         "program_enrollments": [{"program": "enrollment"}],
         "course_run_enrollments": [{"courserun": "enrollment"}],
+        "past_course_run_enrollments": [{"courserun": "enrollment"}],
+        "past_program_enrollments": [{"program": "enrollment"}],
     }
+
     patched_get_user_enrollments.assert_called_with(user)
-    patched_program_enroll_serializer.assert_called_once()
-    patched_course_enroll_serializer.assert_called_once()
+    assert patched_program_enroll_serializer.call_count == 2
+    assert patched_course_enroll_serializer.call_count == 2

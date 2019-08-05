@@ -466,3 +466,20 @@ def test_audit(user, is_program, has_company):
         enrollment.get_audit_class().objects.get(enrollment=enrollment).data_after
         == expected
     )
+
+
+def test_enrollment_is_ended():
+    """Verify that is_ended returns True, if all of course runs in a program/course are ended."""
+    past_date = now_in_utc() - timedelta(days=1)
+    past_program = ProgramFactory.create()
+    past_course = CourseFactory.create()
+
+    past_course_runs = CourseRunFactory.create_batch(
+        3, end_date=past_date, course=past_course, course__program=past_program
+    )
+
+    program_enrollment = ProgramEnrollmentFactory.create(program=past_program)
+    course_enrollment = CourseRunEnrollmentFactory.create(run=past_course_runs[0])
+
+    assert program_enrollment.is_ended
+    assert course_enrollment.is_ended
