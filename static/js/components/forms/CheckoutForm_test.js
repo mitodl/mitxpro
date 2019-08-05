@@ -215,6 +215,12 @@ describe("CheckoutForm", () => {
     sinon.assert.notCalled(submitCouponStub)
   })
 
+  it("loads the coupon code even if there are spaces around the coupon", async () => {
+    const couponCode = "  xyz  "
+    await renderForm({ couponCode: couponCode })
+    sinon.assert.calledWith(submitCouponStub, couponCode)
+  })
+
   it("does not load the coupon code if the code matches the coupon already in the basket", async () => {
     await renderForm({ couponCode: basket.coupons[0].code })
     sinon.assert.notCalled(submitCouponStub)
