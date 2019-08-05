@@ -88,6 +88,7 @@ def test_signed_payload(mocker):
         "b2b_ecommerce.api.now_in_utc", autospec=True, return_value=now
     )
     product_version = order.product_version
+    product = product_version.product
 
     mocker.patch(
         "b2b_ecommerce.api.uuid.uuid4",
@@ -113,7 +114,7 @@ def test_signed_payload(mocker):
         "item_0_code": "enrollment_code",
         "item_0_name": f"Enrollment codes for {product_version.description}"[:254],
         "item_0_quantity": order.num_seats,
-        "item_0_sku": "enrollment_code",
+        "item_0_sku": f"enrollment_code-{str(product.content_type)}-{product.content_object.id}",
         "item_0_tax_amount": "0",
         "item_0_unit_price": str(total_price),
         "line_item_count": 1,
