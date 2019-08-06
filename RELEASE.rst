@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.16.0
+Version 0.16.0 (Released August 06, 2019)
 --------------
 
 - Removed un existent field 'description'
