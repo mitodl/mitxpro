@@ -127,11 +127,8 @@ def sign_cybersource_payload(payload):
             A signed payload to be sent to CyberSource
     """
     field_names = sorted(list(payload.keys()) + ["signed_field_names"])
-    return {
-        **payload,
-        "signed_field_names": ",".join(field_names),
-        "signature": generate_cybersource_sa_signature(payload),
-    }
+    payload = {**payload, "signed_field_names": ",".join(field_names)}
+    return {**payload, "signature": generate_cybersource_sa_signature(payload)}
 
 
 # pylint: disable=too-many-locals
