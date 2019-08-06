@@ -2,7 +2,7 @@
 /*eslint semi: ["error", "always"]*/
 /* global Hls */
 
-function configureHlsVideo(selector, autoplay = false) {
+function configureHlsVideo(selector, autoplay) {
   const video = $(selector).get(0);
 
   if (video) {
