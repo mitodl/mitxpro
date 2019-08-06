@@ -145,7 +145,7 @@ class OrderFulfillmentView(APIView):
 
         # Link the order with the receipt if we can parse it
         reference_number = request.data["req_reference_number"]
-        order = Order.objects.filter_by_reference_number(reference_number).first()
+        order = Order.objects.get_by_reference_number(reference_number)
         receipt.order = order
         receipt.save()
 

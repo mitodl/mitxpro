@@ -8,7 +8,6 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 
 from ecommerce.constants import REFERENCE_NUMBER_PREFIX
-from ecommerce.exceptions import ParseException
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 from users.models import User
@@ -144,27 +143,23 @@ class OrderManager(models.Manager):
         super().__init__()
         self.reference_number_prefix = reference_number_prefix
 
-    def filter_by_reference_number(self, reference_number):
+    def get_by_reference_number(self, reference_number):
         """
-        Look up the order id for the reference number and add a filter to the queryset for it.
+        Look up the order id for the reference number and get the order matching it.
 
         Args:
             reference_number (str): A reference number, a string passed with the Cybersource payload
         Returns:
-            django.db.models.Queryset: A queryset
+            Order or B2BOrder: An order
         """
         from ecommerce.api import get_new_order_id_by_reference_number
 
-        try:
-            order_id = get_new_order_id_by_reference_number(
-                reference_number=reference_number,
-                prefix=f"{self.reference_number_prefix}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
-            )
-        except ParseException:
-            log.exception("Unexpected reference number")
-            order_id = None
+        order_id = get_new_order_id_by_reference_number(
+            reference_number=reference_number,
+            prefix=f"{self.reference_number_prefix}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
+        )
 
-        return self.filter(id=order_id)
+        return self.get(id=order_id)
 
 
 class OrderAbstract(TimestampedModel):

@@ -481,16 +481,16 @@ def test_get_product_version_price_with_discount(has_coupon, basket_and_coupons)
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
-def test_filter_by_reference_number(
+def test_get_by_reference_number(
     basket_and_coupons, mock_hubspot_syncs, settings, hubspot_api_key
 ):
     """
-    filter_by_reference_number returns an Order with status created
+    get_by_reference_number returns an Order with status created
     """
     settings.HUBSPOT_API_KEY = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
-    same_order = Order.objects.filter_by_reference_number(order.reference_id).first()
+    same_order = Order.objects.get_by_reference_number(order.reference_id)
     assert same_order.id == order.id
     if hubspot_api_key:
         assert mock_hubspot_syncs.order.called_with(order.id)
@@ -515,13 +515,13 @@ def test_get_new_order_id_by_reference_number_parse_error(reference_number, erro
         )
     assert ex.value.args[0] == error
 
-    # The same parse error for filter_by_reference_id should result in an empty queryset with no exception thrown
-    assert Order.objects.filter_by_reference_number(reference_number).count() == 0
+    with pytest.raises(ParseException):
+        Order.objects.get_by_reference_number(reference_number)
 
 
-def test_filter_by_reference_number_missing(basket_and_coupons):
+def test_get_by_reference_number_missing(basket_and_coupons):
     """
-    filter_by_reference_number should return an empty queryset if the order id is missing
+    get_by_reference_number should return an empty queryset if the order id is missing
     """
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
@@ -529,7 +529,8 @@ def test_filter_by_reference_number_missing(basket_and_coupons):
     # change order number to something not likely to already exist in database
     order.id = 98_765_432
     assert not Order.objects.filter(id=order.id).exists()
-    assert not Order.objects.filter_by_reference_number(order.reference_id).exists()
+    with pytest.raises(Order.DoesNotExist):
+        Order.objects.get_by_reference_number(order.reference_id)
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])

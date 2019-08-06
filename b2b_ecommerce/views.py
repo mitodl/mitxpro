@@ -102,7 +102,7 @@ class B2BOrderFulfillmentView(APIView):
 
         # Link the order with the receipt if we can parse it
         reference_number = request.data["req_reference_number"]
-        order = B2BOrder.objects.filter_by_reference_number(reference_number).first()
+        order = B2BOrder.objects.get_by_reference_number(reference_number)
         receipt.order = order
         receipt.save()
 

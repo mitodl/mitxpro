@@ -36,7 +36,7 @@ def test_get_new_b2b_order_by_reference_number():
     get_new_order_by_reference_number returns an Order with status created
     """
     order = B2BOrderFactory.create(status=B2BOrder.CREATED)
-    same_order = B2BOrder.objects.filter_by_reference_number(order.reference_id).first()
+    same_order = B2BOrder.objects.get_by_reference_number(order.reference_id)
     assert same_order.id == order.id
 
 
