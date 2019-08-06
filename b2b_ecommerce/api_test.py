@@ -1,13 +1,10 @@
 """Tests for b2b_ecommerce functions"""
 import pytest
 
-from b2b_ecommerce.api import (
-    generate_b2b_cybersource_sa_payload,
-    generate_cybersource_sa_signature,
-)
+from b2b_ecommerce.api import generate_b2b_cybersource_sa_payload
 from b2b_ecommerce.factories import B2BOrderFactory
 from b2b_ecommerce.models import B2BOrder
-from ecommerce.api import ISO_8601_FORMAT
+from ecommerce.api import ISO_8601_FORMAT, generate_cybersource_sa_signature
 from mitxpro.utils import now_in_utc
 
 
