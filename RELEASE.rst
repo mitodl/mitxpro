@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.16.0 (Released August 06, 2019)
+--------------
+
+- Removed un existent field 'description'
+- show archive enrollments on dashboard
+
 Version 0.15.2 (Released August 05, 2019)
 --------------
 
