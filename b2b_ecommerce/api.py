@@ -51,28 +51,22 @@ def generate_b2b_cybersource_sa_payload(*, order, receipt_url, cancel_url):
     # length of 255. At the moment none of these fields should go over that, due to database
     # constraints or other reasons
 
-    line_items = {}
     product_version = order.product_version
     content_object = product_version.product.content_object
     content_type = str(product_version.product.content_type)
     price = order.total_price
-    line_items["item_0_code"] = "enrollment_code"
-    line_items["item_0_name"] = f"Enrollment codes for {product_version.description}"[
-        :254
-    ]
-    line_items["item_0_quantity"] = order.num_seats
-    line_items["item_0_sku"] = f"enrollment_code-{content_type}-{content_object.id}"[
-        :254
-    ]
-    line_items["item_0_tax_amount"] = "0"
-    line_items["item_0_unit_price"] = str(price)
 
     payload = {
         "access_key": settings.CYBERSOURCE_ACCESS_KEY,
         "amount": str(price),
         "currency": "USD",
         "locale": "en-us",
-        **line_items,
+        "item_0_code": "enrollment_code",
+        "item_0_name": f"Enrollment codes for {product_version.description}"[:254],
+        "item_0_quantity": order.num_seats,
+        "item_0_sku": f"enrollment_code-{content_type}-{content_object.id}"[:254],
+        "item_0_tax_amount": "0",
+        "item_0_unit_price": str(price),
         "line_item_count": 1,
         "reference_number": order.reference_id,
         "profile_id": settings.CYBERSOURCE_PROFILE_ID,
