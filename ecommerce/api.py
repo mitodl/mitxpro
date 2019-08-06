@@ -115,8 +115,27 @@ def get_readable_id(run_or_program):
         raise Exception(f"Unexpected object {run_or_program}")
 
 
+def sign_cybersource_payload(payload):
+    """
+    Return a payload signed with the CyberSource key
+
+    Args:
+        payload (dict): An unsigned payload to be sent to CyberSource
+
+    Returns:
+        dict:
+            A signed payload to be sent to CyberSource
+    """
+    field_names = sorted(list(payload.keys()) + ["signed_field_names"])
+    return {
+        **payload,
+        "signed_field_names": ",".join(field_names),
+        "signature": generate_cybersource_sa_signature(payload),
+    }
+
+
 # pylint: disable=too-many-locals
-def generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
+def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
     """
     Generates a payload dict to send to CyberSource for Secure Acceptance
     Args:
@@ -180,7 +199,7 @@ def generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
             coupon_version.payment_version.payment_type or ""
         )
 
-    payload = {
+    return {
         "access_key": settings.CYBERSOURCE_ACCESS_KEY,
         "amount": str(total),
         "consumer_id": order.purchaser.username,
@@ -199,11 +218,22 @@ def generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
         "unsigned_field_names": "",
     }
 
-    field_names = sorted(list(payload.keys()) + ["signed_field_names"])
-    payload["signed_field_names"] = ",".join(field_names)
-    payload["signature"] = generate_cybersource_sa_signature(payload)
 
-    return payload
+def generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
+    """
+    Generates a payload dict to send to CyberSource for Secure Acceptance
+    Args:
+        order (Order): An order
+        receipt_url (str): The URL to be used by Cybersource to redirect the user after completion of the purchase
+        cancel_url (str): The URL to be used by Cybersource to redirect the user after they click cancel
+    Returns:
+        dict: the payload to send to CyberSource via Secure Acceptance
+    """
+    return sign_cybersource_payload(
+        _generate_cybersource_sa_payload(
+            order=order, receipt_url=receipt_url, cancel_url=cancel_url
+        )
+    )
 
 
 def latest_coupon_version(coupon):
