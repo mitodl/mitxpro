@@ -168,6 +168,11 @@ class OrderAbstract(TimestampedModel):
         db_index=True,
     )
 
+    @property
+    def reference_id(self):
+        """Create a string with the order id and a unique prefix so we can lookup the order during order fulfillment"""
+        return f"{self.reference_number_prefix}{settings.CYBERSOURCE_REFERENCE_PREFIX}-{self.id}"
+
     class Meta:
         abstract = True
 
@@ -184,11 +189,6 @@ class Order(OrderAbstract, AuditableModel):
     reference_number_prefix = REFERENCE_NUMBER_PREFIX
 
     objects = OrderManager()
-
-    @property
-    def reference_id(self):
-        """Create a string with the order id and a unique prefix so we can lookup the order during order fulfillment"""
-        return f"{REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}-{self.id}"
 
     def __str__(self):
         """Description for Order"""
