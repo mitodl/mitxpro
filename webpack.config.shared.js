@@ -26,6 +26,11 @@ module.exports = {
   },
   babelSharedLoader: {
     test:    /\.jsx?$/,
+    include: [
+      path.resolve(__dirname, "static/js"),
+      path.resolve(__dirname, "node_modules/query-string"),
+      path.resolve(__dirname, "node_modules/strict-uri-encode"),
+    ],
     loader:  "babel-loader",
     query:   {
       presets: [
