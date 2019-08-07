@@ -26,7 +26,6 @@ module.exports = {
   },
   babelSharedLoader: {
     test:    /\.jsx?$/,
-    exclude: /node_modules/,
     loader:  "babel-loader",
     query:   {
       presets: [
@@ -34,7 +33,6 @@ module.exports = {
         "@babel/preset-react",
         "@babel/preset-flow"
       ],
-      ignore:  ["node_modules/**"],
       plugins: [
         "@babel/plugin-transform-flow-strip-types",
         "react-hot-loader/babel",
