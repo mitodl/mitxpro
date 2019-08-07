@@ -117,9 +117,24 @@ class CouponVersionInline(admin.StackedInline):
 class CouponAdmin(admin.ModelAdmin):
     """Admin for Coupons"""
 
+    list_display = ("id", "coupon_code", "get_payment_name")
+    search_fields = ("coupon_code", "payment__name")
+    list_filter = ("payment",)
+
     model = Coupon
     save_on_top = True
     inlines = [CouponVersionInline]
+
+    def get_queryset(self, request):
+        """Overrides base queryset"""
+        return super().get_queryset(request).select_related("payment")
+
+    def get_payment_name(self, obj):
+        """Returns the related CouponPayment name"""
+        return obj.payment.name
+
+    get_payment_name.short_description = "Coupon Payment Name"
+    get_payment_name.admin_order_field = "payment__name"
 
 
 class CouponPaymentAdmin(admin.ModelAdmin):
@@ -169,7 +184,19 @@ class CouponSelectionAdmin(admin.ModelAdmin):
 class CouponEligibilityAdmin(admin.ModelAdmin):
     """Admin for CouponEligibilitys"""
 
+    list_display = ("id", "coupon", "product")
+    search_fields = ("coupon__coupon_code", "coupon__payment__name")
+    list_filter = ("product",)
+    raw_id_fields = ("coupon",)
+
     model = CouponEligibility
+
+    def get_product_text_id(self, obj):
+        """Returns the text id of the related Product object"""
+        return obj.product.content_object.text_id
+
+    get_product_text_id.short_description = "Product Object Text ID"
+    get_product_text_id.admin_order_field = "product__content_object__text_id"
 
 
 class CouponRedemptionAdmin(admin.ModelAdmin):
@@ -249,7 +276,37 @@ class CompanyAdmin(admin.ModelAdmin):
 class ProductCouponAssignmentAdmin(admin.ModelAdmin):
     """Admin for ProductCouponAssignment"""
 
+    list_display = ("id", "email", "get_coupon", "get_product")
+    search_fields = (
+        "email",
+        "product_coupon__coupon__coupon_code",
+        "product_coupon__coupon__payment__name",
+    )
+    raw_id_fields = ("product_coupon",)
+
     model = ProductCouponAssignment
+
+    def get_queryset(self, request):
+        """Overrides base queryset"""
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("product_coupon__coupon", "product_coupon__product")
+        )
+
+    def get_coupon(self, obj):
+        """Returns the related Coupon"""
+        return obj.product_coupon.coupon
+
+    get_coupon.short_description = "Coupon"
+    get_coupon.admin_order_field = "product_coupon__coupon"
+
+    def get_product(self, obj):
+        """Returns the related Product object"""
+        return obj.product_coupon.product
+
+    get_product.short_description = "Product"
+    get_product.admin_order_field = "product_coupon__product"
 
 
 admin.site.register(Line, LineAdmin)
