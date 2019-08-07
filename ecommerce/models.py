@@ -8,6 +8,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 
 from ecommerce.constants import REFERENCE_NUMBER_PREFIX
+from ecommerce.utils import get_order_id_by_reference_number
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 from users.models import User
@@ -152,9 +153,7 @@ class OrderManager(models.Manager):
         Returns:
             Order or B2BOrder: An order
         """
-        from ecommerce.api import get_new_order_id_by_reference_number
-
-        order_id = get_new_order_id_by_reference_number(
+        order_id = get_order_id_by_reference_number(
             reference_number=reference_number,
             prefix=f"{self.reference_number_prefix}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
         )

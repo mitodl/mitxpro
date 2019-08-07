@@ -29,7 +29,6 @@ from ecommerce.api import (
     get_readable_id,
     ISO_8601_FORMAT,
     redeem_coupon,
-    get_new_order_id_by_reference_number,
     get_product_price,
     get_product_version_price_with_discount,
     get_valid_coupon_versions,
@@ -45,7 +44,6 @@ from ecommerce.api import (
     ENROLL_ERROR_EMAIL_SUBJECT,
     format_enrollment_message,
 )
-from ecommerce.exceptions import ParseException
 from ecommerce.factories import (
     BasketFactory,
     CouponRedemptionFactory,
@@ -496,27 +494,6 @@ def test_get_by_reference_number(
         assert mock_hubspot_syncs.order.called_with(order.id)
     else:
         assert mock_hubspot_syncs.order.not_called()
-
-
-@pytest.mark.parametrize(
-    "reference_number, error",
-    [
-        ("XYZ-1-3", "Reference number must start with MITXPRO-cyb-prefix-"),
-        ("MITXPRO-cyb-prefix-NaN", "Unable to parse order number"),
-    ],
-)
-def test_get_new_order_id_by_reference_number_parse_error(reference_number, error):
-    """
-    Test parse errors are handled well
-    """
-    with pytest.raises(ParseException) as ex:
-        get_new_order_id_by_reference_number(
-            reference_number=reference_number, prefix="MITXPRO-cyb-prefix"
-        )
-    assert ex.value.args[0] == error
-
-    with pytest.raises(ParseException):
-        Order.objects.get_by_reference_number(reference_number)
 
 
 def test_get_by_reference_number_missing(basket_and_coupons):

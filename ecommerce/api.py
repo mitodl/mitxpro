@@ -31,7 +31,6 @@ from courses.models import (
 )
 from courseware.api import enroll_in_edx_course_runs
 from ecommerce import mail_api
-from ecommerce.exceptions import ParseException
 from ecommerce.models import (
     Basket,
     BasketItem,
@@ -436,36 +435,6 @@ def redeem_coupon(coupon_version, order):
         order=order, defaults={"coupon_version": coupon_version}
     )
     return coupon_redemption
-
-
-def get_new_order_id_by_reference_number(*, reference_number, prefix):
-    """
-    Parse a reference number received from CyberSource and return the order id.
-
-    Args:
-        reference_number (str):
-            A string which contains the order id and the instance which generated it
-        prefix (str):
-            The prefix string which is attached to the reference number to distinguish from other
-            reference numbers in other environments.
-
-    Returns:
-        int: An order id
-    """
-    prefix_with_dash = f"{prefix}-"
-    if not reference_number.startswith(prefix_with_dash):
-        log.error(
-            "CyberSource prefix doesn't match: should start with %s but is %s",
-            prefix_with_dash,
-            reference_number,
-        )
-        raise ParseException(f"Reference number must start with {prefix_with_dash}")
-    try:
-        order_id = int(reference_number[len(prefix_with_dash) :])
-    except ValueError:
-        raise ParseException("Unable to parse order number")
-
-    return order_id
 
 
 def complete_order(order):
