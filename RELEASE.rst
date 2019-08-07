@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.16.1 (Released August 07, 2019)
+--------------
+
+- Fix incorrect password redirecting a user to the create account error page
+- fix spaces around copoun code
+
 Version 0.16.0 (Released August 06, 2019)
 --------------
 
