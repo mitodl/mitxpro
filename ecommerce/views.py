@@ -104,10 +104,11 @@ class CheckoutView(APIView):
         if total_price == 0:
             # If price is $0, don't bother going to CyberSource, just mark as fulfilled
             order.status = Order.FULFILLED
-            order.save_and_log(request.user)
+            order.save()
             sync_hubspot_deal(order)
 
             complete_order(order)
+            order.save_and_log(request.user)
 
             # This redirects the user to our order success page
             payload = {}

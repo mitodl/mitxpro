@@ -64,9 +64,10 @@ class B2BCheckoutView(APIView):
         if total_price == 0:
             # If price is $0, don't bother going to CyberSource, just mark as fulfilled
             order.status = B2BOrder.FULFILLED
-            order.save_and_log(None)
+            order.save()
 
             complete_b2b_order(order)
+            order.save_and_log(None)
 
             # This redirects the user to our order success page
             payload = {}
