@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.16.1
+Version 0.16.1 (Released August 07, 2019)
 --------------
 
 - Fix incorrect password redirecting a user to the create account error page
