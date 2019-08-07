@@ -27,8 +27,6 @@ from ecommerce.api import (
     complete_order,
 )
 from ecommerce.mail_api import send_bulk_enroll_emails
-from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
-from ecommerce.exceptions import EcommerceException
 from ecommerce.models import (
     Basket,
     Company,
