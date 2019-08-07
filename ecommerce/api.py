@@ -204,7 +204,7 @@ def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
         **line_items,
         "line_item_count": order.lines.count(),
         **merchant_fields,
-        "reference_number": order.reference_id,
+        "reference_number": order.reference_number,
         "profile_id": settings.CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now_in_utc().strftime(ISO_8601_FORMAT),
         "override_custom_receipt_page": receipt_url,

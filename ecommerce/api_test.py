@@ -232,7 +232,7 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
         "item_2_unit_price": str(line3.product_version.price),
         "line_item_count": 3,
         "locale": "en-us",
-        "reference_number": order.reference_id,
+        "reference_number": order.reference_number,
         "override_custom_receipt_page": receipt_url,
         "override_custom_cancel_page": cancel_url,
         "profile_id": CYBERSOURCE_PROFILE_ID,
@@ -488,7 +488,7 @@ def test_get_by_reference_number(
     settings.HUBSPOT_API_KEY = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
-    same_order = Order.objects.get_by_reference_number(order.reference_id)
+    same_order = Order.objects.get_by_reference_number(order.reference_number)
     assert same_order.id == order.id
     if hubspot_api_key:
         assert mock_hubspot_syncs.order.called_with(order.id)
@@ -507,7 +507,7 @@ def test_get_by_reference_number_missing(basket_and_coupons):
     order.id = 98_765_432
     assert not Order.objects.filter(id=order.id).exists()
     with pytest.raises(Order.DoesNotExist):
-        Order.objects.get_by_reference_number(order.reference_id)
+        Order.objects.get_by_reference_number(order.reference_number)
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])

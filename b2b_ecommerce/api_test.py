@@ -33,7 +33,7 @@ def test_get_new_b2b_order_by_reference_number():
     get_new_order_by_reference_number returns an Order with status created
     """
     order = B2BOrderFactory.create(status=B2BOrder.CREATED)
-    same_order = B2BOrder.objects.get_by_reference_number(order.reference_id)
+    same_order = B2BOrder.objects.get_by_reference_number(order.reference_number)
     assert same_order.id == order.id
 
 
@@ -79,7 +79,7 @@ def test_signed_payload(mocker):
         "item_0_unit_price": str(total_price),
         "line_item_count": 1,
         "locale": "en-us",
-        "reference_number": order.reference_id,
+        "reference_number": order.reference_number,
         "override_custom_receipt_page": receipt_url,
         "override_custom_cancel_page": cancel_url,
         "profile_id": CYBERSOURCE_PROFILE_ID,

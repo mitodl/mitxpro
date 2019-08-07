@@ -150,7 +150,7 @@ def test_order_fulfilled(client, mocker):  # pylint:disable=too-many-arguments
     for _ in range(5):
         data[FAKE.text()] = FAKE.text()
 
-    data["req_reference_number"] = order.reference_id
+    data["req_reference_number"] = order.reference_number
     data["decision"] = "ACCEPT"
 
     mocker.patch(
@@ -205,7 +205,7 @@ def test_not_accept(mocker, client, decision):
     """
     order = B2BOrderFactory.create(status=B2BOrder.CREATED)
 
-    data = {"req_reference_number": order.reference_id, "decision": decision}
+    data = {"req_reference_number": order.reference_number, "decision": decision}
     mocker.patch(
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )
@@ -223,7 +223,7 @@ def test_ignore_duplicate_cancel(client, mocker):
     """
     order = B2BOrderFactory.create(status=B2BOrder.FAILED)
 
-    data = {"req_reference_number": order.reference_id, "decision": "CANCEL"}
+    data = {"req_reference_number": order.reference_number, "decision": "CANCEL"}
     mocker.patch(
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )
@@ -246,7 +246,7 @@ def test_error_on_duplicate_order(client, mocker, order_status, decision):
     """If there is a duplicate message (except for CANCEL), raise an exception"""
     order = B2BOrderFactory.create(status=order_status)
 
-    data = {"req_reference_number": order.reference_id, "decision": decision}
+    data = {"req_reference_number": order.reference_number, "decision": decision}
     mocker.patch(
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )

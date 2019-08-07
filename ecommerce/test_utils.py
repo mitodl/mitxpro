@@ -25,7 +25,7 @@ def gen_fake_receipt_data(order=None):
     keys = sorted(data.keys())
     data["signed_field_names"] = ",".join(keys)
     data["unsigned_field_names"] = ""
-    data["req_reference_number"] = order.reference_id if order else ""
+    data["req_reference_number"] = order.reference_number if order else ""
     data["signature"] = generate_cybersource_sa_signature(data)
     return data
 

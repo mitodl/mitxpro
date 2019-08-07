@@ -64,7 +64,7 @@ def _generate_b2b_cybersource_sa_payload(*, order, receipt_url, cancel_url):
         "item_0_tax_amount": "0",
         "item_0_unit_price": str(price),
         "line_item_count": 1,
-        "reference_number": order.reference_id,
+        "reference_number": order.reference_number,
         "profile_id": settings.CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now_in_utc().strftime(ISO_8601_FORMAT),
         "override_custom_receipt_page": receipt_url,

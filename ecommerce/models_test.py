@@ -200,9 +200,9 @@ def test_prevent_delete(factory):
     assert type(obj).objects.filter(id=obj_id).count() == 1
 
 
-def test_reference_id(settings):
+def test_reference_number(settings):
     """
-    order.reference_id should concatenate the reference prefix and the order id
+    order.reference_number should concatenate the reference prefix and the order id
     """
     cybersource_prefix = "cyb-prefix"
     settings.CYBERSOURCE_REFERENCE_PREFIX = cybersource_prefix
@@ -210,5 +210,5 @@ def test_reference_id(settings):
     order = OrderFactory.create()
     assert (
         f"{REFERENCE_NUMBER_PREFIX}{cybersource_prefix}-{order.id}"
-        == order.reference_id
+        == order.reference_number
     )

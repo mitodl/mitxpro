@@ -219,7 +219,7 @@ def test_order_fulfilled(
     for _ in range(5):
         data[FAKE.text()] = FAKE.text()
 
-    data["req_reference_number"] = order.reference_id
+    data["req_reference_number"] = order.reference_number
     data["decision"] = "ACCEPT"
 
     mocker.patch(
@@ -291,7 +291,7 @@ def test_not_accept(mocker, basket_client, basket_and_coupons, decision):
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
 
-    data = {"req_reference_number": order.reference_id, "decision": decision}
+    data = {"req_reference_number": order.reference_number, "decision": decision}
     mocker.patch(
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )
@@ -312,7 +312,7 @@ def test_ignore_duplicate_cancel(basket_client, mocker, basket_and_coupons):
     order.status = Order.FAILED
     order.save()
 
-    data = {"req_reference_number": order.reference_id, "decision": "CANCEL"}
+    data = {"req_reference_number": order.reference_number, "decision": "CANCEL"}
     mocker.patch(
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )
@@ -336,7 +336,7 @@ def test_error_on_duplicate_order(
     order.status = order_status
     order.save()
 
-    data = {"req_reference_number": order.reference_id, "decision": decision}
+    data = {"req_reference_number": order.reference_number, "decision": decision}
     mocker.patch(
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )
