@@ -31,6 +31,8 @@ from courses.models import (
 )
 from courseware.api import enroll_in_edx_course_runs
 from ecommerce import mail_api
+from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
+from ecommerce.exceptions import EcommerceException
 from ecommerce.models import (
     Basket,
     BasketItem,
@@ -967,3 +969,32 @@ def create_coupons(
     CouponVersion.objects.bulk_create(versions)
     CouponEligibility.objects.bulk_create(eligibilities)
     return payment_version
+
+
+def determine_order_status_change(order, decision):
+    """
+    Detemine what the new order status should be based on the CyberSource decision.
+
+    Args:
+        order (OrderAbstract): An order object with a status field
+        decision (str): The CyberSource decision
+
+    Returns:
+        str:
+            Returns the new order status, or None if there is no status change
+    """
+    if order.status == Order.FAILED and decision == CYBERSOURCE_DECISION_CANCEL:
+        # This is a duplicate message, ignore since it's already handled
+        return None
+
+    if order.status != Order.CREATED:
+        raise EcommerceException(f"{order} is expected to have status 'created'")
+
+    if decision != CYBERSOURCE_DECISION_ACCEPT:
+        log.warning(
+            "Order fulfillment failed: received a decision that wasn't ACCEPT for order %s",
+            order,
+        )
+        return Order.FAILED
+
+    return Order.FULFILLED

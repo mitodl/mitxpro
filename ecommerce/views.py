@@ -16,6 +16,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from ecommerce.api import (
     create_unfulfilled_order,
+    determine_order_status_change,
     generate_cybersource_sa_payload,
     get_product_version_price_with_discount,
     get_full_price_coupon_product_set,
@@ -150,26 +151,14 @@ class OrderFulfillmentView(APIView):
         receipt.order = order
         receipt.save()
 
-        decision = request.data["decision"]
-        if order.status == Order.FAILED and decision == CYBERSOURCE_DECISION_CANCEL:
+        new_order_status = determine_order_status_change(
+            order, request.data["decision"]
+        )
+        if new_order_status is None:
             # This is a duplicate message, ignore since it's already handled
             return Response(status=status.HTTP_200_OK)
-        elif order.status != Order.CREATED:
-            raise EcommerceException(
-                "Order {} is expected to have status 'created'".format(order.id)
-            )
 
-        if decision != CYBERSOURCE_DECISION_ACCEPT:
-            order.status = Order.FAILED
-            log.warning(
-                "Order fulfillment failed: received a decision that wasn't ACCEPT for order %s",
-                order,
-            )
-            if decision != CYBERSOURCE_DECISION_CANCEL:
-                # TBD: send an email about the decision?
-                pass
-        else:
-            order.status = Order.FULFILLED
+        order.status = new_order_status
         order.save()
         sync_hubspot_deal(order)
 

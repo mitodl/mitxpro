@@ -13,8 +13,7 @@ from rest_framework.views import APIView
 
 from b2b_ecommerce.api import complete_b2b_order, generate_b2b_cybersource_sa_payload
 from b2b_ecommerce.models import B2BOrder, B2BReceipt
-from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
-from ecommerce.exceptions import EcommerceException
+from ecommerce.api import determine_order_status_change
 from ecommerce.models import ProductVersion
 from ecommerce.permissions import IsSignedByCyberSource
 
@@ -107,28 +106,15 @@ class B2BOrderFulfillmentView(APIView):
         receipt.order = order
         receipt.save()
 
-        decision = request.data["decision"]
-        if order.status == B2BOrder.FAILED and decision == CYBERSOURCE_DECISION_CANCEL:
+        new_order_status = determine_order_status_change(
+            order, request.data["decision"]
+        )
+        if new_order_status is None:
             # This is a duplicate message, ignore since it's already handled
             return Response(status=status.HTTP_200_OK)
-        elif order.status != B2BOrder.CREATED:
-            raise EcommerceException(
-                "Order {} is expected to have status 'created'".format(order.id)
-            )
 
-        if decision != CYBERSOURCE_DECISION_ACCEPT:
-            order.status = B2BOrder.FAILED
-            log.warning(
-                "Order fulfillment failed: received a decision that wasn't ACCEPT for order %s",
-                order,
-            )
-            if decision != CYBERSOURCE_DECISION_CANCEL:
-                # TBD: send an email about the decision?
-                pass
-        else:
-            order.status = B2BOrder.FULFILLED
-
-        if order.status == B2BOrder.FULFILLED:
+        order.status = new_order_status
+        if new_order_status == B2BOrder.FULFILLED:
             complete_b2b_order(order)
 
         # Save to log everything to an audit table including enrollments created in complete_order

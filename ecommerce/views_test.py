@@ -346,9 +346,7 @@ def test_error_on_duplicate_order(
     assert Order.objects.count() == 1
     assert Order.objects.get(id=order.id).status == order_status
 
-    assert ex.value.args[0] == "Order {id} is expected to have status 'created'".format(
-        id=order.id
-    )
+    assert ex.value.args[0] == f"{order} is expected to have status 'created'"
 
 
 def test_no_permission(basket_client, mocker):
