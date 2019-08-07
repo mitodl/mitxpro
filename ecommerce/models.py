@@ -134,16 +134,6 @@ class OrderManager(models.Manager):
     Add a function to filter on reference id
     """
 
-    def __init__(self, reference_number_prefix):
-        """
-        Override constructor to set reference_number_prefix
-
-        Args:
-             reference_number_prefix (str): Prefix used to differentiate reference numbers used with CyberSource
-        """
-        super().__init__()
-        self.reference_number_prefix = reference_number_prefix
-
     def get_by_reference_number(self, reference_number):
         """
         Look up the order id for the reference number and get the order matching it.
@@ -155,7 +145,7 @@ class OrderManager(models.Manager):
         """
         order_id = get_order_id_by_reference_number(
             reference_number=reference_number,
-            prefix=f"{self.reference_number_prefix}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
+            prefix=f"{self.model.reference_number_prefix}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
         )
 
         return self.get(id=order_id)
@@ -191,8 +181,9 @@ class Order(OrderAbstract, AuditableModel):
     purchaser = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders"
     )
+    reference_number_prefix = REFERENCE_NUMBER_PREFIX
 
-    objects = OrderManager(REFERENCE_NUMBER_PREFIX)
+    objects = OrderManager()
 
     @property
     def reference_id(self):

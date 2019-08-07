@@ -33,7 +33,8 @@ class B2BOrder(OrderAbstract, AuditableModel):
         CouponPaymentVersion, null=True, on_delete=models.PROTECT
     )
 
-    objects = OrderManager(REFERENCE_NUMBER_PREFIX)
+    reference_number_prefix = REFERENCE_NUMBER_PREFIX
+    objects = OrderManager()
 
     @property
     def reference_id(self):
