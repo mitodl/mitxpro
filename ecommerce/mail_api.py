@@ -7,7 +7,11 @@ from django.conf import settings
 from django.urls import reverse
 
 from mail import api
-from mail.constants import EMAIL_BULK_ENROLL, EMAIL_COURSE_RUN_ENROLLMENT
+from mail.constants import (
+    EMAIL_BULK_ENROLL,
+    EMAIL_COURSE_RUN_ENROLLMENT,
+    EMAIL_COURSE_RUN_UNENROLLMENT,
+)
 from ecommerce.models import ProductCouponAssignment
 
 log = logging.getLogger()
@@ -93,3 +97,25 @@ def send_course_run_enrollment_email(enrollment):
         )
     except:  # pylint: disable=bare-except
         log.exception("Error sending enrollment success email")
+
+
+def send_course_run_unenrollment_email(enrollment):
+    """
+    Notify the user of successful unenrollment for a course run
+
+    Args:
+        enrollment (CourseRunEnrollment): the enrollment for which to send the email
+    """
+    try:
+        user = enrollment.user
+        api.send_message(
+            api.message_for_recipient(
+                user.email,
+                api.context_for_user(
+                    user=user, extra_context={"enrollment": enrollment}
+                ),
+                EMAIL_COURSE_RUN_UNENROLLMENT,
+            )
+        )
+    except Exception as exp:  # pylint: disable=broad-except
+        log.exception("Error sending unenrollment success email: %s", exp)
