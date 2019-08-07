@@ -7,6 +7,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
+from ecommerce.constants import REFERENCE_NUMBER_PREFIX
+from ecommerce.utils import get_order_id_by_reference_number
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 from users.models import User
@@ -127,11 +129,30 @@ class BasketItem(TimestampedModel):
         return f"BasketItem of product {self.product} (qty: {self.quantity})"
 
 
-class Order(TimestampedModel, AuditableModel):
+class OrderManager(models.Manager):
     """
-    An order containing information for a purchase. Orders which are fulfilled represent successful
-    completion of a purchase and are the source of truth for this information.
+    Add a function to filter on reference id
     """
+
+    def get_by_reference_number(self, reference_number):
+        """
+        Look up the order id for the reference number and get the order matching it.
+
+        Args:
+            reference_number (str): A reference number, a string passed with the Cybersource payload
+        Returns:
+            Order or B2BOrder: An order
+        """
+        order_id = get_order_id_by_reference_number(
+            reference_number=reference_number,
+            prefix=f"{self.model.reference_number_prefix}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
+        )
+
+        return self.get(id=order_id)
+
+
+class OrderAbstract(TimestampedModel):
+    """An abstract model representing an order"""
 
     FULFILLED = "fulfilled"
     FAILED = "failed"
@@ -140,15 +161,34 @@ class Order(TimestampedModel, AuditableModel):
 
     STATUSES = [CREATED, FULFILLED, FAILED, REFUNDED]
 
-    purchaser = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders"
-    )
     status = models.CharField(
         choices=[(status, status) for status in STATUSES],
         default=CREATED,
         max_length=30,
         db_index=True,
     )
+
+    @property
+    def reference_number(self):
+        """Create a string with the order id and a unique prefix so we can lookup the order during order fulfillment"""
+        return f"{self.reference_number_prefix}{settings.CYBERSOURCE_REFERENCE_PREFIX}-{self.id}"
+
+    class Meta:
+        abstract = True
+
+
+class Order(OrderAbstract, AuditableModel):
+    """
+    An order containing information for a purchase. Orders which are fulfilled represent successful
+    completion of a purchase and are the source of truth for this information.
+    """
+
+    purchaser = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders"
+    )
+    reference_number_prefix = REFERENCE_NUMBER_PREFIX
+
+    objects = OrderManager()
 
     def __str__(self):
         """Description for Order"""

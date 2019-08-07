@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from django.db import connection
 import faker
 
-from ecommerce.api import generate_cybersource_sa_signature, make_reference_id
+from ecommerce.api import generate_cybersource_sa_signature
 from ecommerce.utils import (
     create_update_rule,
     create_delete_rule,
@@ -25,7 +25,7 @@ def gen_fake_receipt_data(order=None):
     keys = sorted(data.keys())
     data["signed_field_names"] = ",".join(keys)
     data["unsigned_field_names"] = ""
-    data["req_reference_number"] = make_reference_id(order) if order else ""
+    data["req_reference_number"] = order.reference_number if order else ""
     data["signature"] = generate_cybersource_sa_signature(data)
     return data
 

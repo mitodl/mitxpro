@@ -139,6 +139,7 @@ INSTALLED_APPS = (
     "ecommerce",
     "voucher",
     "hubspot",
+    "b2b_ecommerce",
 )
 # Only include the seed data app if this isn't running in prod
 if ENVIRONMENT not in ("production", "prod"):

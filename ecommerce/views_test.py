@@ -14,7 +14,7 @@ from rest_framework.test import APIClient
 import factory
 
 from courses.factories import CourseRunFactory, CourseRunEnrollmentFactory
-from ecommerce.api import create_unfulfilled_order, get_readable_id, make_reference_id
+from ecommerce.api import create_unfulfilled_order, get_readable_id, make_receipt_url
 from ecommerce.exceptions import EcommerceException
 from ecommerce.factories import (
     CouponEligibilityFactory,
@@ -135,10 +135,20 @@ def test_creates_order(basket_client, mocker, basket_and_coupons):
         "method": "POST",
     }
 
+    readable_id = get_readable_id(
+        order.lines.first().product_version.product.content_object
+    )
     assert create_mock.call_count == 1
     assert create_mock.call_args[0] == (user,)
     assert generate_mock.call_count == 1
-    assert generate_mock.call_args[0] == (order, "http://testserver/")
+    assert generate_mock.call_args[0] == ()
+    assert generate_mock.call_args[1] == {
+        "order": order,
+        "receipt_url": make_receipt_url(
+            base_url="http://testserver", readable_id=readable_id
+        ),
+        "cancel_url": "http://testserver/checkout/",
+    }
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
@@ -209,7 +219,7 @@ def test_order_fulfilled(
     for _ in range(5):
         data[FAKE.text()] = FAKE.text()
 
-    data["req_reference_number"] = make_reference_id(order)
+    data["req_reference_number"] = order.reference_number
     data["decision"] = "ACCEPT"
 
     mocker.patch(
@@ -281,7 +291,7 @@ def test_not_accept(mocker, basket_client, basket_and_coupons, decision):
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
 
-    data = {"req_reference_number": make_reference_id(order), "decision": decision}
+    data = {"req_reference_number": order.reference_number, "decision": decision}
     mocker.patch(
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )
@@ -302,7 +312,7 @@ def test_ignore_duplicate_cancel(basket_client, mocker, basket_and_coupons):
     order.status = Order.FAILED
     order.save()
 
-    data = {"req_reference_number": make_reference_id(order), "decision": "CANCEL"}
+    data = {"req_reference_number": order.reference_number, "decision": "CANCEL"}
     mocker.patch(
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )
@@ -326,7 +336,7 @@ def test_error_on_duplicate_order(
     order.status = order_status
     order.save()
 
-    data = {"req_reference_number": make_reference_id(order), "decision": decision}
+    data = {"req_reference_number": order.reference_number, "decision": decision}
     mocker.patch(
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )
@@ -336,9 +346,7 @@ def test_error_on_duplicate_order(
     assert Order.objects.count() == 1
     assert Order.objects.get(id=order.id).status == order_status
 
-    assert ex.value.args[0] == "Order {id} is expected to have status 'created'".format(
-        id=order.id
-    )
+    assert ex.value.args[0] == f"{order} is expected to have status 'created'"
 
 
 def test_no_permission(basket_client, mocker):

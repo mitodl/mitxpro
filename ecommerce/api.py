@@ -31,10 +31,12 @@ from courses.models import (
 )
 from courseware.api import enroll_in_edx_course_runs
 from ecommerce import mail_api
-from ecommerce.exceptions import EcommerceException, ParseException
+from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
+from ecommerce.exceptions import EcommerceException
 from ecommerce.models import (
     Basket,
     BasketItem,
+    Company,
     Coupon,
     CouponEligibility,
     CouponVersion,
@@ -56,9 +58,9 @@ log = logging.getLogger(__name__)
 
 ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
-_REFERENCE_NUMBER_PREFIX = "MITXPRO-"
 
 
+# pylint: disable=too-many-lines
 def generate_cybersource_sa_signature(payload):
     """
     Generate an HMAC SHA256 signature for the CyberSource Secure Acceptance payload
@@ -114,13 +116,30 @@ def get_readable_id(run_or_program):
         raise Exception(f"Unexpected object {run_or_program}")
 
 
+def sign_cybersource_payload(payload):
+    """
+    Return a payload signed with the CyberSource key
+
+    Args:
+        payload (dict): An unsigned payload to be sent to CyberSource
+
+    Returns:
+        dict:
+            A signed payload to be sent to CyberSource
+    """
+    field_names = sorted(list(payload.keys()) + ["signed_field_names"])
+    payload = {**payload, "signed_field_names": ",".join(field_names)}
+    return {**payload, "signature": generate_cybersource_sa_signature(payload)}
+
+
 # pylint: disable=too-many-locals
-def generate_cybersource_sa_payload(order, base_url):
+def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
     """
     Generates a payload dict to send to CyberSource for Secure Acceptance
     Args:
         order (Order): An order
-        base_url (str): The base URL to be used by Cybersource to redirect the user after completion of the purchase
+        receipt_url (str): The URL to be used by Cybersource to redirect the user after completion of the purchase
+        cancel_url (str): The URL to be used by Cybersource to redirect the user after they click cancel
     Returns:
         dict: the payload to send to CyberSource via Secure Acceptance
     """
@@ -178,7 +197,7 @@ def generate_cybersource_sa_payload(order, base_url):
             coupon_version.payment_version.payment_type or ""
         )
 
-    payload = {
+    return {
         "access_key": settings.CYBERSOURCE_ACCESS_KEY,
         "amount": str(total),
         "consumer_id": order.purchaser.username,
@@ -187,37 +206,31 @@ def generate_cybersource_sa_payload(order, base_url):
         **line_items,
         "line_item_count": order.lines.count(),
         **merchant_fields,
-        "reference_number": make_reference_id(order),
+        "reference_number": order.reference_number,
         "profile_id": settings.CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now_in_utc().strftime(ISO_8601_FORMAT),
-        "override_custom_receipt_page": make_receipt_url(
-            base_url=base_url, readable_id=readable_id
-        ),
-        "override_custom_cancel_page": urljoin(base_url, "checkout/"),
+        "override_custom_receipt_page": receipt_url,
+        "override_custom_cancel_page": cancel_url,
         "transaction_type": "sale",
         "transaction_uuid": uuid.uuid4().hex,
         "unsigned_field_names": "",
     }
 
-    field_names = sorted(list(payload.keys()) + ["signed_field_names"])
-    payload["signed_field_names"] = ",".join(field_names)
-    payload["signature"] = generate_cybersource_sa_signature(payload)
 
-    return payload
-
-
-def make_reference_id(order):
+def generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
     """
-    Make a reference id
+    Generates a payload dict to send to CyberSource for Secure Acceptance
     Args:
-        order (Order):
-            An order
+        order (Order): An order
+        receipt_url (str): The URL to be used by Cybersource to redirect the user after completion of the purchase
+        cancel_url (str): The URL to be used by Cybersource to redirect the user after they click cancel
     Returns:
-        str:
-            A reference number for use with CyberSource to keep track of orders
+        dict: the payload to send to CyberSource via Secure Acceptance
     """
-    return (
-        f"{_REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}-{order.id}"
+    return sign_cybersource_payload(
+        _generate_cybersource_sa_payload(
+            order=order, receipt_url=receipt_url, cancel_url=cancel_url
+        )
     )
 
 
@@ -424,47 +437,6 @@ def redeem_coupon(coupon_version, order):
         order=order, defaults={"coupon_version": coupon_version}
     )
     return coupon_redemption
-
-
-def get_new_order_by_reference_number(reference_number):
-    """
-    Parse a reference number received from CyberSource and lookup the corresponding Order.
-    Args:
-        reference_number (str):
-            A string which contains the order id and the instance which generated it
-    Returns:
-        Order:
-            An order
-    """
-    if not reference_number.startswith(_REFERENCE_NUMBER_PREFIX):
-        raise ParseException(
-            "Reference number must start with {}".format(_REFERENCE_NUMBER_PREFIX)
-        )
-    reference_number = reference_number[len(_REFERENCE_NUMBER_PREFIX) :]
-
-    try:
-        order_id_pos = reference_number.rindex("-")
-    except ValueError:
-        raise ParseException("Unable to find order number in reference number")
-
-    try:
-        order_id = int(reference_number[order_id_pos + 1 :])
-    except ValueError:
-        raise ParseException("Unable to parse order number")
-
-    prefix = reference_number[:order_id_pos]
-    if prefix != settings.CYBERSOURCE_REFERENCE_PREFIX:
-        log.error(
-            "CyberSource prefix doesn't match: %s != %s",
-            prefix,
-            settings.CYBERSOURCE_REFERENCE_PREFIX,
-        )
-        raise ParseException("CyberSource prefix doesn't match")
-
-    try:
-        return Order.objects.get(id=order_id)
-    except Order.DoesNotExist:
-        raise EcommerceException("Unable to find order {}".format(order_id))
 
 
 def complete_order(order):
@@ -915,3 +887,114 @@ def get_or_create_data_consents(basket):
                     ]
                 )
     return data_consents
+
+
+def create_coupons(
+    *,
+    name,
+    product_ids,
+    amount,
+    num_coupon_codes,
+    coupon_type,
+    max_redemptions=1,
+    tag=None,
+    company_id=None,
+    automatic=False,
+    activation_date=None,
+    expiration_date=None,
+    payment_type=None,
+    payment_transaction=None,
+    coupon_code=None,
+):
+    """
+    Create one or more coupons and whatever instances are needed for them.
+
+    Args:
+        name (str): Name of the CouponPayment
+        company_id (int): The id for a Company object
+        tag (str): The tag for the CouponPayment
+        automatic (bool): Whether or not the coupon should be applied automatically
+        activation_date (datetime): The date after which the coupon is valid. If None, the coupon is valid
+        expiration_date (datetime): The date before which the coupon is valid. If None, the coupon never expires
+        amount (decimal.Decimal): The percent of the coupon, between 0 and 1 (inclusive)
+        num_coupon_codes (int): The number of coupon codes which should be created for the CouponPayment
+        coupon_type (str): The type of coupon
+        max_redemptions (int): The number of times a coupon can be redeemed before it becomes invalid
+        payment_type (str): The type of payment
+        payment_transaction (str): The transaction string
+        coupon_code (str):
+            If specified, the coupon code to use when creating the coupon. If not a random one will be generated.
+        product_ids (list of int): A list of product ids
+
+    Returns:
+        CouponPaymentVersion:
+        A CouponPaymentVersion. Other instances will be created at the same time and linked via foreign keys.
+
+    """
+    if company_id:
+        company = Company.objects.get(id=company_id)
+    else:
+        company = None
+    payment = CouponPayment.objects.create(name=name)
+    payment_version = CouponPaymentVersion.objects.create(
+        payment=payment,
+        company=company,
+        tag=tag,
+        automatic=automatic,
+        activation_date=activation_date,
+        expiration_date=expiration_date,
+        amount=amount,
+        num_coupon_codes=num_coupon_codes,
+        coupon_type=coupon_type,
+        max_redemptions=max_redemptions,
+        max_redemptions_per_user=1,
+        payment_type=payment_type,
+        payment_transaction=payment_transaction,
+    )
+
+    coupons = [
+        Coupon(coupon_code=(coupon_code or uuid.uuid4().hex), payment=payment)
+        for _ in range(num_coupon_codes)
+    ]
+    coupon_objs = Coupon.objects.bulk_create(coupons)
+    versions = [
+        CouponVersion(coupon=obj, payment_version=payment_version)
+        for obj in coupon_objs
+    ]
+    eligibilities = [
+        CouponEligibility(coupon=obj, product_id=product_id)
+        for obj in coupon_objs
+        for product_id in product_ids
+    ]
+    CouponVersion.objects.bulk_create(versions)
+    CouponEligibility.objects.bulk_create(eligibilities)
+    return payment_version
+
+
+def determine_order_status_change(order, decision):
+    """
+    Detemine what the new order status should be based on the CyberSource decision.
+
+    Args:
+        order (OrderAbstract): An order object with a status field
+        decision (str): The CyberSource decision
+
+    Returns:
+        str:
+            Returns the new order status, or None if there is no status change
+    """
+    if order.status == Order.FAILED and decision == CYBERSOURCE_DECISION_CANCEL:
+        # This is a duplicate message, ignore since it's already handled
+        return None
+
+    if order.status != Order.CREATED:
+        raise EcommerceException(f"{order} is expected to have status 'created'")
+
+    if decision != CYBERSOURCE_DECISION_ACCEPT:
+        log.warning(
+            "Order fulfillment failed: received a decision that wasn't ACCEPT for order %s",
+            order,
+        )
+        return Order.FAILED
+
+    return Order.FULFILLED

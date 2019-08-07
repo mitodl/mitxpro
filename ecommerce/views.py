@@ -1,6 +1,7 @@
 """Views for ecommerce"""
 import csv
 import logging
+from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -15,8 +16,8 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from ecommerce.api import (
     create_unfulfilled_order,
+    determine_order_status_change,
     generate_cybersource_sa_payload,
-    get_new_order_by_reference_number,
     get_product_version_price_with_discount,
     get_full_price_coupon_product_set,
     get_available_bulk_product_coupons,
@@ -26,8 +27,6 @@ from ecommerce.api import (
     complete_order,
 )
 from ecommerce.mail_api import send_bulk_enroll_emails
-from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
-from ecommerce.exceptions import EcommerceException
 from ecommerce.models import (
     Basket,
     Company,
@@ -78,7 +77,7 @@ class CheckoutView(APIView):
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # pylint: disable=too-many-locals
         """
         Create a new unfulfilled Order from the user's basket
         and return information used to submit to CyberSource.
@@ -104,10 +103,11 @@ class CheckoutView(APIView):
         if total_price == 0:
             # If price is $0, don't bother going to CyberSource, just mark as fulfilled
             order.status = Order.FULFILLED
-            order.save_and_log(request.user)
+            order.save()
             sync_hubspot_deal(order)
 
             complete_order(order)
+            order.save_and_log(request.user)
 
             # This redirects the user to our order success page
             payload = {}
@@ -115,7 +115,11 @@ class CheckoutView(APIView):
             method = "GET"
         else:
             # This generates a signed payload which is submitted as an HTML form to CyberSource
-            payload = generate_cybersource_sa_payload(order, base_url)
+            receipt_url = make_receipt_url(base_url=base_url, readable_id=readable_id)
+            cancel_url = urljoin(base_url, "checkout/")
+            payload = generate_cybersource_sa_payload(
+                order=order, receipt_url=receipt_url, cancel_url=cancel_url
+            )
             url = settings.CYBERSOURCE_SECURE_ACCEPTANCE_URL
             method = "POST"
 
@@ -141,30 +145,18 @@ class OrderFulfillmentView(APIView):
 
         # Link the order with the receipt if we can parse it
         reference_number = request.data["req_reference_number"]
-        order = get_new_order_by_reference_number(reference_number)
+        order = Order.objects.get_by_reference_number(reference_number)
         receipt.order = order
         receipt.save()
 
-        decision = request.data["decision"]
-        if order.status == Order.FAILED and decision == CYBERSOURCE_DECISION_CANCEL:
+        new_order_status = determine_order_status_change(
+            order, request.data["decision"]
+        )
+        if new_order_status is None:
             # This is a duplicate message, ignore since it's already handled
             return Response(status=status.HTTP_200_OK)
-        elif order.status != Order.CREATED:
-            raise EcommerceException(
-                "Order {} is expected to have status 'created'".format(order.id)
-            )
 
-        if decision != CYBERSOURCE_DECISION_ACCEPT:
-            order.status = Order.FAILED
-            log.warning(
-                "Order fulfillment failed: received a decision that wasn't ACCEPT for order %s",
-                order,
-            )
-            if decision != CYBERSOURCE_DECISION_CANCEL:
-                # TBD: send an email about the decision?
-                pass
-        else:
-            order.status = Order.FULFILLED
+        order.status = new_order_status
         order.save()
         sync_hubspot_deal(order)
 

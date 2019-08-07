@@ -6,7 +6,6 @@ from decimal import Decimal
 from datetime import timedelta
 import hashlib
 import hmac
-from urllib.parse import urljoin
 from unittest.mock import PropertyMock
 from requests.exceptions import HTTPError
 
@@ -29,9 +28,7 @@ from ecommerce.api import (
     generate_cybersource_sa_signature,
     get_readable_id,
     ISO_8601_FORMAT,
-    make_reference_id,
     redeem_coupon,
-    get_new_order_by_reference_number,
     get_product_price,
     get_product_version_price_with_discount,
     get_valid_coupon_versions,
@@ -47,7 +44,6 @@ from ecommerce.api import (
     ENROLL_ERROR_EMAIL_SUBJECT,
     format_enrollment_message,
 )
-from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
     BasketFactory,
     CouponRedemptionFactory,
@@ -184,8 +180,11 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
         autospec=True,
         return_value=mocker.MagicMock(hex=transaction_uuid),
     )
-    base_url = "https://example.com/base_url/"
-    payload = generate_cybersource_sa_payload(order, base_url)
+    receipt_url = "https://example.com/base_url/receipt/"
+    cancel_url = "https://example.com/base_url/cancel/"
+    payload = generate_cybersource_sa_payload(
+        order=order, receipt_url=receipt_url, cancel_url=cancel_url
+    )
     signature = payload.pop("signature")
     assert generate_cybersource_sa_signature(payload) == signature
     signed_field_names = payload["signed_field_names"].split(",")
@@ -207,7 +206,6 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
         if has_coupon
         else {}
     )
-    readable_id = get_readable_id(line1.product_version.product.content_object)
 
     assert payload == {
         "access_key": CYBERSOURCE_ACCESS_KEY,
@@ -234,11 +232,9 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
         "item_2_unit_price": str(line3.product_version.price),
         "line_item_count": 3,
         "locale": "en-us",
-        "reference_number": make_reference_id(order),
-        "override_custom_receipt_page": make_receipt_url(
-            base_url=base_url, readable_id=readable_id
-        ),
-        "override_custom_cancel_page": urljoin(base_url, "checkout/"),
+        "reference_number": order.reference_number,
+        "override_custom_receipt_page": receipt_url,
+        "override_custom_cancel_page": cancel_url,
         "profile_id": CYBERSOURCE_PROFILE_ID,
         "signed_date_time": now.strftime(ISO_8601_FORMAT),
         "signed_field_names": ",".join(signed_field_names),
@@ -271,7 +267,9 @@ def test_payload_coupons():
     # Coupon only eligible for line2, not line1
     CouponRedemption.objects.create(coupon_version=coupon_version, order=order)
 
-    payload = generate_cybersource_sa_payload(order, "base")
+    payload = generate_cybersource_sa_payload(
+        order=order, receipt_url="receipt", cancel_url="cancel"
+    )
     signature = payload.pop("signature")
     assert generate_cybersource_sa_signature(payload) == signature
     signed_field_names = payload["signed_field_names"].split(",")
@@ -286,16 +284,6 @@ def test_payload_coupons():
     assert payload["amount"] == str(total_price)
     assert payload["item_0_unit_price"] == str(line1.product_version.price)
     assert payload["item_1_unit_price"] == str(line2.product_version.price)
-
-
-def test_make_reference_id():
-    """
-    make_reference_id should concatenate the reference prefix and the order id
-    """
-    order = OrderFactory.create()
-    assert f"MITXPRO-{CYBERSOURCE_REFERENCE_PREFIX}-{order.id}" == make_reference_id(
-        order
-    )
 
 
 @pytest.mark.parametrize("auto_only", [True, False])
@@ -491,16 +479,16 @@ def test_get_product_version_price_with_discount(has_coupon, basket_and_coupons)
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
-def test_get_new_order_by_reference_number(
+def test_get_by_reference_number(
     basket_and_coupons, mock_hubspot_syncs, settings, hubspot_api_key
 ):
     """
-    get_new_order_by_reference_number returns an Order with status created
+    get_by_reference_number returns an Order with status created
     """
     settings.HUBSPOT_API_KEY = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
-    same_order = get_new_order_by_reference_number(make_reference_id(order))
+    same_order = Order.objects.get_by_reference_number(order.reference_number)
     assert same_order.id == order.id
     if hubspot_api_key:
         assert mock_hubspot_syncs.order.called_with(order.id)
@@ -508,37 +496,18 @@ def test_get_new_order_by_reference_number(
         assert mock_hubspot_syncs.order.not_called()
 
 
-@pytest.mark.parametrize(
-    "reference_number, error",
-    [
-        ("XYZ-1-3", "Reference number must start with MITXPRO-"),
-        ("MITXPRO-no_dashes_here", "Unable to find order number in reference number"),
-        ("MITXPRO-something-NaN", "Unable to parse order number"),
-        ("MITXPRO-not_matching-3", "CyberSource prefix doesn't match"),
-    ],
-)
-def test_get_new_order_by_reference_number_parse_error(reference_number, error):
+def test_get_by_reference_number_missing(basket_and_coupons):
     """
-    Test parse errors are handled well
-    """
-    with pytest.raises(ParseException) as ex:
-        get_new_order_by_reference_number(reference_number=reference_number)
-    assert ex.value.args[0] == error
-
-
-def test_get_new_order_by_reference_number_missing(basket_and_coupons):
-    """
-    get_new_order_by_reference_number should error when the Order id is not found
+    get_by_reference_number should return an empty queryset if the order id is missing
     """
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(user)
 
-    with pytest.raises(EcommerceException) as ex:
-        # change order number to something not likely to already exist in database
-        order.id = 98_765_432
-        assert not Order.objects.filter(id=order.id).exists()
-        get_new_order_by_reference_number(make_reference_id(order))
-    assert ex.value.args[0] == f"Unable to find order {order.id}"
+    # change order number to something not likely to already exist in database
+    order.id = 98_765_432
+    assert not Order.objects.filter(id=order.id).exists()
+    with pytest.raises(Order.DoesNotExist):
+        Order.objects.get_by_reference_number(order.reference_number)
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])

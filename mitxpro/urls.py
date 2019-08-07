@@ -44,6 +44,7 @@ urlpatterns = [
     ),
     path("hijack/", include("hijack.urls")),
     path("", include("authentication.urls")),
+    path("", include("b2b_ecommerce.urls")),
     path("", include("courses.urls")),
     path("", include("courseware.urls")),
     path("", include("ecommerce.urls")),
