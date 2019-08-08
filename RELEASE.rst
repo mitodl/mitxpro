@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.16.3
+Version 0.16.3 (Released August 08, 2019)
 --------------
 
 - Include specific libraries which need transpiling (#959)
