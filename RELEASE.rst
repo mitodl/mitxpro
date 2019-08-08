@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.16.3 (Released August 08, 2019)
+--------------
+
+- Include specific libraries which need transpiling (#959)
+- Certificate page customization (CMS)
+- Send enrollment/unenrollment emails
+- Add support for IE11 (#956)
+
 Version 0.16.1 (Released August 07, 2019)
 --------------
 
