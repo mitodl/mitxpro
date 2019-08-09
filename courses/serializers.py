@@ -52,10 +52,24 @@ class CourseRunSerializer(serializers.ModelSerializer):
     """CourseRun model serializer"""
 
     product_id = serializers.SerializerMethodField()
+    instructors = serializers.SerializerMethodField()
 
     def get_product_id(self, instance):
         """ Get the product id for a course run """
         return instance.products.values_list("id", flat=True).first()
+
+    def get_instructors(self, instance):
+        """Get the list of instructors"""
+        if getattr(instance.course, "coursepage", None) is not None:
+            faculty_page = instance.course.coursepage.faculty
+        else:
+            return []
+
+        return (
+            [{"name": member.value["name"]} for member in faculty_page.members]
+            if faculty_page is not None
+            else []
+        )
 
     class Meta:
         model = models.CourseRun
@@ -68,6 +82,7 @@ class CourseRunSerializer(serializers.ModelSerializer):
             "expiration_date",
             "courseware_url",
             "courseware_id",
+            "instructors",
             "id",
             "product_id",
         ]
