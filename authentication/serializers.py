@@ -319,6 +319,9 @@ class RegisterExtraDetailsSerializer(SocialAuthSerializer):
     leadership_level = serializers.CharField(
         write_only=True, allow_blank=True, required=False
     )
+    highest_education = serializers.CharField(
+        write_only=True, allow_blank=True, required=False
+    )
 
     def create(self, validated_data):
         """Try to 'save' the request"""

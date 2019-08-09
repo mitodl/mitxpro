@@ -87,7 +87,20 @@ CUSTOM_ECOMMERCE_PROPERTIES = {
                 "fieldType": "text",
             },
         ],
-    }
+    },
+    "contacts": {
+        "groups": [],
+        "properties": [
+            {
+                "name": "highest_education",
+                "label": "Highest Education",
+                "description": "Highest education level",
+                "groupName": "contactinformation",
+                "type": "string",
+                "fieldType": "text",
+            }
+        ],
+    },
 }
 
 HUBSPOT_ECOMMERCE_SETTINGS = {
@@ -201,6 +214,11 @@ HUBSPOT_ECOMMERCE_SETTINGS = {
             {
                 "propertyName": "leadership_level",
                 "targetHubspotProperty": "leadership_level",
+                "dataType": "STRING",
+            },
+            {
+                "propertyName": "highest_education",
+                "targetHubspotProperty": "highest_education",
                 "dataType": "STRING",
             },
         ]

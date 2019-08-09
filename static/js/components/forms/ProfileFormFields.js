@@ -9,7 +9,8 @@ import {
   EMPLOYMENT_FUNCTION,
   EMPLOYMENT_INDUSTRY,
   EMPLOYMENT_LEVEL,
-  EMPLOYMENT_SIZE
+  EMPLOYMENT_SIZE,
+  HIGHEST_EDUCATION_CHOICES
 } from "../../constants"
 import FormError from "./elements/FormError"
 import { newPasswordFieldValidation } from "../../lib/validation"
@@ -454,6 +455,30 @@ export const ProfileFields = () => (
           >
             <option value="">-----</option>
             {EMPLOYMENT_LEVEL.map((level, i) => (
+              <option key={i} value={level}>
+                {level}
+              </option>
+            ))}
+          </Field>
+        </div>
+      </div>
+    </div>
+    <div className="form-group">
+      <div className="row">
+        <div className="col">
+          <label
+            htmlFor="profile.highest_education"
+            className="font-weight-bold"
+          >
+            Highest Level of Education
+          </label>
+          <Field
+            component="select"
+            name="profile.highest_education"
+            className="form-control"
+          >
+            <option value="">-----</option>
+            {HIGHEST_EDUCATION_CHOICES.map((level, i) => (
               <option key={i} value={level}>
                 {level}
               </option>

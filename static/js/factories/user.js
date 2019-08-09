@@ -35,15 +35,16 @@ export const makeUser = (username: ?string): LoggedInUser => ({
   created_on:       casual.moment.format(),
   updated_on:       casual.moment.format(),
   profile:          {
-    gender:           "f",
-    birth_year:       1980,
-    company:          casual.company_name,
-    company_size:     99,
-    industry:         "",
-    job_title:        casual.word,
-    job_function:     "",
-    leadership_level: "",
-    years_experience: 20
+    gender:            "f",
+    birth_year:        1980,
+    company:           casual.company_name,
+    company_size:      99,
+    industry:          "",
+    job_title:         casual.word,
+    job_function:      "",
+    leadership_level:  "",
+    years_experience:  20,
+    highest_education: "Doctorate"
   },
   legal_address: {
     street_address:     [casual.street],

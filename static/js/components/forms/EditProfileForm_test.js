@@ -130,7 +130,8 @@ describe("EditProfileForm", () => {
         "job_function",
         "company_size",
         "leadership_level",
-        "years_experience"
+        "years_experience",
+        "highest_education"
       ]
       for (const key of keys) {
         // $FlowFixMe
