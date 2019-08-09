@@ -9,7 +9,11 @@ from django.contrib.auth.models import AnonymousUser
 import pytest
 import pytz
 
-from cms.factories import CoursePageFactory, ProgramPageFactory
+from cms.factories import (
+    CoursePageFactory,
+    ProgramPageFactory,
+    FacultyMembersPageFactory,
+)
 from courses.factories import (
     CourseRunFactory,
     ProgramFactory,
@@ -129,7 +133,18 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
 
 def test_serialize_course_run():
     """Test CourseRun serialization"""
+    faculty_names = ["Emma Jones", "Joe Smith"]
     course_run = CourseRunFactory.create()
+    course_page = CoursePageFactory.create(course=course_run.course)
+    FacultyMembersPageFactory.create(
+        parent=course_page,
+        **{
+            f"members__{idx}__member__name": name
+            for idx, name in enumerate(faculty_names)
+        },
+    )
+    course_run.refresh_from_db()
+    # instructors =
     data = CourseRunSerializer(course_run).data
     assert data == {
         "title": course_run.title,
@@ -140,6 +155,7 @@ def test_serialize_course_run():
         "enrollment_start": drf_datetime(course_run.enrollment_start),
         "enrollment_end": drf_datetime(course_run.enrollment_end),
         "expiration_date": drf_datetime(course_run.expiration_date),
+        "instructors": [{"name": name} for name in faculty_names],
         "id": course_run.id,
         "product_id": None,
     }

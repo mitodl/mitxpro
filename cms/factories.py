@@ -2,8 +2,10 @@
 from django.core.exceptions import ObjectDoesNotExist
 import factory
 from factory.django import DjangoModelFactory
+import faker
 from faker.providers import internet
 import wagtail_factories
+from wagtail.core.rich_text import RichText
 
 from cms.models import (
     ProgramIndexPage,
@@ -38,6 +40,8 @@ from cms.blocks import (
 from courses.factories import ProgramFactory, CourseFactory
 
 factory.Faker.add_provider(internet)
+
+FAKE = faker.Factory.create()
 
 
 class CatalogPageFactory(wagtail_factories.PageFactory):
@@ -251,9 +255,9 @@ class UserTestimonialsPageFactory(wagtail_factories.PageFactory):
 class FacultyBlockFactory(wagtail_factories.StructBlockFactory):
     """FacultyBlock factory class"""
 
-    name = factory.fuzzy.FuzzyText(prefix="faculty ")
+    name = factory.Faker("name")
     image = factory.SubFactory(wagtail_factories.ImageFactory)
-    description = factory.fuzzy.FuzzyText(prefix="description ")
+    text = factory.LazyFunction(lambda: RichText("<p>{}</p>".format(FAKE.paragraph())))
 
     class Meta:
         model = FacultyBlock
@@ -264,7 +268,7 @@ class FacultyMembersPageFactory(wagtail_factories.PageFactory):
 
     heading = factory.fuzzy.FuzzyText(prefix="heading ")
     subhead = factory.fuzzy.FuzzyText(prefix="subhead ")
-    members = wagtail_factories.StreamFieldFactory(FacultyBlockFactory)
+    members = wagtail_factories.StreamFieldFactory({"member": FacultyBlockFactory})
 
     class Meta:
         model = FacultyMembersPage
