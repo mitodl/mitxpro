@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.16.5
+--------------
+
+- -fix for program
+- Make checkbox CSS rule more specific to catalog page (#969)
+- add highest level of education in profile
+- Add b2b_ecommerce app to handle bulk enrollment code purchases (#917)
+- Include specific libraries which need transpiling (#959)
+- Certificate page customization (CMS)
+- Send enrollment/unenrollment emails
+- Add support for IE11 (#956)
+- Fix Safari issue
+
 Version 0.16.4 (Released August 09, 2019)
 --------------
 
