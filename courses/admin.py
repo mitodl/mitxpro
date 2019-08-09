@@ -13,6 +13,10 @@ from .models import (
     CourseRunEnrollment,
     ProgramEnrollmentAudit,
     CourseRunEnrollmentAudit,
+    CourseRunGrade,
+    CourseRunGradeAudit,
+    CourseRunCertificate,
+    ProgramCertificate,
 )
 
 
@@ -114,6 +118,51 @@ class CourseRunEnrollmentAuditAdmin(admin.ModelAdmin):
         return False
 
 
+class CourseRunGradeAdmin(admin.ModelAdmin):
+    """Admin for CourseRunGrade"""
+
+    model = CourseRunGrade
+
+
+class CourseRunGradeAuditAdmin(admin.ModelAdmin):
+    """Admin for CourseRunGradeAudit"""
+
+    model = CourseRunGradeAudit
+    readonly_fields = get_field_names(CourseRunGradeAudit)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class CourseRunCertificateAdmin(admin.ModelAdmin):
+    """Admin for CourseRunCertificate"""
+
+    model = CourseRunCertificate
+    list_display = ["uuid", "user", "course_run"]
+    search_fields = [
+        "course_run__courseware_id",
+        "course_run__title",
+        "user__username",
+        "user__email",
+    ]
+
+
+class ProgramCertificateAdmin(admin.ModelAdmin):
+    """Admin for ProgramCertificate"""
+
+    model = ProgramCertificate
+    list_display = ["uuid", "user", "program"]
+    search_fields = [
+        "program__readable_id",
+        "program__title",
+        "user__username",
+        "user__email",
+    ]
+
+
 admin.site.register(Program, ProgramAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(CourseRun, CourseRunAdmin)
@@ -121,3 +170,7 @@ admin.site.register(ProgramEnrollment, ProgramEnrollmentAdmin)
 admin.site.register(ProgramEnrollmentAudit, ProgramEnrollmentAuditAdmin)
 admin.site.register(CourseRunEnrollment, CourseRunEnrollmentAdmin)
 admin.site.register(CourseRunEnrollmentAudit, CourseRunEnrollmentAuditAdmin)
+admin.site.register(CourseRunGrade, CourseRunGradeAdmin)
+admin.site.register(CourseRunGradeAudit, CourseRunGradeAuditAdmin)
+admin.site.register(CourseRunCertificate, CourseRunCertificateAdmin)
+admin.site.register(ProgramCertificate, ProgramCertificateAdmin)

@@ -2,13 +2,14 @@
 Course models
 """
 import logging
+import uuid
 import operator as op
 from datetime import timedelta
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MaxValueValidator, MinValueValidator
 
 from cms.urls import detail_path_char_pattern
 from courses.constants import (
@@ -567,3 +568,105 @@ class ProgramEnrollmentAudit(AuditModel):
     @classmethod
     def get_related_field_name(cls):
         return "enrollment"
+
+
+class CourseRunGrade(TimestampedModel, AuditableModel, ValidateOnSaveMixin):
+    """
+    Model to store course run final grades
+    """
+
+    user = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
+    course_run = models.ForeignKey(CourseRun, null=False, on_delete=models.CASCADE)
+    grade = models.FloatField(
+        null=False, validators=[MinValueValidator(0.0), MaxValueValidator(1.0)]
+    )
+    letter_grade = models.CharField(max_length=6, null=True)
+    passed = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ("user", "course_run")
+
+    @classmethod
+    def get_audit_class(cls):
+        return CourseRunGradeAudit
+
+    def to_dict(self):
+        return serialize_model_object(self)
+
+    @property
+    def grade_percent(self):
+        """Returns the grade field value as a number out of 100 (or None if the value is None)"""
+        return self.grade * 100 if self.grade is not None else None
+
+    def __str__(self):
+        return "CourseRunGrade for run '{course_id}', user '{user}' ({grade})".format(
+            course_id=self.course_run.courseware_id,
+            user=self.user.username,
+            grade=self.grade,
+        )
+
+
+class CourseRunGradeAudit(AuditModel):
+    """CourseRunGrade audit table"""
+
+    course_run_grade = models.ForeignKey(
+        CourseRunGrade, null=True, on_delete=models.SET_NULL
+    )
+
+    @classmethod
+    def get_related_field_name(cls):
+        return "course_run_grade"
+
+
+class BaseCertificate(models.Model):
+    """
+    Common properties for certificate models
+    """
+
+    user = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+
+    class Meta:
+        abstract = True
+
+    def get_certified_object_id(self):
+        """Gets the id of the certificate's program/run"""
+        raise NotImplementedError
+
+
+class CourseRunCertificate(TimestampedModel, BaseCertificate):
+    """
+    Model for storing course run certificates
+    """
+
+    course_run = models.ForeignKey(CourseRun, null=False, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("user", "course_run")
+
+    def get_certified_object_id(self):
+        return self.course_run_id
+
+    def __str__(self):
+        return 'CourseRunCertificate for user={user}, run={course_run} ({uuid})"'.format(
+            user=self.user.username, course_run=self.course_run.text_id, uuid=self.uuid
+        )
+
+
+class ProgramCertificate(TimestampedModel, BaseCertificate):
+    """
+    Model for storing program certificates
+    """
+
+    program = models.ForeignKey(Program, null=False, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("user", "program")
+
+    def get_certified_object_id(self):
+        return self.program_id
+
+    def __str__(self):
+        return 'ProgramCertificate for user={user}, program={program} ({uuid})"'.format(
+            user=self.user.username, program=self.program.text_id, uuid=self.uuid
+        )
