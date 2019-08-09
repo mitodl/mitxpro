@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.16.4 (Released August 09, 2019)
+--------------
+
+- Make checkbox CSS rule more specific to catalog page (#969)
+
 Version 0.16.3 (Released August 08, 2019)
 --------------
 
