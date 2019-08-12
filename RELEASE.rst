@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.16.5
+Version 0.16.5 (Released August 12, 2019)
 --------------
 
 - -fix for program
