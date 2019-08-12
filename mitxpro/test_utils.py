@@ -50,13 +50,16 @@ class MockResponse:
     Mock requests.Response
     """
 
-    def __init__(self, content, status_code):
-        self.content = content
+    def __init__(self, content, status_code=200):
+        if isinstance(content, str):
+            self.content = json.loads(content)
+        else:
+            self.content = content
         self.status_code = status_code
 
     def json(self):
-        """ Return content as json """
-        return json.loads(self.content)
+        """ Return json content"""
+        return self.content
 
 
 def drf_datetime(dt):

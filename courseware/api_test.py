@@ -9,6 +9,7 @@ from oauth2_provider.models import Application, AccessToken
 from oauthlib.common import generate_token
 from freezegun import freeze_time
 import responses
+from requests.exceptions import HTTPError
 from rest_framework import status
 
 from courses.factories import CourseRunFactory
@@ -22,11 +23,17 @@ from courseware.api import (
     OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS,
     ACCESS_TOKEN_HEADER_NAME,
 )
-from courseware.constants import PLATFORM_EDX
+from courseware.constants import (
+    PLATFORM_EDX,
+    EDX_ENROLLMENT_PRO_MODE,
+    EDX_ENROLLMENT_AUDIT_MODE,
+    PRO_ENROLL_MODE_ERROR_TEXTS,
+)
 from courseware.exceptions import CoursewareUserCreateError
 from courseware.factories import OpenEdxApiAuthFactory
 from courseware.models import CoursewareUser, OpenEdxApiAuth
 from mitxpro.utils import now_in_utc
+from mitxpro.test_utils import MockResponse
 
 pytestmark = [pytest.mark.django_db]
 
@@ -242,12 +249,42 @@ def test_get_edx_api_client(mocker, settings, user):
 def test_enroll_in_edx_course_runs(mocker, user):
     """Tests that enroll_in_edx_course_runs uses the EdxApi client to enroll in course runs"""
     mock_client = mocker.MagicMock()
+    enroll_return_values = ["result1", "result2"]
+    mock_client.enrollments.create_student_enrollment = mocker.Mock(
+        side_effect=enroll_return_values
+    )
     mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
     course_runs = CourseRunFactory.build_batch(2)
-    enroll_in_edx_course_runs(user, course_runs)
-    mock_client.enrollments.create_audit_student_enrollment.assert_any_call(
-        course_runs[0].courseware_id
+    enroll_results = enroll_in_edx_course_runs(user, course_runs)
+    mock_client.enrollments.create_student_enrollment.assert_any_call(
+        course_runs[0].courseware_id, mode=EDX_ENROLLMENT_PRO_MODE
     )
-    mock_client.enrollments.create_audit_student_enrollment.assert_any_call(
-        course_runs[1].courseware_id
+    mock_client.enrollments.create_student_enrollment.assert_any_call(
+        course_runs[1].courseware_id, mode=EDX_ENROLLMENT_PRO_MODE
     )
+    assert enroll_results == enroll_return_values
+
+
+@pytest.mark.parametrize("error_text", PRO_ENROLL_MODE_ERROR_TEXTS)
+def test_enroll_in_edx_course_runs_audit(mocker, user, error_text):
+    """Tests that enroll_in_edx_course_runs fails over to attempting enrollment with 'audit' mode"""
+    mock_client = mocker.MagicMock()
+    pro_enrollment_response = MockResponse({"message": error_text})
+    audit_result = {"good": "result"}
+    mock_client.enrollments.create_student_enrollment = mocker.Mock(
+        side_effect=[HTTPError(response=pro_enrollment_response), audit_result]
+    )
+    patched_log_error = mocker.patch("courseware.api.log.error")
+    mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+
+    course_run = CourseRunFactory.build()
+    results = enroll_in_edx_course_runs(user, [course_run])
+    assert mock_client.enrollments.create_student_enrollment.call_count == 2
+    mock_client.enrollments.create_student_enrollment.assert_any_call(
+        course_run.courseware_id, mode=EDX_ENROLLMENT_PRO_MODE
+    )
+    mock_client.enrollments.create_student_enrollment.assert_any_call(
+        course_run.courseware_id, mode=EDX_ENROLLMENT_AUDIT_MODE
+    )
+    assert results == [audit_result]
+    patched_log_error.assert_called_once()

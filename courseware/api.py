@@ -1,7 +1,9 @@
 """Courseware API functions"""
+import logging
 from datetime import timedelta
 from urllib.parse import urljoin, urlparse, parse_qs
 import requests
+from requests.exceptions import HTTPError
 from rest_framework import status
 
 from django.conf import settings
@@ -18,10 +20,17 @@ from courseware.exceptions import (
     NoEdxApiAuthError,
 )
 from courseware.models import CoursewareUser, OpenEdxApiAuth
-from courseware.constants import PLATFORM_EDX
+from courseware.constants import (
+    PLATFORM_EDX,
+    EDX_ENROLLMENT_PRO_MODE,
+    EDX_ENROLLMENT_AUDIT_MODE,
+    PRO_ENROLL_MODE_ERROR_TEXTS,
+)
 from courseware.utils import edx_url
 from mitxpro.utils import now_in_utc
 
+
+log = logging.getLogger(__name__)
 
 OPENEDX_REGISTER_USER_PATH = "/user_api/v1/account/registration/"
 OPENEDX_REQUEST_DEFAULTS = dict(country="US", honor_code=True)
@@ -287,7 +296,10 @@ def get_edx_api_client(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS)
         raise NoEdxApiAuthError(
             "{} does not have an associated OpenEdxApiAuth".format(str(user))
         )
-    return EdxApi({"access_token": auth.access_token}, settings.OPENEDX_API_BASE_URL)
+    return EdxApi(
+        {"access_token": auth.access_token, "api_key": settings.OPENEDX_API_KEY},
+        settings.OPENEDX_API_BASE_URL,
+    )
 
 
 def enroll_in_edx_course_runs(user, course_runs):
@@ -306,7 +318,33 @@ def enroll_in_edx_course_runs(user, course_runs):
         requests.exceptions.HTTPError: Raised if the underlying HTTP request fails
     """
     edx_client = get_edx_api_client(user)
-    return [
-        edx_client.enrollments.create_audit_student_enrollment(course_run.courseware_id)
-        for course_run in course_runs
-    ]
+    results = []
+    for course_run in course_runs:
+        try:
+            result = edx_client.enrollments.create_student_enrollment(
+                course_run.courseware_id, mode=EDX_ENROLLMENT_PRO_MODE
+            )
+            results.append(result)
+        except HTTPError as exc:
+            # If the error message indicates that the preferred enrollment mode was the cause of the
+            # error, log an error and try to enroll the user in 'audit' mode as a failover.
+            error_msg = exc.response.json().get("message", "")
+            is_enroll_mode_error = any(
+                [error_text in error_msg for error_text in PRO_ENROLL_MODE_ERROR_TEXTS]
+            )
+            if not is_enroll_mode_error:
+                raise
+            log.error(
+                "Failed to enroll user in %s with '%s' mode. Attempting to enroll with '%s' mode instead. "
+                "(Response [%d]: %s)",
+                course_run.courseware_id,
+                EDX_ENROLLMENT_PRO_MODE,
+                EDX_ENROLLMENT_AUDIT_MODE,
+                exc.response.status_code,
+                error_msg or str(exc.response),
+            )
+            result = edx_client.enrollments.create_student_enrollment(
+                course_run.courseware_id, mode=EDX_ENROLLMENT_AUDIT_MODE
+            )
+            results.append(result)
+    return results
