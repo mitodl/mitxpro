@@ -100,7 +100,7 @@ describe("EditProfilePage", () => {
           // $FlowFixMe
           expectedPayload.profile.years_experience = null
           // $FlowFixMe
-          expectedPayload.profile.highest_education = null
+          expectedPayload.profile.highest_education = ""
         }
 
         sinon.assert.calledWith(
