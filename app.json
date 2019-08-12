@@ -283,6 +283,10 @@
       "description": "The OAuth2 client secret to connect to Open edX with",
       "required": true
     },
+    "OPENEDX_API_KEY": {
+      "description": "edX API key (EDX_API_KEY setting in Open edX)",
+      "required": true
+    },
     "OPENEDX_BASE_REDIRECT_URL": {
       "description": "The base redirect URL for an OAuth Application for the Open edX API",
       "required": false

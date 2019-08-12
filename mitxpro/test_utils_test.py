@@ -46,12 +46,19 @@ def test_assert_not_raises_failure():
             assert 1 == 2
 
 
-def test_mock_response():
+@pytest.mark.parametrize(
+    "content,expected_content",
+    [
+        ['{"test": "content"}', {"test": "content"}],
+        [{"test": "content"}, {"test": "content"}],
+    ],
+)
+def test_mock_response(content, expected_content):
     """ assert MockResponse returns correct values """
-    content = "test"
     response = MockResponse(content, 404)
     assert response.status_code == 404
-    assert response.content == content
+    assert response.content == expected_content
+    assert response.json() == expected_content
 
 
 def test_pickleable_mock():
