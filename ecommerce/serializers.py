@@ -127,6 +127,22 @@ class ProductSerializer(serializers.ModelSerializer):
         model = models.Product
 
 
+class ProductDetailSerializer(ProductSerializer):
+    """Product Serializer with ProductVersion detail included"""
+
+    latest_version = serializers.SerializerMethodField()
+
+    def get_latest_version(self, instance):
+        """Serialize and return the latest ProductVersion for the Product"""
+        return ProductVersionSerializer(
+            instance.latest_version, context={**self.context, "all_runs": True}
+        ).data
+
+    class Meta:
+        fields = ProductSerializer.Meta.fields + ["latest_version"]
+        model = models.Product
+
+
 class CouponSelectionSerializer(serializers.ModelSerializer):
     """CouponSelection serializer for viewing/updating coupons in basket"""
 

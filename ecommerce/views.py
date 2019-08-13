@@ -42,6 +42,7 @@ from ecommerce.serializers import (
     CouponPaymentVersionDetailSerializer,
     CompanySerializer,
     ProductSerializer,
+    ProductDetailSerializer,
     PromoCouponSerializer,
     SingleUseCouponSerializer,
     CurrentCouponPaymentSerializer,
@@ -57,7 +58,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
     authentication_classes = ()
     permission_classes = ()
 
-    serializer_class = ProductSerializer
+    serializer_class = ProductDetailSerializer
     queryset = Product.objects.all()
 
 
