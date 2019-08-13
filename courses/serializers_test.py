@@ -2,7 +2,7 @@
 Tests for course serializers
 """
 # pylint: disable=unused-argument, redefined-outer-name
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import factory
 from django.contrib.auth.models import AnonymousUser
@@ -82,6 +82,7 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("all_runs", [True, False])
 def test_serialize_course(mock_context, is_anonymous, all_runs):
     """Test Course serialization"""
+    now = datetime.now(tz=pytz.UTC)
     if is_anonymous:
         mock_context["request"].user = AnonymousUser()
     user = mock_context["request"].user
@@ -91,14 +92,10 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
     course = course_run.course
 
     # Create expired, enrollment_ended, future, and enrolled course runs
+    CourseRunFactory.create(course=course, end_date=now - timedelta(1), live=True)
+    CourseRunFactory.create(course=course, enrollment_end=now - timedelta(1), live=True)
     CourseRunFactory.create(
-        course=course, end_date=datetime(2010, 1, 1, tzinfo=pytz.UTC), live=True
-    )
-    CourseRunFactory.create(
-        course=course, enrollment_end=datetime(2010, 1, 1, tzinfo=pytz.UTC), live=True
-    )
-    CourseRunFactory.create(
-        course=course, enrollment_start=datetime(2119, 1, 1, tzinfo=pytz.UTC), live=True
+        course=course, enrollment_start=now + timedelta(1), live=True
     )
     enrolled_run = CourseRunFactory.create(course=course, live=True)
     unexpired_runs = [enrolled_run, course_run]
