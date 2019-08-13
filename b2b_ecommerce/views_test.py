@@ -1,5 +1,6 @@
 """Views for b2b_ecommerce"""
 from urllib.parse import urljoin
+import uuid
 
 from django.urls import reverse
 import faker
@@ -283,7 +284,9 @@ def test_order_status(client):
     The order status API should provide information about the order based on its unique_id.
     """
     order = B2BOrderFactory.create()
-    resp = client.get(reverse("b2b-order-status"), {"hash": str(order.unique_id)})
+    resp = client.get(
+        reverse("b2b-order-status", kwargs={"hash": str(order.unique_id)})
+    )
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json() == {
         "email": order.email,
@@ -301,17 +304,8 @@ def test_order_status_missing(client):
     """
     A 404 should be returned if the hash does not match
     """
-    resp = client.get(reverse("b2b-order-status"), {"hash": "xyz"})
+    resp = client.get(reverse("b2b-order-status", kwargs={"hash": str(uuid.uuid4())}))
     assert resp.status_code == status.HTTP_404_NOT_FOUND
-
-
-def test_order_status_no_key(client):
-    """
-    If the hash is not provided a 400 validation error should be returned
-    """
-    resp = client.get(reverse("b2b-order-status"), {})
-    assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp.json() == {"errors": ["Missing query parameter hash"]}
 
 
 def test_enrollment_codes(client):
@@ -327,7 +321,7 @@ def test_enrollment_codes(client):
         coupon_payment_version=coupon_version.payment_version
     )
 
-    resp = client.get(reverse("b2b-enrollment-codes"), {"hash": str(order.unique_id)})
+    resp = client.get(reverse("b2b-enrollment-codes", kwargs={"hash": order.unique_id}))
     assert resp.status_code == status.HTTP_200_OK
     assert resp.get("Content-Type") == "text/csv"
     assert (
@@ -341,12 +335,7 @@ def test_enrollment_codes(client):
 
 def test_enrollment_codes_missing(client):
     """A 404 error should be returned for a missing B2BOrder"""
-    resp = client.get(reverse("b2b-enrollment-codes"), {"hash": "xyz"})
+    resp = client.get(
+        reverse("b2b-enrollment-codes", kwargs={"hash": str(uuid.uuid4())})
+    )
     assert resp.status_code == status.HTTP_404_NOT_FOUND
-
-
-def test_enrollment_codes_no_key(client):
-    """A 400 validation error should be returned for a missing hash key"""
-    resp = client.get(reverse("b2b-enrollment-codes"), {})
-    assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp.json() == {"errors": ["Missing query parameter hash"]}

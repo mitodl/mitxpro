@@ -141,10 +141,7 @@ class B2BOrderStatusView(APIView):
 
     def get(self, request, *args, **kwargs):
         """Return B2B order status and other information about the order needed to display the receipt"""
-        try:
-            order_hash = request.query_params["hash"]
-        except KeyError:
-            raise ValidationError("Missing query parameter hash")
+        order_hash = kwargs["hash"]
         order = get_object_or_404(B2BOrder, unique_id=order_hash)
 
         return Response(
@@ -171,10 +168,7 @@ class B2BEnrollmentCodesView(APIView):
 
     def get(self, request, *args, **kwargs):
         """Create a CSV with enrollment codes"""
-        try:
-            order_hash = request.GET["hash"]
-        except KeyError:
-            raise ValidationError("Missing query parameter hash")
+        order_hash = kwargs["hash"]
         order = get_object_or_404(B2BOrder, unique_id=order_hash)
 
         response = HttpResponse(content_type="text/csv")

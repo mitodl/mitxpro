@@ -1,5 +1,5 @@
 """URLs for business to business ecommerce"""
-from django.conf.urls import url
+from django.urls import path
 
 from b2b_ecommerce.views import (
     B2BCheckoutView,
@@ -11,20 +11,22 @@ from mitxpro.views import index
 
 
 urlpatterns = [
-    url("^api/b2b/checkout/$", B2BCheckoutView.as_view(), name="b2b-checkout"),
-    url(
-        "^api/b2b/order_fulfillment/$",
+    path("api/b2b/checkout/", B2BCheckoutView.as_view(), name="b2b-checkout"),
+    path(
+        "api/b2b/order_fulfillment/",
         B2BOrderFulfillmentView.as_view(),
         name="b2b-order-fulfillment",
     ),
-    url(
-        "^api/b2b/order_enrollment_codes/$",
+    path(
+        "api/b2b/codes/<uuid:hash>/",
         B2BEnrollmentCodesView.as_view(),
         name="b2b-enrollment-codes",
     ),
-    url(
-        "^api/b2b/order_status/$", B2BOrderStatusView.as_view(), name="b2b-order-status"
+    path(
+        "api/b2b/status/<uuid:hash>/",
+        B2BOrderStatusView.as_view(),
+        name="b2b-order-status",
     ),
-    url("^ecommerce/bulk/$", index, name="bulk-enrollment-code"),
-    url("^ecommerce/bulk/receipt/$", index, name="bulk-enrollment-code-receipt"),
+    path("^ecommerce/bulk/", index, name="bulk-enrollment-code"),
+    path("^ecommerce/bulk/receipt/", index, name="bulk-enrollment-code-receipt"),
 ]
