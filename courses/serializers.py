@@ -95,8 +95,8 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_courseruns(self, instance):
         """Unexpired and unenrolled course runs"""
-        show_all_runs = self.context.get("show_all_runs", False)
-        if show_all_runs:
+        all_runs = self.context.get("all_runs", False)
+        if all_runs:
             active_runs = instance.unexpired_runs
         else:
             user = self.context["request"].user

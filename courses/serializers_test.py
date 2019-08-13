@@ -79,14 +79,14 @@ def test_base_course_serializer():
 
 
 @pytest.mark.parametrize("is_anonymous", [True, False])
-@pytest.mark.parametrize("show_all_runs", [True, False])
-def test_serialize_course(mock_context, is_anonymous, show_all_runs):
+@pytest.mark.parametrize("all_runs", [True, False])
+def test_serialize_course(mock_context, is_anonymous, all_runs):
     """Test Course serialization"""
     if is_anonymous:
         mock_context["request"].user = AnonymousUser()
     user = mock_context["request"].user
-    if show_all_runs:
-        mock_context["show_all_runs"] = True
+    if all_runs:
+        mock_context["all_runs"] = True
     course_run = CourseRunFactory.create(course__no_program=True, live=True)
     course = course_run.course
 
@@ -109,7 +109,7 @@ def test_serialize_course(mock_context, is_anonymous, show_all_runs):
     page = CoursePageFactory.create(course=course)
     data = CourseSerializer(instance=course, context=mock_context).data
 
-    if show_all_runs:
+    if all_runs:
         expected_runs = unexpired_runs
     elif not is_anonymous:
         expected_runs = [course_run]

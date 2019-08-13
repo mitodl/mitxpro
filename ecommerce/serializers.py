@@ -119,7 +119,7 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_latest_version(self, instance):
         """Serialize and return the latest ProductVersion for the Product"""
         return ProductVersionSerializer(
-            instance.latest_version, context={**self.context, "show_all_runs": True}
+            instance.latest_version, context={**self.context, "all_runs": True}
         ).data
 
     class Meta:

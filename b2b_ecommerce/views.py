@@ -151,7 +151,7 @@ class B2BOrderStatusView(APIView):
                 "total_price": str(order.total_price),
                 "item_price": str(order.per_item_price),
                 "product_version": ProductVersionSerializer(
-                    order.product_version, context={"show_all_runs": True}
+                    order.product_version, context={"all_runs": True}
                 ).data,
                 "email": order.email,
             }

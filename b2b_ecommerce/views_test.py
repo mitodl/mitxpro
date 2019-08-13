@@ -292,7 +292,7 @@ def test_order_status(client):
         "email": order.email,
         "num_seats": order.num_seats,
         "product_version": ProductVersionSerializer(
-            order.product_version, context={"show_all_runs": True}
+            order.product_version, context={"all_runs": True}
         ).data,
         "item_price": str(order.per_item_price),
         "total_price": str(order.total_price),
