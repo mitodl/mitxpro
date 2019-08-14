@@ -1,18 +1,13 @@
 """Utility functions/classes for course management commands"""
 from functools import partial
 
-from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
-from django.core.validators import validate_email
 from requests.exceptions import HTTPError
 
 from courses.models import CourseRun, CourseRunEnrollment, Program, ProgramEnrollment
 from courseware.api import enroll_in_edx_course_runs
 from ecommerce import mail_api
 from mitxpro.utils import has_equal_properties
-
-User = get_user_model()
 
 
 def enrollment_summary(enrollment):
@@ -40,25 +35,6 @@ def enrollment_summaries(enrollments):
         list of str: A list of string representations of enrollments
     """
     return list(map(enrollment_summary, enrollments))
-
-
-def fetch_user(user_property):
-    """
-    Attempts to fetch a user based on several properties
-
-    Args:
-        user_property (str): The id, email, or username of some User
-    Returns:
-        User: A user that matches the given property
-    """
-    if user_property.isdigit():
-        return User.objects.get(id=int(user_property))
-    else:
-        try:
-            validate_email(user_property)
-            return User.objects.get(email=user_property)
-        except ValidationError:
-            return User.objects.get(username=user_property)
 
 
 def create_or_update_enrollment(model_cls, defaults=None, **kwargs):

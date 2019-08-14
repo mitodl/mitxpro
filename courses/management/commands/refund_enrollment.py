@@ -1,13 +1,10 @@
 """Management command to change enrollment status"""
 from django.contrib.auth import get_user_model
 
-from courses.management.utils import (
-    EnrollmentChangeCommand,
-    fetch_user,
-    enrollment_summaries,
-)
+from courses.management.utils import EnrollmentChangeCommand, enrollment_summaries
 from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from ecommerce.models import Order
+from users.api import fetch_user
 
 User = get_user_model()
 

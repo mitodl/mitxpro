@@ -2,13 +2,10 @@
 from django.core.management.base import CommandError
 from django.contrib.auth import get_user_model
 
-from courses.management.utils import (
-    EnrollmentChangeCommand,
-    fetch_user,
-    enrollment_summary,
-)
+from courses.management.utils import EnrollmentChangeCommand, enrollment_summary
 from courses.constants import ENROLL_CHANGE_STATUS_DEFERRED
 from courses.models import CourseRun, CourseRunEnrollment
+from users.api import fetch_user
 
 User = get_user_model()
 

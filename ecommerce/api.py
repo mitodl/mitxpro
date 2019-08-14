@@ -51,8 +51,9 @@ from ecommerce.models import (
     Line,
     Order,
 )
+from ecommerce.utils import send_support_email
 from hubspot.task_helpers import sync_hubspot_deal
-from mitxpro.utils import now_in_utc, send_support_email
+from mitxpro.utils import now_in_utc
 
 log = logging.getLogger(__name__)
 
