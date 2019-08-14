@@ -36,6 +36,17 @@ def test_fetch_user(prop, value, db_value):
 
 
 @pytest.mark.django_db
+def test_fetch_user_case_sens():
+    """fetch_user should be able to fetch a User with a case-insensitive filter"""
+    email = "abc@example.com"
+    user = UserFactory.create(email=email)
+    upper_email = email.upper()
+    with pytest.raises(User.DoesNotExist):
+        fetch_user(upper_email, ignore_case=False)
+    assert fetch_user(upper_email, ignore_case=True) == user
+
+
+@pytest.mark.django_db
 def test_fetch_user_fail():
     """fetch_user should raise an exception if a matching User was not found"""
     with pytest.raises(User.DoesNotExist):
@@ -62,6 +73,17 @@ def test_fetch_users(prop, values, db_values):
     )
     found_users = fetch_users(values)
     assert set(users) == set(found_users)
+
+
+@pytest.mark.django_db
+def test_fetch_users_case_sens():
+    """fetch_users should be able to fetch Users with a case-insensitive filter"""
+    emails = ["abc@example.com", "def@example.com", "ghi@example.com"]
+    users = UserFactory.create_batch(len(emails), email=factory.Iterator(emails))
+    upper_emails = list(map(str.upper, emails))
+    with pytest.raises(User.DoesNotExist):
+        fetch_users(upper_emails, ignore_case=False)
+    assert set(fetch_users(upper_emails, ignore_case=True)) == set(users)
 
 
 @pytest.mark.django_db

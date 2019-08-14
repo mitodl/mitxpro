@@ -16,6 +16,8 @@ from mitxpro.utils import (
     has_equal_properties,
     remove_password_from_url,
     first_or_none,
+    unique,
+    unique_ignore_case,
 )
 
 
@@ -117,3 +119,19 @@ def test_first_or_none():
     assert first_or_none(set()) is None
     assert first_or_none([1, 2, 3]) == 1
     assert first_or_none(range(1, 5)) == 1
+
+
+def test_unique():
+    """
+    Assert that unique() returns a generator of unique elements from a provided iterable
+    """
+    assert list(unique([1, 2, 2, 3, 3, 0, 3])) == [1, 2, 3, 0]
+    assert list(unique(("a", "b", "a", "c", "C", None))) == ["a", "b", "c", "C", None]
+
+
+def test_unique_ignore_case():
+    """
+    Assert that unique_ignore_case() returns a generator of unique lowercase strings from a
+    provided iterable
+    """
+    assert list(unique_ignore_case(["ABC", "def", "AbC", "DEf"])) == ["abc", "def"]
