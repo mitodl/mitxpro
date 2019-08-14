@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.17.0
+--------------
+
+- Added new edX enrollment command options and refactored command helpers
+- Bumped django
+- Backend work for b2b enrollment code purchases (#977)
+- Fixed bug where 'edx_enrolled' flag was not being updated by enrollment commands
+- profile.highest_education can be blank but not null (#989)
+- Changed edX enrollment mode from audit to professional
+- Improved Django admin UI for several coupon-related ecommerce models
+
 Version 0.16.5 (Released August 12, 2019)
 --------------
 
