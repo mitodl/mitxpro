@@ -167,6 +167,32 @@ def partition(items, predicate=bool):
     return ((item for pred, item in a if not pred), (item for pred, item in b if pred))
 
 
+def unique(iterable):
+    """
+    Returns a generator containing all unique items in an iterable
+
+    Args:
+        iterable (iterable): An iterable of any hashable items
+    Returns:
+        generator: Unique items in the given iterable
+    """
+    seen = set()
+    return (x for x in iterable if x not in seen and not seen.add(x))
+
+
+def unique_ignore_case(strings):
+    """
+    Returns a generator containing all unique strings (coerced to lowercase) in a given iterable
+
+    Args:
+        strings (iterable of str): An iterable of strings
+    Returns:
+        generator: Unique lowercase strings in the given iterable
+    """
+    seen = set()
+    return (s for s in map(str.lower, strings) if s not in seen and not seen.add(s))
+
+
 class ValidateOnSaveMixin(models.Model):
     """Mixin that calls field/model validation methods before saving a model object"""
 
