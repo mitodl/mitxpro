@@ -42,6 +42,7 @@ from ecommerce.serializers import (
     CouponPaymentVersionDetailSerializer,
     CompanySerializer,
     ProductSerializer,
+    ProductDetailSerializer,
     PromoCouponSerializer,
     SingleUseCouponSerializer,
     CurrentCouponPaymentSerializer,
@@ -54,7 +55,10 @@ log = logging.getLogger(__name__)
 class ProductViewSet(ReadOnlyModelViewSet):
     """API view set for Products"""
 
-    serializer_class = ProductSerializer
+    authentication_classes = ()
+    permission_classes = ()
+
+    serializer_class = ProductDetailSerializer
     queryset = Product.objects.all()
 
 

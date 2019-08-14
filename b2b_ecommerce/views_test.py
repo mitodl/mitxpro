@@ -1,5 +1,6 @@
 """Views for b2b_ecommerce"""
 from urllib.parse import urljoin
+import uuid
 
 from django.urls import reverse
 import faker
@@ -9,6 +10,8 @@ from rest_framework import status
 from b2b_ecommerce.factories import B2BOrderFactory, ProductVersionFactory
 from b2b_ecommerce.models import B2BOrder, B2BOrderAudit, B2BReceipt
 from ecommerce.exceptions import EcommerceException
+from ecommerce.factories import CouponVersionFactory
+from ecommerce.serializers import ProductVersionSerializer
 from mitxpro.utils import dict_without_keys
 
 
@@ -50,10 +53,11 @@ def test_create_order(client, mocker):
         return_value=payload,
     )
     product_version = ProductVersionFactory.create()
+    num_seats = 10
     resp = client.post(
         reverse("b2b-checkout"),
         {
-            "num_seats": 10,
+            "num_seats": num_seats,
             "email": "b@example.com",
             "product_version_id": product_version.id,
         },
@@ -66,16 +70,21 @@ def test_create_order(client, mocker):
         "method": "POST",
     }
 
-    base_url = "http://testserver/"
-    receipt_url = urljoin(base_url, reverse("bulk-enrollment-code-receipt"))
     assert B2BOrder.objects.count() == 1
     order = B2BOrder.objects.first()
+    assert order.status == B2BOrder.CREATED
+    assert order.total_price == product_version.price * num_seats
+    assert order.per_item_price == product_version.price
+    assert order.num_seats == num_seats
+    assert order.b2breceipt_set.count() == 0
+    base_url = "http://testserver/"
+    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'
     assert generate_mock.call_count == 1
     assert generate_mock.call_args[0] == ()
     assert generate_mock.call_args[1] == {
         "order": order,
         "receipt_url": receipt_url,
-        "cancel_url": base_url,
+        "cancel_url": urljoin(base_url, reverse("bulk-enrollment-code")),
     }
 
 
@@ -126,16 +135,16 @@ def test_zero_price_checkout(client):  # pylint:disable=too-many-arguments
             "product_version_id": product_version.id,
         },
     )
+    assert B2BOrder.objects.count() == 1
+    order = B2BOrder.objects.first()
     base_url = "http://testserver"
-    receipt_url = urljoin(base_url, reverse("bulk-enrollment-code-receipt"))
+    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json() == {"payload": {}, "url": receipt_url, "method": "GET"}
 
-    assert B2BOrder.objects.count() == 1
-    order = B2BOrder.objects.first()
     assert order.status == B2BOrder.FULFILLED
     assert order.total_price == 0
-    assert order.per_item_price == 0
+    assert order.per_item_price == product_version.price
     assert order.b2breceipt_set.count() == 0
     assert order.num_seats == 0
 
@@ -268,3 +277,65 @@ def test_no_permission(client, mocker):
     )
     resp = client.post(reverse("b2b-order-fulfillment"), data={})
     assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_order_status(client):
+    """
+    The order status API should provide information about the order based on its unique_id.
+    """
+    order = B2BOrderFactory.create()
+    resp = client.get(
+        reverse("b2b-order-status", kwargs={"hash": str(order.unique_id)})
+    )
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json() == {
+        "email": order.email,
+        "num_seats": order.num_seats,
+        "product_version": ProductVersionSerializer(
+            order.product_version, context={"all_runs": True}
+        ).data,
+        "item_price": str(order.per_item_price),
+        "total_price": str(order.total_price),
+        "status": order.status,
+    }
+
+
+def test_order_status_missing(client):
+    """
+    A 404 should be returned if the hash does not match
+    """
+    resp = client.get(reverse("b2b-order-status", kwargs={"hash": str(uuid.uuid4())}))
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_enrollment_codes(client):
+    """A CSV file with enrollment codes should be provided for the B2BOrder"""
+    coupon_version = CouponVersionFactory.create()
+    coupons = [coupon_version.coupon] + [
+        CouponVersionFactory.create(
+            payment_version=coupon_version.payment_version
+        ).coupon
+        for _ in range(5)
+    ]
+    order = B2BOrderFactory.create(
+        coupon_payment_version=coupon_version.payment_version
+    )
+
+    resp = client.get(reverse("b2b-enrollment-codes", kwargs={"hash": order.unique_id}))
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.get("Content-Type") == "text/csv"
+    assert (
+        resp.get("Content-Disposition")
+        == f'attachment; filename="enrollmentcodes-{order.unique_id}.csv"'
+    )
+    assert sorted(resp.content.decode().split()) == sorted(
+        [coupon.coupon_code for coupon in coupons]
+    )
+
+
+def test_enrollment_codes_missing(client):
+    """A 404 error should be returned for a missing B2BOrder"""
+    resp = client.get(
+        reverse("b2b-enrollment-codes", kwargs={"hash": str(uuid.uuid4())})
+    )
+    assert resp.status_code == status.HTTP_404_NOT_FOUND

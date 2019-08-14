@@ -95,9 +95,19 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_courseruns(self, instance):
         """Unexpired and unenrolled course runs"""
-        user = self.context["request"].user
-        active_runs = instance.available_runs(user)
-        return [CourseRunSerializer(instance=run).data for run in active_runs]
+        all_runs = self.context.get("all_runs", False)
+        if all_runs:
+            active_runs = instance.unexpired_runs
+        else:
+            user = self.context["request"].user
+            if user.is_anonymous:
+                active_runs = []
+            else:
+                active_runs = instance.available_runs(user)
+        return [
+            CourseRunSerializer(instance=run, context=self.context).data
+            for run in active_runs
+        ]
 
     class Meta:
         model = models.Course
