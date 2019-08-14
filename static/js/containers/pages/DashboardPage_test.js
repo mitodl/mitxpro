@@ -305,9 +305,7 @@ describe("DashboardPage", () => {
               color: "danger",
               type:  "text",
               props: {
-                text: `Something went wrong. Please contact support at ${
-                  SETTINGS.support_email
-                }.`
+                text: `Something went wrong. Please contact support at ${SETTINGS.support_email}.`
               }
             }
           })

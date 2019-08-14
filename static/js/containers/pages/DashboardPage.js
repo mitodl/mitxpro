@@ -123,9 +123,7 @@ export class DashboardPage extends React.Component<Props, State> {
           type:  ALERT_TYPE_TEXT,
           color: "danger",
           props: {
-            text: `Something went wrong. Please contact support at ${
-              SETTINGS.support_email
-            }.`
+            text: `Something went wrong. Please contact support at ${SETTINGS.support_email}.`
           }
         }
       })
