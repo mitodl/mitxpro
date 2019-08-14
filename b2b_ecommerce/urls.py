@@ -18,12 +18,12 @@ urlpatterns = [
         name="b2b-order-fulfillment",
     ),
     path(
-        "api/b2b/codes/<uuid:hash>/",
+        "api/b2b/orders/<uuid:hash>/codes/",
         B2BEnrollmentCodesView.as_view(),
         name="b2b-enrollment-codes",
     ),
     path(
-        "api/b2b/status/<uuid:hash>/",
+        "api/b2b/orders/<uuid:hash>/status/",
         B2BOrderStatusView.as_view(),
         name="b2b-order-status",
     ),
