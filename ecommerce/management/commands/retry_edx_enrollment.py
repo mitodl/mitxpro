@@ -1,12 +1,11 @@
 """
 Management command to retry edX enrollment for a user's course run enrollments
 """
-import operator as op
-
 from django.core.management import BaseCommand
 from django.contrib.auth import get_user_model
 from requests.exceptions import HTTPError
 
+from users.api import fetch_users
 from courseware.api import enroll_in_edx_course_runs
 from courses.models import CourseRunEnrollment
 
@@ -18,65 +17,65 @@ class Command(BaseCommand):
     Management command to retry edX enrollment for a user's course run enrollments
     """
 
-    help = (
-        "Fetches a user's course run enrollments that were not successfully posted to edX and retries "
-        "them via the edX API."
-    )
+    help = "Fetches users' course run enrollments and reattempts enrollment via the edX API."
 
     def add_arguments(self, parser):
         """
         Definition of arguments this command accepts
         """
-        parser.add_argument("username", nargs="*")
+        parser.add_argument(
+            "-f",
+            "--force",
+            action="store_true",
+            help="Retry edX enrollment even if the target users enrollments indicate edx_enrolled=True",
+        )
+        parser.add_argument(
+            "--run", type=str, help="The 'courseware_id' value for a target CourseRun"
+        )
+        parser.add_argument(
+            "uservalues",
+            nargs="*",
+            type=str,
+            help=(
+                "The ids, emails, or usernames of the target Users (all values will be assumed "
+                "to be of the same type as the first)"
+            ),
+        )
 
     def handle(self, *args, **options):
         """Run the command"""
-        # default to all users who have non-enrolled course run enrollments
-        users = User.objects.filter(
-            # NOTE: written this way so CourseRunEnrollment.objects filters to active ones
-            id__in=CourseRunEnrollment.objects.filter(edx_enrolled=False).values_list(
-                "user", flat=True
-            )
-        )
+        enrollment_filter = {}
+        if not options["force"]:
+            enrollment_filter["edx_enrolled"] = False
+        if options["run"]:
+            enrollment_filter["run__courseware_id"] = options["run"]
+        if options["uservalues"]:
+            enrollment_filter["user__in"] = fetch_users(options["uservalues"])
+        course_run_enrollments = CourseRunEnrollment.objects.filter(**enrollment_filter)
 
-        if options["username"]:
-            users = User.objects.filter(username__in=options["username"])
-
-        for user in users:
-            course_run_enrollments = CourseRunEnrollment.objects.filter(
-                user=user, edx_enrolled=False
-            ).all()
-            if len(course_run_enrollments) == 0:
-                self.stdout.write(
-                    self.style.ERROR(
-                        "User {} ({}) does not have any course run enrollments that failed in edX".format(
-                            user.username, user.email
-                        )
-                    )
-                )
-                return
-
-            course_runs = [enrollment.run for enrollment in course_run_enrollments]
-            self.stdout.write(
-                self.style.SUCCESS(
-                    "Enrolling user {} ({}) in {} course run(s) ({})...".format(
-                        user.username,
-                        user.email,
-                        len(course_runs),
-                        ", ".join([str(run.courseware_id) for run in course_runs]),
+        if course_run_enrollments.count() == 0:
+            self.stderr.write(
+                self.style.ERROR(
+                    "No course run enrollments found that match the given filters ({}).\nExiting...".format(
+                        enrollment_filter
                     )
                 )
             )
+            return
+
+        for enrollment in course_run_enrollments:
+            user = enrollment.user
+            course_run = enrollment.run
             try:
-                enroll_in_edx_course_runs(user, course_runs)
+                enroll_in_edx_course_runs(user, [course_run])
             except HTTPError as exc:
                 self.stderr.write(
                     self.style.ERROR(
-                        "Error enrolling user {} ({}) in {} course run(s) ({}): {}".format(
+                        "API error enrolling user {} ({}) in course run '{}':\n(Status code: {}) {}".format(
                             user.username,
                             user.email,
-                            len(course_runs),
-                            ", ".join([str(run.courseware_id) for run in course_runs]),
+                            course_run.courseware_id,
+                            exc.response.status_code,
                             exc.response.json(),
                         )
                     )
@@ -84,18 +83,24 @@ class Command(BaseCommand):
             except Exception as exc:  # pylint: disable=broad-except
                 self.stderr.write(
                     self.style.ERROR(
-                        "Error enrolling user {} ({}) in {} course run(s) ({}): {}".format(
+                        "Unexpected error enrolling user {} ({}) in course run '{}':\n({}) {}".format(
                             user.username,
                             user.email,
-                            len(course_runs),
-                            ", ".join([str(run.courseware_id) for run in course_runs]),
+                            course_run.courseware_id,
+                            type(exc).__name__,
                             str(exc),
                         )
                     )
                 )
             else:
-                CourseRunEnrollment.objects.filter(
-                    id__in=map(op.attrgetter("id"), course_run_enrollments)
-                ).update(edx_enrolled=True)
+                enrollment.edx_enrolled = True
+                enrollment.save_and_log(None)
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        "Successfully enrolled user {} ({}) in course run '{}'".format(
+                            user.username, user.email, course_run.courseware_id
+                        )
+                    )
+                )
 
         self.stdout.write(self.style.SUCCESS("Done"))

@@ -1,8 +1,10 @@
 """Utility functions for ecommerce"""
 import logging
 
-from ecommerce.exceptions import ParseException
+from django.conf import settings
+from django.core import mail
 
+from ecommerce.exceptions import ParseException
 
 log = logging.getLogger(__name__)
 
@@ -55,3 +57,24 @@ def get_order_id_by_reference_number(*, reference_number, prefix):
         raise ParseException("Unable to parse order number")
 
     return order_id
+
+
+def send_support_email(subject, message):
+    """
+    Send an email to support.
+
+    Args:
+        subject (str): The email subject.
+        message (str): The email message.
+    """
+    try:
+        with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
+            mail.send_mail(
+                subject,
+                message,
+                settings.MAILGUN_FROM_EMAIL,
+                [settings.EMAIL_SUPPORT],
+                connection=connection,
+            )
+    except:  # pylint: disable=bare-except
+        log.exception("Exception sending email to admins")
