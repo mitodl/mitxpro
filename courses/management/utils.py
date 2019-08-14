@@ -71,7 +71,7 @@ def create_or_update_enrollment(model_cls, defaults=None, **kwargs):
         for field_name, field_value in defaults.items():
             setattr(enrollment, field_name, field_value)
         enrollment.save_and_log(None)
-    return enrollment
+    return enrollment, created
 
 
 class EnrollmentChangeCommand(BaseCommand):
@@ -195,7 +195,7 @@ class EnrollmentChangeCommand(BaseCommand):
         enrollment_defaults = dict(
             company=existing_enrollment.company, order=existing_enrollment.order
         )
-        program_enrollment = create_or_update_enrollment(
+        program_enrollment, _ = create_or_update_enrollment(
             ProgramEnrollment, defaults=enrollment_defaults, **enrollment_params
         )
         existing_run_enrollments = existing_enrollment.get_run_enrollments()
@@ -228,17 +228,22 @@ class EnrollmentChangeCommand(BaseCommand):
         enrollment_defaults = dict(
             company=existing_enrollment.company, order=existing_enrollment.order
         )
-        run_enrollment = create_or_update_enrollment(
+        run_enrollment, created = create_or_update_enrollment(
             CourseRunEnrollment, defaults=enrollment_defaults, **enrollment_params
         )
         self.stdout.write(
-            "New course run enrollment record created. "
+            "Course run enrollment record {}. "
             "Attempting to enroll the user {} ({}) in {} on edX...".format(
-                to_user.username, to_user.email, to_run.courseware_id
+                "created" if created else "updated",
+                to_user.username,
+                to_user.email,
+                to_run.courseware_id,
             )
         )
         enrolled_in_edx = self.enroll_in_edx(to_user, [to_run])
         if enrolled_in_edx:
+            run_enrollment.edx_enrolled = True
+            run_enrollment.save_and_log(None)
             mail_api.send_course_run_enrollment_email(run_enrollment)
 
         return run_enrollment
