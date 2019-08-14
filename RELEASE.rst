@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.17.0
+Version 0.17.0 (Released August 14, 2019)
 --------------
 
 - Added new edX enrollment command options and refactored command helpers
