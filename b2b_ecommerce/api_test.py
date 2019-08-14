@@ -1,10 +1,14 @@
 """Tests for b2b_ecommerce functions"""
+from decimal import Decimal
+
 import pytest
 
-from b2b_ecommerce.api import generate_b2b_cybersource_sa_payload
+from b2b_ecommerce.api import complete_b2b_order, generate_b2b_cybersource_sa_payload
 from b2b_ecommerce.factories import B2BOrderFactory
 from b2b_ecommerce.models import B2BOrder
 from ecommerce.api import ISO_8601_FORMAT, generate_cybersource_sa_signature
+from ecommerce.factories import CouponPaymentVersionFactory
+from ecommerce.models import CouponPaymentVersion
 from mitxpro.utils import now_in_utc
 
 
@@ -90,3 +94,26 @@ def test_signed_payload(mocker):
         "unsigned_field_names": "",
     }
     now_mock.assert_called_once_with()
+
+
+def test_complete_b2b_order(mocker):
+    """
+    complete_b2b_order should create the coupons and also send an email for the receipt
+    """
+    order = B2BOrderFactory.create()
+    payment_version = CouponPaymentVersionFactory.create()
+    send_email_mock = mocker.patch("b2b_ecommerce.api.send_b2b_receipt_email")
+    create_coupons = mocker.patch(
+        "b2b_ecommerce.api.create_coupons", return_value=payment_version
+    )
+    complete_b2b_order(order)
+    order.refresh_from_db()
+    assert order.coupon_payment_version == payment_version
+    create_coupons.assert_called_once_with(
+        name=f"CouponPayment for order #{order.id}",
+        product_ids=[order.product_version.product.id],
+        amount=Decimal("1"),
+        num_coupon_codes=order.num_seats,
+        coupon_type=CouponPaymentVersion.SINGLE_USE,
+    )
+    send_email_mock.assert_called_once_with(order)

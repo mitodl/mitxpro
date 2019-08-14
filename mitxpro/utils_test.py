@@ -1,5 +1,6 @@
 """Utils tests"""
 import datetime
+from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest
@@ -7,6 +8,7 @@ import pytz
 
 from ecommerce.models import Order
 from mitxpro.utils import (
+    format_price,
     get_field_names,
     now_in_utc,
     is_near_now,
@@ -135,3 +137,12 @@ def test_unique_ignore_case():
     provided iterable
     """
     assert list(unique_ignore_case(["ABC", "def", "AbC", "DEf"])) == ["abc", "def"]
+
+
+@pytest.mark.parametrize(
+    "price,expected",
+    [[Decimal("0"), "$0.00"], [Decimal("1234567.89"), "$1,234,567.89"]],
+)
+def test_format_price(price, expected):
+    """Format a decimal value into a price"""
+    assert format_price(price) == expected

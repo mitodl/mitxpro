@@ -915,8 +915,8 @@ def create_coupons(
         company_id (int): The id for a Company object
         tag (str): The tag for the CouponPayment
         automatic (bool): Whether or not the coupon should be applied automatically
-        activation_date (datetime): The date after which the coupon is valid. If None, the coupon is valid
-        expiration_date (datetime): The date before which the coupon is valid. If None, the coupon never expires
+        activation_date (datetime.datetime): The date after which the coupon is valid. If None, the coupon is valid
+        expiration_date (datetime.datetime): The date before which the coupon is valid. If None, the coupon never expires
         amount (decimal.Decimal): The percent of the coupon, between 0 and 1 (inclusive)
         num_coupon_codes (int): The number of coupon codes which should be created for the CouponPayment
         coupon_type (str): The type of coupon

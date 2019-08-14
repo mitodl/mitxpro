@@ -6,13 +6,16 @@ import logging
 from django.conf import settings
 from django.urls import reverse
 
+from courses.models import CourseRun
 from mail import api
 from mail.constants import (
+    EMAIL_B2B_RECEIPT,
     EMAIL_BULK_ENROLL,
     EMAIL_COURSE_RUN_ENROLLMENT,
     EMAIL_COURSE_RUN_UNENROLLMENT,
 )
 from ecommerce.models import ProductCouponAssignment
+from mitxpro.utils import format_price
 
 log = logging.getLogger()
 
@@ -119,3 +122,60 @@ def send_course_run_unenrollment_email(enrollment):
         )
     except Exception as exp:  # pylint: disable=broad-except
         log.exception("Error sending unenrollment success email: %s", exp)
+
+
+def send_b2b_receipt_email(order):
+    """
+    Send an email summarizing the enrollment codes purchased by a user
+
+    Args:
+        order (b2b_ecommerce.models.B2BOrder):
+            An order
+    """
+    from ecommerce.api import get_readable_id
+
+    format_string = "%b %-d, %Y"
+
+    course_run_or_program = order.product_version.product.content_object
+    title = course_run_or_program.title
+
+    if (
+        isinstance(course_run_or_program, CourseRun)
+        and course_run_or_program.start_date is not None
+        and course_run_or_program.end_date is not None
+    ):
+        run = course_run_or_program
+        date_range = f"{run.start_date.strftime(format_string)} - {run.end_date.strftime(format_string)}"
+    else:
+        date_range = ""
+
+    download_url = (
+        f'{urljoin(settings.SITE_BASE_URL, reverse("bulk-enrollment-code-receipt"))}?'
+        f'{urlencode({"hash": str(order.unique_id)})}'
+    )
+    try:
+        api.send_message(
+            api.message_for_recipient(
+                order.email,
+                api.context_for_user(
+                    user=None,
+                    extra_context={
+                        "purchase_date": order.updated_on.strftime(format_string),
+                        "total_price": format_price(order.total_price),
+                        "item_price": format_price(order.per_item_price),
+                        "num_seats": str(order.num_seats),
+                        "readable_id": get_readable_id(
+                            order.product_version.product.content_object
+                        ),
+                        "run_date_range": date_range,
+                        "title": title,
+                        "download_url": download_url,
+                        "email": order.email,
+                        "order_reference_id": order.reference_number,
+                    },
+                ),
+                EMAIL_B2B_RECEIPT,
+            )
+        )
+    except:  # pylint: disable=bare-except
+        log.exception("Error sending receipt email")
