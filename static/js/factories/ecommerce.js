@@ -20,7 +20,6 @@ import type {
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
 
 const genBasketItemId = incrementer()
-const genNextObjectId = incrementer()
 const genProductId = incrementer()
 
 const genDataConsentUserId = incrementer()
@@ -33,13 +32,24 @@ export const makeDataConsent = (): DataConsentUser => ({
   consent_text: casual.text
 })
 
-export const makeItem = (itemType: ?string): BasketItem => {
+export const makeItem = (productType: ?string): BasketItem => {
   const basketItemType =
-    itemType ||
+    productType ||
     casual.random_element([PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM])
   const numCourses = basketItemType === PRODUCT_TYPE_COURSERUN ? 1 : 4
   const courses = range(0, numCourses).map(() => makeCourse())
   const runIds = courses.map(course => course.courseruns[0].id)
+
+  let objectId = casual.integer(0, 99999)
+  if (productType === PRODUCT_TYPE_COURSERUN) {
+    const choices = []
+    for (const course of courses) {
+      for (const run of course.courseruns) {
+        choices.push(run.id)
+      }
+    }
+    objectId = casual.random_element(choices)
+  }
 
   return {
     type:          basketItemType,
@@ -51,11 +61,11 @@ export const makeItem = (itemType: ?string): BasketItem => {
     price:         String(casual.double(0, 100)),
     thumbnail_url: casual.url,
     run_ids:       runIds,
-    // $FlowFixMe: flow doesn't understand generators well
-    object_id:     genNextObjectId.next().value,
+    object_id:     objectId,
     // $FlowFixMe: flow doesn't understand generators well
     product_id:    genProductId.next().value,
-    readable_id:   casual.text
+    readable_id:   casual.text,
+    created_on:    casual.moment.format()
   }
 }
 
@@ -76,26 +86,13 @@ export const makeBasketResponse = (itemType: ?string): BasketResponse => {
 
 export const makeProduct = (
   productType: string = PRODUCT_TYPE_COURSERUN
-): ProductDetail => {
-  productType =
-    productType ||
-    casual.random_element([PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM])
-  const contentType =
-    productType === PRODUCT_TYPE_COURSERUN ? "courserun" : "program"
-
-  return {
-    // $FlowFixMe
-    id:             genProductId.next().value,
-    product_type:   productType,
-    content_type:   contentType,
-    title:          casual.word,
-    object_id:      casual.integer(0, 99999),
-    text_id:        casual.word,
-    created_on:     casual.moment.format(),
-    updated_on:     casual.moment.format(),
-    latest_version: makeItem(productType)
-  }
-}
+): ProductDetail => ({
+  // $FlowFixMe
+  id:             genProductId.next().value,
+  title:          casual.word,
+  product_type:   productType,
+  latest_version: makeItem(productType)
+})
 
 const genCompanyId = incrementer()
 export const makeCompany = (): Company => ({

@@ -65,10 +65,12 @@ const B2BPurchaseForm = ({ onSubmit, products, requestPending }: Props) => (
             </div>
           </div>
           <div className="row">
-            <div className="col-lg-8">
+            <div className="col-lg-6">
               <p>Purchase one or more seats for your team.</p>
               <label htmlFor="product">
-                <h5>Select to view available courses or programs:</h5>
+                <span className="description">
+                  Select to view available courses or programs:
+                </span>
                 <Field
                   component={ProductSelector}
                   products={products}
@@ -89,6 +91,7 @@ const B2BPurchaseForm = ({ onSubmit, products, requestPending }: Props) => (
                 <ErrorMessage name="email" render={errorMessageRenderer} />
               </label>
             </div>
+            <div className="col-lg-2" />
             <div className="col-lg-4">
               <B2BPurchaseSummary
                 itemPrice={itemPrice}

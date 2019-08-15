@@ -7,6 +7,7 @@ import moment from "moment"
 import type {
   BasketItem,
   CouponSelection,
+  ProductDetail,
   ProductMap,
   BulkCouponPayment
 } from "../flow/ecommerceTypes"
@@ -53,8 +54,10 @@ export const formatPrice = (price: ?string | number | Decimal): string => {
 const formatDateForRun = (dateString: ?string) =>
   dateString ? moment(dateString).format("ll") : "?"
 
-export const formatRunTitle = (run: CourseRun) =>
-  `${formatDateForRun(run.start_date)} - ${formatDateForRun(run.end_date)}`
+export const formatRunTitle = (run: ?CourseRun) =>
+  run
+    ? `${formatDateForRun(run.start_date)} - ${formatDateForRun(run.end_date)}`
+    : ""
 
 export const isPromo = equals(COUPON_TYPE_PROMO)
 
@@ -71,3 +74,24 @@ export const createProductMap = (
     R.flatten,
     R.pluck("products")
   )(bulkCouponPayments)
+
+export const findRunInProduct = (product: ProductDetail): ?CourseRun => {
+  if (product.product_type !== PRODUCT_TYPE_COURSERUN) {
+    // Calling functions are responsible for checking this
+    throw new Error("Expected a run product")
+  }
+
+  const productVersion = product.latest_version
+  const runId = productVersion.object_id
+
+  for (const course of productVersion.courses) {
+    for (const run of course.courseruns) {
+      if (run.id === runId) {
+        return run
+      }
+    }
+  }
+
+  // This should be prevented by the REST API
+  return null
+}
