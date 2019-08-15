@@ -129,7 +129,7 @@ export type Product = {
 }
 
 export type ProductDetail = Product & {
-  latest_version: BasketItem,
+  latest_version: ProductVersion,
 }
 
 export type ProductMap = {
