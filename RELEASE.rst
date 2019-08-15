@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.17.1
+--------------
+
+- Enabled case-insensitive email search in management commands
+- Bump js dependencies
+
 Version 0.17.0 (Released August 14, 2019)
 --------------
 
