@@ -32,6 +32,15 @@ export const getDateSummary = (
       inProgress: false
     }
   }
+  const expirationDate = parseDateString(
+    courseRunEnrollment.run.expiration_date
+  )
+  if (expirationDate && expirationDate.isBefore(now)) {
+    return {
+      text:       `Access Expired on: ${formatPrettyDate(expirationDate)}`,
+      inProgress: false
+    }
+  }
   const endDate = parseDateString(courseRunEnrollment.run.end_date)
   if (endDate) {
     if (endDate.isAfter(now)) {
@@ -42,7 +51,8 @@ export const getDateSummary = (
     } else {
       return {
         text:       `Ended: ${formatPrettyDate(endDate)}`,
-        inProgress: false
+        inProgress: false,
+        archived:   true
       }
     }
   } else if (startDate) {

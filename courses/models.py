@@ -3,9 +3,11 @@ Course models
 """
 import logging
 import operator as op
+from datetime import timedelta
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericRelation
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
 from cms.urls import detail_path_char_pattern
@@ -297,6 +299,12 @@ class CourseRun(TimestampedModel):
     end_date = models.DateTimeField(null=True, blank=True, db_index=True)
     enrollment_start = models.DateTimeField(null=True, blank=True, db_index=True)
     enrollment_end = models.DateTimeField(null=True, blank=True, db_index=True)
+    expiration_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="When empty, set to 90 days past end date.",
+    )
     live = models.BooleanField(default=False)
     products = GenericRelation(Product, related_query_name="courseruns")
 
@@ -371,6 +379,41 @@ class CourseRun(TimestampedModel):
 
     def __str__(self):
         return self.title
+
+    def clean(self):
+        """
+        If expiration_date is not set:
+        1. If end_date is provided: set expiration_date to default end_date + 90 days.
+        2. If end_date is None, don't do anything.
+
+        Validate that the expiration date is:
+        1. Later than end_date if end_date is set
+        2. Later than start_date if start_date is set
+        """
+        if not self.expiration_date:
+            if self.end_date:
+                self.expiration_date = self.end_date + timedelta(days=90)
+            return
+
+        if self.start_date and self.expiration_date < self.start_date:
+            raise ValidationError("Expiration date must be later than start date.")
+
+        if self.end_date and self.expiration_date < self.end_date:
+            raise ValidationError("Expiration date must be later than end date.")
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        """
+        Overriding the save method to inject clean into it
+        """
+        self.clean()
+        super().save(
+            force_insert=force_insert,
+            force_update=force_update,
+            using=using,
+            update_fields=update_fields,
+        )
 
 
 class EnrollmentModel(TimestampedModel, AuditableModel):

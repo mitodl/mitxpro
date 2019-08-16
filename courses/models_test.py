@@ -149,6 +149,41 @@ def test_course_run_past(end_days, expected):
 
 
 @pytest.mark.parametrize(
+    "start_delta, end_delta, expiration_delta", [[-1, 2, 3], [1, 3, 4], [10, 20, 30]]
+)
+def test_course_run_expiration_date(start_delta, end_delta, expiration_delta):
+    """
+    Test that CourseRun.expiration_date returns the expected value
+    """
+    now = now_in_utc()
+    expiration_date = now + timedelta(days=expiration_delta)
+    assert (
+        CourseRunFactory.create(
+            start_date=now + timedelta(days=start_delta),
+            end_date=now + timedelta(days=end_delta),
+            expiration_date=expiration_date,
+        ).expiration_date
+        == expiration_date
+    )
+
+
+@pytest.mark.parametrize(
+    "start_delta, end_delta, expiration_delta", [[1, 2, 1], [1, 2, -1]]
+)
+def test_course_run_invalid_expiration_date(start_delta, end_delta, expiration_delta):
+    """
+    Test that CourseRun.expiration_date raises ValidationError if expiration_date is before start_date or end_date
+    """
+    now = now_in_utc()
+    with pytest.raises(ValidationError):
+        CourseRunFactory.create(
+            start_date=now + timedelta(days=start_delta),
+            end_date=now + timedelta(days=end_delta),
+            expiration_date=now + timedelta(days=expiration_delta),
+        )
+
+
+@pytest.mark.parametrize(
     "end_days, enroll_start_days, enroll_end_days, expected",
     [
         [None, None, None, True],

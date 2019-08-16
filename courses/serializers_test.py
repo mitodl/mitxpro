@@ -139,6 +139,7 @@ def test_serialize_course_run():
         "end_date": drf_datetime(course_run.end_date),
         "enrollment_start": drf_datetime(course_run.enrollment_start),
         "enrollment_end": drf_datetime(course_run.enrollment_end),
+        "expiration_date": drf_datetime(course_run.expiration_date),
         "id": course_run.id,
         "product_id": None,
     }
@@ -157,6 +158,7 @@ def test_serialize_course_run_detail():
         "end_date": drf_datetime(course_run.end_date),
         "enrollment_start": drf_datetime(course_run.enrollment_start),
         "enrollment_end": drf_datetime(course_run.enrollment_end),
+        "expiration_date": drf_datetime(course_run.expiration_date),
         "id": course_run.id,
     }
 
