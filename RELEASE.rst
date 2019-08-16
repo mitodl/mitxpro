@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.17.2
+--------------
+
+- Add pages for bulk enrollment code purchase and a receipt page to download codes (#958)
+- #918 CourseRun Expiration Date
+
 Version 0.17.1 (Released August 16, 2019)
 --------------
 
