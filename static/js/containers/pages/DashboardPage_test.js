@@ -185,6 +185,9 @@ describe("DashboardPage", () => {
       moment()
         .add(-5, "days")
         .format(),
+      moment()
+        .add(5, "days")
+        .format(),
       "abc",
       true,
       "past start date, non-null courseware id"
@@ -192,6 +195,20 @@ describe("DashboardPage", () => {
     [
       moment()
         .add(-5, "days")
+        .format(),
+      moment()
+        .add(-3, "days")
+        .format(),
+      "abc",
+      false,
+      "past start date, past end date, non-null courseware id"
+    ],
+    [
+      moment()
+        .add(-5, "days")
+        .format(),
+      moment()
+        .add(5, "days")
         .format(),
       null,
       false,
@@ -201,42 +218,137 @@ describe("DashboardPage", () => {
       moment()
         .add(5, "days")
         .format(),
+      moment()
+        .add(10, "days")
+        .format(),
       "abc",
       false,
       "future start date"
     ],
-    [null, "abc", false, "null start date"]
-  ].forEach(([startDate, coursewareUrl, shouldLink, runDescription]) => {
-    it(`${shouldIf(
-      shouldLink
-    )} link to edX if course run has ${runDescription}`, async () => {
-      const userRunEnrollment = mergeDeepRight(makeCourseRunEnrollment(), {
-        run: {
-          courseware_url: coursewareUrl,
-          start_date:     startDate
-        }
-      })
-      const { inner } = await renderPage({
-        entities: {
-          enrollments: {
-            program_enrollments:         [],
-            past_program_enrollments:    [],
-            course_run_enrollments:      [userRunEnrollment],
-            past_course_run_enrollments: []
+    [null, null, "abc", false, "null start date"]
+  ].forEach(
+    ([startDate, endDate, coursewareUrl, shouldLink, runDescription]) => {
+      it(`${shouldIf(
+        shouldLink
+      )} link to edX if course run has ${runDescription}`, async () => {
+        const userRunEnrollment = mergeDeepRight(makeCourseRunEnrollment(), {
+          run: {
+            courseware_url: coursewareUrl,
+            start_date:     startDate,
+            end_date:       endDate
           }
+        })
+        const { inner } = await renderPage({
+          entities: {
+            enrollments: {
+              program_enrollments:         [],
+              past_program_enrollments:    [],
+              course_run_enrollments:      [userRunEnrollment],
+              past_course_run_enrollments: []
+            }
+          }
+        })
+
+        const courseRunLink = inner.find(".course-enrollment h2 a")
+        assert.equal(courseRunLink.exists(), shouldLink)
+        if (shouldLink) {
+          assert.include(
+            courseRunLink.at(0).text(),
+            userRunEnrollment.run.course.title
+          )
         }
       })
+    }
+  )
 
-      const courseRunLink = inner.find(".course-enrollment h2 a")
-      assert.equal(courseRunLink.exists(), shouldLink)
-      if (shouldLink) {
-        assert.include(
-          courseRunLink.at(0).text(),
-          userRunEnrollment.run.course.title
+  //
+  ;[
+    [
+      moment()
+        .add(-5, "days")
+        .format(),
+      moment()
+        .add(-3, "days")
+        .format(),
+      moment()
+        .add(2, "days")
+        .format(),
+      "courseware_url",
+      true,
+      "has link, has ended and not yet expired"
+    ],
+    [
+      moment()
+        .add(-10, "days")
+        .format(),
+      moment()
+        .add(-5, "days")
+        .format(),
+      moment()
+        .add(1, "days")
+        .format(),
+      null,
+      false,
+      "has null link, has ended and not yet expired"
+    ],
+    [
+      moment()
+        .add(-5, "days")
+        .format(),
+      moment()
+        .add(-3, "days")
+        .format(),
+      moment()
+        .add(-1, "days")
+        .format(),
+      "courseware_url",
+      false,
+      "has link, has ended and expired"
+    ]
+  ].forEach(
+    ([
+      startDate,
+      endDate,
+      expirationDate,
+      coursewareUrl,
+      shouldLink,
+      runDescription
+    ]) => {
+      it(`${shouldIf(
+        shouldLink
+      )} render link to archived course if course run ${runDescription}`, async () => {
+        const pastRunEnrollments = mergeDeepRight(makeCourseRunEnrollment(), {
+          run: {
+            courseware_url:  coursewareUrl,
+            start_date:      startDate,
+            end_date:        endDate,
+            expiration_date: expirationDate
+          }
+        })
+        // We need the actual method, not the stub for this test
+        coursesApi.getDateSummary.restore()
+        const { inner } = await renderPage({
+          entities: {
+            enrollments: {
+              program_enrollments:         [],
+              past_program_enrollments:    [],
+              course_run_enrollments:      [],
+              past_course_run_enrollments: [pastRunEnrollments]
+            }
+          }
+        })
+
+        const courseRunLink = inner.find(
+          ".course-enrollment .course-detail-column .archived-course-link a"
         )
-      }
-    })
-  })
+        assert.equal(courseRunLink.exists(), shouldLink)
+        if (shouldLink) {
+          assert.equal(courseRunLink.at(0).prop("href"), coursewareUrl)
+          assert.include(courseRunLink.at(0).text(), "View Archived Course")
+        }
+      })
+    }
+  )
 
   describe("cybersource redirect", () => {
     it("looks up a run or program using the query parameter, and displays the success message", async () => {

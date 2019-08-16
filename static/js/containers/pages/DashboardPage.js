@@ -153,7 +153,8 @@ export class DashboardPage extends React.Component<Props, State> {
   isLinkableCourseRun = ({ run }: CourseRunEnrollment): boolean =>
     !R.isNil(run.courseware_url) &&
     !R.isNil(run.start_date) &&
-    moment(run.start_date).isBefore(this.state.now)
+    moment(run.start_date).isBefore(this.state.now) &&
+    (R.isNil(run.end_date) || moment(run.end_date).isAfter(this.state.now))
 
   onCollapseToggle = (programEnrollmentId: number): void => {
     this.setState({
@@ -206,6 +207,21 @@ export class DashboardPage extends React.Component<Props, State> {
                 )}
               </div>
               <div className="date-summary-text col-12">{dateSummary.text}</div>
+            </div>
+            <div className="row mt-2">
+              <div className="archived-course-link col-lg-8 col-md-7">
+                {dateSummary.archived &&
+                courseRunEnrollment.run.courseware_url ? (
+                    <a
+                      href={courseRunEnrollment.run.courseware_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                    View Archived Course
+                    </a>
+                  ) : null}
+              </div>
+              <div className="certificate-link col-lg-4 col-md-5" />
             </div>
           </div>
         </div>

@@ -124,6 +124,18 @@
       text-align: right;
     }
   }
+
+  .archived-course-link {
+    a {
+      color: $link-blue;
+      text-decoration: underline;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
+
+  }
 }
 
 .program-enrollment {

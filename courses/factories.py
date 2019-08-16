@@ -70,6 +70,9 @@ class CourseRunFactory(DjangoModelFactory):
     enrollment_end = factory.Faker(
         "date_time_this_month", before_now=False, after_now=True, tzinfo=pytz.utc
     )
+    expiration_date = factory.Faker(
+        "date_time_between", start_date="+1y", end_date="+2y", tzinfo=pytz.utc
+    )
     live = factory.Faker("boolean")
 
     class Meta:
