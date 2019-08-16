@@ -37,8 +37,8 @@ type Props = {
   updateBasket: (payload: BasketPayload) => Promise<*>
 }
 type State = {
-  appliedInitialCoupon: false,
-  errors: null
+  appliedInitialCoupon: boolean,
+  errors: string | Object | null
 }
 
 export const calcSelectedRunIds = (

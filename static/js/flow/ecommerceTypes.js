@@ -27,7 +27,7 @@ export type CheckoutPayload = {
   "unsigned_field_names": string,
 };
 
-export type BasketItem = {
+export type ProductVersion = {
   type: PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM,
   courses: Array<Course>,
   thumbnail_url: string,
@@ -37,6 +37,10 @@ export type BasketItem = {
   object_id: number,
   product_id: number,
   id: number,
+  readable_id: string,
+}
+
+export type BasketItem = ProductVersion & {
   run_ids: Array<number>,
 }
 
@@ -51,6 +55,15 @@ export type DataConsentUser = {
   consent_text: string,
   id: number,
   company: Company
+}
+
+export type B2BOrderStatus = {
+  status: string,
+  num_seats: number,
+  total_price: string,
+  item_price: string,
+  email: string,
+  product_version: ProductVersion,
 }
 
 export type BasketResponse = {
@@ -113,10 +126,10 @@ export type Product = {
   id: number,
   title: string,
   product_type: string,
-  created_on: Date,
-  updated_on: Date,
-  object_id: number,
-  content_type: number,
+}
+
+export type ProductDetail = Product & {
+  latest_version: ProductVersion,
 }
 
 export type ProductMap = {
@@ -136,4 +149,10 @@ export type BulkCouponPaymentsResponse = Array<BulkCouponPayment>
 
 export type BulkCouponSendResponse = {
   emails: Array<string>
+}
+
+export type BulkCheckoutPayload = {
+  num_seats: number,
+  product_version_id: number,
+  email: string,
 }

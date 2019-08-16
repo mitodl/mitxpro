@@ -27,6 +27,6 @@ urlpatterns = [
         B2BOrderStatusView.as_view(),
         name="b2b-order-status",
     ),
-    path("^ecommerce/bulk/", index, name="bulk-enrollment-code"),
-    path("^ecommerce/bulk/receipt/", index, name="bulk-enrollment-code-receipt"),
+    path("ecommerce/bulk/", index, name="bulk-enrollment-code"),
+    path("ecommerce/bulk/receipt/", index, name="bulk-enrollment-code-receipt"),
 ]

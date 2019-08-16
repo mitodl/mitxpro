@@ -20,6 +20,7 @@ import DashboardPage from "./pages/DashboardPage"
 import LoginPages from "./pages/login/LoginPages"
 import RegisterPages from "./pages/register/RegisterPages"
 import EcommerceAdminPages from "./pages/admin/EcommerceAdminPages"
+import EcommerceBulkPages from "./pages/b2b/EcommerceBulkPages"
 import ProfilePages from "./pages/profile/ProfilePages"
 
 import type { Match, Location } from "react-router"
@@ -96,6 +97,10 @@ export class App extends React.Component<Props, void> {
           <Route
             path={urljoin(match.url, String(routes.profile))}
             component={ProfilePages}
+          />
+          <Route
+            path={urljoin(match.url, String(routes.ecommerceBulk))}
+            component={EcommerceBulkPages}
           />
         </Switch>
       </div>
