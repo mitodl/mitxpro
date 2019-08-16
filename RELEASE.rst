@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.17.1
+Version 0.17.1 (Released August 16, 2019)
 --------------
 
 - Enabled case-insensitive email search in management commands
