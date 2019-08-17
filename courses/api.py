@@ -43,6 +43,7 @@ def get_user_enrollments(user):
     course_run_enrollments = (
         CourseRunEnrollment.objects.select_related("run__course__coursepage")
         .filter(user=user)
+        .order_by("run__start_date")
         .all()
     )
     non_program_run_enrollments, program_run_enrollments = partition(

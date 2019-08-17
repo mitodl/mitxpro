@@ -20,16 +20,27 @@ from mitxpro.utils import now_in_utc
 def test_get_user_enrollments(user):
     """Test that get_user_enrollments returns an object with a user's program and course enrollments"""
     past_date = now_in_utc() - timedelta(days=1)
+    past_start_dates = [
+        now_in_utc() - timedelta(days=2),
+        now_in_utc() - timedelta(days=3),
+        now_in_utc() - timedelta(days=4),
+    ]
     program = ProgramFactory.create()
     past_program = ProgramFactory.create()
 
     program_course_runs = CourseRunFactory.create_batch(3, course__program=program)
     past_program_course_runs = CourseRunFactory.create_batch(
-        3, end_date=past_date, course__program=past_program
+        3,
+        start_date=factory.Iterator(past_start_dates),
+        end_date=past_date,
+        course__program=past_program,
     )
     non_program_course_runs = CourseRunFactory.create_batch(2, course__program=None)
     past_non_program_course_runs = CourseRunFactory.create_batch(
-        2, end_date=past_date, course__program=None
+        2,
+        start_date=factory.Iterator(past_start_dates),
+        end_date=past_date,
+        course__program=None,
     )
     all_course_runs = (
         program_course_runs
@@ -47,14 +58,14 @@ def test_get_user_enrollments(user):
     # Add a non-active enrollment so we can confirm that it isn't returned
     CourseRunEnrollmentFactory.create(user=user, active=False)
 
-    def key_func(_run):
-        """ Function for sorting runs by id"""
-        return _run.id
+    def key_func(enrollment):
+        """ Function for sorting runs by start_date"""
+        return enrollment.run.start_date
 
     user_enrollments = get_user_enrollments(user)
     assert list(user_enrollments.programs) == [program_enrollment]
     assert list(user_enrollments.past_programs) == [past_program_enrollment]
-    assert sorted(list(user_enrollments.program_runs), key=key_func) == sorted(
+    assert list(user_enrollments.program_runs) == sorted(
         [
             run_enrollment
             for run_enrollment in course_run_enrollments
@@ -62,7 +73,7 @@ def test_get_user_enrollments(user):
         ],
         key=key_func,
     )
-    assert sorted(list(user_enrollments.non_program_runs), key=key_func) == sorted(
+    assert list(user_enrollments.non_program_runs) == sorted(
         [
             run_enrollment
             for run_enrollment in course_run_enrollments
@@ -71,7 +82,7 @@ def test_get_user_enrollments(user):
         key=key_func,
     )
 
-    assert sorted(list(user_enrollments.past_non_program_runs), key=key_func) == sorted(
+    assert list(user_enrollments.past_non_program_runs) == sorted(
         [
             run_enrollment
             for run_enrollment in course_run_enrollments
