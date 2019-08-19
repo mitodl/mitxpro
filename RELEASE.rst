@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.17.2
+Version 0.17.2 (Released August 19, 2019)
 --------------
 
 - Add pages for bulk enrollment code purchase and a receipt page to download codes (#958)
