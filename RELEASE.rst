@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.18.0
+--------------
+
+- Coure/Program Certificate models
+
 Version 0.17.2 (Released August 19, 2019)
 --------------
 
