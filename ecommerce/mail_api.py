@@ -1,12 +1,13 @@
 """Ecommerce mail API"""
-from urllib.parse import urljoin, urlencode
 import itertools
 import logging
+from urllib.parse import urlencode, urljoin
 
 from django.conf import settings
 from django.urls import reverse
 
 from courses.models import CourseRun
+from ecommerce.models import ProductCouponAssignment
 from mail import api
 from mail.constants import (
     EMAIL_B2B_RECEIPT,
@@ -14,7 +15,6 @@ from mail.constants import (
     EMAIL_COURSE_RUN_ENROLLMENT,
     EMAIL_COURSE_RUN_UNENROLLMENT,
 )
-from ecommerce.models import ProductCouponAssignment
 from mitxpro.utils import format_price
 
 log = logging.getLogger()
@@ -22,16 +22,10 @@ log = logging.getLogger()
 
 def get_bulk_enroll_email_context(product_coupon):
     """Gets the bulk enrollment email template context for one CouponEligibility object"""
-    enrollment_url = "?".join(
-        [
-            urljoin(settings.SITE_BASE_URL, reverse("checkout-page")),
-            urlencode(
-                {
-                    "product": product_coupon.product.id,
-                    "code": product_coupon.coupon.coupon_code,
-                }
-            ),
-        ]
+    from ecommerce.api import make_checkout_url
+
+    enrollment_url = make_checkout_url(
+        product_id=product_coupon.product.id, code=product_coupon.coupon.coupon_code
     )
     company_name = (
         product_coupon.coupon.payment.versions.values_list("company__name", flat=True)

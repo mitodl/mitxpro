@@ -3,6 +3,7 @@
 Test voucher views.py
 """
 import json
+from urllib.parse import urljoin
 
 from django.urls import reverse
 import pytest
@@ -178,7 +179,9 @@ def test_get_enroll_view_with_matches(
         assert coupon_choice[1] in titles
 
 
-def test_post_enroll_view_with_coupon_choice(voucher_and_exact_match_with_coupon):
+def test_post_enroll_view_with_coupon_choice(
+    voucher_and_exact_match_with_coupon, settings
+):
     """
     Test the EnrollView POST method with a valid coupon choice
     """
@@ -192,9 +195,9 @@ def test_post_enroll_view_with_coupon_choice(voucher_and_exact_match_with_coupon
         {"coupon_version": json.dumps((product.id, coupon_version.coupon.id))},
     )
     assert response.status_code == 302
-    assert (
-        response.url
-        == f"{reverse('checkout-page')}?product={product.id}&code={coupon_version.coupon.coupon_code}"
+    assert response.url == (
+        f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}?"
+        f"product={product.id}&code={coupon_version.coupon.coupon_code}"
     )
     assert Voucher.objects.get(id=voucher.id).coupon == coupon_version.coupon
 
@@ -250,8 +253,8 @@ def test_post_enroll_view_with_stolen_coupon(
         {"coupon_version": json.dumps((product.id, coupon_version1.coupon.id))},
     )
     assert response.status_code == 302
-    assert (
-        response.url
-        == f"{reverse('checkout-page')}?product={product.id}&code={coupon_version2.coupon.coupon_code}"
+    assert response.url == (
+        f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}?"
+        f"product={product.id}&code={coupon_version2.coupon.coupon_code}"
     )
     assert Voucher.objects.get(id=voucher.id).coupon == coupon_version2.coupon

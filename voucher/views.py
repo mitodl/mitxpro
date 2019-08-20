@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.views.generic import FormView
 from django.views.generic.base import View
 
+from ecommerce.api import make_checkout_url
 from ecommerce.models import Coupon, Product
 from mitxpro.views import get_js_settings_context
 from voucher.forms import UploadVoucherForm, VOUCHER_PARSE_ERROR
@@ -138,7 +139,9 @@ class EnrollView(LoginRequiredMixin, View):
         voucher.coupon_id = coupon_id
         voucher.product_id = product_id
         voucher.save()
-        enroll_url = f"{reverse('checkout-page')}?product={product_id}&code={voucher.coupon.coupon_code}"
+        enroll_url = make_checkout_url(
+            product_id=product_id, code=voucher.coupon.coupon_code
+        )
         return redirect(enroll_url)
 
 

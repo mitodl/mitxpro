@@ -9,6 +9,7 @@ from rest_framework import status
 
 from b2b_ecommerce.factories import B2BOrderFactory, ProductVersionFactory
 from b2b_ecommerce.models import B2BOrder, B2BOrderAudit, B2BReceipt
+from ecommerce.api import make_checkout_url
 from ecommerce.exceptions import EcommerceException
 from ecommerce.factories import CouponVersionFactory
 from ecommerce.serializers import ProductVersionSerializer
@@ -332,8 +333,18 @@ def test_enrollment_codes(client):
         resp.get("Content-Disposition")
         == f'attachment; filename="enrollmentcodes-{order.unique_id}.csv"'
     )
-    assert sorted(resp.content.decode().split()) == sorted(
-        [coupon.coupon_code for coupon in coupons]
+    rows = [line.split(",") for line in resp.content.decode().split()]
+    assert rows[0] == ["code", "url"]
+    assert sorted(rows[1:]) == sorted(
+        [
+            [
+                coupon.coupon_code,
+                make_checkout_url(
+                    code=coupon.coupon_code, product_id=order.product_version.product_id
+                ),
+            ]
+            for coupon in coupons
+        ]
     )
 
 

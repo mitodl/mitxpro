@@ -1,15 +1,17 @@
 """mitxpro utilities"""
+import csv
 import datetime
 from enum import auto, Flag
 import json
 import logging
 import itertools
 from urllib.parse import urlparse, urlunparse, ParseResult
-import pytz
 
 from django.conf import settings
 from django.core.serializers import serialize
 from django.db import models
+from django.http.response import HttpResponse
+import pytz
 
 log = logging.getLogger(__name__)
 
@@ -249,3 +251,32 @@ def format_price(amount):
         str: A currency string
     """
     return f"${amount:0,.2f}"
+
+
+def make_csv_http_response(*, csv_rows, filename):
+    """
+    Create a HttpResponse for a CSV file.
+
+    Args:
+        csv_rows (iterable of dict): An iterable of dict, to be written to the CSV file
+        filename (str): The filename to suggest for download
+
+    Returns:
+        django.http.response.HttpResponse: A HTTP response
+    """
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+    csv_rows = iter(csv_rows)
+    try:
+        first_row = next(csv_rows)
+    except StopIteration:
+        # Nothing to write
+        return response
+
+    writer = csv.DictWriter(response, fieldnames=list(first_row.keys()))
+    writer.writeheader()
+    writer.writerow(first_row)
+    for row in csv_rows:
+        writer.writerow(row)
+    return response

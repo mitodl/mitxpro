@@ -14,6 +14,7 @@ from mitxpro.utils import (
     is_near_now,
     dict_without_keys,
     filter_dict_by_key_set,
+    make_csv_http_response,
     partition,
     has_equal_properties,
     remove_password_from_url,
@@ -146,3 +147,26 @@ def test_unique_ignore_case():
 def test_format_price(price, expected):
     """Format a decimal value into a price"""
     assert format_price(price) == expected
+
+
+def test_make_csv_http_response():
+    """
+    make_csv_http_response should make a HttpResponse object suitable for serving a CSV file.
+    """
+    rows = [{"a": "B", "c": "d"}, {"a": "e", "c": "f"}]
+    response = make_csv_http_response(csv_rows=rows, filename="test_filename")
+    out_rows = [line.split(",") for line in response.content.decode().splitlines()]
+    assert out_rows == [["a", "c"], ["B", "d"], ["e", "f"]]
+    assert response["Content-Disposition"] == 'attachment; filename="test_filename"'
+    assert response["Content-Type"] == "text/csv"
+
+
+def test_make_csv_http_response_empty():
+    """
+    make_csv_http_response should handle empty data sets by returning an empty response
+    """
+    response = make_csv_http_response(csv_rows=[], filename="empty_filename")
+    out_rows = [line.split(",") for line in response.content.decode().splitlines()]
+    assert out_rows == []
+    assert response["Content-Disposition"] == 'attachment; filename="empty_filename"'
+    assert response["Content-Type"] == "text/csv"

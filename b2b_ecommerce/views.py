@@ -1,11 +1,9 @@
 """Views for business to business ecommerce"""
 
-import csv
 import logging
 from urllib.parse import urljoin, urlencode
 
 from django.conf import settings
-from django.http.response import HttpResponse
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -15,10 +13,11 @@ from rest_framework.views import APIView
 
 from b2b_ecommerce.api import complete_b2b_order, generate_b2b_cybersource_sa_payload
 from b2b_ecommerce.models import B2BOrder, B2BReceipt
-from ecommerce.api import determine_order_status_change
+from ecommerce.api import determine_order_status_change, make_checkout_url
 from ecommerce.models import ProductVersion, Coupon
 from ecommerce.permissions import IsSignedByCyberSource
 from ecommerce.serializers import ProductVersionSerializer
+from mitxpro.utils import make_csv_http_response
 
 
 log = logging.getLogger(__name__)
@@ -171,16 +170,18 @@ class B2BEnrollmentCodesView(APIView):
         order_hash = kwargs["hash"]
         order = get_object_or_404(B2BOrder, unique_id=order_hash)
 
-        response = HttpResponse(content_type="text/csv")
-        response[
-            "Content-Disposition"
-        ] = f'attachment; filename="enrollmentcodes-{order_hash}.csv"'
+        rows = (
+            {
+                "code": code,
+                "url": make_checkout_url(
+                    code=code, product_id=order.product_version.product_id
+                ),
+            }
+            for code in Coupon.objects.filter(
+                versions__payment_version__b2border=order
+            ).values_list("coupon_code", flat=True)
+        )
 
-        writer = csv.writer(response)
-
-        for code in Coupon.objects.filter(
-            versions__payment_version__b2border=order
-        ).values_list("coupon_code", flat=True):
-            writer.writerow([code])
-
-        return response
+        return make_csv_http_response(
+            csv_rows=rows, filename=f"enrollmentcodes-{order_hash}.csv"
+        )
