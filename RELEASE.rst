@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.18.2
+--------------
+
+- Send email when a B2BOrder is fulfilled (#1003)
+- voucher dropdown update (#1042)
+
 Version 0.18.1 (Released August 21, 2019)
 --------------
 
