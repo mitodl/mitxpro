@@ -103,9 +103,9 @@ def get_eligible_coupon_choices(voucher):
             json.dumps(
                 (course_matches[i].product.first().id, valid_coupons[i].coupon.id)
             ),
-            "{title} - {start_date}".format(
+            "{title} - starts {start_date}".format(
                 title=course_matches[i].title,
-                start_date=course_matches[i].start_date.date(),
+                start_date=course_matches[i].start_date.strftime("%b %d, %Y"),
             ),
         )
         for i in range(len(course_matches))

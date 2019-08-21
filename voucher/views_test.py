@@ -166,8 +166,8 @@ def test_get_enroll_view_with_matches(
         coupon_version.coupon.id for coupon_version in context.coupon_versions
     ]
     titles = [
-        "{title} - {start_date}".format(
-            title=match.title, start_date=match.start_date.date()
+        "{title} - starts {start_date}".format(
+            title=match.title, start_date=match.start_date.strftime("%b %d, %Y")
         )
         for match in context.partial_matches
     ]
