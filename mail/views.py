@@ -7,7 +7,12 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
 from mail import api
-from mail.constants import EMAIL_VERIFICATION, EMAIL_PW_RESET, EMAIL_BULK_ENROLL
+from mail.constants import (
+    EMAIL_VERIFICATION,
+    EMAIL_PW_RESET,
+    EMAIL_BULK_ENROLL,
+    EMAIL_B2B_RECEIPT,
+)
 from mail.forms import EmailDebuggerForm
 
 
@@ -17,6 +22,18 @@ EMAIL_DEBUG_EXTRA_CONTEXT = {
     EMAIL_BULK_ENROLL: {
         "enrollable_title": "Dummy Course Title",
         "enrollment_url": "http://www.example.com/enroll?course_id=1234",
+    },
+    EMAIL_B2B_RECEIPT: {
+        "download_url": "http://b2b.example.com",
+        "title": "Course run or Program title",
+        "run_date_range": "Jan 1, 2020 - Mar 15, 2020",
+        "item_price": "$12,345.12",
+        "total_price": "$24,690.24",
+        "num_seats": "2",
+        "order_reference_id": "XPRO-ENROLLMENT-user.mitxpro-3",
+        "readable_id": "program-v1:xPRO+AMx",
+        "email": "mitx-purchaser@example.com",
+        "purchase_date": "May 30, 2019",
     },
 }
 

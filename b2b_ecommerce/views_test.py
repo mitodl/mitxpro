@@ -122,10 +122,11 @@ def test_create_order_product_version(client):
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_zero_price_checkout(client):  # pylint:disable=too-many-arguments
+def test_zero_price_checkout(client, mocker):  # pylint:disable=too-many-arguments
     """
     If the order total is $0, we should just fulfill the order and direct the user to our order receipt page
     """
+    complete_order_mock = mocker.patch("b2b_ecommerce.views.complete_b2b_order")
     product_version = ProductVersionFactory.create()
     resp = client.post(
         reverse("b2b-checkout"),
@@ -147,12 +148,14 @@ def test_zero_price_checkout(client):  # pylint:disable=too-many-arguments
     assert order.per_item_price == product_version.price
     assert order.b2breceipt_set.count() == 0
     assert order.num_seats == 0
+    complete_order_mock.assert_called_once_with(order)
 
 
 def test_order_fulfilled(client, mocker):  # pylint:disable=too-many-arguments
     """
     Test the happy case
     """
+    complete_order_mock = mocker.patch("b2b_ecommerce.views.complete_b2b_order")
     order = B2BOrderFactory.create(status=B2BOrder.CREATED)
 
     data = {}
@@ -180,6 +183,7 @@ def test_order_fulfilled(client, mocker):  # pylint:disable=too-many-arguments
     assert dict_without_keys(order_audit.data_after, "updated_on") == dict_without_keys(
         order.to_dict(), "updated_on"
     )
+    complete_order_mock.assert_called_once_with(order)
 
 
 def test_missing_fields(client, mocker):

@@ -236,3 +236,16 @@ def remove_password_from_url(url):
             fragment=pieces.fragment,
         )
     )
+
+
+def format_price(amount):
+    """
+    Format a price in USD
+
+    Args:
+        amount (decimal.Decimal): A decimal value
+
+    Returns:
+        str: A currency string
+    """
+    return f"${amount:0,.2f}"

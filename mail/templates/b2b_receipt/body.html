@@ -1,0 +1,58 @@
+{% extends "email_base.html" %}
+
+{% block content %}
+<!-- 1 Column Text + Button : BEGIN -->
+  <tr>
+      <td style="background-color: #ffffff;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              <tr>
+                  <td style="padding: 20px; font-weight: 600; font-family: sans-serif; font-size: 13px; line-height: 20px; color: #2a2a2a;">
+                      <h1 style="margin: 0 0 10px; font-size: 25px; line-height: 30px; color: #03152d; font-weight: bold;">Receipt</h1>
+                      <p style="margin: 0 0 10px;">
+                          <span style="color: #8a8b8c">Date:</span><br />
+                          {{ purchase_date }}
+                      </p>
+                      <p>
+                          <span style="color: #8a8b8c">Order Number:</span><br/>
+                          {{ order_reference_id }}
+                      </p>
+                      <p>
+                          <span style="color: #8a8b8c">Email Address:</span><br />
+                          {{ email }}
+                      </p>
+
+                      <table style="background-color: #f5f5f5; width: 100%;">
+                          <tr>
+                              <td style="padding: 20px; vertical-align: top" colspan="2">
+                                  <span style="color: #8a8b8c">Order Items:</span><br />
+                                  {{ title }}<br />
+                                  {% if run_date_range %}
+                                      {{ run_date_range }}<br />
+                                  {% endif %}
+                                  {{ readable_id }}<br />
+                              </td>
+                              <td style="padding: 20px; vertical-align: top">
+                                  <span style="color: #8a8b8c">Quantity</span><br />
+                                  {{ num_seats }}
+                              </td>
+                              <td style="padding: 20px; vertical-align: top">
+                                  <span style="color: #8a8b8c">Price Per</span><br />
+                                  {{ item_price }}
+                              </td>
+                              <td style="padding: 20px; vertical-align: top">
+                                  <span style="color: #8a8b8c">Total Paid</span><br />
+                                  {{ total_price }}
+                              </td>
+                          </tr>
+                      </table>
+
+                      <p>
+                          <a href="{{ download_url }}">Download enrollment codes and view your receipt</a>
+                      </p>
+                  </td>
+              </tr>
+          </table>
+      </td>
+  </tr>
+<!-- 1 Column Text + Button : END -->
+{% endblock %}

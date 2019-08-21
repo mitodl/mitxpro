@@ -1,15 +1,29 @@
 """Ecommerce mail API tests"""
+from urllib.parse import urljoin
+
+from django.urls import reverse
 import pytest
 
+from b2b_ecommerce.factories import B2BOrderFactory
 from courses.factories import CourseRunEnrollmentFactory
+from ecommerce.api import get_readable_id
 from ecommerce.factories import (
     CouponPaymentVersionFactory,
     CouponEligibilityFactory,
     ProductVersionFactory,
     CompanyFactory,
 )
-from ecommerce.mail_api import send_bulk_enroll_emails, send_course_run_enrollment_email
-from mail.constants import EMAIL_BULK_ENROLL, EMAIL_COURSE_RUN_ENROLLMENT
+from ecommerce.mail_api import (
+    send_b2b_receipt_email,
+    send_bulk_enroll_emails,
+    send_course_run_enrollment_email,
+)
+from mail.constants import (
+    EMAIL_BULK_ENROLL,
+    EMAIL_COURSE_RUN_ENROLLMENT,
+    EMAIL_B2B_RECEIPT,
+)
+from mitxpro.utils import format_price
 
 lazy = pytest.lazy_fixture
 
@@ -94,3 +108,49 @@ def test_send_course_run_enrollment_email_error(mocker):
     patched_log.exception.assert_called_once_with(
         "Error sending enrollment success email"
     )
+
+
+def test_send_b2b_receipt_email(mocker, settings):
+    """send_b2b_receipt_email should send a receipt email"""
+    patched_mail_api = mocker.patch("ecommerce.mail_api.api")
+    order = B2BOrderFactory.create()
+
+    send_b2b_receipt_email(order)
+
+    format_string = "%b %-d, %Y"
+    run = order.product_version.product.content_object
+    download_url = f'{urljoin(settings.SITE_BASE_URL, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'
+
+    patched_mail_api.context_for_user.assert_called_once_with(
+        user=None,
+        extra_context={
+            "purchase_date": order.updated_on.strftime(format_string),
+            "total_price": format_price(order.total_price),
+            "item_price": format_price(order.per_item_price),
+            "num_seats": str(order.num_seats),
+            "readable_id": get_readable_id(run),
+            "run_date_range": f"{run.start_date.strftime(format_string)} - {run.end_date.strftime(format_string)}",
+            "title": run.title,
+            "download_url": download_url,
+            "email": order.email,
+            "order_reference_id": order.reference_number,
+        },
+    )
+    patched_mail_api.message_for_recipient.assert_called_once_with(
+        order.email, patched_mail_api.context_for_user.return_value, EMAIL_B2B_RECEIPT
+    )
+    patched_mail_api.send_message.assert_called_once_with(
+        patched_mail_api.message_for_recipient.return_value
+    )
+
+
+def test_send_b2b_receipt_email_error(mocker):
+    """send_b2b_receipt_email should log an error and silence the exception if sending mail fails"""
+    order = B2BOrderFactory.create()
+    patched_mail_api = mocker.patch("ecommerce.mail_api.api")
+    patched_log = mocker.patch("ecommerce.mail_api.log")
+    patched_mail_api.send_message.side_effect = Exception("error")
+
+    send_b2b_receipt_email(order)
+
+    patched_log.exception.assert_called_once_with("Error sending receipt email")

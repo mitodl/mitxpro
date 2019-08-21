@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import transaction
 
 from ecommerce.api import create_coupons, ISO_8601_FORMAT, sign_cybersource_payload
+from ecommerce.mail_api import send_b2b_receipt_email
 from ecommerce.models import CouponPaymentVersion
 from mitxpro.utils import now_in_utc
 
@@ -28,6 +29,8 @@ def complete_b2b_order(order):
         )
         order.coupon_payment_version = payment_version
         order.save()
+
+    send_b2b_receipt_email(order)
 
 
 def _generate_b2b_cybersource_sa_payload(*, order, receipt_url, cancel_url):

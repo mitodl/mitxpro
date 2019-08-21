@@ -7,8 +7,9 @@ from datetime import timedelta
 import hashlib
 import hmac
 from unittest.mock import PropertyMock
-from requests.exceptions import HTTPError
+import uuid
 
+from requests.exceptions import HTTPError
 import factory
 from rest_framework.exceptions import ValidationError
 import pytest
@@ -23,6 +24,7 @@ from courses.factories import (
     ProgramEnrollmentFactory,
 )
 from ecommerce.api import (
+    create_coupons,
     create_unfulfilled_order,
     generate_cybersource_sa_payload,
     generate_cybersource_sa_signature,
@@ -46,6 +48,7 @@ from ecommerce.api import (
 )
 from ecommerce.factories import (
     BasketFactory,
+    CompanyFactory,
     CouponRedemptionFactory,
     CouponSelectionFactory,
     CouponVersionFactory,
@@ -1062,3 +1065,69 @@ def test_format_enrollment_message(is_program):
             details=details,
         )
     )
+
+
+@pytest.mark.parametrize("use_defaults", [True, False])
+def test_create_coupons(use_defaults):
+    """create_coupons should fill in good default parameters where necessary"""
+    product = ProductVersionFactory.create().product
+    name = "n a m e"
+    coupon_type = CouponPaymentVersion.SINGLE_USE
+    amount = Decimal("123")
+    num_coupon_codes = 12
+
+    optional = (
+        {}
+        if use_defaults
+        else {
+            "tag": "a tag",
+            "automatic": True,
+            "activation_date": now_in_utc() - timedelta(1),
+            "expiration_date": now_in_utc() + timedelta(1),
+            "payment_type": CouponPaymentVersion.PAYMENT_CC,
+            "payment_transaction": "transaction",
+            "coupon_code": "a coupon code",
+            "company_id": CompanyFactory.create().id,
+        }
+    )
+
+    payment_version = create_coupons(
+        name=name,
+        product_ids=[product.id],
+        amount=amount,
+        num_coupon_codes=num_coupon_codes,
+        coupon_type=coupon_type,
+        **optional,
+    )
+    assert payment_version.payment.name == name
+    assert payment_version.coupon_type == coupon_type
+    assert payment_version.amount == amount
+    assert payment_version.tag == (None if use_defaults else optional["tag"])
+    assert payment_version.automatic is (
+        False if use_defaults else optional["automatic"]
+    )
+    assert payment_version.activation_date == (
+        None if use_defaults else optional["activation_date"]
+    )
+    assert payment_version.expiration_date == (
+        None if use_defaults else optional["expiration_date"]
+    )
+    assert payment_version.payment_type == (
+        None if use_defaults else optional["payment_type"]
+    )
+    assert payment_version.payment_transaction == (
+        None if use_defaults else optional["payment_transaction"]
+    )
+    assert payment_version.company_id == (
+        None if use_defaults else optional["company_id"]
+    )
+
+    coupons = list(Coupon.objects.filter(payment__versions=payment_version))
+    assert len(coupons) == num_coupon_codes
+    for coupon in coupons:
+        if use_defaults:
+            # Automatically generated coupon codes are UUIDs and should be parseable.
+            # An exception will be raised otherwise.
+            uuid.UUID(coupon.coupon_code)
+        else:
+            assert coupon.coupon_code == optional["coupon_code"]
