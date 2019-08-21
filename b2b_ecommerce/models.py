@@ -1,6 +1,7 @@
 """Models for business to business ecommerce"""
 import uuid
 
+from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
@@ -32,8 +33,12 @@ class B2BOrder(OrderAbstract, AuditableModel):
         CouponPaymentVersion, null=True, on_delete=models.PROTECT
     )
 
-    reference_number_prefix = REFERENCE_NUMBER_PREFIX
     objects = OrderManager()
+
+    @staticmethod
+    def get_reference_number_prefix():
+        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""
+        return f"{REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}"
 
     def __str__(self):
         """Description for CouponOrder"""

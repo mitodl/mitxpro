@@ -13,9 +13,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from b2b_ecommerce.api import fulfill_b2b_order
+from b2b_ecommerce.models import B2BOrder
 from ecommerce.api import (
     create_unfulfilled_order,
-    determine_order_status_change,
+    fulfill_order,
     generate_cybersource_sa_payload,
     get_product_version_price_with_discount,
     get_full_price_coupon_product_set,
@@ -25,6 +27,7 @@ from ecommerce.api import (
     validate_basket_for_checkout,
     complete_order,
 )
+from ecommerce.exceptions import ParseException
 from ecommerce.mail_api import send_bulk_enroll_emails
 from ecommerce.models import (
     Basket,
@@ -144,31 +147,20 @@ class OrderFulfillmentView(APIView):
         """
         Confirmation from CyberSource which fulfills an existing Order.
         """
-        # First, save this information in a receipt
-        receipt = Receipt.objects.create(data=request.data)
-
-        # Link the order with the receipt if we can parse it
-        reference_number = request.data["req_reference_number"]
-        order = Order.objects.get_by_reference_number(reference_number)
-        receipt.order = order
-        receipt.save()
-
-        new_order_status = determine_order_status_change(
-            order, request.data["decision"]
-        )
-        if new_order_status is None:
-            # This is a duplicate message, ignore since it's already handled
-            return Response(status=status.HTTP_200_OK)
-
-        order.status = new_order_status
-        order.save()
-        sync_hubspot_deal(order)
-
-        if order.status == Order.FULFILLED:
-            complete_order(order)
-
-        # Save to log everything to an audit table including enrollments created in complete_order
-        order.save_and_log(None)
+        try:
+            reference_number = request.data.get("req_reference_number", "")
+            if reference_number.startswith(B2BOrder.get_reference_number_prefix()):
+                fulfill_b2b_order(request.data)
+            elif reference_number.startswith(Order.get_reference_number_prefix()):
+                fulfill_order(request.data)
+            else:
+                raise ParseException(
+                    f"Unknown prefix '{reference_number}' for reference number"
+                )
+        except:
+            # Not sure what would cause an error here but make sure we save the receipt
+            Receipt.objects.create(data=request.data)
+            raise
 
         # The response does not matter to CyberSource
         return Response(status=status.HTTP_200_OK)

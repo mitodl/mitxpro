@@ -50,6 +50,7 @@ from ecommerce.models import (
     ProductCouponAssignment,
     Line,
     Order,
+    Receipt,
 )
 from ecommerce.utils import send_support_email
 from hubspot.task_helpers import sync_hubspot_deal
@@ -1022,3 +1023,35 @@ def make_checkout_url(*, product_id=None, code=None):
     if code is not None:
         query_params["code"] = code
     return f"{base_checkout_url}?{urlencode(query_params)}"
+
+
+def fulfill_order(request_data):
+    """
+    Fulfill an order for end user purchase of a Product.
+
+    Args:
+        request_data (dict): Request data from CyberSource
+    """
+    # First, save this information in a receipt
+    receipt = Receipt.objects.create(data=request_data)
+
+    # Link the order with the receipt if we can parse it
+    reference_number = request_data["req_reference_number"]
+    order = Order.objects.get_by_reference_number(reference_number)
+    receipt.order = order
+    receipt.save()
+
+    new_order_status = determine_order_status_change(order, request_data["decision"])
+    if new_order_status is None:
+        # This is a duplicate message, ignore since it's already handled
+        return
+
+    order.status = new_order_status
+    order.save()
+    sync_hubspot_deal(order)
+
+    if order.status == Order.FULFILLED:
+        complete_order(order)
+
+    # Save to log everything to an audit table including enrollments created in complete_order
+    order.save_and_log(None)
