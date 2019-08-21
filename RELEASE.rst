@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.18.1 (Released August 21, 2019)
+--------------
+
+- Updated program API with additional fields
+
 Version 0.18.0 (Released August 20, 2019)
 --------------
 
