@@ -127,14 +127,19 @@ def voucher_and_partial_matches(voucher_and_user_client):
     course_run_1 = CourseRunFactory(
         start_date=datetime.combine(
             voucher.course_start_date_input, datetime.min.time(), tzinfo=pytz.UTC
-        )
+        ),
+        live=True,
     )
-    course_run_2 = CourseRunFactory(course__readable_id=voucher.course_id_input)
-    course_run_3 = CourseRunFactory(course__title=voucher.course_title_input)
+    course_run_2 = CourseRunFactory(
+        course__readable_id=voucher.course_id_input, live=True
+    )
+    course_run_3 = CourseRunFactory(course__title=voucher.course_title_input, live=True)
     course_run_4 = CourseRunFactory(
-        course__readable_id=f"{voucher.course_id_input}-noise"
+        course__readable_id=f"{voucher.course_id_input}-noise", live=True
     )
-    course_run_5 = CourseRunFactory(course__title=f"{voucher.course_title_input}-noise")
+    course_run_5 = CourseRunFactory(
+        course__title=f"{voucher.course_title_input}-noise", live=True
+    )
     return SimpleNamespace(
         **vars(voucher_and_user_client),
         company=company,
@@ -160,6 +165,7 @@ def voucher_and_exact_match(voucher_and_user_client):
         ),
         course__readable_id=voucher.course_id_input,
         course__title=voucher.course_title_input,
+        live=True,
     )
     return SimpleNamespace(
         **vars(voucher_and_user_client),

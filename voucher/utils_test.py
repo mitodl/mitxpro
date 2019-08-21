@@ -186,7 +186,12 @@ def _test_eligible_coupon_version(eligible_coupons, context):
     coupon_ids = [
         coupon_version.coupon.id for coupon_version in context.coupon_versions
     ]
-    titles = [match.title for match in context.partial_matches]
+    titles = [
+        "{title} - starts {start_date}".format(
+            title=match.title, start_date=match.start_date.strftime("%b %d, %Y")
+        )
+        for match in context.partial_matches
+    ]
     for eligible_coupon in eligible_coupons:
         product_id, coupon_id = json.loads(eligible_coupon[0])
         assert product_id in product_ids
@@ -233,7 +238,10 @@ def test_exact_course_match(voucher_and_exact_match_with_coupon, settings):
     eligible_coupons = get_eligible_coupon_choices(voucher)
     assert len(eligible_coupons) == 1
     eligible_coupon = eligible_coupons[0]
-    assert eligible_coupon[1] == context.exact_match.title
+    assert eligible_coupon[1] == "{title} - starts {start_date}".format(
+        title=context.exact_match.title,
+        start_date=context.exact_match.start_date.strftime("%b %d, %Y"),
+    )
     product_id, coupon_id = json.loads(eligible_coupon[0])
     assert product_id == context.product.id
     assert coupon_id == context.coupon_version.coupon.id

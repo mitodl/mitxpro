@@ -65,6 +65,22 @@ class CourseManager(models.Manager):  # pylint: disable=missing-docstring
         return self.get_queryset().live()
 
 
+class CourseRunQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
+    def live(self):
+        """Applies a filter for Course runs with live=True"""
+        return self.filter(live=True)
+
+
+class CourseRunManager(models.Manager):  # pylint: disable=missing-docstring
+    def get_queryset(self):
+        """Manager queryset"""
+        return CourseRunQuerySet(self.model, using=self._db)
+
+    def live(self):
+        """Returns a queryset of Course runs with live=True"""
+        return self.get_queryset().live()
+
+
 class ActiveEnrollmentManager(models.Manager):
     """Query manager for active enrollment model objects"""
 
@@ -289,6 +305,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 class CourseRun(TimestampedModel):
     """Model for a single run/instance of a course"""
 
+    objects = CourseRunManager()
     course = models.ForeignKey(
         Course, on_delete=models.CASCADE, related_name="courseruns"
     )
