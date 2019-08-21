@@ -165,7 +165,12 @@ def test_get_enroll_view_with_matches(
     coupon_ids = [
         coupon_version.coupon.id for coupon_version in context.coupon_versions
     ]
-    titles = [match.title for match in context.partial_matches]
+    titles = [
+        "{title} - {start_date}".format(
+            title=match.title, start_date=match.start_date.date()
+        )
+        for match in context.partial_matches
+    ]
     for coupon_choice in response.context[0]["eligible_choices"]:
         product_id, coupon_id = json.loads(coupon_choice[0])
         assert product_id in product_ids

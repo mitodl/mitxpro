@@ -57,27 +57,35 @@ def get_eligible_coupon_choices(voucher):
     course_matches = None
     # Search for an exact match if all inputs exist
     if voucher.course_id_input and voucher.course_title_input:
-        course_matches = CourseRun.objects.filter(
-            course__readable_id__exact=voucher.course_id_input,
-            course__title__exact=voucher.course_title_input,
-            start_date__date=voucher.course_start_date_input,
+        course_matches = (
+            CourseRun.objects.filter(
+                course__readable_id__exact=voucher.course_id_input,
+                course__title__exact=voucher.course_title_input,
+                start_date__date=voucher.course_start_date_input,
+            )
+            .live()
+            .order_by("start_date")
         )
 
     # Search for partial matches if no exact match was found
     if course_matches is None or not course_matches.exists():
         # Try partial matching
-        course_matches = CourseRun.objects.filter(
-            (
-                Q(course__readable_id__icontains=voucher.course_id_input)
-                if voucher.course_id_input
-                else Q()
+        course_matches = (
+            CourseRun.objects.filter(
+                (
+                    Q(course__readable_id__icontains=voucher.course_id_input)
+                    if voucher.course_id_input
+                    else Q()
+                )
+                | (
+                    Q(course__title__icontains=voucher.course_title_input)
+                    if voucher.course_title_input
+                    else Q()
+                )
+                | Q(start_date__date=voucher.course_start_date_input)
             )
-            | (
-                Q(course__title__icontains=voucher.course_title_input)
-                if voucher.course_title_input
-                else Q()
-            )
-            | Q(start_date__date=voucher.course_start_date_input)
+            .live()
+            .order_by("start_date")
         )
 
     if not course_matches.exists():
@@ -95,7 +103,10 @@ def get_eligible_coupon_choices(voucher):
             json.dumps(
                 (course_matches[i].product.first().id, valid_coupons[i].coupon.id)
             ),
-            course_matches[i].title,
+            "{title} - {start_date}".format(
+                title=course_matches[i].title,
+                start_date=course_matches[i].start_date.date(),
+            ),
         )
         for i in range(len(course_matches))
         if valid_coupons[i] is not None and course_matches[i].product is not None
