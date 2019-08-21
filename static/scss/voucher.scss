@@ -12,6 +12,15 @@
     color: $deep-sky-blue;
   }
 
+  .btn {
+    color: white;
+    border-radius: 0;
+    min-width: 180px;
+    font-weight: 600;
+    letter-spacing: 1.16px;
+    line-height: 26px;
+  }
+
   .voucher-card {
 
     @include media-breakpoint-down(sm)  {
