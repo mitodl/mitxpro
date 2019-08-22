@@ -5,7 +5,6 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
 from rest_framework.generics import get_object_or_404, RetrieveUpdateAPIView
@@ -48,6 +47,7 @@ from ecommerce.serializers import (
     CurrentCouponPaymentSerializer,
 )
 from hubspot.task_helpers import sync_hubspot_deal
+from mitxpro.utils import make_csv_http_response
 
 log = logging.getLogger(__name__)
 
@@ -293,15 +293,13 @@ def coupon_code_csv_view(request, version_id):
     if not (request.user and request.user.is_staff):
         raise PermissionDenied
     coupon_payment_version = get_object_or_404(CouponPaymentVersion, id=version_id)
-    response = HttpResponse(content_type="text/csv")
-    response[
-        "Content-Disposition"
-    ] = 'attachment; filename="coupon_codes_{}.csv"'.format(
-        coupon_payment_version.payment.name
+
+    return make_csv_http_response(
+        csv_rows=(
+            {"code": code}
+            for code in coupon_payment_version.couponversion_set.values_list(
+                "coupon__coupon_code", flat=True
+            )
+        ),
+        filename=f"coupon_codes_{coupon_payment_version.payment.name}.csv",
     )
-    writer = csv.writer(response)
-    for coupon_code in coupon_payment_version.couponversion_set.values_list(
-        "coupon__coupon_code", flat=True
-    ):
-        writer.writerow([coupon_code])
-    return response

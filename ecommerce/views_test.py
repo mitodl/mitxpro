@@ -950,15 +950,11 @@ def test_coupon_csv_view(admin_client, admin_drf_client, single_use_coupon_json)
         reverse("coupons_csv", kwargs={"version_id": cpv.id})
     )
     assert csv_response.status_code == 200
-    assert (
-        csv_response.content
-        == b"\r\n".join(
-            [
-                bytes(cv.coupon.coupon_code, encoding="utf8")
-                for cv in cpv.couponversion_set.all()
-            ]
-        )
-        + b"\r\n"
+    rows = [line.split(",") for line in csv_response.content.decode().split()]
+    assert rows[0] == ["code"]
+    codes = [row[0] for row in rows[1:]]
+    assert sorted(codes) == sorted(
+        cpv.couponversion_set.values_list("coupon__coupon_code", flat=True)
     )
 
 
