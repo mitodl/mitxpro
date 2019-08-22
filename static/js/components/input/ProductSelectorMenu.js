@@ -61,8 +61,7 @@ const ProductSelectorMenu = ({
               <br />
               {productType === PRODUCT_TYPE_COURSERUN
                 ? formatRunTitle(findRunInProduct(product))
-                : `(Consists of ${product.latest_version.courses.length} courses)`
-              }
+                : `(Consists of ${product.latest_version.courses.length} courses)`}
             </div>
           </div>
         ))}

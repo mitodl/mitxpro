@@ -339,7 +339,7 @@
         margin-left: 20px;
         border-left: 35px solid transparent;
         border-right: 35px solid transparent;
-        border-bottom: 25px solid white;
+        border-bottom: 25px solid $very-light-gray;
         filter: drop-shadow(0 15px 15px black);
         // move drop shadow at bottom below menu
         z-index: -1;
@@ -347,7 +347,7 @@
 
       .product-selector-menu {
         .header {
-          background-color: white;
+          background-color: $very-light-gray;
           text-transform: uppercase;
           height: 50px;
           align-items: center;
