@@ -99,7 +99,7 @@ export default class ProductSelector extends React.Component<Props, State> {
         <div className="row">
           <div className="col-12">
             <span className="description">
-              Choose{" "}
+              * Choose a{" "}
               {productType === PRODUCT_TYPE_PROGRAM ? "Program" : "Course"}:
             </span>
             <button

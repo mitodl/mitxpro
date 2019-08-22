@@ -21,7 +21,7 @@ export const validate = (values: Object) => {
 
   const numSeats = parseInt(values.num_seats)
   if (isNaN(numSeats) || numSeats <= 0) {
-    errors.num_seats = "Number of seats is required"
+    errors.num_seats = "Number of Seats is required"
   }
 
   if (!values.email.includes("@")) {
@@ -80,14 +80,18 @@ const B2BPurchaseForm = ({ onSubmit, products, requestPending }: Props) => (
               </label>
 
               <label htmlFor="num_seats">
-                *Number of seats:
+                <span className="description">* Number of Seats:</span>
                 <Field type="text" name="num_seats" className="num-seats" />
                 <ErrorMessage name="num_seats" render={errorMessageRenderer} />
               </label>
 
               <label htmlFor="email">
-                *Email Address:
+                <span className="description">* Email Address:</span>
                 <Field type="text" name="email" />
+                <span className="explanation">
+                  * We will email the link to the enrollment codes to this
+                  address.
+                </span>
                 <ErrorMessage name="email" render={errorMessageRenderer} />
               </label>
             </div>
