@@ -107,7 +107,7 @@ describe("B2BPurchaseForm", () => {
         }),
         {
           email:     "Email is required",
-          num_seats: "Number of seats is required",
+          num_seats: "Number of Seats is required",
           product:   "No product selected"
         }
       )
@@ -120,7 +120,7 @@ describe("B2BPurchaseForm", () => {
           email:     "",
           product:   ""
         }).num_seats,
-        "Number of seats is required"
+        "Number of Seats is required"
       )
     })
 
