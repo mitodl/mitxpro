@@ -57,11 +57,12 @@ const ProductSelectorMenu = ({
               alt={`Image for ${product.title}`}
             />
             <div className="menu-item-description">
-              {product.title}
+              <span className="product-title">{product.title}</span>
               <br />
               {productType === PRODUCT_TYPE_COURSERUN
                 ? formatRunTitle(findRunInProduct(product))
-                : null}
+                : `(Consists of ${product.latest_version.courses.length} courses)`
+              }
             </div>
           </div>
         ))}
