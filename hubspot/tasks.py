@@ -5,6 +5,7 @@ import logging
 import re
 
 import celery
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
 from ecommerce.models import Order, Line
@@ -69,6 +70,8 @@ def sync_line_item_with_hubspot(line_id):
 @app.task
 def check_hubspot_api_errors():
     """Check for and log any errors that occurred since the last time this was run"""
+    if not settings.HUBSPOT_API_KEY:
+        return
     last_check, _ = HubspotErrorCheck.objects.get_or_create(
         defaults={"checked_on": now_in_utc()}
     )
