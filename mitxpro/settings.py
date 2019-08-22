@@ -216,6 +216,7 @@ DEFAULT_DATABASE_CONFIG = dj_database_url.parse(
         "sqlite:///{0}".format(os.path.join(BASE_DIR, "db.sqlite3")),
         description="The connection url to the Postgres database",
         required=True,
+        write_app_json=False,
     )
 )
 DEFAULT_DATABASE_CONFIG["CONN_MAX_AGE"] = get_int(

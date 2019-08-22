@@ -12,7 +12,16 @@ class EnvironmentVariableParseException(ImproperlyConfigured):
 
 
 EnvVariable = namedtuple(
-    "EnvVariable", ["name", "default", "description", "required", "dev_only", "value"]
+    "EnvVariable",
+    [
+        "name",
+        "default",
+        "description",
+        "required",
+        "dev_only",
+        "value",
+        "write_app_json",
+    ],
 )
 
 
@@ -28,7 +37,15 @@ def var_parser(parser_func):
 
     # pylint: disable=too-many-arguments
     @wraps(parser_func)
-    def wrapper(self, name, default, description=None, required=False, dev_only=False):
+    def wrapper(
+        self,
+        name,
+        default,
+        description=None,
+        required=False,
+        dev_only=False,
+        write_app_json=True,
+    ):
         """
         Get an environment variable
 
@@ -38,6 +55,7 @@ def var_parser(parser_func):
             description (str): The description of how this variable is used
             required (bool): Whether this variable is required at runtime
             dev_only (bool): Whether this variable is only applicable in dev environments
+            write_app_json (bool): Whether this variable is written to app.json
 
         Raises:
             ValueError:
@@ -60,7 +78,7 @@ def var_parser(parser_func):
         value = parser_func(name, value, default)
 
         configured_envs[name] = EnvVariable(
-            name, default, description, required, dev_only, value
+            name, default, description, required, dev_only, value, write_app_json
         )
 
         return value
@@ -243,7 +261,7 @@ def generate_app_json():
         config = json.load(app_template_json)
 
     for env_var in list_environment_vars():
-        if env_var.dev_only:
+        if env_var.dev_only or not env_var.write_app_json:
             continue
 
         if env_var.name not in config["env"]:

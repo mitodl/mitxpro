@@ -107,10 +107,6 @@
       "description": "The URL to the cybersource WSDL",
       "required": false
     },
-    "DATABASE_URL": {
-      "description": "The connection url to the Postgres database",
-      "required": true
-    },
     "DJANGO_LOG_LEVEL": {
       "description": "The log level for django",
       "required": false
