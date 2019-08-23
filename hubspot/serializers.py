@@ -192,7 +192,7 @@ class ProductSerializer(serializers.ModelSerializer):
     description = serializers.SerializerMethodField()
 
     def get_title(self, instance):
-        """ Return the product title and course-run or id"""
+        """ Return the product title and Courserun number or ProductVersion text_id"""
         product_obj = instance.content_type.get_object_for_this_type(
             pk=instance.object_id
         )
