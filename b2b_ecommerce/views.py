@@ -5,17 +5,15 @@ from urllib.parse import urljoin, urlencode
 
 from django.conf import settings
 from django.urls import reverse
-from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from b2b_ecommerce.api import complete_b2b_order, generate_b2b_cybersource_sa_payload
-from b2b_ecommerce.models import B2BOrder, B2BReceipt
-from ecommerce.api import determine_order_status_change, make_checkout_url
+from b2b_ecommerce.models import B2BOrder
+from ecommerce.api import make_checkout_url
 from ecommerce.models import ProductVersion, Coupon
-from ecommerce.permissions import IsSignedByCyberSource
 from ecommerce.serializers import ProductVersionSerializer
 from mitxpro.utils import make_csv_http_response
 
@@ -87,47 +85,6 @@ class B2BCheckoutView(APIView):
             method = "POST"
 
         return Response({"payload": payload, "url": url, "method": method})
-
-
-class B2BOrderFulfillmentView(APIView):
-    """
-    View for order fulfillment API. This API is special in that only CyberSource should talk to it.
-    Instead of authenticating with OAuth or via session this looks at the signature of the message
-    to verify authenticity.
-    """
-
-    authentication_classes = ()
-    permission_classes = (IsSignedByCyberSource,)
-
-    def post(self, request, *args, **kwargs):
-        """
-        Confirmation from CyberSource which fulfills an existing Order.
-        """
-        # First, save this information in a receipt
-        receipt = B2BReceipt.objects.create(data=request.data)
-
-        # Link the order with the receipt if we can parse it
-        reference_number = request.data["req_reference_number"]
-        order = B2BOrder.objects.get_by_reference_number(reference_number)
-        receipt.order = order
-        receipt.save()
-
-        new_order_status = determine_order_status_change(
-            order, request.data["decision"]
-        )
-        if new_order_status is None:
-            # This is a duplicate message, ignore since it's already handled
-            return Response(status=status.HTTP_200_OK)
-
-        order.status = new_order_status
-        if new_order_status == B2BOrder.FULFILLED:
-            complete_b2b_order(order)
-
-        # Save to log everything to an audit table including enrollments created in complete_order
-        order.save_and_log(None)
-
-        # The response does not matter to CyberSource
-        return Response(status=status.HTTP_200_OK)
 
 
 class B2BOrderStatusView(APIView):

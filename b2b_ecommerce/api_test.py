@@ -1,15 +1,23 @@
 """Tests for b2b_ecommerce functions"""
 from decimal import Decimal
 
+import faker
 import pytest
 
-from b2b_ecommerce.api import complete_b2b_order, generate_b2b_cybersource_sa_payload
+from b2b_ecommerce.api import (
+    complete_b2b_order,
+    generate_b2b_cybersource_sa_payload,
+    fulfill_b2b_order,
+)
 from b2b_ecommerce.factories import B2BOrderFactory
-from b2b_ecommerce.models import B2BOrder
+from b2b_ecommerce.models import B2BOrder, B2BOrderAudit
 from ecommerce.api import ISO_8601_FORMAT, generate_cybersource_sa_signature
+from ecommerce.exceptions import EcommerceException
 from ecommerce.factories import CouponPaymentVersionFactory
 from ecommerce.models import CouponPaymentVersion
-from mitxpro.utils import now_in_utc
+from mitxpro.utils import dict_without_keys, now_in_utc
+
+FAKE = faker.Factory.create()
 
 
 pytestmark = pytest.mark.django_db
@@ -117,3 +125,85 @@ def test_complete_b2b_order(mocker):
         coupon_type=CouponPaymentVersion.SINGLE_USE,
     )
     send_email_mock.assert_called_once_with(order)
+
+
+@pytest.mark.parametrize(
+    "order_status, decision",
+    [
+        (B2BOrder.FAILED, "ERROR"),
+        (B2BOrder.FULFILLED, "ERROR"),
+        (B2BOrder.FULFILLED, "SUCCESS"),
+    ],
+)
+def test_error_on_duplicate_order(mocker, order_status, decision):
+    """If there is a duplicate message (except for CANCEL), raise an exception"""
+    order = B2BOrderFactory.create(status=order_status)
+
+    data = {"req_reference_number": order.reference_number, "decision": decision}
+    mocker.patch(
+        "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
+    )
+    with pytest.raises(EcommerceException) as ex:
+        fulfill_b2b_order(data)
+
+    assert B2BOrder.objects.count() == 1
+    assert B2BOrder.objects.get(id=order.id).status == order_status
+
+    assert ex.value.args[0] == f"{order} is expected to have status 'created'"
+
+
+@pytest.mark.parametrize("decision", ["CANCEL", "something else"])
+def test_not_accept(decision):
+    """
+    If the decision is not ACCEPT then the order should be marked as failed
+    """
+    order = B2BOrderFactory.create(status=B2BOrder.CREATED)
+
+    data = {"req_reference_number": order.reference_number, "decision": decision}
+    fulfill_b2b_order(data)
+    order.refresh_from_db()
+    assert B2BOrder.objects.count() == 1
+    assert order.status == B2BOrder.FAILED
+
+
+def test_ignore_duplicate_cancel():
+    """
+    If the decision is CANCEL and we already have a duplicate failed order, don't change anything.
+    """
+    order = B2BOrderFactory.create(status=B2BOrder.FAILED)
+
+    data = {"req_reference_number": order.reference_number, "decision": "CANCEL"}
+    fulfill_b2b_order(data)
+
+    assert B2BOrder.objects.count() == 1
+    assert B2BOrder.objects.get(id=order.id).status == B2BOrder.FAILED
+
+
+def test_order_fulfilled(mocker):  # pylint:disable=too-many-arguments
+    """
+    Test the happy case
+    """
+    complete_order_mock = mocker.patch("b2b_ecommerce.api.complete_b2b_order")
+    order = B2BOrderFactory.create(status=B2BOrder.CREATED)
+
+    data = {}
+    for _ in range(5):
+        data[FAKE.text()] = FAKE.text()
+
+    data["req_reference_number"] = order.reference_number
+    data["decision"] = "ACCEPT"
+
+    fulfill_b2b_order(data)
+
+    order.refresh_from_db()
+    assert order.status == B2BOrder.FULFILLED
+    assert order.b2breceipt_set.count() == 1
+    assert order.b2breceipt_set.first().data == data
+
+    assert B2BOrderAudit.objects.count() == 1
+    order_audit = B2BOrderAudit.objects.last()
+    assert order_audit.order == order
+    assert dict_without_keys(order_audit.data_after, "updated_on") == dict_without_keys(
+        order.to_dict(), "updated_on"
+    )
+    complete_order_mock.assert_called_once_with(order)

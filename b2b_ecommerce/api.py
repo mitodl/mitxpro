@@ -5,7 +5,13 @@ import uuid
 from django.conf import settings
 from django.db import transaction
 
-from ecommerce.api import create_coupons, ISO_8601_FORMAT, sign_cybersource_payload
+from b2b_ecommerce.models import B2BOrder, B2BReceipt
+from ecommerce.api import (
+    create_coupons,
+    determine_order_status_change,
+    ISO_8601_FORMAT,
+    sign_cybersource_payload,
+)
 from ecommerce.mail_api import send_b2b_receipt_email
 from ecommerce.models import CouponPaymentVersion
 from mitxpro.utils import now_in_utc
@@ -93,3 +99,32 @@ def generate_b2b_cybersource_sa_payload(*, order, receipt_url, cancel_url):
             order=order, receipt_url=receipt_url, cancel_url=cancel_url
         )
     )
+
+
+def fulfill_b2b_order(request_data):
+    """
+    Fulfill an order for enrollment code purchase by B2B entities.
+
+    Args:
+        request_data (dict): Request data from CyberSource
+    """
+    # First, save this information in a receipt
+    receipt = B2BReceipt.objects.create(data=request_data)
+
+    # Link the order with the receipt if we can parse it
+    reference_number = request_data["req_reference_number"]
+    order = B2BOrder.objects.get_by_reference_number(reference_number)
+    receipt.order = order
+    receipt.save()
+
+    new_order_status = determine_order_status_change(order, request_data["decision"])
+    if new_order_status is None:
+        # This is a duplicate message, ignore since it's already handled
+        return
+
+    order.status = new_order_status
+    if new_order_status == B2BOrder.FULFILLED:
+        complete_b2b_order(order)
+
+    # Save to log everything to an audit table including enrollments created in complete_order
+    order.save_and_log(None)

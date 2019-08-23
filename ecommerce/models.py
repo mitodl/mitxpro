@@ -145,7 +145,7 @@ class OrderManager(models.Manager):
         """
         order_id = get_order_id_by_reference_number(
             reference_number=reference_number,
-            prefix=f"{self.model.reference_number_prefix}{settings.CYBERSOURCE_REFERENCE_PREFIX}",
+            prefix=self.model.get_reference_number_prefix(),
         )
 
         return self.get(id=order_id)
@@ -171,7 +171,7 @@ class OrderAbstract(TimestampedModel):
     @property
     def reference_number(self):
         """Create a string with the order id and a unique prefix so we can lookup the order during order fulfillment"""
-        return f"{self.reference_number_prefix}{settings.CYBERSOURCE_REFERENCE_PREFIX}-{self.id}"
+        return f"{self.get_reference_number_prefix()}-{self.id}"
 
     class Meta:
         abstract = True
@@ -186,9 +186,13 @@ class Order(OrderAbstract, AuditableModel):
     purchaser = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders"
     )
-    reference_number_prefix = REFERENCE_NUMBER_PREFIX
 
     objects = OrderManager()
+
+    @staticmethod
+    def get_reference_number_prefix():
+        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""
+        return f"{REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}"
 
     def __str__(self):
         """Description for Order"""

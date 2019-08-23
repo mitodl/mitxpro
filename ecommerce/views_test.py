@@ -15,7 +15,7 @@ import factory
 
 from courses.factories import CourseRunFactory, CourseRunEnrollmentFactory
 from ecommerce.api import create_unfulfilled_order, get_readable_id, make_receipt_url
-from ecommerce.exceptions import EcommerceException
+from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
     CouponEligibilityFactory,
     LineFactory,
@@ -271,11 +271,11 @@ def test_missing_fields(basket_client, mocker):
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )
     try:
-        # Missing fields from Cybersource POST will cause the KeyError.
+        # Missing fields from Cybersource POST will cause a ParseException.
         # In this test we just care that we saved the data in Receipt for later
         # analysis.
         basket_client.post(reverse("order-fulfillment"), data=data)
-    except KeyError:
+    except ParseException:
         pass
 
     assert Order.objects.count() == 0
