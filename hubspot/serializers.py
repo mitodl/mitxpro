@@ -196,7 +196,7 @@ class ProductSerializer(serializers.ModelSerializer):
         product_obj = instance.content_type.get_object_for_this_type(
             pk=instance.object_id
         )
-        title_run_id = re.findall(r'\+R(\d+)$', product_obj.text_id)
+        title_run_id = re.findall(r"\+R(\d+)$", product_obj.text_id)
         title_suffix = f"Run {title_run_id[0]}" if title_run_id else product_obj.text_id
         return f"{product_obj.title}: {title_suffix}"
 
