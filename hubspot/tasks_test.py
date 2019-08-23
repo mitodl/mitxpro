@@ -94,8 +94,9 @@ def test_sync_line_item_with_hubspot(mock_hubspot_request):
     )
 
 
-def test_sync_errors_first_run(mock_hubspot_errors, mock_logger):
+def test_sync_errors_first_run(settings, mock_hubspot_errors, mock_logger):
     """Test that HubspotErrorCheck is created on 1st run and nothing is logged"""
+    settings.HUBSPOT_API_KEY = "dkfjKJ2jfd"
     assert HubspotErrorCheck.objects.count() == 0
     check_hubspot_api_errors()
     assert HubspotErrorCheck.objects.count() == 1
@@ -108,9 +109,15 @@ def test_sync_errors_first_run(mock_hubspot_errors, mock_logger):
     [[TIMESTAMPS[0], 4, 3], [TIMESTAMPS[6], 1, 1]],
 )
 def test_sync_errors_new_errors(
-    mock_hubspot_errors, mock_logger, last_check_dt, expected_errors, call_count
-):
+    settings,
+    mock_hubspot_errors,
+    mock_logger,
+    last_check_dt,
+    expected_errors,
+    call_count,
+):  # pylint: disable=too-many-arguments
     """Test that errors more recent than last checked_on date are logged"""
+    settings.HUBSPOT_API_KEY = "dkfjKJ2jfd"
     last_check = HubspotErrorCheckFactory.create(checked_on=last_check_dt)
     check_hubspot_api_errors()
     assert mock_hubspot_errors.call_count == call_count
@@ -119,7 +126,9 @@ def test_sync_errors_new_errors(
 
 
 @pytest.mark.parametrize("model_that_exists", ["LINE_ITEM", "DEAL"])
-def test_retry_invalid_line_associations(mocker, mock_sync_line, model_that_exists):
+def test_retry_invalid_line_associations(
+    settings, mocker, mock_sync_line, model_that_exists
+):
     """Test that line's are resynced if associated deals exists in hubspot"""
     mock_exists_in_hubspot = mocker.patch(
         "hubspot.tasks.exists_in_hubspot",
@@ -127,6 +136,8 @@ def test_retry_invalid_line_associations(mocker, mock_sync_line, model_that_exis
     )
     HubspotLineResyncFactory.create_batch(3)
     assert HubspotLineResync.objects.count() == 3
+
+    settings.HUBSPOT_API_KEY = "dkfjKJ2jfd"
     retry_invalid_line_associations()
     if model_that_exists == "LINE_ITEM":
         assert mock_exists_in_hubspot.call_count == 3
@@ -136,14 +147,24 @@ def test_retry_invalid_line_associations(mocker, mock_sync_line, model_that_exis
         assert mock_sync_line.call_count == 3
 
 
-def test_create_hubspot_line_resync(mock_hubspot_line_error, mock_retry_lines):
+def test_create_hubspot_line_resync(
+    settings, mock_hubspot_line_error, mock_retry_lines
+):
     """Test that lines are re-synced if the error is INVALID_ASSOCIATION_PROPERTY and the order has since been synced"""
     HubspotErrorCheckFactory.create(checked_on=TIMESTAMPS[0])
     order = OrderFactory(id=FAKE_OBJECT_ID)
     line = LineFactory(order=order, id=FAKE_OBJECT_ID)
-    check_hubspot_api_errors()
 
+    settings.HUBSPOT_API_KEY = "dkfjKJ2jfd"
+    check_hubspot_api_errors()
     assert mock_hubspot_line_error.call_count == 2
     assert mock_retry_lines.call_count == 1
     assert HubspotLineResync.objects.count() == 1
     assert HubspotLineResync.objects.first().line == line
+
+
+def test_skip_error_checks(settings, mock_hubspot_errors):
+    """Test that no requests to Hubspot are made if the HUBSPOT_API_KEY is not set """
+    settings.HUBSPOT_API_KEY = None
+    check_hubspot_api_errors()
+    assert mock_hubspot_errors.call_count == 0
