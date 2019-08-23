@@ -106,7 +106,9 @@ describe("CouponForm", () => {
     [
       "expiration_date",
       1,
-      moment().format("MM/DD/YYYY"),
+      moment()
+        .subtract(1, "days")
+        .format("MM/DD/YYYY"),
       "Expiration date must be after today/activation date"
     ]
   ].forEach(([name, idx, value, errorMessage]) => {
@@ -134,7 +136,7 @@ describe("CouponForm", () => {
   //
   ;[
     ["activation_date", 0, "06/27/2019", "2019-06-27T00:00:00.000Z"],
-    ["expiration_date", 1, "06/27/2519", "2519-06-27T00:00:00.000Z"]
+    ["expiration_date", 1, "06/27/2519", "2519-06-27T23:59:59.999Z"]
   ].forEach(([name, idx, value, formattedDate]) => {
     it(`converts the field name=${name}, value=${JSON.stringify(
       value
