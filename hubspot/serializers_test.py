@@ -5,13 +5,14 @@ Tests for hubspot serializers
 
 import pytest
 
+from courses.factories import CourseRunFactory
 from ecommerce.api import round_half_up
 from ecommerce.factories import (
     LineFactory,
     OrderFactory,
     CouponRedemptionFactory,
     ProductVersionFactory,
-)
+    ProductFactory)
 from ecommerce.models import Product, Order
 from hubspot.api import format_hubspot_id
 from hubspot.serializers import (
@@ -26,13 +27,20 @@ from hubspot.serializers import (
 pytestmark = [pytest.mark.django_db]
 
 
-def test_serialize_product():
+@pytest.mark.parametrize("text_id, expected", [
+    ["course-v1:xPRO+SysEngxNAV+R1", "Run 1"],
+    ["course-v1:xPRO+SysEngxNAV+R10", "Run 10"],
+    ["course-v1:xPRO+SysEngxNAV", "course-v1:xPRO+SysEngxNAV"],
+])
+def test_serialize_product(text_id, expected):
     """ Test that ProductSerializer has correct data """
-    product_version = ProductVersionFactory.create()
+    product_version = ProductVersionFactory.create(
+        product=ProductFactory.create(content_object=CourseRunFactory.create(courseware_id=text_id))
+    )
     product = Product.objects.get(id=product_version.product.id)
     run = product.content_object
     serialized_data = ProductSerializer(instance=product).data
-    assert serialized_data.get("title") == run.title
+    assert serialized_data.get("title") == f"{run.title}: {expected}"
     assert serialized_data.get("product_type") == "courserun"
     assert serialized_data.get("id") == product.id
     assert serialized_data.get("price") == product.latest_version.price.to_eng_string()
