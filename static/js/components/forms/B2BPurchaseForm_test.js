@@ -8,29 +8,41 @@ import Decimal from "decimal.js-light"
 import { Field, Formik } from "formik"
 
 import B2BPurchaseForm, { validate } from "./B2BPurchaseForm"
-import { makeProduct } from "../../factories/ecommerce"
 import ProductSelector from "../input/ProductSelector"
 
+import { makeB2BCouponStatus, makeProduct } from "../../factories/ecommerce"
+
 describe("B2BPurchaseForm", () => {
-  let sandbox, onSubmitStub, products
+  let sandbox,
+    onSubmitStub,
+    products,
+    fetchCouponStatusStub,
+    clearCouponStatusStub,
+    couponStatus
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
 
     onSubmitStub = sandbox.stub()
+    fetchCouponStatusStub = sandbox.stub()
+    clearCouponStatusStub = sandbox.stub()
     products = [makeProduct(), makeProduct(), makeProduct()]
+    couponStatus = makeB2BCouponStatus()
   })
 
   afterEach(() => {
     sandbox.restore()
   })
 
-  const render = (props = {}) =>
-    mount(
+  const render = (props = {}, enzymeFunc = mount) =>
+    enzymeFunc(
       <B2BPurchaseForm
         products={products}
         onSubmit={onSubmitStub}
         requestPending={false}
+        fetchCouponStatus={fetchCouponStatusStub}
+        clearCouponStatus={clearCouponStatusStub}
+        couponStatus={couponStatus}
         {...props}
       />
     )
@@ -69,13 +81,7 @@ describe("B2BPurchaseForm", () => {
       num_seats: "5",
       product:   String(selectedProduct.id)
     }
-    const wrapper = shallow(
-      <B2BPurchaseForm
-        products={products}
-        onSubmit={onSubmitStub}
-        requestPending={false}
-      />
-    )
+    const wrapper = render({}, shallow)
     const actions = {}
     const innerWrapper = shallow(
       shallow(wrapper.prop("render")({ values })).prop("children")(
@@ -85,10 +91,16 @@ describe("B2BPurchaseForm", () => {
     )
 
     const numSeats = parseInt(values.num_seats)
+    const itemPrice = new Decimal(selectedProduct.latest_version.price)
+    const discount = itemPrice
+      .times(numSeats)
+      .times(new Decimal(couponStatus.discount_percent))
     assert.deepEqual(innerWrapper.find("B2BPurchaseSummary").props(), {
       numSeats,
-      totalPrice: new Decimal(selectedProduct.latest_version.price) * numSeats,
-      itemPrice:  new Decimal(selectedProduct.latest_version.price)
+      totalPrice:  itemPrice.times(numSeats).minus(discount),
+      itemPrice:   itemPrice,
+      discount:    discount,
+      alreadyPaid: false
     })
   })
 
@@ -134,5 +146,98 @@ describe("B2BPurchaseForm", () => {
         {}
       )
     })
+  })
+
+  //
+  ;[true, false].forEach(hasCouponCode => {
+    it(`${
+      hasCouponCode ? "applies" : "clears"
+    } the given coupon value`, async () => {
+      const wrapper = render()
+      const newCode = hasCouponCode ? "xyz" : ""
+      const productId = 123
+      const setFieldErrorStub = sandbox.stub()
+      fetchCouponStatusStub.returns(Promise.resolve({ status: 200 }))
+      const values = {
+        coupon:  newCode,
+        product: productId
+      }
+      const innerWrapper = shallow(
+        shallow(
+          wrapper.find(Formik).prop("render")({
+            values,
+            setFieldError: setFieldErrorStub
+          })
+        ).prop("children")(values)
+      )
+
+      await innerWrapper.find(".apply-button").prop("onClick")({
+        preventDefault: sandbox.stub()
+      })
+      if (hasCouponCode) {
+        sinon.assert.calledWith(fetchCouponStatusStub, {
+          product_id: productId,
+          code:       newCode
+        })
+      } else {
+        sinon.assert.calledWith(clearCouponStatusStub)
+      }
+
+      sinon.assert.notCalled(setFieldErrorStub)
+    })
+  })
+
+  it("errors when applying the coupon because no product is selected", async () => {
+    const wrapper = render()
+    const newCode = "xyz"
+    const setFieldErrorStub = sandbox.stub()
+    fetchCouponStatusStub.returns(Promise.resolve({ status: 200 }))
+    const values = {
+      coupon:  newCode,
+      product: ""
+    }
+    const innerWrapper = shallow(
+      shallow(
+        wrapper.find(Formik).prop("render")({
+          values,
+          setFieldError: setFieldErrorStub
+        })
+      ).prop("children")(values)
+    )
+
+    await innerWrapper.find(".apply-button").prop("onClick")({
+      preventDefault: sandbox.stub()
+    })
+    sinon.assert.notCalled(fetchCouponStatusStub)
+    sinon.assert.calledWith(setFieldErrorStub, "coupon", "No product selected")
+  })
+
+  it("errors because the coupon is invalid", async () => {
+    const wrapper = render()
+    const newCode = "xyz"
+    const productId = 123
+    const setFieldErrorStub = sandbox.stub()
+    fetchCouponStatusStub.returns(Promise.resolve({ status: 500 }))
+    const values = {
+      coupon:  newCode,
+      product: productId
+    }
+    const innerWrapper = shallow(
+      shallow(
+        wrapper.find(Formik).prop("render")({
+          values,
+          setFieldError: setFieldErrorStub
+        })
+      ).prop("children")(values)
+    )
+
+    await innerWrapper.find(".apply-button").prop("onClick")({
+      preventDefault: sandbox.stub()
+    })
+    sinon.assert.calledWith(fetchCouponStatusStub, {
+      product_id: productId,
+      code:       newCode
+    })
+    sinon.assert.calledWith(setFieldErrorStub, "coupon", "Invalid coupon code")
   })
 })

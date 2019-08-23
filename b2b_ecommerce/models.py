@@ -3,17 +3,97 @@ import uuid
 
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-
+from django.db.models import Q
+from django.db.models.functions import Now
 from b2b_ecommerce.constants import REFERENCE_NUMBER_PREFIX
 from ecommerce.models import (
+    Company,
     CouponPaymentVersion,
+    Product,
     ProductVersion,
     OrderAbstract,
     OrderManager,
 )
 from mitxpro.models import AuditModel, AuditableModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
+
+
+class B2BCouponManager(models.Manager):
+    """
+    Add a function to filter valid coupons
+    """
+
+    def get_unexpired_coupon(self, *, coupon_code, product_id):
+        """
+        Returns an an unexpired coupon with the coupon code for that product. Otherwise raise B2BCoupon.DoesNotExist.
+
+        Args:
+            coupon_code (str): The coupon code for the B2BCoupon
+            product_id (int): The primary key for the Product
+
+        Returns:
+            B2BCoupon:
+                The coupon instance. If no coupon is found a B2BCoupon.DoesNotExist error is raised
+        """
+        return (
+            self.filter(coupon_code=coupon_code, product_id=product_id, enabled=True)
+            .filter(Q(activation_date__isnull=True) | Q(activation_date__lt=Now()))
+            .filter(Q(expiration_date__isnull=True) | Q(expiration_date__gt=Now()))
+            .exclude(b2bcouponredemption__order__status=B2BOrder.FULFILLED)
+            .get()
+        )
+
+
+class B2BCoupon(TimestampedModel, AuditableModel):
+    """
+    A coupon for B2B purchases
+    """
+
+    name = models.TextField()
+    coupon_code = models.CharField(max_length=50)
+    discount_percent = models.DecimalField(
+        decimal_places=5,
+        max_digits=20,
+        validators=[MinValueValidator(0), MaxValueValidator(1)],
+    )
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    enabled = models.BooleanField(default=False)
+    company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True)
+    expiration_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="If set, the coupons will not be redeemable after this time",
+    )
+    activation_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="If set, the coupons will not be redeemable before this time",
+    )
+
+    objects = B2BCouponManager()
+
+    @classmethod
+    def get_audit_class(cls):
+        return B2BCouponAudit
+
+    def to_dict(self):
+        """Serialize anything which would contribute to an audit trail"""
+        return serialize_model_object(self)
+
+    def __str__(self):
+        return f"B2BCoupon {self.coupon_code}"
+
+
+class B2BCouponAudit(AuditModel):
+    """Audit table for B2BCoupon"""
+
+    coupon = models.ForeignKey(B2BCoupon, null=True, on_delete=models.PROTECT)
+
+    @classmethod
+    def get_related_field_name(cls):
+        return "coupon"
 
 
 class B2BOrder(OrderAbstract, AuditableModel):
@@ -32,6 +112,8 @@ class B2BOrder(OrderAbstract, AuditableModel):
     coupon_payment_version = models.ForeignKey(
         CouponPaymentVersion, null=True, on_delete=models.PROTECT
     )
+    coupon = models.ForeignKey(B2BCoupon, null=True, on_delete=models.PROTECT)
+    discount = models.DecimalField(decimal_places=2, max_digits=20, null=True)
 
     objects = OrderManager()
 
@@ -100,3 +182,18 @@ class B2BReceipt(TimestampedModel):
             return f"B2BReceipt for order {self.order.id}"
         else:
             return "B2BReceipt with no attached order"
+
+
+class B2BCouponRedemption(TimestampedModel):
+    """
+    Link between a coupon and an order which used it.
+    """
+
+    coupon = models.ForeignKey(B2BCoupon, on_delete=models.PROTECT)
+    order = models.ForeignKey(B2BOrder, on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = ("coupon", "order")
+
+    def __str__(self):
+        return f"B2BCouponRedemption for {self.coupon} and {self.order}"

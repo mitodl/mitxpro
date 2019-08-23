@@ -1,10 +1,17 @@
 """Factories for b2b_ecommerce"""
+from datetime import timezone
+
 import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 
-from b2b_ecommerce.models import B2BOrder
-from ecommerce.factories import CouponPaymentVersionFactory, ProductVersionFactory
+from b2b_ecommerce.models import B2BCoupon, B2BOrder
+from ecommerce.factories import (
+    CompanyFactory,
+    CouponPaymentVersionFactory,
+    ProductFactory,
+    ProductVersionFactory,
+)
 
 
 class B2BOrderFactory(DjangoModelFactory):
@@ -20,3 +27,23 @@ class B2BOrderFactory(DjangoModelFactory):
 
     class Meta:
         model = B2BOrder
+
+
+class B2BCouponFactory(DjangoModelFactory):
+    """Factory for B2BCoupon"""
+
+    name = fuzzy.FuzzyText()
+    coupon_code = fuzzy.FuzzyText()
+    activation_date = factory.Faker(
+        "date_time_this_year", before_now=True, after_now=False, tzinfo=timezone.utc
+    )
+    expiration_date = factory.Faker(
+        "date_time_this_year", before_now=False, after_now=True, tzinfo=timezone.utc
+    )
+    enabled = True
+    product = factory.SubFactory(ProductFactory)
+    discount_percent = fuzzy.FuzzyDecimal(low=0, high=1, precision=5)
+    company = factory.SubFactory(CompanyFactory)
+
+    class Meta:
+        model = B2BCoupon

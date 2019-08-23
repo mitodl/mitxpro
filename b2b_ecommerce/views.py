@@ -4,6 +4,8 @@ import logging
 from urllib.parse import urljoin, urlencode
 
 from django.conf import settings
+from django.db import transaction
+from django.http.response import Http404
 from django.urls import reverse
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
@@ -11,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from b2b_ecommerce.api import complete_b2b_order, generate_b2b_cybersource_sa_payload
-from b2b_ecommerce.models import B2BOrder
+from b2b_ecommerce.models import B2BCoupon, B2BCouponRedemption, B2BOrder
 from ecommerce.api import make_checkout_url
 from ecommerce.models import ProductVersion, Coupon
 from ecommerce.serializers import ProductVersionSerializer
@@ -39,6 +41,7 @@ class B2BCheckoutView(APIView):
             num_seats = request.data["num_seats"]
             email = request.data["email"]
             product_version_id = request.data["product_version_id"]
+            discount_code = request.data["discount_code"]
         except KeyError as ex:
             raise ValidationError(f"Missing parameter {ex.args[0]}")
 
@@ -47,17 +50,38 @@ class B2BCheckoutView(APIView):
         except ValueError:
             raise ValidationError("num_seats must be a number")
 
-        product_version = get_object_or_404(ProductVersion, id=product_version_id)
-        total_price = product_version.price * num_seats
+        with transaction.atomic():
+            product_version = get_object_or_404(ProductVersion, id=product_version_id)
+            if discount_code:
+                try:
+                    coupon = B2BCoupon.objects.get_unexpired_coupon(
+                        coupon_code=discount_code, product_id=product_version.product.id
+                    )
+                except B2BCoupon.DoesNotExist:
+                    raise ValidationError("Invalid coupon code")
+            else:
+                coupon = None
 
-        base_url = request.build_absolute_uri("/")
-        order = B2BOrder.objects.create(
-            num_seats=num_seats,
-            email=email,
-            product_version=product_version,
-            total_price=total_price,
-            per_item_price=product_version.price,
-        )
+            total_price = product_version.price * num_seats
+            if coupon:
+                discount = round(coupon.discount_percent * total_price, 2)
+                total_price -= discount
+            else:
+                discount = None
+
+            base_url = request.build_absolute_uri("/")
+            order = B2BOrder.objects.create(
+                num_seats=num_seats,
+                email=email,
+                product_version=product_version,
+                total_price=total_price,
+                per_item_price=product_version.price,
+                discount=discount,
+                coupon=coupon,
+            )
+            order.save_and_log(None)
+            if coupon:
+                B2BCouponRedemption.objects.create(coupon=coupon, order=order)
 
         receipt_url = (
             f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?'
@@ -106,6 +130,7 @@ class B2BOrderStatusView(APIView):
                 "num_seats": order.num_seats,
                 "total_price": str(order.total_price),
                 "item_price": str(order.per_item_price),
+                "discount": str(order.discount) if order.discount is not None else None,
                 "product_version": ProductVersionSerializer(
                     order.product_version, context={"all_runs": True}
                 ).data,
@@ -141,4 +166,36 @@ class B2BEnrollmentCodesView(APIView):
 
         return make_csv_http_response(
             csv_rows=rows, filename=f"enrollmentcodes-{order_hash}.csv"
+        )
+
+
+class B2BCouponView(APIView):
+    """
+    View to show information about whether a coupon code would work with an order, and what discount it would provide.
+    """
+
+    authentication_classes = ()
+    permission_classes = ()
+
+    def get(self, request, *args, **kwargs):
+        """Get information about a coupon"""
+        try:
+            coupon_code = request.GET["code"]
+            product_id = request.GET["product_id"]
+        except KeyError as ex:
+            raise ValidationError(f"Missing parameter {ex.args[0]}")
+
+        try:
+            coupon = B2BCoupon.objects.get_unexpired_coupon(
+                coupon_code=coupon_code, product_id=product_id
+            )
+        except B2BCoupon.DoesNotExist:
+            raise Http404
+
+        return Response(
+            data={
+                "code": coupon_code,
+                "product_id": int(product_id),
+                "discount_percent": str(coupon.discount_percent),
+            }
         )

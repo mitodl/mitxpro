@@ -8,7 +8,7 @@ import B2BPurchasePage, {
 } from "./B2BPurchasePage"
 
 import * as formFuncs from "../../../lib/form"
-import { makeProduct } from "../../../factories/ecommerce"
+import { makeB2BCouponStatus, makeProduct } from "../../../factories/ecommerce"
 
 describe("B2BPurchasePage", () => {
   let helper, renderPage, products
@@ -50,56 +50,102 @@ describe("B2BPurchasePage", () => {
     assert.deepEqual(props.products, products)
   })
 
-  it("submits the form to Cybersource", async () => {
-    const { inner } = await renderPage()
+  //
+  ;[true, false].forEach(hasCouponCode => {
+    it(`submits the form to Cybersource ${
+      hasCouponCode ? "with" : "without"
+    } a coupon`, async () => {
+      const couponStatus = hasCouponCode ? makeB2BCouponStatus() : null
+      const { inner } = await renderPage({
+        entities: {
+          b2b_coupon_status: couponStatus
+        }
+      })
 
-    const url = "/api/b2b/checkout/"
-    const payload = { pay: "load" }
-    helper.handleRequestStub.withArgs("/api/b2b/checkout/", "POST").returns({
-      body: {
-        url,
-        payload
-      },
-      status: 200
+      const url = "/api/b2b/checkout/"
+      const payload = { pay: "load" }
+      helper.handleRequestStub.withArgs("/api/b2b/checkout/", "POST").returns({
+        body: {
+          url,
+          payload
+        },
+        status: 200
+      })
+      const submitStub = helper.sandbox.stub()
+      const form = document.createElement("form")
+      // $FlowFixMe: need to overwrite this function to mock it
+      form.submit = submitStub
+      const createFormStub = helper.sandbox
+        .stub(formFuncs, "createCyberSourceForm")
+        .returns(form)
+      const selectedProduct = products[1]
+      const values = {
+        product:   selectedProduct.id,
+        num_seats: 5,
+        email:     "email@example.com"
+      }
+      const actions = {
+        setSubmitting: helper.sandbox.stub(),
+        setErrors:     helper.sandbox.stub()
+      }
+      await inner.find("B2BPurchaseForm").prop("onSubmit")(values, actions)
+      sinon.assert.calledWith(createFormStub, url, payload)
+      sinon.assert.calledWith(submitStub)
+      sinon.assert.calledWith(
+        helper.handleRequestStub,
+        "/api/b2b/checkout/",
+        "POST",
+        {
+          body: {
+            email:              values.email,
+            product_version_id: selectedProduct.latest_version.id,
+            num_seats:          values.num_seats,
+            discount_code:      couponStatus ? couponStatus.code : null
+          },
+          headers: {
+            "X-CSRFTOKEN": null
+          },
+          credentials: undefined
+        }
+      )
+      sinon.assert.calledWith(actions.setSubmitting, false)
+      sinon.assert.notCalled(actions.setErrors)
     })
-    const submitStub = helper.sandbox.stub()
-    const form = document.createElement("form")
-    // $FlowFixMe: need to overwrite this function to mock it
-    form.submit = submitStub
-    const createFormStub = helper.sandbox
-      .stub(formFuncs, "createCyberSourceForm")
-      .returns(form)
-    const selectedProduct = products[1]
-    const values = {
-      product:   selectedProduct.id,
-      num_seats: 5,
-      email:     "email@example.com"
-    }
-    const actions = {
-      setSubmitting: helper.sandbox.stub(),
-      setErrors:     helper.sandbox.stub()
-    }
-    await inner.find("B2BPurchaseForm").prop("onSubmit")(values, actions)
-    sinon.assert.calledWith(createFormStub, url, payload)
-    sinon.assert.calledWith(submitStub)
+  })
+
+  it("fetches coupon status", async () => {
+    const couponStatus = makeB2BCouponStatus()
+    const { inner, store } = await renderPage({})
+    helper.handleRequestStub
+      .withArgs("/api/b2b/coupon_status/", "GET")
+      .returns({
+        body:   couponStatus,
+        status: 200
+      })
+    const payload = { pay: "load" }
+    await inner.prop("fetchCouponStatus")(payload)
+    assert.deepEqual(store.getState().entities.b2b_coupon_status, couponStatus)
     sinon.assert.calledWith(
       helper.handleRequestStub,
-      "/api/b2b/checkout/",
-      "POST",
+      "/api/b2b/coupon_status/",
+      "GET",
       {
-        body: {
-          email:              values.email,
-          product_version_id: selectedProduct.latest_version.id,
-          num_seats:          values.num_seats
-        },
-        headers: {
-          "X-CSRFTOKEN": null
-        },
+        body:        payload,
+        headers:     undefined,
         credentials: undefined
       }
     )
-    sinon.assert.calledWith(actions.setSubmitting, false)
-    sinon.assert.notCalled(actions.setErrors)
+  })
+
+  it("clears coupon status", async () => {
+    const couponStatus = makeB2BCouponStatus()
+    const { inner, store } = await renderPage({
+      entities: {
+        b2b_coupon_status: couponStatus
+      }
+    })
+    inner.prop("clearCouponStatus")()
+    assert.isNull(store.getState().entities.b2b_coupon_status)
   })
 
   it("submits the form but redirects to a location instead of submitting a form to CyberSource", async () => {

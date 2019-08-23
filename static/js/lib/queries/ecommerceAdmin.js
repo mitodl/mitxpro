@@ -35,7 +35,6 @@ export default {
     }),
     options: {
       method:  "POST",
-      force:   true,
       headers: {
         "X-CSRFTOKEN": getCookie("csrftoken")
       }

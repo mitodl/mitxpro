@@ -222,15 +222,24 @@
     color: $light-gray;
   }
 
-  .checkout-button {
+  .checkout-button, .apply-button {
     background-color: $light-blue;
     color: white;
-    font-size: 28px;
-    padding: 15px 0;
+    font-size: 24px;
     font-weight: 600;
-    width: 100%;
     text-transform: uppercase;
+  }
+
+  .checkout-button {
+    padding: 5px 0;
+    width: 100%;
     border: 0;
+  }
+
+  .apply-button {
+    padding: 3px 20px;
+    border: 0;
+    border-radius: 7px;
   }
 
   .b2b-order-summary {
@@ -250,6 +259,21 @@
     font-size: 16px;
     margin-top: 5px;
     margin-bottom: 10px;
+  }
+
+  .coupon-input-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    input {
+      margin: 0 20px 0 0;
+      width: 100%;
+    }
+
+    .apply-button {
+      margin-left: auto;
+    }
   }
 }
 
@@ -283,6 +307,10 @@
 
     .col-8 {
       font-weight: 700;
+    }
+
+    .discount-row {
+      color: $primary;
     }
   }
 

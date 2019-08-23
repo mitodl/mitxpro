@@ -6,12 +6,19 @@ import Decimal from "decimal.js-light"
 import B2BPurchaseSummary from "../B2BPurchaseSummary"
 import ProductSelector from "../input/ProductSelector"
 
-import type { ProductDetail } from "../../flow/ecommerceTypes"
+import type {
+  B2BCouponStatusPayload,
+  B2BCouponStatusResponse,
+  ProductDetail
+} from "../../flow/ecommerceTypes"
 
 type Props = {
   products: Array<ProductDetail>,
   onSubmit: Function,
-  requestPending: boolean
+  requestPending: boolean,
+  couponStatus: ?B2BCouponStatusResponse,
+  clearCouponStatus: () => void,
+  fetchCouponStatus: (payload: B2BCouponStatusPayload) => Promise<*>
 }
 
 const errorMessageRenderer = msg => <span className="error">{msg}</span>
@@ -35,25 +42,40 @@ export const validate = (values: Object) => {
   return errors
 }
 
-const B2BPurchaseForm = ({ onSubmit, products, requestPending }: Props) => (
+const B2BPurchaseForm = ({
+  onSubmit,
+  products,
+  requestPending,
+  couponStatus,
+  clearCouponStatus,
+  fetchCouponStatus
+}: Props) => (
   <Formik
     onSubmit={onSubmit}
     initialValues={{
       num_seats: "",
       email:     "",
-      product:   ""
+      product:   "",
+      coupon:    ""
     }}
     validate={validate}
-    render={({ values }) => {
-      let itemPrice, totalPrice, numSeats
+    render={({ values, setFieldError }) => {
+      let itemPrice, totalPrice, discount
       const productId = parseInt(values.product)
       const product = products.find(product => product.id === productId)
       const productVersion = product ? product.latest_version : null
-      if (productVersion) {
-        numSeats = parseInt(values.num_seats)
-        if (!isNaN(numSeats) && productVersion.price !== null) {
-          itemPrice = new Decimal(productVersion.price)
-          totalPrice = itemPrice * new Decimal(numSeats)
+      const numSeats = parseInt(values.num_seats)
+      if (productVersion && productVersion.price !== null) {
+        itemPrice = new Decimal(productVersion.price)
+        if (!isNaN(numSeats)) {
+          totalPrice = itemPrice.times(numSeats)
+
+          if (couponStatus) {
+            discount = new Decimal(couponStatus.discount_percent)
+              .times(itemPrice)
+              .times(numSeats)
+            totalPrice = totalPrice.minus(discount)
+          }
         }
       }
 
@@ -96,13 +118,49 @@ const B2BPurchaseForm = ({ onSubmit, products, requestPending }: Props) => (
                 </span>
                 <ErrorMessage name="email" render={errorMessageRenderer} />
               </label>
+
+              <label htmlFor="coupon">
+                <span className="description">Discount code:</span>
+                <div className="coupon-input-container">
+                  <Field type="text" name="coupon" />
+                  <button
+                    className="apply-button"
+                    onClick={async event => {
+                      event.preventDefault()
+
+                      if (!values.coupon) {
+                        clearCouponStatus()
+                        return
+                      }
+
+                      if (!values.product) {
+                        setFieldError("coupon", "No product selected")
+                        return
+                      }
+
+                      const response = await fetchCouponStatus({
+                        product_id: values.product,
+                        code:       values.coupon
+                      })
+                      if (response.status !== 200) {
+                        setFieldError("coupon", "Invalid coupon code")
+                      }
+                    }}
+                  >
+                    Apply
+                  </button>
+                </div>
+                <ErrorMessage name="coupon" render={errorMessageRenderer} />
+              </label>
             </div>
             <div className="col-lg-3" />
             <div className="col-lg-4">
               <B2BPurchaseSummary
                 itemPrice={itemPrice}
                 totalPrice={totalPrice}
-                numSeats={numSeats}
+                discount={discount}
+                numSeats={isNaN(numSeats) ? null : numSeats}
+                alreadyPaid={false}
               />
 
               <button
