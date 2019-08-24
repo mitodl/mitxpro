@@ -244,6 +244,7 @@ class DataConsentUserAdmin(admin.ModelAdmin):
 
     list_display = ("id", "user", "created_on")
     search_fields = ("user__username", "user__email")
+    raw_id_fields = ('user', )
 
     model = DataConsentUser
 
