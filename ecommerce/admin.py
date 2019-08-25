@@ -107,7 +107,7 @@ class CouponVersionInline(admin.StackedInline):
 
     model = CouponVersion
     readonly_fields = get_field_names(CouponVersion)
-    raw_id_fields = ("coupon","payment_version")
+    raw_id_fields = ("coupon","payment_version",)
     extra = 0
     show_change_link = True
     can_delete = False
@@ -154,7 +154,7 @@ class CouponPaymentVersionAdmin(admin.ModelAdmin):
     save_as = True
     save_as_continue = False
     save_on_top = True
-    raw_id_fields = ("coupon","payment")
+    raw_id_fields = ("coupon","payment",)
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -170,7 +170,7 @@ class CouponVersionAdmin(admin.ModelAdmin):
     save_as = True
     save_as_continue = False
     save_on_top = True
-    raw_id_fields = ("coupon","payment_version")
+    raw_id_fields = ("coupon","payment_version",)
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -183,7 +183,7 @@ class CouponSelectionAdmin(admin.ModelAdmin):
     """Admin for CouponSelections"""
 
     model = CouponSelection
-    raw_id_fields = ("coupon","basket")
+    raw_id_fields = ("coupon","basket",)
 
 
 
@@ -193,7 +193,7 @@ class CouponEligibilityAdmin(admin.ModelAdmin):
     list_display = ("id", "coupon", "product")
     search_fields = ("coupon__coupon_code", "coupon__payment__name")
     list_filter = ("product",)
-    raw_id_fields = ("coupon","product")
+    raw_id_fields = ("coupon","product",)
 
     model = CouponEligibility
 
@@ -209,7 +209,7 @@ class CouponRedemptionAdmin(admin.ModelAdmin):
     """Admin for CouponRedemptions"""
 
     model = CouponRedemption
-    raw_id_fields = ("coupon_version","order")
+    raw_id_fields = ("coupon_version","order",)
 
 
 class ProductVersionAdmin(admin.ModelAdmin):
@@ -271,7 +271,7 @@ class DataConsentAgreementAdmin(admin.ModelAdmin):
     list_filter = ("company",)
     list_display = ("id", "company", "created_on")
     search_fields = ("company", "content")
-    raw_id_fields = ("coupon","payment_version")
+    raw_id_fields = ("coupon","payment_version",)
     inlines = [DataConsentUserInline]
 
     model = DataConsentAgreement
