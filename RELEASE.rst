@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.18.2
+Version 0.18.2 (Released August 26, 2019)
 --------------
 
 - Send email when a B2BOrder is fulfilled (#1003)
