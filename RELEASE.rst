@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.19.0
+--------------
+
+- Fixed DATABASE_URL inheritance for CI
+- Remove B2B order fulfillment API, merge with ecommerce order fulfillment API (#1045)
+- Do not check for hubspot errors without an api key (#1048)
+- Add checkout URL to B2B enrollment code checkout CSV (#1040)
+- link to support center on voucher resubmit page
+
 Version 0.18.2 (Released August 26, 2019)
 --------------
 
