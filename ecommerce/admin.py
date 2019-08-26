@@ -45,22 +45,10 @@ class OrderAdmin(admin.ModelAdmin):
 
     model = Order
     list_filter = ("status",)
-    list_display = (
-        "id",
-        "purchaser",
-        "status",
-        "created_on",
-    )
-    search_fields = (
-        "purchaser__username",
-        "purchaser__email",
-    )
+    list_display = ("id", "purchaser", "status", "created_on")
+    search_fields = ("purchaser__username", "purchaser__email")
 
-    readonly_fields = [
-        name
-        for name in get_field_names(Order)
-        if name != "status"
-    ]
+    readonly_fields = [name for name in get_field_names(Order) if name != "status"]
 
     def has_add_permission(self, request):
         return False
@@ -141,19 +129,13 @@ class CouponAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         """Overrides base queryset"""
-        return (
-            super()
-            .get_queryset(request)
-            .select_related("payment")
-        )
+        return super().get_queryset(request).select_related("payment")
 
     def get_payment_name(self, obj):
         """Returns the related CouponPayment name"""
         return obj.payment.name
 
-    get_payment_name.short_description = (
-        "Coupon Payment Name"
-    )
+    get_payment_name.short_description = "Coupon Payment Name"
     get_payment_name.admin_order_field = "payment__name"
 
 
@@ -208,10 +190,7 @@ class CouponEligibilityAdmin(admin.ModelAdmin):
     """Admin for CouponEligibilitys"""
 
     list_display = ("id", "coupon", "product")
-    search_fields = (
-        "coupon__coupon_code",
-        "coupon__payment__name",
-    )
+    search_fields = ("coupon__coupon_code", "coupon__payment__name")
     list_filter = ("product",)
     raw_id_fields = ("coupon", "product")
 
@@ -221,12 +200,8 @@ class CouponEligibilityAdmin(admin.ModelAdmin):
         """Returns the text id of the related Product object"""
         return obj.product.content_object.text_id
 
-    get_product_text_id.short_description = (
-        "Product Object Text ID"
-    )
-    get_product_text_id.admin_order_field = (
-        "product__content_object__text_id"
-    )
+    get_product_text_id.short_description = "Product Object Text ID"
+    get_product_text_id.admin_order_field = "product__content_object__text_id"
 
 
 class CouponRedemptionAdmin(admin.ModelAdmin):
@@ -310,12 +285,7 @@ class CompanyAdmin(admin.ModelAdmin):
 class ProductCouponAssignmentAdmin(admin.ModelAdmin):
     """Admin for ProductCouponAssignment"""
 
-    list_display = (
-        "id",
-        "email",
-        "get_coupon",
-        "get_product",
-    )
+    list_display = ("id", "email", "get_coupon", "get_product")
     search_fields = (
         "email",
         "product_coupon__coupon__coupon_code",
@@ -330,10 +300,7 @@ class ProductCouponAssignmentAdmin(admin.ModelAdmin):
         return (
             super()
             .get_queryset(request)
-            .select_related(
-                "product_coupon__coupon",
-                "product_coupon__product",
-            )
+            .select_related("product_coupon__coupon", "product_coupon__product")
         )
 
     def get_coupon(self, obj):
@@ -348,9 +315,7 @@ class ProductCouponAssignmentAdmin(admin.ModelAdmin):
         return obj.product_coupon.product
 
     get_product.short_description = "Product"
-    get_product.admin_order_field = (
-        "product_coupon__product"
-    )
+    get_product.admin_order_field = "product_coupon__product"
 
 
 admin.site.register(Line, LineAdmin)
@@ -362,19 +327,11 @@ admin.site.register(ProductVersion, ProductVersionAdmin)
 admin.site.register(Coupon, CouponAdmin)
 admin.site.register(CouponVersion, CouponVersionAdmin)
 admin.site.register(CouponPayment, CouponPaymentAdmin)
-admin.site.register(
-    CouponPaymentVersion, CouponPaymentVersionAdmin
-)
+admin.site.register(CouponPaymentVersion, CouponPaymentVersionAdmin)
 admin.site.register(CouponSelection, CouponSelectionAdmin)
-admin.site.register(
-    CouponEligibility, CouponEligibilityAdmin
-)
+admin.site.register(CouponEligibility, CouponEligibilityAdmin)
 admin.site.register(CouponRedemption, CouponRedemptionAdmin)
-admin.site.register(
-    DataConsentAgreement, DataConsentAgreementAdmin
-)
+admin.site.register(DataConsentAgreement, DataConsentAgreementAdmin)
 admin.site.register(DataConsentUser, DataConsentUserAdmin)
-admin.site.register(
-    ProductCouponAssignment, ProductCouponAssignmentAdmin
-)
+admin.site.register(ProductCouponAssignment, ProductCouponAssignmentAdmin)
 admin.site.register(Company, CompanyAdmin)
