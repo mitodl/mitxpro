@@ -154,7 +154,7 @@ class CouponPaymentVersionAdmin(admin.ModelAdmin):
     save_as = True
     save_as_continue = False
     save_on_top = True
-    raw_id_fields = ("coupon", "payment",)
+    raw_id_fields = ("payment",)
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -271,7 +271,7 @@ class DataConsentAgreementAdmin(admin.ModelAdmin):
     list_filter = ("company",)
     list_display = ("id", "company", "created_on")
     search_fields = ("company", "content")
-    raw_id_fields = ("coupon", "payment_version",)
+    raw_id_fields = ("courses",)
     inlines = [DataConsentUserInline]
 
     model = DataConsentAgreement
