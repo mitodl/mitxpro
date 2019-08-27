@@ -81,6 +81,12 @@ const zeroHour = value => {
   }
 }
 
+const finalHour = value => {
+  if (value instanceof Date) {
+    value.setHours(23, 59, 59, 999)
+  }
+}
+
 export const CouponForm = ({
   onSubmit,
   companies,
@@ -220,7 +226,7 @@ export const CouponForm = ({
                 formatDate={formatDate}
                 parseDate={parseDate}
                 onDayChange={value => {
-                  zeroHour(value)
+                  finalHour(value)
                   setFieldValue("expiration_date", value)
                 }}
                 onDayPickerHide={() => setFieldTouched("expiration_date")}
