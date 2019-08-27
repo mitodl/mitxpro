@@ -2,11 +2,11 @@
 /*eslint semi: ["error", "always"]*/
 /* global Hls */
 
-$(document).ready(function() {
-  const video = $("#tv-video").get(0);
+function initializeHlsVideo(VideoSelector) {
+  const video = VideoSelector.get(0);
 
   if (video) {
-    const videoUrl = $("#tv-video").data("source");
+    const videoUrl = VideoSelector.data("source");
     if (Hls.isSupported()) {
       const hls = new Hls();
       hls.loadSource(videoUrl);
@@ -21,4 +21,11 @@ $(document).ready(function() {
       video.src = videoUrl;
     }
   }
+}
+
+$(document).ready(function() {
+  const tvVideo = $("#tv-video");
+  const lightBoxVideo = $("#tv-light-box-video");
+  initializeHlsVideo(tvVideo);
+  initializeHlsVideo(lightBoxVideo);
 });
