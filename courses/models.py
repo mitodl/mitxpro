@@ -597,7 +597,7 @@ class CourseRunGrade(TimestampedModel, AuditableModel, ValidateOnSaveMixin):
     grade = models.FloatField(
         null=False, validators=[MinValueValidator(0.0), MaxValueValidator(1.0)]
     )
-    letter_grade = models.CharField(max_length=6, null=True)
+    letter_grade = models.CharField(max_length=6, blank=True, null=True)
     passed = models.BooleanField(default=False)
 
     class Meta:

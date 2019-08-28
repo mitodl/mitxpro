@@ -7,6 +7,8 @@ from requests.exceptions import HTTPError
 from rest_framework import status
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.shortcuts import reverse
 from oauth2_provider.models import Application, AccessToken
@@ -46,6 +48,8 @@ OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS = 60
 OPENEDX_AUTH_MAX_TTL_IN_SECONDS = 60 * 60
 
 ACCESS_TOKEN_HEADER_NAME = "X-Access-Token"
+
+User = get_user_model()
 
 
 def create_user(user):
@@ -300,6 +304,58 @@ def get_edx_api_client(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS)
         {"access_token": auth.access_token, "api_key": settings.OPENEDX_API_KEY},
         settings.OPENEDX_API_BASE_URL,
     )
+
+
+def get_edx_api_grades_client():
+    """
+    Gets an edx api client instance for use with the grades api
+
+    Returns:
+        UserCurrentGrades: edx api grades client instance
+    """
+    if settings.OPENEDX_GRADES_API_TOKEN is None:
+        raise ImproperlyConfigured("OPENEDX_GRADES_API_TOKEN is not set")
+
+    edx_client = EdxApi(
+        {
+            "access_token": settings.OPENEDX_GRADES_API_TOKEN,
+            "api_key": settings.OPENEDX_API_KEY,
+        },
+        settings.OPENEDX_API_BASE_URL,
+    )
+
+    return edx_client.current_grades
+
+
+def get_edx_grades_with_users(course_run, user=None):
+    """
+    Get all current grades for a course run from OpenEdX along with the enrolled user object
+
+    Args:
+        course_run (CourseRun): The course run for which to fetch the grades and users
+        user (users.models.User): Limit the grades to this user
+
+    Returns:
+        List of (UserCurrentGrade, User) tuples
+    """
+    grades_client = get_edx_api_grades_client()
+    if user:
+        edx_grade = grades_client.get_student_current_grade(
+            user.username, course_run.courseware_id
+        )
+        yield edx_grade, user
+    else:
+        edx_course_grades = grades_client.get_course_current_grades(
+            course_run.courseware_id
+        )
+        all_grades = list(edx_course_grades.all_current_grades)
+        for edx_grade in all_grades:
+            try:
+                user = User.objects.get(email=edx_grade.email)
+            except User.DoesNotExist:
+                log.warning("User with email %s not found", edx_grade.email)
+            else:
+                yield edx_grade, user
 
 
 def enroll_in_edx_course_runs(user, course_runs):

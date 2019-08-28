@@ -724,6 +724,12 @@ MITXPRO_REGISTRATION_ACCESS_TOKEN = get_string(
     description="Access token to secure Open edX registration API with",
 )
 
+OPENEDX_GRADES_API_TOKEN = get_string(
+    "OPENEDX_GRADES_API_TOKEN",
+    None,
+    "Access token to use with OpenEdX API client for syncing grades",
+)
+
 
 # features flags
 def get_all_config_keys():
