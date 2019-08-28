@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.19.1
+--------------
+
+- add raw_id_fields to ecommerce django admin (#1056)
+- #874 Course run certificate management command
+- Set coupon expiration to end of specified day (#1054)
+
 Version 0.19.0 (Released August 28, 2019)
 --------------
 
