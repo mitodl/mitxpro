@@ -52,10 +52,12 @@ const ProductSelectorMenu = ({
               toggleDropdown()
             })}
           >
-            <img
-              src={product.latest_version.thumbnail_url}
-              alt={`Image for ${product.title}`}
-            />
+            <div>
+              <img
+                src={product.latest_version.thumbnail_url}
+                alt={`Image for ${product.title}`}
+              />
+            </div>
             <div className="menu-item-description">
               <span className="product-title">{product.title}</span>
               <br />

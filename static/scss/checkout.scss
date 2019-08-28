@@ -375,9 +375,9 @@
             }
 
             img {
-              min-width: 140px;
-              max-width: 140px;
-              height: 100%;
+              display: block;
+              width: 140px;
+              height: auto;
             }
 
             .menu-item-description {
