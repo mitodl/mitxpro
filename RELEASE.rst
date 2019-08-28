@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.19.0
+Version 0.19.0 (Released August 28, 2019)
 --------------
 
 - Fixed DATABASE_URL inheritance for CI
