@@ -287,6 +287,10 @@
       "description": "The base redirect URL for an OAuth Application for the Open edX API",
       "required": false
     },
+    "OPENEDX_GRADES_API_TOKEN": {
+      "description": "Access token to use with OpenEdX API client for syncing grades",
+      "required": false
+    },
     "OPENEDX_OAUTH_APP_NAME": {
       "description": "The 'name' value for the Open edX OAuth Application",
       "required": true
