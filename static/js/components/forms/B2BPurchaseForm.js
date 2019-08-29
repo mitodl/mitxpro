@@ -65,8 +65,10 @@ const B2BPurchaseForm = ({ onSubmit, products, requestPending }: Props) => (
             </div>
           </div>
           <div className="row">
-            <div className="col-lg-6">
-              <p>Purchase one or more seats for your team.</p>
+            <div className="col-lg-5">
+              <p className="purchase-title">
+                Purchase one or more seats for your team.
+              </p>
               <label htmlFor="product">
                 <span className="description">
                   Select to view available courses or programs:
@@ -80,13 +82,13 @@ const B2BPurchaseForm = ({ onSubmit, products, requestPending }: Props) => (
               </label>
 
               <label htmlFor="num_seats">
-                <span className="description">* Number of Seats:</span>
+                <span className="description">*Number of Seats:</span>
                 <Field type="text" name="num_seats" className="num-seats" />
                 <ErrorMessage name="num_seats" render={errorMessageRenderer} />
               </label>
 
               <label htmlFor="email">
-                <span className="description">* Email Address:</span>
+                <span className="description">*Email Address:</span>
                 <Field type="text" name="email" />
                 <span className="explanation">
                   * We will email the link to the enrollment codes to this
@@ -95,7 +97,7 @@ const B2BPurchaseForm = ({ onSubmit, products, requestPending }: Props) => (
                 <ErrorMessage name="email" render={errorMessageRenderer} />
               </label>
             </div>
-            <div className="col-lg-2" />
+            <div className="col-lg-3" />
             <div className="col-lg-4">
               <B2BPurchaseSummary
                 itemPrice={itemPrice}

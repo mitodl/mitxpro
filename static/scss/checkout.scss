@@ -218,7 +218,7 @@
   label {
     display: flex;
     flex-direction: column;
-    margin: 40px 0;
+    margin-top: 30px;
     color: $light-gray;
   }
 
@@ -244,8 +244,12 @@
 
   input {
     border-radius: 5px;
-    border: 1px solid $soft-light-gray;
-    padding: 5px;
+    border: 1px solid $tab-color;
+    padding: 5px 5px 0 5px;
+    font-weight: 500;
+    font-size: 16px;
+    margin-top: 5px;
+    margin-bottom: 10px;
   }
 }
 
@@ -284,7 +288,7 @@
 
   .description, .explanation {
     display: block;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 600;
   }
 
@@ -300,18 +304,19 @@
     color: black;
 
     button {
-      font-size: 24px;
+      font-size: 22px;
       padding: 5px 20px;
-      border-radius: 8px;
+      border-radius: 7px;
       background-color: white;
-      color: $soft-light-gray;
-      border: 1px solid black;
+      color: $tab-color;
+      border: 1px solid $link-blue;
       font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 1.28px;
 
       &.selected, &.select-product {
-        background-color: $soft-light-gray;
-        color: $denim-blue;
+        background-color: #e2e2e2;
+        color: $link-blue;
         border: 0;
       }
 
@@ -321,8 +326,9 @@
       }
 
       &.select-product {
-        font-size: 24px;
-        padding: 5px 25px;
+        font-size: 19px;
+        padding: 7px 25px 5px 25px;
+        letter-spacing: 1.1px;
       }
     }
 
@@ -390,6 +396,10 @@
           }
         }
       }
+    }
+
+    .selected-product-title {
+      margin-top: 24px;
     }
   }
 }

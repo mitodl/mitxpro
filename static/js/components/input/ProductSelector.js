@@ -98,8 +98,8 @@ export default class ProductSelector extends React.Component<Props, State> {
 
         <div className="row">
           <div className="col-12">
-            <span className="description">
-              * Choose a{" "}
+            <span className="description choose-description">
+              *Choose a{" "}
               {productType === PRODUCT_TYPE_PROGRAM ? "Program" : "Course"}:
             </span>
             <button
@@ -130,7 +130,7 @@ export default class ProductSelector extends React.Component<Props, State> {
               </DropdownMenu>
             </Dropdown>
             {selectedProduct ? (
-              <React.Fragment>
+              <div className="selected-product-title">
                 {selectedProduct.title}
                 <br />
                 {selectedRun ? (
@@ -142,7 +142,7 @@ export default class ProductSelector extends React.Component<Props, State> {
                 <span className="description">
                   {selectedProduct.latest_version.readable_id}
                 </span>
-              </React.Fragment>
+              </div>
             ) : null}
           </div>
         </div>
