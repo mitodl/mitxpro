@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.19.1
+--------------
+
+- Fixed bug in sync_grades_and_certificates command
+- Add id to Hubspot product title (#1053)
+- add raw_id_fields to ecommerce django admin (#1056)
+- #874 Course run certificate management command
+- Set coupon expiration to end of specified day (#1054)
+
 Version 0.19.0 (Released August 28, 2019)
 --------------
 
