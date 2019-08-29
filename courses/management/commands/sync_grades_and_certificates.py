@@ -87,6 +87,7 @@ class Command(BaseCommand):
                 course_run_grade.grade = override_grade
                 course_run_grade.passed = bool(override_grade)
                 course_run_grade.letter_grade = None
+                course_run_grade.set_by_admin = True
                 course_run_grade.save_and_log(None)
                 result.append(
                     "Grade overriden - new grade value: {}".format(

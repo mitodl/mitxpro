@@ -5,6 +5,7 @@ import logging
 import os
 import platform
 from urllib.parse import urljoin, urlparse
+from celery.schedules import crontab
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
@@ -599,6 +600,16 @@ CELERY_RESULT_BACKEND = get_string(
 )
 CELERY_TASK_ALWAYS_EAGER = get_bool("CELERY_TASK_ALWAYS_EAGER", False, dev_only=True)
 CELERY_TASK_EAGER_PROPAGATES = get_bool("CELERY_TASK_EAGER_PROPAGATES", True)
+CRON_COURSE_CERTIFICATES_HOURS = get_string(
+    "CRON_COURSE_CERTIFICATES_HOURS",
+    0,
+    description="'hours' value for the 'generate-course-certificate' scheduled task (defaults to midnight)",
+)
+CRON_COURSE_CERTIFICATES_DAYS = get_string(
+    "CRON_COURSE_CERTIFICATES_DAYS",
+    None,
+    description="'day_of_week' value for 'generate-course-certificate' scheduled task (default will run once a day).",
+)
 
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -619,6 +630,16 @@ CELERY_BEAT_SCHEDULE = {
             "RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY",
             60 * 30,
             description="How many seconds between retrying failed edX enrollments",
+        ),
+    },
+    "generate-course-certificate": {
+        "task": "courses.tasks.generate_course_certificates",
+        "schedule": crontab(
+            minute=0,
+            hour=CRON_COURSE_CERTIFICATES_HOURS,
+            day_of_week=CRON_COURSE_CERTIFICATES_DAYS or "*",
+            day_of_month="*",
+            month_of_year="*",
         ),
     },
 }
