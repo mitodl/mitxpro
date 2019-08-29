@@ -54,8 +54,7 @@ def process_course_run_grade_certificate(course_run_grade):
         delete_count, _ = CourseRunCertificate.objects.filter(
             user=user, course_run=course_run
         ).delete()
-        if delete_count:
-            return None, False, True
+        return None, False, (delete_count > 0)
     else:
         certificate, created = CourseRunCertificate.objects.get_or_create(
             user=user, course_run=course_run
