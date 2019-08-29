@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.19.1
+Version 0.19.1 (Released August 29, 2019)
 --------------
 
 - Fixed bug in sync_grades_and_certificates command
