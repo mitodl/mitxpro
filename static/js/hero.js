@@ -1,6 +1,7 @@
 /*eslint-env jquery*/
 /*eslint semi: ["error", "always"]*/
 /* global Hls */
+/* eslint-disable no-unused-vars */
 
 function configureHlsVideo(selector, autoplay) {
   const video = $(selector).get(0);
@@ -40,28 +41,22 @@ $(document).ready(function() {
   // Promo video in header on product detail page
   configureHlsVideo("#promo-video");
 
-  // The action button is supposed to scroll to and play a video element
+  // The action button is supposed to play a video element in light box.
   // which exists in another section, which is why we need to check for
   // its existence before we try anything.
   $("#actionButton").on("click", function(event) {
     event.preventDefault();
 
-    const aboutVideo = $("#tv-video").get(0);
-    const aboutVideoYoutube = $("#tv-yt-video")
+    const hlsAboutVideo = $("#tv-light-box-video").get(0);
+    const aboutVideoYoutube = $("#tv-yt-light-box-video")
       .find("iframe")
       .get(0);
 
-    if (aboutVideo) {
-      aboutVideo.scrollIntoView({
-        behavior: "smooth",
-        block:    "center"
-      });
-      aboutVideo.play();
+    if (hlsAboutVideo) {
+      showLightBox();
+      hlsAboutVideo.play();
     } else if (aboutVideoYoutube) {
-      aboutVideoYoutube.scrollIntoView({
-        behavior: "smooth",
-        block:    "center"
-      });
+      showLightBox();
       aboutVideoYoutube.contentWindow.postMessage(
         JSON.stringify({
           event: "command",
@@ -74,3 +69,36 @@ $(document).ready(function() {
     }
   });
 });
+
+function closeLightBox() {
+  // Closes the light box.
+
+  const hlsAboutVideo = $("#tv-light-box-video").get(0);
+  const aboutVideoYoutube = $("#tv-yt-light-box-video")
+    .find("iframe")
+    .get(0);
+
+  if (hlsAboutVideo) {
+    hlsAboutVideo.pause();
+  }
+
+  if (aboutVideoYoutube) {
+    aboutVideoYoutube.contentWindow.postMessage(
+      JSON.stringify({
+        event: "command",
+        func:  "stopVideo"
+      }),
+      "https://www.youtube.com"
+    );
+  }
+  $("body").removeClass("light-box");
+  $(".light-box-video-container #light-box")[0].style.display = "none";
+  $(".light-box-video-container #fade-light-box")[0].style.display = "none";
+}
+
+function showLightBox() {
+  // Show up the light box.
+  $("body").addClass("light-box");
+  $(".light-box-video-container #light-box")[0].style.display = "block";
+  $(".light-box-video-container #fade-light-box")[0].style.display = "block";
+}
