@@ -20,8 +20,8 @@ import type {
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
 
 const genBasketItemId = incrementer()
+const genBasketItemObjectId = incrementer()
 const genProductId = incrementer()
-
 const genDataConsentUserId = incrementer()
 
 export const makeDataConsent = (): DataConsentUser => ({
@@ -40,7 +40,7 @@ export const makeItem = (productType: ?string): BasketItem => {
   const courses = range(0, numCourses).map(() => makeCourse())
   const runIds = courses.map(course => course.courseruns[0].id)
 
-  let objectId = casual.integer(0, 99999)
+  let objectId = genBasketItemObjectId.next().value
   if (productType === PRODUCT_TYPE_COURSERUN) {
     const choices = []
     for (const course of courses) {
@@ -61,6 +61,7 @@ export const makeItem = (productType: ?string): BasketItem => {
     price:         String(casual.double(0, 100)),
     thumbnail_url: casual.url,
     run_ids:       runIds,
+    // $FlowFixMe: flow doesn't understand generators well
     object_id:     objectId,
     // $FlowFixMe: flow doesn't understand generators well
     product_id:    genProductId.next().value,

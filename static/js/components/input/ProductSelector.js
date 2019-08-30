@@ -31,7 +31,7 @@ type State = {
 }
 export default class ProductSelector extends React.Component<Props, State> {
   state = {
-    productType:  "courserun",
+    productType:  PRODUCT_TYPE_COURSERUN,
     dropdownOpen: false
   }
 
@@ -68,6 +68,8 @@ export default class ProductSelector extends React.Component<Props, State> {
         selectedRun = findRunInProduct(selectedProduct)
       }
     }
+    const productTypeText =
+      productType === PRODUCT_TYPE_PROGRAM ? "Program" : "Course"
 
     return (
       <div className="product-selector">
@@ -78,7 +80,7 @@ export default class ProductSelector extends React.Component<Props, State> {
                 productType === PRODUCT_TYPE_COURSERUN ? "selected" : ""
               } select-product-type`}
               onClick={preventDefaultAndInvoke(() =>
-                this.updateProductType("courserun")
+                this.updateProductType(PRODUCT_TYPE_COURSERUN)
               )}
             >
               Course
@@ -99,8 +101,7 @@ export default class ProductSelector extends React.Component<Props, State> {
         <div className="row">
           <div className="col-12">
             <span className="description choose-description">
-              *Choose a{" "}
-              {productType === PRODUCT_TYPE_PROGRAM ? "Program" : "Course"}:
+              *Choose a {productTypeText}:
             </span>
             <button
               className="select-product"
@@ -108,8 +109,7 @@ export default class ProductSelector extends React.Component<Props, State> {
                 this.toggleDropdownVisibility()
               )}
             >
-              Click to select{" "}
-              {productType === PRODUCT_TYPE_PROGRAM ? "Program" : "Course"}
+              Click to select {productTypeText}
             </button>
             <br />
             <Dropdown
