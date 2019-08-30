@@ -985,6 +985,15 @@ def test_products_viewset_list(user_drf_client, coupon_product_ids):
         )
 
 
+def test_products_viewset_list_missing_versions(user_drf_client):
+    """ProductViewSet should exclude Product without any ProductVersion"""
+    product = ProductVersionFactory.create().product
+    assert len(user_drf_client.get(reverse("products_api-list")).json()) == 1
+    with unprotect_version_tables():
+        product.latest_version.delete()
+    assert len(user_drf_client.get(reverse("products_api-list")).json()) == 0
+
+
 def test_products_viewset_detail(user_drf_client, coupon_product_ids):
     """ Test that the ProductViewSet returns details for a product """
     response = user_drf_client.get(

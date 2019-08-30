@@ -69,6 +69,7 @@ def test_serialize_basket_product_version_courserun(mock_context):
         "object_id": product_version.product.object_id,
         "product_id": product_version.product.id,
         "readable_id": get_readable_id(product_version.product.content_object),
+        "created_on": product_version.created_on.strftime(datetime_millis_format),
     }
 
 
@@ -95,6 +96,7 @@ def test_serialize_basket_product_version_program(mock_context):
         "object_id": product_version.product.object_id,
         "product_id": product_version.product.id,
         "readable_id": get_readable_id(product_version.product.content_object),
+        "created_on": product_version.created_on.strftime(datetime_millis_format),
     }
 
 

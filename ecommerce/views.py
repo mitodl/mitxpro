@@ -62,7 +62,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
     permission_classes = ()
 
     serializer_class = ProductDetailSerializer
-    queryset = Product.objects.all()
+    queryset = Product.objects.exclude(productversions=None)
 
 
 class CompanyViewSet(ReadOnlyModelViewSet):

@@ -95,6 +95,7 @@ class ProductVersionSerializer(serializers.ModelSerializer):
             "object_id",
             "product_id",
             "readable_id",
+            "created_on",
         ]
         model = models.ProductVersion
 

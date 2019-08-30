@@ -1,12 +1,17 @@
 // @flow
 import React from "react"
+import { Dropdown, DropdownToggle, DropdownMenu } from "reactstrap"
+
+import ProductSelectorMenu from "./ProductSelectorMenu"
 
 import { preventDefaultAndInvoke } from "../../lib/util"
+import { findRunInProduct, formatRunTitle } from "../../lib/ecommerce"
+import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 
-import type { Product } from "../../flow/ecommerceTypes"
+import type { ProductDetail } from "../../flow/ecommerceTypes"
 
 type Props = {
-  products: Array<Product>,
+  products: Array<ProductDetail>,
   field: {
     name: string,
     value: Object,
@@ -21,11 +26,13 @@ type Props = {
 }
 type ProductType = "courserun" | "program"
 type State = {
-  productType: ProductType
+  productType: ProductType,
+  dropdownOpen: boolean
 }
 export default class ProductSelector extends React.Component<Props, State> {
   state = {
-    productType: "courserun"
+    productType:  PRODUCT_TYPE_COURSERUN,
+    dropdownOpen: false
   }
 
   updateProductType = (productType: ProductType) => {
@@ -39,29 +46,51 @@ export default class ProductSelector extends React.Component<Props, State> {
     onChange({ target: { value: "", name } })
   }
 
+  toggleDropdownVisibility = () => {
+    this.setState({
+      dropdownOpen: !this.state.dropdownOpen
+    })
+  }
+
   render() {
     const {
       field: { onChange, name, value },
       products
     } = this.props
-    const { productType } = this.state
+    const { dropdownOpen, productType } = this.state
+    let selectedProduct, selectedRun
+    if (value) {
+      selectedProduct = products.find(_product => _product.id === value)
+      if (
+        selectedProduct &&
+        selectedProduct.product_type === PRODUCT_TYPE_COURSERUN
+      ) {
+        selectedRun = findRunInProduct(selectedProduct)
+      }
+    }
+    const productTypeText =
+      productType === PRODUCT_TYPE_PROGRAM ? "Program" : "Course"
 
     return (
       <div className="product-selector">
         <div className="row">
           <div className="col-12">
             <button
-              className={productType === "courserun" ? "selected" : ""}
+              className={`${
+                productType === PRODUCT_TYPE_COURSERUN ? "selected" : ""
+              } select-product-type`}
               onClick={preventDefaultAndInvoke(() =>
-                this.updateProductType("courserun")
+                this.updateProductType(PRODUCT_TYPE_COURSERUN)
               )}
             >
               Course
             </button>
             <button
-              className={productType === "program" ? "selected" : ""}
+              className={`${
+                productType === PRODUCT_TYPE_PROGRAM ? "selected" : ""
+              } select-product-type`}
               onClick={preventDefaultAndInvoke(() =>
-                this.updateProductType("program")
+                this.updateProductType(PRODUCT_TYPE_PROGRAM)
               )}
             >
               Program
@@ -71,18 +100,50 @@ export default class ProductSelector extends React.Component<Props, State> {
 
         <div className="row">
           <div className="col-12">
-            <select onChange={onChange} name={name} value={value.product}>
-              <option value={""} key={"null"}>
-                Select a product
-              </option>
-              {products
-                .filter(product => product.product_type === productType)
-                .map(product => (
-                  <option value={product.id} key={product.id}>
-                    {product.title}
-                  </option>
-                ))}
-            </select>
+            <span className="description choose-description">
+              *Choose a {productTypeText}:
+            </span>
+            <button
+              className="select-product"
+              onClick={preventDefaultAndInvoke(() =>
+                this.toggleDropdownVisibility()
+              )}
+            >
+              Click to select {productTypeText}
+            </button>
+            <br />
+            <Dropdown
+              isOpen={dropdownOpen}
+              toggle={this.toggleDropdownVisibility}
+            >
+              <DropdownToggle tag="span" />
+              <DropdownMenu>
+                <div className="triangle" />
+                <ProductSelectorMenu
+                  products={products}
+                  productType={productType}
+                  onChange={onChange}
+                  name={name}
+                  selectedProductId={value}
+                  toggleDropdown={this.toggleDropdownVisibility}
+                />
+              </DropdownMenu>
+            </Dropdown>
+            {selectedProduct ? (
+              <div className="selected-product-title">
+                {selectedProduct.title}
+                <br />
+                {selectedRun ? (
+                  <React.Fragment>
+                    {formatRunTitle(selectedRun)}
+                    <br />
+                  </React.Fragment>
+                ) : null}
+                <span className="description">
+                  {selectedProduct.latest_version.readable_id}
+                </span>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
