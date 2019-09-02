@@ -104,7 +104,7 @@ export default class IntegrationTestHelper {
         // if it defines WrappedComponent, find() that so we skip over any intermediaries
         if (
           cls &&
-          cls.hasOwnProperty("WrappedComponent") &&
+          cls.hasOwnProperty("WrappedComponent") && // eslint-disable-line no-prototype-builtins
           inner.find(cls.WrappedComponent).length
         ) {
           inner = inner.find(cls.WrappedComponent)

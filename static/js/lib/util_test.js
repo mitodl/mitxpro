@@ -46,7 +46,7 @@ describe("utility functions", () => {
   })
 
   it("enumerates an iterable", () => {
-    const someNums = function*() {
+    const someNums = function* () {
       yield* [6, 7, 8, 9, 10]
     }
 
