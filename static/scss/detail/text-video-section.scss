@@ -67,51 +67,6 @@
   }
 }
 
-.light-box-video-container {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100vh;
-  overflow: auto;
-  z-index: 9999;
+.hidden {
   display: none;
-
-  #fade-light-box {
-    display: none;
-    position: fixed;
-    top: 0%;
-    left: 0%;
-    width: 100%;
-    height: 100%;
-    background-color: #1e1e1e;
-    z-index: 1001;
-    opacity: .90;
-  }
-
-  #light-box {
-    display: none;
-    position: relative;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 800px;
-    z-index: 1002;
-    overflow: visible;
-    margin: 20px 0;
-    width: calc(100% - 40px);
-
-    iframe, video {
-      width: 100%;
-      height: 400px;
-    }
-  }
-}
-
-body.light-box {
-  overflow: hidden !important;
-
-  .light-box-video-container {
-    display: block;
-  }
 }

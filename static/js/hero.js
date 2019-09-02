@@ -3,6 +3,43 @@
 /* global Hls */
 /* eslint-disable no-unused-vars */
 
+const backgroundVideoSel = "#background-video";
+const promoVideoSel = "#promo-video";
+
+function openVideoLightBox() {
+  const youtubeVideoSrc = $("#tv-light-box-yt-video").attr("data-href");
+  const hlsAboutVideoEl = $("video#tv-light-box-video");
+  if (!youtubeVideoSrc && hlsAboutVideoEl.length === 0) {
+    console.error("We do not have any supported video elements available."); // eslint-disable-line no-console
+    return;
+  }
+
+  let backgroundVideo = null;
+  const fancyBoxArgs = $.extend(
+    {},
+    {
+      beforeShow: function() {
+        backgroundVideo = $(backgroundVideoSel).get(0);
+      },
+      beforeLoad: function() {
+        backgroundVideo && backgroundVideo.pause();
+      },
+      afterClose: function() {
+        backgroundVideo && backgroundVideo.play();
+      }
+    },
+    youtubeVideoSrc
+      ? {
+        src: youtubeVideoSrc
+      }
+      : {
+        content: hlsAboutVideoEl,
+        type:    "html"
+      }
+  );
+  $.fancybox.open(fancyBoxArgs);
+}
+
 function configureHlsVideo(selector, autoplay) {
   const video = $(selector).get(0);
 
@@ -36,69 +73,16 @@ function configureHlsVideo(selector, autoplay) {
 
 $(document).ready(function() {
   // Background cover video in header on home page
-  configureHlsVideo("#background-video", true);
+  configureHlsVideo(backgroundVideoSel, true);
 
   // Promo video in header on product detail page
-  configureHlsVideo("#promo-video");
+  configureHlsVideo(promoVideoSel);
 
   // The action button is supposed to play a video element in light box.
   // which exists in another section, which is why we need to check for
   // its existence before we try anything.
   $("#actionButton").on("click", function(event) {
     event.preventDefault();
-
-    const hlsAboutVideo = $("#tv-light-box-video").get(0);
-    const aboutVideoYoutube = $("#tv-yt-light-box-video")
-      .find("iframe")
-      .get(0);
-
-    if (hlsAboutVideo) {
-      showLightBox();
-      hlsAboutVideo.play();
-    } else if (aboutVideoYoutube) {
-      showLightBox();
-      aboutVideoYoutube.contentWindow.postMessage(
-        JSON.stringify({
-          event: "command",
-          func:  "playVideo"
-        }),
-        "https://www.youtube.com"
-      );
-    } else {
-      console.error("We do not have any supported video elements available."); // eslint-disable-line no-console
-    }
+    openVideoLightBox();
   });
 });
-
-function closeLightBox() {
-  // Closes the light box.
-
-  const hlsAboutVideo = $("#tv-light-box-video").get(0);
-  const aboutVideoYoutube = $("#tv-yt-light-box-video")
-    .find("iframe")
-    .get(0);
-
-  if (hlsAboutVideo) {
-    hlsAboutVideo.pause();
-  }
-
-  if (aboutVideoYoutube) {
-    aboutVideoYoutube.contentWindow.postMessage(
-      JSON.stringify({
-        event: "command",
-        func:  "stopVideo"
-      }),
-      "https://www.youtube.com"
-    );
-  }
-  $("body").removeClass("light-box");
-  $(".light-box-video-container #light-box")[0].style.display = "none";
-  $(".light-box-video-container #fade-light-box")[0].style.display = "none";
-}
-
-function showLightBox() {
-  // Show up the light box.
-  $("body").addClass("light-box");
-  $(".light-box-video-container #light-box")[0].style.display = "block";
-  $(".light-box-video-container #fade-light-box")[0].style.display = "block";
-}

@@ -17,11 +17,18 @@
   {{ block.super }}
   <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="{% static 'js/vendor/jquery.fancybox.min.js' %}"></script>
   <script src="{% static 'js/hero.js' %}"></script>
   <script src="{% static 'js/testimonials_carousel.js' %}"></script>
   <script src="{% static 'js/courseware_carousel.js' %}"></script>
   <script src="{% static 'js/text_video_section.js' %}"></script>
   <script src="{% static 'js/image_carousel.js' %}"></script>
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {# This is included separately because FancyBox isn't used anywhere else so putting into the styles bundle isn't optimal. #}
+  <link href="{% static 'css/vendor/jquery.fancybox.min.css'%}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
