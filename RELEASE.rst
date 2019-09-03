@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.19.2 (Released September 03, 2019)
+--------------
+
+- Add modal selection widget for enrollment code purchase form (#1024)
+- - custom lightbox
+
 Version 0.19.1 (Released August 29, 2019)
 --------------
 
