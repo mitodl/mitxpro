@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.19.2
+Version 0.19.2 (Released September 03, 2019)
 --------------
 
 - Add modal selection widget for enrollment code purchase form (#1024)
