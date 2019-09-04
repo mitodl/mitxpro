@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.20.0
+Version 0.20.0 (Released September 04, 2019)
 --------------
 
 - #595 Sort dashboard courses
