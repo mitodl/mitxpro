@@ -1,4 +1,3 @@
-/* global require:false, module:false */
 import { prop } from "ramda"
 import { compose, createStore, applyMiddleware } from "redux"
 import { createLogger } from "redux-logger"

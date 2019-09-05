@@ -13,11 +13,11 @@ $(document).ready(function() {
   // More Dates
   $(".dates-tooltip").popover({
     template:
-      '<div class="popover" role="tooltip"> \
-        <div class="arrow"></div> \
-        <div class="popover-header py-2 px-0 mx-5"></div> \
-        <div class="popover-body"></div> \
-      </div>'
+      '<div class="popover" role="tooltip">' +
+      '<div class="arrow"></div>' +
+      '<div class="popover-header py-2 px-0 mx-5"></div>' +
+      '<div class="popover-body"></div>' +
+      "</div>"
   });
 
   const navbar = $("#subNavBarContainer");

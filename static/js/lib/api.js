@@ -1,6 +1,5 @@
 // @flow
-/* global SETTINGS:false, fetch: false */
-// For mocking purposes we need to use 'fetch' defined as a global instead of importing as a local.
+/* global SETTINGS:false */
 import "isomorphic-fetch"
 import * as R from "ramda"
 
