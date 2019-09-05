@@ -127,5 +127,9 @@
     "flow": "flow check",
     "fmt": "LOG_LEVEL= prettier-eslint --write --no-semi --ignore 'static/js/flow/**/*.js' 'static/js/**/*.js'",
     "fmt:check": "LOG_LEVEL= prettier-eslint --list-different --no-semi --ignore 'static/js/flow/**/*.js' 'static/js/**/*.js'"
+  },
+  "resolutions": {
+    "mixin-deep": "^1.3.2",
+    "set-value": "^2.0.1"
   }
 }
