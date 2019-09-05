@@ -1,0 +1,12 @@
+.expandable {
+  .header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+
+    .toggle {
+      margin-left: auto;
+    }
+  }
+}

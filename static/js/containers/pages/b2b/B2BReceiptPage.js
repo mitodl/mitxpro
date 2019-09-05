@@ -19,6 +19,7 @@ import { ALERT_TYPE_TEXT } from "../../../constants"
 import type { B2BOrderStatus } from "../../../flow/ecommerceTypes"
 import type { Location } from "react-router"
 import type Moment from "moment"
+import B2BExplanation from "../../../components/B2BExplanation"
 
 type Props = {
   addUserNotification: Function,
@@ -119,49 +120,55 @@ export class B2BReceiptPage extends React.Component<Props, State> {
     } = orderStatus
 
     return (
-      <div className="b2b-receipt-page container">
-        <div className="row">
-          <div className="col-lg-12">
-            <div className="title">Bulk Seats Receipt</div>
+      <React.Fragment>
+        <div className="b2b-receipt-page container">
+          <div className="row">
+            <div className="col-lg-12">
+              <div className="title">Bulk Seats Receipt</div>
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-lg-8">
+              <p>
+                Thank you! You have purchased one or more seats for your team.
+              </p>
+              <h3>Purchase Summary (Order Number):</h3>
+              <p className="course-or-program">
+                <span className="description">Course or program:</span>
+                {title}
+                <span className="description">{readableId}</span>
+              </p>
+              <p className="seats">
+                <span className="description">Seats:</span>
+                {numSeats} (at {formatPrice(itemPrice)} per seat)
+              </p>
+              <p className="email">
+                <span className="description">Email Address:</span>
+                {email}
+              </p>
+              If you encounter any issues please email {SETTINGS.support_email}{" "}
+              to contact customer support.
+            </div>
+            <div className="col-lg-4">
+              <B2BPurchaseSummary
+                itemPrice={itemPrice}
+                totalPrice={totalPrice}
+                numSeats={numSeats}
+              />
+              <a
+                href={`/api/b2b/orders/${hash}/codes/`}
+                className="enrollment-codes-link"
+              >
+                Download codes <i className="material-icons">save_alt</i>
+              </a>
+            </div>
           </div>
         </div>
-        <div className="row">
-          <div className="col-lg-8">
-            <p>
-              Thank you! You have purchased one or more seats for your team.
-            </p>
-            <h3>Purchase Summary (Order Number):</h3>
-            <p className="course-or-program">
-              <span className="description">Course or program:</span>
-              {title}
-              <span className="description">{readableId}</span>
-            </p>
-            <p className="seats">
-              <span className="description">Seats:</span>
-              {numSeats} (at {formatPrice(itemPrice)} per seat)
-            </p>
-            <p className="email">
-              <span className="description">Email Address:</span>
-              {email}
-            </p>
-            If you encounter any issues please email {SETTINGS.support_email} to
-            contact customer support.
-          </div>
-          <div className="col-lg-4">
-            <B2BPurchaseSummary
-              itemPrice={itemPrice}
-              totalPrice={totalPrice}
-              numSeats={numSeats}
-            />
-            <a
-              href={`/api/b2b/orders/${hash}/codes/`}
-              className="enrollment-codes-link"
-            >
-              Download codes <i className="material-icons">save_alt</i>
-            </a>
-          </div>
-        </div>
-      </div>
+        <B2BExplanation
+          alreadyPaid={true}
+          className="b2b-receipt-explanation"
+        />
+      </React.Fragment>
     )
   }
 }

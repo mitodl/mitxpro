@@ -446,3 +446,41 @@
   color: grey;
   background-image: linear-gradient(to right, $soft-light-gray 50%, rgba(255,255,255,0) 0%);
 }
+
+.b2b-explanation {
+  max-width: 1000px;
+
+  .expandable {
+    border-top: 2px solid $tab-color;
+
+    .header {
+      height: 75px;
+
+      .toggle {
+        font-size: 48px;
+        color: $navy-blue;
+      }
+
+      .title {
+        font-size: 20px;
+        color: $navy-blue;
+        font-weight: bold;
+      }
+    }
+
+    &.last-expandable {
+      border-bottom: 2px solid $tab-color;
+      margin-bottom: 20px;
+    }
+
+    .body {
+      font-size: 18px;
+      line-height: 36px;
+      font-weight: 500;
+    }
+  }
+
+  &.b2b-receipt-explanation {
+    margin-top: 30px;
+  }
+}
