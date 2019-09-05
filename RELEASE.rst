@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.20.1
+--------------
+
+- update set-value and mixin-deep js dependencies
+- update eslint utils, fix eslint issues
+- styling of file name
+
 Version 0.20.0 (Released September 04, 2019)
 --------------
 
