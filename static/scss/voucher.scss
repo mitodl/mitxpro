@@ -45,7 +45,10 @@
       font-weight: inherit;
     }
 
-
+    input[type=file] {
+      color: $blue;
+      font-weight: 600;
+    }
 
     select {
       background-color: $white;
