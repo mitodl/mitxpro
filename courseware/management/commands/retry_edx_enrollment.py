@@ -3,7 +3,6 @@ Management command to retry edX enrollment for a user's course run enrollments
 """
 from django.core.management import BaseCommand
 from django.contrib.auth import get_user_model
-from requests.exceptions import HTTPError
 
 from users.api import fetch_users
 from courseware.api import enroll_in_edx_course_runs
@@ -68,30 +67,8 @@ class Command(BaseCommand):
             course_run = enrollment.run
             try:
                 enroll_in_edx_course_runs(user, [course_run])
-            except HTTPError as exc:
-                self.stderr.write(
-                    self.style.ERROR(
-                        "API error enrolling user {} ({}) in course run '{}':\n(Status code: {}) {}".format(
-                            user.username,
-                            user.email,
-                            course_run.courseware_id,
-                            exc.response.status_code,
-                            exc.response.json(),
-                        )
-                    )
-                )
             except Exception as exc:  # pylint: disable=broad-except
-                self.stderr.write(
-                    self.style.ERROR(
-                        "Unexpected error enrolling user {} ({}) in course run '{}':\n({}) {}".format(
-                            user.username,
-                            user.email,
-                            course_run.courseware_id,
-                            type(exc).__name__,
-                            str(exc),
-                        )
-                    )
-                )
+                self.stderr.write(self.style.ERROR(str(exc)))
             else:
                 enrollment.edx_enrolled = True
                 enrollment.save_and_log(None)

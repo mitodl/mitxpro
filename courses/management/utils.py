@@ -2,10 +2,13 @@
 from functools import partial
 
 from django.core.management.base import BaseCommand, CommandError
-from requests.exceptions import HTTPError
 
 from courses.models import CourseRun, CourseRunEnrollment, Program, ProgramEnrollment
 from courseware.api import enroll_in_edx_course_runs
+from courseware.exceptions import (
+    EdxApiEnrollErrorException,
+    UnknownEdxApiEnrollException,
+)
 from ecommerce import mail_api
 from mitxpro.utils import has_equal_properties
 
@@ -237,19 +240,6 @@ class EnrollmentChangeCommand(BaseCommand):
         try:
             enroll_in_edx_course_runs(user, course_runs)
             return True
-        except HTTPError as exc:
-            self.stdout.write(
-                self.style.WARNING(
-                    "edX enrollment request failed ({}).\nResponse: {}".format(
-                        exc.response.status_code, exc.response.text
-                    )
-                )
-            )
-        except Exception as exc:  # pylint: disable=broad-except
-            self.stdout.write(
-                self.style.WARNING(
-                    "Unexpected edX enrollment error.\n{}".format(str(exc))
-                )
-            )
-
+        except (EdxApiEnrollErrorException, UnknownEdxApiEnrollException) as exc:
+            self.stdout.write(self.style.WARNING(str(exc)))
         return False
