@@ -16,10 +16,13 @@ from oauthlib.common import generate_token
 from edx_api.client import EdxApi
 
 from authentication import api as auth_api
+from courses.models import CourseRunEnrollment
 from courseware.exceptions import (
     OpenEdXOAuth2Error,
     CoursewareUserCreateError,
     NoEdxApiAuthError,
+    UnknownEdxApiEnrollException,
+    EdxApiEnrollErrorException,
 )
 from courseware.models import CoursewareUser, OpenEdxApiAuth
 from courseware.constants import (
@@ -27,6 +30,7 @@ from courseware.constants import (
     EDX_ENROLLMENT_PRO_MODE,
     EDX_ENROLLMENT_AUDIT_MODE,
     PRO_ENROLL_MODE_ERROR_TEXTS,
+    COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
 )
 from courseware.utils import edx_url
 from mitxpro.utils import now_in_utc
@@ -371,7 +375,8 @@ def enroll_in_edx_course_runs(user, course_runs):
             The results of enrollments via the edx API client
 
     Raises:
-        requests.exceptions.HTTPError: Raised if the underlying HTTP request fails
+        EdxApiEnrollErrorException: Raised if the underlying edX API HTTP request fails
+        UnknownEdxApiEnrollException: Raised if an unknown error was encountered during the edX API request
     """
     edx_client = get_edx_api_client(user)
     results = []
@@ -389,7 +394,7 @@ def enroll_in_edx_course_runs(user, course_runs):
                 [error_text in error_msg for error_text in PRO_ENROLL_MODE_ERROR_TEXTS]
             )
             if not is_enroll_mode_error:
-                raise
+                raise EdxApiEnrollErrorException(user, course_run, exc) from exc
             log.error(
                 "Failed to enroll user in %s with '%s' mode. Attempting to enroll with '%s' mode instead. "
                 "(Response [%d]: %s)",
@@ -399,8 +404,48 @@ def enroll_in_edx_course_runs(user, course_runs):
                 exc.response.status_code,
                 error_msg or str(exc.response),
             )
-            result = edx_client.enrollments.create_student_enrollment(
-                course_run.courseware_id, mode=EDX_ENROLLMENT_AUDIT_MODE
-            )
+            try:
+                result = edx_client.enrollments.create_student_enrollment(
+                    course_run.courseware_id, mode=EDX_ENROLLMENT_AUDIT_MODE
+                )
+            except HTTPError as inner_exc:
+                raise EdxApiEnrollErrorException(
+                    user, course_run, inner_exc
+                ) from inner_exc
+            except Exception as inner_exc:  # pylint: disable=broad-except
+                raise UnknownEdxApiEnrollException(
+                    user, course_run, inner_exc
+                ) from inner_exc
             results.append(result)
+        except Exception as exc:  # pylint: disable=broad-except
+            raise UnknownEdxApiEnrollException(user, course_run, exc) from exc
     return results
+
+
+def retry_failed_edx_enrollments():
+    """
+    Gathers all CourseRunEnrollments with edx_enrolled=False and retries them via the edX API
+
+    Returns:
+        list of CourseRunEnrollment: All CourseRunEnrollments that were successfully retried
+    """
+    now = now_in_utc()
+    failed_run_enrollments = CourseRunEnrollment.objects.select_related(
+        "user", "run"
+    ).filter(
+        edx_enrolled=False,
+        created_on__lt=now - timedelta(minutes=COURSEWARE_REPAIR_GRACE_PERIOD_MINS),
+    )
+    succeeded = []
+    for enrollment in failed_run_enrollments:
+        user = enrollment.user
+        course_run = enrollment.run
+        try:
+            enroll_in_edx_course_runs(user, [course_run])
+        except Exception as exc:  # pylint: disable=broad-except
+            log.exception(str(exc))
+        else:
+            enrollment.edx_enrolled = True
+            enrollment.save_and_log(None)
+            succeeded.append(enrollment)
+    return succeeded
