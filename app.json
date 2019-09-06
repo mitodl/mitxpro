@@ -321,6 +321,10 @@
       "description": "RedisCloud connection url",
       "required": false
     },
+    "RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY": {
+      "description": "How many seconds between retrying failed edX enrollments",
+      "required": false
+    },
     "ROBOTS_CACHE_TIMEOUT": {
       "description": "How long the robots.txt file should be cached",
       "required": false

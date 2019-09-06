@@ -1,6 +1,6 @@
 """Courseware API tests"""
 # pylint: disable=redefined-outer-name
-
+import operator as op
 from datetime import timedelta
 from urllib.parse import parse_qsl
 
@@ -12,7 +12,7 @@ import responses
 from requests.exceptions import HTTPError
 from rest_framework import status
 
-from courses.factories import CourseRunFactory
+from courses.factories import CourseRunFactory, CourseRunEnrollmentFactory
 from courseware.api import (
     create_user,
     create_edx_user,
@@ -20,6 +20,7 @@ from courseware.api import (
     get_valid_edx_api_auth,
     get_edx_api_client,
     enroll_in_edx_course_runs,
+    retry_failed_edx_enrollments,
     OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS,
     ACCESS_TOKEN_HEADER_NAME,
 )
@@ -28,8 +29,13 @@ from courseware.constants import (
     EDX_ENROLLMENT_PRO_MODE,
     EDX_ENROLLMENT_AUDIT_MODE,
     PRO_ENROLL_MODE_ERROR_TEXTS,
+    COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
 )
-from courseware.exceptions import CoursewareUserCreateError
+from courseware.exceptions import (
+    CoursewareUserCreateError,
+    EdxApiEnrollErrorException,
+    UnknownEdxApiEnrollException,
+)
 from courseware.factories import OpenEdxApiAuthFactory
 from courseware.models import CoursewareUser, OpenEdxApiAuth
 from mitxpro.utils import now_in_utc
@@ -288,3 +294,83 @@ def test_enroll_in_edx_course_runs_audit(mocker, user, error_text):
     )
     assert results == [audit_result]
     patched_log_error.assert_called_once()
+
+
+def test_enroll_pro_api_fail(mocker, user):
+    """
+    Tests that enroll_in_edx_course_runs raises an EdxApiEnrollErrorException if the request fails
+    for some reason besides an enrollment mode error
+    """
+    mock_client = mocker.MagicMock()
+    pro_enrollment_response = MockResponse({"message": "no dice"}, status_code=401)
+    mock_client.enrollments.create_student_enrollment = mocker.Mock(
+        side_effect=HTTPError(response=pro_enrollment_response)
+    )
+    mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+    course_run = CourseRunFactory.build()
+
+    with pytest.raises(EdxApiEnrollErrorException):
+        enroll_in_edx_course_runs(user, [course_run])
+
+
+def test_enroll_pro_unknown_fail(mocker, user):
+    """
+    Tests that enroll_in_edx_course_runs raises an UnknownEdxApiEnrollException if an unexpected exception
+    is encountered
+    """
+    mock_client = mocker.MagicMock()
+    mock_client.enrollments.create_student_enrollment = mocker.Mock(
+        side_effect=ValueError("Unexpected error")
+    )
+    mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+    course_run = CourseRunFactory.build()
+
+    with pytest.raises(UnknownEdxApiEnrollException):
+        enroll_in_edx_course_runs(user, [course_run])
+
+
+@pytest.mark.parametrize("exception_raised", [Exception("An error happened"), None])
+def test_retry_failed_edx_enrollments(mocker, exception_raised):
+    """
+    Tests that retry_failed_edx_enrollments loops through enrollments that failed in edX
+    and attempts to enroll them again
+    """
+    with freeze_time(now_in_utc() - timedelta(days=1)):
+        failed_enrollments = CourseRunEnrollmentFactory.create_batch(
+            3, edx_enrolled=False
+        )
+    patched_enroll_in_edx = mocker.patch(
+        "courseware.api.enroll_in_edx_course_runs",
+        side_effect=[None, exception_raised or None, None],
+    )
+    patched_log_exception = mocker.patch("courseware.api.log.exception")
+    expected_successful_enrollments = (
+        failed_enrollments
+        if not exception_raised
+        else op.itemgetter(0, 2)(failed_enrollments)
+    )
+    successful_enrollments = retry_failed_edx_enrollments()
+
+    assert patched_enroll_in_edx.call_count == len(failed_enrollments)
+    assert set(e.id for e in successful_enrollments) == set(
+        e.id for e in expected_successful_enrollments
+    )
+    assert patched_log_exception.called == (exception_raised is not None)
+
+
+def test_retry_failed_enroll_grace_period(mocker):
+    """
+    Tests that retry_failed_edx_enrollments does not attempt to repair any enrollments that were recently created
+    """
+    now = now_in_utc()
+    with freeze_time(now - timedelta(minutes=COURSEWARE_REPAIR_GRACE_PERIOD_MINS - 1)):
+        CourseRunEnrollmentFactory.create(edx_enrolled=False)
+    with freeze_time(now - timedelta(minutes=COURSEWARE_REPAIR_GRACE_PERIOD_MINS + 1)):
+        older_enrollment = CourseRunEnrollmentFactory.create(edx_enrolled=False)
+    patched_enroll_in_edx = mocker.patch("courseware.api.enroll_in_edx_course_runs")
+    successful_enrollments = retry_failed_edx_enrollments()
+
+    assert successful_enrollments == [older_enrollment]
+    patched_enroll_in_edx.assert_called_once_with(
+        older_enrollment.user, [older_enrollment.run]
+    )
