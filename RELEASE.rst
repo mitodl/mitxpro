@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.20.1
+Version 0.20.1 (Released September 06, 2019)
 --------------
 
 - update set-value and mixin-deep js dependencies
