@@ -612,7 +612,15 @@ CELERY_BEAT_SCHEDULE = {
             600,
             description="How many seconds between Hubspot API error checks",
         ),
-    }
+    },
+    "retry-failed-edx-enrollments": {
+        "task": "courseware.tasks.retry_failed_edx_enrollments",
+        "schedule": get_int(
+            "RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY",
+            60 * 30,
+            description="How many seconds between retrying failed edX enrollments",
+        ),
+    },
 }
 
 

@@ -15,7 +15,6 @@ from django.db.models import Q, Max, F, Count, Subquery
 from django.db import transaction
 from django.urls import reverse
 from rest_framework.exceptions import ValidationError
-from requests.exceptions import HTTPError
 
 from courses.constants import (
     CONTENT_TYPE_MODEL_PROGRAM,
@@ -30,6 +29,10 @@ from courses.models import (
     Program,
 )
 from courseware.api import enroll_in_edx_course_runs
+from courseware.exceptions import (
+    EdxApiEnrollErrorException,
+    UnknownEdxApiEnrollException,
+)
 from ecommerce import mail_api
 from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
 from ecommerce.exceptions import EcommerceException
@@ -490,20 +493,11 @@ def enroll_user_in_order_items(order):
     try:
         enroll_in_edx_course_runs(order.purchaser, runs)
         edx_request_success = True
-    except HTTPError as exc:
+    except (EdxApiEnrollErrorException, UnknownEdxApiEnrollException):
         log.exception(
-            "edX API enrollment failure for user %s (order id: %s, run ids: %s, response: %s)",
-            order.purchaser.username,
+            "Order enrollment failure for order id: %s (user: %s, runs in order: %s)",
             order.id,
-            str([run.id for run in runs]),
-            exc.response.content.decode("utf-8"),
-        )
-        edx_request_success = False
-    except Exception:  # pylint: disable=broad-except
-        log.exception(
-            "Unexpected edX enrollment error for user %s (order id: %s, run ids: %s)",
-            order.purchaser.username,
-            order.id,
+            order.purchaser.email,
             str([run.id for run in runs]),
         )
         edx_request_success = False
