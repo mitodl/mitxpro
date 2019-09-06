@@ -157,6 +157,9 @@ def send_b2b_receipt_email(order):
                         "purchase_date": order.updated_on.strftime(format_string),
                         "total_price": format_price(order.total_price),
                         "item_price": format_price(order.per_item_price),
+                        "discount": format_price(order.discount)
+                        if order.discount is not None
+                        else None,
                         "num_seats": str(order.num_seats),
                         "readable_id": get_readable_id(
                             order.product_version.product.content_object

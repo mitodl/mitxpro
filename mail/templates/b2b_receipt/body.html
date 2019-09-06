@@ -39,6 +39,12 @@
                                   <span style="color: #8a8b8c">Price Per</span><br />
                                   {{ item_price }}
                               </td>
+                              {% if discount %}
+                                  <td style="padding: 20px; vertical-align: top">
+                                      <span style="color: #8a8b8c">Discount</span><br />
+                                      <span style="color: #A31F34">{{ discount }}</span>
+                                  </td>
+                              {% endif %}
                               <td style="padding: 20px; vertical-align: top">
                                   <span style="color: #8a8b8c">Total Paid</span><br />
                                   {{ total_price }}
