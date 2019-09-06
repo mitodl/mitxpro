@@ -599,6 +599,7 @@ class CourseRunGrade(TimestampedModel, AuditableModel, ValidateOnSaveMixin):
     )
     letter_grade = models.CharField(max_length=6, blank=True, null=True)
     passed = models.BooleanField(default=False)
+    set_by_admin = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("user", "course_run")

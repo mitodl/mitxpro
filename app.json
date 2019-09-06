@@ -55,6 +55,14 @@
       "description": null,
       "required": false
     },
+    "CRON_COURSE_CERTIFICATES_DAYS": {
+      "description": "'day_of_week' value for 'generate-course-certificate' scheduled task (default will run once a day).",
+      "required": false
+    },
+    "CRON_COURSE_CERTIFICATES_HOURS": {
+      "description": "'hours' value for the 'generate-course-certificate' scheduled task (defaults to midnight)",
+      "required": false
+    },
     "CYBERSOURCE_ACCESS_KEY": {
       "description": "CyberSource Access Key",
       "required": false

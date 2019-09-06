@@ -1,7 +1,9 @@
 """
 Utilities for courses/certificates
 """
+from django.db import transaction
 from courses.models import CourseRunGrade, CourseRunCertificate
+from mitxpro.utils import has_equal_properties
 
 
 def ensure_course_run_grade(user, course_run, edx_grade, should_update=False):
@@ -25,15 +27,28 @@ def ensure_course_run_grade(user, course_run, edx_grade, should_update=False):
 
     updated = False
     if should_update:
-        grade, created = CourseRunGrade.objects.update_or_create(
-            course_run=course_run, user=user, defaults=grade_properties
-        )
-        updated = not created
+        with transaction.atomic():
+            run_grade, created = CourseRunGrade.objects.select_for_update().get_or_create(
+                course_run=course_run, user=user, defaults=grade_properties
+            )
+
+            if (
+                not created
+                and not run_grade.set_by_admin
+                and not has_equal_properties(run_grade, edx_grade)
+            ):
+                # Perform actual update now.
+                run_grade.grade = edx_grade.percent
+                run_grade.passed = edx_grade.passed
+                run_grade.letter_grade = edx_grade.letter_grade
+                run_grade.save_and_log(None)
+                updated = True
+
     else:
-        grade, created = CourseRunGrade.objects.get_or_create(
+        run_grade, created = CourseRunGrade.objects.get_or_create(
             course_run=course_run, user=user, defaults=grade_properties
         )
-    return grade, created, updated
+    return run_grade, created, updated
 
 
 def process_course_run_grade_certificate(course_run_grade):
