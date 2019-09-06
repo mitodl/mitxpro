@@ -9,7 +9,6 @@ import hmac
 from unittest.mock import PropertyMock
 import uuid
 
-from requests.exceptions import HTTPError
 import factory
 from rest_framework.exceptions import ValidationError
 import pytest
@@ -22,6 +21,10 @@ from courses.factories import (
     CourseRunFactory,
     CourseRunEnrollmentFactory,
     ProgramEnrollmentFactory,
+)
+from courseware.exceptions import (
+    EdxApiEnrollErrorException,
+    UnknownEdxApiEnrollException,
 )
 from ecommerce.api import (
     create_coupons,
@@ -935,15 +938,20 @@ def test_enroll_user_in_order_items_reactivate(mocker, user):
     assert program_enrollment.active is True
 
 
-def test_enroll_user_in_order_items_api_fail(mocker, user):
+@pytest.mark.parametrize(
+    "exception_cls", [EdxApiEnrollErrorException, UnknownEdxApiEnrollException]
+)
+def test_enroll_user_in_order_items_api_fail(mocker, user, exception_cls):
     """
     Test that enroll_user_in_order_items logs a message and still creates local enrollment records
     when the edX API request fails
     """
+    course_run = CourseRunFactory.build()
     patched_enroll_in_runs = mocker.patch(
         "ecommerce.api.enroll_in_edx_course_runs",
-        side_effect=HTTPError(response=mocker.Mock(content=mocker.Mock())),
+        side_effect=exception_cls(user, course_run, mocker.Mock()),
     )
+    patched_log_exception = mocker.patch("ecommerce.api.log.exception")
     order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
     basket = BasketFactory.create(user=user)
     CourseRunSelectionFactory.create_batch(2, basket=basket)
@@ -953,6 +961,7 @@ def test_enroll_user_in_order_items_api_fail(mocker, user):
         CourseRunEnrollment.objects.filter(user=user, edx_enrolled=False).count() == 2
     )
     patched_enroll_in_runs.assert_called_once()
+    patched_log_exception.assert_called_once()
 
 
 @pytest.mark.parametrize("enroll_type", ["CourseRun", "Program"])
