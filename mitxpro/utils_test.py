@@ -19,6 +19,7 @@ from mitxpro.utils import (
     has_equal_properties,
     remove_password_from_url,
     first_or_none,
+    find_object_with_matching_attr,
     unique,
     unique_ignore_case,
 )
@@ -85,6 +86,24 @@ def test_has_equal_properties():
     assert has_equal_properties(obj, dict(a=1, b=2, c=3)) is True
     assert has_equal_properties(obj, dict(a=2)) is False
     assert has_equal_properties(obj, dict(d=4)) is False
+
+
+def test_find_object_with_matching_attr():
+    """
+    Assert that find_object_with_matching_attr returns the first object in an iterable that has the given
+    attribute value (or None if there is no match)
+    """
+    objects = [
+        SimpleNamespace(a=0),
+        SimpleNamespace(a=1),
+        SimpleNamespace(a=2),
+        SimpleNamespace(a=3),
+        SimpleNamespace(a=None),
+    ]
+    assert find_object_with_matching_attr(objects, "a", 3) == objects[3]
+    assert find_object_with_matching_attr(objects, "a", None) == objects[4]
+    assert find_object_with_matching_attr(objects, "a", "bad value") is None
+    assert find_object_with_matching_attr(objects, "b", None) is None
 
 
 def test_partition():

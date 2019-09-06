@@ -128,6 +128,23 @@ def first_matching_item(iterable, predicate):
     return next(filter(predicate, iterable), None)
 
 
+def find_object_with_matching_attr(iterable, attr_name, value):
+    """
+    Finds the first item in an iterable that has an attribute with the given name and value. Returns
+    None otherwise.
+
+    Returns:
+        Matching item or None
+    """
+    for item in iterable:
+        try:
+            if getattr(item, attr_name) == value:
+                return item
+        except AttributeError:
+            pass
+    return None
+
+
 def has_equal_properties(obj, property_dict):
     """
     Returns True if the given object has the properties indicated by the keys of the given dict, and the values

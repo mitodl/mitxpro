@@ -33,10 +33,11 @@ from courseware.constants import (
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
 )
 from courseware.utils import edx_url
-from mitxpro.utils import now_in_utc
+from mitxpro.utils import now_in_utc, find_object_with_matching_attr
 
 
 log = logging.getLogger(__name__)
+User = get_user_model()
 
 OPENEDX_REGISTER_USER_PATH = "/user_api/v1/account/registration/"
 OPENEDX_REQUEST_DEFAULTS = dict(country="US", honor_code=True)
@@ -228,6 +229,69 @@ def _create_tokens_and_update_auth(auth, params):
     auth.access_token_expires_on = now_in_utc() + timedelta(seconds=expires_in)
     auth.save()
     return auth
+
+
+def repair_faulty_edx_user(user):
+    """
+    Loops through all Users that are incorrectly configured in edX and attempts to get
+    them in the correct state.
+
+    Args:
+        user (User): User to repair
+        platform (str): The courseware platform
+
+    Returns:
+        (bool, bool): Flags indicating whether a new edX user was created and whether a new
+                edX auth token was created.
+    """
+    created_user, created_auth_token = False, False
+    if (
+        find_object_with_matching_attr(
+            user.courseware_users.all(), "platform", value=PLATFORM_EDX
+        )
+        is None
+    ):
+        create_edx_user(user)
+        created_user = True
+    if not hasattr(user, "openedx_api_auth"):
+        create_edx_auth_token(user)
+        created_auth_token = True
+    return created_user, created_auth_token
+
+
+def repair_faulty_courseware_users():
+    """
+    Loops through all Users that are incorrectly configured with the courseware and attempts to get
+    them in the correct state.
+
+    Returns:
+        list of User: Users that were successfully repaired
+    """
+    now = now_in_utc()
+    repaired_users = []
+    for user in User.faulty_courseware_users.filter(
+        created_on__lt=now - timedelta(minutes=COURSEWARE_REPAIR_GRACE_PERIOD_MINS)
+    ):
+        try:
+            # edX is our only courseware for the time being. If a different courseware is added, this
+            # function will need to be updated.
+            created_user, created_auth_token = repair_faulty_edx_user(user)
+        except HTTPError as exc:
+            log.exception(
+                "Failed to repair faulty user %s (%s) - Response: [%s] %s",
+                user.username,
+                user.email,
+                exc.response.status_code,
+                exc.response.json(),
+            )
+        except Exception:  # pylint: disable=broad-except
+            log.exception(
+                "Failed to repair faulty user %s (%s)", user.username, user.email
+            )
+        else:
+            if created_user or created_auth_token:
+                repaired_users.append(user)
+    return repaired_users
 
 
 def get_valid_edx_api_auth(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS):

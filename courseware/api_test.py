@@ -1,6 +1,6 @@
 """Courseware API tests"""
 # pylint: disable=redefined-outer-name
-import operator as op
+import itertools
 from datetime import timedelta
 from urllib.parse import parse_qsl
 
@@ -11,12 +11,15 @@ from freezegun import freeze_time
 import responses
 from requests.exceptions import HTTPError
 from rest_framework import status
+from django.contrib.auth import get_user_model
 
 from courses.factories import CourseRunFactory, CourseRunEnrollmentFactory
 from courseware.api import (
     create_user,
     create_edx_user,
     create_edx_auth_token,
+    repair_faulty_edx_user,
+    repair_faulty_courseware_users,
     get_valid_edx_api_auth,
     get_edx_api_client,
     enroll_in_edx_course_runs,
@@ -36,12 +39,23 @@ from courseware.exceptions import (
     EdxApiEnrollErrorException,
     UnknownEdxApiEnrollException,
 )
-from courseware.factories import OpenEdxApiAuthFactory
+from courseware.factories import OpenEdxApiAuthFactory, CoursewareUserFactory
 from courseware.models import CoursewareUser, OpenEdxApiAuth
 from mitxpro.utils import now_in_utc
 from mitxpro.test_utils import MockResponse
+from users.factories import UserFactory
 
+
+User = get_user_model()
 pytestmark = [pytest.mark.django_db]
+
+
+@pytest.fixture()
+def mock_http_error():
+    """Mocked HTTPError with required properties"""
+    return HTTPError(
+        response=MockResponse(content={"bad": "response"}, status_code=400)
+    )
 
 
 @pytest.fixture()
@@ -344,18 +358,23 @@ def test_retry_failed_edx_enrollments(mocker, exception_raised):
         side_effect=[None, exception_raised or None, None],
     )
     patched_log_exception = mocker.patch("courseware.api.log.exception")
-    expected_successful_enrollments = (
-        failed_enrollments
-        if not exception_raised
-        else op.itemgetter(0, 2)(failed_enrollments)
-    )
     successful_enrollments = retry_failed_edx_enrollments()
 
     assert patched_enroll_in_edx.call_count == len(failed_enrollments)
-    assert set(e.id for e in successful_enrollments) == set(
-        e.id for e in expected_successful_enrollments
-    )
-    assert patched_log_exception.called == (exception_raised is not None)
+    assert len(successful_enrollments) == (3 if exception_raised is None else 2)
+    assert patched_log_exception.called == bool(exception_raised)
+    if exception_raised:
+        failed_enroll_user, failed_enroll_runs = patched_enroll_in_edx.call_args_list[
+            1
+        ][0]
+        expected_successful_enrollments = [
+            e
+            for e in failed_enrollments
+            if e.user != failed_enroll_user and e.run != failed_enroll_runs[0]
+        ]
+        assert {e.id for e in successful_enrollments} == {
+            e.id for e in expected_successful_enrollments
+        }
 
 
 def test_retry_failed_enroll_grace_period(mocker):
@@ -374,3 +393,89 @@ def test_retry_failed_enroll_grace_period(mocker):
     patched_enroll_in_edx.assert_called_once_with(
         older_enrollment.user, [older_enrollment.run]
     )
+
+
+@pytest.mark.parametrize(
+    "no_courseware_user,no_edx_auth", itertools.product([True, False], [True, False])
+)
+def test_repair_faulty_edx_user(mocker, user, no_courseware_user, no_edx_auth):
+    """
+    Tests that repair_faulty_edx_user creates CoursewareUser/OpenEdxApiAuth objects as necessary and
+    returns flags that indicate what was created
+    """
+    patched_create_edx_user = mocker.patch("courseware.api.create_edx_user")
+    patched_create_edx_auth_token = mocker.patch("courseware.api.create_edx_auth_token")
+    courseware_user = CoursewareUserFactory.create(user=user)
+    patched_find_object = mocker.patch(
+        "courseware.api.find_object_with_matching_attr",
+        return_value=None if no_courseware_user else courseware_user,
+    )
+    openedx_api_auth = None if no_edx_auth else OpenEdxApiAuthFactory.build()
+    user.openedx_api_auth = openedx_api_auth
+
+    created_user, created_auth_token = repair_faulty_edx_user(user)
+    patched_find_object.assert_called_once()
+    assert patched_create_edx_user.called is no_courseware_user
+    assert patched_create_edx_auth_token.called is no_edx_auth
+    assert created_user is no_courseware_user
+    assert created_auth_token is no_edx_auth
+
+
+@pytest.mark.parametrize(
+    "exception_raised", [pytest.lazy_fixture("mock_http_error"), Exception, None]
+)
+def test_repair_faulty_courseware_users(mocker, exception_raised):
+    """
+    Tests that repair_faulty_courseware_users loops through all incorrectly configured Users, attempts to repair
+    them, and continues iterating through the Users if an exception is raised
+    """
+    with freeze_time(now_in_utc() - timedelta(days=1)):
+        users = UserFactory.create_batch(3)
+    user_count = len(users)
+    patched_log_exception = mocker.patch("courseware.api.log.exception")
+    patched_faulty_user_qset = mocker.patch(
+        "users.models.FaultyCoursewareUserManager.get_queryset",
+        return_value=User.objects.all(),
+    )
+    patched_repair_user = mocker.patch(
+        "courseware.api.repair_faulty_edx_user",
+        side_effect=[
+            (True, True),
+            # Function should continue executing if an exception is thrown
+            exception_raised or (True, True),
+            (True, True),
+        ],
+    )
+    repaired_users = repair_faulty_courseware_users()
+
+    patched_faulty_user_qset.assert_called_once()
+    assert patched_repair_user.call_count == user_count
+    assert len(repaired_users) == (3 if exception_raised is None else 2)
+    assert patched_log_exception.called == bool(exception_raised)
+    if exception_raised:
+        failed_user = patched_repair_user.call_args_list[1][0]
+        expected_repaired_users = [user for user in users if user != failed_user]
+        assert {u.id for u in users} == {u.id for u in expected_repaired_users}
+
+
+def test_retry_users_grace_period(mocker):
+    """
+    Tests that repair_faulty_courseware_users does not attempt to repair any users that were recently created
+    """
+    now = now_in_utc()
+    with freeze_time(now - timedelta(minutes=COURSEWARE_REPAIR_GRACE_PERIOD_MINS - 1)):
+        UserFactory.create()
+    with freeze_time(now - timedelta(minutes=COURSEWARE_REPAIR_GRACE_PERIOD_MINS + 1)):
+        user_to_repair = UserFactory.create()
+    patched_faulty_user_qset = mocker.patch(
+        "users.models.FaultyCoursewareUserManager.get_queryset",
+        return_value=User.objects.all(),
+    )
+    patched_repair_user = mocker.patch(
+        "courseware.api.repair_faulty_edx_user", return_value=(True, True)
+    )
+    repaired_users = repair_faulty_courseware_users()
+
+    assert repaired_users == [user_to_repair]
+    patched_faulty_user_qset.assert_called_once()
+    patched_repair_user.assert_called_once_with(user_to_repair)

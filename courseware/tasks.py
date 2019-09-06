@@ -26,3 +26,10 @@ def retry_failed_edx_enrollments():
         (enrollment.user.email, enrollment.run.courseware_id)
         for enrollment in successful_enrollments
     ]
+
+
+@app.task(acks_late=True)
+def repair_faulty_courseware_users():
+    """Calls the API method to repair faulty courseware users"""
+    repaired_users = api.repair_faulty_courseware_users()
+    return [user.email for user in repaired_users]

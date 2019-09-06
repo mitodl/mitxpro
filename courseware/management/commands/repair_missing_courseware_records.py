@@ -3,10 +3,9 @@ Management command to repair missing courseware records
 """
 from django.core.management import BaseCommand
 from django.contrib.auth import get_user_model
-from django.db.models import Q, Count
 from requests.exceptions import HTTPError
 
-from courseware.api import create_user
+from courseware.api import repair_faulty_edx_user
 
 User = get_user_model()
 
@@ -21,21 +20,16 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Walk all users who are missing records and repair them"""
 
-        users_to_repair = User.objects.annotate(
-            courseware_user_count=Count("courseware_users"),
-            openedx_api_auth_count=Count("openedx_api_auth"),
-        ).filter(Q(courseware_user_count=0) | Q(openedx_api_auth_count=0))
-
-        self.stdout.write(
-            self.style.SUCCESS(f"Repairing {users_to_repair.count()} users")
-        )
+        users_to_repair = User.faulty_courseware_users
+        self.stdout.write(f"Repairing {users_to_repair.count()} users")
 
         error_count = 0
         success_count = 0
 
         for user in users_to_repair.iterator():
+            result = []
             try:
-                create_user(user)
+                created_user, created_auth_token = repair_faulty_edx_user(user)
             except HTTPError as exc:
                 self.stderr.write(
                     self.style.ERROR(
@@ -51,8 +45,14 @@ class Command(BaseCommand):
                 )
                 error_count += 1
             else:
+                if created_user:
+                    result.append("Created edX user")
+                if created_auth_token:
+                    result.append("Created edX auth token")
                 self.stdout.write(
-                    self.style.SUCCESS(f"{user.username} ({user.email}): Success")
+                    self.style.SUCCESS(
+                        f"{user.username} ({user.email}): {', '.join(result)}"
+                    )
                 )
                 success_count += 1
 
