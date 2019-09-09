@@ -5,12 +5,24 @@ from factory import Faker, SubFactory, Trait, LazyAttribute
 from factory.django import DjangoModelFactory
 import pytz
 
-from courseware.models import OpenEdxApiAuth
+from courseware.models import OpenEdxApiAuth, CoursewareUser
+from courseware.constants import PLATFORM_EDX
 from mitxpro.utils import now_in_utc
 
 
+class CoursewareUserFactory(DjangoModelFactory):
+    """Factory for CoursewareUser"""
+
+    user = SubFactory("users.factories.UserFactory")
+    platform = PLATFORM_EDX
+    has_been_synced = True
+
+    class Meta:
+        model = CoursewareUser
+
+
 class OpenEdxApiAuthFactory(DjangoModelFactory):
-    """Factory for Users"""
+    """Factory for OpenEdxApiAuth"""
 
     user = SubFactory("users.factories.UserFactory")
     refresh_token = Faker("pystr", max_chars=30)

@@ -5,6 +5,7 @@ import logging
 import os
 import platform
 from urllib.parse import urljoin, urlparse
+from datetime import timedelta
 from celery.schedules import crontab
 
 import dj_database_url
@@ -14,7 +15,7 @@ from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
-from mitxpro.envs import get_any, get_bool, get_int, get_string
+from mitxpro.envs import get_any, get_bool, get_int, get_string, OffsettingSchedule
 
 VERSION = "0.20.1"
 
@@ -615,6 +616,17 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TIMEZONE = "UTC"
+RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY = get_int(
+    "RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY",
+    60 * 30,
+    description="How many seconds between retrying failed edX enrollments",
+)
+REPAIR_COURSEWARE_USERS_FREQUENCY = get_int(
+    "REPAIR_COURSEWARE_USERS_FREQUENCY",
+    60 * 30,
+    description="How many seconds between repairing courseware records for faulty users",
+)
+REPAIR_COURSEWARE_USERS_OFFSET = int(REPAIR_COURSEWARE_USERS_FREQUENCY / 2)
 CELERY_BEAT_SCHEDULE = {
     "check-hubspot-api-errors": {
         "task": "hubspot.tasks.check_hubspot_api_errors",
@@ -626,10 +638,13 @@ CELERY_BEAT_SCHEDULE = {
     },
     "retry-failed-edx-enrollments": {
         "task": "courseware.tasks.retry_failed_edx_enrollments",
-        "schedule": get_int(
-            "RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY",
-            60 * 30,
-            description="How many seconds between retrying failed edX enrollments",
+        "schedule": RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY,
+    },
+    "repair-faulty-edx-users": {
+        "task": "courseware.tasks.repair_faulty_courseware_users",
+        "schedule": OffsettingSchedule(
+            run_every=timedelta(seconds=REPAIR_COURSEWARE_USERS_FREQUENCY),
+            offset=timedelta(seconds=REPAIR_COURSEWARE_USERS_OFFSET),
         ),
     },
     "generate-course-certificate": {

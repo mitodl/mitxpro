@@ -329,6 +329,10 @@
       "description": "RedisCloud connection url",
       "required": false
     },
+    "REPAIR_COURSEWARE_USERS_FREQUENCY": {
+      "description": "How many seconds between repairing courseware records for faulty users",
+      "required": false
+    },
     "RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY": {
       "description": "How many seconds between retrying failed edX enrollments",
       "required": false

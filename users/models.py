@@ -3,6 +3,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
+from django.db.models import Q, Count
 from django.utils.translation import gettext_lazy as _
 import pycountry
 import ulid
@@ -108,6 +109,26 @@ class UserManager(BaseUserManager):
         return self._create_user(username, email, password, **extra_fields)
 
 
+class FaultyCoursewareUserManager(BaseUserManager):
+    """User manager that defines a queryset of Users that are incorrectly configured in the courseware"""
+
+    def get_queryset(self):  # pylint: disable=missing-docstring
+        return (
+            super()
+            .get_queryset()
+            .select_related("openedx_api_auth")
+            .prefetch_related("courseware_users")
+            .annotate(
+                courseware_user_count=Count("courseware_users"),
+                openedx_api_auth_count=Count("openedx_api_auth"),
+            )
+            .filter(
+                (Q(courseware_user_count=0) | Q(openedx_api_auth_count=0)),
+                is_active=True,
+            )
+        )
+
+
 def generate_username():
     """Generates a new username"""
     return ulid.new().str
@@ -131,6 +152,7 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
     )
 
     objects = UserManager()
+    faulty_courseware_users = FaultyCoursewareUserManager()
 
     def get_full_name(self):
         """Returns the user's fullname"""

@@ -1,10 +1,13 @@
 """Tests for user models"""
 # pylint: disable=too-many-arguments, redefined-outer-name
+import factory
 from django.core.exceptions import ValidationError
 from django.db import transaction
 import pytest
 import ulid
 
+from courseware.factories import OpenEdxApiAuthFactory, CoursewareUserFactory
+from users.factories import UserFactory
 from users.models import LegalAddress, User
 
 pytestmark = pytest.mark.django_db
@@ -87,3 +90,23 @@ def test_legal_address_validation(field, value, is_valid):
         assert field not in exc.value.error_dict
     else:
         assert field in exc.value.error_dict
+
+
+@pytest.mark.django_db
+def test_faulty_user_qset():
+    """User.faulty_courseware_users should return a User queryset that contains incorrectly configured active Users"""
+    users = UserFactory.create_batch(5)
+    # An inactive user should not be returned even if they lack auth and courseware user records
+    UserFactory.create(is_active=False)
+    good_users = users[0:2]
+    expected_faulty_users = users[2:]
+    OpenEdxApiAuthFactory.create_batch(
+        3, user=factory.Iterator(good_users + [users[3]])
+    )
+    CoursewareUserFactory.create_batch(
+        3, user=factory.Iterator(good_users + [users[4]])
+    )
+
+    assert set(User.faulty_courseware_users.values_list("id", flat=True)) == {
+        user.id for user in expected_faulty_users
+    }
