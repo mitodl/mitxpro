@@ -14,7 +14,7 @@ django-oauth-toolkit==1.2.0
 django-user-agents==0.4.0
 djangorestframework==3.9.4
 djoser
-edx-api-client==0.7.1
+edx-api-client==0.8.0
 django-storages==1.7.1
 ipython
 newrelic

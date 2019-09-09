@@ -91,6 +91,18 @@ class AuditableModel(Model):
         raise NotImplementedError
 
     @classmethod
+    def objects_for_audit(cls):
+        """
+        Returns the correct model manager for the auditable model. This defaults to `objects`, but if
+        a different manager is needed for any reason (for example, if `objects` is changed to a manager
+        that applies some default filters), it can be overridden.
+
+        Returns:
+             django.db.models.manager.Manager: The correct model manager for the auditable model
+        """
+        return cls.objects
+
+    @classmethod
     def get_audit_class(cls):
         """
         Returns:
@@ -108,7 +120,7 @@ class AuditableModel(Model):
             acting_user (User):
                 The user who made the change to the model. May be None if inapplicable.
         """
-        before_obj = self.__class__.objects.filter(id=self.id).first()
+        before_obj = self.objects_for_audit().filter(id=self.id).first()
         self.save(*args, **kwargs)
         self.refresh_from_db()
         before_dict = None

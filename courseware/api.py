@@ -21,8 +21,8 @@ from courseware.exceptions import (
     OpenEdXOAuth2Error,
     CoursewareUserCreateError,
     NoEdxApiAuthError,
-    UnknownEdxApiEnrollException,
     EdxApiEnrollErrorException,
+    UnknownEdxApiEnrollException,
 )
 from courseware.models import CoursewareUser, OpenEdxApiAuth
 from courseware.constants import (
@@ -513,3 +513,32 @@ def retry_failed_edx_enrollments():
             enrollment.save_and_log(None)
             succeeded.append(enrollment)
     return succeeded
+
+
+def unenroll_edx_course_run(run_enrollment):
+    """
+    Unenrolls/deactivates a user in an edx course run
+
+    Args:
+        run_enrollment (CourseRunEnrollment): The enrollment record that represents the
+            currently-enrolled course run
+
+    Returns:
+        edx_api.enrollments.models.Enrollment:
+            The resulting Enrollment object (which should be set to inactive)
+
+    Raises:
+        EdxApiEnrollErrorException: Raised if the underlying edX API HTTP request fails
+        UnknownEdxApiEnrollException: Raised if an unknown error was encountered during the edX API request
+    """
+    edx_client = get_edx_api_client(run_enrollment.user)
+    try:
+        deactivated_enrollment = edx_client.enrollments.deactivate_enrollment(
+            run_enrollment.run.courseware_id
+        )
+    except HTTPError as exc:
+        raise EdxApiEnrollErrorException(run_enrollment.user, run_enrollment.run, exc)
+    except Exception as exc:  # pylint: disable=broad-except
+        raise UnknownEdxApiEnrollException(run_enrollment.user, run_enrollment.run, exc)
+    else:
+        return deactivated_enrollment
