@@ -8,7 +8,7 @@ type Props = {
   itemPrice: Decimal,
   totalPrice: Decimal,
   discount: ?string,
-  numSeats: ?number,
+  numSeats: number,
   alreadyPaid: boolean
 }
 const B2BPurchaseSummary = ({
@@ -36,7 +36,7 @@ const B2BPurchaseSummary = ({
       <div className="row">
         <div className="col-4">Quantity:</div>
         <div className="col-8">
-          <span className="quantity">{numSeats || ""}</span>
+          <span className="quantity">{numSeats}</span>
         </div>
       </div>
       {discount ? (
