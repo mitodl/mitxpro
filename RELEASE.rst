@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.20.2
+--------------
+
+- Added cron job to retry edx enrollments
+
 Version 0.20.1 (Released September 06, 2019)
 --------------
 
