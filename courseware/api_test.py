@@ -24,6 +24,7 @@ from courseware.api import (
     get_edx_api_client,
     enroll_in_edx_course_runs,
     retry_failed_edx_enrollments,
+    unenroll_edx_course_run,
     OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS,
     ACCESS_TOKEN_HEADER_NAME,
 )
@@ -51,14 +52,6 @@ pytestmark = [pytest.mark.django_db]
 
 
 @pytest.fixture()
-def mock_http_error():
-    """Mocked HTTPError with required properties"""
-    return HTTPError(
-        response=MockResponse(content={"bad": "response"}, status_code=400)
-    )
-
-
-@pytest.fixture()
 def application(settings):
     """Test data and settings needed for create_edx_user tests"""
     settings.OPENEDX_OAUTH_APP_NAME = "test_app_name"
@@ -71,6 +64,14 @@ def application(settings):
         client_type="confidential",
         authorization_grant_type="authorization-code",
         skip_authorization=True,
+    )
+
+
+@pytest.fixture()
+def mock_http_error():
+    """Mocked HTTPError with required properties"""
+    return HTTPError(
+        response=MockResponse(content={"bad": "response"}, status_code=400)
     )
 
 
@@ -479,3 +480,41 @@ def test_retry_users_grace_period(mocker):
     assert repaired_users == [user_to_repair]
     patched_faulty_user_qset.assert_called_once()
     patched_repair_user.assert_called_once_with(user_to_repair)
+
+
+def test_unenroll_edx_course_run(mocker):
+    """Tests that unenroll_edx_course_run makes a call to unenroll in edX via the API client"""
+    mock_client = mocker.MagicMock()
+    run_enrollment = CourseRunEnrollmentFactory.create(edx_enrolled=True)
+    courseware_id = run_enrollment.run.courseware_id
+    enroll_return_value = mocker.Mock(json={"course_id": courseware_id})
+    mock_client.enrollments.deactivate_enrollment = mocker.Mock(
+        return_value=enroll_return_value
+    )
+    mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+    deactivated_enrollment = unenroll_edx_course_run(run_enrollment)
+
+    mock_client.enrollments.deactivate_enrollment.assert_called_once_with(courseware_id)
+    assert deactivated_enrollment == enroll_return_value
+
+
+@pytest.mark.parametrize(
+    "client_exception_raised,expected_exception",
+    [
+        [pytest.lazy_fixture("mock_http_error"), EdxApiEnrollErrorException],
+        [ValueError, UnknownEdxApiEnrollException],
+        [Exception, UnknownEdxApiEnrollException],
+    ],
+)
+def test_unenroll_edx_course_run_failure(
+    mocker, client_exception_raised, expected_exception
+):
+    """Tests that unenroll_edx_course_run translates exceptions raised by the API client"""
+    run_enrollment = CourseRunEnrollmentFactory.create(edx_enrolled=True)
+    mock_client = mocker.MagicMock()
+    mock_client.enrollments.deactivate_enrollment = mocker.Mock(
+        side_effect=client_exception_raised
+    )
+    mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+    with pytest.raises(expected_exception):
+        unenroll_edx_course_run(run_enrollment)

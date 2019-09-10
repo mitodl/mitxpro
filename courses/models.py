@@ -460,6 +460,10 @@ class EnrollmentModel(TimestampedModel, AuditableModel):
     def get_audit_class(cls):
         raise NotImplementedError
 
+    @classmethod
+    def objects_for_audit(cls):
+        return cls.all_objects
+
     def to_dict(self):
         return {
             **serialize_model_object(self),

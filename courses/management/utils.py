@@ -4,11 +4,11 @@ from functools import partial
 from django.core.management.base import BaseCommand, CommandError
 
 from courses.models import CourseRun, CourseRunEnrollment, Program, ProgramEnrollment
-from courseware.api import enroll_in_edx_course_runs
 from courseware.exceptions import (
     EdxApiEnrollErrorException,
     UnknownEdxApiEnrollException,
 )
+from courseware.api import enroll_in_edx_course_runs, unenroll_edx_course_run
 from ecommerce import mail_api
 from mitxpro.utils import has_equal_properties
 
@@ -43,10 +43,12 @@ def enrollment_summaries(enrollments):
 def create_or_update_enrollment(model_cls, defaults=None, **kwargs):
     """Creates or updates an enrollment record"""
     defaults = {**(defaults or {}), "active": True, "change_status": None}
-    enrollment, created = model_cls.all_objects.get_or_create(
-        **kwargs, defaults=dict(**defaults)
-    )
-    if not created and not has_equal_properties(enrollment, defaults):
+    created = False
+    enrollment = model_cls.all_objects.filter(**kwargs).order_by("-created_on").first()
+    if not enrollment:
+        enrollment = model_cls.objects.create(**{**defaults, **kwargs})
+        created = True
+    elif enrollment and not has_equal_properties(enrollment, defaults):
         for field_name, field_value in defaults.items():
             setattr(enrollment, field_name, field_value)
         enrollment.save_and_log(None)
@@ -138,8 +140,7 @@ class EnrollmentChangeCommand(BaseCommand):
             ),
         )
 
-    @staticmethod
-    def deactivate_run_enrollment(run_enrollment, change_status):
+    def deactivate_run_enrollment(self, run_enrollment, change_status):
         """
         Helper method to deactivate a CourseRunEnrollment
 
@@ -150,7 +151,12 @@ class EnrollmentChangeCommand(BaseCommand):
             CourseRunEnrollment: The deactivated enrollment
         """
         run_enrollment.deactivate_and_save(change_status, no_user=True)
-        mail_api.send_course_run_unenrollment_email(run_enrollment)
+        try:
+            unenroll_edx_course_run(run_enrollment)
+        except Exception as exc:  # pylint: disable=broad-except
+            self.stdout.write(self.style.ERROR(str(exc)))
+        else:
+            mail_api.send_course_run_unenrollment_email(run_enrollment)
         return run_enrollment
 
     def create_program_enrollment(
