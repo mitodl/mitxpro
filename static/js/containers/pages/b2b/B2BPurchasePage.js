@@ -14,6 +14,7 @@ import type {
   BulkCheckoutPayload,
   ProductDetail
 } from "../../../flow/ecommerceTypes"
+import B2BExplanation from "../../../components/B2BExplanation"
 
 type Props = {
   checkout: (payload: BulkCheckoutPayload) => Promise<*>,
@@ -76,12 +77,15 @@ export class B2BPurchasePage extends React.Component<Props, State> {
     const { checkout, products, requestPending } = this.props
 
     return (
-      <B2BPurchaseForm
-        onSubmit={this.onSubmit}
-        products={products}
-        checkout={checkout}
-        requestPending={requestPending}
-      />
+      <React.Fragment>
+        <B2BPurchaseForm
+          onSubmit={this.onSubmit}
+          products={products}
+          checkout={checkout}
+          requestPending={requestPending}
+        />
+        <B2BExplanation alreadyPaid={false} />
+      </React.Fragment>
     )
   }
 }
