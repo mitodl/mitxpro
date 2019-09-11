@@ -669,6 +669,15 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
     def get_certified_object_id(self):
         return self.course_run_id
 
+    @property
+    def link(self):
+        """
+        Get the link at which this certificate will be served
+        Format: /certificates/<uuid>/
+        Example: /certificates/93ebd74e-5f88-4b47-bb09-30a6d575328f/
+        """
+        return "/certificates/{}/".format(str(self.uuid))
+
     def __str__(self):
         return 'CourseRunCertificate for user={user}, run={course_run} ({uuid})"'.format(
             user=self.user.username, course_run=self.course_run.text_id, uuid=self.uuid

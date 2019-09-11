@@ -73,7 +73,8 @@ export const makeCourseRunDetail = (): CourseRunDetail => {
 }
 
 export const makeCourseRunEnrollment = (): CourseRunEnrollment => ({
-  run: makeCourseRunDetail()
+  run:         makeCourseRunDetail(),
+  certificate: null
 })
 
 const genProgramEnrollmentId = incrementer()

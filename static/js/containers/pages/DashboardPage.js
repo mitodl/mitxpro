@@ -221,7 +221,17 @@ export class DashboardPage extends React.Component<Props, State> {
                     </a>
                   ) : null}
               </div>
-              <div className="certificate-link col-lg-4 col-md-5" />
+              <div className="certificate-link col-lg-4 col-md-5">
+                {courseRunEnrollment.certificate ? (
+                  <a
+                    href={courseRunEnrollment.certificate.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View Certificate
+                  </a>
+                ) : null}
+              </div>
             </div>
           </div>
         </div>

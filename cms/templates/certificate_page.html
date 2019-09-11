@@ -1,46 +1,137 @@
 {% extends "base.html" %}
 {% load static wagtailimages_tags %}
 
+{% block title %}{{ site_name }} | Course Certificate{% endblock %}
+
+{% block seohead %}
+    {{ block.super }}
+    <meta property="og:site_name" content="{{ site_name }}" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@MITxonedX" />
+    <meta name="twitter:image" content="{{ share_image_url }}" />
+    <meta property="og:title" content="{{ site_name }} | Course Certificate: {{ page.product_name }}" />
+    <meta property="og:description" content="Course Certificate for {{ page.product_name }} awarded by {{ site_name }}." />
+    <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+    <meta property="og:image:url" content="{{ share_image_url }}" />
+    <meta property="og:image:width" content="{{ share_image_width }}" />
+    <meta property="og:image:height" content="{{ share_image_height }}" />
+    <meta property="og:image:alt" content="A certificate from MIT xPRO" />
+{% endblock %}
+
 {% block content %}
-<div class="certificate-wrapper">
-    <div class="certificate">
-        <div class="certificate-holder">
-            <div class="certificate-logo">
-                <img src="{% static 'images/certificates/certificate-mit-logo.png' %}" alt="">
-            </div>
-            <span class="institute-text">Massachusetts Institute of Technology</span>
-            <div class="institute-logo">
-                <img src="{% static 'images/certificates/certificate-logo.png' %}" alt="">
-            </div>
-            <span class="certify-text">This is to certify that</span>
-            <span class="certify-name">{{ learner_name }}</span>
-            <span class="success-text">has successfully completed</span>
-            <span class="degree-text">{{ page.product_name }}</span>
-            {% if page.CEUs %}
-                <span class="award-text">Awarded {{ page.CEUs }} Continuing Eduction Units (CEUs) <br>{{ run.start_date|date:"F j " }} - {{ run.end_date|date }}</span>
-            {% endif %}
-            <div class="row justify-content-center">
-            {% for signatory in page.signatory_pages %}
-                <div class="col-sm-4 certify-by">
-                    <div class="signature-area">
-                        {% image signatory.signature_image fill-150x50 %}
-                    </div>
-                    <span class="title">{{ signatory.name }}</span>
-                    {% if signatory.title_1 %}
-                        <p>{{ signatory.title_1 }}</p>
-                    {% endif %}
-                    {% if signatory.title_2 %}
-                        <p>{{ signatory.title_2 }}</p>
-                    {% endif %}
-                    {% if signatory.organization %}
-                        <p>{{ signatory.organization }}</p>
-                    {% endif %}
+<div class="container-fluid certificate-page">
+    <div class="row no-print">
+        <div class="col px-0">
+            <div class="cer-head">
+                <div class="certificate-logo">
+                    <a href="https://web.mit.edu/" class="mit"></a>
+                    <a href="/" class="xpro"></a>
+                    <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="">
                 </div>
-            {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% if certificate_user == user %}
+        <div class="row no-print">
+            <div class="col px-0">
+                <div class="cer-user-info">
+                    <div class="user-info-holder">
+                        <ul class="social-links">
+                        <li>
+                            <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri|urlencode }}&text={{ share_text|urlencode }}">
+                                <img src="{% static 'images/certificates/icon-twitter.svg' %}" alt="Share to Twitter">
+                            </a>
+                        </li>
+                        <li>
+                            <a href="http://www.facebook.com/share.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank">
+                                <img src="{% static 'images/certificates/icon-facebook.svg' %}" alt="Share to Facebook">
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.linkedin.com/profile/add?startTask={{ page.product_name|urlencode }}" target="_blank">
+                                <img src="{% static 'images/certificates/icon-linkedin.svg' %}" alt="Share to LinkedIn">
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:window.print();">
+                                <img src="{% static 'images/certificates/icon-print.svg' %}" alt="Print">
+                            </a>
+                        </li>
+                    </ul>
+                        <h2>Congratulations, {{ learner_name }}!</h2>
+                        <p>You have successfully completed {{ page.product_name }}. Share your accomplishment with your friends, family and colleagues. </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col certificate-wrapper">
+            <div class="certificate">
+                <div class="certificate-holder">
+                    <div class="certificate-logo">
+                        <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="">
+                    </div>
+                    <span class="institute-text">Massachusetts Institute of Technology</span>
+                    <div class="institute-logo">
+                        <img src="{% static 'images/certificates/certificate-logo.png' %}" alt="">
+                    </div>
+                    <span class="certify-text">This is to certify that</span>
+                    <span class="certify-name">{{ learner_name }}</span>
+                    <span class="success-text">has successfully completed</span>
+                    <span class="degree-text">{{ page.product_name }}</span>
+                    {% if page.CEUs %}
+                        <span class="award-text">Awarded {{ page.CEUs }} Continuing Education Units (CEUs) <br>{{ run.start_date|date:"F j " }} - {{ run.end_date|date }}</span>
+                    {% endif %}
+                    <div class="row justify-content-center">
+                        {% for signatory in page.signatory_pages %}
+                            <div class="col-sm-4 certify-by">
+                                <div class="signature-area">
+                                    {% image signatory.signature_image fill-150x50 %}
+                                </div>
+                                <span class="title">{{ signatory.name }}</span>
+                                {% if signatory.title_1 %}
+                                    <p>{{ signatory.title_1 }}</p>
+                                {% endif %}
+                                {% if signatory.title_2 %}
+                                    <p>{{ signatory.title_2 }}</p>
+                                {% endif %}
+                                {% if signatory.organization %}
+                                    <p>{{ signatory.organization }}</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row no-print">
+        <div class="col cer-footer">
+            <div class="certificate-logo">
+                <a href="https://web.mit.edu/" class="mit"></a>
+                <a href="/" class="xpro"></a>
+                <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="">
+            </div>
+            <div class="cer-footer-info">
+                <ul class="links">
+                    <li><a href="/terms-of-service/">Terms of Services</a></li>
+                    <li><a href="/privacy-policy/">Privacy Policy</a></li>
+                </ul>
+                <span class="copyright">&copy; <a href="/">MIT Office of Digital Learning</a> <br>All rights reserved except where noted.</span>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    {% if certificate_user == user %}
+        <script type="text/javascript" async src="https://platform.twitter.com/widgets.js"></script>
+    {% endif %}
+{% endblock %}
+
 {% block footer %}
 {% endblock %}

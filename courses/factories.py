@@ -8,7 +8,14 @@ from factory.django import DjangoModelFactory
 from ecommerce.models import Company
 from users.factories import UserFactory
 
-from .models import Program, Course, CourseRun, ProgramEnrollment, CourseRunEnrollment
+from .models import (
+    Program,
+    Course,
+    CourseRun,
+    ProgramEnrollment,
+    CourseRunEnrollment,
+    CourseRunCertificate,
+)
 
 FAKE = faker.Factory.create()
 
@@ -82,6 +89,16 @@ class CourseRunFactory(DjangoModelFactory):
         past_start = factory.Trait(
             start_date=factory.Faker("past_datetime", tzinfo=pytz.utc)
         )
+
+
+class CourseRunCertificateFactory(DjangoModelFactory):
+    """Factory for CourseRunCertificate"""
+
+    course_run = factory.SubFactory(CourseRunFactory)
+    user = factory.SubFactory(UserFactory)
+
+    class Meta:
+        model = CourseRunCertificate
 
 
 class CourseRunEnrollmentFactory(DjangoModelFactory):
