@@ -60,7 +60,9 @@ class B2BCoupon(TimestampedModel, AuditableModel):
     )
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     enabled = models.BooleanField(default=False)
-    company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True)
+    company = models.ForeignKey(
+        Company, on_delete=models.PROTECT, null=True, blank=True
+    )
     expiration_date = models.DateTimeField(
         null=True,
         blank=True,
