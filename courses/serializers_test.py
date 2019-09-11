@@ -30,8 +30,9 @@ from courses.serializers import (
     CourseRunEnrollmentSerializer,
     ProgramEnrollmentSerializer,
 )
+from ecommerce.factories import ProductVersionFactory
 from ecommerce.serializers import CompanySerializer
-from mitxpro.test_utils import drf_datetime
+from mitxpro.test_utils import drf_datetime, assert_drf_json_equal
 
 pytestmark = [pytest.mark.django_db]
 
@@ -51,20 +52,30 @@ def test_base_program_serializer():
     }
 
 
-def test_serialize_program(mock_context):
+@pytest.mark.parametrize("has_product", [True, False])
+def test_serialize_program(mock_context, has_product):
     """Test Program serialization"""
     run = CourseRunFactory.create()
     program = run.course.program
     page = ProgramPageFactory.create(program=program)
+    if has_product:
+        ProductVersionFactory.create(product__content_object=program)
     data = ProgramSerializer(instance=program, context=mock_context).data
-    assert data == {
-        "title": program.title,
-        "readable_id": program.readable_id,
-        "id": program.id,
-        "description": page.description,
-        "courses": [CourseSerializer(instance=run.course, context=mock_context).data],
-        "thumbnail_url": page.thumbnail_image.file.url,
-    }
+
+    assert_drf_json_equal(
+        data,
+        {
+            "title": program.title,
+            "readable_id": program.readable_id,
+            "id": program.id,
+            "description": page.description,
+            "courses": [
+                CourseSerializer(instance=run.course, context=mock_context).data
+            ],
+            "thumbnail_url": page.thumbnail_image.file.url,
+            "current_price": program.current_price,
+        },
+    )
 
 
 def test_base_course_serializer():
@@ -89,9 +100,9 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
     now = datetime.now(tz=pytz.UTC)
     if is_anonymous:
         mock_context["request"].user = AnonymousUser()
-    user = mock_context["request"].user
     if all_runs:
         mock_context["all_runs"] = True
+    user = mock_context["request"].user
     course_run = CourseRunFactory.create(course__no_program=True, live=True)
     course = course_run.course
 
@@ -110,12 +121,10 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
     page = CoursePageFactory.create(course=course)
     data = CourseSerializer(instance=course, context=mock_context).data
 
-    if all_runs:
+    if all_runs or is_anonymous:
         expected_runs = unexpired_runs
-    elif not is_anonymous:
-        expected_runs = [course_run]
     else:
-        expected_runs = []
+        expected_runs = [course_run]
 
     assert data == {
         "title": course.title,
@@ -131,7 +140,8 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
     }
 
 
-def test_serialize_course_run():
+@pytest.mark.parametrize("has_product", [True, False])
+def test_serialize_course_run(has_product):
     """Test CourseRun serialization"""
     faculty_names = ["Emma Jones", "Joe Smith"]
     course_run = CourseRunFactory.create()
@@ -143,22 +153,32 @@ def test_serialize_course_run():
             for idx, name in enumerate(faculty_names)
         },
     )
+    product_id = (
+        ProductVersionFactory.create(product__content_object=course_run).product.id
+        if has_product
+        else None
+    )
+
     course_run.refresh_from_db()
-    # instructors =
+
     data = CourseRunSerializer(course_run).data
-    assert data == {
-        "title": course_run.title,
-        "courseware_id": course_run.courseware_id,
-        "courseware_url": course_run.courseware_url,
-        "start_date": drf_datetime(course_run.start_date),
-        "end_date": drf_datetime(course_run.end_date),
-        "enrollment_start": drf_datetime(course_run.enrollment_start),
-        "enrollment_end": drf_datetime(course_run.enrollment_end),
-        "expiration_date": drf_datetime(course_run.expiration_date),
-        "instructors": [{"name": name} for name in faculty_names],
-        "id": course_run.id,
-        "product_id": None,
-    }
+    assert_drf_json_equal(
+        data,
+        {
+            "title": course_run.title,
+            "courseware_id": course_run.courseware_id,
+            "courseware_url": course_run.courseware_url,
+            "start_date": drf_datetime(course_run.start_date),
+            "end_date": drf_datetime(course_run.end_date),
+            "enrollment_start": drf_datetime(course_run.enrollment_start),
+            "enrollment_end": drf_datetime(course_run.enrollment_end),
+            "expiration_date": drf_datetime(course_run.expiration_date),
+            "current_price": course_run.current_price,
+            "instructors": [{"name": name} for name in faculty_names],
+            "id": course_run.id,
+            "product_id": product_id,
+        },
+    )
 
 
 def test_serialize_course_run_detail():

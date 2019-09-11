@@ -82,6 +82,7 @@ class CourseRunSerializer(serializers.ModelSerializer):
             "expiration_date",
             "courseware_url",
             "courseware_id",
+            "current_price",
             "instructors",
             "id",
             "product_id",
@@ -115,11 +116,12 @@ class CourseSerializer(serializers.ModelSerializer):
         if all_runs:
             active_runs = instance.unexpired_runs
         else:
-            user = self.context["request"].user
-            if user.is_anonymous:
-                active_runs = []
-            else:
-                active_runs = instance.available_runs(user)
+            user = self.context["request"].user if "request" in self.context else None
+            active_runs = (
+                instance.available_runs(user)
+                if user and user.is_authenticated
+                else instance.unexpired_runs
+            )
         return [
             CourseRunSerializer(instance=run, context=self.context).data
             for run in active_runs
@@ -200,6 +202,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             "description",
             "thumbnail_url",
             "readable_id",
+            "current_price",
             "id",
             "courses",
         ]

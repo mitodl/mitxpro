@@ -17,6 +17,7 @@ from ecommerce.api import make_checkout_url
 from ecommerce.factories import CouponVersionFactory
 from ecommerce.serializers import ProductVersionSerializer
 from mitxpro.utils import dict_without_keys
+from mitxpro.test_utils import assert_drf_json_equal
 
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
@@ -245,17 +246,20 @@ def test_order_status(client):
         reverse("b2b-order-status", kwargs={"hash": str(order.unique_id)})
     )
     assert resp.status_code == status.HTTP_200_OK
-    assert resp.json() == {
-        "email": order.email,
-        "num_seats": order.num_seats,
-        "product_version": ProductVersionSerializer(
-            order.product_version, context={"all_runs": True}
-        ).data,
-        "item_price": str(order.per_item_price),
-        "total_price": str(order.total_price),
-        "status": order.status,
-        "discount": None,
-    }
+    assert_drf_json_equal(
+        resp.json(),
+        {
+            "email": order.email,
+            "num_seats": order.num_seats,
+            "product_version": ProductVersionSerializer(
+                order.product_version, context={"all_runs": True}
+            ).data,
+            "item_price": str(order.per_item_price),
+            "total_price": str(order.total_price),
+            "status": order.status,
+            "discount": None,
+        },
+    )
 
 
 def test_order_status_missing(client):
