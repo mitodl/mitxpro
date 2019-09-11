@@ -192,7 +192,7 @@ class Order(OrderAbstract, AuditableModel):
     @staticmethod
     def get_reference_number_prefix():
         """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""
-        return f"{REFERENCE_NUMBER_PREFIX}{settings.CYBERSOURCE_REFERENCE_PREFIX}"
+        return f"{REFERENCE_NUMBER_PREFIX}{settings.ENVIRONMENT}"
 
     def __str__(self):
         """Description for Order"""

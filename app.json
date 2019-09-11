@@ -95,10 +95,6 @@
       "description": "CyberSource Profile ID",
       "required": false
     },
-    "CYBERSOURCE_REFERENCE_PREFIX": {
-      "description": "a string prefix to identify the application in CyberSource transactions",
-      "required": false
-    },
     "CYBERSOURCE_SECURE_ACCEPTANCE_URL": {
       "description": "CyberSource API endpoint",
       "required": false

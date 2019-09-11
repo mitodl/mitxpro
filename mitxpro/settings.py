@@ -808,11 +808,6 @@ CYBERSOURCE_SECURE_ACCEPTANCE_URL = get_string(
 CYBERSOURCE_PROFILE_ID = get_string(
     "CYBERSOURCE_PROFILE_ID", None, description="CyberSource Profile ID"
 )
-CYBERSOURCE_REFERENCE_PREFIX = get_string(
-    "CYBERSOURCE_REFERENCE_PREFIX",
-    None,
-    description="a string prefix to identify the application in CyberSource transactions",
-)
 CYBERSOURCE_WSDL_URL = get_string(
     "CYBERSOURCE_WSDL_URL", None, description="The URL to the cybersource WSDL"
 )
