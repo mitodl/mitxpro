@@ -81,7 +81,7 @@ class CourseRunFactory(DjangoModelFactory):
     expiration_date = factory.Faker(
         "date_time_between", start_date="+1y", end_date="+2y", tzinfo=pytz.utc
     )
-    live = factory.Faker("boolean")
+    live = True
 
     class Meta:
         model = CourseRun

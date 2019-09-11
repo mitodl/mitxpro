@@ -8,6 +8,7 @@ from mitxpro.test_utils import (
     assert_not_raises,
     MockResponse,
     PickleableMock,
+    assert_drf_json_equal,
 )
 
 
@@ -44,6 +45,13 @@ def test_assert_not_raises_failure():
     with pytest.raises(AssertionError):
         with assert_not_raises():
             assert 1 == 2
+
+
+def test_assert_drf_json_equall():
+    """Asserts that objects are equal in JSON"""
+    assert_drf_json_equal({"a": 1}, {"a": 1})
+    assert_drf_json_equal(2, 2)
+    assert_drf_json_equal([2], [2])
 
 
 @pytest.mark.parametrize(

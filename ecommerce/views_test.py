@@ -48,7 +48,7 @@ from ecommerce.serializers import (
     DataConsentUserSerializer,
 )
 from ecommerce.test_utils import unprotect_version_tables
-from mitxpro.test_utils import create_tempfile_csv
+from mitxpro.test_utils import create_tempfile_csv, assert_drf_json_equal
 from mitxpro.utils import dict_without_keys
 from users.factories import UserFactory
 
@@ -995,11 +995,9 @@ def test_products_viewset_list(user_drf_client, coupon_product_ids):
     products = response.json()
     assert {product.get("id") for product in products} == set(coupon_product_ids)
     for product in products:
-        assert (
-            product
-            == ProductSerializer(
-                instance=Product.objects.get(id=product.get("id"))
-            ).data
+        assert_drf_json_equal(
+            product,
+            ProductSerializer(instance=Product.objects.get(id=product.get("id"))).data,
         )
 
 
@@ -1018,11 +1016,9 @@ def test_products_viewset_detail(user_drf_client, coupon_product_ids):
         reverse("products_api-detail", kwargs={"pk": coupon_product_ids[0]})
     )
     assert response.status_code == status.HTTP_200_OK
-    assert (
-        response.json()
-        == ProductSerializer(
-            instance=Product.objects.get(id=coupon_product_ids[0])
-        ).data
+    assert_drf_json_equal(
+        response.json(),
+        ProductSerializer(instance=Product.objects.get(id=coupon_product_ids[0])).data,
     )
 
 

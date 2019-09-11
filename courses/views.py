@@ -23,6 +23,8 @@ from mitxpro.views import get_js_settings_context
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for Programs"""
 
+    permission_classes = []
+
     serializer_class = ProgramSerializer
     queryset = Program.objects.all()
 
