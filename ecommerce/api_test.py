@@ -356,7 +356,9 @@ def test_get_valid_coupon_versions_by_company(basket_and_coupons):
     ) == [basket_and_coupons.coupongroup_worst.coupon_version]
 
 
-@pytest.mark.parametrize("order_status", [Order.FULFILLED, Order.FAILED])
+@pytest.mark.parametrize(
+    "order_status", [Order.FULFILLED, Order.FAILED, Order.REFUNDED]
+)
 def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons, order_status):
     """
     Verify that CouponPaymentVersions that have exceeded redemption limits are not returned
@@ -387,7 +389,7 @@ def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons, order_statu
             basket_and_coupons.basket_item.basket.user,
         )
     )
-    if order_status == Order.FULFILLED:
+    if order_status in (Order.FULFILLED, Order.REFUNDED):
         assert best_versions == []
     else:
         assert best_versions == [

@@ -322,7 +322,12 @@ def get_valid_coupon_versions(
                     "couponredemption",
                     filter=(
                         Q(couponredemption__order__purchaser=user)
-                        & Q(couponredemption__order__status=Order.FULFILLED)
+                        & Q(
+                            couponredemption__order__status__in=(
+                                Order.FULFILLED,
+                                Order.REFUNDED,
+                            )
+                        )
                     ),
                 )
             )
@@ -331,7 +336,14 @@ def get_valid_coupon_versions(
             global_redemptions=(
                 Count(
                     "couponredemption",
-                    filter=(Q(couponredemption__order__status=Order.FULFILLED)),
+                    filter=(
+                        Q(
+                            couponredemption__order__status__in=(
+                                Order.FULFILLED,
+                                Order.REFUNDED,
+                            )
+                        )
+                    ),
                 )
             )
         )
