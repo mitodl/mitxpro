@@ -73,6 +73,7 @@ def test_get_field_names():
         "status",
         "created_on",
         "updated_on",
+        "total_price_paid",
     }
 
 

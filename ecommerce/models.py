@@ -186,6 +186,7 @@ class Order(OrderAbstract, AuditableModel):
     purchaser = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders"
     )
+    total_price_paid = models.DecimalField(decimal_places=2, max_digits=20)
 
     objects = OrderManager()
 
