@@ -41,7 +41,12 @@ class B2BCouponManager(models.Manager):
             self.filter(coupon_code=coupon_code, product_id=product_id, enabled=True)
             .filter(Q(activation_date__isnull=True) | Q(activation_date__lt=Now()))
             .filter(Q(expiration_date__isnull=True) | Q(expiration_date__gt=Now()))
-            .exclude(b2bcouponredemption__order__status=B2BOrder.FULFILLED)
+            .exclude(
+                b2bcouponredemption__order__status__in=(
+                    B2BOrder.FULFILLED,
+                    B2BOrder.REFUNDED,
+                )
+            )
             .get()
         )
 

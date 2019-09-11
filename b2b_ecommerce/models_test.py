@@ -118,10 +118,11 @@ def test_get_unexpired_coupon_not_enabled(order_with_coupon):
         )
 
 
-def test_get_unexpired_coupon_order_fulfilled(order_with_coupon):
+@pytest.mark.parametrize("order_status", [B2BOrder.FULFILLED, B2BOrder.REFUNDED])
+def test_get_unexpired_coupon_order_fulfilled(order_with_coupon, order_status):
     """get_unexpired_coupon should raise a B2BCoupon.DoesNotExist if the coupon is already used in an order"""
     order, coupon = order_with_coupon
-    order.status = B2BOrder.FULFILLED
+    order.status = order_status
     order.save()
     with pytest.raises(B2BCoupon.DoesNotExist):
         B2BCoupon.objects.get_unexpired_coupon(
