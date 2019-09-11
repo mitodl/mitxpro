@@ -3,8 +3,10 @@ Page models for the CMS
 """
 # pylint: disable=too-many-lines
 import re
+from urllib.parse import urljoin
 
 from django.conf import settings
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.db import models
 from django.db.models import Prefetch
 from django.utils.text import slugify
@@ -12,6 +14,7 @@ from django.http.response import Http404
 from django.shortcuts import reverse
 from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
+from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.core import blocks
 from wagtail.core.blocks import PageChooserBlock, RawHTMLBlock, StreamBlock
 from wagtail.core.fields import RichTextField, StreamField
@@ -24,6 +27,7 @@ from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
 from courses.constants import DEFAULT_COURSE_IMG_PATH
+from courses.models import CourseRunCertificate
 from cms.blocks import (
     FacultyBlock,
     LearningTechniqueBlock,
@@ -217,7 +221,7 @@ class CatalogPage(Page):
         )
 
 
-class HomePage(MetadataPageMixin, Page):
+class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
     """
     CMS Page representing the home/root route
     """
@@ -314,6 +318,29 @@ class HomePage(MetadataPageMixin, Page):
             **get_js_settings_context(request),
             "catalog_page": CatalogPage.objects.first(),
         }
+
+    @route(r"^certificates/([A-Za-z0-9-]+)/?$")
+    def course_certificate(self, request, uuid, *args, **kwargs):
+        """
+        Serve a course certificate by uuid
+        """
+        # Try to fetch a certificate by the uuid passed in the URL
+        try:
+            certificate = CourseRunCertificate.objects.get(uuid=uuid)
+        except CourseRunCertificate.DoesNotExist:
+            raise Http404()
+
+        # Get a CertificatePage to serve this request
+        certificate_page = (
+            certificate.course_run.course.page.certificate_page
+            if certificate.course_run.course.page
+            else None
+        )
+        if not certificate_page:
+            raise Http404()
+
+        certificate_page.certificate = certificate
+        return certificate_page.serve(request)
 
 
 class ProductPage(MetadataPageMixin, Page):
@@ -504,6 +531,11 @@ class ProductPage(MetadataPageMixin, Page):
     def propel_career(self):
         """Gets the propel your career section child page"""
         return self._get_child_page_of_type(TextSection)
+
+    @property
+    def certificate_page(self):
+        """Gets the certificate child page"""
+        return self._get_child_page_of_type(CertificatePage)
 
     @property
     def is_course_page(self):
@@ -1223,6 +1255,10 @@ class CertificatePage(CourseProgramChildPage):
     class Meta:
         verbose_name = "Certificate"
 
+    def __init__(self, *args, **kwargs):
+        self.certificate = None
+        super().__init__(*args, **kwargs)
+
     def save(self, *args, **kwargs):
         # auto generate a unique slug so we don't hit a ValidationError
         self.title = (
@@ -1260,17 +1296,42 @@ class CertificatePage(CourseProgramChildPage):
 
     def get_context(self, request, *args, **kwargs):
         preview_context = {}
+        context = {}
 
         if request.is_preview:
             preview_context = {
                 "learner_name": "Anthony M. Stark",
                 "run": self.parent.product.first_unexpired_run,
             }
+        elif self.certificate:
+            # Verify that the certificate in fact is for this same course
+            if self.parent.product != self.certificate.course_run.course:
+                raise Http404()
 
+            context = {
+                "certificate_user": self.certificate.user,
+                "learner_name": self.certificate.user.get_full_name(),
+                "run": self.certificate.course_run,
+            }
+        else:
+            raise Http404()
+
+        # The share image url needs to be absolute
         return {
+            "site_name": settings.SITE_NAME,
+            "share_image_url": urljoin(
+                request.build_absolute_uri("///"),
+                static("images/certificates/share-image.png"),
+            ),
+            "share_image_width": "1665",
+            "share_image_height": "1291",
+            "share_text": "I just earned a certificate in {} from {}".format(
+                self.product_name, settings.SITE_NAME
+            ),
             **super().get_context(request, *args, **kwargs),
             **get_js_settings_context(request),
             **preview_context,
+            **context,
         }
 
 

@@ -4,124 +4,275 @@ $gray-light: #d9e0e3;
 $text-gray-dark: #6b6969;
 $text-gray-light: #d2d0d1;
 
-.certificate-wrapper {
-  padding: 20px 15px;
-  margin: 20px auto;
-  max-width: 1120px;
+@media print {
+  .no-print {
+    display: none;
+  }
+
+  .full-width-print {
+    max-width: 100%;
+  }
 }
 
-.certificate-holder {
-  margin: 0 auto;
-  max-width: 730px;
-}
-
-.certificate {
-  border: 2px solid $gray-light;
-  background: white;
-  padding: 35px 15px 0;
-  font-family: Georgia, 'Times New Roman', Times, serif;
-  text-align: center;
-  color: black;
+.certificate-page {
+  background-color: #edf1f2;
 
   .certificate-logo {
     display: block;
     max-width: 250px;
     margin: 0 auto 15px;
+    position: relative;
 
     img {
       display: block;
       width: 100%;
     }
-  }
 
-  .institute-logo {
-    display: block;
-    max-width: 202px;
-    margin: 0 auto 30px;
+    a {
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 103px;
+      height: 56px;
 
-    img {
-      display: block;
-      width: 100%;
+      &.xpro {
+        left: 149px;
+        top: 22px;
+        width: 98px;
+        height: 33px;
+      }
     }
   }
+}
 
-  .certify-text {
-    display: block;
-    font-size: 18px;
-    line-height: 25px;
-    color: $text-gray-dark;
-    font-style: italic;
-  }
+.cer-head {
+  background: white;
+  padding: 20px 15px 5px;
+}
 
-  .institute-text {
-    display: block;
-    font-size: 18px;
-    line-height: 25px;
-    color: $text-gray-dark;
-    margin: 0 0 15px;
-  }
+.cer-user-info {
+  border: 1px solid #979797;
+  background-color: $navy-blue;
+  padding: 20px 0;
+  font: 14px/17px Helvetica;
+  color: white;
 
-  .certify-name {
-    display: block;
-    font-size: 50px;
-    line-height: 60px;
-    font-weight: 600;
-    margin: 0 0 40px;
-  }
-
-  .degree-text {
-    display: block;
-    font-size: 38px;
-    line-height: 45px;
-    font-weight: 600;
-  }
-
-  .success-text {
-    display: block;
-    font-size: 18px;
-    line-height: 25px;
-    color: $text-gray-dark;
-    font-style: italic;
+  h2 {
     margin: 0 0 10px;
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: bold;
   }
 
-  .award-text {
-    display: block;
-    font-size: 20px;
-    line-height: 25px;
-    margin: 0 0 10px;
+  p {
+    margin: 0;
   }
 
-  .certify-by {
-    padding-top: 35px;
-    padding-bottom: 35px;
-    font-size: 12px;
-    line-height: 17px;
-    color: $text-gray-dark;
-
-    .title {
-      color: black;
-      display: block;
-      font-size: 14px;
-      font-weight: bold;
-      margin: 0 0 5px;
-    }
-
-    p {
-      margin: 0 0 5px;
-    }
+  .user-info-holder {
+    margin: 0 auto;
+    max-width: 1000px;
+    padding: 0 15px;
   }
+}
 
-  .signature-area {
-    border-bottom: 2px solid $text-gray-light;
-    padding: 0 0 15px;
+.certificate-wrapper {
+  padding: 20px 15px;
+  margin: 0 auto;
+  max-width: 1120px;
+
+  .certificate {
+    border: 2px solid $gray-light;
+    background: white;
+    padding: 35px 15px 0;
+    font-family: Georgia, "Times New Roman", Times, serif;
     text-align: center;
-    margin: 0 0 15px;
+    color: black;
 
-    img {
-      display: inline-block;
-      vertical-align: top;
-      max-width: 80%;
+    .institute-logo {
+      display: block;
+      max-width: 202px;
+      margin: 0 auto 30px;
+
+      img {
+        display: block;
+        width: 100%;
+      }
     }
+
+    .certificate-holder {
+      margin: 0 auto;
+      max-width: 730px;
+
+      .certify-text {
+        display: block;
+        font-size: 18px;
+        line-height: 25px;
+        color: $text-gray-dark;
+        font-style: italic;
+      }
+
+      .institute-text {
+        display: block;
+        font-size: 18px;
+        line-height: 25px;
+        color: $text-gray-dark;
+        margin: 0 0 15px;
+      }
+
+      .certify-name {
+        display: block;
+        font-size: 50px;
+        line-height: 60px;
+        font-weight: 600;
+        margin: 0 0 40px;
+      }
+
+      .degree-text {
+        display: block;
+        font-size: 38px;
+        line-height: 45px;
+        font-weight: 600;
+      }
+
+      .success-text {
+        display: block;
+        font-size: 18px;
+        line-height: 25px;
+        color: $text-gray-dark;
+        font-style: italic;
+        margin: 0 0 10px;
+      }
+
+      .award-text {
+        display: block;
+        font-size: 20px;
+        line-height: 25px;
+        margin: 0 0 20px;
+      }
+
+      .certify-by {
+        padding-top: 35px;
+        padding-bottom: 35px;
+        font-size: 12px;
+        line-height: 17px;
+        color: $text-gray-dark;
+
+        .title {
+          color: black;
+          display: block;
+          font-size: 14px;
+          font-weight: bold;
+          margin: 0 0 5px;
+        }
+
+        .signature-area {
+          border-bottom: 2px solid $text-gray-light;
+          padding: 0 0 15px;
+          text-align: center;
+          margin: 0 0 15px;
+
+          img {
+            display: inline-block;
+            vertical-align: top;
+            max-width: 80%;
+          }
+        }
+      }
+
+      p {
+        margin: 0 0 5px;
+      }
+    }
+  }
+}
+
+.cer-footer {
+  margin: 0 auto;
+  max-width: 1100px;
+  border-top: 4px solid #e5e9ec;
+  padding: 60px 15px;
+  font: 12px/17px "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  &:after {
+    clear: both;
+    content: "";
+    display: block;
+  }
+
+  .certificate-logo {
+    float: right;
+    width: 74px;
+    margin: 30px 0 0 20px;
+    position: relative;
+
+    @include media-breakpoint-down(xs) {
+      float: none;
+      margin: 0 0 20px;
+    }
+
+    a {
+      position: absolute;
+      left: 0;
+      top: 2px;
+      width: 31px;
+      height: 18px;
+
+      &.xpro {
+        left: 44px;
+        top: 6px;
+        width: 30px;
+        height: 11px;
+      }
+    }
+  }
+
+  .cer-footer-info {
+    overflow: hidden;
+  }
+
+  a {
+    color: #0079bc;
+  }
+
+  .copyright {
+    display: block;
+  }
+
+  .links {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: inline-block;
+      margin: 0 15px 0 0;
+    }
+  }
+}
+
+.social-links {
+  margin: 10px 0 20px 30px;
+  list-style: none;
+  padding: 0;
+  float: right;
+
+  @include media-breakpoint-down(xs) {
+    float: none;
+    margin: 0;
+    text-align: center;
+  }
+
+  li {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 0 0 15px;
+
+    @include media-breakpoint-down(xs) {
+      margin: 0 10px 15px;
+    }
+  }
+
+  img {
+    width: 25px;
   }
 }

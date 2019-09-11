@@ -36,8 +36,14 @@ export type Program = {
   readable_id: string
 }
 
+export type CourseRunCertificate = {
+  link: string,
+  uuid: string
+}
+
 export type CourseRunEnrollment = {
-  run: CourseRunDetail
+  run: CourseRunDetail,
+  certificate: ?CourseRunCertificate
 }
 
 export type ProgramEnrollment = {

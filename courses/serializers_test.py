@@ -193,6 +193,7 @@ def test_serialize_course_run_enrollments(has_company):
             if has_company
             else None
         ),
+        "certificate": None,
     }
 
 

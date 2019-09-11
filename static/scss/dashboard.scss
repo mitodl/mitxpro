@@ -134,7 +134,20 @@
         text-decoration: none;
       }
     }
+  }
 
+  .certificate-link {
+    a {
+      color: white;
+      font-weight: 600;
+      background-color: $denim-blue;
+      padding-left: 1em;
+      padding-right: 1em;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
   }
 }
 

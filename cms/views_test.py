@@ -4,16 +4,22 @@ from datetime import timedelta
 import pytest
 from django.urls import reverse
 from rest_framework import status
-from wagtail.core.models import Site
+from wagtail.core.models import Site, Page
 
 from cms.factories import (
     CatalogPageFactory,
     CoursePageFactory,
     ProgramPageFactory,
     TextSectionFactory,
+    CertificatePageFactory,
+    HomePageFactory,
 )
 from cms.models import CourseIndexPage, HomePage, ProgramIndexPage
-from courses.factories import CourseFactory, CourseRunFactory
+from courses.factories import (
+    CourseFactory,
+    CourseRunFactory,
+    CourseRunCertificateFactory,
+)
 from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
@@ -76,6 +82,43 @@ def test_course_program_child_view(client):
     child_page.save_revision().publish()
     resp = client.get(child_page.get_url())
     assert resp.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_course_certificate_view(user_client, user):
+    """
+    Test that certificate pages show correctly
+    """
+    site = Site.objects.get(is_default_site=True)
+    root = Page.objects.get(depth=1)
+
+    old_home = Page.objects.filter(depth=2).first()
+    old_home.slug = "some-slug"
+    old_home.save_revision().publish()
+
+    home = HomePageFactory.create(parent=root, slug="home")
+    home.save_revision().publish()
+    site.root_page = home
+    site.save()
+
+    subpages = old_home.get_children()
+
+    for subpage in subpages:
+        subpage.move(home, "last-child")
+
+    course_page = CoursePageFactory.create(parent=home)
+    course_page.save_revision().publish()
+
+    certificate_page = CertificatePageFactory.create(parent=course_page)
+    certificate_page.save_revision().publish()
+
+    course_run_certificate = CourseRunCertificateFactory.create(
+        user=user, course_run__course=course_page.course
+    )
+
+    resp = user_client.get(course_run_certificate.link)
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.context_data["page"] == certificate_page
+    assert resp.context_data["page"].certificate == course_run_certificate
 
 
 def test_catalog_page_product(client):
