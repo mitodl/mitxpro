@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.21.0
+--------------
+
+- #875 #940 Course Certificates
+- Added edX unenrollment capability
+- Added cron job to repair courseware users
+- - Certificates: automate course certificate creation
+- Added cron job to retry edx enrollments
+- update js-yaml
+
 Version 0.20.1 (Released September 06, 2019)
 --------------
 
