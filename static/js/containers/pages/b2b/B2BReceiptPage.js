@@ -146,8 +146,11 @@ export class B2BReceiptPage extends React.Component<Props, State> {
                 <span className="description">Email Address:</span>
                 {email}
               </p>
-              If you encounter any issues please email {SETTINGS.support_email}{" "}
-              to contact customer support.
+              If you encounter any issues please contact{" "}
+              <a href="https://xpro.zendesk.com/hc/requests/new">
+                customer support
+              </a>
+              .
             </div>
             <div className="col-lg-4">
               <B2BPurchaseSummary
