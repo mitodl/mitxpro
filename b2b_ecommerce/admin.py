@@ -3,18 +3,13 @@
 from django.contrib import admin
 
 from b2b_ecommerce.models import B2BCoupon, B2BCouponRedemption, B2BOrder
+from ecommerce.admin import AuditableModelAdmin
 
 
-class B2BCouponAdmin(admin.ModelAdmin):
+class B2BCouponAdmin(AuditableModelAdmin):
     """Admin for B2BCoupon"""
 
     model = B2BCoupon
-
-    def save_model(self, request, obj, form, change):
-        """
-        Override to save and log object
-        """
-        return obj.save_and_log(request.user)
 
 
 class B2BCouponRedemptionAdmin(admin.ModelAdmin):
@@ -23,16 +18,10 @@ class B2BCouponRedemptionAdmin(admin.ModelAdmin):
     model = B2BCouponRedemption
 
 
-class B2BOrderAdmin(admin.ModelAdmin):
+class B2BOrderAdmin(AuditableModelAdmin):
     """Admin for B2BOrder"""
 
     model = B2BOrder
-
-    def save_model(self, request, obj, form, change):
-        """
-        Override to save and log object
-        """
-        return obj.save_and_log(request.user)
 
 
 admin.site.register(B2BCoupon, B2BCouponAdmin)
