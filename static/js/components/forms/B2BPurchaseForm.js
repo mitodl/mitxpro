@@ -43,7 +43,11 @@ export const validate = (values: Object) => {
 }
 
 class B2BPurchaseForm extends React.Component<Props> {
-  applyCoupon = async (event, values, setFieldError) => {
+  applyCoupon = async (
+    event: Event,
+    values: Object,
+    setFieldError: Function
+  ) => {
     const { clearCouponStatus, fetchCouponStatus } = this.props
 
     event.preventDefault()
@@ -67,7 +71,7 @@ class B2BPurchaseForm extends React.Component<Props> {
     }
   }
 
-  renderForm = ({ values, setFieldError }) => {
+  renderForm = ({ values, setFieldError }: Object) => {
     const { products, requestPending, couponStatus } = this.props
 
     let itemPrice, totalPrice, discount
