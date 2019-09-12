@@ -34,7 +34,7 @@ describe("B2BPurchaseForm", () => {
     sandbox.restore()
   })
 
-  const render = (props = {}, enzymeFunc = mount) =>
+  const _render = (enzymeFunc, props = {}) =>
     enzymeFunc(
       <B2BPurchaseForm
         products={products}
@@ -47,8 +47,11 @@ describe("B2BPurchaseForm", () => {
       />
     )
 
+  const shallowRender = props => _render(shallow, props)
+  const mountRender = props => _render(mount, props)
+
   it("renders a form", () => {
-    const wrapper = render()
+    const wrapper = mountRender()
 
     const [productSelectorProps, numSeatsProps, emailProps] = wrapper
       .find(Field)
@@ -66,7 +69,7 @@ describe("B2BPurchaseForm", () => {
     it(`disables the submit button if the request is ${
       requestPending ? "pending" : "not pending"
     }`, () => {
-      const wrapper = render({ requestPending })
+      const wrapper = mountRender({ requestPending })
       assert.equal(
         wrapper.find("button[type='submit']").prop("disabled"),
         requestPending
@@ -81,7 +84,7 @@ describe("B2BPurchaseForm", () => {
       num_seats: "5",
       product:   String(selectedProduct.id)
     }
-    const wrapper = render({}, shallow)
+    const wrapper = shallowRender()
     const actions = {}
     const innerWrapper = shallow(
       shallow(wrapper.prop("render")({ values })).prop("children")(
@@ -106,7 +109,7 @@ describe("B2BPurchaseForm", () => {
 
   describe("validation", () => {
     it("has the validate function in the props", () => {
-      const wrapper = render()
+      const wrapper = mountRender()
       assert.equal(wrapper.find(Formik).prop("validate"), validate)
     })
 
@@ -153,7 +156,7 @@ describe("B2BPurchaseForm", () => {
     it(`${
       hasCouponCode ? "applies" : "clears"
     } the given coupon value`, async () => {
-      const wrapper = render()
+      const wrapper = mountRender()
       const newCode = hasCouponCode ? "xyz" : ""
       const productId = 123
       const setFieldErrorStub = sandbox.stub()
@@ -188,7 +191,7 @@ describe("B2BPurchaseForm", () => {
   })
 
   it("errors when applying the coupon because no product is selected", async () => {
-    const wrapper = render()
+    const wrapper = mountRender()
     const newCode = "xyz"
     const setFieldErrorStub = sandbox.stub()
     fetchCouponStatusStub.returns(Promise.resolve({ status: 200 }))
@@ -213,7 +216,7 @@ describe("B2BPurchaseForm", () => {
   })
 
   it("errors because the coupon is invalid", async () => {
-    const wrapper = render()
+    const wrapper = mountRender()
     const newCode = "xyz"
     const productId = 123
     const setFieldErrorStub = sandbox.stub()
