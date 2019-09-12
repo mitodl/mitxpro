@@ -12,7 +12,11 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from b2b_ecommerce.api import complete_b2b_order, generate_b2b_cybersource_sa_payload
+from b2b_ecommerce.api import (
+    complete_b2b_order,
+    determine_price_and_discount,
+    generate_b2b_cybersource_sa_payload,
+)
 from b2b_ecommerce.models import B2BCoupon, B2BCouponRedemption, B2BOrder
 from ecommerce.api import make_checkout_url
 from ecommerce.models import ProductVersion, Coupon
@@ -52,22 +56,11 @@ class B2BCheckoutView(APIView):
 
         with transaction.atomic():
             product_version = get_object_or_404(ProductVersion, id=product_version_id)
-            if discount_code:
-                try:
-                    coupon = B2BCoupon.objects.get_unexpired_coupon(
-                        coupon_code=discount_code, product_id=product_version.product.id
-                    )
-                except B2BCoupon.DoesNotExist:
-                    raise ValidationError("Invalid coupon code")
-            else:
-                coupon = None
-
-            total_price = product_version.price * num_seats
-            if coupon:
-                discount = round(coupon.discount_percent * total_price, 2)
-                total_price -= discount
-            else:
-                discount = None
+            total_price, coupon, discount = determine_price_and_discount(
+                product_version=product_version,
+                discount_code=discount_code,
+                num_seats=num_seats,
+            )
 
             order = B2BOrder.objects.create(
                 num_seats=num_seats,
