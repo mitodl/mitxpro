@@ -152,17 +152,14 @@ describe("B2BPurchaseForm", () => {
   })
 
   //
-  ;[true, false].forEach(hasCouponCode => {
-    it(`${
-      hasCouponCode ? "applies" : "clears"
-    } the given coupon value`, async () => {
+  ;[["xyz", "applies"], ["", "clears"]].forEach(([couponCode, desc]) => {
+    it(`${desc} the given coupon value`, async () => {
       const wrapper = mountRender()
-      const newCode = hasCouponCode ? "xyz" : ""
       const productId = 123
       const setFieldErrorStub = sandbox.stub()
       fetchCouponStatusStub.returns(Promise.resolve({ status: 200 }))
       const values = {
-        coupon:  newCode,
+        coupon:  couponCode,
         product: productId
       }
       const innerWrapper = shallow(
@@ -177,10 +174,10 @@ describe("B2BPurchaseForm", () => {
       await innerWrapper.find(".apply-button").prop("onClick")({
         preventDefault: sandbox.stub()
       })
-      if (hasCouponCode) {
+      if (couponCode) {
         sinon.assert.calledWith(fetchCouponStatusStub, {
           product_id: productId,
-          code:       newCode
+          code:       couponCode
         })
       } else {
         sinon.assert.calledWith(clearCouponStatusStub)
