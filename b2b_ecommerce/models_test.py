@@ -1,6 +1,7 @@
 """models for b2b_ecommerce"""
-from datetime import timezone
+from datetime import timedelta, timezone
 
+from django.utils import timezone
 import factory
 import pytest
 
@@ -67,11 +68,22 @@ def test_get_unexpired_coupon(order_with_coupon):
     )
 
 
-@pytest.mark.parametrize("key", ["activation_date", "expiration_date"])
-def test_get_unexpired_coupon_null_dates(key, order_with_coupon):
+@pytest.mark.parametrize(
+    "activation_date, expiration_date",
+    [
+        [None, None],
+        [timezone.now() - timedelta(days=1), timezone.now() + timedelta(days=1)],
+        [None, timezone.now() + timedelta(days=1)],
+        [timezone.now() - timedelta(days=1), None],
+    ],
+)
+def test_get_unexpired_coupon_null_dates(
+    order_with_coupon, activation_date, expiration_date
+):
     """expiration or activation dates which are null should be treated as valid"""
     coupon = order_with_coupon.coupon
-    setattr(coupon, key, None)
+    coupon.activation_date = activation_date
+    coupon.expiration_date = expiration_date
     coupon.save()
     assert (
         B2BCoupon.objects.get_unexpired_coupon(
