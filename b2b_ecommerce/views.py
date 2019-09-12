@@ -69,7 +69,6 @@ class B2BCheckoutView(APIView):
             else:
                 discount = None
 
-            base_url = request.build_absolute_uri("/")
             order = B2BOrder.objects.create(
                 num_seats=num_seats,
                 email=email,
@@ -83,6 +82,7 @@ class B2BCheckoutView(APIView):
             if coupon:
                 B2BCouponRedemption.objects.create(coupon=coupon, order=order)
 
+        base_url = request.build_absolute_uri("/")
         receipt_url = (
             f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?'
             f'{urlencode({"hash": str(order.unique_id)})}'
