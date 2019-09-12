@@ -123,7 +123,7 @@ describe("B2BPurchasePage", () => {
         status: 200
       })
     const payload = { pay: "load" }
-    await inner.prop("fetchCouponStatus")(payload)
+    await inner.find("B2BPurchaseForm").prop("fetchCouponStatus")(payload)
     assert.deepEqual(store.getState().entities.b2b_coupon_status, couponStatus)
     sinon.assert.calledWith(
       helper.handleRequestStub,
@@ -144,7 +144,7 @@ describe("B2BPurchasePage", () => {
         b2b_coupon_status: couponStatus
       }
     })
-    inner.prop("clearCouponStatus")()
+    inner.find("B2BPurchaseForm").prop("clearCouponStatus")()
     assert.isNull(store.getState().entities.b2b_coupon_status)
   })
 
