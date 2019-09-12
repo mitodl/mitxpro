@@ -217,6 +217,7 @@ class ProductVersionAdmin(admin.ModelAdmin):
     save_as = True
     save_as_continue = False
     save_on_top = True
+    readonly_fields = ("text_id",)
 
     def has_delete_permission(self, request, obj=None):
         return False
