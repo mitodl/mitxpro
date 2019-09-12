@@ -96,7 +96,7 @@ def test_create_order_with_coupon(client, mocker):
     An order is created with a valid coupon
     """
     payload = {"a": "payload"}
-    generate_mock = mocker.patch(
+    generate_payload_mock = mocker.patch(
         "b2b_ecommerce.views.generate_b2b_cybersource_sa_payload",
         autospec=True,
         return_value=payload,
@@ -134,16 +134,16 @@ def test_create_order_with_coupon(client, mocker):
     assert order.b2breceipt_set.count() == 0
     base_url = "http://testserver/"
     receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'
-    assert generate_mock.call_count == 1
-    assert generate_mock.call_args[0] == ()
-    assert generate_mock.call_args[1] == {
+    assert generate_payload_mock.call_count == 1
+    assert generate_payload_mock.call_args[0] == ()
+    assert generate_payload_mock.call_args[1] == {
         "order": order,
         "receipt_url": receipt_url,
         "cancel_url": urljoin(base_url, reverse("bulk-enrollment-code")),
     }
 
 
-def test_create_order_with_coupon_code(client):
+def test_create_order_with_invalid_code(client):
     """
     An order is created with an invalid coupon, so a validation error is returned
     """
