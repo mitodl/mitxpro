@@ -93,36 +93,18 @@ def test_get_unexpired_coupon_null_dates(
     )
 
 
-def test_get_unexpired_coupon_expired(order_with_coupon):
+@pytest.mark.parametrize(
+    "attr_name, attr_value",
+    [
+        ["enabled", False],
+        ["activation_date", timezone.now() + timedelta(days=1)],
+        ["expiration_date", timezone.now() - timedelta(days=1)],
+    ],
+)
+def test_get_unexpired_coupon_expired(order_with_coupon, attr_name, attr_value):
     """get_unexpired_coupon should raise a B2BCoupon.DoesNotExist if the coupon is expired"""
     coupon = order_with_coupon.coupon
-    coupon.expiration_date = factory.Faker(
-        "date_time_this_year", before_now=True, after_now=False, tzinfo=timezone.utc
-    ).generate({})
-    coupon.save()
-    with pytest.raises(B2BCoupon.DoesNotExist):
-        B2BCoupon.objects.get_unexpired_coupon(
-            coupon_code=coupon.coupon_code, product_id=coupon.product_id
-        )
-
-
-def test_get_unexpired_coupon_never_active(order_with_coupon):
-    """get_unexpired_coupon should raise a B2BCoupon.DoesNotExist if the coupon activation date is in the future"""
-    coupon = order_with_coupon.coupon
-    coupon.activation_date = factory.Faker(
-        "date_time_this_year", before_now=False, after_now=True, tzinfo=timezone.utc
-    ).generate({})
-    coupon.save()
-    with pytest.raises(B2BCoupon.DoesNotExist):
-        B2BCoupon.objects.get_unexpired_coupon(
-            coupon_code=coupon.coupon_code, product_id=coupon.product_id
-        )
-
-
-def test_get_unexpired_coupon_not_enabled(order_with_coupon):
-    """get_unexpired_coupon should raise a B2BCoupon.DoesNotExist if the coupon is not enabled"""
-    coupon = order_with_coupon.coupon
-    coupon.enabled = False
+    setattr(coupon, attr_name, attr_value)
     coupon.save()
     with pytest.raises(B2BCoupon.DoesNotExist):
         B2BCoupon.objects.get_unexpired_coupon(
