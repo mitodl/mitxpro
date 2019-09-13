@@ -65,9 +65,7 @@ def test_reference_number(settings):
         [timezone.now() - timedelta(days=1), None],
     ],
 )
-def test_get_unexpired_coupon(
-    order_with_coupon, activation_date, expiration_date
-):
+def test_get_unexpired_coupon(order_with_coupon, activation_date, expiration_date):
     """expiration or activation dates which are null should be treated as valid"""
     coupon = order_with_coupon.coupon
     coupon.activation_date = activation_date
@@ -89,7 +87,7 @@ def test_get_unexpired_coupon(
         ["expiration_date", timezone.now() - timedelta(days=1)],
     ],
 )
-def test_get_unexpired_coupon_expired(order_with_coupon, attr_name, attr_value):
+def test_get_unexpired_coupon_not_found(order_with_coupon, attr_name, attr_value):
     """get_unexpired_coupon should raise a B2BCoupon.DoesNotExist if the coupon is expired"""
     coupon = order_with_coupon.coupon
     setattr(coupon, attr_name, attr_value)
