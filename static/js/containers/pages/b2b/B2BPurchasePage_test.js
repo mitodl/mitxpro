@@ -51,11 +51,9 @@ describe("B2BPurchasePage", () => {
   })
 
   //
-  ;[true, false].forEach(hasCouponCode => {
-    it(`submits the form to Cybersource ${
-      hasCouponCode ? "with" : "without"
-    } a coupon`, async () => {
-      const couponStatus = hasCouponCode ? makeB2BCouponStatus() : null
+  ;[["xyz", "applies"], ["", "clears"]].forEach(([couponCode, desc]) => {
+    it(`${desc} a coupon`, async () => {
+      const couponStatus = couponCode ? makeB2BCouponStatus() : null
       const { inner } = await renderPage({
         entities: {
           b2b_coupon_status: couponStatus
