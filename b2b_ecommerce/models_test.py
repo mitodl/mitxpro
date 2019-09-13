@@ -56,17 +56,6 @@ def test_reference_number(settings):
     )
 
 
-def test_get_unexpired_coupon(order_with_coupon):
-    """get_unexpired_coupon should get a coupon matching the product id and coupon code, which is also valid"""
-    coupon = order_with_coupon.coupon
-    assert (
-        B2BCoupon.objects.get_unexpired_coupon(
-            coupon_code=coupon.coupon_code, product_id=coupon.product_id
-        )
-        == coupon
-    )
-
-
 @pytest.mark.parametrize(
     "activation_date, expiration_date",
     [
@@ -76,7 +65,7 @@ def test_get_unexpired_coupon(order_with_coupon):
         [timezone.now() - timedelta(days=1), None],
     ],
 )
-def test_get_unexpired_coupon_null_dates(
+def test_get_unexpired_coupon(
     order_with_coupon, activation_date, expiration_date
 ):
     """expiration or activation dates which are null should be treated as valid"""
