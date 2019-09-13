@@ -4,7 +4,7 @@ import factory
 
 from django.contrib.auth import get_user_model
 
-from users.api import get_user_by_id, fetch_user, fetch_users
+from users.api import get_user_by_id, fetch_user, fetch_users, find_available_username
 from users.factories import UserFactory
 
 User = get_user_model()
@@ -107,3 +107,42 @@ def test_fetch_users_fail(prop, existing_values, missing_values):
     expected_missing_value_output = str(sorted(list(missing_values)))
     with pytest.raises(User.DoesNotExist, match=expected_missing_value_output):
         fetch_users(fetch_users_values)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "username_base,suffixed_to_create,expected_available_username",
+    [
+        ["someuser", 0, "someuser1"],
+        ["someuser", 5, "someuser6"],
+        ["abcdefghij", 10, "abcdefgh11"],
+        ["abcdefghi", 99, "abcdefg100"],
+    ],
+)
+def test_find_available_username(
+    mocker, username_base, suffixed_to_create, expected_available_username
+):
+    """find_available_username should return an available username with the lowest possible suffix"""
+    # Change the username max length to 10 for test data simplicity's sake
+    temp_username_max_len = 10
+    mocker.patch("users.api.USERNAME_MAX_LEN", temp_username_max_len)
+
+    def suffixed_username_generator():
+        """Generator for usernames with suffixes that will not exceed the username character limit"""
+        for suffix_int in range(1, suffixed_to_create + 1):
+            suffix = str(suffix_int)
+            username = "{}{}".format(username_base, suffix)
+            if len(username) <= temp_username_max_len:
+                yield username
+            else:
+                num_extra_characters = len(username) - temp_username_max_len
+                yield "{}{}".format(
+                    username_base[0 : len(username_base) - num_extra_characters], suffix
+                )
+
+    UserFactory.create(username=username_base)
+    UserFactory.create_batch(
+        suffixed_to_create, username=factory.Iterator(suffixed_username_generator())
+    )
+    available_username = find_available_username(username_base)
+    assert available_username == expected_available_username

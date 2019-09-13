@@ -12,6 +12,7 @@ from users.models import LegalAddress, Profile, User, GENDER_CHOICES
 class UserFactory(DjangoModelFactory):
     """Factory for Users"""
 
+    username = FuzzyText()
     email = FuzzyText(suffix="@example.com")
     name = Faker("name")
 

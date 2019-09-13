@@ -4,7 +4,6 @@ import factory
 from django.core.exceptions import ValidationError
 from django.db import transaction
 import pytest
-import ulid
 
 from courseware.factories import OpenEdxApiAuthFactory, CoursewareUserFactory
 from users.factories import UserFactory
@@ -20,21 +19,18 @@ pytestmark = pytest.mark.django_db
         [User.objects.create_superuser, True, True, True],
     ],
 )
-@pytest.mark.parametrize("username", [None, "user1"])
 @pytest.mark.parametrize("password", [None, "pass"])
 def test_create_user(
-    create_func, exp_staff, exp_superuser, exp_is_active, username, password
+    create_func, exp_staff, exp_superuser, exp_is_active, password
 ):  # pylint: disable=too-many-arguments
     """Test creating a user"""
+    username = "user1"
     email = "uSer@EXAMPLE.com"
     name = "Jane Doe"
     with transaction.atomic():
         user = create_func(username, email=email, name=name, password=password)
 
-    if username is not None:
-        assert user.username == username
-    else:
-        assert isinstance(ulid.parse(user.username), ulid.ULID)
+    assert user.username == username
     assert user.email == "uSer@example.com"
     assert user.name == name
     assert user.get_full_name() == name

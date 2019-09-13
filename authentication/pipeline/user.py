@@ -1,10 +1,10 @@
 """Auth pipline functions for user authentication"""
 import logging
 
-import ulid
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
 from social_core.pipeline.partial import partial
+from django.db import IntegrityError
 
 from authentication.exceptions import (
     InvalidPasswordException,
@@ -13,13 +13,16 @@ from authentication.exceptions import (
     RequireProfileException,
     RequireRegistrationException,
     UnexpectedExistingUserException,
+    UserCreationFailedException,
 )
 from authentication.utils import SocialAuthState
+from authentication.api import create_user_with_generated_username
 
 from compliance import api as compliance_api
 from courseware import api as courseware_api, tasks as courseware_tasks
 from hubspot.task_helpers import sync_hubspot_user
 from users.serializers import UserSerializer, ProfileSerializer
+from users.utils import usernameify
 
 log = logging.getLogger()
 
@@ -60,14 +63,7 @@ def get_username(
         backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
         user (User): the current user
     """
-    username = None
-
-    if not user:
-        username = ulid.new().str
-    else:
-        username = strategy.storage.user.get_username(user)
-
-    return {"username": username}
+    return {"username": None if not user else strategy.storage.user.get_username(user)}
 
 
 @partial
@@ -92,20 +88,31 @@ def create_user_via_email(
 
     if user is not None:
         raise UnexpectedExistingUserException(backend, current_partial)
-    data = strategy.request_data().copy()
-    data["username"] = kwargs.get("username", kwargs.get("details", {}).get("username"))
-    data["email"] = kwargs.get("email", kwargs.get("details", {}).get("email"))
 
+    data = strategy.request_data().copy()
     if "name" not in data or "password" not in data:
         raise RequirePasswordAndPersonalInfoException(backend, current_partial)
 
+    data["email"] = kwargs.get("email", kwargs.get("details", {}).get("email"))
+    username = usernameify(data["name"], email=data["email"])
+    data["username"] = username
     serializer = UserSerializer(data=data)
 
     if not serializer.is_valid():
         raise RequirePasswordAndPersonalInfoException(
             backend, current_partial, errors=serializer.errors
         )
-    return {"is_new": True, "user": serializer.save()}
+
+    try:
+        created_user = create_user_with_generated_username(serializer, username)
+        if created_user is None:
+            raise IntegrityError(
+                "Failed to create User with generated username ({})".format(username)
+            )
+    except Exception as exc:
+        raise UserCreationFailedException(backend, current_partial) from exc
+
+    return {"is_new": True, "user": created_user, "username": created_user.username}
 
 
 @partial
