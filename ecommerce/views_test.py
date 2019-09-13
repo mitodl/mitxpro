@@ -53,7 +53,6 @@ from mitxpro.utils import dict_without_keys
 from users.factories import UserFactory
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
-CYBERSOURCE_REFERENCE_PREFIX = "fake"
 CYBERSOURCE_ACCESS_KEY = "access"
 CYBERSOURCE_PROFILE_ID = "profile"
 CYBERSOURCE_SECURITY_KEY = "security"
@@ -86,7 +85,6 @@ def ecommerce_settings(settings):
     settings.CYBERSOURCE_ACCESS_KEY = CYBERSOURCE_ACCESS_KEY
     settings.CYBERSOURCE_PROFILE_ID = CYBERSOURCE_PROFILE_ID
     settings.CYBERSOURCE_SECURITY_KEY = CYBERSOURCE_SECURITY_KEY
-    settings.CYBERSOURCE_REFERENCE_PREFIX = CYBERSOURCE_REFERENCE_PREFIX
     settings.CYBERSOURCE_SECURE_ACCEPTANCE_URL = CYBERSOURCE_SECURE_ACCEPTANCE_URL
     settings.ECOMMERCE_EMAIL = "ecommerce@example.com"
     settings.EDXORG_BASE_URL = "http://edx_base"

@@ -90,7 +90,6 @@ lazy = pytest.lazy_fixture
 CYBERSOURCE_ACCESS_KEY = "access"
 CYBERSOURCE_PROFILE_ID = "profile"
 CYBERSOURCE_SECURITY_KEY = "security"
-CYBERSOURCE_REFERENCE_PREFIX = "prefix"
 
 
 @pytest.fixture(autouse=True)
@@ -101,7 +100,6 @@ def cybersource_settings(settings):
     settings.CYBERSOURCE_ACCESS_KEY = CYBERSOURCE_ACCESS_KEY
     settings.CYBERSOURCE_PROFILE_ID = CYBERSOURCE_PROFILE_ID
     settings.CYBERSOURCE_SECURITY_KEY = CYBERSOURCE_SECURITY_KEY
-    settings.CYBERSOURCE_REFERENCE_PREFIX = CYBERSOURCE_REFERENCE_PREFIX
 
 
 def test_valid_signature():

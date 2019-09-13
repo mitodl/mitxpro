@@ -204,11 +204,10 @@ def test_reference_number(settings):
     """
     order.reference_number should concatenate the reference prefix and the order id
     """
-    cybersource_prefix = "cyb-prefix"
-    settings.CYBERSOURCE_REFERENCE_PREFIX = cybersource_prefix
+    settings.ENVIRONMENT = "test"
 
     order = OrderFactory.create()
     assert (
-        f"{REFERENCE_NUMBER_PREFIX}{cybersource_prefix}-{order.id}"
+        f"{REFERENCE_NUMBER_PREFIX}{settings.ENVIRONMENT}-{order.id}"
         == order.reference_number
     )
