@@ -450,6 +450,9 @@ class BasketSerializer(serializers.ModelSerializer):
                 product__id=product_id
             ).exists():
                 raise ValidationError(f"Invalid product id {product_id}")
+            product = models.Product.all_objects.filter(id=product_id).first()
+            if not product.is_active:
+                raise ValidationError(f"Product id {product_id} is not active")
 
         return {"items": items}
 

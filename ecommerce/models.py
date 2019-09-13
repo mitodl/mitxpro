@@ -16,6 +16,18 @@ from users.models import User
 log = logging.getLogger()
 
 
+class ActiveProducts(models.Manager):
+    """
+    return the is_active products only.
+    """
+
+    def get_queryset(self):
+        """
+        :return: active products
+        """
+        return super().get_queryset().filter(is_active=True)
+
+
 class Company(TimestampedModel):
     """
     A company that purchases bulk seats/coupons
@@ -41,7 +53,15 @@ class Product(TimestampedModel):
         help_text="content_object is a link to either a CourseRun or a Program",
     )
     object_id = models.PositiveIntegerField()
+    is_active = models.BooleanField(
+        default=True,
+        null=False,
+        help_text="If it is unchecked then users will not be "
+        "able to load the product on the checkout page.",
+    )
     content_object = GenericForeignKey("content_type", "object_id")
+    objects = ActiveProducts()
+    all_objects = models.Manager()
 
     class Meta:
         unique_together = ("content_type", "object_id")
