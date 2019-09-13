@@ -66,7 +66,7 @@ def test_reference_number(settings):
     ],
 )
 def test_get_unexpired_coupon(order_with_coupon, activation_date, expiration_date):
-    """expiration or activation dates which are null should be treated as valid"""
+    """get_unexpired_coupon should get a coupon matching the product id and coupon code, which is also valid"""
     coupon = order_with_coupon.coupon
     coupon.activation_date = activation_date
     coupon.expiration_date = expiration_date
