@@ -151,15 +151,77 @@ describe("B2BPurchaseForm", () => {
     })
   })
 
-  //
-  ;[["xyz", "applies"], ["", "clears"]].forEach(([couponCode, desc]) => {
-    it(`${desc} the given coupon value`, async () => {
-      const wrapper = mountRender()
-      const productId = 123
-      const setFieldErrorStub = sandbox.stub()
+  describe("coupon submission", () => {
+    let setFieldErrorStub, productId, newCode, wrapper
+
+    beforeEach(() => {
+      setFieldErrorStub = sandbox.stub()
+      productId = 123
       fetchCouponStatusStub.returns(Promise.resolve({ status: 200 }))
+      newCode = "xyz"
+
+      wrapper = mountRender()
+    })
+    ;[["xyz", "applies"], ["", "clears"]].forEach(([couponCode, desc]) => {
+      it(`${desc} the given coupon value`, async () => {
+        const values = {
+          coupon:  couponCode,
+          product: productId
+        }
+        const innerWrapper = shallow(
+          shallow(
+            wrapper.find(Formik).prop("render")({
+              values,
+              setFieldError: setFieldErrorStub
+            })
+          ).prop("children")(values)
+        )
+
+        await innerWrapper.find(".apply-button").prop("onClick")({
+          preventDefault: sandbox.stub()
+        })
+        if (couponCode) {
+          sinon.assert.calledWith(fetchCouponStatusStub, {
+            product_id: productId,
+            code:       couponCode
+          })
+        } else {
+          sinon.assert.calledWith(clearCouponStatusStub)
+        }
+
+        sinon.assert.notCalled(setFieldErrorStub)
+      })
+    })
+
+    it("errors when applying the coupon because no product is selected", async () => {
       const values = {
-        coupon:  couponCode,
+        coupon:  newCode,
+        product: ""
+      }
+      const innerWrapper = shallow(
+        shallow(
+          wrapper.find(Formik).prop("render")({
+            values,
+            setFieldError: setFieldErrorStub
+          })
+        ).prop("children")(values)
+      )
+
+      await innerWrapper.find(".apply-button").prop("onClick")({
+        preventDefault: sandbox.stub()
+      })
+      sinon.assert.notCalled(fetchCouponStatusStub)
+      sinon.assert.calledWith(
+        setFieldErrorStub,
+        "coupon",
+        "No product selected"
+      )
+    })
+
+    it("errors because the coupon is invalid", async () => {
+      fetchCouponStatusStub.returns(Promise.resolve({ status: 500 }))
+      const values = {
+        coupon:  newCode,
         product: productId
       }
       const innerWrapper = shallow(
@@ -174,70 +236,15 @@ describe("B2BPurchaseForm", () => {
       await innerWrapper.find(".apply-button").prop("onClick")({
         preventDefault: sandbox.stub()
       })
-      if (couponCode) {
-        sinon.assert.calledWith(fetchCouponStatusStub, {
-          product_id: productId,
-          code:       couponCode
-        })
-      } else {
-        sinon.assert.calledWith(clearCouponStatusStub)
-      }
-
-      sinon.assert.notCalled(setFieldErrorStub)
+      sinon.assert.calledWith(fetchCouponStatusStub, {
+        product_id: productId,
+        code:       newCode
+      })
+      sinon.assert.calledWith(
+        setFieldErrorStub,
+        "coupon",
+        "Invalid coupon code"
+      )
     })
-  })
-
-  it("errors when applying the coupon because no product is selected", async () => {
-    const wrapper = mountRender()
-    const newCode = "xyz"
-    const setFieldErrorStub = sandbox.stub()
-    fetchCouponStatusStub.returns(Promise.resolve({ status: 200 }))
-    const values = {
-      coupon:  newCode,
-      product: ""
-    }
-    const innerWrapper = shallow(
-      shallow(
-        wrapper.find(Formik).prop("render")({
-          values,
-          setFieldError: setFieldErrorStub
-        })
-      ).prop("children")(values)
-    )
-
-    await innerWrapper.find(".apply-button").prop("onClick")({
-      preventDefault: sandbox.stub()
-    })
-    sinon.assert.notCalled(fetchCouponStatusStub)
-    sinon.assert.calledWith(setFieldErrorStub, "coupon", "No product selected")
-  })
-
-  it("errors because the coupon is invalid", async () => {
-    const wrapper = mountRender()
-    const newCode = "xyz"
-    const productId = 123
-    const setFieldErrorStub = sandbox.stub()
-    fetchCouponStatusStub.returns(Promise.resolve({ status: 500 }))
-    const values = {
-      coupon:  newCode,
-      product: productId
-    }
-    const innerWrapper = shallow(
-      shallow(
-        wrapper.find(Formik).prop("render")({
-          values,
-          setFieldError: setFieldErrorStub
-        })
-      ).prop("children")(values)
-    )
-
-    await innerWrapper.find(".apply-button").prop("onClick")({
-      preventDefault: sandbox.stub()
-    })
-    sinon.assert.calledWith(fetchCouponStatusStub, {
-      product_id: productId,
-      code:       newCode
-    })
-    sinon.assert.calledWith(setFieldErrorStub, "coupon", "Invalid coupon code")
   })
 })
