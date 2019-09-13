@@ -162,20 +162,25 @@ describe("B2BPurchaseForm", () => {
 
       wrapper = mountRender()
     })
+
+    const renderForm = values =>
+      shallow(
+        shallow(
+          wrapper.find(Formik).prop("render")({
+            values,
+            setFieldError: setFieldErrorStub
+          })
+        ).prop("children")(values)
+      )
+
+    //
     ;[["xyz", "applies"], ["", "clears"]].forEach(([couponCode, desc]) => {
       it(`${desc} the given coupon value`, async () => {
         const values = {
           coupon:  couponCode,
           product: productId
         }
-        const innerWrapper = shallow(
-          shallow(
-            wrapper.find(Formik).prop("render")({
-              values,
-              setFieldError: setFieldErrorStub
-            })
-          ).prop("children")(values)
-        )
+        const innerWrapper = renderForm(values)
 
         await innerWrapper.find(".apply-button").prop("onClick")({
           preventDefault: sandbox.stub()
@@ -198,14 +203,7 @@ describe("B2BPurchaseForm", () => {
         coupon:  newCode,
         product: ""
       }
-      const innerWrapper = shallow(
-        shallow(
-          wrapper.find(Formik).prop("render")({
-            values,
-            setFieldError: setFieldErrorStub
-          })
-        ).prop("children")(values)
-      )
+      const innerWrapper = renderForm(values)
 
       await innerWrapper.find(".apply-button").prop("onClick")({
         preventDefault: sandbox.stub()
@@ -224,14 +222,7 @@ describe("B2BPurchaseForm", () => {
         coupon:  newCode,
         product: productId
       }
-      const innerWrapper = shallow(
-        shallow(
-          wrapper.find(Formik).prop("render")({
-            values,
-            setFieldError: setFieldErrorStub
-          })
-        ).prop("children")(values)
-      )
+      const innerWrapper = renderForm(values)
 
       await innerWrapper.find(".apply-button").prop("onClick")({
         preventDefault: sandbox.stub()
