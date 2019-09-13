@@ -88,7 +88,9 @@ def test_get_unexpired_coupon(order_with_coupon, activation_date, expiration_dat
     ],
 )
 def test_get_unexpired_coupon_not_found(order_with_coupon, attr_name, attr_value):
-    """get_unexpired_coupon should raise a B2BCoupon.DoesNotExist if the coupon is expired"""
+    """
+    get_unexpired_coupon should raise a B2BCoupon.DoesNotExist if there is no active, enabled, and unexpired coupon
+    """
     coupon = order_with_coupon.coupon
     setattr(coupon, attr_name, attr_value)
     coupon.save()
