@@ -1,7 +1,7 @@
 """Fixtures for b2b_ecommerce"""
+from types import SimpleNamespace
 
 import pytest
-from types import SimpleNamespace
 
 from b2b_ecommerce.factories import B2BOrderFactory, B2BCouponFactory
 from b2b_ecommerce.models import B2BCouponRedemption, B2BOrder
