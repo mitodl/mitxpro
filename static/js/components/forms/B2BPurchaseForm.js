@@ -2,6 +2,7 @@
 import React from "react"
 import { ErrorMessage, Field, Formik, Form } from "formik"
 import Decimal from "decimal.js-light"
+import { curry } from "ramda"
 
 import B2BPurchaseSummary from "../B2BPurchaseSummary"
 import ProductSelector from "../input/ProductSelector"
@@ -43,33 +44,31 @@ export const validate = (values: Object) => {
 }
 
 class B2BPurchaseForm extends React.Component<Props> {
-  applyCoupon = async (
-    event: Event,
-    values: Object,
-    setFieldError: Function
-  ) => {
-    const { clearCouponStatus, fetchCouponStatus } = this.props
+  applyCoupon = curry(
+    async (values: Object, setFieldError: Function, event: Event) => {
+      const { clearCouponStatus, fetchCouponStatus } = this.props
 
-    event.preventDefault()
+      event.preventDefault()
 
-    if (!values.coupon) {
-      clearCouponStatus()
-      return
+      if (!values.coupon) {
+        clearCouponStatus()
+        return
+      }
+
+      if (!values.product) {
+        setFieldError("coupon", "No product selected")
+        return
+      }
+
+      const response = await fetchCouponStatus({
+        product_id: values.product,
+        code:       values.coupon
+      })
+      if (response.status !== 200) {
+        setFieldError("coupon", "Invalid coupon code")
+      }
     }
-
-    if (!values.product) {
-      setFieldError("coupon", "No product selected")
-      return
-    }
-
-    const response = await fetchCouponStatus({
-      product_id: values.product,
-      code:       values.coupon
-    })
-    if (response.status !== 200) {
-      setFieldError("coupon", "Invalid coupon code")
-    }
-  }
+  )
 
   renderForm = ({ values, setFieldError }: Object) => {
     const { products, requestPending, couponStatus } = this.props
@@ -139,9 +138,7 @@ class B2BPurchaseForm extends React.Component<Props> {
                 <Field type="text" name="coupon" />
                 <button
                   className="apply-button"
-                  onClick={event =>
-                    this.applyCoupon(event, values, setFieldError)
-                  }
+                  onClick={this.applyCoupon(values, setFieldError)}
                 >
                   Apply
                 </button>
