@@ -69,6 +69,10 @@ class UnexpectedExistingUserException(PartialException):
     """Raised if a user already exists but shouldn't in the given pipeline step"""
 
 
+class UserCreationFailedException(PartialException):
+    """Raised if user creation with a generated username failed"""
+
+
 class UserExportBlockedException(AuthException):
     """The user is blocked for export reasons from continuing to sign up"""
 

@@ -1,4 +1,5 @@
 """User models"""
+
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.exceptions import ValidationError
@@ -6,9 +7,9 @@ from django.db import models, transaction
 from django.db.models import Q, Count
 from django.utils.translation import gettext_lazy as _
 import pycountry
-import ulid
 
 from mitxpro.models import TimestampedModel
+from users.constants import USERNAME_MAX_LEN
 
 # Defined in edX Profile model
 MALE = "m"
@@ -129,11 +130,6 @@ class FaultyCoursewareUserManager(BaseUserManager):
         )
 
 
-def generate_username():
-    """Generates a new username"""
-    return ulid.new().str
-
-
 class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
     """Primary user class"""
 
@@ -141,7 +137,7 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email", "name"]
 
-    username = models.CharField(unique=True, default=generate_username, max_length=26)
+    username = models.CharField(unique=True, max_length=USERNAME_MAX_LEN)
     email = models.EmailField(blank=False, unique=True)
     name = models.TextField(blank=True, default="")
     is_staff = models.BooleanField(

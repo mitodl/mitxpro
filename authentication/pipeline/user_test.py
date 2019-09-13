@@ -15,6 +15,7 @@ from authentication.exceptions import (
     RequirePasswordAndPersonalInfoException,
     UnexpectedExistingUserException,
     RequireProfileException,
+    UserCreationFailedException,
 )
 from authentication.utils import SocialAuthState
 from compliance.constants import RESULT_SUCCESS, RESULT_DENIED, RESULT_UNKNOWN
@@ -113,9 +114,9 @@ def test_get_username(mocker, user):
 
 
 def test_get_username_no_user(mocker):
-    """Tests that we get a username for a new user"""
+    """Tests that get_username returns None if there is no User"""
     mock_strategy = mocker.Mock()
-    assert user_actions.get_username(mock_strategy, None, None)["username"] is not None
+    assert user_actions.get_username(mock_strategy, None, None)["username"] is None
     mock_strategy.storage.user.get_username.assert_not_called()
 
 
@@ -252,27 +253,44 @@ def test_create_user_via_email_exit(mocker, backend_name, flow):
 
 
 @pytest.mark.django_db
-def test_create_user_via_email(mock_email_backend, mock_create_user_strategy):
+def test_create_user_via_email(mocker, mock_email_backend, mock_create_user_strategy):
     """
-    Tests that create_user_via_email creates a user via social_core.pipeline.user.create_user_via_email
-    and sets a name and password
+    Tests that create_user_via_email creates a user via social_core.pipeline.user.create_user_via_email,
+    generates a username, and sets a name and password
     """
-    username = "abc"
     email = "user@example.com"
+    generated_username = "testuser123"
+    fake_user = UserFactory.build(username=generated_username)
+    patched_usernameify = mocker.patch(
+        "authentication.pipeline.user.usernameify", return_value=generated_username
+    )
+    patched_create_user = mocker.patch(
+        "authentication.pipeline.user.create_user_with_generated_username",
+        return_value=fake_user,
+    )
+
     response = user_actions.create_user_via_email(
         mock_create_user_strategy,
         mock_email_backend,
-        details=dict(username=username, email=email),
+        details=dict(email=email),
         pipeline_index=0,
         flow=SocialAuthState.FLOW_REGISTER,
     )
-    assert "user" in response
-    assert response["user"].username == username
-    assert response["user"].email == email
-    assert response["user"].name == mock_create_user_strategy.request_data()["name"]
-    assert response["user"].check_password(
-        mock_create_user_strategy.request_data()["password"]
-    )
+    assert response == {
+        "user": fake_user,
+        "username": generated_username,
+        "is_new": True,
+    }
+    request_data = mock_create_user_strategy.request_data()
+    patched_usernameify.assert_called_once_with(request_data["name"], email=email)
+    patched_create_user.assert_called_once()
+    # Confirm that a UserSerializer object was passed to create_user_with_generated_username, and
+    # that it was instantiated with the data we expect.
+    serializer = patched_create_user.call_args_list[0][0][0]
+    assert serializer.initial_data["username"] == generated_username
+    assert serializer.initial_data["email"] == email
+    assert serializer.initial_data["name"] == request_data["name"]
+    assert serializer.initial_data["password"] == request_data["password"]
 
 
 @pytest.mark.django_db
@@ -302,6 +320,35 @@ def test_create_user_via_email_existing_user_raises(
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,
         )
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "create_user_return_val,create_user_exception",
+    [[None, None], [UserFactory.build(), ValueError("bad value")]],
+)
+def test_create_user_via_email_create_fail(
+    mocker,
+    mock_email_backend,
+    mock_create_user_strategy,
+    create_user_return_val,
+    create_user_exception,
+):
+    """Tests that create_user_via_email raises an error if user creation fails"""
+    patched_create_user = mocker.patch(
+        "authentication.pipeline.user.create_user_with_generated_username",
+        return_value=create_user_return_val,
+        side_effect=create_user_exception,
+    )
+    with pytest.raises(UserCreationFailedException):
+        user_actions.create_user_via_email(
+            mock_create_user_strategy,
+            mock_email_backend,
+            details=dict(email="someuser@example.com"),
+            pipeline_index=0,
+            flow=SocialAuthState.FLOW_REGISTER,
+        )
+    patched_create_user.assert_called_once()
 
 
 @pytest.mark.django_db

@@ -22,6 +22,7 @@ from mitxpro.utils import (
     find_object_with_matching_attr,
     unique,
     unique_ignore_case,
+    max_or_none,
 )
 
 
@@ -141,6 +142,15 @@ def test_first_or_none():
     assert first_or_none(set()) is None
     assert first_or_none([1, 2, 3]) == 1
     assert first_or_none(range(1, 5)) == 1
+
+
+def test_max_or_none():
+    """
+    Assert that max_or_none returns the max of some iterable, or None if the iterable has no items
+    """
+    assert max_or_none(i for i in [5, 4, 3, 2, 1]) == 5
+    assert max_or_none([1, 3, 5, 4, 2]) == 5
+    assert max_or_none([]) is None
 
 
 def test_unique():
