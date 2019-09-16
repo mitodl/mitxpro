@@ -6,10 +6,12 @@ import { getCookie } from "../api"
 import type {
   B2BOrderStatus,
   BasketResponse,
-  BulkCheckoutPayload,
+  B2BCheckoutPayload,
   Company,
   CouponPaymentVersion,
-  ProductDetail
+  ProductDetail,
+  B2BCouponStatusPayload,
+  B2BCouponStatusResponse
 } from "../../flow/ecommerceTypes"
 
 const DEFAULT_POST_OPTIONS = {
@@ -26,7 +28,6 @@ export default {
       checkout: () => null
     },
     options: {
-      force: true,
       ...DEFAULT_POST_OPTIONS
     }
   }),
@@ -53,7 +54,6 @@ export default {
     },
     options: {
       method: "PATCH",
-      force:  true,
       ...DEFAULT_POST_OPTIONS
     }
   }),
@@ -98,7 +98,7 @@ export default {
       ...DEFAULT_POST_OPTIONS
     }
   }),
-  b2bCheckoutMutation: (payload: BulkCheckoutPayload) => ({
+  b2bCheckoutMutation: (payload: B2BCheckoutPayload) => ({
     queryKey: "b2bCheckoutMutation",
     url:      "/api/b2b/checkout/",
     update:   {
@@ -108,7 +108,6 @@ export default {
       ...payload
     },
     options: {
-      force: true,
       ...DEFAULT_POST_OPTIONS
     }
   }),
@@ -121,5 +120,20 @@ export default {
     update: {
       b2b_order_status: (prev: B2BOrderStatus, next: B2BOrderStatus) => next
     }
+  }),
+  b2bCouponStatus: (payload: B2BCouponStatusPayload) => ({
+    queryKey:  "b2bCouponStatus",
+    url:       "/api/b2b/coupon_status/",
+    transform: (json: B2BCouponStatusPayload) => ({
+      b2b_coupon_status: json
+    }),
+    update: {
+      b2b_coupon_status: (
+        prev: B2BCouponStatusResponse,
+        next: B2BCouponStatusResponse
+      ) => next
+    },
+    body:  payload,
+    force: true
   })
 }

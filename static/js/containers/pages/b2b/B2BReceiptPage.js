@@ -113,6 +113,7 @@ export class B2BReceiptPage extends React.Component<Props, State> {
 
     const totalPrice = new Decimal(orderStatus.total_price)
     const itemPrice = new Decimal(orderStatus.item_price)
+
     const {
       num_seats: numSeats,
       email,
@@ -156,6 +157,8 @@ export class B2BReceiptPage extends React.Component<Props, State> {
               <B2BPurchaseSummary
                 itemPrice={itemPrice}
                 totalPrice={totalPrice}
+                discount={orderStatus.discount}
+                alreadyPaid={true}
                 numSeats={numSeats}
               />
               <a

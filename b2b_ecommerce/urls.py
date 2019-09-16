@@ -3,6 +3,7 @@ from django.urls import path
 
 from b2b_ecommerce.views import (
     B2BCheckoutView,
+    B2BCouponView,
     B2BEnrollmentCodesView,
     B2BOrderStatusView,
 )
@@ -21,6 +22,7 @@ urlpatterns = [
         B2BOrderStatusView.as_view(),
         name="b2b-order-status",
     ),
+    path("api/b2b/coupon_status/", B2BCouponView.as_view(), name="b2b-coupon-view"),
     path("ecommerce/bulk/", index, name="bulk-enrollment-code"),
     path("ecommerce/bulk/receipt/", index, name="bulk-enrollment-code-receipt"),
 ]

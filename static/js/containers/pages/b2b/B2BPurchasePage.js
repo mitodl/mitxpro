@@ -3,7 +3,12 @@ import React from "react"
 import { connect } from "react-redux"
 import { compose } from "redux"
 import { pathOr } from "ramda"
-import { connectRequest, mutateAsync } from "redux-query"
+import {
+  connectRequest,
+  mutateAsync,
+  requestAsync,
+  updateEntities
+} from "redux-query"
 
 import B2BPurchaseForm from "../../../components/forms/B2BPurchaseForm"
 
@@ -11,15 +16,20 @@ import { createCyberSourceForm } from "../../../lib/form"
 import queries from "../../../lib/queries"
 
 import type {
-  BulkCheckoutPayload,
+  B2BCheckoutPayload,
+  B2BCouponStatusPayload,
+  B2BCouponStatusResponse,
   ProductDetail
 } from "../../../flow/ecommerceTypes"
 import B2BExplanation from "../../../components/B2BExplanation"
 
 type Props = {
-  checkout: (payload: BulkCheckoutPayload) => Promise<*>,
+  checkout: (payload: B2BCheckoutPayload) => Promise<*>,
   products: Array<ProductDetail>,
-  requestPending: boolean
+  requestPending: boolean,
+  couponStatus: ?B2BCouponStatusResponse,
+  clearCouponStatus: () => void,
+  fetchCouponStatus: (payload: B2BCouponStatusPayload) => Promise<*>
 }
 type State = {
   errors: string | Object | null
@@ -32,7 +42,7 @@ type Values = {
 }
 export class B2BPurchasePage extends React.Component<Props, State> {
   onSubmit = async (values: Values, { setErrors, setSubmitting }: Object) => {
-    const { products, checkout } = this.props
+    const { products, checkout, couponStatus } = this.props
     const numSeats = parseInt(values.num_seats)
     const product = products.find(
       _product => _product.id === parseInt(values.product)
@@ -49,7 +59,8 @@ export class B2BPurchasePage extends React.Component<Props, State> {
       const checkoutResponse = await checkout({
         num_seats:          numSeats,
         email:              values.email,
-        product_version_id: productVersion.id
+        product_version_id: productVersion.id,
+        discount_code:      couponStatus ? couponStatus.code : null
       })
 
       if (checkoutResponse.status !== 200) {
@@ -74,7 +85,14 @@ export class B2BPurchasePage extends React.Component<Props, State> {
   }
 
   render() {
-    const { checkout, products, requestPending } = this.props
+    const {
+      checkout,
+      clearCouponStatus,
+      couponStatus,
+      fetchCouponStatus,
+      products,
+      requestPending
+    } = this.props
 
     return (
       <React.Fragment>
@@ -82,6 +100,9 @@ export class B2BPurchasePage extends React.Component<Props, State> {
           onSubmit={this.onSubmit}
           products={products}
           checkout={checkout}
+          couponStatus={couponStatus}
+          clearCouponStatus={clearCouponStatus}
+          fetchCouponStatus={fetchCouponStatus}
           requestPending={requestPending}
         />
         <B2BExplanation alreadyPaid={false} />
@@ -92,6 +113,7 @@ export class B2BPurchasePage extends React.Component<Props, State> {
 
 const mapStateToProps = state => ({
   products:       state.entities.products || [],
+  couponStatus:   state.entities.b2b_coupon_status,
   requestPending: pathOr(
     false,
     ["queries", "b2bCheckoutMutation", "isPending"],
@@ -99,8 +121,16 @@ const mapStateToProps = state => ({
   )
 })
 const mapDispatchToProps = dispatch => ({
-  checkout: (payload: BulkCheckoutPayload) =>
-    dispatch(mutateAsync(queries.ecommerce.b2bCheckoutMutation(payload)))
+  checkout: (payload: B2BCheckoutPayload) =>
+    dispatch(mutateAsync(queries.ecommerce.b2bCheckoutMutation(payload))),
+  clearCouponStatus: () =>
+    dispatch(
+      updateEntities({
+        b2b_coupon_status: () => null
+      })
+    ),
+  fetchCouponStatus: (payload: B2BCouponStatusPayload) =>
+    dispatch(requestAsync(queries.ecommerce.b2bCouponStatus(payload)))
 })
 
 const mapPropsToConfig = () => [queries.ecommerce.productsQuery()]

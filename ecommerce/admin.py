@@ -25,6 +25,13 @@ from hubspot.task_helpers import sync_hubspot_deal
 from mitxpro.utils import get_field_names
 
 
+class AuditableModelAdmin(admin.ModelAdmin):
+    """A ModelAdmin which will save and log"""
+
+    def save_model(self, request, obj, form, change):
+        obj.save_and_log(request.user)
+
+
 class LineAdmin(admin.ModelAdmin):
     """Admin for Line"""
 
@@ -39,7 +46,7 @@ class LineAdmin(admin.ModelAdmin):
         return False
 
 
-class OrderAdmin(admin.ModelAdmin):
+class OrderAdmin(AuditableModelAdmin):
     """Admin for Order"""
 
     model = Order
@@ -59,7 +66,7 @@ class OrderAdmin(admin.ModelAdmin):
         """
         Saves object and logs change to object
         """
-        obj.save_and_log(request.user)
+        super().save_model(request, obj, form, change)
         sync_hubspot_deal(obj)
 
 

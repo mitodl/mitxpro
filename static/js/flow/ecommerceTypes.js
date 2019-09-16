@@ -63,8 +63,20 @@ export type B2BOrderStatus = {
   num_seats: number,
   total_price: string,
   item_price: string,
+  discount: ?string,
   email: string,
   product_version: ProductVersion,
+}
+
+export type B2BCouponStatusPayload = {
+  code: string,
+  product_id: number,
+}
+
+export type B2BCouponStatusResponse = {
+  code: string,
+  product_id: number,
+  discount_percent: string,
 }
 
 export type BasketResponse = {
@@ -152,8 +164,9 @@ export type BulkCouponSendResponse = {
   emails: Array<string>
 }
 
-export type BulkCheckoutPayload = {
+export type B2BCheckoutPayload = {
   num_seats: number,
   product_version_id: number,
+  discount_code: ?string,
   email: string,
 }

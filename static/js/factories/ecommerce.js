@@ -1,6 +1,7 @@
 // @flow
 import casual from "casual-browserify"
 import { range } from "ramda"
+import Decimal from "decimal.js-light"
 
 import { makeCourse } from "./course"
 import { incrementer } from "./util"
@@ -15,7 +16,8 @@ import type {
   Company,
   DataConsentUser,
   ProductDetail,
-  B2BOrderStatus
+  B2BOrderStatus,
+  B2BCouponStatusResponse
 } from "../flow/ecommerceTypes"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
 
@@ -153,15 +155,29 @@ export const makeBulkCouponPayment = (): BulkCouponPayment => ({
 })
 
 export const makeB2BOrderStatus = (): B2BOrderStatus => {
-  const itemPrice = casual.integer(0, 1000)
+  const itemPrice = new Decimal(casual.integer(0, 1000))
   const numSeats = casual.integer(0, 1000)
+  const discount = casual.coin_flip
+    ? new Decimal(casual.double(0, 1)).times(numSeats).times(itemPrice)
+    : null
+  let totalPrice = itemPrice.times(numSeats)
+  if (discount !== null) {
+    totalPrice = totalPrice.minus(discount)
+  }
 
   return {
     status:          casual.random_element(["fulfilled", "created"]),
     num_seats:       numSeats,
     item_price:      String(itemPrice),
-    total_price:     String(itemPrice * numSeats),
+    total_price:     String(totalPrice),
     email:           casual.email,
-    product_version: makeProduct().latest_version
+    product_version: makeProduct().latest_version,
+    discount:        discount !== null ? String(discount) : null
   }
 }
+
+export const makeB2BCouponStatus = (): B2BCouponStatusResponse => ({
+  code:             casual.text,
+  product_id:       makeProduct().id,
+  discount_percent: new Decimal(casual.integer(0, 100)).dividedBy(100)
+})

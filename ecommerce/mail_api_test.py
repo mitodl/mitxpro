@@ -110,10 +110,16 @@ def test_send_course_run_enrollment_email_error(mocker):
     )
 
 
-def test_send_b2b_receipt_email(mocker, settings):
+@pytest.mark.parametrize("has_discount", [True, False])
+def test_send_b2b_receipt_email(mocker, settings, has_discount):
     """send_b2b_receipt_email should send a receipt email"""
     patched_mail_api = mocker.patch("ecommerce.mail_api.api")
     order = B2BOrderFactory.create()
+    if has_discount:
+        discount = order.total_price / 3
+        order.discount = discount
+        order.total_price -= discount
+        order.save()
 
     send_b2b_receipt_email(order)
 
@@ -127,6 +133,7 @@ def test_send_b2b_receipt_email(mocker, settings):
             "purchase_date": order.updated_on.strftime(format_string),
             "total_price": format_price(order.total_price),
             "item_price": format_price(order.per_item_price),
+            "discount": format_price(order.discount) if has_discount else None,
             "num_seats": str(order.num_seats),
             "readable_id": get_readable_id(run),
             "run_date_range": f"{run.start_date.strftime(format_string)} - {run.end_date.strftime(format_string)}",

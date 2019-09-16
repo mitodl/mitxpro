@@ -4,8 +4,9 @@ import uuid
 
 from django.conf import settings
 from django.db import transaction
+from rest_framework.validators import ValidationError
 
-from b2b_ecommerce.models import B2BOrder, B2BReceipt
+from b2b_ecommerce.models import B2BCoupon, B2BOrder, B2BReceipt
 from ecommerce.api import (
     create_coupons,
     determine_order_status_change,
@@ -130,3 +131,35 @@ def fulfill_b2b_order(request_data):
 
     # Save to log everything to an audit table including enrollments created in complete_order
     order.save_and_log(None)
+
+
+def determine_price_and_discount(*, product_version, discount_code, num_seats):
+    """
+    Calculate the total price and discount given the product and a code
+
+    Args:
+        product_version (ProductVersion): The product
+        discount_code (str): The discount code
+        num_seats (int): The number of seats to be purchased
+
+    Returns:
+        tuple: total_price, coupon, discount
+    """
+    if discount_code:
+        try:
+            coupon = B2BCoupon.objects.get_unexpired_coupon(
+                coupon_code=discount_code, product_id=product_version.product.id
+            )
+        except B2BCoupon.DoesNotExist:
+            raise ValidationError("Invalid coupon code")
+    else:
+        coupon = None
+
+    total_price = product_version.price * num_seats
+    if coupon:
+        discount = round(coupon.discount_percent * total_price, 2)
+        total_price -= discount
+    else:
+        discount = None
+
+    return total_price, coupon, discount
