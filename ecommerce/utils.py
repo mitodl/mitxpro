@@ -72,7 +72,7 @@ def send_support_email(subject, message):
             mail.send_mail(
                 subject,
                 message,
-                settings.MAILGUN_FROM_EMAIL,
+                settings.ADMIN_EMAIL,
                 [settings.EMAIL_SUPPORT],
                 connection=connection,
             )
