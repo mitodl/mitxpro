@@ -636,8 +636,11 @@ def create_unfulfilled_order(user):
         # Note: validation is assumed to already have happen when the basket is being modified
         basket, _ = Basket.objects.get_or_create(user=user)
 
-        order = Order.objects.create(status=Order.CREATED, purchaser=user)
+        order = Order.objects.create(
+            status=Order.CREATED, purchaser=user, total_price_paid=decimal.Decimal(0)
+        )
 
+        product_version = None
         for basket_item in basket.basketitems.all():
             product_version = latest_product_version(basket_item.product)
             Line.objects.create(
@@ -646,9 +649,15 @@ def create_unfulfilled_order(user):
                 quantity=basket_item.quantity,
             )
 
+        coupon_version = None
         for coupon_selection in basket.couponselection_set.all():
             coupon = coupon_selection.coupon
-            redeem_coupon(coupon_version=latest_coupon_version(coupon), order=order)
+            coupon_version = latest_coupon_version(coupon)
+            redeem_coupon(coupon_version=coupon_version, order=order)
+        order.total_price_paid = get_product_version_price_with_discount(
+            coupon_version=coupon_version, product_version=product_version
+        )
+        order.save()
         order.save_and_log(user)
     sync_hubspot_deal(order)
     return order
