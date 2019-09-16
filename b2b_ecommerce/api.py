@@ -32,6 +32,8 @@ def complete_b2b_order(order):
             amount=Decimal("1"),
             num_coupon_codes=order.num_seats,
             coupon_type=CouponPaymentVersion.SINGLE_USE,
+            payment_type=CouponPaymentVersion.PAYMENT_SALE,
+            payment_transaction=order.reference_number,
         )
         order.coupon_payment_version = payment_version
         order.save()
