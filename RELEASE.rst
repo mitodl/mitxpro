@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.21.0
+Version 0.21.0 (Released September 16, 2019)
 --------------
 
 - #875 #940 Course Certificates
