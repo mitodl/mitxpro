@@ -7,7 +7,7 @@ import type Decimal from "decimal.js-light"
 type Props = {
   itemPrice: Decimal,
   totalPrice: Decimal,
-  discount: ?Decimal,
+  discount: ?string,
   numSeats: ?number,
   alreadyPaid: boolean
 }
