@@ -62,7 +62,7 @@ class B2BPurchaseForm extends React.Component<Props> {
 
       const response = await fetchCouponStatus({
         product_id: values.product,
-        code:       values.coupon
+        code:       values.coupon.trim()
       })
       if (response.status !== 200) {
         setFieldError("coupon", "Invalid coupon code")

@@ -174,7 +174,7 @@ describe("B2BPurchaseForm", () => {
       )
 
     //
-    ;[["xyz", "applies"], ["", "clears"]].forEach(([couponCode, desc]) => {
+    ;[["  xyz  ", "applies"], ["", "clears"]].forEach(([couponCode, desc]) => {
       it(`${desc} the given coupon value`, async () => {
         const values = {
           coupon:  couponCode,
@@ -188,7 +188,7 @@ describe("B2BPurchaseForm", () => {
         if (couponCode) {
           sinon.assert.calledWith(fetchCouponStatusStub, {
             product_id: productId,
-            code:       couponCode
+            code:       couponCode.trim()
           })
         } else {
           sinon.assert.calledWith(clearCouponStatusStub)
