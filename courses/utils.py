@@ -1,9 +1,13 @@
 """
 Utilities for courses/certificates
 """
+import logging
 from django.db import transaction
-from courses.models import CourseRunGrade, CourseRunCertificate
+from courses.models import CourseRunGrade, CourseRunCertificate, ProgramCertificate
 from mitxpro.utils import has_equal_properties
+
+
+log = logging.getLogger(__name__)
 
 
 def ensure_course_run_grade(user, course_run, edx_grade, should_update=False):
@@ -75,3 +79,47 @@ def process_course_run_grade_certificate(course_run_grade):
             user=user, course_run=course_run
         )
         return certificate, created, False
+
+
+def generate_program_certificate(user, program):
+    """
+    Create a program certificate if the user has a course certificate
+    for each course in the program
+
+    Args:
+        user (User): a Django user.
+        program (programs.models.Program): program where the user is enrolled.
+
+    Returns:
+        (ProgramCertificate or None, bool): A tuple containing a
+        ProgramCertificate (or None if one was not found or created) paired
+        with a boolean indicating whether the certificate was newly created.
+    """
+
+    existing_cert_queryset = ProgramCertificate.objects.filter(
+        user=user, program=program
+    )
+    if existing_cert_queryset.exists():
+        return existing_cert_queryset.first(), False
+
+    courses_in_program_ids = set(program.courses.values_list("id", flat=True))
+    num_courses_with_cert = (
+        CourseRunCertificate.objects.filter(
+            user=user, course_run__course_id__in=courses_in_program_ids
+        )
+        .distinct()
+        .count()
+    )
+
+    if len(courses_in_program_ids) > num_courses_with_cert:
+        return None, False
+
+    program_cert = ProgramCertificate.objects.create(user=user, program=program)
+    if program_cert:
+        log.info(
+            "Program certificate for [%s] in program [%s] is created.",
+            user.username,
+            program.title,
+        )
+
+    return program_cert, True

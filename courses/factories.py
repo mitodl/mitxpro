@@ -15,6 +15,7 @@ from .models import (
     ProgramEnrollment,
     CourseRunEnrollment,
     CourseRunCertificate,
+    ProgramCertificate,
 )
 
 FAKE = faker.Factory.create()
@@ -99,6 +100,16 @@ class CourseRunCertificateFactory(DjangoModelFactory):
 
     class Meta:
         model = CourseRunCertificate
+
+
+class ProgramCertificateFactory(DjangoModelFactory):
+    """Factory for CourseRunCertificate"""
+
+    program = factory.SubFactory(ProgramFactory)
+    user = factory.SubFactory(UserFactory)
+
+    class Meta:
+        model = ProgramCertificate
 
 
 class CourseRunEnrollmentFactory(DjangoModelFactory):
