@@ -2,6 +2,7 @@
 from datetime import datetime
 
 import pytz
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import transaction
 from django.templatetags.static import static
 from rest_framework import serializers
@@ -528,7 +529,11 @@ class BaseCouponSerializer(serializers.Serializer):
         validators=[UniqueValidator(queryset=models.CouponPayment.objects.all())],
     )
     tag = serializers.CharField(max_length=256, allow_null=True, required=False)
-    amount = serializers.DecimalField(decimal_places=2, max_digits=20)
+    amount = serializers.DecimalField(
+        decimal_places=5,
+        max_digits=20,
+        validators=[MinValueValidator(0), MaxValueValidator(1)],
+    )
     automatic = serializers.BooleanField(default=False)
     activation_date = serializers.DateTimeField()
     expiration_date = serializers.DateTimeField()

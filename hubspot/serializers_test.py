@@ -77,7 +77,7 @@ def test_serialize_order(status):
         "purchaser": format_hubspot_id(order.purchaser.id),
         "status": ORDER_STATUS_MAPPING[status],
         "amount": line.product_version.price.to_eng_string(),
-        "discount_amount": "0.00",
+        "discount_amount": "0.0000",
         "close_date": (
             int(order.updated_on.timestamp() * 1000)
             if status == Order.FULFILLED

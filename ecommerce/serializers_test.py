@@ -5,6 +5,7 @@ Tests for ecommerce serializers
 from decimal import Decimal
 
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from mitxpro.test_utils import any_instance_of
 from cms.factories import CoursePageFactory, ProgramPageFactory
@@ -218,6 +219,37 @@ def test_serialize_coupon_single_use(
     assert serializer.is_valid() is (has_payment_transaction and has_products)
 
 
+@pytest.mark.parametrize(
+    "too_high, expected_message",
+    [
+        [True, "Ensure this value is less than or equal to 1."],
+        [False, "Ensure this value is greater than or equal to 0."],
+    ],
+)
+def test_serialize_coupon_invalid_amount(
+    coupon_product_ids, too_high, expected_message
+):
+    """The amount should be between 0 and 1"""
+    data = {
+        "name": "FAKETAG",
+        "tag": None,
+        "automatic": True,
+        "activation_date": "2018-01-01T00:00:00Z",
+        "expiration_date": "2019-12-31T00:00:00Z",
+        "amount": 1.75 if too_high else -0.25,
+        "num_coupon_codes": 2,
+        "coupon_type": "single-use",
+        "company": "Acme Corp.",
+        "payment_type": "credit_card",
+        "payment_transaction": "fake123",
+        "product_ids": coupon_product_ids,
+    }
+    serializer = SingleUseCouponSerializer(data=data)
+    with pytest.raises(ValidationError) as ex:
+        serializer.is_valid(raise_exception=True)
+    assert ex.value.args[0] == {"amount": [expected_message]}
+
+
 @pytest.mark.parametrize("has_coupon_code", [True, False])
 @pytest.mark.parametrize("has_payment_transaction", [True, False])
 @pytest.mark.parametrize("has_products", [True, False])
@@ -241,6 +273,37 @@ def test_serialize_coupon_promo(
     }
     serializer = PromoCouponSerializer(data=data)
     assert serializer.is_valid() is (has_coupon_code and has_products)
+
+
+@pytest.mark.parametrize(
+    "too_high, expected_message",
+    [
+        [True, "Ensure this value is less than or equal to 1."],
+        [False, "Ensure this value is greater than or equal to 0."],
+    ],
+)
+def test_serialize_coupon_promo_invalid_amount(
+    coupon_product_ids, too_high, expected_message
+):
+    """ Test the PromoCouponSerializer """
+    data = {
+        "name": "FAKETAG",
+        "tag": None,
+        "coupon_code": "FAKE_CODE",
+        "automatic": True,
+        "activation_date": "2018-01-01T00:00:00Z",
+        "expiration_date": "2019-12-31T00:00:00Z",
+        "amount": 1.75 if too_high else -0.25,
+        "coupon_type": "promo",
+        "company": "Acme Corp.",
+        "payment_type": "credit_card",
+        "payment_transaction": None,
+        "product_ids": coupon_product_ids,
+    }
+    serializer = PromoCouponSerializer(data=data)
+    with pytest.raises(ValidationError) as ex:
+        serializer.is_valid(raise_exception=True)
+    assert ex.value.args[0] == {"amount": [expected_message]}
 
 
 def test_serialize_coupon_payment_version_serializer(basket_and_coupons):

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from ecommerce.constants import REFERENCE_NUMBER_PREFIX
@@ -345,9 +346,10 @@ class CouponPaymentVersion(TimestampedModel):
     max_redemptions = models.PositiveIntegerField()
     max_redemptions_per_user = models.PositiveIntegerField()
     amount = models.DecimalField(
-        decimal_places=2,
+        decimal_places=5,
         max_digits=20,
         help_text="Percent discount for a coupon. Between 0 and 1.",
+        validators=[MinValueValidator(0), MaxValueValidator(1)],
     )
     expiration_date = models.DateTimeField(
         null=True,
