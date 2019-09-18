@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.22.0
+Version 0.22.0 (Released September 18, 2019)
 --------------
 
 - Add payment_type and payment_transaction for coupons created by B2B purchases (#1115)
