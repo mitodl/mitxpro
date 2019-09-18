@@ -39,6 +39,7 @@ export type ProductVersion = {
   id: number,
   readable_id: string,
   created_on: string,
+  start_date: ?string,
 }
 
 export type BasketItem = ProductVersion & {

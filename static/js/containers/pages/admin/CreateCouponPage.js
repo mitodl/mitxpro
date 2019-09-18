@@ -17,7 +17,7 @@ import type { Response } from "redux-query"
 import type {
   Company,
   CouponPaymentVersion,
-  Product
+  ProductDetail
 } from "../../../flow/ecommerceTypes"
 import { createStructuredSelector } from "reselect"
 import { COUPON_TYPE_SINGLE_USE } from "../../../constants"
@@ -27,7 +27,7 @@ type State = {
 }
 
 type StateProps = {|
-  products: Array<Product>,
+  products: Array<ProductDetail>,
   companies: Array<Company>,
   coupons: Map<string, CouponPaymentVersion>
 |}

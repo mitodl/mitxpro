@@ -26,6 +26,10 @@ import type {
   UserEnrollments
 } from "../flow/courseTypes"
 
+import type { ProductDetail } from "../flow/ecommerceTypes"
+
+import { PRODUCT_TYPE_COURSERUN } from "../constants"
+
 /**
  * Returns a promise which resolves after a number of milliseconds have elapsed
  */
@@ -214,4 +218,17 @@ export const findItemWithTextId = (
   }
 
   return null
+}
+
+export const getProductSelectLabel = (product: ProductDetail) => {
+  if (
+    product.product_type === PRODUCT_TYPE_COURSERUN &&
+    product.latest_version.start_date !== null
+  ) {
+    return `${product.latest_version.readable_id} | ${
+      product.title
+    } | ${formatPrettyDate(moment(product.latest_version.start_date))}`
+  } else {
+    return `${product.latest_version.readable_id} | ${product.title}`
+  }
 }

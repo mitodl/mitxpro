@@ -51,10 +51,14 @@
 
   .product-selection {
     height: 250px;
+
+    div {
+      padding-right: unset;
+    }
   }
 
   .picky {
-    max-width: 600px;
+    max-width: 992px;
   }
 
   .picky__dropdown {

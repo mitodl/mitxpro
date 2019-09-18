@@ -70,6 +70,9 @@ def test_serialize_basket_product_version_courserun(mock_context):
         "product_id": product_version.product.id,
         "readable_id": get_readable_id(product_version.product.content_object),
         "created_on": product_version.created_on.strftime(datetime_millis_format),
+        "start_date": product_version.product.content_object.start_date.isoformat()
+        if product_version.product.content_object.start_date
+        else None,
     }
 
 
@@ -97,6 +100,9 @@ def test_serialize_basket_product_version_program(mock_context):
         "product_id": product_version.product.id,
         "readable_id": get_readable_id(product_version.product.content_object),
         "created_on": product_version.created_on.strftime(datetime_millis_format),
+        "start_date": product_version.product.content_object.next_run_date.isoformat()
+        if product_version.product.content_object.next_run_date
+        else None,
     }
 
 

@@ -17,6 +17,7 @@ import {
   findFormikFieldByName,
   findFormikErrorByName
 } from "../../lib/test_utils"
+import { formatPrettyDate } from "../../lib/util"
 
 describe("CouponForm", () => {
   let sandbox, onSubmitStub
@@ -200,6 +201,36 @@ describe("CouponForm", () => {
         assert.ok(picky.text().includes(availableProduct[1].title))
       }
     })
+  })
+
+  //
+  it(`displays correct product labels`, async () => {
+    const wrapper = renderForm()
+    wrapper
+      .find(`input[name='product_type']`)
+      .findWhere(checkBox => checkBox.prop("value") === "")
+      .simulate("click")
+    await wait()
+    wrapper.update()
+    const picky = wrapper.find(".picky")
+    assert.ok(
+      picky
+        .text()
+        .includes(
+          `${products[0].latest_version.readable_id} | ${
+            products[0].title
+          } | ${formatPrettyDate(
+            moment(products[0].latest_version.start_date)
+          )}`
+        )
+    )
+    assert.ok(
+      picky
+        .text()
+        .includes(
+          `${products[1].latest_version.readable_id} | ${products[1].title}`
+        )
+    )
   })
 
   //
