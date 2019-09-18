@@ -82,7 +82,11 @@ export const makeProgramEnrollment = (): ProgramEnrollment => ({
   // $FlowFixMe
   id:                     genProgramEnrollmentId.next().value,
   program:                makeProgram(),
-  course_run_enrollments: [makeCourseRunEnrollment(), makeCourseRunEnrollment()]
+  course_run_enrollments: [
+    makeCourseRunEnrollment(),
+    makeCourseRunEnrollment()
+  ],
+  certificate: null
 })
 
 export const makeUserEnrollments = (): UserEnrollments => ({

@@ -103,7 +103,7 @@ class CourseRunCertificateFactory(DjangoModelFactory):
 
 
 class ProgramCertificateFactory(DjangoModelFactory):
-    """Factory for CourseRunCertificate"""
+    """Factory for ProgramCertificate"""
 
     program = factory.SubFactory(ProgramFactory)
     user = factory.SubFactory(UserFactory)

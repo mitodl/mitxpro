@@ -669,6 +669,10 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
     def get_certified_object_id(self):
         return self.course_run_id
 
+    def get_courseware_object_id(self):
+        """Gets the course id instead of the course run id"""
+        return self.course_run.course_id
+
     @property
     def link(self):
         """
@@ -676,7 +680,12 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
         Format: /certificates/<uuid>/
         Example: /certificates/93ebd74e-5f88-4b47-bb09-30a6d575328f/
         """
-        return "/certificates/{}/".format(str(self.uuid))
+        return "/certificate/{}/".format(str(self.uuid))
+
+    @property
+    def start_end_dates(self):
+        """Returns the start and end date for courseware object duration"""
+        return self.course_run.start_date, self.course_run.end_date
 
     def __str__(self):
         return 'CourseRunCertificate for user={user}, run={course_run} ({uuid})"'.format(
@@ -696,6 +705,34 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
 
     def get_certified_object_id(self):
         return self.program_id
+
+    def get_courseware_object_id(self):
+        """Gets the program id"""
+        return self.program_id
+
+    @property
+    def link(self):
+        """
+        Get the link at which this certificate will be served
+        Format: /certificates/program/<uuid>/
+        Example: /certificates/program/93ebd74e-5f88-4b47-bb09-30a6d575328f/
+        """
+        return "/certificate/program/{}/".format(str(self.uuid))
+
+    @property
+    def start_end_dates(self):
+        """
+        Start date: earliest course run start date
+        End date: latest course run end date
+        """
+        course_ids = self.program.courses.all().values_list("id", flat=True)
+        dates = CourseRunCertificate.objects.filter(
+            user_id=self.user_id, course_run__course_id__in=course_ids
+        ).aggregate(
+            start_date=models.Min("course_run__start_date"),
+            end_date=models.Max("course_run__end_date"),
+        )
+        return dates["start_date"], dates["end_date"]
 
     def __str__(self):
         return 'ProgramCertificate for user={user}, program={program} ({uuid})"'.format(
