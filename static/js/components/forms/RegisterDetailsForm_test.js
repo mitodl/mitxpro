@@ -52,8 +52,8 @@ describe("RegisterDetailsForm", () => {
       "password",
       "Password must contain at least one letter and number"
     ],
-    ["name", "", "Legal Name is a required field"],
-    ["name", "  ", "Legal Name is a required field"],
+    ["name", "", "Full Name is a required field"],
+    ["name", "  ", "Full Name is a required field"],
     ["name", "Jane", null],
     ["legal_address.city", "Cambridge", null],
     ["legal_address.city", "", "City is a required field"],

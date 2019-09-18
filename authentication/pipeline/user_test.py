@@ -308,6 +308,36 @@ def test_create_user_via_email_no_data(mocker, mock_email_backend):
 
 
 @pytest.mark.django_db
+def test_create_user_via_email_with_shorter_name(mocker, mock_email_backend):
+    """Tests that create_user_via_email raises an error if name field is shorter than 2 characters"""
+    mock_strategy = mocker.Mock()
+    mock_strategy.request_data.return_value = {
+        "name": "a",
+        "password": "password1",
+        "legal_address": {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "street_address_1": "1 Main st",
+            "city": "Boston",
+            "state_or_territory": "US-MA",
+            "country": "US",
+            "postal_code": "02101",
+        },
+    }
+
+    with pytest.raises(RequirePasswordAndPersonalInfoException) as exc:
+        user_actions.create_user_via_email(
+            mock_strategy,
+            mock_email_backend,
+            details=dict(email="test@example.com"),
+            pipeline_index=0,
+            flow=SocialAuthState.FLOW_REGISTER,
+        )
+
+    assert exc.value.errors == ["Full name must be at least 2 characters long."]
+
+
+@pytest.mark.django_db
 def test_create_user_via_email_existing_user_raises(
     user, mock_email_backend, mock_create_user_strategy
 ):
