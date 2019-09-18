@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.22.0 (Released September 18, 2019)
+--------------
+
+- Add payment_type and payment_transaction for coupons created by B2B purchases (#1115)
+- Add Order.total_price_paid and populate from coupon discount and product prices (#1111)
+- Coupons for refunded orders should not be valid (#1102)
+- Remove reference prefix environment variable, use environment instead (#1109)
+- Changed username generation to be based on users' full names
+- Make text_id a read-only field in django admin (#1105)
+- Add explanation text to B2B purchase and receipt pages (#1090)
+- Adding TLS verification for Fastly
+
 Version 0.21.0 (Released September 16, 2019)
 --------------
 
