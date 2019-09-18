@@ -9,7 +9,6 @@ from django.utils.translation import gettext_lazy as _
 import pycountry
 
 from mitxpro.models import TimestampedModel
-from users.constants import USERNAME_MAX_LEN
 
 # Defined in edX Profile model
 MALE = "m"
@@ -137,7 +136,9 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email", "name"]
 
-    username = models.CharField(unique=True, max_length=USERNAME_MAX_LEN)
+    # NOTE: Username max length was set to 50 before we lowered it. We're hardcoding this
+    # value here now until we are ready to migrate the max length at the database level.
+    username = models.CharField(unique=True, max_length=50)
     email = models.EmailField(blank=False, unique=True)
     name = models.TextField(blank=True, default="")
     is_staff = models.BooleanField(

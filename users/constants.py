@@ -1,2 +1,2 @@
 """User constants"""
-USERNAME_MAX_LEN = 50
+USERNAME_MAX_LEN = 30
