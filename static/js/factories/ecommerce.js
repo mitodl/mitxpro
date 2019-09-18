@@ -68,7 +68,8 @@ export const makeItem = (productType: ?string): BasketItem => {
     // $FlowFixMe: flow doesn't understand generators well
     product_id:    genProductId.next().value,
     readable_id:   casual.text,
-    created_on:    casual.moment.format()
+    created_on:    casual.moment.format(),
+    start_date:    casual.moment.format()
   }
 }
 

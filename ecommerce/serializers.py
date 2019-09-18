@@ -41,6 +41,7 @@ class ProductVersionSerializer(serializers.ModelSerializer):
     thumbnail_url = serializers.SerializerMethodField()
     content_title = serializers.SerializerMethodField()
     readable_id = serializers.SerializerMethodField()
+    start_date = serializers.SerializerMethodField()
 
     def get_type(self, instance):
         """ Return the product version type """
@@ -83,6 +84,15 @@ class ProductVersionSerializer(serializers.ModelSerializer):
         """Return the readable_id of the program or course run"""
         return get_readable_id(instance.product.content_object)
 
+    def get_start_date(self, instance):
+        """Returns the start date of the program or course run"""
+        content_object = instance.product.content_object
+        if isinstance(content_object, CourseRun) and content_object.start_date:
+            return content_object.start_date.isoformat()
+        elif isinstance(content_object, Program) and content_object.next_run_date:
+            return content_object.next_run_date.isoformat()
+        return None
+
     class Meta:
         fields = [
             "id",
@@ -96,6 +106,7 @@ class ProductVersionSerializer(serializers.ModelSerializer):
             "product_id",
             "readable_id",
             "created_on",
+            "start_date",
         ]
         model = models.ProductVersion
 

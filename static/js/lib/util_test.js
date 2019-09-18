@@ -23,9 +23,13 @@ import {
   getMaxDate,
   newSetWith,
   newSetWithout,
-  timeoutPromise
+  timeoutPromise,
+  getProductSelectLabel
 } from "./util"
 import { makeUserEnrollments } from "../factories/course"
+import { makeProduct } from "../factories/ecommerce"
+
+import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
 
 describe("utility functions", () => {
   it("waits some milliseconds", done => {
@@ -105,6 +109,22 @@ describe("utility functions", () => {
     ].forEach(([val, exp]) => {
       assert.equal(notNil(val), exp)
     })
+  })
+
+  it("getProductSelectLabel works as expected", () => {
+    const program = makeProduct(PRODUCT_TYPE_PROGRAM)
+    const courseRun = makeProduct(PRODUCT_TYPE_COURSERUN)
+
+    assert.equal(
+      getProductSelectLabel(courseRun),
+      `${courseRun.latest_version.readable_id} | ${
+        courseRun.title
+      } | ${formatPrettyDate(moment(courseRun.latest_version.start_date))}`
+    )
+    assert.equal(
+      getProductSelectLabel(program),
+      `${program.latest_version.readable_id} | ${program.title}`
+    )
   })
 
   it("getTokenFromUrl gets a token value from a url match or the querystring", () => {

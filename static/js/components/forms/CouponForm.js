@@ -15,13 +15,14 @@ import {
   PRODUCT_TYPE_PROGRAM
 } from "../../constants"
 import { isPromo } from "../../lib/ecommerce"
+import { getProductSelectLabel } from "../../lib/util"
 
-import type { Company, Product } from "../../flow/ecommerceTypes"
+import type { Company, ProductDetail } from "../../flow/ecommerceTypes"
 
 type CouponFormProps = {
   onSubmit: Function,
   companies: Array<Company>,
-  products: Array<Product>
+  products: Array<ProductDetail>
 }
 
 const couponValidations = yup.object().shape({
@@ -277,18 +278,25 @@ export const CouponForm = ({
           <Picky
             name="products"
             valueKey="id"
-            labelKey="title"
+            labelKey="label"
             options={filter(
               values.product_type
                 ? pathSatisfies(equals(values.product_type), ["product_type"])
                 : always(true),
-              sortBy(prop("title"), products || [])
+              sortBy(
+                prop("label"),
+                (products || []).map(product => ({
+                  ...product,
+                  label: getProductSelectLabel(product)
+                }))
+              )
             )}
             value={values.products}
             open={true}
             multiple={true}
             includeSelectAll={false}
             includeFilter={true}
+            numberDisplayed={2}
             onChange={value => {
               setFieldValue("products", value)
               setFieldTouched("products")
