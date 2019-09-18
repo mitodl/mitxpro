@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.22.1
+--------------
+
+- #980 Coupons: product selection improvement
+- #1099 Program certificate links and view
+- Implement discount codes for B2B purchases (#1055)
+- Certificates: create program certificate
+
 Version 0.22.0 (Released September 18, 2019)
 --------------
 
