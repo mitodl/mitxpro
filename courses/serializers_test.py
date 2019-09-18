@@ -230,4 +230,5 @@ def test_serialize_program_enrollments(has_company):
         "course_run_enrollments": CourseRunEnrollmentSerializer(
             [course_run_enrollments[1], course_run_enrollments[0]], many=True
         ).data,
+        "certificate": None,
     }

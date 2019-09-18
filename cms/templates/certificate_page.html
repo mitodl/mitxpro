@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static wagtailimages_tags %}
 
-{% block title %}{{ site_name }} | Course Certificate{% endblock %}
+{% block title %}{{ site_name }} | Certificate for: {{ page.product_name }}{% endblock %}
 
 {% block seohead %}
     {{ block.super }}
@@ -10,8 +10,8 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@MITxonedX" />
     <meta name="twitter:image" content="{{ share_image_url }}" />
-    <meta property="og:title" content="{{ site_name }} | Course Certificate: {{ page.product_name }}" />
-    <meta property="og:description" content="Course Certificate for {{ page.product_name }} awarded by {{ site_name }}." />
+    <meta property="og:title" content="{{ site_name }} | Certificate for: {{ page.product_name }}" />
+    <meta property="og:description" content="Certificate for {{ page.product_name }} awarded by {{ site_name }}." />
     <meta property="og:url" content="{{ request.build_absolute_uri }}" />
     <meta property="og:image:url" content="{{ share_image_url }}" />
     <meta property="og:image:width" content="{{ share_image_width }}" />
@@ -82,7 +82,7 @@
                     <span class="success-text">has successfully completed</span>
                     <span class="degree-text">{{ page.product_name }}</span>
                     {% if page.CEUs %}
-                        <span class="award-text">Awarded {{ page.CEUs }} Continuing Education Units (CEUs) <br>{{ run.start_date|date:"F j " }} - {{ run.end_date|date }}</span>
+                        <span class="award-text">Awarded {{ page.CEUs }} Continuing Education Units (CEUs) <br>{{ start_date|date }} - {{ end_date|date }}</span>
                     {% endif %}
                     <div class="row justify-content-center">
                         {% for signatory in page.signatory_pages %}

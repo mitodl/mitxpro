@@ -213,6 +213,14 @@ class CourseRunCertificateSerializer(serializers.ModelSerializer):
         fields = ["uuid", "link"]
 
 
+class ProgramCertificateSerializer(serializers.ModelSerializer):
+    """ProgramCertificate model serializer"""
+
+    class Meta:
+        model = models.ProgramCertificate
+        fields = ["uuid", "link"]
+
+
 class CourseRunEnrollmentSerializer(serializers.ModelSerializer):
     """CourseRunEnrollment model serializer"""
 
@@ -247,6 +255,23 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
     program = BaseProgramSerializer(read_only=True)
     course_run_enrollments = serializers.SerializerMethodField()
     company = CompanySerializer(read_only=True)
+    certificate = serializers.SerializerMethodField()
+
+    def get_certificate(self, enrollment):
+        """
+        Resolve a certificate for this enrollment if it exists
+        """
+        # Using IDs because we don't need the actual record and this avoids redundant queries
+        user_id = enrollment.user_id
+        program_id = enrollment.program_id
+        try:
+            return ProgramCertificateSerializer(
+                models.ProgramCertificate.objects.get(
+                    user_id=user_id, program_id=program_id
+                )
+            ).data
+        except models.ProgramCertificate.DoesNotExist:
+            return None
 
     def __init__(self, *args, **kwargs):
         assert (
@@ -270,4 +295,4 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ProgramEnrollment
-        fields = ["id", "program", "course_run_enrollments", "company"]
+        fields = ["id", "program", "course_run_enrollments", "company", "certificate"]

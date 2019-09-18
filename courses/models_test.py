@@ -13,6 +13,8 @@ from courses.factories import (
     ProgramFactory,
     CourseRunEnrollmentFactory,
     ProgramEnrollmentFactory,
+    CourseRunCertificateFactory,
+    ProgramCertificateFactory,
 )
 from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from courses.models import CourseRunEnrollment
@@ -274,6 +276,45 @@ def test_course_first_unexpired_run():
         enrollment_end=enr_end_date,
     )
     assert course.first_unexpired_run == first_run
+
+
+def test_course_run_certificate_start_end_dates():
+    """
+    Test that the CourseRunCertificate start_end_dates property works properly
+    """
+    certificate = CourseRunCertificateFactory.create()
+    start_date, end_date = certificate.start_end_dates
+    assert start_date == certificate.course_run.start_date
+    assert end_date == certificate.course_run.end_date
+
+
+def test_program_certificate_start_end_dates(user):
+    """
+    Test that the ProgramCertificate start_end_dates property works properly
+    """
+    now = now_in_utc()
+    start_date = now + timedelta(days=1)
+    end_date = now + timedelta(days=100)
+    program = ProgramFactory.create()
+
+    early_course_run = CourseRunFactory.create(
+        course__program=program, start_date=start_date, end_date=end_date
+    )
+    later_course_run = CourseRunFactory.create(
+        course__program=program,
+        start_date=start_date + timedelta(days=1),
+        end_date=end_date + timedelta(days=1),
+    )
+
+    # Need the course run certificates to be there in order for the start_end_dates
+    # to return valid values
+    CourseRunCertificateFactory.create(course_run=early_course_run, user=user)
+    CourseRunCertificateFactory.create(course_run=later_course_run, user=user)
+
+    certificate = ProgramCertificateFactory.create(program=program, user=user)
+    program_start_date, program_end_date = certificate.start_end_dates
+    assert program_start_date == early_course_run.start_date
+    assert program_end_date == later_course_run.end_date
 
 
 def test_program_first_unexpired_run():

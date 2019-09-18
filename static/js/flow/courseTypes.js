@@ -41,6 +41,11 @@ export type CourseRunCertificate = {
   uuid: string
 }
 
+export type ProgramCertificate = {
+  link: string,
+  uuid: string
+}
+
 export type CourseRunEnrollment = {
   run: CourseRunDetail,
   certificate: ?CourseRunCertificate
@@ -49,7 +54,8 @@ export type CourseRunEnrollment = {
 export type ProgramEnrollment = {
   id: number,
   program: Program,
-  course_run_enrollments: Array<CourseRunEnrollment>
+  course_run_enrollments: Array<CourseRunEnrollment>,
+  certificate: ?ProgramCertificate
 }
 
 export type UserEnrollments = {

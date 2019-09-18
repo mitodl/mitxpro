@@ -27,14 +27,19 @@ from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
 from courses.constants import DEFAULT_COURSE_IMG_PATH
-from courses.models import CourseRunCertificate
+from courses.models import CourseRunCertificate, ProgramCertificate
 from cms.blocks import (
     FacultyBlock,
     LearningTechniqueBlock,
     ResourceBlock,
     UserTestimonialBlock,
 )
-from cms.constants import COURSE_INDEX_SLUG, PROGRAM_INDEX_SLUG, SIGNATORY_INDEX_SLUG
+from cms.constants import (
+    COURSE_INDEX_SLUG,
+    PROGRAM_INDEX_SLUG,
+    SIGNATORY_INDEX_SLUG,
+    CERTIFICATE_INDEX_SLUG,
+)
 from cms.utils import sort_and_filter_pages
 from mitxpro.views import get_js_settings_context
 
@@ -221,6 +226,82 @@ class CatalogPage(Page):
         )
 
 
+class CertificateIndexPage(RoutablePageMixin, Page):
+    """
+    Certificate index page placeholder that handles routes for serving
+    certificates given by UUID
+    """
+
+    parent_page_types = ["HomePage"]
+    subpage_types = []
+
+    slug = CERTIFICATE_INDEX_SLUG
+
+    @classmethod
+    def can_create_at(cls, parent):
+        """
+        You can only create one of these pages under the home page.
+        The parent is limited via the `parent_page_type` list.
+        """
+        return (
+            super().can_create_at(parent)
+            and not parent.get_children().type(cls).exists()
+        )
+
+    @route(r"^program/([A-Fa-f0-9-]+)/?$")
+    def program_certificate(self, request, uuid, *args, **kwargs):
+        """
+        Serve a program certificate by uuid
+        """
+        # Try to fetch a certificate by the uuid passed in the URL
+        try:
+            certificate = ProgramCertificate.objects.get(uuid=uuid)
+        except ProgramCertificate.DoesNotExist:
+            raise Http404()
+
+        # Get a CertificatePage to serve this request
+        certificate_page = (
+            certificate.program.page.certificate_page
+            if certificate.program.page
+            else None
+        )
+        if not certificate_page:
+            raise Http404()
+
+        certificate_page.certificate = certificate
+        return certificate_page.serve(request)
+
+    @route(r"^([A-Fa-f0-9-]+)/?$")
+    def course_certificate(self, request, uuid, *args, **kwargs):
+        """
+        Serve a course certificate by uuid
+        """
+        # Try to fetch a certificate by the uuid passed in the URL
+        try:
+            certificate = CourseRunCertificate.objects.get(uuid=uuid)
+        except CourseRunCertificate.DoesNotExist:
+            raise Http404()
+
+        # Get a CertificatePage to serve this request
+        certificate_page = (
+            certificate.course_run.course.page.certificate_page
+            if certificate.course_run.course.page
+            else None
+        )
+        if not certificate_page:
+            raise Http404()
+
+        certificate_page.certificate = certificate
+        return certificate_page.serve(request)
+
+    @route(r"^$")
+    def index_route(self, request, *args, **kwargs):
+        """
+        The index page is not meant to be served/viewed directly
+        """
+        raise Http404()
+
+
 class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
     """
     CMS Page representing the home/root route
@@ -263,6 +344,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
         "TextVideoSection",
         "ResourcePage",
         "ImageCarouselPage",
+        "CertificateIndexPage",
     ]
 
     def _get_child_page_of_type(self, cls):
@@ -318,29 +400,6 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
             **get_js_settings_context(request),
             "catalog_page": CatalogPage.objects.first(),
         }
-
-    @route(r"^certificates/([A-Za-z0-9-]+)/?$")
-    def course_certificate(self, request, uuid, *args, **kwargs):
-        """
-        Serve a course certificate by uuid
-        """
-        # Try to fetch a certificate by the uuid passed in the URL
-        try:
-            certificate = CourseRunCertificate.objects.get(uuid=uuid)
-        except CourseRunCertificate.DoesNotExist:
-            raise Http404()
-
-        # Get a CertificatePage to serve this request
-        certificate_page = (
-            certificate.course_run.course.page.certificate_page
-            if certificate.course_run.course.page
-            else None
-        )
-        if not certificate_page:
-            raise Http404()
-
-        certificate_page.certificate = certificate
-        return certificate_page.serve(request)
 
 
 class ProductPage(MetadataPageMixin, Page):
@@ -1301,17 +1360,19 @@ class CertificatePage(CourseProgramChildPage):
         if request.is_preview:
             preview_context = {
                 "learner_name": "Anthony M. Stark",
-                "run": self.parent.product.first_unexpired_run,
+                "start_date": self.parent.product.first_unexpired_run.start_date,
+                "end_date": self.parent.product.first_unexpired_run.end_date,
             }
         elif self.certificate:
             # Verify that the certificate in fact is for this same course
-            if self.parent.product != self.certificate.course_run.course:
+            if self.parent.product.id != self.certificate.get_courseware_object_id():
                 raise Http404()
-
+            start_date, end_date = self.certificate.start_end_dates
             context = {
                 "certificate_user": self.certificate.user,
                 "learner_name": self.certificate.user.get_full_name(),
-                "run": self.certificate.course_run,
+                "start_date": start_date,
+                "end_date": end_date,
             }
         else:
             raise Http404()

@@ -209,7 +209,7 @@ export class DashboardPage extends React.Component<Props, State> {
               <div className="date-summary-text col-12">{dateSummary.text}</div>
             </div>
             <div className="row mt-2">
-              <div className="archived-course-link col-lg-8 col-md-7">
+              <div className="archived-course-link col-lg-7 col-md-8">
                 {dateSummary.archived &&
                 courseRunEnrollment.run.courseware_url ? (
                     <a
@@ -221,7 +221,7 @@ export class DashboardPage extends React.Component<Props, State> {
                     </a>
                   ) : null}
               </div>
-              <div className="certificate-link col-lg-4 col-md-5">
+              <div className="certificate-link d-flex justify-content-lg-end col-lg-5 col-md-8">
                 {courseRunEnrollment.certificate ? (
                   <a
                     href={courseRunEnrollment.certificate.link}
@@ -252,13 +252,13 @@ export class DashboardPage extends React.Component<Props, State> {
       <div className="program-enrollment row" key={index}>
         <RibbonText text="Program" addedClasses="program" />
 
-        <div className="program-image-column col-12 col-md-3">
+        <div className="program-image-column col-lg-3 col-md-5">
           <img
             src={programEnrollment.program.thumbnail_url}
             alt="Program image"
           />
         </div>
-        <div className="program-detail-column col-12 col-md-9">
+        <div className="program-detail-column col-lg-9 col-md-7">
           <div className="row no-gutters">
             <div className="col-12 col-md-9">
               <h2>{programEnrollment.program.title}</h2>
@@ -276,7 +276,19 @@ export class DashboardPage extends React.Component<Props, State> {
               </section>
             </div>
           </div>
-
+          <div className="row no-gutters mb-3">
+            <div className="certificate-link d-flex justify-content-lg-end col-12">
+              {programEnrollment.certificate ? (
+                <a
+                  href={programEnrollment.certificate.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View Certificate
+                </a>
+              ) : null}
+            </div>
+          </div>
           <Collapse
             className="program-course"
             isOpen={collapseVisible[programEnrollment.id]}
