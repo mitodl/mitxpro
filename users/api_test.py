@@ -5,6 +5,7 @@ import factory
 from django.contrib.auth import get_user_model
 
 from users.api import get_user_by_id, fetch_user, fetch_users, find_available_username
+from users.utils import usernameify
 from users.factories import UserFactory
 
 User = get_user_model()
@@ -146,3 +147,23 @@ def test_find_available_username(
     )
     available_username = find_available_username(username_base)
     assert available_username == expected_available_username
+
+
+@pytest.mark.django_db
+def test_full_username_creation():
+    """
+    Integration test to ensure that the USERNAME_MAX_LEN constant is set correctly, and that
+    generated usernames do not exceed it.
+    """
+    expected_username_max = 30
+    user_full_name = "Longerton McLongernamenbergenstein"
+    generated_username = usernameify(user_full_name)
+    assert len(generated_username) == expected_username_max
+    UserFactory.create(username=generated_username, name=user_full_name)
+    new_user_full_name = "{} Jr.".format(user_full_name)
+    new_generated_username = usernameify(new_user_full_name)
+    assert new_generated_username == generated_username
+    available_username = find_available_username(new_generated_username)
+    assert available_username == "{}1".format(
+        new_generated_username[0 : expected_username_max - 1]
+    )
