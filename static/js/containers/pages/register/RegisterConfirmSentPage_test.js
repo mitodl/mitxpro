@@ -53,7 +53,7 @@ describe("RegisterConfirmSentPage", () => {
   it("displays user's email on the page", async () => {
     const { inner } = await renderPage()
     assert.equal(
-      inner.find(".confirm-sent-page > span").text("href"),
+      inner.find(".confirm-sent-page > p > span").text("href"),
       userEmail
     )
   })

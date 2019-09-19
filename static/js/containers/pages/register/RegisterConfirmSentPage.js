@@ -28,11 +28,16 @@ export class RegisterConfirmSentPage extends React.Component<Props> {
 
           <div className="confirm-sent-page">
             <h2 className="text-center font-weight-600">Thank You!</h2>
-            We sent an email to <span className="email">{email}</span>
-            ,<br /> please verify your address to continue.
-            <div>
-              If you do NOT receive your verification email, here’s what to do:
-            </div>
+            <p>
+              We sent an email to <span className="email">{email}</span>
+              ,<br /> please verify your address to continue.
+            </p>
+            <p>
+              <b>
+                If you do NOT receive your verification email, here’s what to
+                do:
+              </b>
+            </p>
             <ol>
               <li>
                 <span className="font-weight-600">Wait a few moments.</span> It
