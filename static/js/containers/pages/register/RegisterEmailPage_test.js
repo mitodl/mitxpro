@@ -129,21 +129,10 @@ describe("RegisterEmailPage", () => {
 
     assert.lengthOf(helper.browserHistory, 2)
     assert.include(helper.browserHistory.location, {
-      pathname: routes.login.begin,
-      search:   ""
+      pathname: routes.register.confirmSent,
+      search:   `?email=${encodeURIComponent(email)}`
     })
     sinon.assert.notCalled(setErrorsStub)
     sinon.assert.calledWith(setSubmittingStub, false)
-
-    const { ui } = store.getState()
-
-    assert.deepEqual(ui.userNotifications, {
-      "email-sent": {
-        type:  ALERT_TYPE_TEXT,
-        props: {
-          text: `We sent an email to ${email}. Please verify your address to continue.`
-        }
-      }
-    })
   })
 })

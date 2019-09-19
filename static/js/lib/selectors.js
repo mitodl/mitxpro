@@ -21,3 +21,4 @@ export const qsVerificationCodeSelector = createParamSelector(
 )
 export const qsNextSelector = createParamSelector("next")
 export const qsErrorSelector = createParamSelector("error")
+export const qsEmailSelector = createParamSelector("email")

@@ -82,8 +82,6 @@ export const handleAuthResponse = (
     window.location = redirect_url || routes.dashboard
   } else if (state === STATE_LOGIN_PASSWORD) {
     history.push(routes.login.password)
-  } else if (state === STATE_REGISTER_CONFIRM_SENT) {
-    history.push(routes.login.begin)
   } else if (state === STATE_REGISTER_DETAILS) {
     const params = qs.stringify({
       partial_token
