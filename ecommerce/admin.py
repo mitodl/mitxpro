@@ -251,6 +251,10 @@ class ProductAdmin(admin.ModelAdmin):
     model = Product
     inlines = [ProductVersionInline]
 
+    def get_queryset(self, request):
+        """Return all active and in_active products"""
+        return Product.all_objects
+
 
 class DataConsentUserAdmin(admin.ModelAdmin):
     """Admin for DataConsentUser"""

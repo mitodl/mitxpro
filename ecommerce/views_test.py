@@ -615,6 +615,26 @@ def test_patch_basket_update_invalid_product(basket_client, basket_and_coupons):
     assert "Invalid product id {}".format(bad_id) in resp_data["errors"]["items"]
 
 
+def test_patch_basket_update_active_inactive_product(basket_client, basket_and_coupons):
+    """ Test that inactive product id is rejected with no changes to basket but not the active ones. """
+    product = ProductVersionFactory.create().product
+    product.is_active = False
+    product.save()
+    data = {"items": [{"product_id": product.id}]}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    resp_data = resp.json()
+    assert (
+        "Product id {product_id} is not active".format(product_id=product.id)
+        in resp_data["errors"]["items"]
+    )
+
+    product.is_active = True
+    product.save()
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+
+
 @pytest.mark.parametrize("section", ["items", "coupons"])
 def test_patch_basket_update_invalid_data(basket_client, basket_and_coupons, section):
     """ Test that invalid product data is rejected with no changes to basket """
