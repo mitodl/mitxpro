@@ -26,15 +26,14 @@
     </div>
   </div>
 </div>
-<div class="light-box-video-container">
-    <div id="light-box">
+{% if page.video_url %}
+    <div class="light-box-video-holder hidden">
         {% embed page.video_url as youtube_video %}
         {% if youtube_video %}
-            <div class="tv-video youtube-video" id="tv-yt-light-box-video">{{ youtube_video }}</div>
+            <div class="tv-video youtube-video" id="tv-light-box-yt-video" data-href='{{ youtube_video }}'></div>
         {% else %}
-            <video class="tv-light-box-video" id="tv-light-box-video" controls data-source="{{ page.video_url }}"></video>
+            <video class="tv-video" id="tv-light-box-video" controls data-source="{{ page.video_url }}"></video>
         {% endif %}
         <div class="video-caption">{{ page.video_title|richtext }}</div>
     </div>
-    <div id="fade-light-box" onClick="closeLightBox();"></div>
-</div>
+{% endif %}
