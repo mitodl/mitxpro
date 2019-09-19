@@ -85,6 +85,7 @@ class CourseRunEnrollmentAdmin(admin.ModelAdmin):
     """Admin for CourseRunEnrollment"""
 
     model = CourseRunEnrollment
+    raw_id_fields = ("user","order")
 
     def get_queryset(self, request):
         """
