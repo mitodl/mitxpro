@@ -48,6 +48,10 @@ class ProgramEnrollmentAdmin(admin.ModelAdmin):
     """Admin for ProgramEnrollment"""
 
     model = ProgramEnrollment
+    search_fields = ["user", "company", "Program"]
+    list_filter = ["active", "change_status"]
+    list_fields = ["user.email", "change_status"]
+    raw_id_fields = ("user","order")
 
     def get_queryset(self, request):
         """
@@ -86,7 +90,7 @@ class CourseRunEnrollmentAdmin(admin.ModelAdmin):
 
     model = CourseRunEnrollment
     search_fields = ["user", "company", "CourseRun"]
-    list_filter = ["active", "status"]
+    list_filter = ["active", "change_status"]
     list_fields = ["user.email", "change_status"]
     raw_id_fields = ("user","order")
 
