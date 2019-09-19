@@ -103,7 +103,7 @@ class OrderToDealSerializer(serializers.ModelSerializer):
 
         coupon_version = self._get_coupon_version(instance)
         if not coupon_version:
-            return "0.00"
+            return "0.0000"
 
         return round_half_up(
             coupon_version.payment_version.amount
