@@ -8,3 +8,9 @@ class CoursesConfig(AppConfig):
     """AppConfig for Courses"""
 
     name = "courses"
+
+    def ready(self):
+        """
+        Ready handler. Import signals.
+        """
+        import courses.signals  # pylint: disable=unused-variable
