@@ -29,9 +29,10 @@ const seedYear = moment().year()
 export const legalAddressValidation = yup.object().shape({
   name: yup
     .string()
-    .label("Legal Name")
+    .label("Full Name")
     .trim()
-    .required(),
+    .required()
+    .min(2),
   legal_address: yup.object().shape({
     first_name: yup
       .string()
