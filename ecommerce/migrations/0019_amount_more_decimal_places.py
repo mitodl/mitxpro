@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [("ecommerce", "0017_order_total_price_paid")]
+    dependencies = [("ecommerce", "0018_product_is_active")]
 
     operations = [
         migrations.AlterField(
