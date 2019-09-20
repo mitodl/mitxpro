@@ -152,7 +152,7 @@ class B2BPurchaseForm extends React.Component<Props> {
               itemPrice={itemPrice}
               totalPrice={totalPrice}
               discount={discount}
-              numSeats={isNaN(numSeats) ? 0 : numSeats}
+              numSeats={numSeats}
               alreadyPaid={false}
             />
 
