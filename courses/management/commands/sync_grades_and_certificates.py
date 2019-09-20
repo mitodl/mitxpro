@@ -7,6 +7,7 @@ from courses.models import CourseRun
 from courses.utils import ensure_course_run_grade, process_course_run_grade_certificate
 from courseware.api import get_edx_grades_with_users
 from users.api import fetch_user
+from mitxpro.utils import now_in_utc
 
 
 class Command(BaseCommand):
@@ -41,6 +42,13 @@ class Command(BaseCommand):
             action="store_true",
             help="Update local grade records with results from the edX grades API",
         )
+        parser.add_argument(
+            "-f",
+            "--force",
+            action="store_true",
+            dest="force",
+            help="Sync grades/certificates even if the given course run has not ended yet",
+        )
         super().add_arguments(parser)
 
     def handle(self, *args, **options):  # pylint: disable=too-many-locals
@@ -55,6 +63,16 @@ class Command(BaseCommand):
         except CourseRun.DoesNotExist:
             raise CommandError(
                 "Could not find run with courseware_id={}".format(options["run"])
+            )
+        now = now_in_utc()
+        if not options.get("force") and (run.end_date is None or run.end_date > now):
+            raise CommandError(
+                "The given course run has not yet finished, so the course grades should not be "
+                "considered final (courseware_id={}, end_date={}).\n"
+                "Add the -f/--force flag if grades/certificates should be synced anyway.".format(
+                    options["run"],
+                    "None" if run.end_date is None else run.end_date.isoformat(),
+                )
             )
 
         user = fetch_user(options["user"]) if options["user"] else None
