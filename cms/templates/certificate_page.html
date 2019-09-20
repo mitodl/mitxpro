@@ -88,7 +88,7 @@
                         {% for signatory in page.signatory_pages %}
                             <div class="col-sm-4 certify-by">
                                 <div class="signature-area">
-                                    {% image signatory.signature_image fill-150x50 %}
+                                    {% image signatory.signature_image max-150x50 %}
                                 </div>
                                 <span class="title">{{ signatory.name }}</span>
                                 {% if signatory.title_1 %}
@@ -102,6 +102,11 @@
                                 {% endif %}
                             </div>
                         {% endfor %}
+                    </div>
+                    <div class="row justify-content-center validation-link">
+                        <div class="col">
+                        <p>Valid Certificate ID: <a href="{{ request.build_absolute_uri }}" target="_blank">{{ uuid }}</a>
+                        </div>
                     </div>
                 </div>
             </div>
