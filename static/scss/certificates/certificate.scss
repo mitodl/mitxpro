@@ -5,6 +5,10 @@ $text-gray-dark: #6b6969;
 $text-gray-light: #d2d0d1;
 
 @media print {
+  a {
+    color: black !important;
+  }
+
   .no-print {
     display: none;
   }
@@ -102,6 +106,15 @@ $text-gray-light: #d2d0d1;
     .certificate-holder {
       margin: 0 auto;
       max-width: 730px;
+
+      .validation-link {
+        font-size: 16px;
+
+        a {
+          text-decoration: none;
+          color: $blue;
+        }
+      }
 
       .certify-text {
         display: block;

@@ -1369,6 +1369,7 @@ class CertificatePage(CourseProgramChildPage):
                 raise Http404()
             start_date, end_date = self.certificate.start_end_dates
             context = {
+                "uuid": self.certificate.uuid,
                 "certificate_user": self.certificate.user,
                 "learner_name": self.certificate.user.get_full_name(),
                 "start_date": start_date,
