@@ -1,6 +1,24 @@
 Release Notes
 =============
 
+Version 0.22.1
+--------------
+
+- #1123 certificate validation link
+- - Add validation over name field
+- Fix migrations by renaming one conflicting migration to happen later
+- Change decimal places for amount from 2 to 5 and add validation (#1124)
+- - Import the signal in courses app
+- Add a "is_active" field to the product model
+- Open a fancybox upon clicking on Watch Now button..
+- Lowered max username length to 30 (in code, not in db)
+- #980 Coupons: product selection improvement
+- #1099 Program certificate links and view
+- Updated sync_grades_and_certificates params
+- Adding validation to proper Nginx config and full HTML response
+- Implement discount codes for B2B purchases (#1055)
+- Certificates: create program certificate
+
 Version 0.22.0 (Released September 18, 2019)
 --------------
 
