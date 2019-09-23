@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.23.0
+--------------
+
+- Update UI for selecting products in B2B purchase form (#1095)
+- Made programs API public and added Program.current_price
+
 Version 0.22.1 (Released September 23, 2019)
 --------------
 
