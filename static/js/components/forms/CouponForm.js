@@ -16,6 +16,7 @@ import {
 } from "../../constants"
 import { isPromo } from "../../lib/ecommerce"
 import { getProductSelectLabel } from "../../lib/util"
+import FormError from "../../components/forms/elements/FormError"
 
 import type { Company, ProductDetail } from "../../flow/ecommerceTypes"
 
@@ -149,14 +150,14 @@ export const CouponForm = ({
                   Coupon code (letters, numbers, underscore only)*
                   <Field name="coupon_code" />
                 </label>
-                <ErrorMessage name="coupon_code" component="div" />
+                <ErrorMessage name="coupon_code" component={FormError} />
               </div>
               <div>
                 <label htmlFor="max_redemptions">
                   Maximum redemptions*
                   <Field name="max_redemptions" />
                 </label>
-                <ErrorMessage name="max_redemptions" component="div" />
+                <ErrorMessage name="max_redemptions" component={FormError} />
               </div>
             </React.Fragment>
           ) : (
@@ -165,7 +166,7 @@ export const CouponForm = ({
                 Number of coupon codes*
                 <Field name="num_coupon_codes" />
               </label>
-              <ErrorMessage name="num_coupon_codes" component="div" />
+              <ErrorMessage name="num_coupon_codes" component={FormError} />
             </React.Fragment>
           )}
         </div>
@@ -180,14 +181,14 @@ export const CouponForm = ({
               Percentage Discount (1 to 100)*
               <Field name="discount" />
             </label>
-            <ErrorMessage name="discount" component="div" />
+            <ErrorMessage name="discount" component={FormError} />
           </div>
           <div className="block">
             <label htmlFor="name">
               Unique Coupon Name (letters, numbers, underscore only)*
               <Field name="name" />
             </label>
-            <ErrorMessage name="name" component="div" />
+            <ErrorMessage name="name" component={FormError} />
           </div>
           <div className="block">
             <label htmlFor="tag">
@@ -215,7 +216,7 @@ export const CouponForm = ({
                 touched={touched.activation_date}
               />
             </label>
-            <ErrorMessage name="activation_date" component="div" />
+            <ErrorMessage name="activation_date" component={FormError} />
           </div>
           <div className="block">
             <label htmlFor="expiration_date">
@@ -235,7 +236,7 @@ export const CouponForm = ({
                 touched={touched.expiration_date}
               />
             </label>
-            <ErrorMessage name="expiration_date" component="div" />
+            <ErrorMessage name="expiration_date" component={FormError} />
           </div>
         </div>
         <div className="flex">
@@ -273,7 +274,7 @@ export const CouponForm = ({
           />
           All products
         </div>
-        <ErrorMessage name="products" component="div" />
+        <ErrorMessage name="products" component={FormError} />
         <div className="product-selection">
           <Picky
             name="products"
@@ -296,7 +297,6 @@ export const CouponForm = ({
             multiple={true}
             includeSelectAll={false}
             includeFilter={true}
-            numberDisplayed={2}
             onChange={value => {
               setFieldValue("products", value)
               setFieldTouched("products")
@@ -318,14 +318,14 @@ export const CouponForm = ({
                 <option value="staff">Staff</option>
               </Field>
             </label>
-            <ErrorMessage name="payment_type" component="div" />
+            <ErrorMessage name="payment_type" component={FormError} />
           </div>
           <div className="block">
             <label htmlFor="payment_transaction">
               Transaction number{isPromo(values.coupon_type) ? null : "*"}
               <Field name="payment_transaction" />
             </label>
-            <ErrorMessage name="payment_transaction" component="div" />
+            <ErrorMessage name="payment_transaction" component={FormError} />
           </div>
         </div>
         <div className="product-company block">
@@ -342,7 +342,7 @@ export const CouponForm = ({
                 : null}
             </Field>
           </label>
-          <ErrorMessage name="company" component="div" />
+          <ErrorMessage name="company" component={FormError} />
         </div>
         <button type="submit" disabled={isSubmitting}>
           Create coupons
