@@ -7,21 +7,35 @@ import { findRunInProduct, formatRunTitle } from "../../lib/ecommerce"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 
 import type { ProductDetail } from "../../flow/ecommerceTypes"
+import type { Course, CourseRun } from "../../flow/courseTypes"
 
 const productTypeOptions = [
   { value: PRODUCT_TYPE_COURSERUN, label: "Course" },
   { value: PRODUCT_TYPE_PROGRAM, label: "Program" }
 ]
 
-const makeProductOption = (product: ProductDetail) => ({
-  value: product.id,
-  label: product.title
-})
+const makeProductOption = (
+  product: ProductDetail,
+  run?: CourseRun,
+  course?: Course
+) => {
+  return {
+    value: product.id,
+    label:
+      product.product_type === PRODUCT_TYPE_PROGRAM
+        ? product.title
+        : course && course.title
+  }
+}
 
-const makeProductRunOption = (product: ProductDetail) => ({
-  label: formatRunTitle(findRunInProduct(product)),
-  value: product.id
-})
+const makeProductRunOption = (product: ProductDetail) => {
+  const [run] = findRunInProduct(product)
+
+  return {
+    label: formatRunTitle(run),
+    value: product.id
+  }
+}
 
 type Props = {
   products: Array<ProductDetail>,
@@ -40,7 +54,7 @@ type Props = {
 type ProductType = "courserun" | "program"
 type State = {
   productType: ProductType,
-  selectedCourseProduct: ?ProductDetail
+  selected: [?ProductDetail, ?CourseRun, ?Course]
 }
 type SelectOption = {
   label: string,
@@ -48,8 +62,8 @@ type SelectOption = {
 }
 export default class ProductSelector extends React.Component<Props, State> {
   state = {
-    productType:           PRODUCT_TYPE_COURSERUN,
-    selectedCourseProduct: null
+    productType: PRODUCT_TYPE_COURSERUN,
+    selected:    [null, null, null]
   }
 
   calcProductOptions = (): Array<SelectOption> => {
@@ -65,14 +79,14 @@ export default class ProductSelector extends React.Component<Props, State> {
 
     const productRuns = products
       .filter(_product => _product.product_type === PRODUCT_TYPE_COURSERUN)
-      .map(_product => [_product, findRunInProduct(_product)])
+      .map(_product => [_product, ...findRunInProduct(_product)])
 
-    const runIds = new Set()
+    const courseIds = new Set()
     const productOptions = []
-    for (const [product, run] of productRuns) {
-      if (run && !runIds.has(run.id)) {
-        runIds.add(run.id)
-        productOptions.push(makeProductOption(product))
+    for (const [product, run, course] of productRuns) {
+      if (run && course && !courseIds.has(course.id)) {
+        courseIds.add(course.id)
+        productOptions.push(makeProductOption(product, run, course))
       }
     }
     return productOptions
@@ -83,14 +97,13 @@ export default class ProductSelector extends React.Component<Props, State> {
       products,
       field: { value }
     } = this.props
-    const { productType, selectedCourseProduct } = this.state
+    const { productType, selected } = this.state
 
-    const selectedProduct =
-      productType === PRODUCT_TYPE_PROGRAM
-        ? products.find(_product => _product.id === value)
-        : selectedCourseProduct
+    if (productType === PRODUCT_TYPE_PROGRAM) {
+      return products.find(_product => _product.id === value)
+    }
 
-    return selectedProduct ? makeProductOption(selectedProduct) : null
+    return selected[0] ? makeProductOption(...selected) : null
   }
 
   updateSelectedProduct = (productOption: SelectOption) => {
@@ -98,7 +111,10 @@ export default class ProductSelector extends React.Component<Props, State> {
       field: { name, value, onChange },
       products
     } = this.props
-    const { productType, selectedCourseProduct } = this.state
+    const {
+      productType,
+      selected: [selectedProduct]
+    } = this.state
     if (productOption.value === value) {
       return
     }
@@ -109,15 +125,12 @@ export default class ProductSelector extends React.Component<Props, State> {
       const product = products.find(
         _product => _product.id === productOption.value
       )
-      if (
-        selectedCourseProduct &&
-        product &&
-        product.id === selectedCourseProduct.id
-      ) {
+      if (selectedProduct && product && product.id === selectedProduct.id) {
         return
       }
+
       this.setState({
-        selectedCourseProduct: product
+        selected: [product, ...findRunInProduct(product)]
       })
       onChange({ target: { name, value: null } })
     }
@@ -125,18 +138,17 @@ export default class ProductSelector extends React.Component<Props, State> {
 
   calcProductDateOptions = (): Array<*> => {
     const { products } = this.props
-    const { selectedCourseProduct } = this.state
-
-    const courseId = selectedCourseProduct
-      ? selectedCourseProduct.latest_version.courses[0].id
-      : null
+    const {
+      selected: [selectedProduct, selectedRun, selectedCourse]
+    } = this.state
 
     return products
       .filter(
         product =>
           product.product_type === PRODUCT_TYPE_COURSERUN &&
+          selectedCourse &&
           // should only be one course for a course run product
-          product.latest_version.courses[0].id === courseId
+          product.latest_version.courses[0].id === selectedCourse.id
       )
       .map(makeProductRunOption)
   }
@@ -160,7 +172,7 @@ export default class ProductSelector extends React.Component<Props, State> {
     }
     this.setState({
       productType,
-      selectedCourseProduct: null
+      selected: [null, null, null]
     })
     onChange({ target: { value: "", name } })
   }

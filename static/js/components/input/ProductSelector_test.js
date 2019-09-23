@@ -1,5 +1,6 @@
 // @flow
 import React from "react"
+import { clone } from "ramda"
 import sinon from "sinon"
 import { shallow } from "enzyme"
 import { assert } from "chai"
@@ -30,8 +31,13 @@ describe("ProductSelector", () => {
     onChangeStub = sandbox.stub()
     runProduct1Course1 = makeProduct(PRODUCT_TYPE_COURSERUN)
     runProduct2Course1 = makeProduct(PRODUCT_TYPE_COURSERUN)
-    runProduct2Course1.latest_version.courses =
+    runProduct2Course1.latest_version.courses = clone(
       runProduct1Course1.latest_version.courses
+    )
+    runProduct1Course1.latest_version.object_id =
+      runProduct1Course1.latest_version.courses[0].courseruns[0].id
+    runProduct2Course1.latest_version.object_id =
+      runProduct2Course1.latest_version.courses[0].courseruns[1].id
     runProduct2 = makeProduct(PRODUCT_TYPE_COURSERUN)
     programProduct = makeProduct(PRODUCT_TYPE_PROGRAM)
     products = [
@@ -131,11 +137,11 @@ describe("ProductSelector", () => {
     const selectWrapper = wrapper.find(Select).at(1)
     assert.deepEqual(selectWrapper.prop("options"), [
       {
-        label: runProduct2.title,
+        label: findRunInProduct(runProduct2)[1].title,
         value: runProduct2.id
       },
       {
-        label: runProduct1Course1.title,
+        label: findRunInProduct(runProduct1Course1)[1].title,
         value: runProduct1Course1.id
       }
     ])
@@ -171,19 +177,25 @@ describe("ProductSelector", () => {
     })
     const selectWrapper = wrapper.find(Select).at(1)
     selectWrapper.prop("onChange")({ value: runProduct2.id })
-    assert.deepEqual(wrapper.state().selectedCourseProduct, runProduct2)
+    assert.deepEqual(wrapper.state().selected, [
+      runProduct2,
+      ...findRunInProduct(runProduct2)
+    ])
     sinon.assert.calledWith(onChangeStub, { target: { name, value: null } })
   })
 
   it("doesn't change the selected course because it was already selected", () => {
     const wrapper = render()
     wrapper.setState({
-      productType:           PRODUCT_TYPE_COURSERUN,
-      selectedCourseProduct: runProduct2
+      productType: PRODUCT_TYPE_COURSERUN,
+      selected:    [runProduct2, ...findRunInProduct(runProduct2)]
     })
     const selectWrapper = wrapper.find(Select).at(1)
     selectWrapper.prop("onChange")({ value: runProduct2.id })
-    assert.deepEqual(wrapper.state().selectedCourseProduct, runProduct2)
+    assert.deepEqual(wrapper.state().selected, [
+      runProduct2,
+      ...findRunInProduct(runProduct2)
+    ])
     sinon.assert.notCalled(onChangeStub)
   })
 
@@ -203,17 +215,18 @@ describe("ProductSelector", () => {
   it("renders a list of course run dates", () => {
     const wrapper = render()
     wrapper.setState({
-      productType:           PRODUCT_TYPE_COURSERUN,
-      selectedCourseProduct: runProduct2Course1
+      productType: PRODUCT_TYPE_COURSERUN,
+      selected:    [runProduct2Course1, ...findRunInProduct(runProduct2Course1)]
     })
+
     const selectWrapper = wrapper.find(Select).at(2)
     assert.deepEqual(selectWrapper.prop("options"), [
       {
-        label: formatRunTitle(findRunInProduct(runProduct1Course1)),
+        label: formatRunTitle(findRunInProduct(runProduct1Course1)[0]),
         value: runProduct1Course1.id
       },
       {
-        label: formatRunTitle(findRunInProduct(runProduct2Course1)),
+        label: formatRunTitle(findRunInProduct(runProduct2Course1)[0]),
         value: runProduct2Course1.id
       }
     ])
