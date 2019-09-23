@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.22.1
+Version 0.22.1 (Released September 23, 2019)
 --------------
 
 - #1123 certificate validation link
