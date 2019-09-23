@@ -16,7 +16,7 @@ import {
   PRODUCT_TYPE_COURSERUN,
   PRODUCT_TYPE_PROGRAM
 } from "../constants"
-import type { CourseRun } from "../flow/courseTypes"
+import type { Course, CourseRun } from "../flow/courseTypes"
 
 export const calculateDiscount = (
   item: BasketItem,
@@ -75,7 +75,9 @@ export const createProductMap = (
     R.pluck("products")
   )(bulkCouponPayments)
 
-export const findRunInProduct = (product: ProductDetail): ?CourseRun => {
+export const findRunInProduct = (
+  product: ProductDetail
+): [?CourseRun, ?Course] => {
   if (product.product_type !== PRODUCT_TYPE_COURSERUN) {
     // Calling functions are responsible for checking this
     throw new Error("Expected a run product")
@@ -87,11 +89,11 @@ export const findRunInProduct = (product: ProductDetail): ?CourseRun => {
   for (const course of productVersion.courses) {
     for (const run of course.courseruns) {
       if (run.id === runId) {
-        return run
+        return [run, course]
       }
     }
   }
 
   // This should be prevented by the REST API
-  return null
+  return [null, null]
 }

@@ -73,11 +73,13 @@ class B2BPurchaseForm extends React.Component<Props> {
   renderForm = ({ values, setFieldError }: Object) => {
     const { products, requestPending, couponStatus } = this.props
 
-    let itemPrice, totalPrice, discount
+    let itemPrice = new Decimal(0),
+      totalPrice = new Decimal(0),
+      discount
     const productId = parseInt(values.product)
     const product = products.find(product => product.id === productId)
     const productVersion = product ? product.latest_version : null
-    const numSeats = parseInt(values.num_seats)
+    let numSeats = parseInt(values.num_seats)
     if (productVersion && productVersion.price !== null) {
       itemPrice = new Decimal(productVersion.price)
       if (!isNaN(numSeats)) {
@@ -91,6 +93,7 @@ class B2BPurchaseForm extends React.Component<Props> {
         }
       }
     }
+    numSeats = isNaN(numSeats) ? 0 : numSeats
 
     return (
       <Form className="b2b-purchase-form container">
@@ -105,9 +108,6 @@ class B2BPurchaseForm extends React.Component<Props> {
               Purchase one or more seats for your team.
             </p>
             <label htmlFor="product">
-              <span className="description">
-                Select to view available courses or programs:
-              </span>
               <Field
                 component={ProductSelector}
                 products={products}
@@ -133,7 +133,7 @@ class B2BPurchaseForm extends React.Component<Props> {
             </label>
 
             <label htmlFor="coupon">
-              <span className="description">Discount code:</span>
+              <span className="coupon-description">Discount code:</span>
               <div className="coupon-input-container">
                 <Field type="text" name="coupon" />
                 <button
@@ -152,7 +152,7 @@ class B2BPurchaseForm extends React.Component<Props> {
               itemPrice={itemPrice}
               totalPrice={totalPrice}
               discount={discount}
-              numSeats={isNaN(numSeats) ? null : numSeats}
+              numSeats={numSeats}
               alreadyPaid={false}
             />
 
