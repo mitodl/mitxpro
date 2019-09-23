@@ -95,7 +95,6 @@ def generate_program_certificate(user, program):
         ProgramCertificate (or None if one was not found or created) paired
         with a boolean indicating whether the certificate was newly created.
     """
-
     existing_cert_queryset = ProgramCertificate.objects.filter(
         user=user, program=program
     )
