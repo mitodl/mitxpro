@@ -18,19 +18,18 @@ const makeProductOption = (
   product: ProductDetail,
   run?: CourseRun,
   course?: Course
-) => {
-  return {
-    value: product.id,
-    label:
-      product.product_type === PRODUCT_TYPE_PROGRAM || !course
-        ? product.title
-        : course.title
-  }
-}
+) => ({
+  value: product.id,
+  label:
+    product.product_type === PRODUCT_TYPE_PROGRAM || !course
+      ? product.title
+      : course.title
+})
 
 const makeProductRunOption = (product: ProductDetail) => {
   const [run] = findRunInProduct(product)
 
+  console.log("run", product.id, formatRunTitle(run), run)
   return {
     label: formatRunTitle(run),
     value: product.id
@@ -154,13 +153,17 @@ export default class ProductSelector extends React.Component<Props, State> {
     } = this.state
 
     return products
-      .filter(
-        product =>
-          product.product_type === PRODUCT_TYPE_COURSERUN &&
-          selectedCourse &&
-          // should only be one course for a course run product
-          product.latest_version.courses[0].id === selectedCourse.id
-      )
+      .filter(product => {
+        if (
+          product.product_type !== PRODUCT_TYPE_COURSERUN ||
+          !selectedCourse
+        ) {
+          return false
+        }
+        const [run, course] = findRunInProduct(product)
+        // should only be one course for a course run product
+        return course && course.id === selectedCourse.id
+      })
       .map(makeProductRunOption)
   }
 

@@ -23,7 +23,8 @@ describe("ProductSelector", () => {
     runProduct2Course1,
     runProduct1Course1,
     runProduct2,
-    programProduct
+    programProduct,
+    productWithoutRun
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
@@ -40,11 +41,15 @@ describe("ProductSelector", () => {
       runProduct2Course1.latest_version.courses[0].courseruns[1].id
     runProduct2 = makeProduct(PRODUCT_TYPE_COURSERUN)
     programProduct = makeProduct(PRODUCT_TYPE_PROGRAM)
+    productWithoutRun = makeProduct(PRODUCT_TYPE_COURSERUN)
+    productWithoutRun.latest_version.courses = []
+
     products = [
       runProduct2,
       programProduct,
       runProduct1Course1,
-      runProduct2Course1
+      runProduct2Course1,
+      productWithoutRun
     ]
     fieldValue = null
   })
