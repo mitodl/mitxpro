@@ -106,8 +106,8 @@ export default class ProductSelector extends React.Component<Props, State> {
     }
 
     return selectedProduct
-      // $FlowFixMe: Flow is confused by selectedProduct here
-      ? makeProductOption(selectedProduct, selectedRun, selectedCourse)
+      ? // $FlowFixMe: Flow is confused by selectedProduct here
+      makeProductOption(selectedProduct, selectedRun, selectedCourse)
       : null
   }
 
