@@ -105,8 +105,8 @@ export default class ProductSelector extends React.Component<Props, State> {
       return products.find(_product => _product.id === value)
     }
 
-    // $FlowFixMe: Flow is confused by selectedProduct here
     return selectedProduct
+      // $FlowFixMe: Flow is confused by selectedProduct here
       ? makeProductOption(selectedProduct, selectedRun, selectedCourse)
       : null
   }
