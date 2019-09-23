@@ -137,10 +137,12 @@ describe("ProductSelector", () => {
     const selectWrapper = wrapper.find(Select).at(1)
     assert.deepEqual(selectWrapper.prop("options"), [
       {
+        // $FlowFixMe
         label: findRunInProduct(runProduct2)[1].title,
         value: runProduct2.id
       },
       {
+        // $FlowFixMe
         label: findRunInProduct(runProduct1Course1)[1].title,
         value: runProduct1Course1.id
       }

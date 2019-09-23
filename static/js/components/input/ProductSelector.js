@@ -22,9 +22,9 @@ const makeProductOption = (
   return {
     value: product.id,
     label:
-      product.product_type === PRODUCT_TYPE_PROGRAM
+      product.product_type === PRODUCT_TYPE_PROGRAM || !course
         ? product.title
-        : course && course.title
+        : course.title
   }
 }
 
@@ -71,10 +71,10 @@ export default class ProductSelector extends React.Component<Props, State> {
     const { productType } = this.state
 
     const filteredProducts = products.filter(
-      _product => _product.product_type === productType
+      product => product.product_type === productType
     )
     if (productType === PRODUCT_TYPE_PROGRAM) {
-      return filteredProducts.map(makeProductOption)
+      return filteredProducts.map(product => makeProductOption(product))
     }
 
     const productRuns = products
@@ -97,13 +97,19 @@ export default class ProductSelector extends React.Component<Props, State> {
       products,
       field: { value }
     } = this.props
-    const { productType, selected } = this.state
+    const {
+      productType,
+      selected: [selectedProduct, selectedRun, selectedCourse]
+    } = this.state
 
     if (productType === PRODUCT_TYPE_PROGRAM) {
       return products.find(_product => _product.id === value)
     }
 
-    return selected[0] ? makeProductOption(...selected) : null
+    // $FlowFixMe: Flow is confused by selectedProduct here
+    return selectedProduct
+      ? makeProductOption(selectedProduct, selectedRun, selectedCourse)
+      : null
   }
 
   updateSelectedProduct = (productOption: SelectOption) => {
@@ -125,7 +131,12 @@ export default class ProductSelector extends React.Component<Props, State> {
       const product = products.find(
         _product => _product.id === productOption.value
       )
-      if (selectedProduct && product && product.id === selectedProduct.id) {
+      if (!product) {
+        // make flow happy
+        return
+      }
+
+      if (selectedProduct && product.id === selectedProduct.id) {
         return
       }
 
