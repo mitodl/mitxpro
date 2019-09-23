@@ -29,7 +29,6 @@ const makeProductOption = (
 const makeProductRunOption = (product: ProductDetail) => {
   const [run] = findRunInProduct(product)
 
-  console.log("run", product.id, formatRunTitle(run), run)
   return {
     label: formatRunTitle(run),
     value: product.id
@@ -102,7 +101,8 @@ export default class ProductSelector extends React.Component<Props, State> {
     } = this.state
 
     if (productType === PRODUCT_TYPE_PROGRAM) {
-      return products.find(_product => _product.id === value)
+      const product = products.find(_product => _product.id === value)
+      return product ? makeProductOption(product) : null
     }
 
     return selectedProduct
@@ -120,6 +120,7 @@ export default class ProductSelector extends React.Component<Props, State> {
       productType,
       selected: [selectedProduct]
     } = this.state
+
     if (productOption.value === value) {
       return
     }
@@ -164,7 +165,7 @@ export default class ProductSelector extends React.Component<Props, State> {
         // should only be one course for a course run product
         return course && course.id === selectedCourse.id
       })
-      .map(makeProductRunOption)
+      .map(product => makeProductRunOption(product))
   }
 
   calcSelectedProductDate = () => {
@@ -173,7 +174,9 @@ export default class ProductSelector extends React.Component<Props, State> {
       products
     } = this.props
 
-    const product = products.find(product => product.id === value)
+    const product = products
+      .filter(product => product.product_type === PRODUCT_TYPE_COURSERUN)
+      .find(product => product.id === value)
     return product ? makeProductRunOption(product) : null
   }
 
@@ -212,10 +215,7 @@ export default class ProductSelector extends React.Component<Props, State> {
               options={productTypeOptions}
               components={{ IndicatorSeparator: null }}
               onChange={selectedOption =>
-                this.updateProductType(
-                  // $FlowFixMe: thinks selectedOption could be an array
-                  selectedOption ? selectedOption.value : null
-                )
+                this.updateProductType(selectedOption.value)
               }
               value={productTypeOptions.find(
                 option => option.value === productType

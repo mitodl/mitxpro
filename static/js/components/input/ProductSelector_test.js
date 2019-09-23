@@ -177,6 +177,28 @@ describe("ProductSelector", () => {
     sinon.assert.notCalled(onChangeStub)
   })
 
+  it("renders the selected program", () => {
+    fieldValue = programProduct.id
+    const wrapper = render()
+    wrapper.setState({
+      productType: PRODUCT_TYPE_PROGRAM
+    })
+    const selectWrapper = wrapper.find(Select).at(1)
+    assert.deepEqual(selectWrapper.prop("value"), {
+      value: programProduct.id,
+      label: programProduct.title
+    })
+  })
+
+  it("renders no program if none is selected", () => {
+    const wrapper = render()
+    wrapper.setState({
+      productType: PRODUCT_TYPE_PROGRAM
+    })
+    const selectWrapper = wrapper.find(Select).at(1)
+    assert.isNull(selectWrapper.prop("value"))
+  })
+
   it("changes the selected course", () => {
     const wrapper = render()
     wrapper.setState({
@@ -189,6 +211,30 @@ describe("ProductSelector", () => {
       ...findRunInProduct(runProduct2)
     ])
     sinon.assert.calledWith(onChangeStub, { target: { name, value: null } })
+  })
+
+  it("renders the selected course", () => {
+    const wrapper = render()
+    const [run, course] = findRunInProduct(runProduct2Course1)
+    wrapper.setState({
+      productType: PRODUCT_TYPE_COURSERUN,
+      selected:    [runProduct2Course1, run, course]
+    })
+    const selectWrapper = wrapper.find(Select).at(1)
+    assert.deepEqual(selectWrapper.prop("value"), {
+      value: runProduct2Course1.id,
+      label: course.title
+    })
+  })
+
+  it("renders no course if none is selected", () => {
+    const wrapper = render()
+    wrapper.setState({
+      productType: PRODUCT_TYPE_COURSERUN,
+      selected:    [null, null, null]
+    })
+    const selectWrapper = wrapper.find(Select).at(1)
+    assert.isNull(selectWrapper.prop("value"))
   })
 
   it("doesn't change the selected course because it was already selected", () => {
@@ -242,8 +288,8 @@ describe("ProductSelector", () => {
   it("changes the selected course run date", () => {
     const wrapper = render()
     wrapper.setState({
-      productType:           PRODUCT_TYPE_COURSERUN,
-      selectedCourseProduct: runProduct2Course1
+      productType: PRODUCT_TYPE_COURSERUN,
+      selected:    [runProduct2Course1, ...findRunInProduct(runProduct2Course1)]
     })
     const selectWrapper = wrapper.find(Select).at(2)
     selectWrapper.prop("onChange")({ value: "new option" })
