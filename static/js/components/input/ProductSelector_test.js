@@ -223,6 +223,7 @@ describe("ProductSelector", () => {
     const selectWrapper = wrapper.find(Select).at(1)
     assert.deepEqual(selectWrapper.prop("value"), {
       value: runProduct2Course1.id,
+      // $FlowFixMe
       label: course.title
     })
   })
