@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.23.0
+Version 0.23.0 (Released September 23, 2019)
 --------------
 
 - Update UI for selecting products in B2B purchase form (#1095)
