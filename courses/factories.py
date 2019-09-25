@@ -45,7 +45,7 @@ class CourseFactory(DjangoModelFactory):
     """Factory for Courses"""
 
     program = factory.SubFactory(ProgramFactory)
-    position_in_program = factory.Sequence(lambda n: n)
+    position_in_program = None  # will get populated in save()
     title = fuzzy.FuzzyText(prefix="Course ")
     readable_id = factory.Sequence("course-{0}".format)
     live = factory.Faker("boolean")

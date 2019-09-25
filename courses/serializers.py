@@ -1,6 +1,9 @@
 """
 Course model serializers
 """
+from urllib.parse import urljoin
+
+from django.conf import settings
 from django.templatetags.static import static
 from rest_framework import serializers
 
@@ -19,7 +22,7 @@ def _get_thumbnail_url(page):
         str:
             A page URL
     """
-    return (
+    relative_url = (
         page.thumbnail_image.file.url
         if page
         and page.thumbnail_image
@@ -27,6 +30,7 @@ def _get_thumbnail_url(page):
         and page.thumbnail_image.file.url
         else static("images/mit-dome.png")
     )
+    return urljoin(settings.SITE_BASE_URL, relative_url)
 
 
 class BaseCourseSerializer(serializers.ModelSerializer):
@@ -185,7 +189,17 @@ class ProgramSerializer(serializers.ModelSerializer):
 
     thumbnail_url = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
-    courses = CourseSerializer(many=True, read_only=True)
+    courses = serializers.SerializerMethodField()
+    start_date = serializers.SerializerMethodField()
+    end_date = serializers.SerializerMethodField()
+    enrollment_start = serializers.SerializerMethodField()
+    url = serializers.SerializerMethodField()
+
+    def get_courses(self, instance):
+        """Serializer for courses"""
+        return CourseSerializer(
+            instance.courses.order_by("position_in_program"), many=True
+        ).data
 
     def get_thumbnail_url(self, instance):
         """Thumbnail URL"""
@@ -194,6 +208,38 @@ class ProgramSerializer(serializers.ModelSerializer):
     def get_description(self, instance):
         """Description"""
         return instance.page.description if instance.page else None
+
+    def get_start_date(self, instance):
+        """Start date"""
+        return (
+            models.CourseRun.objects.filter(course__program=instance, live=True)
+            .order_by("start_date")
+            .values_list("start_date", flat=True)
+            .first()
+        )
+
+    def get_end_date(self, instance):
+        """End date"""
+        return (
+            models.CourseRun.objects.filter(course__program=instance, live=True)
+            .order_by("end_date")
+            .values_list("end_date", flat=True)
+            .last()
+        )
+
+    def get_enrollment_start(self, instance):
+        """Enrollment start"""
+        return (
+            models.CourseRun.objects.filter(course__program=instance, live=True)
+            .order_by("enrollment_start")
+            .values_list("enrollment_start", flat=True)
+            .first()
+        )
+
+    def get_url(self, instance):
+        """Get URL"""
+        page = instance.page
+        return page.get_full_url() if page else None
 
     class Meta:
         model = models.Program
@@ -205,6 +251,10 @@ class ProgramSerializer(serializers.ModelSerializer):
             "current_price",
             "id",
             "courses",
+            "start_date",
+            "end_date",
+            "enrollment_start",
+            "url",
         ]
 
 
