@@ -40,8 +40,13 @@
       background: linear-gradient(to right, rgba(61,189,191,1) 0%,rgba(241,186,70,1) 100%);
     }
 
+    .email {
+      color: $link-blue;
+      font-weight: 600;
+    }
+
     a {
-      color: $blue;
+      color: $link-blue;
     }
 
     div:first-of-type {
