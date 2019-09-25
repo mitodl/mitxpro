@@ -267,7 +267,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         Returns:
             CourseRun or None: An unexpired course run
 
-        # NOTE: This is implemented with sorted() and courses.all() to allow for prefetch_related
+        # NOTE: This is implemented with sorted() and courseruns.all() to allow for prefetch_related
         #   optimization. You can get the desired course_run with a filter, but
         #   that would run a new query even if prefetch_related was used.
         """
