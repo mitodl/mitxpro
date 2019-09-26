@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 from types import SimpleNamespace
 from urllib.parse import quote_plus
+import operator as op
 
 import pytz
 from django.urls import reverse
@@ -11,9 +12,12 @@ import pytest
 import rest_framework.status as status  # pylint: disable=useless-import-alias
 from rest_framework.renderers import JSONRenderer
 from rest_framework.test import APIClient
-import factory
 
-from courses.factories import CourseRunFactory, CourseRunEnrollmentFactory
+from courses.factories import (
+    CourseRunFactory,
+    CourseRunEnrollmentFactory,
+    ProgramFactory,
+)
 from ecommerce.api import create_unfulfilled_order, get_readable_id, make_receipt_url
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -32,6 +36,7 @@ from ecommerce.models import (
     Order,
     OrderAudit,
     Receipt,
+    CouponPayment,
     CouponPaymentVersion,
     CourseRunSelection,
     Company,
@@ -46,6 +51,7 @@ from ecommerce.serializers import (
     CouponSelectionSerializer,
     CurrentCouponPaymentSerializer,
     DataConsentUserSerializer,
+    BaseProductSerializer,
 )
 from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.test_utils import create_tempfile_csv, assert_drf_json_equal
@@ -1064,50 +1070,68 @@ def test_companies_viewset_post_forbidden(admin_drf_client):
     assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
-def test_bulk_enroll_coupon_list_view(admin_drf_client):
-    """ Test that BulkEnrollCouponListView returns CouponEligibility objects"""
-    coupons = CouponFactory.create_batch(
-        3, enabled=factory.Iterator([True, True, False])
-    )
-    # Create a 100% coupon
-    full_coupon_payment_version = CouponPaymentVersionFactory.create(
-        amount=1,
-        payment=coupons[0].payment,
-        coupon_type=CouponPaymentVersion.SINGLE_USE,
-    )
-    # Create another 100% coupon, then deprecate it with a newer 50% version
-    CouponPaymentVersionFactory.create_batch(
-        2,
-        amount=factory.Iterator([1, 0.5]),
-        payment=coupons[1].payment,
-        coupon_type=CouponPaymentVersion.SINGLE_USE,
-    )
-    # Create another 100% coupon with a disabled Coupon
-    CouponPaymentVersionFactory.create(
-        amount=1,
-        payment=coupons[2].payment,
-        coupon_type=CouponPaymentVersion.SINGLE_USE,
-    )
-    product_coupons = CouponEligibilityFactory.create_batch(
-        3, coupon=factory.Iterator(coupons)
-    )
-    # Apply the full price coupon payment to an additional product
-    product_coupons.insert(1, CouponEligibilityFactory.create(coupon=coupons[0]))
-    api_url = reverse("bulk_coupons_api")
+def test_bulk_enroll_list_view(mocker, admin_drf_client):
+    """
+    Test that BulkEnrollCouponListView returns a list of CouponPayments paired with the Product ids that
+    they apply to, and a dict that maps Product ids to serialized versions of those Products, grouped by type
+    """
+    payment_versions = CouponPaymentVersionFactory.create_batch(2)
+    payment_ids = list(map(op.attrgetter("payment_id"), payment_versions))
+    product_versions = ProductVersionFactory.create_batch(2)
+    products = list(map(op.attrgetter("product"), product_versions))
+    # ProductFactory creates CourseRuns as the product object by default. Create a Program for one of them.
+    program = ProgramFactory.create()
+    products[1].content_object = program
+    products[1].save()
 
-    response = admin_drf_client.get(api_url)
-
-    assert len(response.data) == 1
-    assert len(response.data[0]["products"]) == 2
-    assert response.data == [
-        {
-            **CurrentCouponPaymentSerializer(full_coupon_payment_version.payment).data,
-            "products": ProductSerializer(
-                [product_coupon.product for product_coupon in product_coupons[0:2]],
-                many=True,
-            ).data,
-        }
+    payment_product_pairs = [
+        (
+            CouponPayment.objects.filter(id=payment_ids[0])
+            .with_ordered_versions()
+            .first(),
+            Product.objects.filter(id=products[0].id).with_ordered_versions(),
+        ),
+        (
+            CouponPayment.objects.filter(id=payment_ids[1])
+            .with_ordered_versions()
+            .first(),
+            Product.objects.filter(
+                id__in=[p.id for p in products]
+            ).with_ordered_versions(),
+        ),
     ]
+    patched_get_product_coupons = mocker.patch(
+        "ecommerce.views.get_full_price_coupon_product_set",
+        return_value=payment_product_pairs,
+    )
+    patched_course_run_serializer = mocker.patch(
+        "ecommerce.views.BaseCourseRunSerializer",
+        return_value=mocker.Mock(data={"id": products[0].content_object.id}),
+    )
+    patched_program_serializer = mocker.patch(
+        "ecommerce.views.BaseProgramSerializer",
+        return_value=mocker.Mock(data={"id": products[1].content_object.id}),
+    )
+
+    response = admin_drf_client.get(reverse("bulk_coupons_api"))
+    response_data = response.json()
+    patched_get_product_coupons.assert_called_once()
+    assert len(response_data["coupon_payments"]) == len(payment_ids)
+    assert response_data["coupon_payments"][0] == {
+        **CurrentCouponPaymentSerializer(payment_versions[0].payment).data,
+        "products": [BaseProductSerializer(products[0]).data],
+    }
+    assert response_data["coupon_payments"][1] == {
+        **CurrentCouponPaymentSerializer(payment_versions[1].payment).data,
+        "products": BaseProductSerializer(products, many=True).data,
+    }
+    assert sorted(response_data["product_map"].keys()) == ["courserun", "program"]
+    assert response_data["product_map"]["courserun"] == {
+        str(products[0].id): patched_course_run_serializer.return_value.data
+    }
+    assert response_data["product_map"]["program"] == {
+        str(products[1].id): patched_program_serializer.return_value.data
+    }
 
 
 class TestBulkEnrollmentSubmitView:

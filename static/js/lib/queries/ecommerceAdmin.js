@@ -4,7 +4,6 @@ import { pathOr } from "ramda"
 import { nextState } from "./util"
 import { getCookie } from "../api"
 import { objectToFormData } from "../util"
-import { createProductMap } from "../ecommerce"
 
 import type { BulkCouponPaymentsResponse } from "../../flow/ecommerceTypes"
 
@@ -14,8 +13,8 @@ export default {
   bulkCouponPaymentsQuery:    () => ({
     url:       "/api/bulk_coupons/",
     transform: (json: BulkCouponPaymentsResponse) => ({
-      bulkCouponProducts: createProductMap(json),
-      bulkCouponPayments: json
+      bulkCouponProducts: json.product_map,
+      bulkCouponPayments: json.coupon_payments
     }),
     update: {
       bulkCouponProducts: nextState,

@@ -5,6 +5,8 @@ Tests for ecommerce serializers
 from decimal import Decimal
 
 import pytest
+import factory
+from django.db.models import Prefetch
 from rest_framework.exceptions import ValidationError
 
 from mitxpro.test_utils import any_instance_of
@@ -13,6 +15,7 @@ from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
 from courses.serializers import CourseSerializer
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import get_readable_id, round_half_up
+from ecommerce.constants import ORDERED_VERSIONS_QSET_ATTR
 from ecommerce.factories import (
     ProductVersionFactory,
     ProductFactory,
@@ -24,7 +27,10 @@ from ecommerce.factories import (
 )
 from ecommerce.models import (
     CouponSelection,
+    CouponPayment,
+    CouponPaymentVersion,
     Product,
+    ProductVersion,
     CourseRunSelection,
     DataConsentUser,
 )
@@ -371,6 +377,35 @@ def test_current_coupon_payment_version_serializer():
     }
 
 
+def test_current_coupon_payment_version_serializer_latest(mocker):
+    """
+    Test that CurrentCouponPaymentSerializer does not try to get the latest CouponPaymentVersion
+    from the model object if it is passed in via context
+    """
+    # Since we're testing the preference of the 'latest_version' context var
+    # over CouponPayment.latest_version, we patch CouponPayment.latest_version to return None.
+    # If that property is used instead of the context var, the results will be invalid.
+    mocker.patch(
+        "ecommerce.models.CouponPayment.latest_version",
+        new_callable=mocker.PropertyMock,
+        return_value=None,
+    )
+    payment = CouponPaymentFactory.create()
+    versions = CouponPaymentVersionFactory.create_batch(3, payment=payment)
+    payment_qset = CouponPayment.objects.prefetch_related(
+        Prefetch(
+            "versions",
+            queryset=CouponPaymentVersion.objects.order_by("-created_on"),
+            to_attr=ORDERED_VERSIONS_QSET_ATTR,
+        )
+    )
+    expected_version = versions[2]
+    serialized = CurrentCouponPaymentSerializer(
+        instance=payment_qset.first(), context={"latest_version": expected_version}
+    ).data
+    assert serialized["version"]["id"] == expected_version.id
+
+
 def test_serialize_product(coupon_product_ids):
     """ Test that ProductSerializer has correct data """
     product = Product.objects.get(id=coupon_product_ids[0])
@@ -379,6 +414,39 @@ def test_serialize_product(coupon_product_ids):
     assert serialized_data.get("title") == run.title
     assert serialized_data.get("product_type") == "courserun"
     assert serialized_data.get("id") == product.id
+
+
+def test_serialize_product_with_ordered(mocker):
+    """
+    Test that ProductSerializer takes a context variable that says the ProductVersions are
+    already ordered, so it can use that ordered list of versions instead of calling
+    Product.latest_version and running another query.
+    """
+    # Since we're testing the preference of the 'ordered_versions' queryset property
+    # over Product.latest_version, we patch 'latest_version' to return None. If 'latest_version'
+    # is used by the serializer, the results will be invalid.
+    mocker.patch(
+        "ecommerce.models.Product.latest_version",
+        new_callable=mocker.PropertyMock,
+        return_value=None,
+    )
+    products = ProductFactory.create_batch(2)
+    versions = ProductVersionFactory.create_batch(4, product=factory.Iterator(products))
+    product_qset = Product.objects.prefetch_related(
+        Prefetch(
+            "productversions",
+            queryset=ProductVersion.objects.order_by("-created_on"),
+            to_attr=ORDERED_VERSIONS_QSET_ATTR,
+        )
+    )
+    serialized_data = ProductSerializer(
+        product_qset, context={"has_ordered_versions": True}, many=True
+    ).data
+    expected_versions = [versions[2], versions[3]]
+    assert len(serialized_data) == len(products)
+    assert [version.id for version in expected_versions] == [
+        product_data["latest_version"]["id"] for product_data in serialized_data
+    ]
 
 
 def test_serialize_company():

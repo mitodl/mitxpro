@@ -8,25 +8,13 @@ from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-from ecommerce.constants import REFERENCE_NUMBER_PREFIX
+from ecommerce.constants import REFERENCE_NUMBER_PREFIX, ORDERED_VERSIONS_QSET_ATTR
 from ecommerce.utils import get_order_id_by_reference_number
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 from users.models import User
 
 log = logging.getLogger()
-
-
-class ActiveProducts(models.Manager):
-    """
-    return the is_active products only.
-    """
-
-    def get_queryset(self):
-        """
-        :return: active products
-        """
-        return super().get_queryset().filter(is_active=True)
 
 
 class Company(TimestampedModel):
@@ -39,6 +27,32 @@ class Company(TimestampedModel):
     def __str__(self):
         """Description for Company"""
         return f"Company {self.name}"
+
+
+class ProductQueryset(models.QuerySet):  # pylint: disable=missing-docstring
+    def active(self):
+        """Filters for active products only"""
+        return self.filter(is_active=True)
+
+    def with_ordered_versions(self):
+        """Prefetches related ProductVersions in reverse creation order"""
+        return self.prefetch_related(
+            models.Prefetch(
+                "productversions",
+                queryset=ProductVersion.objects.order_by("-created_on"),
+                to_attr=ORDERED_VERSIONS_QSET_ATTR,
+            )
+        )
+
+
+class ProductManager(models.Manager):  # pylint: disable=missing-docstring
+    def get_queryset(self):
+        """Use the custom queryset, and filter by active products by default"""
+        return ProductQueryset(self.model, using=self._db).active()
+
+    def with_ordered_versions(self):
+        """Prefetches related ProductVersions in reverse creation order"""
+        return self.get_queryset().with_ordered_versions()
 
 
 class Product(TimestampedModel):
@@ -61,7 +75,7 @@ class Product(TimestampedModel):
         "able to load the product on the checkout page.",
     )
     content_object = GenericForeignKey("content_type", "object_id")
-    objects = ActiveProducts()
+    objects = ProductManager()
     all_objects = models.Manager()
 
     class Meta:
@@ -314,6 +328,28 @@ class Line(TimestampedModel):
         return f"Line for order #{self.order.id}, {self.product_version} (qty: {self.quantity})"
 
 
+class CouponPaymentQueryset(models.QuerySet):  # pylint: disable=missing-docstring
+    def with_ordered_versions(self):
+        """Prefetches related CouponPaymentVersions in reverse creation order"""
+        return self.prefetch_related(
+            models.Prefetch(
+                "versions",
+                queryset=CouponPaymentVersion.objects.order_by("-created_on"),
+                to_attr=ORDERED_VERSIONS_QSET_ATTR,
+            )
+        )
+
+
+class CouponPaymentManager(models.Manager):  # pylint: disable=missing-docstring
+    def get_queryset(self):
+        """Sets the custom queryset"""
+        return CouponPaymentQueryset(self.model, using=self._db)
+
+    def with_ordered_versions(self):
+        """Prefetches related CouponPaymentVersions in reverse creation order"""
+        return self.get_queryset().with_ordered_versions()
+
+
 class CouponPayment(TimestampedModel):
     """
     Information about creation of one or more coupons. Most information will go in CouponPaymentVersion.
@@ -321,6 +357,7 @@ class CouponPayment(TimestampedModel):
     """
 
     name = models.CharField(max_length=256, unique=True)
+    objects = CouponPaymentManager()
 
     @property
     def latest_version(self):

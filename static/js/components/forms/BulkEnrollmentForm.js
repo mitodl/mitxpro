@@ -6,6 +6,7 @@ import * as yup from "yup"
 
 import { RadioButtonGroup, RadioButton } from "../input/radio"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_LABELS } from "../../constants"
+import { parseIntOrUndefined } from "../../lib/util"
 
 import type {
   BulkCouponPayment,
@@ -16,6 +17,12 @@ import type {
 const getFirstId = R.compose(
   R.prop("id"),
   R.head
+)
+
+const getFirstKeyAsInt = R.compose(
+  parseIntOrUndefined,
+  R.head,
+  R.keys
 )
 
 const bulkEnrollmentValidations = yup.object().shape({
@@ -61,7 +68,7 @@ export class BulkEnrollmentForm extends React.Component<
     const { productMap } = this.props
 
     const selectedProductType = e.target.value
-    const selectedProductId = getFirstId(productMap[selectedProductType])
+    const selectedProductId = getFirstKeyAsInt(productMap[selectedProductType])
     setFieldValue("product_type", selectedProductType)
     setFieldValue("product_id", selectedProductId)
     setFieldValue(
@@ -107,7 +114,7 @@ export class BulkEnrollmentForm extends React.Component<
     const { productMap } = this.props
 
     const initialProductType = PRODUCT_TYPE_COURSERUN
-    const initialProductId = getFirstId(productMap[PRODUCT_TYPE_COURSERUN])
+    const initialProductId = getFirstKeyAsInt(productMap[initialProductType])
     const initialCouponPaymentId = getFirstId(
       this.getBulkCouponsForProduct(initialProductId)
     )
@@ -166,11 +173,13 @@ export class BulkEnrollmentForm extends React.Component<
                 name="product_id"
                 onChange={this.onChangeProductId(setFieldValue)}
               >
-                {productMap[values.product_type].map((product, i) => (
-                  <option key={i} value={product.id}>
-                    {product.title}
-                  </option>
-                ))}
+                {R.toPairs(productMap[values.product_type]).map(
+                  ([productId, productObject]) => (
+                    <option key={productId} value={productId}>
+                      {productObject.title}
+                    </option>
+                  )
+                )}
               </Field>
             </section>
 
