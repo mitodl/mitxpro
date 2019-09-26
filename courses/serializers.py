@@ -210,7 +210,12 @@ class ProgramSerializer(serializers.ModelSerializer):
         return instance.page.description if instance.page else None
 
     def get_start_date(self, instance):
-        """Start date"""
+        """
+        start_date is the starting date for the earliest live course run for all courses in a program
+
+        Returns:
+            datetime: The starting date
+        """
         return (
             models.CourseRun.objects.filter(course__program=instance, live=True)
             .order_by("start_date")
@@ -219,7 +224,12 @@ class ProgramSerializer(serializers.ModelSerializer):
         )
 
     def get_end_date(self, instance):
-        """End date"""
+        """
+        end_date is the end date for the latest live course run for all courses in a program.
+
+        Returns:
+            datetime: The ending date
+        """
         return (
             models.CourseRun.objects.filter(course__program=instance, live=True)
             .order_by("end_date")
@@ -228,7 +238,9 @@ class ProgramSerializer(serializers.ModelSerializer):
         )
 
     def get_enrollment_start(self, instance):
-        """Enrollment start"""
+        """
+        enrollment_start is first date where enrollment starts for any live course run
+        """
         return (
             models.CourseRun.objects.filter(course__program=instance, live=True)
             .order_by("enrollment_start")
