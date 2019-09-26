@@ -38,10 +38,10 @@ describe("BulkEnrollment", () => {
       products:           {
         [PRODUCT_TYPE_COURSERUN]: {
           [firstProduct.id.toString()]:  firstProduct,
-          [secondProduct.id.toString()]: secondProduct,
+          [secondProduct.id.toString()]: secondProduct
         },
         [PRODUCT_TYPE_PROGRAM]: {
-          [thirdProduct.id.toString()]: thirdProduct,
+          [thirdProduct.id.toString()]: thirdProduct
         }
       }
     }

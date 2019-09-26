@@ -3,15 +3,8 @@ import { assert } from "chai"
 import Decimal from "decimal.js-light"
 import moment from "moment"
 
-import {
-  makeItem,
-  makeCouponSelection,
-} from "../factories/ecommerce"
-import {
-  calculatePrice,
-  formatPrice,
-  formatRunTitle,
-} from "./ecommerce"
+import { makeItem, makeCouponSelection } from "../factories/ecommerce"
+import { calculatePrice, formatPrice, formatRunTitle } from "./ecommerce"
 import { makeCourseRun } from "../factories/course"
 
 describe("ecommerce", () => {

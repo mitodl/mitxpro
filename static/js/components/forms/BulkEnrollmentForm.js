@@ -173,11 +173,13 @@ export class BulkEnrollmentForm extends React.Component<
                 name="product_id"
                 onChange={this.onChangeProductId(setFieldValue)}
               >
-                {R.toPairs(productMap[values.product_type]).map(([productId, productObject]) => (
-                  <option key={productId} value={productId}>
-                    {productObject.title}
-                  </option>
-                ))}
+                {R.toPairs(productMap[values.product_type]).map(
+                  ([productId, productObject]) => (
+                    <option key={productId} value={productId}>
+                      {productObject.title}
+                    </option>
+                  )
+                )}
               </Field>
             </section>
 

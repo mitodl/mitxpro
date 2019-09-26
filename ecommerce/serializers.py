@@ -126,11 +126,10 @@ class BaseProductSerializer(serializers.ModelSerializer):
         model = models.Product
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(BaseProductSerializer):
     """ Product Serializer """
 
     title = serializers.SerializerMethodField()
-    product_type = serializers.SerializerMethodField()
     latest_version = serializers.SerializerMethodField()
 
     def get_title(self, instance):
@@ -138,10 +137,6 @@ class ProductSerializer(serializers.ModelSerializer):
         return instance.content_type.get_object_for_this_type(
             pk=instance.object_id
         ).title
-
-    def get_product_type(self, instance):
-        """ Return the product type """
-        return instance.content_type.model
 
     def get_latest_version(self, instance):
         """Serialize and return the latest ProductVersion for the Product"""
@@ -157,7 +152,7 @@ class ProductSerializer(serializers.ModelSerializer):
         ).data
 
     class Meta:
-        fields = ["id", "title", "product_type", "latest_version"]
+        fields = BaseProductSerializer.Meta.fields + ["title", "latest_version"]
         model = models.Product
 
 

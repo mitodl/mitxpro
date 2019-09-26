@@ -212,10 +212,10 @@ class BulkEnrollCouponListView(APIView):
                     ).data,
                 }
             )
-        serialized["products"] = defaultdict(dict)
+        serialized["product_map"] = defaultdict(dict)
         for product in product_set:
             product_object = product.content_object
-            serialized["products"][product.content_type.model][str(product.id)] = (
+            serialized["product_map"][product.content_type.model][str(product.id)] = (
                 BaseCourseRunSerializer(product_object).data
                 if isinstance(product_object, CourseRun)
                 else BaseProgramSerializer(product_object).data

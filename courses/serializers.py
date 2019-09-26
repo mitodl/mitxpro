@@ -66,7 +66,7 @@ class BaseCourseRunSerializer(serializers.ModelSerializer):
         ]
 
 
-class CourseRunSerializer(BaseCourseSerializer):
+class CourseRunSerializer(BaseCourseRunSerializer):
     """CourseRun model serializer"""
 
     product_id = serializers.SerializerMethodField()
@@ -91,7 +91,11 @@ class CourseRunSerializer(BaseCourseSerializer):
 
     class Meta:
         model = models.CourseRun
-        fields = BaseCourseRunSerializer.Meta.fields + ["product_id", "instructors"]
+        fields = BaseCourseRunSerializer.Meta.fields + [
+            "product_id",
+            "instructors",
+            "current_price",
+        ]
 
 
 class CourseSerializer(serializers.ModelSerializer):

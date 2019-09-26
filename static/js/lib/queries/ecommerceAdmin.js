@@ -13,7 +13,7 @@ export default {
   bulkCouponPaymentsQuery:    () => ({
     url:       "/api/bulk_coupons/",
     transform: (json: BulkCouponPaymentsResponse) => ({
-      bulkCouponProducts: json.products,
+      bulkCouponProducts: json.product_map,
       bulkCouponPayments: json.coupon_payments
     }),
     update: {

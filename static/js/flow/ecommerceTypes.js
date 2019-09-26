@@ -166,7 +166,7 @@ export type BulkCouponPayment = {
 
 export type BulkCouponPaymentsResponse = {
   coupon_payments: Array<BulkCouponPayment>,
-  products: ProductMap
+  product_map: ProductMap
 }
 
 export type BulkCouponSendResponse = {
