@@ -23,4 +23,5 @@ def handle_create_course_run_certificate(
     if created:
         user = instance.user
         program = instance.course_run.course.program
-        transaction.on_commit(lambda: generate_program_certificate(user, program))
+        if program:
+            transaction.on_commit(lambda: generate_program_certificate(user, program))
