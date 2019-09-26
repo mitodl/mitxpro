@@ -12,9 +12,12 @@ import pytest
 import rest_framework.status as status  # pylint: disable=useless-import-alias
 from rest_framework.renderers import JSONRenderer
 from rest_framework.test import APIClient
-import factory
 
-from courses.factories import CourseRunFactory, CourseRunEnrollmentFactory
+from courses.factories import (
+    CourseRunFactory,
+    CourseRunEnrollmentFactory,
+    ProgramFactory,
+)
 from ecommerce.api import create_unfulfilled_order, get_readable_id, make_receipt_url
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -54,7 +57,6 @@ from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.test_utils import create_tempfile_csv, assert_drf_json_equal
 from mitxpro.utils import dict_without_keys
 from users.factories import UserFactory
-from mitxpro.test_utils import list_of_dicts
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_ACCESS_KEY = "access"
@@ -1066,6 +1068,70 @@ def test_companies_viewset_post_forbidden(admin_drf_client):
     """ Test that post requests to the companies API viewset is not allowed"""
     response = admin_drf_client.post(reverse("companies_api-list"), data={})
     assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
+
+
+def test_bulk_enroll_list_view(mocker, admin_drf_client):
+    """
+    Test that BulkEnrollCouponListView returns a list of CouponPayments paired with the Product ids that
+    they apply to, and a dict that maps Product ids to serialized versions of those Products, grouped by type
+    """
+    payment_versions = CouponPaymentVersionFactory.create_batch(2)
+    payment_ids = list(map(op.attrgetter("payment_id"), payment_versions))
+    product_versions = ProductVersionFactory.create_batch(2)
+    products = list(map(op.attrgetter("product"), product_versions))
+    # ProductFactory creates CourseRuns as the product object by default. Create a Program for one of them.
+    program = ProgramFactory.create()
+    products[1].content_object = program
+    products[1].save()
+
+    payment_product_pairs = [
+        (
+            CouponPayment.objects.filter(id=payment_ids[0])
+            .with_ordered_versions()
+            .first(),
+            Product.objects.filter(id=products[0].id).with_ordered_versions(),
+        ),
+        (
+            CouponPayment.objects.filter(id=payment_ids[1])
+            .with_ordered_versions()
+            .first(),
+            Product.objects.filter(
+                id__in=[p.id for p in products]
+            ).with_ordered_versions(),
+        ),
+    ]
+    patched_get_product_coupons = mocker.patch(
+        "ecommerce.views.get_full_price_coupon_product_set",
+        return_value=payment_product_pairs,
+    )
+    patched_course_run_serializer = mocker.patch(
+        "ecommerce.views.BaseCourseRunSerializer",
+        return_value=mocker.Mock(data={"id": products[0].content_object.id}),
+    )
+    patched_program_serializer = mocker.patch(
+        "ecommerce.views.BaseProgramSerializer",
+        return_value=mocker.Mock(data={"id": products[1].content_object.id}),
+    )
+
+    response = admin_drf_client.get(reverse("bulk_coupons_api"))
+    response_data = response.json()
+    patched_get_product_coupons.assert_called_once()
+    assert len(response_data["coupon_payments"]) == len(payment_ids)
+    assert response_data["coupon_payments"][0] == {
+        **CurrentCouponPaymentSerializer(payment_versions[0].payment).data,
+        "products": [BaseProductSerializer(products[0]).data],
+    }
+    assert response_data["coupon_payments"][1] == {
+        **CurrentCouponPaymentSerializer(payment_versions[1].payment).data,
+        "products": BaseProductSerializer(products, many=True).data,
+    }
+    assert sorted(response_data["product_map"].keys()) == ["courserun", "program"]
+    assert response_data["product_map"]["courserun"] == {
+        str(products[0].id): patched_course_run_serializer.return_value.data
+    }
+    assert response_data["product_map"]["program"] == {
+        str(products[1].id): patched_program_serializer.return_value.data
+    }
 
 
 class TestBulkEnrollmentSubmitView:
