@@ -191,6 +191,31 @@ class BulkEnrollCouponListView(APIView):
     authentication_classes = (SessionAuthentication,)
 
     def get(self, request, *args, **kwargs):  # pylint: disable=missing-docstring
+        """
+        Handles GET requests. Response data is of this form:
+
+        {
+            "coupon_payments": [
+                {
+                    <serialized CouponPayment>,
+                    "products": [
+                        <basic serialized data for a Product that the CouponPayment applies to>,
+                        ...
+                    ]
+                },
+                ...
+            ],
+            "product_map": {
+                "courserun": {
+                    "<Product.id>": {<serialized CourseRun>},
+                    ...
+                },
+                "program": {
+                    "<Product.id>": {<serialized Program>},
+                    ...
+                }
+            }
+        """
         product_set = set()
         serialized = {"coupon_payments": []}
         for coupon_payment, products in get_full_price_coupon_product_set():
