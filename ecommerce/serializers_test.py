@@ -378,7 +378,10 @@ def test_current_coupon_payment_version_serializer():
 
 
 def test_current_coupon_payment_version_serializer_latest(mocker):
-
+    """
+    Test that CurrentCouponPaymentSerializer does not try to get the latest CouponPaymentVersion
+    from the model object if it is passed in via context
+    """
     # Since we're testing the preference of the 'latest_version' context var
     # over CouponPayment.latest_version, we patch CouponPayment.latest_version to return None.
     # If that property is used instead of the context var, the results will be invalid.

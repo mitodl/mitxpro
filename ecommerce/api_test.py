@@ -670,9 +670,9 @@ def test_get_full_price_coupon_product_set():
     first_product_qset = coupon_product_pairs[0][1]
     assert first_product_qset.first() == product_coupons[0].product
     second_product_qset = coupon_product_pairs[1][1]
-    assert set(second_product_qset) == set(
-        [product_coupon.product for product_coupon in product_coupons[1:3]]
-    )
+    assert set(second_product_qset) == {
+        product_coupon.product for product_coupon in product_coupons[1:3]
+    }
 
 
 @pytest.mark.parametrize("has_coupon", [True, False])

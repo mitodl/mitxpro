@@ -115,6 +115,8 @@ class ProductVersionSerializer(serializers.ModelSerializer):
 
 
 class BaseProductSerializer(serializers.ModelSerializer):
+    """ Basic Product Serializer """
+
     product_type = serializers.SerializerMethodField()
 
     def get_product_type(self, instance):

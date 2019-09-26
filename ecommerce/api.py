@@ -11,7 +11,7 @@ from urllib.parse import quote_plus, urljoin, urlencode
 import uuid
 
 from django.conf import settings
-from django.db.models import Q, Max, F, Count, Subquery, Prefetch
+from django.db.models import Q, Max, F, Count, Subquery
 from django.db import transaction
 from django.urls import reverse
 from rest_framework.exceptions import ValidationError
@@ -34,11 +34,7 @@ from courseware.exceptions import (
     UnknownEdxApiEnrollException,
 )
 from ecommerce import mail_api
-from ecommerce.constants import (
-    CYBERSOURCE_DECISION_ACCEPT,
-    CYBERSOURCE_DECISION_CANCEL,
-    ORDERED_VERSIONS_QSET_ATTR,
-)
+from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
 from ecommerce.exceptions import EcommerceException
 from ecommerce.models import (
     Basket,
@@ -55,7 +51,6 @@ from ecommerce.models import (
     DataConsentAgreement,
     DataConsentUser,
     Product,
-    ProductVersion,
     ProductCouponAssignment,
     Line,
     Order,
