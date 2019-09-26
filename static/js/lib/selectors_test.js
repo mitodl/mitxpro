@@ -5,7 +5,8 @@ import {
   qsPartialTokenSelector,
   qsNextSelector,
   qsVerificationCodeSelector,
-  qsErrorSelector
+  qsErrorSelector,
+  qsEmailSelector
 } from "./selectors"
 
 describe("selector utils", () => {
@@ -80,6 +81,20 @@ describe("selector utils", () => {
     it("should return undefined if no error param", () => {
       assert.isUndefined(qsErrorSelector({}, makeSearchProps("abc=123")))
       assert.isUndefined(qsErrorSelector({}, makeSearchProps("")))
+    })
+  })
+
+  describe("qsEmailSelector", () => {
+    it("should return the email param", () => {
+      assert.equal(
+        qsEmailSelector({}, makeSearchProps("email=test@example.com")),
+        "test@example.com"
+      )
+    })
+
+    it("should return undefined if no email param", () => {
+      assert.isUndefined(qsEmailSelector({}, makeSearchProps("abc=123")))
+      assert.isUndefined(qsEmailSelector({}, makeSearchProps("")))
     })
   })
 })

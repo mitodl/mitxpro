@@ -21,12 +21,13 @@ export const routes = {
   }),
 
   register: include("/create-account/", {
-    begin:   "",
-    confirm: "confirm/",
-    details: "details/",
-    error:   "error/",
-    extra:   "extra/",
-    denied:  "denied/"
+    begin:       "",
+    confirm:     "confirm/",
+    confirmSent: "confirm-sent/",
+    details:     "details/",
+    error:       "error/",
+    extra:       "extra/",
+    denied:      "denied/"
   }),
 
   profile: include("/profile/", {

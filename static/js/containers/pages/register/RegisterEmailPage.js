@@ -1,5 +1,6 @@
 // @flow
 /* global SETTINGS: false */
+import qs from "query-string"
 import React from "react"
 import DocumentTitle from "react-document-title"
 import { REGISTER_EMAIL_PAGE_TITLE } from "../../../constants"
@@ -21,6 +22,8 @@ import { ALERT_TYPE_TEXT } from "../../../constants"
 
 import RegisterEmailForm from "../../../components/forms/RegisterEmailForm"
 
+import { routes } from "../../../lib/urls"
+
 import type { RouterHistory, Location } from "react-router"
 import type { Response } from "redux-query"
 import type { AuthResponse } from "../../../flow/authTypes"
@@ -37,9 +40,6 @@ type Props = {
   ) => Promise<Response<AuthResponse>>,
   addUserNotification: Function
 }
-
-const emailNotificationText = (email: string): string =>
-  `We sent an email to ${email}. Please verify your address to continue.`
 
 const accountExistsNotificationText = (email: string): string =>
   `You already have an account with ${email}. Enter password to sign in.`
@@ -60,15 +60,12 @@ export class RegisterEmailPage extends React.Component<Props> {
 
       handleAuthResponse(history, body, {
         [STATE_REGISTER_CONFIRM_SENT]: () => {
-          addUserNotification({
-            "email-sent": {
-              type:  ALERT_TYPE_TEXT,
-              props: {
-                text: emailNotificationText(email)
-              }
-            }
+          const params = qs.stringify({
+            email
           })
+          history.push(`${routes.register.confirmSent}?${params}`)
         },
+
         [STATE_LOGIN_PASSWORD]: () => {
           addUserNotification({
             "account-exists": {

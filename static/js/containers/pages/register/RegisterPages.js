@@ -6,6 +6,7 @@ import { routes } from "../../../lib/urls"
 
 import RegisterEmailPage from "./RegisterEmailPage"
 import RegisterConfirmPage from "./RegisterConfirmPage"
+import RegisterConfirmSentPage from "./RegisterConfirmSentPage"
 import RegisterDetailsPage from "./RegisterDetailsPage"
 import RegisterExtraDetailsPage from "./RegisterExtraDetailsPage"
 import RegisterDeniedPage from "./RegisterDeniedPage"
@@ -15,6 +16,11 @@ const RegisterPages = () => (
   <React.Fragment>
     <Switch>
       <Route exact path={routes.register.begin} component={RegisterEmailPage} />
+      <Route
+        exact
+        path={routes.register.confirmSent}
+        component={RegisterConfirmSentPage}
+      />
       <Route
         exact
         path={routes.register.confirm}
