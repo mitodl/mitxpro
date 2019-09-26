@@ -7,7 +7,6 @@ import { mount } from "enzyme"
 import { BulkEnrollmentForm } from "./BulkEnrollmentForm"
 import { makeBulkCouponPayment, makeProduct } from "../../factories/ecommerce"
 import { findFormikFieldByName } from "../../lib/test_utils"
-import { createProductMap } from "../../lib/ecommerce"
 import { PRODUCT_TYPE_PROGRAM, PRODUCT_TYPE_COURSERUN } from "../../constants"
 
 describe("BulkEnrollment", () => {
@@ -33,7 +32,19 @@ describe("BulkEnrollment", () => {
 
     firstPayment.products = [firstProduct, secondProduct]
     secondPayment.products = [firstProduct]
-    return [firstPayment, secondPayment]
+
+    return {
+      bulkCouponPayments: [firstPayment, secondPayment],
+      products:           {
+        [PRODUCT_TYPE_COURSERUN]: {
+          [firstProduct.id.toString()]:  firstProduct,
+          [secondProduct.id.toString()]: secondProduct
+        },
+        [PRODUCT_TYPE_PROGRAM]: {
+          [thirdProduct.id.toString()]: thirdProduct
+        }
+      }
+    }
   }
 
   const renderForm = (props = {}) =>
@@ -49,8 +60,9 @@ describe("BulkEnrollment", () => {
   beforeEach(() => {
     sandbox = sinon.createSandbox()
     submitRequestStub = sandbox.stub().returns(defaultSubmitResponse)
-    bulkCouponPayments = createTestData()
-    productMap = createProductMap(bulkCouponPayments)
+    const testData = createTestData()
+    bulkCouponPayments = testData.bulkCouponPayments
+    productMap = testData.products
   })
 
   it("submits a request to send bulk enrollment emails", async () => {

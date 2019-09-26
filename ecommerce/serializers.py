@@ -21,7 +21,9 @@ from ecommerce.api import (
     latest_product_version,
     get_or_create_data_consents,
 )
+from ecommerce.constants import ORDERED_VERSIONS_QSET_ATTR
 from mitxpro.serializers import WriteableSerializerMethodField
+from mitxpro.utils import first_or_none
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -112,11 +114,24 @@ class ProductVersionSerializer(serializers.ModelSerializer):
         model = models.ProductVersion
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class BaseProductSerializer(serializers.ModelSerializer):
+    """ Basic Product Serializer """
+
+    product_type = serializers.SerializerMethodField()
+
+    def get_product_type(self, instance):
+        """ Return the product type """
+        return instance.content_type.model
+
+    class Meta:
+        fields = ["id", "product_type"]
+        model = models.Product
+
+
+class ProductSerializer(BaseProductSerializer):
     """ Product Serializer """
 
     title = serializers.SerializerMethodField()
-    product_type = serializers.SerializerMethodField()
     latest_version = serializers.SerializerMethodField()
 
     def get_title(self, instance):
@@ -125,18 +140,21 @@ class ProductSerializer(serializers.ModelSerializer):
             pk=instance.object_id
         ).title
 
-    def get_product_type(self, instance):
-        """ Return the product type """
-        return instance.content_type.model
-
     def get_latest_version(self, instance):
         """Serialize and return the latest ProductVersion for the Product"""
+        # The Django ORM can be used to
+        has_ordered_versions = self.context.get("has_ordered_versions", False)
+        latest_version = (
+            instance.latest_version
+            if not has_ordered_versions
+            else first_or_none(getattr(instance, ORDERED_VERSIONS_QSET_ATTR, []))
+        )
         return ProductVersionSerializer(
-            instance.latest_version, context={**self.context, "all_runs": True}
+            latest_version, context={**self.context, "all_runs": True}
         ).data
 
     class Meta:
-        fields = ["id", "title", "product_type", "latest_version"]
+        fields = BaseProductSerializer.Meta.fields + ["title", "latest_version"]
         model = models.Product
 
 
@@ -498,7 +516,10 @@ class CurrentCouponPaymentSerializer(serializers.ModelSerializer):
 
     def get_version(self, instance):
         """ Serializes the most recent associated CouponPaymentVersion """
-        return CouponPaymentVersionSerializer(instance.latest_version).data
+        latest_version = (
+            self.context.get("latest_version", None) or instance.latest_version
+        )
+        return CouponPaymentVersionSerializer(latest_version).data
 
     class Meta:
         fields = "__all__"

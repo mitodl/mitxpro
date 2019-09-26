@@ -9,3 +9,8 @@ CYBERSOURCE_DECISION_ERROR = "ERROR"
 CYBERSOURCE_DECISION_CANCEL = "CANCEL"
 
 REFERENCE_NUMBER_PREFIX = "xpro-b2c-"
+
+# Any query that is prefetching an ordered set of related versions (ex: Product qset fetching
+# related ProductVersions in reverse creation order) can use `to_attr` and this attribute name
+# for the prefetched results.
+ORDERED_VERSIONS_QSET_ATTR = "ordered_versions"
