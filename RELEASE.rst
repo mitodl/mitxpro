@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.23.1 (Released September 26, 2019)
+--------------
+
+- Optimized bulk enrollment form queries
+
 Version 0.23.0 (Released September 23, 2019)
 --------------
 
