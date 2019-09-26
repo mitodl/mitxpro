@@ -180,6 +180,11 @@ export const newSetWithout = (set: Set<*>, valueToDelete: any): Set<*> => {
   return newSet
 }
 
+export const parseIntOrUndefined = (value: any): ?number => {
+  const parsed = parseInt(value)
+  return isNaN(parsed) ? undefined : parsed
+}
+
 /**
  * Returns a Promise that executes a function after a given number of milliseconds then resolves
  */

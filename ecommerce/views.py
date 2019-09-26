@@ -1,6 +1,7 @@
 """Views for ecommerce"""
 import csv
 import logging
+from collections import defaultdict
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -15,6 +16,8 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from b2b_ecommerce.api import fulfill_b2b_order
 from b2b_ecommerce.models import B2BOrder
+from courses.models import CourseRun
+from courses.serializers import BaseCourseRunSerializer, BaseProgramSerializer
 from ecommerce.api import (
     create_unfulfilled_order,
     fulfill_order,
@@ -43,14 +46,14 @@ from ecommerce.serializers import (
     BasketSerializer,
     CouponPaymentVersionDetailSerializer,
     CompanySerializer,
-    ProductSerializer,
+    BaseProductSerializer,
     ProductDetailSerializer,
     PromoCouponSerializer,
     SingleUseCouponSerializer,
     CurrentCouponPaymentSerializer,
 )
 from hubspot.task_helpers import sync_hubspot_deal
-from mitxpro.utils import make_csv_http_response
+from mitxpro.utils import make_csv_http_response, first_or_none
 
 log = logging.getLogger(__name__)
 
@@ -188,16 +191,35 @@ class BulkEnrollCouponListView(APIView):
     authentication_classes = (SessionAuthentication,)
 
     def get(self, request, *args, **kwargs):  # pylint: disable=missing-docstring
-        serialized = [
-            {
-                **CurrentCouponPaymentSerializer(coupon_payment).data,
-                "products": ProductSerializer(
-                    (product_coupon.product for product_coupon in product_coupons),
-                    many=True,
-                ).data,
-            }
-            for coupon_payment, product_coupons in get_full_price_coupon_product_set()
-        ]
+        product_set = set()
+        serialized = {"coupon_payments": []}
+        for coupon_payment, products in get_full_price_coupon_product_set():
+            for product in products:
+                if product not in product_set:
+                    product_set.add(product)
+            serialized["coupon_payments"].append(
+                {
+                    **CurrentCouponPaymentSerializer(
+                        coupon_payment,
+                        context={
+                            "latest_version": first_or_none(
+                                coupon_payment.ordered_versions
+                            )
+                        },
+                    ).data,
+                    "products": BaseProductSerializer(
+                        products, context={"has_ordered_versions": True}, many=True
+                    ).data,
+                }
+            )
+        serialized["products"] = defaultdict(dict)
+        for product in product_set:
+            product_object = product.content_object
+            serialized["products"][product.content_type.model][str(product.id)] = (
+                BaseCourseRunSerializer(product_object).data
+                if isinstance(product_object, CourseRun)
+                else BaseProgramSerializer(product_object).data
+            )
 
         return Response(status=status.HTTP_200_OK, data=serialized)
 

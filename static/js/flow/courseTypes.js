@@ -1,5 +1,5 @@
 // @flow
-export type CourseRun = {
+export type BaseCourseRun = {
   title: string,
   start_date: ?string,
   end_date: ?string,
@@ -7,7 +7,10 @@ export type CourseRun = {
   enrollment_end: ?string,
   courseware_url: ?string,
   courseware_id: string,
-  id: number,
+  id: number
+}
+
+export type CourseRun = BaseCourseRun & {
   product_id: ?number
 }
 

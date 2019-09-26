@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 from types import SimpleNamespace
 from urllib.parse import quote_plus
+import operator as op
 
 import pytz
 from django.urls import reverse
@@ -32,6 +33,7 @@ from ecommerce.models import (
     Order,
     OrderAudit,
     Receipt,
+    CouponPayment,
     CouponPaymentVersion,
     CourseRunSelection,
     Company,
@@ -46,11 +48,13 @@ from ecommerce.serializers import (
     CouponSelectionSerializer,
     CurrentCouponPaymentSerializer,
     DataConsentUserSerializer,
+    BaseProductSerializer,
 )
 from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.test_utils import create_tempfile_csv, assert_drf_json_equal
 from mitxpro.utils import dict_without_keys
 from users.factories import UserFactory
+from mitxpro.test_utils import list_of_dicts
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_ACCESS_KEY = "access"
@@ -1062,52 +1066,6 @@ def test_companies_viewset_post_forbidden(admin_drf_client):
     """ Test that post requests to the companies API viewset is not allowed"""
     response = admin_drf_client.post(reverse("companies_api-list"), data={})
     assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
-
-
-def test_bulk_enroll_coupon_list_view(admin_drf_client):
-    """ Test that BulkEnrollCouponListView returns CouponEligibility objects"""
-    coupons = CouponFactory.create_batch(
-        3, enabled=factory.Iterator([True, True, False])
-    )
-    # Create a 100% coupon
-    full_coupon_payment_version = CouponPaymentVersionFactory.create(
-        amount=1,
-        payment=coupons[0].payment,
-        coupon_type=CouponPaymentVersion.SINGLE_USE,
-    )
-    # Create another 100% coupon, then deprecate it with a newer 50% version
-    CouponPaymentVersionFactory.create_batch(
-        2,
-        amount=factory.Iterator([1, 0.5]),
-        payment=coupons[1].payment,
-        coupon_type=CouponPaymentVersion.SINGLE_USE,
-    )
-    # Create another 100% coupon with a disabled Coupon
-    CouponPaymentVersionFactory.create(
-        amount=1,
-        payment=coupons[2].payment,
-        coupon_type=CouponPaymentVersion.SINGLE_USE,
-    )
-    product_coupons = CouponEligibilityFactory.create_batch(
-        3, coupon=factory.Iterator(coupons)
-    )
-    # Apply the full price coupon payment to an additional product
-    product_coupons.insert(1, CouponEligibilityFactory.create(coupon=coupons[0]))
-    api_url = reverse("bulk_coupons_api")
-
-    response = admin_drf_client.get(api_url)
-
-    assert len(response.data) == 1
-    assert len(response.data[0]["products"]) == 2
-    assert response.data == [
-        {
-            **CurrentCouponPaymentSerializer(full_coupon_payment_version.payment).data,
-            "products": ProductSerializer(
-                [product_coupon.product for product_coupon in product_coupons[0:2]],
-                many=True,
-            ).data,
-        }
-    ]
 
 
 class TestBulkEnrollmentSubmitView:

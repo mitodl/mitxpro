@@ -61,20 +61,6 @@ export const formatRunTitle = (run: ?CourseRun) =>
 
 export const isPromo = equals(COUPON_TYPE_PROMO)
 
-export const createProductMap = (
-  bulkCouponPayments: Array<BulkCouponPayment>
-): ProductMap =>
-  R.compose(
-    R.mergeRight({
-      [PRODUCT_TYPE_PROGRAM]:   [],
-      [PRODUCT_TYPE_COURSERUN]: []
-    }),
-    R.groupBy(R.prop("product_type")),
-    R.uniqBy(R.prop("id")),
-    R.flatten,
-    R.pluck("products")
-  )(bulkCouponPayments)
-
 export const findRunInProduct = (
   product: ProductDetail
 ): [?CourseRun, ?Course] => {

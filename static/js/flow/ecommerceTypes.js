@@ -1,5 +1,5 @@
 // @flow
-import type { Course } from "./courseTypes"
+import type { Course, BaseCourseRun, Program } from "./courseTypes"
 import {PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM} from "../constants"
 
 export type CheckoutResponse = {
@@ -136,10 +136,13 @@ export type Coupon = {
   updated_on: Date
 }
 
-export type Product = {
+export type SimpleProduct = {
   id: number,
-  title: string,
   product_type: string,
+}
+
+export type Product = SimpleProduct & {
+  title: string,
 }
 
 export type ProductDetail = Product & {
@@ -147,19 +150,24 @@ export type ProductDetail = Product & {
 }
 
 export type ProductMap = {
-  [PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM]: Array<Product>,
+  [PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM]: {
+    [string]: [BaseCourseRun | Program]
+  }
 }
 
 export type BulkCouponPayment = {
   id: number,
   name: string,
   version: CouponPaymentVersion,
-  products: Array<Product>,
+  products: Array<SimpleProduct>,
   created_on: Date,
   updated_on: Date
 }
 
-export type BulkCouponPaymentsResponse = Array<BulkCouponPayment>
+export type BulkCouponPaymentsResponse = {
+  coupon_payments: Array<BulkCouponPayment>,
+  products: ProductMap
+}
 
 export type BulkCouponSendResponse = {
   emails: Array<string>

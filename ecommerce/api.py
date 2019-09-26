@@ -11,7 +11,7 @@ from urllib.parse import quote_plus, urljoin, urlencode
 import uuid
 
 from django.conf import settings
-from django.db.models import Q, Max, F, Count, Subquery
+from django.db.models import Q, Max, F, Count, Subquery, Prefetch
 from django.db import transaction
 from django.urls import reverse
 from rest_framework.exceptions import ValidationError
@@ -34,7 +34,11 @@ from courseware.exceptions import (
     UnknownEdxApiEnrollException,
 )
 from ecommerce import mail_api
-from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
+from ecommerce.constants import (
+    CYBERSOURCE_DECISION_ACCEPT,
+    CYBERSOURCE_DECISION_CANCEL,
+    ORDERED_VERSIONS_QSET_ATTR,
+)
 from ecommerce.exceptions import EcommerceException
 from ecommerce.models import (
     Basket,
@@ -50,6 +54,8 @@ from ecommerce.models import (
     CourseRunSelection,
     DataConsentAgreement,
     DataConsentUser,
+    Product,
+    ProductVersion,
     ProductCouponAssignment,
     Line,
     Order,
@@ -693,21 +699,33 @@ def get_full_price_coupon_product_set():
         iterable of tuple(CouponPayment, CouponEligibility): An iterable of CouponPayments paired with the
             CouponEligibility objects associated with them
     """
-    full_coupon_payments = CouponPayment.objects.annotate(
-        max_created_on=Max("versions__created_on")
-    ).filter(
-        versions__coupon_type=CouponPaymentVersion.SINGLE_USE,
-        max_created_on=F("versions__created_on"),
-        versions__amount=1,
+    full_coupon_payments = (
+        CouponPayment.objects.annotate(max_created_on=Max("versions__created_on"))
+        .filter(
+            versions__coupon_type=CouponPaymentVersion.SINGLE_USE,
+            max_created_on=F("versions__created_on"),
+            versions__amount=1,
+        )
+        .with_ordered_versions()
     )
     for coupon_payment in full_coupon_payments:
-        product_coupons = (
-            CouponEligibility.objects.select_related("product")
-            .filter(coupon__enabled=True, coupon__payment=coupon_payment)
-            .distinct("product")
+        products = (
+            Product.objects.annotate(
+                product_coupon_ct=Count(
+                    "couponeligibility",
+                    filter=Q(
+                        couponeligibility__coupon__enabled=True,
+                        couponeligibility__coupon__payment=coupon_payment,
+                    ),
+                )
+            )
+            .filter(product_coupon_ct__gt=0, is_active=True)
+            .with_ordered_versions()
+            .order_by("id")
+            .select_related("content_type")
         )
-        if product_coupons.exists():
-            yield coupon_payment, product_coupons
+        if products.exists():
+            yield coupon_payment, products
 
 
 def get_available_bulk_product_coupons(coupon_payment_id, product_id):

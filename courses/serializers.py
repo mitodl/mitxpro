@@ -48,7 +48,25 @@ class BaseCourseSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "description", "thumbnail_url", "readable_id"]
 
 
-class CourseRunSerializer(serializers.ModelSerializer):
+class BaseCourseRunSerializer(serializers.ModelSerializer):
+    """Minimal CourseRun model serializer"""
+
+    class Meta:
+        model = models.CourseRun
+        fields = [
+            "title",
+            "start_date",
+            "end_date",
+            "enrollment_start",
+            "enrollment_end",
+            "expiration_date",
+            "courseware_url",
+            "courseware_id",
+            "id",
+        ]
+
+
+class CourseRunSerializer(BaseCourseSerializer):
     """CourseRun model serializer"""
 
     product_id = serializers.SerializerMethodField()
@@ -73,20 +91,7 @@ class CourseRunSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.CourseRun
-        fields = [
-            "title",
-            "start_date",
-            "end_date",
-            "enrollment_start",
-            "enrollment_end",
-            "expiration_date",
-            "courseware_url",
-            "courseware_id",
-            "current_price",
-            "instructors",
-            "id",
-            "product_id",
-        ]
+        fields = BaseCourseRunSerializer.Meta.fields + ["product_id", "instructors"]
 
 
 class CourseSerializer(serializers.ModelSerializer):

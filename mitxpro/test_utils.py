@@ -134,3 +134,17 @@ def format_as_iso8601(time):
         miniseconds_format = ".%f"
         formatted_time += time.strftime(miniseconds_format)[:4]
     return formatted_time + "Z"
+
+
+def list_of_dicts(specialty_dict_iter):
+    """
+    Some library methods yield an OrderedDict or defaultdict, and it's easier to confirm their contents using a
+    regular dict. This function turns an iterable of specialty dicts into a list of normal dicts.
+
+    Args:
+        specialty_dict_iter:
+
+    Returns:
+        list of dict: A list of dicts
+    """
+    return list(map(dict, specialty_dict_iter))
