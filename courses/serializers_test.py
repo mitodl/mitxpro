@@ -32,6 +32,7 @@ from courses.serializers import (
 )
 from ecommerce.factories import ProductVersionFactory
 from ecommerce.serializers import CompanySerializer
+from ecommerce.serializers_test import datetime_format
 from mitxpro.test_utils import drf_datetime, assert_drf_json_equal
 
 pytestmark = [pytest.mark.django_db]
@@ -48,15 +49,24 @@ def test_base_program_serializer():
         "readable_id": program.readable_id,
         "id": program.id,
         "description": page.description,
-        "thumbnail_url": page.thumbnail_image.file.url,
+        "thumbnail_url": f"http://localhost:8053{page.thumbnail_image.file.url}",
     }
 
 
 @pytest.mark.parametrize("has_product", [True, False])
 def test_serialize_program(mock_context, has_product):
     """Test Program serialization"""
-    run = CourseRunFactory.create()
-    program = run.course.program
+    run1 = CourseRunFactory.create()
+    course1 = run1.course
+    program = course1.program
+    run2 = CourseRunFactory.create(course__program=program)
+    course2 = run2.course
+    runs = (
+        [run1, run2]
+        + [CourseRunFactory.create(course=course1) for _ in range(2)]
+        + [CourseRunFactory.create(course=course2) for _ in range(2)]
+    )
+
     page = ProgramPageFactory.create(program=program)
     if has_product:
         ProductVersionFactory.create(product__content_object=program)
@@ -70,10 +80,21 @@ def test_serialize_program(mock_context, has_product):
             "id": program.id,
             "description": page.description,
             "courses": [
-                CourseSerializer(instance=run.course, context=mock_context).data
+                CourseSerializer(instance=course, context=mock_context).data
+                for course in [course1, course2]
             ],
-            "thumbnail_url": page.thumbnail_image.file.url,
+            "thumbnail_url": f"http://localhost:8053{page.thumbnail_image.file.url}",
             "current_price": program.current_price,
+            "start_date": sorted(runs, key=lambda run: run.start_date)[
+                0
+            ].start_date.strftime(datetime_format),
+            "end_date": sorted(runs, key=lambda run: run.end_date)[
+                -1
+            ].end_date.strftime(datetime_format),
+            "enrollment_start": sorted(runs, key=lambda run: run.enrollment_start)[
+                0
+            ].enrollment_start.strftime(datetime_format),
+            "url": f"http://localhost{page.get_url()}",
         },
     )
 
@@ -89,7 +110,7 @@ def test_base_course_serializer():
         "description": page.description,
         "readable_id": course.readable_id,
         "id": course.id,
-        "thumbnail_url": page.thumbnail_image.file.url,
+        "thumbnail_url": f"http://localhost:8053{page.thumbnail_image.file.url}",
     }
 
 
@@ -135,7 +156,7 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
             CourseRunSerializer(run).data
             for run in sorted(expected_runs, key=lambda run: run.start_date)
         ],
-        "thumbnail_url": page.thumbnail_image.file.url,
+        "thumbnail_url": f"http://localhost:8053{page.thumbnail_image.file.url}",
         "next_run_id": course.first_unexpired_run.id,
     }
 
