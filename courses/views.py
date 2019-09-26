@@ -32,6 +32,8 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
 class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for Courses"""
 
+    permission_classes = []
+
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
 
