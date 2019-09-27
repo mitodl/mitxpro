@@ -578,6 +578,12 @@ class DataConsentUser(TimestampedModel):
         return f"DataConsentUser {self.user} for {self.agreement}, consent date {self.consent_date}"
 
 
+class BulkCouponAssignment(models.Model):
+    """Records the bulk creation of ProductCouponAssignments"""
+
+    created_on = models.DateTimeField(auto_now_add=True)  # UTC
+
+
 class ProductCouponAssignment(TimestampedModel):
     """
     Records the assignment of a product coupon to an email address (in other words, the given
@@ -587,3 +593,10 @@ class ProductCouponAssignment(TimestampedModel):
     email = models.EmailField(blank=False, db_index=True)
     product_coupon = models.ForeignKey(CouponEligibility, on_delete=models.PROTECT)
     redeemed = models.BooleanField(default=False)
+    bulk_assignment = models.ForeignKey(
+        BulkCouponAssignment,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="assignments",
+    )

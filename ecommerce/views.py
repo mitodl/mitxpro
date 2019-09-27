@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.http import Http404
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
 from rest_framework.generics import get_object_or_404, RetrieveUpdateAPIView
@@ -29,6 +30,8 @@ from ecommerce.api import (
     make_receipt_url,
     validate_basket_for_checkout,
     complete_order,
+    bulk_assign_product_coupons,
+    make_checkout_url,
 )
 from ecommerce.exceptions import ParseException
 from ecommerce.mail_api import send_bulk_enroll_emails
@@ -40,6 +43,7 @@ from ecommerce.models import (
     Product,
     Receipt,
     CouponPayment,
+    BulkCouponAssignment,
 )
 from ecommerce.permissions import IsSignedByCyberSource
 from ecommerce.serializers import (
@@ -53,9 +57,16 @@ from ecommerce.serializers import (
     CurrentCouponPaymentSerializer,
 )
 from hubspot.task_helpers import sync_hubspot_deal
-from mitxpro.utils import make_csv_http_response, first_or_none
+from mitxpro.utils import (
+    make_csv_http_response,
+    first_or_none,
+    format_datetime_for_filename,
+)
 
 log = logging.getLogger(__name__)
+
+
+COUPON_NAME_FILENAME_LIMIT = 20
 
 
 class ProductViewSet(ReadOnlyModelViewSet):
@@ -288,9 +299,15 @@ class BulkEnrollmentSubmitView(APIView):
                 data={"errors": [{"users_file": coupon_limit_error}]},
             )
 
-        send_bulk_enroll_emails(emails, available_product_coupons.all())
+        bulk_assignment, recipient_product_coupon_iter = bulk_assign_product_coupons(
+            emails, available_product_coupons.all()
+        )
+        send_bulk_enroll_emails(recipient_product_coupon_iter)
 
-        return Response(status=status.HTTP_200_OK, data={"emails": emails})
+        return Response(
+            status=status.HTTP_200_OK,
+            data={"emails": emails, "bulk_assignment_id": bulk_assignment.id},
+        )
 
 
 class CouponListView(APIView):
@@ -341,4 +358,42 @@ def coupon_code_csv_view(request, version_id):
             )
         ),
         filename=f"coupon_codes_{coupon_payment_version.payment.name}.csv",
+    )
+
+
+def bulk_assignment_csv_view(request, bulk_assignment_id):
+    """View for returning a csv file of bulk assigned coupons"""
+    if not (request.user and request.user.is_staff):
+        raise PermissionDenied
+    bulk_assignment = (
+        BulkCouponAssignment.objects.filter(id=bulk_assignment_id)
+        .prefetch_related(
+            "assignments__product_coupon__coupon",
+            "assignments__product_coupon__product",
+        )
+        .first()
+    )
+    if not bulk_assignment:
+        raise Http404
+
+    # It's assumed that the bulk assignment will have the same coupon payment for all of the individual assignments, so
+    # use the name value for the first coupon payment for the filename.
+    first_assignment = bulk_assignment.assignments.first()
+    first_coupon_name = first_assignment.product_coupon.coupon.payment.name
+    return make_csv_http_response(
+        csv_rows=(
+            {
+                "email": product_coupon_assignment.email,
+                "enrollment_url": make_checkout_url(
+                    product_id=product_coupon_assignment.product_coupon.product.id,
+                    code=product_coupon_assignment.product_coupon.coupon.coupon_code,
+                ),
+                "coupon_code": product_coupon_assignment.product_coupon.coupon.coupon_code,
+            }
+            for product_coupon_assignment in bulk_assignment.assignments.all()
+        ),
+        filename="Bulk Assign {coupon_name} {formatted_dt}.csv".format(
+            coupon_name=first_coupon_name[0:COUPON_NAME_FILENAME_LIMIT],
+            formatted_dt=format_datetime_for_filename(bulk_assignment.created_on),
+        ),
     )

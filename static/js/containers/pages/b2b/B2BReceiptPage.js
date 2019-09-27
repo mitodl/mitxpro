@@ -15,6 +15,7 @@ import { addUserNotification } from "../../../actions"
 import { wait } from "../../../lib/util"
 import { formatPrice } from "../../../lib/ecommerce"
 import { ALERT_TYPE_TEXT } from "../../../constants"
+import { bulkReceiptCsvUrl } from "../../../lib/urls"
 
 import type { B2BOrderStatus } from "../../../flow/ecommerceTypes"
 import type { Location } from "react-router"
@@ -162,7 +163,7 @@ export class B2BReceiptPage extends React.Component<Props, State> {
                 numSeats={numSeats}
               />
               <a
-                href={`/api/b2b/orders/${hash}/codes/`}
+                href={bulkReceiptCsvUrl(hash)}
                 className="enrollment-codes-link"
               >
                 Download codes <i className="material-icons">save_alt</i>

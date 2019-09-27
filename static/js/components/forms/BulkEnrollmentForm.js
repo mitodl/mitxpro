@@ -7,6 +7,7 @@ import * as yup from "yup"
 import { RadioButtonGroup, RadioButton } from "../input/radio"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_LABELS } from "../../constants"
 import { parseIntOrUndefined } from "../../lib/util"
+import { bulkAssignmentCsvUrl, bulkReceiptCsvUrl } from "../../lib/urls"
 
 import type {
   BulkCouponPayment,
@@ -208,8 +209,20 @@ export class BulkEnrollmentForm extends React.Component<
 
             {successResponseData && R.isEmpty(touched) && (
               <div className="success">
-                Success! Enrollment emails sent to{" "}
-                {successResponseData.emails.length} users.
+                <p>
+                  Success! Enrollment emails sent to{" "}
+                  {successResponseData.emails.length} users.
+                </p>
+                <p>
+                  <a
+                    href={bulkAssignmentCsvUrl(
+                      successResponseData.bulk_assignment_id
+                    )}
+                  >
+                    Download CSV of coupon assignments{" "}
+                    <i className="material-icons">save_alt</i>
+                  </a>
+                </p>
               </div>
             )}
           </Form>

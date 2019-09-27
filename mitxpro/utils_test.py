@@ -12,6 +12,7 @@ from mitxpro.utils import (
     get_field_names,
     now_in_utc,
     is_near_now,
+    format_datetime_for_filename,
     dict_without_keys,
     filter_dict_by_key_set,
     make_csv_http_response,
@@ -43,6 +44,22 @@ def test_is_near_now():
     assert is_near_now(later) is False
     earlier = now - datetime.timedelta(0, 6)
     assert is_near_now(earlier) is False
+
+
+def test_format_datetime_for_filename():
+    """
+    Test that format_datetime_for_filename formats a datetime object to a string for use in a filename
+    """
+    dt = datetime.datetime(
+        year=2019, month=1, day=1, hour=20, minute=21, second=22, microsecond=100
+    )
+    assert format_datetime_for_filename(dt) == "20190101"
+    assert format_datetime_for_filename(dt, include_time=True) == "20190101_202122"
+    assert (
+        format_datetime_for_filename(dt, include_time=True, include_ms=True)
+        == "20190101_202122_000100"
+    )
+    assert format_datetime_for_filename(dt, include_ms=True) == "20190101_202122_000100"
 
 
 def test_dict_without_keys():

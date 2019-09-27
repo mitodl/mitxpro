@@ -4,6 +4,11 @@ import qs from "query-string"
 
 export const getNextParam = (search: string) => qs.parse(search).next || "/"
 
+export const bulkReceiptCsvUrl = (hash: string) =>
+  `/api/b2b/orders/${hash}/codes/`
+export const bulkAssignmentCsvUrl = (bulkEnrollmentId: number) =>
+  `/api/bulk_assignments/${bulkEnrollmentId}/`
+
 export const routes = {
   root:      "/",
   catalog:   "/catalog/",

@@ -28,6 +28,7 @@ from ecommerce.factories import (
     CouponPaymentFactory,
     CouponPaymentVersionFactory,
     CompanyFactory,
+    ProductCouponAssignmentFactory,
 )
 from ecommerce.models import (
     Basket,
@@ -43,6 +44,7 @@ from ecommerce.models import (
     CouponEligibility,
     Product,
     DataConsentUser,
+    BulkCouponAssignment,
 )
 from ecommerce.serializers import (
     BasketSerializer,
@@ -54,7 +56,11 @@ from ecommerce.serializers import (
     BaseProductSerializer,
 )
 from ecommerce.test_utils import unprotect_version_tables
-from mitxpro.test_utils import create_tempfile_csv, assert_drf_json_equal
+from mitxpro.test_utils import (
+    create_tempfile_csv,
+    assert_drf_json_equal,
+    any_instance_of,
+)
 from mitxpro.utils import dict_without_keys
 from users.factories import UserFactory
 
@@ -64,6 +70,7 @@ CYBERSOURCE_PROFILE_ID = "profile"
 CYBERSOURCE_SECURITY_KEY = "security"
 FAKE = faker.Factory.create()
 
+lazy = pytest.lazy_fixture
 
 pytestmark = pytest.mark.django_db
 # pylint: disable=redefined-outer-name,unused-argument,too-many-lines
@@ -982,16 +989,63 @@ def test_coupon_csv_view(admin_client, admin_drf_client, single_use_coupon_json)
     )
 
 
-def test_coupon_csv_view_forbidden(user_client):
-    """ Test that a regular user cannot access a csv download URL """
-    response = user_client.get(reverse("coupons_csv", kwargs={"version_id": 1}))
-    assert response.status_code == status.HTTP_403_FORBIDDEN
+def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
+    """ Test that the bulk assignment CSV includes the correct product coupon assignment data """
+    settings.SITE_BASE_URL = "http://test.com/"
+
+    bulk_assignment = BulkCouponAssignment.objects.create()
+    individual_assignments = ProductCouponAssignmentFactory.create_batch(
+        3, bulk_assignment=bulk_assignment
+    )
+    csv_response = admin_client.get(
+        reverse("bulk_assign_csv", kwargs={"bulk_assignment_id": bulk_assignment.id})
+    )
+    assert csv_response.status_code == 200
+    rows = [line.split(",") for line in csv_response.content.decode().split()]
+    assert len(rows) == (len(individual_assignments) + 1)
+    assert rows[0] == ["email", "enrollment_url", "coupon_code"]
+    data_rows = rows[1:]
+    assert sorted(data_rows) == sorted(
+        [
+            [
+                assignment.email,
+                "http://test.com/checkout/?product={}&code={}".format(
+                    assignment.product_coupon.product.id,
+                    assignment.product_coupon.coupon.coupon_code,
+                ),
+                assignment.product_coupon.coupon.coupon_code,
+            ]
+            for assignment in individual_assignments
+        ]
+    )
 
 
-def test_coupon_csv_view_404(admin_client):
-    """ Test that a 404 is returned for a CouponPaymentVersion that does not exist"""
-    response = admin_client.get(reverse("coupons_csv", kwargs={"version_id": 9999}))
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+@pytest.mark.parametrize(
+    "url_name,url_kwarg_name,test_client,expected_status_code",
+    [
+        ["coupons_csv", "version_id", lazy("admin_client"), status.HTTP_404_NOT_FOUND],
+        ["coupons_csv", "version_id", lazy("user_client"), status.HTTP_403_FORBIDDEN],
+        [
+            "bulk_assign_csv",
+            "bulk_assignment_id",
+            lazy("admin_client"),
+            status.HTTP_404_NOT_FOUND,
+        ],
+        [
+            "bulk_assign_csv",
+            "bulk_assignment_id",
+            lazy("user_client"),
+            status.HTTP_403_FORBIDDEN,
+        ],
+    ],
+)
+def test_csv_views_errors(url_name, url_kwarg_name, test_client, expected_status_code):
+    """
+    Test that the views that return a CSV containing user ecommerce data is protected and returns a 404 if
+    a non-existent id is requested
+    """
+    response = test_client.get(reverse(url_name, kwargs={url_kwarg_name: 9999}))
+    assert response.status_code == expected_status_code
 
 
 def test_products_viewset_list(user_drf_client, coupon_product_ids):
@@ -1182,12 +1236,14 @@ class TestBulkEnrollmentSubmitView:
             format="multipart",
         )
 
-        assert response.data == {"emails": scenario.emails}
+        assert response.data["emails"] == scenario.emails
+        assert response.data["bulk_assignment_id"] == any_instance_of(int)
         scenario.patched_available_product_coupons.assert_called_once_with(
             coupon_payment_id, product_id
         )
-        scenario.patched_send_emails.assert_called_once_with(
-            scenario.emails, available_coupons
+        scenario.patched_send_emails.assert_called_once()
+        assert list(scenario.patched_send_emails.call_args_list[0][0][0]) == list(
+            zip(scenario.emails, available_coupons)
         )
 
     @pytest.mark.parametrize(

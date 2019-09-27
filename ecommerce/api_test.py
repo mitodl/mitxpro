@@ -43,6 +43,7 @@ from ecommerce.api import (
     get_product_courses,
     get_available_bulk_product_coupons,
     get_full_price_coupon_product_set,
+    bulk_assign_product_coupons,
     validate_basket_for_checkout,
     complete_order,
     enroll_user_in_order_items,
@@ -77,6 +78,7 @@ from ecommerce.models import (
     Order,
     OrderAudit,
     Product,
+    ProductCouponAssignment,
 )
 from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.utils import now_in_utc
@@ -673,6 +675,30 @@ def test_get_full_price_coupon_product_set():
     assert set(second_product_qset) == {
         product_coupon.product for product_coupon in product_coupons[1:3]
     }
+
+
+def test_bulk_assign_product_coupons():
+    """
+    bulk_assign_product_coupons should pair emails with available coupons, assign the coupons to those
+    emails, and group them by a bulk assignment record.
+    """
+    emails = sorted(["abc@example.com", "def@example.com", "ghi@example.com"])
+    product_coupons = CouponEligibilityFactory.create_batch(len(emails))
+    email_gen = (e for e in emails)
+    product_coupon_gen = (pc for pc in product_coupons)
+    paired_email_coupon_assignments = list(zip(emails, product_coupons))
+
+    # Pass in generators to make sure there isn't any issue with email/product coupon iterables being exhausted
+    bulk_assignment, result_iter = bulk_assign_product_coupons(
+        email_gen, product_coupon_gen
+    )
+    new_assignments = ProductCouponAssignment.objects.order_by("email").all()
+    assert new_assignments.count() == len(emails)
+    assert paired_email_coupon_assignments == [
+        (a.email, a.product_coupon) for a in new_assignments
+    ]
+    assert all(a.bulk_assignment_id == bulk_assignment.id for a in new_assignments)
+    assert paired_email_coupon_assignments == list(result_iter)
 
 
 @pytest.mark.parametrize("has_coupon", [True, False])

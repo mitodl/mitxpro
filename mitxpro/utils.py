@@ -67,6 +67,26 @@ def now_in_utc():
     return datetime.datetime.now(tz=pytz.UTC)
 
 
+def format_datetime_for_filename(datetime_object, include_time=False, include_ms=False):
+    """
+    Formats a datetime object for use as part of a filename
+
+    Args:
+        datetime_object (datetime.datetime):
+        include_time (bool): True if the formatted string should include the time (hours, minutes, seconds)
+        include_ms (bool): True if the formatted string should include the microseconds
+
+    Returns:
+        str: Formatted datetime
+    """
+    format_parts = ["%Y%m%d"]
+    if include_time or include_ms:
+        format_parts.append("%H%M%S")
+    if include_ms:
+        format_parts.append("%f")
+    return datetime_object.strftime("_".join(format_parts))
+
+
 def dict_without_keys(d, *omitkeys):
     """
     Returns a copy of a dict without the specified keys
