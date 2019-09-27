@@ -1,5 +1,6 @@
 """admin classes for ecommerce"""
 from django.contrib import admin
+from django.contrib.contenttypes.models import ContentType
 
 from ecommerce.models import (
     Line,
@@ -22,20 +23,40 @@ from ecommerce.models import (
 )
 
 from hubspot.task_helpers import sync_hubspot_deal
+from mitxpro.admin import AuditableModelAdmin
 from mitxpro.utils import get_field_names
 
 
-class AuditableModelAdmin(admin.ModelAdmin):
-    """A ModelAdmin which will save and log"""
+class ProductContentTypeListFilter(admin.SimpleListFilter):
+    """Custom filter class for filtering ContentTypes and limiting the options to course run and program"""
 
-    def save_model(self, request, obj, form, change):
-        obj.save_and_log(request.user)
+    title = "content type"
+    parameter_name = "content_type"
+
+    def lookups(self, request, model_admin):
+        """
+        Returns a list of tuples. The first element in each tuple is the coded value for the option that will
+        appear in the URL query. The second element is the human-readable name for the option that will appear
+        in the right sidebar.
+        """
+        valid_content_types = ContentType.objects.filter(
+            model__in=["courserun", "program"]
+        ).values_list("model", flat=True)
+        return zip(valid_content_types, valid_content_types)
+
+    def queryset(self, request, queryset):
+        """
+        Returns the filtered queryset based on the value provided in the query string and retrievable via
+        `self.value()`.
+        """
+        return queryset.filter(content_type__model=self.value())
 
 
 class LineAdmin(admin.ModelAdmin):
     """Admin for Line"""
 
     model = Line
+    list_display = ("id", "order", "get_product_version_text_id", "quantity")
 
     readonly_fields = get_field_names(Line)
 
@@ -44,6 +65,13 @@ class LineAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    def get_product_version_text_id(self, obj):
+        """Returns the related ProductVersion text_id"""
+        return obj.product_version.text_id
+
+    get_product_version_text_id.short_description = "Product Object Text Id"
+    get_product_version_text_id.admin_order_field = "product_version__text_id"
 
 
 class OrderAdmin(AuditableModelAdmin):
@@ -214,17 +242,49 @@ class CouponRedemptionAdmin(admin.ModelAdmin):
     """Admin for CouponRedemptions"""
 
     model = CouponRedemption
+    list_display = (
+        "id",
+        "coupon_version_id",
+        "order",
+        "get_coupon_code",
+        "get_coupon_payment_version",
+    )
     raw_id_fields = ("coupon_version", "order")
+
+    def get_queryset(self, request):
+        """Return all active and in_active products"""
+        return self.model.objects.get_queryset().select_related(
+            "coupon_version__coupon"
+        )
+
+    def get_coupon_code(self, obj):
+        """Returns the related Coupon"""
+        return obj.coupon_version.coupon.coupon_code
+
+    get_coupon_code.short_description = "Coupon Code"
+    get_coupon_code.admin_order_field = "coupon_version__coupon__coupon_code"
+
+    def get_coupon_payment_version(self, obj):
+        """Returns the related Coupon"""
+        return obj.coupon_version.payment_version
+
+    get_coupon_payment_version.short_description = "Coupon Payment Version"
+    get_coupon_payment_version.admin_order_field = "coupon_version__payment_version"
 
 
 class ProductVersionAdmin(admin.ModelAdmin):
     """Admin for ProductVersion"""
 
     model = ProductVersion
+    list_display = ("id", "product_id", "text_id", "price", "description")
     save_as = True
     save_as_continue = False
     save_on_top = True
     readonly_fields = ("text_id",)
+
+    def get_queryset(self, request):
+        """Return all active and in_active products"""
+        return self.model.objects.get_queryset().select_related("product")
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -250,6 +310,8 @@ class ProductAdmin(admin.ModelAdmin):
 
     model = Product
     inlines = [ProductVersionInline]
+    list_display = ("id", "content_object")
+    list_filter = ("is_active", ProductContentTypeListFilter)
 
     def get_queryset(self, request):
         """Return all active and in_active products"""
