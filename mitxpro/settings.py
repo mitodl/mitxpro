@@ -17,7 +17,7 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 
 from mitxpro.envs import get_any, get_bool, get_int, get_string, OffsettingSchedule
 
-VERSION = "0.23.1"
+VERSION = "0.23.2"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
