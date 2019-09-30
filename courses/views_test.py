@@ -102,8 +102,11 @@ def test_delete_program(user_drf_client, programs):
     assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
-def test_get_courses(user_drf_client, courses, mock_context):
+@pytest.mark.parametrize("is_anonymous", [True, False])
+def test_get_courses(user_drf_client, courses, mock_context, is_anonymous):
     """Test the view that handles requests for all Courses"""
+    if is_anonymous:
+        user_drf_client.logout()
     resp = user_drf_client.get(reverse("courses_api-list"))
     courses_data = resp.json()
     assert len(courses_data) == len(courses)
@@ -113,8 +116,11 @@ def test_get_courses(user_drf_client, courses, mock_context):
         )
 
 
-def test_get_course(user_drf_client, courses, mock_context):
+@pytest.mark.parametrize("is_anonymous", [True, False])
+def test_get_course(user_drf_client, courses, mock_context, is_anonymous):
     """Test the view that handles a request for single Course"""
+    if is_anonymous:
+        user_drf_client.logout()
     course = courses[0]
     resp = user_drf_client.get(reverse("courses_api-detail", kwargs={"pk": course.id}))
     course_data = resp.json()
