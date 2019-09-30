@@ -3,7 +3,7 @@
 from django.contrib import admin
 
 from b2b_ecommerce.models import B2BCoupon, B2BCouponRedemption, B2BOrder
-from ecommerce.admin import AuditableModelAdmin
+from mitxpro.admin import AuditableModelAdmin
 
 
 class B2BCouponAdmin(AuditableModelAdmin):

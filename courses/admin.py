@@ -5,6 +5,7 @@ Admin site bindings for profiles
 from django.contrib import admin
 
 from mitxpro.utils import get_field_names
+from mitxpro.admin import AuditableModelAdmin
 from .models import (
     Program,
     Course,
@@ -24,7 +25,8 @@ class ProgramAdmin(admin.ModelAdmin):
     """Admin for Program"""
 
     model = Program
-    search_fields = ["title"]
+    search_fields = ["title", "readable_id"]
+    list_display = ("id", "title", "readable_id")
     list_filter = ["live"]
 
 
@@ -41,13 +43,24 @@ class CourseRunAdmin(admin.ModelAdmin):
 
     model = CourseRun
     search_fields = ["title", "courseware_id"]
+    list_display = ("id", "title", "courseware_id")
     list_filter = ["live", "course"]
 
 
-class ProgramEnrollmentAdmin(admin.ModelAdmin):
+class ProgramEnrollmentAdmin(AuditableModelAdmin):
     """Admin for ProgramEnrollment"""
 
     model = ProgramEnrollment
+    search_fields = [
+        "user__email",
+        "user__username",
+        "company__name",
+        "program__readable_id",
+        "program__title",
+    ]
+    list_filter = ["active", "change_status"]
+    list_display = ("id", "get_user_email", "get_program_readable_id", "change_status")
+    raw_id_fields = ("user", "order", "program")
 
     def get_queryset(self, request):
         """
@@ -59,13 +72,21 @@ class ProgramEnrollmentAdmin(admin.ModelAdmin):
         ordering = self.get_ordering(request)
         if ordering:
             qs = qs.order_by(*ordering)
-        return qs
+        return qs.select_related("user", "program")
 
-    def save_model(self, request, obj, form, change):
-        """
-        Saves object and logs change to object
-        """
-        obj.save_and_log(request.user)
+    def get_user_email(self, obj):
+        """Returns the related User email"""
+        return obj.user.email
+
+    get_user_email.short_description = "User Email"
+    get_user_email.admin_order_field = "user__email"
+
+    def get_program_readable_id(self, obj):
+        """Returns the related Program readable_id"""
+        return obj.program.readable_id
+
+    get_program_readable_id.short_description = "Program"
+    get_program_readable_id.admin_order_field = "program__readable_id"
 
 
 class ProgramEnrollmentAuditAdmin(admin.ModelAdmin):
@@ -81,10 +102,20 @@ class ProgramEnrollmentAuditAdmin(admin.ModelAdmin):
         return False
 
 
-class CourseRunEnrollmentAdmin(admin.ModelAdmin):
+class CourseRunEnrollmentAdmin(AuditableModelAdmin):
     """Admin for CourseRunEnrollment"""
 
     model = CourseRunEnrollment
+    search_fields = [
+        "user__email",
+        "user__username",
+        "company__name",
+        "run__courseware_id",
+        "run__title",
+    ]
+    list_filter = ["active", "change_status", "edx_enrolled"]
+    list_display = ("id", "get_user_email", "get_run_courseware_id", "change_status")
+    raw_id_fields = ("user", "order", "run")
 
     def get_queryset(self, request):
         """
@@ -96,13 +127,21 @@ class CourseRunEnrollmentAdmin(admin.ModelAdmin):
         ordering = self.get_ordering(request)
         if ordering:
             qs = qs.order_by(*ordering)
-        return qs
+        return qs.select_related("user", "run")
 
-    def save_model(self, request, obj, form, change):
-        """
-        Saves object and logs change to object
-        """
-        obj.save_and_log(request.user)
+    def get_user_email(self, obj):
+        """Returns the related User email"""
+        return obj.user.email
+
+    get_user_email.short_description = "User Email"
+    get_user_email.admin_order_field = "user__email"
+
+    def get_run_courseware_id(self, obj):
+        """Returns the related CourseRun courseware_id"""
+        return obj.run.courseware_id
+
+    get_run_courseware_id.short_description = "Course Run"
+    get_run_courseware_id.admin_order_field = "run__courseware_id"
 
 
 class CourseRunEnrollmentAuditAdmin(admin.ModelAdmin):
@@ -122,6 +161,26 @@ class CourseRunGradeAdmin(admin.ModelAdmin):
     """Admin for CourseRunGrade"""
 
     model = CourseRunGrade
+    list_display = ["id", "get_user_email", "get_run_courseware_id", "grade"]
+    list_filter = ["passed", "set_by_admin", "course_run"]
+    raw_id_fields = ("user",)
+
+    def get_queryset(self, request):
+        return self.model.objects.get_queryset().select_related("user", "course_run")
+
+    def get_user_email(self, obj):
+        """Returns the related User email"""
+        return obj.user.email
+
+    get_user_email.short_description = "User Email"
+    get_user_email.admin_order_field = "user__email"
+
+    def get_run_courseware_id(self, obj):
+        """Returns the related CourseRun courseware_id"""
+        return obj.course_run.courseware_id
+
+    get_run_courseware_id.short_description = "Course Run"
+    get_run_courseware_id.admin_order_field = "course_run__courseware_id"
 
 
 class CourseRunGradeAuditAdmin(admin.ModelAdmin):
@@ -148,6 +207,10 @@ class CourseRunCertificateAdmin(admin.ModelAdmin):
         "user__username",
         "user__email",
     ]
+    raw_id_fields = ("user",)
+
+    def get_queryset(self, request):
+        return self.model.objects.get_queryset().select_related("user", "course_run")
 
 
 class ProgramCertificateAdmin(admin.ModelAdmin):
@@ -161,6 +224,10 @@ class ProgramCertificateAdmin(admin.ModelAdmin):
         "user__username",
         "user__email",
     ]
+    raw_id_fields = ("user",)
+
+    def get_queryset(self, request):
+        return self.model.objects.get_queryset().select_related("user", "program")
 
 
 admin.site.register(Program, ProgramAdmin)
