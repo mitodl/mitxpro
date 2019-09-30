@@ -170,7 +170,8 @@ export type BulkCouponPaymentsResponse = {
 }
 
 export type BulkCouponSendResponse = {
-  emails: Array<string>
+  emails:             Array<string>,
+  bulk_assignment_id: number
 }
 
 export type B2BCheckoutPayload = {

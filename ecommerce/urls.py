@@ -11,6 +11,7 @@ from ecommerce.views import (
     BulkEnrollmentSubmitView,
     ProductViewSet,
     coupon_code_csv_view,
+    bulk_assignment_csv_view,
     CompanyViewSet,
 )
 
@@ -40,5 +41,10 @@ urlpatterns = [
         r"^api/bulk_enroll/$",
         BulkEnrollmentSubmitView.as_view(),
         name="bulk_enroll_submit_api",
+    ),
+    re_path(
+        r"^api/bulk_assignments/(?P<bulk_assignment_id>[0-9]+)/$",
+        bulk_assignment_csv_view,
+        name="bulk_assign_csv",
     ),
 ]

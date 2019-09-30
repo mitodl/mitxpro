@@ -9,6 +9,7 @@ import logging
 from traceback import format_exc
 from urllib.parse import quote_plus, urljoin, urlencode
 import uuid
+import itertools
 
 from django.conf import settings
 from django.db.models import Q, Max, F, Count, Subquery
@@ -52,6 +53,7 @@ from ecommerce.models import (
     DataConsentUser,
     Product,
     ProductCouponAssignment,
+    BulkCouponAssignment,
     Line,
     Order,
     Receipt,
@@ -745,6 +747,33 @@ def get_available_bulk_product_coupons(coupon_payment_id, product_id):
             existing_assignments=0,
         )
     )
+
+
+def bulk_assign_product_coupons(emails, available_product_coupons):
+    """
+    Assign product coupons to emails in bulk and create a record of this bulk creation
+
+    Args:
+        emails (iterable of str):
+        available_product_coupons (iterable of CouponEligibility):
+
+    Returns:
+        iterable of (str, CouponEligibility): An iterable of tuples, where each one
+            is an email paired with the product coupon assigned to that email.
+    """
+    # We will loop over pairs of recipients and product coupons again after this method returns,
+    # so create 2 generators
+    recipient_product_coupon_iter1, recipient_product_coupon_iter2 = itertools.tee(
+        zip(emails, available_product_coupons)
+    )
+    bulk_assignment = BulkCouponAssignment.objects.create()
+    ProductCouponAssignment.objects.bulk_create(
+        ProductCouponAssignment(
+            email=email, product_coupon=product_coupon, bulk_assignment=bulk_assignment
+        )
+        for email, product_coupon in recipient_product_coupon_iter1
+    )
+    return bulk_assignment, recipient_product_coupon_iter2
 
 
 # pylint: disable=too-many-branches

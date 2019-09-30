@@ -1,5 +1,4 @@
 """Ecommerce mail API"""
-import itertools
 import logging
 from urllib.parse import urlencode, urljoin
 
@@ -7,7 +6,6 @@ from django.conf import settings
 from django.urls import reverse
 
 from courses.models import CourseRun
-from ecommerce.models import ProductCouponAssignment
 from mail import api
 from mail.constants import (
     EMAIL_B2B_RECEIPT,
@@ -39,39 +37,23 @@ def get_bulk_enroll_email_context(product_coupon):
     }
 
 
-def send_bulk_enroll_emails(recipients, product_coupon_iter):
+def send_bulk_enroll_emails(recipient_product_coupon_iter):
     """
     Sends an email for recipients to enroll in a courseware offering via coupon
 
     Args:
-        recipients (iterable of str): An iterable of user email addresses
-        product_coupon_iter (iterable of CouponEligibility): An iterable of product coupons that will be given
-            one-by-one to the given recipients
-
-    Returns:
-        list of ProductCouponAssignment: Created ProductCouponAssignment objects that represent a bulk enrollment email
-            sent to a recipient
+        recipient_product_coupon_iter (iterable of (str, CouponEligibility)): An iterable of tuples, where each one
+            is an email paired with the product coupon assigned to that email.
     """
-    # We will loop over pairs of recipients and product coupons twice, so create 2 generators
-    recipient_product_coupon_iter1, recipient_product_coupon_iter2 = itertools.tee(
-        zip(recipients, product_coupon_iter)
-    )
-
     api.send_messages(
         api.build_user_specific_messages(
             EMAIL_BULK_ENROLL,
             (
                 (recipient, get_bulk_enroll_email_context(product_coupon))
-                for recipient, product_coupon in recipient_product_coupon_iter1
+                for recipient, product_coupon in recipient_product_coupon_iter
             ),
         )
     )
-    return [
-        ProductCouponAssignment.objects.create(
-            email=recipient, product_coupon=product_coupon
-        )
-        for recipient, product_coupon in recipient_product_coupon_iter2
-    ]
 
 
 def send_course_run_enrollment_email(enrollment):

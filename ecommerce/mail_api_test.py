@@ -3,14 +3,14 @@ from urllib.parse import urljoin
 
 from django.urls import reverse
 import pytest
+import factory
 
 from b2b_ecommerce.factories import B2BOrderFactory
 from courses.factories import CourseRunEnrollmentFactory
 from ecommerce.api import get_readable_id
 from ecommerce.factories import (
     CouponPaymentVersionFactory,
-    CouponEligibilityFactory,
-    ProductVersionFactory,
+    ProductCouponAssignmentFactory,
     CompanyFactory,
 )
 from ecommerce.mail_api import (
@@ -36,44 +36,53 @@ def company():
     return CompanyFactory.create(name="MIT")
 
 
-@pytest.mark.parametrize("test_company", [lazy("company"), None])
-def test_send_bulk_enroll_emails(mocker, settings, test_company):
+def test_send_bulk_enroll_emails(mocker, settings):
     """
     send_bulk_enroll_emails should build messages for each recipient and send them
     """
     patched_mail_api = mocker.patch("ecommerce.mail_api.api")
-
     settings.SITE_BASE_URL = "http://test.com/"
-    email = "a@b.com"
-    payment_version = CouponPaymentVersionFactory.create(company=test_company)
-    product_version = ProductVersionFactory.create()
-    product_coupon = CouponEligibilityFactory.create(
-        coupon__payment=payment_version.payment, product=product_version.product
-    )
 
-    expected_qs = "product={}&code={}".format(
-        product_version.product.id, product_coupon.coupon.coupon_code
+    num_assignments = 2
+    assignments = ProductCouponAssignmentFactory.create_batch(num_assignments)
+    new_company = CompanyFactory.create()
+    new_coupon_payment_versions = CouponPaymentVersionFactory.create_batch(
+        num_assignments,
+        payment=factory.Iterator(
+            [assignment.product_coupon.coupon.payment for assignment in assignments]
+        ),
+        company=factory.Iterator([new_company, None]),
     )
-    expected_context = {
-        "enrollable_title": product_coupon.product.content_object.title,
-        "enrollment_url": "http://test.com/checkout/?{}".format(expected_qs),
-        "company_name": test_company.name if test_company else None,
-    }
+    recipient_product_coupons = [
+        (assignment.email, assignment.product_coupon) for assignment in assignments
+    ]
 
-    send_bulk_enroll_emails([email], [product_coupon])
+    send_bulk_enroll_emails(recipient_product_coupons)
 
     patched_mail_api.build_user_specific_messages.assert_called_once()
     assert (
         patched_mail_api.build_user_specific_messages.call_args[0][0]
         == EMAIL_BULK_ENROLL
     )
-    assert list(patched_mail_api.build_user_specific_messages.call_args[0][1]) == [
-        (email, expected_context)
-    ]
-
-    patched_mail_api.send_messages.assert_called_once_with(
-        patched_mail_api.build_user_specific_messages.return_value
+    recipients_and_contexts_arg = list(
+        patched_mail_api.build_user_specific_messages.call_args[0][1]
     )
+    for i, assignment in enumerate(assignments):
+        assert recipients_and_contexts_arg[i] == (
+            assignment.email,
+            {
+                "enrollable_title": assignment.product_coupon.product.content_object.title,
+                "enrollment_url": "http://test.com/checkout/?product={}&code={}".format(
+                    assignment.product_coupon.product.id,
+                    assignment.product_coupon.coupon.coupon_code,
+                ),
+                "company_name": (
+                    None
+                    if not new_coupon_payment_versions[i].company
+                    else new_coupon_payment_versions[i].company.name
+                ),
+            },
+        )
 
 
 def test_send_course_run_enrollment_email(mocker):
