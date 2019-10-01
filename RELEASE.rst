@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.23.2 (Released October 01, 2019)
+--------------
+
+- Update program serializer (#1155)
+- Optimized bulk enrollment form queries
+- email verification message updated (#1134)
+- ProgramCertificate will not create for standalone course.
+- - Introduce FormErrors for ecommerce coupons
+- change from email for admin notifications
+
 Version 0.23.1 (Released September 26, 2019)
 --------------
 
