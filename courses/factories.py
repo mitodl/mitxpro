@@ -90,6 +90,9 @@ class CourseRunFactory(DjangoModelFactory):
         past_start = factory.Trait(
             start_date=factory.Faker("past_datetime", tzinfo=pytz.utc)
         )
+        past_enrollment_end = factory.Trait(
+            enrollment_end=factory.Faker("past_datetime", tzinfo=pytz.utc)
+        )
 
 
 class CourseRunCertificateFactory(DjangoModelFactory):

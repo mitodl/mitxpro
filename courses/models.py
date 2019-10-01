@@ -166,6 +166,12 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         )
 
     @property
+    def is_catalog_visible(self):
+        """Returns True if this program should be shown on in the catalog"""
+        # NOTE: This is implemented with courses.all() to allow for prefetch_related optimization.
+        return any(course.is_catalog_visible for course in self.courses.all())
+
+    @property
     def current_price(self):
         """Gets the price if it exists"""
         product = self.products.first()
@@ -236,6 +242,21 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
                 and course_run.start_date > now
             ),
             default=None,
+        )
+
+    @property
+    def is_catalog_visible(self):
+        """Returns True if this course should be shown on in the catalog"""
+        now = now_in_utc()
+        # NOTE: This is implemented with courseruns.all() to allow for prefetch_related optimization.
+        return any(
+            course_run
+            for course_run in self.courseruns.all()
+            if course_run.live
+            and (
+                (course_run.start_date and course_run.start_date > now)
+                or (course_run.enrollment_end and course_run.enrollment_end > now)
+            )
         )
 
     @property
