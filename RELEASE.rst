@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.24.0
+--------------
+
+- Changed catalog logic to show courses with past start dates but future enrollment end dates
+- Allow anonymous access to course list and detail API (#1161)
+- Updated several admin classes (course run enrollment, etc)
+- Added bulk assignment CSV download to bulk coupon form
+
 Version 0.23.2 (Released October 01, 2019)
 --------------
 
