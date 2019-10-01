@@ -66,8 +66,15 @@ def test_serialize_program(mock_context, has_product):
         + [CourseRunFactory.create(course=course1) for _ in range(2)]
         + [CourseRunFactory.create(course=course2) for _ in range(2)]
     )
-
+    faculty_names = ["Teacher 1", "Teacher 2"]
     page = ProgramPageFactory.create(program=program)
+    FacultyMembersPageFactory.create(
+        parent=page,
+        **{
+            f"members__{idx}__member__name": name
+            for idx, name in enumerate(faculty_names)
+        },
+    )
     if has_product:
         ProductVersionFactory.create(product__content_object=program)
     data = ProgramSerializer(instance=program, context=mock_context).data
@@ -95,6 +102,7 @@ def test_serialize_program(mock_context, has_product):
                 0
             ].enrollment_start.strftime(datetime_format),
             "url": f"http://localhost{page.get_url()}",
+            "instructors": [{"name": name} for name in faculty_names],
         },
     )
 
@@ -195,7 +203,7 @@ def test_serialize_course_run(has_product):
             "enrollment_end": drf_datetime(course_run.enrollment_end),
             "expiration_date": drf_datetime(course_run.expiration_date),
             "current_price": course_run.current_price,
-            "instructors": [{"name": name} for name in faculty_names],
+            "instructors": course_run.instructors,
             "id": course_run.id,
             "product_id": product_id,
         },

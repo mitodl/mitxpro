@@ -203,6 +203,20 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         """ Gets the readable_id"""
         return self.readable_id
 
+    @property
+    def instructors(self):
+        """Gets a list of instructors from the related program page, or an empty list if none"""
+        if self.page is not None:
+            faculty_page = self.page.faculty
+        else:
+            return []
+
+        return (
+            [{"name": member.value["name"]} for member in faculty_page.members]
+            if faculty_page is not None
+            else []
+        )
+
     def __str__(self):
         return self.title
 
@@ -421,6 +435,20 @@ class CourseRun(TimestampedModel):
     def text_id(self):
         """ Gets the courseware_id"""
         return self.courseware_id
+
+    @property
+    def instructors(self):
+        """List instructors for a course run if they are specified in a related CMS page"""
+        if self.course.page is not None:
+            faculty_page = self.course.page.faculty
+        else:
+            return []
+
+        return (
+            [{"name": member.value["name"]} for member in faculty_page.members]
+            if faculty_page is not None
+            else []
+        )
 
     def __str__(self):
         return self.title

@@ -82,16 +82,7 @@ class CourseRunSerializer(BaseCourseRunSerializer):
 
     def get_instructors(self, instance):
         """Get the list of instructors"""
-        if getattr(instance.course, "coursepage", None) is not None:
-            faculty_page = instance.course.coursepage.faculty
-        else:
-            return []
-
-        return (
-            [{"name": member.value["name"]} for member in faculty_page.members]
-            if faculty_page is not None
-            else []
-        )
+        return instance.instructors
 
     class Meta:
         model = models.CourseRun
@@ -203,6 +194,7 @@ class ProgramSerializer(serializers.ModelSerializer):
     end_date = serializers.SerializerMethodField()
     enrollment_start = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
+    instructors = serializers.SerializerMethodField()
 
     def get_courses(self, instance):
         """Serializer for courses"""
@@ -262,6 +254,10 @@ class ProgramSerializer(serializers.ModelSerializer):
         page = instance.page
         return page.get_full_url() if page else None
 
+    def get_instructors(self, instance):
+        """List all instructors who are a part of any course run within a program"""
+        return instance.instructors
+
     class Meta:
         model = models.Program
         fields = [
@@ -276,6 +272,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             "end_date",
             "enrollment_start",
             "url",
+            "instructors",
         ]
 
 

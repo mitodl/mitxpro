@@ -5,7 +5,11 @@ import factory
 import pytest
 from django.core.exceptions import ValidationError
 
-from cms.factories import CoursePageFactory, ProgramPageFactory
+from cms.factories import (
+    CoursePageFactory,
+    ProgramPageFactory,
+    FacultyMembersPageFactory,
+)
 from courses.factories import (
     CompanyFactory,
     CourseFactory,
@@ -605,3 +609,23 @@ def test_enrollment_is_ended():
 
     assert program_enrollment.is_ended
     assert course_enrollment.is_ended
+
+
+@pytest.mark.parametrize("has_page", [True, False])
+def test_instructors(has_page):
+    """CourseRun.instructors should list instructors from the related CMS page, or provide an empty list"""
+    faculty_names = ["Teacher One", "Teacher Two"]
+    course_run = CourseRunFactory.create()
+    if has_page:
+        course_page = CoursePageFactory.create(course=course_run.course)
+        FacultyMembersPageFactory.create(
+            parent=course_page,
+            **{
+                f"members__{idx}__member__name": name
+                for idx, name in enumerate(faculty_names)
+            },
+        )
+
+    assert course_run.instructors == (
+        [{"name": name} for name in faculty_names] if has_page else []
+    )
