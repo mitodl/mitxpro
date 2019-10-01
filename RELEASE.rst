@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.24.0
+Version 0.24.0 (Released October 01, 2019)
 --------------
 
 - Changed catalog logic to show courses with past start dates but future enrollment end dates
