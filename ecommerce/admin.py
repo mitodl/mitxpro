@@ -49,7 +49,8 @@ class ProductContentTypeListFilter(admin.SimpleListFilter):
         Returns the filtered queryset based on the value provided in the query string and retrievable via
         `self.value()`.
         """
-        return queryset.filter(content_type__model=self.value())
+        qset_filter = {} if not self.value() else {"content_type__model": self.value()}
+        return queryset.filter(**qset_filter)
 
 
 class LineAdmin(admin.ModelAdmin):
