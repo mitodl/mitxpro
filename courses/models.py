@@ -273,9 +273,9 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         """
         return first_matching_item(
             sorted(self.courseruns.all(), key=lambda course_run: course_run.start_date),
-            lambda course_run: course_run.is_unexpired
-            and course_run.live
-            and course_run.start_date,
+            lambda course_run: course_run.live
+            and course_run.start_date
+            and course_run.is_unexpired,
         )
 
     @property
