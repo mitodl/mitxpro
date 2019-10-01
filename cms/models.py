@@ -8,7 +8,6 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.db import models
-from django.db.models import Prefetch
 from django.utils.text import slugify
 from django.http.response import Http404
 from django.shortcuts import reverse
@@ -40,7 +39,7 @@ from cms.constants import (
     SIGNATORY_INDEX_SLUG,
     CERTIFICATE_INDEX_SLUG,
 )
-from cms.utils import sort_and_filter_pages
+from cms.utils import filter_and_sort_catalog_pages
 from mitxpro.views import get_js_settings_context
 
 
@@ -188,35 +187,32 @@ class CatalogPage(Page):
         """
         Populate the context with live programs, courses and programs + courses
         """
-        # Circular import hit when moved to the top of the module
-        from courses.models import CourseRun
-
-        sorted_courserun_qset = CourseRun.objects.order_by("start_date")
-        program_pages = (
+        program_page_qset = (
             ProgramPage.objects.live()
             .filter(program__live=True)
             .order_by("id")
-            .prefetch_related(
-                Prefetch("program__courses__courseruns", queryset=sorted_courserun_qset)
-            )
+            .select_related("program")
+            .prefetch_related("program__courses__courseruns")
         )
-        course_pages = (
+        course_page_qset = (
             CoursePage.objects.live()
             .filter(course__live=True)
             .order_by("id")
-            .prefetch_related(
-                Prefetch("course__courseruns", queryset=sorted_courserun_qset)
-            )
+            .select_related("course")
+            .prefetch_related("course__courseruns")
         )
         featured_product = ProgramPage.objects.filter(
             featured=True, program__live=True
         ) or CoursePage.objects.filter(featured=True, course__live=True)
+        all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
+            program_page_qset, course_page_qset
+        )
         return dict(
             **super().get_context(request),
             **get_js_settings_context(request),
-            all_pages=sort_and_filter_pages(list(program_pages) + list(course_pages)),
-            program_pages=sort_and_filter_pages(program_pages),
-            course_pages=sort_and_filter_pages(course_pages),
+            all_pages=all_pages,
+            program_pages=program_pages,
+            course_pages=course_pages,
             featured_product=featured_product.first(),
             default_image_path=DEFAULT_COURSE_IMG_PATH,
             hubspot_portal_id=settings.HUBSPOT_CONFIG.get("HUBSPOT_PORTAL_ID"),

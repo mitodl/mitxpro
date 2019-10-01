@@ -1,67 +1,78 @@
 """Tests for CMS views"""
 from datetime import timedelta
-
+import factory
 import pytest
 
 from cms.factories import CoursePageFactory, ProgramPageFactory
-from cms.utils import sort_and_filter_pages
-from courses.factories import CourseFactory, CourseRunFactory, ProgramFactory
+from cms.utils import filter_and_sort_catalog_pages
+from courses.factories import CourseRunFactory
 from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
 
 
-def test_sort_and_filter_pages():
+def test_filter_and_sort_catalog_pages():
     """
-    Test that method exclude pages where start_date is not available.
+    Test that filter_and_sort_catalog_pages removes program/course pages that do not have a future start date
+    or enrollment end date, and returns appropriately sorted lists of pages
     """
-    first_program = ProgramFactory(title="first program")
-    second_program = ProgramFactory(title="second program")
-
-    expired_course = CourseFactory.create(title="expired course")
-    CourseRunFactory.create_batch(2, course=expired_course, past_start=True, live=True)
-
     now = now_in_utc()
-    first_course = CourseFactory.create(title="first course", program=first_program)
-    CourseRunFactory.create(
-        course=first_course, start_date=(now + timedelta(hours=1)), live=True
+
+    non_program_run = CourseRunFactory.create(
+        course__no_program=True, start_date=(now + timedelta(hours=1))
+    )
+    first_program_run = CourseRunFactory.create(start_date=(now + timedelta(hours=2)))
+    second_program_run = CourseRunFactory.create(start_date=(now + timedelta(hours=3)))
+    # Create course run with past start_date and future enrollment_end, which should appear in the catalog
+    future_enrollment_end_run = CourseRunFactory.create(
+        past_start=True,
+        enrollment_end=(now + timedelta(days=1)),
+        course__no_program=True,
+    )
+    # Create course run with past start_date and enrollment_end, which should NOT appear in the catalog
+    past_run = CourseRunFactory.create(
+        past_start=True, past_enrollment_end=True, course__no_program=True
+    )
+    all_runs = [
+        past_run,
+        future_enrollment_end_run,
+        second_program_run,
+        first_program_run,
+        non_program_run,
+    ]
+
+    initial_course_pages = CoursePageFactory.create_batch(
+        len(all_runs), course=factory.Iterator(run.course for run in all_runs)
+    )
+    initial_program_pages = ProgramPageFactory.create_batch(
+        2,
+        program=factory.Iterator(
+            run.course.program for run in [second_program_run, first_program_run]
+        ),
     )
 
-    second_course = CourseFactory.create(title="second course", program=second_program)
-    CourseRunFactory.create(
-        course=second_course, start_date=(now + timedelta(hours=2)), live=True
+    all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
+        initial_program_pages, initial_course_pages
     )
 
-    expired_course_page = CoursePageFactory.create(course=expired_course)
-    first_course_page = CoursePageFactory.create(course=first_course)
-    second_course_page = CoursePageFactory.create(course=second_course)
-    first_program_page = ProgramPageFactory.create(program=first_program)
-    second_program_page = ProgramPageFactory.create(program=second_program)
-
-    sorted_pages = sort_and_filter_pages(
-        [
-            expired_course_page,
-            first_course_page,
-            second_course_page,
-            second_program_page,
-            first_program_page,
-        ]
+    # Combined pages and course pages should not include the past course run
+    assert len(all_pages) == (
+        len(initial_program_pages) + len(initial_course_pages) - 1
     )
+    assert len(course_pages) == (len(initial_course_pages) - 1)
+    assert past_run.course not in (page.course for page in course_pages)
 
-    # assert expired_course_pages are filtered out
-    assert expired_course_page not in sorted_pages
-
-    # assert program should appear before course with same start date
-    assert sorted_pages.index(first_program_page) < sorted_pages.index(
-        first_course_page
-    )
-
-    # assert pages are sorted on start_date
-    assert sorted_pages.index(first_course_page) < sorted_pages.index(
-        second_course_page
-    )
-
-    # assert if stat_date is same, pages should be sorted by title.
-    assert sorted_pages.index(first_program_page) < sorted_pages.index(
-        second_program_page
-    )
+    # Pages should be sorted by next run date
+    assert [page.program for page in program_pages] == [
+        first_program_run.course.program,
+        second_program_run.course.program,
+    ]
+    expected_course_run_sort = [
+        future_enrollment_end_run,
+        non_program_run,
+        first_program_run,
+        second_program_run,
+    ]
+    assert [page.course for page in course_pages] == [
+        run.course for run in expected_course_run_sort
+    ]
