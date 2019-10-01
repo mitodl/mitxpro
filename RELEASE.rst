@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.23.2
+Version 0.23.2 (Released October 01, 2019)
 --------------
 
 - Update program serializer (#1155)
