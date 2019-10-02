@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.24.1
+--------------
+
+- performance optimization on catalog page (#1150)
+- Update Forgot Password message
+- MIT xPRO - 1063 Fix redirect issue while creating account
+
 Version 0.24.0 (Released October 01, 2019)
 --------------
 
