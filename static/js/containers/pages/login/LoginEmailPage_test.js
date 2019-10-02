@@ -30,7 +30,7 @@ describe("LoginEmailPage", () => {
       {},
       {
         location: {
-          search: ""
+          search: "?next=/checkout/product=1"
         }
       }
     )
@@ -44,6 +44,16 @@ describe("LoginEmailPage", () => {
     const { inner } = await renderPage()
 
     assert.ok(inner.find("EmailForm").exists())
+  })
+
+  it("next query parameter exists in create account link", async () => {
+    const { inner } = await renderPage()
+
+    assert.ok(
+      inner
+        .find(`Link[to='${routes.register.begin}?next=/checkout/product=1']`)
+        .exists()
+    )
   })
 
   //

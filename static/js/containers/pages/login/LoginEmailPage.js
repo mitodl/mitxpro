@@ -53,6 +53,8 @@ export class LoginEmailPage extends React.Component<Props> {
   }
 
   render() {
+    const link = `${routes.register.begin}${this.props.location.search}`
+
     return (
       <DocumentTitle
         title={`${SETTINGS.site_name} | ${LOGIN_EMAIL_PAGE_TITLE}`}
@@ -66,7 +68,7 @@ export class LoginEmailPage extends React.Component<Props> {
               <EmailForm onSubmit={this.onSubmit.bind(this)}>
                 <React.Fragment>
                   <span>Don't have an account? </span>
-                  <Link to={routes.register.begin} className="link-light-blue">
+                  <Link to={link} className="link-light-blue">
                     Create Account
                   </Link>
                 </React.Fragment>
