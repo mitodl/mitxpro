@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import { assert } from "chai"
 import sinon from "sinon"
 
@@ -11,9 +12,11 @@ import { ALERT_TYPE_TEXT } from "../../../constants"
 
 describe("LoginForgotPasswordPage", () => {
   const email = "email@example.com"
+  const supportEmail = "email@localhost"
   let helper, renderPage, setSubmittingStub
 
   beforeEach(() => {
+    SETTINGS.support_email = supportEmail
     helper = new IntegrationTestHelper()
 
     setSubmittingStub = helper.sandbox.stub()
@@ -62,20 +65,33 @@ describe("LoginForgotPasswordPage", () => {
 
     assert.lengthOf(helper.browserHistory, 2)
     assert.include(helper.browserHistory.location, {
-      pathname: routes.login.begin,
+      pathname: routes.root,
       search:   ""
     })
     sinon.assert.calledWith(setSubmittingStub, false)
+  })
 
-    const { ui } = store.getState()
+  it("after submit it remains on the forgot password page", async () => {
+    const { inner } = await renderPage()
+    const onSubmit = inner.find("EmailForm").prop("onSubmit")
+    await onSubmit({ email }, { setSubmitting: setSubmittingStub })
+    assert.isNotTrue(inner.find("EmailForm").exists())
+  })
 
-    assert.deepEqual(ui.userNotifications, {
-      "forgot-password-sent": {
-        type:  ALERT_TYPE_TEXT,
-        props: {
-          text: `If an account with the email "${email}" exists, an email has been sent with a password reset link.`
-        }
-      }
-    })
+  it("contains the customer support link", async () => {
+    const { inner } = await renderPage()
+    const onSubmit = inner.find("EmailForm").prop("onSubmit")
+    await onSubmit({ email }, { setSubmitting: setSubmittingStub })
+    assert.equal(
+      inner.find(".contact-support > a").prop("href"),
+      `mailto:${supportEmail}`
+    )
+  })
+
+  it("contains the reset your password link", async () => {
+    const { inner } = await renderPage()
+    const onSubmit = inner.find("EmailForm").prop("onSubmit")
+    await onSubmit({ email }, { setSubmitting: setSubmittingStub })
+    assert.equal(inner.find("li > Link").prop("to"), routes.login.forgot.begin)
   })
 })
