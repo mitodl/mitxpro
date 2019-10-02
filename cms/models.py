@@ -191,19 +191,23 @@ class CatalogPage(Page):
             ProgramPage.objects.live()
             .filter(program__live=True)
             .order_by("id")
-            .select_related("program")
+            .select_related("program", "thumbnail_image")
             .prefetch_related("program__courses__courseruns")
         )
         course_page_qset = (
             CoursePage.objects.live()
             .filter(course__live=True)
             .order_by("id")
-            .select_related("course")
+            .select_related("course", "thumbnail_image")
             .prefetch_related("course__courseruns")
         )
         featured_product = ProgramPage.objects.filter(
             featured=True, program__live=True
-        ) or CoursePage.objects.filter(featured=True, course__live=True)
+        ).select_related("program").prefetch_related(
+            "program__courses__courseruns"
+        ) or CoursePage.objects.filter(
+            featured=True, course__live=True
+        )
         all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
             program_page_qset, course_page_qset
         )
@@ -629,7 +633,7 @@ class ProgramPage(ProductPage):
         Gets a list of pages (CoursePage) of all the courses associated with this program
         """
         courses = self.program.courses.all()
-        return CoursePage.objects.filter(course_id__in=courses)
+        return CoursePage.objects.filter(course_id__in=courses).select_related("course")
 
     @property
     def course_lineup(self):

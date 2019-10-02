@@ -266,10 +266,16 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 
         Returns:
             CourseRun or None: An unexpired course run
+
+        # NOTE: This is implemented with sorted() and courseruns.all() to allow for prefetch_related
+        #   optimization. You can get the desired course_run with a filter, but
+        #   that would run a new query even if prefetch_related was used.
         """
         return first_matching_item(
-            self.courseruns.filter(live=True).order_by("start_date"),
-            lambda course_run: course_run.is_unexpired,
+            sorted(self.courseruns.all(), key=lambda course_run: course_run.start_date),
+            lambda course_run: course_run.live
+            and course_run.start_date
+            and course_run.is_unexpired,
         )
 
     @property
