@@ -1,10 +1,13 @@
 """User app utility functions"""
-import re
 import logging
+import re
 
+from requests.exceptions import HTTPError
+
+from django.contrib.auth import get_user_model
 from users.constants import USERNAME_MAX_LEN
 
-
+User = get_user_model()
 log = logging.getLogger(__name__)
 
 USERNAME_SEPARATOR = "-"
@@ -81,3 +84,40 @@ def is_duplicate_username_error(exc):
         bool: Whether or not the exception indicates a duplicate username error
     """
     return re.search(r"\(username\)=\([^\s]+\) already exists", str(exc)) is not None
+
+
+def ensure_active_user(user):
+    """
+    Activates the user (if required) and generates Open edX credentials and corresponding user if
+    necessary
+
+    Args:
+        user (users.models.User): The user to activate/verify as functional
+    """
+    from courseware.api import repair_faulty_edx_user  # circular import issues
+
+    if not user.is_active:
+        user.is_active = True
+        user.save()
+        log.info("User %s activated", user.email)
+
+    # Check if the user is properly onboard with edX (has proper auth credentials)
+    # and try to repair if necessary
+    if User.faulty_courseware_users.filter(pk=user.id).exists():
+        try:
+            created_user, created_auth_token = repair_faulty_edx_user(user)
+            if created_user:
+                log.info("Created edX user for %s", user.email)
+            if created_auth_token:
+                log.info("Created edX auth token for %s", user.email)
+        except HTTPError as exc:
+            log.error(
+                "%s (%s): Failed to repair: %s",
+                user.username,
+                user.email,
+                exc.response.json(),
+            )
+        except Exception as exc:  # pylint: disable=broad-except
+            log.error(
+                "%s (%s): Failed to repair: %s", user.username, user.email, str(exc)
+            )
