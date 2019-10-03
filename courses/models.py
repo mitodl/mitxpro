@@ -304,6 +304,20 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             )
         )
 
+    @property
+    def instructors(self):
+        """Return a list of instructors from the related CMS page, or an empty list if there is no page"""
+        if self.page is not None:
+            faculty_page = self.page.faculty
+        else:
+            return []
+
+        return (
+            [{"name": member.value["name"]} for member in faculty_page.members]
+            if faculty_page is not None
+            else []
+        )
+
     def available_runs(self, user):
         """
         Get all enrollable runs for a Course that a user has not already enrolled in.
@@ -439,16 +453,7 @@ class CourseRun(TimestampedModel):
     @property
     def instructors(self):
         """List instructors for a course run if they are specified in a related CMS page"""
-        if self.course.page is not None:
-            faculty_page = self.course.page.faculty
-        else:
-            return []
-
-        return (
-            [{"name": member.value["name"]} for member in faculty_page.members]
-            if faculty_page is not None
-            else []
-        )
+        return self.course.instructors
 
     def __str__(self):
         return self.title
