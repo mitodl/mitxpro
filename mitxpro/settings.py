@@ -135,6 +135,7 @@ INSTALLED_APPS = (
     "cms",
     "compliance",
     "courseware",
+    "sheets",
     # must be after "users" to pick up custom user model
     "compat",
     "hijack",
@@ -875,8 +876,9 @@ HUBSPOT_ID_PREFIX = get_string(
     "HUBSPOT_ID_PREFIX", "xpronew", description="Hub spot id prefix."
 )
 
-
 WAGTAILEMBEDS_FINDERS = [
     {"class": "cms.embeds.YouTubeEmbedFinder"},
     {"class": "wagtail.embeds.finders.oembed"},
 ]
+
+COUPON_GENERATION_SHEET_ID = "10yNFvLimDm1Gm9yuZSUQo0Wae1Dnp75jaDac8y2EbZY"
