@@ -362,6 +362,16 @@ describe("CheckoutPage", () => {
     assert.equal(inner.find(".checkout-page").text(), "No item in basket")
   })
 
+  it("displays loader", async () => {
+    basket.items = []
+    const { inner } = await renderPage()
+    inner.setState({ isLoading: true })
+    assert.equal(
+      inner.find(".checkout-page").text(),
+      "One moment while we prepare checkout"
+    )
+  })
+
   describe("calcSelectedRunIds", () => {
     it("calculates selected run ids from a basket item", () => {
       const item = basket.items[0]
