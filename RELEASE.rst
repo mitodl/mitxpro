@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.24.1
+Version 0.24.1 (Released October 03, 2019)
 --------------
 
 - performance optimization on catalog page (#1150)
