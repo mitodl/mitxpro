@@ -49,7 +49,7 @@ class UserAdmin(ContribUserAdmin, HijackUserAdminMixin):
     """Admin views for user"""
 
     fieldsets = (
-        (None, {"fields": ("username", "password")}),
+        (None, {"fields": ("username", "password", "last_login", "created_on")}),
         (_("Personal Info"), {"fields": ("name", "email")}),
         (
             _("Permissions"),
@@ -65,11 +65,19 @@ class UserAdmin(ContribUserAdmin, HijackUserAdminMixin):
             },
         ),
     )
-    list_display = ("username", "email", "name", "is_staff", "hijack_field")
+    list_display = (
+        "username",
+        "email",
+        "name",
+        "is_staff",
+        "hijack_field",
+        "last_login",
+        "created_on",
+    )
     list_filter = ("is_staff", "is_superuser", "is_active", "groups")
     search_fields = ("username", "name", "email")
     ordering = ("email",)
-    readonly_fields = ("username",)
+    readonly_fields = ("username", "last_login", "created_on")
     inlines = [UserLegalAddressInline, UserProfileInline]
 
 
