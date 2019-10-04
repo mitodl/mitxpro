@@ -1,7 +1,8 @@
 """User utils tests"""
-import pytest
+from unittest.mock import patch
 
-from users.utils import usernameify, is_duplicate_username_error
+import pytest
+from users.utils import ensure_active_user, is_duplicate_username_error, usernameify
 
 
 @pytest.mark.parametrize(
@@ -48,3 +49,18 @@ def test_is_duplicate_username_error(exception_text, expected_value):
     is_duplicate_username_error should return True if the exception text provided indicates a duplicate username error
     """
     assert is_duplicate_username_error(exception_text) is expected_value
+
+
+@patch("courseware.api.repair_faulty_edx_user", return_value=(None, None))
+def test_ensure_active_user(mock_repair_faulty_edx_user, user):
+    """
+    Test that ensure_active_user activates and tries to repair courseware user record
+    """
+    user.is_active = False
+    user.save()
+
+    assert not user.is_active
+
+    ensure_active_user(user)
+    mock_repair_faulty_edx_user.assert_called_once_with(user)
+    assert user.is_active
