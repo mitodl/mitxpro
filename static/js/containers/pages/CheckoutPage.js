@@ -38,7 +38,8 @@ type Props = {
 }
 type State = {
   appliedInitialCoupon: boolean,
-  errors: string | Object | null
+  errors: string | Object | null,
+  isLoading: boolean
 }
 
 export const calcSelectedRunIds = (
@@ -84,7 +85,8 @@ export const calcSelectedRunIds = (
 export class CheckoutPage extends React.Component<Props, State> {
   state = {
     appliedInitialCoupon: false,
-    errors:               null
+    errors:               null,
+    isLoading:            true
   }
 
   getQueryParams = () => {
@@ -104,19 +106,21 @@ export class CheckoutPage extends React.Component<Props, State> {
     const { productId } = this.getQueryParams()
     if (!productId) {
       await fetchBasket()
-      return
-    }
-
-    const basketResponse = await updateBasket({
-      items: [{ product_id: productId }]
-    })
-    if (basketResponse.status !== 200) {
-      if (basketResponse.body.errors) {
-        this.setState({
-          errors: basketResponse.body.errors
-        })
+    } else {
+      const basketResponse = await updateBasket({
+        items: [{ product_id: productId }]
+      })
+      if (basketResponse.status !== 200) {
+        if (basketResponse.body.errors) {
+          this.setState({
+            errors: basketResponse.body.errors
+          })
+        }
       }
     }
+    this.setState({
+      isLoading: false
+    })
   }
 
   submit = async (values: Values, actions: Actions) => {
@@ -202,16 +206,28 @@ export class CheckoutPage extends React.Component<Props, State> {
 
   render() {
     const { basket, requestPending } = this.props
-    const { errors } = this.state
+    const { errors, isLoading } = this.state
 
     const item = basket && basket.items[0]
     if (!basket || !item) {
       return (
         <DocumentTitle title={`${SETTINGS.site_name} | ${CHECKOUT_PAGE_TITLE}`}>
-          <div className="checkout-page">
-            No item in basket
-            {formatErrors(errors)}
-          </div>
+          {!isLoading ? (
+            <div className="checkout-page">
+              No item in basket
+              {formatErrors(errors)}
+            </div>
+          ) : (
+            <div className="checkout-page  checkout-loader text-center align-self-center">
+              <div className="loader-area">
+                <img
+                  src="/static/images/loader.gif"
+                  className="mx-auto d-block"
+                />
+                One moment while we prepare checkout
+              </div>
+            </div>
+          )}
         </DocumentTitle>
       )
     }
