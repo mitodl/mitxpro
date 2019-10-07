@@ -151,7 +151,7 @@ export type ProductDetail = Product & {
 
 export type ProductMap = {
   [PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM]: {
-    [string]: [BaseCourseRun | Program]
+    (string): [BaseCourseRun | Program]
   }
 }
 

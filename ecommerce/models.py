@@ -337,7 +337,7 @@ class CouponPaymentQueryset(models.QuerySet):  # pylint: disable=missing-docstri
                 queryset=CouponPaymentVersion.objects.order_by("-created_on"),
                 to_attr=ORDERED_VERSIONS_QSET_ATTR,
             )
-        )
+        ).order_by("name")
 
 
 class CouponPaymentManager(models.Manager):  # pylint: disable=missing-docstring
