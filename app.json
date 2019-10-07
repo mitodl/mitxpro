@@ -409,6 +409,14 @@
     "VOUCHER_INTERNATIONAL_EMPLOYEE_KEY": {
       "description": null,
       "required": false
+    },
+    "ZENDESK_HELP_WIDGET_ENABLED": {
+      "description": "Enabled/disable state for Zendesk web help widget.",
+      "required": false
+    },
+    "ZENDESK_HELP_WIDGET_KEY": {
+      "description": "Represents the key for Zendesk web help widget.",
+      "required": false
     }
   },
   "keywords": [
