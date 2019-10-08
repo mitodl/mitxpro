@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.24.2 (Released October 08, 2019)
+--------------
+
+- Fixed Product admin
+- Fixing verification rendering
+
 Version 0.24.1 (Released October 03, 2019)
 --------------
 
