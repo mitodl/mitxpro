@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.24.2
+Version 0.24.2 (Released October 08, 2019)
 --------------
 
 - Fixed Product admin
