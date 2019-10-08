@@ -38,7 +38,8 @@
                         "price": 321
                     }
                 }
-            ]
+            ],
+            "topics": [{"name": "demonstration"}]
         },
         {
             "program": "Systems Engineering",
@@ -59,7 +60,8 @@
                         "price": 846
                     }
                 }
-            ]
+            ],
+            "topics": [{"name": "systems engineering"}]
         },
         {
             "program": "Systems Engineering",
@@ -80,7 +82,8 @@
                         "price": 848
                     }
                 }
-            ]
+            ],
+            "topics": [{"name": "systems engineering"}]
         },
         {
             "program": "Systems Engineering",
@@ -101,7 +104,8 @@
                         "price": 849
                     }
                 }
-            ]
+            ],
+            "topics": [{"name": "architecture"}, {"name": "systems engineering"}]
         },
         {
             "program": "Systems Engineering",
@@ -123,7 +127,8 @@
                         "price": 847
                     }
                 }
-            ]
+            ],
+            "topics": [{"name": "systems engineering"}, {"name": "quantitative"}]
         },
         {
             "program": "Digital Learning",
@@ -161,7 +166,8 @@
                     "start_date": "2015-08-15T00:00:00+00:00",
                     "enrollment_end": "2015-08-29T00:00:00+00:00"
                 }
-            ]
+            ],
+            "topics": [{"name": "digital"}]
         },
         {
             "program": "Digital Learning",
@@ -192,7 +198,8 @@
                     "start_date": "2015-08-15T00:00:00+00:00",
                     "enrollment_end": "2015-08-29T00:00:00+00:00"
                 }
-            ]
+            ],
+            "topics": [{"name": "digital"}]
         },
         {
             "program": "Digital Learning",
@@ -226,7 +233,8 @@
                     "start_date": "2015-08-15T00:00:00+00:00",
                     "enrollment_end": "2015-08-29T00:00:00+00:00"
                 }
-            ]
+            ],
+            "topics": [{"name": "digital"}]
         },
         {
             "program": "Analog Learning",
@@ -260,7 +268,8 @@
                     "start_date": "2015-08-15T00:00:00+00:00",
                     "enrollment_end": "2015-08-29T00:00:00+00:00"
                 }
-            ]
+            ],
+            "topics": [{"name": "analog"}]
         },
         {
             "program": "Analog Learning",
@@ -294,7 +303,8 @@
                     "start_date": "2015-08-15T00:00:00+00:00",
                     "enrollment_end": "2015-08-29T00:00:00+00:00"
                 }
-            ]
+            ],
+            "topics": [{"name": "analog"}]
         },
         {
             "program": "Analog Learning",
@@ -331,7 +341,8 @@
                     "start_date": "2015-08-15T00:00:00+00:00",
                     "enrollment_end": "2015-08-29T00:00:00+00:00"
                 }
-            ]
+            ],
+            "topics": [{"name": "analog"}]
         },
         {
             "title": "Introduction to Quantum Computing",
@@ -348,7 +359,8 @@
                     "start_date": "2019-08-15T00:00:00+00:00",
                     "enrollment_end": "2019-08-29T00:00:00+00:00"
                 }
-            ]
+            ],
+            "topics": [{"name": "computing"}, {"name": "quantum computing"}]
         },
         {
             "title": "Introduction to Not-Live Courses",
@@ -365,7 +377,8 @@
                     "start_date": "2019-08-15T00:00:00+00:00",
                     "enrollment_end": "2019-08-29T00:00:00+00:00"
                 }
-            ]
+            ],
+            "topics": [{"name": "dead courses"}]
         }
     ],
     "resource_pages": [

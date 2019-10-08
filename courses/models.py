@@ -221,6 +221,17 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         return self.title
 
 
+class CourseTopic(TimestampedModel):
+    """
+    Topics for all courses (e.g. "History")
+    """
+
+    name = models.CharField(max_length=128, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     """Model for a course"""
 
@@ -234,6 +245,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         max_length=255, unique=True, validators=[validate_url_path_field]
     )
     live = models.BooleanField(default=False)
+    topics = models.ManyToManyField(CourseTopic, blank=True)
 
     @property
     def page(self):
