@@ -204,6 +204,7 @@ class ProgramSerializer(serializers.ModelSerializer):
     enrollment_start = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
     instructors = serializers.SerializerMethodField()
+    topics = serializers.SerializerMethodField()
 
     def get_courses(self, instance):
         """Serializer for courses"""
@@ -267,6 +268,15 @@ class ProgramSerializer(serializers.ModelSerializer):
         """List all instructors who are a part of any course run within a program"""
         return instance.instructors
 
+    def get_topics(self, instance):
+        """List all topics in all courses in the program"""
+        topics = (
+            models.CourseTopic.objects.filter(course__program=instance)
+            .values("name")
+            .distinct("name")
+        )
+        return list(topics)
+
     class Meta:
         model = models.Program
         fields = [
@@ -282,6 +292,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             "enrollment_start",
             "url",
             "instructors",
+            "topics",
         ]
 
 
