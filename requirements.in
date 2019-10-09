@@ -30,6 +30,7 @@ social-auth-app-django==3.1.0
 ulid-py
 ua-parser==0.8.0
 user-agents==2.0
+user-util==0.1.5
 uwsgi
 wagtail==2.5.1
 wagtail-metadata==2.0.1
