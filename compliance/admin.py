@@ -27,9 +27,9 @@ class ExportsInquiryLogAdmin(admin.ModelAdmin):
         eligible_objects = queryset.exclude(
             computed_result__in=[RESULT_MANUALLY_APPROVED, RESULT_SUCCESS]
         )
-        eligible_objects.update(computed_result=RESULT_MANUALLY_APPROVED)
         for obj in eligible_objects:
             ensure_active_user(obj.user)
+        eligible_objects.update(computed_result=RESULT_MANUALLY_APPROVED)
 
     manually_approve_inquiry.short_description = "Manually approve selected records"
 
