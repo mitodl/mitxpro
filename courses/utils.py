@@ -39,7 +39,7 @@ def ensure_course_run_grade(user, course_run, edx_grade, should_update=False):
             if (
                 not created
                 and not run_grade.set_by_admin
-                and not has_equal_properties(run_grade, edx_grade)
+                and not has_equal_properties(run_grade, grade_properties)
             ):
                 # Perform actual update now.
                 run_grade.grade = edx_grade.percent
