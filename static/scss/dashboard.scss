@@ -173,6 +173,10 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+
+    .program-course {
+      overflow: hidden;
+    }
   }
 
   .collapse-toggle {
