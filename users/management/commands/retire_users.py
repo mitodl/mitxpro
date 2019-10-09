@@ -2,6 +2,7 @@
 Retire user(s) from MIT xPRO
 """
 from argparse import RawTextHelpFormatter
+from urllib.parse import urlparse
 
 from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
@@ -10,10 +11,14 @@ from social_django.models import UserSocialAuth
 
 from user_util import user_util
 
+from mitxpro import settings
+
 User = get_user_model()
 
 RETIRED_USER_SALTS = ["mitxpro-retired-email"]
-RETIRED_EMAIL_FMT = "retired_email_{}@retired.mit.edu"
+RETIRED_EMAIL_FMT = "retired_email_{}@retired." + "{}".format(
+    urlparse(settings.SITE_BASE_URL).netloc
+)
 
 
 class Command(BaseCommand):
