@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.25.1
+Version 0.25.1 (Released October 10, 2019)
 --------------
 
 - #1205 certificate button 404 fix
