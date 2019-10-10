@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.25.0 (Released October 10, 2019)
+--------------
+
+- add product as raw_id_field in product version admin page
+- add loading indicator on checkout page
+- Add instructors to programs API (#1177)
+- #978 Admin interface for export compliance result
+- - Display account created date and last login date on user admin page
+
 Version 0.24.2 (Released October 08, 2019)
 --------------
 
