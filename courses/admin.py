@@ -35,8 +35,8 @@ class CourseAdmin(admin.ModelAdmin):
     """Admin for Course"""
 
     model = Course
-    search_fields = ["title"]
-    list_filter = ["live", "program"]
+    search_fields = ["title", "topics__name"]
+    list_filter = ["live", "program", "topics__name"]
 
 
 class CourseRunAdmin(admin.ModelAdmin):
