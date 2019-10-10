@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.25.1
+--------------
+
+- #1205 certificate button 404 fix
+- #1203 Exports inquiry admin action fix
+- retire user management command (#1158)
+- fix catalog page for IE11
+- #1200 Course certificate generation task fix
+
 Version 0.25.0 (Released October 10, 2019)
 --------------
 
