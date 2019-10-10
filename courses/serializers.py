@@ -303,6 +303,14 @@ class CourseRunEnrollmentSerializer(serializers.ModelSerializer):
         """
         Resolve a certificate for this enrollment if it exists
         """
+        # No need to include a certificate if there is no corresponding wagtail page
+        # to support the render
+        if (
+            not enrollment.run.course.page
+            or not enrollment.run.course.page.certificate_page
+        ):
+            return None
+
         # Using IDs because we don't need the actual record and this avoids redundant queries
         user_id = enrollment.user_id
         course_run_id = enrollment.run_id
@@ -332,6 +340,11 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
         """
         Resolve a certificate for this enrollment if it exists
         """
+        # No need to include a certificate if there is no corresponding wagtail page
+        # to support the render
+        if not enrollment.program.page or not enrollment.program.page.certificate_page:
+            return None
+
         # Using IDs because we don't need the actual record and this avoids redundant queries
         user_id = enrollment.user_id
         program_id = enrollment.program_id
