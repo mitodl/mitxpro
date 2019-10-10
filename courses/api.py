@@ -30,6 +30,7 @@ def get_user_enrollments(user):
     program_enrollments = (
         ProgramEnrollment.objects.select_related("program__programpage")
         .prefetch_related("program__courses")
+        .select_related("user", "company")
         .filter(user=user)
         .all()
     )
@@ -41,7 +42,7 @@ def get_user_enrollments(user):
     )
     program_course_ids = set(course.id for course in program_courses)
     course_run_enrollments = (
-        CourseRunEnrollment.objects.select_related("run__course__coursepage")
+        CourseRunEnrollment.objects.select_related("run__course__coursepage", "company")
         .filter(user=user)
         .order_by("run__start_date")
         .all()
