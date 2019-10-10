@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.25.0
+Version 0.25.0 (Released October 10, 2019)
 --------------
 
 - add product as raw_id_field in product version admin page
