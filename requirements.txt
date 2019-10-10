@@ -50,6 +50,7 @@ google-api-python-client==1.7.11
 google-auth-httplib2==0.0.3
 google-auth-oauthlib==0.4.0
 google-auth==1.6.3        # via google-api-python-client, google-auth-httplib2, google-auth-oauthlib
+gspread==3.1.0
 html5lib==0.999999999     # via wagtail
 httplib2==0.14.0          # via google-api-python-client, google-auth-httplib2
 idna==2.8                 # via requests

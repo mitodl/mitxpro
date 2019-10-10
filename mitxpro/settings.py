@@ -881,4 +881,9 @@ WAGTAILEMBEDS_FINDERS = [
     {"class": "wagtail.embeds.finders.oembed"},
 ]
 
-COUPON_GENERATION_SHEET_ID = "10yNFvLimDm1Gm9yuZSUQo0Wae1Dnp75jaDac8y2EbZY"
+# Sheets settings
+BASE_DRIVE_FOLDER_ID = get_string("BASE_DRIVE_FOLDER_ID", None)
+SHEETS_OUTPUT_FOLDER_ID = get_string("SHEETS_OUTPUT_FOLDER_ID", None)
+COUPON_GENERATION_SHEET_ID = get_string("COUPON_GENERATION_SHEET_ID", None)
+_sheets_admin_email_str = get_string("SHEETS_ADMIN_EMAILS", None)
+SHEETS_ADMIN_EMAILS = None if not _sheets_admin_email_str else _sheets_admin_email_str.split(",")
