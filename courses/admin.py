@@ -17,6 +17,7 @@ from .models import (
     CourseRunGrade,
     CourseRunGradeAudit,
     CourseRunCertificate,
+    CourseTopic,
     ProgramCertificate,
 )
 
@@ -34,8 +35,8 @@ class CourseAdmin(admin.ModelAdmin):
     """Admin for Course"""
 
     model = Course
-    search_fields = ["title"]
-    list_filter = ["live", "program"]
+    search_fields = ["title", "topics__name"]
+    list_filter = ["live", "program", "topics"]
 
 
 class CourseRunAdmin(admin.ModelAdmin):
@@ -230,6 +231,12 @@ class ProgramCertificateAdmin(admin.ModelAdmin):
         return self.model.objects.get_queryset().select_related("user", "program")
 
 
+class CourseTopicAdmin(admin.ModelAdmin):
+    """Admin for CourseTopic"""
+
+    model = CourseTopic
+
+
 admin.site.register(Program, ProgramAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(CourseRun, CourseRunAdmin)
@@ -241,3 +248,4 @@ admin.site.register(CourseRunGrade, CourseRunGradeAdmin)
 admin.site.register(CourseRunGradeAudit, CourseRunGradeAuditAdmin)
 admin.site.register(CourseRunCertificate, CourseRunCertificateAdmin)
 admin.site.register(ProgramCertificate, ProgramCertificateAdmin)
+admin.site.register(CourseTopic, CourseTopicAdmin)

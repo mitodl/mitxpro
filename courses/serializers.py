@@ -100,6 +100,7 @@ class CourseSerializer(serializers.ModelSerializer):
     description = serializers.SerializerMethodField()
     courseruns = serializers.SerializerMethodField()
     next_run_id = serializers.SerializerMethodField()
+    topics = serializers.SerializerMethodField()
 
     def get_thumbnail_url(self, instance):
         """Thumbnail URL"""
@@ -131,6 +132,13 @@ class CourseSerializer(serializers.ModelSerializer):
             for run in active_runs
         ]
 
+    def get_topics(self, instance):
+        """List topics of a course"""
+        return sorted(
+            [{"name": topic.name} for topic in instance.topics.all()],
+            key=lambda topic: topic["name"],
+        )
+
     class Meta:
         model = models.Course
         fields = [
@@ -141,6 +149,7 @@ class CourseSerializer(serializers.ModelSerializer):
             "readable_id",
             "courseruns",
             "next_run_id",
+            "topics",
         ]
 
 

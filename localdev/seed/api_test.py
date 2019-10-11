@@ -3,7 +3,7 @@
 from types import SimpleNamespace
 import pytest
 
-from courses.models import Program, Course, CourseRun
+from courses.models import Program, Course, CourseRun, CourseTopic
 from cms.models import ProgramPage, CoursePage, ResourcePage
 from ecommerce.models import Product, ProductVersion
 from ecommerce.test_utils import unprotect_version_tables
@@ -80,3 +80,28 @@ def test_seed_and_unseed_data(seeded):
     assert ResourcePage.objects.count() == 0
     assert Product.objects.count() == 0
     assert ProductVersion.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_topics(seeded):
+    """Tests that the seed data functions can deserialize topics"""
+    for course_data in seeded.raw_data["courses"]:
+        course = Course.objects.get(readable_id=course_data["readable_id"])
+        topics = [
+            {"name": topic.name} for topic in CourseTopic.objects.filter(course=course)
+        ]
+
+        def name_key(topic):
+            """Helper function to get a name for sorting purporses"""
+            return topic["name"]
+
+        assert sorted(topics, key=name_key) == sorted(
+            course_data["topics"], key=name_key
+        )
+
+    before_count = CourseTopic.objects.count()
+
+    with unprotect_version_tables():
+        seeded.loader.delete_seed_data(seeded.raw_data)
+    # unseeding will not cause topics to be deleted since they could be referenced by other courses
+    assert CourseTopic.objects.count() == before_count

@@ -14,6 +14,7 @@ from courses.models import (
     CourseRun,
     CourseRunEnrollment,
     CourseRunEnrollmentAudit,
+    CourseTopic,
     ProgramEnrollment,
     ProgramEnrollmentAudit,
 )
@@ -75,6 +76,9 @@ from ecommerce.models import (
 #         {
 #             ...ResourcePage properties...
 #         }
+#     ],
+#     "topics": [
+#         {"name": "cars"}
 #     ]
 # }
 
@@ -251,6 +255,9 @@ class SeedDataLoader:
             # Use the seed-adjusted value for the property that we're using to identify seeded objects
             field_name: seeded_value,
         }
+        topics = None
+        if model_cls == Course and "topics" in model_object_data:
+            topics = model_object_data.pop("topics")
         existing_qset = self._get_existing_seeded_qset(model_cls, data)
         if existing_qset.exists():
             existing_qset.update(**model_object_data)
@@ -261,6 +268,12 @@ class SeedDataLoader:
             serialized.is_valid(raise_exception=True)
             courseware_obj = serialized.save()
             self.seed_result.add_created(courseware_obj)
+        if topics is not None:
+            topic_objs = [
+                CourseTopic.objects.get_or_create(name=topic["name"])[0]
+                for topic in topics
+            ]
+            courseware_obj.topics.set(topic_objs)
         return courseware_obj
 
     def _deserialize_product(self, courseware_obj, product_data):

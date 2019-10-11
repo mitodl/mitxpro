@@ -20,6 +20,7 @@ from courses.factories import (
     CourseRunEnrollmentFactory,
     ProgramEnrollmentFactory,
 )
+from courses.models import CourseTopic
 from courses.serializers import (
     ProgramSerializer,
     CourseSerializer,
@@ -134,6 +135,8 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
     user = mock_context["request"].user
     course_run = CourseRunFactory.create(course__no_program=True, live=True)
     course = course_run.course
+    topic = "a course topic"
+    course.topics.set([CourseTopic.objects.create(name=topic)])
 
     # Create expired, enrollment_ended, future, and enrolled course runs
     CourseRunFactory.create(course=course, end_date=now - timedelta(1), live=True)
@@ -166,6 +169,7 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
         ],
         "thumbnail_url": f"http://localhost:8053{page.thumbnail_image.file.url}",
         "next_run_id": course.first_unexpired_run.id,
+        "topics": [{"name": topic}],
     }
 
 
