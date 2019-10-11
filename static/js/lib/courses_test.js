@@ -8,7 +8,7 @@ import {
   makeCourseRunEnrollment,
   makeProgramEnrollment
 } from "../factories/course"
-import { formatPrettyDate } from "./util"
+import { formatPrettyDate, formatPrettyDateTimeAmPm } from "./util"
 
 describe("courses API function", () => {
   describe("programDateRange", () => {
@@ -51,7 +51,7 @@ describe("courses API function", () => {
     it("returns a summary if the start date is in the future", () => {
       courseRunEnrollment.run.start_date = future.toISOString()
       assert.deepEqual(coursesApi.getDateSummary(courseRunEnrollment), {
-        text:       `Starts: ${formatPrettyDate(future)}`,
+        text:       `Starts: ${formatPrettyDateTimeAmPm(future)}`,
         inProgress: false
       })
     })
@@ -60,7 +60,7 @@ describe("courses API function", () => {
       courseRunEnrollment.run.start_date = past.toISOString()
       courseRunEnrollment.run.end_date = future.toISOString()
       assert.deepEqual(coursesApi.getDateSummary(courseRunEnrollment), {
-        text:       `Ends: ${formatPrettyDate(future)}`,
+        text:       `Ends: ${formatPrettyDateTimeAmPm(future)}`,
         inProgress: true
       })
     })

@@ -3,6 +3,7 @@ import moment from "moment"
 
 import {
   formatPrettyDate,
+  formatPrettyDateTimeAmPm,
   firstItem,
   secondItem,
   parseDateString,
@@ -28,7 +29,7 @@ export const getDateSummary = (
   const startDate = parseDateString(courseRunEnrollment.run.start_date)
   if (startDate && startDate.isAfter(now)) {
     return {
-      text:       `Starts: ${formatPrettyDate(startDate)}`,
+      text:       `Starts: ${formatPrettyDateTimeAmPm(startDate)}`,
       inProgress: false
     }
   }
@@ -45,7 +46,7 @@ export const getDateSummary = (
   if (endDate) {
     if (endDate.isAfter(now)) {
       return {
-        text:       `Ends: ${formatPrettyDate(endDate)}`,
+        text:       `Ends: ${formatPrettyDateTimeAmPm(endDate)}`,
         inProgress: true
       }
     } else {

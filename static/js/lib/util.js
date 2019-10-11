@@ -145,6 +145,9 @@ export const assertRaises = async (
 export const formatPrettyDate = (momentDate: Moment) =>
   momentDate.format("MMMM D, YYYY")
 
+export const formatPrettyDateTimeAmPm = (momentDate: Moment) =>
+  momentDate.format("LLL")
+
 export const firstItem = R.view(R.lensIndex(0))
 
 export const secondItem = R.view(R.lensIndex(1))
