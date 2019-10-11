@@ -83,6 +83,13 @@ In xPro:
     http://edx.odl.local:18000/auth/complete/mitxpro-oauth2/
     http://host.docker.internal:18000/auth/complete/mitxpro-oauth2/
     ```
+    - _[Linux users]_ You will need redirect uris for both the local edX host alias and for the gateway IP of the docker-compose networking setup for xPro as found via `docker network inspect mitxpro_default`
+    ```shell
+    http://edx.odl.local:18000/auth/complete/mitxpro-oauth2/
+    http://<GATEWAY_IP>:18000/auth/complete/mitxpro-oauth2/
+    # `GATEWAY_IP` should be something like `172.19.0.1`.
+    ```
+
   - `Client type`: "Confidential"
   - `Authorization grant type`: "Authorization code"
   - `Skip authorization`: checked

@@ -99,9 +99,42 @@ would in a Django shell.
 
 ### Running tests
 
-Unlike our other web applications this project is not using tox. To run tests locally, run this command instead:
+#### NOTE: These commands can be run with ```docker-compose exec``` to execute them in an already-running container, or with ```docker-compose run --rm``` to execute them in a new container.
 
+
+    ### PYTHON TESTS/LINTING
+    # Run Python tests
+    
     docker-compose run --rm web pytest
+    # Run Python tests in a single file
+    docker-compose run --rm web pytest /path/to/test.py
+    # Run Python test cases in a single file that match some function/class name
+    docker-compose run --rm web pytest /path/to/test.py -k test_some_logic
+    # Run Python linter
+    docker-compose run --rm web pylint
+    
+    ### PYTHON FORMATTING
+    # Format all python files
+    docker-compose run --rm web black .
+    # Format a specific file
+    docker-compose run --rm web black /path/to/file.py
+    
+    ### JS/CSS TESTS/LINTING
+    # We also include a helper script to execute JS tests in most of our projects 
+    docker-compose run --rm watch ./scripts/test/js_test.sh
+    # Run JS tests in specific file
+    docker-compose run --rm watch ./scripts/test/js_test.sh path/to/file.js
+    # Run JS tests in specific file with a description that matches some text
+    docker-compose run --rm watch ./scripts/test/js_test.sh path/to/file.js "should test basic arithmetic"
+    # Run the JS linter
+    docker-compose run --rm watch npm run lint
+    # Run SCSS linter
+    docker-compose run --rm watch npm run scss_lint
+    # Run the Flow type checker
+    docker-compose run --rm watch npm run-script flow
+    
+    # Run prettier-eslint, fixes style issues that may be causing the build to fail
+    docker-compose run --rm watch npm run fmt
     
 ### Seed data
 
@@ -110,7 +143,7 @@ Seed data can be generated via management command. It's designed to be idempoten
 ```
 docker-compose run --rm web ./manage.py seed_data
 # To delete seed data
-docker-compose run --rm web ./manage.py seed_data --delete
+docker-compose run --rm web ./manage.py delete_seed_data
 ```
 
 ### Setup product index pages
