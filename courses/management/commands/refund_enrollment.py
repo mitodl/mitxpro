@@ -32,6 +32,9 @@ class Command(EnrollmentChangeCommand):
             type=str,
             help="The 'courseware_id' value for an enrolled CourseRun",
         )
+        parser.add_argument(
+            "--order", type=str, help="The 'order_id' value for an user's order ID."
+        )
         super().add_arguments(parser)
 
     def handle(self, *args, **options):

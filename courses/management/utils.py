@@ -84,6 +84,7 @@ class EnrollmentChangeCommand(BaseCommand):
         """
         program_property = command_options["program"]
         run_property = command_options["run"]
+        order_property = command_options["order"]
         force = command_options["force"]
 
         if program_property and run_property:
@@ -93,16 +94,20 @@ class EnrollmentChangeCommand(BaseCommand):
         elif not program_property and not run_property:
             raise CommandError("Either 'program' or 'run' must be provided.")
 
+        query_params = {"user": user}
+        if order_property:
+            query_params["order"] = order_property
+
         if program_property:
-            enrolled_obj = Program.objects.get(readable_id=program_property)
-            enrollment = ProgramEnrollment.all_objects.filter(
-                user=user, program=enrolled_obj
-            ).first()
+            query_params["program"] = enrolled_obj = Program.objects.get(
+                readable_id=program_property
+            )
+            enrollment = ProgramEnrollment.all_objects.filter(**query_params).first()
         else:
-            enrolled_obj = CourseRun.objects.get(courseware_id=run_property)
-            enrollment = CourseRunEnrollment.all_objects.filter(
-                user=user, run=enrolled_obj
-            ).first()
+            query_params["run"] = enrolled_obj = CourseRun.objects.get(
+                courseware_id=run_property
+            )
+            enrollment = CourseRunEnrollment.all_objects.filter(**query_params).first()
 
         if not enrollment:
             raise CommandError("Enrollment not found for: {}".format(enrolled_obj))
