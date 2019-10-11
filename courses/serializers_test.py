@@ -78,6 +78,10 @@ def test_serialize_program(mock_context, has_product):
     )
     if has_product:
         ProductVersionFactory.create(product__content_object=program)
+    topics = [CourseTopic.objects.create(name=f"topic{num}") for num in range(3)]
+    course1.topics.set([topics[0], topics[1]])
+    course2.topics.set([topics[1], topics[2]])
+
     data = ProgramSerializer(instance=program, context=mock_context).data
 
     assert_drf_json_equal(
@@ -104,6 +108,7 @@ def test_serialize_program(mock_context, has_product):
             ].enrollment_start.strftime(datetime_format),
             "url": f"http://localhost{page.get_url()}",
             "instructors": [{"name": name} for name in faculty_names],
+            "topics": [{"name": topic.name} for topic in topics],
         },
     )
 
