@@ -53,6 +53,7 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
         <script src="{% static 'js/notifications.js' %}"></script>
     {% endblock %}
+    {% if zendesk_config.help_widget_enabled %}
     <script type="text/javascript">
         zE('webWidget', 'prefill', {
             name: {
@@ -62,6 +63,7 @@
                 value: '{{user.email}}',
             }
         });
+    {% endif %}
     </script>
   </body>
 </html>

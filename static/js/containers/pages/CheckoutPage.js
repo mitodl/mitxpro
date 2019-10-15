@@ -8,6 +8,7 @@ import { mutateAsync, requestAsync } from "redux-query"
 import { compose } from "redux"
 import queryString from "query-string"
 import { pathOr } from "ramda"
+import * as Sentry from "@sentry/browser"
 
 import { CheckoutForm } from "../../components/forms/CheckoutForm"
 
@@ -39,7 +40,8 @@ type Props = {
 type State = {
   appliedInitialCoupon: boolean,
   errors: string | Object | null,
-  isLoading: boolean
+  isLoading: boolean,
+  showGenericError: boolean
 }
 
 export const calcSelectedRunIds = (
@@ -86,7 +88,19 @@ export class CheckoutPage extends React.Component<Props, State> {
   state = {
     appliedInitialCoupon: false,
     errors:               null,
-    isLoading:            true
+    isLoading:            true,
+    showGenericError:     false
+  }
+
+  logExceptionToSentry = (
+    title: ?string = "General Exception",
+    extra: ?Object = {}
+  ) => {
+    Sentry.withScope(scope => {
+      scope.setExtra("extra", extra)
+      scope.setFingerprint(["{{ default }}", title])
+      Sentry.captureException(new Error(title))
+    })
   }
 
   getQueryParams = () => {
@@ -111,11 +125,20 @@ export class CheckoutPage extends React.Component<Props, State> {
         items: [{ product_id: productId }]
       })
       if (basketResponse.status !== 200) {
-        if (basketResponse.body.errors) {
+        if (basketResponse.body && basketResponse.body.errors) {
+          this.logExceptionToSentry(
+            "Basket API exception",
+            basketResponse.body.errors
+          )
           this.setState({
             errors: basketResponse.body.errors
           })
+        } else {
+          this.logExceptionToSentry("Basket API error", basketResponse)
+          this.setState({ showGenericError: true })
         }
+      } else {
+        this.setState({ showGenericError: false })
       }
     }
     this.setState({
@@ -135,7 +158,6 @@ export class CheckoutPage extends React.Component<Props, State> {
     const basketPayload = {
       items: basket.items.map(item => ({
         product_id: item.product_id,
-        // $FlowFixMe: flow doesn't understand that Object.values will return an array of number here
         run_ids:    Object.values(values.runs).map(runId => parseInt(runId))
       })),
       coupons:       values.couponCode ? [{ code: values.couponCode }] : [],
@@ -144,19 +166,37 @@ export class CheckoutPage extends React.Component<Props, State> {
     try {
       const basketResponse = await updateBasket(basketPayload)
       if (basketResponse.status !== 200) {
-        if (basketResponse.body.errors) {
+        if (basketResponse.body && basketResponse.body.errors) {
+          this.logExceptionToSentry(
+            "Basket API exception",
+            basketResponse.body.errors
+          )
           actions.setErrors(basketResponse.body.errors)
+        } else {
+          this.logExceptionToSentry("Basket API error", basketResponse)
+          this.setState({ showGenericError: true })
         }
         return
       }
 
+      this.setState({ showGenericError: false })
+
       const checkoutResponse = await checkout()
       if (checkoutResponse.status !== 200) {
-        if (checkoutResponse.body.errors) {
+        if (checkoutResponse.body && checkoutResponse.body.errors) {
+          this.logExceptionToSentry(
+            "Checkout API exception",
+            checkoutResponse.body.errors
+          )
           actions.setErrors(checkoutResponse.body.errors)
+        } else {
+          this.logExceptionToSentry("Checkout API error", checkoutResponse)
+          this.setState({ showGenericError: true })
         }
         return
       }
+
+      this.setState({ showGenericError: false })
 
       const { method, url, payload } = checkoutResponse.body
       if (method === "GET") {
@@ -206,18 +246,13 @@ export class CheckoutPage extends React.Component<Props, State> {
 
   render() {
     const { basket, requestPending } = this.props
-    const { errors, isLoading } = this.state
+    const { errors, isLoading, showGenericError } = this.state
 
     const item = basket && basket.items[0]
     if (!basket || !item) {
       return (
         <DocumentTitle title={`${SETTINGS.site_name} | ${CHECKOUT_PAGE_TITLE}`}>
-          {!isLoading ? (
-            <div className="checkout-page">
-              No item in basket
-              {formatErrors(errors)}
-            </div>
-          ) : (
+          {isLoading ? (
             <div className="checkout-page  checkout-loader text-center align-self-center">
               <div className="loader-area">
                 <img
@@ -226,6 +261,27 @@ export class CheckoutPage extends React.Component<Props, State> {
                 />
                 One moment while we prepare checkout
               </div>
+            </div>
+          ) : showGenericError ? (
+            <div className="checkout-page">
+              <div className="error">
+                Something went wrong. Please contact us at{" "}
+                <u>
+                  <a
+                    href="https://xpro.zendesk.com/hc/en-us/requests/new"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Customer Support
+                  </a>
+                </u>
+                .
+              </div>
+            </div>
+          ) : (
+            <div className="checkout-page">
+              No item in basket
+              {formatErrors(errors)}
             </div>
           )}
         </DocumentTitle>
