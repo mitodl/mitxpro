@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.26.0
+--------------
+
+- add order optional parameter in refund_enrollment command
+- Fix the layout issue for IE
+
 Version 0.25.2 (Released October 15, 2019)
 --------------
 
