@@ -16,7 +16,7 @@ class GoogleApiAuth(TimestampedModel):
     )
     access_token = models.CharField(max_length=2048)
     refresh_token = models.CharField(null=True, max_length=512)
-    id_token = models.CharField(max_length=256)
+    id_token = models.CharField(null=True, max_length=256)
 
 
 class CouponGenerationRequest(TimestampedModel):
