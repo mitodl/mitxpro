@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.25.2 (Released October 15, 2019)
+--------------
+
+- Add topics to programs API (#1197)
+- fix broken commands in readme
+- Add course topics (#1196)
+
 Version 0.25.1 (Released October 10, 2019)
 --------------
 
