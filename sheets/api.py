@@ -5,6 +5,7 @@ import datetime
 import pytz
 from collections import namedtuple
 from decimal import Decimal
+import itertools
 import logging
 
 from django.conf import settings
@@ -12,7 +13,7 @@ from django.db import transaction
 from django.core.exceptions import ImproperlyConfigured
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-import gspread
+import pygsheets
 
 from courses.models import CourseRun, Program
 from courses.constants import CONTENT_TYPE_MODEL_COURSERUN, CONTENT_TYPE_MODEL_PROGRAM
@@ -107,16 +108,6 @@ def get_google_creds_from_pickled_token():
     return creds
 
 
-class GSpreadCredentials:
-    def __init__(self):
-        self._creds = get_google_creds_from_pickled_token()
-        self.access_token = self._creds.token
-
-    def refresh(self, http):
-        self._creds = get_google_creds_from_pickled_token()
-        self.access_token = self._creds.token
-
-
 def get_credentials():
     google_api_auth = GoogleApiAuth.objects.order_by("-updated_on").first()
     if google_api_auth:
@@ -130,12 +121,12 @@ def get_credentials():
             scopes=REQUIRED_GOOGLE_API_SCOPES
         )
     if GoogleToken.objects.exists():
-        return GSpreadCredentials()
+        return get_google_creds_from_pickled_token()
     raise ImproperlyConfigured("Authorization with Google has not been completed.")
 
 
 def get_data_rows(worksheet):
-    row_iter = iter(worksheet.get_all_values())
+    row_iter = iter(worksheet.get_all_values(include_tailing_empty=False, include_tailing_empty_rows=False))
     # Skip header row
     next(row_iter)
     yield from row_iter
@@ -173,8 +164,8 @@ def create_coupons_for_request_row(coupon_req_row):
 class CouponRequestHandler:
     def __init__(self):
         self._credentials = get_credentials()
-        self.gspread_client = gspread.authorize(self._credentials)
-        spreadsheet = self.gspread_client.open_by_key(settings.COUPON_REQUEST_SHEET_ID)
+        self.pygsheets_client = pygsheets.authorize(custom_credentials=self._credentials)
+        spreadsheet = self.pygsheets_client.open_by_key(settings.COUPON_REQUEST_SHEET_ID)
         self.coupon_request_sheet = spreadsheet.sheet1
 
     def parsed_row_iterator(self):
@@ -208,26 +199,18 @@ class CouponRequestHandler:
         return processed_requests
 
     def update_coupon_request_checkboxes(self, processed_requests):
-        update_cells = []
         for processed_request in processed_requests:
-            processed_cell = self.coupon_request_sheet.acell(
-                "{}{}".format(CouponRequestRow.PROCESSED_COLUMN, processed_request.row_index)
+            self.coupon_request_sheet.update_value(
+                "{}{}".format(CouponRequestRow.PROCESSED_COLUMN, processed_request.row_index),
+                True
             )
-            processed_cell.value = True
-            update_cells.append(processed_cell)
-        self.coupon_request_sheet.update_cells(update_cells)
 
     def move_file_to_folder(self, file_id, to_folder_id, from_folder_id=None):
         from_folder_id = from_folder_id or settings.DRIVE_BASE_FOLDER_ID
-        url = DRIVE_API_FILE_URL.format(file_id=file_id)
-        return self.gspread_client.request(
-            "patch",
-            url,
-            params={
-                "addParents": to_folder_id,
-                "removeParents": from_folder_id,
-            },
-            json={}
+        return self.pygsheets_client.drive.move_file(
+            file_id=file_id,
+            old_folder=from_folder_id,
+            new_folder=to_folder_id
         )
 
     def create_bulk_coupon_sheet(self, coupon_req_row):
@@ -248,27 +231,25 @@ class CouponRequestHandler:
             coupon_req_row.transaction_id,
             coupon_req_row.company_name
         )
-        bulk_coupon_sheet = self.gspread_client.create(spreadsheet_title)
+        create_kwargs = dict(folder=settings.DRIVE_OUTPUT_FOLDER_ID) if settings.DRIVE_OUTPUT_FOLDER_ID else {}
+        bulk_coupon_sheet = self.pygsheets_client.create(spreadsheet_title, **create_kwargs)
         worksheet = bulk_coupon_sheet.sheet1
         # Add headers
-        header_cells = worksheet.range("A1:{}1".format(coupon_assign_sheet_spec.last_data_column))
-        for i, header_text in enumerate(coupon_assign_sheet_spec.column_headers):
-            header_cells[i].value = header_text
-        worksheet.update_cells(header_cells)
+        worksheet.update_values(
+            crange="A1:{}1".format(coupon_assign_sheet_spec.last_data_column),
+            values=[coupon_assign_sheet_spec.column_headers]
+        )
         # Write data to body of worksheet
-        coupon_code_cells = worksheet.range("A{}:A{}".format(
-            coupon_assign_sheet_spec.first_data_row,
-            len(coupon_codes) + coupon_assign_sheet_spec.first_data_row
-        ))
-        for i, coupon_code in enumerate(coupon_codes):
-            coupon_code_cells[i].value = coupon_code
-        worksheet.update_cells(coupon_code_cells)
-        # Move to desired drive folder
-        if settings.DRIVE_OUTPUT_FOLDER_ID:
-            self.move_file_to_folder(bulk_coupon_sheet.id, to_folder_id=settings.DRIVE_OUTPUT_FOLDER_ID)
+        worksheet.update_values(
+            crange="A{}:A{}".format(
+                coupon_assign_sheet_spec.first_data_row,
+                len(coupon_codes) + coupon_assign_sheet_spec.first_data_row
+            ),
+            values=[[coupon_code] for coupon_code in coupon_codes]
+        )
         # Share
         for email in settings.SHEETS_ADMIN_EMAILS:
-            bulk_coupon_sheet.share(email, perm_type="user", role="writer")
+            bulk_coupon_sheet.share(email, type="user", role="writer")
 
         return bulk_coupon_sheet
 

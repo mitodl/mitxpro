@@ -62,11 +62,9 @@ def request_google_auth(request):
     )
     flow.redirect_uri = urljoin(settings.SITE_BASE_URL, reverse("complete-google-auth"))
     authorization_url, state = flow.authorization_url(
-        # Enable offline access so that you can refresh an access token without
-        # re-prompting the user for permission. Recommended for web server apps.
         access_type="offline",
-        # Enable incremental authorization. Recommended as a best practice.
-        include_granted_scopes="true"
+        include_granted_scopes="true",
+        prompt="consent",
     )
     request.session["state"] = state
     request.session["code_verifier"] = flow.code_verifier
