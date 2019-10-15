@@ -38,7 +38,7 @@
           <h2>{{ page.subhead }}</h2>
         </div>
         <div class="mt-5 mb-5">
-          {% if action_title and action_url %}
+          {% if page.about_mit_xpro.video_url and action_title and action_url %}
             <a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="{{ action_url }}">{{ action_title }}</a>
           {% else %}
             {% if not user.is_anonymous %}
