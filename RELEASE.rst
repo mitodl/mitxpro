@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.25.2
+Version 0.25.2 (Released October 15, 2019)
 --------------
 
 - Add topics to programs API (#1197)
