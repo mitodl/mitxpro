@@ -8,7 +8,7 @@ x-environment:
   SECRET_KEY: local_unsafe_key
   COVERAGE_DIR: htmlcov
   DATABASE_URL: postgres://postgres@db:5432/postgres
-  MITXPRO_BASE_URL: https://0b289465.ngrok.io
+  MITXPRO_BASE_URL: https://51b768a1.ngrok.io
   MITXPRO_SECURE_SSL_REDIRECT: 'False'
   MITXPRO_DB_DISABLE_SSL: 'True'
   MITXPRO_ADMIN_EMAIL: admin@localhost

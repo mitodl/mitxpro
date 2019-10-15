@@ -5,8 +5,8 @@
 
 {% block content %}
   <div style="padding: 50px">
-    {% if success %}
-      <h4 style="color: green">Authentication successful!</h4>
+    {% if auth_completed %}
+      <h3 style="color: green">Authentication successful!</h3>
     {% endif %}
     {% if existing_api_auth %}
       <p style="background-color: #ffbb33">

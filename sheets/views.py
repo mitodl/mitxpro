@@ -100,7 +100,7 @@ def complete_google_auth(request):
         google_api_auth.id_token = credentials.id_token
         google_api_auth.save()
 
-    return redirect(reverse("request-google-auth", kwargs={"success": "1"}))
+    return redirect("{}?success=1".format(reverse("google-auth-view")))
 
 
 @csrf_exempt
