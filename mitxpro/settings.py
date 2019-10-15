@@ -882,8 +882,44 @@ WAGTAILEMBEDS_FINDERS = [
 ]
 
 # Sheets settings
-BASE_DRIVE_FOLDER_ID = get_string("BASE_DRIVE_FOLDER_ID", None)
-SHEETS_OUTPUT_FOLDER_ID = get_string("SHEETS_OUTPUT_FOLDER_ID", None)
-COUPON_GENERATION_SHEET_ID = get_string("COUPON_GENERATION_SHEET_ID", None)
-_sheets_admin_email_str = get_string("SHEETS_ADMIN_EMAILS", None)
+DRIVE_CLIENT_ID = get_string(
+    "DRIVE_CLIENT_ID",
+    None,
+    description="Client ID from Google API credentials"
+)
+DRIVE_CLIENT_SECRET = get_string(
+    "DRIVE_CLIENT_SECRET",
+    None,
+    description="Client secret from Google API credentials"
+)
+DRIVE_API_PROJECT_ID = get_string(
+    "DRIVE_API_PROJECT_ID",
+    None,
+    description="ID for the Google API project where the credentials were created"
+)
+DRIVE_WEBHOOK_CHANNEL_ID = get_string(
+    "DRIVE_WEBHOOK_CHANNEL_ID",
+    "mitxpro-sheets-app",
+    description="Channel ID to use for requests to get push notifications for file changes"
+)
+DRIVE_BASE_FOLDER_ID = get_string(
+    "DRIVE_BASE_FOLDER_ID",
+    "root",
+    "ID of the top level Drive folder"
+)
+DRIVE_OUTPUT_FOLDER_ID = get_string(
+    "DRIVE_OUTPUT_FOLDER_ID",
+    None,
+    "ID of the Drive folder where newly created Sheets should be kept"
+)
+COUPON_REQUEST_SHEET_ID = get_string(
+    "COUPON_REQUEST_SHEET_ID",
+    None,
+    "ID of the Google Sheet that contains requests for coupons"
+)
+_sheets_admin_email_str = get_string(
+    "SHEETS_ADMIN_EMAILS",
+    None,
+    "Comma-separated list of emails for users that should be added as an editor for all newly created Sheets"
+)
 SHEETS_ADMIN_EMAILS = None if not _sheets_admin_email_str else _sheets_admin_email_str.split(",")
