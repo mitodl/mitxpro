@@ -35,7 +35,7 @@ class ProgramFactory(DjangoModelFactory):
 
     title = fuzzy.FuzzyText(prefix="Program ")
     readable_id = factory.Sequence("program-{0}".format)
-    live = factory.Faker("boolean")
+    live = True
 
     class Meta:
         model = Program
@@ -48,7 +48,7 @@ class CourseFactory(DjangoModelFactory):
     position_in_program = None  # will get populated in save()
     title = fuzzy.FuzzyText(prefix="Course ")
     readable_id = factory.Sequence("course-{0}".format)
-    live = factory.Faker("boolean")
+    live = True
 
     class Meta:
         model = Course

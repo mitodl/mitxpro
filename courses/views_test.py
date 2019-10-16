@@ -22,6 +22,7 @@ from courses.factories import (
 )
 from courses.serializers import CourseRunSerializer, CourseSerializer, ProgramSerializer
 from ecommerce.factories import ProductFactory, ProductVersionFactory
+from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import now_in_utc
 
 pytestmark = [pytest.mark.django_db]
@@ -40,7 +41,10 @@ def catalog_page(home_page):
 @pytest.fixture()
 def programs():
     """Fixture for a set of Programs in the database"""
-    return ProgramFactory.create_batch(3)
+    programs = ProgramFactory.create_batch(3)
+    for program in programs:
+        ProductVersionFactory.create(product=ProductFactory(content_object=program))
+    return programs
 
 
 @pytest.fixture()
@@ -61,7 +65,7 @@ def test_get_programs(user_drf_client, programs):
     programs_data = sorted(resp.json(), key=op.itemgetter("id"))
     assert len(programs_data) == len(programs)
     for program, program_data in zip(programs, programs_data):
-        assert program_data == ProgramSerializer(program).data
+        assert_drf_json_equal(program_data, ProgramSerializer(program).data)
 
 
 def test_get_program(user_drf_client, programs):
@@ -71,7 +75,7 @@ def test_get_program(user_drf_client, programs):
         reverse("programs_api-detail", kwargs={"pk": program.id})
     )
     program_data = resp.json()
-    assert program_data == ProgramSerializer(program).data
+    assert_drf_json_equal(program_data, ProgramSerializer(program).data)
 
 
 def test_create_program(user_drf_client, programs):
@@ -389,3 +393,91 @@ def test_user_enrollments_view(mocker, client, user):
     patched_get_user_enrollments.assert_called_with(user)
     assert patched_program_enroll_serializer.call_count == 2
     assert patched_course_enroll_serializer.call_count == 2
+
+
+@pytest.mark.parametrize("live", [True, False])
+def test_programs_not_live(client, live):
+    """Programs should be filtered out if live=False"""
+    program = ProgramFactory.create(live=live)
+    ProductVersionFactory.create(product=ProductFactory(content_object=program))
+    resp = client.get(reverse("programs_api-list"))
+    assert resp.status_code == status.HTTP_200_OK
+    assert_drf_json_equal(
+        resp.json(), [ProgramSerializer(program).data] if live else []
+    )
+
+
+@pytest.mark.parametrize("live", [True, False])
+def test_courses_not_live_in_programs_api(client, live):
+    """Courses should be filtered out of the programs API if not live"""
+    course = CourseFactory.create(live=live, program__live=True)
+    ProductVersionFactory.create(product=ProductFactory(content_object=course.program))
+    resp = client.get(reverse("programs_api-list"))
+    assert resp.status_code == status.HTTP_200_OK
+    assert_drf_json_equal(
+        resp.json()[0]["courses"], [CourseSerializer(course).data] if live else []
+    )
+
+
+@pytest.mark.parametrize("live", [True, False])
+def test_courses_not_live_in_courses_api(client, live):
+    """Courses should be filtered out of the courses API if not live"""
+    course = CourseFactory.create(live=live)
+    resp = client.get(reverse("courses_api-list"))
+    assert resp.status_code == status.HTTP_200_OK
+    assert_drf_json_equal(resp.json(), [CourseSerializer(course).data] if live else [])
+
+
+@pytest.mark.parametrize("live", [True, False])
+def test_course_runs_not_live_in_courses_api(client, live):
+    """Course runs should be filtered out of the courses API if not live"""
+    run = CourseRunFactory.create(live=live, course__live=True)
+    ProductVersionFactory.create(product=ProductFactory(content_object=run))
+    resp = client.get(reverse("courses_api-list"))
+    assert resp.status_code == status.HTTP_200_OK
+    assert_drf_json_equal(
+        resp.json()[0]["courseruns"], [CourseRunSerializer(run).data] if live else []
+    )
+
+
+@pytest.mark.parametrize("has_product", [True, False])
+def test_course_runs_without_product_in_courses_api(client, has_product):
+    """Course runs should be filtered out of the courses API if they don't have an associated product"""
+    run = CourseRunFactory.create(live=True, course__live=True)
+    if has_product:
+        ProductVersionFactory.create(product=ProductFactory(content_object=run))
+    resp = client.get(reverse("courses_api-list"))
+    assert resp.status_code == status.HTTP_200_OK
+    assert_drf_json_equal(
+        resp.json()[0]["courseruns"],
+        [CourseRunSerializer(run).data] if has_product else [],
+    )
+
+
+@pytest.mark.parametrize("has_product", [True, False])
+def test_program_without_product_in_programs_api(client, has_product):
+    """Programs should be filtered out of the programs API if they don't have an associated product"""
+    program = ProgramFactory.create(live=True)
+    if has_product:
+        ProductVersionFactory.create(product=ProductFactory(content_object=program))
+    resp = client.get(reverse("programs_api-list"))
+    assert resp.status_code == status.HTTP_200_OK
+    assert_drf_json_equal(
+        resp.json(), [ProgramSerializer(program).data] if has_product else []
+    )
+
+
+@pytest.mark.parametrize("has_product", [True, False])
+def test_course_runs_without_product_in_programs_api(client, has_product):
+    """Regardless of whether course runs have a product, runs should **not** be filtered out of the programs API"""
+    run = CourseRunFactory.create(live=True, course__live=True)
+    ProductVersionFactory.create(
+        product=ProductFactory(content_object=run.course.program)
+    )
+    if has_product:
+        ProductVersionFactory.create(product=ProductFactory(content_object=run))
+    resp = client.get(reverse("programs_api-list"))
+    assert resp.status_code == status.HTTP_200_OK
+    assert_drf_json_equal(
+        resp.json()[0]["courses"][0]["courseruns"], [CourseRunSerializer(run).data]
+    )

@@ -118,6 +118,7 @@ class CourseSerializer(serializers.ModelSerializer):
     def get_courseruns(self, instance):
         """Unexpired and unenrolled course runs"""
         all_runs = self.context.get("all_runs", False)
+        filter_products = self.context.get("filter_products", True)
         if all_runs:
             active_runs = instance.unexpired_runs
         else:
@@ -130,6 +131,7 @@ class CourseSerializer(serializers.ModelSerializer):
         return [
             CourseRunSerializer(instance=run, context=self.context).data
             for run in active_runs
+            if run.live and (run.products.exists() if filter_products else True)
         ]
 
     def get_topics(self, instance):
@@ -209,7 +211,9 @@ class ProgramSerializer(serializers.ModelSerializer):
     def get_courses(self, instance):
         """Serializer for courses"""
         return CourseSerializer(
-            instance.courses.order_by("position_in_program"), many=True
+            instance.courses.filter(live=True).order_by("position_in_program"),
+            many=True,
+            context={"filter_products": False},
         ).data
 
     def get_thumbnail_url(self, instance):

@@ -26,7 +26,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = []
 
     serializer_class = ProgramSerializer
-    queryset = Program.objects.all()
+    queryset = Program.objects.filter(live=True).exclude(products=None)
 
 
 class CourseViewSet(viewsets.ReadOnlyModelViewSet):
@@ -35,7 +35,7 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = []
 
     serializer_class = CourseSerializer
-    queryset = Course.objects.all()
+    queryset = Course.objects.filter(live=True)
 
 
 class CourseRunViewSet(viewsets.ReadOnlyModelViewSet):
