@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.26.0
+Version 0.26.0 (Released October 16, 2019)
 --------------
 
 - add order optional parameter in refund_enrollment command
