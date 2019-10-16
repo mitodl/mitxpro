@@ -5,7 +5,6 @@ import datetime
 import pytz
 from collections import namedtuple
 from decimal import Decimal
-import itertools
 import logging
 
 from django.conf import settings

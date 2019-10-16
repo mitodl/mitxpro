@@ -84,7 +84,6 @@ def complete_google_auth(request):
     flow.code_verifier = request.session["code_verifier"]
 
     # Use the authorization server's response to fetch the OAuth 2.0 tokens.
-    # authorization_response = request.get_raw_uri()
     flow.fetch_token(code=request.GET.get("code"))
 
     # Store credentials

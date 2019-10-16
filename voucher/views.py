@@ -15,7 +15,7 @@ from django.views.generic.base import View
 
 from ecommerce.api import make_checkout_url
 from ecommerce.models import Coupon, Product
-from mitxpro.views import get_js_settings_context
+from mitxpro.views import get_base_context
 from voucher.forms import UploadVoucherForm, VOUCHER_PARSE_ERROR
 from voucher.models import Voucher
 from voucher.utils import (
@@ -80,7 +80,7 @@ class UploadVoucherFormView(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         return {
             **super().get_context_data(**kwargs),
-            **get_js_settings_context(self.request),
+            **get_base_context(self.request),
         }
 
 
@@ -111,7 +111,7 @@ class EnrollView(LoginRequiredMixin, View):
                 "enroll.html",
                 context={
                     "eligible_choices": eligible_choices,
-                    **get_js_settings_context(self.request),
+                    **get_base_context(self.request),
                 },
             )
 
@@ -150,7 +150,7 @@ def resubmit(request):
     """
     Prompt user to email voucher after failed voucher parsing
     """
-    return render(request, "resubmit.html", context=get_js_settings_context(request))
+    return render(request, "resubmit.html", context=get_base_context(request))
 
 
 @login_required
@@ -158,4 +158,4 @@ def redeemed(request):
     """
     Coupon has already been redeemed
     """
-    return render(request, "redeemed.html", context=get_js_settings_context(request))
+    return render(request, "redeemed.html", context=get_base_context(request))

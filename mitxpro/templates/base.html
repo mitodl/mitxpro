@@ -23,7 +23,9 @@
     <title>{% block title %}{% endblock %}</title>
     <meta name="description" content="{% block description %}{% endblock %}">
     <meta name="keywords" content="{% block keywords %}{% endblock %}">
-    <meta name="google-site-verification" content="8MDwZ8e-qdLp7O0JKvAQB5CBYsvBFZTjiiyFBzcOVHY" />
+    {% if domain_verification_tag %}
+      <meta name="google-site-verification" content="{{ domain_verification_tag }}" />
+    {% endif %}
     {% block extrahead %}
     {% endblock %}
     {% endspaceless %}

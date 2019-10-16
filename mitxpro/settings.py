@@ -917,6 +917,11 @@ COUPON_REQUEST_SHEET_ID = get_string(
     None,
     "ID of the Google Sheet that contains requests for coupons"
 )
+GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
+    "GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE",
+    None,
+    "The value of the meta tag used by Google to verify the owner of a domain (used for enabling push notifications)"
+)
 _sheets_admin_email_str = get_string(
     "SHEETS_ADMIN_EMAILS",
     None,

@@ -24,7 +24,7 @@ class DriveClient:
     @property
     def files_service(self):
         """Returns the Files API service"""
-        return self._drive_resource().files()
+        return self._drive_resource.files()
 
     def request_file_watch(self, file_id, channel_id):
         """
@@ -35,9 +35,6 @@ class DriveClient:
             fileId=file_id,
             body={
                 "id": channel_id,
-                "resourceId": file_id,
-                # An opaque ID that identifies the resource being watched on this channel. Stable across different API versions.
-                "resourceUri": "https://docs.google.com/spreadsheets/d/{}/edit#gid=0".format(file_id),
                 "address": urljoin(settings.SITE_BASE_URL, reverse("handle-coupon-request-sheet-update")),
                 "payload": True,
                 "kind": FILE_WATCH_KIND,
