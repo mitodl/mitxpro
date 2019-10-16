@@ -84,6 +84,9 @@ These additional settings must also be added:
 - `SHEETS_ADMIN_EMAILS`: Comma-separated list of emails of users that you would like to be invited as editors
   for each coupon assignment Sheet created. For testing, it's fine to just set this as your own email. 
 
+*NOTE: If you're testing this in a CI PR build, you may also need to change the `MITXPRO_BASE_URL`
+setting from `https://xpro-ci.herokuapp.com` to `https://xpro-ci-pr-<YOUR_PR_NUMBER>.herokuapp.com`*  
+
 ##### 2d) Test the credentials
 
 To test that API auth is set up correctly:
