@@ -3,6 +3,8 @@ import { nthArg } from "ramda"
 
 import { FLOW_LOGIN, FLOW_REGISTER } from "../auth"
 
+import { getCookie } from "../api"
+
 import type {
   AuthResponse,
   LegalAddress,
@@ -90,6 +92,19 @@ export default {
   forgotPasswordMutation: (email: string) => ({
     url:  "/api/password_reset/",
     body: { email }
+  }),
+
+  changePasswordMutation: (oldPassword: string, newPassword: string) => ({
+    url:     "/api/set_password/",
+    options: {
+      headers: {
+        "X-CSRFTOKEN": getCookie("csrftoken")
+      }
+    },
+    body: {
+      current_password: oldPassword,
+      new_password:     newPassword
+    }
   }),
 
   forgotPasswordConfirmMutation: (

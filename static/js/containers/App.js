@@ -22,6 +22,7 @@ import RegisterPages from "./pages/register/RegisterPages"
 import EcommerceAdminPages from "./pages/admin/EcommerceAdminPages"
 import EcommerceBulkPages from "./pages/b2b/EcommerceBulkPages"
 import ProfilePages from "./pages/profile/ProfilePages"
+import AccountSettingsPage from "./pages/settings/AccountSettingsPage"
 
 import type { Match, Location } from "react-router"
 import type { CurrentUser } from "../flow/authTypes"
@@ -101,6 +102,10 @@ export class App extends React.Component<Props, void> {
           <Route
             path={urljoin(match.url, String(routes.ecommerceBulk))}
             component={EcommerceBulkPages}
+          />
+          <Route
+            path={urljoin(match.url, String(routes.accountSettings))}
+            component={AccountSettingsPage}
           />
         </Switch>
       </div>
