@@ -22,8 +22,23 @@ export const newPasswordFieldValidation = passwordFieldValidation.matches(
   }
 )
 
-export const changePasswordFormValidation = yup.object().shape({
+export const resetPasswordFormValidation = yup.object().shape({
   newPassword:     newPasswordFieldValidation.label("New Password"),
+  confirmPassword: yup
+    .string()
+    .label("Confirm Password")
+    .required()
+    .oneOf([yup.ref("newPassword")], "Passwords must match")
+})
+
+export const changePasswordFormValidation = yup.object().shape({
+  oldPassword: yup
+    .string()
+    .label("Old Password")
+    .required(),
+
+  newPassword: newPasswordFieldValidation.label("New Password"),
+
   confirmPassword: yup
     .string()
     .label("Confirm Password")

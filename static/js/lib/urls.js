@@ -10,10 +10,11 @@ export const bulkAssignmentCsvUrl = (bulkEnrollmentId: number) =>
   `/api/bulk_assignments/${bulkEnrollmentId}/`
 
 export const routes = {
-  root:      "/",
-  catalog:   "/catalog/",
-  dashboard: "/dashboard/",
-  logout:    "/logout/",
+  root:            "/",
+  catalog:         "/catalog/",
+  dashboard:       "/dashboard/",
+  accountSettings: "/account-settings/",
+  logout:          "/logout/",
 
   // authentication related routes
   login: include("/signin/", {

@@ -82,6 +82,23 @@
       padding-top: 41px;
     }
   }
+
+  &.account-settings-page {
+    max-width: 800px;
+
+    .email-section {
+      margin: 30px 0 0;
+      border: 1px solid $tab-color;
+      border-width: 1px 0;
+      padding: 23px 0;
+    }
+
+    .password-section {
+      padding: 13px 0;
+      margin: 0 0 40px;
+      border-bottom: 1px dashed $tab-color;
+    }
+  }
 }
 
 .auth-card {

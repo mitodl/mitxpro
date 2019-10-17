@@ -46,6 +46,16 @@ const UserMenu = ({ currentUser }: Props) => {
           <div className="dropdown-icon icon-dashboard" />
           Dashboard
         </MixedLink>
+
+        <MixedLink
+          className="dropdown-item"
+          dest={routes.accountSettings}
+          aria-label="settings"
+        >
+          <div className="dropdown-icon icon-21 icon-settings" />
+          Settings
+        </MixedLink>
+
         <div className="dropdown-divider" />
         <a className="dropdown-item" href={routes.logout} aria-label="Sign Out">
           <div className="dropdown-icon icon-logout" />

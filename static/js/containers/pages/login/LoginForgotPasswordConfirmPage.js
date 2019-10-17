@@ -12,10 +12,10 @@ import auth from "../../../lib/queries/auth"
 import { routes } from "../../../lib/urls"
 import { ALERT_TYPE_TEXT } from "../../../constants"
 
-import ChangePasswordForm from "../../../components/forms/ChangePasswordForm"
+import ResetPasswordForm from "../../../components/forms/ResetPasswordForm"
 
 import type { Match, RouterHistory } from "react-router"
-import type { ChangePasswordFormValues } from "../../../components/forms/ChangePasswordForm"
+import type { ResetPasswordFormValues } from "../../../components/forms/ResetPasswordForm"
 
 type Props = {
   match: Match,
@@ -31,7 +31,7 @@ type Props = {
 
 export class LoginForgotPasswordConfirmPage extends React.Component<Props> {
   async onSubmit(
-    { newPassword, confirmPassword }: ChangePasswordFormValues,
+    { newPassword, confirmPassword }: ResetPasswordFormValues,
     { setSubmitting }: any
   ) {
     const {
@@ -94,7 +94,7 @@ export class LoginForgotPasswordConfirmPage extends React.Component<Props> {
               <p>Enter a new password for your account.</p>
             </div>
             <div className="col-12">
-              <ChangePasswordForm onSubmit={this.onSubmit.bind(this)} />
+              <ResetPasswordForm onSubmit={this.onSubmit.bind(this)} />
             </div>
           </div>
         </div>

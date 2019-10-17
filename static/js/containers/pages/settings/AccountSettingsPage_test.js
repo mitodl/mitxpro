@@ -2,18 +2,18 @@
 import { assert } from "chai"
 import sinon from "sinon"
 
-import LoginForgotPasswordConfirmPage, {
-  LoginForgotPasswordConfirmPage as InnerLoginForgotPasswordConfirmPage
-} from "./LoginForgotPasswordConfirmPage"
+import AccountSettingsPage, {
+  AccountSettingsPage as InnerAccountSettingsPage
+} from "./AccountSettingsPage"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import { routes } from "../../../lib/urls"
 import { ALERT_TYPE_TEXT } from "../../../constants"
 
-describe("LoginForgotPasswordConfirmPage", () => {
-  const newPassword = "pass1"
-  const confirmPassword = "pass2"
-  const token = "token1"
-  const uid = "uid1"
+describe("AccountSettingsPage", () => {
+  const oldPassword = "password1"
+  const newPassword = "password2"
+  const confirmPassword = "password2"
+
   let helper, renderPage, setSubmittingStub
 
   beforeEach(() => {
@@ -22,14 +22,10 @@ describe("LoginForgotPasswordConfirmPage", () => {
     setSubmittingStub = helper.sandbox.stub()
 
     renderPage = helper.configureHOCRenderer(
-      LoginForgotPasswordConfirmPage,
-      InnerLoginForgotPasswordConfirmPage,
+      AccountSettingsPage,
+      InnerAccountSettingsPage,
       {},
-      {
-        match: {
-          params: { token, uid }
-        }
-      }
+      {}
     )
   })
 
@@ -40,23 +36,25 @@ describe("LoginForgotPasswordConfirmPage", () => {
   it("displays a form", async () => {
     const { inner } = await renderPage()
 
-    assert.ok(inner.find("ResetPasswordForm").exists())
+    assert.ok(inner.find("ChangePasswordForm").exists())
   })
 
   //
   ;[
     [
       200,
-      routes.login.begin,
-      "Your password has been updated, you may use it to sign in now."
+      routes.accountSettings,
+      "success",
+      "Your password has been updated successfully."
     ],
 
     [
       400,
-      routes.login.forgot.begin,
-      "Unable to reset your password with that link, please try again."
+      routes.accountSettings,
+      "danger",
+      "Unable to reset your password, please try again later."
     ]
-  ].forEach(([status, expectedUrl, expectedMessage]) => {
+  ].forEach(([status, expectedUrl, expectedColor, expectedMessage]) => {
     it(`handles onSubmit with status=${status}`, async () => {
       const { inner, store } = await renderPage()
 
@@ -64,25 +62,25 @@ describe("LoginForgotPasswordConfirmPage", () => {
         status
       })
 
-      const onSubmit = inner.find("ResetPasswordForm").prop("onSubmit")
+      const onSubmit = inner.find("ChangePasswordForm").prop("onSubmit")
+
+      const resetFormStub = helper.sandbox.stub()
 
       await onSubmit(
-        { newPassword, confirmPassword },
-        { setSubmitting: setSubmittingStub }
+        { oldPassword, newPassword },
+        { setSubmitting: setSubmittingStub, resetForm: resetFormStub }
       )
       sinon.assert.calledWith(
         helper.handleRequestStub,
-        "/api/password_reset/confirm/",
+        "/api/set_password/",
         "POST",
         {
           body: {
-            new_password:    newPassword,
-            re_new_password: confirmPassword,
-            token,
-            uid
+            current_password: oldPassword,
+            new_password:     newPassword
           },
           credentials: undefined,
-          headers:     undefined
+          headers:     { "X-CSRFTOKEN": null }
         }
       )
 
@@ -92,11 +90,13 @@ describe("LoginForgotPasswordConfirmPage", () => {
         search:   ""
       })
       sinon.assert.calledWith(setSubmittingStub, false)
+      sinon.assert.calledWith(resetFormStub)
 
       const { ui } = store.getState()
       assert.deepEqual(ui.userNotifications, {
-        "forgot-password-confirm": {
+        "password-change": {
           type:  ALERT_TYPE_TEXT,
+          color: expectedColor,
           props: {
             text: expectedMessage
           }
