@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.26.1
+--------------
+
+- Updated metadata for new attempt at TLS cert generation
+
 Version 0.26.0 (Released October 16, 2019)
 --------------
 
