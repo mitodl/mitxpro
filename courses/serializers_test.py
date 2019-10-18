@@ -20,7 +20,7 @@ from courses.factories import (
     CourseRunEnrollmentFactory,
     ProgramEnrollmentFactory,
 )
-from courses.models import CourseTopic
+from courses.models import CourseTopic, CourseRun
 from courses.serializers import (
     ProgramSerializer,
     CourseSerializer,
@@ -92,7 +92,9 @@ def test_serialize_program(mock_context, has_product):
             "id": program.id,
             "description": page.description,
             "courses": [
-                CourseSerializer(instance=course, context=mock_context).data
+                CourseSerializer(
+                    instance=course, context={**mock_context, "filter_products": False}
+                ).data
                 for course in [course1, course2]
             ],
             "thumbnail_url": f"http://localhost:8053{page.thumbnail_image.file.url}",
@@ -156,6 +158,11 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
     )
 
     page = CoursePageFactory.create(course=course)
+
+    # create products for all courses so the serializer shows them
+    for run in CourseRun.objects.all():
+        ProductVersionFactory.create(product__content_object=run)
+
     data = CourseSerializer(instance=course, context=mock_context).data
 
     if all_runs or is_anonymous:
@@ -163,19 +170,22 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
     else:
         expected_runs = [course_run]
 
-    assert data == {
-        "title": course.title,
-        "description": page.description,
-        "readable_id": course.readable_id,
-        "id": course.id,
-        "courseruns": [
-            CourseRunSerializer(run).data
-            for run in sorted(expected_runs, key=lambda run: run.start_date)
-        ],
-        "thumbnail_url": f"http://localhost:8053{page.thumbnail_image.file.url}",
-        "next_run_id": course.first_unexpired_run.id,
-        "topics": [{"name": topic}],
-    }
+    assert_drf_json_equal(
+        data,
+        {
+            "title": course.title,
+            "description": page.description,
+            "readable_id": course.readable_id,
+            "id": course.id,
+            "courseruns": [
+                CourseRunSerializer(run).data
+                for run in sorted(expected_runs, key=lambda run: run.start_date)
+            ],
+            "thumbnail_url": f"http://localhost:8053{page.thumbnail_image.file.url}",
+            "next_run_id": course.first_unexpired_run.id,
+            "topics": [{"name": topic}],
+        },
+    )
 
 
 @pytest.mark.parametrize("has_product", [True, False])
