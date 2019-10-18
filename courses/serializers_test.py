@@ -31,7 +31,7 @@ from courses.serializers import (
     CourseRunEnrollmentSerializer,
     ProgramEnrollmentSerializer,
 )
-from ecommerce.factories import ProductVersionFactory, ProductFactory
+from ecommerce.factories import ProductVersionFactory
 from ecommerce.serializers import CompanySerializer
 from ecommerce.serializers_test import datetime_format
 from mitxpro.test_utils import drf_datetime, assert_drf_json_equal
@@ -92,7 +92,9 @@ def test_serialize_program(mock_context, has_product):
             "id": program.id,
             "description": page.description,
             "courses": [
-                CourseSerializer(instance=course, context=mock_context).data
+                CourseSerializer(
+                    instance=course, context={**mock_context, "filter_products": False}
+                ).data
                 for course in [course1, course2]
             ],
             "thumbnail_url": f"http://localhost:8053{page.thumbnail_image.file.url}",
@@ -159,7 +161,7 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
 
     # create products for all courses so the serializer shows them
     for run in CourseRun.objects.all():
-        ProductVersionFactory.create(product=ProductFactory(content_object=run))
+        ProductVersionFactory.create(product__content_object=run)
 
     data = CourseSerializer(instance=course, context=mock_context).data
 
