@@ -57,6 +57,19 @@ SECURE_SSL_REDIRECT = get_bool(
     description="Application-level SSL redirect setting.",
 )
 
+ZENDESK_CONFIG = {
+    "HELP_WIDGET_ENABLED": get_string(
+        "ZENDESK_HELP_WIDGET_ENABLED",
+        False,
+        description="Enabled/disable state for Zendesk web help widget.",
+    ),
+    "HELP_WIDGET_KEY": get_string(
+        "ZENDESK_HELP_WIDGET_KEY",
+        "8ef9ef96-3317-40a9-8ef6-de0737503caa",
+        description="Represents the key for Zendesk web help widget.",
+    ),
+}
+
 HUBSPOT_CONFIG = {
     "HUBSPOT_NEW_COURSES_FORM_GUID": get_string(
         "HUBSPOT_NEW_COURSES_FORM_GUID",

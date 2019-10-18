@@ -27,4 +27,8 @@ def configuration_context(request):
             "HUBSPOT_FOOTER_FORM_GUID"
         ),
         "site_name": settings.SITE_NAME,
+        "zendesk_config": {
+            "help_widget_enabled": settings.ZENDESK_CONFIG.get("HELP_WIDGET_ENABLED"),
+            "help_widget_key": settings.ZENDESK_CONFIG.get("HELP_WIDGET_KEY"),
+        },
     }
