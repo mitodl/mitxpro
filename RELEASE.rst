@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.26.2
+--------------
+
+- - Added the zendesk help widget to project
+- Show time along with date for upcoming courses.
+
 Version 0.26.1 (Released October 17, 2019)
 --------------
 
