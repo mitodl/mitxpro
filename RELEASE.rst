@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.27.0
+Version 0.27.0 (Released October 21, 2019)
 --------------
 
 - Expand clickable area for user menu
