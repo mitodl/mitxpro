@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.views.generic import FormView
 from django.views.generic.base import View
 
-from ecommerce.api import make_checkout_url
+from ecommerce.utils import make_checkout_url
 from ecommerce.models import Coupon, Product
 from mitxpro.views import get_js_settings_context
 from voucher.forms import UploadVoucherForm, VOUCHER_PARSE_ERROR

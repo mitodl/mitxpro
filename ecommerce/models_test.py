@@ -130,6 +130,18 @@ def test_run_queryset(is_program):
     )
 
 
+def test_type_string():
+    """
+    type_string should return a string representation of the Product type
+    """
+    program = ProgramFactory.create()
+    run = CourseRunFactory.create()
+    program_product = ProductFactory.create(content_object=program)
+    assert program_product.type_string == "program"
+    run_product = ProductFactory.create(content_object=run)
+    assert run_product.type_string == "courserun"
+
+
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
 def test_hubspot_syncs(mock_hubspot_syncs, settings, hubspot_api_key):
     """ Test that hubspot sync tasks are called only if API key is set"""

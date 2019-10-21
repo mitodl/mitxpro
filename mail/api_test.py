@@ -3,14 +3,17 @@ from email.utils import formataddr
 import pytest
 
 from mail.api import (
-    get_base_context,
     context_for_user,
     safe_format_recipients,
     render_email_templates,
     send_messages,
     messages_for_recipients,
     build_messages,
+    build_user_specific_messages,
+    build_message,
+    EmailMetadata,
 )
+from mitxpro.test_utils import any_instance_of
 from users.factories import UserFactory
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("email_settings")]
@@ -102,23 +105,118 @@ def test_build_messages(mocker):
     """
     Tests that build_messages creates message objects for a set of recipients with the correct context
     """
-    mock_msg = mocker.Mock()
-    patched_msg_class = mocker.patch("mail.api.AnymailMessage", return_value=mock_msg)
-    patched_render = mocker.patch(
-        "mail.api.render_email_templates",
-        return_value=("subject", "text body", "<p>html body</p>"),
+    patched_build_message = mocker.patch("mail.api.build_message")
+    patched_base_context = mocker.patch(
+        "mail.api.get_base_context", return_value={"base": "context"}
     )
-
+    patched_get_connection = mocker.patch("mail.api.mail.get_connection")
     template_name = "sample"
     recipients = ["a@b.com", "c@d.com"]
     extra_context = {"extra": "context"}
-    messages = list(build_messages(template_name, recipients, extra_context))
-    assert patched_render.call_args[0] == (
-        template_name,
-        {**extra_context, **get_base_context()},
+    metadata = EmailMetadata(tags=None, user_variables={"k1": "v1"})
+
+    messages = list(
+        build_messages(template_name, recipients, extra_context, metadata=metadata)
     )
-    assert patched_msg_class.call_count == len(recipients)
-    assert messages == [mock_msg] * len(recipients)
+    assert patched_build_message.call_count == len(recipients)
+    assert len(messages) == len(recipients)
+    patched_get_connection.assert_called_once()
+    patched_base_context.assert_called_once()
+    for recipient in recipients:
+        patched_build_message.assert_any_call(
+            connection=any_instance_of(mocker.Mock),
+            template_name=template_name,
+            recipient=recipient,
+            context={"base": "context", "extra": "context"},
+            metadata=metadata,
+        )
+
+
+def test_build_user_specific_messages(mocker):
+    """
+    Tests that build_user_specific_messages loops through an iterable of recipient data tuples
+    and builds a message for each one
+    """
+    patched_build_message = mocker.patch("mail.api.build_message")
+    mocker.patch("mail.api.get_base_context", return_value={"base": "context"})
+    mocker.patch("mail.api.mail.get_connection")
+    template_name = "sample"
+    recipient_tuples = [
+        (
+            "a@b.com",
+            {"first": "context"},
+            EmailMetadata(tags=["tag1"], user_variables=None),
+        ),
+        ("c@d.com", {"second": "context"}, None),
+    ]
+
+    messages = list(build_user_specific_messages(template_name, recipient_tuples))
+    assert len(messages) == len(recipient_tuples)
+    for recipient, context, metadata in recipient_tuples:
+        patched_build_message.assert_any_call(
+            connection=any_instance_of(mocker.Mock),
+            template_name=template_name,
+            recipient=recipient,
+            context={"base": "context", **context},
+            metadata=metadata,
+        )
+
+
+def test_build_message(mocker, settings):
+    """
+    Tests that build_message correctly builds a message object using the Anymail APIs
+    """
+    settings.MAILGUN_FROM_EMAIL = "from-email@example.com"
+    settings.MITXPRO_REPLY_TO_ADDRESS = "reply-email@example.com"
+    subject = "subject"
+    text_body = "body"
+    html_body = "<p>body</p>"
+    recipient_email = "recipient@example.com"
+    template_name = "my_template"
+    context = {"context_key": "context_value"}
+    metadata = EmailMetadata(tags=["my-tag"], user_variables={"k1": "v1", "k2": "v2"})
+    patched_render = mocker.patch(
+        "mail.api.render_email_templates", return_value=(subject, text_body, html_body)
+    )
+    patched_anymail_message = mocker.patch("mail.api.AnymailMessage")
+    mock_connection = mocker.Mock()
+
+    msg = build_message(
+        mock_connection, template_name, recipient_email, context, metadata=metadata
+    )
+    patched_render.assert_called_once_with(template_name, context)
+    patched_anymail_message.assert_called_once_with(
+        subject=subject,
+        body=text_body,
+        to=[recipient_email],
+        from_email=settings.MAILGUN_FROM_EMAIL,
+        connection=mock_connection,
+        headers={"Reply-To": settings.MITXPRO_REPLY_TO_ADDRESS},
+    )
+    msg.attach_alternative.assert_called_once_with(html_body, "text/html")
+    assert msg.esp_extra == {"o:tag": ["my-tag"], "v:k1": "v1", "v:k2": "v2"}
+
+
+def test_build_message_optional_params(mocker):
+    """Tests that build_message correctly handles optional/None values for certain arguments"""
+    template_name = "my_template"
+    patched_render = mocker.patch(
+        "mail.api.render_email_templates",
+        return_value=("subject", "body", "<p>body</p>"),
+    )
+    mocker.patch("mail.api.AnymailMessage")
+
+    msg = build_message(
+        connection=mocker.Mock(),
+        template_name=template_name,
+        recipient="recipient@example.com",
+        context=None,
+        metadata=None,
+    )
+    patched_render.assert_called_once_with(template_name, {})
+    # The "esp_extra" property should not have been assigned any value since metadata=None.
+    # Since AnymailMessage is patched, that means this property should just be a Mock object.
+    assert isinstance(msg.esp_extra, mocker.Mock)
 
 
 def test_send_message(mailoutbox):

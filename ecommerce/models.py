@@ -99,6 +99,17 @@ class Product(TimestampedModel):
         else:
             raise ValueError(f"Unexpected content type for {self.content_type.model}")
 
+    @property
+    def type_string(self):
+        """
+        Helper property to return a string representation of the product type,
+        e.g.: "courserun", "program"
+
+        Returns:
+            str: String representing the product type
+        """
+        return self.content_type.model
+
     def __str__(self):
         """Description of a product"""
         return f"Product for {self.content_object}"

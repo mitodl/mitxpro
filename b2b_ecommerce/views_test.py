@@ -13,7 +13,7 @@ from b2b_ecommerce.factories import (
     ProductVersionFactory,
 )
 from b2b_ecommerce.models import B2BCoupon, B2BOrder, B2BCouponRedemption
-from ecommerce.api import make_checkout_url
+from ecommerce.utils import make_checkout_url
 from ecommerce.factories import CouponVersionFactory
 from ecommerce.serializers import ProductVersionSerializer
 from mitxpro.utils import dict_without_keys
