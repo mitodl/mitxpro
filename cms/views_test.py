@@ -14,13 +14,14 @@ from cms.factories import (
     CertificatePageFactory,
     HomePageFactory,
 )
-from cms.models import CourseIndexPage, HomePage, ProgramIndexPage
+from cms.models import CourseIndexPage, HomePage, ProgramIndexPage, TextVideoSection
 from courses.factories import (
     CourseFactory,
     CourseRunFactory,
     CourseRunCertificateFactory,
     ProgramCertificateFactory,
 )
+
 from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
@@ -36,13 +37,30 @@ def test_home_page_view(client):
     resp = client.get(page.get_url())
     content = resp.content.decode("utf-8")
 
+    # without watch now button
+    assert (
+        f'<a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="#">Watch Now</a>'
+        not in content
+    )
+    assert "dropdown-menu" in content
+
+    # add video section
+    about_page = TextVideoSection(
+        content="<p>content</p>", video_url="http://test.com/abcd"
+    )
+    page.add_child(instance=about_page)
+    resp = client.get(page.get_url())
+    content = resp.content.decode("utf-8")
+
+    # with watch now button
     assert (
         f'<a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="#">Watch Now</a>'
         in content
     )
+    assert "dropdown-menu" not in content
+
     assert reverse("user-dashboard") not in content
     assert reverse("checkout-page") not in content
-    assert "dropdown-menu" not in content
 
 
 def test_courses_index_view(client):
