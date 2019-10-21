@@ -49,6 +49,20 @@
   }
 }
 
+.user-menu.dropdown {
+  padding-left: 15px;
+  padding-right: 15px;
+
+  .dropdown-toggle {
+    max-width: 100%;
+    padding: 0px;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
+
 .icon-profile {
   background: url("#{$static-path}/images/icon-user.png") left no-repeat;
   height: 25px;
