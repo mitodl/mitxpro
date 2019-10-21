@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.26.2
+Version 0.26.2 (Released October 21, 2019)
 --------------
 
 - Filter courses, runs, and programs based on product and live status (#1230)
