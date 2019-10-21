@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.27.0
+--------------
+
+- Expand clickable area for user menu
+- watch now should come only in the presence of video
+- #843 Checkout: non-200 responses
+
 Version 0.26.2 (Released October 21, 2019)
 --------------
 
