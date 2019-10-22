@@ -21,6 +21,7 @@ send_messages(messages)
 from email.utils import formataddr
 import logging
 import re
+from collections import namedtuple
 
 from anymail.message import AnymailMessage
 from bs4 import BeautifulSoup
@@ -28,6 +29,7 @@ from django.conf import settings
 from django.core import mail
 from django.template.loader import render_to_string
 
+EmailMetadata = namedtuple("EmailMetadata", ["tags", "user_variables"])
 log = logging.getLogger()
 
 
@@ -171,7 +173,7 @@ def message_for_recipient(recipient, context, template_name):
     return list(messages_for_recipients([(recipient, context)], template_name))[0]
 
 
-def build_messages(template_name, recipients, extra_context):
+def build_messages(template_name, recipients, extra_context, metadata=None):
     """
     Creates message objects for a set of recipients with the same context in each message.
 
@@ -180,6 +182,7 @@ def build_messages(template_name, recipients, extra_context):
         recipients (iterable of str): Iterable of user email addresses
         extra_context (dict or None): A dict of context variables to pass into the template (in addition
             to the base context variables)
+        metadata (EmailMetadata or None): An object containing extra data to attach to the message
 
     Yields:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
@@ -192,31 +195,34 @@ def build_messages(template_name, recipients, extra_context):
                 template_name=template_name,
                 recipient=recipient,
                 context=context,
+                metadata=metadata,
             )
 
 
-def build_user_specific_messages(template_name, recipients_and_contexts):
+def build_user_specific_messages(template_name, recipient_iter):
     """
     Creates message objects for a set of recipients with a specific context for each recipient in each message.
 
     Args:
         template_name (str): name of the template, this should match a directory in mail/templates
-        recipients_and_contexts (iterable of (str, dict)): Iterable of users and their contexts as a dict
+        recipient_iter (iterable of (str, dict, EmailMetadata)): Iterable of of tuples, each one containing
+          an email address, the context for that recipient (dict), and message metadata (if any was provided)
 
     Yields:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
     """
     with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
-        for recipient, context in recipients_and_contexts:
+        for recipient, context, metadata in recipient_iter:
             yield build_message(
                 connection=connection,
                 template_name=template_name,
                 recipient=recipient,
                 context={**get_base_context(), **(context or {})},
+                metadata=metadata,
             )
 
 
-def build_message(connection, template_name, recipient, context):
+def build_message(connection, template_name, recipient, context, metadata=None):
     """
     Creates a message object
 
@@ -225,6 +231,7 @@ def build_message(connection, template_name, recipient, context):
         template_name (str): name of the template, this should match a directory in mail/templates
         recipient (str): Recipient email address
         context (dict or None): A dict of context variables
+        metadata (EmailMetadata or None): An object containing extra data to attach to the message
 
     Returns:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
@@ -238,6 +245,16 @@ def build_message(connection, template_name, recipient, context):
         connection=connection,
         headers={"Reply-To": settings.MITXPRO_REPLY_TO_ADDRESS},
     )
+    esp_extra = {}
+    if metadata:
+        if metadata.tags:
+            esp_extra.update({"o:tag": metadata.tags})
+        if metadata.user_variables:
+            esp_extra.update(
+                {"v:{}".format(k): v for k, v in metadata.user_variables.items()}
+            )
+    if esp_extra:
+        msg.esp_extra = esp_extra
     msg.attach_alternative(html_body, "text/html")
     return msg
 

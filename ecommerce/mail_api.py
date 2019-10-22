@@ -13,15 +13,25 @@ from mail.constants import (
     EMAIL_COURSE_RUN_ENROLLMENT,
     EMAIL_COURSE_RUN_UNENROLLMENT,
 )
+from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG
+from ecommerce.utils import make_checkout_url
 from mitxpro.utils import format_price
 
 log = logging.getLogger()
 
 
-def get_bulk_enroll_email_context(product_coupon):
-    """Gets the bulk enrollment email template context for one CouponEligibility object"""
-    from ecommerce.api import make_checkout_url
+def get_bulk_enroll_message_tuple(recipient, product_coupon):
+    """
+    Builds the tuple of data required for each recipient's bulk enrollment email
 
+    Args:
+        recipient (str): The recipient email address
+        product_coupon (CouponEligibility): The product coupon that was assigned to the given recipient
+
+    Returns:
+        tuple of (str, dict, EmailMetadata): A tuple containing an email address, a dict of message context variables,
+            and a message metadata object
+    """
     enrollment_url = make_checkout_url(
         product_id=product_coupon.product.id, code=product_coupon.coupon.coupon_code
     )
@@ -30,11 +40,23 @@ def get_bulk_enroll_email_context(product_coupon):
         .order_by("-created_on")
         .first()
     )
-    return {
-        "enrollable_title": product_coupon.product.content_object.title,
+    product_object = product_coupon.product.content_object
+    context = {
+        "enrollable_title": product_object.title,
         "enrollment_url": enrollment_url,
         "company_name": company_name,
     }
+    return (
+        recipient,
+        context,
+        api.EmailMetadata(
+            tags=[BULK_ENROLLMENT_EMAIL_TAG],
+            user_variables={
+                "enrollment_code": product_coupon.coupon.coupon_code,
+                product_coupon.product.type_string: product_object.text_id,
+            },
+        ),
+    )
 
 
 def send_bulk_enroll_emails(recipient_product_coupon_iter):
@@ -49,7 +71,7 @@ def send_bulk_enroll_emails(recipient_product_coupon_iter):
         api.build_user_specific_messages(
             EMAIL_BULK_ENROLL,
             (
-                (recipient, get_bulk_enroll_email_context(product_coupon))
+                get_bulk_enroll_message_tuple(recipient, product_coupon)
                 for recipient, product_coupon in recipient_product_coupon_iter
             ),
         )

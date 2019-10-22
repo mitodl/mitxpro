@@ -18,7 +18,7 @@ from b2b_ecommerce.api import (
     generate_b2b_cybersource_sa_payload,
 )
 from b2b_ecommerce.models import B2BCoupon, B2BCouponRedemption, B2BOrder
-from ecommerce.api import make_checkout_url
+from ecommerce.utils import make_checkout_url
 from ecommerce.models import ProductVersion, Coupon
 from ecommerce.serializers import ProductVersionSerializer
 from mitxpro.utils import make_csv_http_response

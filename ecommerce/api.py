@@ -7,7 +7,7 @@ import hashlib
 import hmac
 import logging
 from traceback import format_exc
-from urllib.parse import quote_plus, urljoin, urlencode
+from urllib.parse import quote_plus, urljoin
 import uuid
 import itertools
 
@@ -1057,29 +1057,6 @@ def determine_order_status_change(order, decision):
         return Order.FAILED
 
     return Order.FULFILLED
-
-
-def make_checkout_url(*, product_id=None, code=None):
-    """
-    Helper function to create a checkout URL with appropriate query parameters.
-
-    Args:
-        product_id (int): A Product ID
-        code (str): The coupon code
-
-    Returns:
-        str: The URL for the checkout page, including product and coupon code if available
-    """
-    base_checkout_url = urljoin(settings.SITE_BASE_URL, reverse("checkout-page"))
-    if product_id is None and code is None:
-        return base_checkout_url
-
-    query_params = {}
-    if product_id is not None:
-        query_params["product"] = product_id
-    if code is not None:
-        query_params["code"] = code
-    return f"{base_checkout_url}?{urlencode(query_params)}"
 
 
 def fulfill_order(request_data):

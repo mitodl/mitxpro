@@ -18,6 +18,8 @@ from ecommerce.mail_api import (
     send_bulk_enroll_emails,
     send_course_run_enrollment_email,
 )
+from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG
+from mail.api import EmailMetadata
 from mail.constants import (
     EMAIL_BULK_ENROLL,
     EMAIL_COURSE_RUN_ENROLLMENT,
@@ -40,7 +42,10 @@ def test_send_bulk_enroll_emails(mocker, settings):
     """
     send_bulk_enroll_emails should build messages for each recipient and send them
     """
-    patched_mail_api = mocker.patch("ecommerce.mail_api.api")
+    patched_send_messages = mocker.patch("ecommerce.mail_api.api.send_messages")
+    patched_build_user_messages = mocker.patch(
+        "ecommerce.mail_api.api.build_user_specific_messages"
+    )
     settings.SITE_BASE_URL = "http://test.com/"
 
     num_assignments = 2
@@ -59,15 +64,12 @@ def test_send_bulk_enroll_emails(mocker, settings):
 
     send_bulk_enroll_emails(recipient_product_coupons)
 
-    patched_mail_api.build_user_specific_messages.assert_called_once()
-    assert (
-        patched_mail_api.build_user_specific_messages.call_args[0][0]
-        == EMAIL_BULK_ENROLL
-    )
-    recipients_and_contexts_arg = list(
-        patched_mail_api.build_user_specific_messages.call_args[0][1]
-    )
+    patched_send_messages.assert_called_once()
+    patched_build_user_messages.assert_called_once()
+    assert patched_build_user_messages.call_args[0][0] == EMAIL_BULK_ENROLL
+    recipients_and_contexts_arg = list(patched_build_user_messages.call_args[0][1])
     for i, assignment in enumerate(assignments):
+        product_type_str = assignment.product_coupon.product.type_string
         assert recipients_and_contexts_arg[i] == (
             assignment.email,
             {
@@ -82,6 +84,13 @@ def test_send_bulk_enroll_emails(mocker, settings):
                     else new_coupon_payment_versions[i].company.name
                 ),
             },
+            EmailMetadata(
+                tags=[BULK_ENROLLMENT_EMAIL_TAG],
+                user_variables={
+                    "enrollment_code": assignment.product_coupon.coupon.coupon_code,
+                    product_type_str: assignment.product_coupon.product.content_object.text_id,
+                },
+            ),
         )
 
 

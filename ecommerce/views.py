@@ -31,8 +31,8 @@ from ecommerce.api import (
     validate_basket_for_checkout,
     complete_order,
     bulk_assign_product_coupons,
-    make_checkout_url,
 )
+from ecommerce.utils import make_checkout_url
 from ecommerce.exceptions import ParseException
 from ecommerce.mail_api import send_bulk_enroll_emails
 from ecommerce.models import (
