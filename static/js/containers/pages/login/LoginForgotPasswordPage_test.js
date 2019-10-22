@@ -59,7 +59,7 @@ describe("LoginForgotPasswordPage", () => {
           email
         },
         credentials: undefined,
-        headers:     undefined
+        headers:     { "X-CSRFTOKEN": null }
       }
     )
 

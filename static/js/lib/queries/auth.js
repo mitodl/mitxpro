@@ -90,8 +90,14 @@ export default {
   }),
 
   forgotPasswordMutation: (email: string) => ({
-    url:  "/api/password_reset/",
-    body: { email }
+    url:     "/api/password_reset/",
+    body:    { email },
+    options: {
+      method:  "POST",
+      headers: {
+        "X-CSRFTOKEN": getCookie("csrftoken")
+      }
+    }
   }),
 
   changePasswordMutation: (oldPassword: string, newPassword: string) => ({
@@ -119,6 +125,12 @@ export default {
       re_new_password: reNewPassword,
       token,
       uid
+    },
+    options: {
+      method:  "POST",
+      headers: {
+        "X-CSRFTOKEN": getCookie("csrftoken")
+      }
     }
   })
 }
