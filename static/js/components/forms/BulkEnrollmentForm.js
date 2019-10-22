@@ -39,7 +39,8 @@ type BulkEnrollmentFormProps = {
 }
 
 type BulkEnrollmentFormState = {
-  successResponseData: ?BulkCouponSendResponse
+  successResponseData: ?BulkCouponSendResponse,
+  productType: string
 }
 
 export class BulkEnrollmentForm extends React.Component<
@@ -49,19 +50,24 @@ export class BulkEnrollmentForm extends React.Component<
   fileInput: Object
 
   state = {
-    successResponseData: null
+    successResponseData: null,
+    productType:         PRODUCT_TYPE_COURSERUN
   }
 
   constructor(props: BulkEnrollmentFormProps) {
     super(props)
     this.fileInput = React.createRef()
+    this.getSortedIds.bind(true)
   }
 
-  getBulkCouponsForProduct = (productId: number): Array<BulkCouponPayment> => {
+  getBulkCouponsForProduct = (
+    productId: number | string
+  ): Array<BulkCouponPayment> => {
     const { bulkCouponPayments } = this.props
-
     return bulkCouponPayments.filter(bulkCoupon => {
-      return bulkCoupon.products.find(product => product.id === productId)
+      return bulkCoupon.products.find(
+        product => parseInt(product.id) === parseInt(productId)
+      )
     })
   }
 
@@ -69,13 +75,19 @@ export class BulkEnrollmentForm extends React.Component<
     const { productMap } = this.props
 
     const selectedProductType = e.target.value
-    const selectedProductId = getFirstKeyAsInt(productMap[selectedProductType])
+    const selectedProductId = this.getSortedIds(
+      productMap,
+      selectedProductType
+    )[0]
     setFieldValue("product_type", selectedProductType)
     setFieldValue("product_id", selectedProductId)
     setFieldValue(
       "coupon_payment_id",
       getFirstId(this.getBulkCouponsForProduct(selectedProductId))
     )
+    this.setState({
+      productType: selectedProductType
+    })
   })
 
   onChangeProductId = R.curry((setFieldValue: Function, e: Object) => {
@@ -110,12 +122,39 @@ export class BulkEnrollmentForm extends React.Component<
     }
   }
 
+  getSortedIds = (productMap: ProductMap, initialProductType: string) => {
+    const sortedIds: Array<string> = Object.keys(
+      productMap[initialProductType]
+    ).sort((key1, key2) => {
+      const sortKey =
+        initialProductType === PRODUCT_TYPE_COURSERUN
+          ? "courseware_id"
+          : "readable_id"
+      if (
+        productMap[initialProductType][key1][sortKey] <
+        productMap[initialProductType][key2][sortKey]
+      ) {
+        return -1
+      } else if (
+        productMap[initialProductType][key1][sortKey] >
+        productMap[initialProductType][key2][sortKey]
+      ) {
+        return 1
+      }
+      return 0
+    })
+    return sortedIds
+  }
+
   render() {
     const { successResponseData } = this.state
     const { productMap } = this.props
 
-    const initialProductType = PRODUCT_TYPE_COURSERUN
-    const initialProductId = getFirstKeyAsInt(productMap[initialProductType])
+    const initialProductType = this.state.productType
+
+    const sortedProductIds = this.getSortedIds(productMap, initialProductType)
+
+    const initialProductId = parseInt(sortedProductIds[0])
     const initialCouponPaymentId = getFirstId(
       this.getBulkCouponsForProduct(initialProductId)
     )
@@ -174,13 +213,17 @@ export class BulkEnrollmentForm extends React.Component<
                 name="product_id"
                 onChange={this.onChangeProductId(setFieldValue)}
               >
-                {R.toPairs(productMap[values.product_type]).map(
-                  ([productId, productObject]) => (
-                    <option key={productId} value={productId}>
-                      {productObject.title}
-                    </option>
-                  )
-                )}
+                {sortedProductIds.map(productId => (
+                  <option key={productId} value={productId}>
+                    {values.product_type === "program"
+                      ? productMap[values.product_type][productId][
+                        "readable_id"
+                      ]
+                      : productMap[values.product_type][productId][
+                        "courseware_id"
+                      ]}
+                  </option>
+                ))}
               </Field>
             </section>
 

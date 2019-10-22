@@ -86,7 +86,7 @@ class CompanyViewSet(ReadOnlyModelViewSet):
     authentication_classes = (SessionAuthentication,)
 
     serializer_class = CompanySerializer
-    queryset = Company.objects.all()
+    queryset = Company.objects.all().order_by("name")
 
 
 class CheckoutView(APIView):

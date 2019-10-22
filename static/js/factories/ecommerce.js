@@ -19,6 +19,7 @@ import type {
   B2BOrderStatus,
   B2BCouponStatusResponse
 } from "../flow/ecommerceTypes"
+import type { BaseCourseRun, Program } from "../flow/courseTypes"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
 
 const genBasketItemId = incrementer()
@@ -97,6 +98,28 @@ export const makeProduct = (
   product_type:   productType,
   latest_version: makeItem(productType)
 })
+
+export const makeCourseRunOrProgram = (
+  productType: string = PRODUCT_TYPE_COURSERUN,
+  courseWareId: ?string
+): [BaseCourseRun | Program] => {
+  // $FlowFixMe
+  const product = {}
+  product.id = genProductId.next().value
+  product.title = casual.title
+  product.description = casual.description
+  product.thumbnail_url = casual.url
+  if (productType === PRODUCT_TYPE_COURSERUN) {
+    if (courseWareId) {
+      product.courseware_id = courseWareId
+    } else {
+      product.courseware_id = casual.string.replace(/ /g, "+")
+    }
+  } else {
+    product.readable_id = casual.string.replace(/ /g, "+")
+  }
+  return product
+}
 
 const genCompanyId = incrementer()
 export const makeCompany = (): Company => ({
