@@ -1,43 +1,45 @@
 """Wagtail page factories"""
+import pytz
 from django.core.exceptions import ObjectDoesNotExist
+from wagtail.core.rich_text import RichText
+
 import factory
 from factory.django import DjangoModelFactory
 import faker
 from faker.providers import internet
 import wagtail_factories
-from wagtail.core.rich_text import RichText
-
-from cms.models import (
-    ProgramIndexPage,
-    CourseIndexPage,
-    ProgramPage,
-    CoursePage,
-    LearningOutcomesPage,
-    LearningTechniquesPage,
-    FrequentlyAskedQuestion,
-    FrequentlyAskedQuestionPage,
-    ForTeamsPage,
-    WhoShouldEnrollPage,
-    CoursesInProgramPage,
-    ResourcePage,
-    UserTestimonialsPage,
-    FacultyMembersPage,
-    ImageCarouselPage,
-    SiteNotification,
-    HomePage,
-    TextVideoSection,
-    CatalogPage,
-    TextSection,
-    SignatoryPage,
-    CertificatePage,
-)
 from cms.blocks import (
+    FacultyBlock,
     LearningTechniqueBlock,
     ResourceBlock,
     UserTestimonialBlock,
-    FacultyBlock,
 )
-from courses.factories import ProgramFactory, CourseFactory
+from cms.models import (
+    CatalogPage,
+    CertificatePage,
+    CourseIndexPage,
+    CoursePage,
+    CoursesInProgramPage,
+    ExternalCoursePage,
+    FacultyMembersPage,
+    ForTeamsPage,
+    FrequentlyAskedQuestion,
+    FrequentlyAskedQuestionPage,
+    HomePage,
+    ImageCarouselPage,
+    LearningOutcomesPage,
+    LearningTechniquesPage,
+    ProgramIndexPage,
+    ProgramPage,
+    ResourcePage,
+    SignatoryPage,
+    SiteNotification,
+    TextSection,
+    TextVideoSection,
+    UserTestimonialsPage,
+    WhoShouldEnrollPage,
+)
+from courses.factories import CourseFactory, ProgramFactory
 
 factory.Faker.add_provider(internet)
 
@@ -87,6 +89,38 @@ class CoursePageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = CoursePage
+
+    @factory.post_generation
+    def post_gen(obj, create, extracted, **kwargs):  # pylint:disable=unused-argument
+        """Post-generation hook"""
+        if create:
+            # Move the created page to be a child of the course index page
+            index_page = CourseIndexPage.objects.first()
+            if not index_page:
+                raise ObjectDoesNotExist
+            obj.move(index_page, "last-child")
+            obj.refresh_from_db()
+        return obj
+
+
+class ExternalCoursePageFactory(wagtail_factories.PageFactory):
+    """ExternalCoursePage factory class"""
+
+    title = factory.Sequence("Test page - External Course {0}".format)
+    start_date = factory.Faker(
+        "date_time_this_month", before_now=True, after_now=False, tzinfo=pytz.utc
+    )
+    price = factory.fuzzy.FuzzyDecimal(low=1, high=123)
+    external_url = factory.Faker("uri")
+    readable_id = factory.Sequence(
+        lambda number: "external-course:/v{}/{}".format(number, FAKE.slug())
+    )
+    subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
+    thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    background_image = factory.SubFactory(wagtail_factories.ImageFactory)
+
+    class Meta:
+        model = ExternalCoursePage
 
     @factory.post_generation
     def post_gen(obj, create, extracted, **kwargs):  # pylint:disable=unused-argument

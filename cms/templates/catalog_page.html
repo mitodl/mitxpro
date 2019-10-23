@@ -47,7 +47,7 @@
                 {% for page in all_pages %}
                   {% if page.program %}
                       {% include "partials/catalog_card.html" with courseware_page=page object_type="program" tab="all" %}
-                  {% elif page.course %}
+                  {% elif page.course or page.is_external_course_page %}
                       {% include "partials/catalog_card.html" with courseware_page=page object_type="course" tab="all"%}
                   {% endif %}
                 {% endfor %}
