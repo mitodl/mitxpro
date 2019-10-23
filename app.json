@@ -55,6 +55,14 @@
       "description": null,
       "required": false
     },
+    "COUPON_REQUEST_SHEET_DATE_FORMAT": {
+      "description": "Python strptime format for the datetime columns in the coupon request sheet",
+      "required": false
+    },
+    "COUPON_REQUEST_SHEET_ID": {
+      "description": "ID of the Google Sheet that contains requests for coupons",
+      "required": false
+    },
     "CRON_COURSE_CERTIFICATES_DAYS": {
       "description": "'day_of_week' value for 'generate-course-certificate' scheduled task (default will run once a day).",
       "required": false
@@ -115,8 +123,36 @@
       "description": "The log level for django",
       "required": false
     },
+    "DRIVE_API_PROJECT_ID": {
+      "description": "ID for the Google API project where the credentials were created",
+      "required": false
+    },
+    "DRIVE_BASE_FOLDER_ID": {
+      "description": "ID of the top level Drive folder",
+      "required": false
+    },
+    "DRIVE_CLIENT_ID": {
+      "description": "Client ID from Google API credentials",
+      "required": false
+    },
+    "DRIVE_CLIENT_SECRET": {
+      "description": "Client secret from Google API credentials",
+      "required": false
+    },
+    "DRIVE_OUTPUT_FOLDER_ID": {
+      "description": "ID of the Drive folder where newly created Sheets should be kept",
+      "required": false
+    },
+    "DRIVE_WEBHOOK_CHANNEL_ID": {
+      "description": "Channel ID to use for requests to get push notifications for file changes",
+      "required": false
+    },
     "GA_TRACKING_ID": {
       "description": "Google analytics tracking ID",
+      "required": false
+    },
+    "GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE": {
+      "description": "The value of the meta tag used by Google to verify the owner of a domain (used for enabling push notifications)",
       "required": false
     },
     "HEROKU_APP_NAME": {
@@ -348,6 +384,10 @@
     },
     "SENTRY_LOG_LEVEL": {
       "description": "The log level for Sentry",
+      "required": false
+    },
+    "SHEETS_ADMIN_EMAILS": {
+      "description": "Comma-separated list of emails for users that should be added as an editor for all newly created Sheets",
       "required": false
     },
     "SITE_NAME": {

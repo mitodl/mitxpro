@@ -20,22 +20,31 @@ from mitxpro.templatetags.render_bundle import public_path
 from mitxpro.utils import remove_password_from_url
 
 
-def get_js_settings_context(request):
+def get_base_context(request):
     """
-    Returns the template context key/value needed for templates that render
-    JS settings as JSON.
+    Returns the template context key/values needed for the base template and all templates that extend it
     """
-    js_settings = {
-        "gaTrackingID": settings.GA_TRACKING_ID,
-        "environment": settings.ENVIRONMENT,
-        "public_path": public_path(request),
-        "release_version": settings.VERSION,
-        "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
-        "sentry_dsn": remove_password_from_url(os.environ.get("SENTRY_DSN", "")),
-        "support_email": settings.EMAIL_SUPPORT,
-        "site_name": settings.SITE_NAME,
+    context = {
+        "js_settings_json": json.dumps(
+            {
+                "gaTrackingID": settings.GA_TRACKING_ID,
+                "environment": settings.ENVIRONMENT,
+                "public_path": public_path(request),
+                "release_version": settings.VERSION,
+                "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
+                "sentry_dsn": remove_password_from_url(
+                    os.environ.get("SENTRY_DSN", "")
+                ),
+                "support_email": settings.EMAIL_SUPPORT,
+                "site_name": settings.SITE_NAME,
+            }
+        )
     }
-    return {"js_settings_json": json.dumps(js_settings)}
+    if settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE:
+        context[
+            "domain_verification_tag"
+        ] = settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE
+    return context
 
 
 @csrf_exempt
@@ -44,7 +53,7 @@ def index(request, **kwargs):  # pylint: disable=unused-argument
     The index view
     """
     if request.method == "GET":
-        return render(request, "index.html", context=get_js_settings_context(request))
+        return render(request, "index.html", context=get_base_context(request))
     else:
         return redirect(request.get_full_path())
 
@@ -52,7 +61,7 @@ def index(request, **kwargs):  # pylint: disable=unused-argument
 def handler404(request, exception):
     """404: NOT FOUND ERROR handler"""
     response = render_to_string(
-        "404.html", request=request, context=get_js_settings_context(request)
+        "404.html", request=request, context=get_base_context(request)
     )
     return HttpResponseNotFound(response)
 
@@ -60,7 +69,7 @@ def handler404(request, exception):
 def handler500(request):
     """500 INTERNAL SERVER ERROR handler"""
     response = render_to_string(
-        "500.html", request=request, context=get_js_settings_context(request)
+        "500.html", request=request, context=get_base_context(request)
     )
     return HttpResponseServerError(response)
 
@@ -76,7 +85,7 @@ def restricted(request):
     """
     if not (request.user and request.user.is_staff):
         raise PermissionDenied
-    return render(request, "index.html", context=get_js_settings_context(request))
+    return render(request, "index.html", context=get_base_context(request))
 
 
 class AppContextView(APIView):

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ site_name }} | Google OAuth{% endblock %}
+
+{% block content %}
+  <div style="padding: 50px">
+    {% if auth_completed %}
+      <h3 style="color: green">Authentication successful!</h3>
+    {% endif %}
+    {% if auth_completed %}
+      <p style="border: 3px #ffbb33 solid; border-radius: 10px; padding: 10px;">
+        ⚠️ You have an existing API auth record with an access token and refresh token.
+        Clicking the button below and completing authorization with Google will overwrite
+        that record. ⚠️
+      </p>
+    {% endif %}
+    <form action="{% url "request-google-auth" %}">
+      <input type="submit" value="Authenticate and authorize with Google" />
+    </form>
+  </div>
+{% endblock %}

@@ -38,6 +38,10 @@ class ProgramQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
         """Applies a filter for Programs with live=True"""
         return self.filter(live=True)
 
+    def with_text_id(self, text_id):
+        """Applies a filter for the Program's readable_id"""
+        return self.filter(readable_id=text_id)
+
 
 class ProgramManager(models.Manager):  # pylint: disable=missing-docstring
     def get_queryset(self):
@@ -47,6 +51,10 @@ class ProgramManager(models.Manager):  # pylint: disable=missing-docstring
     def live(self):
         """Returns a queryset of Programs with live=True"""
         return self.get_queryset().live()
+
+    def with_text_id(self, text_id):
+        """Returns a queryset filtered by text id (i.e.: readable_id)"""
+        return self.get_queryset().with_text_id(text_id)
 
 
 class CourseQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
@@ -70,6 +78,10 @@ class CourseRunQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
         """Applies a filter for Course runs with live=True"""
         return self.filter(live=True)
 
+    def with_text_id(self, text_id):
+        """Applies a filter for the CourseRun's courseware_id"""
+        return self.filter(courseware_id=text_id)
+
 
 class CourseRunManager(models.Manager):  # pylint: disable=missing-docstring
     def get_queryset(self):
@@ -79,6 +91,10 @@ class CourseRunManager(models.Manager):  # pylint: disable=missing-docstring
     def live(self):
         """Returns a queryset of Course runs with live=True"""
         return self.get_queryset().live()
+
+    def with_text_id(self, text_id):
+        """Returns a queryset filtered by text id (i.e.: courseware_id)"""
+        return self.get_queryset().with_text_id(text_id)
 
 
 class ActiveEnrollmentManager(models.Manager):
