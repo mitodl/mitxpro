@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.27.1
+--------------
+
+- add sorting for all ecommerce adming pages
+- Added custom metadata options in mail API and added metadata to bulk enrollment emails
+
 Version 0.27.0 (Released October 21, 2019)
 --------------
 
