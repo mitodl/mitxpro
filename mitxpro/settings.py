@@ -148,6 +148,7 @@ INSTALLED_APPS = (
     "cms",
     "compliance",
     "courseware",
+    "sheets",
     # must be after "users" to pick up custom user model
     "compat",
     "hijack",
@@ -888,8 +889,56 @@ HUBSPOT_ID_PREFIX = get_string(
     "HUBSPOT_ID_PREFIX", "xpronew", description="Hub spot id prefix."
 )
 
-
 WAGTAILEMBEDS_FINDERS = [
     {"class": "cms.embeds.YouTubeEmbedFinder"},
     {"class": "wagtail.embeds.finders.oembed"},
 ]
+
+# Sheets settings
+DRIVE_CLIENT_ID = get_string(
+    "DRIVE_CLIENT_ID", None, description="Client ID from Google API credentials"
+)
+DRIVE_CLIENT_SECRET = get_string(
+    "DRIVE_CLIENT_SECRET", None, description="Client secret from Google API credentials"
+)
+DRIVE_API_PROJECT_ID = get_string(
+    "DRIVE_API_PROJECT_ID",
+    None,
+    description="ID for the Google API project where the credentials were created",
+)
+DRIVE_WEBHOOK_CHANNEL_ID = get_string(
+    "DRIVE_WEBHOOK_CHANNEL_ID",
+    "mitxpro-sheets-app",
+    description="Channel ID to use for requests to get push notifications for file changes",
+)
+DRIVE_BASE_FOLDER_ID = get_string(
+    "DRIVE_BASE_FOLDER_ID", "root", "ID of the top level Drive folder"
+)
+DRIVE_OUTPUT_FOLDER_ID = get_string(
+    "DRIVE_OUTPUT_FOLDER_ID",
+    None,
+    description="ID of the Drive folder where newly created Sheets should be kept",
+)
+COUPON_REQUEST_SHEET_ID = get_string(
+    "COUPON_REQUEST_SHEET_ID",
+    None,
+    description="ID of the Google Sheet that contains requests for coupons",
+)
+GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
+    "GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE",
+    None,
+    description="The value of the meta tag used by Google to verify the owner of a domain (used for enabling push notifications)",
+)
+_sheets_admin_email_str = get_string(
+    "SHEETS_ADMIN_EMAILS",
+    None,
+    description="Comma-separated list of emails for users that should be added as an editor for all newly created Sheets",
+)
+SHEETS_ADMIN_EMAILS = (
+    None if not _sheets_admin_email_str else _sheets_admin_email_str.split(",")
+)
+COUPON_REQUEST_SHEET_DATE_FORMAT = get_string(
+    "COUPON_REQUEST_SHEET_DATE_FORMAT",
+    "%m/%d/%Y %H:%M:%S",
+    description="Python strptime format for the datetime columns in the coupon request sheet",
+)

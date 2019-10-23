@@ -3,12 +3,11 @@ import json
 import logging
 from datetime import datetime
 from uuid import uuid4
-
 import re
-import pdftotext
 
 from django.conf import settings
 from django.db.models import Q
+import pdftotext
 
 from courses.models import CourseRun
 from ecommerce.api import get_valid_coupon_versions
