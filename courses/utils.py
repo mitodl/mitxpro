@@ -3,7 +3,13 @@ Utilities for courses/certificates
 """
 import logging
 from django.db import transaction
-from courses.models import CourseRunGrade, CourseRunCertificate, ProgramCertificate
+from courses.models import (
+    CourseRunGrade,
+    CourseRunCertificate,
+    ProgramCertificate,
+    Program,
+    CourseRun,
+)
 from mitxpro.utils import has_equal_properties
 
 
@@ -122,3 +128,73 @@ def generate_program_certificate(user, program):
         )
 
     return program_cert, True
+
+
+def revoke_program_certificate(
+    user, readable_id, revoke_state, include_program_courses
+):
+    """
+    Revoked a program certificate.
+
+    Args:
+        user (User): a Django user.
+        readable_id: represents the program (readable_id) for revoking a ProgramCertificate.
+        revoke_state: (bool) override the is_revoked state of ProgramCertificate.
+        include_program_courses: (bool) Indicate to revoke/un-revoke all course runs that are associated with a program.
+    """
+    program = Program.objects.get(readable_id=readable_id)
+    try:
+        program_certificate = ProgramCertificate.all_objects.get(
+            user=user, program__readable_id=readable_id
+        )
+    except ProgramCertificate.DoesNotExist:
+        log.warning(
+            "Program certificate for user: %s in program %s does not exist.",
+            user.username,
+            readable_id,
+        )
+        return False
+
+    program_certificate.is_revoked = revoke_state
+    program_certificate.save()
+
+    if include_program_courses:
+        courses_in_program_ids = set(program.courses.values_list("id", flat=True))
+        CourseRunCertificate.all_objects.filter(
+            user=user, course_run__course_id__in=courses_in_program_ids
+        ).update(is_revoked=revoke_state)
+
+        log.info(
+            "Course certificates associated with that program: [%s] are also updated",
+            program,
+        )
+
+    return True
+
+
+def revoke_course_run_certificate(user, courseware_id, revoke_state):
+    """
+        Revoked a course run certificate.
+
+        Args:
+            user (User): a Django user.
+            courseware_id: represents the course run.
+            revoke_state: represents the course run (courseware_id) for revoking a CourseRunCertificate.
+    """
+    course_run = CourseRun.objects.get(courseware_id=courseware_id)
+    try:
+        course_run_certificate = CourseRunCertificate.all_objects.get(
+            user=user, course_run=course_run
+        )
+    except CourseRunCertificate.DoesNotExist:
+        log.warning(
+            "Course run certificate for user: %s and course_run: %s does not exist.",
+            user.username,
+            course_run,
+        )
+        return False
+
+    course_run_certificate.is_revoked = revoke_state
+    course_run_certificate.save()
+
+    return True
