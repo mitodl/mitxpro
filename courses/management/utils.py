@@ -82,10 +82,10 @@ class EnrollmentChangeCommand(BaseCommand):
         Returns:
             tuple: (ProgramEnrollment, Program) or (CourseRunEnrollment, CourseRun)
         """
-        program_property = command_options["program"]
-        run_property = command_options["run"]
-        order_property = command_options["order"]
-        force = command_options["force"]
+        program_property = command_options.get("program")
+        run_property = command_options.get("run")
+        order_property = command_options.get("order")
+        force = command_options.get("force")
 
         if program_property and run_property:
             raise CommandError(

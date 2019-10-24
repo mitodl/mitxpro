@@ -18,8 +18,8 @@ def test_fetch_enrollment(order):
     run_enrollment = CourseRunEnrollmentFactory(user=user)
     program_enrollment = ProgramEnrollmentFactory(user=user)
 
-    run_command_options = {"run": run_enrollment.run}
-    program_command_options = {"program": program_enrollment.program}
+    run_command_options = {"run": run_enrollment.run.courseware_id}
+    program_command_options = {"program": program_enrollment.program.readable_id}
 
     if order:
         run_command_options["order"] = run_enrollment.order
