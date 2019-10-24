@@ -10,13 +10,26 @@
             <h2>Confirm Course</h2>
             <hr/>
             <p>Please confirm this is the course you are trying to enroll in:</p>
+            {% if messages %}
+                {% for message in messages %}
+                <div{% if message.tags %} class="form-{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            {% endif %}
             <form method="post" enctype="multipart/form-data" class="voucher-form ">
                 {% csrf_token %}
-                <select name="coupon_version" id="coupon_version" classname="form-control">
-                    {% for choice in eligible_choices %}
-                        <option value="{{ choice.0 }}">{{ choice.1 }}</option>
-                    {% endfor %}
-                </select>
+                <div class="flex">
+                    <select name="coupon_version" id="coupon_version" classname="form-control">
+                        <option value="">Choose Course</option>
+                        {% for choice in eligible_choices %}
+                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                        {% endfor %}
+                    </select>
+                    <div id="voucher-error" class="form-error d-none">
+                        Please select a course from the list.
+                        If your expected course isn't in the list, please contact
+                        <a href="https://xpro.zendesk.com/hc/en-us/requests/new" target="_blank" rel="noopener noreferrer">Customer Support</a>.
+                    </div>
+                </div>
                 <hr/>
                 <div class="text-right">
                     <button type="submit" class="btn btn-primary btn-light-blue">ENROLL</button>
@@ -24,4 +37,23 @@
             </form>
         </div>
     </div>
+
+    <script type="text/javascript">
+      document.querySelector(".voucher-form").addEventListener("change", function(e) {
+        if (!$("#coupon_version").val()) {
+          $("#voucher-error").removeClass("d-none");
+        }
+        else
+          $("#voucher-error").addClass("d-none");
+      });
+
+      document.querySelector(".voucher-form").addEventListener("submit", function(e){
+        if (!$("#coupon_version").val()) {
+          $("#voucher-error").removeClass("d-none");
+          e.preventDefault();    //stop form from submitting
+        }
+        else
+          $("#voucher-error").addClass("d-none");
+      });
+    </script>
 {% endblock content %}

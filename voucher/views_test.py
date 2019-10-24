@@ -202,6 +202,34 @@ def test_post_enroll_view_with_coupon_choice(
     assert Voucher.objects.get(id=voucher.id).coupon == coupon_version.coupon
 
 
+def test_post_enroll_view_without_coupon_choice(
+    voucher_and_exact_match_with_coupon, settings
+):
+    """
+    Test the EnrollView POST method with a valid coupon choice
+    """
+    context = voucher_and_exact_match_with_coupon
+    client = context.client
+    settings.VOUCHER_COMPANY_ID = context.company.id
+    response = client.post(reverse("voucher:enroll"), {"coupon_version": ""})
+    assert response.status_code == 200
+    assert b"Coupon Version is required." in response.content
+
+
+def test_post_enroll_view_with_empty_coupon_choice(
+    voucher_and_exact_match_with_coupon, settings
+):
+    """
+    Test the EnrollView POST method with a valid coupon choice
+    """
+    context = voucher_and_exact_match_with_coupon
+    client = context.client
+    settings.VOUCHER_COMPANY_ID = context.company.id
+    response = client.post(reverse("voucher:enroll"), {"coupon_version": ("", "")})
+    assert response.status_code == 200
+    assert b"Coupon Version is required." in response.content
+
+
 def test_post_enroll_view_with_stolen_only_coupon(
     mock_logger, voucher_and_exact_match_with_coupon, settings
 ):

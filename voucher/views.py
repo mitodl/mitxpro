@@ -12,6 +12,8 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.generic import FormView
 from django.views.generic.base import View
+from django.contrib import messages
+
 
 from ecommerce.utils import make_checkout_url
 from ecommerce.models import Coupon, Product
@@ -120,29 +122,39 @@ class EnrollView(LoginRequiredMixin, View):
         Submit a CouponVersion object and redirect to the enrollment page
         """
         voucher = get_current_voucher(self.request.user)
-        product_id, coupon_id = json.loads(request.POST["coupon_version"])
+        try:
+            product_id, coupon_id = json.loads(request.POST["coupon_version"])
+        except json.JSONDecodeError:
+            messages.error(request, "Coupon Version is required.")
+            return self.get(request)
 
-        # Ensure no one has snagged this coupon while the user was waiting
-        if hasattr(Coupon.objects.get(id=coupon_id), "voucher"):
-            new_coupon_version = get_valid_voucher_coupons_version(
-                voucher, Product.objects.get(id=product_id)
-            )
-            if new_coupon_version is None or not hasattr(new_coupon_version, "coupon"):
-                log.error(
-                    "Found no valid coupons for matches for voucher %s", voucher.id
+        if product_id and coupon_id:
+            # Ensure no one has snagged this coupon while the user was waiting
+            if hasattr(Coupon.objects.get(id=coupon_id), "voucher"):
+                new_coupon_version = get_valid_voucher_coupons_version(
+                    voucher, Product.objects.get(id=product_id)
                 )
-                return redirect("voucher:resubmit")
-            else:
-                coupon_id = new_coupon_version.coupon.id
+                if new_coupon_version is None or not hasattr(
+                    new_coupon_version, "coupon"
+                ):
+                    log.error(
+                        "Found no valid coupons for matches for voucher %s", voucher.id
+                    )
+                    return redirect("voucher:resubmit")
+                else:
+                    coupon_id = new_coupon_version.coupon.id
 
-        # Save coupon for this particular voucher
-        voucher.coupon_id = coupon_id
-        voucher.product_id = product_id
-        voucher.save()
-        enroll_url = make_checkout_url(
-            product_id=product_id, code=voucher.coupon.coupon_code
-        )
-        return redirect(enroll_url)
+            # Save coupon for this particular voucher
+            voucher.coupon_id = coupon_id
+            voucher.product_id = product_id
+            voucher.save()
+            enroll_url = make_checkout_url(
+                product_id=product_id, code=voucher.coupon.coupon_code
+            )
+            return redirect(enroll_url)
+        else:
+            messages.error(request, "Coupon Version is required.")
+            return self.get(request)
 
 
 @login_required
