@@ -84,9 +84,10 @@
                     {% if page.CEUs %}
                         <span class="award-text">Awarded {{ page.CEUs }} Continuing Education Units (CEUs) <br>{{ start_date|date }} - {{ end_date|date }}</span>
                     {% endif %}
-                    <div class="row justify-content-center">
+                    <div class="row justify-content-center certify-by-row">
                         {% for signatory in page.signatory_pages %}
-                            <div class="col-sm-4 certify-by">
+
+                            <div class="col-sm-4 signature-{{ page.signatory_pages | length }} certify-by">
                                 <div class="signature-area">
                                     {% image signatory.signature_image max-150x50 %}
                                 </div>
@@ -105,7 +106,7 @@
                     </div>
                     <div class="row justify-content-center validation-link">
                         <div class="col">
-                        <p>Valid Certificate ID: <a href="{{ request.build_absolute_uri }}" target="_blank">{{ uuid }}</a>
+                        <p><strong>Valid Certificate ID:</strong> <a href="{{ request.build_absolute_uri }}" target="_blank">{{ uuid }}</a>
                         </div>
                     </div>
                 </div>
