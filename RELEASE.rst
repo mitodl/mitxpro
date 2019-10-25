@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.27.1
+Version 0.27.1 (Released October 25, 2019)
 --------------
 
 - add sorting for all ecommerce adming pages
