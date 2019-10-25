@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.27.2
+--------------
+
+- Design the certificate in print mode.
+- fix key error in transfer enrollment command
+
 Version 0.27.1 (Released October 25, 2019)
 --------------
 
