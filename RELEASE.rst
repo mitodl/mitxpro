@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.27.2
+Version 0.27.2 (Released October 28, 2019)
 --------------
 
 - Design the certificate in print mode.
