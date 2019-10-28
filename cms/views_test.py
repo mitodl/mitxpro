@@ -42,7 +42,6 @@ def test_home_page_view(client):
         f'<a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="#">Watch Now</a>'
         not in content
     )
-    assert "dropdown-menu" in content
 
     # add video section
     about_page = TextVideoSection(

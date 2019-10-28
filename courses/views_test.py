@@ -284,18 +284,25 @@ def test_course_view(
         is_enrolled and has_unexpired_run and not is_anonymous
     )
 
-    has_button = False
+    # Anynoymous users don't see the enrolled/enroll-now button.
+    # For logged in users:
+    # a) product should exist, next courserun should be there, user not enrolled (enroll now button)
+    # b) user is enrolled (enrolled button)
+    # NOTE: added `has_unexpired_run` to test for case (b) only because of the way the test is written,
+    #       enrollment isn't actually created unless the course has an unexpired run.
+    has_button = (
+        (has_product and has_unexpired_run and not is_enrolled)
+        or (is_enrolled and has_unexpired_run)
+    ) and not is_anonymous
     url = ""  # make linter happy
     class_name = ""
     if not is_anonymous:
         if not is_enrolled and has_product and has_unexpired_run:
             url = f'{reverse("checkout-page")}?product={product_id}'
             class_name = "enroll-now"
-            has_button = True
         if is_enrolled and has_unexpired_run:
             url = reverse("user-dashboard")
             class_name = "enrolled"
-            has_button = True
 
     assert (
         f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")
@@ -304,17 +311,32 @@ def test_course_view(
     assert (
         "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")
         in resp.content
-    ) is is_anonymous
+    ) is (is_anonymous and has_product and has_unexpired_run)
 
 
 @pytest.mark.parametrize("is_enrolled", [True, False])
 @pytest.mark.parametrize("has_product", [True, False])
+@pytest.mark.parametrize("has_unexpired_run", [True, False])
 @pytest.mark.parametrize("is_anonymous", [True, False])
-def test_program_view(client, user, home_page, is_enrolled, has_product, is_anonymous):
+def test_program_view(
+    client, user, home_page, is_enrolled, has_product, has_unexpired_run, is_anonymous
+):
     """
-    Test that the course detail view has the right context and shows the right HTML for the enroll/view button
+    Test that the program detail view has the right context and shows the right HTML for the enroll/view button
     """
     program = ProgramFactory.create(live=True)
+
+    if has_unexpired_run:
+        now = now_in_utc()
+        CourseRunFactory.create_batch(
+            3,
+            course=CourseFactory.create(
+                program=program, live=True, position_in_program=1
+            ),
+            live=True,
+            start_date=now + timedelta(hours=2),
+        )
+
     # coursepage required for loading seo metadata
     ProgramPageFactory.create(program=program, parent=home_page)
 
@@ -334,18 +356,22 @@ def test_program_view(client, user, home_page, is_enrolled, has_product, is_anon
     assert resp.context["product_id"] == product_id
     assert resp.context["enrolled"] == (is_enrolled and not is_anonymous)
 
-    has_button = False
+    # Anynoymous users don't see the enrolled/enroll-now button.
+    # For logged in users:
+    # a) product should exist, next courserun should be there, user not enrolled (enroll now button)
+    # b) user is enrolled (enrolled button)
+    has_button = (
+        (has_product and has_unexpired_run and not is_enrolled) or is_enrolled
+    ) and not is_anonymous
     url = ""  # make linter happy
     class_name = ""
     if not is_anonymous:
-        if not is_enrolled and has_product:
+        if not is_enrolled and has_product and has_unexpired_run:
             url = f'{reverse("checkout-page")}?product={product_id}'
             class_name = "enroll-now"
-            has_button = True
         if is_enrolled:
             url = reverse("user-dashboard")
             class_name = "enrolled"
-            has_button = True
 
     assert (
         f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")
@@ -354,7 +380,7 @@ def test_program_view(client, user, home_page, is_enrolled, has_product, is_anon
     assert (
         "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")
         in resp.content
-    ) is is_anonymous
+    ) is (is_anonymous and has_product and has_unexpired_run)
 
 
 def test_user_enrollments_view(mocker, client, user):

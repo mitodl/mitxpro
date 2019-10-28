@@ -628,6 +628,11 @@ class ProductPage(MetadataPageMixin, Page):
         """Checks whether the page in question is for an external course or not."""
         return isinstance(self, ExternalCoursePage)
 
+    @property
+    def is_program_page(self):
+        """Gets the product page type, this is used for sorting product pages."""
+        return isinstance(self, ProgramPage)
+
 
 class ProgramPage(ProductPage):
     """
