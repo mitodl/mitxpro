@@ -136,11 +136,11 @@ class TestSettings(TestCase):
         from mitxpro.envs import generate_app_json
 
         with open("app.json") as app_json_file:
-            app_json = app_json_file.read()
+            app_json = json.load(app_json_file)
 
         generated_app_json = generate_app_json()
 
         # pytest will print the difference
-        assert app_json == json.dumps(
+        assert json.dumps(app_json, sort_keys=True, indent=2) == json.dumps(
             generated_app_json, sort_keys=True, indent=2
         ), "Generated app.json does not match the app.json file. Please use the 'generate_app_json' management command to update app.json"

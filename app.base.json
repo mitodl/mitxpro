@@ -1,6 +1,6 @@
 {
   "addons": [
-    "heroku-postgresql:hobby-dev",
+    "heroku-postgresql:standard-0",
     "newrelic:wayne",
     "rediscloud:30"
   ],
