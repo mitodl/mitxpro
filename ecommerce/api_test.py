@@ -896,7 +896,8 @@ def test_complete_order_coupon_assignments(mocker, user, basket_and_coupons):
     order = OrderFactory.create(purchaser=user, status=Order.CREATED)
     coupon_redemption = CouponRedemptionFactory.create(order=order)
     coupon_assignment = ProductCouponAssignmentFactory.create(
-        email=order.purchaser.email,
+        # Set assignment email as uppercase to test that the email match is case-insensitive
+        email=order.purchaser.email.upper(),
         product_coupon__coupon=coupon_redemption.coupon_version.coupon,
     )
 
@@ -1123,7 +1124,8 @@ def test_fetch_and_serialize_unused_coupons(user):
     # Create assignments for the user and set all to be unredeemed/unused
     ProductCouponAssignmentFactory.create_batch(
         len(product_coupons),
-        email=user.email,
+        # Set assignment email as uppercase to test that the email match is case-insensitive
+        email=user.email.upper(),
         redeemed=False,
         product_coupon=factory.Iterator(product_coupons),
     )
