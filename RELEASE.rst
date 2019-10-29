@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.28.0
+--------------
+
+- Changing default database addon to be standard-0 to allow for more connections
+- change password form added
+
 Version 0.27.2 (Released October 28, 2019)
 --------------
 
