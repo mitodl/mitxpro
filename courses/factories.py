@@ -16,6 +16,7 @@ from .models import (
     CourseRunEnrollment,
     CourseRunCertificate,
     ProgramCertificate,
+    CourseRunGrade,
 )
 
 FAKE = faker.Factory.create()
@@ -103,6 +104,20 @@ class CourseRunCertificateFactory(DjangoModelFactory):
 
     class Meta:
         model = CourseRunCertificate
+
+
+class CourseRunGradeFactory(DjangoModelFactory):
+    """Factory for CourseRunGrade"""
+
+    course_run = factory.SubFactory(CourseRunFactory)
+    user = factory.SubFactory(UserFactory)
+    grade = factory.fuzzy.FuzzyDecimal(low=0.0, high=1.0)
+    letter_grade = factory.fuzzy.FuzzyText(length=1)
+    passed = factory.fuzzy.FuzzyChoice([True, False])
+    set_by_admin = factory.fuzzy.FuzzyChoice([True, False])
+
+    class Meta:
+        model = CourseRunGrade
 
 
 class ProgramCertificateFactory(DjangoModelFactory):

@@ -67,18 +67,22 @@ def process_course_run_grade_certificate(course_run_grade):
     """
     user = course_run_grade.user
     course_run = course_run_grade.course_run
+
+    # A grade of 0.0 indicates that the certificate should be deleted
     should_delete = not bool(course_run_grade.grade)
+    should_create = course_run_grade.passed
 
     if should_delete:
         delete_count, _ = CourseRunCertificate.objects.filter(
             user=user, course_run=course_run
         ).delete()
         return None, False, (delete_count > 0)
-    else:
+    elif should_create:
         certificate, created = CourseRunCertificate.objects.get_or_create(
             user=user, course_run=course_run
         )
         return certificate, created, False
+    return None, False, False
 
 
 def generate_program_certificate(user, program):
