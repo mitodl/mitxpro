@@ -47,11 +47,12 @@ describe("Top-level App", () => {
         unused_coupons: [unusedCoupon]
       })
       expectedNotificationState = {
-        "unused-coupon": {
+        "unused-coupon-0": {
           type:  ALERT_TYPE_UNUSED_COUPON,
           props: {
-            productId:  unusedCoupon.product_id,
-            couponCode: unusedCoupon.coupon_code
+            productId:   unusedCoupon.product_id,
+            productName: unusedCoupon.product_name,
+            couponCode:  unusedCoupon.coupon_code
           }
         }
       }

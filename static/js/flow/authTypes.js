@@ -52,6 +52,7 @@ export type LegalAddress = {
 export type UnusedCoupon = {
   coupon_code: string,
   product_id: number,
+  product_name: string,
   expiration_date: string
 }
 

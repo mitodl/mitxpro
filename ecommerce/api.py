@@ -898,6 +898,9 @@ def fetch_and_serialize_unused_coupons(user):
         {
             "coupon_code": coupon_data["coupon__coupon_code"],
             "product_id": coupon_data["product__id"],
+            "product_name": Product.objects.get(id=coupon_data["product__id"])
+            .run_queryset[0]
+            .title,
             "expiration_date": coupon_data[
                 "coupon__payment__versions__expiration_date"
             ],

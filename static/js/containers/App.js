@@ -39,15 +39,19 @@ export class App extends React.Component<Props, void> {
     if (this.shouldShowUnusedCouponAlert(prevProps, this.props)) {
       const { currentUser, addUserNotification } = this.props
       // $FlowFixMe: currentUser cannot be undefined or is_anonymous=true
-      const unusedCoupon = currentUser.unused_coupons[0]
-      addUserNotification({
-        "unused-coupon": {
-          type:  ALERT_TYPE_UNUSED_COUPON,
-          props: {
-            productId:  unusedCoupon.product_id,
-            couponCode: unusedCoupon.coupon_code
+      const unusedCoupons = currentUser.unused_coupons
+      unusedCoupons.map((unusedCoupon, index) => {
+        const key1 = `unused-coupon-${index}`
+        addUserNotification({
+          [key1]: {
+            type:  ALERT_TYPE_UNUSED_COUPON,
+            props: {
+              productId:   unusedCoupon.product_id,
+              productName: unusedCoupon.product_name,
+              couponCode:  unusedCoupon.coupon_code
+            }
           }
-        }
+        })
       })
     }
   }

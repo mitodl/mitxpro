@@ -19,6 +19,7 @@ export const makeAnonymousUser = (): AnonymousUser => ({
 export const makeUnusedCoupon = (): UnusedCoupon => ({
   // $FlowFixMe: Flow thinks incr.next().value may be undefined, but it won't ever be
   product_id:      incr.next().value,
+  product_name:    casual.word,
   coupon_code:     casual.word,
   expiration_date: casual.moment.format()
 })

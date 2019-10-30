@@ -9,6 +9,7 @@ import type { Action } from "../flow/reduxTypes"
 export type TextNotificationProps = { text: string }
 export type UnusedCouponNotificationProps = {
   productId: number,
+  productName: string,
   couponCode: string
 }
 

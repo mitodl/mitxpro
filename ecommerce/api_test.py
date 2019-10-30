@@ -1134,6 +1134,7 @@ def test_fetch_and_serialize_unused_coupons(user):
         {
             "coupon_code": expected_product_coupon.coupon.coupon_code,
             "product_id": expected_product_coupon.product.id,
+            "product_name": expected_product_coupon.product.content_object.title,
             "expiration_date": expected_payment_version.expiration_date,
         }
     ]

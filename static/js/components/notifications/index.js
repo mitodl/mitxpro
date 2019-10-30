@@ -21,11 +21,11 @@ export const TextNotification = (
 export const UnusedCouponNotification = (
   props: UnusedCouponNotificationProps & ComponentProps
 ) => {
-  const { productId, couponCode, dismiss } = props
+  const { productId, productName, couponCode, dismiss } = props
 
   return (
     <span>
-      You have an unused coupon.{" "}
+      You have an unused enrollment code.{" "}
       <MixedLink
         dest={`${routes.checkout}?product=${productId}&code=${couponCode}`}
         onClick={dismiss}
@@ -33,7 +33,7 @@ export const UnusedCouponNotification = (
       >
         Checkout now
       </MixedLink>{" "}
-      to redeem it.
+      to enroll in {productName}.
     </span>
   )
 }

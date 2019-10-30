@@ -29,11 +29,13 @@ describe("Notification component", () => {
 
   it("UnusedCouponNotification", () => {
     const productId = 1,
-      couponCode = "code"
+      couponCode = "code",
+      productName = "name"
     const wrapper = shallow(
       <UnusedCouponNotification
         productId={productId}
         couponCode={couponCode}
+        productName={productName}
         dismiss={dismissStub}
       />
     )
