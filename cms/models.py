@@ -367,6 +367,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
         "ResourcePage",
         "ImageCarouselPage",
         "CertificateIndexPage",
+        "SignatoryIndexPage",
     ]
 
     def _get_child_page_of_type(self, cls):
