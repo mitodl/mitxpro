@@ -3,14 +3,16 @@ Page models for the CMS
 """
 # pylint: disable=too-many-lines
 import re
+from datetime import date, datetime
 from urllib.parse import urljoin
 
+import pytz
 from django.conf import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.db import models
-from django.utils.text import slugify
 from django.http.response import Http404
 from django.shortcuts import reverse
+from django.utils.text import slugify
 from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
@@ -20,13 +22,11 @@ from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Orderable, Page
 from wagtail.core.utils import WAGTAIL_APPEND_SLASH
 from wagtail.images.blocks import ImageChooserBlock
-from wagtail.images.models import Image
 from wagtail.images.edit_handlers import ImageChooserPanel
+from wagtail.images.models import Image
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
-from courses.constants import DEFAULT_COURSE_IMG_PATH
-from courses.models import CourseRunCertificate, ProgramCertificate
 from cms.blocks import (
     FacultyBlock,
     LearningTechniqueBlock,
@@ -34,12 +34,14 @@ from cms.blocks import (
     UserTestimonialBlock,
 )
 from cms.constants import (
+    CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
     PROGRAM_INDEX_SLUG,
     SIGNATORY_INDEX_SLUG,
-    CERTIFICATE_INDEX_SLUG,
 )
 from cms.utils import filter_and_sort_catalog_pages
+from courses.constants import DEFAULT_COURSE_IMG_PATH
+from courses.models import CourseRunCertificate, ProgramCertificate
 from mitxpro.views import get_js_settings_context
 
 
@@ -70,6 +72,14 @@ class CourseObjectIndexPage(Page):
         """Fetch a child page by a Program/Course readable_id value"""
         raise NotImplementedError
 
+    def get_external_child_by_readable_id(self, readable_id):
+        """Fetch a child page by slug: typically used in external courseware pages"""
+        return (
+            self.get_children()
+            .type(ExternalCoursePage)
+            .get(externalcoursepage__readable_id=readable_id)
+        )
+
     def route(self, request, path_components):
         if path_components:
             # request is for a child of this page
@@ -81,7 +91,13 @@ class CourseObjectIndexPage(Page):
                 # instead of the page slug (as Wagtail does by default)
                 subpage = self.get_child_by_readable_id(child_readable_id)
             except Page.DoesNotExist:
-                raise Http404
+                try:
+                    # Try to find an external course page
+                    subpage = self.get_external_child_by_readable_id(
+                        readable_id=child_readable_id
+                    )
+                except Page.DoesNotExist:
+                    raise Http404
 
             return subpage.specific.route(request, remaining_components)
         return super().route(request, path_components)
@@ -201,6 +217,12 @@ class CatalogPage(Page):
             .select_related("course", "thumbnail_image")
             .prefetch_related("course__courseruns")
         )
+        external_course_qset = (
+            ExternalCoursePage.objects.live()
+            .order_by("title")
+            .select_related("thumbnail_image")
+        )
+
         featured_product = ProgramPage.objects.filter(
             featured=True, program__live=True
         ).select_related("program").prefetch_related(
@@ -209,7 +231,7 @@ class CatalogPage(Page):
             featured=True, course__live=True
         )
         all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
-            program_page_qset, course_page_qset
+            program_page_qset, course_page_qset, external_course_qset
         )
         return dict(
             **super().get_context(request),
@@ -601,6 +623,11 @@ class ProductPage(MetadataPageMixin, Page):
         """Gets the product page type, this is used for sorting product pages."""
         return isinstance(self, CoursePage)
 
+    @property
+    def is_external_course_page(self):
+        """Checks whether the page in question is for an external course or not."""
+        return isinstance(self, ExternalCoursePage)
+
 
 class ProgramPage(ProductPage):
     """
@@ -744,6 +771,98 @@ class CoursePage(ProductPage):
         }
 
 
+class ExternalCoursePage(ProductPage):
+    """
+    CMS page representing an external course
+    """
+
+    template = "product_page.html"
+
+    parent_page_types = ["CourseIndexPage"]
+
+    external_url = models.URLField(
+        null=False, blank=False, help_text="The URL of the external course web page."
+    )
+    readable_id = models.CharField(
+        max_length=64,
+        null=False,
+        blank=False,
+        unique=True,
+        help_text="The readable ID of the external course. Appears in URL, has to be unique.",
+    )
+    start_date = models.DateField(
+        null=True, blank=True, help_text="The start date of the external course."
+    )
+    price = models.DecimalField(
+        null=True,
+        blank=True,
+        decimal_places=2,
+        max_digits=20,
+        help_text="The price of the external course.",
+    )
+
+    content_panels = [
+        FieldPanel("external_url"),
+        FieldPanel("readable_id"),
+        FieldPanel("start_date"),
+        FieldPanel("price"),
+    ] + ProductPage.content_panels
+
+    def get_url_parts(self, request=None):
+        # We need to skip `ProductPage` in the MRO and get to `Page.get_url_parts`
+        # pylint: disable=bad-super-call
+        url_parts = super(ProductPage, self).get_url_parts(request=request)
+        if not url_parts:
+            return None
+        return (
+            url_parts[0],
+            url_parts[1],
+            # Wagtail generates the 'page_path' part of the url tuple with the
+            # parent page slug followed by this page's slug (e.g.: "/courses/my-page-title").
+            # We want to generate that path with the parent page slug followed by the readable_id
+            # of the external course instead (e.g.: "/courses/external:some+external+course")
+            re.sub(
+                self.slugged_page_path_pattern,
+                r"\1{}\3".format(self.readable_id),
+                url_parts[2],
+            ),
+        )
+
+    @property
+    def program_page(self):
+        """
+        External courses are not related to local programs
+        """
+        return None
+
+    @property
+    def course_lineup(self):
+        """There is no course lineup for external courses"""
+        return None
+
+    @property
+    def course_pages(self):
+        """
+        There is no program associated with external courses so there would be
+        no course_pages value
+        """
+        return None
+
+    @property
+    def product(self):
+        """There is no product associated with external courses"""
+        return None
+
+    @property
+    def next_run_date(self):
+        """The next run date should be only if `start_date` is in the future"""
+        return (
+            datetime.combine(self.start_date, datetime.min.time(), tzinfo=pytz.UTC)
+            if self.start_date and self.start_date > date.today()
+            else None
+        )
+
+
 class CourseProgramChildPage(Page):
     """
     Abstract page representing a child of Course/Program Page
@@ -752,7 +871,7 @@ class CourseProgramChildPage(Page):
     class Meta:
         abstract = True
 
-    parent_page_types = ["CoursePage", "ProgramPage", "HomePage"]
+    parent_page_types = ["ExternalCoursePage", "CoursePage", "ProgramPage", "HomePage"]
 
     # disable promote panels, no need for slug entry, it will be autogenerated
     promote_panels = []

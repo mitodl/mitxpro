@@ -26,6 +26,7 @@ from cms.factories import (
     WhoShouldEnrollPageFactory,
     TextSectionFactory,
     CertificatePageFactory,
+    ExternalCoursePageFactory,
 )
 from cms.models import (
     UserTestimonialsPage,
@@ -102,16 +103,26 @@ def test_program_page_course_pages():
 
 
 def test_custom_detail_page_urls():
-    """Verify that course/program detail pages return our custom URL path"""
+    """Verify that course/external-course/program detail pages return our custom URL path"""
     readable_id = "some:readable-id"
+    external_readable_id = "some:external-readable-id"
     program_pages = ProgramPageFactory.create_batch(
         2, program__readable_id=factory.Iterator([readable_id, "non-matching-id"])
     )
     course_pages = CoursePageFactory.create_batch(
         2, course__readable_id=factory.Iterator([readable_id, "non-matching-id"])
     )
+    external_course_pages = ExternalCoursePageFactory.create_batch(
+        2,
+        readable_id=factory.Iterator(
+            [external_readable_id, "non-matching-external-id"]
+        ),
+    )
     assert program_pages[0].get_url() == "/programs/{}/".format(readable_id)
     assert course_pages[0].get_url() == "/courses/{}/".format(readable_id)
+    assert external_course_pages[0].get_url() == "/courses/{}/".format(
+        external_readable_id
+    )
 
 
 def test_custom_detail_page_urls_handled():
@@ -272,6 +283,19 @@ def test_course_page_faculty_subpage():
     _assert_faculty_members(course_page)
 
 
+def test_external_course_page_faculty_subpage():
+    """
+    FacultyMembersPage should return expected values if associated with ExternalCoursePage
+    """
+    external_course_page = ExternalCoursePageFactory.create()
+
+    assert not external_course_page.faculty
+    FacultyMembersPageFactory.create(
+        parent=external_course_page, members=json.dumps(_get_faculty_members())
+    )
+    _assert_faculty_members(external_course_page)
+
+
 def _get_faculty_members():
     """Provides a `faculty` property instantiation data"""
     return [
@@ -311,6 +335,31 @@ def test_course_page_testimonials():
         items__0__testimonial__quote="quote",
     )
     assert course_page.testimonials == testimonials_page
+    assert testimonials_page.heading == "heading"
+    assert testimonials_page.subhead == "subhead"
+    for testimonial in testimonials_page.items:  # pylint: disable=not-an-iterable
+        assert testimonial.value.get("name") == "name"
+        assert testimonial.value.get("title") == "title"
+        assert testimonial.value.get("image").title == "image"
+        assert testimonial.value.get("quote") == "quote"
+
+
+def test_external_course_page_testimonials():
+    """
+    testimonials property should return expected value if associated with an ExternalCoursePage
+    """
+    external_course_page = ExternalCoursePageFactory.create()
+    assert UserTestimonialsPage.can_create_at(external_course_page)
+    testimonials_page = UserTestimonialsPageFactory.create(
+        parent=external_course_page,
+        heading="heading",
+        subhead="subhead",
+        items__0__testimonial__name="name",
+        items__0__testimonial__title="title",
+        items__0__testimonial__image__title="image",
+        items__0__testimonial__quote="quote",
+    )
+    assert external_course_page.testimonials == testimonials_page
     assert testimonials_page.heading == "heading"
     assert testimonials_page.subhead == "subhead"
     for testimonial in testimonials_page.items:  # pylint: disable=not-an-iterable
@@ -408,6 +457,26 @@ def test_course_page_for_teams():
     assert teams_page.dark_theme
 
 
+def test_external_course_page_for_teams():
+    """
+    The ForTeams property should return expected values if associated with a ExternalCoursePage
+    """
+    external_course_page = ExternalCoursePageFactory.create()
+    assert ForTeamsPage.can_create_at(external_course_page)
+    teams_page = ForTeamsPageFactory.create(
+        parent=external_course_page,
+        content="<p>content</p>",
+        switch_layout=True,
+        dark_theme=True,
+        action_title="Action Title",
+    )
+    assert external_course_page.for_teams == teams_page
+    assert teams_page.action_title == "Action Title"
+    assert teams_page.content == "<p>content</p>"
+    assert teams_page.switch_layout
+    assert teams_page.dark_theme
+
+
 def test_program_page_for_teams():
     """
     The ForTeams property should return expected values if associated with a ProgramPage
@@ -455,6 +524,18 @@ def test_course_page_faq_property():
     assert list(course_page.faqs) == [faq]
 
 
+def test_external_course_page_faq_property():
+    """ Faqs property should return list of faqs related to given ExternalCoursePage"""
+    external_course_page = ExternalCoursePageFactory.create()
+    assert FrequentlyAskedQuestionPage.can_create_at(external_course_page)
+
+    faqs_page = FrequentlyAskedQuestionPageFactory.create(parent=external_course_page)
+    faq = FrequentlyAskedQuestionFactory.create(faqs_page=faqs_page)
+
+    assert faqs_page.get_parent() is external_course_page
+    assert list(external_course_page.faqs) == [faq]
+
+
 def test_program_page_faq_property():
     """ Faqs property should return list of faqs related to given ProgramPage"""
     program_page = ProgramPageFactory.create()
@@ -489,6 +570,35 @@ def test_course_page_properties():
     assert course_page.video_title == "<p>title</p>"
     assert course_page.video_url == "http://test.com/mock.mp4"
     assert course_page.background_image.title == "background-image"
+
+
+def test_external_course_page_properties():
+    """
+    Wagtail-page-related properties should return expected values
+    """
+    external_course_page = ExternalCoursePageFactory.create(
+        title="<p>page title</p>",
+        subhead="subhead",
+        description="<p>desc</p>",
+        catalog_details="<p>catalog desc</p>",
+        duration="1 week",
+        video_title="<p>title</p>",
+        video_url="http://test.com/mock.mp4",
+        background_image__title="background-image",
+    )
+    assert external_course_page.title == "<p>page title</p>"
+    assert external_course_page.subhead == "subhead"
+    assert external_course_page.description == "<p>desc</p>"
+    assert external_course_page.catalog_details == "<p>catalog desc</p>"
+    assert external_course_page.duration == "1 week"
+    assert external_course_page.video_title == "<p>title</p>"
+    assert external_course_page.video_url == "http://test.com/mock.mp4"
+    assert external_course_page.background_image.title == "background-image"
+    assert not external_course_page.program_page
+    assert not external_course_page.course_lineup
+    assert not external_course_page.course_pages
+    assert not external_course_page.product
+    assert not external_course_page.next_run_date
 
 
 def test_program_page_properties():
@@ -542,6 +652,33 @@ def test_course_page_learning_outcomes():
     assert not LearningOutcomesPage.can_create_at(course_page)
 
 
+def test_external_course_page_learning_outcomes():
+    """
+    ExternalCoursePage related LearningOutcomesPage should return expected values if it exists
+    """
+    external_course_page = ExternalCoursePageFactory.create()
+
+    assert external_course_page.outcomes is None
+    assert LearningOutcomesPage.can_create_at(external_course_page)
+
+    learning_outcomes_page = LearningOutcomesPageFactory(
+        parent=external_course_page,
+        heading="heading",
+        sub_heading="<p>subheading</p>",
+        outcome_items=json.dumps([{"type": "outcome", "value": "benefit"}]),
+    )
+    assert learning_outcomes_page.get_parent() == external_course_page
+    assert learning_outcomes_page.heading == "heading"
+    assert learning_outcomes_page.sub_heading == "<p>subheading</p>"
+    for (
+        block
+    ) in learning_outcomes_page.outcome_items:  # pylint: disable=not-an-iterable
+        assert block.block_type == "outcome"
+        assert block.value == "benefit"
+    assert external_course_page.outcomes == learning_outcomes_page
+    assert not LearningOutcomesPage.can_create_at(external_course_page)
+
+
 def test_program_learning_outcomes():
     """
     ProgramPage related LearningOutcomesPage should return expected values if it exists
@@ -582,6 +719,29 @@ def test_course_page_learning_techniques():
         technique_items__0__techniques__image__title="image-title",
     )
     assert learning_techniques_page.get_parent() == course_page
+    for (
+        technique
+    ) in learning_techniques_page.technique_items:  # pylint: disable=not-an-iterable
+        assert technique.value.get("heading") == "heading"
+        assert technique.value.get("sub_heading") == "sub_heading"
+        assert technique.value.get("image").title == "image-title"
+
+
+def test_external_course_page_learning_techniques():
+    """
+    ExternalCoursePage related subpages should return expected values if they exist
+    ExternalCoursePage related LearningTechniquesPage should return expected values if it exists
+    """
+    external_course_page = ExternalCoursePageFactory.create()
+
+    assert LearningTechniquesPage.can_create_at(external_course_page)
+    learning_techniques_page = LearningTechniquesPageFactory(
+        parent=external_course_page,
+        technique_items__0__techniques__heading="heading",
+        technique_items__0__techniques__sub_heading="sub_heading",
+        technique_items__0__techniques__image__title="image-title",
+    )
+    assert learning_techniques_page.get_parent() == external_course_page
     for (
         technique
     ) in learning_techniques_page.technique_items:  # pylint: disable=not-an-iterable
@@ -668,6 +828,24 @@ def test_course_page_propel_career():
     assert propel_career_page.dark_theme
 
 
+def test_external_course_page_propel_career():
+    """
+    The propel_career property should return expected values if associated with an ExternalCoursePage
+    """
+    external_course_page = ExternalCoursePageFactory.create()
+    propel_career_page = TextSectionFactory.create(
+        parent=external_course_page,
+        content="<p>content</p>",
+        dark_theme=True,
+        action_title="Action Title",
+    )
+    assert external_course_page.propel_career == propel_career_page
+    assert propel_career_page.action_title == "Action Title"
+    assert propel_career_page.action_url
+    assert propel_career_page.content == "<p>content</p>"
+    assert propel_career_page.dark_theme
+
+
 def test_program_page_propel_career():
     """
     The propel_career property should return expected values if associated with a ProgramPage
@@ -694,6 +872,17 @@ def test_is_course_page():
     assert course_page.is_course_page
 
 
+def test_is_external_course_page():
+    """Returns True if object is type of ExternalCoursePage"""
+    program_page = ProgramPageFactory.create()
+    course_page = CoursePageFactory.create()
+    external_course_page = ExternalCoursePageFactory.create()
+
+    assert not program_page.is_external_course_page
+    assert not course_page.is_external_course_page
+    assert external_course_page.is_external_course_page
+
+
 def test_featured_product():
     """Verify that there will be only one product marked as feature."""
     program_page = ProgramPageFactory.create(featured=True)
@@ -713,6 +902,11 @@ def test_featured_product():
     course_page.refresh_from_db()
     assert not course_page.featured
     assert another_course_page.featured
+
+    external_course_page = ExternalCoursePageFactory.create(featured=True)
+    another_course_page.refresh_from_db()
+    assert not another_course_page.featured
+    assert external_course_page.featured
 
 
 def test_certificate_for_course_page():
