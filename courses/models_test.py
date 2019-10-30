@@ -59,17 +59,33 @@ def test_program_num_courses():
 def test_program_next_run_date():
     """
     next_run_date should return the date of the CourseRun with the nearest future start date
+    and first position in program (course__position_in_program=1)
     """
     program = ProgramFactory.create()
-    CourseRunFactory.create_batch(2, course__program=program, past_start=True)
+    CourseRunFactory.create_batch(
+        2,
+        course=CourseFactory.create(program=program, position_in_program=3),
+        past_start=True,
+    )
     assert program.next_run_date is None
 
     now = now_in_utc()
-    future_dates = [now + timedelta(hours=1), now + timedelta(hours=2)]
+    second_course_future_dates = [now + timedelta(hours=1), now + timedelta(hours=3)]
     CourseRunFactory.create_batch(
-        2, course__program=program, start_date=factory.Iterator(future_dates), live=True
+        2,
+        course=CourseFactory.create(program=program, position_in_program=2),
+        start_date=factory.Iterator(second_course_future_dates),
+        live=True,
     )
-    assert program.next_run_date == future_dates[0]
+
+    first_course_future_dates = [now + timedelta(hours=2), now + timedelta(hours=4)]
+    CourseRunFactory.create_batch(
+        2,
+        course=CourseFactory.create(program=program, position_in_program=1),
+        start_date=factory.Iterator(first_course_future_dates),
+        live=True,
+    )
+    assert program.next_run_date == first_course_future_dates[0]
 
 
 def test_program_is_catalog_visible():
@@ -97,7 +113,8 @@ def test_program_is_catalog_visible():
 
 def test_program_first_course_unexpired_runs():
     """
-    first_course_unexpired_runs should return the unexpired course runs of the earliest course
+    first_course_unexpired_runs should return the unexpired course runs of the first course
+    in the program (position_in_program=1)
     """
     program = ProgramFactory.create()
 
@@ -115,18 +132,23 @@ def test_program_first_course_unexpired_runs():
         now + timedelta(days=12),
     ]
 
-    course = CourseFactory.create(live=True, program=program)
+    first_course = CourseFactory.create(
+        live=True, program=program, position_in_program=1
+    )
+    second_course = CourseFactory.create(
+        live=True, program=program, position_in_program=2
+    )
 
     CourseRunFactory.create_batch(
         2,
-        course=course,
+        course=second_course,
         start_date=factory.Iterator(past_start_dates),
         end_date=factory.Iterator(past_end_dates),
         live=True,
     )
     CourseRunFactory.create_batch(
         3,
-        course=course,
+        course=first_course,
         start_date=factory.Iterator(past_start_dates),
         end_date=factory.Iterator(future_end_dates),
         enrollment_end=factory.Iterator(future_end_dates),

@@ -156,14 +156,10 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 
     @property
     def next_run_date(self):
-        """Gets the start date of the next CourseRun if one exists"""
-        # NOTE: This is implemented with min() and courses.all() to allow for prefetch_related
-        #   optimization. You can get the desired start_date with a filtered and sorted query, but
-        #   that would run a new query even if prefetch_related was used.
-        return min(
-            filter(None, [course.next_run_date for course in self.courses.all()]),
-            default=None,
-        )
+        """Gets the start date of the next CourseRun of the first course (position_in_program=1) if one exists"""
+        first_course = self.courses.filter(position_in_program=1, live=True).first()
+        if first_course:
+            return first_course.next_run_date
 
     @property
     def is_catalog_visible(self):
@@ -184,19 +180,17 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 
     @property
     def first_unexpired_run(self):
-        """Gets the earliest unexpired CourseRun if one exists"""
-        return min(
-            filter(None, [course.first_unexpired_run for course in self.courses.all()]),
-            default=None,
-            key=lambda run: run.start_date,
-        )
+        """Gets the earliest unexpired CourseRun of the first course (position_in_program=1) if one exists"""
+        first_course = self.courses.filter(position_in_program=1, live=True).first()
+        if first_course:
+            return first_course.first_unexpired_run
 
     @property
     def first_course_unexpired_runs(self):
-        """Gets the unexpired course runs for the first (earliest) course in this program"""
-        first_course_run = self.first_unexpired_run
-        if first_course_run:
-            return first_course_run.course.unexpired_runs
+        """Gets the unexpired course runs for the first course (position_in_program=1) in this program"""
+        first_course = self.courses.filter(position_in_program=1, live=True).first()
+        if first_course:
+            return first_course.unexpired_runs
 
     @property
     def text_id(self):

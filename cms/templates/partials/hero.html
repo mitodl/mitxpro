@@ -40,13 +40,13 @@
         <div class="mt-5 mb-5">
           {% if page.about_mit_xpro.video_url and action_title and action_url %}
             <a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="{{ action_url }}">{{ action_title }}</a>
-          {% else %}
+          {% elif page.product %}
             {% if not user.is_anonymous %}
               {% if page.is_external_course_page %}
                 <a class="enroll-button enroll-now" href="{{ page.external_url }}">
                   Apply Now
                 </a>
-              {% elif not enrolled and product_id %}
+              {% elif not enrolled and product_id and page.product.first_unexpired_run %}
                 <a class="enroll-button enroll-now" href="{{ checkout_url }}">
                   Enroll Now
                 </a>
@@ -55,7 +55,7 @@
                   Enrolled <i class="material-icons">check</i>
                 </a>
               {% endif %}
-            {% else %}
+            {% elif product_id and page.product.first_unexpired_run %}
               <div class="enroll-dropdown">
                 <a class="enroll-button dropdown-toggle" data-toggle="dropdown" data-flip="false" aria-haspopup="true" aria-expanded="true">
                   Enroll Now
