@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.28.1
+--------------
+
+- #1265 Certificate generation only on passed status
+- #1222 Program next run date comes from first course
+- #1232 External course CMS page
+- #1250 Add SignatoryIndexPage from CMS
+
 Version 0.28.0 (Released October 30, 2019)
 --------------
 
