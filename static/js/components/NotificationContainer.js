@@ -62,7 +62,7 @@ export class NotificationContainer extends React.Component<Props, State> {
             <Alert
               key={i}
               color={notification.color || "info"}
-              className="rounded-0 border-0"
+              className="rounded-0 border-0 m-1"
               isOpen={!hiddenNotifications.has(notificationKey)}
               toggle={dismiss}
               fade={true}
