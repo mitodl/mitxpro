@@ -41,9 +41,9 @@ export class App extends React.Component<Props, void> {
       // $FlowFixMe: currentUser cannot be undefined or is_anonymous=true
       const unusedCoupons = currentUser.unused_coupons
       unusedCoupons.map((unusedCoupon, index) => {
-        const key1 = `unused-coupon-${index}`
+        const key = `unused-coupon-${index}`
         addUserNotification({
-          [key1]: {
+          [key]: {
             type:  ALERT_TYPE_UNUSED_COUPON,
             props: {
               productId:   unusedCoupon.product_id,
