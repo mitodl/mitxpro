@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.28.1
+Version 0.28.1 (Released October 31, 2019)
 --------------
 
 - #1265 Certificate generation only on passed status
