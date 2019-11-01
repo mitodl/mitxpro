@@ -3,6 +3,8 @@
 from django.db import migrations
 from wagtail.core.models import Page
 
+from cms.models import CatalogPage
+
 
 def get_home_page(apps):
     """
@@ -41,7 +43,6 @@ def create_catalog_page(apps, schema_editor):
     Create a catalog page under the home page
     """
     ContentType = apps.get_model("contenttypes.ContentType")
-    CatalogPage = apps.get_model("cms", "CatalogPage")
     catalog_content_type, _ = ContentType.objects.get_or_create(
         app_label="cms", model="catalogpage"
     )
@@ -50,7 +51,7 @@ def create_catalog_page(apps, schema_editor):
     catalog = CatalogPage.objects.first()
 
     if not catalog:
-        catalog = Page(
+        catalog = CatalogPage(
             title="Courseware Catalog",
             content_type_id=catalog_content_type.id,
             slug="catalog",
