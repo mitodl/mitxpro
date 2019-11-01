@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.28.2
+Version 0.28.2 (Released November 01, 2019)
 --------------
 
 - #1280 External course page apply now button fix
