@@ -475,7 +475,8 @@ def complete_order(order):
     )
     if order_coupon_ids:
         updated_count = ProductCouponAssignment.objects.filter(
-            email=order.purchaser.email, product_coupon__coupon__in=order_coupon_ids
+            email__iexact=order.purchaser.email,
+            product_coupon__coupon__in=order_coupon_ids,
         ).update(redeemed=True)
         if updated_count:
             log.info(
@@ -872,7 +873,7 @@ def fetch_and_serialize_unused_coupons(user):
             }
     """
     unused_product_coupon_ids = ProductCouponAssignment.objects.filter(
-        email=user.email, redeemed=False
+        email__iexact=user.email, redeemed=False
     ).values_list("product_coupon", flat=True)
     if not unused_product_coupon_ids:
         return []
