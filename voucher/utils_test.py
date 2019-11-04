@@ -2,6 +2,7 @@
 import json
 import re
 from datetime import datetime
+import difflib
 
 import pytest
 import pytz
@@ -207,7 +208,27 @@ def test_partial_course_matches(voucher_and_partial_matches_with_coupons, settin
     voucher = context.voucher
     settings.VOUCHER_COMPANY_ID = context.company.id
     eligible_coupons = get_eligible_coupon_choices(voucher)
+    eligible_coupons_titles = [
+        eligible_coupon[1] for eligible_coupon in eligible_coupons
+    ]
+    coupon_eligibility_list = [
+        "{} - starts {}".format(
+            coupon_eligibility.product.content_object.title,
+            coupon_eligibility.product.content_object.start_date.strftime("%b %d, %Y"),
+        )
+        for coupon_eligibility in context.coupon_eligibility_list
+    ]
+
+    close_matches = difflib.get_close_matches(
+        voucher.course_title_input,
+        coupon_eligibility_list,
+        len(coupon_eligibility_list),
+        cutoff=0,
+    )
+
     assert len(eligible_coupons) == len(context.coupon_eligibility_list)
+    assert eligible_coupons_titles == close_matches
+
     _test_eligible_coupon_version(eligible_coupons, context)
 
 

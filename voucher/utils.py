@@ -3,6 +3,7 @@ import json
 import logging
 from datetime import datetime
 from uuid import uuid4
+import difflib
 
 import re
 import pdftotext
@@ -113,6 +114,22 @@ def get_eligible_coupon_choices(voucher):
     ]
     if course_matches and not eligible_choices:
         log.error("Found no valid coupons for matches for voucher %s", voucher.id)
+
+    if len(eligible_choices) > 1 and voucher.course_title_input:
+        eligible_choices_titles = [choice[1] for choice in eligible_choices]
+        close_matches = difflib.get_close_matches(
+            voucher.course_title_input,
+            eligible_choices_titles,
+            len(eligible_choices_titles),
+            0,
+        )
+        sorted_eligible_choices = []
+        for match in close_matches:
+            sorted_eligible_choices.append(
+                eligible_choices[eligible_choices_titles.index(match)]
+            )
+        eligible_choices = sorted_eligible_choices
+
     return eligible_choices
 
 
