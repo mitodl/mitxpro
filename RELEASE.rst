@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.29.0
+--------------
+
+- #1245 Add search to product and version admin
+- Display the text id and price in product list_display
+- Vouchers: sort matching courseruns by similarity
+- Changed product coupon assignment match to be case-insensitive
+
 Version 0.28.2 (Released November 01, 2019)
 --------------
 
