@@ -599,6 +599,20 @@ if MITXPRO_USE_S3:
         AWS_S3_CUSTOM_DOMAIN = "{dist}.cloudfront.net".format(dist=CLOUDFRONT_DIST)
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
+
+# Feature flags
+def get_all_config_keys():
+    """Returns all the configuration keys from both environment and configuration files"""
+    return list(os.environ.keys())
+
+
+MITXPRO_FEATURES_PREFIX = get_string("MITXPRO_FEATURES_PREFIX", "FEATURE_")
+FEATURES = {
+    key[len(MITXPRO_FEATURES_PREFIX) :]: get_any(key, None)
+    for key in get_all_config_keys()
+    if key.startswith(MITXPRO_FEATURES_PREFIX)
+}
+
 # Celery
 USE_CELERY = True
 REDISCLOUD_URL = get_string(
@@ -642,6 +656,11 @@ REPAIR_COURSEWARE_USERS_FREQUENCY = get_int(
     description="How many seconds between repairing courseware records for faulty users",
 )
 REPAIR_COURSEWARE_USERS_OFFSET = int(REPAIR_COURSEWARE_USERS_FREQUENCY / 2)
+SHEETS_ASSIGNMENT_CHECK_FREQUENCY = get_int(
+    "SHEETS_ASSIGNMENT_CHECK_FREQUENCY",
+    60 * 60 * 2,
+    description="The frequency that the Drive folder should be checked for unprocessed coupon assignment Sheets",
+)
 CELERY_BEAT_SCHEDULE = {
     "check-hubspot-api-errors": {
         "task": "hubspot.tasks.check_hubspot_api_errors",
@@ -673,6 +692,11 @@ CELERY_BEAT_SCHEDULE = {
         ),
     },
 }
+if FEATURES.get("COUPON_SHEETS"):
+    CELERY_BEAT_SCHEDULE["check-unprocessed-coupon-assignment-sheets"] = {
+        "task": "sheets.tasks.check_incomplete_coupon_assignments",
+        "schedule": SHEETS_ASSIGNMENT_CHECK_FREQUENCY,
+    }
 
 
 # Hijack
@@ -788,20 +812,6 @@ OPENEDX_GRADES_API_TOKEN = get_string(
     None,
     "Access token to use with OpenEdX API client for syncing grades",
 )
-
-
-# features flags
-def get_all_config_keys():
-    """Returns all the configuration keys from both environment and configuration files"""
-    return list(os.environ.keys())
-
-
-MITXPRO_FEATURES_PREFIX = get_string("MITXPRO_FEATURES_PREFIX", "FEATURE_")
-FEATURES = {
-    key[len(MITXPRO_FEATURES_PREFIX) :]: get_any(key, None)
-    for key in get_all_config_keys()
-    if key.startswith(MITXPRO_FEATURES_PREFIX)
-}
 
 # django debug toolbar only in debug mode
 if DEBUG:

@@ -45,6 +45,7 @@ from ecommerce.models import (
     Product,
     DataConsentUser,
     BulkCouponAssignment,
+    ProductCouponAssignment,
 )
 from ecommerce.serializers import (
     BasketSerializer,
@@ -1222,6 +1223,7 @@ class TestBulkEnrollmentSubmitView:
         scenario.patched_available_product_coupons.return_value = mocker.Mock(
             count=mocker.Mock(return_value=len(available_coupons)),
             all=mocker.Mock(return_value=available_coupons),
+            values_list=mocker.Mock(return_value=[pc.id for pc in available_coupons]),
         )
         product_id = 1
         coupon_payment_id = coupon_payment_version.payment.id
@@ -1242,8 +1244,10 @@ class TestBulkEnrollmentSubmitView:
             coupon_payment_id, product_id
         )
         scenario.patched_send_emails.assert_called_once()
+        product_coupon_assignments = ProductCouponAssignment.objects.all()
+        assert len(product_coupon_assignments) == len(scenario.emails)
         assert list(scenario.patched_send_emails.call_args_list[0][0][0]) == list(
-            zip(scenario.emails, available_coupons)
+            product_coupon_assignments
         )
 
     @pytest.mark.parametrize(

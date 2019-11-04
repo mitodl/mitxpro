@@ -15,13 +15,12 @@ from pygsheets.worksheet import Worksheet
 from google.oauth2.credentials import Credentials  # pylint: disable-all
 
 from sheets.api import (
-    coupon_request_sheet_spec,
-    ProcessedRequest,
     CouponRequestRow,
     get_credentials,
     create_coupons_for_request_row,
     CouponRequestHandler,
 )
+from sheets.utils import coupon_request_sheet_spec, ProcessedRequest
 from sheets.factories import CouponGenerationRequestFactory, GoogleApiAuthFactory
 from courses.models import CourseRun
 from ecommerce.models import CouponPaymentVersion

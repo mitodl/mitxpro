@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 @staff_member_required(login_url="login")
 def google_auth_view(request):
     """Admin view that renders a page that allows a user to begin Google OAuth auth"""
-    existing_api_auth = GoogleApiAuth.objects.filter(requesting_user=request.user)
+    existing_api_auth = GoogleApiAuth.objects.first()
     return render(
         request,
         "google_auth.html",
@@ -72,9 +72,8 @@ def complete_google_auth(request):
     # Store credentials
     credentials = flow.credentials
     with transaction.atomic():
-        google_api_auth, _ = GoogleApiAuth.objects.select_for_update().get_or_create(
-            requesting_user=request.user
-        )
+        google_api_auth, _ = GoogleApiAuth.objects.select_for_update().get_or_create()
+        google_api_auth.requesting_user = request.user
         google_api_auth.access_token = credentials.token
         google_api_auth.refresh_token = credentials.refresh_token
         google_api_auth.save()

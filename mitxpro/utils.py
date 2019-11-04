@@ -218,7 +218,22 @@ def partition(items, predicate=bool):
         tuple of iterables: An iterable of non-matching items, paired with an iterable of matching items
     """
     a, b = itertools.tee((predicate(item), item) for item in items)
-    return ((item for pred, item in a if not pred), (item for pred, item in b if pred))
+    return (item for pred, item in a if not pred), (item for pred, item in b if pred)
+
+
+def partition_to_lists(items, predicate=bool):
+    """
+    Partitions an iterable into two different lists - the first does not match the given condition, and the second
+    does match the given condition.
+
+    Args:
+        items (iterable): An iterable of items to partition
+        predicate (function): A function that takes each item and returns True or False
+    Returns:
+        tuple of lists: A list of non-matching items, paired with a list of matching items
+    """
+    a, b = partition(items, predicate=predicate)
+    return list(a), list(b)
 
 
 def unique(iterable):
@@ -245,6 +260,49 @@ def unique_ignore_case(strings):
     """
     seen = set()
     return (s for s in map(str.lower, strings) if s not in seen and not seen.add(s))
+
+
+def item_at_index_or_none(indexable, index):
+    """
+    Returns the item at a certain index, or None if that index doesn't exist
+
+    Args:
+        indexable (list or tuple):
+        index (int): The index in the list or tuple
+
+    Returns:
+        The item at the given index, or None
+    """
+    try:
+        return indexable[index]
+    except IndexError:
+        return None
+
+
+def all_equal(*args):
+    """
+    Returns True if all of the provided args are equal to each other
+
+    Args:
+        *args (hashable): Arguments of any hashable type
+
+    Returns:
+        bool: True if all of the provided args are equal
+    """
+    return len(set(args)) == 1
+
+
+def all_unique(iterable):
+    """
+    Returns True if all of the provided args are equal to each other
+
+    Args:
+        iterable: An iterable of hashable items
+
+    Returns:
+        bool: True if all of the provided args are equal
+    """
+    return len(set(iterable)) == len(iterable)
 
 
 class ValidateOnSaveMixin(models.Model):

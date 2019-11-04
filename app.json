@@ -390,6 +390,10 @@
       "description": "Comma-separated list of emails for users that should be added as an editor for all newly created Sheets",
       "required": false
     },
+    "SHEETS_ASSIGNMENT_CHECK_FREQUENCY": {
+      "description": "The frequency that the Drive folder should be checked for unprocessed coupon assignment Sheets",
+      "required": false
+    },
     "SITE_NAME": {
       "description": "Name of the site. e.g MIT xPRO",
       "required": false
