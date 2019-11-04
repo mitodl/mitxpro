@@ -1,5 +1,7 @@
 """Sheets app util function tests"""
 
+from pygsheets.worksheet import Worksheet
+
 from sheets.constants import (
     GOOGLE_AUTH_URI,
     GOOGLE_TOKEN_URI,
@@ -25,3 +27,14 @@ def test_generate_google_client_config(settings):
             "auth_provider_x509_cert_url": GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
         }
     }
+
+
+def test_get_data_rows(mocker):
+    """get_data_rows should return each row of a worksheet data after the first row (i.e.: the header row)"""
+    non_header_rows = [["code1", "email1@example.com"], ["code2", "email2@example.com"]]
+    sheet_rows = [utils.coupon_assign_sheet_spec.column_headers] + non_header_rows
+    mocked_worksheet = mocker.MagicMock(
+        spec=Worksheet, get_all_values=mocker.Mock(return_value=sheet_rows)
+    )
+    data_rows = list(utils.get_data_rows(mocked_worksheet))
+    assert data_rows == non_header_rows

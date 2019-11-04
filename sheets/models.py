@@ -10,7 +10,7 @@ class GoogleApiAuth(TimestampedModel):
     """Model that stores OAuth credentials to be used to authenticate with the Google API"""
 
     requesting_user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, unique=True
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True
     )
     access_token = models.CharField(max_length=2048)
     refresh_token = models.CharField(null=True, max_length=512)
@@ -18,6 +18,7 @@ class GoogleApiAuth(TimestampedModel):
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
+        # GoogleApiAuth should be a singleton, i.e.: there should never be more than one
         if force_insert and self._meta.model.objects.count() > 0:
             raise ValidationError(
                 "Only one {} object should exist. Update the existing object instead "

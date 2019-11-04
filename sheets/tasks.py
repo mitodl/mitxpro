@@ -1,9 +1,9 @@
 """Sheets app tasks"""
 from mitxpro.celery import app
-from sheets.api import CouponRequestHandler
+from sheets.api import CouponRequestHandler, CouponAssignmentHandler
 
 
-@app.task(acks_late=True)
+@app.task()
 def handle_unprocessed_coupon_requests():
     """
     Goes through all unprocessed rows in the coupon request sheet, creates the requested
@@ -17,3 +17,13 @@ def handle_unprocessed_coupon_requests():
         (processed_request.row_index, processed_request.coupon_req_row.transaction_id)
         for processed_request in processed_requests
     ]
+
+
+@app.task()
+def check_incomplete_coupon_assignments():
+    """
+    Processes all as-yet-incomplete coupon assignment spreadsheets
+    """
+    coupon_assignment_handler = CouponAssignmentHandler()
+    spreadsheets = coupon_assignment_handler.process_assignment_spreadsheets()
+    return [(spreadsheet.id, spreadsheet.title) for spreadsheet in spreadsheets]

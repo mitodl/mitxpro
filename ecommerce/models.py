@@ -592,6 +592,10 @@ class DataConsentUser(TimestampedModel):
 class BulkCouponAssignment(models.Model):
     """Records the bulk creation of ProductCouponAssignments"""
 
+    assignment_sheet_id = models.CharField(max_length=100, db_index=True, null=True)
+    assignments_started = models.BooleanField(default=False)
+    assignments_complete = models.BooleanField(default=False)
+    updated_on = models.DateTimeField(auto_now=True, null=True)  # UTC
     created_on = models.DateTimeField(auto_now_add=True)  # UTC
 
 
@@ -611,3 +615,6 @@ class ProductCouponAssignment(TimestampedModel):
         on_delete=models.CASCADE,
         related_name="assignments",
     )
+
+    def __str__(self):
+        return f"ProductCouponAssignment for {self.email}, product coupon {self.product_coupon_id} (redeemed: {self.redeemed})"

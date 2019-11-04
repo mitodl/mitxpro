@@ -20,7 +20,7 @@ from mitxpro.utils import format_price
 log = logging.getLogger()
 
 
-def get_bulk_enroll_message_tuple(recipient, product_coupon):
+def get_bulk_enroll_message_data(recipient, product_coupon):
     """
     Builds the tuple of data required for each recipient's bulk enrollment email
 
@@ -29,8 +29,7 @@ def get_bulk_enroll_message_tuple(recipient, product_coupon):
         product_coupon (CouponEligibility): The product coupon that was assigned to the given recipient
 
     Returns:
-        tuple of (str, dict, EmailMetadata): A tuple containing an email address, a dict of message context variables,
-            and a message metadata object
+        ecommerce.api.UserMessageProps: An object containing user-specific message data
     """
     enrollment_url = make_checkout_url(
         product_id=product_coupon.product.id, code=product_coupon.coupon.coupon_code
@@ -46,10 +45,10 @@ def get_bulk_enroll_message_tuple(recipient, product_coupon):
         "enrollment_url": enrollment_url,
         "company_name": company_name,
     }
-    return (
-        recipient,
-        context,
-        api.EmailMetadata(
+    return api.UserMessageProps(
+        recipient=recipient,
+        context=context,
+        metadata=api.EmailMetadata(
             tags=[BULK_ENROLLMENT_EMAIL_TAG],
             user_variables={
                 "enrollment_code": product_coupon.coupon.coupon_code,
@@ -59,20 +58,23 @@ def get_bulk_enroll_message_tuple(recipient, product_coupon):
     )
 
 
-def send_bulk_enroll_emails(recipient_product_coupon_iter):
+def send_bulk_enroll_emails(product_coupon_assignments):
     """
     Sends an email for recipients to enroll in a courseware offering via coupon
 
     Args:
-        recipient_product_coupon_iter (iterable of (str, CouponEligibility)): An iterable of tuples, where each one
-            is an email paired with the product coupon assigned to that email.
+        product_coupon_assignments (iterable of ProductCouponAssignments):
+            Product coupon assignments about which we want to notify the recipients
     """
     api.send_messages(
         api.build_user_specific_messages(
             EMAIL_BULK_ENROLL,
             (
-                get_bulk_enroll_message_tuple(recipient, product_coupon)
-                for recipient, product_coupon in recipient_product_coupon_iter
+                get_bulk_enroll_message_data(
+                    product_coupon_assignment.email,
+                    product_coupon_assignment.product_coupon,
+                )
+                for product_coupon_assignment in product_coupon_assignments
             ),
         )
     )

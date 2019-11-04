@@ -1,6 +1,6 @@
 """Tests for sheets app views"""
 from sheets.tasks import handle_unprocessed_coupon_requests
-from sheets.api import ProcessedRequest
+from sheets.utils import ProcessedRequest
 
 
 def test_handle_unprocessed_coupon_requests(mocker, coupon_req_row):

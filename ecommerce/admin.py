@@ -19,6 +19,7 @@ from ecommerce.models import (
     DataConsentAgreement,
     DataConsentUser,
     Company,
+    BulkCouponAssignment,
     ProductCouponAssignment,
 )
 
@@ -357,16 +358,31 @@ class CompanyAdmin(admin.ModelAdmin):
     model = Company
 
 
+class BulkCouponAssignmentAdmin(admin.ModelAdmin):
+    """Admin for BulkCouponAssignment"""
+
+    list_display = (
+        "id",
+        "assignment_sheet_id",
+        "assignments_started",
+        "assignments_complete",
+        "created_on",
+        "updated_on",
+    )
+
+    model = BulkCouponAssignment
+
+
 class ProductCouponAssignmentAdmin(admin.ModelAdmin):
     """Admin for ProductCouponAssignment"""
 
-    list_display = ("id", "email", "get_coupon", "get_product")
+    list_display = ("id", "email", "get_coupon", "get_product", "bulk_assignment_id")
     search_fields = (
         "email",
         "product_coupon__coupon__coupon_code",
         "product_coupon__coupon__payment__name",
     )
-    raw_id_fields = ("product_coupon",)
+    raw_id_fields = ("product_coupon", "bulk_assignment")
 
     model = ProductCouponAssignment
 
@@ -408,5 +424,6 @@ admin.site.register(CouponEligibility, CouponEligibilityAdmin)
 admin.site.register(CouponRedemption, CouponRedemptionAdmin)
 admin.site.register(DataConsentAgreement, DataConsentAgreementAdmin)
 admin.site.register(DataConsentUser, DataConsentUserAdmin)
+admin.site.register(BulkCouponAssignment, BulkCouponAssignmentAdmin)
 admin.site.register(ProductCouponAssignment, ProductCouponAssignmentAdmin)
 admin.site.register(Company, CompanyAdmin)

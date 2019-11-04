@@ -19,7 +19,7 @@ from ecommerce.mail_api import (
     send_course_run_enrollment_email,
 )
 from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG
-from mail.api import EmailMetadata
+from mail.api import UserMessageProps, EmailMetadata
 from mail.constants import (
     EMAIL_BULK_ENROLL,
     EMAIL_COURSE_RUN_ENROLLMENT,
@@ -58,11 +58,8 @@ def test_send_bulk_enroll_emails(mocker, settings):
         ),
         company=factory.Iterator([new_company, None]),
     )
-    recipient_product_coupons = [
-        (assignment.email, assignment.product_coupon) for assignment in assignments
-    ]
 
-    send_bulk_enroll_emails(recipient_product_coupons)
+    send_bulk_enroll_emails(assignments)
 
     patched_send_messages.assert_called_once()
     patched_build_user_messages.assert_called_once()
@@ -70,27 +67,27 @@ def test_send_bulk_enroll_emails(mocker, settings):
     recipients_and_contexts_arg = list(patched_build_user_messages.call_args[0][1])
     for i, assignment in enumerate(assignments):
         product_type_str = assignment.product_coupon.product.type_string
-        assert recipients_and_contexts_arg[i] == (
-            assignment.email,
-            {
-                "enrollable_title": assignment.product_coupon.product.content_object.title,
-                "enrollment_url": "http://test.com/checkout/?product={}&code={}".format(
-                    assignment.product_coupon.product.id,
-                    assignment.product_coupon.coupon.coupon_code,
-                ),
-                "company_name": (
-                    None
-                    if not new_coupon_payment_versions[i].company
-                    else new_coupon_payment_versions[i].company.name
-                ),
-            },
-            EmailMetadata(
-                tags=[BULK_ENROLLMENT_EMAIL_TAG],
-                user_variables={
-                    "enrollment_code": assignment.product_coupon.coupon.coupon_code,
-                    product_type_str: assignment.product_coupon.product.content_object.text_id,
-                },
+        user_message_props = recipients_and_contexts_arg[i]
+        assert isinstance(user_message_props, UserMessageProps) is True
+        assert user_message_props.recipient == assignment.email
+        assert user_message_props.context == {
+            "enrollable_title": assignment.product_coupon.product.content_object.title,
+            "enrollment_url": "http://test.com/checkout/?product={}&code={}".format(
+                assignment.product_coupon.product.id,
+                assignment.product_coupon.coupon.coupon_code,
             ),
+            "company_name": (
+                None
+                if not new_coupon_payment_versions[i].company
+                else new_coupon_payment_versions[i].company.name
+            ),
+        }
+        assert user_message_props.metadata == EmailMetadata(
+            tags=[BULK_ENROLLMENT_EMAIL_TAG],
+            user_variables={
+                "enrollment_code": assignment.product_coupon.coupon.coupon_code,
+                product_type_str: assignment.product_coupon.product.content_object.text_id,
+            },
         )
 
 

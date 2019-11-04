@@ -2,8 +2,8 @@
 import os
 import re
 import datetime
+import itertools
 import pytz
-from collections import namedtuple
 from decimal import Decimal
 import pickle
 import logging
@@ -21,32 +21,114 @@ import pygsheets
 
 from courses.models import CourseRun, Program
 from courses.constants import CONTENT_TYPE_MODEL_COURSERUN, CONTENT_TYPE_MODEL_PROGRAM
-from ecommerce.api import create_coupons
-from ecommerce.models import Company, CouponPaymentVersion, Coupon
+from ecommerce.api import create_coupons, bulk_assign_product_coupons
+from ecommerce.mail_api import send_bulk_enroll_emails
+from ecommerce.models import (
+    Company,
+    CouponPaymentVersion,
+    Coupon,
+    BulkCouponAssignment,
+    CouponEligibility,
+    ProductCouponAssignment,
+)
+from mitxpro.utils import (
+    now_in_utc,
+    item_at_index_or_none,
+    all_equal,
+    all_unique,
+    partition,
+    partition_to_lists,
+)
 from sheets.models import CouponGenerationRequest, GoogleApiAuth
-from sheets.constants import GOOGLE_TOKEN_URI, REQUIRED_GOOGLE_API_SCOPES
+from sheets.constants import (
+    GOOGLE_TOKEN_URI,
+    REQUIRED_GOOGLE_API_SCOPES,
+    ASSIGNMENT_PROCESSED_KEY,
+    ASSIGNMENT_PROCESSED_DATE_KEY,
+    ASSIGNMENT_COMPLETED_KEY,
+    ASSIGNMENT_COMPLETED_DATE_KEY,
+    GOOGLE_API_TRUE_VAL,
+    ASSIGNMENT_SHEET_PREFIX,
+)
+from sheets.utils import (
+    coupon_request_sheet_spec,
+    coupon_assign_sheet_spec,
+    ProcessedRequest,
+    get_data_rows,
+    spreadsheet_repr,
+    format_date,
+)
+from sheets.exceptions import SheetValidationException, SheetUpdateException
 
 log = logging.getLogger(__name__)
 
 BULK_PURCHASE_DEFAULTS = dict(amount=Decimal("1.0"), automatic=False)
+DEFAULT_GOOGLE_EXPIRE_TIMEDELTA = dict(minutes=60)
 DEV_TOKEN_PATH = "localdev/google.token"
 
-SpreadsheetSpec = namedtuple(
-    "SpreadsheetSpec",
-    ["first_data_row", "last_data_column", "num_columns", "column_headers"],
-)
-coupon_request_sheet_spec = SpreadsheetSpec(
-    first_data_row=2, last_data_column="I", num_columns=9, column_headers=[]
-)
-coupon_assign_sheet_spec = SpreadsheetSpec(
-    first_data_row=2,
-    last_data_column="B",
-    num_columns=2,
-    column_headers=["Coupon Code", "Email (Assignee)"],
-)
-ProcessedRequest = namedtuple(
-    "ProcessedRequest", ["row_index", "coupon_req_row", "request_id"]
-)
+
+def get_google_creds_from_pickled_token_file(token_file_path):
+    """
+    Helper method to get valid credentials from a local token file (and refresh as necessary).
+    For dev use only.
+    """
+    with open(token_file_path, "rb") as f:
+        creds = pickle.loads(f.read())
+    if creds and creds.expired and creds.refresh_token:
+        creds.refresh(Request())
+        with open(token_file_path, "wb") as token:
+            pickle.dump(creds, token)
+    if not creds:
+        raise ImproperlyConfigured("Local token file credentials are empty")
+    if not creds.valid:
+        raise ImproperlyConfigured("Local token file credentials are invalid")
+    return creds
+
+
+def get_credentials():
+    """
+    Gets valid Google API client credentials
+
+    Returns:
+        google.oauth2.credentials.Credentials: Credentials to be used by the Google Drive client/pygsheets/etc.
+
+    Raises:
+        ImproperlyConfigured: Raised if no credentials have been configured
+    """
+    google_api_auth = GoogleApiAuth.objects.order_by("-updated_on").first()
+    if google_api_auth:
+        creds = Credentials(
+            token=google_api_auth.access_token,
+            refresh_token=google_api_auth.refresh_token,
+            token_uri=GOOGLE_TOKEN_URI,
+            client_id=settings.DRIVE_CLIENT_ID,
+            client_secret=settings.DRIVE_CLIENT_SECRET,
+            scopes=REQUIRED_GOOGLE_API_SCOPES,
+        )
+        # Refresh if necessary
+        needs_refresh = (
+            creds.expired
+            if creds.expiry
+            else google_api_auth.updated_on
+            < (now_in_utc() - datetime.timedelta(**DEFAULT_GOOGLE_EXPIRE_TIMEDELTA))
+        )
+        if needs_refresh:
+            log.info("Refreshing GoogleApiAuth credentials...")
+            creds.refresh(Request())
+            GoogleApiAuth.objects.filter(id=google_api_auth.id).update(
+                access_token=creds.token, updated_on=now_in_utc()
+            )
+        return creds
+    # (For local development use only) You can use a locally-created token for auth.
+    # This token can be created by following the Google API Python quickstart guide:
+    # https://developers.google.com/sheets/api/quickstart/python.
+    # A script with more helpful options than the one in that guide can be found here:
+    # https://gist.github.com/gsidebo/b87abaafda3e79186c1e5f7f964074ab
+    if settings.ENVIRONMENT == "dev":
+        token_file_path = os.path.join(settings.BASE_DIR, DEV_TOKEN_PATH)
+        if os.path.exists(token_file_path):
+            return get_google_creds_from_pickled_token_file(token_file_path)
+    raise ImproperlyConfigured("Authorization with Google has not been completed.")
 
 
 class CouponRequestRow:
@@ -159,83 +241,6 @@ class CouponRequestRow:
         )
         product = product_object.products.first()
         return [product.id]
-
-
-def get_google_creds_from_pickled_token_file(token_file_path):
-    """
-    Helper method to get valid credentials from a local token file (and refresh as necessary).
-    For dev use only.
-    """
-    with open(token_file_path, "rb") as f:
-        creds = pickle.loads(f.read())
-    if creds and creds.expired and creds.refresh_token:
-        creds.refresh(Request())
-        with open(token_file_path, "wb") as token:
-            pickle.dump(creds, token)
-    if not creds:
-        raise ImproperlyConfigured("Local token file credentials are empty")
-    if not creds.valid:
-        raise ImproperlyConfigured("Local token file credentials are invalid")
-    return creds
-
-
-def get_credentials():
-    """
-    Gets valid Google API client credentials
-
-    Returns:
-        google.oauth2.credentials.Credentials: Credentials to be used by the Google Drive client/pygsheets/etc.
-
-    Raises:
-        ImproperlyConfigured: Raised if no credentials have been configured
-    """
-    google_api_auth = GoogleApiAuth.objects.order_by("-updated_on").first()
-    if google_api_auth:
-        creds = Credentials(
-            token=google_api_auth.access_token,
-            refresh_token=google_api_auth.refresh_token,
-            token_uri=GOOGLE_TOKEN_URI,
-            client_id=settings.DRIVE_CLIENT_ID,
-            client_secret=settings.DRIVE_CLIENT_SECRET,
-            scopes=REQUIRED_GOOGLE_API_SCOPES,
-        )
-        # Refresh if necessary
-        if creds.expired:
-            creds.refresh(Request())
-            GoogleApiAuth.objects.filter(id=google_api_auth.id).update(
-                access_token=creds.token
-            )
-        return creds
-    # For local development use only: you can use a locally-created token for auth.
-    # This token can be created by following the Google API Python quickstart guide:
-    # https://developers.google.com/sheets/api/quickstart/python.
-    # A script with more helpful options than the one in that guide can be found here:
-    # https://gist.github.com/gsidebo/b87abaafda3e79186c1e5f7f964074ab
-    if settings.ENVIRONMENT == "dev":
-        token_file_path = os.path.join(settings.BASE_DIR, DEV_TOKEN_PATH)
-        if os.path.exists(token_file_path):
-            return get_google_creds_from_pickled_token_file(token_file_path)
-    raise ImproperlyConfigured("Authorization with Google has not been completed.")
-
-
-def get_data_rows(worksheet):
-    """
-    Yields the data rows of a spreadsheet that has a header row
-
-    Args:
-        worksheet (pygsheets.worksheet.Worksheet): Worksheet object
-
-    Yields:
-        list of str: List of cell values in a given row
-    """
-    row_iter = iter(
-        worksheet.get_all_values(
-            include_tailing_empty=False, include_tailing_empty_rows=False
-        )
-    )
-    # Skip header row
-    next(row_iter)
-    yield from row_iter
 
 
 def create_coupons_for_request_row(coupon_req_row):
@@ -372,8 +377,13 @@ class CouponRequestHandler:
             )
             return
         # Create sheet
-        spreadsheet_title = "Bulk Coupons - {} {}".format(
-            coupon_req_row.transaction_id, coupon_req_row.company_name
+        spreadsheet_title = "".join(
+            [
+                ASSIGNMENT_SHEET_PREFIX,
+                "{} {}".format(
+                    coupon_req_row.transaction_id, coupon_req_row.company_name
+                ),
+            ]
         )
         create_kwargs = (
             dict(folder=settings.DRIVE_OUTPUT_FOLDER_ID)
@@ -418,3 +428,313 @@ class CouponRequestHandler:
         # Write new sheets with codes
         for processed_request in processed_requests:
             self.create_bulk_coupon_sheet(processed_request.coupon_req_row)
+
+
+class CouponAssignmentHandler:
+    """Manages the processing of coupon assignments from Sheet data"""
+
+    ASSIGNMENT_SHEETS_QUERY = (
+        '"{folder_id}" in parents and '
+        'name contains "{name_prefix}" and '
+        "trashed != true".format(
+            folder_id=settings.DRIVE_OUTPUT_FOLDER_ID,
+            name_prefix=ASSIGNMENT_SHEET_PREFIX,
+        )
+    )
+    INCOMPLETE_SHEETS_QUERY_TERM = 'not appProperties has {{key="{completed_key}" and value="{completed_value}"}}'.format(
+        completed_key=ASSIGNMENT_COMPLETED_KEY, completed_value=GOOGLE_API_TRUE_VAL
+    )
+
+    def __init__(self):
+        self._credentials = get_credentials()
+        self.pygsheets_client = pygsheets.authorize(
+            custom_credentials=self._credentials
+        )
+
+    def _update_spreadsheet_properties(self, file_id, property_dict):
+        """
+        Sets metadata properties on the spreadsheet, which can then be
+        included in queries.
+
+        Args:
+            file_id (str): The spreadsheet ID
+            property_dict (dict): Dict of properties to set
+
+        Returns:
+            dict: Google Drive API results from the files.update endpoint
+        """
+        return (
+            self.pygsheets_client.drive.service.files()
+            .update(fileId=file_id, body={"appProperties": property_dict})
+            .execute()
+        )
+
+    def _set_spreadsheet_processed(self, file_id):
+        """
+        Sets spreadsheet metadata to indicate that at least some coupon assignments have been completed.
+
+        Args:
+            file_id (str): The spreadsheet ID
+
+        Returns:
+            dict: Google Drive API results from the files.update endpoint
+        """
+        return self._update_spreadsheet_properties(
+            file_id,
+            {
+                ASSIGNMENT_PROCESSED_KEY: GOOGLE_API_TRUE_VAL,
+                ASSIGNMENT_PROCESSED_DATE_KEY: now_in_utc(),
+            },
+        )
+
+    def _set_spreadsheet_completed(self, file_id):
+        """
+        Sets spreadsheet metadata to indicate that all coupon assignments have been completed.
+
+        Args:
+            file_id (str): The spreadsheet ID
+
+        Returns:
+            dict: Google Drive API results from the files.update endpoint
+        """
+        now_str = now_in_utc()
+        return self._update_spreadsheet_properties(
+            file_id,
+            {
+                ASSIGNMENT_PROCESSED_KEY: GOOGLE_API_TRUE_VAL,
+                ASSIGNMENT_PROCESSED_DATE_KEY: now_str,
+                ASSIGNMENT_COMPLETED_KEY: GOOGLE_API_TRUE_VAL,
+                ASSIGNMENT_COMPLETED_DATE_KEY: now_str,
+            },
+        )
+
+    def fetch_incomplete_sheets(self):
+        """
+        Fetches Spreadsheets with metadata that indicate that they have not yet been completed.
+
+        Returns:
+            list of pygsheets.spreadsheet.Spreadsheet: A list of Spreadsheets that have not been completed
+        """
+        return self.pygsheets_client.open_all(
+            query="{} and {}".format(
+                self.ASSIGNMENT_SHEETS_QUERY, self.INCOMPLETE_SHEETS_QUERY_TERM
+            )
+        )
+
+    def get_sheet_properties(self, file_id):
+        """
+        Helper method to fetch the dictionary of appProperties for the given spreadsheet by its
+        file ID. The Google Sheets API doesn't know about this data. Only the Drive API can access
+        it, hence this helper method.
+
+        Args:
+            file_id (str): The spreadsheet ID
+
+        Returns:
+            dict: appProperties (if any) for the given sheet according to Drive
+        """
+        result = (
+            self.pygsheets_client.drive.service.files()
+            .get(fileId=file_id, fields="appProperties")
+            .execute()
+        )
+        if result and "appProperties" in result:
+            return result["appProperties"]
+        return {}
+
+    @staticmethod
+    def get_desired_coupon_assignments(data_rows):
+        """
+        Parses coupon assignment sheet data to get desired coupon assignments. Only rows with both a non-empty coupon
+        code and email are considered.
+
+        Args:
+            data_rows (list of lists): A matrix (list of lists) of data from a coupon assignment Worksheet
+
+        Returns:
+            set of (str, int): A set of emails paired with the product coupon (CouponEligibility)
+                id's that should be assigned to them.
+        """
+        coupon_codes = [row[0] for row in data_rows]
+        if not coupon_codes:
+            raise SheetValidationException("No data found in coupon assignment Sheet")
+        elif not all_unique(coupon_codes):
+            raise SheetValidationException(
+                "All coupon codes in the Sheet must be unique"
+            )
+        emails = [item_at_index_or_none(row, 1) for row in data_rows]
+        code_email_pairs = [
+            (code, email) for code, email in zip(coupon_codes, emails) if code and email
+        ]
+        product_coupon_ids = CouponEligibility.objects.filter(
+            coupon__coupon_code__in=[pair[0] for pair in code_email_pairs]
+        ).values_list("id", flat=True)
+        if len(product_coupon_ids) != len(code_email_pairs):
+            raise SheetValidationException(
+                "Mismatch between the number of actual product coupons and the number of coupon "
+                "codes listed in the Sheet."
+            )
+        return set(zip([pair[1] for pair in code_email_pairs], product_coupon_ids))
+
+    @staticmethod
+    def get_assignments_to_create_and_remove(
+        existing_assignment_qet, desired_assignments
+    ):
+        """
+        Returns coupon assignments that should be created and existing coupon assignments that should be deleted.
+
+        Args:
+            existing_assignment_qet (django.db.models.query.QuerySet): Queryset of existing ProductCouponAssignments
+            desired_assignments (set of (str, int)): A set of emails paired with the product coupon (CouponEligibility)
+                id's that should be assigned to them. This represents the complete set of assignments that should exist
+                in the database, including previously-existing assignments.
+
+        Returns:
+            ( set of (str, int), iterable of int ):
+                A set of (email, product coupon id) tuples, which indicate new assignments we want to create,
+                paired with an iterable of ProductCouponAssignment id's that should be deleted.
+        """
+        existing_tuple_set = set()
+        assignments_to_remove = []
+        # Based on existing ProductCouponAssignments, figure out which assignments should be
+        # created and which ones do not exist in the desired assignments and should therefore be removed.
+        for existing_assignment in existing_assignment_qet.all():
+            assignment_tuple = (
+                existing_assignment.email,
+                existing_assignment.product_coupon_id,
+            )
+            if assignment_tuple in desired_assignments:
+                existing_tuple_set.add(assignment_tuple)
+            else:
+                assignments_to_remove.append(existing_assignment)
+        tuple_set_to_create = desired_assignments - existing_tuple_set
+
+        if assignments_to_remove:
+            # Remove any assignments that have already been redeemed from the list of assignments to remove/delete.
+            # If they have been redeemed already, we can't delete them.
+            assignments_to_remove, already_redeemed_assignments = partition_to_lists(
+                assignments_to_remove, lambda assignment: assignment.redeemed
+            )
+            if already_redeemed_assignments:
+                log.error(
+                    "Cannot remove ProductCouponAssignments that are already redeemed - "
+                    "The following assignments will not be removed: %s"
+                    % str(list(already_redeemed_assignments))
+                )
+                # If any of the assignments we want to create have the same product coupon as one
+                # of these already-redeemed assignments, filter them out and log an error.
+                product_coupon_ids = set(
+                    assignment.product_coupon_id
+                    for assignment in already_redeemed_assignments
+                )
+                adjusted_create_iter, cannot_create_iter = partition(
+                    tuple_set_to_create,
+                    lambda assignment_tuple: assignment_tuple[1] in product_coupon_ids,
+                )
+                tuple_set_to_create = set(adjusted_create_iter)
+                if cannot_create_iter:
+                    log.error(
+                        "Cannot create ProductCouponAssignments for codes that have already been redeemed. "
+                        "The following assignments will be not be created: %s"
+                        % str(list(cannot_create_iter))
+                    )
+
+        return (
+            tuple_set_to_create,
+            [assignment.id for assignment in assignments_to_remove],
+        )
+
+    def process_assignment_spreadsheet(self, spreadsheet):
+        """
+        Does the following given a coupon assignment spreadsheet:
+        1) Creates a bulk assignment record if one doesn't exist
+        2) Gets valid assignment rows from the Sheet
+        3) Creates new product coupon assignments, removes assignments that were created before,
+           but no longer exist in the sheet, and updates bulk assignment status
+        4) Send emails to all recipients of newly-created ProductCouponAssignments
+        5) Sets metadata on the Sheet if it was processed for the first time and/or was completed
+           for the first time
+
+        Args:
+            spreadsheet (pygsheets.spreadsheet.Spreadsheet):
+        """
+        sheet = spreadsheet.sheet1
+        data_rows = list(get_data_rows(sheet))
+
+        bulk_assignment, _ = BulkCouponAssignment.objects.get_or_create(
+            assignment_sheet_id=spreadsheet.id
+        )
+        initial_started_value = bulk_assignment.assignments_started
+        initial_completed_value = bulk_assignment.assignments_complete
+
+        desired_assignments = self.get_desired_coupon_assignments(data_rows)
+        if bulk_assignment.assignments_started:
+            existing_assignment_qet = bulk_assignment.assignments
+            existing_assignment_count = existing_assignment_qet.count()
+            assignments_to_create, assignment_ids_to_remove = self.get_assignments_to_create_and_remove(
+                existing_assignment_qet, desired_assignments
+            )
+            if assignment_ids_to_remove:
+                num_removed, _ = ProductCouponAssignment.objects.filter(
+                    id__in=assignment_ids_to_remove
+                ).delete()
+                existing_assignment_count -= num_removed
+        else:
+            assignments_to_create = desired_assignments
+            existing_assignment_count = 0
+
+        # Create ProductCouponAssignments and update the BulkCouponAssignment record to reflect the progress
+        with transaction.atomic():
+            _, created_assignments = bulk_assign_product_coupons(
+                assignments_to_create, bulk_assignment=bulk_assignment
+            )
+            bulk_assignment.assignments_started = True
+            # If the data rows in the spreadsheet all have valid assignments, and the number of assignments
+            # in the database is equal to the number of data rows, we can consider this Sheet completed.
+            assignments_complete = all_equal(
+                len(data_rows),
+                len(desired_assignments),
+                (existing_assignment_count + len(created_assignments)),
+            )
+            bulk_assignment.assignments_complete = assignments_complete
+            bulk_assignment.save()
+
+        if created_assignments:
+            send_bulk_enroll_emails(created_assignments)
+
+        try:
+            if bulk_assignment.assignments_complete != initial_completed_value:
+                self._set_spreadsheet_completed(spreadsheet.id)
+            elif bulk_assignment.assignments_started != initial_started_value:
+                self._set_spreadsheet_processed(spreadsheet.id)
+        except Exception as exc:
+            raise SheetUpdateException from exc
+
+    def process_assignment_spreadsheets(self):
+        """
+        Processes all as-yet-incomplete coupon assignment spreadsheets
+
+        Returns:
+            list of pygsheets.spreadsheet.Spreadsheet: Successfully-processed spreadsheets
+        """
+        processed = []
+        for spreadsheet in self.fetch_incomplete_sheets():
+            log.info("Processing spreadsheet (%s)..." % spreadsheet_repr(spreadsheet))
+            try:
+                self.process_assignment_spreadsheet(spreadsheet)
+            except SheetValidationException as exc:
+                log.info(
+                    "Spreadsheet has invalid data for processing - %s, exception: %s"
+                    % (spreadsheet_repr(spreadsheet), str(exc))
+                )
+            except SheetUpdateException as exc:
+                log.error(
+                    "All relevant coupons have been assigned and messages have been sent, "
+                    "but failed to update the spreadsheet properties to indicate status "
+                    "- %s, exception: %s" % (spreadsheet_repr(spreadsheet), str(exc))
+                )
+            except Exception as exc:
+                log.error(exc)
+            else:
+                processed.append(spreadsheet)
+        return processed

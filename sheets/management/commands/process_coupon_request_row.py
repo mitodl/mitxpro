@@ -4,11 +4,8 @@ to reflect the processed request.
 """
 from django.core.management import BaseCommand, CommandError
 
-from sheets.api import (
-    CouponRequestHandler,
-    create_coupons_for_request_row,
-    ProcessedRequest,
-)
+from sheets.api import CouponRequestHandler, create_coupons_for_request_row
+from sheets.utils import ProcessedRequest
 
 
 class Command(BaseCommand):
@@ -96,7 +93,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                "Coupon generation succeeded.\n{}, CouponGenerationRequest: {}".format(
+                "Coupon generation succeeded.\n{}, CouponGenerationRequest id: {}".format(
                     row_summary, coupon_gen_request.id
                 )
             )

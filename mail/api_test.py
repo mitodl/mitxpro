@@ -11,6 +11,7 @@ from mail.api import (
     build_messages,
     build_user_specific_messages,
     build_message,
+    UserMessageProps,
     EmailMetadata,
 )
 from mitxpro.test_utils import any_instance_of
@@ -134,31 +135,34 @@ def test_build_messages(mocker):
 
 def test_build_user_specific_messages(mocker):
     """
-    Tests that build_user_specific_messages loops through an iterable of recipient data tuples
-    and builds a message for each one
+    Tests that build_user_specific_messages loops through an iterable of user message properties
+    and builds a message object from each one
     """
     patched_build_message = mocker.patch("mail.api.build_message")
     mocker.patch("mail.api.get_base_context", return_value={"base": "context"})
     mocker.patch("mail.api.mail.get_connection")
     template_name = "sample"
-    recipient_tuples = [
-        (
+    user_message_props_iter = [
+        UserMessageProps(
             "a@b.com",
             {"first": "context"},
-            EmailMetadata(tags=["tag1"], user_variables=None),
+            metadata=EmailMetadata(tags=["tag1"], user_variables=None),
         ),
-        ("c@d.com", {"second": "context"}, None),
+        UserMessageProps("c@d.com", {"second": "context"}),
+        UserMessageProps("e@f.com"),
     ]
 
-    messages = list(build_user_specific_messages(template_name, recipient_tuples))
-    assert len(messages) == len(recipient_tuples)
-    for recipient, context, metadata in recipient_tuples:
+    messages = list(
+        build_user_specific_messages(template_name, user_message_props_iter)
+    )
+    assert len(messages) == len(user_message_props_iter)
+    for user_message_props in user_message_props_iter:
         patched_build_message.assert_any_call(
             connection=any_instance_of(mocker.Mock),
             template_name=template_name,
-            recipient=recipient,
-            context={"base": "context", **context},
-            metadata=metadata,
+            recipient=user_message_props.recipient,
+            context={"base": "context", **user_message_props.context},
+            metadata=user_message_props.metadata,
         )
 
 
