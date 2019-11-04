@@ -283,6 +283,14 @@ class ProductVersionAdmin(admin.ModelAdmin):
     save_on_top = True
     readonly_fields = ("text_id",)
     raw_id_fields = ("product",)
+    search_fields = (
+        "text_id",
+        "description",
+        "product__courseruns__title",
+        "product__programs__title",
+        "product__courseruns__courseware_id",
+        "product__programs__readable_id",
+    )
 
     def get_queryset(self, request):
         """Return all active and in_active products"""
@@ -314,6 +322,12 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductVersionInline]
     list_display = ("id", "content_object")
     list_filter = ("is_active", ProductContentTypeListFilter)
+    search_fields = (
+        "courseruns__title",
+        "programs__title",
+        "courseruns__courseware_id",
+        "programs__readable_id",
+    )
 
     def get_queryset(self, request):
         """Return all active and in_active products"""
