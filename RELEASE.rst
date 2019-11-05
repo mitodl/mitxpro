@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.29.0
+Version 0.29.0 (Released November 05, 2019)
 --------------
 
 - #1245 Add search to product and version admin
