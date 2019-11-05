@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator, MaxValueValidator, MinValueValidator
+from django.utils.functional import cached_property
 
 from cms.urls import detail_path_char_pattern
 from courses.constants import (
@@ -182,7 +183,7 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         """Gets the number of courses in this program"""
         return self.courses.count()
 
-    @property
+    @cached_property
     def next_run_date(self):
         """Gets the start date of the next CourseRun of the first course (position_in_program=1) if one exists"""
         first_course = self.courses.filter(position_in_program=1, live=True).first()
@@ -274,7 +275,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         """Gets the associated CoursePage"""
         return getattr(self, "coursepage", None)
 
-    @property
+    @cached_property
     def next_run_date(self):
         """Gets the start date of the next CourseRun if one exists"""
         now = now_in_utc()
