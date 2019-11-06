@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.29.1
+Version 0.29.1 (Released November 06, 2019)
 --------------
 
 - Added setting for controlling edx API client request timeout
