@@ -787,6 +787,11 @@ OPENEDX_GRADES_API_TOKEN = get_string(
     None,
     "Access token to use with OpenEdX API client for syncing grades",
 )
+EDX_API_CLIENT_TIMEOUT = get_int(
+    "EDX_API_CLIENT_TIMEOUT",
+    60,
+    "Timeout (in seconds) for requests made via the edX API client",
+)
 
 
 # features flags

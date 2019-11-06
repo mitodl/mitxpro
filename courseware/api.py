@@ -371,6 +371,7 @@ def get_edx_api_client(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS)
     return EdxApi(
         {"access_token": auth.access_token, "api_key": settings.OPENEDX_API_KEY},
         settings.OPENEDX_API_BASE_URL,
+        timeout=settings.EDX_API_CLIENT_TIMEOUT,
     )
 
 
@@ -390,6 +391,7 @@ def get_edx_api_grades_client():
             "api_key": settings.OPENEDX_API_KEY,
         },
         settings.OPENEDX_API_BASE_URL,
+        timeout=settings.EDX_API_CLIENT_TIMEOUT,
     )
 
     return edx_client.current_grades
