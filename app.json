@@ -115,6 +115,10 @@
       "description": "The log level for django",
       "required": false
     },
+    "EDX_API_CLIENT_TIMEOUT": {
+      "description": "Timeout (in seconds) for requests made via the edX API client",
+      "required": false
+    },
     "GA_TRACKING_ID": {
       "description": "Google analytics tracking ID",
       "required": false
