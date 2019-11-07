@@ -11,11 +11,15 @@ from localdev.seed.api import SeedDataLoader, get_raw_seed_data_from_file
 
 
 @pytest.fixture
-def seeded():
+def seeded(settings):
     """Fixture for a scenario where course data has been loaded from our JSON file"""
+    settings.VOUCHER_DOMESTIC_EMPLOYEE_KEY = ""
+    settings.VOUCHER_DOMESTIC_EMPLOYEE_ID_KEY = None
+    delattr(settings, "VOUCHER_COMPANY_ID")
     data = get_raw_seed_data_from_file()
     seed_data_loader = SeedDataLoader()
     seed_data_loader.create_seed_data(data)
+    seed_data_loader.seed_result.report.values()
     return SimpleNamespace(raw_data=data, loader=seed_data_loader)
 
 
@@ -59,7 +63,7 @@ def test_seed_and_unseed_data(seeded):
         for course_data in seeded.raw_data["courses"]
     )
     # Hardcoding this value since it would be annoying to check for it programatically
-    expected_products = 7
+    expected_products = 11
     expected_resource_pages = len(seeded.raw_data["resource_pages"])
     assert Program.objects.count() == expected_programs
     assert ProgramPage.objects.count() == expected_programs

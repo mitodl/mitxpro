@@ -238,7 +238,7 @@ class EnvParser:
 
         if missing_settings:
             raise ImproperlyConfigured(
-                "The following settings are missing: {}".format(
+                "The following settings are missing: {}. You need to add these environment variables in .env file.".format(
                     ", ".join(missing_settings)
                 )
             )
