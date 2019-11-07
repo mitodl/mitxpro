@@ -294,39 +294,7 @@ $text-gray-light: #d2d0d1;
   }
 
   .certify-by-row {
-    display: block;
-
-    &:after {
-      content: "";
-      display: block;
-      clear: both;
-    }
-
-    .certify-by {
-      float: left;
-      width: 33.3333%;
-
-      &.signature-1 {
-        float: none;
-        margin: 0 auto;
-      }
-
-      &.signature-2 {
-        width: 30%;
-
-        &:first-child {
-          margin-left: 20%;
-        }
-      }
-
-      &.signature-4 {
-        width: 25%;
-      }
-
-      &.signature-5 {
-        width: 20%;
-      }
-    }
+    flex-wrap: nowrap;
   }
 
   @page {
