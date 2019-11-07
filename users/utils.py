@@ -17,6 +17,10 @@ USERNAME_SEPARATOR_REPLACE_CHARS = "\\s_"
 USERNAME_INVALID_CHAR_PATTERN = r"[^\w{}{}]|[\d]".format(
     USERNAME_SEPARATOR_REPLACE_CHARS, USERNAME_SEPARATOR
 )
+
+USERNAME_TURKISH_I_CHARS = r"[ıİ]"
+USERNAME_TURKISH_I_CHARS_REPLACEMENT = "i"
+
 # Pattern for chars to replace with a single separator. The separator character itself
 # is also included in this pattern so repeated separators are squashed down.
 USERNAME_SEPARATOR_REPLACE_PATTERN = r"[{}{}]+".format(
@@ -33,9 +37,12 @@ def _reformat_for_username(string):
     Returns:
         str: A version of the string with username-appropriate characters
     """
-    cleaned = re.sub(USERNAME_INVALID_CHAR_PATTERN, "", string)
+    cleaned_string = re.sub(USERNAME_INVALID_CHAR_PATTERN, "", string)
+    cleaned_string = re.sub(
+        USERNAME_TURKISH_I_CHARS, USERNAME_TURKISH_I_CHARS_REPLACEMENT, cleaned_string
+    )
     return (
-        re.sub(USERNAME_SEPARATOR_REPLACE_PATTERN, USERNAME_SEPARATOR, cleaned)
+        re.sub(USERNAME_SEPARATOR_REPLACE_PATTERN, USERNAME_SEPARATOR, cleaned_string)
         .lower()
         .strip(USERNAME_SEPARATOR)
     )
@@ -56,6 +63,7 @@ def usernameify(full_name, email=""):
             full name and email
     """
     username = _reformat_for_username(full_name)
+
     if not username and email:
         log.error(
             "User's full name could not be used to generate a username (full name: '%s'). "

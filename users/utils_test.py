@@ -17,6 +17,7 @@ from users.utils import ensure_active_user, is_duplicate_username_error, usernam
         ["Кирил Френков", None, "кирил-френков"],
         ["年號", None, "年號"],
         ["abcdefghijklmnopqrstuvwxyz", None, "abcdefghijklmnopqrst"],
+        ["ai bi cı dI eİ fI", None, "ai-bi-ci-di-ei-fi"],
         ["", "some.email@example.co.uk", "someemail"],
     ],
 )
