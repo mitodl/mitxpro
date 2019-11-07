@@ -12,6 +12,7 @@ from requests import HTTPError
 
 from ecommerce.factories import LineFactory, ProductFactory
 from hubspot import api
+from hubspot.api import make_properties_url
 from hubspot.serializers import OrderToDealSerializer, LineSerializer, ProductSerializer
 from mitxpro.test_utils import any_instance_of
 from users.serializers import UserSerializer
@@ -204,6 +205,17 @@ def test_make_product_sync_message():
             "propertyNameToValues": serialized_product,
         }
     ]
+
+
+@pytest.mark.parametrize(
+    "object_type, version", [["line_items", "v2"], ["deals", "v1"]]
+)
+def test_make_properties_url(object_type, version):
+    """ Test make_properties_url selects the right version for the properties url """
+    assert (
+        make_properties_url("endpoint", object_type)
+        == f"/properties/{version}/{object_type}/endpoint"
+    )
 
 
 @pytest.mark.parametrize(

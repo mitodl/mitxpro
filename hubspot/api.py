@@ -289,6 +289,25 @@ def make_product_sync_message(product_id):
     return [make_sync_message(product_id, properties)]
 
 
+def make_properties_url(endpoint, object_type):
+    """
+    Create the url for a call to the properties api based on object type
+
+    Args:
+        endpoint (str): endpoint to follow /properties/{version}/{object_type}
+        object_type (str): the type of object properties to query
+
+    Returns:
+        string: a properties url for use in send_hubspot_request
+    """
+    if object_type == "line_items":
+        version = "v2"
+    else:
+        version = "v1"
+
+    return urljoin(f"/properties/{version}/{object_type.lower()}/", endpoint)
+
+
 def sync_object_property(object_type, property_dict):
     """
     Create or update a new object property
@@ -325,7 +344,10 @@ def sync_object_property(object_type, property_dict):
         endpoint = ""
 
     response = send_hubspot_request(
-        endpoint, f"/properties/v1/{object_type}/properties", method, body=property_dict
+        endpoint,
+        make_properties_url("properties", object_type),
+        method,
+        body=property_dict,
     )
     response.raise_for_status()
     return response.json()
@@ -343,7 +365,7 @@ def get_object_property(object_type, property_name):
         dict:  the property attributes
     """
     response = send_hubspot_request(
-        property_name, f"/properties/v1/{object_type}/properties/named", "GET"
+        property_name, make_properties_url("properties/named", object_type), "GET"
     )
     response.raise_for_status()
     return response.json()
@@ -379,11 +401,7 @@ def delete_object_property(object_type, property_name):
         dict:  the result of the delete request in JSON format
     """
     response = send_hubspot_request(
-        "",
-        "/properties/v1/{}/properties/named/{}".format(
-            object_type.lower(), property_name
-        ),
-        "DELETE",
+        "", make_properties_url(f"named/{property_name}", object_type), "DELETE"
     )
     response.raise_for_status()
     return response.json()
@@ -401,7 +419,7 @@ def get_property_group(object_type, group_name):
         dict:  The group attributes
     """
     response = send_hubspot_request(
-        group_name, f"/properties/v1/{object_type}/groups/named", "GET"
+        group_name, make_properties_url("groups/named", object_type), "GET"
     )
     response.raise_for_status()
     return response.json()
@@ -450,7 +468,7 @@ def sync_property_group(object_type, name, label):
         endpoint = ""
 
     response = send_hubspot_request(
-        endpoint, f"/properties/v1/{object_type}/groups", method, body=body
+        endpoint, make_properties_url("groups", object_type), method, body=body
     )
     response.raise_for_status()
     return response.json()
@@ -468,9 +486,7 @@ def delete_property_group(object_type, group_name):
         dict:  The result of the delete command in JSON format
     """
     response = send_hubspot_request(
-        "",
-        "/properties/v1/{}/groups/named/{}".format(object_type.lower(), group_name),
-        "DELETE",
+        "", make_properties_url(f"groups/named/{group_name}", object_type), "DELETE"
     )
     response.raise_for_status()
     return response.json()

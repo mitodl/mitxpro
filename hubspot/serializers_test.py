@@ -62,6 +62,7 @@ def test_serialize_line():
         "product": format_hubspot_id(line.product_version.product.id),
         "order": format_hubspot_id(line.order_id),
         "quantity": line.quantity,
+        "status": line.order.status,
     }
 
 
@@ -75,7 +76,7 @@ def test_serialize_order(status):
         "id": order.id,
         "name": f"XPRO-ORDER-{order.id}",
         "purchaser": format_hubspot_id(order.purchaser.id),
-        "status": ORDER_STATUS_MAPPING[status],
+        "stage": ORDER_STATUS_MAPPING[status],
         "amount": line.product_version.price.to_eng_string(),
         "discount_amount": "0.0000",
         "close_date": (
@@ -90,6 +91,7 @@ def test_serialize_order(status):
         "discount_percent": "0",
         "order_type": ORDER_TYPE_B2C,
         "lines": [LineSerializer(instance=line).data],
+        "status": order.status,
     }
 
 
@@ -107,7 +109,7 @@ def test_serialize_order_with_coupon():
         "id": order.id,
         "name": f"XPRO-ORDER-{order.id}",
         "purchaser": format_hubspot_id(order.purchaser.id),
-        "status": ORDER_STATUS_MAPPING[order.status],
+        "stage": ORDER_STATUS_MAPPING[order.status],
         "amount": line.product_version.price.to_eng_string(),
         "discount_amount": discount.to_eng_string(),
         "close_date": (
@@ -124,4 +126,5 @@ def test_serialize_order_with_coupon():
             coupon_redemption.coupon_version.payment_version.amount * 100
         ).to_eng_string(),
         "lines": [LineSerializer(instance=line).data],
+        "status": order.status,
     }

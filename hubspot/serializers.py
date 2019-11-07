@@ -24,6 +24,7 @@ class LineSerializer(serializers.ModelSerializer):
 
     product = serializers.SerializerMethodField()
     order = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     def get_order(self, instance):
         """ Get the order id and return the hubspot deal integratorObject id"""
@@ -33,8 +34,12 @@ class LineSerializer(serializers.ModelSerializer):
         """ Get the product id and return the hubspot product integratorObject id"""
         return format_hubspot_id(instance.product_version.product.id)
 
+    def get_status(self, instance):
+        """ Get status of the associated Order """
+        return instance.order.status
+
     class Meta:
-        fields = ("id", "product", "order", "quantity")
+        fields = ("id", "product", "order", "quantity", "status")
         model = models.Line
 
 
@@ -42,7 +47,7 @@ class OrderToDealSerializer(serializers.ModelSerializer):
     """ Order/Deal Serializer for Hubspot """
 
     name = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
+    stage = serializers.SerializerMethodField()
     close_date = serializers.SerializerMethodField(allow_null=True)
     amount = serializers.SerializerMethodField()
     discount_amount = serializers.SerializerMethodField()
@@ -82,7 +87,7 @@ class OrderToDealSerializer(serializers.ModelSerializer):
         """ Return the order/deal name """
         return f"XPRO-ORDER-{instance.id}"
 
-    def get_status(self, instance):
+    def get_stage(self, instance):
         """ Return the status mapped to the hubspot equivalent """
         return ORDER_STATUS_MAPPING[instance.status]
 
@@ -168,13 +173,14 @@ class OrderToDealSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "amount",
+            "stage",
+            "status",
             "discount_amount",
             "discount_percent",
             "close_date",
             "coupon_code",
             "lines",
             "purchaser",
-            "status",
             "company",
             "order_type",
             "payment_type",

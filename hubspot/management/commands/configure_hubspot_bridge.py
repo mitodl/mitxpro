@@ -5,6 +5,7 @@ and Line Items
 import json
 from django.core.management import BaseCommand
 
+from ecommerce import models
 from hubspot.api import (
     send_hubspot_request,
     property_group_exists,
@@ -41,6 +42,40 @@ CUSTOM_ECOMMERCE_PROPERTIES = {
                     {
                         "value": ORDER_TYPE_B2C,
                         "label": ORDER_TYPE_B2C,
+                        "displayOrder": 1,
+                        "hidden": False,
+                    },
+                ],
+            },
+            {
+                "name": "status",
+                "label": "Order Status",
+                "description": "The current status of the order",
+                "groupName": "dealinformation",
+                "type": "enumeration",
+                "fieldType": "select",
+                "options": [
+                    {
+                        "value": models.Order.FULFILLED,
+                        "label": models.Order.FULFILLED,
+                        "displayOrder": 0,
+                        "hidden": False,
+                    },
+                    {
+                        "value": models.Order.FAILED,
+                        "label": models.Order.FAILED,
+                        "displayOrder": 1,
+                        "hidden": False,
+                    },
+                    {
+                        "value": models.Order.CREATED,
+                        "label": models.Order.CREATED,
+                        "displayOrder": 0,
+                        "hidden": False,
+                    },
+                    {
+                        "value": models.Order.REFUNDED,
+                        "label": models.Order.REFUNDED,
                         "displayOrder": 1,
                         "hidden": False,
                     },
@@ -98,6 +133,53 @@ CUSTOM_ECOMMERCE_PROPERTIES = {
                 "groupName": "contactinformation",
                 "type": "string",
                 "fieldType": "text",
+            },
+            {
+                "name": "birth_year",
+                "label": "Year of Birth",
+                "description": "Year of birth",
+                "groupName": "contactinformation",
+                "type": "string",
+                "fieldType": "text",
+            },
+        ],
+    },
+    "line_items": {
+        "groups": [],
+        "properties": [
+            {
+                "name": "status",
+                "label": "Order Status",
+                "description": "The current status of the order associated with the line item",
+                "groupName": "lineiteminformation",
+                "type": "enumeration",
+                "fieldType": "select",
+                "options": [
+                    {
+                        "value": models.Order.FULFILLED,
+                        "label": models.Order.FULFILLED,
+                        "displayOrder": 0,
+                        "hidden": False,
+                    },
+                    {
+                        "value": models.Order.FAILED,
+                        "label": models.Order.FAILED,
+                        "displayOrder": 1,
+                        "hidden": False,
+                    },
+                    {
+                        "value": models.Order.CREATED,
+                        "label": models.Order.CREATED,
+                        "displayOrder": 0,
+                        "hidden": False,
+                    },
+                    {
+                        "value": models.Order.REFUNDED,
+                        "label": models.Order.REFUNDED,
+                        "displayOrder": 1,
+                        "hidden": False,
+                    },
+                ],
             }
         ],
     },
@@ -236,6 +318,11 @@ HUBSPOT_ECOMMERCE_SETTINGS = {
                 "dataType": "NUMBER",
             },
             {
+                "propertyName": "status",
+                "targetHubspotProperty": "status",
+                "dataType": "STRING",
+            },
+            {
                 "propertyName": "discount_amount",
                 "targetHubspotProperty": "ip__ecomm_bridge__discount_amount",
                 "dataType": "NUMBER",
@@ -256,7 +343,7 @@ HUBSPOT_ECOMMERCE_SETTINGS = {
                 "dataType": "STRING",
             },
             {
-                "propertyName": "status",
+                "propertyName": "stage",
                 "targetHubspotProperty": "dealstage",
                 "dataType": "STRING",
             },
@@ -303,6 +390,11 @@ HUBSPOT_ECOMMERCE_SETTINGS = {
                 "propertyName": "quantity",
                 "targetHubspotProperty": "quantity",
                 "dataType": "NUMBER",
+            },
+            {
+                "propertyName": "status",
+                "targetHubspotProperty": "status",
+                "dataType": "STRING",
             },
         ]
     },
