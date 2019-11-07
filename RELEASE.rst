@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.29.2
+--------------
+
+- #1301 Fix certificate view (4 signatures inline)
+- Added setting for controlling edx API client request timeout
+
 Version 0.29.1 (Released November 06, 2019)
 --------------
 
