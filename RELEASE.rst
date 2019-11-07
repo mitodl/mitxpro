@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.29.2
+Version 0.29.2 (Released November 07, 2019)
 --------------
 
 - #1301 Fix certificate view (4 signatures inline)
