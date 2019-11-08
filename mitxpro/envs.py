@@ -168,6 +168,25 @@ def parse_str(name, value, default):  # pylint: disable=unused-argument
     return value
 
 
+def parse_list(name, value, default):  # pylint: disable=unused-argument
+    """
+    Parses a comma separated string into a list
+
+    Argumments:
+        value (str or list[str]):
+            the value as a string or list of strings
+
+    Returns:
+        list[str]:
+            the parsed value
+    """
+    parsed_value = value
+    if isinstance(value, str):
+        parsed_value = value.split(",")
+
+    return [item.strip(" ") for item in parsed_value]
+
+
 def parse_any(name, value, default):
     """
     Attempts to parse an environment variable as a bool, int, or a string
@@ -185,7 +204,7 @@ def parse_any(name, value, default):
             the environment variable value parsed as a bool, int, or a string
     """
     # attempt to parse the var in this order of parsers
-    for parser in [parse_bool, parse_int, parse_str]:
+    for parser in [parse_bool, parse_int, parse_str, parse_list]:
         try:
             return parser(name, value, default)
         except EnvironmentVariableParseException:
@@ -237,6 +256,7 @@ class EnvParser:
     get_string = var_parser(parse_str)
     get_bool = var_parser(parse_bool)
     get_int = var_parser(parse_int)
+    get_list = var_parser(parse_list)
     get_any = var_parser(parse_any)
 
 
@@ -246,6 +266,7 @@ env = EnvParser()
 get_string = env.get_string
 get_int = env.get_int
 get_bool = env.get_bool
+get_list = env.get_list
 get_any = env.get_any
 validate = env.validate
 list_environment_vars = env.list_environment_vars
