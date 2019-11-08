@@ -28,6 +28,9 @@ class Command(EnrollmentChangeCommand):
             help="The id, email, or username of the User to whom the enrollment will be transferred",
             required=True,
         )
+        parser.add_argument(
+            "--order", type=str, help="The 'order_id' value for an user's order ID."
+        )
         group = parser.add_mutually_exclusive_group()
         group.add_argument(
             "--program",

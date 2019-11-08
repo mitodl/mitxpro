@@ -61,7 +61,7 @@ class Command(EnrollmentChangeCommand):
                     from_run.course.title, to_run.course.title
                 )
             )
-        elif not to_run.is_unexpired:
+        elif not to_run.is_unexpired and not options["force"]:
             raise CommandError("'to' run is expired")
 
         from_enrollment = CourseRunEnrollment.all_objects.get(user=user, run=from_run)
