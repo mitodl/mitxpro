@@ -98,6 +98,24 @@ class TestSettings(TestCase):
         mail.mail_admins("Test", "message")
         self.assertIn(test_admin_email, mail.outbox[0].to)
 
+    def test_csrf_trusted_origins(self):
+        """Verify that we can configure CSRF_TRUSTED_ORIGINS with a var"""
+        # Test the default
+        settings_vars = self.patch_settings(REQUIRED_SETTINGS)
+        self.assertEqual(settings_vars.get("CSRF_TRUSTED_ORIGINS"), [])
+
+        # Verify the env var works
+        settings_vars = self.patch_settings(
+            {
+                **REQUIRED_SETTINGS,
+                "CSRF_TRUSTED_ORIGINS": "some.domain.com, some.other.domain.org",
+            }
+        )
+        self.assertEqual(
+            settings_vars.get("CSRF_TRUSTED_ORIGINS"),
+            ["some.domain.com", "some.other.domain.org"],
+        )
+
     def test_db_ssl_enable(self):
         """Verify that we can enable/disable database SSL with a var"""
 

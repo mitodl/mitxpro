@@ -15,7 +15,14 @@ from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
-from mitxpro.envs import get_any, get_bool, get_int, get_string, OffsettingSchedule
+from mitxpro.envs import (
+    get_any,
+    get_bool,
+    get_int,
+    get_string,
+    get_list,
+    OffsettingSchedule,
+)
 
 VERSION = "0.29.2"
 
@@ -50,6 +57,12 @@ HEROKU_APP_NAME = get_string(
 )
 
 ALLOWED_HOSTS = ["*"]
+
+CSRF_TRUSTED_ORIGINS = get_list(
+    "CSRF_TRUSTED_ORIGINS",
+    [],
+    description="Comma separated string of trusted domains that should be CSRF exempt",
+)
 
 SECURE_SSL_REDIRECT = get_bool(
     "MITXPRO_SECURE_SSL_REDIRECT",

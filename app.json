@@ -63,6 +63,10 @@
       "description": "'hours' value for the 'generate-course-certificate' scheduled task (defaults to midnight)",
       "required": false
     },
+    "CSRF_TRUSTED_ORIGINS": {
+      "description": "Comma separated string of trusted domains that should be CSRF exempt",
+      "required": false
+    },
     "CYBERSOURCE_ACCESS_KEY": {
       "description": "CyberSource Access Key",
       "required": false
