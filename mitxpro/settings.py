@@ -24,7 +24,7 @@ from mitxpro.envs import (
     OffsettingSchedule,
 )
 
-VERSION = "0.29.2"
+VERSION = "0.30.0"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

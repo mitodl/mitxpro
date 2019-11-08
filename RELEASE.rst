@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.30.0 (Released November 08, 2019)
+--------------
+
+- Add status to deal and line, add birth year to contact
+
 Version 0.29.2 (Released November 07, 2019)
 --------------
 
