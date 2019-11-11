@@ -82,7 +82,7 @@ describe("LoginForgotPasswordConfirmPage", () => {
             uid
           },
           credentials: undefined,
-          headers:     undefined
+          headers:     { "X-CSRFTOKEN": null }
         }
       )
 
