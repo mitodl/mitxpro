@@ -260,13 +260,11 @@ class BasketSerializer(serializers.ModelSerializer):
         for course in serialized_product_version["courses"]:
             for run in course["courseruns"]:
                 valid_run_ids.add(run["id"])
-        run_ids = [
-            run_id
-            for run_id in models.CourseRunSelection.objects.filter(
-                basket=basket
+        run_ids = list(
+            models.CourseRunSelection.objects.filter(
+                basket=basket, run_id__in=valid_run_ids
             ).values_list("run", flat=True)
-            if run_id in valid_run_ids
-        ]
+        )
         return {**serialized_product_version, "run_ids": run_ids}
 
     def get_items(self, instance):
