@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.31.0
+Version 0.31.0 (Released November 12, 2019)
 --------------
 
 - fix forgot password form while logged in
