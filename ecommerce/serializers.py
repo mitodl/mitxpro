@@ -232,36 +232,6 @@ class CouponSerializer(serializers.ModelSerializer):
         model = models.Coupon
 
 
-def _serialize_item(*, item, basket, context):
-    """
-    Serialize a BasketItem
-
-    Args:
-        item (BasketItem): A basket item
-        basket (Basket): A basket
-        context (dict): Context from the BasketSerializer
-
-    Returns:
-        dict:
-            A serialized representation
-    """
-    serialized_product_version = ProductVersionSerializer(
-        instance=latest_product_version(item.product), context=context
-    ).data
-    valid_run_ids = set()
-    for course in serialized_product_version["courses"]:
-        for run in course["courseruns"]:
-            valid_run_ids.add(run["id"])
-    run_ids = [
-        run_id
-        for run_id in models.CourseRunSelection.objects.filter(
-            basket=basket
-        ).values_list("run", flat=True)
-        if run_id in valid_run_ids
-    ]
-    return {**serialized_product_version, "run_ids": run_ids}
-
-
 class BasketSerializer(serializers.ModelSerializer):
     """Basket model serializer"""
 
@@ -269,10 +239,40 @@ class BasketSerializer(serializers.ModelSerializer):
     coupons = WriteableSerializerMethodField()
     data_consents = WriteableSerializerMethodField()
 
+    @classmethod
+    def _serialize_item(cls, *, item, basket, context):
+        """
+        Serialize a BasketItem
+
+        Args:
+            item (BasketItem): A basket item
+            basket (Basket): A basket
+            context (dict): Context from the BasketSerializer
+
+        Returns:
+            dict:
+                A serialized representation
+        """
+        serialized_product_version = ProductVersionSerializer(
+            instance=latest_product_version(item.product), context=context
+        ).data
+        valid_run_ids = set()
+        for course in serialized_product_version["courses"]:
+            for run in course["courseruns"]:
+                valid_run_ids.add(run["id"])
+        run_ids = [
+            run_id
+            for run_id in models.CourseRunSelection.objects.filter(
+                basket=basket
+            ).values_list("run", flat=True)
+            if run_id in valid_run_ids
+        ]
+        return {**serialized_product_version, "run_ids": run_ids}
+
     def get_items(self, instance):
         """ Get the basket items """
         return [
-            _serialize_item(item=item, basket=instance, context=self.context)
+            self._serialize_item(item=item, basket=instance, context=self.context)
             for item in instance.basketitems.all()
         ]
 
