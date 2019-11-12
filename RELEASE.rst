@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.31.1
+Version 0.31.1 (Released November 12, 2019)
 --------------
 
 - Filter invalid runs from selected runs list (#1308)
