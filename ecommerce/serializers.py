@@ -56,6 +56,7 @@ class ProductVersionSerializer(serializers.ModelSerializer):
 
         model_class = instance.product.content_type.model_class()
         if model_class is CourseRun:
+            # filter_products=True because the course run must have an associated product.
             return [
                 CourseSerializer(
                     instance.product.content_object.course,
@@ -67,6 +68,8 @@ class ProductVersionSerializer(serializers.ModelSerializer):
                 program=instance.product.content_object
             ).order_by("position_in_program")
 
+            # filter_products=False because we want to show course runs even if they don't have
+            # products, since the product is for the program.
             return CourseSerializer(
                 courses, many=True, context={**self.context, "filter_products": False}
             ).data
