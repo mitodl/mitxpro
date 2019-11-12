@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.31.0 (Released November 12, 2019)
+--------------
+
+- fix forgot password form while logged in
+- #1267 Configurable CSRF_TRUSTED_ORIGINS env var
+
 Version 0.30.0 (Released November 08, 2019)
 --------------
 
