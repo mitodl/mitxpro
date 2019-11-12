@@ -56,17 +56,25 @@ class ProductVersionSerializer(serializers.ModelSerializer):
 
         model_class = instance.product.content_type.model_class()
         if model_class is CourseRun:
-            courses = [instance.product.content_object.course]
+            # filter_products=True because the course run must have an associated product.
+            return [
+                CourseSerializer(
+                    instance.product.content_object.course,
+                    context={**self.context, "filter_products": True},
+                ).data
+            ]
         elif model_class is Program:
             courses = Course.objects.filter(
                 program=instance.product.content_object
             ).order_by("position_in_program")
+
+            # filter_products=False because we want to show course runs even if they don't have
+            # products, since the product is for the program.
+            return CourseSerializer(
+                courses, many=True, context={**self.context, "filter_products": False}
+            ).data
         else:
             raise ValueError(f"Unexpected product for {model_class}")
-
-        return [
-            CourseSerializer(course, context=self.context).data for course in courses
-        ]
 
     def get_thumbnail_url(self, instance):
         """Return the thumbnail for the courserun or program"""
@@ -234,19 +242,39 @@ class BasketSerializer(serializers.ModelSerializer):
     coupons = WriteableSerializerMethodField()
     data_consents = WriteableSerializerMethodField()
 
+    @classmethod
+    def _serialize_item(cls, *, item, basket, context):
+        """
+        Serialize a BasketItem
+
+        Args:
+            item (BasketItem): A basket item
+            basket (Basket): A basket
+            context (dict): Context from the BasketSerializer
+
+        Returns:
+            dict:
+                A serialized representation
+        """
+        serialized_product_version = ProductVersionSerializer(
+            instance=latest_product_version(item.product), context=context
+        ).data
+        valid_run_ids = set()
+        for course in serialized_product_version["courses"]:
+            valid_run_ids = valid_run_ids.union(
+                {run["id"] for run in course["courseruns"]}
+            )
+        run_ids = list(
+            models.CourseRunSelection.objects.filter(
+                basket=basket, run_id__in=valid_run_ids
+            ).values_list("run", flat=True)
+        )
+        return {**serialized_product_version, "run_ids": run_ids}
+
     def get_items(self, instance):
         """ Get the basket items """
         return [
-            {
-                **ProductVersionSerializer(
-                    instance=latest_product_version(item.product), context=self.context
-                ).data,
-                "run_ids": list(
-                    models.CourseRunSelection.objects.filter(
-                        basket=instance
-                    ).values_list("run", flat=True)
-                ),
-            }
+            self._serialize_item(item=item, basket=instance, context=self.context)
             for item in instance.basketitems.all()
         ]
 

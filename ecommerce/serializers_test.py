@@ -179,12 +179,16 @@ def test_serialize_basket_data_consents(basket_and_agreement, mock_context):
     }
 
 
-def test_serialize_basket(basket_and_agreement, mock_context):
+@pytest.mark.parametrize("is_live", [True, False])
+def test_serialize_basket(basket_and_agreement, mock_context, is_live):
     """Test Basket serialization"""
     basket = basket_and_agreement.basket
     selection = CouponSelection.objects.get(basket=basket)
     run = CourseRunSelection.objects.get(basket=basket).run
     data_consent = DataConsentUser.objects.get(user=basket.user)
+    run.live = is_live
+    run.save()
+
     data = BasketSerializer(instance=basket, context=mock_context).data
     assert data == {
         "items": [
@@ -193,7 +197,7 @@ def test_serialize_basket(basket_and_agreement, mock_context):
                     instance=basket_and_agreement.product.latest_version,
                     context=mock_context,
                 ).data,
-                "run_ids": [run.id],
+                "run_ids": [run.id] if is_live else [],
             }
         ],
         "coupons": [CouponSelectionSerializer(selection).data],
