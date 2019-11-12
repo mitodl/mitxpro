@@ -261,8 +261,9 @@ class BasketSerializer(serializers.ModelSerializer):
         ).data
         valid_run_ids = set()
         for course in serialized_product_version["courses"]:
-            for run in course["courseruns"]:
-                valid_run_ids.add(run["id"])
+            valid_run_ids = valid_run_ids.union(
+                {run["id"] for run in course["courseruns"]}
+            )
         run_ids = list(
             models.CourseRunSelection.objects.filter(
                 basket=basket, run_id__in=valid_run_ids
