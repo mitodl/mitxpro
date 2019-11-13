@@ -4,6 +4,7 @@ from django.db import migrations
 from wagtail.core.models import Page
 
 from cms.constants import CERTIFICATE_INDEX_SLUG
+from cms.models import CertificateIndexPage
 
 
 def get_home_page(apps):
@@ -43,7 +44,6 @@ def create_index_page(apps, schema_editor):
     Create a certificate index page under the home page
     """
     ContentType = apps.get_model("contenttypes.ContentType")
-    CertificateIndexPage = apps.get_model("cms", "CertificateIndexPage")
     index_content_type, _ = ContentType.objects.get_or_create(
         app_label="cms", model="certificateindexpage"
     )
@@ -52,7 +52,7 @@ def create_index_page(apps, schema_editor):
     index_page = CertificateIndexPage.objects.first()
 
     if not index_page:
-        index_page = Page(
+        index_page = CertificateIndexPage(
             title="Certificate Index Page",
             content_type_id=index_content_type.id,
             slug=CERTIFICATE_INDEX_SLUG,
