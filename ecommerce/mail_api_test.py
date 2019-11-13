@@ -10,6 +10,7 @@ from courses.factories import CourseRunEnrollmentFactory
 from ecommerce.api import get_readable_id
 from ecommerce.factories import (
     CouponPaymentVersionFactory,
+    BulkCouponAssignmentFactory,
     ProductCouponAssignmentFactory,
     CompanyFactory,
 )
@@ -49,7 +50,10 @@ def test_send_bulk_enroll_emails(mocker, settings):
     settings.SITE_BASE_URL = "http://test.com/"
 
     num_assignments = 2
-    assignments = ProductCouponAssignmentFactory.create_batch(num_assignments)
+    bulk_assignment = BulkCouponAssignmentFactory.create()
+    assignments = ProductCouponAssignmentFactory.create_batch(
+        num_assignments, bulk_assignment=bulk_assignment
+    )
     new_company = CompanyFactory.create()
     new_coupon_payment_versions = CouponPaymentVersionFactory.create_batch(
         num_assignments,
@@ -59,7 +63,7 @@ def test_send_bulk_enroll_emails(mocker, settings):
         company=factory.Iterator([new_company, None]),
     )
 
-    send_bulk_enroll_emails(assignments)
+    send_bulk_enroll_emails(bulk_assignment.id, assignments)
 
     patched_send_messages.assert_called_once()
     patched_build_user_messages.assert_called_once()
@@ -85,6 +89,7 @@ def test_send_bulk_enroll_emails(mocker, settings):
         assert user_message_props.metadata == EmailMetadata(
             tags=[BULK_ENROLLMENT_EMAIL_TAG],
             user_variables={
+                "bulk_assignment": bulk_assignment.id,
                 "enrollment_code": assignment.product_coupon.coupon.coupon_code,
                 product_type_str: assignment.product_coupon.product.content_object.text_id,
             },

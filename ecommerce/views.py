@@ -302,7 +302,7 @@ class BulkEnrollmentSubmitView(APIView):
         bulk_assignment, product_coupon_assignments = bulk_assign_product_coupons(
             zip(emails, available_product_coupons.values_list("id", flat=True))
         )
-        send_bulk_enroll_emails(product_coupon_assignments)
+        send_bulk_enroll_emails(bulk_assignment.id, product_coupon_assignments)
 
         return Response(
             status=status.HTTP_200_OK,

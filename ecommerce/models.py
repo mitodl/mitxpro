@@ -13,6 +13,7 @@ from ecommerce.utils import get_order_id_by_reference_number
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 from users.models import User
+from mail.constants import MAILGUN_EVENT_CHOICES
 
 log = logging.getLogger()
 
@@ -593,8 +594,9 @@ class BulkCouponAssignment(models.Model):
     """Records the bulk creation of ProductCouponAssignments"""
 
     assignment_sheet_id = models.CharField(max_length=100, db_index=True, null=True)
-    assignments_started = models.BooleanField(default=False)
-    assignments_complete = models.BooleanField(default=False)
+    assignments_started_date = models.DateTimeField(null=True, blank=True)
+    assignments_completed_date = models.DateTimeField(null=True, blank=True)
+    message_delivery_complete = models.BooleanField(default=False)
     updated_on = models.DateTimeField(auto_now=True, null=True)  # UTC
     created_on = models.DateTimeField(auto_now_add=True)  # UTC
 
@@ -608,6 +610,10 @@ class ProductCouponAssignment(TimestampedModel):
     email = models.EmailField(blank=False, db_index=True)
     product_coupon = models.ForeignKey(CouponEligibility, on_delete=models.PROTECT)
     redeemed = models.BooleanField(default=False)
+    message_status = models.CharField(
+        choices=MAILGUN_EVENT_CHOICES, max_length=15, null=True, blank=True
+    )
+    message_status_date = models.DateTimeField(null=True, blank=True)
     bulk_assignment = models.ForeignKey(
         BulkCouponAssignment,
         null=True,

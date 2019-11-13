@@ -287,9 +287,9 @@ def all_equal(*args):
         *args (hashable): Arguments of any hashable type
 
     Returns:
-        bool: True if all of the provided args are equal
+        bool: True if all of the provided args are equal, or if the args are empty
     """
-    return len(set(args)) == 1
+    return len(set(args)) <= 1
 
 
 def all_unique(iterable):
@@ -303,6 +303,20 @@ def all_unique(iterable):
         bool: True if all of the provided args are equal
     """
     return len(set(iterable)) == len(iterable)
+
+
+def has_all_keys(dict_to_scan, keys):
+    """
+    Returns True if the given dict has all of the given keys
+
+    Args:
+        dict_to_scan (dict):
+        keys (iterable of str): Iterable of keys to check for
+
+    Returns:
+        bool: True if the given dict has all of the given keys
+    """
+    return all(key in dict_to_scan for key in keys)
 
 
 class ValidateOnSaveMixin(models.Model):

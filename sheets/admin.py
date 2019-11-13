@@ -11,7 +11,7 @@ class CouponGenerationRequestAdmin(admin.ModelAdmin):
     """Admin for CouponGenerationRequest"""
 
     model = models.CouponGenerationRequest
-    list_display = ("id", "transaction_id", "completed", "spreadsheet_updated")
+    list_display = ("id", "transaction_id", "completed")
 
 
 class GoogleApiAuthAdmin(admin.ModelAdmin):

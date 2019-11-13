@@ -364,10 +364,9 @@ class BulkCouponAssignmentAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "assignment_sheet_id",
-        "assignments_started",
-        "assignments_complete",
-        "created_on",
-        "updated_on",
+        "assignments_started_date",
+        "assignments_completed_date",
+        "message_delivery_complete",
     )
 
     model = BulkCouponAssignment

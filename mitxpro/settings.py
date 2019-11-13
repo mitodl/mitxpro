@@ -661,6 +661,12 @@ SHEETS_ASSIGNMENT_CHECK_FREQUENCY = get_int(
     60 * 60 * 2,
     description="The frequency that the Drive folder should be checked for unprocessed coupon assignment Sheets",
 )
+SHEETS_DELIVERY_DATE_UPDATE_OFFSET = get_int(
+    "SHEETS_DELIVERY_DATE_UPDATE_OFFSET",
+    60 * 5,
+    description="How many seconds to wait after the coupon assignment check before updating coupon delivery dates",
+)
+
 CELERY_BEAT_SCHEDULE = {
     "check-hubspot-api-errors": {
         "task": "hubspot.tasks.check_hubspot_api_errors",
@@ -693,10 +699,21 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 if FEATURES.get("COUPON_SHEETS"):
-    CELERY_BEAT_SCHEDULE["check-unprocessed-coupon-assignment-sheets"] = {
-        "task": "sheets.tasks.check_incomplete_coupon_assignments",
-        "schedule": SHEETS_ASSIGNMENT_CHECK_FREQUENCY,
-    }
+    CELERY_BEAT_SCHEDULE.update(
+        {
+            "check-unprocessed-coupon-assignment-sheets": {
+                "task": "sheets.tasks.check_incomplete_coupon_assignments",
+                "schedule": SHEETS_ASSIGNMENT_CHECK_FREQUENCY,
+            },
+            "update-assignment-delivery-dates": {
+                "task": "sheets.tasks.update_incomplete_assignment_delivery_statuses",
+                "schedule": OffsettingSchedule(
+                    run_every=timedelta(seconds=SHEETS_ASSIGNMENT_CHECK_FREQUENCY),
+                    offset=timedelta(seconds=SHEETS_DELIVERY_DATE_UPDATE_OFFSET),
+                ),
+            },
+        }
+    )
 
 
 # Hijack
@@ -905,6 +922,11 @@ WAGTAILEMBEDS_FINDERS = [
 ]
 
 # Sheets settings
+DRIVE_SERVICE_ACCOUNT_CREDS = get_string(
+    "DRIVE_SERVICE_ACCOUNT_CREDS",
+    None,
+    description="The contents of the Service Account credentials JSON to use for Google API auth",
+)
 DRIVE_CLIENT_ID = get_string(
     "DRIVE_CLIENT_ID", None, description="Client ID from Google API credentials"
 )

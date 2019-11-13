@@ -243,7 +243,7 @@ def test_coupon_request_handler_write_results(
         CouponRequestHandler, "update_coupon_request_checkboxes"
     )
     patched_create_sheet = mocker.patch.object(
-        CouponRequestHandler, "create_bulk_coupon_sheet"
+        CouponRequestHandler, "create_coupon_assignment_sheet"
     )
 
     coupon_req_handler = CouponRequestHandler()
@@ -266,7 +266,7 @@ def test_coupon_request_handler_write_results_empty(
         CouponRequestHandler, "update_coupon_request_checkboxes"
     )
     patched_create_sheet = mocker.patch.object(
-        CouponRequestHandler, "create_bulk_coupon_sheet"
+        CouponRequestHandler, "create_coupon_assignment_sheet"
     )
 
     coupon_req_handler = CouponRequestHandler()

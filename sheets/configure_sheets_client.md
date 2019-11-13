@@ -30,16 +30,38 @@ can be manually applied. ⚠️**
 
 ### 2) Google API auth
 
-Authentication can be accomplished via OAuth (Authorization code flow) or by setting
-up a service account
+Authentication can be accomplished via OAuth (Authorization code flow) for a personal
+Google account, or via Service Accounts
 (Google documentation: [OAuth Authorization code](https://developers.google.com/identity/protocols/OAuth2WebServer), 
 [Service Accounts](https://developers.google.com/identity/protocols/OAuth2ServiceAccount)).
 
 **Follow one or the other of these auth methods, not both!**
 
-#### OAuth Authorization Code
+#### Service Accounts  
 
-##### 2a) Set up credentials in the Google API console
+##### 1) Get Service Accounts credentials from devops or another developer
+
+Devops, or a fellow developer, will have the Service Accounts credentials for
+an MIT-owned Google account.
+
+##### 2) Add settings
+
+Add these settings to you `.env` file
+
+```dotenv
+# This setting will be the contents of the credentials JSON file
+# with all line breaks removed
+DRIVE_SERVICE_ACCOUNT_CREDS={"type": "service_account", "project_id": "mitxpro", "private_key_id": ...}
+
+# The SHEETS_ADMIN_EMAILS setting can include any number of personal email addresses
+# for users that should be able to edit coupon assignment Sheets, but it MUST
+# include the Service Account client email if you're using Service Accounts for auth. 
+SHEETS_ADMIN_EMAILS=admin1@example.com,some-service-account-user@somesubdomain.iam.gserviceaccount.com
+```
+
+#### Personal OAuth Authorization Code
+
+##### 1) Set up credentials in the Google API console
 
 1. Create a project in the [API console](https://console.cloud.google.com/apis/dashboard), and select that project in the dropdown.
 1. Enable the Google Sheets and Google Drive APIs in the dashboard ("Enable APIs and Services" button at the top of the 
@@ -61,7 +83,7 @@ up a service account
    - The project ID can be found in the querystring of the [API console](https://console.cloud.google.com/apis/dashboard)
      dashboard as the value of the `project` parameter, e.g.: `my-project-1069972158283`)
 
-##### 2b) Grant permissions from the mitxpro app
+##### 2) Grant permissions from the mitxpro app
 
 1. Run mitxpro and log in as an admin user
 1. Go to `/sheets/admin/auth/`, and click the button to kick off OAuth process
@@ -71,7 +93,7 @@ up a service account
    - If auth was successful, you should be brought back to that same admin page with a
      success message. There should also be a `GoogleApiAuth` record (which can be checked in Django admin).
 
-##### 2c) Add mitxpro settings values
+##### 3) Add mitxpro settings values
 
 The following settings values should already be set from previous steps:
 `DRIVE_CLIENT_ID`, `DRIVE_CLIENT_SECRET`, `DRIVE_API_PROJECT_ID`.
@@ -87,7 +109,7 @@ These additional settings must also be added:
 *NOTE: If you're testing this in a CI PR build, you may also need to change the `MITXPRO_BASE_URL`
 setting from `https://xpro-ci.herokuapp.com` to `https://xpro-ci-pr-<YOUR_PR_NUMBER>.herokuapp.com`*  
 
-##### 2d) Test the credentials
+##### 4) Test the credentials
 
 To test that API auth is set up correctly:
 1. Add a row to the coupon request Sheet with the "Processed" column unchecked/`FALSE`
@@ -99,9 +121,6 @@ be checked for the given row, your coupons should be created, a new coupon assig
 Sheet should have been created in the same folder as your coupon request Sheet, and
 that new Sheet should be shared with the emails in your `SHEETS_ADMIN_EMAILS` setting.
 
-#### Service Accounts  
-
-TBD
 
 ### 3) Push notification setup
 
