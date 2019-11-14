@@ -37,4 +37,3 @@ class CouponGenerationRequest(TimestampedModel):
 
     transaction_id = models.CharField(max_length=100, db_index=True, null=False)
     completed = models.BooleanField(default=False)
-    spreadsheet_updated = models.BooleanField(default=False)

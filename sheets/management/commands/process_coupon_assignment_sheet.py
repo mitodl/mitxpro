@@ -7,6 +7,7 @@ from django.core.management import BaseCommand, CommandError
 from sheets.api import CouponAssignmentHandler
 from sheets.constants import ASSIGNMENT_COMPLETED_KEY, GOOGLE_API_TRUE_VAL
 from sheets.utils import spreadsheet_repr
+from sheets.management.utils import get_assignment_spreadsheet_by_title
 
 
 class Command(BaseCommand):
@@ -23,13 +24,13 @@ class Command(BaseCommand):
             "-i",
             "--id",
             type=str,
-            help="The spreadsheet ID (can be found in the sheet's URL)",
+            help="The coupon assignment Sheet ID (can be found in the sheet's URL)",
         )
         group.add_argument(
             "-t",
             "--title",
             type=str,
-            help="The title of the spreadsheet (should match exactly one sheet)",
+            help="The title of the coupon assignment Sheet (should match exactly one sheet)",
         )
         parser.add_argument(
             "-f",
@@ -50,20 +51,9 @@ class Command(BaseCommand):
         if options["id"]:
             spreadsheet = pygsheets_client.open_by_key(options["id"])
         else:
-            matching_spreadsheets = pygsheets_client.open_all(
-                "{base_query} and name contains '{title}'".format(
-                    base_query=coupon_assignment_handler.ASSIGNMENT_SHEETS_QUERY,
-                    title=options["title"],
-                )
+            spreadsheet = get_assignment_spreadsheet_by_title(
+                pygsheets_client, options["title"]
             )
-            if len(matching_spreadsheets) != 1:
-                raise CommandError(
-                    "There should be 1 coupon assignment sheet that matches the given title ('{}'). "
-                    "{} were found.".format(
-                        options["title"], len(matching_spreadsheets)
-                    )
-                )
-            spreadsheet = matching_spreadsheets[0]
 
         # Check file properties to make sure this sheet wasn't already processed
         if not options["force"]:
@@ -83,12 +73,18 @@ class Command(BaseCommand):
                 spreadsheet_repr(spreadsheet)
             )
         )
-        coupon_assignment_handler.process_assignment_spreadsheet(spreadsheet)
+        bulk_assignment, num_created, num_removed = coupon_assignment_handler.process_assignment_spreadsheet(
+            spreadsheet
+        )
 
         self.stdout.write(
             self.style.SUCCESS(
-                "Successfully processed coupon assignment sheet ({})".format(
-                    spreadsheet_repr(spreadsheet)
+                "Successfully processed coupon assignment sheet ({}).\n"
+                "{} individual coupon assignment(s) added, {} deleted (BulkCouponAssignment id: {}).".format(
+                    spreadsheet_repr(spreadsheet),
+                    num_created,
+                    num_removed,
+                    bulk_assignment.id,
                 )
             )
         )

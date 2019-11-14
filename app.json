@@ -143,6 +143,10 @@
       "description": "ID of the Drive folder where newly created Sheets should be kept",
       "required": false
     },
+    "DRIVE_SERVICE_ACCOUNT_CREDS": {
+      "description": "The contents of the Service Account credentials JSON to use for Google API auth",
+      "required": false
+    },
     "DRIVE_WEBHOOK_CHANNEL_ID": {
       "description": "Channel ID to use for requests to get push notifications for file changes",
       "required": false
@@ -392,6 +396,10 @@
     },
     "SHEETS_ASSIGNMENT_CHECK_FREQUENCY": {
       "description": "The frequency that the Drive folder should be checked for unprocessed coupon assignment Sheets",
+      "required": false
+    },
+    "SHEETS_DELIVERY_DATE_UPDATE_OFFSET": {
+      "description": "How many seconds to wait after the coupon assignment check before updating coupon delivery dates",
       "required": false
     },
     "SITE_NAME": {

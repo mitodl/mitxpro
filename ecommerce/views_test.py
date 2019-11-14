@@ -1246,7 +1246,11 @@ class TestBulkEnrollmentSubmitView:
         scenario.patched_send_emails.assert_called_once()
         product_coupon_assignments = ProductCouponAssignment.objects.all()
         assert len(product_coupon_assignments) == len(scenario.emails)
-        assert list(scenario.patched_send_emails.call_args_list[0][0][0]) == list(
+        assert (
+            scenario.patched_send_emails.call_args_list[0][0][0]
+            == response.data["bulk_assignment_id"]
+        )
+        assert list(scenario.patched_send_emails.call_args_list[0][0][1]) == list(
             product_coupon_assignments
         )
 
