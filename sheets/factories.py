@@ -10,7 +10,7 @@ from users.factories import UserFactory
 class CouponGenerationRequestFactory(
     DjangoModelFactory
 ):  # pylint: disable=missing-docstring
-    transaction_id = Faker("pystr", max_chars=15)
+    purchase_order_id = Faker("pystr", max_chars=15)
 
     class Meta:
         model = models.CouponGenerationRequest

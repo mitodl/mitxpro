@@ -1,4 +1,5 @@
 """Tests for sheets app views"""
+from mitxpro.utils import now_in_utc
 from sheets.tasks import handle_unprocessed_coupon_requests
 from sheets.utils import ProcessedRequest
 
@@ -12,8 +13,18 @@ def test_handle_unprocessed_coupon_requests(mocker, coupon_req_row):
         "sheets.tasks.CouponRequestHandler", autospec=True
     )
     dummy_processed_requests = [
-        ProcessedRequest(row_index=1, coupon_req_row=coupon_req_row, request_id=1),
-        ProcessedRequest(row_index=2, coupon_req_row=coupon_req_row, request_id=2),
+        ProcessedRequest(
+            row_index=1,
+            coupon_req_row=coupon_req_row,
+            request_id=1,
+            date_processed=now_in_utc(),
+        ),
+        ProcessedRequest(
+            row_index=2,
+            coupon_req_row=coupon_req_row,
+            request_id=2,
+            date_processed=now_in_utc(),
+        ),
     ]
     patched_req_handler.return_value.create_coupons_from_sheet.return_value = (
         dummy_processed_requests

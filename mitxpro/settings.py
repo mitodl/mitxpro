@@ -943,8 +943,10 @@ DRIVE_WEBHOOK_CHANNEL_ID = get_string(
     "mitxpro-sheets-app",
     description="Channel ID to use for requests to get push notifications for file changes",
 )
-DRIVE_BASE_FOLDER_ID = get_string(
-    "DRIVE_BASE_FOLDER_ID", "root", "ID of the top level Drive folder"
+DRIVE_SHARED_ID = get_string(
+    "DRIVE_SHARED_ID",
+    None,
+    description="ID of the Shared Drive (a.k.a. Team Drive). This is equal to the top-level folder ID.",
 )
 DRIVE_OUTPUT_FOLDER_ID = get_string(
     "DRIVE_OUTPUT_FOLDER_ID",

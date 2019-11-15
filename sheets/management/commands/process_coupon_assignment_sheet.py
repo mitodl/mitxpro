@@ -57,7 +57,7 @@ class Command(BaseCommand):
 
         # Check file properties to make sure this sheet wasn't already processed
         if not options["force"]:
-            sheet_properties = coupon_assignment_handler.get_sheet_properties(
+            sheet_properties = coupon_assignment_handler.expanded_sheets_client.get_sheet_properties(
                 spreadsheet.id
             )
             if sheet_properties.get(ASSIGNMENT_COMPLETED_KEY) == GOOGLE_API_TRUE_VAL:
