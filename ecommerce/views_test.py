@@ -191,7 +191,13 @@ def test_zero_price_checkout(
 
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json() == {
-        "payload": {},
+        "payload": {
+            "transaction_id": "T-{}".format(order.id),
+            "transaction_total": 0.0,
+            "product_type": line.product_version.product.type_string,
+            "courseware_id": readable_id,
+            "reference_number": "REF-{}".format(order.id),
+        },
         "url": f"http://testserver/dashboard/?status=purchased&purchased={quote_plus(readable_id)}",
         "method": "GET",
     }

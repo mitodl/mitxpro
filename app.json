@@ -127,6 +127,10 @@
       "description": "Google analytics tracking ID",
       "required": false
     },
+    "GTM_TRACKING_ID": {
+      "description": "Google Tag Manager container ID",
+      "required": false
+    },
     "HEROKU_APP_NAME": {
       "description": "The name of the review app",
       "required": false

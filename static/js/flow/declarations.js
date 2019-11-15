@@ -7,6 +7,7 @@ declare type Settings = {
   sentry_dsn: string,
   release_version: string,
   environment: string,
+  gtmTrackingID: ?string,
   gaTrackingID: ?string,
   recaptchaKey: ?string,
   support_email: string,

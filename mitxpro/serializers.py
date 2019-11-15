@@ -9,6 +9,7 @@ class AppContextSerializer(serializers.Serializer):
     """Serializer for the application context"""
 
     public_path = serializers.SerializerMethodField()
+    gtm_tracking_id = serializers.SerializerMethodField()
     ga_tracking_id = serializers.SerializerMethodField()
     environment = serializers.SerializerMethodField()
     release_version = serializers.SerializerMethodField()
@@ -21,6 +22,10 @@ class AppContextSerializer(serializers.Serializer):
     def get_release_version(self, request):
         """Returns a dictionary of features"""
         return settings.VERSION
+
+    def get_gtm_tracking_id(self, request):
+        """Returns the GTM container ID"""
+        return settings.GTM_TRACKING_ID
 
     def get_ga_tracking_id(self, request):
         """Returns a dictionary of features"""

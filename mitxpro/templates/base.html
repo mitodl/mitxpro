@@ -18,6 +18,11 @@
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" rel="stylesheet"/>
     <script type="text/javascript">
     var SETTINGS = {{ js_settings_json|safe }};
+    {% if CSOURCE_PAYLOAD %}
+    var CSOURCE_PAYLOAD = {{ CSOURCE_PAYLOAD|safe }};
+    {% else %}
+    var CSOURCE_PAYLOAD = null;
+    {% endif %}
     </script>
     {% render_bundle 'style' %}
     <title>{% block title %}{% endblock %}</title>

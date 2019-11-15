@@ -130,8 +130,20 @@ class CheckoutView(APIView):
             complete_order(order)
             order.save_and_log(request.user)
 
+            product = line.product_version.product
+
+            # $0 orders do not go to CyberSource so we need to build a payload
+            # for GTM in order to track these purchases as well. Actual tracking
+            # call is sent from the frontend.
+            payload = {
+                "transaction_id": "T-{}".format(order.id),
+                "transaction_total": 0.00,
+                "product_type": product.type_string,
+                "courseware_id": readable_id,
+                "reference_number": "REF-{}".format(order.id),
+            }
+
             # This redirects the user to our order success page
-            payload = {}
             url = make_receipt_url(base_url=base_url, readable_id=readable_id)
             method = "GET"
         else:

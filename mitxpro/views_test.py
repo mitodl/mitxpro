@@ -2,12 +2,14 @@
 Test end to end django views.
 """
 import json
+import os
 
 from django.test import Client
 from django.urls import reverse
 import pytest
 from rest_framework import status
 
+from mitxpro.utils import remove_password_from_url
 
 pytestmark = [pytest.mark.django_db]
 
@@ -44,6 +46,7 @@ def test_cms_signin_redirect_to_site_signin(client):
 def test_webpack_url(mocker, settings, client):
     """Verify that webpack bundle src shows up in production"""
     settings.GA_TRACKING_ID = "fake"
+    settings.GTM_TRACKING_ID = "fake"
     settings.ENVIRONMENT = "test"
     settings.VERSION = "4.5.6"
     settings.EMAIL_SUPPORT = "support@text.com"
@@ -58,9 +61,10 @@ def test_webpack_url(mocker, settings, client):
     js_settings = json.loads(response.context["js_settings_json"])
     assert js_settings == {
         "gaTrackingID": "fake",
+        "gtmTrackingID": "fake",
         "public_path": "/static/bundles/",
         "environment": settings.ENVIRONMENT,
-        "sentry_dsn": "",
+        "sentry_dsn": remove_password_from_url(os.environ.get("SENTRY_DSN", "")),
         "release_version": settings.VERSION,
         "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
         "support_email": settings.EMAIL_SUPPORT,
@@ -71,6 +75,7 @@ def test_webpack_url(mocker, settings, client):
 def test_app_context(settings, client):
     """Tests the app context API"""
     settings.GA_TRACKING_ID = "fake"
+    settings.GTM_TRACKING_ID = "fake"
     settings.ENVIRONMENT = "test"
     settings.VERSION = "4.5.6"
     settings.USE_WEBPACK_DEV_SERVER = False
@@ -81,6 +86,7 @@ def test_app_context(settings, client):
     assert response.json() == {
         "features": {},
         "ga_tracking_id": "fake",
+        "gtm_tracking_id": "fake",
         "public_path": "/static/bundles/",
         "environment": settings.ENVIRONMENT,
         "release_version": settings.VERSION,
@@ -93,8 +99,4 @@ def test_dashboard(verb):
     client = Client(enforce_csrf_checks=True)
     method = getattr(client, verb)
     response = method(reverse("user-dashboard"))
-    if verb == "get":
-        assert response.status_code == status.HTTP_200_OK
-    else:
-        assert response.status_code == status.HTTP_302_FOUND
-        assert response.url == reverse("user-dashboard")
+    assert response.status_code == status.HTTP_200_OK

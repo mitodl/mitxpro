@@ -1,5 +1,8 @@
 // @flow
 /* global SETTINGS: false */
+declare var dataLayer: Object[]
+declare var CSOURCE_PAYLOAD: ?Object
+
 import React from "react"
 import DocumentTitle from "react-document-title"
 import { DASHBOARD_PAGE_TITLE } from "../../constants"
@@ -54,6 +57,17 @@ export class DashboardPage extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    if (CSOURCE_PAYLOAD && SETTINGS.gtmTrackingID) {
+      dataLayer.push({
+        event:            "purchase",
+        transactionId:    CSOURCE_PAYLOAD.transaction_id,
+        transactionTotal: CSOURCE_PAYLOAD.transaction_total,
+        productType:      CSOURCE_PAYLOAD.product_type,
+        coursewareId:     CSOURCE_PAYLOAD.courseware_id,
+        referenceNumber:  CSOURCE_PAYLOAD.reference_number
+      })
+      CSOURCE_PAYLOAD = null
+    }
     this.handleOrderStatus()
   }
 

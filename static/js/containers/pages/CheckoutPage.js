@@ -1,5 +1,7 @@
 // @flow
 /* global SETTINGS: false */
+declare var dataLayer: Object[]
+
 import React from "react"
 import DocumentTitle from "react-document-title"
 import { CHECKOUT_PAGE_TITLE } from "../../constants"
@@ -200,7 +202,24 @@ export class CheckoutPage extends React.Component<Props, State> {
 
       const { method, url, payload } = checkoutResponse.body
       if (method === "GET") {
-        window.location = url
+        if (SETTINGS.gtmTrackingID) {
+          dataLayer.push({
+            event:            "purchase",
+            transactionId:    payload.transaction_id,
+            transactionTotal: payload.transaction_total,
+            productType:      payload.product_type,
+            coursewareId:     payload.courseware_id,
+            referenceNumber:  payload.reference_number,
+            eventTimeout:     2000,
+            eventCallback:    () => {
+              setTimeout(() => {
+                window.location = url
+              }, 1500)
+            }
+          })
+        } else {
+          window.location = url
+        }
       } else {
         const form = createCyberSourceForm(url, payload)
         const body: HTMLElement = (document.querySelector("body"): any)
