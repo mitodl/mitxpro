@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.31.2 (Released November 15, 2019)
+--------------
+
+- update pillow, wagtail
+- #1259 Usernamify fix for Turkish characters
+
 Version 0.31.1 (Released November 12, 2019)
 --------------
 
