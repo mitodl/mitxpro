@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.31.2
+Version 0.31.2 (Released November 15, 2019)
 --------------
 
 - update pillow, wagtail
