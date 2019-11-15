@@ -173,6 +173,48 @@ def test_course_certificate_view(user_client, user):
     assert resp.context_data["page"].certificate == course_run_certificate
 
 
+def test_course_certificate_view_revoked_state(user_client, user):
+    """
+    Test that certificate page return 404 for revoked certificate.
+    """
+    site = Site.objects.get(is_default_site=True)
+    root = Page.objects.get(depth=1)
+
+    old_home = Page.objects.filter(depth=2).first()
+    old_home.slug = "some-slug"
+    old_home.save_revision().publish()
+
+    home = HomePageFactory.create(parent=root, slug="home")
+    home.save_revision().publish()
+    site.root_page = home
+    site.save()
+
+    subpages = old_home.get_children()
+
+    for subpage in subpages:
+        subpage.move(home, "last-child")
+
+    course_page = CoursePageFactory.create(parent=home)
+    course_page.save_revision().publish()
+
+    certificate_page = CertificatePageFactory.create(parent=course_page)
+    certificate_page.save_revision().publish()
+
+    course_run = CourseRunFactory.create(course=course_page.course)
+
+    course_run_certificate = CourseRunCertificateFactory.create(
+        user=user, course_run=course_run, is_revoked=False
+    )
+
+    resp = user_client.get(course_run_certificate.link)
+    assert resp.status_code == status.HTTP_200_OK
+
+    course_run_certificate.is_revoked = True
+    course_run_certificate.save()
+    resp = user_client.get(course_run_certificate.link)
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+
+
 def test_program_certificate_invalid_view(user_client, user):
     """
     Test that program certificate page returns a 404 if CertificatePage does not exist for that program

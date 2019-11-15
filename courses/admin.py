@@ -201,7 +201,7 @@ class CourseRunCertificateAdmin(admin.ModelAdmin):
     """Admin for CourseRunCertificate"""
 
     model = CourseRunCertificate
-    list_display = ["uuid", "user", "course_run"]
+    list_display = ["uuid", "user", "course_run", "get_revoked_state"]
     search_fields = [
         "course_run__courseware_id",
         "course_run__title",
@@ -210,15 +210,24 @@ class CourseRunCertificateAdmin(admin.ModelAdmin):
     ]
     raw_id_fields = ("user",)
 
+    def get_revoked_state(self, obj):
+        """ return the revoked state"""
+        return obj.is_revoked is not True
+
+    get_revoked_state.short_description = "Active"
+    get_revoked_state.boolean = True
+
     def get_queryset(self, request):
-        return self.model.objects.get_queryset().select_related("user", "course_run")
+        return self.model.all_objects.get_queryset().select_related(
+            "user", "course_run"
+        )
 
 
 class ProgramCertificateAdmin(admin.ModelAdmin):
     """Admin for ProgramCertificate"""
 
     model = ProgramCertificate
-    list_display = ["uuid", "user", "program"]
+    list_display = ["uuid", "user", "program", "get_revoked_state"]
     search_fields = [
         "program__readable_id",
         "program__title",
@@ -227,8 +236,15 @@ class ProgramCertificateAdmin(admin.ModelAdmin):
     ]
     raw_id_fields = ("user",)
 
+    def get_revoked_state(self, obj):
+        """ return the revoked state"""
+        return obj.is_revoked is not True
+
+    get_revoked_state.short_description = "Active"
+    get_revoked_state.boolean = True
+
     def get_queryset(self, request):
-        return self.model.objects.get_queryset().select_related("user", "program")
+        return self.model.all_objects.get_queryset().select_related("user", "program")
 
 
 class CourseTopicAdmin(admin.ModelAdmin):

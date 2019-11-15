@@ -33,6 +33,18 @@ User = get_user_model()
 log = logging.getLogger(__name__)
 
 
+class ActiveCertificates(models.Manager):
+    """
+    Return the active certificates only
+    """
+
+    def get_queryset(self):
+        """
+        :return: un-revoked certificates
+        """
+        return super().get_queryset().filter(is_revoked=False)
+
+
 class ProgramQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
     def live(self):
         """Applies a filter for Programs with live=True"""
@@ -713,6 +725,11 @@ class BaseCertificate(models.Model):
 
     user = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    is_revoked = models.BooleanField(
+        default=False,
+        help_text="Indicates whether or not the certificate is revoked",
+        verbose_name="revoked",
+    )
 
     class Meta:
         abstract = True
@@ -728,6 +745,9 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
     """
 
     course_run = models.ForeignKey(CourseRun, null=False, on_delete=models.CASCADE)
+
+    objects = ActiveCertificates()
+    all_objects = models.Manager()
 
     class Meta:
         unique_together = ("user", "course_run")
@@ -765,6 +785,9 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
     """
 
     program = models.ForeignKey(Program, null=False, on_delete=models.CASCADE)
+
+    objects = ActiveCertificates()
+    all_objects = models.Manager()
 
     class Meta:
         unique_together = ("user", "program")
