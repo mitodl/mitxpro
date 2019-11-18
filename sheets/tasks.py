@@ -14,7 +14,10 @@ def handle_unprocessed_coupon_requests():
     processed_requests = coupon_request_handler.create_coupons_from_sheet()
     coupon_request_handler.write_results_to_sheets(processed_requests)
     return [
-        (processed_request.row_index, processed_request.coupon_req_row.transaction_id)
+        (
+            processed_request.row_index,
+            processed_request.coupon_req_row.purchase_order_id,
+        )
         for processed_request in processed_requests
     ]
 

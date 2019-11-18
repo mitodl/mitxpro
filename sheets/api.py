@@ -1,12 +1,11 @@
 """API for the Sheets app"""
 import os
-import re
 import json
 import datetime
-import pytz
 from decimal import Decimal
 import pickle
 import logging
+from urllib.parse import urljoin
 
 from django.conf import settings
 from django.db import transaction
@@ -15,6 +14,7 @@ from django.core.exceptions import ImproperlyConfigured
 # NOTE: Due to an unresolved bug (https://github.com/PyCQA/pylint/issues/2108), the
 # `google` package (and other packages without an __init__.py file) will break pylint.
 # The `disable-all` rules are here until that bug is fixed.
+from django.urls import reverse
 from google.oauth2.credentials import Credentials  # pylint: disable-all
 from google.oauth2.service_account import (
     Credentials as ServiceAccountCredentials,
@@ -22,8 +22,6 @@ from google.oauth2.service_account import (
 from google.auth.transport.requests import Request  # pylint: disable-all
 import pygsheets
 
-from courses.models import CourseRun, Program
-from courses.constants import CONTENT_TYPE_MODEL_COURSERUN, CONTENT_TYPE_MODEL_PROGRAM
 from ecommerce.api import create_coupons, bulk_assign_product_coupons
 from ecommerce.mail_api import send_bulk_enroll_emails
 from ecommerce.models import (
@@ -61,6 +59,8 @@ from sheets.constants import (
     GOOGLE_API_TRUE_VAL,
     GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN,
     GOOGLE_DATE_TIME_FORMAT,
+    GOOGLE_API_FILE_WATCH_KIND,
+    GOOGLE_API_NOTIFICATION_TYPE,
 )
 from sheets.utils import (
     coupon_request_sheet_spec,
@@ -75,6 +75,8 @@ from sheets.utils import (
     AssignmentRow,
     ASSIGNMENT_SHEET_STATUS_COLUMN,
     format_datetime_for_sheet_formula,
+    CouponRequestRow,
+    assignment_sheet_file_name,
 )
 from sheets.exceptions import SheetValidationException, SheetUpdateException
 
@@ -166,116 +168,119 @@ def get_credentials():
     raise ImproperlyConfigured("Authorization with Google has not been completed.")
 
 
-class CouponRequestRow:
-    """Represents a row of a coupon request sheet"""
+def get_authorized_pygsheets_client():
+    """
+    Instantiates a pygsheets Client and authorizes it with the proper credentials.
 
-    PROCESSED_COLUMN = "I"
+    Returns:
+        pygsheets.client.Client: The authorized Client object
+    """
+    credentials = get_credentials()
+    pygsheets_client = pygsheets.authorize(custom_credentials=credentials)
+    if settings.DRIVE_SHARED_ID:
+        pygsheets_client.drive.enable_team_drive(team_drive_id=settings.DRIVE_SHARED_ID)
+    return pygsheets_client
 
-    def __init__(
-        self,
-        transaction_id,
-        coupon_name,
-        num_codes,
-        product_text_id,
-        product_object_cls,
-        activation,
-        expiration,
-        company_name,
-        processed,
-    ):
-        self.transaction_id = transaction_id
-        self.coupon_name = coupon_name
-        self.num_codes = num_codes
-        self.product_text_id = product_text_id
-        self.product_object_cls = product_object_cls
-        self.activation = activation
-        self.expiration = expiration
-        self.company_name = company_name
-        self.processed = processed
 
-    @classmethod
-    def parse_raw_data(cls, raw_row_data):
+class ExpandedSheetsClient:
+    """
+    Helper class that executes some Drive/Sheets API requests that pygsheets doesn't directly support
+    """
+
+    def __init__(self, pygsheets_client):
         """
-        Parses raw row data
+        Args:
+            pygsheets_client (pygsheets.client.Client): An authorized pygsheets client
+        """
+        self.pygsheets_client = pygsheets_client
+
+    def update_spreadsheet_properties(self, file_id, property_dict):
+        """
+        Sets metadata properties on the spreadsheet, which can then be
+        included in queries.
 
         Args:
-            raw_row_data (list of str): The raw row data
+            file_id (str): The spreadsheet ID
+            property_dict (dict): Dict of properties to set
 
         Returns:
-            CouponRequestRow: The parsed data row
-        """
-        return cls(
-            transaction_id=raw_row_data[0].strip(),
-            coupon_name=raw_row_data[1].strip(),
-            num_codes=int(raw_row_data[2]),
-            product_text_id=raw_row_data[3].strip(),
-            product_object_cls=cls.get_product_model_cls(raw_row_data[4]),
-            activation=cls.parse_raw_date_str(raw_row_data[5]),
-            expiration=cls.parse_raw_date_str(raw_row_data[6]),
-            company_name=raw_row_data[7],
-            processed=(raw_row_data[8].lower() == "true"),
-        )
-
-    @staticmethod
-    def parse_raw_date_str(raw_date_str):
-        """
-        Parses a string that represents a datetime and returns the datetime (or None)
-
-        Args:
-            raw_date_str (str): The datetime string
-
-        Returns:
-            datetime.datetime or None: The parsed datetime or None
+            dict: Google Drive API response to the files.update request
         """
         return (
-            datetime.datetime.strptime(
-                raw_date_str, settings.COUPON_REQUEST_SHEET_DATE_FORMAT
-            ).astimezone(pytz.UTC)
-            if raw_date_str
-            else None
+            self.pygsheets_client.drive.service.files()
+            .update(
+                fileId=file_id,
+                body={"appProperties": property_dict},
+                supportsTeamDrives=True,
+            )
+            .execute()
         )
 
-    @staticmethod
-    def get_product_model_cls(product_type):
+    def get_sheet_properties(self, file_id):
         """
-        Given a string that represents a product type, returns the corresponding model class
+        Helper method to fetch the dictionary of appProperties for the given spreadsheet by its
+        file ID. The Google Sheets API doesn't know about this data. Only the Drive API can access
+        it, hence this helper method.
 
         Args:
-            product_type (str): String that represents a product type
+            file_id (str): The spreadsheet ID
 
         Returns:
-            class: CourseRun or Program
-
-        Raises:
-            ValueError: Raised if the product type does not match either class
+            dict: appProperties (if any) for the given sheet according to Drive
         """
-        simplified_product_type = re.sub(r"\s", "", product_type.lower())
-        if simplified_product_type == CONTENT_TYPE_MODEL_COURSERUN:
-            return CourseRun
-        elif simplified_product_type == CONTENT_TYPE_MODEL_PROGRAM:
-            return Program
-        raise ValueError(
-            "Could not parse product type as course run or program (value: '{}')".format(
-                product_type
+        result = (
+            self.pygsheets_client.drive.service.files()
+            .get(fileId=file_id, fields="appProperties", supportsTeamDrives=True)
+            .execute()
+        )
+        if result and "appProperties" in result:
+            return result["appProperties"]
+        return {}
+
+    def batch_update_sheet_cells(self, sheet_id, request_objects):
+        """
+        Updates the relevant cells of a coupon assignment Sheet with the email delivery dates for the assignments
+        on the coupon assignments on the rows of those cells.
+
+        Args:
+            sheet_id (str): The spreadsheet id
+            request_objects (list of dict): Update request objects
+                (docs: https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/request#Request)
+
+        Returns:
+            dict: Google API response to the spreadsheets.values.batchUpdate request
+        """
+        return (
+            self.pygsheets_client.sheet.service.spreadsheets()
+            .batchUpdate(spreadsheetId=sheet_id, body={"requests": request_objects})
+            .execute()
+        )
+
+    def request_file_watch(self, file_id, channel_id):
+        """
+        Executes the request to watch for changes made to a specific file in Drive. If successful, Drive will
+        make requests to our webhook when changes are made to the given file.
+
+        Returns:
+            dict: Google API response to a files.watch request
+        """
+        return (
+            self.pygsheets_client.drive.service.files()
+            .watch(
+                fileId=file_id,
+                body={
+                    "id": channel_id,
+                    "address": urljoin(
+                        settings.SITE_BASE_URL,
+                        reverse("handle-coupon-request-sheet-update"),
+                    ),
+                    "payload": True,
+                    "kind": GOOGLE_API_FILE_WATCH_KIND,
+                    "type": GOOGLE_API_NOTIFICATION_TYPE,
+                },
             )
+            .execute()
         )
-
-    def get_product_ids(self):
-        """
-        Gets a single-item list of the first product associated with the CourseRun/Program indicated
-        by this row. A list is returned so that it can be readily used by the `create_coupons` helper function.
-
-        Returns:
-            list of int: A list containing the product ID
-        """
-        product_object = (
-            self.product_object_cls.objects.live()
-            .with_text_id(self.product_text_id)
-            .prefetch_related("products")
-            .first()
-        )
-        product = product_object.products.order_by("-created_on").first()
-        return [product.id]
 
 
 def create_coupons_for_request_row(coupon_req_row):
@@ -283,7 +288,7 @@ def create_coupons_for_request_row(coupon_req_row):
     Creates coupons for a given request
 
     Args:
-        coupon_req_row (CouponRequestRow): A representation of a coupon request row
+        coupon_req_row (sheets.utils.CouponRequestRow): A representation of a coupon request row
 
     Returns:
         CouponGenerationRequest or None: The record of the completed coupon generation request, or None
@@ -291,18 +296,18 @@ def create_coupons_for_request_row(coupon_req_row):
     """
     with transaction.atomic():
         coupon_gen_request, created = CouponGenerationRequest.objects.select_for_update().get_or_create(
-            transaction_id=coupon_req_row.transaction_id
+            purchase_order_id=coupon_req_row.purchase_order_id
         )
         if not created and coupon_gen_request.completed:
             log.error(
                 "Found completed CouponGenerationRequest, but the 'processed' column "
                 "in the spreadsheet == False (transaction id: %s)"
-                % coupon_req_row.transaction_id
+                % coupon_req_row.purchase_order_id
             )
             return
         create_coupons(
             name=coupon_req_row.coupon_name,
-            product_ids=coupon_req_row.get_product_ids(),
+            product_ids=[coupon_req_row.get_product_id()],
             num_coupon_codes=coupon_req_row.num_codes,
             coupon_type=CouponPaymentVersion.SINGLE_USE,
             max_redemptions=1,
@@ -310,7 +315,7 @@ def create_coupons_for_request_row(coupon_req_row):
             activation_date=coupon_req_row.activation,
             expiration_date=coupon_req_row.expiration,
             payment_type=CouponPaymentVersion.PAYMENT_PO,
-            payment_transaction=coupon_req_row.transaction_id,
+            payment_transaction=coupon_req_row.purchase_order_id,
             **BULK_PURCHASE_DEFAULTS,
         )
         coupon_gen_request.completed = True
@@ -322,10 +327,7 @@ class CouponRequestHandler:
     """Manages the processing of coupon requests from a Sheet"""
 
     def __init__(self):
-        self._credentials = get_credentials()
-        self.pygsheets_client = pygsheets.authorize(
-            custom_credentials=self._credentials
-        )
+        self.pygsheets_client = get_authorized_pygsheets_client()
         spreadsheet = self.pygsheets_client.open_by_key(
             settings.COUPON_REQUEST_SHEET_ID
         )
@@ -363,7 +365,7 @@ class CouponRequestHandler:
         """
         processed_requests = []
         for row_index, coupon_req_row in self.parsed_row_iterator():
-            if coupon_req_row.processed:
+            if coupon_req_row.date_processed:
                 continue
             coupon_gen_request = create_coupons_for_request_row(coupon_req_row)
             if coupon_gen_request:
@@ -372,11 +374,12 @@ class CouponRequestHandler:
                         row_index=row_index,
                         coupon_req_row=coupon_req_row,
                         request_id=coupon_gen_request.id,
+                        date_processed=now_in_utc(),
                     )
                 )
         return processed_requests
 
-    def update_coupon_request_checkboxes(self, processed_requests):
+    def update_coupon_request_processed_dates(self, processed_requests):
         """
         For all processed request rows, programatically sets the "processed" column to checked/TRUE.
 
@@ -386,9 +389,9 @@ class CouponRequestHandler:
         for processed_request in processed_requests:
             self.coupon_request_sheet.update_value(
                 "{}{}".format(
-                    CouponRequestRow.PROCESSED_COLUMN, processed_request.row_index
+                    CouponRequestRow.DATE_PROCESSED_COLUMN, processed_request.row_index
                 ),
-                True,
+                format_datetime_for_sheet_formula(processed_request.date_processed),
             )
 
     def create_coupon_assignment_sheet(self, coupon_req_row):
@@ -412,13 +415,8 @@ class CouponRequestHandler:
             )
             return
         # Create sheet
-        spreadsheet_title = "".join(
-            [
-                ASSIGNMENT_SHEET_PREFIX,
-                "{} {}".format(
-                    coupon_req_row.transaction_id, coupon_req_row.company_name
-                ),
-            ]
+        spreadsheet_title = assignment_sheet_file_name(
+            coupon_req_row.purchase_order_id, coupon_req_row.company_name
         )
         create_kwargs = (
             dict(folder=settings.DRIVE_OUTPUT_FOLDER_ID)
@@ -442,8 +440,17 @@ class CouponRequestHandler:
             ),
             values=[[coupon_code] for coupon_code in coupon_codes],
         )
-        # Auto-adjust first column width to fit coupon codes
-        worksheet.adjust_column_width(start=0, end=1, pixel_size=270)
+        # Adjust code and email column widths to fit coupon codes and emails
+        worksheet.adjust_column_width(start=0, end=2, pixel_size=270)
+        # Format header cells with bold text
+        header_range = worksheet.get_values(
+            start="A1",
+            end="{}1".format(coupon_assign_sheet_spec.last_data_column),
+            returnas="range",
+        )
+        first_cell = header_range.cells[0][0]
+        first_cell.set_text_format("bold", True)
+        header_range.apply_format(first_cell)
         # Share
         for email in settings.SHEETS_ADMIN_EMAILS:
             added_kwargs = (
@@ -466,7 +473,7 @@ class CouponRequestHandler:
         if not processed_requests:
             return
         # Set checkboxes
-        self.update_coupon_request_checkboxes(processed_requests)
+        self.update_coupon_request_processed_dates(processed_requests)
         # Write new sheets with codes
         for processed_request in processed_requests:
             self.create_coupon_assignment_sheet(processed_request.coupon_req_row)
@@ -488,28 +495,8 @@ class CouponAssignmentHandler:
     )
 
     def __init__(self):
-        self._credentials = get_credentials()
-        self.pygsheets_client = pygsheets.authorize(
-            custom_credentials=self._credentials
-        )
-
-    def _update_spreadsheet_properties(self, file_id, property_dict):
-        """
-        Sets metadata properties on the spreadsheet, which can then be
-        included in queries.
-
-        Args:
-            file_id (str): The spreadsheet ID
-            property_dict (dict): Dict of properties to set
-
-        Returns:
-            dict: Google Drive API results from the files.update endpoint
-        """
-        return (
-            self.pygsheets_client.drive.service.files()
-            .update(fileId=file_id, body={"appProperties": property_dict})
-            .execute()
-        )
+        self.pygsheets_client = get_authorized_pygsheets_client()
+        self.expanded_sheets_client = ExpandedSheetsClient(self.pygsheets_client)
 
     def _set_spreadsheet_processed(self, file_id):
         """
@@ -521,7 +508,7 @@ class CouponAssignmentHandler:
         Returns:
             dict: Google Drive API results from the files.update endpoint
         """
-        return self._update_spreadsheet_properties(
+        return self.expanded_sheets_client.update_spreadsheet_properties(
             file_id,
             {
                 ASSIGNMENT_PROCESSING_START_KEY: GOOGLE_API_TRUE_VAL,
@@ -542,7 +529,7 @@ class CouponAssignmentHandler:
             dict: Google Drive API results from the files.update endpoint
         """
         now_str = format_datetime_for_google_api(now_in_utc())
-        return self._update_spreadsheet_properties(
+        return self.expanded_sheets_client.update_spreadsheet_properties(
             file_id,
             {
                 ASSIGNMENT_PROCESSING_START_KEY: GOOGLE_API_TRUE_VAL,
@@ -563,46 +550,6 @@ class CouponAssignmentHandler:
             query="{} and {}".format(
                 self.ASSIGNMENT_SHEETS_QUERY, self.INCOMPLETE_SHEETS_QUERY_TERM
             )
-        )
-
-    def get_sheet_properties(self, file_id):
-        """
-        Helper method to fetch the dictionary of appProperties for the given spreadsheet by its
-        file ID. The Google Sheets API doesn't know about this data. Only the Drive API can access
-        it, hence this helper method.
-
-        Args:
-            file_id (str): The spreadsheet ID
-
-        Returns:
-            dict: appProperties (if any) for the given sheet according to Drive
-        """
-        result = (
-            self.pygsheets_client.drive.service.files()
-            .get(fileId=file_id, fields="appProperties")
-            .execute()
-        )
-        if result and "appProperties" in result:
-            return result["appProperties"]
-        return {}
-
-    def batch_update_sheet_cells(self, sheet_id, request_objects):
-        """
-        Updates the relevant cells of a coupon assignment Sheet with the email delivery dates for the assignments
-        on the coupon assignments on the rows of those cells.
-
-        Args:
-            sheet_id (str): The spreadsheet id
-            request_objects (list of dict): Update request objects
-                (docs: https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/request#Request)
-
-        Returns:
-            dict: Google API response body
-        """
-        return (
-            self.pygsheets_client.sheet.service.spreadsheets()
-            .batchUpdate(spreadsheetId=sheet_id, body={"requests": request_objects})
-            .execute()
         )
 
     @staticmethod
@@ -935,7 +882,7 @@ class CouponAssignmentHandler:
         Returns:
             dict: Google API response body
         """
-        return self.batch_update_sheet_cells(
+        return self.expanded_sheets_client.batch_update_sheet_cells(
             sheet_id=sheet_id,
             request_objects=[
                 build_multi_cell_update_request_body(

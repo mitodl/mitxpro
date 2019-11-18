@@ -35,5 +35,5 @@ class GoogleApiAuth(TimestampedModel):
 class CouponGenerationRequest(TimestampedModel):
     """Model that represents a request to create bulk enrollment coupons"""
 
-    transaction_id = models.CharField(max_length=100, db_index=True, null=False)
+    purchase_order_id = models.CharField(max_length=100, db_index=True, null=False)
     completed = models.BooleanField(default=False)

@@ -7,11 +7,16 @@ import pytz
 
 from django.conf import settings
 from django.urls import reverse
+from django.core.exceptions import ObjectDoesNotExist
+
+from courses.models import CourseRun, Program
+from mitxpro.utils import item_at_index_or_none
 
 from sheets.constants import (
     GOOGLE_AUTH_URI,
     GOOGLE_TOKEN_URI,
     GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
+    ASSIGNMENT_SHEET_PREFIX,
 )
 
 
@@ -37,7 +42,7 @@ SpreadsheetSpec = namedtuple(
     ["first_data_row", "last_data_column", "num_columns", "column_headers"],
 )
 coupon_request_sheet_spec = SpreadsheetSpec(
-    first_data_row=2, last_data_column="I", num_columns=9, column_headers=[]
+    first_data_row=2, last_data_column="H", num_columns=8, column_headers=[]
 )
 coupon_assign_sheet_spec = SpreadsheetSpec(
     first_data_row=2,
@@ -45,13 +50,137 @@ coupon_assign_sheet_spec = SpreadsheetSpec(
     num_columns=4,
     column_headers=["Coupon Code", "Email (Assignee)", "Status", "Status Date"],
 )
-ASSIGNMENT_SHEET_STATUS_COLUMN = 2
+ASSIGNMENT_SHEET_STATUS_COLUMN = next(
+    (
+        i
+        for i, header in enumerate(coupon_assign_sheet_spec.column_headers)
+        if header == "Status"
+    )
+)
 AssignmentRow = namedtuple(
     "AssignmentRow", ["row_index", "coupon_code", "email", "status", "status_date"]
 )
 ProcessedRequest = namedtuple(
-    "ProcessedRequest", ["row_index", "coupon_req_row", "request_id"]
+    "ProcessedRequest", ["row_index", "coupon_req_row", "request_id", "date_processed"]
 )
+
+
+class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
+    """Represents a row of a coupon request sheet"""
+
+    DATE_PROCESSED_COLUMN = "H"
+
+    def __init__(
+        self,
+        purchase_order_id,
+        coupon_name,
+        num_codes,
+        product_text_id,
+        company_name,
+        activation,
+        expiration,
+        date_processed,
+    ):  # pylint: disable=too-many-arguments
+        self.purchase_order_id = purchase_order_id
+        self.coupon_name = coupon_name
+        self.num_codes = num_codes
+        self.product_text_id = product_text_id
+        self.company_name = company_name
+        self.activation = activation
+        self.expiration = expiration
+        self.date_processed = date_processed
+
+    @classmethod
+    def parse_raw_data(cls, raw_row_data):
+        """
+        Parses raw row data
+
+        Args:
+            raw_row_data (list of str): The raw row data
+
+        Returns:
+            CouponRequestRow: The parsed data row
+        """
+        return cls(
+            purchase_order_id=raw_row_data[0].strip(),
+            coupon_name=raw_row_data[1].strip(),
+            num_codes=int(raw_row_data[2]),
+            product_text_id=raw_row_data[3].strip(),
+            company_name=raw_row_data[4],
+            activation=cls.parse_raw_date_str(item_at_index_or_none(raw_row_data, 5)),
+            expiration=cls.parse_raw_date_str(item_at_index_or_none(raw_row_data, 6)),
+            date_processed=cls.parse_raw_date_str(
+                item_at_index_or_none(raw_row_data, 7)
+            ),
+        )
+
+    @staticmethod
+    def parse_raw_date_str(raw_date_str):
+        """
+        Parses a string that represents a datetime and returns the datetime (or None)
+
+        Args:
+            raw_date_str (str): The datetime string
+
+        Returns:
+            datetime.datetime or None: The parsed datetime or None
+        """
+        return (
+            datetime.datetime.strptime(
+                raw_date_str, settings.COUPON_REQUEST_SHEET_DATE_FORMAT
+            ).astimezone(pytz.UTC)
+            if raw_date_str
+            else None
+        )
+
+    def get_product_id(self):
+        """
+        Gets the id for the most recently-created product associated with the CourseRun/Program indicated
+        by this row.
+
+        Returns:
+            int: The most recently-created product ID for the object indicated by the text ID in the spreadsheet
+        """
+        for product_object_cls in [CourseRun, Program]:
+            product_object = (
+                product_object_cls.objects.live()
+                .with_text_id(self.product_text_id)
+                .prefetch_related("products")
+                .first()
+            )
+            if product_object:
+                break
+        product = (
+            None
+            if not product_object
+            else product_object.products.order_by("-created_on").first()
+        )
+        if not product_object:
+            raise ObjectDoesNotExist(
+                "Could not find a CourseRun or Program with id '%s'"
+                % self.product_text_id
+            )
+        elif not product:
+            raise ObjectDoesNotExist(
+                "No Products associated with %s" % str(product_object)
+            )
+        return product.id
+
+
+def assignment_sheet_file_name(purchase_order_id, company_name):
+    """
+    Generates the filename for a coupon assignment Sheet
+
+    Args:
+        purchase_order_id (str):
+        company_name (str):
+
+    Returns:
+        str: File name for a coupon assignment Sheet
+    """
+    return "".join(
+        [ASSIGNMENT_SHEET_PREFIX, "{} {}".format(purchase_order_id, company_name)]
+    )
 
 
 class AssignmentStatusMap:

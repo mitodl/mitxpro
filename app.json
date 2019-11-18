@@ -127,10 +127,6 @@
       "description": "ID for the Google API project where the credentials were created",
       "required": false
     },
-    "DRIVE_BASE_FOLDER_ID": {
-      "description": "ID of the top level Drive folder",
-      "required": false
-    },
     "DRIVE_CLIENT_ID": {
       "description": "Client ID from Google API credentials",
       "required": false
@@ -145,6 +141,10 @@
     },
     "DRIVE_SERVICE_ACCOUNT_CREDS": {
       "description": "The contents of the Service Account credentials JSON to use for Google API auth",
+      "required": false
+    },
+    "DRIVE_SHARED_ID": {
+      "description": "ID of the Shared Drive (a.k.a. Team Drive). This is equal to the top-level folder ID.",
       "required": false
     },
     "DRIVE_WEBHOOK_CHANNEL_ID": {
