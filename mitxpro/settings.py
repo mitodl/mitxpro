@@ -562,6 +562,9 @@ STATUS_TOKEN = get_string(
 )
 HEALTH_CHECK = ["CELERY", "REDIS", "POSTGRES"]
 
+GTM_TRACKING_ID = get_string(
+    "GTM_TRACKING_ID", "", description="Google Tag Manager container ID"
+)
 GA_TRACKING_ID = get_string(
     "GA_TRACKING_ID", "", description="Google analytics tracking ID"
 )

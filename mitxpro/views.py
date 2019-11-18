@@ -10,7 +10,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseNotFound, HttpResponseServerError
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.template.loader import render_to_string
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -26,6 +26,7 @@ def get_js_settings_context(request):
     JS settings as JSON.
     """
     js_settings = {
+        "gtmTrackingID": settings.GTM_TRACKING_ID,
         "gaTrackingID": settings.GA_TRACKING_ID,
         "environment": settings.ENVIRONMENT,
         "public_path": public_path(request),
@@ -43,10 +44,32 @@ def index(request, **kwargs):  # pylint: disable=unused-argument
     """
     The index view
     """
-    if request.method == "GET":
-        return render(request, "index.html", context=get_js_settings_context(request))
-    else:
-        return redirect(request.get_full_path())
+    context = get_js_settings_context(request)
+
+    # pylint: disable=too-many-boolean-expressions
+    if request.method == "POST" and (
+        "auth_amount" in request.POST
+        and "req_merchant_defined_data2" in request.POST
+        and "req_merchant_defined_data1" in request.POST
+        and "req_reference_number" in request.POST
+        and "req_transaction_uuid" in request.POST
+        and "reason_code" in request.POST
+        and request.POST["reason_code"] == "100"
+    ):
+        payment_dict = {
+            "transaction_id": request.POST["req_transaction_uuid"],
+            "transaction_total": float(request.POST["auth_amount"]),
+            "reference_number": request.POST["req_reference_number"],
+            "product_type": request.POST["req_merchant_defined_data1"],
+            "courseware_id": request.POST["req_merchant_defined_data2"],
+        }
+
+        # Inject the cybersource POST payload into the context so
+        # that it can be processed for purchase tracking on the front
+        # end via GTM
+        context["CSOURCE_PAYLOAD"] = json.dumps(payment_dict)
+
+    return render(request, "index.html", context=context)
 
 
 def handler404(request, exception):
