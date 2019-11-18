@@ -1,4 +1,5 @@
 // sass-lint:disable mixins-before-declarations
+// sass-lint:disable no-vendor-prefixes
 
 $gray-light: #d9e0e3;
 $text-gray-dark: #6b6969;
@@ -381,6 +382,14 @@ $text-gray-light: #d2d0d1;
           font-size: 11px;
         }
       }
+    }
+  }
+
+  @supports (-moz-appearance: meterbar) {
+    .certificate-page {
+      position: absolute !important;
+      left: 0px !important;
+      -moz-transform: scale(1.1);
     }
   }
 }
