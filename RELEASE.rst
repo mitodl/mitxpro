@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.32.0
+Version 0.32.0 (Released November 19, 2019)
 --------------
 
 - make Firefox Certificate print stylesheet makes page elements identical to Chrome
