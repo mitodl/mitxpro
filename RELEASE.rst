@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.32.1
+--------------
+
+- TypeError/api/courses/
+- #1173 gtm purchase tracking
+
 Version 0.32.0 (Released November 19, 2019)
 --------------
 
