@@ -303,11 +303,15 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         #   optimization. You can get the desired course_run with a filter, but
         #   that would run a new query even if prefetch_related was used.
         """
+        course_runs = self.courseruns.all()
+        eligible_course_runs = [
+            course_run
+            for course_run in course_runs
+            if course_run.live and course_run.start_date and course_run.is_unexpired
+        ]
         return first_matching_item(
-            sorted(self.courseruns.all(), key=lambda course_run: course_run.start_date),
-            lambda course_run: course_run.live
-            and course_run.start_date
-            and course_run.is_unexpired,
+            sorted(eligible_course_runs, key=lambda course_run: course_run.start_date),
+            lambda course_run: True,
         )
 
     @property
