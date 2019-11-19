@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.32.1
+Version 0.32.1 (Released November 19, 2019)
 --------------
 
 - TypeError/api/courses/
