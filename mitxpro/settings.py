@@ -577,6 +577,11 @@ RECAPTCHA_SECRET_KEY = get_string(
     "RECAPTCHA_SECRET_KEY", "", description="The ReCaptcha secret key"
 )
 
+USE_X_FORWARDED_HOST = get_bool(
+    "USE_X_FORWARDED_HOST",
+    False,
+    description="Set HOST header to original domain accessed by user",
+)
 SITE_NAME = get_string(
     "SITE_NAME", "MIT xPRO", description="Name of the site. e.g MIT xPRO"
 )

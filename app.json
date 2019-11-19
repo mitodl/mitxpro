@@ -370,6 +370,10 @@
       "description": "Token to access the status API.",
       "required": false
     },
+    "USE_X_FORWARDED_HOST": {
+      "description": "Set HOST header to original domain accessed by user",
+      "required": false
+    },
     "VOUCHER_COMPANY_ID": {
       "description": null,
       "required": false
