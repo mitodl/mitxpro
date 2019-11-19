@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.32.0 (Released November 19, 2019)
+--------------
+
+- make Firefox Certificate print stylesheet makes page elements identical to Chrome
+- - Management Command to revoke courserun/program certificate.
+- #1243 Set user context for Sentry
+
 Version 0.31.2 (Released November 15, 2019)
 --------------
 
