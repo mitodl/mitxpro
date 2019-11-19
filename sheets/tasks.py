@@ -23,7 +23,7 @@ def handle_unprocessed_coupon_requests():
 
 
 @app.task
-def check_incomplete_coupon_assignments():
+def handle_incomplete_coupon_assignments():
     """
     Processes all as-yet-incomplete coupon assignment spreadsheets
     """
@@ -44,5 +44,5 @@ def update_incomplete_assignment_delivery_statuses():
     )
     return [
         (bulk_assignment_id, len(product_coupon_assignments))
-        for bulk_assignment_id, product_coupon_assignments in updated_assignments
+        for bulk_assignment_id, product_coupon_assignments in updated_assignments.items()
     ]

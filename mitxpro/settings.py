@@ -656,15 +656,15 @@ REPAIR_COURSEWARE_USERS_FREQUENCY = get_int(
     description="How many seconds between repairing courseware records for faulty users",
 )
 REPAIR_COURSEWARE_USERS_OFFSET = int(REPAIR_COURSEWARE_USERS_FREQUENCY / 2)
-SHEETS_ASSIGNMENT_CHECK_FREQUENCY = get_int(
-    "SHEETS_ASSIGNMENT_CHECK_FREQUENCY",
+SHEETS_MONITORING_FREQUENCY = get_int(
+    "SHEETS_MONITORING_FREQUENCY",
     60 * 60 * 2,
-    description="The frequency that the Drive folder should be checked for unprocessed coupon assignment Sheets",
+    description="The frequency that the Drive folder should be checked for bulk coupon Sheets that need processing",
 )
-SHEETS_DELIVERY_DATE_UPDATE_OFFSET = get_int(
-    "SHEETS_DELIVERY_DATE_UPDATE_OFFSET",
+SHEETS_TASK_OFFSET = get_int(
+    "SHEETS_TASK_OFFSET",
     60 * 5,
-    description="How many seconds to wait after the coupon assignment check before updating coupon delivery dates",
+    description="How many seconds to wait in between executing different Sheets tasks in series",
 )
 
 CELERY_BEAT_SCHEDULE = {
@@ -699,22 +699,40 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 if FEATURES.get("COUPON_SHEETS"):
+    alt_sheets_processing = FEATURES.get("COUPON_SHEETS_ALT_PROCESSING")
+    if alt_sheets_processing:
+        CELERY_BEAT_SCHEDULE.update(
+            {
+                "handle-coupon-request-sheet": {
+                    "task": "sheets.tasks.handle_unprocessed_coupon_requests",
+                    "schedule": SHEETS_MONITORING_FREQUENCY,
+                }
+            }
+        )
     CELERY_BEAT_SCHEDULE.update(
         {
-            "check-unprocessed-coupon-assignment-sheets": {
-                "task": "sheets.tasks.check_incomplete_coupon_assignments",
-                "schedule": SHEETS_ASSIGNMENT_CHECK_FREQUENCY,
+            "handle-unprocessed-coupon-assignment-sheets": {
+                "task": "sheets.tasks.handle_incomplete_coupon_assignments",
+                "schedule": OffsettingSchedule(
+                    run_every=timedelta(seconds=SHEETS_MONITORING_FREQUENCY),
+                    offset=timedelta(
+                        seconds=0 if not alt_sheets_processing else SHEETS_TASK_OFFSET
+                    ),
+                ),
             },
             "update-assignment-delivery-dates": {
                 "task": "sheets.tasks.update_incomplete_assignment_delivery_statuses",
                 "schedule": OffsettingSchedule(
-                    run_every=timedelta(seconds=SHEETS_ASSIGNMENT_CHECK_FREQUENCY),
-                    offset=timedelta(seconds=SHEETS_DELIVERY_DATE_UPDATE_OFFSET),
+                    run_every=timedelta(seconds=SHEETS_MONITORING_FREQUENCY),
+                    offset=timedelta(
+                        seconds=SHEETS_TASK_OFFSET
+                        if not alt_sheets_processing
+                        else SHEETS_TASK_OFFSET * 2
+                    ),
                 ),
             },
         }
     )
-
 
 # Hijack
 HIJACK_ALLOW_GET_REQUESTS = True

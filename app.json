@@ -394,12 +394,12 @@
       "description": "Comma-separated list of emails for users that should be added as an editor for all newly created Sheets",
       "required": false
     },
-    "SHEETS_ASSIGNMENT_CHECK_FREQUENCY": {
-      "description": "The frequency that the Drive folder should be checked for unprocessed coupon assignment Sheets",
+    "SHEETS_MONITORING_FREQUENCY": {
+      "description": "The frequency that the Drive folder should be checked for bulk coupon Sheets that need processing",
       "required": false
     },
-    "SHEETS_DELIVERY_DATE_UPDATE_OFFSET": {
-      "description": "How many seconds to wait after the coupon assignment check before updating coupon delivery dates",
+    "SHEETS_TASK_OFFSET": {
+      "description": "How many seconds to wait in between executing different Sheets tasks in series",
       "required": false
     },
     "SITE_NAME": {

@@ -1,10 +1,11 @@
 """Endpoint URLs for sheets app"""
 from django.urls import re_path
+from django.conf import settings
 
 from sheets import views
 
 urlpatterns = (
-    re_path(r"^sheets/admin/auth/", views.google_auth_view, name="google-auth-view"),
+    re_path(r"^sheets/admin/", views.sheets_admin_view, name="sheets-admin-view"),
     re_path(
         r"^api/sheets/auth/", views.request_google_auth, name="request-google-auth"
     ),
@@ -19,3 +20,21 @@ urlpatterns = (
         name="handle-coupon-request-sheet-update",
     ),
 )
+if settings.FEATURES.get("COUPON_SHEETS_ALT_PROCESSING"):
+    urlpatterns += (
+        re_path(
+            r"^api/sheets/coupon-requests/",
+            views.process_request_sheet,
+            name="process-request-sheet",
+        ),
+        re_path(
+            r"^api/sheets/coupon-assignments/",
+            views.process_assignment_sheets,
+            name="process-assignment-sheets",
+        ),
+        re_path(
+            r"^api/sheets/coupon-message-statuses/",
+            views.update_assignment_delivery_statuses,
+            name="update-assignment-delivery-statuses",
+        ),
+    )

@@ -86,7 +86,7 @@ SHEETS_ADMIN_EMAILS=admin1@example.com,some-service-account-user@somesubdomain.i
 ##### 2) Grant permissions from the mitxpro app
 
 1. Run mitxpro and log in as an admin user
-1. Go to `/sheets/admin/auth/`, and click the button to kick off OAuth process
+1. Go to `/sheets/admin/`, and click the button to kick off OAuth process
 1. Grant permissions to the app to use the relevant APIs.
    - If running locally, you'll probably hit a page that says the app is untrusted, in which
      case you can click "Advanced" and proceed with authorization anyway.

@@ -18,7 +18,7 @@ def google_api_auth(user):
     return GoogleApiAuthFactory.create(requesting_user=user)
 
 
-@pytest.mark.parametrize("url_name", ["google-auth-view", "request-google-auth"])
+@pytest.mark.parametrize("url_name", ["sheets-admin-view", "request-google-auth"])
 def test_staff_only_views(user_client, url_name):
     """Sheets auth views should be staff-only"""
     resp = user_client.get(reverse(url_name))
@@ -97,7 +97,7 @@ def test_complete_auth(
         is True
     )
     assert response.status_code == status.HTTP_302_FOUND
-    assert response.url.startswith(reverse("google-auth-view"))
+    assert response.url.startswith(reverse("sheets-admin-view"))
 
 
 @pytest.mark.django_db
