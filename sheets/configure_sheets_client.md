@@ -11,8 +11,9 @@ assignment of bulk coupons.
 
 **HIGH-LEVEL STEPS**
 1. [Create Drive folder and coupon request Sheet](#1-create-drive-folder-and-coupon-request-sheet)
-1. [Google API auth](#2-google-api-auth)
-1. [Push notification setup](#3-push-notification-setup)
+1. [Add settings for Drive files](#2-add-settings-for-drive-files)
+1. [Google API auth](#3-google-api-auth)
+1. [Push notification setup](#4-push-notification-setup)
 
 
 ### 1) Create Drive folder and coupon request Sheet
@@ -20,15 +21,44 @@ assignment of bulk coupons.
 The main driver of bulk coupon creation and assignment is the coupon request Sheet.
 This Sheet needs to follow a specific format, so if this Sheet does not exist in the 
 Drive you're working against, contact a fellow developer to have an example Sheet shared
-with you so you can copy it. That Sheet should exist in a separate Drive folder. All coupon
+with you so you can copy it. This Sheet should exist in a dedicated Drive folder. All coupon
 assignment Sheets created from this app will also be placed in that folder.
 
-**⚠️ NOTE: You can make changes to this Sheet manually to test this feature, but in production, 
-we will only want to allow (1) this app, and (2) a Google Form to make changes to the Sheet. 
-That permission scheme is still a work in progress, so for now, changes to the coupon request Sheet
-can be manually applied. ⚠️**
+### 2) Add settings for Drive files
 
-### 2) Google API auth
+```dotenv
+# To get this value, load the coupon request sheet and check the url. 
+# Example: `https://docs.google.com/spreadsheets/d/abcdefg012345678/edit#gid=0` – `abcdefg012345678` is the ID.
+COUPON_REQUEST_SHEET_ID=my-request-sheet-id
+
+# To get this value, navigate to the Drive folder where your request Sheet exists and 
+# check the url. Example: `https://drive.google.com/drive/u/1/folders/abcdefg012345678` – `abcdefg012345678` is the ID.
+DRIVE_OUTPUT_FOLDER_ID=my-output-folder-id
+
+# Comma-separated list of emails of users that you would like to be invited as editors
+# for each coupon assignment Sheet created. For testing, it's fine to just set this as your own email.
+SHEETS_ADMIN_EMAILS=this@example.com,that@example.com 
+
+# *NOTE:* 
+# This is only needed if you're using a Shared Drive/Team Drive folder.
+# This value is equal to the ID of the top-level folder in the Shared Drive,
+# which can be found in the URL when viewing that folder.  
+DRIVE_SHARED_ID=my-shared-drive-id
+```
+
+Optional settings that are good to know:
+
+```dotenv
+# Set this to a valid value in the TZ database if you want all dates in the spreadsheet
+# to be assumed to be in that particular timezone.
+SHEETS_DATE_TIMEZONE=America/New_York
+
+# Set this to adjust the frequency that the coupon assignment spreadsheets will be
+# checked for new/updated assignments and updated message statuses.
+SHEETS_MONITORING_FREQUENCY=600
+```
+
+### 3) Google API auth
 
 Authentication can be accomplished via OAuth (Authorization code flow) for a personal
 Google account, or via Service Accounts
@@ -39,14 +69,14 @@ Google account, or via Service Accounts
 
 #### Service Accounts  
 
-##### 1) Get Service Accounts credentials from devops or another developer
+##### a) Get Service Accounts credentials from devops or another developer
 
 Devops, or a fellow developer, will have the Service Accounts credentials for
 an MIT-owned Google account.
 
-##### 2) Add settings
+##### b) Add settings
 
-Add these settings to you `.env` file
+Add these settings to your `.env` file
 
 ```dotenv
 # This setting will be the contents of the credentials JSON file
@@ -59,9 +89,13 @@ DRIVE_SERVICE_ACCOUNT_CREDS={"type": "service_account", "project_id": "mitxpro",
 SHEETS_ADMIN_EMAILS=admin1@example.com,some-service-account-user@somesubdomain.iam.gserviceaccount.com
 ```
 
+##### c) Share the bulk coupons Drive folder with the Service Account email
+
+The Service Account user will need to be added with edit permissions.
+
 #### Personal OAuth Authorization Code
 
-##### 1) Set up credentials in the Google API console
+##### a) Set up credentials in the Google API console
 
 1. Create a project in the [API console](https://console.cloud.google.com/apis/dashboard), and select that project in the dropdown.
 1. Enable the Google Sheets and Google Drive APIs in the dashboard ("Enable APIs and Services" button at the top of the 
@@ -83,7 +117,7 @@ SHEETS_ADMIN_EMAILS=admin1@example.com,some-service-account-user@somesubdomain.i
    - The project ID can be found in the querystring of the [API console](https://console.cloud.google.com/apis/dashboard)
      dashboard as the value of the `project` parameter, e.g.: `my-project-1069972158283`)
 
-##### 2) Grant permissions from the mitxpro app
+##### b) Grant permissions from the mitxpro app
 
 1. Run mitxpro and log in as an admin user
 1. Go to `/sheets/admin/`, and click the button to kick off OAuth process
@@ -93,23 +127,7 @@ SHEETS_ADMIN_EMAILS=admin1@example.com,some-service-account-user@somesubdomain.i
    - If auth was successful, you should be brought back to that same admin page with a
      success message. There should also be a `GoogleApiAuth` record (which can be checked in Django admin).
 
-##### 3) Add mitxpro settings values
-
-The following settings values should already be set from previous steps:
-`DRIVE_CLIENT_ID`, `DRIVE_CLIENT_SECRET`, `DRIVE_API_PROJECT_ID`.
-
-These additional settings must also be added:
-- `COUPON_REQUEST_SHEET_ID`: To get this value, load the coupon request sheet and check the url. 
-  Example: `https://docs.google.com/spreadsheets/d/abcdefg012345678/edit#gid=0` – `abcdefg012345678` is the ID.
-- `DRIVE_OUTPUT_FOLDER_ID`: To get this value, navigate to the Drive folder where your request Sheet exists and 
-  check the url. Example: `https://drive.google.com/drive/u/1/folders/abcdefg012345678` – `abcdefg012345678` is the ID.
-- `SHEETS_ADMIN_EMAILS`: Comma-separated list of emails of users that you would like to be invited as editors
-  for each coupon assignment Sheet created. For testing, it's fine to just set this as your own email. 
-
-*NOTE: If you're testing this in a CI PR build, you may also need to change the `MITXPRO_BASE_URL`
-setting from `https://xpro-ci.herokuapp.com` to `https://xpro-ci-pr-<YOUR_PR_NUMBER>.herokuapp.com`*  
-
-##### 4) Test the credentials
+##### c) Test the credentials
 
 To test that API auth is set up correctly:
 1. Add a row to the coupon request Sheet with the "Processed" column unchecked/`FALSE`
@@ -122,8 +140,14 @@ Sheet should have been created in the same folder as your coupon request Sheet, 
 that new Sheet should be shared with the emails in your `SHEETS_ADMIN_EMAILS` setting.
 
 
-### 3) Push notification setup
+### 4) Push notification setup
 
+This requires the app to be publicly available. When running locally, that can
+be accomplished by running something like [ngrok](https://ngrok.com). If using Service
+Accounts for auth, the push notification setup will only work for domains that we own 
+(i.e.: production/RC/CI, but not for PR builds hosted on herokuapp.com) 
+
+##### a) Domain verification: 
 1. Add a verified domain in [Google Webmaster Central](https://www.google.com/webmasters/verification/home?hl=en)
   - "Add A Property" > enter the full URL of your running mitxpro app > "Alternate Methods" > "HTML tag"
   - Copy the value of the `content` property of the `<meta>` tag in the section that drops down when
@@ -133,7 +157,10 @@ that new Sheet should be shared with the emails in your `SHEETS_ADMIN_EMAILS` se
 1. Click "Verify" in the Webmaster page once the running mitxpro app has the correct settings value
 1. If verification was successful, unset the `GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE` setting as it is not needed anymore
 1. Add the domain you just verified in the [Domain Verification section in API console](https://console.cloud.google.com/apis/credentials/domainverification)
-1. Run the management command that make the file watch request to Google: `setup_sheet_update_webhook`
+
+##### b) Adding the push notification/webhook
+
+Run the management command that make the file watch request to Google: `setup_sheet_update_webhook`
 
 If that management command indicates success, any rows added to the coupon request Sheet should
 cause the mitxpro app to process that row (and any other row that has an unchecked "Processed" column).
