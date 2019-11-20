@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.32.2
+--------------
+
+- Add X-Forwarded-Host setting and make it configurable
+- Not check for expired run if there is --force flag
+
 Version 0.32.1 (Released November 19, 2019)
 --------------
 
