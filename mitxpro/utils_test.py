@@ -17,6 +17,7 @@ from mitxpro.utils import (
     filter_dict_by_key_set,
     make_csv_http_response,
     partition,
+    partition_to_lists,
     has_equal_properties,
     remove_password_from_url,
     first_or_none,
@@ -24,6 +25,10 @@ from mitxpro.utils import (
     unique,
     unique_ignore_case,
     max_or_none,
+    item_at_index_or_none,
+    all_equal,
+    all_unique,
+    has_all_keys,
 )
 
 
@@ -139,6 +144,20 @@ def test_partition():
     assert list(truthy) == [1, 2, 1, 3, 1, 4]
 
 
+def test_partition_to_lists():
+    """
+    Assert that partition_to_lists splits an iterable into two lists according to a condition
+    """
+    nums = [1, 2, 1, 3, 1, 4, 0, None, None]
+    not_ones, ones = partition_to_lists(nums, lambda n: n == 1)
+    assert not_ones == [2, 3, 4, 0, None, None]
+    assert ones == [1, 1, 1]
+    # The default predicate is the standard Python bool() function
+    falsey, truthy = partition_to_lists(nums)
+    assert falsey == [0, None, None]
+    assert truthy == [1, 2, 1, 3, 1, 4]
+
+
 @pytest.mark.parametrize(
     "url, expected",
     [
@@ -185,6 +204,43 @@ def test_unique_ignore_case():
     provided iterable
     """
     assert list(unique_ignore_case(["ABC", "def", "AbC", "DEf"])) == ["abc", "def"]
+
+
+def test_item_at_index_or_none():
+    """
+    Assert that item_at_index_or_none returns an item at a given index, or None if that index
+    doesn't exist
+    """
+    arr = [1, 2, 3]
+    assert item_at_index_or_none(arr, 1) == 2
+    assert item_at_index_or_none(arr, 10) is None
+
+
+def test_all_equal():
+    """
+    Assert that all_equal returns True if all of the provided args are equal to each other
+    """
+    assert all_equal(1, 1, 1) is True
+    assert all_equal(1, 2, 1) is False
+    assert all_equal() is True
+
+
+def test_all_unique():
+    """
+    Assert that all_unique returns True if all of the items in the iterable argument are unique
+    """
+    assert all_unique([1, 2, 3, 4]) is True
+    assert all_unique((1, 2, 3, 4)) is True
+    assert all_unique([1, 2, 3, 1]) is False
+
+
+def test_has_all_keys():
+    """
+    Assert that has_all_keys returns True if the given dict has all of the specified keys
+    """
+    d = {"a": 1, "b": 2, "c": 3}
+    assert has_all_keys(d, ["a", "c"]) is True
+    assert has_all_keys(d, ["a", "z"]) is False
 
 
 @pytest.mark.parametrize(

@@ -16,6 +16,9 @@ djangorestframework==3.9.4
 djoser
 edx-api-client==0.8.0
 django-storages==1.7.1
+google-api-python-client==1.7.11
+google-auth==1.6.3
+pygsheets==2.0.2
 ipython
 newrelic
 pdftotext==2.1.1

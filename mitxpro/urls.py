@@ -49,6 +49,7 @@ urlpatterns = [
     path("", include("courseware.urls")),
     path("", include("ecommerce.urls")),
     path("", include("users.urls")),
+    path("", include("sheets.urls")),
     path("", include("mail.urls")),
     path("boeing/", include(("voucher.urls", "voucher"))),
     path("api/app_context", AppContextView.as_view(), name="api-app_context"),

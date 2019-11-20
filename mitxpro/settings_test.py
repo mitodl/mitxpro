@@ -35,7 +35,8 @@ class TestSettings(TestCase):
         """Patch the cached settings loaded by EnvParser"""
         with mock.patch.dict("os.environ", values, clear=True):
             envs.env.reload()
-        return self.reload_settings()
+            settings_dict = self.reload_settings()
+        return settings_dict
 
     def reload_settings(self):
         """

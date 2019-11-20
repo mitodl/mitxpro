@@ -222,11 +222,21 @@ class DataConsentUserFactory(DjangoModelFactory):
         model = models.DataConsentUser
 
 
+class BulkCouponAssignmentFactory(DjangoModelFactory):
+    """Factory for BulkCouponAssignment"""
+
+    assignment_sheet_id = Faker("pystr", max_chars=43)
+
+    class Meta:
+        model = models.BulkCouponAssignment
+
+
 class ProductCouponAssignmentFactory(DjangoModelFactory):
     """Factory for ProductCouponAssignment"""
 
     email = fuzzy.FuzzyText(suffix="@example.com")
     product_coupon = SubFactory(CouponEligibilityFactory)
+    bulk_assignment = SubFactory(BulkCouponAssignmentFactory)
 
     class Meta:
         model = models.ProductCouponAssignment

@@ -280,11 +280,17 @@ def generate_app_json():
         dict:
             object that can be serialized to JSON for app.json
     """
+    from django.conf import settings
+
     with open("app.base.json") as app_template_json:
         config = json.load(app_template_json)
 
     for env_var in list_environment_vars():
-        if env_var.dev_only or not env_var.write_app_json:
+        if (
+            env_var.dev_only
+            or not env_var.write_app_json
+            or env_var.name.startswith(settings.MITXPRO_FEATURES_PREFIX)
+        ):
             continue
 
         if env_var.name not in config["env"]:

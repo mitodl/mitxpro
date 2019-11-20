@@ -17,7 +17,7 @@ from courses.serializers import (
     ProgramEnrollmentSerializer,
 )
 from courses.constants import DEFAULT_COURSE_IMG_PATH
-from mitxpro.views import get_js_settings_context
+from mitxpro.views import get_base_context
 
 
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
@@ -77,7 +77,7 @@ class CourseCatalogView(ListView):
         object_list = base_context_data.pop("object_list")
         return {
             **base_context_data,
-            **get_js_settings_context(self.request),
+            **get_base_context(self.request),
             "programs": object_list["programs"],
             "courses": object_list["courses"],
             "default_image_path": DEFAULT_COURSE_IMG_PATH,
