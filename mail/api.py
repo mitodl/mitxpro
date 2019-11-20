@@ -29,8 +29,25 @@ from django.conf import settings
 from django.core import mail
 from django.template.loader import render_to_string
 
-EmailMetadata = namedtuple("EmailMetadata", ["tags", "user_variables"])
 log = logging.getLogger()
+
+
+EmailMetadata = namedtuple("EmailMetadata", ["tags", "user_variables"])
+
+
+class UserMessageProps:
+    """Simple class that contains the data needed for a user-specific message"""
+
+    def __init__(self, recipient, context=None, metadata=None):
+        """
+        Args:
+            recipient (str): Recipient email address
+            context (dict or None): Dict containing message context (defaults to empty dict)
+            metadata (EmailMetadata or None): An object containing metadata to attach to the message
+        """
+        self.recipient = recipient
+        self.context = context or {}
+        self.metadata = metadata
 
 
 def safe_format_recipients(recipients):
@@ -199,26 +216,25 @@ def build_messages(template_name, recipients, extra_context, metadata=None):
             )
 
 
-def build_user_specific_messages(template_name, recipient_iter):
+def build_user_specific_messages(template_name, user_message_props_iter):
     """
     Creates message objects for a set of recipients with a specific context for each recipient in each message.
 
     Args:
         template_name (str): name of the template, this should match a directory in mail/templates
-        recipient_iter (iterable of (str, dict, EmailMetadata)): Iterable of of tuples, each one containing
-          an email address, the context for that recipient (dict), and message metadata (if any was provided)
+        user_message_props_iter (iterable of UserMessageProps): Iterable of objects containing user message data
 
     Yields:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
     """
     with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
-        for recipient, context, metadata in recipient_iter:
+        for user_message_props in user_message_props_iter:
             yield build_message(
                 connection=connection,
                 template_name=template_name,
-                recipient=recipient,
-                context={**get_base_context(), **(context or {})},
-                metadata=metadata,
+                recipient=user_message_props.recipient,
+                context={**get_base_context(), **user_message_props.context},
+                metadata=user_message_props.metadata,
             )
 
 

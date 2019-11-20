@@ -17,10 +17,24 @@ def user(db):
 
 
 @pytest.fixture
+def staff_user(db):
+    """Staff user fixture"""
+    return UserFactory.create(is_staff=True)
+
+
+@pytest.fixture
 def user_client(user):
     """Django test client that is authenticated with the user"""
     client = Client()
     client.force_login(user)
+    return client
+
+
+@pytest.fixture
+def staff_client(staff_user):
+    """Django test client that is authenticated with the staff user"""
+    client = Client()
+    client.force_login(staff_user)
     return client
 
 

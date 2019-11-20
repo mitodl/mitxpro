@@ -42,7 +42,7 @@ from cms.constants import (
 from cms.utils import filter_and_sort_catalog_pages
 from courses.constants import DEFAULT_COURSE_IMG_PATH
 from courses.models import CourseRunCertificate, ProgramCertificate
-from mitxpro.views import get_js_settings_context
+from mitxpro.views import get_base_context
 
 
 class CourseObjectIndexPage(Page):
@@ -235,7 +235,7 @@ class CatalogPage(Page):
         )
         return dict(
             **super().get_context(request),
-            **get_js_settings_context(request),
+            **get_base_context(request),
             all_pages=all_pages,
             program_pages=program_pages,
             course_pages=course_pages,
@@ -420,7 +420,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
     def get_context(self, request, *args, **kwargs):
         return {
             **super().get_context(request),
-            **get_js_settings_context(request),
+            **get_base_context(request),
             "catalog_page": CatalogPage.objects.first(),
         }
 
@@ -552,7 +552,7 @@ class ProductPage(MetadataPageMixin, Page):
     def get_context(self, request, *args, **kwargs):
         return {
             **super().get_context(request, *args, **kwargs),
-            **get_js_settings_context(request),
+            **get_base_context(request),
             "title": self.title,
         }
 
@@ -695,7 +695,7 @@ class ProgramPage(ProductPage):
 
         return {
             **super().get_context(request, **kwargs),
-            **get_js_settings_context(request),
+            **get_base_context(request),
             "product_id": product.id if product else None,
             "checkout_url": f"{reverse('checkout-page')}?product={ product.id }"
             if product
@@ -767,7 +767,7 @@ class CoursePage(ProductPage):
 
         return {
             **super().get_context(request, **kwargs),
-            **get_js_settings_context(request),
+            **get_base_context(request),
             "product_id": product.id if product else None,
             "checkout_url": f"{reverse('checkout-page')}?product={ product.id }"
             if product
@@ -1324,7 +1324,7 @@ class ResourcePage(Page):
 
     def get_context(self, request, *args, **kwargs):
         context = super(ResourcePage, self).get_context(request)
-        context.update(**get_js_settings_context(request))
+        context.update(**get_base_context(request))
 
         return context
 
@@ -1516,7 +1516,7 @@ class CertificatePage(CourseProgramChildPage):
                 self.product_name, settings.SITE_NAME
             ),
             **super().get_context(request, *args, **kwargs),
-            **get_js_settings_context(request),
+            **get_base_context(request),
             **preview_context,
             **context,
         }

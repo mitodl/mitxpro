@@ -9,7 +9,6 @@ import logging
 from traceback import format_exc
 from urllib.parse import quote_plus, urljoin
 import uuid
-import itertools
 
 from django.conf import settings
 from django.db.models import Q, Max, F, Count, Subquery
@@ -750,31 +749,32 @@ def get_available_bulk_product_coupons(coupon_payment_id, product_id):
     )
 
 
-def bulk_assign_product_coupons(emails, available_product_coupons):
+def bulk_assign_product_coupons(desired_assignments, bulk_assignment=None):
     """
     Assign product coupons to emails in bulk and create a record of this bulk creation
 
     Args:
-        emails (iterable of str):
-        available_product_coupons (iterable of CouponEligibility):
+        desired_assignments (iterable of (str, int)): An iterable of emails paired with the
+            ProductCoupon id that each email should be assigned
+        bulk_assignment (BulkCouponAssignment or None): A BulkCouponAssignment object, or
+            None if a new one should be created
 
     Returns:
-        iterable of (str, CouponEligibility): An iterable of tuples, where each one
-            is an email paired with the product coupon assigned to that email.
+        (BulkCouponAssignment, list of ProductCouponAssignment): The BulkCouponAssignment object paired with
+            all of the ProductCouponAssignments that were created for it
     """
-    # We will loop over pairs of recipients and product coupons again after this method returns,
-    # so create 2 generators
-    recipient_product_coupon_iter1, recipient_product_coupon_iter2 = itertools.tee(
-        zip(emails, available_product_coupons)
+    bulk_assignment = bulk_assignment or BulkCouponAssignment.objects.create()
+    return (
+        bulk_assignment,
+        ProductCouponAssignment.objects.bulk_create(
+            ProductCouponAssignment(
+                email=email,
+                product_coupon_id=product_coupon_id,
+                bulk_assignment=bulk_assignment,
+            )
+            for email, product_coupon_id in desired_assignments
+        ),
     )
-    bulk_assignment = BulkCouponAssignment.objects.create()
-    ProductCouponAssignment.objects.bulk_create(
-        ProductCouponAssignment(
-            email=email, product_coupon=product_coupon, bulk_assignment=bulk_assignment
-        )
-        for email, product_coupon in recipient_product_coupon_iter1
-    )
-    return bulk_assignment, recipient_product_coupon_iter2
 
 
 # pylint: disable=too-many-branches
