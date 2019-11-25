@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.32.3
+Version 0.32.3 (Released November 25, 2019)
 --------------
 
 - Updated Sheets setup doc
