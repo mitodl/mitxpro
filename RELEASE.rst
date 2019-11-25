@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.32.3 (Released November 25, 2019)
+--------------
+
+- Updated Sheets setup doc
+- Enabled bulk coupon creation and assignment via Google Sheets
+
 Version 0.32.2 (Released November 21, 2019)
 --------------
 
