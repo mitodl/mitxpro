@@ -190,6 +190,7 @@ class ExpandedSheetsClient:
             pygsheets_client (pygsheets.client.Client): An authorized pygsheets client
         """
         self.pygsheets_client = pygsheets_client
+        self.supports_team_drives = bool(settings.DRIVE_SHARED_ID)
 
     def update_spreadsheet_properties(self, file_id, property_dict):
         """
@@ -208,7 +209,7 @@ class ExpandedSheetsClient:
             .update(
                 fileId=file_id,
                 body={"appProperties": property_dict},
-                supportsTeamDrives=True,
+                supportsTeamDrives=self.supports_team_drives,
             )
             .execute()
         )
@@ -227,7 +228,11 @@ class ExpandedSheetsClient:
         """
         result = (
             self.pygsheets_client.drive.service.files()
-            .get(fileId=file_id, fields="appProperties", supportsTeamDrives=True)
+            .get(
+                fileId=file_id,
+                fields="appProperties",
+                supportsTeamDrives=self.supports_team_drives,
+            )
             .execute()
         )
         if result and "appProperties" in result:
@@ -265,6 +270,7 @@ class ExpandedSheetsClient:
             self.pygsheets_client.drive.service.files()
             .watch(
                 fileId=file_id,
+                supportsTeamDrives=self.supports_team_drives,
                 body={
                     "id": channel_id,
                     "address": urljoin(
