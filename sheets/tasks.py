@@ -28,8 +28,10 @@ def handle_incomplete_coupon_assignments():
     Processes all as-yet-incomplete coupon assignment spreadsheets
     """
     coupon_assignment_handler = CouponAssignmentHandler()
-    spreadsheets = coupon_assignment_handler.process_assignment_spreadsheets()
-    return [(spreadsheet.id, spreadsheet.title) for spreadsheet in spreadsheets]
+    processed_spreadsheet_metadata = (
+        coupon_assignment_handler.process_assignment_spreadsheets()
+    )
+    return processed_spreadsheet_metadata
 
 
 @app.task
