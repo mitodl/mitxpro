@@ -192,6 +192,31 @@ class ExpandedSheetsClient:
         self.pygsheets_client = pygsheets_client
         self.supports_team_drives = bool(settings.DRIVE_SHARED_ID)
 
+    def get_metadata_for_matching_files(self, query, file_fields="id, name"):
+        """
+        Fetches metadata for all Drive files that match a given query
+        Args:
+            query (str): The Drive files query (ref: https://developers.google.com/drive/api/v3/search-files)
+            file_fields (str): Comma-separated list of file fields that should be returned in the metadata
+                results (ref: https://developers.google.com/drive/api/v3/reference/files#resource)
+
+        Returns:
+            list of dict: A dict of metadata for each file that matched the given query
+        """
+        extra_list_params = {}
+        if self.supports_team_drives:
+            extra_list_params.update(
+                dict(
+                    corpora="teamDrive",
+                    teamDriveId=settings.DRIVE_SHARED_ID,
+                    supportsTeamDrives=True,
+                    includeTeamDriveItems=True,
+                )
+            )
+        return self.pygsheets_client.drive.list(
+            **extra_list_params, fields="files({})".format(file_fields), q=query
+        )
+
     def update_spreadsheet_properties(self, file_id, property_dict):
         """
         Sets metadata properties on the spreadsheet, which can then be
@@ -501,6 +526,7 @@ class CouponAssignmentHandler:
         completed_key=ASSIGNMENT_MESSAGES_COMPLETED_KEY,
         completed_value=GOOGLE_API_TRUE_VAL,
     )
+    FILE_METADATA_FIELDS = "id, name, modifiedTime, appProperties"
 
     def __init__(self):
         self.pygsheets_client = get_authorized_pygsheets_client()
@@ -529,17 +555,22 @@ class CouponAssignmentHandler:
 
     def fetch_incomplete_sheets(self):
         """
-        Fetches assignment Spreadsheets with metadata that indicate that they have not yet been completed
+        Yields assignment Spreadsheets with metadata that indicate that they have not yet been completed
         and should still be considered for processing.
+        NOTE: The pygsheets client includes the `open_all` method, but it loads all matching spreadsheets
+        into memory immediately, which can and will cause memory issues, hence this reimplementation.
 
-        Returns:
-            list of pygsheets.spreadsheet.Spreadsheet: A list of Spreadsheets that have not been completed
+        Yields:
+            pygsheets.spreadsheet.Spreadsheet: An assignment Spreadsheet that has not been completed
         """
-        return self.pygsheets_client.open_all(
+        incomplete_assignment_sheet_metadata = self.expanded_sheets_client.get_metadata_for_matching_files(
             query="{} and {}".format(
                 self.ASSIGNMENT_SHEETS_QUERY, self.INCOMPLETE_SHEETS_QUERY_TERM
-            )
+            ),
+            file_fields=self.FILE_METADATA_FIELDS,
         )
+        for metadata_dict in incomplete_assignment_sheet_metadata:
+            yield self.pygsheets_client.open_by_key(metadata_dict["id"])
 
     @staticmethod
     def assignment_tuple_iter(data_rows):
@@ -751,7 +782,8 @@ class CouponAssignmentHandler:
         Processes all as-yet-incomplete coupon assignment spreadsheets
 
         Returns:
-            list of pygsheets.spreadsheet.Spreadsheet: Successfully-processed spreadsheets
+            list of (str, str): Spreadsheet ids paired with spreadsheet titles for all successfully-processed
+                assignment sheets
         """
         processed = []
         for spreadsheet in self.fetch_incomplete_sheets():
@@ -772,7 +804,7 @@ class CouponAssignmentHandler:
             except Exception as exc:
                 log.error(exc)
             else:
-                processed.append(spreadsheet)
+                processed.append((spreadsheet.id, spreadsheet.title))
         return processed
 
     def build_assignment_status_map(self, bulk_assignments, earliest_date=None):
