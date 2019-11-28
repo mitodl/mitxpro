@@ -379,6 +379,68 @@
                 }
             ],
             "topics": [{"name": "dead courses"}]
+        },
+        {
+            "title": "Additive Manufacturing for Innovative Design and Production",
+            "subhead": "Additive Manufacturing for Innovative Design and Production.",
+            "description": "<p>Additive Manufacturing for Innovative Design and Production.</p>",
+            "readable_id": "course-v1:SEED+AMx",
+            "course_runs": [
+                {
+                    "title": "Additive Manufacturing for Innovative Design and Production - April 2018",
+                    "courseware_id": "course-v1:SEED+AMx+R3",
+                    "enrollment_start": "2018-04-15T00:00:00+00:00",
+                    "end_date": "2018-07-02T00:00:00+00:00",
+                    "start_date": "2018-04-30T00:00:00+00:00",
+                    "enrollment_end": "2018-04-29T00:00:00+00:00",
+                    "_product": {
+                        "price": 100
+                    }
+                },
+                {
+                    "title": "Additive Manufacturing for Innovative Design and Production - April 2019",
+                    "courseware_id": "course-v1:SEED+AMx+R4",
+                    "enrollment_start": "2019-04-15T00:00:00+00:00",
+                    "end_date": "2019-07-02T00:00:00+00:00",
+                    "start_date": "2019-04-30T00:00:00+00:00",
+                    "enrollment_end": "2019-04-29T00:00:00+00:00",
+                    "_product": {
+                        "price": 100
+                    }
+                }
+            ],
+            "topics": [{"name": "manufacturing"}]
+        },
+        {
+            "title": "Model-Based Systems Engineering: Documentation and Analysis 1",
+            "subhead": "Model-Based Systems Engineering: Documentation and Analysis 1.",
+            "description": "<p>Model-Based Systems Engineering: Documentation and Analysis 1.</p>",
+            "readable_id": "course-v1:SEED+SysEngBx3",
+            "course_runs": [
+                {
+                    "title": "Model-Based Systems Engineering: Documentation and Analysis - April 2018",
+                    "courseware_id": "course-v1:SEED+SysEngBx3+R7",
+                    "enrollment_start": "2018-04-01T00:00:00+00:00",
+                    "end_date": "2018-05-07T00:00:00+00:00",
+                    "start_date": "2018-04-09T00:00:00+00:00",
+                    "enrollment_end": "2018-04-08T00:00:00+00:00",
+                    "_product": {
+                        "price": 150
+                    }
+                },
+                {
+                    "title": "Model-Based Systems Engineering: Documentation and Analysis - April 2019",
+                    "courseware_id": "course-v1:SEED+SysEngBx3+R8",
+                    "enrollment_start": "2019-04-01T00:00:00+00:00",
+                    "end_date": "2019-05-07T00:00:00+00:00",
+                    "start_date": "2019-04-09T00:00:00+00:00",
+                    "enrollment_end": "2019-04-08T00:00:00+00:00",
+                    "_product": {
+                        "price": 150
+                    }
+                }
+            ],
+            "topics": [{"name": "architecture"}, {"name": "systems engineering"}]
         }
     ],
     "resource_pages": [
@@ -441,6 +503,39 @@
                     }
                 }
             ]
+        }
+    ],
+    "companies": [
+        {
+            "name": "Boeing"
+        }
+    ],
+    "coupons": [
+        {
+            "name": "AMxB_100",
+            "coupon_code": "AMxB_100",
+            "num_coupon_codes": 1,
+            "amount": 1,
+            "activation_date": "2018-05-07T00:00:00+00:00",
+            "expiration_date": "2020-12-31T00:00:00+00:00",
+            "product_ids": ["8"],
+            "coupon_type": "single-use",
+            "payment_type": "staff",
+            "payment_transaction": "123",
+            "company": "1"
+        },
+        {
+            "name": "SysEngBx3_100",
+            "coupon_code": "SysEngBx3_100",
+            "num_coupon_codes": 1,
+            "amount": 1,
+            "activation_date": "2018-05-07T00:00:00+00:00",
+            "expiration_date": "2020-12-31T00:00:00+00:00",
+            "product_ids": ["9"],
+            "coupon_type": "single-use",
+            "payment_type": "staff",
+            "payment_transaction": "123",
+            "company": "1"
         }
     ]
 }

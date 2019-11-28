@@ -4,6 +4,8 @@ Course model serializers
 from rest_framework import serializers
 
 from courses import models
+from ecommerce.models import Company, CouponPaymentVersion
+from ecommerce.serializers import SingleUseCouponSerializer
 
 
 class ProgramSerializer(serializers.ModelSerializer):
@@ -27,4 +29,20 @@ class CourseRunSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.CourseRun
+        fields = "__all__"
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    """Company model serializer"""
+
+    class Meta:
+        model = Company
+        fields = "__all__"
+
+
+class CouponSerializer(SingleUseCouponSerializer):
+    """Coupon model Serializer"""
+
+    class Meta:
+        model = CouponPaymentVersion
         fields = "__all__"

@@ -7,6 +7,7 @@ from wagtail.core.models import Page
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from rest_framework.exceptions import ValidationError
 
 from courses.models import (
     Program,
@@ -22,6 +23,8 @@ from localdev.seed.serializers import (
     ProgramSerializer,
     CourseSerializer,
     CourseRunSerializer,
+    CompanySerializer,
+    CouponSerializer,
 )
 from mitxpro.utils import (
     dict_without_keys,
@@ -52,6 +55,8 @@ from ecommerce.models import (
     BasketItem,
     CourseRunSelection,
     ProductCouponAssignment,
+    Company,
+    CouponPaymentVersion,
 )
 
 # ROUGH EXPECTED FORMAT FOR SEED DATA FILE:
@@ -153,6 +158,7 @@ class SeedResult:
         self.updated = defaultdict(int)
         self.deleted = defaultdict(int)
         self.ignored = defaultdict(int)
+        self.missing = defaultdict()
 
     def add_created(self, obj):
         """Adds to the count of created object types"""
@@ -172,15 +178,31 @@ class SeedResult:
             if deleted_count:
                 self.deleted[deleted_type] += deleted_count
 
+    def add_missing(self, settings_variables):
+        """check for missing requirements mentioned in the settings_variables"""
+        for variable in settings_variables:
+            try:
+                # check in settings
+                if not getattr(settings, variable):
+                    self.missing[variable] = variable
+            except AttributeError:
+                self.missing[variable] = variable
+
     @property
     def report(self):
         """Simple dict representing the seed result"""
-        return {
+        report = {
             "Created": dict(self.created),
             "Updated": dict(self.updated),
             "Deleted": dict(self.deleted),
             "Ignored (Already Existed)": dict(self.ignored),
         }
+        if self.missing:
+            report["Missing Environment Variables"] = self.missing.keys()
+            report[
+                "Install Missing Values"
+            ] = "Put the missing environment variables in .env file in order to use vouchers."
+        return report
 
     def __repr__(self):
         return str(self.report)
@@ -193,11 +215,19 @@ class SeedDataLoader:
     # we'll want to change that, but for now this dict exists to indicate which field should
     # be used to (a) find an existing object for some data we're deserializing, and
     # (b) prepend a string indicating that the object is seed data.
-    SEED_DATA_FIELD_MAP = {Program: "title", Course: "title", CourseRun: "title"}
+    SEED_DATA_FIELD_MAP = {
+        Program: "title",
+        Course: "title",
+        CourseRun: "title",
+        Company: "name",
+        CouponPaymentVersion: "name",
+    }
     SEED_DATA_DESERIALIZER = {
         Program: ProgramSerializer,
         Course: CourseSerializer,
         CourseRun: CourseRunSerializer,
+        Company: CompanySerializer,
+        CouponPaymentVersion: CouponSerializer,
     }
     # Maps a course model with some information about its associated Wagtail page class
     COURSE_MODEL_PAGE_PROPS = {
@@ -238,6 +268,8 @@ class SeedDataLoader:
     def _get_existing_seeded_qset(self, model_cls, data):
         """Returns a qset of seed data objects for some model class"""
         field_name, seeded_value = self._seeded_field_and_value(model_cls, data)
+        if model_cls == CouponPaymentVersion:
+            field_name = "payment__{}".format(field_name)
         return model_cls.objects.filter(**{field_name: seeded_value})
 
     def _deserialize(self, serializer_cls, data):
@@ -247,14 +279,37 @@ class SeedDataLoader:
         """
         model_cls = serializer_cls.Meta.model
         field_name, seeded_value = self._seeded_field_and_value(model_cls, data)
-        model_object_data = {
-            # Set 'live' to True for seeded objects by default
-            "live": True,
-            # Use every property in 'data' that corresponds to a model property
-            **filter_for_model_fields(model_cls, data),
-            # Use the seed-adjusted value for the property that we're using to identify seeded objects
-            field_name: seeded_value,
-        }
+        model_object_data = {}
+
+        if model_cls in [Program, Course, CourseRun]:
+            model_object_data = {
+                # Set 'live' to True for seeded objects by default
+                "live": True,
+                # Use every property in 'data' that corresponds to a model property
+                **filter_for_model_fields(model_cls, data),
+                # Use the seed-adjusted value for the property that we're using to identify seeded objects
+                field_name: seeded_value,
+            }
+        else:
+            model_object_data = data
+
+        if model_cls == CouponPaymentVersion:
+            products = Product.objects.all()[7:]
+            products = [product for product in products]  # Queries the database
+            company = Company.objects.get(name="Boeing")
+            if "AMxB" in data["name"]:
+                data["product_ids"] = [
+                    str(products[0].id),  # uses cache
+                    str(products[1].id),  # uses cache
+                ]
+                data["company"] = str(company.id)
+            elif "SysEngxB3" in data["name"]:
+                data["product_ids"] = [
+                    str(products[2].id),  # uses cache
+                    str(products[3].id),  # uses cache
+                ]
+                data["company"] = str(company.id)
+
         topics = None
         if model_cls == Course and "topics" in model_object_data:
             topics = model_object_data.pop("topics")
@@ -265,7 +320,11 @@ class SeedDataLoader:
             self.seed_result.add_updated(courseware_obj)
         else:
             serialized = serializer_cls(data=model_object_data)
-            serialized.is_valid(raise_exception=True)
+            try:
+                serialized.is_valid(raise_exception=True)
+            except ValidationError:
+                self.seed_result.add_ignored(model_cls())
+                return None
             courseware_obj = serialized.save()
             self.seed_result.add_created(courseware_obj)
         if topics is not None:
@@ -477,17 +536,50 @@ class SeedDataLoader:
                 model_cls=ResourcePage, data=resource_page_data, parent=None
             )
 
+        for raw_company_data in raw_data["companies"]:
+            yield SeedDataSpec(model_cls=Company, data=raw_company_data, parent=None)
+
+        for raw_coupon_data in raw_data["coupons"]:
+            yield SeedDataSpec(
+                model_cls=CouponPaymentVersion, data=raw_coupon_data, parent=None
+            )
+
     def create_seed_data(self, raw_data):
         """
         Iterate over all objects described in the seed data spec, add/update them one-by-one, and return the results
         """
+        check_settings = [
+            "VOUCHER_DOMESTIC_DATES_KEY",
+            "VOUCHER_DOMESTIC_EMPLOYEE_ID_KEY",
+            "VOUCHER_DOMESTIC_KEY",
+            "VOUCHER_DOMESTIC_COURSE_KEY",
+            "VOUCHER_DOMESTIC_CREDITS_KEY",
+            "VOUCHER_DOMESTIC_DATES_KEY",
+            "VOUCHER_DOMESTIC_AMOUNT_KEY",
+            "VOUCHER_INTERNATIONAL_EMPLOYEE_KEY",
+            "VOUCHER_INTERNATIONAL_EMPLOYEE_ID_KEY",
+            "VOUCHER_INTERNATIONAL_DATES_KEY",
+            "VOUCHER_INTERNATIONAL_COURSE_NAME_KEY",
+            "VOUCHER_INTERNATIONAL_COURSE_NUMBER_KEY",
+            "VOUCHER_COMPANY_ID",
+        ]
+
         self.seed_result = SeedResult()
+        self.seed_result.add_missing(check_settings)
         for seed_data_spec in self.iter_seed_data(raw_data):
-            if seed_data_spec.model_cls in [Program, Course, CourseRun]:
+            if seed_data_spec.model_cls in [
+                Program,
+                Course,
+                CourseRun,
+                Company,
+                CouponPaymentVersion,
+            ]:
                 serializer_cls = self.SEED_DATA_DESERIALIZER[seed_data_spec.model_cls]
                 courseware_model_obj = self._deserialize(
                     serializer_cls, seed_data_spec.data
                 )
+                if courseware_model_obj is None:
+                    continue
                 if seed_data_spec.model_cls in self.COURSE_MODEL_PAGE_PROPS:
                     self._deserialize_courseware_cms_page(
                         courseware_model_obj, seed_data_spec.data
