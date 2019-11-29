@@ -4,7 +4,7 @@ import { assert } from "chai"
 import sinon from "sinon"
 // $FlowFixMe: flow doesn't see fn
 import moment, { fn as momentProto } from "moment"
-import { mergeDeepRight } from "ramda"
+import { mergeDeepRight, mergeRight } from "ramda"
 
 import DashboardPage, {
   DashboardPage as InnerDashboardPage
@@ -16,6 +16,9 @@ import {
   makeCourseRunEnrollment,
   makeUserEnrollments
 } from "../../factories/course"
+
+import { makeUser, makeUnusedCoupon } from "../../factories/user"
+
 import * as coursesApi from "../../lib/courses"
 import * as utilFuncs from "../../lib/util"
 
@@ -24,13 +27,17 @@ describe("DashboardPage", () => {
     renderPage,
     userEnrollments,
     programDateRangeStub,
-    getDateSummaryStub
+    getDateSummaryStub,
+    currentUser
   const past = moment().add(-1, "days"),
     future = moment().add(1, "days")
 
   beforeEach(() => {
     helper = new IntegrationTestHelper()
     userEnrollments = makeUserEnrollments()
+    currentUser = mergeRight(makeUser(), {
+      unused_coupons: [makeUnusedCoupon()]
+    })
     programDateRangeStub = helper.sandbox
       .stub(coursesApi, "programDateRange")
       .returns([past, future])
@@ -43,7 +50,8 @@ describe("DashboardPage", () => {
       InnerDashboardPage,
       {
         entities: {
-          enrollments: userEnrollments
+          enrollments: userEnrollments,
+          currentUser: currentUser
         }
       },
       {
@@ -84,6 +92,10 @@ describe("DashboardPage", () => {
       inner.find(".non-program-course-enrollments .course-enrollment"),
       nonProgramRunEnrollments.length
     )
+    assert.lengthOf(
+      inner.find(".enrollment-code"),
+      currentUser.unused_coupons.length
+    )
   })
 
   it("shows a message if the user has no enrollments", async () => {
@@ -92,6 +104,9 @@ describe("DashboardPage", () => {
         enrollments: {
           program_enrollments:    [],
           course_run_enrollments: []
+        },
+        currentUser: {
+          is_authenticated: false
         }
       }
     })

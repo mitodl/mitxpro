@@ -18,6 +18,8 @@ import qs from "query-string"
 
 import { addUserNotification } from "../../actions"
 import queries from "../../lib/queries"
+import users, { currentUserSelector } from "../../lib/queries/users"
+
 import { routes } from "../../lib/urls"
 import { getDateSummary, programDateRange } from "../../lib/courses"
 import { formatPrettyDate, findItemWithTextId, wait } from "../../lib/util"
@@ -29,11 +31,15 @@ import type {
   CourseRunEnrollment,
   UserEnrollments
 } from "../../flow/courseTypes"
+import type { EnrollmentCode } from "../../flow/ecommerceTypes"
+import type { CurrentUser } from "../../flow/authTypes"
+
 import { ALERT_TYPE_TEXT } from "../../constants"
 
 type Props = {
   addUserNotification: Function,
   enrollments: UserEnrollments,
+  currentUser: CurrentUser,
   forceRequest: () => Promise<*>,
   history: RouterHistory,
   location: Location
@@ -163,6 +169,11 @@ export class DashboardPage extends React.Component<Props, State> {
     )
   }
 
+  enrollmentCodesExist = (): boolean => {
+    const { currentUser } = this.props
+
+    return currentUser.is_authenticated && currentUser.unused_coupons.length > 0
+  }
   isLinkableCourseRun = ({ run }: CourseRunEnrollment): boolean =>
     !R.isNil(run.courseware_url) &&
     !R.isNil(run.start_date) &&
@@ -257,6 +268,57 @@ export class DashboardPage extends React.Component<Props, State> {
                 ) : null}
               </div>
             </div>
+          </div>
+        </div>
+      )
+    }
+  )
+
+  renderEnrollmentCode = R.curry(
+    (
+      enrollmentCode: EnrollmentCode,
+      isProgramCourse: boolean,
+      index: number
+    ) => {
+      return (
+        <div className="enrollment-code row" key={index}>
+          {enrollmentCode.product_type === "program" ? (
+            <RibbonText text="Program" addedClasses="program" />
+          ) : (
+            <RibbonText text="Course" addedClasses="course" />
+          )}
+          <div className="course-image-column col-12 col-md-3">
+            <img src={enrollmentCode.thumbnail_url} alt="Course image" />
+          </div>
+          <div className="course-detail-column col-12 col-md-9">
+            <div className="row">
+              <div className="col-12 col-md-9">
+                <h2>{enrollmentCode.product_title}</h2>
+                <p>
+                  Enrollment Code - <span>{enrollmentCode.coupon_code}</span>
+                </p>
+                <p>
+                  Use code by{" "}
+                  <span className="expiration-date">
+                    {formatPrettyDate(moment(enrollmentCode.expiration_date))}
+                  </span>
+                  {", "}
+                  to enroll in <span>{enrollmentCode.product_type}</span> for
+                  free
+                  <br />
+                  Start Date:{" "}
+                  <span>
+                    {formatPrettyDate(moment(enrollmentCode.start_date))}
+                  </span>
+                </p>
+              </div>
+            </div>
+            <a
+              href={`${routes.checkout}?product=${enrollmentCode.product_id}&code=${enrollmentCode.coupon_code}`}
+              className="btn btn-primary btn-enroll"
+            >
+              <span className="button-text">Enroll</span>
+            </a>
           </div>
         </div>
       )
@@ -358,10 +420,11 @@ export class DashboardPage extends React.Component<Props, State> {
   }
 
   render() {
-    const { enrollments } = this.props
+    const { enrollments, currentUser } = this.props
 
     const enrollmentsExist = this.enrollmentsExist()
     const pastEnrollmentsExist = this.pastEnrollmentsExist()
+    const enrollmentCodesExist = this.enrollmentCodesExist()
 
     return (
       <React.Fragment>
@@ -373,9 +436,7 @@ export class DashboardPage extends React.Component<Props, State> {
               <div className="header col-12">
                 <h1>Dashboard</h1>
                 {enrollments &&
-                  (enrollmentsExist ? (
-                    <h3>Courses and Programs</h3>
-                  ) : (
+                  (enrollmentsExist || enrollmentCodesExist ? null : (
                     <div className="empty-msg">
                       <h2>
                         You are not yet enrolled in any courses or programs.
@@ -390,18 +451,32 @@ export class DashboardPage extends React.Component<Props, State> {
                   ))}
               </div>
             </div>
+            {currentUser.is_authenticated &&
+              (currentUser.unused_coupons.length > 0 ? (
+                <React.Fragment>
+                  <h3>Unredeemed Enrollment Code(s)</h3>
+                  <div className="enrollment-codes">
+                    {currentUser.unused_coupons.map(this.renderEnrollmentCode)}
+                  </div>
+                </React.Fragment>
+              ) : null)}
             {enrollments ? (
               <React.Fragment>
-                <div className="program-enrollments">
-                  {enrollments.program_enrollments.map(
-                    this.renderProgramEnrollment
-                  )}
-                </div>
-                <div className="non-program-course-enrollments">
-                  {enrollments.course_run_enrollments.map(
-                    this.renderCourseEnrollment(false)
-                  )}
-                </div>
+                {enrollmentsExist ? (
+                  <div>
+                    <h3>Courses and Programs</h3>
+                    <div className="program-enrollments">
+                      {enrollments.program_enrollments.map(
+                        this.renderProgramEnrollment
+                      )}
+                    </div>
+                    <div className="non-program-course-enrollments">
+                      {enrollments.course_run_enrollments.map(
+                        this.renderCourseEnrollment(false)
+                      )}
+                    </div>
+                  </div>
+                ) : null}
                 {pastEnrollmentsExist ? (
                   <div className="past-enrollments">
                     <h3>Past Courses and Programs</h3>
@@ -429,14 +504,18 @@ export class DashboardPage extends React.Component<Props, State> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  enrollments: queries.enrollment.enrollmentsSelector
+  enrollments: queries.enrollment.enrollmentsSelector,
+  currentUser: currentUserSelector
 })
+
+const mapPropsToConfigs = () => [
+  queries.enrollment.enrollmentsQuery(),
+  users.currentUserQuery()
+]
 
 const mapDispatchToProps = {
   addUserNotification
 }
-
-const mapPropsToConfigs = () => [queries.enrollment.enrollmentsQuery()]
 
 export default compose(
   connect(

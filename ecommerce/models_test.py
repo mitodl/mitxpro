@@ -1,23 +1,24 @@
 """Tests for ecommerce models"""
-from django.db.utils import IntegrityError
 import pytest
+from django.db.utils import IntegrityError
 
-from courses.factories import CourseRunFactory, ProgramFactory
+from cms.factories import CoursePageFactory, ProgramPageFactory
+from courses.factories import CourseFactory, CourseRunFactory, ProgramFactory
+from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import get_product_version_price_with_discount
 from ecommerce.constants import REFERENCE_NUMBER_PREFIX
 from ecommerce.factories import (
-    CouponRedemptionFactory,
     CouponPaymentVersionFactory,
+    CouponRedemptionFactory,
     CouponVersionFactory,
     LineFactory,
+    OrderFactory,
     ProductFactory,
     ProductVersionFactory,
-    OrderFactory,
 )
 from ecommerce.models import OrderAudit
 from mitxpro.utils import serialize_model_object
 from users.factories import UserFactory
-
 
 pytestmark = pytest.mark.django_db
 
@@ -140,6 +141,61 @@ def test_type_string():
     assert program_product.type_string == "program"
     run_product = ProductFactory.create(content_object=run)
     assert run_product.type_string == "courserun"
+
+
+def test_title():
+    """
+    title should return a string representation of the Product's title
+    """
+    program = ProgramFactory.create(title="test title of the program")
+    course = CourseFactory.create(title="test title of the course")
+    run = CourseRunFactory.create(course=course)
+
+    program_product = ProductFactory.create(content_object=program)
+    assert program_product.title == "test title of the program"
+    run_product = ProductFactory.create(content_object=run)
+    assert run_product.title == "test title of the course"
+
+
+def test_thumbnail_url():
+    """
+    thumbnail_url should return a url of the Product's thumbnail
+    """
+    program = ProgramFactory.create()
+    course = CourseFactory.create()
+    run = CourseRunFactory.create(course=course)
+
+    program_page = ProgramPageFactory(program=program)
+    course_page = CoursePageFactory(course=course)
+    program_product = ProductFactory.create(content_object=program)
+
+    assert (
+        program_product.thumbnail_url
+        == program_page.thumbnail_image.get_rendition(
+            CATALOG_COURSE_IMG_WAGTAIL_FILL
+        ).url
+    )
+    run_product = ProductFactory.create(content_object=run)
+    assert (
+        run_product.thumbnail_url
+        == course_page.thumbnail_image.get_rendition(
+            CATALOG_COURSE_IMG_WAGTAIL_FILL
+        ).url
+    )
+
+
+def test_start_date():
+    """
+    start_date should return a start next_run_date of the Product
+    """
+    program = ProgramFactory.create()
+    course = CourseFactory.create()
+    run = CourseRunFactory.create(course=course)
+
+    program_product = ProductFactory.create(content_object=program)
+    assert program_product.start_date == program.next_run_date
+    run_product = ProductFactory.create(content_object=run)
+    assert run_product.start_date == course.next_run_date
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])

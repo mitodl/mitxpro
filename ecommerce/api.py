@@ -923,16 +923,24 @@ def fetch_and_serialize_unused_coupons(user):
             "coupon__coupon_code",
         )
     )
-    return [
-        {
-            "coupon_code": coupon_data["coupon__coupon_code"],
-            "product_id": coupon_data["product__id"],
-            "expiration_date": coupon_data[
-                "coupon__payment__versions__expiration_date"
-            ],
-        }
-        for coupon_data in coupons_data
-    ]
+
+    unused_coupons = []
+    for coupon_data in coupons_data:
+        product = Product.objects.get(id=coupon_data["product__id"])
+        unused_coupons.append(
+            {
+                "coupon_code": coupon_data["coupon__coupon_code"],
+                "product_id": coupon_data["product__id"],
+                "expiration_date": coupon_data[
+                    "coupon__payment__versions__expiration_date"
+                ],
+                "product_title": product.title,
+                "product_type": product.type_string,
+                "thumbnail_url": product.thumbnail_url,
+                "start_date": product.start_date,
+            }
+        )
+    return unused_coupons
 
 
 def get_or_create_data_consents(basket):
