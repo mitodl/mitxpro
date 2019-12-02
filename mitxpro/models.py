@@ -3,6 +3,7 @@ Common model classes
 """
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
+from django.core.exceptions import ValidationError
 from django.db.models import DateTimeField, ForeignKey, Manager, Model, PROTECT
 from django.db.models.query import QuerySet
 from django.db import transaction
@@ -133,3 +134,25 @@ class AuditableModel(Model):
         audit_class = self.get_audit_class()
         audit_kwargs[audit_class.get_related_field_name()] = self
         audit_class.objects.create(**audit_kwargs)
+
+
+class SingletonModel(Model):
+    """Model class for models representing tables that should only have a single record"""
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        if force_insert and self._meta.model.objects.count() > 0:
+            raise ValidationError(
+                "Only one {} object should exist. Update the existing object instead "
+                "of creating a new one.".format(self.__class__.__name__)
+            )
+        return super().save(
+            force_insert=force_insert,
+            force_update=force_update,
+            using=using,
+            update_fields=update_fields,
+        )
+
+    class Meta:
+        abstract = True

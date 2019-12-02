@@ -160,7 +160,7 @@ Accounts for auth, the push notification setup will only work for domains that w
 
 ##### b) Adding the push notification/webhook
 
-Run the management command that make the file watch request to Google: `setup_sheet_update_webhook`
+Run the management command that make the file watch request to Google: `setup_request_sheet_file_watch`
 
 If that management command indicates success, any rows added to the coupon request Sheet should
 cause the mitxpro app to process that row (and any other row that has an unchecked "Processed" column).

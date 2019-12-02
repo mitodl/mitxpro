@@ -20,6 +20,7 @@ from google.oauth2.service_account import (
     Credentials as ServiceAccountCredentials,
 )  # pylint: disable-all
 from google.auth.transport.requests import Request  # pylint: disable-all
+from googleapiclient.discovery import build
 import pygsheets
 
 from ecommerce.api import create_coupons, bulk_assign_product_coupons
@@ -46,7 +47,7 @@ from mitxpro.utils import (
     partition_to_lists,
 )
 from sheets.mail_api import get_bulk_assignment_messages
-from sheets.models import CouponGenerationRequest, GoogleApiAuth
+from sheets.models import CouponGenerationRequest, GoogleApiAuth, GoogleFileWatch
 from sheets.constants import (
     GOOGLE_TOKEN_URI,
     REQUIRED_GOOGLE_API_SCOPES,
@@ -75,6 +76,8 @@ from sheets.utils import (
     CouponRequestRow,
     assignment_sheet_file_name,
     get_enumerated_data_rows,
+    format_datetime_for_google_timestamp,
+    google_timestamp_to_datetime,
 )
 from sheets.exceptions import (
     SheetValidationException,
@@ -288,32 +291,107 @@ class ExpandedSheetsClient:
             .execute()
         )
 
-    def request_file_watch(self, file_id, channel_id):
-        """
-        Executes the request to watch for changes made to a specific file in Drive. If successful, Drive will
-        make requests to our webhook when changes are made to the given file.
 
-        Returns:
-            dict: Google API response to a files.watch request
-        """
-        return (
-            self.pygsheets_client.drive.service.files()
-            .watch(
-                fileId=file_id,
-                supportsTeamDrives=self.supports_team_drives,
-                body={
-                    "id": channel_id,
-                    "address": urljoin(
-                        settings.SITE_BASE_URL,
-                        reverse("handle-coupon-request-sheet-update"),
-                    ),
-                    "payload": True,
-                    "kind": GOOGLE_API_FILE_WATCH_KIND,
-                    "type": GOOGLE_API_NOTIFICATION_TYPE,
-                },
-            )
-            .execute()
+def request_file_watch(file_id, channel_id, expiration=None, credentials=None):
+    """
+    Sends a request to the Google API to watch for changes in a given file. If successful, this
+    app will receive requests from Google when changes are made to the file.
+    Ref: https://developers.google.com/drive/api/v3/reference/files/watch
+
+    Args:
+        file_id (str): The id of the file in Google Drive (can be determined from the URL)
+        channel_id (str): Arbitrary string to identify the file watch being set up. This will
+            be included in the header of every request Google sends to the app.
+        expiration (datetime.datetime or None): The datetime that this file watch should expire.
+            Defaults to 1 hour, and cannot exceed 24 hours.
+        credentials (google.oauth2.credentials.Credentials or None): Credentials to be used by the
+            Google Drive client
+
+    Returns:
+        dict: The Google file watch API response
+    """
+    credentials = credentials or get_credentials()
+    # Including cache_discovery=False to suppress a noisy warning
+    drive_service = build("drive", "v3", credentials=credentials, cache_discovery=False)
+    extra_body_params = {}
+    if expiration:
+        extra_body_params["expiration"] = format_datetime_for_google_timestamp(
+            expiration
         )
+    return (
+        drive_service.files()
+        .watch(
+            fileId=file_id,
+            supportsTeamDrives=True,
+            body={
+                "id": channel_id,
+                "resourceId": file_id,
+                "address": urljoin(
+                    settings.SITE_BASE_URL,
+                    reverse("handle-coupon-request-sheet-update"),
+                ),
+                "payload": True,
+                "kind": GOOGLE_API_FILE_WATCH_KIND,
+                "type": GOOGLE_API_NOTIFICATION_TYPE,
+                **extra_body_params,
+            },
+        )
+        .execute()
+    )
+
+
+def renew_coupon_request_file_watch():
+    """
+    Creates or renews a file watch on the coupon request spreadsheet depending on the existence
+    of other file watches and when they expire.
+
+    Returns:
+        (GoogleFileWatch, bool, bool): The GoogleFileWatch object, a flag indicating
+            whether or not it was newly created during execution, and a flag indicating
+            whether or not it was updated during execution.
+    """
+    now = now_in_utc()
+    min_fresh_expiration_date = now + datetime.timedelta(
+        minutes=settings.DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES
+    )
+    new_channel_id = "{}-{}".format(
+        settings.DRIVE_WEBHOOK_CHANNEL_ID, now.strftime("%Y%m%d-%H%M%S")
+    )
+    with transaction.atomic():
+        file_watch, created = GoogleFileWatch.objects.select_for_update().get_or_create(
+            file_id=settings.COUPON_REQUEST_SHEET_ID,
+            defaults=dict(
+                version=1,
+                channel_id=new_channel_id,
+                activation_date=now,
+                expiration_date=now,
+            ),
+        )
+        if not created and file_watch.expiration_date > min_fresh_expiration_date:
+            return file_watch, False, False
+        if file_watch.expiration_date < now:
+            log.error(
+                "Current file watch in the database is expired. Some file changes may have failed to "
+                "trigger a push notification (%s)" % file_watch
+            )
+        expiration = now + datetime.timedelta(
+            minutes=settings.DRIVE_WEBHOOK_EXPIRATION_MINUTES
+        )
+        resp_dict = request_file_watch(
+            settings.COUPON_REQUEST_SHEET_ID, new_channel_id, expiration=expiration
+        )
+        log.info(
+            "File watch request for push notifications on coupon request sheet completed. Response: %s"
+            % str(resp_dict)
+        )
+        file_watch.activation_date = now
+        file_watch.expiration_date = google_timestamp_to_datetime(
+            resp_dict["expiration"]
+        )
+        if not created:
+            file_watch.version += 1
+        file_watch.save()
+        return file_watch, created, True
 
 
 def create_coupons_for_request_row(coupon_req_row):
