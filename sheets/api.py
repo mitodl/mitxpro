@@ -60,9 +60,9 @@ from sheets.constants import (
     GOOGLE_API_NOTIFICATION_TYPE,
 )
 from sheets.utils import (
-    coupon_request_sheet_spec,
     coupon_assign_sheet_spec,
     ProcessedRequest,
+    FailedRequest,
     get_data_rows,
     spreadsheet_repr,
     format_datetime_for_google_api,
@@ -74,8 +74,14 @@ from sheets.utils import (
     format_datetime_for_sheet_formula,
     CouponRequestRow,
     assignment_sheet_file_name,
+    get_enumerated_data_rows,
 )
-from sheets.exceptions import SheetValidationException, SheetUpdateException
+from sheets.exceptions import (
+    SheetValidationException,
+    SheetUpdateException,
+    SheetOutOfSyncException,
+    InvalidSheetProductException,
+)
 
 log = logging.getLogger(__name__)
 
@@ -266,8 +272,7 @@ class ExpandedSheetsClient:
 
     def batch_update_sheet_cells(self, sheet_id, request_objects):
         """
-        Updates the relevant cells of a coupon assignment Sheet with the email delivery dates for the assignments
-        on the coupon assignments on the rows of those cells.
+        Performs a batch update of targeted cells in a spreadsheet.
 
         Args:
             sheet_id (str): The spreadsheet id
@@ -332,7 +337,10 @@ def create_coupons_for_request_row(coupon_req_row):
                 "in the spreadsheet == False (transaction id: %s)"
                 % coupon_req_row.purchase_order_id
             )
-            return
+            raise SheetOutOfSyncException(
+                coupon_gen_request=coupon_gen_request,
+                row_index=coupon_req_row.row_index,
+            )
         create_coupons(
             name=coupon_req_row.coupon_name,
             product_ids=[coupon_req_row.get_product_id()],
@@ -361,42 +369,71 @@ class CouponRequestHandler:
         )
         self.coupon_request_sheet = spreadsheet.sheet1
 
-    def parsed_row_iterator(self):
+    @staticmethod
+    def create_coupons_from_rows(enumerated_data_rows):
         """
-        Generator for successfully-parsed rows in the coupon request sheet. Rows that fail parsing
-        are logged and skipped.
+        Parses the given data rows, creates coupons for the rows that have not been processed,
+        and returns information about which rows were successfully processed and which ones failed.
 
-        Yields:
-            tuple of (int, CouponRequestRow): The row number in the sheet paired with the parsed coupon request row
+        Args:
+            enumerated_data_rows (iterable of (int, list of str)): Row indices paired with a list of strings
+                representing the data in each row
+
+        Returns:
+            (list of ProcessedRequest, list of FailedRequest, list of ProcessedRequest):
+                A list of objects representing each request row that was processed,
+                a list of objects representing each request row that couldn't be processed,
+                and a list of objects representing each request row that is complete but doesn't say so in
+                the spreadsheet.
         """
-        enumerated_data_rows = enumerate(
-            get_data_rows(self.coupon_request_sheet),
-            start=coupon_request_sheet_spec.first_data_row,
-        )
+        processed_requests = []
+        failed_requests = []
+        unrecorded_complete_requests = []
         for row_index, row_data in enumerated_data_rows:
             try:
-                yield row_index, CouponRequestRow.parse_raw_data(row_data)
+                coupon_req_row = CouponRequestRow.parse_raw_data(row_index, row_data)
             except Exception as exc:
                 log.error(
                     "Coupon request row could not be parsed (row %d). Exception: %s"
-                    % row_index,
-                    str(exc),
+                    % (row_index, str(exc))
+                )
+                failed_requests.append(
+                    FailedRequest(
+                        row_index=row_index,
+                        exception=exc,
+                        error_text="Row parsing error ({})".format(exc),
+                    )
                 )
                 continue
 
-    def create_coupons_from_sheet(self):
-        """
-        Creates coupons for all rows in the coupon request sheet that indicate that they are not yet processed.
-
-        Returns:
-            list of ProcessedRequest: A list of objects containing information about each request row that was processed.
-        """
-        processed_requests = []
-        for row_index, coupon_req_row in self.parsed_row_iterator():
             if coupon_req_row.date_processed:
                 continue
-            coupon_gen_request = create_coupons_for_request_row(coupon_req_row)
-            if coupon_gen_request:
+
+            try:
+                coupon_gen_request = create_coupons_for_request_row(coupon_req_row)
+            except SheetOutOfSyncException as exc:
+                unrecorded_complete_requests.append(
+                    ProcessedRequest(
+                        row_index=row_index,
+                        coupon_req_row=coupon_req_row,
+                        request_id=exc.coupon_gen_request.id,
+                        date_processed=exc.coupon_gen_request.updated_on,
+                    )
+                )
+            except Exception as exc:
+                if isinstance(exc, Company.DoesNotExist):
+                    error_msg = "Company not found"
+                elif isinstance(exc, InvalidSheetProductException):
+                    error_msg = "Invalid product ({})".format(exc)
+                else:
+                    error_msg = "Enrollment code creation error ({})".format(exc)
+                log.error(error_msg)
+                failed_requests.append(
+                    FailedRequest(
+                        row_index=row_index, exception=exc, error_text=error_msg
+                    )
+                )
+            else:
                 processed_requests.append(
                     ProcessedRequest(
                         row_index=row_index,
@@ -405,25 +442,46 @@ class CouponRequestHandler:
                         date_processed=now_in_utc(),
                     )
                 )
-        return processed_requests
+        return processed_requests, failed_requests, unrecorded_complete_requests
 
     def update_coupon_request_processed_dates(self, processed_requests):
         """
-        For all processed request rows, programatically sets the "processed" column to checked/TRUE.
+        For all processed request rows, programatically sets the "Date Processed" column value and
+        blanks the error column.
 
         Args:
             processed_requests (list of ProcessedRequest): A list of ProcessedRequest objects
         """
         for processed_request in processed_requests:
+            self.coupon_request_sheet.update_values(
+                crange="{processed_col}{row_index}:{error_col}{row_index}".format(
+                    processed_col=CouponRequestRow.DATE_PROCESSED_COLUMN,
+                    error_col=CouponRequestRow.ERROR_COLUMN,
+                    row_index=processed_request.row_index,
+                ),
+                values=[
+                    [
+                        format_datetime_for_sheet_formula(
+                            processed_request.date_processed.astimezone(
+                                settings.SHEETS_DATE_TIMEZONE
+                            )
+                        ),
+                        "",
+                    ]
+                ],
+            )
+
+    def update_coupon_request_errors(self, failed_requests):
+        """
+        For all failed request rows, updates the error column to contain the error message.
+
+        Args:
+            failed_requests (list of FailedRequest): A list of FailedRequest objects
+        """
+        for failed_request in failed_requests:
             self.coupon_request_sheet.update_value(
-                "{}{}".format(
-                    CouponRequestRow.DATE_PROCESSED_COLUMN, processed_request.row_index
-                ),
-                format_datetime_for_sheet_formula(
-                    processed_request.date_processed.astimezone(
-                        settings.SHEETS_DATE_TIMEZONE
-                    )
-                ),
+                "{}{}".format(CouponRequestRow.ERROR_COLUMN, failed_request.row_index),
+                failed_request.error_text,
             )
 
     def create_coupon_assignment_sheet(self, coupon_req_row):
@@ -494,21 +552,69 @@ class CouponRequestHandler:
 
         return bulk_coupon_sheet
 
-    def write_results_to_sheets(self, processed_requests):
+    def create_and_update_sheets(self, processed_requests):
         """
         Updates the coupon request sheet and creates a coupon assignment sheet for every successfully
         processed coupon request.
 
         Args:
             processed_requests (list of ProcessedRequest): List of ProcessedRequest objects
+
+        Returns:
+            list of pygsheets.Spreadsheet: Spreadsheet objects representing the spreadsheets that were
+                created
         """
-        if not processed_requests:
-            return
-        # Set checkboxes
+        # Set processed dates
         self.update_coupon_request_processed_dates(processed_requests)
-        # Write new sheets with codes
-        for processed_request in processed_requests:
+        # Write new assignment sheets with coupon codes
+        return [
             self.create_coupon_assignment_sheet(processed_request.coupon_req_row)
+            for processed_request in processed_requests
+        ]
+
+    def process_sheet(self, limit_row_index=None):
+        """
+        Attempts to process the coupon request Sheet. This involves parsing rows in the spreadsheet,
+        creating coupons, creating coupon assignment Sheets for rows that were successfully processed, and
+        updating the coupon request Sheet with information about what succeeded and what failed.
+
+        Args:
+            limit_row_index (int or None): The row index of the specific coupon request Sheet row that
+                should be processed. If None, this function will attempt to process all unprocessed rows
+                in the Sheet.
+
+        Returns:
+            dict: A dictionary indicating the results of processing the coupon request Sheet
+        """
+        enumerated_data_rows = get_enumerated_data_rows(
+            self.coupon_request_sheet, limit_row_index=limit_row_index
+        )
+        processed_requests, failed_requests, unrecorded_complete_requests = self.create_coupons_from_rows(
+            enumerated_data_rows
+        )
+        results = {}
+        if processed_requests:
+            new_spreadsheets = self.create_and_update_sheets(processed_requests)
+            results["processed_requests"] = {
+                "rows": [
+                    processed_request.row_index
+                    for processed_request in processed_requests
+                ],
+                "assignment_sheets": [
+                    spreadsheet.title for spreadsheet in new_spreadsheets
+                ],
+            }
+        if failed_requests:
+            self.update_coupon_request_errors(failed_requests)
+            results["failed_request_rows"] = [
+                request.row_index for request in failed_requests
+            ]
+        if unrecorded_complete_requests:
+            self.update_coupon_request_processed_dates(unrecorded_complete_requests)
+            results["synced_request_rows"] = [
+                request.row_index for request in unrecorded_complete_requests
+            ]
+        return results
 
 
 class CouponAssignmentHandler:

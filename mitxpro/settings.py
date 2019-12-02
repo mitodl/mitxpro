@@ -1014,13 +1014,10 @@ GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
     None,
     description="The value of the meta tag used by Google to verify the owner of a domain (used for enabling push notifications)",
 )
-_sheets_admin_email_str = get_string(
+SHEETS_ADMIN_EMAILS = get_list(
     "SHEETS_ADMIN_EMAILS",
-    None,
+    [],
     description="Comma-separated list of emails for users that should be added as an editor for all newly created Sheets",
-)
-SHEETS_ADMIN_EMAILS = (
-    None if not _sheets_admin_email_str else _sheets_admin_email_str.split(",")
 )
 SHEETS_DATE_FORMAT = get_string(
     "SHEETS_DATE_FORMAT",
