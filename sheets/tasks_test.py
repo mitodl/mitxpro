@@ -26,13 +26,10 @@ def test_handle_unprocessed_coupon_requests(mocker, coupon_req_row):
             date_processed=now_in_utc(),
         ),
     ]
-    patched_req_handler.return_value.create_coupons_from_sheet.return_value = (
+    patched_req_handler.return_value.create_coupons_from_rows.return_value = (
         dummy_processed_requests
     )
 
     handle_unprocessed_coupon_requests.delay()
     patched_req_handler.assert_called_once()
-    patched_req_handler.return_value.create_coupons_from_sheet.assert_called_once()
-    patched_req_handler.return_value.write_results_to_sheets.assert_called_once_with(
-        dummy_processed_requests
-    )
+    patched_req_handler.return_value.process_sheet.assert_called_once()

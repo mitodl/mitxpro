@@ -7,7 +7,6 @@ import pytz
 
 from django.conf import settings
 from django.urls import reverse
-from django.core.exceptions import ObjectDoesNotExist
 
 from courses.models import CourseRun, Program
 from mitxpro.utils import item_at_index_or_none
@@ -17,7 +16,9 @@ from sheets.constants import (
     GOOGLE_TOKEN_URI,
     GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
     ASSIGNMENT_SHEET_PREFIX,
+    GOOGLE_SHEET_FIRST_ROW,
 )
+from sheets.exceptions import InvalidSheetProductException
 
 
 def generate_google_client_config():
@@ -42,10 +43,13 @@ SpreadsheetSpec = namedtuple(
     ["first_data_row", "last_data_column", "num_columns", "column_headers"],
 )
 coupon_request_sheet_spec = SpreadsheetSpec(
-    first_data_row=2, last_data_column="H", num_columns=8, column_headers=[]
+    first_data_row=GOOGLE_SHEET_FIRST_ROW + 1,
+    last_data_column="H",
+    num_columns=8,
+    column_headers=[],
 )
 coupon_assign_sheet_spec = SpreadsheetSpec(
-    first_data_row=2,
+    first_data_row=GOOGLE_SHEET_FIRST_ROW + 1,
     last_data_column="D",
     num_columns=4,
     column_headers=["Coupon Code", "Email (Assignee)", "Status", "Status Date"],
@@ -57,11 +61,12 @@ ASSIGNMENT_SHEET_STATUS_COLUMN = next(
         if header == "Status"
     )
 )
-AssignmentRow = namedtuple(
-    "AssignmentRow", ["row_index", "coupon_code", "email", "status", "status_date"]
-)
 ProcessedRequest = namedtuple(
     "ProcessedRequest", ["row_index", "coupon_req_row", "request_id", "date_processed"]
+)
+FailedRequest = namedtuple("FailedRequest", ["row_index", "exception", "error_text"])
+AssignmentRow = namedtuple(
+    "AssignmentRow", ["row_index", "coupon_code", "email", "status", "status_date"]
 )
 
 
@@ -69,9 +74,11 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
     """Represents a row of a coupon request sheet"""
 
     DATE_PROCESSED_COLUMN = "H"
+    ERROR_COLUMN = "I"
 
     def __init__(
         self,
+        row_index,
         purchase_order_id,
         coupon_name,
         num_codes,
@@ -81,6 +88,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
         expiration,
         date_processed,
     ):  # pylint: disable=too-many-arguments
+        self.row_index = row_index
         self.purchase_order_id = purchase_order_id
         self.coupon_name = coupon_name
         self.num_codes = num_codes
@@ -91,17 +99,19 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
         self.date_processed = date_processed
 
     @classmethod
-    def parse_raw_data(cls, raw_row_data):
+    def parse_raw_data(cls, row_index, raw_row_data):
         """
         Parses raw row data
 
         Args:
+            row_index (int): The row index according to the spreadsheet (not zero-based)
             raw_row_data (list of str): The raw row data
 
         Returns:
             CouponRequestRow: The parsed data row
         """
         return cls(
+            row_index=row_index,
             purchase_order_id=raw_row_data[0].strip(),
             coupon_name=raw_row_data[1].strip(),
             num_codes=int(raw_row_data[2]),
@@ -135,12 +145,12 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
             else product_object.products.order_by("-created_on").first()
         )
         if not product_object:
-            raise ObjectDoesNotExist(
-                "Could not find a CourseRun or Program with id '%s'"
+            raise InvalidSheetProductException(
+                "Could not find a CourseRun or Program with text id '%s'"
                 % self.product_text_id
             )
         elif not product:
-            raise ObjectDoesNotExist(
+            raise InvalidSheetProductException(
                 "No Products associated with %s" % str(product_object)
             )
         return product.id
@@ -329,19 +339,21 @@ class AssignmentStatusMap:
         return self._assignment_map.keys()
 
 
-def get_data_rows(worksheet, include_tailing_empty=False):
+def get_data_rows(worksheet, include_trailing_empty=False):
     """
     Yields the data rows of a spreadsheet that has a header row
 
     Args:
         worksheet (pygsheets.worksheet.Worksheet): Worksheet object
+        include_trailing_empty (bool): Whether to include empty trailing cells/values after last non-zero value
 
     Yields:
         list of str: List of cell values in a given row
     """
     row_iter = iter(
         worksheet.get_all_values(
-            include_tailing_empty=include_tailing_empty,
+            # These param names are a typo in the pygsheets library
+            include_tailing_empty=include_trailing_empty,
             include_tailing_empty_rows=False,
         )
     )
@@ -351,6 +363,37 @@ def get_data_rows(worksheet, include_tailing_empty=False):
     except StopIteration:
         return
     yield from row_iter
+
+
+def get_enumerated_data_rows(
+    worksheet, limit_row_index=None, include_trailing_empty=False
+):
+    """
+    Yields enumerated data rows of a spreadsheet that has a header row (with an option to limit the results
+    by row index)
+
+    Args:
+        worksheet (pygsheets.worksheet.Worksheet): Worksheet object
+        limit_row_index (int or None): The row index of the specific data row that
+            should be used. If None, the iterable returned will include all rows.
+        include_trailing_empty (bool): Whether to include empty trailing cells/values after last non-zero value
+
+    Yields:
+        (int, list of str): Row index (according to the Google Sheet, NOT zero-indexed) paired with the list
+            of strings representing the data in each column of the row
+    """
+    enumerated_data_rows = enumerate(
+        get_data_rows(worksheet, include_trailing_empty=include_trailing_empty),
+        start=GOOGLE_SHEET_FIRST_ROW + 1,
+    )
+    if limit_row_index:
+        yield from (
+            (index, row)
+            for index, row in enumerated_data_rows
+            if index == limit_row_index
+        )
+    else:
+        yield from enumerated_data_rows
 
 
 def spreadsheet_repr(spreadsheet):

@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 def sheets_admin_view(request):
     """Admin view that renders a page that allows a user to begin Google OAuth auth"""
     if not settings.FEATURES.get("COUPON_SHEETS"):
-        return Http404
+        raise Http404
     existing_api_auth = GoogleApiAuth.objects.first()
     successful_action = request.GET.get("success")
     return render(
@@ -55,7 +55,7 @@ def sheets_admin_view(request):
 def request_google_auth(request):
     """Admin view to begin Google OAuth auth"""
     if not settings.FEATURES.get("COUPON_SHEETS"):
-        return Http404
+        raise Http404
     flow = Flow.from_client_config(
         generate_google_client_config(), scopes=REQUIRED_GOOGLE_API_SCOPES
     )
@@ -72,7 +72,7 @@ def request_google_auth(request):
 def complete_google_auth(request):
     """Admin view that handles the redirect from Google after completing Google auth"""
     if not settings.FEATURES.get("COUPON_SHEETS"):
-        return Http404
+        raise Http404
     state = request.session.get("state")
     if not state:
         raise GoogleAuthError(
@@ -101,7 +101,7 @@ def complete_google_auth(request):
 def handle_coupon_request_sheet_update(request):
     """View that handles requests sent from Google's push notification service when a file changes"""
     if not settings.FEATURES.get("COUPON_SHEETS"):
-        return Http404
+        raise Http404
     tasks.handle_unprocessed_coupon_requests.delay()
     return HttpResponse(status=status.HTTP_200_OK)
 
@@ -111,8 +111,7 @@ def handle_coupon_request_sheet_update(request):
 def process_request_sheet(request):
     """Helper view to process the coupon request Sheet"""
     coupon_request_handler = CouponRequestHandler()
-    processed_requests = coupon_request_handler.create_coupons_from_sheet()
-    coupon_request_handler.write_results_to_sheets(processed_requests)
+    coupon_request_handler.process_sheet()
     return redirect("{}?success=coupon-request".format(reverse("sheets-admin-view")))
 
 

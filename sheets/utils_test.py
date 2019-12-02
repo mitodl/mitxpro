@@ -35,8 +35,11 @@ def test_generate_google_client_config(settings):
 
 def test_get_data_rows(mocker):
     """get_data_rows should return each row of a worksheet data after the first row (i.e.: the header row)"""
-    non_header_rows = [["code1", "email1@example.com"], ["code2", "email2@example.com"]]
-    sheet_rows = [utils.coupon_assign_sheet_spec.column_headers] + non_header_rows
+    non_header_rows = [
+        ["row 1 - column 1", "row 1 - column 2"],
+        ["row 2 - column 1", "row 2 - column 2"],
+    ]
+    sheet_rows = [["HEADER 1", "HEADER 2"]] + non_header_rows
     mocked_worksheet = mocker.MagicMock(
         spec=Worksheet, get_all_values=mocker.Mock(return_value=sheet_rows)
     )
@@ -44,9 +47,35 @@ def test_get_data_rows(mocker):
     assert data_rows == non_header_rows
 
 
+def test_get_enumerated_data_rows(mocker):
+    """
+    enumerated_data_rows should return each row index paired with the raw data in the row for all rows after the
+    header row. It should also limit the rows returned if requested.
+    """
+    non_header_rows = [
+        ["row 1 - column 1", "row 1 - column 2"],
+        ["row 2 - column 1", "row 2 - column 2"],
+    ]
+    sheet_rows = [["HEADER 1", "HEADER 2"]] + non_header_rows
+    mocked_worksheet = mocker.MagicMock(
+        spec=Worksheet, get_all_values=mocker.Mock(return_value=sheet_rows)
+    )
+    enumerated_data_rows = list(utils.get_enumerated_data_rows(mocked_worksheet))
+    assert enumerated_data_rows == [
+        (2, ["row 1 - column 1", "row 1 - column 2"]),
+        (3, ["row 2 - column 1", "row 2 - column 2"]),
+    ]
+    enumerated_data_rows = list(
+        utils.get_enumerated_data_rows(mocked_worksheet, limit_row_index=3)
+    )
+    assert enumerated_data_rows == [(3, ["row 2 - column 1", "row 2 - column 2"])]
+
+
 def test_coupon_request_row_valid(coupon_req_raw_data):
     """CouponRequestRow should take a row of raw data and parse it when it's initialized"""
-    coupon_req_row = CouponRequestRow.parse_raw_data(coupon_req_raw_data)
+    row_index = 2
+    coupon_req_row = CouponRequestRow.parse_raw_data(row_index, coupon_req_raw_data)
+    assert coupon_req_row.row_index == 2
     assert coupon_req_row.purchase_order_id == "purchase_order_id_1"
     assert coupon_req_row.coupon_name == "mycoupon"
     assert coupon_req_row.num_codes == 5
@@ -58,12 +87,16 @@ def test_coupon_request_row_valid(coupon_req_raw_data):
     # If any of the date columns at the end of the row are blank, our Sheets client returns a row
     # with those values cut off completely from the array. Ensure that the row can be parsed without those indices.
     updated_raw_data = coupon_req_raw_data[0:5]
-    updated_coupon_req_row = CouponRequestRow.parse_raw_data(updated_raw_data)
+    updated_coupon_req_row = CouponRequestRow.parse_raw_data(
+        row_index, updated_raw_data
+    )
     assert updated_coupon_req_row.activation is None
     assert updated_coupon_req_row.expiration is None
     # Ensure that the "Date Processed" column can be parsed if it exists in the row array.
     updated_raw_data = coupon_req_raw_data + ["03/03/2021 03:03:03"]
-    updated_coupon_req_row = CouponRequestRow.parse_raw_data(updated_raw_data)
+    updated_coupon_req_row = CouponRequestRow.parse_raw_data(
+        row_index, updated_raw_data
+    )
     assert updated_coupon_req_row.date_processed == datetime(
         2021, 3, 3, 3, 3, 3, tzinfo=pytz.UTC
     )

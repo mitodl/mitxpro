@@ -39,6 +39,7 @@ def coupon_req_raw_data(base_data):
 def coupon_req_row(base_data):  # pylint: disable=redefined-outer-name
     """Fixture that returns a valid CouponRequestRow"""
     return CouponRequestRow(
+        row_index=2,
         purchase_order_id="purchase_order_id_1",
         coupon_name="mycoupon",
         num_codes=5,
