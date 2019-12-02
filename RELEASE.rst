@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.33.0
+--------------
+
+- Added model and task to manage coupon request webhook
+- Added error reporting for coupon request spreadsheet
+- Vouchers: seed data for vouchers
+- Changed coupon assignment sheet handling to fetch one at a time
+- Fixed Google Sheets file watch request
+
 Version 0.32.3 (Released November 25, 2019)
 --------------
 
