@@ -422,6 +422,21 @@ def format_datetime_for_google_api(dt):
     return dt.isoformat()
 
 
+def format_datetime_for_google_timestamp(dt):
+    """
+    Formats a datetime for use in a Google API request that expects a timestamp
+    (e.g.: file watch expiration – https://developers.google.com/drive/api/v3/reference/files/watch#request-body)
+
+    Args:
+        dt (datetime.datetime):
+
+    Returns:
+        int: The datetime formatted as a timestamp for use in a Google API request
+    """
+    # Google expects the timestamp to be in milliseconds, not seconds, hence the '* 1000'
+    return int(dt.timestamp() * 1000)
+
+
 def format_datetime_for_mailgun(dt):
     """
     String-ifies a datetime value in the format expected by the Mailgun API
@@ -467,12 +482,26 @@ def parse_sheet_date_str(date_str):
     return dt if settings.SHEETS_DATE_TIMEZONE == pytz.UTC else dt.astimezone(pytz.UTC)
 
 
+def google_timestamp_to_datetime(google_timestamp):
+    """
+    Parses a timestamp value from a Google API response as a normal datetime (UTC)
+
+    Args:
+        google_timestamp (str or int): A timestamp value from a Google API response
+
+    Returns:
+        datetime.datetime: The parsed timestamp with UTC timezone
+    """
+    timestamp_in_seconds = int(google_timestamp) / 1000
+    return datetime.datetime.fromtimestamp(timestamp_in_seconds, pytz.utc)
+
+
 def mailgun_timestamp_to_datetime(timestamp):
     """
     Parses a timestamp value from a Mailgun API response as a datetime
 
     Args:
-        timestamp (str): A timestamp value from a Mailgun API response
+        timestamp (float): A timestamp value from a Mailgun API response
 
     Returns:
         datetime.datetime: The parsed timestamp

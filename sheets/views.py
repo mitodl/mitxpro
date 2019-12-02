@@ -18,7 +18,7 @@ from rest_framework import status
 from google_auth_oauthlib.flow import Flow  # pylint: disable-all
 from google.auth.exceptions import GoogleAuthError  # pylint: disable-all
 
-from sheets.models import GoogleApiAuth
+from sheets.models import GoogleApiAuth, GoogleFileWatch
 from sheets.constants import REQUIRED_GOOGLE_API_SCOPES
 from sheets.utils import generate_google_client_config
 from sheets import tasks
@@ -99,9 +99,35 @@ def complete_google_auth(request):
 
 @csrf_exempt
 def handle_coupon_request_sheet_update(request):
-    """View that handles requests sent from Google's push notification service when a file changes"""
+    """
+    View that handles requests sent from Google's push notification service when changes are made to the
+    coupon request sheet.
+    """
     if not settings.FEATURES.get("COUPON_SHEETS"):
         raise Http404
+    channel_id = request.META.get("HTTP_X_GOOG_CHANNEL_ID")
+    if not channel_id:
+        log.error(
+            "Google file watch request received without a Channel ID in the expected header field "
+            "(HTTP_X_GOOG_CHANNEL_ID)."
+        )
+        return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
+    req_sheet_file_watch = GoogleFileWatch.objects.filter(
+        file_id=settings.COUPON_REQUEST_SHEET_ID
+    ).first()
+    if not req_sheet_file_watch:
+        log.error(
+            "Google file watch request received, but no local file watch record exists "
+            "in the database."
+        )
+        return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
+    if channel_id != req_sheet_file_watch.channel_id:
+        log.warning(
+            "Google file watch request received, but the Channel ID does not match the active file watch "
+            "channel ID in the app (%s, %s)"
+            % (channel_id, req_sheet_file_watch.channel_id)
+        )
+        return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
     tasks.handle_unprocessed_coupon_requests.delay()
     return HttpResponse(status=status.HTTP_200_OK)
 

@@ -9,9 +9,7 @@ def test_handle_unprocessed_coupon_requests(mocker, coupon_req_row):
     handle_unprocessed_coupon_requests should go through all unprocessed rows in a sheet, create coupons,
     and update/create sheets
     """
-    patched_req_handler = mocker.patch(
-        "sheets.tasks.CouponRequestHandler", autospec=True
-    )
+    patched_req_handler = mocker.patch("sheets.api.CouponRequestHandler", autospec=True)
     dummy_processed_requests = [
         ProcessedRequest(
             row_index=1,

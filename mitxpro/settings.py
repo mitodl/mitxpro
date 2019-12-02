@@ -680,6 +680,24 @@ REPAIR_COURSEWARE_USERS_FREQUENCY = get_int(
     description="How many seconds between repairing courseware records for faulty users",
 )
 REPAIR_COURSEWARE_USERS_OFFSET = int(REPAIR_COURSEWARE_USERS_FREQUENCY / 2)
+DRIVE_WEBHOOK_EXPIRATION_MINUTES = get_int(
+    "DRIVE_WEBHOOK_EXPIRATION_MINUTES",
+    60 * 24,
+    description=(
+        "The number of minutes after creation that a webhook (push notification) for a Drive "
+        "file will expire (Google does not accept an expiration beyond 24 hours, and if the "
+        "expiration is not provided via API, it defaults to 1 hour)."
+    ),
+)
+DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES = get_int(
+    "DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES",
+    30,
+    description=(
+        "The maximum time difference (in minutes) from the present time to a webhook expiration "
+        "date to consider a webhook 'fresh', i.e.: not in need of renewal. If the time difference "
+        "is less than this value, the webhook should be renewed."
+    ),
+)
 SHEETS_MONITORING_FREQUENCY = get_int(
     "SHEETS_MONITORING_FREQUENCY",
     60 * 60 * 2,
@@ -723,6 +741,13 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 if FEATURES.get("COUPON_SHEETS"):
+    CELERY_BEAT_SCHEDULE["renew_file_watches"] = {
+        "task": "sheets.tasks.renew_file_watches",
+        "schedule": (
+            DRIVE_WEBHOOK_EXPIRATION_MINUTES - DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES
+        )
+        * 60,
+    }
     alt_sheets_processing = FEATURES.get("COUPON_SHEETS_ALT_PROCESSING")
     if alt_sheets_processing:
         CELERY_BEAT_SCHEDULE.update(

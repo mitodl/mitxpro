@@ -151,6 +151,14 @@
       "description": "Channel ID to use for requests to get push notifications for file changes",
       "required": false
     },
+    "DRIVE_WEBHOOK_EXPIRATION_MINUTES": {
+      "description": "The number of minutes after creation that a webhook (push notification) for a Drive file will expire (Google does not accept an expiration beyond 24 hours, and if the expiration is not provided via API, it defaults to 1 hour).",
+      "required": false
+    },
+    "DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES": {
+      "description": "The maximum time difference (in minutes) from the present time to a webhook expiration date to consider a webhook 'fresh', i.e.: not in need of renewal. If the time difference is less than this value, the webhook should be renewed.",
+      "required": false
+    },
     "EDX_API_CLIENT_TIMEOUT": {
       "description": "Timeout (in seconds) for requests made via the edX API client",
       "required": false

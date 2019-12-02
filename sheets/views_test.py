@@ -6,7 +6,7 @@ from rest_framework import status
 
 from sheets.views import complete_google_auth
 from sheets.models import GoogleApiAuth
-from sheets.factories import GoogleApiAuthFactory
+from sheets.factories import GoogleApiAuthFactory, GoogleFileWatchFactory
 from mitxpro.test_utils import set_request_session
 
 lazy = pytest.lazy_fixture
@@ -107,12 +107,20 @@ def test_complete_auth(
 
 
 @pytest.mark.django_db
-def test_handle_coupon_request_sheet_update(mocker):
+def test_handle_coupon_request_sheet_update(mocker, settings):
     """
     View that handles push notifications for file changes in Google should call a task to
     create coupons and write the results to the necessary Sheets.
     """
+    settings.FEATURES["COUPON_SHEETS"] = True
+    settings.COUPON_REQUEST_SHEET_ID = "abc123"
+    GoogleFileWatchFactory.create(
+        file_id=settings.COUPON_REQUEST_SHEET_ID, channel_id="file-watch-channel"
+    )
     patched_tasks = mocker.patch("sheets.views.tasks")
     client = Client()
-    client.get(reverse("handle-coupon-request-sheet-update"))
+    client.get(
+        reverse("handle-coupon-request-sheet-update"),
+        HTTP_X_GOOG_CHANNEL_ID="file-watch-channel",
+    )
     patched_tasks.handle_unprocessed_coupon_requests.delay.assert_called_once()

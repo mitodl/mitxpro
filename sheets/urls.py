@@ -15,7 +15,7 @@ urlpatterns = [
         name="complete-google-auth",
     ),
     re_path(
-        r"^api/sheets/filewatch/",
+        r"^api/sheets/coupon-requests/watch/",
         views.handle_coupon_request_sheet_update,
         name="handle-coupon-request-sheet-update",
     ),
