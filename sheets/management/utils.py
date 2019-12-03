@@ -2,6 +2,7 @@
 from django.core.management import CommandError
 
 from sheets.api import CouponAssignmentHandler
+from sheets.utils import get_enumerated_data_rows, CouponRequestRow
 
 
 def get_matching_request_row(coupon_request_handler, row=None, po_id=None):
@@ -19,8 +20,15 @@ def get_matching_request_row(coupon_request_handler, row=None, po_id=None):
     """
     matching_rows = []
     # Scan the sheet to find rows that match the given conditions
-    for row_index, coupon_req_row in coupon_request_handler.parsed_row_iterator():
+    enumerated_data_rows = get_enumerated_data_rows(
+        coupon_request_handler.coupon_request_sheet
+    )
+    for row_index, row_data in enumerated_data_rows:
         if row and row != row_index:
+            continue
+        try:
+            coupon_req_row = CouponRequestRow.parse_raw_data(row_index, row_data)
+        except:  # pylint: disable=bare-except
             continue
         if po_id and po_id != coupon_req_row.purchase_order_id:
             continue

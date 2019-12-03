@@ -21,6 +21,7 @@ from google.oauth2.service_account import (
 )  # pylint: disable-all
 from google.auth.transport.requests import Request  # pylint: disable-all
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 import pygsheets
 
 from ecommerce.api import create_coupons, bulk_assign_product_coupons
@@ -626,7 +627,16 @@ class CouponRequestHandler:
                 if GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN in email
                 else {}
             )
-            bulk_coupon_sheet.share(email, type="user", role="writer", **added_kwargs)
+            try:
+                bulk_coupon_sheet.share(
+                    email, type="user", role="writer", **added_kwargs
+                )
+            except:  # pylint: disable=bare-except
+                log.exception(
+                    "Failed to share the sheet with email '%s' (sheet title: '%s')",
+                    email,
+                    spreadsheet_title,
+                )
 
         return bulk_coupon_sheet
 
