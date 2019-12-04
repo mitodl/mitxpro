@@ -216,9 +216,21 @@
     position: absolute;
     width: 130px;
     height: 40px;
-    top: 25px;
+    top: 16px;
     right: 0;
     z-index: 10;
+
+    &.course {
+      .text {
+        color: $primary;
+      }
+    }
+
+    &.program {
+      .text {
+        color: $blue;
+      }
+    }
 
     .text {
       padding-left: 7px;
