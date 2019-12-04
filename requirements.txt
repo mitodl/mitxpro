@@ -6,7 +6,6 @@
 #
 amqp==2.5.0               # via kombu
 appdirs==1.4.3            # via zeep
-appnope==0.1.0            # via ipython
 asn1crypto==0.24.0        # via cryptography
 attrs==19.1.0             # via zeep
 backcall==0.1.0           # via ipython
@@ -40,7 +39,7 @@ django-templated-mail==1.1.1  # via djoser
 django-treebeard==4.3     # via wagtail
 django-user-agents==0.4.0
 django-webpack-loader==0.5.0
-django==2.2.4
+django==2.2.8
 djangorestframework==3.9.4
 djoser==1.7.0
 docutils==0.14            # via botocore
@@ -112,4 +111,4 @@ willow==1.1               # via wagtail
 zeep==3.4.0
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.6.0        # via html5lib, ipython
+# setuptools
