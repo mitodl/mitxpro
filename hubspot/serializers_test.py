@@ -63,6 +63,7 @@ def test_serialize_line():
         "order": format_hubspot_id(line.order_id),
         "quantity": line.quantity,
         "status": line.order.status,
+        "product_id": line.product_version.text_id,
     }
 
 

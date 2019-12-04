@@ -25,6 +25,7 @@ class LineSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField()
     order = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    product_id = serializers.SerializerMethodField()
 
     def get_order(self, instance):
         """ Get the order id and return the hubspot deal integratorObject id"""
@@ -38,8 +39,14 @@ class LineSerializer(serializers.ModelSerializer):
         """ Get status of the associated Order """
         return instance.order.status
 
+    def get_product_id(self, instance):
+        """Return the product version text_id"""
+        if instance.product_version:
+            return instance.product_version.text_id
+        return ""
+
     class Meta:
-        fields = ("id", "product", "order", "quantity", "status")
+        fields = ("id", "product", "order", "quantity", "status", "product_id")
         model = models.Line
 
 
