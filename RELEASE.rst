@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.33.0
+Version 0.33.0 (Released December 04, 2019)
 --------------
 
 - Added model and task to manage coupon request webhook
