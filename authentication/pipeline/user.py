@@ -1,9 +1,12 @@
 """Auth pipline functions for user authentication"""
+import json
 import logging
 
+import requests
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
 from social_core.pipeline.partial import partial
+from django.conf import settings
 from django.db import IntegrityError
 
 from authentication.exceptions import (
@@ -250,5 +253,36 @@ def create_courseware_user(
         courseware_tasks.create_user_from_id.apply_async(
             (user.id,), countdown=CREATE_COURSEWARE_USER_RETRY_DELAY
         )
+
+    return {}
+
+
+def send_user_to_hubspot(request, **kwargs):
+    """
+    Create a hubspot contact using the hubspot Forms API
+    Submit the user's email and optionally a hubspotutk cookie
+    """
+    portal_id = settings.HUBSPOT_CONFIG.get("HUBSPOT_PORTAL_ID")
+    form_id = settings.HUBSPOT_CONFIG.get("HUBSPOT_CREATE_USER_FORM_ID")
+
+    if not (portal_id and form_id):
+        log.error(
+            "HUBSPOT_PORTAL_ID or HUBSPOT_CREATE_USER_FORM_ID not set. Can't submit to Hubspot forms api."
+        )
+        return {}
+
+    hutk = request.COOKIES.get("hubspotutk")
+    email = kwargs.get("email", kwargs.get("details", {}).get("email"))
+
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+    data = {"email": email}
+
+    if hutk:
+        data["hs_context"] = json.dumps({"hutk": hutk})
+
+    url = f"https://forms.hubspot.com/uploads/form/v2/{portal_id}/{form_id}?&"
+
+    requests.post(url=url, data=data, headers=headers)
 
     return {}

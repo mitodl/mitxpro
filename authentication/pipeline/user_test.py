@@ -448,6 +448,37 @@ def test_forbid_hijack(mocker, hijacked):
         assert user_actions.forbid_hijack(*args, **kwargs) == {}
 
 
+def test_send_user_to_hubspot(mocker, settings):
+    """
+    Tests that send_user_to_hubspot sends the correct data
+    """
+    mock_requests = mocker.patch("authentication.pipeline.user.requests")
+    mock_log = mocker.patch("authentication.pipeline.user.log")
+
+    mock_request = mocker.Mock(COOKIES={"hubspotutk": "somefakedata"})
+
+    # Test with no settings set
+    ret_val = user_actions.send_user_to_hubspot(
+        mock_request, details={"email": "test@test.co"}
+    )
+    assert ret_val == {}
+    mock_log.error.assert_called_once()
+
+    # Test with appropriate settings set
+    settings.HUBSPOT_CONFIG["HUBSPOT_PORTAL_ID"] = "123456"
+    settings.HUBSPOT_CONFIG["HUBSPOT_CREATE_USER_FORM_ID"] = "abcdefg"
+    ret_val = user_actions.send_user_to_hubspot(
+        mock_request, details={"email": "test@test.co"}
+    )
+    assert ret_val == {}
+
+    mock_requests.post.assert_called_with(
+        data={"email": "test@test.co", "hs_context": '{"hutk": "somefakedata"}'},
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        url="https://forms.hubspot.com/uploads/form/v2/123456/abcdefg?&",
+    )
+
+
 @pytest.mark.parametrize("is_active", [True, False])
 @pytest.mark.parametrize("is_new", [True, False])
 @pytest.mark.parametrize(

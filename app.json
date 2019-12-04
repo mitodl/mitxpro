@@ -179,6 +179,10 @@
       "description": "API key for Hubspot",
       "required": false
     },
+    "HUBSPOT_CREATE_USER_FORM_ID": {
+      "description": "Form ID for Hubspot Forms API",
+      "required": false
+    },
     "HUBSPOT_ERROR_CHECK_FREQUENCY": {
       "description": "How many seconds between Hubspot API error checks",
       "required": false
