@@ -2,11 +2,16 @@
 Tasks for the courses app
 """
 import logging
+from django.db.models import Q
 from requests.exceptions import HTTPError
 from mitxpro.celery import app
 from mitxpro.utils import now_in_utc
 from courses.models import CourseRun, CourseRunCertificate
-from courses.utils import ensure_course_run_grade, process_course_run_grade_certificate
+from courses.utils import (
+    ensure_course_run_grade,
+    process_course_run_grade_certificate,
+    sync_course_runs,
+)
 from courseware.api import get_edx_grades_with_users
 
 log = logging.getLogger(__name__)
@@ -73,3 +78,17 @@ def exception_logging_generator(generator):
             log.exception("EdX API error for fetching user grades %s:", exc)
         except Exception as exp:  # pylint: disable=broad-except
             log.exception("Error fetching user grades from edX %s:", exp)
+
+
+@app.task
+def sync_courseruns_data():
+    """
+    Task to sync titles and dates for course runs from edX.
+    """
+    now = now_in_utc()
+    runs = CourseRun.objects.live().filter(
+        Q(expiration_date__isnull=True) | Q(expiration_date__gt=now)
+    )
+
+    # `sync_course_runs` logs internally so no need to capture/output the returned values
+    sync_course_runs(runs)

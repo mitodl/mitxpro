@@ -2,21 +2,27 @@
 """
 Tests for signals
 """
+from unittest.mock import Mock
+
+from edx_api.course_detail import CourseDetail, CourseDetails
+from requests.exceptions import HTTPError
+
 import pytest
 from courses.factories import (
-    UserFactory,
-    ProgramFactory,
     CourseFactory,
-    CourseRunFactory,
     CourseRunCertificateFactory,
-    ProgramCertificateFactory,
+    CourseRunFactory,
     CourseRunGradeFactory,
+    ProgramCertificateFactory,
+    ProgramFactory,
+    UserFactory,
 )
+from courses.models import ProgramCertificate
 from courses.utils import (
     generate_program_certificate,
     process_course_run_grade_certificate,
+    sync_course_runs,
 )
-from courses.models import ProgramCertificate
 
 pytestmark = pytest.mark.django_db
 
@@ -144,3 +150,62 @@ def test_generate_program_certificate_success(user, program):
     assert result[1] is True
     assert isinstance(result[0], ProgramCertificate)
     assert len(ProgramCertificate.objects.all()) == 1
+
+
+@pytest.mark.parametrize(
+    "mocked_api_response, expect_success",
+    [
+        [
+            CourseDetail(
+                {
+                    "id": "course-v1:edX+DemoX+2020_T1",
+                    "start": "2019-01-01T00:00:00Z",
+                    "end": "2020-02-01T00:00:00Z",
+                    "enrollment_start": "2019-01-01T00:00:00Z",
+                    "enrollment_end": "2020-02-01T00:00:00Z",
+                    "name": "Demonstration Course",
+                }
+            ),
+            True,
+        ],
+        [
+            CourseDetail(
+                {
+                    "id": "course-v1:edX+DemoX+2020_T1",
+                    "start": "2021-01-01T00:00:00Z",
+                    "end": "2020-02-01T00:00:00Z",
+                    "enrollment_start": None,
+                    "enrollment_end": None,
+                    "name": None,
+                }
+            ),
+            False,
+        ],
+        [HTTPError(response=Mock(status_code=404)), False],
+        [HTTPError(response=Mock(status_code=400)), False],
+        [ConnectionError(), False],
+    ],
+)
+def test_sync_course_runs(settings, mocker, mocked_api_response, expect_success):
+    """
+    Test that sync_course_runs fetches data from edX API. Should fail on API responding with
+    an error, as well as trying to set the course run title to None
+    """
+    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"
+    mocker.patch.object(CourseDetails, "get_detail", side_effect=[mocked_api_response])
+    course_run = CourseRunFactory.create()
+
+    success_count, failure_count = sync_course_runs([course_run])
+
+    if expect_success:
+        course_run.refresh_from_db()
+        assert success_count == 1
+        assert failure_count == 0
+        assert course_run.title == mocked_api_response.name
+        assert course_run.start_date == mocked_api_response.start
+        assert course_run.end_date == mocked_api_response.end
+        assert course_run.enrollment_start == mocked_api_response.enrollment_start
+        assert course_run.enrollment_end == mocked_api_response.enrollment_end
+    else:
+        assert success_count == 0
+        assert failure_count == 1
