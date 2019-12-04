@@ -188,8 +188,8 @@ export class DashboardPage extends React.Component<Props, State> {
       return (
         <div className="course-enrollment row" key={index}>
           {!isProgramCourse && (
-            <div class="text-ribbon course">
-              <div class="text">Course</div>
+            <div className="text-ribbon course">
+              <div className="text">Course</div>
             </div>
           )}
           <div className="course-image-column col-12 col-md-3">
@@ -264,8 +264,8 @@ export class DashboardPage extends React.Component<Props, State> {
 
     return (
       <div className="program-enrollment row" key={index}>
-        <div class="text-ribbon program">
-          <div class="text">Program</div>
+        <div className="text-ribbon program">
+          <div className="text">Program</div>
         </div>
 
         <div className="program-image-column col-lg-3 col-md-5">
