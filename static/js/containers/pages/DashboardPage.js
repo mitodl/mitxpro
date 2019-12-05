@@ -15,8 +15,6 @@ import * as R from "ramda"
 import { Collapse, Button } from "reactstrap"
 import qs from "query-string"
 
-import { RibbonText } from "../../components/Ribbon"
-
 import { addUserNotification } from "../../actions"
 import queries from "../../lib/queries"
 import { routes } from "../../lib/urls"
@@ -190,7 +188,9 @@ export class DashboardPage extends React.Component<Props, State> {
       return (
         <div className="course-enrollment row" key={index}>
           {!isProgramCourse && (
-            <RibbonText text="Course" addedClasses="course" />
+            <div className="text-ribbon course">
+              <div className="text">Course</div>
+            </div>
           )}
           <div className="course-image-column col-12 col-md-3">
             <img
@@ -264,7 +264,9 @@ export class DashboardPage extends React.Component<Props, State> {
 
     return (
       <div className="program-enrollment row" key={index}>
-        <RibbonText text="Program" addedClasses="program" />
+        <div className="text-ribbon program">
+          <div className="text">Program</div>
+        </div>
 
         <div className="program-image-column col-lg-3 col-md-5">
           <img
