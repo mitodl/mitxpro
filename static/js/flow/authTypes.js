@@ -49,6 +49,11 @@ export type LegalAddress = {
   postal_code?: string
 }
 
+export type ExtendedLegalAddress = LegalAddress & {
+  city: string,
+  email: string
+}
+
 export type UnusedCoupon = {
   coupon_code: string,
   product_id: number,

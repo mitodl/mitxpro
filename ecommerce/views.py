@@ -9,7 +9,11 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
-from rest_framework.generics import get_object_or_404, RetrieveUpdateAPIView
+from rest_framework.generics import (
+    get_object_or_404,
+    RetrieveUpdateAPIView,
+    RetrieveAPIView,
+)
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -55,6 +59,7 @@ from ecommerce.serializers import (
     PromoCouponSerializer,
     SingleUseCouponSerializer,
     CurrentCouponPaymentSerializer,
+    OrderReceiptSerializer,
 )
 from hubspot.task_helpers import sync_hubspot_deal
 from mitxpro.utils import (
@@ -190,6 +195,20 @@ class OrderFulfillmentView(APIView):
 
         # The response does not matter to CyberSource
         return Response(status=status.HTTP_200_OK)
+
+
+class OrderReceiptView(RetrieveAPIView):
+    """
+    View for fetching receipt against an order.
+    """
+
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = OrderReceiptSerializer
+
+    def get_queryset(self):
+        return Order.objects.filter(purchaser=self.request.user, status=Order.FULFILLED)
 
 
 class BasketView(RetrieveUpdateAPIView):

@@ -1,6 +1,7 @@
 // @flow
 import type { Course, BaseCourseRun, Program } from "./courseTypes"
 import {PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM} from "../constants"
+import type { ExtendedLegalAddress } from "./authTypes"
 
 export type CheckoutResponse = {
   url: string,
@@ -95,6 +96,42 @@ export type BasketPayload = {
   items?: Array<BasketItemPayload>,
   coupons?: Array<{ code: string }>,
   data_consents?: Array<number>
+}
+
+export type ProductVersionSummary = {
+  price: string,
+  content_title: string,
+  readable_id: string,
+  start_date: Date
+}
+
+export type OrderLine = {
+  price: string,
+  quantity: number,
+  total_paid: string,
+  discount: string,
+  content_title: string,
+  readable_id: string,
+  start_date: string,
+  end_date: string
+}
+
+export type OrderSummary = {
+  id: string,
+  created_on: string
+}
+
+export type CybersourceReceiptSummary = {
+  card_number: string,
+  card_type: ?string
+}
+
+export type OrderReceiptResponse = {
+  coupon: ?string,
+  lines: [OrderLine],
+  purchaser: ExtendedLegalAddress,
+  order: OrderSummary,
+  receipt: ?CybersourceReceiptSummary
 }
 
 export type Company = {

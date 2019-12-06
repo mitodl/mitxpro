@@ -15,7 +15,7 @@ from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
 from courses.serializers import CourseSerializer
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import get_readable_id, round_half_up
-from ecommerce.constants import ORDERED_VERSIONS_QSET_ATTR
+from ecommerce.constants import ORDERED_VERSIONS_QSET_ATTR, CYBERSOURCE_CARD_TYPES
 from ecommerce.factories import (
     ProductVersionFactory,
     ProductFactory,
@@ -24,6 +24,8 @@ from ecommerce.factories import (
     CouponFactory,
     CouponPaymentVersionFactory,
     CouponPaymentFactory,
+    LineFactory,
+    ReceiptFactory,
 )
 from ecommerce.models import (
     CouponSelection,
@@ -33,6 +35,7 @@ from ecommerce.models import (
     ProductVersion,
     CourseRunSelection,
     DataConsentUser,
+    Order,
 )
 from ecommerce.serializers import (
     ProductVersionSerializer,
@@ -48,6 +51,7 @@ from ecommerce.serializers import (
     CompanySerializer,
     DataConsentUserSerializer,
     CouponSerializer,
+    OrderReceiptSerializer,
 )
 
 pytestmark = [pytest.mark.django_db]
@@ -451,6 +455,73 @@ def test_serialize_product_with_ordered(mocker):
     assert [version.id for version in expected_versions] == [
         product_data["latest_version"]["id"] for product_data in serialized_data
     ]
+
+
+@pytest.mark.parametrize(
+    "receipt_data",
+    [
+        {"req_card_number": "1234", "req_card_type": "001"},
+        {"req_card_number": "5678", "req_card_type": "002"},
+        {"req_card_number": "5678"},
+        {},
+    ],
+)
+def test_serialize_order_receipt(receipt_data):
+    """ Test that the OrderReceiptSerializer has correct data """
+    line = LineFactory.create(order__status=Order.FULFILLED)
+    product_version = line.product_version
+    order = line.order
+    purchaser = order.purchaser.legal_address
+    receipt = (
+        ReceiptFactory.create(order=order, data=receipt_data) if receipt_data else None
+    )
+    serialized_data = OrderReceiptSerializer(instance=order).data
+    assert serialized_data == {
+        "coupon": None,
+        "lines": [
+            {
+                "readable_id": get_readable_id(product_version.product.content_object),
+                "content_title": product_version.product.content_object.title,
+                "discount": "0",
+                "start_date": None,
+                "end_date": None,
+                "price": str(int(product_version.price)),
+                "total_paid": str(int(line.quantity * product_version.price)),
+                "quantity": line.quantity,
+            }
+        ],
+        "order": {"id": order.id, "created_on": order.created_on},
+        "purchaser": {
+            "first_name": purchaser.first_name,
+            "last_name": purchaser.last_name,
+            "email": order.purchaser.email,
+            "country": purchaser.country,
+            "state_or_territory": purchaser.state_or_territory,
+            "city": purchaser.city,
+            "postal_code": purchaser.postal_code,
+            "street_address": [
+                line
+                for line in [
+                    purchaser.street_address_1,
+                    purchaser.street_address_2,
+                    purchaser.street_address_3,
+                    purchaser.street_address_4,
+                    purchaser.street_address_5,
+                ]
+                if line
+            ],
+        },
+        "receipt": {
+            "card_number": receipt_data["req_card_number"]
+            if "req_card_number" in receipt_data
+            else None,
+            "card_type": CYBERSOURCE_CARD_TYPES[receipt_data["req_card_type"]]
+            if "req_card_type" in receipt_data
+            else None,
+        }
+        if receipt
+        else None,
+    }
 
 
 def test_serialize_company():

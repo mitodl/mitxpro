@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pytz
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db import transaction
+from django.db import transaction, models as dj_models
 from django.templatetags.static import static
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -20,10 +20,12 @@ from ecommerce.api import (
     latest_coupon_version,
     latest_product_version,
     get_or_create_data_consents,
+    get_product_version_price_with_discount,
 )
-from ecommerce.constants import ORDERED_VERSIONS_QSET_ATTR
+from ecommerce.constants import ORDERED_VERSIONS_QSET_ATTR, CYBERSOURCE_CARD_TYPES
 from mitxpro.serializers import WriteableSerializerMethodField
 from mitxpro.utils import first_or_none
+from users.serializers import ExtendedLegalAddressSerializer
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -32,6 +34,30 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         fields = ["id", "name"]
         model = models.Company
+
+
+class ProductVersionSummarySerializer(serializers.ModelSerializer):
+    """ ProductVersion serializer for fetching summary info for receipts """
+
+    content_title = serializers.SerializerMethodField()
+    readable_id = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = ["price", "content_title", "readable_id"]
+        model = models.ProductVersion
+
+    def get_content_title(self, instance):
+        """Return the title of the program or course run"""
+        return instance.product.content_object.title
+
+    def get_readable_id(self, instance):
+        """Return the readable_id of the program or course run"""
+        return get_readable_id(instance.product.content_object)
+
+    def get_price(self, instance):
+        """The price does not need decimal points here"""
+        return str(int(instance.price))
 
 
 class ProductVersionSerializer(serializers.ModelSerializer):
@@ -694,3 +720,95 @@ class DataConsentUserSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ["consent_date", "id", "company", "consent_text"]
         model = models.DataConsentUser
+
+
+class LineSummarySerializer(serializers.ModelSerializer):
+    """ Summary serializer for Line model """
+
+    product_version = ProductVersionSummarySerializer()
+
+    class Meta:
+        model = models.Line
+        fields = ["product_version", "quantity"]
+
+
+class OrderReceiptSerializer(serializers.ModelSerializer):
+    """ Serializer for extracting receipt info from an Order object"""
+
+    lines = serializers.SerializerMethodField()
+    purchaser = serializers.SerializerMethodField()
+    coupon = serializers.SerializerMethodField()
+    order = serializers.SerializerMethodField()
+    receipt = serializers.SerializerMethodField()
+
+    def get_receipt(self, instance):
+        """Get receipt information if it exists"""
+        receipt = instance.receipt_set.order_by("-created_on").first()
+        if receipt and (
+            "req_card_number" in receipt.data or "req_card_type" in receipt.data
+        ):
+            data = {"card_number": None, "card_type": None}
+            if "req_card_number" in receipt.data:
+                data["card_number"] = receipt.data["req_card_number"]
+            if (
+                "req_card_type" in receipt.data
+                and receipt.data["req_card_type"] in CYBERSOURCE_CARD_TYPES
+            ):
+                data["card_type"] = CYBERSOURCE_CARD_TYPES[
+                    receipt.data["req_card_type"]
+                ]
+            return data
+        return None
+
+    def get_lines(self, instance):
+        """ Get product information along with applied discounts """
+        coupon_redemption = instance.couponredemption_set.first()
+        lines = []
+        for line in instance.lines.all():
+            total_paid = line.product_version.price * line.quantity
+            discount = 0.0
+            dates = CourseRunEnrollment.objects.filter(
+                order_id=instance.id, change_status__isnull=True
+            ).aggregate(
+                start_date=dj_models.Min("run__start_date"),
+                end_date=dj_models.Max("run__end_date"),
+            )
+            if coupon_redemption:
+                total_paid = (
+                    get_product_version_price_with_discount(
+                        coupon_version=coupon_redemption.coupon_version,
+                        product_version=line.product_version,
+                    )
+                    * line.quantity
+                )
+                discount = line.product_version.price - total_paid
+            lines.append(
+                dict(
+                    quantity=line.quantity,
+                    total_paid=str(int(total_paid)),
+                    discount=str(int(discount)),
+                    **ProductVersionSummarySerializer(line.product_version).data,
+                    start_date=dates["start_date"],
+                    end_date=dates["end_date"],
+                )
+            )
+        return lines
+
+    def get_order(self, instance):
+        """Get order-specific information"""
+        return dict(id=instance.id, created_on=instance.created_on)
+
+    def get_coupon(self, instance):
+        """Get coupon code from the coupon redemption if available"""
+        coupon_redemption = instance.couponredemption_set.first()
+        if not coupon_redemption:
+            return None
+        return coupon_redemption.coupon_version.coupon.coupon_code
+
+    def get_purchaser(self, instance):
+        """Get the purchaser infrmation"""
+        return ExtendedLegalAddressSerializer(instance.purchaser.legal_address).data
+
+    class Meta:
+        fields = ["purchaser", "lines", "coupon", "order", "receipt"]
+        model = models.Order
