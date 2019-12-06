@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.33.1
+Version 0.33.1 (Released December 06, 2019)
 --------------
 
 - Added spreadsheet sharing error handling
