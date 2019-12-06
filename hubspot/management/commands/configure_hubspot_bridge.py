@@ -180,7 +180,15 @@ CUSTOM_ECOMMERCE_PROPERTIES = {
                         "hidden": False,
                     },
                 ],
-            }
+            },
+            {
+                "name": "product_id",
+                "label": "Product Id",
+                "description": "The product id of the latest product version",
+                "groupName": "lineiteminformation",
+                "type": "string",
+                "fieldType": "text",
+            },
         ],
     },
 }
@@ -394,6 +402,11 @@ HUBSPOT_ECOMMERCE_SETTINGS = {
             {
                 "propertyName": "status",
                 "targetHubspotProperty": "status",
+                "dataType": "STRING",
+            },
+            {
+                "propertyName": "product_id",
+                "targetHubspotProperty": "product_id",
                 "dataType": "STRING",
             },
         ]
