@@ -100,6 +100,9 @@ HUBSPOT_CONFIG = {
     "HUBSPOT_PORTAL_ID": get_string(
         "HUBSPOT_PORTAL_ID", "5890463", description="Hub spot portal id."
     ),
+    "HUBSPOT_CREATE_USER_FORM_ID": get_string(
+        "HUBSPOT_CREATE_USER_FORM_ID", None, description="Form ID for Hubspot Forms API"
+    ),
 }
 
 WEBPACK_LOADER = {
@@ -343,6 +346,8 @@ SOCIAL_AUTH_PIPELINE = (
     # Send a validation email to the user to verify its email address.
     # Disabled by default.
     "social_core.pipeline.mail.mail_validation",
+    # Send the email address and hubspot cookie if it exists to hubspot.
+    "authentication.pipeline.user.send_user_to_hubspot",
     # Generate a username for the user
     # NOTE: needs to be right before create_user so nothing overrides the username
     "authentication.pipeline.user.get_username",
