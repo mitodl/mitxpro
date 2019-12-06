@@ -52,5 +52,6 @@ export const routes = {
   ecommerceBulk: include("/ecommerce/bulk/", {
     bulkPurchase: "",
     receipt:      "receipt/"
-  })
+  }),
+  receipt: "receipt/:orderId/"
 }

@@ -13,6 +13,7 @@ from ecommerce.views import (
     coupon_code_csv_view,
     bulk_assignment_csv_view,
     CompanyViewSet,
+    OrderReceiptView,
 )
 
 router = SimpleRouter()
@@ -26,6 +27,11 @@ urlpatterns = [
         r"^api/order_fulfillment/$",
         OrderFulfillmentView.as_view(),
         name="order-fulfillment",
+    ),
+    url(
+        r"^api/order_receipt/(?P<pk>\d+)/$",
+        OrderReceiptView.as_view(),
+        name="order_receipt_api",
     ),
     url(r"^api/basket/$", BasketView.as_view(), name="basket_api"),
     url(r"^api/coupons/$", CouponListView.as_view(), name="coupon_api"),

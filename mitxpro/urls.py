@@ -76,6 +76,7 @@ urlpatterns = [
     # social django needs to be here to preempt the login
     path("", include("social_django.urls", namespace="social")),
     re_path(r"^dashboard/", index, name="user-dashboard"),
+    re_path(r"^receipt/(?P<pk>\d+)/", index, name="order-receipt"),
     re_path(r"^account-settings/", index, name="account-settings"),
     # Wagtail
     re_path(

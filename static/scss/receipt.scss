@@ -1,0 +1,168 @@
+// sass-lint:disable mixins-before-declarations
+$label-color: #8a8b8c;
+
+.receipt-wrapper {
+  padding: 0 15px;
+  margin: 0 auto;
+
+  .print-row {
+    text-align: right;
+    font-size: 18px;
+    line-height: 25px;
+    padding: 0px 0px 50px 0px;
+    font-weight: 600;
+
+    a {
+      display: inline-block;
+      vertical-align: top;
+      color: black;
+
+      img {
+        display: inline-block;
+        vertical-align: middle;
+        margin: 0 0 0 10px;
+        width: 18px;
+      }
+    }
+  }
+
+  .rec-logo {
+    width: 253px;
+    margin: 0 0 70px;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  h1 {
+    color: black;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 51px;
+    margin: 0 0 35px;
+  }
+
+  h2 {
+    color: black;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 26px;
+    margin: 0 0 25px;
+  }
+
+  .rec-footer {
+    padding: 50px 0;
+
+    .rec-footer-top {
+      overflow: hidden;
+      padding: 0 0 68px;
+    }
+
+    .rec-footer-info {
+      float: left;
+      width: 445px;
+
+      .rec-footer-logo {
+        float: left;
+        margin: 8px 24px 0 0;
+        width: 104px;
+
+        img {
+          display: block;
+          width: 100%;
+        }
+      }
+    }
+
+    .info {
+      overflow: hidden;
+      color: rgba(0, 0, 0, 0.85);
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 28px;
+
+      p {
+        margin: 0;
+      }
+    }
+  }
+
+  .rec-copyright {
+    color: rgba(0, 0, 0, 0.85);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 28px;
+    text-align: center;
+    display: block;
+
+    a {
+      color: rgba(0, 0, 0, 0.85);
+    }
+  }
+
+  .section-info {
+    padding: 25px;
+
+    &.gray {
+      background: #f5f5f5;
+    }
+
+    .section-holder {
+      margin: 20px 0 0;
+      padding: 25px 0 0;
+
+      &:first-child {
+        margin: 0;
+        padding: 0;
+        border: none;
+      }
+
+      .low-line-height {
+        line-height: 10px !important;
+      }
+
+      .label,
+      .value {
+        font-size: 18px;
+        line-height: 23px;
+        font-weight: 600;
+        color: black;
+      }
+
+      .label {
+        color: $label-color;
+      }
+
+      .label-table {
+        .label,
+        .value {
+          text-align: right;
+
+          @include media-breakpoint-down(sm) {
+            text-align: left;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media print {
+  .print-row,
+  .footer,
+  .header-holder {
+    display: none !important;
+  }
+
+  .receipt-wrapper .rec-logo,
+  .receipt-wrapper h1 {
+    margin: 0 0 20px !important;
+  }
+
+  .user-dashboard {
+    padding: 0px;
+  }
+}

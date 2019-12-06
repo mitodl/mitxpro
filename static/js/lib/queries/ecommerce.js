@@ -11,7 +11,8 @@ import type {
   CouponPaymentVersion,
   ProductDetail,
   B2BCouponStatusPayload,
-  B2BCouponStatusResponse
+  B2BCouponStatusResponse,
+  OrderReceiptResponse
 } from "../../flow/ecommerceTypes"
 
 const DEFAULT_POST_OPTIONS = {
@@ -135,5 +136,16 @@ export default {
     },
     body:  payload,
     force: true
+  }),
+  orderReceiptSelector: pathOr(null, ["entities", "orderReceipt"]),
+  orderReceipt:         (orderId: string) => ({
+    url:       `/api/order_receipt/${orderId}/`,
+    transform: (json: OrderReceiptResponse) => ({
+      orderReceipt: json
+    }),
+    update: {
+      orderReceipt: (prev: OrderReceiptResponse, next: OrderReceiptResponse) =>
+        next
+    }
   })
 }
