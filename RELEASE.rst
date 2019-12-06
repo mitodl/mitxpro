@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.33.2
+--------------
+
+- Send cookie to hubspot when a user creates a new account (#1364)
+- Add product_id to hubspot line item (#1366)
+- #1345 Receipt Page
+- restyle labels on dashboard (#1361)
+
 Version 0.33.1 (Released December 06, 2019)
 --------------
 
