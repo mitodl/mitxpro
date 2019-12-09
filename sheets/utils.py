@@ -17,6 +17,7 @@ from sheets.constants import (
     GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
     ASSIGNMENT_SHEET_PREFIX,
     GOOGLE_SHEET_FIRST_ROW,
+    ASSIGNMENT_SHEET_ENROLLED_STATUS,
 )
 from sheets.exceptions import InvalidSheetProductException
 
@@ -229,6 +230,12 @@ class AssignmentStatusMap:
         )
         if not assignment_dict:
             return
+        # The "enrolled" status is set by the app when a user redeems a bulk enrollment coupon
+        # and is considered the end of the bulk enrollment flow. It should not be overwritten by any
+        # other status.
+        if assignment_dict["existing_status"] == ASSIGNMENT_SHEET_ENROLLED_STATUS:
+            return
+
         if (
             assignment_dict["existing_status"]
             and assignment_dict["existing_status_date"]

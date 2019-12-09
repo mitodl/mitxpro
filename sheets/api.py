@@ -21,10 +21,9 @@ from google.oauth2.service_account import (
 )  # pylint: disable-all
 from google.auth.transport.requests import Request  # pylint: disable-all
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 import pygsheets
 
-from ecommerce.api import create_coupons, bulk_assign_product_coupons
+import ecommerce.api
 from ecommerce.mail_api import send_bulk_enroll_emails
 from ecommerce.models import (
     Company,
@@ -429,7 +428,7 @@ def create_coupons_for_request_row(coupon_req_row):
                 coupon_gen_request=coupon_gen_request,
                 row_index=coupon_req_row.row_index,
             )
-        create_coupons(
+        ecommerce.api.create_coupons(
             name=coupon_req_row.coupon_name,
             product_ids=[coupon_req_row.get_product_id()],
             num_coupon_codes=coupon_req_row.num_codes,
@@ -775,18 +774,21 @@ class CouponAssignmentHandler:
         for metadata_dict in incomplete_assignment_sheet_metadata:
             yield self.pygsheets_client.open_by_key(metadata_dict["id"])
 
-    @staticmethod
-    def assignment_tuple_iter(data_rows):
+    def get_sheet_rows(self, sheet_id):
         """
-        Validates assignment Sheet data rows and returns a "safe" iterable for the data in those rows
+        Returns an iterable of raw row data in a coupon assignment sheet with None filled
+        in for any empty columns.
 
         Args:
-            data_rows (list of lists): Matrix of raw data in the non-header rows of a Sheet
+            sheet_id (str): A coupon assignment spreadsheet id
 
         Returns:
-            iterable of (str, str, str, str): An iterable for the data rows that yields None for a given column
-                if that column is empty
+            iterable of (str, str, str, str): A matrix of raw row data from the sheet
         """
+        spreadsheet = self.pygsheets_client.open_by_key(sheet_id)
+        worksheet = spreadsheet.sheet1
+        data_rows = list(get_data_rows(worksheet))
+
         coupon_codes = [row[0] for row in data_rows]
         if not coupon_codes:
             raise SheetValidationException("No data found in coupon assignment Sheet")
@@ -799,7 +801,21 @@ class CouponAssignmentHandler:
         status_dates = (item_at_index_or_none(row, 3) for row in data_rows)
         return zip(coupon_codes, emails, statuses, status_dates)
 
-    def assignment_sheet_data_iter(self, bulk_assignments):
+    def get_enumerated_sheet_rows(self, sheet_id):
+        """
+        Returns enumerated raw data rows in a coupon assignment sheet.
+
+        Args:
+            sheet_id (str): A coupon assignment spreadsheet id
+
+        Returns:
+            iterable of (int, iterable of (str, str, str, str)):
+                An enumerated matrix of raw row data from the sheet
+        """
+        sheet_rows = self.get_sheet_rows(sheet_id)
+        return enumerate(sheet_rows, start=1)
+
+    def assignment_sheet_row_iter(self, bulk_assignments):
         """
         Generator for data rows in Sheets associated with bulk assignments
 
@@ -811,12 +827,9 @@ class CouponAssignmentHandler:
                 matrix of data rows in the coupon assignment Sheet associated with that object
         """
         for bulk_assignment in bulk_assignments:
-            spreadsheet = self.pygsheets_client.open_by_key(
+            yield bulk_assignment, self.get_sheet_rows(
                 bulk_assignment.assignment_sheet_id
             )
-            worksheet = spreadsheet.sheet1
-            data_rows = list(get_data_rows(worksheet))
-            yield bulk_assignment, self.assignment_tuple_iter(data_rows)
 
     @classmethod
     def get_desired_coupon_assignments(cls, data_rows):
@@ -825,15 +838,14 @@ class CouponAssignmentHandler:
         code and email are considered.
 
         Args:
-            data_rows (list of lists): A matrix (list of lists) of data from a coupon assignment Worksheet
+            data_rows (iterable of (str, str, str, str)): A matrix of row data from a coupon assignment Worksheet
 
         Returns:
             set of (str, int): A set of emails paired with the product coupon (CouponEligibility)
                 id's that should be assigned to them.
         """
-        assignment_tuples = cls.assignment_tuple_iter(data_rows)
         valid_code_email_pairs = [
-            (code, email) for code, email, _, _ in assignment_tuples if code and email
+            (code, email) for code, email, _, _ in data_rows if code and email
         ]
         product_coupon_tuples = CouponEligibility.objects.filter(
             coupon__coupon_code__in=[pair[0] for pair in valid_code_email_pairs]
@@ -936,16 +948,14 @@ class CouponAssignmentHandler:
             (BulkCouponAssignment, int, int): The bulk coupon assignment created/updated paired with
                 the number of ProductCouponAssignments created and the number deleted
         """
-        sheet = spreadsheet.sheet1
-        data_rows = list(get_data_rows(sheet))
-
         bulk_assignment, _ = BulkCouponAssignment.objects.get_or_create(
             assignment_sheet_id=spreadsheet.id
         )
         created_assignments, num_assignments_removed = [], 0
+        sheet_data_rows = self.get_sheet_rows(spreadsheet.id)
 
         # Determine what assignments need to be created and deleted
-        desired_assignments = self.get_desired_coupon_assignments(data_rows)
+        desired_assignments = self.get_desired_coupon_assignments(sheet_data_rows)
         if bulk_assignment.assignments_started_date:
             existing_assignment_qet = bulk_assignment.assignments
             existing_assignment_count = existing_assignment_qet.count()
@@ -966,7 +976,7 @@ class CouponAssignmentHandler:
 
         # Create ProductCouponAssignments and update the BulkCouponAssignment record to reflect the progress
         with transaction.atomic():
-            _, created_assignments = bulk_assign_product_coupons(
+            _, created_assignments = ecommerce.api.bulk_assign_product_coupons(
                 assignments_to_create, bulk_assignment=bulk_assignment
             )
             now = now_in_utc()
@@ -1030,7 +1040,7 @@ class CouponAssignmentHandler:
 
         # Initialize the map of coupon assignment deliveries starting with the data in each
         # coupon assignment Sheet.
-        for bulk_assignment, assignment_tuples in self.assignment_sheet_data_iter(
+        for bulk_assignment, assignment_rows in self.assignment_sheet_row_iter(
             bulk_assignments
         ):
             assignment_status_map.add_assignment_rows(
@@ -1044,7 +1054,7 @@ class CouponAssignmentHandler:
                         status_date=status_date,
                     )
                     for row_index, (code, email, status, status_date) in enumerate(
-                        assignment_tuples, start=1
+                        assignment_rows, start=1
                     )
                 ],
             )
