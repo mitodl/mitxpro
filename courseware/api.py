@@ -375,6 +375,39 @@ def get_edx_api_client(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS)
     )
 
 
+def get_edx_api_service_client():
+    """
+    Gets an edx api client instance for the service worker user
+
+    Returns:
+         EdxApi: edx api service worker client instance
+    """
+    if settings.OPENEDX_SERVICE_WORKER_API_TOKEN is None:
+        raise ImproperlyConfigured("OPENEDX_SERVICE_WORKER_API_TOKEN is not set")
+
+    edx_client = EdxApi(
+        {
+            "access_token": settings.OPENEDX_SERVICE_WORKER_API_TOKEN,
+            "api_key": settings.OPENEDX_API_KEY,
+        },
+        settings.OPENEDX_API_BASE_URL,
+        timeout=settings.EDX_API_CLIENT_TIMEOUT,
+    )
+
+    return edx_client
+
+
+def get_edx_api_course_detail_client():
+    """
+    Gets an edx api client instance for use with the grades api
+
+    Returns:
+        CourseDetails: edx api course client instance
+    """
+    edx_client = get_edx_api_service_client()
+    return edx_client.course_detail
+
+
 def get_edx_api_grades_client():
     """
     Gets an edx api client instance for use with the grades api
@@ -382,18 +415,7 @@ def get_edx_api_grades_client():
     Returns:
         UserCurrentGrades: edx api grades client instance
     """
-    if settings.OPENEDX_GRADES_API_TOKEN is None:
-        raise ImproperlyConfigured("OPENEDX_GRADES_API_TOKEN is not set")
-
-    edx_client = EdxApi(
-        {
-            "access_token": settings.OPENEDX_GRADES_API_TOKEN,
-            "api_key": settings.OPENEDX_API_KEY,
-        },
-        settings.OPENEDX_API_BASE_URL,
-        timeout=settings.EDX_API_CLIENT_TIMEOUT,
-    )
-
+    edx_client = get_edx_api_service_client()
     return edx_client.current_grades
 
 

@@ -669,6 +669,17 @@ CRON_COURSE_CERTIFICATES_DAYS = get_string(
     None,
     description="'day_of_week' value for 'generate-course-certificate' scheduled task (default will run once a day).",
 )
+CRON_COURSERUN_SYNC_HOURS = get_string(
+    "CRON_COURSERUN_SYNC_HOURS",
+    0,
+    description="'hours' value for the 'sync-courseruns-data' scheduled task (defaults to midnight)",
+)
+CRON_COURSERUN_SYNC_DAYS = get_string(
+    "CRON_COURSERUN_SYNC_DAYS",
+    None,
+    description="'day_of_week' value for 'sync-courseruns-data' scheduled task (default will run once a day).",
+)
+
 
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -740,6 +751,16 @@ CELERY_BEAT_SCHEDULE = {
             minute=0,
             hour=CRON_COURSE_CERTIFICATES_HOURS,
             day_of_week=CRON_COURSE_CERTIFICATES_DAYS or "*",
+            day_of_month="*",
+            month_of_year="*",
+        ),
+    },
+    "sync-courseruns-data": {
+        "task": "courses.tasks.sync_courseruns_data",
+        "schedule": crontab(
+            minute=0,
+            hour=CRON_COURSERUN_SYNC_HOURS,
+            day_of_week=CRON_COURSERUN_SYNC_DAYS or "*",
             day_of_month="*",
             month_of_year="*",
         ),
@@ -896,10 +917,10 @@ MITXPRO_REGISTRATION_ACCESS_TOKEN = get_string(
     description="Access token to secure Open edX registration API with",
 )
 
-OPENEDX_GRADES_API_TOKEN = get_string(
-    "OPENEDX_GRADES_API_TOKEN",
+OPENEDX_SERVICE_WORKER_API_TOKEN = get_string(
+    "OPENEDX_SERVICE_WORKER_API_TOKEN",
     None,
-    "Access token to use with OpenEdX API client for syncing grades",
+    "Active access token with staff level permissions to use with OpenEdX API client for service tasks",
 )
 EDX_API_CLIENT_TIMEOUT = get_int(
     "EDX_API_CLIENT_TIMEOUT",

@@ -59,6 +59,14 @@
       "description": "ID of the Google Sheet that contains requests for coupons",
       "required": false
     },
+    "CRON_COURSERUN_SYNC_DAYS": {
+      "description": "'day_of_week' value for 'sync-courseruns-data' scheduled task (default will run once a day).",
+      "required": false
+    },
+    "CRON_COURSERUN_SYNC_HOURS": {
+      "description": "'hours' value for the 'sync-courseruns-data' scheduled task (defaults to midnight)",
+      "required": false
+    },
     "CRON_COURSE_CERTIFICATES_DAYS": {
       "description": "'day_of_week' value for 'generate-course-certificate' scheduled task (default will run once a day).",
       "required": false
@@ -351,13 +359,13 @@
       "description": "The base redirect URL for an OAuth Application for the Open edX API",
       "required": false
     },
-    "OPENEDX_GRADES_API_TOKEN": {
-      "description": "Access token to use with OpenEdX API client for syncing grades",
-      "required": false
-    },
     "OPENEDX_OAUTH_APP_NAME": {
       "description": "The 'name' value for the Open edX OAuth Application",
       "required": true
+    },
+    "OPENEDX_SERVICE_WORKER_API_TOKEN": {
+      "description": "Active access token with staff level permissions to use with OpenEdX API client for service tasks",
+      "required": false
     },
     "OPENEDX_TOKEN_EXPIRES_HOURS": {
       "description": "The number of hours until an access token for the Open edX API expires",

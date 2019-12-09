@@ -2,6 +2,8 @@
 Utilities for courses/certificates
 """
 import logging
+from requests.exceptions import HTTPError
+from rest_framework.status import HTTP_404_NOT_FOUND
 from django.db import transaction
 from courses.models import (
     CourseRunGrade,
@@ -11,6 +13,7 @@ from courses.models import (
     CourseRun,
 )
 from mitxpro.utils import has_equal_properties
+from courseware.api import get_edx_api_course_detail_client
 
 
 log = logging.getLogger(__name__)
@@ -202,3 +205,60 @@ def revoke_course_run_certificate(user, courseware_id, revoke_state):
     course_run_certificate.save()
 
     return True
+
+
+def sync_course_runs(runs):
+    """
+    Sync course run dates and title from Open edX
+
+    Args:
+        runs ([CourseRun]): list of CourseRun objects.
+
+    Returns:
+        [str], [str]: Lists of success and error logs respectively
+    """
+    api_client = get_edx_api_course_detail_client()
+
+    success_count = 0
+    failure_count = 0
+
+    # Iterate all eligible runs and sync if possible
+    for run in runs:
+        try:
+            course_detail = api_client.get_detail(run.courseware_id)
+        except HTTPError as e:
+            failure_count += 1
+            if e.response.status_code == HTTP_404_NOT_FOUND:
+                log.error(
+                    "Course not found on edX for readable id: %s", run.courseware_id
+                )
+            else:
+                log.error("%s: %s", str(e), run.courseware_id)
+        except Exception as e:  # pylint: disable=broad-except
+            failure_count += 1
+            log.error("%s: %s", str(e), run.courseware_id)
+        else:
+            # Reset the expiration_date so it is calculated automatically and
+            # does not raise a validation error now that the start or end date
+            # has changed.
+            if (
+                run.start_date != course_detail.start
+                or run.end_date != course_detail.end
+            ):
+                run.expiration_date = None
+
+            run.title = course_detail.name
+            run.start_date = course_detail.start
+            run.end_date = course_detail.end
+            run.enrollment_start = course_detail.enrollment_start
+            run.enrollment_end = course_detail.enrollment_end
+            try:
+                run.save()
+                success_count += 1
+                log.info("Updated course run: %s", run.courseware_id)
+            except Exception as e:  # pylint: disable=broad-except
+                # Report any validation or otherwise model errors
+                log.error("%s: %s", str(e), run.courseware_id)
+                failure_count += 1
+
+    return success_count, failure_count
