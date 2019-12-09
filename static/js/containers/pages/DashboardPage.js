@@ -283,9 +283,13 @@ export class DashboardPage extends React.Component<Props, State> {
       return (
         <div className="enrollment-code row" key={index}>
           {enrollmentCode.product_type === "program" ? (
-            <RibbonText text="Program" addedClasses="program" />
+            <div className="text-ribbon program">
+              <div className="text">Program</div>
+            </div>
           ) : (
-            <RibbonText text="Course" addedClasses="course" />
+            <div className="text-ribbon course">
+              <div className="text">Course</div>
+            </div>
           )}
           <div className="course-image-column col-12 col-md-3">
             <img src={enrollmentCode.thumbnail_url} alt="Course image" />
