@@ -58,6 +58,7 @@ from ecommerce.models import (
     Order,
     Receipt,
 )
+from ecommerce.mail_api import send_ecommerce_order_receipt
 from ecommerce.utils import send_support_email
 import sheets.tasks
 from hubspot.task_helpers import sync_hubspot_deal
@@ -1100,6 +1101,7 @@ def fulfill_order(request_data):
 
     # Link the order with the receipt if we can parse it
     reference_number = request_data["req_reference_number"]
+    req_bill_to_email = request_data.get("req_bill_to_email")
     order = Order.objects.get_by_reference_number(reference_number)
     receipt.order = order
     receipt.save()
@@ -1115,6 +1117,10 @@ def fulfill_order(request_data):
 
     if order.status == Order.FULFILLED:
         complete_order(order)
+        if settings.ENABLE_ORDER_RECEIPTS:
+            send_ecommerce_order_receipt(
+                order=order, cyber_source_provided_email=req_bill_to_email
+            )
 
     # Save to log everything to an audit table including enrollments created in complete_order
     order.save_and_log(None)
