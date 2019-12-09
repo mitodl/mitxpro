@@ -128,7 +128,7 @@ def test_create_coupons_for_request_row(mocker, base_data, coupon_req_row):
     create_coupons_for_request_row should call the 'create_coupons' coupons helper
     function and creates an object to record the processing of the coupon request.
     """
-    patched_create_coupons = mocker.patch("sheets.api.create_coupons")
+    patched_create_coupons = mocker.patch("ecommerce.api.create_coupons")
 
     coupon_gen_request = create_coupons_for_request_row(coupon_req_row)
     patched_create_coupons.assert_called_once_with(

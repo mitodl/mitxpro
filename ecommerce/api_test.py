@@ -2,6 +2,7 @@
 Test for ecommerce functions
 """
 from base64 import b64encode
+from collections import defaultdict
 from decimal import Decimal
 from datetime import timedelta
 import hashlib
@@ -66,6 +67,7 @@ from ecommerce.factories import (
     CourseRunSelectionFactory,
     CouponEligibilityFactory,
     ProductCouponAssignmentFactory,
+    BulkCouponAssignmentFactory,
 )
 from ecommerce.models import (
     BasketItem,
@@ -888,19 +890,37 @@ def test_complete_order_coupon_assignments(mocker, user, basket_and_coupons):
     Test that complete_order sets relevant product assignments to redeemed
     """
     mocker.patch("ecommerce.api.enroll_user_in_order_items")
+    patched_set_enrolled = mocker.patch("sheets.tasks.set_assignment_rows_to_enrolled")
     basket_and_coupons.basket.user = user
     basket_and_coupons.basket.save()
     order = OrderFactory.create(purchaser=user, status=Order.CREATED)
-    coupon_redemption = CouponRedemptionFactory.create(order=order)
-    coupon_assignment = ProductCouponAssignmentFactory.create(
+    coupon_redemptions = CouponRedemptionFactory.create_batch(2, order=order)
+    order_coupons = [
+        redemption.coupon_version.coupon for redemption in coupon_redemptions
+    ]
+    bulk_assignment = BulkCouponAssignmentFactory.create()
+    coupon_assignments = ProductCouponAssignmentFactory.create_batch(
+        2,
         # Set assignment email as uppercase to test that the email match is case-insensitive
         email=order.purchaser.email.upper(),
-        product_coupon__coupon=coupon_redemption.coupon_version.coupon,
+        product_coupon__coupon=factory.Iterator(order_coupons),
+        bulk_assignment=factory.Iterator([None, bulk_assignment]),
     )
 
     complete_order(order)
-    coupon_assignment.refresh_from_db()
-    assert coupon_assignment.redeemed is True
+    for coupon_assignment in coupon_assignments:
+        coupon_assignment.refresh_from_db()
+        assert coupon_assignment.redeemed is True
+    patched_set_enrolled.delay.assert_called_once_with(
+        defaultdict(
+            list,
+            {
+                bulk_assignment.assignment_sheet_id: [
+                    [order_coupons[1].coupon_code, order.purchaser.email.upper()]
+                ]
+            },
+        )
+    )
 
 
 @pytest.mark.parametrize("has_redemption", [True, False])

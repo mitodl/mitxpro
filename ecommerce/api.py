@@ -6,6 +6,7 @@ import decimal
 import hashlib
 import hmac
 import logging
+from collections import defaultdict
 from traceback import format_exc
 from urllib.parse import quote_plus, urljoin
 import uuid
@@ -58,6 +59,7 @@ from ecommerce.models import (
     Receipt,
 )
 from ecommerce.utils import send_support_email
+import sheets.tasks
 from hubspot.task_helpers import sync_hubspot_deal
 from mitxpro.utils import now_in_utc
 
@@ -458,6 +460,42 @@ def redeem_coupon(coupon_version, order):
     return coupon_redemption
 
 
+def set_coupons_to_redeemed(assignee_email, coupon_ids):
+    """
+    Updates coupon assignment records to indicate that they have been redeemed, and starts a task to
+    update the status of the corresponding coupon assignment spreadsheet rows if they exist.
+
+    Args:
+        assignee_email (str): The email address that was assigned for the given coupons
+        coupon_ids (iterable of int): ecommerce.models.Coupon id values for the Coupons that were redeemed
+    """
+    updated_assignments = []
+    with transaction.atomic():
+        assignments = (
+            ProductCouponAssignment.objects.select_for_update()
+            .filter(email__iexact=assignee_email, product_coupon__coupon__in=coupon_ids)
+            .select_related("product_coupon__coupon")
+        )
+        for assignment in assignments:
+            if not assignment.redeemed:
+                assignment.redeemed = True
+                assignment.save()
+                updated_assignments.append(assignment)
+
+    updated_assignments_in_bulk = [
+        assignment
+        for assignment in updated_assignments
+        if assignment.bulk_assignment_id
+    ]
+    if updated_assignments_in_bulk:
+        sheet_update_map = defaultdict(list)
+        for assignment in updated_assignments_in_bulk:
+            sheet_update_map[assignment.bulk_assignment.assignment_sheet_id].append(
+                [assignment.product_coupon.coupon.coupon_code, assignment.email]
+            )
+        sheets.tasks.set_assignment_rows_to_enrolled.delay(sheet_update_map)
+
+
 def complete_order(order):
     """
     Enrolls a user in all items associated with their Order and gets rid of checkout-related objects
@@ -473,17 +511,7 @@ def complete_order(order):
         "coupon_version__coupon__id", flat=True
     )
     if order_coupon_ids:
-        updated_count = ProductCouponAssignment.objects.filter(
-            email__iexact=order.purchaser.email,
-            product_coupon__coupon__in=order_coupon_ids,
-        ).update(redeemed=True)
-        if updated_count:
-            log.info(
-                "Set %s coupon assignment(s) to redeemed (user: %s, coupon ids: %s)",
-                updated_count,
-                order.purchaser.email,
-                str(order_coupon_ids),
-            )
+        set_coupons_to_redeemed(order.purchaser.email, order_coupon_ids)
 
     # clear the basket
     with transaction.atomic():
