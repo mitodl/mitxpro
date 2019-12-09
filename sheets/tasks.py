@@ -50,5 +50,5 @@ def renew_file_watches():
     """
     Renews push notifications for changes to certain files via the Google API.
     """
-    file_watch, created = api.renew_coupon_request_file_watch()
+    file_watch, created, _ = api.renew_coupon_request_file_watch()
     return file_watch.id, file_watch.channel_id, created
