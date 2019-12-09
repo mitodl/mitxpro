@@ -341,10 +341,14 @@ def request_file_watch(file_id, channel_id, expiration=None, credentials=None):
     )
 
 
-def renew_coupon_request_file_watch():
+def renew_coupon_request_file_watch(force=False):
     """
     Creates or renews a file watch on the coupon request spreadsheet depending on the existence
     of other file watches and when they expire.
+
+    Args:
+        force (bool): If True, make the file watch request and overwrite the GoogleFileWatch record
+            even if an unexpired one exists.
 
     Returns:
         (GoogleFileWatch, bool, bool): The GoogleFileWatch object, a flag indicating
@@ -368,7 +372,11 @@ def renew_coupon_request_file_watch():
                 expiration_date=now,
             ),
         )
-        if not created and file_watch.expiration_date > min_fresh_expiration_date:
+        if (
+            not created
+            and file_watch.expiration_date > min_fresh_expiration_date
+            and not force
+        ):
             return file_watch, False, False
         if file_watch.expiration_date < now:
             log.error(
@@ -389,6 +397,7 @@ def renew_coupon_request_file_watch():
         file_watch.expiration_date = google_timestamp_to_datetime(
             resp_dict["expiration"]
         )
+        file_watch.channel_id = new_channel_id
         if not created:
             file_watch.version += 1
         file_watch.save()
