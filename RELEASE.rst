@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.33.2
+Version 0.33.2 (Released December 09, 2019)
 --------------
 
 - Send cookie to hubspot when a user creates a new account (#1364)
