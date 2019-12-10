@@ -40,8 +40,9 @@ describe("ReceiptPage", () => {
     ],
     coupon: "50OFF",
     order:  {
-      id:         1,
-      created_on: "2019-10-09T09:47:09.219354Z"
+      id:               1,
+      created_on:       "2019-10-09T09:47:09.219354Z",
+      reference_number: "xpro-b2c-dev-1"
     },
     receipt: {
       card_number: "xxxxxxxxxxxx1234",
@@ -60,6 +61,14 @@ describe("ReceiptPage", () => {
           currentUser:  user,
           countries:    countries,
           orderReceipt: receiptObject
+        },
+        queries: {
+          countries: {
+            isPending: false
+          },
+          orderReceipt: {
+            isPending: false
+          }
         }
       },
       {
@@ -84,7 +93,10 @@ describe("ReceiptPage", () => {
   it("renders the receipt with correct information for a logged in user", async () => {
     const { inner } = await renderPage()
     assert.isTrue(inner.find(".receipt-wrapper").exists())
-    assert.equal(inner.find("#orderNumber").text(), receiptObject.order.id)
+    assert.equal(
+      inner.find("#orderNumber").text(),
+      receiptObject.order.reference_number
+    )
 
     const dateString = parseDateString(receiptObject.order.created_on)
 

@@ -51,14 +51,16 @@ export type ProgramCertificate = {
 
 export type CourseRunEnrollment = {
   run: CourseRunDetail,
-  certificate: ?CourseRunCertificate
+  certificate: ?CourseRunCertificate,
+  receipt: ?number
 }
 
 export type ProgramEnrollment = {
   id: number,
   program: Program,
   course_run_enrollments: Array<CourseRunEnrollment>,
-  certificate: ?ProgramCertificate
+  certificate: ?ProgramCertificate,
+  receipt: ?number
 }
 
 export type UserEnrollments = {

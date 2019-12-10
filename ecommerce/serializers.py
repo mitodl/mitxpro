@@ -796,7 +796,11 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
 
     def get_order(self, instance):
         """Get order-specific information"""
-        return dict(id=instance.id, created_on=instance.created_on)
+        return dict(
+            id=instance.id,
+            created_on=instance.created_on,
+            reference_number=instance.reference_number,
+        )
 
     def get_coupon(self, instance):
         """Get coupon code from the coupon redemption if available"""

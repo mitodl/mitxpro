@@ -74,7 +74,8 @@ export const makeCourseRunDetail = (): CourseRunDetail => {
 
 export const makeCourseRunEnrollment = (): CourseRunEnrollment => ({
   run:         makeCourseRunDetail(),
-  certificate: null
+  certificate: null,
+  receipt:     null
 })
 
 const genProgramEnrollmentId = incrementer()
@@ -86,7 +87,8 @@ export const makeProgramEnrollment = (): ProgramEnrollment => ({
     makeCourseRunEnrollment(),
     makeCourseRunEnrollment()
   ],
-  certificate: null
+  certificate: null,
+  receipt:     null
 })
 
 export const makeUserEnrollments = (): UserEnrollments => ({

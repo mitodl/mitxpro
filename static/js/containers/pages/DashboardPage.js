@@ -8,6 +8,7 @@ import DocumentTitle from "react-document-title"
 import { DASHBOARD_PAGE_TITLE } from "../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
+import { Link } from "react-router-dom"
 import { connectRequest } from "redux-query"
 import { createStructuredSelector } from "reselect"
 import moment from "moment"
@@ -222,6 +223,15 @@ export class DashboardPage extends React.Component<Props, State> {
               </div>
               <div className="date-summary-text col-12">{dateSummary.text}</div>
             </div>
+            {courseRunEnrollment.receipt && !isProgramCourse ? (
+              <div className="row mt-2">
+                <div className="col">
+                  <Link to={`/receipt/${courseRunEnrollment.receipt}`}>
+                    View Receipt
+                  </Link>
+                </div>
+              </div>
+            ) : null}
             <div className="row mt-2">
               <div className="archived-course-link col-lg-7 col-md-8">
                 {dateSummary.archived &&
@@ -320,16 +330,27 @@ export class DashboardPage extends React.Component<Props, State> {
             </section>
           </Collapse>
 
-          <div className="expand-control">
-            <Button
-              className="collapse-toggle btn-link shadow-none"
-              onClick={R.partial(this.onCollapseToggle, [programEnrollment.id])}
-            >
-              {isExpanded ? <span>Close</span> : <span>View Courses</span>}
-              <i className="material-icons">
-                {isExpanded ? "expand_less" : "expand_more"}
-              </i>
-            </Button>
+          <div className="row">
+            <div className="expand-control d-flex col-6 mt-1">
+              {programEnrollment.receipt ? (
+                <Link to={`/receipt/${programEnrollment.receipt}`}>
+                  View Receipt
+                </Link>
+              ) : null}
+            </div>
+            <div id="expand-control" className="d-flex flex-row-reverse col-6">
+              <Button
+                className="collapse-toggle btn-link shadow-none d-flex align-items-center"
+                onClick={R.partial(this.onCollapseToggle, [
+                  programEnrollment.id
+                ])}
+              >
+                {isExpanded ? <span>Close</span> : <span>View Courses</span>}
+                <i className="material-icons">
+                  {isExpanded ? "expand_less" : "expand_more"}
+                </i>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

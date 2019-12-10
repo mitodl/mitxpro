@@ -490,7 +490,11 @@ def test_serialize_order_receipt(receipt_data):
                 "quantity": line.quantity,
             }
         ],
-        "order": {"id": order.id, "created_on": order.created_on},
+        "order": {
+            "id": order.id,
+            "created_on": order.created_on,
+            "reference_number": order.reference_number,
+        },
         "purchaser": {
             "first_name": purchaser.first_name,
             "last_name": purchaser.last_name,

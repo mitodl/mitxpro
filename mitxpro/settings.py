@@ -983,6 +983,10 @@ CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS = get_string(
     description="Additional sanctions lists to validate for exports. Refer to Cybersource docs.",
 )
 
+ENABLE_ORDER_RECEIPTS = get_bool(
+    "ENABLE_ORDER_RECEIPTS", False, description="Enable enrollment order receipts."
+)
+
 # Voucher keys for PDF parsing
 VOUCHER_DOMESTIC_EMPLOYEE_KEY = get_string("VOUCHER_DOMESTIC_EMPLOYEE_KEY", "UNIQUE02")
 VOUCHER_DOMESTIC_EMPLOYEE_ID_KEY = get_string(

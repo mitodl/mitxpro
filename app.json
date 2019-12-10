@@ -171,6 +171,10 @@
       "description": "Timeout (in seconds) for requests made via the edX API client",
       "required": false
     },
+    "ENABLE_ORDER_RECEIPTS": {
+      "description": "Enable enrollment order receipts.",
+      "required": false
+    },
     "GA_TRACKING_ID": {
       "description": "Google analytics tracking ID",
       "required": false
