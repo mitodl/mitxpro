@@ -592,9 +592,7 @@ class CouponRequestHandler:
             )
             return
         # Create sheet
-        spreadsheet_title = assignment_sheet_file_name(
-            coupon_req_row.purchase_order_id, coupon_req_row.company_name
-        )
+        spreadsheet_title = assignment_sheet_file_name(coupon_req_row)
         create_kwargs = (
             dict(folder=settings.DRIVE_OUTPUT_FOLDER_ID)
             if settings.DRIVE_OUTPUT_FOLDER_ID

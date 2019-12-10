@@ -157,19 +157,23 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
         return product.id
 
 
-def assignment_sheet_file_name(purchase_order_id, company_name):
+def assignment_sheet_file_name(coupon_req_row):
     """
     Generates the filename for a coupon assignment Sheet
 
     Args:
-        purchase_order_id (str):
-        company_name (str):
+        coupon_req_row (CouponRequestRow):
 
     Returns:
         str: File name for a coupon assignment Sheet
     """
-    return "".join(
-        [ASSIGNMENT_SHEET_PREFIX, "{} {}".format(purchase_order_id, company_name)]
+    return " - ".join(
+        [
+            ASSIGNMENT_SHEET_PREFIX,
+            coupon_req_row.company_name,
+            coupon_req_row.purchase_order_id,
+            coupon_req_row.product_text_id,
+        ]
     )
 
 
