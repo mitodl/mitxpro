@@ -159,13 +159,13 @@ describe("DashboardPage", () => {
       })
       assert.equal(
         inner
-          .find(".expand-control Button")
+          .find("#expand-control Button")
           .childAt(0)
           .text(),
         willExpand ? "View Courses" : "Close"
       )
       assert.equal(
-        inner.find(".expand-control .material-icons").text(),
+        inner.find("#expand-control .material-icons").text(),
         willExpand ? "expand_more" : "expand_less"
       )
 

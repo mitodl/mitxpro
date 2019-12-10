@@ -210,6 +210,12 @@ class OrderReceiptView(RetrieveAPIView):
     def get_queryset(self):
         return Order.objects.filter(purchaser=self.request.user, status=Order.FULFILLED)
 
+    def get(self, request, *args, **kwargs):
+        """ Return a 404 for all requests if the feature is not enabled """
+        if not settings.ENABLE_ORDER_RECEIPTS:
+            raise Http404
+        return self.retrieve(request, *args, **kwargs)
+
 
 class BasketView(RetrieveUpdateAPIView):
     """ API view for viewing and updating a basket """

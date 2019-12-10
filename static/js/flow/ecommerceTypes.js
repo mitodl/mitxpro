@@ -118,7 +118,8 @@ export type OrderLine = {
 
 export type OrderSummary = {
   id: string,
-  created_on: string
+  created_on: string,
+  reference_number: string
 }
 
 export type CybersourceReceiptSummary = {

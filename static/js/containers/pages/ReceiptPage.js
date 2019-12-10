@@ -28,8 +28,18 @@ type Props = {
 }
 
 export class ReceiptPage extends React.Component<Props> {
+  async componentDidMount() {
+    // If we have a preloaded order but it's not the one we should display, force a fetch
+    if (
+      this.props.orderReceipt &&
+      this.props.orderReceipt.order.id !==
+        parseInt(this.props.match.params.orderId)
+    ) {
+      await this.props.forceRequest()
+    }
+  }
+
   async componentDidUpdate(prevProps: Props) {
-    // Force the request update if the orderId has changed
     if (prevProps.match.params.orderId !== this.props.match.params.orderId) {
       await this.props.forceRequest()
     }
@@ -50,11 +60,13 @@ export class ReceiptPage extends React.Component<Props> {
     if (orderReceipt) {
       orderDate = parseDateString(orderReceipt.order.created_on)
 
-      const country = countries.find(
-        element => element.code === orderReceipt.purchaser.country
-      )
-      if (country) {
-        countryName = country.name
+      if (countries) {
+        const country = countries.find(
+          element => element.code === orderReceipt.purchaser.country
+        )
+        if (country) {
+          countryName = country.name
+        }
       }
 
       if (orderReceipt.purchaser.state_or_territory) {
@@ -123,7 +135,7 @@ export class ReceiptPage extends React.Component<Props> {
                         <div className="col-lg-10 col-md-9 col-sm-8">
                           {orderDate ? (
                             <p className="value" id="orderNumber">
-                              {orderReceipt.order.id}
+                              {orderReceipt.order.reference_number}
                             </p>
                           ) : null}
                         </div>
@@ -392,8 +404,8 @@ const mapStateToProps = state => ({
   countries:    state.entities.countries,
   orderReceipt: state.entities.orderReceipt,
   isLoading:
-    pathOr(false, ["queries", "countriesQuery", "isPending"], state) ||
-    pathOr(false, ["queries", "orderReceipt", "isPending"], state)
+    pathOr(true, ["queries", "countries", "isPending"], state) ||
+    pathOr(true, ["queries", "orderReceipt", "isPending"], state)
 })
 
 const mapPropsToConfigs = props => [

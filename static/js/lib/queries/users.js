@@ -38,6 +38,7 @@ export default {
   }),
   countriesSelector: pathOr(null, ["entities", "countries"]),
   countriesQuery:    () => ({
+    queryKey:  "countries",
     url:       "/api/countries/",
     transform: objOf("countries"),
     update:    {

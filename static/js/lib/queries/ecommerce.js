@@ -139,6 +139,7 @@ export default {
   }),
   orderReceiptSelector: pathOr(null, ["entities", "orderReceipt"]),
   orderReceipt:         (orderId: string) => ({
+    queryKey:  "orderReceipt",
     url:       `/api/order_receipt/${orderId}/`,
     transform: (json: OrderReceiptResponse) => ({
       orderReceipt: json

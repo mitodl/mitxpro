@@ -32,6 +32,7 @@ from courses.serializers import (
     ProgramEnrollmentSerializer,
 )
 from ecommerce.factories import ProductVersionFactory
+from ecommerce.models import Order
 from ecommerce.serializers import CompanySerializer
 from ecommerce.serializers_test import datetime_format
 from mitxpro.test_utils import drf_datetime, assert_drf_json_equal
@@ -247,9 +248,13 @@ def test_serialize_course_run_detail():
     }
 
 
-@pytest.mark.parametrize("has_company", [True, False])
-def test_serialize_course_run_enrollments(has_company):
+@pytest.mark.parametrize(
+    "has_company, receipts_enabled",
+    [[True, False], [False, False], [False, True], [True, True]],
+)
+def test_serialize_course_run_enrollments(settings, has_company, receipts_enabled):
     """Test that CourseRunEnrollmentSerializer has correct data"""
+    settings.ENABLE_ORDER_RECEIPTS = receipts_enabled
     course_run_enrollment = CourseRunEnrollmentFactory.create(
         has_company_affiliation=has_company
     )
@@ -262,6 +267,9 @@ def test_serialize_course_run_enrollments(has_company):
             else None
         ),
         "certificate": None,
+        "receipt": course_run_enrollment.order_id
+        if course_run_enrollment.order.status == Order.FULFILLED and receipts_enabled
+        else None,
     }
 
 
@@ -272,9 +280,13 @@ def test_serialize_program_enrollments_assert():
         ProgramEnrollmentSerializer(program_enrollment)
 
 
-@pytest.mark.parametrize("has_company", [True, False])
-def test_serialize_program_enrollments(has_company):
+@pytest.mark.parametrize(
+    "has_company, receipts_enabled",
+    [[True, False], [False, False], [False, True], [True, True]],
+)
+def test_serialize_program_enrollments(settings, has_company, receipts_enabled):
     """Test that ProgramEnrollmentSerializer has correct data"""
+    settings.ENABLE_ORDER_RECEIPTS = receipts_enabled
     program = ProgramFactory.create()
     course_run_enrollments = CourseRunEnrollmentFactory.create_batch(
         3,
@@ -299,4 +311,7 @@ def test_serialize_program_enrollments(has_company):
             [course_run_enrollments[1], course_run_enrollments[0]], many=True
         ).data,
         "certificate": None,
+        "receipt": program_enrollment.order_id
+        if program_enrollment.order.status == Order.FULFILLED and receipts_enabled
+        else None,
     }

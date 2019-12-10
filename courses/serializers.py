@@ -322,6 +322,7 @@ class CourseRunEnrollmentSerializer(serializers.ModelSerializer):
     run = CourseRunDetailSerializer(read_only=True)
     company = CompanySerializer(read_only=True)
     certificate = serializers.SerializerMethodField()
+    receipt = serializers.SerializerMethodField()
 
     def get_certificate(self, enrollment):
         """
@@ -347,9 +348,20 @@ class CourseRunEnrollmentSerializer(serializers.ModelSerializer):
         except models.CourseRunCertificate.DoesNotExist:
             return None
 
+    def get_receipt(self, enrollment):
+        """
+        Resolve a receipt for this enrollment
+        """
+        return (
+            enrollment.order_id
+            if enrollment.order.status == enrollment.order.FULFILLED
+            and settings.ENABLE_ORDER_RECEIPTS
+            else None
+        )
+
     class Meta:
         model = models.CourseRunEnrollment
-        fields = ["run", "company", "certificate"]
+        fields = ["run", "company", "certificate", "receipt"]
 
 
 class ProgramEnrollmentSerializer(serializers.ModelSerializer):
@@ -359,6 +371,7 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
     course_run_enrollments = serializers.SerializerMethodField()
     company = CompanySerializer(read_only=True)
     certificate = serializers.SerializerMethodField()
+    receipt = serializers.SerializerMethodField()
 
     def get_certificate(self, enrollment):
         """
@@ -380,6 +393,17 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
             ).data
         except models.ProgramCertificate.DoesNotExist:
             return None
+
+    def get_receipt(self, enrollment):
+        """
+        Resolve a receipt for this enrollment
+        """
+        return (
+            enrollment.order_id
+            if enrollment.order.status == enrollment.order.FULFILLED
+            and settings.ENABLE_ORDER_RECEIPTS
+            else None
+        )
 
     def __init__(self, *args, **kwargs):
         assert (
@@ -403,4 +427,11 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ProgramEnrollment
-        fields = ["id", "program", "course_run_enrollments", "company", "certificate"]
+        fields = [
+            "id",
+            "program",
+            "course_run_enrollments",
+            "company",
+            "certificate",
+            "receipt",
+        ]
