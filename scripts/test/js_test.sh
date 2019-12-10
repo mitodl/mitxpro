@@ -10,6 +10,9 @@ then
 elif [[ ! -z "$WATCH" ]]
 then
     export CMD="node ./node_modules/mocha/bin/_mocha --watch"
+elif [[ ! -z "$DEBUG" ]]
+then
+    export CMD="node --inspect-brk=0.0.0.0:9229 ./node_modules/mocha/bin/_mocha"
 else
     export CMD="node ./node_modules/mocha/bin/_mocha"
 fi

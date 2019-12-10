@@ -79,6 +79,7 @@ services:
       /bin/bash -c './webpack_dev_server.sh --install'
     ports:
       - "8052:8052"
+      - "9229:9229"
     environment:
       NODE_ENV: 'production'
       DOCKER_HOST: ${DOCKER_HOST:-missing}
