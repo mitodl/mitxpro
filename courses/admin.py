@@ -162,9 +162,10 @@ class CourseRunGradeAdmin(admin.ModelAdmin):
     """Admin for CourseRunGrade"""
 
     model = CourseRunGrade
-    list_display = ["id", "get_user_email", "get_run_courseware_id", "grade"]
+    list_display = ["id", "get_user_email", "get_run_title", "grade"]
     list_filter = ["passed", "set_by_admin", "course_run"]
     raw_id_fields = ("user",)
+    search_fields = ["user__email", "user__username"]
 
     def get_queryset(self, request):
         return self.model.objects.get_queryset().select_related("user", "course_run")
@@ -176,12 +177,12 @@ class CourseRunGradeAdmin(admin.ModelAdmin):
     get_user_email.short_description = "User Email"
     get_user_email.admin_order_field = "user__email"
 
-    def get_run_courseware_id(self, obj):
-        """Returns the related CourseRun courseware_id"""
-        return obj.course_run.courseware_id
+    def get_run_title(self, obj):
+        """Returns the related CourseRun title"""
+        return obj.course_run.title
 
-    get_run_courseware_id.short_description = "Course Run"
-    get_run_courseware_id.admin_order_field = "course_run__courseware_id"
+    get_run_title.short_description = "Course Run"
+    get_run_title.admin_order_field = "course_run__title"
 
 
 class CourseRunGradeAuditAdmin(admin.ModelAdmin):
