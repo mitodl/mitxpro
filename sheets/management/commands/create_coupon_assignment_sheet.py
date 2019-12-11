@@ -43,9 +43,7 @@ class Command(BaseCommand):
                 )
             )
 
-        spreadsheet_file_name = assignment_sheet_file_name(
-            matching_req_row.purchase_order_id, matching_req_row.company_name
-        )
+        spreadsheet_file_name = assignment_sheet_file_name(matching_req_row)
         try:
             coupon_request_handler.pygsheets_client.open(spreadsheet_file_name)
         except SpreadsheetNotFound:
