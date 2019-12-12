@@ -81,6 +81,8 @@ def set_assignment_rows_to_enrolled(sheet_update_map):
         )
         status_row_updates = []
         for row_index, (coupon_code, email, _, _) in enumerated_sheet_rows:
+            if not coupon_code or not email:
+                continue
             if (coupon_code.lower(), email.lower()) in assignment_code_email_set:
                 status_row_updates.append(
                     (row_index, ASSIGNMENT_SHEET_ENROLLED_STATUS, now)
