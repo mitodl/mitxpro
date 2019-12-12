@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.34.0
+Version 0.34.0 (Released December 12, 2019)
 --------------
 
 - #1346 Add receipt link to dashboard
