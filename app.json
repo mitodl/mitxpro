@@ -442,6 +442,10 @@
       "description": "How many seconds to wait in between executing different Sheets tasks in series",
       "required": false
     },
+    "SHOW_UNREDEEMED_COUPON_ON_DASHBOARD": {
+      "description": "Show unused coupon codes on dashboard with enroll button.",
+      "required": false
+    },
     "SITE_NAME": {
       "description": "Name of the site. e.g MIT xPRO",
       "required": false

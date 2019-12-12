@@ -2,6 +2,7 @@
 from collections import defaultdict
 import re
 
+from django.conf import settings
 from django.db import transaction
 import pycountry
 from rest_framework import serializers
@@ -229,7 +230,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_unused_coupons(self, instance):
         """Returns a list of unused coupons"""
-        if not instance.is_anonymous:
+        if not instance.is_anonymous and settings.SHOW_UNREDEEMED_COUPON_ON_DASHBOARD:
             return fetch_and_serialize_unused_coupons(instance)
         return []
 

@@ -1088,3 +1088,9 @@ _sheets_date_timezone = get_string(
     ),
 )
 SHEETS_DATE_TIMEZONE = pytz.timezone(_sheets_date_timezone)
+
+SHOW_UNREDEEMED_COUPON_ON_DASHBOARD = get_bool(
+    "SHOW_UNREDEEMED_COUPON_ON_DASHBOARD",
+    False,
+    description="Show unused coupon codes on dashboard with enroll button.",
+)

@@ -1154,6 +1154,10 @@ def test_fetch_and_serialize_unused_coupons(user):
             "coupon_code": expected_product_coupon.coupon.coupon_code,
             "product_id": expected_product_coupon.product.id,
             "expiration_date": expected_payment_version.expiration_date,
+            "product_title": expected_product_coupon.product.title,
+            "product_type": expected_product_coupon.product.type_string,
+            "thumbnail_url": expected_product_coupon.product.thumbnail_url,
+            "start_date": expected_product_coupon.product.start_date,
         }
     ]
 

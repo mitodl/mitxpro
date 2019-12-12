@@ -1,5 +1,6 @@
 """Test for user views"""
 import pytest
+from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
 
@@ -37,11 +38,16 @@ def test_get_user_by_id(user_client, user):
     }
 
 
-@pytest.mark.parametrize("is_anonymous", [True, False])
-def test_get_user_by_me(mocker, client, user, is_anonymous):
+@pytest.mark.parametrize(
+    "is_anonymous, show_enrollment_codes", ([True, False], [True, False])
+)
+def test_get_user_by_me(mocker, client, user, is_anonymous, show_enrollment_codes):
     """Test that user can request their own user by the 'me' alias"""
     if not is_anonymous:
         client.force_login(user)
+
+    if show_enrollment_codes:
+        settings.SHOW_UNREDEEMED_COUPON_ON_DASHBOARD = True
 
     patched_unused_coupon_api = mocker.patch(
         "users.serializers.fetch_and_serialize_unused_coupons",
@@ -63,7 +69,7 @@ def test_get_user_by_me(mocker, client, user, is_anonymous):
             "unused_coupons": [],
         }
         patched_unused_coupon_api.assert_not_called()
-    else:
+    elif not is_anonymous and show_enrollment_codes:
         assert resp.json() == {
             "id": user.id,
             "username": user.username,
@@ -97,6 +103,9 @@ def test_get_user_by_me(mocker, client, user, is_anonymous):
             "updated_on": drf_datetime(user.updated_on),
         }
         patched_unused_coupon_api.assert_called_with(user)
+    elif not is_anonymous and not show_enrollment_codes:
+        response = resp.json()
+        assert response["unused_coupons"] == []
 
 
 @pytest.mark.django_db

@@ -163,7 +163,7 @@
       width: 100%;
     }
 
-    .course-enrollment {
+    .course-enrollment, .enrollment-code {
       margin-top: 15px;
       margin-bottom: 15px;
     }
@@ -209,7 +209,8 @@
 }
 
 .program-enrollment.row,
-.course-enrollment.row {
+.course-enrollment.row,
+.enrollment-code.row {
   position: relative;
 
   .text-ribbon {
@@ -246,6 +247,38 @@
 
     &.course svg {
       fill: $primary;
+    }
+  }
+}
+
+.enrollment-code {
+  margin-bottom: 15px;
+
+  .course-detail-column {
+    position: relative;
+    padding: 15px;
+    border: 1px solid $detail-grid-border-color;
+
+    .expiration-date {
+      color: $blue;
+    }
+
+    .btn-enroll {
+      position: absolute;
+      right: 15px;
+      bottom: 15px;
+      height: 38px;
+      width: 220px;
+      border-radius: 5px;
+      background-color: $denim-blue;
+      border-color: $denim-blue;
+
+      .button-text {
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: 1.39px;
+        line-height: 25px;
+      }
     }
   }
 }

@@ -218,3 +218,13 @@ export type B2BCheckoutPayload = {
   discount_code: ?string,
   email: string,
 }
+
+export type EnrollmentCode = {
+  coupon_code: number,
+  product_id: number,
+  expiration_date: Date,
+  product_title: string,
+  product_type: string,
+  thumbnail_url: string,
+  start_date: Date,
+}

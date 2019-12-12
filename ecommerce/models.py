@@ -111,6 +111,61 @@ class Product(TimestampedModel):
         """
         return self.content_type.model
 
+    @property
+    def title(self):
+        """
+        Helper property to return a string representation of the product title,
+        e.g.: "courserun.title", "program.title"
+
+        Returns:
+            str: String representing the product title
+        """
+        from courses.models import Program, CourseRun
+
+        content_object = self.content_object
+        if isinstance(content_object, Program):
+            return content_object.title
+        elif isinstance(content_object, CourseRun):
+            return content_object.course.title
+        else:
+            raise ValueError(f"Unexpected content type for {self.content_type.model}")
+
+    @property
+    def thumbnail_url(self):
+        """
+        Helper property to return a thumbnail url of the product.
+
+        Returns:
+            thumbnail_url: image url of the product
+        """
+        from courses.models import Program, CourseRun
+
+        content_object = self.content_object
+        if isinstance(content_object, Program):
+            return content_object.catalog_image_url
+        elif isinstance(content_object, CourseRun):
+            return content_object.course.catalog_image_url
+        else:
+            raise ValueError(f"Unexpected product {content_object}")
+
+    @property
+    def start_date(self):
+        """
+        Helper property to return a start date of the product.
+
+        Returns:
+            start_date: start date of the product
+        """
+        from courses.models import Program, CourseRun
+
+        content_object = self.content_object
+        if isinstance(content_object, Program):
+            return content_object.next_run_date
+        elif isinstance(content_object, CourseRun):
+            return content_object.course.next_run_date
+        else:
+            raise ValueError(f"Unexpected product {content_object}")
+
     def __str__(self):
         """Description of a product"""
         return f"Product for {self.content_object}"
