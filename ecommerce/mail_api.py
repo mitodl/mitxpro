@@ -4,7 +4,7 @@ from urllib.parse import urlencode, urljoin
 
 from django.conf import settings
 from django.urls import reverse
-
+import pycountry
 from courses.models import CourseRun
 from mail import api
 from mail.constants import (
@@ -12,6 +12,7 @@ from mail.constants import (
     EMAIL_BULK_ENROLL,
     EMAIL_COURSE_RUN_ENROLLMENT,
     EMAIL_COURSE_RUN_UNENROLLMENT,
+    EMAIL_PRODUCT_ORDER_RECEIPT,
 )
 from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG
 from ecommerce.utils import make_checkout_url
@@ -186,3 +187,70 @@ def send_b2b_receipt_email(order):
         )
     except:  # pylint: disable=bare-except
         log.exception("Error sending receipt email")
+
+
+def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
+    """
+    Send emails receipt summarizing the user purchase detail.
+
+    Args:
+        cyber_source_provided_email: Include the email address if user provide though CyberSource payment process.
+        order: An order.
+    """
+    from ecommerce.serializers import OrderReceiptSerializer
+
+    data = OrderReceiptSerializer(instance=order).data
+    purchaser = data.get("purchaser")
+    coupon = data.get("coupon")
+    lines = data.get("lines")
+    order = data.get("order")
+    receipt = data.get("receipt")
+    country = pycountry.countries.get(alpha_2=purchaser.get("country"))
+    recipients = [purchaser.get("email")]
+    if cyber_source_provided_email and cyber_source_provided_email not in recipients:
+        recipients.append(cyber_source_provided_email)
+
+    try:
+        messages = list(
+            api.messages_for_recipients(
+                [
+                    (
+                        recipient,
+                        api.context_for_user(
+                            user=None,
+                            extra_context={
+                                "coupon": coupon,
+                                "lines": lines,
+                                "order_total": sum(
+                                    int(line["total_paid"]) for line in lines
+                                ),
+                                "order": order,
+                                "receipt": receipt,
+                                "purchaser": {
+                                    "name": " ".join(
+                                        [
+                                            purchaser.get("first_name"),
+                                            purchaser.get("last_name"),
+                                        ]
+                                    ),
+                                    "email": purchaser.get("email"),
+                                    "street_address": purchaser.get("street_address"),
+                                    "state_code": purchaser.get(
+                                        "state_or_territory"
+                                    ).split("-")[-1],
+                                    "postal_code": purchaser.get("postal_code"),
+                                    "city": purchaser.get("city"),
+                                    "country": country.name if country else None,
+                                },
+                            },
+                        ),
+                    )
+                    for recipient in recipients
+                ],
+                EMAIL_PRODUCT_ORDER_RECEIPT,
+            )
+        )
+        api.send_messages(messages)
+
+    except:  # pylint: disable=bare-except
+        log.exception("Error sending order receipt email.")

@@ -1,32 +1,40 @@
 """Ecommerce mail API tests"""
 from urllib.parse import urljoin
 
+import datetime
 from django.urls import reverse
 import pytest
 import factory
+from pytz import UTC
 
 from b2b_ecommerce.factories import B2BOrderFactory
-from courses.factories import CourseRunEnrollmentFactory
+from courses.factories import CourseRunEnrollmentFactory, CourseRunFactory
 from ecommerce.api import get_readable_id
 from ecommerce.factories import (
     CouponPaymentVersionFactory,
     BulkCouponAssignmentFactory,
     ProductCouponAssignmentFactory,
     CompanyFactory,
+    LineFactory,
+    ReceiptFactory,
 )
 from ecommerce.mail_api import (
     send_b2b_receipt_email,
     send_bulk_enroll_emails,
     send_course_run_enrollment_email,
+    send_ecommerce_order_receipt,
 )
 from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG
+from ecommerce.models import Order
 from mail.api import UserMessageProps, EmailMetadata
 from mail.constants import (
     EMAIL_BULK_ENROLL,
     EMAIL_COURSE_RUN_ENROLLMENT,
     EMAIL_B2B_RECEIPT,
+    EMAIL_PRODUCT_ORDER_RECEIPT,
 )
 from mitxpro.utils import format_price
+from users.factories import UserFactory
 
 lazy = pytest.lazy_fixture
 
@@ -181,3 +189,83 @@ def test_send_b2b_receipt_email_error(mocker):
     send_b2b_receipt_email(order)
 
     patched_log.exception.assert_called_once_with("Error sending receipt email")
+
+
+@pytest.mark.parametrize(
+    "receipt_data", [{"req_card_number": "1234", "req_card_type": "001"}]
+)
+def test_send_ecommerce_order_receipt(mocker, receipt_data):
+    """send_ecommerce_order_receipt should send a receipt email"""
+    patched_mail_api = mocker.patch("ecommerce.mail_api.api")
+    date = datetime.datetime(2010, 1, 1, 0, tzinfo=UTC)
+    user = UserFactory.create(
+        name="test",
+        email="test@example.com",
+        legal_address__first_name="Test",
+        legal_address__last_name="User",
+        legal_address__street_address_1="11 Main Street",
+        legal_address__country="US",
+        legal_address__state_or_territory="US-CO",
+        legal_address__city="Boulder",
+        legal_address__postal_code="80309",
+    )
+    line = LineFactory.create(
+        order__status=Order.CREATED,
+        order__id=1,
+        order__created_on=date,
+        order__total_price_paid=0,
+        order__purchaser=user,
+        product_version__price=100,
+        quantity=1,
+        product_version__product__content_object=CourseRunFactory.create(
+            title="test_run_title"
+        ),
+        product_version__product__content_object__course__readable_id="course:/v7/choose-agency",
+    )
+    # pylint: disable=expression-not-assigned
+    (
+        ReceiptFactory.create(order=line.order, data=receipt_data)
+        if receipt_data
+        else None
+    )
+    send_ecommerce_order_receipt(line.order)
+    patched_mail_api.context_for_user.assert_called_once_with(
+        user=None,
+        extra_context={
+            "coupon": None,
+            "lines": [
+                {
+                    "quantity": 1,
+                    "total_paid": "100",
+                    "discount": "0",
+                    "price": "100",
+                    "readable_id": get_readable_id(
+                        line.product_version.product.content_object
+                    ),
+                    "start_date": None,
+                    "end_date": None,
+                    "content_title": "test_run_title",
+                }
+            ],
+            "order_total": 100,
+            "order": {
+                "id": 1,
+                "created_on": line.order.created_on,
+                "reference_number": "xpro-b2c-dev-1",
+            },
+            "receipt": {"card_number": "1234", "card_type": "Visa"},
+            "purchaser": {
+                "name": " ".join(["Test", "User"]),
+                "email": "test@example.com",
+                "street_address": ["11 Main Street"],
+                "state_code": "CO",
+                "postal_code": "80309",
+                "city": "Boulder",
+                "country": "United States",
+            },
+        },
+    )
+    patched_mail_api.messages_for_recipients.assert_called_once_with(
+        [("test@example.com", patched_mail_api.context_for_user.return_value)],
+        EMAIL_PRODUCT_ORDER_RECEIPT,
+    )

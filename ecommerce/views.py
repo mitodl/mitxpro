@@ -38,7 +38,7 @@ from ecommerce.api import (
 )
 from ecommerce.utils import make_checkout_url
 from ecommerce.exceptions import ParseException
-from ecommerce.mail_api import send_bulk_enroll_emails
+from ecommerce.mail_api import send_bulk_enroll_emails, send_ecommerce_order_receipt
 from ecommerce.models import (
     Basket,
     Company,
@@ -150,6 +150,8 @@ class CheckoutView(APIView):
 
             # This redirects the user to our order success page
             url = make_receipt_url(base_url=base_url, readable_id=readable_id)
+            if settings.ENABLE_ORDER_RECEIPTS:
+                send_ecommerce_order_receipt(order)
             method = "GET"
         else:
             # This generates a signed payload which is submitted as an HTML form to CyberSource
