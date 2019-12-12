@@ -1179,7 +1179,12 @@ class CouponAssignmentHandler:
                         status_date=status_date,
                     )
                     for row_index, (code, email, status, status_date) in enumerate(
-                        assignment_rows, start=1
+                        # The first_data_row value is expressed as a 1-based index to match
+                        # the row indices in an actual Sheet, but this assignment row data
+                        # will be used for an API endpoint that expects a zero-based index.
+                        # Subtracting 1 converts the value to it's zero-based-index equivalent.
+                        assignment_rows,
+                        start=(coupon_assign_sheet_spec.first_data_row - 1),
                     )
                 ],
             )
