@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.34.0 (Released December 12, 2019)
+--------------
+
+- #1346 Add receipt link to dashboard
+- Set coupon assignment sheet status when coupon is redeemed
+- Fixed file watch bug and added management command options
+- #1246 sync course runs from edx
+- Bump django from 2.2.4 to 2.2.8
+
 Version 0.33.2 (Released December 09, 2019)
 --------------
 
