@@ -32,6 +32,8 @@ def coupon_req_raw_data(base_data):
         base_data.company.name,
         "01/01/2019 01:01:01",
         "02/02/2020 02:02:02",
+        "",
+        "",
     ]
 
 
@@ -48,4 +50,5 @@ def coupon_req_row(base_data):  # pylint: disable=redefined-outer-name
         activation=datetime(2019, 1, 1, 1, 1, 1, tzinfo=pytz.UTC),
         expiration=datetime(2020, 2, 2, 2, 2, 2, tzinfo=pytz.UTC),
         date_processed=False,
+        error=None,
     )

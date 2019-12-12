@@ -986,6 +986,11 @@ CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS = get_string(
 ENABLE_ORDER_RECEIPTS = get_bool(
     "ENABLE_ORDER_RECEIPTS", False, description="Enable enrollment order receipts."
 )
+SHOW_UNREDEEMED_COUPON_ON_DASHBOARD = get_bool(
+    "SHOW_UNREDEEMED_COUPON_ON_DASHBOARD",
+    False,
+    description="Show unused coupon codes on dashboard with enroll button.",
+)
 
 # Voucher keys for PDF parsing
 VOUCHER_DOMESTIC_EMPLOYEE_KEY = get_string("VOUCHER_DOMESTIC_EMPLOYEE_KEY", "UNIQUE02")
@@ -1088,9 +1093,9 @@ _sheets_date_timezone = get_string(
     ),
 )
 SHEETS_DATE_TIMEZONE = pytz.timezone(_sheets_date_timezone)
-
-SHOW_UNREDEEMED_COUPON_ON_DASHBOARD = get_bool(
-    "SHOW_UNREDEEMED_COUPON_ON_DASHBOARD",
-    False,
-    description="Show unused coupon codes on dashboard with enroll button.",
-)
+SHEETS_REQ_PROCESSED_COL = 7
+SHEETS_REQ_ERROR_COL = 8
+# Calculate the column letters in the spreadsheet based on those indices
+_uppercase_a_ord = ord("A")
+SHEETS_REQ_PROCESSED_COL_LETTER = chr(SHEETS_REQ_PROCESSED_COL + _uppercase_a_ord)
+SHEETS_REQ_ERROR_COL_LETTER = chr(SHEETS_REQ_ERROR_COL + _uppercase_a_ord)
