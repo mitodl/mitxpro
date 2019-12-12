@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.34.1
+--------------
+
+- Fixed bug with updating coupon assignment rows upon enrollment
+
 Version 0.34.0 (Released December 12, 2019)
 --------------
 
