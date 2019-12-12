@@ -1093,8 +1093,15 @@ _sheets_date_timezone = get_string(
     ),
 )
 SHEETS_DATE_TIMEZONE = pytz.timezone(_sheets_date_timezone)
-SHEETS_REQ_PROCESSED_COL = 7
-SHEETS_REQ_ERROR_COL = 8
+# Specify the zero-based index of certain request sheet columns
+if FEATURES.get("COUPON_SHEETS_TRACK_REQUESTER"):
+    SHEETS_REQ_EMAIL_COL = 7
+    SHEETS_REQ_PROCESSED_COL = 8
+    SHEETS_REQ_ERROR_COL = 9
+else:
+    SHEETS_REQ_EMAIL_COL = None
+    SHEETS_REQ_PROCESSED_COL = 7
+    SHEETS_REQ_ERROR_COL = 8
 # Calculate the column letters in the spreadsheet based on those indices
 _uppercase_a_ord = ord("A")
 SHEETS_REQ_PROCESSED_COL_LETTER = chr(SHEETS_REQ_PROCESSED_COL + _uppercase_a_ord)

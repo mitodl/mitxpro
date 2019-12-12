@@ -102,6 +102,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
         expiration,
         date_processed,
         error,
+        requester=None,
     ):  # pylint: disable=too-many-arguments
         self.row_index = row_index
         self.purchase_order_id = purchase_order_id
@@ -113,6 +114,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
         self.expiration = expiration
         self.date_processed = date_processed
         self.error = error
+        self.requester = requester
 
     @classmethod
     def parse_raw_data(cls, row_index, raw_row_data):
@@ -130,6 +132,15 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
             SheetRowParsingException: Raised if the row could not be parsed
         """
         try:
+            added_kwargs = (
+                dict(
+                    requester=item_at_index_or_none(
+                        raw_row_data, settings.SHEETS_REQ_EMAIL_COL
+                    )
+                )
+                if settings.FEATURES.get("COUPON_SHEETS_TRACK_REQUESTER")
+                else {}
+            )
             return cls(
                 row_index=row_index,
                 purchase_order_id=raw_row_data[cls.PURCHASE_ORDER_COL_INDEX].strip(),
@@ -147,6 +158,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
                 error=item_at_index_or_none(
                     raw_row_data, settings.SHEETS_REQ_ERROR_COL
                 ),
+                **added_kwargs,
             )
         except Exception as exc:
             raise SheetRowParsingException from exc
