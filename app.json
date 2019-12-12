@@ -443,7 +443,7 @@
       "required": false
     },
     "SHOW_UNREDEEMED_COUPON_ON_DASHBOARD": {
-      "description": "Show unused coupon codes on dashboard with enrollment button.",
+      "description": "Show unused coupon codes on dashboard with enroll button.",
       "required": false
     },
     "SITE_NAME": {
