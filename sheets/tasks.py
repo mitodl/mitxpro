@@ -96,5 +96,10 @@ def renew_file_watches():
     """
     Renews push notifications for changes to certain files via the Google API.
     """
-    file_watch, created, _ = api.renew_coupon_request_file_watch()
+    # This task is run on a schedule and ensures that there is an unexpired file watch
+    # on the coupon request sheet. If a file watch was manually created/updated at any
+    # point, this task might be run while that file watch is still unexpired. If the file
+    # watch renewal was skipped, the task might not run again until after expiration. To
+    # avoid that situation, the file watch is always renewed here (force=True).
+    file_watch, created, _ = api.renew_coupon_request_file_watch(force=True)
     return file_watch.id, file_watch.channel_id, created
