@@ -59,6 +59,7 @@ from sheets.constants import (
     GOOGLE_DATE_TIME_FORMAT,
     GOOGLE_API_FILE_WATCH_KIND,
     GOOGLE_API_NOTIFICATION_TYPE,
+    GOOGLE_SHEET_FIRST_ROW,
 )
 from sheets.utils import (
     coupon_assign_sheet_spec,
@@ -78,6 +79,7 @@ from sheets.utils import (
     get_enumerated_data_rows,
     format_datetime_for_google_timestamp,
     google_timestamp_to_datetime,
+    google_date_string_to_datetime,
 )
 from sheets.exceptions import (
     SheetValidationException,
@@ -753,15 +755,14 @@ class CouponAssignmentHandler:
             },
         )
 
-    def fetch_incomplete_sheets(self):
+    def fetch_incomplete_sheet_metadata(self):
         """
-        Yields assignment Spreadsheets with metadata that indicate that they have not yet been completed
+        Yields assignment spreadsheet metadata for sheets that indicate that they have not yet been completed
         and should still be considered for processing.
-        NOTE: The pygsheets client includes the `open_all` method, but it loads all matching spreadsheets
-        into memory immediately, which can and will cause memory issues, hence this reimplementation.
 
         Yields:
-            pygsheets.spreadsheet.Spreadsheet: An assignment Spreadsheet that has not been completed
+            dict: An metadata dict for an assignment spreadsheet whose keys match the
+                `FILE_METADATA_FIELDS` property value
         """
         incomplete_assignment_sheet_metadata = self.expanded_sheets_client.get_metadata_for_matching_files(
             query="{} and {}".format(
@@ -769,24 +770,35 @@ class CouponAssignmentHandler:
             ),
             file_fields=self.FILE_METADATA_FIELDS,
         )
-        for metadata_dict in incomplete_assignment_sheet_metadata:
-            yield self.pygsheets_client.open_by_key(metadata_dict["id"])
+        yield from incomplete_assignment_sheet_metadata
 
-    def get_sheet_rows(self, sheet_id):
+    def fetch_assignment_sheet(self, sheet_id):
         """
-        Returns an iterable of raw row data in a coupon assignment sheet with None filled
-        in for any empty columns.
+        Helper method to fetch a Spreadsheet object via pygsheets and return it along with
+        the worksheet where coupon assignments are made
 
         Args:
             sheet_id (str): A coupon assignment spreadsheet id
 
         Returns:
-            iterable of (str, str, str, str): A matrix of raw row data from the sheet
+            (pygsheets.spreadsheet.Spreadsheet, pygsheets.worksheet.Worksheet): A Spreadsheet
+                object paired with a Worksheet object
         """
         spreadsheet = self.pygsheets_client.open_by_key(sheet_id)
-        worksheet = spreadsheet.sheet1
-        data_rows = list(get_data_rows(worksheet))
+        return spreadsheet, spreadsheet.sheet1
 
+    def get_sheet_rows(self, worksheet):
+        """
+        Returns an iterable of raw row data in a coupon assignment sheet with None filled
+        in for any empty columns.
+
+        Args:
+            worksheet (pygsheets.worksheet.Worksheet): A coupon assignment worksheet
+
+        Returns:
+            iterable of (str, str, str, str): A matrix of raw row data from the sheet
+        """
+        data_rows = list(get_data_rows(worksheet))
         coupon_codes = [row[0] for row in data_rows]
         if not coupon_codes:
             raise SheetValidationException("No data found in coupon assignment Sheet")
@@ -799,19 +811,19 @@ class CouponAssignmentHandler:
         status_dates = (item_at_index_or_none(row, 3) for row in data_rows)
         return zip(coupon_codes, emails, statuses, status_dates)
 
-    def get_enumerated_sheet_rows(self, sheet_id):
+    def get_enumerated_sheet_rows(self, worksheet):
         """
         Returns enumerated raw data rows in a coupon assignment sheet.
 
         Args:
-            sheet_id (str): A coupon assignment spreadsheet id
+            worksheet (pygsheets.worksheet.Worksheet): A coupon assignment worksheet
 
         Returns:
             iterable of (int, iterable of (str, str, str, str)):
                 An enumerated matrix of raw row data from the sheet
         """
-        sheet_rows = self.get_sheet_rows(sheet_id)
-        return enumerate(sheet_rows, start=1)
+        sheet_rows = self.get_sheet_rows(worksheet)
+        return enumerate(sheet_rows, start=coupon_assign_sheet_spec.first_data_row)
 
     def assignment_sheet_row_iter(self, bulk_assignments):
         """
@@ -825,9 +837,10 @@ class CouponAssignmentHandler:
                 matrix of data rows in the coupon assignment Sheet associated with that object
         """
         for bulk_assignment in bulk_assignments:
-            yield bulk_assignment, self.get_sheet_rows(
+            _, worksheet = self.fetch_assignment_sheet(
                 bulk_assignment.assignment_sheet_id
             )
+            yield bulk_assignment, self.get_sheet_rows(worksheet)
 
     @classmethod
     def get_desired_coupon_assignments(cls, data_rows):
@@ -927,7 +940,7 @@ class CouponAssignmentHandler:
             [assignment.id for assignment in assignments_to_remove],
         )
 
-    def process_assignment_spreadsheet(self, spreadsheet):
+    def process_assignment_spreadsheet(self, worksheet, bulk_assignment, last_modified):
         """
         Ensures that there are product coupon assignments for every filled-in row in a coupon assignment Spreadsheet,
         and sets some metadata to reflect the state of the bulk assignment.
@@ -940,17 +953,17 @@ class CouponAssignmentHandler:
         4) Send emails to all recipients of newly-created ProductCouponAssignments
 
         Args:
-            spreadsheet (pygsheets.spreadsheet.Spreadsheet):
+            worksheet (pygsheets.worksheet.Worksheet):
+            bulk_assignment (BulkCouponAssignment): The BulkCouponAssignment that is tracking the
+                status of the assignments in this worksheet
+            last_modified (datetime.datetime): The datetime when the spreadsheet was last modified
 
         Returns:
             (BulkCouponAssignment, int, int): The bulk coupon assignment created/updated paired with
                 the number of ProductCouponAssignments created and the number deleted
         """
-        bulk_assignment, _ = BulkCouponAssignment.objects.get_or_create(
-            assignment_sheet_id=spreadsheet.id
-        )
         created_assignments, num_assignments_removed = [], 0
-        sheet_data_rows = self.get_sheet_rows(spreadsheet.id)
+        sheet_data_rows = self.get_sheet_rows(worksheet)
 
         # Determine what assignments need to be created and deleted
         desired_assignments = self.get_desired_coupon_assignments(sheet_data_rows)
@@ -977,9 +990,9 @@ class CouponAssignmentHandler:
             _, created_assignments = ecommerce.api.bulk_assign_product_coupons(
                 assignments_to_create, bulk_assignment=bulk_assignment
             )
-            now = now_in_utc()
+            bulk_assignment.assignment_sheet_last_modified = last_modified
             if not bulk_assignment.assignments_started_date and created_assignments:
-                bulk_assignment.assignments_started_date = now
+                bulk_assignment.assignments_started_date = now_in_utc()
             bulk_assignment.save()
 
         # Send messages if any assignments were created
@@ -997,23 +1010,50 @@ class CouponAssignmentHandler:
                 assignment sheets
         """
         processed = []
-        for spreadsheet in self.fetch_incomplete_sheets():
-            log.info("Processing spreadsheet (%s)..." % spreadsheet_repr(spreadsheet))
-            try:
-                self.process_assignment_spreadsheet(spreadsheet)
-            except SheetValidationException as exc:
+        for spreadsheet_metadata in self.fetch_incomplete_sheet_metadata():
+            sheet_id = spreadsheet_metadata["id"]
+            sheet_last_modified = google_date_string_to_datetime(
+                spreadsheet_metadata["modifiedTime"]
+            )
+            bulk_assignment, created = BulkCouponAssignment.objects.get_or_create(
+                assignment_sheet_id=sheet_id,
+                defaults=dict(assignment_sheet_last_modified=sheet_last_modified),
+            )
+            if (
+                not created
+                and bulk_assignment.assignment_sheet_last_modified
+                and bulk_assignment.assignment_sheet_last_modified
+                >= sheet_last_modified
+            ):
                 log.info(
-                    "Spreadsheet has invalid data for processing - %s, exception: %s"
-                    % (spreadsheet_repr(spreadsheet), str(exc))
+                    "Spreadsheet is unchanged since last scan (%s). Skipping...",
+                    spreadsheet_repr(spreadsheet_metadata=spreadsheet_metadata),
                 )
-            except SheetUpdateException as exc:
-                log.error(
+                continue
+
+            spreadsheet, worksheet = self.fetch_assignment_sheet(sheet_id)
+            log.info("Processing spreadsheet (%s)...", spreadsheet_repr(spreadsheet))
+            try:
+                self.process_assignment_spreadsheet(
+                    worksheet, bulk_assignment, last_modified=sheet_last_modified
+                )
+            except SheetValidationException:
+                log.exception(
+                    "Spreadsheet has invalid data for processing - %s",
+                    spreadsheet_repr(spreadsheet),
+                )
+            except SheetUpdateException:
+                log.exception(
                     "All relevant coupons have been assigned and messages have been sent, "
                     "but failed to update the spreadsheet properties to indicate status "
-                    "- %s, exception: %s" % (spreadsheet_repr(spreadsheet), str(exc))
+                    "- %s",
+                    spreadsheet_repr(spreadsheet),
                 )
-            except Exception as exc:
-                log.error(exc)
+            except:  # pylint: disable=bare-except
+                log.exception(
+                    "Unexpected error while processing spreadsheet - %s",
+                    spreadsheet_repr(spreadsheet),
+                )
             else:
                 processed.append((spreadsheet.id, spreadsheet.title))
         return processed

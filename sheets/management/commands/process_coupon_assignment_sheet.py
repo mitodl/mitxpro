@@ -4,9 +4,10 @@ based on the sheet data, and sends a message to all recipients who received a co
 """
 from django.core.management import BaseCommand, CommandError
 
+from ecommerce.models import BulkCouponAssignment
 from sheets.api import CouponAssignmentHandler
 from sheets.constants import ASSIGNMENT_MESSAGES_COMPLETED_KEY, GOOGLE_API_TRUE_VAL
-from sheets.utils import spreadsheet_repr
+from sheets.utils import spreadsheet_repr, google_date_string_to_datetime
 from sheets.management.utils import get_assignment_spreadsheet_by_title
 
 
@@ -76,8 +77,13 @@ class Command(BaseCommand):
                 spreadsheet_repr(spreadsheet)
             )
         )
+        sheet_last_modified = google_date_string_to_datetime(spreadsheet.updated)
+        bulk_assignment, _ = BulkCouponAssignment.objects.get_or_create(
+            assignment_sheet_id=spreadsheet.id,
+            defaults=dict(assignment_sheet_last_modified=sheet_last_modified),
+        )
         bulk_assignment, num_created, num_removed = coupon_assignment_handler.process_assignment_spreadsheet(
-            spreadsheet
+            spreadsheet.sheet1, bulk_assignment, last_modified=sheet_last_modified
         )
 
         self.stdout.write(
