@@ -13,14 +13,33 @@ class SheetUpdateException(Exception):
     """
 
 
+class SheetRowParsingException(Exception):
+    """
+    General exception for failures while attempting to parse the data in a Sheet row
+    """
+
+
+class SheetCouponCreationException(Exception):
+    """
+    General exception for failures while attempting to create coupons based on the data in a coupon
+    request sheet
+    """
+
+    def __init__(self, coupon_gen_request, coupon_req_row, inner_exc, msg=None):
+        self.coupon_gen_request = coupon_gen_request
+        self.coupon_req_row = coupon_req_row
+        self.inner_exc = inner_exc
+        super().__init__(msg)
+
+
 class SheetOutOfSyncException(Exception):
     """
     General exception for situations where the data in a spreadsheet does not reflect the state of the database
     """
 
-    def __init__(self, coupon_gen_request, row_index, msg=None):
+    def __init__(self, coupon_gen_request, coupon_req_row, msg=None):
         self.coupon_gen_request = coupon_gen_request
-        self.row_index = row_index
+        self.coupon_req_row = coupon_req_row
         super().__init__(msg)
 
 

@@ -19,7 +19,7 @@ from sheets.constants import (
     GOOGLE_SHEET_FIRST_ROW,
     ASSIGNMENT_SHEET_ENROLLED_STATUS,
 )
-from sheets.exceptions import InvalidSheetProductException
+from sheets.exceptions import InvalidSheetProductException, SheetRowParsingException
 
 
 def generate_google_client_config():
@@ -41,17 +41,28 @@ def generate_google_client_config():
 
 SpreadsheetSpec = namedtuple(
     "SpreadsheetSpec",
-    ["first_data_row", "last_data_column", "num_columns", "column_headers"],
+    [
+        "first_data_row",
+        "last_data_column",
+        "calculated_column_indices",
+        "num_columns",
+        "column_headers",
+    ],
 )
 coupon_request_sheet_spec = SpreadsheetSpec(
     first_data_row=GOOGLE_SHEET_FIRST_ROW + 1,
-    last_data_column="H",
-    num_columns=8,
+    last_data_column=settings.SHEETS_REQ_ERROR_COL_LETTER,
+    calculated_column_indices={
+        settings.SHEETS_REQ_PROCESSED_COL,
+        settings.SHEETS_REQ_ERROR_COL,
+    },
+    num_columns=settings.SHEETS_REQ_ERROR_COL,
     column_headers=[],
 )
 coupon_assign_sheet_spec = SpreadsheetSpec(
     first_data_row=GOOGLE_SHEET_FIRST_ROW + 1,
     last_data_column="D",
+    calculated_column_indices={0, 2, 3},
     num_columns=4,
     column_headers=["Coupon Code", "Email (Assignee)", "Status", "Status Date"],
 )
@@ -65,7 +76,10 @@ ASSIGNMENT_SHEET_STATUS_COLUMN = next(
 ProcessedRequest = namedtuple(
     "ProcessedRequest", ["row_index", "coupon_req_row", "request_id", "date_processed"]
 )
-FailedRequest = namedtuple("FailedRequest", ["row_index", "exception", "error_text"])
+FailedRequest = namedtuple(
+    "FailedRequest", ["row_index", "exception", "sheet_error_text"]
+)
+IgnoredRequest = namedtuple("IgnoredRequest", ["row_index", "coupon_req_row", "reason"])
 AssignmentRow = namedtuple(
     "AssignmentRow", ["row_index", "coupon_code", "email", "status", "status_date"]
 )
@@ -74,8 +88,7 @@ AssignmentRow = namedtuple(
 class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
     """Represents a row of a coupon request sheet"""
 
-    DATE_PROCESSED_COLUMN = "H"
-    ERROR_COLUMN = "I"
+    PURCHASE_ORDER_COL_INDEX = 0
 
     def __init__(
         self,
@@ -88,6 +101,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
         activation,
         expiration,
         date_processed,
+        error,
     ):  # pylint: disable=too-many-arguments
         self.row_index = row_index
         self.purchase_order_id = purchase_order_id
@@ -98,6 +112,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
         self.activation = activation
         self.expiration = expiration
         self.date_processed = date_processed
+        self.error = error
 
     @classmethod
     def parse_raw_data(cls, row_index, raw_row_data):
@@ -110,18 +125,49 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
 
         Returns:
             CouponRequestRow: The parsed data row
+
+        Raises:
+            SheetRowParsingException: Raised if the row could not be parsed
         """
-        return cls(
-            row_index=row_index,
-            purchase_order_id=raw_row_data[0].strip(),
-            coupon_name=raw_row_data[1].strip(),
-            num_codes=int(raw_row_data[2]),
-            product_text_id=raw_row_data[3].strip(),
-            company_name=raw_row_data[4],
-            activation=parse_sheet_date_str(item_at_index_or_none(raw_row_data, 5)),
-            expiration=parse_sheet_date_str(item_at_index_or_none(raw_row_data, 6)),
-            date_processed=parse_sheet_date_str(item_at_index_or_none(raw_row_data, 7)),
-        )
+        try:
+            return cls(
+                row_index=row_index,
+                purchase_order_id=raw_row_data[cls.PURCHASE_ORDER_COL_INDEX].strip(),
+                coupon_name=raw_row_data[1].strip(),
+                num_codes=int(raw_row_data[2]),
+                product_text_id=raw_row_data[3].strip(),
+                company_name=raw_row_data[4],
+                activation=parse_sheet_date_str(item_at_index_or_none(raw_row_data, 5)),
+                expiration=parse_sheet_date_str(item_at_index_or_none(raw_row_data, 6)),
+                date_processed=parse_sheet_date_str(
+                    item_at_index_or_none(
+                        raw_row_data, settings.SHEETS_REQ_PROCESSED_COL
+                    )
+                ),
+                error=item_at_index_or_none(
+                    raw_row_data, settings.SHEETS_REQ_ERROR_COL
+                ),
+            )
+        except Exception as exc:
+            raise SheetRowParsingException from exc
+
+    @classmethod
+    def get_user_input_columns(cls, raw_row_data):
+        """
+        Returns a list of column data that were entered via user input (as opposed to
+        calculated columns that the user does not control)
+
+        Args:
+            raw_row_data (iterable of str): The raw row data
+
+        Returns:
+            list of str: The row data containing only columns with user-entered values
+        """
+        return [
+            col
+            for i, col in enumerate(raw_row_data)
+            if i not in coupon_request_sheet_spec.calculated_column_indices
+        ]
 
     def get_product_id(self):
         """

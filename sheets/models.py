@@ -20,7 +20,13 @@ class CouponGenerationRequest(TimestampedModel):
     """Model that represents a request to create bulk enrollment coupons"""
 
     purchase_order_id = models.CharField(max_length=100, db_index=True, null=False)
-    completed = models.BooleanField(default=False)
+    date_completed = models.DateTimeField(null=True, blank=True)
+    raw_data = models.CharField(max_length=300, null=True, blank=True)
+
+    def __str__(self):
+        return "GoogleFileWatch: id={}, purchase_order_id={}, completed={}".format(
+            self.id, self.purchase_order_id, self.date_completed is not None
+        )
 
 
 class GoogleFileWatch(TimestampedModel):

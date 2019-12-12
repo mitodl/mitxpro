@@ -24,7 +24,7 @@ def test_handle_unprocessed_coupon_requests(mocker, coupon_req_row):
             date_processed=now_in_utc(),
         ),
     ]
-    patched_req_handler.return_value.create_coupons_from_rows.return_value = (
+    patched_req_handler.return_value.parse_rows_and_create_coupons.return_value = (
         dummy_processed_requests
     )
 

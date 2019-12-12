@@ -6,6 +6,8 @@ from decimal import Decimal
 from types import SimpleNamespace
 import pytest
 import pytz
+import copy
+import json
 
 from django.core.exceptions import ImproperlyConfigured
 import pygsheets
@@ -26,7 +28,13 @@ from sheets.constants import (
     GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN,
     REQUIRED_GOOGLE_API_SCOPES,
 )
-from sheets.exceptions import SheetOutOfSyncException, InvalidSheetProductException
+from sheets.exceptions import (
+    SheetOutOfSyncException,
+    InvalidSheetProductException,
+    SheetRowParsingException,
+    SheetCouponCreationException,
+)
+from sheets.models import CouponGenerationRequest
 from sheets.utils import (
     coupon_request_sheet_spec,
     ProcessedRequest,
@@ -34,6 +42,7 @@ from sheets.utils import (
     CouponRequestRow,
     get_enumerated_data_rows,
     FailedRequest,
+    IgnoredRequest,
 )
 from sheets.factories import CouponGenerationRequestFactory, GoogleApiAuthFactory
 from ecommerce.models import CouponPaymentVersion, Company
@@ -47,13 +56,11 @@ def pygsheets_fixtures(mocker, db, coupon_req_raw_data):
     google_api_auth = GoogleApiAuthFactory.create()
     # Create some fake worksheet rows, with a header row and two rows of data
     # (the second slightly different from the first)
-    sheet_rows = [
-        coupon_request_sheet_spec.column_headers,
-        coupon_req_raw_data,
-        coupon_req_raw_data,
-    ]
-    sheet_rows[1][0] = "another_purchase_order_id"
-    sheet_rows[1][2] = "10"
+    sheet_rows = [coupon_request_sheet_spec.column_headers, coupon_req_raw_data]
+    added_row = list(coupon_req_raw_data)
+    added_row[0] = "another_purchase_order_id"
+    added_row[2] = "10"
+    sheet_rows.append(added_row)
     mocked_worksheet = MagicMock(
         spec=Worksheet, get_all_values=Mock(return_value=sheet_rows)
     )
@@ -67,6 +74,7 @@ def pygsheets_fixtures(mocker, db, coupon_req_raw_data):
     top_level_module = MagicMock(
         spec=pygsheets, authorize=Mock(return_value=mocked_pygsheets_client)
     )
+    mocker.patch("sheets.api.pygsheets", top_level_module)
     return SimpleNamespace(
         pygsheets=top_level_module,
         client=mocked_pygsheets_client,
@@ -129,8 +137,7 @@ def test_create_coupons_for_request_row(mocker, base_data, coupon_req_row):
     function and creates an object to record the processing of the coupon request.
     """
     patched_create_coupons = mocker.patch("ecommerce.api.create_coupons")
-
-    coupon_gen_request = create_coupons_for_request_row(coupon_req_row)
+    create_coupons_for_request_row(coupon_req_row)
     patched_create_coupons.assert_called_once_with(
         name=coupon_req_row.coupon_name,
         product_ids=[base_data.product_version.product.id],
@@ -145,42 +152,21 @@ def test_create_coupons_for_request_row(mocker, base_data, coupon_req_row):
         amount=Decimal("1.0"),
         automatic=False,
     )
-    assert coupon_gen_request.completed is True
 
 
-@pytest.mark.django_db
-def test_create_coupons_already_complete(mocker, coupon_req_row):
+def test_coupon_req_handler_parse_and_create(mocker, pygsheets_fixtures):
     """
-    create_coupons_for_request_row should raise an exception if a
-    request has already been completed for the request row's transaction id.
-    """
-    patched_log = mocker.patch("sheets.api.log")
-    CouponGenerationRequestFactory.create(
-        purchase_order_id=coupon_req_row.purchase_order_id, completed=True
-    )
-    with pytest.raises(SheetOutOfSyncException):
-        create_coupons_for_request_row(coupon_req_row)
-    patched_log.error.assert_called_once()
-
-
-def test_coupon_request_handler_create_coupons(mocker, pygsheets_fixtures):
-    """
-    CouponRequestHandler.create_coupons_from_rows should iterate through the given rows of data, create
+    CouponRequestHandler.parse_rows_and_create_coupons should iterate through the given rows of data, create
     coupons for the ones that are not yet processed, and return objects representing the row results.
     """
-    mocker.patch("sheets.api.pygsheets", pygsheets_fixtures.pygsheets)
-    coupon_gen_requests = CouponGenerationRequestFactory.create_batch(
-        pygsheets_fixtures.num_data_rows
-    )
-    patched_create_coupons = mocker.patch(
-        "sheets.api.create_coupons_for_request_row", side_effect=coupon_gen_requests
-    )
+    patched_create_coupons = mocker.patch("sheets.api.create_coupons_for_request_row")
 
     coupon_req_handler = CouponRequestHandler()
     enumerated_rows = get_enumerated_data_rows(coupon_req_handler.coupon_request_sheet)
-    processed_requests, failed_requests, _ = coupon_req_handler.create_coupons_from_rows(
+    processed_requests, failed_requests, _, _ = coupon_req_handler.parse_rows_and_create_coupons(
         enumerated_rows
     )
+
     assert patched_create_coupons.call_count == pygsheets_fixtures.num_data_rows
     assert len(processed_requests) == pygsheets_fixtures.num_data_rows
     assert len(failed_requests) == 0
@@ -190,64 +176,148 @@ def test_coupon_request_handler_create_coupons(mocker, pygsheets_fixtures):
         isinstance(processed_request.coupon_req_row, CouponRequestRow)
         for processed_request in processed_requests
     )
-    assert [
+    request_ids = [
         processed_request.request_id for processed_request in processed_requests
-    ] == [coupon_gen_request.id for coupon_gen_request in coupon_gen_requests]
+    ]
+    coupon_gen_request_ids = CouponGenerationRequest.objects.filter(
+        id__in=request_ids
+    ).values_list("id", flat=True)
+    assert len(coupon_gen_request_ids) == pygsheets_fixtures.num_data_rows
+    assert set(coupon_gen_request_ids) == set(request_ids)
 
 
-def test_coupon_request_handler_coupon_failures(
-    mocker, pygsheets_fixtures, coupon_req_row
-):
+def test_parse_and_create_other_responses(mocker, pygsheets_fixtures, coupon_req_row):
     """
-    CouponRequestHandler.create_coupons_from_rows should return objects representing row failures
+    CouponRequestHandler.parse_rows_and_create_coupons should return objects representing row failures
     if data rows can't be parsed or coupons can't be created.
     """
-    mocker.patch("sheets.api.pygsheets", pygsheets_fixtures.pygsheets)
     patched_log = mocker.patch("sheets.api.log")
-    patched_row_parse = mocker.patch.object(
-        CouponRequestRow,
-        "parse_raw_data",
-        side_effect=[
-            IndexError("Parsing failure"),
-            coupon_req_row,
-            coupon_req_row,
-            coupon_req_row,
-        ],
+
+    row_with_error_text = copy.copy(coupon_req_row)
+    row_with_error_text.error = "Row error"
+    incomplete_request = CouponGenerationRequestFactory.create(date_completed=None)
+    complete_request = CouponGenerationRequestFactory.create(
+        date_completed=now_in_utc()
     )
-    patched_create_coupons = mocker.patch(
-        "sheets.api.create_coupons_for_request_row",
-        side_effect=[
-            Company.DoesNotExist(),
-            InvalidSheetProductException(),
-            ValueError("Coupon creation failure"),
-        ],
+    parse_and_create_side_effects = [
+        SheetRowParsingException(),
+        SheetCouponCreationException(
+            incomplete_request, coupon_req_row, inner_exc=Company.DoesNotExist()
+        ),
+        SheetCouponCreationException(
+            incomplete_request, coupon_req_row, inner_exc=InvalidSheetProductException()
+        ),
+        SheetCouponCreationException(
+            incomplete_request, coupon_req_row, inner_exc=ValueError()
+        ),
+        ValueError("Unexpected value error"),
+        SheetOutOfSyncException(incomplete_request, coupon_req_row),
+        # Rows with error text that were passed over should be included in results as ignored rows
+        (incomplete_request, row_with_error_text, True),
+        # Completed rows that were ignored should NOT be included in results as ignored rows
+        (complete_request, coupon_req_row, True),
+    ]
+    patched_parse_row_and_create_coupons = mocker.patch(
+        "sheets.api.CouponRequestHandler.parse_row_and_create_coupons",
+        side_effect=parse_and_create_side_effects,
     )
+    row_count = len(parse_and_create_side_effects)
+
     coupon_req_handler = CouponRequestHandler()
-    enumerated_rows = enumerate([["mock", "row", "data"]] * 4, start=2)
-    processed_requests, failed_requests, _ = coupon_req_handler.create_coupons_from_rows(
+    enumerated_rows = enumerate([["mock", "row", "data"]] * row_count, start=2)
+    processed_reqs, failed_reqs, ignored_reqs, unrecorded_reqs = coupon_req_handler.parse_rows_and_create_coupons(
         enumerated_rows
     )
-    assert len(failed_requests) == 4
-    assert patched_log.error.call_count == 4
-    assert patched_row_parse.call_count == 4
-    # create_coupons_for_request_row should not be called if the row fails parsing
-    assert patched_create_coupons.call_count == 3
-    expected_exception_types = [
-        IndexError,
-        Company.DoesNotExist,
-        InvalidSheetProductException,
-        ValueError,
-    ]
-    exceptions = [failed_request.exception for failed_request in failed_requests]
-    assert all(
-        isinstance(exception, expected_exception_type)
-        for exception, expected_exception_type in zip(
-            exceptions, expected_exception_types
-        )
+
+    assert patched_parse_row_and_create_coupons.call_count == row_count
+    assert len(processed_reqs) == 0
+    # All but the last 3 calls to 'parse_row_and_create_coupons' should be counted as failed requests
+    assert len(failed_reqs) == (row_count - 3)
+    assert len(ignored_reqs) == 1
+    assert len(unrecorded_reqs) == 1
+    assert patched_log.exception.call_count == len(failed_reqs)
+
+
+def test_coupon_req_handler_parse_raw_data_update(
+    mocker, pygsheets_fixtures, coupon_req_raw_data
+):
+    """
+    CouponRequestHandler.parse_rows_and_create_coupons should update the `raw_data` property for a
+    CouponGenerationRequest if the actual data in the row is different.
+    """
+    mocker.patch("sheets.api.create_coupons_for_request_row")
+    raw_row_data = copy.copy(coupon_req_raw_data)
+    raw_data_for_gen_request = json.dumps(
+        CouponRequestRow.get_user_input_columns(raw_row_data)
+    )
+    coupon_gen_request = CouponGenerationRequestFactory.create(
+        purchase_order_id=raw_row_data[CouponRequestRow.PURCHASE_ORDER_COL_INDEX],
+        raw_data=raw_data_for_gen_request,
+    )
+
+    raw_row_data[3] = "updated column value"
+    coupon_req_handler = CouponRequestHandler()
+    _, _, _ = coupon_req_handler.parse_row_and_create_coupons(
+        row_index=1, row_data=raw_row_data
+    )
+    coupon_gen_request.refresh_from_db()
+    assert coupon_gen_request.raw_data != raw_data_for_gen_request
+    assert coupon_gen_request.raw_data == json.dumps(
+        CouponRequestRow.get_user_input_columns(raw_row_data)
     )
 
 
-def test_coupon_request_handler_update_processed(
+def test_coupon_req_handler_parse_already_processed(
+    mocker, settings, pygsheets_fixtures, coupon_req_raw_data
+):
+    """
+    CouponRequestHandler.parse_rows_and_create_coupons should return ignored=True and skip coupon creation
+    if a request row indicates that it has already been processed.
+    """
+    patched_create_coupons = mocker.patch("sheets.api.create_coupons_for_request_row")
+    now = now_in_utc()
+    row_data = copy.copy(coupon_req_raw_data)
+    row_data[settings.SHEETS_REQ_PROCESSED_COL] = now.strftime(
+        settings.SHEETS_DATE_FORMAT
+    )
+
+    coupon_req_handler = CouponRequestHandler()
+    coupon_gen_request, coupon_req_row, ignored = coupon_req_handler.parse_row_and_create_coupons(
+        row_index=1, row_data=row_data
+    )
+    assert ignored is True
+    assert (
+        coupon_req_row.purchase_order_id
+        == row_data[CouponRequestRow.PURCHASE_ORDER_COL_INDEX]
+    )
+    patched_create_coupons.assert_not_called()
+
+
+def test_coupon_req_handler_parse_unchanged_error(
+    mocker, settings, pygsheets_fixtures, coupon_req_raw_data
+):
+    """
+    CouponRequestHandler.parse_rows_and_create_coupons should return ignored=True and skip coupon creation
+    if a request row has an error and the row data is unchanged from our data in the database.
+    """
+    patched_create_coupons = mocker.patch("sheets.api.create_coupons_for_request_row")
+    row_data = copy.copy(coupon_req_raw_data)
+    row_data[settings.SHEETS_REQ_ERROR_COL] = "Error"
+    existing_coupon_gen_request = CouponGenerationRequestFactory.create(
+        purchase_order_id=row_data[CouponRequestRow.PURCHASE_ORDER_COL_INDEX],
+        raw_data=json.dumps(CouponRequestRow.get_user_input_columns(row_data)),
+    )
+
+    coupon_req_handler = CouponRequestHandler()
+    coupon_gen_request, coupon_req_row, ignored = coupon_req_handler.parse_row_and_create_coupons(
+        row_index=1, row_data=row_data
+    )
+    assert ignored is True
+    assert coupon_gen_request == existing_coupon_gen_request
+    patched_create_coupons.assert_not_called()
+
+
+def test_coupon_req_handler_update_processed(
     mocker, settings, pygsheets_fixtures, coupon_req_row
 ):
     """
@@ -256,7 +326,6 @@ def test_coupon_request_handler_update_processed(
     """
     tz_new_york = pytz.timezone("America/New_York")
     settings.SHEETS_DATE_TIMEZONE = tz_new_york
-    mocker.patch("sheets.api.pygsheets", pygsheets_fixtures.pygsheets)
     processed_dates = [now_in_utc(), now_in_utc() - timedelta(days=1)]
     processed_requests = [
         ProcessedRequest(
@@ -302,15 +371,12 @@ def test_coupon_request_handler_update_processed(
     )
 
 
-def test_coupon_request_handler_write_results(
-    mocker, pygsheets_fixtures, coupon_req_row
-):
+def test_coupon_req_handler_write_results(mocker, pygsheets_fixtures, coupon_req_row):
     """
     CouponRequestHandler.write_results_to_sheets should use the pygsheets client to
     update request sheet checkboxes and create a new assignment sheet for every row
     that was successfully processed.
     """
-    mocker.patch("sheets.api.pygsheets", pygsheets_fixtures.pygsheets)
     processed_requests = [
         ProcessedRequest(
             row_index=2,
@@ -346,7 +412,6 @@ def test_process_sheet(mocker, pygsheets_fixtures):
     CouponRequestHandler.process_sheet should create coupons for all relevant rows, appropriately handle
     rows that succeeded and failed, and return some results.
     """
-    mocker.patch("sheets.api.pygsheets", pygsheets_fixtures.pygsheets)
     patched_get_rows = mocker.patch(
         "sheets.api.get_enumerated_data_rows", return_value=[(1, ["fake", "row"])]
     )
@@ -359,20 +424,24 @@ def test_process_sheet(mocker, pygsheets_fixtures):
         ),
     ]
     failed_request = FailedRequest(
-        row_index=4, exception=Exception("error"), error_text="bad"
+        row_index=4, exception=Exception("error"), sheet_error_text="bad"
+    )
+    ignored_request = IgnoredRequest(
+        row_index=5, coupon_req_row=mocker.Mock(), reason="Ignored"
     )
     unrecorded_complete_request = ProcessedRequest(
-        row_index=5,
+        row_index=6,
         coupon_req_row=mocker.Mock(),
-        request_id=5,
+        request_id=6,
         date_processed=now_in_utc(),
     )
-    patched_create_coupons_from_rows = mocker.patch.object(
+    patched_parse_rows_and_create_coupons = mocker.patch.object(
         CouponRequestHandler,
-        "create_coupons_from_rows",
+        "parse_rows_and_create_coupons",
         return_value=(
             processed_requests,
             [failed_request],
+            [ignored_request],
             [unrecorded_complete_request],
         ),
     )
@@ -394,7 +463,7 @@ def test_process_sheet(mocker, pygsheets_fixtures):
     patched_get_rows.assert_called_once_with(
         coupon_req_handler.coupon_request_sheet, limit_row_index=None
     )
-    patched_create_coupons_from_rows.assert_called_once_with(
+    patched_parse_rows_and_create_coupons.assert_called_once_with(
         patched_get_rows.return_value
     )
     patched_create_and_update_sheets.assert_called_once_with(processed_requests)
@@ -408,5 +477,6 @@ def test_process_sheet(mocker, pygsheets_fixtures):
             "assignment_sheets": ["new spreadsheet"],
         },
         "failed_request_rows": [4],
-        "synced_request_rows": [5],
+        "ignored_request_rows": [5],
+        "synced_request_rows": [6],
     }
