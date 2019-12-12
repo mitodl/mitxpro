@@ -407,17 +407,26 @@ def get_enumerated_data_rows(
         yield from enumerated_data_rows
 
 
-def spreadsheet_repr(spreadsheet):
+def spreadsheet_repr(spreadsheet=None, spreadsheet_metadata=None):
     """
     Returns a simple string representation of a Spreadsheet object
 
     Args:
-        spreadsheet (pygsheets.spreadsheet.Spreadsheet):
+        spreadsheet (pygsheets.spreadsheet.Spreadsheet or None):
+        spreadsheet_metadata (dict or None): A dict of spreadsheet metadata
 
     Returns:
         str: String representation of the spreadsheet
     """
-    return "'{}', id: {}".format(spreadsheet.title, spreadsheet.id)
+    if spreadsheet:
+        sheet_id, title = spreadsheet.id, spreadsheet.title
+    elif spreadsheet_metadata:
+        sheet_id, title = spreadsheet_metadata["id"], spreadsheet_metadata["name"]
+    else:
+        sheet_id, title = None, None
+    if not sheet_id or not title:
+        raise ValueError("Invalid spreadsheet/metadata provided")
+    return "'{}', id: {}".format(title, sheet_id)
 
 
 def format_datetime_for_google_api(dt):
@@ -503,8 +512,24 @@ def google_timestamp_to_datetime(google_timestamp):
     Returns:
         datetime.datetime: The parsed timestamp with UTC timezone
     """
+    # Google timestamps are expressed in milliseconds, hence the '/ 1000'
     timestamp_in_seconds = int(google_timestamp) / 1000
     return datetime.datetime.fromtimestamp(timestamp_in_seconds, pytz.utc)
+
+
+def google_date_string_to_datetime(google_date_str):
+    """
+    Parses a datetime string value from a Google API response as a normal datetime (UTC)
+
+    Args:
+        google_date_str (str): A datetime string value from a Google API response
+
+    Returns:
+        datetime.datetime: The parsed timestamp with UTC timezone
+    """
+    return datetime.datetime.strptime(
+        google_date_str, "%Y-%m-%dT%H:%M:%S.%fZ"
+    ).astimezone(pytz.UTC)
 
 
 def mailgun_timestamp_to_datetime(timestamp):
