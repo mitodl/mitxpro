@@ -233,6 +233,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
         user=None,
         extra_context={
             "coupon": None,
+            "content_title": "test_run_title",
             "lines": [
                 {
                     "quantity": 1,
