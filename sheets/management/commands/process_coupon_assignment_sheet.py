@@ -37,7 +37,11 @@ class Command(BaseCommand):
             "-f",
             "--force",
             action="store_true",
-            help="Process coupon assignment sheet even if file properties indicate that it was already processed",
+            help=(
+                "Process coupon assignment sheet even if "
+                "(a) file properties indicate that it was already processed, or"
+                "(b) the file is unchanged since the last time it was processed.",
+            ),
         )
         super().add_arguments(parser)
 
@@ -77,11 +81,25 @@ class Command(BaseCommand):
                 spreadsheet_repr(spreadsheet)
             )
         )
-        sheet_last_modified = google_date_string_to_datetime(spreadsheet.updated)
-        bulk_assignment, _ = BulkCouponAssignment.objects.get_or_create(
+        metadata = coupon_assignment_handler.expanded_sheets_client.get_drive_file_metadata(
+            file_id=spreadsheet.id, fields="modifiedTime"
+        )
+        sheet_last_modified = google_date_string_to_datetime(metadata["modifiedTime"])
+        bulk_assignment, created = BulkCouponAssignment.objects.get_or_create(
             assignment_sheet_id=spreadsheet.id,
             defaults=dict(assignment_sheet_last_modified=sheet_last_modified),
         )
+        if (
+            not created
+            and sheet_last_modified <= bulk_assignment.assignment_sheet_last_modified
+            and not options["force"]
+        ):
+            raise CommandError(
+                "Spreadsheet is unchanged since it was last processed (%s, last modified: %s). "
+                "Add the '-f/--force' flag to process it anyway."
+                % (spreadsheet_repr(spreadsheet), sheet_last_modified.isoformat())
+            )
+
         bulk_assignment, num_created, num_removed = coupon_assignment_handler.process_assignment_spreadsheet(
             spreadsheet.sheet1, bulk_assignment, last_modified=sheet_last_modified
         )

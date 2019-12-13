@@ -253,6 +253,28 @@ class ExpandedSheetsClient:
             .execute()
         )
 
+    def get_drive_file_metadata(self, file_id, fields="id, name, modifiedTime"):
+        """
+        Helper method to fetch metadata for some Drive file.
+
+        Args:
+           file_id (str): The file ID
+           fields (str): Comma-separated list of file fields that should be returned in the metadata
+                results (ref: https://developers.google.com/drive/api/v3/reference/files#resource)
+
+        Returns:
+           dict: The file metadata, which includes the specified fields.
+        """
+        return (
+            self.pygsheets_client.drive.service.files()
+            .get(
+                fileId=file_id,
+                fields=fields,
+                supportsTeamDrives=self.supports_team_drives,
+            )
+            .execute()
+        )
+
     def get_sheet_properties(self, file_id):
         """
         Helper method to fetch the dictionary of appProperties for the given spreadsheet by its
@@ -265,15 +287,7 @@ class ExpandedSheetsClient:
         Returns:
             dict: appProperties (if any) for the given sheet according to Drive
         """
-        result = (
-            self.pygsheets_client.drive.service.files()
-            .get(
-                fileId=file_id,
-                fields="appProperties",
-                supportsTeamDrives=self.supports_team_drives,
-            )
-            .execute()
-        )
+        result = self.get_drive_file_metadata(file_id=file_id, fields="appProperties")
         if result and "appProperties" in result:
             return result["appProperties"]
         return {}
@@ -546,8 +560,8 @@ class CouponRequestHandler:
                 )
             except SheetOutOfSyncException as exc:
                 log.error(
-                    "Found completed CouponGenerationRequest, but the 'processed' column "
-                    "in the spreadsheet == False (purchase order id: %s)",
+                    "Found completed CouponGenerationRequest, but the 'Date Processed' column "
+                    "in the spreadsheet is empty (purchase order id: %s)",
                     exc.coupon_req_row.purchase_order_id,
                 )
                 unrecorded_complete_requests.append(
@@ -651,7 +665,7 @@ class CouponRequestHandler:
                 "{}{}".format(
                     settings.SHEETS_REQ_ERROR_COL_LETTER, failed_request.row_index
                 ),
-                failed_request.error_text,
+                failed_request.sheet_error_text,
             )
 
     def create_coupon_assignment_sheet(self, coupon_req_row):

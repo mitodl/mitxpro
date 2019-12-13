@@ -25,7 +25,7 @@ class Command(BaseCommand):
             "-f",
             "--force",
             action="store_true",
-            help="Process request row even if the 'processed' column is set to checked/true",
+            help="Process request row even if the 'Date Processed' column is non-empty",
         )
 
     def handle(self, *args, **options):  # pylint:disable=missing-docstring
