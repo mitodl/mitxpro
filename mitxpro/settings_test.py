@@ -166,21 +166,18 @@ class TestSettings(TestCase):
 
     def test_server_side_cursors_disabled(self):
         """DISABLE_SERVER_SIDE_CURSORS should be true by default"""
-        with mock.patch.dict("os.environ", REQUIRED_SETTINGS):
-            settings_vars = self.reload_settings()
-            assert (
-                settings_vars["DEFAULT_DATABASE_CONFIG"]["DISABLE_SERVER_SIDE_CURSORS"]
-                is True
-            )
+        settings_vars = self.patch_settings(REQUIRED_SETTINGS)
+        assert (
+            settings_vars["DEFAULT_DATABASE_CONFIG"]["DISABLE_SERVER_SIDE_CURSORS"]
+            is True
+        )
 
     def test_server_side_cursors_enabled(self):
         """DISABLE_SERVER_SIDE_CURSORS should be false if MITXPRO_DB_DISABLE_SS_CURSORS is false"""
-        with mock.patch.dict(
-            "os.environ",
-            {**REQUIRED_SETTINGS, "MITXPRO_DB_DISABLE_SS_CURSORS": "False"},
-        ):
-            settings_vars = self.reload_settings()
-            assert (
-                settings_vars["DEFAULT_DATABASE_CONFIG"]["DISABLE_SERVER_SIDE_CURSORS"]
-                is False
-            )
+        settings_vars = self.patch_settings(
+            {**REQUIRED_SETTINGS, "MITXPRO_DB_DISABLE_SS_CURSORS": "False"}
+        )
+        assert (
+            settings_vars["DEFAULT_DATABASE_CONFIG"]["DISABLE_SERVER_SIDE_CURSORS"]
+            is False
+        )

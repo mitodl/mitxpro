@@ -268,7 +268,7 @@
       "required": false
     },
     "MITXPRO_DB_DISABLE_SS_CURSORS": {
-      "description": "Disable server-side cursors",
+      "description": null,
       "required": false
     },
     "MITXPRO_EMAIL_BACKEND": {
