@@ -260,6 +260,10 @@ DEFAULT_DATABASE_CONFIG["CONN_MAX_AGE"] = get_int(
     0,
     description="Maximum age of connection to Postgres in seconds",
 )
+DEFAULT_DATABASE_CONFIG["DISABLE_SERVER_SIDE_CURSORS"] = get_bool(
+    "MITXPRO_DB_DISABLE_SS_CURSORS", True
+)
+
 
 if get_bool(
     "MITXPRO_DB_DISABLE_SSL",

@@ -267,6 +267,10 @@
       "description": "Disables SSL to postgres if set to True",
       "required": false
     },
+    "MITXPRO_DB_DISABLE_SS_CURSORS": {
+      "description": "Disable server-side cursors",
+      "required": false
+    },
     "MITXPRO_EMAIL_BACKEND": {
       "description": null,
       "required": false
