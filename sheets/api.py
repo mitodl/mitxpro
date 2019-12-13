@@ -408,12 +408,13 @@ def renew_coupon_request_file_watch(force=False):
         return file_watch, created, True
 
 
-def create_coupons_for_request_row(coupon_req_row):
+def create_coupons_for_request_row(coupon_req_row, company_id):
     """
     Creates coupons for a given request
 
     Args:
         coupon_req_row (sheets.utils.CouponRequestRow): A representation of a coupon request row
+        company_id (int): The id of the Company on whose behalf these coupons are being created
 
     Returns:
         CouponPaymentVersion:
@@ -425,7 +426,7 @@ def create_coupons_for_request_row(coupon_req_row):
         num_coupon_codes=coupon_req_row.num_codes,
         coupon_type=CouponPaymentVersion.SINGLE_USE,
         max_redemptions=1,
-        company_id=Company.objects.get(name__iexact=coupon_req_row.company_name).id,
+        company_id=company_id,
         activation_date=coupon_req_row.activation,
         expiration_date=coupon_req_row.expiration,
         payment_type=CouponPaymentVersion.PAYMENT_PO,
@@ -488,8 +489,14 @@ class CouponRequestHandler:
         if not created and coupon_req_row.error and not raw_data_changed:
             return coupon_gen_request, coupon_req_row, True
 
+        company, created = Company.objects.get_or_create(
+            name__iexact=coupon_req_row.company_name,
+            defaults=dict(name=coupon_req_row.company_name),
+        )
+        if created:
+            log.info("Created new Company '%s'...", coupon_req_row.company_name)
         try:
-            create_coupons_for_request_row(coupon_req_row)
+            create_coupons_for_request_row(coupon_req_row, company.id)
         except Exception as exc:
             raise SheetCouponCreationException(
                 coupon_gen_request=coupon_gen_request,
@@ -553,9 +560,7 @@ class CouponRequestHandler:
                 )
             except SheetCouponCreationException as exc:
                 log.exception("Enrollment code creation error (row %d)", row_index)
-                if isinstance(exc.inner_exc, Company.DoesNotExist):
-                    error_msg = "Company not found"
-                elif isinstance(exc.inner_exc, InvalidSheetProductException):
+                if isinstance(exc.inner_exc, InvalidSheetProductException):
                     error_msg = "Invalid product ({})".format(exc.inner_exc)
                 else:
                     error_msg = "Enrollment code creation error ({})".format(
