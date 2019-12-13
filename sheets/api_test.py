@@ -1,6 +1,6 @@
 # pylint: disable=redefined-outer-name,unused-argument
 """Sheets API tests"""
-
+import copy
 from datetime import timedelta
 from decimal import Decimal
 from types import SimpleNamespace
@@ -137,14 +137,15 @@ def test_create_coupons_for_request_row(mocker, base_data, coupon_req_row):
     function and creates an object to record the processing of the coupon request.
     """
     patched_create_coupons = mocker.patch("ecommerce.api.create_coupons")
-    create_coupons_for_request_row(coupon_req_row)
+    fake_company_id = 123
+    create_coupons_for_request_row(coupon_req_row, company_id=fake_company_id)
     patched_create_coupons.assert_called_once_with(
         name=coupon_req_row.coupon_name,
         product_ids=[base_data.product_version.product.id],
         num_coupon_codes=coupon_req_row.num_codes,
         coupon_type=CouponPaymentVersion.SINGLE_USE,
         max_redemptions=1,
-        company_id=base_data.company.id,
+        company_id=fake_company_id,
         activation_date=coupon_req_row.activation,
         expiration_date=coupon_req_row.expiration,
         payment_type=CouponPaymentVersion.PAYMENT_PO,
@@ -192,7 +193,6 @@ def test_parse_and_create_other_responses(mocker, pygsheets_fixtures, coupon_req
     if data rows can't be parsed or coupons can't be created.
     """
     patched_log = mocker.patch("sheets.api.log")
-
     row_with_error_text = copy.copy(coupon_req_row)
     row_with_error_text.error = "Row error"
     incomplete_request = CouponGenerationRequestFactory.create(date_completed=None)
@@ -201,9 +201,6 @@ def test_parse_and_create_other_responses(mocker, pygsheets_fixtures, coupon_req
     )
     parse_and_create_side_effects = [
         SheetRowParsingException(),
-        SheetCouponCreationException(
-            incomplete_request, coupon_req_row, inner_exc=Company.DoesNotExist()
-        ),
         SheetCouponCreationException(
             incomplete_request, coupon_req_row, inner_exc=InvalidSheetProductException()
         ),
@@ -242,7 +239,7 @@ def test_coupon_req_handler_parse_raw_data_update(
     mocker, pygsheets_fixtures, coupon_req_raw_data
 ):
     """
-    CouponRequestHandler.parse_rows_and_create_coupons should update the `raw_data` property for a
+    CouponRequestHandler.parse_row_and_create_coupons should update the `raw_data` property for a
     CouponGenerationRequest if the actual data in the row is different.
     """
     mocker.patch("sheets.api.create_coupons_for_request_row")
@@ -271,7 +268,7 @@ def test_coupon_req_handler_parse_already_processed(
     mocker, settings, pygsheets_fixtures, coupon_req_raw_data
 ):
     """
-    CouponRequestHandler.parse_rows_and_create_coupons should return ignored=True and skip coupon creation
+    CouponRequestHandler.parse_row_and_create_coupons should return ignored=True and skip coupon creation
     if a request row indicates that it has already been processed.
     """
     patched_create_coupons = mocker.patch("sheets.api.create_coupons_for_request_row")
@@ -297,7 +294,7 @@ def test_coupon_req_handler_parse_unchanged_error(
     mocker, settings, pygsheets_fixtures, coupon_req_raw_data
 ):
     """
-    CouponRequestHandler.parse_rows_and_create_coupons should return ignored=True and skip coupon creation
+    CouponRequestHandler.parse_row_and_create_coupons should return ignored=True and skip coupon creation
     if a request row has an error and the row data is unchanged from our data in the database.
     """
     patched_create_coupons = mocker.patch("sheets.api.create_coupons_for_request_row")
@@ -317,8 +314,28 @@ def test_coupon_req_handler_parse_unchanged_error(
     patched_create_coupons.assert_not_called()
 
 
+@pytest.mark.django_db
+def test_coupon_req_handler_parse_new_company(
+    mocker, pygsheets_fixtures, coupon_req_raw_data
+):
+    """
+    CouponRequestHandler.parse_row_and_create_coupons should create a Company by the name
+    indicated in the request row if it doesn't exist yet.
+    """
+    patched_create_coupons = mocker.patch("sheets.api.create_coupons_for_request_row")
+    new_company_name = "New Company"
+    row_data = copy.copy(coupon_req_raw_data)
+    row_data[4] = new_company_name
+    coupon_req_handler = CouponRequestHandler()
+    _, _, _ = coupon_req_handler.parse_row_and_create_coupons(
+        row_index=1, row_data=row_data
+    )
+    patched_create_coupons.assert_called_once()
+    assert Company.objects.filter(name=new_company_name).exists() is True
+
+
 def test_coupon_req_handler_update_processed(
-    mocker, settings, pygsheets_fixtures, coupon_req_row
+    settings, pygsheets_fixtures, coupon_req_row
 ):
     """
     CouponRequestHandler.update_coupon_request_processed_dates should use the pygsheets client to update the "processed"
