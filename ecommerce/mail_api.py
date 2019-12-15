@@ -220,6 +220,9 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
                             user=None,
                             extra_context={
                                 "coupon": coupon,
+                                "content_title": lines[0].get("content_title")
+                                if lines
+                                else None,
                                 "lines": lines,
                                 "order_total": sum(
                                     int(line["total_paid"]) for line in lines
