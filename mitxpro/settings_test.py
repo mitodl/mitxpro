@@ -163,3 +163,21 @@ class TestSettings(TestCase):
         assert json.dumps(app_json, sort_keys=True, indent=2) == json.dumps(
             generated_app_json, sort_keys=True, indent=2
         ), "Generated app.json does not match the app.json file. Please use the 'generate_app_json' management command to update app.json"
+
+    def test_server_side_cursors_disabled(self):
+        """DISABLE_SERVER_SIDE_CURSORS should be true by default"""
+        settings_vars = self.patch_settings(REQUIRED_SETTINGS)
+        assert (
+            settings_vars["DEFAULT_DATABASE_CONFIG"]["DISABLE_SERVER_SIDE_CURSORS"]
+            is True
+        )
+
+    def test_server_side_cursors_enabled(self):
+        """DISABLE_SERVER_SIDE_CURSORS should be false if MITXPRO_DB_DISABLE_SS_CURSORS is false"""
+        settings_vars = self.patch_settings(
+            {**REQUIRED_SETTINGS, "MITXPRO_DB_DISABLE_SS_CURSORS": "False"}
+        )
+        assert (
+            settings_vars["DEFAULT_DATABASE_CONFIG"]["DISABLE_SERVER_SIDE_CURSORS"]
+            is False
+        )
