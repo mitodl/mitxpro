@@ -85,6 +85,10 @@ def test_program_next_run_date():
         start_date=factory.Iterator(first_course_future_dates),
         live=True,
     )
+
+    # invalidate cached property
+    del program.next_run_date
+
     assert program.next_run_date == first_course_future_dates[0]
 
 
@@ -409,6 +413,10 @@ def test_course_next_run_date():
     CourseRunFactory.create_batch(
         2, course=course, start_date=factory.Iterator(future_dates), live=True
     )
+
+    # invlidate cached property
+    del course.next_run_date
+
     assert course.next_run_date == future_dates[0]
 
 
