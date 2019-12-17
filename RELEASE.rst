@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.34.3
+Version 0.34.3 (Released December 17, 2019)
 --------------
 
 - Added setting for overriding host used in SSL redirect
