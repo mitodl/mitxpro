@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.34.2 (Released December 17, 2019)
+--------------
+
+- Modified request sheet handling to allow for requester email column
+- Fixed bug with updating coupon assignment rows upon enrollment
+- Revert "Fixed bug with updating coupon assignment rows upon enrollment"
+- Optimized coupon assignment sheets processing to ignore unchanged sheets
+- Prevented repeated processing of failed coupon request rows
+- Forced spreadsheet file watch renewal in running job
+- Fixed bug with updating coupon assignment rows upon enrollment
+- Send order receipt email to purchaser
+- list unredeemed enrollments on dashboard (#1356)
+- Changed assignment sheet title
+- add search for courserungrade in admin (#1377)
+
 Version 0.34.1 (Released December 12, 2019)
 --------------
 
