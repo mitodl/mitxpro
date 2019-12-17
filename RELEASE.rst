@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.34.3
+--------------
+
+- Added setting for overriding host used in SSL redirect
+- Disable server-side cursors by default to avoid invalid cursor errors (#1407)
+- optimize repetitive looping on course catalog page (#1291)
+- display correct course name over receipt email
+- Changed coupon request handling to create unrecognized companies
+
 Version 0.34.2 (Released December 17, 2019)
 --------------
 
