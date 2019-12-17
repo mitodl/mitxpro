@@ -73,6 +73,13 @@ SECURE_SSL_REDIRECT = get_bool(
     description="Application-level SSL redirect setting.",
 )
 
+SECURE_SSL_HOST = get_string(
+    "MITXPRO_SECURE_SSL_HOST",
+    None,
+    description="Hostame to redirect non-secure requests to. "
+    "Overrides value from HOST header.",
+)
+
 ZENDESK_CONFIG = {
     "HELP_WIDGET_ENABLED": get_string(
         "ZENDESK_HELP_WIDGET_ENABLED",
