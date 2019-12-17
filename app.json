@@ -331,6 +331,10 @@
       "description": "E-mail to use for reply-to address of emails",
       "required": false
     },
+    "MITXPRO_SECURE_SSL_HOST": {
+      "description": "Hostame to redirect non-secure requests to. Overrides value from HOST header.",
+      "required": false
+    },
     "MITXPRO_SECURE_SSL_REDIRECT": {
       "description": "Application-level SSL redirect setting.",
       "required": false
