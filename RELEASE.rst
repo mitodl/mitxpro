@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.34.2
+Version 0.34.2 (Released December 17, 2019)
 --------------
 
 - Modified request sheet handling to allow for requester email column
