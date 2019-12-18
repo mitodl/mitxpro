@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.34.4
+Version 0.34.4 (Released December 18, 2019)
 --------------
 
 - change value of constant (#1414)
