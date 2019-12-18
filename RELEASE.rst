@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.34.4
+--------------
+
+- change value of constant (#1414)
+- Fixed sheets error handling & management command bugs
+
 Version 0.34.3 (Released December 17, 2019)
 --------------
 
