@@ -2,6 +2,8 @@
 Tasks for the courses app
 """
 import logging
+from datetime import timedelta
+from django.conf import settings
 from django.db.models import Q
 from requests.exceptions import HTTPError
 from mitxpro.celery import app
@@ -23,7 +25,9 @@ def generate_course_certificates():
     Task to generate certificates for courses.
     """
     now = now_in_utc()
-    course_runs = CourseRun.objects.filter(end_date__lt=now).exclude(
+    course_runs = CourseRun.objects.filter(
+        end_date__lt=now - timedelta(hours=settings.CERTIFICATE_CREATION_DELAY_IN_HOURS)
+    ).exclude(
         id__in=CourseRunCertificate.objects.values_list("course_run__id", flat=True)
     )
 

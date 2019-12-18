@@ -642,6 +642,12 @@ FEATURES = {
     if key.startswith(MITXPRO_FEATURES_PREFIX)
 }
 
+CERTIFICATE_CREATION_DELAY_IN_HOURS = get_int(
+    "CERTIFICATE_CREATION_DELAY_IN_HOURS",
+    48,
+    description="The number of hours to delay automated certificate creation after a course run ends.",
+)
+
 # Celery
 USE_CELERY = True
 REDISCLOUD_URL = get_string(
