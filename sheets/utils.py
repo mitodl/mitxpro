@@ -52,10 +52,7 @@ SpreadsheetSpec = namedtuple(
 coupon_request_sheet_spec = SpreadsheetSpec(
     first_data_row=GOOGLE_SHEET_FIRST_ROW + 1,
     last_data_column=settings.SHEETS_REQ_ERROR_COL_LETTER,
-    calculated_column_indices={
-        settings.SHEETS_REQ_PROCESSED_COL,
-        settings.SHEETS_REQ_ERROR_COL,
-    },
+    calculated_column_indices=settings.SHEETS_REQ_CALCULATED_COLUMNS,
     num_columns=settings.SHEETS_REQ_ERROR_COL,
     column_headers=[],
 )
