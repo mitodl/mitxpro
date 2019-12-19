@@ -5,7 +5,7 @@ import { Modal, ModalHeader, ModalBody } from "reactstrap"
 
 import Markdown from "../Markdown"
 
-import { formatErrors } from "../../lib/form"
+import { formatErrors, formatSuccessMessage } from "../../lib/form"
 import {
   calculateDiscount,
   calculatePrice,
@@ -182,6 +182,18 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
     })
   }
 
+  isPromoCodeApplied = () => {
+    const { coupon, errors, values } = this.props
+
+    return (
+      !errors.coupons &&
+      values.couponCode &&
+      values.couponCode !== "" &&
+      coupon &&
+      coupon.code === values.couponCode
+    )
+  }
+
   render() {
     const {
       basket,
@@ -250,7 +262,9 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                     Apply
                   </button>
                 </div>
-                {formatErrors(errors.coupons)}
+                {this.isPromoCodeApplied()
+                  ? formatSuccessMessage("Success! Promo Code applied.")
+                  : formatErrors(errors.coupons)}
               </div>
               {dataConsent ? (
                 <div className="data-consent">

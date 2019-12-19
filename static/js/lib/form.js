@@ -44,3 +44,7 @@ export const formatErrors = (
   // $FlowFixMe
   return <div className="error">{errorString}</div>
 }
+
+export const formatSuccessMessage = (message: string): React$Element<*> => {
+  return <div className="success">{message}</div>
+}
