@@ -51,7 +51,9 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # pylint: disable=too-many-locals
+    def handle(
+        self, *args, **options
+    ):  # pylint: disable=too-many-locals,too-many-branches
         """Handle command execution"""
         # Grade override for all users for the course run. Disallowed.
         if options["grade"] is not None and not options["user"]:
@@ -88,18 +90,12 @@ class Command(BaseCommand):
 
         results = []
         for edx_grade, user in edx_grade_user_iter:
-            result = []
-            course_run_grade, created, updated = ensure_course_run_grade(
+            course_run_grade, created_grade, updated_grade = ensure_course_run_grade(
                 user=user,
                 course_run=run,
                 edx_grade=edx_grade,
                 should_update=should_update,
             )
-
-            if created:
-                result.append("New grade record created")
-            elif updated:
-                result.append("Grade record updated with new data from edX grades API")
 
             if override_grade is not None:
                 course_run_grade.grade = override_grade
@@ -107,28 +103,39 @@ class Command(BaseCommand):
                 course_run_grade.letter_grade = None
                 course_run_grade.set_by_admin = True
                 course_run_grade.save_and_log(None)
-                result.append(
-                    "Grade overriden - new grade value: {}".format(
-                        course_run_grade.grade
-                    )
-                )
 
-            _, created, deleted = process_course_run_grade_certificate(
+            _, created_cert, deleted_cert = process_course_run_grade_certificate(
                 course_run_grade=course_run_grade
             )
 
-            if deleted:
-                result.append("Certificate deleted")
+            if created_grade:
+                grade_status = "created"
+            elif updated_grade:
+                grade_status = "updated"
             else:
-                result.append(
-                    "Certificate created"
-                    if created
-                    else "Certificate ignored (already existed)"
+                grade_status = "already exists"
+
+            grade_summary = ["passed: {}".format(course_run_grade.passed)]
+            if override_grade is not None:
+                grade_summary.append(
+                    "value override: {}".format(course_run_grade.grade)
                 )
 
-            result_summary = ", ".join(result) if len(result) else "No changes made"
+            if created_cert:
+                cert_status = "created"
+            elif deleted_cert:
+                cert_status = "deleted"
+            elif course_run_grade.passed:
+                cert_status = "already exists"
+            else:
+                cert_status = "ignored"
+
+            result_summary = "Grade: {} ({}), Certificate: {}".format(
+                grade_status, ", ".join(grade_summary), cert_status
+            )
+
             results.append(
-                "Processed user {} ({}) in course run {}. Result: {}".format(
+                "Processed user {} ({}) in course run {}. Result - {}".format(
                     user.username, user.email, run.courseware_id, result_summary
                 )
             )
