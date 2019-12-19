@@ -241,7 +241,8 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         )
 
     def __str__(self):
-        return self.title
+        title = f"{self.readable_id} | {self.title}"
+        return title if len(title) <= 100 else title[:97] + "..."
 
 
 class CourseTopic(TimestampedModel):
@@ -393,7 +394,8 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         return super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.title
+        title = f"{self.readable_id} | {self.title}"
+        return title if len(title) <= 100 else title[:97] + "..."
 
 
 class CourseRun(TimestampedModel):
@@ -495,7 +497,8 @@ class CourseRun(TimestampedModel):
         return self.course.instructors
 
     def __str__(self):
-        return self.title
+        title = f"{self.courseware_id} | {self.title}"
+        return title if len(title) <= 100 else title[:97] + "..."
 
     def clean(self):
         """
