@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.34.5
+Version 0.34.5 (Released December 20, 2019)
 --------------
 
 - #1404 display readable id when selecting courseware in cms pages
