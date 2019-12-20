@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.http import Http404
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
@@ -81,7 +82,9 @@ class ProductViewSet(ReadOnlyModelViewSet):
     permission_classes = ()
 
     serializer_class = ProductDetailSerializer
-    queryset = Product.objects.exclude(productversions=None)
+    queryset = Product.objects.exclude(
+        Q(visible_in_bulk_form=False) | Q(productversions=None)
+    )
 
 
 class CompanyViewSet(ReadOnlyModelViewSet):

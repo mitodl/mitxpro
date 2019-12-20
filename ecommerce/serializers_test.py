@@ -342,6 +342,7 @@ def test_serialize_coupon_payment_version_serializer(basket_and_coupons):
 def test_coupon_payment_serializer():
     """ Test that the CouponPaymentSerializer has correct data """
     payment = CouponPaymentFactory.build()
+    assert str(payment) == "CouponPayment {}".format(payment.name)
     serialized = CouponPaymentSerializer(payment).data
     assert serialized == {
         "name": payment.name,
@@ -552,6 +553,9 @@ def test_serialize_coupon():
     name = "Some Coupon"
     code = "1234"
     coupon = CouponFactory.build(payment__name=name, coupon_code=code, enabled=True)
+    assert str(coupon) == "Coupon {} for {}".format(
+        coupon.coupon_code, str(coupon.payment)
+    )
     serialized_data = CouponSerializer(instance=coupon).data
     assert serialized_data == {
         "id": None,

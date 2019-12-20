@@ -188,6 +188,9 @@ def test_zero_price_checkout(
     )
     resp = basket_client.post(reverse("checkout"))
     line = order.lines.first()
+    assert str(line) == "Line for order #{}, {} (qty: {})".format(
+        line.order.id, str(line.product_version), line.quantity
+    )
     readable_id = get_readable_id(line.product_version.product.content_object)
 
     assert resp.status_code == status.HTTP_200_OK
@@ -253,7 +256,9 @@ def test_order_fulfilled(
     order.refresh_from_db()
     assert order.status == Order.FULFILLED
     assert order.receipt_set.count() == 1
-    assert order.receipt_set.first().data == data
+    receipt = order.receipt_set.first()
+    assert str(receipt) == "Receipt for order {}".format(receipt.order.id)
+    assert receipt.data == data
     enroll_user.assert_called_with(order)
 
     assert OrderAudit.objects.count() == 2
@@ -412,6 +417,8 @@ def test_get_order_configuration(  # pylint: disable=too-many-arguments
 
 def test_get_basket_new_user(basket_and_coupons, user, user_drf_client):
     """Test that the view creates a basket returns a 200 if a user doesn't already have a basket"""
+    basket = Basket.objects.all().first()
+    assert str(basket) == "Basket for {}".format(str(basket.user))
     assert Basket.objects.filter(user=user).exists() is False
     resp = user_drf_client.get(reverse("basket_api"))
     assert resp.status_code == 200
@@ -430,6 +437,10 @@ def test_patch_basket_new_user(basket_and_coupons, user, user_drf_client):
 def test_patch_basket_new_item(basket_client, basket_and_coupons, mock_context):
     """Test that a user can add an item to their basket"""
     data = {"items": [{"product_id": basket_and_coupons.product_version.product.id}]}
+    basket_item = BasketItem.objects.all().first()
+    assert str(basket_item) == "BasketItem of product {} (qty: {})".format(
+        str(basket_item.product), basket_item.quantity
+    )
     BasketItem.objects.all().delete()  # clear the basket first
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
@@ -470,9 +481,15 @@ def test_patch_basket_replace_item_with_same(basket_client, basket_and_agreement
         CourseRunSelection.objects.values_list("run", flat=True)
     )
     dcu = DataConsentUser.objects.get(user=basket_and_agreement.basket.user)
+    assert str(dcu) == "DataConsentUser {} for {}, consent date {}".format(
+        str(dcu.user), str(dcu.agreement), str(dcu.consent_date)
+    )
     assert resp.json()["data_consents"] == [DataConsentUserSerializer(dcu).data]
     selection = CouponSelection.objects.get(
         basket=basket_and_agreement.basket, coupon=basket_and_agreement.coupon
+    )
+    assert str(selection) == "CouponSelection for basket {}, coupon {}".format(
+        str(selection.basket), str(selection.coupon)
     )
     assert resp.json()["coupons"] == [CouponSelectionSerializer(selection).data]
 
@@ -905,6 +922,9 @@ def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     model_version = CouponPaymentVersion.objects.get(id=resp.json().get("id"))
+    assert str(model_version) == "CouponPaymentVersion for {} of type {}".format(
+        model_version.num_coupon_codes, model_version.coupon_type
+    )
     assert model_version.couponversion_set.count() == 5
     assert model_version.payment.coupon_set.count() == 5
     assert model_version.amount == data.get("amount")
@@ -1025,6 +1045,13 @@ def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
     individual_assignments = ProductCouponAssignmentFactory.create_batch(
         3, bulk_assignment=bulk_assignment
     )
+    assert str(
+        individual_assignments[0]
+    ) == "ProductCouponAssignment for {}, product coupon {} (redeemed: {})".format(
+        individual_assignments[0].email,
+        individual_assignments[0].product_coupon_id,
+        individual_assignments[0].redeemed,
+    )
     csv_response = admin_client.get(
         reverse("bulk_assign_csv", kwargs={"bulk_assignment_id": bulk_assignment.id})
     )
@@ -1089,6 +1116,16 @@ def test_products_viewset_list(user_drf_client, coupon_product_ids):
         )
 
 
+def test_products_viewset_list_missing_unchecked_bulk_visibility(user_drf_client):
+    """ Test that the ProductViewSet returns all products
+        which are visible_in_bulk_form
+    """
+    response = user_drf_client.get(reverse("products_api-list"))
+    assert response.status_code == status.HTTP_200_OK
+    products = response.json()
+    assert len(products) == Product.objects.filter(visible_in_bulk_form=True).count()
+
+
 def test_products_viewset_list_missing_versions(user_drf_client):
     """ProductViewSet should exclude Product without any ProductVersion"""
     product = ProductVersionFactory.create().product
@@ -1135,6 +1172,7 @@ def test_companies_viewset_detail(user_drf_client):
     response = user_drf_client.get(
         reverse("companies_api-detail", kwargs={"pk": company.id})
     )
+    assert str(company) == "Company {}".format(company.name)
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == CompanySerializer(instance=company).data
 

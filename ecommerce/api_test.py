@@ -273,6 +273,9 @@ def test_payload_coupons():
     order.purchaser.save()
 
     coupon_version = CouponVersionFactory.create()
+    assert str(coupon_version) == "CouponVersion {} for {}".format(
+        coupon_version.coupon.coupon_code, str(coupon_version.payment_version)
+    )
     # Coupon only eligible for line2, not line1
     CouponRedemption.objects.create(coupon_version=coupon_version, order=order)
 
@@ -603,6 +606,11 @@ def test_get_available_bulk_product_coupons():
     bulk enrollment invitations
     """
     first_product_coupon = CouponEligibilityFactory.create(coupon__enabled=True)
+    assert str(
+        first_product_coupon
+    ) == "CouponProduct for product {}, coupon {}".format(
+        first_product_coupon.product, first_product_coupon.coupon
+    )
     # Create more valid product coupons that apply to the same payment and product
     additional_product_coupons = CouponEligibilityFactory.create_batch(
         3,
@@ -984,6 +992,9 @@ def test_enroll_user_in_order_items_with_voucher(mocker, user):
     order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
     basket = BasketFactory.create(user=user)
     run_selection = CourseRunSelectionFactory.create(basket=basket)
+    assert str(run_selection) == "CourseRunSelection for {} and {}".format(
+        str(run_selection.basket), str(run_selection.run)
+    )
     product = ProductFactory.create(content_object=run_selection.run)
     LineFactory(order=order, product_version__product=product)
     voucher = VoucherFactory(

@@ -75,6 +75,12 @@ class Product(TimestampedModel):
         help_text="If it is unchecked then users will not be "
         "able to load the product on the checkout page.",
     )
+    visible_in_bulk_form = models.BooleanField(
+        default=True,
+        null=False,
+        help_text="If it is unchecked then this product will not be listed in the "
+        "product drop-down on the bulk purchase form at /ecommerce/bulk.",
+    )
     content_object = GenericForeignKey("content_type", "object_id")
     objects = ProductManager()
     all_objects = models.Manager()
