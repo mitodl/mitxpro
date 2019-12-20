@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.34.5 (Released December 20, 2019)
+--------------
+
+- #1404 display readable id when selecting courseware in cms pages
+- #1313 update sync_grades_and_certificates command msg
+- MIT xPRO - 1386 Checkout: Display success message when coupon is successful
+
 Version 0.34.4 (Released December 18, 2019)
 --------------
 
