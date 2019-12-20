@@ -51,6 +51,10 @@
       "description": null,
       "required": false
     },
+    "CERTIFICATE_CREATION_DELAY_IN_HOURS": {
+      "description": "The number of hours to delay automated certificate creation after a course run ends.",
+      "required": false
+    },
     "CLOUDFRONT_DIST": {
       "description": null,
       "required": false
