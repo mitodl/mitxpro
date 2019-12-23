@@ -1,5 +1,7 @@
 """Sheets app constants"""
 
+from mail.constants import MAILGUN_FAILED
+
 REQUIRED_GOOGLE_API_SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive",
@@ -18,3 +20,12 @@ GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN = "iam.gserviceaccount.com"
 GOOGLE_API_NOTIFICATION_TYPE = "webhook"
 GOOGLE_API_FILE_WATCH_KIND = "api#channel"
 GOOGLE_API_TRUE_VAL = "TRUE"
+
+INVALID_EMAIL_STATUS = "invalid"
+UNKNOWN_EMAIL_ERROR_STATUS = "unrecognized error"
+UNSENT_EMAIL_STATUSES = {
+    None,
+    INVALID_EMAIL_STATUS,
+    MAILGUN_FAILED,
+    UNKNOWN_EMAIL_ERROR_STATUS,
+}

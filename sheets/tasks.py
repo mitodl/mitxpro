@@ -76,16 +76,17 @@ def set_assignment_rows_to_enrolled(sheet_update_map):
             for assignment_code_email_pair in assignment_code_email_pairs
         )
         _, worksheet = coupon_assignment_handler.fetch_assignment_sheet(sheet_id)
-        enumerated_sheet_rows = coupon_assignment_handler.get_enumerated_sheet_rows(
-            worksheet
-        )
+        assignment_rows = coupon_assignment_handler.get_sheet_rows(worksheet)
         status_row_updates = []
-        for row_index, (coupon_code, email, _, _) in enumerated_sheet_rows:
-            if not coupon_code or not email:
+        for assignment_row in assignment_rows:
+            if not assignment_row.code or not assignment_row.email:
                 continue
-            if (coupon_code.lower(), email.lower()) in assignment_code_email_set:
+            if (
+                assignment_row.code.lower(),
+                assignment_row.email.lower(),
+            ) in assignment_code_email_set:
                 status_row_updates.append(
-                    (row_index, ASSIGNMENT_SHEET_ENROLLED_STATUS, now)
+                    (assignment_row.row_index, ASSIGNMENT_SHEET_ENROLLED_STATUS, now)
                 )
         coupon_assignment_handler.update_sheet_with_new_statuses(
             sheet_id, status_row_updates

@@ -27,7 +27,11 @@ from anymail.message import AnymailMessage
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.core import mail
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.template.loader import render_to_string
+
+from mail.exceptions import MultiEmailValidationError
 
 log = logging.getLogger()
 
@@ -297,3 +301,24 @@ def send_message(message):
         message (django.core.mail.EmailMultiAlternatives): message to send
     """
     send_messages([message])
+
+
+def validate_email_addresses(email_addresses):
+    """
+    Validates a group of email addresses. A single exception is raised with the list of all invalid
+    emails if any of the email addresses fails validation.
+
+    Args:
+        email_addresses (iterable of str): An iterable of email addresses
+
+    Raises:
+        MultiEmailValidationError: Raised if any of the emails fail validation
+    """
+    invalid_emails = set()
+    for email in email_addresses:
+        try:
+            validate_email(email)
+        except ValidationError:
+            invalid_emails.add(email)
+    if invalid_emails:
+        raise MultiEmailValidationError(invalid_emails)
