@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.35.0
+--------------
+
+- add flag for hide/show product in bulk seat page
+- #1395 Delay automated certificate creation by a number of hours
+
 Version 0.34.5 (Released December 20, 2019)
 --------------
 
