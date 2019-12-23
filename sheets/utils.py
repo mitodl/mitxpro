@@ -77,9 +77,6 @@ FailedRequest = namedtuple(
     "FailedRequest", ["row_index", "exception", "sheet_error_text"]
 )
 IgnoredRequest = namedtuple("IgnoredRequest", ["row_index", "coupon_req_row", "reason"])
-AssignmentRow = namedtuple(
-    "AssignmentRow", ["row_index", "coupon_code", "email", "status", "status_date"]
-)
 
 
 class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
@@ -212,6 +209,45 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
         return product.id
 
 
+class CouponAssignmentRow:
+    """Represents a row of a coupon assignment sheet"""
+
+    def __init__(
+        self, row_index, code, assignee_email, status, status_date
+    ):  # pylint: disable=too-many-arguments
+        self.row_index = row_index
+        self.code = code
+        self.email = assignee_email
+        self.status = status
+        self.status_date = status_date
+
+    @classmethod
+    def parse_raw_data(cls, row_index, raw_row_data):
+        """
+        Parses raw row data
+
+        Args:
+            row_index (int): The row index according to the spreadsheet (not zero-based)
+            raw_row_data (list of str): The raw row data
+
+        Returns:
+            CouponAssignmentRow: The parsed data row
+
+        Raises:
+            SheetRowParsingException: Raised if the row could not be parsed
+        """
+        try:
+            return cls(
+                row_index=row_index,
+                code=raw_row_data[0],
+                assignee_email=item_at_index_or_none(raw_row_data, 1),
+                status=item_at_index_or_none(raw_row_data, 2),
+                status_date=item_at_index_or_none(raw_row_data, 3),
+            )
+        except Exception as exc:
+            raise SheetRowParsingException from exc
+
+
 def assignment_sheet_file_name(coupon_req_row):
     """
     Generates the filename for a coupon assignment Sheet
@@ -249,13 +285,13 @@ class AssignmentStatusMap:
 
         Args:
             bulk_assignment (BulkCouponAssignment): A BulkCouponAssignment object
-            assignment_rows (iterable of AssignmentRow): Objects representing rows in an assignment Sheet
+            assignment_rows (iterable of CouponAssignmentRow): Objects representing rows in an assignment Sheet
         """
         self._sheet_id_map[bulk_assignment.id] = bulk_assignment.assignment_sheet_id
         for assignment_row in assignment_rows:
             if assignment_row.email:
                 self._assignment_map[bulk_assignment.id][
-                    (assignment_row.coupon_code, assignment_row.email)
+                    (assignment_row.code, assignment_row.email)
                 ] = {
                     "row_index": assignment_row.row_index,
                     "new_status": None,
