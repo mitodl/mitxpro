@@ -225,7 +225,7 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
                                 else None,
                                 "lines": lines,
                                 "order_total": sum(
-                                    int(line["total_paid"]) for line in lines
+                                    float(line["total_paid"]) for line in lines
                                 ),
                                 "order": order,
                                 "receipt": receipt,
