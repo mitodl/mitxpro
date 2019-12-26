@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.35.0
+Version 0.35.0 (Released December 26, 2019)
 --------------
 
 - add flag for hide/show product in bulk seat page
