@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.35.1
+--------------
+
+- Added validation and reporting for emails in coupon assignment sheets
+
 Version 0.35.0 (Released December 26, 2019)
 --------------
 
