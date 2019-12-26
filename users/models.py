@@ -225,6 +225,21 @@ class LegalAddress(TimestampedModel):
         """Str representation for the legal address"""
         return f"Legal address for {self.user}"
 
+    @property
+    def street_address(self):
+        """Return the list of street address lines"""
+        return [
+            line
+            for line in [
+                self.street_address_1,
+                self.street_address_2,
+                self.street_address_3,
+                self.street_address_4,
+                self.street_address_5,
+            ]
+            if line
+        ]
+
 
 class Profile(TimestampedModel):
     """ A user's profile and employment info """

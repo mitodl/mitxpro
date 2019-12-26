@@ -54,7 +54,7 @@ def verify_exports_compliance(
             with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
                 mail.send_mail(
                     f"Exports Compliance: denied {user.email}",
-                    f"User with first name '{user.legal_address.first_name}', last name '{user.legal_address.last_name}, and email '{user.email}' was denied due to exports violation, for reason_code={export_inquiry.reason_code}, info_code={export_inquiry.info_code}",
+                    f"User with first name '{user.legal_address.first_name}', last name '{user.legal_address.last_name}, address '{','.join(user.legal_address.street_address)}', and email '{user.email}' was denied due to exports violation, for reason_code={export_inquiry.reason_code}, info_code={export_inquiry.info_code}",
                     settings.ADMIN_EMAIL,
                     [settings.EMAIL_SUPPORT],
                     connection=connection,
