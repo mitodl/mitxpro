@@ -24,6 +24,10 @@
   div {
     padding-bottom: 20px;
     padding-right: 10px;
+
+    .no-pad {
+      padding: 0;
+    }
   }
 
   input[type='checkbox']   {
@@ -63,5 +67,11 @@
 
   .picky__dropdown {
     z-index: unset;
+  }
+
+  .dangerous {
+    background-color: #ef5350;
+    color: #ffffff;
+    padding: 15px;
   }
 }

@@ -172,10 +172,6 @@ export const CouponForm = ({
         </div>
 
         <div>
-          <div>
-            <Field type="checkbox" name="automatic" />
-            Automatically apply coupon to eligible products in basket
-          </div>
           <div className="block">
             <label htmlFor="discount">
               Percentage Discount (1 to 100)*
@@ -344,9 +340,26 @@ export const CouponForm = ({
           </label>
           <ErrorMessage name="company" component={FormError} />
         </div>
-        <button type="submit" disabled={isSubmitting}>
-          Create coupons
-        </button>
+        <div className="block">
+          <div className="dangerous">
+            <strong>⚠️WARNING: You probably do not want this option. ⚠️</strong>
+            <br />
+            <br />
+            Enabling this option will automatically apply this code to{" "}
+            <strong>EVERY USER</strong> who purchases this course run/program.
+            In other words, the code will be automatically applied and they will
+            not need to enter any coupon code during checkout.
+          </div>
+          <div className="flex dangerous">
+            <Field type="checkbox" name="automatic" />
+            Automatically apply coupon to eligible products in basket
+          </div>
+        </div>
+        <div>
+          <button type="submit" disabled={isSubmitting}>
+            Create coupons
+          </button>
+        </div>
       </Form>
     )}
   />
