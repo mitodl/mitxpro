@@ -483,11 +483,11 @@ def test_serialize_order_receipt(receipt_data):
             {
                 "readable_id": get_readable_id(product_version.product.content_object),
                 "content_title": product_version.product.content_object.title,
-                "discount": "0",
+                "discount": "0.0",
                 "start_date": None,
                 "end_date": None,
-                "price": str(int(product_version.price)),
-                "total_paid": str(int(line.quantity * product_version.price)),
+                "price": str(product_version.price),
+                "total_paid": str(line.quantity * product_version.price),
                 "quantity": line.quantity,
             }
         ],

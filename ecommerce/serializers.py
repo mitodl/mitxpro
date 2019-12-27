@@ -57,7 +57,7 @@ class ProductVersionSummarySerializer(serializers.ModelSerializer):
 
     def get_price(self, instance):
         """The price does not need decimal points here"""
-        return str(int(instance.price))
+        return str(instance.price)
 
 
 class ProductVersionSerializer(serializers.ModelSerializer):
@@ -785,8 +785,8 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
             lines.append(
                 dict(
                     quantity=line.quantity,
-                    total_paid=str(int(total_paid)),
-                    discount=str(int(discount)),
+                    total_paid=str(total_paid),
+                    discount=str(discount),
                     **ProductVersionSummarySerializer(line.product_version).data,
                     start_date=dates["start_date"],
                     end_date=dates["end_date"],

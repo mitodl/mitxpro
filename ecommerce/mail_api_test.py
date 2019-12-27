@@ -237,9 +237,9 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
             "lines": [
                 {
                     "quantity": 1,
-                    "total_paid": "100",
-                    "discount": "0",
-                    "price": "100",
+                    "total_paid": "100.00",
+                    "discount": "0.0",
+                    "price": "100.00",
                     "readable_id": get_readable_id(
                         line.product_version.product.content_object
                     ),
@@ -248,7 +248,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                     "content_title": "test_run_title",
                 }
             ],
-            "order_total": 100,
+            "order_total": 100.0,
             "order": {
                 "id": 1,
                 "created_on": line.order.created_on,
