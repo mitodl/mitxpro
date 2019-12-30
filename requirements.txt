@@ -44,7 +44,7 @@ djangorestframework==3.9.4
 djoser==1.7.0
 docutils==0.14            # via botocore
 draftjs-exporter==2.1.6   # via wagtail
-edx-api-client==0.8.0
+edx-api-client==0.9.0
 elasticsearch==7.0.2      # via django-server-status
 google-api-python-client==1.7.11
 google-auth-httplib2==0.0.3  # via google-api-python-client
