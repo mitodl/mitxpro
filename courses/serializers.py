@@ -398,12 +398,13 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
         """
         Resolve a receipt for this enrollment
         """
-        return (
-            enrollment.order_id
-            if enrollment.order.status == enrollment.order.FULFILLED
-            and settings.ENABLE_ORDER_RECEIPTS
-            else None
-        )
+        if enrollment.order:
+            return (
+                enrollment.order_id
+                if enrollment.order.status == enrollment.order.FULFILLED
+                and settings.ENABLE_ORDER_RECEIPTS
+                else None
+            )
 
     def __init__(self, *args, **kwargs):
         assert (
