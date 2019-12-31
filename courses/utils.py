@@ -11,6 +11,7 @@ from courses.models import (
     ProgramCertificate,
     Program,
     CourseRun,
+    ProgramEnrollment,
 )
 from mitxpro.utils import has_equal_properties
 from courseware.api import get_edx_api_course_detail_client
@@ -97,7 +98,8 @@ def process_course_run_grade_certificate(course_run_grade):
 def generate_program_certificate(user, program):
     """
     Create a program certificate if the user has a course certificate
-    for each course in the program
+    for each course in the program. Also, It will create the
+    program enrollment if it does not exist for the user.
 
     Args:
         user (User): a Django user.
@@ -133,6 +135,16 @@ def generate_program_certificate(user, program):
             user.username,
             program.title,
         )
+        _, created = ProgramEnrollment.objects.get_or_create(
+            program=program, user=user, defaults={"active": True, "change_status": None}
+        )
+
+        if created:
+            log.info(
+                "Program enrollment for [%s] in program [%s] is created.",
+                user.username,
+                program.title,
+            )
 
     return program_cert, True
 
