@@ -190,7 +190,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
       values.couponCode &&
       values.couponCode !== "" &&
       coupon &&
-      coupon.code === values.couponCode
+      coupon.code === values.couponCode.trim()
     )
   }
 
