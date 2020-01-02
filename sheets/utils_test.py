@@ -16,7 +16,6 @@ from sheets.utils import CouponRequestRow
 
 def test_generate_google_client_config(settings):
     """generate_google_client_config should return a dict with expected values"""
-    settings.FEATURES["COUPON_SHEETS"] = True
     settings.DRIVE_CLIENT_ID = "some-id"
     settings.DRIVE_CLIENT_SECRET = "some-secret"
     settings.DRIVE_API_PROJECT_ID = "some-project-id"

@@ -67,6 +67,7 @@ def pygsheets_fixtures(mocker, db, coupon_req_raw_data):
     mocked_spreadsheet = MagicMock(spec=Spreadsheet, sheet1=mocked_worksheet)
     mocked_pygsheets_client = MagicMock(
         spec=PygsheetsClient,
+        oauth=Mock(),
         open_by_key=Mock(return_value=mocked_spreadsheet),
         drive=MagicMock(spec=DriveAPIWrapper),
         sheet=MagicMock(spec=SheetAPIWrapper),
@@ -365,7 +366,7 @@ def test_coupon_req_handler_update_processed(
         processed_requests
     )
     pygsheets_fixtures.worksheet.update_values.assert_any_call(
-        crange="H2:I2",
+        crange="I2:J2",
         values=[
             [
                 format_datetime_for_sheet_formula(
@@ -376,7 +377,7 @@ def test_coupon_req_handler_update_processed(
         ],
     )
     pygsheets_fixtures.worksheet.update_values.assert_any_call(
-        crange="H3:I3",
+        crange="I3:J3",
         values=[
             [
                 format_datetime_for_sheet_formula(

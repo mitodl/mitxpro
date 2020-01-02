@@ -81,6 +81,7 @@ from sheets.utils import (
     google_timestamp_to_datetime,
     google_date_string_to_datetime,
     build_protected_range_request_body,
+    build_drive_file_email_share_request,
 )
 from sheets.exceptions import (
     SheetValidationException,
@@ -89,6 +90,7 @@ from sheets.exceptions import (
     InvalidSheetProductException,
     SheetCouponCreationException,
     SheetRowParsingException,
+    FailedBatchRequestException,
 )
 
 log = logging.getLogger(__name__)
@@ -130,7 +132,7 @@ def get_credentials():
         is_sharing_to_service_account = any(
             email
             for email in settings.SHEETS_ADMIN_EMAILS
-            if GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN in email
+            if email.endswith(GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN)
         )
         if not is_sharing_to_service_account:
             raise ImproperlyConfigured(
@@ -311,6 +313,94 @@ class ExpandedSheetsClient:
         )
 
 
+def build_drive_service(credentials=None):
+    """
+    Builds the Google API client Drive service for API functionality that cannot be implemented correctly
+    with pygsheets.
+
+    Args:
+        credentials (google.oauth2.credentials.Credentials or None): Credentials to be used by the
+            Google Drive client
+
+    Returns:
+        googleapiclient.discovery.Resource: The Drive API service. The methods available on this resource are
+            defined dynamically (ref: http://googleapis.github.io/google-api-python-client/docs/dyn/drive_v3.html)
+    """
+    credentials = credentials or get_credentials()
+    return build("drive", "v3", credentials=credentials, cache_discovery=False)
+
+
+def batch_share_callback(
+    request_id, response, exception
+):  # pylint: disable=unused-argument
+    """
+    A callback function given to the Google API client's new_batch_http_request(). Called for the result
+    of each individual request executed in a batch API call.
+    Ref: https://developers.google.com/drive/api/v3/batch#using-client-libraries
+    NOTE: If *any* of the individual share requests in the batch fail, this callback is called and passed an exception
+    for *all* of the individual requests whether they contained a bad email address or not. There is no way to
+    determine the specific failed emails from the arguments to this function.
+
+    Args:
+        request_id (str): The id of the individual batch request
+        response (dict): The API response body if no error occurred
+        exception (googleapiclient.errors.HttpError): The error, if one occurred
+    """
+    if exception:
+        raise FailedBatchRequestException from exception
+
+
+def share_drive_file_with_emails(file_id, emails_to_share, credentials=None):
+    """
+    Shares a Drive file with multiple recipients. First attempts to share with the list of emails via a batch request.
+    If that fails, attempts to share with each email address individually. If a batch share request fails, the file is
+    not shared with any of the emails, and there is no way to get reliable information about which specific emails
+    failed. This function defaults to individual sharing so valid emails will still be shared to if the batch request
+    fails.
+
+    Args:
+        file_id (str): The Drive file id
+        emails_to_share (list of str): Email addresses that will be added as shared users for the given file
+        credentials (google.oauth2.credentials.Credentials or None): Credentials to be used by the
+            Google Drive client
+
+    Returns:
+
+    """
+    if not emails_to_share:
+        return
+    drive_service = build_drive_service(credentials=credentials)
+    batch = drive_service.new_batch_http_request()
+    for email_to_share in emails_to_share:
+        batch.add(
+            drive_service.permissions().create(
+                **build_drive_file_email_share_request(file_id, email_to_share)
+            ),
+            request_id=email_to_share,
+            callback=batch_share_callback,
+        )
+    try:
+        batch.execute()
+    except FailedBatchRequestException:
+        log.exception(
+            "Failed to batch-share the spreadsheet (id: '%s'). One or more of the emails failed, "
+            "so the spreadsheet was not shared with any of them. Now attempting to share individually...",
+            file_id,
+        )
+        for email_to_share in emails_to_share:
+            perm_request = drive_service.permissions().create(
+                **build_drive_file_email_share_request(file_id, email_to_share)
+            )
+            try:
+                perm_request.execute()
+            except:  # pylint: disable=broad-except
+                log.exception(
+                    "Failed to share the file with id '%s' with email '%s'",
+                    file_id,
+                    email_to_share,
+                )
+
+
 def request_file_watch(file_id, channel_id, expiration=None, credentials=None):
     """
     Sends a request to the Google API to watch for changes in a given file. If successful, this
@@ -329,9 +419,7 @@ def request_file_watch(file_id, channel_id, expiration=None, credentials=None):
     Returns:
         dict: The Google file watch API response
     """
-    credentials = credentials or get_credentials()
-    # Including cache_discovery=False to suppress a noisy warning
-    drive_service = build("drive", "v3", credentials=credentials, cache_discovery=False)
+    drive_service = build_drive_service(credentials=credentials)
     extra_body_params = {}
     if expiration:
         extra_body_params["expiration"] = format_datetime_for_google_timestamp(
@@ -454,6 +542,7 @@ class CouponRequestHandler:
 
     def __init__(self):
         self.pygsheets_client = get_authorized_pygsheets_client()
+        self._credentials = self.pygsheets_client.oauth
         spreadsheet = self.pygsheets_client.open_by_key(
             settings.COUPON_REQUEST_SHEET_ID
         )
@@ -777,23 +866,12 @@ class CouponRequestHandler:
             num_data_rows=len(coupon_codes),
         )
         # Share
-        for email in settings.SHEETS_ADMIN_EMAILS:
-            added_kwargs = (
-                {"sendNotificationEmail": False}
-                if GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN in email
-                else {}
+        if settings.SHEETS_ADMIN_EMAILS:
+            share_drive_file_with_emails(
+                file_id=bulk_coupon_sheet.id,
+                emails_to_share=settings.SHEETS_ADMIN_EMAILS,
+                credentials=self._credentials,
             )
-            try:
-                bulk_coupon_sheet.share(
-                    email, type="user", role="writer", **added_kwargs
-                )
-            except:  # pylint: disable=bare-except
-                log.exception(
-                    "Failed to share the sheet with email '%s' (sheet title: '%s')",
-                    email,
-                    spreadsheet_title,
-                )
-
         return bulk_coupon_sheet
 
     def create_and_update_sheets(self, processed_requests):
