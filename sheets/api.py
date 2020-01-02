@@ -80,6 +80,7 @@ from sheets.utils import (
     format_datetime_for_google_timestamp,
     google_timestamp_to_datetime,
     google_date_string_to_datetime,
+    build_protected_range_request_body,
 )
 from sheets.exceptions import (
     SheetValidationException,
@@ -667,6 +668,53 @@ class CouponRequestHandler:
                 failed_request.sheet_error_text,
             )
 
+    def protect_coupon_assignment_ranges(
+        self, spreadsheet_id, worksheet_id, num_data_rows
+    ):
+        """
+        Sets the header row, the coupon code column, and the status columns to protected so that they can only be
+        edited by the script or a privileged user.
+
+        Args:
+            spreadsheet_id (str): The Spreadsheet id
+            worksheet_id (int): The id of the Worksheet that these ranges will be applied to
+            num_data_rows (int): The number of data rows (i.e.: all rows except the header) in the sheet
+
+        Returns:
+            dict: The response body from the Google Sheets API batch update request
+        """
+        header_range_req = build_protected_range_request_body(
+            worksheet_id=worksheet_id,
+            start_row_index=0,
+            num_rows=1,
+            start_col_index=0,
+            num_cols=coupon_assign_sheet_spec.num_columns,
+            warning_only=False,
+            description="Header Row",
+        )
+        coupon_code_range_req = build_protected_range_request_body(
+            worksheet_id=worksheet_id,
+            start_row_index=coupon_assign_sheet_spec.first_data_row - 1,
+            num_rows=num_data_rows,
+            start_col_index=0,
+            num_cols=1,
+            warning_only=False,
+            description="Coupon Codes",
+        )
+        status_columns_range_req = build_protected_range_request_body(
+            worksheet_id=worksheet_id,
+            start_row_index=coupon_assign_sheet_spec.first_data_row - 1,
+            num_rows=num_data_rows,
+            start_col_index=ASSIGNMENT_SHEET_STATUS_COLUMN,
+            num_cols=2,
+            warning_only=True,
+            description="Status Columns",
+        )
+        return self.pygsheets_client.sheet.batch_update(
+            spreadsheet_id,
+            [header_range_req, coupon_code_range_req, status_columns_range_req],
+        )
+
     def create_coupon_assignment_sheet(self, coupon_req_row):
         """
         Creates a coupon assignment sheet from a single coupon request row
@@ -722,6 +770,12 @@ class CouponRequestHandler:
         first_cell = header_range.cells[0][0]
         first_cell.set_text_format("bold", True)
         header_range.apply_format(first_cell)
+        # Protect ranges of cells that should not be edited (everything besides the email column)
+        self.protect_coupon_assignment_ranges(
+            spreadsheet_id=bulk_coupon_sheet.id,
+            worksheet_id=worksheet.id,
+            num_data_rows=len(coupon_codes),
+        )
         # Share
         for email in settings.SHEETS_ADMIN_EMAILS:
             added_kwargs = (
