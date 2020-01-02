@@ -52,7 +52,7 @@ export class HeaderApp extends React.Component<Props, void> {
       return <div />
     }
 
-    return <Header currentUser={currentUser} />
+    return <Header currentUser={currentUser} location={null} />
   }
 }
 

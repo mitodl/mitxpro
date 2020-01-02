@@ -1,5 +1,5 @@
 {% load static hijack_tags render_bundle %}
-{% load wagtailcore_tags render_notification %}
+{% load wagtailcore_tags latest_notification startswith %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -42,7 +42,10 @@
   <div class="main-panel">
     {% include "partials/gtm_body.html" %}
     {% hijack_notification %}
-    {% latest_notification %}
+    {# Site-wide notifications should not show up on the ecommerce bulk pages #}
+    {% if not request.path|startswith:'/ecommerce/bulk/' %}
+      {% latest_notification %}
+    {% endif %}
     {% block headercontent %}
     {% endblock %}
     {% block content %}
