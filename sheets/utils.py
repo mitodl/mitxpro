@@ -661,3 +661,46 @@ def build_multi_cell_update_request_body(row_index, column_index, values):
             "fields": "*",
         }
     }
+
+
+def build_protected_range_request_body(
+    start_row_index,
+    num_rows,
+    start_col_index,
+    num_cols,
+    worksheet_id=0,
+    warning_only=False,
+    description=None,
+):  # pylint: disable=too-many-arguments
+    """
+    Builds a request body that will be sent to the Google Sheets API to create a protected range on a spreadsheet.
+
+    Args:
+        start_row_index (int): The zero-based index of the row of the range that will be protected
+        num_rows (int): The number of rows that this range will span
+        start_col_index (int): The zero-based index of the column of the range that will be protected
+        num_cols (int): The number of columns that this range will span
+        worksheet_id (int): The worksheet id in the given spreadsheet (typically expressed as an index)
+        warning_only (bool): If True, the range will be editable, but will display a warning/confirmation dialog
+            before edits are accepted
+        description (str or None): An optional description for the protected range
+
+    Returns:
+        dict: A request body that will be sent to the Google Sheets API to create a protected range
+    """
+    extra_params = {} if description is None else {"description": description}
+    return {
+        "addProtectedRange": {
+            "protectedRange": {
+                "range": {
+                    "sheetId": worksheet_id,
+                    "startRowIndex": start_row_index,
+                    "endRowIndex": start_row_index + num_rows,
+                    "startColumnIndex": start_col_index,
+                    "endColumnIndex": start_col_index + num_cols,
+                },
+                "warningOnly": warning_only,
+                **extra_params,
+            }
+        }
+    }
