@@ -725,7 +725,7 @@ DRIVE_WEBHOOK_EXPIRATION_MINUTES = get_int(
 )
 DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES = get_int(
     "DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES",
-    30,
+    60 * 12,
     description=(
         "The maximum time difference (in minutes) from the present time to a webhook expiration "
         "date to consider a webhook 'fresh', i.e.: not in need of renewal. If the time difference "
