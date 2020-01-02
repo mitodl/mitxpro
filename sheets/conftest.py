@@ -10,6 +10,28 @@ from ecommerce.factories import CompanyFactory, ProductVersionFactory
 from sheets.utils import CouponRequestRow
 
 
+@pytest.fixture(autouse=True)
+def sheets_settings(settings):
+    """Default settings for sheets tests"""
+    settings.FEATURES["COUPON_SHEETS"] = True
+    settings.FEATURES["COUPON_SHEETS_TRACK_REQUESTER"] = True
+    settings.SHEETS_REQ_EMAIL_COL = 7
+    settings.SHEETS_REQ_PROCESSED_COL = 8
+    settings.SHEETS_REQ_ERROR_COL = 9
+    settings.SHEETS_REQ_CALCULATED_COLUMNS = {
+        settings.SHEETS_REQ_EMAIL_COL,
+        settings.SHEETS_REQ_PROCESSED_COL,
+        settings.SHEETS_REQ_ERROR_COL,
+    }
+    _uppercase_a_ord = ord("A")
+    settings.SHEETS_REQ_PROCESSED_COL_LETTER = chr(
+        settings.SHEETS_REQ_PROCESSED_COL + _uppercase_a_ord
+    )
+    settings.SHEETS_REQ_ERROR_COL_LETTER = chr(
+        settings.SHEETS_REQ_ERROR_COL + _uppercase_a_ord
+    )
+
+
 @pytest.fixture()
 def base_data(db):  # pylint: disable=unused-argument
     """Fixture that creates basic objects that are necessary to support a coupon request"""
@@ -32,6 +54,7 @@ def coupon_req_raw_data(base_data):
         base_data.company.name,
         "01/01/2019 01:01:01",
         "02/02/2020 02:02:02",
+        "",
         "",
         "",
     ]

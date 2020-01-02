@@ -12,12 +12,6 @@ from mitxpro.test_utils import set_request_session
 lazy = pytest.lazy_fixture
 
 
-@pytest.fixture(autouse=True)
-def auto_settings(settings):
-    """Fixture that sets default settings values for all tests in the module"""
-    settings.FEATURES["COUPON_SHEETS"] = True
-
-
 @pytest.fixture()
 def google_api_auth(user):
     """Fixture that creates a google auth object"""
@@ -112,7 +106,6 @@ def test_handle_coupon_request_sheet_update(mocker, settings):
     View that handles push notifications for file changes in Google should call a task to
     create coupons and write the results to the necessary Sheets.
     """
-    settings.FEATURES["COUPON_SHEETS"] = True
     settings.COUPON_REQUEST_SHEET_ID = "abc123"
     GoogleFileWatchFactory.create(
         file_id=settings.COUPON_REQUEST_SHEET_ID, channel_id="file-watch-channel"

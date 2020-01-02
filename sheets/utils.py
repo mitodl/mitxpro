@@ -18,6 +18,7 @@ from sheets.constants import (
     ASSIGNMENT_SHEET_PREFIX,
     GOOGLE_SHEET_FIRST_ROW,
     ASSIGNMENT_SHEET_ENROLLED_STATUS,
+    GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN,
 )
 from sheets.exceptions import InvalidSheetProductException, SheetRowParsingException
 
@@ -704,3 +705,28 @@ def build_protected_range_request_body(
             }
         }
     }
+
+
+def build_drive_file_email_share_request(file_id, email_to_share):
+    """
+    Builds the body of a Drive file share request
+
+    Args:
+        file_id (str): The file id of the Drive file being shared
+        email_to_share (str): The email of the user to whom the file will be shared
+
+    Returns:
+        dict: A dictionary of parameters for the body of a share request
+    """
+    added_kwargs = (
+        {"sendNotificationEmail": False}
+        if email_to_share.endswith(GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN)
+        else {}
+    )
+    return dict(
+        fileId=file_id,
+        body={"type": "user", "role": "writer", "emailAddress": email_to_share},
+        fields="id",
+        supportsTeamDrives=True,
+        **added_kwargs,
+    )

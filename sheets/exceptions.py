@@ -47,3 +47,9 @@ class InvalidSheetProductException(Exception):
     """
     Exception for an invalid product entered into the coupon request spreadsheet
     """
+
+
+class FailedBatchRequestException(Exception):
+    """
+    General exception for a failure during a Google batch API request
+    """
