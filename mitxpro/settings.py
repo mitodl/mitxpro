@@ -940,6 +940,11 @@ OPENEDX_SERVICE_WORKER_API_TOKEN = get_string(
     None,
     "Active access token with staff level permissions to use with OpenEdX API client for service tasks",
 )
+OPENEDX_SERVICE_WORKER_USERNAME = get_string(
+    "OPENEDX_SERVICE_WORKER_USERNAME",
+    None,
+    "Username of the user whose token has been set in OPENEDX_SERVICE_WORKER_API_TOKEN",
+)
 EDX_API_CLIENT_TIMEOUT = get_int(
     "EDX_API_CLIENT_TIMEOUT",
     60,

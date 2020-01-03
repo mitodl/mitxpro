@@ -4,6 +4,7 @@ Utilities for courses/certificates
 import logging
 from requests.exceptions import HTTPError
 from rest_framework.status import HTTP_404_NOT_FOUND
+from django.conf import settings
 from django.db import transaction
 from courses.models import (
     CourseRunGrade,
@@ -237,7 +238,10 @@ def sync_course_runs(runs):
     # Iterate all eligible runs and sync if possible
     for run in runs:
         try:
-            course_detail = api_client.get_detail(run.courseware_id)
+            course_detail = api_client.get_detail(
+                course_id=run.courseware_id,
+                username=settings.OPENEDX_SERVICE_WORKER_USERNAME,
+            )
         except HTTPError as e:
             failure_count += 1
             if e.response.status_code == HTTP_404_NOT_FOUND:
