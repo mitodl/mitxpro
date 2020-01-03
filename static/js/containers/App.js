@@ -64,7 +64,7 @@ export class App extends React.Component<Props, void> {
         prevProps.location.pathname === routes.checkout))
 
   render() {
-    const { match, currentUser } = this.props
+    const { match, currentUser, location } = this.props
 
     if (!currentUser) {
       // application is still loading
@@ -73,7 +73,7 @@ export class App extends React.Component<Props, void> {
 
     return (
       <div className="app">
-        <Header currentUser={currentUser} />
+        <Header currentUser={currentUser} location={location} />
         <Switch>
           <PrivateRoute
             exact

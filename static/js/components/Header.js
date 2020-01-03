@@ -6,12 +6,14 @@ import TopAppBar from "./TopAppBar"
 import NotificationContainer from "./NotificationContainer"
 
 import type { CurrentUser } from "../flow/authTypes"
+import type { Location } from "react-router"
 
 type Props = {
-  currentUser: CurrentUser
+  currentUser: CurrentUser,
+  location: ?Location
 }
 
-const Header = ({ currentUser }: Props) => {
+const Header = ({ currentUser, location }: Props) => {
   if (currentUser && currentUser.is_authenticated) {
     Sentry.configureScope(scope => {
       scope.setUser({
@@ -28,7 +30,7 @@ const Header = ({ currentUser }: Props) => {
   }
   return (
     <React.Fragment>
-      <TopAppBar currentUser={currentUser} />
+      <TopAppBar currentUser={currentUser} location={location} />
       <NotificationContainer />
     </React.Fragment>
   )
