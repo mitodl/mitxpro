@@ -19,6 +19,7 @@ from .models import (
     CourseRunCertificate,
     CourseTopic,
     ProgramCertificate,
+    ProgramRun,
 )
 
 
@@ -29,6 +30,15 @@ class ProgramAdmin(admin.ModelAdmin):
     search_fields = ["title", "readable_id"]
     list_display = ("id", "title", "readable_id")
     list_filter = ["live"]
+
+
+class ProgramRunAdmin(admin.ModelAdmin):
+    """Admin for ProgramRun"""
+
+    model = ProgramRun
+    search_fields = ["program__title", "program__readable_id"]
+    list_filter = ["live"]
+    list_display = ("id", "readable_id", "live")
 
 
 class CourseAdmin(admin.ModelAdmin):
@@ -255,6 +265,7 @@ class CourseTopicAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Program, ProgramAdmin)
+admin.site.register(ProgramRun, ProgramRunAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(CourseRun, CourseRunAdmin)
 admin.site.register(ProgramEnrollment, ProgramEnrollmentAdmin)

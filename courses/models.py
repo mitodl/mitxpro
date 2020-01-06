@@ -245,6 +245,42 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         return title if len(title) <= 100 else title[:97] + "..."
 
 
+class ProgramRun(TimestampedModel):
+    """Model for a single run/instance of a program"""
+
+    title = models.CharField(max_length=255)
+    program = models.ForeignKey(
+        Program, on_delete=models.CASCADE, related_name="programruns"
+    )
+    run_id = models.CharField(max_length=255)
+    live = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ["program", "run_id"]
+
+    @property
+    def readable_id(self):
+        """Get the readable id for the program run"""
+        return f"{self.program.readable_id}+{self.run_id}"
+
+    @property
+    def is_live(self):
+        """
+        Use this attribute instead of just program_run.live in order to make
+        sure that both the program and program run are live.
+        """
+        return self.live and self.program.live
+
+    @property
+    def text_id(self):
+        """Gets the readable_id"""
+        return self.readable_id
+
+    def __str__(self):
+        """String representation of the program run"""
+        return self.title
+
+
 class CourseTopic(TimestampedModel):
     """
     Topics for all courses (e.g. "History")
@@ -421,6 +457,13 @@ class CourseRun(TimestampedModel):
     )
     live = models.BooleanField(default=False)
     products = GenericRelation(Product, related_query_name="courseruns")
+    program_run = models.ForeignKey(
+        ProgramRun,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="courseruns",
+    )
 
     @property
     def is_past(self):
@@ -509,6 +552,8 @@ class CourseRun(TimestampedModel):
         Validate that the expiration date is:
         1. Later than end_date if end_date is set
         2. Later than start_date if start_date is set
+
+        Validate that the ProgramRun is a run for the self.course.program Program.
         """
         if not self.expiration_date:
             if self.end_date:
@@ -520,6 +565,11 @@ class CourseRun(TimestampedModel):
 
         if self.end_date and self.expiration_date < self.end_date:
             raise ValidationError("Expiration date must be later than end date.")
+
+        if self.program_run.program != self.course.program:
+            raise ValidationError(
+                "Program run can only be from the program attached to the course."
+            )
 
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
