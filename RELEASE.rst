@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.35.2 (Released January 08, 2020)
+--------------
+
+- Fix coupon success message
+- Create a ProgramEnrollment along with ProgramCertificate
+- Updated the version of handlebars
+- Included user's street address
+- Added warning for 'automatic' option in coupon creation form
+- update the serialize-javascript
+- 1438 display dollars and cents in both email and receipt page
+
 Version 0.35.1 (Released December 30, 2019)
 --------------
 
