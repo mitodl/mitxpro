@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.35.2
+Version 0.35.2 (Released January 08, 2020)
 --------------
 
 - Fix coupon success message
