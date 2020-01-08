@@ -98,6 +98,9 @@ def test_signed_payload(mocker):
         "transaction_type": "sale",
         "transaction_uuid": transaction_uuid,
         "unsigned_field_names": "",
+        "merchant_defined_data1": order.contract_number
+        if order.contract_number
+        else "",
     }
     now_mock.assert_called_once_with()
 

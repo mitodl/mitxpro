@@ -84,6 +84,9 @@ def _generate_b2b_cybersource_sa_payload(*, order, receipt_url, cancel_url):
         "transaction_type": "sale",
         "transaction_uuid": uuid.uuid4().hex,
         "unsigned_field_names": "",
+        "merchant_defined_data1": order.contract_number
+        if order.contract_number
+        else "",
     }
 
 

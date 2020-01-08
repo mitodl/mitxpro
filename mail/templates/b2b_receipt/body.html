@@ -39,6 +39,12 @@
                                   <span style="color: #8a8b8c">Price Per</span><br />
                                   {{ item_price }}
                               </td>
+                              {% if contract_number %}
+                                  <td style="padding: 20px; vertical-align: top;">
+                                      <span style="color: #8a8b8c">Contract#</span><br />
+                                      {{ contract_number }}
+                                  </td>
+                              {% endif %}
                               {% if discount %}
                                   <td style="padding: 20px; vertical-align: top">
                                       <span style="color: #8a8b8c">Discount</span><br />

@@ -171,6 +171,9 @@ def send_b2b_receipt_email(order):
                         "discount": format_price(order.discount)
                         if order.discount is not None
                         else None,
+                        "contract_number": order.contract_number
+                        if order.contract_number is not None
+                        else None,
                         "num_seats": str(order.num_seats),
                         "readable_id": get_readable_id(
                             order.product_version.product.content_object

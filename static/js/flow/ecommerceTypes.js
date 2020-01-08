@@ -67,6 +67,7 @@ export type B2BOrderStatus = {
   item_price: string,
   discount: ?string,
   email: string,
+  contract_number: ?string,
   product_version: ProductVersion,
 }
 
@@ -217,6 +218,7 @@ export type B2BCheckoutPayload = {
   product_version_id: number,
   discount_code: ?string,
   email: string,
+  contract_number: ?string
 }
 
 export type EnrollmentCode = {

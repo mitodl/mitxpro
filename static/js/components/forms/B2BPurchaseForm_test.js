@@ -41,6 +41,7 @@ describe("B2BPurchaseForm", () => {
         onSubmit={onSubmitStub}
         requestPending={false}
         fetchCouponStatus={fetchCouponStatusStub}
+        contractNumber={null}
         clearCouponStatus={clearCouponStatusStub}
         couponStatus={couponStatus}
         {...props}

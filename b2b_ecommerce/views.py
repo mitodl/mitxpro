@@ -46,6 +46,7 @@ class B2BCheckoutView(APIView):
             email = request.data["email"]
             product_version_id = request.data["product_version_id"]
             discount_code = request.data["discount_code"]
+            contract_number = request.data.get("contract_number")
         except KeyError as ex:
             raise ValidationError(f"Missing parameter {ex.args[0]}")
 
@@ -70,6 +71,7 @@ class B2BCheckoutView(APIView):
                 per_item_price=product_version.price,
                 discount=discount,
                 coupon=coupon,
+                contract_number=contract_number,
             )
             order.save_and_log(None)
             if coupon:
@@ -128,6 +130,7 @@ class B2BOrderStatusView(APIView):
                     order.product_version, context={"all_runs": True}
                 ).data,
                 "email": order.email,
+                "contract_number": order.contract_number,
             }
         )
 

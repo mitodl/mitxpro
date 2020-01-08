@@ -118,6 +118,7 @@ export class B2BReceiptPage extends React.Component<Props, State> {
     const {
       num_seats: numSeats,
       email,
+      contract_number: contractNumber,
       product_version: { content_title: title, readable_id: readableId }
     } = orderStatus
 
@@ -148,6 +149,12 @@ export class B2BReceiptPage extends React.Component<Props, State> {
                 <span className="description">Email Address:</span>
                 {email}
               </p>
+              {contractNumber && (
+                <p className="contract-number">
+                  <span className="description">Contract Number:</span>
+                  {contractNumber}
+                </p>
+              )}
               If you encounter any issues please contact{" "}
               <a href="https://xpro.zendesk.com/hc/requests/new">
                 customer support
