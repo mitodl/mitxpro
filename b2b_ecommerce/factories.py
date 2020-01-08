@@ -24,7 +24,7 @@ class B2BOrderFactory(DjangoModelFactory):
     total_price = factory.LazyAttribute(lambda obj: obj.per_item_price * obj.num_seats)
     product_version = factory.SubFactory(ProductVersionFactory)
     coupon_payment_version = factory.SubFactory(CouponPaymentVersionFactory)
-    contract_number = fuzzy.FuzzyInteger(low=100, high=1000)
+    contract_number = str(fuzzy.FuzzyInteger(low=100, high=1000))
 
     class Meta:
         model = B2BOrder
