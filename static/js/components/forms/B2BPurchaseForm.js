@@ -20,7 +20,9 @@ type Props = {
   couponStatus: ?B2BCouponStatusResponse,
   clearCouponStatus: () => void,
   fetchCouponStatus: (payload: B2BCouponStatusPayload) => Promise<*>,
-  contractNumber: ?string
+  contractNumber: ?string,
+  discountCode: ?string,
+  productId: ?string
 }
 
 const errorMessageRenderer = msg => <span className="error">{msg}</span>
@@ -46,8 +48,13 @@ export const validate = (values: Object) => {
 
 class B2BPurchaseForm extends React.Component<Props> {
   applyCoupon = curry(
-    async (values: Object, setFieldError: Function, event: Event) => {
-      const { clearCouponStatus, fetchCouponStatus } = this.props
+    async (
+      values: Object,
+      setFieldError: Function,
+      setFieldTouched: Function,
+      event: Event
+    ) => {
+      const { products, clearCouponStatus, fetchCouponStatus } = this.props
 
       event.preventDefault()
 
@@ -60,18 +67,28 @@ class B2BPurchaseForm extends React.Component<Props> {
         setFieldError("coupon", "No product selected")
         return
       }
+      let productId = values.product
+      if (isNaN(values.product)) {
+        const _product = products.find(
+          product => product.latest_version.readable_id === values.product
+        )
+        if (_product) {
+          productId = _product.id
+        }
+      }
 
       const response = await fetchCouponStatus({
-        product_id: values.product,
+        product_id: productId,
         code:       values.coupon.trim()
       })
       if (response.status !== 200) {
         setFieldError("coupon", "Invalid coupon code")
+        setFieldTouched("coupon", true, false)
       }
     }
   )
 
-  renderForm = ({ values, setFieldError }: Object) => {
+  renderForm = ({ values, setFieldError, setFieldTouched }: Object) => {
     const {
       products,
       requestPending,
@@ -81,10 +98,26 @@ class B2BPurchaseForm extends React.Component<Props> {
 
     let itemPrice = new Decimal(0),
       totalPrice = new Decimal(0),
-      discount
-    const productId = parseInt(values.product)
-    const product = products.find(product => product.id === productId)
+      discount,
+      productId,
+      product
+
+    // product_id can be either a product readable_id or an integer value in query parameter.
+    // in case of readable_id, we need to look inside the latest_version of product.
+    if (isNaN(values.product)) {
+      product = products.find(
+        product => product.latest_version.readable_id === values.product
+      )
+      if (product !== undefined) {
+        productId = product.id
+      }
+    } else {
+      productId = parseInt(values.product)
+      product = products.find(product => product.id === productId)
+    }
+
     const productVersion = product ? product.latest_version : null
+    const productType = product ? product.product_type : null
     let numSeats = parseInt(values.num_seats)
 
     if (productVersion && productVersion.price !== null) {
@@ -118,6 +151,8 @@ class B2BPurchaseForm extends React.Component<Props> {
               <Field
                 component={ProductSelector}
                 products={products}
+                selectedProduct={product}
+                productType={productType}
                 name="product"
               />
               <ErrorMessage name="product" render={errorMessageRenderer} />
@@ -157,7 +192,11 @@ class B2BPurchaseForm extends React.Component<Props> {
                 <Field type="text" name="coupon" />
                 <button
                   className="apply-button"
-                  onClick={this.applyCoupon(values, setFieldError)}
+                  onClick={this.applyCoupon(
+                    values,
+                    setFieldError,
+                    setFieldTouched
+                  )}
                 >
                   Apply
                 </button>
@@ -189,16 +228,16 @@ class B2BPurchaseForm extends React.Component<Props> {
   }
 
   render() {
-    const { onSubmit, contractNumber } = this.props
+    const { onSubmit } = this.props
     return (
       <Formik
         onSubmit={onSubmit}
         initialValues={{
-          num_seats:       "",
-          email:           "",
-          product:         "",
-          coupon:          "",
-          contract_number: contractNumber || ""
+          num_seats:      "",
+          email:          "",
+          product:        this.props.productId || "",
+          coupon:         this.props.discountCode || "",
+          contractNumber: this.props.contractNumber || ""
         }}
         validate={validate}
         render={this.renderForm}

@@ -39,7 +39,7 @@ type Props = {
   products: Array<ProductDetail>,
   field: {
     name: string,
-    value: ?number,
+    value: any,
     onChange: Function,
     onBlur: Function
   },
@@ -47,7 +47,9 @@ type Props = {
     touched: boolean,
     errors: Object,
     values: Object
-  }
+  },
+  productType: ProductType,
+  selectedProduct: Object
 }
 type ProductType = "courserun" | "program"
 type State = {
@@ -91,6 +93,7 @@ export default class ProductSelector extends React.Component<Props, State> {
   }
 
   calcSelectedProduct = () => {
+    let product
     const {
       products,
       field: { value }
@@ -100,8 +103,16 @@ export default class ProductSelector extends React.Component<Props, State> {
       selected: [selectedProduct, selectedRun, selectedCourse]
     } = this.state
 
+    // product_id can be either a product readable_id or an integer value in query parameter.
+    // in case of readable_id, we need to look inside the latest_version of product.
     if (productType === PRODUCT_TYPE_PROGRAM) {
-      const product = products.find(_product => _product.id === value)
+      if (isNaN(value)) {
+        product = products.find(
+          product => product.latest_version.readable_id === value
+        )
+      } else {
+        product = products.find(_product => _product.id === parseInt(value))
+      }
       return product ? makeProductOption(product) : null
     }
 
@@ -169,14 +180,23 @@ export default class ProductSelector extends React.Component<Props, State> {
   }
 
   calcSelectedProductDate = () => {
+    let product
     const {
       field: { value },
       products
     } = this.props
 
-    const product = products
-      .filter(product => product.product_type === PRODUCT_TYPE_COURSERUN)
-      .find(product => product.id === value)
+    // product_id can be either a product readable_id or an integer value in query parameter.
+    // in case of readable_id, we need to look inside the latest_version of product.
+    if (isNaN(value)) {
+      product = products
+        .filter(product => product.product_type === PRODUCT_TYPE_COURSERUN)
+        .find(product => product.latest_version.readable_id === value)
+    } else {
+      product = products
+        .filter(product => product.product_type === PRODUCT_TYPE_COURSERUN)
+        .find(product => product.id === parseInt(value))
+    }
     return product ? makeProductRunOption(product) : null
   }
 
@@ -194,10 +214,19 @@ export default class ProductSelector extends React.Component<Props, State> {
     onChange({ target: { value: "", name } })
   }
 
+  static getDerivedStateFromProps(props: Props, state: State) {
+    if (props.productType && props.selectedProduct) {
+      state.productType = props.productType
+      state.selected = [props.selectedProduct, null, null]
+    }
+    return null
+  }
+
   render() {
     const {
       field: { onChange, name }
     } = this.props
+
     const { productType } = this.state
 
     const productTypeText =

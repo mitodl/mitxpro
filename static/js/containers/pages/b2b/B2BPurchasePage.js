@@ -33,7 +33,9 @@ type Props = {
   clearCouponStatus: () => void,
   fetchCouponStatus: (payload: B2BCouponStatusPayload) => Promise<*>,
   location: window.location,
-  contractNumber: ?string
+  contractNumber: ?string,
+  productId: string,
+  discountCode: string
 }
 type State = {
   errors: string | Object | null
@@ -49,9 +51,16 @@ export class B2BPurchasePage extends React.Component<Props, State> {
   onSubmit = async (values: Values, { setErrors, setSubmitting }: Object) => {
     const { products, checkout, couponStatus } = this.props
     const numSeats = parseInt(values.num_seats)
-    const product = products.find(
-      _product => _product.id === parseInt(values.product)
-    )
+    let product
+    if (isNaN(values.product)) {
+      product = products.find(
+        product => product.latest_version.readable_id === values.product
+      )
+    } else {
+      product = products.find(
+        _product => _product.id === parseInt(values.product)
+      )
+    }
     if (!product) {
       throw new Error(
         "No product found. This should have been caught in validation."
@@ -99,9 +108,15 @@ export class B2BPurchasePage extends React.Component<Props, State> {
       products,
       requestPending
     } = this.props
-    const { contract_number: contractNumber } = qs.parse(
-      this.props.location.search
-    )
+
+    const params = new URLSearchParams(this.props.location.search)
+    const contractNumber = params.get("contract_number")
+    const discountCode = params.get("discount_code")
+    let productId = params.get("product_id")
+    if (productId) {
+      // eslint-disable-next-line no-useless-escape
+      productId = productId.replace(/\ /g, "+")
+    }
 
     return (
       <React.Fragment>
@@ -114,6 +129,8 @@ export class B2BPurchasePage extends React.Component<Props, State> {
           clearCouponStatus={clearCouponStatus}
           fetchCouponStatus={fetchCouponStatus}
           requestPending={requestPending}
+          productId={productId}
+          discountCode={discountCode}
         />
         <B2BExplanation alreadyPaid={false} />
       </React.Fragment>

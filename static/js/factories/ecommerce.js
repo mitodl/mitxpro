@@ -35,13 +35,20 @@ export const makeDataConsent = (): DataConsentUser => ({
   consent_text: casual.text
 })
 
-export const makeItem = (productType: ?string): BasketItem => {
+export const makeItem = (
+  productType: ?string,
+  readableId: ?string
+): BasketItem => {
   const basketItemType =
     productType ||
     casual.random_element([PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM])
   const numCourses = basketItemType === PRODUCT_TYPE_COURSERUN ? 1 : 4
   const courses = range(0, numCourses).map(() => makeCourse())
   const runIds = courses.map(course => course.courseruns[0].id)
+  let productReadableId = casual.text
+  if (readableId) {
+    productReadableId = readableId
+  }
 
   let objectId = genBasketItemObjectId.next().value
   if (productType === PRODUCT_TYPE_COURSERUN) {
@@ -68,7 +75,7 @@ export const makeItem = (productType: ?string): BasketItem => {
     object_id:     objectId,
     // $FlowFixMe: flow doesn't understand generators well
     product_id:    genProductId.next().value,
-    readable_id:   casual.text,
+    readable_id:   productReadableId,
     created_on:    casual.moment.format(),
     start_date:    casual.moment.format()
   }
@@ -90,13 +97,14 @@ export const makeBasketResponse = (itemType: ?string): BasketResponse => {
 }
 
 export const makeProduct = (
-  productType: string = PRODUCT_TYPE_COURSERUN
+  productType: string = PRODUCT_TYPE_COURSERUN,
+  readableId: string = casual.text
 ): ProductDetail => ({
   // $FlowFixMe
   id:             genProductId.next().value,
   title:          casual.word,
   product_type:   productType,
-  latest_version: makeItem(productType)
+  latest_version: makeItem(productType, readableId)
 })
 
 export const makeCourseRunOrProgram = (
