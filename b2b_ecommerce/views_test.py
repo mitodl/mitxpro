@@ -264,7 +264,7 @@ def test_order_status(client):
             "total_price": str(order.total_price),
             "status": order.status,
             "discount": None,
-            "contract_number": order.contract_number,
+            "contract_number": str(order.contract_number),
         },
     )
 
