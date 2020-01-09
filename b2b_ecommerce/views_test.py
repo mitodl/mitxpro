@@ -64,6 +64,7 @@ def test_create_order(client, mocker):
             "email": "b@example.com",
             "product_version_id": product_version.id,
             "discount_code": "",
+            "contract_number": "",
         },
     )
 
@@ -112,6 +113,7 @@ def test_create_order_with_coupon(client, mocker):
             "email": "b@example.com",
             "product_version_id": product_version.id,
             "discount_code": coupon.coupon_code,
+            "contract_number": "",
         },
     )
 
@@ -157,6 +159,7 @@ def test_create_order_with_invalid_code(client):
             "email": "b@example.com",
             "product_version_id": product_version.id,
             "discount_code": "nope",
+            "contract_number": "",
         },
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -185,6 +188,7 @@ def test_create_order_num_seats_integer(client):
             "email": "a@example.com",
             "product_version_id": 987,
             "discount_code": "",
+            "contract_number": "",
         },
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -202,6 +206,7 @@ def test_create_order_product_version(client):
             "email": "a@example.com",
             "product_version_id": 987,
             "discount_code": "",
+            "contract_number": "",
         },
     )
     assert resp.status_code == status.HTTP_404_NOT_FOUND
@@ -220,6 +225,7 @@ def test_zero_price_checkout(client, mocker):  # pylint:disable=too-many-argumen
             "email": "a@email.example.com",
             "product_version_id": product_version.id,
             "discount_code": "",
+            "contract_number": "",
         },
     )
     assert B2BOrder.objects.count() == 1
@@ -258,6 +264,7 @@ def test_order_status(client):
             "total_price": str(order.total_price),
             "status": order.status,
             "discount": None,
+            "contract_number": order.contract_number,
         },
     )
 

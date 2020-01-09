@@ -104,7 +104,8 @@ describe("B2BPurchasePage", () => {
               email:              values.email,
               product_version_id: selectedProduct.latest_version.id,
               num_seats:          values.num_seats,
-              discount_code:      couponStatus ? couponStatus.code : null
+              discount_code:      couponStatus ? couponStatus.code : null,
+              contract_number:    null
             },
             headers: {
               "X-CSRFTOKEN": null

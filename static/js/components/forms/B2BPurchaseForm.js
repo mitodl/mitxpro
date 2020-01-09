@@ -19,7 +19,8 @@ type Props = {
   requestPending: boolean,
   couponStatus: ?B2BCouponStatusResponse,
   clearCouponStatus: () => void,
-  fetchCouponStatus: (payload: B2BCouponStatusPayload) => Promise<*>
+  fetchCouponStatus: (payload: B2BCouponStatusPayload) => Promise<*>,
+  contractNumber: ?string
 }
 
 const errorMessageRenderer = msg => <span className="error">{msg}</span>
@@ -71,7 +72,12 @@ class B2BPurchaseForm extends React.Component<Props> {
   )
 
   renderForm = ({ values, setFieldError }: Object) => {
-    const { products, requestPending, couponStatus } = this.props
+    const {
+      products,
+      requestPending,
+      couponStatus,
+      contractNumber
+    } = this.props
 
     let itemPrice = new Decimal(0),
       totalPrice = new Decimal(0),
@@ -80,6 +86,7 @@ class B2BPurchaseForm extends React.Component<Props> {
     const product = products.find(product => product.id === productId)
     const productVersion = product ? product.latest_version : null
     let numSeats = parseInt(values.num_seats)
+
     if (productVersion && productVersion.price !== null) {
       itemPrice = new Decimal(productVersion.price)
       if (!isNaN(numSeats)) {
@@ -132,6 +139,18 @@ class B2BPurchaseForm extends React.Component<Props> {
               <ErrorMessage name="email" render={errorMessageRenderer} />
             </label>
 
+            {contractNumber && (
+              <label htmlFor="contract_number">
+                <span className="description">Contract Number:</span>
+                <Field
+                  type="text"
+                  name="contract_number"
+                  readOnly={true}
+                  value={contractNumber}
+                />
+              </label>
+            )}
+
             <label htmlFor="coupon">
               <span className="coupon-description">Discount code:</span>
               <div className="coupon-input-container">
@@ -170,15 +189,16 @@ class B2BPurchaseForm extends React.Component<Props> {
   }
 
   render() {
-    const { onSubmit } = this.props
+    const { onSubmit, contractNumber } = this.props
     return (
       <Formik
         onSubmit={onSubmit}
         initialValues={{
-          num_seats: "",
-          email:     "",
-          product:   "",
-          coupon:    ""
+          num_seats:       "",
+          email:           "",
+          product:         "",
+          coupon:          "",
+          contract_number: contractNumber || ""
         }}
         validate={validate}
         render={this.renderForm}

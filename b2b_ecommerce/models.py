@@ -121,6 +121,7 @@ class B2BOrder(OrderAbstract, AuditableModel):
     )
     coupon = models.ForeignKey(B2BCoupon, null=True, on_delete=models.PROTECT)
     discount = models.DecimalField(decimal_places=2, max_digits=20, null=True)
+    contract_number = models.CharField(null=True, max_length=50)
 
     objects = OrderManager()
 

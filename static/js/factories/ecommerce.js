@@ -181,6 +181,7 @@ export const makeBulkCouponPayment = (): BulkCouponPayment => ({
 export const makeB2BOrderStatus = (): B2BOrderStatus => {
   const itemPrice = new Decimal(casual.integer(0, 1000))
   const numSeats = casual.integer(0, 1000)
+  const contractNumber = casual.integer(1000, 5000)
   const discount = casual.coin_flip
     ? new Decimal(casual.double(0, 1)).times(numSeats).times(itemPrice)
     : null
@@ -196,7 +197,8 @@ export const makeB2BOrderStatus = (): B2BOrderStatus => {
     total_price:     String(totalPrice),
     email:           casual.email,
     product_version: makeProduct().latest_version,
-    discount:        discount !== null ? String(discount) : null
+    discount:        discount !== null ? String(discount) : null,
+    contract_number: contractNumber
   }
 }
 

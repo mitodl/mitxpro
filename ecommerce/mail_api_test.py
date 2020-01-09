@@ -163,6 +163,7 @@ def test_send_b2b_receipt_email(mocker, settings, has_discount):
             "item_price": format_price(order.per_item_price),
             "discount": format_price(order.discount) if has_discount else None,
             "num_seats": str(order.num_seats),
+            "contract_number": order.contract_number,
             "readable_id": get_readable_id(run),
             "run_date_range": f"{run.start_date.strftime(format_string)} - {run.end_date.strftime(format_string)}",
             "title": run.title,

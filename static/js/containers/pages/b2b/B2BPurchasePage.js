@@ -3,6 +3,8 @@ import React from "react"
 import { connect } from "react-redux"
 import { compose } from "redux"
 import { pathOr } from "ramda"
+import qs from "query-string"
+
 import {
   connectRequest,
   mutateAsync,
@@ -29,7 +31,9 @@ type Props = {
   requestPending: boolean,
   couponStatus: ?B2BCouponStatusResponse,
   clearCouponStatus: () => void,
-  fetchCouponStatus: (payload: B2BCouponStatusPayload) => Promise<*>
+  fetchCouponStatus: (payload: B2BCouponStatusPayload) => Promise<*>,
+  location: window.location,
+  contractNumber: ?string
 }
 type State = {
   errors: string | Object | null
@@ -38,7 +42,8 @@ type Values = {
   // these are form fields so they all start off as strings
   num_seats: string,
   product: string,
-  email: string
+  email: string,
+  contract_number: string
 }
 export class B2BPurchasePage extends React.Component<Props, State> {
   onSubmit = async (values: Values, { setErrors, setSubmitting }: Object) => {
@@ -60,7 +65,8 @@ export class B2BPurchasePage extends React.Component<Props, State> {
         num_seats:          numSeats,
         email:              values.email,
         product_version_id: productVersion.id,
-        discount_code:      couponStatus ? couponStatus.code : null
+        discount_code:      couponStatus ? couponStatus.code : null,
+        contract_number:    values.contract_number || null
       })
 
       if (checkoutResponse.status !== 200) {
@@ -93,6 +99,9 @@ export class B2BPurchasePage extends React.Component<Props, State> {
       products,
       requestPending
     } = this.props
+    const { contract_number: contractNumber } = qs.parse(
+      this.props.location.search
+    )
 
     return (
       <React.Fragment>
@@ -101,6 +110,7 @@ export class B2BPurchasePage extends React.Component<Props, State> {
           products={products}
           checkout={checkout}
           couponStatus={couponStatus}
+          contractNumber={contractNumber}
           clearCouponStatus={clearCouponStatus}
           fetchCouponStatus={fetchCouponStatus}
           requestPending={requestPending}

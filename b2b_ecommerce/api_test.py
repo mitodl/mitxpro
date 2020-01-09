@@ -47,11 +47,12 @@ def test_get_new_b2b_order_by_reference_number():
     assert same_order.id == order.id
 
 
-def test_signed_payload(mocker):
+@pytest.mark.parametrize("contract_number", [None, "12345"])
+def test_signed_payload(mocker, contract_number):
     """
     A valid payload should be signed appropriately
     """
-    order = B2BOrderFactory.create()
+    order = B2BOrderFactory.create(contract_number=contract_number)
     transaction_uuid = "hex"
 
     now = now_in_utc()
@@ -98,6 +99,7 @@ def test_signed_payload(mocker):
         "transaction_type": "sale",
         "transaction_uuid": transaction_uuid,
         "unsigned_field_names": "",
+        "merchant_defined_data1": order.contract_number or "",
     }
     now_mock.assert_called_once_with()
 
