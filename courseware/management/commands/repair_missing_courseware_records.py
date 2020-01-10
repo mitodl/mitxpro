@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from requests.exceptions import HTTPError
 
 from courseware.api import repair_faulty_edx_user
+from mitxpro.utils import get_error_response_summary
 
 User = get_user_model()
 
@@ -33,14 +34,15 @@ class Command(BaseCommand):
             except HTTPError as exc:
                 self.stderr.write(
                     self.style.ERROR(
-                        f"{user.username} ({user.email}): Failed to repair: {exc.response.json()}"
+                        f"{user.username} ({user.email}): "
+                        f"Failed to repair ({get_error_response_summary(exc.response)})"
                     )
                 )
                 error_count += 1
             except Exception as exc:  # pylint: disable=broad-except
                 self.stderr.write(
                     self.style.ERROR(
-                        f"{user.username} ({user.email}): Failed to repair: {str(exc)}"
+                        f"{user.username} ({user.email}): Failed to repair (Exception: {str(exc)})"
                     )
                 )
                 error_count += 1

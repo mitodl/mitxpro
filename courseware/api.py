@@ -33,8 +33,12 @@ from courseware.constants import (
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
 )
 from courseware.utils import edx_url
-from mitxpro.utils import now_in_utc, find_object_with_matching_attr
-
+from mitxpro.utils import (
+    now_in_utc,
+    find_object_with_matching_attr,
+    get_error_response_summary,
+    is_json_response,
+)
 
 log = logging.getLogger(__name__)
 User = get_user_model()
@@ -53,8 +57,6 @@ OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS = 60
 OPENEDX_AUTH_MAX_TTL_IN_SECONDS = 60 * 60
 
 ACCESS_TOKEN_HEADER_NAME = "X-Access-Token"
-
-User = get_user_model()
 
 
 def create_user(user):
@@ -108,14 +110,8 @@ def create_edx_user(user):
         )
         # edX responds with 200 on success, not 201
         if resp.status_code != status.HTTP_200_OK:
-            body = None
-            try:
-                # try to parse json, it could be HTML!
-                body = resp.json()
-            except:  # pylint: disable=bare-except
-                pass
             raise CoursewareUserCreateError(
-                f"Error creating Open edX user, got status_code={resp.status_code}, body={body}"
+                f"Error creating Open edX user. {get_error_response_summary(resp)}"
             )
 
 
@@ -278,11 +274,10 @@ def repair_faulty_courseware_users():
             created_user, created_auth_token = repair_faulty_edx_user(user)
         except HTTPError as exc:
             log.exception(
-                "Failed to repair faulty user %s (%s) - Response: [%s] %s",
+                "Failed to repair faulty user %s (%s). %s",
                 user.username,
                 user.email,
-                exc.response.status_code,
-                exc.response.json(),
+                get_error_response_summary(exc.response),
             )
         except Exception:  # pylint: disable=broad-except
             log.exception(
@@ -475,8 +470,10 @@ def enroll_in_edx_course_runs(user, course_runs):
             )
             results.append(result)
         except HTTPError as exc:
-            # If the error message indicates that the preferred enrollment mode was the cause of the
+            # If there is an error message and it indicates that the preferred enrollment mode was the cause of the
             # error, log an error and try to enroll the user in 'audit' mode as a failover.
+            if not is_json_response(exc.response):
+                raise EdxApiEnrollErrorException(user, course_run, exc) from exc
             error_msg = exc.response.json().get("message", "")
             is_enroll_mode_error = any(
                 [error_text in error_msg for error_text in PRO_ENROLL_MODE_ERROR_TEXTS]
@@ -485,12 +482,11 @@ def enroll_in_edx_course_runs(user, course_runs):
                 raise EdxApiEnrollErrorException(user, course_run, exc) from exc
             log.error(
                 "Failed to enroll user in %s with '%s' mode. Attempting to enroll with '%s' mode instead. "
-                "(Response [%d]: %s)",
+                "(%s)",
                 course_run.courseware_id,
                 EDX_ENROLLMENT_PRO_MODE,
                 EDX_ENROLLMENT_AUDIT_MODE,
-                exc.response.status_code,
-                error_msg or str(exc.response),
+                get_error_response_summary(exc.response),
             )
             try:
                 result = edx_client.enrollments.create_student_enrollment(

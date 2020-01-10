@@ -31,7 +31,10 @@ from mitxpro.utils import (
     all_unique,
     has_all_keys,
     request_get_with_timeout_retry,
+    get_error_response_summary,
+    is_json_response,
 )
+from mitxpro.test_utils import MockResponse
 
 
 def test_now_in_utc():
@@ -252,6 +255,55 @@ def test_has_all_keys():
 def test_format_price(price, expected):
     """Format a decimal value into a price"""
     assert format_price(price) == expected
+
+
+@pytest.mark.parametrize(
+    "content,content_type,exp_summary_content,exp_url_in_summary",
+    [
+        ['{"bad": "response"}', "application/json", '{"bad": "response"}', False],
+        ["plain text", "text/plain", "plain text", False],
+        [
+            "<div>HTML content</div>",
+            "text/html; charset=utf-8",
+            "(HTML body ignored)",
+            True,
+        ],
+    ],
+)
+def test_get_error_response_summary(
+    content, content_type, exp_summary_content, exp_url_in_summary
+):
+    """
+    get_error_response_summary should provide a summary of an error HTTP response object with the correct bits of
+    information depending on the type of content.
+    """
+    status_code = 400
+    url = "http://example.com"
+    mock_response = MockResponse(
+        status_code=status_code, content=content, content_type=content_type, url=url
+    )
+    summary = get_error_response_summary(mock_response)
+    assert f"Response - code: {status_code}" in summary
+    assert f"content: {exp_summary_content}" in summary
+    assert (f"url: {url}" in summary) is exp_url_in_summary
+
+
+@pytest.mark.parametrize(
+    "content,content_type,expected",
+    [
+        ['{"bad": "response"}', "application/json", True],
+        ["plain text", "text/plain", False],
+        ["<div>HTML content</div>", "text/html; charset=utf-8", False],
+    ],
+)
+def test_is_json_response(content, content_type, expected):
+    """
+    is_json_response should return True if the given response's content type indicates JSON content
+    """
+    mock_response = MockResponse(
+        status_code=400, content=content, content_type=content_type
+    )
+    assert is_json_response(mock_response) is expected
 
 
 def test_make_csv_http_response():

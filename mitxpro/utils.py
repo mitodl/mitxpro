@@ -321,6 +321,38 @@ def has_all_keys(dict_to_scan, keys):
     return all(key in dict_to_scan for key in keys)
 
 
+def get_error_response_summary(response):
+    """
+    Returns a summary of an error raised from a failed HTTP request using the requests library
+
+    Args:
+        response (requests.models.Response): The requests library response object
+
+    Returns:
+        str: A summary of the error response
+    """
+    # If the response is an HTML document, include the URL in the summary but not the raw HTML
+    if "text/html" in response.headers.get("Content-Type", ""):
+        summary_dict = {"url": response.url, "content": "(HTML body ignored)"}
+    else:
+        summary_dict = {"content": response.text}
+    summary_dict_str = ", ".join([f"{k}: {v}" for k, v in summary_dict.items()])
+    return f"Response - code: {response.status_code}, {summary_dict_str}"
+
+
+def is_json_response(response):
+    """
+    Returns True if the given response object is JSON-parseable
+
+    Args:
+        response (requests.models.Response): The requests library response object
+
+    Returns:
+        bool: True if this response is JSON-parseable
+    """
+    return response.headers.get("Content-Type") == "application/json"
+
+
 class ValidateOnSaveMixin(models.Model):
     """Mixin that calls field/model validation methods before saving a model object"""
 

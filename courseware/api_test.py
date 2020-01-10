@@ -43,7 +43,7 @@ from courseware.exceptions import (
 from courseware.factories import OpenEdxApiAuthFactory, CoursewareUserFactory
 from courseware.models import CoursewareUser, OpenEdxApiAuth
 from mitxpro.utils import now_in_utc
-from mitxpro.test_utils import MockResponse
+from mitxpro.test_utils import MockResponse, MockHttpError
 from users.factories import UserFactory
 
 
@@ -64,14 +64,6 @@ def application(settings):
         client_type="confidential",
         authorization_grant_type="authorization-code",
         skip_authorization=True,
-    )
-
-
-@pytest.fixture()
-def mock_http_error():
-    """Mocked HTTPError with required properties"""
-    return HTTPError(
-        response=MockResponse(content={"bad": "response"}, status_code=400)
     )
 
 
@@ -422,9 +414,7 @@ def test_repair_faulty_edx_user(mocker, user, no_courseware_user, no_edx_auth):
     assert created_auth_token is no_edx_auth
 
 
-@pytest.mark.parametrize(
-    "exception_raised", [pytest.lazy_fixture("mock_http_error"), Exception, None]
-)
+@pytest.mark.parametrize("exception_raised", [MockHttpError, Exception, None])
 def test_repair_faulty_courseware_users(mocker, exception_raised):
     """
     Tests that repair_faulty_courseware_users loops through all incorrectly configured Users, attempts to repair
@@ -501,7 +491,7 @@ def test_unenroll_edx_course_run(mocker):
 @pytest.mark.parametrize(
     "client_exception_raised,expected_exception",
     [
-        [pytest.lazy_fixture("mock_http_error"), EdxApiEnrollErrorException],
+        [MockHttpError, EdxApiEnrollErrorException],
         [ValueError, UnknownEdxApiEnrollException],
         [Exception, UnknownEdxApiEnrollException],
     ],
