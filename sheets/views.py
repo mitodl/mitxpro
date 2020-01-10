@@ -124,8 +124,9 @@ def handle_coupon_request_sheet_update(request):
     if channel_id != req_sheet_file_watch.channel_id:
         log.warning(
             "Google file watch request received, but the Channel ID does not match the active file watch "
-            "channel ID in the app (%s, %s)"
-            % (channel_id, req_sheet_file_watch.channel_id)
+            "channel ID in the app (%s, %s)",
+            channel_id,
+            req_sheet_file_watch.channel_id,
         )
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
     tasks.handle_unprocessed_coupon_requests.delay()
