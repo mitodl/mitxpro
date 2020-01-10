@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.35.3
+--------------
+
+- mitxpro-1393 Add contract number to b2b order (#1430)
+- Add more fields in address line.
+- upgrade autoprefixer to fix builds (#1469)
+- #1398 Remove login/register from bulk purchase pages
+- Changed default renewal period for Drive webhooks to 12hrs
+- Added batch Drive file sharing
+- Set coupon assignment sheet cells to protected
+- #1418 Fix course run sync from edX
+
 Version 0.35.2 (Released January 08, 2020)
 --------------
 
