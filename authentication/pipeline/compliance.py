@@ -1,6 +1,7 @@
 """Compliance pipeline actions"""
 import logging
 
+import pycountry
 from django.conf import settings
 from django.core import mail
 from social_core.exceptions import AuthException
@@ -52,9 +53,27 @@ def verify_exports_compliance(
         )
         try:
             with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
+                city = ", " + user.legal_address.city if user.legal_address.city else ""
+                state = (
+                    ", " + user.legal_address.state_or_territory
+                    if user.legal_address.state_or_territory
+                    else ""
+                )
+                postal_code = (
+                    ", " + user.legal_address.postal_code
+                    if user.legal_address.postal_code
+                    else ""
+                )
+                country = (
+                    ", "
+                    + pycountry.countries.get(alpha_2=user.legal_address.country).name
+                    if user.legal_address.country
+                    else ""
+                )
+
                 mail.send_mail(
                     f"Exports Compliance: denied {user.email}",
-                    f"User with first name '{user.legal_address.first_name}', last name '{user.legal_address.last_name}, address '{','.join(user.legal_address.street_address)}', and email '{user.email}' was denied due to exports violation, for reason_code={export_inquiry.reason_code}, info_code={export_inquiry.info_code}",
+                    f"User with first name '{user.legal_address.first_name}', last name '{user.legal_address.last_name}, address '{' '.join(user.legal_address.street_address)}{city}{state}{postal_code}{country}' , and email '{user.email}' was denied due to exports violation, for reason_code={export_inquiry.reason_code}, info_code={export_inquiry.info_code}",
                     settings.ADMIN_EMAIL,
                     [settings.EMAIL_SUPPORT],
                     connection=connection,
