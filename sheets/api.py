@@ -487,7 +487,8 @@ def renew_coupon_request_file_watch(force=False):
         if file_watch.expiration_date < now:
             log.error(
                 "Current file watch in the database is expired. Some file changes may have failed to "
-                "trigger a push notification (%s)" % file_watch
+                "trigger a push notification (%s)",
+                file_watch,
             )
         expiration = now + datetime.timedelta(
             minutes=settings.DRIVE_WEBHOOK_EXPIRATION_MINUTES
@@ -496,8 +497,8 @@ def renew_coupon_request_file_watch(force=False):
             settings.COUPON_REQUEST_SHEET_ID, new_channel_id, expiration=expiration
         )
         log.info(
-            "File watch request for push notifications on coupon request sheet completed. Response: %s"
-            % str(resp_dict)
+            "File watch request for push notifications on coupon request sheet completed. Response: %s",
+            resp_dict,
         )
         file_watch.activation_date = now
         file_watch.expiration_date = google_timestamp_to_datetime(
@@ -820,8 +821,8 @@ class CouponRequestHandler:
         ).values_list("coupon_code", flat=True)
         if not coupon_codes:
             log.error(
-                "Cannot create bulk coupon sheet - No coupon codes found matching the name '%s'"
-                % coupon_req_row.coupon_name
+                "Cannot create bulk coupon sheet - No coupon codes found matching the name '%s'",
+                coupon_req_row.coupon_name,
             )
             return
         # Create sheet
@@ -1180,8 +1181,8 @@ class CouponAssignmentHandler:
             if already_redeemed_assignments:
                 log.error(
                     "Cannot remove ProductCouponAssignments that are already redeemed - "
-                    "The following assignments will not be removed: %s"
-                    % str(list(already_redeemed_assignments))
+                    "The following assignments will not be removed: %s",
+                    list(already_redeemed_assignments),
                 )
                 # If any of the assignments we want to create have the same product coupon as one
                 # of these already-redeemed assignments, filter them out and log an error.
@@ -1197,8 +1198,8 @@ class CouponAssignmentHandler:
                 if cannot_create_iter:
                     log.error(
                         "Cannot create ProductCouponAssignments for codes that have already been redeemed. "
-                        "The following assignments will be not be created: %s"
-                        % str(list(cannot_create_iter))
+                        "The following assignments will be not be created: %s",
+                        list(cannot_create_iter),
                     )
 
         return (
@@ -1473,11 +1474,12 @@ class CouponAssignmentHandler:
                 # Update spreadsheet metadata to reflect the status
                 try:
                     self._set_spreadsheet_completed(spreadsheet_id, now)
-                except Exception as exc:
-                    log.error(
+                except Exception:  # pylint: disable=broad-except
+                    log.exception(
                         "The BulkCouponAssignment has been updated to indicate that message delivery is complete, "
-                        "but the request to update spreadsheet properties to indicate this status failed."
-                        "- %s, exception: %s" % (spreadsheet_id, str(exc))
+                        "but the request to update spreadsheet properties to indicate this status failed "
+                        "(spreadsheet id: %s)",
+                        spreadsheet_id,
                     )
 
             # Update delivery dates in Sheet
