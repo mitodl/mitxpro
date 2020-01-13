@@ -902,17 +902,22 @@ def test_complete_order_coupon_assignments(mocker, user, basket_and_coupons):
     basket_and_coupons.basket.user = user
     basket_and_coupons.basket.save()
     order = OrderFactory.create(purchaser=user, status=Order.CREATED)
-    coupon_redemptions = CouponRedemptionFactory.create_batch(2, order=order)
+    coupon_redemptions = CouponRedemptionFactory.create_batch(3, order=order)
     order_coupons = [
         redemption.coupon_version.coupon for redemption in coupon_redemptions
     ]
     bulk_assignment = BulkCouponAssignmentFactory.create()
+    non_sheet_bulk_assignment = BulkCouponAssignmentFactory.create(
+        assignment_sheet_id=None
+    )
     coupon_assignments = ProductCouponAssignmentFactory.create_batch(
-        2,
+        len(coupon_redemptions),
         # Set assignment email as uppercase to test that the email match is case-insensitive
         email=order.purchaser.email.upper(),
         product_coupon__coupon=factory.Iterator(order_coupons),
-        bulk_assignment=factory.Iterator([None, bulk_assignment]),
+        bulk_assignment=factory.Iterator(
+            [None, non_sheet_bulk_assignment, bulk_assignment]
+        ),
     )
 
     complete_order(order)
@@ -924,7 +929,7 @@ def test_complete_order_coupon_assignments(mocker, user, basket_and_coupons):
             list,
             {
                 bulk_assignment.assignment_sheet_id: [
-                    [order_coupons[1].coupon_code, order.purchaser.email.upper()]
+                    [order_coupons[2].coupon_code, order.purchaser.email.upper()]
                 ]
             },
         )
