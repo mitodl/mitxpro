@@ -5,6 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 import pytz
+from rest_framework import status
 
 from ecommerce.models import Order
 from mitxpro.utils import (
@@ -29,6 +30,7 @@ from mitxpro.utils import (
     all_equal,
     all_unique,
     has_all_keys,
+    request_get_with_timeout_retry,
 )
 
 
@@ -273,3 +275,20 @@ def test_make_csv_http_response_empty():
     assert out_rows == []
     assert response["Content-Disposition"] == 'attachment; filename="empty_filename"'
     assert response["Content-Type"] == "text/csv"
+
+
+def test_request_get_with_timeout_retry(mocker):
+    """request_get_with_timeout_retry should make a GET request and retry if the response status is 504 (timeout)"""
+    mock_response = mocker.Mock(status_code=status.HTTP_504_GATEWAY_TIMEOUT)
+    patched_request_get = mocker.patch(
+        "mitxpro.utils.requests.get", return_value=mock_response
+    )
+    patched_log = mocker.patch("mitxpro.utils.log")
+    url = "http://example.com/retry"
+    retries = 4
+
+    result = request_get_with_timeout_retry(url, retries=retries)
+    assert patched_request_get.call_count == retries
+    assert patched_log.warning.call_count == (retries - 1)
+    mock_response.raise_for_status.assert_called_once()
+    assert result == mock_response

@@ -12,6 +12,8 @@ from django.core.serializers import serialize
 from django.db import models
 from django.http.response import HttpResponse
 import pytz
+from rest_framework import status
+import requests
 
 log = logging.getLogger(__name__)
 
@@ -404,3 +406,30 @@ def make_csv_http_response(*, csv_rows, filename):
     for row in csv_rows:
         writer.writerow(row)
     return response
+
+
+def request_get_with_timeout_retry(url, retries):
+    """
+    Makes a GET request, and retries if the server responds with a 504 (timeout)
+
+    Args:
+        url (str): The URL of the Mailgun API endpoint
+        retries (int): The number of times to retry the request
+
+    Returns:
+        response (requests.models.Response): The requests library response object
+
+    Raises:
+        requests.exceptions.HTTPError: Raised if the response has a status code indicating an error
+    """
+    resp = requests.get(url)
+    # If there was a timeout (504), retry before giving up
+    tries = 1
+    while resp.status_code == status.HTTP_504_GATEWAY_TIMEOUT and tries < retries:
+        tries += 1
+        log.warning(
+            "GET request timed out (%s). Retrying for attempt %d...", url, tries
+        )
+        resp = requests.get(url)
+    resp.raise_for_status()
+    return resp
