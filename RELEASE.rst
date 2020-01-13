@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.35.3
+Version 0.35.3 (Released January 13, 2020)
 --------------
 
 - mitxpro-1393 Add contract number to b2b order (#1430)
