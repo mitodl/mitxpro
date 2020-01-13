@@ -89,7 +89,7 @@ export type BasketResponse = {
 }
 
 type BasketItemPayload = {
-  product_id: number,
+  readable_id: string,
   run_ids?: Array<number>,
 }
 

@@ -436,7 +436,15 @@ def test_patch_basket_new_user(basket_and_coupons, user, user_drf_client):
 
 def test_patch_basket_new_item(basket_client, basket_and_coupons, mock_context):
     """Test that a user can add an item to their basket"""
-    data = {"items": [{"product_id": basket_and_coupons.product_version.product.id}]}
+    data = {
+        "items": [
+            {
+                "readable_id": get_readable_id(
+                    basket_and_coupons.product_version.product.content_object
+                )
+            }
+        ]
+    }
     basket_item = BasketItem.objects.all().first()
     assert str(basket_item) == "BasketItem of product {} (qty: {})".format(
         str(basket_item.product), basket_item.quantity
@@ -452,12 +460,13 @@ def test_patch_basket_new_item(basket_client, basket_and_coupons, mock_context):
 def test_patch_basket_replace_item(basket_client, basket_and_agreement):
     """If a user changes the item in the basket it should clear away old selected runs and coupons"""
     new_product = ProductVersionFactory.create().product
-    data = {"items": [{"product_id": new_product.id}]}
+    readable_id = get_readable_id(new_product.content_object)
+    data = {"items": [{"readable_id": readable_id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     items = resp.json()["items"]
     assert len(items) == 1
-    assert items[0]["product_id"] == new_product.id
+    assert items[0]["readable_id"] == readable_id
     assert items[0]["run_ids"] == []
     assert resp.json()["data_consents"] == []
     assert resp.json()["coupons"] == []
@@ -471,12 +480,13 @@ def test_patch_basket_replace_item_with_same(basket_client, basket_and_agreement
     If a user changes the item in the basket but it's the same as the old product,
     the same runs and coupons should be selected as before
     """
-    data = {"items": [{"product_id": basket_and_agreement.product.id}]}
+    readable_id = get_readable_id(basket_and_agreement.product.content_object)
+    data = {"items": [{"readable_id": readable_id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     items = resp.json()["items"]
     assert len(items) == 1
-    assert items[0]["product_id"] == basket_and_agreement.product.id
+    assert items[0]["readable_id"] == readable_id
     assert items[0]["run_ids"] == list(
         CourseRunSelection.objects.values_list("run", flat=True)
     )
@@ -496,7 +506,7 @@ def test_patch_basket_replace_item_with_same(basket_client, basket_and_agreement
 
 def test_patch_basket_multiple_products(basket_client, basket_and_coupons):
     """ Test that an update with multiple products is rejected """
-    data = {"items": [{"product_id": 10}, {"product_id": 11}]}
+    data = {"items": [{"readable_id": "10"}, {"readable_id": "11"}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
@@ -614,7 +624,11 @@ def test_patch_basket_update_valid_product_valid_coupon(
     product_version = ProductVersionFactory()
     CouponEligibilityFactory(product=product_version.product, coupon=best_coupon)
 
-    data = {"items": [{"product_id": product_version.product.id}]}
+    data = {
+        "items": [
+            {"readable_id": get_readable_id(product_version.product.content_object)}
+        ]
+    }
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     resp_data = resp.json()
@@ -633,7 +647,11 @@ def test_patch_basket_update_valid_product_invalid_coupon_auto(
     product_version = ProductVersionFactory()
     CouponEligibilityFactory(product=product_version.product, coupon=auto_coupon)
 
-    data = {"items": [{"product_id": product_version.product.id}]}
+    data = {
+        "items": [
+            {"readable_id": get_readable_id(product_version.product.content_object)}
+        ]
+    }
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     resp_data = resp.json()
@@ -654,7 +672,12 @@ def test_patch_basket_update_valid_product_invalid_coupon_no_auto(
         basket.couponselection_set.all().delete()
     else:
         assert basket.couponselection_set.first() is not None
-    data = {"items": [{"product_id": product_version.product.id}]}
+
+    data = {
+        "items": [
+            {"readable_id": get_readable_id(product_version.product.content_object)}
+        ]
+    }
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     resp_data = resp.json()
@@ -665,8 +688,8 @@ def test_patch_basket_update_valid_product_invalid_coupon_no_auto(
 
 def test_patch_basket_update_invalid_product(basket_client, basket_and_coupons):
     """ Test that invalid product id is rejected with no changes to basket """
-    bad_id = 9999
-    data = {"items": [{"product_id": bad_id}]}
+    bad_id = "9999"
+    data = {"items": [{"readable_id": bad_id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
@@ -678,12 +701,14 @@ def test_patch_basket_update_active_inactive_product(basket_client, basket_and_c
     product = ProductVersionFactory.create().product
     product.is_active = False
     product.save()
-    data = {"items": [{"product_id": product.id}]}
+
+    readable_id = get_readable_id(product.content_object)
+    data = {"items": [{"readable_id": readable_id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
     assert (
-        "Product id {product_id} is not active".format(product_id=product.id)
+        "Product id {product_id} is not active".format(product_id=readable_id)
         in resp_data["errors"]["items"]
     )
 
@@ -740,7 +765,7 @@ def test_patch_basket_update_runs(basket_client, basket_and_coupons, add_new_run
         data={
             "items": [
                 {
-                    "product_id": product.id,
+                    "readable_id": get_readable_id(product.content_object),
                     "run_ids": [run1.id, run2.id] if add_new_runs else [],
                 }
             ]
@@ -778,7 +803,14 @@ def test_patch_basket_invalid_run(
     resp = basket_client.patch(
         reverse("basket_api"),
         type="json",
-        data={"items": [{"product_id": product.id, "run_ids": [other_run_id]}]},
+        data={
+            "items": [
+                {
+                    "readable_id": get_readable_id(product.content_object),
+                    "run_ids": [other_run_id],
+                }
+            ]
+        },
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     assert resp.json()["errors"] == {
@@ -812,7 +844,14 @@ def test_patch_basket_multiple_runs(
     resp = basket_client.patch(
         reverse("basket_api"),
         type="json",
-        data={"items": [{"product_id": product.id, "run_ids": [run1.id, run2.id]}]},
+        data={
+            "items": [
+                {
+                    "readable_id": get_readable_id(product.content_object),
+                    "run_ids": [run1.id, run2.id],
+                }
+            ]
+        },
     )
     if multiple_for_program:
         assert resp.status_code == status.HTTP_200_OK
@@ -842,7 +881,9 @@ def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
         data={
             "items": [
                 {
-                    "product_id": basket_and_coupons.product_version.product.id,
+                    "readable_id": get_readable_id(
+                        basket_and_coupons.product_version.product.content_object
+                    ),
                     "run_ids": [run.id],
                 }
             ]
@@ -864,7 +905,9 @@ def test_patch_basket__another_user_enrolled(basket_client, basket_and_coupons):
         data={
             "items": [
                 {
-                    "product_id": basket_and_coupons.product_version.product.id,
+                    "readable_id": get_readable_id(
+                        basket_and_coupons.product_version.product.content_object
+                    ),
                     "run_ids": [run.id],
                 }
             ]
@@ -1065,7 +1108,9 @@ def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
             [
                 assignment.email,
                 "http://test.com/checkout/?product={}&code={}".format(
-                    assignment.product_coupon.product.id,
+                    quote_plus(
+                        assignment.product_coupon.product.content_object.courseware_id
+                    ),
                     assignment.product_coupon.coupon.coupon_code,
                 ),
                 assignment.product_coupon.coupon.coupon_code,

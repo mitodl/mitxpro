@@ -304,7 +304,7 @@ def test_enrollment_codes(client):
             [
                 coupon.coupon_code,
                 make_checkout_url(
-                    code=coupon.coupon_code, product_id=order.product_version.product_id
+                    code=coupon.coupon_code, product=order.product_version.product
                 ),
             ]
             for coupon in coupons

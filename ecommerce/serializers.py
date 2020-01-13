@@ -365,9 +365,14 @@ class BasketSerializer(serializers.ModelSerializer):
         if items:
             # Item updated
             item = items[0]
-            product_id = item.get("product_id")
+            readable_id = item.get("readable_id")
+            readable_id = readable_id.replace(" ", "+")
             run_ids = item.get("run_ids")
-            product = models.Product.objects.get(id=product_id)
+
+            product = models.Product.all_objects.filter(
+                dj_models.Q(courseruns__courseware_id=readable_id)
+                | dj_models.Q(programs__readable_id=readable_id)
+            ).first()
             previous_product = models.Product.objects.filter(
                 basketitem__basket=basket
             ).first()
@@ -375,7 +380,7 @@ class BasketSerializer(serializers.ModelSerializer):
             if (
                 run_ids is None
                 and previous_product is not None
-                and product_id == previous_product.id
+                and product.id == previous_product.id
             ):
                 # User is updating basket item to the same item as before
                 run_ids = list(
@@ -515,17 +520,26 @@ class BasketSerializer(serializers.ModelSerializer):
             if len(items) > 1:
                 raise ValidationError("Basket cannot contain more than one item")
             item = items[0]
-            product_id = item.get("product_id")
+            readable_id = item.get("readable_id")
 
-            if product_id is None:
+            if readable_id is None:
                 raise ValidationError("Invalid request")
-            if not models.ProductVersion.objects.filter(
-                product__id=product_id
-            ).exists():
-                raise ValidationError(f"Invalid product id {product_id}")
-            product = models.Product.all_objects.filter(id=product_id).first()
+            else:
+                readable_id = readable_id.replace(" ", "+")
+
+            product = models.Product.all_objects.filter(
+                dj_models.Q(courseruns__courseware_id=readable_id)
+                | dj_models.Q(programs__readable_id=readable_id)
+            ).first()
+            if (
+                product is None
+                or not models.ProductVersion.objects.filter(
+                    product__id=product.id
+                ).exists()
+            ):
+                raise ValidationError(f"Invalid product id {readable_id}")
             if not product.is_active:
-                raise ValidationError(f"Product id {product_id} is not active")
+                raise ValidationError(f"Product id {readable_id} is not active")
 
         return {"items": items}
 

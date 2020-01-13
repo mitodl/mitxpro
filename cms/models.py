@@ -697,7 +697,7 @@ class ProgramPage(ProductPage):
             **super().get_context(request, **kwargs),
             **get_base_context(request),
             "product_id": product.id if product else None,
-            "checkout_url": f"{reverse('checkout-page')}?product={ product.id }"
+            "checkout_url": f"{reverse('checkout-page')}?product={ program.readable_id }"
             if product
             else None,
             "enrolled": enrolled,
@@ -769,7 +769,7 @@ class CoursePage(ProductPage):
             **super().get_context(request, **kwargs),
             **get_base_context(request),
             "product_id": product.id if product else None,
-            "checkout_url": f"{reverse('checkout-page')}?product={ product.id }"
+            "checkout_url": f"{reverse('checkout-page')}?product={ run.courseware_id }"
             if product
             else None,
             "enrolled": enrolled,

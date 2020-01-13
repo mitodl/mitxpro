@@ -42,7 +42,7 @@ describe("CheckoutPage", () => {
     it(`updates the basket with a product id from the query parameter${
       hasError ? ", but an error is returned" : ""
     }`, async () => {
-      const productId = 4567
+      const productId = "4567"
       if (hasError) {
         helper.handleRequestStub.withArgs("/api/basket/", "PATCH").returns({
           status: 400,
@@ -65,7 +65,7 @@ describe("CheckoutPage", () => {
         "/api/basket/",
         "PATCH",
         {
-          body:        { items: [{ product_id: productId }] },
+          body:        { items: [{ readable_id: productId }] },
           credentials: undefined,
           headers:     {
             "X-CSRFTOKEN": null
@@ -194,8 +194,8 @@ describe("CheckoutPage", () => {
           body: {
             items: [
               {
-                product_id: basketItem.product_id,
-                run_ids:    []
+                readable_id: basketItem.readable_id,
+                run_ids:     []
               }
             ],
             coupons:       [],
@@ -241,8 +241,8 @@ describe("CheckoutPage", () => {
       body: {
         items: [
           {
-            product_id: basketItem.product_id,
-            run_ids:    []
+            readable_id: basketItem.readable_id,
+            run_ids:     []
           }
         ],
         coupons:       [],
@@ -290,7 +290,7 @@ describe("CheckoutPage", () => {
     sinon.assert.notCalled(submitStub)
     sinon.assert.calledWith(helper.handleRequestStub, "/api/basket/", "PATCH", {
       body: {
-        items:         [{ product_id: basket.items[0].product_id, run_ids: [runId] }],
+        items:         [{ readable_id: basket.items[0].readable_id, run_ids: [runId] }],
         coupons:       [],
         data_consents: []
       },
@@ -341,7 +341,7 @@ describe("CheckoutPage", () => {
         {
           body: {
             items: [
-              { product_id: basket.items[0].product_id, run_ids: [runId] }
+              { readable_id: basket.items[0].readable_id, run_ids: [runId] }
             ],
             coupons:       hasCoupon ? [{ code: code }] : [],
             data_consents: []

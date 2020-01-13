@@ -21,7 +21,7 @@ import type {
 
 export type SetFieldError = (fieldName: string, fieldValue: any) => void
 export type UpdateProduct = (
-  productId: number,
+  productId: string,
   runId: number,
   setFieldError: SetFieldError
 ) => Promise<void>
@@ -153,7 +153,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                   run => run.id === selectedRunId
                 )
                 if (run && run.product_id) {
-                  await updateProduct(run.product_id, run.id, setFieldError)
+                  await updateProduct(run.readable_id, run.id, setFieldError)
                   resetForm()
                 }
               }}

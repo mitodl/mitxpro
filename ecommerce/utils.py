@@ -82,24 +82,28 @@ def send_support_email(subject, message):
         log.exception("Exception sending email to admins")
 
 
-def make_checkout_url(*, product_id=None, code=None):
+def make_checkout_url(*, product=None, code=None):
     """
     Helper function to create a checkout URL with appropriate query parameters.
 
     Args:
-        product_id (int): A Product ID
+        product (Product): A Product instance
         code (str): The coupon code
 
     Returns:
         str: The URL for the checkout page, including product and coupon code if available
     """
     base_checkout_url = urljoin(settings.SITE_BASE_URL, reverse("checkout-page"))
-    if product_id is None and code is None:
+    if product is None and code is None:
         return base_checkout_url
 
     query_params = {}
-    if product_id is not None:
-        query_params["product"] = product_id
+    if product is not None:
+        if product.content_type.model == "courserun":
+            readable_id = product.content_object.courseware_id
+        else:
+            readable_id = product.content_object.readable_id
+        query_params["product"] = readable_id
     if code is not None:
         query_params["code"] = code
     return f"{base_checkout_url}?{urlencode(query_params)}"

@@ -11,7 +11,8 @@ export type BaseCourseRun = {
 }
 
 export type CourseRun = BaseCourseRun & {
-  product_id: ?number
+  product_id: ?number,
+  readable_id: string
 }
 
 export type BaseCourse = {

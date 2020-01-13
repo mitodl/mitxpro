@@ -111,7 +111,7 @@ export class CheckoutPage extends React.Component<Props, State> {
     } = this.props
     const params = queryString.parse(search)
     return {
-      productId:   parseInt(params.product),
+      productId:   params.product,
       preselectId: parseInt(params.preselect),
       couponCode:  params.code
     }
@@ -124,7 +124,7 @@ export class CheckoutPage extends React.Component<Props, State> {
       await fetchBasket()
     } else {
       const basketResponse = await updateBasket({
-        items: [{ product_id: productId }]
+        items: [{ readable_id: productId }]
       })
       if (basketResponse.status !== 200) {
         if (basketResponse.body && basketResponse.body.errors) {
@@ -159,8 +159,8 @@ export class CheckoutPage extends React.Component<Props, State> {
     // update basket with selected runs
     const basketPayload = {
       items: basket.items.map(item => ({
-        product_id: item.product_id,
-        run_ids:    Object.values(values.runs).map(runId => parseInt(runId))
+        readable_id: item.readable_id,
+        run_ids:     Object.values(values.runs).map(runId => parseInt(runId))
       })),
       coupons:       values.couponCode ? [{ code: values.couponCode }] : [],
       data_consents: values.dataConsent ? [basket.data_consents[0].id] : []
@@ -249,13 +249,13 @@ export class CheckoutPage extends React.Component<Props, State> {
   }
 
   updateProduct = async (
-    productId: number,
+    productId: string,
     runId: number,
     setFieldError: SetFieldError
   ) => {
     const { updateBasket } = this.props
     const response = await updateBasket({
-      items: [{ product_id: productId, run_ids: runId ? [runId] : [] }]
+      items: [{ readable_id: productId, run_ids: runId ? [runId] : [] }]
     })
     setFieldError(
       "runs",

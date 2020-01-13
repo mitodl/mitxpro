@@ -34,7 +34,7 @@ def get_bulk_enroll_message_data(bulk_assignment_id, recipient, product_coupon):
         ecommerce.api.UserMessageProps: An object containing user-specific message data
     """
     enrollment_url = make_checkout_url(
-        product_id=product_coupon.product.id, code=product_coupon.coupon.coupon_code
+        product=product_coupon.product, code=product_coupon.coupon.coupon_code
     )
     company_name = (
         product_coupon.coupon.payment.versions.values_list("company__name", flat=True)

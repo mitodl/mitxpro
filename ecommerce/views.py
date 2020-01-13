@@ -111,7 +111,6 @@ class CheckoutView(APIView):
         Create a new unfulfilled Order from the user's basket
         and return information used to submit to CyberSource.
         """
-
         validate_basket_for_checkout(request.user.basket)
         base_url = request.build_absolute_uri("/")
         order = create_unfulfilled_order(request.user)
@@ -427,7 +426,7 @@ def bulk_assignment_csv_view(request, bulk_assignment_id):
             {
                 "email": product_coupon_assignment.email,
                 "enrollment_url": make_checkout_url(
-                    product_id=product_coupon_assignment.product_coupon.product.id,
+                    product=product_coupon_assignment.product_coupon.product,
                     code=product_coupon_assignment.product_coupon.coupon.coupon_code,
                 ),
                 "coupon_code": product_coupon_assignment.product_coupon.coupon.coupon_code,

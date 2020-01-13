@@ -3,11 +3,12 @@
 Test voucher views.py
 """
 import json
-from urllib.parse import urljoin
+from urllib.parse import urljoin, unquote
 
 from django.urls import reverse
 import pytest
 
+from ecommerce.api import get_readable_id
 from ecommerce.factories import CouponVersionFactory, CouponEligibilityFactory
 from users.factories import UserFactory
 from voucher.factories import VoucherFactory
@@ -190,14 +191,16 @@ def test_post_enroll_view_with_coupon_choice(
     voucher = context.voucher
     coupon_version = context.coupon_version
     product = context.product
+    readable_id = get_readable_id(product.content_object)
+
     response = client.post(
         reverse("voucher:enroll"),
         {"coupon_version": json.dumps((product.id, coupon_version.coupon.id))},
     )
     assert response.status_code == 302
-    assert response.url == (
+    assert unquote(response.url) == (
         f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}?"
-        f"product={product.id}&code={coupon_version.coupon.coupon_code}"
+        f"product={readable_id}&code={coupon_version.coupon.coupon_code}"
     )
     assert Voucher.objects.get(id=voucher.id).coupon == coupon_version.coupon
 
@@ -276,13 +279,15 @@ def test_post_enroll_view_with_stolen_coupon(
         coupon=coupon_eligibility.coupon, payment_version=context.payment_version
     )
     product = context.product
+    readable_id = get_readable_id(product.content_object)
+
     response = client.post(
         reverse("voucher:enroll"),
         {"coupon_version": json.dumps((product.id, coupon_version1.coupon.id))},
     )
     assert response.status_code == 302
-    assert response.url == (
+    assert unquote(response.url) == (
         f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}?"
-        f"product={product.id}&code={coupon_version2.coupon.coupon_code}"
+        f"product={readable_id}&code={coupon_version2.coupon.coupon_code}"
     )
     assert Voucher.objects.get(id=voucher.id).coupon == coupon_version2.coupon

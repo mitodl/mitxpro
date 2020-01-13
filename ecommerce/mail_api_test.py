@@ -1,5 +1,5 @@
 """Ecommerce mail API tests"""
-from urllib.parse import urljoin
+from urllib.parse import urljoin, unquote
 
 import datetime
 from django.urls import reverse
@@ -82,10 +82,13 @@ def test_send_bulk_enroll_emails(mocker, settings):
         user_message_props = recipients_and_contexts_arg[i]
         assert isinstance(user_message_props, UserMessageProps) is True
         assert user_message_props.recipient == assignment.email
+        user_message_props.context["enrollment_url"] = unquote(
+            user_message_props.context["enrollment_url"]
+        )
         assert user_message_props.context == {
             "enrollable_title": assignment.product_coupon.product.content_object.title,
             "enrollment_url": "http://test.com/checkout/?product={}&code={}".format(
-                assignment.product_coupon.product.id,
+                assignment.product_coupon.product.content_object.courseware_id,
                 assignment.product_coupon.coupon.coupon_code,
             ),
             "company_name": (

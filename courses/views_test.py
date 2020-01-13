@@ -298,7 +298,7 @@ def test_course_view(
     class_name = ""
     if not is_anonymous:
         if not is_enrolled and has_product and has_unexpired_run:
-            url = f'{reverse("checkout-page")}?product={product_id}'
+            url = f'{reverse("checkout-page")}?product={run.courseware_id}'
             class_name = "enroll-now"
         if is_enrolled and has_unexpired_run:
             url = reverse("user-dashboard")
@@ -367,7 +367,7 @@ def test_program_view(
     class_name = ""
     if not is_anonymous:
         if not is_enrolled and has_product and has_unexpired_run:
-            url = f'{reverse("checkout-page")}?product={product_id}'
+            url = f'{reverse("checkout-page")}?product={program.readable_id}'
             class_name = "enroll-now"
         if is_enrolled:
             url = reverse("user-dashboard")

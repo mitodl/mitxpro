@@ -152,7 +152,7 @@ class B2BEnrollmentCodesView(APIView):
             {
                 "code": code,
                 "url": make_checkout_url(
-                    code=code, product_id=order.product_version.product_id
+                    code=code, product=order.product_version.product
                 ),
             }
             for code in Coupon.objects.filter(
