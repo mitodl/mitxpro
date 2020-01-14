@@ -183,6 +183,7 @@ INSTALLED_APPS = (
     "voucher",
     "hubspot",
     "b2b_ecommerce",
+    "compressor",
 )
 # Only include the seed data app if this isn't running in prod
 if ENVIRONMENT not in ("production", "prod"):
@@ -397,9 +398,12 @@ if CLOUDFRONT_DIST:
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    'compressor.finders.CompressorFinder',
 ]
 
 STATIC_ROOT = "staticfiles"
+COMPRESS_ENABLED = True
+COMPRESS_OFFLINE = True
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
 # Request files from the webpack dev server
