@@ -5,7 +5,7 @@ codecov
 django-debug-toolbar
 factory_boy==2.11.1
 faker
-freezegun
+freezegun==0.3.12
 ipdb
 nplusone>=0.8.1
 pdbpp
