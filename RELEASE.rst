@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.36.0
+Version 0.36.0 (Released January 14, 2020)
 --------------
 
 - Fixed sheets app log message interpolation
