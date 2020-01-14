@@ -1,14 +1,17 @@
 """Mail API for sheets app"""
+import logging
 from urllib.parse import urlencode
 from collections import namedtuple
 
-import requests
 from django.conf import settings
 
 from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG
 from mail.constants import MAILGUN_API_DOMAIN
+from sheets.constants import MAILGUN_API_TIMEOUT_RETRIES
 from sheets.utils import format_datetime_for_mailgun
-from mitxpro.utils import has_all_keys
+from mitxpro.utils import has_all_keys, request_get_with_timeout_retry
+
+log = logging.getLogger(__name__)
 
 BulkAssignmentMessage = namedtuple(
     "BulkAssignmentMessage",
@@ -29,6 +32,9 @@ def get_bulk_assignment_messages(event=None, begin=None, end=None):
     Yields:
         BulkAssignmentMessage: Mailgun event data built from Mailgun's raw JSON representation
             (https://documentation.mailgun.com/en/latest/api-events.html#event-structure)
+
+    Raises:
+        requests.exceptions.HTTPError: Raised if the response has a status code indicating an error
     """
     added_params = {}
     if event:
@@ -45,7 +51,7 @@ def get_bulk_assignment_messages(event=None, begin=None, end=None):
     )
     if added_params:
         url = "&".join((url, urlencode(added_params)))
-    resp = requests.get(url)
+    resp = request_get_with_timeout_retry(url, retries=MAILGUN_API_TIMEOUT_RETRIES)
     resp_data = resp.json()
     resp_items = resp_data.get("items")
     while resp_items:
@@ -70,7 +76,9 @@ def get_bulk_assignment_messages(event=None, begin=None, end=None):
                 "/{}/".format(MAILGUN_API_DOMAIN),
                 "/api:{}@{}/".format(settings.MAILGUN_KEY, MAILGUN_API_DOMAIN),
             )
-            resp = requests.get(url)
+            resp = request_get_with_timeout_retry(
+                url, retries=MAILGUN_API_TIMEOUT_RETRIES
+            )
             resp_data = resp.json()
             resp_items = resp_data.get("items")
         else:
