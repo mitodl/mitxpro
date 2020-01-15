@@ -403,7 +403,7 @@ STATICFILES_FINDERS = [
 
 STATIC_ROOT = "staticfiles"
 COMPRESS_ENABLED = True
-COMPRESS_OFFLINE = True
+COMPRESS_OFFLINE = False
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
 # Request files from the webpack dev server
