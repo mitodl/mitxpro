@@ -354,7 +354,8 @@ class CourseRunEnrollmentSerializer(serializers.ModelSerializer):
         """
         return (
             enrollment.order_id
-            if enrollment.order.status == enrollment.order.FULFILLED
+            if enrollment.order
+            and enrollment.order.status == enrollment.order.FULFILLED
             and settings.ENABLE_ORDER_RECEIPTS
             else None
         )
@@ -401,7 +402,8 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
         if enrollment.order:
             return (
                 enrollment.order_id
-                if enrollment.order.status == enrollment.order.FULFILLED
+                if enrollment.order
+                and enrollment.order.status == enrollment.order.FULFILLED
                 and settings.ENABLE_ORDER_RECEIPTS
                 else None
             )
