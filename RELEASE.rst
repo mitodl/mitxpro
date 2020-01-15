@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.36.1
+--------------
+
+- Allowed multiple coupon requests with same contract number
+- Removed 'get_embed' Wagtail library function tests
+- 1385 Management command to create enrollment
+- pin the version for freezegun
+- Added retry for timed-out Mailgun API requests
+
 Version 0.36.0 (Released January 14, 2020)
 --------------
 
