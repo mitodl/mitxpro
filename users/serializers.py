@@ -1,6 +1,5 @@
 """User serializers"""
 from collections import defaultdict
-import logging
 import re
 
 from django.conf import settings
@@ -8,14 +7,10 @@ from django.db import transaction
 import pycountry
 from rest_framework import serializers
 
-from courseware.api import update_edx_user_email
 from ecommerce.api import fetch_and_serialize_unused_coupons
-from mail import verification_api
 from mitxpro.serializers import WriteableSerializerMethodField
-from users.models import LegalAddress, User, Profile, ChangeEmailRequest
+from users.models import LegalAddress, User, Profile
 from hubspot.task_helpers import sync_hubspot_user
-
-log = logging.getLogger()
 
 US_POSTAL_RE = re.compile(r"[0-9]{5}(-[0-9]{4}){0,1}")
 CA_POSTAL_RE = re.compile(r"[A-Z]\d[A-Z] \d[A-Z]\d$", flags=re.I)
@@ -325,77 +320,6 @@ class UserSerializer(serializers.ModelSerializer):
             "updated_on",
             "unused_coupons",
         )
-
-
-class ChangeEmailRequestCreateSerializer(serializers.ModelSerializer):
-    """Serializer for starting a user email change"""
-
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    new_email = serializers.EmailField()
-
-    def validate(self, attrs):
-        """Validate the change request"""
-        # verify no other user has this email address
-        errors = {}
-
-        user = attrs["user"]
-        new_email = attrs["new_email"]
-
-        if user.email == new_email:
-            # verify the user isn't trying to change their email to their current one
-            # this would indicate a programming error on the frontend if this request is allowed
-            errors["email"] = "Provided email address is same as your current one"
-        elif User.objects.filter(email=new_email).exists():
-            errors["email"] = "Invalid email address"
-
-        if errors:
-            raise serializers.ValidationError(errors)
-
-        return attrs
-
-    def create(self, validated_data):
-        """Create the email change request"""
-        change_request = super().create(validated_data)
-
-        verification_api.send_verify_email_change_email(
-            self.context["request"], change_request
-        )
-
-        return change_request
-
-    class Meta:
-        model = ChangeEmailRequest
-
-        fields = ("user", "new_email")
-
-
-class ChangeEmailRequestUpdateSerializer(serializers.ModelSerializer):
-    """Serializer for confirming a user email change"""
-
-    confirmed = serializers.BooleanField()
-
-    @transaction.atomic
-    def update(self, instance, validated_data):
-        """Updates an email change request"""
-        if User.objects.filter(email=instance.new_email).exists():
-            log.debug("User '{}' tried to change email address to one already in use")
-            raise serializers.ValidationError("Unable to change email")
-
-        result = super().update(instance, validated_data)
-
-        # change request has been confirmed
-        if result.confirmed:
-            user = result.user
-            user.email = result.new_email
-            user.save()
-            update_edx_user_email(user)
-
-        return result
-
-    class Meta:
-        model = ChangeEmailRequest
-
-        fields = ("confirmed",)
 
 
 class StateProvinceSerializer(serializers.Serializer):
