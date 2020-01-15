@@ -11,6 +11,7 @@ class CouponGenerationRequestFactory(
     DjangoModelFactory
 ):  # pylint: disable=missing-docstring
     purchase_order_id = Faker("pystr", max_chars=15)
+    coupon_name = fuzzy.FuzzyText()
 
     class Meta:
         model = models.CouponGenerationRequest

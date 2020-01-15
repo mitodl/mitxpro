@@ -13,7 +13,7 @@ class CouponGenerationRequestAdmin(admin.ModelAdmin):
     """Admin for CouponGenerationRequest"""
 
     model = models.CouponGenerationRequest
-    list_display = ("id", "purchase_order_id", "date_completed")
+    list_display = ("id", "purchase_order_id", "coupon_name", "date_completed")
 
 
 class GoogleApiAuthAdmin(SingletonModelAdmin):

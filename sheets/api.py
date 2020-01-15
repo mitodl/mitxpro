@@ -1,7 +1,9 @@
 """API for the Sheets app"""
+import itertools
 import os
 import json
 import datetime
+from collections import defaultdict
 from decimal import Decimal
 import pickle
 import logging
@@ -550,6 +552,65 @@ class CouponRequestHandler:
         self.coupon_request_sheet = spreadsheet.sheet1
 
     @staticmethod
+    def validate_sheet(enumerated_data_rows):
+        """
+        Checks the request sheet data for any data issues beyond the scope of a single row (i.e.: any row data
+        that is invalid because of the data in other rows in the sheet)
+
+        Args:
+            enumerated_data_rows (iterable of (int, list of str)): Row indices paired with a list of strings
+                representing the data in each row
+
+        Returns:
+            ( (iterable of (int, list of str)), list of FailedRequest ): Enumerated data rows with invalidated rows
+                filtered out, paired with objects representing the rows that failed validation.
+        """
+        enumerated_data_rows_1, enumerated_data_rows_2 = itertools.tee(
+            enumerated_data_rows
+        )
+        failed_row_dict = {}
+        observed_coupon_names = set()
+        invalid_coupon_name_row_map = defaultdict(list)
+        for row_index, row_data in enumerated_data_rows_1:
+            coupon_name = row_data[CouponRequestRow.COUPON_NAME_COL_INDEX].strip()
+            if coupon_name in observed_coupon_names:
+                invalid_coupon_name_row_map[coupon_name].append(row_index)
+            else:
+                observed_coupon_names.add(coupon_name)
+
+        # If any coupon names were found on multiple rows, log a message and create a failed request
+        # object for each row with a non-unique coupon name (except for the row with the first instance
+        # of that name).
+        for coupon_name, row_indices in invalid_coupon_name_row_map.items():
+            log.error(
+                "Coupon name '%s' appears %d times on the request sheet (rows: %s). Coupon name "
+                "must be unique.",
+                coupon_name,
+                (len(row_indices) + 1),
+                row_indices,
+            )
+            sheet_error_text = "Coupon name '{}' already exists in the sheet".format(
+                coupon_name
+            )
+            failed_row_dict = {
+                **failed_row_dict,
+                **{
+                    row_index: FailedRequest(
+                        row_index=row_index,
+                        exception=SheetValidationException(sheet_error_text),
+                        sheet_error_text=sheet_error_text,
+                    )
+                    for row_index in row_indices
+                },
+            }
+
+        valid_data_rows = filter(
+            lambda index_data_tuple: index_data_tuple[0] not in failed_row_dict.keys(),
+            enumerated_data_rows_2,
+        )
+        return valid_data_rows, list(failed_row_dict.values())
+
+    @staticmethod
     def parse_row_and_create_coupons(row_index, row_data):
         """
         Ensures that the given request row has a database record representing the request,
@@ -570,13 +631,16 @@ class CouponRequestHandler:
                 and the data in the sheet do not agree
             SheetCouponCreationException: Raised if there was an error during coupon creation
         """
+        coupon_name = row_data[CouponRequestRow.COUPON_NAME_COL_INDEX].strip()
         purchase_order_id = row_data[CouponRequestRow.PURCHASE_ORDER_COL_INDEX].strip()
         user_input_json = json.dumps(CouponRequestRow.get_user_input_columns(row_data))
 
         with transaction.atomic():
             coupon_gen_request, created = CouponGenerationRequest.objects.select_for_update().get_or_create(
-                purchase_order_id=purchase_order_id,
-                defaults=dict(raw_data=user_input_json),
+                coupon_name=coupon_name,
+                defaults=dict(
+                    purchase_order_id=purchase_order_id, raw_data=user_input_json
+                ),
             )
             raw_data_changed = coupon_gen_request.raw_data != user_input_json
             if raw_data_changed:
@@ -629,10 +693,12 @@ class CouponRequestHandler:
                 the spreadsheet.
         """
         processed_requests = []
-        failed_requests = []
         ignored_requests = []
         unrecorded_complete_requests = []
-        for row_index, row_data in enumerated_data_rows:
+        valid_enumerated_data_rows, failed_requests = self.validate_sheet(
+            enumerated_data_rows
+        )
+        for row_index, row_data in valid_enumerated_data_rows:
             try:
                 coupon_gen_request, coupon_req_row, ignored = self.parse_row_and_create_coupons(
                     row_index, row_data

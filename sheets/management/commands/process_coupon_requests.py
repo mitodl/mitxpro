@@ -20,7 +20,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "-r", "--row", type=int, help="Row number in the request Sheet"
         )
-        parser.add_argument("-p", "--po-id", type=str, help="Purchase Order ID")
+        parser.add_argument("-c", "--coupon-name", type=str, help="Coupon name")
         parser.add_argument(
             "-f",
             "--force",
@@ -33,9 +33,11 @@ class Command(BaseCommand):
         matching_row_index = None
 
         # Raise exception if the row was already processed and the 'force' flag wasn't added
-        if options["row"] or options["po_id"]:
+        if options["row"] or options["coupon_name"]:
             matching_row_index, matching_req_row = get_matching_request_row(
-                coupon_request_handler, row=options["row"], po_id=options["po_id"]
+                coupon_request_handler,
+                row=options["row"],
+                coupon_name=options["coupon_name"],
             )
             if matching_req_row.date_processed is not None and not options["force"]:
                 raise CommandError(
@@ -43,8 +45,10 @@ class Command(BaseCommand):
                     "Add the -f/--force flag to process it anyway."
                 )
 
-            row_summary = "purchase order id: {}, row: {}".format(
-                matching_req_row.purchase_order_id, matching_row_index
+            row_summary = "purchase order id: {}, coupon name: {}, row: {}".format(
+                matching_req_row.purchase_order_id,
+                matching_req_row.coupon_name,
+                matching_row_index,
             )
             self.stdout.write("Found matching row ({})".format(row_summary))
 

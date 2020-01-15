@@ -5,7 +5,7 @@ from sheets.api import CouponAssignmentHandler
 from sheets.utils import get_enumerated_data_rows, CouponRequestRow
 
 
-def get_matching_request_row(coupon_request_handler, row=None, po_id=None):
+def get_matching_request_row(coupon_request_handler, row=None, coupon_name=None):
     """
     Gets a matching row from the coupon request Sheet, or raises an exception if the parameters don't match
     exactly one row.
@@ -13,7 +13,7 @@ def get_matching_request_row(coupon_request_handler, row=None, po_id=None):
     Args:
         coupon_request_handler (sheets.api.CouponRequestHandler):
         row (int or None): Row index
-        po_id (str or None): Purchase order ID
+        coupon_name (str or None): Coupon name
 
     Returns:
         (int, sheets.utils.CouponRequestRow): The row index and an object representation of the matching row
@@ -30,7 +30,7 @@ def get_matching_request_row(coupon_request_handler, row=None, po_id=None):
             coupon_req_row = CouponRequestRow.parse_raw_data(row_index, row_data)
         except:  # pylint: disable=bare-except
             continue
-        if po_id and po_id != coupon_req_row.purchase_order_id:
+        if coupon_name and coupon_name != coupon_req_row.coupon_name:
             continue
         matching_rows.append((row_index, coupon_req_row))
 
@@ -39,8 +39,8 @@ def get_matching_request_row(coupon_request_handler, row=None, po_id=None):
         param_summary = []
         if row:
             param_summary.append("Row number == {}".format(row))
-        if po_id:
-            param_summary.append("Purchase Order ID == {}".format(po_id))
+        if coupon_name:
+            param_summary.append("Coupon name == {}".format(coupon_name))
         error_text = (
             "Could not find a matching row ({})"
             if len(matching_rows) == 0
