@@ -32,16 +32,37 @@ export const resetPasswordFormValidation = yup.object().shape({
 })
 
 export const changePasswordFormValidation = yup.object().shape({
+  email: emailFieldValidation.label("Email"),
+
+  user_email: yup.string().label("User Email"),
+
+  /* eslint-disable camelcase */
   oldPassword: yup
     .string()
     .label("Old Password")
-    .required(),
+    .when(["email", "user_email"], (email, user_email, schema) =>
+      user_email === email ? schema.required() : schema.notRequired()
+    ),
 
-  newPassword: newPasswordFieldValidation.label("New Password"),
+  newPassword: yup
+    .string()
+    .label("New Password")
+    .when(["email", "user_email"], (email, user_email, schema) =>
+      user_email === email
+        ? schema
+          .matches(/^(?=.*[0-9])(?=.*[a-zA-Z]).*$/, {
+            message: "Password must contain at least one letter and number"
+          })
+          .required()
+          .min(8)
+        : schema.matches(/^.*$/).notRequired()
+    ),
 
   confirmPassword: yup
     .string()
     .label("Confirm Password")
-    .required()
+    .when(["email", "user_email"], (email, user_email, schema) =>
+      user_email === email ? schema.required().min(8) : schema.notRequired()
+    )
     .oneOf([yup.ref("newPassword")], "Passwords must match")
 })
