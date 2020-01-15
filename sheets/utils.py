@@ -84,6 +84,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
     """Represents a row of a coupon request sheet"""
 
     PURCHASE_ORDER_COL_INDEX = 0
+    COUPON_NAME_COL_INDEX = 1
 
     def __init__(
         self,
@@ -139,7 +140,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
             return cls(
                 row_index=row_index,
                 purchase_order_id=raw_row_data[cls.PURCHASE_ORDER_COL_INDEX].strip(),
-                coupon_name=raw_row_data[1].strip(),
+                coupon_name=raw_row_data[cls.COUPON_NAME_COL_INDEX].strip(),
                 num_codes=int(raw_row_data[2]),
                 product_text_id=raw_row_data[3].strip(),
                 company_name=raw_row_data[4],
@@ -156,7 +157,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
                 **added_kwargs,
             )
         except Exception as exc:
-            raise SheetRowParsingException from exc
+            raise SheetRowParsingException(str(exc)) from exc
 
     @classmethod
     def get_user_input_columns(cls, raw_row_data):

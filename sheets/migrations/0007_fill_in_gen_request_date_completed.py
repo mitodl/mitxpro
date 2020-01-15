@@ -17,7 +17,7 @@ def now_in_utc():
 
 def set_date_completed_to_none(apps, schema_editor):
     """
-    Remove the certificate index page
+    Set all date_completed field values to None
     """
     CouponGenerationRequest = apps.get_model("sheets", "CouponGenerationRequest")
     CouponGenerationRequest.objects.exclude(date_completed=None).update(
@@ -27,7 +27,7 @@ def set_date_completed_to_none(apps, schema_editor):
 
 def fill_in_date_completed(apps, schema_editor):
     """
-    Create a certificate index page under the home page
+    Set all date_completed field value to the current datetime
     """
     now = now_in_utc()
     CouponGenerationRequest = apps.get_model("sheets", "CouponGenerationRequest")

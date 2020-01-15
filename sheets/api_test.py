@@ -59,6 +59,7 @@ def pygsheets_fixtures(mocker, db, coupon_req_raw_data):
     sheet_rows = [coupon_request_sheet_spec.column_headers, coupon_req_raw_data]
     added_row = list(coupon_req_raw_data)
     added_row[0] = "another_purchase_order_id"
+    added_row[1] = "another_coupon_id"
     added_row[2] = "10"
     sheet_rows.append(added_row)
     mocked_worksheet = MagicMock(
@@ -222,7 +223,9 @@ def test_parse_and_create_other_responses(mocker, pygsheets_fixtures, coupon_req
     row_count = len(parse_and_create_side_effects)
 
     coupon_req_handler = CouponRequestHandler()
-    enumerated_rows = enumerate([["mock", "row", "data"]] * row_count, start=2)
+    enumerated_rows = enumerate(
+        [["order{}".format(i), "coupon{}".format(i)] for i in range(row_count)], start=2
+    )
     processed_reqs, failed_reqs, ignored_reqs, unrecorded_reqs = coupon_req_handler.parse_rows_and_create_coupons(
         enumerated_rows
     )
@@ -249,7 +252,7 @@ def test_coupon_req_handler_parse_raw_data_update(
         CouponRequestRow.get_user_input_columns(raw_row_data)
     )
     coupon_gen_request = CouponGenerationRequestFactory.create(
-        purchase_order_id=raw_row_data[CouponRequestRow.PURCHASE_ORDER_COL_INDEX],
+        coupon_name=raw_row_data[CouponRequestRow.COUPON_NAME_COL_INDEX],
         raw_data=raw_data_for_gen_request,
     )
 
@@ -302,7 +305,7 @@ def test_coupon_req_handler_parse_unchanged_error(
     row_data = copy.copy(coupon_req_raw_data)
     row_data[settings.SHEETS_REQ_ERROR_COL] = "Error"
     existing_coupon_gen_request = CouponGenerationRequestFactory.create(
-        purchase_order_id=row_data[CouponRequestRow.PURCHASE_ORDER_COL_INDEX],
+        coupon_name=row_data[CouponRequestRow.COUPON_NAME_COL_INDEX],
         raw_data=json.dumps(CouponRequestRow.get_user_input_columns(row_data)),
     )
 
