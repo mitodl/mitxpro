@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.36.1
+Version 0.36.1 (Released January 15, 2020)
 --------------
 
 - Allowed multiple coupon requests with same contract number
