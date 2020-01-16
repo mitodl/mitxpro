@@ -1,4 +1,5 @@
 """Courseware exceptions"""
+from mitxpro.utils import get_error_response_summary
 
 
 class CoursewareUserCreateError(Exception):
@@ -31,12 +32,11 @@ class EdxApiEnrollErrorException(Exception):
         self.http_error = http_error
         if msg is None:
             # Set some default useful error message
-            msg = "EdX API error enrolling user {} ({}) in course run '{}':\n(Status code: {}) {}".format(
+            msg = "EdX API error enrolling user {} ({}) in course run '{}'.\n{}".format(
                 self.user.username,
                 self.user.email,
                 self.course_run.courseware_id,
-                self.http_error.response.status_code,
-                self.http_error.response.json(),
+                get_error_response_summary(self.http_error.response),
             )
         super().__init__(msg)
 

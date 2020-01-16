@@ -11,6 +11,7 @@ import pytest
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.renderers import JSONRenderer
+from requests.exceptions import HTTPError
 
 
 def any_instance_of(*cls):
@@ -66,16 +67,30 @@ class MockResponse:
     Mock requests.Response
     """
 
-    def __init__(self, content, status_code=200):
-        if isinstance(content, str):
-            self.content = json.loads(content)
+    def __init__(
+        self, content, status_code=200, content_type="application/json", url=None
+    ):
+        if isinstance(content, (dict, list)):
+            self.content = json.dumps(content)
         else:
-            self.content = content
+            self.content = str(content)
+        self.text = self.content
         self.status_code = status_code
+        self.headers = {"Content-Type": content_type}
+        if url:
+            self.url = url
 
     def json(self):
         """ Return json content"""
-        return self.content
+        return json.loads(self.content)
+
+
+class MockHttpError(HTTPError):
+    """Mocked requests.exceptions.HttpError"""
+
+    def __init__(self, *args, **kwargs):
+        response = MockResponse(content={"bad": "response"}, status_code=400)
+        super().__init__(*args, **{**kwargs, **{"response": response}})
 
 
 def drf_datetime(dt):

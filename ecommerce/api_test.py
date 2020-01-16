@@ -84,6 +84,7 @@ from ecommerce.models import (
 )
 from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.utils import now_in_utc
+from mitxpro.test_utils import MockHttpError
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
 
@@ -1060,9 +1061,15 @@ def test_enroll_user_in_order_items_reactivate(mocker, user):
 
 
 @pytest.mark.parametrize(
-    "exception_cls", [EdxApiEnrollErrorException, UnknownEdxApiEnrollException]
+    "exception_cls,inner_exception",
+    [
+        [EdxApiEnrollErrorException, MockHttpError()],
+        [UnknownEdxApiEnrollException, Exception()],
+    ],
 )
-def test_enroll_user_in_order_items_api_fail(mocker, user, exception_cls):
+def test_enroll_user_in_order_items_api_fail(
+    mocker, user, exception_cls, inner_exception
+):
     """
     Test that enroll_user_in_order_items logs a message and still creates local enrollment records
     when the edX API request fails
@@ -1070,7 +1077,7 @@ def test_enroll_user_in_order_items_api_fail(mocker, user, exception_cls):
     course_run = CourseRunFactory.build()
     patched_enroll_in_runs = mocker.patch(
         "ecommerce.api.enroll_in_edx_course_runs",
-        side_effect=exception_cls(user, course_run, mocker.Mock()),
+        side_effect=exception_cls(user, course_run, inner_exception),
     )
     patched_log_exception = mocker.patch("ecommerce.api.log.exception")
     order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)

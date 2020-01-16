@@ -5,6 +5,8 @@ import re
 from requests.exceptions import HTTPError
 
 from django.contrib.auth import get_user_model
+
+from mitxpro.utils import get_error_response_summary
 from users.constants import USERNAME_MAX_LEN
 
 User = get_user_model()
@@ -120,12 +122,10 @@ def ensure_active_user(user):
                 log.info("Created edX auth token for %s", user.email)
         except HTTPError as exc:
             log.error(
-                "%s (%s): Failed to repair: %s",
+                "%s (%s): Failed to repair (%s)",
                 user.username,
                 user.email,
-                exc.response.json(),
+                get_error_response_summary(exc.response),
             )
-        except Exception as exc:  # pylint: disable=broad-except
-            log.error(
-                "%s (%s): Failed to repair: %s", user.username, user.email, str(exc)
-            )
+        except Exception:  # pylint: disable=broad-except
+            log.exception("%s (%s): Failed to repair", user.username, user.email)
