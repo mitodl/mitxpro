@@ -482,11 +482,12 @@ def set_coupons_to_redeemed(assignee_email, coupon_ids):
                 assignment.redeemed = True
                 assignment.save()
                 updated_assignments.append(assignment)
-
+    # If the redeemed coupons were assigned in bulk enrollment spreadsheets, update those spreadsheets
+    # to reflect that they were redeemed
     updated_assignments_in_bulk = [
         assignment
         for assignment in updated_assignments
-        if assignment.bulk_assignment_id
+        if assignment.bulk_assignment and assignment.bulk_assignment.assignment_sheet_id
     ]
     if updated_assignments_in_bulk:
         sheet_update_map = defaultdict(list)
