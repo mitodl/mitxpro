@@ -6,6 +6,7 @@ REQUIRED_GOOGLE_API_SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive",
 ]
+DEFAULT_GOOGLE_EXPIRE_TIMEDELTA = dict(minutes=60)
 # The index of the first row of a spreadsheet according to Google
 GOOGLE_SHEET_FIRST_ROW = 1
 GOOGLE_AUTH_URI = "https://accounts.google.com/o/oauth2/auth"

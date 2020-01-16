@@ -22,7 +22,8 @@ from sheets.models import GoogleApiAuth, GoogleFileWatch
 from sheets.constants import REQUIRED_GOOGLE_API_SCOPES
 from sheets.utils import generate_google_client_config
 from sheets import tasks
-from sheets.api import CouponRequestHandler, CouponAssignmentHandler
+from sheets.coupon_assign_api import CouponAssignmentHandler
+from sheets.coupon_request_api import CouponRequestHandler
 
 log = logging.getLogger(__name__)
 
