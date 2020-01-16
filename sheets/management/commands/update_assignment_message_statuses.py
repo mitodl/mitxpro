@@ -5,7 +5,7 @@ on what messages were delivered, failed delivery, etc.
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.models import BulkCouponAssignment
-from sheets.api import CouponAssignmentHandler
+from sheets.coupon_assign_api import CouponAssignmentHandler
 from sheets.management.utils import get_assignment_spreadsheet_by_title
 
 

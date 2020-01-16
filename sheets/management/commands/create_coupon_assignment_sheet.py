@@ -4,7 +4,7 @@ Creates a coupon assignment Sheet for some row in the coupon request Sheet if on
 from django.core.management import BaseCommand, CommandError
 from pygsheets.exceptions import SpreadsheetNotFound
 
-from sheets.api import CouponRequestHandler
+from sheets.coupon_request_api import CouponRequestHandler
 from sheets.management.utils import get_matching_request_row
 from sheets.models import CouponGenerationRequest
 from sheets.utils import spreadsheet_repr, assignment_sheet_file_name

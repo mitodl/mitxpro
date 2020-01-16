@@ -5,7 +5,7 @@ based on the sheet data, and sends a message to all recipients who received a co
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.models import BulkCouponAssignment
-from sheets.api import CouponAssignmentHandler
+from sheets.coupon_assign_api import CouponAssignmentHandler
 from sheets.constants import ASSIGNMENT_MESSAGES_COMPLETED_KEY, GOOGLE_API_TRUE_VAL
 from sheets.utils import spreadsheet_repr, google_date_string_to_datetime
 from sheets.management.utils import get_assignment_spreadsheet_by_title

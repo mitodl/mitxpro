@@ -1,7 +1,7 @@
 """Sheets app management command utils"""
 from django.core.management import CommandError
 
-from sheets.api import CouponAssignmentHandler
+from sheets.coupon_assign_api import CouponAssignmentHandler
 from sheets.utils import get_enumerated_data_rows, CouponRequestRow
 
 
@@ -11,7 +11,7 @@ def get_matching_request_row(coupon_request_handler, row=None, coupon_name=None)
     exactly one row.
 
     Args:
-        coupon_request_handler (sheets.api.CouponRequestHandler):
+        coupon_request_handler (sheets.coupon_request_api.CouponRequestHandler):
         row (int or None): Row index
         coupon_name (str or None): Coupon name
 

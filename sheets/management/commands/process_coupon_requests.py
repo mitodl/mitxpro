@@ -4,7 +4,7 @@ to reflect the processed request(s).
 """
 from django.core.management import BaseCommand, CommandError
 
-from sheets.api import CouponRequestHandler
+from sheets.coupon_request_api import CouponRequestHandler
 from sheets.management.utils import get_matching_request_row
 
 
