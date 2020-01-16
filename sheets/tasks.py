@@ -91,7 +91,7 @@ def set_assignment_rows_to_enrolled(sheet_update_map):
                     (assignment_row.row_index, ASSIGNMENT_SHEET_ENROLLED_STATUS, now)
                 )
         coupon_assignment_handler.update_sheet_with_new_statuses(
-            sheet_id, status_row_updates
+            sheet_id, status_row_updates, zero_based_indices=False
         )
         result_summary[sheet_id] = len(assignment_code_email_pairs)
     return result_summary
