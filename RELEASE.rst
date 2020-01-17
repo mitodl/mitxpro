@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.36.2
+Version 0.36.2 (Released January 17, 2020)
 --------------
 
 - Fixed off-by-one error with coupon assignment sheet enrolled status
