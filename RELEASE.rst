@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.36.2 (Released January 17, 2020)
+--------------
+
+- Fixed off-by-one error with coupon assignment sheet enrolled status
+- Split sheets app code
+- Streamlined failed HTTP response messaging
+- Fixed coupon redemption handling to account for non-spreadsheet bulk enrollments
+
 Version 0.36.1 (Released January 15, 2020)
 --------------
 
