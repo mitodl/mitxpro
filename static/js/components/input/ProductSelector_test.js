@@ -40,7 +40,7 @@ describe("ProductSelector", () => {
     runProduct2Course1.latest_version.object_id =
       runProduct2Course1.latest_version.courses[0].courseruns[1].id
     runProduct2 = makeProduct(PRODUCT_TYPE_COURSERUN)
-    programProduct = makeProduct(PRODUCT_TYPE_PROGRAM)
+    programProduct = makeProduct(PRODUCT_TYPE_PROGRAM, "test+Aug_2016")
     productWithoutRun = makeProduct(PRODUCT_TYPE_COURSERUN)
     productWithoutRun.latest_version.courses = []
 
@@ -73,6 +73,8 @@ describe("ProductSelector", () => {
           errors:  {},
           values:  {}
         }}
+        productType="courserun"
+        selectedProduct=""
       />
     )
 
@@ -132,6 +134,19 @@ describe("ProductSelector", () => {
         value: programProduct.id
       }
     ])
+  })
+
+  it("select the program when we pass readable_id", () => {
+    fieldValue = "test+Aug_2016"
+    const wrapper = render()
+    wrapper.setState({
+      productType: PRODUCT_TYPE_PROGRAM
+    })
+    const selectWrapper = wrapper.find(Select).at(1)
+    assert.deepEqual(selectWrapper.prop("value"), {
+      value: programProduct.id,
+      label: programProduct.title
+    })
   })
 
   it("renders only one course per course run", () => {

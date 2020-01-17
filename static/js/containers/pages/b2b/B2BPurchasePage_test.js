@@ -15,7 +15,11 @@ describe("B2BPurchasePage", () => {
 
   beforeEach(() => {
     helper = new IntegrationTestHelper()
-    products = [makeProduct(), makeProduct(), makeProduct()]
+    products = [
+      makeProduct(),
+      makeProduct(),
+      makeProduct("program", "test+Aug_2016")
+    ]
     renderPage = helper.configureHOCRenderer(
       B2BPurchasePage,
       InnerB2BPurchasePage,
@@ -26,7 +30,7 @@ describe("B2BPurchasePage", () => {
       },
       {
         location: {
-          search: ""
+          search: "product_id=test-course-v1:MITx+Digital+Learning+300+Aug_2016"
         }
       }
     )
@@ -137,7 +141,7 @@ describe("B2BPurchasePage", () => {
       form.submit = submitStub
       const selectedProduct = products[1]
       const values = {
-        product:   selectedProduct.id,
+        product:   "test+Aug_2016",
         num_seats: 5,
         email:     "email@example.com"
       }

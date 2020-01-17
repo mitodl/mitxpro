@@ -18,15 +18,21 @@ describe("B2BPurchaseForm", () => {
     products,
     fetchCouponStatusStub,
     clearCouponStatusStub,
-    couponStatus
+    couponStatus,
+    productReadableId
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
+    productReadableId = "test+Aug_2016"
 
     onSubmitStub = sandbox.stub()
     fetchCouponStatusStub = sandbox.stub()
     clearCouponStatusStub = sandbox.stub()
-    products = [makeProduct(), makeProduct(), makeProduct()]
+    products = [
+      makeProduct("courserun", productReadableId),
+      makeProduct(),
+      makeProduct()
+    ]
     couponStatus = makeB2BCouponStatus()
   })
 
@@ -44,6 +50,8 @@ describe("B2BPurchaseForm", () => {
         contractNumber={null}
         clearCouponStatus={clearCouponStatusStub}
         couponStatus={couponStatus}
+        productId="test+Aug_2016"
+        discountCode="1234567890"
         {...props}
       />
     )
@@ -153,11 +161,12 @@ describe("B2BPurchaseForm", () => {
   })
 
   describe("coupon submission", () => {
-    let setFieldErrorStub, productId, newCode, wrapper
+    let setFieldErrorStub, setFieldTouchedStub, productId, newCode, wrapper
 
     beforeEach(() => {
       setFieldErrorStub = sandbox.stub()
-      productId = 123
+      setFieldTouchedStub = sandbox.stub()
+      productId = 71
       fetchCouponStatusStub.returns(Promise.resolve({ status: 200 }))
       newCode = "xyz"
 
@@ -169,35 +178,42 @@ describe("B2BPurchaseForm", () => {
         shallow(
           wrapper.find(Formik).prop("render")({
             values,
-            setFieldError: setFieldErrorStub
+            setFieldError:   setFieldErrorStub,
+            setFieldTouched: setFieldTouchedStub
           })
         ).prop("children")(values)
       )
 
     //
-    ;[["  xyz  ", "applies"], ["", "clears"]].forEach(([couponCode, desc]) => {
-      it(`${desc} the given coupon value`, async () => {
-        const values = {
-          coupon:  couponCode,
-          product: productId
-        }
-        const innerWrapper = renderForm(values)
+    // eslint-disable-next-line camelcase
+    ;[["  xyz  ", "applies", "test+Aug_2016"], ["", "clears", ""]].forEach(
+      ([couponCode, desc, productReadableId]) => {
+        it(`${desc} the given coupon value`, async () => {
+          const values = {
+            coupon:  couponCode,
+            product: productId
+          }
+          if (productReadableId) {
+            values.product = productReadableId
+          }
+          const innerWrapper = renderForm(values)
 
-        await innerWrapper.find(".apply-button").prop("onClick")({
-          preventDefault: sandbox.stub()
-        })
-        if (couponCode) {
-          sinon.assert.calledWith(fetchCouponStatusStub, {
-            product_id: productId,
-            code:       couponCode.trim()
+          await innerWrapper.find(".apply-button").prop("onClick")({
+            preventDefault: sandbox.stub()
           })
-        } else {
-          sinon.assert.calledWith(clearCouponStatusStub)
-        }
+          if (couponCode) {
+            sinon.assert.calledWith(fetchCouponStatusStub, {
+              product_id: productId,
+              code:       couponCode.trim()
+            })
+          } else {
+            sinon.assert.calledWith(clearCouponStatusStub)
+          }
 
-        sinon.assert.notCalled(setFieldErrorStub)
-      })
-    })
+          sinon.assert.notCalled(setFieldErrorStub)
+        })
+      }
+    )
 
     it("errors when applying the coupon because no product is selected", async () => {
       const values = {
