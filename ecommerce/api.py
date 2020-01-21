@@ -535,6 +535,15 @@ def enroll_user_in_order_items(order):
     programs = get_order_programs(order)
     company = get_company_affiliation(order)
 
+    if programs and not runs:
+        log.error(
+            "An order is being completed for a program, but does not have any course run selections. "
+            "(Order: %d, purchaser: '%s', program(s): %s)",
+            order.id,
+            order.purchaser.email,
+            [program.readable_id for program in programs],
+        )
+
     try:
         enroll_in_edx_course_runs(order.purchaser, runs)
         edx_request_success = True
