@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.36.3
+Version 0.36.3 (Released January 22, 2020)
 --------------
 
 - Allow product_id and CouponCode to be specificed in URL
