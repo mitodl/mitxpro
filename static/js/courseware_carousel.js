@@ -1,6 +1,7 @@
 /*eslint-env jquery*/
 /*eslint semi: ["error", "always"]*/
 $(".course-slider").slick({
+  rows:           0,
   slidesToShow:   3,
   slidesToScroll: 1,
   dots:           false,

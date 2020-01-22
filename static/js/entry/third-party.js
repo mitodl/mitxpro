@@ -1,0 +1,6 @@
+import "jquery"
+import "popper.js"
+import "bootstrap"
+import "slick-carousel"
+import "hls.js"
+import "@fancyapps/fancybox"

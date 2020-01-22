@@ -1,0 +1,8 @@
+import "../notifications.js"
+import "../tooltip.js"
+import "../hero.js"
+import "../testimonials_carousel.js"
+import "../courseware_carousel.js"
+import "../text_video_section.js"
+import "../image_carousel.js"
+import "../faculty_carousel.js"
