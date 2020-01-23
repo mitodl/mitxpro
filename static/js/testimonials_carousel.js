@@ -3,6 +3,7 @@
 const numTestimonialSlides = $(".learners-slider .slide").length;
 
 $(".learners-slider").slick({
+  rows:           0,
   slidesToShow:   3,
   slidesToScroll: 1,
   dots:           numTestimonialSlides > 3,

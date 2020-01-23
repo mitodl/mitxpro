@@ -3,6 +3,7 @@
 const numLogoSlides = $(".logos-slider .slide").length;
 
 $(".logos-slider").slick({
+  rows:           0,
   slidesToShow:   6,
   slidesToScroll: 3,
   infinite:       false,

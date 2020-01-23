@@ -9,11 +9,6 @@
   {% render_bundle 'header' %}
 {% endblock %}
 
-{% block scripts %}
-  {{ block.super }}
-  <script src="{% static 'js/tooltip.js' %}"></script>
-{% endblock %}
-
 {% block content %}
   <div class="course-catalog">
     {% block banner %}

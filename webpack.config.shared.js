@@ -4,15 +4,35 @@ const webpack = require("webpack")
 module.exports = {
   config: {
     entry: {
-      root:  ["@babel/polyfill", "./static/js/entry/root"],
-      header:  ["@babel/polyfill", "./static/js/entry/header"],
-      style: "./static/js/entry/style"
+      root:         ["@babel/polyfill", "./static/js/entry/root"],
+      header:       ["@babel/polyfill", "./static/js/entry/header"],
+      style:        "./static/js/entry/style",
+      third_party:  ["@babel/polyfill", "./static/js/entry/third-party"],
+      django:       "./static/js/entry/django"
     },
     module: {
       rules: [
         {
           test: /\.(svg|ttf|woff|woff2|eot|gif)$/,
           use:  "url-loader"
+        },
+        {
+          test: require.resolve('jquery'),
+          use:  [{
+            loader:  'expose-loader',
+            options: 'jQuery'
+          },
+          {
+            loader:  'expose-loader',
+            options: '$'
+          }]
+        },
+        {
+          test: require.resolve('hls.js'),
+          use:  [{
+            loader:  'expose-loader',
+            options: 'Hls'
+          }]
         }
       ]
     },

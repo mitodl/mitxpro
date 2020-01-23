@@ -3,6 +3,7 @@
 const numFacultySlides = $(".faculty-slider .slide").length;
 
 $(".faculty-slider").slick({
+  rows:           0,
   slidesToShow:   3,
   slidesToScroll: 1,
   dots:           numFacultySlides > 3,
