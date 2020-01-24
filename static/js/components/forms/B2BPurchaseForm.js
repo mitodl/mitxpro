@@ -6,6 +6,7 @@ import { curry } from "ramda"
 
 import B2BPurchaseSummary from "../B2BPurchaseSummary"
 import ProductSelector from "../input/ProductSelector"
+import B2BCheckoutExplanation from "../B2BCheckoutExplanation"
 
 import type {
   B2BCouponStatusPayload,
@@ -139,15 +140,13 @@ class B2BPurchaseForm extends React.Component<Props> {
       <Form className="b2b-purchase-form container">
         <div className="row">
           <div className="col-lg-12">
-            <div className="title">Bulk Seats</div>
+            <div className="title">Bulk Purchase Order</div>
           </div>
+          <B2BCheckoutExplanation />
         </div>
         <div className="row">
           <div className="col-lg-5">
-            <p className="purchase-title">
-              Purchase one or more seats for your team.
-            </p>
-            <label htmlFor="product">
+            <label htmlFor="product" className="mt-0">
               <Field
                 component={ProductSelector}
                 products={products}
@@ -159,17 +158,18 @@ class B2BPurchaseForm extends React.Component<Props> {
             </label>
 
             <label htmlFor="num_seats">
-              <span className="description">*Number of Seats:</span>
+              <span className="description">
+                *Number of enrollment codes to purchase:
+              </span>
               <Field type="text" name="num_seats" className="num-seats" />
               <ErrorMessage name="num_seats" render={errorMessageRenderer} />
             </label>
 
             <label htmlFor="email">
-              <span className="description">*Email Address:</span>
+              <span className="description">*Your email address:</span>
               <Field type="text" name="email" />
               <span className="explanation">
-                * We will email the link to the enrollment codes to this
-                address.
+                * We will email the enrollment codes to this address.
               </span>
               <ErrorMessage name="email" render={errorMessageRenderer} />
             </label>
@@ -221,6 +221,12 @@ class B2BPurchaseForm extends React.Component<Props> {
             >
               Place order
             </button>
+            <div className="description enterprise-terms-condition">
+              By placing my order I accept the{" "}
+              <a href="/enterprise-terms-and-conditions/">
+                MIT xPRO Enterprise Sales Terms and Conditions
+              </a>
+            </div>
           </div>
         </div>
       </Form>

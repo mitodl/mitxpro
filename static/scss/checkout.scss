@@ -1,5 +1,5 @@
 .checkout-page {
-  @include media-breakpoint-up (lg) {
+  @include media-breakpoint-up(lg) {
     padding-left: 40px;
     padding-right: 40px;
   }
@@ -55,7 +55,7 @@
         height: auto;
       }
 
-      @include media-breakpoint-up (lg) {
+      @include media-breakpoint-up(lg) {
         min-width: 200px;
         max-width: 200px;
       }
@@ -126,7 +126,8 @@
         margin-bottom: 25px;
       }
 
-      .price-row,.discount-row {
+      .price-row,
+      .discount-row {
         font-size: 24px;
       }
 
@@ -151,7 +152,8 @@
       margin-right: 10px;
     }
 
-    a, a:hover {
+    a,
+    a:hover {
       color: $light-blue;
       text-decoration: underline;
       cursor: pointer;
@@ -171,21 +173,22 @@
     width: 100%;
   }
 
-  input[type='checkbox']   {
+  input[type="checkbox"] {
     display: unset;
   }
 
   .submit-links {
     margin-top: 10px;
 
-    a, a:hover {
+    a,
+    a:hover {
       color: $light-blue;
     }
   }
 }
 
 .data-consent-modal {
-  @include media-breakpoint-up (lg) {
+  @include media-breakpoint-up(lg) {
     min-width: 800px;
   }
 
@@ -225,11 +228,13 @@
     }
   }
 
-  .product-row, .course-date-row {
+  .product-row,
+  .course-date-row {
     margin-top: 30px;
   }
 
-  .checkout-button, .apply-button {
+  .checkout-button,
+  .apply-button {
     color: white;
     font-size: 24px;
     font-weight: 600;
@@ -292,7 +297,8 @@
   }
 }
 
-.b2b-purchase-form, .checkout-page {
+.b2b-purchase-form,
+.checkout-page {
   .error {
     color: $primary;
   }
@@ -302,7 +308,8 @@
   }
 }
 
-.b2b-purchase-form, .b2b-receipt-page {
+.b2b-purchase-form,
+.b2b-receipt-page {
   margin: 0 auto;
   max-width: 1000px;
   font-weight: 600;
@@ -337,10 +344,16 @@
     }
   }
 
-  .description, .explanation {
+  .description,
+  .explanation {
     display: block;
     font-size: 16px;
     font-weight: 600;
+  }
+
+  .enterprise-terms-condition {
+    margin-top: 10px;
+    line-height: 1.4;
   }
 
   .coupon-description {
@@ -366,7 +379,8 @@
   }
 }
 
-.order-summary, .b2b-order-summary {
+.order-summary,
+.b2b-order-summary {
   font-weight: 600;
   font-size: 16px;
 
@@ -386,14 +400,22 @@
 
 .order-summary .bar {
   margin-top: 25px;
-  background-image: linear-gradient(to right, black 50%, rgba(255,255,255,0) 0%);
+  background-image: linear-gradient(
+    to right,
+    black 50%,
+    rgba(255, 255, 255, 0) 0%
+  );
 }
 
 .b2b-order-summary .bar {
   margin-top: 10px;
   margin-bottom: 10px;
   color: grey;
-  background-image: linear-gradient(to right, $soft-light-gray 50%, rgba(255,255,255,0) 0%);
+  background-image: linear-gradient(
+    to right,
+    $soft-light-gray 50%,
+    rgba(255, 255, 255, 0) 0%
+  );
 }
 
 .b2b-explanation {

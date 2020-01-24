@@ -132,7 +132,6 @@ export class B2BPurchasePage extends React.Component<Props, State> {
           productId={productId}
           discountCode={discountCode}
         />
-        <B2BExplanation alreadyPaid={false} />
       </React.Fragment>
     )
   }
