@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.37.0
+Version 0.37.0 (Released January 27, 2020)
 --------------
 
 - #1277 Static content (JS) via Webpack for Django
