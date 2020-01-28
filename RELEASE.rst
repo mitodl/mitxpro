@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.38.0
+Version 0.38.0 (Released January 28, 2020)
 --------------
 
 - handlebars plus django version update
