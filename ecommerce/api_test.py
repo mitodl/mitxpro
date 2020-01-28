@@ -1124,6 +1124,26 @@ def test_enroll_user_in_order_exception(mocker, user, enroll_type):
         assert item in patched_send_support_email.call_args[0][1]
 
 
+def test_enroll_user_program_no_runs(mocker, user):
+    """
+    Test that enroll_user_in_order_items logs an error if an order for a program is being completed
+    without any course run selections.
+    """
+    patched_log = mocker.patch("ecommerce.api.log")
+    mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
+    order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
+    BasketFactory.create(user=user)
+    program = ProgramFactory.create()
+    LineFactory.create(order=order, product_version__product__content_object=program)
+
+    enroll_user_in_order_items(order)
+    patched_log.error.assert_called_once()
+    assert (
+        "An order is being completed for a program, but does not have any course run selections"
+        in patched_log.error.call_args[0][0]
+    )
+
+
 def test_fetch_and_serialize_unused_coupons_empty(user):
     """
     Test that fetch_and_serialize_unused_coupons returns an empty list for users
