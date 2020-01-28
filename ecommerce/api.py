@@ -1142,3 +1142,16 @@ def fulfill_order(request_data):
 
     # Save to log everything to an audit table including enrollments created in complete_order
     order.save_and_log(None)
+
+
+def get_product_from_querystring_id(qs_product_id):
+    """Get product from querystring (product_id)"""
+    if isinstance(qs_product_id, int) or qs_product_id.isdigit():
+        return Product.objects.get(id=int(qs_product_id))
+    else:
+        # Text IDs for Programs/CourseRuns have '+' characters, which represent spaces in URL-encoded strings
+        product_text_id = qs_product_id.replace(" ", "+")
+        return Product.objects.get(
+            Q(courseruns__courseware_id=product_text_id)
+            | Q(programs__readable_id=product_text_id)
+        )
