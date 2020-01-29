@@ -6,7 +6,9 @@ from mitxpro.utils import now_in_utc
 from sheets import api
 import sheets.coupon_assign_api
 import sheets.coupon_request_api
+import sheets.refund_request_api
 from sheets.constants import ASSIGNMENT_SHEET_ENROLLED_STATUS
+from sheets.utils import request_sheet_metadata, refund_sheet_metadata
 
 
 @app.task
@@ -18,6 +20,18 @@ def handle_unprocessed_coupon_requests():
     """
     coupon_request_handler = sheets.coupon_request_api.CouponRequestHandler()
     results = coupon_request_handler.process_sheet()
+    return results
+
+
+@app.task
+def handle_unprocessed_refund_requests():
+    """
+    Ensures that all non-legacy rows in the spreadsheet are correctly represented in the database,
+    reverses/refunds enrollments if appropriate, updates the spreadsheet to reflect any changes
+    made, and returns a summary of those changes.
+    """
+    refund_request_handler = sheets.enroll_refund_api.RefundRequestHandler()
+    results = refund_request_handler.process_sheet()
     return results
 
 
@@ -103,9 +117,20 @@ def renew_file_watches():
     Renews push notifications for changes to certain files via the Google API.
     """
     # This task is run on a schedule and ensures that there is an unexpired file watch
-    # on the coupon request sheet. If a file watch was manually created/updated at any
+    # on each sheet we want to watch. If a file watch was manually created/updated at any
     # point, this task might be run while that file watch is still unexpired. If the file
     # watch renewal was skipped, the task might not run again until after expiration. To
     # avoid that situation, the file watch is always renewed here (force=True).
-    file_watch, created, _ = api.renew_coupon_request_file_watch(force=True)
-    return file_watch.id, file_watch.channel_id, created
+    sheet_metadata_objects = (request_sheet_metadata, refund_sheet_metadata)
+    results = []
+    for sheet_metadata in sheet_metadata_objects:
+        file_watch, created, _ = api.renew_sheet_file_watch(sheet_metadata, force=True)
+        results.append(
+            {
+                "type": sheet_metadata.sheet_type,
+                "file_watch_id": file_watch.id,
+                "file_watch_channel_id": file_watch.channel_id,
+                "created": created,
+            }
+        )
+    return results

@@ -1092,6 +1092,20 @@ COUPON_REQUEST_SHEET_ID = get_string(
     None,
     description="ID of the Google Sheet that contains requests for coupons",
 )
+ENROLLMENT_CHANGE_SHEET_ID = get_string(
+    "ENROLLMENT_CHANGE_SHEET_ID",
+    None,
+    description=(
+        "ID of the Google Sheet that contains the enrollment change request worksheets (refunds, transfers, etc)"
+    ),
+)
+REFUND_REQUEST_WORKSHEET_ID = get_string(
+    "REFUND_REQUEST_WORKSHEET_ID",
+    "0",
+    description=(
+        "ID of the worksheet within the enrollment change request spreadsheet that contains enrollment refund requests"
+    ),
+)
 GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
     "GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE",
     None,
@@ -1105,7 +1119,12 @@ SHEETS_ADMIN_EMAILS = get_list(
 SHEETS_DATE_FORMAT = get_string(
     "SHEETS_DATE_FORMAT",
     "%m/%d/%Y %H:%M:%S",
-    description="Python strptime format for datetime columns in the bulk coupon spreadsheets",
+    description="Python strptime format for datetime columns in enrollment management spreadsheets",
+)
+SHEETS_DATE_ONLY_FORMAT = get_string(
+    "SHEETS_DATE_ONLY_FORMAT",
+    "%m/%d/%Y",
+    description="Python strptime format for date columns (no time) in enrollment management spreadsheets",
 )
 _sheets_date_timezone = get_string(
     "SHEETS_DATE_TIMEZONE",
@@ -1116,6 +1135,15 @@ _sheets_date_timezone = get_string(
     ),
 )
 SHEETS_DATE_TIMEZONE = pytz.timezone(_sheets_date_timezone)
+
+SHEETS_REFUND_FIRST_ROW = get_int(
+    "SHEETS_REFUND_FIRST_ROW",
+    4,
+    description=(
+        "The first row (as it appears in the spreadsheet) of data that our scripts should consider "
+        "processing in the refund request spreadsheet"
+    ),
+)
 # Specify the zero-based index of certain request sheet columns
 if FEATURES.get("COUPON_SHEETS_TRACK_REQUESTER"):
     SHEETS_REQ_EMAIL_COL = 7

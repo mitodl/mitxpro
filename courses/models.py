@@ -612,7 +612,7 @@ class CourseRunEnrollment(EnrollmentModel):
         return CourseRunEnrollmentAudit
 
     @classmethod
-    def get_program_run_enrollments(cls, user, program):
+    def get_program_run_enrollments(cls, user, program, order_id=None):
         """
         Fetches the CourseRunEnrollments associated with a given user and program
 
@@ -623,7 +623,10 @@ class CourseRunEnrollment(EnrollmentModel):
         Returns:
             queryset of CourseRunEnrollment: Course run enrollments associated with a user/program
         """
-        return cls.objects.filter(user=user, run__course__program=program)
+        added_filters = {} if order_id is None else dict(order_id=order_id)
+        return cls.objects.filter(
+            user=user, run__course__program=program, **added_filters
+        )
 
     def to_dict(self):
         return {**super().to_dict(), "text_id": self.run.courseware_id}
@@ -663,15 +666,19 @@ class ProgramEnrollment(EnrollmentModel):
     def get_audit_class(cls):
         return ProgramEnrollmentAudit
 
-    def get_run_enrollments(self):
+    def get_run_enrollments(self, order_id=None):
         """
         Fetches the CourseRunEnrollments associated with this ProgramEnrollment
+
+        Args:
+            order_id (int or None): If provided, only return enrollments associated with this order id
 
         Returns:
             queryset of CourseRunEnrollment: Associated course run enrollments
         """
+        added_filters = {} if order_id is None else dict(order_id=order_id)
         return CourseRunEnrollment.get_program_run_enrollments(
-            user=self.user, program=self.program
+            user=self.user, program=self.program, **added_filters
         )
 
     def to_dict(self):

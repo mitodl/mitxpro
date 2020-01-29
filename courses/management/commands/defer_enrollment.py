@@ -2,6 +2,7 @@
 from django.core.management.base import CommandError
 from django.contrib.auth import get_user_model
 
+from courses.api import deactivate_run_enrollment
 from courses.management.utils import EnrollmentChangeCommand, enrollment_summary
 from courses.constants import ENROLL_CHANGE_STATUS_DEFERRED
 from courses.models import CourseRun, CourseRunEnrollment
@@ -74,7 +75,7 @@ class Command(EnrollmentChangeCommand):
             )
 
         to_enrollment = self.create_run_enrollment(from_enrollment, to_run=to_run)
-        self.deactivate_run_enrollment(
+        deactivate_run_enrollment(
             from_enrollment, change_status=ENROLL_CHANGE_STATUS_DEFERRED
         )
 

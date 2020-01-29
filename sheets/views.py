@@ -19,8 +19,16 @@ from google_auth_oauthlib.flow import Flow  # pylint: disable-all
 from google.auth.exceptions import GoogleAuthError  # pylint: disable-all
 
 from sheets.models import GoogleApiAuth, GoogleFileWatch
-from sheets.constants import REQUIRED_GOOGLE_API_SCOPES
-from sheets.utils import generate_google_client_config
+from sheets.constants import (
+    REQUIRED_GOOGLE_API_SCOPES,
+    SHEET_TYPE_COUPON_REQUEST,
+    SHEET_TYPE_REFUND,
+)
+from sheets.utils import (
+    generate_google_client_config,
+    CouponRequestSheetMetadata,
+    RefundRequestSheetMetadata,
+)
 from sheets import tasks
 from sheets.coupon_assign_api import CouponAssignmentHandler
 from sheets.coupon_request_api import CouponRequestHandler
@@ -99,10 +107,10 @@ def complete_google_auth(request):
 
 
 @csrf_exempt
-def handle_coupon_request_sheet_update(request):
+def handle_watched_sheet_update(request):
     """
     View that handles requests sent from Google's push notification service when changes are made to the
-    coupon request sheet.
+    a sheet with a file watch applied.
     """
     if not settings.FEATURES.get("COUPON_SHEETS"):
         raise Http404
@@ -113,24 +121,43 @@ def handle_coupon_request_sheet_update(request):
             "(HTTP_X_GOOG_CHANNEL_ID)."
         )
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
+
+    sheet_type = request.GET.get("sheet", SHEET_TYPE_COUPON_REQUEST)
+    if sheet_type == SHEET_TYPE_COUPON_REQUEST:
+        sheet_metadata = CouponRequestSheetMetadata()
+    elif sheet_type == SHEET_TYPE_REFUND:
+        sheet_metadata = RefundRequestSheetMetadata()
+    else:
+        log.error(
+            "Unknown sheet type '%s' (passed via 'sheet' query parameter)", sheet_type
+        )
+        return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
+
     req_sheet_file_watch = GoogleFileWatch.objects.filter(
-        file_id=settings.COUPON_REQUEST_SHEET_ID
+        file_id=sheet_metadata.sheet_file_id
     ).first()
     if not req_sheet_file_watch:
         log.error(
-            "Google file watch request received, but no local file watch record exists "
-            "in the database."
+            "Google file watch request for %s received, but no local file watch record exists "
+            "in the database.",
+            sheet_metadata.sheet_name,
         )
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
     if channel_id != req_sheet_file_watch.channel_id:
         log.warning(
-            "Google file watch request received, but the Channel ID does not match the active file watch "
-            "channel ID in the app (%s, %s)",
+            "Google file watch request for %s received, but the Channel ID does not match the "
+            "active file watch channel ID in the app (%s, %s)",
+            sheet_metadata.sheet_name,
             channel_id,
             req_sheet_file_watch.channel_id,
         )
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
-    tasks.handle_unprocessed_coupon_requests.delay()
+
+    if sheet_type == SHEET_TYPE_COUPON_REQUEST:
+        tasks.handle_unprocessed_coupon_requests.delay()
+    elif sheet_type == SHEET_TYPE_REFUND:
+        tasks.handle_unprocessed_refund_requests.delay()
+
     return HttpResponse(status=status.HTTP_200_OK)
 
 

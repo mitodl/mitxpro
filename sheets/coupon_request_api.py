@@ -8,9 +8,10 @@ import logging
 from django.conf import settings
 from django.db import transaction
 
+from courses.models import CourseRun, Program
 import ecommerce.api
 from ecommerce.models import Company, Coupon, CouponPaymentVersion
-from mitxpro.utils import now_in_utc
+from mitxpro.utils import now_in_utc, item_at_index_or_none
 from sheets.api import get_authorized_pygsheets_client, share_drive_file_with_emails
 from sheets.exceptions import (
     SheetOutOfSyncException,
@@ -21,16 +22,16 @@ from sheets.exceptions import (
 )
 from sheets.models import CouponGenerationRequest
 from sheets.utils import (
-    CouponRequestRow,
     FailedRequest,
     ProcessedRequest,
     IgnoredRequest,
     format_datetime_for_sheet_formula,
     build_protected_range_request_body,
-    coupon_assign_sheet_spec,
-    ASSIGNMENT_SHEET_STATUS_COLUMN,
     assignment_sheet_file_name,
     get_enumerated_data_rows,
+    parse_sheet_datetime_str,
+    request_sheet_metadata,
+    assign_sheet_metadata,
 )
 
 log = logging.getLogger(__name__)
@@ -43,7 +44,7 @@ def create_coupons_for_request_row(coupon_req_row, company_id):
     Creates coupons for a given request
 
     Args:
-        coupon_req_row (sheets.utils.CouponRequestRow): A representation of a coupon request row
+        coupon_req_row (sheets.coupon_request_api.CouponRequestRow): A representation of a coupon request row
         company_id (int): The id of the Company on whose behalf these coupons are being created
 
     Returns:
@@ -63,6 +64,124 @@ def create_coupons_for_request_row(coupon_req_row, company_id):
         payment_transaction=coupon_req_row.purchase_order_id,
         **BULK_PURCHASE_DEFAULTS,
     )
+
+
+class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
+    """Represents a row of a coupon request sheet"""
+
+    def __init__(
+        self,
+        row_index,
+        purchase_order_id,
+        coupon_name,
+        num_codes,
+        product_text_id,
+        company_name,
+        activation,
+        expiration,
+        date_processed,
+        error,
+        requester=None,
+    ):  # pylint: disable=too-many-arguments
+        self.row_index = row_index
+        self.purchase_order_id = purchase_order_id
+        self.coupon_name = coupon_name
+        self.num_codes = num_codes
+        self.product_text_id = product_text_id
+        self.company_name = company_name
+        self.activation = activation
+        self.expiration = expiration
+        self.date_processed = date_processed
+        self.error = error
+        self.requester = requester
+
+    @classmethod
+    def parse_raw_data(cls, row_index, raw_row_data):
+        """
+        Parses raw row data
+
+        Args:
+            row_index (int): The row index according to the spreadsheet (not zero-based)
+            raw_row_data (list of str): The raw row data
+
+        Returns:
+            CouponRequestRow: The parsed data row
+
+        Raises:
+            SheetRowParsingException: Raised if the row could not be parsed
+        """
+        try:
+            added_kwargs = (
+                dict(
+                    requester=item_at_index_or_none(
+                        raw_row_data, settings.SHEETS_REQ_EMAIL_COL
+                    )
+                )
+                if settings.FEATURES.get("COUPON_SHEETS_TRACK_REQUESTER")
+                else {}
+            )
+            return cls(
+                row_index=row_index,
+                purchase_order_id=raw_row_data[
+                    request_sheet_metadata.PURCHASE_ORDER_COL_INDEX
+                ].strip(),
+                coupon_name=raw_row_data[
+                    request_sheet_metadata.COUPON_NAME_COL_INDEX
+                ].strip(),
+                num_codes=int(raw_row_data[2]),
+                product_text_id=raw_row_data[3].strip(),
+                company_name=raw_row_data[4],
+                activation=parse_sheet_datetime_str(
+                    item_at_index_or_none(raw_row_data, 5)
+                ),
+                expiration=parse_sheet_datetime_str(
+                    item_at_index_or_none(raw_row_data, 6)
+                ),
+                date_processed=parse_sheet_datetime_str(
+                    item_at_index_or_none(
+                        raw_row_data, request_sheet_metadata.PROCESSED_COL
+                    )
+                ),
+                error=item_at_index_or_none(
+                    raw_row_data, request_sheet_metadata.ERROR_COL
+                ),
+                **added_kwargs,
+            )
+        except Exception as exc:
+            raise SheetRowParsingException(str(exc)) from exc
+
+    def get_product_id(self):
+        """
+        Gets the id for the most recently-created product associated with the CourseRun/Program indicated
+        by this row.
+
+        Returns:
+            int: The most recently-created product ID for the object indicated by the text ID in the spreadsheet
+        """
+        for product_object_cls in [CourseRun, Program]:
+            product_object = (
+                product_object_cls.objects.live()
+                .with_text_id(self.product_text_id)
+                .prefetch_related("products")
+                .first()
+            )
+            if product_object:
+                break
+        product = (
+            None
+            if not product_object
+            else product_object.products.order_by("-created_on").first()
+        )
+        if not product_object:
+            raise InvalidSheetProductException(
+                "Could not find a CourseRun or Program with text id '%s'"
+                % self.product_text_id
+            )
+        elif not product:
+            raise InvalidSheetProductException(
+                "No Products associated with %s" % str(product_object)
+            )
+        return product.id
 
 
 class CouponRequestHandler:
@@ -95,7 +214,7 @@ class CouponRequestHandler:
         observed_coupon_names = set()
         invalid_coupon_name_row_map = defaultdict(list)
         for row_index, row_data in enumerated_data_rows_1:
-            coupon_name = row_data[CouponRequestRow.COUPON_NAME_COL_INDEX].strip()
+            coupon_name = row_data[request_sheet_metadata.COUPON_NAME_COL_INDEX].strip()
             if coupon_name in observed_coupon_names:
                 invalid_coupon_name_row_map[coupon_name].append(row_index)
             else:
@@ -154,9 +273,13 @@ class CouponRequestHandler:
                 and the data in the sheet do not agree
             SheetCouponCreationException: Raised if there was an error during coupon creation
         """
-        coupon_name = row_data[CouponRequestRow.COUPON_NAME_COL_INDEX].strip()
-        purchase_order_id = row_data[CouponRequestRow.PURCHASE_ORDER_COL_INDEX].strip()
-        user_input_json = json.dumps(CouponRequestRow.get_user_input_columns(row_data))
+        coupon_name = row_data[request_sheet_metadata.COUPON_NAME_COL_INDEX].strip()
+        purchase_order_id = row_data[
+            request_sheet_metadata.PURCHASE_ORDER_COL_INDEX
+        ].strip()
+        user_input_json = json.dumps(
+            request_sheet_metadata.get_form_input_columns(row_data)
+        )
 
         with transaction.atomic():
             coupon_gen_request, created = CouponGenerationRequest.objects.select_for_update().get_or_create(
@@ -367,13 +490,13 @@ class CouponRequestHandler:
             start_row_index=0,
             num_rows=1,
             start_col_index=0,
-            num_cols=coupon_assign_sheet_spec.num_columns,
+            num_cols=assign_sheet_metadata.num_columns,
             warning_only=False,
             description="Header Row",
         )
         coupon_code_range_req = build_protected_range_request_body(
             worksheet_id=worksheet_id,
-            start_row_index=coupon_assign_sheet_spec.first_data_row - 1,
+            start_row_index=assign_sheet_metadata.first_data_row - 1,
             num_rows=num_data_rows,
             start_col_index=0,
             num_cols=1,
@@ -382,9 +505,9 @@ class CouponRequestHandler:
         )
         status_columns_range_req = build_protected_range_request_body(
             worksheet_id=worksheet_id,
-            start_row_index=coupon_assign_sheet_spec.first_data_row - 1,
+            start_row_index=assign_sheet_metadata.first_data_row - 1,
             num_rows=num_data_rows,
-            start_col_index=ASSIGNMENT_SHEET_STATUS_COLUMN,
+            start_col_index=assign_sheet_metadata.STATUS_COL,
             num_cols=2,
             warning_only=True,
             description="Status Columns",
@@ -427,14 +550,14 @@ class CouponRequestHandler:
         worksheet = bulk_coupon_sheet.sheet1
         # Add headers
         worksheet.update_values(
-            crange="A1:{}1".format(coupon_assign_sheet_spec.last_data_column),
-            values=[coupon_assign_sheet_spec.column_headers],
+            crange="A1:{}1".format(assign_sheet_metadata.LAST_COL_LETTER),
+            values=[assign_sheet_metadata.column_headers],
         )
         # Write data to body of worksheet
         worksheet.update_values(
             crange="A{}:A{}".format(
-                coupon_assign_sheet_spec.first_data_row,
-                len(coupon_codes) + coupon_assign_sheet_spec.first_data_row,
+                assign_sheet_metadata.first_data_row,
+                len(coupon_codes) + assign_sheet_metadata.first_data_row,
             ),
             values=[[coupon_code] for coupon_code in coupon_codes],
         )
@@ -443,7 +566,7 @@ class CouponRequestHandler:
         # Format header cells with bold text
         header_range = worksheet.get_values(
             start="A1",
-            end="{}1".format(coupon_assign_sheet_spec.last_data_column),
+            end="{}1".format(assign_sheet_metadata.LAST_COL_LETTER),
             returnas="range",
         )
         first_cell = header_range.cells[0][0]
@@ -498,9 +621,12 @@ class CouponRequestHandler:
         Returns:
             dict: A dictionary indicating the results of processing the coupon request Sheet
         """
-        enumerated_data_rows = get_enumerated_data_rows(
-            self.coupon_request_sheet, limit_row_index=limit_row_index
-        )
+        if limit_row_index is None:
+            enumerated_data_rows = get_enumerated_data_rows(self.coupon_request_sheet)
+        else:
+            enumerated_data_rows = [
+                (limit_row_index, self.coupon_request_sheet.get_row(limit_row_index))
+            ]
         processed_requests, failed_requests, ignored_requests, unrecorded_complete_requests = self.parse_rows_and_create_coupons(
             enumerated_data_rows
         )

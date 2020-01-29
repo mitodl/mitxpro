@@ -25,8 +25,24 @@ class CouponGenerationRequest(TimestampedModel):
     raw_data = models.CharField(max_length=300, null=True, blank=True)
 
     def __str__(self):
-        return "GoogleFileWatch: id={}, purchase_order_id={}, completed={}".format(
-            self.id, self.purchase_order_id, self.date_completed is not None
+        return "CouponGenerationRequest: id={}, coupon_name={}, purchase_order_id={}, completed={}".format(
+            self.id,
+            self.coupon_name,
+            self.purchase_order_id,
+            self.date_completed is not None,
+        )
+
+
+class RefundRequest(TimestampedModel):
+    """Model that represents a request to refund an enrollment"""
+
+    form_response_id = models.IntegerField(db_index=True, unique=True, null=False)
+    date_completed = models.DateTimeField(null=True, blank=True)
+    raw_data = models.CharField(max_length=300, null=True, blank=True)
+
+    def __str__(self):
+        return "RefundRequest: id={}, form_response_id={}, completed={}".format(
+            self.id, self.form_response_id, self.date_completed is not None
         )
 
 

@@ -2,6 +2,7 @@
 from django.core.management.base import CommandError
 from django.contrib.auth import get_user_model
 
+from courses.api import deactivate_program_enrollment, deactivate_run_enrollment
 from courses.management.utils import EnrollmentChangeCommand, enrollment_summaries
 from courses.constants import ENROLL_CHANGE_STATUS_TRANSFERRED
 from courses.models import CourseRunEnrollment
@@ -65,7 +66,7 @@ class Command(EnrollmentChangeCommand):
             new_program_enrollment, new_run_enrollments = self.create_program_enrollment(
                 enrollment, to_user=to_user
             )
-            self.deactivate_program_enrollment(
+            deactivate_program_enrollment(
                 enrollment, change_status=ENROLL_CHANGE_STATUS_TRANSFERRED
             )
         else:
@@ -73,7 +74,7 @@ class Command(EnrollmentChangeCommand):
             new_run_enrollments = [
                 self.create_run_enrollment(enrollment, to_user=to_user)
             ]
-            self.deactivate_run_enrollment(
+            deactivate_run_enrollment(
                 enrollment, change_status=ENROLL_CHANGE_STATUS_TRANSFERRED
             )
 

@@ -1,15 +1,13 @@
 """Sheets app util functions"""
 import datetime
 import email.utils
-from collections import namedtuple, defaultdict
-from urllib.parse import urljoin
+from collections import namedtuple
+from urllib.parse import urljoin, quote_plus
+from enum import Enum
 import pytz
 
 from django.conf import settings
 from django.urls import reverse
-
-from courses.models import CourseRun, Program
-from mitxpro.utils import item_at_index_or_none
 
 from sheets.constants import (
     GOOGLE_AUTH_URI,
@@ -17,10 +15,12 @@ from sheets.constants import (
     GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
     ASSIGNMENT_SHEET_PREFIX,
     GOOGLE_SHEET_FIRST_ROW,
-    ASSIGNMENT_SHEET_ENROLLED_STATUS,
     GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN,
+    SHEETS_VALUE_REQUEST_PAGE_SIZE,
+    SHEET_TYPE_COUPON_REQUEST,
+    SHEET_TYPE_REFUND,
+    SHEET_TYPE_COUPON_ASSIGN,
 )
-from sheets.exceptions import InvalidSheetProductException, SheetRowParsingException
 
 
 def generate_google_client_config():
@@ -40,37 +40,161 @@ def generate_google_client_config():
     }
 
 
-SpreadsheetSpec = namedtuple(
-    "SpreadsheetSpec",
-    [
-        "first_data_row",
-        "last_data_column",
-        "calculated_column_indices",
-        "num_columns",
-        "column_headers",
-    ],
+def get_column_letter(column_index):
+    """
+    Returns the spreadsheet column letter that corresponds to a given index (e.g.: 0 -> 'A', 3 -> 'D')
+
+    Args:
+        column_index (int):
+
+    Returns:
+        str: The column index expressed as a letter
+    """
+    if column_index > 25:
+        raise ValueError("Cannot generate a column letter past 'Z'")
+    uppercase_a_ord = ord("A")
+    return chr(column_index + uppercase_a_ord)
+
+
+class SheetMetadata:
+    """Metadata for a type of Google Sheet that this app interacts with"""
+
+    sheet_type = None
+    sheet_name = None
+    first_data_row = None
+    non_input_column_indices = set()
+    num_columns = 0
+
+    @property
+    def form_input_column_indices(self):
+        """
+        Returns indices of columns that contain data entered by a user in a form
+
+        Returns:
+            set: Indices of columns that contain data entered by a user in a form
+        """
+        return set(range(self.num_columns)).difference(self.non_input_column_indices)
+
+    def get_form_input_columns(self, row_data):
+        """
+        Returns a list of column values for columns that contain data entered by a user in a form
+        (i.e.: no auto-generated values, or values entered by this app)
+
+        Args:
+            row_data (iterable): Cell values from a row in a sheet
+
+        Returns:
+            list: Values for columns that contain data entered by a user in a form
+        """
+        return [
+            col for i, col in enumerate(row_data) if i in self.form_input_column_indices
+        ]
+
+
+class WatchableSheetMetadata(SheetMetadata):
+    """Metadata for a type of Google Sheet that this app interacts with and tracks via file watch/webhook"""
+
+    sheet_file_id = None
+
+    @property
+    def handler_url_stub(self):
+        """The URL stub that should be used by Google when a change is made to a watched file"""
+        return "{}?sheet={}".format(
+            reverse("handle-watched-sheet-update"), quote_plus(self.sheet_type)
+        )
+
+
+class CouponRequestSheetMetadata(WatchableSheetMetadata):
+    """Metadata for the coupon request spreadsheet"""
+
+    PURCHASE_ORDER_COL_INDEX = 0
+    COUPON_NAME_COL_INDEX = 1
+    PROCESSED_COL = settings.SHEETS_REQ_PROCESSED_COL
+    ERROR_COL = settings.SHEETS_REQ_ERROR_COL
+
+    def __init__(self):
+        self.sheet_type = SHEET_TYPE_COUPON_REQUEST
+        self.sheet_name = "Coupon Request sheet"
+        self.first_data_row = GOOGLE_SHEET_FIRST_ROW + 1
+        self.non_input_column_indices = settings.SHEETS_REQ_CALCULATED_COLUMNS
+        self.num_columns = self.ERROR_COL + 1
+        self.sheet_file_id = settings.COUPON_REQUEST_SHEET_ID
+
+
+class RefundRequestSheetMetadata(
+    WatchableSheetMetadata
+):  # pylint: disable=too-many-instance-attributes
+    """Metadata for the refund request spreadsheet"""
+
+    FORM_RESPONSE_ID_COL = 0
+    REFUND_PROCESSOR_COL = 11
+    REFUND_COMPLETED_DATE_COL = 12
+    ERROR_COL = 13
+    SKIP_ROW_COL = 14
+
+    def __init__(self):
+        self.sheet_type = SHEET_TYPE_REFUND
+        self.sheet_name = "Refund Request sheet"
+        self.first_data_row = settings.SHEETS_REFUND_FIRST_ROW
+        self.num_columns = self.SKIP_ROW_COL + 1
+        self.non_input_column_indices = set(
+            # Response ID column
+            [self.FORM_RESPONSE_ID_COL]
+            +
+            # Every column from the finance columns to the end of the row
+            list(range(8, self.num_columns))
+        )
+        self.sheet_file_id = settings.ENROLLMENT_CHANGE_SHEET_ID
+
+        self.REFUND_PROCESSOR_COL_LETTER = get_column_letter(self.REFUND_PROCESSOR_COL)
+        self.ERROR_COL_LETTER = get_column_letter(self.ERROR_COL)
+
+
+class CouponAssignSheetMetadata(
+    SheetMetadata
+):  # pylint: disable=too-many-instance-attributes
+    """Metadata for a coupon assignment spreadsheet"""
+
+    def __init__(self):
+        self.sheet_type = SHEET_TYPE_COUPON_ASSIGN
+        self.sheet_name = "Coupon Assignment sheet"
+        self.first_data_row = GOOGLE_SHEET_FIRST_ROW + 1
+        self.column_headers = [
+            "Coupon Code",
+            "Email (Assignee)",
+            "Status",
+            "Status Date",
+        ]
+        self.non_input_column_indices = {0, 2, 3}
+        self.num_columns = len(self.column_headers)
+
+        self.LAST_COL_LETTER = get_column_letter(self.num_columns - 1)
+        self.STATUS_COL = (
+            i for i, header in enumerate(self.column_headers) if header == "Status"
+        )
+
+
+request_sheet_metadata = CouponRequestSheetMetadata()
+refund_sheet_metadata = RefundRequestSheetMetadata()
+assign_sheet_metadata = CouponAssignSheetMetadata()
+
+
+class ResultType(Enum):
+    """Enum of possible row results"""
+
+    IGNORED = "ignored"
+    FAILED = "failed"
+    OUT_OF_SYNC = "out_of_sync"
+    PROCESSED = "processed"
+
+    def __lt__(self, other):
+        return self.value < other.value  # pylint: disable=comparison-with-callable
+
+
+RowResult = namedtuple(
+    "RowResult", ["row_index", "row_db_record", "message", "result_type"]
 )
-coupon_request_sheet_spec = SpreadsheetSpec(
-    first_data_row=GOOGLE_SHEET_FIRST_ROW + 1,
-    last_data_column=settings.SHEETS_REQ_ERROR_COL_LETTER,
-    calculated_column_indices=settings.SHEETS_REQ_CALCULATED_COLUMNS,
-    num_columns=settings.SHEETS_REQ_ERROR_COL,
-    column_headers=[],
-)
-coupon_assign_sheet_spec = SpreadsheetSpec(
-    first_data_row=GOOGLE_SHEET_FIRST_ROW + 1,
-    last_data_column="D",
-    calculated_column_indices={0, 2, 3},
-    num_columns=4,
-    column_headers=["Coupon Code", "Email (Assignee)", "Status", "Status Date"],
-)
-ASSIGNMENT_SHEET_STATUS_COLUMN = next(
-    (
-        i
-        for i, header in enumerate(coupon_assign_sheet_spec.column_headers)
-        if header == "Status"
-    )
-)
+
 ProcessedRequest = namedtuple(
     "ProcessedRequest", ["row_index", "coupon_req_row", "request_id", "date_processed"]
 )
@@ -80,182 +204,12 @@ FailedRequest = namedtuple(
 IgnoredRequest = namedtuple("IgnoredRequest", ["row_index", "coupon_req_row", "reason"])
 
 
-class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
-    """Represents a row of a coupon request sheet"""
-
-    PURCHASE_ORDER_COL_INDEX = 0
-    COUPON_NAME_COL_INDEX = 1
-
-    def __init__(
-        self,
-        row_index,
-        purchase_order_id,
-        coupon_name,
-        num_codes,
-        product_text_id,
-        company_name,
-        activation,
-        expiration,
-        date_processed,
-        error,
-        requester=None,
-    ):  # pylint: disable=too-many-arguments
-        self.row_index = row_index
-        self.purchase_order_id = purchase_order_id
-        self.coupon_name = coupon_name
-        self.num_codes = num_codes
-        self.product_text_id = product_text_id
-        self.company_name = company_name
-        self.activation = activation
-        self.expiration = expiration
-        self.date_processed = date_processed
-        self.error = error
-        self.requester = requester
-
-    @classmethod
-    def parse_raw_data(cls, row_index, raw_row_data):
-        """
-        Parses raw row data
-
-        Args:
-            row_index (int): The row index according to the spreadsheet (not zero-based)
-            raw_row_data (list of str): The raw row data
-
-        Returns:
-            CouponRequestRow: The parsed data row
-
-        Raises:
-            SheetRowParsingException: Raised if the row could not be parsed
-        """
-        try:
-            added_kwargs = (
-                dict(
-                    requester=item_at_index_or_none(
-                        raw_row_data, settings.SHEETS_REQ_EMAIL_COL
-                    )
-                )
-                if settings.FEATURES.get("COUPON_SHEETS_TRACK_REQUESTER")
-                else {}
-            )
-            return cls(
-                row_index=row_index,
-                purchase_order_id=raw_row_data[cls.PURCHASE_ORDER_COL_INDEX].strip(),
-                coupon_name=raw_row_data[cls.COUPON_NAME_COL_INDEX].strip(),
-                num_codes=int(raw_row_data[2]),
-                product_text_id=raw_row_data[3].strip(),
-                company_name=raw_row_data[4],
-                activation=parse_sheet_date_str(item_at_index_or_none(raw_row_data, 5)),
-                expiration=parse_sheet_date_str(item_at_index_or_none(raw_row_data, 6)),
-                date_processed=parse_sheet_date_str(
-                    item_at_index_or_none(
-                        raw_row_data, settings.SHEETS_REQ_PROCESSED_COL
-                    )
-                ),
-                error=item_at_index_or_none(
-                    raw_row_data, settings.SHEETS_REQ_ERROR_COL
-                ),
-                **added_kwargs,
-            )
-        except Exception as exc:
-            raise SheetRowParsingException(str(exc)) from exc
-
-    @classmethod
-    def get_user_input_columns(cls, raw_row_data):
-        """
-        Returns a list of column data that were entered via user input (as opposed to
-        calculated columns that the user does not control)
-
-        Args:
-            raw_row_data (iterable of str): The raw row data
-
-        Returns:
-            list of str: The row data containing only columns with user-entered values
-        """
-        return [
-            col
-            for i, col in enumerate(raw_row_data)
-            if i not in coupon_request_sheet_spec.calculated_column_indices
-        ]
-
-    def get_product_id(self):
-        """
-        Gets the id for the most recently-created product associated with the CourseRun/Program indicated
-        by this row.
-
-        Returns:
-            int: The most recently-created product ID for the object indicated by the text ID in the spreadsheet
-        """
-        for product_object_cls in [CourseRun, Program]:
-            product_object = (
-                product_object_cls.objects.live()
-                .with_text_id(self.product_text_id)
-                .prefetch_related("products")
-                .first()
-            )
-            if product_object:
-                break
-        product = (
-            None
-            if not product_object
-            else product_object.products.order_by("-created_on").first()
-        )
-        if not product_object:
-            raise InvalidSheetProductException(
-                "Could not find a CourseRun or Program with text id '%s'"
-                % self.product_text_id
-            )
-        elif not product:
-            raise InvalidSheetProductException(
-                "No Products associated with %s" % str(product_object)
-            )
-        return product.id
-
-
-class CouponAssignmentRow:
-    """Represents a row of a coupon assignment sheet"""
-
-    def __init__(
-        self, row_index, code, assignee_email, status, status_date
-    ):  # pylint: disable=too-many-arguments
-        self.row_index = row_index
-        self.code = code
-        self.email = assignee_email
-        self.status = status
-        self.status_date = status_date
-
-    @classmethod
-    def parse_raw_data(cls, row_index, raw_row_data):
-        """
-        Parses raw row data
-
-        Args:
-            row_index (int): The row index according to the spreadsheet (not zero-based)
-            raw_row_data (list of str): The raw row data
-
-        Returns:
-            CouponAssignmentRow: The parsed data row
-
-        Raises:
-            SheetRowParsingException: Raised if the row could not be parsed
-        """
-        try:
-            return cls(
-                row_index=row_index,
-                code=raw_row_data[0],
-                assignee_email=item_at_index_or_none(raw_row_data, 1),
-                status=item_at_index_or_none(raw_row_data, 2),
-                status_date=item_at_index_or_none(raw_row_data, 3),
-            )
-        except Exception as exc:
-            raise SheetRowParsingException from exc
-
-
 def assignment_sheet_file_name(coupon_req_row):
     """
     Generates the filename for a coupon assignment Sheet
 
     Args:
-        coupon_req_row (CouponRequestRow):
+        coupon_req_row (sheets.coupon_request_api.CouponRequestRow):
 
     Returns:
         str: File name for a coupon assignment Sheet
@@ -268,179 +222,6 @@ def assignment_sheet_file_name(coupon_req_row):
             coupon_req_row.product_text_id,
         ]
     )
-
-
-class AssignmentStatusMap:
-    """
-    Manages the relationship between bulk coupon assignments, the rows in their spreadsheets, and the status of
-    their coupon assignment messages according to Mailgun
-    """
-
-    def __init__(self):
-        self._assignment_map = defaultdict(dict)
-        self._unassigned_code_map = defaultdict(int)
-        self._sheet_id_map = {}
-
-    def add_assignment_rows(self, bulk_assignment, assignment_rows):
-        """
-        Adds information about coupon assignment rows from a coupon assignment Sheet
-
-        Args:
-            bulk_assignment (BulkCouponAssignment): A BulkCouponAssignment object
-            assignment_rows (iterable of CouponAssignmentRow): Objects representing rows in an assignment Sheet
-        """
-        self._sheet_id_map[bulk_assignment.id] = bulk_assignment.assignment_sheet_id
-        for assignment_row in assignment_rows:
-            if assignment_row.email:
-                self._assignment_map[bulk_assignment.id][
-                    (assignment_row.code, assignment_row.email)
-                ] = {
-                    "row_index": assignment_row.row_index,
-                    "new_status": None,
-                    "new_status_date": None,
-                    "existing_status": assignment_row.status,
-                    "existing_status_date": parse_sheet_date_str(
-                        assignment_row.status_date
-                    ),
-                }
-            else:
-                self._unassigned_code_map[bulk_assignment.id] += 1
-
-    def add_potential_event_date(
-        self, bulk_assignment_id, code, recipient_email, event_type, event_date
-    ):  # pylint: disable=too-many-arguments
-        """
-        Fills in a status (e.g.: "delivered") and the datetime when that status was logged if the given
-        coupon assignment exists in the map, and the status is different from the previous status.
-        Does nothing if (a) the bulk assignment id isn't in the map, (b) the code and email don't match any assignment,
-        or (c) the assignment already had the given status in the spreadsheet.
-
-        Args:
-            bulk_assignment_id (int):
-            code (str): Coupon code
-            recipient_email (str):
-            event_type (str): The event type (e.g.: "delivered", "failed")
-            event_date (datetime.datetime): The datetime when the email was delivered for the given coupon assignment
-        """
-        assignment_dict = self._assignment_map.get(bulk_assignment_id, {}).get(
-            (code, recipient_email)
-        )
-        if not assignment_dict:
-            return
-        # The "enrolled" status is set by the app when a user redeems a bulk enrollment coupon
-        # and is considered the end of the bulk enrollment flow. It should not be overwritten by any
-        # other status.
-        if assignment_dict["existing_status"] == ASSIGNMENT_SHEET_ENROLLED_STATUS:
-            return
-
-        if (
-            assignment_dict["existing_status"]
-            and assignment_dict["existing_status_date"]
-            and event_type == assignment_dict["existing_status"]
-            and event_date == assignment_dict["existing_status_date"]
-        ):
-            self._assignment_map[bulk_assignment_id][(code, recipient_email)].update(
-                {"new_status": None, "new_status_date": None}
-            )
-        else:
-            self._assignment_map[bulk_assignment_id][(code, recipient_email)].update(
-                {"new_status": event_type, "new_status_date": event_date}
-            )
-
-    def get_new_status_and_date(self, bulk_assignment_id, code, recipient_email):
-        """
-        Returns the new status and status date for the coupon assignment matching the code and email
-        in the given bulk assignment
-
-        Args:
-            bulk_assignment_id (int):
-            code (str): Coupon code
-            recipient_email (str):
-
-        Returns:
-            (str or None, datetime.datetime or None): The new status paired with the date that
-                the status was logged in Mailgun (or (None, None) if the given assignment does not
-                have a new status.
-        """
-        message_data = self._assignment_map[bulk_assignment_id].get(
-            (code, recipient_email)
-        )
-        return (
-            (message_data["new_status"], message_data["new_status_date"])
-            if message_data
-            else (None, None)
-        )
-
-    def has_new_statuses(self, bulk_assignment_id):
-        """
-        Returns True if the given bulk assignment has any individual assignments with a new status
-
-        Args:
-            bulk_assignment_id (int):
-
-        Returns:
-            bool: True if the given bulk assignment has any individual assignments with a new status
-        """
-        return any(
-            message_data["new_status"] is not None
-            for _, message_data in self._assignment_map[bulk_assignment_id].items()
-        )
-
-    def get_status_date_rows(self, bulk_assignment_id):
-        """
-        Returns a row index, status, and status date for each coupon assignment with a new status in the
-        given bulk assignment
-
-        Args:
-            bulk_assignment_id (int):
-
-        Returns:
-            iterable of (int, str, datetime.datetime): An iterable of row indices (indicating the Sheet row) paired
-                with new status and the date of that status change
-        """
-        return (
-            (
-                message_data["row_index"],
-                message_data["new_status"],
-                message_data["new_status_date"],
-            )
-            for message_data in self._assignment_map[bulk_assignment_id].values()
-            if message_data["new_status"]
-        )
-
-    def get_sheet_id(self, bulk_assignment_id):
-        """
-        Returns the assignment spreadsheet id associated with the given bulk assignment
-
-        Args:
-            bulk_assignment_id (int):
-
-        Returns:
-            str: The assignment spreadsheet id
-        """
-        return self._sheet_id_map[bulk_assignment_id]
-
-    def has_unassigned_codes(self, bulk_assignment_id):
-        """
-        Returns True if any of the coupon codes in the coupon assignment Sheet have not been assigned an email
-
-        Args:
-            bulk_assignment_id (int):
-
-        Returns:
-            bool: True if any of the coupon codes in the coupon assignment Sheet have not been assigned an email
-        """
-        return self._unassigned_code_map[bulk_assignment_id] > 0
-
-    @property
-    def bulk_assignment_ids(self):
-        """
-        Returns all of the bulk assignment ids in the map
-
-        Returns:
-            iterable of int: BulkCouponAssignment ids
-        """
-        return self._assignment_map.keys()
 
 
 def get_data_rows(worksheet, include_trailing_empty=False):
@@ -469,17 +250,12 @@ def get_data_rows(worksheet, include_trailing_empty=False):
     yield from row_iter
 
 
-def get_enumerated_data_rows(
-    worksheet, limit_row_index=None, include_trailing_empty=False
-):
+def get_enumerated_data_rows(worksheet, include_trailing_empty=False):
     """
-    Yields enumerated data rows of a spreadsheet that has a header row (with an option to limit the results
-    by row index)
+    Yields enumerated data rows of a spreadsheet that has a header row
 
     Args:
         worksheet (pygsheets.worksheet.Worksheet): Worksheet object
-        limit_row_index (int or None): The row index of the specific data row that
-            should be used. If None, the iterable returned will include all rows.
         include_trailing_empty (bool): Whether to include empty trailing cells/values after last non-zero value
 
     Yields:
@@ -490,14 +266,47 @@ def get_enumerated_data_rows(
         get_data_rows(worksheet, include_trailing_empty=include_trailing_empty),
         start=GOOGLE_SHEET_FIRST_ROW + 1,
     )
-    if limit_row_index:
-        yield from (
-            (index, row)
-            for index, row in enumerated_data_rows
-            if index == limit_row_index
+    yield from enumerated_data_rows
+
+
+def get_data_rows_after_start(
+    worksheet,
+    start_row,
+    start_col,
+    end_col,
+    page_size=SHEETS_VALUE_REQUEST_PAGE_SIZE,
+    **kwargs,
+):
+    """
+    Yields the data rows of a spreadsheet starting with a given row and spanning a given column range
+    until empty rows are encountered.
+
+    Args:
+        worksheet (pygsheets.worksheet.Worksheet): Worksheet object
+        start_row (int): Zero-based index of the first row for which you want data returned
+        start_col (int): Zero-based index of the start of the column range
+        end_col (int):  Zero-based index of the end of the column range
+        page_size (int): The number of rows to fetch per individual API request
+        kwargs (dict): Option params to pass along to pygsheets.worksheet.Worksheet.get_values
+
+    Yields:
+        list of str: List of cell values in a given row
+    """
+    request_count = 0
+    values = []
+    while request_count == 0 or (values and len(values) == page_size):
+        end_row = start_row + page_size - 1
+        values = worksheet.get_values(
+            start=(start_row, start_col),
+            end=(end_row, end_col),
+            include_tailing_empty=True,
+            include_tailing_empty_rows=False,
+            returnas="matrix",
+            **kwargs,
         )
-    else:
-        yield from enumerated_data_rows
+        request_count += 1
+        yield from values
+        start_row = end_row + 1
 
 
 def spreadsheet_repr(spreadsheet=None, spreadsheet_metadata=None):
@@ -520,6 +329,20 @@ def spreadsheet_repr(spreadsheet=None, spreadsheet_metadata=None):
     if not sheet_id or not title:
         raise ValueError("Invalid spreadsheet/metadata provided")
     return "'{}', id: {}".format(title, sheet_id)
+
+
+def clean_sheet_value(value):
+    """
+    Takes a spreadsheet cell value and returns a cleaned version
+
+    Args:
+        value (str): A raw spreadsheet cell value
+
+    Returns:
+        str or None: A string with whitespace stripped, or None if the resulting value was an empty string
+    """
+    stripped = value.strip()
+    return None if stripped == "" else stripped
 
 
 def format_datetime_for_google_api(dt):
@@ -576,9 +399,41 @@ def format_datetime_for_sheet_formula(dt):
     return f"=DATE({dt.year},{dt.month},{dt.day}) + TIME({dt.hour},{dt.minute},{dt.second})"
 
 
-def parse_sheet_date_str(date_str):
+def _parse_sheet_date_str(date_str, date_format):
+    """
+    Parses a string that represents a date/datetime and returns the UTC datetime (or None)
+
+    Args:
+        date_str (str): The date/datetime string
+        date_format (str): The strptime-compatible format string that the string is expected to match
+
+    Returns:
+        datetime.datetime or None: The parsed datetime (in UTC) or None
+    """
+    if not date_str:
+        return None
+    dt = datetime.datetime.strptime(date_str, date_format).astimezone(
+        settings.SHEETS_DATE_TIMEZONE
+    )
+    return dt if settings.SHEETS_DATE_TIMEZONE == pytz.UTC else dt.astimezone(pytz.UTC)
+
+
+def parse_sheet_datetime_str(datetime_str):
     """
     Parses a string that represents a datetime and returns the UTC datetime (or None)
+
+    Args:
+        datetime_str (str): The datetime string
+
+    Returns:
+        datetime.datetime or None: The parsed datetime (in UTC) or None
+    """
+    return _parse_sheet_date_str(datetime_str, settings.SHEETS_DATE_FORMAT)
+
+
+def parse_sheet_date_only_str(date_str):
+    """
+    Parses a string that represents a date and returns the UTC datetime (or None)
 
     Args:
         date_str (str): The datetime string
@@ -586,13 +441,7 @@ def parse_sheet_date_str(date_str):
     Returns:
         datetime.datetime or None: The parsed datetime (in UTC) or None
     """
-    if not date_str:
-        return None
-
-    dt = datetime.datetime.strptime(date_str, settings.SHEETS_DATE_FORMAT).astimezone(
-        settings.SHEETS_DATE_TIMEZONE
-    )
-    return dt if settings.SHEETS_DATE_TIMEZONE == pytz.UTC else dt.astimezone(pytz.UTC)
+    return _parse_sheet_date_str(date_str, settings.SHEETS_DATE_ONLY_FORMAT)
 
 
 def google_timestamp_to_datetime(google_timestamp):
@@ -638,7 +487,9 @@ def mailgun_timestamp_to_datetime(timestamp):
     return datetime.datetime.fromtimestamp(timestamp, pytz.utc)
 
 
-def build_multi_cell_update_request_body(row_index, column_index, values):
+def build_multi_cell_update_request_body(
+    row_index, column_index, values, worksheet_id=0
+):
     """
     Builds a dict for use in the body of a Google Sheets API batch update request
 
@@ -646,6 +497,7 @@ def build_multi_cell_update_request_body(row_index, column_index, values):
         row_index (int): The index of the cell row that should be updated (starting with 0)
         column_index (int): The index of the first cell column that should be updated (starting with 0)
         values (list of dict): The updates to be performed
+        worksheet_id (int):
 
     Returns:
         dict: A single update request object for use in a Google Sheets API batch update request
@@ -653,7 +505,7 @@ def build_multi_cell_update_request_body(row_index, column_index, values):
     return {
         "updateCells": {
             "range": {
-                "sheetId": 0,
+                "sheetId": worksheet_id,
                 "startRowIndex": row_index,
                 "endRowIndex": row_index + 1,
                 "startColumnIndex": column_index,
@@ -682,7 +534,7 @@ def build_protected_range_request_body(
         num_rows (int): The number of rows that this range will span
         start_col_index (int): The zero-based index of the column of the range that will be protected
         num_cols (int): The number of columns that this range will span
-        worksheet_id (int): The worksheet id in the given spreadsheet (typically expressed as an index)
+        worksheet_id (int): The worksheet id in the given spreadsheet (the first worksheet id is always 0)
         warning_only (bool): If True, the range will be editable, but will display a warning/confirmation dialog
             before edits are accepted
         description (str or None): An optional description for the protected range

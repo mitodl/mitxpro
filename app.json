@@ -179,6 +179,10 @@
       "description": "Enable enrollment order receipts.",
       "required": false
     },
+    "ENROLLMENT_CHANGE_SHEET_ID": {
+      "description": "ID of the Google Sheet that contains the enrollment change request worksheets (refunds, transfers, etc)",
+      "required": false
+    },
     "GA_TRACKING_ID": {
       "description": "Google analytics tracking ID",
       "required": false
@@ -413,6 +417,10 @@
       "description": "RedisCloud connection url",
       "required": false
     },
+    "REFUND_REQUEST_WORKSHEET_ID": {
+      "description": "ID of the worksheet within the enrollment change request spreadsheet that contains enrollment refund requests",
+      "required": false
+    },
     "REPAIR_COURSEWARE_USERS_FREQUENCY": {
       "description": "How many seconds between repairing courseware records for faulty users",
       "required": false
@@ -443,7 +451,11 @@
       "required": false
     },
     "SHEETS_DATE_FORMAT": {
-      "description": "Python strptime format for datetime columns in the bulk coupon spreadsheets",
+      "description": "Python strptime format for datetime columns in enrollment management spreadsheets",
+      "required": false
+    },
+    "SHEETS_DATE_ONLY_FORMAT": {
+      "description": "Python strptime format for date columns (no time) in enrollment management spreadsheets",
       "required": false
     },
     "SHEETS_DATE_TIMEZONE": {
@@ -452,6 +464,10 @@
     },
     "SHEETS_MONITORING_FREQUENCY": {
       "description": "The frequency that the Drive folder should be checked for bulk coupon Sheets that need processing",
+      "required": false
+    },
+    "SHEETS_REFUND_FIRST_ROW": {
+      "description": "The first row (as it appears in the spreadsheet) of data that our scripts should consider processing in the refund request spreadsheet",
       "required": false
     },
     "SHEETS_TASK_OFFSET": {

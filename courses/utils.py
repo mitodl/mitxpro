@@ -6,6 +6,8 @@ from requests.exceptions import HTTPError
 from rest_framework.status import HTTP_404_NOT_FOUND
 from django.conf import settings
 from django.db import transaction
+
+from courses.constants import PROGRAM_TEXT_ID_PREFIX
 from courses.models import (
     CourseRunGrade,
     CourseRunCertificate,
@@ -278,3 +280,16 @@ def sync_course_runs(runs):
                 failure_count += 1
 
     return success_count, failure_count
+
+
+def is_program_text_id(item_text_id):
+    """
+    Analyzes a text id for some enrollable item and returns True if it's a program id
+
+    Args:
+        item_text_id (str): The text id for some enrollable item (program/course run)
+
+    Returns:
+        bool: True if the given id is a program id
+    """
+    return item_text_id.startswith(PROGRAM_TEXT_ID_PREFIX)
