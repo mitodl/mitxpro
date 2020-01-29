@@ -2,6 +2,9 @@
   <a class="navbar-toggler collapsed active-block" data-toggle="collapse" data-target="#subNavBar">
     <span id="subNavBarSelector" class="collapsed-header">Who Should Enroll</span>
   </a>
+  <div class="sub-nav-enroll-button-block">
+    {% include "partials/enroll_button.html" %}
+  </div>
   <div id="subNavBar" class="collapse navbar-collapse justify-content-center">
     <ul class="navbar-nav container justify-content-center">
       {% if page.outcomes %} <li class="nav-item px-2 d-flex align-items-center"><a class="nav-link text-center" href="#learningOutcomes">What You Will Learn</a></li> {% endif %}
