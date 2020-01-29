@@ -4,7 +4,7 @@
 import copy
 import json
 from decimal import Decimal
-from datetime import timedelta
+from datetime import timedelta, datetime
 from types import SimpleNamespace
 
 import pytest
@@ -19,6 +19,8 @@ from mitxpro.utils import now_in_utc
 from sheets.coupon_request_api import (
     create_coupons_for_request_row,
     CouponRequestHandler,
+    CouponRequestRow,
+    request_sheet_metadata,
 )
 from sheets.exceptions import (
     SheetRowParsingException,
@@ -30,12 +32,10 @@ from sheets.factories import CouponGenerationRequestFactory, GoogleApiAuthFactor
 from sheets.models import CouponGenerationRequest
 from sheets.utils import (
     get_enumerated_data_rows,
-    CouponRequestRow,
     ProcessedRequest,
     format_datetime_for_sheet_formula,
     FailedRequest,
     IgnoredRequest,
-    coupon_request_sheet_spec,
 )
 
 
@@ -47,7 +47,7 @@ def pygsheets_fixtures(mocker, db, coupon_req_raw_data):
     google_api_auth = GoogleApiAuthFactory.create()
     # Create some fake worksheet rows, with a header row and two rows of data
     # (the second slightly different from the first)
-    sheet_rows = [coupon_request_sheet_spec.column_headers, coupon_req_raw_data]
+    sheet_rows = [["Header", "Column", "Values"], coupon_req_raw_data]
     added_row = list(coupon_req_raw_data)
     added_row[0] = "another_purchase_order_id"
     added_row[1] = "another_coupon_id"
@@ -101,6 +101,36 @@ def test_create_coupons_for_request_row(mocker, base_data, coupon_req_row):
         amount=Decimal("1.0"),
         automatic=False,
     )
+
+
+def test_coupon_request_row_valid(settings, coupon_req_raw_data):
+    """CouponRequestRow should take a row of raw data and parse it when it's initialized"""
+    row_index = 2
+    raw_data = copy.copy(coupon_req_raw_data)
+    coupon_req_row = CouponRequestRow.parse_raw_data(row_index, raw_data)
+    assert coupon_req_row.row_index == 2
+    assert coupon_req_row.purchase_order_id == "purchase_order_id_1"
+    assert coupon_req_row.coupon_name == "mycoupon"
+    assert coupon_req_row.num_codes == 5
+    assert coupon_req_row.product_text_id == "course-v1:some-course"
+    assert coupon_req_row.company_name == "MIT"
+    assert coupon_req_row.activation == datetime(2019, 1, 1, 1, 1, 1, tzinfo=pytz.UTC)
+    assert coupon_req_row.expiration == datetime(2020, 2, 2, 2, 2, 2, tzinfo=pytz.UTC)
+    assert coupon_req_row.date_processed is None
+    # If any of the date columns at the end of the row are blank, our Sheets client returns a row
+    # with those values cut off completely from the array. Ensure that the row can be parsed without those indices.
+    truncated_raw_data = raw_data[0:5]
+    coupon_req_row = CouponRequestRow.parse_raw_data(row_index, truncated_raw_data)
+    assert coupon_req_row.activation is None
+    assert coupon_req_row.expiration is None
+    # Ensure that the "Date Processed" and "Error" columns can be parsed if they exist in the row array.
+    raw_data[request_sheet_metadata.PROCESSED_COL] = "03/03/2030 03:03:03"
+    raw_data[request_sheet_metadata.ERROR_COL] = "Error"
+    coupon_req_row = CouponRequestRow.parse_raw_data(row_index, raw_data)
+    assert coupon_req_row.date_processed == datetime(
+        2030, 3, 3, 3, 3, 3, tzinfo=pytz.UTC
+    )
+    assert coupon_req_row.error == "Error"
 
 
 def test_parse_rows_and_create_coupons(mocker, pygsheets_fixtures):
@@ -197,10 +227,10 @@ def test_parse_row_raw_data_update(mocker, pygsheets_fixtures, coupon_req_raw_da
     mocker.patch("sheets.coupon_request_api.create_coupons_for_request_row")
     raw_row_data = copy.copy(coupon_req_raw_data)
     raw_data_for_gen_request = json.dumps(
-        CouponRequestRow.get_user_input_columns(raw_row_data)
+        request_sheet_metadata.get_form_input_columns(raw_row_data)
     )
     coupon_gen_request = CouponGenerationRequestFactory.create(
-        coupon_name=raw_row_data[CouponRequestRow.COUPON_NAME_COL_INDEX],
+        coupon_name=raw_row_data[request_sheet_metadata.COUPON_NAME_COL_INDEX],
         raw_data=raw_data_for_gen_request,
     )
 
@@ -212,7 +242,7 @@ def test_parse_row_raw_data_update(mocker, pygsheets_fixtures, coupon_req_raw_da
     coupon_gen_request.refresh_from_db()
     assert coupon_gen_request.raw_data != raw_data_for_gen_request
     assert coupon_gen_request.raw_data == json.dumps(
-        CouponRequestRow.get_user_input_columns(raw_row_data)
+        request_sheet_metadata.get_form_input_columns(raw_row_data)
     )
 
 
@@ -228,7 +258,7 @@ def test_parse_row_already_processed(
     )
     now = now_in_utc()
     row_data = copy.copy(coupon_req_raw_data)
-    row_data[settings.SHEETS_REQ_PROCESSED_COL] = now.strftime(
+    row_data[request_sheet_metadata.PROCESSED_COL] = now.strftime(
         settings.SHEETS_DATE_FORMAT
     )
 
@@ -239,7 +269,7 @@ def test_parse_row_already_processed(
     assert ignored is True
     assert (
         coupon_req_row.purchase_order_id
-        == row_data[CouponRequestRow.PURCHASE_ORDER_COL_INDEX]
+        == row_data[request_sheet_metadata.PURCHASE_ORDER_COL_INDEX]
     )
     patched_create_coupons.assert_not_called()
 
@@ -255,10 +285,12 @@ def test_parse_row_unchanged_error(
         "sheets.coupon_request_api.create_coupons_for_request_row"
     )
     raw_row_data = copy.copy(coupon_req_raw_data)
-    raw_row_data[settings.SHEETS_REQ_ERROR_COL] = "Error"
+    raw_row_data[request_sheet_metadata.ERROR_COL] = "Error"
     existing_coupon_gen_request = CouponGenerationRequestFactory.create(
-        coupon_name=raw_row_data[CouponRequestRow.COUPON_NAME_COL_INDEX],
-        raw_data=json.dumps(CouponRequestRow.get_user_input_columns(raw_row_data)),
+        coupon_name=raw_row_data[request_sheet_metadata.COUPON_NAME_COL_INDEX],
+        raw_data=json.dumps(
+            request_sheet_metadata.get_form_input_columns(raw_row_data)
+        ),
     )
 
     coupon_req_handler = CouponRequestHandler()
@@ -344,7 +376,7 @@ def test_update_processed(settings, pygsheets_fixtures, coupon_req_row):
 
 def test_write_results_to_sheets(mocker, pygsheets_fixtures, coupon_req_row):
     """
-    CouponRequestHandler.write_results_to_sheets should use the pygsheets client to
+    CouponRequestHandler.create_and_update_sheets should use the pygsheets client to
     update request sheet checkboxes and create a new assignment sheet for every row
     that was successfully processed.
     """
@@ -432,9 +464,7 @@ def test_process_sheet(mocker, pygsheets_fixtures):
     coupon_req_handler = CouponRequestHandler()
     results = coupon_req_handler.process_sheet()
 
-    patched_get_rows.assert_called_once_with(
-        coupon_req_handler.coupon_request_sheet, limit_row_index=None
-    )
+    patched_get_rows.assert_called_once_with(coupon_req_handler.coupon_request_sheet)
     patched_parse_rows_and_create_coupons.assert_called_once_with(
         patched_get_rows.return_value
     )

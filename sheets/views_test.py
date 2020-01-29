@@ -113,7 +113,7 @@ def test_handle_coupon_request_sheet_update(mocker, settings):
     patched_tasks = mocker.patch("sheets.views.tasks")
     client = Client()
     client.get(
-        reverse("handle-coupon-request-sheet-update"),
+        reverse("handle-watched-sheet-update"),
         HTTP_X_GOOG_CHANNEL_ID="file-watch-channel",
     )
     patched_tasks.handle_unprocessed_coupon_requests.delay.assert_called_once()

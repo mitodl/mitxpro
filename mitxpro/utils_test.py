@@ -1,6 +1,7 @@
 """Utils tests"""
 import datetime
 from decimal import Decimal
+import operator as op
 from types import SimpleNamespace
 
 import pytest
@@ -30,6 +31,7 @@ from mitxpro.utils import (
     all_equal,
     all_unique,
     has_all_keys,
+    group_into_dict,
     request_get_with_timeout_retry,
     get_error_response_summary,
     is_json_response,
@@ -246,6 +248,37 @@ def test_has_all_keys():
     d = {"a": 1, "b": 2, "c": 3}
     assert has_all_keys(d, ["a", "c"]) is True
     assert has_all_keys(d, ["a", "z"]) is False
+
+
+def test_group_into_dict():
+    """
+    Assert that group_into_dict takes an iterable of items and returns a dictionary of those items
+    grouped by generated keys
+    """
+
+    class Car:  # pylint: disable=missing-docstring
+        def __init__(self, make, model):
+            self.make = make
+            self.model = model
+
+    cars = [
+        Car(make="Honda", model="Civic"),
+        Car(make="Honda", model="Accord"),
+        Car(make="Ford", model="F150"),
+        Car(make="Ford", model="Focus"),
+        Car(make="Jeep", model="Wrangler"),
+    ]
+    grouped_cars = group_into_dict(cars, key_fn=op.attrgetter("make"))
+    assert set(grouped_cars.keys()) == {"Honda", "Ford", "Jeep"}
+    assert set(grouped_cars["Honda"]) == set(cars[0:2])
+    assert set(grouped_cars["Ford"]) == set(cars[2:4])
+    assert grouped_cars["Jeep"] == [cars[4]]
+
+    nums = [1, 2, 3, 4, 5, 6]
+    grouped_nums = group_into_dict(nums, key_fn=lambda num: (num % 2 == 0))
+    assert grouped_nums.keys() == {True, False}
+    assert set(grouped_nums[True]) == {2, 4, 6}
+    assert set(grouped_nums[False]) == {1, 3, 5}
 
 
 @pytest.mark.parametrize(

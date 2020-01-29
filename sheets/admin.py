@@ -16,6 +16,13 @@ class CouponGenerationRequestAdmin(admin.ModelAdmin):
     list_display = ("id", "purchase_order_id", "coupon_name", "date_completed")
 
 
+class RefundRequestAdmin(admin.ModelAdmin):
+    """Admin for RefundRequest"""
+
+    model = models.RefundRequest
+    list_display = ("id", "form_response_id", "date_completed")
+
+
 class GoogleApiAuthAdmin(SingletonModelAdmin):
     """Admin for GoogleApiAuth"""
 
@@ -44,5 +51,6 @@ class GoogleFileWatchAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.CouponGenerationRequest, CouponGenerationRequestAdmin)
+admin.site.register(models.RefundRequest, RefundRequestAdmin)
 admin.site.register(models.GoogleApiAuth, GoogleApiAuthAdmin)
 admin.site.register(models.GoogleFileWatch, GoogleFileWatchAdmin)

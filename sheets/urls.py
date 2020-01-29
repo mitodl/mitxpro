@@ -15,9 +15,9 @@ urlpatterns = [
         name="complete-google-auth",
     ),
     re_path(
-        r"^api/sheets/coupon-requests/watch/",
-        views.handle_coupon_request_sheet_update,
-        name="handle-coupon-request-sheet-update",
+        r"^api/sheets/watch/",
+        views.handle_watched_sheet_update,
+        name="handle-watched-sheet-update",
     ),
 ]
 if settings.FEATURES.get("COUPON_SHEETS_ALT_PROCESSING"):

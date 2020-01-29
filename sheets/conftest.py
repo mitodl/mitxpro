@@ -7,7 +7,7 @@ import pytest
 
 from courses.factories import CourseRunFactory
 from ecommerce.factories import CompanyFactory, ProductVersionFactory
-from sheets.utils import CouponRequestRow
+from sheets.coupon_request_api import CouponRequestRow
 
 
 @pytest.fixture(autouse=True)

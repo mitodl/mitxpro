@@ -2,16 +2,17 @@
 Makes a request to receive push notifications when the coupon request Sheet is updated.
 """
 from django.core.management import BaseCommand
-from django.conf import settings
 
 from googleapiclient.errors import HttpError
 
-from sheets.api import renew_coupon_request_file_watch, request_file_watch
+from sheets.api import renew_sheet_file_watch, request_file_watch
+from sheets.constants import SHEET_TYPE_COUPON_REQUEST, SHEET_TYPE_REFUND
+from sheets.utils import CouponRequestSheetMetadata, RefundRequestSheetMetadata
 
 
 class Command(BaseCommand):
     """
-    Makes a request to receive push notifications when the coupon request Sheet is updated.
+    Makes a request to receive push notifications when a spreadsheet is updated.
     """
 
     help = __doc__
@@ -34,17 +35,28 @@ class Command(BaseCommand):
                 "file watch record."
             ),
         )
+        parser.add_argument(
+            "-s",
+            "--sheet",
+            default=SHEET_TYPE_COUPON_REQUEST,
+            choices=[SHEET_TYPE_COUPON_REQUEST, SHEET_TYPE_REFUND],
+            help="The sheet that will have a file watch configured (default: '%(default)s')",
+        )
 
     def handle(self, *args, **options):  # pylint:disable=missing-docstring
+        if options["sheet"] == SHEET_TYPE_COUPON_REQUEST:
+            sheet_metadata = CouponRequestSheetMetadata()
+        else:
+            sheet_metadata = RefundRequestSheetMetadata()
         try:
-            file_watch, created, updated = renew_coupon_request_file_watch(
-                force=options["force"]
+            file_watch, created, updated = renew_sheet_file_watch(
+                sheet_metadata, force=options["force"]
             )
         except HttpError as exc:
             self.stdout.write(
                 self.style.ERROR(
-                    "File watch request failed.\nResponse [{}]: {}".format(
-                        exc.resp["status"], exc
+                    "Request to create/renew file watch for {} failed.\nResponse [{}]: {}".format(
+                        sheet_metadata.sheet_name, exc.resp["status"], exc
                     )
                 )
             )
@@ -58,7 +70,9 @@ class Command(BaseCommand):
                 desc = "found (unexpired)"
             self.stdout.write(
                 self.style.SUCCESS(
-                    "Coupon request sheet file watch {}.\n{}".format(desc, file_watch)
+                    "{} file watch {}.\n{}".format(
+                        sheet_metadata.sheet_name, desc, file_watch
+                    )
                 )
             )
 
@@ -71,8 +85,9 @@ class Command(BaseCommand):
                 )
                 try:
                     resp_dict = request_file_watch(
-                        settings.COUPON_REQUEST_SHEET_ID,
+                        sheet_metadata.sheet_file_id,
                         file_watch.channel_id,
+                        sheet_metadata.handler_url_stub,
                         expiration=file_watch.expiration_date,
                     )
                 except HttpError as exc:

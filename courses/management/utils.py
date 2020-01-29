@@ -8,7 +8,7 @@ from courseware.exceptions import (
     EdxApiEnrollErrorException,
     UnknownEdxApiEnrollException,
 )
-from courseware.api import enroll_in_edx_course_runs, unenroll_edx_course_run
+from courseware.api import enroll_in_edx_course_runs
 from ecommerce import mail_api
 from mitxpro.utils import has_equal_properties
 
@@ -120,49 +120,6 @@ class EnrollmentChangeCommand(BaseCommand):
             )
 
         return enrollment, enrolled_obj
-
-    def deactivate_program_enrollment(self, program_enrollment, change_status):
-        """
-        Helper method to deactivate a ProgramEnrollment
-
-        Args:
-            program_enrollment (ProgramEnrollment): The program enrollment to deactivate
-            change_status (str): The change status to set on the enrollment when deactivating
-        Returns:
-            tuple of ProgramEnrollment, list(CourseRunEnrollment): The deactivated enrollments
-        """
-        program_enrollment.deactivate_and_save(change_status, no_user=True)
-        program_run_enrollments = program_enrollment.get_run_enrollments()
-        return (
-            program_enrollment,
-            list(
-                map(
-                    partial(
-                        self.deactivate_run_enrollment, change_status=change_status
-                    ),
-                    program_run_enrollments,
-                )
-            ),
-        )
-
-    def deactivate_run_enrollment(self, run_enrollment, change_status):
-        """
-        Helper method to deactivate a CourseRunEnrollment
-
-        Args:
-            run_enrollment (CourseRunEnrollment): The course run enrollment to deactivate
-            change_status (str): The change status to set on the enrollment when deactivating
-        Returns:
-            CourseRunEnrollment: The deactivated enrollment
-        """
-        run_enrollment.deactivate_and_save(change_status, no_user=True)
-        try:
-            unenroll_edx_course_run(run_enrollment)
-        except Exception as exc:  # pylint: disable=broad-except
-            self.stdout.write(self.style.ERROR(str(exc)))
-        else:
-            mail_api.send_course_run_unenrollment_email(run_enrollment)
-        return run_enrollment
 
     def create_program_enrollment(
         self, existing_enrollment, to_program=None, to_user=None

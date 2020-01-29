@@ -2,10 +2,15 @@
 
 import itertools
 from collections import namedtuple
+from functools import partial
+import logging
 
 from courses.models import CourseRunEnrollment, ProgramEnrollment
+from courseware.api import unenroll_edx_course_run
+from ecommerce import mail_api
 from mitxpro.utils import partition
 
+log = logging.getLogger(__name__)
 UserEnrollments = namedtuple(
     "UserEnrollments",
     [
@@ -67,4 +72,63 @@ def get_user_enrollments(user):
         program_runs=program_run_enrollments,
         non_program_runs=non_program_run_enrollments,
         past_non_program_runs=past_non_program_run_enrollments,
+    )
+
+
+def deactivate_run_enrollment(run_enrollment, change_status):
+    """
+    Helper method to deactivate a CourseRunEnrollment
+
+    Args:
+        run_enrollment (CourseRunEnrollment): The course run enrollment to deactivate
+        change_status (str): The change status to set on the enrollment when deactivating
+    Returns:
+        CourseRunEnrollment: The deactivated enrollment
+    """
+    run_enrollment.deactivate_and_save(change_status, no_user=True)
+    try:
+        unenroll_edx_course_run(run_enrollment)
+    except Exception:  # pylint: disable=broad-except
+        log.exception(
+            "Failed to unenroll course run '%s' for user '%s' in edX",
+            run_enrollment.run.courseware_id,
+            run_enrollment.user.email,
+        )
+    else:
+        mail_api.send_course_run_unenrollment_email(run_enrollment)
+    return run_enrollment
+
+
+def deactivate_program_enrollment(
+    program_enrollment, change_status, limit_to_order=True
+):
+    """
+    Helper method to deactivate a ProgramEnrollment
+
+    Args:
+        program_enrollment (ProgramEnrollment): The program enrollment to deactivate
+        change_status (str): The change status to set on the enrollment when deactivating
+        limit_to_order (bool): If True, only deactivate enrollments associated with the
+            same Order that the program enrollment is associated with
+
+    Returns:
+        tuple of ProgramEnrollment, list(CourseRunEnrollment): The deactivated enrollments
+    """
+    program_enrollment.deactivate_and_save(change_status, no_user=True)
+    run_enrollment_params = (
+        dict(order_id=program_enrollment.order_id)
+        if limit_to_order and program_enrollment.order_id
+        else {}
+    )
+    program_run_enrollments = program_enrollment.get_run_enrollments(
+        **run_enrollment_params
+    )
+    return (
+        program_enrollment,
+        list(
+            map(
+                partial(deactivate_run_enrollment, change_status=change_status),
+                program_run_enrollments,
+            )
+        ),
     )

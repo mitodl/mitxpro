@@ -1,6 +1,7 @@
 """Management command to change enrollment status"""
 from django.contrib.auth import get_user_model
 
+from courses.api import deactivate_program_enrollment, deactivate_run_enrollment
 from courses.management.utils import EnrollmentChangeCommand, enrollment_summaries
 from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from ecommerce.models import Order
@@ -43,13 +44,13 @@ class Command(EnrollmentChangeCommand):
         enrollment, _ = self.fetch_enrollment(user, options)
 
         if options["program"]:
-            program_enrollment, run_enrollments = self.deactivate_program_enrollment(
+            program_enrollment, run_enrollments = deactivate_program_enrollment(
                 enrollment, change_status=ENROLL_CHANGE_STATUS_REFUNDED
             )
         else:
             program_enrollment = None
             run_enrollments = [
-                self.deactivate_run_enrollment(
+                deactivate_run_enrollment(
                     enrollment, change_status=ENROLL_CHANGE_STATUS_REFUNDED
                 )
             ]

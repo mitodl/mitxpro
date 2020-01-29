@@ -31,6 +31,7 @@ from sheets.constants import (
     GOOGLE_API_FILE_WATCH_KIND,
     GOOGLE_API_NOTIFICATION_TYPE,
     DEFAULT_GOOGLE_EXPIRE_TIMEDELTA,
+    SHEETS_VALUE_REQUEST_PAGE_SIZE,
 )
 from sheets.utils import (
     format_datetime_for_google_timestamp,
@@ -345,7 +346,9 @@ def share_drive_file_with_emails(file_id, emails_to_share, credentials=None):
                 )
 
 
-def request_file_watch(file_id, channel_id, expiration=None, credentials=None):
+def request_file_watch(
+    file_id, channel_id, handler_url, expiration=None, credentials=None
+):
     """
     Sends a request to the Google API to watch for changes in a given file. If successful, this
     app will receive requests from Google when changes are made to the file.
@@ -355,6 +358,8 @@ def request_file_watch(file_id, channel_id, expiration=None, credentials=None):
         file_id (str): The id of the file in Google Drive (can be determined from the URL)
         channel_id (str): Arbitrary string to identify the file watch being set up. This will
             be included in the header of every request Google sends to the app.
+        handler_url (str): The URL stub for the xpro endpoint that should be called from Google's end when the file
+            changes.
         expiration (datetime.datetime or None): The datetime that this file watch should expire.
             Defaults to 1 hour, and cannot exceed 24 hours.
         credentials (google.oauth2.credentials.Credentials or None): Credentials to be used by the
@@ -377,10 +382,7 @@ def request_file_watch(file_id, channel_id, expiration=None, credentials=None):
             body={
                 "id": channel_id,
                 "resourceId": file_id,
-                "address": urljoin(
-                    settings.SITE_BASE_URL,
-                    reverse("handle-coupon-request-sheet-update"),
-                ),
+                "address": urljoin(settings.SITE_BASE_URL, handler_url),
                 "payload": True,
                 "kind": GOOGLE_API_FILE_WATCH_KIND,
                 "type": GOOGLE_API_NOTIFICATION_TYPE,
@@ -391,12 +393,14 @@ def request_file_watch(file_id, channel_id, expiration=None, credentials=None):
     )
 
 
-def renew_coupon_request_file_watch(force=False):
+def renew_sheet_file_watch(sheet_metadata, force=False):
     """
-    Creates or renews a file watch on the coupon request spreadsheet depending on the existence
-    of other file watches and when they expire.
+    Creates or renews a file watch on a spreadsheet depending on the existence
+    of other file watches and their expiration.
 
     Args:
+        sheet_metadata (Type(sheets.utils.WatchableSheetMetadata)): The file watch metadata for the sheet
+            that we want to create/renew the file watch for.
         force (bool): If True, make the file watch request and overwrite the GoogleFileWatch record
             even if an unexpired one exists.
 
@@ -409,12 +413,14 @@ def renew_coupon_request_file_watch(force=False):
     min_fresh_expiration_date = now + datetime.timedelta(
         minutes=settings.DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES
     )
-    new_channel_id = "{}-{}".format(
-        settings.DRIVE_WEBHOOK_CHANNEL_ID, now.strftime("%Y%m%d-%H%M%S")
+    new_channel_id = "{}-{}-{}".format(
+        settings.DRIVE_WEBHOOK_CHANNEL_ID,
+        sheet_metadata.sheet_type,
+        now.strftime("%Y%m%d-%H%M%S"),
     )
     with transaction.atomic():
         file_watch, created = GoogleFileWatch.objects.select_for_update().get_or_create(
-            file_id=settings.COUPON_REQUEST_SHEET_ID,
+            file_id=sheet_metadata.sheet_file_id,
             defaults=dict(
                 version=1,
                 channel_id=new_channel_id,
@@ -430,18 +436,23 @@ def renew_coupon_request_file_watch(force=False):
             return file_watch, False, False
         if file_watch.expiration_date < now:
             log.error(
-                "Current file watch in the database is expired. Some file changes may have failed to "
-                "trigger a push notification (%s)",
+                "Current file watch in the database for %s is expired. "
+                "Some file changes may have failed to trigger a push notification (%s)",
+                sheet_metadata.sheet_name,
                 file_watch,
             )
         expiration = now + datetime.timedelta(
             minutes=settings.DRIVE_WEBHOOK_EXPIRATION_MINUTES
         )
         resp_dict = request_file_watch(
-            settings.COUPON_REQUEST_SHEET_ID, new_channel_id, expiration=expiration
+            sheet_metadata.sheet_file_id,
+            new_channel_id,
+            sheet_metadata.handler_url_stub,
+            expiration=expiration,
         )
         log.info(
-            "File watch request for push notifications on coupon request sheet completed. Response: %s",
+            "File watch request for push notifications on %s completed. Response: %s",
+            sheet_metadata.sheet_name,
             resp_dict,
         )
         file_watch.activation_date = now
