@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.38.1
+Version 0.38.1 (Released January 30, 2020)
 --------------
 
 - Add error logging for program orders with no run selections
