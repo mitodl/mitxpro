@@ -11,6 +11,7 @@ import { compose } from "redux"
 import queryString from "query-string"
 import { pathOr } from "ramda"
 import * as Sentry from "@sentry/browser"
+import moment from "moment"
 
 import { CheckoutForm } from "../../components/forms/CheckoutForm"
 
@@ -58,31 +59,45 @@ export const calcSelectedRunIds = (
   }
 
   const selectedRunIds = {}
-  for (const course of item.courses) {
-    if (course.next_run_id) {
-      selectedRunIds[course.id] = course.next_run_id
-    }
-  }
 
-  const courseLookup = {}
-  for (const course of item.courses) {
-    for (const run of course.courseruns) {
-      courseLookup[run.id] = course.id
-    }
-  }
-
-  // Try to preselect a run if the ID was given
   if (preselectId) {
-    const courseId = courseLookup[preselectId]
-    selectedRunIds[courseId] = preselectId
+    let preselectCourseId, preselectedRuneDate
+
+    const courseLookup = {}
+    for (const course of item.courses) {
+      courseLookup[course.id] = {}
+      for (const run of course.courseruns) {
+        if (run.id === preselectId) {
+          preselectCourseId = course.id
+          preselectedRuneDate = run.start_date
+          selectedRunIds[course.id] = run.id
+        }
+        courseLookup[course.id][run.id] = run.start_date
+      }
+    }
+
+    for (const [courseId, courseRuns] of Object.entries(courseLookup)) {
+      if (courseId !== String(preselectCourseId)) {
+        for (const [runId, runDate] of Object.entries(courseRuns)) {
+          if (
+            moment(runDate)
+              .startOf("day")
+              .isSameOrAfter(moment(preselectedRuneDate).startOf("day"))
+          ) {
+            selectedRunIds[courseId] = runId
+            break
+          }
+        }
+      }
+    }
+  } else {
+    for (const course of item.courses) {
+      if (course.next_run_id) {
+        selectedRunIds[course.id] = course.next_run_id
+      }
+    }
   }
 
-  for (const runId of item.run_ids) {
-    const courseId = courseLookup[runId]
-
-    // there should only be one run selected for a course
-    selectedRunIds[courseId] = runId
-  }
   return selectedRunIds
 }
 
