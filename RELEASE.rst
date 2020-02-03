@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.38.2 (Released February 03, 2020)
+--------------
+
+- Added refund processing via Google Sheets
+
 Version 0.38.1 (Released January 30, 2020)
 --------------
 
