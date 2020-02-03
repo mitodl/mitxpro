@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.39.0
+--------------
+
+- Add CEU override for certificates
+
 Version 0.38.2 (Released February 03, 2020)
 --------------
 
