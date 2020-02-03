@@ -3,7 +3,7 @@ Page models for the CMS
 """
 # pylint: disable=too-many-lines
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from urllib.parse import urljoin
 
 import pytz
@@ -32,6 +32,8 @@ from cms.blocks import (
     LearningTechniqueBlock,
     ResourceBlock,
     UserTestimonialBlock,
+    CourseRunCertificateOverrides,
+    validate_unique_readable_ids,
 )
 from cms.constants import (
     CERTIFICATE_INDEX_SLUG,
@@ -39,6 +41,7 @@ from cms.constants import (
     PROGRAM_INDEX_SLUG,
     SIGNATORY_INDEX_SLUG,
 )
+from cms.forms import CertificatePageForm
 from cms.utils import filter_and_sort_catalog_pages
 from courses.constants import DEFAULT_COURSE_IMG_PATH
 from courses.models import CourseRunCertificate, ProgramCertificate
@@ -1430,11 +1433,21 @@ class CertificatePage(CourseProgramChildPage):
         help_text="You can choose upto 5 signatories.",
     )
 
+    overrides = StreamField(
+        [("course_run", CourseRunCertificateOverrides())],
+        blank=True,
+        help_text="Overrides for specific runs of this Course/Program",
+        validators=[validate_unique_readable_ids],
+    )
+
     content_panels = [
         FieldPanel("product_name"),
         FieldPanel("CEUs"),
+        StreamFieldPanel("overrides"),
         StreamFieldPanel("signatories"),
     ]
+
+    base_form_class = CertificatePageForm
 
     class Meta:
         verbose_name = "Certificate"
@@ -1485,20 +1498,36 @@ class CertificatePage(CourseProgramChildPage):
         if request.is_preview:
             preview_context = {
                 "learner_name": "Anthony M. Stark",
-                "start_date": self.parent.product.first_unexpired_run.start_date,
-                "end_date": self.parent.product.first_unexpired_run.end_date,
+                "start_date": self.parent.product.first_unexpired_run.start_date
+                if self.parent.product.first_unexpired_run
+                else datetime.now(),
+                "end_date": self.parent.product.first_unexpired_run.end_date
+                if self.parent.product.first_unexpired_run
+                else datetime.now() + timedelta(days=45),
+                "CEUs": self.CEUs,
             }
         elif self.certificate:
             # Verify that the certificate in fact is for this same course
             if self.parent.product.id != self.certificate.get_courseware_object_id():
                 raise Http404()
             start_date, end_date = self.certificate.start_end_dates
+            CEUs = self.CEUs
+
+            for override in self.overrides:  # pylint: disable=not-an-iterable
+                if (
+                    override.value.get("readable_id")
+                    == self.certificate.get_courseware_object_readable_id()
+                ):
+                    CEUs = override.value.get("CEUs")
+                    break
+
             context = {
                 "uuid": self.certificate.uuid,
                 "certificate_user": self.certificate.user,
                 "learner_name": self.certificate.user.get_full_name(),
                 "start_date": start_date,
                 "end_date": end_date,
+                "CEUs": CEUs,
             }
         else:
             raise Http404()

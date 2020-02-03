@@ -769,6 +769,10 @@ class BaseCertificate(models.Model):
         """Gets the id of the certificate's program/run"""
         raise NotImplementedError
 
+    def get_courseware_object_readable_id(self):
+        """Get the readable id of the certificate's run/program"""
+        return NotImplementedError
+
 
 class CourseRunCertificate(TimestampedModel, BaseCertificate):
     """
@@ -789,6 +793,9 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
     def get_courseware_object_id(self):
         """Gets the course id instead of the course run id"""
         return self.course_run.course_id
+
+    def get_courseware_object_readable_id(self):
+        return self.course_run.courseware_id
 
     @property
     def link(self):
@@ -829,6 +836,9 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
     def get_courseware_object_id(self):
         """Gets the program id"""
         return self.program_id
+
+    def get_courseware_object_readable_id(self):
+        return self.program.readable_id
 
     @property
     def link(self):
