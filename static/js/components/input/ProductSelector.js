@@ -255,9 +255,7 @@ export default class ProductSelector extends React.Component<Props, State> {
 
         <div className="row product-row">
           <div className="col-12">
-            <span className="description">
-              Select available {productTypeText}:
-            </span>
+            <span className="description">Select {productTypeText}:</span>
             <Select
               className="select"
               components={{ IndicatorSeparator: null }}
