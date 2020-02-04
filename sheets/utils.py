@@ -169,7 +169,7 @@ class CouponAssignSheetMetadata(
         self.num_columns = len(self.column_headers)
 
         self.LAST_COL_LETTER = get_column_letter(self.num_columns - 1)
-        self.STATUS_COL = (
+        self.STATUS_COL = next(
             i for i, header in enumerate(self.column_headers) if header == "Status"
         )
 
