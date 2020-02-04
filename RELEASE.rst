@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.39.0
+--------------
+
+- allow email change
+- Fixed bug with column definition for refund request sheet
+- Fixed unenrollment email start date text
+- Add CEU override for certificates
+- Sticky Enroll Button Changes
+- initial changes
+
 Version 0.38.2 (Released February 03, 2020)
 --------------
 
