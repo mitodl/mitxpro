@@ -1,7 +1,8 @@
 // sass-lint:disable mixins-before-declarations
 .sub-nav-bar {
   background: $gray-bg;
-  display: block;
+  display: flex;
+  justify-content: center;
   box-shadow: 0 0 13px rgba(0, 0, 0, 0.5);
 
   .navbar-nav > li > a {
@@ -12,9 +13,18 @@
     }
   }
 
+  &.navbar-expand-md {
+    .navbar-collapse {
+      @include media-breakpoint-up(md) {
+        flex-grow: initial;
+      }
+    }
+  }
+
   .navbar-toggler {
     border: unset;
     color: $blue !important;
+    width: calc(100% - 160px);
 
     span.fa-chevron-down {
       display: none;
@@ -32,6 +42,118 @@
 
     span.fa-chevron-up {
       display: none;
+    }
+  }
+
+  .sub-nav-enroll-button-block {
+    position: relative;
+    @include media-breakpoint-up(md) {
+      order: 2;
+    }
+
+    .enroll-button {
+      width: 140px;
+      display: inline-flex;
+      margin: 0;
+      border-radius: 5px;
+      background-color: $primary;
+      color: white !important;
+      padding: 15px 25px;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      margin-left: 20px;
+
+      &.enrolled {
+        border: 4px solid $primary;
+        background-color: white;
+        color: $primary !important;
+      }
+
+      &:hover {
+        // underline is at different levels since we centered the text and checkmark vertically, so it looks strange
+        text-decoration: none;
+      }
+    }
+
+    .enroll-dropdown {
+      .dropdown-toggle::after {
+        display: none;
+      }
+
+      .login-popup {
+        max-width: 350px;
+        margin-left: 20px;
+        margin-right: 20px;
+        padding: 20px;
+        font-weight: 600;
+        font-size: 20px;
+        min-width: 320px;
+
+        .close-btn {
+          position: absolute;
+          top: 0;
+          right: 0;
+          padding: 5px;
+          margin: 20px 7px 0 0;
+          font-size: 72px;
+          font-weight: 300;
+          background-color: white !important;
+          color: black;
+          min-width: unset;
+          height: unset;
+          cursor: pointer;
+        }
+
+        h4 {
+          font-weight: 700;
+          font-size: 22px;
+        }
+
+        .popup-buttons {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          margin-top: 20px;
+
+          .link-button {
+            border: 2px solid $light-blue;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 24px;
+
+            &.sign-in-link {
+              color: white;
+              background-color: $light-blue;
+            }
+
+            &.create-account-link {
+              color: black;
+            }
+          }
+        }
+      }
+
+      .triangle {
+        width: 15px;
+        height: 15px;
+        position: absolute;
+        top: -7px;
+        background: white;
+        transform: rotate(45deg);
+      }
+
+      .dropdown-menu {
+        .triangle {
+          right: 24px;
+        }
+      }
+    }
+
+    .action-button {
+      font-size: x-large;
+      font-weight: 400;
     }
   }
 }
