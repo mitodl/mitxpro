@@ -25,10 +25,15 @@ def generate_course_certificates():
     Task to generate certificates for courses.
     """
     now = now_in_utc()
-    course_runs = CourseRun.objects.filter(
-        end_date__lt=now - timedelta(hours=settings.CERTIFICATE_CREATION_DELAY_IN_HOURS)
-    ).exclude(
-        id__in=CourseRunCertificate.objects.values_list("course_run__id", flat=True)
+    course_runs = (
+        CourseRun.objects.live()
+        .filter(
+            end_date__lt=now
+            - timedelta(hours=settings.CERTIFICATE_CREATION_DELAY_IN_HOURS)
+        )
+        .exclude(
+            id__in=CourseRunCertificate.objects.values_list("course_run__id", flat=True)
+        )
     )
 
     for run in course_runs:
