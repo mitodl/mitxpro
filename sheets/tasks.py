@@ -3,10 +3,12 @@ from googleapiclient.errors import HttpError
 
 from mitxpro.celery import app
 from mitxpro.utils import now_in_utc
-from sheets import api
-import sheets.coupon_assign_api
-import sheets.coupon_request_api
-import sheets.refund_request_api
+from sheets import (
+    api as sheets_api,
+    coupon_assign_api,
+    coupon_request_api,
+    refund_request_api,
+)
 from sheets.constants import ASSIGNMENT_SHEET_ENROLLED_STATUS
 from sheets.utils import request_sheet_metadata, refund_sheet_metadata
 
@@ -18,7 +20,7 @@ def handle_unprocessed_coupon_requests():
     coupons, updates the request sheet to indicate that it was processed, and creates
     the necessary coupon assignment sheets.
     """
-    coupon_request_handler = sheets.coupon_request_api.CouponRequestHandler()
+    coupon_request_handler = coupon_request_api.CouponRequestHandler()
     results = coupon_request_handler.process_sheet()
     return results
 
@@ -30,7 +32,7 @@ def handle_unprocessed_refund_requests():
     reverses/refunds enrollments if appropriate, updates the spreadsheet to reflect any changes
     made, and returns a summary of those changes.
     """
-    refund_request_handler = sheets.enroll_refund_api.RefundRequestHandler()
+    refund_request_handler = refund_request_api.RefundRequestHandler()
     results = refund_request_handler.process_sheet()
     return results
 
@@ -40,7 +42,7 @@ def handle_incomplete_coupon_assignments():
     """
     Processes all as-yet-incomplete coupon assignment spreadsheets
     """
-    coupon_assignment_handler = sheets.coupon_assign_api.CouponAssignmentHandler()
+    coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler()
     processed_spreadsheet_metadata = (
         coupon_assignment_handler.process_assignment_spreadsheets()
     )
@@ -53,7 +55,7 @@ def update_incomplete_assignment_delivery_statuses():
     Fetches all BulkCouponAssignments that have assignments but have not yet finished delivery, then updates the
     delivery status for each depending on what has been sent.
     """
-    coupon_assignment_handler = sheets.coupon_assign_api.CouponAssignmentHandler()
+    coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler()
     updated_assignments = (
         coupon_assignment_handler.update_incomplete_assignment_message_statuses()
     )
@@ -79,7 +81,7 @@ def set_assignment_rows_to_enrolled(sheet_update_map):
             number of updated assignments in that sheet.
     """
     now = now_in_utc()
-    coupon_assignment_handler = sheets.coupon_assign_api.CouponAssignmentHandler()
+    coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler()
     result_summary = {}
     for sheet_id, assignment_code_email_pairs in sheet_update_map.items():
         # Convert the list of lists into a set of tuples, and set the strings to lowercase so
@@ -124,7 +126,9 @@ def renew_file_watches():
     sheet_metadata_objects = (request_sheet_metadata, refund_sheet_metadata)
     results = []
     for sheet_metadata in sheet_metadata_objects:
-        file_watch, created, _ = api.renew_sheet_file_watch(sheet_metadata, force=True)
+        file_watch, created, _ = sheets_api.renew_sheet_file_watch(
+            sheet_metadata, force=True
+        )
         results.append(
             {
                 "type": sheet_metadata.sheet_type,
