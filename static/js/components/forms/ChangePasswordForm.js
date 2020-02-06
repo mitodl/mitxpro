@@ -18,8 +18,7 @@ type Props = {
 export type ChangePasswordFormValues = {
   oldPassword: string,
   newPassword: string,
-  confirmPassword: string,
-  email: string
+  confirmPassword: string
 }
 
 const ChangePasswordForm = ({ onSubmit, user }: Props) => (
@@ -28,24 +27,9 @@ const ChangePasswordForm = ({ onSubmit, user }: Props) => (
     validationSchema={changePasswordFormValidation}
     initialValues={{
       email:           user.email,
-      user_email:      user.email,
       oldPassword:     "",
       newPassword:     "",
       confirmPassword: ""
-    }}
-    validate={async values => {
-      try {
-        await changePasswordFormValidation.validate(values)
-        return {}
-      } catch (error) {
-        const FIRST_ERROR = 0
-        return error.inner.reduce((errors, error) => {
-          return {
-            ...errors,
-            [error.path]: error.errors[FIRST_ERROR]
-          }
-        }, {})
-      }
     }}
     render={({ isSubmitting }) => (
       <Form>
@@ -55,21 +39,21 @@ const ChangePasswordForm = ({ onSubmit, user }: Props) => (
             <Field
               name="email"
               className="form-control"
+              readOnly={true}
               component={EmailInput}
             />
-            <ErrorMessage name="email" component={FormError} />
+            <ErrorMessage name="oldPassword" component={FormError} />
           </div>
-          <div className="form-group hidden">
-            <label htmlFor="user_email">User Email</label>
-            <Field
-              name="user_email"
-              className="form-control"
-              component={EmailInput}
-              value={user.email}
-            />
-            <ErrorMessage name="user_email" component={FormError} />
+          <div>
+            If you want to change your email address, Please contact us at{" "}
+            <a
+              href="https://xpro.zendesk.com/hc/en-us/requests/new"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Customer Support
+            </a>
           </div>
-          <div className="light-gray-text">Name that will appear on emails</div>
         </section>
 
         <section className="password-section">

@@ -2,20 +2,11 @@
 import pycountry
 from oauth2_provider.contrib.rest_framework import IsAuthenticatedOrTokenHasScope
 from rest_framework import mixins, viewsets
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from mitxpro.permissions import UserIsOwnerPermission
-from mitxpro.serializers import EmptySerializer
-from mitxpro.utils import now_in_utc
-from users.models import User, ChangeEmailRequest
-from users.serializers import (
-    PublicUserSerializer,
-    UserSerializer,
-    CountrySerializer,
-    ChangeEmailRequestCreateSerializer,
-    ChangeEmailRequestUpdateSerializer,
-)
+from users.models import User
+from users.serializers import PublicUserSerializer, UserSerializer, CountrySerializer
 
 
 class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -40,38 +31,6 @@ class CurrentUserRetrieveUpdateViewSet(
         """Returns the current request user"""
         # NOTE: this may be a logged in or anonymous user
         return self.request.user
-
-
-class ChangeEmailRequestViewSet(
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-):
-    """Viewset for creating and updating email change requests"""
-
-    lookup_field = "code"
-
-    def get_permissions(self):
-        permission_classes = []
-        if self.action == "create":
-            permission_classes = [IsAuthenticated]
-
-        return [permission() for permission in permission_classes]
-
-    def get_queryset(self):
-        """Rerturn a queryset of valid pending requests"""
-        return ChangeEmailRequest.objects.filter(
-            expires_on__gt=now_in_utc(), confirmed=False
-        )
-
-    def get_serializer_class(self):
-        if self.action == "create":
-            return ChangeEmailRequestCreateSerializer
-        elif self.action == "partial_update":
-            return ChangeEmailRequestUpdateSerializer
-        else:
-            return EmptySerializer
 
 
 class CountriesStatesViewSet(viewsets.ViewSet):
