@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load render_bundle wagtailcore_tags %}
 
+{% block title %}{{ site_name }} | {{ page.title }}{% endblock %}
+
 {% block headercontent %}
 <div id="header"></div>
 {% render_bundle 'header' %}
