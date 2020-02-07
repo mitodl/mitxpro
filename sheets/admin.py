@@ -23,6 +23,13 @@ class RefundRequestAdmin(admin.ModelAdmin):
     list_display = ("id", "form_response_id", "date_completed")
 
 
+class DeferralRequestAdmin(admin.ModelAdmin):
+    """Admin for DeferralRequest"""
+
+    model = models.DeferralRequest
+    list_display = ("id", "form_response_id", "date_completed")
+
+
 class GoogleApiAuthAdmin(SingletonModelAdmin):
     """Admin for GoogleApiAuth"""
 
@@ -52,5 +59,6 @@ class GoogleFileWatchAdmin(admin.ModelAdmin):
 
 admin.site.register(models.CouponGenerationRequest, CouponGenerationRequestAdmin)
 admin.site.register(models.RefundRequest, RefundRequestAdmin)
+admin.site.register(models.DeferralRequest, DeferralRequestAdmin)
 admin.site.register(models.GoogleApiAuth, GoogleApiAuthAdmin)
 admin.site.register(models.GoogleFileWatch, GoogleFileWatchAdmin)

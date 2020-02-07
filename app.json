@@ -131,6 +131,10 @@
       "description": "The URL to the cybersource WSDL",
       "required": false
     },
+    "DEFERRAL_REQUEST_WORKSHEET_ID": {
+      "description": "ID of the worksheet within the enrollment change request spreadsheet that contains enrollment deferral requests",
+      "required": false
+    },
     "DJANGO_LOG_LEVEL": {
       "description": "The log level for django",
       "required": false
@@ -460,6 +464,10 @@
     },
     "SHEETS_DATE_TIMEZONE": {
       "description": "The name of the timezone that should be assumed for date/time values in spreadsheets. Choose from a value in the TZ database (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).",
+      "required": false
+    },
+    "SHEETS_DEFERRAL_FIRST_ROW": {
+      "description": "The first row (as it appears in the spreadsheet) of data that our scripts should consider processing in the deferral request spreadsheet",
       "required": false
     },
     "SHEETS_MONITORING_FREQUENCY": {

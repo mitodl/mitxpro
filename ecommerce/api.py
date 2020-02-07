@@ -7,7 +7,6 @@ import hashlib
 import hmac
 import logging
 from collections import defaultdict
-from traceback import format_exc
 from urllib.parse import quote_plus, urljoin
 import uuid
 
@@ -17,24 +16,13 @@ from django.db import transaction
 from django.urls import reverse
 from rest_framework.exceptions import ValidationError
 
+from courses.api import create_run_enrollments, create_program_enrollments
 from courses.constants import (
     CONTENT_TYPE_MODEL_PROGRAM,
     CONTENT_TYPE_MODEL_COURSE,
     CONTENT_TYPE_MODEL_COURSERUN,
 )
-from courses.models import (
-    Course,
-    CourseRun,
-    CourseRunEnrollment,
-    ProgramEnrollment,
-    Program,
-)
-from courseware.api import enroll_in_edx_course_runs
-from courseware.exceptions import (
-    EdxApiEnrollErrorException,
-    UnknownEdxApiEnrollException,
-)
-from ecommerce import mail_api
+from courses.models import Course, CourseRun, CourseRunEnrollment, Program
 from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
 from ecommerce.exceptions import EcommerceException
 from ecommerce.models import (
@@ -59,15 +47,13 @@ from ecommerce.models import (
     Receipt,
 )
 from ecommerce.mail_api import send_ecommerce_order_receipt
-from ecommerce.utils import send_support_email
 import sheets.tasks
 from hubspot.task_helpers import sync_hubspot_deal
-from mitxpro.utils import now_in_utc
+from mitxpro.utils import now_in_utc, first_or_none
 
 log = logging.getLogger(__name__)
 
 ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
 
 
 # pylint: disable=too-many-lines
@@ -544,17 +530,11 @@ def enroll_user_in_order_items(order):
             [program.readable_id for program in programs],
         )
 
-    try:
-        enroll_in_edx_course_runs(order.purchaser, runs)
-        edx_request_success = True
-    except (EdxApiEnrollErrorException, UnknownEdxApiEnrollException):
-        log.exception(
-            "Order enrollment failure for order id: %s (user: %s, runs in order: %s)",
-            order.id,
-            order.purchaser.email,
-            str([run.id for run in runs]),
+    successful_run_enrollments = []
+    if runs:
+        successful_run_enrollments, _ = create_run_enrollments(
+            order.purchaser, runs, order=order, company=company
         )
-        edx_request_success = False
 
     voucher = (
         order.purchaser.vouchers.filter(
@@ -573,68 +553,21 @@ def enroll_user_in_order_items(order):
         and voucher.enrollment is None
     ):
         voucher_target = voucher.product.content_object
-
-    for run in runs:
-        try:
-            enrollment, created = CourseRunEnrollment.all_objects.get_or_create(
-                user=order.purchaser,
-                run=run,
-                order=order,
-                defaults=dict(company=company, edx_enrolled=edx_request_success),
-            )
-            if not created and not enrollment.active:
-                enrollment.reactivate_and_save()
-        except:  # pylint: disable=bare-except
-            send_support_email(
-                ENROLL_ERROR_EMAIL_SUBJECT,
-                format_enrollment_message(order, run, format_exc()),
-            )
-            raise
-        if voucher_target == run:
-            voucher.enrollment = enrollment
-            voucher.save()
-        if enrollment.edx_enrolled:
-            mail_api.send_course_run_enrollment_email(enrollment)
-
-    for program in programs:
-        try:
-            enrollment, created = ProgramEnrollment.all_objects.get_or_create(
-                user=order.purchaser,
-                program=program,
-                order=order,
-                defaults=dict(company=company),
-            )
-            if not created and not enrollment.active:
-                enrollment.reactivate_and_save()
-        except:  # pylint: disable=bare-except
-            send_support_email(
-                ENROLL_ERROR_EMAIL_SUBJECT,
-                format_enrollment_message(order, program, format_exc()),
-            )
-            raise
-
-
-def format_enrollment_message(order, obj, details):
-    """
-    Return a formatted error message for a failed enrollment
-
-    Args:
-        order (Order): the order with a failed enrollment
-        obj (Program or CourseRun): the object that failed enrollment
-        details (str): Details of the error (typically a stack trace)
-
-    Returns:
-        str: The formatted error message
-    """
-    return "{name}({email}): Order #{order_id}, {error_obj} #{obj_id} ({obj_title})\n\n{details}".format(
-        name=order.purchaser.username,
-        email=order.purchaser.email,
-        order_id=order.id,
-        error_obj=("Run" if isinstance(obj, CourseRun) else "Program"),
-        obj_id=obj.id,
-        obj_title=obj.title,
-        details=details,
+    voucher_enrollment = first_or_none(
+        (
+            enrollment
+            for enrollment in successful_run_enrollments
+            if enrollment.run == voucher_target
+        )
     )
+    if voucher_enrollment is not None:
+        voucher.enrollment = voucher_enrollment
+        voucher.save()
+
+    if programs:
+        create_program_enrollments(
+            order.purchaser, programs, order=order, company=company
+        )
 
 
 def get_company_affiliation(order):

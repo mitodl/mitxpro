@@ -4,11 +4,19 @@ import itertools
 from collections import namedtuple
 from functools import partial
 import logging
+from traceback import format_exc
 
-from courses.models import CourseRunEnrollment, ProgramEnrollment
-from courseware.api import unenroll_edx_course_run
+from django.core.exceptions import ValidationError
+
+from courses.constants import ENROLL_CHANGE_STATUS_DEFERRED
+from courses.models import CourseRunEnrollment, ProgramEnrollment, CourseRun
+from courseware.api import unenroll_edx_course_run, enroll_in_edx_course_runs
+from courseware.exceptions import (
+    UnknownEdxApiEnrollException,
+    EdxApiEnrollErrorException,
+)
 from ecommerce import mail_api
-from mitxpro.utils import partition
+from mitxpro.utils import partition, first_or_none
 
 log = logging.getLogger(__name__)
 UserEnrollments = namedtuple(
@@ -75,6 +83,100 @@ def get_user_enrollments(user):
     )
 
 
+def create_run_enrollments(user, runs, order=None, company=None):
+    """
+    Creates local records of a user's enrollment in course runs, and attempts to enroll them
+    in edX via API
+
+    Args:
+        user (User): The user to enroll
+        runs (iterable of CourseRun): The course runs to enroll in
+        order (ecommerce.models.Order or None): The order associated with these enrollments
+        company (ecommerce.models.Company or None): The company on whose behalf these enrollments
+            are being created
+
+    Returns:
+        (list of CourseRunEnrollment, bool): A list of enrollment objects that were successfully
+            created, paired with a boolean indicating whether or not edX enrollment was successful
+            for all of the given course runs
+    """
+    try:
+        enroll_in_edx_course_runs(user, runs)
+    except (EdxApiEnrollErrorException, UnknownEdxApiEnrollException):
+        log.exception(
+            "edX enrollment failure for user: %s, runs: %s (order: %s)",
+            user,
+            [run.courseware_id for run in runs],
+            order.id if order else None,
+        )
+        edx_request_success = False
+    else:
+        edx_request_success = True
+
+    successful_enrollments = []
+    for run in runs:
+        try:
+            enrollment, created = CourseRunEnrollment.all_objects.get_or_create(
+                user=user,
+                run=run,
+                order=order,
+                defaults=dict(company=company, edx_enrolled=edx_request_success),
+            )
+            if not created and not enrollment.active:
+                enrollment.edx_enrolled = edx_request_success
+                enrollment.reactivate_and_save()
+        except:  # pylint: disable=bare-except
+            mail_api.send_enrollment_failure_message(order, run, details=format_exc())
+            log.exception(
+                "Failed to create/update enrollment record (user: %s, run: %s, order: %s)",
+                user,
+                run.courseware_id,
+                order.id if order else None,
+            )
+        else:
+            successful_enrollments.append(enrollment)
+            if enrollment.edx_enrolled:
+                mail_api.send_course_run_enrollment_email(enrollment)
+    return successful_enrollments, edx_request_success
+
+
+def create_program_enrollments(user, programs, order=None, company=None):
+    """
+    Creates local records of a user's enrollment in programs
+
+    Args:
+        user (User): The user to enroll
+        programs (iterable of Program): The course runs to enroll in
+        order (ecommerce.models.Order or None): The order associated with these enrollments
+        company (ecommerce.models.Company or None): The company on whose behalf these enrollments
+            are being created
+
+    Returns:
+        list of ProgramEnrollment: A list of enrollment objects that were successfully created
+    """
+    successful_enrollments = []
+    for program in programs:
+        try:
+            enrollment, created = ProgramEnrollment.all_objects.get_or_create(
+                user=user, program=program, order=order, defaults=dict(company=company)
+            )
+            if not created and not enrollment.active:
+                enrollment.reactivate_and_save()
+        except:  # pylint: disable=bare-except
+            mail_api.send_enrollment_failure_message(
+                order, program, details=format_exc()
+            )
+            log.exception(
+                "Failed to create/update enrollment record (user: %s, program: %s, order: %s)",
+                user,
+                program.readable_id,
+                order.id if order else None,
+            )
+        else:
+            successful_enrollments.append(enrollment)
+    return successful_enrollments
+
+
 def deactivate_run_enrollment(run_enrollment, change_status):
     """
     Helper method to deactivate a CourseRunEnrollment
@@ -82,10 +184,10 @@ def deactivate_run_enrollment(run_enrollment, change_status):
     Args:
         run_enrollment (CourseRunEnrollment): The course run enrollment to deactivate
         change_status (str): The change status to set on the enrollment when deactivating
+
     Returns:
         CourseRunEnrollment: The deactivated enrollment
     """
-    run_enrollment.deactivate_and_save(change_status, no_user=True)
     try:
         unenroll_edx_course_run(run_enrollment)
     except Exception:  # pylint: disable=broad-except
@@ -94,8 +196,13 @@ def deactivate_run_enrollment(run_enrollment, change_status):
             run_enrollment.run.courseware_id,
             run_enrollment.user.email,
         )
+        edx_unenrolled = False
     else:
+        edx_unenrolled = True
         mail_api.send_course_run_unenrollment_email(run_enrollment)
+    if edx_unenrolled:
+        run_enrollment.edx_enrolled = False
+    run_enrollment.deactivate_and_save(change_status, no_user=True)
     return run_enrollment
 
 
@@ -132,3 +239,49 @@ def deactivate_program_enrollment(
             )
         ),
     )
+
+
+def defer_enrollment(user, from_courseware_id, to_courseware_id, force=False):
+    """
+    Deactivates a user's existing enrollment in one course run and enrolls the user in another.
+
+    Args:
+        user (User): The enrolled user
+        from_courseware_id (str): The courseware_id value of the currently enrolled CourseRun
+        to_courseware_id (str): The courseware_id value of the desired CourseRun
+        force (bool): If True, the deferral will be completed even if the current enrollment is inactive
+            or the desired enrollment is in a different course
+
+    Returns:
+        (CourseRunEnrollment, CourseRunEnrollment): The deactivated enrollment paired with the
+            new enrollment that was the target of the deferral
+    """
+    from_enrollment = CourseRunEnrollment.all_objects.get(
+        user=user, run__courseware_id=from_courseware_id
+    )
+    if not force and not from_enrollment.active:
+        raise ValidationError(
+            "Cannot defer from inactive enrollment (id: {}, run: {}, user: {}). "
+            "Set force=True to defer anyway.".format(
+                from_enrollment.id, from_enrollment.run.courseware_id, user.email
+            )
+        )
+    to_run = CourseRun.objects.get(courseware_id=to_courseware_id)
+    if from_enrollment.run == to_run:
+        raise ValidationError(
+            "Cannot defer to the same course run (run: {})".format(to_run.courseware_id)
+        )
+    elif not force and from_enrollment.run.course != to_run.course:
+        raise ValidationError(
+            "Cannot defer to a course run of a different course ('{}' -> '{}'). "
+            "Set force=True to defer anyway.".format(
+                from_enrollment.run.course.title, to_run.course.title
+            )
+        )
+    to_enrollments, _ = create_run_enrollments(
+        user, [to_run], order=from_enrollment.order, company=from_enrollment.company
+    )
+    from_enrollment = deactivate_run_enrollment(
+        from_enrollment, ENROLL_CHANGE_STATUS_DEFERRED
+    )
+    return from_enrollment, first_or_none(to_enrollments)

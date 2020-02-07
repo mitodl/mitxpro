@@ -8,7 +8,11 @@ import factory
 from pytz import UTC
 
 from b2b_ecommerce.factories import B2BOrderFactory
-from courses.factories import CourseRunEnrollmentFactory, CourseRunFactory
+from courses.factories import (
+    CourseRunEnrollmentFactory,
+    CourseRunFactory,
+    ProgramFactory,
+)
 from ecommerce.api import get_readable_id
 from ecommerce.factories import (
     CouponPaymentVersionFactory,
@@ -17,12 +21,16 @@ from ecommerce.factories import (
     CompanyFactory,
     LineFactory,
     ReceiptFactory,
+    ProductVersionFactory,
+    ProductFactory,
 )
 from ecommerce.mail_api import (
     send_b2b_receipt_email,
     send_bulk_enroll_emails,
     send_course_run_enrollment_email,
     send_ecommerce_order_receipt,
+    send_enrollment_failure_message,
+    ENROLL_ERROR_EMAIL_SUBJECT,
 )
 from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG
 from ecommerce.models import Order
@@ -271,3 +279,32 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
         [("test@example.com", patched_mail_api.context_for_user.return_value)],
         EMAIL_PRODUCT_ORDER_RECEIPT,
     )
+
+
+@pytest.mark.parametrize("is_program", [True, False])
+def test_send_enrollment_failure_message(mocker, is_program):
+    """Test that send_enrollment_failure_message sends a message with proper formatting"""
+    patched_django_mail = mocker.patch("ecommerce.mail_api.mail")
+    product_object = (
+        ProgramFactory.create() if is_program else CourseRunFactory.create()
+    )
+    product_version = ProductVersionFactory.create(
+        product=ProductFactory.create(content_object=product_object)
+    )
+    order = LineFactory.create(product_version=product_version).order
+    details = "TestException on line 21"
+    expected_message = "{name}({email}): Order #{order_id}, {error_obj} #{obj_id} ({obj_title})\n\n{details}".format(
+        name=order.purchaser.username,
+        email=order.purchaser.email,
+        order_id=order.id,
+        error_obj=("Program" if is_program else "Run"),
+        obj_id=product_object.id,
+        obj_title=product_object.title,
+        details=details,
+    )
+
+    send_enrollment_failure_message(order, product_object, details)
+    patched_django_mail.send_mail.assert_called_once()
+    send_mail_args = patched_django_mail.send_mail.call_args[0]
+    assert send_mail_args[0] == ENROLL_ERROR_EMAIL_SUBJECT
+    assert send_mail_args[1] == expected_message

@@ -23,9 +23,13 @@ def enrollment_summary(enrollment):
         str: A string representation of an enrollment
     """
     if isinstance(enrollment, ProgramEnrollment):
-        return "<ProgramEnrollment for {}>".format(enrollment.program.text_id)
+        return "<ProgramEnrollment: id={}, program={}>".format(
+            enrollment.id, enrollment.program.text_id
+        )
     else:
-        return "<CourseRunEnrollment for {}>".format(enrollment.run.text_id)
+        return "<CourseRunEnrollment: id={}, run={}>".format(
+            enrollment.id, enrollment.run.text_id
+        )
 
 
 def enrollment_summaries(enrollments):
