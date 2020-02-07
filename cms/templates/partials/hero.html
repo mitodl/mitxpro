@@ -41,7 +41,6 @@
           {% include "partials/enroll_button.html" %}
         </div>
       </div>
-      </div>
       <div class="col-lg-5">
         {% if page.video_url %}
           {% embed page.video_url as youtube_video %}
@@ -51,7 +50,8 @@
               <video class="promo-video" id="promo-video" data-source="{{ page.video_url }}" controls></video>
             {% endif %}
           <div class="video-caption">{{ page.video_title|safe }}</div>
-        {% endif %}
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
