@@ -1,6 +1,24 @@
 Release Notes
 =============
 
+Version 0.39.0
+--------------
+
+- make account settings page to a private route
+- Fix video on catalog page is wrapping to a new line.
+- Pass readable product id to checkout page in URL
+- Revert "allow email change"
+- Fixed vararg positioning
+- Added title for resource pages
+- added live check
+- Fixed incorrect sheets module reference in tasks
+- allow email change
+- Fixed bug with column definition for refund request sheet
+- Fixed unenrollment email start date text
+- Add CEU override for certificates
+- Sticky Enroll Button Changes
+- initial changes
+
 Version 0.38.2 (Released February 03, 2020)
 --------------
 
