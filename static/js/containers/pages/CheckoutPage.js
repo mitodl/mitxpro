@@ -111,7 +111,7 @@ export class CheckoutPage extends React.Component<Props, State> {
     } = this.props
     const params = queryString.parse(search)
     return {
-      productId:   parseInt(params.product),
+      productId:   params.product,
       preselectId: parseInt(params.preselect),
       couponCode:  params.code
     }
@@ -249,7 +249,7 @@ export class CheckoutPage extends React.Component<Props, State> {
   }
 
   updateProduct = async (
-    productId: number,
+    productId: number | string,
     runId: number,
     setFieldError: SetFieldError
   ) => {

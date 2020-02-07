@@ -21,7 +21,7 @@ import type {
 
 export type SetFieldError = (fieldName: string, fieldValue: any) => void
 export type UpdateProduct = (
-  productId: number,
+  productId: number | string,
   runId: number,
   setFieldError: SetFieldError
 ) => Promise<void>

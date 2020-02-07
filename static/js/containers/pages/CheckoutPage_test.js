@@ -42,7 +42,7 @@ describe("CheckoutPage", () => {
     it(`updates the basket with a product id from the query parameter${
       hasError ? ", but an error is returned" : ""
     }`, async () => {
-      const productId = 4567
+      const productId = "4567"
       if (hasError) {
         helper.handleRequestStub.withArgs("/api/basket/", "PATCH").returns({
           status: 400,

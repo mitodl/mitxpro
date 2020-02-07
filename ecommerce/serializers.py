@@ -1,7 +1,9 @@
 """ ecommerce serializers """
 from datetime import datetime
-
+import logging
 import pytz
+
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import transaction, models as dj_models
 from django.templatetags.static import static
@@ -22,10 +24,13 @@ from ecommerce.api import (
     get_or_create_data_consents,
     get_product_version_price_with_discount,
 )
+from ecommerce.api import get_product_from_querystring_id
 from ecommerce.constants import ORDERED_VERSIONS_QSET_ATTR, CYBERSOURCE_CARD_TYPES
 from mitxpro.serializers import WriteableSerializerMethodField
 from mitxpro.utils import first_or_none
 from users.serializers import ExtendedLegalAddressSerializer
+
+log = logging.getLogger(__name__)
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -367,7 +372,16 @@ class BasketSerializer(serializers.ModelSerializer):
             item = items[0]
             product_id = item.get("product_id")
             run_ids = item.get("run_ids")
-            product = models.Product.objects.get(id=product_id)
+
+            try:
+                product = get_product_from_querystring_id(product_id)
+            except (ObjectDoesNotExist, MultipleObjectsReturned) as exc:
+                if isinstance(exc, MultipleObjectsReturned):
+                    log.error(
+                        "Multiple Products found with identical ids: %s", product_id
+                    )
+                raise ValidationError(f"Invalid product id {product_id}") from exc
+
             previous_product = models.Product.objects.filter(
                 basketitem__basket=basket
             ).first()
@@ -375,7 +389,7 @@ class BasketSerializer(serializers.ModelSerializer):
             if (
                 run_ids is None
                 and previous_product is not None
-                and product_id == previous_product.id
+                and product.id == previous_product.id
             ):
                 # User is updating basket item to the same item as before
                 run_ids = list(
@@ -519,13 +533,15 @@ class BasketSerializer(serializers.ModelSerializer):
 
             if product_id is None:
                 raise ValidationError("Invalid request")
-            if not models.ProductVersion.objects.filter(
-                product__id=product_id
-            ).exists():
-                raise ValidationError(f"Invalid product id {product_id}")
-            product = models.Product.all_objects.filter(id=product_id).first()
-            if not product.is_active:
-                raise ValidationError(f"Product id {product_id} is not active")
+
+            try:
+                get_product_from_querystring_id(product_id)
+            except (ObjectDoesNotExist, MultipleObjectsReturned) as exc:
+                if isinstance(exc, MultipleObjectsReturned):
+                    log.error(
+                        "Multiple Products found with identical ids: %s", product_id
+                    )
+                raise ValidationError(f"Invalid product id {product_id}") from exc
 
         return {"items": items}
 

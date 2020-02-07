@@ -434,9 +434,34 @@ def test_patch_basket_new_user(basket_and_coupons, user, user_drf_client):
     assert Basket.objects.filter(user=user).exists() is True
 
 
-def test_patch_basket_new_item(basket_client, basket_and_coupons, mock_context):
+def test_patch_basket_new_item_with_product_id(
+    basket_client, basket_and_coupons, mock_context
+):
     """Test that a user can add an item to their basket"""
     data = {"items": [{"product_id": basket_and_coupons.product_version.product.id}]}
+    basket_item = BasketItem.objects.all().first()
+    assert str(basket_item) == "BasketItem of product {} (qty: {})".format(
+        str(basket_item.product), basket_item.quantity
+    )
+    BasketItem.objects.all().delete()  # clear the basket first
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json() == render_json(
+        BasketSerializer(instance=basket_and_coupons.basket, context=mock_context)
+    )
+
+
+def test_patch_basket_new_item_with_text_id(
+    basket_client, basket_and_coupons, mock_context
+):
+    """Test that a user can add an item to their basket using the text id of the course run/program"""
+    data = {
+        "items": [
+            {
+                "product_id": basket_and_coupons.product_version.product.content_object.text_id
+            }
+        ]
+    }
     basket_item = BasketItem.objects.all().first()
     assert str(basket_item) == "BasketItem of product {} (qty: {})".format(
         str(basket_item.product), basket_item.quantity
@@ -683,7 +708,7 @@ def test_patch_basket_update_active_inactive_product(basket_client, basket_and_c
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
     assert (
-        "Product id {product_id} is not active".format(product_id=product.id)
+        "Invalid product id {product_id}".format(product_id=product.id)
         in resp_data["errors"]["items"]
     )
 
@@ -691,6 +716,20 @@ def test_patch_basket_update_active_inactive_product(basket_client, basket_and_c
     product.save()
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
+
+
+def test_patch_basket_update_inactive_product(basket_client, basket_and_coupons):
+    """Test that an inactive product id is rejected when updating the basket"""
+    product = ProductVersionFactory.create(product__is_active=False).product
+    text_id = product.content_object.text_id
+    data = {"items": [{"product_id": text_id}]}
+    resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    resp_data = resp.json()
+    assert (
+        "Invalid product id {product_id}".format(product_id=text_id)
+        in resp_data["errors"]["items"]
+    )
 
 
 @pytest.mark.parametrize("section", ["items", "coupons"])
