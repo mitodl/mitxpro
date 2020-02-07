@@ -108,7 +108,7 @@ export class App extends React.Component<Props, void> {
             path={urljoin(match.url, String(routes.ecommerceBulk))}
             component={EcommerceBulkPages}
           />
-          <Route
+          <PrivateRoute
             path={urljoin(match.url, String(routes.accountSettings))}
             component={AccountSettingsPage}
           />
