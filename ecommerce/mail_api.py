@@ -3,6 +3,7 @@ import logging
 from urllib.parse import urlencode, urljoin
 
 from django.conf import settings
+from django.core import mail
 from django.urls import reverse
 import pycountry
 from courses.models import CourseRun
@@ -19,6 +20,7 @@ from ecommerce.utils import make_checkout_url
 from mitxpro.utils import format_price
 
 log = logging.getLogger()
+ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
 
 
 def get_bulk_enroll_message_data(bulk_assignment_id, recipient, product_coupon):
@@ -258,3 +260,46 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
 
     except:  # pylint: disable=bare-except
         log.exception("Error sending order receipt email.")
+
+
+def send_support_email(subject, message):
+    """
+    Send an email to support.
+
+    Args:
+        subject (str): The email subject.
+        message (str): The email message.
+    """
+    try:
+        with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
+            mail.send_mail(
+                subject,
+                message,
+                settings.ADMIN_EMAIL,
+                [settings.EMAIL_SUPPORT],
+                connection=connection,
+            )
+    except:  # pylint: disable=bare-except
+        log.exception("Exception sending email to admins")
+
+
+def send_enrollment_failure_message(order, obj, details):
+    """
+    Args:
+        order (Order): the order with a failed enrollment
+        obj (Program or CourseRun): the object that failed enrollment
+        details (str): Details of the error (typically a stack trace)
+
+    Returns:
+        str: The formatted error message
+    """
+    message = "{name}({email}): Order #{order_id}, {error_obj} #{obj_id} ({obj_title})\n\n{details}".format(
+        name=order.purchaser.username,
+        email=order.purchaser.email,
+        order_id=order.id,
+        error_obj=("Run" if isinstance(obj, CourseRun) else "Program"),
+        obj_id=obj.id,
+        obj_title=obj.title,
+        details=details,
+    )
+    send_support_email(ENROLL_ERROR_EMAIL_SUBJECT, message)

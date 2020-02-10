@@ -19,12 +19,6 @@ class Command(BaseCommand):
         parser.add_argument(
             "-r", "--row", type=int, help="Row number in the refund request Sheet"
         )
-        parser.add_argument(
-            "-f",
-            "--force",
-            action="store_true",
-            help="Process refund request row even if the completed date column is non-empty",
-        )
 
     def handle(self, *args, **options):  # pylint:disable=missing-docstring
         refund_request_handler = RefundRequestHandler()

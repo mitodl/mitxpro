@@ -2,13 +2,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth import get_user_model
 
-from courses.models import CourseRun, CourseRunEnrollment
-from courseware.api import enroll_in_edx_course_runs
-from courseware.exceptions import (
-    EdxApiEnrollErrorException,
-    UnknownEdxApiEnrollException,
-)
-from ecommerce import mail_api
+from courses.api import create_run_enrollments
+from courses.models import CourseRun
 from ecommerce.api import best_coupon_for_product
 from ecommerce.models import Coupon, Product
 from users.api import fetch_user
@@ -60,16 +55,6 @@ class Command(BaseCommand):
                 )
             )
 
-        user_enrollment = CourseRunEnrollment.objects.filter(
-            user=user, run=run, active=True, change_status=None
-        ).first()
-        if user_enrollment:
-            raise CommandError(
-                "User={} is already enrolled in courseware_id={}".format(
-                    options["user"], options["run"]
-                )
-            )
-
         coupon = Coupon.objects.filter(coupon_code=options["code"])
         if not coupon:
             raise CommandError(
@@ -87,36 +72,16 @@ class Command(BaseCommand):
                 }
             )
 
-        try:
-            enroll_in_edx_course_runs(user, [run])
-            edx_request_success = True
-        except (EdxApiEnrollErrorException, UnknownEdxApiEnrollException):
-            self.stdout.write(
-                self.style.WARNING(
-                    "Failed to enroll in edx course {}".format(options["run"])
-                )
-            )
-            edx_request_success = False
-
-        enrollment, created = CourseRunEnrollment.objects.get_or_create(
-            user=user,
-            run=run,
-            order=None,
-            defaults=dict(edx_enrolled=edx_request_success),
+        successful_enrollments, edx_request_success = create_run_enrollments(
+            user, [run]
         )
-        if not created:
-            raise CommandError(
-                "Failed to enroll in MIT xPRO course {}".format(options["run"])
-            )
-        if not enrollment.active:
-            enrollment.active = True
-            enrollment.save()
-
-        if enrollment.edx_enrolled:
-            mail_api.send_course_run_enrollment_email(enrollment)
+        if not successful_enrollments:
+            raise CommandError("Failed to create the enrollment record")
 
         self.stdout.write(
             self.style.SUCCESS(
-                "Enrollment created for user {} in {}".format(user, options["run"])
+                "Enrollment created for user {} in {} (edX enrollment success: {})".format(
+                    user, options["run"], edx_request_success
+                )
             )
         )

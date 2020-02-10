@@ -3,7 +3,6 @@ import logging
 from urllib.parse import urljoin, urlencode
 
 from django.conf import settings
-from django.core import mail
 from django.urls import reverse
 
 from ecommerce.exceptions import ParseException
@@ -59,27 +58,6 @@ def get_order_id_by_reference_number(*, reference_number, prefix):
         raise ParseException("Unable to parse order number")
 
     return order_id
-
-
-def send_support_email(subject, message):
-    """
-    Send an email to support.
-
-    Args:
-        subject (str): The email subject.
-        message (str): The email message.
-    """
-    try:
-        with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
-            mail.send_mail(
-                subject,
-                message,
-                settings.ADMIN_EMAIL,
-                [settings.EMAIL_SUPPORT],
-                connection=connection,
-            )
-    except:  # pylint: disable=bare-except
-        log.exception("Exception sending email to admins")
 
 
 def make_checkout_url(*, product_id=None, code=None):

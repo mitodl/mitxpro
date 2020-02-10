@@ -33,15 +33,31 @@ class CouponGenerationRequest(TimestampedModel):
         )
 
 
-class RefundRequest(TimestampedModel):
-    """Model that represents a request to refund an enrollment"""
+class EnrollmentChangeRequestModel(TimestampedModel):
+    """Model that represents a request to change an enrollment"""
 
     form_response_id = models.IntegerField(db_index=True, unique=True, null=False)
     date_completed = models.DateTimeField(null=True, blank=True)
     raw_data = models.CharField(max_length=300, null=True, blank=True)
 
+    class Meta:
+        abstract = True
+
+
+class RefundRequest(EnrollmentChangeRequestModel):
+    """Model that represents a request to refund an enrollment"""
+
     def __str__(self):
         return "RefundRequest: id={}, form_response_id={}, completed={}".format(
+            self.id, self.form_response_id, self.date_completed is not None
+        )
+
+
+class DeferralRequest(EnrollmentChangeRequestModel):
+    """Model that represents a request to defer an enrollment"""
+
+    def __str__(self):
+        return "DeferralRequest: id={}, form_response_id={}, completed={}".format(
             self.id, self.form_response_id, self.date_completed is not None
         )
 

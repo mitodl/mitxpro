@@ -14,18 +14,12 @@ import factory
 from rest_framework.exceptions import ValidationError
 import pytest
 
-from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from courses.models import CourseRunEnrollment, ProgramEnrollment
 from courses.factories import (
     CourseFactory,
     ProgramFactory,
     CourseRunFactory,
     CourseRunEnrollmentFactory,
-    ProgramEnrollmentFactory,
-)
-from courseware.exceptions import (
-    EdxApiEnrollErrorException,
-    UnknownEdxApiEnrollException,
 )
 from ecommerce.api import (
     create_coupons,
@@ -49,8 +43,6 @@ from ecommerce.api import (
     complete_order,
     enroll_user_in_order_items,
     fetch_and_serialize_unused_coupons,
-    ENROLL_ERROR_EMAIL_SUBJECT,
-    format_enrollment_message,
 )
 from ecommerce.factories import (
     BasketFactory,
@@ -84,7 +76,6 @@ from ecommerce.models import (
 )
 from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.utils import now_in_utc
-from mitxpro.test_utils import MockHttpError
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
 
@@ -943,7 +934,7 @@ def test_enroll_user_in_order_items(mocker, user, has_redemption):
     Test that enroll_user_in_order_items creates objects that represent a user's enrollment
     in course runs and programs
     """
-    patched_enroll = mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
+    patched_enroll = mocker.patch("courses.api.enroll_in_edx_course_runs")
     patched_send_email = mocker.patch(
         "ecommerce.mail_api.send_course_run_enrollment_email"
     )
@@ -994,13 +985,9 @@ def test_enroll_user_in_order_items_with_voucher(mocker, user):
     """
     Test that enroll_user_in_order_items attaches the enrollment to a voucher if a suitable one exists
     """
-    patched_enroll = mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
     order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
     basket = BasketFactory.create(user=user)
     run_selection = CourseRunSelectionFactory.create(basket=basket)
-    assert str(run_selection) == "CourseRunSelection for {} and {}".format(
-        str(run_selection.basket), str(run_selection.run)
-    )
     product = ProductFactory.create(content_object=run_selection.run)
     LineFactory(order=order, product_version__product=product)
     voucher = VoucherFactory(
@@ -1008,120 +995,21 @@ def test_enroll_user_in_order_items_with_voucher(mocker, user):
         product=product,
         coupon=CouponEligibilityFactory.create(product=product).coupon,
     )
+    enrollments = CourseRunEnrollmentFactory.create_batch(
+        2,
+        user=user,
+        run=factory.Iterator([CourseRunFactory.create(), run_selection.run]),
+    )
     CouponRedemptionFactory.create(coupon_version__coupon=voucher.coupon)
-
-    enroll_user_in_order_items(order)
-    assert patched_enroll.call_count == 1
-
-    created_course_run_enrollments = CourseRunEnrollment.objects.order_by("pk").all()
-    assert created_course_run_enrollments.count() == 1
-    assert (
-        Voucher.objects.get(id=voucher.id).enrollment
-        == created_course_run_enrollments.first()
-    )
-
-
-def test_enroll_user_in_order_items_reactivate(mocker, user):
-    """
-    Test that enroll_user_in_order_items attaches the enrollment to a voucher if a suitable one exists
-    """
-    mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
-    order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
-    basket = BasketFactory.create(user=user)
-    run_selections = CourseRunSelectionFactory.create_batch(2, basket=basket)
-    program = ProgramFactory.create()
-    LineFactory.create_batch(
-        3,
-        order=order,
-        product_version__product__content_object=factory.Iterator(
-            [selection.run for selection in run_selections] + [program]
-        ),
-    )
-    # Create inactive enrollments that should be set to active after this method is executed
-    course_run_enrollment = CourseRunEnrollmentFactory.create(
-        active=False,
-        change_status=ENROLL_CHANGE_STATUS_REFUNDED,
-        user=user,
-        run=run_selections[0].run,
-        order=order,
-    )
-    program_enrollment = ProgramEnrollmentFactory(
-        active=False,
-        change_status=ENROLL_CHANGE_STATUS_REFUNDED,
-        user=user,
-        program=program,
-        order=order,
+    patched_create_run_enrollments = mocker.patch(
+        "ecommerce.api.create_run_enrollments",
+        autospec=True,
+        return_value=(enrollments, True),
     )
 
     enroll_user_in_order_items(order)
-    course_run_enrollment.refresh_from_db()
-    program_enrollment.refresh_from_db()
-    assert course_run_enrollment.active is True
-    assert program_enrollment.active is True
-
-
-@pytest.mark.parametrize(
-    "exception_cls,inner_exception",
-    [
-        [EdxApiEnrollErrorException, MockHttpError()],
-        [UnknownEdxApiEnrollException, Exception()],
-    ],
-)
-def test_enroll_user_in_order_items_api_fail(
-    mocker, user, exception_cls, inner_exception
-):
-    """
-    Test that enroll_user_in_order_items logs a message and still creates local enrollment records
-    when the edX API request fails
-    """
-    course_run = CourseRunFactory.build()
-    patched_enroll_in_runs = mocker.patch(
-        "ecommerce.api.enroll_in_edx_course_runs",
-        side_effect=exception_cls(user, course_run, inner_exception),
-    )
-    patched_log_exception = mocker.patch("ecommerce.api.log.exception")
-    order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
-    basket = BasketFactory.create(user=user)
-    CourseRunSelectionFactory.create_batch(2, basket=basket)
-
-    enroll_user_in_order_items(order)
-    assert (
-        CourseRunEnrollment.objects.filter(user=user, edx_enrolled=False).count() == 2
-    )
-    patched_enroll_in_runs.assert_called_once()
-    patched_log_exception.assert_called_once()
-
-
-@pytest.mark.parametrize("enroll_type", ["CourseRun", "Program"])
-def test_enroll_user_in_order_exception(mocker, user, enroll_type):
-    """
-    Test that enroll_user_in_order_items sends an email to support if an enrollment fails
-    """
-    patched_send_support_email = mocker.patch("ecommerce.api.send_support_email")
-    mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
-    order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
-    basket = BasketFactory.create(user=user)
-    run_selections = CourseRunSelectionFactory.create_batch(2, basket=basket)
-    program = ProgramFactory.create()
-    LineFactory.create_batch(
-        3,
-        order=order,
-        product_version__product__content_object=factory.Iterator(
-            [selection.run for selection in run_selections] + [program]
-        ),
-    )
-    mocker.patch(
-        f"ecommerce.api.{enroll_type}Enrollment.all_objects.get_or_create",
-        side_effect=Exception(),
-    )
-
-    with pytest.raises(Exception):
-        enroll_user_in_order_items(order)
-
-    patched_send_support_email.assert_called_once()
-    assert patched_send_support_email.call_args[0][0] == ENROLL_ERROR_EMAIL_SUBJECT
-    for item in (user.username, user.email, f"Order #{order.id}"):
-        assert item in patched_send_support_email.call_args[0][1]
+    patched_create_run_enrollments.assert_called_once()
+    assert Voucher.objects.get(id=voucher.id).enrollment == enrollments[1]
 
 
 def test_enroll_user_program_no_runs(mocker, user):
@@ -1130,7 +1018,6 @@ def test_enroll_user_program_no_runs(mocker, user):
     without any course run selections.
     """
     patched_log = mocker.patch("ecommerce.api.log")
-    mocker.patch("ecommerce.api.enroll_in_edx_course_runs")
     order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
     BasketFactory.create(user=user)
     program = ProgramFactory.create()
@@ -1203,30 +1090,6 @@ def test_fetch_and_serialize_unused_coupons(user):
             "start_date": expected_product_coupon.product.start_date,
         }
     ]
-
-
-@pytest.mark.parametrize("is_program", [True, False])
-def test_format_enrollment_message(is_program):
-    """Test that format_enrollment_message formats a message correctly"""
-    product_object = (
-        ProgramFactory.create() if is_program else CourseRunFactory.create()
-    )
-    product_version = ProductVersionFactory.create(
-        product=ProductFactory.create(content_object=product_object)
-    )
-    order = LineFactory.create(product_version=product_version).order
-    details = "TestException on line 21"
-    assert format_enrollment_message(order, product_object, details) == (
-        "{name}({email}): Order #{order_id}, {error_obj} #{obj_id} ({obj_title})\n\n{details}".format(
-            name=order.purchaser.username,
-            email=order.purchaser.email,
-            order_id=order.id,
-            error_obj=("Program" if is_program else "Run"),
-            obj_id=product_object.id,
-            obj_title=product_object.title,
-            details=details,
-        )
-    )
 
 
 @pytest.mark.parametrize("use_defaults", [True, False])

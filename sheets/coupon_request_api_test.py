@@ -103,7 +103,7 @@ def test_create_coupons_for_request_row(mocker, base_data, coupon_req_row):
     )
 
 
-def test_coupon_request_row_valid(settings, coupon_req_raw_data):
+def test_coupon_request_row_valid(coupon_req_raw_data):
     """CouponRequestRow should take a row of raw data and parse it when it's initialized"""
     row_index = 2
     raw_data = copy.copy(coupon_req_raw_data)
@@ -274,9 +274,7 @@ def test_parse_row_already_processed(
     patched_create_coupons.assert_not_called()
 
 
-def test_parse_row_unchanged_error(
-    mocker, settings, pygsheets_fixtures, coupon_req_raw_data
-):
+def test_parse_row_unchanged_error(mocker, pygsheets_fixtures, coupon_req_raw_data):
     """
     CouponRequestHandler.parse_row_and_create_coupons should return ignored=True and skip coupon creation
     if a request row has an error and the row data is unchanged from our data in the database.

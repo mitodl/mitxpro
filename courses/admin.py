@@ -44,7 +44,14 @@ class CourseRunAdmin(admin.ModelAdmin):
 
     model = CourseRun
     search_fields = ["title", "courseware_id"]
-    list_display = ("id", "title", "courseware_id")
+    list_display = (
+        "id",
+        "title",
+        "courseware_id",
+        "start_date",
+        "end_date",
+        "enrollment_start",
+    )
     list_filter = ["live", "course"]
 
 

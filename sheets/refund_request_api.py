@@ -1,10 +1,7 @@
 """Enrollment refund API"""
-import json
-import operator as op
 import logging
 
 from django.conf import settings
-from django.db import transaction
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -13,22 +10,19 @@ from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from courses.models import CourseRunEnrollment, ProgramEnrollment
 from courses.utils import is_program_text_id
 from ecommerce.models import Order
-from mitxpro.utils import group_into_dict, now_in_utc
-from sheets.api import get_authorized_pygsheets_client
+from mitxpro.utils import now_in_utc
 from sheets.constants import (
     REFUND_SHEET_ORDER_TYPE_PAID,
     REFUND_SHEET_ORDER_TYPE_FULL_COUPON,
-    REFUND_SHEET_PROCESSOR_NAME,
     GOOGLE_API_TRUE_VAL,
 )
+from sheets.enrollment_change_api import EnrollmentChangeRequestHandler
 from sheets.exceptions import SheetRowParsingException
 from sheets.models import RefundRequest
 from sheets.utils import (
     ResultType,
     RowResult,
     clean_sheet_value,
-    get_data_rows_after_start,
-    format_datetime_for_sheet_formula,
     parse_sheet_date_only_str,
     refund_sheet_metadata,
 )
@@ -105,11 +99,9 @@ class RefundRequestRow:  # pylint: disable=too-many-instance-attributes
                 finance_email=raw_row_data[8],
                 finance_approve_date=parse_sheet_date_only_str(raw_row_data[9]),
                 finance_notes=raw_row_data[10],
-                refund_processor=raw_row_data[
-                    refund_sheet_metadata.REFUND_PROCESSOR_COL
-                ],
+                refund_processor=raw_row_data[refund_sheet_metadata.PROCESSOR_COL],
                 refund_complete_date=parse_sheet_date_only_str(
-                    raw_row_data[refund_sheet_metadata.REFUND_COMPLETED_DATE_COL]
+                    raw_row_data[refund_sheet_metadata.COMPLETED_DATE_COL]
                 ),
                 errors=raw_row_data[refund_sheet_metadata.ERROR_COL],
                 skip_row=(
@@ -121,111 +113,16 @@ class RefundRequestRow:  # pylint: disable=too-many-instance-attributes
             raise SheetRowParsingException(str(exc)) from exc
 
 
-class RefundRequestHandler:
+class RefundRequestHandler(EnrollmentChangeRequestHandler):
     """Manages the processing of refund requests from a spreadsheet"""
 
     def __init__(self):
-        self.pygsheets_client = get_authorized_pygsheets_client()
-        spreadsheet = self.pygsheets_client.open_by_key(
-            settings.ENROLLMENT_CHANGE_SHEET_ID
+        super().__init__(
+            worksheet_id=settings.REFUND_REQUEST_WORKSHEET_ID,
+            start_row=settings.SHEETS_REFUND_FIRST_ROW,
+            sheet_metadata=refund_sheet_metadata,
+            request_model_cls=RefundRequest,
         )
-        self.refund_request_sheet = spreadsheet.worksheet(
-            "id", value=settings.REFUND_REQUEST_WORKSHEET_ID
-        )
-
-    def get_non_legacy_rows(self):
-        """
-        Fetches raw data rows in the refund request sheet, excluding "legacy" rows.
-        In other words, just the rows that have been created since we started automatically processing
-        refund requests from the spreadsheet.
-
-        Returns:
-            iterable of (int, iterable of (str)): Enumerated raw data rows in the refund request sheet,
-                excluding "legacy" rows
-        """
-        return enumerate(
-            get_data_rows_after_start(
-                self.refund_request_sheet,
-                start_row=settings.SHEETS_REFUND_FIRST_ROW,
-                start_col=1,
-                end_col=refund_sheet_metadata.num_columns,
-            ),
-            start=settings.SHEETS_REFUND_FIRST_ROW,
-        )
-
-    def update_row_completed_dates(self, row_results):
-        """
-        For all successfully-processed rows, programatically sets the completion date column and
-        blanks the error column.
-
-        Args:
-            row_results (iterable of RowResult): Objects representing the results of processing a row
-        """
-        for row_result in row_results:
-            self.refund_request_sheet.update_values(
-                crange="{processor_col}{row_index}:{error_col}{row_index}".format(
-                    processor_col=refund_sheet_metadata.REFUND_PROCESSOR_COL_LETTER,
-                    error_col=refund_sheet_metadata.ERROR_COL_LETTER,
-                    row_index=row_result.row_index,
-                ),
-                values=[
-                    [
-                        REFUND_SHEET_PROCESSOR_NAME,
-                        format_datetime_for_sheet_formula(
-                            row_result.row_db_record.date_completed.astimezone(
-                                settings.SHEETS_DATE_TIMEZONE
-                            )
-                        ),
-                        "",
-                    ]
-                ],
-            )
-
-    def update_row_errors(self, failed_row_results):
-        """
-        For all rows that could not be processed, sets the error column value to an error message.
-
-        Args:
-            failed_row_results (iterable of RowResult): Objects representing the results of processing a row
-        """
-        for row_result in failed_row_results:
-            self.refund_request_sheet.update_value(
-                "{}{}".format(
-                    refund_sheet_metadata.ERROR_COL_LETTER, row_result.row_index
-                ),
-                row_result.message,
-            )
-
-    @staticmethod
-    def get_or_create_request(row_data):
-        """
-        Ensures that an object exists in the database that represents the given refund request, and
-        that it reflects the correct state based on the data in the spreadsheet row.
-
-        Args:
-            row_data (list of str): Raw data from a row in the spreadsheet
-
-        Returns:
-            (RefundRequest, bool, bool): A tuple containing an object representing the refund request,
-                a flag that indicates whether or not it was newly created, and a flag that indicates
-                whether or not it was updated.
-        """
-        form_response_id = int(
-            row_data[refund_sheet_metadata.FORM_RESPONSE_ID_COL].strip()
-        )
-        user_input_json = json.dumps(
-            refund_sheet_metadata.get_form_input_columns(row_data)
-        )
-        with transaction.atomic():
-            refund_request, created = RefundRequest.objects.select_for_update().get_or_create(
-                form_response_id=form_response_id,
-                defaults=dict(raw_data=user_input_json),
-            )
-            raw_data_changed = refund_request.raw_data != user_input_json
-            if raw_data_changed:
-                refund_request.raw_data = user_input_json
-                refund_request.save()
-        return refund_request, created, raw_data_changed
 
     @staticmethod
     def get_order_objects(refund_req_row):
@@ -328,9 +225,6 @@ class RefundRequestHandler:
                 result_type=ResultType.FAILED,
                 message="Parsing failure: {}".format(str(exc)),
             )
-        if refund_req_row.skip_row:
-            return
-
         is_unchanged_error_row = (
             refund_req_row.errors is not None
             and not request_created
@@ -392,95 +286,3 @@ class RefundRequestHandler:
             result_type=ResultType.PROCESSED,
             message=None,
         )
-
-    def update_sheet_from_results(self, row_results):
-        """
-        Helper method that updates the relevant spreadsheet cells based on the row results, logs any
-        necessary messages, and returns a summary of the changes made
-
-        Args:
-            row_results (iterable of RowResult): Objects representing the results of processing rows
-
-        Returns:
-            dict: Row results grouped into a dict with the result types as keys
-        """
-        row_result_dict = group_into_dict(
-            row_results, key_fn=op.attrgetter("result_type")
-        )
-        processed_row_results = row_result_dict.get(ResultType.PROCESSED, [])
-        if processed_row_results:
-            self.update_row_completed_dates(processed_row_results)
-        failed_row_results = row_result_dict.get(ResultType.FAILED, [])
-        if failed_row_results:
-            self.update_row_errors(failed_row_results)
-        out_of_sync_row_results = row_result_dict.get(ResultType.OUT_OF_SYNC, [])
-        if out_of_sync_row_results:
-            log.warning(
-                "Rows found without a completed date, but local records indicate that they were completed: %s",
-                [row_result.row_index for row_result in out_of_sync_row_results],
-            )
-            self.update_row_completed_dates(out_of_sync_row_results)
-        ignored_row_results = row_result_dict.get(ResultType.IGNORED, [])
-        if ignored_row_results:
-            log.warning(
-                "Ignored request rows in the enrollment refund sheet: %s",
-                [row_result.row_index for row_result in ignored_row_results],
-            )
-        return row_result_dict
-
-    def process_sheet(self, limit_row_index=None):
-        """
-        Ensures that all non-legacy rows in the spreadsheet are correctly represented in the database,
-        reverses/refunds enrollments if appropriate, updates the spreadsheet to reflect any changes
-        made, and returns a summary of those changes.
-
-        Args:
-            limit_row_index (int or None): The row index of the specific coupon request Sheet row that
-                should be processed. If None, this function will attempt to process all unprocessed rows
-                in the Sheet.
-
-        Returns:
-            dict: A summary of the changes made while processing the refund request sheet
-        """
-        if limit_row_index is None:
-            enumerated_data_rows = self.get_non_legacy_rows()
-        else:
-            enumerated_data_rows = [
-                (limit_row_index, self.refund_request_sheet.get_row(limit_row_index))
-            ]
-        completed_form_response_ids = set(
-            RefundRequest.objects.exclude(date_completed=None).values_list(
-                "form_response_id", flat=True
-            )
-        )
-        row_results = []
-        for row_index, row_data in enumerated_data_rows:
-            form_response_id = int(
-                row_data[refund_sheet_metadata.FORM_RESPONSE_ID_COL].strip()
-            )
-            completed_date_str = row_data[
-                refund_sheet_metadata.REFUND_COMPLETED_DATE_COL
-            ].strip()
-            if form_response_id in completed_form_response_ids and completed_date_str:
-                continue
-            row_result = None
-            try:
-                row_result = self.process_row(row_index, row_data)
-            except Exception as exc:  # pylint: disable=broad-except
-                row_result = RowResult(
-                    row_index=row_index,
-                    row_db_record=None,
-                    result_type=ResultType.FAILED,
-                    message="Unknown error: {}".format(str(exc)),
-                )
-            finally:
-                if row_result:
-                    row_results.append(row_result)
-
-        if not row_results:
-            return {}
-        row_result_dict = self.update_sheet_from_results(row_results)
-        return {
-            result_type.value: [row_result.row_index for row_result in row_results]
-            for result_type, row_results in row_result_dict.items()
-        }

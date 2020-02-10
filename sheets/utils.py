@@ -20,6 +20,7 @@ from sheets.constants import (
     SHEET_TYPE_COUPON_REQUEST,
     SHEET_TYPE_REFUND,
     SHEET_TYPE_COUPON_ASSIGN,
+    SHEET_TYPE_DEFERRAL,
 )
 
 
@@ -127,8 +128,8 @@ class RefundRequestSheetMetadata(
     """Metadata for the refund request spreadsheet"""
 
     FORM_RESPONSE_ID_COL = 0
-    REFUND_PROCESSOR_COL = 11
-    REFUND_COMPLETED_DATE_COL = 12
+    PROCESSOR_COL = 11
+    COMPLETED_DATE_COL = 12
     ERROR_COL = 13
     SKIP_ROW_COL = 14
 
@@ -146,7 +147,36 @@ class RefundRequestSheetMetadata(
         )
         self.sheet_file_id = settings.ENROLLMENT_CHANGE_SHEET_ID
 
-        self.REFUND_PROCESSOR_COL_LETTER = get_column_letter(self.REFUND_PROCESSOR_COL)
+        self.PROCESSOR_COL_LETTER = get_column_letter(self.PROCESSOR_COL)
+        self.ERROR_COL_LETTER = get_column_letter(self.ERROR_COL)
+
+
+class DeferralRequestSheetMetadata(
+    WatchableSheetMetadata
+):  # pylint: disable=too-many-instance-attributes
+    """Metadata for the deferral request spreadsheet"""
+
+    FORM_RESPONSE_ID_COL = 0
+    PROCESSOR_COL = 7
+    COMPLETED_DATE_COL = 8
+    ERROR_COL = 9
+    SKIP_ROW_COL = 10
+
+    def __init__(self):
+        self.sheet_type = SHEET_TYPE_DEFERRAL
+        self.sheet_name = "Deferral Request sheet"
+        self.first_data_row = settings.SHEETS_DEFERRAL_FIRST_ROW
+        self.num_columns = self.SKIP_ROW_COL + 1
+        self.non_input_column_indices = set(
+            # Response ID column
+            [self.FORM_RESPONSE_ID_COL]
+            +
+            # Every column from the finance columns to the end of the row
+            list(range(self.PROCESSOR_COL, self.num_columns))
+        )
+        self.sheet_file_id = settings.ENROLLMENT_CHANGE_SHEET_ID
+
+        self.PROCESSOR_COL_LETTER = get_column_letter(self.PROCESSOR_COL)
         self.ERROR_COL_LETTER = get_column_letter(self.ERROR_COL)
 
 
@@ -176,6 +206,7 @@ class CouponAssignSheetMetadata(
 
 request_sheet_metadata = CouponRequestSheetMetadata()
 refund_sheet_metadata = RefundRequestSheetMetadata()
+deferral_sheet_metadata = DeferralRequestSheetMetadata()
 assign_sheet_metadata = CouponAssignSheetMetadata()
 
 

@@ -1106,6 +1106,14 @@ REFUND_REQUEST_WORKSHEET_ID = get_string(
         "ID of the worksheet within the enrollment change request spreadsheet that contains enrollment refund requests"
     ),
 )
+DEFERRAL_REQUEST_WORKSHEET_ID = get_string(
+    "DEFERRAL_REQUEST_WORKSHEET_ID",
+    None,
+    description=(
+        "ID of the worksheet within the enrollment change request spreadsheet that contains "
+        "enrollment deferral requests"
+    ),
+)
 GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
     "GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE",
     None,
@@ -1142,6 +1150,14 @@ SHEETS_REFUND_FIRST_ROW = get_int(
     description=(
         "The first row (as it appears in the spreadsheet) of data that our scripts should consider "
         "processing in the refund request spreadsheet"
+    ),
+)
+SHEETS_DEFERRAL_FIRST_ROW = get_int(
+    "SHEETS_DEFERRAL_FIRST_ROW",
+    5,
+    description=(
+        "The first row (as it appears in the spreadsheet) of data that our scripts should consider "
+        "processing in the deferral request spreadsheet"
     ),
 )
 # Specify the zero-based index of certain request sheet columns
