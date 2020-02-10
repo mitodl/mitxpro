@@ -249,7 +249,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                     "content_title": "test_run_title",
                 }
             ],
-            "order_total": 100.0,
+            "order_total": "100.00",
             "order": {
                 "id": 1,
                 "created_on": line.order.created_on,
