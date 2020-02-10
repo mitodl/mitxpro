@@ -101,10 +101,11 @@ export const makeProduct = (
   readableId: string = casual.text
 ): ProductDetail => ({
   // $FlowFixMe
-  id:             genProductId.next().value,
-  title:          casual.word,
-  product_type:   productType,
-  latest_version: makeItem(productType, readableId)
+  id:                   genProductId.next().value,
+  title:                casual.word,
+  product_type:         productType,
+  visible_in_bulk_form: casual.boolean,
+  latest_version:       makeItem(productType, readableId)
 })
 
 export const makeCourseRunOrProgram = (
