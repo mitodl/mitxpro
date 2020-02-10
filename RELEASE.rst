@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.39.0
+Version 0.39.0 (Released February 10, 2020)
 --------------
 
 - make account settings page to a private route
