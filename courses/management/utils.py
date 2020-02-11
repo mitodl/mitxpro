@@ -7,6 +7,7 @@ from courses.models import CourseRun, CourseRunEnrollment, Program, ProgramEnrol
 from courseware.exceptions import (
     EdxApiEnrollErrorException,
     UnknownEdxApiEnrollException,
+    NoEdxApiAuthError,
 )
 from courseware.api import enroll_in_edx_course_runs
 from ecommerce import mail_api
@@ -212,6 +213,10 @@ class EnrollmentChangeCommand(BaseCommand):
         try:
             enroll_in_edx_course_runs(user, course_runs)
             return True
-        except (EdxApiEnrollErrorException, UnknownEdxApiEnrollException) as exc:
+        except (
+            EdxApiEnrollErrorException,
+            UnknownEdxApiEnrollException,
+            NoEdxApiAuthError,
+        ) as exc:
             self.stdout.write(self.style.WARNING(str(exc)))
         return False

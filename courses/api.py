@@ -14,6 +14,7 @@ from courseware.api import unenroll_edx_course_run, enroll_in_edx_course_runs
 from courseware.exceptions import (
     UnknownEdxApiEnrollException,
     EdxApiEnrollErrorException,
+    NoEdxApiAuthError,
 )
 from ecommerce import mail_api
 from mitxpro.utils import partition, first_or_none
@@ -102,7 +103,11 @@ def create_run_enrollments(user, runs, order=None, company=None):
     """
     try:
         enroll_in_edx_course_runs(user, runs)
-    except (EdxApiEnrollErrorException, UnknownEdxApiEnrollException):
+    except (
+        EdxApiEnrollErrorException,
+        UnknownEdxApiEnrollException,
+        NoEdxApiAuthError,
+    ):
         log.exception(
             "edX enrollment failure for user: %s, runs: %s (order: %s)",
             user,
