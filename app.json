@@ -23,6 +23,10 @@
   ],
   "description": " ",
   "env": {
+    "AUTH_CHANGE_EMAIL_TTL": {
+      "description": "Expiry datetime for a change email request",
+      "required": false
+    },
     "AWS_ACCESS_KEY_ID": {
       "description": "AWS Access Key for S3 storage.",
       "required": false

@@ -134,5 +134,6 @@ export const REGISTER_ERROR_PAGE_TITLE = "Registration Error"
 export const REGISTER_DENIED_PAGE_TITLE = REGISTER_ERROR_PAGE_TITLE
 
 export const ACCOUNT_SETTINGS_PAGE_TITLE = "Account Settings"
+export const EMAIL_CONFIRM_PAGE_TITLE = "Confirm Email Change"
 
 export const RECEIPT_PAGE_TITLE = "Receipt"

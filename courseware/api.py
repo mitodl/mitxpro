@@ -198,6 +198,42 @@ def create_edx_auth_token(user):
     return auth
 
 
+def update_edx_user_email(user):
+    """
+    Updates the LMS email address for the user with the user's current email address
+    utilizing the social auth (oauth) mechanism.
+
+    Args:
+        user(user.models.User): the user to update the record for
+    """
+    with requests.Session() as req_session:
+        django_session = auth_api.create_user_session(user)
+        session_cookie = requests.cookies.create_cookie(
+            name=settings.SESSION_COOKIE_NAME,
+            domain=urlparse(settings.SITE_BASE_URL).hostname,
+            path=settings.SESSION_COOKIE_PATH,
+            value=django_session.session_key,
+        )
+        req_session.cookies.set_cookie(session_cookie)
+
+        url = edx_url(OPENEDX_SOCIAL_LOGIN_XPRO_PATH)
+        resp = req_session.get(url)
+        resp.raise_for_status()
+
+        redirect_uri = urljoin(
+            settings.SITE_BASE_URL, reverse("openedx-private-oauth-complete")
+        )
+        url = edx_url(OPENEDX_OAUTH2_AUTHORIZE_PATH)
+        params = dict(
+            client_id=settings.OPENEDX_API_CLIENT_ID,
+            scope=" ".join(OPENEDX_OAUTH2_SCOPES),
+            redirect_uri=redirect_uri,
+            response_type="code",
+        )
+        resp = req_session.get(url, params=params)
+        resp.raise_for_status()
+
+
 def _create_tokens_and_update_auth(auth, params):
     """
     Updates an OpenEdxApiAuth given the passed params

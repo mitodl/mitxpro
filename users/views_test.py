@@ -1,10 +1,16 @@
 """Test for user views"""
 import pytest
+from django.contrib.auth.hashers import make_password
 from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 
+import requests
 from mitxpro.test_utils import drf_datetime
+from users.factories import UserFactory
+from users.models import ChangeEmailRequest
+from users.serializers import ChangeEmailRequestUpdateSerializer
 
 
 @pytest.mark.django_db
@@ -118,3 +124,77 @@ def test_countries_states_view(client):
     assert len(countries.get("FR").get("states")) == 0
     assert countries.get("US").get("name") == "United States"
     assert countries.get("TW").get("name") == "Taiwan"
+
+
+def test_create_email_change_request_existing_email(user_drf_client, user):
+    """Test that create change email request gives validation error for existing user email"""
+    new_user = UserFactory.create()
+    user_password = user.password
+    user.password = make_password(user.password)
+    user.save()
+    resp = user_drf_client.post(
+        "/api/change-emails/",
+        data={"new_email": new_user.email, "password": user_password},
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_create_email_change_request_valid_email(user_drf_client, user, mocker):
+    """Test that change request is created"""
+    user_password = user.password
+    user.password = make_password(user.password)
+    user.save()
+
+    mock_response = mocker.patch.object(requests.Session, "get")
+    mock_response.raise_for_status.return_value = None
+    resp = user_drf_client.post(
+        "/api/change-emails/",
+        data={"new_email": "abc@example.com", "password": user_password},
+    )
+
+    assert resp.status_code == status.HTTP_201_CREATED
+
+    code = resp.context[0]["confirmation_url"].split("?verification_code=")[1]
+    assert code
+
+    with pytest.raises(NotImplementedError):
+        user_drf_client.put(
+            "/api/change-emails/{}/".format(code), data={"confirmed": True}
+        )
+
+    resp = user_drf_client.patch(
+        "/api/change-emails/{}/".format(code), data={"confirmed": True}
+    )
+    assert resp.status_code == status.HTTP_200_OK
+
+
+def test_update_email_change_request_existing_email(user):
+    """Test that update change email request gives validation error for existing user email"""
+    new_user = UserFactory.create()
+    change_request = ChangeEmailRequest.objects.create(
+        user=user, new_email=new_user.email
+    )
+    serializer = ChangeEmailRequestUpdateSerializer(change_request, {"confirmed": True})
+
+    with pytest.raises(ValidationError):
+        serializer.is_valid()
+        serializer.save()
+
+
+def test_create_email_change_request_same_email(user_drf_client, user):
+    """Test that user same email wouldn't be processed"""
+    resp = user_drf_client.post(
+        "/api/change-emails/",
+        data={
+            "new_email": user.email,
+            "password": user.password,
+            "old_password": user.password,
+        },
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_update_email_change_request_invalid_token(user_drf_client):
+    """Test that invalid token doesn't work"""
+    resp = user_drf_client.patch("/api/change-emails/abc/", data={"confirmed": True})
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
