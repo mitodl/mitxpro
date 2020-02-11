@@ -69,7 +69,6 @@ urlpatterns = [
     path("create-account/error/", index, name="signup-error"),
     path("create-account/confirm/", index, name="register-confirm"),
     path("account/inactive/", index, name="account-inactive"),
-    path("account/confirm-email/", index, name="account-confirm-email-change"),
     path("checkout/", index, name="checkout-page"),
     path("profile/", index, name="view-profile"),
     path("profile/edit/", index, name="edit-profile"),

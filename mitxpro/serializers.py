@@ -51,11 +51,3 @@ class WriteableSerializerMethodField(serializers.SerializerMethodField):
 
     def to_internal_value(self, data):
         return data
-
-
-class EmptySerializer(serializers.Serializer):
-    """Serializer that returns an empty object"""
-
-    def to_representation(self, instance):  # pylint: disable=unused-argument
-        """Always returns an empty object"""
-        return {}

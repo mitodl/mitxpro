@@ -231,8 +231,3 @@ export type EnrollmentCode = {
   thumbnail_url: string,
   start_date: Date,
 }
-
-export type updateEmailResponse = {
-  confirmed: boolean,
-  detail: ?string,
-}
