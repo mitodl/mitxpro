@@ -45,7 +45,6 @@ describe("validation utils", () => {
   describe("ChangePasswordFormValidation", () => {
     it(`should validate with matching passwords`, async () => {
       const inputs = {
-        email:           "abc@example.com",
         oldPassword:     "old-password",
         newPassword:     "password1",
         confirmPassword: "password1"
@@ -59,8 +58,6 @@ describe("validation utils", () => {
     ;[
       [
         {
-          email:           "abc@example.com",
-          user_email:      "abc@example.com",
           oldPassword:     "",
           newPassword:     "password1",
           confirmPassword: "password1"
@@ -68,18 +65,11 @@ describe("validation utils", () => {
         ["Old Password is a required field"]
       ],
       [
-        {
-          email:           "abc@example.com",
-          user_email:      "abc@example.com",
-          oldPassword:     "password1",
-          newPassword:     "",
-          confirmPassword: ""
-        },
+        { oldPassword: "password1", newPassword: "", confirmPassword: "" },
         ["Confirm Password is a required field"]
       ],
       [
         {
-          email:           "abc@example.com",
           oldPassword:     "password1",
           newPassword:     "password1",
           confirmPassword: "password2"
@@ -88,18 +78,14 @@ describe("validation utils", () => {
       ],
       [
         {
-          email:           "abc@example.com",
-          user_email:      "abc@example.com",
           oldPassword:     "password1",
           newPassword:     "pass",
           confirmPassword: "pass"
         },
-        ["Confirm Password must be at least 8 characters"]
+        ["New Password must be at least 8 characters"]
       ],
       [
         {
-          email:           "abc@example.com",
-          user_email:      "abc@example.com",
           oldPassword:     "password1",
           newPassword:     "password",
           confirmPassword: "password"
