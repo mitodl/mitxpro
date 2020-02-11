@@ -163,7 +163,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
         return instance.content_type.model
 
     class Meta:
-        fields = ["id", "product_type"]
+        fields = ["id", "product_type", "visible_in_bulk_form"]
         model = models.Product
 
 

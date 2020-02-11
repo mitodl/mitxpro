@@ -178,6 +178,7 @@ export type Coupon = {
 export type SimpleProduct = {
   id: number,
   product_type: string,
+  visible_in_bulk_form: boolean,
 }
 
 export type Product = SimpleProduct & {

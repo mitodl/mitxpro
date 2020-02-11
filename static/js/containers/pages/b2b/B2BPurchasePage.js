@@ -122,7 +122,9 @@ export class B2BPurchasePage extends React.Component<Props, State> {
       <React.Fragment>
         <B2BPurchaseForm
           onSubmit={this.onSubmit}
-          products={products}
+          products={products.filter(
+            product => product.visible_in_bulk_form === true
+          )}
           checkout={checkout}
           couponStatus={couponStatus}
           contractNumber={contractNumber}

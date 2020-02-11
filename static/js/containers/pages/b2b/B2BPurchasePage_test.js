@@ -51,7 +51,10 @@ describe("B2BPurchasePage", () => {
   it("renders a form", async () => {
     const { inner } = await renderPage()
     const props = inner.find("B2BPurchaseForm").props()
-    assert.deepEqual(props.products, products)
+    assert.deepEqual(
+      props.products,
+      products.filter(product => product.visible_in_bulk_form === true)
+    )
   })
 
   describe("submission", () => {
