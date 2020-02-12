@@ -187,11 +187,9 @@ export const LegalAddressFields = ({
     ) : null}
     <div className="form-group">
       {/* LegalAddress fields */}
-      <label
-        htmlFor="legal_address.street_address"
-        className="font-weight-bold"
-      >
-        Street Address*
+      <label htmlFor="legal_address.street_address" className="row">
+        <div className="col-4 font-weight-bold">Street Address*</div>
+        <div className="col-8">(Home or Residential Address Only)</div>
       </label>
       <FieldArray
         name="legal_address.street_address"
