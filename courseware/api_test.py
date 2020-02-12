@@ -18,6 +18,7 @@ from courseware.api import (
     create_user,
     create_edx_user,
     create_edx_auth_token,
+    update_edx_user_email,
     repair_faulty_edx_user,
     repair_faulty_courseware_users,
     get_valid_edx_api_auth,
@@ -192,6 +193,51 @@ def test_create_edx_auth_token(settings, user):
     assert auth.access_token_expires_on == now_in_utc() + timedelta(
         minutes=59, seconds=50
     )
+
+
+@responses.activate
+def test_update_edx_user_email(settings, user):
+    """Tests update_edx_user_email makes the expected incantations to update the user"""
+    responses.add(
+        responses.POST,
+        f"{settings.OPENEDX_API_BASE_URL}/user_api/v1/account/registration/",
+        json=dict(success=True),
+        status=status.HTTP_200_OK,
+    )
+
+    create_edx_user(user)
+
+    courseware_user_qs = CoursewareUser.objects.filter(user=user)
+    assert courseware_user_qs.exists()
+    assert courseware_user_qs.first().user.email != "abc@example.com"
+
+    user.email = "abc@example.com"
+    user.save()
+
+    code = "ghi789"
+    responses.add(
+        responses.GET,
+        f"{settings.OPENEDX_API_BASE_URL}/auth/login/mitxpro-oauth2/?auth_entry=login",
+        status=status.HTTP_200_OK,
+    )
+    responses.add(
+        responses.GET,
+        f"{settings.OPENEDX_API_BASE_URL}/oauth2/authorize",
+        headers={
+            "Location": f"{settings.SITE_BASE_URL}/login/_private/complete?code={code}"
+        },
+        status=status.HTTP_302_FOUND,
+    )
+    responses.add(
+        responses.GET,
+        f"{settings.SITE_BASE_URL}/login/_private/complete",
+        status=status.HTTP_200_OK,
+    )
+
+    update_edx_user_email(user)
+
+    assert len(responses.calls) == 4
+    assert CoursewareUser.objects.get(user=user).user.email == "abc@example.com"
 
 
 @responses.activate

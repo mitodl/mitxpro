@@ -12,3 +12,12 @@ def test_create_edx_user_from_id(mocker):
     user = UserFactory.create()
     tasks.create_edx_user_from_id.delay(user.id)
     patch_create_user.assert_called_once_with(user)
+
+
+@pytest.mark.django_db
+def test_update_edx_user_email_async(mocker):
+    """Test that create_edx_user_from_id loads a user and calls the API method to create an edX user"""
+    patch_update_user = mocker.patch("courseware.tasks.api.update_edx_user_email")
+    user = UserFactory.create()
+    tasks.change_edx_user_email_async.delay(user.id)
+    patch_update_user.assert_called_once_with(user)

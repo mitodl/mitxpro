@@ -24,6 +24,7 @@ import EcommerceAdminPages from "./pages/admin/EcommerceAdminPages"
 import EcommerceBulkPages from "./pages/b2b/EcommerceBulkPages"
 import ProfilePages from "./pages/profile/ProfilePages"
 import AccountSettingsPage from "./pages/settings/AccountSettingsPage"
+import EmailConfirmPage from "./pages/settings/EmailConfirmPage"
 
 import type { Match, Location } from "react-router"
 import type { CurrentUser } from "../flow/authTypes"
@@ -111,6 +112,10 @@ export class App extends React.Component<Props, void> {
           <PrivateRoute
             path={urljoin(match.url, String(routes.accountSettings))}
             component={AccountSettingsPage}
+          />
+          <Route
+            path={urljoin(match.url, String(routes.account.confirmEmail))}
+            component={EmailConfirmPage}
           />
         </Switch>
       </div>

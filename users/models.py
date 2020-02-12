@@ -1,5 +1,8 @@
 """User models"""
+from datetime import timedelta
+import uuid
 
+from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.exceptions import ValidationError
@@ -9,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 import pycountry
 
 from mitxpro.models import TimestampedModel
+from mitxpro.utils import now_in_utc
 
 # Defined in edX Profile model
 MALE = "m"
@@ -158,6 +162,34 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
     def __str__(self):
         """Str representation for the user"""
         return f"User username={self.username} email={self.email}"
+
+
+def generate_change_email_code():
+    """Generates a new change email code"""
+    return uuid.uuid4().hex
+
+
+def generate_change_email_expires():
+    """Generates the expiry datetime for a change email request"""
+    return now_in_utc() + timedelta(minutes=settings.AUTH_CHANGE_EMAIL_TTL_IN_MINUTES)
+
+
+class ChangeEmailRequest(TimestampedModel):
+    """Model for tracking an attempt to change the user's email"""
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="change_email_attempts"
+    )
+    new_email = models.EmailField(blank=False)
+
+    code = models.CharField(
+        unique=True, blank=False, default=generate_change_email_code, max_length=32
+    )
+    confirmed = models.BooleanField(default=False)
+    expires_on = models.DateTimeField(default=generate_change_email_expires)
+
+    class Meta:
+        index_together = ("expires_on", "confirmed", "code")
 
 
 def validate_iso_3166_1_code(value):

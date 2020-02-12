@@ -2,6 +2,7 @@
 from mitxpro.celery import app
 from courseware import api
 from users.api import get_user_by_id
+from users.models import User
 
 
 @app.task(acks_late=True)
@@ -33,3 +34,12 @@ def repair_faulty_courseware_users():
     """Calls the API method to repair faulty courseware users"""
     repaired_users = api.repair_faulty_courseware_users()
     return [user.email for user in repaired_users]
+
+
+@app.task(acks_late=True)
+def change_edx_user_email_async(user_id):
+    """
+    Task to change edX user email in the background to avoid database level locks
+    """
+    user = User.objects.get(id=user_id)
+    api.update_edx_user_email(user)

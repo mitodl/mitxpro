@@ -2,7 +2,14 @@
 /* global SETTINGS:false */
 import React from "react"
 
-import { Formik, Field, Form, ErrorMessage } from "formik"
+import {
+  Formik,
+  Field,
+  Form,
+  ErrorMessage,
+  yupToFormErrors,
+  validateYupSchema
+} from "formik"
 
 import { PasswordInput, EmailInput } from "./elements/inputs"
 import FormError from "./elements/FormError"
@@ -18,19 +25,26 @@ type Props = {
 export type ChangePasswordFormValues = {
   oldPassword: string,
   newPassword: string,
-  confirmPassword: string
+  confirmPassword: string,
+  email: string,
+  emailPassword: string
 }
 
 const ChangePasswordForm = ({ onSubmit, user }: Props) => (
   <Formik
     onSubmit={onSubmit}
-    validationSchema={changePasswordFormValidation}
     initialValues={{
       email:           user.email,
+      emailPassword:   "",
       oldPassword:     "",
       newPassword:     "",
       confirmPassword: ""
     }}
+    validate={values =>
+      validateYupSchema(values, changePasswordFormValidation, false, {
+        currentEmail: user.email
+      }).catch(err => Promise.reject(yupToFormErrors(err)))
+    }
     render={({ isSubmitting }) => (
       <Form>
         <section className="email-section">
@@ -39,20 +53,21 @@ const ChangePasswordForm = ({ onSubmit, user }: Props) => (
             <Field
               name="email"
               className="form-control"
-              readOnly={true}
               component={EmailInput}
             />
-            <ErrorMessage name="oldPassword" component={FormError} />
+            <ErrorMessage name="email" component={FormError} />
           </div>
-          <div>
-            If you want to change your email address, Please contact us at{" "}
-            <a
-              href="https://xpro.zendesk.com/hc/en-us/requests/new"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Customer Support
-            </a>
+          <div className="form-group">
+            <label htmlFor="emailPassword">Confirm Password</label>
+            <Field
+              name="emailPassword"
+              className="form-control"
+              component={PasswordInput}
+            />
+            <ErrorMessage name="emailPassword" component={FormError} />
+          </div>
+          <div className="light-gray-text">
+            Password required to change email address
           </div>
         </section>
 

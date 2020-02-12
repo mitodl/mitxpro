@@ -1,10 +1,16 @@
 """Test for user views"""
+from datetime import timedelta
 import pytest
+
 from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
+from social_django.models import UserSocialAuth
 
 from mitxpro.test_utils import drf_datetime
+from mitxpro.utils import now_in_utc
+from users.factories import UserFactory
+from users.models import ChangeEmailRequest
 
 
 @pytest.mark.django_db
@@ -118,3 +124,91 @@ def test_countries_states_view(client):
     assert len(countries.get("FR").get("states")) == 0
     assert countries.get("US").get("name") == "United States"
     assert countries.get("TW").get("name") == "Taiwan"
+
+
+def test_create_email_change_request_invalid_password(user_drf_client, user):
+    """Test that invalid password is returned"""
+    resp = user_drf_client.post(
+        "/api/change-emails/",
+        data={
+            "new_email": "abc@example.com",
+            "password": user.password,
+            "old_password": "abc",
+        },
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_create_email_change_request_existing_email(user_drf_client, user):
+    """Test that create change email request gives validation error for existing user email"""
+    new_user = UserFactory.create()
+    user_password = user.password
+    user.set_password(user.password)
+    user.save()
+    resp = user_drf_client.post(
+        "/api/change-emails/",
+        data={"new_email": new_user.email, "password": user_password},
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_create_email_change_request_same_email(user_drf_client, user):
+    """Test that user same email wouldn't be processed"""
+    resp = user_drf_client.post(
+        "/api/change-emails/",
+        data={
+            "new_email": user.email,
+            "password": user.password,
+            "old_password": user.password,
+        },
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_create_email_change_request_valid_email(user_drf_client, user, mocker):
+    """Test that change request is created"""
+    user_password = user.password
+    user.set_password(user.password)
+    user.save()
+
+    mocker.patch("courseware.tasks.change_edx_user_email_async", return_value=None)
+    mocker.patch("courseware.tasks.api.update_edx_user_email")
+    mock_email = mocker.patch("mail.verification_api.send_verify_email_change_email")
+    resp = user_drf_client.post(
+        "/api/change-emails/",
+        data={"new_email": "abc@example.com", "password": user_password},
+    )
+
+    assert resp.status_code == status.HTTP_201_CREATED
+
+    code = mock_email.call_args[0][1].code
+    assert code
+
+    old_email = user.email
+    resp = user_drf_client.patch(
+        "/api/change-emails/{}/".format(code), data={"confirmed": True}
+    )
+    assert not UserSocialAuth.objects.filter(uid=old_email, user=user).exists()
+    assert resp.status_code == status.HTTP_200_OK
+    user.refresh_from_db()
+    assert user.email == "abc@example.com"
+
+
+def test_create_email_change_request_expired_code(user_drf_client, user):
+    """Check for expired code for Email Change Request"""
+    change_request = ChangeEmailRequest.objects.create(
+        user=user,
+        new_email="abc@example.com",
+        expires_on=now_in_utc() - timedelta(seconds=5),
+    )
+
+    resp = user_drf_client.patch(
+        "/api/change-emails/{}/".format(change_request.code), data={"confirmed": True}
+    )
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_update_email_change_request_invalid_token(user_drf_client):
+    """Test that invalid token doesn't work"""
+    resp = user_drf_client.patch("/api/change-emails/abc/", data={"confirmed": True})
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
