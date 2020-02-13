@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.40.0
+Version 0.40.0 (Released February 13, 2020)
 --------------
 
 - Revert "Merge pull request #1535 from mitodl/umar/369-allow-email-change"
