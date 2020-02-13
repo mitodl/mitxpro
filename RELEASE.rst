@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.40.0 (Released February 13, 2020)
+--------------
+
+- Revert "Merge pull request #1535 from mitodl/umar/369-allow-email-change"
+- #369 allow email change
+- fix: currency should have two decimal places
+- Users with bad edX auth can complete orders.
+- load products on coupon page with visible_in_bulk_form=false
+- Remove unused CourseCatalogView (#1524)
+- Handle deferrals via Google Sheets
+- Fixed flaky bulk enrollment list test
+
 Version 0.39.0 (Released February 10, 2020)
 --------------
 
