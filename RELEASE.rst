@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.40.1
+--------------
+
+- course run on program checkout page (#1515)
+- Change Street Address label (Home or Residential)
+
 Version 0.40.0 (Released February 13, 2020)
 --------------
 
