@@ -240,3 +240,9 @@ export const getProductSelectLabel = (product: ProductDetail) => {
     return `${product.latest_version.readable_id} | ${product.title}`
   }
 }
+
+export const sameDayOrLater = (
+  momentDate1: Moment,
+  momentDate2: Moment
+): boolean =>
+  momentDate1.startOf("day").isSameOrAfter(momentDate2.startOf("day"))

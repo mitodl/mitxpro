@@ -11,11 +11,15 @@ import { compose } from "redux"
 import queryString from "query-string"
 import { pathOr } from "ramda"
 import * as Sentry from "@sentry/browser"
+import moment from "moment"
+import * as R from "ramda"
 
 import { CheckoutForm } from "../../components/forms/CheckoutForm"
 
 import queries from "../../lib/queries"
 import { createCyberSourceForm, formatErrors } from "../../lib/form"
+
+import { sameDayOrLater } from "../../lib/util"
 
 import type { Response } from "redux-query"
 import type { Location } from "react-router"
@@ -58,30 +62,40 @@ export const calcSelectedRunIds = (
   }
 
   const selectedRunIds = {}
-  for (const course of item.courses) {
-    if (course.next_run_id) {
-      selectedRunIds[course.id] = course.next_run_id
-    }
-  }
-
-  const courseLookup = {}
-  for (const course of item.courses) {
-    for (const run of course.courseruns) {
-      courseLookup[run.id] = course.id
-    }
-  }
-
-  // Try to preselect a run if the ID was given
+  let preselectCourseId, preselectedRunId, preselectedRunDate
   if (preselectId) {
-    const courseId = courseLookup[preselectId]
-    selectedRunIds[courseId] = preselectId
+    for (const course of item.courses) {
+      const matchingRun = course.courseruns.find(run => run.id === preselectId)
+      if (matchingRun) {
+        preselectCourseId = course.id
+        preselectedRunDate = moment(matchingRun.start_date)
+        selectedRunIds[preselectCourseId] = matchingRun.id
+        break
+      }
+    }
+  }
+  if (!preselectCourseId) {
+    for (const course of item.courses) {
+      if (course.next_run_id) {
+        selectedRunIds[course.id] = course.next_run_id
+      }
+    }
+    return selectedRunIds
   }
 
-  for (const runId of item.run_ids) {
-    const courseId = courseLookup[runId]
-
-    // there should only be one run selected for a course
-    selectedRunIds[courseId] = runId
+  const otherCourses = R.reject(R.propEq("id", preselectCourseId), item.courses)
+  for (const course of otherCourses) {
+    // Course runs are sorted by start date, so we just need the first one we find with a
+    // start date that is the same or later than the preselected run.
+    const runClosestToPreselect = course.courseruns.find(run =>
+      sameDayOrLater(moment(run.start_date), preselectedRunDate)
+    )
+    const selectedRunId = runClosestToPreselect
+      ? runClosestToPreselect.id
+      : course.next_run_id
+    if (selectedRunId) {
+      selectedRunIds[course.id] = selectedRunId
+    }
   }
   return selectedRunIds
 }

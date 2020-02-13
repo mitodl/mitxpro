@@ -379,11 +379,7 @@ describe("CheckoutPage", () => {
       const expected = {}
       for (const runId of item.run_ids) {
         for (const course of item.courses) {
-          for (const run of course.courseruns) {
-            if (run.id === runId) {
-              expected[course.id] = run.id
-            }
-          }
+          expected[course.id] = course.next_run_id
         }
       }
       assert.deepEqual(calcSelectedRunIds(item), expected)
