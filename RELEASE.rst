@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.40.1
+Version 0.40.1 (Released February 14, 2020)
 --------------
 
 - course run on program checkout page (#1515)
