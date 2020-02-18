@@ -26,7 +26,7 @@ x-extra-hosts:
 
 services:
   db:
-    image: postgres
+    image: postgres:11.6
     ports:
       - "5432"
 
