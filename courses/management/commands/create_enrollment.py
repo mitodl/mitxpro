@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from courses.api import create_run_enrollments
 from courses.models import CourseRun
 from ecommerce.api import best_coupon_for_product
-from ecommerce.models import Coupon, Product
+from ecommerce.models import Coupon, Product, ProductCouponAssignment
 from users.api import fetch_user
 
 User = get_user_model()
@@ -55,14 +55,14 @@ class Command(BaseCommand):
                 )
             )
 
-        coupon = Coupon.objects.filter(coupon_code=options["code"])
+        coupon = Coupon.objects.filter(coupon_code=options["code"]).first()
         if not coupon:
             raise CommandError(
                 "That enrollment code {} does not exist".format(options["code"])
             )
 
         # Check if the coupon is valid for the product
-        coupon_version = best_coupon_for_product(product, user, code=options["code"])
+        coupon_version = best_coupon_for_product(product, user, code=coupon.coupon_code)
         if coupon_version is None:
             raise CommandError(
                 {
@@ -77,6 +77,10 @@ class Command(BaseCommand):
         )
         if not successful_enrollments:
             raise CommandError("Failed to create the enrollment record")
+
+        ProductCouponAssignment.objects.filter(
+            email__iexact=user.email, redeemed=False, product_coupon__coupon=coupon
+        ).update(redeemed=True)
 
         self.stdout.write(
             self.style.SUCCESS(
