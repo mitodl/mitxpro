@@ -128,6 +128,7 @@ class CouponFactory(DjangoModelFactory):
 
     coupon_code = fuzzy.FuzzyText()
     payment = SubFactory(CouponPaymentFactory)
+    is_global = False
 
     class Meta:
         model = models.Coupon

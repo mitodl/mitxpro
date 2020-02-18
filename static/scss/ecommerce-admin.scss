@@ -53,6 +53,10 @@
     display: flex;
   }
 
+  .disabled {
+    opacity: 0.5;
+  }
+
   .product-selection {
     height: 250px;
 
