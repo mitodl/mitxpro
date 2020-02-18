@@ -106,7 +106,7 @@ def mock_hubspot_errors(mocker):
     """Mock the get_sync_errors API call, assuming a limit of 2"""
     yield mocker.patch(
         "hubspot.api.paged_sync_errors",
-        side_effect=[error_response_json[0:2], error_response_json[2:]],
+        side_effect=[error_response_json[0:2], error_response_json[2:], []],
     )
 
 
@@ -114,7 +114,7 @@ def mock_hubspot_errors(mocker):
 def mock_hubspot_line_error(mocker):
     """Mock the get_sync_errors API call and return a line sync error with an invalid association property"""
     yield mocker.patch(
-        "hubspot.api.paged_sync_errors", side_effect=[line_error_response_json[0:1]]
+        "hubspot.api.paged_sync_errors", side_effect=[line_error_response_json[0:1], []]
     )
 
 
