@@ -481,15 +481,15 @@ class CouponPaymentVersion(TimestampedModel):
         help_text="Percent discount for a coupon. Between 0 and 1.",
         validators=[MinValueValidator(0), MaxValueValidator(1)],
     )
-    expiration_date = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="If set, the coupons will not be redeemable after this time",
-    )
     activation_date = models.DateTimeField(
         null=True,
         blank=True,
         help_text="If set, the coupons will not be redeemable before this time",
+    )
+    expiration_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="If set, the coupons will not be redeemable after this time",
     )
     company = models.ForeignKey(
         Company, on_delete=models.PROTECT, null=True, blank=True

@@ -3,6 +3,9 @@ Admin site bindings for profiles
 """
 
 from django.contrib import admin
+from django.db import models
+from django.forms import TextInput
+
 
 from mitxpro.utils import get_field_names
 from mitxpro.admin import AuditableModelAdmin
@@ -38,6 +41,10 @@ class CourseAdmin(admin.ModelAdmin):
     search_fields = ["title", "topics__name"]
     list_filter = ["live", "program", "topics"]
 
+    formfield_overrides = {
+        models.CharField: {"widget": TextInput(attrs={"size": "80"})}
+    }
+
 
 class CourseRunAdmin(admin.ModelAdmin):
     """Admin for CourseRun"""
@@ -53,6 +60,11 @@ class CourseRunAdmin(admin.ModelAdmin):
         "enrollment_start",
     )
     list_filter = ["live", "course"]
+    readonly_fields = ("created_on", "updated_on")
+
+    formfield_overrides = {
+        models.CharField: {"widget": TextInput(attrs={"size": "80"})}
+    }
 
 
 class ProgramEnrollmentAdmin(AuditableModelAdmin):

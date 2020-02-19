@@ -182,6 +182,8 @@ class CouponPaymentAdmin(admin.ModelAdmin):
     save_on_top = True
     inlines = [CouponPaymentVersionInline]
 
+    search_fields = ("name",)
+
 
 class CouponPaymentVersionAdmin(admin.ModelAdmin):
     """Admin for CouponPaymentVersions"""
