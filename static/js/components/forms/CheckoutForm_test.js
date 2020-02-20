@@ -280,9 +280,6 @@ describe("CheckoutForm", () => {
       basketItem.courses.forEach((course, i) => {
         const select = inner.find("select").at(i)
 
-        const runId = selectedRuns[course.id]
-        assert.equal(select.prop("value"), runId)
-
         const runs = course.courseruns
         assert.equal(select.find("option").length, runs.length + 1)
         const firstOption = select.find("option").at(0)

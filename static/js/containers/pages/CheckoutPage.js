@@ -61,43 +61,11 @@ export const calcSelectedRunIds = (
     }
   }
 
-  const selectedRunIds = {}
-  let preselectCourseId, preselectedRunId, preselectedRunDate
-  if (preselectId) {
-    for (const course of item.courses) {
-      const matchingRun = course.courseruns.find(run => run.id === preselectId)
-      if (matchingRun) {
-        preselectCourseId = course.id
-        preselectedRunDate = moment(matchingRun.start_date)
-        selectedRunIds[preselectCourseId] = matchingRun.id
-        break
-      }
-    }
-  }
-  if (!preselectCourseId) {
-    for (const course of item.courses) {
-      if (course.next_run_id) {
-        selectedRunIds[course.id] = course.next_run_id
-      }
-    }
-    return selectedRunIds
-  }
-
-  const otherCourses = R.reject(R.propEq("id", preselectCourseId), item.courses)
-  for (const course of otherCourses) {
-    // Course runs are sorted by start date, so we just need the first one we find with a
-    // start date that is the same or later than the preselected run.
-    const runClosestToPreselect = course.courseruns.find(run =>
-      sameDayOrLater(moment(run.start_date), preselectedRunDate)
-    )
-    const selectedRunId = runClosestToPreselect
-      ? runClosestToPreselect.id
-      : course.next_run_id
-    if (selectedRunId) {
-      selectedRunIds[course.id] = selectedRunId
-    }
-  }
-  return selectedRunIds
+  // NOTE: Due to a bug, the logic for preselecting course runs for courses in a program is disabled. In other words,
+  // all course run select boxes should start with no selection at all. This will change when we decide on desired
+  // course run pre-selection behavior. The following code replaces logic that was last changed in this PR:
+  // https://github.com/mitodl/mitxpro/pull/1515
+  return {}
 }
 
 export class CheckoutPage extends React.Component<Props, State> {

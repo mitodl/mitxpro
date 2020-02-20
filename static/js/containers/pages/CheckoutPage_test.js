@@ -89,25 +89,6 @@ describe("CheckoutPage", () => {
     assert.equal(inner.find("CheckoutForm").prop("couponCode"), code)
   })
 
-  it("parses the preselect ID from the query parameter and verifies it exists in selected runs", async () => {
-    const course = basket.items[0].courses[0]
-    const courseId = course.id
-    const courseRunId = course.courseruns[0].id
-    const { inner } = await renderPage(
-      {},
-      {
-        location: {
-          search: `product=4567&preselect=${courseRunId}`
-        }
-      }
-    )
-    // Verify that the preselected courseRunId is included against the courseId in selectedRuns
-    assert.equal(
-      inner.find("CheckoutForm").prop("selectedRuns")[courseId],
-      courseRunId
-    )
-  })
-
   it("submits the coupon code", async () => {})
   ;[true, false].forEach(hasCouponCode => {
     [true, false].forEach(hasError => {
@@ -376,24 +357,7 @@ describe("CheckoutPage", () => {
     it("calculates selected run ids from a basket item", () => {
       const item = basket.items[0]
       item.type = PRODUCT_TYPE_PROGRAM
-      const expected = {}
-      for (const runId of item.run_ids) {
-        for (const course of item.courses) {
-          expected[course.id] = course.next_run_id
-        }
-      }
-      assert.deepEqual(calcSelectedRunIds(item), expected)
-    })
-
-    it("uses the next_run_id for a default selected course run", () => {
-      const item = basket.items[0]
-      item.type = PRODUCT_TYPE_PROGRAM
-      const expected = {}
-      for (const course of item.courses) {
-        expected[course.id] = course.next_run_id
-      }
-      item.run_ids = []
-      assert.deepEqual(calcSelectedRunIds(item), expected)
+      assert.deepEqual(calcSelectedRunIds(item), {})
     })
   })
 
