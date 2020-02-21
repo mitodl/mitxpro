@@ -23,11 +23,13 @@ from sheets.constants import (
     REQUIRED_GOOGLE_API_SCOPES,
     SHEET_TYPE_COUPON_REQUEST,
     SHEET_TYPE_REFUND,
+    SHEET_TYPE_DEFERRAL,
 )
 from sheets.utils import (
     generate_google_client_config,
     CouponRequestSheetMetadata,
     RefundRequestSheetMetadata,
+    DeferralRequestSheetMetadata,
 )
 from sheets import tasks
 from sheets.coupon_assign_api import CouponAssignmentHandler
@@ -127,6 +129,8 @@ def handle_watched_sheet_update(request):
         sheet_metadata = CouponRequestSheetMetadata()
     elif sheet_type == SHEET_TYPE_REFUND:
         sheet_metadata = RefundRequestSheetMetadata()
+    elif sheet_type == SHEET_TYPE_DEFERRAL:
+        sheet_metadata = DeferralRequestSheetMetadata()
     else:
         log.error(
             "Unknown sheet type '%s' (passed via 'sheet' query parameter)", sheet_type
@@ -157,6 +161,8 @@ def handle_watched_sheet_update(request):
         tasks.handle_unprocessed_coupon_requests.delay()
     elif sheet_type == SHEET_TYPE_REFUND:
         tasks.handle_unprocessed_refund_requests.delay()
+    elif sheet_type == SHEET_TYPE_DEFERRAL:
+        tasks.handle_unprocessed_deferral_requests.delay()
 
     return HttpResponse(status=status.HTTP_200_OK)
 

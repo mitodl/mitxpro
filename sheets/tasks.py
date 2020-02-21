@@ -8,6 +8,7 @@ from sheets import (
     coupon_assign_api,
     coupon_request_api,
     refund_request_api,
+    deferral_request_api,
 )
 from sheets.constants import ASSIGNMENT_SHEET_ENROLLED_STATUS
 from sheets.utils import request_sheet_metadata, refund_sheet_metadata
@@ -34,6 +35,18 @@ def handle_unprocessed_refund_requests():
     """
     refund_request_handler = refund_request_api.RefundRequestHandler()
     results = refund_request_handler.process_sheet()
+    return results
+
+
+@app.task
+def handle_unprocessed_deferral_requests():
+    """
+    Ensures that all non-legacy rows in the spreadsheet are correctly represented in the database,
+    defers user enrollments where appropriate, updates the spreadsheet to reflect any changes
+    made, and returns a summary of those changes.
+    """
+    deferral_request_handler = deferral_request_api.DeferralRequestHandler()
+    results = deferral_request_handler.process_sheet()
     return results
 
 
