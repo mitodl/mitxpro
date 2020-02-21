@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.41.0
+--------------
+
+- Update heroku to Python 3.7
+- Added deferral sheet file watch and management command
+- Removed course run preselect logic in checkout
+- Django admin improvements
+- Upgrade postgres version in docker-compose, and update to Python 3.7 (#1551)
+- #59 Fix unused coupon banner bug after command create enrollment
+
 Version 0.40.1 (Released February 14, 2020)
 --------------
 
