@@ -2,7 +2,7 @@
 """
 Tests for signals
 """
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock, patch
 
 from edx_api.course_detail import CourseDetail, CourseDetails
 from requests.exceptions import HTTPError
@@ -22,6 +22,10 @@ from courses.utils import (
     generate_program_certificate,
     process_course_run_grade_certificate,
     sync_course_runs,
+    ensure_course_run_grade,
+    log,
+    revoke_program_certificate,
+    revoke_course_run_certificate,
 )
 
 pytestmark = pytest.mark.django_db
@@ -91,6 +95,26 @@ def test_course_run_certificate_idempotent(user, course):
     assert not deleted
 
 
+def test_course_run_certificate_revoke(user, course):
+    """
+    Test that revoke_course_run_certificate revokes a course certificate
+    """
+    grade = CourseRunGradeFactory.create(
+        course_run__course=course, user=user, grade=0.25, passed=True
+    )
+
+    # Certificate is created the first time
+    certificate, created, deleted = process_course_run_grade_certificate(grade)
+    assert certificate
+    assert certificate.is_revoked is False
+    assert created is True
+    assert not deleted
+
+    assert revoke_course_run_certificate(user, grade.course_run.courseware_id, True)
+    certificate.refresh_from_db()
+    assert certificate.is_revoked is True
+
+
 def test_course_run_certificate_blacklist(user, course):
     """
     Test that the certificate is not generated if grade isn't passing
@@ -146,10 +170,35 @@ def test_generate_program_certificate_success(user, program):
 
     CourseRunCertificateFactory.create(user=user, course_run=course_run)
 
-    result = generate_program_certificate(user=user, program=program)
-    assert result[1] is True
-    assert isinstance(result[0], ProgramCertificate)
+    with patch.object(log, "info") as mock_log:
+        cert, created = generate_program_certificate(user=user, program=program)
+        mock_log.assert_called()
+    assert created is True
+    assert isinstance(cert, ProgramCertificate)
     assert len(ProgramCertificate.objects.all()) == 1
+
+
+def test_revoke_program_certificate(user, program):
+    """
+    Test that revoke_program_certificate revokes a program certificate
+    """
+    course = CourseFactory.create(program=program)
+    course_run = CourseRunFactory.create(course=course)
+
+    course_cert = CourseRunCertificateFactory.create(user=user, course_run=course_run)
+    assert course_cert.is_revoked is False
+
+    cert, created = generate_program_certificate(user=user, program=program)
+    assert created is True
+    assert isinstance(cert, ProgramCertificate)
+    assert cert.is_revoked is False
+    assert len(ProgramCertificate.objects.all()) == 1
+    assert revoke_program_certificate(user, program.readable_id, True, True)
+
+    cert.refresh_from_db()
+    course_cert.refresh_from_db()
+    assert cert.is_revoked is True
+    assert course_cert.is_revoked is True
 
 
 @pytest.mark.parametrize(
@@ -209,3 +258,50 @@ def test_sync_course_runs(settings, mocker, mocked_api_response, expect_success)
     else:
         assert success_count == 0
         assert failure_count == 1
+
+
+def test_ensure_course_run_grade():
+    """Test that ensure_course_run_grade works as expected"""
+    run = CourseRunFactory.create()
+    user = UserFactory()
+    edx_grade = MagicMock(percent=0.5, passed=True, letter_grade="A")
+    grade, created, updated = ensure_course_run_grade(user, run, edx_grade)
+    assert grade.course_run == run
+    assert grade.user == user
+    assert grade.grade == 0.5
+    assert grade.letter_grade == "A"
+    assert grade.passed is True
+    assert grade.set_by_admin is False
+    assert created is True
+    assert updated is False
+
+
+def test_ensure_course_run_grade_update():
+    """Test that ensure_course_run_grade works as expected when an update is indicated"""
+    run = CourseRunFactory.create()
+    user = UserFactory()
+    edx_grade = MagicMock(percent=0.5, passed=True, letter_grade="A")
+    grade, created, updated = ensure_course_run_grade(user, run, edx_grade)
+
+    assert grade.course_run == run
+    assert grade.user == user
+    assert grade.grade == 0.5
+    assert grade.letter_grade == "A"
+    assert grade.passed is True
+    assert grade.set_by_admin is False
+    assert created is True
+    assert updated is False
+
+    edx_grade = MagicMock(percent=0.3, passed=False, letter_grade="F")
+    grade, created, updated = ensure_course_run_grade(
+        user, run, edx_grade, should_update=True
+    )
+
+    assert grade.course_run == run
+    assert grade.user == user
+    assert grade.grade == 0.3
+    assert grade.letter_grade == "F"
+    assert grade.passed is False
+    assert grade.set_by_admin is False
+    assert created is False
+    assert updated is True
