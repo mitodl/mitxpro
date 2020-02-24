@@ -860,6 +860,7 @@ def fetch_and_serialize_unused_coupons(user):
             Q(coupon__payment__versions__expiration_date=None)
             | Q(coupon__payment__versions__expiration_date__gt=now)
         )
+        .exclude(product__is_active=False)
         .order_by("coupon__payment__versions__expiration_date")
         .values(
             "product__id",
@@ -870,20 +871,24 @@ def fetch_and_serialize_unused_coupons(user):
 
     unused_coupons = []
     for coupon_data in coupons_data:
-        product = Product.objects.get(id=coupon_data["product__id"])
-        unused_coupons.append(
-            {
-                "coupon_code": coupon_data["coupon__coupon_code"],
-                "product_id": coupon_data["product__id"],
-                "expiration_date": coupon_data[
-                    "coupon__payment__versions__expiration_date"
-                ],
-                "product_title": product.title,
-                "product_type": product.type_string,
-                "thumbnail_url": product.thumbnail_url,
-                "start_date": product.start_date,
-            }
-        )
+        try:
+            product = Product.objects.get(id=coupon_data["product__id"])
+        except Product.DoesNotExist:
+            pass
+        else:
+            unused_coupons.append(
+                {
+                    "coupon_code": coupon_data["coupon__coupon_code"],
+                    "product_id": coupon_data["product__id"],
+                    "expiration_date": coupon_data[
+                        "coupon__payment__versions__expiration_date"
+                    ],
+                    "product_title": product.title,
+                    "product_type": product.type_string,
+                    "thumbnail_url": product.thumbnail_url,
+                    "start_date": product.start_date,
+                }
+            )
     return unused_coupons
 
 
