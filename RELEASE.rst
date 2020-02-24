@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.41.0
+Version 0.41.0 (Released February 24, 2020)
 --------------
 
 - Update heroku to Python 3.7
