@@ -11,8 +11,9 @@ DEFAULT_GOOGLE_EXPIRE_TIMEDELTA = dict(minutes=60)
 SHEETS_VALUE_REQUEST_PAGE_SIZE = 50
 SHEET_TYPE_COUPON_REQUEST = "enrollrequest"
 SHEET_TYPE_COUPON_ASSIGN = "enrollassign"
-SHEET_TYPE_REFUND = "refund"
-SHEET_TYPE_DEFERRAL = "defer"
+SHEET_TYPE_ENROLL_CHANGE = "enrollchange"
+WORKSHEET_TYPE_REFUND = "refund"
+WORKSHEET_TYPE_DEFERRAL = "defer"
 
 # The index of the first row of a spreadsheet according to Google
 GOOGLE_SHEET_FIRST_ROW = 1

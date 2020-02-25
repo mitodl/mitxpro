@@ -18,9 +18,10 @@ from sheets.constants import (
     GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN,
     SHEETS_VALUE_REQUEST_PAGE_SIZE,
     SHEET_TYPE_COUPON_REQUEST,
-    SHEET_TYPE_REFUND,
+    WORKSHEET_TYPE_REFUND,
     SHEET_TYPE_COUPON_ASSIGN,
-    SHEET_TYPE_DEFERRAL,
+    WORKSHEET_TYPE_DEFERRAL,
+    SHEET_TYPE_ENROLL_CHANGE,
 )
 
 
@@ -62,6 +63,8 @@ class SheetMetadata:
 
     sheet_type = None
     sheet_name = None
+    worksheet_type = None
+    worksheet_name = None
     first_data_row = None
     non_input_column_indices = set()
     num_columns = 0
@@ -134,8 +137,10 @@ class RefundRequestSheetMetadata(
     SKIP_ROW_COL = 14
 
     def __init__(self):
-        self.sheet_type = SHEET_TYPE_REFUND
-        self.sheet_name = "Refund Request sheet"
+        self.sheet_type = SHEET_TYPE_ENROLL_CHANGE
+        self.sheet_name = "Enrollment Change Request sheet"
+        self.worksheet_type = WORKSHEET_TYPE_REFUND
+        self.worksheet_name = "Refunds"
         self.first_data_row = settings.SHEETS_REFUND_FIRST_ROW
         self.num_columns = self.SKIP_ROW_COL + 1
         self.non_input_column_indices = set(
@@ -163,8 +168,10 @@ class DeferralRequestSheetMetadata(
     SKIP_ROW_COL = 10
 
     def __init__(self):
-        self.sheet_type = SHEET_TYPE_DEFERRAL
-        self.sheet_name = "Deferral Request sheet"
+        self.sheet_type = SHEET_TYPE_ENROLL_CHANGE
+        self.sheet_name = "Enrollment Change Request sheet"
+        self.worksheet_type = WORKSHEET_TYPE_DEFERRAL
+        self.worksheet_name = "Deferrals"
         self.first_data_row = settings.SHEETS_DEFERRAL_FIRST_ROW
         self.num_columns = self.SKIP_ROW_COL + 1
         self.non_input_column_indices = set(

@@ -31,12 +31,18 @@ from sheets.constants import (
     GOOGLE_API_FILE_WATCH_KIND,
     GOOGLE_API_NOTIFICATION_TYPE,
     DEFAULT_GOOGLE_EXPIRE_TIMEDELTA,
-    SHEETS_VALUE_REQUEST_PAGE_SIZE,
+    SHEET_TYPE_COUPON_REQUEST,
+    SHEET_TYPE_ENROLL_CHANGE,
+    WORKSHEET_TYPE_REFUND,
+    SHEET_TYPE_COUPON_ASSIGN,
 )
 from sheets.utils import (
     format_datetime_for_google_timestamp,
     google_timestamp_to_datetime,
     build_drive_file_email_share_request,
+    CouponRequestSheetMetadata,
+    RefundRequestSheetMetadata,
+    CouponAssignSheetMetadata,
 )
 from sheets.exceptions import FailedBatchRequestException
 
@@ -464,3 +470,25 @@ def renew_sheet_file_watch(sheet_metadata, force=False):
             file_watch.version += 1
         file_watch.save()
         return file_watch, created, True
+
+
+def get_sheet_metadata_from_type(sheet_type):
+    """
+    Gets sheet metadata associated with the given sheet type
+
+    Args:
+        sheet_type (str):
+
+    Returns:
+        type(sheets.utils.SheetMetadata): An object with metadata about some sheet type
+
+    Raises:
+         ValueError: Raised if there is no metadata class associated with the given sheet type
+    """
+    if sheet_type == SHEET_TYPE_COUPON_REQUEST:
+        return CouponRequestSheetMetadata()
+    elif sheet_type == SHEET_TYPE_COUPON_ASSIGN:
+        return CouponAssignSheetMetadata()
+    elif sheet_type in {SHEET_TYPE_ENROLL_CHANGE, WORKSHEET_TYPE_REFUND}:
+        return RefundRequestSheetMetadata()
+    raise ValueError(f"No sheet metadata exists matching the type '{sheet_type}'")

@@ -1,21 +1,16 @@
 """
 Makes a request to receive push notifications when the coupon request Sheet is updated.
 """
-from django.core.management import BaseCommand, CommandError
+from django.core.management import BaseCommand
 
 from googleapiclient.errors import HttpError
 
-from sheets.api import renew_sheet_file_watch, request_file_watch
-from sheets.constants import (
-    SHEET_TYPE_COUPON_REQUEST,
-    SHEET_TYPE_REFUND,
-    SHEET_TYPE_DEFERRAL,
+from sheets.api import (
+    renew_sheet_file_watch,
+    request_file_watch,
+    get_sheet_metadata_from_type,
 )
-from sheets.utils import (
-    CouponRequestSheetMetadata,
-    RefundRequestSheetMetadata,
-    DeferralRequestSheetMetadata,
-)
+from sheets.constants import SHEET_TYPE_COUPON_REQUEST, SHEET_TYPE_ENROLL_CHANGE
 
 
 class Command(BaseCommand):
@@ -47,21 +42,14 @@ class Command(BaseCommand):
             "-s",
             "--sheet",
             default=SHEET_TYPE_COUPON_REQUEST,
-            choices=[SHEET_TYPE_COUPON_REQUEST, SHEET_TYPE_REFUND, SHEET_TYPE_DEFERRAL],
+            choices=[SHEET_TYPE_COUPON_REQUEST, SHEET_TYPE_ENROLL_CHANGE],
             help="The sheet that will have a file watch configured (default: '%(default)s')",
         )
 
     def handle(
         self, *args, **options
     ):  # pylint:disable=missing-docstring,too-many-branches
-        if options["sheet"] == SHEET_TYPE_COUPON_REQUEST:
-            sheet_metadata = CouponRequestSheetMetadata()
-        elif options["sheet"] == SHEET_TYPE_REFUND:
-            sheet_metadata = RefundRequestSheetMetadata()
-        elif options["sheet"] == SHEET_TYPE_DEFERRAL:
-            sheet_metadata = DeferralRequestSheetMetadata()
-        else:
-            raise CommandError("Invalid sheet type")
+        sheet_metadata = get_sheet_metadata_from_type(options["sheet"])
         try:
             file_watch, created, updated = renew_sheet_file_watch(
                 sheet_metadata, force=options["force"]

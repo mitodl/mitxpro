@@ -191,8 +191,9 @@ class EnrollmentChangeRequestHandler:
         ignored_row_results = row_result_dict.get(ResultType.IGNORED, [])
         if ignored_row_results:
             log.warning(
-                "Ignored rows in %s: %s",
+                "Ignored rows in %s (%s): %s",
                 self.sheet_metadata.sheet_name,
+                self.sheet_metadata.worksheet_name,
                 [row_result.row_index for row_result in ignored_row_results],
             )
         return row_result_dict

@@ -18,19 +18,14 @@ from rest_framework import status
 from google_auth_oauthlib.flow import Flow  # pylint: disable-all
 from google.auth.exceptions import GoogleAuthError  # pylint: disable-all
 
+from sheets.api import get_sheet_metadata_from_type
 from sheets.models import GoogleApiAuth, GoogleFileWatch
 from sheets.constants import (
     REQUIRED_GOOGLE_API_SCOPES,
     SHEET_TYPE_COUPON_REQUEST,
-    SHEET_TYPE_REFUND,
-    SHEET_TYPE_DEFERRAL,
+    SHEET_TYPE_ENROLL_CHANGE,
 )
-from sheets.utils import (
-    generate_google_client_config,
-    CouponRequestSheetMetadata,
-    RefundRequestSheetMetadata,
-    DeferralRequestSheetMetadata,
-)
+from sheets.utils import generate_google_client_config
 from sheets import tasks
 from sheets.coupon_assign_api import CouponAssignmentHandler
 from sheets.coupon_request_api import CouponRequestHandler
@@ -125,13 +120,9 @@ def handle_watched_sheet_update(request):
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
 
     sheet_type = request.GET.get("sheet", SHEET_TYPE_COUPON_REQUEST)
-    if sheet_type == SHEET_TYPE_COUPON_REQUEST:
-        sheet_metadata = CouponRequestSheetMetadata()
-    elif sheet_type == SHEET_TYPE_REFUND:
-        sheet_metadata = RefundRequestSheetMetadata()
-    elif sheet_type == SHEET_TYPE_DEFERRAL:
-        sheet_metadata = DeferralRequestSheetMetadata()
-    else:
+    try:
+        sheet_metadata = get_sheet_metadata_from_type(sheet_type)
+    except:
         log.error(
             "Unknown sheet type '%s' (passed via 'sheet' query parameter)", sheet_type
         )
@@ -159,9 +150,8 @@ def handle_watched_sheet_update(request):
 
     if sheet_type == SHEET_TYPE_COUPON_REQUEST:
         tasks.handle_unprocessed_coupon_requests.delay()
-    elif sheet_type == SHEET_TYPE_REFUND:
+    elif sheet_type == SHEET_TYPE_ENROLL_CHANGE:
         tasks.handle_unprocessed_refund_requests.delay()
-    elif sheet_type == SHEET_TYPE_DEFERRAL:
         tasks.handle_unprocessed_deferral_requests.delay()
 
     return HttpResponse(status=status.HTTP_200_OK)
