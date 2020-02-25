@@ -38,7 +38,7 @@ class CourseAdmin(admin.ModelAdmin):
     """Admin for Course"""
 
     model = Course
-    search_fields = ["title", "topics__name"]
+    search_fields = ["title", "topics__name", "readable_id"]
     list_filter = ["live", "program", "topics"]
 
     formfield_overrides = {
