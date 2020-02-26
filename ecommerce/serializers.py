@@ -1,7 +1,5 @@
 """ ecommerce serializers """
-from datetime import datetime
 import logging
-import pytz
 
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -23,11 +21,12 @@ from ecommerce.api import (
     latest_product_version,
     get_or_create_data_consents,
     get_product_version_price_with_discount,
+    get_product_from_querystring_id,
 )
-from ecommerce.api import get_product_from_querystring_id
 from ecommerce.constants import ORDERED_VERSIONS_QSET_ATTR, CYBERSOURCE_CARD_TYPES
+from ecommerce.models import Basket
 from mitxpro.serializers import WriteableSerializerMethodField
-from mitxpro.utils import first_or_none
+from mitxpro.utils import first_or_none, now_in_utc
 from users.serializers import ExtendedLegalAddressSerializer
 
 log = logging.getLogger(__name__)
@@ -324,99 +323,7 @@ class BasketSerializer(serializers.ModelSerializer):
         return DataConsentUserSerializer(instance=data_consents, many=True).data
 
     @classmethod
-    def _get_runs_for_product(cls, *, product, run_ids, user):
-        """Helper function to get and validate selected runs in a product"""
-        if None in run_ids:
-            raise ValidationError(
-                {"runs": "Each course must have a course run selection"}
-            )
-
-        runs_for_product = list(product.run_queryset.filter(id__in=run_ids))
-        run_ids_for_product = {run.id for run in runs_for_product}
-
-        missing_run_ids = set(run_ids) - run_ids_for_product
-        if missing_run_ids:
-            raise ValidationError(
-                {"runs": f"Unable to find run(s) with id(s) {missing_run_ids}"}
-            )
-
-        courses_for_product = {}
-        for run in runs_for_product:
-            if run.course_id not in courses_for_product:
-                courses_for_product[run.course_id] = run.id
-            elif courses_for_product[run.course_id] != run.id:
-                raise ValidationError(
-                    {"runs": "Only one run per course can be selected"}
-                )
-
-        if CourseRunEnrollment.objects.filter(user=user, run_id__in=run_ids).exists():
-            raise ValidationError({"runs": "User has already enrolled in run"})
-
-        return runs_for_product
-
-    @classmethod
-    def _update_items(cls, basket, items):
-        """
-        Helper function to determine if the basket item should be updated, removed, or kept as is.
-
-        Args:
-            basket (Basket): the basket to update
-            items (list of JSON objects): Basket items to update, or clear if empty list, or leave as is if None
-
-        Returns:
-            tuple: Product object to assign to basket, if any, and a list of CourseRun
-
-        """
-        if items:
-            # Item updated
-            item = items[0]
-            product_id = item.get("product_id")
-            run_ids = item.get("run_ids")
-
-            try:
-                product = get_product_from_querystring_id(product_id)
-            except (ObjectDoesNotExist, MultipleObjectsReturned) as exc:
-                if isinstance(exc, MultipleObjectsReturned):
-                    log.error(
-                        "Multiple Products found with identical ids: %s", product_id
-                    )
-                raise ValidationError(f"Invalid product id {product_id}") from exc
-
-            previous_product = models.Product.objects.filter(
-                basketitem__basket=basket
-            ).first()
-
-            if (
-                run_ids is None
-                and previous_product is not None
-                and product.id == previous_product.id
-            ):
-                # User is updating basket item to the same item as before
-                run_ids = list(
-                    models.CourseRunSelection.objects.filter(basket=basket).values_list(
-                        "run", flat=True
-                    )
-                )
-
-            if run_ids is not None:
-                runs = cls._get_runs_for_product(
-                    product=product, run_ids=run_ids, user=basket.user
-                )
-            else:
-                runs = None
-        elif items is not None:
-            # Item removed
-            product = None
-            runs = None
-        else:
-            # Item has not changed
-            basket_item = basket.basketitems.first()
-            product = basket_item.product if basket_item else None
-            runs = list(CourseRun.objects.filter(courserunselection__basket=basket))
-        return product, runs
-
-    @classmethod
-    def _update_coupons(cls, basket, product, coupons):
+    def _get_applicable_coupon_version(cls, basket, product, coupons):
         """
         Helper function to determine if the basket coupon should be updated, removed, or kept as is.
 
@@ -429,10 +336,6 @@ class BasketSerializer(serializers.ModelSerializer):
             CouponVersion: CouponVersion object to assign to basket, if any.
 
         """
-        if not product:
-            # No product, so clear coupon too
-            return None
-
         product_version = product.latest_version
         if coupons:
             if len(coupons) > 1:
@@ -479,6 +382,105 @@ class BasketSerializer(serializers.ModelSerializer):
                 )
         return coupon_version
 
+    @classmethod
+    def _update_basket_data(
+        cls,
+        basket,
+        updated_product=None,
+        updated_program_run=None,
+        updated_run_ids=None,
+        coupon_version=None,
+        data_consents=None,
+        clear_all=False,
+    ):  # pylint: disable=too-many-arguments
+        """
+        Creates/updates/deletes Basket-related data
+
+        Args:
+            basket (models.Basket): The user's Basket
+            updated_product (models.Product): If provided, indicates a new Product that differs from the
+                previous Product associated with the Basket
+            updated_program_run (courses.models.ProgramRun): If provided, indicates a ProgramRun to associate
+                with the Product
+            updated_run_ids (iterable of int): If provided, indicates a new selection of CourseRun ids for
+                this basket
+            coupon_version (models.CouponVersion): A valid coupon to associate with this Basket. If None, all
+                coupon selections for the Basket are deleted
+            data_consents (iterable of int): Data consent ids
+            clear_all (boolean): If True, clears the basket, i.e.: all basket items, course run selections,
+                and coupon selections are deleted
+        """
+        with transaction.atomic():
+            # Fetching the basket again using select_for_update to avoid ending up in a weird state
+            # if concurrent requests are received.
+            basket = Basket.objects.select_for_update().get(id=basket.id)
+            if clear_all is True or updated_product is not None:
+                basket.basketitems.all().delete()
+            if clear_all is True or updated_run_ids is not None:
+                basket.courserunselection_set.all().delete()
+            if clear_all is True or coupon_version is None:
+                basket.couponselection_set.all().delete()
+
+            if updated_product is not None:
+                models.BasketItem.objects.create(
+                    product=updated_product,
+                    quantity=1,
+                    basket=basket,
+                    program_run=updated_program_run,
+                )
+            if updated_run_ids is not None:
+                models.CourseRunSelection.objects.bulk_create(
+                    models.CourseRunSelection(basket=basket, run_id=run_id)
+                    for run_id in updated_run_ids
+                )
+            if coupon_version is not None:
+                models.CouponSelection.objects.update_or_create(
+                    basket=basket, defaults={"coupon": coupon_version.coupon}
+                )
+            if data_consents is not None:
+                models.DataConsentUser.objects.filter(
+                    id__in=data_consents, user=basket.user
+                ).update(consent_date=now_in_utc())
+
+    def _determine_items_to_update(self, basket, items, existing_product):
+        """
+        Compares products/run selections in the request with the ones that already exist for this
+        Basket. If they are different, the updated versions are returned.
+
+        Args:
+            basket (models.Basket):
+            items (list of dict): The items from the request body
+            existing_product (models.Product): The Product currently associated with the given Basket
+
+        Returns:
+            (Product, set of int, ProgramRun): A tuple containing an updated Product (or None if the
+                Product has not changed), a set of updated course run id selections (or None if they were
+                not changed), and a ProgramRun associated with the product (or None if the product id in
+                the request does not reference a ProgramRun)
+        """
+        item = items[0]
+        request_product_id = item.get("product_id")
+        run_ids = set(item.get("run_ids", []))
+        try:
+            product, _, program_run = get_product_from_querystring_id(
+                request_product_id
+            )
+        except (ObjectDoesNotExist, MultipleObjectsReturned) as exc:
+            if isinstance(exc, MultipleObjectsReturned):
+                log.error(
+                    "Multiple Products found with identical ids: %s", request_product_id
+                )
+            raise ValidationError(
+                {"items": f"Invalid product id {request_product_id}"}
+            ) from exc
+        self._validate_runs(run_ids, product)
+        existing_run_ids = set(
+            basket.courserunselection_set.values_list("run_id", flat=True)
+        )
+        updated_product = product if product != existing_product else None
+        updated_run_ids = run_ids if run_ids != existing_run_ids else None
+        return updated_product, updated_run_ids, program_run
+
     def update(self, instance, validated_data):
         items = validated_data.get("items")
         coupons = validated_data.get("coupons")
@@ -488,40 +490,78 @@ class BasketSerializer(serializers.ModelSerializer):
         if items is None and coupons is None and data_consents is None:
             raise ValidationError("Invalid request")
 
-        product, runs = self._update_items(basket, items)
-        coupon_version = self._update_coupons(basket, product, coupons)
-        with transaction.atomic():
-            if product:
-                # Update basket items and coupon selection
-                basket.basketitems.all().delete()
-                models.BasketItem.objects.create(
-                    product=product, quantity=1, basket=basket
-                )
+        if items == []:
+            self._update_basket_data(
+                basket, data_consents=data_consents, clear_all=True
+            )
+            return basket
 
-                models.CourseRunSelection.objects.filter(basket=basket).delete()
-                if runs is not None:
-                    for run in runs:
-                        models.CourseRunSelection.objects.create(basket=basket, run=run)
+        existing_product = basket.get_product()
+        coupon_version = None
 
-                if coupon_version:
-                    models.CouponSelection.objects.update_or_create(
-                        basket=basket, defaults={"coupon": coupon_version.coupon}
-                    )
-                else:
-                    basket.couponselection_set.all().delete()
-            else:
-                # Remove everything from basket
-                basket.basketitems.all().delete()
-                basket.couponselection_set.all().delete()
-                basket.courserunselection_set.all().delete()
+        if items is None:
+            updated_product = None
+            updated_run_ids = None
+            program_run = None
+        else:
+            updated_product, updated_run_ids, program_run = self._determine_items_to_update(
+                basket, items, existing_product
+            )
 
-            if data_consents is not None:
-                sign_date = datetime.now(tz=pytz.UTC)
-                models.DataConsentUser.objects.filter(
-                    id__in=data_consents, user=basket.user
-                ).update(consent_date=sign_date)
+        if updated_product or existing_product:
+            coupon_version = self._get_applicable_coupon_version(
+                basket,
+                # Whether or not the product was updated, we want to make sure that there is a valid
+                # coupon associated with the basket
+                product=updated_product or existing_product,
+                coupons=coupons,
+            )
+
+        self._update_basket_data(
+            basket,
+            updated_product=updated_product,
+            updated_program_run=program_run,
+            updated_run_ids=updated_run_ids,
+            coupon_version=coupon_version,
+            data_consents=data_consents,
+            clear_all=False,
+        )
 
         return instance
+
+    def _validate_runs(self, run_ids, product):
+        """
+        Validates the run ids provided in the request
+
+        Args:
+            run_ids (set of int): A set of CourseRun ids
+            product (models.Product): The Product referred to in the request
+        Raises:
+            ValidationError: Raised if the run ids provided are invalid
+        """
+        if run_ids is not None and len(run_ids) > 0:
+            if None in run_ids:
+                raise ValidationError(
+                    {"runs": "Each course must have a course run selection"}
+                )
+            if CourseRunEnrollment.objects.filter(
+                user=self.instance.user, run_id__in=run_ids
+            ).exists():
+                raise ValidationError(
+                    {
+                        "runs": "User has already enrolled in one of the selected course runs"
+                    }
+                )
+        product_run_course_map = dict(
+            product.run_queryset.filter(id__in=run_ids).values_list("id", "course_id")
+        )
+        if len(product_run_course_map) < len(run_ids):
+            missing_run_ids = set(run_ids) - set(product_run_course_map.keys())
+            raise ValidationError(
+                {"runs": f"Unable to find run(s) with id(s) {missing_run_ids}"}
+            )
+        elif len(set(product_run_course_map.values())) < len(run_ids):
+            raise ValidationError({"runs": "Only one run per course can be selected"})
 
     def validate_items(self, items):
         """Validate some basic things about items"""
@@ -530,19 +570,8 @@ class BasketSerializer(serializers.ModelSerializer):
                 raise ValidationError("Basket cannot contain more than one item")
             item = items[0]
             product_id = item.get("product_id")
-
             if product_id is None:
                 raise ValidationError("Invalid request")
-
-            try:
-                get_product_from_querystring_id(product_id)
-            except (ObjectDoesNotExist, MultipleObjectsReturned) as exc:
-                if isinstance(exc, MultipleObjectsReturned):
-                    log.error(
-                        "Multiple Products found with identical ids: %s", product_id
-                    )
-                raise ValidationError(f"Invalid product id {product_id}") from exc
-
         return {"items": items}
 
     def validate_coupons(self, coupons):

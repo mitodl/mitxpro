@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from ecommerce.models import (
     Line,
+    ProgramRunLine,
     Order,
     OrderAudit,
     Receipt,
@@ -59,6 +60,7 @@ class LineAdmin(admin.ModelAdmin):
 
     model = Line
     list_display = ("id", "order", "get_product_version_text_id", "quantity")
+    search_fields = ("order__id", "product_version__text_id")
 
     readonly_fields = get_field_names(Line)
 
@@ -74,6 +76,28 @@ class LineAdmin(admin.ModelAdmin):
 
     get_product_version_text_id.short_description = "Product Object Text Id"
     get_product_version_text_id.admin_order_field = "product_version__text_id"
+
+
+class ProgramRunLineAdmin(admin.ModelAdmin):
+    """Admin for ProgramRunLine"""
+
+    model = ProgramRunLine
+    list_display = ("id", "line", "get_order", "program_run")
+
+    readonly_fields = get_field_names(ProgramRunLine)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def get_order(self, obj):
+        """Returns the related Order"""
+        return obj.line.order
+
+    get_order.short_description = "Order"
+    get_order.admin_order_field = "line__order"
 
 
 class OrderAdmin(AuditableModelAdmin):
@@ -437,6 +461,7 @@ class ProductCouponAssignmentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Line, LineAdmin)
+admin.site.register(ProgramRunLine, ProgramRunLineAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderAudit, OrderAuditAdmin)
 admin.site.register(Receipt, ReceiptAdmin)

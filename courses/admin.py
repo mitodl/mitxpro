@@ -11,6 +11,7 @@ from mitxpro.utils import get_field_names
 from mitxpro.admin import AuditableModelAdmin
 from .models import (
     Program,
+    ProgramRun,
     Course,
     CourseRun,
     ProgramEnrollment,
@@ -32,6 +33,14 @@ class ProgramAdmin(admin.ModelAdmin):
     search_fields = ["title", "readable_id"]
     list_display = ("id", "title", "readable_id")
     list_filter = ["live"]
+
+
+class ProgramRunAdmin(admin.ModelAdmin):
+    """Admin for ProgramRun"""
+
+    model = ProgramRun
+    list_display = ("id", "program", "run_suffix", "full_readable_id")
+    list_filter = ["program"]
 
 
 class CourseAdmin(admin.ModelAdmin):
@@ -274,6 +283,7 @@ class CourseTopicAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Program, ProgramAdmin)
+admin.site.register(ProgramRun, ProgramRunAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(CourseRun, CourseRunAdmin)
 admin.site.register(ProgramEnrollment, ProgramEnrollmentAdmin)

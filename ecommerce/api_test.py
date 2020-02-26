@@ -11,15 +11,17 @@ from unittest.mock import PropertyMock
 import uuid
 
 import factory
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import ValidationError
 import pytest
 
-from courses.models import CourseRunEnrollment, ProgramEnrollment
+from courses.models import CourseRunEnrollment, ProgramEnrollment, CourseRun, Program
 from courses.factories import (
     CourseFactory,
     ProgramFactory,
     CourseRunFactory,
     CourseRunEnrollmentFactory,
+    ProgramRunFactory,
 )
 from ecommerce.api import (
     create_coupons,
@@ -43,6 +45,8 @@ from ecommerce.api import (
     complete_order,
     enroll_user_in_order_items,
     fetch_and_serialize_unused_coupons,
+    get_product_from_text_id,
+    get_product_from_querystring_id,
 )
 from ecommerce.factories import (
     BasketFactory,
@@ -60,6 +64,7 @@ from ecommerce.factories import (
     CouponEligibilityFactory,
     ProductCouponAssignmentFactory,
     BulkCouponAssignmentFactory,
+    BasketItemFactory,
 )
 from ecommerce.models import (
     BasketItem,
@@ -75,7 +80,7 @@ from ecommerce.models import (
     ProductCouponAssignment,
 )
 from ecommerce.test_utils import unprotect_version_tables
-from mitxpro.utils import now_in_utc
+from mitxpro.utils import now_in_utc, dict_without_keys
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
 
@@ -518,11 +523,11 @@ def test_get_by_reference_number_missing(basket_and_coupons):
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
 @pytest.mark.parametrize("has_coupon", [True, False])
-def test_create_order(
+def test_create_unfulfilled_order(
     has_coupon, basket_and_coupons, settings, hubspot_api_key, mock_hubspot_syncs
 ):  # pylint: disable=too-many-locals
     """
-    Create Order from a purchasable course
+    create_unfulfilled_order should create an Order from a purchasable course
     """
     settings.HUBSPOT_API_KEY = hubspot_api_key
     coupon = basket_and_coupons.coupongroup_best.coupon
@@ -549,13 +554,13 @@ def test_create_order(
     assert order_audit.order == order
     assert order_audit.data_after == order.to_dict()
 
-    # data_before only has updated_on different, since we only call save_and_log
-    # after Order is already created
     data_before = order_audit.data_before
     dict_before = order.to_dict()
-    del data_before["updated_on"]
-    del dict_before["updated_on"]
-    assert data_before == dict_before
+    # The "updated_on" value is different for data_before since we only call save_and_log
+    # after Order is already created
+    assert dict_without_keys(data_before, "updated_on") == dict_without_keys(
+        dict_before, "updated_on"
+    )
 
     if has_coupon:
         assert (
@@ -572,6 +577,27 @@ def test_create_order(
         assert mock_hubspot_syncs.order.called_with(order.id)
     else:
         assert mock_hubspot_syncs.order.not_called()
+
+
+@pytest.mark.parametrize("has_program_run", [True, False])
+def test_create_unfulfilled_order_program_run(user, has_program_run):
+    """
+    create_unfulfilled_order should associate a ProgramRunLine with a Line in an order if
+    the basket item has a program run attached
+    """
+    basket_item = BasketItemFactory.create(
+        basket__user=user, with_program_run=has_program_run
+    )
+    ProductVersionFactory(product=basket_item.product)
+
+    order = create_unfulfilled_order(user)
+    assert order.lines.count() == 1
+    line = order.lines.first()
+    if has_program_run:
+        assert line.programrunline.program_run == basket_item.program_run
+    else:
+        with pytest.raises(ObjectDoesNotExist):
+            line.programrunline  # pylint: disable=pointless-statement
 
 
 def test_get_product_courses():
@@ -1247,3 +1273,92 @@ def test_create_coupons(use_defaults):
             uuid.UUID(coupon.coupon_code)
         else:
             assert coupon.coupon_code == optional["coupon_code"]
+
+
+@pytest.mark.parametrize(
+    "input_text_id,run_text_id,program_text_id,prog_run_suffix",
+    [
+        ["course-v1:some+run", "course-v1:some+run", None, None],
+        ["program-v1:some+program", None, "program-v1:some+program", None],
+        ["program-v1:some+program+R1", None, "program-v1:some+program+R1", None],
+        ["program-v1:some+program+R1", None, "program-v1:some+program", "R1"],
+    ],
+)
+def test_get_product_from_text_id(
+    input_text_id, run_text_id, program_text_id, prog_run_suffix
+):
+    """
+    get_product_from_text_id should fetch a Product, Program/CourseRun, and (if applicable) a ProgramRun
+    based on the given text id
+    """
+    expected_content_object = None
+    if run_text_id:
+        expected_content_object = CourseRunFactory.create(courseware_id=run_text_id)
+    if program_text_id:
+        expected_content_object = ProgramFactory.create(readable_id=program_text_id)
+        if prog_run_suffix:
+            ProgramRunFactory.create(
+                program=expected_content_object, run_suffix=prog_run_suffix
+            )
+    expected_product = ProductFactory.create(content_object=expected_content_object)
+
+    product, content_object, program_run = get_product_from_text_id(input_text_id)
+    assert product == expected_product
+    assert content_object is not None
+    assert content_object == expected_content_object
+    if prog_run_suffix is not None:
+        assert program_run is not None
+        assert program_run.run_suffix == prog_run_suffix
+        assert program_run.program == content_object
+
+
+def test_get_product_from_text_id_failure():
+    """
+    get_product_from_text_id should raise exceptions if the object(s) indicated by the text id don't exist
+    or they don't have associated products
+    """
+    program_without_product = ProgramFactory.create()
+    run_without_product = CourseRunFactory.create()
+    program_run = ProgramRunFactory.create(program=program_without_product)
+    invalid_prog_run_text_id = (
+        f"{program_without_product.text_id}+{program_run.run_suffix}5"
+    )
+    arg_exception_map = {
+        program_without_product.text_id: Product.DoesNotExist,
+        run_without_product.text_id: Product.DoesNotExist,
+        program_run.full_readable_id: Product.DoesNotExist,
+        "course-v1:doesnt+exist": CourseRun.DoesNotExist,
+        "program-v1:doesnt+exist": Program.DoesNotExist,
+        invalid_prog_run_text_id: Program.DoesNotExist,
+    }
+    for text_id, expected_exception in arg_exception_map.items():
+        with pytest.raises(expected_exception):
+            get_product_from_text_id(text_id)
+
+
+@pytest.mark.parametrize(
+    "qs_product_id,exp_text_id",
+    [
+        ["123", None],
+        ["course-v1:some+id", "course-v1:some+id"],
+        ["course-v1:some id", "course-v1:some+id"],
+    ],
+)
+def test_get_product_from_querystring_id(mocker, qs_product_id, exp_text_id):
+    """
+    get_product_from_querystring_id should fetch a Product, Program/CourseRun, and (if applicable) a ProgramRun
+    based on a querystring product id value.
+    """
+    product = ProductFactory.create(id=123)
+    patched_get_product = mocker.patch(
+        "ecommerce.api.get_product_from_text_id",
+        return_value=(product, product.content_object, None),
+    )
+    returned_product, returned_content_object, _ = get_product_from_querystring_id(
+        qs_product_id
+    )
+    assert returned_product == product
+    assert returned_content_object == product.content_object
+    assert patched_get_product.called is (exp_text_id is not None)
+    if exp_text_id is not None:
+        patched_get_product.assert_called_once_with(exp_text_id)

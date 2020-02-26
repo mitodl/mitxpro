@@ -35,15 +35,19 @@ def get_bulk_enroll_message_data(bulk_assignment_id, recipient, product_coupon):
     Returns:
         ecommerce.api.UserMessageProps: An object containing user-specific message data
     """
+    product_object = product_coupon.product.content_object
+    if product_coupon.program_run:
+        email_product_id = product_coupon.program_run.full_readable_id
+    else:
+        email_product_id = product_object.text_id
     enrollment_url = make_checkout_url(
-        product_id=product_coupon.product.id, code=product_coupon.coupon.coupon_code
+        product_id=email_product_id, code=product_coupon.coupon.coupon_code
     )
     company_name = (
         product_coupon.coupon.payment.versions.values_list("company__name", flat=True)
         .order_by("-created_on")
         .first()
     )
-    product_object = product_coupon.product.content_object
     context = {
         "enrollable_title": product_object.title,
         "enrollment_url": enrollment_url,

@@ -529,7 +529,7 @@ def test_patch_basket_multiple_products(basket_client, basket_and_coupons):
 
 
 def test_patch_basket_invalid_coupon_format(basket_client, basket_and_coupons):
-    """Test that an update with an invalid format is rejected"""
+    """Test that an update with an invalid coupon code format is rejected"""
     resp = basket_client.patch(
         reverse("basket_api"), type="json", data={"coupons": ["coupon code"]}
     )
@@ -888,7 +888,9 @@ def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
         },
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp.json()["errors"] == {"runs": "User has already enrolled in run"}
+    assert resp.json()["errors"] == {
+        "runs": "User has already enrolled in one of the selected course runs"
+    }
 
 
 def test_patch_basket__another_user_enrolled(basket_client, basket_and_coupons):

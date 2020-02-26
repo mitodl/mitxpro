@@ -216,6 +216,16 @@ class Basket(TimestampedModel):
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
 
+    def get_product(self):
+        """
+        Fetches the Product associated with this Basket
+
+        Returns:
+            Product: The Product in this Basket (or None if one does not exist)
+        """
+        first_basket_item = self.basketitems.select_related("product").first()
+        return first_basket_item.product if first_basket_item else None
+
     def __str__(self):
         """Description of Basket"""
         return f"Basket for {self.user}"
@@ -231,6 +241,9 @@ class BasketItem(TimestampedModel):
         Basket, on_delete=models.PROTECT, related_name="basketitems"
     )
     quantity = models.PositiveIntegerField()
+    program_run = models.ForeignKey(
+        "courses.ProgramRun", on_delete=models.CASCADE, null=True, blank=True
+    )
 
     def __str__(self):
         """Description of BasketItem"""
@@ -401,6 +414,20 @@ class Line(TimestampedModel):
         return f"Line for order #{self.order.id}, {self.product_version} (qty: {self.quantity})"
 
 
+class ProgramRunLine(TimestampedModel):
+    """
+    A mapping from a Line to the ProgramRun associated with that Line
+    """
+
+    line = models.OneToOneField(
+        Line, on_delete=models.CASCADE, related_name="programrunline"
+    )
+    program_run = models.ForeignKey("courses.ProgramRun", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"ProgramRunLine for line: {self.id}, order: {self.line.order.id}, text id: {self.program_run.full_readable_id}"
+
+
 class CouponPaymentQueryset(models.QuerySet):  # pylint: disable=missing-docstring
     def with_ordered_versions(self):
         """Prefetches related CouponPaymentVersions in reverse creation order"""
@@ -549,6 +576,9 @@ class CouponEligibility(TimestampedModel):
 
     coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    program_run = models.ForeignKey(
+        "courses.ProgramRun", on_delete=models.PROTECT, null=True, blank=True
+    )
 
     class Meta:
         unique_together = ("coupon", "product")
