@@ -167,7 +167,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
         model = models.Product
 
 
-class ProductSerializer(BaseProductSerializer):
+class ProductDetailSerializer(BaseProductSerializer):
     """ Product Serializer """
 
     title = serializers.SerializerMethodField()
@@ -194,22 +194,6 @@ class ProductSerializer(BaseProductSerializer):
 
     class Meta:
         fields = BaseProductSerializer.Meta.fields + ["title", "latest_version"]
-        model = models.Product
-
-
-class ProductDetailSerializer(ProductSerializer):
-    """Product Serializer with ProductVersion detail included"""
-
-    latest_version = serializers.SerializerMethodField()
-
-    def get_latest_version(self, instance):
-        """Serialize and return the latest ProductVersion for the Product"""
-        return ProductVersionSerializer(
-            instance.latest_version, context={**self.context, "all_runs": True}
-        ).data
-
-    class Meta:
-        fields = ProductSerializer.Meta.fields + ["latest_version"]
         model = models.Product
 
 

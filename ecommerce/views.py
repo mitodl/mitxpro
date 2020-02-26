@@ -81,7 +81,18 @@ class ProductViewSet(ReadOnlyModelViewSet):
     permission_classes = ()
 
     serializer_class = ProductDetailSerializer
-    queryset = Product.objects.exclude(productversions=None)
+    queryset = (
+        Product.objects.exclude(productversions=None)
+        .select_related("content_type")
+        .with_ordered_versions()
+    )
+
+    def get_serializer_context(self):
+        """
+        return the serializer context.
+        """
+
+        return {"has_ordered_versions": True}
 
 
 class CompanyViewSet(ReadOnlyModelViewSet):
