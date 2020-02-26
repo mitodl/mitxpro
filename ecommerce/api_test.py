@@ -1092,6 +1092,97 @@ def test_fetch_and_serialize_unused_coupons(user):
     ]
 
 
+def test_fetch_and_serialize_unused_coupons_for_active_products(user):
+    """
+    Test that fetch_and_serialize_unused_coupons returns an serialized coupon assignments
+    if those coupons are the most recent versions and are unexpired and exclude the inactive products.
+    """
+    now = now_in_utc()
+    future = now + timedelta(days=5)
+    past = now - timedelta(days=5)
+
+    courserun_active_product = ProductFactory.create(
+        content_object=CourseRunFactory.create(), is_active=True
+    )
+    courserun_inactive_product = ProductFactory.create(
+        content_object=CourseRunFactory.create(), is_active=False
+    )
+
+    coupons = CouponFactory.create_batch(2)
+    payment_versions = CouponPaymentVersionFactory.create_batch(
+        3,
+        expiration_date=factory.Iterator([future, future, past]),
+        created_on=factory.Iterator([future, past, future]),
+        payment=factory.Iterator(
+            [coupons[0].payment, coupons[0].payment, coupons[1].payment]
+        ),
+    )
+
+    product_coupons = CouponEligibilityFactory.create_batch(
+        2,
+        coupon=factory.Iterator(coupons),
+        product=factory.Iterator(
+            [courserun_active_product, courserun_inactive_product]
+        ),
+    )
+    expected_payment_version = payment_versions[0]
+    expected_product_coupon = product_coupons[0]
+
+    # Create assignments for the user and set all to be unredeemed/unused
+    ProductCouponAssignmentFactory.create_batch(
+        len(product_coupons),
+        # Set assignment email as uppercase to test that the email match is case-insensitive
+        email=user.email.upper(),
+        redeemed=False,
+        product_coupon=factory.Iterator(product_coupons),
+    )
+
+    unused_coupons = fetch_and_serialize_unused_coupons(user)
+
+    assert unused_coupons == [
+        {
+            "coupon_code": expected_product_coupon.coupon.coupon_code,
+            "product_id": expected_product_coupon.product.id,
+            "expiration_date": expected_payment_version.expiration_date,
+            "product_title": expected_product_coupon.product.title,
+            "product_type": expected_product_coupon.product.type_string,
+            "thumbnail_url": expected_product_coupon.product.thumbnail_url,
+            "start_date": expected_product_coupon.product.start_date,
+        }
+    ]
+
+
+def test_fetch_and_serialize_unused_coupons_for_all_inactive_products(user):
+    """
+    Test that fetch_and_serialize_unused_coupons returns [] as all products
+    are not active ones.
+    """
+    courserun_inactive_product = ProductFactory.create(
+        content_object=CourseRunFactory.create(), is_active=False
+    )
+
+    coupons = CouponFactory.create_batch(2)
+    product_coupons = CouponEligibilityFactory.create_batch(
+        2,
+        coupon=factory.Iterator(coupons),
+        product=factory.Iterator(
+            [courserun_inactive_product, courserun_inactive_product]
+        ),
+    )
+
+    # Create assignments for the user and set all to be unredeemed/unused
+    ProductCouponAssignmentFactory.create_batch(
+        len(product_coupons),
+        # Set assignment email as uppercase to test that the email match is case-insensitive
+        email=user.email.upper(),
+        redeemed=False,
+        product_coupon=factory.Iterator(product_coupons),
+    )
+
+    unused_coupons = fetch_and_serialize_unused_coupons(user)
+    assert unused_coupons == []
+
+
 @pytest.mark.parametrize("use_defaults", [True, False])
 def test_create_coupons(use_defaults):
     """create_coupons should fill in good default parameters where necessary"""
