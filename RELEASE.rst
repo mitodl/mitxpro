@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.41.1
+--------------
+
+- Fix Checkout page crashes if user has inactive enrollment code
+- Fixed enrollment change sheet file watch renewal
+- add readable_id in search fiels in course admin (#1563)
+- Bump django from 2.2.8 to 2.2.10 (#1541)
+- Bump codecov from 3.5.0 to 3.6.5 (#1553)
+- Web app should issue appropriate headers for cache management (#1538)
+
 Version 0.41.0 (Released February 24, 2020)
 --------------
 
