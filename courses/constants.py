@@ -5,6 +5,10 @@ CONTENT_TYPE_MODEL_COURSE = "course"
 CONTENT_TYPE_MODEL_COURSERUN = "courserun"
 
 PROGRAM_TEXT_ID_PREFIX = "program-"
+ENROLLABLE_ITEM_ID_SEPARATOR = "+"
+PROGRAM_RUN_ID_PATTERN = r"^{program_prefix}.*\{separator}(?P<run_suffix>R\d+)$".format(
+    program_prefix=PROGRAM_TEXT_ID_PREFIX, separator=ENROLLABLE_ITEM_ID_SEPARATOR
+)
 
 ENROLL_CHANGE_STATUS_DEFERRED = "deferred"
 ENROLL_CHANGE_STATUS_TRANSFERRED = "transferred"

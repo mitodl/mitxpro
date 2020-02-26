@@ -3,11 +3,11 @@ Factories for ecommerce models
 """
 from datetime import timezone
 
-from factory import fuzzy, Faker, LazyAttribute, SubFactory, post_generation
+from factory import fuzzy, Faker, LazyAttribute, SubFactory, Trait, post_generation
 from factory.django import DjangoModelFactory
 import faker
 
-from courses.factories import CourseRunFactory
+from courses.factories import CourseRunFactory, ProgramRunFactory
 from ecommerce import models
 from ecommerce.test_utils import gen_fake_receipt_data
 from mitxpro.utils import now_in_utc
@@ -61,9 +61,13 @@ class BasketItemFactory(DjangoModelFactory):
     product = SubFactory(ProductFactory)
     basket = SubFactory(BasketFactory)
     quantity = fuzzy.FuzzyInteger(1, 5)
+    program_run = None
 
     class Meta:
         model = models.BasketItem
+
+    class Params:
+        with_program_run = Trait(program_run=SubFactory(ProgramRunFactory))
 
 
 class OrderFactory(DjangoModelFactory):

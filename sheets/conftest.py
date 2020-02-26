@@ -4,8 +4,9 @@ from datetime import datetime
 from types import SimpleNamespace
 import pytz
 import pytest
+import factory
 
-from courses.factories import CourseRunFactory
+from courses.factories import CourseRunFactory, ProgramFactory, ProgramRunFactory
 from ecommerce.factories import CompanyFactory, ProductVersionFactory
 from sheets.coupon_request_api import CouponRequestRow
 
@@ -37,10 +38,23 @@ def base_data(db):  # pylint: disable=unused-argument
     """Fixture that creates basic objects that are necessary to support a coupon request"""
     company = CompanyFactory.create(name="MIT")
     run = CourseRunFactory.create(courseware_id="course-v1:some-course")
-    product_version = ProductVersionFactory.create(
-        text_id=run.courseware_id, product__content_object=run
+    program = ProgramFactory.create(readable_id="program-v1:some-program")
+    program_run = ProgramRunFactory.create(program=program)
+    product_objects = [run, program]
+    product_versions = ProductVersionFactory.create_batch(
+        2,
+        text_id=factory.Iterator([obj.text_id for obj in product_objects]),
+        product__content_object=factory.Iterator(product_objects),
     )
-    return SimpleNamespace(company=company, run=run, product_version=product_version)
+
+    return SimpleNamespace(
+        company=company,
+        run=run,
+        program=program,
+        program_run=program_run,
+        run_product_version=product_versions[0],
+        program_product_version=product_versions[1],
+    )
 
 
 @pytest.fixture()

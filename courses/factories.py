@@ -5,11 +5,13 @@ import factory
 from factory import fuzzy, SubFactory, Trait
 from factory.django import DjangoModelFactory
 
+from courses.constants import PROGRAM_TEXT_ID_PREFIX
 from ecommerce.models import Company
 from users.factories import UserFactory
 
 from .models import (
     Program,
+    ProgramRun,
     Course,
     CourseRun,
     ProgramEnrollment,
@@ -35,11 +37,23 @@ class ProgramFactory(DjangoModelFactory):
     """Factory for Programs"""
 
     title = fuzzy.FuzzyText(prefix="Program ")
-    readable_id = factory.Sequence("program-{0}".format)
+    readable_id = factory.Sequence(
+        lambda number: "{}{}".format(PROGRAM_TEXT_ID_PREFIX, number)
+    )
     live = True
 
     class Meta:
         model = Program
+
+
+class ProgramRunFactory(DjangoModelFactory):
+    """Factory for ProgramRuns"""
+
+    program = factory.SubFactory(ProgramFactory)
+    run_suffix = factory.Sequence("R{0}".format)
+
+    class Meta:
+        model = ProgramRun
 
 
 class CourseFactory(DjangoModelFactory):

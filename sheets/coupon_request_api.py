@@ -51,9 +51,13 @@ def create_coupons_for_request_row(coupon_req_row, company_id):
         CouponPaymentVersion:
             A CouponPaymentVersion. Other instances will be created at the same time and linked via foreign keys.
     """
+    product, _, program_run = ecommerce.api.get_product_from_text_id(
+        coupon_req_row.product_text_id
+    )
+    product_program_run_map = {product.id: program_run.id} if program_run else None
     return ecommerce.api.create_coupons(
         name=coupon_req_row.coupon_name,
-        product_ids=[coupon_req_row.get_product_id()],
+        product_ids=[product.id],
         num_coupon_codes=coupon_req_row.num_codes,
         coupon_type=CouponPaymentVersion.SINGLE_USE,
         max_redemptions=1,
@@ -62,6 +66,7 @@ def create_coupons_for_request_row(coupon_req_row, company_id):
         expiration_date=coupon_req_row.expiration,
         payment_type=CouponPaymentVersion.PAYMENT_PO,
         payment_transaction=coupon_req_row.purchase_order_id,
+        product_program_run_map=product_program_run_map,
         **BULK_PURCHASE_DEFAULTS,
     )
 

@@ -18,6 +18,7 @@ from courses.constants import (
     CATALOG_COURSE_IMG_WAGTAIL_FILL,
     COURSE_BG_IMG_WAGTAIL_FILL,
     COURSE_BG_IMG_MOBILE_WAGTAIL_FILL,
+    ENROLLABLE_ITEM_ID_SEPARATOR,
 )
 from courseware.utils import edx_redirect_url
 from ecommerce.models import Product
@@ -243,6 +244,35 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     def __str__(self):
         title = f"{self.readable_id} | {self.title}"
         return title if len(title) <= 100 else title[:97] + "..."
+
+
+class ProgramRun(TimestampedModel, ValidateOnSaveMixin):
+    """Model for program run (a specific offering of a program, used for sales purposes)"""
+
+    program = models.ForeignKey(
+        Program, on_delete=models.CASCADE, related_name="programruns"
+    )
+    run_suffix = models.CharField(max_length=10, validators=[validate_url_path_field])
+    start_date = models.DateTimeField(null=True, blank=True, db_index=True)
+    end_date = models.DateTimeField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        unique_together = ("program", "run_suffix")
+
+    @property
+    def full_readable_id(self):
+        """
+        Returns the program's readable id with this program run's suffix
+
+        Returns:
+            str: The program's readable id with a program run suffix
+        """
+        return ENROLLABLE_ITEM_ID_SEPARATOR.join(
+            [self.program.readable_id, self.run_suffix]
+        )
+
+    def __str__(self):
+        return f"{self.program.readable_id} | {self.run_suffix}"
 
 
 class CourseTopic(TimestampedModel):

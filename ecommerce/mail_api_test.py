@@ -1,11 +1,10 @@
 """Ecommerce mail API tests"""
-from urllib.parse import urljoin
-
+from urllib.parse import urljoin, quote_plus
 import datetime
-from django.urls import reverse
 import pytest
 import factory
 from pytz import UTC
+from django.urls import reverse
 
 from b2b_ecommerce.factories import B2BOrderFactory
 from courses.factories import (
@@ -93,7 +92,7 @@ def test_send_bulk_enroll_emails(mocker, settings):
         assert user_message_props.context == {
             "enrollable_title": assignment.product_coupon.product.content_object.title,
             "enrollment_url": "http://test.com/checkout/?product={}&code={}".format(
-                assignment.product_coupon.product.id,
+                quote_plus(assignment.product_coupon.product.content_object.text_id),
                 assignment.product_coupon.coupon.coupon_code,
             ),
             "company_name": (

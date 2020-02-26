@@ -1,6 +1,7 @@
 """
 Functions for ecommerce
 """
+import re
 from base64 import b64encode
 import decimal
 import hashlib
@@ -11,7 +12,7 @@ from urllib.parse import quote_plus, urljoin
 import uuid
 
 from django.conf import settings
-from django.db.models import Q, Max, F, Count, Subquery
+from django.db.models import Q, Max, F, Count, Subquery, Prefetch
 from django.db import transaction
 from django.urls import reverse
 from rest_framework.exceptions import ValidationError
@@ -21,8 +22,10 @@ from courses.constants import (
     CONTENT_TYPE_MODEL_PROGRAM,
     CONTENT_TYPE_MODEL_COURSE,
     CONTENT_TYPE_MODEL_COURSERUN,
+    PROGRAM_RUN_ID_PATTERN,
 )
-from courses.models import Course, CourseRun, CourseRunEnrollment, Program
+from courses.models import Course, CourseRun, CourseRunEnrollment, Program, ProgramRun
+from courses.utils import is_program_text_id
 from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
 from ecommerce.exceptions import EcommerceException
 from ecommerce.models import (
@@ -45,6 +48,7 @@ from ecommerce.models import (
     Line,
     Order,
     Receipt,
+    ProgramRunLine,
 )
 from ecommerce.mail_api import send_ecommerce_order_receipt
 import sheets.tasks
@@ -616,13 +620,19 @@ def create_unfulfilled_order(user):
         )
 
         product_version = None
-        for basket_item in basket.basketitems.all():
+        for basket_item in basket.basketitems.select_related(
+            "product", "program_run"
+        ).all():
             product_version = latest_product_version(basket_item.product)
-            Line.objects.create(
+            line = Line.objects.create(
                 order=order,
                 product_version=product_version,
                 quantity=basket_item.quantity,
             )
+            if basket_item.program_run:
+                ProgramRunLine.objects.create(
+                    line=line, program_run=basket_item.program_run
+                )
 
         coupon_version = None
         for coupon_selection in basket.couponselection_set.all():
@@ -727,7 +737,7 @@ def bulk_assign_product_coupons(desired_assignments, bulk_assignment=None):
 
     Args:
         desired_assignments (iterable of (str, int)): An iterable of emails paired with the
-            ProductCoupon id that each email should be assigned
+            CouponEligibility id that each email should be assigned
         bulk_assignment (BulkCouponAssignment or None): A BulkCouponAssignment object, or
             None if a new one should be created
 
@@ -950,6 +960,7 @@ def create_coupons(
     payment_type=None,
     payment_transaction=None,
     coupon_code=None,
+    product_program_run_map=None,
 ):
     """
     Create one or more coupons and whatever instances are needed for them.
@@ -970,6 +981,8 @@ def create_coupons(
         coupon_code (str):
             If specified, the coupon code to use when creating the coupon. If not a random one will be generated.
         product_ids (list of int): A list of product ids
+        product_program_run_map (dict): An optional dictionary that maps a product id to an associated ProgramRun id.
+            If provided, the CouponEligibility records for those products will be mapped to the given ProgramRuns.
 
     Returns:
         CouponPaymentVersion:
@@ -1006,8 +1019,13 @@ def create_coupons(
         CouponVersion(coupon=obj, payment_version=payment_version)
         for obj in coupon_objs
     ]
+    product_program_run_map = product_program_run_map or {}
     eligibilities = [
-        CouponEligibility(coupon=obj, product_id=product_id)
+        CouponEligibility(
+            coupon=obj,
+            product_id=product_id,
+            program_run_id=product_program_run_map.get(product_id),
+        )
         for obj in coupon_objs
         for product_id in product_ids
     ]
@@ -1082,14 +1100,100 @@ def fulfill_order(request_data):
     order.save_and_log(None)
 
 
+def get_product_from_text_id(text_id):
+    """
+    Fetches a product from a text id that references a Program or CourseRun. If the text id is for a
+    Program, and that id has a program run suffix (ex: "+R1"), an associated ProgramRun is also returned.
+
+    Args:
+        text_id (str): A text id for a Program/CourseRun
+
+    Returns:
+        (Product, Program or CourseRun, ProgramRun): A tuple containing the Product for the CourseRun/Program,
+            the Program/CourseRun associated with the text id, and a matching ProgramRun if the text id
+            indicated one
+    """
+    program_run_id_match = re.match(PROGRAM_RUN_ID_PATTERN, text_id)
+    # This text id matches the pattern of a program text id with a program run attached
+    if program_run_id_match:
+        potential_prog_run_id = program_run_id_match.groupdict()["run_suffix"]
+        potential_text_id_base = text_id[
+            0 : (len(text_id) - len(potential_prog_run_id) - 1)
+        ]
+        # A Program's own text id may end with something that looks like a ProgramRun suffix, but has
+        # no associated ProgramRun (ex: program.readable_id == "program-v1:my+program+R1"). This query looks
+        # for a Program with a ProgramRun that matches the suffix, or one that matches the full given text id
+        # without a ProgramRun. The version with a matching ProgramRun is preferred.
+        program = (
+            Program.objects.filter(
+                Q(
+                    readable_id=potential_text_id_base,
+                    programruns__run_suffix=potential_prog_run_id,
+                )
+                | Q(readable_id=text_id)
+            )
+            .order_by("-programruns__run_suffix")
+            .prefetch_related(
+                Prefetch(
+                    "programruns",
+                    queryset=ProgramRun.objects.filter(
+                        run_suffix=potential_prog_run_id
+                    ),
+                    to_attr="matching_program_runs",
+                )
+            )
+            .prefetch_related("products")
+            .first()
+        )
+        if not program:
+            raise Program.DoesNotExist(
+                f"Could not find Program with readable_id={text_id} "
+                "or readable_id={potential_text_id_base} with program run {potential_prog_run_id}"
+            )
+        program_run = first_or_none(program.matching_program_runs)
+        product = first_or_none(program.products.all())
+        if not product:
+            raise Product.DoesNotExist(f"Product for {program} does not exist")
+        return product, program, program_run
+    # This is a "normal" text id that should match a CourseRun/Program
+    else:
+        if is_program_text_id(text_id):
+            content_object_model = Program
+            content_object_filter = dict(readable_id=text_id)
+        else:
+            content_object_model = CourseRun
+            content_object_filter = dict(courseware_id=text_id)
+        content_object = (
+            content_object_model.objects.filter(**content_object_filter)
+            .prefetch_related("products")
+            .first()
+        )
+        if not content_object:
+            raise content_object_model.DoesNotExist(
+                f"{content_object_model._meta.model} matching filter {content_object_filter} does not exist"
+            )
+        product = first_or_none(content_object.products.all())
+        if not product:
+            raise Product.DoesNotExist(f"Product for {content_object} does not exist")
+        return product, content_object, None
+
+
 def get_product_from_querystring_id(qs_product_id):
-    """Get product from querystring (product_id)"""
+    """
+    Fetches a product from a querystring product id value, which may be a numerical or text id
+
+    Args:
+        qs_product_id (str): A product id from a querystring
+
+    Returns:
+        (Product, Program or CourseRun, ProgramRun): A tuple containing the Product that matches the id,
+            the Program/CourseRun associated with that product, and a matching ProgramRun if the product id
+            indicated one
+    """
     if isinstance(qs_product_id, int) or qs_product_id.isdigit():
-        return Product.objects.get(id=int(qs_product_id))
+        product = Product.objects.get(id=int(qs_product_id))
+        return product, product.content_object, None
     else:
         # Text IDs for Programs/CourseRuns have '+' characters, which represent spaces in URL-encoded strings
-        product_text_id = qs_product_id.replace(" ", "+")
-        return Product.objects.get(
-            Q(courseruns__courseware_id=product_text_id)
-            | Q(programs__readable_id=product_text_id)
-        )
+        parsed_product_text_id = qs_product_id.replace(" ", "+")
+        return get_product_from_text_id(parsed_product_text_id)

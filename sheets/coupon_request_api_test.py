@@ -82,14 +82,14 @@ def pygsheets_fixtures(mocker, db, coupon_req_raw_data):
 def test_create_coupons_for_request_row(mocker, base_data, coupon_req_row):
     """
     create_coupons_for_request_row should call the 'create_coupons' coupons helper
-    function and creates an object to record the processing of the coupon request.
+    function and create an object to record the processing of the coupon request.
     """
     patched_create_coupons = mocker.patch("ecommerce.api.create_coupons")
     fake_company_id = 123
     create_coupons_for_request_row(coupon_req_row, company_id=fake_company_id)
     patched_create_coupons.assert_called_once_with(
         name=coupon_req_row.coupon_name,
-        product_ids=[base_data.product_version.product.id],
+        product_ids=[base_data.run_product_version.product.id],
         num_coupon_codes=coupon_req_row.num_codes,
         coupon_type=CouponPaymentVersion.SINGLE_USE,
         max_redemptions=1,
@@ -99,8 +99,27 @@ def test_create_coupons_for_request_row(mocker, base_data, coupon_req_row):
         payment_type=CouponPaymentVersion.PAYMENT_PO,
         payment_transaction=coupon_req_row.purchase_order_id,
         amount=Decimal("1.0"),
+        product_program_run_map=None,
         automatic=False,
     )
+
+
+@pytest.mark.django_db
+def test_create_coupons_for_request_row_progrun(mocker, base_data, coupon_req_row):
+    """
+    create_coupons_for_request_row should call the 'create_coupons' coupons helper
+    function with a reference to a ProgramRun if the request row has a text id that references
+    a program run
+    """
+    patched_create_coupons = mocker.patch("ecommerce.api.create_coupons")
+    fake_company_id = 123
+    new_req_row = copy.copy(coupon_req_row)
+    new_req_row.product_text_id = base_data.program_run.full_readable_id
+    create_coupons_for_request_row(new_req_row, company_id=fake_company_id)
+    patched_create_coupons.assert_called_once()
+    assert patched_create_coupons.call_args_list[0][1]["product_program_run_map"] == {
+        base_data.program_product_version.product.id: base_data.program_run.id
+    }
 
 
 def test_coupon_request_row_valid(coupon_req_raw_data):
