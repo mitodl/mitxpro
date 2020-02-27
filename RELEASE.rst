@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.41.1
+Version 0.41.1 (Released February 27, 2020)
 --------------
 
 - Fix Checkout page crashes if user has inactive enrollment code
