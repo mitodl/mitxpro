@@ -395,14 +395,14 @@ def test_user_enrollments_view(mocker, client, user):
         past_non_program_runs=[],
     )
     patched_get_user_enrollments = mocker.patch(
-        "courses.views.get_user_enrollments", return_value=user_enrollments
+        "courses.views.v1.get_user_enrollments", return_value=user_enrollments
     )
     patched_program_enroll_serializer = mocker.patch(
-        "courses.views.ProgramEnrollmentSerializer",
+        "courses.views.v1.ProgramEnrollmentSerializer",
         return_value=mocker.Mock(data=[{"program": "enrollment"}]),
     )
     patched_course_enroll_serializer = mocker.patch(
-        "courses.views.CourseRunEnrollmentSerializer",
+        "courses.views.v1.CourseRunEnrollmentSerializer",
         return_value=mocker.Mock(data=[{"courserun": "enrollment"}]),
     )
 

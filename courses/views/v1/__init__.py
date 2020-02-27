@@ -1,4 +1,4 @@
-"""Course views"""
+"""Course views verson 1"""
 from rest_framework import viewsets, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
