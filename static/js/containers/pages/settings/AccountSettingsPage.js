@@ -5,7 +5,7 @@ import DocumentTitle from "react-document-title"
 import { ACCOUNT_SETTINGS_PAGE_TITLE } from "../../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
-import { mutateAsync } from "redux-query"
+import { mutateAsync, requestAsync } from "redux-query"
 import { Link } from "react-router-dom"
 
 import { addUserNotification } from "../../../actions"
@@ -22,6 +22,8 @@ import { currentUserSelector } from "../../../lib/queries/users"
 
 import type { RouterHistory } from "react-router"
 import type { ChangePasswordFormValues } from "../../../components/forms/ChangePasswordForm"
+import type { Response } from "redux-query"
+import users from "../../../lib/queries/users"
 
 type Props = {
   history: RouterHistory,
@@ -30,43 +32,80 @@ type Props = {
     newPassword: string,
     confirmPassword: string
   ) => Promise<any>,
+  changeEmail: (newEmail: string, password: string) => Promise<any>,
   addUserNotification: Function,
   currentUser: User
 }
 
 export class AccountSettingsPage extends React.Component<Props> {
   async onSubmit(
-    { oldPassword, newPassword, confirmPassword }: ChangePasswordFormValues,
+    {
+      oldPassword,
+      newPassword,
+      confirmPassword,
+      email,
+      emailPassword
+    }: ChangePasswordFormValues,
     { setSubmitting, resetForm }: any
   ) {
-    const { addUserNotification, changePassword, history } = this.props
+    const {
+      addUserNotification,
+      changePassword,
+      changeEmail,
+      currentUser,
+      history
+    } = this.props
 
     try {
-      const response = await changePassword(
-        oldPassword,
-        newPassword,
-        confirmPassword
-      )
-
-      let alertText, color
-      if (response.status === 200) {
-        alertText = "Your password has been updated successfully."
-        color = "success"
-      } else {
-        alertText = "Unable to reset your password, please try again later."
-        color = "danger"
+      let alertText, color, alertKey
+      if (currentUser && email !== currentUser.email) {
+        alertKey = "email-change"
+        const response = await changeEmail(email, emailPassword)
+        if (response.status === 200 || response.status === 201) {
+          alertText =
+            "You have been sent a verification email on your updated address. Please click on the link in the email to finish email address update."
+          color = "success"
+        } else {
+          alertText =
+            "Unable to update your email address, please try again later."
+          color = "danger"
+        }
+        addUserNotification({
+          [alertKey]: {
+            type:  ALERT_TYPE_TEXT,
+            color: color,
+            props: {
+              text: alertText
+            }
+          }
+        })
       }
 
-      addUserNotification({
-        "password-change": {
-          type:  ALERT_TYPE_TEXT,
-          color: color,
-          props: {
-            text: alertText
-          }
-        }
-      })
+      if (oldPassword && newPassword && confirmPassword) {
+        alertKey = "password-change"
+        const response = await changePassword(
+          oldPassword,
+          newPassword,
+          confirmPassword
+        )
 
+        if (response.status === 200) {
+          alertText = "Your password has been updated successfully."
+          color = "success"
+        } else {
+          alertText = "Unable to reset your password, please try again later."
+          color = "danger"
+        }
+        addUserNotification({
+          [alertKey]: {
+            type:  ALERT_TYPE_TEXT,
+            color: color,
+            props: {
+              text: alertText
+            }
+          }
+        })
+      }
       history.push(routes.accountSettings)
     } finally {
       resetForm()
@@ -102,12 +141,16 @@ export class AccountSettingsPage extends React.Component<Props> {
 const changePassword = (oldPassword: string, newPassword: string) =>
   mutateAsync(auth.changePasswordMutation(oldPassword, newPassword))
 
+const changeEmail = (newEmail: string, password: string) =>
+  mutateAsync(auth.changeEmailMutation(newEmail, password))
+
 const mapStateToProps = createStructuredSelector({
   currentUser: currentUserSelector
 })
 
 const mapDispatchToProps = {
   changePassword,
+  changeEmail,
   addUserNotification
 }
 

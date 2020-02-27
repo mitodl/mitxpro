@@ -3,6 +3,7 @@ import React from "react"
 import sinon from "sinon"
 import { assert } from "chai"
 import { shallow } from "enzyme"
+import { Formik } from "formik"
 
 import ChangePasswordForm from "./ChangePasswordForm"
 
@@ -38,5 +39,17 @@ describe("ChangePasswordForm", () => {
     assert.ok(findFormikFieldByName(form, "newPassword").exists())
     assert.ok(findFormikFieldByName(form, "confirmPassword").exists())
     assert.ok(form.find("button[type='submit']").exists())
+  })
+
+  it("old password is required to change the email address", async () => {
+    const wrapper = renderForm()
+    try {
+      await wrapper.find(Formik).prop("validate")({
+        email:         "abc@example.com",
+        emailPassword: ""
+      })
+    } catch (errors) {
+      assert.equal(errors.emailPassword, "Confirm Password is a required field")
+    }
   })
 })

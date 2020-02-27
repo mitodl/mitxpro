@@ -1,6 +1,11 @@
 """Tests for users.serializers"""
 import pytest
 
+from rest_framework.exceptions import ValidationError
+
+from users.factories import UserFactory
+from users.models import ChangeEmailRequest
+from users.serializers import ChangeEmailRequestUpdateSerializer
 from users.serializers import LegalAddressSerializer, UserSerializer
 
 
@@ -173,3 +178,61 @@ def test_create_user_serializer(
         mock_user_sync.assert_called_with(user.id)
     else:
         mock_user_sync.assert_not_called()
+
+
+def test_update_email_change_request_existing_email(user):
+    """Test that update change email request gives validation error for existing user email"""
+    new_user = UserFactory.create()
+    change_request = ChangeEmailRequest.objects.create(
+        user=user, new_email=new_user.email
+    )
+    serializer = ChangeEmailRequestUpdateSerializer(change_request, {"confirmed": True})
+
+    with pytest.raises(ValidationError):
+        serializer.is_valid()
+        serializer.save()
+
+
+def test_create_email_change_request_same_email(user):
+    """Test that update change email request gives validation error for same user email"""
+    change_request = ChangeEmailRequest.objects.create(user=user, new_email=user.email)
+    serializer = ChangeEmailRequestUpdateSerializer(change_request, {"confirmed": True})
+
+    with pytest.raises(ValidationError):
+        serializer.is_valid()
+        serializer.save()
+
+
+@pytest.mark.parametrize("raises_error", [False, True])
+def test_update_user_email(
+    mocker, user, raises_error
+):  # pylint: disable=too-many-arguments
+    """Test that update edx user email takes the correct action"""
+
+    mock_update_edx_user_email = mocker.patch(
+        "courseware.tasks.api.update_edx_user_email"
+    )
+
+    new_user = UserFactory.create()
+    if raises_error:
+        mock_update_edx_user_email.side_effect = Exception("error")
+        new_email = new_user.email
+    else:
+        new_email = "abc@example.com"
+    mock_change_edx_user_email_task = mocker.patch(
+        "courseware.tasks.change_edx_user_email_async"
+    )
+
+    change_request = ChangeEmailRequest.objects.create(user=user, new_email=new_email)
+    serializer = ChangeEmailRequestUpdateSerializer(change_request, {"confirmed": True})
+    try:
+        serializer.is_valid()
+        serializer.save()
+    except ValidationError:
+        pass
+
+    if raises_error:
+        mock_update_edx_user_email.assert_not_called()
+    else:
+        mock_update_edx_user_email.assert_called_once_with(user)
+    mock_change_edx_user_email_task.apply_async.assert_not_called()

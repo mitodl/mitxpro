@@ -53,5 +53,9 @@ export const routes = {
     bulkPurchase: "",
     receipt:      "receipt/"
   }),
-  receipt: "receipt/:orderId/"
+  receipt: "receipt/:orderId/",
+
+  account: include("/account/", {
+    confirmEmail: "confirm-email"
+  })
 }

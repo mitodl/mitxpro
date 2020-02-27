@@ -126,3 +126,8 @@ export type UserProfileForm = {
     legal_address: ?LegalAddress,
     profile: ?Profile
 }
+
+export type updateEmailResponse = {
+  confirmed: boolean,
+  detail: ?string,
+}

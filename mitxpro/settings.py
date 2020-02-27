@@ -383,6 +383,12 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.user.user_details",
 )
 
+AUTH_CHANGE_EMAIL_TTL_IN_MINUTES = get_int(
+    "AUTH_CHANGE_EMAIL_TTL_IN_MINUTES",
+    60 * 24,
+    description="Expiry time for a change email request, default is 1440 minutes(1 day)",
+)
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
