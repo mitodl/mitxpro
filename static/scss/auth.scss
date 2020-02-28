@@ -31,7 +31,7 @@
     line-height: 20px;
     padding: 49px 95px 40px;
     position: relative;
-    box-shadow: inset 0 1px 3px 0 rgba(0,0,0,0.5), -4px 3px 17px -4px rgba(0,0,0,0.25);
+    box-shadow: inset 0 1px 3px 0 rgba(0, 0, 0, 0.5), -4px 3px 17px -4px rgba(0, 0, 0, 0.25);
     background-color: $very-light-gray;
 
     &:before {
@@ -39,9 +39,13 @@
       left: 0;
       top: 0;
       right: 0;
-      content: '';
+      content: "";
       height: 8px;
-      background: linear-gradient(to right, rgba(61,189,191,1) 0%,rgba(241,186,70,1) 100%);
+      background: linear-gradient(
+        to right,
+        rgba(61, 189, 191, 1) 0%,
+        rgba(241, 186, 70, 1) 100%
+      );
     }
 
     .email {
@@ -89,24 +93,26 @@
     .email-section {
       margin: 30px 0 0;
       border: 1px solid $tab-color;
-      border-width: 1px 0;
-      padding: 23px 0;
-    }
+      border-width: 1px 0 0;
+      padding: 23px 0 0;
 
-    .password-section {
-      padding: 13px 0;
-      margin: 0 0 40px;
-      border-bottom: 1px dashed $tab-color;
+      h4 {
+        font-size: 23px;
+        line-height: 28px;
+        font-weight: 600;
+        margin-top: 5px;
+        padding-bottom: 10px;
+      }
     }
   }
 }
 
 .auth-card {
-  @include media-breakpoint-down(sm)  {
+  @include media-breakpoint-down(sm) {
     padding: 20px;
   }
 
-  @include media-breakpoint-down(xs)  {
+  @include media-breakpoint-down(xs) {
     padding: 15px 0;
   }
 
