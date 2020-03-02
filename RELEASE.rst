@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.42.0
+--------------
+
+- Sheets management utils tests
+- Moved courses views to v1 directory (+1 squashed commit) Squashed commits: [cf7045d] API v1 routes
+- Revert "Revert "Allow Email Change PR #1535""
+- Added program runs concept and tracking of program run purchases
+
 Version 0.41.1 (Released February 27, 2020)
 --------------
 
