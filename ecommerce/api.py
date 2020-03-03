@@ -961,6 +961,7 @@ def create_coupons(
     payment_transaction=None,
     coupon_code=None,
     product_program_run_map=None,
+    include_future_runs=True,
 ):
     """
     Create one or more coupons and whatever instances are needed for them.
@@ -983,6 +984,8 @@ def create_coupons(
         product_ids (list of int): A list of product ids
         product_program_run_map (dict): An optional dictionary that maps a product id to an associated ProgramRun id.
             If provided, the CouponEligibility records for those products will be mapped to the given ProgramRuns.
+        include_future_runs (bool): Whether or not coupon will available for future runs
+
 
     Returns:
         CouponPaymentVersion:
@@ -1011,7 +1014,11 @@ def create_coupons(
     )
 
     coupons = [
-        Coupon(coupon_code=(coupon_code or uuid.uuid4().hex), payment=payment)
+        Coupon(
+            coupon_code=(coupon_code or uuid.uuid4().hex),
+            payment=payment,
+            include_future_runs=include_future_runs,
+        )
         for _ in range(num_coupon_codes)
     ]
     coupon_objs = Coupon.objects.bulk_create(coupons)

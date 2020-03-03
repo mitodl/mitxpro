@@ -110,7 +110,8 @@ export const CouponForm = ({
       expiration_date:     "",
       company:             "",
       payment_type:        "",
-      payment_transaction: ""
+      payment_transaction: "",
+      include_future_runs: true
     }}
     render={({
       isSubmitting,
@@ -234,6 +235,16 @@ export const CouponForm = ({
             </label>
             <ErrorMessage name="expiration_date" component={FormError} />
           </div>
+        </div>
+        <div className="flex">
+          <label htmlFor="include_future_runs">
+            <Field
+              type="checkbox"
+              name="include_future_runs"
+              checked={values.include_future_runs}
+            />
+            Include future runs
+          </label>
         </div>
         <div className="flex">
           <Field

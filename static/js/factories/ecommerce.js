@@ -175,7 +175,8 @@ export const makeCouponPaymentVersion = (
   payment_transaction: casual.word,
   company:             casual.word,
   created_on:          casual.moment.format(),
-  updated_on:          casual.moment.format()
+  updated_on:          casual.moment.format(),
+  include_future_runs: true
 })
 
 const genBulkCouponPaymentId = incrementer()
