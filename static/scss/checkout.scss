@@ -379,6 +379,52 @@
   }
 }
 
+.purchase-summary-block {
+  font-size: 16px;
+
+  .b2b-explanation {
+    .col-lg-12 {
+      padding-left: 0;
+    }
+
+    .expandable {
+      .body {
+        line-height: 22px;
+        padding-right: 15%;
+
+        li {
+          margin-bottom: 15px;
+        }
+      }
+    }
+  }
+
+  .text-box {
+    max-width: 450px;
+  }
+
+  p {
+    line-height: 22px;
+
+    a {
+      color: $deep-sky-blue;
+      text-decoration: underline;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+
+  h4 {
+    font-weight: 600;
+  }
+
+  .description {
+    color: $light-gray;
+  }
+}
+
 .order-summary,
 .b2b-order-summary {
   font-weight: 600;

@@ -23,7 +23,6 @@ import type {
   B2BCouponStatusResponse,
   ProductDetail
 } from "../../../flow/ecommerceTypes"
-import B2BExplanation from "../../../components/B2BExplanation"
 
 type Props = {
   checkout: (payload: B2BCheckoutPayload) => Promise<*>,

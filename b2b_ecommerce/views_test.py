@@ -264,7 +264,11 @@ def test_order_status(client):
             "total_price": str(order.total_price),
             "status": order.status,
             "discount": None,
+            "created_on": order.created_on,
+            "reference_number": order.reference_number,
+            "coupon_code": order.coupon.coupon_code if order.coupon else None,
             "contract_number": order.contract_number,
+            "receipt_data": {"card_type": None, "card_number": None},
         },
     )
 

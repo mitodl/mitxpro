@@ -203,14 +203,18 @@ export const makeB2BOrderStatus = (): B2BOrderStatus => {
   }
 
   return {
-    status:          casual.random_element(["fulfilled", "created"]),
-    num_seats:       numSeats,
-    item_price:      String(itemPrice),
-    total_price:     String(totalPrice),
-    email:           casual.email,
-    product_version: makeProduct().latest_version,
-    discount:        discount !== null ? String(discount) : null,
-    contract_number: contractNumber
+    status:           casual.random_element(["fulfilled", "created"]),
+    num_seats:        numSeats,
+    item_price:       String(itemPrice),
+    total_price:      String(totalPrice),
+    email:            casual.email,
+    product_version:  makeProduct().latest_version,
+    discount:         discount !== null ? String(discount) : null,
+    created_on:       casual.moment.format(),
+    coupon_code:      "1234",
+    reference_number: "reference-b2b-xyz",
+    receipt_data:     { card_type: null, card_number: null },
+    contract_number:  contractNumber
   }
 }
 
