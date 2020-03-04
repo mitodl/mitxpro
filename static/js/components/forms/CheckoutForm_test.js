@@ -14,10 +14,10 @@ import {
   calculateDiscount,
   calculatePrice,
   formatPrice,
-  formatRunTitle
+  formatRunTitle,
+  calcSelectedRunIds
 } from "../../lib/ecommerce"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
-import { calcSelectedRunIds } from "../../containers/pages/CheckoutPage"
 import { isIf, shouldIf } from "../../lib/test_utils"
 
 describe("CheckoutForm", () => {

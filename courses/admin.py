@@ -39,7 +39,7 @@ class ProgramRunAdmin(admin.ModelAdmin):
     """Admin for ProgramRun"""
 
     model = ProgramRun
-    list_display = ("id", "program", "run_suffix", "full_readable_id")
+    list_display = ("id", "program", "run_tag", "full_readable_id")
     list_filter = ["program"]
 
 
@@ -64,6 +64,7 @@ class CourseRunAdmin(admin.ModelAdmin):
         "id",
         "title",
         "courseware_id",
+        "run_tag",
         "start_date",
         "end_date",
         "enrollment_start",

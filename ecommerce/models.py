@@ -216,16 +216,6 @@ class Basket(TimestampedModel):
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
 
-    def get_product(self):
-        """
-        Fetches the Product associated with this Basket
-
-        Returns:
-            Product: The Product in this Basket (or None if one does not exist)
-        """
-        first_basket_item = self.basketitems.select_related("product").first()
-        return first_basket_item.product if first_basket_item else None
-
     def __str__(self):
         """Description of Basket"""
         return f"Basket for {self.user}"

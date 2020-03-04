@@ -70,6 +70,7 @@ class ProductVersionSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     object_id = serializers.IntegerField(source="product.object_id", read_only=True)
     product_id = serializers.IntegerField(source="product.id", read_only=True)
+    run_tag = serializers.SerializerMethodField()
     courses = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
     content_title = serializers.SerializerMethodField()
@@ -123,7 +124,16 @@ class ProductVersionSerializer(serializers.ModelSerializer):
 
     def get_readable_id(self, instance):
         """Return the readable_id of the program or course run"""
-        return get_readable_id(instance.product.content_object)
+        return instance.product.content_object.text_id
+
+    def get_run_tag(self, instance):
+        """Return the run_tag of the program run or course run"""
+        content_object = instance.product.content_object
+        if isinstance(content_object, Program):
+            program_run = self.context.get("program_run")
+            return None if not program_run else program_run.run_tag
+        else:
+            return content_object.run_tag
 
     def get_start_date(self, instance):
         """Returns the start date of the program or course run"""
@@ -131,7 +141,11 @@ class ProductVersionSerializer(serializers.ModelSerializer):
         if isinstance(content_object, CourseRun) and content_object.start_date:
             return content_object.start_date.isoformat()
         elif isinstance(content_object, Program) and content_object.next_run_date:
-            return content_object.next_run_date.isoformat()
+            program_run = self.context.get("program_run")
+            if program_run:
+                return program_run.start_date.isoformat()
+            else:
+                return content_object.next_run_date.isoformat()
         return None
 
     class Meta:
@@ -146,6 +160,7 @@ class ProductVersionSerializer(serializers.ModelSerializer):
             "object_id",
             "product_id",
             "readable_id",
+            "run_tag",
             "created_on",
             "start_date",
         ]
@@ -273,12 +288,12 @@ class BasketSerializer(serializers.ModelSerializer):
     data_consents = WriteableSerializerMethodField()
 
     @classmethod
-    def _serialize_item(cls, *, item, basket, context):
+    def _serialize_item(cls, *, basket_item, basket, context):
         """
         Serialize a BasketItem
 
         Args:
-            item (BasketItem): A basket item
+            basket_item (BasketItem): A basket item
             basket (Basket): A basket
             context (dict): Context from the BasketSerializer
 
@@ -286,8 +301,10 @@ class BasketSerializer(serializers.ModelSerializer):
             dict:
                 A serialized representation
         """
+        if basket_item.program_run:
+            context["program_run"] = basket_item.program_run
         serialized_product_version = ProductVersionSerializer(
-            instance=latest_product_version(item.product), context=context
+            instance=latest_product_version(basket_item.product), context=context
         ).data
         valid_run_ids = set()
         for course in serialized_product_version["courses"]:
@@ -304,18 +321,17 @@ class BasketSerializer(serializers.ModelSerializer):
     def get_items(self, instance):
         """ Get the basket items """
         return [
-            self._serialize_item(item=item, basket=instance, context=self.context)
-            for item in instance.basketitems.all()
+            self._serialize_item(
+                basket_item=item, basket=instance, context=self.context
+            )
+            for item in instance.basketitems.select_related("program_run").all()
         ]
 
     def get_coupons(self, instance):
         """ Get the basket coupons """
-        return [
-            CouponSelectionSerializer(instance=coupon_selection).data
-            for coupon_selection in models.CouponSelection.objects.filter(
-                basket=instance
-            )
-        ]
+        return CouponSelectionSerializer(
+            instance.couponselection_set.all(), many=True
+        ).data
 
     def get_data_consents(self, instance):
         """ Get the DataConsentUser objects associated with the basket via coupon and product"""
@@ -338,17 +354,7 @@ class BasketSerializer(serializers.ModelSerializer):
         """
         product_version = product.latest_version
         if coupons:
-            if len(coupons) > 1:
-                raise ValidationError(
-                    {"coupons": "Basket cannot contain more than one coupon"}
-                )
-            coupon = coupons[0]
-            if not isinstance(coupon, dict):
-                raise ValidationError({"coupons": "Invalid request"})
-            coupon_code = coupon.get("code")
-            if coupon_code is None:
-                raise ValidationError({"coupons": "Invalid request"})
-
+            coupon_code = coupons[0].get("code")
             # Check if the coupon is valid for the product
             coupon_version = best_coupon_for_product(
                 product_version.product, basket.user, code=coupon_code
@@ -387,8 +393,9 @@ class BasketSerializer(serializers.ModelSerializer):
         cls,
         basket,
         updated_product=None,
-        updated_program_run=None,
         updated_run_ids=None,
+        program_run=None,
+        should_update_program_run=False,
         coupon_version=None,
         data_consents=None,
         clear_all=False,
@@ -400,10 +407,11 @@ class BasketSerializer(serializers.ModelSerializer):
             basket (models.Basket): The user's Basket
             updated_product (models.Product): If provided, indicates a new Product that differs from the
                 previous Product associated with the Basket
-            updated_program_run (courses.models.ProgramRun): If provided, indicates a ProgramRun to associate
-                with the Product
             updated_run_ids (iterable of int): If provided, indicates a new selection of CourseRun ids for
                 this basket
+            program_run (courses.models.ProgramRun): The program run associated with the product in the basket
+            should_update_program_run (bool): If True, indicates that the program run associated with the basket
+                item should be updated
             coupon_version (models.CouponVersion): A valid coupon to associate with this Basket. If None, all
                 coupon selections for the Basket are deleted
             data_consents (iterable of int): Data consent ids
@@ -414,19 +422,21 @@ class BasketSerializer(serializers.ModelSerializer):
             # Fetching the basket again using select_for_update to avoid ending up in a weird state
             # if concurrent requests are received.
             basket = Basket.objects.select_for_update().get(id=basket.id)
-            if clear_all is True or updated_product is not None:
+            if clear_all is True:
                 basket.basketitems.all().delete()
             if clear_all is True or updated_run_ids is not None:
                 basket.courserunselection_set.all().delete()
             if clear_all is True or coupon_version is None:
                 basket.couponselection_set.all().delete()
 
-            if updated_product is not None:
-                models.BasketItem.objects.create(
-                    product=updated_product,
-                    quantity=1,
-                    basket=basket,
-                    program_run=updated_program_run,
+            if updated_product is not None or should_update_program_run is True:
+                update_dict = dict(quantity=1)
+                if updated_product is not None:
+                    update_dict["product"] = updated_product
+                if should_update_program_run is True:
+                    update_dict["program_run"] = program_run
+                models.BasketItem.objects.update_or_create(
+                    basket=basket, defaults=update_dict
                 )
             if updated_run_ids is not None:
                 models.CourseRunSelection.objects.bulk_create(
@@ -442,25 +452,20 @@ class BasketSerializer(serializers.ModelSerializer):
                     id__in=data_consents, user=basket.user
                 ).update(consent_date=now_in_utc())
 
-    def _determine_items_to_update(self, basket, items, existing_product):
+    def _fetch_and_validate_product(self, items):
         """
-        Compares products/run selections in the request with the ones that already exist for this
-        Basket. If they are different, the updated versions are returned.
+        Fetches the product associated with the product id in the request, paired with a program
+        run indicated by that id (or None if the id does not indicate a program run)
 
         Args:
-            basket (models.Basket):
             items (list of dict): The items from the request body
-            existing_product (models.Product): The Product currently associated with the given Basket
 
         Returns:
-            (Product, set of int, ProgramRun): A tuple containing an updated Product (or None if the
-                Product has not changed), a set of updated course run id selections (or None if they were
-                not changed), and a ProgramRun associated with the product (or None if the product id in
-                the request does not reference a ProgramRun)
+            (models.Product, courses.models.ProgramRun): The Product paired with an asociated ProgramRun
+                if one exists (or None if one does not exist)
         """
         item = items[0]
         request_product_id = item.get("product_id")
-        run_ids = set(item.get("run_ids", []))
         try:
             product, _, program_run = get_product_from_querystring_id(
                 request_product_id
@@ -473,19 +478,36 @@ class BasketSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 {"items": f"Invalid product id {request_product_id}"}
             ) from exc
+        return product, program_run
+
+    def _validate_and_compare_runs(self, basket, items, product):
+        """
+        Compares course run selections in the request with the ones that already exist for this
+        Basket. If they are different, the updated ids are returned.
+
+        Args:
+            basket (models.Basket):
+            items (list of dict): The items from the request body
+            product (models.Product): The Product currently associated with the given Basket
+
+        Returns:
+            set of int: A set of updated course run id selections (or None if they were not changed)
+        """
+        item = items[0]
+        run_ids = set(item.get("run_ids", []))
         self._validate_runs(run_ids, product)
         existing_run_ids = set(
             basket.courserunselection_set.values_list("run_id", flat=True)
         )
-        updated_product = product if product != existing_product else None
-        updated_run_ids = run_ids if run_ids != existing_run_ids else None
-        return updated_product, updated_run_ids, program_run
+        return run_ids if run_ids != existing_run_ids else None
 
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data):  # pylint: disable=too-many-locals
         items = validated_data.get("items")
         coupons = validated_data.get("coupons")
         data_consents = validated_data.get("data_consents")
         basket = instance
+
+        self._validate_coupons(coupons)
 
         if items is None and coupons is None and data_consents is None:
             raise ValidationError("Invalid request")
@@ -496,17 +518,26 @@ class BasketSerializer(serializers.ModelSerializer):
             )
             return basket
 
-        existing_product = basket.get_product()
+        existing_item = basket.basketitems.select_related(
+            "product", "program_run"
+        ).first()
+        existing_product, existing_program_run = (
+            (None, None)
+            if existing_item is None
+            else (existing_item.product, existing_item.program_run)
+        )
         coupon_version = None
 
         if items is None:
             updated_product = None
             updated_run_ids = None
             program_run = None
+            should_update_program_run = False
         else:
-            updated_product, updated_run_ids, program_run = self._determine_items_to_update(
-                basket, items, existing_product
-            )
+            product, program_run = self._fetch_and_validate_product(items)
+            updated_product = product if product != existing_product else None
+            updated_run_ids = self._validate_and_compare_runs(basket, items, product)
+            should_update_program_run = program_run != existing_program_run
 
         if updated_product or existing_product:
             coupon_version = self._get_applicable_coupon_version(
@@ -520,18 +551,47 @@ class BasketSerializer(serializers.ModelSerializer):
         self._update_basket_data(
             basket,
             updated_product=updated_product,
-            updated_program_run=program_run,
             updated_run_ids=updated_run_ids,
+            program_run=program_run,
+            should_update_program_run=should_update_program_run,
             coupon_version=coupon_version,
             data_consents=data_consents,
             clear_all=False,
         )
+        return basket
 
-        return instance
+    @staticmethod
+    def _validate_coupons(coupons):
+        """
+        Validates coupons provided in the request.
+        NOTE: This is not being done in a standard field validator function (validate_*) because our
+        front end expects these error values to be a simple string, and standard DRF field validators
+        put a list of strings in the body when you raise a ValidationError
+
+        Args:
+            coupons (list): Coupon data from the request body
+
+        Raises:
+            ValidationError: Raised if the coupon data is in the wrong format
+        """
+        if coupons:
+            if len(coupons) > 1:
+                raise ValidationError(
+                    {"coupons": "Basket cannot contain more than one coupon"}
+                )
+            coupon = coupons[0]
+            if not isinstance(coupon, dict):
+                raise ValidationError({"coupons": "Invalid request"})
+            coupon_code = coupon.get("code")
+            if coupon_code is None:
+                raise ValidationError({"coupons": "Invalid request"})
 
     def _validate_runs(self, run_ids, product):
         """
-        Validates the run ids provided in the request
+        Validates the run ids provided in the request.
+        NOTE: This is not being done in a standard field validator function (validate_*) because our
+        front end expects these error values to be a simple string, and standard DRF field validators
+        put a list of strings in the body when you raise a ValidationError
 
         Args:
             run_ids (set of int): A set of CourseRun ids
@@ -575,24 +635,22 @@ class BasketSerializer(serializers.ModelSerializer):
         return {"items": items}
 
     def validate_coupons(self, coupons):
-        """
-        Can't do much validation at this point since we don't have the product version id. Instead
-        this is done above in _update_coupons.
-        """
+        """No-op validator function for coupon data in the request body"""
         return {"coupons": coupons}
 
     def validate_data_consents(self, data_consents):
         """Validate that DataConsentUser objects exist"""
-        valid_consent_ids = set(
-            models.DataConsentUser.objects.filter(id__in=data_consents).values_list(
-                "id", flat=True
+        if data_consents:
+            valid_consent_ids = set(
+                models.DataConsentUser.objects.filter(id__in=data_consents).values_list(
+                    "id", flat=True
+                )
             )
-        )
-        invalid_consent_ids = set(data_consents) - valid_consent_ids
-        if invalid_consent_ids:
-            raise ValidationError(
-                f"Invalid data consent id {','.join([str(consent_id) for consent_id in invalid_consent_ids])}"
-            )
+            invalid_consent_ids = set(data_consents) - valid_consent_ids
+            if invalid_consent_ids:
+                raise ValidationError(
+                    f"Invalid data consent id {','.join([str(consent_id) for consent_id in invalid_consent_ids])}"
+                )
         return {"data_consents": data_consents}
 
     class Meta:

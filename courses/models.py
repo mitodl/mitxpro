@@ -252,12 +252,12 @@ class ProgramRun(TimestampedModel, ValidateOnSaveMixin):
     program = models.ForeignKey(
         Program, on_delete=models.CASCADE, related_name="programruns"
     )
-    run_suffix = models.CharField(max_length=10, validators=[validate_url_path_field])
+    run_tag = models.CharField(max_length=10, validators=[validate_url_path_field])
     start_date = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True, db_index=True)
 
     class Meta:
-        unique_together = ("program", "run_suffix")
+        unique_together = ("program", "run_tag")
 
     @property
     def full_readable_id(self):
@@ -268,11 +268,11 @@ class ProgramRun(TimestampedModel, ValidateOnSaveMixin):
             str: The program's readable id with a program run suffix
         """
         return ENROLLABLE_ITEM_ID_SEPARATOR.join(
-            [self.program.readable_id, self.run_suffix]
+            [self.program.readable_id, self.run_tag]
         )
 
     def __str__(self):
-        return f"{self.program.readable_id} | {self.run_suffix}"
+        return f"{self.program.readable_id} | {self.run_tag}"
 
 
 class CourseTopic(TimestampedModel):
@@ -438,6 +438,10 @@ class CourseRun(TimestampedModel):
     product = GenericRelation(Product, related_query_name="course_run")
     title = models.CharField(max_length=255)
     courseware_id = models.CharField(max_length=255, unique=True)
+    run_tag = models.CharField(
+        max_length=10,
+        help_text="A string that identifies the set of runs that this run belongs to (example: 'R2')",
+    )
     courseware_url_path = models.CharField(max_length=500, blank=True, null=True)
     start_date = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True, db_index=True)
@@ -451,6 +455,9 @@ class CourseRun(TimestampedModel):
     )
     live = models.BooleanField(default=False)
     products = GenericRelation(Product, related_query_name="courseruns")
+
+    class Meta:
+        unique_together = ("course", "run_tag")
 
     @property
     def is_past(self):

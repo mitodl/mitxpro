@@ -18,6 +18,7 @@ import type {
 const genCourseRunId = incrementer()
 const genProductId = incrementer()
 const genCoursewareId = incrementer()
+const genRunTagNumber = incrementer()
 const genReadableId = incrementer()
 
 export const makeCourseRun = (): CourseRun => ({
@@ -28,6 +29,7 @@ export const makeCourseRun = (): CourseRun => ({
   enrollment_end:   casual.moment.add(3, "M").format(),
   courseware_url:   casual.url,
   courseware_id:    casual.word.concat(genCoursewareId.next().value),
+  run_tag:          casual.word.concat(genRunTagNumber.next().value),
   // $FlowFixMe
   id:               genCourseRunId.next().value,
   product_id:       genProductId.next().value

@@ -36,6 +36,57 @@ export const calculatePrice = (
   coupon: ?CouponSelection
 ): Decimal => new Decimal(item.price).minus(calculateDiscount(item, coupon))
 
+const determinePreselectRunTag = (
+  item: BasketItem,
+  preselectId: number = 0
+): ?string => {
+  if (preselectId && item.courses.length > 0) {
+    const matchingPreselectRun = item.courses[0].courseruns.find(
+      run => run.id === preselectId
+    )
+    if (matchingPreselectRun && matchingPreselectRun.run_tag) {
+      return matchingPreselectRun.run_tag
+    } else {
+      return null
+    }
+  }
+  if (item.run_tag) {
+    return item.run_tag
+  }
+  return null
+}
+
+export const calcSelectedRunIds = (
+  item: BasketItem,
+  preselectId: number = 0
+): { [number]: number } => {
+  if (item.type === PRODUCT_TYPE_COURSERUN) {
+    const course = item.courses[0]
+    return {
+      [course.id]: item.object_id
+    }
+  }
+
+  const preselectRunTag = determinePreselectRunTag(item, preselectId)
+  if (!preselectRunTag) {
+    return {}
+  }
+
+  const numCourses = item.courses.length
+  const courseRunSelectionMap = {}
+  for (const course of item.courses) {
+    const matchingRun = course.courseruns.find(
+      run => run.run_tag === preselectRunTag
+    )
+    if (matchingRun) {
+      courseRunSelectionMap[course.id] = matchingRun.id
+    }
+  }
+  return Object.keys(courseRunSelectionMap).length === numCourses
+    ? courseRunSelectionMap
+    : {}
+}
+
 export const formatPrice = (price: ?string | number | Decimal): string => {
   if (price === null || price === undefined) {
     return ""

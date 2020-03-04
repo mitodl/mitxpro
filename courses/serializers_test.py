@@ -216,6 +216,7 @@ def test_serialize_course_run(has_product):
         {
             "title": course_run.title,
             "courseware_id": course_run.courseware_id,
+            "run_tag": course_run.run_tag,
             "courseware_url": course_run.courseware_url,
             "start_date": drf_datetime(course_run.start_date),
             "end_date": drf_datetime(course_run.end_date),

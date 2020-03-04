@@ -11,23 +11,19 @@ import { compose } from "redux"
 import queryString from "query-string"
 import { pathOr } from "ramda"
 import * as Sentry from "@sentry/browser"
-import moment from "moment"
-import * as R from "ramda"
 
 import { CheckoutForm } from "../../components/forms/CheckoutForm"
 
 import queries from "../../lib/queries"
 import { createCyberSourceForm, formatErrors } from "../../lib/form"
-
-import { sameDayOrLater } from "../../lib/util"
+import { calcSelectedRunIds } from "../../lib/ecommerce"
 
 import type { Response } from "redux-query"
 import type { Location } from "react-router"
 import type {
   BasketResponse,
   BasketPayload,
-  CheckoutResponse,
-  BasketItem
+  CheckoutResponse
 } from "../../flow/ecommerceTypes"
 import type {
   Actions,
@@ -48,24 +44,6 @@ type State = {
   errors: string | Object | null,
   isLoading: boolean,
   showGenericError: boolean
-}
-
-export const calcSelectedRunIds = (
-  item: BasketItem,
-  preselectId: number = 0
-): { [number]: number } => {
-  if (item.type === "courserun") {
-    const course = item.courses[0]
-    return {
-      [course.id]: item.object_id
-    }
-  }
-
-  // NOTE: Due to a bug, the logic for preselecting course runs for courses in a program is disabled. In other words,
-  // all course run select boxes should start with no selection at all. This will change when we decide on desired
-  // course run pre-selection behavior. The following code replaces logic that was last changed in this PR:
-  // https://github.com/mitodl/mitxpro/pull/1515
-  return {}
 }
 
 export class CheckoutPage extends React.Component<Props, State> {
@@ -139,9 +117,10 @@ export class CheckoutPage extends React.Component<Props, State> {
     }
 
     // update basket with selected runs
+    const { productId } = this.getQueryParams()
     const basketPayload = {
       items: basket.items.map(item => ({
-        product_id: item.product_id,
+        product_id: productId,
         run_ids:    Object.values(values.runs).map(runId => parseInt(runId))
       })),
       coupons:       values.couponCode ? [{ code: values.couponCode }] : [],

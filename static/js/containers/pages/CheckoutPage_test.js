@@ -2,23 +2,24 @@
 import { assert } from "chai"
 import sinon from "sinon"
 
-import CheckoutPage, {
-  calcSelectedRunIds,
-  CheckoutPage as InnerCheckoutPage
-} from "./CheckoutPage"
+import CheckoutPage, { CheckoutPage as InnerCheckoutPage } from "./CheckoutPage"
 
 import { PRODUCT_TYPE_PROGRAM } from "../../constants"
 import { makeBasketResponse } from "../../factories/ecommerce"
 import * as formFuncs from "../../lib/form"
 import IntegrationTestHelper from "../../util/integration_test_helper"
+import * as ecommerceApi from "../../lib/ecommerce"
 
 describe("CheckoutPage", () => {
-  let helper, renderPage, basket
+  let helper, renderPage, basket, calcSelectedRunIdsStub
 
   beforeEach(() => {
     basket = makeBasketResponse(PRODUCT_TYPE_PROGRAM)
 
     helper = new IntegrationTestHelper()
+    calcSelectedRunIdsStub = helper.sandbox
+      .stub(ecommerceApi, "calcSelectedRunIds")
+      .returns({})
     renderPage = helper.configureHOCRenderer(
       CheckoutPage,
       InnerCheckoutPage,
@@ -28,7 +29,9 @@ describe("CheckoutPage", () => {
         }
       },
       {
-        location: {}
+        location: {
+          search: `product=${basket.items[0].product_id}`
+        }
       }
     )
   })
@@ -87,6 +90,31 @@ describe("CheckoutPage", () => {
       }
     )
     assert.equal(inner.find("CheckoutForm").prop("couponCode"), code)
+  })
+
+  it("calculates preselected course run ids for the checkout form", async () => {
+    const preselectId = 10
+    // $FlowFixMe: flow complains about a numerical key here, and ESLint complains if you set it to "1"
+    const fakeSelectedRunIds = { 1: preselectId }
+    calcSelectedRunIdsStub.returns(fakeSelectedRunIds)
+
+    const { inner } = await renderPage(
+      {},
+      {
+        location: {
+          search: `product=4567&preselect=${preselectId}`
+        }
+      }
+    )
+    sinon.assert.calledWith(
+      calcSelectedRunIdsStub,
+      basket.items[0],
+      preselectId
+    )
+    assert.equal(
+      inner.find("CheckoutForm").prop("selectedRuns"),
+      fakeSelectedRunIds
+    )
   })
 
   it("submits the coupon code", async () => {})
@@ -175,7 +203,7 @@ describe("CheckoutPage", () => {
           body: {
             items: [
               {
-                product_id: basketItem.product_id,
+                product_id: basketItem.product_id.toString(),
                 run_ids:    []
               }
             ],
@@ -222,7 +250,7 @@ describe("CheckoutPage", () => {
       body: {
         items: [
           {
-            product_id: basketItem.product_id,
+            product_id: basketItem.product_id.toString(),
             run_ids:    []
           }
         ],
@@ -271,7 +299,12 @@ describe("CheckoutPage", () => {
     sinon.assert.notCalled(submitStub)
     sinon.assert.calledWith(helper.handleRequestStub, "/api/basket/", "PATCH", {
       body: {
-        items:         [{ product_id: basket.items[0].product_id, run_ids: [runId] }],
+        items: [
+          {
+            product_id: basket.items[0].product_id.toString(),
+            run_ids:    [runId]
+          }
+        ],
         coupons:       [],
         data_consents: []
       },
@@ -322,7 +355,10 @@ describe("CheckoutPage", () => {
         {
           body: {
             items: [
-              { product_id: basket.items[0].product_id, run_ids: [runId] }
+              {
+                product_id: basket.items[0].product_id.toString(),
+                run_ids:    [runId]
+              }
             ],
             coupons:       hasCoupon ? [{ code: code }] : [],
             data_consents: []
@@ -351,14 +387,6 @@ describe("CheckoutPage", () => {
       inner.find(".checkout-page").text(),
       "One moment while we prepare checkout"
     )
-  })
-
-  describe("calcSelectedRunIds", () => {
-    it("calculates selected run ids from a basket item", () => {
-      const item = basket.items[0]
-      item.type = PRODUCT_TYPE_PROGRAM
-      assert.deepEqual(calcSelectedRunIds(item), {})
-    })
   })
 
   //

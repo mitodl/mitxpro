@@ -45,6 +45,7 @@ from cms.forms import CertificatePageForm
 from cms.utils import filter_and_sort_catalog_pages
 from courses.constants import DEFAULT_COURSE_IMG_PATH
 from courses.models import CourseRunCertificate, ProgramCertificate
+from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
 
 
@@ -695,12 +696,26 @@ class ProgramPage(ProductPage):
             if program and not is_anonymous
             else False
         )
+        now = now_in_utc()
+        active_program_run = program.programruns.filter(
+            start_date__lte=now, end_date__gt=now
+        ).first()
+        if active_program_run:
+            checkout_product_id = active_program_run.full_readable_id
+        elif product:
+            checkout_product_id = product.id
+        else:
+            checkout_product_id = None
 
         return {
             **super().get_context(request, **kwargs),
             **get_base_context(request),
             "product_id": product.id if product else None,
-            "checkout_url": f"{reverse('checkout-page')}?product={ product.id }"
+            "checkout_url": (
+                None
+                if not checkout_product_id
+                else f"{reverse('checkout-page')}?product={ checkout_product_id }"
+            )
             if product
             else None,
             "enrolled": enrolled,

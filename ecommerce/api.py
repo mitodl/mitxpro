@@ -1116,10 +1116,9 @@ def get_product_from_text_id(text_id):
     program_run_id_match = re.match(PROGRAM_RUN_ID_PATTERN, text_id)
     # This text id matches the pattern of a program text id with a program run attached
     if program_run_id_match:
-        potential_prog_run_id = program_run_id_match.groupdict()["run_suffix"]
-        potential_text_id_base = text_id[
-            0 : (len(text_id) - len(potential_prog_run_id) - 1)
-        ]
+        match_dict = program_run_id_match.groupdict()
+        potential_prog_run_id = match_dict["run_tag"]
+        potential_text_id_base = match_dict["text_id_base"]
         # A Program's own text id may end with something that looks like a ProgramRun suffix, but has
         # no associated ProgramRun (ex: program.readable_id == "program-v1:my+program+R1"). This query looks
         # for a Program with a ProgramRun that matches the suffix, or one that matches the full given text id
@@ -1128,17 +1127,15 @@ def get_product_from_text_id(text_id):
             Program.objects.filter(
                 Q(
                     readable_id=potential_text_id_base,
-                    programruns__run_suffix=potential_prog_run_id,
+                    programruns__run_tag=potential_prog_run_id,
                 )
                 | Q(readable_id=text_id)
             )
-            .order_by("-programruns__run_suffix")
+            .order_by("-programruns__run_tag")
             .prefetch_related(
                 Prefetch(
                     "programruns",
-                    queryset=ProgramRun.objects.filter(
-                        run_suffix=potential_prog_run_id
-                    ),
+                    queryset=ProgramRun.objects.filter(run_tag=potential_prog_run_id),
                     to_attr="matching_program_runs",
                 )
             )
