@@ -131,6 +131,8 @@ class B2BOrderStatusView(APIView):
                 ).data,
                 "email": order.email,
                 "contract_number": order.contract_number,
+                "created_on": order.created_on,
+                "coupon_code": order.coupon.coupon_code
             }
         )
 
