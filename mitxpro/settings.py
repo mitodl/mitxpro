@@ -10,6 +10,7 @@ from datetime import timedelta
 
 import pytz
 from celery.schedules import crontab
+from redbeat import RedBeatScheduler
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
@@ -671,16 +672,25 @@ USE_CELERY = True
 REDISCLOUD_URL = get_string(
     "REDISCLOUD_URL", None, description="RedisCloud connection url"
 )
+if REDISCLOUD_URL is not None:
+    _redis_url = REDISCLOUD_URL
+else:
+    _redis_url = get_string(
+        "REDIS_URL", None, description="Redis URL for non-production use"
+    )
+
 CELERY_BROKER_URL = get_string(
     "CELERY_BROKER_URL",
-    REDISCLOUD_URL,
-    description="Where celery should get tasks, default is REDISCLOUD_URL",
+    _redis_url,
+    description="Where celery should get tasks, default is Redis URL",
 )
 CELERY_RESULT_BACKEND = get_string(
     "CELERY_RESULT_BACKEND",
-    REDISCLOUD_URL,
-    description="Where celery should put task results, default is REDISCLOUD_URL",
+    _redis_url,
+    description="Where celery should put task results, default is Redis URL",
 )
+CELERY_BEAT_SCHEDULER = RedBeatScheduler
+CELERY_REDBEAT_REDIS_URL = _redis_url
 CELERY_TASK_ALWAYS_EAGER = get_bool("CELERY_TASK_ALWAYS_EAGER", False, dev_only=True)
 CELERY_TASK_EAGER_PROPAGATES = get_bool("CELERY_TASK_EAGER_PROPAGATES", True)
 CRON_COURSE_CERTIFICATES_HOURS = get_string(
@@ -731,7 +741,7 @@ DRIVE_WEBHOOK_EXPIRATION_MINUTES = get_int(
 )
 DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES = get_int(
     "DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES",
-    60 * 12,
+    60 * 3,
     description=(
         "The maximum time difference (in minutes) from the present time to a webhook expiration "
         "date to consider a webhook 'fresh', i.e.: not in need of renewal. If the time difference "

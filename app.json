@@ -44,11 +44,11 @@
       "required": false
     },
     "CELERY_BROKER_URL": {
-      "description": "Where celery should get tasks, default is REDISCLOUD_URL",
+      "description": "Where celery should get tasks, default is Redis URL",
       "required": false
     },
     "CELERY_RESULT_BACKEND": {
-      "description": "Where celery should put task results, default is REDISCLOUD_URL",
+      "description": "Where celery should put task results, default is Redis URL",
       "required": false
     },
     "CELERY_TASK_EAGER_PROPAGATES": {
@@ -423,6 +423,10 @@
     },
     "REDISCLOUD_URL": {
       "description": "RedisCloud connection url",
+      "required": false
+    },
+    "REDIS_URL": {
+      "description": "Redis URL for non-production use",
       "required": false
     },
     "REFUND_REQUEST_WORKSHEET_ID": {
