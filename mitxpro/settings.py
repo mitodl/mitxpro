@@ -14,10 +14,6 @@ from redbeat import RedBeatScheduler
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
-import sentry_sdk
-from sentry_sdk.integrations.celery import CeleryIntegration
-from sentry_sdk.integrations.django import DjangoIntegration
-from sentry_sdk.integrations.logging import LoggingIntegration
 
 from mitxpro.envs import (
     get_any,
@@ -27,8 +23,35 @@ from mitxpro.envs import (
     get_list,
     OffsettingSchedule,
 )
+from mitxpro.sentry import init_sentry
 
 VERSION = "0.42.1"
+
+ENVIRONMENT = get_string(
+    "MITXPRO_ENVIRONMENT",
+    "dev",
+    description="The execution environment that the app is in (e.g. dev, staging, prod)",
+    required=True,
+)
+# this is only available to heroku review apps
+HEROKU_APP_NAME = get_string(
+    "HEROKU_APP_NAME", None, description="The name of the review app"
+)
+
+# initialize Sentry before doing anything else so we capture any config errors
+SENTRY_DSN = get_string(
+    "SENTRY_DSN", "", description="The connection settings for Sentry"
+)
+SENTRY_LOG_LEVEL = get_string(
+    "SENTRY_LOG_LEVEL", "ERROR", description="The log level for Sentry"
+)
+init_sentry(
+    dsn=SENTRY_DSN,
+    environment=ENVIRONMENT,
+    version=VERSION,
+    log_level=SENTRY_LOG_LEVEL,
+    heroku_app_name=HEROKU_APP_NAME,
+)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -48,17 +71,6 @@ SECRET_KEY = get_string(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_bool("DEBUG", False, dev_only=True)
 
-ENVIRONMENT = get_string(
-    "MITXPRO_ENVIRONMENT",
-    "dev",
-    description="The execution environment that the app is in (e.g. dev, staging, prod)",
-    required=True,
-)
-
-# this is only available to heroku review apps
-HEROKU_APP_NAME = get_string(
-    "HEROKU_APP_NAME", None, description="The name of the review app"
-)
 
 ALLOWED_HOSTS = ["*"]
 
@@ -506,9 +518,6 @@ LOG_LEVEL = get_string("MITXPRO_LOG_LEVEL", "INFO", description="The log level d
 DJANGO_LOG_LEVEL = get_string(
     "DJANGO_LOG_LEVEL", "INFO", description="The log level for django"
 )
-SENTRY_LOG_LEVEL = get_string(
-    "SENTRY_LOG_LEVEL", "ERROR", description="The log level for Sentry"
-)
 
 # For logging to a remote syslog host
 LOG_HOST = get_string("MITXPRO_LOG_HOST", "localhost")
@@ -568,21 +577,6 @@ LOGGING = {
     },
     "root": {"handlers": ["console", "syslog"], "level": LOG_LEVEL},
 }
-
-# Sentry
-sentry_sdk.init(
-    dsn=get_string("SENTRY_DSN", "", description="The connection settings for Sentry"),
-    environment=ENVIRONMENT,
-    release=VERSION,
-    integrations=[
-        DjangoIntegration(),
-        CeleryIntegration(),
-        LoggingIntegration(level=SENTRY_LOG_LEVEL),
-    ],
-)
-with sentry_sdk.configure_scope() as scope:
-    if HEROKU_APP_NAME:
-        scope.set_tag("review_app_name", HEROKU_APP_NAME)
 
 # server-status
 STATUS_TOKEN = get_string(
