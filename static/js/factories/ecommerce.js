@@ -35,6 +35,7 @@ export const makeDataConsent = (): DataConsentUser => ({
   consent_text: casual.text
 })
 
+const genRunTagNumber = incrementer()
 export const makeItem = (
   productType: ?string,
   readableId: ?string
@@ -76,6 +77,7 @@ export const makeItem = (
     // $FlowFixMe: flow doesn't understand generators well
     product_id:    genProductId.next().value,
     readable_id:   productReadableId,
+    run_tag:       casual.word.concat(genRunTagNumber.next().value),
     created_on:    casual.moment.format(),
     start_date:    casual.moment.format()
   }

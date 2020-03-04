@@ -39,6 +39,7 @@ export type ProductVersion = {
   product_id: number,
   id: number,
   readable_id: string,
+  run_tag: ?string,
   created_on: string,
   start_date: ?string,
 }

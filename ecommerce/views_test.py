@@ -797,7 +797,7 @@ def test_patch_basket_update_runs(basket_client, basket_and_coupons, add_new_run
 def test_patch_basket_invalid_run(
     basket_client, basket_and_coupons, is_program, is_selected
 ):
-    """A patch request with an run for a different product should result in a 400 error"""
+    """A patch request with a run for a different product should result in a 400 error"""
     product_version = basket_and_coupons.product_version
     product = product_version.product
     run = CourseRunFactory.create()
@@ -893,8 +893,8 @@ def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
     }
 
 
-def test_patch_basket__another_user_enrolled(basket_client, basket_and_coupons):
-    """A patch request for a run for a course that another user has already enrolled in should succeed"""
+def test_patch_basket_other_user_enrolled(basket_client, basket_and_coupons):
+    """A patch request for a course run that another user has already enrolled in should succeed"""
     run = basket_and_coupons.run
     order = LineFactory.create(order__status=Order.FULFILLED).order
     CourseRunEnrollmentFactory.create(run=run, user=order.purchaser, order=order)

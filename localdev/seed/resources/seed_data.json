@@ -13,7 +13,10 @@
             "title": "Digital Learning",
             "subhead": "Learn stuff about digital learning.",
             "description": "<p>Learn stuff about digital learning.</p>",
-            "readable_id": "program-v1:xPRO+DgtlLearn"
+            "readable_id": "program-v1:xPRO+DgtlLearn",
+            "_product": {
+                "price": 2501
+            }
         },
         {
             "title": "Analog Learning",
@@ -32,6 +35,7 @@
                 {
                     "title": "edX Demonstration Course - Spring 2013",
                     "courseware_id": "course-v1:edX+DemoX+Demo_Course",
+                    "run_tag": "DEMO",
                     "courseware_url_path": "/courses/course-v1:edX+DemoX+Demo_Course/course/",
                     "start_date": "2013-02-05T00:00:00+00:00",
                     "_product": {
@@ -51,8 +55,9 @@
             "course_runs": [
                 {
                     "title": "Architecture of Complex Systems - Fall 2019",
-                    "courseware_id": "course-v1:TestX+SysEngxB1+1T2019",
-                    "courseware_url_path": "/courses/course-v1:TestX+SysEngxB1+1T2019/course/",
+                    "courseware_id": "course-v1:TestX+SysEngxB1+R1",
+                    "run_tag": "R1",
+                    "courseware_url_path": "/courses/course-v1:TestX+SysEngxB1+R1/course/",
                     "start_date": "2019-08-15T00:00:00+00:00",
                     "end_date": "2019-12-15T00:00:00+00:00",
                     "enrollment_end": "2019-08-29T00:00:00+00:00",
@@ -73,8 +78,9 @@
             "course_runs": [
                 {
                     "title": "Models in Engineering - Spring 2020",
-                    "courseware_id": "course-v1:TestX+SysEngxB2+1T2019",
-                    "courseware_url_path": "/courses/course-v1:TestX+SysEngxB2+1T2019/course/",
+                    "courseware_id": "course-v1:TestX+SysEngxB2+R1",
+                    "run_tag": "R1",
+                    "courseware_url_path": "/courses/course-v1:TestX+SysEngxB2+R1/course/",
                     "end_date": "2020-05-15T00:00:00+00:00",
                     "start_date": "2020-01-15T00:00:00+00:00",
                     "enrollment_end": "2020-01-29T00:00:00+00:00",
@@ -95,8 +101,9 @@
             "course_runs": [
                 {
                     "title": "Model-Based Systems Engineering: Documentation and Analysis - Fall 2020",
-                    "courseware_id": "course-v1:TestX+SysEngxB3+1T2019",
-                    "courseware_url_path": "/courses/course-v1:TestX+SysEngxB3+1T2019/course/",
+                    "courseware_id": "course-v1:TestX+SysEngxB3+R1",
+                    "run_tag": "R1",
+                    "courseware_url_path": "/courses/course-v1:TestX+SysEngxB3+R1/course/",
                     "start_date": "2020-08-15T00:00:00+00:00",
                     "end_date": "2020-12-15T00:00:00+00:00",
                     "enrollment_end": "2020-08-29T00:00:00+00:00",
@@ -117,8 +124,9 @@
             "course_runs": [
                 {
                     "title": "Quantitative Methods in Systems Engineering - August 2019",
-                    "courseware_id": "course-v1:TestX+SysEngxB4+1T2019",
-                    "courseware_url_path": "/courses/course-v1:TestX+SysEngxB4+1T2019/course/",
+                    "courseware_id": "course-v1:TestX+SysEngxB4+R1",
+                    "run_tag": "R1",
+                    "courseware_url_path": "/courses/course-v1:TestX+SysEngxB4+R1/course/",
                     "enrollment_start": "2019-08-15T00:00:00+00:00",
                     "end_date": "2019-12-15T00:00:00+00:00",
                     "start_date": "2019-08-15T00:00:00+00:00",
@@ -140,28 +148,32 @@
             "course_runs": [
                 {
                     "title": "Digital Learning 100 - August 2021",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+100+Aug_2021",
+                    "courseware_id": "course-v1:MITx+Digital+Learning+100+R4",
+                    "run_tag": "R4",
                     "start_date": "2021-08-15T00:00:00+00:00",
                     "end_date": "2021-12-15T00:00:00+00:00",
                     "enrollment_end": "2021-08-29T00:00:00+00:00"
                 },
                 {
                     "title": "Digital Learning 100 - August 2020",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+100+Aug_2020",
+                    "courseware_id": "course-v1:MITx+Digital+Learning+100+R3",
+                    "run_tag": "R3",
                     "start_date": "2020-08-15T00:00:00+00:00",
                     "end_date": "2020-12-15T00:00:00+00:00",
                     "enrollment_end": "2020-08-29T00:00:00+00:00"
                 },
                 {
                     "title": "Digital Learning 100 - January 2016",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+100+Jan_2016",
+                    "courseware_id": "course-v1:MITx+Digital+Learning+100+R2",
+                    "run_tag": "R2",
                     "end_date": "2016-05-15T00:00:00+00:00",
                     "start_date": "2016-01-15T00:00:00+00:00",
                     "enrollment_end": "2016-01-29T00:00:00+00:00"
                 },
                 {
                     "title": "Digital Learning 100 - August 2015",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+100+Aug_2015",
+                    "courseware_id": "course-v1:MITx+Digital+Learning+100+R1",
+                    "run_tag": "R1",
                     "end_date": "2015-12-15T00:00:00+00:00",
                     "start_date": "2015-08-15T00:00:00+00:00",
                     "enrollment_end": "2015-08-29T00:00:00+00:00"
@@ -179,21 +191,24 @@
             "course_runs": [
                 {
                     "title": "Digital Learning 200 - August 2016",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+200+Aug_2016",
+                    "courseware_id": "course-v1:MITx+Digital+Learning+200+R3",
+                    "run_tag": "R3",
                     "end_date": "2016-12-15T00:00:00+00:00",
                     "start_date": "2016-08-15T00:00:00+00:00",
                     "enrollment_end": "2016-08-29T00:00:00+00:00"
                 },
                 {
                     "title": "Digital Learning 200 - January 2016",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+200+Jan_2016",
+                    "courseware_id": "course-v1:MITx+Digital+Learning+200+R2",
+                    "run_tag": "R2",
                     "end_date": "2016-05-15T00:00:00+00:00",
                     "start_date": "2016-01-15T00:00:00+00:00",
                     "enrollment_end": "2016-01-29T00:00:00+00:00"
                 },
                 {
                     "title": "Digital Learning 200 - August 2015",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+200+Aug_2015",
+                    "courseware_id": "course-v1:MITx+Digital+Learning+200+R1",
+                    "run_tag": "R1",
                     "end_date": "2015-12-15T00:00:00+00:00",
                     "start_date": "2015-08-15T00:00:00+00:00",
                     "enrollment_end": "2015-08-29T00:00:00+00:00"
@@ -211,7 +226,8 @@
             "course_runs": [
                 {
                     "title": "Digital Learning 300 - August 2016",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+300+Aug_2016",
+                    "courseware_id": "course-v1:MITx+Digital+Learning+300+R3",
+                    "run_tag": "R3",
                     "enrollment_start": "2016-08-15T00:00:00+00:00",
                     "end_date": "2016-12-15T00:00:00+00:00",
                     "start_date": "2016-08-15T00:00:00+00:00",
@@ -219,7 +235,8 @@
                 },
                 {
                     "title": "Digital Learning 300 - January 2016",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+300+Jan_2016",
+                    "courseware_id": "course-v1:MITx+Digital+Learning+300+R2",
+                    "run_tag": "R2",
                     "enrollment_start": "2016-01-15T00:00:00+00:00",
                     "end_date": "2016-05-15T00:00:00+00:00",
                     "start_date": "2016-01-15T00:00:00+00:00",
@@ -227,7 +244,8 @@
                 },
                 {
                     "title": "Digital Learning 300 - August 2015",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+300+Aug_2015",
+                    "courseware_id": "course-v1:MITx+Digital+Learning+300+R1",
+                    "run_tag": "R1",
                     "enrollment_start": "2015-08-15T00:00:00+00:00",
                     "end_date": "2015-12-15T00:00:00+00:00",
                     "start_date": "2015-08-15T00:00:00+00:00",
@@ -246,7 +264,8 @@
             "course_runs": [
                 {
                     "title": "Analog Learning 100 - August 2016",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+100+Aug_2016",
+                    "courseware_id": "course-v1:MITx+Analog+Learning+100+R3",
+                    "run_tag": "R3",
                     "enrollment_start": "2016-08-15T00:00:00+00:00",
                     "end_date": "2016-12-15T00:00:00+00:00",
                     "start_date": "2016-08-15T00:00:00+00:00",
@@ -254,7 +273,8 @@
                 },
                 {
                     "title": "Analog Learning 100 - January 2016",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+100+Jan_2016",
+                    "courseware_id": "course-v1:MITx+Analog+Learning+100+R2",
+                    "run_tag": "R2",
                     "enrollment_start": "2016-01-15T00:00:00+00:00",
                     "end_date": "2016-05-15T00:00:00+00:00",
                     "start_date": "2016-01-15T00:00:00+00:00",
@@ -262,7 +282,8 @@
                 },
                 {
                     "title": "Analog Learning 100 - August 2015",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+100+Aug_2015",
+                    "courseware_id": "course-v1:MITx+Analog+Learning+100+R1",
+                    "run_tag": "R1",
                     "enrollment_start": "2015-08-15T00:00:00+00:00",
                     "end_date": "2015-12-15T00:00:00+00:00",
                     "start_date": "2015-08-15T00:00:00+00:00",
@@ -281,7 +302,8 @@
             "course_runs": [
                 {
                     "title": "Analog Learning 200 - August 2016",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+200+Aug_2016",
+                    "courseware_id": "course-v1:MITx+Analog+Learning+200+R3",
+                    "run_tag": "R3",
                     "enrollment_start": "2016-08-15T00:00:00+00:00",
                     "end_date": "2016-12-15T00:00:00+00:00",
                     "start_date": "2016-08-15T00:00:00+00:00",
@@ -289,7 +311,8 @@
                 },
                 {
                     "title": "Analog Learning 200 - January 2016",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+200+Jan_2016",
+                    "courseware_id": "course-v1:MITx+Analog+Learning+200+R2",
+                    "run_tag": "R2",
                     "enrollment_start": "2016-01-15T00:00:00+00:00",
                     "end_date": "2016-05-15T00:00:00+00:00",
                     "start_date": "2016-01-15T00:00:00+00:00",
@@ -297,7 +320,8 @@
                 },
                 {
                     "title": "Analog Learning 200 - August 2015",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+200+Aug_2015",
+                    "courseware_id": "course-v1:MITx+Analog+Learning+200+R1",
+                    "run_tag": "R1",
                     "enrollment_start": "2015-08-15T00:00:00+00:00",
                     "end_date": "2015-12-15T00:00:00+00:00",
                     "start_date": "2015-08-15T00:00:00+00:00",
@@ -316,7 +340,8 @@
             "course_runs": [
                 {
                     "title": "Analog Learning 300 - August 2016",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+300+Aug_2016",
+                    "courseware_id": "course-v1:MITx+Analog+Learning+300+R3",
+                    "run_tag": "R3",
                     "enrollment_start": "2016-08-15T00:00:00+00:00",
                     "end_date": "2016-12-15T00:00:00+00:00",
                     "start_date": "2016-08-15T00:00:00+00:00",
@@ -327,7 +352,8 @@
                 },
                 {
                     "title": "Analog Learning 300 - January 2016",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+300+Jan_2016",
+                    "courseware_id": "course-v1:MITx+Analog+Learning+300+R2",
+                    "run_tag": "R2",
                     "enrollment_start": "2016-01-15T00:00:00+00:00",
                     "end_date": "2016-05-15T00:00:00+00:00",
                     "start_date": "2016-01-15T00:00:00+00:00",
@@ -335,7 +361,8 @@
                 },
                 {
                     "title": "Analog Learning 300 - August 2015",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+300+Aug_2015",
+                    "courseware_id": "course-v1:MITx+Analog+Learning+300+R1",
+                    "run_tag": "R1",
                     "enrollment_start": "2015-08-15T00:00:00+00:00",
                     "end_date": "2015-12-15T00:00:00+00:00",
                     "start_date": "2015-08-15T00:00:00+00:00",
@@ -352,7 +379,8 @@
             "course_runs": [
                 {
                     "title": "Quantum Computing - August 2019",
-                    "courseware_id": "course-v1:MITxPRO+QCx1+2T2019",
+                    "courseware_id": "course-v1:MITxPRO+QCx1+R1",
+                    "run_tag": "R1",
                     "courseware_url_path": "/courses/course-v1:MITxPRO+QCx1+2T2019/about",
                     "enrollment_start": "2019-08-15T00:00:00+00:00",
                     "end_date": "2019-12-15T00:00:00+00:00",
@@ -371,7 +399,8 @@
             "course_runs": [
                 {
                     "title": "Not-Live Courses - August 2019",
-                    "courseware_id": "course-v1:MITxPRO+notlive+2T2019",
+                    "courseware_id": "course-v1:MITxPRO+notlive+R1",
+                    "run_tag": "R1",
                     "enrollment_start": "2019-08-15T00:00:00+00:00",
                     "end_date": "2019-12-15T00:00:00+00:00",
                     "start_date": "2019-08-15T00:00:00+00:00",
@@ -389,6 +418,7 @@
                 {
                     "title": "Additive Manufacturing for Innovative Design and Production - April 2018",
                     "courseware_id": "course-v1:SEED+AMx+R3",
+                    "run_tag": "R3",
                     "enrollment_start": "2018-04-15T00:00:00+00:00",
                     "end_date": "2018-07-02T00:00:00+00:00",
                     "start_date": "2018-04-30T00:00:00+00:00",
@@ -400,6 +430,7 @@
                 {
                     "title": "Additive Manufacturing for Innovative Design and Production - April 2019",
                     "courseware_id": "course-v1:SEED+AMx+R4",
+                    "run_tag": "R4",
                     "enrollment_start": "2019-04-15T00:00:00+00:00",
                     "end_date": "2019-07-02T00:00:00+00:00",
                     "start_date": "2019-04-30T00:00:00+00:00",
@@ -420,6 +451,7 @@
                 {
                     "title": "Model-Based Systems Engineering: Documentation and Analysis - April 2018",
                     "courseware_id": "course-v1:SEED+SysEngBx3+R7",
+                    "run_tag": "R7",
                     "enrollment_start": "2018-04-01T00:00:00+00:00",
                     "end_date": "2018-05-07T00:00:00+00:00",
                     "start_date": "2018-04-09T00:00:00+00:00",
@@ -431,6 +463,7 @@
                 {
                     "title": "Model-Based Systems Engineering: Documentation and Analysis - April 2019",
                     "courseware_id": "course-v1:SEED+SysEngBx3+R8",
+                    "run_tag": "R8",
                     "enrollment_start": "2019-04-01T00:00:00+00:00",
                     "end_date": "2019-05-07T00:00:00+00:00",
                     "start_date": "2019-04-09T00:00:00+00:00",
@@ -508,34 +541,41 @@
     "companies": [
         {
             "name": "Boeing"
+        },
+        {
+            "name": "MIT"
         }
     ],
     "coupons": [
         {
-            "name": "AMxB_100",
-            "coupon_code": "AMxB_100",
+            "name": "AMxB100",
+            "coupon_code": "AMxB100",
             "num_coupon_codes": 1,
             "amount": 1,
-            "activation_date": "2018-05-07T00:00:00+00:00",
-            "expiration_date": "2020-12-31T00:00:00+00:00",
-            "product_ids": ["8"],
+            "activation_date": "2018-05-07T00:00:00",
             "coupon_type": "single-use",
             "payment_type": "staff",
             "payment_transaction": "123",
-            "company": "1"
+            "_company": "Boeing",
+            "_courseruns": [
+                "Additive Manufacturing for Innovative Design and Production - April 2018",
+                "Additive Manufacturing for Innovative Design and Production - April 2019"
+            ]
         },
         {
-            "name": "SysEngBx3_100",
-            "coupon_code": "SysEngBx3_100",
+            "name": "SysEngBx3100",
+            "coupon_code": "SysEngBx3100",
             "num_coupon_codes": 1,
             "amount": 1,
-            "activation_date": "2018-05-07T00:00:00+00:00",
-            "expiration_date": "2020-12-31T00:00:00+00:00",
-            "product_ids": ["9"],
+            "activation_date": "2018-05-07T00:00:00",
             "coupon_type": "single-use",
             "payment_type": "staff",
             "payment_transaction": "123",
-            "company": "1"
+            "_company": "Boeing",
+            "_courseruns": [
+                "Model-Based Systems Engineering: Documentation and Analysis - April 2018",
+                "Model-Based Systems Engineering: Documentation and Analysis - April 2019"
+            ]
         }
     ]
 }

@@ -11,7 +11,12 @@ from rest_framework.exceptions import ValidationError
 
 from mitxpro.test_utils import any_instance_of
 from cms.factories import CoursePageFactory, ProgramPageFactory
-from courses.factories import CourseFactory, ProgramFactory, CourseRunFactory
+from courses.factories import (
+    CourseFactory,
+    ProgramFactory,
+    CourseRunFactory,
+    ProgramRunFactory,
+)
 from courses.serializers import CourseSerializer
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import get_readable_id, round_half_up
@@ -80,6 +85,7 @@ def test_serialize_basket_product_version_courserun(mock_context):
         "object_id": product_version.product.object_id,
         "product_id": product_version.product.id,
         "readable_id": get_readable_id(product_version.product.content_object),
+        "run_tag": courserun.run_tag,
         "created_on": product_version.created_on.strftime(datetime_millis_format),
         "start_date": product_version.product.content_object.start_date.isoformat()
         if product_version.product.content_object.start_date
@@ -110,11 +116,25 @@ def test_serialize_basket_product_version_program(mock_context):
         "object_id": product_version.product.object_id,
         "product_id": product_version.product.id,
         "readable_id": get_readable_id(product_version.product.content_object),
+        "run_tag": None,
         "created_on": product_version.created_on.strftime(datetime_millis_format),
         "start_date": product_version.product.content_object.next_run_date.isoformat()
         if product_version.product.content_object.next_run_date
         else None,
     }
+
+
+def test_serialize_basket_product_version_programrun(mock_context):
+    """Test ProductVersion serialization for a Program with an associated ProgramRun"""
+    program_run = ProgramRunFactory()
+    product_version = ProductVersionFactory.create(
+        product=ProductFactory(content_object=program_run.program)
+    )
+    context = {**mock_context, **{"program_run": program_run}}
+
+    data = ProductVersionSerializer(instance=product_version, context=context).data
+    assert data["object_id"] == program_run.program.id
+    assert data["run_tag"] == program_run.run_tag
 
 
 def test_basket_thumbnail_courserun(basket_and_coupons, mock_context):

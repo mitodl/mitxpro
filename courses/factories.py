@@ -50,7 +50,7 @@ class ProgramRunFactory(DjangoModelFactory):
     """Factory for ProgramRuns"""
 
     program = factory.SubFactory(ProgramFactory)
-    run_suffix = factory.Sequence("R{0}".format)
+    run_tag = factory.Sequence("R{0}".format)
 
     class Meta:
         model = ProgramRun
@@ -80,6 +80,7 @@ class CourseRunFactory(DjangoModelFactory):
     courseware_id = factory.Sequence(
         lambda number: "course:/v{}/{}".format(number, FAKE.slug())
     )
+    run_tag = factory.Sequence("R{0}".format)
     courseware_url_path = factory.Faker("uri")
     start_date = factory.Faker(
         "date_time_this_month", before_now=True, after_now=False, tzinfo=pytz.utc

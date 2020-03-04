@@ -7,6 +7,7 @@ export type BaseCourseRun = {
   enrollment_end: ?string,
   courseware_url: ?string,
   courseware_id: string,
+  run_tag: ?string,
   id: number
 }
 

@@ -1276,7 +1276,7 @@ def test_create_coupons(use_defaults):
 
 
 @pytest.mark.parametrize(
-    "input_text_id,run_text_id,program_text_id,prog_run_suffix",
+    "input_text_id,run_text_id,program_text_id,prog_run_tag",
     [
         ["course-v1:some+run", "course-v1:some+run", None, None],
         ["program-v1:some+program", None, "program-v1:some+program", None],
@@ -1285,7 +1285,7 @@ def test_create_coupons(use_defaults):
     ],
 )
 def test_get_product_from_text_id(
-    input_text_id, run_text_id, program_text_id, prog_run_suffix
+    input_text_id, run_text_id, program_text_id, prog_run_tag
 ):
     """
     get_product_from_text_id should fetch a Product, Program/CourseRun, and (if applicable) a ProgramRun
@@ -1296,9 +1296,9 @@ def test_get_product_from_text_id(
         expected_content_object = CourseRunFactory.create(courseware_id=run_text_id)
     if program_text_id:
         expected_content_object = ProgramFactory.create(readable_id=program_text_id)
-        if prog_run_suffix:
+        if prog_run_tag:
             ProgramRunFactory.create(
-                program=expected_content_object, run_suffix=prog_run_suffix
+                program=expected_content_object, run_tag=prog_run_tag
             )
     expected_product = ProductFactory.create(content_object=expected_content_object)
 
@@ -1306,9 +1306,9 @@ def test_get_product_from_text_id(
     assert product == expected_product
     assert content_object is not None
     assert content_object == expected_content_object
-    if prog_run_suffix is not None:
+    if prog_run_tag is not None:
         assert program_run is not None
-        assert program_run.run_suffix == prog_run_suffix
+        assert program_run.run_tag == prog_run_tag
         assert program_run.program == content_object
 
 
@@ -1321,7 +1321,7 @@ def test_get_product_from_text_id_failure():
     run_without_product = CourseRunFactory.create()
     program_run = ProgramRunFactory.create(program=program_without_product)
     invalid_prog_run_text_id = (
-        f"{program_without_product.text_id}+{program_run.run_suffix}5"
+        f"{program_without_product.text_id}+{program_run.run_tag}5"
     )
     arg_exception_map = {
         program_without_product.text_id: Product.DoesNotExist,
