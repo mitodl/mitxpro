@@ -9,7 +9,6 @@ import moment from "moment"
 import Decimal from "decimal.js-light"
 
 import B2BPurchaseSummary from "../../../components/B2BPurchaseSummary"
-import B2BReceiptExplanation from "../../../components/B2BReceiptExplanation"
 
 import queries from "../../../lib/queries"
 import { addUserNotification } from "../../../actions"
@@ -19,16 +18,14 @@ import { ALERT_TYPE_TEXT } from "../../../constants"
 import { bulkReceiptCsvUrl } from "../../../lib/urls"
 
 import type { B2BOrderStatus } from "../../../flow/ecommerceTypes"
-import type { CurrentUser } from "../../flow/authTypes"
 import type { Location } from "react-router"
 import type Moment from "moment"
-
+import B2BExplanation from "../../../components/B2BExplanation"
 
 type Props = {
   addUserNotification: Function,
   orderStatus: B2BOrderStatus,
   location: Location,
-  currentUser: CurrentUser,
   forceRequest: () => Promise<void>,
   requestPending: boolean
 }
@@ -106,7 +103,6 @@ export class B2BReceiptPage extends React.Component<Props, State> {
   render() {
     const {
       orderStatus,
-      currentUser,
       location: { search }
     } = this.props
 
@@ -123,8 +119,6 @@ export class B2BReceiptPage extends React.Component<Props, State> {
       num_seats: numSeats,
       email,
       contract_number: contractNumber,
-      created_on: createdOn,
-      coupon_code: couponCode,
       product_version: { content_title: title, readable_id: readableId }
     } = orderStatus
 
@@ -136,60 +130,36 @@ export class B2BReceiptPage extends React.Component<Props, State> {
               <div className="title">Bulk Seats Receipt</div>
             </div>
           </div>
-          <div className="row purchase-summary-block">
+          <div className="row">
             <div className="col-lg-8">
               <p>
                 Thank you! You have purchased one or more seats for your team.
               </p>
-              <B2BReceiptExplanation
-                className="b2b-receipt-explanation"
-              />
-              <div className="text-box">
-                <h4>Purchase Summary (Order Number):</h4>
-                <p className="order-date">
-                  <span className="description">Order Date:</span>
-                  {moment(createdOn).format("MMMM DD, YYYY")}
+              <h3>Purchase Summary (Order Number):</h3>
+              <p className="course-or-program">
+                <span className="description">Course or program:</span>
+                {title}
+                <span className="description">{readableId}</span>
+              </p>
+              <p className="seats">
+                <span className="description">Seats:</span>
+                {numSeats} (at {formatPrice(itemPrice)} per seat)
+              </p>
+              <p className="email">
+                <span className="description">Email Address:</span>
+                {email}
+              </p>
+              {contractNumber && (
+                <p className="contract-number">
+                  <span className="description">Contract Number:</span>
+                  {contractNumber}
                 </p>
-                { currentUser && currentUser.is_authenticated ? (
-                  <p className="customer-name">
-                    <span className="description">Customer Name:</span>
-                    {currentUser.name}
-                  </p>) :  (null
-                )}
-                <p className="course-or-program">
-                  <span className="description">Course or program:</span>
-                  {title} {" "} {readableId}
-                </p>
-                <p className="seats">
-                  <span className="description">Seats:</span>
-                  {numSeats} (at {formatPrice(itemPrice)} per seat)
-                </p>
-                <p className="email">
-                  <span className="description">Email Address:</span>
-                  {email}
-                </p>
-                {contractNumber && (
-                  <p className="contract-number">
-                    <span className="description">Contract Number:</span>
-                    {contractNumber}
-                  </p>
-                )}
-                { couponCode ? (
-                  <p className="coupon_code">
-                    <span className="description">Discount:</span>
-                    {couponCode} Applied
-                  </p>
-                ) : (null)
-                }
-                <p>If you encounter any issues with the enrollment codes or you have
-                not receieve the enrollment codes within 24 hour please click the
-                link below to contact Customer Support.</p>
-                <p>
-                  <a href="https://xpro.zendesk.com/hc/requests/new">
-                    MIT xPRO Customer Support
-                  </a>
-                </p>
-              </div>
+              )}
+              If you encounter any issues please contact{" "}
+              <a href="https://xpro.zendesk.com/hc/requests/new">
+                customer support
+              </a>
+              .
             </div>
             <div className="col-lg-4">
               <B2BPurchaseSummary
@@ -205,24 +175,20 @@ export class B2BReceiptPage extends React.Component<Props, State> {
               >
                 Download codes <i className="material-icons">save_alt</i>
               </a>
-              <div className="enterprise-terms-condition">
-                By placing my order I accept the{" "}
-                <a href="/enterprise-terms-and-conditions/">
-                  MIT xPRO Enterprise Sales Terms and Conditions
-                </a>
-              </div>
             </div>
           </div>
         </div>
+        <B2BExplanation
+          alreadyPaid={true}
+          className="b2b-receipt-explanation"
+        />
       </React.Fragment>
     )
   }
 }
 
 const mapStateToProps = state => ({
-  currentUser:  state.entities.currentUser,
-  orderStatus:  state.entities.b2b_order_status,
-  orderReceipt: state.entities.orderReceipt,
+  orderStatus: state.entities.b2b_order_status
 })
 
 const mapDispatchToProps = {
