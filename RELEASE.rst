@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.42.1
+--------------
+
+- Integrated program runs for checkout
+- Revert "Bulk purchase: update receipt page"
+- Bulk purchase: update receipt page
+- Split account settings page into two forms
+
 Version 0.42.0 (Released March 03, 2020)
 --------------
 
