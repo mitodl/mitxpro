@@ -5,8 +5,7 @@ import DocumentTitle from "react-document-title"
 import { ACCOUNT_SETTINGS_PAGE_TITLE } from "../../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
-import { mutateAsync, requestAsync } from "redux-query"
-import { Link } from "react-router-dom"
+import { mutateAsync } from "redux-query"
 
 import { addUserNotification } from "../../../actions"
 import auth from "../../../lib/queries/auth"
@@ -14,6 +13,7 @@ import { routes } from "../../../lib/urls"
 import { ALERT_TYPE_TEXT } from "../../../constants"
 
 import ChangePasswordForm from "../../../components/forms/ChangePasswordForm"
+import ChangeEmailForm from "../../../components/forms/ChangeEmailForm"
 
 import type { User } from "../../../flow/authTypes"
 
@@ -22,8 +22,8 @@ import { currentUserSelector } from "../../../lib/queries/users"
 
 import type { RouterHistory } from "react-router"
 import type { ChangePasswordFormValues } from "../../../components/forms/ChangePasswordForm"
+import type { ChangeEmailFormValues } from "../../../components/forms/ChangeEmailForm"
 import type { Response } from "redux-query"
-import users from "../../../lib/queries/users"
 
 type Props = {
   history: RouterHistory,
@@ -38,74 +38,75 @@ type Props = {
 }
 
 export class AccountSettingsPage extends React.Component<Props> {
-  async onSubmit(
-    {
-      oldPassword,
-      newPassword,
-      confirmPassword,
-      email,
-      emailPassword
-    }: ChangePasswordFormValues,
+  async onSubmitPasswordForm(
+    { oldPassword, newPassword, confirmPassword }: ChangePasswordFormValues,
     { setSubmitting, resetForm }: any
   ) {
-    const {
-      addUserNotification,
-      changePassword,
-      changeEmail,
-      currentUser,
-      history
-    } = this.props
+    const { addUserNotification, changePassword, history } = this.props
 
     try {
-      let alertText, color, alertKey
-      if (currentUser && email !== currentUser.email) {
-        alertKey = "email-change"
-        const response = await changeEmail(email, emailPassword)
-        if (response.status === 200 || response.status === 201) {
-          alertText =
-            "You have been sent a verification email on your updated address. Please click on the link in the email to finish email address update."
-          color = "success"
-        } else {
-          alertText =
-            "Unable to update your email address, please try again later."
-          color = "danger"
-        }
-        addUserNotification({
-          [alertKey]: {
-            type:  ALERT_TYPE_TEXT,
-            color: color,
-            props: {
-              text: alertText
-            }
-          }
-        })
+      const response = await changePassword(
+        oldPassword,
+        newPassword,
+        confirmPassword
+      )
+
+      let alertText, color
+      if (response.status === 200) {
+        alertText = "Your password has been updated successfully."
+        color = "success"
+      } else {
+        alertText = "Unable to reset your password, please try again later."
+        color = "danger"
       }
 
-      if (oldPassword && newPassword && confirmPassword) {
-        alertKey = "password-change"
-        const response = await changePassword(
-          oldPassword,
-          newPassword,
-          confirmPassword
-        )
-
-        if (response.status === 200) {
-          alertText = "Your password has been updated successfully."
-          color = "success"
-        } else {
-          alertText = "Unable to reset your password, please try again later."
-          color = "danger"
-        }
-        addUserNotification({
-          [alertKey]: {
-            type:  ALERT_TYPE_TEXT,
-            color: color,
-            props: {
-              text: alertText
-            }
+      addUserNotification({
+        "password-change": {
+          type:  ALERT_TYPE_TEXT,
+          color: color,
+          props: {
+            text: alertText
           }
-        })
+        }
+      })
+
+      history.push(routes.accountSettings)
+    } finally {
+      resetForm()
+      setSubmitting(false)
+    }
+  }
+
+  async onSubmitEmailForm(
+    { email, confirmPassword }: ChangeEmailFormValues,
+    { setSubmitting, resetForm }: any
+  ) {
+    const { addUserNotification, changeEmail, history } = this.props
+
+    try {
+      const response = await changeEmail(email, confirmPassword)
+
+      let alertText, color
+      if (response.status === 200 || response.status === 201) {
+        alertText =
+          "You have been sent a verification email on your updated address. Please click on the link in the email to finish email address update."
+        color = "success"
+      } else {
+        alertText =
+          "Unable to update your email address, please try again later."
+        color = "danger"
       }
+
+      addUserNotification({
+        "email-change": {
+          type:  ALERT_TYPE_TEXT,
+          color: color,
+          props: {
+            text: alertText
+          }
+        }
+      })
+
       history.push(routes.accountSettings)
     } finally {
       resetForm()
@@ -127,9 +128,12 @@ export class AccountSettingsPage extends React.Component<Props> {
 
           <div className="auth-card card-shadow auth-form">
             <h3>Basic Account Information</h3>
-            <ChangePasswordForm
+            <ChangeEmailForm
               user={currentUser}
-              onSubmit={this.onSubmit.bind(this)}
+              onSubmit={this.onSubmitEmailForm.bind(this)}
+            />
+            <ChangePasswordForm
+              onSubmit={this.onSubmitPasswordForm.bind(this)}
             />
           </div>
         </div>

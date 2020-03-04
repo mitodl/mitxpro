@@ -8,7 +8,7 @@ import AccountSettingsPage, {
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import { routes } from "../../../lib/urls"
 import { ALERT_TYPE_TEXT } from "../../../constants"
-import { makeAnonymousUser, makeUser } from "../../../factories/user"
+import { makeUser } from "../../../factories/user"
 
 describe("AccountSettingsPage", () => {
   const oldPassword = "password1"
@@ -135,7 +135,7 @@ describe("AccountSettingsPage", () => {
         status
       })
 
-      const onSubmit = inner.find("ChangePasswordForm").prop("onSubmit")
+      const onSubmit = inner.find("ChangeEmailForm").prop("onSubmit")
 
       const resetFormStub = helper.sandbox.stub()
 

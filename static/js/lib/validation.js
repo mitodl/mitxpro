@@ -32,36 +32,25 @@ export const resetPasswordFormValidation = yup.object().shape({
 })
 
 export const changePasswordFormValidation = yup.object().shape({
-  email: emailFieldValidation.label("Email"),
-
-  user_email: yup.string().label("User Email"),
-
-  /* eslint-disable camelcase */
-  emailPassword: yup
-    .string()
-    .label("Confirm Password")
-    .when(["email", "$currentEmail"], (email, currentEmail, schema) =>
-      currentEmail !== email ? schema.required().min(8) : schema.notRequired()
-    ),
-
   oldPassword: yup
     .string()
     .label("Old Password")
-    .when(["email", "$currentEmail"], (email, currentEmail, schema) =>
-      currentEmail === email ? schema.required() : schema.notRequired()
-    ),
+    .required(),
 
-  newPassword: newPasswordFieldValidation
-    .label("New Password")
-    .when(["email", "$currentEmail"], (email, currentEmail, schema) =>
-      currentEmail === email ? schema.required() : schema.notRequired()
-    ),
+  newPassword: newPasswordFieldValidation.label("New Password"),
 
   confirmPassword: yup
     .string()
     .label("Confirm Password")
-    .when(["email", "$currentEmail"], (email, currentEmail, schema) =>
-      currentEmail === email ? schema.required().min(8) : schema.notRequired()
-    )
+    .required()
     .oneOf([yup.ref("newPassword")], "Passwords must match")
+})
+
+export const changeEmailFormValidation = yup.object().shape({
+  email: emailFieldValidation.notOneOf(
+    [yup.ref("$currentEmail")],
+    "Email cannot be same, Use a different one"
+  ),
+
+  confirmPassword: passwordFieldValidation.label("Confirm Password")
 })

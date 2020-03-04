@@ -3,6 +3,7 @@ import { assert } from "chai"
 import { ValidationError } from "yup"
 
 import {
+  changeEmailFormValidation,
   changePasswordFormValidation,
   resetPasswordFormValidation
 } from "./validation"
@@ -45,38 +46,19 @@ describe("validation utils", () => {
   describe("ChangePasswordFormValidation", () => {
     it(`should validate with matching passwords`, async () => {
       const inputs = {
-        email:           "abc@example.com",
         oldPassword:     "old-password",
         newPassword:     "password1",
         confirmPassword: "password1"
       }
-      const result = await changePasswordFormValidation.validate(inputs, {
-        context: { currentEmail: "abc@example.com" }
-      })
+      const result = await changePasswordFormValidation.validate(inputs)
 
       assert.deepEqual(result, inputs)
     })
 
     //
     ;[
-      // change email Confirm Password error
       [
         {
-          email:         "test@example.com",
-          emailPassword: ""
-        },
-        ["Confirm Password is a required field"]
-      ],
-      [
-        {
-          email:         "test@example.com",
-          emailPassword: "abcd"
-        },
-        ["Confirm Password must be at least 8 characters"]
-      ],
-      [
-        {
-          email:           "abc@example.com",
           oldPassword:     "",
           newPassword:     "password1",
           confirmPassword: "password1"
@@ -85,7 +67,6 @@ describe("validation utils", () => {
       ],
       [
         {
-          email:           "abc@example.com",
           oldPassword:     "password1",
           newPassword:     "",
           confirmPassword: ""
@@ -94,7 +75,6 @@ describe("validation utils", () => {
       ],
       [
         {
-          email:           "abc@example.com",
           oldPassword:     "password1",
           newPassword:     "password1",
           confirmPassword: "password2"
@@ -103,16 +83,14 @@ describe("validation utils", () => {
       ],
       [
         {
-          email:           "abc@example.com",
           oldPassword:     "password1",
           newPassword:     "pass",
           confirmPassword: "pass"
         },
-        ["Confirm Password must be at least 8 characters"]
+        ["New Password must be at least 8 characters"]
       ],
       [
         {
-          email:           "abc@example.com",
           oldPassword:     "password1",
           newPassword:     "password",
           confirmPassword: "password"
@@ -123,7 +101,55 @@ describe("validation utils", () => {
       it(`should throw an error with inputs=${JSON.stringify(
         inputs
       )}`, async () => {
-        const promise = changePasswordFormValidation.validate(inputs, {
+        const promise = changePasswordFormValidation.validate(inputs)
+
+        const result = await assert.isRejected(promise, ValidationError)
+
+        assert.deepEqual(result.errors, errors)
+      })
+    })
+  }),
+  describe("ChangeEmailFormValidation", () => {
+    it(`should validate with different email`, async () => {
+      const inputs = {
+        email:           "test@example.com",
+        confirmPassword: "password1"
+      }
+      const result = await changeEmailFormValidation.validate(inputs, {
+        context: { currentEmail: "abc@example.com" }
+      })
+
+      assert.deepEqual(result, inputs)
+    })
+
+    //
+    ;[
+      [
+        {
+          email:           "abc@example.com",
+          confirmPassword: "password"
+        },
+        ["Email cannot be same, Use a different one"]
+      ],
+      [
+        {
+          email:           "test@example.com",
+          confirmPassword: ""
+        },
+        ["Confirm Password is a required field"]
+      ],
+      [
+        {
+          email:           "test@example.com",
+          confirmPassword: "abcd"
+        },
+        ["Confirm Password must be at least 8 characters"]
+      ]
+    ].forEach(([inputs, errors]) => {
+      it(`should throw an error with inputs=${JSON.stringify(
+        inputs
+      )}`, async () => {
+        const promise = changeEmailFormValidation.validate(inputs, {
           context: { currentEmail: "abc@example.com" }
         })
 

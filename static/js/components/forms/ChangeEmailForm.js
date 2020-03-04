@@ -2,52 +2,55 @@
 /* global SETTINGS:false */
 import React from "react"
 
-import { Formik, Field, Form, ErrorMessage } from "formik"
+import {
+  Formik,
+  Field,
+  Form,
+  ErrorMessage,
+  yupToFormErrors,
+  validateYupSchema
+} from "formik"
 
-import { PasswordInput } from "./elements/inputs"
+import { PasswordInput, EmailInput } from "./elements/inputs"
 import FormError from "./elements/FormError"
-import { changePasswordFormValidation } from "../../lib/validation"
+import { changeEmailFormValidation } from "../../lib/validation"
+
+import type { User } from "../../flow/authTypes"
 
 type Props = {
-  onSubmit: Function
+  onSubmit: Function,
+  user: User
 }
 
-export type ChangePasswordFormValues = {
-  oldPassword: string,
-  newPassword: string,
+export type ChangeEmailFormValues = {
+  email: string,
   confirmPassword: string
 }
 
-const ChangePasswordForm = ({ onSubmit }: Props) => (
+const ChangeEmailForm = ({ onSubmit, user }: Props) => (
   <Formik
     onSubmit={onSubmit}
-    validationSchema={changePasswordFormValidation}
     initialValues={{
-      oldPassword:     "",
-      newPassword:     "",
+      email:           user.email,
       confirmPassword: ""
     }}
+    validate={values =>
+      validateYupSchema(values, changeEmailFormValidation, false, {
+        currentEmail: user.email
+      }).catch(err => Promise.reject(yupToFormErrors(err)))
+    }
     render={({ isSubmitting }) => (
       <Form>
         <section className="email-section">
-          <h4>Change Password</h4>
+          <h4>Change Email</h4>
           <div className="form-group">
-            <label htmlFor="oldPassword">Old Password</label>
+            <label htmlFor="email">Email</label>
             <Field
-              name="oldPassword"
+              name="email"
               className="form-control"
-              component={PasswordInput}
+              component={EmailInput}
             />
-            <ErrorMessage name="oldPassword" component={FormError} />
-          </div>
-          <div className="form-group">
-            <label htmlFor="newPassword">New Password</label>
-            <Field
-              name="newPassword"
-              className="form-control"
-              component={PasswordInput}
-            />
-            <ErrorMessage name="newPassword" component={FormError} />
+            <ErrorMessage name="email" component={FormError} />
           </div>
           <div className="form-group">
             <label htmlFor="confirmPassword">Confirm Password</label>
@@ -58,7 +61,11 @@ const ChangePasswordForm = ({ onSubmit }: Props) => (
             />
             <ErrorMessage name="confirmPassword" component={FormError} />
           </div>
+          <div className="light-gray-text">
+            Password required to change email address
+          </div>
         </section>
+
         <div className="row submit-row no-gutters justify-content-end">
           <button
             type="submit"
@@ -73,4 +80,4 @@ const ChangePasswordForm = ({ onSubmit }: Props) => (
   />
 )
 
-export default ChangePasswordForm
+export default ChangeEmailForm
