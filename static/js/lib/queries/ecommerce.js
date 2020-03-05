@@ -60,6 +60,7 @@ export default {
   }),
   productsSelector: pathOr(null, ["entities", "products"]),
   productsQuery:    () => ({
+    queryKey:  "products",
     url:       "/api/products/",
     transform: (json: Array<ProductDetail>) => ({
       products: json
@@ -122,7 +123,8 @@ export default {
       b2b_order_status: (prev: B2BOrderStatus, next: B2BOrderStatus) => next
     }
   }),
-  b2bCouponStatus: (payload: B2BCouponStatusPayload) => ({
+  b2bCouponStatusSelector: pathOr(null, ["entities", "b2b_coupon_status"]),
+  b2bCouponStatus:         (payload: B2BCouponStatusPayload) => ({
     queryKey:  "b2bCouponStatus",
     url:       "/api/b2b/coupon_status/",
     transform: (json: B2BCouponStatusPayload) => ({

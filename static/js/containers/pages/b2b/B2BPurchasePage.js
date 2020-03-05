@@ -3,7 +3,7 @@ import React from "react"
 import { connect } from "react-redux"
 import { compose } from "redux"
 import { pathOr } from "ramda"
-import qs from "query-string"
+import { createStructuredSelector } from "reselect"
 
 import {
   connectRequest,
@@ -35,7 +35,8 @@ type Props = {
   location: window.location,
   contractNumber: ?string,
   productId: string,
-  discountCode: string
+  discountCode: string,
+  isLoading: boolean
 }
 type State = {
   errors: string | Object | null
@@ -106,7 +107,8 @@ export class B2BPurchasePage extends React.Component<Props, State> {
       couponStatus,
       fetchCouponStatus,
       products,
-      requestPending
+      requestPending,
+      isLoading
     } = this.props
 
     const params = new URLSearchParams(this.props.location.search)
@@ -120,34 +122,48 @@ export class B2BPurchasePage extends React.Component<Props, State> {
 
     return (
       <React.Fragment>
-        <B2BPurchaseForm
-          onSubmit={this.onSubmit}
-          products={products.filter(
-            product => product.visible_in_bulk_form === true
-          )}
-          checkout={checkout}
-          couponStatus={couponStatus}
-          contractNumber={contractNumber}
-          clearCouponStatus={clearCouponStatus}
-          fetchCouponStatus={fetchCouponStatus}
-          requestPending={requestPending}
-          productId={productId}
-          discountCode={discountCode}
-        />
+        {isLoading ? (
+          <div className="page page-loader text-center align-self-center">
+            <div className="loader-area">
+              <img
+                src="/static/images/loader.gif"
+                className="mx-auto d-block"
+              />
+              One moment while we prepare bulk purchase page
+            </div>
+          </div>
+        ) : (
+          <B2BPurchaseForm
+            onSubmit={this.onSubmit}
+            products={products.filter(
+              product => product.visible_in_bulk_form === true
+            )}
+            checkout={checkout}
+            couponStatus={couponStatus}
+            contractNumber={contractNumber}
+            clearCouponStatus={clearCouponStatus}
+            fetchCouponStatus={fetchCouponStatus}
+            requestPending={requestPending}
+            productId={productId}
+            discountCode={discountCode}
+          />
+        )}
       </React.Fragment>
     )
   }
 }
 
-const mapStateToProps = state => ({
-  products:       state.entities.products || [],
-  couponStatus:   state.entities.b2b_coupon_status,
-  requestPending: pathOr(
-    false,
-    ["queries", "b2bCheckoutMutation", "isPending"],
-    state
-  )
-})
+const mapStateToProps = state =>
+  createStructuredSelector({
+    products:       queries.ecommerce.productsSelector,
+    couponStatus:   queries.ecommerce.b2bCouponStatusSelector,
+    requestPending: pathOr(false, [
+      "queries",
+      "b2bCheckoutMutation",
+      "isPending"
+    ]),
+    isLoading: pathOr(true, ["queries", "products", "isPending"])
+  })
 const mapDispatchToProps = dispatch => ({
   checkout: (payload: B2BCheckoutPayload) =>
     dispatch(mutateAsync(queries.ecommerce.b2bCheckoutMutation(payload))),
