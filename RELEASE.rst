@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.42.1
+Version 0.42.1 (Released March 05, 2020)
 --------------
 
 - Fixed run_tag data migration
