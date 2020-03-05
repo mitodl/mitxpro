@@ -164,7 +164,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
                 message="'from' and 'to' ids are identical",
             )
         try:
-            user = User.objects.get(email=deferral_req_row.learner_email)
+            user = User.objects.get(email__iexact=deferral_req_row.learner_email)
             defer_enrollment(
                 user,
                 from_courseware_id=deferral_req_row.from_courseware_id,

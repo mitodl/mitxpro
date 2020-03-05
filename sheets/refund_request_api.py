@@ -136,7 +136,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
             (Order, ProgramEnrollment or CourseRunEnrollment): The order and enrollment associated
                 with this refund request.
         """
-        user = User.objects.get(email=refund_req_row.learner_email)
+        user = User.objects.get(email__iexact=refund_req_row.learner_email)
         order = Order.objects.get(id=refund_req_row.order_id, purchaser=user)
         if is_program_text_id(refund_req_row.product_id):
             enrollment = ProgramEnrollment.all_objects.get(
