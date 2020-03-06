@@ -233,7 +233,7 @@ export class CheckoutPage extends React.Component<Props, State> {
       return (
         <DocumentTitle title={`${SETTINGS.site_name} | ${CHECKOUT_PAGE_TITLE}`}>
           {isLoading ? (
-            <div className="checkout-page  checkout-loader text-center align-self-center">
+            <div className="checkout-page page-loader text-center align-self-center">
               <div className="loader-area">
                 <img
                   src="/static/images/loader.gif"

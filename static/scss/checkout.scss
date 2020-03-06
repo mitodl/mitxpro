@@ -455,26 +455,3 @@
     margin-top: 30px;
   }
 }
-
-.checkout-loader {
-  position: fixed;
-  width: 100%;
-  top: 90px;
-  left: 0;
-  height: calc(100vh - 90px);
-  z-index: 9;
-  right: 0;
-  max-width: initial;
-  display: flex;
-  flex-flow: wrap;
-  align-content: center;
-  padding-top: 0;
-
-  .loader-area {
-    width: 100%;
-
-    img {
-      margin-bottom: 15px;
-    }
-  }
-}

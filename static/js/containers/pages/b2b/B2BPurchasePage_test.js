@@ -26,6 +26,11 @@ describe("B2BPurchasePage", () => {
       {
         entities: {
           products
+        },
+        queries: {
+          products: {
+            isPending: false
+          }
         }
       },
       {
@@ -46,6 +51,15 @@ describe("B2BPurchasePage", () => {
       body:   undefined,
       status: 200
     })
+  })
+
+  it("displays loader", async () => {
+    const { inner } = await renderPage()
+    inner.setProps({ isLoading: true })
+    assert.equal(
+      inner.find(".page").text(),
+      "One moment while we prepare bulk purchase page"
+    )
   })
 
   it("renders a form", async () => {
@@ -215,6 +229,9 @@ describe("B2BPurchasePage", () => {
   it("sets requestPending when a request is in progress", async () => {
     const { inner } = await renderPage({
       queries: {
+        products: {
+          isPending: false
+        },
         b2bCheckoutMutation: {
           isPending: true
         }
