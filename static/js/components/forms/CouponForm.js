@@ -111,7 +111,7 @@ export const CouponForm = ({
       company:             "",
       payment_type:        "",
       payment_transaction: "",
-      include_future_runs: true
+      include_future_runs: false
     }}
     render={({
       isSubmitting,
