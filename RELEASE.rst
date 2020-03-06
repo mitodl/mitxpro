@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.42.3
+--------------
+
+- apply coupons to all course runs of a course (#1574)
+- Suppress system shutdown sentry errors
+- add loading spinner to bulk purchase page
+- Remove course run expiration dates #76
+- Made email search case-insensitive for refunds/deferrals
+
 Version 0.42.2 (Released March 06, 2020)
 --------------
 
