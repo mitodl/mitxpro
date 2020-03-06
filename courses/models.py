@@ -4,7 +4,6 @@ Course models
 import logging
 import uuid
 import operator as op
-from datetime import timedelta
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericRelation
@@ -451,7 +450,7 @@ class CourseRun(TimestampedModel):
         null=True,
         blank=True,
         db_index=True,
-        help_text="When empty, set to 90 days past end date.",
+        help_text="The date beyond which the learner should not see link to this course run on their dashboard.",
     )
     live = models.BooleanField(default=False)
     products = GenericRelation(Product, related_query_name="courseruns")
@@ -548,8 +547,6 @@ class CourseRun(TimestampedModel):
         2. Later than start_date if start_date is set
         """
         if not self.expiration_date:
-            if self.end_date:
-                self.expiration_date = self.end_date + timedelta(days=90)
             return
 
         if self.start_date and self.expiration_date < self.start_date:
