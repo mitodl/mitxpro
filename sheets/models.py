@@ -69,10 +69,13 @@ class GoogleFileWatch(TimestampedModel):
     """
 
     file_id = models.CharField(max_length=100, db_index=True, null=False)
-    channel_id = models.CharField(max_length=50, db_index=True, null=False)
-    version = models.IntegerField(db_index=True, unique=True, null=True, blank=True)
+    channel_id = models.CharField(max_length=100, db_index=True, null=False)
+    version = models.IntegerField(db_index=True, null=True, blank=True)
     activation_date = models.DateTimeField(null=False)
     expiration_date = models.DateTimeField(db_index=True, unique=True, null=False)
+
+    class Meta:
+        unique_together = ("file_id", "version")
 
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None

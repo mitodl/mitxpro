@@ -79,6 +79,24 @@ class SheetMetadata:
         """
         return set(range(self.num_columns)).difference(self.non_input_column_indices)
 
+    def handler_url_stub(self, file_id=None):
+        """
+        Returns the URL that Google should send requests to when a change is made to a watched
+        spreadsheet.
+
+        Args:
+            file_id (str): (Optional) The id of the spreadsheet as it appears in the spreadsheet's URL.
+                If the spreadsheet being watched is a singleton, this isn't necessary.
+
+        Returns:
+            str: The URL that Google will send file watch requests to
+        """
+        params = dict(sheet=quote_plus(self.sheet_type))
+        if file_id:
+            params["fileId"] = file_id
+        param_str = "&".join([f"{k}={v}" for k, v in params.items()])
+        return "{}?{}".format(reverse("handle-watched-sheet-update"), param_str)
+
     def get_form_input_columns(self, row_data):
         """
         Returns a list of column values for columns that contain data entered by a user in a form
@@ -95,20 +113,13 @@ class SheetMetadata:
         ]
 
 
-class WatchableSheetMetadata(SheetMetadata):
+class SingletonSheetMetadata(SheetMetadata):
     """Metadata for a type of Google Sheet that this app interacts with and tracks via file watch/webhook"""
 
     sheet_file_id = None
 
-    @property
-    def handler_url_stub(self):
-        """The URL stub that should be used by Google when a change is made to a watched file"""
-        return "{}?sheet={}".format(
-            reverse("handle-watched-sheet-update"), quote_plus(self.sheet_type)
-        )
 
-
-class CouponRequestSheetMetadata(WatchableSheetMetadata):
+class CouponRequestSheetMetadata(SingletonSheetMetadata):
     """Metadata for the coupon request spreadsheet"""
 
     PURCHASE_ORDER_COL_INDEX = 0
@@ -126,7 +137,7 @@ class CouponRequestSheetMetadata(WatchableSheetMetadata):
 
 
 class RefundRequestSheetMetadata(
-    WatchableSheetMetadata
+    SingletonSheetMetadata
 ):  # pylint: disable=too-many-instance-attributes
     """Metadata for the refund request spreadsheet"""
 
@@ -157,7 +168,7 @@ class RefundRequestSheetMetadata(
 
 
 class DeferralRequestSheetMetadata(
-    WatchableSheetMetadata
+    SingletonSheetMetadata
 ):  # pylint: disable=too-many-instance-attributes
     """Metadata for the deferral request spreadsheet"""
 

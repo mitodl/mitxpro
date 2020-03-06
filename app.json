@@ -167,6 +167,14 @@
       "description": "ID of the Shared Drive (a.k.a. Team Drive). This is equal to the top-level folder ID.",
       "required": false
     },
+    "DRIVE_WEBHOOK_ASSIGNMENT_MAX_AGE_DAYS": {
+      "description": "The number of days from the last update that a coupon assignment sheet should still be considered 'fresh', i.e.: should still be monitored for changes via webhook/file watch.",
+      "required": false
+    },
+    "DRIVE_WEBHOOK_ASSIGNMENT_WAIT": {
+      "description": "The number of seconds to wait to process a coupon assignment sheet after we receive a webhook request from that sheet. The task to process the sheet is scheduled this many seconds in the future.",
+      "required": false
+    },
     "DRIVE_WEBHOOK_CHANNEL_ID": {
       "description": "Channel ID to use for requests to get push notifications for file changes",
       "required": false

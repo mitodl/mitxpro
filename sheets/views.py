@@ -24,6 +24,7 @@ from sheets.constants import (
     REQUIRED_GOOGLE_API_SCOPES,
     SHEET_TYPE_COUPON_REQUEST,
     SHEET_TYPE_ENROLL_CHANGE,
+    SHEET_TYPE_COUPON_ASSIGN,
 )
 from sheets.utils import generate_google_client_config
 from sheets import tasks
@@ -127,10 +128,16 @@ def handle_watched_sheet_update(request):
             "Unknown sheet type '%s' (passed via 'sheet' query parameter)", sheet_type
         )
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
+    qs_file_id = request.GET.get("fileId")
+    if sheet_type == SHEET_TYPE_COUPON_ASSIGN and qs_file_id is None:
+        log.error(
+            "Webhook requests for '%s' sheet received without a 'fileId' parameter",
+            sheet_type,
+        )
+        return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
+    file_id = qs_file_id or sheet_metadata.sheet_file_id
 
-    req_sheet_file_watch = GoogleFileWatch.objects.filter(
-        file_id=sheet_metadata.sheet_file_id
-    ).first()
+    req_sheet_file_watch = GoogleFileWatch.objects.filter(file_id=file_id).first()
     if not req_sheet_file_watch:
         log.error(
             "Google file watch request for %s received, but no local file watch record exists "
@@ -150,6 +157,8 @@ def handle_watched_sheet_update(request):
 
     if sheet_type == SHEET_TYPE_COUPON_REQUEST:
         tasks.handle_unprocessed_coupon_requests.delay()
+    elif sheet_type == SHEET_TYPE_COUPON_ASSIGN:
+        tasks.schedule_coupon_assignment_sheet_handling.delay(file_id)
     elif sheet_type == SHEET_TYPE_ENROLL_CHANGE:
         tasks.handle_unprocessed_refund_requests.delay()
         tasks.handle_unprocessed_deferral_requests.delay()

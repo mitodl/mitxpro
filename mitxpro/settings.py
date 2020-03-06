@@ -742,6 +742,23 @@ DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES = get_int(
         "is less than this value, the webhook should be renewed."
     ),
 )
+DRIVE_WEBHOOK_ASSIGNMENT_WAIT = get_int(
+    "DRIVE_WEBHOOK_ASSIGNMENT_WAIT",
+    60 * 5,
+    description=(
+        "The number of seconds to wait to process a coupon assignment sheet after we receive "
+        "a webhook request from that sheet. The task to process the sheet is scheduled this many "
+        "seconds in the future."
+    ),
+)
+DRIVE_WEBHOOK_ASSIGNMENT_MAX_AGE_DAYS = get_int(
+    "DRIVE_WEBHOOK_ASSIGNMENT_MAX_AGE_DAYS",
+    30,
+    description=(
+        "The number of days from the last update that a coupon assignment sheet should still be "
+        "considered 'fresh', i.e.: should still be monitored for changes via webhook/file watch."
+    ),
+)
 SHEETS_MONITORING_FREQUENCY = get_int(
     "SHEETS_MONITORING_FREQUENCY",
     60 * 60 * 2,
@@ -814,26 +831,15 @@ if FEATURES.get("COUPON_SHEETS"):
         )
     CELERY_BEAT_SCHEDULE.update(
         {
-            "handle-unprocessed-coupon-assignment-sheets": {
-                "task": "sheets.tasks.handle_incomplete_coupon_assignments",
+            "update-assignment-delivery-dates": {
+                "task": "sheets.tasks.update_incomplete_assignment_delivery_statuses",
                 "schedule": OffsettingSchedule(
                     run_every=timedelta(seconds=SHEETS_MONITORING_FREQUENCY),
                     offset=timedelta(
                         seconds=0 if not alt_sheets_processing else SHEETS_TASK_OFFSET
                     ),
                 ),
-            },
-            "update-assignment-delivery-dates": {
-                "task": "sheets.tasks.update_incomplete_assignment_delivery_statuses",
-                "schedule": OffsettingSchedule(
-                    run_every=timedelta(seconds=SHEETS_MONITORING_FREQUENCY),
-                    offset=timedelta(
-                        seconds=SHEETS_TASK_OFFSET
-                        if not alt_sheets_processing
-                        else SHEETS_TASK_OFFSET * 2
-                    ),
-                ),
-            },
+            }
         }
     )
 
@@ -1171,20 +1177,14 @@ SHEETS_DEFERRAL_FIRST_ROW = get_int(
     ),
 )
 # Specify the zero-based index of certain request sheet columns
-if FEATURES.get("COUPON_SHEETS_TRACK_REQUESTER"):
-    SHEETS_REQ_EMAIL_COL = 7
-    SHEETS_REQ_PROCESSED_COL = 8
-    SHEETS_REQ_ERROR_COL = 9
-    SHEETS_REQ_CALCULATED_COLUMNS = {
-        SHEETS_REQ_EMAIL_COL,
-        SHEETS_REQ_PROCESSED_COL,
-        SHEETS_REQ_ERROR_COL,
-    }
-else:
-    SHEETS_REQ_EMAIL_COL = None
-    SHEETS_REQ_PROCESSED_COL = 7
-    SHEETS_REQ_ERROR_COL = 8
-    SHEETS_REQ_CALCULATED_COLUMNS = {SHEETS_REQ_PROCESSED_COL, SHEETS_REQ_ERROR_COL}
+SHEETS_REQ_EMAIL_COL = 7
+SHEETS_REQ_PROCESSED_COL = 8
+SHEETS_REQ_ERROR_COL = 9
+SHEETS_REQ_CALCULATED_COLUMNS = {
+    SHEETS_REQ_EMAIL_COL,
+    SHEETS_REQ_PROCESSED_COL,
+    SHEETS_REQ_ERROR_COL,
+}
 # Calculate the column letters in the spreadsheet based on those indices
 _uppercase_a_ord = ord("A")
 SHEETS_REQ_PROCESSED_COL_LETTER = chr(SHEETS_REQ_PROCESSED_COL + _uppercase_a_ord)

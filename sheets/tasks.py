@@ -1,6 +1,13 @@
 """Sheets app tasks"""
-from googleapiclient.errors import HttpError
+import json
+import logging
+from datetime import datetime, timedelta
+from itertools import chain, repeat
 
+from googleapiclient.errors import HttpError
+from django.conf import settings
+
+from ecommerce.models import BulkCouponAssignment
 from mitxpro.celery import app
 from mitxpro.utils import now_in_utc
 from sheets import (
@@ -11,7 +18,13 @@ from sheets import (
     deferral_request_api,
 )
 from sheets.constants import ASSIGNMENT_SHEET_ENROLLED_STATUS
-from sheets.utils import request_sheet_metadata, refund_sheet_metadata
+from sheets.utils import (
+    request_sheet_metadata,
+    assign_sheet_metadata,
+    refund_sheet_metadata,
+)
+
+log = logging.getLogger(__name__)
 
 
 @app.task
@@ -51,15 +64,88 @@ def handle_unprocessed_deferral_requests():
 
 
 @app.task
-def handle_incomplete_coupon_assignments():
+def process_coupon_assignment_sheet(*, file_id, change_date=None):
     """
-    Processes all as-yet-incomplete coupon assignment spreadsheets
+    Processes a single coupon assignment spreadsheets
+
+    Args:
+        file_id (str): The file id of the assignment spreadsheet (visible in the spreadsheet URL)
+        change_date (str): ISO-8601-formatted string indicating the datetime when this spreadsheet
+            was changed
     """
     coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler()
-    processed_spreadsheet_metadata = (
-        coupon_assignment_handler.process_assignment_spreadsheets()
+    _, worksheet = coupon_assignment_handler.fetch_assignment_sheet(file_id)
+    change_dt = datetime.fromisoformat(change_date) if change_date else now_in_utc()
+    bulk_assignment, _ = BulkCouponAssignment.objects.update_or_create(
+        assignment_sheet_id=file_id, defaults=dict(sheet_last_modified_date=change_dt)
     )
-    return processed_spreadsheet_metadata
+    _, num_created, num_removed = coupon_assignment_handler.process_assignment_spreadsheet(
+        worksheet, bulk_assignment
+    )
+    return {
+        "sheet_id": file_id,
+        "assignments_created": num_created,
+        "assignments_removed": num_removed,
+    }
+
+
+def _get_scheduled_assignment_task_ids(file_id):
+    """
+    Gets the task ids for coupon assignment sheet processing tasks that are scheduled in the
+    future and have not been executed yet.
+
+    Args:
+        file_id (str): The file id of the assignment spreadsheet (visible in the spreadsheet URL)
+
+    Returns:
+        list of str: Task ids of currently-scheduled but not-yet-executed tasks to process the
+            assignment spreadsheet with the given id
+    """
+    task_name = process_coupon_assignment_sheet.name
+    already_scheduled_task_ids = []
+    # If the scheduled task name matches the 'process_coupon_assignment_sheet' task, and it was
+    # provided the given file_id as a kwarg, add its task id to the list
+    for scheduled in chain.from_iterable(app.control.inspect().scheduled().values()):
+        task_metadata = scheduled["request"]
+        if task_metadata["name"] == task_name:
+            # NOTE: Celery provides metadata for scheduled tasks, and the args/kwargs passed to
+            # that task are stored as serialized strings (e.g.: "{'file_id': '123'}"). Here the kwargs
+            # are being parsed as JSON after coercing the string to use double-quotes.
+            task_kwargs = json.loads(
+                task_metadata.get("kwargs", "{}").replace("'", '"')
+            )
+            if task_kwargs.get("file_id") == file_id:
+                already_scheduled_task_ids.append(task_metadata["id"])
+    return already_scheduled_task_ids
+
+
+@app.task
+def schedule_coupon_assignment_sheet_handling(file_id):
+    """
+    Schedules a task to process the assignment sheet with the given file id after cancelling
+    any currently-scheduled tasks to process the same sheet. This scheduling/canceling logic
+    is intended to minimize unintended assignments in the sheet. If a user has not edited the
+    spreadsheet for some period of time, it's assumed that those edits are more likely to be
+    considered "final".
+
+    Args:
+        file_id (str): The file id of the assignment spreadsheet (visible in the spreadsheet URL)
+    """
+    # Cancel any already-scheduled tasks to process this particular assignment sheet
+    already_scheduled_task_ids = _get_scheduled_assignment_task_ids(file_id)
+    if already_scheduled_task_ids:
+        log.warning(
+            "Canceling existing task(s) for processing coupon assignment sheet (id: '%s')...",
+            file_id,
+        )
+        app.control.revoke(already_scheduled_task_ids)
+    # Schedule a new task to process this assignment sheet
+    async_result = process_coupon_assignment_sheet.s(
+        file_id=file_id, change_date=now_in_utc().isoformat()
+    ).apply_async(
+        eta=(now_in_utc() + timedelta(seconds=settings.DRIVE_WEBHOOK_ASSIGNMENT_WAIT))
+    )
+    return async_result.id
 
 
 @app.task
@@ -131,22 +217,34 @@ def renew_file_watches():
     """
     Renews push notifications for changes to certain files via the Google API.
     """
+    assignment_sheet_ids_to_renew = (
+        coupon_assign_api.fetch_webhook_eligible_assign_sheet_ids()
+    )
+    metadata_file_id_pairs = chain(
+        # The coupon request and enrollment change request sheets are singletons.
+        # It's not necessary to specify their file id here.
+        [(request_sheet_metadata, None)],
+        [(refund_sheet_metadata, None)],
+        zip(
+            repeat(assign_sheet_metadata, len(assignment_sheet_ids_to_renew)),
+            assignment_sheet_ids_to_renew,
+        ),
+    )
     # This task is run on a schedule and ensures that there is an unexpired file watch
     # on each sheet we want to watch. If a file watch was manually created/updated at any
     # point, this task might be run while that file watch is still unexpired. If the file
     # watch renewal was skipped, the task might not run again until after expiration. To
     # avoid that situation, the file watch is always renewed here (force=True).
-    sheet_metadata_objects = (request_sheet_metadata, refund_sheet_metadata)
     results = []
-    for sheet_metadata in sheet_metadata_objects:
-        file_watch, created, _ = sheets_api.renew_sheet_file_watch(
-            sheet_metadata, force=True
+    for sheet_metadata, file_id in metadata_file_id_pairs:
+        file_watch, created, _ = sheets_api.create_or_renew_sheet_file_watch(
+            sheet_metadata, force=True, sheet_file_id=file_id
         )
         results.append(
             {
                 "type": sheet_metadata.sheet_type,
-                "file_watch_id": file_watch.id,
                 "file_watch_channel_id": file_watch.channel_id,
+                "file_watch_file_id": file_watch.file_id,
                 "created": created,
             }
         )

@@ -1,6 +1,7 @@
 """Coupon assignment API"""
 import logging
 from collections import defaultdict
+from datetime import timedelta
 
 from django.conf import settings
 from django.db import transaction
@@ -57,6 +58,28 @@ from sheets.utils import (
 )
 
 log = logging.getLogger(__name__)
+
+
+def fetch_webhook_eligible_assign_sheet_ids():
+    """
+    Fetches the file ids of coupon assignment sheets with enough recent activity that they can
+    have a file watch created/renewed.
+
+    Returns:
+        iterable of str: File ids for assignment sheets that can have a file watch created/renewed
+    """
+    min_last_activity_date = now_in_utc() - timedelta(
+        days=settings.DRIVE_WEBHOOK_ASSIGNMENT_MAX_AGE_DAYS
+    )
+    return (
+        BulkCouponAssignment.objects.exclude(assignment_sheet_id=None)
+        .exclude(assignments_started_date=None, created_on__lt=min_last_activity_date)
+        .filter(
+            message_delivery_completed_date=None,
+            last_assignment_date__gte=min_last_activity_date,
+        )
+        .values_list("assignment_sheet_id", flat=True)
+    )
 
 
 class CouponAssignmentRow:
@@ -549,7 +572,7 @@ class CouponAssignmentHandler:
         )
 
     def process_assignment_spreadsheet(
-        self, worksheet, bulk_assignment, last_modified
+        self, worksheet, bulk_assignment
     ):  # pylint: disable=too-many-locals
         """
         Ensures that there are product coupon assignments for every filled-in row in a coupon assignment Spreadsheet,
@@ -566,7 +589,6 @@ class CouponAssignmentHandler:
             worksheet (pygsheets.worksheet.Worksheet):
             bulk_assignment (BulkCouponAssignment): The BulkCouponAssignment that is tracking the
                 status of the assignments in this worksheet
-            last_modified (datetime.datetime): The datetime when the spreadsheet was last modified
 
         Returns:
             (BulkCouponAssignment, int, int): The bulk coupon assignment created/updated paired with
@@ -613,10 +635,13 @@ class CouponAssignmentHandler:
             _, created_assignments = ecommerce.api.bulk_assign_product_coupons(
                 assignments_to_create, bulk_assignment=bulk_assignment
             )
-            bulk_assignment.assignment_sheet_last_modified = last_modified
-            if not bulk_assignment.assignments_started_date and created_assignments:
-                bulk_assignment.assignments_started_date = now_in_utc()
-            bulk_assignment.save()
+            if created_assignments or num_assignments_removed:
+                now = now_in_utc()
+                if not bulk_assignment.assignments_started_date and created_assignments:
+                    bulk_assignment.assignments_started_date = now
+                bulk_assignment.last_assignment_date = now
+                bulk_assignment.updated_on = now
+                bulk_assignment.save()
 
         # Send messages if any assignments were created
         if created_assignments:
@@ -643,15 +668,14 @@ class CouponAssignmentHandler:
             sheet_last_modified = google_date_string_to_datetime(
                 spreadsheet_metadata["modifiedTime"]
             )
-            bulk_assignment, created = BulkCouponAssignment.objects.get_or_create(
+            bulk_assignment, created = BulkCouponAssignment.objects.update_or_create(
                 assignment_sheet_id=sheet_id,
-                defaults=dict(assignment_sheet_last_modified=sheet_last_modified),
+                defaults=dict(sheet_last_modified_date=sheet_last_modified),
             )
             if (
                 not created
-                and bulk_assignment.assignment_sheet_last_modified
-                and bulk_assignment.assignment_sheet_last_modified
-                >= sheet_last_modified
+                and bulk_assignment.sheet_last_modified_date
+                and bulk_assignment.sheet_last_modified_date >= sheet_last_modified
             ):
                 log.info(
                     "Spreadsheet is unchanged since last scan (%s). Skipping...",
@@ -662,9 +686,7 @@ class CouponAssignmentHandler:
             spreadsheet, worksheet = self.fetch_assignment_sheet(sheet_id)
             log.info("Processing spreadsheet (%s)...", spreadsheet_repr(spreadsheet))
             try:
-                self.process_assignment_spreadsheet(
-                    worksheet, bulk_assignment, last_modified=sheet_last_modified
-                )
+                self.process_assignment_spreadsheet(worksheet, bulk_assignment)
             except SheetValidationException:
                 log.exception(
                     "Spreadsheet has invalid data for processing - %s",
