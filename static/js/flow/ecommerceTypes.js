@@ -165,7 +165,8 @@ export type CouponPaymentVersion = {
   activation_date: Date,
   payment_type: ?string,
   payment_transaction: ?string,
-  company: ?Company
+  company: ?Company,
+  include_future_runs: boolean
 }
 
 export type Coupon = {

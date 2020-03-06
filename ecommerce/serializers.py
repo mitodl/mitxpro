@@ -732,6 +732,7 @@ class BaseCouponSerializer(serializers.Serializer):
     company = serializers.CharField(
         max_length=512, allow_null=True, allow_blank=True, required=False
     )
+    include_future_runs = serializers.BooleanField()
 
     def validate_product_ids(self, value):
         """ Determine if the product_ids field is valid """
@@ -764,6 +765,7 @@ class BaseCouponSerializer(serializers.Serializer):
             payment_transaction=validated_data.get("payment_transaction"),
             coupon_code=validated_data.get("coupon_code"),
             product_ids=validated_data.get("product_ids"),
+            include_future_runs=validated_data.get("include_future_runs"),
         )
 
 
