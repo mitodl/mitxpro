@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.42.2
+Version 0.42.2 (Released March 06, 2020)
 --------------
 
 - Added RedBeat to handle task scheduling
