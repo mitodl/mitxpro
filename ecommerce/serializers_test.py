@@ -52,7 +52,7 @@ from ecommerce.serializers import (
     CouponPaymentVersionSerializer,
     CouponPaymentSerializer,
     CurrentCouponPaymentSerializer,
-    ProductSerializer,
+    ProductDetailSerializer,
     CompanySerializer,
     DataConsentUserSerializer,
     CouponSerializer,
@@ -440,10 +440,10 @@ def test_current_coupon_payment_version_serializer_latest(mocker):
 
 
 def test_serialize_product(coupon_product_ids):
-    """ Test that ProductSerializer has correct data """
+    """ Test that ProductDetailSerializer has correct data """
     product = Product.objects.get(id=coupon_product_ids[0])
     run = product.content_object
-    serialized_data = ProductSerializer(instance=product).data
+    serialized_data = ProductDetailSerializer(instance=product).data
     assert serialized_data.get("title") == run.title
     assert serialized_data.get("product_type") == "courserun"
     assert serialized_data.get("id") == product.id
@@ -451,7 +451,7 @@ def test_serialize_product(coupon_product_ids):
 
 def test_serialize_product_with_ordered(mocker):
     """
-    Test that ProductSerializer takes a context variable that says the ProductVersions are
+    Test that ProductDetailSerializer takes a context variable that says the ProductVersions are
     already ordered, so it can use that ordered list of versions instead of calling
     Product.latest_version and running another query.
     """
@@ -472,7 +472,7 @@ def test_serialize_product_with_ordered(mocker):
             to_attr=ORDERED_VERSIONS_QSET_ATTR,
         )
     )
-    serialized_data = ProductSerializer(
+    serialized_data = ProductDetailSerializer(
         product_qset, context={"has_ordered_versions": True}, many=True
     ).data
     expected_versions = [versions[2], versions[3]]

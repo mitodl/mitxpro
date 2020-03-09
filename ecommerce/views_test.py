@@ -49,7 +49,7 @@ from ecommerce.models import (
 )
 from ecommerce.serializers import (
     BasketSerializer,
-    ProductSerializer,
+    ProductDetailSerializer,
     CompanySerializer,
     CouponSelectionSerializer,
     CurrentCouponPaymentSerializer,
@@ -1153,7 +1153,9 @@ def test_products_viewset_list(user_drf_client, coupon_product_ids):
     for product in products:
         assert_drf_json_equal(
             product,
-            ProductSerializer(instance=Product.objects.get(id=product.get("id"))).data,
+            ProductDetailSerializer(
+                instance=Product.objects.get(id=product.get("id"))
+            ).data,
         )
 
 
@@ -1184,8 +1186,28 @@ def test_products_viewset_detail(user_drf_client, coupon_product_ids):
     assert response.status_code == status.HTTP_200_OK
     assert_drf_json_equal(
         response.json(),
-        ProductSerializer(instance=Product.objects.get(id=coupon_product_ids[0])).data,
+        ProductDetailSerializer(
+            instance=Product.objects.get(id=coupon_product_ids[0])
+        ).data,
     )
+
+
+@pytest.mark.django_db
+def test_products_viewset_performance(
+    user_drf_client, coupon_product_ids, django_assert_num_queries
+):
+    """ Test that the ProductViewSet returns the expected number of queries hit. """
+    with django_assert_num_queries(29):
+        response = user_drf_client.get(
+            reverse("products_api-detail", kwargs={"pk": coupon_product_ids[0]})
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert_drf_json_equal(
+            response.json(),
+            ProductDetailSerializer(
+                instance=Product.objects.get(id=coupon_product_ids[0])
+            ).data,
+        )
 
 
 def test_products_viewset_post_forbidden(admin_drf_client):
