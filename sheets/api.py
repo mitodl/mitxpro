@@ -399,16 +399,18 @@ def request_file_watch(
     )
 
 
-def renew_sheet_file_watch(sheet_metadata, force=False):
+def create_or_renew_sheet_file_watch(sheet_metadata, force=False, sheet_file_id=None):
     """
     Creates or renews a file watch on a spreadsheet depending on the existence
     of other file watches and their expiration.
 
     Args:
-        sheet_metadata (Type(sheets.utils.WatchableSheetMetadata)): The file watch metadata for the sheet
+        sheet_metadata (Type(sheets.utils.SheetMetadata)): The file watch metadata for the sheet
             that we want to create/renew the file watch for.
         force (bool): If True, make the file watch request and overwrite the GoogleFileWatch record
             even if an unexpired one exists.
+        sheet_file_id (str): (Optional) The id of the spreadsheet as it appears in the spreadsheet's
+            URL. If the spreadsheet being watched is a singleton, this isn't necessary.
 
     Returns:
         (GoogleFileWatch, bool, bool): The GoogleFileWatch object, a flag indicating
@@ -419,14 +421,22 @@ def renew_sheet_file_watch(sheet_metadata, force=False):
     min_fresh_expiration_date = now + datetime.timedelta(
         minutes=settings.DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES
     )
-    new_channel_id = "{}-{}-{}".format(
+    sheet_file_id = sheet_file_id or sheet_metadata.sheet_file_id
+    new_channel_id_segments = [
         settings.DRIVE_WEBHOOK_CHANNEL_ID,
         sheet_metadata.sheet_type,
         now.strftime("%Y%m%d-%H%M%S"),
-    )
+    ]
+    if isinstance(sheet_metadata, CouponAssignSheetMetadata):
+        new_channel_id_segments.insert(2, sheet_file_id)
+        handler_url = sheet_metadata.handler_url_stub(file_id=sheet_file_id)
+    else:
+        handler_url = sheet_metadata.handler_url_stub()
+    new_channel_id = "-".join(new_channel_id_segments)
+
     with transaction.atomic():
         file_watch, created = GoogleFileWatch.objects.select_for_update().get_or_create(
-            file_id=sheet_metadata.sheet_file_id,
+            file_id=sheet_file_id,
             defaults=dict(
                 version=1,
                 channel_id=new_channel_id,
@@ -451,10 +461,7 @@ def renew_sheet_file_watch(sheet_metadata, force=False):
             minutes=settings.DRIVE_WEBHOOK_EXPIRATION_MINUTES
         )
         resp_dict = request_file_watch(
-            sheet_metadata.sheet_file_id,
-            new_channel_id,
-            sheet_metadata.handler_url_stub,
-            expiration=expiration,
+            sheet_file_id, new_channel_id, handler_url, expiration=expiration
         )
         log.info(
             "File watch request for push notifications on %s completed. Response: %s",

@@ -85,13 +85,13 @@ class Command(BaseCommand):
             file_id=spreadsheet.id, fields="modifiedTime"
         )
         sheet_last_modified = google_date_string_to_datetime(metadata["modifiedTime"])
-        bulk_assignment, created = BulkCouponAssignment.objects.get_or_create(
+        bulk_assignment, created = BulkCouponAssignment.objects.update_or_create(
             assignment_sheet_id=spreadsheet.id,
-            defaults=dict(assignment_sheet_last_modified=sheet_last_modified),
+            defaults=dict(sheet_last_modified_date=sheet_last_modified),
         )
         if (
             not created
-            and sheet_last_modified <= bulk_assignment.assignment_sheet_last_modified
+            and sheet_last_modified <= bulk_assignment.sheet_last_modified_date
             and not options["force"]
         ):
             raise CommandError(
@@ -101,7 +101,7 @@ class Command(BaseCommand):
             )
 
         bulk_assignment, num_created, num_removed = coupon_assignment_handler.process_assignment_spreadsheet(
-            spreadsheet.sheet1, bulk_assignment, last_modified=sheet_last_modified
+            spreadsheet.sheet1, bulk_assignment
         )
 
         self.stdout.write(

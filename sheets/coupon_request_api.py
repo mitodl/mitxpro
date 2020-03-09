@@ -12,7 +12,11 @@ from courses.models import CourseRun, Program
 import ecommerce.api
 from ecommerce.models import Company, Coupon, CouponPaymentVersion
 from mitxpro.utils import now_in_utc, item_at_index_or_none
-from sheets.api import get_authorized_pygsheets_client, share_drive_file_with_emails
+from sheets.api import (
+    get_authorized_pygsheets_client,
+    share_drive_file_with_emails,
+    create_or_renew_sheet_file_watch,
+)
 from sheets.exceptions import (
     SheetOutOfSyncException,
     SheetCouponCreationException,
@@ -116,15 +120,6 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
             SheetRowParsingException: Raised if the row could not be parsed
         """
         try:
-            added_kwargs = (
-                dict(
-                    requester=item_at_index_or_none(
-                        raw_row_data, settings.SHEETS_REQ_EMAIL_COL
-                    )
-                )
-                if settings.FEATURES.get("COUPON_SHEETS_TRACK_REQUESTER")
-                else {}
-            )
             return cls(
                 row_index=row_index,
                 purchase_order_id=raw_row_data[
@@ -147,10 +142,12 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
                         raw_row_data, request_sheet_metadata.PROCESSED_COL
                     )
                 ),
+                requester=item_at_index_or_none(
+                    raw_row_data, settings.SHEETS_REQ_EMAIL_COL
+                ),
                 error=item_at_index_or_none(
                     raw_row_data, request_sheet_metadata.ERROR_COL
                 ),
-                **added_kwargs,
             )
         except Exception as exc:
             raise SheetRowParsingException(str(exc)) from exc
@@ -590,6 +587,10 @@ class CouponRequestHandler:
                 emails_to_share=settings.SHEETS_ADMIN_EMAILS,
                 credentials=self._credentials,
             )
+        # Set up webhook to monitor changes to this new assignment sheet
+        create_or_renew_sheet_file_watch(
+            assign_sheet_metadata, sheet_file_id=bulk_coupon_sheet.id
+        )
         return bulk_coupon_sheet
 
     def create_and_update_sheets(self, processed_requests):

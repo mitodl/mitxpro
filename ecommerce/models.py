@@ -677,7 +677,8 @@ class BulkCouponAssignment(models.Model):
     """Records the bulk creation of ProductCouponAssignments"""
 
     assignment_sheet_id = models.CharField(max_length=100, db_index=True, null=True)
-    assignment_sheet_last_modified = models.DateTimeField(null=True, blank=True)
+    sheet_last_modified_date = models.DateTimeField(null=True, blank=True)
+    last_assignment_date = models.DateTimeField(null=True, blank=True)
     assignments_started_date = models.DateTimeField(null=True, blank=True)
     message_delivery_completed_date = models.DateTimeField(null=True, blank=True)
     updated_on = models.DateTimeField(auto_now=True, null=True)  # UTC
