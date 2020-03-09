@@ -229,17 +229,22 @@ class CouponSelectionSerializer(serializers.ModelSerializer):
 
     def get_targets(self, instance):
         """ Get the product version id(s) in the basket the coupon applies to"""
-        eligible_product_ids = (
-            models.CouponEligibility.objects.select_related("coupon", "product")
-            .filter(
-                coupon__coupon_code=instance.coupon.coupon_code,
-                coupon__enabled=True,
-                product__in=instance.basket.basketitems.values_list(
-                    "product", flat=True
-                ),
+        if instance.coupon.enabled and instance.coupon.is_global:
+            eligible_product_ids = instance.basket.basketitems.values_list(
+                "product", flat=True
             )
-            .values_list("product", flat=True)
-        )
+        else:
+            eligible_product_ids = (
+                models.CouponEligibility.objects.select_related("coupon", "product")
+                .filter(
+                    coupon__coupon_code=instance.coupon.coupon_code,
+                    coupon__enabled=True,
+                    product__in=instance.basket.basketitems.values_list(
+                        "product", flat=True
+                    ),
+                )
+                .values_list("product", flat=True)
+            )
         return [
             latest_product_version(product).id
             for product in models.Product.objects.filter(id__in=eligible_product_ids)
@@ -700,6 +705,7 @@ class BaseCouponSerializer(serializers.Serializer):
         validators=[MinValueValidator(0), MaxValueValidator(1)],
     )
     automatic = serializers.BooleanField(default=False)
+    is_global = serializers.BooleanField(default=False)
     activation_date = serializers.DateTimeField()
     expiration_date = serializers.DateTimeField()
     product_ids = serializers.ListField(child=serializers.IntegerField())
@@ -718,20 +724,34 @@ class BaseCouponSerializer(serializers.Serializer):
     )
     include_future_runs = serializers.BooleanField()
 
-    def validate_product_ids(self, value):
-        """ Determine if the product_ids field is valid """
-        if not value or len(value) == 0:
-            raise ValidationError("At least one product must be selected")
-        products_missing = set(value) - set(
-            models.Product.objects.filter(id__in=value).values_list("id", flat=True)
-        )
-        if products_missing:
+    def validate(self, attrs):
+        """Determine if product_ids was supplied or is_global was set"""
+        # If neither of product_ids or is_global was set we need to bail
+        if (not attrs["product_ids"] or len(attrs["product_ids"]) == 0) and not attrs[
+            "is_global"
+        ]:
             raise ValidationError(
-                "Product with id(s) {} could not be found".format(
-                    ",".join(str(pid) for pid in products_missing)
+                {
+                    "product_ids": "At least one product must be selected or coupon should be global."
+                }
+            )
+
+        # If the data does not represent a coupon check for valid product_ids
+        if not attrs["is_global"]:
+            products_missing = set(attrs["product_ids"]) - set(
+                models.Product.objects.filter(id__in=attrs["product_ids"]).values_list(
+                    "id", flat=True
                 )
             )
-        return value
+            if products_missing:
+                raise ValidationError(
+                    {
+                        "product_ids": "Product with id(s) {} could not be found".format(
+                            ",".join(str(pid) for pid in products_missing)
+                        )
+                    }
+                )
+        return attrs
 
     def create(self, validated_data):
         return create_coupons(
@@ -739,6 +759,7 @@ class BaseCouponSerializer(serializers.Serializer):
             tag=validated_data.get("tag"),
             name=validated_data.get("name"),
             automatic=validated_data.get("automatic", False),
+            is_global=validated_data.get("is_global", False),
             activation_date=validated_data.get("activation_date"),
             expiration_date=validated_data.get("expiration_date"),
             amount=validated_data.get("amount"),

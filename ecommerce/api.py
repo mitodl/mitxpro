@@ -270,18 +270,29 @@ def get_valid_coupon_versions(
     product_coupon_subquery = CouponEligibility.objects.select_related("coupon").filter(
         product=product, coupon__enabled=True
     )
+
+    # Get all enabled global coupons
+    global_coupon_subquery = Coupon.objects.filter(is_global=True, enabled=True)
+
     if code:
         product_coupon_subquery = product_coupon_subquery.filter(
             coupon__coupon_code=code
         )
+        global_coupon_subquery = global_coupon_subquery.filter(coupon_code=code)
 
     # Get the latest versions for product coupons
     coupon_version_subquery = CouponVersion.objects.filter(
         coupon__in=Subquery(product_coupon_subquery.values_list("coupon", flat=True))
     )
+    global_coupon_version_subquery = CouponVersion.objects.filter(
+        coupon__in=global_coupon_subquery.values_list("pk", flat=True)
+    )
 
     if full_discount:
         coupon_version_subquery = coupon_version_subquery.filter(
+            payment_version__amount=decimal.Decimal(1)
+        )
+        global_coupon_version_subquery = global_coupon_version_subquery.filter(
             payment_version__amount=decimal.Decimal(1)
         )
 
@@ -289,9 +300,15 @@ def get_valid_coupon_versions(
         coupon_version_subquery = coupon_version_subquery.filter(
             payment_version__automatic=True
         )
+        global_coupon_version_subquery = global_coupon_version_subquery.filter(
+            payment_version__automatic=True
+        )
 
     if company is not None:
         coupon_version_subquery = coupon_version_subquery.filter(
+            payment_version__company=company
+        )
+        global_coupon_version_subquery = global_coupon_version_subquery.filter(
             payment_version__company=company
         )
 
@@ -299,10 +316,18 @@ def get_valid_coupon_versions(
         "coupon", "-created_on"
     ).distinct("coupon")
 
+    global_coupon_version_subquery = global_coupon_version_subquery.order_by(
+        "coupon", "-created_on"
+    )
+
+    combined_coupon_versions_list = list(
+        coupon_version_subquery.values_list("pk", flat=True)
+    ) + list(global_coupon_version_subquery.values_list("pk", flat=True))
+
     # Exclude versions with too many redemptions or active dates outside of today.
     query = (
         CouponVersion.objects.select_related("coupon", "payment_version")
-        .filter(pk__in=Subquery(coupon_version_subquery.values_list("pk", flat=True)))
+        .filter(pk__in=combined_coupon_versions_list)
         .filter(
             Q(payment_version__expiration_date__gte=now)
             | Q(payment_version__expiration_date__isnull=True)
@@ -420,9 +445,9 @@ def get_product_version_price_with_discount(*, coupon_version, product_version):
         Decimal: the discounted price for the Product
     """
     price = product_version.price
-    if (
-        coupon_version
-        and CouponEligibility.objects.filter(
+    if coupon_version and (
+        coupon_version.coupon.is_global
+        or CouponEligibility.objects.filter(
             coupon__versions=coupon_version, product__productversions=product_version
         ).exists()
     ):
@@ -955,6 +980,7 @@ def create_coupons(
     tag=None,
     company_id=None,
     automatic=False,
+    is_global=False,
     activation_date=None,
     expiration_date=None,
     payment_type=None,
@@ -1018,6 +1044,7 @@ def create_coupons(
             coupon_code=(coupon_code or uuid.uuid4().hex),
             payment=payment,
             include_future_runs=include_future_runs,
+            is_global=is_global,
         )
         for _ in range(num_coupon_codes)
     ]

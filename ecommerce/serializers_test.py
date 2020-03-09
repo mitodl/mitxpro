@@ -587,4 +587,23 @@ def test_serialize_coupon():
         "coupon_code": code,
         "enabled": True,
         "include_future_runs": True,
+        "is_global": False,
+    }
+
+
+def test_serialize_global_coupon():
+    """Test that CouponSerializer produces the correct serialized data for a global coupon"""
+    name = "FAKE"
+    code = "1111"
+    coupon = CouponFactory.build(
+        payment__name=name, coupon_code=code, is_global=True, enabled=True
+    )
+    serialized_data = CouponSerializer(instance=coupon).data
+    assert serialized_data == {
+        "id": None,
+        "name": name,
+        "coupon_code": code,
+        "enabled": True,
+        "include_future_runs": True,
+        "is_global": True,
     }

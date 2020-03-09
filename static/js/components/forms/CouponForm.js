@@ -31,8 +31,12 @@ const couponValidations = yup.object().shape({
     .string()
     .required("Coupon name is required")
     .matches(/^\w+$/, "Only letters, numbers, and underscores allowed"),
-  coupon_type:     yup.string().required("Coupon type is required"),
-  products:        yup.array().min(1, "${min} or more products must be selected"),
+  coupon_type: yup.string().required("Coupon type is required"),
+  products:    yup.array().when("is_global", {
+    is:   false,
+    then: yup.array().min(1, "${min} or more products must be selected")
+  }),
+  is_global:       yup.boolean(),
   activation_date: yup.date().required("Valid activation date required"),
   expiration_date: yup
     .date()
@@ -111,7 +115,8 @@ export const CouponForm = ({
       company:             "",
       payment_type:        "",
       payment_transaction: "",
-      include_future_runs: false
+      include_future_runs: false,
+      is_global:           false
     }}
     render={({
       isSubmitting,
@@ -236,17 +241,37 @@ export const CouponForm = ({
             <ErrorMessage name="expiration_date" component={FormError} />
           </div>
         </div>
-        <div className="flex">
+        <div className={values.is_global ? "flex disabled" : "flex"}>
           <label htmlFor="include_future_runs">
             <Field
               type="checkbox"
               name="include_future_runs"
               checked={values.include_future_runs}
+              disabled={values.is_global}
             />
             Include future runs
           </label>
         </div>
-        <div className="flex">
+        <div className={values.include_future_runs ? "flex disabled" : "flex"}>
+          <label htmlFor="is_global">
+            <Field
+              type="checkbox"
+              name="is_global"
+              checked={values.is_global}
+              onChange={() => {
+                values.is_global = !values.is_global
+                setFieldValue("is_global", values.is_global)
+                if (values.is_global) {
+                  setFieldValue("products", [])
+                  setFieldTouched("products")
+                }
+              }}
+              disabled={values.include_future_runs}
+            />
+            Global coupon (applies to all products)
+          </label>
+        </div>
+        <div className="flex" hidden={values.is_global}>
           <Field
             type="radio"
             name="product_type"
@@ -282,7 +307,7 @@ export const CouponForm = ({
           All products
         </div>
         <ErrorMessage name="products" component={FormError} />
-        <div className="product-selection">
+        <div className="product-selection" hidden={values.is_global}>
           <Picky
             name="products"
             valueKey="id"

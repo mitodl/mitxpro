@@ -47,6 +47,7 @@ from ecommerce.api import (
     fetch_and_serialize_unused_coupons,
     get_product_from_text_id,
     get_product_from_querystring_id,
+    best_coupon_for_product,
 )
 from ecommerce.factories import (
     BasketFactory,
@@ -311,6 +312,31 @@ def test_get_valid_coupon_versions(basket_and_coupons, auto_only):
     if not auto_only:
         expected_versions.append(basket_and_coupons.coupongroup_best.coupon_version)
     assert set(best_versions) == set(expected_versions)
+
+
+def test_global_coupons_apply_all_products(user):
+    """
+    Verify that a coupon created with is_global=True is valid for all products, even those
+    created after the coupon.
+    """
+    coupon = CouponVersionFactory(coupon__is_global=True, coupon__enabled=True).coupon
+    CouponVersionFactory.create(coupon__enabled=True)
+
+    coupon_version = coupon.versions.first()
+
+    CouponPaymentVersionFactory(payment=coupon.payment, amount=Decimal(1))
+    product = ProductVersionFactory.create().product
+    product_2 = ProductVersionFactory.create().product
+    versions = get_valid_coupon_versions(product, user)
+
+    # Check that only the global coupon is returned
+    assert coupon.is_global
+    assert len(versions) == 1
+    assert versions[0] == coupon_version
+
+    # Check that the global coupon is applied to all products
+    assert best_coupon_for_product(product, user) == coupon_version
+    assert best_coupon_for_product(product_2, user) == coupon_version
 
 
 def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):

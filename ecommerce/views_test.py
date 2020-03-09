@@ -46,6 +46,7 @@ from ecommerce.models import (
     DataConsentUser,
     BulkCouponAssignment,
     ProductCouponAssignment,
+    Coupon,
 )
 from ecommerce.serializers import (
     BasketSerializer,
@@ -978,6 +979,31 @@ def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     )
 
 
+def test_post_global_singleuse_coupons(admin_drf_client, single_use_coupon_json):
+    """ Test that the correct model objects are created for a batch of single-use coupons (global coupon) """
+    data = single_use_coupon_json
+    data["is_global"] = True
+    resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    model_version = CouponPaymentVersion.objects.get(id=resp.json().get("id"))
+    assert str(model_version) == "CouponPaymentVersion for {} of type {}".format(
+        model_version.num_coupon_codes, model_version.coupon_type
+    )
+    assert model_version.couponversion_set.count() == 5
+    assert model_version.payment.coupon_set.count() == 5
+    assert model_version.amount == data.get("amount")
+    assert model_version.coupon_type == "single-use"
+    assert model_version.payment_transaction == data.get("payment_transaction")
+    assert Company.objects.filter(id=data.get("company")).first() is not None
+    assert (
+        Coupon.objects.filter(payment=model_version.payment).first().is_global is True
+    )
+    assert (
+        CouponEligibility.objects.filter(product__in=data.get("product_ids")).count()
+        == 15
+    )
+
+
 def test_post_promo_coupon(admin_drf_client, promo_coupon_json):
     """ Test that the correct model objects are created for a promo coupon """
     data = promo_coupon_json
@@ -999,6 +1025,31 @@ def test_post_promo_coupon(admin_drf_client, promo_coupon_json):
     )
 
 
+def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
+    """ Test that the correct model objects are created for a promo coupon (global coupon) """
+    data = promo_coupon_json
+    data["is_global"] = True
+    resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
+    assert resp.status_code == status.HTTP_200_OK
+    model_version = CouponPaymentVersion.objects.get(id=resp.json().get("id"))
+    assert model_version.couponversion_set.count() == 1
+    assert model_version.payment.coupon_set.count() == 1
+    assert model_version.amount == data.get("amount")
+    assert model_version.coupon_type == "promo"
+    assert model_version.payment_transaction == data.get("payment_transaction")
+    assert model_version.payment.coupon_set.first().coupon_code == data.get(
+        "coupon_code"
+    )
+    assert Company.objects.filter(id=data.get("company")).first() is not None
+    assert (
+        Coupon.objects.filter(payment=model_version.payment).first().is_global is True
+    )
+    assert (
+        CouponEligibility.objects.filter(product__in=data.get("product_ids")).count()
+        == 3
+    )
+
+
 @pytest.mark.parametrize(
     "attribute,bad_value,error",
     [
@@ -1007,7 +1058,11 @@ def test_post_promo_coupon(admin_drf_client, promo_coupon_json):
             [9998, 9999],
             "Product with id(s) 9998,9999 could not be found",
         ],
-        ["product_ids", [], "At least one product must be selected"],
+        [
+            "product_ids",
+            [],
+            "At least one product must be selected or coupon should be global.",
+        ],
         ["name", "AlreadyExists", "This field must be unique."],
         ["coupon_code", "AlreadyExists", "This field must be unique."],
     ],

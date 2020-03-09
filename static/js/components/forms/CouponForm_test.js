@@ -52,6 +52,7 @@ describe("CouponForm", () => {
     assert.ok(wrapper.find("DayPickerInput").at(1).exists)
     assert.ok(findFormikFieldByName(form, "product_type").exists())
     assert.ok(findFormikFieldByName(form, "coupon_type").exists())
+    assert.ok(findFormikFieldByName(form, "is_global").exists())
     assert.ok(form.find("button[type='submit']").exists())
   })
 

@@ -174,7 +174,8 @@ export type Coupon = {
   coupon_code: string,
   enabled: boolean,
   created_on: Date,
-  updated_on: Date
+  updated_on: Date,
+  is_global: boolean
 }
 
 export type SimpleProduct = {
