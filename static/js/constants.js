@@ -109,6 +109,7 @@ export const HIGHEST_EDUCATION_CHOICES = [
 
 export const ALERT_TYPE_TEXT = "text"
 export const ALERT_TYPE_UNUSED_COUPON = "unused-coupon"
+export const ALTER_TYPE_B2B_ORDER_STATUS = "b2b-order-status"
 
 // HTML title for different pages
 export const CHECKOUT_PAGE_TITLE = "Checkout"

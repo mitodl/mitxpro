@@ -3,7 +3,11 @@ import React from "react"
 import { assert } from "chai"
 import { shallow } from "enzyme"
 
-import { TextNotification, UnusedCouponNotification } from "."
+import {
+  TextNotification,
+  UnusedCouponNotification,
+  B2BOrderStatusNotification
+} from "."
 import { routes } from "../../lib/urls"
 import IntegrationTestHelper from "../../util/integration_test_helper"
 
@@ -41,6 +45,24 @@ describe("Notification component", () => {
     assert.isTrue(link.exists())
     assert.deepInclude(link.props(), {
       dest:      `${routes.checkout}?product=${productId}&code=${couponCode}`,
+      onClick:   dismissStub,
+      className: "alert-link"
+    })
+  })
+
+  it("B2BOrderStatusNotification", () => {
+    const wrapper = shallow(
+      <B2BOrderStatusNotification dismiss={dismissStub} />
+    )
+    assert.equal(
+      wrapper.text(),
+      "Something went wrong. Please contact us at Customer Support."
+    )
+    const link = wrapper.find("a")
+    assert.isTrue(link.exists())
+    assert.equal(link.text(), "Customer Support")
+    assert.deepInclude(link.props(), {
+      href:      "https://xpro.zendesk.com/hc/en-us/requests/new",
       onClick:   dismissStub,
       className: "alert-link"
     })

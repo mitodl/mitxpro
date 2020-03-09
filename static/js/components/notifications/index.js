@@ -3,7 +3,11 @@ import React from "react"
 
 import MixedLink from "../MixedLink"
 import { routes } from "../../lib/urls"
-import { ALERT_TYPE_TEXT, ALERT_TYPE_UNUSED_COUPON } from "../../constants"
+import {
+  ALERT_TYPE_TEXT,
+  ALERT_TYPE_UNUSED_COUPON,
+  ALTER_TYPE_B2B_ORDER_STATUS
+} from "../../constants"
 
 import type {
   TextNotificationProps,
@@ -38,7 +42,26 @@ export const UnusedCouponNotification = (
   )
 }
 
+export const B2BOrderStatusNotification = (props: ComponentProps) => {
+  const { dismiss } = props
+
+  return (
+    <span>
+      Something went wrong. Please contact us at{" "}
+      <a
+        href="https://xpro.zendesk.com/hc/en-us/requests/new"
+        onClick={dismiss}
+        className="alert-link"
+      >
+        Customer Support
+      </a>
+      .
+    </span>
+  )
+}
+
 export const notificationTypeMap = {
-  [ALERT_TYPE_TEXT]:          TextNotification,
-  [ALERT_TYPE_UNUSED_COUPON]: UnusedCouponNotification
+  [ALERT_TYPE_TEXT]:             TextNotification,
+  [ALERT_TYPE_UNUSED_COUPON]:    UnusedCouponNotification,
+  [ALTER_TYPE_B2B_ORDER_STATUS]: B2BOrderStatusNotification
 }
