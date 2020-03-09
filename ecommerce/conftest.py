@@ -131,7 +131,7 @@ def promo_coupon_json(coupon_product_ids):
         "payment_type": "purchase_order",
         "payment_transaction": "fake_transaction_num",
         "product_ids": coupon_product_ids,
-        "include_future_runs": True,
+        "include_future_runs": False,
     }
 
 
@@ -151,7 +151,7 @@ def single_use_coupon_json(coupon_product_ids):
         "payment_type": "credit_card",
         "payment_transaction": "fake_transaction_num",
         "product_ids": coupon_product_ids,
-        "include_future_runs": True,
+        "include_future_runs": False,
     }
 
 

@@ -987,7 +987,7 @@ def create_coupons(
     payment_transaction=None,
     coupon_code=None,
     product_program_run_map=None,
-    include_future_runs=True,
+    include_future_runs=False,
 ):
     """
     Create one or more coupons and whatever instances are needed for them.

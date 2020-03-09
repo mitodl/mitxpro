@@ -537,7 +537,7 @@ class Coupon(TimestampedModel):
     payment = models.ForeignKey(CouponPayment, on_delete=models.PROTECT)
     is_global = models.BooleanField(default=False)
     enabled = models.BooleanField(default=True)
-    include_future_runs = models.BooleanField(default=True)
+    include_future_runs = models.BooleanField(default=False)
 
     def __str__(self):
         """Description for Coupon"""
