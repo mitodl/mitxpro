@@ -248,7 +248,7 @@ def test_serialize_coupon_single_use(
         "payment_type": "credit_card",
         "payment_transaction": ("fake123" if has_payment_transaction else None),
         "product_ids": (coupon_product_ids if has_products else []),
-        "include_future_runs": True,
+        "include_future_runs": False,
     }
     serializer = SingleUseCouponSerializer(data=data)
     assert serializer.is_valid() is (has_payment_transaction and has_products)
@@ -278,7 +278,7 @@ def test_serialize_coupon_invalid_amount(
         "payment_type": "credit_card",
         "payment_transaction": "fake123",
         "product_ids": coupon_product_ids,
-        "include_future_runs": True,
+        "include_future_runs": False,
     }
     serializer = SingleUseCouponSerializer(data=data)
     with pytest.raises(ValidationError) as ex:
@@ -306,7 +306,7 @@ def test_serialize_coupon_promo(
         "payment_type": "credit_card",
         "payment_transaction": ("fake123" if has_payment_transaction else None),
         "product_ids": (coupon_product_ids if has_products else []),
-        "include_future_runs": True,
+        "include_future_runs": False,
     }
     serializer = PromoCouponSerializer(data=data)
     assert serializer.is_valid() is (has_coupon_code and has_products)
@@ -336,7 +336,7 @@ def test_serialize_coupon_promo_invalid_amount(
         "payment_type": "credit_card",
         "payment_transaction": None,
         "product_ids": coupon_product_ids,
-        "include_future_runs": True,
+        "include_future_runs": False,
     }
     serializer = PromoCouponSerializer(data=data)
     with pytest.raises(ValidationError) as ex:
@@ -586,7 +586,7 @@ def test_serialize_coupon():
         "name": name,
         "coupon_code": code,
         "enabled": True,
-        "include_future_runs": True,
+        "include_future_runs": False,
         "is_global": False,
     }
 
@@ -604,6 +604,6 @@ def test_serialize_global_coupon():
         "name": name,
         "coupon_code": code,
         "enabled": True,
-        "include_future_runs": True,
+        "include_future_runs": False,
         "is_global": True,
     }
