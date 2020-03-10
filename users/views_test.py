@@ -2,7 +2,6 @@
 from datetime import timedelta
 import pytest
 
-from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
 from social_django.models import UserSocialAuth
@@ -51,9 +50,6 @@ def test_get_user_by_me(mocker, client, user, is_anonymous, show_enrollment_code
     """Test that user can request their own user by the 'me' alias"""
     if not is_anonymous:
         client.force_login(user)
-
-    if show_enrollment_codes:
-        settings.SHOW_UNREDEEMED_COUPON_ON_DASHBOARD = True
 
     patched_unused_coupon_api = mocker.patch(
         "users.serializers.fetch_and_serialize_unused_coupons",
