@@ -2,7 +2,11 @@
 import { mergeRight, omit } from "ramda"
 
 import { ADD_USER_NOTIFICATION, REMOVE_USER_NOTIFICATION } from "../actions"
-import { ALERT_TYPE_TEXT, ALERT_TYPE_UNUSED_COUPON } from "../constants"
+import {
+  ALERT_TYPE_TEXT,
+  ALERT_TYPE_UNUSED_COUPON,
+  ALTER_TYPE_B2B_ORDER_STATUS
+} from "../constants"
 
 import type { Action } from "../flow/reduxTypes"
 
@@ -22,6 +26,11 @@ export type UserNotificationSpec =
       type: ALERT_TYPE_UNUSED_COUPON,
       color: string,
       props: UnusedCouponNotificationProps
+    }
+  | {
+      type: ALTER_TYPE_B2B_ORDER_STATUS,
+      color: string,
+      props: TextNotificationProps
     }
 
 export type UserNotificationMapping = { [string]: UserNotificationSpec }

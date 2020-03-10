@@ -14,7 +14,7 @@ import queries from "../../../lib/queries"
 import { addUserNotification } from "../../../actions"
 import { wait } from "../../../lib/util"
 import { formatPrice } from "../../../lib/ecommerce"
-import { ALERT_TYPE_TEXT } from "../../../constants"
+import { ALTER_TYPE_B2B_ORDER_STATUS } from "../../../constants"
 import { bulkReceiptCsvUrl } from "../../../lib/urls"
 
 import type { B2BOrderStatus } from "../../../flow/ecommerceTypes"
@@ -90,11 +90,8 @@ export class B2BReceiptPage extends React.Component<Props, State> {
     } else {
       addUserNotification({
         "b2b-order-status": {
-          type:  ALERT_TYPE_TEXT,
-          color: "danger",
-          props: {
-            text: `Something went wrong. Please contact support at ${SETTINGS.support_email}.`
-          }
+          type:  ALTER_TYPE_B2B_ORDER_STATUS,
+          color: "danger"
         }
       })
     }

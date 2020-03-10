@@ -155,10 +155,7 @@ describe("B2BReceiptPage", () => {
         assert.deepEqual(store.getState().ui.userNotifications, {
           "b2b-order-status": {
             color: "danger",
-            type:  "text",
-            props: {
-              text: `Something went wrong. Please contact support at ${SETTINGS.support_email}.`
-            }
+            type:  "b2b-order-status"
           }
         })
       } else {
