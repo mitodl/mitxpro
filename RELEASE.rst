@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.43.0 (Released March 10, 2020)
+--------------
+
+- set False as default in include_future_runs
+- Global coupons/promos #62
+- Optimizing N+1 ORM operations
+- apply coupons to all course runs of a course (#1574)
+- Suppress system shutdown sentry errors
+- add loading spinner to bulk purchase page
+- Remove course run expiration dates #76
+- Made email search case-insensitive for refunds/deferrals
+
 Version 0.42.2 (Released March 06, 2020)
 --------------
 
