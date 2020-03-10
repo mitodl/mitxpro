@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.43.0
+Version 0.43.0 (Released March 10, 2020)
 --------------
 
 - set False as default in include_future_runs
