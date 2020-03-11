@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.43.1 (Released March 11, 2020)
+--------------
+
+- Bulk Purchase: change error message to an HREF instead of a MAILTO
+- Fixed conflicting ecommerce migration file names
+- Added assignment sheet webhook
+
 Version 0.43.0 (Released March 10, 2020)
 --------------
 
