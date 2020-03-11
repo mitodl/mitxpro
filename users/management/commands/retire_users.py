@@ -10,6 +10,7 @@ from django.core.management import BaseCommand
 from social_django.models import UserSocialAuth
 
 from user_util import user_util
+from users.api import fetch_users
 
 from mitxpro import settings
 
@@ -27,12 +28,16 @@ class Command(BaseCommand):
     """
 
     help = """
-    Retire one or multiple users. For single user use:\n
+    Retire one or multiple users. Username or email can be used to identify a user.
+
+    For single user use:\n
     `./manage.py retire_users --user=foo` or do \n
-    `./manage.py retire_users -u foo` \n
-    
+    `./manage.py retire_users -u foo` \n or do \n
+    `./manage.py retire_users -u foo@email.com` \n or do \n
+
     For multiple users, add arg `--user` for each user i.e:\n
     `./manage.py retire_users --user=foo --user=bar --user=baz` or do \n
+    `./manage.py retire_users --user=foo@email.com --user=bar@email.com --user=baz` or do \n
     `./manage.py retire_users -u foo -u bar -u baz`
     """
 
@@ -54,7 +59,7 @@ class Command(BaseCommand):
             action="append",
             default=[],
             dest="users",
-            help="Single or multiple username(s)",
+            help="Single or multiple username(s) or email(s)",
         ),
 
     def get_retired_email(self, email):
@@ -62,36 +67,25 @@ class Command(BaseCommand):
         return user_util.get_retired_email(email, RETIRED_USER_SALTS, RETIRED_EMAIL_FMT)
 
     def handle(self, *args, **kwargs):
-        usernames = kwargs.get("users", [])
+        users = kwargs.get("users", [])
 
-        if not usernames:
+        if not users:
             self.stderr.write(
                 self.style.ERROR(
-                    "No username(s) provided. Please provide username(s) using -u or --user."
+                    "No user(s) provided. Please provide user(s) using -u or --user."
                 )
             )
             exit(1)
 
-        for username in usernames:
-            self.stdout.write("Retiring user: {username}".format(username=username))
+        users = fetch_users(kwargs["users"])
 
-            try:
-                user = User.objects.get(username=username)
-            except User.DoesNotExist:
-                self.stdout.write(
-                    self.style.ERROR(
-                        "User: '{username}' does not exist in MIT xPRO".format(
-                            username=username
-                        )
-                    )
-                )
-                continue
-
+        for user in users:
+            self.stdout.write("Retiring user: {user}".format(user=user))
             if not user.is_active:
                 self.stdout.write(
                     self.style.ERROR(
-                        "User: '{username}' is already deactivated in MIT xPRO".format(
-                            username=username
+                        "User: '{user}' is already deactivated in MIT xPRO".format(
+                            user=user
                         )
                     )
                 )
@@ -112,18 +106,15 @@ class Command(BaseCommand):
             )
 
             # reset user social auth
-            UserSocialAuth.objects.filter(user=user).delete()
+            auth_deleted_count = UserSocialAuth.objects.filter(user=user).delete()
 
-            self.stdout.write(
-                "For  user: '{username}' SocialAuth rows deleted".format(
-                    username=username
+            if auth_deleted_count:
+                self.stdout.write(
+                    "For  user: '{user}' SocialAuth rows deleted".format(user=user)
                 )
-            )
 
             self.stdout.write(
                 self.style.SUCCESS(
-                    "User: '{username}' is retired from MIT xPRO".format(
-                        username=username
-                    )
+                    "User: '{user}' is retired from MIT xPRO".format(user=user)
                 )
             )
