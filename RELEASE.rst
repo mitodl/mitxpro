@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.43.1
+Version 0.43.1 (Released March 11, 2020)
 --------------
 
 - Bulk Purchase: change error message to an HREF instead of a MAILTO
