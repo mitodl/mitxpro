@@ -1025,11 +1025,6 @@ CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS = get_string(
 ENABLE_ORDER_RECEIPTS = get_bool(
     "ENABLE_ORDER_RECEIPTS", False, description="Enable enrollment order receipts."
 )
-SHOW_UNREDEEMED_COUPON_ON_DASHBOARD = get_bool(
-    "SHOW_UNREDEEMED_COUPON_ON_DASHBOARD",
-    False,
-    description="Show unused coupon codes on dashboard with enroll button.",
-)
 
 # Voucher keys for PDF parsing
 VOUCHER_DOMESTIC_EMPLOYEE_KEY = get_string("VOUCHER_DOMESTIC_EMPLOYEE_KEY", "UNIQUE02")
