@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.43.2
+--------------
+
+- remove SHOW_UNREDEEMED_COUPON_ON_DASHBOARD feature flag
+
 Version 0.43.1 (Released March 11, 2020)
 --------------
 
