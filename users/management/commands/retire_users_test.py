@@ -51,3 +51,23 @@ def test_multiple_success():
         assert user.is_active is False
         assert "retired_email" in user.email
         assert UserSocialAuth.objects.filter(user=user).count() == 0
+
+
+@pytest.mark.django_db
+def test_retire_user_with_email():
+    """test retire_users command success with user email"""
+    test_email = "test@email.com"
+
+    user = UserFactory.create(email=test_email, is_active=True)
+    UserSocialAuthFactory.create(user=user, provider="edX")
+
+    assert user.is_active is True
+    assert "retired_email" not in user.email
+    assert UserSocialAuth.objects.filter(user=user).count() == 1
+
+    COMMAND.handle("retire_users", users=[test_email])
+
+    user.refresh_from_db()
+    assert user.is_active is False
+    assert "retired_email" in user.email
+    assert UserSocialAuth.objects.filter(user=user).count() == 0
