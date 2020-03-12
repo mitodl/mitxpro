@@ -30,12 +30,12 @@ services:
       - "5432"
 
   redis:
-    image: redis
+    image: redis:3.0.3
     ports:
       - "6379"
 
   nginx:
-    image: nginx
+    image: nginx:1.9.5
     ports:
       - "8053:8053"
     links:
