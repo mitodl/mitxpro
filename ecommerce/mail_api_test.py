@@ -30,6 +30,7 @@ from ecommerce.mail_api import (
     send_ecommerce_order_receipt,
     send_enrollment_failure_message,
     ENROLL_ERROR_EMAIL_SUBJECT,
+    EMAIL_DATE_FORMAT,
 )
 from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG
 from ecommerce.models import Order
@@ -100,6 +101,9 @@ def test_send_bulk_enroll_emails(mocker, settings):
                 if not new_coupon_payment_versions[i].company
                 else new_coupon_payment_versions[i].company.name
             ),
+            "expiration_date": new_coupon_payment_versions[i].expiration_date.strftime(
+                EMAIL_DATE_FORMAT
+            ),
         }
         assert user_message_props.metadata == EmailMetadata(
             tags=[BULK_ENROLLMENT_EMAIL_TAG],
@@ -158,21 +162,20 @@ def test_send_b2b_receipt_email(mocker, settings, has_discount):
 
     send_b2b_receipt_email(order)
 
-    format_string = "%b %-d, %Y"
     run = order.product_version.product.content_object
     download_url = f'{urljoin(settings.SITE_BASE_URL, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'
 
     patched_mail_api.context_for_user.assert_called_once_with(
         user=None,
         extra_context={
-            "purchase_date": order.updated_on.strftime(format_string),
+            "purchase_date": order.updated_on.strftime(EMAIL_DATE_FORMAT),
             "total_price": format_price(order.total_price),
             "item_price": format_price(order.per_item_price),
             "discount": format_price(order.discount) if has_discount else None,
             "num_seats": str(order.num_seats),
             "contract_number": order.contract_number,
             "readable_id": get_readable_id(run),
-            "run_date_range": f"{run.start_date.strftime(format_string)} - {run.end_date.strftime(format_string)}",
+            "run_date_range": f"{run.start_date.strftime(EMAIL_DATE_FORMAT)} - {run.end_date.strftime(EMAIL_DATE_FORMAT)}",
             "title": run.title,
             "download_url": download_url,
             "email": order.email,

@@ -21,6 +21,7 @@ from mitxpro.utils import format_price
 
 log = logging.getLogger()
 ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
+EMAIL_DATE_FORMAT = "%b %-d, %Y"
 
 
 def get_bulk_enroll_message_data(bulk_assignment_id, recipient, product_coupon):
@@ -43,15 +44,22 @@ def get_bulk_enroll_message_data(bulk_assignment_id, recipient, product_coupon):
     enrollment_url = make_checkout_url(
         product_id=email_product_id, code=product_coupon.coupon.coupon_code
     )
-    company_name = (
-        product_coupon.coupon.payment.versions.values_list("company__name", flat=True)
+    payment_version_data = (
+        product_coupon.coupon.payment.versions.values(
+            "company__name", "expiration_date"
+        )
         .order_by("-created_on")
         .first()
     )
+    company_name = payment_version_data.get("company__name")
+    expiration_date = payment_version_data.get("expiration_date")
     context = {
         "enrollable_title": product_object.title,
         "enrollment_url": enrollment_url,
         "company_name": company_name,
+        "expiration_date": (
+            expiration_date.strftime(EMAIL_DATE_FORMAT) if expiration_date else None
+        ),
     }
     return api.UserMessageProps(
         recipient=recipient,
@@ -145,8 +153,6 @@ def send_b2b_receipt_email(order):
     """
     from ecommerce.api import get_readable_id
 
-    format_string = "%b %-d, %Y"
-
     course_run_or_program = order.product_version.product.content_object
     title = course_run_or_program.title
 
@@ -156,7 +162,7 @@ def send_b2b_receipt_email(order):
         and course_run_or_program.end_date is not None
     ):
         run = course_run_or_program
-        date_range = f"{run.start_date.strftime(format_string)} - {run.end_date.strftime(format_string)}"
+        date_range = f"{run.start_date.strftime(EMAIL_DATE_FORMAT)} - {run.end_date.strftime(EMAIL_DATE_FORMAT)}"
     else:
         date_range = ""
 
@@ -171,7 +177,7 @@ def send_b2b_receipt_email(order):
                 api.context_for_user(
                     user=None,
                     extra_context={
-                        "purchase_date": order.updated_on.strftime(format_string),
+                        "purchase_date": order.updated_on.strftime(EMAIL_DATE_FORMAT),
                         "total_price": format_price(order.total_price),
                         "item_price": format_price(order.per_item_price),
                         "discount": format_price(order.discount)
