@@ -7791,6 +7791,13 @@ react-transition-group@^2.2.1, react-transition-group@^2.3.1:
     prop-types "^15.6.2"
     react-lifecycles-compat "^3.0.4"
 
+react-zendesk@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/react-zendesk/-/react-zendesk-0.1.5.tgz#d0e7a300c22c631d9c41afe78ee5439c60452acd"
+  integrity sha512-9X+nBXAbU8avte1J3C6EJQzc1XN6g0yNfdr3eoZWvaunqqM1AS1TmlImetjVnAc/bKUYZuXWUIzWchlQJp+z/A==
+  dependencies:
+    prop-types "^15.7.2"
+
 react@^16.8.4:
   version "16.8.4"
   resolved "https://registry.yarnpkg.com/react/-/react-16.8.4.tgz#fdf7bd9ae53f03a9c4cd1a371432c206be1c4768"

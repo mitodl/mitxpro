@@ -94,7 +94,7 @@ SECURE_SSL_HOST = get_string(
 )
 
 ZENDESK_CONFIG = {
-    "HELP_WIDGET_ENABLED": get_string(
+    "HELP_WIDGET_ENABLED": get_bool(
         "ZENDESK_HELP_WIDGET_ENABLED",
         False,
         description="Enabled/disable state for Zendesk web help widget.",

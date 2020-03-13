@@ -12,6 +12,10 @@ declare type Settings = {
   recaptchaKey: ?string,
   support_email: string,
   site_name: string,
+  zendesk_config: {
+    help_widget_enabled: bool,
+    help_widget_key: ?string
+  }
 }
 declare var SETTINGS: Settings;
 
