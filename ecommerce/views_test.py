@@ -1,6 +1,6 @@
 """ecommerce tests for views"""
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from types import SimpleNamespace
 from urllib.parse import quote_plus
 import operator as op
@@ -63,7 +63,7 @@ from mitxpro.test_utils import (
     assert_drf_json_equal,
     any_instance_of,
 )
-from mitxpro.utils import dict_without_keys
+from mitxpro.utils import dict_without_keys, now_in_utc
 from users.factories import UserFactory
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
@@ -829,7 +829,7 @@ def test_patch_basket_invalid_run(
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     assert resp.json()["errors"] == {
         "runs": (
-            f"Unable to find run(s) with id(s) {{{other_run_id}}}"
+            f"Some invalid courses were selected."
             if is_selected
             else "Each course must have a course run selection"
         )
@@ -1492,3 +1492,29 @@ class TestBulkEnrollmentSubmitView:
         resp_data = response.json()
         assert isinstance(resp_data.get("errors"), list)
         assert expected_error in resp_data["errors"][0]["users_file"]
+
+
+def test_patch_basket_expired_run(basket_client, basket_and_coupons):
+    """A patch request with expired run ids should show the error"""
+    product_version = basket_and_coupons.product_version
+    product = product_version.product
+    now = now_in_utc()
+    course_run = CourseRunFactory.create(
+        enrollment_start=(now - timedelta(days=150)),
+        enrollment_end=(now - timedelta(days=120)),
+        start_date=(now - timedelta(days=120)),
+        end_date=(now - timedelta(days=10)),
+    )
+    product.content_object = course_run
+    product.save()
+
+    resp = basket_client.patch(
+        reverse("basket_api"),
+        type="json",
+        data={"items": [{"product_id": product.id, "run_ids": [course_run.id]}]},
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    resp_data = resp.json()
+    assert sorted(resp_data["errors"]) == [
+        "We're sorry, this course or program is no longer available for enrollment."
+    ]
