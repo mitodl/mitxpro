@@ -1,10 +1,11 @@
 """Tests for CMS views"""
 from datetime import timedelta
+from types import SimpleNamespace
 
 import pytest
 from django.urls import reverse
 from rest_framework import status
-from wagtail.core.models import Site, Page
+from wagtail.core.models import Site
 
 from cms.factories import (
     CatalogPageFactory,
@@ -20,20 +21,30 @@ from courses.factories import (
     CourseRunFactory,
     CourseRunCertificateFactory,
     ProgramCertificateFactory,
+    ProgramRunFactory,
 )
+from ecommerce.factories import ProductVersionFactory
 
 from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
+# pylint: disable=redefined-outer-name,unused-argument
 
 
-def test_home_page_view(client):
+@pytest.fixture()
+def wagtail_basics():
+    """Fixture for Wagtail objects that we expect to always exist"""
+    site = Site.objects.get(is_default_site=True)
+    root = site.root_page
+    return SimpleNamespace(site=site, root=root)
+
+
+def test_home_page_view(client, wagtail_basics):
     """
     Test that the home page shows the right HTML for the watch now button
     """
-    root = Site.objects.get(is_default_site=True).root_page
     page = HomePage(title="Home Page", subhead="<p>subhead</p>")
-    root.add_child(instance=page)
+    wagtail_basics.root.add_child(instance=page)
     resp = client.get(page.get_url())
     content = resp.content.decode("utf-8")
 
@@ -62,66 +73,48 @@ def test_home_page_view(client):
     assert reverse("checkout-page") not in content
 
 
-def test_courses_index_view(client):
+def test_courses_index_view(client, wagtail_basics):
     """
     Test that the courses index page shows a 404
     """
-    root = Site.objects.get(is_default_site=True).root_page
     page, created = CourseIndexPage.objects.get_or_create()
 
     if created:
-        root.add_child(instance=page)
+        wagtail_basics.root.add_child(instance=page)
 
     resp = client.get(page.get_url())
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_programs_index_view(client):
+def test_programs_index_view(client, wagtail_basics):
     """
     Test that the programs index page shows a 404
     """
-    root = Site.objects.get(is_default_site=True).root_page
     page, created = ProgramIndexPage.objects.get_or_create()
 
     if created:
-        root.add_child(instance=page)
+        wagtail_basics.root.add_child(instance=page)
 
     resp = client.get(page.get_url())
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_course_program_child_view(client):
+def test_course_program_child_view(client, wagtail_basics):
     """
     Test that course/program child pages show a 404
     """
-    root = Site.objects.get(is_default_site=True).root_page
-
-    child_page = TextSectionFactory.create(parent=root)
+    child_page = TextSectionFactory.create(parent=wagtail_basics.root)
     child_page.save_revision().publish()
     resp = client.get(child_page.get_url())
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_course_certificate_invalid_view(user_client, user):
+def test_course_certificate_invalid_view(user_client, user, wagtail_basics):
     """
     Test that certificate page returns a 404 if CertificatePage does not exist for that course
     """
-    site = Site.objects.get(is_default_site=True)
-    root = Page.objects.get(depth=1)
-
-    old_home = Page.objects.filter(depth=2).first()
-    old_home.slug = "some-slug"
-    old_home.save_revision().publish()
-
-    home = HomePageFactory.create(parent=root, slug="home")
+    home = HomePageFactory.create(parent=wagtail_basics.root, slug="home")
     home.save_revision().publish()
-    site.root_page = home
-    site.save()
-
-    subpages = old_home.get_children()
-
-    for subpage in subpages:
-        subpage.move(home, "last-child")
 
     course_page = CoursePageFactory.create(parent=home)
     course_page.save_revision().publish()
@@ -134,26 +127,12 @@ def test_course_certificate_invalid_view(user_client, user):
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_course_certificate_view(user_client, user):
+def test_course_certificate_view(user_client, user, wagtail_basics):
     """
     Test that certificate page show correctly
     """
-    site = Site.objects.get(is_default_site=True)
-    root = Page.objects.get(depth=1)
-
-    old_home = Page.objects.filter(depth=2).first()
-    old_home.slug = "some-slug"
-    old_home.save_revision().publish()
-
-    home = HomePageFactory.create(parent=root, slug="home")
+    home = HomePageFactory.create(parent=wagtail_basics.root, slug="home")
     home.save_revision().publish()
-    site.root_page = home
-    site.save()
-
-    subpages = old_home.get_children()
-
-    for subpage in subpages:
-        subpage.move(home, "last-child")
 
     course_page = CoursePageFactory.create(parent=home)
     course_page.save_revision().publish()
@@ -173,26 +152,12 @@ def test_course_certificate_view(user_client, user):
     assert resp.context_data["page"].certificate == course_run_certificate
 
 
-def test_course_certificate_view_revoked_state(user_client, user):
+def test_course_certificate_view_revoked_state(user_client, user, wagtail_basics):
     """
     Test that certificate page return 404 for revoked certificate.
     """
-    site = Site.objects.get(is_default_site=True)
-    root = Page.objects.get(depth=1)
-
-    old_home = Page.objects.filter(depth=2).first()
-    old_home.slug = "some-slug"
-    old_home.save_revision().publish()
-
-    home = HomePageFactory.create(parent=root, slug="home")
+    home = HomePageFactory.create(parent=wagtail_basics.root, slug="home")
     home.save_revision().publish()
-    site.root_page = home
-    site.save()
-
-    subpages = old_home.get_children()
-
-    for subpage in subpages:
-        subpage.move(home, "last-child")
 
     course_page = CoursePageFactory.create(parent=home)
     course_page.save_revision().publish()
@@ -215,26 +180,12 @@ def test_course_certificate_view_revoked_state(user_client, user):
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_program_certificate_invalid_view(user_client, user):
+def test_program_certificate_invalid_view(user_client, user, wagtail_basics):
     """
     Test that program certificate page returns a 404 if CertificatePage does not exist for that program
     """
-    site = Site.objects.get(is_default_site=True)
-    root = Page.objects.get(depth=1)
-
-    old_home = Page.objects.filter(depth=2).first()
-    old_home.slug = "some-slug"
-    old_home.save_revision().publish()
-
-    home = HomePageFactory.create(parent=root, slug="home")
+    home = HomePageFactory.create(parent=wagtail_basics.root, slug="home")
     home.save_revision().publish()
-    site.root_page = home
-    site.save()
-
-    subpages = old_home.get_children()
-
-    for subpage in subpages:
-        subpage.move(home, "last-child")
 
     program_page = ProgramPageFactory.create(parent=home)
     program_page.save_revision().publish()
@@ -247,26 +198,12 @@ def test_program_certificate_invalid_view(user_client, user):
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_program_certificate_view(user_client, user):
+def test_program_certificate_view(user_client, user, wagtail_basics):
     """
     Test that certificate page show correctly
     """
-    site = Site.objects.get(is_default_site=True)
-    root = Page.objects.get(depth=1)
-
-    old_home = Page.objects.filter(depth=2).first()
-    old_home.slug = "some-slug"
-    old_home.save_revision().publish()
-
-    home = HomePageFactory.create(parent=root, slug="home")
+    home = HomePageFactory.create(parent=wagtail_basics.root, slug="home")
     home.save_revision().publish()
-    site.root_page = home
-    site.save()
-
-    subpages = old_home.get_children()
-
-    for subpage in subpages:
-        subpage.move(home, "last-child")
 
     program_page = ProgramPageFactory.create(parent=home)
     program_page.save_revision().publish()
@@ -284,13 +221,12 @@ def test_program_certificate_view(user_client, user):
     assert resp.context_data["page"].certificate == program_certificate
 
 
-def test_catalog_page_product(client):
+def test_catalog_page_product(client, wagtail_basics):
     """
     Verify that the catalog page does not include cards for either product pages
     that are not live (unpublished) or pages that have a product with live=False
     """
-    homepage = Site.objects.get(is_default_site=True).root_page
-
+    homepage = wagtail_basics.root
     catalog_page = CatalogPageFactory.create(parent=homepage)
     catalog_page.save_revision().publish()
 
@@ -347,3 +283,43 @@ def test_catalog_page_product(client):
     assert resp.status_code == status.HTTP_200_OK
     assert resp.context_data["course_pages"] == [active_course_page]
     assert resp.context_data["program_pages"] == [active_program_page]
+
+
+def test_program_page_checkout_url_product(client, wagtail_basics):
+    """
+    The checkout URL in the program page context should include the product ID if a product exists
+    for the given program
+    """
+    program_page = ProgramPageFactory.create()
+    program_page.save_revision().publish()
+    product_version = ProductVersionFactory.create(
+        product__content_object=program_page.program
+    )
+    resp = client.get(program_page.get_url())
+    checkout_url = resp.context["checkout_url"]
+    assert f"product={product_version.product.id}" in checkout_url
+
+
+def test_program_page_checkout_url_program_run(client, wagtail_basics):
+    """
+    The checkout URL in the program page context should include the program run text ID if a program run exists
+    """
+    program_page = ProgramPageFactory.create()
+    program_page.save_revision().publish()
+    program_run = ProgramRunFactory.create(
+        program=program_page.program, start_date=(now_in_utc() - timedelta(days=1))
+    )
+    resp = client.get(program_page.get_url())
+    checkout_url = resp.context["checkout_url"]
+    assert checkout_url is None
+
+    program_run.start_date = now_in_utc() + timedelta(days=1)
+    program_run.save()
+    # If multiple future program runs exist, the one with the earliest start date should be used
+    ProgramRunFactory.create(
+        program=program_page.program,
+        start_date=(program_run.start_date + timedelta(days=1)),
+    )
+    resp = client.get(program_page.get_url())
+    checkout_url = resp.context["checkout_url"]
+    assert f"product={program_run.full_readable_id}" in checkout_url

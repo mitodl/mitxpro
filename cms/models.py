@@ -697,11 +697,13 @@ class ProgramPage(ProductPage):
             else False
         )
         now = now_in_utc()
-        active_program_run = program.programruns.filter(
-            start_date__lte=now, end_date__gt=now
-        ).first()
-        if active_program_run:
-            checkout_product_id = active_program_run.full_readable_id
+        soonest_future_program_run = (
+            program.programruns.filter(start_date__gt=now)
+            .order_by("start_date")
+            .first()
+        )
+        if soonest_future_program_run:
+            checkout_product_id = soonest_future_program_run.full_readable_id
         elif product:
             checkout_product_id = product.id
         else:
@@ -715,9 +717,7 @@ class ProgramPage(ProductPage):
                 None
                 if not checkout_product_id
                 else f"{reverse('checkout-page')}?product={ checkout_product_id }"
-            )
-            if product
-            else None,
+            ),
             "enrolled": enrolled,
             "user": request.user,
         }
