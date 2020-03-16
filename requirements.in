@@ -36,6 +36,6 @@ ua-parser==0.8.0
 user-agents==2.0
 user-util==0.1.5
 uwsgi
-wagtail==2.6.3
+wagtail==2.7.1
 wagtail-metadata==2.0.1
 zeep==3.4.0
