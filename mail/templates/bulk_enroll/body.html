@@ -8,14 +8,18 @@
               <tr>
                   <td style="padding: 20px; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #555555;">
                       <h1 style="margin: 0 0 10px; font-size: 25px; line-height: 30px; color: #03152d; font-weight: bold;">Complete your {{ site_name }} Enrollment</h1>
-                      <p style="margin: 0 0 10px;">
+                      <p style="margin: 0 0 10px; text-align: justify;">
                         {% if company_name %}
-                          {{ company_name }} has enrolled you in
+                          {{ company_name }} has paid for your enrollment in "{{ enrollable_title }}".
                         {% else %}
-                          You have been enrolled in
+                          Payment for your enrollment in "{{ enrollable_title }}" is complete.
                         {% endif %}
-                        {{ enrollable_title }} on {{ site_name }}.
-                        Please complete your enrollment by clicking this link:
+
+                        Click the Enroll button
+                        {% if expiration_date %}
+                          before {{ expiration_date }}
+                        {% endif %}
+                        to access the course for free.
                       </p>
                   </td>
               </tr>
@@ -30,6 +34,12 @@
                           </tr>
                       </table>
                       <!-- Button : END -->
+                  </td>
+              </tr>
+              <tr>
+                  <td style="padding: 0 20px 20px;">
+                    <p>If the button doesn't work, copy and paste this link into your web browser:</p>
+                    {{ enrollment_url }}
                   </td>
               </tr>
               <tr>
