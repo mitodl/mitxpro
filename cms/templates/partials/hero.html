@@ -25,9 +25,9 @@
 
 <div class="header-block">
   <div class="container header-container">
-    {% if page.background_video_url %}
+    {% if background_video_url %}
       {% if not request.user_agent.is_mobile %}
-        <video autoplay muted loop class="background-video" id="background-video" data-source="{{ page.background_video_url }}">
+        <video autoplay muted loop class="background-video" id="background-video" data-source="{{ background_video_url }}">
         </video>
       {% endif %}
     {% endif %}

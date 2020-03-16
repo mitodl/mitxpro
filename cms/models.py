@@ -426,6 +426,14 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
             **super().get_context(request),
             **get_base_context(request),
             "catalog_page": CatalogPage.objects.first(),
+            # The context variables below are added to avoid duplicate queries within the templates
+            "background_video_url": self.background_video_url,
+            "upcoming_courseware": self.upcoming_courseware,
+            "about_mit_xpro": self.about_mit_xpro,
+            "learning_experience": self.learning_experience,
+            "testimonials": self.testimonials,
+            "inquiry_section": self.inquiry_section,
+            "image_carousel_section": self.image_carousel_section,
         }
 
 
@@ -558,6 +566,18 @@ class ProductPage(MetadataPageMixin, Page):
             **super().get_context(request, *args, **kwargs),
             **get_base_context(request),
             "title": self.title,
+            # The context variables below are added to avoid duplicate queries within the templates
+            "background_video_url": self.background_video_url,
+            "testimonials": self.testimonials,
+            "faculty": self.faculty,
+            "course_lineup": self.course_lineup,
+            "course_pages": self.course_pages,
+            "for_teams": self.for_teams,
+            "faqs": self.faqs,
+            "outcomes": self.outcomes,
+            "who_should_enroll": self.who_should_enroll,
+            "techniques": self.techniques,
+            "propel_career": self.propel_career,
         }
 
     def _get_child_page_of_type(self, cls):
@@ -670,7 +690,9 @@ class ProgramPage(ProductPage):
         Gets a list of pages (CoursePage) of all the courses associated with this program
         """
         courses = self.program.courses.all()
-        return CoursePage.objects.filter(course_id__in=courses).select_related("course")
+        return CoursePage.objects.filter(course_id__in=courses).select_related(
+            "course", "thumbnail_image"
+        )
 
     @property
     def course_lineup(self):
