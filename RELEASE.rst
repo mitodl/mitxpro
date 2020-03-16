@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.43.3 (Released March 16, 2020)
+--------------
+
+- Pin redis version to 5.0.5 in docker config
+- Pin nginx to 1.16.1 in docker config
+
 Version 0.43.2 (Released March 12, 2020)
 --------------
 
