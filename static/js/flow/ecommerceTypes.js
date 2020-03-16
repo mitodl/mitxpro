@@ -69,6 +69,10 @@ export type B2BOrderStatus = {
   discount: ?string,
   email: string,
   contract_number: ?string,
+  created_on: ?string,
+  coupon_code: ?string,
+  reference_number: ?string,
+  receipt_data: { card_type: ?string, card_number: ?string },
   product_version: ProductVersion,
 }
 

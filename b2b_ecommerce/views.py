@@ -17,10 +17,11 @@ from b2b_ecommerce.api import (
     determine_price_and_discount,
     generate_b2b_cybersource_sa_payload,
 )
-from b2b_ecommerce.models import B2BCoupon, B2BCouponRedemption, B2BOrder
+from b2b_ecommerce.models import B2BCoupon, B2BCouponRedemption, B2BOrder, B2BReceipt
 from ecommerce.utils import make_checkout_url
 from ecommerce.models import ProductVersion, Coupon
 from ecommerce.serializers import ProductVersionSerializer
+from ecommerce.constants import CYBERSOURCE_CARD_TYPES
 from mitxpro.utils import make_csv_http_response
 
 
@@ -119,6 +120,14 @@ class B2BOrderStatusView(APIView):
         order_hash = kwargs["hash"]
         order = get_object_or_404(B2BOrder, unique_id=order_hash)
 
+        receipt = B2BReceipt.objects.filter(order=order).order_by("-created_on").first()
+        receipt_data = {"card_number": None, "card_type": None}
+        if receipt:
+            receipt_data["card_number"] = receipt.data.get("req_card_number")
+            receipt_data["card_type"] = CYBERSOURCE_CARD_TYPES.get(
+                receipt.data.get("req_card_type")
+            )
+
         return Response(
             data={
                 "status": order.status,
@@ -131,6 +140,10 @@ class B2BOrderStatusView(APIView):
                 ).data,
                 "email": order.email,
                 "contract_number": order.contract_number,
+                "created_on": order.created_on,
+                "reference_number": order.reference_number,
+                "coupon_code": order.coupon.coupon_code if order.coupon else None,
+                "receipt_data": receipt_data,
             }
         )
 
