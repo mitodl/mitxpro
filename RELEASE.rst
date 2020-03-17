@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.44.0
+Version 0.44.0 (Released March 17, 2020)
 --------------
 
 - Changed enrollment code email text
