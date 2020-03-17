@@ -231,7 +231,14 @@ class CourseRunCertificateAdmin(admin.ModelAdmin):
     """Admin for CourseRunCertificate"""
 
     model = CourseRunCertificate
-    list_display = ["uuid", "user", "course_run", "get_revoked_state"]
+    list_display = [
+        "uuid",
+        "user",
+        "course_run",
+        "get_revoked_state",
+        "created_on",
+        "updated_on",
+    ]
     search_fields = [
         "course_run__courseware_id",
         "course_run__title",
@@ -257,7 +264,14 @@ class ProgramCertificateAdmin(admin.ModelAdmin):
     """Admin for ProgramCertificate"""
 
     model = ProgramCertificate
-    list_display = ["uuid", "user", "program", "get_revoked_state"]
+    list_display = [
+        "uuid",
+        "user",
+        "program",
+        "get_revoked_state",
+        "created_on",
+        "updated_on",
+    ]
     search_fields = [
         "program__readable_id",
         "program__title",
