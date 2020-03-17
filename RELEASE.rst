@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.44.0 (Released March 17, 2020)
+--------------
+
+- Changed enrollment code email text
+- Retire users by email address in addition to username
+- Bulk purchase: update receipt page
+- Choose future program run from catalog instead of active one
+
 Version 0.43.3 (Released March 16, 2020)
 --------------
 
