@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import pytest
 
 # pylint:disable=redefined-outer-name
-
+from ecommerce.api import ValidatedBasket
 from ecommerce.factories import (
     BasketItemFactory,
     CouponEligibilityFactory,
@@ -85,6 +85,19 @@ def basket_and_coupons():
         coupongroup_best=coupongroup_best,
         coupongroup_worst=coupongroup_worst,
         run=run,
+    )
+
+
+@pytest.fixture
+def validated_basket(basket_and_coupons):
+    """Fixture for a ValidatedBasket object"""
+    return ValidatedBasket(
+        basket=basket_and_coupons.basket,
+        basket_item=basket_and_coupons.basket_item,
+        product_version=basket_and_coupons.product_version,
+        coupon_version=basket_and_coupons.coupongroup_best.coupon_version,
+        run_selection_ids={basket_and_coupons.run.id},
+        data_consent_users=[],
     )
 
 

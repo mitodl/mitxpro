@@ -19,7 +19,7 @@ from ecommerce.api import (
     get_valid_coupon_versions,
     latest_coupon_version,
     latest_product_version,
-    get_or_create_data_consents,
+    get_or_create_data_consent_users,
     get_product_version_price_with_discount,
     get_product_from_querystring_id,
 )
@@ -324,7 +324,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
     def get_data_consents(self, instance):
         """ Get the DataConsentUser objects associated with the basket via coupon and product"""
-        data_consents = get_or_create_data_consents(instance)
+        data_consents = get_or_create_data_consent_users(instance)
         return DataConsentUserSerializer(instance=data_consents, many=True).data
 
     @classmethod

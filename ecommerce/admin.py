@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from ecommerce.models import (
     Line,
+    LineRunSelection,
     ProgramRunLine,
     Order,
     OrderAudit,
@@ -76,6 +77,35 @@ class LineAdmin(admin.ModelAdmin):
 
     get_product_version_text_id.short_description = "Product Object Text Id"
     get_product_version_text_id.admin_order_field = "product_version__text_id"
+
+
+class LineRunSelectionAdmin(admin.ModelAdmin):
+    """Admin for LineRunSelection"""
+
+    model = LineRunSelection
+    list_display = ("id", "line", "get_order", "get_run_courseware_id")
+
+    readonly_fields = get_field_names(LineRunSelection)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def get_order(self, obj):
+        """Returns the related Order"""
+        return obj.line.order
+
+    get_order.short_description = "Order"
+    get_order.admin_order_field = "line__order"
+
+    def get_run_courseware_id(self, obj):
+        """Returns the courseware_id of the associated CourseRun"""
+        return obj.run.courseware_id
+
+    get_run_courseware_id.short_description = "Run Courseware Id"
+    get_run_courseware_id.admin_order_field = "run__courseware_id"
 
 
 class ProgramRunLineAdmin(admin.ModelAdmin):
@@ -461,6 +491,7 @@ class ProductCouponAssignmentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Line, LineAdmin)
+admin.site.register(LineRunSelection, LineRunSelectionAdmin)
 admin.site.register(ProgramRunLine, ProgramRunLineAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderAudit, OrderAuditAdmin)
