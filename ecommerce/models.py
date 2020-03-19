@@ -404,6 +404,24 @@ class Line(TimestampedModel):
         return f"Line for order #{self.order.id}, {self.product_version} (qty: {self.quantity})"
 
 
+class LineRunSelection(TimestampedModel):
+    """
+    A mapping from a selection of a run in a program to the order line. Represents a course run selection in a
+    submitted order.
+    """
+
+    line = models.ForeignKey(
+        Line, on_delete=models.CASCADE, related_name="line_selections"
+    )
+    run = models.ForeignKey("courses.CourseRun", on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("line", "run")
+
+    def __str__(self):
+        return f"LineRunSelection for order {self.line.order.id}, line {self.line}, run {self.run.courseware_id}"
+
+
 class ProgramRunLine(TimestampedModel):
     """
     A mapping from a Line to the ProgramRun associated with that Line

@@ -92,6 +92,16 @@ class LineFactory(DjangoModelFactory):
         model = models.Line
 
 
+class LineRunSelectionFactory(DjangoModelFactory):
+    """Factory for LineRunSelection"""
+
+    line = SubFactory(LineFactory)
+    run = SubFactory(CourseRunFactory)
+
+    class Meta:
+        model = models.LineRunSelection
+
+
 class CouponPaymentFactory(DjangoModelFactory):
     """Factory for CouponPayment"""
 

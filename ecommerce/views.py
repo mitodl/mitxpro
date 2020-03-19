@@ -27,10 +27,8 @@ from ecommerce.api import (
     create_unfulfilled_order,
     fulfill_order,
     generate_cybersource_sa_payload,
-    get_product_version_price_with_discount,
     get_full_price_coupon_product_set,
     get_available_bulk_product_coupons,
-    get_readable_id,
     make_receipt_url,
     validate_basket_for_checkout,
     complete_order,
@@ -119,25 +117,13 @@ class CheckoutView(APIView):
         Create a new unfulfilled Order from the user's basket
         and return information used to submit to CyberSource.
         """
-
-        validate_basket_for_checkout(request.user.basket)
+        validated_basket = validate_basket_for_checkout(request.user)
+        order = create_unfulfilled_order(validated_basket)
         base_url = request.build_absolute_uri("/")
-        order = create_unfulfilled_order(request.user)
-        coupon_redemption = order.couponredemption_set.first()
-        coupon_version = coupon_redemption.coupon_version if coupon_redemption else None
-        total_price = sum(
-            get_product_version_price_with_discount(
-                coupon_version=coupon_version, product_version=line.product_version
-            )
-            for line in order.lines.all()
-        )
+        text_id = validated_basket.product_version.product.content_object.text_id
+        receipt_url = make_receipt_url(base_url=base_url, readable_id=text_id)
 
-        # Should only have one line per order currently
-        line = order.lines.first()
-
-        readable_id = get_readable_id(line.product_version.product.content_object)
-
-        if total_price == 0:
+        if order.total_price_paid == 0:
             # If price is $0, don't bother going to CyberSource, just mark as fulfilled
             order.status = Order.FULFILLED
             order.save()
@@ -146,7 +132,7 @@ class CheckoutView(APIView):
             complete_order(order)
             order.save_and_log(request.user)
 
-            product = line.product_version.product
+            product = validated_basket.product_version.product
 
             # $0 orders do not go to CyberSource so we need to build a payload
             # for GTM in order to track these purchases as well. Actual tracking
@@ -155,18 +141,17 @@ class CheckoutView(APIView):
                 "transaction_id": "T-{}".format(order.id),
                 "transaction_total": 0.00,
                 "product_type": product.type_string,
-                "courseware_id": readable_id,
+                "courseware_id": text_id,
                 "reference_number": "REF-{}".format(order.id),
             }
 
             # This redirects the user to our order success page
-            url = make_receipt_url(base_url=base_url, readable_id=readable_id)
+            url = receipt_url
             if settings.ENABLE_ORDER_RECEIPTS:
                 send_ecommerce_order_receipt(order)
             method = "GET"
         else:
             # This generates a signed payload which is submitted as an HTML form to CyberSource
-            receipt_url = make_receipt_url(base_url=base_url, readable_id=readable_id)
             cancel_url = urljoin(base_url, "checkout/")
             payload = generate_cybersource_sa_payload(
                 order=order, receipt_url=receipt_url, cancel_url=cancel_url

@@ -10,6 +10,7 @@ import logging
 from collections import defaultdict
 from urllib.parse import quote_plus, urljoin
 import uuid
+from typing import NamedTuple, Optional, Iterable
 
 from django.conf import settings
 from django.db.models import Q, Max, F, Count, Subquery, Prefetch
@@ -24,7 +25,7 @@ from courses.constants import (
     CONTENT_TYPE_MODEL_COURSERUN,
     PROGRAM_RUN_ID_PATTERN,
 )
-from courses.models import Course, CourseRun, CourseRunEnrollment, Program, ProgramRun
+from courses.models import CourseRun, Program, ProgramRun
 from courses.utils import is_program_text_id
 from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
 from ecommerce.exceptions import EcommerceException
@@ -43,12 +44,14 @@ from ecommerce.models import (
     DataConsentAgreement,
     DataConsentUser,
     Product,
+    ProductVersion,
     ProductCouponAssignment,
     BulkCouponAssignment,
     Line,
     Order,
     Receipt,
     ProgramRunLine,
+    LineRunSelection,
 )
 from ecommerce.mail_api import send_ecommerce_order_receipt
 import sheets.tasks
@@ -545,8 +548,8 @@ def enroll_user_in_order_items(order):
     Args:
         order (Order): An order
     """
-    basket = order.purchaser.basket
-    runs = CourseRun.objects.filter(courserunselection__basket=basket)
+    order_line = Line.objects.prefetch_related("line_selections__run").get(order=order)
+    runs = [line_selection.run for line_selection in order_line.line_selections.all()]
     programs = get_order_programs(order)
     company = get_company_affiliation(order)
 
@@ -624,51 +627,43 @@ def get_order_programs(order):
     ]
 
 
-def create_unfulfilled_order(user):
+def create_unfulfilled_order(validated_basket):
     """
     Create a new Order which is not fulfilled for a purchasable Product. Note that validation should
     be done in the basket REST API so the validation is not done here (different from MicroMasters).
 
     Args:
-        user (User):
-            The purchaser
+        validated_basket (ValidatedBasket): The validated Basket and related objects
 
     Returns:
         Order: A newly created Order for the Product in the basket
     """
     with transaction.atomic():
-        # Note: validation is assumed to already have happen when the basket is being modified
-        basket, _ = Basket.objects.get_or_create(user=user)
-
+        total_price_paid = get_product_version_price_with_discount(
+            coupon_version=validated_basket.coupon_version,
+            product_version=validated_basket.product_version,
+        )
         order = Order.objects.create(
-            status=Order.CREATED, purchaser=user, total_price_paid=decimal.Decimal(0)
+            status=Order.CREATED,
+            purchaser=validated_basket.basket.user,
+            total_price_paid=total_price_paid,
         )
-
-        product_version = None
-        for basket_item in basket.basketitems.select_related(
-            "product", "program_run"
-        ).all():
-            product_version = latest_product_version(basket_item.product)
-            line = Line.objects.create(
-                order=order,
-                product_version=product_version,
-                quantity=basket_item.quantity,
+        line = Line.objects.create(
+            order=order,
+            product_version=validated_basket.product_version,
+            quantity=validated_basket.basket_item.quantity,
+        )
+        if validated_basket.basket_item.program_run:
+            ProgramRunLine.objects.create(
+                line=line, program_run=validated_basket.basket_item.program_run
             )
-            if basket_item.program_run:
-                ProgramRunLine.objects.create(
-                    line=line, program_run=basket_item.program_run
-                )
-
-        coupon_version = None
-        for coupon_selection in basket.couponselection_set.all():
-            coupon = coupon_selection.coupon
-            coupon_version = latest_coupon_version(coupon)
-            redeem_coupon(coupon_version=coupon_version, order=order)
-        order.total_price_paid = get_product_version_price_with_discount(
-            coupon_version=coupon_version, product_version=product_version
-        )
-        order.save()
-        order.save_and_log(user)
+        if validated_basket.run_selection_ids:
+            LineRunSelection.objects.bulk_create(
+                LineRunSelection(line=line, run_id=run_id)
+                for run_id in validated_basket.run_selection_ids
+            )
+        if validated_basket.coupon_version:
+            redeem_coupon(coupon_version=validated_basket.coupon_version, order=order)
     sync_hubspot_deal(order)
     return order
 
@@ -784,85 +779,186 @@ def bulk_assign_product_coupons(desired_assignments, bulk_assignment=None):
     )
 
 
+class ValidatedBasket(NamedTuple):
+    """An object representing a Basket and related objects that have been validated to be ready for checkout"""
+
+    basket: Basket
+    basket_item: BasketItem
+    product_version: ProductVersion
+    coupon_version: Optional[CouponVersion]
+    run_selection_ids: Optional[Iterable[int]]
+    data_consent_users: Optional[Iterable[DataConsentUser]]
+
+
+def _validate_basket_contents(basket):
+    """
+    Verifies that the contents of the basket and the item being purchased are all valid, and returns objects from
+    the database that are related to the basket.
+
+    Args:
+        basket (Basket): The basket being validated
+
+    Returns:
+        (BasketItem, Product, ProductVersion): The basket item, product, and product version associated with
+            the basket
+    """
+    # A basket is expected to have a one item (which in turn will create one Line)
+    basket_items = basket.basketitems.all()
+    if len(basket_items) == 0:
+        raise ValidationError(
+            {"items": "No items in basket. Cannot complete checkout."}
+        )
+    elif len(basket_items) > 1:
+        log.error(
+            "User %s is checking out %d items in their basket. Baskets should only have one BasketItem.",
+            basket.user.email,
+            len(basket_items),
+        )
+        raise ValidationError(
+            {
+                "items": "Something went wrong with the items being purchased. Please contact support."
+            }
+        )
+    basket_item = basket_items[0]
+    product = basket_item.product
+    if product.is_active is False or product.content_object.live is False:
+        log.error(
+            "User %s is checking out with a product in their basket that was not live (%s).",
+            basket.user.email,
+            product.content_object.text_id,
+        )
+        raise ValidationError(
+            {"items": "This item cannot be purchased. Please contact support."}
+        )
+    product_version = latest_product_version(basket_item.product)
+    return basket_item, product, product_version
+
+
+def _validate_basket_run_selections(basket, product_object):
+    """
+    Verifies that the course run selections for the given basket are valid, and returns the course run IDs of the
+    selected course runs.
+
+    Args:
+        basket (Basket): The basket being validated
+        product_object (Union([Program, CourseRun])): The program or course run being purchased
+
+    Returns:
+        set of int: The course run IDs of the selected course runs
+    """
+    course_run_selections = basket.courserunselection_set.all()
+    if len(course_run_selections) == 0:
+        raise ValidationError({"runs": "You must select a date for each course."})
+    if isinstance(product_object, Program):
+        valid_course_ids = set(
+            product_object.courses.live().values_list("id", flat=True)
+        )
+    else:
+        valid_course_ids = {product_object.course_id}
+    if len(course_run_selections) < len(valid_course_ids):
+        raise ValidationError({"runs": "You must select a date for each course."})
+    selected_course_ids = {
+        selection.run.course_id for selection in course_run_selections
+    }
+    if len(course_run_selections) > len(
+        valid_course_ids
+    ) or not selected_course_ids.issubset(valid_course_ids):
+        raise ValidationError({"runs": "Some invalid courses were selected."})
+    for selection in course_run_selections:
+        if not selection.run.is_unexpired:
+            raise ValidationError(
+                {
+                    "runs": f"Course '{selection.run.title}' is not accepting enrollments."
+                }
+            )
+    selected_course_run_ids = {
+        run_selection.run_id for run_selection in course_run_selections
+    }
+    if basket.user.courserunenrollment_set.filter(
+        run__in=selected_course_run_ids
+    ).exists():
+        raise ValidationError(
+            {"runs": "You are already enrolled in one or more of these courses."}
+        )
+    return selected_course_run_ids
+
+
+def _validate_coupon_selection(basket, product):
+    """
+    Verifies that the any coupons applied to the basket are valid, and returns the coupon version if a
+    valid coupon code was applied.
+
+    Args:
+        basket (Basket): The basket being validated
+        product (Product): The product being purchased
+
+    Returns:
+        Optional(CouponVersion): The coupon version associated with the applied coupon code (or None if no code was
+            applied to the basket)
+    """
+    coupon_selections = basket.couponselection_set
+    if coupon_selections.count() > 1:
+        log.error(
+            "User %s is checking out with multiple coupon selections. There should be one or zero.",
+            basket.user.email,
+        )
+        raise ValidationError(
+            {
+                "coupons": "Something went wrong with your coupon. Please clear it and try again."
+            }
+        )
+    coupon_selection = first_or_none(coupon_selections.all())
+    if coupon_selection is None:
+        coupon_version = None
+    else:
+        valid_product_coupon_versions = get_valid_coupon_versions(
+            product=product, user=basket.user, code=coupon_selection.coupon.coupon_code
+        )
+        coupon_version = first_or_none(valid_product_coupon_versions)
+        if coupon_version is None:
+            raise ValidationError({"coupons": "Coupon is not valid for product."})
+    return coupon_version
+
+
 # pylint: disable=too-many-branches
-def validate_basket_for_checkout(basket):
+def validate_basket_for_checkout(user):
     """
     Validate basket for checkout
 
     Args:
-        basket (Basket): A user's basket
+        user (User): The user whose basket needs validation
+
+    Returns:
+        ValidatedBasket: The validated Basket and related objects
     """
-    # Only one basket item allowed
-    try:
-        basket_item = BasketItem.objects.get(basket=basket)
-    except BasketItem.DoesNotExist:
-        raise ValidationError({"items": "No items in basket, cannot checkout"})
+    basket = Basket.objects.prefetch_related(
+        "basketitems__product__content_object",
+        "couponselection_set__coupon",
+        "courserunselection_set__run",
+    ).get(user=user)
 
-    product = basket_item.product
-    # No more than one coupon allowed
-    try:
-        coupon = Coupon.objects.get(couponselection__basket=basket)
-    except Coupon.DoesNotExist:
-        coupon = None
-
-    # Coupon must be valid for the product
-    if coupon is not None:
-        if not get_valid_coupon_versions(
-            product=product, user=basket.user, code=coupon.coupon_code
-        ):
-            raise ValidationError({"coupons": "Coupon is not valid for product"})
-
-    # Basket item runs must be linked to the basket item product
-    run_queryset = product.run_queryset
-    if (
-        CourseRunSelection.objects.filter(basket=basket)
-        .exclude(run__in=run_queryset)
-        .exists()
-    ):
-        raise ValidationError(
-            {"runs": "Some runs present in basket which are not part of product"}
-        )
-
-    # User must not already be enrolled in a course run covered by the product
-    if CourseRunEnrollment.objects.filter(
-        user=basket.user, run__in=run_queryset
-    ).exists():
-        raise ValidationError(
-            {"runs": "User is already enrolled in one or more runs in basket"}
-        )
-
-    # User must have selected one run id for each course in basket
-    runs = list(CourseRun.objects.filter(courserunselection__basket=basket))
-    courses_runs = {}
-    for run in runs:
-        if run.course_id not in courses_runs:
-            courses_runs[run.course_id] = run.id
-        elif courses_runs[run.course_id] != run.id:
-            raise ValidationError(
-                {"runs": "Two or more runs assigned for a single course"}
-            )
-
-    if (
-        len(courses_runs)
-        != Course.objects.filter(courseruns__id__in=run_queryset).distinct().count()
-    ):
-        # This is != but it could be < because the > case should be covered in previous clauses.
-        # The user can only select more courses than a product has if they are selecting runs outside
-        # of the product, which we checked above.
-        raise ValidationError({"runs": "Each course must have a course run selection"})
-
-    # All run ids must be purchasable and enrollable by user
-    for run in runs:
-        if not run.is_unexpired:
-            raise ValidationError({"runs": f"Run {run.id} is expired"})
+    basket_item, product, product_version = _validate_basket_contents(basket)
+    selected_course_run_ids = _validate_basket_run_selections(
+        basket, product.content_object
+    )
+    coupon_version = _validate_coupon_selection(basket, product)
 
     # User must have signed any data consent agreements necessary for the basket
-    data_consents = get_or_create_data_consents(basket)
-    for data_consent in data_consents:
-        if data_consent.consent_date is None:
+    data_consent_users = get_or_create_data_consent_users(basket)
+    for data_consent_user in data_consent_users:
+        if data_consent_user.consent_date is None:
             raise ValidationError(
-                {"data_consents": "The data consent agreement has not yet been signed"}
+                {"data_consents": "The data consent agreement has not yet been signed."}
             )
+
+    return ValidatedBasket(
+        basket=basket,
+        basket_item=basket_item,
+        product_version=product_version,
+        coupon_version=coupon_version,
+        run_selection_ids=selected_course_run_ids,
+        data_consent_users=data_consent_users,
+    )
 
 
 def fetch_and_serialize_unused_coupons(user):
@@ -927,7 +1023,7 @@ def fetch_and_serialize_unused_coupons(user):
     return unused_coupons
 
 
-def get_or_create_data_consents(basket):
+def get_or_create_data_consent_users(basket):
     """
     Get or create DataConsentUser objects for a basket.
 

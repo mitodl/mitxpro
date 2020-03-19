@@ -181,3 +181,23 @@ def set_request_session(request, session_dict):
         request.session[key] = value
     request.session.save()
     return request
+
+
+def update_namespace(tuple_to_update, **updates):
+    """
+    Returns a new namespace with the same properties as the input, but updated with
+    the given kwargs.
+
+    Args:
+        tuple_to_update (Union([types.namedtuple, typing.NamedTuple])): The tuple object
+        **updates: Properties to update on the tuple
+
+    Returns:
+        Union([types.namedtuple, typing.NamedTuple]): The updated namespace
+    """
+    return tuple_to_update.__class__(
+        **{  # pylint: disable=protected-access
+            **tuple_to_update._asdict(),  # pylint: disable=protected-access
+            **updates,
+        }
+    )

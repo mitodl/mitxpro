@@ -18,7 +18,7 @@ from courses.factories import (
     CourseRunEnrollmentFactory,
     ProgramFactory,
 )
-from ecommerce.api import create_unfulfilled_order, get_readable_id, make_receipt_url
+from ecommerce.api import create_unfulfilled_order, make_receipt_url
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
     CouponEligibilityFactory,
@@ -75,7 +75,7 @@ FAKE = faker.Factory.create()
 lazy = pytest.lazy_fixture
 
 pytestmark = pytest.mark.django_db
-# pylint: disable=redefined-outer-name,unused-argument,too-many-lines
+# pylint: disable=redefined-outer-name,unused-argument,too-many-lines,too-many-arguments
 
 
 def render_json(serializer):
@@ -128,13 +128,15 @@ def test_creates_order(basket_client, mocker, basket_and_coupons):
     An order is created using create_unfulfilled_order and a payload
     is generated using generate_cybersource_sa_payload
     """
-    user = basket_and_coupons.basket_item.basket.user
-    order = LineFactory.create(order__status=Order.CREATED).order
+    line = LineFactory.create(
+        order__status=Order.CREATED, product_version=basket_and_coupons.product_version
+    )
+    order = line.order
     payload = {"a": "payload"}
-    create_mock = mocker.patch(
+    create_order_mock = mocker.patch(
         "ecommerce.views.create_unfulfilled_order", autospec=True, return_value=order
     )
-    generate_mock = mocker.patch(
+    generate_payload_mock = mocker.patch(
         "ecommerce.views.generate_cybersource_sa_payload",
         autospec=True,
         return_value=payload,
@@ -148,17 +150,16 @@ def test_creates_order(basket_client, mocker, basket_and_coupons):
         "method": "POST",
     }
 
-    readable_id = get_readable_id(
-        order.lines.first().product_version.product.content_object
-    )
-    assert create_mock.call_count == 1
-    assert create_mock.call_args[0] == (user,)
-    assert generate_mock.call_count == 1
-    assert generate_mock.call_args[0] == ()
-    assert generate_mock.call_args[1] == {
+    text_id = line.product_version.product.content_object.text_id
+    assert create_order_mock.call_count == 1
+    create_order_arg = create_order_mock.call_args[0][0]
+    assert create_order_arg.basket == basket_and_coupons.basket
+    assert generate_payload_mock.call_count == 1
+    assert generate_payload_mock.call_args[0] == ()
+    assert generate_payload_mock.call_args[1] == {
         "order": order,
         "receipt_url": make_receipt_url(
-            base_url="http://testserver", readable_id=readable_id
+            base_url="http://testserver", readable_id=text_id
         ),
         "cancel_url": "http://testserver/checkout/",
     }
@@ -178,21 +179,24 @@ def test_zero_price_checkout(
     """
     settings.HUBSPOT_API_KEY = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
-    order = LineFactory.create(
-        order__status=Order.CREATED, product_version__price=0, order__purchaser=user
-    ).order
-    create_mock = mocker.patch(
+    line = LineFactory.create(
+        order__status=Order.CREATED,
+        order__purchaser=user,
+        order__total_price_paid=0,
+        product_version=basket_and_coupons.product_version,
+    )
+    order = line.order
+    create_order_mock = mocker.patch(
         "ecommerce.views.create_unfulfilled_order", autospec=True, return_value=order
     )
     enroll_user_mock = mocker.patch(
         "ecommerce.api.enroll_user_in_order_items", autospec=True
     )
     resp = basket_client.post(reverse("checkout"))
-    line = order.lines.first()
     assert str(line) == "Line for order #{}, {} (qty: {})".format(
         line.order.id, str(line.product_version), line.quantity
     )
-    readable_id = get_readable_id(line.product_version.product.content_object)
+    text_id = line.product_version.product.content_object.text_id
 
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json() == {
@@ -200,16 +204,16 @@ def test_zero_price_checkout(
             "transaction_id": "T-{}".format(order.id),
             "transaction_total": 0.0,
             "product_type": line.product_version.product.type_string,
-            "courseware_id": readable_id,
+            "courseware_id": text_id,
             "reference_number": "REF-{}".format(order.id),
         },
-        "url": f"http://testserver/dashboard/?status=purchased&purchased={quote_plus(readable_id)}",
+        "url": f"http://testserver/dashboard/?status=purchased&purchased={quote_plus(text_id)}",
         "method": "GET",
     }
 
-    assert create_mock.call_count == 1
-    assert create_mock.call_args[0] == (user,)
-
+    assert create_order_mock.call_count == 1
+    create_order_arg = create_order_mock.call_args[0][0]
+    assert create_order_arg.basket == basket_and_coupons.basket
     assert enroll_user_mock.call_count == 1
     assert enroll_user_mock.call_args[0] == (order,)
     assert BasketItem.objects.filter(basket__user=user).count() == 0
@@ -223,19 +227,20 @@ def test_zero_price_checkout(
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
 def test_order_fulfilled(
-    basket_client,
     mocker,
+    settings,
+    basket_client,
     basket_and_coupons,
+    validated_basket,
     hubspot_api_key,
     mock_hubspot_syncs,
-    settings,
 ):  # pylint:disable=too-many-arguments
     """
     Test the happy case
     """
     settings.HUBSPOT_API_KEY = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
-    order = create_unfulfilled_order(user)
+    order = create_unfulfilled_order(validated_basket)
 
     data = {}
     for _ in range(5):
@@ -262,7 +267,7 @@ def test_order_fulfilled(
     assert receipt.data == data
     enroll_user.assert_called_with(order)
 
-    assert OrderAudit.objects.count() == 2
+    assert OrderAudit.objects.count() == 1
     order_audit = OrderAudit.objects.last()
     assert order_audit.order == order
     assert dict_without_keys(
@@ -308,12 +313,13 @@ def test_missing_fields(basket_client, mocker):
 
 
 @pytest.mark.parametrize("decision", ["CANCEL", "something else"])
-def test_not_accept(mocker, basket_client, basket_and_coupons, decision):
+def test_not_accept(
+    mocker, validated_basket, basket_client, basket_and_coupons, decision
+):
     """
     If the decision is not ACCEPT then the order should be marked as failed
     """
-    user = basket_and_coupons.basket_item.basket.user
-    order = create_unfulfilled_order(user)
+    order = create_unfulfilled_order(validated_basket)
 
     data = {"req_reference_number": order.reference_number, "decision": decision}
     mocker.patch(
@@ -327,12 +333,13 @@ def test_not_accept(mocker, basket_client, basket_and_coupons, decision):
     assert order.status == Order.FAILED
 
 
-def test_ignore_duplicate_cancel(basket_client, mocker, basket_and_coupons):
+def test_ignore_duplicate_cancel(
+    mocker, validated_basket, basket_client, basket_and_coupons
+):
     """
     If the decision is CANCEL and we already have a duplicate failed order, don't change anything.
     """
-    user = basket_and_coupons.basket_item.basket.user
-    order = create_unfulfilled_order(user)
+    order = create_unfulfilled_order(validated_basket)
     order.status = Order.FAILED
     order.save()
 
@@ -352,11 +359,10 @@ def test_ignore_duplicate_cancel(basket_client, mocker, basket_and_coupons):
     [(Order.FAILED, "ERROR"), (Order.FULFILLED, "ERROR"), (Order.FULFILLED, "SUCCESS")],
 )
 def test_error_on_duplicate_order(
-    basket_client, mocker, basket_and_coupons, order_status, decision
+    mocker, validated_basket, basket_client, basket_and_coupons, order_status, decision
 ):
     """If there is a duplicate message (except for CANCEL), raise an exception"""
-    user = basket_and_coupons.basket_item.basket.user
-    order = create_unfulfilled_order(user)
+    order = create_unfulfilled_order(validated_basket)
     order.status = order_status
     order.save()
 
