@@ -25,7 +25,12 @@
                       <!-- Button : END -->
                   </td>
               </tr>
-
+              <tr>
+                <td style="padding: 0 20px 20px;">
+                    <p>If the button doesn't work, copy and paste this link into your web browser:</p>
+                    {{ base_url }}{% url 'password-reset-confirm' uid=uid token=token %}
+                </td>
+            </tr>
           </table>
       </td>
   </tr>
