@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.44.1
+--------------
+
+- choose an active course run when the current product is expired.
+- Add a text-only link in password change email
+- Add a text-only link on verification emails
+- Fix tracking of course run selections when completing orders
+- Utilizing search param in zendesk help widget
+- upgrade wagtail to 2.7.1
+- Admin: on course and program certificates, show date created and updated
+
 Version 0.44.0 (Released March 17, 2020)
 --------------
 
