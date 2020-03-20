@@ -44,58 +44,19 @@ OPENEDX_API_BASE_URL=http://docker.for.mac.localhost:18000
 OPENEDX_BASE_REDIRECT_URL=http://edx.odl.local:18000
 ```
 
-### Create Homepage
-Go to `/cms/pages/` in your local deployment and create a `Home Page` type page at the root of the site.
-Then go to `CMS Admin > Settings > Sites > (default site)` and set this page as the "Root page" of the site.
-Go back to `/cms/pages/` and move any existing pages under the new home page (only if you already have some pages in the CMS).
-Finally, delete the default Wagtail home page titled "Welcome to your new Wagtail site!"
+### Configure Wagtail (CMS)
 
-**Note:** This step should be done before using the database seed command otherwise you will have to manually move every page under the new homepage. 
+There are a few changes that must be made to the CMS for the site
+to be usable. You can apply all of those changes by running a management command:
+
+```
+docker-compose run --rm web ./manage.py configure_wagtail
+```
 
 # Optional Setup
 
 Described below are some setup steps that are not strictly necessary
 for running the app
-
-### Running the app in a notebook
-
-This repo includes a config for running a [Jupyter notebook](https://jupyter.org/) in a
-Docker container. This enables you to do in a Jupyter notebook anything you might
-otherwise do in a Django shell. To get started:
-
-- Copy the example file
-    ```bash
-    # Choose any name for the resulting .ipynb file
-    cp localdev/app.ipynb.example localdev/app.ipynb
-    ```
-- Build the `notebook` container _(for first time use, or when requirements change)_
-    ```bash
-    docker-compose -f docker-compose-notebook.yml build
-    ```
-- Run all the standard containers (`docker-compose up`)
-- In another terminal window, run the `notebook` container
-    ```bash
-    docker-compose -f docker-compose-notebook.yml run --rm --service-ports notebook
-    ```
-- Visit the running notebook server in your browser. The `notebook` container log output will
-  indicate the URL and `token` param with some output that looks like this:
-    ```
-    notebook_1  |     To access the notebook, open this file in a browser:
-    notebook_1  |         file:///home/mitodl/.local/share/jupyter/runtime/nbserver-8-open.html
-    notebook_1  |     Or copy and paste one of these URLs:
-    notebook_1  |         http://(2c19429d04d0 or 127.0.0.1):8080/?token=2566e5cbcd723e47bdb1b058398d6bb9fbf7a31397e752ea
-    ```
-  Here is a one-line command that will produce a browser-ready URL from that output. Run this in a separate terminal:
-    ```bash
-    APP_HOST="xpro.odl.local"; docker logs $(docker ps --format '{{.Names}}' | grep "_notebook_run_") | grep -E "http://(.*):8080[^ ]+\w" | tail -1 | sed -e 's/^[[:space:]]*//' | sed -e "s/(.*)/$APP_HOST/"
-    ```
-  OSX users can pipe that output to `xargs open` to open a browser window directly with the URL from that command.
-- Navigate to the `.ipynb` file that you created and click it to run the notebook
-- Execute the first block to confirm it's working properly (click inside the block
-  and press Shift+Enter)
-
-From there, you should be able to run code snippets with a live Django app just like you
-would in a Django shell.
 
 ### Running tests
 
@@ -146,13 +107,42 @@ docker-compose run --rm web ./manage.py seed_data
 docker-compose run --rm web ./manage.py delete_seed_data
 ```
 
-### Setup product index pages
+### Running the app in a notebook
 
-Seed data generated in the previous step would create pages directly under the home page. In an update to page routing along the way there has been an hierarchy change where all product pages are required to be under their respective index pages in order to render properly (`CoursePage` under `CourseIndexPage` and `ProgramPage` under `ProgramIndexPage`). The following command can setup your index pages if they are missing and/or the product pages are misplaced. This command is also designed to be idempotent and running it multiple times does not create multiple index pages.
-```
-docker-compose run --rm web ./manage.py setup_index_pages
-```
-#### To revert the change
-```
-docker-compose run --rm web ./manage.py setup_index_pages --revert
-```
+This repo includes a config for running a [Jupyter notebook](https://jupyter.org/) in a
+Docker container. This enables you to do in a Jupyter notebook anything you might
+otherwise do in a Django shell. To get started:
+
+- Copy the example file
+    ```bash
+    # Choose any name for the resulting .ipynb file
+    cp localdev/app.ipynb.example localdev/app.ipynb
+    ```
+- Build the `notebook` container _(for first time use, or when requirements change)_
+    ```bash
+    docker-compose -f docker-compose-notebook.yml build
+    ```
+- Run all the standard containers (`docker-compose up`)
+- In another terminal window, run the `notebook` container
+    ```bash
+    docker-compose -f docker-compose-notebook.yml run --rm --service-ports notebook
+    ```
+- Visit the running notebook server in your browser. The `notebook` container log output will
+  indicate the URL and `token` param with some output that looks like this:
+    ```
+    notebook_1  |     To access the notebook, open this file in a browser:
+    notebook_1  |         file:///home/mitodl/.local/share/jupyter/runtime/nbserver-8-open.html
+    notebook_1  |     Or copy and paste one of these URLs:
+    notebook_1  |         http://(2c19429d04d0 or 127.0.0.1):8080/?token=2566e5cbcd723e47bdb1b058398d6bb9fbf7a31397e752ea
+    ```
+  Here is a one-line command that will produce a browser-ready URL from that output. Run this in a separate terminal:
+    ```bash
+    APP_HOST="xpro.odl.local"; docker logs $(docker ps --format '{{.Names}}' | grep "_notebook_run_") | grep -E "http://(.*):8080[^ ]+\w" | tail -1 | sed -e 's/^[[:space:]]*//' | sed -e "s/(.*)/$APP_HOST/"
+    ```
+  OSX users can pipe that output to `xargs open` to open a browser window directly with the URL from that command.
+- Navigate to the `.ipynb` file that you created and click it to run the notebook
+- Execute the first block to confirm it's working properly (click inside the block
+  and press Shift+Enter)
+
+From there, you should be able to run code snippets with a live Django app just like you
+would in a Django shell.

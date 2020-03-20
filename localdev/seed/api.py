@@ -43,7 +43,7 @@ from cms.models import (
     CourseIndexPage,
     ProgramIndexPage,
 )
-from cms.utils import get_home_page
+from cms.api import get_home_page, configure_wagtail
 from ecommerce.api import create_coupons
 from ecommerce.models import (
     Product,
@@ -645,6 +645,9 @@ class SeedDataLoader:
         """
         Iterate over all objects described in the seed data spec, add/update them one-by-one, and return the results
         """
+        # First, make sure that Wagtail is properly set up. The seed data is only usable
+        # if Wagtail is correctly configured
+        configure_wagtail()
         self.seed_result = SeedResult()
         for seed_data_spec in self.iter_seed_data(raw_data):
             if seed_data_spec.model_cls in [Program, Course, CourseRun]:

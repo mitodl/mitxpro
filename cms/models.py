@@ -42,7 +42,7 @@ from cms.constants import (
     SIGNATORY_INDEX_SLUG,
 )
 from cms.forms import CertificatePageForm
-from cms.utils import filter_and_sort_catalog_pages
+from cms.api import filter_and_sort_catalog_pages
 from courses.constants import DEFAULT_COURSE_IMG_PATH
 from courses.models import CourseRunCertificate, ProgramCertificate
 from mitxpro.utils import now_in_utc
