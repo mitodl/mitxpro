@@ -59,6 +59,10 @@
         $(".navbar-collapse.show").removeClass("show");
         $(".navbar-toggler").addClass("collapsed");
       });
+      
+      if (SETTINGS.zendesk_config.help_widget_enabled) {
+        zE('webWidget', 'helpCenter:setSuggestions', { search: '{{page.product.title}}'});
+      }
     });
   </script>
 {% endblock %}

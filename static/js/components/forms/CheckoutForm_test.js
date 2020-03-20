@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import { mount, shallow } from "enzyme/build"
 import React from "react"
 import { assert } from "chai"
@@ -39,6 +40,10 @@ describe("CheckoutForm", () => {
     onSubmitStub = sandbox.stub()
     submitCouponStub = sandbox.stub()
     updateProductStub = sandbox.stub()
+    SETTINGS.zendesk_config = {
+      help_widget_enabled: false,
+      help_widget_key:     "fake_key"
+    }
   })
 
   afterEach(() => {
