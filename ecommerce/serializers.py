@@ -459,6 +459,12 @@ class BasketSerializer(serializers.ModelSerializer):
             product, _, program_run = get_product_from_querystring_id(
                 request_product_id
             )
+            if isinstance(_, CourseRun):
+                if _.end_date and _.end_date < now_in_utc():
+                    raise ValidationError(
+                        "We're sorry, this course or program is no longer available for enrollment."
+                    )
+
         except (ObjectDoesNotExist, MultipleObjectsReturned) as exc:
             if isinstance(exc, MultipleObjectsReturned):
                 log.error(
@@ -605,10 +611,7 @@ class BasketSerializer(serializers.ModelSerializer):
             product.run_queryset.filter(id__in=run_ids).values_list("id", "course_id")
         )
         if len(product_run_course_map) < len(run_ids):
-            missing_run_ids = set(run_ids) - set(product_run_course_map.keys())
-            raise ValidationError(
-                {"runs": f"Unable to find run(s) with id(s) {missing_run_ids}"}
-            )
+            raise ValidationError({"runs": f"Some invalid courses were selected."})
         elif len(set(product_run_course_map.values())) < len(run_ids):
             raise ValidationError({"runs": "Only one run per course can be selected"})
 

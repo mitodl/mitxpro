@@ -43,7 +43,8 @@ type State = {
   appliedInitialCoupon: boolean,
   errors: string | Object | null,
   isLoading: boolean,
-  showGenericError: boolean
+  showGenericError: boolean,
+  basketProduct: string
 }
 
 export class CheckoutPage extends React.Component<Props, State> {
@@ -51,7 +52,8 @@ export class CheckoutPage extends React.Component<Props, State> {
     appliedInitialCoupon: false,
     errors:               null,
     isLoading:            true,
-    showGenericError:     false
+    showGenericError:     false,
+    basketProduct:        ""
   }
 
   logExceptionToSentry = (
@@ -102,6 +104,7 @@ export class CheckoutPage extends React.Component<Props, State> {
       } else {
         this.setState({ showGenericError: false })
       }
+      this.setState({ basketProduct: productId })
     }
     this.setState({
       isLoading: false
@@ -110,6 +113,7 @@ export class CheckoutPage extends React.Component<Props, State> {
 
   submit = async (values: Values, actions: Actions) => {
     const { basket, updateBasket, checkout } = this.props
+    const { basketProduct } = this.state
 
     if (!basket) {
       // if there is no basket there shouldn't be any submit button rendered
@@ -117,10 +121,9 @@ export class CheckoutPage extends React.Component<Props, State> {
     }
 
     // update basket with selected runs
-    const { productId } = this.getQueryParams()
     const basketPayload = {
       items: basket.items.map(item => ({
-        product_id: productId,
+        product_id: basketProduct,
         run_ids:    Object.values(values.runs).map(runId => parseInt(runId))
       })),
       coupons:       values.couponCode ? [{ code: values.couponCode }] : [],
@@ -222,6 +225,7 @@ export class CheckoutPage extends React.Component<Props, State> {
       "runs",
       response.body.errors ? response.body.errors.runs : undefined
     )
+    this.setState({ basketProduct: productId.toString() })
   }
 
   render() {
