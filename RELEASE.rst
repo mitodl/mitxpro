@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.44.1
+Version 0.44.1 (Released March 24, 2020)
 --------------
 
 - choose an active course run when the current product is expired.
