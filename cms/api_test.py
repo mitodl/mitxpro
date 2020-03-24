@@ -1,4 +1,4 @@
-"""Tests for CMS views"""
+"""Tests for CMS API"""
 from datetime import timedelta
 
 import factory
@@ -9,7 +9,7 @@ from cms.factories import (
     ProgramPageFactory,
 )
 from cms.models import ExternalCoursePage
-from cms.utils import filter_and_sort_catalog_pages
+from cms.api import filter_and_sort_catalog_pages
 from courses.factories import CourseRunFactory
 from mitxpro.utils import now_in_utc
 
