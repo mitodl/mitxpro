@@ -20,15 +20,15 @@
 
 {% block content %}
   {% include "partials/hero.html" with action_title="Watch Now" action_url="#" %}
-  {% if page.upcoming_courseware %}
+  {% if upcoming_courseware %}
     {% pageurl catalog_page as catalog_url %}
-    {% include "partials/course-carousel.html" with page=page.upcoming_courseware button_title="View All" button_url=catalog_url %}
+    {% include "partials/course-carousel.html" with page=upcoming_courseware button_title="View All" button_url=catalog_url %}
   {% endif %}
-  {% if page.about_mit_xpro %} {% include "partials/text-video-section.html" with page=page.about_mit_xpro %} {% endif %}
-  {% if page.learning_experience %} {% include "partials/learning-techniques.html" with page=page.learning_experience %} {% endif %}
-  {% if page.testimonials %} {% include "partials/testimonial-carousel.html" with page=page.testimonials %} {% endif %}
-  {% if page.inquiry_section %} {% include "partials/for-teams.html" with page=page.inquiry_section %} {% endif %}
-  {% if page.image_carousel_section %} {% include "partials/image-carousel.html" with page=page.image_carousel_section %} {% endif %}
+  {% if about_mit_xpro %} {% include "partials/text-video-section.html" with page=about_mit_xpro %} {% endif %}
+  {% if learning_experience %} {% include "partials/learning-techniques.html" with page=learning_experience %} {% endif %}
+  {% if testimonials %} {% include "partials/testimonial-carousel.html" with page=testimonials %} {% endif %}
+  {% if inquiry_section %} {% include "partials/for-teams.html" with page=inquiry_section %} {% endif %}
+  {% if image_carousel_section %} {% include "partials/image-carousel.html" with page=image_carousel_section %} {% endif %}
 {% endblock %}
 {% block contact-us %}
     {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
