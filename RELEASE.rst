@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.44.2
+Version 0.44.2 (Released March 26, 2020)
 --------------
 
 - Reduce redundant queries on templates
