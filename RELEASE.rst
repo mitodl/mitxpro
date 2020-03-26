@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.44.2
+--------------
+
+- Reduce redundant queries on templates
+- Streamlined Wagtail configuration and seed data provisioning
+
 Version 0.44.1 (Released March 24, 2020)
 --------------
 
