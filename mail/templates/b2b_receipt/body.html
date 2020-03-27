@@ -1,70 +1,181 @@
 {% extends "email_base.html" %}
-
 {% block content %}
 <!-- 1 Column Text + Button : BEGIN -->
+{% with purchaser=receipt_data.purchaser card_type=receipt_data.card_type card_number=receipt_data.card_number coupon_code=receipt_data.coupon_code %}
   <tr>
-      <td style="background-color: #ffffff;">
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-              <tr>
-                  <td style="padding: 20px; font-weight: 600; font-family: sans-serif; font-size: 13px; line-height: 20px; color: #2a2a2a;">
-                      <h1 style="margin: 0 0 10px; font-size: 25px; line-height: 30px; color: #03152d; font-weight: bold;">Receipt</h1>
-                      <p style="margin: 0 0 10px;">
-                          <span style="color: #8a8b8c">Date:</span><br />
-                          {{ purchase_date }}
-                      </p>
-                      <p>
-                          <span style="color: #8a8b8c">Order Number:</span><br/>
-                          {{ order_reference_id }}
-                      </p>
-                      <p>
-                          <span style="color: #8a8b8c">Email Address:</span><br />
-                          {{ email }}
-                      </p>
-
-                      <table style="background-color: #f5f5f5; width: 100%;">
-                          <tr>
-                              <td style="padding: 20px; vertical-align: top" colspan="2">
-                                  <span style="color: #8a8b8c">Order Items:</span><br />
-                                  {{ title }}<br />
-                                  {% if run_date_range %}
-                                      {{ run_date_range }}<br />
-                                  {% endif %}
-                                  {{ readable_id }}<br />
-                              </td>
-                              <td style="padding: 20px; vertical-align: top">
-                                  <span style="color: #8a8b8c">Quantity</span><br />
-                                  {{ num_seats }}
-                              </td>
-                              <td style="padding: 20px; vertical-align: top">
-                                  <span style="color: #8a8b8c">Price Per</span><br />
-                                  {{ item_price }}
-                              </td>
-                              {% if contract_number %}
-                                  <td style="padding: 20px; vertical-align: top;">
-                                      <span style="color: #8a8b8c">Contract#</span><br />
-                                      {{ contract_number }}
-                                  </td>
-                              {% endif %}
-                              {% if discount %}
-                                  <td style="padding: 20px; vertical-align: top">
-                                      <span style="color: #8a8b8c">Discount</span><br />
-                                      <span style="color: #A31F34">{{ discount }}</span>
-                                  </td>
-                              {% endif %}
-                              <td style="padding: 20px; vertical-align: top">
-                                  <span style="color: #8a8b8c">Total Paid</span><br />
-                                  {{ total_price }}
-                              </td>
-                          </tr>
-                      </table>
-
-                      <p>
-                          <a href="{{ download_url }}">Download enrollment codes and view your receipt</a>
-                      </p>
+    <td style="background-color: #fff; font-family: arial, sans-serif;">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="table-layout: auto !important;">
+          <tr>
+            <td style="font-family: arial, sans-serif; font-size: 14px; line-height: 20px; color: #000000;">
+              {% if purchaser and purchaser.name %}
+                <p style="color: #000000;" >Dear {{ purchaser.name }},</p>
+              {% endif %}
+              <p style="color: #000000;" >Thank you! You have purchased one or more seats for you team.</p>
+              <p><a href="{{ download_url }}">Download enrollment codes and view receipt</a></p>
+              <p style="color: #000000;" >Below you will find a copy of you receipt:</p>
+              <h1 style="margin: 20px 0 10px; font-size: 30px; line-height: 50px; color: #03152d; font-weight: bold;">Receipt</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-size: 15px; line-height: 25px; padding: 20px 20px 0; background-color: #f5f5f5;">
+              <h1 style="margin: 0 0 10px; font-size: 18px; line-height: 23px; color: #03152d; font-weight: bold;">Order Information</h1>
+            </td>
+          </tr>
+          <tr>
+              <td style="background-color: #f5f5f5; padding: 0 20px 10px; font-family: sans-serif; font-size: 15px; line-height: 25px; color: #272727;">
+                  <table style="width: 100%; table-layout: auto !important;">
+                    <tr>
+                      <td style="width: 150px;"><span style="color: #8a8b8c">Order Date:</span></td>
+                      <td>{{ purchase_date }}</td>
+                    </tr>
+                    <tr>
+                      <td style="width: 150px;"><span style="color: #8a8b8c">Order Number:</span></td>
+                      <td>{{ order_reference_id }}</td>
+                    </tr>
+                  </table>
+              </td>
+          </tr>
+          <tr>
+            <td style="background-color: #f5f5f5; padding: 0 20px 20px; font-family: sans-serif; font-size: 15px; line-height: 25px; color: #272727;">
+                  <hr style="margin: 0 0 10px;">
+                  <table style="width: 100%;">
+                    <tr>
+                      <td style="vertical-align: top; width: 150px;"><span style="color: #8a8b8c">Order Item:</span></td>
+                      <td>
+                        {{ title }}<br />
+                      </td>
+                      <td style="vertical-align: top; text-align: right;padding: 0 10px;">
+                        <span style="color: #8a8b8c">Quantity</span><br />
+                        {{ num_seats }}
+                      </td>
+                      <td style="vertical-align: top; text-align: right;padding: 0 10px;">
+                        <span style="color: #8a8b8c">Price Per</span><br />
+                        {{ item_price }}
+                      </td>
+                      {% if contract_number %}
+                      <td style="vertical-align: top; text-align: right;;">
+                        <span style="color: #8a8b8c">Contract#</span><br />
+                        {{ contract_number }}
+                      </td>
+                      {% endif %}
+                      {% if discount %}
+                      <td style="vertical-align: top; text-align: right;padding: 0 10px;">
+                        <span style="color: #8a8b8c">Discount</span><br />
+                        {{ discount }}
+                      </td>
+                      {% endif %}
+                      <td style="vertical-align: top; text-align: right;padding: 0 0 0 10px;">
+                        <span style="color: #8a8b8c">Total Paid</span><br />
+                        {{ total_price }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; width: 150px;"><span style="color: #8a8b8c">Product Number:</span></td>
+                      <td style="vertical-align: top;" colspan="5">
+                        {{ readable_id }}
+                      </td>
+                    </tr>
+                    {% if run_date_range %}
+                    <tr>
+                      <td style="vertical-align: top;"><div style="width: 150px;"><span style="color: #8a8b8c">Dates:</span></div></td>
+                      <td style="vertical-align: top;" colspan="5">
+                            {{ run_date_range }}<br />
+                      </td>
+                    </tr>
+                    {% endif %}
+                  </table>
+              </td>
+          </tr>
+          <!-- if Cybersource purchaser information is available -->
+          {% if purchaser %}
+          <tr>
+            <td style="font-size: 15px; line-height: 25px; padding: 20px  20px 0;">
+              <h1 style="margin: 0 0 10px; font-size: 18px; line-height: 23px; color: #03152d; font-weight: bold;">Customer Information</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-size: 15px; line-height: 25px; padding: 0 20px 20px;">
+              <table style="width: 100%; table-layout: auto !important">
+                <tr>
+                  <td style="width: 150px;">
+                    <span style="color: #8a8b8c">Name:</span>
                   </td>
-              </tr>
-          </table>
-      </td>
+                  <td style="vertical-align: top;">
+                    {{ purchaser.name }}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="width: 150px;">
+                    <span style="color: #8a8b8c">Email Address:</span>
+                  </td>
+                  <td style="vertical-align: top;">
+                    {{ email }}
+                  </td>
+                </tr>
+                <!-- Cybersource address_line1 is mandatory but not the address_line2 -->
+                {% if purchaser.street_address_1 %}
+                <tr>
+                  <td style="width: 150px; vertical-align: top;">
+                    <span style="color: #8a8b8c">Address:</span>
+                  </td>
+                  <td style="vertical-align: top;">
+                    <div> {{ purchaser.street_address_1 }} </div>
+                    <div> {{ purchaser.street_address_2 }} </div>
+                    <div>
+                        {{ purchaser.city}}, {{ purchaser.state}} {{ purchaser.postal_code}}
+                    </div>
+                    <div>
+                        {{ purchaser.country }}
+                    </div>
+                  </td>
+                </tr>
+                {% endif %}
+              </table>
+            </td>
+          </tr>
+          {% endif %}
+          {% if card_number and card_type or coupon_code %}
+          <tr>
+            <td style="font-size: 15px; line-height: 25px; padding: 20px 20px 0; background-color: #f5f5f5;">
+              <h1 style="margin: 0 0 10px; font-size: 18px; line-height: 23px; color: #03152d; font-weight: bold;">Payment Information</h1>
+            </td>
+          </tr>
+          <tr>
+              <td style="font-size: 15px; line-height: 25px; padding: 0 20px 20px; background-color: #f5f5f5;">
+                <table style="width: 100%;">
+                    {% if card_number and card_type %}
+                    <tr>
+                        <td style="width: 150px; vertical-align: top;">
+                            <span style="color: #8a8b8c">Payment Method:</span>
+                        </td>
+                        <td style="vertical-align: bottom">
+                            {{ card_type }} | {{ card_number }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if coupon_code %}
+                    <tr>
+                        <td style="width: 150px; vertical-align: top;">
+                            <span style="color: #8a8b8c">Discount Code:</span>
+                        </td>
+                        <td style="vertical-align: top">
+                            {{ coupon_code }}
+                        </td>
+                    </tr>
+                    {% endif %}
+              </table>
+            </td>
+          </tr>
+          {% endif %}
+          <tr>
+            <td style="padding: 20px; text-align: center; font-size: 11px; line-height: 12px;">
+              <p style="margin: 0">MIT Open Learning, 600 Technology Square, 2nd Floor, Cambridge, MA 02139</p>
+              <p style="margin: 0;">&copy; 2019 {{ site_name }}, All Rights Reserved. <a href="{{ base_url }}/terms-of-service" style="color: #03152d; text-decoration: underline;">Terms of Service</a> and <a href="{{ base_url }}/privacy-policy" style="color: #03152d; text-decoration: underline;">Privacy Policy</a></p>
+            </td>
+          </tr>
+      </table>
+    </td>
   </tr>
+  {% endwith %}
 <!-- 1 Column Text + Button : END -->
 {% endblock %}
