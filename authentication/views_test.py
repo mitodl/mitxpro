@@ -97,6 +97,12 @@ def mock_email_send(mocker):
 
 
 @contextmanager
+def noop():
+    """A no-op context manager"""
+    yield
+
+
+@contextmanager
 def export_check_response(response_name):
     """Context manager for configuring export check responses"""
     with override_settings(
@@ -411,26 +417,34 @@ class AuthStateMachine(RuleBasedStateMachine):
             },
         )
 
-    @rule(auth_state=consumes(LoginPasswordAuthStates))
-    def login_password_user_inactive(self, auth_state):
+    @rule(
+        auth_state=consumes(LoginPasswordAuthStates),
+        verify_exports=st.sampled_from([True, False]),
+    )
+    def login_password_user_inactive(self, auth_state, verify_exports):
         """Login for an inactive user"""
         self.user.is_active = False
         self.user.save()
 
-        assert_api_call(
-            self.client,
-            "psa-login-password",
-            {
-                "flow": auth_state["flow"],
-                "partial_token": auth_state["partial_token"],
-                "password": self.password,
-            },
-            {
-                "flow": auth_state["flow"],
-                "partial_token": None,
-                "state": SocialAuthState.STATE_INACTIVE,
-            },
-        )
+        cm = export_check_response("100_success") if verify_exports else noop()
+
+        with cm:
+            assert_api_call(
+                self.client,
+                "psa-login-password",
+                {
+                    "flow": auth_state["flow"],
+                    "partial_token": auth_state["partial_token"],
+                    "password": self.password,
+                },
+                {
+                    "flow": auth_state["flow"],
+                    "redirect_url": NEXT_URL,
+                    "partial_token": None,
+                    "state": SocialAuthState.STATE_SUCCESS,
+                },
+                expect_authenticated=True,
+            )
 
     @rule(auth_state=consumes(LoginPasswordAuthStates))
     def login_password_exports_temporary_error(self, auth_state):
