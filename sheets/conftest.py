@@ -87,4 +87,6 @@ def coupon_req_row(base_data):  # pylint: disable=redefined-outer-name
         expiration=datetime(2020, 2, 2, 2, 2, 2, tzinfo=pytz.UTC),
         date_processed=False,
         error=None,
+        skip_row=False,
+        requester="email@example.com",
     )

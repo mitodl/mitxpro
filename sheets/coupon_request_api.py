@@ -17,6 +17,7 @@ from sheets.api import (
     share_drive_file_with_emails,
     create_or_renew_sheet_file_watch,
 )
+from sheets.constants import GOOGLE_API_TRUE_VAL
 from sheets.exceptions import (
     SheetOutOfSyncException,
     SheetCouponCreationException,
@@ -90,7 +91,8 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
         expiration,
         date_processed,
         error,
-        requester=None,
+        skip_row,
+        requester,
     ):  # pylint: disable=too-many-arguments
         self.row_index = row_index
         self.purchase_order_id = purchase_order_id
@@ -102,6 +104,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
         self.expiration = expiration
         self.date_processed = date_processed
         self.error = error
+        self.skip_row = skip_row
         self.requester = requester
 
     @classmethod
@@ -148,6 +151,10 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
                 error=item_at_index_or_none(
                     raw_row_data, request_sheet_metadata.ERROR_COL
                 ),
+                skip_row=item_at_index_or_none(
+                    raw_row_data, request_sheet_metadata.SKIP_ROW_COL
+                )
+                == GOOGLE_API_TRUE_VAL,
             )
         except Exception as exc:
             raise SheetRowParsingException(str(exc)) from exc
@@ -347,6 +354,11 @@ class CouponRequestHandler:
             enumerated_data_rows
         )
         for row_index, row_data in valid_enumerated_data_rows:
+            if (
+                item_at_index_or_none(row_data, request_sheet_metadata.SKIP_ROW_COL)
+                == GOOGLE_API_TRUE_VAL
+            ):
+                continue
             try:
                 coupon_gen_request, coupon_req_row, ignored = self.parse_row_and_create_coupons(
                     row_index, row_data
@@ -404,7 +416,7 @@ class CouponRequestHandler:
                 )
             else:
                 # We only need to report on ignored rows if the row has some error text.
-                # Rows that have already been processed are also be ignored, but that is a normal
+                # Rows that have already been processed are also ignored, but that is a normal
                 # and unremarkable state that doesn't need to be tracked.
                 if ignored and coupon_req_row.error:
                     ignored_requests.append(
