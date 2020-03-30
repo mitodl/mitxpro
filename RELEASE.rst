@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.45.0
+Version 0.45.0 (Released March 30, 2020)
 --------------
 
 - Fixed login for users who passed exports but were never activated
