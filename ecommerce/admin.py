@@ -422,6 +422,10 @@ class DataConsentUserInline(admin.StackedInline):
     extra = 1
     show_change_link = True
 
+    def get_queryset(self, request):
+        """Overrides base method to improve performance"""
+        return super().get_queryset(request).select_related("user", "agreement")
+
 
 class DataConsentAgreementAdmin(admin.ModelAdmin):
     """Admin for DataConsentAgreement"""
