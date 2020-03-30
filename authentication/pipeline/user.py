@@ -217,7 +217,7 @@ def activate_user(
         backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
         user (User): the current user
     """
-    if user.is_active or not is_new:
+    if user.is_active:
         return {}
 
     export_inquiry = compliance_api.get_latest_exports_inquiry(user)

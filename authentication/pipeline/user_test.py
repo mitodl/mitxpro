@@ -506,7 +506,7 @@ def test_activate_user(
 
     assert user_actions.activate_user(None, None, user=user, is_new=is_new) == {}
 
-    if not user.is_active and is_new:
+    if not user.is_active:
         # only if the user is inactive and just registered
         assert user.is_active is expected
 
