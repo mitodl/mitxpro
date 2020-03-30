@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.45.0
+--------------
+
+- Fixed login for users who passed exports but were never activated
+- Optimize N+1 queries on admin dataconsentagreement page
+
 Version 0.44.2 (Released March 26, 2020)
 --------------
 
