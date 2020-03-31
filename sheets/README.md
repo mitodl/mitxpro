@@ -4,16 +4,16 @@
 1. [What Is This?](#what-is-this)
 1. [How It Works](#how-it-works)
 1. [Types of Sheets](#types-of-sheets)
-1. [Sheets Management](#sheets-management)
+1. [Sheet Basics](#sheet-basics)
+1. [Handling Request Sheet Errors](#handling-request-sheet-errors)
+1. [Handling Assignment Sheet Errors](#handling-assignment-sheet-errors)
 1. [Development Setup](#development-setup)
 
 ## What Is This?
 
-We've had a few customer service-related use cases that we have needed to support. One option in terms of implementation
-was to create several custom web UIs in xPro and give user access to all who needed it (CS representatives, finance 
-team members, etc.) This had the potential to become a persistent headache for developers, so we decided to support 
-these use cases through UIs that are very familiar to most users regardless of technical expertise: Google Sheets and
-Google Forms. Using various Google Drive and Sheets APIs, the following is now possible: 
+Rather than support web UIs for certain internal Customer Support and Finance tasks, we chose to support these tasks  
+through UIs that are already very familiar to these teams: Google Sheets and Google Forms. 
+Using various Google Drive and Sheets APIs, the following is now possible: 
 
 1. CS/finance users can make various requests (e.g.: enrollment code creation/assignment, enrollment deferrals) by filling 
   out a Google Form or entering data into Google Sheets.
@@ -28,11 +28,11 @@ The basic workflow for most flavors of xPro sheets is roughly as follows:
 be done, and it is automatically added to a form responses worksheet within a relevant spreadsheet.
     - That submission also appears in the main worksheet within the spreadsheet automatically via a query.
 1. In response to the change in the spreadsheet, Google sends a file watch request to an endpoint in our app, which 
-  indicates to us that the spreadsheet has been changed, so we may have some new requests to handle.
-1. Our app scans the main worksheet of the spreadsheet for new or updated rows and takes the appropriate action if the
+  indicates to us that the spreadsheet has been changed, so we may have some new/updated requests to handle.
+1. Our app scans the main worksheet of the spreadsheet for new/updated rows and takes the appropriate action if the
   data is all valid (e.g.: issuing a refund, creating new enrollment codes, etc.)
 1. If a request was completed for some row, or if an error occurred, our app updates certain columns in the 
-  main worksheet to indicate the status of that request.  
+  main worksheet to indicate the status of that request.
 
 ## Types of Sheets
 
@@ -44,28 +44,50 @@ Right now there are three sheet types:
     1. Refund Requests
     1. Deferral Requests
 
-#### Enrollment Code Request Sheet & Assignment Sheets
+New requests for the "request"-type sheets are submitted via Google Form:
+
+1. [Enrollment Code Request form](https://docs.google.com/forms/d/1XfV5ppOYCFHd2Z1B1uL75C-ChgytHfkTD8YOSQM0vFM/edit) 
+1. [Refund Request form](https://docs.google.com/forms/d/1n-TYFd91zKkSkjjudoACMId-mfUeAQ-rGMCzTKqPVFQ/edit)
+1. [Deferral Request form](https://docs.google.com/forms/d/1lEbKGfLxMwh0Drj-CQJo5QXU2evEqxEP5iFGB4qNrw8/edit)
+
+#### Enrollment Code Request sheet
 
 _Details to be filled in later..._
 
-#### Enrollment Change Requests (Refunds, Deferrals)
+#### Enrollment Code Assignment sheets
 
 _Details to be filled in later..._
 
-## Sheets Management
+#### Change of Enrollment Request sheet (Refunds, Deferrals)
 
-One cardinal rule to follow for all of the "request"-type sheets: **Do not edit the main worksheet directly, unless the 
-columns exist specifically for user input**. Examples of columns that are intended for user input are the Finance 
-columns in the Change of Enrollment sheets.
+_Details to be filled in later..._
+
+## Sheet Basics
 
 The terms "main worksheet" and "form responses worksheet" are used below. Here are some
-screenshots for explanation.
+screenshots to explain what those terms are referring to:
 
 **Enrollment Code Request worksheet tabs:**
 ![Enrollment Code Request worksheet tabs](images/enrollment-code-worksheet-tabs.png)
 
 **Change of Enrollment Request worksheet tabs:**
 ![Change of Enrollment Request worksheet tabs](images/change-of-enrollment-worksheet-tabs.png)
+
+Some basic details for reading and interacting with these spreadsheets:
+
+1. One cardinal rule to follow for all of the "request"-type sheets: **Do not edit the main worksheet directly, unless the 
+  columns exist specifically for user input**. Examples of columns that are intended for user input are the Finance 
+  columns in the Change of Enrollment sheets.
+1. If a row in any spreadsheet was successfully processed by our app, there should be a timestamp in a column called 
+  "Date Processed"/"Completed Date"/etc., or a success status in the "Status" column.
+1. If there is an error in some row (e.g.: a typo), there should be a message in the "Errors" column, or a 
+  failure status in the "Status" column. See below for instructions on how to respond to errors in 
+  [request sheets](#handling-request-sheet-errors) and in [assignment sheets](#handling-assignment-sheet-errors).
+
+## Handling Request Sheet Errors
+
+As stated above, errors cannot be fixed by directly updating the main worksheet in these spreadsheets. You have
+two options for addressing errors: editing the submitted form data, or setting the row to "ignored".
 
 #### Editing Rows
 
@@ -95,9 +117,11 @@ column of that row in the Form Responses worksheet.**
 Ignored rows will be greyed out on the main worksheet, and the app will automatically skip over all request rows that 
 are set to ignored. 
 
-#### Interpreting the rows
+## Handling Assignment Sheet Errors
 
-_Details to be filled in later..._
+Only the "email" column of an assignment sheet can be manually edited, and those cells should only be
+edited if the "status" column of that row has (a) no value, indicating that it has not yet been processed,
+or (b) an error/failure status, which usually indicates that the email was invalid.
 
 ## Development Setup
 
