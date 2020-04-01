@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.46.0
+--------------
+
+- B2B bulk receipt email update
+
 Version 0.45.0 (Released March 30, 2020)
 --------------
 
