@@ -180,6 +180,7 @@ def test_send_b2b_receipt_email(mocker, settings, has_discount):
             "download_url": download_url,
             "email": order.email,
             "order_reference_id": order.reference_number,
+            "receipt_data": {},
         },
     )
     patched_mail_api.message_for_recipient.assert_called_once_with(

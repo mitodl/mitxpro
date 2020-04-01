@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 
-from b2b_ecommerce.models import B2BCoupon, B2BCouponRedemption, B2BOrder
+from b2b_ecommerce.models import B2BCoupon, B2BCouponRedemption, B2BOrder, B2BReceipt
 from mitxpro.admin import AuditableModelAdmin
 
 
@@ -18,12 +18,19 @@ class B2BCouponRedemptionAdmin(admin.ModelAdmin):
     model = B2BCouponRedemption
 
 
+class B2BReceiptAdmin(admin.ModelAdmin):
+    """Admin for B2BReceipt"""
+
+    model = B2BReceipt
+
+
 class B2BOrderAdmin(AuditableModelAdmin):
     """Admin for B2BOrder"""
 
     model = B2BOrder
 
 
+admin.site.register(B2BReceipt, B2BReceiptAdmin)
 admin.site.register(B2BCoupon, B2BCouponAdmin)
 admin.site.register(B2BOrder, B2BOrderAdmin)
 admin.site.register(B2BCouponRedemption, B2BCouponRedemptionAdmin)

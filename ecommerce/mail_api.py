@@ -15,13 +15,56 @@ from mail.constants import (
     EMAIL_COURSE_RUN_UNENROLLMENT,
     EMAIL_PRODUCT_ORDER_RECEIPT,
 )
-from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG
+from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG, CYBERSOURCE_CARD_TYPES
 from ecommerce.utils import make_checkout_url
 from mitxpro.utils import format_price
 
 log = logging.getLogger()
 ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
 EMAIL_DATE_FORMAT = "%b %-d, %Y"
+
+
+def get_b2b_receipt_data(order):
+    """
+    Get receipt information if it exists
+
+    Args:
+        Order (object): An order instance.
+
+    Returns:
+        A dict of receipt data, in case of Cybersource purchase.
+    """
+    receipt = order.b2breceipt_set.order_by("-created_on").first()
+    receipt_data = {}
+    if receipt:
+        country = pycountry.countries.get(
+            alpha_2=receipt.data.get("req_bill_to_address_country")
+        )
+        receipt_data = {
+            "card_number": receipt.data.get("req_card_number"),
+            "card_type": CYBERSOURCE_CARD_TYPES.get(receipt.data.get("req_card_type")),
+            "purchaser": {
+                "name": " ".join(
+                    [
+                        receipt.data.get("req_bill_to_forename"),
+                        receipt.data.get("req_bill_to_surname"),
+                    ]
+                ),
+                "email": receipt.data.get("req_bill_to_email"),
+                "street_address_1": receipt.data.get("req_bill_to_address_line1", ""),
+                "street_address_2": receipt.data.get("req_bill_to_address_line2", ""),
+                "state": receipt.data.get("req_bill_to_address_state", ""),
+                "postal_code": receipt.data.get("req_bill_to_address_postal_code", ""),
+                "city": receipt.data.get("req_bill_to_address_city", ""),
+                "country": country.name if country else "",
+            },
+        }
+
+    coupon_redemption = order.b2bcouponredemption_set.first()
+    if coupon_redemption:
+        receipt_data["coupon_code"] = coupon_redemption.coupon.coupon_code
+
+    return receipt_data
 
 
 def get_bulk_enroll_message_data(bulk_assignment_id, recipient, product_coupon):
@@ -193,6 +236,7 @@ def send_b2b_receipt_email(order):
                         "download_url": download_url,
                         "email": order.email,
                         "order_reference_id": order.reference_number,
+                        "receipt_data": get_b2b_receipt_data(order),
                     },
                 ),
                 EMAIL_B2B_RECEIPT,
