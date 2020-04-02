@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.46.1
+--------------
+
+- Used dynamic image loading for select CMS pages
+- Added support for ignored rows in a coupon request spreadsheet
+
 Version 0.46.0 (Released April 02, 2020)
 --------------
 
