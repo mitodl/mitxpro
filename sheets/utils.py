@@ -126,6 +126,7 @@ class CouponRequestSheetMetadata(SingletonSheetMetadata):
     COUPON_NAME_COL_INDEX = 1
     PROCESSED_COL = settings.SHEETS_REQ_PROCESSED_COL
     ERROR_COL = settings.SHEETS_REQ_ERROR_COL
+    SKIP_ROW_COL = ERROR_COL + 1
 
     def __init__(self):
         self.sheet_type = SHEET_TYPE_COUPON_REQUEST
