@@ -27,7 +27,7 @@
                 <div class="certificate-logo">
                     <a href="https://web.mit.edu/" class="mit"></a>
                     <a href="/" class="xpro"></a>
-                    <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="">
+                    <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
                 </div>
             </div>
         </div>
@@ -71,11 +71,11 @@
             <div class="certificate">
                 <div class="certificate-holder">
                     <div class="certificate-logo">
-                        <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="">
+                        <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
                     </div>
                     <span class="institute-text">Massachusetts Institute of Technology</span>
                     <div class="institute-logo">
-                        <img src="{% static 'images/certificates/certificate-logo.png' %}" alt="">
+                        <img src="{% static 'images/certificates/certificate-logo.png' %}" alt="MIT">
                     </div>
                     <span class="certify-text">This is to certify that</span>
                     <span class="certify-name">{{ learner_name }}</span>
@@ -86,10 +86,9 @@
                     {% endif %}
                     <div class="row justify-content-center certify-by-row">
                         {% for signatory in page.signatory_pages %}
-
                             <div class="col-sm-4 col-md-3 certify-by">
                                 <div class="signature-area">
-                                    {% image signatory.signature_image max-150x50 %}
+                                    <img src="{% image_url signatory.signature_image "max-150x50" %}" alt="{{ signatory.name }} signature" />
                                 </div>
                                 <span class="title">{{ signatory.name }}</span>
                                 {% if signatory.title_1 %}
@@ -106,7 +105,10 @@
                     </div>
                     <div class="row justify-content-center validation-link">
                         <div class="col">
-                        <p><strong>Valid Certificate ID:</strong> <a href="{{ request.build_absolute_uri }}" target="_blank">{{ uuid }}</a>
+                          <p>
+                              <strong>Valid Certificate ID:</strong>
+                              <a href="{{ request.build_absolute_uri }}" target="_blank">{{ uuid }}</a>
+                          </p>
                         </div>
                     </div>
                 </div>
@@ -118,7 +120,7 @@
             <div class="certificate-logo">
                 <a href="https://web.mit.edu/" class="mit"></a>
                 <a href="/" class="xpro"></a>
-                <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="">
+                <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
             </div>
             <div class="cer-footer-info">
                 <ul class="links">

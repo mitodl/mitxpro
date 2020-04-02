@@ -11,8 +11,7 @@
       {% for member in page.members %}
         <div class="slide">
           <div class="slide-holder">
-            {% image member.value.image fill-300x300 as faculty_image %}
-            <img src="{{ faculty_image.url }}" alt="{{ member.value.name }}">
+            <img src="{% image_url member.value.image "fill-300x300" %}" alt="{{ member.value.name }}">
             <h2>{{ member.value.name }}</h2>
             <div class="text-holder">
               {{ member.value.description|richtext }}
