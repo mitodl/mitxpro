@@ -835,8 +835,8 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
     def link(self):
         """
         Get the link at which this certificate will be served
-        Format: /certificates/<uuid>/
-        Example: /certificates/93ebd74e-5f88-4b47-bb09-30a6d575328f/
+        Format: /certificate/<uuid>/
+        Example: /certificate/93ebd74e-5f88-4b47-bb09-30a6d575328f/
         """
         return "/certificate/{}/".format(str(self.uuid))
 
@@ -878,8 +878,8 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
     def link(self):
         """
         Get the link at which this certificate will be served
-        Format: /certificates/program/<uuid>/
-        Example: /certificates/program/93ebd74e-5f88-4b47-bb09-30a6d575328f/
+        Format: /certificate/program/<uuid>/
+        Example: /certificate/program/93ebd74e-5f88-4b47-bb09-30a6d575328f/
         """
         return "/certificate/program/{}/".format(str(self.uuid))
 

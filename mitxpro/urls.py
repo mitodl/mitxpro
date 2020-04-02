@@ -23,6 +23,7 @@ from oauth2_provider.urls import base_urlpatterns
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.core import urls as wagtail_urls
+from wagtail.images.views.serve import ServeView
 
 from mitxpro.views import (
     index,
@@ -80,6 +81,13 @@ urlpatterns = [
     re_path(r"^receipt/(?P<pk>\d+)/", index, name="order-receipt"),
     re_path(r"^account-settings/", index, name="account-settings"),
     # Wagtail
+    # NOTE: This route enables dynamic Wagtail image loading. It comes directly from the Wagtail docs:
+    #       https://docs.wagtail.io/en/v2.7/advanced_topics/images/image_serve_view.html#setup
+    re_path(
+        r"^images/([^/]*)/(\d*)/([^/]*)/[^/]*$",
+        ServeView.as_view(),
+        name="wagtailimages_serve",
+    ),
     re_path(
         r"^cms/login", cms_signin_redirect_to_site_signin, name="wagtailadmin_login"
     ),

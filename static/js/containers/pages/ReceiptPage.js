@@ -106,7 +106,10 @@ export class ReceiptPage extends React.Component<Props> {
                     </a>
                   </div>
                   <div className="rec-logo">
-                    <img src="/static/images/mitx-pro-logo.png" alt="" />
+                    <img
+                      src="/static/images/mitx-pro-logo.png"
+                      alt="MIT xPro"
+                    />
                   </div>
                   <h1>Receipt</h1>
                   <div className="section-info gray">
