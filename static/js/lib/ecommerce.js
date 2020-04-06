@@ -9,7 +9,8 @@ import type {
   CouponSelection,
   ProductDetail,
   ProductMap,
-  BulkCouponPayment
+  BulkCouponPayment,
+  SimpleProductDetail
 } from "../flow/ecommerceTypes"
 import {
   COUPON_TYPE_PROMO,
@@ -102,15 +103,28 @@ export const formatPrice = (price: ?string | number | Decimal): string => {
   }
 }
 
-const formatDateForRun = (dateString: ?string) =>
+export const formatCoursewareDate = (dateString: ?string) =>
   dateString ? moment(dateString).format("ll") : "?"
 
 export const formatRunTitle = (run: ?CourseRun) =>
   run
-    ? `${formatDateForRun(run.start_date)} - ${formatDateForRun(run.end_date)}`
+    ? `${formatCoursewareDate(run.start_date)} - ${formatCoursewareDate(
+      run.end_date
+    )}`
     : ""
 
 export const isPromo = equals(COUPON_TYPE_PROMO)
+
+export const findProductById = <T: ProductDetail | SimpleProductDetail>(
+  products: Array<T>,
+  id: number | string
+): ?T => {
+  if (isNaN(id)) {
+    return products.find(product => product.latest_version.readable_id === id)
+  } else {
+    return products.find(product => product.id === parseInt(id))
+  }
+}
 
 export const findRunInProduct = (
   product: ProductDetail

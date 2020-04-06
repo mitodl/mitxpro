@@ -20,7 +20,7 @@ from b2b_ecommerce.api import (
 from b2b_ecommerce.models import B2BCoupon, B2BCouponRedemption, B2BOrder, B2BReceipt
 from ecommerce.utils import make_checkout_url
 from ecommerce.models import ProductVersion, Coupon
-from ecommerce.serializers import ProductVersionSerializer
+from ecommerce.serializers import FullProductVersionSerializer
 from ecommerce.constants import CYBERSOURCE_CARD_TYPES
 from mitxpro.utils import make_csv_http_response
 
@@ -135,7 +135,7 @@ class B2BOrderStatusView(APIView):
                 "total_price": str(order.total_price),
                 "item_price": str(order.per_item_price),
                 "discount": str(order.discount) if order.discount is not None else None,
-                "product_version": ProductVersionSerializer(
+                "product_version": FullProductVersionSerializer(
                     order.product_version, context={"all_runs": True}
                 ).data,
                 "email": order.email,

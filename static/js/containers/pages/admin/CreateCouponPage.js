@@ -128,7 +128,7 @@ const createCoupon = (coupon: Object) =>
   mutateAsync(queries.ecommerce.couponsMutation(coupon))
 
 const mapPropsToConfig = () => [
-  queries.ecommerce.productsQuery(),
+  queries.ecommerce.fullProductsQuery(),
   queries.ecommerce.companiesQuery()
 ]
 

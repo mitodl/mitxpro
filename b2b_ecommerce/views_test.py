@@ -15,7 +15,7 @@ from b2b_ecommerce.factories import (
 from b2b_ecommerce.models import B2BCoupon, B2BOrder, B2BCouponRedemption
 from ecommerce.utils import make_checkout_url
 from ecommerce.factories import CouponVersionFactory
-from ecommerce.serializers import ProductVersionSerializer
+from ecommerce.serializers import FullProductVersionSerializer
 from mitxpro.utils import dict_without_keys
 from mitxpro.test_utils import assert_drf_json_equal
 
@@ -257,7 +257,7 @@ def test_order_status(client):
         {
             "email": order.email,
             "num_seats": order.num_seats,
-            "product_version": ProductVersionSerializer(
+            "product_version": FullProductVersionSerializer(
                 order.product_version, context={"all_runs": True}
             ).data,
             "item_price": str(order.per_item_price),

@@ -2,7 +2,7 @@
 import json
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urljoin
 import operator as op
 
 import pytz
@@ -56,6 +56,7 @@ from ecommerce.serializers import (
     CurrentCouponPaymentSerializer,
     DataConsentUserSerializer,
     BaseProductSerializer,
+    ProductChoiceSerializer,
 )
 from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.test_utils import (
@@ -1258,7 +1259,7 @@ def test_products_viewset_performance(
     user_drf_client, coupon_product_ids, django_assert_num_queries
 ):
     """ Test that the ProductViewSet returns the expected number of queries hit. """
-    with django_assert_num_queries(29):
+    with django_assert_num_queries(27):
         response = user_drf_client.get(
             reverse("products_api-detail", kwargs={"pk": coupon_product_ids[0]})
         )
@@ -1275,6 +1276,23 @@ def test_products_viewset_post_forbidden(admin_drf_client):
     """ Test that post requests to the products API viewset is not allowed"""
     response = admin_drf_client.post(reverse("products_api-list"), data={})
     assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
+
+
+def test_products_viewset_nested_param(user_drf_client, coupon_product_ids):
+    """ Test that the ProductViewSet returns details for a product """
+    response = user_drf_client.get(
+        urljoin(reverse("products_api-list"), "?nested=false")
+    )
+    assert response.status_code == status.HTTP_200_OK
+    products = response.json()
+    assert {product.get("id") for product in products} == set(coupon_product_ids)
+    for product in products:
+        assert_drf_json_equal(
+            product,
+            ProductChoiceSerializer(
+                instance=Product.objects.get(id=product.get("id"))
+            ).data,
+        )
 
 
 def test_companies_viewset_list(user_drf_client):

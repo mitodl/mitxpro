@@ -10,12 +10,15 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
 from courses.models import Course, CourseRun, Program, CourseRunEnrollment
-from courses.constants import DEFAULT_COURSE_IMG_PATH
+from courses.constants import (
+    DEFAULT_COURSE_IMG_PATH,
+    CONTENT_TYPE_MODEL_COURSERUN,
+    CONTENT_TYPE_MODEL_PROGRAM,
+)
 from ecommerce import models
 from ecommerce.api import (
     best_coupon_for_product,
     create_coupons,
-    get_readable_id,
     get_valid_coupon_versions,
     latest_coupon_version,
     latest_product_version,
@@ -40,46 +43,58 @@ class CompanySerializer(serializers.ModelSerializer):
         model = models.Company
 
 
-class ProductVersionSummarySerializer(serializers.ModelSerializer):
-    """ ProductVersion serializer for fetching summary info for receipts """
+class BaseProductVersionSerializer(serializers.ModelSerializer):
+    """ProductVersion serializer for fetching summary info for receipts"""
 
     content_title = serializers.SerializerMethodField()
     readable_id = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
-
-    class Meta:
-        fields = ["price", "content_title", "readable_id"]
-        model = models.ProductVersion
 
     def get_content_title(self, instance):
         """Return the title of the program or course run"""
         return instance.product.content_object.title
 
     def get_readable_id(self, instance):
-        """Return the readable_id of the program or course run"""
-        return get_readable_id(instance.product.content_object)
+        """Return the text id of the program or course run"""
+        return instance.product.content_object.text_id
 
     def get_price(self, instance):
-        """The price does not need decimal points here"""
+        """Return the product version price"""
         return str(instance.price)
 
+    class Meta:
+        fields = ["price", "content_title", "readable_id"]
+        model = models.ProductVersion
 
-class ProductVersionSerializer(serializers.ModelSerializer):
-    """ ProductVersion serializer for viewing/updating items in basket """
 
-    type = serializers.SerializerMethodField()
+class ProductVersionSerializer(BaseProductVersionSerializer):
+    """ProductVersion serializer"""
+
     object_id = serializers.IntegerField(source="product.object_id", read_only=True)
     product_id = serializers.IntegerField(source="product.id", read_only=True)
-    run_tag = serializers.SerializerMethodField()
-    courses = serializers.SerializerMethodField()
-    thumbnail_url = serializers.SerializerMethodField()
-    content_title = serializers.SerializerMethodField()
-    readable_id = serializers.SerializerMethodField()
-    start_date = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField()
 
     def get_type(self, instance):
-        """ Return the product version type """
+        """Return the content type of the product version's product"""
         return instance.product.content_type.model
+
+    class Meta:
+        fields = BaseProductVersionSerializer.Meta.fields + [
+            "id",
+            "object_id",
+            "product_id",
+            "type",
+        ]
+        model = models.ProductVersion
+
+
+class FullProductVersionSerializer(ProductVersionSerializer):
+    """ProductVersion serializer for viewing/updating items in basket"""
+
+    start_date = serializers.SerializerMethodField()
+    thumbnail_url = serializers.SerializerMethodField()
+    run_tag = serializers.SerializerMethodField()
+    courses = serializers.SerializerMethodField()
 
     def get_courses(self, instance):
         """ Return the courses in the product """
@@ -118,14 +133,6 @@ class ProductVersionSerializer(serializers.ModelSerializer):
             raise ValueError(f"Unexpected product {content_object}")
         return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
-    def get_content_title(self, instance):
-        """Return the title of the program or course run"""
-        return instance.product.content_object.title
-
-    def get_readable_id(self, instance):
-        """Return the readable_id of the program or course run"""
-        return instance.product.content_object.text_id
-
     def get_run_tag(self, instance):
         """Return the run_tag of the program run or course run"""
         content_object = instance.product.content_object
@@ -149,66 +156,107 @@ class ProductVersionSerializer(serializers.ModelSerializer):
         return None
 
     class Meta:
-        fields = [
-            "id",
-            "price",
-            "description",
-            "content_title",
-            "type",
-            "courses",
-            "thumbnail_url",
-            "object_id",
-            "product_id",
-            "readable_id",
-            "run_tag",
-            "created_on",
+        fields = ProductVersionSerializer.Meta.fields + [
             "start_date",
+            "thumbnail_url",
+            "run_tag",
+            "courses",
+            "description",
+            "created_on",
         ]
         model = models.ProductVersion
 
 
 class BaseProductSerializer(serializers.ModelSerializer):
-    """ Basic Product Serializer """
+    """Basic Product Serializer"""
 
+    title = serializers.SerializerMethodField()
     product_type = serializers.SerializerMethodField()
 
+    def get_title(self, instance):
+        """Return the product title"""
+        return instance.content_object.title
+
     def get_product_type(self, instance):
-        """ Return the product type """
+        """Return the product type"""
         return instance.content_type.model
 
     class Meta:
-        fields = ["id", "product_type", "visible_in_bulk_form"]
+        fields = ["id", "title", "product_type", "visible_in_bulk_form"]
         model = models.Product
 
 
-class ProductDetailSerializer(BaseProductSerializer):
-    """ Product Serializer """
+class ProductSerializer(BaseProductSerializer):
+    """Product Serializer with the latest ProductVersion also serialized"""
 
-    title = serializers.SerializerMethodField()
     latest_version = serializers.SerializerMethodField()
 
-    def get_title(self, instance):
-        """ Return the product title """
-        return instance.content_type.get_object_for_this_type(
-            pk=instance.object_id
-        ).title
-
-    def get_latest_version(self, instance):
-        """Serialize and return the latest ProductVersion for the Product"""
-        # The Django ORM can be used to
+    def _get_latest_version_obj(self, instance):
+        """Helper method to get the latest ProductVersion for the given Product"""
         has_ordered_versions = self.context.get("has_ordered_versions", False)
-        latest_version = (
+        return (
             instance.latest_version
             if not has_ordered_versions
             else first_or_none(getattr(instance, ORDERED_VERSIONS_QSET_ATTR, []))
         )
+
+    def get_latest_version(self, instance):
+        """Return the serialized latest ProductVersion"""
         return ProductVersionSerializer(
-            latest_version, context={**self.context, "all_runs": True}
+            self._get_latest_version_obj(instance), context=self.context
         ).data
 
     class Meta:
-        fields = BaseProductSerializer.Meta.fields + ["title", "latest_version"]
+        fields = BaseProductSerializer.Meta.fields + ["latest_version"]
         model = models.Product
+
+
+class ProductChoiceSerializer(ProductSerializer):
+    """Product serializer for presenting a set of products as menu options"""
+
+    parent = serializers.SerializerMethodField()
+    start_date = serializers.SerializerMethodField()
+    end_date = serializers.SerializerMethodField()
+
+    def get_parent(self, instance):
+        """Returns the serialized parent course (or nothing if the product is for a program)"""
+        if instance.content_type.model == CONTENT_TYPE_MODEL_COURSERUN:
+            course = instance.content_object.course
+            return {"id": course.id, "title": course.title}
+        return {}
+
+    def get_start_date(self, instance):
+        """Returns the start date"""
+        dt = (
+            instance.content_object.next_run_date
+            if instance.content_type.model == CONTENT_TYPE_MODEL_PROGRAM
+            else instance.content_object.start_date
+        )
+        return dt.isoformat() if dt is not None else None
+
+    def get_end_date(self, instance):
+        """Returns the end date"""
+        dt = (
+            None
+            if instance.content_type.model == CONTENT_TYPE_MODEL_PROGRAM
+            else instance.content_object.end_date
+        )
+        return dt.isoformat() if dt is not None else None
+
+    class Meta:
+        fields = ProductSerializer.Meta.fields + ["parent", "start_date", "end_date"]
+        model = models.Product
+
+
+class ProductDetailSerializer(ProductSerializer):
+    """Product serializer with full nested serialization of related objects"""
+
+    def get_latest_version(self, instance):
+        """Returns the serialized latest version with full nested serialization of related objects"""
+        return FullProductVersionSerializer(
+            self._get_latest_version_obj(instance),
+            context={**self.context, "all_runs": True},
+        ).data
 
 
 class CouponSelectionSerializer(serializers.ModelSerializer):
@@ -292,7 +340,7 @@ class BasketSerializer(serializers.ModelSerializer):
         """
         if basket_item.program_run:
             context["program_run"] = basket_item.program_run
-        serialized_product_version = ProductVersionSerializer(
+        serialized_product_version = FullProductVersionSerializer(
             instance=latest_product_version(basket_item.product), context=context
         ).data
         valid_run_ids = set()
@@ -838,7 +886,7 @@ class DataConsentUserSerializer(serializers.ModelSerializer):
 class LineSummarySerializer(serializers.ModelSerializer):
     """ Summary serializer for Line model """
 
-    product_version = ProductVersionSummarySerializer()
+    product_version = BaseProductVersionSerializer()
 
     class Meta:
         model = models.Line
@@ -900,7 +948,7 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                     quantity=line.quantity,
                     total_paid=str(total_paid),
                     discount=str(discount),
-                    **ProductVersionSummarySerializer(line.product_version).data,
+                    **BaseProductVersionSerializer(line.product_version).data,
                     start_date=dates["start_date"],
                     end_date=dates["end_date"],
                 )

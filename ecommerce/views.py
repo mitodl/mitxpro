@@ -5,7 +5,7 @@ from collections import defaultdict
 from urllib.parse import urljoin
 
 from django.conf import settings
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import Http404
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
@@ -21,6 +21,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from b2b_ecommerce.api import fulfill_b2b_order
 from b2b_ecommerce.models import B2BOrder
+from courses.constants import VALID_PRODUCT_TYPES
 from courses.models import CourseRun
 from courses.serializers import BaseCourseRunSerializer, BaseProgramSerializer
 from ecommerce.api import (
@@ -58,6 +59,7 @@ from ecommerce.serializers import (
     SingleUseCouponSerializer,
     CurrentCouponPaymentSerializer,
     OrderReceiptSerializer,
+    ProductChoiceSerializer,
 )
 from hubspot.task_helpers import sync_hubspot_deal
 from mitxpro.utils import (
@@ -78,18 +80,52 @@ class ProductViewSet(ReadOnlyModelViewSet):
     authentication_classes = ()
     permission_classes = ()
 
-    serializer_class = ProductDetailSerializer
     queryset = (
         Product.objects.exclude(productversions=None)
         .select_related("content_type")
+        .prefetch_related("content_object")
         .with_ordered_versions()
     )
+
+    def _get_request_properties(self):
+        """
+        Helper method to determine the desired objects and data format from the querystring params
+
+        Returns:
+            (bool, Optional[str]): Tuple with a flag that indicates if the nested ("full") serializer should be used,
+                paired with a product type if the products should be filtered by a product type
+        """
+        nested_param = self.request.query_params.get("nested")
+        if nested_param is None or nested_param.lower() == "true":
+            return True, None
+        product_type = self.request.query_params.get("type", None)
+        if product_type is not None and product_type not in VALID_PRODUCT_TYPES:
+            raise ValidationError(
+                "'type' parameter must be one of [{}], or omitted entirely.".format(
+                    VALID_PRODUCT_TYPES
+                )
+            )
+        return False, product_type
+
+    def get_queryset(self):
+        queryset = (
+            Product.objects.exclude(productversions=None)
+            .select_related("content_type")
+            .with_ordered_versions()
+        )
+        nested, product_type = self._get_request_properties()
+        if nested or product_type is None:
+            return queryset
+        return queryset.filter(content_type__model=product_type)
+
+    def get_serializer_class(self):
+        nested, _ = self._get_request_properties()
+        return ProductDetailSerializer if nested else ProductChoiceSerializer
 
     def get_serializer_context(self):
         """
         return the serializer context.
         """
-
         return {"has_ordered_versions": True}
 
 

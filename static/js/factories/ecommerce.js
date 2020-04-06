@@ -17,7 +17,9 @@ import type {
   DataConsentUser,
   ProductDetail,
   B2BOrderStatus,
-  B2BCouponStatusResponse
+  B2BCouponStatusResponse,
+  SimpleProductDetail,
+  BaseProductVersion
 } from "../flow/ecommerceTypes"
 import type { BaseCourseRun, Program } from "../flow/courseTypes"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
@@ -97,6 +99,42 @@ export const makeBasketResponse = (itemType: ?string): BasketResponse => {
     data_consents: [makeDataConsent()]
   }
 }
+
+export const makeSimpleProductVersion = (
+  productType: string = PRODUCT_TYPE_COURSERUN,
+  readableId: string = casual.text
+): BaseProductVersion => ({
+  // $FlowFixMe
+  id:            genProductId.next().value,
+  type:          productType,
+  price:         String(casual.double(0, 100)),
+  content_title: casual.text,
+  readable_id:   readableId,
+  object_id:     casual.random,
+  // $FlowFixMe
+  product_id:    genProductId.next().value
+})
+
+export const makeSimpleProduct = (
+  productType: string = PRODUCT_TYPE_COURSERUN,
+  readableId: string = casual.text
+): SimpleProductDetail => ({
+  // $FlowFixMe
+  id:                   genProductId.next().value,
+  title:                casual.word,
+  product_type:         productType,
+  visible_in_bulk_form: casual.boolean,
+  start_date:           casual.moment.format(),
+  end_date:             casual.moment.format(),
+  parent:
+    productType === PRODUCT_TYPE_PROGRAM
+      ? {}
+      : {
+        id:    casual.random,
+        title: casual.text
+      },
+  latest_version: makeSimpleProductVersion(productType, readableId)
+})
 
 export const makeProduct = (
   productType: string = PRODUCT_TYPE_COURSERUN,
