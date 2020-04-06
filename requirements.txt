@@ -67,7 +67,7 @@ parso==0.5.1              # via jedi
 pdftotext==2.1.1          # via -r requirements.in
 pexpect==4.7.0            # via ipython
 pickleshare==0.7.5        # via ipython
-pillow==6.2.0             # via -r requirements.in, wagtail
+pillow==6.2.2             # via -r requirements.in, wagtail
 prompt-toolkit==2.0.9     # via ipython
 psycopg2==2.8.3           # via -r requirements.in, django-server-status
 ptyprocess==0.6.0         # via pexpect
