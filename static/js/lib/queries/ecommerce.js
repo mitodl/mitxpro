@@ -1,5 +1,5 @@
 // @flow
-import { pathOr, objOf } from "ramda"
+import { pathOr, objOf, nthArg } from "ramda"
 
 import { getCookie } from "../api"
 
@@ -12,8 +12,12 @@ import type {
   ProductDetail,
   B2BCouponStatusPayload,
   B2BCouponStatusResponse,
-  OrderReceiptResponse
+  OrderReceiptResponse,
+  SimpleProductDetail
 } from "../../flow/ecommerceTypes"
+
+// uses the next piece of state which is the second argument
+const nextState = nthArg(1)
 
 const DEFAULT_POST_OPTIONS = {
   headers: {
@@ -58,15 +62,29 @@ export default {
       ...DEFAULT_POST_OPTIONS
     }
   }),
-  productsSelector: pathOr(null, ["entities", "products"]),
-  productsQuery:    () => ({
+  productsSelector:  pathOr(null, ["entities", "products"]),
+  fullProductsQuery: () => ({
     queryKey:  "products",
     url:       "/api/products/",
     transform: (json: Array<ProductDetail>) => ({
       products: json
     }),
     update: {
-      products: (prev: Array<ProductDetail>, next: Array<ProductDetail>) => next
+      products: nextState
+    }
+  }),
+  productsQuery: (productType?: string) => ({
+    queryKey: "products",
+    url:      "/api/products/",
+    body:     {
+      nested: false,
+      ...(productType ? { type: productType } : {})
+    },
+    transform: (json: Array<SimpleProductDetail>) => ({
+      products: json
+    }),
+    update: {
+      products: nextState
     }
   }),
   companiesSelector: pathOr(null, ["entities", "companies"]),

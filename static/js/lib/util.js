@@ -98,6 +98,7 @@ export const removeTrailingSlash = (str: string) =>
 
 export const emptyOrNil = either(isEmpty, isNil)
 export const allEmptyOrNil = all(emptyOrNil)
+export const anyNil = R.any(R.isNil)
 
 export const spaceSeparated = (strings: Array<?string>): string =>
   strings.filter(str => str).join(" ")

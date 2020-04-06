@@ -2,41 +2,22 @@
 import React from "react"
 // $FlowFixMe: Flow trips up with this library
 import Select from "react-select"
+import * as R from "ramda"
 
-import { findRunInProduct, formatRunTitle } from "../../lib/ecommerce"
+import { formatCoursewareDate } from "../../lib/ecommerce"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 
-import type { ProductDetail } from "../../flow/ecommerceTypes"
-import type { Course, CourseRun } from "../../flow/courseTypes"
+import type { SimpleProductDetail } from "../../flow/ecommerceTypes"
+import type { Course } from "../../flow/courseTypes"
+import { anyNil } from "../../lib/util"
 
-const productTypeOptions = [
-  { value: PRODUCT_TYPE_COURSERUN, label: "Course" },
-  { value: PRODUCT_TYPE_PROGRAM, label: "Program" }
-]
-
-const makeProductOption = (
-  product: ProductDetail,
-  run?: CourseRun,
-  course?: Course
-) => ({
-  value: product.id,
-  label:
-    product.product_type === PRODUCT_TYPE_PROGRAM || !course
-      ? product.title
-      : course.title
-})
-
-const makeProductRunOption = (product: ProductDetail) => {
-  const [run] = findRunInProduct(product)
-
-  return {
-    label: formatRunTitle(run),
-    value: product.id
-  }
+export const productTypeLabels = {
+  [PRODUCT_TYPE_COURSERUN]: "Course",
+  [PRODUCT_TYPE_PROGRAM]:   "Program"
 }
+const defaultSelectComponentsProp = { IndicatorSeparator: null }
 
 type Props = {
-  products: Array<ProductDetail>,
   field: {
     name: string,
     value: any,
@@ -48,22 +29,63 @@ type Props = {
     errors: Object,
     values: Object
   },
-  productType: ProductType,
-  selectedProduct: Object
-}
-type ProductType = "courserun" | "program"
-type State = {
-  productType: ProductType,
-  selected: [?ProductDetail, ?CourseRun, ?Course]
+  products: Array<SimpleProductDetail>,
+  selectedProduct: ?SimpleProductDetail
 }
 type SelectOption = {
   label: string,
   value: number | string
 }
+type ProductType = PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM
+type State = {
+  productType: ProductType,
+  selectedCoursewareObj: ?SelectOption,
+  selectedCourseDate: ?SelectOption,
+  initialized: boolean
+}
+
+const buildProgramOption = (product: SimpleProductDetail): SelectOption => ({
+  value: product.id,
+  label: product.latest_version.content_title
+})
+
+const buildCourseOption = (product: SimpleProductDetail): SelectOption => ({
+  value: product.parent.id || "",
+  label: product.parent.title || ""
+})
+
+const buildCourseDateOption = (product: SimpleProductDetail): SelectOption => ({
+  value: product.id,
+  label: `${formatCoursewareDate(product.start_date)} - ${formatCoursewareDate(
+    product.end_date
+  )}`
+})
+
+export const productDateSortCompare = (
+  firstProduct: SimpleProductDetail,
+  secondProduct: SimpleProductDetail
+) => {
+  if (!firstProduct.start_date) {
+    return 1
+  }
+  if (!secondProduct.start_date) {
+    return -1
+  }
+  return firstProduct.start_date < secondProduct.start_date ? -1 : 1
+}
+
 export default class ProductSelector extends React.Component<Props, State> {
   state = {
-    productType: PRODUCT_TYPE_COURSERUN,
-    selected:    [null, null, null]
+    productType:           PRODUCT_TYPE_COURSERUN,
+    selectedCoursewareObj: null,
+    selectedCourseDate:    null,
+    initialized:           false
+  }
+
+  componentDidUpdate(prevProps: Props, prevState: State) {
+    if (!R.equals(prevState, this.state)) {
+      this.updateSelectedProduct()
+    }
   }
 
   calcProductOptions = (): Array<SelectOption> => {
@@ -74,163 +96,127 @@ export default class ProductSelector extends React.Component<Props, State> {
       product => product.product_type === productType
     )
     if (productType === PRODUCT_TYPE_PROGRAM) {
-      return filteredProducts.map(product => makeProductOption(product))
+      return filteredProducts.map(buildProgramOption)
     }
 
-    const productRuns = products
-      .filter(_product => _product.product_type === PRODUCT_TYPE_COURSERUN)
-      .map(_product => [_product, ...findRunInProduct(_product)])
-
-    const courseIds = new Set()
-    const productOptions = []
-    for (const [product, run, course] of productRuns) {
-      if (run && course && !courseIds.has(course.id)) {
-        courseIds.add(course.id)
-        productOptions.push(makeProductOption(product, run, course))
-      }
-    }
-    return productOptions
+    return R.compose(
+      R.uniq,
+      R.map(buildCourseOption)
+    )(filteredProducts)
   }
 
-  calcSelectedProduct = () => {
-    let product
-    const {
-      products,
-      field: { value }
-    } = this.props
-    const {
-      productType,
-      selected: [selectedProduct, selectedRun, selectedCourse]
-    } = this.state
-
-    // product_id can be either a product readable_id or an integer value in query parameter.
-    // in case of readable_id, we need to look inside the latest_version of product.
-    if (productType === PRODUCT_TYPE_PROGRAM) {
-      if (isNaN(value)) {
-        product = products.find(
-          product => product.latest_version.readable_id === value
-        )
-      } else {
-        product = products.find(_product => _product.id === parseInt(value))
-      }
-      return product ? makeProductOption(product) : null
-    }
-
-    return selectedProduct
-      ? // $FlowFixMe: Flow is confused by selectedProduct here
-      makeProductOption(selectedProduct, selectedRun, selectedCourse)
-      : null
-  }
-
-  updateSelectedProduct = (productOption: SelectOption) => {
-    const {
-      field: { name, value, onChange },
-      products
-    } = this.props
-    const {
-      productType,
-      selected: [selectedProduct]
-    } = this.state
-
-    if (productOption.value === value) {
-      return
-    }
-
-    if (productType === PRODUCT_TYPE_PROGRAM) {
-      onChange({ target: { name, value: productOption.value } })
-    } else {
-      const product = products.find(
-        _product => _product.id === productOption.value
-      )
-      if (!product) {
-        // make flow happy
-        return
-      }
-
-      if (selectedProduct && product.id === selectedProduct.id) {
-        return
-      }
-
-      this.setState({
-        selected: [product, ...findRunInProduct(product)]
-      })
-      onChange({ target: { name, value: null } })
-    }
-  }
-
-  calcProductDateOptions = (): Array<*> => {
+  calcProductDateOptions = (): Array<SelectOption> => {
     const { products } = this.props
-    const {
-      selected: [selectedProduct, selectedRun, selectedCourse]
-    } = this.state
+    const { selectedCoursewareObj } = this.state
+
+    if (!selectedCoursewareObj) {
+      return []
+    }
 
     return products
-      .filter(product => {
-        if (
-          product.product_type !== PRODUCT_TYPE_COURSERUN ||
-          !selectedCourse
-        ) {
-          return false
-        }
-        const [run, course] = findRunInProduct(product)
-        // should only be one course for a course run product
-        return course && course.id === selectedCourse.id
-      })
-      .map(product => makeProductRunOption(product))
+      .filter(
+        product =>
+          product.product_type === PRODUCT_TYPE_COURSERUN &&
+          product.parent.id === selectedCoursewareObj.value
+      )
+      .sort(productDateSortCompare)
+      .map(buildCourseDateOption)
   }
 
-  calcSelectedProductDate = () => {
-    let product
-    const {
-      field: { value },
-      products
-    } = this.props
+  setProductType = (selectedOption: SelectOption) => {
+    const { productType } = this.state
 
-    // product_id can be either a product readable_id or an integer value in query parameter.
-    // in case of readable_id, we need to look inside the latest_version of product.
-    if (isNaN(value)) {
-      product = products
-        .filter(product => product.product_type === PRODUCT_TYPE_COURSERUN)
-        .find(product => product.latest_version.readable_id === value)
-    } else {
-      product = products
-        .filter(product => product.product_type === PRODUCT_TYPE_COURSERUN)
-        .find(product => product.id === parseInt(value))
-    }
-    return product ? makeProductRunOption(product) : null
-  }
-
-  updateProductType = (productType: ProductType) => {
-    const {
-      field: { name, onChange }
-    } = this.props
-    if (this.state.productType === productType) {
+    if (selectedOption.value === productType) {
       return
     }
     this.setState({
-      productType,
-      selected: [null, null, null]
+      productType:           selectedOption.value,
+      selectedCoursewareObj: null,
+      selectedCourseDate:    null
     })
-    onChange({ target: { value: "", name } })
+  }
+
+  setSelectedCoursewareObj = (selectedOption: SelectOption) => {
+    const { selectedCoursewareObj } = this.state
+
+    if (selectedOption === selectedCoursewareObj) {
+      return
+    }
+    this.setState({
+      selectedCoursewareObj: selectedOption,
+      selectedCourseDate:    null
+    })
+  }
+
+  setSelectedCourseDate = (selectedOption: SelectOption) => {
+    const { selectedCourseDate } = this.state
+
+    if (selectedOption === selectedCourseDate) {
+      return
+    }
+    this.setState({
+      selectedCourseDate: selectedOption
+    })
+  }
+
+  updateSelectedProduct = () => {
+    const {
+      field: { name, onChange }
+    } = this.props
+    const {
+      productType,
+      selectedCoursewareObj,
+      selectedCourseDate
+    } = this.state
+    let productValue
+
+    if (
+      (productType === PRODUCT_TYPE_PROGRAM && !selectedCoursewareObj) ||
+      (productType === PRODUCT_TYPE_COURSERUN &&
+        anyNil([selectedCoursewareObj, selectedCourseDate]))
+    ) {
+      onChange({ target: { name, value: null } })
+      return
+    }
+
+    if (productType === PRODUCT_TYPE_PROGRAM) {
+      // $FlowFixMe: Can't be null/undefined
+      productValue = selectedCoursewareObj.value
+    } else {
+      // $FlowFixMe: Can't be null/undefined
+      productValue = selectedCourseDate.value
+    }
+    onChange({ target: { name, value: productValue } })
   }
 
   static getDerivedStateFromProps(props: Props, state: State) {
-    if (props.productType && props.selectedProduct) {
-      state.productType = props.productType
-      state.selected = [props.selectedProduct, null, null]
+    if (!props.selectedProduct || state.initialized) {
+      return null
     }
-    return null
+    const productType = props.selectedProduct.product_type
+    let selectedCoursewareObj, selectedCourseDate
+    if (productType === PRODUCT_TYPE_PROGRAM) {
+      selectedCoursewareObj = buildProgramOption(props.selectedProduct)
+    } else {
+      selectedCoursewareObj = buildCourseOption(props.selectedProduct)
+      // $FlowFixMe: selectedProduct can't be null/undefined
+      selectedCourseDate = buildCourseDateOption(props.selectedProduct)
+    }
+
+    return {
+      productType,
+      selectedCoursewareObj,
+      selectedCourseDate,
+      initialized: true
+    }
   }
 
   render() {
     const {
-      field: { onChange, name }
-    } = this.props
-
-    const { productType } = this.state
-
-    const productTypeText =
-      productType === PRODUCT_TYPE_PROGRAM ? "program" : "course"
+      productType,
+      selectedCoursewareObj,
+      selectedCourseDate
+    } = this.state
 
     return (
       <div className="product-selector">
@@ -241,27 +227,31 @@ export default class ProductSelector extends React.Component<Props, State> {
             </span>
             <Select
               className="select"
-              options={productTypeOptions}
-              components={{ IndicatorSeparator: null }}
-              onChange={selectedOption =>
-                this.updateProductType(selectedOption.value)
-              }
-              value={productTypeOptions.find(
-                option => option.value === productType
-              )}
+              options={Object.keys(productTypeLabels).map(productTypeKey => ({
+                value: productTypeKey,
+                label: productTypeLabels[productTypeKey]
+              }))}
+              components={defaultSelectComponentsProp}
+              onChange={this.setProductType}
+              value={{
+                value: productType,
+                label: productTypeLabels[productType]
+              }}
             />
           </div>
         </div>
 
         <div className="row product-row">
           <div className="col-12">
-            <span className="description">Select {productTypeText}:</span>
+            <span className="description">
+              Select {productTypeLabels[productType]}:
+            </span>
             <Select
               className="select"
-              components={{ IndicatorSeparator: null }}
+              components={defaultSelectComponentsProp}
               options={this.calcProductOptions()}
-              value={this.calcSelectedProduct()}
-              onChange={this.updateSelectedProduct}
+              value={selectedCoursewareObj}
+              onChange={this.setSelectedCoursewareObj}
             />
           </div>
         </div>
@@ -272,18 +262,10 @@ export default class ProductSelector extends React.Component<Props, State> {
               <span className="description">Select start date:</span>
               <Select
                 className="select"
-                components={{ IndicatorSeparator: null }}
+                components={defaultSelectComponentsProp}
                 options={this.calcProductDateOptions()}
-                value={this.calcSelectedProductDate()}
-                onChange={selectedProduct => {
-                  onChange({
-                    target: {
-                      name,
-                      // $FlowFixMe: seems to think selectedProduct is an array here
-                      value: selectedProduct ? selectedProduct.value : null
-                    }
-                  })
-                }}
+                value={selectedCourseDate}
+                onChange={this.setSelectedCourseDate}
               />
             </div>
           </div>

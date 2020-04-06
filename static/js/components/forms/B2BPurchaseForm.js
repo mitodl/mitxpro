@@ -11,11 +11,12 @@ import B2BCheckoutExplanation from "../B2BCheckoutExplanation"
 import type {
   B2BCouponStatusPayload,
   B2BCouponStatusResponse,
-  ProductDetail
+  SimpleProductDetail
 } from "../../flow/ecommerceTypes"
+import { findProductById } from "../../lib/ecommerce"
 
 type Props = {
-  products: Array<ProductDetail>,
+  products: Array<SimpleProductDetail>,
   onSubmit: Function,
   requestPending: boolean,
   couponStatus: ?B2BCouponStatusResponse,
@@ -68,18 +69,9 @@ class B2BPurchaseForm extends React.Component<Props> {
         setFieldError("coupon", "No product selected")
         return
       }
-      let productId = values.product
-      if (isNaN(values.product)) {
-        const _product = products.find(
-          product => product.latest_version.readable_id === values.product
-        )
-        if (_product) {
-          productId = _product.id
-        }
-      }
 
       const response = await fetchCouponStatus({
-        product_id: productId,
+        product_id: values.product,
         code:       values.coupon.trim()
       })
       if (response.status !== 200) {
@@ -99,26 +91,10 @@ class B2BPurchaseForm extends React.Component<Props> {
 
     let itemPrice = new Decimal(0),
       totalPrice = new Decimal(0),
-      discount,
-      productId,
-      product
+      discount
 
-    // product_id can be either a product readable_id or an integer value in query parameter.
-    // in case of readable_id, we need to look inside the latest_version of product.
-    if (isNaN(values.product)) {
-      product = products.find(
-        product => product.latest_version.readable_id === values.product
-      )
-      if (product !== undefined) {
-        productId = product.id
-      }
-    } else {
-      productId = parseInt(values.product)
-      product = products.find(product => product.id === productId)
-    }
-
+    const product = findProductById(products, values.product)
     const productVersion = product ? product.latest_version : null
-    const productType = product ? product.product_type : null
     let numSeats = parseInt(values.num_seats)
 
     if (productVersion && productVersion.price !== null) {
@@ -151,7 +127,6 @@ class B2BPurchaseForm extends React.Component<Props> {
                 component={ProductSelector}
                 products={products}
                 selectedProduct={product}
-                productType={productType}
                 name="product"
               />
               <ErrorMessage name="product" render={errorMessageRenderer} />

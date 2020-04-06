@@ -10,7 +10,10 @@ import { Field, Formik } from "formik"
 import B2BPurchaseForm, { validate } from "./B2BPurchaseForm"
 import ProductSelector from "../input/ProductSelector"
 
-import { makeB2BCouponStatus, makeProduct } from "../../factories/ecommerce"
+import {
+  makeB2BCouponStatus,
+  makeSimpleProduct
+} from "../../factories/ecommerce"
 
 describe("B2BPurchaseForm", () => {
   let sandbox,
@@ -18,20 +21,18 @@ describe("B2BPurchaseForm", () => {
     products,
     fetchCouponStatusStub,
     clearCouponStatusStub,
-    couponStatus,
-    productReadableId
+    couponStatus
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
-    productReadableId = "test+Aug_2016"
 
     onSubmitStub = sandbox.stub()
     fetchCouponStatusStub = sandbox.stub()
     clearCouponStatusStub = sandbox.stub()
     products = [
-      makeProduct("courserun", productReadableId),
-      makeProduct(),
-      makeProduct()
+      makeSimpleProduct("courserun"),
+      makeSimpleProduct(),
+      makeSimpleProduct()
     ]
     couponStatus = makeB2BCouponStatus()
   })
@@ -186,15 +187,12 @@ describe("B2BPurchaseForm", () => {
 
     //
     // eslint-disable-next-line camelcase
-    ;[["  xyz  ", "applies", "test+Aug_2016"], ["", "clears", ""]].forEach(
-      ([couponCode, desc, productReadableId]) => {
+    ;[["  xyz  ", "applies", true], ["", "clears", false]].forEach(
+      ([couponCode, desc, productIdExists]) => {
         it(`${desc} the given coupon value`, async () => {
           const values = {
             coupon:  couponCode,
-            product: productId
-          }
-          if (productReadableId) {
-            values.product = productReadableId
+            product: productIdExists ? productId : null
           }
           const innerWrapper = renderForm(values)
 

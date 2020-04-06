@@ -8,7 +8,7 @@ export type CheckoutResponse = {
   payload: CheckoutPayload,
   method?: ?string,
   errors?: string|Array<string>
-};
+}
 
 export type CheckoutPayload = {
   "access_key": string,
@@ -26,21 +26,23 @@ export type CheckoutPayload = {
   "transaction_type": string,
   "transaction_uuid": string,
   "unsigned_field_names": string,
-};
+}
 
-export type ProductVersion = {
+export type BaseProductVersion = {
   type: PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM,
-  courses: Array<Course>,
-  thumbnail_url: string,
+  id: number,
   price: string,
-  description: string,
   content_title: string,
   object_id: number,
   product_id: number,
-  id: number,
   readable_id: string,
+}
+
+export type ProductVersion = BaseProductVersion & {
+  courses: Array<Course>,
+  thumbnail_url: string,
   run_tag: ?string,
-  created_on: string,
+  description: string,
   start_date: ?string,
 }
 
@@ -102,13 +104,6 @@ export type BasketPayload = {
   items?: Array<BasketItemPayload>,
   coupons?: Array<{ code: string }>,
   data_consents?: Array<number>
-}
-
-export type ProductVersionSummary = {
-  price: string,
-  content_title: string,
-  readable_id: string,
-  start_date: Date
 }
 
 export type OrderLine = {
@@ -182,14 +177,21 @@ export type Coupon = {
   is_global: boolean
 }
 
-export type SimpleProduct = {
+export type Product = {
   id: number,
   product_type: string,
+  title: string,
   visible_in_bulk_form: boolean,
 }
 
-export type Product = SimpleProduct & {
-  title: string,
+export type SimpleProductDetail = Product & {
+  latest_version: BaseProductVersion,
+  parent:         {
+    id?:    number,
+    title?: string
+  },
+  start_date: ?string,
+  end_date: ?string
 }
 
 export type ProductDetail = Product & {
@@ -206,7 +208,7 @@ export type BulkCouponPayment = {
   id: number,
   name: string,
   version: CouponPaymentVersion,
-  products: Array<SimpleProduct>,
+  products: Array<Product>,
   created_on: Date,
   updated_on: Date
 }

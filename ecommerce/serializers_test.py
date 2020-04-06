@@ -18,7 +18,11 @@ from courses.factories import (
     ProgramRunFactory,
 )
 from courses.serializers import CourseSerializer
-from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
+from courses.constants import (
+    CATALOG_COURSE_IMG_WAGTAIL_FILL,
+    CONTENT_TYPE_MODEL_PROGRAM,
+    CONTENT_TYPE_MODEL_COURSERUN,
+)
 from ecommerce.api import get_readable_id, round_half_up
 from ecommerce.constants import ORDERED_VERSIONS_QSET_ATTR, CYBERSOURCE_CARD_TYPES
 from ecommerce.factories import (
@@ -43,7 +47,6 @@ from ecommerce.models import (
     Order,
 )
 from ecommerce.serializers import (
-    ProductVersionSerializer,
     CouponSelectionSerializer,
     BasketSerializer,
     SingleUseCouponSerializer,
@@ -53,6 +56,8 @@ from ecommerce.serializers import (
     CouponPaymentSerializer,
     CurrentCouponPaymentSerializer,
     ProductDetailSerializer,
+    ProductChoiceSerializer,
+    FullProductVersionSerializer,
     CompanySerializer,
     DataConsentUserSerializer,
     CouponSerializer,
@@ -71,7 +76,9 @@ def test_serialize_basket_product_version_courserun(mock_context):
     product_version = ProductVersionFactory.create(
         product=ProductFactory(content_object=courserun)
     )
-    data = ProductVersionSerializer(instance=product_version, context=mock_context).data
+    data = FullProductVersionSerializer(
+        instance=product_version, context=mock_context
+    ).data
     assert data == {
         "id": product_version.id,
         "description": product_version.description,
@@ -101,7 +108,9 @@ def test_serialize_basket_product_version_program(mock_context):
         product=ProductFactory(content_object=program)
     )
 
-    data = ProductVersionSerializer(instance=product_version, context=mock_context).data
+    data = FullProductVersionSerializer(
+        instance=product_version, context=mock_context
+    ).data
     assert data == {
         "id": product_version.id,
         "description": product_version.description,
@@ -132,7 +141,7 @@ def test_serialize_basket_product_version_programrun(mock_context):
     )
     context = {**mock_context, **{"program_run": program_run}}
 
-    data = ProductVersionSerializer(instance=product_version, context=context).data
+    data = FullProductVersionSerializer(instance=product_version, context=context).data
     assert data["object_id"] == program_run.program.id
     assert data["run_tag"] == program_run.run_tag
 
@@ -145,7 +154,9 @@ def test_basket_thumbnail_courserun(basket_and_coupons, mock_context):
     )
     run = CourseRunFactory.create(course=course_page.course)
     product_version = ProductVersionFactory.create(product__content_object=run)
-    data = ProductVersionSerializer(instance=product_version, context=mock_context).data
+    data = FullProductVersionSerializer(
+        instance=product_version, context=mock_context
+    ).data
     assert (
         data["thumbnail_url"]
         == course_page.thumbnail_image.get_rendition(
@@ -162,7 +173,9 @@ def test_basket_thumbnail_program(basket_and_coupons, mock_context):
     )
     program = program_page.program
     product_version = ProductVersionFactory.create(product__content_object=program)
-    data = ProductVersionSerializer(instance=product_version, context=mock_context).data
+    data = FullProductVersionSerializer(
+        instance=product_version, context=mock_context
+    ).data
     assert (
         data["thumbnail_url"]
         == program_page.thumbnail_image.get_rendition(
@@ -217,7 +230,7 @@ def test_serialize_basket(basket_and_agreement, mock_context, is_live):
     assert data == {
         "items": [
             {
-                **ProductVersionSerializer(
+                **FullProductVersionSerializer(
                     instance=basket_and_agreement.product.latest_version,
                     context=mock_context,
                 ).data,
@@ -480,6 +493,58 @@ def test_serialize_product_with_ordered(mocker):
     assert [version.id for version in expected_versions] == [
         product_data["latest_version"]["id"] for product_data in serialized_data
     ]
+
+
+def test_serialize_program_product_choice():
+    """ProductChoiceSerializer should serialize a program Product and its latest ProductVersion"""
+    program = ProgramFactory.create()
+    product_version = ProductVersionFactory.create(product__content_object=program)
+    product = product_version.product
+    serialized_data = ProductChoiceSerializer(instance=product).data
+    assert serialized_data == {
+        "id": product.id,
+        "title": program.title,
+        "product_type": CONTENT_TYPE_MODEL_PROGRAM,
+        "visible_in_bulk_form": product.visible_in_bulk_form,
+        "start_date": program.next_run_date,
+        "end_date": None,
+        "parent": {},
+        "latest_version": {
+            "id": product_version.id,
+            "object_id": program.id,
+            "product_id": product.id,
+            "type": CONTENT_TYPE_MODEL_PROGRAM,
+            "price": str(product_version.price),
+            "content_title": program.title,
+            "readable_id": program.readable_id,
+        },
+    }
+
+
+def test_serialize_run_product_choice():
+    """ProductChoiceSerializer should serialize a course run Product and its latest ProductVersion"""
+    course_run = CourseRunFactory.create()
+    product_version = ProductVersionFactory.create(product__content_object=course_run)
+    product = product_version.product
+    serialized_data = ProductChoiceSerializer(instance=product).data
+    assert serialized_data == {
+        "id": product.id,
+        "title": course_run.title,
+        "product_type": CONTENT_TYPE_MODEL_COURSERUN,
+        "visible_in_bulk_form": product.visible_in_bulk_form,
+        "start_date": course_run.start_date.isoformat(),
+        "end_date": course_run.end_date.isoformat(),
+        "parent": {"id": course_run.course.id, "title": course_run.course.title},
+        "latest_version": {
+            "id": product_version.id,
+            "object_id": course_run.id,
+            "product_id": product.id,
+            "type": CONTENT_TYPE_MODEL_COURSERUN,
+            "price": str(product_version.price),
+            "content_title": course_run.title,
+            "readable_id": course_run.courseware_id,
+        },
+    }
 
 
 @pytest.mark.parametrize(

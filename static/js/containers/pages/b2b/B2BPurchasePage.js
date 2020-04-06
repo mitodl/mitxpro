@@ -21,12 +21,13 @@ import type {
   B2BCheckoutPayload,
   B2BCouponStatusPayload,
   B2BCouponStatusResponse,
-  ProductDetail
+  SimpleProductDetail
 } from "../../../flow/ecommerceTypes"
+import { findProductById } from "../../../lib/ecommerce"
 
 type Props = {
   checkout: (payload: B2BCheckoutPayload) => Promise<*>,
-  products: Array<ProductDetail>,
+  products: Array<SimpleProductDetail>,
   requestPending: boolean,
   couponStatus: ?B2BCouponStatusResponse,
   clearCouponStatus: () => void,
@@ -51,16 +52,7 @@ export class B2BPurchasePage extends React.Component<Props, State> {
   onSubmit = async (values: Values, { setErrors, setSubmitting }: Object) => {
     const { products, checkout, couponStatus } = this.props
     const numSeats = parseInt(values.num_seats)
-    let product
-    if (isNaN(values.product)) {
-      product = products.find(
-        product => product.latest_version.readable_id === values.product
-      )
-    } else {
-      product = products.find(
-        _product => _product.id === parseInt(values.product)
-      )
-    }
+    const product = findProductById(products, values.product)
     if (!product) {
       throw new Error(
         "No product found. This should have been caught in validation."
@@ -114,7 +106,7 @@ export class B2BPurchasePage extends React.Component<Props, State> {
     const contractNumber = params.get("contract_number")
     const discountCode = params.get("discount_code")
     let productId = params.get("product_id")
-    if (productId) {
+    if (productId && isNaN(productId)) {
       // eslint-disable-next-line no-useless-escape
       productId = productId.replace(/\ /g, "+")
     }
