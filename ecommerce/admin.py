@@ -26,7 +26,7 @@ from ecommerce.models import (
 )
 
 from hubspot.task_helpers import sync_hubspot_deal
-from mitxpro.admin import AuditableModelAdmin
+from mitxpro.admin import AuditableModelAdmin, TimestampedModelAdmin
 from mitxpro.utils import get_field_names
 
 
@@ -84,7 +84,6 @@ class LineRunSelectionAdmin(admin.ModelAdmin):
 
     model = LineRunSelection
     list_display = ("id", "line", "get_order", "get_run_courseware_id")
-
     readonly_fields = get_field_names(LineRunSelection)
 
     def has_add_permission(self, request):
@@ -130,10 +129,11 @@ class ProgramRunLineAdmin(admin.ModelAdmin):
     get_order.admin_order_field = "line__order"
 
 
-class OrderAdmin(AuditableModelAdmin):
+class OrderAdmin(AuditableModelAdmin, TimestampedModelAdmin):
     """Admin for Order"""
 
     model = Order
+    include_created_on_in_list = True
     list_filter = ("status",)
     list_display = ("id", "purchaser", "status", "created_on")
     search_fields = ("purchaser__username", "purchaser__email")
@@ -154,11 +154,20 @@ class OrderAdmin(AuditableModelAdmin):
         sync_hubspot_deal(obj)
 
 
-class OrderAuditAdmin(admin.ModelAdmin):
+class OrderAuditAdmin(TimestampedModelAdmin):
     """Admin for OrderAudit"""
 
     model = OrderAudit
+    include_created_on_in_list = True
+    list_display = ("id", "order_id", "get_order_user")
     readonly_fields = get_field_names(OrderAudit)
+
+    def get_order_user(self, obj):
+        """Returns the related Order's user email"""
+        return obj.order.purchaser.email
+
+    get_order_user.short_description = "User"
+    get_order_user.admin_order_field = "order__purchaser__email"
 
     def has_add_permission(self, request):
         return False
@@ -167,11 +176,21 @@ class OrderAuditAdmin(admin.ModelAdmin):
         return False
 
 
-class ReceiptAdmin(admin.ModelAdmin):
+class ReceiptAdmin(TimestampedModelAdmin):
     """Admin for Receipt"""
 
     model = Receipt
+    include_created_on_in_list = True
+    list_display = ("id", "order_id", "get_order_user")
     readonly_fields = get_field_names(Receipt)
+    ordering = ("-created_on",)
+
+    def get_order_user(self, obj):
+        """Returns the related Order's user email"""
+        return obj.order.purchaser.email
+
+    get_order_user.short_description = "User"
+    get_order_user.admin_order_field = "order__purchaser__email"
 
     def has_add_permission(self, request):
         return False
@@ -235,7 +254,7 @@ class CouponPaymentAdmin(admin.ModelAdmin):
     model = CouponPayment
     save_on_top = True
     inlines = [CouponPaymentVersionInline]
-
+    list_display = ("id", "name")
     search_fields = ("name",)
 
 
@@ -246,10 +265,32 @@ class CouponPaymentVersionAdmin(admin.ModelAdmin):
     save_as = True
     save_as_continue = False
     save_on_top = True
+    list_display = (
+        "id",
+        "get_payment_name",
+        "get_company_name",
+        "payment_type",
+        "amount",
+        "num_coupon_codes",
+        "activation_date",
+    )
     raw_id_fields = ("payment",)
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    def get_payment_name(self, obj):
+        """Returns the related CouponPayment name"""
+        return obj.payment.name
+
+    get_payment_name.short_description = "Coupon Payment Name"
+    get_payment_name.admin_order_field = "payment__name"
+
+    def get_company_name(self, obj):
+        """Returns the related Company name"""
+        return None if not obj.company else obj.company.name
+
+    get_company_name.short_description = "Company Name"
 
     class Media:
         css = {"all": ("css/django-admin-version.css",)}
@@ -262,10 +303,25 @@ class CouponVersionAdmin(admin.ModelAdmin):
     save_as = True
     save_as_continue = False
     save_on_top = True
+    list_display = ("id", "get_coupon_code", "get_payment_name")
     raw_id_fields = ("coupon", "payment_version")
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    def get_coupon_code(self, obj):
+        """Returns the related Coupon code"""
+        return obj.coupon.coupon_code
+
+    get_coupon_code.short_description = "Coupon Code"
+    get_coupon_code.admin_order_field = "coupon__coupon_code"
+
+    def get_payment_name(self, obj):
+        """Returns the related CouponPayment name"""
+        return obj.payment_version.payment.name
+
+    get_payment_name.short_description = "Coupon Payment Name"
+    get_payment_name.admin_order_field = "payment__name"
 
     class Media:
         css = {"all": ("css/django-admin-version.css",)}
@@ -275,7 +331,29 @@ class CouponSelectionAdmin(admin.ModelAdmin):
     """Admin for CouponSelections"""
 
     model = CouponSelection
+    list_display = ("id", "get_payment_name", "get_coupon_code", "get_basket_user")
     raw_id_fields = ("coupon", "basket")
+
+    def get_payment_name(self, obj):
+        """Returns the related CouponPayment name"""
+        return obj.coupon.payment.name
+
+    get_payment_name.short_description = "Coupon Payment Name"
+    get_payment_name.admin_order_field = "coupon__payment__name"
+
+    def get_coupon_code(self, obj):
+        """Returns the related Coupon code"""
+        return obj.coupon.coupon_code
+
+    get_coupon_code.short_description = "Coupon Code"
+    get_coupon_code.admin_order_field = "coupon__coupon_code"
+
+    def get_basket_user(self, obj):
+        """Returns the related Basket user's email"""
+        return obj.basket.user.email
+
+    get_basket_user.short_description = "Basket User"
+    get_basket_user.admin_order_field = "basket__user__email"
 
 
 class CouponEligibilityAdmin(admin.ModelAdmin):
@@ -404,10 +482,11 @@ class ProductAdmin(admin.ModelAdmin):
     get_price.short_description = "Price"
 
 
-class DataConsentUserAdmin(admin.ModelAdmin):
+class DataConsentUserAdmin(TimestampedModelAdmin):
     """Admin for DataConsentUser"""
 
-    list_display = ("id", "user", "created_on")
+    include_created_on_in_list = True
+    list_display = ("id", "user")
     search_fields = ("user__username", "user__email")
     raw_id_fields = ("user", "coupon")
 
@@ -427,11 +506,12 @@ class DataConsentUserInline(admin.StackedInline):
         return super().get_queryset(request).select_related("user", "agreement")
 
 
-class DataConsentAgreementAdmin(admin.ModelAdmin):
+class DataConsentAgreementAdmin(TimestampedModelAdmin):
     """Admin for DataConsentAgreement"""
 
+    include_created_on_in_list = True
     list_filter = ("company",)
-    list_display = ("id", "company", "created_on")
+    list_display = ("id", "company")
     search_fields = ("company", "content")
     raw_id_fields = ("courses",)
     inlines = [DataConsentUserInline]

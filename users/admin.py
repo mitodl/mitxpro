@@ -4,6 +4,7 @@ from django.contrib.auth.admin import UserAdmin as ContribUserAdmin
 from django.utils.translation import gettext_lazy as _
 from hijack_admin.admin import HijackUserAdminMixin
 
+from mitxpro.admin import TimestampedModelAdmin
 from users.models import LegalAddress, User, Profile
 
 
@@ -45,9 +46,10 @@ class UserProfileInline(admin.StackedInline):
         return True
 
 
-class UserAdmin(ContribUserAdmin, HijackUserAdminMixin):
+class UserAdmin(ContribUserAdmin, HijackUserAdminMixin, TimestampedModelAdmin):
     """Admin views for user"""
 
+    include_created_on_in_list = True
     fieldsets = (
         (None, {"fields": ("username", "password", "last_login", "created_on")}),
         (_("Personal Info"), {"fields": ("name", "email")}),
@@ -72,12 +74,11 @@ class UserAdmin(ContribUserAdmin, HijackUserAdminMixin):
         "is_staff",
         "hijack_field",
         "last_login",
-        "created_on",
     )
     list_filter = ("is_staff", "is_superuser", "is_active", "groups")
     search_fields = ("username", "name", "email")
     ordering = ("email",)
-    readonly_fields = ("username", "last_login", "created_on")
+    readonly_fields = ("username", "last_login")
     inlines = [UserLegalAddressInline, UserProfileInline]
 
 
