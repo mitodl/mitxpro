@@ -41,7 +41,14 @@ class GoogleFileWatchAdmin(admin.ModelAdmin):
     """Admin for GoogleFileWatch"""
 
     model = models.GoogleFileWatch
-    list_display = ("id", "file_id", "channel_id", "activation_date", "expiration_date")
+    list_display = (
+        "id",
+        "file_id",
+        "channel_id",
+        "activation_date",
+        "expiration_date",
+        "last_request_received",
+    )
     ordering = ["-expiration_date"]
 
     def save_form(self, request, form, change):
