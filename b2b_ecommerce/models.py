@@ -117,11 +117,15 @@ class B2BOrder(OrderAbstract, AuditableModel):
     total_price = models.DecimalField(decimal_places=2, max_digits=20)
     unique_id = models.UUIDField(default=uuid.uuid4)
     coupon_payment_version = models.ForeignKey(
-        CouponPaymentVersion, null=True, on_delete=models.PROTECT
+        CouponPaymentVersion, null=True, blank=True, on_delete=models.PROTECT
     )
-    coupon = models.ForeignKey(B2BCoupon, null=True, on_delete=models.PROTECT)
-    discount = models.DecimalField(decimal_places=2, max_digits=20, null=True)
-    contract_number = models.CharField(null=True, max_length=50)
+    coupon = models.ForeignKey(
+        B2BCoupon, null=True, blank=True, on_delete=models.PROTECT
+    )
+    discount = models.DecimalField(
+        decimal_places=2, max_digits=20, null=True, blank=True
+    )
+    contract_number = models.CharField(max_length=50, null=True, blank=True)
 
     objects = OrderManager()
 

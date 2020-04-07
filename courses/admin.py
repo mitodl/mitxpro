@@ -8,7 +8,7 @@ from django.forms import TextInput
 
 
 from mitxpro.utils import get_field_names
-from mitxpro.admin import AuditableModelAdmin
+from mitxpro.admin import AuditableModelAdmin, TimestampedModelAdmin
 from .models import (
     Program,
     ProgramRun,
@@ -48,14 +48,22 @@ class CourseAdmin(admin.ModelAdmin):
 
     model = Course
     search_fields = ["title", "topics__name", "readable_id"]
+    list_display = ("id", "title", "get_program", "position_in_program")
     list_filter = ["live", "program", "topics"]
 
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
     }
 
+    def get_program(self, obj):
+        """Returns the related User email"""
+        return obj.program.readable_id if obj.program is not None else None
 
-class CourseRunAdmin(admin.ModelAdmin):
+    get_program.short_description = "Program"
+    get_program.admin_order_field = "program__readable_id"
+
+
+class CourseRunAdmin(TimestampedModelAdmin):
     """Admin for CourseRun"""
 
     model = CourseRun
@@ -70,7 +78,6 @@ class CourseRunAdmin(admin.ModelAdmin):
         "enrollment_start",
     )
     list_filter = ["live", "course"]
-    readonly_fields = ("created_on", "updated_on")
 
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
@@ -119,11 +126,27 @@ class ProgramEnrollmentAdmin(AuditableModelAdmin):
     get_program_readable_id.admin_order_field = "program__readable_id"
 
 
-class ProgramEnrollmentAuditAdmin(admin.ModelAdmin):
+class ProgramEnrollmentAuditAdmin(TimestampedModelAdmin):
     """Admin for ProgramEnrollmentAudit"""
 
     model = ProgramEnrollmentAudit
+    include_created_on_in_list = True
+    list_display = ("id", "enrollment_id", "get_program_readable_id", "get_user")
     readonly_fields = get_field_names(ProgramEnrollmentAudit)
+
+    def get_program_readable_id(self, obj):
+        """Returns the related Program readable_id"""
+        return obj.enrollment.program.readable_id
+
+    get_program_readable_id.short_description = "Program"
+    get_program_readable_id.admin_order_field = "enrollment__program__readable_id"
+
+    def get_user(self, obj):
+        """Returns the related User's email"""
+        return obj.enrollment.user.email
+
+    get_user.short_description = "User"
+    get_user.admin_order_field = "enrollment__user__email"
 
     def has_add_permission(self, request):
         return False
@@ -174,11 +197,27 @@ class CourseRunEnrollmentAdmin(AuditableModelAdmin):
     get_run_courseware_id.admin_order_field = "run__courseware_id"
 
 
-class CourseRunEnrollmentAuditAdmin(admin.ModelAdmin):
+class CourseRunEnrollmentAuditAdmin(TimestampedModelAdmin):
     """Admin for CourseRunEnrollmentAudit"""
 
     model = CourseRunEnrollmentAudit
+    include_created_on_in_list = True
+    list_display = ("id", "enrollment_id", "get_run_courseware_id", "get_user")
     readonly_fields = get_field_names(CourseRunEnrollmentAudit)
+
+    def get_run_courseware_id(self, obj):
+        """Returns the related CourseRun courseware_id"""
+        return obj.enrollment.run.courseware_id
+
+    get_run_courseware_id.short_description = "Course Run"
+    get_run_courseware_id.admin_order_field = "enrollment__run__courseware_id"
+
+    def get_user(self, obj):
+        """Returns the related User's email"""
+        return obj.enrollment.user.email
+
+    get_user.short_description = "User"
+    get_user.admin_order_field = "enrollment__user__email"
 
     def has_add_permission(self, request):
         return False
@@ -214,11 +253,34 @@ class CourseRunGradeAdmin(admin.ModelAdmin):
     get_run_courseware_id.admin_order_field = "course_run__courseware_id"
 
 
-class CourseRunGradeAuditAdmin(admin.ModelAdmin):
+class CourseRunGradeAuditAdmin(TimestampedModelAdmin):
     """Admin for CourseRunGradeAudit"""
 
     model = CourseRunGradeAudit
+    include_created_on_in_list = True
+    list_display = (
+        "id",
+        "course_run_grade_id",
+        "get_user_email",
+        "get_run_courseware_id",
+    )
     readonly_fields = get_field_names(CourseRunGradeAudit)
+
+    def get_user_email(self, obj):
+        """Returns the related User email"""
+        return obj.course_run_grade.user.email
+
+    get_user_email.short_description = "User Email"
+    get_user_email.admin_order_field = "course_run_grade__user__email"
+
+    def get_run_courseware_id(self, obj):
+        """Returns the related CourseRun courseware_id"""
+        return obj.course_run_grade.course_run.courseware_id
+
+    get_run_courseware_id.short_description = "Course Run"
+    get_run_courseware_id.admin_order_field = (
+        "course_run_grade__course_run__courseware_id"
+    )
 
     def has_add_permission(self, request):
         return False
@@ -227,18 +289,12 @@ class CourseRunGradeAuditAdmin(admin.ModelAdmin):
         return False
 
 
-class CourseRunCertificateAdmin(admin.ModelAdmin):
+class CourseRunCertificateAdmin(TimestampedModelAdmin):
     """Admin for CourseRunCertificate"""
 
     model = CourseRunCertificate
-    list_display = [
-        "uuid",
-        "user",
-        "course_run",
-        "get_revoked_state",
-        "created_on",
-        "updated_on",
-    ]
+    include_timestamps_in_list = True
+    list_display = ["uuid", "user", "course_run", "get_revoked_state"]
     search_fields = [
         "course_run__courseware_id",
         "course_run__title",
@@ -260,18 +316,12 @@ class CourseRunCertificateAdmin(admin.ModelAdmin):
         )
 
 
-class ProgramCertificateAdmin(admin.ModelAdmin):
+class ProgramCertificateAdmin(TimestampedModelAdmin):
     """Admin for ProgramCertificate"""
 
     model = ProgramCertificate
-    list_display = [
-        "uuid",
-        "user",
-        "program",
-        "get_revoked_state",
-        "created_on",
-        "updated_on",
-    ]
+    include_timestamps_in_list = True
+    list_display = ["uuid", "user", "program", "get_revoked_state"]
     search_fields = [
         "program__readable_id",
         "program__title",
