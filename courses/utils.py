@@ -117,6 +117,9 @@ def generate_program_certificate(user, program):
         user=user, program=program
     )
     if existing_cert_queryset.exists():
+        ProgramEnrollment.objects.get_or_create(
+            program=program, user=user, defaults={"active": True, "change_status": None}
+        )
         return existing_cert_queryset.first(), False
 
     courses_in_program_ids = set(program.courses.values_list("id", flat=True))
