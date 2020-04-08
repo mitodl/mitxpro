@@ -25,7 +25,7 @@ from mitxpro.envs import (
 )
 from mitxpro.sentry import init_sentry
 
-VERSION = "0.46.1"
+VERSION = "0.47.0"
 
 ENVIRONMENT = get_string(
     "MITXPRO_ENVIRONMENT",

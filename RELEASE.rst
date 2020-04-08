@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.47.0
+--------------
+
+- Improve uWSGI configuration (#1616)
+- Various admin fixes + timestamped model admin class
+- Optimized bulk purchase page
+- Program certificate fix for missing enrollment - #126
+- Pillow upgrade - #132
+- Bump minimist from 1.2.0 to 1.2.3
+
 Version 0.46.1 (Released April 08, 2020)
 --------------
 
