@@ -187,7 +187,7 @@ class ReceiptAdmin(TimestampedModelAdmin):
 
     def get_order_user(self, obj):
         """Returns the related Order's user email"""
-        return obj.order.purchaser.email
+        return obj.order.purchaser.email if obj.order is not None else None
 
     get_order_user.short_description = "User"
     get_order_user.admin_order_field = "order__purchaser__email"
