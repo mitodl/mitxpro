@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.46.1
+Version 0.46.1 (Released April 08, 2020)
 --------------
 
 - Used dynamic image loading for select CMS pages
