@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.47.0
+Version 0.47.0 (Released April 08, 2020)
 --------------
 
 - Improve uWSGI configuration (#1616)
