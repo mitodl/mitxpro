@@ -18,6 +18,7 @@ from rest_framework import status
 from google_auth_oauthlib.flow import Flow  # pylint: disable-all
 from google.auth.exceptions import GoogleAuthError  # pylint: disable-all
 
+from mitxpro.utils import now_in_utc
 from sheets.api import get_sheet_metadata_from_type
 from sheets.models import GoogleApiAuth, GoogleFileWatch
 from sheets.constants import (
@@ -137,12 +138,19 @@ def handle_watched_sheet_update(request):
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
     file_id = qs_file_id or sheet_metadata.sheet_file_id
 
-    req_sheet_file_watch = GoogleFileWatch.objects.filter(file_id=file_id).first()
-    if not req_sheet_file_watch:
+    try:
+        with transaction.atomic():
+            req_sheet_file_watch = GoogleFileWatch.objects.select_for_update().get(
+                file_id=file_id
+            )
+            req_sheet_file_watch.last_request_received = now_in_utc()
+            req_sheet_file_watch.save()
+    except GoogleFileWatch.DoesNotExist:
         log.error(
-            "Google file watch request for %s received, but no local file watch record exists "
+            "Google file watch request for %s received (%s), but no local file watch record exists "
             "in the database.",
             sheet_metadata.sheet_name,
+            file_id,
         )
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
     if channel_id != req_sheet_file_watch.channel_id:
