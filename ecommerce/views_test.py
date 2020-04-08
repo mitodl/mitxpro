@@ -1221,6 +1221,35 @@ def test_products_viewset_list(user_drf_client, coupon_product_ids):
         )
 
 
+def test_products_viewset_list_sort(user_drf_client):
+    """ Test that the ProductViewSet returns all products sorted by title when requested"""
+    product_version_1 = ProductVersionFactory.create(product__content_object__title="B")
+    product_version_2 = ProductVersionFactory.create(product__content_object__title="D")
+    product_version_3 = ProductVersionFactory.create(product__content_object__title="C")
+    product_version_4 = ProductVersionFactory.create(product__content_object__title="A")
+
+    # In alphabetical orders per product__content_object__title
+    product_versions_sorted = [
+        product_version_4,
+        product_version_1,
+        product_version_3,
+        product_version_2,
+    ]
+    product_ids_sorted = [
+        product_version.product.id for product_version in product_versions_sorted
+    ]
+
+    response = user_drf_client.get(reverse("products_api-list"))
+    assert response.status_code == status.HTTP_200_OK
+    products = response.json()
+    assert [product.get("id") for product in products] != product_ids_sorted
+
+    response_sorted = user_drf_client.get(reverse("products_api-list") + "?sort=title")
+    assert response_sorted.status_code == status.HTTP_200_OK
+    products = response_sorted.json()
+    assert [product.get("id") for product in products] == product_ids_sorted
+
+
 def test_products_viewset_list_missing_unchecked_bulk_visibility(user_drf_client):
     """ Test that the ProductViewSet returns all products
         which are visible_in_bulk_form

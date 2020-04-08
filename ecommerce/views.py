@@ -134,6 +134,17 @@ class ProductViewSet(ReadOnlyModelViewSet):
         """
         return {"has_ordered_versions": True}
 
+    def list(self, request, *args, **kwargs):
+        """
+        Sort the default response if indicated in query string
+        """
+        response = super().list(request, *args, **kwargs)
+        sort = request.GET.get("sort")
+
+        if status.is_success(response.status_code) and sort == "title":
+            response.data.sort(key=lambda item: item["title"].lower())
+        return response
+
 
 class CompanyViewSet(ReadOnlyModelViewSet):
     """API view set for Companies"""
