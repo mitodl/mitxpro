@@ -91,6 +91,12 @@ class CourseRunQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
         """Applies a filter for Course runs with live=True"""
         return self.filter(live=True)
 
+    def available(self):
+        """Applies a filter for Course runs with end_date in future"""
+        return self.filter(
+            models.Q(end_date__isnull=True) | models.Q(end_date__gt=now_in_utc())
+        )
+
     def with_text_id(self, text_id):
         """Applies a filter for the CourseRun's courseware_id"""
         return self.filter(courseware_id=text_id)
@@ -104,6 +110,10 @@ class CourseRunManager(models.Manager):  # pylint: disable=missing-docstring
     def live(self):
         """Returns a queryset of Course runs with live=True"""
         return self.get_queryset().live()
+
+    def available(self):
+        """Returns a querset of Couse runs with end_date in future"""
+        return self.get_queryset().available()
 
     def with_text_id(self, text_id):
         """Returns a queryset filtered by text id (i.e.: courseware_id)"""

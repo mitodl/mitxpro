@@ -64,6 +64,7 @@ def get_eligible_coupon_choices(voucher):
                 start_date__date=voucher.course_start_date_input,
             )
             .live()
+            .available()
             .order_by("start_date")
         )
 
@@ -85,6 +86,7 @@ def get_eligible_coupon_choices(voucher):
                 | Q(start_date__date=voucher.course_start_date_input)
             )
             .live()
+            .available()
             .order_by("start_date")
         )
 
