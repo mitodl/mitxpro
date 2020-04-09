@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.47.1
+--------------
+
+- Don't display courses that have ended in Boeing voucher upload
+- Fixed Receipt admin class
+- Bulk purchase text updates - #136
+- Added field to track when file watch requests come in
+
 Version 0.47.0 (Released April 08, 2020)
 --------------
 
