@@ -116,7 +116,7 @@ class B2BPurchaseForm extends React.Component<Props> {
       <Form className="b2b-purchase-form container">
         <div className="row">
           <div className="col-lg-12">
-            <div className="title">Bulk Purchase Order</div>
+            <div className="title">Order Form</div>
           </div>
           <B2BCheckoutExplanation />
         </div>
@@ -197,10 +197,8 @@ class B2BPurchaseForm extends React.Component<Props> {
               Place order
             </button>
             <div className="description enterprise-terms-condition">
-              By placing my order I accept the{" "}
-              <a href="/enterprise-terms-and-conditions/">
-                MIT xPRO Enterprise Sales Terms and Conditions
-              </a>
+              By placing my order, I accept the{" "}
+              <a href="/terms-of-service/">MIT xPRO Terms and Conditions.</a>
             </div>
           </div>
         </div>
