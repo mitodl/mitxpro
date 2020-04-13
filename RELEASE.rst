@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.47.1
+Version 0.47.1 (Released April 13, 2020)
 --------------
 
 - Don't display courses that have ended in Boeing voucher upload
