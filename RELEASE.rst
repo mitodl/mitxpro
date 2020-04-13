@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.48.0
+--------------
+
+- Filter out course runs with enrollment closed
+- remove users from the dataconsentagreement admin page
+
 Version 0.47.1 (Released April 13, 2020)
 --------------
 
