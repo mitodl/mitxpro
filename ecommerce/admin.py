@@ -493,19 +493,6 @@ class DataConsentUserAdmin(TimestampedModelAdmin):
     model = DataConsentUser
 
 
-class DataConsentUserInline(admin.StackedInline):
-    """Admin Inline for DataConsentUser objects"""
-
-    model = DataConsentUser
-    raw_id_fields = ("user", "coupon")
-    extra = 1
-    show_change_link = True
-
-    def get_queryset(self, request):
-        """Overrides base method to improve performance"""
-        return super().get_queryset(request).select_related("user", "agreement")
-
-
 class DataConsentAgreementAdmin(TimestampedModelAdmin):
     """Admin for DataConsentAgreement"""
 
@@ -514,7 +501,6 @@ class DataConsentAgreementAdmin(TimestampedModelAdmin):
     list_display = ("id", "company")
     search_fields = ("company", "content")
     raw_id_fields = ("courses",)
-    inlines = [DataConsentUserInline]
 
     model = DataConsentAgreement
 
