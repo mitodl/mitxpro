@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db.models import Q
 from django.http import Http404
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
@@ -66,6 +67,7 @@ from mitxpro.utils import (
     make_csv_http_response,
     first_or_none,
     format_datetime_for_filename,
+    now_in_utc,
 )
 
 log = logging.getLogger(__name__)
@@ -79,13 +81,6 @@ class ProductViewSet(ReadOnlyModelViewSet):
 
     authentication_classes = ()
     permission_classes = ()
-
-    queryset = (
-        Product.objects.exclude(productversions=None)
-        .select_related("content_type")
-        .prefetch_related("content_object")
-        .with_ordered_versions()
-    )
 
     def _get_request_properties(self):
         """
@@ -108,9 +103,20 @@ class ProductViewSet(ReadOnlyModelViewSet):
         return False, product_type
 
     def get_queryset(self):
+        now = now_in_utc()
+        expired_courseruns = CourseRun.objects.filter(
+            enrollment_end__lt=now
+        ).values_list("id", flat=True)
         queryset = (
-            Product.objects.exclude(productversions=None)
+            Product.objects.exclude(
+                Q(productversions=None)
+                | (
+                    Q(object_id__in=expired_courseruns)
+                    & Q(content_type__model="courserun")
+                )
+            )
             .select_related("content_type")
+            .prefetch_related("content_object")
             .with_ordered_versions()
         )
         nested, product_type = self._get_request_properties()
