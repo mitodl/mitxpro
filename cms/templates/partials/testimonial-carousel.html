@@ -1,4 +1,4 @@
-{% load wagtailimages_tags wagtailcore_tags %}
+{% load image_version_url wagtailcore_tags %}
 <div id="testimonials" class="learners-block">
   <div class="container">
     <div class="head">
@@ -12,7 +12,7 @@
       <div class="slide">
         <div class="slide-holder">
           {% if testimonial.value.image %}
-            <img src="{% image_url testimonial.value.image "fill-75x75" %}" alt="{{ testimonial.value.name }}" />
+            <img src="{% image_version_url testimonial.value.image "fill-75x75" %}" alt="{{ testimonial.value.name }}" />
           {% endif %}
           <h2>{{ testimonial.value.name }}, {{ testimonial.value.title }}</h2>
           <p>{{ testimonial.value.quote|truncatechars:150 }}</p>
@@ -36,7 +36,7 @@
             </div>
             <div class="container px-4">
               <div class="row py-2">
-                <img src="{% image_url testimonial.value.image "fill-100x100" %}" class="border rounded-circle headshot-image" alt="Testimonial image" />
+                <img src="{% image_version_url testimonial.value.image "fill-100x100" %}" class="border rounded-circle headshot-image" alt="Testimonial image" />
               </div>
               <div class="row mb-4">
                 <h2 class="modal-title text-uppercase">{{ testimonial.value.name }}, {{ testimonial.value.title }}</h2>

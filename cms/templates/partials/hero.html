@@ -1,17 +1,15 @@
-{% load wagtailembeds_tags wagtailimages_tags %}
+{% load wagtailembeds_tags image_version_url %}
 
 {% block extrahead %}
   <style>
   {% if page.background_image %}
     .header-block {
-      {% image page.background_image fill-768x576 as background_image %}
-      background-image: url('{{ background_image.url }}');
+      background-image: url('{% image_version_url page.background_image "fill-768x576" %}');
     }
 
     @media screen and (min-width: 768px) {
       .header-block {
-        {% image page.background_image fill-1920x1080 as background_image %}
-        background-image: url('{{ background_image.url }}');
+        background-image: url('{% image_version_url page.background_image "fill-1920x1080" %}');
       }
       {% if page.background_video_url %}
         .header-block {

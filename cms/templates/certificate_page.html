@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static wagtailimages_tags %}
+{% load static wagtailimages_tags image_version_url %}
 
 {% block title %}{{ site_name }} | Certificate for: {{ page.product_name }}{% endblock %}
 
@@ -88,7 +88,7 @@
                         {% for signatory in page.signatory_pages %}
                             <div class="col-sm-4 col-md-3 certify-by">
                                 <div class="signature-area">
-                                    <img src="{% image_url signatory.signature_image "max-150x50" %}" alt="{{ signatory.name }} signature" />
+                                    <img src="{% image_version_url signatory.signature_image "max-150x50" %}" alt="{{ signatory.name }} signature" />
                                 </div>
                                 <span class="title">{{ signatory.name }}</span>
                                 {% if signatory.title_1 %}

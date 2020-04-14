@@ -1,4 +1,4 @@
-{% load wagtailimages_tags %}
+{% load image_version_url %}
 <div id="targetAudience" class="who-should-enroll-block">
   <div class="container">
     <div class="row">
@@ -13,7 +13,7 @@
       <div class="col-lg-6">
         {% if page.image %}
           <div class="img-holder {% if page.switch_layout %}stick-left{% endif %}">
-            {% image page.image fill-870x500 %}
+            <img src="{% image_version_url page.image "fill-870x500" %}" alt="{{ page.image.title }}" />
           </div>
         {% endif %}
       </div>
