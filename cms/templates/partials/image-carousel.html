@@ -1,4 +1,4 @@
-{% load static wagtailimages_tags %}
+{% load static image_version_url %}
 <div class="companies-trust-block">
     <div class="container">
         <h1>{{ page.title }}</h1>
@@ -6,7 +6,7 @@
             {% for image in page.images %}
             <div class="slide">
                 <div class="img-holder">
-                    <img src="{% image_url image.value "format-png" %}" alt="{{ image.value.title }}" />
+                    <img src="{% image_version_url image.value "format-png" %}" alt="{{ image.value.title }}" />
                 </div>
             </div>
             {% endfor %}
