@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.48.0
+Version 0.48.0 (Released April 14, 2020)
 --------------
 
 - Filter out course runs with enrollment closed
