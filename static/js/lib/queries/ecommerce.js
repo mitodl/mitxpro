@@ -65,7 +65,7 @@ export default {
   productsSelector:  pathOr(null, ["entities", "products"]),
   fullProductsQuery: () => ({
     queryKey:  "products",
-    url:       "/api/products/",
+    url:       "/api/products/?sort=title",
     transform: (json: Array<ProductDetail>) => ({
       products: json
     }),
@@ -75,7 +75,7 @@ export default {
   }),
   productsQuery: (productType?: string) => ({
     queryKey: "products",
-    url:      "/api/products/",
+    url:      "/api/products/?sort=title",
     body:     {
       nested: false,
       ...(productType ? { type: productType } : {})
