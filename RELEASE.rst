@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.48.1
+--------------
+
+- Moved test file for cms templatetags
+- Remove py-call-osafterfork setting from uwsgi.ini (#1641)
+- Added versioned image URL template tag to enable CMS image caching
+- Bulk purchase form product alphabetic sorting - #137
+
 Version 0.48.0 (Released April 14, 2020)
 --------------
 
