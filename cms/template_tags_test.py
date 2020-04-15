@@ -1,4 +1,4 @@
-"""Tests for image_version_url templatetag"""
+"""Tests for custom CMS templatetags"""
 import pytest
 from wagtail.images.views.serve import generate_signature
 from wagtail_factories import ImageFactory
