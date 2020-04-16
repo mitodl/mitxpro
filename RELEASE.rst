@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.48.2 (Released April 16, 2020)
+--------------
+
+- Move static/hash.txt rule before the generic static rule (#1658)
+
 Version 0.48.1 (Released April 16, 2020)
 --------------
 
