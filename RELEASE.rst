@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.48.1
+Version 0.48.1 (Released April 16, 2020)
 --------------
 
 - Moved test file for cms templatetags
