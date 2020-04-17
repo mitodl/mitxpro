@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.48.3
+--------------
+
+- acorn version bump
+- Rename UWSGI_ env vars, remove redundant if-env (#1651)
+
 Version 0.48.2 (Released April 16, 2020)
 --------------
 
