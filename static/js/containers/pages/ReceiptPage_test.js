@@ -106,7 +106,9 @@ describe("ReceiptPage", () => {
 
     assert.equal(
       inner.find("#purchaserName").text(),
-      `${receiptObject.purchaser.first_name} ${receiptObject.purchaser.last_name}`
+      `${receiptObject.purchaser.first_name} ${
+        receiptObject.purchaser.last_name
+      }`
     )
     assert.equal(
       inner.find("#purchaserEmail").text(),
@@ -131,7 +133,9 @@ describe("ReceiptPage", () => {
 
     assert.equal(
       inner.find("#paymentMethod").text(),
-      `${receiptObject.receipt.card_type} | ${receiptObject.receipt.card_number}`
+      `${receiptObject.receipt.card_type} | ${
+        receiptObject.receipt.card_number
+      }`
     )
     assert.equal(inner.find("#discountCode").text(), receiptObject.coupon)
   })

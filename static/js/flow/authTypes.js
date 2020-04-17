@@ -32,12 +32,12 @@ export type AuthExtraData = {
 
 export type AuthResponse = {
   partial_token: ?string,
-  flow:          AuthFlow,
-  state:         AuthStates,
-  errors:        AuthErrors,
-  field_errors:  AuthFieldErrors,
-  redirect_url:  ?string,
-  extra_data:    AuthExtraData
+  flow: AuthFlow,
+  state: AuthStates,
+  errors: AuthErrors,
+  field_errors: AuthFieldErrors,
+  redirect_url: ?string,
+  extra_data: AuthExtraData
 }
 
 export type LegalAddress = {
@@ -74,25 +74,25 @@ export type Profile = {
 }
 
 export type User = {
-    id: number,
-    username: string,
-    email: string,
-    name: string,
-    created_on: string,
-    updated_on: string,
-    profile: ?Profile,
-    legal_address: ?LegalAddress,
-    unused_coupons: Array<UnusedCoupon>
+  id: number,
+  username: string,
+  email: string,
+  name: string,
+  created_on: string,
+  updated_on: string,
+  profile: ?Profile,
+  legal_address: ?LegalAddress,
+  unused_coupons: Array<UnusedCoupon>
 }
 
 export type AnonymousUser = {
   is_anonymous: true,
-  is_authenticated: false,
+  is_authenticated: false
 }
 
 export type LoggedInUser = {
   is_anonymous: false,
-  is_authenticated: true,
+  is_authenticated: true
 } & User
 
 export type CurrentUser = AnonymousUser | LoggedInUser
@@ -103,8 +103,8 @@ export type StateOrTerritory = {
 }
 
 export type Country = {
-  name:   string,
-  code:   string,
+  name: string,
+  code: string,
   states: Array<StateOrTerritory>
 }
 
@@ -121,13 +121,13 @@ export type PasswordFormValues = {
 }
 
 export type UserProfileForm = {
-    email: string,
-    name: string,
-    legal_address: ?LegalAddress,
-    profile: ?Profile
+  email: string,
+  name: string,
+  legal_address: ?LegalAddress,
+  profile: ?Profile
 }
 
 export type updateEmailResponse = {
   confirmed: boolean,
-  detail: ?string,
+  detail: ?string
 }

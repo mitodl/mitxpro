@@ -13,21 +13,21 @@ declare type Settings = {
   support_email: string,
   site_name: string,
   zendesk_config: {
-    help_widget_enabled: bool,
+    help_widget_enabled: boolean,
     help_widget_key: ?string
   }
 }
-declare var SETTINGS: Settings;
+declare var SETTINGS: Settings
 
 // mocha
-declare var it: Function;
-declare var beforeEach: Function;
-declare var afterEach: Function;
-declare var describe: Function;
+declare var it: Function
+declare var beforeEach: Function
+declare var afterEach: Function
+declare var describe: Function
 
 // webpack
-declare var __webpack_public_path__: string; // eslint-disable-line camelcase
+declare var __webpack_public_path__: string // eslint-disable-line camelcase
 
 declare var module: {
-  hot: any,
+  hot: any
 }

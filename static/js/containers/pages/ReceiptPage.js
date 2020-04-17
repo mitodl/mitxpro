@@ -264,7 +264,7 @@ export class ReceiptPage extends React.Component<Props> {
                                 {endDate && formatPrettyDate(endDate)}
                               </p>
                             </div>
-                            <div className="col"></div>
+                            <div className="col" />
                           </div>
                         </div>
                       )
