@@ -5,7 +5,7 @@ import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 
-from b2b_ecommerce.models import B2BCoupon, B2BOrder
+from b2b_ecommerce.models import B2BCoupon, B2BOrder, B2BCouponRedemption
 from ecommerce.factories import (
     CompanyFactory,
     CouponPaymentVersionFactory,
@@ -48,3 +48,13 @@ class B2BCouponFactory(DjangoModelFactory):
 
     class Meta:
         model = B2BCoupon
+
+
+class B2BCouponRedemptionFactory(DjangoModelFactory):
+    """Factory for CouponRedemption"""
+
+    coupon = factory.SubFactory(B2BCouponFactory)
+    order = factory.SubFactory(B2BOrderFactory)
+
+    class Meta:
+        model = B2BCouponRedemption

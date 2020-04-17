@@ -14,6 +14,8 @@ from hubspot.api import (
     make_product_sync_message,
     make_deal_sync_message,
     make_line_item_sync_message,
+    make_b2b_deal_sync_message,
+    make_b2b_product_sync_message,
 )
 from hubspot.conftest import TIMESTAMPS, FAKE_OBJECT_ID
 from hubspot.factories import HubspotErrorCheckFactory, HubspotLineResyncFactory
@@ -24,6 +26,8 @@ from hubspot.tasks import (
     sync_product_with_hubspot,
     sync_deal_with_hubspot,
     sync_line_item_with_hubspot,
+    sync_b2b_deal_with_hubspot,
+    sync_b2b_product_with_hubspot,
     check_hubspot_api_errors,
     retry_invalid_line_associations,
 )
@@ -81,6 +85,31 @@ def test_sync_deal_with_hubspot(
 
     assert mocked_celery.replace.call_count == 1
     assert mocked_celery.replace.call_args[0][1] == mocked_celery.chain.return_value
+
+
+def test_b2b_sync_deal_with_hubspot(
+    mock_hubspot_request, mocked_celery, hubspot_b2b_order
+):
+    """Test that send_hubspot_request is called properly for a DEAL sync"""
+    with pytest.raises(mocked_celery.replace_exception_class):
+        sync_b2b_deal_with_hubspot.delay(hubspot_b2b_order.id)
+    assert mocked_celery.group.call_count == 1
+
+    body = make_b2b_deal_sync_message(hubspot_b2b_order.id)
+    body[0]["changeOccurredTimestamp"] = ANY
+    mock_hubspot_request.assert_called_once_with(
+        "DEAL", HUBSPOT_SYNC_URL, "PUT", body=body
+    )
+
+
+def test_sync_b2b_product_with_hubspot(mock_hubspot_request, hubspot_b2b_order):
+    """Test that send_hubspot_request is called properly for a LINE_ITEM sync"""
+    sync_b2b_product_with_hubspot(hubspot_b2b_order.id)
+    body = make_b2b_product_sync_message(hubspot_b2b_order.id)
+    body[0]["changeOccurredTimestamp"] = ANY
+    mock_hubspot_request.assert_called_once_with(
+        "LINE_ITEM", HUBSPOT_SYNC_URL, "PUT", body=body
+    )
 
 
 def test_sync_line_item_with_hubspot(mock_hubspot_request):

@@ -15,6 +15,30 @@ def sync_hubspot_user(user):
         tasks.sync_contact_with_hubspot.delay(user.id)
 
 
+def sync_hubspot_b2b_deal(order):
+    """
+    Trigger celery task to sync a B2B order to Hubspot if it has lines
+
+    Args:
+        order (Order): The B2B order to sync
+    """
+    if settings.HUBSPOT_API_KEY and order:
+        tasks.sync_b2b_deal_with_hubspot.apply_async(
+            countdown=120, kwargs={"order_id": order.id}
+        )
+
+
+def sync_hubspot_b2b_contact(email):
+    """
+    Trigger celery task to sync a B2B contact to Hubspot
+
+    Args:
+        order (Order): The B2B order to sync
+    """
+    if settings.HUBSPOT_API_KEY and email:
+        tasks.sync_b2b_contact_with_hubspot.delay(email)
+
+
 def sync_hubspot_deal(order):
     """
     Trigger celery task to sync an order to Hubspot if it has lines

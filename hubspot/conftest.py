@@ -7,6 +7,7 @@ from types import SimpleNamespace
 import pytz
 from django.conf import settings
 import pytest
+from b2b_ecommerce import factories as b2b_factories
 from ecommerce import factories
 from hubspot.api import hubspot_timestamp
 
@@ -178,6 +179,17 @@ def hubspot_order():
     coupon_version = factories.CouponVersionFactory(payment_version=payment_version)
     factories.LineFactory(order=order, product_version=product_version)
     factories.CouponRedemptionFactory(order=order, coupon_version=coupon_version)
+    return order
+
+
+@pytest.fixture
+def hubspot_b2b_order():
+    """ Return an B2B order for testing with hubspot"""
+    order = b2b_factories.B2BOrderFactory.create(status="created")
+    coupon = b2b_factories.B2BCouponFactory.create(
+        product=order.product_version.product
+    )
+    b2b_factories.B2BCouponRedemptionFactory.create(coupon=coupon, order=order)
     return order
 
 

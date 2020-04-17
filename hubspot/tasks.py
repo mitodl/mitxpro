@@ -14,7 +14,10 @@ from hubspot.api import (
     make_contact_sync_message,
     make_product_sync_message,
     make_deal_sync_message,
+    make_b2b_deal_sync_message,
     make_line_item_sync_message,
+    make_b2b_product_sync_message,
+    make_b2b_contact_sync_message,
     get_sync_errors,
     hubspot_timestamp,
     parse_hubspot_id,
@@ -43,6 +46,33 @@ def sync_product_with_hubspot(product_id):
     """Send a sync-message to sync a product with a hubspot product"""
     body = make_product_sync_message(product_id)
     response = send_hubspot_request("PRODUCT", HUBSPOT_SYNC_URL, "PUT", body=body)
+    response.raise_for_status()
+
+
+@app.task
+def sync_b2b_contact_with_hubspot(email):
+    """Send a sync-message to sync a user with a hubspot b2b contact"""
+    body = make_b2b_contact_sync_message(email)
+    response = send_hubspot_request("CONTACT", HUBSPOT_SYNC_URL, "PUT", body=body)
+    response.raise_for_status()
+
+
+@app.task(bind=True)
+def sync_b2b_deal_with_hubspot(self, order_id):  # pylint: disable=unused-argument
+    """Send a sync-message to sync a b2b order with a hubspot deal"""
+    body = make_b2b_deal_sync_message(order_id)
+    response = send_hubspot_request("DEAL", HUBSPOT_SYNC_URL, "PUT", body=body)
+    response.raise_for_status()
+
+    index_tasks = celery.group([sync_b2b_product_with_hubspot.si(order_id)])
+    raise self.replace(celery.chain(index_tasks))
+
+
+@app.task
+def sync_b2b_product_with_hubspot(order_id):
+    """Send a sync-message to sync a line with a hubspot line item"""
+    body = make_b2b_product_sync_message(order_id)
+    response = send_hubspot_request("LINE_ITEM", HUBSPOT_SYNC_URL, "PUT", body=body)
     response.raise_for_status()
 
 

@@ -4,12 +4,15 @@ and Line Items
 """
 from django.core.management import BaseCommand
 from requests import HTTPError
-
+from b2b_ecommerce.models import B2BOrder
 from ecommerce.models import Product, Order, Line
 from hubspot.api import (
     make_contact_sync_message,
     make_product_sync_message,
     make_deal_sync_message,
+    make_b2b_deal_sync_message,
+    make_b2b_product_sync_message,
+    make_b2b_contact_sync_message,
     make_line_item_sync_message,
     send_hubspot_request,
 )
@@ -28,7 +31,9 @@ class Command(BaseCommand):
     )
 
     @staticmethod
-    def bulk_sync_model(objects, make_object_sync_message, object_type):
+    def bulk_sync_model(
+        objects, make_object_sync_message, object_type, use_email=False
+    ):
         """
         Sync all database objects of a certain type with hubspot
         Args:
@@ -36,8 +41,12 @@ class Command(BaseCommand):
             make_object_sync_message (function) function that takes an objectID and
                 returns a sync message for that model
             object_type (str) one of "CONTACT", "DEAL", "PRODUCT", "LINE_ITEM"
+            use_email (bool) either we need to pass the object ID or Email in case of "USER" queryset.
         """
-        sync_messages = [make_object_sync_message(obj.id)[0] for obj in objects]
+        if objects.model is B2BOrder and use_email:
+            sync_messages = [make_object_sync_message(obj.email)[0] for obj in objects]
+        else:
+            sync_messages = [make_object_sync_message(obj.id)[0] for obj in objects]
         while len(sync_messages) > 0:
             staged_messages = sync_messages[0:200]
             sync_messages = sync_messages[200:]
@@ -63,6 +72,19 @@ class Command(BaseCommand):
         self.bulk_sync_model(User.objects.all(), make_contact_sync_message, "CONTACT")
         print("  Finished")
 
+    def sync_b2b_contacts(self):
+        """
+        Sync all users with b2b contacts in hubspot
+        """
+        print("  Syncing users with hubspot b2b contacts...")
+        self.bulk_sync_model(
+            B2BOrder.objects.all(),
+            make_b2b_contact_sync_message,
+            "CONTACT",
+            use_email=True,
+        )
+        print("  Finished")
+
     def sync_products(self):
         """
         Sync all products with products in hubspot
@@ -72,6 +94,24 @@ class Command(BaseCommand):
             Product.objects.filter(productversions__isnull=False),
             make_product_sync_message,
             "PRODUCT",
+        )
+        print("  Finished")
+
+    def sync_b2b_deals(self):
+        """
+        Sync all b2b orders with deals in hubspot
+        """
+        print("  Syncing b2b orders with hubspot deals...")
+        self.bulk_sync_model(B2BOrder.objects.all(), make_b2b_deal_sync_message, "DEAL")
+        print("  Finished")
+
+    def sync_b2b_product_item(self):
+        """
+        Sync b2b deal product with line_items in hubspot
+        """
+        print("  Syncing b2b product with hubspot line items...")
+        self.bulk_sync_model(
+            B2BOrder.objects.all(), make_b2b_product_sync_message, "LINE_ITEM"
         )
         print("  Finished")
 
@@ -101,6 +141,9 @@ class Command(BaseCommand):
         self.sync_products()
         self.sync_deals()
         self.sync_line_items()
+        self.sync_b2b_contacts()
+        self.sync_b2b_deals()
+        self.sync_b2b_product_item()
 
     def add_arguments(self, parser):
         """
@@ -127,11 +170,30 @@ class Command(BaseCommand):
             help="Sync all orders",
         )
         parser.add_argument(
+            "--b2bdeals",
+            "--b2borders",
+            dest="sync_b2b_deals",
+            action="store_true",
+            help="Sync all b2b orders",
+        )
+        parser.add_argument(
             "--lines",
             "--line-items",
             dest="sync_line_items",
             action="store_true",
             help="Sync all lines",
+        )
+        parser.add_argument(
+            "--b2bproducts",
+            dest="sync_b2b_product",
+            action="store_true",
+            help="Sync b2b products",
+        )
+        parser.add_argument(
+            "--b2bcontacts",
+            dest="sync_b2b_contacts",
+            action="store_true",
+            help="Sync b2b contacts",
         )
 
     def handle(self, *args, **options):
@@ -141,6 +203,9 @@ class Command(BaseCommand):
             or options["sync_products"]
             or options["sync_deals"]
             or options["sync_line_items"]
+            or options["sync_b2b_deals"]
+            or options["sync_b2b_product"]
+            or options["sync_b2b_contacts"]
         ):
             # If no flags are set, sync everything
             self.sync_all()
@@ -154,5 +219,11 @@ class Command(BaseCommand):
                 self.sync_deals()
             if options["sync_line_items"]:
                 self.sync_line_items()
+            if options["sync_b2b_deals"]:
+                self.sync_b2b_deals()
+            if options["sync_b2b_product"]:
+                self.sync_b2b_product_item()
+            if options["sync_b2b_contacts"]:
+                self.sync_b2b_contacts()
 
         print("Hubspot sync complete")
