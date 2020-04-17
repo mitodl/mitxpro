@@ -142,7 +142,9 @@ export class DashboardPage extends React.Component<Props, State> {
           type:  ALERT_TYPE_TEXT,
           color: "danger",
           props: {
-            text: `Something went wrong. Please contact support at ${SETTINGS.support_email}.`
+            text: `Something went wrong. Please contact support at ${
+              SETTINGS.support_email
+            }.`
           }
         }
       })
@@ -318,7 +320,9 @@ export class DashboardPage extends React.Component<Props, State> {
               </div>
             </div>
             <a
-              href={`${routes.checkout}?product=${enrollmentCode.product_id}&code=${enrollmentCode.coupon_code}`}
+              href={`${routes.checkout}?product=${
+                enrollmentCode.product_id
+              }&code=${enrollmentCode.coupon_code}`}
               className="btn btn-primary btn-enroll"
             >
               <span className="button-text">Enroll</span>

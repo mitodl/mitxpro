@@ -21,7 +21,7 @@ export type BaseCourse = {
   description: ?string,
   thumbnail_url: string,
   readable_id: ?string,
-  next_run_id: ?number,
+  next_run_id: ?number
 }
 
 export type Course = BaseCourse & {

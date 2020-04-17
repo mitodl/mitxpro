@@ -1,31 +1,31 @@
 // @flow
 import type { Course, BaseCourseRun, Program } from "./courseTypes"
-import {PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM} from "../constants"
+import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
 import type { ExtendedLegalAddress } from "./authTypes"
 
 export type CheckoutResponse = {
   url: string,
   payload: CheckoutPayload,
   method?: ?string,
-  errors?: string|Array<string>
+  errors?: string | Array<string>
 }
 
 export type CheckoutPayload = {
-  "access_key": string,
-  "amount": string,
-  "consumer_id": string,
-  "currency": string,
-  "locale": string,
-  "override_custom_cancel_page": string,
-  "override_custom_receipt_page": string,
-  "profile_id": string,
-  "reference_number": string,
-  "signature": string,
-  "signed_date_time": string,
-  "signed_field_names": string,
-  "transaction_type": string,
-  "transaction_uuid": string,
-  "unsigned_field_names": string,
+  access_key: string,
+  amount: string,
+  consumer_id: string,
+  currency: string,
+  locale: string,
+  override_custom_cancel_page: string,
+  override_custom_receipt_page: string,
+  profile_id: string,
+  reference_number: string,
+  signature: string,
+  signed_date_time: string,
+  signed_field_names: string,
+  transaction_type: string,
+  transaction_uuid: string,
+  unsigned_field_names: string
 }
 
 export type BaseProductVersion = {
@@ -35,7 +35,7 @@ export type BaseProductVersion = {
   content_title: string,
   object_id: number,
   product_id: number,
-  readable_id: string,
+  readable_id: string
 }
 
 export type ProductVersion = BaseProductVersion & {
@@ -43,11 +43,11 @@ export type ProductVersion = BaseProductVersion & {
   thumbnail_url: string,
   run_tag: ?string,
   description: string,
-  start_date: ?string,
+  start_date: ?string
 }
 
 export type BasketItem = ProductVersion & {
-  run_ids: Array<number>,
+  run_ids: Array<number>
 }
 
 export type CouponSelection = {
@@ -75,18 +75,18 @@ export type B2BOrderStatus = {
   coupon_code: ?string,
   reference_number: ?string,
   receipt_data: { card_type: ?string, card_number: ?string },
-  product_version: ProductVersion,
+  product_version: ProductVersion
 }
 
 export type B2BCouponStatusPayload = {
   code: string,
-  product_id: number,
+  product_id: number
 }
 
 export type B2BCouponStatusResponse = {
   code: string,
   product_id: number,
-  discount_percent: string,
+  discount_percent: string
 }
 
 export type BasketResponse = {
@@ -96,8 +96,8 @@ export type BasketResponse = {
 }
 
 type BasketItemPayload = {
-  product_id: number|string,
-  run_ids?: Array<number>,
+  product_id: number | string,
+  run_ids?: Array<number>
 }
 
 export type BasketPayload = {
@@ -138,7 +138,7 @@ export type OrderReceiptResponse = {
 
 export type Company = {
   id: number,
-  name: string,
+  name: string
 }
 
 export type CouponPayment = {
@@ -181,13 +181,13 @@ export type Product = {
   id: number,
   product_type: string,
   title: string,
-  visible_in_bulk_form: boolean,
+  visible_in_bulk_form: boolean
 }
 
 export type SimpleProductDetail = Product & {
   latest_version: BaseProductVersion,
-  parent:         {
-    id?:    number,
+  parent: {
+    id?: number,
     title?: string
   },
   start_date: ?string,
@@ -195,7 +195,7 @@ export type SimpleProductDetail = Product & {
 }
 
 export type ProductDetail = Product & {
-  latest_version: ProductVersion,
+  latest_version: ProductVersion
 }
 
 export type ProductMap = {
@@ -219,7 +219,7 @@ export type BulkCouponPaymentsResponse = {
 }
 
 export type BulkCouponSendResponse = {
-  emails:             Array<string>,
+  emails: Array<string>,
   bulk_assignment_id: number
 }
 
@@ -238,5 +238,5 @@ export type EnrollmentCode = {
   product_title: string,
   product_type: string,
   thumbnail_url: string,
-  start_date: Date,
+  start_date: Date
 }

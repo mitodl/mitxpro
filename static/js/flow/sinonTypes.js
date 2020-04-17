@@ -1,3 +1,1 @@
-export type Sandbox = {
-
-};
+export type Sandbox = {}
