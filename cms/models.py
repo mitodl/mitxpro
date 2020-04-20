@@ -43,8 +43,8 @@ from cms.constants import (
 )
 from cms.forms import CertificatePageForm
 from cms.api import filter_and_sort_catalog_pages
-from courses.constants import DEFAULT_COURSE_IMG_PATH
-from courses.models import CourseRunCertificate, ProgramCertificate
+from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
+from courses.models import CourseRunCertificate, ProgramCertificate, ProgramRun
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
 
@@ -169,6 +169,18 @@ class ProgramIndexPage(CourseObjectIndexPage):
 
     def get_child_by_readable_id(self, readable_id):
         """Fetch a child page by the related Program's readable_id value"""
+        program_run_id_match = re.match(PROGRAM_RUN_ID_PATTERN, readable_id)
+        # This text id matches the pattern of a program text id with a program run attached
+        if program_run_id_match:
+            match_dict = program_run_id_match.groupdict()
+            if ProgramRun.objects.filter(
+                program__readable_id=match_dict["text_id_base"],
+                run_tag=match_dict["run_tag"],
+            ).exists():
+                # If the given readable_id matches a ProgramRun, remove the run tag from the
+                # readable_id (example: `program-v1:my+program+R1` -> `program-v1:my+program`)
+                readable_id = match_dict["text_id_base"]
+
         return self.get_children().get(programpage__program__readable_id=readable_id)
 
 

@@ -323,3 +323,24 @@ def test_program_page_checkout_url_program_run(client, wagtail_basics):
     resp = client.get(program_page.get_url())
     checkout_url = resp.context["checkout_url"]
     assert f"product={program_run.full_readable_id}" in checkout_url
+
+
+def test_program_page_for_program_run(client):
+    """
+    Test that prgram page URL works with program run id
+    """
+    program_page = ProgramPageFactory.create()
+    program_page.save_revision().publish()
+    program_run = ProgramRunFactory.create(
+        program=program_page.program,
+        run_tag="R1",
+        start_date=(now_in_utc() + timedelta(days=10)),
+    )
+
+    page_base_url = program_page.get_url().rstrip("/")
+    good_url = "{}+{}/".format(page_base_url, program_run.run_tag)
+    resp = client.get(good_url)
+    assert resp.status_code == 200
+    bad_url = "{}+R2/".format(page_base_url)
+    resp = client.get(bad_url)
+    assert resp.status_code == 404
