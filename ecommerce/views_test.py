@@ -7,6 +7,7 @@ import operator as op
 
 import pytz
 from django.urls import reverse
+import factory
 import faker
 import pytest
 import rest_framework.status as status  # pylint: disable=useless-import-alias
@@ -1221,33 +1222,37 @@ def test_products_viewset_list(user_drf_client, coupon_product_ids):
         )
 
 
-def test_products_viewset_list_sort(user_drf_client):
-    """ Test that the ProductViewSet returns all products sorted by title when requested"""
-    product_version_1 = ProductVersionFactory.create(product__content_object__title="B")
-    product_version_2 = ProductVersionFactory.create(product__content_object__title="D")
-    product_version_3 = ProductVersionFactory.create(product__content_object__title="C")
-    product_version_4 = ProductVersionFactory.create(product__content_object__title="A")
-
-    # In alphabetical orders per product__content_object__title
-    product_versions_sorted = [
-        product_version_4,
-        product_version_1,
-        product_version_3,
-        product_version_2,
+@pytest.mark.parametrize("nested", [False, True])
+def test_products_viewset_list_sort(user_drf_client, nested):
+    """Test that the sorting works as expected"""
+    product_versions = ProductVersionFactory.create_batch(
+        4,
+        product__content_object__title=factory.Iterator(["C", "E", "D", "B"]),
+        product__content_object__course__title=factory.Iterator(["B", "A", "C", "D"]),
+    )
+    product_versions_sorted_flat = [
+        product_versions[1].product,
+        product_versions[0].product,
+        product_versions[2].product,
+        product_versions[3].product,
     ]
-    product_ids_sorted = [
-        product_version.product.id for product_version in product_versions_sorted
+    product_versions_sorted_nested = [
+        product_versions[3].product,
+        product_versions[0].product,
+        product_versions[2].product,
+        product_versions[1].product,
     ]
-
-    response = user_drf_client.get(reverse("products_api-list"))
-    assert response.status_code == status.HTTP_200_OK
-    products = response.json()
-    assert [product.get("id") for product in products] != product_ids_sorted
-
-    response_sorted = user_drf_client.get(reverse("products_api-list") + "?sort=title")
+    response_sorted = user_drf_client.get(
+        "{}?sort=title&nested={}".format(reverse("products_api-list"), nested)
+    )
     assert response_sorted.status_code == status.HTTP_200_OK
-    products = response_sorted.json()
-    assert [product.get("id") for product in products] == product_ids_sorted
+    resp_products = response_sorted.json()
+    expected_products = (
+        product_versions_sorted_nested if nested else product_versions_sorted_flat
+    )
+    assert [product.get("id") for product in resp_products] == [
+        product.id for product in expected_products
+    ]
 
 
 def test_products_viewset_list_missing_unchecked_bulk_visibility(user_drf_client):

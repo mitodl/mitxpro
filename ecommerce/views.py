@@ -139,10 +139,15 @@ class ProductViewSet(ReadOnlyModelViewSet):
         Sort the default response if indicated in query string
         """
         response = super().list(request, *args, **kwargs)
+        nested, _ = self._get_request_properties()
         sort = request.GET.get("sort")
 
         if status.is_success(response.status_code) and sort == "title":
-            response.data.sort(key=lambda item: item["title"].lower())
+            response.data.sort(
+                key=lambda item: item["parent"]["title"].lower()
+                if (not nested) and item["parent"]
+                else item["title"].lower()
+            )
         return response
 
 
