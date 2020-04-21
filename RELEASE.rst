@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.48.3
+Version 0.48.3 (Released April 21, 2020)
 --------------
 
 - acorn version bump
