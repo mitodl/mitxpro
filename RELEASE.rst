@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.49.0
+--------------
+
+- Fix product title/nested sorting on Product API - #146
+- Change URL routing to allow for program run ids
+
 Version 0.48.3 (Released April 21, 2020)
 --------------
 
