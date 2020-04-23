@@ -317,33 +317,30 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                   <span>{formatPrice(calculatePrice(item, coupon))}</span>
                 </div>
               </div>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-lg-7" />
-            <div className="col-lg-5">
-              <button
-                className="checkout-button"
-                type="submit"
-                disabled={requestPending}
-              >
-                Place your order
-              </button>
-              {formatErrors(errors.items)}
-              <div className="submit-links">
-                By placing my order I agree to the{" "}
-                <a href="/terms-of-service/" target="_blank">
-                  Terms of Service
-                </a>
-                ,{" "}
-                <a href="/honor-code/" target="_blank">
-                  Refund Policy
-                </a>
-                , and{" "}
-                <a href="/privacy-policy/" target="_blank">
-                  Privacy Policy
-                </a>
-                .
+              <div>
+                <button
+                  className="checkout-button"
+                  type="submit"
+                  disabled={requestPending}
+                >
+                  Place your order
+                </button>
+                {formatErrors(errors.items)}
+                <div className="submit-links">
+                  By placing my order I agree to the{" "}
+                  <a href="/terms-of-service/" target="_blank">
+                    Terms of Service
+                  </a>
+                  ,{" "}
+                  <a href="/honor-code/" target="_blank">
+                    Refund Policy
+                  </a>
+                  , and{" "}
+                  <a href="/privacy-policy/" target="_blank">
+                    Privacy Policy
+                  </a>
+                  .
+                </div>
               </div>
             </div>
           </div>
