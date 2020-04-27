@@ -39,6 +39,6 @@ the same moira list.
     
     - Enter the product id for the product you just created
     - Set the price as directed by the course team. 
-    - Set the title to be the same as the courserun title. The product title will appear on the checkout page
+    - Set the description to be the same as the courserun title. The product title will appear on the checkout page
     
   - test the product by going to /checkout/?product= and the courserun id (text or integer) 
