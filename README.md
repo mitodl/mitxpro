@@ -146,3 +146,18 @@ otherwise do in a Django shell. To get started:
 
 From there, you should be able to run code snippets with a live Django app just like you
 would in a Django shell.
+
+
+## Commits
+
+To ensure commits to github are safe, you should install the following first:
+```
+pip install pre_commit
+pre-commit install
+```
+
+To automatically install precommit hooks when cloning a repo, you can run this:
+```
+git config --global init.templateDir ~/.git-template
+pre-commit init-templatedir ~/.git-template
+```    
