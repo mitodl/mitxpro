@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.48.4
+Version 0.48.4 (Released April 27, 2020)
 --------------
 
 - change placement of order button on checkout page
