@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.49.0
+--------------
+
+- update kind-of version to 6.0.2
+
 Version 0.48.4 (Released April 27, 2020)
 --------------
 
