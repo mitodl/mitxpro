@@ -67,7 +67,8 @@ from ecommerce.factories import (
     BulkCouponAssignmentFactory,
     BasketItemFactory,
     LineRunSelectionFactory,
-    CouponPaymentFactory)
+    CouponPaymentFactory,
+)
 from ecommerce.models import (
     BasketItem,
     Coupon,
@@ -323,39 +324,34 @@ def test_get_valid_coupon_versions_after_redemption(user, is_global):
     """
     payment = CouponPaymentFactory()
     civ_old = CouponPaymentVersionFactory(
-        payment=payment, amount=Decimal("0.50000"), max_redemptions_per_user=1, num_coupon_codes=1
+        payment=payment,
+        amount=Decimal("0.50000"),
+        max_redemptions_per_user=1,
+        num_coupon_codes=1,
     )
-    # Coupon payment for best coupon, more recent than previous so takes precedence
     civ_new = CouponPaymentVersionFactory(
-        payment=payment, amount=Decimal("1.00000"), max_redemptions_per_user=1, num_coupon_codes=1
+        payment=payment,
+        amount=Decimal("1.00000"),
+        max_redemptions_per_user=1,
+        num_coupon_codes=1,
     )
-    coupon = CouponFactory(payment=payment, coupon_code="TESTCOUPON1", is_global=is_global)
+    coupon = CouponFactory(
+        payment=payment, coupon_code="TESTCOUPON1", is_global=is_global
+    )
     CouponVersionFactory(payment_version=civ_old, coupon=coupon)
     cv_new = CouponVersionFactory(payment_version=civ_new, coupon=coupon)
 
-    # Both best and worst coupons eligible for the product
     product = ProductFactory()
-
     if not is_global:
         CouponEligibilityFactory.create(coupon=coupon, product=product)
 
-    coupon_versions = list(
-        get_valid_coupon_versions(
-            product,
-            user
-        )
-    )
+    coupon_versions = list(get_valid_coupon_versions(product, user))
     expected_versions = [cv_new]
     assert coupon_versions == expected_versions
 
     order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
     redeem_coupon(cv_new, order)
-    assert list(
-        get_valid_coupon_versions(
-            product,
-            user
-        )
-    ) == []
+    assert list(get_valid_coupon_versions(product, user)) == []
 
 
 def test_global_coupons_apply_all_products(user):
