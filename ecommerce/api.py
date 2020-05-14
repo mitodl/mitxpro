@@ -321,7 +321,7 @@ def get_valid_coupon_versions(
 
     global_coupon_version_subquery = global_coupon_version_subquery.order_by(
         "coupon", "-created_on"
-    )
+    ).distinct("coupon")
 
     combined_coupon_versions_list = list(
         coupon_version_subquery.values_list("pk", flat=True)
