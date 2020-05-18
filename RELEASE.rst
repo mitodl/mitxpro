@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.50.0 (Released May 18, 2020)
+--------------
+
+- Filter out old coupon versions (#1773)
+
 Version 0.49.0 (Released May 07, 2020)
 --------------
 
