@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.51.0
+--------------
+
+- add course creation runbook (#1754)
+
 Version 0.50.0 (Released May 18, 2020)
 --------------
 
