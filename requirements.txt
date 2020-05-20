@@ -52,7 +52,7 @@ google-auth-httplib2==0.0.3  # via google-api-python-client
 google-auth-oauthlib==0.4.0  # via pygsheets
 google-auth==1.6.3        # via -r requirements.in, google-api-python-client, google-auth-httplib2, google-auth-oauthlib
 html5lib==0.999999999     # via wagtail
-httplib2==0.14.0          # via google-api-python-client, google-auth-httplib2
+httplib2==0.18.0          # via google-api-python-client, google-auth-httplib2
 idna==2.8                 # via requests
 ipython-genutils==0.2.0   # via traitlets
 ipython==7.6.1            # via -r requirements.in
