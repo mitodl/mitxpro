@@ -90,6 +90,14 @@ CUSTOM_ECOMMERCE_PROPERTIES = {
                 "fieldType": "text",
             },
             {
+                "name": "num_seats",
+                "label": "Number of seats",
+                "description": "Total number of seats to purchase",
+                "groupName": "dealinformation",
+                "type": "number",
+                "fieldType": "text",
+            },
+            {
                 "name": "payment_transaction",
                 "label": "Payment Transaction ID",
                 "description": "ID of payment transaction",
@@ -379,6 +387,11 @@ HUBSPOT_ECOMMERCE_SETTINGS = {
                 "propertyName": "order_type",
                 "targetHubspotProperty": "order_type",
                 "dataType": "STRING",
+            },
+            {
+                "propertyName": "num_seats",
+                "targetHubspotProperty": "num_seats",
+                "dataType": "NUMBER",
             },
         ]
     },

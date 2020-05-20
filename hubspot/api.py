@@ -233,6 +233,40 @@ def make_contact_sync_message(user_id):
     return [make_sync_message(user.id, properties)]
 
 
+def make_b2b_contact_sync_message(email):
+    """
+    Create the body of a sync message for a b2b contact.
+
+    Args:
+        email (string): User email
+
+    Returns:
+        list: dict containing serializable sync-message data
+    """
+    user_id = email
+    return [make_sync_message(user_id, {"email": email})]
+
+
+def make_b2b_deal_sync_message(order_id):
+    """
+    Create the body of a sync message for a b2b deal.
+
+    Args:
+        order_id (int): B2B Order id
+
+    Returns:
+        list: dict containing serializable sync-message data for deals (orders)
+    """
+    from b2b_ecommerce.models import B2BOrder
+    from hubspot.serializers import B2BOrderToDealSerializer
+    from hubspot.serializers import ORDER_TYPE_B2B
+
+    order = B2BOrder.objects.get(id=order_id)
+    properties = B2BOrderToDealSerializer(order).data
+    properties["order_type"] = ORDER_TYPE_B2B
+    return [make_sync_message(order_id, properties)]
+
+
 def make_deal_sync_message(order_id):
     """
     Create the body of a sync message for a deal.
@@ -269,6 +303,24 @@ def make_line_item_sync_message(line_id):
     line = Line.objects.get(id=line_id)
     properties = LineSerializer(line).data
     return [make_sync_message(line_id, properties)]
+
+
+def make_b2b_product_sync_message(order_id):
+    """
+    Create the body of a sync message for a line item.
+
+    Args:
+        line_id (int): Line id
+
+    Returns:
+        list: dict containing serializable sync-message data for lines
+    """
+    from b2b_ecommerce.models import B2BOrder
+    from hubspot.serializers import B2BProductVersionToLineSerializer
+
+    order = B2BOrder.objects.get(id=order_id)
+    properties = B2BProductVersionToLineSerializer(order).data
+    return [make_sync_message(order_id, properties)]
 
 
 def make_product_sync_message(product_id):

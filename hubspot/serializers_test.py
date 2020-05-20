@@ -3,8 +3,12 @@ Tests for hubspot serializers
 """
 # pylint: disable=unused-argument, redefined-outer-name
 
+from decimal import Decimal
 import pytest
-
+from rest_framework import status
+from django.urls import reverse
+from b2b_ecommerce.factories import B2BOrderFactory, B2BCouponFactory
+from b2b_ecommerce.models import B2BOrder
 from courses.factories import CourseRunFactory
 from ecommerce.api import round_half_up
 from ecommerce.factories import (
@@ -15,11 +19,13 @@ from ecommerce.factories import (
     ProductFactory,
 )
 from ecommerce.models import Product, Order
+
 from hubspot.api import format_hubspot_id
 from hubspot.serializers import (
     ProductSerializer,
     LineSerializer,
     OrderToDealSerializer,
+    B2BOrderToDealSerializer,
     ORDER_STATUS_MAPPING,
     ORDER_TYPE_B2C,
     ORDER_TYPE_B2B,
@@ -128,4 +134,85 @@ def test_serialize_order_with_coupon():
         ).to_eng_string(),
         "lines": [LineSerializer(instance=line).data],
         "status": order.status,
+    }
+
+
+@pytest.mark.parametrize("status", [Order.FULFILLED, Order.CREATED])
+def test_serialize_b2b_order(status):
+    """Test that B2BOrderToDealSerializer produces the correct serialized data"""
+    order = B2BOrderFactory.create(status=status, num_seats=10)
+    serialized_data = B2BOrderToDealSerializer(instance=order).data
+    assert serialized_data == {
+        "id": order.id,
+        "name": f"XPRO-B2BORDER-{order.id}",
+        "stage": ORDER_STATUS_MAPPING[status],
+        "amount": order.total_price.to_eng_string(),
+        "discount_amount": None,
+        "close_date": (
+            int(order.updated_on.timestamp() * 1000)
+            if status == Order.FULFILLED
+            else None
+        ),
+        "coupon_code": None,
+        "company": None,
+        "payment_type": None,
+        "payment_transaction": None,
+        "discount_percent": None,
+        "num_seats": 10,
+        "status": order.status,
+        "purchaser": format_hubspot_id(order.email),
+    }
+
+
+def test_serialize_b2b_order_with_coupon(client, mocker):
+    """Test that B2BOrderToDealSerializer produces the correct serialized data for an order with coupon"""
+
+    product_version = ProductVersionFactory.create(price=10)
+    payload = {"a": "payload"}
+    mocker.patch(
+        "b2b_ecommerce.views.generate_b2b_cybersource_sa_payload",
+        autospec=True,
+        return_value=payload,
+    )
+    coupon = B2BCouponFactory.create(
+        product=product_version.product, discount_percent=Decimal(0.8)
+    )
+    num_seats = 10
+    resp = client.post(
+        reverse("b2b-checkout"),
+        {
+            "num_seats": num_seats,
+            "email": "b@example.com",
+            "product_version_id": product_version.id,
+            "discount_code": coupon.coupon_code,
+            "contract_number": "",
+        },
+    )
+
+    assert resp.status_code == status.HTTP_200_OK
+    assert B2BOrder.objects.count() == 1
+    order = B2BOrder.objects.first()
+    discount = round(Decimal(coupon.discount_percent) * 100, 2)
+    serialized_data = B2BOrderToDealSerializer(instance=order).data
+    assert serialized_data == {
+        "id": order.id,
+        "name": f"XPRO-B2BORDER-{order.id}",
+        "stage": ORDER_STATUS_MAPPING[order.status],
+        "discount_amount": discount.to_eng_string(),
+        "amount": order.total_price.to_eng_string(),
+        "close_date": (
+            int(order.updated_on.timestamp() * 1000)
+            if order.status == Order.FULFILLED
+            else None
+        ),
+        "coupon_code": coupon.coupon_code,
+        "company": coupon.company.name,
+        "payment_type": None,
+        "payment_transaction": None,
+        "num_seats": num_seats,
+        "discount_percent": round(
+            Decimal(coupon.discount_percent) * 100, 2
+        ).to_eng_string(),
+        "status": order.status,
+        "purchaser": format_hubspot_id(order.email),
     }

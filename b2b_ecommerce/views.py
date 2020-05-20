@@ -23,6 +23,8 @@ from ecommerce.models import ProductVersion, Coupon
 from ecommerce.serializers import FullProductVersionSerializer
 from ecommerce.constants import CYBERSOURCE_CARD_TYPES
 from mitxpro.utils import make_csv_http_response
+from hubspot.task_helpers import sync_hubspot_b2b_deal, sync_hubspot_b2b_contact
+from users.models import User
 
 
 log = logging.getLogger(__name__)
@@ -104,6 +106,10 @@ class B2BCheckoutView(APIView):
             url = settings.CYBERSOURCE_SECURE_ACCEPTANCE_URL
             method = "POST"
 
+        if not User.objects.filter(email=email).exists():
+            sync_hubspot_b2b_contact(email)
+        if order:
+            sync_hubspot_b2b_deal(order)
         return Response({"payload": payload, "url": url, "method": method})
 
 
