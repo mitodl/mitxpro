@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.51.2
+Version 0.51.2 (Released May 27, 2020)
 --------------
 
 - Bulk purchase: sync with Hubspot
