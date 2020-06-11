@@ -72,7 +72,7 @@ class GoogleFileWatch(TimestampedModel):
     channel_id = models.CharField(max_length=100, db_index=True, null=False)
     version = models.IntegerField(db_index=True, null=True, blank=True)
     activation_date = models.DateTimeField(null=False)
-    expiration_date = models.DateTimeField(db_index=True, unique=True, null=False)
+    expiration_date = models.DateTimeField(null=False)
     last_request_received = models.DateTimeField(null=True, blank=True)
 
     class Meta:
