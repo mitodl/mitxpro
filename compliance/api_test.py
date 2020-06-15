@@ -104,11 +104,11 @@ def test_verify_user_with_exports_temporary_errors(mocker, user, reason_code):
         last_sent={"envelope": etree.Element("sent")},
         last_received={"envelope": etree.Element("received")},
     )
-    with mocker.patch(
+    mocker.patch(
         "compliance.api.get_cybersource_client",
         return_value=(mock_client, mock_history),
-    ):
-        assert api.verify_user_with_exports(user) is None
+    )
+    assert api.verify_user_with_exports(user) is None
     mock_log.error.assert_called_once_with(
         "Unable to verify exports controls, received reasonCode: %s", reason_code
     )
@@ -133,11 +133,11 @@ def test_verify_user_with_exports_sanctions_lists(
         last_sent={"envelope": etree.Element("sent")},
         last_received={"envelope": etree.Element("received")},
     )
-    with mocker.patch(
+    mocker.patch(
         "compliance.api.get_cybersource_client",
         return_value=(mock_client, mock_history),
-    ):
-        api.verify_user_with_exports(user)
+    )
+    api.verify_user_with_exports(user)
 
     payload = mock_client.service.runTransaction.call_args[1]
 

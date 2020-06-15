@@ -53,6 +53,7 @@ if [[ $(
     grep -v 'ignored, nothing could be mapped' |
     grep -v "This browser doesn't support the \`onScroll\` event" |
     grep -v "process.on(SIGPROF) is reserved while debugging" |
+    grep -v "Browserslist: caniuse-lite is outdated" |
     wc -l |
     awk '{print $1}'
     ) -ne 0 ]]  # is file empty?
