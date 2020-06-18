@@ -7,7 +7,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.templatetags.static import static
 
+from courses.constants import DEFAULT_COURSE_IMG_PATH
 from ecommerce.constants import REFERENCE_NUMBER_PREFIX, ORDERED_VERSIONS_QSET_ATTR
 from ecommerce.utils import get_order_id_by_reference_number
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
@@ -148,11 +150,12 @@ class Product(TimestampedModel):
 
         content_object = self.content_object
         if isinstance(content_object, Program):
-            return content_object.catalog_image_url
+            catalog_image_url = content_object.catalog_image_url
         elif isinstance(content_object, CourseRun):
-            return content_object.course.catalog_image_url
+            catalog_image_url = content_object.course.catalog_image_url
         else:
             raise ValueError(f"Unexpected product {content_object}")
+        return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
     @property
     def start_date(self):
