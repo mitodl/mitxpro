@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.52.0
+--------------
+
+- Fix Broken Image
+- Removed index/unique constraint google file watch expiration field
+- Changed pytest mocker usages to stop using context processors + ignored caniuse-lite warning
+
 Version 0.51.2 (Released May 27, 2020)
 --------------
 
