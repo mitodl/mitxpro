@@ -1,4 +1,4 @@
-beautifulsoup4==4.8.2
+beautifulsoup4==4.6.0
 celery==4.3.0
 celery-redbeat==0.13.0
 boto3==1.9.188
@@ -36,6 +36,6 @@ ua-parser==0.8.0
 user-agents==2.0
 user-util==0.1.5
 uwsgi
-wagtail==2.9
+wagtail==2.7.3
 wagtail-metadata==2.0.1
 zeep==3.4.0
