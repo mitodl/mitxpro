@@ -179,6 +179,13 @@ $text-gray-light: #d2d0d1;
         }
       }
 
+      @media (min-width: 768px) {
+        .col-24 {
+          flex: 0 0 20%;
+          max-width: 20%;
+        }
+      }
+
       p {
         margin: 0 0 5px;
       }
@@ -303,11 +310,9 @@ $text-gray-light: #d2d0d1;
   }
 
   .certificate-page {
-
     .certificate-logo {
       max-width: 170px;
       margin: 0 auto 10px;
-
     }
 
     .certificate-wrapper {
@@ -324,7 +329,6 @@ $text-gray-light: #d2d0d1;
       }
 
       .certificate-holder {
-
         .certify-by {
           padding-top: 0;
           padding-bottom: 7px;
