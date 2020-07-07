@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.53.0
+Version 0.53.0 (Released July 07, 2020)
 --------------
 
 - make 5 signatories for the certificate (#1804)
