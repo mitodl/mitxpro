@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.53.1
+--------------
+
+- clean up the certificate page display
+- pin isort to fix the build error
+
 Version 0.53.0 (Released July 07, 2020)
 --------------
 
