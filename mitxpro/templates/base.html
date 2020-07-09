@@ -34,7 +34,7 @@
     {% block extrahead %}
     {% endblock %}
     {% endspaceless %}
-      {% if zendesk_config.help_widget_enabled %}
+      {% if zendesk_config.help_widget_enabled and not request.path|startswith:'/certificate/' %}
           <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key={{zendesk_config.help_widget_key}}"> </script>
       {% endif %}
   </head>
@@ -43,7 +43,7 @@
     {% include "partials/gtm_body.html" %}
     {% hijack_notification %}
     {# Site-wide notifications should not show up on the ecommerce bulk pages #}
-    {% if not request.path|startswith:'/ecommerce/bulk/' %}
+    {% if not request.path|startswith:'/ecommerce/bulk/,/certificate/' %}
       {% latest_notification %}
     {% endif %}
     {% block headercontent %}
@@ -62,7 +62,7 @@
     {% render_bundle 'django' %}
     {% block scripts %}
     {% endblock %}
-    {% if zendesk_config.help_widget_enabled %}
+    {% if zendesk_config.help_widget_enabled and not request.path|startswith:'/certificate/' %}
     <script type="text/javascript">
         zE('webWidget', 'prefill', {
             name: {

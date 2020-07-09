@@ -8,5 +8,8 @@ register = template.Library()
 def startswith(text, starts):
     """Filter to check if a string starts with a specific format"""
     if isinstance(text, str):
-        return text.startswith(starts)
+        starts = starts.split(",")
+        for start in starts:
+            if text.startswith(start):
+                return True
     return False
