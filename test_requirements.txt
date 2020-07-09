@@ -7,6 +7,7 @@ factory_boy==2.11.1
 faker
 freezegun==0.3.12
 ipdb
+isort==4.3.21
 nplusone>=0.8.1
 pdbpp
 pip-tools
