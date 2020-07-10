@@ -22,6 +22,7 @@ from ecommerce.utils import make_checkout_url
 from ecommerce.models import ProductVersion, Coupon
 from ecommerce.serializers import FullProductVersionSerializer
 from ecommerce.constants import CYBERSOURCE_CARD_TYPES
+from ecommerce.api import get_product_from_text_id
 from mitxpro.utils import make_csv_http_response
 from hubspot.task_helpers import sync_hubspot_b2b_deal, sync_hubspot_b2b_contact
 from users.models import User
@@ -194,11 +195,21 @@ class B2BCouponView(APIView):
 
     def get(self, request, *args, **kwargs):
         """Get information about a coupon"""
+        product = None
         try:
             coupon_code = request.GET["code"]
             product_id = request.GET["product_id"]
         except KeyError as ex:
             raise ValidationError(f"Missing parameter {ex.args[0]}")
+
+        try:
+            # product_id can be an integer e.g. 1234 or
+            # a string in form of text_id e.g. program-v1:xPRO+SysEngx.
+            product_id = int(product_id)
+        except ValueError:
+            product, _, _ = get_product_from_text_id(text_id=product_id)
+        if product:
+            product_id = product.id
 
         try:
             coupon = B2BCoupon.objects.get_unexpired_coupon(
@@ -210,7 +221,7 @@ class B2BCouponView(APIView):
         return Response(
             data={
                 "code": coupon_code,
-                "product_id": int(product_id),
+                "product_id": product_id,
                 "discount_percent": str(coupon.discount_percent),
             }
         )
