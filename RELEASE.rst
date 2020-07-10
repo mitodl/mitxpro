@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.53.1
+Version 0.53.1 (Released July 10, 2020)
 --------------
 
 - clean up the certificate page display
