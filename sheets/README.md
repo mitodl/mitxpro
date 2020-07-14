@@ -1,4 +1,4 @@
-# xPro Google Sheets
+# xPRO Google Sheets
 
 **SECTIONS**
 1. [What Is This?](#what-is-this)
@@ -22,7 +22,7 @@ Using various Google Drive and Sheets APIs, the following is now possible:
 
 ## How It Works
 
-The basic workflow for most flavors of xPro sheets is roughly as follows:
+The basic workflow for most flavors of xPRO sheets is roughly as follows:
 
 1. A user fills out a Google Form. That form submission is a request for some work to 
 be done, and it is automatically added to a form responses worksheet within a relevant spreadsheet.
@@ -46,9 +46,12 @@ Right now there are three sheet types:
 
 New requests for the "request"-type sheets are submitted via Google Form:
 
-1. [Enrollment Code Request form](https://docs.google.com/forms/d/1XfV5ppOYCFHd2Z1B1uL75C-ChgytHfkTD8YOSQM0vFM/edit) 
-1. [Refund Request form](https://docs.google.com/forms/d/1n-TYFd91zKkSkjjudoACMId-mfUeAQ-rGMCzTKqPVFQ/edit)
-1. [Deferral Request form](https://docs.google.com/forms/d/1lEbKGfLxMwh0Drj-CQJo5QXU2evEqxEP5iFGB4qNrw8/edit)
+1. Enrollment Code Request form
+    ![Enrollment Code Request form](images/form-enroll-code-request.png)
+1. Refund Request form
+    ![Refund Request form](images/form-refund-request.png)
+1. Deferral Request form
+    ![Deferral Request form](images/form-defer-request.png)
 
 #### Enrollment Code Request sheet
 
@@ -76,8 +79,8 @@ screenshots to explain what those terms are referring to:
 Some basic details for reading and interacting with these spreadsheets:
 
 1. One cardinal rule to follow for all of the "request"-type sheets: **Do not edit the main worksheet directly, unless the 
-  columns exist specifically for user input**. Examples of columns that are intended for user input are the Finance 
-  columns in the Change of Enrollment sheets.
+  columns exist specifically for direct user input**. Examples of columns that are intended for direct user input are the 
+  Finance columns in the Change of Enrollment sheets.
 1. If a row in any spreadsheet was successfully processed by our app, there should be a timestamp in a column called 
   "Date Processed"/"Completed Date"/etc., or a success status in the "Status" column.
 1. If there is an error in some row (e.g.: a typo), there should be a message in the "Errors" column, or a 
@@ -111,7 +114,7 @@ Responses data should be handled automatically.
 **When you'll want to set a row to ignored:** The request is no longer relevant (for example, the request is an accidental repeat). 
 
 **How to do it:** Find the row in the relevant Form Responses worksheet that matches the
-row on the main worksheet** (check the "Editing Rows" section for details), **and enter `=TRUE` into the "Ignored?" 
+row on the main worksheet (check the "Editing Rows" section for details), **and enter `=TRUE` into the "Ignored?" 
 column of that row in the Form Responses worksheet.** 
 
 Ignored rows will be greyed out on the main worksheet, and the app will automatically skip over all request rows that 
