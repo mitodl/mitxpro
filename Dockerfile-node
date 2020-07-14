@@ -3,11 +3,10 @@ LABEL maintainer "ODL DevOps <mitx-devops@mit.edu>"
 
 RUN apt-get update && apt-get install libelf1
 
-COPY package.json /src/
+COPY package.json scripts/ /tmp/
+COPY scripts/ /tmp/scripts/
 
-COPY scripts /src/scripts
-
-RUN node /src/scripts/install_yarn.js
+RUN YARN_VERSION=$(node /tmp/scripts/yarn_version.js) ; yarn policies set-version $YARN_VERSION
 
 RUN mkdir -p /home/node/.cache/yarn
 
