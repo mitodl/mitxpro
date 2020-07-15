@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.54.1
+--------------
+
+- Fix for product_id as text during coupon redemption
+
 Version 0.54.0 (Released July 15, 2020)
 --------------
 
