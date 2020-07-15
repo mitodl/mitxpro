@@ -341,12 +341,29 @@ def test_coupon_view(client):
     }
 
 
+def test_coupon_view_product_with_text_id(client):
+    """Information about a coupon should be returned with product text id"""
+    order = B2BOrderFactory.create(status=B2BOrder.CREATED)
+    coupon = B2BCouponFactory.create(product=order.product_version.product)
+    B2BCouponRedemption.objects.create(coupon=coupon, order=order)
+    response = client.get(
+        f'{reverse("b2b-coupon-view")}?'
+        f'{urlencode({"code": coupon.coupon_code, "product_id": order.product_version.text_id})}'
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {
+        "code": coupon.coupon_code,
+        "discount_percent": str(coupon.discount_percent),
+        "product_id": order.product_version.product_id,
+    }
+
+
 def test_coupon_view_invalid(client, mocker):
     """If a coupon is invalid a 404 response should be returned"""
     patched = mocker.patch.object(
         B2BCoupon.objects, "get_unexpired_coupon", side_effect=B2BCoupon.DoesNotExist
     )
-    params = {"code": "x", "product_id": "3"}
+    params = {"code": "x", "product_id": 3}
     response = client.get(f'{reverse("b2b-coupon-view")}?' f"{urlencode(params)}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     patched.assert_called_once_with(
