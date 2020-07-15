@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.54.0
+Version 0.54.0 (Released July 15, 2020)
 --------------
 
 - Fix various build/run issues
