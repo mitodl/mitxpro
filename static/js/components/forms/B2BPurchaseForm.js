@@ -212,11 +212,11 @@ class B2BPurchaseForm extends React.Component<Props> {
       <Formik
         onSubmit={onSubmit}
         initialValues={{
-          num_seats:      "",
-          email:          "",
-          product:        this.props.productId || "",
-          coupon:         this.props.discountCode || "",
-          contractNumber: this.props.contractNumber || ""
+          num_seats:       "",
+          email:           "",
+          product:         this.props.productId || "",
+          coupon:          this.props.discountCode || "",
+          contract_number: this.props.contractNumber || ""
         }}
         validate={validate}
         render={this.renderForm}
