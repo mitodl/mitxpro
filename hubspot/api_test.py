@@ -10,10 +10,16 @@ from django.conf import settings
 from faker import Faker
 from requests import HTTPError
 
+from b2b_ecommerce.models import B2B_INTEGRATION_PREFIX
 from ecommerce.factories import LineFactory, ProductFactory
 from hubspot import api
 from hubspot.api import make_properties_url
-from hubspot.serializers import OrderToDealSerializer, LineSerializer, ProductSerializer
+from hubspot.serializers import (
+    OrderToDealSerializer,
+    LineSerializer,
+    ProductSerializer,
+    B2BOrderToDealSerializer,
+)
 from mitxpro.test_utils import any_instance_of
 from users.serializers import UserSerializer
 
@@ -164,6 +170,26 @@ def test_make_deal_sync_message(hubspot_order):
             "integratorObjectId": "{}-{}".format(
                 settings.HUBSPOT_ID_PREFIX, hubspot_order.id
             ),
+            "action": "UPSERT",
+            "changeOccurredTimestamp": any_instance_of(int),
+            "propertyNameToValues": serialized_order,
+        }
+    ]
+
+
+@pytest.mark.django_db
+def test_make_b2b_deal_sync_message(hubspot_b2b_order):
+    """Test make_b2b_deal_sync_message serializes a deal and returns a properly formatted sync message"""
+    deal_sync_message = api.make_b2b_deal_sync_message(hubspot_b2b_order.id)
+
+    serialized_order = B2BOrderToDealSerializer(hubspot_b2b_order).data
+    serialized_order["order_type"] = "B2B"
+    for key in serialized_order.keys():
+        if serialized_order[key] is None:
+            serialized_order[key] = ""
+    assert deal_sync_message == [
+        {
+            "integratorObjectId": f"{settings.HUBSPOT_ID_PREFIX}-{B2B_INTEGRATION_PREFIX}{hubspot_b2b_order.id}",
             "action": "UPSERT",
             "changeOccurredTimestamp": any_instance_of(int),
             "propertyNameToValues": serialized_order,
