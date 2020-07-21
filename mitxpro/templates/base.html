@@ -64,15 +64,17 @@
     {% endblock %}
     {% if zendesk_config.help_widget_enabled and not request.path|startswith:'/certificate/' %}
     <script type="text/javascript">
-        zE('webWidget', 'prefill', {
+        if (typeof zE !== 'undefined') {
+          zE('webWidget', 'prefill', {
             name: {
                 value: '{{user.name}}',
             },
             email: {
                 value: '{{user.email}}',
             }
-        });
-    {% endif %}
+          });
+      }
     </script>
+    {% endif %}
   </body>
 </html>
