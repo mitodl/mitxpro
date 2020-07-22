@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.55.0
+--------------
+
+- Make sure B2BOrders have unique integration ids (#1827)
+- Fix undefined error for hbspot
+- Update the purchase link to support URL parameters and save data properly
+- More PR feedback
+- PR feedback
+- Added sheets feature runbook
+
 Version 0.54.1 (Released July 17, 2020)
 --------------
 
