@@ -264,7 +264,7 @@ def make_b2b_deal_sync_message(order_id):
     order = B2BOrder.objects.get(id=order_id)
     properties = B2BOrderToDealSerializer(order).data
     properties["order_type"] = ORDER_TYPE_B2B
-    return [make_sync_message(order_id, properties)]
+    return [make_sync_message(order.integration_id, properties)]
 
 
 def make_deal_sync_message(order_id):

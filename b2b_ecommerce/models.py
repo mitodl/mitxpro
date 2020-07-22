@@ -19,6 +19,8 @@ from ecommerce.models import (
 from mitxpro.models import AuditModel, AuditableModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 
+B2B_INTEGRATION_PREFIX = "B2B-"
+
 
 class B2BCouponManager(models.Manager):
     """
@@ -164,6 +166,17 @@ class B2BOrder(OrderAbstract, AuditableModel):
                 serialize_model_object(receipt) for receipt in self.b2breceipt_set.all()
             ],
         }
+
+    @property
+    def integration_id(self):
+        """
+        Return an integration id to be used by Hubspot as the unique deal id.
+        This is necessary to prevent overlap with Order ids.
+
+        Returns:
+            str: the integration id
+        """
+        return f"{B2B_INTEGRATION_PREFIX}{self.id}"
 
 
 class B2BOrderAudit(AuditModel):
