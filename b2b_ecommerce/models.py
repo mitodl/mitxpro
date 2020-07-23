@@ -39,18 +39,24 @@ class B2BCouponManager(models.Manager):
             B2BCoupon:
                 The coupon instance. If no coupon is found a B2BCoupon.DoesNotExist error is raised
         """
-        return (
-            self.filter(coupon_code=coupon_code, product_id=product_id, enabled=True)
+        coupon = (
+            self.filter(
+                Q(coupon_code=coupon_code),
+                Q(enabled=True),
+                Q(product_id=None) | Q(product_id=product_id),
+            )
             .filter(Q(activation_date__isnull=True) | Q(activation_date__lt=Now()))
             .filter(Q(expiration_date__isnull=True) | Q(expiration_date__gt=Now()))
-            .exclude(
-                b2bcouponredemption__order__status__in=(
-                    B2BOrder.FULFILLED,
-                    B2BOrder.REFUNDED,
-                )
-            )
             .get()
         )
+
+        if coupon and not coupon.reusable:
+            coupon_redemption = B2BCouponRedemption.objects.filter(
+                coupon=coupon, order__status__in=(B2BOrder.FULFILLED, B2BOrder.REFUNDED)
+            )
+            if coupon_redemption.exists():
+                raise B2BCoupon.DoesNotExist
+        return coupon
 
 
 class B2BCoupon(TimestampedModel, AuditableModel):
@@ -65,20 +71,30 @@ class B2BCoupon(TimestampedModel, AuditableModel):
         max_digits=20,
         validators=[MinValueValidator(0), MaxValueValidator(1)],
     )
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        help_text="If no product is selected, the coupon is valid for any product",
+    )
+    reusable = models.BooleanField(
+        default=False,
+        help_text="When checked, the coupon can be redeemed multiple times",
+    )
     enabled = models.BooleanField(default=False)
     company = models.ForeignKey(
         Company, on_delete=models.PROTECT, null=True, blank=True
-    )
-    expiration_date = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="If set, the coupons will not be redeemable after this time",
     )
     activation_date = models.DateTimeField(
         null=True,
         blank=True,
         help_text="If set, the coupons will not be redeemable before this time",
+    )
+    expiration_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="If set, the coupons will not be redeemable after this time",
     )
 
     objects = B2BCouponManager()

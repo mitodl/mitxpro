@@ -42,6 +42,7 @@ class B2BCouponFactory(DjangoModelFactory):
         "date_time_this_year", before_now=False, after_now=True, tzinfo=timezone.utc
     )
     enabled = True
+    reusable = False
     product = factory.SubFactory(ProductFactory)
     discount_percent = fuzzy.FuzzyDecimal(low=0, high=1, precision=5)
     company = factory.SubFactory(CompanyFactory)
