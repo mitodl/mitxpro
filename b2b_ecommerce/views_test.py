@@ -358,6 +358,29 @@ def test_coupon_view_product_with_text_id(client):
     }
 
 
+@pytest.mark.parametrize("reusable", [True, False])
+@pytest.mark.parametrize("order_status", [B2BOrder.FULFILLED, B2BOrder.REFUNDED])
+def test_reusable_coupon_order_fulfilled(client, reusable, order_status):
+    """Information about a reusable coupon should be returned"""
+    order = B2BOrderFactory.create(status=order_status)
+    coupon = B2BCouponFactory.create(product=None, reusable=reusable)
+    B2BCouponRedemption.objects.create(coupon=coupon, order=order)
+    response = client.get(
+        f'{reverse("b2b-coupon-view")}?'
+        f'{urlencode({"code": coupon.coupon_code, "product_id": order.product_version.product_id})}'
+    )
+
+    if reusable:
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {
+            "code": coupon.coupon_code,
+            "discount_percent": str(coupon.discount_percent),
+            "product_id": order.product_version.product_id,
+        }
+    else:
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
 def test_coupon_view_invalid(client, mocker):
     """If a coupon is invalid a 404 response should be returned"""
     patched = mocker.patch.object(

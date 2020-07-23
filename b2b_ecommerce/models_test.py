@@ -100,14 +100,25 @@ def test_get_unexpired_coupon_not_found(order_with_coupon, attr_name, attr_value
         )
 
 
+@pytest.mark.parametrize("reusable", [True, False])
 @pytest.mark.parametrize("order_status", [B2BOrder.FULFILLED, B2BOrder.REFUNDED])
-def test_get_unexpired_coupon_order_fulfilled(order_with_coupon, order_status):
+def test_get_unexpired_coupon_order_fulfilled(
+    order_with_coupon, reusable, order_status
+):
     """get_unexpired_coupon should raise a B2BCoupon.DoesNotExist if the coupon is already used in an order"""
     order = order_with_coupon.order
     coupon = order_with_coupon.coupon
+    coupon.reusable = reusable
+    coupon.save()
     order.status = order_status
     order.save()
-    with pytest.raises(B2BCoupon.DoesNotExist):
-        B2BCoupon.objects.get_unexpired_coupon(
+
+    if not reusable:
+        with pytest.raises(B2BCoupon.DoesNotExist):
+            B2BCoupon.objects.get_unexpired_coupon(
+                coupon_code=coupon.coupon_code, product_id=coupon.product_id
+            )
+    else:
+        assert coupon == B2BCoupon.objects.get_unexpired_coupon(
             coupon_code=coupon.coupon_code, product_id=coupon.product_id
         )
