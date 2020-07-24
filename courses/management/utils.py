@@ -1,6 +1,4 @@
 """Utility functions/classes for course management commands"""
-from functools import partial
-
 from django.core.management.base import BaseCommand, CommandError
 
 from courses.models import CourseRun, CourseRunEnrollment, Program, ProgramEnrollment
@@ -127,7 +125,11 @@ class EnrollmentChangeCommand(BaseCommand):
         return enrollment, enrolled_obj
 
     def create_program_enrollment(
-        self, existing_enrollment, to_program=None, to_user=None
+        self,
+        existing_enrollment,
+        to_program=None,
+        to_user=None,
+        keep_failed_enrollments=False,
     ):
         """
         Helper method to create a new ProgramEnrollment based on an existing enrollment
@@ -138,6 +140,8 @@ class EnrollmentChangeCommand(BaseCommand):
                 the new enrollment will use the existing enrollment's program)
             to_user (User or None): The user to assign to the program enrollment (if None, the new
                 enrollment will user the existing enrollment's user)
+            keep_failed_enrollments: (boolean): If True, keeps the local enrollment record
+                in the database even if the enrollment fails in edX.
         Returns:
             tuple of (ProgramEnrollment, list(CourseRunEnrollment)): The newly created enrollments
         """
@@ -147,21 +151,35 @@ class EnrollmentChangeCommand(BaseCommand):
         enrollment_defaults = dict(
             company=existing_enrollment.company, order=existing_enrollment.order
         )
-        program_enrollment, _ = create_or_update_enrollment(
-            ProgramEnrollment, defaults=enrollment_defaults, **enrollment_params
-        )
         existing_run_enrollments = existing_enrollment.get_run_enrollments()
-        return (
-            program_enrollment,
-            list(
-                map(
-                    partial(self.create_run_enrollment, to_user=to_user),
-                    existing_run_enrollments,
-                )
-            ),
-        )
+        created_run_enrollments = []
+        for run_enrollment in existing_run_enrollments:
+            created_run_enrollment = self.create_run_enrollment(
+                run_enrollment,
+                to_user=to_user,
+                keep_failed_enrollments=keep_failed_enrollments,
+            )
+            if created_run_enrollment:
+                created_run_enrollments.append(created_run_enrollment)
 
-    def create_run_enrollment(self, existing_enrollment, to_run=None, to_user=None):
+        created = False
+        if created_run_enrollments:
+            program_enrollment, created = create_or_update_enrollment(
+                ProgramEnrollment, defaults=enrollment_defaults, **enrollment_params
+            )
+            return (program_enrollment, created_run_enrollments)
+        else:
+            if created:
+                program_enrollment.delete()
+            return (None, None)
+
+    def create_run_enrollment(
+        self,
+        existing_enrollment,
+        to_run=None,
+        to_user=None,
+        keep_failed_enrollments=False,
+    ):
         """
         Helper method to create a CourseRunEnrollment based on an existing enrollment
 
@@ -171,6 +189,8 @@ class EnrollmentChangeCommand(BaseCommand):
                 the new enrollment will use the existing enrollment's course run)
             to_user (User or None): The user to assign to the new enrollment (if None, the new
                 enrollment will user the existing enrollment's user)
+            keep_failed_enrollments: (boolean): If True, keeps the local enrollment record
+                in the database even if the enrollment fails in edX.
         Returns:
             CourseRunEnrollment: The newly created enrollment
         """
@@ -197,6 +217,10 @@ class EnrollmentChangeCommand(BaseCommand):
             run_enrollment.edx_enrolled = True
             run_enrollment.save_and_log(None)
             mail_api.send_course_run_enrollment_email(run_enrollment)
+        elif not keep_failed_enrollments:
+            if created:
+                run_enrollment.delete()
+            return None
 
         return run_enrollment
 

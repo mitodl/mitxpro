@@ -32,7 +32,15 @@ class Command(BaseCommand):
         parser.add_argument(
             "--code", type=str, help="The enrollment code for the course", required=True
         )
+        parser.add_argument(
+            "-k",
+            "--keep-failed-enrollments",
+            action="store_true",
+            dest="keep_failed_enrollments",
+            help="If provided, enrollment records will be kept even if edX enrollment fails",
+        )
         super().add_arguments(parser)
+        # pylint: disable=too-many-locals
 
     def handle(self, *args, **options):
         """Handle command execution"""
@@ -73,7 +81,7 @@ class Command(BaseCommand):
             )
 
         successful_enrollments, edx_request_success = create_run_enrollments(
-            user, [run]
+            user, [run], keep_failed_enrollments=options["keep_failed_enrollments"]
         )
         if not successful_enrollments:
             raise CommandError("Failed to create the enrollment record")
