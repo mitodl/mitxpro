@@ -565,7 +565,11 @@ def enroll_user_in_order_items(order):
     successful_run_enrollments = []
     if runs:
         successful_run_enrollments, _ = create_run_enrollments(
-            order.purchaser, runs, order=order, company=company
+            order.purchaser,
+            runs,
+            order=order,
+            company=company,
+            keep_failed_enrollments=True,
         )
 
     voucher = (

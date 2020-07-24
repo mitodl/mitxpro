@@ -2,7 +2,6 @@
 
 import itertools
 from collections import namedtuple
-from functools import partial
 import logging
 from traceback import format_exc
 
@@ -84,7 +83,9 @@ def get_user_enrollments(user):
     )
 
 
-def create_run_enrollments(user, runs, order=None, company=None):
+def create_run_enrollments(
+    user, runs, keep_failed_enrollments=False, order=None, company=None
+):
     """
     Creates local records of a user's enrollment in course runs, and attempts to enroll them
     in edX via API
@@ -95,12 +96,16 @@ def create_run_enrollments(user, runs, order=None, company=None):
         order (ecommerce.models.Order or None): The order associated with these enrollments
         company (ecommerce.models.Company or None): The company on whose behalf these enrollments
             are being created
+        keep_failed_enrollments: (boolean): If True, keeps the local enrollment record
+            in the database even if the enrollment fails in edX.
 
     Returns:
         (list of CourseRunEnrollment, bool): A list of enrollment objects that were successfully
             created, paired with a boolean indicating whether or not edX enrollment was successful
             for all of the given course runs
     """
+    successful_enrollments = []
+
     try:
         enroll_in_edx_course_runs(user, runs)
     except (
@@ -115,10 +120,11 @@ def create_run_enrollments(user, runs, order=None, company=None):
             order.id if order else None,
         )
         edx_request_success = False
+        if not keep_failed_enrollments:
+            return successful_enrollments, edx_request_success
     else:
         edx_request_success = True
 
-    successful_enrollments = []
     for run in runs:
         try:
             enrollment, created = CourseRunEnrollment.all_objects.get_or_create(
@@ -182,13 +188,17 @@ def create_program_enrollments(user, programs, order=None, company=None):
     return successful_enrollments
 
 
-def deactivate_run_enrollment(run_enrollment, change_status):
+def deactivate_run_enrollment(
+    run_enrollment, change_status, keep_failed_enrollments=False
+):
     """
     Helper method to deactivate a CourseRunEnrollment
 
     Args:
         run_enrollment (CourseRunEnrollment): The course run enrollment to deactivate
         change_status (str): The change status to set on the enrollment when deactivating
+        keep_failed_enrollments: (boolean): If True, keeps the local enrollment record
+            in the database even if the enrollment fails in edX.
 
     Returns:
         CourseRunEnrollment: The deactivated enrollment
@@ -201,6 +211,8 @@ def deactivate_run_enrollment(run_enrollment, change_status):
             run_enrollment.run.courseware_id,
             run_enrollment.user.email,
         )
+        if not keep_failed_enrollments:
+            return None
         edx_unenrolled = False
     else:
         edx_unenrolled = True
@@ -212,7 +224,10 @@ def deactivate_run_enrollment(run_enrollment, change_status):
 
 
 def deactivate_program_enrollment(
-    program_enrollment, change_status, limit_to_order=True
+    program_enrollment,
+    change_status,
+    keep_failed_enrollments=False,
+    limit_to_order=True,
 ):
     """
     Helper method to deactivate a ProgramEnrollment
@@ -220,13 +235,14 @@ def deactivate_program_enrollment(
     Args:
         program_enrollment (ProgramEnrollment): The program enrollment to deactivate
         change_status (str): The change status to set on the enrollment when deactivating
+        keep_failed_enrollments: (boolean): If True, keeps the local enrollment record
+            in the database even if the enrollment fails in edX.
         limit_to_order (bool): If True, only deactivate enrollments associated with the
             same Order that the program enrollment is associated with
 
     Returns:
         tuple of ProgramEnrollment, list(CourseRunEnrollment): The deactivated enrollments
     """
-    program_enrollment.deactivate_and_save(change_status, no_user=True)
     run_enrollment_params = (
         dict(order_id=program_enrollment.order_id)
         if limit_to_order and program_enrollment.order_id
@@ -235,18 +251,31 @@ def deactivate_program_enrollment(
     program_run_enrollments = program_enrollment.get_run_enrollments(
         **run_enrollment_params
     )
-    return (
-        program_enrollment,
-        list(
-            map(
-                partial(deactivate_run_enrollment, change_status=change_status),
-                program_run_enrollments,
-            )
-        ),
-    )
+
+    deactivated_course_runs = []
+    for run_enrollment in program_run_enrollments:
+        if deactivate_run_enrollment(
+            run_enrollment,
+            change_status=change_status,
+            keep_failed_enrollments=keep_failed_enrollments,
+        ):
+            deactivated_course_runs.append(run_enrollment)
+
+    if deactivated_course_runs:
+        program_enrollment.deactivate_and_save(change_status, no_user=True)
+    else:
+        return (None, None)
+
+    return (program_enrollment, deactivated_course_runs)
 
 
-def defer_enrollment(user, from_courseware_id, to_courseware_id, force=False):
+def defer_enrollment(
+    user,
+    from_courseware_id,
+    to_courseware_id,
+    keep_failed_enrollments=False,
+    force=False,
+):
     """
     Deactivates a user's existing enrollment in one course run and enrolls the user in another.
 
@@ -254,6 +283,8 @@ def defer_enrollment(user, from_courseware_id, to_courseware_id, force=False):
         user (User): The enrolled user
         from_courseware_id (str): The courseware_id value of the currently enrolled CourseRun
         to_courseware_id (str): The courseware_id value of the desired CourseRun
+        keep_failed_enrollments: (boolean): If True, keeps the local enrollment record
+            in the database even if the enrollment fails in edX.
         force (bool): If True, the deferral will be completed even if the current enrollment is inactive
             or the desired enrollment is in a different course
 
@@ -284,9 +315,15 @@ def defer_enrollment(user, from_courseware_id, to_courseware_id, force=False):
             )
         )
     to_enrollments, _ = create_run_enrollments(
-        user, [to_run], order=from_enrollment.order, company=from_enrollment.company
+        user,
+        [to_run],
+        order=from_enrollment.order,
+        company=from_enrollment.company,
+        keep_failed_enrollments=keep_failed_enrollments,
     )
     from_enrollment = deactivate_run_enrollment(
-        from_enrollment, ENROLL_CHANGE_STATUS_DEFERRED
+        from_enrollment,
+        ENROLL_CHANGE_STATUS_DEFERRED,
+        keep_failed_enrollments=keep_failed_enrollments,
     )
     return from_enrollment, first_or_none(to_enrollments)

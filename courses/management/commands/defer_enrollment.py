@@ -35,6 +35,13 @@ class Command(EnrollmentChangeCommand):
             help="The 'courseware_id' value for the CourseRun that you are deferring to",
             required=True,
         )
+        parser.add_argument(
+            "-k",
+            "--keep-failed-enrollments",
+            action="store_true",
+            dest="keep_failed_enrollments",
+            help="If provided, enrollment records will be kept even if edX enrollment fails",
+        )
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
@@ -45,7 +52,11 @@ class Command(EnrollmentChangeCommand):
 
         try:
             from_enrollment, to_enrollment = defer_enrollment(
-                user, from_courseware_id, to_courseware_id, force=options["force"]
+                user,
+                from_courseware_id,
+                to_courseware_id,
+                keep_failed_enrollments=options["keep_failed_enrollments"],
+                force=options["force"],
             )
         except ObjectDoesNotExist as exc:
             if isinstance(exc, CourseRunEnrollment.DoesNotExist):

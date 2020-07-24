@@ -43,11 +43,20 @@ class Command(EnrollmentChangeCommand):
             type=str,
             help="The 'courseware_id' value for an enrolled CourseRun",
         )
+        parser.add_argument(
+            "-k",
+            "--keep-failed-enrollments",
+            action="store_true",
+            dest="keep_failed_enrollments",
+            help="If provided, enrollment records will be kept even if edX enrollment fails",
+        )
+
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
         from_user = fetch_user(options["from_user"])
         to_user = fetch_user(options["to_user"])
+        keep_failed_enrollments = options["keep_failed_enrollments"]
         enrollment, enrolled_obj = self.fetch_enrollment(from_user, options)
 
         if options["program"]:
@@ -64,31 +73,55 @@ class Command(EnrollmentChangeCommand):
                 )
 
             new_program_enrollment, new_run_enrollments = self.create_program_enrollment(
-                enrollment, to_user=to_user
+                enrollment,
+                to_user=to_user,
+                keep_failed_enrollments=keep_failed_enrollments,
             )
-            deactivate_program_enrollment(
-                enrollment, change_status=ENROLL_CHANGE_STATUS_TRANSFERRED
-            )
+            if new_program_enrollment and new_run_enrollments:
+                deactivate_program_enrollment(
+                    enrollment,
+                    change_status=ENROLL_CHANGE_STATUS_TRANSFERRED,
+                    keep_failed_enrollments=keep_failed_enrollments,
+                )
         else:
             new_program_enrollment = None
-            new_run_enrollments = [
-                self.create_run_enrollment(enrollment, to_user=to_user)
-            ]
-            deactivate_run_enrollment(
-                enrollment, change_status=ENROLL_CHANGE_STATUS_TRANSFERRED
+            new_run_enrollment = self.create_run_enrollment(
+                enrollment,
+                to_user=to_user,
+                keep_failed_enrollments=keep_failed_enrollments,
             )
+            new_run_enrollments = []
+            if new_run_enrollment:
+                new_run_enrollments.append(new_run_enrollment)
+                deactivate_run_enrollment(
+                    enrollment,
+                    change_status=ENROLL_CHANGE_STATUS_TRANSFERRED,
+                    keep_failed_enrollments=keep_failed_enrollments,
+                )
 
-        self.stdout.write(
-            self.style.SUCCESS(
-                "Transferred enrollment – 'from' user: {} ({}), 'to' user: {} ({})\n"
-                "Enrollments created/updated: {}".format(
-                    from_user.username,
-                    from_user.email,
-                    to_user.username,
-                    to_user.email,
-                    enrollment_summaries(
-                        filter(bool, [new_program_enrollment] + new_run_enrollments)
-                    ),
+        if new_program_enrollment or new_run_enrollments:
+            self.stdout.write(
+                self.style.SUCCESS(
+                    "Transferred enrollment – 'from' user: {} ({}), 'to' user: {} ({})\n"
+                    "Enrollments created/updated: {}".format(
+                        from_user.username,
+                        from_user.email,
+                        to_user.username,
+                        to_user.email,
+                        enrollment_summaries(
+                            filter(bool, [new_program_enrollment] + new_run_enrollments)
+                        ),
+                    )
                 )
             )
-        )
+        else:
+            self.stdout.write(
+                self.style.ERROR(
+                    "Failed to transfer enrollment – 'from' user: {} ({}), 'to' user: {} ({})\n".format(
+                        from_user.username,
+                        from_user.email,
+                        to_user.username,
+                        to_user.email,
+                    )
+                )
+            )
