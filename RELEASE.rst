@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.55.0
+Version 0.55.0 (Released July 27, 2020)
 --------------
 
 - Make sure B2BOrders have unique integration ids (#1827)
