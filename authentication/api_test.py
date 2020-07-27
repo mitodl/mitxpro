@@ -16,7 +16,7 @@ def test_create_user_session(user):
     assert session.session_key is not None
 
 
-def test_create_user_with_generated_username(mocker):
+def test_create_user_with_generated_username(mocker, valid_address_dict):
     """
     Integration test to assert that create_user_with_generated_username tries to find an available
     username and try again to save a User if there was a username collision
@@ -24,12 +24,11 @@ def test_create_user_with_generated_username(mocker):
     username = "testuser"
     # Create a user with the desired username before calling the function so we get a collision
     UserFactory.create(username=username)
-    fake_user = UserFactory.build()
     data = {
         "username": username,
-        "email": fake_user.email,
-        "name": fake_user.name,
-        "legal_address": fake_user.legal_address.__dict__,
+        "email": "test@example.com",
+        "name": "Test User",
+        "legal_address": valid_address_dict,
         "password": "fakepassword",
     }
     serializer = UserSerializer(data=data)

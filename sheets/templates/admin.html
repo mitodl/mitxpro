@@ -32,13 +32,6 @@
           <input type="submit" value="Process bulk coupon request Sheet" />
           {% csrf_token %}
         </form>
-        {% if coupon_assignments_processed %}
-          <h3 style="color: green">Successfully processed coupon assignment sheets!</h3>
-        {% endif %}
-        <form action="{% url "process-assignment-sheets" %}" method="post" style="margin-bottom: 15px;">
-          <input type="submit" value="Process bulk coupon assignment Sheets" />
-          {% csrf_token %}
-        </form>
         {% if coupon_message_statuses_updated %}
           <h3 style="color: green">Successfully updated coupon message statuses!</h3>
         {% endif %}

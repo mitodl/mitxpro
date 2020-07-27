@@ -185,15 +185,6 @@ def process_request_sheet(request):
 
 @require_http_methods(["POST"])
 @staff_member_required(login_url="login")
-def process_assignment_sheets(request):
-    """Helper view to process coupon assignment Sheets"""
-    coupon_assignment_handler = CouponAssignmentHandler()
-    coupon_assignment_handler.process_assignment_spreadsheets()
-    return redirect("{}?success=coupon-assignment".format(reverse("sheets-admin-view")))
-
-
-@require_http_methods(["POST"])
-@staff_member_required(login_url="login")
 def update_assignment_delivery_statuses(request):
     """
     Helper view to update message delivery statuses for coupon assignments in assignment Sheets
