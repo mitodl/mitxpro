@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.56.0
+--------------
+
+- precommit hook configuration (#1760)
+- Changed email matching in coupon assignment to case-insensitive + updated columns when coupons assigned
+- create_enrollment command create an order
+- make create, defer, transfer and refund enrollment commands atomic with the edX enrollments
+- allow b2b coupons to be used multiple times and with any product
+
 Version 0.55.0 (Released July 27, 2020)
 --------------
 
