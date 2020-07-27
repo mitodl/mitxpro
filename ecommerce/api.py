@@ -760,13 +760,13 @@ def bulk_assign_product_coupons(desired_assignments, bulk_assignment=None):
     Assign product coupons to emails in bulk and create a record of this bulk creation
 
     Args:
-        desired_assignments (iterable of (str, int)): An iterable of emails paired with the
+        desired_assignments (Iterable[(str, int)]): An iterable of emails paired with the
             CouponEligibility id that each email should be assigned
-        bulk_assignment (BulkCouponAssignment or None): A BulkCouponAssignment object, or
+        bulk_assignment (Optional[BulkCouponAssignment]): A BulkCouponAssignment object, or
             None if a new one should be created
 
     Returns:
-        (BulkCouponAssignment, list of ProductCouponAssignment): The BulkCouponAssignment object paired with
+        (BulkCouponAssignment, List[ProductCouponAssignment]): The BulkCouponAssignment object paired with
             all of the ProductCouponAssignments that were created for it
     """
     bulk_assignment = bulk_assignment or BulkCouponAssignment.objects.create()

@@ -77,3 +77,17 @@ def wagtail_site():
 def home_page(wagtail_site):
     """Fixture for the home page"""
     return wagtail_site.root_page
+
+
+@pytest.fixture
+def valid_address_dict():
+    """Yields a dict that will deserialize into a valid legal address"""
+    return dict(
+        first_name="Test",
+        last_name="User",
+        street_address_1="1 Main St",
+        state_or_territory="US-MA",
+        city="Cambridge",
+        country="US",
+        postal_code="02139",
+    )

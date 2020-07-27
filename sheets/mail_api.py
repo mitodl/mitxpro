@@ -43,7 +43,7 @@ def get_bulk_assignment_messages(event=None, begin=None, end=None):
         added_params["begin"] = format_datetime_for_mailgun(begin)
     if end:
         added_params["end"] = format_datetime_for_mailgun(end)
-    url = "https://api:{key}@{api_domain}/v3/{domain}" "/events?tags={tag}".format(
+    url = "https://api:{key}@{api_domain}/v3/{domain}/events?tags={tag}".format(
         key=settings.MAILGUN_KEY,
         api_domain=MAILGUN_API_DOMAIN,
         domain=settings.MAILGUN_SENDER_DOMAIN,

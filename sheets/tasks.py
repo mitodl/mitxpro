@@ -66,7 +66,7 @@ def handle_unprocessed_deferral_requests():
 @app.task
 def process_coupon_assignment_sheet(*, file_id, change_date=None):
     """
-    Processes a single coupon assignment spreadsheets
+    Processes a single coupon assignment spreadsheet
 
     Args:
         file_id (str): The file id of the assignment spreadsheet (visible in the spreadsheet URL)
@@ -74,13 +74,12 @@ def process_coupon_assignment_sheet(*, file_id, change_date=None):
             was changed
     """
     coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler()
-    _, worksheet = coupon_assignment_handler.fetch_assignment_sheet(file_id)
     change_dt = datetime.fromisoformat(change_date) if change_date else now_in_utc()
     bulk_assignment, _ = BulkCouponAssignment.objects.update_or_create(
         assignment_sheet_id=file_id, defaults=dict(sheet_last_modified_date=change_dt)
     )
-    _, num_created, num_removed = coupon_assignment_handler.process_assignment_spreadsheet(
-        worksheet, bulk_assignment
+    _, num_created, num_removed = coupon_assignment_handler.process_assignment_spreadsheet_by_id(
+        file_id, bulk_assignment
     )
     return {
         "sheet_id": file_id,

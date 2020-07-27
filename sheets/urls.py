@@ -28,11 +28,6 @@ if settings.FEATURES.get("COUPON_SHEETS_ALT_PROCESSING"):
             name="process-request-sheet",
         ),
         re_path(
-            r"^api/sheets/coupon-assignments/",
-            views.process_assignment_sheets,
-            name="process-assignment-sheets",
-        ),
-        re_path(
             r"^api/sheets/coupon-message-statuses/",
             views.update_assignment_delivery_statuses,
             name="update-assignment-delivery-statuses",
