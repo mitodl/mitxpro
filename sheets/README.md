@@ -128,4 +128,4 @@ or (b) an error/failure status, which usually indicates that the email was inval
 
 ## Development Setup
 
-_Details to be filled in later..._
+Instructions can be found here: [xPRO Google Sheets - Developer Setup](./dev-setup.md)
