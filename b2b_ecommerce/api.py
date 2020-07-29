@@ -15,6 +15,7 @@ from ecommerce.api import (
 )
 from ecommerce.mail_api import send_b2b_receipt_email
 from ecommerce.models import CouponPaymentVersion
+from hubspot.task_helpers import sync_hubspot_b2b_deal
 from mitxpro.utils import now_in_utc
 
 
@@ -132,6 +133,8 @@ def fulfill_b2b_order(request_data):
 
     # Save to log everything to an audit table including enrollments created in complete_order
     order.save_and_log(None)
+
+    sync_hubspot_b2b_deal(order)
 
 
 def determine_price_and_discount(*, product_version, discount_code, num_seats):

@@ -71,7 +71,7 @@ class B2BProductVersionToLineSerializer(serializers.ModelSerializer):
 
     def get_order(self, instance):
         """ Get the order id and return the hubspot deal integratorObject id"""
-        return format_hubspot_id(instance.id)
+        return format_hubspot_id(instance.integration_id)
 
     def get_quantity(self, instance):
         """return the number of seats associated with the b2b order"""
