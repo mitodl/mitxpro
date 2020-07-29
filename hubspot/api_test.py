@@ -19,6 +19,7 @@ from hubspot.serializers import (
     LineSerializer,
     ProductSerializer,
     B2BOrderToDealSerializer,
+    B2BProductVersionToLineSerializer,
 )
 from mitxpro.test_utils import any_instance_of
 from users.serializers import UserSerializer
@@ -193,6 +194,25 @@ def test_make_b2b_deal_sync_message(hubspot_b2b_order):
             "action": "UPSERT",
             "changeOccurredTimestamp": any_instance_of(int),
             "propertyNameToValues": serialized_order,
+        }
+    ]
+
+
+@pytest.mark.django_db
+def test_make_b2b_product_sync_message(hubspot_b2b_order):
+    """Test make_b2b_product_sync_message serializes a product and returns a properly formatted sync message"""
+    product_sync_message = api.make_b2b_product_sync_message(hubspot_b2b_order.id)
+
+    serialized_product = B2BProductVersionToLineSerializer(hubspot_b2b_order).data
+    for key in serialized_product.keys():
+        if serialized_product[key] is None:
+            serialized_product[key] = ""
+    assert product_sync_message == [
+        {
+            "integratorObjectId": f"{settings.HUBSPOT_ID_PREFIX}-{B2B_INTEGRATION_PREFIX}{hubspot_b2b_order.id}",
+            "action": "UPSERT",
+            "changeOccurredTimestamp": any_instance_of(int),
+            "propertyNameToValues": serialized_product,
         }
     ]
 

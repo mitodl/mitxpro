@@ -29,6 +29,7 @@ from hubspot.serializers import (
     ORDER_STATUS_MAPPING,
     ORDER_TYPE_B2C,
     ORDER_TYPE_B2B,
+    B2BProductVersionToLineSerializer,
 )
 
 pytestmark = [pytest.mark.django_db]
@@ -161,6 +162,20 @@ def test_serialize_b2b_order(status):
         "num_seats": 10,
         "status": order.status,
         "purchaser": format_hubspot_id(order.email),
+    }
+
+
+def test_serialize_b2b_product_version():
+    """Test that B2BProductVersionToLineSerializer produces the correct serialized data"""
+    order = B2BOrderFactory.create(status=Order.FULFILLED, num_seats=10)
+    serialized_data = B2BProductVersionToLineSerializer(instance=order).data
+    assert serialized_data == {
+        "id": format_hubspot_id(order.product_version.id),
+        "product": format_hubspot_id(order.product_version.product.id),
+        "order": format_hubspot_id(order.integration_id),
+        "quantity": order.num_seats,
+        "status": order.status,
+        "product_id": order.product_version.text_id,
     }
 
 
