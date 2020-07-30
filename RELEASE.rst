@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.56.1 (Released July 30, 2020)
+--------------
+
+- Fix hubspot b2b product sync id (#1836)
+- updated pillow version
+
 Version 0.56.0 (Released July 30, 2020)
 --------------
 
