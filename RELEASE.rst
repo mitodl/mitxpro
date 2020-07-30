@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.56.0
+Version 0.56.0 (Released July 30, 2020)
 --------------
 
 - precommit hook configuration (#1760)
