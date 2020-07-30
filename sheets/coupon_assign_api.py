@@ -503,7 +503,7 @@ class CouponAssignmentHandler:
         # created and which ones do not exist in the desired assignments and should therefore be removed.
         for existing_assignment in existing_assignment_qset.all():
             assignment_tuple = (
-                existing_assignment.email,
+                existing_assignment.email.lower(),
                 existing_assignment.product_coupon_id,
             )
             if assignment_tuple in desired_assignments:
