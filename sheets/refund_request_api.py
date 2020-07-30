@@ -16,7 +16,7 @@ from sheets.constants import (
     REFUND_SHEET_ORDER_TYPE_FULL_COUPON,
     GOOGLE_API_TRUE_VAL,
 )
-from sheets.enrollment_change_api import EnrollmentChangeRequestHandler
+from sheets.sheet_handler_api import EnrollmentChangeRequestHandler
 from sheets.exceptions import SheetRowParsingException
 from sheets.models import RefundRequest
 from sheets.utils import (
@@ -159,13 +159,16 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
             enrollment (ProgramEnrollment or CourseRunEnrollment):
         """
         if isinstance(enrollment, ProgramEnrollment):
-            deactivate_program_enrollment(
+            deactivated_enrollment, _ = deactivate_program_enrollment(
                 enrollment, change_status=ENROLL_CHANGE_STATUS_REFUNDED
             )
         else:
-            deactivate_run_enrollment(
+            deactivated_enrollment = deactivate_run_enrollment(
                 enrollment, change_status=ENROLL_CHANGE_STATUS_REFUNDED
             )
+        # When #1838 is completed, this logic can be removed
+        if deactivated_enrollment is None:
+            raise Exception("Enrollment change failed in edX")
         order.status = Order.REFUNDED
         order.save_and_log(acting_user=None)
 
@@ -222,18 +225,18 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
             return RowResult(
                 row_index=row_index,
                 row_db_record=refund_request,
+                row_object=None,
                 result_type=ResultType.FAILED,
                 message="Parsing failure: {}".format(str(exc)),
             )
         is_unchanged_error_row = (
-            refund_req_row.errors is not None
-            and not request_created
-            and not request_updated
+            refund_req_row.errors and not request_created and not request_updated
         )
         if is_unchanged_error_row:
             return RowResult(
                 row_index=row_index,
                 row_db_record=refund_request,
+                row_object=None,
                 result_type=ResultType.IGNORED,
                 message=None,
             )
@@ -244,6 +247,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
             return RowResult(
                 row_index=row_index,
                 row_db_record=refund_request,
+                row_object=None,
                 result_type=ResultType.OUT_OF_SYNC,
                 message=None,
             )
@@ -273,6 +277,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
             return RowResult(
                 row_index=row_index,
                 row_db_record=refund_request,
+                row_object=None,
                 result_type=ResultType.FAILED,
                 message=message,
             )
@@ -283,6 +288,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
         return RowResult(
             row_index=row_index,
             row_db_record=refund_request,
+            row_object=refund_req_row,
             result_type=ResultType.PROCESSED,
             message=None,
         )

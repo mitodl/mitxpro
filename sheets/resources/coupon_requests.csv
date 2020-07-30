@@ -1,0 +1,8 @@
+Purchase Order,Coupon Name,# Codes,Product Id,Company,Activation,Expiration,Requested By,Date Processed,Errors,Ignored?
+po-1,coupon-1,2,course-v1:edX+DemoX+Demo_Course,MIT,1/1/2019 11:11:00,12/31/2019 11:22:00,,1/1/2020 13:09:39,,TRUE
+po-2,coupon-2,3,course-v1:edX+DemoX+Demo_Course,MIT,1/1/2019 11:11:00,,requester@example.com,1/1/2020 13:09:40,,
+po-3,coupon-3,2,course-v1:edX+DemoX+Demo_Course,MIT,1/1/2019 11:11:00,,requester@example.com,,,TRUE
+po-4,coupon-4,3,course-v1:bad+courseware+id,MIT,1/1/2019 11:11:00,,requester@example.com,,,
+po-5,repeat-coupon,2,course-v1:edX+DemoX+Demo_Course,MIT,1/1/2019 11:11:00,,requester@example.com,,,
+po-6,repeat-coupon,3,course-v1:edX+DemoX+Demo_Course,MIT,1/1/2019 11:11:00,,requester@example.com,,,
+po-7,coupon-7,2,course-v1:edX+DemoX+Demo_Course,MIT Open Learning,1/1/2019 11:11:00,,requester@example.com,,,

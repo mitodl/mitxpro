@@ -1,7 +1,14 @@
 """Factory for Users"""
-import string
-
-from factory import Faker, Trait, SubFactory, RelatedFactory, fuzzy
+import pycountry
+from factory import (
+    Faker,
+    Trait,
+    SubFactory,
+    RelatedFactory,
+    fuzzy,
+    lazy_attribute,
+    random,
+)
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText
 from social_django.models import UserSocialAuth
@@ -47,10 +54,26 @@ class LegalAddressFactory(DjangoModelFactory):
 
     street_address_1 = Faker("street_address")
 
-    state_or_territory = Faker("lexify", text="??-??", letters=string.ascii_uppercase)
     city = Faker("city")
     country = Faker("country_code", representation="alpha-2")
     postal_code = Faker("postalcode")
+
+    @lazy_attribute
+    def state_or_territory(self):
+        """
+        Return a state/territory if one is applicable for the given country.
+
+        NOTE: There didn't seem to be a straightforward way to produce a state/territory using faker,
+        and using random letters for that value results in addresses that fail our own address validation.
+        This implementation is here to ensure that we produce legit-looking addresses that our own app
+        will consider valid.
+        """
+        if self.country not in {"US", "CA"}:
+            return ""
+        subdivisions = pycountry.subdivisions.get(country_code=self.country)
+        subdivision = random.randgen.sample(subdivisions, 1)[0]
+        # Example: "US-MA"
+        return subdivision.code
 
     class Meta:
         model = LegalAddress

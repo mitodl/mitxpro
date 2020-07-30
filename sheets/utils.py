@@ -114,12 +114,16 @@ class SheetMetadata:
 
 
 class SingletonSheetMetadata(SheetMetadata):
-    """Metadata for a type of Google Sheet that this app interacts with and tracks via file watch/webhook"""
+    """
+    Metadata for a type of Google Sheet that this app interacts with, and of which only one should exist
+    """
 
     sheet_file_id = None
 
 
-class CouponRequestSheetMetadata(SingletonSheetMetadata):
+class CouponRequestSheetMetadata(
+    SingletonSheetMetadata
+):  # pylint: disable=too-many-instance-attributes
     """Metadata for the coupon request spreadsheet"""
 
     PURCHASE_ORDER_COL_INDEX = 0
@@ -128,13 +132,16 @@ class CouponRequestSheetMetadata(SingletonSheetMetadata):
     ERROR_COL = settings.SHEETS_REQ_ERROR_COL
     SKIP_ROW_COL = ERROR_COL + 1
 
-    def __init__(self):
+    def __init__(self):  # pylint: disable=too-many-instance-attributes
         self.sheet_type = SHEET_TYPE_COUPON_REQUEST
         self.sheet_name = "Coupon Request sheet"
         self.first_data_row = GOOGLE_SHEET_FIRST_ROW + 1
         self.non_input_column_indices = settings.SHEETS_REQ_CALCULATED_COLUMNS
         self.num_columns = self.ERROR_COL + 1
         self.sheet_file_id = settings.COUPON_REQUEST_SHEET_ID
+
+        self.PROCESSED_COL_LETTER = get_column_letter(self.PROCESSED_COL)
+        self.ERROR_COL_LETTER = get_column_letter(self.ERROR_COL)
 
 
 class RefundRequestSheetMetadata(
@@ -242,7 +249,7 @@ class ResultType(Enum):
 
 
 RowResult = namedtuple(
-    "RowResult", ["row_index", "row_db_record", "message", "result_type"]
+    "RowResult", ["row_index", "row_db_record", "row_object", "message", "result_type"]
 )
 
 ProcessedRequest = namedtuple(
@@ -298,25 +305,6 @@ def get_data_rows(worksheet, include_trailing_empty=False):
     except StopIteration:
         return
     yield from row_iter
-
-
-def get_enumerated_data_rows(worksheet, include_trailing_empty=False):
-    """
-    Yields enumerated data rows of a spreadsheet that has a header row
-
-    Args:
-        worksheet (pygsheets.worksheet.Worksheet): Worksheet object
-        include_trailing_empty (bool): Whether to include empty trailing cells/values after last non-zero value
-
-    Yields:
-        (int, list of str): Row index (according to the Google Sheet, NOT zero-indexed) paired with the list
-            of strings representing the data in each column of the row
-    """
-    enumerated_data_rows = enumerate(
-        get_data_rows(worksheet, include_trailing_empty=include_trailing_empty),
-        start=GOOGLE_SHEET_FIRST_ROW + 1,
-    )
-    yield from enumerated_data_rows
 
 
 def get_data_rows_after_start(
@@ -506,7 +494,7 @@ def google_timestamp_to_datetime(google_timestamp):
     """
     # Google timestamps are expressed in milliseconds, hence the '/ 1000'
     timestamp_in_seconds = int(google_timestamp) / 1000
-    return datetime.datetime.fromtimestamp(timestamp_in_seconds, pytz.utc)
+    return datetime.datetime.fromtimestamp(timestamp_in_seconds, pytz.UTC)
 
 
 def google_date_string_to_datetime(google_date_str):
@@ -534,7 +522,7 @@ def mailgun_timestamp_to_datetime(timestamp):
     Returns:
         datetime.datetime: The parsed timestamp
     """
-    return datetime.datetime.fromtimestamp(timestamp, pytz.utc)
+    return datetime.datetime.fromtimestamp(timestamp, pytz.UTC)
 
 
 def build_multi_cell_update_request_body(

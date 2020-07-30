@@ -48,13 +48,6 @@ def sheets_admin_view(request):
         {
             "existing_api_auth": existing_api_auth,
             "auth_completed": successful_action == "auth",
-            "alternative_sheets_processing": settings.FEATURES.get(
-                "COUPON_SHEETS_ALT_PROCESSING", False
-            ),
-            "coupon_requests_processed": successful_action == "coupon-request",
-            "coupon_assignments_processed": successful_action == "coupon-assignment",
-            "coupon_message_statuses_updated": successful_action
-            == "coupon-message-status",
         },
     )
 
@@ -172,26 +165,3 @@ def handle_watched_sheet_update(request):
         tasks.handle_unprocessed_deferral_requests.delay()
 
     return HttpResponse(status=status.HTTP_200_OK)
-
-
-@require_http_methods(["POST"])
-@staff_member_required(login_url="login")
-def process_request_sheet(request):
-    """Helper view to process the coupon request Sheet"""
-    coupon_request_handler = CouponRequestHandler()
-    coupon_request_handler.process_sheet()
-    return redirect("{}?success=coupon-request".format(reverse("sheets-admin-view")))
-
-
-@require_http_methods(["POST"])
-@staff_member_required(login_url="login")
-def update_assignment_delivery_statuses(request):
-    """
-    Helper view to update message delivery statuses for coupon assignments in assignment Sheets
-    that have not yet been completed
-    """
-    coupon_assignment_handler = CouponAssignmentHandler()
-    coupon_assignment_handler.update_incomplete_assignment_message_statuses()
-    return redirect(
-        "{}?success=coupon-message-status".format(reverse("sheets-admin-view"))
-    )

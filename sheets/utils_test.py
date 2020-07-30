@@ -41,23 +41,3 @@ def test_get_data_rows(mocker):
     )
     data_rows = list(utils.get_data_rows(mocked_worksheet))
     assert data_rows == non_header_rows
-
-
-def test_get_enumerated_data_rows(mocker):
-    """
-    enumerated_data_rows should return each row index paired with the raw data in the row for all rows after the
-    header row.
-    """
-    non_header_rows = [
-        ["row 1 - column 1", "row 1 - column 2"],
-        ["row 2 - column 1", "row 2 - column 2"],
-    ]
-    sheet_rows = [["HEADER 1", "HEADER 2"]] + non_header_rows
-    mocked_worksheet = mocker.MagicMock(
-        spec=Worksheet, get_all_values=mocker.Mock(return_value=sheet_rows)
-    )
-    enumerated_data_rows = list(utils.get_enumerated_data_rows(mocked_worksheet))
-    assert enumerated_data_rows == [
-        (2, ["row 1 - column 1", "row 1 - column 2"]),
-        (3, ["row 2 - column 1", "row 2 - column 2"]),
-    ]
