@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.56.2
+Version 0.56.2 (Released July 30, 2020)
 --------------
 
 - Fixed case-sensitivity bug with coupon assignment sheets
