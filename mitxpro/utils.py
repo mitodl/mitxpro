@@ -281,6 +281,20 @@ def item_at_index_or_none(indexable, index):
         return None
 
 
+def item_at_index_or_blank(indexable, index):
+    """
+    Returns the item at a certain index, or a blank string if that index doesn't exist
+
+    Args:
+        indexable (List[str]): A list of strings
+        index (int): The index in the list or tuple
+
+    Returns:
+        str: The item at the given index, or a blank string
+    """
+    return item_at_index_or_none(indexable, index) or ""
+
+
 def all_equal(*args):
     """
     Returns True if all of the provided args are equal to each other
@@ -338,11 +352,11 @@ def group_into_dict(items, key_fn):
         }
 
     Args:
-        items (iterable of any): An iterable of objects to group into a dictionary
-        key_fn (function): A function that will take an individual item and produce a dict key
+        items (Iterable[T]): An iterable of objects to group into a dictionary
+        key_fn (Callable[[T], Any]): A function that will take an individual item and produce a dict key
 
     Returns:
-        dict: A dictionary with keys produced by the key function paired with a list of all the given
+        Dict[Any, T]: A dictionary with keys produced by the key function paired with a list of all the given
             items that produced that key.
     """
     sorted_items = sorted(items, key=key_fn)

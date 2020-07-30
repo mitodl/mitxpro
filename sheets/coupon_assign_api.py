@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.db import transaction
+from django.utils.functional import cached_property
 
 import ecommerce.api
 from ecommerce.mail_api import send_bulk_enroll_emails
@@ -14,12 +15,6 @@ from ecommerce.models import (
     BulkCouponAssignment,
 )
 from mail.api import validate_email_addresses
-from mail.constants import (
-    MAILGUN_DELIVERED,
-    MAILGUN_FAILED,
-    MAILGUN_OPENED,
-    MAILGUN_CLICKED,
-)
 from mail.exceptions import MultiEmailValidationError
 from mitxpro.utils import (
     now_in_utc,
@@ -38,6 +33,9 @@ from sheets.constants import (
     ASSIGNMENT_SHEET_INVALID_STATUS,
     UNSENT_EMAIL_STATUSES,
     ASSIGNMENT_SHEET_ENROLLED_STATUS,
+    GOOGLE_SHEET_FIRST_ROW,
+    RELEVANT_ASSIGNMENT_EMAIL_EVENTS,
+    ASSIGNMENT_SHEET_MAX_AGE_DAYS,
     ASSIGNMENT_SHEET_ASSIGNED_STATUS,
 )
 from sheets.exceptions import SheetValidationException, SheetRowParsingException
@@ -53,28 +51,6 @@ from sheets.utils import (
 )
 
 log = logging.getLogger(__name__)
-
-
-def fetch_webhook_eligible_assign_sheet_ids():
-    """
-    Fetches the file ids of coupon assignment sheets with enough recent activity that they can
-    have a file watch created/renewed.
-
-    Returns:
-        Iterable[str]: File ids for assignment sheets that can have a file watch created/renewed
-    """
-    min_last_activity_date = now_in_utc() - timedelta(
-        days=settings.DRIVE_WEBHOOK_ASSIGNMENT_MAX_AGE_DAYS
-    )
-    return (
-        BulkCouponAssignment.objects.exclude(assignment_sheet_id=None)
-        .exclude(assignments_started_date=None, created_on__lt=min_last_activity_date)
-        .filter(
-            message_delivery_completed_date=None,
-            last_assignment_date__gte=min_last_activity_date,
-        )
-        .values_list("assignment_sheet_id", flat=True)
-    )
 
 
 class CouponAssignmentRow:
@@ -127,7 +103,6 @@ class AssignmentStatusMap:
     def __init__(self):
         self._assignment_map = defaultdict(dict)
         self._unassigned_code_map = defaultdict(int)
-        self._sheet_id_map = {}
 
     def add_assignment_rows(self, bulk_assignment, assignment_rows):
         """
@@ -137,7 +112,6 @@ class AssignmentStatusMap:
             bulk_assignment (BulkCouponAssignment): A BulkCouponAssignment object
             assignment_rows (List[CouponAssignmentRow]): Objects representing rows in an assignment Sheet
         """
-        self._sheet_id_map[bulk_assignment.id] = bulk_assignment.assignment_sheet_id
         for assignment_row in assignment_rows:
             if assignment_row.email:
                 self._assignment_map[bulk_assignment.id][
@@ -170,8 +144,9 @@ class AssignmentStatusMap:
             event_type (str): The event type (e.g.: "delivered", "failed")
             event_date (datetime.datetime): The datetime when the email was delivered for the given coupon assignment
         """
+        recipient_email_lowercase = recipient_email.lower()
         assignment_dict = self._assignment_map.get(bulk_assignment_id, {}).get(
-            (code, recipient_email)
+            (code, recipient_email_lowercase)
         )
         if not assignment_dict:
             return
@@ -187,13 +162,13 @@ class AssignmentStatusMap:
             and event_type == assignment_dict["existing_status"]
             and event_date == assignment_dict["existing_status_date"]
         ):
-            self._assignment_map[bulk_assignment_id][(code, recipient_email)].update(
-                {"new_status": None, "new_status_date": None}
-            )
+            self._assignment_map[bulk_assignment_id][
+                (code, recipient_email_lowercase)
+            ].update({"new_status": None, "new_status_date": None})
         else:
-            self._assignment_map[bulk_assignment_id][(code, recipient_email)].update(
-                {"new_status": event_type, "new_status_date": event_date}
-            )
+            self._assignment_map[bulk_assignment_id][
+                (code, recipient_email_lowercase)
+            ].update({"new_status": event_type, "new_status_date": event_date})
 
     def get_new_status_and_date(self, bulk_assignment_id, code, recipient_email):
         """
@@ -206,12 +181,12 @@ class AssignmentStatusMap:
             recipient_email (str):
 
         Returns:
-            (Optional[str], Optional[datetime.datetime]): The new status paired with the date that
+            Tuple[Optional[str], Optional[datetime.datetime]]: The new status paired with the date that
                 the status was logged in Mailgun (or (None, None) if the given assignment does not
                 have a new status.
         """
         message_data = self._assignment_map[bulk_assignment_id].get(
-            (code, recipient_email)
+            (code, recipient_email.lower())
         )
         return (
             (message_data["new_status"], message_data["new_status_date"])
@@ -243,7 +218,7 @@ class AssignmentStatusMap:
             bulk_assignment_id (int):
 
         Returns:
-            Iterable[(int, str, datetime.datetime)]: An iterable of row indices (indicating the Sheet row) paired
+            Iterable[Tuple[int, str, datetime.datetime]]: An iterable of row indices (indicating the Sheet row) paired
                 with new status and the date of that status change
         """
         return (
@@ -255,18 +230,6 @@ class AssignmentStatusMap:
             for message_data in self._assignment_map[bulk_assignment_id].values()
             if message_data["new_status"]
         )
-
-    def get_sheet_id(self, bulk_assignment_id):
-        """
-        Returns the assignment spreadsheet id associated with the given bulk assignment
-
-        Args:
-            bulk_assignment_id (int):
-
-        Returns:
-            str: The assignment spreadsheet id
-        """
-        return self._sheet_id_map[bulk_assignment_id]
 
     def has_unassigned_codes(self, bulk_assignment_id):
         """
@@ -291,6 +254,167 @@ class AssignmentStatusMap:
         return self._assignment_map.keys()
 
 
+def fetch_webhook_eligible_assign_sheet_ids():
+    """
+    Fetches the file ids of coupon assignment sheets with enough recent activity that they can
+    have a file watch created/renewed.
+
+    Returns:
+        iterable of str: File ids for assignment sheets that can have a file watch created/renewed
+    """
+    min_last_activity_date = now_in_utc() - timedelta(
+        days=settings.DRIVE_WEBHOOK_ASSIGNMENT_MAX_AGE_DAYS
+    )
+    return (
+        BulkCouponAssignment.objects.exclude(assignment_sheet_id=None)
+        .exclude(assignments_started_date=None, created_on__lt=min_last_activity_date)
+        .filter(
+            message_delivery_completed_date=None,
+            last_assignment_date__gte=min_last_activity_date,
+        )
+        .values_list("assignment_sheet_id", flat=True)
+    )
+
+
+def update_product_coupon_assignments(bulk_assignment_id, assignment_status_map):
+    """
+    Updates the message fields of product coupon assignments in the database if they have new statuses according
+    to the assignment status map.
+
+    Args:
+        bulk_assignment_id (int): ID of a BulkCouponAssignment record
+        assignment_status_map (AssignmentStatusMap): An object representing the status of messages sent for
+            bulk coupon assignments.
+
+    Returns:
+        List[ProductCouponAssignment]: Product coupon assignments that were updated
+    """
+    updated_assignments = []
+    product_coupon_assignments = ProductCouponAssignment.objects.filter(
+        bulk_assignment_id=bulk_assignment_id
+    ).select_related("product_coupon__coupon")
+    for assignment in product_coupon_assignments:
+        new_status, new_status_date = assignment_status_map.get_new_status_and_date(
+            bulk_assignment_id,
+            assignment.product_coupon.coupon.coupon_code,
+            assignment.email,
+        )
+        if (
+            new_status
+            and new_status_date
+            and (
+                new_status != assignment.message_status
+                or new_status_date != assignment.message_status_date
+            )
+        ):
+            assignment.message_status = new_status
+            assignment.message_status_date = new_status_date
+            assignment.updated_on = now_in_utc()
+            updated_assignments.append(assignment)
+    ProductCouponAssignment.objects.bulk_update(
+        updated_assignments,
+        fields=["message_status", "message_status_date", "updated_on"],
+    )
+    return updated_assignments
+
+
+def fetch_update_eligible_bulk_assignments():
+    """
+    Fetches bulk assignment records that should be considered for a message status update
+
+    Returns:
+        List[BulkCouponAssignment]: Bulk assignment records that should be considered for a message status update
+    """
+    now = now_in_utc()
+    min_last_assignment_date = now - timedelta(days=ASSIGNMENT_SHEET_MAX_AGE_DAYS)
+    # Fetch all bulk assignments that are eligible to have message statuses updated
+    return list(
+        BulkCouponAssignment.objects.exclude(assignment_sheet_id=None)
+        .exclude(assignments_started_date=None)
+        .filter(
+            message_delivery_completed_date=None,
+            last_assignment_date__gt=min_last_assignment_date,
+        )
+        .order_by("assignments_started_date")
+        .prefetch_related("assignments")
+    )
+
+
+def find_bulk_assignment_messages(assignment_status_map, earliest_message_date=None):
+    """
+    Builds an object that tracks the relationship between bulk coupon assignments, the Sheets they represent,
+    and the enrollment email statuses for their individual assignments (e.g.: "delivered", "failed").
+
+    Args:
+        assignment_status_map (AssignmentStatusMap): An object representing the status of messages sent for
+            bulk coupon assignments.
+        earliest_message_date (datetime.datetime): The earliest date that should be considered for Mailgun messages
+            that are being queried.
+
+    Returns:
+        AssignmentStatusMap: The assignment status map with updated message statuses
+    """
+    # Loop through bulk coupon assignment emails from the Mailgun API and fill in the
+    # delivery or failure date for any matching coupon assignments in the map.
+    message_iter = filter(
+        lambda bulk_assignment_message: bulk_assignment_message.event
+        in RELEVANT_ASSIGNMENT_EMAIL_EVENTS,
+        get_bulk_assignment_messages(begin=earliest_message_date, end=now_in_utc()),
+    )
+    for message in message_iter:
+        assignment_status_map.add_potential_event_date(
+            message.bulk_assignment_id,
+            message.coupon_code,
+            message.email,
+            event_type=message.event,
+            event_date=mailgun_timestamp_to_datetime(message.timestamp),
+        )
+    return assignment_status_map
+
+
+def update_incomplete_assignment_message_statuses(bulk_assignments):
+    """
+    For each bulk assignment record passed in, attempts to update the message status for each individual assignment in
+    the database and spreadsheet.
+
+    Args:
+        bulk_assignments (List[BulkCouponAssignment]):
+
+    Returns:
+        dict: Bulk assignment ids mapped to a list of all product coupon assignments that were updated
+    """
+    if not bulk_assignments:
+        return {}
+    # We only need to fetch Mailgun messages as far back as the earliest assignment date of all the bulk assignments.
+    earliest_date = bulk_assignments[0].assignments_started_date
+    assignment_status_map = AssignmentStatusMap()
+    assignment_sheet_handlers = {}
+    updated_assignment_map = {}
+    # Loop through bulk assignments, load the spreadsheets associated with them, and add the data rows to a map.
+    for bulk_assignment in bulk_assignments:
+        coupon_assign_handler = CouponAssignmentHandler(
+            spreadsheet_id=bulk_assignment.assignment_sheet_id,
+            bulk_assignment=bulk_assignment,
+        )
+        assignment_sheet_handlers[bulk_assignment.id] = coupon_assign_handler
+        assignment_status_map.add_assignment_rows(
+            bulk_assignment, assignment_rows=coupon_assign_handler.parsed_rows()
+        )
+    # Query Mailgun for bulk assignment messages and match them to the spreadsheet rows in the map.
+    assignment_status_map = find_bulk_assignment_messages(
+        assignment_status_map, earliest_message_date=earliest_date
+    )
+    # For coupon assignment that has a new status according to Mailgun, update the sheets and the database records
+    # to reflect those new statuses.
+    for bulk_assignment in bulk_assignments:
+        coupon_assign_handler = assignment_sheet_handlers[bulk_assignment.id]
+        updated_assignment_map[
+            bulk_assignment.id
+        ] = coupon_assign_handler.update_coupon_delivery_statuses(assignment_status_map)
+
+    return updated_assignment_map
+
+
 class CouponAssignmentHandler:
     """Manages the processing of coupon assignments from Sheet data"""
 
@@ -308,86 +432,115 @@ class CouponAssignmentHandler:
     )
     FILE_METADATA_FIELDS = "id, name, modifiedTime, appProperties"
 
-    def __init__(self):
+    def __init__(self, spreadsheet_id, bulk_assignment):
         self.pygsheets_client = get_authorized_pygsheets_client()
         self.expanded_sheets_client = ExpandedSheetsClient(self.pygsheets_client)
+        self.spreadsheet = self.pygsheets_client.open_by_key(spreadsheet_id)
+        self.bulk_assignment = bulk_assignment
 
-    def _set_spreadsheet_completed(self, file_id, completed_dt=None):
+    @cached_property
+    def worksheet(self):
+        """
+        Returns the correct Worksheet object for this spreadsheet
+
+        Returns:
+             pygsheets.worksheet.Worksheet: The Worksheet object
+        """
+        # By default, the first worksheet of the spreadsheet should be used
+        return self.spreadsheet.sheet1
+
+    def get_enumerated_rows(self):
+        """
+        Yields enumerated data rows of a spreadsheet (excluding header row(s))
+
+        Yields:
+            Tuple[int, List[str]]: Row index (according to the Google Sheet, NOT zero-indexed) paired with the list
+                of strings representing the data in each column of the row
+        """
+        yield from enumerate(
+            get_data_rows(self.worksheet, include_trailing_empty=False),
+            start=GOOGLE_SHEET_FIRST_ROW + 1,
+        )
+
+    def parsed_rows(self):
+        """
+        Returns a list of parsed row data
+
+        Returns:
+            List[CouponAssignmentRow]: List of parsed row data from the sheet
+        """
+        data_rows = list(get_data_rows(self.worksheet))
+        coupon_codes = [row[0] for row in data_rows]
+        if not coupon_codes:
+            raise SheetValidationException("No data found in coupon assignment Sheet")
+        elif not all_unique(coupon_codes):
+            raise SheetValidationException(
+                "All coupon codes in the Sheet must be unique"
+            )
+        return [
+            CouponAssignmentRow.parse_raw_data(
+                row_index=row_index, raw_row_data=row_data
+            )
+            for row_index, row_data in enumerate(
+                data_rows, start=assign_sheet_metadata.first_data_row
+            )
+        ]
+
+    def set_spreadsheet_completed(self, completed_dt=None):
         """
         Sets spreadsheet metadata to indicate that all coupon assignments have been completed and enrollment
         messages have all been sent.
 
         Args:
-            file_id (str): The spreadsheet ID
-            completed_dt (Optional[datetime.datetime]): A datetime indicating completion date (defaults to UTC now)
+            completed_dt (datetime.datetime or None): A datetime indicating completion date (defaults to UTC now)
 
         Returns:
             dict: Google Drive API results from the files.update endpoint
         """
         date_str = format_datetime_for_google_api(completed_dt or now_in_utc())
         return self.expanded_sheets_client.update_spreadsheet_properties(
-            file_id,
+            self.spreadsheet.id,
             {
                 ASSIGNMENT_MESSAGES_COMPLETED_KEY: GOOGLE_API_TRUE_VAL,
                 ASSIGNMENT_MESSAGES_COMPLETED_DATE_KEY: date_str,
             },
         )
 
-    def fetch_incomplete_sheet_metadata(self):
+    def report_invalid_emails(self, assignment_rows, invalid_emails):
         """
-        Yields assignment spreadsheet metadata for sheets that indicate that they have not yet been completed
-        and should still be considered for processing.
-
-        Yields:
-            dict: An metadata dict for an assignment spreadsheet whose keys match the
-                `FILE_METADATA_FIELDS` property value
-        """
-        incomplete_assignment_sheet_metadata = self.expanded_sheets_client.get_metadata_for_matching_files(
-            query="{} and {}".format(
-                self.ASSIGNMENT_SHEETS_QUERY, self.INCOMPLETE_SHEETS_QUERY_TERM
-            ),
-            file_fields=self.FILE_METADATA_FIELDS,
-        )
-        yield from incomplete_assignment_sheet_metadata
-
-    def fetch_assignment_sheet(self, sheet_id):
-        """
-        Helper method to fetch a Spreadsheet object via pygsheets and return it along with
-        the worksheet where coupon assignments are made
+        Updates the status column for each row in an assignment sheet with an invalid email
 
         Args:
-            sheet_id (str): A coupon assignment spreadsheet id
-
-        Returns:
-            (pygsheets.spreadsheet.Spreadsheet, pygsheets.worksheet.Worksheet): A Spreadsheet
-                object paired with a Worksheet object
+            assignment_rows (iterable of CouponAssignmentRow): The parsed rows in the given assignment sheet
+            invalid_emails (set of str): Email addresses that failed validation
         """
-        spreadsheet = self.pygsheets_client.open_by_key(sheet_id)
-        return spreadsheet, spreadsheet.sheet1
+        now = now_in_utc()
 
-    def update_sheet_with_new_statuses(
-        self, sheet_id, status_date_rows, zero_based_indices=True
-    ):
+        status_date_rows = [
+            (row.row_index, ASSIGNMENT_SHEET_INVALID_STATUS, now)
+            for row in assignment_rows
+            if row.email in {email.lower() for email in invalid_emails}
+        ]
+        self.update_sheet_with_new_statuses(status_date_rows=status_date_rows)
+
+    def update_sheet_with_new_statuses(self, status_date_rows):
         """
         Updates the relevant cells of a coupon assignment Sheet with message statuses and dates.
 
         Args:
-            sheet_id (str): The spreadsheet id
-            status_date_rows (Iterable[(int, str, datetime.datetime)]): An iterable of row indices
-                (indicating the Sheet row, zero-based) paired with the message status and the date
+            status_date_rows (iterable of (int, str, datetime.datetime): An iterable of row indices
+                (1-based, as it is in the spreadsheet) paired with the message status and the date
                 of that status change.
-            zero_based_indices (bool): True indicates that the row indices being passed in are zero-based. False
-                indicates that the row indices are 1-based and need to be adjusted for the API call.
 
         Returns:
             dict: Google API response body
         """
-        index_adjust = 0 if zero_based_indices else 1
         return self.expanded_sheets_client.batch_update_sheet_cells(
-            sheet_id=sheet_id,
+            sheet_id=self.spreadsheet.id,
             request_objects=[
                 build_multi_cell_update_request_body(
-                    row_index=row_index - index_adjust,
+                    # The API endpoint uses 0-based indices. Decrementing the 1-based index to comply with that.
+                    row_index=row_index - 1,
                     column_index=assign_sheet_metadata.STATUS_COL,
                     values=[
                         {"userEnteredValue": {"stringValue": status}},
@@ -409,50 +562,33 @@ class CouponAssignmentHandler:
             ],
         )
 
-    def get_sheet_rows(self, worksheet):
+    def report_assigned_codes(self, assignment_rows, created_assignments):
         """
-        Returns an iterable of raw row data in a coupon assignment sheet with None filled
-        in for any empty columns.
-
+        Updates the status column for each row in an assignment sheet that was successfully assigned.
         Args:
-            worksheet (pygsheets.worksheet.Worksheet): A coupon assignment worksheet
-
-        Returns:
-            Iterable[(str, str, str, str)]: A matrix of raw row data from the sheet
+            assignment_rows (List[CouponAssignmentRow]): The parsed rows in the given assignment sheet
+            created_assignments (List[ProductCouponAssignment]): Newly-created product coupon assignments
         """
-        data_rows = list(get_data_rows(worksheet))
-        coupon_codes = [row[0] for row in data_rows]
-        if not coupon_codes:
-            raise SheetValidationException("No data found in coupon assignment Sheet")
-        elif not all_unique(coupon_codes):
-            raise SheetValidationException(
-                "All coupon codes in the Sheet must be unique"
-            )
-        return (
-            CouponAssignmentRow.parse_raw_data(
-                row_index=row_index, raw_row_data=row_data
-            )
-            for row_index, row_data in enumerate(
-                data_rows, start=assign_sheet_metadata.first_data_row
-            )
-        )
-
-    def assignment_sheet_row_iter(self, bulk_assignments):
-        """
-        Generator for data rows in Sheets associated with bulk assignments
-
-        Args:
-            bulk_assignments (Iterable[BulkCouponAssignment]):
-
-        Yields:
-            (BulkCouponAssignment, Iterable[(str, str, str, str)]): A bulk coupon assignment object paired with a
-                matrix of data rows in the coupon assignment Sheet associated with that object
-        """
-        for bulk_assignment in bulk_assignments:
-            _, worksheet = self.fetch_assignment_sheet(
-                bulk_assignment.assignment_sheet_id
-            )
-            yield bulk_assignment, self.get_sheet_rows(worksheet)
+        status_date_rows = []
+        # Map the code and email pair to the date it was created. This will allow us to find matching assignments and
+        # set the status date correctly.
+        assignment_creation_dict = {
+            (
+                assignment.product_coupon.coupon.coupon_code,
+                assignment.email.lower(),
+            ): assignment.created_on
+            for assignment in created_assignments
+        }
+        for row in assignment_rows:
+            if (row.code, row.email) in assignment_creation_dict:
+                status_date_rows.append(
+                    (
+                        row.row_index,
+                        ASSIGNMENT_SHEET_ASSIGNED_STATUS,
+                        assignment_creation_dict[(row.code, row.email)],
+                    )
+                )
+        self.update_sheet_with_new_statuses(status_date_rows=status_date_rows)
 
     @classmethod
     def get_desired_coupon_assignments(cls, assignment_rows):
@@ -461,10 +597,10 @@ class CouponAssignmentHandler:
         code and email are considered.
 
         Args:
-            assignment_rows (List[CouponAssignmentRow]):
+            assignment_rows (iterable of CouponAssignmentRow):
 
         Returns:
-            Set[(str, int)]: A set of emails paired with the product coupon (CouponEligibility)
+            set of (str, int): A set of emails paired with the product coupon (CouponEligibility)
                 id's that should be assigned to them.
         """
         valid_rows = [row for row in assignment_rows if row.code and row.email]
@@ -488,12 +624,12 @@ class CouponAssignmentHandler:
 
         Args:
             existing_assignment_qset (django.db.models.query.QuerySet): Queryset of existing ProductCouponAssignments
-            desired_assignments (Set[(str, int)]): A set of emails paired with the product coupon (CouponEligibility)
+            desired_assignments (set of (str, int)): A set of emails paired with the product coupon (CouponEligibility)
                 id's that should be assigned to them. This represents the complete set of assignments that should exist
                 in the database, including previously-existing assignments.
 
         Returns:
-            ( Set[(str, int)], Iterable[int] ):
+            ( set of (str, int), iterable of int ):
                 A set of (email, product coupon id) tuples, which indicate new assignments we want to create,
                 paired with an iterable of ProductCouponAssignment id's that should be deleted.
         """
@@ -547,108 +683,80 @@ class CouponAssignmentHandler:
             [assignment.id for assignment in assignments_to_remove],
         )
 
-    def report_assigned_codes(self, sheet_id, assignment_rows, created_assignments):
+    def update_coupon_delivery_statuses(self, assignment_status_map):
         """
-        Updates the status column for each row in an assignment sheet that was successfully assigned.
+        Updates product coupon assignment records and their corresponding rows in the spreadsheet based on the
+        contents of the assigment status map.
 
         Args:
-            sheet_id (str): An assignment spreadsheet id
-            assignment_rows (List[CouponAssignmentRow]): The parsed rows in the given assignment sheet
-            created_assignments (List[ProductCouponAssignment]): Newly-created product coupon assignments
-        """
-        status_date_rows = []
-        # Map the code and email pair to the date it was created. This will allow us to find matching assignments and
-        # set the status date correctly.
-        assignment_creation_dict = {
-            (
-                assignment.product_coupon.coupon.coupon_code,
-                assignment.email,
-            ): assignment.created_on
-            for assignment in created_assignments
-        }
-        for row in assignment_rows:
-            if (row.code, row.email) in assignment_creation_dict:
-                status_date_rows.append(
-                    (
-                        row.row_index,
-                        ASSIGNMENT_SHEET_ASSIGNED_STATUS,
-                        assignment_creation_dict[(row.code, row.email)],
-                    )
-                )
-        self.update_sheet_with_new_statuses(
-            sheet_id=sheet_id,
-            status_date_rows=status_date_rows,
-            zero_based_indices=False,
-        )
-
-    def report_invalid_emails(self, sheet_id, assignment_rows, invalid_emails):
-        """
-        Updates the status column for each row in an assignment sheet with an invalid email
-
-        Args:
-            sheet_id (str): An assignment spreadsheet id
-            assignment_rows (List[CouponAssignmentRow]): The parsed rows in the given assignment sheet
-            invalid_emails (Set[str]): Email addresses that failed validation
-        """
-        now = now_in_utc()
-        status_date_rows = [
-            (row.row_index, ASSIGNMENT_SHEET_INVALID_STATUS, now)
-            for row in assignment_rows
-            if row.email in invalid_emails
-        ]
-        self.update_sheet_with_new_statuses(
-            sheet_id=sheet_id,
-            status_date_rows=status_date_rows,
-            zero_based_indices=False,
-        )
-
-    def process_assignment_spreadsheet_by_id(self, sheet_id, bulk_assignment):
-        """
-        Ensures that there are product coupon assignments for every filled-in row in a coupon assignment Spreadsheet,
-        and sets some metadata to reflect the state of the bulk assignment.
-
-        Args:
-            sheet_id (str): The sheet ID (as indicated in the URL)
-            bulk_assignment (BulkCouponAssignment): The BulkCouponAssignment that is tracking the
-                status of the assignments in this worksheet
+            assignment_status_map (AssignmentStatusMap): An object representing the status of messages sent for
+                bulk coupon assignments.
 
         Returns:
-            (BulkCouponAssignment, int, int): The bulk coupon assignment created/updated paired with
-                the number of ProductCouponAssignments created and the number deleted
+            List[ProductCouponAssignment]: Product coupon assignment objects that were updated
         """
-        _, worksheet = self.fetch_assignment_sheet(sheet_id)
-        return self.process_assignment_spreadsheet(worksheet, bulk_assignment)
+        bulk_assignment_id = self.bulk_assignment.id
 
-    def process_assignment_spreadsheet(
-        self, worksheet, bulk_assignment
-    ):  # pylint: disable=too-many-locals
+        # Update product coupon assignment statuses and dates in database
+        updated_assignments = update_product_coupon_assignments(
+            bulk_assignment_id, assignment_status_map
+        )
+
+        # Set the BulkCouponAssignment to complete if every coupon has been assigned and
+        # all of the coupon messages have been delivered.
+        unsent_assignments_exist = ProductCouponAssignment.objects.filter(
+            bulk_assignment_id=self.bulk_assignment.id,
+            message_status__in=UNSENT_EMAIL_STATUSES,
+        ).exists()
+        if (
+            not unsent_assignments_exist
+            and not assignment_status_map.has_unassigned_codes(bulk_assignment_id)
+        ):
+            now = now_in_utc()
+            BulkCouponAssignment.objects.filter(id=bulk_assignment_id).update(
+                message_delivery_completed_date=now, updated_on=now
+            )
+            # Update spreadsheet metadata to reflect the status
+            try:
+                self.set_spreadsheet_completed(now)
+            except Exception:  # pylint: disable=broad-except
+                log.exception(
+                    "The BulkCouponAssignment has been updated to indicate that message delivery is complete, "
+                    "but the request to update spreadsheet properties to indicate this status failed "
+                    "(spreadsheet id: %s)",
+                    self.spreadsheet.id,
+                )
+
+        # Update delivery dates in Sheet
+        if assignment_status_map.has_new_statuses(bulk_assignment_id):
+            self.update_sheet_with_new_statuses(
+                assignment_status_map.get_status_date_rows(bulk_assignment_id)
+            )
+
+        return updated_assignments
+
+    def process_assignment_spreadsheet(self):  # pylint: disable=too-many-locals
         """
         Ensures that there are product coupon assignments for every filled-in row in a coupon assignment Spreadsheet,
         and sets some metadata to reflect the state of the bulk assignment.
 
         In more detail:
-        1) Creates a bulk assignment record if one doesn't exist
-        2) Gets valid assignment rows from the Sheet
-        3) Creates new product coupon assignments, removes assignments that were created before
+        1) Gets valid assignment rows from the Sheet
+        2) Creates new product coupon assignments, removes assignments that were created before
            but no longer exist in the sheet, and updates bulk assignment status
-        4) Send emails to all recipients of newly-created ProductCouponAssignments
-
-        Args:
-            worksheet (pygsheets.worksheet.Worksheet):
-            bulk_assignment (BulkCouponAssignment): The BulkCouponAssignment that is tracking the
-                status of the assignments in this worksheet
+        3) Send emails to all recipients of newly-created ProductCouponAssignments
 
         Returns:
             (BulkCouponAssignment, int, int): The bulk coupon assignment created/updated paired with
                 the number of ProductCouponAssignments created and the number deleted
         """
         created_assignments, invalid_emails, num_assignments_removed = [], set(), 0
-        assignment_rows = list(self.get_sheet_rows(worksheet))
+        assignment_rows = self.parsed_rows()
 
         # Determine what assignments need to be created and deleted
         desired_assignments = self.get_desired_coupon_assignments(assignment_rows)
-        if bulk_assignment.assignments_started_date:
-            existing_assignment_qset = bulk_assignment.assignments
+        if self.bulk_assignment.assignments_started_date:
+            existing_assignment_qset = self.bulk_assignment.assignments
             existing_assignment_count = existing_assignment_qset.count()
             assignments_to_create, assignment_ids_to_remove = self.get_assignments_to_create_and_remove(
                 existing_assignment_qset, desired_assignments
@@ -680,6 +788,9 @@ class CouponAssignmentHandler:
 
         # Create ProductCouponAssignments and update the BulkCouponAssignment record to reflect the progress
         with transaction.atomic():
+            bulk_assignment = BulkCouponAssignment.objects.select_for_update().get(
+                id=self.bulk_assignment.id
+            )
             _, created_assignments = ecommerce.api.bulk_assign_product_coupons(
                 assignments_to_create, bulk_assignment=bulk_assignment
             )
@@ -690,174 +801,15 @@ class CouponAssignmentHandler:
                 bulk_assignment.last_assignment_date = now
                 bulk_assignment.updated_on = now
                 bulk_assignment.save()
+                self.bulk_assignment = bulk_assignment
 
-        # Send messages if any assignments were created and update the sheet to reflect the new assignments
+        # Send messages if any assignments were created
         if created_assignments:
-            send_bulk_enroll_emails(bulk_assignment.id, created_assignments)
-            self.report_assigned_codes(
-                bulk_assignment.assignment_sheet_id,
-                assignment_rows,
-                created_assignments,
-            )
+            send_bulk_enroll_emails(self.bulk_assignment.id, created_assignments)
+            self.report_assigned_codes(assignment_rows, created_assignments)
+
         # Update the sheet if any emails failed validation
         if invalid_emails:
-            self.report_invalid_emails(
-                bulk_assignment.assignment_sheet_id, assignment_rows, invalid_emails
-            )
+            self.report_invalid_emails(assignment_rows, invalid_emails)
 
-        return bulk_assignment, len(created_assignments), num_assignments_removed
-
-    def build_assignment_status_map(self, bulk_assignments, earliest_date=None):
-        """
-        Builds an object that tracks the relationship between bulk coupon assignments, the Sheets they represent,
-        and the enrollment email statuses for their individual assignments (e.g.: "delivered", "failed").
-
-        Args:
-            bulk_assignments (Iterable[BulkCouponAssignment]):
-            earliest_date (Optional[datetime.datetime]): The lower date bound for Mailgun messages to search
-                for. If None, this will be calculated from the given bulk assignments.
-
-        Returns:
-            AssignmentStatusMap: The assignment delivery map
-        """
-        earliest_date = earliest_date or min(
-            assignment.assignments_started_date for assignment in bulk_assignments
-        )
-        assignment_status_map = AssignmentStatusMap()
-
-        # Initialize the map of coupon assignment deliveries starting with the data in each
-        # coupon assignment Sheet.
-        for bulk_assignment, assignment_rows in self.assignment_sheet_row_iter(
-            bulk_assignments
-        ):
-            assignment_status_map.add_assignment_rows(bulk_assignment, assignment_rows)
-
-        # Loop through bulk coupon assignment emails from the Mailgun API and fill in the
-        # delivery or failure date for any matching coupon assignments in the map.
-        relevant_events = {
-            MAILGUN_DELIVERED,
-            MAILGUN_FAILED,
-            MAILGUN_OPENED,
-            MAILGUN_CLICKED,
-        }
-        message_iter = filter(
-            lambda bulk_assignment_message: bulk_assignment_message.event
-            in relevant_events,
-            get_bulk_assignment_messages(begin=earliest_date, end=now_in_utc()),
-        )
-        for message in message_iter:
-            assignment_status_map.add_potential_event_date(
-                message.bulk_assignment_id,
-                message.coupon_code,
-                message.email.lower(),
-                event_type=message.event,
-                event_date=mailgun_timestamp_to_datetime(message.timestamp),
-            )
-
-        return assignment_status_map
-
-    def update_coupon_delivery_statuses(self, assignment_status_map):
-        """
-        Updates the relevant database records and spreadsheet cells depending on the coupon message statuses in the
-        assignment status map.
-
-        Args:
-            assignment_status_map (AssignmentStatusMap): The assignment status map to use for updating the
-                database and Sheet
-
-        Returns:
-            dict: Bulk assignment ids mapped to a list of all product coupon assignments that were updated that
-                bulk assignment
-        """
-        updated_assignments = {}
-        for bulk_assignment_id in assignment_status_map.bulk_assignment_ids:
-            # Update product coupon assignment statuses and dates in database
-            updated_assignments[bulk_assignment_id] = []
-            product_coupon_assignments = ProductCouponAssignment.objects.filter(
-                bulk_assignment_id=bulk_assignment_id
-            ).select_related("product_coupon__coupon")
-            for assignment in product_coupon_assignments:
-                new_status, new_status_date = assignment_status_map.get_new_status_and_date(
-                    bulk_assignment_id,
-                    assignment.product_coupon.coupon.coupon_code,
-                    assignment.email,
-                )
-                if (
-                    new_status
-                    and new_status_date
-                    and (
-                        new_status != assignment.message_status
-                        or new_status_date != assignment.message_status_date
-                    )
-                ):
-                    assignment.message_status = new_status
-                    assignment.message_status_date = new_status_date
-                    assignment.updated_on = now_in_utc()
-                    updated_assignments[bulk_assignment_id].append(assignment)
-            ProductCouponAssignment.objects.bulk_update(
-                updated_assignments[bulk_assignment_id],
-                fields=["message_status", "message_status_date", "updated_on"],
-            )
-
-            # Set the BulkCouponAssignment to complete if every coupon has been assigned and
-            # all of the coupon messages have been delivered.
-            spreadsheet_id = assignment_status_map.get_sheet_id(bulk_assignment_id)
-            unsent_assignments_exist = any(
-                assignment.message_status in UNSENT_EMAIL_STATUSES
-                for assignment in product_coupon_assignments
-            )
-            if (
-                not unsent_assignments_exist
-                and not assignment_status_map.has_unassigned_codes(bulk_assignment_id)
-            ):
-                now = now_in_utc()
-                BulkCouponAssignment.objects.filter(id=bulk_assignment_id).update(
-                    message_delivery_completed_date=now, updated_on=now
-                )
-                # Update spreadsheet metadata to reflect the status
-                try:
-                    self._set_spreadsheet_completed(spreadsheet_id, now)
-                except Exception:  # pylint: disable=broad-except
-                    log.exception(
-                        "The BulkCouponAssignment has been updated to indicate that message delivery is complete, "
-                        "but the request to update spreadsheet properties to indicate this status failed "
-                        "(spreadsheet id: %s)",
-                        spreadsheet_id,
-                    )
-
-            # Update delivery dates in Sheet
-            if assignment_status_map.has_new_statuses(bulk_assignment_id):
-                self.update_sheet_with_new_statuses(
-                    spreadsheet_id,
-                    assignment_status_map.get_status_date_rows(bulk_assignment_id),
-                    zero_based_indices=False,
-                )
-
-        return updated_assignments
-
-    def update_incomplete_assignment_message_statuses(self):
-        """
-        Fetches all BulkCouponAssignments that have one or more undelivered coupon assignments, and
-        attempts to update the message status for each in the database and spreadsheet.
-
-        Returns:
-            dict: Bulk assignment ids mapped to a list of all product coupon assignments that were updated that
-                bulk assignment
-        """
-        bulk_assignments = (
-            BulkCouponAssignment.objects.exclude(assignment_sheet_id=None)
-            .exclude(assignments_started_date=None)
-            .filter(message_delivery_completed_date=None)
-            .order_by("assignments_started_date")
-            .prefetch_related("assignments")
-        )
-        if not bulk_assignments.exists():
-            return {}
-        earliest_date = bulk_assignments[0].assignments_started_date
-        assignment_status_map = self.build_assignment_status_map(
-            bulk_assignments, earliest_date=earliest_date
-        )
-        updated_assignments = self.update_coupon_delivery_statuses(
-            assignment_status_map
-        )
-        return updated_assignments
+        return self.bulk_assignment, len(created_assignments), num_assignments_removed

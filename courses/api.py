@@ -264,9 +264,9 @@ def deactivate_program_enrollment(
     if deactivated_course_runs:
         program_enrollment.deactivate_and_save(change_status, no_user=True)
     else:
-        return (None, None)
+        return None, None
 
-    return (program_enrollment, deactivated_course_runs)
+    return program_enrollment, deactivated_course_runs
 
 
 def defer_enrollment(

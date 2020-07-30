@@ -409,7 +409,7 @@ def create_or_renew_sheet_file_watch(sheet_metadata, force=False, sheet_file_id=
             that we want to create/renew the file watch for.
         force (bool): If True, make the file watch request and overwrite the GoogleFileWatch record
             even if an unexpired one exists.
-        sheet_file_id (str): (Optional) The id of the spreadsheet as it appears in the spreadsheet's
+        sheet_file_id (Optional[str]): (Optional) The id of the spreadsheet as it appears in the spreadsheet's
             URL. If the spreadsheet being watched is a singleton, this isn't necessary.
 
     Returns:

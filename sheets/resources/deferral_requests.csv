@@ -1,0 +1,3 @@
+Id,Request Date,Learner Email,Zendesk Ticket,Deferral Approved By,FROM: course run id,TO: course run id,Deferral Updated By,Deferral Complete Date,Errors,Ignore?
+1,7/1/2019,peter@example.com,12345,tfinase@mit.edu,program-v1:xPro+SysEngX+R7,program-v1:xPro+SysEngX+R8,pdpinch@mit.edu,7/2/2019,,
+2,7/3/2019,mariacru@mit.edu,31395,tstien@mit.edu,course-v1:xPRO+LASERx1+R1,course-v1:xPRO+LASERx1+R2,pdpinch@mit.edu,7/3/2019,,

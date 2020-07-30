@@ -5,8 +5,8 @@ based on the sheet data, and sends a message to all recipients who received a co
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.models import BulkCouponAssignment
+from sheets.api import get_authorized_pygsheets_client, ExpandedSheetsClient
 from sheets.coupon_assign_api import CouponAssignmentHandler
-from sheets.constants import ASSIGNMENT_MESSAGES_COMPLETED_KEY, GOOGLE_API_TRUE_VAL
 from sheets.utils import spreadsheet_repr, google_date_string_to_datetime
 from sheets.management.utils import get_assignment_spreadsheet_by_title
 
@@ -38,9 +38,7 @@ class Command(BaseCommand):
             "--force",
             action="store_true",
             help=(
-                "Process coupon assignment sheet even if "
-                "(a) file properties indicate that it was already processed, or"
-                "(b) the file is unchanged since the last time it was processed.",
+                "Process coupon assignment sheet even if the file is unchanged since the last time it was processed.",
             ),
         )
         super().add_arguments(parser)
@@ -49,9 +47,7 @@ class Command(BaseCommand):
         if not options["id"] and not options["title"]:
             raise CommandError("Need to provide --id or --title")
 
-        coupon_assignment_handler = CouponAssignmentHandler()
-        pygsheets_client = coupon_assignment_handler.pygsheets_client
-
+        pygsheets_client = get_authorized_pygsheets_client()
         # Fetch the correct spreadsheet
         if options["id"]:
             spreadsheet = pygsheets_client.open_by_key(options["id"])
@@ -59,29 +55,15 @@ class Command(BaseCommand):
             spreadsheet = get_assignment_spreadsheet_by_title(
                 pygsheets_client, options["title"]
             )
-
-        # Check file properties to make sure this sheet wasn't already processed
-        if not options["force"]:
-            sheet_properties = coupon_assignment_handler.expanded_sheets_client.get_sheet_properties(
-                spreadsheet.id
-            )
-            if (
-                sheet_properties.get(ASSIGNMENT_MESSAGES_COMPLETED_KEY)
-                == GOOGLE_API_TRUE_VAL
-            ):
-                raise CommandError(
-                    "Spreadsheet properties indicate that the assignment sheet has been fully processed (%s). "
-                    "Add the '-f/--force' flag to process it anyway."
-                    % (spreadsheet_repr(spreadsheet))
-                )
-
         # Process the sheet
         self.stdout.write(
             "Found spreadsheet ({}). Processing...".format(
                 spreadsheet_repr(spreadsheet)
             )
         )
-        metadata = coupon_assignment_handler.expanded_sheets_client.get_drive_file_metadata(
+
+        expanded_sheets_client = ExpandedSheetsClient(pygsheets_client)
+        metadata = expanded_sheets_client.get_drive_file_metadata(
             file_id=spreadsheet.id, fields="modifiedTime"
         )
         sheet_last_modified = google_date_string_to_datetime(metadata["modifiedTime"])
@@ -100,8 +82,11 @@ class Command(BaseCommand):
                 % (spreadsheet_repr(spreadsheet), sheet_last_modified.isoformat())
             )
 
-        bulk_assignment, num_created, num_removed = coupon_assignment_handler.process_assignment_spreadsheet(
-            spreadsheet.sheet1, bulk_assignment
+        coupon_assignment_handler = CouponAssignmentHandler(
+            spreadsheet_id=spreadsheet.id, bulk_assignment=bulk_assignment
+        )
+        bulk_assignment, num_created, num_removed = (
+            coupon_assignment_handler.process_assignment_spreadsheet()
         )
 
         self.stdout.write(

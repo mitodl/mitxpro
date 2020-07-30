@@ -28,6 +28,7 @@ from mitxpro.utils import (
     unique_ignore_case,
     max_or_none,
     item_at_index_or_none,
+    item_at_index_or_blank,
     all_equal,
     all_unique,
     has_all_keys,
@@ -221,6 +222,17 @@ def test_item_at_index_or_none():
     arr = [1, 2, 3]
     assert item_at_index_or_none(arr, 1) == 2
     assert item_at_index_or_none(arr, 10) is None
+
+
+def test_item_at_index_or_blank():
+    """
+    Assert that item_at_index_or_blank returns an item at a given index, or a blank string if that index
+    doesn't exist
+    """
+    arr = ["string 1", "string 2"]
+    assert item_at_index_or_blank(arr, 0) == "string 1"
+    assert item_at_index_or_blank(arr, 1) == "string 2"
+    assert item_at_index_or_blank(arr, 10) == ""
 
 
 def test_all_equal():

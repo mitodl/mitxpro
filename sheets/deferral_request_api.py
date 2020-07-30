@@ -9,7 +9,7 @@ from courses.api import defer_enrollment
 from courses.models import CourseRunEnrollment, CourseRun
 from mitxpro.utils import now_in_utc
 from sheets.constants import GOOGLE_API_TRUE_VAL
-from sheets.enrollment_change_api import EnrollmentChangeRequestHandler
+from sheets.sheet_handler_api import EnrollmentChangeRequestHandler
 from sheets.exceptions import SheetRowParsingException
 from sheets.models import DeferralRequest
 from sheets.utils import (
@@ -130,18 +130,18 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
             return RowResult(
                 row_index=row_index,
                 row_db_record=deferral_request,
+                row_object=None,
                 result_type=ResultType.FAILED,
                 message="Parsing failure: {}".format(str(exc)),
             )
         is_unchanged_error_row = (
-            deferral_req_row.errors is not None
-            and not request_created
-            and not request_updated
+            deferral_req_row.errors and not request_created and not request_updated
         )
         if is_unchanged_error_row:
             return RowResult(
                 row_index=row_index,
                 row_db_record=deferral_request,
+                row_object=None,
                 result_type=ResultType.IGNORED,
                 message=None,
             )
@@ -152,6 +152,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
             return RowResult(
                 row_index=row_index,
                 row_db_record=deferral_request,
+                row_object=None,
                 result_type=ResultType.OUT_OF_SYNC,
                 message=None,
             )
@@ -160,16 +161,20 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
             return RowResult(
                 row_index=row_index,
                 row_db_record=deferral_request,
+                row_object=None,
                 result_type=ResultType.FAILED,
                 message="'from' and 'to' ids are identical",
             )
         try:
             user = User.objects.get(email__iexact=deferral_req_row.learner_email)
-            defer_enrollment(
+            from_enrollment, to_enrollment = defer_enrollment(
                 user,
                 from_courseware_id=deferral_req_row.from_courseware_id,
                 to_courseware_id=deferral_req_row.to_courseware_id,
             )
+            # When #1838 is completed, this logic can be removed
+            if not from_enrollment and not to_enrollment:
+                raise Exception("edX enrollment change failed")
         except ObjectDoesNotExist as exc:
             if isinstance(exc, CourseRunEnrollment.DoesNotExist):
                 message = "'from' course run enrollment does not exist ({})".format(
@@ -188,6 +193,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
             return RowResult(
                 row_index=row_index,
                 row_db_record=deferral_request,
+                row_object=None,
                 result_type=ResultType.FAILED,
                 message=message,
             )
@@ -195,6 +201,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
             return RowResult(
                 row_index=row_index,
                 row_db_record=deferral_request,
+                row_object=None,
                 result_type=ResultType.FAILED,
                 message="Invalid deferral: {}".format(exc),
             )
@@ -204,6 +211,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
         return RowResult(
             row_index=row_index,
             row_db_record=deferral_request,
+            row_object=deferral_req_row,
             result_type=ResultType.PROCESSED,
             message=None,
         )

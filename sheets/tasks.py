@@ -73,13 +73,15 @@ def process_coupon_assignment_sheet(*, file_id, change_date=None):
         change_date (str): ISO-8601-formatted string indicating the datetime when this spreadsheet
             was changed
     """
-    coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler()
     change_dt = datetime.fromisoformat(change_date) if change_date else now_in_utc()
     bulk_assignment, _ = BulkCouponAssignment.objects.update_or_create(
         assignment_sheet_id=file_id, defaults=dict(sheet_last_modified_date=change_dt)
     )
-    _, num_created, num_removed = coupon_assignment_handler.process_assignment_spreadsheet_by_id(
-        file_id, bulk_assignment
+    coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler(
+        spreadsheet_id=file_id, bulk_assignment=bulk_assignment
+    )
+    _, num_created, num_removed = (
+        coupon_assignment_handler.process_assignment_spreadsheet()
     )
     return {
         "sheet_id": file_id,
@@ -153,9 +155,9 @@ def update_incomplete_assignment_delivery_statuses():
     Fetches all BulkCouponAssignments that have assignments but have not yet finished delivery, then updates the
     delivery status for each depending on what has been sent.
     """
-    coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler()
-    updated_assignments = (
-        coupon_assignment_handler.update_incomplete_assignment_message_statuses()
+    bulk_assignments = coupon_assign_api.fetch_update_eligible_bulk_assignments()
+    updated_assignments = coupon_assign_api.update_incomplete_assignment_message_statuses(
+        bulk_assignments
     )
     return [
         (bulk_assignment_id, len(product_coupon_assignments))
@@ -179,9 +181,12 @@ def set_assignment_rows_to_enrolled(sheet_update_map):
             number of updated assignments in that sheet.
     """
     now = now_in_utc()
-    coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler()
     result_summary = {}
     for sheet_id, assignment_code_email_pairs in sheet_update_map.items():
+        bulk_assignment = BulkCouponAssignment.objects.get(assignment_sheet_id=sheet_id)
+        coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler(
+            spreadsheet_id=sheet_id, bulk_assignment=bulk_assignment
+        )
         # Convert the list of lists into a set of tuples, and set the strings to lowercase so
         # the matches will be case-insensitive.
         assignment_code_email_set = set(
@@ -191,8 +196,7 @@ def set_assignment_rows_to_enrolled(sheet_update_map):
             )
             for assignment_code_email_pair in assignment_code_email_pairs
         )
-        _, worksheet = coupon_assignment_handler.fetch_assignment_sheet(sheet_id)
-        assignment_rows = coupon_assignment_handler.get_sheet_rows(worksheet)
+        assignment_rows = coupon_assignment_handler.parsed_rows()
         status_row_updates = []
         for assignment_row in assignment_rows:
             if not assignment_row.code or not assignment_row.email:
@@ -204,9 +208,7 @@ def set_assignment_rows_to_enrolled(sheet_update_map):
                 status_row_updates.append(
                     (assignment_row.row_index, ASSIGNMENT_SHEET_ENROLLED_STATUS, now)
                 )
-        coupon_assignment_handler.update_sheet_with_new_statuses(
-            sheet_id, status_row_updates, zero_based_indices=False
-        )
+        coupon_assignment_handler.update_sheet_with_new_statuses(status_row_updates)
         result_summary[sheet_id] = len(assignment_code_email_pairs)
     return result_summary
 

@@ -22,24 +22,5 @@
         <input type="submit" value="Authenticate and authorize with Google" />
       </form>
     </fieldset>
-    {% if alternative_sheets_processing %}
-      <fieldset style="border: 1px black solid; border-radius: 12px; padding: 15px; margin-bottom: 15px;">
-        <legend style="width: inherit;">Process Coupon Sheets</legend>
-        {% if coupon_requests_processed %}
-          <h3 style="color: green">Successfully processed coupon request sheet!</h3>
-        {% endif %}
-        <form action="{% url "process-request-sheet" %}" method="post" style="margin-bottom: 15px;">
-          <input type="submit" value="Process bulk coupon request Sheet" />
-          {% csrf_token %}
-        </form>
-        {% if coupon_message_statuses_updated %}
-          <h3 style="color: green">Successfully updated coupon message statuses!</h3>
-        {% endif %}
-        <form action="{% url "update-assignment-delivery-statuses" %}" method="post" style="margin-bottom: 15px;">
-          <input type="submit" value="Update bulk coupon message statuses" />
-          {% csrf_token %}
-        </form>
-      </fieldset>
-    {% endif %}
   </div>
 {% endblock %}
