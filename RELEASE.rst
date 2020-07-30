@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.56.1
+Version 0.56.1 (Released July 30, 2020)
 --------------
 
 - Fix hubspot b2b product sync id (#1836)
