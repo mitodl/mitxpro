@@ -3,17 +3,18 @@ import React from "react"
 import { mount, shallow } from "enzyme"
 import sinon from "sinon"
 import { assert } from "chai"
-import Decimal from "decimal.js-light"
 
 import { Field, Formik } from "formik"
 
 import B2BPurchaseForm, { validate } from "./B2BPurchaseForm"
 import ProductSelector from "../input/ProductSelector"
+import configureStoreMain from "../../store/configureStore"
 
 import {
   makeB2BCouponStatus,
   makeSimpleProduct
 } from "../../factories/ecommerce"
+import { Provider } from "react-redux"
 
 describe("B2BPurchaseForm", () => {
   let sandbox,
@@ -21,11 +22,12 @@ describe("B2BPurchaseForm", () => {
     products,
     fetchCouponStatusStub,
     clearCouponStatusStub,
-    couponStatus
+    couponStatus,
+    store
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
-
+    store = configureStoreMain({})
     onSubmitStub = sandbox.stub()
     fetchCouponStatusStub = sandbox.stub()
     clearCouponStatusStub = sandbox.stub()
@@ -42,23 +44,26 @@ describe("B2BPurchaseForm", () => {
   })
 
   const _render = (enzymeFunc, props = {}) =>
+    /* Wrapping in <Provider /> now because ProductSelector needs access to the store */
     enzymeFunc(
-      <B2BPurchaseForm
-        products={products}
-        onSubmit={onSubmitStub}
-        requestPending={false}
-        fetchCouponStatus={fetchCouponStatusStub}
-        contractNumber={null}
-        clearCouponStatus={clearCouponStatusStub}
-        couponStatus={couponStatus}
-        productId="test+Aug_2016"
-        discountCode="1234567890"
-        {...props}
-      />
+      <Provider store={store}>
+        <B2BPurchaseForm
+          products={products}
+          onSubmit={onSubmitStub}
+          requestPending={false}
+          fetchCouponStatus={fetchCouponStatusStub}
+          contractNumber={null}
+          clearCouponStatus={clearCouponStatusStub}
+          couponStatus={couponStatus}
+          productId="test+Aug_2016"
+          discountCode="1234567890"
+          {...props}
+        />
+      </Provider>
     )
 
   const shallowRender = props => _render(shallow, props)
-  const mountRender = props => _render(mount, props)
+  const mountRender = props => _render(mount, props).first()
 
   it("renders a form", () => {
     const wrapper = mountRender()
@@ -87,36 +92,6 @@ describe("B2BPurchaseForm", () => {
     })
   })
 
-  //
-  it("renders the order summary with correct price and quantity info", () => {
-    const selectedProduct = products[2]
-    const values = {
-      num_seats: "5",
-      product:   String(selectedProduct.id)
-    }
-    const wrapper = shallowRender()
-    const actions = {}
-    const innerWrapper = shallow(
-      shallow(wrapper.prop("render")({ values })).prop("children")(
-        values,
-        actions
-      )
-    )
-
-    const numSeats = parseInt(values.num_seats)
-    const itemPrice = new Decimal(selectedProduct.latest_version.price)
-    const discount = itemPrice
-      .times(numSeats)
-      .times(new Decimal(couponStatus.discount_percent))
-    assert.deepEqual(innerWrapper.find("B2BPurchaseSummary").props(), {
-      numSeats,
-      totalPrice:  itemPrice.times(numSeats).minus(discount),
-      itemPrice:   itemPrice,
-      discount:    discount,
-      alreadyPaid: false
-    })
-  })
-
   describe("validation", () => {
     it("has the validate function in the props", () => {
       const wrapper = mountRender()
@@ -128,7 +103,7 @@ describe("B2BPurchaseForm", () => {
         validate({
           num_seats: "",
           email:     "",
-          product:   ""
+          product:   { productId: null, programId: null }
         }),
         {
           email:     "Email is required",
@@ -143,7 +118,7 @@ describe("B2BPurchaseForm", () => {
         validate({
           num_seats: "-2",
           email:     "",
-          product:   ""
+          product:   { productId: null, programId: null }
         }).num_seats,
         "Number of Seats is required"
       )
@@ -154,102 +129,9 @@ describe("B2BPurchaseForm", () => {
         validate({
           num_seats: "3",
           email:     "a@email.address",
-          product:   "4"
+          product:   { productId: "4", programRunId: null }
         }),
         {}
-      )
-    })
-  })
-
-  describe("coupon submission", () => {
-    let setFieldErrorStub, setFieldTouchedStub, productId, newCode, wrapper
-
-    beforeEach(() => {
-      setFieldErrorStub = sandbox.stub()
-      setFieldTouchedStub = sandbox.stub()
-      productId = 71
-      fetchCouponStatusStub.returns(Promise.resolve({ status: 200 }))
-      newCode = "xyz"
-
-      wrapper = mountRender()
-    })
-
-    const renderForm = values =>
-      shallow(
-        shallow(
-          wrapper.find(Formik).prop("render")({
-            values,
-            setFieldError:   setFieldErrorStub,
-            setFieldTouched: setFieldTouchedStub
-          })
-        ).prop("children")(values)
-      )
-
-    //
-    // eslint-disable-next-line camelcase
-    ;[["  xyz  ", "applies", true], ["", "clears", false]].forEach(
-      ([couponCode, desc, productIdExists]) => {
-        it(`${desc} the given coupon value`, async () => {
-          const values = {
-            coupon:  couponCode,
-            product: productIdExists ? productId : null
-          }
-          const innerWrapper = renderForm(values)
-
-          await innerWrapper.find(".apply-button").prop("onClick")({
-            preventDefault: sandbox.stub()
-          })
-          if (couponCode) {
-            sinon.assert.calledWith(fetchCouponStatusStub, {
-              product_id: productId,
-              code:       couponCode.trim()
-            })
-          } else {
-            sinon.assert.calledWith(clearCouponStatusStub)
-          }
-
-          sinon.assert.notCalled(setFieldErrorStub)
-        })
-      }
-    )
-
-    it("errors when applying the coupon because no product is selected", async () => {
-      const values = {
-        coupon:  newCode,
-        product: ""
-      }
-      const innerWrapper = renderForm(values)
-
-      await innerWrapper.find(".apply-button").prop("onClick")({
-        preventDefault: sandbox.stub()
-      })
-      sinon.assert.notCalled(fetchCouponStatusStub)
-      sinon.assert.calledWith(
-        setFieldErrorStub,
-        "coupon",
-        "No product selected"
-      )
-    })
-
-    it("errors because the coupon is invalid", async () => {
-      fetchCouponStatusStub.returns(Promise.resolve({ status: 500 }))
-      const values = {
-        coupon:  newCode,
-        product: productId
-      }
-      const innerWrapper = renderForm(values)
-
-      await innerWrapper.find(".apply-button").prop("onClick")({
-        preventDefault: sandbox.stub()
-      })
-      sinon.assert.calledWith(fetchCouponStatusStub, {
-        product_id: productId,
-        code:       newCode
-      })
-      sinon.assert.calledWith(
-        setFieldErrorStub,
-        "coupon",
-        "Invalid coupon code"
       )
     })
   })

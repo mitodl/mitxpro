@@ -18,6 +18,7 @@ from courses.factories import (
     CourseRunFactory,
     CourseRunEnrollmentFactory,
     ProgramFactory,
+    ProgramRunFactory,
 )
 from ecommerce.api import create_unfulfilled_order, make_receipt_url
 from ecommerce.exceptions import EcommerceException, ParseException
@@ -58,6 +59,7 @@ from ecommerce.serializers import (
     DataConsentUserSerializer,
     BaseProductSerializer,
     ProductChoiceSerializer,
+    ProgramRunSerializer,
 )
 from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.test_utils import (
@@ -1570,3 +1572,25 @@ def test_patch_basket_expired_run(basket_client, basket_and_coupons):
     assert sorted(resp_data["errors"]) == [
         "We're sorry, this course or program is no longer available for enrollment."
     ]
+
+
+def test_program_runs_api():
+    """Program run api should return the correct data"""
+    product_version = ProductVersionFactory(
+        product__content_object=ProgramFactory.create()
+    )
+    program_runs = ProgramRunFactory.create_batch(
+        3, program=product_version.product.content_object
+    )
+    client = APIClient()
+    resp = client.get(
+        reverse(
+            "program_runs_api-list",
+            kwargs={"program_product_id": product_version.product.id},
+        )
+    )
+    serialized_data = ProgramRunSerializer(program_runs, many=True).data
+    assert resp.status_code == status.HTTP_200_OK
+    assert sorted(resp.data, key=lambda item: item["id"]) == sorted(
+        serialized_data, key=lambda item: item["id"]
+    )

@@ -13,7 +13,8 @@ import type {
   B2BCouponStatusPayload,
   B2BCouponStatusResponse,
   OrderReceiptResponse,
-  SimpleProductDetail
+  SimpleProductDetail,
+  ProgramRunDetail
 } from "../../flow/ecommerceTypes"
 
 // uses the next piece of state which is the second argument
@@ -167,6 +168,17 @@ export default {
     update: {
       orderReceipt: (prev: OrderReceiptResponse, next: OrderReceiptResponse) =>
         next
+    }
+  }),
+  programRunsSelector: pathOr(null, ["entities", "programRuns"]),
+  programRunsQuery:    (productId: string) => ({
+    queryKey:  "programRuns",
+    url:       `/api/products/${productId}/runs/`,
+    transform: (json: [ProgramRunDetail]) => ({
+      programRuns: json
+    }),
+    update: {
+      programRuns: (prev: [ProgramRunDetail], next: [ProgramRunDetail]) => next
     }
   })
 }

@@ -24,7 +24,7 @@ type Props = {
   fetchCouponStatus: (payload: B2BCouponStatusPayload) => Promise<*>,
   contractNumber: ?string,
   discountCode: ?string,
-  productId: ?string
+  productId: Object
 }
 
 const errorMessageRenderer = msg => <span className="error">{msg}</span>
@@ -41,7 +41,7 @@ export const validate = (values: Object) => {
     errors.email = "Email is required"
   }
 
-  if (!values.product) {
+  if (!values.product.productId) {
     errors.product = "No product selected"
   }
 
@@ -65,13 +65,13 @@ class B2BPurchaseForm extends React.Component<Props> {
         return
       }
 
-      if (!values.product) {
+      if (!values.product.productId) {
         setFieldError("coupon", "No product selected")
         return
       }
 
       const response = await fetchCouponStatus({
-        product_id: values.product,
+        product_id: values.product.productId,
         code:       values.coupon.trim()
       })
       if (response.status !== 200) {
@@ -93,7 +93,7 @@ class B2BPurchaseForm extends React.Component<Props> {
       totalPrice = new Decimal(0),
       discount
 
-    const product = findProductById(products, values.product)
+    const product = findProductById(products, values.product.productId)
     const productVersion = product ? product.latest_version : null
     let numSeats = parseInt(values.num_seats)
 
@@ -212,11 +212,14 @@ class B2BPurchaseForm extends React.Component<Props> {
       <Formik
         onSubmit={onSubmit}
         initialValues={{
-          num_seats:       "",
-          email:           "",
-          product:         this.props.productId || "",
-          coupon:          this.props.discountCode || "",
-          contract_number: this.props.contractNumber || ""
+          num_seats: "",
+          email:     "",
+          product:   {
+            productId:    this.props.productId || "",
+            programRunId: null
+          },
+          coupon:         this.props.discountCode || "",
+          contractNumber: this.props.contractNumber || ""
         }}
         validate={validate}
         render={this.renderForm}

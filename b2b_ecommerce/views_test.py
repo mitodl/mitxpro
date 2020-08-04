@@ -13,6 +13,7 @@ from b2b_ecommerce.factories import (
     ProductVersionFactory,
 )
 from b2b_ecommerce.models import B2BCoupon, B2BOrder, B2BCouponRedemption
+from courses.factories import ProgramRunFactory
 from ecommerce.utils import make_checkout_url
 from ecommerce.factories import CouponVersionFactory
 from ecommerce.serializers import FullProductVersionSerializer
@@ -308,7 +309,38 @@ def test_enrollment_codes(client):
             [
                 coupon.coupon_code,
                 make_checkout_url(
-                    code=coupon.coupon_code, product_id=order.product_version.product_id
+                    code=coupon.coupon_code, product_id=order.product_version.text_id
+                ),
+            ]
+            for coupon in coupons
+        ]
+    )
+
+
+def test_program_run_enrollment_codes(client):
+    """A CSV file with enrollment codes should be provided for the B2BOrder that is attached to a ProgramRun"""
+    program_run = ProgramRunFactory()
+    coupon_version = CouponVersionFactory.create()
+    coupons = [
+        coupon_version.coupon,
+        CouponVersionFactory.create(
+            payment_version=coupon_version.payment_version
+        ).coupon,
+    ]
+    order = B2BOrderFactory.create(
+        coupon_payment_version=coupon_version.payment_version, program_run=program_run
+    )
+
+    resp = client.get(reverse("b2b-enrollment-codes", kwargs={"hash": order.unique_id}))
+    rows = [line.split(",") for line in resp.content.decode().split()]
+    assert sorted(rows[1:]) == sorted(
+        [
+            [
+                coupon.coupon_code,
+                make_checkout_url(
+                    code=coupon.coupon_code,
+                    product_id=order.product_version.text_id,
+                    run_tag=program_run.run_tag,
                 ),
             ]
             for coupon in coupons

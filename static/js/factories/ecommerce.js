@@ -19,15 +19,21 @@ import type {
   B2BOrderStatus,
   B2BCouponStatusResponse,
   SimpleProductDetail,
-  BaseProductVersion
+  BaseProductVersion,
+  ProgramRunDetail
 } from "../flow/ecommerceTypes"
 import type { BaseCourseRun, Program } from "../flow/courseTypes"
-import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
+import {
+  ENROLLABLE_ITEM_ID_SEPARATOR,
+  PRODUCT_TYPE_COURSERUN,
+  PRODUCT_TYPE_PROGRAM
+} from "../constants"
 
 const genBasketItemId = incrementer()
 const genBasketItemObjectId = incrementer()
 const genProductId = incrementer()
 const genDataConsentUserId = incrementer()
+const genProgramRunId = incrementer()
 
 export const makeDataConsent = (): DataConsentUser => ({
   // $FlowFixMe: flow doesn't understand generators well
@@ -169,6 +175,19 @@ export const makeCourseRunOrProgram = (
   }
   return product
 }
+
+export const makeProgramRun = (
+  program: BaseProductVersion
+): ProgramRunDetail => ({
+  // $FlowFixMe: flow doesn't understand generators well
+  id:      genProductId.next().value,
+  run_tag: `${program.readable_id}${ENROLLABLE_ITEM_ID_SEPARATOR}R${
+    // $FlowFixMe: flow doesn't understand generators well
+    genProgramRunId.next().value
+  }`,
+  start_date: casual.moment.format(),
+  end_date:   casual.moment.format()
+})
 
 const genCompanyId = incrementer()
 export const makeCompany = (): Company => ({

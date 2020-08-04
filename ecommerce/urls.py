@@ -14,10 +14,16 @@ from ecommerce.views import (
     bulk_assignment_csv_view,
     CompanyViewSet,
     OrderReceiptView,
+    ProgramRunsViewSet,
 )
 
 router = SimpleRouter()
 router.register(r"products", ProductViewSet, basename="products_api")
+router.register(
+    r"products/(?P<program_product_id>[0-9]+)/runs",
+    ProgramRunsViewSet,
+    basename="program_runs_api",
+)
 router.register(r"companies", CompanyViewSet, basename="companies_api")
 
 urlpatterns = [

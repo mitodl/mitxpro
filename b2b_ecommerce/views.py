@@ -26,7 +26,7 @@ from ecommerce.api import get_product_from_text_id
 from mitxpro.utils import make_csv_http_response
 from hubspot.task_helpers import sync_hubspot_b2b_deal, sync_hubspot_b2b_contact
 from users.models import User
-
+from courses.models import ProgramRun
 
 log = logging.getLogger(__name__)
 
@@ -51,6 +51,7 @@ class B2BCheckoutView(APIView):
             product_version_id = request.data["product_version_id"]
             discount_code = request.data["discount_code"]
             contract_number = request.data.get("contract_number")
+            run_id = request.data.get("run_id")
         except KeyError as ex:
             raise ValidationError(f"Missing parameter {ex.args[0]}")
 
@@ -66,6 +67,9 @@ class B2BCheckoutView(APIView):
                 discount_code=discount_code,
                 num_seats=num_seats,
             )
+            program_run = (
+                None if not run_id else ProgramRun.objects.filter(pk=run_id).first()
+            )
 
             order = B2BOrder.objects.create(
                 num_seats=num_seats,
@@ -76,6 +80,7 @@ class B2BCheckoutView(APIView):
                 discount=discount,
                 coupon=coupon,
                 contract_number=contract_number,
+                program_run=program_run,
             )
             order.save_and_log(None)
             if coupon:
@@ -166,13 +171,17 @@ class B2BEnrollmentCodesView(APIView):
     def get(self, request, *args, **kwargs):
         """Create a CSV with enrollment codes"""
         order_hash = kwargs["hash"]
-        order = get_object_or_404(B2BOrder, unique_id=order_hash)
+        order = get_object_or_404(
+            B2BOrder.objects.select_related("program_run"), unique_id=order_hash
+        )
 
         rows = (
             {
                 "code": code,
                 "url": make_checkout_url(
-                    code=code, product_id=order.product_version.product_id
+                    code=code,
+                    product_id=order.product_version.text_id,
+                    run_tag=order.program_run.run_tag if order.program_run else None,
                 ),
             }
             for code in Coupon.objects.filter(

@@ -62,6 +62,7 @@ from ecommerce.serializers import (
     DataConsentUserSerializer,
     CouponSerializer,
     OrderReceiptSerializer,
+    ProgramRunSerializer,
 )
 
 pytestmark = [pytest.mark.django_db]
@@ -518,6 +519,18 @@ def test_serialize_program_product_choice():
             "content_title": program.title,
             "readable_id": program.readable_id,
         },
+    }
+
+
+def test_serialize_program_run():
+    """ProgramRunSerializer should serializer a program run with proper format"""
+    program_run = ProgramRunFactory()
+    serialized_data = ProgramRunSerializer(instance=program_run).data
+    assert serialized_data == {
+        "id": program_run.id,
+        "run_tag": program_run.run_tag,
+        "start_date": program_run.start_date,
+        "end_date": program_run.end_date,
     }
 
 
