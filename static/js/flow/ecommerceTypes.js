@@ -184,6 +184,13 @@ export type Product = {
   visible_in_bulk_form: boolean
 }
 
+export type ProgramRunDetail = {
+  id: number,
+  run_tag: string,
+  start_date: string,
+  end_date: string
+}
+
 export type SimpleProductDetail = Product & {
   latest_version: BaseProductVersion,
   parent: {
@@ -228,7 +235,8 @@ export type B2BCheckoutPayload = {
   product_version_id: number,
   discount_code: ?string,
   email: string,
-  contract_number: ?string
+  contract_number: ?string,
+  run_id: ?number
 }
 
 export type EnrollmentCode = {

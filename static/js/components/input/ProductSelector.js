@@ -3,13 +3,20 @@ import React from "react"
 // $FlowFixMe: Flow trips up with this library
 import Select from "react-select"
 import * as R from "ramda"
+import { connect } from "react-redux"
+import { compose } from "redux"
 
 import { formatCoursewareDate } from "../../lib/ecommerce"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 
-import type { SimpleProductDetail } from "../../flow/ecommerceTypes"
+import type {
+  SimpleProductDetail,
+  ProgramRunDetail
+} from "../../flow/ecommerceTypes"
 import type { Course } from "../../flow/courseTypes"
 import { anyNil } from "../../lib/util"
+import { requestAsync } from "redux-query"
+import queries from "../../lib/queries"
 
 export const productTypeLabels = {
   [PRODUCT_TYPE_COURSERUN]: "Course",
@@ -30,7 +37,10 @@ type Props = {
     values: Object
   },
   products: Array<SimpleProductDetail>,
-  selectedProduct: ?SimpleProductDetail
+  selectedProduct: ?SimpleProductDetail,
+  programRunsLoading: boolean,
+  programRuns: Array<ProgramRunDetail>,
+  fetchProgramRuns: Function
 }
 type SelectOption = {
   label: string,
@@ -61,9 +71,16 @@ const buildCourseDateOption = (product: SimpleProductDetail): SelectOption => ({
   )}`
 })
 
+const buildProgramDateOption = (run: ProgramRunDetail): SelectOption => ({
+  value: run.id,
+  label: `${formatCoursewareDate(run.start_date)} - ${formatCoursewareDate(
+    run.end_date
+  )}`
+})
+
 export const productDateSortCompare = (
-  firstProduct: SimpleProductDetail,
-  secondProduct: SimpleProductDetail
+  firstProduct: SimpleProductDetail | ProgramRunDetail,
+  secondProduct: SimpleProductDetail | ProgramRunDetail
 ) => {
   if (!firstProduct.start_date) {
     return 1
@@ -74,7 +91,7 @@ export const productDateSortCompare = (
   return firstProduct.start_date < secondProduct.start_date ? -1 : 1
 }
 
-export default class ProductSelector extends React.Component<Props, State> {
+export class ProductSelector extends React.Component<Props, State> {
   state = {
     productType:           PRODUCT_TYPE_COURSERUN,
     selectedCoursewareObj: null,
@@ -105,22 +122,33 @@ export default class ProductSelector extends React.Component<Props, State> {
     )(filteredProducts)
   }
 
-  calcProductDateOptions = (): Array<SelectOption> => {
-    const { products } = this.props
-    const { selectedCoursewareObj } = this.state
-
-    if (!selectedCoursewareObj) {
+  calcProductDateOptions = (
+    selectedCoursewareObj: ?SelectOption
+  ): Array<SelectOption> => {
+    const { products, programRunsLoading, programRuns } = this.props
+    const { productType } = this.state
+    if (
+      !selectedCoursewareObj ||
+      (productType === PRODUCT_TYPE_PROGRAM && programRunsLoading)
+    ) {
       return []
     }
 
-    return products
-      .filter(
-        product =>
-          product.product_type === PRODUCT_TYPE_COURSERUN &&
-          product.parent.id === selectedCoursewareObj.value
-      )
-      .sort(productDateSortCompare)
-      .map(buildCourseDateOption)
+    if (productType === PRODUCT_TYPE_PROGRAM) {
+      return programRuns
+        .sort(productDateSortCompare)
+        .map(buildProgramDateOption)
+    } else {
+      return products
+        .filter(
+          product =>
+            product.product_type === PRODUCT_TYPE_COURSERUN &&
+            // $FlowFixMe: flow doesn't seem to understand selectedCoursewareObj will be valid here
+            product.parent.id === selectedCoursewareObj.value
+        )
+        .sort(productDateSortCompare)
+        .map(buildCourseDateOption)
+    }
   }
 
   setProductType = (selectedOption: SelectOption) => {
@@ -137,7 +165,8 @@ export default class ProductSelector extends React.Component<Props, State> {
   }
 
   setSelectedCoursewareObj = (selectedOption: SelectOption) => {
-    const { selectedCoursewareObj } = this.state
+    const { selectedCoursewareObj, productType } = this.state
+    const { fetchProgramRuns } = this.props
 
     if (selectedOption === selectedCoursewareObj) {
       return
@@ -146,6 +175,10 @@ export default class ProductSelector extends React.Component<Props, State> {
       selectedCoursewareObj: selectedOption,
       selectedCourseDate:    null
     })
+    if (productType === PRODUCT_TYPE_PROGRAM) {
+      fetchProgramRuns(selectedOption.value)
+    }
+    this.calcProductDateOptions(selectedOption)
   }
 
   setSelectedCourseDate = (selectedOption: SelectOption) => {
@@ -175,18 +208,36 @@ export default class ProductSelector extends React.Component<Props, State> {
       (productType === PRODUCT_TYPE_COURSERUN &&
         anyNil([selectedCoursewareObj, selectedCourseDate]))
     ) {
-      onChange({ target: { name, value: null } })
+      onChange({
+        target: { name, value: { productId: null, programRunId: null } }
+      })
       return
     }
 
     if (productType === PRODUCT_TYPE_PROGRAM) {
-      // $FlowFixMe: Can't be null/undefined
-      productValue = selectedCoursewareObj.value
+      // This is a dirty hack to support program run tags. Refer to `B2bPurchasePage.onSubmit` for further info.
+      productValue = {
+        // $FlowFixMe: Can't be null/undefined
+        productId:    selectedCoursewareObj.value,
+        programRunId: selectedCourseDate ? selectedCourseDate.value : null
+      }
     } else {
       // $FlowFixMe: Can't be null/undefined
-      productValue = selectedCourseDate.value
+      productValue = { productId: selectedCourseDate.value, programRunId: null }
     }
     onChange({ target: { name, value: productValue } })
+  }
+
+  shouldShowDateSelector = (): boolean => {
+    const { productType, selectedCoursewareObj } = this.state
+    const { programRuns } = this.props
+    return (
+      productType === PRODUCT_TYPE_COURSERUN ||
+      (selectedCoursewareObj !== null &&
+        productType === PRODUCT_TYPE_PROGRAM &&
+        programRuns &&
+        programRuns.length > 0)
+    )
   }
 
   static getDerivedStateFromProps(props: Props, state: State) {
@@ -217,6 +268,8 @@ export default class ProductSelector extends React.Component<Props, State> {
       selectedCoursewareObj,
       selectedCourseDate
     } = this.state
+
+    const { programRuns, programRunsLoading } = this.props
 
     return (
       <div className="product-selector">
@@ -255,22 +308,51 @@ export default class ProductSelector extends React.Component<Props, State> {
             />
           </div>
         </div>
-
-        {productType === PRODUCT_TYPE_COURSERUN ? (
+        {productType === PRODUCT_TYPE_PROGRAM &&
+          selectedCoursewareObj !== null &&
+          programRunsLoading && (
+          <img
+            src="/static/images/loader.gif"
+            className="mx-auto d-block"
+            alt="Loading..."
+          />
+        )}
+        {this.shouldShowDateSelector() && !programRunsLoading && (
           <div className="row course-date-row">
             <div className="col-12">
               <span className="description">Select start date:</span>
               <Select
                 className="select"
                 components={defaultSelectComponentsProp}
-                options={this.calcProductDateOptions()}
+                options={this.calcProductDateOptions(selectedCoursewareObj)}
                 value={selectedCourseDate}
                 onChange={this.setSelectedCourseDate}
               />
             </div>
           </div>
-        ) : null}
+        )}
       </div>
     )
   }
 }
+
+const mapDispatchToProps = dispatch => ({
+  fetchProgramRuns: (productId: string) =>
+    dispatch(requestAsync(queries.ecommerce.programRunsQuery(productId)))
+})
+
+const mapStateToProps = state => ({
+  programRuns:        state.entities.programRuns,
+  programRunsLoading: R.pathOr(
+    true,
+    ["queries", "programRuns", "isPending"],
+    state
+  )
+})
+
+export default compose(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )
+)(ProductSelector)

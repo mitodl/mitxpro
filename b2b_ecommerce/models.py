@@ -144,6 +144,13 @@ class B2BOrder(OrderAbstract, AuditableModel):
         decimal_places=2, max_digits=20, null=True, blank=True
     )
     contract_number = models.CharField(max_length=50, null=True, blank=True)
+    program_run = models.ForeignKey(
+        "courses.ProgramRun",
+        blank=True,
+        null=True,
+        help_text="Program run to associate this order with",
+        on_delete=models.PROTECT,
+    )
 
     objects = OrderManager()
 

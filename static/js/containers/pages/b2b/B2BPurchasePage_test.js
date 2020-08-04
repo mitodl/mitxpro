@@ -109,7 +109,7 @@ describe("B2BPurchasePage", () => {
           .returns(form)
         const selectedProduct = products[1]
         const values = {
-          product:   selectedProduct.id,
+          product:   { productId: selectedProduct.id, programRunId: null },
           num_seats: 5,
           email:     "email@example.com"
         }
@@ -126,7 +126,8 @@ describe("B2BPurchasePage", () => {
               product_version_id: selectedProduct.latest_version.id,
               num_seats:          values.num_seats,
               discount_code:      couponStatus ? couponStatus.code : null,
-              contract_number:    null
+              contract_number:    null,
+              run_id:             null
             },
             headers: {
               "X-CSRFTOKEN": null
@@ -158,7 +159,7 @@ describe("B2BPurchasePage", () => {
       form.submit = submitStub
       const selectedProduct = products[1]
       const values = {
-        product:   "test+Aug_2016",
+        product:   { productId: "test+Aug_2016", programRunId: null },
         num_seats: 5,
         email:     "email@example.com"
       }
@@ -181,7 +182,7 @@ describe("B2BPurchasePage", () => {
       })
       const selectedProduct = products[1]
       const values = {
-        product:   selectedProduct.id,
+        product:   { productId: selectedProduct.id, programRunId: null },
         num_seats: 5,
         email:     "email@example.com"
       }

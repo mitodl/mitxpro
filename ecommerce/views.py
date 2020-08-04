@@ -8,8 +8,8 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
 from django.http import Http404
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework import status
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.generics import (
     get_object_or_404,
     RetrieveUpdateAPIView,
@@ -23,7 +23,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from b2b_ecommerce.api import fulfill_b2b_order
 from b2b_ecommerce.models import B2BOrder
 from courses.constants import VALID_PRODUCT_TYPES
-from courses.models import CourseRun
+from courses.models import CourseRun, ProgramRun
 from courses.serializers import BaseCourseRunSerializer, BaseProgramSerializer
 from ecommerce.api import (
     create_unfulfilled_order,
@@ -36,7 +36,6 @@ from ecommerce.api import (
     complete_order,
     bulk_assign_product_coupons,
 )
-from ecommerce.utils import make_checkout_url
 from ecommerce.exceptions import ParseException
 from ecommerce.mail_api import send_bulk_enroll_emails, send_ecommerce_order_receipt
 from ecommerce.models import (
@@ -61,7 +60,9 @@ from ecommerce.serializers import (
     CurrentCouponPaymentSerializer,
     OrderReceiptSerializer,
     ProductChoiceSerializer,
+    ProgramRunSerializer,
 )
+from ecommerce.utils import make_checkout_url
 from hubspot.task_helpers import sync_hubspot_deal
 from mitxpro.utils import (
     make_csv_http_response,
@@ -149,6 +150,19 @@ class ProductViewSet(ReadOnlyModelViewSet):
                 else item["title"].lower()
             )
         return response
+
+
+class ProgramRunsViewSet(ReadOnlyModelViewSet):
+    """API view set for program runs"""
+
+    authentication_classes = ()
+    permission_classes = ()
+    serializer_class = ProgramRunSerializer
+
+    def get_queryset(self):
+        return ProgramRun.objects.filter(
+            program__products=self.kwargs["program_product_id"]
+        )
 
 
 class CompanyViewSet(ReadOnlyModelViewSet):

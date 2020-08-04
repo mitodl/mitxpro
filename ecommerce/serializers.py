@@ -9,7 +9,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
-from courses.models import Course, CourseRun, Program, CourseRunEnrollment
+from courses.models import Course, CourseRun, Program, CourseRunEnrollment, ProgramRun
 from courses.constants import (
     DEFAULT_COURSE_IMG_PATH,
     CONTENT_TYPE_MODEL_COURSERUN,
@@ -246,6 +246,14 @@ class ProductChoiceSerializer(ProductSerializer):
     class Meta:
         fields = ProductSerializer.Meta.fields + ["parent", "start_date", "end_date"]
         model = models.Product
+
+
+class ProgramRunSerializer(serializers.ModelSerializer):
+    """Serializer for program runs"""
+
+    class Meta:
+        model = ProgramRun
+        fields = ["id", "run_tag", "start_date", "end_date"]
 
 
 class ProductDetailSerializer(ProductSerializer):

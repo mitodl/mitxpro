@@ -44,7 +44,7 @@ type State = {
 type Values = {
   // these are form fields so they all start off as strings
   num_seats: string,
-  product: string,
+  product: Object,
   email: string,
   contract_number: string
 }
@@ -52,7 +52,8 @@ export class B2BPurchasePage extends React.Component<Props, State> {
   onSubmit = async (values: Values, { setErrors, setSubmitting }: Object) => {
     const { products, checkout, couponStatus } = this.props
     const numSeats = parseInt(values.num_seats)
-    const product = findProductById(products, values.product)
+    const { productId, programRunId } = values.product
+    const product = findProductById(products, productId)
     if (!product) {
       throw new Error(
         "No product found. This should have been caught in validation."
@@ -67,7 +68,8 @@ export class B2BPurchasePage extends React.Component<Props, State> {
         email:              values.email,
         product_version_id: productVersion.id,
         discount_code:      couponStatus ? couponStatus.code : null,
-        contract_number:    values.contract_number || null
+        contract_number:    values.contract_number || null,
+        run_id:             programRunId
       })
 
       if (checkoutResponse.status !== 200) {

@@ -5,6 +5,7 @@ from urllib.parse import urljoin, urlencode
 from django.conf import settings
 from django.urls import reverse
 
+from courses.constants import ENROLLABLE_ITEM_ID_SEPARATOR
 from ecommerce.exceptions import ParseException
 
 log = logging.getLogger(__name__)
@@ -60,13 +61,14 @@ def get_order_id_by_reference_number(*, reference_number, prefix):
     return order_id
 
 
-def make_checkout_url(*, product_id=None, code=None):
+def make_checkout_url(*, product_id=None, code=None, run_tag=None):
     """
     Helper function to create a checkout URL with appropriate query parameters.
 
     Args:
-        product_id (int): A Product ID
+        product_id (int|str): A Product ID or text ID
         code (str): The coupon code
+        run_tag (str): A ProgramRun run tag
 
     Returns:
         str: The URL for the checkout page, including product and coupon code if available
@@ -77,7 +79,11 @@ def make_checkout_url(*, product_id=None, code=None):
 
     query_params = {}
     if product_id is not None:
-        query_params["product"] = product_id
+        query_params["product"] = (
+            product_id
+            if run_tag is None
+            else f"{product_id}{ENROLLABLE_ITEM_ID_SEPARATOR}{run_tag}"
+        )
     if code is not None:
         query_params["code"] = code
     return f"{base_checkout_url}?{urlencode(query_params)}"
