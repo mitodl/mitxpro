@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.57.0
+--------------
+
+- Add dates to bulk purchase for programs - #1669
+- Added developer readme for sheets feature
+- Refactor sheets handlers
+
 Version 0.56.2 (Released July 30, 2020)
 --------------
 
