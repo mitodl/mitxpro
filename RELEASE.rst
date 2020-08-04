@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.57.0
+Version 0.57.0 (Released August 04, 2020)
 --------------
 
 - Add dates to bulk purchase for programs - #1669
