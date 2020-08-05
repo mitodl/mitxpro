@@ -57,6 +57,7 @@ describe("B2BPurchaseForm", () => {
           couponStatus={couponStatus}
           productId="test+Aug_2016"
           discountCode="1234567890"
+          seats="1"
           {...props}
         />
       </Provider>

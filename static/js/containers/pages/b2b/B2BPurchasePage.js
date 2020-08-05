@@ -107,6 +107,7 @@ export class B2BPurchasePage extends React.Component<Props, State> {
     const params = new URLSearchParams(this.props.location.search)
     const contractNumber = params.get("contract_number")
     const discountCode = params.get("code")
+    const seats = params.get("seats")
     let productId = params.get("product_id")
     if (productId && isNaN(productId)) {
       // eslint-disable-next-line no-useless-escape
@@ -139,6 +140,7 @@ export class B2BPurchasePage extends React.Component<Props, State> {
             requestPending={requestPending}
             productId={productId}
             discountCode={discountCode}
+            seats={seats}
           />
         )}
       </React.Fragment>
