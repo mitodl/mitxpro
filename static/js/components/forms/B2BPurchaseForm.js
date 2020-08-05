@@ -24,7 +24,8 @@ type Props = {
   fetchCouponStatus: (payload: B2BCouponStatusPayload) => Promise<*>,
   contractNumber: ?string,
   discountCode: ?string,
-  productId: Object
+  productId: Object,
+  seats: ?string
 }
 
 const errorMessageRenderer = msg => <span className="error">{msg}</span>
@@ -49,6 +50,24 @@ export const validate = (values: Object) => {
 }
 
 class B2BPurchaseForm extends React.Component<Props> {
+  formikRef = React.createRef<Formik>()
+
+  componentDidMount() {
+    // on page load apply the coupon code provided in the URL query paramater
+    const formikRef = this.formikRef
+    if (formikRef) {
+      const formikRefObj = formikRef.current
+      if (formikRefObj && formikRefObj.state.values.coupon) {
+        this.applyCoupon(
+          formikRefObj.state.values,
+          formikRefObj.setFieldError,
+          formikRefObj.setFieldTouched,
+          null
+        )
+      }
+    }
+  }
+
   applyCoupon = curry(
     async (
       values: Object,
@@ -58,7 +77,9 @@ class B2BPurchaseForm extends React.Component<Props> {
     ) => {
       const { products, clearCouponStatus, fetchCouponStatus } = this.props
 
-      event.preventDefault()
+      if (event) {
+        event.preventDefault()
+      }
 
       if (!values.coupon) {
         clearCouponStatus()
@@ -67,6 +88,7 @@ class B2BPurchaseForm extends React.Component<Props> {
 
       if (!values.product.productId) {
         setFieldError("coupon", "No product selected")
+        setFieldTouched("coupon", true, false)
         return
       }
 
@@ -74,7 +96,7 @@ class B2BPurchaseForm extends React.Component<Props> {
         product_id: values.product.productId,
         code:       values.coupon.trim()
       })
-      if (response.status !== 200) {
+      if (response && response.status !== 200) {
         setFieldError("coupon", "Invalid coupon code")
         setFieldTouched("coupon", true, false)
       }
@@ -212,17 +234,18 @@ class B2BPurchaseForm extends React.Component<Props> {
       <Formik
         onSubmit={onSubmit}
         initialValues={{
-          num_seats: "",
+          num_seats: this.props.seats || 1,
           email:     "",
           product:   {
             productId:    this.props.productId || "",
             programRunId: null
           },
-          coupon:         this.props.discountCode || "",
-          contractNumber: this.props.contractNumber || ""
+          coupon:          this.props.discountCode || "",
+          contract_number: this.props.contractNumber || ""
         }}
         validate={validate}
         render={this.renderForm}
+        ref={this.formikRef}
       />
     )
   }
