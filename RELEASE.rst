@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.57.1
+--------------
+
+- 1850 inconsistent behavior on bulk purchase page
+- Removed redundant sheets dev documentation
+- Fixed Drive folder details in sheets dev setup readme
+- B2B/Bulk: Automatically Apply Coupon Codes Passed in URL
+- Bump elliptic from 6.4.1 to 6.5.3
+- Bump codecov from 3.6.5 to 3.7.1
+- Bump jquery from 3.4.1 to 3.5.0
+
 Version 0.57.0 (Released August 04, 2020)
 --------------
 
