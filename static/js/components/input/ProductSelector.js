@@ -248,6 +248,7 @@ export class ProductSelector extends React.Component<Props, State> {
     let selectedCoursewareObj, selectedCourseDate
     if (productType === PRODUCT_TYPE_PROGRAM) {
       selectedCoursewareObj = buildProgramOption(props.selectedProduct)
+      props.fetchProgramRuns(selectedCoursewareObj.value)
     } else {
       selectedCoursewareObj = buildCourseOption(props.selectedProduct)
       // $FlowFixMe: selectedProduct can't be null/undefined
@@ -269,7 +270,7 @@ export class ProductSelector extends React.Component<Props, State> {
       selectedCourseDate
     } = this.state
 
-    const { programRuns, programRunsLoading } = this.props
+    const { programRunsLoading } = this.props
 
     return (
       <div className="product-selector">
@@ -344,7 +345,7 @@ const mapDispatchToProps = dispatch => ({
 const mapStateToProps = state => ({
   programRuns:        state.entities.programRuns,
   programRunsLoading: R.pathOr(
-    true,
+    false,
     ["queries", "programRuns", "isPending"],
     state
   )

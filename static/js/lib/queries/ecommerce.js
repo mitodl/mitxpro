@@ -179,6 +179,7 @@ export default {
     }),
     update: {
       programRuns: (prev: [ProgramRunDetail], next: [ProgramRunDetail]) => next
-    }
+    },
+    force: true
   })
 }
