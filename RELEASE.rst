@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.57.1
+Version 0.57.1 (Released August 06, 2020)
 --------------
 
 - 1850 inconsistent behavior on bulk purchase page
