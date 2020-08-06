@@ -45,20 +45,21 @@ An xPRO Drive folder should have the following artifacts:
   an enrollment code request form, a refund request form, and a deferral request form.
 1. A **folder** which is the target for enrollment code assignment sheets that we generate.
 
-**This folder should be copied from CI, RC, or a fellow developer.** Copying this folder or
-these individual items will save a lot of manual setup. Just chat or email someone on the team 
-to point you to where they are. 
+**The contents of this folder should be copied from a "template" folder to a folder in your local Drive.** 
+There is a template folder on the MIT shared drive, or you can ask a fellow developer to share one. 
+**Just chat or email someone on the team to point you to one of these template folders.** 
+Once you can access a template folder, do the following to make your own copy:
 
-The Drive folder should look something like this:
+1. Create a folder on your local Drive. Call it something like "Local xPRO Enrollments".
+1. Create an empty subfolder for assignment sheets. Call it something like "Local Assignment Sheets".
+1. In the template folder, select the spreadsheets (NOT the forms or any folders), and make a copy of them.
+    - *NOTE: This will automatically create copies of the forms since the forms are linked to the spreadsheets already. This is intentional.*
+    - *ALSO NOTE: These spreadsheets each have a single test response already entered, and should be visible on the main worksheets. Leave those test responses where they are.*
+1. Select the copied spreadsheets *and* forms, and move them to your xPRO enrollments folder that you created above.
+
+Your Drive folder should look something like this when you're done:
 
 ![Enrollment Code Request form](images/sheets-drive-folder.png)
-
-You should now test that the forms are correctly linked to the spreadsheets:
-1. Open both the enrollment code request form and spreadsheet
-1. Click the "Preview" icon at the top of the form (looks like an eye)
-1. Fill out the form and submit it (the data doesn't matter)
-1. Confirm that you can see the data you just submitted as a row on the first worksheet
-    in the enrollment code request spreadsheet.
 
 ### 4) Add initial settings 
 
@@ -146,7 +147,7 @@ those up locally too, but it's probably easier just to use the management comman
 Here's an example workflow for making a request for enrollment codes and assigning them:
 
 1. Fill out and submit the enrollment code request form. The contract number and coupon name can
- be anything as long as they are not repeated from other submissions. This will add a row to the
+ be anything as long as they are not repeated from other submissions. This should add a row to the
  first worksheet in the enrollment code request spreadsheet.
 1. Run the management command to process the sheet: 
  `./manage.py process_coupon_requests -i "<Enrollment code request spreadsheet id>"`. This should
