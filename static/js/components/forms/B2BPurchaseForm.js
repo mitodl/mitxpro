@@ -24,7 +24,7 @@ type Props = {
   fetchCouponStatus: (payload: B2BCouponStatusPayload) => Promise<*>,
   contractNumber: ?string,
   discountCode: ?string,
-  productId: Object,
+  productId: ?string,
   seats: ?string
 }
 
@@ -108,7 +108,8 @@ class B2BPurchaseForm extends React.Component<Props> {
       products,
       requestPending,
       couponStatus,
-      contractNumber
+      contractNumber,
+      clearCouponStatus
     } = this.props
 
     let itemPrice = new Decimal(0),
@@ -123,12 +124,19 @@ class B2BPurchaseForm extends React.Component<Props> {
       itemPrice = new Decimal(productVersion.price)
       if (!isNaN(numSeats)) {
         totalPrice = itemPrice.times(numSeats)
-
-        if (couponStatus) {
+        // $FlowFixMe: product.id is not undefined
+        if (couponStatus && couponStatus.product_id === product.id) {
           discount = new Decimal(couponStatus.discount_percent)
             .times(itemPrice)
             .times(numSeats)
           totalPrice = totalPrice.minus(discount)
+        } else if (
+          couponStatus &&
+          product &&
+          couponStatus.product_id !== product.id
+        ) {
+          values.coupon = ""
+          clearCouponStatus()
         }
       }
     }
