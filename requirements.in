@@ -7,6 +7,7 @@ django==2.2.10
 django-anymail[mailgun]==6.1.0
 django-hijack==2.1.10
 django-hijack-admin==2.1.10
+django-ipware==3.0.0
 django-redis==4.10.0
 django-robots==3.1.0
 django-server-status==0.6.0

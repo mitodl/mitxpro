@@ -136,13 +136,14 @@ def sign_cybersource_payload(payload):
 
 
 # pylint: disable=too-many-locals
-def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
+def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_address):
     """
     Generates a payload dict to send to CyberSource for Secure Acceptance
     Args:
         order (Order): An order
         receipt_url (str): The URL to be used by Cybersource to redirect the user after completion of the purchase
         cancel_url (str): The URL to be used by Cybersource to redirect the user after they click cancel
+        ip_address (str): The user's IP address
     Returns:
         dict: the payload to send to CyberSource via Secure Acceptance
     """
@@ -217,22 +218,27 @@ def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
         "transaction_type": "sale",
         "transaction_uuid": uuid.uuid4().hex,
         "unsigned_field_names": "",
+        "customer_ip_address": ip_address if ip_address else None,
     }
 
 
-def generate_cybersource_sa_payload(*, order, receipt_url, cancel_url):
+def generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_address=None):
     """
     Generates a payload dict to send to CyberSource for Secure Acceptance
     Args:
         order (Order): An order
         receipt_url (str): The URL to be used by Cybersource to redirect the user after completion of the purchase
         cancel_url (str): The URL to be used by Cybersource to redirect the user after they click cancel
+        ip_address (str): The user's IP address
     Returns:
         dict: the payload to send to CyberSource via Secure Acceptance
     """
     return sign_cybersource_payload(
         _generate_cybersource_sa_payload(
-            order=order, receipt_url=receipt_url, cancel_url=cancel_url
+            order=order,
+            receipt_url=receipt_url,
+            cancel_url=cancel_url,
+            ip_address=ip_address,
         )
     )
 

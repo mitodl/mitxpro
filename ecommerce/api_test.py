@@ -145,7 +145,8 @@ def test_get_readable_id():
 @pytest.mark.parametrize("has_coupon", [True, False])
 @pytest.mark.parametrize("has_company", [True, False])
 @pytest.mark.parametrize("is_program_product", [True, False])
-def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
+@pytest.mark.parametrize("user_ip", ["194.100.0.1", "", None])
+def test_signed_payload(mocker, has_coupon, has_company, is_program_product, user_ip):
     """
     A valid payload should be signed appropriately
     """
@@ -193,7 +194,7 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
     receipt_url = "https://example.com/base_url/receipt/"
     cancel_url = "https://example.com/base_url/cancel/"
     payload = generate_cybersource_sa_payload(
-        order=order, receipt_url=receipt_url, cancel_url=cancel_url
+        order=order, receipt_url=receipt_url, cancel_url=cancel_url, ip_address=user_ip
     )
     signature = payload.pop("signature")
     assert generate_cybersource_sa_signature(payload) == signature
@@ -257,6 +258,7 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product):
         else content_object.courseware_id,
         "merchant_defined_data3": "1",
         **other_merchant_fields,
+        "customer_ip_address": user_ip if user_ip else None,
     }
     now_mock.assert_called_once_with()
 
