@@ -106,7 +106,7 @@ user-util==0.1.5          # via -r requirements.in
 uwsgi==2.0.18             # via -r requirements.in
 vine==1.3.0               # via amqp, celery
 wagtail-metadata==2.0.1   # via -r requirements.in
-wagtail==2.7.1            # via -r requirements.in, wagtail-metadata
+wagtail==2.7.4            # via -r requirements.in, wagtail-metadata
 wcwidth==0.1.7            # via prompt-toolkit
 webencodings==0.5.1       # via html5lib
 willow==1.3               # via wagtail
