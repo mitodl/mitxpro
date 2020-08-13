@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.57.2
+--------------
+
+- Change recaptcha domain (#1861)
+- Bump serialize-javascript from 2.1.2 to 3.1.0
+- Fixed bug b2b coupon applied to all products - #1844
+- Bump httplib2 from 0.14.0 to 0.18.0
+
 Version 0.57.1 (Released August 06, 2020)
 --------------
 
