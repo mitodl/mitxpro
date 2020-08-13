@@ -8,6 +8,7 @@ from ecommerce import models
 from ecommerce.api import get_product_version_price_with_discount, round_half_up
 from ecommerce.models import CouponVersion, ProductVersion, CouponRedemption
 from hubspot.api import format_hubspot_id
+from users.models import User
 
 ORDER_STATUS_MAPPING = {
     models.Order.FULFILLED: "processed",
@@ -163,7 +164,8 @@ class B2BOrderToDealSerializer(serializers.ModelSerializer):
     def get_purchaser(self, instance):
         """Get the purchaser id"""
         if instance.email:
-            user_id = instance.email
+            existing_user = User.objects.filter(email=instance.email).first()
+            user_id = existing_user.id if existing_user else instance.email
             return format_hubspot_id(user_id)
 
     class Meta:
