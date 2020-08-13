@@ -27,6 +27,9 @@ export default class ScaledRecaptcha extends React.Component<Props, State> {
   recaptcha: null
 
   constructor(props: Props) {
+    window.recaptchaOptions = {
+      useRecaptchaNet: true
+    }
     super(props)
     // use old-style ref so we can resize when it mounts
     this.recaptcha = null
