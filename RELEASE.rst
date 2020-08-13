@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.57.2
+Version 0.57.2 (Released August 13, 2020)
 --------------
 
 - Change recaptcha domain (#1861)
