@@ -8,7 +8,11 @@ import B2BPurchasePage, {
 } from "./B2BPurchasePage"
 
 import * as formFuncs from "../../../lib/form"
-import { makeB2BCouponStatus, makeProduct } from "../../../factories/ecommerce"
+import {
+  makeB2BCouponStatus,
+  makeCourseRunProduct,
+  makeProgramProduct
+} from "../../../factories/ecommerce"
 
 describe("B2BPurchasePage", () => {
   let helper, renderPage, products
@@ -16,9 +20,9 @@ describe("B2BPurchasePage", () => {
   beforeEach(() => {
     helper = new IntegrationTestHelper()
     products = [
-      makeProduct(),
-      makeProduct(),
-      makeProduct("program", "test+Aug_2016")
+      makeCourseRunProduct(),
+      makeCourseRunProduct(),
+      makeProgramProduct("test+Aug_2016")
     ]
     renderPage = helper.configureHOCRenderer(
       B2BPurchasePage,

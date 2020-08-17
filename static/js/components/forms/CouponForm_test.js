@@ -12,7 +12,11 @@ import {
   PRODUCT_TYPE_COURSERUN,
   PRODUCT_TYPE_PROGRAM
 } from "../../constants"
-import { makeCompany, makeProduct } from "../../factories/ecommerce"
+import {
+  makeCompany,
+  makeCourseRunProduct,
+  makeProgramProduct
+} from "../../factories/ecommerce"
 import {
   findFormikFieldByName,
   findFormikErrorByName
@@ -21,10 +25,7 @@ import { formatPrettyDate } from "../../lib/util"
 
 describe("CouponForm", () => {
   let sandbox, onSubmitStub
-  const products = [
-    makeProduct(PRODUCT_TYPE_COURSERUN),
-    makeProduct(PRODUCT_TYPE_PROGRAM)
-  ]
+  const products = [makeCourseRunProduct(), makeProgramProduct()]
 
   const renderForm = () =>
     mount(
@@ -161,7 +162,7 @@ describe("CouponForm", () => {
   //
   ;[
     [[], "1 or more products must be selected"],
-    [[makeProduct()], null]
+    [[makeCourseRunProduct()], null]
   ].forEach(([value, errorMessage]) => {
     it(`validates the field name=products, value="${JSON.stringify(
       value
@@ -197,9 +198,11 @@ describe("CouponForm", () => {
       const picky = wrapper.find(".picky")
       const options = picky.find("input[type='checkbox']")
       assert.equal(options.at(1).exists(), productType === "")
-      assert.ok(picky.text().includes(availableProduct[0].title))
+      assert.ok(picky.text().includes(availableProduct[0].content_object.title))
       if (productType === "") {
-        assert.ok(picky.text().includes(availableProduct[1].title))
+        assert.ok(
+          picky.text().includes(availableProduct[1].content_object.title)
+        )
       }
     })
   })
@@ -219,9 +222,9 @@ describe("CouponForm", () => {
         .text()
         .includes(
           `${products[0].latest_version.readable_id} | ${
-            products[0].title
+            products[0].content_object.title
           } | ${formatPrettyDate(
-            moment(products[0].latest_version.start_date)
+            moment(products[0].content_object.start_date)
           )}`
         )
     )
@@ -229,7 +232,9 @@ describe("CouponForm", () => {
       picky
         .text()
         .includes(
-          `${products[1].latest_version.readable_id} | ${products[1].title}`
+          `${products[1].latest_version.readable_id} | ${
+            products[1].content_object.title
+          }`
         )
     )
   })

@@ -26,7 +26,7 @@ import type {
   UserEnrollments
 } from "../flow/courseTypes"
 
-import type { ProductDetail } from "../flow/ecommerceTypes"
+import type { Product } from "../flow/ecommerceTypes"
 
 import { PRODUCT_TYPE_COURSERUN } from "../constants"
 
@@ -229,16 +229,19 @@ export const findItemWithTextId = (
   return null
 }
 
-export const getProductSelectLabel = (product: ProductDetail) => {
+export const getProductSelectLabel = (product: Product) => {
+  const label = `${product.content_object.readable_id} | ${
+    product.content_object.title
+  }`
   if (
     product.product_type === PRODUCT_TYPE_COURSERUN &&
-    product.latest_version.start_date !== null
+    product.content_object.start_date !== null
   ) {
-    return `${product.latest_version.readable_id} | ${
-      product.title
-    } | ${formatPrettyDate(moment(product.latest_version.start_date))}`
+    return `${label} | ${formatPrettyDate(
+      moment(product.content_object.start_date)
+    )}`
   } else {
-    return `${product.latest_version.readable_id} | ${product.title}`
+    return label
   }
 }
 

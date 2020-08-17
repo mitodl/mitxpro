@@ -5,7 +5,6 @@ Tests for ecommerce serializers
 from decimal import Decimal
 
 import pytest
-import factory
 from django.db.models import Prefetch
 from rest_framework.exceptions import ValidationError
 
@@ -18,11 +17,7 @@ from courses.factories import (
     ProgramRunFactory,
 )
 from courses.serializers import CourseSerializer
-from courses.constants import (
-    CATALOG_COURSE_IMG_WAGTAIL_FILL,
-    CONTENT_TYPE_MODEL_PROGRAM,
-    CONTENT_TYPE_MODEL_COURSERUN,
-)
+from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import get_readable_id, round_half_up
 from ecommerce.constants import ORDERED_VERSIONS_QSET_ATTR, CYBERSOURCE_CARD_TYPES
 from ecommerce.factories import (
@@ -40,8 +35,6 @@ from ecommerce.models import (
     CouponSelection,
     CouponPayment,
     CouponPaymentVersion,
-    Product,
-    ProductVersion,
     CourseRunSelection,
     DataConsentUser,
     Order,
@@ -55,8 +48,6 @@ from ecommerce.serializers import (
     CouponPaymentVersionSerializer,
     CouponPaymentSerializer,
     CurrentCouponPaymentSerializer,
-    ProductDetailSerializer,
-    ProductChoiceSerializer,
     FullProductVersionSerializer,
     CompanySerializer,
     DataConsentUserSerializer,
@@ -453,113 +444,6 @@ def test_current_coupon_payment_version_serializer_latest(mocker):
     assert serialized["version"]["id"] == expected_version.id
 
 
-def test_serialize_product(coupon_product_ids):
-    """ Test that ProductDetailSerializer has correct data """
-    product = Product.objects.get(id=coupon_product_ids[0])
-    run = product.content_object
-    serialized_data = ProductDetailSerializer(instance=product).data
-    assert serialized_data.get("title") == run.title
-    assert serialized_data.get("product_type") == "courserun"
-    assert serialized_data.get("id") == product.id
-
-
-def test_serialize_product_with_ordered(mocker):
-    """
-    Test that ProductDetailSerializer takes a context variable that says the ProductVersions are
-    already ordered, so it can use that ordered list of versions instead of calling
-    Product.latest_version and running another query.
-    """
-    # Since we're testing the preference of the 'ordered_versions' queryset property
-    # over Product.latest_version, we patch 'latest_version' to return None. If 'latest_version'
-    # is used by the serializer, the results will be invalid.
-    mocker.patch(
-        "ecommerce.models.Product.latest_version",
-        new_callable=mocker.PropertyMock,
-        return_value=None,
-    )
-    products = ProductFactory.create_batch(2)
-    versions = ProductVersionFactory.create_batch(4, product=factory.Iterator(products))
-    product_qset = Product.objects.prefetch_related(
-        Prefetch(
-            "productversions",
-            queryset=ProductVersion.objects.order_by("-created_on"),
-            to_attr=ORDERED_VERSIONS_QSET_ATTR,
-        )
-    )
-    serialized_data = ProductDetailSerializer(
-        product_qset, context={"has_ordered_versions": True}, many=True
-    ).data
-    expected_versions = [versions[2], versions[3]]
-    assert len(serialized_data) == len(products)
-    assert [version.id for version in expected_versions] == [
-        product_data["latest_version"]["id"] for product_data in serialized_data
-    ]
-
-
-def test_serialize_program_product_choice():
-    """ProductChoiceSerializer should serialize a program Product and its latest ProductVersion"""
-    program = ProgramFactory.create()
-    product_version = ProductVersionFactory.create(product__content_object=program)
-    product = product_version.product
-    serialized_data = ProductChoiceSerializer(instance=product).data
-    assert serialized_data == {
-        "id": product.id,
-        "title": program.title,
-        "product_type": CONTENT_TYPE_MODEL_PROGRAM,
-        "visible_in_bulk_form": product.visible_in_bulk_form,
-        "start_date": program.next_run_date,
-        "end_date": None,
-        "parent": {},
-        "latest_version": {
-            "id": product_version.id,
-            "object_id": program.id,
-            "product_id": product.id,
-            "type": CONTENT_TYPE_MODEL_PROGRAM,
-            "price": str(product_version.price),
-            "content_title": program.title,
-            "readable_id": program.readable_id,
-        },
-    }
-
-
-def test_serialize_program_run():
-    """ProgramRunSerializer should serializer a program run with proper format"""
-    program_run = ProgramRunFactory()
-    serialized_data = ProgramRunSerializer(instance=program_run).data
-    assert serialized_data == {
-        "id": program_run.id,
-        "run_tag": program_run.run_tag,
-        "start_date": program_run.start_date,
-        "end_date": program_run.end_date,
-    }
-
-
-def test_serialize_run_product_choice():
-    """ProductChoiceSerializer should serialize a course run Product and its latest ProductVersion"""
-    course_run = CourseRunFactory.create()
-    product_version = ProductVersionFactory.create(product__content_object=course_run)
-    product = product_version.product
-    serialized_data = ProductChoiceSerializer(instance=product).data
-    assert serialized_data == {
-        "id": product.id,
-        "title": course_run.title,
-        "product_type": CONTENT_TYPE_MODEL_COURSERUN,
-        "visible_in_bulk_form": product.visible_in_bulk_form,
-        "start_date": course_run.start_date.isoformat(),
-        "end_date": course_run.end_date.isoformat(),
-        "parent": {"id": course_run.course.id, "title": course_run.course.title},
-        "latest_version": {
-            "id": product_version.id,
-            "object_id": course_run.id,
-            "product_id": product.id,
-            "type": CONTENT_TYPE_MODEL_COURSERUN,
-            "price": str(product_version.price),
-            "content_title": course_run.title,
-            "readable_id": course_run.courseware_id,
-        },
-    }
-
-
 @pytest.mark.parametrize(
     "receipt_data",
     [
@@ -684,4 +568,16 @@ def test_serialize_global_coupon():
         "enabled": True,
         "include_future_runs": False,
         "is_global": True,
+    }
+
+
+def test_serialize_program_run():
+    """ProgramRunSerializer should serializer a program run with proper format"""
+    program_run = ProgramRunFactory()
+    serialized_data = ProgramRunSerializer(instance=program_run).data
+    assert serialized_data == {
+        "id": program_run.id,
+        "run_tag": program_run.run_tag,
+        "start_date": program_run.start_date,
+        "end_date": program_run.end_date,
     }

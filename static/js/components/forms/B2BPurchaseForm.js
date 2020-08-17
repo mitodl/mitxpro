@@ -11,12 +11,12 @@ import B2BCheckoutExplanation from "../B2BCheckoutExplanation"
 import type {
   B2BCouponStatusPayload,
   B2BCouponStatusResponse,
-  SimpleProductDetail
+  Product
 } from "../../flow/ecommerceTypes"
 import { findProductById } from "../../lib/ecommerce"
 
 type Props = {
-  products: Array<SimpleProductDetail>,
+  products: Array<Product>,
   onSubmit: Function,
   requestPending: boolean,
   couponStatus: ?B2BCouponStatusResponse,

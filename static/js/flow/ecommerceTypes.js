@@ -42,8 +42,7 @@ export type ProductVersion = BaseProductVersion & {
   courses: Array<Course>,
   thumbnail_url: string,
   run_tag: ?string,
-  description: string,
-  start_date: ?string
+  description: string
 }
 
 export type BasketItem = ProductVersion & {
@@ -177,13 +176,6 @@ export type Coupon = {
   is_global: boolean
 }
 
-export type Product = {
-  id: number,
-  product_type: string,
-  title: string,
-  visible_in_bulk_form: boolean
-}
-
 export type ProgramRunDetail = {
   id: number,
   run_tag: string,
@@ -191,19 +183,45 @@ export type ProgramRunDetail = {
   end_date: string
 }
 
-export type SimpleProductDetail = Product & {
-  latest_version: BaseProductVersion,
-  parent: {
-    id?: number,
-    title?: string
-  },
-  start_date: ?string,
-  end_date: ?string
-}
+export type CourseRunContentObject = {|
+  id: string,
+  title: string,
+  readable_id: string,
+  start_date: string,
+  end_date: string,
+  course: {
+    id: number,
+    title: string
+  }
+|}
 
-export type ProductDetail = Product & {
+export type ProductType = PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM
+
+export type ProgramContentObject = {|
+  id: string,
+  title: string,
+  readable_id: string
+|}
+
+export type BaseProduct = {
+  id: number,
+  title: string,
+  product_type: ProductType,
+  visible_in_bulk_form: boolean,
   latest_version: ProductVersion
 }
+
+export type CourseRunProduct = BaseProduct & {
+  product_type: "courserun",
+  content_object: CourseRunContentObject
+}
+
+export type ProgramProduct = BaseProduct & {
+  product_type: "program",
+  content_object: ProgramContentObject
+}
+
+export type Product = CourseRunProduct | ProgramProduct
 
 export type ProductMap = {
   [PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM]: {

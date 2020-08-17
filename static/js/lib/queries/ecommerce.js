@@ -9,11 +9,10 @@ import type {
   B2BCheckoutPayload,
   Company,
   CouponPaymentVersion,
-  ProductDetail,
+  Product,
   B2BCouponStatusPayload,
   B2BCouponStatusResponse,
   OrderReceiptResponse,
-  SimpleProductDetail,
   ProgramRunDetail
 } from "../../flow/ecommerceTypes"
 
@@ -63,25 +62,14 @@ export default {
       ...DEFAULT_POST_OPTIONS
     }
   }),
-  productsSelector:  pathOr(null, ["entities", "products"]),
-  fullProductsQuery: () => ({
-    queryKey:  "products",
-    url:       "/api/products/?sort=title",
-    transform: (json: Array<ProductDetail>) => ({
-      products: json
-    }),
-    update: {
-      products: nextState
-    }
-  }),
-  productsQuery: (productType?: string) => ({
+  productsSelector: pathOr(null, ["entities", "products"]),
+  productsQuery:    (productType?: string) => ({
     queryKey: "products",
-    url:      "/api/products/?sort=title",
+    url:      "/api/products/",
     body:     {
-      nested: false,
       ...(productType ? { type: productType } : {})
     },
-    transform: (json: Array<SimpleProductDetail>) => ({
+    transform: (json: Array<Product>) => ({
       products: json
     }),
     update: {

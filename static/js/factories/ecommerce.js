@@ -15,12 +15,15 @@ import type {
   CouponPaymentVersion,
   Company,
   DataConsentUser,
-  ProductDetail,
+  Product,
   B2BOrderStatus,
   B2BCouponStatusResponse,
-  SimpleProductDetail,
-  BaseProductVersion,
-  ProgramRunDetail
+  ProgramRunDetail,
+  ProgramContentObject,
+  ProgramProduct,
+  CourseRunContentObject,
+  CourseRunProduct,
+  BaseProductVersion
 } from "../flow/ecommerceTypes"
 import type { BaseCourseRun, Program } from "../flow/courseTypes"
 import {
@@ -34,6 +37,7 @@ const genBasketItemObjectId = incrementer()
 const genProductId = incrementer()
 const genDataConsentUserId = incrementer()
 const genProgramRunId = incrementer()
+const genProductContentObjectId = incrementer()
 
 export const makeDataConsent = (): DataConsentUser => ({
   // $FlowFixMe: flow doesn't understand generators well
@@ -106,7 +110,7 @@ export const makeBasketResponse = (itemType: ?string): BasketResponse => {
   }
 }
 
-export const makeSimpleProductVersion = (
+export const makeProductVersion = (
   productType: string = PRODUCT_TYPE_COURSERUN,
   readableId: string = casual.text
 ): BaseProductVersion => ({
@@ -121,37 +125,52 @@ export const makeSimpleProductVersion = (
   product_id:    genProductId.next().value
 })
 
-export const makeSimpleProduct = (
-  productType: string = PRODUCT_TYPE_COURSERUN,
-  readableId: string = casual.text
-): SimpleProductDetail => ({
-  // $FlowFixMe
-  id:                   genProductId.next().value,
-  title:                casual.word,
-  product_type:         productType,
-  visible_in_bulk_form: casual.boolean,
-  start_date:           casual.moment.format(),
-  end_date:             casual.moment.format(),
-  parent:
-    productType === PRODUCT_TYPE_PROGRAM
-      ? {}
-      : {
-        id:    casual.random,
-        title: casual.text
-      },
-  latest_version: makeSimpleProductVersion(productType, readableId)
+export const makeProgramContentObject = (
+  readableId: string
+): ProgramContentObject => ({
+  // $FlowFixMe: flow doesn't understand generators well
+  id:          genProductContentObjectId.next().value,
+  readable_id: readableId,
+  title:       casual.word
 })
 
-export const makeProduct = (
-  productType: string = PRODUCT_TYPE_COURSERUN,
+export const makeCourseRunContentObject = (
+  readableId: string
+): CourseRunContentObject => {
+  const course = makeCourse()
+  return {
+    // $FlowFixMe: flow doesn't understand generators well
+    id:          genProductContentObjectId.next().value,
+    title:       casual.word,
+    readable_id: readableId,
+    start_date:  casual.moment.format(),
+    end_date:    casual.moment.format(),
+    course:      { id: course.id, title: course.title }
+  }
+}
+
+export const makeCourseRunProduct = (
   readableId: string = casual.text
-): ProductDetail => ({
+): CourseRunProduct => ({
   // $FlowFixMe
   id:                   genProductId.next().value,
   title:                casual.word,
-  product_type:         productType,
+  product_type:         PRODUCT_TYPE_COURSERUN,
   visible_in_bulk_form: casual.boolean,
-  latest_version:       makeItem(productType, readableId)
+  content_object:       makeCourseRunContentObject(readableId),
+  latest_version:       makeItem(PRODUCT_TYPE_COURSERUN, readableId)
+})
+
+export const makeProgramProduct = (
+  readableId: string = casual.text
+): ProgramProduct => ({
+  // $FlowFixMe
+  id:                   genProductId.next().value,
+  title:                casual.word,
+  product_type:         PRODUCT_TYPE_PROGRAM,
+  visible_in_bulk_form: casual.boolean,
+  content_object:       makeProgramContentObject(readableId),
+  latest_version:       makeItem(PRODUCT_TYPE_PROGRAM, readableId)
 })
 
 export const makeCourseRunOrProgram = (
@@ -242,7 +261,7 @@ export const makeBulkCouponPayment = (): BulkCouponPayment => ({
   id:         genBulkCouponPaymentId.next().value,
   name:       casual.word,
   version:    makeCouponPaymentVersion(),
-  products:   [makeProduct()],
+  products:   [makeCourseRunProduct()],
   created_on: casual.moment.format(),
   updated_on: casual.moment.format()
 })
@@ -265,7 +284,7 @@ export const makeB2BOrderStatus = (): B2BOrderStatus => {
     item_price:       String(itemPrice),
     total_price:      String(totalPrice),
     email:            casual.email,
-    product_version:  makeProduct().latest_version,
+    product_version:  makeCourseRunProduct().latest_version,
     discount:         discount !== null ? String(discount) : null,
     created_on:       casual.moment.format(),
     coupon_code:      "1234",
@@ -277,6 +296,6 @@ export const makeB2BOrderStatus = (): B2BOrderStatus => {
 
 export const makeB2BCouponStatus = (): B2BCouponStatusResponse => ({
   code:             casual.text,
-  product_id:       makeProduct().id,
+  product_id:       makeCourseRunProduct().id,
   discount_percent: new Decimal(casual.integer(0, 100)).dividedBy(100)
 })

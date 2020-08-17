@@ -21,13 +21,13 @@ import type {
   B2BCheckoutPayload,
   B2BCouponStatusPayload,
   B2BCouponStatusResponse,
-  SimpleProductDetail
+  Product
 } from "../../../flow/ecommerceTypes"
 import { findProductById } from "../../../lib/ecommerce"
 
 type Props = {
   checkout: (payload: B2BCheckoutPayload) => Promise<*>,
-  products: Array<SimpleProductDetail>,
+  products: Array<Product>,
   requestPending: boolean,
   couponStatus: ?B2BCouponStatusResponse,
   clearCouponStatus: () => void,

@@ -11,11 +11,16 @@ import Select from "react-select"
 import ProductSelector, {
   productTypeLabels,
   productDateSortCompare,
+  programRunDateSortCompare,
   ProductSelector as InnerProductSelector
 } from "./ProductSelector"
 
 import { makeCourse } from "../../factories/course"
-import { makeSimpleProduct, makeProgramRun } from "../../factories/ecommerce"
+import {
+  makeProgramRun,
+  makeCourseRunProduct,
+  makeProgramProduct
+} from "../../factories/ecommerce"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 import {
   findRunInProduct,
@@ -30,14 +35,6 @@ import type { ProgramRunDetail } from "../../flow/ecommerceTypes"
 // a <StateManager /> with className="select"
 const SelectComponentSelector = "StateManager.select"
 
-const generateCourseRunParent = () => {
-  const course = makeCourse()
-  return {
-    id:    course.id,
-    title: course.title
-  }
-}
-
 describe("ProductSelector", () => {
   let defaultProps,
     products,
@@ -49,13 +46,13 @@ describe("ProductSelector", () => {
 
   beforeEach(() => {
     onChangeStub = sinon.createSandbox().stub()
-    const courseRunParent = generateCourseRunParent()
-    runProduct1Course1 = makeSimpleProduct(PRODUCT_TYPE_COURSERUN)
-    runProduct2Course1 = makeSimpleProduct(PRODUCT_TYPE_COURSERUN)
-    runProduct1Course1.parent = courseRunParent
-    runProduct2Course1.parent = courseRunParent
-    runProduct2 = makeSimpleProduct(PRODUCT_TYPE_COURSERUN)
-    programProduct = makeSimpleProduct(PRODUCT_TYPE_PROGRAM, "test+Aug_2016")
+    const course = makeCourse()
+    runProduct1Course1 = makeCourseRunProduct()
+    runProduct2Course1 = makeCourseRunProduct()
+    runProduct1Course1.content_object.course = course
+    runProduct2Course1.content_object.course = course
+    runProduct2 = makeCourseRunProduct()
+    programProduct = makeProgramProduct("test+Aug_2016")
 
     products = [
       runProduct2,
@@ -160,12 +157,12 @@ describe("ProductSelector", () => {
     // If multiple runs belong to the same course, that course should only show up once in the options
     const expectedOptions = [
       {
-        label: runProduct2.parent.title,
-        value: runProduct2.parent.id
+        label: runProduct2.content_object.course.title,
+        value: runProduct2.content_object.course.id
       },
       {
-        label: runProduct1Course1.parent.title,
-        value: runProduct1Course1.parent.id
+        label: runProduct1Course1.content_object.course.title,
+        value: runProduct1Course1.content_object.course.id
       }
     ]
     assert.deepEqual(selectWrapper.prop("options"), expectedOptions)
@@ -182,8 +179,8 @@ describe("ProductSelector", () => {
     )
     const selectWrapper = wrapper.find(SelectComponentSelector).at(1)
     assert.deepEqual(selectWrapper.prop("value"), {
-      value: selectedProduct.parent.id,
-      label: selectedProduct.parent.title
+      value: selectedProduct.content_object.course.id,
+      label: selectedProduct.content_object.course.title
     })
   })
 
@@ -205,8 +202,8 @@ describe("ProductSelector", () => {
     wrapper.setState({
       productType:           PRODUCT_TYPE_COURSERUN,
       selectedCoursewareObj: {
-        label: runProduct2Course1.parent.title,
-        value: runProduct2Course1.parent.id
+        label: runProduct2Course1.content_object.course.title,
+        value: runProduct2Course1.content_object.course.id
       }
     })
 
@@ -216,8 +213,8 @@ describe("ProductSelector", () => {
       selectWrapper.prop("options"),
       expectedProducts.sort(productDateSortCompare).map(product => ({
         label: `${formatCoursewareDate(
-          product.start_date
-        )} - ${formatCoursewareDate(product.end_date)}`,
+          product.content_object.start_date
+        )} - ${formatCoursewareDate(product.content_object.end_date)}`,
         value: product.id
       }))
     )
@@ -266,7 +263,7 @@ describe("ProductSelector", () => {
     const selectWrapper = wrapper.find(SelectComponentSelector).at(2)
     assert.deepEqual(
       selectWrapper.prop("options"),
-      programRuns.sort(productDateSortCompare).map(programRun => ({
+      programRuns.sort(programRunDateSortCompare).map(programRun => ({
         label: `${formatCoursewareDate(
           programRun.start_date
         )} - ${formatCoursewareDate(programRun.end_date)}`,
@@ -313,8 +310,8 @@ describe("ProductSelector", () => {
     wrapper.setState({
       productType:           PRODUCT_TYPE_COURSERUN,
       selectedCoursewareObj: {
-        label: product.parent.title,
-        value: product.parent.id
+        label: product.content_object.course.title,
+        value: product.content_object.course.id
       }
     })
     sinon.assert.calledWith(onChangeStub, {

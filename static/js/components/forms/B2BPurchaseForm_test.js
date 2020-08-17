@@ -12,7 +12,7 @@ import configureStoreMain from "../../store/configureStore"
 
 import {
   makeB2BCouponStatus,
-  makeSimpleProduct
+  makeCourseRunProduct
 } from "../../factories/ecommerce"
 import { Provider } from "react-redux"
 
@@ -32,9 +32,9 @@ describe("B2BPurchaseForm", () => {
     fetchCouponStatusStub = sandbox.stub()
     clearCouponStatusStub = sandbox.stub()
     products = [
-      makeSimpleProduct("courserun"),
-      makeSimpleProduct(),
-      makeSimpleProduct()
+      makeCourseRunProduct(),
+      makeCourseRunProduct(),
+      makeCourseRunProduct()
     ]
     couponStatus = makeB2BCouponStatus()
   })

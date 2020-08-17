@@ -27,7 +27,10 @@ import {
   getProductSelectLabel
 } from "./util"
 import { makeUserEnrollments } from "../factories/course"
-import { makeProduct } from "../factories/ecommerce"
+import {
+  makeProgramProduct,
+  makeCourseRunProduct
+} from "../factories/ecommerce"
 
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
 
@@ -112,18 +115,18 @@ describe("utility functions", () => {
   })
 
   it("getProductSelectLabel works as expected", () => {
-    const program = makeProduct(PRODUCT_TYPE_PROGRAM)
-    const courseRun = makeProduct(PRODUCT_TYPE_COURSERUN)
+    const program = makeProgramProduct()
+    const courseRun = makeCourseRunProduct()
 
     assert.equal(
       getProductSelectLabel(courseRun),
-      `${courseRun.latest_version.readable_id} | ${
-        courseRun.title
-      } | ${formatPrettyDate(moment(courseRun.latest_version.start_date))}`
+      `${courseRun.content_object.readable_id} | ${
+        courseRun.content_object.title
+      } | ${formatPrettyDate(moment(courseRun.content_object.start_date))}`
     )
     assert.equal(
       getProductSelectLabel(program),
-      `${program.latest_version.readable_id} | ${program.title}`
+      `${program.content_object.readable_id} | ${program.content_object.title}`
     )
   })
 

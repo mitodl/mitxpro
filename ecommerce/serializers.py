@@ -9,12 +9,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
+from courses.constants import DEFAULT_COURSE_IMG_PATH
 from courses.models import Course, CourseRun, Program, CourseRunEnrollment, ProgramRun
-from courses.constants import (
-    DEFAULT_COURSE_IMG_PATH,
-    CONTENT_TYPE_MODEL_COURSERUN,
-    CONTENT_TYPE_MODEL_PROGRAM,
-)
 from ecommerce import models
 from ecommerce.api import (
     best_coupon_for_product,
@@ -26,10 +22,10 @@ from ecommerce.api import (
     get_product_version_price_with_discount,
     get_product_from_querystring_id,
 )
-from ecommerce.constants import ORDERED_VERSIONS_QSET_ATTR, CYBERSOURCE_CARD_TYPES
+from ecommerce.constants import CYBERSOURCE_CARD_TYPES
 from ecommerce.models import Basket
 from mitxpro.serializers import WriteableSerializerMethodField
-from mitxpro.utils import first_or_none, now_in_utc
+from mitxpro.utils import now_in_utc
 from users.serializers import ExtendedLegalAddressSerializer
 
 log = logging.getLogger(__name__)
@@ -167,85 +163,43 @@ class FullProductVersionSerializer(ProductVersionSerializer):
         model = models.ProductVersion
 
 
-class BaseProductSerializer(serializers.ModelSerializer):
-    """Basic Product Serializer"""
+class ProgramProductContentObjectSerializer(serializers.ModelSerializer):
+    """Product serializer for Program"""
 
-    title = serializers.SerializerMethodField()
-    product_type = serializers.SerializerMethodField()
-
-    def get_title(self, instance):
-        """Return the product title"""
-        return instance.content_object.title
-
-    def get_product_type(self, instance):
-        """Return the product type"""
-        return instance.content_type.model
+    readable_id = serializers.CharField(source="text_id")
 
     class Meta:
-        fields = ["id", "title", "product_type", "visible_in_bulk_form"]
-        model = models.Product
+        fields = ["id", "title", "readable_id"]
+        model = Program
 
 
-class ProductSerializer(BaseProductSerializer):
-    """Product Serializer with the latest ProductVersion also serialized"""
+class CourseRunProductContentObjectSerializer(serializers.ModelSerializer):
+    """Product serializer for CourseRun"""
 
-    latest_version = serializers.SerializerMethodField()
+    readable_id = serializers.CharField(source="text_id")
+    course = serializers.SerializerMethodField()
 
-    def _get_latest_version_obj(self, instance):
-        """Helper method to get the latest ProductVersion for the given Product"""
-        has_ordered_versions = self.context.get("has_ordered_versions", False)
-        return (
-            instance.latest_version
-            if not has_ordered_versions
-            else first_or_none(getattr(instance, ORDERED_VERSIONS_QSET_ATTR, []))
-        )
-
-    def get_latest_version(self, instance):
-        """Return the serialized latest ProductVersion"""
-        return ProductVersionSerializer(
-            self._get_latest_version_obj(instance), context=self.context
-        ).data
+    def get_course(self, instance):
+        """Return a serialized version of the course"""
+        return {"id": instance.course.id, "title": instance.course.title}
 
     class Meta:
-        fields = BaseProductSerializer.Meta.fields + ["latest_version"]
-        model = models.Product
+        fields = ["id", "title", "start_date", "end_date", "course", "readable_id"]
+        model = CourseRun
 
 
-class ProductChoiceSerializer(ProductSerializer):
-    """Product serializer for presenting a set of products as menu options"""
+class ProductContentObjectField(serializers.RelatedField):
+    """Serializer field for related content objects"""
 
-    parent = serializers.SerializerMethodField()
-    start_date = serializers.SerializerMethodField()
-    end_date = serializers.SerializerMethodField()
-
-    def get_parent(self, instance):
-        """Returns the serialized parent course (or nothing if the product is for a program)"""
-        if instance.content_type.model == CONTENT_TYPE_MODEL_COURSERUN:
-            course = instance.content_object.course
-            return {"id": course.id, "title": course.title}
-        return {}
-
-    def get_start_date(self, instance):
-        """Returns the start date"""
-        dt = (
-            instance.content_object.next_run_date
-            if instance.content_type.model == CONTENT_TYPE_MODEL_PROGRAM
-            else instance.content_object.start_date
+    def to_representation(self, value):
+        """Serialize the content object using a serializer that matches the model type"""
+        if isinstance(value, Program):
+            return ProgramProductContentObjectSerializer(instance=value).data
+        elif isinstance(value, CourseRun):
+            return CourseRunProductContentObjectSerializer(instance=value).data
+        raise Exception(
+            "Unexpected to find type for Product.content_object:", value.__class__
         )
-        return dt.isoformat() if dt is not None else None
-
-    def get_end_date(self, instance):
-        """Returns the end date"""
-        dt = (
-            None
-            if instance.content_type.model == CONTENT_TYPE_MODEL_PROGRAM
-            else instance.content_object.end_date
-        )
-        return dt.isoformat() if dt is not None else None
-
-    class Meta:
-        fields = ProductSerializer.Meta.fields + ["parent", "start_date", "end_date"]
-        model = models.Product
 
 
 class ProgramRunSerializer(serializers.ModelSerializer):
@@ -256,15 +210,22 @@ class ProgramRunSerializer(serializers.ModelSerializer):
         fields = ["id", "run_tag", "start_date", "end_date"]
 
 
-class ProductDetailSerializer(ProductSerializer):
-    """Product serializer with full nested serialization of related objects"""
+class ProductSerializer(serializers.ModelSerializer):
+    """Product Serializer with the latest ProductVersion also serialized"""
 
-    def get_latest_version(self, instance):
-        """Returns the serialized latest version with full nested serialization of related objects"""
-        return FullProductVersionSerializer(
-            self._get_latest_version_obj(instance),
-            context={**self.context, "all_runs": True},
-        ).data
+    product_type = serializers.CharField(source="content_type.model", read_only=True)
+    content_object = ProductContentObjectField(read_only=True)
+    latest_version = ProductVersionSerializer(read_only=True)
+
+    class Meta:
+        fields = [
+            "id",
+            "product_type",
+            "visible_in_bulk_form",
+            "latest_version",
+            "content_object",
+        ]
+        model = models.Product
 
 
 class CouponSelectionSerializer(serializers.ModelSerializer):

@@ -7,7 +7,7 @@ import { mount } from "enzyme"
 import { BulkEnrollmentForm } from "./BulkEnrollmentForm"
 import {
   makeBulkCouponPayment,
-  makeProduct,
+  makeCourseRunProduct,
   makeCourseRunOrProgram
 } from "../../factories/ecommerce"
 import { findFormikFieldByName } from "../../lib/test_utils"
@@ -26,12 +26,12 @@ describe("BulkEnrollment", () => {
   const createTestData = () => {
     const firstPayment = makeBulkCouponPayment(),
       secondPayment = makeBulkCouponPayment(),
-      firstProduct = makeProduct(),
-      secondProduct = makeProduct(),
-      thirdProduct = makeProduct(),
-      fourthProduct = makeProduct(),
-      fifthProduct = makeProduct(),
-      sixthProduct = makeProduct(),
+      firstProduct = makeCourseRunProduct(),
+      secondProduct = makeCourseRunProduct(),
+      thirdProduct = makeCourseRunProduct(),
+      fourthProduct = makeCourseRunProduct(),
+      fifthProduct = makeCourseRunProduct(),
+      sixthProduct = makeCourseRunProduct(),
       firstItem = makeCourseRunOrProgram(),
       secondItem = makeCourseRunOrProgram(),
       thirdItem = makeCourseRunOrProgram(PRODUCT_TYPE_COURSERUN, "b"),

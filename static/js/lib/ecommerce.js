@@ -7,10 +7,9 @@ import moment from "moment"
 import type {
   BasketItem,
   CouponSelection,
-  ProductDetail,
+  Product,
   ProductMap,
-  BulkCouponPayment,
-  SimpleProductDetail
+  BulkCouponPayment
 } from "../flow/ecommerceTypes"
 import {
   COUPON_TYPE_PROMO,
@@ -115,10 +114,10 @@ export const formatRunTitle = (run: ?CourseRun) =>
 
 export const isPromo = equals(COUPON_TYPE_PROMO)
 
-export const findProductById = <T: ProductDetail | SimpleProductDetail>(
-  products: Array<T>,
+export const findProductById = (
+  products: Array<Product>,
   id: number | string
-): ?T => {
+): ?Product => {
   if (isNaN(id)) {
     return products.find(product => product.latest_version.readable_id === id)
   } else {
@@ -126,9 +125,7 @@ export const findProductById = <T: ProductDetail | SimpleProductDetail>(
   }
 }
 
-export const findRunInProduct = (
-  product: ProductDetail
-): [?CourseRun, ?Course] => {
+export const findRunInProduct = (product: Product): [?CourseRun, ?Course] => {
   if (product.product_type !== PRODUCT_TYPE_COURSERUN) {
     // Calling functions are responsible for checking this
     throw new Error("Expected a run product")
