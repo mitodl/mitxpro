@@ -18,12 +18,12 @@ import { isPromo } from "../../lib/ecommerce"
 import { getProductSelectLabel } from "../../lib/util"
 import FormError from "../../components/forms/elements/FormError"
 
-import type { Company, ProductDetail } from "../../flow/ecommerceTypes"
+import type { Company, Product } from "../../flow/ecommerceTypes"
 
 type CouponFormProps = {
   onSubmit: Function,
   companies: Array<Company>,
-  products: Array<ProductDetail>
+  products: Array<Product>
 }
 
 const couponValidations = yup.object().shape({

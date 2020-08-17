@@ -27,6 +27,7 @@ defusedxml==0.6.0         # via python3-openid, social-auth-core, zeep
 dj-database-url==0.5.0    # via -r requirements.in
 django-anymail[mailgun]==6.1.0  # via -r requirements.in
 django-compat==1.0.15     # via django-hijack, django-hijack-admin
+django-filter==2.3.0      # via -r requirements.in
 django-hijack-admin==2.1.10  # via -r requirements.in
 django-hijack==2.1.10     # via -r requirements.in, django-hijack-admin
 django-ipware==3.0.0      # via -r requirements.in
@@ -41,11 +42,12 @@ django-templated-mail==1.1.1  # via djoser
 django-treebeard==4.3     # via wagtail
 django-user-agents==0.4.0  # via -r requirements.in
 django-webpack-loader==0.5.0  # via -r requirements.in
-django==2.2.10            # via -r requirements.in, django-anymail, django-oauth-toolkit, django-redis, django-storages, django-taggit, django-treebeard, django-user-agents, wagtail
+django==2.2.10            # via -r requirements.in, django-anymail, django-filter, django-oauth-toolkit, django-redis, django-storages, django-taggit, django-treebeard, django-user-agents, wagtail
 djangorestframework==3.9.4  # via -r requirements.in, wagtail
 djoser==1.7.0             # via -r requirements.in
 docutils==0.14            # via botocore
 draftjs-exporter==2.1.6   # via wagtail
+drf-flex-fields==0.8.5    # via -r requirements.in
 edx-api-client==0.9.0     # via -r requirements.in
 elasticsearch==7.0.2      # via django-server-status
 google-api-python-client==1.7.11  # via -r requirements.in, pygsheets

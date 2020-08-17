@@ -5,9 +5,10 @@ from collections import defaultdict
 from urllib.parse import urljoin
 
 from django.conf import settings
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import Http404
+from django_filters import rest_framework as filters
 from ipware import get_client_ip
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
@@ -23,7 +24,6 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from b2b_ecommerce.api import fulfill_b2b_order
 from b2b_ecommerce.models import B2BOrder
-from courses.constants import VALID_PRODUCT_TYPES
 from courses.models import CourseRun, ProgramRun
 from courses.serializers import BaseCourseRunSerializer, BaseProgramSerializer
 from ecommerce.api import (
@@ -37,6 +37,7 @@ from ecommerce.api import (
     complete_order,
     bulk_assign_product_coupons,
 )
+from ecommerce.filters import ProductFilter
 from ecommerce.exceptions import ParseException
 from ecommerce.mail_api import send_bulk_enroll_emails, send_ecommerce_order_receipt
 from ecommerce.models import (
@@ -54,13 +55,11 @@ from ecommerce.serializers import (
     BasketSerializer,
     CouponPaymentVersionDetailSerializer,
     CompanySerializer,
-    BaseProductSerializer,
-    ProductDetailSerializer,
+    ProductSerializer,
     PromoCouponSerializer,
     SingleUseCouponSerializer,
     CurrentCouponPaymentSerializer,
     OrderReceiptSerializer,
-    ProductChoiceSerializer,
     ProgramRunSerializer,
 )
 from ecommerce.utils import make_checkout_url
@@ -83,33 +82,16 @@ class ProductViewSet(ReadOnlyModelViewSet):
 
     authentication_classes = ()
     permission_classes = ()
-
-    def _get_request_properties(self):
-        """
-        Helper method to determine the desired objects and data format from the querystring params
-
-        Returns:
-            (bool, Optional[str]): Tuple with a flag that indicates if the nested ("full") serializer should be used,
-                paired with a product type if the products should be filtered by a product type
-        """
-        nested_param = self.request.query_params.get("nested")
-        if nested_param is None or nested_param.lower() == "true":
-            return True, None
-        product_type = self.request.query_params.get("type", None)
-        if product_type is not None and product_type not in VALID_PRODUCT_TYPES:
-            raise ValidationError(
-                "'type' parameter must be one of [{}], or omitted entirely.".format(
-                    VALID_PRODUCT_TYPES
-                )
-            )
-        return False, product_type
+    serializer_class = ProductSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = ProductFilter
 
     def get_queryset(self):
         now = now_in_utc()
         expired_courseruns = CourseRun.objects.filter(
             enrollment_end__lt=now
         ).values_list("id", flat=True)
-        queryset = (
+        return (
             Product.objects.exclude(
                 Q(productversions=None)
                 | (
@@ -119,38 +101,11 @@ class ProductViewSet(ReadOnlyModelViewSet):
             )
             .select_related("content_type")
             .prefetch_related("content_object")
+            .prefetch_generic_related(
+                "content_type", {CourseRun: ["content_object__course"]}
+            )
             .with_ordered_versions()
         )
-        nested, product_type = self._get_request_properties()
-        if nested or product_type is None:
-            return queryset
-        return queryset.filter(content_type__model=product_type)
-
-    def get_serializer_class(self):
-        nested, _ = self._get_request_properties()
-        return ProductDetailSerializer if nested else ProductChoiceSerializer
-
-    def get_serializer_context(self):
-        """
-        return the serializer context.
-        """
-        return {"has_ordered_versions": True}
-
-    def list(self, request, *args, **kwargs):
-        """
-        Sort the default response if indicated in query string
-        """
-        response = super().list(request, *args, **kwargs)
-        nested, _ = self._get_request_properties()
-        sort = request.GET.get("sort")
-
-        if status.is_success(response.status_code) and sort == "title":
-            response.data.sort(
-                key=lambda item: item["parent"]["title"].lower()
-                if (not nested) and item["parent"]
-                else item["title"].lower()
-            )
-        return response
 
 
 class ProgramRunsViewSet(ReadOnlyModelViewSet):
@@ -355,9 +310,7 @@ class BulkEnrollCouponListView(APIView):
                             )
                         },
                     ).data,
-                    "products": BaseProductSerializer(
-                        products, context={"has_ordered_versions": True}, many=True
-                    ).data,
+                    "products": ProductSerializer(products, many=True).data,
                 }
             )
         serialized["product_map"] = defaultdict(dict)

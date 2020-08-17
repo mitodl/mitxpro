@@ -7,7 +7,6 @@ import operator as op
 
 import pytz
 from django.urls import reverse
-import factory
 import faker
 import pytest
 import rest_framework.status as status  # pylint: disable=useless-import-alias
@@ -52,14 +51,12 @@ from ecommerce.models import (
 )
 from ecommerce.serializers import (
     BasketSerializer,
-    ProductDetailSerializer,
     CompanySerializer,
     CouponSelectionSerializer,
     CurrentCouponPaymentSerializer,
     DataConsentUserSerializer,
-    BaseProductSerializer,
-    ProductChoiceSerializer,
     ProgramRunSerializer,
+    ProductSerializer,
 )
 from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.test_utils import (
@@ -1226,43 +1223,8 @@ def test_products_viewset_list(user_drf_client, coupon_product_ids):
     for product in products:
         assert_drf_json_equal(
             product,
-            ProductDetailSerializer(
-                instance=Product.objects.get(id=product.get("id"))
-            ).data,
+            ProductSerializer(instance=Product.objects.get(id=product.get("id"))).data,
         )
-
-
-@pytest.mark.parametrize("nested", [False, True])
-def test_products_viewset_list_sort(user_drf_client, nested):
-    """Test that the sorting works as expected"""
-    product_versions = ProductVersionFactory.create_batch(
-        4,
-        product__content_object__title=factory.Iterator(["C", "E", "D", "B"]),
-        product__content_object__course__title=factory.Iterator(["B", "A", "C", "D"]),
-    )
-    product_versions_sorted_flat = [
-        product_versions[1].product,
-        product_versions[0].product,
-        product_versions[2].product,
-        product_versions[3].product,
-    ]
-    product_versions_sorted_nested = [
-        product_versions[3].product,
-        product_versions[0].product,
-        product_versions[2].product,
-        product_versions[1].product,
-    ]
-    response_sorted = user_drf_client.get(
-        "{}?sort=title&nested={}".format(reverse("products_api-list"), nested)
-    )
-    assert response_sorted.status_code == status.HTTP_200_OK
-    resp_products = response_sorted.json()
-    expected_products = (
-        product_versions_sorted_nested if nested else product_versions_sorted_flat
-    )
-    assert [product.get("id") for product in resp_products] == [
-        product.id for product in expected_products
-    ]
 
 
 def test_products_viewset_list_missing_unchecked_bulk_visibility(user_drf_client):
@@ -1292,9 +1254,7 @@ def test_products_viewset_detail(user_drf_client, coupon_product_ids):
     assert response.status_code == status.HTTP_200_OK
     assert_drf_json_equal(
         response.json(),
-        ProductDetailSerializer(
-            instance=Product.objects.get(id=coupon_product_ids[0])
-        ).data,
+        ProductSerializer(instance=Product.objects.get(id=coupon_product_ids[0])).data,
     )
 
 
@@ -1303,14 +1263,14 @@ def test_products_viewset_performance(
     user_drf_client, coupon_product_ids, django_assert_num_queries
 ):
     """ Test that the ProductViewSet returns the expected number of queries hit. """
-    with django_assert_num_queries(27):
+    with django_assert_num_queries(11):
         response = user_drf_client.get(
             reverse("products_api-detail", kwargs={"pk": coupon_product_ids[0]})
         )
         assert response.status_code == status.HTTP_200_OK
         assert_drf_json_equal(
             response.json(),
-            ProductDetailSerializer(
+            ProductSerializer(
                 instance=Product.objects.get(id=coupon_product_ids[0])
             ).data,
         )
@@ -1333,9 +1293,7 @@ def test_products_viewset_nested_param(user_drf_client, coupon_product_ids):
     for product in products:
         assert_drf_json_equal(
             product,
-            ProductChoiceSerializer(
-                instance=Product.objects.get(id=product.get("id"))
-            ).data,
+            ProductSerializer(instance=Product.objects.get(id=product.get("id"))).data,
         )
 
 
@@ -1425,7 +1383,7 @@ def test_bulk_enroll_list_view(mocker, admin_drf_client):
     assert len(response_data["coupon_payments"]) == len(payment_ids)
     assert response_data["coupon_payments"][0] == {
         **CurrentCouponPaymentSerializer(payment_versions[0].payment).data,
-        "products": [BaseProductSerializer(products[0]).data],
+        "products": [ProductSerializer(products[0]).data],
     }
     # This test is flaky in CI for unknown reasons. The "products" lists end up being out of order by id despite
     # using a query that is ordered by id. These assertions are a hack to get around it.
@@ -1437,9 +1395,7 @@ def test_bulk_enroll_list_view(mocker, admin_drf_client):
     )
     assert sorted(
         second_serialized_payment["products"], key=op.itemgetter("id")
-    ) == sorted(
-        BaseProductSerializer(products, many=True).data, key=op.itemgetter("id")
-    )
+    ) == sorted(ProductSerializer(products, many=True).data, key=op.itemgetter("id"))
     assert sorted(response_data["product_map"].keys()) == ["courserun", "program"]
     assert response_data["product_map"]["courserun"] == {
         str(products[0].id): patched_course_run_serializer.return_value.data

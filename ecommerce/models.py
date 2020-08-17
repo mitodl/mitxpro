@@ -8,12 +8,18 @@ from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.templatetags.static import static
+from django.utils.functional import cached_property
 
 from courses.constants import DEFAULT_COURSE_IMG_PATH
 from ecommerce.constants import REFERENCE_NUMBER_PREFIX, ORDERED_VERSIONS_QSET_ATTR
 from ecommerce.utils import get_order_id_by_reference_number
-from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
-from mitxpro.utils import serialize_model_object
+from mitxpro.models import (
+    AuditableModel,
+    AuditModel,
+    TimestampedModel,
+    PrefetchGenericQuerySet,
+)
+from mitxpro.utils import serialize_model_object, first_or_none
 from users.models import User
 from mail.constants import MAILGUN_EVENT_CHOICES
 
@@ -32,7 +38,7 @@ class Company(TimestampedModel):
         return f"Company {self.name}"
 
 
-class ProductQueryset(models.QuerySet):  # pylint: disable=missing-docstring
+class ProductQuerySet(PrefetchGenericQuerySet):  # pylint: disable=missing-docstring
     def active(self):
         """Filters for active products only"""
         return self.filter(is_active=True)
@@ -48,14 +54,13 @@ class ProductQueryset(models.QuerySet):  # pylint: disable=missing-docstring
         )
 
 
-class ProductManager(models.Manager):  # pylint: disable=missing-docstring
+class _ProductManager(models.Manager):  # pylint: disable=missing-docstring
     def get_queryset(self):
         """Use the custom queryset, and filter by active products by default"""
-        return ProductQueryset(self.model, using=self._db).active()
+        return ProductQuerySet(self.model, using=self._db).active()
 
-    def with_ordered_versions(self):
-        """Prefetches related ProductVersions in reverse creation order"""
-        return self.get_queryset().with_ordered_versions()
+
+ProductManager = _ProductManager.from_queryset(ProductQuerySet)
 
 
 class Product(TimestampedModel):
@@ -90,10 +95,15 @@ class Product(TimestampedModel):
     class Meta:
         unique_together = ("content_type", "object_id")
 
-    @property
+    @cached_property
+    def ordered_versions(self):
+        """Return the list of product versions ordered by creation date descending"""
+        return self.productversions.order_by("-created_on")
+
+    @cached_property
     def latest_version(self):
         """Gets the most recently created ProductVersion associated with this Product"""
-        return self.productversions.order_by("-created_on").first()
+        return first_or_none(self.ordered_versions)
 
     @property
     def run_queryset(self):

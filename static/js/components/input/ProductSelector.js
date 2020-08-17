@@ -10,7 +10,9 @@ import { formatCoursewareDate } from "../../lib/ecommerce"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 
 import type {
-  SimpleProductDetail,
+  CourseRunProduct,
+  ProgramProduct,
+  Product,
   ProgramRunDetail
 } from "../../flow/ecommerceTypes"
 import type { Course } from "../../flow/courseTypes"
@@ -36,8 +38,8 @@ type Props = {
     errors: Object,
     values: Object
   },
-  products: Array<SimpleProductDetail>,
-  selectedProduct: ?SimpleProductDetail,
+  products: Array<Product>,
+  selectedProduct: ?Product,
   programRunsLoading: boolean,
   programRuns: Array<ProgramRunDetail>,
   fetchProgramRuns: Function
@@ -54,21 +56,21 @@ type State = {
   initialized: boolean
 }
 
-const buildProgramOption = (product: SimpleProductDetail): SelectOption => ({
+const buildProgramOption = (product: ProgramProduct): SelectOption => ({
   value: product.id,
   label: product.latest_version.content_title
 })
 
-const buildCourseOption = (product: SimpleProductDetail): SelectOption => ({
-  value: product.parent.id || "",
-  label: product.parent.title || ""
+const buildCourseOption = (product: CourseRunProduct): SelectOption => ({
+  value: product.content_object.course.id || "",
+  label: product.content_object.course.title || ""
 })
 
-const buildCourseDateOption = (product: SimpleProductDetail): SelectOption => ({
+const buildCourseDateOption = (product: CourseRunProduct): SelectOption => ({
   value: product.id,
-  label: `${formatCoursewareDate(product.start_date)} - ${formatCoursewareDate(
-    product.end_date
-  )}`
+  label: `${formatCoursewareDate(
+    product.content_object.start_date
+  )} - ${formatCoursewareDate(product.content_object.end_date)}`
 })
 
 const buildProgramDateOption = (run: ProgramRunDetail): SelectOption => ({
@@ -79,8 +81,24 @@ const buildProgramDateOption = (run: ProgramRunDetail): SelectOption => ({
 })
 
 export const productDateSortCompare = (
-  firstProduct: SimpleProductDetail | ProgramRunDetail,
-  secondProduct: SimpleProductDetail | ProgramRunDetail
+  firstProduct: CourseRunProduct,
+  secondProduct: CourseRunProduct
+) => {
+  if (!firstProduct.content_object.start_date) {
+    return 1
+  }
+  if (!secondProduct.content_object.start_date) {
+    return -1
+  }
+  return firstProduct.content_object.start_date <
+    secondProduct.content_object.start_date
+    ? -1
+    : 1
+}
+
+export const programRunDateSortCompare = (
+  firstProduct: ProgramRunDetail,
+  secondProduct: ProgramRunDetail
 ) => {
   if (!firstProduct.start_date) {
     return 1
@@ -90,6 +108,17 @@ export const productDateSortCompare = (
   }
   return firstProduct.start_date < secondProduct.start_date ? -1 : 1
 }
+
+const buildCourseDateOptions = R.compose(
+  R.map(buildCourseDateOption),
+  R.sort(productDateSortCompare)
+)
+const buildProgramOptions = R.map(buildProgramOption)
+
+const buildProgramDateOptions = R.compose(
+  R.map(buildProgramDateOption),
+  R.sort(programRunDateSortCompare)
+)
 
 export class ProductSelector extends React.Component<Props, State> {
   state = {
@@ -113,7 +142,7 @@ export class ProductSelector extends React.Component<Props, State> {
       product => product.product_type === productType
     )
     if (productType === PRODUCT_TYPE_PROGRAM) {
-      return filteredProducts.map(buildProgramOption)
+      return buildProgramOptions(filteredProducts)
     }
 
     return R.compose(
@@ -135,19 +164,16 @@ export class ProductSelector extends React.Component<Props, State> {
     }
 
     if (productType === PRODUCT_TYPE_PROGRAM) {
-      return programRuns
-        .sort(productDateSortCompare)
-        .map(buildProgramDateOption)
+      return buildProgramDateOptions(programRuns)
     } else {
-      return products
-        .filter(
+      return buildCourseDateOptions(
+        products.filter(
           product =>
             product.product_type === PRODUCT_TYPE_COURSERUN &&
             // $FlowFixMe: flow doesn't seem to understand selectedCoursewareObj will be valid here
-            product.parent.id === selectedCoursewareObj.value
+            product.content_object.course.id === selectedCoursewareObj.value
         )
-        .sort(productDateSortCompare)
-        .map(buildCourseDateOption)
+      )
     }
   }
 
@@ -254,19 +280,23 @@ export class ProductSelector extends React.Component<Props, State> {
     if (!props.selectedProduct || state.initialized) {
       return null
     }
-    const productType = props.selectedProduct.product_type
+    const selectedProduct: Product = props.selectedProduct
     let selectedCoursewareObj, selectedCourseDate
-    if (productType === PRODUCT_TYPE_PROGRAM) {
-      selectedCoursewareObj = buildProgramOption(props.selectedProduct)
+    if (selectedProduct.product_type === PRODUCT_TYPE_PROGRAM) {
+      // $FlowFixMe: thinks this is a courserun
+      selectedCoursewareObj = buildProgramOption(selectedProduct)
       props.fetchProgramRuns(selectedCoursewareObj.value)
-    } else {
-      selectedCoursewareObj = buildCourseOption(props.selectedProduct)
+    } else if (selectedProduct.product_type === PRODUCT_TYPE_COURSERUN) {
+      // $FlowFixMe: thinks this is a program
+      selectedCoursewareObj = buildCourseOption(selectedProduct)
       // $FlowFixMe: selectedProduct can't be null/undefined
-      selectedCourseDate = buildCourseDateOption(props.selectedProduct)
+      selectedCourseDate = buildCourseDateOption(selectedProduct)
+    } else {
+      throw Error(`Unknown product type: ${selectedProduct.product_type}`)
     }
 
     return {
-      productType,
+      productType: selectedProduct.product_type,
       selectedCoursewareObj,
       selectedCourseDate,
       initialized: true

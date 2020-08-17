@@ -91,3 +91,9 @@ def valid_address_dict():
         country="US",
         postal_code="02139",
     )
+
+
+@pytest.fixture()
+def nplusone_fail(settings):
+    """Configures the nplusone app to raise errors"""
+    settings.NPLUSONE_RAISE = True

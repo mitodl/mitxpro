@@ -8,7 +8,8 @@ import CreateCouponPage, {
 import {
   makeCompany,
   makeCouponPaymentVersion,
-  makeProduct
+  makeCourseRunProduct,
+  makeProgramProduct
 } from "../../../factories/ecommerce"
 import { COUPON_TYPE_PROMO, COUPON_TYPE_SINGLE_USE } from "../../../constants"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
@@ -23,11 +24,7 @@ describe("CreateCouponPage", () => {
 
   beforeEach(() => {
     helper = new IntegrationTestHelper()
-    products = [
-      makeProduct("courserun"),
-      makeProduct("course"),
-      makeProduct("program")
-    ]
+    products = [makeCourseRunProduct(), makeProgramProduct()]
     companies = [makeCompany(), makeCompany()]
     setSubmittingStub = helper.sandbox.stub()
     setErrorsStub = helper.sandbox.stub()

@@ -41,7 +41,8 @@ class ActiveCertificates(models.Manager):
 
     def get_queryset(self):
         """
-        :return: un-revoked certificates
+        Returns:
+            QuerySet: queryset for un-revoked certificates
         """
         return super().get_queryset().filter(is_revoked=False)
 
@@ -56,34 +57,10 @@ class ProgramQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
         return self.filter(readable_id=text_id)
 
 
-class ProgramManager(models.Manager):  # pylint: disable=missing-docstring
-    def get_queryset(self):
-        """Manager queryset"""
-        return ProgramQuerySet(self.model, using=self._db)
-
-    def live(self):
-        """Returns a queryset of Programs with live=True"""
-        return self.get_queryset().live()
-
-    def with_text_id(self, text_id):
-        """Returns a queryset filtered by text id (i.e.: readable_id)"""
-        return self.get_queryset().with_text_id(text_id)
-
-
 class CourseQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
     def live(self):
         """Applies a filter for Courses with live=True"""
         return self.filter(live=True)
-
-
-class CourseManager(models.Manager):  # pylint: disable=missing-docstring
-    def get_queryset(self):
-        """Manager queryset"""
-        return CourseQuerySet(self.model, using=self._db)
-
-    def live(self):
-        """Returns a queryset of Courses with live=True"""
-        return self.get_queryset().live()
 
 
 class CourseRunQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
@@ -100,24 +77,6 @@ class CourseRunQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
     def with_text_id(self, text_id):
         """Applies a filter for the CourseRun's courseware_id"""
         return self.filter(courseware_id=text_id)
-
-
-class CourseRunManager(models.Manager):  # pylint: disable=missing-docstring
-    def get_queryset(self):
-        """Manager queryset"""
-        return CourseRunQuerySet(self.model, using=self._db)
-
-    def live(self):
-        """Returns a queryset of Course runs with live=True"""
-        return self.get_queryset().live()
-
-    def available(self):
-        """Returns a querset of Couse runs with end_date in future"""
-        return self.get_queryset().available()
-
-    def with_text_id(self, text_id):
-        """Returns a queryset filtered by text id (i.e.: courseware_id)"""
-        return self.get_queryset().with_text_id(text_id)
 
 
 class ActiveEnrollmentManager(models.Manager):
@@ -175,7 +134,7 @@ validate_url_path_field = RegexValidator(
 class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     """Model for a course program"""
 
-    objects = ProgramManager()
+    objects = ProgramQuerySet.as_manager()
     title = models.CharField(max_length=255)
     readable_id = models.CharField(
         max_length=255, unique=True, validators=[validate_url_path_field]
@@ -298,7 +257,7 @@ class CourseTopic(TimestampedModel):
 class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     """Model for a course"""
 
-    objects = CourseManager()
+    objects = CourseQuerySet.as_manager()
     program = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=True, blank=True, related_name="courses"
     )
@@ -440,7 +399,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 class CourseRun(TimestampedModel):
     """Model for a single run/instance of a course"""
 
-    objects = CourseRunManager()
+    objects = CourseRunQuerySet.as_manager()
     course = models.ForeignKey(
         Course, on_delete=models.CASCADE, related_name="courseruns"
     )

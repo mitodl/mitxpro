@@ -159,6 +159,7 @@ INSTALLED_APPS = (
     "oauth2_provider",
     "rest_framework",
     "anymail",
+    "django_filters",
     # WAGTAIL
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
