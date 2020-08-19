@@ -139,9 +139,14 @@ def test_serialize_order_with_coupon():
 
 
 @pytest.mark.parametrize("status", [Order.FULFILLED, Order.CREATED])
-def test_serialize_b2b_order(status):
+@pytest.mark.parametrize("existing_user", [True, False])
+def test_serialize_b2b_order(status, existing_user, user):
     """Test that B2BOrderToDealSerializer produces the correct serialized data"""
     order = B2BOrderFactory.create(status=status, num_seats=10)
+    purchaser_id = order.email
+    if existing_user:
+        order.email = user.email
+        purchaser_id = user.id
     serialized_data = B2BOrderToDealSerializer(instance=order).data
     assert serialized_data == {
         "id": order.id,
@@ -161,7 +166,7 @@ def test_serialize_b2b_order(status):
         "discount_percent": None,
         "num_seats": 10,
         "status": order.status,
-        "purchaser": format_hubspot_id(order.email),
+        "purchaser": format_hubspot_id(purchaser_id),
     }
 
 
