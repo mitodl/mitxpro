@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.58.0
+Version 0.58.0 (Released August 19, 2020)
 --------------
 
 - Add the Accessability link in footer
