@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.58.1
+--------------
+
+- sync with existing user if exists (#1864)
+
 Version 0.58.0 (Released August 19, 2020)
 --------------
 
