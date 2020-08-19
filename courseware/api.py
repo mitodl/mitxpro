@@ -553,6 +553,7 @@ def retry_failed_edx_enrollments():
     failed_run_enrollments = CourseRunEnrollment.objects.select_related(
         "user", "run"
     ).filter(
+        user__is_active=True,
         edx_enrolled=False,
         created_on__lt=now - timedelta(minutes=COURSEWARE_REPAIR_GRACE_PERIOD_MINS),
     )
