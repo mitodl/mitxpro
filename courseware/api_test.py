@@ -390,8 +390,9 @@ def test_retry_failed_edx_enrollments(mocker, exception_raised):
     """
     with freeze_time(now_in_utc() - timedelta(days=1)):
         failed_enrollments = CourseRunEnrollmentFactory.create_batch(
-            3, edx_enrolled=False
+            3, edx_enrolled=False, user__is_active=True
         )
+        CourseRunEnrollmentFactory.create(edx_enrolled=False, user__is_active=False)
     patched_enroll_in_edx = mocker.patch(
         "courseware.api.enroll_in_edx_course_runs",
         side_effect=[None, exception_raised or None, None],
@@ -422,9 +423,11 @@ def test_retry_failed_enroll_grace_period(mocker):
     """
     now = now_in_utc()
     with freeze_time(now - timedelta(minutes=COURSEWARE_REPAIR_GRACE_PERIOD_MINS - 1)):
-        CourseRunEnrollmentFactory.create(edx_enrolled=False)
+        CourseRunEnrollmentFactory.create(edx_enrolled=False, user__is_active=True)
     with freeze_time(now - timedelta(minutes=COURSEWARE_REPAIR_GRACE_PERIOD_MINS + 1)):
-        older_enrollment = CourseRunEnrollmentFactory.create(edx_enrolled=False)
+        older_enrollment = CourseRunEnrollmentFactory.create(
+            edx_enrolled=False, user__is_active=True
+        )
     patched_enroll_in_edx = mocker.patch("courseware.api.enroll_in_edx_course_runs")
     successful_enrollments = retry_failed_edx_enrollments()
 
