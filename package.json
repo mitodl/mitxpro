@@ -59,7 +59,7 @@
     "isomorphic-fetch": "^2.2.1",
     "jquery": "^3.5.0",
     "jsdom": "^16.2.2",
-    "lodash": "^4.17.14",
+    "lodash": "^4.17.19",
     "mini-css-extract-plugin": "^0.5.0",
     "minimist": "^1.2.3",
     "mocha": "^4.0.1",
