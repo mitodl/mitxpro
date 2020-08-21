@@ -140,6 +140,12 @@ def test_creates_order(basket_client, mocker, basket_and_coupons):
     create_order_mock = mocker.patch(
         "ecommerce.views.create_unfulfilled_order", autospec=True, return_value=order
     )
+
+    fake_ip = "195.0.0.1"
+    mock_ip_call = mocker.patch(
+        "ecommerce.views.get_client_ip", return_value=(fake_ip, True)
+    )
+
     generate_payload_mock = mocker.patch(
         "ecommerce.views.generate_cybersource_sa_payload",
         autospec=True,
@@ -154,6 +160,7 @@ def test_creates_order(basket_client, mocker, basket_and_coupons):
         "method": "POST",
     }
 
+    assert mock_ip_call.call_count == 1
     text_id = line.product_version.product.content_object.text_id
     assert create_order_mock.call_count == 1
     create_order_arg = create_order_mock.call_args[0][0]
@@ -166,6 +173,7 @@ def test_creates_order(basket_client, mocker, basket_and_coupons):
             base_url="http://testserver", readable_id=text_id
         ),
         "cancel_url": "http://testserver/checkout/",
+        "ip_address": fake_ip,
     }
 
 

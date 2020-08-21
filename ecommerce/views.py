@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
 from django.http import Http404
+from ipware import get_client_ip
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.generics import (
@@ -194,6 +195,7 @@ class CheckoutView(APIView):
         base_url = request.build_absolute_uri("/")
         text_id = validated_basket.product_version.product.content_object.text_id
         receipt_url = make_receipt_url(base_url=base_url, readable_id=text_id)
+        user_ip, _ = get_client_ip(request)
 
         if order.total_price_paid == 0:
             # If price is $0, don't bother going to CyberSource, just mark as fulfilled
@@ -226,7 +228,10 @@ class CheckoutView(APIView):
             # This generates a signed payload which is submitted as an HTML form to CyberSource
             cancel_url = urljoin(base_url, "checkout/")
             payload = generate_cybersource_sa_payload(
-                order=order, receipt_url=receipt_url, cancel_url=cancel_url
+                order=order,
+                receipt_url=receipt_url,
+                cancel_url=cancel_url,
+                ip_address=user_ip,
             )
             url = settings.CYBERSOURCE_SECURE_ACCEPTANCE_URL
             method = "POST"
