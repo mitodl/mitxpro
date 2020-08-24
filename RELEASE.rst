@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.59.0
+--------------
+
+- Links in site notification with same color
+- Send IP address to cybersource
+- Only retry enrollments for active users
+- Bump wagtail from 2.7.1 to 2.7.4
+
 Version 0.58.2 (Released August 24, 2020)
 --------------
 
