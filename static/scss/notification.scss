@@ -49,6 +49,13 @@
     background: $primary;
     text-align: center;
     color: white;
+
+    a {
+      color: white;
+      text-decoration: underline;
+      background-color: transparent;
+    }
+
   }
 
   .close-notification {
