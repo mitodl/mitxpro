@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.59.0
+Version 0.59.0 (Released August 24, 2020)
 --------------
 
 - Links in site notification with same color
