@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.58.2 (Released August 24, 2020)
+--------------
+
+- Bump lodash from 4.17.15 to 4.17.19
+
 Version 0.58.1 (Released August 19, 2020)
 --------------
 
