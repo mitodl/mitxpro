@@ -222,10 +222,20 @@ export class ProductSelector extends React.Component<Props, State> {
         programRunId: selectedCourseDate ? selectedCourseDate.value : null
       }
     } else {
-      // $FlowFixMe: Can't be null/undefined
-      productValue = { productId: selectedCourseDate.value, programRunId: null }
+      productValue = {
+        // $FlowFixMe: Can't be null/undefined
+        productId:    selectedCourseDate.value,
+        programRunId: null
+      }
     }
     onChange({ target: { name, value: productValue } })
+
+    // $FlowFixMe
+    const { applyCoupon, setFieldError, setFieldTouched, values } = this.props
+    if (values) {
+      values.product = productValue
+      applyCoupon(values, setFieldError, setFieldTouched, null)
+    }
   }
 
   shouldShowDateSelector = (): boolean => {

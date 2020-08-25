@@ -135,7 +135,7 @@ class B2BPurchaseForm extends React.Component<Props> {
           product &&
           couponStatus.product_id !== product.id
         ) {
-          values.coupon = ""
+          values.coupon = this.props.discountCode || ""
           clearCouponStatus()
         }
       }
@@ -157,6 +157,10 @@ class B2BPurchaseForm extends React.Component<Props> {
                 component={ProductSelector}
                 products={products}
                 selectedProduct={product}
+                values={values}
+                applyCoupon={this.applyCoupon}
+                setFieldError={setFieldError}
+                setFieldTouched={setFieldTouched}
                 name="product"
               />
               <ErrorMessage name="product" render={errorMessageRenderer} />
