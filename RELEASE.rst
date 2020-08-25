@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.59.1
+--------------
+
+- Upgrade jquery to 3.5.1 - #1863
+- apply coupon automatically on switching product from the select field
+- certificate layout: line up signatures and their underlines
+
 Version 0.59.0 (Released August 24, 2020)
 --------------
 
