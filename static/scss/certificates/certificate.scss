@@ -167,9 +167,15 @@ $text-gray-light: #d2d0d1;
 
         .signature-area {
           border-bottom: 2px solid $text-gray-light;
-          padding: 0 0 15px;
+          padding: 0 0 5px;
           text-align: center;
           margin: 0 0 15px;
+          min-height: 70px;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          flex-wrap: wrap;
+          flex-direction: column;
 
           img {
             display: inline-block;
