@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.59.1
+Version 0.59.1 (Released August 25, 2020)
 --------------
 
 - Upgrade jquery to 3.5.1 - #1863
