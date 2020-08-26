@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.59.2
+--------------
+
+- Simplified product API
+
 Version 0.59.1 (Released August 25, 2020)
 --------------
 
