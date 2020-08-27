@@ -177,20 +177,26 @@ class B2BEnrollmentCodesView(APIView):
 
         rows = (
             {
-                "code": code,
                 "url": make_checkout_url(
                     code=code,
                     product_id=order.product_version.text_id,
                     run_tag=order.program_run.run_tag if order.program_run else None,
-                ),
+                )
             }
             for code in Coupon.objects.filter(
                 versions__payment_version__b2border=order
             ).values_list("coupon_code", flat=True)
         )
 
+        instructions = [
+            "Distribute the links below to each of your learners. Additional instructions are available at:",
+            '=HYPERLINK("https://xpro.zendesk.com/hc/en-us/articles/360048166292-How-to-I-distribute-my-enrollment-codes-that-I-purchased-in-a-bulk-order-")',
+        ]
+
         return make_csv_http_response(
-            csv_rows=rows, filename=f"enrollmentcodes-{order_hash}.csv"
+            csv_rows=rows,
+            filename=f"enrollmentcodes-{order_hash}.csv",
+            instructions=instructions,
         )
 
 
