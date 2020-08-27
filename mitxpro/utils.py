@@ -456,19 +456,25 @@ def format_price(amount):
     return f"${amount:0,.2f}"
 
 
-def make_csv_http_response(*, csv_rows, filename):
+def make_csv_http_response(*, csv_rows, filename, instructions=None):
     """
-    Create a HttpResponse for a CSV file.
+    Create a HttpResponse for a CSV file with instructions at the start of the file.
 
     Args:
         csv_rows (iterable of dict): An iterable of dict, to be written to the CSV file
         filename (str): The filename to suggest for download
+        instructions (iterable of str): An iterable of str instructions to be written to the CSV file, one per row
 
     Returns:
         django.http.response.HttpResponse: A HTTP response
     """
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+    if instructions:
+        writer = csv.writer(response)
+        for instruction in instructions:
+            writer.writerow([instruction])
 
     csv_rows = iter(csv_rows)
     try:

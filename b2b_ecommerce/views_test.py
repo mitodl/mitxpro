@@ -302,15 +302,16 @@ def test_enrollment_codes(client):
         resp.get("Content-Disposition")
         == f'attachment; filename="enrollmentcodes-{order.unique_id}.csv"'
     )
-    rows = [line.split(",") for line in resp.content.decode().split()]
-    assert rows[0] == ["code", "url"]
-    assert sorted(rows[1:]) == sorted(
+    rows = [line.split(",") for line in resp.content.decode().split("\r\n")]
+    assert rows[0] == [
+        "Distribute the links below to each of your learners. Additional instructions are available at:"
+    ]
+    assert sorted(rows[3 : len(rows) - 1]) == sorted(
         [
             [
-                coupon.coupon_code,
                 make_checkout_url(
                     code=coupon.coupon_code, product_id=order.product_version.text_id
-                ),
+                )
             ]
             for coupon in coupons
         ]
@@ -332,16 +333,15 @@ def test_program_run_enrollment_codes(client):
     )
 
     resp = client.get(reverse("b2b-enrollment-codes", kwargs={"hash": order.unique_id}))
-    rows = [line.split(",") for line in resp.content.decode().split()]
-    assert sorted(rows[1:]) == sorted(
+    rows = [line.split(",") for line in resp.content.decode().split("\r\n")]
+    assert sorted(rows[3 : len(rows) - 1]) == sorted(
         [
             [
-                coupon.coupon_code,
                 make_checkout_url(
                     code=coupon.coupon_code,
                     product_id=order.product_version.text_id,
                     run_tag=program_run.run_tag,
-                ),
+                )
             ]
             for coupon in coupons
         ]
