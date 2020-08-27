@@ -6,6 +6,15 @@
 
 {% block seohead %}
     {% meta_tags page %}
+    <meta property="og:image" content="{% image page.thumbnail_image fill-821x400 as thumbnail_image %}{{ page.get_site.root_url }}{{thumbnail_image.url}}" />
+    <meta property="og:description" content="{{page.search_description}}">
+    <meta property="product:brand" content="xPro">
+    <meta property="product:availability" content="in stock">
+    <meta property="product:condition" content="new">
+    <meta property="product:price:amount" content="{{ page.product.current_price }}">
+    <meta property="product:price:currency" content="USD">
+    <meta property="product:retailer_item_id" content="{{ page.product.readable_id }}">
+    <meta property="product:category" content="317">
 {% endblock%}
 
 {% block headercontent %}
