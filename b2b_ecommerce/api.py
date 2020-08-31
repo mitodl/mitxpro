@@ -26,10 +26,20 @@ def complete_b2b_order(order):
     Args:
         order (B2BOrder): A fulfilled order for enrollment codes
     """
+
+    if order.coupon and order.contract_number:
+        name = f"{order.contract_number} {order.coupon.coupon_code}"
+    elif order.contract_number:
+        name = order.contract_number
+    elif order.coupon:
+        name = order.coupon.coupon_code
+    else:
+        name = f"CouponPayment for order #{order.id}"
+
     with transaction.atomic():
         product_id = order.product_version.product.id
         payment_version = create_coupons(
-            name=f"CouponPayment for order #{order.id}",
+            name=name,
             product_ids=[product_id],
             amount=Decimal("1"),
             num_coupon_codes=order.num_seats,
