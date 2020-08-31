@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.60.0
+--------------
+
+- B2B/Bulk: Add Instructions to downloadable enrollment sheet and remove enrollment code column
+- remove underline from notification cross button
+
 Version 0.59.2 (Released August 27, 2020)
 --------------
 
