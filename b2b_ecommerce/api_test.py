@@ -9,7 +9,7 @@ from b2b_ecommerce.api import (
     generate_b2b_cybersource_sa_payload,
     fulfill_b2b_order,
 )
-from b2b_ecommerce.factories import B2BOrderFactory
+from b2b_ecommerce.factories import B2BOrderFactory, B2BCouponFactory
 from b2b_ecommerce.models import B2BOrder, B2BOrderAudit
 from ecommerce.api import ISO_8601_FORMAT, generate_cybersource_sa_signature
 from ecommerce.exceptions import EcommerceException
@@ -104,21 +104,45 @@ def test_signed_payload(mocker, contract_number):
     now_mock.assert_called_once_with()
 
 
-def test_complete_b2b_order(mocker):
+@pytest.mark.parametrize(
+    "contract_number, b2b_coupon_code",
+    [
+        ("contract_number", "code"),
+        ("contract_number", None),
+        (None, "code"),
+        (None, None),
+    ],
+)
+def test_complete_b2b_order(mocker, contract_number, b2b_coupon_code):
     """
     complete_b2b_order should create the coupons and also send an email for the receipt
     """
-    order = B2BOrderFactory.create()
+
+    if b2b_coupon_code:
+        b2b_coupon = B2BCouponFactory.create(coupon_code=b2b_coupon_code)
+    else:
+        b2b_coupon = None
+    order = B2BOrderFactory.create(contract_number=contract_number, coupon=b2b_coupon)
     payment_version = CouponPaymentVersionFactory.create()
     send_email_mock = mocker.patch("b2b_ecommerce.api.send_b2b_receipt_email")
     create_coupons = mocker.patch(
         "b2b_ecommerce.api.create_coupons", return_value=payment_version
     )
+
+    if b2b_coupon and contract_number:
+        expected_name = f"{contract_number} {b2b_coupon.coupon_code}"
+    elif contract_number:
+        expected_name = contract_number
+    elif b2b_coupon:
+        expected_name = b2b_coupon.coupon_code
+    else:
+        expected_name = f"CouponPayment for order #{order.id}"
+
     complete_b2b_order(order)
     order.refresh_from_db()
     assert order.coupon_payment_version == payment_version
     create_coupons.assert_called_once_with(
-        name=f"CouponPayment for order #{order.id}",
+        name=expected_name,
         product_ids=[order.product_version.product.id],
         amount=Decimal("1"),
         num_coupon_codes=order.num_seats,
