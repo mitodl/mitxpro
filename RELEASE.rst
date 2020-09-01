@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.60.0
+Version 0.60.0 (Released September 01, 2020)
 --------------
 
 - B2B/Bulk: Add Instructions to downloadable enrollment sheet and remove enrollment code column
