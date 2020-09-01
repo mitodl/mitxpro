@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.60.1
+--------------
+
+- Product page microdata
+
 Version 0.60.0 (Released September 01, 2020)
 --------------
 
