@@ -48,7 +48,7 @@ export class EmailConfirmPage extends React.Component<Props> {
           type:  ALERT_TYPE_TEXT,
           props: {
             text:
-              "Success! We've verified your email. You email has been updated."
+              "Success! We've verified your email. Your email has been updated."
           }
         }
       })

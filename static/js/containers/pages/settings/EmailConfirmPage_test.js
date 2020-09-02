@@ -45,7 +45,7 @@ describe("EmailConfirmPage", () => {
         type:  "text",
         props: {
           text:
-            "Success! We've verified your email. You email has been updated."
+            "Success! We've verified your email. Your email has been updated."
         }
       }
     })
