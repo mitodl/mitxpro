@@ -50,6 +50,10 @@ def create_user_with_generated_username(serializer, initial_username):
     created_user = None
     username = initial_username
     attempts = 0
+
+    if len(username) < 2:
+        username = username + "11"
+
     while created_user is None and attempts < USERNAME_COLLISION_ATTEMPTS:
         try:
             created_user = serializer.save(username=username)
