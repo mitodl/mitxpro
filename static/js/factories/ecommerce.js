@@ -143,8 +143,8 @@ export const makeCourseRunContentObject = (
     id:          genProductContentObjectId.next().value,
     title:       casual.word,
     readable_id: readableId,
-    start_date:  casual.moment.format(),
-    end_date:    casual.moment.format(),
+    start_date:  casual.moment.format("2050-01-01"),
+    end_date:    casual.moment.format("2050-12-12"),
     course:      { id: course.id, title: course.title }
   }
 }
@@ -204,8 +204,21 @@ export const makeProgramRun = (
     // $FlowFixMe: flow doesn't understand generators well
     genProgramRunId.next().value
   }`,
-  start_date: casual.moment.format(),
-  end_date:   casual.moment.format()
+  start_date: casual.moment.format("2050-01-01"),
+  end_date:   casual.moment.format("2050-12-12")
+})
+
+export const makePastProgramRun = (
+  program: BaseProductVersion
+): ProgramRunDetail => ({
+  // $FlowFixMe: flow doesn't understand generators well
+  id:      genProductId.next().value,
+  run_tag: `${program.readable_id}${ENROLLABLE_ITEM_ID_SEPARATOR}R${
+    // $FlowFixMe: flow doesn't understand generators well
+    genProgramRunId.next().value
+  }`,
+  start_date: casual.moment.format("2019-01-01"),
+  end_date:   casual.moment.format("2050-12-12")
 })
 
 const genCompanyId = incrementer()

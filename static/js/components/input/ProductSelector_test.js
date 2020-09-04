@@ -18,6 +18,7 @@ import ProductSelector, {
 import { makeCourse } from "../../factories/course"
 import {
   makeProgramRun,
+  makePastProgramRun,
   makeCourseRunProduct,
   makeProgramProduct
 } from "../../factories/ecommerce"
@@ -270,6 +271,23 @@ describe("ProductSelector", () => {
         value: programRun.id
       }))
     )
+  })
+
+  it("not renders a list of available program runs when a program start_date is in past", () => {
+    const programRuns = [
+      makePastProgramRun(programProduct.latest_version),
+      makePastProgramRun(programProduct.latest_version)
+    ]
+    const props = Object.assign(defaultProps, { programRuns })
+    const wrapper = shallow(<InnerProductSelector {...props} />)
+    wrapper.setState({
+      productType:           PRODUCT_TYPE_PROGRAM,
+      selectedCoursewareObj: {
+        label: programProduct.latest_version.content_title,
+        value: programProduct.id
+      }
+    })
+    assert.deepEqual(undefined)
   })
 
   it("sets the selected program run when one is selected", () => {
