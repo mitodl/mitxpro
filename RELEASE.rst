@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.60.2 (Released September 04, 2020)
+--------------
+
+- Sorting pages in CMS admin by title - #171
+
 Version 0.60.1 (Released September 01, 2020)
 --------------
 
