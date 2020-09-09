@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.61.0
+--------------
+
+- pad short username
+- change b2b order coupon name
+- fix email change confirmation
+- Updated instructions for Programs, Program Runs, Courses, and Course …
+- Do not select past dates for course runs
+
 Version 0.60.2 (Released September 04, 2020)
 --------------
 
