@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.61.0
+Version 0.61.0 (Released September 09, 2020)
 --------------
 
 - pad short username
