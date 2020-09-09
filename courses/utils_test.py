@@ -91,9 +91,9 @@ def test_course_run_certificate_idempotent(user, course):
     assert not deleted
 
 
-def test_course_run_certificate_blacklist(user, course):
+def test_course_run_certificate_not_passing(user, course):
     """
-    Test that the certificate is not generated if grade isn't passing
+    Test that the certificate is not generated if the grade is set to 0.0
     """
     grade = CourseRunGradeFactory.create(
         course_run__course=course, user=user, grade=1.0, passed=True

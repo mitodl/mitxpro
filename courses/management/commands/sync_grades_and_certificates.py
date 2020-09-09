@@ -33,8 +33,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "--grade",
             type=float,
-            help="Override a grade. Setting grade: 0 blacklists a user. Setting a passing grade \
-                (>0.0) whitelists a user. range: 0.0 - 1.0",
+            help="Override a grade. Setting grade to 0.0 blocks certificate creation. Setting a passing grade \
+                (>0.0) allows certificate creation. Range: 0.0 - 1.0",
             required=False,
         )
         parser.add_argument(
