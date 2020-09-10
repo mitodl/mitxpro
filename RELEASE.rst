@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.61.1
+--------------
+
+- clarify management command (#1909)
+
 Version 0.61.0 (Released September 09, 2020)
 --------------
 
