@@ -130,7 +130,7 @@ def test_complete_b2b_order(mocker, contract_number, b2b_coupon_code):
     )
 
     if b2b_coupon and contract_number:
-        expected_name = f"{contract_number} {b2b_coupon.coupon_code}"
+        expected_name = f"order_{order.id} {contract_number} {b2b_coupon.coupon_code}"
     elif contract_number:
         expected_name = contract_number
     elif b2b_coupon:

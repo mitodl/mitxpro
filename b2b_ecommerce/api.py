@@ -28,7 +28,7 @@ def complete_b2b_order(order):
     """
 
     if order.coupon and order.contract_number:
-        name = f"{order.contract_number} {order.coupon.coupon_code}"
+        name = f"order_{order.id} {order.contract_number} {order.coupon.coupon_code}"
     elif order.contract_number:
         name = order.contract_number
     elif order.coupon:
