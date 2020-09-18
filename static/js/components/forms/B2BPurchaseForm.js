@@ -232,7 +232,9 @@ class B2BPurchaseForm extends React.Component<Props> {
             </button>
             <div className="description enterprise-terms-condition">
               By placing my order, I accept the{" "}
-              <a href="/terms-of-service/">MIT xPRO Terms and Conditions.</a>
+              <a href="/enterprise-terms-and-conditions/">
+                MIT xPRO Enterprise Terms and Conditions.
+              </a>
             </div>
           </div>
         </div>
