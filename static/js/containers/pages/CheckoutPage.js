@@ -102,6 +102,14 @@ export class CheckoutPage extends React.Component<Props, State> {
           this.setState({ showGenericError: true })
         }
       } else {
+        window.dataLayer = window.dataLayer || []
+        if (basketResponse.body && basketResponse.body.items) {
+          window.dataLayer.push({
+            event:          "addToCart",
+            "course-id":    basketResponse.body.items[0].readable_id,
+            "course-price": basketResponse.body.items[0].price || "0"
+          })
+        }
         this.setState({ showGenericError: false })
       }
       this.setState({ basketProduct: productId })
@@ -170,11 +178,9 @@ export class CheckoutPage extends React.Component<Props, State> {
           dataLayer.push({
             event:            "purchase",
             transactionId:    payload.transaction_id,
-            "course-price":   payload.item_0_unit_price || "0",
             transactionTotal: payload.transaction_total,
             productType:      payload.product_type,
             coursewareId:     payload.courseware_id,
-            "course-id":      payload.courseware_id,
             referenceNumber:  payload.reference_number,
             eventTimeout:     2000,
             eventCallback:    () => {

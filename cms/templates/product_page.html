@@ -11,7 +11,13 @@
     <meta property="product:brand" content="xPro">
     <meta property="product:availability" content="in stock">
     <meta property="product:condition" content="new">
-    <meta property="product:price:amount" content="{{ page.product.current_price }}">
+    {% if page.is_external_course_page and page.price %}
+      <meta property="product:price:amount" content="{{ page.price }}">
+    {% elif page.product.current_price %}
+      <meta property="product:price:amount" content="{{ page.product.current_price }}">
+    {% elif page.is_course_page and page.product.first_unexpired_run and page.product.first_unexpired_run.current_price %}
+      <meta property="product:price:amount" content="{{ page.product.first_unexpired_run.current_price }}">
+    {% endif %}
     <meta property="product:price:currency" content="USD">
     <meta property="product:retailer_item_id" content="{{ page.product.readable_id }}">
     <meta property="product:category" content="317">
