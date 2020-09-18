@@ -1,6 +1,8 @@
 """
 Makes a request to receive push notifications when xPro spreadsheets are updated
 """
+from collections import namedtuple
+
 from django.core.management import BaseCommand
 from googleapiclient.errors import HttpError
 
@@ -10,10 +12,11 @@ from sheets.api import (
     get_sheet_metadata_from_type,
 )
 from sheets.coupon_assign_api import fetch_webhook_eligible_assign_sheet_ids
-from sheets.constants import (
-    SHEET_TYPE_COUPON_REQUEST,
-    SHEET_TYPE_COUPON_ASSIGN,
-    SHEET_TYPE_ENROLL_CHANGE,
+from sheets.constants import VALID_SHEET_TYPES, SHEET_TYPE_COUPON_ASSIGN
+
+SheetMap = namedtuple("SheetMap", ["metadata", "file_ids"])
+FileWatchResult = namedtuple(
+    "FileWatchResult", ["file_watch", "metadata", "created", "updated"]
 )
 
 
@@ -27,14 +30,13 @@ class Command(BaseCommand):
     def add_arguments(self, parser):  # pylint:disable=missing-docstring
         parser.add_argument(
             "-s",
-            "--sheet",
-            default=SHEET_TYPE_COUPON_REQUEST,
-            choices=[
-                SHEET_TYPE_COUPON_REQUEST,
-                SHEET_TYPE_ENROLL_CHANGE,
-                SHEET_TYPE_COUPON_ASSIGN,
-            ],
-            help="The sheet that will have a file watch configured (default: '%(default)s')",
+            "--sheet-type",
+            choices=VALID_SHEET_TYPES,
+            help=(
+                "(Optional) The type of sheet that should have a file watch configured. "
+                "Leave blank to renew all sheet types."
+            ),
+            required=False,
         )
         parser.add_argument(
             "--sheet-id",
@@ -44,6 +46,7 @@ class Command(BaseCommand):
                 "is specified and no file id is provided, file watches will be set up/renewed for all "
                 "eligible assignment sheets."
             ),
+            required=False,
         )
         group = parser.add_mutually_exclusive_group()
         group.add_argument(
@@ -65,47 +68,93 @@ class Command(BaseCommand):
 
     def handle(
         self, *args, **options
-    ):  # pylint:disable=missing-docstring,too-many-branches
-        sheet_metadata = get_sheet_metadata_from_type(options["sheet"])
-        if options["sheet"] == SHEET_TYPE_COUPON_ASSIGN:
+    ):  # pylint:disable=missing-docstring,too-many-branches,too-many-locals
+
+        sheet_dict = {}
+
+        # Build a map of sheets that should be renewed (and specific file IDs if applicable)
+        if options["sheet_type"]:
+            sheet_dict[options["sheet_type"]] = SheetMap(
+                metadata=get_sheet_metadata_from_type(options["sheet_type"]),
+                file_ids=[None],
+            )
+        else:
+            for sheet_type in VALID_SHEET_TYPES:
+                sheet_dict[sheet_type] = SheetMap(
+                    metadata=get_sheet_metadata_from_type(sheet_type), file_ids=[None]
+                )
+        if SHEET_TYPE_COUPON_ASSIGN in sheet_dict:
             file_ids = (
                 [options["sheet_id"]]
                 if options["sheet_id"]
                 else fetch_webhook_eligible_assign_sheet_ids()
             )
-        else:
-            file_ids = [None]
-
-        file_watch_results = []
-        for file_id in file_ids:
-            try:
-                file_watch, created, updated = create_or_renew_sheet_file_watch(
-                    sheet_metadata, force=options["force"], sheet_file_id=file_id
+            if file_ids:
+                sheet_dict[SHEET_TYPE_COUPON_ASSIGN] = SheetMap(
+                    metadata=get_sheet_metadata_from_type(SHEET_TYPE_COUPON_ASSIGN),
+                    file_ids=file_ids,
                 )
-                file_watch_results.append((file_watch, created, updated))
-            except HttpError as exc:
+            else:
                 self.stdout.write(
-                    self.style.ERROR(
-                        "Request to create/renew file watch for {} failed.\nResponse [{}]: {}".format(
-                            sheet_metadata.sheet_name, exc.resp["status"], exc
-                        )
+                    self.style.WARNING(
+                        "No assignment sheets were found that are eligible to renew. Skipping assignment sheets..."
                     )
                 )
+                del sheet_dict[SHEET_TYPE_COUPON_ASSIGN]
 
-        for file_watch, created, updated in file_watch_results:
-            if created:
+        # Make requests to renew the file watches for the given sheets and record the results
+        file_watch_results = []
+        for sheet_type, sheet_map in sheet_dict.items():
+            for file_id in sheet_map.file_ids:
+                try:
+                    file_watch, created, updated = create_or_renew_sheet_file_watch(
+                        sheet_map.metadata,
+                        force=options["force"],
+                        sheet_file_id=file_id,
+                    )
+                    file_watch_results.append(
+                        FileWatchResult(
+                            file_watch=file_watch,
+                            metadata=sheet_map.metadata,
+                            created=created,
+                            updated=updated,
+                        )
+                    )
+                except HttpError as exc:
+                    self.stdout.write(
+                        self.style.ERROR(
+                            "Request to create/renew file watch for {} failed.\nResponse [{}]: {}".format(
+                                sheet_map.metadata.sheet_name, exc.resp["status"], exc
+                            )
+                        )
+                    )
+
+        # Output the results, and post-process if necessary
+        for file_watch_result in file_watch_results:
+            file_watch = file_watch_result.file_watch
+            if file_watch_result.created:
                 desc = "created"
-            elif updated:
+            elif file_watch_result.updated:
                 desc = "updated"
             else:
                 desc = "found (unexpired)"
+            file_id_desc = ""
+            if file_watch_result.metadata.sheet_type == SHEET_TYPE_COUPON_ASSIGN:
+                file_id_desc = " (file id: {})".format(file_watch.file_id)
+
             self.stdout.write(
                 self.style.SUCCESS(
-                    "{} file watch {}.".format(sheet_metadata.sheet_name, desc)
+                    "{} file watch {}{}.".format(
+                        file_watch_result.metadata.sheet_name, desc, file_id_desc
+                    )
                 )
             )
             self.stdout.write(str(file_watch))
-            if created or updated or not options["confirm"]:
+            if (
+                file_watch_result.created
+                or file_watch_result.updated
+                or not options["confirm"]
+            ):
                 continue
 
             self.stdout.write(
@@ -118,10 +167,11 @@ class Command(BaseCommand):
                 resp_dict = request_file_watch(
                     file_id=file_watch.file_id,
                     channel_id=file_watch.channel_id,
-                    handler_url=sheet_metadata.handler_url_stub(
+                    handler_url=file_watch_result.metadata.handler_url_stub(
                         file_id=(
                             file_watch.file_id
-                            if options["sheet"] == SHEET_TYPE_COUPON_ASSIGN
+                            if file_watch_result.metadata.sheet_type
+                            == SHEET_TYPE_COUPON_ASSIGN
                             else None
                         )
                     ),
