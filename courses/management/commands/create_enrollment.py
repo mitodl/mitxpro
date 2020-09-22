@@ -111,12 +111,12 @@ class Command(BaseCommand):
             coupon_version=coupon_version, product_version=product_version
         )
 
-        # Create an order if not exist.
-        order, _ = Order.objects.get_or_create(
+        # Create an order.
+        order = Order.objects.create(
             status=Order.FULFILLED, purchaser=user, total_price_paid=total_price_paid
         )
 
-        line, _ = Line.objects.get_or_create(
+        line = Line.objects.create(
             order=order, product_version=product_version, quantity=1
         )
 
