@@ -1,62 +1,80 @@
 {% load static %}
 
 <footer class="footer">
-    <div class="footer-top">
-        <div class="container">
-            <div class="content-holder">
-                <div class="row">
-                    <div class="col-sm-6 clearfix">
-                        <img src={% static 'images/help.png' %}>
-                        <div class="info">
-                            <a href="https://xpro.zendesk.com/hc/">
-                                <h2>Help & FAQ</h2>
-                            </a>
-                            <p>Find answers to your questions.</p>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 clearfix">
-                        <img src={% static 'images/contact.png' %}>
-                        <div class="info">
-                            <a href="https://xpro.zendesk.com/hc/en-us/requests/new">
-                                <h2>Contact Us</h2>
-                            </a>
-                            <p>Let us know how we can assist you.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  <div class="footer-top">
     <div class="container">
-        <div class="footer-bottom">
-            <div class="mit-info">
-                <img src="{% static 'images/mit.png' %}" alt="MIT">
-                <address>
-                    Massachusetts Institute of Technology <br>77 Massachusetts Avenue <br>Cambridge, MA 02139
-                </address>
+      <div class="content-holder">
+        <div class="row">
+          <div class="col-sm-6 clearfix">
+            <img src={% static 'images/help.png' %} alt="Help">
+            <div class="info">
+              <a href="https://xpro.zendesk.com/hc/">
+                <h2>Help & FAQ</h2>
+              </a>
+              <p>Find answers to your questions.</p>
             </div>
-            <div class="right-info">
-                <ul class="footer-nav">
-                    <li><a href="/about-us/">About Us</a></li>
-                </ul>
-                <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2-legacy.js"></script>
-                <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2.js"></script>
-                <script>
-                    if (typeof hbspt !== 'undefined') {
-                        hbspt.forms.create({
-                            portalId: '{{ hubspot_portal_id }}',
-                            formId: '{{ hubspot_footer_form_guid }}'
-                        });
-                    }
-                </script>
+          </div>
+          <div class="col-sm-6 clearfix">
+            <img src={% static 'images/contact.png' %} alt="Contact Us">
+            <div class="info">
+              <a href="https://xpro.zendesk.com/hc/en-us/requests/new">
+                <h2>Contact Us</h2>
+              </a>
+              <p>Let us know how we can assist you.</p>
             </div>
+          </div>
         </div>
-        <ul class="footer-sub-nav">
-            <li><a href="/terms-of-service/">Terms of Service</a></li>
-            <li><a href="/privacy-policy/">Privacy Policy</a></li>
-            <li><a href="/honor-code/">Honor Code</a></li>
-            <li><a target="_blank" href="https://accessibility.mit.edu/">Accessibility</a></li>
-        </ul>
-        <span class="copyright">© 2019 All rights reserved. <a href="#">{{ site_name }}</a>.</span>
+      </div>
     </div>
+  </div>
+  <div class="container">
+    <div class="footer-bottom">
+      <div class="mit-info">
+        <img src="{% static 'images/mit.png' %}" alt="MIT" />
+        <address>
+          Massachusetts Institute of Technology <br />77 Massachusetts Avenue
+          <br />Cambridge, MA 02139
+        </address>
+      </div>
+      <div class="right-info">
+        <ul class="footer-nav">
+          <li><a href="/about-us/">About Us</a></li>
+        </ul>
+        <script
+          charset="utf-8"
+          type="text/javascript"
+          src="//js.hsforms.net/forms/v2-legacy.js"
+        ></script>
+        <script
+          charset="utf-8"
+          type="text/javascript"
+          src="//js.hsforms.net/forms/v2.js"
+        ></script>
+        <script>
+          if (typeof hbspt !== "undefined") {
+            hbspt.forms.create({
+              portalId: "{{ hubspot_portal_id }}",
+              formId: "{{ hubspot_footer_form_guid }}",
+            });
+          }
+        </script>
+      </div>
+    </div>
+    <ul class="footer-sub-nav">
+      <li><a href="/terms-of-service/">Terms of Service</a></li>
+      <li><a href="/privacy-policy/">Privacy Policy</a></li>
+      <li><a href="/honor-code/">Honor Code</a></li>
+      <li>
+        <a
+          target="_blank"
+          href="https://accessibility.mit.edu/"
+          rel="noopener noreferrer"
+          >Accessibility</a
+        >
+      </li>
+    </ul>
+    <span class="copyright"
+      >© 2019 All rights reserved. <a href="#">{{ site_name }}</a>.</span
+    >
+  </div>
 </footer>
