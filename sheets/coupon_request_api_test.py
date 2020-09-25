@@ -47,13 +47,16 @@ def pygsheets_fixtures(mocker, db, request_csv_rows):
         "sheets.sheet_handler_api.get_data_rows", return_value=request_csv_rows
     )
     mocked_worksheet = MagicMock(spec=Worksheet, get_all_values=Mock(return_value=[]))
-    mocked_spreadsheet = MagicMock(spec=Spreadsheet, sheet1=mocked_worksheet)
+    mocked_spreadsheet = MagicMock(
+        spec=Spreadsheet, sheet1=mocked_worksheet, id="abc123"
+    )
     mocked_pygsheets_client = MagicMock(
         spec=PygsheetsClient,
         oauth=Mock(),
         open_by_key=Mock(return_value=mocked_spreadsheet),
         drive=MagicMock(spec=DriveAPIWrapper),
         sheet=MagicMock(spec=SheetAPIWrapper),
+        create=Mock(return_value=mocked_spreadsheet),
     )
     mocker.patch(
         "sheets.coupon_request_api.get_authorized_pygsheets_client",
