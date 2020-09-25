@@ -9,7 +9,7 @@ from django.db import transaction
 from django.utils.functional import cached_property
 
 import ecommerce.api
-from ecommerce.models import Company, Coupon, CouponPaymentVersion
+from ecommerce.models import Company, Coupon, CouponPaymentVersion, BulkCouponAssignment
 from mitxpro.utils import now_in_utc, item_at_index_or_none, item_at_index_or_blank
 from sheets.api import (
     get_authorized_pygsheets_client,
@@ -292,6 +292,9 @@ class CouponRequestHandler(SheetHandler):
             worksheet_id=worksheet.id,
             num_data_rows=len(coupon_codes),
         )
+        # If it doesn't exist, create bulk coupon assignment for tracking purposes
+        BulkCouponAssignment.objects.create(assignment_sheet_id=bulk_coupon_sheet.id)
+
         # Share
         if settings.SHEETS_ADMIN_EMAILS:
             share_drive_file_with_emails(
