@@ -1227,6 +1227,27 @@ def test_products_viewset_list(user_drf_client, coupon_product_ids):
         )
 
 
+def test_products_viewset_list_ordering(user_drf_client):
+    """
+    Test that the ProductViewSet returns all products ordered alphabetically
+    by course/program title
+    """
+    response = user_drf_client.get(reverse("products_api-list"))
+    assert response.status_code == status.HTTP_200_OK
+    products = response.json()
+    serialized_products_list = ProductSerializer(data=products, many=True).initial_data
+    ordered_products_title = sorted(
+        serialized_products_list,
+        key=lambda k: k["content_object"]["course"]["title"]
+        if "course" in k["content_object"]
+        else k["content_object"]["title"],
+    )
+    ordered_products_type = sorted(
+        ordered_products_title, key=lambda k: k["product_type"], reverse=True
+    )
+    assert ordered_products_type == serialized_products_list
+
+
 def test_products_viewset_list_missing_unchecked_bulk_visibility(user_drf_client):
     """ Test that the ProductViewSet returns all products
         which are visible_in_bulk_form
