@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.62.0
+Version 0.62.0 (Released September 29, 2020)
 --------------
 
 - Fix Order.MultipleObjectsReturned create_enrollment command
