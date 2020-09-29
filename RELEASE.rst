@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.62.0 (Released September 29, 2020)
+--------------
+
+- Fix Order.MultipleObjectsReturned create_enrollment command
+- Bump django from 2.2.10 to 2.2.13
+- Updated file watch renewal command to allow renewal of all sheets
+- B2B/Bulk: Update coupon payment name to fix name collisions
+- Updated the terms & condition text and link url
+- Home page performance tweaks - #1908
+- Addressing Sam's Feedback
+
 Version 0.61.1 (Released September 10, 2020)
 --------------
 
