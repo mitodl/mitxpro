@@ -12,6 +12,7 @@ import pytest
 import rest_framework.status as status  # pylint: disable=useless-import-alias
 from rest_framework.renderers import JSONRenderer
 from rest_framework.test import APIClient
+import factory
 
 from courses.factories import (
     CourseRunFactory,
@@ -1225,6 +1226,41 @@ def test_products_viewset_list(user_drf_client, coupon_product_ids):
             product,
             ProductSerializer(instance=Product.objects.get(id=product.get("id"))).data,
         )
+
+
+def test_products_viewset_list_ordering(user_drf_client):
+    """
+    Test that the ProductViewSet returns all products ordered alphabetically
+    by course/program title
+    """
+    programs = ProgramFactory.create_batch(
+        2, title=factory.Iterator(["Z Program", "A Program"])
+    )
+    runs = CourseRunFactory.create_batch(
+        2, course__title=factory.Iterator(["Z Course", "A Course"])
+    )
+    ProductVersionFactory.create_batch(
+        4, product__content_object=factory.Iterator(runs + programs)
+    )
+    response = user_drf_client.get(reverse("products_api-list"))
+    assert response.status_code == status.HTTP_200_OK
+    products = response.json()
+    product_object_ids = [
+        product["latest_version"]["object_id"] for product in products
+    ]
+    # Results should be returned with programs before course runs, then alphabetized by title
+    assert product_object_ids == [
+        programs[1].id,
+        programs[0].id,
+        runs[1].id,
+        runs[0].id,
+    ]
+    assert [product["latest_version"]["type"] for product in products] == [
+        "program",
+        "program",
+        "courserun",
+        "courserun",
+    ]
 
 
 def test_products_viewset_list_missing_unchecked_bulk_visibility(user_drf_client):

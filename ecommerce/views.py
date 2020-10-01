@@ -99,6 +99,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
                     & Q(content_type__model="courserun")
                 )
             )
+            .order_by("programs__title", "course_run__course__title")
             .select_related("content_type")
             .prefetch_related("content_object")
             .prefetch_generic_related(
