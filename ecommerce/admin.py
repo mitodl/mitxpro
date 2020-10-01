@@ -511,15 +511,17 @@ class CompanyAdmin(admin.ModelAdmin):
     model = Company
 
 
-class BulkCouponAssignmentAdmin(admin.ModelAdmin):
+class BulkCouponAssignmentAdmin(TimestampedModelAdmin):
     """Admin for BulkCouponAssignment"""
 
+    include_created_on_in_list = True
     list_display = (
         "id",
         "assignment_sheet_id",
         "assignments_started_date",
         "message_delivery_completed_date",
     )
+    search_fields = ("assignment_sheet_id",)
 
     model = BulkCouponAssignment
 
