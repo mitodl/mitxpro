@@ -8,7 +8,7 @@ import pytest
 from django.db.models import Prefetch
 from rest_framework.exceptions import ValidationError
 
-from mitxpro.test_utils import any_instance_of
+from mitxpro.test_utils import any_instance_of, drf_datetime
 from cms.factories import CoursePageFactory, ProgramPageFactory
 from courses.factories import (
     CourseFactory,
@@ -578,6 +578,6 @@ def test_serialize_program_run():
     assert serialized_data == {
         "id": program_run.id,
         "run_tag": program_run.run_tag,
-        "start_date": program_run.start_date,
-        "end_date": program_run.end_date,
+        "start_date": drf_datetime(program_run.start_date),
+        "end_date": drf_datetime(program_run.end_date),
     }

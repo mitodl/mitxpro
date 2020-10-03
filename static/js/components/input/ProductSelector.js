@@ -167,26 +167,25 @@ export class ProductSelector extends React.Component<Props, State> {
     if (productType === PRODUCT_TYPE_PROGRAM) {
       return buildProgramDateOptions(
         programRuns.filter(programRun => {
-          let startDate = null
-          if (programRun.start_date) {
-            startDate = new Date(programRun.start_date)
+          let endDate = null
+          if (programRun.end_date) {
+            endDate = new Date(programRun.end_date)
           }
-          return startDate && startDate >= todaysDate
+          return endDate && endDate >= todaysDate
         })
       )
     } else {
       return buildCourseDateOptions(
         products.filter(product => {
-          let startDate = null
-          if (product.content_object.start_date) {
-            startDate = new Date(product.content_object.start_date)
+          let enrollmentEndDate = null
+          if (product.content_object.enrollment_end) {
+            enrollmentEndDate = new Date(product.content_object.enrollment_end)
           }
           return (
             product.product_type === PRODUCT_TYPE_COURSERUN &&
             // $FlowFixMe: flow doesn't seem to understand selectedCoursewareObj will be valid here
             product.content_object.course.id === selectedCoursewareObj.value &&
-            startDate &&
-            startDate >= todaysDate
+            (enrollmentEndDate === null || enrollmentEndDate >= todaysDate)
           )
         })
       )

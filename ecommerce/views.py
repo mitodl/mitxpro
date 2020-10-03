@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import Http404
 from django_filters import rest_framework as filters
 from ipware import get_client_ip
@@ -24,7 +24,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from b2b_ecommerce.api import fulfill_b2b_order
 from b2b_ecommerce.models import B2BOrder
-from courses.models import CourseRun, ProgramRun
+from courses.models import CourseRun, ProgramRun, Program, Course
 from courses.serializers import BaseCourseRunSerializer, BaseProgramSerializer
 from ecommerce.api import (
     create_unfulfilled_order,
@@ -91,6 +91,27 @@ class ProductViewSet(ReadOnlyModelViewSet):
         expired_courseruns = CourseRun.objects.filter(
             enrollment_end__lt=now
         ).values_list("id", flat=True)
+
+        expired_courses = (
+            Course.objects.annotate(
+                runs=Count("courseruns", filter=~Q(courseruns__in=expired_courseruns))
+            )
+            .filter(runs=0)
+            .values_list("id", flat=True)
+        )
+        expired_programs = (
+            Program.objects.annotate(
+                valid_runs=Count("programruns", filter=Q(programruns__end_date__gt=now))
+            )
+            .filter(
+                Q(programruns__isnull=True)
+                | Q(valid_runs=0)
+                | Q(courses__in=expired_courses)
+            )
+            .values_list("id", flat=True)
+            .distinct()
+        )
+
         return (
             Product.objects.exclude(
                 Q(productversions=None)
@@ -98,6 +119,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
                     Q(object_id__in=expired_courseruns)
                     & Q(content_type__model="courserun")
                 )
+                | (Q(object_id__in=expired_programs) & Q(content_type__model="program"))
             )
             .order_by("programs__title", "course_run__course__title")
             .select_related("content_type")
