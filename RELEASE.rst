@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.62.1 (Released October 06, 2020)
+--------------
+
+- preload icomoon font and some changes for best practices in HTML
+- Addressed Gavin feedback: Course ordered list test updated
+- Fixed bug where coupon assignment sheets didn't have local DB record
+- Added courses list ordering for B2B Bulk order page
+
 Version 0.62.0 (Released September 29, 2020)
 --------------
 
