@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.62.1
+Version 0.62.1 (Released October 06, 2020)
 --------------
 
 - preload icomoon font and some changes for best practices in HTML
