@@ -179,3 +179,9 @@ mitxpro-oauth2`
   - xPro:
     - Set `LOGOUT_REDIRECT_URL` to the full path to the edx `/logout` view.
       - For local development this will be `http://<EDX_HOSTNAME>:18000/logout`
+
+
+#### Configure Open edX user and token for use with xPro management commands
+
+- In Open edX, create a staff user and then under `/admin/oauth2_provider/accesstoken/` add access token. The value of said token needs to match the value set for the `OPENEDX_SERVICE_WORKER_API_TOKEN` key in the xPro app.
+
