@@ -1290,34 +1290,40 @@ def test_products_viewset_valid_courses(user_drf_client):
 
 def test_products_viewset_valid_programs(user_drf_client):
     """ Test that the ProductViewSet returns contains only valid programs products"""
-
-    program = ProgramFactory.create()
-    runs = CourseRunFactory.create_batch(2, course__program=program)
-    ProgramRunFactory.create(program=program)
+    now = now_in_utc()
+    programs = ProgramFactory.create_batch(2)
+    runs = CourseRunFactory.create_batch(2, course__program=factory.Iterator(programs))
+    ProgramRunFactory.create_batch(
+        2,
+        program=factory.Iterator(programs),
+        end_date=factory.Iterator([None, now + timedelta(1)]),
+    )
     ProductVersionFactory.create_batch(
-        3, product__content_object=factory.Iterator(runs + [program])
+        4, product__content_object=factory.Iterator(runs + programs)
     )
     response = user_drf_client.get(reverse("products_api-list"))
     assert response.status_code == status.HTTP_200_OK
     products = response.json()
-    now = now_in_utc()
     expired_courseruns = CourseRun.objects.filter(enrollment_end__lt=now).values_list(
         "id", flat=True
     )
+    program_ids = [
+        product["latest_version"]["object_id"]
+        for product in products
+        if product["product_type"] == "program"
+    ]
     # For all the programs in the list there should be on enrollable course run for each associated course
-    for product in products:
-        if product["product_type"] == "program":
-            program = Program.objects.get(pk=product["latest_version"]["object_id"])
-            count = (
-                program.courses.annotate(
-                    runs=Count(
-                        "courseruns", filter=~Q(courseruns__in=expired_courseruns)
-                    )
-                )
-                .filter(runs=0)
-                .count()
+    assert set(program_ids) == {programs[0].id, programs[1].id}
+    for program_id in program_ids:
+        program = Program.objects.get(pk=program_id)
+        count = (
+            program.courses.annotate(
+                runs=Count("courseruns", filter=~Q(courseruns__in=expired_courseruns))
             )
-            assert count == 0
+            .filter(runs=0)
+            .count()
+        )
+        assert count == 0
 
 
 def test_products_viewset_list_missing_unchecked_bulk_visibility(user_drf_client):

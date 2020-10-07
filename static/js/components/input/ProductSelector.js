@@ -171,7 +171,7 @@ export class ProductSelector extends React.Component<Props, State> {
           if (programRun.end_date) {
             endDate = new Date(programRun.end_date)
           }
-          return endDate && endDate >= todaysDate
+          return endDate === null || endDate >= todaysDate
         })
       )
     } else {

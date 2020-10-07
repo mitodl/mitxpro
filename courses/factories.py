@@ -51,12 +51,6 @@ class ProgramRunFactory(DjangoModelFactory):
 
     program = factory.SubFactory(ProgramFactory)
     run_tag = factory.Sequence("R{0}".format)
-    start_date = factory.Faker(
-        "date_time_this_month", before_now=True, after_now=False, tzinfo=pytz.utc
-    )
-    end_date = factory.Faker(
-        "date_time_this_year", before_now=False, after_now=True, tzinfo=pytz.utc
-    )
 
     class Meta:
         model = ProgramRun
