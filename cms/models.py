@@ -241,7 +241,7 @@ class CatalogPage(Page):
 
         featured_product = ProgramPage.objects.filter(
             featured=True, program__live=True
-        ).select_related("program").prefetch_related(
+        ).select_related("program", "thumbnail_image").prefetch_related(
             "program__courses__courseruns"
         ) or CoursePage.objects.filter(
             featured=True, course__live=True
