@@ -389,7 +389,8 @@ export class ReceiptPage extends React.Component<Props> {
                       </div>
                     </div>
                     <span className="rec-copyright">
-                      © 2019 All rights reserved. MIT xPRO.
+                      &copy; {new Date().getFullYear()} All rights reserved. MIT
+                      xPRO.
                     </span>
                   </div>
                 </div>
