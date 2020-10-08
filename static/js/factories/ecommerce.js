@@ -140,12 +140,14 @@ export const makeCourseRunContentObject = (
   const course = makeCourse()
   return {
     // $FlowFixMe: flow doesn't understand generators well
-    id:          genProductContentObjectId.next().value,
-    title:       casual.word,
-    readable_id: readableId,
-    start_date:  casual.moment.format("2050-01-01"),
-    end_date:    casual.moment.format("2050-12-12"),
-    course:      { id: course.id, title: course.title }
+    id:               genProductContentObjectId.next().value,
+    title:            casual.word,
+    readable_id:      readableId,
+    start_date:       casual.moment.format("2050-01-01"),
+    end_date:         casual.moment.format("2050-12-12"),
+    enrollment_start: casual.moment.format("2020-01-01"),
+    enrollment_end:   casual.moment.format("2050-12-12"),
+    course:           { id: course.id, title: course.title }
   }
 }
 

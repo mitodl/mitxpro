@@ -189,6 +189,8 @@ export type CourseRunContentObject = {|
   readable_id: string,
   start_date: string,
   end_date: string,
+  enrollment_start: string,
+  enrollment_end: string,
   course: {
     id: number,
     title: string

@@ -7,6 +7,7 @@ import operator as op
 
 import pytz
 from django.urls import reverse
+from django.db.models import Count, Q
 import faker
 import pytest
 import rest_framework.status as status  # pylint: disable=useless-import-alias
@@ -20,6 +21,7 @@ from courses.factories import (
     ProgramFactory,
     ProgramRunFactory,
 )
+from courses.models import Program, CourseRun
 from ecommerce.api import create_unfulfilled_order, make_receipt_url
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -59,6 +61,7 @@ from ecommerce.serializers import (
     ProgramRunSerializer,
     ProductSerializer,
 )
+from ecommerce.serializers_test import datetime_format
 from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.test_utils import (
     create_tempfile_csv,
@@ -1237,8 +1240,11 @@ def test_products_viewset_list_ordering(user_drf_client):
         2, title=factory.Iterator(["Z Program", "A Program"])
     )
     runs = CourseRunFactory.create_batch(
-        2, course__title=factory.Iterator(["Z Course", "A Course"])
+        2,
+        course__title=factory.Iterator(["Z Course", "A Course"]),
+        course__program=factory.Iterator(programs),
     )
+    ProgramRunFactory.create_batch(2, program=factory.Iterator(programs))
     ProductVersionFactory.create_batch(
         4, product__content_object=factory.Iterator(runs + programs)
     )
@@ -1261,6 +1267,63 @@ def test_products_viewset_list_ordering(user_drf_client):
         "courserun",
         "courserun",
     ]
+
+
+def test_products_viewset_valid_courses(user_drf_client):
+    """ Test that the ProductViewSet returns contains only valid course products """
+
+    runs = CourseRunFactory.create_batch(2)
+    ProductVersionFactory.create_batch(
+        2, product__content_object=factory.Iterator(runs)
+    )
+    response = user_drf_client.get(reverse("products_api-list"))
+    assert response.status_code == status.HTTP_200_OK
+    products = response.json()
+    assert products != []
+    # For all the course run products, enrollment_end should not have passed
+    for product in products:
+        enrollment_end = product["content_object"]["enrollment_end"]
+        assert enrollment_end is None or enrollment_end > now_in_utc().strftime(
+            datetime_format
+        )
+
+
+def test_products_viewset_valid_programs(user_drf_client):
+    """ Test that the ProductViewSet returns contains only valid programs products"""
+    now = now_in_utc()
+    programs = ProgramFactory.create_batch(2)
+    runs = CourseRunFactory.create_batch(2, course__program=factory.Iterator(programs))
+    ProgramRunFactory.create_batch(
+        2,
+        program=factory.Iterator(programs),
+        end_date=factory.Iterator([None, now + timedelta(1)]),
+    )
+    ProductVersionFactory.create_batch(
+        4, product__content_object=factory.Iterator(runs + programs)
+    )
+    response = user_drf_client.get(reverse("products_api-list"))
+    assert response.status_code == status.HTTP_200_OK
+    products = response.json()
+    expired_courseruns = CourseRun.objects.filter(enrollment_end__lt=now).values_list(
+        "id", flat=True
+    )
+    program_ids = [
+        product["latest_version"]["object_id"]
+        for product in products
+        if product["product_type"] == "program"
+    ]
+    # For all the programs in the list there should be on enrollable course run for each associated course
+    assert set(program_ids) == {programs[0].id, programs[1].id}
+    for program_id in program_ids:
+        program = Program.objects.get(pk=program_id)
+        count = (
+            program.courses.annotate(
+                runs=Count("courseruns", filter=~Q(courseruns__in=expired_courseruns))
+            )
+            .filter(runs=0)
+            .count()
+        )
+        assert count == 0
 
 
 def test_products_viewset_list_missing_unchecked_bulk_visibility(user_drf_client):

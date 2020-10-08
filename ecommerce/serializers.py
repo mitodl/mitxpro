@@ -184,7 +184,16 @@ class CourseRunProductContentObjectSerializer(serializers.ModelSerializer):
         return {"id": instance.course.id, "title": instance.course.title}
 
     class Meta:
-        fields = ["id", "title", "start_date", "end_date", "course", "readable_id"]
+        fields = [
+            "id",
+            "title",
+            "start_date",
+            "end_date",
+            "course",
+            "readable_id",
+            "enrollment_start",
+            "enrollment_end",
+        ]
         model = CourseRun
 
 
