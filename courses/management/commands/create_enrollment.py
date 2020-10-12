@@ -1,6 +1,7 @@
 """Management command to change enrollment status"""
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth import get_user_model
+from django.db import transaction
 
 from courses.api import create_run_enrollments
 from courses.models import CourseRun
@@ -84,12 +85,30 @@ class Command(BaseCommand):
                     )
                 }
             )
+        # Fetch the latest product version.
+        product_version = latest_product_version(product)
 
-        successful_enrollments, edx_request_success = create_run_enrollments(
-            user, [run], keep_failed_enrollments=options["keep_failed_enrollments"]
+        # Calculate the total paid price after applying coupon.
+        total_price_paid = get_product_version_price_with_discount(
+            coupon_version=coupon_version, product_version=product_version
         )
-        if not successful_enrollments:
-            raise CommandError("Failed to create the enrollment record")
+
+        with transaction.atomic():
+            # Create an order.
+            order = Order.objects.create(
+                status=Order.FULFILLED,
+                purchaser=user,
+                total_price_paid=total_price_paid,
+            )
+
+            successful_enrollments, edx_request_success = create_run_enrollments(
+                user,
+                [run],
+                keep_failed_enrollments=options["keep_failed_enrollments"],
+                order=order,
+            )
+            if not successful_enrollments:
+                raise CommandError("Failed to create the enrollment record")
 
         ProductCouponAssignment.objects.filter(
             email__iexact=user.email, redeemed=False, product_coupon__coupon=coupon
@@ -101,19 +120,6 @@ class Command(BaseCommand):
                     user, options["run"], edx_request_success
                 )
             )
-        )
-
-        # Fetch the latest product version.
-        product_version = latest_product_version(product)
-
-        # Calculate the total paid price after applying coupon.
-        total_price_paid = get_product_version_price_with_discount(
-            coupon_version=coupon_version, product_version=product_version
-        )
-
-        # Create an order.
-        order = Order.objects.create(
-            status=Order.FULFILLED, purchaser=user, total_price_paid=total_price_paid
         )
 
         line = Line.objects.create(
