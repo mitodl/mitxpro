@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.63.0
+Version 0.63.0 (Released October 13, 2020)
 --------------
 
 - Improved BulkCouponAssignment admin to be searchable and show timestamps
