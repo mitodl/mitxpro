@@ -148,6 +148,10 @@
     background: black;
   }
 
+  &:focus {
+    outline: none;
+  }
+
   &:after {
     font-size: 25px;
     line-height: 30px;

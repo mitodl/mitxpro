@@ -3,6 +3,13 @@
   font-family: "icomoon";
   font-weight: normal;
   font-style: normal;
+  src: url("#{$static-path}/fonts/icomoon.eot?dd3z7r"),
+  url("#{$static-path}/fonts/icomoon.eot?dd3z7r#iefix")
+  format("embedded-opentype"),
+  url("#{$static-path}/fonts/icomoon.ttf?dd3z7r") format("truetype"),
+  url("#{$static-path}/fonts/icomoon.woff?dd3z7r") format("woff"),
+  url("#{$static-path}/fonts/icomoon.svg?dd3z7r#icomoon") format("svg");
+  font-display: swap;
 }
 
 [class^="icon-"],
