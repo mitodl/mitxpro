@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.63.1
+--------------
+
+- fix kind-of security alert
+- Dependabot alert: Upgraded yargs-parser above 13.1.2 (#1943)
+- B2b Bulk Course/Program dates (#1935)
+- Added info about setting up Open edX user and token
+- Associated order with course enrollment in enrollment command
+- Fixed copyright year text and made it dynamic
+- fix n+1 queries to optimize the page
+
 Version 0.63.0 (Released October 13, 2020)
 --------------
 
