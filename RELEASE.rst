@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.63.1
+Version 0.63.1 (Released October 15, 2020)
 --------------
 
 - fix kind-of security alert
