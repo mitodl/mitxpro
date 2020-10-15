@@ -1,5 +1,6 @@
 """User views"""
 import pycountry
+from django.db import transaction
 from oauth2_provider.contrib.rest_framework import IsAuthenticatedOrTokenHasScope
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -7,6 +8,7 @@ from rest_framework.response import Response
 
 from mitxpro.permissions import UserIsOwnerPermission
 from mitxpro.utils import now_in_utc
+from users import api
 from users.models import User, ChangeEmailRequest
 from users.serializers import (
     PublicUserSerializer,
@@ -39,6 +41,16 @@ class CurrentUserRetrieveUpdateViewSet(
         """Returns the current request user"""
         # NOTE: this may be a logged in or anonymous user
         return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        with transaction.atomic():
+            user_name = request.user.name
+            user_update_response = super(CurrentUserRetrieveUpdateViewSet, self).update(
+                request, *args, **kwargs
+            )
+            if user_name != request.data.get("name"):
+                api.update_edx_user(request.user)
+            return user_update_response
 
 
 class ChangeEmailRequestViewSet(

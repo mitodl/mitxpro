@@ -7,13 +7,24 @@ from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib.auth import get_user_model
+from rest_framework import status
 
-from mitxpro.utils import first_or_none, unique, unique_ignore_case, max_or_none
+from authentication.exceptions import UserProfileUpdateFailedException
+from courseware import api
+from courseware.utils import edx_url
+from mitxpro.utils import (
+    first_or_none,
+    unique,
+    unique_ignore_case,
+    max_or_none,
+    get_error_response_summary,
+)
 from users.constants import USERNAME_MAX_LEN
 
 User = get_user_model()
 
 CASE_INSENSITIVE_SEARCHABLE_FIELDS = {"email"}
+OPENEDX_UPDATE_USER_ACCOUNT_PATH = "/api/user/v1/accounts/{username}"
 
 
 def get_user_by_id(user_id):
@@ -206,3 +217,29 @@ def find_available_username(initial_username_base):
         )
         # If there is space for 4 digits for the suffix, the minimum value it could be is 1000, or 10^3
         current_min_suffix = 10 ** (available_suffix_digits - 1)
+
+
+def update_edx_user(user):
+    """
+    Makes a request to update user's name on edx if changed in xPRO
+
+    Args:
+        user (user.models.User): the application user
+    """
+
+    edx_api = api.get_edx_api_client(user)
+    req_session = edx_api.get_requester()
+    req_session.headers.update(
+        {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/merge-patch+json",
+        }
+    )
+    url = edx_url(OPENEDX_UPDATE_USER_ACCOUNT_PATH.format(username=user.username))
+    data = dict(name=user.name)
+    resp = req_session.patch(url, json=data)
+    if resp.status_code != status.HTTP_200_OK:
+        raise UserProfileUpdateFailedException(
+            f"Error updating Open edX user name. {get_error_response_summary(resp)}"
+        )
