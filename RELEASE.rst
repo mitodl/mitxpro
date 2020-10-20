@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.64.1
+--------------
+
+- fix icomoon svg broken icons
+
 Version 0.64.0 (Released October 20, 2020)
 --------------
 
