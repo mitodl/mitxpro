@@ -1,20 +1,10 @@
 """Tests for user api"""
-
 import pytest
 import factory
-import responses
 
 from django.contrib.auth import get_user_model
-from rest_framework import status
 
-from courseware.factories import OpenEdxApiAuthFactory
-from users.api import (
-    get_user_by_id,
-    fetch_user,
-    fetch_users,
-    find_available_username,
-    update_edx_user,
-)
+from users.api import get_user_by_id, fetch_user, fetch_users, find_available_username
 from users.utils import usernameify
 from users.factories import UserFactory
 
@@ -177,20 +167,3 @@ def test_full_username_creation():
     assert available_username == "{}1".format(
         new_generated_username[0 : expected_username_max - 1]
     )
-
-
-@responses.activate
-def test_update_user_doesnt_calls_edx_update(settings, user):
-    """Test that update_edx_user calls the right edx api to update the name there"""
-    settings.OPENEDX_API_BASE_URL = "http://example.com"
-    new_user_name = "Test Name"
-    OpenEdxApiAuthFactory.create(user=user)
-
-    responses.add(
-        responses.PATCH,
-        f"{settings.OPENEDX_API_BASE_URL}/api/user/v1/accounts/{user.username}",
-        json=dict(name=new_user_name),
-        status=status.HTTP_200_OK,
-    )
-    update_edx_user(user)
-    assert len(responses.calls) == 1

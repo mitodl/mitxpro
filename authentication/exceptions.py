@@ -87,7 +87,3 @@ class UserTryAgainLaterException(AuthException):
 
 class UserMissingSocialAuthException(Exception):
     """Raised if the user doesn't have a social auth"""
-
-
-class UserProfileUpdateFailedException(Exception):
-    """Raised if a user's profile update call is failed"""

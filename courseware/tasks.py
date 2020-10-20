@@ -43,3 +43,12 @@ def change_edx_user_email_async(user_id):
     """
     user = User.objects.get(id=user_id)
     api.update_edx_user_email(user)
+
+
+@app.task(acks_late=True)
+def change_edx_user_name_async(user_id):
+    """
+    Task to change edX user name in the background to avoid database level locks
+    """
+    user = User.objects.get(id=user_id)
+    api.update_edx_user_name(user)

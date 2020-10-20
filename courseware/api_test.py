@@ -28,6 +28,7 @@ from courseware.api import (
     unenroll_edx_course_run,
     OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS,
     ACCESS_TOKEN_HEADER_NAME,
+    update_edx_user_name,
 )
 from courseware.constants import (
     PLATFORM_EDX,
@@ -35,6 +36,7 @@ from courseware.constants import (
     EDX_ENROLLMENT_AUDIT_MODE,
     PRO_ENROLL_MODE_ERROR_TEXTS,
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
+    OPENEDX_UPDATE_USER_ACCOUNT_PATH,
 )
 from courseware.exceptions import (
     CoursewareUserCreateError,
@@ -557,3 +559,19 @@ def test_unenroll_edx_course_run_failure(
     mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
     with pytest.raises(expected_exception):
         unenroll_edx_course_run(run_enrollment)
+
+
+@responses.activate
+def test_update_user_name_calls_right_edx_update_api(settings, user):
+    """Test that update_edx_user calls the right edx api to update the name there"""
+    settings.OPENEDX_API_BASE_URL = "http://example.com"
+    new_user_name = "Test Name"
+    OpenEdxApiAuthFactory.create(user=user)
+    responses.add(
+        responses.PATCH,
+        f"{settings.OPENEDX_API_BASE_URL}{OPENEDX_UPDATE_USER_ACCOUNT_PATH.format(username=user.username)}",
+        json=dict(name=new_user_name),
+        status=status.HTTP_200_OK,
+    )
+    update_edx_user_name(user)
+    assert len(responses.calls) == 1

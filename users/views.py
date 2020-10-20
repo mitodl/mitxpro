@@ -6,9 +6,9 @@ from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from courseware import tasks
 from mitxpro.permissions import UserIsOwnerPermission
 from mitxpro.utils import now_in_utc
-from users import api
 from users.models import User, ChangeEmailRequest
 from users.serializers import (
     PublicUserSerializer,
@@ -45,12 +45,12 @@ class CurrentUserRetrieveUpdateViewSet(
     def update(self, request, *args, **kwargs):
         with transaction.atomic():
             user_name = request.user.name
-            user_update_response = super(CurrentUserRetrieveUpdateViewSet, self).update(
+            update_result = super(CurrentUserRetrieveUpdateViewSet, self).update(
                 request, *args, **kwargs
             )
             if user_name != request.data.get("name"):
-                api.update_edx_user(request.user)
-            return user_update_response
+                tasks.change_edx_user_name_async.delay(request.user.id)
+            return update_result
 
 
 class ChangeEmailRequestViewSet(
