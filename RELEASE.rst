@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.64.0 (Released October 20, 2020)
+--------------
+
+- fix minimist security alert
+
 Version 0.63.1 (Released October 15, 2020)
 --------------
 
