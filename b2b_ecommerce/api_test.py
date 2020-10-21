@@ -148,7 +148,7 @@ def test_complete_b2b_order(mocker, contract_number, b2b_coupon_code):
         num_coupon_codes=order.num_seats,
         coupon_type=CouponPaymentVersion.SINGLE_USE,
         payment_type=CouponPaymentVersion.PAYMENT_SALE,
-        payment_transaction=order.reference_number,
+        payment_transaction=order.contract_number or order.reference_number,
     )
     send_email_mock.assert_called_once_with(order)
 
