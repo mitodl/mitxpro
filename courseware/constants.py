@@ -15,3 +15,4 @@ PRO_ENROLL_MODE_ERROR_TEXTS = (
 )
 # The amount of minutes after creation that a courseware model record should be eligible for repair
 COURSEWARE_REPAIR_GRACE_PERIOD_MINS = 5
+OPENEDX_UPDATE_USER_ACCOUNT_PATH = "/api/user/v1/accounts/{username}"

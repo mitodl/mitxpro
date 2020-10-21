@@ -23,6 +23,7 @@ from courseware.exceptions import (
     NoEdxApiAuthError,
     EdxApiEnrollErrorException,
     UnknownEdxApiEnrollException,
+    UserNameUpdateFailedException,
 )
 from courseware.models import CoursewareUser, OpenEdxApiAuth
 from courseware.constants import (
@@ -31,6 +32,7 @@ from courseware.constants import (
     EDX_ENROLLMENT_AUDIT_MODE,
     PRO_ENROLL_MODE_ERROR_TEXTS,
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
+    OPENEDX_UPDATE_USER_ACCOUNT_PATH,
 )
 from courseware.utils import edx_url
 from mitxpro.utils import (
@@ -599,3 +601,29 @@ def unenroll_edx_course_run(run_enrollment):
         raise UnknownEdxApiEnrollException(run_enrollment.user, run_enrollment.run, exc)
     else:
         return deactivated_enrollment
+
+
+def update_edx_user_name(user):
+    """
+    Makes a request to update user's name on edx if changed in xPRO
+
+    Args:
+        user (user.models.User): the application user
+    """
+
+    edx_api = get_edx_api_client(user)
+    req_session = edx_api.get_requester()
+    req_session.headers.update(
+        {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/merge-patch+json",
+        }
+    )
+    url = edx_url(OPENEDX_UPDATE_USER_ACCOUNT_PATH.format(username=user.username))
+    data = dict(name=user.name)
+    resp = req_session.patch(url, json=data)
+    if resp.status_code != status.HTTP_200_OK:
+        raise UserNameUpdateFailedException(
+            f"Error updating Open edX user name. {get_error_response_summary(resp)}"
+        )

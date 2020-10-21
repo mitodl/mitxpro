@@ -65,3 +65,7 @@ class UnknownEdxApiEnrollException(Exception):
                 str(base_exc),
             )
         super().__init__(msg)
+
+
+class UserNameUpdateFailedException(Exception):
+    """Raised if a user's profile name(Full Name) update call is failed"""

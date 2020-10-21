@@ -3,11 +3,13 @@ from datetime import timedelta
 import pytest
 
 from django.urls import reverse
+from factory import fuzzy
 from rest_framework import status
 from social_django.models import UserSocialAuth
 
 from mitxpro.test_utils import drf_datetime
 from mitxpro.utils import now_in_utc
+from users.api import User
 from users.factories import UserFactory
 from users.models import ChangeEmailRequest
 
@@ -208,3 +210,60 @@ def test_update_email_change_request_invalid_token(user_drf_client):
     """Test that invalid token doesn't work"""
     resp = user_drf_client.patch("/api/change-emails/abc/", data={"confirmed": True})
     assert resp.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_update_user_name_change(mocker, user_client, user, valid_address_dict):
+    """Test that updating user's name is properly reflected in xPRO"""
+    new_name = fuzzy.FuzzyText(prefix="Test-").fuzz()
+    mocker.patch("courseware.api.update_edx_user_name")
+    payload = {
+        "name": new_name,
+        "email": user.email,
+        "legal_address": valid_address_dict,
+    }
+
+    resp = user_client.patch(
+        reverse("users_api-me"), content_type="application/json", data=payload
+    )
+
+    assert resp.status_code == status.HTTP_200_OK
+    # Checks that returned response has updated name
+    assert resp.data["name"] == new_name
+    # Checks that user's name in database is also updated
+    assert User.objects.get(pk=user.pk).name == new_name
+
+
+def test_update_user_name_change_edx(mocker, user_client, user, valid_address_dict):
+    """Test that PATCH on user/me also calls update user's name api in edX if there is a name change in xPRO"""
+    new_name = fuzzy.FuzzyText(prefix="Test-").fuzz()
+    update_edx_mock = mocker.patch("courseware.api.update_edx_user_name")
+    payload = {
+        "name": new_name,
+        "email": user.email,
+        "legal_address": valid_address_dict,
+    }
+    resp = user_client.patch(
+        reverse("users_api-me"), content_type="application/json", data=payload
+    )
+
+    assert resp.status_code == status.HTTP_200_OK
+    # Checks that update edx user was called and only once when there was a change in user's name(Full Name)
+    update_edx_mock.assert_called_once_with(user)
+
+
+def test_update_user_no_name_change_edx(mocker, user_client, user, valid_address_dict):
+    """Test that PATCH on user/me without name change doesn't call update user's name in edX"""
+    update_edx_mock = mocker.patch("courseware.api.update_edx_user_name")
+    resp = user_client.patch(
+        reverse("users_api-me"),
+        content_type="application/json",
+        data={
+            "name": user.name,
+            "email": user.email,
+            "legal_address": valid_address_dict,
+        },
+    )
+
+    assert resp.status_code == status.HTTP_200_OK
+    # Checks that update edx user was called not called when there is no change in user's name(Full Name)
+    update_edx_mock.assert_not_called()

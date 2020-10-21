@@ -1,10 +1,12 @@
 """User views"""
 import pycountry
+from django.db import transaction
 from oauth2_provider.contrib.rest_framework import IsAuthenticatedOrTokenHasScope
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from courseware import tasks
 from mitxpro.permissions import UserIsOwnerPermission
 from mitxpro.utils import now_in_utc
 from users.models import User, ChangeEmailRequest
@@ -39,6 +41,16 @@ class CurrentUserRetrieveUpdateViewSet(
         """Returns the current request user"""
         # NOTE: this may be a logged in or anonymous user
         return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        with transaction.atomic():
+            user_name = request.user.name
+            update_result = super(CurrentUserRetrieveUpdateViewSet, self).update(
+                request, *args, **kwargs
+            )
+            if user_name != request.data.get("name"):
+                tasks.change_edx_user_name_async.delay(request.user.id)
+            return update_result
 
 
 class ChangeEmailRequestViewSet(
