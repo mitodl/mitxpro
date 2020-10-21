@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.64.2
+--------------
+
+- Synced xpro user name change with edX (#1958)
+- prioritize contract_number to be used as payment_transaction
+
 Version 0.64.1 (Released October 20, 2020)
 --------------
 
