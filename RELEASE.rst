@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.64.2
+Version 0.64.2 (Released October 22, 2020)
 --------------
 
 - Synced xpro user name change with edX (#1958)
