@@ -23,7 +23,8 @@ import {
 import { authSelector } from "../../../lib/queries/auth"
 import {
   qsVerificationCodeSelector,
-  qsPartialTokenSelector
+  qsPartialTokenSelector,
+  qsSelector
 } from "../../../lib/selectors"
 
 import type { RouterHistory, Location } from "react-router"
@@ -86,18 +87,12 @@ export class RegisterConfirmPage extends React.Component<Props> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  auth:   authSelector,
-  params: createStructuredSelector({
-    verificationCode: qsVerificationCodeSelector,
-    partialToken:     qsPartialTokenSelector
-  })
+  auth:     authSelector,
+  qsParams: qsSelector
 })
 
-const registerConfirmEmail = (code: string, partialToken: string) =>
-  mutateAsync(queries.auth.registerConfirmEmailMutation(code, partialToken))
-
-const mapPropsToConfig = ({ params: { verificationCode, partialToken } }) =>
-  registerConfirmEmail(verificationCode, partialToken)
+const mapPropsToConfig = ({ qsParams }) =>
+  mutateAsync(queries.auth.registerConfirmEmailMutation(qsParams))
 
 const mapDispatchToProps = {
   addUserNotification

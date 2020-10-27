@@ -53,13 +53,12 @@ export default {
     body: { email, recaptcha, next, flow: FLOW_REGISTER }
   }),
 
-  registerConfirmEmailMutation: (code: string, partialToken: string) => ({
+  registerConfirmEmailMutation: (qsParams: Object) => ({
     ...DEFAULT_OPTIONS,
     url:  "/api/register/confirm/",
     body: {
-      verification_code: code,
-      partial_token:     partialToken,
-      flow:              FLOW_REGISTER
+      flow: FLOW_REGISTER,
+      ...qsParams
     }
   }),
 

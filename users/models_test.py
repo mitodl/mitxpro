@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 import pytest
 
+from affiliate.factories import AffiliateFactory
 from courseware.factories import OpenEdxApiAuthFactory, CoursewareUserFactory
 from users.factories import UserFactory
 from users.models import LegalAddress, User
@@ -41,6 +42,23 @@ def test_create_user(
         assert user.check_password(password)
 
     assert LegalAddress.objects.filter(user=user).exists()
+
+
+def test_create_user_affiliate():
+    """create_user should create a new affiliate tracking record if an affiliate id was passed in the kwargs"""
+    affiliate = AffiliateFactory.create()
+    with transaction.atomic():
+        user = User.objects.create_user(
+            "username1",
+            email="a@b.com",
+            name="Jane Doe",
+            password="asdfghjkl1",
+            affiliate_id=affiliate.id,
+        )
+    affiliate_referral_action = user.affiliate_user_actions.first()
+    assert affiliate_referral_action is not None
+    assert affiliate_referral_action.affiliate == affiliate
+    assert affiliate_referral_action.created_user == user
 
 
 @pytest.mark.parametrize(

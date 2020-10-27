@@ -189,6 +189,7 @@ INSTALLED_APPS = (
     "compliance",
     "courseware",
     "sheets",
+    "affiliate",
     # must be after "users" to pick up custom user model
     "compat",
     "hijack",
@@ -212,6 +213,7 @@ if not DISABLE_WEBPACK_LOADER_STATS:
 MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "affiliate.middleware.AffiliateMiddleware",
     "oauth2_provider.middleware.OAuth2TokenMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
