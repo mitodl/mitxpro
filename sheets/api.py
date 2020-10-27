@@ -4,6 +4,7 @@ import json
 import datetime
 import pickle
 import logging
+from collections import namedtuple
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -21,9 +22,10 @@ from google.oauth2.service_account import (
 from google.auth.transport.requests import Request  # pylint: disable-all
 from googleapiclient.discovery import build
 import pygsheets
+from googleapiclient.errors import HttpError
 
 from mitxpro.utils import now_in_utc
-from sheets.models import GoogleApiAuth, GoogleFileWatch
+from sheets.models import GoogleApiAuth, GoogleFileWatch, FileWatchRenewalAttempt
 from sheets.constants import (
     GOOGLE_TOKEN_URI,
     REQUIRED_GOOGLE_API_SCOPES,
@@ -35,6 +37,7 @@ from sheets.constants import (
     SHEET_TYPE_ENROLL_CHANGE,
     WORKSHEET_TYPE_REFUND,
     SHEET_TYPE_COUPON_ASSIGN,
+    SHEET_RENEWAL_RECORD_LIMIT,
 )
 from sheets.utils import (
     format_datetime_for_google_timestamp,
@@ -49,6 +52,10 @@ from sheets.exceptions import FailedBatchRequestException
 log = logging.getLogger(__name__)
 
 DEV_TOKEN_PATH = "localdev/google.token"
+FileWatchSpec = namedtuple(
+    "FileWatchSpec",
+    ["sheet_metadata", "sheet_file_id", "channel_id", "handler_url", "force"],
+)
 
 
 def get_google_creds_from_pickled_token_file(token_file_path):
@@ -399,6 +406,69 @@ def request_file_watch(
     )
 
 
+def _generate_channel_id(sheet_metadata, sheet_file_id=None, dt=None):
+    """
+    Generates a string channel id based on several spreadsheet attributes. The channel id is an identifier
+    used in the Google file watch API.
+
+    Args:
+        sheet_metadata (SheetMetadata):
+        sheet_file_id (str): The file id of the spreadsheet
+        dt (Optional[datetime.datetime]): The date and time when the file watch was created
+
+    Returns:
+        str: The channel id to be used in the Google file watch API
+    """
+    dt = dt or now_in_utc()
+    new_channel_id_segments = [
+        settings.DRIVE_WEBHOOK_CHANNEL_ID,
+        sheet_metadata.sheet_type,
+        dt.strftime("%Y%m%d-%H%M%S"),
+    ]
+    if isinstance(sheet_metadata, CouponAssignSheetMetadata):
+        new_channel_id_segments.insert(2, sheet_file_id)
+    return "-".join(new_channel_id_segments)
+
+
+def _track_file_watch_renewal(sheet_type, sheet_file_id, exception=None):
+    """
+    Creates a record of the attempt to update a Google file watch. This is used for
+    debugging purposes as the renewal endpoint is flaky.
+
+    Args:
+        sheet_type (str): The type of spreadsheet
+        sheet_file_id (str): The file id of the spreadsheet
+        exception (Optional[Exception]): The exception raised when trying to renew the file watch
+    """
+    result = None
+    result_status_code = None
+    if exception is None:
+        result_status_code = 200
+    else:
+        if isinstance(exception, HttpError):
+            result_status_code = exception.resp.status
+            exc_content = json.loads(exception.content.decode("utf-8"))
+            if "error" in exc_content:
+                result = exc_content["error"]["message"]
+        if not result:
+            result = str(exception)[0:300]
+    FileWatchRenewalAttempt.objects.create(
+        sheet_type=sheet_type,
+        sheet_file_id=sheet_file_id,
+        result=result,
+        result_status_code=result_status_code,
+    )
+    # Clear out old records. We only need to keep a record of renewal attempts for debugging recent errors.
+    existing_attempt_ids = (
+        FileWatchRenewalAttempt.objects.filter(sheet_file_id=sheet_file_id)
+        .order_by("-id")
+        .values_list("id", flat=True)
+    )
+    if len(existing_attempt_ids) > SHEET_RENEWAL_RECORD_LIMIT:
+        id_to_delete = existing_attempt_ids[SHEET_RENEWAL_RECORD_LIMIT]
+        FileWatchRenewalAttempt.objects.filter(id__lte=id_to_delete).delete()
+
+
 def create_or_renew_sheet_file_watch(sheet_metadata, force=False, sheet_file_id=None):
     """
     Creates or renews a file watch on a spreadsheet depending on the existence
@@ -418,22 +488,18 @@ def create_or_renew_sheet_file_watch(sheet_metadata, force=False, sheet_file_id=
             whether or not it was updated during execution.
     """
     now = now_in_utc()
+    sheet_file_id = sheet_file_id or sheet_metadata.sheet_file_id
+    new_channel_id = _generate_channel_id(
+        sheet_metadata, sheet_file_id=sheet_file_id, dt=now
+    )
+    handler_url = (
+        sheet_metadata.handler_url_stub(file_id=sheet_file_id)
+        if isinstance(sheet_metadata, CouponAssignSheetMetadata)
+        else sheet_metadata.handler_url_stub()
+    )
     min_fresh_expiration_date = now + datetime.timedelta(
         minutes=settings.DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES
     )
-    sheet_file_id = sheet_file_id or sheet_metadata.sheet_file_id
-    new_channel_id_segments = [
-        settings.DRIVE_WEBHOOK_CHANNEL_ID,
-        sheet_metadata.sheet_type,
-        now.strftime("%Y%m%d-%H%M%S"),
-    ]
-    if isinstance(sheet_metadata, CouponAssignSheetMetadata):
-        new_channel_id_segments.insert(2, sheet_file_id)
-        handler_url = sheet_metadata.handler_url_stub(file_id=sheet_file_id)
-    else:
-        handler_url = sheet_metadata.handler_url_stub()
-    new_channel_id = "-".join(new_channel_id_segments)
-
     with transaction.atomic():
         file_watch, created = GoogleFileWatch.objects.select_for_update().get_or_create(
             file_id=sheet_file_id,
@@ -453,16 +519,24 @@ def create_or_renew_sheet_file_watch(sheet_metadata, force=False, sheet_file_id=
         if file_watch.expiration_date < now:
             log.error(
                 "Current file watch in the database for %s is expired. "
-                "Some file changes may have failed to trigger a push notification (%s)",
+                "Some file changes may have failed to trigger a push notification (%s, file id: %s)",
                 sheet_metadata.sheet_name,
                 file_watch,
+                sheet_file_id,
             )
         expiration = now + datetime.timedelta(
             minutes=settings.DRIVE_WEBHOOK_EXPIRATION_MINUTES
         )
-        resp_dict = request_file_watch(
-            sheet_file_id, new_channel_id, handler_url, expiration=expiration
-        )
+        try:
+            resp_dict = request_file_watch(
+                sheet_file_id, new_channel_id, handler_url, expiration=expiration
+            )
+        except HttpError as exc:
+            _track_file_watch_renewal(
+                sheet_metadata.sheet_type, sheet_file_id, exception=exc
+            )
+        else:
+            _track_file_watch_renewal(sheet_metadata.sheet_type, sheet_file_id)
         log.info(
             "File watch request for push notifications on %s completed. Response: %s",
             sheet_metadata.sheet_name,

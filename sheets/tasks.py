@@ -6,6 +6,7 @@ from itertools import chain, repeat
 
 from googleapiclient.errors import HttpError
 from django.conf import settings
+import celery
 
 from ecommerce.models import BulkCouponAssignment
 from mitxpro.celery import app
@@ -17,11 +18,11 @@ from sheets import (
     refund_request_api,
     deferral_request_api,
 )
-from sheets.constants import ASSIGNMENT_SHEET_ENROLLED_STATUS
-from sheets.utils import (
-    request_sheet_metadata,
-    assign_sheet_metadata,
-    refund_sheet_metadata,
+from sheets.constants import (
+    ASSIGNMENT_SHEET_ENROLLED_STATUS,
+    SHEET_TYPE_COUPON_REQUEST,
+    SHEET_TYPE_ENROLL_CHANGE,
+    SHEET_TYPE_COUPON_ASSIGN,
 )
 
 log = logging.getLogger(__name__)
@@ -213,40 +214,52 @@ def set_assignment_rows_to_enrolled(sheet_update_map):
     return result_summary
 
 
-@app.task(autoretry_for=(HttpError,), retry_kwargs={"max_retries": 3, "countdown": 5})
-def renew_file_watches():
+@app.task(
+    autoretry_for=(HttpError,),
+    retry_kwargs={"max_retries": 3, "countdown": 5},
+    rate_limit="6/m",
+)
+def renew_file_watch(*, sheet_type, file_id):
     """
-    Renews push notifications for changes to certain files via the Google API.
+    Renews push notifications for changes to a certain spreadsheet via the Google API.
     """
-    assignment_sheet_ids_to_renew = (
-        coupon_assign_api.fetch_webhook_eligible_assign_sheet_ids()
-    )
-    metadata_file_id_pairs = chain(
-        # The coupon request and enrollment change request sheets are singletons.
-        # It's not necessary to specify their file id here.
-        [(request_sheet_metadata, None)],
-        [(refund_sheet_metadata, None)],
-        zip(
-            repeat(assign_sheet_metadata, len(assignment_sheet_ids_to_renew)),
-            assignment_sheet_ids_to_renew,
-        ),
-    )
-    # This task is run on a schedule and ensures that there is an unexpired file watch
+    sheet_metadata = sheets_api.get_sheet_metadata_from_type(sheet_type)
+    # These renewal tasks are run on a schedule and ensure that there is an unexpired file watch
     # on each sheet we want to watch. If a file watch was manually created/updated at any
     # point, this task might be run while that file watch is still unexpired. If the file
     # watch renewal was skipped, the task might not run again until after expiration. To
     # avoid that situation, the file watch is always renewed here (force=True).
-    results = []
-    for sheet_metadata, file_id in metadata_file_id_pairs:
-        file_watch, created, _ = sheets_api.create_or_renew_sheet_file_watch(
-            sheet_metadata, force=True, sheet_file_id=file_id
-        )
-        results.append(
-            {
-                "type": sheet_metadata.sheet_type,
-                "file_watch_channel_id": file_watch.channel_id,
-                "file_watch_file_id": file_watch.file_id,
-                "created": created,
-            }
-        )
-    return results
+    file_watch, created, _ = sheets_api.create_or_renew_sheet_file_watch(
+        sheet_metadata, force=True, sheet_file_id=file_id
+    )
+    return {
+        "type": sheet_metadata.sheet_type,
+        "file_watch_channel_id": file_watch.channel_id,
+        "file_watch_file_id": file_watch.file_id,
+        "created": created,
+    }
+
+
+def renew_all_file_watches():
+    """
+    Renews push notifications for changes to all relevant spreadsheets via the Google API.
+    """
+    assignment_sheet_ids_to_renew = (
+        coupon_assign_api.fetch_webhook_eligible_assign_sheet_ids()
+    )
+    sheet_type_file_id_pairs = chain(
+        # The coupon request and enrollment change request sheets are singletons.
+        # It's not necessary to specify their file id here.
+        [(SHEET_TYPE_COUPON_REQUEST, None)],
+        [(SHEET_TYPE_ENROLL_CHANGE, None)],
+        zip(
+            repeat(SHEET_TYPE_COUPON_ASSIGN, len(assignment_sheet_ids_to_renew)),
+            assignment_sheet_ids_to_renew,
+        ),
+    )
+    celery.group(
+        *[
+            renew_file_watch.s(sheet_type=sheet_type, file_id=file_id)
+            for sheet_type, file_id in sheet_type_file_id_pairs
+        ]
+    )()
