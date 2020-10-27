@@ -6,6 +6,7 @@ import pytest
 from social_core.backends.email import EmailAuth
 from social_django.utils import load_strategy, load_backend
 
+from affiliate.factories import AffiliateFactory
 from users.factories import UserFactory
 from authentication.pipeline import user as user_actions
 from authentication.exceptions import (
@@ -43,6 +44,7 @@ def mock_email_backend(mocker, backend_settings):
 def mock_create_user_strategy(mocker):
     """Fixture that returns a valid strategy for create_user_via_email"""
     strategy = mocker.Mock()
+    strategy.request = mocker.Mock(affiliate_code=None)
     strategy.request_data.return_value = {
         "name": "Jane Doe",
         "password": "password1",
@@ -379,6 +381,35 @@ def test_create_user_via_email_create_fail(
             flow=SocialAuthState.FLOW_REGISTER,
         )
     patched_create_user.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_create_user_via_email_affiliate(
+    mocker, mock_create_user_strategy, mock_email_backend
+):
+    """
+    create_user_via_email passes an affiliate id into the user serializer if the affiliate code exists
+    on the request object
+    """
+    affiliate = AffiliateFactory.create()
+    mock_create_user_strategy.request.affiliate_code = affiliate.code
+    patched_create_user = mocker.patch(
+        "authentication.pipeline.user.create_user_with_generated_username",
+        return_value=UserFactory.build(),
+    )
+    user_actions.create_user_via_email(
+        mock_create_user_strategy,
+        mock_email_backend,
+        details=dict(email="someuser@example.com"),
+        pipeline_index=0,
+        flow=SocialAuthState.FLOW_REGISTER,
+    )
+    patched_create_user.assert_called_once()
+    # Confirm that a UserSerializer object was passed to create_user_with_generated_username, and
+    # that it was instantiated with the affiliate id in the context.
+    serializer = patched_create_user.call_args_list[0][0][0]
+    assert "affiliate_id" in serializer.context
+    assert serializer.context["affiliate_id"] == affiliate.id
 
 
 @pytest.mark.django_db

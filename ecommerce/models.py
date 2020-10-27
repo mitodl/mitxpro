@@ -20,7 +20,6 @@ from mitxpro.models import (
     PrefetchGenericQuerySet,
 )
 from mitxpro.utils import serialize_model_object, first_or_none
-from users.models import User
 from mail.constants import MAILGUN_EVENT_CHOICES
 
 log = logging.getLogger()
@@ -695,7 +694,7 @@ class DataConsentUser(TimestampedModel):
     User required to sign an agreement, and the signing date if any.
     """
 
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     agreement = models.ForeignKey(DataConsentAgreement, on_delete=models.PROTECT)
     coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
     consent_date = models.DateTimeField(null=True)

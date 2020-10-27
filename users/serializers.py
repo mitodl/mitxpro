@@ -250,7 +250,11 @@ class UserSerializer(serializers.ModelSerializer):
 
         with transaction.atomic():
             user = User.objects.create_user(
-                username, email=email, password=password, **validated_data
+                username,
+                email=email,
+                password=password,
+                affiliate_id=self.context.get("affiliate_id", None),
+                **validated_data,
             )
 
             # this side-effects such that user.legal_address and user.profile are updated in-place

@@ -22,6 +22,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from affiliate.api import get_affiliate_id_from_request
 from b2b_ecommerce.api import fulfill_b2b_order
 from b2b_ecommerce.models import B2BOrder
 from courses.models import CourseRun, ProgramRun, Program, Course
@@ -173,7 +174,8 @@ class CheckoutView(APIView):
         and return information used to submit to CyberSource.
         """
         validated_basket = validate_basket_for_checkout(request.user)
-        order = create_unfulfilled_order(validated_basket)
+        affiliate_id = get_affiliate_id_from_request(request)
+        order = create_unfulfilled_order(validated_basket, affiliate_id=affiliate_id)
         base_url = request.build_absolute_uri("/")
         text_id = validated_basket.product_version.product.content_object.text_id
         receipt_url = make_receipt_url(base_url=base_url, readable_id=text_id)

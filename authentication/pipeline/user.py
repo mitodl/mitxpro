@@ -9,6 +9,7 @@ from social_core.pipeline.partial import partial
 from django.conf import settings
 from django.db import IntegrityError
 
+from affiliate.api import get_affiliate_id_from_request
 from authentication.exceptions import (
     InvalidPasswordException,
     RequirePasswordException,
@@ -93,6 +94,7 @@ def create_user_via_email(
     if user is not None:
         raise UnexpectedExistingUserException(backend, current_partial)
 
+    context = {}
     data = strategy.request_data().copy()
     if "name" not in data or "password" not in data:
         raise RequirePasswordAndPersonalInfoException(backend, current_partial)
@@ -106,7 +108,12 @@ def create_user_via_email(
     data["email"] = kwargs.get("email", kwargs.get("details", {}).get("email"))
     username = usernameify(data["name"], email=data["email"])
     data["username"] = username
-    serializer = UserSerializer(data=data)
+
+    affiliate_id = get_affiliate_id_from_request(strategy.request)
+    if affiliate_id is not None:
+        context["affiliate_id"] = affiliate_id
+
+    serializer = UserSerializer(data=data, context=context)
 
     if not serializer.is_valid():
         raise RequirePasswordAndPersonalInfoException(

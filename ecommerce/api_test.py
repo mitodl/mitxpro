@@ -15,6 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import ValidationError
 import pytest
 
+from affiliate.factories import AffiliateFactory
 from courses.models import CourseRunEnrollment, ProgramEnrollment, CourseRun, Program
 from courses.factories import (
     CourseFactory,
@@ -662,6 +663,17 @@ def test_create_unfulfilled_order_program_run(validated_basket, has_program_run)
     else:
         with pytest.raises(ObjectDoesNotExist):
             line.programrunline  # pylint: disable=pointless-statement
+
+
+def test_create_unfulfilled_order_affiliate(validated_basket):
+    """
+    create_unfulfilled_order should add a database record tracking the order creation if an affiliate id is passed in
+    """
+    affiliate = AffiliateFactory.create()
+    order = create_unfulfilled_order(validated_basket, affiliate_id=affiliate.id)
+    affiliate_referral_action = order.affiliate_order_actions.first()
+    assert affiliate_referral_action.affiliate == affiliate
+    assert affiliate_referral_action.created_order == order
 
 
 def test_get_product_courses():

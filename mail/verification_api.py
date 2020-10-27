@@ -3,6 +3,8 @@ from urllib.parse import quote_plus
 
 from django.urls import reverse
 
+from affiliate.api import get_affiliate_code_from_request
+from affiliate.constants import AFFILIATE_QS_PARAM
 from mail import api
 from mail.constants import EMAIL_VERIFICATION, EMAIL_CHANGE_EMAIL
 
@@ -24,6 +26,10 @@ def send_verification_email(
         quote_plus(code.code),
         quote_plus(partial_token),
     )
+
+    affiliate_code = get_affiliate_code_from_request(strategy.request)
+    if affiliate_code is not None:
+        url = f"{url}&{AFFILIATE_QS_PARAM}={affiliate_code}"
 
     api.send_message(
         api.message_for_recipient(

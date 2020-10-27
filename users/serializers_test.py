@@ -3,6 +3,7 @@ import pytest
 
 from rest_framework.exceptions import ValidationError
 
+from affiliate.factories import AffiliateFactory
 from users.factories import UserFactory
 from users.models import ChangeEmailRequest
 from users.serializers import ChangeEmailRequestUpdateSerializer
@@ -178,6 +179,27 @@ def test_create_user_serializer(
         mock_user_sync.assert_called_with(user.id)
     else:
         mock_user_sync.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_create_user_serializer_affiliate(sample_address):
+    """UserSerializer should create a new affiliate tracking record if an affiliate id was passed in the context"""
+    affiliate = AffiliateFactory.create()
+    serializer = UserSerializer(
+        data={
+            "username": "fakename",
+            "email": "fake@fake.edu",
+            "password": "fake",
+            "legal_address": sample_address,
+        },
+        context={"affiliate_id": affiliate.id},
+    )
+    assert serializer.is_valid()
+    user = serializer.save()
+    affiliate_referral_action = user.affiliate_user_actions.first()
+    assert affiliate_referral_action is not None
+    assert affiliate_referral_action.affiliate == affiliate
+    assert affiliate_referral_action.created_user == user
 
 
 def test_update_email_change_request_existing_email(user):

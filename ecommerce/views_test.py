@@ -15,6 +15,8 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.test import APIClient
 import factory
 
+from affiliate.constants import AFFILIATE_QS_PARAM
+from affiliate.factories import AffiliateFactory
 from courses.factories import (
     CourseRunFactory,
     CourseRunEnrollmentFactory,
@@ -298,6 +300,31 @@ def test_order_fulfilled(
         assert mock_hubspot_syncs.order.called_with(order.id)
     else:
         assert mock_hubspot_syncs.order.not_called()
+
+
+def test_order_affiliate(basket_client, mocker, basket_and_coupons):
+    """
+    The order view should pass an affiliate id into the order creation API function if an affiliate id exists
+    in the session.
+    """
+    user = basket_and_coupons.basket_item.basket.user
+    line = LineFactory.create(
+        order__status=Order.CREATED,
+        order__purchaser=user,
+        order__total_price_paid=0,
+        product_version=basket_and_coupons.product_version,
+    )
+    order = line.order
+    mocker.patch("ecommerce.api.enroll_user_in_order_items", autospec=True)
+    create_order_mock = mocker.patch(
+        "ecommerce.views.create_unfulfilled_order", autospec=True, return_value=order
+    )
+    affiliate = AffiliateFactory.create()
+    # Make an initial request to get the affiliate code in the session
+    basket_client.get(f"/?{AFFILIATE_QS_PARAM}={affiliate.code}")
+    resp = basket_client.post(reverse("checkout"))
+    assert resp.status_code == status.HTTP_200_OK
+    assert create_order_mock.call_args_list[0][1] == dict(affiliate_id=affiliate.id)
 
 
 def test_missing_fields(basket_client, mocker):

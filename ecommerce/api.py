@@ -18,6 +18,7 @@ from django.db import transaction
 from django.urls import reverse
 from rest_framework.exceptions import ValidationError
 
+from affiliate.models import AffiliateReferralAction
 from courses.api import create_run_enrollments, create_program_enrollments
 from courses.constants import (
     CONTENT_TYPE_MODEL_PROGRAM,
@@ -637,13 +638,14 @@ def get_order_programs(order):
     ]
 
 
-def create_unfulfilled_order(validated_basket):
+def create_unfulfilled_order(validated_basket, affiliate_id=None):
     """
     Create a new Order which is not fulfilled for a purchasable Product. Note that validation should
     be done in the basket REST API so the validation is not done here (different from MicroMasters).
 
     Args:
         validated_basket (ValidatedBasket): The validated Basket and related objects
+        affiliate_id (Optional[int]): The id of the Affiliate record to associate with this order
 
     Returns:
         Order: A newly created Order for the Product in the basket
@@ -674,6 +676,10 @@ def create_unfulfilled_order(validated_basket):
             )
         if validated_basket.coupon_version:
             redeem_coupon(coupon_version=validated_basket.coupon_version, order=order)
+        if affiliate_id is not None:
+            AffiliateReferralAction.objects.create(
+                affiliate_id=affiliate_id, created_order=order
+            )
     sync_hubspot_deal(order)
     return order
 

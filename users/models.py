@@ -11,6 +11,7 @@ from django.db.models import Q, Count
 from django.utils.translation import gettext_lazy as _
 import pycountry
 
+from affiliate.models import AffiliateReferralAction
 from mitxpro.models import TimestampedModel
 from mitxpro.utils import now_in_utc
 
@@ -63,7 +64,7 @@ HIGHEST_EDUCATION_CHOICES = (
 )
 
 
-def _post_create_user(user):
+def _post_create_user(user, affiliate_id=None):
     """
     Create records related to the user
 
@@ -72,6 +73,10 @@ def _post_create_user(user):
     """
     LegalAddress.objects.create(user=user)
     Profile.objects.create(user=user)
+    if affiliate_id is not None:
+        AffiliateReferralAction.objects.create(
+            affiliate_id=affiliate_id, created_user=user
+        )
 
 
 class UserManager(BaseUserManager):
@@ -86,11 +91,11 @@ class UserManager(BaseUserManager):
         fields = {**extra_fields, "email": email}
         if username is not None:
             fields["username"] = username
-
+        affiliate_id = fields.pop("affiliate_id", None)
         user = self.model(**fields)
         user.set_password(password)
         user.save(using=self._db)
-        _post_create_user(user)
+        _post_create_user(user, affiliate_id=affiliate_id)
         return user
 
     def create_user(self, username, email=None, password=None, **extra_fields):
