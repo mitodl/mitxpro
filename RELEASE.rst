@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.65.0
+Version 0.65.0 (Released October 28, 2020)
 --------------
 
 - Added support for affiliate links
