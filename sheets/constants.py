@@ -24,6 +24,7 @@ VALID_SHEET_TYPES = [
 ]
 WORKSHEET_TYPE_REFUND = "refund"
 WORKSHEET_TYPE_DEFERRAL = "defer"
+SHEET_RENEWAL_RECORD_LIMIT = 20
 
 # The index of the first row of a spreadsheet according to Google
 GOOGLE_SHEET_FIRST_ROW = 1

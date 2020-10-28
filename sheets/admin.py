@@ -64,8 +64,26 @@ class GoogleFileWatchAdmin(admin.ModelAdmin):
         return super().save_form(request, form, change)
 
 
+class FileWatchRenewalAttemptAdmin(admin.ModelAdmin):
+    """Admin for FileWatchRenewalAttempt"""
+
+    model = models.FileWatchRenewalAttempt
+    list_display = (
+        "id",
+        "sheet_type",
+        "sheet_file_id",
+        "date_attempted",
+        "result",
+        "result_status_code",
+    )
+    search_fields = ("sheet_file_id", "result")
+    list_filter = ("sheet_type", "result_status_code")
+    ordering = ("-date_attempted",)
+
+
 admin.site.register(models.CouponGenerationRequest, CouponGenerationRequestAdmin)
 admin.site.register(models.RefundRequest, RefundRequestAdmin)
 admin.site.register(models.DeferralRequest, DeferralRequestAdmin)
 admin.site.register(models.GoogleApiAuth, GoogleApiAuthAdmin)
 admin.site.register(models.GoogleFileWatch, GoogleFileWatchAdmin)
+admin.site.register(models.FileWatchRenewalAttempt, FileWatchRenewalAttemptAdmin)

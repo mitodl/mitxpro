@@ -2,8 +2,10 @@
 from django.conf import settings
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.db.models import DateTimeField, Model, PositiveSmallIntegerField
 
 from mitxpro.models import TimestampedModel, SingletonModel
+from sheets.constants import VALID_SHEET_TYPES
 
 
 class GoogleApiAuth(TimestampedModel, SingletonModel):
@@ -102,3 +104,20 @@ class GoogleFileWatch(TimestampedModel):
         return "GoogleFileWatch: id={}, channel_id={}, file_id={}, expires={}".format(
             self.id, self.channel_id, self.file_id, self.expiration_date.isoformat()
         )
+
+
+class FileWatchRenewalAttempt(Model):
+    """
+    Tracks attempts to renew a Google file watch. Used for debugging flaky endpoint.
+    """
+
+    sheet_type = models.CharField(
+        max_length=30,
+        choices=zip(VALID_SHEET_TYPES, VALID_SHEET_TYPES),
+        db_index=True,
+        null=False,
+    )
+    sheet_file_id = models.CharField(max_length=100, db_index=True, null=False)
+    date_attempted = DateTimeField(auto_now_add=True)
+    result = models.CharField(max_length=300, null=True, blank=True)
+    result_status_code = PositiveSmallIntegerField(null=True, blank=True)

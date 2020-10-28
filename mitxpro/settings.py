@@ -815,8 +815,8 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 if FEATURES.get("COUPON_SHEETS"):
-    CELERY_BEAT_SCHEDULE["renew_file_watches"] = {
-        "task": "sheets.tasks.renew_file_watches",
+    CELERY_BEAT_SCHEDULE["renew_all_file_watches"] = {
+        "task": "sheets.tasks.renew_all_file_watches",
         "schedule": (
             DRIVE_WEBHOOK_EXPIRATION_MINUTES - DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES
         )
