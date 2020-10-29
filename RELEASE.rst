@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.65.1
+Version 0.65.1 (Released October 29, 2020)
 --------------
 
 - Improved task execution and added tracking for sheets file watch renewal
