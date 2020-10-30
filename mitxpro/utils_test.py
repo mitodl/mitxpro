@@ -36,6 +36,8 @@ from mitxpro.utils import (
     request_get_with_timeout_retry,
     get_error_response_summary,
     is_json_response,
+    first_matching_item,
+    matching_item_index,
 )
 from mitxpro.test_utils import MockResponse
 
@@ -177,6 +179,23 @@ def test_partition_to_lists():
 def test_remove_password_from_url(url, expected):
     """Assert that the url is parsed and the password is not present in the returned value, if provided"""
     assert remove_password_from_url(url) == expected
+
+
+def test_first_matching_item():
+    """first_matching_item should return an item that matches a predicate, or None"""
+    assert first_matching_item(["a", "b", "c", "b"], lambda x: x == "b") == "b"
+    number_iter = (i for i in [2, 4, 6, 8, 9, 10])
+    assert first_matching_item(number_iter, lambda i: i % 2 == 1) == 9
+    assert first_matching_item([1, 2, 3, 4, 5], lambda i: i == 6) is None
+
+
+def test_matching_item_index():
+    """matching_item_index should return the index of an item equal to the given value, or raises an exception"""
+    assert matching_item_index(["a", "b", "c", "d"], "b") == 1
+    with pytest.raises(StopIteration):
+        matching_item_index(["a", "b", "c", "d"], "e")
+    number_iter = (i for i in [0, 1, 2, 3, 4])
+    assert matching_item_index(number_iter, 2) == 2
 
 
 def test_first_or_none():

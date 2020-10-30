@@ -9,6 +9,7 @@ import pytz
 from django.conf import settings
 from django.urls import reverse
 
+from mitxpro.utils import matching_item_index
 from sheets.constants import (
     GOOGLE_AUTH_URI,
     GOOGLE_TOKEN_URI,
@@ -220,14 +221,15 @@ class CouponAssignSheetMetadata(
             "Email (Assignee)",
             "Status",
             "Status Date",
+            "Enrollment URL",
         ]
         self.non_input_column_indices = {0, 2, 3}
         self.num_columns = len(self.column_headers)
 
+        self.ENROLL_CODE_COL = matching_item_index(self.column_headers, "Coupon Code")
+        self.STATUS_COL = matching_item_index(self.column_headers, "Status")
+        self.ENROLL_URL_COL = matching_item_index(self.column_headers, "Enrollment URL")
         self.LAST_COL_LETTER = get_column_letter(self.num_columns - 1)
-        self.STATUS_COL = next(
-            i for i, header in enumerate(self.column_headers) if header == "Status"
-        )
 
 
 request_sheet_metadata = CouponRequestSheetMetadata()

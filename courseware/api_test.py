@@ -562,11 +562,14 @@ def test_unenroll_edx_course_run_failure(
 
 
 @responses.activate
-def test_update_user_name_calls_right_edx_update_api(settings, user):
+def test_update_user_name_api_call(mocker, settings, user):
     """Test that update_edx_user calls the right edx api to update the name there"""
     settings.OPENEDX_API_BASE_URL = "http://example.com"
     new_user_name = "Test Name"
-    OpenEdxApiAuthFactory.create(user=user)
+    auth = OpenEdxApiAuthFactory.create(user=user)
+    mock_refresh = mocker.patch(
+        "courseware.api.get_valid_edx_api_auth", return_value=auth
+    )
     responses.add(
         responses.PATCH,
         f"{settings.OPENEDX_API_BASE_URL}{OPENEDX_UPDATE_USER_ACCOUNT_PATH.format(username=user.username)}",
@@ -574,4 +577,5 @@ def test_update_user_name_calls_right_edx_update_api(settings, user):
         status=status.HTTP_200_OK,
     )
     update_edx_user_name(user)
+    mock_refresh.assert_called_once()
     assert len(responses.calls) == 1
