@@ -483,7 +483,7 @@ def create_or_renew_sheet_file_watch(sheet_metadata, force=False, sheet_file_id=
             URL. If the spreadsheet being watched is a singleton, this isn't necessary.
 
     Returns:
-        (GoogleFileWatch, bool, bool): The GoogleFileWatch object, a flag indicating
+        (Optional[GoogleFileWatch], bool, bool): The GoogleFileWatch object (or None), a flag indicating
             whether or not it was newly created during execution, and a flag indicating
             whether or not it was updated during execution.
     """
@@ -535,6 +535,7 @@ def create_or_renew_sheet_file_watch(sheet_metadata, force=False, sheet_file_id=
             _track_file_watch_renewal(
                 sheet_metadata.sheet_type, sheet_file_id, exception=exc
             )
+            return None, False, False
         else:
             _track_file_watch_renewal(sheet_metadata.sheet_type, sheet_file_id)
         log.info(

@@ -234,12 +234,13 @@ def renew_file_watch(*, sheet_type, file_id):
     )
     return {
         "type": sheet_metadata.sheet_type,
-        "file_watch_channel_id": file_watch.channel_id,
-        "file_watch_file_id": file_watch.file_id,
+        "file_watch_channel_id": getattr(file_watch, "channel_id"),
+        "file_watch_file_id": getattr(file_watch, "file_id"),
         "created": created,
     }
 
 
+@app.task()
 def renew_all_file_watches():
     """
     Renews push notifications for changes to all relevant spreadsheets via the Google API.

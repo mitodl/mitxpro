@@ -13,6 +13,7 @@ from sheets.api import (
 )
 from sheets.coupon_assign_api import fetch_webhook_eligible_assign_sheet_ids
 from sheets.constants import VALID_SHEET_TYPES, SHEET_TYPE_COUPON_ASSIGN
+from sheets.models import FileWatchRenewalAttempt
 
 SheetMap = namedtuple("SheetMap", ["metadata", "file_ids"])
 FileWatchResult = namedtuple(
@@ -106,32 +107,36 @@ class Command(BaseCommand):
         file_watch_results = []
         for sheet_type, sheet_map in sheet_dict.items():
             for file_id in sheet_map.file_ids:
-                try:
-                    file_watch, created, updated = create_or_renew_sheet_file_watch(
-                        sheet_map.metadata,
-                        force=options["force"],
-                        sheet_file_id=file_id,
+                file_watch, created, updated = create_or_renew_sheet_file_watch(
+                    sheet_map.metadata, force=options["force"], sheet_file_id=file_id
+                )
+                file_watch_results.append(
+                    FileWatchResult(
+                        file_watch=file_watch,
+                        metadata=sheet_map.metadata,
+                        created=created,
+                        updated=updated,
                     )
-                    file_watch_results.append(
-                        FileWatchResult(
-                            file_watch=file_watch,
-                            metadata=sheet_map.metadata,
-                            created=created,
-                            updated=updated,
-                        )
-                    )
-                except HttpError as exc:
-                    self.stdout.write(
-                        self.style.ERROR(
-                            "Request to create/renew file watch for {} failed.\nResponse [{}]: {}".format(
-                                sheet_map.metadata.sheet_name, exc.resp["status"], exc
-                            )
-                        )
-                    )
+                )
 
         # Output the results, and post-process if necessary
         for file_watch_result in file_watch_results:
             file_watch = file_watch_result.file_watch
+            if file_watch is None:
+                renewal_attempt = (
+                    FileWatchRenewalAttempt.objects.filter().order_by("-id").first()
+                )
+                error_msg = (
+                    ""
+                    if renewal_attempt is None
+                    else "\n[{}] {}".format(
+                        renewal_attempt.result_status_code, renewal_attempt.result
+                    )
+                )
+                self.style.ERROR(
+                    "Failed to create/update file watch.{}".format(error_msg)
+                )
+                continue
             if file_watch_result.created:
                 desc = "created"
             elif file_watch_result.updated:
