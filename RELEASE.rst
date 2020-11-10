@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.66.0
+Version 0.66.0 (Released November 10, 2020)
 --------------
 
 - Added task decorator to file watch renewal task and fixed exception handling
