@@ -164,6 +164,8 @@ def test_get_course_runs(user_drf_client, course_runs):
     resp = user_drf_client.get(reverse("course_runs_api-list"))
     course_runs_data = resp.json()
     assert len(course_runs_data) == len(course_runs)
+    # Force sorting by run id since this test has been flaky
+    course_runs_data = sorted(course_runs_data, key=op.itemgetter("id"))
     for course_run, course_run_data in zip(course_runs, course_runs_data):
         assert course_run_data == CourseRunSerializer(course_run).data
 
