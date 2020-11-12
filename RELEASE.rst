@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.66.1
+--------------
+
+- Fixed flaky course runs test
+
 Version 0.66.0 (Released November 10, 2020)
 --------------
 
