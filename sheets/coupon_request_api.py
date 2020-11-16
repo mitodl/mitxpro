@@ -10,6 +10,7 @@ from django.utils.functional import cached_property
 
 import ecommerce.api
 from ecommerce.models import Company, Coupon, CouponPaymentVersion, BulkCouponAssignment
+from ecommerce.utils import make_checkout_url
 from mitxpro.utils import now_in_utc, item_at_index_or_none, item_at_index_or_blank
 from sheets.api import (
     get_authorized_pygsheets_client,
@@ -29,6 +30,7 @@ from sheets.utils import (
     request_sheet_metadata,
     assign_sheet_metadata,
     ResultType,
+    get_column_letter,
 )
 
 log = logging.getLogger(__name__)
@@ -36,33 +38,32 @@ log = logging.getLogger(__name__)
 BULK_PURCHASE_DEFAULTS = dict(amount=Decimal("1.0"), automatic=False)
 
 
-def create_coupons_for_request_row(coupon_req_row, company_id):
+def create_coupons_for_request_row(row, company_id):
     """
     Creates coupons for a given request
 
     Args:
-        coupon_req_row (sheets.coupon_request_api.CouponRequestRow): A representation of a coupon request row
+        row (sheets.coupon_request_api.CouponRequestRow): A representation of a coupon request row
         company_id (int): The id of the Company on whose behalf these coupons are being created
 
     Returns:
         CouponPaymentVersion:
             A CouponPaymentVersion. Other instances will be created at the same time and linked via foreign keys.
     """
-    product, _, program_run = ecommerce.api.get_product_from_text_id(
-        coupon_req_row.product_text_id
+    product_program_run_map = (
+        {row.product.id: row.program_run.id} if row.program_run else None
     )
-    product_program_run_map = {product.id: program_run.id} if program_run else None
     return ecommerce.api.create_coupons(
-        name=coupon_req_row.coupon_name,
-        product_ids=[product.id],
-        num_coupon_codes=coupon_req_row.num_codes,
+        name=row.coupon_name,
+        product_ids=[row.product.id],
+        num_coupon_codes=row.num_codes,
         coupon_type=CouponPaymentVersion.SINGLE_USE,
         max_redemptions=1,
         company_id=company_id,
-        activation_date=coupon_req_row.activation,
-        expiration_date=coupon_req_row.expiration,
+        activation_date=row.activation,
+        expiration_date=row.expiration,
         payment_type=CouponPaymentVersion.PAYMENT_PO,
-        payment_transaction=coupon_req_row.purchase_order_id,
+        payment_transaction=row.purchase_order_id,
         product_program_run_map=product_program_run_map,
         **BULK_PURCHASE_DEFAULTS,
     )
@@ -85,7 +86,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
         errors,
         skip_row,
         requester,
-    ):  # pylint: disable=too-many-arguments
+    ):  # pylint: disable=too-many-arguments,too-many-locals
         self.row_index = row_index
         self.purchase_order_id = purchase_order_id
         self.coupon_name = coupon_name
@@ -98,6 +99,12 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
         self.errors = errors
         self.skip_row = skip_row
         self.requester = requester
+        #
+        product, _, program_run = ecommerce.api.get_product_from_text_id(
+            self.product_text_id
+        )
+        self.product = product
+        self.program_run = program_run
 
     @classmethod
     def parse_raw_data(cls, row_index, raw_row_data):
@@ -231,7 +238,7 @@ class CouponRequestHandler(SheetHandler):
             [header_range_req, coupon_code_range_req, status_columns_range_req],
         )
 
-    def create_coupon_assignment_sheet(self, coupon_req_row):
+    def create_assignment_sheet(self, coupon_req_row):
         """
         Creates a coupon assignment sheet from a single coupon request row
 
@@ -267,14 +274,36 @@ class CouponRequestHandler(SheetHandler):
             crange="A1:{}1".format(assign_sheet_metadata.LAST_COL_LETTER),
             values=[assign_sheet_metadata.column_headers],
         )
-        # Write data to body of worksheet
+        # Write enrollment codes to the appropriate column of the worksheet
+        last_data_row_idx = len(coupon_codes) + assign_sheet_metadata.first_data_row
         worksheet.update_values(
-            crange="A{}:A{}".format(
-                assign_sheet_metadata.first_data_row,
-                len(coupon_codes) + assign_sheet_metadata.first_data_row,
+            crange="{enroll_col_letter}{first_data_row}:{enroll_col_letter}{last_data_row}".format(
+                enroll_col_letter=get_column_letter(
+                    assign_sheet_metadata.ENROLL_CODE_COL
+                ),
+                first_data_row=assign_sheet_metadata.first_data_row,
+                last_data_row=last_data_row_idx,
             ),
             values=[[coupon_code] for coupon_code in coupon_codes],
         )
+        # Write enrollment URLs to the appropriate column of the worksheet
+        product_coupon_iter = zip(
+            itertools.repeat(coupon_req_row.product.id, len(coupon_codes)), coupon_codes
+        )
+        worksheet.update_values(
+            crange="{enroll_url_letter}{first_data_row}:{enroll_url_letter}{last_data_row}".format(
+                enroll_url_letter=get_column_letter(
+                    assign_sheet_metadata.ENROLL_URL_COL
+                ),
+                first_data_row=assign_sheet_metadata.first_data_row,
+                last_data_row=last_data_row_idx,
+            ),
+            values=[
+                [make_checkout_url(product_id=product_id, code=coupon_code)]
+                for product_id, coupon_code in product_coupon_iter
+            ],
+        )
+
         # Adjust code and email column widths to fit coupon codes and emails
         worksheet.adjust_column_width(start=0, end=2, pixel_size=270)
         # Format header cells with bold text
@@ -332,7 +361,7 @@ class CouponRequestHandler(SheetHandler):
         # Create assignment sheets for all newly-processed rows
         processed_row_results = grouped_row_results.get(ResultType.PROCESSED, [])
         for row_result in processed_row_results:
-            self.create_coupon_assignment_sheet(row_result.row_object)
+            self.create_assignment_sheet(row_result.row_object)
 
     def get_or_create_request(self, row_data):
         coupon_name = row_data[self.sheet_metadata.COUPON_NAME_COL_INDEX].strip()

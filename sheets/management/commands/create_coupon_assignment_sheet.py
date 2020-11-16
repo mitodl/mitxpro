@@ -55,9 +55,7 @@ class Command(BaseCommand):
                 )
             )
 
-        spreadsheet = coupon_request_handler.create_coupon_assignment_sheet(
-            coupon_req_row
-        )
+        spreadsheet = coupon_request_handler.create_assignment_sheet(coupon_req_row)
         self.stdout.write(
             self.style.SUCCESS(
                 "Coupon assignment Sheet created ({})".format(
