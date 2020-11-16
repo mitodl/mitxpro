@@ -6,6 +6,7 @@ import pytest
 from courses.factories import (
     CourseRunFactory,
     CourseRunCertificateFactory,
+    ProgramCertificateFactory,
     UserFactory,
     CourseFactory,
 )
@@ -50,3 +51,17 @@ def test_generate_program_certificate_not_called(
     cert = CourseRunCertificateFactory.create(user=user, course_run=course_run)
     cert.save()
     generate_program_cert_mock.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "factory", [CourseRunCertificateFactory, ProgramCertificateFactory]
+)
+def test_create_digital_credential_request(mocker, factory):
+    """Verify that create_digital_credential_request only calls create_and_notify_digital_credential_request when created"""
+    create_and_notify_digital_credential_request_mock = mocker.patch(
+        "courses.signals.create_and_notify_digital_credential_request", autospec=True
+    )
+    instance = factory.create()
+    create_and_notify_digital_credential_request_mock.assert_called_once_with(instance)
+    instance.save()
+    create_and_notify_digital_credential_request_mock.assert_called_once_with(instance)

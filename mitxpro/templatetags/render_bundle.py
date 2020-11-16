@@ -2,30 +2,14 @@
 
 from django import template
 from django.conf import settings
-from django.templatetags.static import static
 from django.utils.safestring import mark_safe
 
 from webpack_loader.utils import get_loader
 
-from mitxpro.utils import webpack_dev_server_url
+from mitxpro.utils import public_path
 
 
 register = template.Library()
-
-
-def ensure_trailing_slash(url):
-    """ensure a url has a trailing slash"""
-    return url if url.endswith("/") else url + "/"
-
-
-def public_path(request):
-    """
-    Return the correct public_path for Webpack to use
-    """
-    if settings.USE_WEBPACK_DEV_SERVER:
-        return ensure_trailing_slash(webpack_dev_server_url(request))
-    else:
-        return ensure_trailing_slash(static("bundles/"))
 
 
 def _get_bundle(request, bundle_name):

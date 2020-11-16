@@ -10,7 +10,9 @@ from urllib.parse import urlparse, urlunparse, ParseResult
 from django.conf import settings
 from django.core.serializers import serialize
 from django.db import models
+from django.http import HttpRequest
 from django.http.response import HttpResponse
+from django.templatetags.static import static
 import pytz
 from rest_framework import status
 import requests
@@ -27,6 +29,21 @@ class FeatureFlag(Flag):
     """
 
     EXAMPLE_FEATURE = auto()
+
+
+def ensure_trailing_slash(url):
+    """ensure a url has a trailing slash"""
+    return url if url.endswith("/") else url + "/"
+
+
+def public_path(request):
+    """
+    Return the correct public_path for Webpack to use
+    """
+    if settings.USE_WEBPACK_DEV_SERVER:
+        return ensure_trailing_slash(webpack_dev_server_url(request))
+    else:
+        return ensure_trailing_slash(static("bundles/"))
 
 
 def webpack_dev_server_host(request):
@@ -548,3 +565,30 @@ def request_get_with_timeout_retry(url, retries):
         resp = requests.get(url)
     resp.raise_for_status()
     return resp
+
+
+def get_js_settings(request: HttpRequest):
+    """
+    Get the set of JS settings
+
+    Args:
+        request (django.http.HttpRequest) the current request
+
+    Returns:
+        dict: the settings object
+    """
+    return {
+        "gtmTrackingID": settings.GTM_TRACKING_ID,
+        "gaTrackingID": settings.GA_TRACKING_ID,
+        "environment": settings.ENVIRONMENT,
+        "public_path": public_path(request),
+        "release_version": settings.VERSION,
+        "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
+        "sentry_dsn": remove_password_from_url(settings.SENTRY_DSN),
+        "support_email": settings.EMAIL_SUPPORT,
+        "site_name": settings.SITE_NAME,
+        "zendesk_config": {
+            "help_widget_enabled": settings.ZENDESK_CONFIG.get("HELP_WIDGET_ENABLED"),
+            "help_widget_key": settings.ZENDESK_CONFIG.get("HELP_WIDGET_KEY"),
+        },
+    }

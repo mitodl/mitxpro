@@ -5,7 +5,7 @@ from django.test.client import RequestFactory
 import pytest
 
 from mitxpro.utils import webpack_dev_server_url
-from mitxpro.templatetags.render_bundle import render_bundle, public_path
+from mitxpro.templatetags.render_bundle import render_bundle
 
 
 FAKE_COMMON_BUNDLE = [
@@ -46,8 +46,6 @@ def test_debug(settings, mocker):
         )
     )
 
-    assert public_path(request) == webpack_dev_server_url(request) + "/"
-
     get_bundle.assert_called_with(bundle_name)
     get_loader.assert_called_with("DEFAULT")
 
@@ -74,8 +72,6 @@ def test_production(settings, mocker):
             base="/static/bundles", filename=FAKE_COMMON_BUNDLE[0]["name"]
         )
     )
-
-    assert public_path(request) == "/static/bundles/"
 
     get_bundle.assert_called_with(bundle_name)
     get_loader.assert_called_with("DEFAULT")

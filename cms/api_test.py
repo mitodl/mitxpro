@@ -1,14 +1,8 @@
 """Tests for CMS API"""
 from datetime import timedelta
 
-import factory
 import pytest
-from cms.factories import (
-    CoursePageFactory,
-    ExternalCoursePageFactory,
-    ExternalProgramPageFactory,
-    ProgramPageFactory,
-)
+from cms.factories import ExternalCoursePageFactory, ExternalProgramPageFactory
 from cms.models import ExternalCoursePage
 from cms.api import filter_and_sort_catalog_pages
 from courses.factories import CourseRunFactory
@@ -65,15 +59,10 @@ def test_filter_and_sort_catalog_pages():  # pylint:disable=too-many-locals
         later_external_program_page,
     ]
 
-    initial_course_pages = CoursePageFactory.create_batch(
-        len(all_runs), course=factory.Iterator(run.course for run in all_runs)
-    )
-    initial_program_pages = ProgramPageFactory.create_batch(
-        2,
-        program=factory.Iterator(
-            run.course.program for run in [second_program_run, first_program_run]
-        ),
-    )
+    initial_course_pages = [run.course.page for run in all_runs]
+    initial_program_pages = [
+        run.course.program.page for run in [second_program_run, first_program_run]
+    ]
 
     all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
         initial_program_pages,

@@ -57,6 +57,8 @@ urlpatterns = (
         path("", include("users.urls")),
         path("", include("sheets.urls")),
         path("", include("mail.urls")),
+        path("api/v1/", include("mitol.digitalcredentials.urls")),
+        path("", include("mitol.mail.urls")),
         path("boeing/", include(("voucher.urls", "voucher"))),
         path("api/app_context", AppContextView.as_view(), name="api-app_context"),
         # named routes mapped to the react app

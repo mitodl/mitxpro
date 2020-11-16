@@ -17,7 +17,7 @@ class VoucherFactory(DjangoModelFactory):
     employee_id = factory.Faker("password", special_chars=False)
 
     course_start_date_input = factory.Faker("date_object")
-    course_id_input = factory.Faker("password")
+    course_id_input = factory.Sequence("course-{0}".format)
     course_title_input = factory.fuzzy.FuzzyText(prefix="Course ")
 
     user = factory.SubFactory(UserFactory)

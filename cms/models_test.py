@@ -240,7 +240,7 @@ def test_home_page_upcoming_courseware():
     """
     home_page = HomePageFactory.create()
     assert not home_page.upcoming_courseware
-    course = CourseFactory.create()
+    course = CourseFactory.create(page=None)
     carousel_page = CoursesInProgramPageFactory.create(
         parent=home_page,
         heading="heading",
@@ -1184,7 +1184,7 @@ def test_certificate_for_course_page():
     """
     The Certificate property should return expected values if associated with a CertificatePage
     """
-    course_page = CoursePageFactory.create()
+    course_page = CoursePageFactory.create(certificate_page=None)
     assert CertificatePage.can_create_at(course_page)
     assert not SignatoryPage.can_create_at(course_page)
 
@@ -1213,7 +1213,7 @@ def test_certificate_for_program_page():
     """
     The Certificate property should return expected values if associated with a CertificatePage
     """
-    program_page = ProgramPageFactory.create()
+    program_page = ProgramPageFactory.create(certificate_page=None)
     assert CertificatePage.can_create_at(program_page)
     assert not SignatoryPage.can_create_at(program_page)
 

@@ -13,6 +13,7 @@ from authentication.views import (
     CustomPasswordResetView,
     CustomPasswordResetConfirmView,
     CustomSetPasswordView,
+    well_known_openid_configuration,
 )
 
 
@@ -48,4 +49,9 @@ urlpatterns = [
     path("api/set_password/", CustomSetPasswordView.as_view(), name="set-password-api"),
     path("api/auths/", get_social_auth_types, name="get-auth-types-api"),
     path("logout/", CustomLogoutView.as_view(), name="logout"),
+    path(
+        ".well-known/openid-configuration",
+        well_known_openid_configuration,
+        name="well-known-openid-configuration",
+    ),
 ]

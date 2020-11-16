@@ -847,3 +847,13 @@ def test_get_social_auth_types(client, user):
     client.force_login(user)
     resp = client.get(url)
     assert resp.json() == [{"provider": provider} for provider in social_auth_providers]
+
+
+def test_well_known_openid_configuration(client):
+    """Test that .well-known/openid-configuration returns the right data"""
+    resp = client.get("/.well-known/openid-configuration")
+    assert resp.json() == {
+        "issuer": "http://localhost:8053",
+        "authorization_endpoint": "http://localhost:8053/oauth2/authorize/",
+        "token_endpoint": "http://localhost:8053/oauth2/token/",
+    }

@@ -60,10 +60,14 @@ class ProgramPageFactory(wagtail_factories.PageFactory):
     """ProgramPage factory class"""
 
     title = factory.Sequence("Test page - Program {0}".format)
-    program = factory.SubFactory(ProgramFactory)
+    program = factory.SubFactory(ProgramFactory, page=None)
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
+
+    certificate_page = factory.RelatedFactory(
+        "cms.factories.CertificatePageFactory", "parent"
+    )
 
     class Meta:
         model = ProgramPage
@@ -85,10 +89,14 @@ class CoursePageFactory(wagtail_factories.PageFactory):
     """CoursePage factory class"""
 
     title = factory.Sequence("Test page - Course {0}".format)
-    course = factory.SubFactory(CourseFactory)
+    course = factory.SubFactory(CourseFactory, page=None)
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
+
+    certificate_page = factory.RelatedFactory(
+        "cms.factories.CertificatePageFactory", "parent"
+    )
 
     class Meta:
         model = CoursePage
@@ -436,7 +444,7 @@ class CertificatePageFactory(wagtail_factories.PageFactory):
     """CertificatePage factory class"""
 
     product_name = factory.fuzzy.FuzzyText(prefix="product_name")
-    CEUs = factory.fuzzy.FuzzyText(prefix="1.8")
+    CEUs = factory.Faker("pystr_format", string_format="#.#")
     signatories = wagtail_factories.StreamFieldFactory(
         {"signatory": SignatoryPageFactory}
     )

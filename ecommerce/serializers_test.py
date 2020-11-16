@@ -80,7 +80,7 @@ def test_serialize_basket_product_version_courserun(mock_context):
         "courses": [
             CourseSerializer(instance=courserun.course, context=mock_context).data
         ],
-        "thumbnail_url": "/static/images/mit-dome.png",
+        "thumbnail_url": courserun.course.catalog_image_url,
         "object_id": product_version.product.object_id,
         "product_id": product_version.product.id,
         "readable_id": get_readable_id(product_version.product.content_object),
@@ -94,7 +94,7 @@ def test_serialize_basket_product_version_courserun(mock_context):
 
 def test_serialize_basket_product_version_program(mock_context):
     """Test ProductVersion serialization for a Program"""
-    program = ProgramFactory()
+    program = ProgramFactory.create()
     courses = CourseFactory.create_batch(3, program=program)
     product_version = ProductVersionFactory.create(
         product=ProductFactory(content_object=program)
@@ -113,7 +113,7 @@ def test_serialize_basket_product_version_program(mock_context):
             CourseSerializer(instance=course, context=mock_context).data
             for course in courses
         ],
-        "thumbnail_url": "/static/images/mit-dome.png",
+        "thumbnail_url": program.catalog_image_url,
         "object_id": product_version.product.object_id,
         "product_id": product_version.product.id,
         "readable_id": get_readable_id(product_version.product.content_object),
@@ -481,7 +481,7 @@ def test_serialize_order_receipt(receipt_data):
                 "price": str(product_version.price),
                 "total_paid": str(line.quantity * product_version.price),
                 "quantity": line.quantity,
-                "CEUs": None,
+                "CEUs": product_version.product.content_object.course.page.certificate_page.CEUs,
             }
         ],
         "order": {

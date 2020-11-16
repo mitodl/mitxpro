@@ -3,11 +3,12 @@ Tasks for the courses app
 """
 import logging
 from datetime import timedelta
+
 from django.conf import settings
 from django.db.models import Q
+from mitol.digitalcredentials.models import DigitalCredentialRequest
 from requests.exceptions import HTTPError
-from mitxpro.celery import app
-from mitxpro.utils import now_in_utc
+
 from courses.models import CourseRun, CourseRunCertificate
 from courses.utils import (
     ensure_course_run_grade,
@@ -15,6 +16,9 @@ from courses.utils import (
     sync_course_runs,
 )
 from courseware.api import get_edx_grades_with_users
+from mitxpro.celery import app
+from mitxpro.utils import now_in_utc
+
 
 log = logging.getLogger(__name__)
 
@@ -101,3 +105,16 @@ def sync_courseruns_data():
 
     # `sync_course_runs` logs internally so no need to capture/output the returned values
     sync_course_runs(runs)
+
+
+@app.task(acks_late=True)
+def notify_digital_credential_request(digital_credential_request_id: int):
+    """Notifies a learner regarding a digital credentials request"""
+    # avoid circular import error
+    from courses.credentials import send_digital_credential_request_notification
+
+    digital_credential_request = DigitalCredentialRequest.objects.get(
+        id=digital_credential_request_id
+    )
+
+    send_digital_credential_request_notification(digital_credential_request)

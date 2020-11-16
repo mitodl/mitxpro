@@ -6,12 +6,12 @@ import importlib
 import sys
 from unittest import mock
 
+import semantic_version
 from django.conf import settings
 from django.core import mail
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 from mitol.common import envs, pytest_utils
-import semantic_version
 
 
 REQUIRED_SETTINGS = {
@@ -28,6 +28,7 @@ test_app_json_modified = pytest_utils.test_app_json_modified
 def cleanup_settings():
     """Cleanup settings after a test"""
     envs.env.reload()
+    importlib.reload(sys.modules["mitol.digitalcredentials.settings"])
     importlib.reload(sys.modules["mitxpro.settings"])
 
 

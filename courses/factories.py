@@ -42,6 +42,8 @@ class ProgramFactory(DjangoModelFactory):
     )
     live = True
 
+    page = factory.RelatedFactory("cms.factories.ProgramPageFactory", "program")
+
     class Meta:
         model = Program
 
@@ -64,6 +66,8 @@ class CourseFactory(DjangoModelFactory):
     title = fuzzy.FuzzyText(prefix="Course ")
     readable_id = factory.Sequence("course-{0}".format)
     live = True
+
+    page = factory.RelatedFactory("cms.factories.CoursePageFactory", "course")
 
     class Meta:
         model = Course

@@ -22,6 +22,9 @@ from mitol.common.envs import (
     get_delimited_list,
 )
 
+# wildcard import boilerplate digital credentials settings
+from mitol.digitalcredentials.settings import *  # pylint: disable=wildcard-import,unused-wildcard-import
+
 
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
@@ -189,13 +192,11 @@ INSTALLED_APPS = (
     "taggit",
     # django-robots
     "robots",
-    # ol-dango apps
-    "mitol.common.apps.CommonApp",
     # Put our apps after this point
     "mitxpro",
     "authentication",
     "courses",
-    "mail",
+    "mail.apps.MailApp",
     "users",
     "cms",
     "compliance",
@@ -210,6 +211,11 @@ INSTALLED_APPS = (
     "voucher",
     "hubspot",
     "b2b_ecommerce",
+    # ol-dango apps, must be after this project's apps for template precedence
+    "mitol.common.apps.CommonApp",
+    "mitol.digitalcredentials.apps.DigitalCredentialsApp",
+    "mitol.mail.apps.MailApp",
+    "mitol.oauth_toolkit_extensions.apps.OAuthToolkitExtensionsApp",
 )
 # Only include the seed data app if this isn't running in prod
 if ENVIRONMENT not in ("production", "prod"):
@@ -261,7 +267,7 @@ ROOT_URLCONF = "mitxpro.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -974,15 +980,24 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
 )
 
+
+# required for migrations
+OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "oauth2_provider.AccessToken"
+OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
+OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "oauth2_provider.RefreshToken"
+
 OAUTH2_PROVIDER = {
     # this is the list of available scopes
     "SCOPES": {
         "read": "Read scope",
         "write": "Write scope",
         "user:read": "Can read user and profile data",
-    }
+        "digitalcredentials": "Can read and write Digital Credentials data",
+    },
+    "DEFAULT_SCOPES": ["user:read"],
+    "SCOPES_BACKEND_CLASS": "mitol.oauth_toolkit_extensions.backends.ApplicationAccessOrSettingsScopes",
+    "ERROR_RESPONSE_WITH_SCOPES": DEBUG,
 }
-DEFAULT_SCOPES = ["user:read"]
 
 
 # DRF configuration
@@ -1009,6 +1024,30 @@ DJOSER = {
     "PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND": True,
     "EMAIL": {"password_reset": "authentication.views.CustomPasswordResetEmail"},
 }
+
+# ol-django configuration
+
+# mitol-django-common
+MITOL_COMMON_USER_FACTORY = "users.factories.UserFactory"
+
+# mitol-django-mail
+MITOL_MAIL_FROM_EMAIL = MAILGUN_FROM_EMAIL
+MITOL_MAIL_REPLY_TO_ADDRESS = MITXPRO_REPLY_TO_ADDRESS
+MITOL_MAIL_MESSAGE_CLASSES = ["courses.messages.DigitalCredentialAvailableMessage"]
+MITOL_MAIL_RECIPIENT_OVERRIDE = MAILGUN_RECIPIENT_OVERRIDE
+MITOL_MAIL_FORMAT_RECIPIENT_FUNC = "users.utils.format_recipient"
+MITOL_MAIL_ENABLE_EMAIL_DEBUGGER = get_bool(  # NOTE: this will override the legacy mail debugger defined in this project
+    name="MITOL_MAIL_ENABLE_EMAIL_DEBUGGER",
+    default=False,
+    description="Enable the mitol-mail email debugger",
+    dev_only=True,
+)
+
+# mitol-django-digital-credentials
+MITOL_DIGITAL_CREDENTIALS_BUILD_CREDENTIAL_FUNC = (
+    "courses.credentials.build_digital_credential"
+)
+
 
 MITXPRO_OAUTH_PROVIDER = "mitxpro-oauth2"
 OPENEDX_OAUTH_APP_NAME = get_string(
@@ -1368,4 +1407,21 @@ SHEETS_REFUND_SKIP_ROW_COL = get_int(
     description=(
         "The zero-based index of the enrollment change sheet column that indicates whether the row should be skipped"
     ),
+)
+
+# Digital Credentials
+DIGITAL_CREDENTIALS_DEEP_LINK_URL = get_string(
+    name="DIGITAL_CREDENTIALS_DEEP_LINK_URL",
+    default=None,
+    description="URL at which to deep link the learner to for the digital credentials wallet",
+)
+DIGITAL_CREDENTIALS_ISSUER_ID = get_string(
+    name="DIGITAL_CREDENTIALS_ISSUER_ID",
+    default=None,
+    description="Issuer identifier for digital credentials",
+)
+DIGITAL_CREDENTIALS_VERIFICATION_METHOD = get_string(
+    name="DIGITAL_CREDENTIALS_VERIFICATION_METHOD",
+    default=None,
+    description="Verification method for digital credentials",
 )

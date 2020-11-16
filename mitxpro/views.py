@@ -1,7 +1,6 @@
 """
 mitxpro views
 """
-import os
 import json
 
 from django.conf import settings
@@ -16,37 +15,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from mitxpro.serializers import AppContextSerializer
-from mitxpro.templatetags.render_bundle import public_path
-from mitxpro.utils import remove_password_from_url
 
 
 def get_base_context(request):
     """
     Returns the template context key/values needed for the base template and all templates that extend it
     """
-    context = {
-        "js_settings_json": json.dumps(
-            {
-                "gtmTrackingID": settings.GTM_TRACKING_ID,
-                "gaTrackingID": settings.GA_TRACKING_ID,
-                "environment": settings.ENVIRONMENT,
-                "public_path": public_path(request),
-                "release_version": settings.VERSION,
-                "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
-                "sentry_dsn": remove_password_from_url(
-                    os.environ.get("SENTRY_DSN", "")
-                ),
-                "support_email": settings.EMAIL_SUPPORT,
-                "site_name": settings.SITE_NAME,
-                "zendesk_config": {
-                    "help_widget_enabled": settings.ZENDESK_CONFIG.get(
-                        "HELP_WIDGET_ENABLED"
-                    ),
-                    "help_widget_key": settings.ZENDESK_CONFIG.get("HELP_WIDGET_KEY"),
-                },
-            }
-        )
-    }
+    context = {}
     if settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE:
         context[
             "domain_verification_tag"

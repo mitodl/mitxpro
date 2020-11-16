@@ -1,5 +1,6 @@
 """Utils tests"""
 import datetime
+import os
 from decimal import Decimal
 import operator as op
 from types import SimpleNamespace
@@ -38,8 +39,47 @@ from mitxpro.utils import (
     is_json_response,
     first_matching_item,
     matching_item_index,
+    public_path,
+    ensure_trailing_slash,
+    webpack_dev_server_host,
+    webpack_dev_server_url,
+    get_js_settings,
 )
 from mitxpro.test_utils import MockResponse
+
+
+def test_ensure_trailing_slash():
+    """Verify ensure_trailing_slash() enforces a single slash on the end"""
+    assert ensure_trailing_slash("http://example.com") == "http://example.com/"
+    assert ensure_trailing_slash("http://example.com/") == "http://example.com/"
+
+
+def test_public_path(rf, settings):
+    """Test public_path() behaviors"""
+    request = rf.get("/")
+
+    settings.USE_WEBPACK_DEV_SERVER = True
+    assert public_path(request) == webpack_dev_server_url(request) + "/"
+
+    settings.USE_WEBPACK_DEV_SERVER = False
+    assert public_path(request) == "/static/bundles/"
+
+
+def test_webpack_dev_server_host(settings, rf):
+    """Test webpack_dev_server_host()"""
+    request = rf.get("/", SERVER_NAME="invalid-dev-server1.local")
+    settings.WEBPACK_DEV_SERVER_HOST = "invalid-dev-server2.local"
+    assert webpack_dev_server_host(request) == "invalid-dev-server2.local"
+    settings.WEBPACK_DEV_SERVER_HOST = None
+    assert webpack_dev_server_host(request) == "invalid-dev-server1.local"
+
+
+def test_webpack_dev_server_url(settings, rf):
+    """Test webpack_dev_server_url()"""
+    settings.WEBPACK_DEV_SERVER_PORT = 7777
+    settings.WEBPACK_DEV_SERVER_HOST = "invalid-dev-server.local"
+    request = rf.get("/")
+    assert webpack_dev_server_url(request) == "http://invalid-dev-server.local:7777"
 
 
 def test_now_in_utc():
@@ -408,3 +448,32 @@ def test_request_get_with_timeout_retry(mocker):
     assert patched_log.warning.call_count == (retries - 1)
     mock_response.raise_for_status.assert_called_once()
     assert result == mock_response
+
+
+def test_get_js_settings(settings, rf):
+    """Test get_js_settings"""
+    settings.GA_TRACKING_ID = "fake"
+    settings.GTM_TRACKING_ID = "fake"
+    settings.ENVIRONMENT = "test"
+    settings.VERSION = "4.5.6"
+    settings.EMAIL_SUPPORT = "support@text.com"
+    settings.USE_WEBPACK_DEV_SERVER = False
+    settings.RECAPTCHA_SITE_KEY = "fake_key"
+    settings.ZENDESK_CONFIG = {
+        "HELP_WIDGET_ENABLED": False,
+        "HELP_WIDGET_KEY": "fake_key",
+    }
+    request = rf.get("/")
+
+    assert get_js_settings(request) == {
+        "gaTrackingID": "fake",
+        "gtmTrackingID": "fake",
+        "public_path": "/static/bundles/",
+        "environment": settings.ENVIRONMENT,
+        "sentry_dsn": remove_password_from_url(os.environ.get("SENTRY_DSN", "")),
+        "release_version": settings.VERSION,
+        "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
+        "support_email": settings.EMAIL_SUPPORT,
+        "site_name": settings.SITE_NAME,
+        "zendesk_config": {"help_widget_enabled": False, "help_widget_key": "fake_key"},
+    }

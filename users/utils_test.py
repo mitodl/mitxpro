@@ -2,7 +2,13 @@
 from unittest.mock import patch
 
 import pytest
-from users.utils import ensure_active_user, is_duplicate_username_error, usernameify
+
+from users.utils import (
+    ensure_active_user,
+    format_recipient,
+    is_duplicate_username_error,
+    usernameify,
+)
 
 
 @pytest.mark.parametrize(
@@ -65,3 +71,8 @@ def test_ensure_active_user(mock_repair_faulty_edx_user, user):
     ensure_active_user(user)
     mock_repair_faulty_edx_user.assert_called_once_with(user)
     assert user.is_active
+
+
+def test_format_recipient(user):
+    """Verify that format_recipient correctly format's a user's name and email"""
+    assert format_recipient(user) == f"{user.name} <{user.email}>"

@@ -139,6 +139,18 @@
       "description": "ID of the worksheet within the enrollment change request spreadsheet that contains enrollment deferral requests",
       "required": false
     },
+    "DIGITAL_CREDENTIALS_DEEP_LINK_URL": {
+      "description": "URL at which to deep link the learner to for the digital credentials wallet",
+      "required": false
+    },
+    "DIGITAL_CREDENTIALS_ISSUER_ID": {
+      "description": "Issuer identifier for digital credentials",
+      "required": false
+    },
+    "DIGITAL_CREDENTIALS_VERIFICATION_METHOD": {
+      "description": "Verification method for digital credentials",
+      "required": false
+    },
     "DJANGO_LOG_LEVEL": {
       "description": "The log level for django",
       "required": false
@@ -269,6 +281,14 @@
     },
     "MEDIA_ROOT": {
       "description": "The root directory for locally stored media. Typically not used.",
+      "required": false
+    },
+    "MITOL_DIGITAL_CREDENTIALS_HMAC_SECRET": {
+      "description": "HMAC secret to sign digital credentials requests with",
+      "required": false
+    },
+    "MITOL_DIGITAL_CREDENTIALS_VERIFY_SERVICE_BASE_URL": {
+      "description": "Base URL for sing-and-verify service to call for digital credentials",
       "required": false
     },
     "MITXPRO_ADMIN_EMAIL": {
