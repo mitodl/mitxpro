@@ -78,6 +78,7 @@ class FileWatchRenewalAttemptAdmin(admin.ModelAdmin):
     )
     search_fields = ("sheet_file_id", "result")
     list_filter = ("sheet_type", "result_status_code")
+    readonly_fields = ("date_attempted",)
     ordering = ("-date_attempted",)
 
 

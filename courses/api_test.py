@@ -420,7 +420,7 @@ def test_defer_enrollment(mocker, keep_failed_enrollments):
 @pytest.mark.django_db
 def test_defer_enrollment_validation(mocker, user):
     """
-    defer_enrollment should raise an exception if the 'from' and 'to' course runs are invalid
+    defer_enrollment should raise an exception if the 'from' or 'to' course runs are invalid
     """
     courses = CourseFactory.create_batch(2)
     enrollments = CourseRunEnrollmentFactory.create_batch(
@@ -428,6 +428,9 @@ def test_defer_enrollment_validation(mocker, user):
         user=user,
         active=factory.Iterator([False, True, True]),
         run__course=factory.Iterator([courses[0], courses[0], courses[1]]),
+    )
+    unenrollable_run = CourseRunFactory.create(
+        enrollment_end=now_in_utc() - timedelta(days=1)
     )
     patched_create_enrollments = mocker.patch(
         "courses.api.create_run_enrollments", return_value=([], False)
@@ -438,6 +441,13 @@ def test_defer_enrollment_validation(mocker, user):
         # Deferring to the same course run should raise a validation error
         defer_enrollment(
             user, enrollments[0].run.courseware_id, enrollments[0].run.courseware_id
+        )
+    patched_create_enrollments.assert_not_called()
+
+    with pytest.raises(ValidationError):
+        # Deferring to a course run that is outside of its enrollment period should raise a validation error
+        defer_enrollment(
+            user, enrollments[0].run.courseware_id, unenrollable_run.courseware_id
         )
     patched_create_enrollments.assert_not_called()
 
