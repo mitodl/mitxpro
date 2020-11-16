@@ -2,32 +2,34 @@
 Course models
 """
 import logging
-import uuid
 import operator as op
-from django.db import models
+import uuid
+
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator, MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
+from django.db import models
 from django.utils.functional import cached_property
 
 from cms.urls import detail_path_char_pattern
 from courses.constants import (
-    ENROLL_CHANGE_STATUS_CHOICES,
     CATALOG_COURSE_IMG_WAGTAIL_FILL,
-    COURSE_BG_IMG_WAGTAIL_FILL,
     COURSE_BG_IMG_MOBILE_WAGTAIL_FILL,
+    COURSE_BG_IMG_WAGTAIL_FILL,
+    ENROLL_CHANGE_STATUS_CHOICES,
     ENROLLABLE_ITEM_ID_SEPARATOR,
 )
 from courseware.utils import edx_redirect_url
 from ecommerce.models import Product
-from mitxpro.models import TimestampedModel, AuditableModel, AuditModel
+from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import (
-    now_in_utc,
-    first_matching_item,
-    serialize_model_object,
     ValidateOnSaveMixin,
+    first_matching_item,
+    now_in_utc,
+    serialize_model_object,
 )
+
 
 User = get_user_model()
 

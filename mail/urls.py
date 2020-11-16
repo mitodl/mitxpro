@@ -6,7 +6,7 @@ from mail.views import EmailDebuggerView
 
 urlpatterns = []
 
-if settings.DEBUG:
+if settings.DEBUG and not settings.MITOL_MAIL_ENABLE_EMAIL_DEBUGGER:
     urlpatterns += [
         url(r"^__emaildebugger__/$", EmailDebuggerView.as_view(), name="email-debugger")
     ]

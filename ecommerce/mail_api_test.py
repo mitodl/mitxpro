@@ -268,7 +268,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                     "start_date": None,
                     "end_date": None,
                     "content_title": "test_run_title",
-                    "CEUs": None,
+                    "CEUs": line.product_version.product.content_object.course.page.certificate_page.CEUs,
                 }
             ],
             "order_total": "100.00",

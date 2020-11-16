@@ -2,7 +2,7 @@
 from django.conf import settings
 from rest_framework import serializers
 
-from mitxpro.templatetags.render_bundle import public_path
+from mitxpro.utils import public_path
 
 
 class AppContextSerializer(serializers.Serializer):

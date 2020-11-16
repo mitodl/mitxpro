@@ -9,12 +9,9 @@ from django.contrib.auth.models import AnonymousUser
 import pytest
 import pytz
 
-from cms.factories import (
-    CoursePageFactory,
-    ProgramPageFactory,
-    FacultyMembersPageFactory,
-)
+from cms.factories import FacultyMembersPageFactory
 from courses.factories import (
+    CourseFactory,
     CourseRunFactory,
     ProgramFactory,
     CourseRunEnrollmentFactory,
@@ -42,25 +39,23 @@ pytestmark = [pytest.mark.django_db]
 
 def test_base_program_serializer():
     """Test BaseProgramSerializer serialization"""
-    run = CourseRunFactory.create()
-    program = run.course.program
-    page = ProgramPageFactory.create(program=program)
+    program = ProgramFactory.create()
     data = BaseProgramSerializer(program).data
     assert data == {
         "title": program.title,
         "readable_id": program.readable_id,
         "id": program.id,
-        "description": page.description,
-        "thumbnail_url": f"http://localhost:8053{page.thumbnail_image.file.url}",
+        "description": program.page.description,
+        "thumbnail_url": f"http://localhost:8053{program.page.thumbnail_image.file.url}",
     }
 
 
 @pytest.mark.parametrize("has_product", [True, False])
 def test_serialize_program(mock_context, has_product):
     """Test Program serialization"""
-    run1 = CourseRunFactory.create()
+    program = ProgramFactory.create()
+    run1 = CourseRunFactory.create(course__program=program)
     course1 = run1.course
-    program = course1.program
     run2 = CourseRunFactory.create(course__program=program)
     course2 = run2.course
     runs = (
@@ -69,9 +64,8 @@ def test_serialize_program(mock_context, has_product):
         + [CourseRunFactory.create(course=course2) for _ in range(2)]
     )
     faculty_names = ["Teacher 1", "Teacher 2"]
-    page = ProgramPageFactory.create(program=program)
     FacultyMembersPageFactory.create(
-        parent=page,
+        parent=program.page,
         **{
             f"members__{idx}__member__name": name
             for idx, name in enumerate(faculty_names)
@@ -91,14 +85,14 @@ def test_serialize_program(mock_context, has_product):
             "title": program.title,
             "readable_id": program.readable_id,
             "id": program.id,
-            "description": page.description,
+            "description": program.page.description,
             "courses": [
                 CourseSerializer(
                     instance=course, context={**mock_context, "filter_products": False}
                 ).data
                 for course in [course1, course2]
             ],
-            "thumbnail_url": f"http://localhost:8053{page.thumbnail_image.file.url}",
+            "thumbnail_url": f"http://localhost:8053{program.page.thumbnail_image.file.url}",
             "current_price": program.current_price,
             "start_date": sorted(runs, key=lambda run: run.start_date)[
                 0
@@ -109,7 +103,7 @@ def test_serialize_program(mock_context, has_product):
             "enrollment_start": sorted(runs, key=lambda run: run.enrollment_start)[
                 0
             ].enrollment_start.strftime(datetime_format),
-            "url": f"http://localhost{page.get_url()}",
+            "url": f"http://localhost{program.page.get_url()}",
             "instructors": [{"name": name} for name in faculty_names],
             "topics": [{"name": topic.name} for topic in topics],
         },
@@ -118,16 +112,14 @@ def test_serialize_program(mock_context, has_product):
 
 def test_base_course_serializer():
     """Test CourseRun serialization"""
-    run = CourseRunFactory.create(course__no_program=True)
-    course = run.course
-    page = CoursePageFactory.create(course=course)
+    course = CourseFactory.create()
     data = BaseCourseSerializer(course).data
     assert data == {
         "title": course.title,
-        "description": page.description,
+        "description": course.page.description,
         "readable_id": course.readable_id,
         "id": course.id,
-        "thumbnail_url": f"http://localhost:8053{page.thumbnail_image.file.url}",
+        "thumbnail_url": f"http://localhost:8053{course.page.thumbnail_image.file.url}",
     }
 
 
@@ -158,8 +150,6 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
         run=enrolled_run, **({} if is_anonymous else {"user": user})
     )
 
-    page = CoursePageFactory.create(course=course)
-
     # create products for all courses so the serializer shows them
     for run in CourseRun.objects.all():
         ProductVersionFactory.create(product__content_object=run)
@@ -175,14 +165,14 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
         data,
         {
             "title": course.title,
-            "description": page.description,
+            "description": course.page.description,
             "readable_id": course.readable_id,
             "id": course.id,
             "courseruns": [
                 CourseRunSerializer(run).data
                 for run in sorted(expected_runs, key=lambda run: run.start_date)
             ],
-            "thumbnail_url": f"http://localhost:8053{page.thumbnail_image.file.url}",
+            "thumbnail_url": f"http://localhost:8053{course.page.thumbnail_image.file.url}",
             "next_run_id": course.first_unexpired_run.id,
             "topics": [{"name": topic}],
         },
@@ -194,9 +184,8 @@ def test_serialize_course_run(has_product):
     """Test CourseRun serialization"""
     faculty_names = ["Emma Jones", "Joe Smith"]
     course_run = CourseRunFactory.create()
-    course_page = CoursePageFactory.create(course=course_run.course)
     FacultyMembersPageFactory.create(
-        parent=course_page,
+        parent=course_run.course.page,
         **{
             f"members__{idx}__member__name": name
             for idx, name in enumerate(faculty_names)

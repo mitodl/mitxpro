@@ -1,23 +1,24 @@
 """API for the Courses app"""
 
 import itertools
-from collections import namedtuple
 import logging
+from collections import namedtuple
 from traceback import format_exc
 
 from django.core.exceptions import ValidationError
 from requests.exceptions import HTTPError, ConnectionError as RequestsConnectionError
 
 from courses.constants import ENROLL_CHANGE_STATUS_DEFERRED
-from courses.models import CourseRunEnrollment, ProgramEnrollment, CourseRun
-from courseware.api import unenroll_edx_course_run, enroll_in_edx_course_runs
+from courses.models import CourseRun, CourseRunEnrollment, ProgramEnrollment
+from courseware.api import enroll_in_edx_course_runs, unenroll_edx_course_run
 from courseware.exceptions import (
-    UnknownEdxApiEnrollException,
     EdxApiEnrollErrorException,
     NoEdxApiAuthError,
+    UnknownEdxApiEnrollException,
 )
 from ecommerce import mail_api
-from mitxpro.utils import partition, first_or_none
+from mitxpro.utils import first_or_none, partition
+
 
 log = logging.getLogger(__name__)
 UserEnrollments = namedtuple(

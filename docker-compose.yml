@@ -7,6 +7,7 @@ x-environment:
   DEV_ENV: 'True'  # necessary to have nginx connect to web container
   SECRET_KEY: local_unsafe_key
   DATABASE_URL: postgres://postgres@db:5432/postgres
+  MITOL_DIGITAL_CREDENTIALS_HMAC_SECRET: test-hmac-secret
   MITXPRO_BASE_URL: ${MITXPRO_BASE_URL:-http://xpro.odl.local:8053}
   MITXPRO_SECURE_SSL_REDIRECT: 'False'
   MITXPRO_DB_DISABLE_SSL: 'True'
@@ -21,6 +22,7 @@ x-environment:
 x-extra-hosts:
   &default-extra-hosts
   - "edx.odl.local:${OPENEDX_IP:-172.22.0.1}"
+  - "host.docker.internal:host-gateway"
 
 services:
   db:

@@ -10,8 +10,6 @@ from django.contrib.auth.models import AnonymousUser
 from django.urls import reverse
 from rest_framework import status
 
-from cms.factories import CoursePageFactory, ProgramPageFactory
-from cms.models import CatalogPage
 from courses.api import UserEnrollments
 from courses.factories import (
     CourseFactory,
@@ -26,16 +24,6 @@ from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import now_in_utc
 
 pytestmark = [pytest.mark.django_db]
-
-
-@pytest.fixture()
-def catalog_page(home_page):
-    """Fixture for the catalog page"""
-    catalog_page = CatalogPage.objects.first()
-    if not catalog_page:
-        catalog_page = CatalogPage(title="Catalog", slug="catalog")
-        catalog_page = home_page.add_child(catalog_page, "last-child")
-    return catalog_page
 
 
 @pytest.fixture()
@@ -214,41 +202,6 @@ def test_delete_course_run(user_drf_client, course_runs):
     assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
-def test_course_catalog_view(client, catalog_page):
-    """
-    Test that the course catalog view fetches live and available programs/courses and serializes
-    them for the catalog template.
-    """
-    program = ProgramFactory.create(live=True)
-    course = CourseFactory.create(program=program, live=True)
-    CourseRunFactory.create(
-        course=course, start_date=(now_in_utc() + timedelta(hours=1)), live=True
-    )
-
-    program_page = ProgramPageFactory.create(program=program)
-
-    course_page_in_program = CoursePageFactory.create(
-        course=course, course__program=program, course__live=True
-    )
-
-    # course without program
-    single_course = CourseFactory.create(live=True)
-    CourseRunFactory.create(
-        course=single_course, start_date=(now_in_utc() + timedelta(hours=1)), live=True
-    )
-    course_page_no_program = CoursePageFactory.create(
-        course=single_course, course__no_program=True, course__live=True
-    )
-
-    program_pages = [program_page]
-    course_pages = [course_page_in_program, course_page_no_program]
-
-    resp = client.get(catalog_page.get_url())
-    assert resp.templates[0].name == "catalog_page.html"
-    assert list(resp.context["program_pages"]) == program_pages
-    assert list(resp.context["course_pages"]) == course_pages
-
-
 # pylint: disable=too-many-arguments
 @pytest.mark.parametrize("is_enrolled", [True, False])
 @pytest.mark.parametrize("has_unexpired_run", [True, False])
@@ -260,9 +213,7 @@ def test_course_view(
     """
     Test that the course detail view has the right context and shows the right HTML for the enroll/view button
     """
-    course = CourseFactory.create(live=True)
-    # coursepage required for loading seo metadata
-    CoursePageFactory.create(course=course, parent=home_page)
+    course = CourseFactory.create(live=True, page__parent=home_page)
 
     if has_unexpired_run:
         run = CourseRunFactory.create(course=course, live=True)
@@ -326,7 +277,7 @@ def test_program_view(
     """
     Test that the program detail view has the right context and shows the right HTML for the enroll/view button
     """
-    program = ProgramFactory.create(live=True)
+    program = ProgramFactory.create(live=True, page__parent=home_page)
 
     if has_unexpired_run:
         now = now_in_utc()
@@ -338,9 +289,6 @@ def test_program_view(
             live=True,
             start_date=now + timedelta(hours=2),
         )
-
-    # coursepage required for loading seo metadata
-    ProgramPageFactory.create(program=program, parent=home_page)
 
     if has_product:
         product_id = ProductVersionFactory.create(

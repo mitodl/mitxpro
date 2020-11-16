@@ -12,7 +12,6 @@ from cms.factories import (
     CoursePageFactory,
     ProgramPageFactory,
     TextSectionFactory,
-    CertificatePageFactory,
     HomePageFactory,
     UserTestimonialsPageFactory,
     CourseIndexPageFactory,
@@ -21,10 +20,10 @@ from cms.factories import (
 )
 from cms.models import CourseIndexPage, HomePage, ProgramIndexPage, TextVideoSection
 from courses.factories import (
-    CourseFactory,
     CourseRunFactory,
     CourseRunCertificateFactory,
     ProgramCertificateFactory,
+    ProgramFactory,
     ProgramRunFactory,
 )
 from ecommerce.factories import ProductVersionFactory
@@ -162,7 +161,7 @@ def test_course_certificate_invalid_view(user_client, user, wagtail_basics):
     home = HomePageFactory.create(parent=wagtail_basics.root, slug="home")
     home.save_revision().publish()
 
-    course_page = CoursePageFactory.create(parent=home)
+    course_page = CoursePageFactory.create(parent=home, certificate_page=None)
     course_page.save_revision().publish()
 
     course_run_certificate = CourseRunCertificateFactory.create(
@@ -183,9 +182,6 @@ def test_course_certificate_view(user_client, user, wagtail_basics):
     course_page = CoursePageFactory.create(parent=home)
     course_page.save_revision().publish()
 
-    certificate_page = CertificatePageFactory.create(parent=course_page)
-    certificate_page.save_revision().publish()
-
     course_run = CourseRunFactory.create(course=course_page.course)
 
     course_run_certificate = CourseRunCertificateFactory.create(
@@ -194,7 +190,7 @@ def test_course_certificate_view(user_client, user, wagtail_basics):
 
     resp = user_client.get(course_run_certificate.link)
     assert resp.status_code == status.HTTP_200_OK
-    assert resp.context_data["page"] == certificate_page
+    assert resp.context_data["page"] == course_page.certificate_page
     assert resp.context_data["page"].certificate == course_run_certificate
 
 
@@ -207,9 +203,6 @@ def test_course_certificate_view_revoked_state(user_client, user, wagtail_basics
 
     course_page = CoursePageFactory.create(parent=home)
     course_page.save_revision().publish()
-
-    certificate_page = CertificatePageFactory.create(parent=course_page)
-    certificate_page.save_revision().publish()
 
     course_run = CourseRunFactory.create(course=course_page.course)
 
@@ -233,7 +226,7 @@ def test_program_certificate_invalid_view(user_client, user, wagtail_basics):
     home = HomePageFactory.create(parent=wagtail_basics.root, slug="home")
     home.save_revision().publish()
 
-    program_page = ProgramPageFactory.create(parent=home)
+    program_page = ProgramPageFactory.create(parent=home, certificate_page=None)
     program_page.save_revision().publish()
 
     program_certificate = ProgramCertificateFactory.create(
@@ -254,16 +247,13 @@ def test_program_certificate_view(user_client, user, wagtail_basics):
     program_page = ProgramPageFactory.create(parent=home)
     program_page.save_revision().publish()
 
-    certificate_page = CertificatePageFactory.create(parent=program_page)
-    certificate_page.save_revision().publish()
-
     program_certificate = ProgramCertificateFactory.create(
         user=user, program=program_page.program
     )
 
     resp = user_client.get(program_certificate.link)
     assert resp.status_code == status.HTTP_200_OK
-    assert resp.context_data["page"] == certificate_page
+    assert resp.context_data["page"] == program_page.certificate_page
     assert resp.context_data["page"].certificate == program_certificate
 
 
@@ -280,46 +270,45 @@ def test_catalog_page_product(client, wagtail_basics):
     start_date = now + timedelta(days=2)
     end_date = now + timedelta(days=10)
 
+    active_program_1 = ProgramFactory.create()
+    active_program_2 = ProgramFactory.create()
+
     # Live course page and course with a future course run. Should be included in upcoming context
-    active_course_page = CoursePageFactory.create(course__live=True)
-    CourseRunFactory.create(
-        course=active_course_page.product,
+    active_course_run = CourseRunFactory.create(
+        course__program=active_program_1,
+        course__live=True,
         start_date=start_date,
         end_date=end_date,
         live=True,
     )
 
-    # Live program page and program containing a live course with a future course run. Should be
-    # included in upcoming context
-    active_program_page = ProgramPageFactory.create(program__live=True)
-    active_program_course = CourseFactory.create(
-        program=active_program_page.product, live=True
-    )
-    CourseRunFactory.create(
-        course=active_program_course,
-        start_date=start_date,
-        end_date=end_date,
-        live=True,
-    )
-
-    # The course isn't live however it has a valid and live run. This should be filtered out in the
+    # The course isn't live however it has a valid and live run and page. This should be filtered out in the
     # upcoming template context
-    inactive_course_page = CoursePageFactory.create(course__live=False)
     CourseRunFactory.create(
-        course=inactive_course_page.product,
+        course__program=active_program_1,
+        course__live=False,
         start_date=start_date,
         end_date=end_date,
         live=True,
     )
 
-    # Both the course and course run are live, however the program is not. This should be filtered
-    # out in the upcoming template context
-    inactive_program_page = ProgramPageFactory.create(program__live=False)
-    inactive_program_course = CourseFactory.create(
-        program=inactive_program_page.product, live=True
-    )
+    # The course is live but it has no page. This should be filtered out in the upcoming template context
     CourseRunFactory.create(
-        course=inactive_program_course,
+        course__program=active_program_2,
+        course__live=True,
+        course__page=None,
+        start_date=start_date,
+        end_date=end_date,
+        live=True,
+    )
+
+    # Both the course and course run are live, but there is no course page
+    # The program is also not live. These should both be filtered
+    # out in the upcoming template context
+    CourseRunFactory.create(
+        course__live=True,
+        course__program__live=False,
+        course__page=False,
         start_date=start_date,
         end_date=end_date,
         live=True,
@@ -327,8 +316,11 @@ def test_catalog_page_product(client, wagtail_basics):
 
     resp = client.get(catalog_page.get_url())
     assert resp.status_code == status.HTTP_200_OK
-    assert resp.context_data["course_pages"] == [active_course_page]
-    assert resp.context_data["program_pages"] == [active_program_page]
+    assert resp.context_data["course_pages"] == [active_course_run.course.page]
+    assert resp.context_data["program_pages"] == [
+        active_program_1.page,
+        active_program_2.page,
+    ]
 
 
 def test_program_page_checkout_url_product(client, wagtail_basics):

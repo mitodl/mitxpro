@@ -1,15 +1,10 @@
 """
 Test end to end django views.
 """
-import json
-import os
-
 from django.test import Client
 from django.urls import reverse
 import pytest
 from rest_framework import status
-
-from mitxpro.utils import remove_password_from_url
 
 pytestmark = [pytest.mark.django_db]
 
@@ -43,38 +38,14 @@ def test_cms_signin_redirect_to_site_signin(client):
     assert response.request["PATH_INFO"] == "/signin/"
 
 
-def test_webpack_url(mocker, settings, client):
+def test_webpack_url(mocker, client):
     """Verify that webpack bundle src shows up in production"""
-    settings.GA_TRACKING_ID = "fake"
-    settings.GTM_TRACKING_ID = "fake"
-    settings.ENVIRONMENT = "test"
-    settings.VERSION = "4.5.6"
-    settings.EMAIL_SUPPORT = "support@text.com"
-    settings.USE_WEBPACK_DEV_SERVER = False
-    settings.RECAPTCHA_SITE_KEY = "fake_key"
-    settings.ZENDESK_CONFIG = {
-        "HELP_WIDGET_ENABLED": False,
-        "HELP_WIDGET_KEY": "fake_key",
-    }
     get_bundle = mocker.patch("mitxpro.templatetags.render_bundle._get_bundle")
 
-    response = client.get(reverse("login"))
+    client.get(reverse("login"))
 
     bundles = {bundle[0][1] for bundle in get_bundle.call_args_list}
     assert bundles == {"django", "root", "style"}
-    js_settings = json.loads(response.context["js_settings_json"])
-    assert js_settings == {
-        "gaTrackingID": "fake",
-        "gtmTrackingID": "fake",
-        "public_path": "/static/bundles/",
-        "environment": settings.ENVIRONMENT,
-        "sentry_dsn": remove_password_from_url(os.environ.get("SENTRY_DSN", "")),
-        "release_version": settings.VERSION,
-        "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
-        "support_email": settings.EMAIL_SUPPORT,
-        "site_name": settings.SITE_NAME,
-        "zendesk_config": {"help_widget_enabled": False, "help_widget_key": "fake_key"},
-    }
 
 
 def test_app_context(settings, client):

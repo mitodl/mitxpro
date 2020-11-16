@@ -2,7 +2,8 @@
 from django.apps import AppConfig
 
 
-class MailConfig(AppConfig):
+class MailApp(AppConfig):
     """Mail AppConfig"""
 
     name = "mail"
+    label = "mailv1"

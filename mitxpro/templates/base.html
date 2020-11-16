@@ -1,4 +1,4 @@
-{% load static hijack_tags render_bundle %}
+{% load static hijack_tags render_bundle js_interop %}
 {% load wagtailcore_tags latest_notification startswith %}
 
 <!DOCTYPE html>
@@ -15,8 +15,8 @@
           media="all" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap"
           media="none" onload="if(media!='all') media='all'">
+    {% js_settings %}
     <script type="text/javascript">
-    var SETTINGS = {{ js_settings_json|safe }};
     {% if CSOURCE_PAYLOAD %}
     var CSOURCE_PAYLOAD = {{ CSOURCE_PAYLOAD|safe }};
     {% else %}

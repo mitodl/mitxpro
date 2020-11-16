@@ -2,7 +2,6 @@
 import pytest
 from django.db.utils import IntegrityError
 
-from cms.factories import CoursePageFactory, ProgramPageFactory
 from courses.factories import CourseFactory, CourseRunFactory, ProgramFactory
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import get_product_version_price_with_discount
@@ -171,23 +170,19 @@ def test_thumbnail_url():
     thumbnail_url should return a url of the Product's thumbnail
     """
     program = ProgramFactory.create()
-    course = CourseFactory.create()
-    run = CourseRunFactory.create(course=course)
-
-    program_page = ProgramPageFactory(program=program)
-    course_page = CoursePageFactory(course=course)
     program_product = ProductFactory.create(content_object=program)
+    run = CourseRunFactory.create()
+    run_product = ProductFactory.create(content_object=run)
 
     assert (
         program_product.thumbnail_url
-        == program_page.thumbnail_image.get_rendition(
+        == program.page.thumbnail_image.get_rendition(
             CATALOG_COURSE_IMG_WAGTAIL_FILL
         ).url
     )
-    run_product = ProductFactory.create(content_object=run)
     assert (
         run_product.thumbnail_url
-        == course_page.thumbnail_image.get_rendition(
+        == run.course.page.thumbnail_image.get_rendition(
             CATALOG_COURSE_IMG_WAGTAIL_FILL
         ).url
     )

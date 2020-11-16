@@ -1,0 +1,45 @@
+{% extends "oauth2_provider/base.html" %}
+
+{% load i18n render_bundle %}
+{% block content %}
+  <div class="container auth-page">
+    {% if not error %}
+      <div class="row auth-header">
+        <h3 class="block-center-heading">{% trans "Authorize" %} {{ application.name }}?</h3>
+      </div>
+      <div class="row auth-card card-shadow auth-form">
+        <div class="col-12">
+          <form id="authorizationForm" method="post">
+            <div class="form-group">
+              {% csrf_token %}
+
+              {% for field in form %}
+                {% if field.is_hidden %}
+                  {{ field }}
+                {% endif %}
+              {% endfor %}
+
+              <p>{% trans "The application requires following permissions" %}</p>
+              <ul>
+                {% for scope in scopes_descriptions %}
+                  <li>{{ scope }}</li>
+                {% endfor %}
+              </ul>
+
+              {{ form.errors }}
+              {{ form.non_field_errors }}
+            </div>
+
+            <div class="row submit-row no-gutters justify-content-end">
+              <button type="submit" class="btn" value="Cancel">Cancel</button>
+              <button type="submit" class="btn btn-primary btn-light-blue" name="allow" value="Authorize">Authorize</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <h2>Error: {{ error.error }}</h2>
+      <p>{{ error.description }}</p>
+    {% endif %}
+  </div>
+{% endblock %}

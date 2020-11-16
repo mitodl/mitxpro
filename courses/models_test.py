@@ -178,7 +178,7 @@ def test_program_page():
     """
     page property should return an associated Wagtail page if one exists
     """
-    program = ProgramFactory.create()
+    program = ProgramFactory.create(page=None)
     assert program.page is None
     page = ProgramPageFactory.create(program=program)
     assert program.page == page
@@ -447,7 +447,7 @@ def test_course_page():
     """
     page property should return an associated Wagtail page if one exists
     """
-    course = CourseFactory.create()
+    course = CourseFactory.create(page=None)
     assert course.page is None
     page = CoursePageFactory.create(course=course)
     assert course.page == page
@@ -645,7 +645,7 @@ def test_enrollment_is_ended():
 def test_instructors(has_page):
     """CourseRun.instructors should list instructors from the related CMS page, or provide an empty list"""
     faculty_names = ["Teacher One", "Teacher Two"]
-    course_run = CourseRunFactory.create()
+    course_run = CourseRunFactory.create(course__page=None)
     if has_page:
         course_page = CoursePageFactory.create(course=course_run.course)
         FacultyMembersPageFactory.create(

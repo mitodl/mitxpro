@@ -1,13 +1,14 @@
 """User app utility functions"""
 import logging
 import re
-
-from requests.exceptions import HTTPError
+from email.utils import formataddr
 
 from django.contrib.auth import get_user_model
+from requests.exceptions import HTTPError
 
 from mitxpro.utils import get_error_response_summary
 from users.constants import USERNAME_MAX_LEN
+
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -129,3 +130,8 @@ def ensure_active_user(user):
             )
         except Exception:  # pylint: disable=broad-except
             log.exception("%s (%s): Failed to repair", user.username, user.email)
+
+
+def format_recipient(user: User) -> str:
+    """Format the user as a recipient"""
+    return formataddr((user.name, user.email))
