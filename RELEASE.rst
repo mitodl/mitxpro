@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.67.0 (Released November 17, 2020)
+--------------
+
+- Added enrollment URL column to enrollment code assignment sheets
+- change button text from 'apply now' to 'learn more' for external course pages
+- Bump cryptography from 2.7 to 3.2
+- Added validation for enrollment deferrals to an unenrollable course run
+- Added flag to run python tests only without pylint/cov/warnings
+
 Version 0.66.1 (Released November 12, 2020)
 --------------
 
