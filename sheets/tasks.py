@@ -10,7 +10,7 @@ import celery
 
 from ecommerce.models import BulkCouponAssignment
 from mitxpro.celery import app
-from mitxpro.utils import now_in_utc
+from mitxpro.utils import now_in_utc, case_insensitive_equal
 from sheets import (
     api as sheets_api,
     coupon_assign_api,
@@ -24,6 +24,7 @@ from sheets.constants import (
     SHEET_TYPE_ENROLL_CHANGE,
     SHEET_TYPE_COUPON_ASSIGN,
 )
+from sheets.utils import AssignmentRowUpdate
 
 log = logging.getLogger(__name__)
 
@@ -173,9 +174,9 @@ def set_assignment_rows_to_enrolled(sheet_update_map):
     in a coupon assignment sheet.
 
     Args:
-        sheet_update_map (dict): A dict with assignment sheet id's mapped to pairs of coupon codes
+        sheet_update_map (dict): A dict of dicts that maps assignment sheet id's a dict of coupon codes
             and emails representing the rows that need to be set to enrolled.
-            Example: {"sheet-id-1": [["couponcode1", "a@b.com"], ["couponcode2", "c@d.com"]]}
+            Example: {"sheet-id-1": {"couponcode1": "a@b.com", "couponcode2": "c@d.com"}}
 
     Returns:
         dict: A summary of execution results. The id of each provided sheet is mapped to the
@@ -183,34 +184,35 @@ def set_assignment_rows_to_enrolled(sheet_update_map):
     """
     now = now_in_utc()
     result_summary = {}
-    for sheet_id, assignment_code_email_pairs in sheet_update_map.items():
+    for sheet_id, assignment_code_email_dict in sheet_update_map.items():
         bulk_assignment = BulkCouponAssignment.objects.get(assignment_sheet_id=sheet_id)
         coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler(
             spreadsheet_id=sheet_id, bulk_assignment=bulk_assignment
         )
-        # Convert the list of lists into a set of tuples, and set the strings to lowercase so
-        # the matches will be case-insensitive.
-        assignment_code_email_set = set(
-            (
-                assignment_code_email_pair[0].lower(),
-                assignment_code_email_pair[1].lower(),
-            )
-            for assignment_code_email_pair in assignment_code_email_pairs
-        )
         assignment_rows = coupon_assignment_handler.parsed_rows()
-        status_row_updates = []
+        assignment_row_updates = []
         for assignment_row in assignment_rows:
             if not assignment_row.code or not assignment_row.email:
                 continue
-            if (
-                assignment_row.code.lower(),
-                assignment_row.email.lower(),
-            ) in assignment_code_email_set:
-                status_row_updates.append(
-                    (assignment_row.row_index, ASSIGNMENT_SHEET_ENROLLED_STATUS, now)
+            if assignment_row.code in assignment_code_email_dict:
+                redeemed_email = assignment_code_email_dict[assignment_row.code]
+                alternate_email = (
+                    None
+                    if case_insensitive_equal(redeemed_email, assignment_row.email)
+                    else redeemed_email
                 )
-        coupon_assignment_handler.update_sheet_with_new_statuses(status_row_updates)
-        result_summary[sheet_id] = len(assignment_code_email_pairs)
+                assignment_row_updates.append(
+                    AssignmentRowUpdate(
+                        row_index=assignment_row.row_index,
+                        status=ASSIGNMENT_SHEET_ENROLLED_STATUS,
+                        status_date=now,
+                        alternate_email=alternate_email,
+                    )
+                )
+        coupon_assignment_handler.update_sheet_with_new_statuses(
+            assignment_row_updates, zero_based_index=False
+        )
+        result_summary[sheet_id] = len(assignment_code_email_dict)
     return result_summary
 
 

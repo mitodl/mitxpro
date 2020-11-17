@@ -22,6 +22,7 @@ from mitxpro.utils import (
     partition_to_lists,
     partition,
     item_at_index_or_none,
+    case_insensitive_equal,
 )
 from sheets.api import get_authorized_pygsheets_client, ExpandedSheetsClient
 from sheets.constants import (
@@ -48,6 +49,7 @@ from sheets.utils import (
     mailgun_timestamp_to_datetime,
     parse_sheet_datetime_str,
     assign_sheet_metadata,
+    AssignmentRowUpdate,
 )
 
 log = logging.getLogger(__name__)
@@ -114,16 +116,16 @@ class AssignmentStatusMap:
         """
         for assignment_row in assignment_rows:
             if assignment_row.email:
-                self._assignment_map[bulk_assignment.id][
-                    (assignment_row.code, assignment_row.email)
-                ] = {
+                self._assignment_map[bulk_assignment.id][assignment_row.code] = {
                     "row_index": assignment_row.row_index,
+                    "email": assignment_row.email,
                     "new_status": None,
                     "new_status_date": None,
                     "existing_status": assignment_row.status,
                     "existing_status_date": parse_sheet_datetime_str(
                         assignment_row.status_date
                     ),
+                    "alternate_email": None,
                 }
             else:
                 self._unassigned_code_map[bulk_assignment.id] += 1
@@ -144,10 +146,7 @@ class AssignmentStatusMap:
             event_type (str): The event type (e.g.: "delivered", "failed")
             event_date (datetime.datetime): The datetime when the email was delivered for the given coupon assignment
         """
-        recipient_email_lowercase = recipient_email.lower()
-        assignment_dict = self._assignment_map.get(bulk_assignment_id, {}).get(
-            (code, recipient_email_lowercase)
-        )
+        assignment_dict = self._assignment_map.get(bulk_assignment_id, {}).get(code)
         if not assignment_dict:
             return
         # The "enrolled" status is set by the app when a user redeems a bulk enrollment coupon
@@ -162,37 +161,22 @@ class AssignmentStatusMap:
             and event_type == assignment_dict["existing_status"]
             and event_date == assignment_dict["existing_status_date"]
         ):
-            self._assignment_map[bulk_assignment_id][
-                (code, recipient_email_lowercase)
-            ].update({"new_status": None, "new_status_date": None})
+            self._assignment_map[bulk_assignment_id][code].update(
+                {"new_status": None, "new_status_date": None, "alternate_email": None}
+            )
         else:
-            self._assignment_map[bulk_assignment_id][
-                (code, recipient_email_lowercase)
-            ].update({"new_status": event_type, "new_status_date": event_date})
-
-    def get_new_status_and_date(self, bulk_assignment_id, code, recipient_email):
-        """
-        Returns the new status and status date for the coupon assignment matching the code and email
-        in the given bulk assignment
-
-        Args:
-            bulk_assignment_id (int):
-            code (str): Coupon code
-            recipient_email (str):
-
-        Returns:
-            Tuple[Optional[str], Optional[datetime.datetime]]: The new status paired with the date that
-                the status was logged in Mailgun (or (None, None) if the given assignment does not
-                have a new status.
-        """
-        message_data = self._assignment_map[bulk_assignment_id].get(
-            (code, recipient_email.lower())
-        )
-        return (
-            (message_data["new_status"], message_data["new_status_date"])
-            if message_data
-            else (None, None)
-        )
+            alternate_email = (
+                recipient_email
+                if not case_insensitive_equal(recipient_email, assignment_dict["email"])
+                else None
+            )
+            self._assignment_map[bulk_assignment_id][code].update(
+                {
+                    "new_status": event_type,
+                    "new_status_date": event_date,
+                    "alternate_email": alternate_email,
+                }
+            )
 
     def has_new_statuses(self, bulk_assignment_id):
         """
@@ -209,26 +193,51 @@ class AssignmentStatusMap:
             for _, message_data in self._assignment_map[bulk_assignment_id].items()
         )
 
-    def get_status_date_rows(self, bulk_assignment_id):
+    def get_row_update(self, bulk_assignment_id, code):
         """
-        Returns a row index, status, and status date for each coupon assignment with a new status in the
-        given bulk assignment
+        Returns an object representing the row of the spreadsheet with the specified coupon code (or None if
+        the row does not have a new status)
+
+        Args:
+            bulk_assignment_id (int):
+            code (str): Coupon code
+
+        Returns:
+            AssignmentRowUpdate: An object representing a row of the spreadsheet that needs to be updated (or None if
+                the row does not have a new status)
+        """
+        message_data = self._assignment_map[bulk_assignment_id].get(code)
+        return (
+            AssignmentRowUpdate(
+                row_index=message_data["row_index"],
+                status=message_data["new_status"],
+                status_date=message_data["new_status_date"],
+                alternate_email=message_data["alternate_email"],
+            )
+            if message_data and message_data["new_status"] is not None
+            else None
+        )
+
+    def get_row_updates(self, bulk_assignment_id):
+        """
+        Returns a row object for each coupon assignment that has a new status in the given bulk assignment
 
         Args:
             bulk_assignment_id (int):
 
         Returns:
-            Iterable[Tuple[int, str, datetime.datetime]]: An iterable of row indices (indicating the Sheet row) paired
-                with new status and the date of that status change
+            Iterable[AssignmentRowUpdate]: An iterable of objects representing a row of the spreadsheet that needs
+                to be updated.
         """
         return (
-            (
-                message_data["row_index"],
-                message_data["new_status"],
-                message_data["new_status_date"],
+            AssignmentRowUpdate(
+                row_index=message_data["row_index"],
+                status=message_data["new_status"],
+                status_date=message_data["new_status_date"],
+                alternate_email=message_data["alternate_email"],
             )
             for message_data in self._assignment_map[bulk_assignment_id].values()
-            if message_data["new_status"]
+            if message_data["new_status"] is not None
         )
 
     def has_unassigned_codes(self, bulk_assignment_id):
@@ -294,22 +303,15 @@ def update_product_coupon_assignments(bulk_assignment_id, assignment_status_map)
         bulk_assignment_id=bulk_assignment_id
     ).select_related("product_coupon__coupon")
     for assignment in product_coupon_assignments:
-        new_status, new_status_date = assignment_status_map.get_new_status_and_date(
-            bulk_assignment_id,
-            assignment.product_coupon.coupon.coupon_code,
-            assignment.email,
+        updated_row = assignment_status_map.get_row_update(
+            bulk_assignment_id, assignment.product_coupon.coupon.coupon_code
         )
-        if (
-            new_status
-            and new_status_date
-            and (
-                new_status != assignment.message_status
-                or new_status_date != assignment.message_status_date
-            )
-        ):
-            assignment.message_status = new_status
-            assignment.message_status_date = new_status_date
+        if updated_row is not None:
+            assignment.message_status = updated_row.status
+            assignment.message_status_date = updated_row.status_date
             assignment.updated_on = now_in_utc()
+            if updated_row.alternate_email is not None:
+                assignment.email = updated_row.alternate_email
             updated_assignments.append(assignment)
     ProductCouponAssignment.objects.bulk_update(
         updated_assignments,
@@ -365,7 +367,7 @@ def find_bulk_assignment_messages(assignment_status_map, earliest_message_date=N
         assignment_status_map.add_potential_event_date(
             message.bulk_assignment_id,
             message.coupon_code,
-            message.email,
+            recipient_email=message.email,
             event_type=message.event,
             event_date=mailgun_timestamp_to_datetime(message.timestamp),
         )
@@ -516,38 +518,46 @@ class CouponAssignmentHandler:
         """
         now = now_in_utc()
 
-        status_date_rows = [
-            (row.row_index, ASSIGNMENT_SHEET_INVALID_STATUS, now)
+        row_updates = [
+            AssignmentRowUpdate(
+                row_index=row.row_index,
+                status=ASSIGNMENT_SHEET_INVALID_STATUS,
+                status_date=now,
+                alternate_email=None,
+            )
             for row in assignment_rows
             if row.email in {email.lower() for email in invalid_emails}
         ]
-        self.update_sheet_with_new_statuses(status_date_rows=status_date_rows)
+        self.update_sheet_with_new_statuses(
+            row_updates=row_updates, zero_based_index=False
+        )
 
-    def update_sheet_with_new_statuses(self, status_date_rows):
+    def update_sheet_with_new_statuses(self, row_updates, zero_based_index=False):
         """
         Updates the relevant cells of a coupon assignment Sheet with message statuses and dates.
 
         Args:
-            status_date_rows (iterable of (int, str, datetime.datetime): An iterable of row indices
-                (1-based, as it is in the spreadsheet) paired with the message status and the date
-                of that status change.
+            row_updates (iterable of AssignmentRowUpdate): An iterable of objects representing the possibly-updated
+                row data
+            zero_based_index (bool): True if the row index is 0-based, False if the row index in 1-based
 
         Returns:
-            dict: Google API response body
+            list(dict): The bodies of the Google API responses
         """
-        return self.expanded_sheets_client.batch_update_sheet_cells(
+        index_increment = 0 if zero_based_index else -1
+        responses = []
+        resp = self.expanded_sheets_client.batch_update_sheet_cells(
             sheet_id=self.spreadsheet.id,
             request_objects=[
                 build_multi_cell_update_request_body(
-                    # The API endpoint uses 0-based indices. Decrementing the 1-based index to comply with that.
-                    row_index=row_index - 1,
+                    row_index=row_update.row_index + index_increment,
                     column_index=assign_sheet_metadata.STATUS_COL,
                     values=[
-                        {"userEnteredValue": {"stringValue": status}},
+                        {"userEnteredValue": {"stringValue": row_update.status}},
                         {
                             "userEnteredValue": {
                                 "formulaValue": format_datetime_for_sheet_formula(
-                                    status_date.astimezone(
+                                    row_update.status_date.astimezone(
                                         settings.SHEETS_DATE_TIMEZONE
                                     )
                                 )
@@ -558,7 +568,52 @@ class CouponAssignmentHandler:
                         },
                     ],
                 )
-                for row_index, status, status_date in status_date_rows
+                for row_update in row_updates
+            ],
+        )
+        responses.append(resp)
+        alt_email_row_updates = [
+            row_update
+            for row_update in row_updates
+            if row_update.alternate_email is not None
+        ]
+        if alt_email_row_updates:
+            responses.append(
+                self.update_sheet_with_alternate_emails(
+                    alt_email_row_updates, zero_based_index=zero_based_index
+                )
+            )
+        return responses
+
+    def update_sheet_with_alternate_emails(self, row_updates, zero_based_index=False):
+        """
+        Updates the relevant cells of a coupon assignment Sheet with emails that users enrolled with (if different from
+        the email that was originally entered for the assignment).
+
+        Args:
+            row_updates (iterable of AssignmentRowUpdate): An iterable of objects representing rows in the
+                spreadsheet that need to be updated
+            zero_based_index (bool): True if the row index is 0-based, False if the row index in 1-based
+
+        Returns:
+            dict: Google API response body
+        """
+        index_increment = 0 if zero_based_index else -1
+        return self.expanded_sheets_client.batch_update_sheet_cells(
+            sheet_id=self.spreadsheet.id,
+            request_objects=[
+                build_multi_cell_update_request_body(
+                    row_index=row_update.row_index + index_increment,
+                    column_index=assign_sheet_metadata.ENROLLED_EMAIL_COL,
+                    values=[
+                        {
+                            "userEnteredValue": {
+                                "stringValue": row_update.alternate_email
+                            }
+                        }
+                    ],
+                )
+                for row_update in row_updates
             ],
         )
 
@@ -569,7 +624,7 @@ class CouponAssignmentHandler:
             assignment_rows (List[CouponAssignmentRow]): The parsed rows in the given assignment sheet
             created_assignments (List[ProductCouponAssignment]): Newly-created product coupon assignments
         """
-        status_date_rows = []
+        updated_rows = []
         # Map the code and email pair to the date it was created. This will allow us to find matching assignments and
         # set the status date correctly.
         assignment_creation_dict = {
@@ -580,15 +635,21 @@ class CouponAssignmentHandler:
             for assignment in created_assignments
         }
         for row in assignment_rows:
-            if (row.code, row.email) in assignment_creation_dict:
-                status_date_rows.append(
-                    (
-                        row.row_index,
-                        ASSIGNMENT_SHEET_ASSIGNED_STATUS,
-                        assignment_creation_dict[(row.code, row.email)],
+            if not row.email:
+                continue
+            code_email_tuple = (row.code, row.email.lower())
+            if code_email_tuple in assignment_creation_dict:
+                updated_rows.append(
+                    AssignmentRowUpdate(
+                        row_index=row.row_index,
+                        status=ASSIGNMENT_SHEET_ASSIGNED_STATUS,
+                        status_date=assignment_creation_dict[code_email_tuple],
+                        alternate_email=None,
                     )
                 )
-        self.update_sheet_with_new_statuses(status_date_rows=status_date_rows)
+        self.update_sheet_with_new_statuses(
+            row_updates=updated_rows, zero_based_index=False
+        )
 
     @classmethod
     def get_desired_coupon_assignments(cls, assignment_rows):
@@ -729,9 +790,8 @@ class CouponAssignmentHandler:
 
         # Update delivery dates in Sheet
         if assignment_status_map.has_new_statuses(bulk_assignment_id):
-            self.update_sheet_with_new_statuses(
-                assignment_status_map.get_status_date_rows(bulk_assignment_id)
-            )
+            row_updates = assignment_status_map.get_row_updates(bulk_assignment_id)
+            self.update_sheet_with_new_statuses(row_updates, zero_based_index=False)
 
         return updated_assignments
 
