@@ -1038,11 +1038,11 @@ def test_complete_order_coupon_assignments(mocker, user, basket_and_coupons):
         assert coupon_assignment.redeemed is True
     patched_set_enrolled.delay.assert_called_once_with(
         defaultdict(
-            list,
+            dict,
             {
-                bulk_assignment.assignment_sheet_id: [
-                    [order_coupons[2].coupon_code, order.purchaser.email.upper()]
-                ]
+                bulk_assignment.assignment_sheet_id: {
+                    order_coupons[2].coupon_code: order.purchaser.email.upper()
+                }
             },
         )
     )

@@ -222,6 +222,7 @@ class CouponAssignSheetMetadata(
             "Status",
             "Status Date",
             "Enrollment URL",
+            "Enrolled Email",
         ]
         self.non_input_column_indices = {0, 2, 3}
         self.num_columns = len(self.column_headers)
@@ -229,6 +230,9 @@ class CouponAssignSheetMetadata(
         self.ENROLL_CODE_COL = matching_item_index(self.column_headers, "Coupon Code")
         self.STATUS_COL = matching_item_index(self.column_headers, "Status")
         self.ENROLL_URL_COL = matching_item_index(self.column_headers, "Enrollment URL")
+        self.ENROLLED_EMAIL_COL = matching_item_index(
+            self.column_headers, "Enrolled Email"
+        )
         self.LAST_COL_LETTER = get_column_letter(self.num_columns - 1)
 
 
@@ -253,7 +257,6 @@ class ResultType(Enum):
 RowResult = namedtuple(
     "RowResult", ["row_index", "row_db_record", "row_object", "message", "result_type"]
 )
-
 ProcessedRequest = namedtuple(
     "ProcessedRequest", ["row_index", "coupon_req_row", "request_id", "date_processed"]
 )
@@ -261,6 +264,9 @@ FailedRequest = namedtuple(
     "FailedRequest", ["row_index", "exception", "sheet_error_text"]
 )
 IgnoredRequest = namedtuple("IgnoredRequest", ["row_index", "coupon_req_row", "reason"])
+AssignmentRowUpdate = namedtuple(
+    "AssignmentRowUpdate", ["row_index", "status", "status_date", "alternate_email"]
+)
 
 
 def assignment_sheet_file_name(coupon_req_row):

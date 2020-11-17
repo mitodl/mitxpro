@@ -57,7 +57,7 @@ from ecommerce.models import (
 from ecommerce.mail_api import send_ecommerce_order_receipt
 import sheets.tasks
 from hubspot.task_helpers import sync_hubspot_deal
-from mitxpro.utils import now_in_utc, first_or_none
+from mitxpro.utils import now_in_utc, first_or_none, case_insensitive_equal
 
 log = logging.getLogger(__name__)
 
@@ -486,25 +486,30 @@ def redeem_coupon(coupon_version, order):
     return coupon_redemption
 
 
-def set_coupons_to_redeemed(assignee_email, coupon_ids):
+def set_coupons_to_redeemed(redeemed_email, coupon_ids):
     """
     Updates coupon assignment records to indicate that they have been redeemed, and starts a task to
     update the status of the corresponding coupon assignment spreadsheet rows if they exist.
 
     Args:
-        assignee_email (str): The email address that was assigned for the given coupons
+        redeemed_email (str): The email address that was used to redeem the given coupons
         coupon_ids (iterable of int): ecommerce.models.Coupon id values for the Coupons that were redeemed
     """
     updated_assignments = []
     with transaction.atomic():
         assignments = (
             ProductCouponAssignment.objects.select_for_update()
-            .filter(email__iexact=assignee_email, product_coupon__coupon__in=coupon_ids)
+            .filter(product_coupon__coupon__in=coupon_ids)
             .select_related("product_coupon__coupon")
         )
         for assignment in assignments:
             if not assignment.redeemed:
                 assignment.redeemed = True
+                # We allow codes to be redeemed by an email other than the one that was assigned. If the user that
+                # redeemed this code does not match the email on the ProductCouponAssignment, update the db record.
+                if not case_insensitive_equal(redeemed_email, assignment.email):
+                    assignment.original_email = assignment.email
+                    assignment.email = redeemed_email
                 assignment.save()
                 updated_assignments.append(assignment)
     # If the redeemed coupons were assigned in bulk enrollment spreadsheets, update those spreadsheets
@@ -515,11 +520,11 @@ def set_coupons_to_redeemed(assignee_email, coupon_ids):
         if assignment.bulk_assignment and assignment.bulk_assignment.assignment_sheet_id
     ]
     if updated_assignments_in_bulk:
-        sheet_update_map = defaultdict(list)
+        sheet_update_map = defaultdict(dict)
         for assignment in updated_assignments_in_bulk:
-            sheet_update_map[assignment.bulk_assignment.assignment_sheet_id].append(
-                [assignment.product_coupon.coupon.coupon_code, assignment.email]
-            )
+            sheet_update_map[assignment.bulk_assignment.assignment_sheet_id][
+                assignment.product_coupon.coupon.coupon_code
+            ] = assignment.email
         sheets.tasks.set_assignment_rows_to_enrolled.delay(sheet_update_map)
 
 

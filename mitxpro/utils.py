@@ -89,6 +89,20 @@ def format_datetime_for_filename(datetime_object, include_time=False, include_ms
     return datetime_object.strftime("_".join(format_parts))
 
 
+def case_insensitive_equal(str1, str2):
+    """
+    Compares two strings to determine if they are case-insensitively equal
+
+    Args:
+        str1 (str):
+        str2 (str):
+
+    Returns:
+        bool: True if the strings are equal, ignoring case
+    """
+    return str1.lower() == str2.lower()
+
+
 def dict_without_keys(d, *omitkeys):
     """
     Returns a copy of a dict without the specified keys
