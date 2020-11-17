@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.67.0
+Version 0.67.0 (Released November 17, 2020)
 --------------
 
 - Added enrollment URL column to enrollment code assignment sheets
