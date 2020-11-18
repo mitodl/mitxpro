@@ -2,6 +2,8 @@ name: CI
 on:
   push:
     branches:
+      - release
+      - release-candidate
       - master
 jobs:
   zap_scan:
@@ -10,9 +12,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: master
-      - name: OWASP ZAP Full Scan of Heroku CI
-        uses: zaproxy/action-baseline@0.4.0
+          ref: ${{ github.ref }}
+      - name: OWASP ZAP Baseline Scan of Heroku CI
+        if: ${{ github.ref == 'refs/heads/master' }}
+        uses: zaproxy/action-baseline@v0.4.0
         with:
-          target: ${{ secrets.ZAP_TARGET }}
+          target: ${{ secrets.ZAP_CI_TARGET }}
+          rules_file_name: '.zap/rules.tsv'
+      - name: OWASP ZAP Full Scan of Heroku RC
+        if: ${{ github.ref == 'refs/heads/release-candidate' }}
+        uses: zaproxy/action-full-scan@v0.2.0
+        with:
+          target: ${{ secrets.ZAP_RC_TARGET }}
+          rules_file_name: '.zap/rules.tsv'
+      - name: OWASP ZAP Full Scan of Heroku Production
+        if: ${{ github.ref == 'refs/heads/release' }}
+        uses: zaproxy/action-full-scan@v0.2.0
+        with:
+          target: ${{ secrets.ZAP_PROD_TARGET }}
           rules_file_name: '.zap/rules.tsv'
