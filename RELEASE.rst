@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.67.1
+--------------
+
+- Change ZAP security test to run on schedule (#1995)
+- Add OWASP ZAP scan (#1993)
+- Added handling for redeeming enrollment codes with different email
+
 Version 0.67.0 (Released November 17, 2020)
 --------------
 
