@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.67.2
+--------------
+
+- Add git ref to Github action 'uses' specifier (#1999)
+- Rename ZAP Github workflow
+- Remove ZAP release tags to get latest vuln definitions
+
 Version 0.67.1 (Released November 19, 2020)
 --------------
 
