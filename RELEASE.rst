@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.67.1
+Version 0.67.1 (Released November 19, 2020)
 --------------
 
 - Change ZAP security test to run on schedule (#1995)
