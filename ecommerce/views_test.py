@@ -869,7 +869,7 @@ def test_patch_basket_invalid_run(
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     assert resp.json()["errors"] == {
         "runs": (
-            f"Some invalid courses were selected."
+            "Some invalid courses were selected."
             if is_selected
             else "Each course must have a course run selection"
         )

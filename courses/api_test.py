@@ -202,7 +202,7 @@ def test_create_run_enrollments_creation_fail(mocker, user):
     runs = CourseRunFactory.create_batch(2)
     enrollment = CourseRunEnrollmentFactory.build(run=runs[1])
     mocker.patch(
-        f"courses.api.CourseRunEnrollment.all_objects.get_or_create",
+        "courses.api.CourseRunEnrollment.all_objects.get_or_create",
         side_effect=[Exception(), (enrollment, True)],
     )
     patched_edx_enroll = mocker.patch("courses.api.enroll_in_edx_course_runs")
@@ -259,7 +259,7 @@ def test_create_program_enrollments_creation_fail(mocker, user):
     programs = ProgramFactory.create_batch(2)
     enrollment = ProgramEnrollmentFactory.build(program=programs[1])
     mocker.patch(
-        f"courses.api.ProgramEnrollment.all_objects.get_or_create",
+        "courses.api.ProgramEnrollment.all_objects.get_or_create",
         side_effect=[Exception(), (enrollment, True)],
     )
     patched_log_exception = mocker.patch("courses.api.log.exception")

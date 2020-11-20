@@ -61,7 +61,7 @@ def test_get_affiliate_id_from_request():
     affiliate code from the request
     """
     affiliate_code = "abc"
-    request = RequestFactory().get(f"/")
+    request = RequestFactory().get("/")
     setattr(request, "affiliate_code", affiliate_code)
     affiliate_id = get_affiliate_id_from_request(request)
     assert affiliate_id is None

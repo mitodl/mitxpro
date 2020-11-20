@@ -3,7 +3,6 @@ Validate that our settings functions work
 """
 
 import importlib
-import json
 import sys
 from unittest import mock
 
@@ -11,15 +10,19 @@ from django.conf import settings
 from django.core import mail
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
+from mitol.common import envs, pytest_utils
 import semantic_version
 
-from mitxpro import envs
 
 REQUIRED_SETTINGS = {
     "MAILGUN_SENDER_DOMAIN": "mailgun.fake.domain",
     "MAILGUN_KEY": "fake_mailgun_key",
     "MITXPRO_BASE_URL": "http://localhost:8053",
 }
+
+# this is a test, but pylint thinks it ends up being unused
+# hence we import the entire module and assign it here
+test_app_json_modified = pytest_utils.test_app_json_modified
 
 
 def cleanup_settings():
@@ -146,23 +149,6 @@ class TestSettings(TestCase):
         Verify that we have a semantic compatible version.
         """
         semantic_version.Version(settings.VERSION)
-
-    @staticmethod
-    def test_app_json_modified():
-        """
-        generate_app_json should return a dictionary of JSON config for app.json
-        """
-        from mitxpro.envs import generate_app_json
-
-        with open("app.json") as app_json_file:
-            app_json = json.load(app_json_file)
-
-        generated_app_json = generate_app_json()
-
-        # pytest will print the difference
-        assert json.dumps(app_json, sort_keys=True, indent=2) == json.dumps(
-            generated_app_json, sort_keys=True, indent=2
-        ), "Generated app.json does not match the app.json file. Please use the 'generate_app_json' management command to update app.json"
 
     def test_server_side_cursors_disabled(self):
         """DISABLE_SERVER_SIDE_CURSORS should be true by default"""

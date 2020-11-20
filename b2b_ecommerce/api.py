@@ -164,8 +164,8 @@ def determine_price_and_discount(*, product_version, discount_code, num_seats):
             coupon = B2BCoupon.objects.get_unexpired_coupon(
                 coupon_code=discount_code, product_id=product_version.product.id
             )
-        except B2BCoupon.DoesNotExist:
-            raise ValidationError("Invalid coupon code")
+        except B2BCoupon.DoesNotExist as exc:
+            raise ValidationError("Invalid coupon code") from exc
     else:
         coupon = None
 

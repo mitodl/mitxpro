@@ -287,7 +287,9 @@ class CertificateIndexPage(RoutablePageMixin, Page):
         )
 
     @route(r"^program/([A-Fa-f0-9-]+)/?$")
-    def program_certificate(self, request, uuid, *args, **kwargs):
+    def program_certificate(
+        self, request, uuid, *args, **kwargs
+    ):  # pylint: disable=unused-argument
         """
         Serve a program certificate by uuid
         """
@@ -310,7 +312,9 @@ class CertificateIndexPage(RoutablePageMixin, Page):
         return certificate_page.serve(request)
 
     @route(r"^([A-Fa-f0-9-]+)/?$")
-    def course_certificate(self, request, uuid, *args, **kwargs):
+    def course_certificate(
+        self, request, uuid, *args, **kwargs
+    ):  # pylint: disable=unused-argument
         """
         Serve a course certificate by uuid
         """
@@ -602,7 +606,7 @@ class ProductPage(MetadataPageMixin, Page):
         if self.featured:
             for child_class in ProductPage.__subclasses__():
                 child_class.objects.filter(featured=True).update(featured=False)
-        super(ProductPage, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     @property
     def product(self):
@@ -1375,7 +1379,7 @@ class ResourcePage(Page):
     ]
 
     def get_context(self, request, *args, **kwargs):
-        context = super(ResourcePage, self).get_context(request)
+        context = super().get_context(request)
         context.update(**get_base_context(request))
 
         return context
@@ -1611,4 +1615,4 @@ class SiteNotification(models.Model):
     panels = [FieldPanel("message")]
 
     def __str__(self):
-        return self.message
+        return str(self.message)

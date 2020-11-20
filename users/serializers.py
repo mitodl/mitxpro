@@ -98,11 +98,11 @@ class LegalAddressSerializer(serializers.ModelSerializer):
             else:
                 if country.alpha_2 == "US" and not US_POSTAL_RE.match(postal_code):
                     errors["postal_code"].append(
-                        f"Postal Code must be in the format 'NNNNN' or 'NNNNN-NNNNN'"
+                        "Postal Code must be in the format 'NNNNN' or 'NNNNN-NNNNN'"
                     )
                 elif country.alpha_2 == "CA" and not CA_POSTAL_RE.match(postal_code):
                     errors["postal_code"].append(
-                        f"Postal Code must be in the format 'ANA NAN'"
+                        "Postal Code must be in the format 'ANA NAN'"
                     )
 
         if errors:

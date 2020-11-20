@@ -48,7 +48,7 @@ class Command(BaseCommand):
         if options["type"]:
             if not options["title"]:
                 raise CommandError("'title' must be specified with 'type'")
-            elif not seed_data_loader.is_seed_value(options["title"]):
+            if not seed_data_loader.is_seed_value(options["title"]):
                 raise CommandError(
                     "This command should only be run to delete seeded objects. Seeded objects are indicated "
                     "by a prefixed title (example: {})".format(

@@ -201,6 +201,7 @@ class PrefetchGenericQuerySet(QuerySet):
         qs = self._chain()
 
         for model_classes, lookups in model_lookups.items():
+            # pylint: disable=isinstance-second-argument-not-valid-type
             model_classes = (
                 model_classes
                 if isinstance(model_classes, Iterable)

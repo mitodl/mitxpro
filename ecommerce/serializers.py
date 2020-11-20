@@ -637,8 +637,8 @@ class BasketSerializer(serializers.ModelSerializer):
             product.run_queryset.filter(id__in=run_ids).values_list("id", "course_id")
         )
         if len(product_run_course_map) < len(run_ids):
-            raise ValidationError({"runs": f"Some invalid courses were selected."})
-        elif len(set(product_run_course_map.values())) < len(run_ids):
+            raise ValidationError({"runs": "Some invalid courses were selected."})
+        if len(set(product_run_course_map.values())) < len(run_ids):
             raise ValidationError({"runs": "Only one run per course can be selected"})
 
     def validate_items(self, items):

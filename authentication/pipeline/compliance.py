@@ -44,7 +44,7 @@ def verify_exports_compliance(
 
     if export_inquiry is None:
         raise UserTryAgainLaterException(backend)
-    elif export_inquiry.is_denied:
+    if export_inquiry.is_denied:
         log.info(
             "User with email '%s' was denied due to exports violation, for reason_code=%s, info_code=%s",
             user.email,
@@ -83,7 +83,7 @@ def verify_exports_compliance(
                 "Exception sending email to support regarding export compliance check failure"
             )
         raise UserExportBlockedException(backend, export_inquiry.reason_code)
-    elif export_inquiry.is_unknown:
+    if export_inquiry.is_unknown:
         raise AuthException("Unable to authenticate, please contact support")
 
     return {}

@@ -45,9 +45,7 @@ class CurrentUserRetrieveUpdateViewSet(
     def update(self, request, *args, **kwargs):
         with transaction.atomic():
             user_name = request.user.name
-            update_result = super(CurrentUserRetrieveUpdateViewSet, self).update(
-                request, *args, **kwargs
-            )
+            update_result = super().update(request, *args, **kwargs)
             if user_name != request.data.get("name"):
                 tasks.change_edx_user_name_async.delay(request.user.id)
             return update_result

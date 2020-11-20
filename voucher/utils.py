@@ -192,7 +192,7 @@ def read_pdf_domestic(pdf):
                 scanning_rows = True
                 first_row = True
                 continue
-            elif line.startswith("NOTE:"):
+            if line.startswith("NOTE:"):
                 scanning_rows = False
 
             if scanning_rows:

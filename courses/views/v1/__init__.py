@@ -49,7 +49,7 @@ class UserEnrollmentsView(APIView):
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Read-only access"""
         user = request.user
         user_enrollments = get_user_enrollments(user)

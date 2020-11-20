@@ -829,7 +829,7 @@ def _validate_basket_contents(basket):
         raise ValidationError(
             {"items": "No items in basket. Cannot complete checkout."}
         )
-    elif len(basket_items) > 1:
+    if len(basket_items) > 1:
         log.error(
             "User %s is checking out %d items in their basket. Baskets should only have one BasketItem.",
             basket.user.email,

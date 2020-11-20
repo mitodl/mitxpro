@@ -10,6 +10,6 @@ class RootConfig(AppConfig):
     name = "mitxpro"
 
     def ready(self):
-        from mitxpro import envs
+        from mitol.common import envs
 
         envs.validate()
