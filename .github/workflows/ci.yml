@@ -1,4 +1,4 @@
-name: Scanning
+name: CI
 on:
   schedule:
     - cron: '0 5 * * *'
