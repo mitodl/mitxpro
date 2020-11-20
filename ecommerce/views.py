@@ -168,7 +168,9 @@ class CheckoutView(APIView):
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request, *args, **kwargs):  # pylint: disable=too-many-locals
+    def post(
+        self, request, *args, **kwargs
+    ):  # pylint: disable=too-many-locals,unused-argument
         """
         Create a new unfulfilled Order from the user's basket
         and return information used to submit to CyberSource.
@@ -233,7 +235,7 @@ class OrderFulfillmentView(APIView):
     authentication_classes = ()
     permission_classes = (IsSignedByCyberSource,)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """
         Confirmation from CyberSource which fulfills an existing Order.
         """
@@ -297,7 +299,7 @@ class BulkEnrollCouponListView(APIView):
     permission_classes = (IsAdminUser,)
     authentication_classes = (SessionAuthentication,)
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=missing-docstring
+    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """
         Handles GET requests. Response data is of this form:
 
@@ -362,7 +364,7 @@ class BulkEnrollmentSubmitView(APIView):
     permission_classes = (IsAdminUser,)
     authentication_classes = (SessionAuthentication,)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """View to send an enrollment email to all users in an uploaded csv file"""
         product_id = int(request.data["product_id"])
         coupon_payment_id = int(request.data["coupon_payment_id"])
@@ -412,7 +414,7 @@ class CouponListView(APIView):
     permission_classes = (IsAdminUser,)
     authentication_classes = (SessionAuthentication,)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """ Create coupon(s) and related objects """
         # Determine what kind of coupon this is.
         if request.data.get("coupon_type") == CouponPaymentVersion.SINGLE_USE:

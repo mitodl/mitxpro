@@ -205,7 +205,7 @@ class ProductVersion(TimestampedModel):
     class Meta:
         indexes = [models.Index(fields=["created_on"])]
 
-    def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
+    def save(self, *args, **kwargs):  # pylint: disable=signature-differs
         try:
             self.text_id = getattr(self.product.content_object, "text_id")
         except AttributeError:

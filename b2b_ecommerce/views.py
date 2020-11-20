@@ -40,7 +40,9 @@ class B2BCheckoutView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    def post(self, request, *args, **kwargs):  # pylint: disable=too-many-locals
+    def post(
+        self, request, *args, **kwargs
+    ):  # pylint: disable=too-many-locals,unused-argument
         """
         Create a new unfulfilled Order from the user's basket
         and return information used to submit to CyberSource.
@@ -127,7 +129,7 @@ class B2BOrderStatusView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Return B2B order status and other information about the order needed to display the receipt"""
         order_hash = kwargs["hash"]
         order = get_object_or_404(B2BOrder, unique_id=order_hash)
@@ -168,7 +170,7 @@ class B2BEnrollmentCodesView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Create a CSV with enrollment codes"""
         order_hash = kwargs["hash"]
         order = get_object_or_404(
@@ -208,7 +210,7 @@ class B2BCouponView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Get information about a coupon"""
         product = None
         try:

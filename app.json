@@ -32,7 +32,7 @@
       "required": false
     },
     "AWS_QUERYSTRING_AUTH": {
-      "description": null,
+      "description": "Enables querystring auth for S3 urls",
       "required": false
     },
     "AWS_SECRET_ACCESS_KEY": {
@@ -52,7 +52,7 @@
       "required": false
     },
     "CELERY_TASK_EAGER_PROPAGATES": {
-      "description": null,
+      "description": "Early executed tasks propagate exceptions",
       "required": false
     },
     "CERTIFICATE_CREATION_DELAY_IN_HOURS": {
@@ -60,7 +60,7 @@
       "required": false
     },
     "CLOUDFRONT_DIST": {
-      "description": null,
+      "description": "The Cloundfront distribution to use for static assets",
       "required": false
     },
     "COUPON_REQUEST_SHEET_ID": {
@@ -216,7 +216,7 @@
       "required": false
     },
     "HOST_IP": {
-      "description": null,
+      "description": "This server's host IP",
       "required": false
     },
     "HUBSPOT_API_KEY": {
@@ -263,16 +263,12 @@
       "description": "The token for authenticating against the Mailgun API",
       "required": true
     },
-    "MAILGUN_RECIPIENT_OVERRIDE": {
-      "description": null,
-      "required": false
-    },
     "MAILGUN_SENDER_DOMAIN": {
       "description": "The domain to send mailgun email through",
       "required": true
     },
     "MEDIA_ROOT": {
-      "description": null,
+      "description": "The root directory for locally stored media. Typically not used.",
       "required": false
     },
     "MITXPRO_ADMIN_EMAIL": {
@@ -292,11 +288,11 @@
       "required": false
     },
     "MITXPRO_DB_DISABLE_SS_CURSORS": {
-      "description": null,
+      "description": "Disables Postgres server side cursors",
       "required": false
     },
     "MITXPRO_EMAIL_BACKEND": {
-      "description": null,
+      "description": "The default email backend to use for outgoing email. This is used in some places by django itself. See `NOTIFICATION_EMAIL_BACKEND` for the backend used for most application emails.",
       "required": false
     },
     "MITXPRO_EMAIL_HOST": {
@@ -323,20 +319,16 @@
       "description": "The execution environment that the app is in (e.g. dev, staging, prod)",
       "required": true
     },
-    "MITXPRO_FEATURES_PREFIX": {
-      "description": null,
-      "required": false
-    },
     "MITXPRO_FROM_EMAIL": {
       "description": "E-mail to use for the from field",
       "required": false
     },
     "MITXPRO_LOG_HOST": {
-      "description": null,
+      "description": "Remote syslog server hostname",
       "required": false
     },
     "MITXPRO_LOG_HOST_PORT": {
-      "description": null,
+      "description": "Remote syslog server port",
       "required": false
     },
     "MITXPRO_LOG_LEVEL": {
@@ -344,7 +336,7 @@
       "required": false
     },
     "MITXPRO_NOTIFICATION_EMAIL_BACKEND": {
-      "description": null,
+      "description": "The email backend to use for application emails",
       "required": false
     },
     "MITXPRO_REGISTRATION_ACCESS_TOKEN": {
@@ -416,10 +408,6 @@
     },
     "PGBOUNCER_MIN_POOL_SIZE": {
       "value": "50"
-    },
-    "REACT_GA_DEBUG": {
-      "description": null,
-      "required": false
     },
     "RECAPTCHA_SECRET_KEY": {
       "description": "The ReCaptcha secret key",
@@ -511,55 +499,55 @@
       "required": false
     },
     "VOUCHER_COMPANY_ID": {
-      "description": null,
+      "description": "Company ID for vouchers",
       "required": false
     },
     "VOUCHER_DOMESTIC_AMOUNT_KEY": {
-      "description": null,
+      "description": "Amount key for domestic vouchers",
       "required": false
     },
     "VOUCHER_DOMESTIC_COURSE_KEY": {
-      "description": null,
+      "description": "Course key for domestic vouchers",
       "required": false
     },
     "VOUCHER_DOMESTIC_CREDITS_KEY": {
-      "description": null,
+      "description": "Credits key for domestic vouchers",
       "required": false
     },
     "VOUCHER_DOMESTIC_DATES_KEY": {
-      "description": null,
+      "description": "Dates key for domestic vouchers",
       "required": false
     },
     "VOUCHER_DOMESTIC_EMPLOYEE_ID_KEY": {
-      "description": null,
+      "description": "Voucher employee key ID for domestic vouchers",
       "required": false
     },
     "VOUCHER_DOMESTIC_EMPLOYEE_KEY": {
-      "description": null,
+      "description": "Employee key for domestic vouchers",
       "required": false
     },
     "VOUCHER_DOMESTIC_KEY": {
-      "description": null,
+      "description": "Voucher key for domestic vouchers",
       "required": false
     },
     "VOUCHER_INTERNATIONAL_COURSE_NAME_KEY": {
-      "description": null,
+      "description": "Course name key for international vouchers",
       "required": false
     },
     "VOUCHER_INTERNATIONAL_COURSE_NUMBER_KEY": {
-      "description": null,
+      "description": "Course number key for international vouchers",
       "required": false
     },
     "VOUCHER_INTERNATIONAL_DATES_KEY": {
-      "description": null,
+      "description": "Dates key for international vouchers",
       "required": false
     },
     "VOUCHER_INTERNATIONAL_EMPLOYEE_ID_KEY": {
-      "description": null,
+      "description": "Voucher employee key ID for international vouchers",
       "required": false
     },
     "VOUCHER_INTERNATIONAL_EMPLOYEE_KEY": {
-      "description": null,
+      "description": "Employee key for international vouchers",
       "required": false
     },
     "ZENDESK_HELP_WIDGET_ENABLED": {

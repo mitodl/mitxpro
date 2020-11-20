@@ -515,7 +515,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print(
-            f"Checking Hubspot Ecommerce Bridge installation for given Hubspot API Key..."
+            "Checking Hubspot Ecommerce Bridge installation for given Hubspot API Key..."
         )
         installation_status = json.loads(get_hubspot_installation_status().text)
         print(installation_status)
@@ -536,8 +536,8 @@ class Command(BaseCommand):
                 print("Ecommerce Bridge is not installed")
                 return
         else:
-            print(f"Configuring settings...")
+            print("Configuring settings...")
             configure_hubspot_settings()
-            print(f"Configuring custom groups and properties...")
+            print("Configuring custom groups and properties...")
             install_custom_properties()
-            print(f"Settings and custom properties configured")
+            print("Settings and custom properties configured")

@@ -475,7 +475,7 @@ class CouponAssignmentHandler:
         coupon_codes = [row[0] for row in data_rows]
         if not coupon_codes:
             raise SheetValidationException("No data found in coupon assignment Sheet")
-        elif not all_unique(coupon_codes):
+        if not all_unique(coupon_codes):
             raise SheetValidationException(
                 "All coupon codes in the Sheet must be unique"
             )

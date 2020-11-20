@@ -87,7 +87,7 @@ def index(request, **kwargs):  # pylint: disable=unused-argument
     return render(request, "index.html", context=context)
 
 
-def handler404(request, exception):
+def handler404(request, exception):  # pylint: disable=unused-argument
     """404: NOT FOUND ERROR handler"""
     response = render_to_string(
         "404.html", request=request, context=get_base_context(request)
@@ -122,6 +122,6 @@ class AppContextView(APIView):
 
     permission_classes = []
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Read-only access"""
         return Response(AppContextSerializer(request).data)

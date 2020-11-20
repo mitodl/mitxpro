@@ -200,15 +200,11 @@ class CustomDjoserAPIView(ActionViewMixin):
 class CustomPasswordResetView(CustomDjoserAPIView, DjoserPasswordResetView):
     """Custom view to modify base functionality in Djoser's PasswordResetView class"""
 
-    pass
-
 
 class CustomPasswordResetConfirmView(
     CustomDjoserAPIView, DjoserPasswordResetConfirmView
 ):
     """Custom view to modify base functionality in Djoser's PasswordResetConfirmView class"""
-
-    pass
 
 
 class CustomSetPasswordView(CustomDjoserAPIView, DjoserSetPasswordView):

@@ -58,10 +58,10 @@ class Command(BaseCommand):
             raise CommandError(
                 "Either 'program' or 'run' should be provided, not both."
             )
-        elif not program and not run:
+        if not program and not run:
             raise CommandError("Either 'program' or 'run' must be provided.")
 
-        elif (program or run) and not user:
+        if (program or run) and not user:
             raise CommandError("A valid user must be provided.")
 
         updated = False

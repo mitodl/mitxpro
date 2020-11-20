@@ -3,6 +3,7 @@ Retire user(s) from MIT xPRO
 """
 from argparse import RawTextHelpFormatter
 from urllib.parse import urlparse
+import sys
 
 from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
@@ -60,7 +61,7 @@ class Command(BaseCommand):
             default=[],
             dest="users",
             help="Single or multiple username(s) or email(s)",
-        ),
+        )
 
     def get_retired_email(self, email):
         """ Convert user email to retired email format. """
@@ -75,7 +76,7 @@ class Command(BaseCommand):
                     "No user(s) provided. Please provide user(s) using -u or --user."
                 )
             )
-            exit(1)
+            sys.exit(1)
 
         users = fetch_users(kwargs["users"])
 

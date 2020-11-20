@@ -375,7 +375,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     class Meta:
         ordering = ("program", "title")
 
-    def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
+    def save(self, *args, **kwargs):  # pylint: disable=signature-differs
         """Overridden save method"""
         # If adding a Course to a Program without position specified, set it as the highest position + 1.
         # WARNING: This is open to a race condition. Two near-simultaneous queries could end up with

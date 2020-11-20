@@ -14,36 +14,37 @@ from redbeat import RedBeatScheduler
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
-
-from mitxpro.envs import (
-    get_any,
+from mitol.common.envs import (
+    get_features,
     get_bool,
     get_int,
     get_string,
-    get_list,
-    OffsettingSchedule,
+    get_delimited_list,
 )
+
+
+from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
 VERSION = "0.67.1"
 
 ENVIRONMENT = get_string(
-    "MITXPRO_ENVIRONMENT",
-    "dev",
+    name="MITXPRO_ENVIRONMENT",
+    default="dev",
     description="The execution environment that the app is in (e.g. dev, staging, prod)",
     required=True,
 )
 # this is only available to heroku review apps
 HEROKU_APP_NAME = get_string(
-    "HEROKU_APP_NAME", None, description="The name of the review app"
+    name="HEROKU_APP_NAME", default=None, description="The name of the review app"
 )
 
 # initialize Sentry before doing anything else so we capture any config errors
 SENTRY_DSN = get_string(
-    "SENTRY_DSN", "", description="The connection settings for Sentry"
+    name="SENTRY_DSN", default="", description="The connection settings for Sentry"
 )
 SENTRY_LOG_LEVEL = get_string(
-    "SENTRY_LOG_LEVEL", "ERROR", description="The log level for Sentry"
+    name="SENTRY_LOG_LEVEL", default="ERROR", description="The log level for Sentry"
 )
 init_sentry(
     dsn=SENTRY_DSN,
@@ -57,71 +58,78 @@ init_sentry(
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SITE_BASE_URL = get_string(
-    "MITXPRO_BASE_URL",
-    None,
+    name="MITXPRO_BASE_URL",
+    default=None,
     description="Base url for the application in the format PROTOCOL://HOSTNAME[:PORT]",
     required=True,
 )
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_string(
-    "SECRET_KEY", None, description="Django secret key.", required=True
+    name="SECRET_KEY", default=None, description="Django secret key.", required=True
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_bool("DEBUG", False, dev_only=True)
+DEBUG = get_bool(
+    name="DEBUG",
+    default=False,
+    dev_only=True,
+    description="Set to True to enable DEBUG mode. Don't turn on in production.",
+)
 
 
 ALLOWED_HOSTS = ["*"]
 
-CSRF_TRUSTED_ORIGINS = get_list(
-    "CSRF_TRUSTED_ORIGINS",
-    [],
+CSRF_TRUSTED_ORIGINS = get_delimited_list(
+    name="CSRF_TRUSTED_ORIGINS",
+    default=[],
     description="Comma separated string of trusted domains that should be CSRF exempt",
 )
 
 SECURE_SSL_REDIRECT = get_bool(
-    "MITXPRO_SECURE_SSL_REDIRECT",
-    True,
+    name="MITXPRO_SECURE_SSL_REDIRECT",
+    default=True,
     description="Application-level SSL redirect setting.",
 )
 
 SECURE_SSL_HOST = get_string(
-    "MITXPRO_SECURE_SSL_HOST",
-    None,
+    name="MITXPRO_SECURE_SSL_HOST",
+    default=None,
     description="Hostame to redirect non-secure requests to. "
     "Overrides value from HOST header.",
 )
 
 ZENDESK_CONFIG = {
     "HELP_WIDGET_ENABLED": get_bool(
-        "ZENDESK_HELP_WIDGET_ENABLED",
-        False,
+        name="ZENDESK_HELP_WIDGET_ENABLED",
+        default=False,
         description="Enabled/disable state for Zendesk web help widget.",
     ),
     "HELP_WIDGET_KEY": get_string(
-        "ZENDESK_HELP_WIDGET_KEY",
-        "8ef9ef96-3317-40a9-8ef6-de0737503caa",
+        name="ZENDESK_HELP_WIDGET_KEY",
+        default="8ef9ef96-3317-40a9-8ef6-de0737503caa",
         description="Represents the key for Zendesk web help widget.",
     ),
 }
 
 HUBSPOT_CONFIG = {
     "HUBSPOT_NEW_COURSES_FORM_GUID": get_string(
-        "HUBSPOT_NEW_COURSES_FORM_GUID",
-        "b9220dc1-4e48-4097-8539-9f2907f18b1e",
+        name="HUBSPOT_NEW_COURSES_FORM_GUID",
+        default="b9220dc1-4e48-4097-8539-9f2907f18b1e",
         description="Form guid over hub spot for new courses email subscription form.",
     ),
     "HUBSPOT_FOOTER_FORM_GUID": get_string(
-        "HUBSPOT_FOOTER_FORM_GUID",
-        "ff810010-c33c-4e99-9285-32d283fbc816",
+        name="HUBSPOT_FOOTER_FORM_GUID",
+        default="ff810010-c33c-4e99-9285-32d283fbc816",
         description="Form guid over hub spot for footer block.",
     ),
     "HUBSPOT_PORTAL_ID": get_string(
-        "HUBSPOT_PORTAL_ID", "5890463", description="Hub spot portal id."
+        name="HUBSPOT_PORTAL_ID", default="5890463", description="Hub spot portal id."
     ),
     "HUBSPOT_CREATE_USER_FORM_ID": get_string(
-        "HUBSPOT_CREATE_USER_FORM_ID", None, description="Form ID for Hubspot Forms API"
+        name="HUBSPOT_CREATE_USER_FORM_ID",
+        default=None,
+        description="Form ID for Hubspot Forms API",
     ),
 }
 
@@ -137,7 +145,9 @@ WEBPACK_LOADER = {
 }
 
 SITE_ID = get_string(
-    "MITXPRO_SITE_ID", 1, description="The default site id for django sites framework"
+    name="MITXPRO_SITE_ID",
+    default=1,
+    description="The default site id for django sites framework",
 )
 
 # configure a custom user model
@@ -179,6 +189,8 @@ INSTALLED_APPS = (
     "taggit",
     # django-robots
     "robots",
+    # ol-dango apps
+    "mitol.common.apps.CommonApp",
     # Put our apps after this point
     "mitxpro",
     "authentication",
@@ -205,7 +217,10 @@ if ENVIRONMENT not in ("production", "prod"):
 
 
 DISABLE_WEBPACK_LOADER_STATS = get_bool(
-    "DISABLE_WEBPACK_LOADER_STATS", False, dev_only=True
+    name="DISABLE_WEBPACK_LOADER_STATS",
+    default=False,
+    dev_only=True,
+    description="Disables the webpack loader, development environment only.",
 )
 if not DISABLE_WEBPACK_LOADER_STATS:
     INSTALLED_APPS += ("webpack_loader",)
@@ -237,8 +252,8 @@ LOGIN_REDIRECT_URL = "/"
 LOGIN_URL = "/signin"
 LOGIN_ERROR_URL = "/signin"
 LOGOUT_REDIRECT_URL = get_string(
-    "LOGOUT_REDIRECT_URL",
-    "/",
+    name="LOGOUT_REDIRECT_URL",
+    default="/",
     description="Url to redirect to after logout, typically Open edX's own logout url",
 )
 
@@ -271,27 +286,29 @@ WSGI_APPLICATION = "mitxpro.wsgi.application"
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 DEFAULT_DATABASE_CONFIG = dj_database_url.parse(
     get_string(
-        "DATABASE_URL",
-        "sqlite:///{0}".format(os.path.join(BASE_DIR, "db.sqlite3")),
+        name="DATABASE_URL",
+        default="sqlite:///{0}".format(os.path.join(BASE_DIR, "db.sqlite3")),
         description="The connection url to the Postgres database",
         required=True,
         write_app_json=False,
     )
 )
 DEFAULT_DATABASE_CONFIG["CONN_MAX_AGE"] = get_int(
-    "MITXPRO_DB_CONN_MAX_AGE",
-    0,
+    name="MITXPRO_DB_CONN_MAX_AGE",
+    default=0,
     description="Maximum age of connection to Postgres in seconds",
 )
 # If True, disables server-side database cursors to prevent invalid cursor errors when using pgbouncer
 DEFAULT_DATABASE_CONFIG["DISABLE_SERVER_SIDE_CURSORS"] = get_bool(
-    "MITXPRO_DB_DISABLE_SS_CURSORS", True
+    name="MITXPRO_DB_DISABLE_SS_CURSORS",
+    default=True,
+    description="Disables Postgres server side cursors",
 )
 
 
 if get_bool(
-    "MITXPRO_DB_DISABLE_SSL",
-    False,
+    name="MITXPRO_DB_DISABLE_SSL",
+    default=False,
     description="Disables SSL to postgres if set to True",
 ):
     DEFAULT_DATABASE_CONFIG["OPTIONS"] = {}
@@ -316,8 +333,8 @@ USE_TZ = True
 # django-robots
 ROBOTS_USE_HOST = False
 ROBOTS_CACHE_TIMEOUT = get_int(
-    "ROBOTS_CACHE_TIMEOUT",
-    60 * 60 * 24,
+    name="ROBOTS_CACHE_TIMEOUT",
+    default=60 * 60 * 24,
     description="How long the robots.txt file should be cached",
 )
 
@@ -400,8 +417,8 @@ SOCIAL_AUTH_PIPELINE = (
 )
 
 AUTH_CHANGE_EMAIL_TTL_IN_MINUTES = get_int(
-    "AUTH_CHANGE_EMAIL_TTL_IN_MINUTES",
-    60 * 24,
+    name="AUTH_CHANGE_EMAIL_TTL_IN_MINUTES",
+    default=60 * 24,
     description="Expiry time for a change email request, default is 1440 minutes(1 day)",
 )
 
@@ -410,7 +427,11 @@ AUTH_CHANGE_EMAIL_TTL_IN_MINUTES = get_int(
 
 # Serve static files with dj-static
 STATIC_URL = "/static/"
-CLOUDFRONT_DIST = get_string("CLOUDFRONT_DIST", None)
+CLOUDFRONT_DIST = get_string(
+    name="CLOUDFRONT_DIST",
+    default=None,
+    description="The Cloundfront distribution to use for static assets",
+)
 if CLOUDFRONT_DIST:
     STATIC_URL = urljoin(
         "https://{dist}.cloudfront.net".format(dist=CLOUDFRONT_DIST), STATIC_URL
@@ -426,77 +447,109 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
 # Request files from the webpack dev server
 USE_WEBPACK_DEV_SERVER = get_bool(
-    "MITXPRO_USE_WEBPACK_DEV_SERVER", False, dev_only=True
+    name="MITXPRO_USE_WEBPACK_DEV_SERVER",
+    default=False,
+    dev_only=True,
+    description="Enables the webpack devserver, development only",
 )
-WEBPACK_DEV_SERVER_HOST = get_string("WEBPACK_DEV_SERVER_HOST", "", dev_only=True)
-WEBPACK_DEV_SERVER_PORT = get_int("WEBPACK_DEV_SERVER_PORT", 8052, dev_only=True)
+WEBPACK_DEV_SERVER_HOST = get_string(
+    name="WEBPACK_DEV_SERVER_HOST",
+    default="",
+    dev_only=True,
+    description="The webpack dev server hostname, development only",
+)
+WEBPACK_DEV_SERVER_PORT = get_int(
+    name="WEBPACK_DEV_SERVER_PORT",
+    default=8052,
+    dev_only=True,
+    description="The webpack dev server port, development only",
+)
 
 # Important to define this so DEBUG works properly
-INTERNAL_IPS = (get_string("HOST_IP", "127.0.0.1"),)
+INTERNAL_IPS = (
+    get_string(
+        name="HOST_IP", default="127.0.0.1", description="This server's host IP"
+    ),
+)
 
 # Configure e-mail settings
 EMAIL_BACKEND = get_string(
-    "MITXPRO_EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
+    name="MITXPRO_EMAIL_BACKEND",
+    default="django.core.mail.backends.smtp.EmailBackend",
+    description="The default email backend to use for outgoing email. This is used in some places by django itself. See `NOTIFICATION_EMAIL_BACKEND` for the backend used for most application emails.",
 )
 EMAIL_HOST = get_string(
-    "MITXPRO_EMAIL_HOST", "localhost", description="Outgoing e-mail hostname"
+    name="MITXPRO_EMAIL_HOST",
+    default="localhost",
+    description="Outgoing e-mail hostname",
 )
-EMAIL_PORT = get_int("MITXPRO_EMAIL_PORT", 25, description="Outgoing e-mail port")
+EMAIL_PORT = get_int(
+    name="MITXPRO_EMAIL_PORT", default=25, description="Outgoing e-mail port"
+)
 EMAIL_HOST_USER = get_string(
-    "MITXPRO_EMAIL_USER", "", description="Outgoing e-mail auth username"
+    name="MITXPRO_EMAIL_USER", default="", description="Outgoing e-mail auth username"
 )
 EMAIL_HOST_PASSWORD = get_string(
-    "MITXPRO_EMAIL_PASSWORD", "", description="Outgoing e-mail auth password"
+    name="MITXPRO_EMAIL_PASSWORD",
+    default="",
+    description="Outgoing e-mail auth password",
 )
 EMAIL_USE_TLS = get_bool(
-    "MITXPRO_EMAIL_TLS", False, description="Outgoing e-mail TLS setting"
+    name="MITXPRO_EMAIL_TLS", default=False, description="Outgoing e-mail TLS setting"
 )
 
 MITXPRO_REPLY_TO_ADDRESS = get_string(
-    "MITXPRO_REPLY_TO_ADDRESS",
-    "webmaster@localhost",
+    name="MITXPRO_REPLY_TO_ADDRESS",
+    default="webmaster@localhost",
     description="E-mail to use for reply-to address of emails",
 )
 
 
 DEFAULT_FROM_EMAIL = get_string(
-    "MITXPRO_FROM_EMAIL",
-    "webmaster@localhost",
+    name="MITXPRO_FROM_EMAIL",
+    default="webmaster@localhost",
     description="E-mail to use for the from field",
 )
 
 MAILGUN_SENDER_DOMAIN = get_string(
-    "MAILGUN_SENDER_DOMAIN",
-    None,
+    name="MAILGUN_SENDER_DOMAIN",
+    default=None,
     description="The domain to send mailgun email through",
     required=True,
 )
 MAILGUN_KEY = get_string(
-    "MAILGUN_KEY",
-    None,
+    name="MAILGUN_KEY",
+    default=None,
     description="The token for authenticating against the Mailgun API",
     required=True,
 )
 MAILGUN_BATCH_CHUNK_SIZE = get_int(
-    "MAILGUN_BATCH_CHUNK_SIZE",
-    1000,
+    name="MAILGUN_BATCH_CHUNK_SIZE",
+    default=1000,
     description="Maximum number of emails to send in a batch",
 )
-MAILGUN_RECIPIENT_OVERRIDE = get_string("MAILGUN_RECIPIENT_OVERRIDE", None)
+MAILGUN_RECIPIENT_OVERRIDE = get_string(
+    name="MAILGUN_RECIPIENT_OVERRIDE",
+    default=None,
+    dev_only=True,
+    description="Override the recipient for outgoing email, development only",
+)
 MAILGUN_FROM_EMAIL = get_string(
-    "MAILGUN_FROM_EMAIL",
-    "no-reply@localhost",
+    name="MAILGUN_FROM_EMAIL",
+    default="no-reply@localhost",
     description="Email which mail comes from",
 )
 
 EMAIL_SUPPORT = get_string(
-    "MITXPRO_SUPPORT_EMAIL",
-    MAILGUN_RECIPIENT_OVERRIDE or "support@localhost",
+    name="MITXPRO_SUPPORT_EMAIL",
+    default=MAILGUN_RECIPIENT_OVERRIDE or "support@localhost",
     description="Email address listed for customer support",
 )
 
 NOTIFICATION_EMAIL_BACKEND = get_string(
-    "MITXPRO_NOTIFICATION_EMAIL_BACKEND", "anymail.backends.mailgun.EmailBackend"
+    name="MITXPRO_NOTIFICATION_EMAIL_BACKEND",
+    default="anymail.backends.mailgun.EmailBackend",
+    description="The email backend to use for application emails",
 )
 
 ANYMAIL = {
@@ -506,8 +559,8 @@ ANYMAIL = {
 
 # e-mail configurable admins
 ADMIN_EMAIL = get_string(
-    "MITXPRO_ADMIN_EMAIL",
-    "",
+    name="MITXPRO_ADMIN_EMAIL",
+    default="",
     description="E-mail to send 500 reports to.",
     required=True,
 )
@@ -517,14 +570,22 @@ else:
     ADMINS = ()
 
 # Logging configuration
-LOG_LEVEL = get_string("MITXPRO_LOG_LEVEL", "INFO", description="The log level default")
+LOG_LEVEL = get_string(
+    name="MITXPRO_LOG_LEVEL", default="INFO", description="The log level default"
+)
 DJANGO_LOG_LEVEL = get_string(
-    "DJANGO_LOG_LEVEL", "INFO", description="The log level for django"
+    name="DJANGO_LOG_LEVEL", default="INFO", description="The log level for django"
 )
 
 # For logging to a remote syslog host
-LOG_HOST = get_string("MITXPRO_LOG_HOST", "localhost")
-LOG_HOST_PORT = get_int("MITXPRO_LOG_HOST_PORT", 514)
+LOG_HOST = get_string(
+    name="MITXPRO_LOG_HOST",
+    default="localhost",
+    description="Remote syslog server hostname",
+)
+LOG_HOST_PORT = get_int(
+    name="MITXPRO_LOG_HOST_PORT", default=514, description="Remote syslog server port"
+)
 
 HOSTNAME = platform.node().split(".")[0]
 
@@ -583,53 +644,68 @@ LOGGING = {
 
 # server-status
 STATUS_TOKEN = get_string(
-    "STATUS_TOKEN", "", description="Token to access the status API."
+    name="STATUS_TOKEN", default="", description="Token to access the status API."
 )
 HEALTH_CHECK = ["CELERY", "REDIS", "POSTGRES"]
 
 GTM_TRACKING_ID = get_string(
-    "GTM_TRACKING_ID", "", description="Google Tag Manager container ID"
+    name="GTM_TRACKING_ID", default="", description="Google Tag Manager container ID"
 )
 GA_TRACKING_ID = get_string(
-    "GA_TRACKING_ID", "", description="Google analytics tracking ID"
+    name="GA_TRACKING_ID", default="", description="Google analytics tracking ID"
 )
-REACT_GA_DEBUG = get_bool("REACT_GA_DEBUG", False)
+REACT_GA_DEBUG = get_bool(
+    name="REACT_GA_DEBUG",
+    default=False,
+    dev_only=True,
+    description="Enable debug for react-ga, development only",
+)
 
 RECAPTCHA_SITE_KEY = get_string(
-    "RECAPTCHA_SITE_KEY", "", description="The ReCaptcha site key"
+    name="RECAPTCHA_SITE_KEY", default="", description="The ReCaptcha site key"
 )
 RECAPTCHA_SECRET_KEY = get_string(
-    "RECAPTCHA_SECRET_KEY", "", description="The ReCaptcha secret key"
+    name="RECAPTCHA_SECRET_KEY", default="", description="The ReCaptcha secret key"
 )
 
 USE_X_FORWARDED_HOST = get_bool(
-    "USE_X_FORWARDED_HOST",
-    False,
+    name="USE_X_FORWARDED_HOST",
+    default=False,
     description="Set HOST header to original domain accessed by user",
 )
 SITE_NAME = get_string(
-    "SITE_NAME", "MIT xPRO", description="Name of the site. e.g MIT xPRO"
+    name="SITE_NAME", default="MIT xPRO", description="Name of the site. e.g MIT xPRO"
 )
 WAGTAIL_SITE_NAME = SITE_NAME
 
-MEDIA_ROOT = get_string("MEDIA_ROOT", "/var/media/")
+MEDIA_ROOT = get_string(
+    name="MEDIA_ROOT",
+    default="/var/media/",
+    description="The root directory for locally stored media. Typically not used.",
+)
 MEDIA_URL = "/media/"
 MITXPRO_USE_S3 = get_bool(
-    "MITXPRO_USE_S3",
-    False,
+    name="MITXPRO_USE_S3",
+    default=False,
     description="Use S3 for storage backend (required on Heroku)",
 )
 
 AWS_ACCESS_KEY_ID = get_string(
-    "AWS_ACCESS_KEY_ID", None, description="AWS Access Key for S3 storage."
+    name="AWS_ACCESS_KEY_ID", default=None, description="AWS Access Key for S3 storage."
 )
 AWS_SECRET_ACCESS_KEY = get_string(
-    "AWS_SECRET_ACCESS_KEY", None, description="AWS Secret Key for S3 storage."
+    name="AWS_SECRET_ACCESS_KEY",
+    default=None,
+    description="AWS Secret Key for S3 storage.",
 )
 AWS_STORAGE_BUCKET_NAME = get_string(
-    "AWS_STORAGE_BUCKET_NAME", None, description="S3 Bucket name."
+    name="AWS_STORAGE_BUCKET_NAME", default=None, description="S3 Bucket name."
 )
-AWS_QUERYSTRING_AUTH = get_string("AWS_QUERYSTRING_AUTH", None)
+AWS_QUERYSTRING_AUTH = get_bool(
+    name="AWS_QUERYSTRING_AUTH",
+    default=False,
+    description="Enables querystring auth for S3 urls",
+)
 # Provide nice validation of the configuration
 if MITXPRO_USE_S3 and (
     not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_STORAGE_BUCKET_NAME
@@ -644,70 +720,67 @@ if MITXPRO_USE_S3:
         AWS_S3_CUSTOM_DOMAIN = "{dist}.cloudfront.net".format(dist=CLOUDFRONT_DIST)
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
-
-# Feature flags
-def get_all_config_keys():
-    """Returns all the configuration keys from both environment and configuration files"""
-    return list(os.environ.keys())
-
-
-MITXPRO_FEATURES_PREFIX = get_string("MITXPRO_FEATURES_PREFIX", "FEATURE_")
-FEATURES = {
-    key[len(MITXPRO_FEATURES_PREFIX) :]: get_any(key, None)
-    for key in get_all_config_keys()
-    if key.startswith(MITXPRO_FEATURES_PREFIX)
-}
+FEATURES = get_features()
 
 CERTIFICATE_CREATION_DELAY_IN_HOURS = get_int(
-    "CERTIFICATE_CREATION_DELAY_IN_HOURS",
-    48,
+    name="CERTIFICATE_CREATION_DELAY_IN_HOURS",
+    default=48,
     description="The number of hours to delay automated certificate creation after a course run ends.",
 )
 
 # Celery
 USE_CELERY = True
 REDISCLOUD_URL = get_string(
-    "REDISCLOUD_URL", None, description="RedisCloud connection url"
+    name="REDISCLOUD_URL", default=None, description="RedisCloud connection url"
 )
 if REDISCLOUD_URL is not None:
     _redis_url = REDISCLOUD_URL
 else:
     _redis_url = get_string(
-        "REDIS_URL", None, description="Redis URL for non-production use"
+        name="REDIS_URL", default=None, description="Redis URL for non-production use"
     )
 
 CELERY_BROKER_URL = get_string(
-    "CELERY_BROKER_URL",
-    _redis_url,
+    name="CELERY_BROKER_URL",
+    default=_redis_url,
     description="Where celery should get tasks, default is Redis URL",
 )
 CELERY_RESULT_BACKEND = get_string(
-    "CELERY_RESULT_BACKEND",
-    _redis_url,
+    name="CELERY_RESULT_BACKEND",
+    default=_redis_url,
     description="Where celery should put task results, default is Redis URL",
 )
 CELERY_BEAT_SCHEDULER = RedBeatScheduler
 CELERY_REDBEAT_REDIS_URL = _redis_url
-CELERY_TASK_ALWAYS_EAGER = get_bool("CELERY_TASK_ALWAYS_EAGER", False, dev_only=True)
-CELERY_TASK_EAGER_PROPAGATES = get_bool("CELERY_TASK_EAGER_PROPAGATES", True)
+CELERY_TASK_ALWAYS_EAGER = get_bool(
+    name="CELERY_TASK_ALWAYS_EAGER",
+    default=False,
+    dev_only=True,
+    description="Enables eager execution of celery tasks, development only",
+)
+CELERY_TASK_EAGER_PROPAGATES = get_bool(
+    name="CELERY_TASK_EAGER_PROPAGATES",
+    default=True,
+    description="Early executed tasks propagate exceptions",
+)
 CRON_COURSE_CERTIFICATES_HOURS = get_string(
-    "CRON_COURSE_CERTIFICATES_HOURS",
-    0,
+    name="CRON_COURSE_CERTIFICATES_HOURS",
+    default=0,
     description="'hours' value for the 'generate-course-certificate' scheduled task (defaults to midnight)",
 )
 CRON_COURSE_CERTIFICATES_DAYS = get_string(
-    "CRON_COURSE_CERTIFICATES_DAYS",
-    None,
+    name="CRON_COURSE_CERTIFICATES_DAYS",
+    default=None,
     description="'day_of_week' value for 'generate-course-certificate' scheduled task (default will run once a day).",
 )
 CRON_COURSERUN_SYNC_HOURS = get_string(
-    "CRON_COURSERUN_SYNC_HOURS",
-    0,
+    name="CRON_COURSERUN_SYNC_HOURS",
+    default=0,
     description="'hours' value for the 'sync-courseruns-data' scheduled task (defaults to midnight)",
 )
 CRON_COURSERUN_SYNC_DAYS = get_string(
-    "CRON_COURSERUN_SYNC_DAYS",
-    None,
+    name="CRON_COURSERUN_SYNC_DAYS",
+    default=None,
     description="'day_of_week' value for 'sync-courseruns-data' scheduled task (default will run once a day).",
 )
 
@@ -717,19 +790,19 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TIMEZONE = "UTC"
 RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY = get_int(
-    "RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY",
-    60 * 30,
+    name="RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY",
+    default=60 * 30,
     description="How many seconds between retrying failed edX enrollments",
 )
 REPAIR_COURSEWARE_USERS_FREQUENCY = get_int(
-    "REPAIR_COURSEWARE_USERS_FREQUENCY",
-    60 * 30,
+    name="REPAIR_COURSEWARE_USERS_FREQUENCY",
+    default=60 * 30,
     description="How many seconds between repairing courseware records for faulty users",
 )
 REPAIR_COURSEWARE_USERS_OFFSET = int(REPAIR_COURSEWARE_USERS_FREQUENCY / 2)
 DRIVE_WEBHOOK_EXPIRATION_MINUTES = get_int(
-    "DRIVE_WEBHOOK_EXPIRATION_MINUTES",
-    60 * 24,
+    name="DRIVE_WEBHOOK_EXPIRATION_MINUTES",
+    default=60 * 24,
     description=(
         "The number of minutes after creation that a webhook (push notification) for a Drive "
         "file will expire (Google does not accept an expiration beyond 24 hours, and if the "
@@ -737,8 +810,8 @@ DRIVE_WEBHOOK_EXPIRATION_MINUTES = get_int(
     ),
 )
 DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES = get_int(
-    "DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES",
-    60 * 3,
+    name="DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES",
+    default=60 * 3,
     description=(
         "The maximum time difference (in minutes) from the present time to a webhook expiration "
         "date to consider a webhook 'fresh', i.e.: not in need of renewal. If the time difference "
@@ -746,8 +819,8 @@ DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES = get_int(
     ),
 )
 DRIVE_WEBHOOK_ASSIGNMENT_WAIT = get_int(
-    "DRIVE_WEBHOOK_ASSIGNMENT_WAIT",
-    60 * 5,
+    name="DRIVE_WEBHOOK_ASSIGNMENT_WAIT",
+    default=60 * 5,
     description=(
         "The number of seconds to wait to process a coupon assignment sheet after we receive "
         "a webhook request from that sheet. The task to process the sheet is scheduled this many "
@@ -755,21 +828,21 @@ DRIVE_WEBHOOK_ASSIGNMENT_WAIT = get_int(
     ),
 )
 DRIVE_WEBHOOK_ASSIGNMENT_MAX_AGE_DAYS = get_int(
-    "DRIVE_WEBHOOK_ASSIGNMENT_MAX_AGE_DAYS",
-    30,
+    name="DRIVE_WEBHOOK_ASSIGNMENT_MAX_AGE_DAYS",
+    default=30,
     description=(
         "The number of days from the last update that a coupon assignment sheet should still be "
         "considered 'fresh', i.e.: should still be monitored for changes via webhook/file watch."
     ),
 )
 SHEETS_MONITORING_FREQUENCY = get_int(
-    "SHEETS_MONITORING_FREQUENCY",
-    60 * 60 * 2,
+    name="SHEETS_MONITORING_FREQUENCY",
+    default=60 * 60 * 2,
     description="The frequency that the Drive folder should be checked for bulk coupon Sheets that need processing",
 )
 SHEETS_TASK_OFFSET = get_int(
-    "SHEETS_TASK_OFFSET",
-    60 * 5,
+    name="SHEETS_TASK_OFFSET",
+    default=60 * 5,
     description="How many seconds to wait in between executing different Sheets tasks in series",
 )
 
@@ -777,8 +850,8 @@ CELERY_BEAT_SCHEDULE = {
     "check-hubspot-api-errors": {
         "task": "hubspot.tasks.check_hubspot_api_errors",
         "schedule": get_int(
-            "HUBSPOT_ERROR_CHECK_FREQUENCY",
-            600,
+            name="HUBSPOT_ERROR_CHECK_FREQUENCY",
+            default=600,
             description="How many seconds between Hubspot API error checks",
         ),
     },
@@ -908,66 +981,66 @@ DJOSER = {
 
 MITXPRO_OAUTH_PROVIDER = "mitxpro-oauth2"
 OPENEDX_OAUTH_APP_NAME = get_string(
-    "OPENEDX_OAUTH_APP_NAME",
-    "edx-oauth-app",
+    name="OPENEDX_OAUTH_APP_NAME",
+    default="edx-oauth-app",
     required=True,
     description="The 'name' value for the Open edX OAuth Application",
 )
 OPENEDX_API_BASE_URL = get_string(
-    "OPENEDX_API_BASE_URL",
-    "http://edx.odl.local:18000",
+    name="OPENEDX_API_BASE_URL",
+    default="http://edx.odl.local:18000",
     description="The base URL for the Open edX API",
     required=True,
 )
 OPENEDX_BASE_REDIRECT_URL = get_string(
-    "OPENEDX_BASE_REDIRECT_URL",
-    OPENEDX_API_BASE_URL,
+    name="OPENEDX_BASE_REDIRECT_URL",
+    default=OPENEDX_API_BASE_URL,
     description="The base redirect URL for an OAuth Application for the Open edX API",
 )
 OPENEDX_TOKEN_EXPIRES_HOURS = get_int(
-    "OPENEDX_TOKEN_EXPIRES_HOURS",
-    1000,
+    name="OPENEDX_TOKEN_EXPIRES_HOURS",
+    default=1000,
     description="The number of hours until an access token for the Open edX API expires",
 )
 OPENEDX_API_CLIENT_ID = get_string(
-    "OPENEDX_API_CLIENT_ID",
-    None,
+    name="OPENEDX_API_CLIENT_ID",
+    default=None,
     description="The OAuth2 client id to connect to Open edX with",
     required=True,
 )
 OPENEDX_API_CLIENT_SECRET = get_string(
-    "OPENEDX_API_CLIENT_SECRET",
-    None,
+    name="OPENEDX_API_CLIENT_SECRET",
+    default=None,
     description="The OAuth2 client secret to connect to Open edX with",
     required=True,
 )
 OPENEDX_API_KEY = get_string(
-    "OPENEDX_API_KEY",
-    None,
+    name="OPENEDX_API_KEY",
+    default=None,
     description="edX API key (EDX_API_KEY setting in Open edX)",
     required=True,
 )
 
 MITXPRO_REGISTRATION_ACCESS_TOKEN = get_string(
-    "MITXPRO_REGISTRATION_ACCESS_TOKEN",
-    None,
+    name="MITXPRO_REGISTRATION_ACCESS_TOKEN",
+    default=None,
     description="Access token to secure Open edX registration API with",
 )
 
 OPENEDX_SERVICE_WORKER_API_TOKEN = get_string(
-    "OPENEDX_SERVICE_WORKER_API_TOKEN",
-    None,
-    "Active access token with staff level permissions to use with OpenEdX API client for service tasks",
+    name="OPENEDX_SERVICE_WORKER_API_TOKEN",
+    default=None,
+    description="Active access token with staff level permissions to use with OpenEdX API client for service tasks",
 )
 OPENEDX_SERVICE_WORKER_USERNAME = get_string(
-    "OPENEDX_SERVICE_WORKER_USERNAME",
-    None,
-    "Username of the user whose token has been set in OPENEDX_SERVICE_WORKER_API_TOKEN",
+    name="OPENEDX_SERVICE_WORKER_USERNAME",
+    default=None,
+    description="Username of the user whose token has been set in OPENEDX_SERVICE_WORKER_API_TOKEN",
 )
 EDX_API_CLIENT_TIMEOUT = get_int(
-    "EDX_API_CLIENT_TIMEOUT",
-    60,
-    "Timeout (in seconds) for requests made via the edX API client",
+    name="EDX_API_CLIENT_TIMEOUT",
+    default=60,
+    description="Timeout (in seconds) for requests made via the edX API client",
 )
 
 # django debug toolbar only in debug mode
@@ -978,90 +1051,140 @@ if DEBUG:
 
 # Cybersource
 CYBERSOURCE_ACCESS_KEY = get_string(
-    "CYBERSOURCE_ACCESS_KEY", None, description="CyberSource Access Key"
+    name="CYBERSOURCE_ACCESS_KEY", default=None, description="CyberSource Access Key"
 )
 CYBERSOURCE_SECURITY_KEY = get_string(
-    "CYBERSOURCE_SECURITY_KEY", None, description="CyberSource API key"
+    name="CYBERSOURCE_SECURITY_KEY", default=None, description="CyberSource API key"
 )
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = get_string(
-    "CYBERSOURCE_SECURE_ACCEPTANCE_URL", None, description="CyberSource API endpoint"
+    name="CYBERSOURCE_SECURE_ACCEPTANCE_URL",
+    default=None,
+    description="CyberSource API endpoint",
 )
 CYBERSOURCE_PROFILE_ID = get_string(
-    "CYBERSOURCE_PROFILE_ID", None, description="CyberSource Profile ID"
+    name="CYBERSOURCE_PROFILE_ID", default=None, description="CyberSource Profile ID"
 )
 CYBERSOURCE_WSDL_URL = get_string(
-    "CYBERSOURCE_WSDL_URL", None, description="The URL to the cybersource WSDL"
+    name="CYBERSOURCE_WSDL_URL",
+    default=None,
+    description="The URL to the cybersource WSDL",
 )
 CYBERSOURCE_MERCHANT_ID = get_string(
-    "CYBERSOURCE_MERCHANT_ID", None, description="The cybersource merchant id"
+    name="CYBERSOURCE_MERCHANT_ID",
+    default=None,
+    description="The cybersource merchant id",
 )
 CYBERSOURCE_TRANSACTION_KEY = get_string(
-    "CYBERSOURCE_TRANSACTION_KEY", None, description="The cybersource transaction key"
+    name="CYBERSOURCE_TRANSACTION_KEY",
+    default=None,
+    description="The cybersource transaction key",
 )
 CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY = get_string(
-    "CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY",
-    None,
+    name="CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY",
+    default=None,
     description="The public key to encrypt export results with for our own security purposes. Should be a base64 encoded NaCl public key.",
 )
 CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR = get_string(
-    "CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR",
-    "AND",
+    name="CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR",
+    default="AND",
     description="Whether just the name or the name and address should be used in exports verification. Refer to Cybersource docs.",
 )
 CYBERSOURCE_EXPORT_SERVICE_ADDRESS_WEIGHT = get_string(
-    "CYBERSOURCE_EXPORT_SERVICE_ADDRESS_WEIGHT",
-    "high",
+    name="CYBERSOURCE_EXPORT_SERVICE_ADDRESS_WEIGHT",
+    default="high",
     description="The weight of the address in determining whether a user passes exports checks. Refer to Cybersource docs.",
 )
 CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT = get_string(
-    "CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT",
-    "high",
+    name="CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT",
+    default="high",
     description="The weight of the name in determining whether a user passes exports checks. Refer to Cybersource docs.",
 )
 
 CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS = get_string(
-    "CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS",
-    None,
+    name="CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS",
+    default=None,
     description="Additional sanctions lists to validate for exports. Refer to Cybersource docs.",
 )
 
 ENABLE_ORDER_RECEIPTS = get_bool(
-    "ENABLE_ORDER_RECEIPTS", False, description="Enable enrollment order receipts."
+    name="ENABLE_ORDER_RECEIPTS",
+    default=False,
+    description="Enable enrollment order receipts.",
 )
 
 # Voucher keys for PDF parsing
-VOUCHER_DOMESTIC_EMPLOYEE_KEY = get_string("VOUCHER_DOMESTIC_EMPLOYEE_KEY", "UNIQUE02")
-VOUCHER_DOMESTIC_EMPLOYEE_ID_KEY = get_string(
-    "VOUCHER_DOMESTIC_EMPLOYEE_ID_KEY", "UNIQUE03"
+VOUCHER_DOMESTIC_EMPLOYEE_KEY = get_string(
+    name="VOUCHER_DOMESTIC_EMPLOYEE_KEY",
+    default="UNIQUE02",
+    description="Employee key for domestic vouchers",
 )
-VOUCHER_DOMESTIC_KEY = get_string("VOUCHER_DOMESTIC_KEY", "UNIQUE04")
-VOUCHER_DOMESTIC_COURSE_KEY = get_string("VOUCHER_DOMESTIC_COURSE_KEY", "UNIQUE05")
-VOUCHER_DOMESTIC_CREDITS_KEY = get_string("VOUCHER_DOMESTIC_CREDITS_KEY", "UNIQUE06")
-VOUCHER_DOMESTIC_DATES_KEY = get_string("VOUCHER_DOMESTIC_DATES_KEY", "UNIQUE07")
-VOUCHER_DOMESTIC_AMOUNT_KEY = get_string("VOUCHER_DOMESTIC_AMOUNT_KEY", "UNIQUE08")
+VOUCHER_DOMESTIC_EMPLOYEE_ID_KEY = get_string(
+    name="VOUCHER_DOMESTIC_EMPLOYEE_ID_KEY",
+    default="UNIQUE03",
+    description="Voucher employee key ID for domestic vouchers",
+)
+VOUCHER_DOMESTIC_KEY = get_string(
+    name="VOUCHER_DOMESTIC_KEY",
+    default="UNIQUE04",
+    description="Voucher key for domestic vouchers",
+)
+VOUCHER_DOMESTIC_COURSE_KEY = get_string(
+    name="VOUCHER_DOMESTIC_COURSE_KEY",
+    default="UNIQUE05",
+    description="Course key for domestic vouchers",
+)
+VOUCHER_DOMESTIC_CREDITS_KEY = get_string(
+    name="VOUCHER_DOMESTIC_CREDITS_KEY",
+    default="UNIQUE06",
+    description="Credits key for domestic vouchers",
+)
+VOUCHER_DOMESTIC_DATES_KEY = get_string(
+    name="VOUCHER_DOMESTIC_DATES_KEY",
+    default="UNIQUE07",
+    description="Dates key for domestic vouchers",
+)
+VOUCHER_DOMESTIC_AMOUNT_KEY = get_string(
+    name="VOUCHER_DOMESTIC_AMOUNT_KEY",
+    default="UNIQUE08",
+    description="Amount key for domestic vouchers",
+)
 
 VOUCHER_INTERNATIONAL_EMPLOYEE_KEY = get_string(
-    "VOUCHER_INTERNATIONAL_EMPLOYEE_KEY", "UNIQUE09"
+    name="VOUCHER_INTERNATIONAL_EMPLOYEE_KEY",
+    default="UNIQUE09",
+    description="Employee key for international vouchers",
 )
 VOUCHER_INTERNATIONAL_EMPLOYEE_ID_KEY = get_string(
-    "VOUCHER_INTERNATIONAL_EMPLOYEE_ID_KEY", "UNIQUE13"
+    name="VOUCHER_INTERNATIONAL_EMPLOYEE_ID_KEY",
+    default="UNIQUE13",
+    description="Voucher employee key ID for international vouchers",
 )
 VOUCHER_INTERNATIONAL_DATES_KEY = get_string(
-    "VOUCHER_INTERNATIONAL_DATES_KEY", "UNIQUE15"
+    name="VOUCHER_INTERNATIONAL_DATES_KEY",
+    default="UNIQUE15",
+    description="Dates key for international vouchers",
 )
 VOUCHER_INTERNATIONAL_COURSE_NAME_KEY = get_string(
-    "VOUCHER_INTERNATIONAL_COURSE_NAME_KEY", "UNIQUE16"
+    name="VOUCHER_INTERNATIONAL_COURSE_NAME_KEY",
+    default="UNIQUE16",
+    description="Course name key for international vouchers",
 )
 VOUCHER_INTERNATIONAL_COURSE_NUMBER_KEY = get_string(
-    "VOUCHER_INTERNATIONAL_COURSE_NUMBER_KEY", "UNIQUE17"
+    name="VOUCHER_INTERNATIONAL_COURSE_NUMBER_KEY",
+    default="UNIQUE17",
+    description="Course number key for international vouchers",
 )
 
-VOUCHER_COMPANY_ID = get_int("VOUCHER_COMPANY_ID", "1")
+VOUCHER_COMPANY_ID = get_int(
+    name="VOUCHER_COMPANY_ID", default="1", description="Company ID for vouchers"
+)
 
 # Hubspot sync settings
-HUBSPOT_API_KEY = get_string("HUBSPOT_API_KEY", None, description="API key for Hubspot")
+HUBSPOT_API_KEY = get_string(
+    name="HUBSPOT_API_KEY", default=None, description="API key for Hubspot"
+)
 HUBSPOT_ID_PREFIX = get_string(
-    "HUBSPOT_ID_PREFIX", "xpronew", description="Hub spot id prefix."
+    name="HUBSPOT_ID_PREFIX", default="xpronew", description="Hub spot id prefix."
 )
 
 WAGTAILEMBEDS_FINDERS = [
@@ -1071,86 +1194,90 @@ WAGTAILEMBEDS_FINDERS = [
 
 # Sheets settings
 DRIVE_SERVICE_ACCOUNT_CREDS = get_string(
-    "DRIVE_SERVICE_ACCOUNT_CREDS",
-    None,
+    name="DRIVE_SERVICE_ACCOUNT_CREDS",
+    default=None,
     description="The contents of the Service Account credentials JSON to use for Google API auth",
 )
 DRIVE_CLIENT_ID = get_string(
-    "DRIVE_CLIENT_ID", None, description="Client ID from Google API credentials"
+    name="DRIVE_CLIENT_ID",
+    default=None,
+    description="Client ID from Google API credentials",
 )
 DRIVE_CLIENT_SECRET = get_string(
-    "DRIVE_CLIENT_SECRET", None, description="Client secret from Google API credentials"
+    name="DRIVE_CLIENT_SECRET",
+    default=None,
+    description="Client secret from Google API credentials",
 )
 DRIVE_API_PROJECT_ID = get_string(
-    "DRIVE_API_PROJECT_ID",
-    None,
+    name="DRIVE_API_PROJECT_ID",
+    default=None,
     description="ID for the Google API project where the credentials were created",
 )
 DRIVE_WEBHOOK_CHANNEL_ID = get_string(
-    "DRIVE_WEBHOOK_CHANNEL_ID",
-    "mitxpro-sheets-app",
+    name="DRIVE_WEBHOOK_CHANNEL_ID",
+    default="mitxpro-sheets-app",
     description="Channel ID to use for requests to get push notifications for file changes",
 )
 DRIVE_SHARED_ID = get_string(
-    "DRIVE_SHARED_ID",
-    None,
+    name="DRIVE_SHARED_ID",
+    default=None,
     description="ID of the Shared Drive (a.k.a. Team Drive). This is equal to the top-level folder ID.",
 )
 DRIVE_OUTPUT_FOLDER_ID = get_string(
-    "DRIVE_OUTPUT_FOLDER_ID",
-    None,
+    name="DRIVE_OUTPUT_FOLDER_ID",
+    default=None,
     description="ID of the Drive folder where newly created Sheets should be kept",
 )
 COUPON_REQUEST_SHEET_ID = get_string(
-    "COUPON_REQUEST_SHEET_ID",
-    None,
+    name="COUPON_REQUEST_SHEET_ID",
+    default=None,
     description="ID of the Google Sheet that contains requests for coupons",
 )
 ENROLLMENT_CHANGE_SHEET_ID = get_string(
-    "ENROLLMENT_CHANGE_SHEET_ID",
-    None,
+    name="ENROLLMENT_CHANGE_SHEET_ID",
+    default=None,
     description=(
         "ID of the Google Sheet that contains the enrollment change request worksheets (refunds, transfers, etc)"
     ),
 )
 REFUND_REQUEST_WORKSHEET_ID = get_string(
-    "REFUND_REQUEST_WORKSHEET_ID",
-    "0",
+    name="REFUND_REQUEST_WORKSHEET_ID",
+    default="0",
     description=(
         "ID of the worksheet within the enrollment change request spreadsheet that contains enrollment refund requests"
     ),
 )
 DEFERRAL_REQUEST_WORKSHEET_ID = get_string(
-    "DEFERRAL_REQUEST_WORKSHEET_ID",
-    None,
+    name="DEFERRAL_REQUEST_WORKSHEET_ID",
+    default=None,
     description=(
         "ID of the worksheet within the enrollment change request spreadsheet that contains "
         "enrollment deferral requests"
     ),
 )
 GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
-    "GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE",
-    None,
+    name="GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE",
+    default=None,
     description="The value of the meta tag used by Google to verify the owner of a domain (used for enabling push notifications)",
 )
-SHEETS_ADMIN_EMAILS = get_list(
-    "SHEETS_ADMIN_EMAILS",
-    [],
+SHEETS_ADMIN_EMAILS = get_delimited_list(
+    name="SHEETS_ADMIN_EMAILS",
+    default=[],
     description="Comma-separated list of emails for users that should be added as an editor for all newly created Sheets",
 )
 SHEETS_DATE_FORMAT = get_string(
-    "SHEETS_DATE_FORMAT",
-    "%m/%d/%Y %H:%M:%S",
+    name="SHEETS_DATE_FORMAT",
+    default="%m/%d/%Y %H:%M:%S",
     description="Python strptime format for datetime columns in enrollment management spreadsheets",
 )
 SHEETS_DATE_ONLY_FORMAT = get_string(
-    "SHEETS_DATE_ONLY_FORMAT",
-    "%m/%d/%Y",
+    name="SHEETS_DATE_ONLY_FORMAT",
+    default="%m/%d/%Y",
     description="Python strptime format for date columns (no time) in enrollment management spreadsheets",
 )
 _sheets_date_timezone = get_string(
-    "SHEETS_DATE_TIMEZONE",
-    "UTC",
+    name="SHEETS_DATE_TIMEZONE",
+    default="UTC",
     description=(
         "The name of the timezone that should be assumed for date/time values in spreadsheets. "
         "Choose from a value in the TZ database (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)."
@@ -1159,16 +1286,16 @@ _sheets_date_timezone = get_string(
 SHEETS_DATE_TIMEZONE = pytz.timezone(_sheets_date_timezone)
 
 SHEETS_REFUND_FIRST_ROW = get_int(
-    "SHEETS_REFUND_FIRST_ROW",
-    4,
+    name="SHEETS_REFUND_FIRST_ROW",
+    default=4,
     description=(
         "The first row (as it appears in the spreadsheet) of data that our scripts should consider "
         "processing in the refund request spreadsheet"
     ),
 )
 SHEETS_DEFERRAL_FIRST_ROW = get_int(
-    "SHEETS_DEFERRAL_FIRST_ROW",
-    5,
+    name="SHEETS_DEFERRAL_FIRST_ROW",
+    default=5,
     description=(
         "The first row (as it appears in the spreadsheet) of data that our scripts should consider "
         "processing in the deferral request spreadsheet"

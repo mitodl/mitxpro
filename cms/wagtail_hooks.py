@@ -4,7 +4,9 @@ from wagtail.core import hooks
 
 
 @hooks.register("construct_explorer_page_queryset")
-def sort_pages_alphabetically(parent_page, pages, request):
+def sort_pages_alphabetically(
+    parent_page, pages, request
+):  # pylint: disable=unused-argument
     """Sort all pages by title alphabetically"""
     return pages.order_by("title")
 

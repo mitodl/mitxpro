@@ -94,7 +94,7 @@ class EnrollmentChangeCommand(BaseCommand):
             raise CommandError(
                 "Either 'program' or 'run' should be provided, not both."
             )
-        elif not program_property and not run_property:
+        if not program_property and not run_property:
             raise CommandError("Either 'program' or 'run' must be provided.")
 
         query_params = {"user": user}
@@ -114,7 +114,7 @@ class EnrollmentChangeCommand(BaseCommand):
 
         if not enrollment:
             raise CommandError("Enrollment not found for: {}".format(enrolled_obj))
-        elif not enrollment.active and not force:
+        if not enrollment.active and not force:
             raise CommandError(
                 "The given enrollment is not active ({}).\n"
                 "Add the -f/--force flag if you want to change the status anyway.".format(

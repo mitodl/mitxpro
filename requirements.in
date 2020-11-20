@@ -24,6 +24,7 @@ google-api-python-client==1.7.11
 google-auth==1.6.3
 pygsheets==2.0.2
 ipython
+mitol-django-common==0.3.0
 newrelic
 pdftotext==2.1.1
 Pillow==7.1.0

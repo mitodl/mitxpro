@@ -2,6 +2,7 @@
 Makes a request to receive push notifications when xPro spreadsheets are updated
 """
 from collections import namedtuple
+import sys
 
 from django.core.management import BaseCommand
 from googleapiclient.errors import HttpError
@@ -198,7 +199,7 @@ class Command(BaseCommand):
                     self.stdout.write(
                         self.style.ERROR("Request failed: {}".format(exc))
                     )
-                    exit(1)
+                    sys.exit(1)
             else:
                 self.stdout.write(
                     self.style.SUCCESS(
