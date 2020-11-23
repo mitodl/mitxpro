@@ -35,11 +35,6 @@ eval "$CMD $CMD_ARGS" 2> >(tee "$TMP_FILE")
 
 export TEST_RESULT=$?
 export TRAVIS_BUILD_DIR=$PWD
-if [[ ! -z "$CODECOV" ]]
-then
-    echo "Uploading coverage..."
-    node ./node_modules/codecov/bin/codecov
-fi
 
 if [[ $TEST_RESULT -ne 0 ]]
 then
@@ -54,6 +49,7 @@ if [[ $(
     grep -v "This browser doesn't support the \`onScroll\` event" |
     grep -v "process.on(SIGPROF) is reserved while debugging" |
     grep -v "Browserslist: caniuse-lite is outdated" |
+    grep -v "ExperimentalWarning" |
     wc -l |
     awk '{print $1}'
     ) -ne 0 ]]  # is file empty?
