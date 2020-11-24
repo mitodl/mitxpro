@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.68.0
+--------------
+
+- Disable zap scan (#2002)
+- enroll button design fixes
+
 Version 0.67.2 (Released November 24, 2020)
 --------------
 
