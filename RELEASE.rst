@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.68.0
+Version 0.68.0 (Released November 25, 2020)
 --------------
 
 - Disable zap scan (#2002)
