@@ -45,9 +45,8 @@ def test_get_user_by_id(user_client, user):
     }
 
 
-@pytest.mark.parametrize(
-    "is_anonymous, show_enrollment_codes", ([True, False], [True, False])
-)
+@pytest.mark.parametrize("is_anonymous", [True, False])
+@pytest.mark.parametrize("show_enrollment_codes", [True, False])
 def test_get_user_by_me(mocker, client, user, is_anonymous, show_enrollment_codes):
     """Test that user can request their own user by the 'me' alias"""
     if not is_anonymous:
@@ -109,7 +108,8 @@ def test_get_user_by_me(mocker, client, user, is_anonymous, show_enrollment_code
         patched_unused_coupon_api.assert_called_with(user)
     elif not is_anonymous and not show_enrollment_codes:
         response = resp.json()
-        assert response["unused_coupons"] == []
+        patched_unused_coupon_api.assert_called_with(user)
+        assert response["unused_coupons"] == patched_unused_coupon_api.return_value
 
 
 @pytest.mark.django_db
