@@ -200,6 +200,25 @@ changing to `delivered`, `opened`, et al.), one of a few things could be happeni
    `update_assignment_message_statuses` command.
    
     ```python ./manage.py update_assignment_message_statuses --sheet-id <spreadsheet ID>```
+    
+### Google Apps Script error emails
+
+We sometimes get emails from Google with a subject line like this: 
+
+> Summary of failures for Google Apps Script: ...
+
+**Please note that the failure of this script has no real
+effect on the app, and all spreadsheet functionality should still work even if these scripts are failing.** 
+The Apps Scripts that are being referred to in these messages are scripts that update the list of company names in the "Company" 
+dropdown in a corresponding Google form. The scripts are run when a "request"-type spreadsheet changes, and the company names come from a 
+worksheet within the spreadsheet that can be manually updated to reflect all of our partners. It's important that we have an up-to-date list of companies for our CS reps to choose from when they fill out a request form, but as stated above, this doesn't affect any critical functionality.
+
+Depending on the error message and the frequency of emails, we should respond in a few different ways:
+
+1. **The error message is something like "We're sorry, a server error occurred. Please wait a bit and try again.", and we have not received a large number of emails.** – The Apps Script service seems to be prone to intermittent failures. If we receive an error message like this, and we only receive one or several of them, we don't need to take any immediate action. The service will likely come back up on its own.
+1. **The error message is the one described above, and we are receiving a large number of emails.** – In this case, it's still possible that there is just an extended outage. The best approach is just to wait and see, and if the error emails persist for a few days, contact a developer to try running the script manually. If the script succeeds after being run manually, it's probably best just to get rid of the script trigger (meaning the script will not run when the spreadsheet changes).
+1. **The error message is something like "The domain policies associated with the user are invalid or non existent."** – In this case it's best to delete the script trigger for the given spreadsheet, create a new version of the same script (just copy/paste the contents into a new script), and set up a new trigger which calls that new script.
+
 
 ## Development Setup
 
