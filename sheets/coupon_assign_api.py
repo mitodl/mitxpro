@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 """Coupon assignment API"""
 import logging
 from collections import defaultdict
@@ -15,6 +16,7 @@ from ecommerce.models import (
     BulkCouponAssignment,
 )
 from mail.api import validate_email_addresses
+from mail.constants import MAILGUN_DELIVERED
 from mail.exceptions import MultiEmailValidationError
 from mitxpro.utils import (
     now_in_utc,
@@ -38,6 +40,7 @@ from sheets.constants import (
     RELEVANT_ASSIGNMENT_EMAIL_EVENTS,
     ASSIGNMENT_SHEET_MAX_AGE_DAYS,
     ASSIGNMENT_SHEET_ASSIGNED_STATUS,
+    ASSIGNMENT_SHEET_EMAIL_RETRY_MINUTES,
 )
 from sheets.exceptions import SheetValidationException, SheetRowParsingException
 from sheets.mail_api import get_bulk_assignment_messages
@@ -59,13 +62,14 @@ class CouponAssignmentRow:
     """Represents a row of a coupon assignment sheet"""
 
     def __init__(
-        self, row_index, code, assignee_email, status, status_date
+        self, row_index, code, assignee_email, status, status_date, enrolled_email
     ):  # pylint: disable=too-many-arguments
         self.row_index = row_index
         self.code = code
         self.email = assignee_email
         self.status = status
         self.status_date = status_date
+        self.enrolled_email = enrolled_email
 
     @classmethod
     def parse_raw_data(cls, row_index, raw_row_data):
@@ -83,14 +87,23 @@ class CouponAssignmentRow:
             SheetRowParsingException: Raised if the row could not be parsed
         """
         try:
-            raw_email = item_at_index_or_none(raw_row_data, 1)
+            raw_email = item_at_index_or_none(
+                raw_row_data, assign_sheet_metadata.ASSIGNED_EMAIL_COL
+            )
             email = None if not raw_email else raw_email.lower()
             return cls(
                 row_index=row_index,
-                code=raw_row_data[0],
+                code=raw_row_data[assign_sheet_metadata.ENROLL_CODE_COL],
                 assignee_email=email,
-                status=item_at_index_or_none(raw_row_data, 2),
-                status_date=item_at_index_or_none(raw_row_data, 3),
+                status=item_at_index_or_none(
+                    raw_row_data, assign_sheet_metadata.STATUS_COL
+                ),
+                status_date=item_at_index_or_none(
+                    raw_row_data, assign_sheet_metadata.STATUS_DATE_COL
+                ),
+                enrolled_email=item_at_index_or_none(
+                    raw_row_data, assign_sheet_metadata.ENROLLED_EMAIL_COL
+                ),
             )
         except Exception as exc:
             raise SheetRowParsingException(str(exc)) from exc
@@ -125,6 +138,7 @@ class AssignmentStatusMap:
                     "existing_status_date": parse_sheet_datetime_str(
                         assignment_row.status_date
                     ),
+                    "delivery_date": None,
                     "alternate_email": None,
                 }
             else:
@@ -149,6 +163,9 @@ class AssignmentStatusMap:
         assignment_dict = self._assignment_map.get(bulk_assignment_id, {}).get(code)
         if not assignment_dict:
             return
+        # Set a flag if we see a Mailgun event for the delivery of this enrollment code email
+        if event_type == MAILGUN_DELIVERED:
+            self._assignment_map[bulk_assignment_id][code]["delivery_date"] = event_date
         # The "enrolled" status is set by the app when a user redeems a bulk enrollment coupon
         # and is considered the end of the bulk enrollment flow. It should not be overwritten by any
         # other status.
@@ -239,6 +256,21 @@ class AssignmentStatusMap:
             for message_data in self._assignment_map[bulk_assignment_id].values()
             if message_data["new_status"] is not None
         )
+
+    def get_message_delivery_date(self, bulk_assignment_id, code):
+        """
+        Returns the delivery datetime if an enrollment code email has been sent for the given bulk assignment
+        enrollment code.
+
+        Args:
+            bulk_assignment_id (int):
+            code (str): Coupon code
+
+        Returns:
+            datetime.datetime or None: The datetime when the enrollment code message for this code was sent
+        """
+        message_data = self._assignment_map[bulk_assignment_id].get(code)
+        return False if message_data is None else message_data["delivery_date"]
 
     def has_unassigned_codes(self, bulk_assignment_id):
         """
@@ -417,6 +449,80 @@ def update_incomplete_assignment_message_statuses(bulk_assignments):
     return updated_assignment_map
 
 
+def _validate_assignment_row(parsed_row, assignment, delivery_date):
+    """
+    Returns information about an update that needs to be made to an out-of-sync assignment sheet row.
+
+    Args:
+        parsed_row (CouponAssignmentRow):
+        assignment (ProductCouponAssignment):
+        delivery_date (Optional[datetime.datetime]): The datetime when the enrollment code email was sent
+
+    Returns:
+        Optional[AssignmentRowUpdate]:
+            An object indicating a row update that needs to be made to the assignment sheet (or None if no update needs
+            to be made)
+    """
+    if (
+        assignment
+        and assignment.redeemed is True
+        and parsed_row.status != ASSIGNMENT_SHEET_ENROLLED_STATUS
+    ):
+        # The enrollment code assignment was redeemed, but the spreadsheet row doesn't have
+        # the "enrolled" status
+        return AssignmentRowUpdate(
+            row_index=parsed_row.row_index,
+            status=ASSIGNMENT_SHEET_ENROLLED_STATUS,
+            status_date=assignment.updated_on,
+            alternate_email=assignment.email
+            if assignment.original_email is not None
+            else None,
+        )
+    elif assignment and not parsed_row.status:
+        # An assignment was created, but the spreadsheet row has no status
+        if delivery_date is not None:
+            # The enrollment code was emailed, so the row should have a status like "delivered"/"opened"/etc.
+            status = MAILGUN_DELIVERED
+            status_date = delivery_date
+        else:
+            # The enrollment code was not emailed, so the row should have the "assigned" status
+            status = ASSIGNMENT_SHEET_ASSIGNED_STATUS
+            status_date = assignment.created_on
+        return AssignmentRowUpdate(
+            row_index=parsed_row.row_index,
+            status=status,
+            status_date=status_date,
+            alternate_email=None,
+        )
+    return None
+
+
+def _validate_assignment_delivery(parsed_row, assignment, delivery_date):
+    """
+    Returns True if the email for the given enrollment code was never sent, and it's old enough that we
+    would expect it to have been sent.
+
+    Args:
+        parsed_row (CouponAssignmentRow):
+        assignment (ProductCouponAssignment):
+        delivery_date (Optional[datetime.datetime]): The datetime when the enrollment code email was sent
+
+    Returns:
+        bool: True if the email for the given enrollment code was never sent, and it's old enough that we
+            would expect it to have been sent
+    """
+    return (
+        assignment
+        and delivery_date is None
+        and parsed_row.status in {None, ASSIGNMENT_SHEET_ASSIGNED_STATUS}
+        and (
+            assignment.updated_on
+            + timedelta(minutes=ASSIGNMENT_SHEET_EMAIL_RETRY_MINUTES)
+        )
+        < now_in_utc()
+    )
+
+
 class CouponAssignmentHandler:
     """Manages the processing of coupon assignments from Sheet data"""
 
@@ -507,6 +613,52 @@ class CouponAssignmentHandler:
                 ASSIGNMENT_MESSAGES_COMPLETED_DATE_KEY: date_str,
             },
         )
+
+    def get_out_of_sync_sheet_data(self):
+        """
+        Compares assignment sheet rows to enrollment records in the database and message delivery data in Mailgun.
+        Returns data for any rows that (a) are out of sync, or (b) were never sent an enrollment code email.
+
+        Returns:
+            Tuple[List[AssignmentRowUpdate], List[ProductCouponAssignment]]:
+                A tuple containing a list of row updates that need to be made to the assignment sheet, paired with a
+                list of assigned product coupons for which an email should have been sent.
+        """
+        parsed_rows = self.parsed_rows()
+        earliest_message_date = self.bulk_assignment.assignments_started_date
+        assignment_status_map = AssignmentStatusMap()
+        assignment_status_map.add_assignment_rows(
+            self.bulk_assignment, assignment_rows=parsed_rows
+        )
+        assignment_status_map = find_bulk_assignment_messages(
+            assignment_status_map, earliest_message_date=earliest_message_date
+        )
+
+        assignment_dict = {
+            assignment.product_coupon.coupon.coupon_code: assignment
+            for assignment in ProductCouponAssignment.objects.filter(
+                bulk_assignment=self.bulk_assignment
+            ).select_related("product_coupon__coupon")
+        }
+        row_updates = []
+        unsent_assignments = []
+        for parsed_row in parsed_rows:
+            code = parsed_row.code
+            assignment = assignment_dict.get(code, None)
+            delivery_date = assignment_status_map.get_message_delivery_date(
+                self.bulk_assignment.id, code
+            )
+            row_update = _validate_assignment_row(parsed_row, assignment, delivery_date)
+            if row_update:
+                row_updates.append(row_update)
+                continue
+            needs_enrollment_email = _validate_assignment_delivery(
+                parsed_row, assignment, delivery_date
+            )
+            if needs_enrollment_email:
+                unsent_assignments.append(assignment)
+
+        return row_updates, unsent_assignments
 
     def report_invalid_emails(self, assignment_rows, invalid_emails):
         """
@@ -624,7 +776,7 @@ class CouponAssignmentHandler:
             assignment_rows (List[CouponAssignmentRow]): The parsed rows in the given assignment sheet
             created_assignments (List[ProductCouponAssignment]): Newly-created product coupon assignments
         """
-        updated_rows = []
+        row_updates = []
         # Map the code and email pair to the date it was created. This will allow us to find matching assignments and
         # set the status date correctly.
         assignment_creation_dict = {
@@ -639,7 +791,7 @@ class CouponAssignmentHandler:
                 continue
             code_email_tuple = (row.code, row.email.lower())
             if code_email_tuple in assignment_creation_dict:
-                updated_rows.append(
+                row_updates.append(
                     AssignmentRowUpdate(
                         row_index=row.row_index,
                         status=ASSIGNMENT_SHEET_ASSIGNED_STATUS,
@@ -648,7 +800,7 @@ class CouponAssignmentHandler:
                     )
                 )
         self.update_sheet_with_new_statuses(
-            row_updates=updated_rows, zero_based_index=False
+            row_updates=row_updates, zero_based_index=False
         )
 
     @classmethod

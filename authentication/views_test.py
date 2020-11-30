@@ -55,7 +55,7 @@ def email_user(user):
     return user
 
 
-# pylint:disable=too-many-arguments
+# pylint: disable=too-many-arguments
 def assert_api_call(
     client,
     url,
