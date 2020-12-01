@@ -357,6 +357,57 @@ def test_get_valid_coupon_versions_after_redemption(user, is_global):
     assert list(get_valid_coupon_versions(product, user)) == []
 
 
+@pytest.mark.parametrize("is_global", [True, False])
+def test_get_valid_coupon_versions_with_max_redemptions_per_user(user, is_global):
+    """
+    Verify that the correct CouponPaymentVersions are returned before and after redemption
+    """
+    amount = "1.00000"
+    coupon_code = "TESTCOUPON1"
+    coupon_type = CouponPaymentVersion.PROMO
+    max_redemptions = 3
+    max_redemptions_per_user = 2
+
+    coupon_payment_version = CouponPaymentVersionFactory.create(
+        amount=Decimal(amount),
+        coupon_type=coupon_type,
+        max_redemptions=max_redemptions,
+        max_redemptions_per_user=max_redemptions_per_user,
+        num_coupon_codes=1,
+    )
+    coupon_version = CouponVersionFactory.create(
+        payment_version=coupon_payment_version,
+        coupon__coupon_code=coupon_code,
+        coupon__is_global=is_global,
+    )
+    products = ProductFactory.create_batch(max_redemptions_per_user + 1)
+    if not is_global:
+        CouponEligibilityFactory.create_batch(
+            len(products),
+            coupon=coupon_version.coupon,
+            product=factory.Iterator(products),
+        )
+
+    assert list(get_valid_coupon_versions(products[0], user, code=coupon_code)) == [
+        coupon_version
+    ]
+    redeem_coupon(
+        coupon_version=coupon_version,
+        order=OrderFactory.create(purchaser=user, status=Order.FULFILLED),
+    )
+
+    assert list(get_valid_coupon_versions(products[1], user, code=coupon_code)) == [
+        coupon_version
+    ]
+    redeem_coupon(
+        coupon_version=coupon_version,
+        order=OrderFactory.create(purchaser=user, status=Order.FULFILLED),
+    )
+
+    # max_redemptions_per_user was set to 2, so the coupon should no longer be valid for this user
+    assert list(get_valid_coupon_versions(products[2], user, code=coupon_code)) == []
+
+
 def test_global_coupons_apply_all_products(user):
     """
     Verify that a coupon created with is_global=True is valid for all products, even those

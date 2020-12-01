@@ -273,6 +273,7 @@ class CouponPaymentVersionAdmin(admin.ModelAdmin):
         "amount",
         "num_coupon_codes",
         "activation_date",
+        "max_redemptions_per_user",
     )
     raw_id_fields = ("payment",)
 

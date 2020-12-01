@@ -1094,6 +1094,7 @@ def create_coupons(
     num_coupon_codes,
     coupon_type,
     max_redemptions=1,
+    max_redemptions_per_user=1,
     tag=None,
     company_id=None,
     automatic=False,
@@ -1151,7 +1152,7 @@ def create_coupons(
         num_coupon_codes=num_coupon_codes,
         coupon_type=coupon_type,
         max_redemptions=max_redemptions,
-        max_redemptions_per_user=1,
+        max_redemptions_per_user=max_redemptions_per_user,
         payment_type=payment_type,
         payment_transaction=payment_transaction,
     )

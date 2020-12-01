@@ -739,7 +739,11 @@ class BaseCouponSerializer(serializers.Serializer):
     expiration_date = serializers.DateTimeField()
     product_ids = serializers.ListField(child=serializers.IntegerField())
     max_redemptions = serializers.IntegerField(default=1)
-    max_redemptions_per_user = serializers.IntegerField(default=1)
+    max_redemptions_per_user = serializers.IntegerField(
+        default=1,
+        required=False,
+        validators=[MinValueValidator(1), MaxValueValidator(100)],
+    )
     coupon_type = serializers.ChoiceField(
         choices=set(
             zip(
@@ -795,6 +799,7 @@ class BaseCouponSerializer(serializers.Serializer):
             num_coupon_codes=validated_data.get("num_coupon_codes"),
             coupon_type=validated_data.get("coupon_type"),
             max_redemptions=validated_data.get("max_redemptions", 1),
+            max_redemptions_per_user=validated_data.get("max_redemptions_per_user", 1),
             payment_type=validated_data.get("payment_type"),
             payment_transaction=validated_data.get("payment_transaction"),
             coupon_code=validated_data.get("coupon_code"),
