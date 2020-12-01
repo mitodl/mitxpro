@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.69.0
+--------------
+
+- Updated sheets readme with apps script failure details
+- Added API and command to sync enroll code assignment sheets
+- enhance users_api-me  api tests (#2014)
+- Switched to mitol.common.envs
+- Updated sheets readme with more troubleshooting
+
 Version 0.68.0 (Released November 25, 2020)
 --------------
 
