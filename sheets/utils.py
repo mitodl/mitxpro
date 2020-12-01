@@ -228,7 +228,11 @@ class CouponAssignSheetMetadata(
         self.num_columns = len(self.column_headers)
 
         self.ENROLL_CODE_COL = matching_item_index(self.column_headers, "Coupon Code")
+        self.ASSIGNED_EMAIL_COL = matching_item_index(
+            self.column_headers, "Email (Assignee)"
+        )
         self.STATUS_COL = matching_item_index(self.column_headers, "Status")
+        self.STATUS_DATE_COL = matching_item_index(self.column_headers, "Status Date")
         self.ENROLL_URL_COL = matching_item_index(self.column_headers, "Enrollment URL")
         self.ENROLLED_EMAIL_COL = matching_item_index(
             self.column_headers, "Enrolled Email"
