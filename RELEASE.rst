@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.69.0
+Version 0.69.0 (Released December 02, 2020)
 --------------
 
 - Updated sheets readme with apps script failure details
