@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% load static wagtailcore_tags wagtailimages_tags wagtailmetadata_tags render_bundle %}
+{% load static wagtailcore_tags wagtailimages_tags wagtailmetadata_tags render_bundle image_version_url %}
 
 
 {% block title %}{{ site_name }} | {{ page.title }}{% endblock %}
 
 {% block seohead %}
     {% meta_tags page %}
-    <meta property="og:image" content="{% image page.thumbnail_image fill-821x400 as thumbnail_image %}{{ page.get_site.root_url }}{{thumbnail_image.url}}" />
+    <meta property="og:image" content="{{ page.get_site.root_url }}{% image_version_url page.thumbnail_image "fill-821x400" %}" />
     <meta property="og:description" content="{{page.search_description}}">
     <meta property="product:brand" content="xPro">
     <meta property="product:availability" content="in stock">
