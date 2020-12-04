@@ -13,7 +13,7 @@ pdbpp
 pip-tools
 hypothesis==4.23.4
 pylint==2.6.0
-pylint-django==2.3.0
+pylint-django==2.1.0
 pytest==4.4.1
 pytest-cov>=2.6.1
 pytest-django

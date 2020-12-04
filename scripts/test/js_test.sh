@@ -31,15 +31,11 @@ if [[ ! -z "$2" ]]; then
     CMD_ARGS+=" -g \"$2\""
 fi
 
+echo "Running: $CMD $CMD_ARGS"
+
 eval "$CMD $CMD_ARGS" 2> >(tee "$TMP_FILE")
 
 export TEST_RESULT=$?
-export TRAVIS_BUILD_DIR=$PWD
-if [[ ! -z "$CODECOV" ]]
-then
-    echo "Uploading coverage..."
-    node ./node_modules/codecov/bin/codecov
-fi
 
 if [[ $TEST_RESULT -ne 0 ]]
 then

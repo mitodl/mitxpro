@@ -11,7 +11,7 @@ from fixtures.autouse import *
 from fixtures.cybersource import *
 
 
-TEST_MEDIA_ROOT = "/var/media/test_media_root"
+TEST_MEDIA_SUBDIR = "test_media_root"
 
 
 def pytest_addoption(parser):
@@ -32,7 +32,9 @@ def pytest_cmdline_main(config):
 
 def pytest_configure(config):
     """Pytest hook to perform some initial configuration"""
-    settings.MEDIA_ROOT = TEST_MEDIA_ROOT
+    if not settings.MEDIA_ROOT.endswith(TEST_MEDIA_SUBDIR):
+        settings.MEDIA_ROOT = os.path.join(settings.MEDIA_ROOT, TEST_MEDIA_SUBDIR)
+
     if getattr(config.option, "simple") is True:
         # NOTE: These plugins are already configured by the time the pytest_cmdline_main hook is run, so we can't
         #       simply add/alter the command line options in that hook. This hook is being used to
@@ -53,5 +55,5 @@ def clean_up_files():
     effectively deleting any files that were created by factories over the course of the test suite.
     """
     yield
-    if os.path.exists(TEST_MEDIA_ROOT):
-        shutil.rmtree(TEST_MEDIA_ROOT)
+    if os.path.exists(settings.MEDIA_ROOT):
+        shutil.rmtree(settings.MEDIA_ROOT)
