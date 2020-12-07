@@ -54,6 +54,7 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/test_requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: pip install -r requirements.txt -r test_requirements.txt
 
@@ -67,6 +68,7 @@ jobs:
           sudo sysctl -w vm.swappiness=1
           sudo sysctl -w fs.file-max=262144
           sudo sysctl -w vm.max_map_count=262144
+
       - name: Runs Elasticsearch
         uses: elastic/elastic-github-actions/elasticsearch@master
         with:
@@ -74,12 +76,20 @@ jobs:
 
       - name: Running Celery
         run: |
-          celery -A main worker -B -l INFO &
+          celery -A mitxpro worker -B -l INFO &
           sleep 10
         env:
           CELERY_TASK_ALWAYS_EAGER: 'True'
           CELERY_BROKER_URL: redis://localhost:6379/4
           CELERY_RESULT_BACKEND: redis://localhost:6379/4
+          SECRET_KEY: local_unsafe_key
+          MITXPRO_BASE_URL: http://localhost:8053
+          MAILGUN_SENDER_DOMAIN: other.fake.site
+          MAILGUN_KEY: fake_mailgun_key
+          MITXPRO_ADMIN_EMAIL: example@localhost
+          OPENEDX_API_CLIENT_ID: fake_client_id
+          OPENEDX_API_CLIENT_SECRET: fake_client_secret
+          OPENEDX_API_KEY: test-openedx-api-key
 
       - name: Tests
         run: |
