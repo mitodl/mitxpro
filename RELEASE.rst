@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.69.1
+Version 0.69.1 (Released December 07, 2020)
 --------------
 
 - Added far-future cache control header to wagtail images
