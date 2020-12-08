@@ -36,12 +36,12 @@ from courseware.constants import (
     EDX_ENROLLMENT_AUDIT_MODE,
     PRO_ENROLL_MODE_ERROR_TEXTS,
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
-    OPENEDX_UPDATE_USER_ACCOUNT_PATH,
 )
 from courseware.exceptions import (
     CoursewareUserCreateError,
     EdxApiEnrollErrorException,
     UnknownEdxApiEnrollException,
+    UserNameUpdateFailedException,
 )
 from courseware.factories import OpenEdxApiAuthFactory, CoursewareUserFactory
 from courseware.models import CoursewareUser, OpenEdxApiAuth
@@ -561,21 +561,40 @@ def test_unenroll_edx_course_run_failure(
         unenroll_edx_course_run(run_enrollment)
 
 
-@responses.activate
-def test_update_user_name_api_call(mocker, settings, user):
-    """Test that update_edx_user calls the right edx api to update the name there"""
-    settings.OPENEDX_API_BASE_URL = "http://example.com"
-    new_user_name = "Test Name"
-    auth = OpenEdxApiAuthFactory.create(user=user)
-    mock_refresh = mocker.patch(
-        "courseware.api.get_valid_edx_api_auth", return_value=auth
+def test_update_user_edx_name(mocker, user):
+    """Test that update_edx_user makes a call to update update_user_name in edX via API client"""
+    user.name = "Test Name"
+    mock_client = mocker.MagicMock()
+    update_name_return_value = mocker.Mock(
+        json={"name": user.name, "username": user.username, "email": user.email}
     )
-    responses.add(
-        responses.PATCH,
-        f"{settings.OPENEDX_API_BASE_URL}{OPENEDX_UPDATE_USER_ACCOUNT_PATH.format(username=user.username)}",
-        json=dict(name=new_user_name),
-        status=status.HTTP_200_OK,
+    mock_client.user_info.update_user_name = mocker.Mock(
+        return_value=update_name_return_value
     )
-    update_edx_user_name(user)
-    mock_refresh.assert_called_once()
-    assert len(responses.calls) == 1
+    mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+    updated_user = update_edx_user_name(user)
+    mock_client.user_info.update_user_name.assert_called_once_with(
+        user.username, user.name
+    )
+    assert update_name_return_value == updated_user
+
+
+@pytest.mark.parametrize(
+    "client_exception_raised,expected_exception",
+    [
+        [MockHttpError, UserNameUpdateFailedException],
+        [ValueError, UserNameUpdateFailedException],
+        [Exception, UserNameUpdateFailedException],
+    ],
+)
+def test_update_edx_user_name_failure(
+    mocker, client_exception_raised, expected_exception, user
+):
+    """Tests that update_edx_user_name translates exceptions raised by the API client"""
+    mock_client = mocker.MagicMock()
+    mock_client.user_info.update_user_name = mocker.Mock(
+        side_effect=client_exception_raised
+    )
+    mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+    with pytest.raises(expected_exception):
+        update_edx_user_name(user)

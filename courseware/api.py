@@ -32,7 +32,6 @@ from courseware.constants import (
     EDX_ENROLLMENT_AUDIT_MODE,
     PRO_ENROLL_MODE_ERROR_TEXTS,
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
-    OPENEDX_UPDATE_USER_ACCOUNT_PATH,
 )
 from courseware.utils import edx_url
 from mitxpro.utils import (
@@ -609,21 +608,18 @@ def update_edx_user_name(user):
 
     Args:
         user (user.models.User): the application user
+
+    Returns:
+        edx_api.user_info.models.Info: Object representing updated details of user in edX
+
+    Raises:
+        UserNameUpdateFailedException: Raised if underlying edX API request fails due to any reason
     """
 
-    edx_api = get_edx_api_client(user)
-    req_session = edx_api.get_requester()
-    req_session.headers.update(
-        {
-            "Accept": "application/json, text/javascript, */*; q=0.01",
-            "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/merge-patch+json",
-        }
-    )
-    url = edx_url(OPENEDX_UPDATE_USER_ACCOUNT_PATH.format(username=user.username))
-    data = dict(name=user.name)
-    resp = req_session.patch(url, json=data)
-    if resp.status_code != status.HTTP_200_OK:
+    edx_client = get_edx_api_client(user)
+    try:
+        return edx_client.user_info.update_user_name(user.username, user.name)
+    except Exception as exc:
         raise UserNameUpdateFailedException(
-            f"Error updating Open edX user name. {get_error_response_summary(resp)}"
+            "Error updating user's full name in edX.", exc
         )
