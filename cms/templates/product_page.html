@@ -6,7 +6,9 @@
 
 {% block seohead %}
     {% meta_tags page %}
-    <meta property="og:image" content="{{ page.get_site.root_url }}{% image_version_url page.thumbnail_image "fill-821x400" %}" />
+    {% if page.thumbnail_image %}
+      <meta property="og:image" content="{% image_version_url page.thumbnail_image "fill-821x400" True %}" />
+    {% endif %}
     <meta property="og:description" content="{{page.search_description}}">
     <meta property="product:brand" content="xPro">
     <meta property="product:availability" content="in stock">
