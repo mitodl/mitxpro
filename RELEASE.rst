@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.70.0
+Version 0.70.0 (Released December 09, 2020)
 --------------
 
 - Migrate from travis to github actions (#2024)
