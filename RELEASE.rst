@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.70.1
+Version 0.70.1 (Released December 11, 2020)
 --------------
 
 - Fixed 404/500 error with missing course thumbnails
