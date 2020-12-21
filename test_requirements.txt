@@ -14,13 +14,13 @@ pip-tools
 hypothesis==4.23.4
 pylint==2.6.0
 pylint-django==2.1.0
-pytest==4.4.1
+pytest==5.4.3
 pytest-cov>=2.6.1
 pytest-django
 pytest-env
 pytest-mock
-pytest-pylint==0.14.1
-pytest-lazy-fixture==0.5.1
+pytest-pylint==0.18.0
+pytest-lazy-fixture==0.6.3
 responses
 safety
 semantic-version
