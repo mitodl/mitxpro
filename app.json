@@ -550,6 +550,18 @@
       "description": "Employee key for international vouchers",
       "required": false
     },
+    "WAGTAIL_CACHE_BACKEND": {
+      "description": "The caching backend to be used for Wagtail image renditions",
+      "required": false
+    },
+    "WAGTAIL_CACHE_MAX_ENTRIES": {
+      "description": "The maximum number of cache entries for Wagtail images",
+      "required": false
+    },
+    "WAGTAIL_CACHE_URL": {
+      "description": "URL for Wagtail image renditions cache",
+      "required": false
+    },
     "ZENDESK_HELP_WIDGET_ENABLED": {
       "description": "Enabled/disable state for Zendesk web help widget.",
       "required": false
