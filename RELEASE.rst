@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.72.0
+--------------
+
+- Peg faker at 5.0.1 to avoid test failures (#2039)
+
 Version 0.71.0 (Released December 21, 2020)
 --------------
 
