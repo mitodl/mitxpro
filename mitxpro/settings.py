@@ -237,7 +237,6 @@ MIDDLEWARE = (
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
     "django_user_agents.middleware.UserAgentMiddleware",
-    "wagtail.core.middleware.SiteMiddleware",
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",
 )
 
@@ -728,8 +727,7 @@ CERTIFICATE_CREATION_DELAY_IN_HOURS = get_int(
     description="The number of hours to delay automated certificate creation after a course run ends.",
 )
 
-# Celery
-USE_CELERY = True
+# Redis
 REDISCLOUD_URL = get_string(
     name="REDISCLOUD_URL", default=None, description="RedisCloud connection url"
 )
@@ -740,6 +738,8 @@ else:
         name="REDIS_URL", default=None, description="Redis URL for non-production use"
     )
 
+# Celery
+USE_CELERY = True
 CELERY_BROKER_URL = get_string(
     name="CELERY_BROKER_URL",
     default=_redis_url,
@@ -924,6 +924,27 @@ HIJACK_ALLOW_GET_REQUESTS = True
 HIJACK_LOGOUT_REDIRECT_URL = "/admin/users/user"
 HIJACK_REGISTER_ADMIN = False
 
+# Wagtail
+WAGTAIL_CACHE_BACKEND = get_string(
+    name="WAGTAIL_CACHE_BACKEND",
+    default="django_redis.cache.RedisCache",
+    description="The caching backend to be used for Wagtail image renditions",
+)
+WAGTAIL_CACHE_URL = get_string(
+    name="WAGTAIL_CACHE_URL",
+    default=_redis_url,
+    description="URL for Wagtail image renditions cache",
+)
+WAGTAIL_CACHE_MAX_ENTRIES = get_int(
+    name="WAGTAIL_CACHE_MAX_ENTRIES",
+    default=200,
+    description="The maximum number of cache entries for Wagtail images",
+)
+WAGTAILEMBEDS_FINDERS = [
+    {"class": "cms.embeds.YouTubeEmbedFinder"},
+    {"class": "wagtail.embeds.finders.oembed"},
+]
+
 # django cache back-ends
 CACHES = {
     "default": {
@@ -934,6 +955,16 @@ CACHES = {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": CELERY_BROKER_URL,
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+    },
+    "renditions": {
+        "BACKEND": WAGTAIL_CACHE_BACKEND,
+        "LOCATION": WAGTAIL_CACHE_URL,
+        "TIMEOUT": 31_536_000,  # 1 year
+        "KEY_PREFIX": "wag",
+        "OPTIONS": {
+            "MAX_ENTRIES": WAGTAIL_CACHE_MAX_ENTRIES,
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
     },
 }
 
@@ -1186,11 +1217,6 @@ HUBSPOT_API_KEY = get_string(
 HUBSPOT_ID_PREFIX = get_string(
     name="HUBSPOT_ID_PREFIX", default="xpronew", description="Hub spot id prefix."
 )
-
-WAGTAILEMBEDS_FINDERS = [
-    {"class": "cms.embeds.YouTubeEmbedFinder"},
-    {"class": "wagtail.embeds.finders.oembed"},
-]
 
 # Sheets settings
 DRIVE_SERVICE_ACCOUNT_CREDS = get_string(

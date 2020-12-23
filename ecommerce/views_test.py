@@ -1389,7 +1389,7 @@ def test_products_viewset_performance(
     user_drf_client, coupon_product_ids, django_assert_num_queries
 ):
     """ Test that the ProductViewSet returns the expected number of queries hit. """
-    with django_assert_num_queries(11):
+    with django_assert_num_queries(10):
         response = user_drf_client.get(
             reverse("products_api-detail", kwargs={"pk": coupon_product_ids[0]})
         )
