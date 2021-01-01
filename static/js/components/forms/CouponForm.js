@@ -71,6 +71,14 @@ const couponValidations = yup.object().shape({
       .min(1, "Must be at least ${min}")
       .required("Number required")
   }),
+  max_redemptions_per_user: yup.number().when("coupon_type", {
+    is:   COUPON_TYPE_PROMO,
+    then: yup
+      .number()
+      .required("Number required")
+      .min(1, "Must be at least ${min}")
+      .max(100, "Must be at most ${max}")
+  }),
   payment_transaction: yup.string().when("coupon_type", {
     is:   COUPON_TYPE_SINGLE_USE,
     then: yup.string().required("Payment transaction is required")
@@ -102,21 +110,22 @@ export const CouponForm = ({
     onSubmit={onSubmit}
     validationSchema={couponValidations}
     initialValues={{
-      coupon_type:         COUPON_TYPE_SINGLE_USE,
-      product_type:        PRODUCT_TYPE_COURSERUN,
-      products:            [],
-      num_coupon_codes:    1,
-      max_redemptions:     1000000,
-      discount:            "",
-      name:                "",
-      coupon_code:         "",
-      activation_date:     "",
-      expiration_date:     "",
-      company:             "",
-      payment_type:        "",
-      payment_transaction: "",
-      include_future_runs: false,
-      is_global:           false
+      coupon_type:              COUPON_TYPE_SINGLE_USE,
+      product_type:             PRODUCT_TYPE_COURSERUN,
+      products:                 [],
+      num_coupon_codes:         1,
+      max_redemptions:          1000000,
+      max_redemptions_per_user: 1,
+      discount:                 "",
+      name:                     "",
+      coupon_code:              "",
+      activation_date:          "",
+      expiration_date:          "",
+      company:                  "",
+      payment_type:             "",
+      payment_transaction:      "",
+      include_future_runs:      false,
+      is_global:                false
     }}
     render={({
       isSubmitting,
@@ -192,6 +201,18 @@ export const CouponForm = ({
             </label>
             <ErrorMessage name="name" component={FormError} />
           </div>
+          {isPromo(values.coupon_type) && (
+            <div className="block">
+              <label htmlFor="max_redemptions_per_user">
+                Max Redemptions Per User (1 to 100)*
+                <Field name="max_redemptions_per_user" />
+              </label>
+              <ErrorMessage
+                name="max_redemptions_per_user"
+                component={FormError}
+              />
+            </div>
+          )}
           <div className="block">
             <label htmlFor="tag">
               Tag (optional)
