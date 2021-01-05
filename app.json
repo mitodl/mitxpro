@@ -478,8 +478,24 @@
       "description": "The frequency that the Drive folder should be checked for bulk coupon Sheets that need processing",
       "required": false
     },
+    "SHEETS_REFUND_COMPLETED_DATE_COL": {
+      "description": "The zero-based index of the enrollment change sheet column that contains the row completion date",
+      "required": false
+    },
+    "SHEETS_REFUND_ERROR_COL": {
+      "description": "The zero-based index of the enrollment change sheet column that contains row processing error messages",
+      "required": false
+    },
     "SHEETS_REFUND_FIRST_ROW": {
       "description": "The first row (as it appears in the spreadsheet) of data that our scripts should consider processing in the refund request spreadsheet",
+      "required": false
+    },
+    "SHEETS_REFUND_PROCESSOR_COL": {
+      "description": "The zero-based index of the enrollment change sheet column that contains the user that processed the row",
+      "required": false
+    },
+    "SHEETS_REFUND_SKIP_ROW_COL": {
+      "description": "The zero-based index of the enrollment change sheet column that indicates whether the row should be skipped",
       "required": false
     },
     "SHEETS_TASK_OFFSET": {

@@ -151,10 +151,11 @@ class RefundRequestSheetMetadata(
     """Metadata for the refund request spreadsheet"""
 
     FORM_RESPONSE_ID_COL = 0
-    PROCESSOR_COL = 11
-    COMPLETED_DATE_COL = 12
-    ERROR_COL = 13
-    SKIP_ROW_COL = 14
+
+    PROCESSOR_COL = settings.SHEETS_REFUND_PROCESSOR_COL
+    COMPLETED_DATE_COL = settings.SHEETS_REFUND_COMPLETED_DATE_COL
+    ERROR_COL = settings.SHEETS_REFUND_ERROR_COL
+    SKIP_ROW_COL = settings.SHEETS_REFUND_SKIP_ROW_COL
 
     def __init__(self):
         self.sheet_type = SHEET_TYPE_ENROLL_CHANGE

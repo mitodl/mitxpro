@@ -1340,3 +1340,32 @@ SHEETS_REQ_CALCULATED_COLUMNS = {
 _uppercase_a_ord = ord("A")
 SHEETS_REQ_PROCESSED_COL_LETTER = chr(SHEETS_REQ_PROCESSED_COL + _uppercase_a_ord)
 SHEETS_REQ_ERROR_COL_LETTER = chr(SHEETS_REQ_ERROR_COL + _uppercase_a_ord)
+
+SHEETS_REFUND_PROCESSOR_COL = get_int(
+    name="SHEETS_REFUND_PROCESSOR_COL",
+    default=11,
+    description=(
+        "The zero-based index of the enrollment change sheet column that contains the user that processed the row"
+    ),
+)
+SHEETS_REFUND_COMPLETED_DATE_COL = get_int(
+    name="SHEETS_REFUND_COMPLETED_DATE_COL",
+    default=12,
+    description=(
+        "The zero-based index of the enrollment change sheet column that contains the row completion date"
+    ),
+)
+SHEETS_REFUND_ERROR_COL = get_int(
+    name="SHEETS_REFUND_ERROR_COL",
+    default=13,
+    description=(
+        "The zero-based index of the enrollment change sheet column that contains row processing error messages"
+    ),
+)
+SHEETS_REFUND_SKIP_ROW_COL = get_int(
+    name="SHEETS_REFUND_SKIP_ROW_COL",
+    default=14,
+    description=(
+        "The zero-based index of the enrollment change sheet column that indicates whether the row should be skipped"
+    ),
+)
