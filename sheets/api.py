@@ -10,21 +10,17 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.db import transaction
 from django.core.exceptions import ImproperlyConfigured
-from django.urls import reverse
-
-# NOTE: Due to an unresolved bug (https://github.com/PyCQA/pylint/issues/2108), the
-# `google` package (and other packages without an __init__.py file) will break pylint.
-# The `disable-all` rules are here until that bug is fixed.
-from google.oauth2.credentials import Credentials  # pylint: disable-all
-from google.oauth2.service_account import (
-    Credentials as ServiceAccountCredentials,
-)  # pylint: disable-all
-from google.auth.transport.requests import Request  # pylint: disable-all
-from googleapiclient.discovery import build
 import pygsheets
+
+from google.oauth2.credentials import Credentials  # pylint:disable=no-name-in-module
+from google.oauth2.service_account import (  # pylint:disable=no-name-in-module
+    Credentials as ServiceAccountCredentials,
+)
+from google.auth.transport.requests import Request  # pylint:disable=no-name-in-module
+from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from mitxpro.utils import now_in_utc, get_error_response_summary
+from mitxpro.utils import now_in_utc
 from sheets.models import GoogleApiAuth, GoogleFileWatch, FileWatchRenewalAttempt
 from sheets.constants import (
     GOOGLE_TOKEN_URI,
@@ -351,7 +347,7 @@ def share_drive_file_with_emails(file_id, emails_to_share, credentials=None):
             )
             try:
                 perm_request.execute()
-            except:  # pylint: disable=broad-except
+            except:  # pylint: disable=bare-except
                 log.exception(
                     "Failed to share the file with id '%s' with email '%s'",
                     file_id,
