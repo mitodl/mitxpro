@@ -39,6 +39,16 @@ def wagtail_basics():
     return SimpleNamespace(site=site, root=root)
 
 
+def test_custom_wagtail_api(client, admin_user):
+    """
+    We have a hook that alters the sorting of pages in the default Wagtail admin API. This test asserts that
+    the admin API does not return an error as a result of that change.
+    """
+    client.force_login(admin_user)
+    resp = client.get("/cms/api/main/pages/?child_of=1&for_explorer=1")
+    assert resp.status_code == status.HTTP_200_OK
+
+
 def test_home_page_view(client, wagtail_basics):
     """
     Test that the home page shows the right HTML for the watch now button
