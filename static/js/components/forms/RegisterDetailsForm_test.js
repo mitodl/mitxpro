@@ -200,7 +200,7 @@ describe("RegisterDetailsForm", () => {
 
   // Tests name regex for first & last name
   const invalidNameMessage =
-    "Name cannot start with a special character, and it cannot contain any character from {/^$#*=[]`%_;<>{}}"
+    "Name cannot start with a special character (~!@&)(+:'.?/,`-), and cannot contain any of (/^$#*=[]`%_;<>{}|\")"
   ;["legal_address.first_name", "legal_address.last_name"].forEach(
     fieldName => {
       const wrapper = renderForm()
@@ -228,7 +228,7 @@ describe("RegisterDetailsForm", () => {
         )} and expects error=${JSON.stringify(
           invalidNameMessage
         )}`, async () => {
-          // Prepend the character to start if the name value
+          // Prepend the character to start of the name value
           const value = `${validCharacter}Name`
           field.simulate("change", {
             persist: () => {},

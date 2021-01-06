@@ -276,7 +276,7 @@ def test_legal_address_serializer_invalid_name(sample_address):
 
     # Case 2: Make sure that name doesn't start with valid special character(s)
     # These characters are valid for a name but they shouldn't be at the start
-    for valid_character in '^/^$#*=[]`%_;<>{}"|':
+    for valid_character in '^/$#*=[]`%_;<>{}"|':
         sample_address["first_name"] = "{}First".format(valid_character)
         sample_address["last_name"] = "{}Last".format(valid_character)
         serializer = LegalAddressSerializer(data=sample_address)

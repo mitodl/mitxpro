@@ -26,8 +26,7 @@ export const NAME_REGEX = /^(?![~!@&)(+:'.?/,`-]+)([^/^$#*=[\]`%_;<>{}"|]+)$/
 
 // Field Error messages
 export const NAME_REGEX_FAIL_MESSAGE =
-  "Name cannot start with a special character, and it cannot contain any character from {/^$#*=[]`%_;<>{}}"
-
+  "Name cannot start with a special character (~!@&)(+:'.?/,`-), and cannot contain any of (/^$#*=[]`%_;<>{}|\")"
 const ADDRESS_LINES_MAX = 4
 const seedYear = moment().year()
 
