@@ -22,7 +22,11 @@ const US_POSTAL_CODE_REGEX = /[0-9]{5}(-[0-9]{4}){0,1}/
 const CA_POSTAL_CODE_REGEX = /[A-Z][0-9][A-Z] [0-9][A-Z][0-9]/
 const COUNTRIES_REQUIRING_POSTAL_CODE = [US_ALPHA_2, CA_ALPHA_2]
 const COUNTRIES_REQUIRING_STATE = [US_ALPHA_2, CA_ALPHA_2]
+export const NAME_REGEX = /^(?![~!@&)(+:'.?/,`-]+)([^/^$#*=[\]`%_;<>{}"|]+)$/
 
+// Field Error messages
+export const NAME_REGEX_FAIL_MESSAGE =
+  "Name cannot start with a special character (~!@&)(+:'.?/,`-), and cannot contain any of (/^$#*=[]`%_;<>{}|\")"
 const ADDRESS_LINES_MAX = 4
 const seedYear = moment().year()
 
@@ -38,11 +42,13 @@ export const legalAddressValidation = yup.object().shape({
       .string()
       .label("First Name")
       .trim()
+      .matches(NAME_REGEX, NAME_REGEX_FAIL_MESSAGE)
       .required(),
     last_name: yup
       .string()
       .label("Last Name")
       .trim()
+      .matches(NAME_REGEX, NAME_REGEX_FAIL_MESSAGE)
       .required(),
     city: yup
       .string()

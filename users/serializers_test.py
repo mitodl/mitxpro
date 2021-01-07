@@ -258,3 +258,27 @@ def test_update_user_email(
     else:
         mock_update_edx_user_email.assert_called_once_with(user)
     mock_change_edx_user_email_task.apply_async.assert_not_called()
+
+
+def test_legal_address_serializer_invalid_name(sample_address):
+    """Test that LegalAddressSerializer raises an exception if any if the first or last name is not valid"""
+
+    # To make sure that this test isn't flaky, Checking all the character and sequences that should match our name regex
+
+    # Case 1: Make sure that invalid character(s) doesn't exist within the name
+    for invalid_character in "~!@&)(+:'.?/,`-":
+        # Replace the invalid character on 3 different places within name for rigorous testing of this case
+        sample_address["first_name"] = "{0}First{0} Name{0}".format(invalid_character)
+        sample_address["last_name"] = "{0}Last{0} Name{0}".format(invalid_character)
+        serializer = LegalAddressSerializer(data=sample_address)
+        with pytest.raises(ValidationError):
+            serializer.is_valid(raise_exception=True)
+
+    # Case 2: Make sure that name doesn't start with valid special character(s)
+    # These characters are valid for a name but they shouldn't be at the start
+    for valid_character in '^/$#*=[]`%_;<>{}"|':
+        sample_address["first_name"] = "{}First".format(valid_character)
+        sample_address["last_name"] = "{}Last".format(valid_character)
+        serializer = LegalAddressSerializer(data=sample_address)
+        with pytest.raises(ValidationError):
+            serializer.is_valid(raise_exception=True)
