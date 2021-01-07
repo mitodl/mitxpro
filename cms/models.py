@@ -253,6 +253,12 @@ class CatalogPage(Page):
             .select_related("thumbnail_image")
         )
 
+        external_program_qset = (
+            ExternalProgramPage.objects.live()
+            .order_by("title")
+            .select_related("thumbnail_image")
+        )
+
         featured_product = ProgramPage.objects.filter(
             featured=True, program__live=True
         ).select_related("program", "thumbnail_image").prefetch_related(
@@ -261,7 +267,10 @@ class CatalogPage(Page):
             featured=True, course__live=True
         )
         all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
-            program_page_qset, course_page_qset, external_course_qset
+            program_page_qset,
+            course_page_qset,
+            external_course_qset,
+            external_program_qset,
         )
         return dict(
             **super().get_context(request),

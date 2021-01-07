@@ -6,6 +6,7 @@ import pytest
 from cms.factories import (
     CoursePageFactory,
     ExternalCoursePageFactory,
+    ExternalProgramPageFactory,
     ProgramPageFactory,
 )
 from cms.models import ExternalCoursePage
@@ -24,12 +25,19 @@ def test_filter_and_sort_catalog_pages():  # pylint:disable=too-many-locals
     now = now_in_utc()
 
     earlier_external_course_page = ExternalCoursePageFactory.create(start_date=now)
+    earlier_external_program_page = ExternalProgramPageFactory.create(
+        start_date=now, course_count=2
+    )
     non_program_run = CourseRunFactory.create(
         course__no_program=True, start_date=(now + timedelta(days=1))
     )
     first_program_run = CourseRunFactory.create(start_date=(now + timedelta(days=2)))
     second_program_run = CourseRunFactory.create(start_date=(now + timedelta(days=3)))
     later_external_course_page = ExternalCoursePageFactory.create(
+        start_date=now + timedelta(days=4)
+    )
+
+    later_external_program_page = ExternalProgramPageFactory.create(
         start_date=now + timedelta(days=4)
     )
     # Create course run with past start_date and future enrollment_end, which should appear in the catalog
@@ -52,6 +60,11 @@ def test_filter_and_sort_catalog_pages():  # pylint:disable=too-many-locals
 
     external_course_pages = [earlier_external_course_page, later_external_course_page]
 
+    external_program_pages = [
+        earlier_external_program_page,
+        later_external_program_page,
+    ]
+
     initial_course_pages = CoursePageFactory.create_batch(
         len(all_runs), course=factory.Iterator(run.course for run in all_runs)
     )
@@ -63,7 +76,10 @@ def test_filter_and_sort_catalog_pages():  # pylint:disable=too-many-locals
     )
 
     all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
-        initial_program_pages, initial_course_pages, external_course_pages
+        initial_program_pages,
+        initial_course_pages,
+        external_course_pages,
+        external_program_pages,
     )
 
     # Combined pages and course pages should not include the past course run
@@ -71,10 +87,15 @@ def test_filter_and_sort_catalog_pages():  # pylint:disable=too-many-locals
         len(initial_program_pages)
         + len(initial_course_pages)
         + len(external_course_pages)
+        + len(external_program_pages)
         - 1
     )
     assert len(course_pages) == (
         len(initial_course_pages) + len(external_course_pages) - 1
+    )
+
+    assert len(program_pages) == (
+        len(initial_program_pages) + len(external_program_pages)
     )
 
     # Filtered out external course page because it does not have a `course` attribute
@@ -83,9 +104,14 @@ def test_filter_and_sort_catalog_pages():  # pylint:disable=too-many-locals
     )
 
     # Pages should be sorted by next run date
-    assert [page.program for page in program_pages] == [
+    assert [
+        page if page.is_external_program_page else page.program
+        for page in program_pages
+    ] == [
+        earlier_external_program_page,
         first_program_run.course.program,
         second_program_run.course.program,
+        later_external_program_page,
     ]
     expected_course_run_sort = [
         future_enrollment_end_run,
