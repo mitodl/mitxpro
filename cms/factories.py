@@ -21,6 +21,7 @@ from cms.models import (
     CoursePage,
     CoursesInProgramPage,
     ExternalCoursePage,
+    ExternalProgramPage,
     FacultyMembersPage,
     ForTeamsPage,
     FrequentlyAskedQuestion,
@@ -128,6 +129,39 @@ class ExternalCoursePageFactory(wagtail_factories.PageFactory):
         if create:
             # Move the created page to be a child of the course index page
             index_page = CourseIndexPage.objects.first()
+            if not index_page:
+                raise ObjectDoesNotExist
+            obj.move(index_page, "last-child")
+            obj.refresh_from_db()
+        return obj
+
+
+class ExternalProgramPageFactory(wagtail_factories.PageFactory):
+    """ExternalProgramPage factory class"""
+
+    title = factory.Sequence("Test page - External Program {0}".format)
+    start_date = factory.Faker(
+        "date_time_this_month", before_now=True, after_now=False, tzinfo=pytz.utc
+    )
+    price = factory.fuzzy.FuzzyDecimal(low=1, high=123)
+    external_url = factory.Faker("uri")
+    readable_id = factory.Sequence(
+        lambda number: "external-course:/v{}/{}".format(number, FAKE.slug())
+    )
+    subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
+    thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    background_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    course_count = factory.fuzzy.FuzzyInteger(1)
+
+    class Meta:
+        model = ExternalProgramPage
+
+    @factory.post_generation
+    def post_gen(obj, create, extracted, **kwargs):  # pylint:disable=unused-argument
+        """Post-generation hook"""
+        if create:
+            # Move the created page to be a child of the program index page
+            index_page = ProgramIndexPage.objects.first()
             if not index_page:
                 raise ObjectDoesNotExist
             obj.move(index_page, "last-child")
