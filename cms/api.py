@@ -44,9 +44,7 @@ def filter_and_sort_catalog_pages(
 
     page_run_dates = {
         page: (
-            page.next_run_date
-            if page.is_external_course_page or page.is_external_program_page
-            else page.product.next_run_date
+            page.next_run_date if page.is_external_page else page.product.next_run_date
         )
         or datetime(year=MINYEAR, month=1, day=1, tzinfo=pytz.UTC)
         for page in itertools.chain(
