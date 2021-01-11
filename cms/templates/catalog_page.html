@@ -40,7 +40,7 @@
             <div class="tab-content">
               <div class="tab-pane catalog-body fade in show active" id="all" role="tabpanel" aria-labelledby="all-tab">
                 {% for page in all_pages %}
-                  {% if page.program %}
+                  {% if page.program or page.is_external_program_page %}
                       {% include "partials/catalog_card.html" with courseware_page=page object_type="program" tab="all" %}
                   {% elif page.course or page.is_external_course_page %}
                       {% include "partials/catalog_card.html" with courseware_page=page object_type="course" tab="all"%}

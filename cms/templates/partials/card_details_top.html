@@ -16,7 +16,7 @@
     </a>
   </h3>
   <ul>
-    {% if courseware_page.is_external_course_page and courseware_page.price %}
+    {% if courseware_page.is_external_page and courseware_page.price %}
       <li>
         <strong>Price:</strong>
         ${{ courseware_page.price|floatformat:"0"|intcomma }}
@@ -35,7 +35,11 @@
     {% if object_type == "program" %}
       <li>
         <strong>Number of Courses:</strong>
-        {{ courseware_page.product.courses.count }}
+          {% if courseware_page.is_external_program_page %}
+            {{ courseware_page.course_count }}
+          {% else %}
+            {{ courseware_page.product.courses.count }}
+          {% endif %}
       </li>
     {% endif %}
     {% if courseware_page.duration %}
@@ -44,7 +48,7 @@
         {{ courseware_page.duration }}
       </li>
     {% endif %}
-    {% if courseware_page.is_external_course_page and courseware_page.next_run_date %}
+    {% if courseware_page.is_external_page and courseware_page.next_run_date %}
       <li>
         <strong>Next Start Date:</strong>
         {{ courseware_page.next_run_date|date:"F j, Y" }}
