@@ -1031,8 +1031,8 @@ class ExternalProgramPage(ProductPage):
 
     @property
     def course_lineup(self):
-        """There is no course lineup for external courses"""
-        return None
+        """Gets the (course carousel page/course lineup) for external program"""
+        return self._get_child_page_of_type(CoursesInProgramPage)
 
     @property
     def course_pages(self):
@@ -1373,7 +1373,7 @@ class CoursesInProgramPage(CourseProgramChildPage):
     """
 
     # We need this to be only under a program page and home page
-    parent_page_types = ["ProgramPage", "HomePage"]
+    parent_page_types = ["ProgramPage", "ExternalProgramPage", "HomePage"]
 
     heading = models.CharField(
         max_length=255, help_text="The heading to show in this section"
@@ -1394,7 +1394,12 @@ class CoursesInProgramPage(CourseProgramChildPage):
             (
                 "item",
                 PageChooserBlock(
-                    required=False, target_model=["cms.CoursePage", "cms.ProgramPage"]
+                    required=False,
+                    target_model=[
+                        "cms.CoursePage",
+                        "cms.ProgramPage",
+                        "cms.ExternalCoursePage",
+                    ],
                 ),
             )
         ],

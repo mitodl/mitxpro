@@ -94,7 +94,9 @@
   {% if techniques %} {% include "partials/learning-techniques.html" with page=techniques %} {% endif %}
   {% if testimonials %} {% include "partials/testimonial-carousel.html" with page=testimonials %} {% endif %}
   {% if faculty %} {% include "partials/faculty-carousel.html" with page=faculty %} {% endif %}
-  {% if course_lineup and course_pages %}
+  {% if page.is_external_program_page and course_lineup%}
+    {% include "partials/course-carousel.html" with page=course_lineup%}
+  {% elif course_lineup and course_pages %}
     {% with program_page=page.program_page %}
       {% pageurl program_page as program_url %}
       {% if page.program %}
