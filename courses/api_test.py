@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import pytest
 import factory
 from django.core.exceptions import ValidationError
+from requests import HTTPError, ConnectionError as RequestsConnectionError
 
 from courses.api import (
     get_user_enrollments,
@@ -31,6 +32,7 @@ from courses.models import CourseRunEnrollment, ProgramEnrollment
 from courseware.exceptions import (
     UnknownEdxApiEnrollException,
     EdxApiEnrollErrorException,
+    NoEdxApiAuthError,
 )
 from ecommerce.factories import OrderFactory, CompanyFactory
 from mitxpro.test_utils import MockHttpError
@@ -153,6 +155,33 @@ def test_create_run_enrollments(mocker, user):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    "exception_cls", [NoEdxApiAuthError, HTTPError, RequestsConnectionError]
+)
+def test_create_run_enrollments_api_fail(mocker, user, exception_cls):
+    """
+    create_run_enrollments should log a message and still create local enrollment records when certain exceptions
+    are raised if a flag is set to true
+    """
+    patched_edx_enroll = mocker.patch(
+        "courses.api.enroll_in_edx_course_runs", side_effect=exception_cls
+    )
+    patched_log_exception = mocker.patch("courses.api.log.exception")
+    patched_send_enrollment_email = mocker.patch(
+        "courses.api.mail_api.send_course_run_enrollment_email"
+    )
+    run = CourseRunFactory.create()
+    successful_enrollments, edx_request_success = create_run_enrollments(
+        user, [run], order=None, company=None, keep_failed_enrollments=True
+    )
+    patched_edx_enroll.assert_called_once_with(user, [run])
+    patched_log_exception.assert_called_once()
+    patched_send_enrollment_email.assert_not_called()
+    assert len(successful_enrollments) == 1
+    assert edx_request_success is False
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize("keep_failed_enrollments", [True, False])
 @pytest.mark.parametrize(
     "exception_cls,inner_exception",
@@ -161,11 +190,12 @@ def test_create_run_enrollments(mocker, user):
         [UnknownEdxApiEnrollException, Exception()],
     ],
 )
-def test_create_run_enrollments_api_fail(
+def test_create_run_enrollments_enroll_api_fail(
     mocker, user, keep_failed_enrollments, exception_cls, inner_exception
 ):
     """
-    create_run_enrollments should log a message and still create local enrollment records if a flag is set to true
+    create_run_enrollments should log a message and still create local enrollment records when an enrollment exception
+    is raised if a flag is set to true
     """
     num_runs = 3
     runs = CourseRunFactory.create_batch(num_runs)

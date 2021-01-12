@@ -6,6 +6,7 @@ import logging
 from traceback import format_exc
 
 from django.core.exceptions import ValidationError
+from requests.exceptions import HTTPError, ConnectionError as RequestsConnectionError
 
 from courses.constants import ENROLL_CHANGE_STATUS_DEFERRED
 from courses.models import CourseRunEnrollment, ProgramEnrollment, CourseRun
@@ -105,13 +106,14 @@ def create_run_enrollments(
             for all of the given course runs
     """
     successful_enrollments = []
-
     try:
         enroll_in_edx_course_runs(user, runs)
     except (
         EdxApiEnrollErrorException,
         UnknownEdxApiEnrollException,
         NoEdxApiAuthError,
+        HTTPError,
+        RequestsConnectionError,
     ):
         log.exception(
             "edX enrollment failure for user: %s, runs: %s (order: %s)",
