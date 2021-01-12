@@ -63,7 +63,7 @@ jedi==0.14.1              # via ipython
 jmespath==0.9.4           # via boto3, botocore
 kombu==4.6.3              # via celery, django-server-status
 l18n==2020.6.1            # via wagtail
-lxml==4.3.4               # via zeep
+lxml==4.6.2               # via zeep
 mitol-django-common==0.3.0  # via -r requirements.in
 newrelic==4.20.1.121      # via -r requirements.in
 oauthlib==3.0.2           # via django-oauth-toolkit, requests-oauthlib, social-auth-core
