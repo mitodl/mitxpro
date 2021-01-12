@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.73.0 (Released January 12, 2021)
+--------------
+
+- Added fields validation on user profile first & last name (#2041)
+- Added Wagtail admin API test
+- Added Viewset routing for wagtail hook
+- adding max_redemption_per_user feature for promo coupons (#2017)
+- Upgraded wagtail to 2.9.3, added image rendition caching
+
 Version 0.72.0 (Released December 23, 2020)
 --------------
 
