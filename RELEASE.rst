@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.73.0
+Version 0.73.0 (Released January 12, 2021)
 --------------
 
 - Added fields validation on user profile first & last name (#2041)
