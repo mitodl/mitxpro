@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.74.0
+--------------
+
+- Bump lxml from 4.3.4 to 4.6.2
+- Added optional auth code column to refund spreadsheet
+- Enable pylint in sheets/api.py (#2055)
+
 Version 0.73.0 (Released January 12, 2021)
 --------------
 
