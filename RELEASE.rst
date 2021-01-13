@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.74.0
+Version 0.74.0 (Released January 13, 2021)
 --------------
 
 - Bump lxml from 4.3.4 to 4.6.2
