@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.74.1
+--------------
+
+- External/3rd Party Programs (#2062)
+- Fixed error handling to save enrollments on edX HTTP errors
+
 Version 0.74.0 (Released January 13, 2021)
 --------------
 
