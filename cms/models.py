@@ -76,12 +76,20 @@ class CourseObjectIndexPage(Page):
         """Fetch a child page by a Program/Course readable_id value"""
         raise NotImplementedError
 
-    def get_external_child_by_readable_id(self, readable_id):
+    def get_external_course_child_by_readable_id(self, readable_id):
         """Fetch a child page by slug: typically used in external courseware pages"""
         return (
             self.get_children()
             .type(ExternalCoursePage)
             .get(externalcoursepage__readable_id=readable_id)
+        )
+
+    def get_external_program_child_by_readable_id(self, readable_id):
+        """Fetch a child page by slug: typically used in external program pages"""
+        return (
+            self.get_children()
+            .type(ExternalProgramPage)
+            .get(externalprogrampage__readable_id=readable_id)
         )
 
     def route(self, request, path_components):
@@ -97,11 +105,17 @@ class CourseObjectIndexPage(Page):
             except Page.DoesNotExist:
                 try:
                     # Try to find an external course page
-                    subpage = self.get_external_child_by_readable_id(
+                    subpage = self.get_external_course_child_by_readable_id(
                         readable_id=child_readable_id
                     )
                 except Page.DoesNotExist:
-                    raise Http404
+                    try:
+                        # Try to find an external program page
+                        subpage = self.get_external_program_child_by_readable_id(
+                            readable_id=child_readable_id
+                        )
+                    except Page.DoesNotExist:
+                        raise Http404
 
             return subpage.specific.route(request, remaining_components)
         return super().route(request, path_components)
@@ -239,6 +253,12 @@ class CatalogPage(Page):
             .select_related("thumbnail_image")
         )
 
+        external_program_qset = (
+            ExternalProgramPage.objects.live()
+            .order_by("title")
+            .select_related("thumbnail_image")
+        )
+
         featured_product = ProgramPage.objects.filter(
             featured=True, program__live=True
         ).select_related("program", "thumbnail_image").prefetch_related(
@@ -247,7 +267,10 @@ class CatalogPage(Page):
             featured=True, course__live=True
         )
         all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
-            program_page_qset, course_page_qset, external_course_qset
+            program_page_qset,
+            course_page_qset,
+            external_course_qset,
+            external_program_qset,
         )
         return dict(
             **super().get_context(request),
@@ -670,9 +693,19 @@ class ProductPage(MetadataPageMixin, Page):
         return isinstance(self, ExternalCoursePage)
 
     @property
+    def is_external_program_page(self):
+        """Checks whether the page in question is for an external program or not."""
+        return isinstance(self, ExternalProgramPage)
+
+    @property
     def is_program_page(self):
         """Gets the product page type, this is used for sorting product pages."""
         return isinstance(self, ProgramPage)
+
+    @property
+    def is_external_page(self):
+        """Checks whether the page in question is for an external course/program page or not."""
+        return self.is_external_program_page or self.is_external_course_page
 
 
 class ProgramPage(ProductPage):
@@ -925,6 +958,105 @@ class ExternalCoursePage(ProductPage):
         )
 
 
+class ExternalProgramPage(ProductPage):
+    """
+    CMS page representing an external program.
+    """
+
+    template = "product_page.html"
+
+    parent_page_types = ["ProgramIndexPage"]
+
+    external_url = models.URLField(
+        null=False, blank=False, help_text="The URL of the external program web page."
+    )
+    readable_id = models.CharField(
+        max_length=64,
+        null=False,
+        blank=False,
+        unique=True,
+        help_text="The readable ID of the external program. Appears in URL, has to be unique.",
+    )
+    start_date = models.DateField(
+        null=True, blank=True, help_text="The start date of the external program."
+    )
+    price = models.DecimalField(
+        null=True,
+        blank=True,
+        decimal_places=2,
+        max_digits=20,
+        help_text="The price of the external program.",
+    )
+
+    course_count = models.IntegerField(
+        blank=False,
+        null=False,
+        help_text="The number of total courses in the external program.",
+    )
+
+    content_panels = [
+        FieldPanel("external_url"),
+        FieldPanel("readable_id"),
+        FieldPanel("course_count"),
+        FieldPanel("start_date"),
+        FieldPanel("price"),
+    ] + ProductPage.content_panels
+
+    def get_url_parts(self, request=None):
+        # We need to skip `ProductPage` in the MRO and get to `Page.get_url_parts`
+        # pylint: disable=bad-super-call
+        url_parts = super(ProductPage, self).get_url_parts(request=request)
+        if not url_parts:
+            return None
+        return (
+            url_parts[0],
+            url_parts[1],
+            # Wagtail generates the 'page_path' part of the url tuple with the
+            # parent page slug followed by this page's slug (e.g.: "/programs/my-page-title").
+            # We want to generate that path with the parent page slug followed by the readable_id
+            # of the external program instead (e.g.: "/programs/external:some+external+program")
+            re.sub(
+                self.slugged_page_path_pattern,
+                r"\1{}\3".format(self.readable_id),
+                url_parts[2],
+            ),
+        )
+
+    @property
+    def program_page(self):
+        """
+        External programs are not related to local programs
+        """
+        return None
+
+    @property
+    def course_lineup(self):
+        """Gets the (course carousel page/course lineup) for external program"""
+        return self._get_child_page_of_type(CoursesInProgramPage)
+
+    @property
+    def course_pages(self):
+        """
+        There is no program associated with external programs so there would be
+        no course_pages value
+        """
+        return None
+
+    @property
+    def product(self):
+        """There is no product associated with external programs"""
+        return None
+
+    @property
+    def next_run_date(self):
+        """The next run date should be only if `start_date` is in the future"""
+        return (
+            datetime.combine(self.start_date, datetime.min.time(), tzinfo=pytz.UTC)
+            if self.start_date and self.start_date > date.today()
+            else None
+        )
+
+
 class CourseProgramChildPage(Page):
     """
     Abstract page representing a child of Course/Program Page
@@ -933,7 +1065,13 @@ class CourseProgramChildPage(Page):
     class Meta:
         abstract = True
 
-    parent_page_types = ["ExternalCoursePage", "CoursePage", "ProgramPage", "HomePage"]
+    parent_page_types = [
+        "ExternalCoursePage",
+        "CoursePage",
+        "ProgramPage",
+        "HomePage",
+        "ExternalProgramPage",
+    ]
 
     # disable promote panels, no need for slug entry, it will be autogenerated
     promote_panels = []
@@ -1235,7 +1373,7 @@ class CoursesInProgramPage(CourseProgramChildPage):
     """
 
     # We need this to be only under a program page and home page
-    parent_page_types = ["ProgramPage", "HomePage"]
+    parent_page_types = ["ProgramPage", "ExternalProgramPage", "HomePage"]
 
     heading = models.CharField(
         max_length=255, help_text="The heading to show in this section"
@@ -1256,7 +1394,12 @@ class CoursesInProgramPage(CourseProgramChildPage):
             (
                 "item",
                 PageChooserBlock(
-                    required=False, target_model=["cms.CoursePage", "cms.ProgramPage"]
+                    required=False,
+                    target_model=[
+                        "cms.CoursePage",
+                        "cms.ProgramPage",
+                        "cms.ExternalCoursePage",
+                    ],
                 ),
             )
         ],
