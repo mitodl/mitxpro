@@ -41,22 +41,26 @@
           <li><a href="/about-us/">About Us</a></li>
         </ul>
         <script
+          defer
           charset="utf-8"
           type="text/javascript"
           src="//js.hsforms.net/forms/v2-legacy.js"
         ></script>
         <script
+          defer
           charset="utf-8"
           type="text/javascript"
           src="//js.hsforms.net/forms/v2.js"
         ></script>
         <script>
-          if (typeof hbspt !== "undefined") {
-            hbspt.forms.create({
-              portalId: "{{ hubspot_portal_id }}",
-              formId: "{{ hubspot_footer_form_guid }}",
-            });
-          }
+          document.addEventListener('DOMContentLoaded', function() {
+            if (typeof hbspt !== "undefined") {
+              hbspt.forms.create({
+                portalId: "{{ hubspot_portal_id }}",
+                formId: "{{ hubspot_footer_form_guid }}",
+              });
+            }
+          });
         </script>
       </div>
     </div>

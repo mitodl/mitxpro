@@ -2,7 +2,6 @@
 /*eslint semi: ["error", "always"]*/
 /* global Hls */
 /* eslint-disable no-unused-vars */
-
 const backgroundVideoSel = "#background-video";
 const promoVideoSel = "#promo-video";
 
@@ -71,7 +70,7 @@ function configureHlsVideo(selector, autoplay) {
   }
 }
 
-$(document).ready(function() {
+export default function hero() {
   // Background cover video in header on home page
   configureHlsVideo(backgroundVideoSel, true);
 
@@ -85,4 +84,4 @@ $(document).ready(function() {
     event.preventDefault();
     openVideoLightBox();
   });
-});
+}
