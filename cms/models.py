@@ -259,13 +259,9 @@ class CatalogPage(Page):
             .select_related("thumbnail_image")
         )
 
-        featured_product = ProgramPage.objects.filter(
-            featured=True, program__live=True
-        ).select_related("program", "thumbnail_image").prefetch_related(
-            "program__courses__courseruns"
-        ) or CoursePage.objects.filter(
-            featured=True, course__live=True
-        )
+        featured_product = program_page_qset.filter(
+            featured=True
+        ) or course_page_qset.filter(featured=True)
         all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
             program_page_qset,
             course_page_qset,

@@ -5,7 +5,7 @@
     {% if courseware_page.thumbnail_image %}
       <img src="{% image_version_url courseware_page.thumbnail_image "fill-275x155" %}" alt="{{ courseware_page.thumbnail_image.title }}" />
     {% else %}
-      <img src="{% static default_image_path %}" alt="Preview image" />
+      <img src="{% static default_image_path %}" width="275" height="155" alt="Preview image"/>
     {% endif %}
   </div>
 </div>
