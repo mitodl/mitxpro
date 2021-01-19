@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.74.1
+Version 0.74.1 (Released January 19, 2021)
 --------------
 
 - External/3rd Party Programs (#2062)
