@@ -11,9 +11,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="{% static 'images/favicon.ico' %}" />
     {% include "partials/gtm_head.html" %}
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap" rel="stylesheet">
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro|Roboto|Rajdhani:300,400,500,600,700&display=swap" >
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap" rel="stylesheet" media="none" onload="if(media!='all') media='all'">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" rel="stylesheet" media="none" onload="if(media!='all') media='all'"/>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro|Roboto|Rajdhani:300,400,500,600,700&display=swap"media="none" onload="if(media!='all') media='all'" >
 
     <script type="text/javascript">
     var SETTINGS = {{ js_settings_json|safe }};
@@ -34,7 +34,7 @@
     {% endblock %}
     {% endspaceless %}
       {% if zendesk_config.help_widget_enabled and not request.path|startswith:'/certificate/' %}
-          <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key={{zendesk_config.help_widget_key}}"> </script>
+          <script defer id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key={{zendesk_config.help_widget_key}}"> </script>
       {% endif %}
   </head>
   <body class="{% block bodyclass %}{% endblock %}">
