@@ -40,7 +40,7 @@ def test_debug(settings, mocker):
         "mitxpro.templatetags.render_bundle.get_loader", return_value=loader
     )
     assert render_bundle(context, bundle_name) == (
-        '<script type="text/javascript" src="{base}/{filename}" >'
+        '<script type="text/javascript" src="{base}/{filename}"  >'
         "</script>".format(
             base=webpack_dev_server_url(request), filename=FAKE_COMMON_BUNDLE[0]["name"]
         )
@@ -69,7 +69,7 @@ def test_production(settings, mocker):
         "mitxpro.templatetags.render_bundle.get_loader", return_value=loader
     )
     assert render_bundle(context, bundle_name) == (
-        '<script type="text/javascript" src="{base}/{filename}" >'
+        '<script type="text/javascript" src="{base}/{filename}"  >'
         "</script>".format(
             base="/static/bundles", filename=FAKE_COMMON_BUNDLE[0]["name"]
         )

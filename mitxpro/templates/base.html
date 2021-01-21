@@ -35,7 +35,7 @@
     {% endblock %}
     {% endspaceless %}
       {% if zendesk_config.help_widget_enabled and not request.path|startswith:'/certificate/' %}
-          <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key={{zendesk_config.help_widget_key}}"> </script>
+          <script defer id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key={{zendesk_config.help_widget_key}}"> </script>
       {% endif %}
   </head>
   <body class="{% block bodyclass %}{% endblock %}">
@@ -58,22 +58,22 @@
     {% block footer %}
         {% include "footer.html" %}
     {% endblock %}
-    {% render_bundle 'third_party' %}
-    {% render_bundle 'django' %}
+    {% render_bundle 'third_party' added_attrs='defer' %}
+    {% render_bundle 'django' added_attrs='defer' %}
     {% block scripts %}
     {% endblock %}
     {% if zendesk_config.help_widget_enabled and not request.path|startswith:'/certificate/' %}
     <script type="text/javascript">
-        $(function() {
-            if (typeof zE !== 'undefined') {
-              zE('webWidget', 'prefill', {
-                name: {
-                    value: '{{user.name}}',
-                },
-                email: {
-                    value: '{{user.email}}',
-                }
-              });
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof zE !== 'undefined') {
+          zE('webWidget', 'prefill', {
+            name: {
+                value: '{{user.name}}',
+            },
+            email: {
+                value: '{{user.email}}',
+            }
+          });
         }
       });
     </script>

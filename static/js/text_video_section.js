@@ -23,9 +23,9 @@ function initializeHlsVideo(VideoSelector) {
   }
 }
 
-$(document).ready(function() {
+export default function textVideoSection() {
   const tvVideo = $("#tv-video");
   const lightBoxVideo = $("#tv-light-box-video");
   initializeHlsVideo(tvVideo);
   initializeHlsVideo(lightBoxVideo);
-});
+}
