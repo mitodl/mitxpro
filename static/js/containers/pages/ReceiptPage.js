@@ -109,8 +109,8 @@ export class ReceiptPage extends React.Component<Props> {
                     <img
                       src="/static/images/mitx-pro-logo.png"
                       alt="MIT xPro"
-                      width="154"
-                      height="47.5"
+                      width={154}
+                      height={47.5}
                     />
                   </div>
                   <h1>Receipt</h1>
