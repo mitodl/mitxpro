@@ -8,6 +8,7 @@ import celery
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
+from b2b_ecommerce.models import B2B_INTEGRATION_PREFIX
 from ecommerce.models import Order, Line
 from hubspot.api import (
     send_hubspot_request,
@@ -111,7 +112,8 @@ def check_hubspot_api_errors():
         error_timestamp = error.get("errorTimestamp")
         if error_timestamp > last_timestamp:
             obj_type = (error.get("objectType", "N/A"),)
-            obj_id = parse_hubspot_id(error.get("integratorObjectId", ""))
+            integration_id = error.get("integratorObjectId", "")
+            obj_id = parse_hubspot_id(integration_id)
             error_type = error.get("type", "N/A")
             details = error.get("details", "")
 
@@ -121,6 +123,9 @@ def check_hubspot_api_errors():
                 and error_type == "INVALID_ASSOCIATION_PROPERTY"
                 and ASSOCIATED_DEAL_RE.search(details) is not None
             ):
+                if B2B_INTEGRATION_PREFIX in integration_id:
+                    # ignore it, an incoming second sync attempt should clear it up
+                    continue
                 try:
                     line = Line.objects.get(id=obj_id)
                 except ObjectDoesNotExist:
