@@ -199,9 +199,9 @@ def test_ignore_hubspot_b2b_line_error(
     HubspotErrorCheckFactory.create(checked_on=TIMESTAMPS[0])
     settings.HUBSPOT_API_KEY = "dkfjKJ2jfd"
     check_hubspot_api_errors()
-    assert mock_hubspot_b2b_line_error.call_count == 1
+    assert mock_hubspot_b2b_line_error.call_count == 2
     assert HubspotLineResync.objects.count() == 0
-    assert mock_logger.call_count == 0
+    mock_logger.assert_not_called()
 
 
 def test_skip_error_checks(settings, mock_hubspot_errors):
