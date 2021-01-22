@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.74.3
+--------------
+
+- Combined and reduced font imports, delayed loading non-essential fonts
+
 Version 0.74.2 (Released January 22, 2021)
 --------------
 
