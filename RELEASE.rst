@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.74.3
+--------------
+
+- Fixed broken JS-based interactive elements on product page
+- Combined and reduced font imports, delayed loading non-essential fonts
+
 Version 0.74.2 (Released January 22, 2021)
 --------------
 
