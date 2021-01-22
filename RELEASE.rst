@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.74.3
+Version 0.74.3 (Released January 22, 2021)
 --------------
 
 - Fixed broken JS-based interactive elements on product page
