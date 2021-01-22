@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.74.2
+Version 0.74.2 (Released January 22, 2021)
 --------------
 
 - defering possible js and css files (#2072)
