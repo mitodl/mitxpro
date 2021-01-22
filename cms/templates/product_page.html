@@ -33,7 +33,7 @@
 {% block scripts %}
   {{ block.super }}
   <script type="text/javascript">
-    $(document).ready(function() {
+    document.addEventListener('DOMContentLoaded', function() {
       // FAQs
       $("body").on("click", ".readmore", function(e) {
         const $readmoreText = $(this).find(".readmore-text");
