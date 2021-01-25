@@ -6,7 +6,7 @@
             {% for image in page.images %}
             <div class="slide">
                 <div class="img-holder">
-                    {% wagtail_image_lazy_load image.value format-png|max-185x185 alt=image.value.title class="wagtail-lazy-load" %}
+                    {% wagtail_image_lazy_load image.value max-185x185 alt=image.value.title class="wagtail-lazy-load" %}
                 </div>
             </div>
             {% endfor %}
