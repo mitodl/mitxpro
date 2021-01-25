@@ -1,4 +1,4 @@
-{% load static wagtailimages_tags image_version_url %}
+{% load static wagtailimages_tags wagtail_image_lazy_load %}
 <div id="forTeams" class="for-teams-block {% if page.dark_theme %} dark-theme {% endif %}">
   <div class="container">
     <div class="row">
@@ -12,7 +12,7 @@
       <div class="col-lg-5">
         <div class="img-holder {% if page.switch_layout %}stick-left{% endif %}">
           {% if page.image %}
-            <img src="{% image_version_url page.image "fill-750x505" %}" alt="{{ page.image.title }}" />
+            {% wagtail_image_lazy_load page.image fill-750x505 alt=page.image.title class="wagtail-lazy-load" %}
           {% else %}
             <img src="{% static 'images/default-for-teams-image.jpg' %}" alt="For Teams">
           {% endif%}

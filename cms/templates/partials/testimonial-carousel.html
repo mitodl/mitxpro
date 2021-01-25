@@ -1,4 +1,4 @@
-{% load image_version_url wagtailcore_tags %}
+{% load wagtail_image_lazy_load wagtailcore_tags %}
 <div id="testimonials" class="learners-block">
   <div class="container">
     <div class="head">
@@ -12,7 +12,7 @@
       <div class="slide">
         <div class="slide-holder">
           {% if testimonial.value.image %}
-            <img src="{% image_version_url testimonial.value.image "fill-75x75" %}" alt="{{ testimonial.value.name }}" />
+            {% wagtail_image_lazy_load testimonial.value.image fill-75x75 alt=testimonial.value.name class="wagtail-lazy-load" %}
           {% endif %}
           <h2>{{ testimonial.value.name }}, {{ testimonial.value.title }}</h2>
           <p>{{ testimonial.value.quote|truncatechars:150 }}</p>
@@ -36,13 +36,13 @@
             </div>
             <div class="container px-4">
               <div class="row py-2">
-                <img src="{% image_version_url testimonial.value.image "fill-100x100" %}" class="border rounded-circle headshot-image" alt="Testimonial image" />
+                {% wagtail_image_lazy_load testimonial.value.image fill-100x100 alt="Testimonial image" class="border rounded-circle headshot-image wagtail-lazy-load" %}
               </div>
               <div class="row mb-4">
                 <h2 class="modal-title text-uppercase">{{ testimonial.value.name }}, {{ testimonial.value.title }}</h2>
               </div>
               <div class="row quote-container">
-                <p>{{ testimonial.value.quote }}</p>        
+                <p>{{ testimonial.value.quote }}</p>
               </div>
             </div>
           </div>

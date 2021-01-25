@@ -1,4 +1,4 @@
-{% load wagtailcore_tags image_version_url %}
+{% load wagtailcore_tags wagtail_image_lazy_load %}
 <div id="faculty" class="faculty-block">
   <div class="container">
     <div class="head">
@@ -11,7 +11,7 @@
       {% for member in page.members %}
         <div class="slide">
           <div class="slide-holder">
-            <img src="{% image_version_url member.value.image "fill-300x300" %}" alt="{{ member.value.name }}">
+            {% wagtail_image_lazy_load member.value.image fill-300x300 alt=member.value.name class="wagtail-lazy-load" %}
             <h2>{{ member.value.name }}</h2>
             <div class="text-holder">
               {{ member.value.description|richtext }}

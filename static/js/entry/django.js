@@ -6,6 +6,7 @@ import coursewareCarousel from "../courseware_carousel.js"
 import textVideoSection from "../text_video_section.js"
 import imageCarousel from "../image_carousel.js"
 import facultyCarousel from "../faculty_carousel.js"
+import wagtailLazyLoader from "../wagtail_lazy_load.js"
 
 document.addEventListener("DOMContentLoaded", function() {
   notifications()
@@ -16,4 +17,5 @@ document.addEventListener("DOMContentLoaded", function() {
   textVideoSection()
   imageCarousel()
   facultyCarousel()
+  wagtailLazyLoader()
 })

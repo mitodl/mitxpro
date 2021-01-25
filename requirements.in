@@ -41,5 +41,6 @@ user-agents==2.0
 user-util==0.1.5
 uwsgi
 wagtail==2.9.3
+wagtail-lazyimages==0.1.8
 wagtail-metadata==3.3.0
 zeep==3.4.0

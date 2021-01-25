@@ -1,4 +1,4 @@
-{% load static image_version_url %}
+{% load static wagtail_image_lazy_load %}
 <div class="companies-trust-block">
     <div class="container">
         <h1>{{ page.title }}</h1>
@@ -6,7 +6,7 @@
             {% for image in page.images %}
             <div class="slide">
                 <div class="img-holder">
-                    <img src="{% image_version_url image.value "format-png|max-185x185" %}" alt="{{ image.value.title }}" />
+                    {% wagtail_image_lazy_load image.value format-png|max-185x185 alt=image.value.title class="wagtail-lazy-load" %}
                 </div>
             </div>
             {% endfor %}

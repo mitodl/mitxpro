@@ -210,6 +210,7 @@ INSTALLED_APPS = (
     "voucher",
     "hubspot",
     "b2b_ecommerce",
+    "wagtail_lazyimages",
 )
 # Only include the seed data app if this isn't running in prod
 if ENVIRONMENT not in ("production", "prod"):
