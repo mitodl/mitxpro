@@ -33,9 +33,6 @@
     {% block extrahead %}
     {% endblock %}
     {% endspaceless %}
-      {% if zendesk_config.help_widget_enabled and not request.path|startswith:'/certificate/' %}
-          <script defer id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key={{zendesk_config.help_widget_key}}"> </script>
-      {% endif %}
   </head>
   <body class="{% block bodyclass %}{% endblock %}">
   <div class="main-panel">
@@ -61,18 +58,28 @@
     {% block scripts %}
     {% endblock %}
     {% if zendesk_config.help_widget_enabled and not request.path|startswith:'/certificate/' %}
-    <script type="text/javascript">
-      document.addEventListener('DOMContentLoaded', function() {
+    <script defer type="text/javascript">
+      function loadZendesk(){
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.id = 'ze-snippet';
+        script.async = true;
+        script.src = "https://static.zdassets.com/ekr/snippet.js?key={{zendesk_config.help_widget_key}}";
+        document.getElementsByTagName("body")[0].appendChild(script);
         if (typeof zE !== 'undefined') {
-          zE('webWidget', 'prefill', {
-            name: {
-                value: '{{user.name}}',
-            },
-            email: {
-                value: '{{user.email}}',
-            }
-          });
+            zE('webWidget', 'prefill', {
+                name: {
+                    value: '{{user.name}}',
+                },
+                email: {
+                    value: '{{user.email}}',
+                }
+            });
         }
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+          setTimeout("loadZendesk();", 3000)
       });
     </script>
     {% endif %}
