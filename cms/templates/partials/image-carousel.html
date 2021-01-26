@@ -1,4 +1,4 @@
-{% load static wagtail_image_lazy_load %}
+{% load static wagtail_lazy_image %}
 <div class="companies-trust-block">
     <div class="container">
         <h1>{{ page.title }}</h1>
@@ -6,7 +6,7 @@
             {% for image in page.images %}
             <div class="slide">
                 <div class="img-holder">
-                    {% wagtail_image_lazy_load image.value max-185x185 alt=image.value.title class="wagtail-lazy-load" %}
+                    {% wagtail_lazy_image image.value max-185x185 alt=image.value.title class="lazy" %}
                 </div>
             </div>
             {% endfor %}

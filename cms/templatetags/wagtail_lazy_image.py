@@ -1,10 +1,10 @@
 """CMS templatetags"""
 
+from re import findall
 from urllib.parse import quote_plus
 
 from django import template
 
-from bs4 import BeautifulSoup
 from wagtail.images.templatetags.wagtailimages_tags import image
 from wagtail_lazyimages.templatetags.lazyimages_tags import LazyImageNode
 
@@ -29,18 +29,19 @@ class CustomLazyImageNode(LazyImageNode):
         if not img:
             return ""
 
+        file_hash = quote_plus(img.file_hash)
         raw_img_tag = super().render(context)
-        parsed_content = BeautifulSoup(raw_img_tag, "lxml").img
 
-        if parsed_content.get("src") and parsed_content.get("data-src"):
-            file_hash = quote_plus(img.file_hash)
-            parsed_content["src"] = f"{parsed_content['src']}?v={file_hash}"
-            parsed_content["data-src"] = f"{parsed_content['data-src']}?v={file_hash}"
-        return str(parsed_content)
+        for link in findall(r"src=(.+?)\s", raw_img_tag):
+            raw_img_tag = raw_img_tag.replace(
+                link, f"{link[:-1]}?v={file_hash}{link[-1]}"
+            )
+
+        return raw_img_tag
 
 
-@register.tag(name="wagtail_image_lazy_load")
-def wagtail_image_lazy_load(img, filter_spec):
+@register.tag(name="wagtail_lazy_image")
+def wagtail_lazy_image(img, filter_spec):
     """
     Generates an image tag using Wagtail-lazyimages library and appends a version to the path to enable effective caching
 

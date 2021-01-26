@@ -1,9 +1,9 @@
-{% load static wagtailcore_tags  wagtail_image_lazy_load %}
+{% load static wagtailcore_tags  wagtail_lazy_image %}
 {% for courseware_page in pages %}
   <div class="slide" data-url="{{ courseware_page.url }}">
     <div class="slide-holder">
       {% if courseware_page.thumbnail_image %}
-        {% wagtail_image_lazy_load courseware_page.thumbnail_image fill-480x275 alt=courseware_page.title class="wagtail-lazy-load" %}
+        {% wagtail_lazy_image courseware_page.thumbnail_image fill-480x275 alt=courseware_page.title class="lazy" %}
       {% else %}
         <img src="{% static 'images/mit-dome.png' %}" alt="{{ courseware_page.title }}" />
       {% endif %}

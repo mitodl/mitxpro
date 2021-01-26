@@ -1,9 +1,9 @@
-{% load static humanize wagtailcore_tags wagtailimages_tags wagtail_image_lazy_load %}
+{% load static humanize wagtailcore_tags wagtailimages_tags wagtail_lazy_image %}
 
 <div class="cover-image">
   <div class="cover-image-frame">
     {% if courseware_page.thumbnail_image %}
-      {% wagtail_image_lazy_load courseware_page.thumbnail_image fill-275x155 alt=courseware_page.thumbnail_image.title class="wagtail-lazy-load" %}
+      {% wagtail_lazy_image courseware_page.thumbnail_image fill-275x155 alt=courseware_page.thumbnail_image.title class="lazy" %}
     {% else %}
       <img src="{% static default_image_path %}" alt="Preview image" />
     {% endif %}

@@ -8,7 +8,7 @@ export default function wagtailLazyLoader() {
     threshold:  0
   };
 
-  const imgs = document.querySelectorAll(".wagtail-lazy-load");
+  const imgs = document.querySelectorAll("img.lazy");
 
   const observer = new IntersectionObserver(function(entries, observer) {
     entries.forEach(function(entry) {

@@ -1,5 +1,4 @@
 astroid==2.4.2
-beautifulsoup4==4.8.2
 black==18.9b0
 bpython
 codecov

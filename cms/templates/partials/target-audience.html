@@ -1,4 +1,4 @@
-{% load wagtail_image_lazy_load %}
+{% load wagtail_lazy_image %}
 <div id="targetAudience" class="who-should-enroll-block">
   <div class="container">
     <div class="row">
@@ -13,7 +13,7 @@
       <div class="col-lg-6">
         {% if page.image %}
           <div class="img-holder {% if page.switch_layout %}stick-left{% endif %}">
-            {% wagtail_image_lazy_load page.image fill-870x500 alt=page.image.title class="wagtail-lazy-load" %}
+            {% wagtail_lazy_image page.image fill-870x500 alt=page.image.title class="lazy" %}
           </div>
         {% endif %}
       </div>

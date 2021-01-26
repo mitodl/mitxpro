@@ -1,11 +1,11 @@
-{% load wagtail_image_lazy_load %}
+{% load wagtail_lazy_image %}
 <div id="learningTechniques" class="container learning-techniques-block section-spacing">
   <h1>{{ page.title }}</h1>
   <ul class="learning-techniques-list">
     {% for technique in page.technique_items %}
       <li>
         <div class="img-holder">
-          {% wagtail_image_lazy_load technique.value.image max-200x200 alt="Learning technique" height="110" width="auto" class="wagtail-lazy-load" %}
+          {% wagtail_lazy_image technique.value.image max-200x200 alt="Learning technique" height="110" width="auto" class="lazy" %}
         </div>
         <h3>{{ technique.value.heading }}</h3>
         <h4>{{ technique.value.sub_heading }}</h4>
