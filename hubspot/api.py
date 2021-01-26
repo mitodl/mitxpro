@@ -10,6 +10,7 @@ from urllib.parse import urljoin, urlencode
 import requests
 from django.conf import settings
 
+from b2b_ecommerce.models import B2B_INTEGRATION_PREFIX
 from mitxpro.utils import now_in_utc
 
 HUBSPOT_API_BASE_URL = "https://api.hubapi.com"
@@ -51,8 +52,10 @@ def parse_hubspot_id(hubspot_id):
     Returns:
         int: The object ID or None
     """
-    match = re.compile(fr"{settings.HUBSPOT_ID_PREFIX}-(\d+)").match(hubspot_id)
-    return int(match.group(1)) if match else None
+    match = re.compile(
+        fr"{settings.HUBSPOT_ID_PREFIX}-({B2B_INTEGRATION_PREFIX})?(\d+)"
+    ).match(hubspot_id)
+    return int(match.group(2)) if match else None
 
 
 def send_hubspot_request(

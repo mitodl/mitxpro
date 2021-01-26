@@ -8,6 +8,7 @@ import pytz
 from django.conf import settings
 import pytest
 from b2b_ecommerce import factories as b2b_factories
+from b2b_ecommerce.models import B2B_INTEGRATION_PREFIX
 from ecommerce import factories
 from hubspot.api import hubspot_timestamp
 
@@ -82,11 +83,11 @@ line_error_response_json = [
     {
         "portalId": 5_890_463,
         "objectType": "LINE_ITEM",
-        "integratorObjectId": f"{settings.HUBSPOT_ID_PREFIX}-{FAKE_OBJECT_ID + 1}",
+        "integratorObjectId": f"{settings.HUBSPOT_ID_PREFIX}-{B2B_INTEGRATION_PREFIX}{FAKE_OBJECT_ID + 1}",
         "changeOccurredTimestamp": hubspot_timestamp(TIMESTAMPS[0]),
         "errorTimestamp": hubspot_timestamp(TIMESTAMPS[2]),
         "type": "INVALID_ASSOCIATION_PROPERTY",
-        "details": f"Invalid associations [hs_assoc__deal_id: {settings.HUBSPOT_ID_PREFIX}-{FAKE_OBJECT_ID}]. Do those objects exist?",
+        "details": f"Invalid associations [hs_assoc__deal_id: {settings.HUBSPOT_ID_PREFIX}-{B2B_INTEGRATION_PREFIX}{FAKE_OBJECT_ID}]. Do those objects exist?",
         "status": "OPEN",
     },
     {
@@ -124,6 +125,14 @@ def mock_hubspot_line_errors(mocker):
     """Mock the get_sync_errors API call and return multiple line sync error with invalid association properties"""
     yield mocker.patch(
         "hubspot.api.paged_sync_errors", side_effect=[line_error_response_json]
+    )
+
+
+@pytest.fixture
+def mock_hubspot_b2b_line_error(mocker):
+    """Mock the get_sync_errors API call and return a b2b line sync error with invalid association properties"""
+    yield mocker.patch(
+        "hubspot.api.paged_sync_errors", side_effect=[[line_error_response_json[1]], []]
     )
 
 
