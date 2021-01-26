@@ -1,3 +1,12 @@
+// Third-party imports
+import "jquery"
+import "bootstrap"
+import "popper.js"
+import "slick-carousel"
+import "hls.js"
+import "@fancyapps/fancybox"
+
+// Custom native imports
 import notifications from "../notifications.js"
 import tooltip from "../tooltip.js"
 import hero from "../hero.js"
@@ -6,6 +15,7 @@ import coursewareCarousel from "../courseware_carousel.js"
 import textVideoSection from "../text_video_section.js"
 import imageCarousel from "../image_carousel.js"
 import facultyCarousel from "../faculty_carousel.js"
+import productDetails from "../product_detail.js"
 
 document.addEventListener("DOMContentLoaded", function() {
   notifications()
@@ -16,4 +26,5 @@ document.addEventListener("DOMContentLoaded", function() {
   textVideoSection()
   imageCarousel()
   facultyCarousel()
+  productDetails()
 })
