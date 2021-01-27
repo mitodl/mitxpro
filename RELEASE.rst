@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.75.0
+Version 0.75.0 (Released January 27, 2021)
 --------------
 
 - Ignore B2B line sync errors in hubspot (#2078)
