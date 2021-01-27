@@ -10,7 +10,8 @@ const prodBabelConfig = Object.assign({}, babelSharedLoader)
 
 prodBabelConfig.query.plugins.push(
   "@babel/plugin-transform-react-constant-elements",
-  "@babel/plugin-transform-react-inline-elements"
+  "@babel/plugin-transform-react-inline-elements",
+  "@babel/plugin-transform-react-remove-prop-types"
 )
 
 const prodConfig = Object.assign({}, config)
