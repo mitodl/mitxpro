@@ -13,7 +13,7 @@ import {
   trim,
   view
 } from "ramda"
-import { truncate as _truncate } from "lodash"
+import _truncate from "lodash/truncate"
 import qs from "query-string"
 import { assert } from "chai"
 import * as R from "ramda"
