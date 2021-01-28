@@ -41,6 +41,8 @@ const TopAppBar = ({ currentUser, location }: Props) => (
             src="/static/images/mitx-pro-logo.png"
             className="site-logo"
             alt={SETTINGS.site_name}
+            width={154}
+            height={47.5}
           />
         </div>
         {currentUser.is_authenticated ? null : (

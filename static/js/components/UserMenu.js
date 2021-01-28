@@ -27,6 +27,8 @@ const UserMenu = ({ currentUser }: Props) => {
           src="/static/images/avatar_default.png"
           alt={`Profile image for ${currentUser.name}`}
           className={`profile-image`}
+          width={34}
+          height={34}
         />
       </div>
       <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
