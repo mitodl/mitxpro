@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.75.1
+--------------
+
+- using module level lodash imports (#2091)
+- Set inline styling bourdaries and default lazy tag in img elements
+- Merge 3rd-party & django js files, Move HTML scripts to js files
+
 Version 0.75.0 (Released January 27, 2021)
 --------------
 
