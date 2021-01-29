@@ -46,12 +46,23 @@ class UserProfileInline(admin.StackedInline):
         return True
 
 
+_username_warning = """
+<div style="background-color: #dc3545; color: #fff; padding: 10px; font-size: 16px; border-radius: 5px;">
+   <strong>WARNING:</strong> 
+   Changing this username will require you to apply the same change in edX immediately after.<br /><br>
+   Do not make this change unless you can perform the same change to the edX username, or you have someone
+   else lined up to do it.
+</div>
+"""
+
+
 class UserAdmin(ContribUserAdmin, HijackUserAdminMixin, TimestampedModelAdmin):
     """Admin views for user"""
 
     include_created_on_in_list = True
     fieldsets = (
-        (None, {"fields": ("username", "password", "last_login", "created_on")}),
+        (None, {"fields": ("password", "last_login", "created_on")}),
+        (_("Username"), {"fields": ("username",), "description": _username_warning}),
         (_("Personal Info"), {"fields": ("name", "email")}),
         (
             _("Permissions"),
@@ -78,7 +89,7 @@ class UserAdmin(ContribUserAdmin, HijackUserAdminMixin, TimestampedModelAdmin):
     list_filter = ("is_staff", "is_superuser", "is_active", "groups")
     search_fields = ("username", "name", "email")
     ordering = ("email",)
-    readonly_fields = ("username", "last_login")
+    readonly_fields = ("last_login",)
     inlines = [UserLegalAddressInline, UserProfileInline]
 
 
