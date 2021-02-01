@@ -4,6 +4,7 @@ Page models for the CMS
 # pylint: disable=too-many-lines
 import re
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 from urllib.parse import urljoin
 
 import pytz
@@ -13,6 +14,8 @@ from django.db import models
 from django.http.response import Http404
 from django.shortcuts import reverse
 from django.utils.text import slugify
+from django.core.validators import MinValueValidator
+
 from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
@@ -889,6 +892,9 @@ class ExternalCoursePage(ProductPage):
         blank=True,
         decimal_places=2,
         max_digits=20,
+        validators=[
+            MinValueValidator(Decimal("0"), message="Price cannot be negative")
+        ],
         help_text="The price of the external course.",
     )
 
@@ -981,10 +987,13 @@ class ExternalProgramPage(ProductPage):
         blank=True,
         decimal_places=2,
         max_digits=20,
+        validators=[
+            MinValueValidator(Decimal("0"), message="Price cannot be negative")
+        ],
         help_text="The price of the external program.",
     )
 
-    course_count = models.IntegerField(
+    course_count = models.PositiveIntegerField(
         blank=False,
         null=False,
         help_text="The number of total courses in the external program.",
