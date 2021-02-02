@@ -48,6 +48,7 @@ def test_get_new_b2b_order_by_reference_number():
 
 
 @pytest.mark.parametrize("contract_number", [None, "12345"])
+@pytest.mark.flaky(max_runs=3, min_passes=1)
 def test_signed_payload(mocker, contract_number):
     """
     A valid payload should be signed appropriately

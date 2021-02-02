@@ -147,6 +147,7 @@ def test_get_readable_id():
 @pytest.mark.parametrize("has_company", [True, False])
 @pytest.mark.parametrize("is_program_product", [True, False])
 @pytest.mark.parametrize("user_ip", ["194.100.0.1", "", None])
+@pytest.mark.flaky(max_runs=3, min_passes=1)
 def test_signed_payload(mocker, has_coupon, has_company, is_program_product, user_ip):
     """
     A valid payload should be signed appropriately
