@@ -2,54 +2,49 @@
 /*eslint semi: ["error", "always"]*/
 
 export default function productDetails() {
-  // FAQs
-  $("body").on("click", ".readmore", function(e) {
-    const $readmoreText = $(this).find(".readmore-text");
-    e.preventDefault();
-    $("li.extra-faq").toggleClass("d-none");
-    $readmoreText.text($readmoreText.text() === "Hide" ? "Read" : "Hide");
-  });
-
-  // More Dates
-  $(".dates-tooltip").popover({
-    template:
-      '<div class="popover" role="tooltip">' +
-      '<div class="arrow"></div>' +
-      '<div class="popover-header py-2 px-0 mx-5"></div>' +
-      '<div class="popover-body"></div>' +
-      "</div>"
-  });
-
   const navbar = $("#subNavBarContainer");
 
-  // Navigation Bar
-  $("body").scrollspy({
-    target: "#subNavBar",
-    offset: navbar.outerHeight() + 5.0
-  });
+  // Makes sure to run the script only when DOM conatins #subNavBarContainer (i.e on product page)
+  if (navbar.length) {
+    // FAQs
+    $("body").on("click", ".readmore", function(e) {
+      const $readmoreText = $(this).find(".readmore-text");
+      e.preventDefault();
+      $("li.extra-faq").toggleClass("d-none");
+      $readmoreText.text($readmoreText.text() === "Hide" ? "Read" : "Hide");
+    });
 
-  $(window).on("activate.bs.scrollspy", function(e, obj) {
-    $("#subNavBarSelector").text(
-      $(`.navbar-nav>li>a[href='${obj.relatedTarget}']`).text()
-    );
-  });
+    // More Dates
+    $(".dates-tooltip").popover({
+      template:
+        '<div class="popover" role="tooltip">' +
+        '<div class="arrow"></div>' +
+        '<div class="popover-header py-2 px-0 mx-5"></div>' +
+        '<div class="popover-body"></div>' +
+        "</div>"
+    });
 
-  $(".navbar-nav>li>a").on("click", function(event) {
-    event.preventDefault();
+    // Navigation Bar
+    $("body").scrollspy({
+      target: "#subNavBar",
+      offset: navbar.outerHeight() + 5.0
+    });
 
-    const target = $($(this).attr("href"));
+    $(window).on("activate.bs.scrollspy", function(e, obj) {
+      $("#subNavBarSelector").text(
+        $(`.navbar-nav>li>a[href='${obj.relatedTarget}']`).text()
+      );
+    });
 
-    window.scrollTo(0, target.offset().top - navbar.outerHeight());
+    $(".navbar-nav>li>a").on("click", function(event) {
+      event.preventDefault();
 
-    $(".navbar-collapse.show").removeClass("show");
-    $(".navbar-toggler").addClass("collapsed");
-  });
+      const target = $($(this).attr("href"));
 
-  // eslint-disable-next-line no-undef
-  if (SETTINGS.zendesk_config.help_widget_enabled) {
-    // eslint-disable-next-line no-undef
-    zE("webWidget", "helpCenter:setSuggestions", {
-      search: "{{page.product.title}}"
+      window.scrollTo(0, target.offset().top - navbar.outerHeight());
+
+      $(".navbar-collapse.show").removeClass("show");
+      $(".navbar-toggler").addClass("collapsed");
     });
   }
 }
