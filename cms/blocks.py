@@ -46,6 +46,30 @@ class UserTestimonialBlock(blocks.StructBlock):
     quote = blocks.TextBlock(help_text="The quote that appears on the testimonial.")
 
 
+class NewsAndEventsBlock(blocks.StructBlock):
+    """
+    Custom block to represent a news or event
+    """
+
+    content_type = blocks.CharBlock(
+        max_length=100, help_text="Specify the news/events type here."
+    )
+    title = blocks.CharBlock(
+        max_length=255, help_text="Specify the news/events title here."
+    )
+    image = ImageChooserBlock(
+        blank=True, null=True, help_text="Specify the image for news/events section."
+    )
+    content = blocks.TextBlock(help_text="Specify the news/events content here.")
+    call_to_action = blocks.CharBlock(
+        max_length=100,
+        help_text="Specify the news/events call-to-action text here (e.g: 'Read More').",
+    )
+    action_url = blocks.URLBlock(
+        help_text="Specify the news/events action-url here (like a link to an article e.g: https://www.google.com/search?q=article)."
+    )
+
+
 class FacultyBlock(blocks.StructBlock):
     """
     Block class that defines a faculty member
