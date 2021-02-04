@@ -1,10 +1,11 @@
 """Authentication views"""
-from urllib.parse import quote
+from urllib.parse import quote, urlparse, urlencode
 
 import requests
 from django.conf import settings
 from django.core import mail as django_mail
 from django.contrib.auth import get_user_model, update_session_auth_hash
+from django.contrib.auth.views import LogoutView
 from django.shortcuts import render
 from social_core.backends.email import EmailAuth
 from social_django.models import UserSocialAuth
@@ -222,3 +223,17 @@ class CustomSetPasswordView(CustomDjoserAPIView, DjoserSetPasswordView):
         if response.status_code in (status.HTTP_200_OK, status.HTTP_204_NO_CONTENT):
             update_session_auth_hash(self.request, self.request.user)
         return response
+
+
+class CustomLogoutView(LogoutView):
+    """Custom view to modify base functionality in django.contrib.auth.views.LogoutView"""
+
+    def get_next_page(self):
+        next_page = super().get_next_page()
+
+        if next_page in (self.next_page, self.request.path):
+            return next_page
+        else:
+            params = {"redirect_url": settings.SITE_BASE_URL}
+            next_page += ("&" if urlparse(next_page).query else "?") + urlencode(params)
+            return next_page

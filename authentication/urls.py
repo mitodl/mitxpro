@@ -1,5 +1,4 @@
 """URL configurations for authentication"""
-from django.contrib.auth import views as auth_views
 from django.urls import path
 
 from authentication.views import (
@@ -10,6 +9,7 @@ from authentication.views import (
     RegisterDetailsView,
     RegisterExtraDetailsView,
     get_social_auth_types,
+    CustomLogoutView,
     CustomPasswordResetView,
     CustomPasswordResetConfirmView,
     CustomSetPasswordView,
@@ -47,5 +47,5 @@ urlpatterns = [
     ),
     path("api/set_password/", CustomSetPasswordView.as_view(), name="set-password-api"),
     path("api/auths/", get_social_auth_types, name="get-auth-types-api"),
-    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("logout/", CustomLogoutView.as_view(), name="logout"),
 ]
