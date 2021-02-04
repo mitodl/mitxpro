@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.76.0
+Version 0.76.0 (Released February 04, 2021)
 --------------
 
 - add test coverage threshold (#2098)
