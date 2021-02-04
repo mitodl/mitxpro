@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.76.0 (Released February 04, 2021)
+--------------
+
+- add test coverage threshold (#2098)
+- Allow only positive values on price and course count External Course/Program (#2099)
+- Allowed username update in admin with warning
+- using module level lodash imports (#2091)
+- Set inline styling bourdaries and default lazy tag in img elements
+- Merge 3rd-party & django js files, Move HTML scripts to js files
+
 Version 0.75.0 (Released January 27, 2021)
 --------------
 
