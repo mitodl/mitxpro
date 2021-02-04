@@ -30,6 +30,17 @@
   {% render_bundle 'header' %}
 {% endblock %}
 
+{% block scripts %}
+  {{ block.super }}
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      if (SETTINGS.zendesk_config.help_widget_enabled) {
+        zE('webWidget', 'helpCenter:setSuggestions', { search: '{{page.product.title}}'});
+      }
+    });
+  </script>
+{% endblock %}
+
 {% block content %}
 <div>
   {% include "partials/hero.html" %}
