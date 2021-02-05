@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.76.1
+--------------
+
+- Lower coverage requirements to fix flakiness
+- Fix product_page JS rendering issue (#2109)
+- adding logout redirection (#2103)
+- Fix Flaky Tests (#2102)
+
 Version 0.76.0 (Released February 04, 2021)
 --------------
 
