@@ -30,9 +30,11 @@
     font-weight: 600;
 
     &:after {
-      content: "\e902";
-      font-family: icomoon;
-      margin-left: 10px;
+      content: "arrow_circle_up";
+      font-family: Material Icons;
+      margin-left: 20px;
+      text-transform: none;
+      transform: rotate(90deg);
     }
   }
 

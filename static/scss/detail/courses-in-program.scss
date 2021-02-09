@@ -114,12 +114,15 @@
     color: $primary;
 
     &:after {
-      content: "\e902";
-      font-family: icomoon;
+      font-family: Material Icons;
+      content: "arrow_circle_up";
+      text-transform: none;
+      transform: rotate(90deg);
+      font-size: 20px;
       display: inline-block;
       vertical-align: top;
-      line-height: 24px;
-      margin: 0 0 0 10px;
+      line-height: 21px;
+      margin: 0 0 0 5px;
     }
   }
 }
