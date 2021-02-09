@@ -5,7 +5,13 @@ import IntegrationTestHelper from "../../../util/integration_test_helper"
 import RegisterConfirmPage, {
   RegisterConfirmPage as InnerRegisterConfirmPage
 } from "./RegisterConfirmPage"
-import { STATE_REGISTER_DETAILS } from "../../../lib/auth"
+import {
+  STATE_REGISTER_DETAILS,
+  STATE_INVALID_LINK,
+  STATE_EXISTING_ACCOUNT,
+  STATE_INVALID_EMAIL
+} from "../../../lib/auth"
+import { routes } from "../../../lib/urls"
 
 describe("RegisterConfirmPage", () => {
   let helper, renderPage
@@ -55,5 +61,64 @@ describe("RegisterConfirmPage", () => {
     })
     assert.equal(helper.currentLocation.pathname, "/create-account/details/")
     assert.equal(helper.currentLocation.search, `?partial_token=${token}`)
+  })
+
+  it("Shows a register link with invalid/expired confirmation code", async () => {
+    helper.handleRequestStub.returns({})
+    const token = "asdf"
+    const { inner, store } = await renderPage({
+      entities: {
+        auth: {
+          state:         STATE_INVALID_LINK,
+          partial_token: token,
+          extra_data:    {}
+        }
+      }
+    })
+    const confirmationErrorText = inner.find(".confirmation-message")
+    assert.isNotNull(confirmationErrorText)
+    assert.equal(
+      confirmationErrorText.text().replace("<Link /> ", ""),
+      "This invitation is invalid or has expired. Please to register again."
+    )
+  })
+
+  it("Shows a login link with existing account message", async () => {
+    helper.handleRequestStub.returns({})
+    const token = "asdf"
+    const { inner, store } = await renderPage({
+      entities: {
+        auth: {
+          state:         STATE_EXISTING_ACCOUNT,
+          partial_token: token,
+          extra_data:    {}
+        }
+      }
+    })
+    const confirmationErrorText = inner.find(".confirmation-message")
+    assert.isNotNull(confirmationErrorText)
+    assert.equal(
+      confirmationErrorText.text().replace("<Link /> ", ""),
+      "You already have an xPRO account. Please to sign in."
+    )
+  })
+
+  it("Shows a register link with invalid or no confirmation code", async () => {
+    helper.handleRequestStub.returns({})
+    const token = "asdf"
+    const { inner, store } = await renderPage({
+      entities: {
+        auth: {
+          state:         STATE_INVALID_EMAIL,
+          partial_token: token,
+          extra_data:    {}
+        }
+      }
+    })
+    const confirmationErrorText = inner.find(".confirmation-message")
+    assert.equal(
+      confirmationErrorText.text().replace("<Link /> ", ""),
+      "No confirmation code was provided or it has expired. to register again."
+    )
   })
 })

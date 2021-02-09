@@ -29,6 +29,8 @@ class SocialAuthState:  # pylint: disable=too-many-instance-attributes
     STATE_INACTIVE = "inactive"
     STATE_INVALID_EMAIL = "invalid-email"
     STATE_USER_BLOCKED = "user-blocked"
+    STATE_INVALID_LINK = "invalid-link"
+    STATE_EXISTING_ACCOUNT = "existing-account"
 
     def __init__(
         self,

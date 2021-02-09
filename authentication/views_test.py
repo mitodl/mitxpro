@@ -47,6 +47,8 @@ User = get_user_model()
 
 fake = Faker()
 
+# pylint: disable=too-many-public-methods
+
 
 @pytest.fixture
 def email_user(user):
@@ -509,7 +511,29 @@ class AuthStateMachine(RuleBasedStateMachine):
                 "flow": auth_state["flow"],
                 "redirect_url": None,
                 "partial_token": None,
-                "state": SocialAuthState.STATE_INVALID_EMAIL,
+                "state": SocialAuthState.STATE_INVALID_LINK,
+            },
+        )
+
+    @rule(auth_state=consumes(ConfirmationRedeemedAuthStates))
+    def redeem_confirmation_code_twice_existing_user(self, auth_state):
+        """Redeeming a code twice should fail"""
+        _, _, code, partial_token = self.mock_email_send.call_args[0]
+        self.create_existing_user()
+        assert_api_call(
+            self.client,
+            "psa-register-confirm",
+            {
+                "flow": auth_state["flow"],
+                "verification_code": code.code,
+                "partial_token": partial_token,
+            },
+            {
+                "errors": [],
+                "flow": auth_state["flow"],
+                "redirect_url": None,
+                "partial_token": None,
+                "state": SocialAuthState.STATE_EXISTING_ACCOUNT,
             },
         )
 
