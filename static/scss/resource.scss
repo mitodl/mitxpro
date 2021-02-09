@@ -77,9 +77,11 @@ html {
     text-decoration: none;
 
     &:after {
-      content: "\e905";
-      font-family: icomoon;
-      margin-left: 10px;
+      font-size: 24px;
+      font-family: Material Icons;
+      content: "arrow_circle_up";
+      margin-left: 5px;
+      vertical-align: middle;
     }
   }
 }

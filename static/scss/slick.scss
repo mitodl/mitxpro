@@ -121,6 +121,7 @@
   box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.1);
   margin: -75px 0 0;
   cursor: pointer;
+  padding: 0;
 
   @include media-breakpoint-up(md) {
     left: -25px;
@@ -153,16 +154,16 @@
   }
 
   &:after {
-    font-size: 25px;
+    font-size: 30px;
     line-height: 30px;
-    font-family: icomoon;
-    content: "\e900";
+    font-family: Material Icons;
+    content: "chevron_left";
     @include media-breakpoint-up(md) {
-      font-size: 22px;
+      font-size: 34px;
       line-height: 20px;
     }
     @media (min-width: 1275px) {
-      font-size: 30px;
+      font-size: 50px;
       line-height: 40px;
     }
   }
@@ -177,7 +178,7 @@
   }
 
   &:after {
-    content: "\e901";
+    content: "chevron_right";
   }
   @media (min-width: 1275px) {
     right: -65px;
