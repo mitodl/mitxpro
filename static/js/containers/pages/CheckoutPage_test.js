@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import { assert } from "chai"
 import sinon from "sinon"
 
@@ -6,9 +7,10 @@ import CheckoutPage, { CheckoutPage as InnerCheckoutPage } from "./CheckoutPage"
 
 import { PRODUCT_TYPE_PROGRAM } from "../../constants"
 import { makeBasketResponse } from "../../factories/ecommerce"
-import * as formFuncs from "../../lib/form"
 import IntegrationTestHelper from "../../util/integration_test_helper"
+import * as formFuncs from "../../lib/form"
 import * as ecommerceApi from "../../lib/ecommerce"
+import { routes } from "../../lib/urls"
 
 describe("CheckoutPage", () => {
   let helper, renderPage, basket, calcSelectedRunIdsStub
@@ -20,6 +22,10 @@ describe("CheckoutPage", () => {
     calcSelectedRunIdsStub = helper.sandbox
       .stub(ecommerceApi, "calcSelectedRunIds")
       .returns({})
+    SETTINGS.zendesk_config = {
+      help_widget_enabled: false,
+      help_widget_key:     "fake_key"
+    }
     renderPage = helper.configureHOCRenderer(
       CheckoutPage,
       InnerCheckoutPage,
@@ -75,7 +81,9 @@ describe("CheckoutPage", () => {
           }
         }
       )
-      assert.equal(inner.state().errors, hasError ? "error" : null)
+      const state = inner.state()
+      assert.equal(state.loadingFailed, hasError)
+      assert.equal(state.loadingErrorMessages, hasError ? "error" : undefined)
     })
   })
 
@@ -120,7 +128,7 @@ describe("CheckoutPage", () => {
   it("submits the coupon code", async () => {})
   ;[true, false].forEach(hasCouponCode => {
     [true, false].forEach(hasError => {
-      it(`tries to submit ${hasCouponCode ? "an empty " : ""}the coupon code${
+      it(`tries to submit ${hasCouponCode ? "an empty " : ""}coupon code${
         hasError ? " but receives an error message" : ""
       }`, async () => {
         const setFieldError = helper.sandbox.stub()
@@ -144,7 +152,7 @@ describe("CheckoutPage", () => {
         sinon.assert.calledWith(
           setFieldError,
           "coupons",
-          hasError ? couponError : undefined
+          hasError ? couponError : null
         )
       })
     })
@@ -400,6 +408,55 @@ describe("CheckoutPage", () => {
         }
       })
       assert.isTrue(inner.find("CheckoutForm").prop("requestPending"))
+    })
+  })
+
+  describe("when logged out", () => {
+    let actions
+
+    beforeEach(() => {
+      actions = {
+        setSubmitting: helper.sandbox.stub(),
+        setErrors:     helper.sandbox.stub()
+      }
+    })
+
+    it("should redirect when you try to submit", async () => {
+      const { inner } = await renderPage()
+      helper.handleRequestStub.withArgs("/api/checkout/", "POST").returns({
+        status: 403
+      })
+      const values = { runs: {} }
+      await inner.find("CheckoutForm").prop("onSubmit")(values, actions)
+
+      assert.equal(helper.browserHistory.location.pathname, routes.login.begin)
+    })
+
+    it("should redirect when you try to update the run", async () => {
+      const { inner } = await renderPage()
+      helper.handleRequestStub.withArgs("/api/basket/", "PATCH").returns({
+        status: 403
+      })
+      await inner.find("CheckoutForm").prop("submitCoupon")(
+        "some_code",
+        helper.sandbox.stub()
+      )
+
+      assert.equal(helper.browserHistory.location.pathname, routes.login.begin)
+    })
+
+    it("should redirect when you try to update the promo code", async () => {
+      const { inner } = await renderPage()
+      helper.handleRequestStub.withArgs("/api/basket/", "PATCH").returns({
+        status: 403
+      })
+      await inner.find("CheckoutForm").prop("updateProduct")(
+        1,
+        1,
+        helper.sandbox.stub()
+      )
+
+      assert.equal(helper.browserHistory.location.pathname, routes.login.begin)
     })
   })
 })

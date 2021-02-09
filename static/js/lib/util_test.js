@@ -24,7 +24,10 @@ import {
   newSetWith,
   newSetWithout,
   timeoutPromise,
-  getProductSelectLabel
+  getProductSelectLabel,
+  isSuccessResponse,
+  isErrorResponse,
+  isUnauthorizedResponse
 } from "./util"
 import { makeUserEnrollments } from "../factories/course"
 import {
@@ -303,4 +306,49 @@ describe("utility functions", () => {
       assert.isNull(findItemWithTextId(enrollments, "missing"))
     })
   })
+
+  //
+  ;[[200, false], [299, false], [300, false], [400, true], [500, true]].forEach(
+    ([status, expResult]) => {
+      it(`isErrorResponse returns ${String(expResult)} when status=${String(
+        status
+      )}`, () => {
+        const response = {
+          status: status,
+          body:   {}
+        }
+        assert.equal(isErrorResponse(response), expResult)
+      })
+    }
+  )
+
+  //
+  ;[[200, true], [299, true], [300, false], [400, false], [500, false]].forEach(
+    ([status, expResult]) => {
+      it(`isSuccessResponse returns ${String(expResult)} when status=${String(
+        status
+      )}`, () => {
+        const response = {
+          status: status,
+          body:   {}
+        }
+        assert.equal(isSuccessResponse(response), expResult)
+      })
+    }
+  )
+
+  //
+  ;[[401, true], [403, true], [200, false], [400, false], [500, false]].forEach(
+    ([status, expResult]) => {
+      it(`isUnauthorizedResponse returns ${String(
+        expResult
+      )} when status=${String(status)}`, () => {
+        const response = {
+          status: status,
+          body:   {}
+        }
+        assert.equal(isUnauthorizedResponse(response), expResult)
+      })
+    }
+  )
 })

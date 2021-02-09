@@ -624,7 +624,7 @@ def test_patch_basket_update_coupon_invalid(basket_client, basket_and_coupons):
     resp_data = resp.json()
     assert (
         resp_data["errors"]["coupons"]
-        == f"Enrollment / Promotional Code {bad_code} is invalid"
+        == f"Enrollment / Promotional Code '{bad_code}' is invalid"
     )
 
 

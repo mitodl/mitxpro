@@ -21,13 +21,7 @@ import type {
   BasketResponse,
   CouponSelection
 } from "../../flow/ecommerceTypes"
-
 export type SetFieldError = (fieldName: string, fieldValue: any) => void
-export type UpdateProduct = (
-  productId: number | string,
-  runId: number,
-  setFieldError: SetFieldError
-) => Promise<void>
 export type Values = {
   runs: { [number]: string },
   couponCode: ?string,
@@ -44,7 +38,9 @@ type Errors = {
   runs?: string,
   coupons?: string,
   items?: string,
-  data_consents?: string
+  data_consents?: string,
+  genericBasket: boolean,
+  genericSubmit: boolean
 }
 type CommonProps = {
   item: BasketItem,
@@ -56,7 +52,11 @@ type CommonProps = {
     couponCode: ?string,
     setFieldError: SetFieldError
   ) => Promise<void>,
-  updateProduct: UpdateProduct
+  updateProduct: (
+    productId: number | string,
+    runId: number,
+    setFieldError: SetFieldError
+  ) => Promise<void>
 }
 type OuterProps = CommonProps & {
   couponCode: ?string,
@@ -74,7 +74,29 @@ type InnerState = {
   dataSharingModalVisibility: boolean
 }
 
+export const renderGenericError = () => {
+  return (
+    <div className="error">
+      Something went wrong. Please contact us at{" "}
+      <u>
+        <a
+          href="https://xpro.zendesk.com/hc/en-us/requests/new"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Customer Support
+        </a>
+      </u>
+      .
+    </div>
+  )
+}
+
 export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
+  // HACK: This helps to prevent a React unmounted warning if we redirect away from the page before we're done
+  //       managing the state.
+  isMounted = false
+
   constructor(props: InnerProps) {
     super(props)
     this.state = {
@@ -83,7 +105,12 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
   }
 
   componentDidMount() {
+    this.isMounted = true
     this.props.onMount()
+  }
+
+  componentWillUnmount() {
+    this.isMounted = false
   }
 
   renderBasketItem = () => {
@@ -157,7 +184,9 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                 )
                 if (run && run.product_id) {
                   await updateProduct(run.product_id, run.id, setFieldError)
-                  resetForm()
+                  if (this.isMounted) {
+                    resetForm()
+                  }
                 }
               }}
             >
@@ -190,6 +219,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
 
     return (
       !errors.coupons &&
+      !errors.genericBasket &&
       values.couponCode &&
       values.couponCode !== "" &&
       coupon &&
@@ -270,8 +300,10 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                     Apply
                   </button>
                 </div>
-                {this.isPromoCodeApplied()
-                  ? formatSuccessMessage("Success! Promo Code applied.")
+                {this.isPromoCodeApplied() &&
+                  formatSuccessMessage("Success! Promo Code applied.")}
+                {errors.genericBasket
+                  ? renderGenericError()
                   : formatErrors(errors.coupons)}
               </div>
               {dataConsent ? (
@@ -325,7 +357,9 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                 >
                   Place your order
                 </button>
-                {formatErrors(errors.items)}
+                {errors.genericSubmit
+                  ? renderGenericError()
+                  : formatErrors(errors.items)}
                 <div className="submit-links">
                   By placing my order I agree to the{" "}
                   <a href="/terms-of-service/" target="_blank">

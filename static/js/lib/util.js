@@ -29,6 +29,7 @@ import type {
 import type { Product } from "../flow/ecommerceTypes"
 
 import { PRODUCT_TYPE_COURSERUN } from "../constants"
+import type { HttpRespErrorMessage, HttpResponse } from "../flow/httpTypes"
 
 /**
  * Returns a promise which resolves after a number of milliseconds have elapsed
@@ -250,3 +251,21 @@ export const sameDayOrLater = (
   momentDate2: Moment
 ): boolean =>
   momentDate1.startOf("day").isSameOrAfter(momentDate2.startOf("day"))
+
+export const isSuccessResponse = (response: HttpResponse<*>): boolean =>
+  response.status >= 200 && response.status < 300
+
+export const isErrorResponse = (response: HttpResponse<*>): boolean =>
+  response.status === 0 || response.status >= 400
+
+export const isUnauthorizedResponse = (response: HttpResponse<*>): boolean =>
+  response.status === 401 || response.status === 403
+
+export const getErrorMessages = (
+  response: HttpResponse<*>
+): HttpRespErrorMessage => {
+  if (!response.body || !response.body.errors) {
+    return null
+  }
+  return response.body.errors
+}

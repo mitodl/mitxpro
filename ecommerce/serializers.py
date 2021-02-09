@@ -377,7 +377,7 @@ class BasketSerializer(serializers.ModelSerializer):
             if coupon_version is None:
                 raise ValidationError(
                     {
-                        "coupons": "Enrollment / Promotional Code {} is invalid".format(
+                        "coupons": "Enrollment / Promotional Code '{}' is invalid".format(
                             coupon_code
                         )
                     }
