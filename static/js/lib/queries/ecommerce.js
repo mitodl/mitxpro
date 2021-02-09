@@ -5,6 +5,7 @@ import { getCookie } from "../api"
 
 import type {
   B2BOrderStatus,
+  BasketPayload,
   BasketResponse,
   B2BCheckoutPayload,
   Company,
@@ -45,7 +46,7 @@ export default {
       basket: (prev: BasketResponse, next: BasketResponse) => next
     }
   }),
-  basketMutation: (payload: BasketResponse) => ({
+  basketMutation: (payload: BasketPayload) => ({
     queryKey: "basketMutation",
     url:      "/api/basket/",
     update:   {
