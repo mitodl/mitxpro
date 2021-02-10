@@ -47,7 +47,7 @@ chardet==3.0.4
     # via requests
 click==7.0
     # via user-util
-cryptography==3.2
+cryptography==3.3.2
     # via pyopenssl
 decorator==4.4.0
     # via
