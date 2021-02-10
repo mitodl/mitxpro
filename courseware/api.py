@@ -475,9 +475,9 @@ def get_edx_grades_with_users(course_run, user=None):
         all_grades = list(edx_course_grades.all_current_grades)
         for edx_grade in all_grades:
             try:
-                user = User.objects.get(email=edx_grade.email)
+                user = User.objects.get(username=edx_grade.username)
             except User.DoesNotExist:
-                log.warning("User with email %s not found", edx_grade.email)
+                log.warning("User with username %s not found", edx_grade.username)
             else:
                 yield edx_grade, user
 
