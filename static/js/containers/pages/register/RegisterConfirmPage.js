@@ -90,15 +90,15 @@ export class RegisterConfirmPage extends React.Component<Props> {
     let linkRoute = null
     if (state === STATE_INVALID_LINK) {
       preLinkText = "This invitation is invalid or has expired. Please"
-      postLinkText = "to register again."
+      postLinkText = "to register again"
       linkRoute = routes.register.begin
     } else if (state === STATE_EXISTING_ACCOUNT) {
       preLinkText = "You already have an xPRO account. Please"
-      postLinkText = "to sign in."
+      postLinkText = "to sign in"
       linkRoute = routes.login.begin
     } else if (state === STATE_INVALID_EMAIL) {
       preLinkText = "No confirmation code was provided or it has expired."
-      postLinkText = "to register again."
+      postLinkText = "to register again"
       linkRoute = routes.register.begin
     }
     return (
@@ -106,9 +106,9 @@ export class RegisterConfirmPage extends React.Component<Props> {
         <span className={"confirmation-message"}>
           {preLinkText}{" "}
           <Link class={"action-link"} to={linkRoute}>
-            Click here
-          </Link>{" "}
-          {postLinkText}
+            click here {postLinkText}
+          </Link>
+          .
         </span>
       </React.Fragment>
     )

@@ -517,7 +517,7 @@ class AuthStateMachine(RuleBasedStateMachine):
 
     @rule(auth_state=consumes(ConfirmationRedeemedAuthStates))
     def redeem_confirmation_code_twice_existing_user(self, auth_state):
-        """Redeeming a code twice should fail"""
+        """Redeeming a code twice with an existing user should fail with existing account state"""
         _, _, code, partial_token = self.mock_email_send.call_args[0]
         self.create_existing_user()
         assert_api_call(

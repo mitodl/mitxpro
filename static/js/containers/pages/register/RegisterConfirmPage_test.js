@@ -78,8 +78,8 @@ describe("RegisterConfirmPage", () => {
     const confirmationErrorText = inner.find(".confirmation-message")
     assert.isNotNull(confirmationErrorText)
     assert.equal(
-      confirmationErrorText.text().replace("<Link /> ", ""),
-      "This invitation is invalid or has expired. Please to register again."
+      confirmationErrorText.text().replace("<Link />", ""),
+      "This invitation is invalid or has expired. Please ."
     )
   })
 
@@ -98,8 +98,8 @@ describe("RegisterConfirmPage", () => {
     const confirmationErrorText = inner.find(".confirmation-message")
     assert.isNotNull(confirmationErrorText)
     assert.equal(
-      confirmationErrorText.text().replace("<Link /> ", ""),
-      "You already have an xPRO account. Please to sign in."
+      confirmationErrorText.text().replace("<Link />", ""),
+      "You already have an xPRO account. Please ."
     )
   })
 
@@ -117,8 +117,8 @@ describe("RegisterConfirmPage", () => {
     })
     const confirmationErrorText = inner.find(".confirmation-message")
     assert.equal(
-      confirmationErrorText.text().replace("<Link /> ", ""),
-      "No confirmation code was provided or it has expired. to register again."
+      confirmationErrorText.text().replace("<Link />", ""),
+      "No confirmation code was provided or it has expired. ."
     )
   })
 })
