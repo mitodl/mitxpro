@@ -30,6 +30,8 @@ from cms.models import (
     ImageCarouselPage,
     LearningOutcomesPage,
     LearningTechniquesPage,
+    NewsAndEventsBlock,
+    NewsAndEventsPage,
     ProgramIndexPage,
     ProgramPage,
     ResourcePage,
@@ -318,6 +320,32 @@ class UserTestimonialsPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = UserTestimonialsPage
+
+
+class NewsAndEventsBlockFactory(wagtail_factories.StructBlockFactory):
+    """NewsAndEventsBlock factory class"""
+
+    content_type = factory.fuzzy.FuzzyText(prefix="content_type ")
+    title = factory.fuzzy.FuzzyText(prefix="title ")
+    image = factory.SubFactory(wagtail_factories.ImageFactory)
+    content = factory.fuzzy.FuzzyText(prefix="content ")
+    call_to_action = factory.fuzzy.FuzzyText(prefix="call_to_action ")
+    action_url = factory.Faker("uri")
+
+    class Meta:
+        model = NewsAndEventsBlock
+
+
+class NewsAndEventsPageFactory(wagtail_factories.PageFactory):
+    """NewsAndEventsPage factory class"""
+
+    heading = factory.fuzzy.FuzzyText(prefix="heading ")
+    items = wagtail_factories.StreamFieldFactory(
+        {"news_and_events": NewsAndEventsBlockFactory}
+    )
+
+    class Meta:
+        model = NewsAndEventsPage
 
 
 class FacultyBlockFactory(wagtail_factories.StructBlockFactory):

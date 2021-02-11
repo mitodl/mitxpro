@@ -1,0 +1,25 @@
+{% load image_version_url wagtailcore_tags %}
+<div id="news-and-events" class="news-and-events-block">
+  <div class="container">
+    <div class="head">
+      <h1>{{ page.heading }}</h1>
+    </div>
+    <div class="news-and-events-slider">
+      {% for card in page.items %}
+      <div class="slide">
+        <div class="slide-holder">
+          {% if card.value.image %}
+            <img src="{% image_version_url card.value.image "fill-330x200" %}" alt="{{ card.value.name }}" width="330" height="200" loading="lazy"/>
+          {% endif %}
+          <div class="card-type">
+            {{ card.value.content_type }}
+          </div>
+          <p class="title">{{ card.value.title }}</p>
+          <p class="content">{{ card.value.content|truncatechars:150 }}</p>
+            <a href="{{ card.value.action_url }}" class="read-more">{{ card.value.call_to_action|truncatechars:30 }}</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

@@ -13,6 +13,7 @@ from cms.factories import (
     SiteNotificationFactory,
     ForTeamsPageFactory,
     UserTestimonialsPageFactory,
+    NewsAndEventsPageFactory,
     CoursesInProgramPageFactory,
     HomePageFactory,
     ProgramPageFactory,
@@ -178,6 +179,39 @@ def test_home_page_testimonials():
         assert testimonial.value.get("title") == "title"
         assert testimonial.value.get("image").title == "image"
         assert testimonial.value.get("quote") == "quote"
+
+
+def test_home_page_news_and_events():
+    """
+    NewsAndEvents subpage should provide expected values
+    """
+    home_page = HomePageFactory.create()
+    assert not home_page.news_and_events
+    news_and_events_page = NewsAndEventsPageFactory.create(
+        parent=home_page,
+        heading="heading",
+        items__0__news_and_events__content_type="content_type-0",
+        items__0__news_and_events__title="title-0",
+        items__0__news_and_events__image__title="image-0",
+        items__0__news_and_events__content="content-0",
+        items__0__news_and_events__call_to_action="call_to_action-0",
+        items__0__news_and_events__action_url="action_url-0",
+        items__1__news_and_events__content_type="content_type-1",
+        items__1__news_and_events__title="title-1",
+        items__1__news_and_events__image__title="image-1",
+        items__1__news_and_events__content="content-1",
+        items__1__news_and_events__call_to_action="call_to_action-1",
+        items__1__news_and_events__action_url="action_url-1",
+    )
+    assert home_page.news_and_events == news_and_events_page
+    assert news_and_events_page.heading == "heading"
+    for count, news_and_events in enumerate(news_and_events_page.items):
+        assert news_and_events.value.get("content_type") == f"content_type-{count}"
+        assert news_and_events.value.get("title") == f"title-{count}"
+        assert news_and_events.value.get("image").title == f"image-{count}"
+        assert news_and_events.value.get("content") == f"content-{count}"
+        assert news_and_events.value.get("call_to_action") == f"call_to_action-{count}"
+        assert news_and_events.value.get("action_url") == f"action_url-{count}"
 
 
 def test_home_page_inquiry_section():

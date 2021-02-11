@@ -1,0 +1,133 @@
+// sass-lint:disable mixins-before-declarations
+.news-and-events-block {
+  padding: 100px 0 50px;
+  background: white;
+  min-height: 400px;
+  overflow: hidden;
+  position: relative;
+  color: black;
+  background-size: cover;
+
+  .head {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    color: $primary;
+
+    @include media-breakpoint-up(lg) {
+      margin: 0 0 25px;
+    }
+  }
+}
+
+.news-and-events-slider {
+  position: relative;
+  margin: 0 -15px;
+
+  &:after {
+    display: block;
+    clear: both;
+    content: "";
+  }
+
+  .slide {
+    float: left;
+    width: 33.333%;
+    padding: 0 5px;
+    margin: 10px;
+    opacity: 0.3;
+
+    &.slick-active {
+      opacity: 1;
+    }
+  }
+
+  .slick-list {
+    overflow: hidden;
+  }
+
+  .slick-dots li.slick-active button {
+    background-color: $primary;
+  }
+
+  .slick-dots li button {
+    background-color: $events-background;
+  }
+
+  .slick-dots li button:hover {
+    background-color: $primary;
+  }
+
+  .slide-holder {
+    background: $events-background;
+    border-radius: 5px;
+    box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.1);
+    height: 100%;
+    padding: 10px;
+    position: relative;
+    text-align: left;
+
+    .card-type {
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 34px;
+      padding: 5px;
+    }
+
+    p.title {
+      color: $primary;
+      font-size: 21px;
+      font-weight: 700;
+      line-height: 25px;
+      margin: 0 0 10px;
+      min-height: 50px;
+      padding: 0 5px 5px 5px;
+    }
+
+    p.content {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      line-height: 20px;
+      margin: 0 0 30px;
+      min-height: 50px;
+      padding: 5px 5px 30px 5px;
+    }
+  }
+
+  img {
+    display: block;
+    width: 100%;
+  }
+
+  .read-more {
+    position: absolute;
+    left: 15px;
+    bottom: 10px;
+    background: $primary;
+    border-radius: 3px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 5px 5px 5px 10px;
+    font-size: 18px;
+    line-height: 24px;
+    display: inline-block;
+    vertical-align: top;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: white;
+
+    &:after {
+      content: "arrow_circle_up";
+      display: inline-block;
+      font-family: Material Icons;
+      line-height: 24px;
+      margin: 0 0 0 10px;
+      text-transform: none;
+      transform: rotate(90deg);
+      vertical-align: top;
+    }
+  }
+}

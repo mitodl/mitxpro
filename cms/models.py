@@ -31,11 +31,12 @@ from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
 from cms.blocks import (
+    CourseRunCertificateOverrides,
     FacultyBlock,
     LearningTechniqueBlock,
+    NewsAndEventsBlock,
     ResourceBlock,
     UserTestimonialBlock,
-    CourseRunCertificateOverrides,
     validate_unique_readable_ids,
 )
 from cms.constants import (
@@ -404,6 +405,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
         "CoursesInProgramPage",
         "LearningTechniquesPage",
         "UserTestimonialsPage",
+        "NewsAndEventsPage",
         "ForTeamsPage",
         "TextVideoSection",
         "ResourcePage",
@@ -430,6 +432,13 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
         Gets the testimonials section subpage
         """
         return self._get_child_page_of_type(UserTestimonialsPage)
+
+    @property
+    def news_and_events(self):
+        """
+        Gets the news and events section subpage
+        """
+        return self._get_child_page_of_type(NewsAndEventsPage)
 
     @property
     def upcoming_courseware(self):
@@ -465,13 +474,14 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
             **get_base_context(request),
             "catalog_page": CatalogPage.objects.first(),
             # The context variables below are added to avoid duplicate queries within the templates
-            "background_video_url": self.background_video_url,
-            "upcoming_courseware": self.upcoming_courseware,
             "about_mit_xpro": self.about_mit_xpro,
-            "learning_experience": self.learning_experience,
-            "testimonials": self.testimonials,
-            "inquiry_section": self.inquiry_section,
+            "background_video_url": self.background_video_url,
             "image_carousel_section": self.image_carousel_section,
+            "inquiry_section": self.inquiry_section,
+            "learning_experience": self.learning_experience,
+            "news_and_events": self.news_and_events,
+            "testimonials": self.testimonials,
+            "upcoming_courseware": self.upcoming_courseware,
         }
 
 
@@ -1154,6 +1164,56 @@ class UserTestimonialsPage(CourseProgramChildPage):
 
     class Meta:
         verbose_name = "Testimonials Section"
+
+
+class NewsAndEventsPage(Page):
+    """
+    Page that holds news and events updates
+    """
+
+    parent_page_types = ["HomePage"]
+    promote_panels = []
+    subpage_types = []
+
+    heading = models.CharField(
+        max_length=255, help_text="The heading to display on this section."
+    )
+
+    items = StreamField(
+        [("news_and_events", NewsAndEventsBlock())],
+        blank=False,
+        help_text="Add news and events updates to display in this section.",
+    )
+    content_panels = [FieldPanel("heading"), StreamFieldPanel("items")]
+
+    class Meta:
+        verbose_name = "News and Events"
+
+    def save(self, clean=True, **kwargs):
+        # auto generate a unique slug so we don't hit a ValidationError
+        if not self.title:
+            self.title = self.__class__._meta.verbose_name.title()
+
+        self.slug = slugify("{}-{}".format(self.title, self.id))
+        super().save(clean=clean, **kwargs)
+
+    def serve(self, request, *args, **kwargs):
+        """
+        As the name suggests these pages are going to be children of some other page. They are not
+        designed to be viewed on their own so we raise a 404 if someone tries to access their slug.
+        """
+        raise Http404
+
+    @classmethod
+    def can_create_at(cls, parent):
+        """
+        You can only create one of these pages under the home page.
+        The parent is limited via the `parent_page_type` list.
+        """
+        return (
+            super().can_create_at(parent)
+            and not parent.get_children().type(cls).exists()
+        )
 
 
 class LearningOutcomesPage(CourseProgramChildPage):
