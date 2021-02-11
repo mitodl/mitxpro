@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.76.2
+--------------
+
+- Show appropriate messages on Registration Confirmation link failure (#2117)
+- Add news and events carousel (#2111)
+- fix: filtering user on the basis of username because of non-masters courses (#2118)
+- Bump cryptography from 3.2 to 3.3.2
+- Replace Font-Awesome & Icomoon with Google Font
+- Fix basket sentry errors
+- Bump httplib2 from 0.18.0 to 0.19.0
+
 Version 0.76.1 (Released February 11, 2021)
 --------------
 
