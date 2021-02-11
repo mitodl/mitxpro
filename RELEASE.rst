@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.76.1
+Version 0.76.1 (Released February 11, 2021)
 --------------
 
 - Lower coverage requirements to fix flakiness
