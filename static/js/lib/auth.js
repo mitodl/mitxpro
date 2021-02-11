@@ -17,6 +17,8 @@ export const STATE_SUCCESS = "success"
 export const STATE_INACTIVE = "inactive"
 export const STATE_INVALID_EMAIL = "invalid-email"
 export const STATE_USER_BLOCKED = "user-blocked"
+export const STATE_INVALID_LINK = "invalid-link"
+export const STATE_EXISTING_ACCOUNT = "existing-account"
 
 export const STATE_LOGIN_EMAIL = "login/email"
 export const STATE_LOGIN_PASSWORD = "login/password"
@@ -28,6 +30,12 @@ export const STATE_REGISTER_CONFIRM = "register/confirm"
 export const STATE_REGISTER_DETAILS = "register/details"
 export const STATE_REGISTER_EXTRA_DETAILS = "register/extra"
 export const STATE_REGISTER_REQUIRED = "register/required"
+
+export const INFORMATIVE_STATES = [
+  STATE_INVALID_EMAIL,
+  STATE_INVALID_LINK,
+  STATE_EXISTING_ACCOUNT
+]
 
 export const ALL_STATES = [
   STATE_ERROR,

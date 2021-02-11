@@ -71,6 +71,7 @@ class SocialAuthSerializer(serializers.Serializer):
                 "next", redirect_uri or backend.setting("LOGIN_REDIRECT_URL")
             )
 
+    # pylint: disable=too-many-return-statements
     def _authenticate(self, flow):
         """Authenticate the current request"""
         request = self.context["request"]
@@ -85,7 +86,21 @@ class SocialAuthSerializer(serializers.Serializer):
 
         partial = partial_pipeline_data(backend, user, **kwargs)
         if partial:
-            user = backend.continue_pipeline(partial)
+            try:
+                user = backend.continue_pipeline(partial)
+            except InvalidEmail:
+                authentication_flow = partial.data.get("kwargs").get("flow")
+                if (
+                    authentication_flow
+                    and authentication_flow == SocialAuthState.FLOW_REGISTER
+                ):
+                    email = partial.data.get("kwargs").get("details").get("email")
+                    user_exists = User.objects.filter(email=email).exists()
+
+                    if user_exists:
+                        return SocialAuthState(SocialAuthState.STATE_EXISTING_ACCOUNT)
+                    return SocialAuthState(SocialAuthState.STATE_INVALID_LINK)
+                return SocialAuthState(SocialAuthState.STATE_INVALID_EMAIL)
             # clean partial data after usage
             strategy.clean_partial_pipeline(partial.token)
         else:

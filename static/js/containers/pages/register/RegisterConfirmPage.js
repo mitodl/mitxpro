@@ -17,7 +17,10 @@ import { routes } from "../../../lib/urls"
 import {
   STATE_REGISTER_DETAILS,
   STATE_INVALID_EMAIL,
-  handleAuthResponse
+  handleAuthResponse,
+  INFORMATIVE_STATES,
+  STATE_INVALID_LINK,
+  STATE_EXISTING_ACCOUNT
 } from "../../../lib/auth"
 
 import { authSelector } from "../../../lib/queries/auth"
@@ -69,12 +72,8 @@ export class RegisterConfirmPage extends React.Component<Props> {
         <div className="container auth-page">
           <div className="row">
             <div className="col">
-              {auth && auth.state === STATE_INVALID_EMAIL ? (
-                <React.Fragment>
-                  <p>No confirmation code was provided or it has expired.</p>
-                  <Link to={routes.register.begin}>Click here</Link> to register
-                  again.
-                </React.Fragment>
+              {auth && INFORMATIVE_STATES.indexOf(auth.state) > -1 ? (
+                this.getAppropriateInformationFragment(auth.state)
               ) : (
                 <p>Confirming...</p>
               )}
@@ -82,6 +81,36 @@ export class RegisterConfirmPage extends React.Component<Props> {
           </div>
         </div>
       </DocumentTitle>
+    )
+  }
+
+  getAppropriateInformationFragment(state: string) {
+    let preLinkText = ""
+    let postLinkText = ""
+    let linkRoute = null
+    if (state === STATE_INVALID_LINK) {
+      preLinkText = "This invitation is invalid or has expired. Please"
+      postLinkText = "to register again"
+      linkRoute = routes.register.begin
+    } else if (state === STATE_EXISTING_ACCOUNT) {
+      preLinkText = "You already have an xPRO account. Please"
+      postLinkText = "to sign in"
+      linkRoute = routes.login.begin
+    } else if (state === STATE_INVALID_EMAIL) {
+      preLinkText = "No confirmation code was provided or it has expired."
+      postLinkText = "to register again"
+      linkRoute = routes.register.begin
+    }
+    return (
+      <React.Fragment>
+        <span className={"confirmation-message"}>
+          {preLinkText}{" "}
+          <Link class={"action-link"} to={linkRoute}>
+            click here {postLinkText}
+          </Link>
+          .
+        </span>
+      </React.Fragment>
     )
   }
 }
