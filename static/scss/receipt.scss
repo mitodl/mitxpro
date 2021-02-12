@@ -2,148 +2,240 @@
 $label-color: #8a8b8c;
 
 .receipt-wrapper {
-  padding: 0 15px;
+
+  padding: 20px 15px;
   margin: 0 auto;
+  max-width: 1018px;
+  font: 500 18px/23px 'Rajdhani', Times New Roman, serif;
+  color: black;
 
-  .print-row {
-    text-align: right;
-    font-size: 18px;
-    line-height: 25px;
-    padding: 0px 0px 50px 0px;
-    font-weight: 600;
+  @media only screen and (max-width: 992px) {
+    font: 500 16px/21px 'Rajdhani', Times New Roman, serif;
+  }
 
-    a {
-      display: inline-block;
-      vertical-align: top;
-      color: black;
+  * {
+    box-sizing: border-box;
+  }
 
-      img {
-        display: inline-block;
-        vertical-align: middle;
-        margin: 0 0 0 10px;
-        width: 18px;
+  a {
+    color: $link-blue;
+    text-decoration: underline;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  dl {
+    overflow: hidden;
+    margin: 0 0 10px;
+
+    dt {
+      float: left;
+      width: 160px;
+      font-weight: 600;
+
+      @media only screen and (max-width: 767px) {
+        width: 120px;
       }
     }
-  }
 
-  .rec-logo {
-    width: 253px;
-    margin: 0 0 70px;
-
-    img {
-      display: block;
-      width: 100%;
-      height: auto;
+    dd {
+      overflow: hidden;
+      padding: 0 0 0 15px;
+      margin: 0;
+      word-break: break-all;
     }
-  }
-
-  h1 {
-    color: black;
-    font-size: 40px;
-    font-weight: 600;
-    line-height: 51px;
-    margin: 0 0 35px;
   }
 
   h2 {
+    font: 600 40px/51px 'Rajdhani', Times New Roman, serif;
+    margin: 0 0 30px;
     color: black;
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 26px;
-    margin: 0 0 25px;
+
+    @media only screen and (max-width: 767px) {
+      font: 600 30px/41px 'Rajdhani', Times New Roman, serif;
+      margin: 0 0 10px;
+    }
+  }
+}
+
+.receipt-row {
+  overflow: hidden;
+  margin: 0 -15px;
+  position: relative;
+
+  &.p-b-80 {
+    padding-bottom: 65px;
+
+    @media only screen and (max-width: 767px) {
+      padding-bottom: 0;
+    }
   }
 
-  .rec-footer {
-    padding: 50px 0;
+  .print-btn {
+    position: absolute;
+    right: 15px;
+    top: 0;
+  }
 
-    .rec-footer-top {
-      overflow: hidden;
-      padding: 0 0 68px;
+  .receipt-col {
+    float: left;
+    width: 50%;
+    padding: 0 15px;
+
+    @media only screen and (max-width: 767px) {
+      float: none;
+      width: 100%;
+      padding-bottom: 40px;
     }
 
-    .rec-footer-info {
-      float: left;
-      width: 445px;
+    &.p-t-50 {
+      padding-top: 50px;
 
-      .rec-footer-logo {
+      @media only screen and (max-width: 767px) {
+        padding-top: 0;
+      }
+    }
+  }
+
+  h3 {
+    font: 600 20px/26px 'Rajdhani', Times New Roman, serif;
+    margin: 0 -15px 20px;
+    border: none;
+    padding: 5px 15px;
+    color: black;
+    background: $very-light-gray;
+
+    @media only screen and (max-width: 992px) {
+      font: 600 18px/24px 'Rajdhani', Times New Roman, serif;
+    }
+  }
+}
+
+.receipt-logo {
+  width: 150px;
+  margin: 0 0 10px;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
+.receipt-mit-info {
+  max-width: 226px;
+  font-size: 16px;
+  line-height: 21px;
+
+  p {
+    margin: 0;
+  }
+}
+
+.receipt-table-holder {
+  overflow-x: auto;
+  margin: 0 -15px;
+  padding: 0 0 15px;
+
+  h3 {
+    font: 600 20px/26px 'Rajdhani', Times New Roman, serif;
+    margin: 0;
+    padding: 5px 15px;
+    color: black;
+    background: $very-light-gray;
+    display: none;
+    border: none;
+
+    @media only screen and (max-width: 767px) {
+      display: block;
+    }
+  }
+
+  .receipt-table {
+    width: 100%;
+    border-spacing: 0;
+
+    thead {
+
+      @media only screen and (max-width: 767px) {
+        display: none;
+      }
+    }
+
+    th {
+      padding: 5px 15px;
+      text-align: left;
+      color: black;
+      background: $very-light-gray;
+      white-space: nowrap;
+      font: 600 20px/26px 'Rajdhani', Times New Roman, serif;
+
+      @media only screen and (max-width: 992px) {
+        font: 600 18px/24px 'Rajdhani', Times New Roman, serif;
+      }
+    }
+
+    td {
+      padding: 20px 15px 0;
+      vertical-align: top;
+
+      @media only screen and (max-width: 767px) {
+        display: block;
+        width: 100%;
+      }
+
+      &:before {
+        display: none;
+        color: black;
+        white-space: nowrap;
+        padding: 0 10px 0 0;
+        font: 600 18px/24px 'Rajdhani', Times New Roman, serif;
         float: left;
-        margin: 8px 24px 0 0;
-        width: 104px;
+        width: 135px;
 
-        img {
+        @media only screen and (max-width: 767px) {
           display: block;
-          width: 100%;
         }
       }
-    }
 
-    .info {
-      overflow: hidden;
-      color: rgba(0, 0, 0, 0.85);
-      font-size: 18px;
-      font-weight: 600;
-      line-height: 28px;
-
-      p {
-        margin: 0;
-      }
-    }
-  }
-
-  .rec-copyright {
-    color: rgba(0, 0, 0, 0.85);
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 28px;
-    text-align: center;
-    display: block;
-
-    a {
-      color: rgba(0, 0, 0, 0.85);
-    }
-  }
-
-  .section-info {
-    padding: 25px;
-
-    &.gray {
-      background: #f5f5f5;
-    }
-
-    .section-holder {
-      margin: 20px 0 0;
-      padding: 25px 0 0;
-
-      &:first-child {
-        margin: 0;
-        padding: 0;
-        border: none;
+      div {
+        overflow: hidden;
       }
 
-      .low-line-height {
-        line-height: 10px !important;
+      &:nth-child(1) {
+
+        &:before {
+          content: "Title";
+        }
       }
 
-      .label,
-      .value {
-        font-size: 18px;
-        line-height: 23px;
-        font-weight: 600;
-        color: black;
+      &:nth-child(2) {
+
+        &:before {
+          content: "Quantity";
+        }
       }
 
-      .label {
-        color: $label-color;
+      &:nth-child(3) {
+
+        &:before {
+          content: "Unit Price";
+        }
       }
 
-      .label-table {
-        .label,
-        .value {
-          text-align: right;
+      &:nth-child(4) {
 
-          @include media-breakpoint-down(sm) {
-            text-align: left;
-          }
+        &:before {
+          content: "Discount";
+        }
+      }
+
+      &:nth-child(5) {
+
+        &:before {
+          content: "Total Paid";
         }
       }
     }
@@ -151,18 +243,15 @@ $label-color: #8a8b8c;
 }
 
 @media print {
+  .print-btn,
   .print-row,
   .footer,
   .header-holder {
     display: none !important;
   }
 
-  .receipt-wrapper .rec-logo,
-  .receipt-wrapper h1 {
-    margin: 0 0 20px !important;
-  }
-
-  .user-dashboard {
-    padding: 0px;
+  .receipt-wrapper {
+    padding: 0 15px;
+    font: 500 16px/21px 'Rajdhani', Times New Roman, serif;
   }
 }

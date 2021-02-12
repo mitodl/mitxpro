@@ -891,7 +891,7 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
         if receipt and (
             "req_card_number" in receipt.data or "req_card_type" in receipt.data
         ):
-            data = {"card_number": None, "card_type": None}
+            data = {"card_number": None, "card_type": None, "bill_to_forename": None}
             if "req_card_number" in receipt.data:
                 data["card_number"] = receipt.data["req_card_number"]
             if (
@@ -901,6 +901,8 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                 data["card_type"] = CYBERSOURCE_CARD_TYPES[
                     receipt.data["req_card_type"]
                 ]
+            if "req_bill_to_forename" in receipt.data:
+                data["bill_to_forename"] = receipt.data["req_bill_to_forename"]
             return data
         return None
 
@@ -926,11 +928,38 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                     * line.quantity
                 )
                 discount = line.product_version.price - total_paid
+
+            content_object = line.product_version.product.content_object
+            (course, program, certificate_page, CEUs) = (None, None, None, None)
+            if isinstance(content_object, Program):
+                program = Program.objects.get(readable_id=line.product_version.text_id)
+            elif isinstance(content_object, CourseRun):
+                course = Course.objects.get(
+                    courseruns__courseware_id=line.product_version.text_id
+                )
+            if course and course.page and course.page.certificate_page:
+                certificate_page = course.page.certificate_page
+            elif program and program.page and program.page.certificate_page:
+                certificate_page = program.page.certificate_page
+
+            if certificate_page:
+                CEUs = certificate_page.CEUs
+                for (
+                    override
+                ) in certificate_page.overrides:  # pylint: disable=not-an-iterable
+                    if (
+                        override.value.get("readable_id")
+                        == line.product_version.text_id
+                    ):
+                        CEUs = override.value.get("CEUs")
+                        break
+
             lines.append(
                 dict(
                     quantity=line.quantity,
                     total_paid=str(total_paid),
                     discount=str(discount),
+                    CEUs=str(CEUs) if CEUs else None,
                     **BaseProductVersionSerializer(line.product_version).data,
                     start_date=dates["start_date"],
                     end_date=dates["end_date"],

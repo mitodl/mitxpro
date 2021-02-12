@@ -258,6 +258,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                     "start_date": None,
                     "end_date": None,
                     "content_title": "test_run_title",
+                    "CEUs": None,
                 }
             ],
             "order_total": "100.00",
@@ -266,7 +267,11 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                 "created_on": line.order.created_on,
                 "reference_number": "xpro-b2c-dev-1",
             },
-            "receipt": {"card_number": "1234", "card_type": "Visa"},
+            "receipt": {
+                "card_number": "1234",
+                "card_type": "Visa",
+                "bill_to_forename": None,
+            },
             "purchaser": {
                 "name": " ".join(["Test", "User"]),
                 "email": "test@example.com",

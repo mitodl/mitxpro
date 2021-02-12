@@ -24,6 +24,7 @@ describe("ReceiptPage", () => {
       state_or_territory: "US-CA",
       country:            "US",
       postal_code:        "90640",
+      company:            "ABC",
       email:              "john.doe@acme.com"
     },
     lines: [
@@ -45,8 +46,9 @@ describe("ReceiptPage", () => {
       reference_number: "xpro-b2c-dev-1"
     },
     receipt: {
-      card_number: "xxxxxxxxxxxx1234",
-      card_type:   "Visa"
+      bill_to_forename: "John",
+      card_number:      "xxxxxxxxxxxx1234",
+      card_type:        "Visa"
     }
   }
 

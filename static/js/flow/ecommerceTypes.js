@@ -117,7 +117,8 @@ export type OrderLine = {
   content_title: string,
   readable_id: string,
   start_date: string,
-  end_date: string
+  end_date: string,
+  CEUs: string
 }
 
 export type OrderSummary = {
@@ -127,6 +128,7 @@ export type OrderSummary = {
 }
 
 export type CybersourceReceiptSummary = {
+  bill_to_forename: string,
   card_number: string,
   card_type: ?string
 }
