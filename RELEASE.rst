@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.76.2
+Version 0.76.2 (Released February 16, 2021)
 --------------
 
 - Show appropriate messages on Registration Confirmation link failure (#2117)
