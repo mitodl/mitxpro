@@ -1001,7 +1001,9 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
 
     def get_purchaser(self, instance):
         """Get the purchaser infrmation"""
-        return ExtendedLegalAddressSerializer(instance.purchaser.legal_address).data
+        data = ExtendedLegalAddressSerializer(instance.purchaser.legal_address).data
+        data.update({"company_name": instance.purchaser.profile.company})
+        return data
 
     class Meta:
         fields = ["purchaser", "lines", "coupon", "order", "receipt"]
