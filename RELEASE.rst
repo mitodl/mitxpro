@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.77.0
+Version 0.77.0 (Released February 24, 2021)
 --------------
 
 - Added country name in compliance admin (#2131)
