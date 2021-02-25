@@ -90,7 +90,6 @@ export class ReceiptPage extends React.Component<Props> {
                 </div>
               </div>
             )}
-            {currentUser.is_authenticated}
             {currentUser.is_authenticated && !isLoading && !orderReceipt && (
               <div className="row">
                 <div className="header col-12">
@@ -200,12 +199,25 @@ export class ReceiptPage extends React.Component<Props> {
                   {orderReceipt.receipt ? (
                     <div className="receipt-col">
                       <h3>Payment Information</h3>
-                      {orderReceipt.receipt.bill_to_forename ? (
-                        <dl>
-                          <dt>Name:</dt>
-                          <dd>{orderReceipt.receipt.bill_to_forename}</dd>
-                        </dl>
-                      ) : null}
+                      {orderReceipt.receipt.bill_to_forename ||
+                      orderReceipt.receipt.bill_to_surname ? (
+                          <dl>
+                            <dt>Name:</dt>
+                            <dd>
+                              {orderReceipt.receipt.bill_to_forename}{" "}
+                              {orderReceipt.receipt.bill_to_surname}
+                            </dd>
+                          </dl>
+                        ) : null}
+
+                      <dl>
+                        {orderReceipt.receipt.bill_to_email ? (
+                          <dl>
+                            <dt>Email:</dt>
+                            <dd>{orderReceipt.receipt.bill_to_email}</dd>
+                          </dl>
+                        ) : null}
+                      </dl>
 
                       <dl>
                         <dt>Payment Method:</dt>
@@ -218,10 +230,12 @@ export class ReceiptPage extends React.Component<Props> {
                             : null}
                         </dd>
                       </dl>
-                      <dl>
-                        <dt>Discount Code:</dt>
-                        <dd id="discountCode">{orderReceipt.coupon}</dd>
-                      </dl>
+                      {orderReceipt.coupon ? (
+                        <dl>
+                          <dt>Discount Code:</dt>
+                          <dd id="discountCode">{orderReceipt.coupon}</dd>
+                        </dl>
+                      ) : null}
                     </div>
                   ) : null}
                 </div>

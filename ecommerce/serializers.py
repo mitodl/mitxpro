@@ -891,7 +891,13 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
         if receipt and (
             "req_card_number" in receipt.data or "req_card_type" in receipt.data
         ):
-            data = {"card_number": None, "card_type": None, "bill_to_forename": None}
+            data = {
+                "card_number": None,
+                "card_type": None,
+                "bill_to_forename": None,
+                "bill_to_surname": None,
+                "bill_to_email": None,
+            }
             if "req_card_number" in receipt.data:
                 data["card_number"] = receipt.data["req_card_number"]
             if (
@@ -903,6 +909,10 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                 ]
             if "req_bill_to_forename" in receipt.data:
                 data["bill_to_forename"] = receipt.data["req_bill_to_forename"]
+            if "req_bill_to_surname" in receipt.data:
+                data["bill_to_surname"] = receipt.data["req_bill_to_surname"]
+            if "req_bill_to_email" in receipt.data:
+                data["bill_to_email"] = receipt.data["req_bill_to_email"]
             return data
         return None
 
