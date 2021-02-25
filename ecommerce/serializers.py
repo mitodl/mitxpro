@@ -1,4 +1,5 @@
 """ ecommerce serializers """
+# pylint: disable=too-many-lines
 import logging
 
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
@@ -894,10 +895,11 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
             data = {
                 "card_number": None,
                 "card_type": None,
-                "bill_to_forename": None,
-                "bill_to_surname": None,
+                "name": None,
                 "bill_to_email": None,
+                "payment_method": None,
             }
+
             if "req_card_number" in receipt.data:
                 data["card_number"] = receipt.data["req_card_number"]
             if (
@@ -907,12 +909,14 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                 data["card_type"] = CYBERSOURCE_CARD_TYPES[
                     receipt.data["req_card_type"]
                 ]
-            if "req_bill_to_forename" in receipt.data:
-                data["bill_to_forename"] = receipt.data["req_bill_to_forename"]
-            if "req_bill_to_surname" in receipt.data:
-                data["bill_to_surname"] = receipt.data["req_bill_to_surname"]
+            if "req_payment_method" in receipt.data:
+                data["payment_method"] = receipt.data["req_payment_method"]
             if "req_bill_to_email" in receipt.data:
                 data["bill_to_email"] = receipt.data["req_bill_to_email"]
+            if "req_bill_to_forename" in receipt.data or "req_bill_to_surname" in receipt.data:
+                data[
+                    "name"
+                ] = f"{receipt.data.get('req_bill_to_forename')} {receipt.data.get('req_bill_to_surname')}"
             return data
         return None
 

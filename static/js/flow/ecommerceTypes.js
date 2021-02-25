@@ -128,11 +128,11 @@ export type OrderSummary = {
 }
 
 export type CybersourceReceiptSummary = {
-  bill_to_forename: string,
-  bill_to_surname: string,
+  name: string,
   card_number: string,
   card_type: ?string,
-  bill_to_email: string
+  bill_to_email: string,
+  payment_method: string
 }
 
 export type OrderReceiptResponse = {

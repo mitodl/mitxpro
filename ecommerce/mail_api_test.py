@@ -270,7 +270,9 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
             "receipt": {
                 "card_number": "1234",
                 "card_type": "Visa",
-                "bill_to_forename": None,
+                "name": None,
+                "payment_method": None,
+                "bill_to_email": None
             },
             "purchaser": {
                 "name": " ".join(["Test", "User"]),

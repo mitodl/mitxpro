@@ -48,7 +48,8 @@ describe("ReceiptPage", () => {
     receipt: {
       bill_to_forename: "John",
       card_number:      "xxxxxxxxxxxx1234",
-      card_type:        "Visa"
+      card_type:        "Visa",
+      payment_method:   "card"
     }
   }
 
@@ -132,13 +133,14 @@ describe("ReceiptPage", () => {
       country => country.code === receiptObject.purchaser.country
     ).name
     assert.equal(inner.find("#purchaserCountry").text(), countryName)
-
-    assert.equal(
-      inner.find("#paymentMethod").text(),
-      `${receiptObject.receipt.card_type} | ${
-        receiptObject.receipt.card_number
-      }`
-    )
+    if (inner.find("#paymentMethod").text() === "card") {
+      assert.equal(
+        inner.find("#paymentMethod").text(),
+        `${receiptObject.receipt.card_type} | ${
+          receiptObject.receipt.card_number
+        }`
+      )
+    }
     assert.equal(inner.find("#discountCode").text(), receiptObject.coupon)
   })
 

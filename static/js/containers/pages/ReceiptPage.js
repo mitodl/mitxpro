@@ -199,37 +199,39 @@ export class ReceiptPage extends React.Component<Props> {
                   {orderReceipt.receipt ? (
                     <div className="receipt-col">
                       <h3>Payment Information</h3>
-                      {orderReceipt.receipt.bill_to_forename ||
-                      orderReceipt.receipt.bill_to_surname ? (
+                      <dl>
+                        <dt>Name:</dt>
+                        <dd>{orderReceipt.receipt.name}</dd>
+                      </dl>
+                      {orderReceipt.receipt &&
+                      orderReceipt.receipt.payment_method === "card" ? (
                           <dl>
-                            <dt>Name:</dt>
-                            <dd>
-                              {orderReceipt.receipt.bill_to_forename}{" "}
-                              {orderReceipt.receipt.bill_to_surname}
+                            <dt>Payment Method:</dt>
+                            <dd id="paymentMethod">
+                              {orderReceipt.receipt.card_type
+                                ? `${orderReceipt.receipt.card_type} | `
+                                : null}
+                              {orderReceipt.receipt.card_number
+                                ? orderReceipt.receipt.card_number
+                                : null}
                             </dd>
                           </dl>
+                        ) : orderReceipt.receipt.payment_method === "paypal" ? (
+                          <div>
+                            <dl>
+                              {orderReceipt.receipt.bill_to_email ? (
+                                <dl>
+                                  <dt>Email:</dt>
+                                  <dd>{orderReceipt.receipt.bill_to_email}</dd>
+                                </dl>
+                              ) : null}
+                            </dl>
+                            <dl>
+                              <dt>Payment Method:</dt>
+                              <dd id="paymentMethod">Paypal</dd>
+                            </dl>
+                          </div>
                         ) : null}
-
-                      <dl>
-                        {orderReceipt.receipt.bill_to_email ? (
-                          <dl>
-                            <dt>Email:</dt>
-                            <dd>{orderReceipt.receipt.bill_to_email}</dd>
-                          </dl>
-                        ) : null}
-                      </dl>
-
-                      <dl>
-                        <dt>Payment Method:</dt>
-                        <dd id="paymentMethod">
-                          {orderReceipt.receipt.card_type
-                            ? `${orderReceipt.receipt.card_type} | `
-                            : null}
-                          {orderReceipt.receipt.card_number
-                            ? orderReceipt.receipt.card_number
-                            : null}
-                        </dd>
-                      </dl>
                       {orderReceipt.coupon ? (
                         <dl>
                           <dt>Discount Code:</dt>
