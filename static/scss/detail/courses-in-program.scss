@@ -2,7 +2,7 @@
 .course-in-program {
   width: 100%;
   padding: 100px 0 50px;
-  background: white url("#{$static-path}/images/course-carousel-bg.jpg") no-repeat 50% 50%;
+  background: white no-repeat 50% 50%;
   min-height: 400px;
   overflow: hidden;
   position: relative;
@@ -47,6 +47,10 @@
     transform: translateX(-50%);
     left: 50%;
   }
+}
+
+.course-in-program.lazy-background {
+  background-image: url("#{$static-path}/images/course-carousel-bg.jpg");
 }
 
 .course-slider {

@@ -2,7 +2,7 @@
 .posted-block {
   width: 100%;
   padding: 75px 0;
-  background: url('#{$static-path}/images/bg-contact.jpg') repeat-x 50% 50%;
+  background: repeat-x 50% 50%;
   min-height: 200px;
   background-size: cover;
   position: relative;
@@ -138,6 +138,10 @@
       margin: 0;
     }
   }
+}
+
+.posted-block.lazy-background {
+  background-image: url('#{$static-path}/images/bg-contact.jpg');
 }
 
 .submitted-message {
