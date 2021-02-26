@@ -204,7 +204,17 @@ def test_send_b2b_receipt_email_error(mocker):
 
 
 @pytest.mark.parametrize(
-    "receipt_data", [{"req_card_number": "1234", "req_card_type": "001"}]
+    "receipt_data",
+    [
+        {
+            "req_card_number": "1234",
+            "req_card_type": "001",
+            "req_payment_method": "card",
+            "req_bill_to_forename": "MIT",
+            "req_bill_to_surname": "Doof",
+            "req_bill_to_email": "doof@mit.edu",
+        }
+    ],
 )
 def test_send_ecommerce_order_receipt(mocker, receipt_data):
     """send_ecommerce_order_receipt should send a receipt email"""
@@ -270,9 +280,9 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
             "receipt": {
                 "card_number": "1234",
                 "card_type": "Visa",
-                "name": None,
-                "payment_method": None,
-                "bill_to_email": None,
+                "name": "MIT Doof",
+                "payment_method": "card",
+                "bill_to_email": "doof@mit.edu",
             },
             "purchaser": {
                 "name": " ".join(["Test", "User"]),
@@ -282,6 +292,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                 "postal_code": "80309",
                 "city": "Boulder",
                 "country": "United States",
+                "company": user.profile.company,
             },
         },
     )

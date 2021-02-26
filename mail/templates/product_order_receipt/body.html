@@ -16,8 +16,8 @@
             <h2 style="color: #000000; font-size: 22px; font-weight: 700; line-height: 24px; margin: 0 0 22px;">Receipt</h2>
             <h3 style="color: #000000; font-size: 16px; font-weight: 700; line-height: 18px; margin: 0 0 20px;">Order Information</h3>
             <p>
-                <strong style="font-weight: 700;">Date:</strong><span> {{ order.created_on|date:"F j, Y"}} </span><br>
                 {% if order.reference_number  %}<strong style="font-weight: 700;">Order Number:</strong> {{ order.reference_number }}<br> {% endif %}
+                <strong style="font-weight: 700;">Order Date:</strong><span> {{ order.created_on|date:"F j, Y"}} </span><br>
                 <strong style="font-weight: 700;">Order Total:</strong> ${{ order_total }}<br>
             </p>
             {% for line in lines %}
@@ -37,7 +37,7 @@
             <h3 style="color: #000000; font-size: 16px; font-weight: 700; line-height: 18px; margin: 0 0 20px;">Customer Information</h3>
             <p style="margin: 0;">
                 <strong style="font-weight: 700;">Name:</strong> {{ purchaser.name }}<br>
-                <strong style="font-weight: 700;">Email Address:</strong> {{ purchaser.email }}<br>
+                <strong style="font-weight: 700;">Company Name:</strong> {{ purchaser.company }}<br>
                 {% if purchaser.street_address %}
                     <table width="100%">
                         <tr>
@@ -55,12 +55,19 @@
                         </tr>
                     </table>
                 {% endif %}
+                <strong style="font-weight: 700;">Email Address:</strong> {{ purchaser.email }}<br>
             </p>
             {% if receipt or coupon %}
                 <h3 style="color: #000000; font-size: 16px; font-weight: 700; line-height: 18px; margin: 0 0 20px;">Payment Information</h3>
                 <p>
                     {%  if receipt %}
-                        <strong style="font-weight: 700;">Payment Method:</strong> {{ receipt.card_type }} | {{ receipt.card_number }}<br>
+                        <strong style="font-weight: 700;">Name:</strong> {{ receipt.name }}<br>
+                        {% if receipt.payment_method == 'card' %}
+                            <strong style="font-weight: 700;">Payment Method:</strong> {{ receipt.card_type }} | {{ receipt.card_number }}<br>
+                        {% elif receipt.payment_method == 'paypal' %}
+                            <strong style="font-weight: 700;">Email:</strong> {{ receipt.email }} (Paypal account email)<br>
+                            <strong style="font-weight: 700;">Payment Method:</strong> Paypal<br>
+                        {% endif %}
                     {% endif %}
                     {% if coupon %}
                         <strong style="font-weight: 700;">Discount Code:</strong> {{ coupon }}
@@ -74,7 +81,7 @@
 {%  endblock %}
 {% block footer-address %}
     <div style="text-align: center">
-        MIT Open Learning, 600 Technology Square, 2nd Floor, Cambridge, MA 02139
+        MIT Open Learning, 600 Technology Square, NE49-2000, Cambridge, MA 02139
         <br>
         &copy; {% now "Y" %} {{ site_name }}, All Rights Reserved. <a href="{{ base_url }}/terms-of-service" style="color: #b0b0b0; text-decoration: underline;">Terms of Service</a> and <a href="{{ base_url }}/privacy-policy" style="color: #b0b0b0; text-decoration: underline;">Privacy Policy</a>
     </div>

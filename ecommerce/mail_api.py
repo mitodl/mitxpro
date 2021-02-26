@@ -302,6 +302,7 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
                                     "postal_code": purchaser.get("postal_code"),
                                     "city": purchaser.get("city"),
                                     "country": country.name if country else None,
+                                    "company": purchaser.get("company"),
                                 },
                             },
                         ),
