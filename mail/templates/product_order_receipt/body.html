@@ -61,8 +61,8 @@
                 <h3 style="color: #000000; font-size: 16px; font-weight: 700; line-height: 18px; margin: 0 0 20px;">Payment Information</h3>
                 <p>
                     {%  if receipt %}
+                        <strong style="font-weight: 700;">Name:</strong> {{ receipt.name }}<br>
                         {% if receipt.payment_method == 'card' %}
-                            <strong style="font-weight: 700;">Name:</strong> {{ receipt.name }}<br>
                             <strong style="font-weight: 700;">Payment Method:</strong> {{ receipt.card_type }} | {{ receipt.card_number }}<br>
                         {% elif receipt.payment_method == 'paypal' %}
                             <strong style="font-weight: 700;">Email:</strong> {{ receipt.email }} (Paypal account email)<br>
