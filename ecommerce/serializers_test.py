@@ -524,7 +524,8 @@ def test_serialize_order_receipt(receipt_data):
             if "req_bill_to_email" in receipt.data
             else None,
             "name": f"{receipt.data.get('req_bill_to_forename')} {receipt.data.get('req_bill_to_surname')}"
-            if "req_bill_to_forename" in receipt.data or "req_bill_to_surname" in receipt.data
+            if "req_bill_to_forename" in receipt.data
+            or "req_bill_to_surname" in receipt.data
             else None,
         }
         if receipt
