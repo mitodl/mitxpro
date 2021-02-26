@@ -24,6 +24,7 @@ describe("ReceiptPage", () => {
       state_or_territory: "US-CA",
       country:            "US",
       postal_code:        "90640",
+      company:            "ABC",
       email:              "john.doe@acme.com"
     },
     lines: [
@@ -45,8 +46,10 @@ describe("ReceiptPage", () => {
       reference_number: "xpro-b2c-dev-1"
     },
     receipt: {
-      card_number: "xxxxxxxxxxxx1234",
-      card_type:   "Visa"
+      bill_to_forename: "John",
+      card_number:      "xxxxxxxxxxxx1234",
+      card_type:        "Visa",
+      payment_method:   "card"
     }
   }
 
@@ -130,13 +133,14 @@ describe("ReceiptPage", () => {
       country => country.code === receiptObject.purchaser.country
     ).name
     assert.equal(inner.find("#purchaserCountry").text(), countryName)
-
-    assert.equal(
-      inner.find("#paymentMethod").text(),
-      `${receiptObject.receipt.card_type} | ${
-        receiptObject.receipt.card_number
-      }`
-    )
+    if (inner.find("#paymentMethod").text() === "card") {
+      assert.equal(
+        inner.find("#paymentMethod").text(),
+        `${receiptObject.receipt.card_type} | ${
+          receiptObject.receipt.card_number
+        }`
+      )
+    }
     assert.equal(inner.find("#discountCode").text(), receiptObject.coupon)
   })
 

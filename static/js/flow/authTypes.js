@@ -46,7 +46,8 @@ export type LegalAddress = {
   street_address: Array<string>,
   country: string,
   state_or_territory?: string,
-  postal_code?: string
+  postal_code?: string,
+  company?: string
 }
 
 export type ExtendedLegalAddress = LegalAddress & {

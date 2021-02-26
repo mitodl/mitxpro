@@ -450,6 +450,12 @@ def test_current_coupon_payment_version_serializer_latest(mocker):
         {"req_card_number": "1234", "req_card_type": "001"},
         {"req_card_number": "5678", "req_card_type": "002"},
         {"req_card_number": "5678"},
+        {
+            "req_card_number": "5678",
+            "req_card_type": "002",
+            "req_bill_to_forename": "XYZ",
+            "req_bill_to_surname": "ABC",
+        },
         {},
     ],
 )
@@ -475,6 +481,7 @@ def test_serialize_order_receipt(receipt_data):
                 "price": str(product_version.price),
                 "total_paid": str(line.quantity * product_version.price),
                 "quantity": line.quantity,
+                "CEUs": None,
             }
         ],
         "order": {
@@ -490,6 +497,7 @@ def test_serialize_order_receipt(receipt_data):
             "state_or_territory": purchaser.state_or_territory,
             "city": purchaser.city,
             "postal_code": purchaser.postal_code,
+            "company": order.purchaser.profile.company,
             "street_address": [
                 line
                 for line in [
@@ -508,6 +516,16 @@ def test_serialize_order_receipt(receipt_data):
             else None,
             "card_type": CYBERSOURCE_CARD_TYPES[receipt_data["req_card_type"]]
             if "req_card_type" in receipt_data
+            else None,
+            "payment_method": receipt.data["req_payment_method"]
+            if "req_payment_method" in receipt.data
+            else None,
+            "bill_to_email": receipt.data["req_bill_to_email"]
+            if "req_bill_to_email" in receipt.data
+            else None,
+            "name": f"{receipt.data.get('req_bill_to_forename')} {receipt.data.get('req_bill_to_surname')}"
+            if "req_bill_to_forename" in receipt.data
+            or "req_bill_to_surname" in receipt.data
             else None,
         }
         if receipt
