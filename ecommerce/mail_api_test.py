@@ -281,7 +281,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                 "card_number": "1234",
                 "card_type": "Visa",
                 "name": "MIT Doof",
-                "payment_method": 'card',
+                "payment_method": "card",
                 "bill_to_email": "doof@mit.edu",
             },
             "purchaser": {
