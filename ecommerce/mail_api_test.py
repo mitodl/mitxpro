@@ -292,7 +292,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                 "postal_code": "80309",
                 "city": "Boulder",
                 "country": "United States",
-                "company_name": user.profile.company,
+                "company": user.profile.company,
             },
         },
     )

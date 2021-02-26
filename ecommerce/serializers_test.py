@@ -509,7 +509,6 @@ def test_serialize_order_receipt(receipt_data):
                 ]
                 if line
             ],
-            "company_name": order.purchaser.profile.company,
         },
         "receipt": {
             "card_number": receipt_data["req_card_number"]
