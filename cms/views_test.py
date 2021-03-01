@@ -14,6 +14,10 @@ from cms.factories import (
     TextSectionFactory,
     CertificatePageFactory,
     HomePageFactory,
+    UserTestimonialsPageFactory,
+    CourseIndexPageFactory,
+    ProgramIndexPageFactory,
+    SignatoryPageFactory,
 )
 from cms.models import CourseIndexPage, HomePage, ProgramIndexPage, TextVideoSection
 from courses.factories import (
@@ -47,6 +51,38 @@ def test_custom_wagtail_api(client, admin_user):
     client.force_login(admin_user)
     resp = client.get("/cms/api/main/pages/?child_of=1&for_explorer=1")
     assert resp.status_code == status.HTTP_200_OK
+
+
+def test_wagtail_items_ordering(client, admin_user):
+    """
+    Assert that the pages returned by wagtail admin are alphabetically sorted
+    """
+    client.force_login(admin_user)
+    home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
+    # Create random pages
+    testimonial_page = UserTestimonialsPageFactory.create(
+        parent=home_page, title="Testimonials"
+    )
+    signatory_page = SignatoryPageFactory.create(parent=home_page, title="Signatories")
+    course_index_page = CourseIndexPageFactory.create(parent=home_page, title="Courses")
+    program_index_page = ProgramIndexPageFactory.create(
+        parent=home_page, title="Programs"
+    )
+    catalog_page = CatalogPageFactory.create(parent=home_page, title="Catalog")
+
+    resp = client.get(
+        "/cms/api/main/pages/?child_of={}&for_explorer=1".format(home_page.id)
+    )
+    assert resp.status_code == status.HTTP_200_OK
+    items = list(resp.data.items())[1][1]  # Pages in response
+    response_page_titles = [item["title"] for item in items]
+    assert response_page_titles == [
+        catalog_page.title,
+        course_index_page.title,
+        program_index_page.title,
+        signatory_page.title,
+        testimonial_page.title,
+    ]
 
 
 def test_home_page_view(client, wagtail_basics):
