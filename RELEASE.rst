@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.77.1
+Version 0.77.1 (Released March 01, 2021)
 --------------
 
 - update email receipts for checkout purchases (#2129)
