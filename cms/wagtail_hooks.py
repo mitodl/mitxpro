@@ -1,6 +1,5 @@
 """Custom hooks to configure wagtail behavior"""
-from wagtail.api.v2.router import WagtailAPIRouter
-from wagtail.api.v2.views import PagesAPIViewSet
+from wagtail.admin.api.views import PagesAdminAPIViewSet
 from wagtail.core import hooks
 
 
@@ -12,7 +11,7 @@ def sort_pages_alphabetically(
     return pages.order_by("title")
 
 
-class OrderedPagesAPIEndpoint(PagesAPIViewSet):
+class OrderedPagesAPIEndpoint(PagesAdminAPIViewSet):
     """A clone of the default Wagtail admin API that additionally orders all responses by page title alphabetically"""
 
     def filter_queryset(self, queryset):
@@ -21,8 +20,6 @@ class OrderedPagesAPIEndpoint(PagesAPIViewSet):
 
 
 @hooks.register("construct_admin_api")
-def configure_admin_api_default_order(api_router):
+def configure_admin_api_default_order(router):
     """Swap admin pages API for our own flavor that orders results by title"""
-    api_router = WagtailAPIRouter("wagtailapi")
-    api_router.register_endpoint("pages", OrderedPagesAPIEndpoint)
-    return api_router
+    router.register_endpoint("pages", OrderedPagesAPIEndpoint)

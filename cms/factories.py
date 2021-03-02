@@ -401,6 +401,24 @@ class HomePageFactory(wagtail_factories.PageFactory):
         model = HomePage
 
 
+class CourseIndexPageFactory(wagtail_factories.PageFactory):
+    """CourseIndexPage factory class"""
+
+    title = factory.fuzzy.FuzzyText(prefix="Course Index ")
+
+    class Meta:
+        model = CourseIndexPage
+
+
+class ProgramIndexPageFactory(wagtail_factories.PageFactory):
+    """ProgramIndexPage factory class"""
+
+    title = factory.fuzzy.FuzzyText(prefix="Program Index ")
+
+    class Meta:
+        model = ProgramIndexPage
+
+
 class SignatoryPageFactory(wagtail_factories.PageFactory):
     """SignatoryPage factory class"""
 
