@@ -10,7 +10,7 @@
               {% if purchaser and purchaser.name %}
                 <p style="color: #000000;" >Dear {{ purchaser.name }},</p>
               {% endif %}
-              <p style="color: #000000;" >Thank you! You have purchased one or more seats for you team.</p>
+              <p style="color: #000000;" >Thank you! You have purchased one or more seats for your team.</p>
               <p><a href="{{ download_url }}">Download enrollment codes and view receipt</a></p>
               <p style="color: #000000;" >Below you will find a copy of you receipt:</p>
               <h1 style="margin: 20px 0 10px; font-size: 30px; line-height: 50px; color: #03152d; font-weight: bold;">Receipt</h1>
@@ -25,12 +25,12 @@
               <td style="background-color: #f5f5f5; padding: 0 20px 10px; font-family: sans-serif; font-size: 15px; line-height: 25px; color: #272727;">
                   <table style="width: 100%; table-layout: auto !important;">
                     <tr>
-                      <td style="width: 150px;"><span style="color: #8a8b8c">Order Date:</span></td>
-                      <td>{{ purchase_date }}</td>
-                    </tr>
-                    <tr>
                       <td style="width: 150px;"><span style="color: #8a8b8c">Order Number:</span></td>
                       <td>{{ order_reference_id }}</td>
+                    </tr>
+                    <tr>
+                      <td style="width: 150px;"><span style="color: #8a8b8c">Order Date:</span></td>
+                      <td>{{ purchase_date }}</td>
                     </tr>
                   </table>
               </td>
@@ -104,14 +104,16 @@
                     {{ purchaser.name }}
                   </td>
                 </tr>
+                {% if purchaser.company %}
                 <tr>
                   <td style="width: 150px;">
-                    <span style="color: #8a8b8c">Email Address:</span>
+                    <span style="color: #8a8b8c">Company:</span>
                   </td>
                   <td style="vertical-align: top;">
-                    {{ email }}
+                    {{ purchaser.company }}
                   </td>
                 </tr>
+                {% endif %}
                 <!-- Cybersource address_line1 is mandatory but not the address_line2 -->
                 {% if purchaser.street_address_1 %}
                 <tr>
@@ -130,6 +132,14 @@
                   </td>
                 </tr>
                 {% endif %}
+                <tr>
+                  <td style="width: 150px;">
+                    <span style="color: #8a8b8c">Email Address:</span>
+                  </td>
+                  <td style="vertical-align: top;">
+                    {{ email }}
+                  </td>
+                </tr>
               </table>
             </td>
           </tr>
@@ -143,6 +153,14 @@
           <tr>
               <td style="font-size: 15px; line-height: 25px; padding: 0 20px 20px; background-color: #f5f5f5;">
                 <table style="width: 100%;">
+                    {% if payment_method == 'paypal' %}
+                        <td style="width: 150px; vertical-align: top;">
+                          <span style="color: #8a8b8c">Payment Method:</span>
+                      </td>
+                      <td style="vertical-align: top">
+                          Paypal
+                      </td>
+                    {% endif %}
                     {% if card_number and card_type %}
                     <tr>
                         <td style="width: 150px; vertical-align: top;">
@@ -169,7 +187,7 @@
           {% endif %}
           <tr>
             <td style="padding: 20px; text-align: center; font-size: 11px; line-height: 12px;">
-              <p style="margin: 0">MIT Open Learning, 600 Technology Square, 2nd Floor, Cambridge, MA 02139</p>
+              <p style="margin: 0">MIT Open Learning, 600 Technology Square, NE49-2000, Cambridge, MA 02139</p>
               <p style="margin: 0;">&copy; {% now "Y" %} {{ site_name }}, All Rights Reserved. <a href="{{ base_url }}/enterprise-terms-and-conditions" style="color: #03152d; text-decoration: underline;">Terms of Service</a> and <a href="{{ base_url }}/privacy-policy" style="color: #03152d; text-decoration: underline;">Privacy Policy</a></p>
             </td>
           </tr>
