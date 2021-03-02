@@ -196,26 +196,28 @@ export class ReceiptPage extends React.Component<Props> {
                       </dd>
                     </dl>
                   </div>
+                  <h3>Payment Information</h3>
                   {orderReceipt.receipt ? (
                     <div className="receipt-col">
-                      <h3>Payment Information</h3>
-                      <dl>
-                        <dt>Name:</dt>
-                        <dd>{orderReceipt.receipt.name}</dd>
-                      </dl>
                       {orderReceipt.receipt &&
                       orderReceipt.receipt.payment_method === "card" ? (
-                          <dl>
-                            <dt>Payment Method:</dt>
-                            <dd id="paymentMethod">
-                              {orderReceipt.receipt.card_type
-                                ? `${orderReceipt.receipt.card_type} | `
-                                : null}
-                              {orderReceipt.receipt.card_number
-                                ? orderReceipt.receipt.card_number
-                                : null}
-                            </dd>
-                          </dl>
+                          <div>
+                            <dl>
+                              <dt>Name:</dt>
+                              <dd>{orderReceipt.receipt.name}</dd>
+                            </dl>
+                            <dl>
+                              <dt>Payment Method:</dt>
+                              <dd id="paymentMethod">
+                                {orderReceipt.receipt.card_type
+                                  ? `${orderReceipt.receipt.card_type} | `
+                                  : null}
+                                {orderReceipt.receipt.card_number
+                                  ? orderReceipt.receipt.card_number
+                                  : null}
+                              </dd>
+                            </dl>
+                          </div>
                         ) : orderReceipt.receipt.payment_method === "paypal" ? (
                           <div>
                             <dl>
@@ -232,12 +234,14 @@ export class ReceiptPage extends React.Component<Props> {
                             </dl>
                           </div>
                         ) : null}
-                      {orderReceipt.coupon ? (
-                        <dl>
-                          <dt>Discount Code:</dt>
-                          <dd id="discountCode">{orderReceipt.coupon}</dd>
-                        </dl>
-                      ) : null}
+                    </div>
+                  ) : null}
+                  {orderReceipt.coupon ? (
+                    <div className="receipt-col">
+                      <dl>
+                        <dt>Discount Code:</dt>
+                        <dd id="discountCode">{orderReceipt.coupon}</dd>
+                      </dl>
                     </div>
                   ) : null}
                 </div>
