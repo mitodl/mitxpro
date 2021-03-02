@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.78.0
+--------------
+
+- Updated compliance email recipient (#2140)
+- fix course order in carousel w.r.t position_in_program (#2136)
+- Fixed wagtail admin pages list ordering (#2138)
+
 Version 0.77.1 (Released March 01, 2021)
 --------------
 
