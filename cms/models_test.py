@@ -1237,3 +1237,24 @@ def test_certificate_for_program_page():
         assert signatory.value.title_2 == "Title_2"
         assert signatory.value.organization == "Organization"
         assert signatory.value.signature_image.title == "Image"
+
+
+def test_program_course_order():
+    """
+    The course pages in program page should be ordered on the basis of position_in_program
+    """
+    program_page = ProgramPageFactory.create()
+    course_pages = CoursePageFactory.create_batch(
+        3,
+        course__position_in_program=factory.Iterator([2, 3, 1]),
+        course__program=program_page.program,
+    )
+    single_course_page = course_pages[0]
+    assert [
+        course_page.course.position_in_program
+        for course_page in single_course_page.course_pages
+    ] == [1, 2, 3]
+    assert [
+        course_page.course.position_in_program
+        for course_page in program_page.course_pages
+    ] == [1, 2, 3]

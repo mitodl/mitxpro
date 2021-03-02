@@ -748,8 +748,10 @@ class ProgramPage(ProductPage):
         Gets a list of pages (CoursePage) of all the courses associated with this program
         """
         courses = self.program.courses.all()
-        return CoursePage.objects.filter(course_id__in=courses).select_related(
-            "course", "thumbnail_image"
+        return (
+            CoursePage.objects.filter(course_id__in=courses)
+            .select_related("course", "thumbnail_image")
+            .order_by("course__position_in_program")
         )
 
     @property
@@ -839,7 +841,11 @@ class CoursePage(ProductPage):
         Gets a list of pages (CoursePage) of all the courses from the associated program
         """
         return (
-            CoursePage.objects.filter(course__program=self.course.program)
+            (
+                CoursePage.objects.filter(course__program=self.course.program)
+                .select_related("course", "thumbnail_image")
+                .order_by("course__position_in_program")
+            )
             if self.course.program
             else []
         )
