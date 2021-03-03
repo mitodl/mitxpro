@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.78.0
+Version 0.78.0 (Released March 03, 2021)
 --------------
 
 - Updated compliance email recipient (#2140)
