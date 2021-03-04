@@ -889,9 +889,7 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
     def get_receipt(self, instance):
         """Get receipt information if it exists"""
         receipt = instance.receipt_set.order_by("-created_on").first()
-        if receipt and (
-            "req_card_number" in receipt.data or "req_card_type" in receipt.data
-        ):
+        if receipt:
             data = {
                 "card_number": None,
                 "card_type": None,
