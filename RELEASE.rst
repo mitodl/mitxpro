@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.78.1
+Version 0.78.1 (Released March 08, 2021)
 --------------
 
 - HotFix (#2141)
