@@ -43,6 +43,9 @@ def get_b2b_receipt_data(order):
         receipt_data = {
             "card_number": receipt.data.get("req_card_number"),
             "card_type": CYBERSOURCE_CARD_TYPES.get(receipt.data.get("req_card_type")),
+            "payment_method": receipt.data.get("req_payment_method")
+            if "req_payment_method" in receipt.data
+            else None,
             "purchaser": {
                 "name": " ".join(
                     [
