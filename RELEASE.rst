@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.79.0
+--------------
+
+- Upgrade django-oauth-toolkit to 1.4.0 (#2124)
+- Bump elliptic from 6.5.3 to 6.5.4 (#2146)
+- Update B2B Email Receipt (#2142)
+
 Version 0.78.1 (Released March 08, 2021)
 --------------
 
