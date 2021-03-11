@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.79.0
+Version 0.79.0 (Released March 11, 2021)
 --------------
 
 - Upgrade django-oauth-toolkit to 1.4.0 (#2124)
