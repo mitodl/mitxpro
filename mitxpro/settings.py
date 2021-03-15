@@ -997,6 +997,11 @@ OAUTH2_PROVIDER = {
     "DEFAULT_SCOPES": ["user:read"],
     "SCOPES_BACKEND_CLASS": "mitol.oauth_toolkit_extensions.backends.ApplicationAccessOrSettingsScopes",
     "ERROR_RESPONSE_WITH_SCOPES": DEBUG,
+    "ALLOWED_REDIRECT_URI_SCHEMES": get_delimited_list(
+        name="OAUTH2_PROVIDER_ALLOWED_REDIRECT_URI_SCHEMES",
+        default=["http", "https"],
+        description="List of schemes allowed for oauth2 redirect URIs",
+    ),
 }
 
 

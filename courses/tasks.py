@@ -6,7 +6,6 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.db.models import Q
-from mitol.digitalcredentials.models import DigitalCredentialRequest
 from requests.exceptions import HTTPError
 
 from courses.models import CourseRun, CourseRunCertificate
@@ -105,16 +104,3 @@ def sync_courseruns_data():
 
     # `sync_course_runs` logs internally so no need to capture/output the returned values
     sync_course_runs(runs)
-
-
-@app.task(acks_late=True)
-def notify_digital_credential_request(digital_credential_request_id: int):
-    """Notifies a learner regarding a digital credentials request"""
-    # avoid circular import error
-    from courses.credentials import send_digital_credential_request_notification
-
-    digital_credential_request = DigitalCredentialRequest.objects.get(
-        id=digital_credential_request_id
-    )
-
-    send_digital_credential_request_notification(digital_credential_request)

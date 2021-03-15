@@ -283,6 +283,14 @@
       "description": "The root directory for locally stored media. Typically not used.",
       "required": false
     },
+    "MITOL_DIGITAL_CREDENTIALS_AUTH_TYPE": {
+      "description": "Auth type that is passed to the digital credentials wallet app",
+      "required": false
+    },
+    "MITOL_DIGITAL_CREDENTIALS_DEEP_LINK_URL": {
+      "description": "URL at which to deep link the learner to for the digital credentials wallet",
+      "required": false
+    },
     "MITOL_DIGITAL_CREDENTIALS_HMAC_SECRET": {
       "description": "HMAC secret to sign digital credentials requests with",
       "required": false
@@ -385,6 +393,10 @@
     },
     "MITXPRO_USE_S3": {
       "description": "Use S3 for storage backend (required on Heroku)",
+      "required": false
+    },
+    "OAUTH2_PROVIDER_ALLOWED_REDIRECT_URI_SCHEMES": {
+      "description": "List of schemes allowed for oauth2 redirect URIs",
       "required": false
     },
     "OPENEDX_API_BASE_URL": {

@@ -9,6 +9,16 @@ router = routers.SimpleRouter()
 router.register(r"programs", v1.ProgramViewSet, basename="programs_api")
 router.register(r"courses", v1.CourseViewSet, basename="courses_api")
 router.register(r"course_runs", v1.CourseRunViewSet, basename="course_runs_api")
+router.register(
+    r"course_run_certificates",
+    v1.CourseRunCertificateViewSet,
+    basename="course_run_certificates_api",
+)
+router.register(
+    r"program_certificates",
+    v1.ProgramCertificateViewSet,
+    basename="program_certificates_api",
+)
 
 urlpatterns = [
     re_path(r"^api/v1/", include(router.urls)),

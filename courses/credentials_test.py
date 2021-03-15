@@ -1,23 +1,14 @@
 """Credentials tests"""
-from urllib.parse import parse_qs, urljoin, urlparse
+from urllib.parse import urljoin
 
 import pytest
-from django.db.models.signals import post_save
-from factory.django import mute_signals
 from mitol.common.pytest_utils import any_instance_of
-from mitol.digitalcredentials.factories import (
-    DigitalCredentialRequestFactory,
-    LearnerDIDFactory,
-)
-from mitol.digitalcredentials.models import DigitalCredentialRequest
+from mitol.digitalcredentials.factories import LearnerDIDFactory
 
 from courses.credentials import (
     build_course_run_credential,
     build_digital_credential,
     build_program_credential,
-    create_and_notify_digital_credential_request,
-    create_deep_link_url,
-    send_digital_credential_request_notification,
 )
 from courses.factories import (
     CourseFactory,
@@ -26,7 +17,6 @@ from courses.factories import (
     ProgramCertificateFactory,
     ProgramFactory,
 )
-from courses.messages import DigitalCredentialAvailableMessage
 
 
 pytestmark = pytest.mark.django_db
@@ -223,137 +213,3 @@ def test_test_build_digital_credential_invalid_certified_object(mocker):
     invalid_courseware = CourseFactory.create()
     with pytest.raises(Exception):
         build_digital_credential(invalid_courseware, mocker.Mock())
-
-
-@pytest.mark.parametrize(
-    "certificate_factory", [ProgramCertificateFactory, CourseRunCertificateFactory]
-)
-@pytest.mark.parametrize("exists", [True, False])
-@pytest.mark.parametrize("enabled", [True, False])
-def test_create_and_notify_digital_credential_request(
-    settings, mocker, user, certificate_factory, exists, enabled
-):  # pylint: disable=too-many-arguments
-    """Test create_and_notify_digital_credential_request"""
-    settings.FEATURES["DIGITAL_CREDENTIALS"] = enabled
-    mocker.patch(
-        "courses.credentials.transaction.on_commit",
-        side_effect=lambda callback: callback(),
-    )
-    mock_notify_digital_credential_request = mocker.patch(
-        "courses.credentials.notify_digital_credential_request", autospec=True
-    )
-
-    with mute_signals(post_save):
-        certificate = certificate_factory.create(user=user)
-    if exists:
-        DigitalCredentialRequestFactory.create(
-            learner=user, credentialed_object=certificate
-        )
-
-    create_and_notify_digital_credential_request(certificate)
-
-    if not exists and not enabled:
-        assert DigitalCredentialRequest.objects.count() == 0
-    elif exists:
-        mock_notify_digital_credential_request.assert_not_called()
-    else:
-        credential_request = DigitalCredentialRequest.objects.get(learner=user)
-        mock_notify_digital_credential_request.delay.assert_called_once_with(
-            credential_request.id
-        )
-
-
-@pytest.mark.parametrize(
-    "factory", [ProgramCertificateFactory, CourseRunCertificateFactory]
-)
-def test_create_deep_link_url(settings, factory, user):
-    """Test create_deep_link_url()"""
-    settings.DIGITAL_CREDENTIALS_DEEP_LINK_URL = "scheme:site"
-    certificate = factory.create()
-    credential_request = DigitalCredentialRequestFactory.create(
-        learner=user, credentialed_object=certificate
-    )
-
-    url = create_deep_link_url(credential_request)
-
-    scheme, _, path, _, query, _ = urlparse(url)
-
-    assert scheme == "scheme"
-    assert path == "site"
-    assert parse_qs(query) == {
-        "auth_type": ["code"],
-        "issuer": [settings.SITE_BASE_URL],
-        "vc_request_url": [
-            f"http://localhost:8053/api/v1/credentials/request/{credential_request.uuid}/"
-        ],
-        "challenge": [str(credential_request.uuid)],
-    }
-
-
-@pytest.mark.parametrize("enabled", [True, False])
-@pytest.mark.parametrize(
-    "factory, factory_kwargs",
-    [
-        (ProgramCertificateFactory, {"program__title": "credential title"}),
-        (
-            CourseRunCertificateFactory,
-            {"course_run__course__title": "credential title"},
-        ),
-    ],
-)
-def test_send_digital_credential_request_notification(
-    settings, user, mocker, enabled, factory, factory_kwargs
-):  # pylint: disable=too-many-arguments
-    """Verify send_digital_credential_request_notification sends an email for the courseware"""
-    settings.FEATURES["DIGITAL_CREDENTIALS_EMAIL"] = enabled
-    certificate = factory.create(**factory_kwargs)
-    credential_request = DigitalCredentialRequestFactory.create(
-        learner=user, credentialed_object=certificate
-    )
-    mock_log = mocker.patch("courses.credentials.log")
-    mock_get_message_sender = mocker.patch("courses.credentials.get_message_sender")
-    mock_sender = mock_get_message_sender.return_value.__enter__.return_value
-    mock_create_deep_link_url = mocker.patch("courses.credentials.create_deep_link_url")
-
-    send_digital_credential_request_notification(credential_request)
-
-    if not enabled:
-        mock_log.debug.assert_called_once_with(
-            "Feature FEATURE_DIGITAL_CREDENTIALS_EMAIL is disabled"
-        )
-        mock_get_message_sender.assert_not_called()
-        mock_sender.build_and_send_message.assert_not_called()
-    else:
-        mock_log.debug.assert_not_called()
-        mock_get_message_sender.assert_called_once_with(
-            DigitalCredentialAvailableMessage
-        )
-        mock_create_deep_link_url.assert_called_once_with(credential_request)
-        mock_sender.build_and_send_message.assert_called_once_with(
-            credential_request.learner,
-            {
-                "courseware_title": "credential title",
-                "deep_link_url": mock_create_deep_link_url.return_value,
-            },
-        )
-
-
-def test_send_digital_credential_request_notification_invalid_object(
-    settings, user, mocker
-):  # pylint: disable=too-many-arguments
-    """Verify send_digital_credential_request_notification sends an email for the courseware"""
-    settings.FEATURES["DIGITAL_CREDENTIALS_EMAIL"] = True
-    certificate = ProgramFactory.create()
-    credential_request = DigitalCredentialRequestFactory.create(
-        learner=user, credentialed_object=certificate
-    )
-    mock_log = mocker.patch("courses.credentials.log")
-    mock_get_message_sender = mocker.patch("courses.credentials.get_message_sender")
-
-    send_digital_credential_request_notification(credential_request)
-
-    mock_log.error.assert_called_once_with(
-        "Unhandled credentialed_object for digital credential request: %s",
-        credential_request,
-    )
-    mock_get_message_sender.assert_not_called()
