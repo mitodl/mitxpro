@@ -1,18 +1,28 @@
 """Course views verson 1"""
-from rest_framework import viewsets, status
+from mitol.digitalcredentials.mixins import DigitalCredentialsRequestViewSetMixin
+from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from courses.models import Program, Course, CourseRun
 from courses.api import get_user_enrollments
+from courses.models import (
+    Course,
+    CourseRun,
+    CourseRunCertificate,
+    Program,
+    ProgramCertificate,
+)
 from courses.serializers import (
-    ProgramSerializer,
-    CourseSerializer,
-    CourseRunSerializer,
+    CourseRunCertificateSerializer,
     CourseRunEnrollmentSerializer,
+    CourseRunSerializer,
+    CourseSerializer,
+    ProgramCertificateSerializer,
     ProgramEnrollmentSerializer,
+    ProgramSerializer,
 )
 
 
@@ -84,3 +94,43 @@ class UserEnrollmentsView(APIView):
         return ProgramEnrollmentSerializer(
             programs, many=True, context={"course_run_enrollments": list(program_runs)}
         ).data
+
+
+class CourseRunCertificateViewSet(
+    viewsets.ReadOnlyModelViewSet, DigitalCredentialsRequestViewSetMixin
+):
+    """API for CourseRunCertificate"""
+
+    serializer_class = CourseRunCertificateSerializer
+    permission_classes = (IsAuthenticated,)
+    lookup_field = "uuid"
+
+    def get_queryset(self):
+        """Get the set of non-revoked certificates for the current user"""
+        return CourseRunCertificate.objects.filter(
+            user=self.request.user, is_revoked=False
+        )
+
+    def get_learner_for_obj(self, certificate: CourseRunCertificate):
+        """Get the learner for the CourseRunCertificate"""
+        return certificate.user
+
+
+class ProgramCertificateViewSet(
+    viewsets.ReadOnlyModelViewSet, DigitalCredentialsRequestViewSetMixin
+):
+    """API for ProgramCertificate"""
+
+    serializer_class = ProgramCertificateSerializer
+    permission_classes = (IsAuthenticated,)
+    lookup_field = "uuid"
+
+    def get_queryset(self):
+        """Get the set of non-revoked certificates for the current user"""
+        return ProgramCertificate.objects.filter(
+            user=self.request.user, is_revoked=False
+        )
+
+    def get_learner_for_obj(self, certificate: ProgramCertificate):
+        """Get the learner for the ProgramCertificate"""
+        return certificate.user

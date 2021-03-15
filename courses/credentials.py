@@ -1,19 +1,13 @@
 """Digital courseware credentials"""
 import logging
 from typing import Dict, Union
-from urllib.parse import urlencode, urljoin
+from urllib.parse import urljoin
 
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
-from django.shortcuts import reverse
 from mitol.common.utils import now_in_utc
-from mitol.digitalcredentials.models import DigitalCredentialRequest, LearnerDID
-from mitol.mail.api import get_message_sender
+from mitol.digitalcredentials.models import LearnerDID
 
-from courses.messages import DigitalCredentialAvailableMessage
 from courses.models import CourseRunCertificate, ProgramCertificate
-from courses.tasks import notify_digital_credential_request
 
 
 log = logging.getLogger(__name__)
@@ -128,73 +122,3 @@ def build_digital_credential(
             "verificationMethod": settings.DIGITAL_CREDENTIALS_VERIFICATION_METHOD
         },
     }
-
-
-def create_and_notify_digital_credential_request(
-    certificate: Union[CourseRunCertificate, ProgramCertificate]
-):
-    """Create a digital credential request and notify the learner"""
-    if not settings.FEATURES.get("DIGITAL_CREDENTIALS", False):
-        log.debug("Feature FEATURE_DIGITAL_CREDENTIALS is disabled")
-        return
-
-    digital_credential_request, created = DigitalCredentialRequest.objects.get_or_create(
-        credentialed_object_id=certificate.id,
-        credentialed_content_type=ContentType.objects.get_for_model(certificate),
-        learner=certificate.user,
-    )
-
-    if created:
-        transaction.on_commit(
-            lambda: notify_digital_credential_request.delay(
-                digital_credential_request.id
-            )
-        )
-
-
-def create_deep_link_url(credential_request: DigitalCredentialRequest) -> str:
-    """Creates and returns a deep link credential url"""
-    params = {
-        "auth_type": "code",
-        "issuer": settings.SITE_BASE_URL,
-        "vc_request_url": urljoin(
-            settings.SITE_BASE_URL,
-            reverse(
-                "digital-credentials:credentials-request",
-                kwargs={"uuid": credential_request.uuid},
-            ),
-        ),
-        "challenge": credential_request.uuid,
-    }
-
-    return f"{settings.DIGITAL_CREDENTIALS_DEEP_LINK_URL}?{urlencode(params)}"
-
-
-def send_digital_credential_request_notification(
-    credential_request: DigitalCredentialRequest
-):
-    """Send an email notification for a digital credential request"""
-    if not settings.FEATURES.get("DIGITAL_CREDENTIALS_EMAIL", False):
-        log.debug("Feature FEATURE_DIGITAL_CREDENTIALS_EMAIL is disabled")
-        return
-
-    certificate = credential_request.credentialed_object
-
-    if isinstance(certificate, ProgramCertificate):
-        courseware_title = certificate.program.title
-    elif isinstance(certificate, CourseRunCertificate):
-        courseware_title = certificate.course_run.course.title
-    else:
-        log.error(
-            "Unhandled credentialed_object for digital credential request: %s",
-            credential_request,
-        )
-        return
-
-    deep_link_url = create_deep_link_url(credential_request)
-
-    with get_message_sender(DigitalCredentialAvailableMessage) as sender:
-        sender.build_and_send_message(
-            credential_request.learner,
-            {"courseware_title": courseware_title, "deep_link_url": deep_link_url},
-        )

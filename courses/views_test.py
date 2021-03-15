@@ -8,20 +8,31 @@ from datetime import timedelta
 import pytest
 from django.contrib.auth.models import AnonymousUser
 from django.urls import reverse
+from mitol.digitalcredentials.models import DigitalCredentialRequest
+from mitol.digitalcredentials.serializers import DigitalCredentialRequestSerializer
 from rest_framework import status
 
 from courses.api import UserEnrollments
 from courses.factories import (
     CourseFactory,
-    CourseRunFactory,
-    ProgramFactory,
+    CourseRunCertificateFactory,
     CourseRunEnrollmentFactory,
+    CourseRunFactory,
+    ProgramCertificateFactory,
     ProgramEnrollmentFactory,
+    ProgramFactory,
 )
-from courses.serializers import CourseRunSerializer, CourseSerializer, ProgramSerializer
+from courses.serializers import (
+    CourseRunCertificateSerializer,
+    CourseRunSerializer,
+    CourseSerializer,
+    ProgramCertificateSerializer,
+    ProgramSerializer,
+)
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import now_in_utc
+
 
 pytestmark = [pytest.mark.django_db]
 
@@ -457,3 +468,51 @@ def test_course_runs_without_product_in_programs_api(client, has_product):
     assert_drf_json_equal(
         resp.json()[0]["courses"][0]["courseruns"], [CourseRunSerializer(run).data]
     )
+
+
+@pytest.mark.parametrize(
+    "factory, serializer_cls, api_name",
+    [
+        (
+            CourseRunCertificateFactory,
+            CourseRunCertificateSerializer,
+            "course_run_certificates_api",
+        ),
+        (
+            ProgramCertificateFactory,
+            ProgramCertificateSerializer,
+            "program_certificates_api",
+        ),
+    ],
+)
+def test_course_run_certificate_api(
+    settings, user, user_drf_client, factory, serializer_cls, api_name
+):
+    """Verify that the certificates APIs function as expected"""
+    settings.MITOL_DIGITAL_CREDENTIALS_AUTH_TYPE = "xpro"
+    settings.MITOL_DIGITAL_CREDENTIALS_DEEP_LINK_URL = "http://localhost"
+
+    cert = factory.create(user=user)
+
+    resp = user_drf_client.get(reverse(f"{api_name}-list"))
+    assert resp.json() == [serializer_cls(cert).data]
+
+    resp = user_drf_client.get(
+        reverse(f"{api_name}-detail", kwargs=dict(uuid=cert.uuid))
+    )
+    assert resp.json() == serializer_cls(cert).data
+
+    assert DigitalCredentialRequest.objects.count() == 0
+
+    resp = user_drf_client.post(
+        reverse(f"{api_name}-request_digital_credentials", kwargs=dict(uuid=cert.uuid))
+    )
+
+    assert DigitalCredentialRequest.objects.count() == 1
+
+    dcr = DigitalCredentialRequest.objects.first()
+
+    assert dcr.learner == user
+    assert dcr.credentialed_object == cert
+
+    assert resp.json() == DigitalCredentialRequestSerializer(dcr).data
