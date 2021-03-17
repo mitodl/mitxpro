@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.79.1 (Released March 17, 2021)
+--------------
+
+- Add digital credentials
+
 Version 0.79.0 (Released March 11, 2021)
 --------------
 
