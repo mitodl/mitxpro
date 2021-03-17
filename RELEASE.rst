@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.79.2
+--------------
+
+- Bump httplib2 from 0.18.0 to 0.19.0 (#2150)
+
 Version 0.79.1 (Released March 17, 2021)
 --------------
 
