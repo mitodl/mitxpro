@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.80.0
+--------------
+
+- Bump django from 2.2.13 to 2.2.18 (#2153)
+
 Version 0.79.2 (Released March 17, 2021)
 --------------
 
