@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.81.0
+--------------
+
+- Remove pytest-pylint (#2159)
+
 Version 0.80.0 (Released March 19, 2021)
 --------------
 
