@@ -19,7 +19,6 @@ pytest-cov>=2.6.1
 pytest-django
 pytest-env
 pytest-mock
-pytest-pylint==0.14.1
 pytest-lazy-fixture==0.5.1
 responses
 safety
