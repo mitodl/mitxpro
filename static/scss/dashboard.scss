@@ -111,16 +111,45 @@
 }
 
 .certificate-link {
-  a {
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+
+  >a {
     color: white;
     font-weight: 600;
     background-color: $denim-blue;
     padding-left: 1em;
     padding-right: 1em;
+    float: left;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      margin-bottom: 15px;
+      text-align: center;
+    }
 
     &:hover {
       text-decoration: none;
     }
+  }
+}
+
+.modal-content-credentials {
+  overflow: hidden;
+  text-align: left;
+  padding-bottom: 8px;
+  background: $dc-background;
+
+  &:after {
+    position: absolute;
+    left: 0;
+    top: 0;
+    content: "";
+    height: 5px;
+    width: 100%;
+    background: linear-gradient(to right, #3dbdbf 0%, #f1ba46 100%);
   }
 }
 
@@ -138,6 +167,15 @@
 }
 
 .digital-credential-link {
+  float: left;
+  margin-left: 30px;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
+  }
+
   a {
     color: $link-blue;
     text-decoration: underline;
@@ -149,6 +187,12 @@
   }
 
   .digital-credential-store-button {
+    display: none;
+
+    @media (max-width: 768px) {
+      display: flex;
+    }
+
     img {
       width: auto;
       height: 40px;
@@ -160,25 +204,25 @@
       border-radius: 5px;
       margin-bottom: 15px;
       text-align: center;
-      padding: 5px 20px;
+      padding: 2px 20px;
     }
   }
 
   .learn-more-button {
-    //display: inline-flex;
-    //cursor: pointer;
-    //float: right;
+
+    @media (min-width: 768px) {
+      float: right;
+    }
 
     a {
       margin-top: 15px;
       border-radius: 5px;
       background: $light-gray;
-      text-transform: uppercase;
       font-weight: 500;
       color: white;
       text-align: center;
       width: 100%;
-      padding: 10px 20px;
+      padding: 7px 20px;
       text-decoration: none;
     }
 
@@ -190,15 +234,23 @@
 
 
   .download-digital-credential-button {
+    display: none;
+
+    @media (max-width: 768px) {
+      display: flex;
+    }
+
     button {
       color: white;
-      font-weight: 600;
+      font-weight: 500;
       background: $denim-blue;
-      padding: 10px 20px;
+      padding: 7px 20px;
       border-radius: 5px;
       width: 100%;
       text-align: center;
       text-decoration: none;
+      border: none;
+      box-shadow: none;
 
       &:hover {
         text-decoration: underline;

@@ -262,7 +262,7 @@ export class DashboardPage extends React.Component<Props, State> {
                     </a>
                   ) : null}
               </div>
-              <div className="d-flex justify-content-lg-end col-lg-5 col-md-8">
+              <div className="d-flex justify-content-lg-end col-12">
                 {courseRunEnrollment.certificate ? (
                   <div className="certificate-link">
                     <a
@@ -273,7 +273,7 @@ export class DashboardPage extends React.Component<Props, State> {
                       View Certificate
                     </a>
                     {SETTINGS.digital_credentials ? (
-                      <div className="digital-credential-link row mt-2">
+                      <div className="digital-credential-link">
                         <a
                           data-toggle="modal"
                           href={`#${courseDialogIdentifier}`}
@@ -406,7 +406,7 @@ export class DashboardPage extends React.Component<Props, State> {
                     View Certificate
                   </a>
                   {SETTINGS.digital_credentials ? (
-                    <div className="digital-credential-link row mt-2">
+                    <div className="digital-credential-link">
                       <a
                         data-toggle="modal"
                         href={`#${programDialogIdentifier}`}
@@ -474,7 +474,7 @@ export class DashboardPage extends React.Component<Props, State> {
     return (
       <div className="modal fade" id={dialogId} role="dialog">
         <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
+          <div className="modal-content modal-content-credentials">
             <div className="modal-body">
               <div className="container no-gutters px-0">
                 <div className="d-flex flex-row-reverse">
