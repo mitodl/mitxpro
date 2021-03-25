@@ -509,7 +509,12 @@ export class DashboardPage extends React.Component<Props, State> {
 
                 <div className="row download-digital-credential-button">
                   {/* eslint-disable-next-line no-undef */}
-                  <button type="submit" onClick={ () => mapCredentials(certificateUUID) }>Download Digital Credential</button>
+                  <button
+                    type="submit"
+                    onClick={() => mapCredentials(certificateUUID)}
+                  >
+                    Download Digital Credential
+                  </button>
                 </div>
 
                 <div className="row learn-more-button">

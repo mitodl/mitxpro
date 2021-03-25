@@ -1,7 +1,7 @@
 import { pathOr } from "ramda"
 
 import { nextState } from "./util"
-import {getCookie} from "../api"
+import { getCookie } from "../api"
 
 export default {
   enrollmentsSelector: pathOr(null, ["entities", "enrollments"]),
@@ -15,7 +15,6 @@ export default {
     }
   }),
 
-
   courseDigitalCredentialDownload: (uuid: string) => ({
     queryKey: "digitalCredentialDownload",
     url:      `/api/v1/course_run_certificates/${uuid}/request-digital-credential`,
@@ -26,5 +25,5 @@ export default {
         "X-CSRFTOKEN": getCookie("csrftoken")
       }
     }
-  }),
+  })
 }
