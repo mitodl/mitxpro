@@ -12,7 +12,9 @@ import type {
   CourseRunEnrollment,
   Program,
   ProgramEnrollment,
-  UserEnrollments, CourseRunCertificate, ProgramCertificate
+  UserEnrollments,
+  CourseRunCertificate,
+  ProgramCertificate
 } from "../flow/courseTypes"
 
 const genCourseRunId = incrementer()

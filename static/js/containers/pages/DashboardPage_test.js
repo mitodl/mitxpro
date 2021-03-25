@@ -1,23 +1,23 @@
 /* global SETTINGS: false */
 // @flow
-import {assert} from "chai"
+import { assert } from "chai"
 import sinon from "sinon"
 // $FlowFixMe: flow doesn't see fn
-import moment, {fn as momentProto} from "moment"
-import {mergeDeepRight, mergeRight} from "ramda"
+import moment, { fn as momentProto } from "moment"
+import { mergeDeepRight, mergeRight } from "ramda"
 
 import DashboardPage, {
   DashboardPage as InnerDashboardPage
 } from "./DashboardPage"
-import {formatPrettyDate} from "../../lib/util"
-import {shouldIf} from "../../lib/test_utils"
+import { formatPrettyDate } from "../../lib/util"
+import { shouldIf } from "../../lib/test_utils"
 import IntegrationTestHelper from "../../util/integration_test_helper"
 import {
   makeCourseRunEnrollment,
   makeUserEnrollments
 } from "../../factories/course"
 
-import {makeUser, makeUnusedCoupon} from "../../factories/user"
+import { makeUser, makeUnusedCoupon } from "../../factories/user"
 
 import * as coursesApi from "../../lib/courses"
 import * as utilFuncs from "../../lib/util"
@@ -43,7 +43,7 @@ describe("DashboardPage", () => {
       .returns([past, future])
     getDateSummaryStub = helper.sandbox
       .stub(coursesApi, "getDateSummary")
-      .returns({text: "Ends: January 1, 2019", inProgress: true})
+      .returns({ text: "Ends: January 1, 2019", inProgress: true })
 
     renderPage = helper.configureHOCRenderer(
       DashboardPage,
@@ -67,7 +67,7 @@ describe("DashboardPage", () => {
   })
 
   it("renders a dashboard", async () => {
-    const {inner} = await renderPage()
+    const { inner } = await renderPage()
     assert.isTrue(inner.find(".user-dashboard").exists())
     const programEnrollments = userEnrollments.program_enrollments
     const pastProgramEnrollments = userEnrollments.past_program_enrollments
@@ -99,10 +99,10 @@ describe("DashboardPage", () => {
   })
 
   it("shows a message if the user has no enrollments", async () => {
-    const {inner} = await renderPage({
+    const { inner } = await renderPage({
       entities: {
         enrollments: {
-          program_enrollments: [],
+          program_enrollments:    [],
           course_run_enrollments: []
         },
         currentUser: {
@@ -120,7 +120,7 @@ describe("DashboardPage", () => {
   })
 
   it("shows specific date information", async () => {
-    const {inner} = await renderPage()
+    const { inner } = await renderPage()
     sinon.assert.calledWith(
       programDateRangeStub,
       userEnrollments.program_enrollments[0]
@@ -128,10 +128,10 @@ describe("DashboardPage", () => {
     sinon.assert.callCount(
       getDateSummaryStub,
       userEnrollments.program_enrollments[0].course_run_enrollments.length +
-      userEnrollments.past_program_enrollments[0].course_run_enrollments
-        .length +
-      userEnrollments.course_run_enrollments.length +
-      userEnrollments.past_course_run_enrollments.length
+        userEnrollments.past_program_enrollments[0].course_run_enrollments
+          .length +
+        userEnrollments.course_run_enrollments.length +
+        userEnrollments.past_course_run_enrollments.length
     )
 
     const dates = programDateRangeStub()
@@ -158,10 +158,10 @@ describe("DashboardPage", () => {
       willExpand ? "expands" : "collapses"
     } a program courses section`, async () => {
       const programEnrollmentId = userEnrollments.program_enrollments[0].id
-      const {inner} = await renderPage({
+      const { inner } = await renderPage({
         entities: {
           enrollments: {
-            program_enrollments: userEnrollments.program_enrollments,
+            program_enrollments:      userEnrollments.program_enrollments,
             past_program_enrollments: []
           }
         }
@@ -249,16 +249,16 @@ describe("DashboardPage", () => {
         const userRunEnrollment = mergeDeepRight(makeCourseRunEnrollment(), {
           run: {
             courseware_url: coursewareUrl,
-            start_date: startDate,
-            end_date: endDate
+            start_date:     startDate,
+            end_date:       endDate
           }
         })
-        const {inner} = await renderPage({
+        const { inner } = await renderPage({
           entities: {
             enrollments: {
-              program_enrollments: [],
-              past_program_enrollments: [],
-              course_run_enrollments: [userRunEnrollment],
+              program_enrollments:         [],
+              past_program_enrollments:    [],
+              course_run_enrollments:      [userRunEnrollment],
               past_course_run_enrollments: []
             }
           }
@@ -322,32 +322,32 @@ describe("DashboardPage", () => {
     ]
   ].forEach(
     ([
-       startDate,
-       endDate,
-       expirationDate,
-       coursewareUrl,
-       shouldLink,
-       runDescription
-     ]) => {
+      startDate,
+      endDate,
+      expirationDate,
+      coursewareUrl,
+      shouldLink,
+      runDescription
+    ]) => {
       it(`${shouldIf(
         shouldLink
       )} render link to archived course if course run ${runDescription}`, async () => {
         const pastRunEnrollments = mergeDeepRight(makeCourseRunEnrollment(), {
           run: {
-            courseware_url: coursewareUrl,
-            start_date: startDate,
-            end_date: endDate,
+            courseware_url:  coursewareUrl,
+            start_date:      startDate,
+            end_date:        endDate,
             expiration_date: expirationDate
           }
         })
         // We need the actual method, not the stub for this test
         coursesApi.getDateSummary.restore()
-        const {inner} = await renderPage({
+        const { inner } = await renderPage({
           entities: {
             enrollments: {
-              program_enrollments: [],
-              past_program_enrollments: [],
-              course_run_enrollments: [],
+              program_enrollments:         [],
+              past_program_enrollments:    [],
+              course_run_enrollments:      [],
               past_course_run_enrollments: [pastRunEnrollments]
             }
           }
@@ -372,7 +372,7 @@ describe("DashboardPage", () => {
       const stub = helper.sandbox
         .stub(utilFuncs, "findItemWithTextId")
         .returns(program)
-      const {store} = await renderPage(
+      const { store } = await renderPage(
         {},
         {
           location: {
@@ -382,7 +382,7 @@ describe("DashboardPage", () => {
       )
       assert.deepEqual(store.getState().ui.userNotifications, {
         "order-status": {
-          type: "text",
+          type:  "text",
           props: {
             text: `You are now enrolled in ${program.title}!`
           }
@@ -409,7 +409,7 @@ describe("DashboardPage", () => {
           .stub(utilFuncs, "findItemWithTextId")
           .returns(null)
 
-        const {store} = await renderPage(
+        const { store } = await renderPage(
           {},
           {
             location: {
@@ -430,7 +430,7 @@ describe("DashboardPage", () => {
           assert.deepEqual(store.getState().ui.userNotifications, {
             "order-status": {
               color: "danger",
-              type: "text",
+              type:  "text",
               props: {
                 text: `Something went wrong. Please contact support at ${
                   SETTINGS.support_email
@@ -448,10 +448,9 @@ describe("DashboardPage", () => {
       })
     })
 
-
     it("shows a digital credential link", async () => {
       SETTINGS.digital_credentials = true
-      const {inner} = await renderPage({
+      const { inner } = await renderPage({
         entities: {
           enrollments: {
             program_enrollments:    userEnrollments.program_enrollments,
@@ -472,7 +471,7 @@ describe("DashboardPage", () => {
 
   it("doesn't shows a digital credential link if feature is off", async () => {
     SETTINGS.digital_credentials = false
-    const {inner} = await renderPage({
+    const { inner } = await renderPage({
       entities: {
         enrollments: {
           program_enrollments:    userEnrollments.program_enrollments,
