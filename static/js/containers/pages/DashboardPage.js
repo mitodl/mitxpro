@@ -508,7 +508,8 @@ export class DashboardPage extends React.Component<Props, State> {
                 </div>
 
                 <div className="row download-digital-credential-button">
-                  <button>Download Digital Credential</button>
+                  {/* eslint-disable-next-line no-undef */}
+                  <button type="submit" onClick={ () => mapCredentials(certificateUUID) }>Download Digital Credential</button>
                 </div>
 
                 <div className="row learn-more-button">
@@ -610,6 +611,10 @@ const mapStateToProps = createStructuredSelector({
   enrollments: queries.enrollment.enrollmentsSelector,
   currentUser: currentUserSelector
 })
+
+const mapCredentials = (uuid: string) => {
+  queries.enrollment.courseDigitalCredentialDownload(uuid)
+}
 
 const mapPropsToConfigs = () => [
   queries.enrollment.enrollmentsQuery(),

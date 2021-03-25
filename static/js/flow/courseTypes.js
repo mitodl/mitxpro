@@ -70,3 +70,9 @@ export type UserEnrollments = {
   past_program_enrollments: Array<ProgramEnrollment>,
   past_course_run_enrollments: Array<CourseRunEnrollment>
 }
+
+
+export type DigitalCredential = {
+  uuid: string,
+  deep_link_url: string
+}

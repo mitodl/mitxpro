@@ -20,7 +20,7 @@ import type {
 // uses the next piece of state which is the second argument
 const nextState = nthArg(1)
 
-const DEFAULT_POST_OPTIONS = {
+export const DEFAULT_POST_OPTIONS = {
   headers: {
     "X-CSRFTOKEN": getCookie("csrftoken")
   }
