@@ -262,9 +262,9 @@ export class DashboardPage extends React.Component<Props, State> {
                     </a>
                   ) : null}
               </div>
-              <div className="certificate-link d-flex justify-content-lg-end col-lg-5 col-md-8">
+              <div className="d-flex justify-content-lg-end col-lg-5 col-md-8">
                 {courseRunEnrollment.certificate ? (
-                  <div>
+                  <div className="certificate-link">
                     <a
                       href={courseRunEnrollment.certificate.link}
                       target="_blank"
@@ -395,9 +395,9 @@ export class DashboardPage extends React.Component<Props, State> {
             </div>
           </div>
           <div className="row no-gutters mb-3">
-            <div className="certificate-link d-flex justify-content-lg-end col-12">
+            <div className="d-flex justify-content-lg-end col-12">
               {programEnrollment.certificate ? (
-                <div>
+                <div className="certificate-link">
                   <a
                     href={programEnrollment.certificate.link}
                     target="_blank"
