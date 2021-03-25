@@ -124,6 +124,89 @@
   }
 }
 
+.digital-credential-dialog {
+  h2 {
+    border-bottom: 1px solid $tab-color;
+    width: 100%;
+    padding-bottom: 10px;
+    font-weight: 500;
+  }
+
+  p {
+    font-weight: 500;
+  }
+}
+
+.digital-credential-link {
+  a {
+    color: $link-blue;
+    text-decoration: underline;
+    background: transparent;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .digital-credential-store-button {
+    img {
+      width: auto;
+      height: 40px;
+    }
+
+    a {
+      width: 100%;
+      background: black;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      text-align: center;
+      padding: 5px 20px;
+    }
+  }
+
+  .learn-more-button {
+    //display: inline-flex;
+    //cursor: pointer;
+    //float: right;
+
+    a {
+      margin-top: 15px;
+      border-radius: 5px;
+      background: $light-gray;
+      text-transform: uppercase;
+      font-weight: 500;
+      color: white;
+      text-align: center;
+      width: 100%;
+      padding: 10px 20px;
+      text-decoration: none;
+    }
+
+    &:hover {
+      // underline is at different levels since we centered the text and checkmark vertically, so it looks strange
+      text-decoration: underline;
+    }
+  }
+
+
+  .download-digital-credential-button {
+    button {
+      color: white;
+      font-weight: 600;
+      background: $denim-blue;
+      padding: 10px 20px;
+      border-radius: 5px;
+      width: 100%;
+      text-align: center;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
 .program-detail-column,
 .non-program-course-enrollments .course-detail-column {
   padding: 15px;

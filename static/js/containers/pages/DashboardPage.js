@@ -1,5 +1,7 @@
 // @flow
 /* global SETTINGS: false */
+import { append } from "ramda"
+
 declare var dataLayer: Object[]
 declare var CSOURCE_PAYLOAD: ?Object
 
@@ -198,7 +200,9 @@ export class DashboardPage extends React.Component<Props, State> {
       index: number
     ) => {
       const dateSummary = getDateSummary(courseRunEnrollment)
-
+      const courseDialogIdentifier = `course-${
+        courseRunEnrollment.run.product_id
+      }`
       return (
         <div className="course-enrollment row" key={index}>
           {!isProgramCourse && (
@@ -260,13 +264,31 @@ export class DashboardPage extends React.Component<Props, State> {
               </div>
               <div className="certificate-link d-flex justify-content-lg-end col-lg-5 col-md-8">
                 {courseRunEnrollment.certificate ? (
-                  <a
-                    href={courseRunEnrollment.certificate.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View Certificate
-                  </a>
+                  <div>
+                    <a
+                      href={courseRunEnrollment.certificate.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      View Certificate
+                    </a>
+                    {SETTINGS.digital_credentials ? (
+                      <div className="digital-credential-link row mt-2">
+                        <a
+                          data-toggle="modal"
+                          href={`#${courseDialogIdentifier}`}
+                          className="read-more"
+                        >
+                          {" "}
+                          Digital Credential
+                        </a>
+                        {this.renderDigitalCredentialDialog(
+                          courseRunEnrollment.certificate.uuid,
+                          courseDialogIdentifier
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
             </div>
@@ -341,7 +363,7 @@ export class DashboardPage extends React.Component<Props, State> {
 
     const dateRange = programDateRange(programEnrollment)
     const isExpanded = collapseVisible[programEnrollment.id]
-
+    const programDialogIdentifier = `program-${programEnrollment.id}`
     return (
       <div className="program-enrollment row" key={index}>
         <div className="text-ribbon program">
@@ -375,13 +397,31 @@ export class DashboardPage extends React.Component<Props, State> {
           <div className="row no-gutters mb-3">
             <div className="certificate-link d-flex justify-content-lg-end col-12">
               {programEnrollment.certificate ? (
-                <a
-                  href={programEnrollment.certificate.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View Certificate
-                </a>
+                <div>
+                  <a
+                    href={programEnrollment.certificate.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View Certificate
+                  </a>
+                  {SETTINGS.digital_credentials ? (
+                    <div className="digital-credential-link row mt-2">
+                      <a
+                        data-toggle="modal"
+                        href={`#${programDialogIdentifier}`}
+                        className="read-more"
+                      >
+                        {" "}
+                        Digital Credential
+                      </a>
+                      {this.renderDigitalCredentialDialog(
+                        programEnrollment.certificate.uuid,
+                        programDialogIdentifier
+                      )}
+                    </div>
+                  ) : null}
+                </div>
               ) : null}
             </div>
           </div>
@@ -420,6 +460,61 @@ export class DashboardPage extends React.Component<Props, State> {
                   {isExpanded ? "expand_less" : "expand_more"}
                 </i>
               </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  renderDigitalCredentialDialog = (
+    certificateUUID: string,
+    dialogId: string
+  ) => {
+    return (
+      <div className="modal fade" id={dialogId} role="dialog">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-body">
+              <div className="container no-gutters px-0">
+                <div className="d-flex flex-row-reverse">
+                  <a className="text-dark" data-dismiss="modal">
+                    <span
+                      className="material-icons"
+                      data-icon="cancel"
+                      aria-hidden="true"
+                    />
+                  </a>
+                </div>
+              </div>
+              <div className="container px-4 digital-credential-dialog">
+                <div className="row py-2">
+                  <h2>Digital Credential</h2>
+                </div>
+                <div className="row">
+                  <p>
+                    You need a mobile device to manage your digital credentials.
+                    Please download the CredWallet app on your phone and return
+                    here to retrieve your digital credential.
+                  </p>
+                </div>
+                <div className="row digital-credential-store-button">
+                  <a href="">
+                    <img
+                      src="/static/images/app-store-badge.svg"
+                      alt="Course image"
+                    />
+                  </a>
+                </div>
+
+                <div className="row download-digital-credential-button">
+                  <button>Download Digital Credential</button>
+                </div>
+
+                <div className="row learn-more-button">
+                  <a href="">Learn More</a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
