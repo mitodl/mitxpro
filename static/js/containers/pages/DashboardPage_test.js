@@ -447,5 +447,45 @@ describe("DashboardPage", () => {
         }
       })
     })
+
+    it("shows a digital credential link", async () => {
+      SETTINGS.digital_credentials = true
+      const { inner } = await renderPage({
+        entities: {
+          enrollments: {
+            program_enrollments:    userEnrollments.program_enrollments,
+            course_run_enrollments: userEnrollments.program_enrollments[0].course_run_enrollments.concat(
+              userEnrollments.past_program_enrollments[0].course_run_enrollments
+            )
+          },
+          currentUser: {
+            is_authenticated: false
+          }
+        }
+      })
+
+      const digitalCredentialLink = inner.find(".digital-credential-link")
+      assert.isTrue(digitalCredentialLink.exists())
+    })
+  })
+
+  it("doesn't shows a digital credential link if feature is off", async () => {
+    SETTINGS.digital_credentials = false
+    const { inner } = await renderPage({
+      entities: {
+        enrollments: {
+          program_enrollments:    userEnrollments.program_enrollments,
+          course_run_enrollments: userEnrollments.program_enrollments[0].course_run_enrollments.concat(
+            userEnrollments.past_program_enrollments[0].course_run_enrollments
+          )
+        },
+        currentUser: {
+          is_authenticated: false
+        }
+      }
+    })
+
+    const digitalCredentialLink = inner.find(".digital-credential-link")
+    assert.isFalse(digitalCredentialLink.exists())
   })
 })

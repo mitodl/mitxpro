@@ -1,5 +1,7 @@
 // @flow
 /* global SETTINGS: false */
+import auth from "../../lib/queries/auth"
+
 declare var dataLayer: Object[]
 declare var CSOURCE_PAYLOAD: ?Object
 
@@ -9,7 +11,7 @@ import { DASHBOARD_PAGE_TITLE } from "../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { Link } from "react-router-dom"
-import { connectRequest } from "redux-query"
+import { connectRequest, mutateAsync, requestAsync } from "redux-query"
 import { createStructuredSelector } from "reselect"
 import moment from "moment"
 import * as R from "ramda"
@@ -42,7 +44,8 @@ type Props = {
   currentUser: CurrentUser,
   forceRequest: () => Promise<*>,
   history: RouterHistory,
-  location: Location
+  location: Location,
+  downloadDigitalCredentials: (uuid: string, isCourse: boolean) => Promise<*>
 }
 
 type State = {
@@ -198,7 +201,7 @@ export class DashboardPage extends React.Component<Props, State> {
       index: number
     ) => {
       const dateSummary = getDateSummary(courseRunEnrollment)
-
+      const courseDialogIdentifier = `course-${courseRunEnrollment.run.id}`
       return (
         <div className="course-enrollment row" key={index}>
           {!isProgramCourse && (
@@ -258,15 +261,34 @@ export class DashboardPage extends React.Component<Props, State> {
                     </a>
                   ) : null}
               </div>
-              <div className="certificate-link d-flex justify-content-lg-end col-lg-5 col-md-8">
+              <div className="d-flex justify-content-lg-end col-12">
                 {courseRunEnrollment.certificate ? (
-                  <a
-                    href={courseRunEnrollment.certificate.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View Certificate
-                  </a>
+                  <div className="certificate-link">
+                    <a
+                      href={courseRunEnrollment.certificate.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      View Certificate
+                    </a>
+                    {SETTINGS.digital_credentials ? (
+                      <div className="digital-credential-link">
+                        <a
+                          data-toggle="modal"
+                          href={`#${courseDialogIdentifier}`}
+                          className="read-more"
+                        >
+                          {" "}
+                          Digital Credential
+                        </a>
+                        {this.renderDigitalCredentialDialog(
+                          courseRunEnrollment.certificate.uuid,
+                          courseDialogIdentifier,
+                          true
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
             </div>
@@ -341,7 +363,7 @@ export class DashboardPage extends React.Component<Props, State> {
 
     const dateRange = programDateRange(programEnrollment)
     const isExpanded = collapseVisible[programEnrollment.id]
-
+    const programDialogIdentifier = `program-${programEnrollment.id}`
     return (
       <div className="program-enrollment row" key={index}>
         <div className="text-ribbon program">
@@ -373,15 +395,34 @@ export class DashboardPage extends React.Component<Props, State> {
             </div>
           </div>
           <div className="row no-gutters mb-3">
-            <div className="certificate-link d-flex justify-content-lg-end col-12">
+            <div className="d-flex justify-content-lg-end col-12">
               {programEnrollment.certificate ? (
-                <a
-                  href={programEnrollment.certificate.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View Certificate
-                </a>
+                <div className="certificate-link">
+                  <a
+                    href={programEnrollment.certificate.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View Certificate
+                  </a>
+                  {SETTINGS.digital_credentials ? (
+                    <div className="digital-credential-link">
+                      <a
+                        data-toggle="modal"
+                        href={`#${programDialogIdentifier}`}
+                        className="read-more"
+                      >
+                        {" "}
+                        Digital Credential
+                      </a>
+                      {this.renderDigitalCredentialDialog(
+                        programEnrollment.certificate.uuid,
+                        programDialogIdentifier,
+                        false
+                      )}
+                    </div>
+                  ) : null}
+                </div>
               ) : null}
             </div>
           </div>
@@ -420,6 +461,81 @@ export class DashboardPage extends React.Component<Props, State> {
                   {isExpanded ? "expand_less" : "expand_more"}
                 </i>
               </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  renderDigitalCredentialDialog = (
+    certificateUUID: string,
+    dialogId: string,
+    isCourse: boolean
+  ) => {
+    return (
+      <div className="modal fade" id={dialogId} role="dialog">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content modal-content-credentials">
+            <div className="modal-body">
+              <div className="container no-gutters px-0">
+                <div className="d-flex flex-row-reverse">
+                  <a className="text-dark" data-dismiss="modal">
+                    <span
+                      className="material-icons"
+                      data-icon="cancel"
+                      aria-hidden="true"
+                    />
+                  </a>
+                </div>
+              </div>
+              <div className="container px-4 digital-credential-dialog">
+                <div className="row py-2">
+                  <h2>Digital Credential</h2>
+                </div>
+                <div className="row">
+                  <p className="desktop-instruction">
+                    You need a mobile device to manage your digital credentials.
+                    Please download the CredWallet app on your phone and return
+                    here to retrieve your digital credential.
+                  </p>
+                  <p className="mobile-instruction">
+                    Digital Credentials require an Apple or Android mobile
+                    device. To retrieve your credential, install the CredWallet
+                    app and then click Download Digital Credential.
+                  </p>
+                </div>
+                <div className="row digital-credential-store-button">
+                  <a href="https://testflight.apple.com/join/fERBVJoU">
+                    <img
+                      src="/static/images/app-store-badge.svg"
+                      alt="Course image"
+                    />
+                  </a>
+                </div>
+
+                <div className="row download-digital-credential-button">
+                  {/* eslint-disable-next-line no-undef */}
+                  <button
+                    type="submit"
+                    onClick={() => {
+                      this.props
+                        .downloadDigitalCredentials(certificateUUID, isCourse)
+                        .then(response => {
+                          Promise.resolve(
+                            (window.location = response.body.deep_link_url)
+                          )
+                        })
+                    }}
+                  >
+                    Download Digital Credential
+                  </button>
+                </div>
+
+                <div className="row learn-more-button">
+                  <a href="https://digitalcredentials.mit.edu/">Learn More</a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -521,7 +637,14 @@ const mapPropsToConfigs = () => [
   users.currentUserQuery()
 ]
 
+const downloadDigitalCredentials = (uuid: string, isCourse: boolean) =>
+  requestAsync({
+    ...queries.digitalCredentials.downloadDigitalCredentials(uuid, isCourse),
+    force: true
+  })
+
 const mapDispatchToProps = {
+  downloadDigitalCredentials,
   addUserNotification
 }
 
