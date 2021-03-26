@@ -15,7 +15,8 @@ declare type Settings = {
   zendesk_config: {
     help_widget_enabled: boolean,
     help_widget_key: ?string
-  }
+  },
+  digital_credentials: boolean
 }
 declare var SETTINGS: Settings
 

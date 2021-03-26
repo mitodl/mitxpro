@@ -12,7 +12,9 @@ import type {
   CourseRunEnrollment,
   Program,
   ProgramEnrollment,
-  UserEnrollments
+  UserEnrollments,
+  CourseRunCertificate,
+  ProgramCertificate
 } from "../flow/courseTypes"
 
 const genCourseRunId = incrementer()
@@ -76,7 +78,7 @@ export const makeCourseRunDetail = (): CourseRunDetail => {
 
 export const makeCourseRunEnrollment = (): CourseRunEnrollment => ({
   run:         makeCourseRunDetail(),
-  certificate: null,
+  certificate: makeCourseCertificate(),
   receipt:     null
 })
 
@@ -89,7 +91,7 @@ export const makeProgramEnrollment = (): ProgramEnrollment => ({
     makeCourseRunEnrollment(),
     makeCourseRunEnrollment()
   ],
-  certificate: null,
+  certificate: makeProgramCertificate(),
   receipt:     null
 })
 
@@ -104,4 +106,14 @@ export const makeUserEnrollments = (): UserEnrollments => ({
     makeCourseRunEnrollment(),
     makeCourseRunEnrollment()
   ]
+})
+
+export const makeCourseCertificate = (): CourseRunCertificate => ({
+  uuid: "some-uuid",
+  link: "some-link"
+})
+
+export const makeProgramCertificate = (): ProgramCertificate => ({
+  uuid: "some-uuid",
+  link: "some-link"
 })
