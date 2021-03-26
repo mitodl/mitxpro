@@ -43,7 +43,7 @@ type Props = {
   forceRequest: () => Promise<*>,
   history: RouterHistory,
   location: Location,
-  downloadDigitalCredentials: (uuid: string, isCourse: boolean) => Promise<*>
+  requestDigitalCredentials: (uuid: string, isCourse: boolean) => Promise<*>
 }
 
 type State = {
@@ -518,7 +518,7 @@ export class DashboardPage extends React.Component<Props, State> {
                     type="submit"
                     onClick={() => {
                       this.props
-                        .downloadDigitalCredentials(certificateUUID, isCourse)
+                        .requestDigitalCredentials(certificateUUID, isCourse)
                         .then(response => {
                           Promise.resolve(
                             (window.location = response.body.deep_link_url)
@@ -635,14 +635,14 @@ const mapPropsToConfigs = () => [
   users.currentUserQuery()
 ]
 
-const downloadDigitalCredentials = (uuid: string, isCourse: boolean) =>
+const requestDigitalCredentials = (uuid: string, isCourse: boolean) =>
   requestAsync({
-    ...queries.digitalCredentials.downloadDigitalCredentials(uuid, isCourse),
+    ...queries.digitalCredentials.requestDigitalCredentials(uuid, isCourse),
     force: true
   })
 
 const mapDispatchToProps = {
-  downloadDigitalCredentials,
+  requestDigitalCredentials,
   addUserNotification
 }
 
