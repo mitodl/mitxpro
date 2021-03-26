@@ -11,7 +11,7 @@ import { DASHBOARD_PAGE_TITLE } from "../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
 import { Link } from "react-router-dom"
-import { connectRequest } from "redux-query"
+import {connectRequest, mutateAsync, requestAsync} from "redux-query"
 import { createStructuredSelector } from "reselect"
 import moment from "moment"
 import * as R from "ramda"
@@ -33,7 +33,6 @@ import type {
   CourseRunEnrollment,
   UserEnrollments
 } from "../../flow/courseTypes"
-import type { EnrollmentCode } from "../../flow/ecommerceTypes"
 import type { CurrentUser } from "../../flow/authTypes"
 
 import { ALERT_TYPE_TEXT } from "../../constants"
@@ -44,7 +43,8 @@ type Props = {
   currentUser: CurrentUser,
   forceRequest: () => Promise<*>,
   history: RouterHistory,
-  location: Location
+  location: Location,
+  digitalCredential: (uuid: string, isCourse: boolean) => Promise<*>
 }
 
 type State = {
@@ -193,6 +193,10 @@ export class DashboardPage extends React.Component<Props, State> {
     })
   }
 
+  redirectUser = (): none => {
+
+  }
+
   renderCourseEnrollment = R.curry(
     (
       isProgramCourse: boolean,
@@ -284,7 +288,7 @@ export class DashboardPage extends React.Component<Props, State> {
                         </a>
                         {this.renderDigitalCredentialDialog(
                           courseRunEnrollment.certificate.uuid,
-                          courseDialogIdentifier
+                          courseDialogIdentifier,true
                         )}
                       </div>
                     ) : null}
@@ -417,7 +421,8 @@ export class DashboardPage extends React.Component<Props, State> {
                       </a>
                       {this.renderDigitalCredentialDialog(
                         programEnrollment.certificate.uuid,
-                        programDialogIdentifier
+                        programDialogIdentifier,
+                        false
                       )}
                     </div>
                   ) : null}
@@ -469,7 +474,8 @@ export class DashboardPage extends React.Component<Props, State> {
 
   renderDigitalCredentialDialog = (
     certificateUUID: string,
-    dialogId: string
+    dialogId: string,
+    isCourse: boolean
   ) => {
     return (
       <div className="modal fade" id={dialogId} role="dialog">
@@ -492,11 +498,16 @@ export class DashboardPage extends React.Component<Props, State> {
                   <h2>Digital Credential</h2>
                 </div>
                 <div className="row">
-                  <p>
+                  <p className="desktop-instruction">
                     You need a mobile device to manage your digital credentials.
                     Please download the CredWallet app on your phone and return
                     here to retrieve your digital credential.
                   </p>
+                  <p className="mobile-instruction">
+                    Digital Credentials require an Apple or Android mobile device. To retrieve your credential, install
+                    the CredWallet app and then click Download Digital Credential.
+                  </p>
+
                 </div>
                 <div className="row digital-credential-store-button">
                   <a href="https://testflight.apple.com/join/fERBVJoU">
@@ -511,7 +522,12 @@ export class DashboardPage extends React.Component<Props, State> {
                   {/* eslint-disable-next-line no-undef */}
                   <button
                     type="submit"
-                    onClick={() => mapCredentials(certificateUUID)}
+                    onClick={() => {
+                      this.props.digitalCredential(certificateUUID, isCourse)
+                        .then(response => {
+                          Promise.resolve(window.location = response.body.deep_link_url)
+                        })
+                    }}
                   >
                     Download Digital Credential
                   </button>
@@ -617,18 +633,20 @@ const mapStateToProps = createStructuredSelector({
   currentUser: currentUserSelector
 })
 
-const mapCredentials = (uuid: string) => {
-  queries.enrollment.courseDigitalCredentialDownload(uuid)
-}
-
 const mapPropsToConfigs = () => [
   queries.enrollment.enrollmentsQuery(),
   users.currentUserQuery()
 ]
 
-const mapDispatchToProps = {
-  addUserNotification
-}
+const mapDispatchToProps = dispatch => ({
+  addUserNotification,
+  // eslint-disable-next-line no-undef
+  digitalCredential: (uuid: string, isCourse: boolean) => dispatch(requestAsync({
+    ...queries.digitalCredentials.downloadDigitalCredentials(uuid, isCourse),
+    force: true
+  })
+  ),
+})
 
 export default compose(
   connect(

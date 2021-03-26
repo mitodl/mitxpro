@@ -257,6 +257,20 @@
       }
     }
   }
+
+  .desktop-instruction{
+    display: none;
+    @media (min-width: 768px) {
+      display: block;
+    }
+ }
+
+  .mobile-instruction {
+    display: block;
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
 }
 
 .program-detail-column,
