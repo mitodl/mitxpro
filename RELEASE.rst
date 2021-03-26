@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.81.0
+Version 0.81.0 (Released March 26, 2021)
 --------------
 
 - Backend updates to support new DC UX
