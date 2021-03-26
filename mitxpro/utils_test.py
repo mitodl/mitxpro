@@ -463,7 +463,7 @@ def test_get_js_settings(settings, rf):
         "HELP_WIDGET_ENABLED": False,
         "HELP_WIDGET_KEY": "fake_key",
     }
-    settings.FEATURES['DIGITAL_CREDENTIALS'] = True
+    settings.FEATURES["DIGITAL_CREDENTIALS"] = True
 
     request = rf.get("/")
 
@@ -479,5 +479,4 @@ def test_get_js_settings(settings, rf):
         "site_name": settings.SITE_NAME,
         "zendesk_config": {"help_widget_enabled": False, "help_widget_key": "fake_key"},
         "digital_credentials": settings.FEATURES.get("DIGITAL_CREDENTIALS", False),
-
     }

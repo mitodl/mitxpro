@@ -201,7 +201,7 @@ export class DashboardPage extends React.Component<Props, State> {
     ) => {
       const dateSummary = getDateSummary(courseRunEnrollment)
       const courseDialogIdentifier = `course-${
-        courseRunEnrollment.run.product_id
+        courseRunEnrollment.run.id
       }`
       return (
         <div className="course-enrollment row" key={index}>
@@ -499,7 +499,7 @@ export class DashboardPage extends React.Component<Props, State> {
                   </p>
                 </div>
                 <div className="row digital-credential-store-button">
-                  <a href="">
+                  <a href="https://testflight.apple.com/join/fERBVJoU">
                     <img
                       src="/static/images/app-store-badge.svg"
                       alt="Course image"
@@ -518,7 +518,7 @@ export class DashboardPage extends React.Component<Props, State> {
                 </div>
 
                 <div className="row learn-more-button">
-                  <a href="">Learn More</a>
+                  <a href="https://digitalcredentials.mit.edu/">Learn More</a>
                 </div>
               </div>
             </div>
