@@ -284,7 +284,7 @@ export class DashboardPage extends React.Component<Props, State> {
                         </a>
                         {this.renderDigitalCredentialDialog(
                           courseRunEnrollment.certificate.uuid,
-                          courseDialogIdentifier,true
+                          courseDialogIdentifier, true
                         )}
                       </div>
                     ) : null}
