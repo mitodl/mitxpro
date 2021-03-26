@@ -193,10 +193,6 @@ export class DashboardPage extends React.Component<Props, State> {
     })
   }
 
-  redirectUser = (): none => {
-
-  }
-
   renderCourseEnrollment = R.curry(
     (
       isProgramCourse: boolean,

@@ -1,6 +1,5 @@
 import { getCookie } from "../api"
-import type {updateEmailResponse} from "../../flow/authTypes";
-import type {DigitalCredential} from "../../flow/courseTypes";
+import type {DigitalCredential} from "../../flow/courseTypes"
 
 export default {
   downloadDigitalCredentials: (uuid: string, isCourse: boolean) => ({
