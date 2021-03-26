@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.81.1
+--------------
+
+- Added digital credentials dialog and redirection (#2168)
+
 Version 0.81.0 (Released March 26, 2021)
 --------------
 
