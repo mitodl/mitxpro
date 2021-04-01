@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.81.2
+--------------
+
+- Bump pygments from 2.4.2 to 2.7.4 (#2172)
+- Bump rsa from 4.0 to 4.1 (#2166)
+- Bump y18n from 4.0.0 to 4.0.1 (#2173)
+
 Version 0.81.1 (Released March 29, 2021)
 --------------
 
