@@ -238,6 +238,15 @@ export class DashboardPage extends React.Component<Props, State> {
               </div>
               <div className="date-summary-text col-12">{dateSummary.text}</div>
             </div>
+            {courseRunEnrollment.receipt ? (
+              <div className="row mt-2">
+                <div className="col">
+                  <Link to={`/receipt/${courseRunEnrollment.receipt}`}>
+                    View Receipt
+                  </Link>
+                </div>
+              </div>
+            ) : null}
             <div className="row mt-2">
               <div className="archived-course-link col-lg-7 col-md-8">
                 {dateSummary.archived &&
