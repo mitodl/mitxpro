@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.81.2
+Version 0.81.2 (Released April 05, 2021)
 --------------
 
 - Bump pygments from 2.4.2 to 2.7.4 (#2172)
