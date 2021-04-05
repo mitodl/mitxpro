@@ -71,7 +71,7 @@
                     <span class="success-text">has successfully completed</span>
                     <span class="degree-text">{{ page.product_name }}</span>
                     {% if page.CEUs %}
-                        <span class="award-text">Awarded {{ CEUs }} Continuing Education Units (CEUs) <br>{{ start_date|date }} - {{ end_date|date }}</span>
+                        <span class="award-text">Awarded {{ CEUs }} Continuing Education Units (CEUs) <br>{{ end_date|date }}</span>
                     {% endif %}
                     <div class="row justify-content-center certify-by-row">
                         {% for signatory in page.signatory_pages %}
