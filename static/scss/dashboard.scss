@@ -257,20 +257,6 @@
       }
     }
   }
-
-  .desktop-instruction {
-    display: none;
-    @media (min-width: 768px) {
-      display: block;
-    }
-  }
-
-  .mobile-instruction {
-    display: block;
-    @media (min-width: 768px) {
-      display: none;
-    }
-  }
 }
 
 .program-detail-column,
@@ -354,6 +340,14 @@
       flex-direction: row;
       align-items: center;
     }
+  }
+}
+
+.view-receipt {
+  text-decoration: underline;
+
+  @media (max-width: 768px) {
+    margin-bottom: 15px;
   }
 }
 

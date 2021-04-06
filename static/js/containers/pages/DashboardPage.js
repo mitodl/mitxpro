@@ -35,6 +35,7 @@ import type { EnrollmentCode } from "../../flow/ecommerceTypes"
 import type { CurrentUser } from "../../flow/authTypes"
 
 import { ALERT_TYPE_TEXT } from "../../constants"
+import { isIOS, isAndroid, isMobile } from "react-device-detect"
 
 type Props = {
   addUserNotification: Function,
@@ -237,15 +238,6 @@ export class DashboardPage extends React.Component<Props, State> {
               </div>
               <div className="date-summary-text col-12">{dateSummary.text}</div>
             </div>
-            {courseRunEnrollment.receipt && !isProgramCourse ? (
-              <div className="row mt-2">
-                <div className="col">
-                  <Link to={`/receipt/${courseRunEnrollment.receipt}`}>
-                    View Receipt
-                  </Link>
-                </div>
-              </div>
-            ) : null}
             <div className="row mt-2">
               <div className="archived-course-link col-lg-7 col-md-8">
                 {dateSummary.archived &&
@@ -259,7 +251,15 @@ export class DashboardPage extends React.Component<Props, State> {
                     </a>
                   ) : null}
               </div>
-              <div className="d-flex justify-content-lg-end col-12">
+              <div className="d-sm-flex justify-content-sm-between col-12 mt-3 mb-2">
+                {courseRunEnrollment.receipt && !isProgramCourse ? (
+                  <div className="view-receipt">
+                    <Link to={`/receipt/${courseRunEnrollment.receipt}`}>
+                      View Receipt
+                    </Link>
+                  </div>
+                ) : null}
+
                 {courseRunEnrollment.certificate ? (
                   <div className="certificate-link">
                     <a
@@ -368,13 +368,13 @@ export class DashboardPage extends React.Component<Props, State> {
           <div className="text">Program</div>
         </div>
 
-        <div className="program-image-column col-lg-3 col-md-5">
+        <div className="program-image-column col-12 col-md-3">
           <img
             src={programEnrollment.program.thumbnail_url}
             alt="Program image"
           />
         </div>
-        <div className="program-detail-column col-lg-9 col-md-7">
+        <div className="program-detail-column col-12 col-md-9">
           <div className="row no-gutters">
             <div className="col-12 col-md-9">
               <h2>{programEnrollment.program.title}</h2>
@@ -393,7 +393,15 @@ export class DashboardPage extends React.Component<Props, State> {
             </div>
           </div>
           <div className="row no-gutters mb-3">
-            <div className="d-flex justify-content-lg-end col-12">
+            <div className="d-sm-flex justify-content-sm-between col-12 mt-3 mb-2">
+              <div className="view-receipt">
+                {programEnrollment.receipt ? (
+                  <Link to={`/receipt/${programEnrollment.receipt}`}>
+                    View Receipt
+                  </Link>
+                ) : null}
+              </div>
+
               {programEnrollment.certificate ? (
                 <div className="certificate-link">
                   <a
@@ -440,14 +448,7 @@ export class DashboardPage extends React.Component<Props, State> {
           </Collapse>
 
           <div className="row">
-            <div className="expand-control d-flex col-6 mt-1">
-              {programEnrollment.receipt ? (
-                <Link to={`/receipt/${programEnrollment.receipt}`}>
-                  View Receipt
-                </Link>
-              ) : null}
-            </div>
-            <div id="expand-control" className="d-flex flex-row-reverse col-6">
+            <div id="expand-control" className="d-flex flex-row-reverse col-12">
               <Button
                 className="collapse-toggle btn-link shadow-none d-flex align-items-center"
                 onClick={R.partial(this.onCollapseToggle, [
@@ -464,6 +465,18 @@ export class DashboardPage extends React.Component<Props, State> {
         </div>
       </div>
     )
+  }
+
+  isAndroidOrIOSMobile = (): boolean => {
+    // Returns true if the device is mobile or tablet and the OS is either Android or iOS
+    return (isAndroid || isIOS) && isMobile
+  }
+
+  digitalCredentialsDialogText = (): string => {
+    if (this.isAndroidOrIOSMobile()) {
+      return "To retrieve your credential, install the CredWallet app and then click Download Digital Credential.\n"
+    }
+    return "To retrieve your credential, please open the xPRO dashboard on an iOS or Android device and follow the instructions.\n"
   }
 
   renderDigitalCredentialDialog = (
@@ -492,44 +505,45 @@ export class DashboardPage extends React.Component<Props, State> {
                   <h2>Digital Credential</h2>
                 </div>
                 <div className="row">
-                  <p className="desktop-instruction">
-                    You need a mobile device to manage your digital credentials.
-                    Please download the CredWallet app on your phone and return
-                    here to retrieve your digital credential.
-                  </p>
-                  <p className="mobile-instruction">
-                    Digital Credentials require an Apple or Android mobile
-                    device. To retrieve your credential, install the CredWallet
-                    app and then click Download Digital Credential.
-                  </p>
+                  <p>{this.digitalCredentialsDialogText()}</p>
                 </div>
                 <div className="row digital-credential-store-button">
-                  <a href="https://testflight.apple.com/join/fERBVJoU">
-                    <img
-                      src="/static/images/app-store-badge.svg"
-                      alt="Course image"
-                    />
-                  </a>
+                  {isIOS && isMobile && (
+                    <a href="https://testflight.apple.com/join/fERBVJoU">
+                      <img
+                        src="/static/images/app-store-badge.svg"
+                        alt="AppStore Image"
+                      />
+                    </a>
+                  )}
+                  {isAndroid && isMobile && (
+                    <a href="https://play.google.com/store/apps">
+                      <img
+                        src="/static/images/google-play-badge.png"
+                        alt="Playstore Image"
+                      />
+                    </a>
+                  )}
                 </div>
 
-                <div className="row download-digital-credential-button">
-                  {/* eslint-disable-next-line no-undef */}
-                  <button
-                    type="submit"
-                    onClick={() => {
-                      this.props
-                        .requestDigitalCredentials(certificateUUID, isCourse)
-                        .then(response => {
-                          Promise.resolve(
-                            (window.location = response.body.deep_link_url)
-                          )
-                        })
-                    }}
-                  >
-                    Download Digital Credential
-                  </button>
-                </div>
-
+                {this.isAndroidOrIOSMobile() && (
+                  <div className="row download-digital-credential-button">
+                    <button
+                      type="submit"
+                      onClick={() => {
+                        this.props
+                          .requestDigitalCredentials(certificateUUID, isCourse)
+                          .then(response => {
+                            Promise.resolve(
+                              (window.location = response.body.deep_link_url)
+                            )
+                          })
+                      }}
+                    >
+                      Download Digital Credential
+                    </button>
+                  </div>
+                )}
                 <div className="row learn-more-button">
                   <a href="https://digitalcredentials.mit.edu/">Learn More</a>
                 </div>
