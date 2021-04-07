@@ -1430,3 +1430,11 @@ DIGITAL_CREDENTIALS_VERIFICATION_METHOD = get_string(
     default=None,
     description="Verification method for digital credentials",
 )
+# pylint:disable=fixme
+# FIXME: This setting is meant to be temporary and it should be removed once we decide to support digital credentials
+#  for all courses/programs.
+DIGITAL_CREDENTIALS_SUPPORTED_RUNS = get_delimited_list(
+    name="DIGITAL_CREDENTIALS_SUPPORTED_RUNS",
+    default=[],
+    description="Comma separated string of course/program runs/Ids that support digital credentials",
+)

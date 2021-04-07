@@ -450,13 +450,18 @@ describe("DashboardPage", () => {
 
     it("shows a digital credential link", async () => {
       SETTINGS.digital_credentials = true
+      const programEnrollments = userEnrollments.program_enrollments
+      const courseRunEnrollments = userEnrollments.program_enrollments[0].course_run_enrollments.concat(
+        userEnrollments.past_program_enrollments[0].course_run_enrollments
+      )
+      SETTINGS.digital_credentials_supported_runs = [
+        programEnrollments[0].program.readable_id
+      ]
       const { inner } = await renderPage({
         entities: {
           enrollments: {
-            program_enrollments:    userEnrollments.program_enrollments,
-            course_run_enrollments: userEnrollments.program_enrollments[0].course_run_enrollments.concat(
-              userEnrollments.past_program_enrollments[0].course_run_enrollments
-            )
+            program_enrollments:    programEnrollments,
+            course_run_enrollments: courseRunEnrollments
           },
           currentUser: {
             is_authenticated: false
