@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.82.0
+Version 0.82.0 (Released April 07, 2021)
 --------------
 
 - Updated receipts design and OS based Digital Credentials info text and store buttons (#2171)
