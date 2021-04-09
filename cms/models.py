@@ -1795,6 +1795,7 @@ class CertificatePage(CourseProgramChildPage):
                 "start_date": start_date,
                 "end_date": end_date,
                 "CEUs": CEUs,
+                "is_program_certificate": True if isinstance(self.certificate, ProgramCertificate) else False
             }
         else:
             raise Http404()
