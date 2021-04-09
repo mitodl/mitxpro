@@ -269,23 +269,26 @@ export class DashboardPage extends React.Component<Props, State> {
                     >
                       View Certificate
                     </a>
-                    {SETTINGS.digital_credentials ? (
-                      <div className="digital-credential-link">
-                        <a
-                          data-toggle="modal"
-                          href={`#${courseDialogIdentifier}`}
-                          className="read-more"
-                        >
-                          {" "}
+                    {this.isDigitalCredentialSupported(
+                      courseRunEnrollment.run.courseware_id
+                    ) ? (
+                        <div className="digital-credential-link">
+                          <a
+                            data-toggle="modal"
+                            href={`#${courseDialogIdentifier}`}
+                            className="read-more"
+                          >
+                            {" "}
                           Digital Credential
-                        </a>
-                        {this.renderDigitalCredentialDialog(
-                          courseRunEnrollment.certificate.uuid,
-                          courseDialogIdentifier,
-                          true
-                        )}
-                      </div>
-                    ) : null}
+                          </a>
+                          {this.renderDigitalCredentialDialog(
+                          // $FlowFixMe: Flow thinks certificate can be null or undefined but it can't be
+                            courseRunEnrollment.certificate.uuid,
+                            courseDialogIdentifier,
+                            true
+                          )}
+                        </div>
+                      ) : null}
                   </div>
                 ) : null}
               </div>
@@ -411,23 +414,26 @@ export class DashboardPage extends React.Component<Props, State> {
                   >
                     View Certificate
                   </a>
-                  {SETTINGS.digital_credentials ? (
-                    <div className="digital-credential-link">
-                      <a
-                        data-toggle="modal"
-                        href={`#${programDialogIdentifier}`}
-                        className="read-more"
-                      >
-                        {" "}
+                  {this.isDigitalCredentialSupported(
+                    programEnrollment.program.readable_id
+                  ) ? (
+                      <div className="digital-credential-link">
+                        <a
+                          data-toggle="modal"
+                          href={`#${programDialogIdentifier}`}
+                          className="read-more"
+                        >
+                          {" "}
                         Digital Credential
-                      </a>
-                      {this.renderDigitalCredentialDialog(
-                        programEnrollment.certificate.uuid,
-                        programDialogIdentifier,
-                        false
-                      )}
-                    </div>
-                  ) : null}
+                        </a>
+                        {this.renderDigitalCredentialDialog(
+                        // $FlowFixMe: Flow thinks certificate can be null or undefined but it can't be
+                          programEnrollment.certificate.uuid,
+                          programDialogIdentifier,
+                          false
+                        )}
+                      </div>
+                    ) : null}
                 </div>
               ) : null}
             </div>
@@ -477,6 +483,17 @@ export class DashboardPage extends React.Component<Props, State> {
       return "To retrieve your credential, install the CredWallet app and then click Download Digital Credential.\n"
     }
     return "To retrieve your credential, please open the xPRO dashboard on an iOS or Android device and follow the instructions.\n"
+  }
+
+  isDigitalCredentialSupported = (runId: string): boolean => {
+    // Returns true if digital credentials feature is on and the passed run id exists in supported list of runs
+    {
+      /*FIXME: Check for digital credentials supported runs is meant to be temporary, It needs to be removed once we decide to support digital credentials for all courses/programs.*/
+    }
+    return (
+      SETTINGS.digital_credentials &&
+      SETTINGS.digital_credentials_supported_runs.includes(runId)
+    )
   }
 
   renderDigitalCredentialDialog = (

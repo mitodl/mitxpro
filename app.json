@@ -151,6 +151,10 @@
       "description": "Verification method for digital credentials",
       "required": false
     },
+    "DIGITAL_CREDENTIALS_SUPPORTED_RUNS": {
+      "description": "Comma separated string of course/program runs/Ids that support digital credentials",
+      "required": false
+    },
     "DJANGO_LOG_LEVEL": {
       "description": "The log level for django",
       "required": false
