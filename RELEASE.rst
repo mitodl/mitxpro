@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.83.0
+--------------
+
+- asadiqbal08/Remove the start date from certificate page (#2177)
+
 Version 0.82.1 (Released April 12, 2021)
 --------------
 
