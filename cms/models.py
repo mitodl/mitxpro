@@ -1799,7 +1799,7 @@ class CertificatePage(CourseProgramChildPage):
                 "start_date": start_date,
                 "end_date": end_date,
                 "CEUs": CEUs,
-                "is_program_certificate": is_program_certificate
+                "is_program_certificate": is_program_certificate,
             }
         else:
             raise Http404()
