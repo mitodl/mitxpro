@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.82.1
+Version 0.82.1 (Released April 12, 2021)
 --------------
 
 - Added configuration based digital credential support (#2182)
