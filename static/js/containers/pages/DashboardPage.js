@@ -252,7 +252,7 @@ export class DashboardPage extends React.Component<Props, State> {
                   ) : null}
               </div>
               <div className="d-sm-flex justify-content-sm-between col-12 mt-3 mb-2">
-                {courseRunEnrollment.receipt && !isProgramCourse ? (
+                {courseRunEnrollment.receipt ? (
                   <div className="view-receipt">
                     <Link to={`/receipt/${courseRunEnrollment.receipt}`}>
                       View Receipt
