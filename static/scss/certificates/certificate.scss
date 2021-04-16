@@ -143,11 +143,17 @@ $text-gray-light: #d2d0d1;
         margin: 0 0 10px;
       }
 
+      .program-degree-text {
+        display: block;
+        font-size: 20px;
+        line-height: 25px;
+      }
+
       .award-text {
         display: block;
         font-size: 20px;
         line-height: 25px;
-        margin: 0 0 20px;
+        margin: 20px 0 20px;
       }
 
       .certify-by {
@@ -373,6 +379,12 @@ $text-gray-light: #d2d0d1;
           font-weight: bold;
         }
 
+        .program-degree-text {
+          font-size: 13px;
+          line-height: 17px;
+          font-weight: bold;
+        }
+
         .certify-name {
           font-size: 40px;
           line-height: 40px;
@@ -383,7 +395,6 @@ $text-gray-light: #d2d0d1;
           width: 570px;
           font-size: 25px;
           line-height: 30px;
-          margin: 0 0 20px;
           display: inline-block;
           text-align: center;
         }
