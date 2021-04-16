@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.83.1 (Released April 16, 2021)
+--------------
+
+- Showing receipt Link in case of individual courses run purchases of a program (#2175)
+- Bump lxml from 4.6.2 to 4.6.3 (#2164)
+
 Version 0.83.0 (Released April 13, 2021)
 --------------
 
