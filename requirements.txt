@@ -123,12 +123,13 @@ django==2.2.20
     #   django-taggit
     #   django-treebeard
     #   django-user-agents
+    #   djangorestframework
     #   mitol-django-common
     #   mitol-django-digital-credentials
     #   mitol-django-mail
     #   mitol-django-oauth-toolkit-extensions
     #   wagtail
-djangorestframework==3.9.4
+djangorestframework==3.11.2
     # via
     #   -r requirements.in
     #   mitol-django-digital-credentials
