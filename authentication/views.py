@@ -13,15 +13,16 @@ from social_django.utils import load_backend
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes, renderer_classes
+from rest_framework.decorators import (
+    api_view,
+    permission_classes,
+    renderer_classes,
+    action,
+)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from anymail.message import AnymailMessage
-from djoser.views import (
-    PasswordResetView as DjoserPasswordResetView,
-    PasswordResetConfirmView as DjoserPasswordResetConfirmView,
-    SetPasswordView as DjoserSetPasswordView,
-)
+from djoser.views import UserViewSet
 from djoser.utils import ActionViewMixin
 from djoser.email import PasswordResetEmail as DjoserPasswordResetEmail
 
@@ -182,7 +183,7 @@ class CustomPasswordResetEmail(DjoserPasswordResetEmail):
         return context
 
 
-class CustomDjoserAPIView(ActionViewMixin):
+class CustomDjoserAPIView(UserViewSet, ActionViewMixin):
     """
     Overrides the post method of a Djoser view and adds one extra piece of logic:
 
@@ -192,37 +193,23 @@ class CustomDjoserAPIView(ActionViewMixin):
     when redux-hammock is changed to support 204's.
     """
 
-    def post(self, request, **kwargs):  # pylint: disable=missing-docstring
+    def post(self, request):  # pylint: disable=missing-docstring,arguments-differ
         response = super().post(request)
         if response.status_code == status.HTTP_204_NO_CONTENT:
             return Response({}, status=status.HTTP_200_OK)
         return response
 
-
-class CustomPasswordResetView(CustomDjoserAPIView, DjoserPasswordResetView):
-    """Custom view to modify base functionality in Djoser's PasswordResetView class"""
-
-
-class CustomPasswordResetConfirmView(
-    CustomDjoserAPIView, DjoserPasswordResetConfirmView
-):
-    """Custom view to modify base functionality in Djoser's PasswordResetConfirmView class"""
-
-
-class CustomSetPasswordView(CustomDjoserAPIView, DjoserSetPasswordView):
-    """Custom view to modify base functionality in Djoser's SetPasswordView class"""
-
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request, **kwargs):
+    @action(["post"], detail=False)
+    def set_password(self, request, *args, **kwargs):
         """
         Overrides CustomDjoserAPIView.post to update the session after a successful
         password change. Without this explicit refresh, the user's session would be
         invalid and they would be logged out.
         """
-        response = super().post(request)
+        response = super().set_password(request, *args, **kwargs)
         if response.status_code in (status.HTTP_200_OK, status.HTTP_204_NO_CONTENT):
             update_session_auth_hash(self.request, self.request.user)
+            return Response({}, status=status.HTTP_200_OK)
         return response
 
 

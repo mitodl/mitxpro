@@ -123,17 +123,18 @@ django==2.2.20
     #   django-taggit
     #   django-treebeard
     #   django-user-agents
+    #   djangorestframework
     #   mitol-django-common
     #   mitol-django-digital-credentials
     #   mitol-django-mail
     #   mitol-django-oauth-toolkit-extensions
     #   wagtail
-djangorestframework==3.9.4
+djangorestframework==3.11.2
     # via
     #   -r requirements.in
     #   mitol-django-digital-credentials
     #   wagtail
-djoser==1.7.0
+djoser==2.0.3
     # via -r requirements.in
 docutils==0.14
     # via botocore
@@ -173,7 +174,7 @@ idna==2.8
     # via requests
 ipython-genutils==0.2.0
     # via traitlets
-ipython==7.6.1
+ipython==7.17.0
     # via -r requirements.in
 isodate==0.6.0
     # via zeep

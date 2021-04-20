@@ -10,9 +10,7 @@ from authentication.views import (
     RegisterExtraDetailsView,
     get_social_auth_types,
     CustomLogoutView,
-    CustomPasswordResetView,
-    CustomPasswordResetConfirmView,
-    CustomSetPasswordView,
+    CustomDjoserAPIView,
     well_known_openid_configuration,
 )
 
@@ -38,15 +36,19 @@ urlpatterns = [
     ),
     path(
         "api/password_reset/",
-        CustomPasswordResetView.as_view(),
+        CustomDjoserAPIView.as_view({"post": "reset_password"}),
         name="password-reset-api",
     ),
     path(
         "api/password_reset/confirm/",
-        CustomPasswordResetConfirmView.as_view(),
+        CustomDjoserAPIView.as_view({"post": "reset_password_confirm"}),
         name="password-reset-confirm-api",
     ),
-    path("api/set_password/", CustomSetPasswordView.as_view(), name="set-password-api"),
+    path(
+        "api/set_password/",
+        CustomDjoserAPIView.as_view({"post": "set_password"}),
+        name="set-password-api",
+    ),
     path("api/auths/", get_social_auth_types, name="get-auth-types-api"),
     path("logout/", CustomLogoutView.as_view(), name="logout"),
     path(
