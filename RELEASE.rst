@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.84.0
+Version 0.84.0 (Released April 21, 2021)
 --------------
 
 - Bump ssri from 6.0.1 to 6.0.2 (#2191)
