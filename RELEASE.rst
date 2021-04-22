@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.84.1
+Version 0.84.1 (Released April 22, 2021)
 --------------
 
 - changing text in program certificates (#2189)
