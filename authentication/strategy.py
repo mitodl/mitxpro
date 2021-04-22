@@ -1,5 +1,4 @@
 """Custom strategy"""
-from rest_framework.request import Request
 from social_django.strategy import DjangoStrategy
 
 
