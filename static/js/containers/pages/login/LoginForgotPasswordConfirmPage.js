@@ -56,7 +56,7 @@ export class LoginForgotPasswordConfirmPage extends React.Component<Props> {
       )
 
       let alertText, redirectRoute
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 204) {
         alertText =
           "Your password has been updated, you may use it to sign in now."
         redirectRoute = routes.login.begin

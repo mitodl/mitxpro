@@ -185,19 +185,8 @@ class CustomPasswordResetEmail(DjoserPasswordResetEmail):
 
 class CustomDjoserAPIView(UserViewSet, ActionViewMixin):
     """
-    Overrides the post method of a Djoser view and adds one extra piece of logic:
-
-    In version 0.30.0, the fetch function in redux-hammock does not handle responses
-    with empty response data. Djoser returns 204's with empty response data, so we are
-    coercing that to a 200 with an empty dict as the response data. This can be removed
-    when redux-hammock is changed to support 204's.
+    Overrides the post method of a Djoser view to update session after successful password change
     """
-
-    def post(self, request):  # pylint: disable=missing-docstring,arguments-differ
-        response = super().post(request)
-        if response.status_code == status.HTTP_204_NO_CONTENT:
-            return Response({}, status=status.HTTP_200_OK)
-        return response
 
     @action(["post"], detail=False)
     def set_password(self, request, *args, **kwargs):
