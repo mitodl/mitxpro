@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.84.2
+--------------
+
+- Upgrade djangorestframework to 3.12.4, djoser to 2.1.0 and social-auth-app-django to 4.0.0 (#2193)
+
 Version 0.84.1 (Released April 22, 2021)
 --------------
 
