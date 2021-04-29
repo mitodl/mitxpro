@@ -633,12 +633,12 @@ class ProductPage(MetadataPageMixin, Page):
         child = self.get_children().type(cls).live().first()
         return child.specific if child else None
 
-    def save(self, clean=True, **kwargs):
+    def save(self, clean=True, user=None, log_action=False, **kwargs):
         """If featured is True then set False in any existing product page(s)."""
         if self.featured:
             for child_class in ProductPage.__subclasses__():
                 child_class.objects.filter(featured=True).update(featured=False)
-        super().save(clean=clean, **kwargs)
+        super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
     @property
     def product(self):
@@ -1105,12 +1105,12 @@ class CourseProgramChildPage(Page):
             and parent.get_children().type(cls).count() == 0
         )
 
-    def save(self, clean=True, **kwargs):
+    def save(self, clean=True, user=None, log_action=False, **kwargs):
         # autogenerate a unique slug so we don't hit a ValidationError
         if not self.title:
             self.title = self.__class__._meta.verbose_name.title()
         self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
-        super().save(clean=clean, **kwargs)
+        super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
     def get_url_parts(self, request=None):
         """
@@ -1195,13 +1195,13 @@ class NewsAndEventsPage(Page):
     class Meta:
         verbose_name = "News and Events"
 
-    def save(self, clean=True, **kwargs):
+    def save(self, clean=True, user=None, log_action=False, **kwargs):
         # auto generate a unique slug so we don't hit a ValidationError
         if not self.title:
             self.title = self.__class__._meta.verbose_name.title()
 
         self.slug = slugify("{}-{}".format(self.title, self.id))
-        super().save(clean=clean, **kwargs)
+        super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
     def serve(self, request, *args, **kwargs):
         """
@@ -1550,11 +1550,11 @@ class FrequentlyAskedQuestionPage(CourseProgramChildPage):
 
     content_panels = [InlinePanel("faqs", label="Frequently Asked Questions")]
 
-    def save(self, clean=True, **kwargs):
+    def save(self, clean=True, user=None, log_action=False, **kwargs):
         # autogenerate a unique slug so we don't hit a ValidationError
         self.title = "Frequently Asked Questions"
         self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
-        super().save(clean=clean, **kwargs)
+        super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
 
 class FrequentlyAskedQuestion(Orderable):
@@ -1648,13 +1648,13 @@ class SignatoryPage(Page):
         ImageChooserPanel("signature_image"),
     ]
 
-    def save(self, clean=True, **kwargs):
+    def save(self, clean=True, user=None, log_action=False, **kwargs):
         # auto generate a unique slug so we don't hit a ValidationError
         if not self.title:
             self.title = self.__class__._meta.verbose_name.title() + "-" + self.name
 
         self.slug = slugify("{}-{}".format(self.title, self.id))
-        super().save(clean=clean, **kwargs)
+        super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
     def serve(self, request, *args, **kwargs):
         """
@@ -1723,7 +1723,7 @@ class CertificatePage(CourseProgramChildPage):
         self.certificate = None
         super().__init__(*args, **kwargs)
 
-    def save(self, clean=True, **kwargs):
+    def save(self, clean=True, user=None, log_action=False, **kwargs):
         # auto generate a unique slug so we don't hit a ValidationError
         self.title = (
             self.__class__._meta.verbose_name.title()
@@ -1732,7 +1732,7 @@ class CertificatePage(CourseProgramChildPage):
         )
 
         self.slug = slugify("certificate-{}".format(self.get_parent().id))
-        Page.save(self, clean=clean, **kwargs)
+        Page.save(self, clean=clean, user=user, log_action=log_action, **kwargs)
 
     def serve(self, request, *args, **kwargs):
         """
