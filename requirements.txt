@@ -377,7 +377,7 @@ uritemplate==3.0.0
     # via
     #   coreapi
     #   google-api-python-client
-urllib3==1.25.3
+urllib3==1.25.8
     # via
     #   botocore
     #   elasticsearch
