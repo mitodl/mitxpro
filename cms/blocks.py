@@ -121,15 +121,13 @@ def validate_unique_readable_ids(value):
     Validates that all of the course run override blocks in this stream field have
     unique readable IDs
     """
-
     # We want to validate the overall stream not underlying blocks individually
-    if len(value.stream_data) and not isinstance(value.stream_data[0], tuple):
+    if len(value) < 2:
         return
-
     items = [
-        stream_block[1].get("readable_id")
-        for stream_block in value.stream_data
-        if "course_run" in stream_block[0]
+        stream_block.value.get("readable_id")
+        for stream_block in value
+        if stream_block.block_type == "course_run"
     ]
     if len(set(items)) != len(items):
         raise blocks.StreamBlockValidationError(

@@ -247,7 +247,7 @@ pexpect==4.7.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-pillow==8.1.2
+pillow==8.2.0
     # via
     #   -r requirements.in
     #   wagtail
@@ -381,8 +381,6 @@ ua-parser==0.8.0
     #   user-agents
 ulid-py==0.0.9
     # via -r requirements.in
-unidecode==1.1.1
-    # via wagtail
 uritemplate==3.0.0
     # via
     #   coreapi
@@ -407,7 +405,7 @@ vine==1.3.0
     #   celery
 wagtail-metadata==3.3.0
     # via -r requirements.in
-wagtail==2.11.7
+wagtail==2.12.4
     # via
     #   -r requirements.in
     #   wagtail-metadata

@@ -2,7 +2,7 @@
 from urllib.parse import urljoin
 
 import pytest
-from wagtail.images.views.serve import generate_signature
+from wagtail.images.utils import generate_signature
 from wagtail_factories import ImageFactory
 
 from cms.templatetags.image_version_url import image_version_url
