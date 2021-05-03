@@ -6,6 +6,8 @@
 #
 amqp==2.5.0
     # via kombu
+anyascii==0.2.0
+    # via wagtail
 appdirs==1.4.3
     # via zeep
 asgiref==3.3.4
@@ -84,7 +86,9 @@ django-compat==1.0.15
     #   django-hijack
     #   django-hijack-admin
 django-filter==2.3.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   wagtail
 django-hijack-admin==2.1.10
     # via -r requirements.in
 django-hijack==2.1.10
@@ -93,7 +97,7 @@ django-hijack==2.1.10
     #   django-hijack-admin
 django-ipware==3.0.0
     # via -r requirements.in
-django-modelcluster==5.0.1
+django-modelcluster==5.1
     # via wagtail
 django-oauth-toolkit==1.4.0
     # via
@@ -156,6 +160,8 @@ edx-api-client==0.10.0
     # via -r requirements.in
 elasticsearch==7.0.2
     # via django-server-status
+et-xmlfile==1.1.0
+    # via openpyxl
 flaky==3.7.0
     # via -r requirements.in
 google-api-python-client==1.7.11
@@ -231,6 +237,8 @@ oauthlib==3.1.0
     #   django-oauth-toolkit
     #   requests-oauthlib
     #   social-auth-core
+openpyxl==3.0.7
+    # via tablib
 parso==0.5.1
     # via jedi
 pdftotext==2.1.1
@@ -357,6 +365,8 @@ soupsieve==2.0.1
     # via beautifulsoup4
 sqlparse==0.3.0
     # via django
+tablib[xls,xlsx]==3.0.0
+    # via wagtail
 tenacity==6.1.0
     # via celery-redbeat
 toolz==0.9.0
@@ -397,7 +407,7 @@ vine==1.3.0
     #   celery
 wagtail-metadata==3.3.0
     # via -r requirements.in
-wagtail==2.9.3
+wagtail==2.11.6
     # via
     #   -r requirements.in
     #   wagtail-metadata
@@ -405,10 +415,14 @@ wcwidth==0.1.7
     # via prompt-toolkit
 webencodings==0.5.1
     # via html5lib
-willow==1.3
+willow==1.4
     # via wagtail
+xlrd==2.0.1
+    # via tablib
 xlsxwriter==1.3.7
     # via wagtail
+xlwt==1.3.0
+    # via tablib
 zeep==3.4.0
     # via -r requirements.in
 zipp==3.4.1
