@@ -322,7 +322,7 @@ requests==2.22.0
     #   social-auth-core
     #   wagtail
     #   zeep
-rsa==4.1
+rsa==4.7
     # via google-auth
 s3transfer==0.2.1
     # via boto3
