@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.85.0
+--------------
+
+- Bump rsa from 4.1 to 4.7 (#2199)
+- Bump urllib3 from 1.25.3 to 1.25.8 (#2198)
+
 Version 0.84.2 (Released April 27, 2021)
 --------------
 
