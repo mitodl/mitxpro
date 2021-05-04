@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.85.0
+Version 0.85.0 (Released May 04, 2021)
 --------------
 
 - Bump rsa from 4.1 to 4.7 (#2199)
