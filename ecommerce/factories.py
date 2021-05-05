@@ -209,6 +209,7 @@ class DataConsentAgreementFactory(DjangoModelFactory):
 
     content = fuzzy.FuzzyText()
     company = SubFactory(CompanyFactory)
+    is_global = False
 
     @post_generation
     # pylint: disable=unused-argument

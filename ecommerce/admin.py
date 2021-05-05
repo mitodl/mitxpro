@@ -1,7 +1,10 @@
 """admin classes for ecommerce"""
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
+from django import forms
+from django.core.exceptions import ValidationError
 
+from courses.models import Course
 from ecommerce.models import (
     Line,
     LineRunSelection,
@@ -494,6 +497,41 @@ class DataConsentUserAdmin(TimestampedModelAdmin):
     model = DataConsentUser
 
 
+class DataConsentAgreementForm(forms.ModelForm):
+    """Form for DataConsentAgreementAdmin"""
+
+    class Meta:
+        model = DataConsentAgreement
+        fields = "__all__"
+
+    def clean(self):
+        is_global = self.cleaned_data.get("is_global", False)
+        courses = self.cleaned_data.get("courses", Course.objects.none())
+        company = self.cleaned_data.get("company", None)
+        check_duplicate = self.instance.pk is None or self.instance.company != company
+        # Check if a global agreement for a specific company already exists.
+        # (Only applicable if a new object is created or company is changed in an existing object)
+        if (
+            check_duplicate
+            and is_global
+            and DataConsentAgreement.objects.filter(
+                company=company, is_global=True
+            ).exists()
+        ):
+            raise ValidationError(
+                "You already have a global agreement for this company"
+            )
+        # Check that is_global flag is enabled or at least one course is associated with the agreement
+        if not is_global and not courses.all():
+            raise ValidationError(
+                "You must either check All Courses box or select courses for the agreement"
+            )
+        # If is_global flag is true, we will just clean the associated course list
+        if is_global:
+            self.cleaned_data["courses"] = Course.objects.none()
+        return self.cleaned_data
+
+
 class DataConsentAgreementAdmin(TimestampedModelAdmin):
     """Admin for DataConsentAgreement"""
 
@@ -503,7 +541,7 @@ class DataConsentAgreementAdmin(TimestampedModelAdmin):
     search_fields = ("company", "content")
     raw_id_fields = ("courses",)
 
-    model = DataConsentAgreement
+    form = DataConsentAgreementForm
 
 
 class CompanyAdmin(admin.ModelAdmin):
