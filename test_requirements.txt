@@ -3,7 +3,7 @@ black==18.9b0
 bpython
 codecov
 django-debug-toolbar
-factory_boy==2.11.1
+factory_boy==3.0.1
 faker==5.0.1
 freezegun==0.3.12
 ipdb

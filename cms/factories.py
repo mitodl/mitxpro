@@ -64,7 +64,7 @@ class ProgramPageFactory(wagtail_factories.PageFactory):
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
-
+    parent = factory.SubFactory(wagtail_factories.PageFactory)
     certificate_page = factory.RelatedFactory(
         "cms.factories.CertificatePageFactory", "parent"
     )
@@ -93,7 +93,7 @@ class CoursePageFactory(wagtail_factories.PageFactory):
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
-
+    parent = factory.SubFactory(wagtail_factories.PageFactory)
     certificate_page = factory.RelatedFactory(
         "cms.factories.CertificatePageFactory", "parent"
     )
@@ -129,6 +129,7 @@ class ExternalCoursePageFactory(wagtail_factories.PageFactory):
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    parent = factory.SubFactory(wagtail_factories.PageFactory)
 
     class Meta:
         model = ExternalCoursePage
@@ -162,6 +163,7 @@ class ExternalProgramPageFactory(wagtail_factories.PageFactory):
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
     course_count = factory.fuzzy.FuzzyInteger(1)
+    parent = factory.SubFactory(wagtail_factories.PageFactory)
 
     class Meta:
         model = ExternalProgramPage
