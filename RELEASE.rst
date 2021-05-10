@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.85.1
+Version 0.85.1 (Released May 10, 2021)
 --------------
 
 - Bump Pillow to 8.2.0 & wagtail to 2.12.4 (#2156)
