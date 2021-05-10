@@ -39,6 +39,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Apt update
+        run: sudo apt-get update -y
+
       - name: Apt install
         run: cat Aptfile | sudo xargs apt-get install
 
