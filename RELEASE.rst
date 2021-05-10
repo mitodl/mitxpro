@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.86.0
+Version 0.86.0 (Released May 10, 2021)
 --------------
 
 - Fix github actions by updating apt dependency list (#2206)
