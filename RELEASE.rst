@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.86.1
+--------------
+
+- Format code
+- update PR template
+- fix contexts
+
 Version 0.86.0 (Released May 10, 2021)
 --------------
 
