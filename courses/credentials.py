@@ -98,9 +98,8 @@ def build_digital_credential(
         "credential": {
             "@context": [
                 "https://www.w3.org/2018/credentials/v1",
-                "https://www.w3.org/2018/credentials/examples/v1",
-                "https://w3c-ccg.github.io/lds-jws2020/contexts/lds-jws2020-v1.json",
-                "https://w3id.org/dcc/v1",
+                "https://w3id.org/security/suites/ed25519-2020/v1",
+                "https://w3id.org/dcc/v1"
             ],
             "id": urljoin(settings.SITE_BASE_URL, certificate.link),
             "type": ["VerifiableCredential", "LearningCredential"],
