@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.86.1
+--------------
+
+- fix contexts
+
 Version 0.86.0 (Released May 10, 2021)
 --------------
 
