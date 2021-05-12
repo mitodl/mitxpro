@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.86.1
+Version 0.86.1 (Released May 12, 2021)
 --------------
 
 - Format code
