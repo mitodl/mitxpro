@@ -443,7 +443,7 @@ describe("CheckoutForm", () => {
 
     const linkPairs = [
       ["Terms of Service", "/terms-of-service/"],
-      ["Refund Policy", "/honor-code/"],
+      ["Refund Policy", "/terms-of-service/#registration"],
       ["Privacy Policy", "/privacy-policy/"]
     ]
 
