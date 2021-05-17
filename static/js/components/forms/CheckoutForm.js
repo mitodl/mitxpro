@@ -366,7 +366,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                     Terms of Service
                   </a>
                   ,{" "}
-                  <a href="/honor-code/" target="_blank">
+                  <a href="/terms-of-service/#registration" target="_blank">
                     Refund Policy
                   </a>
                   , and{" "}
