@@ -59,6 +59,20 @@
     {% endblock %}
     {% render_bundle 'django' added_attrs='defer' %}
     {% block scripts %}
+      {# Script to defer youtube video rendering #}
+      <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+          const iframes = Array.from(document.getElementsByTagName('iframe'));
+            iframes.forEach(function (iframe) {
+              const data_src = iframe.getAttribute('data-src')
+                /* Making sure that we only change attributes of those iframes that have youtube embed as a source url.
+                By replacing the src with data-src we let the iframe run the youtube scripts and load the video.*/
+              if (data_src && data_src.indexOf("youtube.com/embed") !== -1) {
+                iframe.setAttribute('src', data_src);
+              }
+          });
+        });
+        </script>
     {% endblock %}
     {% if zendesk_config.help_widget_enabled and not request.path|startswith:'/certificate/' %}
     <script type="text/javascript">
