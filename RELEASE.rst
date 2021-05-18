@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.86.2
+--------------
+
+- update refund policy link in checkout page (#2217)
+
 Version 0.86.1 (Released May 12, 2021)
 --------------
 
