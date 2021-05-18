@@ -59,6 +59,7 @@ from ecommerce.factories import (
     CouponVersionFactory,
     CouponFactory,
     CouponPaymentVersionFactory,
+    DataConsentAgreementFactory,
     LineFactory,
     OrderFactory,
     ProductVersionFactory,
@@ -1062,6 +1063,25 @@ def test_validate_global_data_consent(basket_and_agreement):
         global_agreement[0].agreement.company == basket_and_agreement.agreement.company
     )
     assert global_agreement[0].agreement.is_global is True
+
+
+def test_company_multiple_global_consent_error(mocker, basket_and_agreement):
+    """
+    An error should be logged if there are more than one global consent available for a single company
+    """
+    patched_log = mocker.patch("ecommerce.api.log")
+    DataConsentAgreementFactory.create(
+        company=basket_and_agreement.agreement.company, is_global=True
+    )
+    basket_and_agreement.agreement.courses.clear()
+    basket_and_agreement.agreement.is_global = True
+    basket_and_agreement.agreement.save()
+
+    get_or_create_data_consent_users(basket_and_agreement.basket)
+    patched_log.error.assert_called_once_with(
+        "More than one global agreement found for the company: %s",
+        basket_and_agreement.agreement.company,
+    )
 
 
 def test_complete_order(mocker, user, basket_and_coupons):

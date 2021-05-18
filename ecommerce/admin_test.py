@@ -61,7 +61,7 @@ def test_consent_agreement_clean_model_validation_error():
     assert consent_agreement_form.errors is not None
     assert (
         consent_agreement_form.errors["__all__"][0]
-        == "You already have a global agreement for this company"
+        == "You already have a global consent agreement for this company"
     )
 
 

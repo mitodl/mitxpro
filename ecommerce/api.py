@@ -1079,8 +1079,14 @@ def get_or_create_data_consent_users(basket):
                     # Ideally, There should always be only one global consent agreement for a company at maximum
                     global_agreement = DataConsentAgreement.objects.filter(
                         company=company, is_global=True
-                    ).first()
-                    agreements = [global_agreement] if global_agreement else []
+                    )
+                    if global_agreement.count() > 1:
+                        log.error(
+                            "More than one global agreement found for the company: %s",
+                            company,
+                        )
+                    else:
+                        agreements = list(global_agreement)
 
                 data_consents.extend(
                     [

@@ -508,18 +508,16 @@ class DataConsentAgreementForm(forms.ModelForm):
         is_global = self.cleaned_data.get("is_global", False)
         courses = self.cleaned_data.get("courses", Course.objects.none())
         company = self.cleaned_data.get("company", None)
-        check_duplicate = self.instance.pk is None or self.instance.company != company
         # Check if a global agreement for a specific company already exists.
         # (Only applicable if a new object is created or company is changed in an existing object)
         if (
-            check_duplicate
-            and is_global
-            and DataConsentAgreement.objects.filter(
-                company=company, is_global=True
-            ).exists()
+            is_global
+            and DataConsentAgreement.objects.filter(company=company, is_global=True)
+            .exclude(pk__in=[self.instance.pk or -1])
+            .exists()
         ):
             raise ValidationError(
-                "You already have a global agreement for this company"
+                "You already have a global consent agreement for this company"
             )
         # Check that is_global flag is enabled or at least one course is associated with the agreement
         if not is_global and not courses.all():
