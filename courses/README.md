@@ -79,23 +79,12 @@ The course team will announce on the xpro_newcourses moira list, after the cours
   - **Test** the product by going to `/checkout/?product=` and the course run id (text or integer)  
 
 
-7. **Professional Track**: Check to make sure the course run in Studio has an appropriate professional track. New course runs in Studio default to audit track. The track doesn't actually make a difference, but users get confusing messages about auditing and certificates in open-edx if they are in an audit track. May eventually be addressed by issue #973.
-  - go to `/admin/course_modes/` in xPRO Studio
-  - click on 'course modes'
-  - if a coursemode doesn't already exist for the course run, select Add Course Mode    
-    - choose the course run from the drop-down list
-    - choose the mode to `no-id-professional` from the drop-down
-    - Set the name of the coursemode. By convention this is `Professional`
-    - No need to set any of the other values
-  - After creating the mode, run management command to force users into the new role, e.g. `retry_edx_enrollment --run course-v1:xPRO+QCFx2+R5 --force`
-
-
-8. **Access Codes**: 
+7. **Access Codes**: 
   - Test staff and team codes on the checkout page to ensure they'll work. Note that if a team code has expired, you should set the expiration date to be after the last run for that course. 
   - You may need to add coupon eligibilities if necessary.
 
 
-9. **Data Consent Agreement**:
+8. **Data Consent Agreement**:
   - You may need to set up a data consent agreement for this course
   - Go to `/admin/ecommerce/dataconsentagreement/` and click on `ADD DATA CONSENT AGREEMENT`
   - Enter the 
