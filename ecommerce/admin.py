@@ -513,7 +513,7 @@ class DataConsentAgreementForm(forms.ModelForm):
         if (
             is_global
             and DataConsentAgreement.objects.filter(company=company, is_global=True)
-            .exclude(pk__in=[self.instance.pk or -1])
+            .exclude(pk=self.instance.pk)
             .exists()
         ):
             raise ValidationError(
