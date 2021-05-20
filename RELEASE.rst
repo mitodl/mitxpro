@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.86.3
+--------------
+
+- Add support for Global Data Consent Agreement (#2201)
+- Bump hosted-git-info from 2.8.4 to 2.8.9 (#2204)
+- Removing unsed handlebars package (#2212)
+- Bump lodash from 4.17.19 to 4.17.21 (#2203)
+- Removed reference to Professional Track (#2221)
+
 Version 0.86.2 (Released May 20, 2021)
 --------------
 
