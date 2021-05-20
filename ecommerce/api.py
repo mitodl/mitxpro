@@ -1067,11 +1067,26 @@ def get_or_create_data_consent_users(basket):
                 coupon_selection.coupon
             ).payment_version.company
             if company:
+                # We will give priority to the course based consent if one exists, otherwise we'll try to fetch global
+                # consent
                 agreements = (
                     DataConsentAgreement.objects.filter(company=company)
                     .filter(courses__in=courses)
                     .distinct()
                 )
+
+                if not agreements:
+                    # Ideally, There should always be only one global consent agreement for a company at maximum
+                    global_agreement = DataConsentAgreement.objects.filter(
+                        company=company, is_global=True
+                    )
+                    if global_agreement.count() > 1:
+                        log.error(
+                            "More than one global agreement found for the company: %s",
+                            company,
+                        )
+                    else:
+                        agreements = list(global_agreement)
 
                 data_consents.extend(
                     [

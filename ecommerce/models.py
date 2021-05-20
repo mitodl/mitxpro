@@ -683,10 +683,15 @@ class DataConsentAgreement(TimestampedModel):
 
     content = models.TextField()
     company = models.ForeignKey(Company, on_delete=models.PROTECT)
-    courses = models.ManyToManyField("courses.Course")
+    is_global = models.BooleanField(
+        default=False,
+        help_text="When selected it will override the value of the courses field below",
+        verbose_name="All Courses",
+    )
+    courses = models.ManyToManyField("courses.Course", blank=True)
 
     def __str__(self):
-        return f"DataConsentAgreement for {self.company.name}, products {','.join([str(course.id) for course in self.courses.all()])}"
+        return f"DataConsentAgreement for {self.company.name}, products {'(All)' if self.is_global else ','.join([str(course.id) for course in self.courses.all()])}"
 
 
 class DataConsentUser(TimestampedModel):
