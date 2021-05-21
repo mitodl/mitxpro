@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.86.3
+Version 0.86.3 (Released May 21, 2021)
 --------------
 
 - Add support for Global Data Consent Agreement (#2201)
