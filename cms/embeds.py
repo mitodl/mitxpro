@@ -32,9 +32,9 @@ class YouTubeEmbedFinder(OEmbedFinder):
 
     def find_embed(self, url, max_width=None):
         embed = super().find_embed(url, max_width)
-
         embed_tag = BeautifulSoup(embed["html"], "html.parser")
-        iframe_url = embed_tag.find("iframe").attrs["src"]
+        player_iframe = embed_tag.find("iframe")
+        iframe_url = player_iframe.attrs["src"]
         scheme, netloc, path, params, query, fragment = urlparse(iframe_url)
 
         querydict = parse_qs(query)
@@ -43,7 +43,9 @@ class YouTubeEmbedFinder(OEmbedFinder):
 
         query = urlencode(querydict, doseq=1)
         iframe_url = urlunparse((scheme, netloc, path, params, query, fragment))
-        embed_tag.find("iframe").attrs["src"] = iframe_url
+        player_iframe.attrs["loading"] = "lazy"
+        player_iframe.attrs["src"] = ""
+        player_iframe.attrs["data-src"] = iframe_url
         embed["html"] = str(embed_tag)
 
         return embed
