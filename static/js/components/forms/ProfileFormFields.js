@@ -59,7 +59,7 @@ export const legalAddressValidation = yup.object().shape({
       .array()
       .label("Street address")
       .of(yup.string().max(60))
-      .min(1)
+      .min(1, "Street address is a required field")
       .max(ADDRESS_LINES_MAX)
       .compact()
       .required(),
