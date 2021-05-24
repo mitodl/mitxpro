@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.87.0
+--------------
+
+- upgrade merge version (#2224)
+- Defer youtube rendering script (#2179)
+
 Version 0.86.3 (Released May 21, 2021)
 --------------
 
