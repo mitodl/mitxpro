@@ -74,7 +74,7 @@ class Command(BaseCommand):
             "--block",
             action="store_true",
             dest="block_users",
-            help="If provided, user's email will be hashed and marked block",
+            help="If provided, user's email will be hashed and added to the blocklist",
         )
 
     def get_retired_email(self, email):
@@ -120,7 +120,7 @@ class Command(BaseCommand):
                 if created:
                     self.stdout.write(
                         self.style.SUCCESS(
-                            "Email {email} is added in blocklist of MIT xPRO.".format(
+                            "Email {email} is added to the blocklist of MIT xPRO.".format(
                                 email=email
                             )
                         )
