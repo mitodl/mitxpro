@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.87.1
+Version 0.87.1 (Released May 27, 2021)
 --------------
 
 - Yup version bump (#2223)
