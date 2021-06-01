@@ -25,7 +25,7 @@ google-auth==1.6.3
 pygsheets==2.0.2
 ipython
 mitol-django-common==0.4.0
-mitol-django-digital-credentials==1.4.1
+mitol-django-digital-credentials==2.0.0
 mitol-django-mail==0.3.0
 mitol-django-oauth-toolkit-extensions==0.1.0
 newrelic
