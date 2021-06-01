@@ -113,9 +113,9 @@ class Command(BaseCommand):
             email = user.email
 
             if block_users:
-                hash_object = hashlib.md5(email.encode("utf-8"))
+                hash_object = hashlib.md5(email.lower().encode("utf-8"))
                 _, created = BlockList.objects.get_or_create(
-                    hashed_email=hash_object.hexdigest().lower()
+                    hashed_email=hash_object.hexdigest()
                 )
                 if created:
                     self.stdout.write(
