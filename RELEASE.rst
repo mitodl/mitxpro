@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.88.0
+--------------
+
+- Bump ws from 7.2.3 to 7.4.6 (#2232)
+
 Version 0.87.1 (Released May 27, 2021)
 --------------
 
