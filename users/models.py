@@ -316,4 +316,4 @@ class Profile(TimestampedModel):
 class BlockList(TimestampedModel):
     """ A user's blocklist model """
 
-    hashed_email = models.CharField(max_length=128, default="")
+    hashed_email = models.CharField(max_length=128)
