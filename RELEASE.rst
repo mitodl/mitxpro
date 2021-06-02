@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.88.0
+Version 0.88.0 (Released June 02, 2021)
 --------------
 
 - Update digital-credentials dependency
