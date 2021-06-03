@@ -1,7 +1,6 @@
 """Auth pipline functions for user authentication"""
 import json
 import logging
-
 import requests
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
@@ -18,8 +17,9 @@ from authentication.exceptions import (
     RequireRegistrationException,
     UnexpectedExistingUserException,
     UserCreationFailedException,
+    EmailBlockedException,
 )
-from authentication.utils import SocialAuthState
+from authentication.utils import SocialAuthState, user_email_blocked
 from authentication.api import create_user_with_generated_username
 
 from compliance import api as compliance_api
@@ -180,10 +180,13 @@ def validate_password(
     Raises:
         RequirePasswordException: if the user password is invalid
     """
+    data = strategy.request_data()
+    if flow == SocialAuthState.FLOW_REGISTER and "email" in data:
+        if user_email_blocked(data["email"]):
+            raise EmailBlockedException(backend, current_partial)
+
     if backend.name != EmailAuth.name or flow != SocialAuthState.FLOW_LOGIN:
         return {}
-
-    data = strategy.request_data()
 
     if user is None:
         raise RequireRegistrationException(backend, current_partial)

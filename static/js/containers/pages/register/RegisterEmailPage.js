@@ -10,11 +10,13 @@ import { mutateAsync } from "redux-query"
 import { createStructuredSelector } from "reselect"
 
 import { addUserNotification } from "../../../actions"
+
 import queries from "../../../lib/queries"
 import {
   STATE_ERROR,
   STATE_REGISTER_CONFIRM_SENT,
   STATE_LOGIN_PASSWORD,
+  STATE_REGISTER_EMAIL,
   handleAuthResponse
 } from "../../../lib/auth"
 import { qsNextSelector } from "../../../lib/selectors"
@@ -66,6 +68,29 @@ export class RegisterEmailPage extends React.Component<Props> {
           history.push(`${routes.register.confirmSent}?${params}`)
         },
 
+        [STATE_REGISTER_EMAIL]: () => {
+          addUserNotification({
+            "account-blocked": {
+              type:  ALERT_TYPE_TEXT,
+              color: "danger",
+              props: {
+                text: [
+                  <div key="1">
+                    Please contact{" "}
+                    <a
+                      style={{ color: "white" }}
+                      href={"https://xpro.zendesk.com/hc/en-us/requests/new"}
+                    >
+                      {" "}
+                      customer support
+                    </a>{" "}
+                    to complete your registration.
+                  </div>
+                ]
+              }
+            }
+          })
+        },
         [STATE_LOGIN_PASSWORD]: () => {
           addUserNotification({
             "account-exists": {

@@ -23,6 +23,7 @@ from authentication.exceptions import (
     RequireProfileException,
     UserExportBlockedException,
     UserTryAgainLaterException,
+    EmailBlockedException,
 )
 from authentication.utils import SocialAuthState
 
@@ -286,6 +287,12 @@ class RegisterEmailSerializer(SocialAuthSerializer):
         except RequirePasswordException as exc:
             result = SocialAuthState(
                 SocialAuthState.STATE_LOGIN_PASSWORD,
+                partial=exc.partial,
+                errors=[str(exc)],
+            )
+        except EmailBlockedException as exc:
+            result = SocialAuthState(
+                SocialAuthState.STATE_REGISTER_EMAIL,
                 partial=exc.partial,
                 errors=[str(exc)],
             )
