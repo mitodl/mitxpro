@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from hijack_admin.admin import HijackUserAdminMixin
 
 from mitxpro.admin import TimestampedModelAdmin
-from users.models import LegalAddress, User, Profile
+from users.models import LegalAddress, User, Profile, BlockList
 
 
 class UserLegalAddressInline(admin.StackedInline):
@@ -93,4 +93,15 @@ class UserAdmin(ContribUserAdmin, HijackUserAdminMixin, TimestampedModelAdmin):
     inlines = [UserLegalAddressInline, UserProfileInline]
 
 
+class BlockListAdmin(admin.ModelAdmin):
+    """Admin for BlockList"""
+
+    model = BlockList
+    list_display = ("hashed_email",)
+
+    def has_add_permission(self, request):
+        return False
+
+
 admin.site.register(User, UserAdmin)
+admin.site.register(BlockList, BlockListAdmin)

@@ -311,3 +311,9 @@ class Profile(TimestampedModel):
     def __str__(self):
         """Str representation for the profile"""
         return f"Profile for {self.user}"
+
+
+class BlockList(TimestampedModel):
+    """ A user's blocklist model """
+
+    hashed_email = models.CharField(max_length=128)

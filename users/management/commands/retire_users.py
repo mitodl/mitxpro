@@ -1,6 +1,7 @@
 """
 Retire user(s) from MIT xPRO
 """
+import hashlib
 from argparse import RawTextHelpFormatter
 from urllib.parse import urlparse
 import sys
@@ -12,6 +13,7 @@ from social_django.models import UserSocialAuth
 
 from user_util import user_util
 from users.api import fetch_users
+from users.models import BlockList
 
 from mitxpro import settings
 
@@ -40,6 +42,10 @@ class Command(BaseCommand):
     `./manage.py retire_users --user=foo --user=bar --user=baz` or do \n
     `./manage.py retire_users --user=foo@email.com --user=bar@email.com --user=baz` or do \n
     `./manage.py retire_users -u foo -u bar -u baz`
+
+    For blocking user(s) use --block option:\n
+    `./manage.py retire_users --user=foo@email.com --block` or do \n
+    `./manage.py retire_users -u foo@email.com -b` \n or do \n
     """
 
     def create_parser(self, prog_name, subcommand):  # pylint: disable=arguments-differ
@@ -63,12 +69,21 @@ class Command(BaseCommand):
             help="Single or multiple username(s) or email(s)",
         )
 
+        parser.add_argument(
+            "-b",
+            "--block",
+            action="store_true",
+            dest="block_users",
+            help="If provided, user's email will be hashed and added to the blocklist",
+        )
+
     def get_retired_email(self, email):
         """ Convert user email to retired email format. """
         return user_util.get_retired_email(email, RETIRED_USER_SALTS, RETIRED_EMAIL_FMT)
 
     def handle(self, *args, **kwargs):
         users = kwargs.get("users", [])
+        block_users = kwargs.get("block_users")
 
         if not users:
             self.stderr.write(
@@ -96,6 +111,21 @@ class Command(BaseCommand):
 
             # Change user password & email
             email = user.email
+
+            if block_users:
+                hash_object = hashlib.md5(email.lower().encode("utf-8"))
+                _, created = BlockList.objects.get_or_create(
+                    hashed_email=hash_object.hexdigest()
+                )
+                if created:
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            "Email {email} is added to the blocklist of MIT xPRO.".format(
+                                email=email
+                            )
+                        )
+                    )
+
             user.email = self.get_retired_email(user.email)
             user.set_unusable_password()
             user.save()
