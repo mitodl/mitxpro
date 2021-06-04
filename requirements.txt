@@ -122,7 +122,7 @@ django-user-agents==0.4.0
     # via -r requirements.in
 django-webpack-loader==0.5.0
     # via -r requirements.in
-django==2.2.20
+django==2.2.21
     # via
     #   -r requirements.in
     #   django-anymail
