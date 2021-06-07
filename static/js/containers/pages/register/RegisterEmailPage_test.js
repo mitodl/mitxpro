@@ -1,7 +1,7 @@
 // @flow
 import { assert } from "chai"
 import sinon from "sinon"
-import React from 'react'
+import React from "react"
 
 import RegisterEmailPage, {
   RegisterEmailPage as InnerRegisterEmailPage
