@@ -17,11 +17,12 @@ from authentication.exceptions import (
     UnexpectedExistingUserException,
     RequireProfileException,
     UserCreationFailedException,
-    EmailBlockedException
+    EmailBlockedException,
 )
 from authentication.utils import SocialAuthState
 from compliance.constants import RESULT_SUCCESS, RESULT_DENIED, RESULT_UNKNOWN
 from compliance.factories import ExportsInquiryLogFactory
+
 
 @pytest.fixture
 def backend_settings(settings):
@@ -224,6 +225,7 @@ def test_user_password_not_exists(rf):
             user=None,
             flow=SocialAuthState.FLOW_LOGIN,
         )
+
 
 @pytest.mark.parametrize(
     "backend_name,flow",
@@ -583,11 +585,12 @@ def test_create_courseware_user(
         mock_create_user_api.assert_not_called()
         mock_create_user_task.apply_async.assert_not_called()
 
+
 @pytest.mark.parametrize(
     "backend_name,flow,data",
     [
         ("notemail", SocialAuthState.FLOW_REGISTER, {}),
-        ("notemail", SocialAuthState.FLOW_LOGIN, dict(email='test@example.com')),
+        ("notemail", SocialAuthState.FLOW_LOGIN, dict(email="test@example.com")),
     ],
 )
 def test_validate_email_backend(mocker, backend_name, flow, data):
@@ -605,13 +608,14 @@ def test_validate_email_backend(mocker, backend_name, flow, data):
 
     mock_strategy.request_data.assert_called_once()
 
+
 @pytest.mark.django_db
 def test_create_user_when_email_blocked(mocker):
-    """Tests that validate_email raises an error if user email is blocked""" 
+    """Tests that validate_email raises an error if user email is blocked"""
     mock_strategy = mocker.Mock()
     mock_email_backend = mocker.Mock()
-    mock_strategy.request_data.return_value = {'email': 'test@example.com'}
-    mocker.patch('authentication.pipeline.user.user_email_blocked', return_value=True)
+    mock_strategy.request_data.return_value = {"email": "test@example.com"}
+    mocker.patch("authentication.pipeline.user.user_email_blocked", return_value=True)
     with pytest.raises(EmailBlockedException):
         user_actions.validate_email(
             mock_strategy,

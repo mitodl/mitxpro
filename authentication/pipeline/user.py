@@ -186,6 +186,7 @@ def validate_email(
             raise EmailBlockedException(backend, current_partial)
     return {}
 
+
 @partial
 def validate_password(
     strategy, backend, user=None, flow=None, current_partial=None, *args, **kwargs
