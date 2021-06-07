@@ -1,6 +1,7 @@
 // @flow
 import { assert } from "chai"
 import sinon from "sinon"
+import React from 'react'
 
 import RegisterEmailPage, {
   RegisterEmailPage as InnerRegisterEmailPage
@@ -9,6 +10,7 @@ import IntegrationTestHelper from "../../../util/integration_test_helper"
 import {
   STATE_REGISTER_CONFIRM_SENT,
   STATE_LOGIN_PASSWORD,
+  STATE_REGISTER_EMAIL,
   STATE_ERROR
 } from "../../../lib/auth"
 import { makeRegisterAuthResponse } from "../../../factories/auth"
@@ -106,6 +108,50 @@ describe("RegisterEmailPage", () => {
         color: "danger",
         props: {
           text: `You already have an account with ${email}. Enter password to sign in.`
+        }
+      }
+    })
+  })
+
+  it("handles onSubmit for blocked email", async () => {
+    const { inner, store } = await renderPage()
+
+    helper.handleRequestStub.returns({
+      body: makeRegisterAuthResponse({
+        state: STATE_REGISTER_EMAIL
+      })
+    })
+
+    const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit")
+
+    await onSubmit(
+      { email, recaptcha },
+      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub }
+    )
+
+    sinon.assert.notCalled(setErrorsStub)
+    sinon.assert.calledWith(setSubmittingStub, false)
+
+    const { ui } = store.getState()
+
+    assert.deepEqual(ui.userNotifications, {
+      "account-blocked": {
+        type:  ALERT_TYPE_TEXT,
+        color: "danger",
+        props: {
+          text: [
+            <div key="1">
+              Please contact{" "}
+              <a
+                style={{ color: "white" }}
+                href={"https://xpro.zendesk.com/hc/en-us/requests/new"}
+              >
+                {" "}
+                customer support
+              </a>{" "}
+              to complete your registration.
+            </div>
+          ]
         }
       }
     })

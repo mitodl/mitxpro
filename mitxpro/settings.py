@@ -392,6 +392,8 @@ SOCIAL_AUTH_PIPELINE = (
     # validate an incoming email auth request
     "authentication.pipeline.user.validate_email_auth_request",
     # require a password and profile if they're not set
+    "authentication.pipeline.user.validate_email",
+    # require a password and profile if they're not set
     "authentication.pipeline.user.validate_password",
     # Send a validation email to the user to verify its email address.
     # Disabled by default.
