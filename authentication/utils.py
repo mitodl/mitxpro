@@ -67,7 +67,7 @@ def load_drf_strategy(request=None):
     )
 
 
-def user_email_blocked(email):
+def is_user_email_blocked(email):
     """Returns the user's email blocked status"""
     hash_object = hashlib.md5(email.lower().encode("utf-8"))
     return BlockList.objects.filter(hashed_email=hash_object.hexdigest()).exists()

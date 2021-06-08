@@ -19,7 +19,7 @@ from authentication.exceptions import (
     UserCreationFailedException,
     EmailBlockedException,
 )
-from authentication.utils import SocialAuthState, user_email_blocked
+from authentication.utils import SocialAuthState, is_user_email_blocked
 from authentication.api import create_user_with_generated_username
 
 from compliance import api as compliance_api
@@ -182,7 +182,7 @@ def validate_email(
     """
     data = strategy.request_data()
     if flow == SocialAuthState.FLOW_REGISTER and "email" in data:
-        if user_email_blocked(data["email"]):
+        if is_user_email_blocked(data["email"]):
             raise EmailBlockedException(backend, current_partial)
     return {}
 

@@ -55,7 +55,7 @@ class EmailBlockedException(PartialException):
     """Raised if a user's email is marked blocked"""
 
     def __str__(self):
-        return "Email is marked blocked"
+        return "Email address is marked blocked"
 
 
 class RequirePasswordAndPersonalInfoException(PartialException):
