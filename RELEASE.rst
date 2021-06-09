@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.88.1 (Released June 09, 2021)
+--------------
+
+- asadiqbal08/Add -blocklist option to retire_users command (#2230)
+- Bump browserslist from 4.6.6 to 4.16.6 (#2228)
+
 Version 0.88.0 (Released June 02, 2021)
 --------------
 
