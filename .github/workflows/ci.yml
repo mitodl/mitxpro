@@ -128,7 +128,6 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           file: ./coverage.xml
-          fail_ci_if_error: true
 
   javascript-tests:
     runs-on: ubuntu-latest
@@ -182,4 +181,3 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           file: coverage/lcov.info
-          fail_ci_if_error: true
