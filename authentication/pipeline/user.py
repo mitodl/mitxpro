@@ -1,7 +1,6 @@
 """Auth pipline functions for user authentication"""
 import json
 import logging
-
 import requests
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
@@ -18,8 +17,9 @@ from authentication.exceptions import (
     RequireRegistrationException,
     UnexpectedExistingUserException,
     UserCreationFailedException,
+    EmailBlockedException,
 )
-from authentication.utils import SocialAuthState
+from authentication.utils import SocialAuthState, is_user_email_blocked
 from authentication.api import create_user_with_generated_username
 
 from compliance import api as compliance_api
@@ -164,6 +164,30 @@ def create_profile(
 
 
 @partial
+def validate_email(
+    strategy, backend, user=None, flow=None, current_partial=None, *args, **kwargs
+):  # pylint: disable=unused-argument
+    """
+    Validates a user's email for register
+
+    Args:
+        strategy (social_django.strategy.DjangoStrategy): the strategy used to authenticate
+        backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
+        user (User): the current user
+        flow (str): the type of flow (login or register)
+        current_partial (Partial): the partial for the step in the pipeline
+
+    Raises:
+        EmailBlockedException: if the user email is blocked
+    """
+    data = strategy.request_data()
+    if flow == SocialAuthState.FLOW_REGISTER and "email" in data:
+        if is_user_email_blocked(data["email"]):
+            raise EmailBlockedException(backend, current_partial)
+    return {}
+
+
+@partial
 def validate_password(
     strategy, backend, user=None, flow=None, current_partial=None, *args, **kwargs
 ):  # pylint: disable=unused-argument
@@ -184,7 +208,6 @@ def validate_password(
         return {}
 
     data = strategy.request_data()
-
     if user is None:
         raise RequireRegistrationException(backend, current_partial)
 

@@ -51,6 +51,13 @@ class RequirePasswordException(PartialException):
         return "Password is required to login"
 
 
+class EmailBlockedException(PartialException):
+    """Raised if a user's email is marked blocked"""
+
+    def __str__(self):
+        return "Email address is marked blocked"
+
+
 class RequirePasswordAndPersonalInfoException(PartialException):
     """Authentication requires a password and address"""
 

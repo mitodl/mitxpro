@@ -17,6 +17,7 @@ from authentication.exceptions import (
     UnexpectedExistingUserException,
     RequireProfileException,
     UserCreationFailedException,
+    EmailBlockedException,
 )
 from authentication.utils import SocialAuthState
 from compliance.constants import RESULT_SUCCESS, RESULT_DENIED, RESULT_UNKNOWN
@@ -583,3 +584,44 @@ def test_create_courseware_user(
     else:
         mock_create_user_api.assert_not_called()
         mock_create_user_task.apply_async.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "backend_name,flow,data",
+    [
+        ("notemail", SocialAuthState.FLOW_REGISTER, {}),
+        ("notemail", SocialAuthState.FLOW_LOGIN, dict(email="test@example.com")),
+    ],
+)
+def test_validate_email_backend(mocker, backend_name, flow, data):
+    """Tests validate_email with data and flows"""
+    mock_strategy = mocker.Mock()
+    mock_backend = mocker.Mock()
+    mock_backend.name = backend_name
+    mock_strategy.request_data.return_value = data
+    assert (
+        user_actions.validate_email(
+            mock_strategy, mock_backend, pipeline_index=0, flow=flow
+        )
+        == {}
+    )
+
+    mock_strategy.request_data.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_create_user_when_email_blocked(mocker):
+    """Tests that validate_email raises an error if user email is blocked"""
+    mock_strategy = mocker.Mock()
+    mock_email_backend = mocker.Mock()
+    mock_strategy.request_data.return_value = {"email": "test@example.com"}
+    mocker.patch(
+        "authentication.pipeline.user.is_user_email_blocked", return_value=True
+    )
+    with pytest.raises(EmailBlockedException):
+        user_actions.validate_email(
+            mock_strategy,
+            mock_email_backend,
+            pipeline_index=0,
+            flow=SocialAuthState.FLOW_REGISTER,
+        )

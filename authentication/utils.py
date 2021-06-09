@@ -1,6 +1,8 @@
 """Authentication utils"""
+import hashlib
 from social_core.utils import get_strategy
 from social_django.utils import STORAGE
+from users.models import BlockList
 
 
 class SocialAuthState:  # pylint: disable=too-many-instance-attributes
@@ -63,3 +65,9 @@ def load_drf_strategy(request=None):
     return get_strategy(
         "authentication.strategy.DjangoRestFrameworkStrategy", STORAGE, request
     )
+
+
+def is_user_email_blocked(email):
+    """Returns the user's email blocked status"""
+    hash_object = hashlib.md5(email.lower().encode("utf-8"))
+    return BlockList.objects.filter(hashed_email=hash_object.hexdigest()).exists()
