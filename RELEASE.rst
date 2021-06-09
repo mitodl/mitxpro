@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.88.1
+Version 0.88.1 (Released June 09, 2021)
 --------------
 
 - asadiqbal08/Add -blocklist option to retire_users command (#2230)
