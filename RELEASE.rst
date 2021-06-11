@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.89.1
+--------------
+
+- Bump yargs-parser from 13.1.1 to 13.1.2 (#2250)
+- Bump lodash-es from 4.17.11 to 4.17.21 (#2253)
+- Bump ua-parser-js from 0.7.19 to 0.7.28 (#2251)
+- Bump eslint-utils from 1.3.1 to 1.4.3 (#2252)
+- Bump django from 2.2.21 to 2.2.24 (#2255)
+- build: bump react-markdown for transitive trim dependency alert (#2237)
+
 Version 0.89.0 (Released June 11, 2021)
 --------------
 
