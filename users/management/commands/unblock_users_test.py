@@ -12,9 +12,6 @@ from django.test import TestCase
 
 User = get_user_model()
 
-# RETIRE_USER_COMMAND = retire_users.Command()
-# UNBLOCK_USER_COMMAND = unblock_users.Command()
-
 
 class TestUnblockUsers(TestCase):
     """
