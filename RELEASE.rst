@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.89.0
+Version 0.89.0 (Released June 11, 2021)
 --------------
 
 - fix: don't fail CI on coverage (#2245)
