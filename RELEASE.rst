@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.89.0 (Released June 11, 2021)
+--------------
+
+- fix: don't fail CI on coverage (#2245)
+- Bump normalize-url from 4.5.0 to 4.5.1 (#2244)
+- build: upgrade boto3, sentry-sdk and requests to fix urllib3 alert (#2241)
+- Blocklist: Check for blocked emails when registering users (#2239)
+- Bump django from 2.2.20 to 2.2.21 (#2242)
+
 Version 0.88.1 (Released June 09, 2021)
 --------------
 
