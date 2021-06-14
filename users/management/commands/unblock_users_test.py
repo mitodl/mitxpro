@@ -15,7 +15,7 @@ User = get_user_model()
 
 class TestUnblockUsers(TestCase):
     """
-    Tests recalculate learner grades management command.
+    Tests unblock users management command.
     """
 
     def setUp(self):
