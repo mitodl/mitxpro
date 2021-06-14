@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.89.1
+Version 0.89.1 (Released June 14, 2021)
 --------------
 
 - Bump yargs-parser from 13.1.1 to 13.1.2 (#2250)
