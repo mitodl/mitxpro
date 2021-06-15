@@ -74,7 +74,7 @@ def is_user_email_blocked(email):
 
 
 def block_user_email(email):
-    """Blocked the user's email if provided"""
+    """Blocks the user's email if provided"""
     msg = None
     if email:
         hash_object = hashlib.md5(email.lower().encode("utf-8"))

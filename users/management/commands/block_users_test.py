@@ -54,4 +54,4 @@ class TestblockUsers(TestCase):
         """test block_users command exit if not user provided"""
         assert BlockList.objects.all().count() == 0
         with self.assertRaises(SystemExit):
-            COMMAND.handle("retire_users", users=[])
+            COMMAND.handle("block_users", users=[])

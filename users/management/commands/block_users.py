@@ -1,22 +1,14 @@
 """
 block user(s) from MIT xPRO
 """
-import hashlib
-from argparse import RawTextHelpFormatter
-from urllib.parse import urlparse
-import sys
 
+from argparse import RawTextHelpFormatter
+import sys
 from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
-
-from social_django.models import UserSocialAuth
 from authentication.utils import block_user_email
-from mail.api import validate_email_addresses
-from mail.exceptions import MultiEmailValidationError
 from users.api import fetch_users
-from users.models import BlockList
 
-from mitxpro import settings
 
 User = get_user_model()
 
