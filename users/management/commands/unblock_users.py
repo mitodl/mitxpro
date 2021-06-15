@@ -55,7 +55,7 @@ class Command(BaseCommand):
             action="append",
             default=[],
             dest="users",
-            help="Single or multiple username(s) or email(s)",
+            help="Single or multiple email(s)",
         )
 
     def handle(self, *args, **kwargs):
@@ -70,11 +70,11 @@ class Command(BaseCommand):
 
         try:
             validate_email_addresses(users)
-        except MultiEmailValidationError:
+        except MultiEmailValidationError as exep:
             self.stdout.write(
                 self.style.ERROR(
-                    "One or more provided user email addresses {users} are not in valid format."
-                ).format(users=users)
+                    "The following provided emails ({emails})  are not in valid format."
+                ).format(emails=exep.invalid_emails)
             )
             sys.exit(2)
 
@@ -84,6 +84,7 @@ class Command(BaseCommand):
                 hashed_email=hash_object.hexdigest()
             )
             if blocked_user:
+                blocked_user.delete()
                 self.stdout.write(
                     self.style.SUCCESS(
                         "Email {email} has been removed from the blocklist of MIT xPRO.".format(
@@ -91,7 +92,6 @@ class Command(BaseCommand):
                         )
                     )
                 )
-                blocked_user.delete()
             else:
                 self.stdout.write(
                     self.style.WARNING(
