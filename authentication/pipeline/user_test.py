@@ -614,7 +614,10 @@ def test_create_user_when_email_blocked(mocker):
     """Tests that validate_email raises an error if user email is blocked"""
     mock_strategy = mocker.Mock()
     mock_email_backend = mocker.Mock()
-    mock_strategy.request_data.return_value = {"email": "test@example.com", "flow": "register"}
+    mock_strategy.request_data.return_value = {
+        "email": "test@example.com",
+        "flow": "register",
+    }
     mocker.patch(
         "authentication.pipeline.user.is_user_email_blocked", return_value=True
     )
