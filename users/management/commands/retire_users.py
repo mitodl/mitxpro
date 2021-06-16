@@ -8,7 +8,7 @@ import sys
 
 from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
-
+from authentication.utils import block_user_email
 from social_django.models import UserSocialAuth
 
 from user_util import user_util
@@ -113,18 +113,9 @@ class Command(BaseCommand):
             email = user.email
 
             if block_users:
-                hash_object = hashlib.md5(email.lower().encode("utf-8"))
-                _, created = BlockList.objects.get_or_create(
-                    hashed_email=hash_object.hexdigest()
-                )
-                if created:
-                    self.stdout.write(
-                        self.style.SUCCESS(
-                            "Email {email} is added to the blocklist of MIT xPRO.".format(
-                                email=email
-                            )
-                        )
-                    )
+                msg = block_user_email(email=email)
+                if msg:
+                    self.stdout.write(self.style.SUCCESS(msg))
 
             user.email = self.get_retired_email(user.email)
             user.set_unusable_password()

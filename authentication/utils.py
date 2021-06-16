@@ -71,3 +71,22 @@ def is_user_email_blocked(email):
     """Returns the user's email blocked status"""
     hash_object = hashlib.md5(email.lower().encode("utf-8"))
     return BlockList.objects.filter(hashed_email=hash_object.hexdigest()).exists()
+
+
+def block_user_email(email):
+    """Blocks the user's email if provided"""
+    msg = None
+    if email:
+        hash_object = hashlib.md5(email.lower().encode("utf-8"))
+        _, created = BlockList.objects.get_or_create(
+            hashed_email=hash_object.hexdigest()
+        )
+        if created:
+            msg = "Email {email} is added to the blocklist of MIT xPRO.".format(
+                email=email
+            )
+        else:
+            msg = "Email {email} is already marked blocked for MIT xPRO.".format(
+                email=email
+            )
+    return msg

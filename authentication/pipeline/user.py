@@ -181,7 +181,8 @@ def validate_email(
         EmailBlockedException: if the user email is blocked
     """
     data = strategy.request_data()
-    if flow == SocialAuthState.FLOW_REGISTER and "email" in data:
+    authentication_flow = data.get("flow")
+    if authentication_flow == SocialAuthState.FLOW_REGISTER and "email" in data:
         if is_user_email_blocked(data["email"]):
             raise EmailBlockedException(backend, current_partial)
     return {}
