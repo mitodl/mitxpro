@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.90.0
+--------------
+
+- asadiqbal08/command unblock_users to remove users from the blocklist. (#2254)
+- asadiqbal08/Standalone block user command and code refactoring (#2257)
+
 Version 0.89.1 (Released June 14, 2021)
 --------------
 
