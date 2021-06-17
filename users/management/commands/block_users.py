@@ -4,13 +4,10 @@ block user(s) from MIT xPRO
 
 from argparse import RawTextHelpFormatter
 import sys
-from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
 from authentication.utils import block_user_email
-from users.api import fetch_users
-
-
-User = get_user_model()
+from mail.api import validate_email_addresses
+from mail.exceptions import MultiEmailValidationError
 
 
 class Command(BaseCommand):
@@ -23,12 +20,8 @@ class Command(BaseCommand):
 
     For single user use:\n
     `./manage.py block_users --user=foo@email.com` or do \n
-    `./manage.py block_users -u foo@email.com` \n or do \n
-    `./manage.py block_users --user=foo` or do \n
-    `./manage.py block_users -u foo` \n or do \n
-    
+
     For multiple users, add arg `--user` for each user i.e:\n
-    `./manage.py block_users --user=foo --user=bar --user=baz` or do \n
     `./manage.py block_users --user=foo@email.com --user=bar@email.com --user=abc@email.com` or do \n
     """
 
@@ -63,9 +56,17 @@ class Command(BaseCommand):
             )
             sys.exit(1)
 
-        users = fetch_users(kwargs["users"])
-        for user in users:
-            email = user.email
-            msg = block_user_email(email=email)
+        try:
+            validate_email_addresses(users)
+        except MultiEmailValidationError as exep:
+            self.stdout.write(
+                self.style.ERROR(
+                    "The following provided emails ({emails})  are not in valid format."
+                ).format(emails=exep.invalid_emails)
+            )
+            sys.exit(2)
+
+        for user_email in users:
+            msg = block_user_email(email=user_email)
             if msg:
                 self.stdout.write(self.style.SUCCESS(msg))
