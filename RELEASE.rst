@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.89.2
+Version 0.89.2 (Released June 17, 2021)
 --------------
 
 - asadiqbal08/Update block_users on email address that wasn't already registered. (#2262)
