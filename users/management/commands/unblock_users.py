@@ -7,7 +7,7 @@ import sys
 from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
 
-from authentication.utils import get_hash_object
+from authentication.utils import get_md5_hash
 from mail.api import validate_email_addresses
 from mail.exceptions import MultiEmailValidationError
 from users.models import BlockList
@@ -74,7 +74,7 @@ class Command(BaseCommand):
             sys.exit(2)
 
         for user_email in users:
-            hash_object = get_hash_object(user_email)
+            hash_object = get_md5_hash(user_email)
             blocked_user = BlockList.objects.filter(
                 hashed_email=hash_object.hexdigest()
             )
