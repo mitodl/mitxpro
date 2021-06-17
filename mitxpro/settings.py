@@ -29,7 +29,7 @@ from mitol.digitalcredentials.settings import *  # pylint: disable=wildcard-impo
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
-VERSION = "0.89.1"
+VERSION = "0.89.2"
 
 ENVIRONMENT = get_string(
     name="MITXPRO_ENVIRONMENT",
