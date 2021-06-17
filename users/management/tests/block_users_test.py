@@ -40,7 +40,7 @@ class TestblockUsers(TestCase):
     @pytest.mark.django_db
     def test_multiple_success_blocking_user(self):
         """test block_users command blocking emails success with more than one user"""
-        test_usernames = ["foo", "bar", "baz"]
+        test_usernames = ["foo@test.com", "bar@test.com", "baz@test.com"]
 
         for username in test_usernames:
             user = UserFactory.create(username=username, is_active=True)
@@ -55,3 +55,10 @@ class TestblockUsers(TestCase):
         assert BlockList.objects.all().count() == 0
         with self.assertRaises(SystemExit):
             COMMAND.handle("block_users", users=[])
+
+    @pytest.mark.django_db
+    def test_user_blocking_with_invalid_email(self):
+        """test block_users command system exit if not provided a valid email address"""
+        test_email = "test.com"
+        with self.assertRaises(SystemExit):
+            COMMAND.handle("block_users", users=[test_email])

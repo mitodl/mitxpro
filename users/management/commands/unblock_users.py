@@ -1,22 +1,17 @@
 """
 Unblock user(s) from MIT xPRO
 """
-import hashlib
 from argparse import RawTextHelpFormatter
-from urllib.parse import urlparse
 import sys
 
 from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
 
-from social_django.models import UserSocialAuth
-
+from authentication.utils import get_md5_hash
 from mail.api import validate_email_addresses
 from mail.exceptions import MultiEmailValidationError
-from users.api import fetch_users
 from users.models import BlockList
 
-from mitxpro import settings
 
 User = get_user_model()
 
@@ -79,7 +74,7 @@ class Command(BaseCommand):
             sys.exit(2)
 
         for user_email in users:
-            hash_object = hashlib.md5(user_email.lower().encode("utf-8"))
+            hash_object = get_md5_hash(user_email)
             blocked_user = BlockList.objects.filter(
                 hashed_email=hash_object.hexdigest()
             )
