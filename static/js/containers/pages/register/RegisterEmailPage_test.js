@@ -143,7 +143,7 @@ describe("RegisterEmailPage", () => {
             <div key="1">
               Please contact{" "}
               <a
-                style={{ color: "white", textDecoration: "underline"}}
+                style={{ color: "white", textDecoration: "underline" }}
                 href={"https://xpro.zendesk.com/hc/en-us/requests/new"}
               >
                 {" "}
