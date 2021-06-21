@@ -193,7 +193,31 @@ def test_create_order_num_seats_integer(client):
         },
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp.json() == {"errors": ["num_seats must be a number"]}
+    assert resp.json() == {"errors": {"num_seats": "num_seats must be a number"}}
+
+
+def test_create_order_duplicate_reference_number(client):
+    """
+    A 400 error should be returned if reference_number is duplicate
+    """
+    duplicate_test_contract_number = "DUPLICATE_TEST"
+    B2BOrderFactory.create(
+        status=B2BOrder.FULFILLED, contract_number=duplicate_test_contract_number
+    )
+    resp = client.post(
+        reverse("b2b-checkout"),
+        {
+            "num_seats": 1,
+            "email": "a@example.com",
+            "product_version_id": 987,
+            "discount_code": "",
+            "contract_number": duplicate_test_contract_number.lower(),  # additional step for case insensitivity
+        },
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json() == {
+        "errors": {"contract_number": "This contract number has already been used"}
+    }
 
 
 def test_create_order_product_version(client):

@@ -60,7 +60,17 @@ class B2BCheckoutView(APIView):
         try:
             num_seats = int(num_seats)
         except ValueError:
-            raise ValidationError("num_seats must be a number")
+            raise ValidationError({"num_seats": "num_seats must be a number"})
+
+        if (
+            contract_number
+            and B2BOrder.objects.filter(
+                contract_number__iexact=contract_number, status=B2BOrder.FULFILLED
+            ).exists()
+        ):
+            raise ValidationError(
+                {"contract_number": "This contract number has already been used"}
+            )
 
         with transaction.atomic():
             product_version = get_object_or_404(ProductVersion, id=product_version_id)

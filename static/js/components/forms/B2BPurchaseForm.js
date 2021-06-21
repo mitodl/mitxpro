@@ -192,6 +192,10 @@ class B2BPurchaseForm extends React.Component<Props> {
                   readOnly={true}
                   value={contractNumber}
                 />
+                <ErrorMessage
+                  name="contract_number"
+                  render={errorMessageRenderer}
+                />
               </label>
             )}
 
