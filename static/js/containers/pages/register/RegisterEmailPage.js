@@ -78,7 +78,7 @@ export class RegisterEmailPage extends React.Component<Props> {
                   <div key="1">
                     Please contact{" "}
                     <a
-                      style={{ color: "white" }}
+                      style={{ color: "white", textDecoration: "underline" }}
                       href={"https://xpro.zendesk.com/hc/en-us/requests/new"}
                     >
                       {" "}
