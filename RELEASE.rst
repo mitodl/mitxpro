@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.90.0
+--------------
+
+- asadiqbal08/The customer support link should be underlined (#2267)
+- fix: validation for duplicate contract_number in order creation (#2259)
+
 Version 0.89.2 (Released June 17, 2021)
 --------------
 
