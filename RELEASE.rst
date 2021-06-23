@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.90.0
+Version 0.90.0 (Released June 23, 2021)
 --------------
 
 - asadiqbal08/The customer support link should be underlined (#2267)
