@@ -144,6 +144,7 @@
     "js-yaml": "^3.13.1",
     "kind-of": "6.0.3",
     "minimist": "1.2.5",
-    "merge": "^2.1.1"
+    "merge": "^2.1.1",
+    "node-sass/**/trim-newlines": "^3.0.1"
   }
 }
