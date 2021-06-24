@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.90.1
+--------------
+
+- upgrade trim-newlines to v3.0.1 (#2270)
+
 Version 0.90.0 (Released June 23, 2021)
 --------------
 
