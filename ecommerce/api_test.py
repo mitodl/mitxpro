@@ -267,6 +267,7 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product, use
     now_mock.assert_called_once_with()
 
 
+@pytest.mark.flaky(max_runs=3, min_passes=1)
 def test_payload_coupons():
     """Coupon discounts should be factored into the total"""
     line1 = LineFactory.create()
