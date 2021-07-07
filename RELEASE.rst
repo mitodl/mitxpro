@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.91.1
+--------------
+
+- migrate from node-sass to sass (#2273)
+
 Version 0.91.0 (Released July 07, 2021)
 --------------
 
