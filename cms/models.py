@@ -586,6 +586,8 @@ class ProductPage(MetadataPageMixin, Page):
         "FacultyMembersPage",
         "TextSection",
         "CertificatePage",
+        "NewsAndEventsPage",
+        
     ]
 
     # Matches the standard page path that Wagtail returns for this page type.
@@ -626,6 +628,7 @@ class ProductPage(MetadataPageMixin, Page):
             "who_should_enroll": self.who_should_enroll,
             "techniques": self.techniques,
             "propel_career": self.propel_career,
+            "news_and_events": self.news_and_events
         }
 
     def _get_child_page_of_type(self, cls):
@@ -654,6 +657,13 @@ class ProductPage(MetadataPageMixin, Page):
     def who_should_enroll(self):
         """Gets the who should enroll child page"""
         return self._get_child_page_of_type(WhoShouldEnrollPage)
+
+    @property
+    def news_and_events(self):
+        """
+        Gets the news and events section subpage
+        """
+        return self._get_child_page_of_type(NewsAndEventsPage)
 
     @property
     def techniques(self):
@@ -1177,7 +1187,14 @@ class NewsAndEventsPage(Page):
     Page that holds news and events updates
     """
 
-    parent_page_types = ["HomePage"]
+    parent_page_types = [
+        "ExternalCoursePage",
+        "CoursePage",
+        "ProgramPage",
+        "HomePage",
+        "ExternalProgramPage",
+    ]
+
     promote_panels = []
     subpage_types = []
 
