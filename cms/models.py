@@ -587,7 +587,6 @@ class ProductPage(MetadataPageMixin, Page):
         "TextSection",
         "CertificatePage",
         "NewsAndEventsPage",
-        
     ]
 
     # Matches the standard page path that Wagtail returns for this page type.
