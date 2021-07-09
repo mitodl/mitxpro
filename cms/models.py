@@ -627,7 +627,7 @@ class ProductPage(MetadataPageMixin, Page):
             "who_should_enroll": self.who_should_enroll,
             "techniques": self.techniques,
             "propel_career": self.propel_career,
-            "news_and_events": self.news_and_events
+            "news_and_events": self.news_and_events,
         }
 
     def _get_child_page_of_type(self, cls):
