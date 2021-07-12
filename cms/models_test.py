@@ -1293,7 +1293,7 @@ def test_product_program_page_news_and_events():
         assert news_and_events.value.get("action_url") == f"action_url-{count}"
 
 
-def test_product_course_page_news_and_events():
+def test_product_course_page_news_and_events_without_program():
     """
     NewsAndEvents subpage should provide expected values if comes under CoursePage
     and CoursePage is not associated with any program.
@@ -1327,7 +1327,7 @@ def test_product_course_page_news_and_events():
         assert news_and_events.value.get("action_url") == f"action_url-{count}"
 
 
-def test_product_course_page_news_and_events():
+def test_product_course_page_news_and_events_with_program():
     """
     NewsAndEvents subpage should provide expected values of program 'news and events' if comes under CoursePage
     and CoursePage is associated with a program.
