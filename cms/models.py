@@ -658,13 +658,6 @@ class ProductPage(MetadataPageMixin, Page):
         return self._get_child_page_of_type(WhoShouldEnrollPage)
 
     @property
-    def news_and_events(self):
-        """
-        Gets the news and events section subpage
-        """
-        return self._get_child_page_of_type(NewsAndEventsPage)
-
-    @property
     def techniques(self):
         """Gets the learning techniques child page"""
         return self._get_child_page_of_type(LearningTechniquesPage)
@@ -769,6 +762,13 @@ class ProgramPage(ProductPage):
         return self._get_child_page_of_type(CoursesInProgramPage)
 
     @property
+    def news_and_events(self):
+        """
+        Gets the news and events section subpage
+        """
+        return self._get_child_page_of_type(NewsAndEventsPage)
+
+    @property
     def product(self):
         """Gets the product associated with this page"""
         return self.program
@@ -843,6 +843,15 @@ class CoursePage(ProductPage):
     def course_lineup(self):
         """Gets the course carousel page"""
         return self.program_page.course_lineup if self.program_page else None
+
+    @property
+    def news_and_events(self):
+        """
+        Gets the news and events section subpage
+        """
+        if self.program_page:
+            return self.program_page.news_and_events
+        return self._get_child_page_of_type(NewsAndEventsPage)
 
     @property
     def course_pages(self):
