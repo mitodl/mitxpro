@@ -1266,7 +1266,7 @@ def test_product_program_page_news_and_events():
     """
     program_page = ProgramPageFactory.create()
     assert not program_page.news_and_events
-    news_and_events_page = create_news_and_events(parent=program_page)    
+    news_and_events_page = create_news_and_events(parent=program_page)
     assert program_page.news_and_events == news_and_events_page
     assert news_and_events_page.heading == "heading"
     _assert_news_and_events_values(news_and_events_page)
