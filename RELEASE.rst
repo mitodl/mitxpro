@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.91.2
+--------------
+
+- marked flaky for a test (#2274)
+
 Version 0.91.1 (Released July 08, 2021)
 --------------
 
