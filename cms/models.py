@@ -849,7 +849,7 @@ class CoursePage(ProductPage):
         """
         Gets the news and events section subpage
         """
-        if self.program_page:
+        if self.program_page and self.program_page.news_and_events:
             return self.program_page.news_and_events
         return self._get_child_page_of_type(NewsAndEventsPage)
 
