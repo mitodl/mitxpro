@@ -718,6 +718,13 @@ class ProductPage(MetadataPageMixin, Page):
         """Checks whether the page in question is for an external course/program page or not."""
         return self.is_external_program_page or self.is_external_course_page
 
+    @property
+    def news_and_events(self):
+        """
+        Gets the news and events section subpage
+        """
+        return self._get_child_page_of_type(NewsAndEventsPage)
+
 
 class ProgramPage(ProductPage):
     """
@@ -760,13 +767,6 @@ class ProgramPage(ProductPage):
     def course_lineup(self):
         """Gets the course carousel page"""
         return self._get_child_page_of_type(CoursesInProgramPage)
-
-    @property
-    def news_and_events(self):
-        """
-        Gets the news and events section subpage
-        """
-        return self._get_child_page_of_type(NewsAndEventsPage)
 
     @property
     def product(self):
