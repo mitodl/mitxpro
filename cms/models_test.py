@@ -1266,31 +1266,10 @@ def test_product_program_page_news_and_events():
     """
     program_page = ProgramPageFactory.create()
     assert not program_page.news_and_events
-    news_and_events_page = NewsAndEventsPageFactory.create(
-        parent=program_page,
-        heading="heading",
-        items__0__news_and_events__content_type="content_type-0",
-        items__0__news_and_events__title="title-0",
-        items__0__news_and_events__image__title="image-0",
-        items__0__news_and_events__content="content-0",
-        items__0__news_and_events__call_to_action="call_to_action-0",
-        items__0__news_and_events__action_url="action_url-0",
-        items__1__news_and_events__content_type="content_type-1",
-        items__1__news_and_events__title="title-1",
-        items__1__news_and_events__image__title="image-1",
-        items__1__news_and_events__content="content-1",
-        items__1__news_and_events__call_to_action="call_to_action-1",
-        items__1__news_and_events__action_url="action_url-1",
-    )
+    news_and_events_page = create_news_and_events(parent=program_page)    
     assert program_page.news_and_events == news_and_events_page
     assert news_and_events_page.heading == "heading"
-    for count, news_and_events in enumerate(news_and_events_page.items):
-        assert news_and_events.value.get("content_type") == f"content_type-{count}"
-        assert news_and_events.value.get("title") == f"title-{count}"
-        assert news_and_events.value.get("image").title == f"image-{count}"
-        assert news_and_events.value.get("content") == f"content-{count}"
-        assert news_and_events.value.get("call_to_action") == f"call_to_action-{count}"
-        assert news_and_events.value.get("action_url") == f"action_url-{count}"
+    _assert_news_and_events_values(news_and_events_page)
 
 
 def test_product_course_page_news_and_events_without_program():
