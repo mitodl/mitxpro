@@ -67,7 +67,7 @@
     "nyc": "^15.1.0",
     "object.entries": "^1.0.4",
     "popper.js": "^1.16.0",
-    "postcss-loader": "^2.0.6",
+    "postcss-loader": "^4.0.0",
     "prettier-eslint": "^9.0.1",
     "prettier-eslint-cli": "^5.0.0",
     "prop-types": "^15.5.10",
