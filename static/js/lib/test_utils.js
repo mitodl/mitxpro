@@ -21,9 +21,7 @@ export const assertIsJust = (m: Maybe, val: any) => {
 }
 
 export const findFormikFieldByName = (wrapper: any, name: string) =>
-  wrapper
-    .find("FormikConnect(FieldInner)")
-    .filterWhere(node => node.prop("name") === name)
+  wrapper.find("Field").filterWhere(node => node.prop("name") === name)
 
 export const findFormikErrorByName = (wrapper: any, name: string) =>
   wrapper
