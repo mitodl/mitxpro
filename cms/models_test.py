@@ -1258,3 +1258,106 @@ def test_program_course_order():
         course_page.course.position_in_program
         for course_page in program_page.course_pages
     ] == [1, 2, 3]
+
+
+def test_product_program_page_news_and_events():
+    """
+    NewsAndEvents subpage should provide expected values if comes under ProgramPage.
+    """
+    program_page = ProgramPageFactory.create()
+    assert not program_page.news_and_events
+    news_and_events_page = create_news_and_events(parent=program_page)
+    assert program_page.news_and_events == news_and_events_page
+    assert news_and_events_page.heading == "heading"
+    _assert_news_and_events_values(news_and_events_page)
+
+
+def test_product_course_page_news_and_events_without_program():
+    """
+    NewsAndEvents subpage should provide expected values if comes under CoursePage
+    and CoursePage is not associated with any program.
+    """
+    course_page = CoursePageFactory.create(course__program=None)
+    assert not course_page.news_and_events
+    news_and_events_page = create_news_and_events(parent=course_page)
+    assert course_page.news_and_events == news_and_events_page
+    assert news_and_events_page.heading == "heading"
+    _assert_news_and_events_values(news_and_events_page)
+
+
+def test_product_course_page_news_and_events_with_program():
+    """
+    NewsAndEvents subpage should provide expected values of program 'news and events' if comes under CoursePage
+    and CoursePage is associated with a program.
+    """
+    program_page = ProgramPageFactory.create()
+    course_page = CoursePageFactory.create(course__program=program_page.program)
+    assert not course_page.news_and_events
+    program_news_and_events_page = create_news_and_events(
+        parent=program_page, heading="heading program"
+    )
+    course_news_and_events_page = create_news_and_events(parent=course_page)
+
+    assert course_page.news_and_events == program_news_and_events_page
+    assert course_page.news_and_events != course_news_and_events_page
+    assert program_news_and_events_page.heading == "heading program"
+    _assert_news_and_events_values(program_news_and_events_page)
+
+
+def test_external_program_page_news_and_events():
+    """
+    NewsAndEvents subpage should provide expected values of external program.
+    """
+    external_program_page = ExternalProgramPageFactory.create()
+    assert not external_program_page.news_and_events
+    news_and_events_page = create_news_and_events(parent=external_program_page)
+    assert external_program_page.news_and_events == news_and_events_page
+    assert news_and_events_page.heading == "heading"
+    _assert_news_and_events_values(news_and_events_page)
+
+
+def test_external_course_page_news_and_events():
+    """
+    NewsAndEvents subpage should provide expected values of external course.
+    """
+    external_course_page = ExternalCoursePageFactory.create()
+    assert not external_course_page.news_and_events
+    news_and_events_page = create_news_and_events(parent=external_course_page)
+    assert external_course_page.news_and_events == news_and_events_page
+    assert news_and_events_page.heading == "heading"
+    _assert_news_and_events_values(news_and_events_page)
+
+
+def create_news_and_events(parent, heading="heading"):
+    """
+    Create a news and events page and return it.
+    """
+    return NewsAndEventsPageFactory.create(
+        parent=parent,
+        heading=heading,
+        items__0__news_and_events__content_type="content_type-0",
+        items__0__news_and_events__title="title-0",
+        items__0__news_and_events__image__title="image-0",
+        items__0__news_and_events__content="content-0",
+        items__0__news_and_events__call_to_action="call_to_action-0",
+        items__0__news_and_events__action_url="action_url-0",
+        items__1__news_and_events__content_type="content_type-1",
+        items__1__news_and_events__title="title-1",
+        items__1__news_and_events__image__title="image-1",
+        items__1__news_and_events__content="content-1",
+        items__1__news_and_events__call_to_action="call_to_action-1",
+        items__1__news_and_events__action_url="action_url-1",
+    )
+
+
+def _assert_news_and_events_values(news_and_events_page):
+    """
+    Assure the expected values for news and events page.
+    """
+    for count, news_and_events in enumerate(news_and_events_page.items):
+        assert news_and_events.value.get("content_type") == f"content_type-{count}"
+        assert news_and_events.value.get("title") == f"title-{count}"
+        assert news_and_events.value.get("image").title == f"image-{count}"
+        assert news_and_events.value.get("content") == f"content-{count}"
+        assert news_and_events.value.get("call_to_action") == f"call_to_action-{count}"
+        assert news_and_events.value.get("action_url") == f"action_url-{count}"

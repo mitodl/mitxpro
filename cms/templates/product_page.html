@@ -63,6 +63,7 @@
       {% endif %}
     {% endwith %}
   {% endif %}
+  {% if news_and_events %} {% include "partials/news-and-events-carousel.html" with page=news_and_events %} {% endif %}
   {% if for_teams %} {% include "partials/for-teams.html" with page=for_teams %} {% endif %}
   {% if faqs %} {% include "partials/faqs.html" with faqs=faqs %} {% endif %}
   {% if propel_career %} {% include "partials/text-section.html" with page=propel_career %} {% endif %}
