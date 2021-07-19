@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.91.3 (Released July 19, 2021)
+--------------
+
+- asadiqbal08/News and Events carousel to product pages (#2279)
+
 Version 0.91.2 (Released July 14, 2021)
 --------------
 
