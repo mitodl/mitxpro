@@ -305,7 +305,8 @@ export const makeB2BOrderStatus = (): B2BOrderStatus => {
     coupon_code:      "1234",
     reference_number: "reference-b2b-xyz",
     receipt_data:     { card_type: null, card_number: null },
-    contract_number:  contractNumber
+    contract_number:  contractNumber,
+    customer_name:    "Some Name"
   }
 }
 

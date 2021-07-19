@@ -12,14 +12,14 @@ from b2b_ecommerce.factories import (
     B2BOrderFactory,
     ProductVersionFactory,
 )
-from b2b_ecommerce.models import B2BCoupon, B2BOrder, B2BCouponRedemption
+from b2b_ecommerce.models import B2BCoupon, B2BOrder, B2BCouponRedemption, B2BReceipt
 from courses.factories import ProgramRunFactory
 from ecommerce.utils import make_checkout_url
 from ecommerce.factories import CouponVersionFactory
 from ecommerce.serializers import FullProductVersionSerializer
 from mitxpro.utils import dict_without_keys
 from mitxpro.test_utils import assert_drf_json_equal
-
+from users.factories import UserFactory
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_ACCESS_KEY = "access"
@@ -281,6 +281,7 @@ def test_order_status(client):
         resp.json(),
         {
             "email": order.email,
+            "customer_name": "",
             "num_seats": order.num_seats,
             "product_version": FullProductVersionSerializer(
                 order.product_version, context={"all_runs": True}
@@ -296,6 +297,40 @@ def test_order_status(client):
             "receipt_data": {"card_type": None, "card_number": None},
         },
     )
+
+
+def test_order_status_customer_name(client):
+    """
+    Test that the correct customer name is returned by order status API
+    """
+    order = B2BOrderFactory.create()
+    resp = client.get(
+        reverse("b2b-order-status", kwargs={"hash": str(order.unique_id)})
+    )
+
+    # Order status API returns no customer name if there is no existing user associated with order email and there is no
+    # receipt associated with order
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json().get("customer_name") == ""
+    receipt_date = {"req_bill_to_forename": "Test", "req_bill_to_surname": "Name"}
+
+    # Order status API returns customer name from the receipt data when there is no user account with order email
+
+    B2BReceipt.objects.create(order=order, data=receipt_date)
+    resp = client.get(
+        reverse("b2b-order-status", kwargs={"hash": str(order.unique_id)})
+    )
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json().get("customer_name") == "Test Name"
+
+    # Order status API returns name of the existing user if there exists an order's email matching user account
+
+    test_user = UserFactory.create(email=order.email)
+    resp = client.get(
+        reverse("b2b-order-status", kwargs={"hash": str(order.unique_id)})
+    )
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json().get("customer_name") == test_user.name
 
 
 def test_order_status_missing(client):
