@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.93.0
+--------------
+
+- upgrade glob-parent to 5.1.2 (#2292)
+
 Version 0.92.0 (Released July 26, 2021)
 --------------
 
