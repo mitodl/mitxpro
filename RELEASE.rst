@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.92.0 (Released July 26, 2021)
+--------------
+
+- update mocha for diff dependecny upgrade (#2290)
+
 Version 0.91.3 (Released July 19, 2021)
 --------------
 
