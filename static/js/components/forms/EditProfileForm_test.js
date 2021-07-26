@@ -68,10 +68,10 @@ describe("EditProfileForm", () => {
   //
   ;[
     ["legal_address.first_name", "", "First Name is a required field"],
-    ["legal_address.first_name", "  ", "First Name is a required field"],
+    ["legal_address.first_name", "  ", "Name cannot start with a special character (~!@&)(+:'.?/,`-), and cannot contain any of (/^$#*=[]`%_;<>{}|\")"],
     ["legal_address.first_name", "Jane", null],
     ["legal_address.last_name", "", "Last Name is a required field"],
-    ["legal_address.last_name", "  ", "Last Name is a required field"],
+    ["legal_address.last_name", "  ", "Name cannot start with a special character (~!@&)(+:'.?/,`-), and cannot contain any of (/^$#*=[]`%_;<>{}|\")"],
     ["legal_address.last_name", "Doe", null],
     ["profile.company", "", "Company is a required field"],
     ["profile.company", "  ", "Company is a required field"],
