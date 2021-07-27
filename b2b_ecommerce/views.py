@@ -146,11 +146,21 @@ class B2BOrderStatusView(APIView):
 
         receipt = B2BReceipt.objects.filter(order=order).order_by("-created_on").first()
         receipt_data = {"card_number": None, "card_type": None}
+        customer = User.objects.filter(email=order.email).first()
+        customer_name = ""
+        if customer:
+            customer_name = customer.name
         if receipt:
             receipt_data["card_number"] = receipt.data.get("req_card_number")
             receipt_data["card_type"] = CYBERSOURCE_CARD_TYPES.get(
                 receipt.data.get("req_card_type")
             )
+            if not customer_name:
+                customer_name = (
+                    receipt.data.get("req_bill_to_forename")
+                    + " "
+                    + receipt.data.get("req_bill_to_surname")
+                )
 
         return Response(
             data={
@@ -163,6 +173,7 @@ class B2BOrderStatusView(APIView):
                     order.product_version, context={"all_runs": True}
                 ).data,
                 "email": order.email,
+                "customer_name": customer_name.strip(),
                 "contract_number": order.contract_number,
                 "created_on": order.created_on,
                 "reference_number": order.reference_number,

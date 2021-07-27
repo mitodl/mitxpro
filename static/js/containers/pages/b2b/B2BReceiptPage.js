@@ -103,7 +103,6 @@ export class B2BReceiptPage extends React.Component<Props, State> {
   render() {
     const {
       orderStatus,
-      currentUser,
       location: { search }
     } = this.props
 
@@ -124,9 +123,9 @@ export class B2BReceiptPage extends React.Component<Props, State> {
       coupon_code: couponCode,
       receipt_data: receiptData,
       reference_number: referenceNumber,
+      customer_name: customerName,
       product_version: { content_title: title, readable_id: readableId }
     } = orderStatus
-
     return (
       <React.Fragment>
         <div className="b2b-receipt-page container">
@@ -150,10 +149,10 @@ export class B2BReceiptPage extends React.Component<Props, State> {
                   <span className="description">Order Date:</span>
                   {formatPrettyDate(moment(createdOn))}
                 </p>
-                {currentUser && currentUser.is_authenticated && (
+                {customerName && (
                   <p className="customer-name">
                     <span className="description">Customer Name:</span>
-                    {currentUser.name}
+                    {customerName}
                   </p>
                 )}
                 <p className="email">
@@ -232,7 +231,6 @@ export class B2BReceiptPage extends React.Component<Props, State> {
 }
 
 const mapStateToProps = state => ({
-  currentUser: state.entities.currentUser,
   orderStatus: state.entities.b2b_order_status
 })
 
