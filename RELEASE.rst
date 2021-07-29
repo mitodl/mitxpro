@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.93.1
+Version 0.93.1 (Released July 29, 2021)
 --------------
 
 - fix: fetch correct customer name on the b2b reciepts (#2293)
