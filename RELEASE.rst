@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.94.0
+--------------
+
+- upgrading deep-extend to 0.6.0 (#2295)
+
 Version 0.93.1 (Released July 29, 2021)
 --------------
 
