@@ -4,7 +4,7 @@ from urllib.parse import quote, urlparse, urlencode, urljoin
 import requests
 from django.conf import settings
 from django.core import mail as django_mail
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.views import LogoutView
 from django.shortcuts import render, reverse
 from social_core.backends.email import EmailAuth
@@ -13,7 +13,12 @@ from social_django.utils import load_backend
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes, renderer_classes
+from rest_framework.decorators import (
+    api_view,
+    permission_classes,
+    renderer_classes,
+    action,
+)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from anymail.message import AnymailMessage
@@ -182,6 +187,18 @@ class CustomDjoserAPIView(UserViewSet, ActionViewMixin):
     """
     Overrides the post method of a Djoser view to update session after successful password change
     """
+
+    @action(["post"], detail=False)
+    def set_password(self, request, *args, **kwargs):
+        """
+        Overrides CustomDjoserAPIView.set_password to update the session after a successful
+        password change. Without this explicit refresh, the user's session would be
+        invalid and they would be logged out.
+        """
+        response = super().set_password(request, *args, **kwargs)
+        if response.status_code in (status.HTTP_200_OK, status.HTTP_204_NO_CONTENT):
+            update_session_auth_hash(self.request, self.request.user)
+        return response
 
 
 class CustomLogoutView(LogoutView):

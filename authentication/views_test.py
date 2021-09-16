@@ -24,6 +24,7 @@ from hypothesis.extra.django import TestCase as HTestCase
 import pytest
 import responses
 from rest_framework import status
+from rest_framework.response import Response
 from social_core.backends.email import EmailAuth
 
 from authentication.serializers import PARTIAL_PIPELINE_TOKEN_KEY
@@ -789,26 +790,8 @@ def test_register_email_hijacked(client, user, admin_user):
     assert response.status_code == 403
 
 
-class DjoserViewTests:
+class TestDjoserView:
     """Tests for views that modify Djoser views"""
-
-    # pylint: disable=too-many-arguments
-    @pytest.mark.parametrize(
-        "url", ["password-reset-api", "password-reset-confirm-api", "set-password-api"]
-    )
-    def test_password_reset_coerce_204(self, mocker, client, user, url):
-        """
-        Verify that password reset views coerce a 204 response to a 200 in order
-        to play nice with redux-hammock.
-        """
-        mocker.patch(
-            "authentication.views.ActionViewMixin.post",
-            return_value=mocker.Mock(status_code=status.HTTP_400_BAD_REQUEST),
-        )
-        client.force_login(user)
-        response = client.post(reverse(url), {})
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json() == {}
 
     @pytest.mark.parametrize(
         "response_status,expected_session_update",
@@ -826,8 +809,8 @@ class DjoserViewTests:
         request succeeds.
         """
         mocker.patch(
-            "authentication.views.ActionViewMixin.post",
-            return_value=mocker.Mock(status_code=response_status),
+            "authentication.views.UserViewSet.set_password",
+            return_value=Response(data={}, status=response_status),
         )
         update_session_patch = mocker.patch(
             "authentication.views.update_session_auth_hash", return_value=mocker.Mock()

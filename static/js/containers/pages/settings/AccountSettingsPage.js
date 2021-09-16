@@ -52,7 +52,7 @@ export class AccountSettingsPage extends React.Component<Props> {
       )
 
       let alertText, color
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 204) {
         alertText = "Your password has been updated successfully."
         color = "success"
       } else {
