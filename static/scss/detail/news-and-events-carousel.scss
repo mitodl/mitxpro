@@ -1,7 +1,7 @@
 // sass-lint:disable mixins-before-declarations
 .news-and-events-block {
   padding: 100px 0 50px;
-  background: white;
+  background: $gray-bg;
   min-height: 400px;
   overflow: hidden;
   position: relative;
@@ -61,7 +61,7 @@
   }
 
   .slide-holder {
-    background: $events-background;
+    background: white;
     border-radius: 5px;
     box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.1);
     height: 100%;
