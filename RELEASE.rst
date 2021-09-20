@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.95.0
+--------------
+
+- Updated styles for news and event carousel
+
 Version 0.94.0 (Released August 10, 2021)
 --------------
 
