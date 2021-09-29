@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.95.1
+--------------
+
+- Bump pillow from 8.2.0 to 8.3.2 (#2305)
+- Bump path-parse from 1.0.6 to 1.0.7 (#2301)
+
 Version 0.95.0 (Released September 21, 2021)
 --------------
 
