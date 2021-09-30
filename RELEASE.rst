@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.95.1
+Version 0.95.1 (Released September 30, 2021)
 --------------
 
 - Bump pillow from 8.2.0 to 8.3.2 (#2305)
