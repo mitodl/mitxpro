@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.96.0
+--------------
+
+- removed unsued dependency
+- Bump tar from 4.4.10 to 4.4.19
+
 Version 0.95.1 (Released September 30, 2021)
 --------------
 
