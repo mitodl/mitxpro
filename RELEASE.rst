@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.96.0
+Version 0.96.0 (Released October 05, 2021)
 --------------
 
 - removed unsued dependency
