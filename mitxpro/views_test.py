@@ -38,23 +38,13 @@ def test_cms_signin_redirect_to_site_signin(client):
     assert response.request["PATH_INFO"] == "/signin/"
 
 
-def test_webpack_url(mocker, client):
-    """Verify that webpack bundle src shows up in production"""
-    get_bundle = mocker.patch("mitxpro.templatetags.render_bundle._get_bundle")
-
-    client.get(reverse("login"))
-
-    bundles = {bundle[0][1] for bundle in get_bundle.call_args_list}
-    assert bundles == {"django", "root", "style"}
-
-
 def test_app_context(settings, client):
     """Tests the app context API"""
     settings.GA_TRACKING_ID = "fake"
     settings.GTM_TRACKING_ID = "fake"
     settings.ENVIRONMENT = "test"
     settings.VERSION = "4.5.6"
-    settings.USE_WEBPACK_DEV_SERVER = False
+    settings.WEBPACK_USE_DEV_SERVER = False
 
     response = client.get(reverse("api-app_context"))
 

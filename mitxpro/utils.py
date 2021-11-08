@@ -40,7 +40,7 @@ def public_path(request):
     """
     Return the correct public_path for Webpack to use
     """
-    if settings.USE_WEBPACK_DEV_SERVER:
+    if settings.WEBPACK_USE_DEV_SERVER:
         return ensure_trailing_slash(webpack_dev_server_url(request))
     else:
         return ensure_trailing_slash(static("bundles/"))

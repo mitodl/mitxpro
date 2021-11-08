@@ -1,4 +1,5 @@
 """PDF Parsing functions for Vouchers"""
+# pylint: disable=R1702
 import json
 import logging
 from datetime import datetime
@@ -178,52 +179,52 @@ def read_pdf_domestic(pdf):
 
     scanning_rows = False
     first_row = False
-
     for page in pdf:
         for line in page.splitlines():
-            for row_name in row_values:
-                if line.startswith(row_name):
-                    elements = [e.strip() for e in line.split("  ") if e != ""]
-                    if len(elements) > 1:
-                        row_values[row_name] = elements[1]
+            if len(line) > 0:
+                for row_name in row_values:
+                    if line.startswith(row_name):
+                        elements = [e.strip() for e in line.split("  ") if e != ""]
+                        if len(elements) > 1:
+                            row_values[row_name] = elements[1]
 
-            if line.startswith(settings.VOUCHER_DOMESTIC_KEY):
-                start_positions = [line.index(val) for val in column_values]
-                scanning_rows = True
-                first_row = True
-                continue
-            if line.startswith("NOTE:"):
-                scanning_rows = False
+                if line.startswith(settings.VOUCHER_DOMESTIC_KEY):
+                    start_positions = [line.index(val) for val in column_values]
+                    scanning_rows = True
+                    first_row = True
+                    continue
+                if line.startswith("NOTE:"):
+                    scanning_rows = False
 
-            if scanning_rows:
-                elements = [
-                    line[a:b].strip()
-                    for a, b in zip(start_positions, start_positions[1:] + [None])
-                ]
-                update_column_values(column_values, elements)
+                if scanning_rows:
+                    elements = [
+                        line[a:b].strip()
+                        for a, b in zip(start_positions, start_positions[1:] + [None])
+                    ]
+                    update_column_values(column_values, elements)
 
-                # Handle issue where credits are often incorrectly placed as part of the Course Name column
-                if first_row:
-                    last_val = column_values[
-                        settings.VOUCHER_DOMESTIC_COURSE_KEY
-                    ].split(" ")[-1]
-                    try:
-                        float(last_val)
-                        column_values[
+                    # Handle issue where credits are often incorrectly placed as part of the Course Name column
+                    if first_row:
+                        last_val = column_values[
                             settings.VOUCHER_DOMESTIC_COURSE_KEY
-                        ] = column_values[settings.VOUCHER_DOMESTIC_COURSE_KEY][
-                            0 : column_values[
+                        ].split(" ")[-1]
+                        try:
+                            float(last_val)
+                            column_values[
                                 settings.VOUCHER_DOMESTIC_COURSE_KEY
-                            ].index(last_val)
-                        ]
-                        column_values[settings.VOUCHER_DOMESTIC_CREDITS_KEY] = (
-                            last_val
-                            + column_values[settings.VOUCHER_DOMESTIC_CREDITS_KEY]
-                        )
-                    except ValueError:
-                        pass
+                            ] = column_values[settings.VOUCHER_DOMESTIC_COURSE_KEY][
+                                0 : column_values[
+                                    settings.VOUCHER_DOMESTIC_COURSE_KEY
+                                ].index(last_val)
+                            ]
+                            column_values[settings.VOUCHER_DOMESTIC_CREDITS_KEY] = (
+                                last_val
+                                + column_values[settings.VOUCHER_DOMESTIC_CREDITS_KEY]
+                            )
+                        except ValueError:
+                            pass
 
-                    first_row = False
+                        first_row = False
 
     row_values.update(column_values)
     return row_values

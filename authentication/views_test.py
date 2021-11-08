@@ -789,54 +789,6 @@ def test_register_email_hijacked(client, user, admin_user):
     assert response.status_code == 403
 
 
-class DjoserViewTests:
-    """Tests for views that modify Djoser views"""
-
-    # pylint: disable=too-many-arguments
-    @pytest.mark.parametrize(
-        "url", ["password-reset-api", "password-reset-confirm-api", "set-password-api"]
-    )
-    def test_password_reset_coerce_204(self, mocker, client, user, url):
-        """
-        Verify that password reset views coerce a 204 response to a 200 in order
-        to play nice with redux-hammock.
-        """
-        mocker.patch(
-            "authentication.views.ActionViewMixin.post",
-            return_value=mocker.Mock(status_code=status.HTTP_400_BAD_REQUEST),
-        )
-        client.force_login(user)
-        response = client.post(reverse(url), {})
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json() == {}
-
-    @pytest.mark.parametrize(
-        "response_status,expected_session_update",
-        [
-            [status.HTTP_200_OK, True],
-            [status.HTTP_204_NO_CONTENT, True],
-            [status.HTTP_400_BAD_REQUEST, False],
-        ],
-    )
-    def test_password_change_session_update(
-        self, mocker, response_status, expected_session_update, client, user
-    ):
-        """
-        Tests that the password change view updates the Django session when the
-        request succeeds.
-        """
-        mocker.patch(
-            "authentication.views.ActionViewMixin.post",
-            return_value=mocker.Mock(status_code=response_status),
-        )
-        update_session_patch = mocker.patch(
-            "authentication.views.update_session_auth_hash", return_value=mocker.Mock()
-        )
-        client.force_login(user)
-        client.post(reverse("set-password-api"), {})
-        assert update_session_patch.called is expected_session_update
-
-
 def test_get_social_auth_types(client, user):
     """Verify that get_social_auth_types returns a list of providers that the user has authenticated with"""
     social_auth_providers = ["provider1", "provider2"]
