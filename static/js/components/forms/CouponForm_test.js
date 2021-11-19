@@ -60,19 +60,19 @@ describe("CouponForm", () => {
   //
   ;[
     ["name", "", "Coupon name is required"],
-    ["name", "Valid_name", null],
+    ["name", "Valid_name", ""],
     ["name", "Invalid name", "Only letters, numbers, and underscores allowed"],
     ["discount", "", "Percentage discount is required"],
     ["discount", "0.5", "Must be at least 1"],
     ["discount", "-1", "Must be at least 1"],
     ["discount", "200", "Must be at most 100"],
-    ["discount", "1", null],
-    ["discount", "100", null],
+    ["discount", "1", ""],
+    ["discount", "100", ""],
     ["payment_transaction", "", "Payment transaction is required"],
-    ["payment_transaction", "number", null],
+    ["payment_transaction", "number", ""],
     ["num_coupon_codes", "", "Number required"],
     ["num_coupon_codes", "0", "Must be at least 1"],
-    ["num_coupon_codes", "2", null]
+    ["num_coupon_codes", "2", ""]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value
@@ -97,14 +97,14 @@ describe("CouponForm", () => {
     ["activation_date", 0, "", "Valid activation date required"],
     ["expiration_date", 1, "bad_date", "Valid expiration date required"],
     ["activation_date", 0, "bad_date", "Valid activation date required"],
-    ["activation_date", 0, "06/27/2019", null],
+    ["activation_date", 0, "06/27/2019", ""],
     [
       "expiration_date",
       1,
       moment()
         .add(1, "days")
         .format("MM/DD/YYYY"),
-      null
+      ""
     ],
     [
       "expiration_date",
@@ -162,7 +162,7 @@ describe("CouponForm", () => {
   //
   ;[
     [[], "1 or more products must be selected"],
-    [[makeCourseRunProduct()], null]
+    [[makeCourseRunProduct()], ""]
   ].forEach(([value, errorMessage]) => {
     it(`validates the field name=products, value="${JSON.stringify(
       value
@@ -242,7 +242,7 @@ describe("CouponForm", () => {
   //
   ;[
     ["payment_type", "", "Payment type is required"],
-    ["payment_type", "staff", null]
+    ["payment_type", "staff", ""]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value
@@ -266,7 +266,7 @@ describe("CouponForm", () => {
   //
   ;[
     ["coupon_code", "", "Coupon code is required"],
-    ["coupon_code", "VALIDCODE", null],
+    ["coupon_code", "VALIDCODE", ""],
     [
       "coupon_code",
       "INVALID CODE",
@@ -274,7 +274,7 @@ describe("CouponForm", () => {
     ],
     ["max_redemptions", "", "Number required"],
     ["max_redemptions", "-10", "Must be at least 1"],
-    ["max_redemptions", "10000", null]
+    ["max_redemptions", "10000", ""]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value="${value}" and expects error=${JSON.stringify(
       errorMessage

@@ -104,3 +104,12 @@ celerybeat-schedule
 
 # Google API token file (for local testing)
 localdev/google.token
+
+# Yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

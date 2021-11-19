@@ -46,7 +46,7 @@ describe("RegisterDetailsForm", () => {
     ["password", "", "Password is a required field"],
     ["password", "pass", "Password must be at least 8 characters"],
     ["password", "passwor", "Password must be at least 8 characters"],
-    ["password", "password123", null],
+    ["password", "password123", ""],
     [
       "password",
       "password",
@@ -54,8 +54,8 @@ describe("RegisterDetailsForm", () => {
     ],
     ["name", "", "Full Name is a required field"],
     ["name", "  ", "Full Name is a required field"],
-    ["name", "Jane", null],
-    ["legal_address.city", "Cambridge", null],
+    ["name", "Jane", ""],
+    ["legal_address.city", "Cambridge", ""],
     ["legal_address.city", "", "City is a required field"],
     ["legal_address.city", "  ", "City is a required field"]
   ].forEach(([name, value, errorMessage]) => {
