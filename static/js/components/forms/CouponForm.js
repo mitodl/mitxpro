@@ -1,7 +1,7 @@
 // @flow
 import React from "react"
 import moment from "moment"
-import Picky from "react-picky"
+import { Picky } from "react-picky"
 import { filter, pathSatisfies, equals, always, sortBy, prop } from "ramda"
 import { formatDate, parseDate } from "react-day-picker/moment"
 import DayPickerInput from "react-day-picker/DayPickerInput"
