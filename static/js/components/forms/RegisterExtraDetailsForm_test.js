@@ -42,10 +42,10 @@ describe("RegisterExtraDetailsForm", () => {
   ;[
     ["profile.company", "", "Company is a required field"],
     ["profile.company", "  ", "Company is a required field"],
-    ["profile.company", "MIT", null],
+    ["profile.company", "MIT", ""],
     ["profile.job_title", "", "Job Title is a required field"],
     ["profile.job_title", "  ", "Job Title is a required field"],
-    ["profile.job_title", "QA Tester", null]
+    ["profile.job_title", "QA Tester", ""]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value
@@ -67,9 +67,9 @@ describe("RegisterExtraDetailsForm", () => {
   //
   ;[
     ["profile.gender", "", "Gender is a required field"],
-    ["profile.gender", "f", null],
+    ["profile.gender", "f", ""],
     ["profile.birth_year", "", "Birth Year is a required field"],
-    ["profile.birth_year", "2000", null]
+    ["profile.birth_year", "2000", ""]
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value

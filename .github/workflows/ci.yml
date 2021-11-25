@@ -137,14 +137,11 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v2-beta
         with:
-          node-version: 12.16.1
-
-      - name: Setup environment
-        run: sudo apt-get install libelf1
+           node-version: 15.14.0
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
 
       - uses: actions/cache@v1
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
@@ -154,7 +151,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: Install dependencies
-        run: yarn install --frozen-lockfile --ignore-engines --prefer-offline
+        run: yarn install --immutable
 
       - name: Lints
         run: npm run lint
