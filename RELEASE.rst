@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.97.0
+--------------
+
+- added --exit option to mocha
+- addressed feedback
+- updated react-picky version and fixed import
+- updated yarn to 3.1
+
 Version 0.96.0 (Released October 05, 2021)
 --------------
 
