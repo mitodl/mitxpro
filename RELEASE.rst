@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.97.0
+Version 0.97.0 (Released November 30, 2021)
 --------------
 
 - added --exit option to mocha
