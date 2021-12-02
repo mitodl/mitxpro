@@ -25,7 +25,7 @@ from mitol.common.envs import (
 
 # wildcard import boilerplate digital credentials settings
 from mitol.digitalcredentials.settings import *  # pylint: disable=wildcard-import,unused-wildcard-import
-from mitol.common.settings.webpack import * # pylint: disable=wildcard-import,unused-wildcard-import
+from mitol.common.settings.webpack import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
