@@ -9,7 +9,7 @@ services:
       DEBUG: 'True'
       NODE_ENV: 'development'
       WEBPACK_USE_DEV_SERVER: 'True'
-      WEBPACK_DEV_SERVER_PORT: 8052
+      WEBPACK_DEV_SERVER_PORT: ${WEBPACK_DEV_SERVER_PORT:-8052}
 
   celery:
     volumes:
@@ -19,7 +19,7 @@ services:
       DEBUG: 'True'
       NODE_ENV: 'development'
       WEBPACK_USE_DEV_SERVER: 'True'
-      WEBPACK_DEV_SERVER_PORT: 8052
+      WEBPACK_DEV_SERVER_PORT: ${WEBPACK_DEV_SERVER_PORT:-8052}
 
   nginx:
     volumes:
