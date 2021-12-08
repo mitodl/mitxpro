@@ -20,11 +20,12 @@ from mitol.common.envs import (
     get_int,
     get_string,
     get_delimited_list,
+    import_settings_modules,
 )
 
 # wildcard import boilerplate digital credentials settings
 from mitol.digitalcredentials.settings import *  # pylint: disable=wildcard-import,unused-wildcard-import
-
+from mitol.common.settings.webpack import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
@@ -216,19 +217,14 @@ INSTALLED_APPS = (
     "mitol.digitalcredentials.apps.DigitalCredentialsApp",
     "mitol.mail.apps.MailApp",
     "mitol.oauth_toolkit_extensions.apps.OAuthToolkitExtensionsApp",
+    "mitol.authentication.apps.TransitionalAuthenticationApp",
 )
 # Only include the seed data app if this isn't running in prod
 if ENVIRONMENT not in ("production", "prod"):
     INSTALLED_APPS += ("localdev.seed",)
 
 
-DISABLE_WEBPACK_LOADER_STATS = get_bool(
-    name="DISABLE_WEBPACK_LOADER_STATS",
-    default=False,
-    dev_only=True,
-    description="Disables the webpack loader, development environment only.",
-)
-if not DISABLE_WEBPACK_LOADER_STATS:
+if not WEBPACK_DISABLE_LOADER_STATS:
     INSTALLED_APPS += ("webpack_loader",)
 
 MIDDLEWARE = (
@@ -452,25 +448,6 @@ STATICFILES_FINDERS = [
 STATIC_ROOT = "staticfiles"
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
-# Request files from the webpack dev server
-USE_WEBPACK_DEV_SERVER = get_bool(
-    name="MITXPRO_USE_WEBPACK_DEV_SERVER",
-    default=False,
-    dev_only=True,
-    description="Enables the webpack devserver, development only",
-)
-WEBPACK_DEV_SERVER_HOST = get_string(
-    name="WEBPACK_DEV_SERVER_HOST",
-    default="",
-    dev_only=True,
-    description="The webpack dev server hostname, development only",
-)
-WEBPACK_DEV_SERVER_PORT = get_int(
-    name="WEBPACK_DEV_SERVER_PORT",
-    default=8052,
-    dev_only=True,
-    description="The webpack dev server port, development only",
-)
 
 # Important to define this so DEBUG works properly
 INTERNAL_IPS = (
@@ -1022,18 +999,6 @@ REST_FRAMEWORK = {
 # (see: http://djoser.readthedocs.io/en/stable/settings.html#password-reset-confirm-url)
 PASSWORD_RESET_CONFIRM_URL = "password_reset/confirm/{uid}/{token}/"
 
-# Djoser library settings (see: http://djoser.readthedocs.io/en/stable/settings.html)
-DJOSER = {
-    "PASSWORD_RESET_CONFIRM_URL": PASSWORD_RESET_CONFIRM_URL,
-    "SET_PASSWORD_RETYPE": False,
-    "LOGOUT_ON_PASSWORD_CHANGE": False,
-    "PASSWORD_RESET_CONFIRM_RETYPE": True,
-    "PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND": True,
-    "EMAIL": {"password_reset": "authentication.views.CustomPasswordResetEmail"},
-}
-
-# ol-django configuration
-
 # mitol-django-common
 MITOL_COMMON_USER_FACTORY = "users.factories.UserFactory"
 
@@ -1054,6 +1019,12 @@ MITOL_MAIL_ENABLE_EMAIL_DEBUGGER = get_bool(  # NOTE: this will override the leg
 MITOL_DIGITAL_CREDENTIALS_BUILD_CREDENTIAL_FUNC = (
     "courses.credentials.build_digital_credential"
 )
+
+# mitol-django-authenticaton
+# import_settings_module, imports the default settings defined in ol-django-authentication app
+import_settings_modules(globals(), "mitol.authentication.settings.djoser_settings")
+MITOL_AUTHENTICATION_FROM_EMAIL = MAILGUN_FROM_EMAIL
+MITOL_AUTHENTICATION_REPLY_TO_EMAIL = MITXPRO_REPLY_TO_ADDRESS
 
 
 MITXPRO_OAUTH_PROVIDER = "mitxpro-oauth2"

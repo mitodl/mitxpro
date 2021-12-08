@@ -58,10 +58,10 @@ def test_public_path(rf, settings):
     """Test public_path() behaviors"""
     request = rf.get("/")
 
-    settings.USE_WEBPACK_DEV_SERVER = True
+    settings.WEBPACK_USE_DEV_SERVER = True
     assert public_path(request) == webpack_dev_server_url(request) + "/"
 
-    settings.USE_WEBPACK_DEV_SERVER = False
+    settings.WEBPACK_USE_DEV_SERVER = False
     assert public_path(request) == "/static/bundles/"
 
 
@@ -457,7 +457,7 @@ def test_get_js_settings(settings, rf):
     settings.ENVIRONMENT = "test"
     settings.VERSION = "4.5.6"
     settings.EMAIL_SUPPORT = "support@text.com"
-    settings.USE_WEBPACK_DEV_SERVER = False
+    settings.WEBPACK_USE_DEV_SERVER = False
     settings.RECAPTCHA_SITE_KEY = "fake_key"
     settings.ZENDESK_CONFIG = {
         "HELP_WIDGET_ENABLED": False,
