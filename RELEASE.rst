@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.97.1
+--------------
+
+- updated compose file
+- fixed formatting issue
+- added ol-django-authentication app to MITxPro
+
 Version 0.97.0 (Released November 30, 2021)
 --------------
 
