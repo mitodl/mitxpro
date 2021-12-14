@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.97.1
+Version 0.97.1 (Released December 14, 2021)
 --------------
 
 - updated compose file
