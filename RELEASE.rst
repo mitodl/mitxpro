@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.98.1
+Version 0.98.1 (Released January 03, 2022)
 --------------
 
 - Bump django from 2.2.24 to 2.2.25 (#2334)
