@@ -227,19 +227,21 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product, use
         "amount": str(total_price),
         "consumer_id": username,
         "currency": "USD",
-        "item_0_code": "program" if is_program_product else "course run",
+        "item_0_code": "courses | program"
+        if is_program_product
+        else "courses | course run",
         "item_0_name": line1.product_version.description,
         "item_0_quantity": line1.quantity,
         "item_0_sku": line1.product_version.product.content_object.id,
         "item_0_tax_amount": "0",
         "item_0_unit_price": str(line1.product_version.price),
-        "item_1_code": "course run",
+        "item_1_code": "courses | course run",
         "item_1_name": line2.product_version.description,
         "item_1_quantity": line2.quantity,
         "item_1_sku": line2.product_version.product.content_object.id,
         "item_1_tax_amount": "0",
         "item_1_unit_price": str(line2.product_version.price),
-        "item_2_code": "program",
+        "item_2_code": "courses | program",
         "item_2_name": line3.product_version.description,
         "item_2_quantity": line3.quantity,
         "item_2_sku": line3.product_version.product.content_object.id,
@@ -256,7 +258,9 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product, use
         "transaction_type": "sale",
         "transaction_uuid": transaction_uuid,
         "unsigned_field_names": "",
-        "merchant_defined_data1": "program" if is_program_product else "course run",
+        "merchant_defined_data1": "courses | program"
+        if is_program_product
+        else "courses | course run",
         "merchant_defined_data2": content_object.readable_id
         if is_program_product
         else content_object.courseware_id,

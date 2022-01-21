@@ -238,7 +238,7 @@ def reverse_migrate_data(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("wagtailcore", "0059_apply_collection_ordering"),
+        ("wagtailcore", "0062_comment_models_and_pagesubscription"),
         ("cms", "0050_news_and_events_page"),
     ]
 

@@ -30,7 +30,7 @@ class YouTubeEmbedFinder(OEmbedFinder):
 
         super().__init__(providers=providers, options=options)
 
-    def find_embed(self, url, max_width=None):
+    def find_embed(self, url, max_width=None):  # pylint: disable=arguments-differ
         embed = super().find_embed(url, max_width)
         embed_tag = BeautifulSoup(embed["html"], "html.parser")
         player_iframe = embed_tag.find("iframe")

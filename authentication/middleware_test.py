@@ -20,7 +20,7 @@ def test_process_exception_no_strategy(rf, settings):
 def test_process_exception(rf, settings):
     """Tests that a process_exception handles auth exceptions correctly"""
     settings.DEBUG = False
-    msg = "error message"
+    msg = "This account is already in use."
     request = rf.get(reverse("social:complete", args=("email",)))
     # social_django depends on request.sesssion, so use the middleware to set that
     SessionMiddleware().process_request(request)
