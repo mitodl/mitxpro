@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.98.2
+Version 0.98.2 (Released January 31, 2022)
 --------------
 
 - Bump ipython from 7.17.0 to 7.31.1 (#2344)
