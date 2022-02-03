@@ -107,7 +107,7 @@ django-compat==1.0.15
     # via
     #   django-hijack
     #   django-hijack-admin
-django-filter==2.3.0
+django-filter==2.4.0
     # via
     #   -r requirements.in
     #   wagtail
