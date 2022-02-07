@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.99.0
+--------------
+
+- Bump django from 2.2.25 to 2.2.26 (#2346)
+- Bump django-filter from 2.3.0 to 2.4.0 (#2345)
+
 Version 0.98.2 (Released January 31, 2022)
 --------------
 
