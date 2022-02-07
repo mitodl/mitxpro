@@ -5,7 +5,6 @@ import { assert } from "chai"
 import moment from "moment"
 
 import {
-  assertRaises,
   wait,
   enumerate,
   findItemWithTextId,
@@ -34,6 +33,22 @@ import {
   makeProgramProduct,
   makeCourseRunProduct
 } from "../factories/ecommerce"
+
+const assertRaises = async (
+  asyncFunc: Function,
+  expectedMessage: string
+) => {
+  let exception
+  try {
+    await asyncFunc()
+  } catch (ex) {
+    exception = ex
+  }
+  if (!exception) {
+    throw new Error("No exception caught")
+  }
+  assert.equal(exception.message, expectedMessage)
+}
 
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
 
