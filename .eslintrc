@@ -1,5 +1,12 @@
 {
   "extends": "eslint-config-mitodl",
+  "settings": {
+    "react": {
+      "pragma": "React",
+      "version": "detect",
+      "flowVersion": "0.2.3"
+    }
+  },
   rules: {
     "no-unused-vars": 0,
     // module importing pattern have huge impact over performance, especially when it comes to lodash
