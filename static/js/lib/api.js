@@ -3,8 +3,6 @@
 import "isomorphic-fetch"
 import * as R from "ramda"
 
-import { S, parseJSON, filterE } from "./sanctuary"
-
 export function getCookie(name: string): string | null {
   let cookieValue = null
 
@@ -76,17 +74,6 @@ const _fetchWithCSRF = async (path: string, init: Object = {}): Promise<*> => {
 
 export { _fetchWithCSRF as fetchWithCSRF }
 
-// resolveEither :: Either -> Promise
-// if the Either is a Left, returns Promise.reject(val)
-// if the Either is a Right, returns Promise.resolve(val)
-// where val is the unwrapped value in the Either
-const resolveEither = S.either(
-  val => Promise.reject(val),
-  val => Promise.resolve(val)
-)
-
-const handleEmptyJSON = json => (json.length === 0 ? JSON.stringify({}) : json)
-
 /**
  * Calls to fetch but does a few other things:
  *  - turn cookies on for this domain
@@ -116,21 +103,19 @@ const _fetchJSONWithCSRF = async (
     window.location = `/logout?next=${encodeURIComponent(loginRedirect)}`
   }
 
-  // we pull the text out of the response
-  const text = await response.text()
+  let json
+  try {
+    json = await response.json()
+  } catch {
+    json = {}
+  }
 
-  // Here we use the `parseJSON` function, which returns an Either.
-  // Left records an error parsing the JSON, and Right success. `filterE` will turn a Right
-  // into a Left based on a boolean function (similar to filtering a Maybe), and we use `bimap`
-  // to merge an error code into a Left. The `resolveEither` function above will resolve a Right
-  // and reject a Left.
-  return R.compose(
-    resolveEither,
-    S.bimap(R.merge({ errorStatusCode: response.status }), R.identity),
-    filterE(() => response.ok),
-    parseJSON,
-    handleEmptyJSON
-  )(text)
+  if (response.ok) {
+    return json
+  } else {
+    json.errorStatusCode = response.status
+    throw json
+  }
 }
 
 // allow mocking in tests

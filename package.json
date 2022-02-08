@@ -97,7 +97,6 @@
     "redux-logger": "^3.0.6",
     "redux-query": "^2.3.1",
     "reselect": "^4.0.0",
-    "sanctuary": "^0.13.2",
     "sass": "1.32.13",
     "sass-lint": "^1.13.1",
     "sass-loader": "10",

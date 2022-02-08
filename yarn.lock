@@ -9154,7 +9154,6 @@ __metadata:
     redux-logger: ^3.0.6
     redux-query: ^2.3.1
     reselect: ^4.0.0
-    sanctuary: ^0.13.2
     sass: 1.32.13
     sass-lint: ^1.13.1
     sass-loader: 10
@@ -11736,50 +11735,6 @@ __metadata:
   version: 1.3.0
   resolution: "samsam@npm:1.3.0"
   checksum: 084914f7707538b735a41e0edba86abd8f9dd2a47a79511b56b55e8032801db767d9eb31899246179295fbb9ab7ab4d12ebc3410ad4265d897cbf0056c3db63d
-  languageName: node
-  linkType: hard
-
-"sanctuary-def@npm:0.12.1":
-  version: 0.12.1
-  resolution: "sanctuary-def@npm:0.12.1"
-  dependencies:
-    sanctuary-type-classes: 6.0.x
-    sanctuary-type-identifiers: 2.0.x
-  checksum: 7b8cb7236ec39aea94667a5beab5126c9753a8546cca6fb6d6e6ce00e5ea6f32d2c32e0524d505abe7089d39f37d25a7a67b1f832079f8bdcfa24df0236aab88
-  languageName: node
-  linkType: hard
-
-"sanctuary-type-classes@npm:6.0.0, sanctuary-type-classes@npm:6.0.x":
-  version: 6.0.0
-  resolution: "sanctuary-type-classes@npm:6.0.0"
-  dependencies:
-    sanctuary-type-identifiers: 1.0.x
-  checksum: 7cad8f5b960f77c09d33ae28db6877bb1bd5d609479c25962975cb6a417c84df8a78d3a911c50030e4c2ad2e696e86a62948544e24c23c1d0e0048a30be224d3
-  languageName: node
-  linkType: hard
-
-"sanctuary-type-identifiers@npm:1.0.x":
-  version: 1.0.0
-  resolution: "sanctuary-type-identifiers@npm:1.0.0"
-  checksum: 613416b6a700a000e278175c4970852c5a7908599a6265ef234f6702f3a5791f9d272a4faabd8936eef6b298cf6ab6a12fd9b4882e6c7009195f6717a02c3994
-  languageName: node
-  linkType: hard
-
-"sanctuary-type-identifiers@npm:2.0.1, sanctuary-type-identifiers@npm:2.0.x":
-  version: 2.0.1
-  resolution: "sanctuary-type-identifiers@npm:2.0.1"
-  checksum: ad155591533deb89e0cd59656a17abcffb2c2aaf04954d6ad581f3e2f55293092b0f2cd0e9fe9b2efee49127757d76ee747a15b74a70d53188858539d1707cc8
-  languageName: node
-  linkType: hard
-
-"sanctuary@npm:^0.13.2":
-  version: 0.13.2
-  resolution: "sanctuary@npm:0.13.2"
-  dependencies:
-    sanctuary-def: 0.12.1
-    sanctuary-type-classes: 6.0.0
-    sanctuary-type-identifiers: 2.0.1
-  checksum: ad2cd65f99a3ceb14eaeabeb574501d039f08371e76487bc1830cc338076988f2331fefcd6c7f68a25b8cf44efd75d119dc6f9845cd5f2dad1765fd4235d7129
   languageName: node
   linkType: hard
 
