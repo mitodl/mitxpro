@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.100.0
+---------------
+
+- Bump celery, redis and celery-redbeat (#2340)
+
 Version 0.99.0 (Released February 08, 2022)
 --------------
 
