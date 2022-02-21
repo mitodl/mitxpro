@@ -53,11 +53,20 @@ module.exports = Object.assign(prodConfig, {
     })
   ],
   optimization: {
+    minimize: true,
+    chunkIds: 'named',
     splitChunks: {
-      name:      "common",
-      minChunks: 2
+      chunks: "all",
+      minChunks: 2,
+      automaticNameDelimiter: '-',
+      cacheGroups: {
+        common: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'common',
+          chunks: 'all',
+        }
+      },
     },
-    minimize: true
   },
   devtool: "source-map"
 })

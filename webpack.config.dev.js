@@ -21,6 +21,7 @@ const insertHotReload = (host, port, entries) =>
 const devConfig = Object.assign({}, config, {
   context: __dirname,
   mode:    "development",
+  devtool: "inline-source-map",
   output:  {
     path:     path.resolve("./static/bundles/"),
     filename: "[name].js"
@@ -29,15 +30,22 @@ const devConfig = Object.assign({}, config, {
     new webpack.HotModuleReplacementPlugin(),
     new BundleTracker({ filename: "./webpack-stats.json" })
   ],
-  devtool:      "source-map",
   optimization: {
-    namedModules: true,
-    splitChunks:  {
-      name:      "common",
-      minChunks: 2
+    chunkIds: 'named',
+    moduleIds: 'named',
+    splitChunks: {
+      chunks: "all",
+      minChunks: 2,
+      automaticNameDelimiter: '-',
+      cacheGroups: {
+        common: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'common',
+          chunks: 'all',
+        },
+      },
     },
-    noEmitOnErrors: true
-  }
+  },
 })
 
 devConfig.module.rules = [
