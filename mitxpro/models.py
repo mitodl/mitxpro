@@ -5,7 +5,7 @@ import copy
 from typing import Iterable
 
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
+from django.db import models
 from django.core.exceptions import ValidationError
 from django.db.models import (
     DateTimeField,
@@ -72,8 +72,8 @@ class AuditModel(TimestampedModel):
     """An abstract base class for audit models"""
 
     acting_user = ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=PROTECT)
-    data_before = JSONField(blank=True, null=True)
-    data_after = JSONField(blank=True, null=True)
+    data_before = models.JSONField(blank=True, null=True)
+    data_after = models.JSONField(blank=True, null=True)
 
     class Meta:
         abstract = True

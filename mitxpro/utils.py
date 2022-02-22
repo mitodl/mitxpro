@@ -149,10 +149,11 @@ def serialize_model_object(obj):
             A representation of the model
     """
     # serialize works on iterables so we need to wrap object in a list, then unwrap it
-    data = json.loads(serialize("json", [obj]))[0]
-    serialized = data["fields"]
-    serialized["id"] = data["pk"]
-    return serialized
+    if obj:
+        data = json.loads(serialize("json", [obj]))[0]
+        serialized = data["fields"]
+        serialized["id"] = data["pk"]
+        return serialized
 
 
 def get_field_names(model):

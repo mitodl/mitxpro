@@ -2,7 +2,6 @@
 import uuid
 
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Q
@@ -222,7 +221,7 @@ class B2BReceipt(TimestampedModel):
     """
 
     order = models.ForeignKey(B2BOrder, null=True, on_delete=models.PROTECT)
-    data = JSONField()
+    data = models.JSONField()
 
     def __str__(self):
         """Description of B2BReceipt"""

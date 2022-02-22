@@ -1411,3 +1411,5 @@ DIGITAL_CREDENTIALS_SUPPORTED_RUNS = get_delimited_list(
     default=[],
     description="Comma separated string of course/program runs/Ids that support digital credentials",
 )
+
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
