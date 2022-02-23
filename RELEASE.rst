@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.100.1
+---------------
+
+- bundle optimization in webpack (#2350)
+- remove Sanctuary library
+
 Version 0.100.0 (Released February 23, 2022)
 ---------------
 
