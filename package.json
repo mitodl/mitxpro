@@ -109,7 +109,7 @@
     "unzipper": "^0.10.1",
     "url-join": "^4.0.0",
     "url-loader": "^4.1.0",
-    "validator": "^10.11.0",
+    "validator": "^13.7.0",
     "waait": "^1.0.4",
     "webpack": "^4.46.0",
     "webpack-bundle-tracker": "^0.4.3",
