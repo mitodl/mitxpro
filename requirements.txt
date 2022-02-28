@@ -50,16 +50,16 @@ celery-redbeat==2.0.0
     # via -r requirements.in
 certifi==2021.10.8
     # via
-    #   elasticsearch
+    #   elastic-transport
     #   requests
     #   sentry-sdk
 cffi==1.15.0
     # via
     #   cryptography
     #   pynacl
-charset-normalizer==2.0.10
+charset-normalizer==2.0.12
     # via requests
-click==8.0.3
+click==8.0.4
     # via
     #   celery
     #   click-didyoumean
@@ -82,7 +82,7 @@ cryptography==36.0.1
     #   social-auth-core
 cssselect==1.1.0
     # via premailer
-cssutils==2.3.0
+cssutils==2.4.0
     # via premailer
 decorator==5.1.1
     # via ipython
@@ -93,7 +93,7 @@ defusedxml==0.7.1
     #   zeep
 dj-database-url==0.5.0
     # via -r requirements.in
-django==3.2.11
+django==3.2.5
     # via
     #   -r requirements.in
     #   django-anymail
@@ -179,7 +179,9 @@ drf-flex-fields==0.8.5
     # via -r requirements.in
 edx-api-client==0.10.0
     # via -r requirements.in
-elasticsearch==7.16.3
+elastic-transport==8.0.1
+    # via elasticsearch
+elasticsearch==8.0.0
     # via django-server-status
 et-xmlfile==1.1.0
     # via openpyxl
@@ -188,7 +190,7 @@ factory-boy==3.2.1
     #   mitol-django-common
     #   mitol-django-digital-credentials
     #   mitol-django-oauth-toolkit-extensions
-faker==11.3.0
+faker==13.2.0
     # via factory-boy
 flaky==3.7.0
     # via -r requirements.in
@@ -204,13 +206,13 @@ google-auth==1.6.3
     #   google-auth-oauthlib
 google-auth-httplib2==0.1.0
     # via google-api-python-client
-google-auth-oauthlib==0.4.6
+google-auth-oauthlib==0.5.0
     # via pygsheets
 html5lib==1.1
     # via
     #   mitol-django-mail
     #   wagtail
-httplib2==0.20.2
+httplib2==0.20.4
     # via
     #   google-api-python-client
     #   google-auth-httplib2
@@ -226,7 +228,7 @@ importlib-metadata==1.7.0
     #   pytest
 iniconfig==1.1.1
     # via pytest
-ipython==7.31.1
+ipython==7.32.0
     # via -r requirements.in
 isodate==0.6.1
     # via zeep
@@ -246,11 +248,11 @@ kombu==5.2.3
     #   django-server-status
 l18n==2021.3
     # via wagtail
-lxml==4.7.1
+lxml==4.8.0
     # via
     #   premailer
     #   zeep
-markupsafe==2.0.1
+markupsafe==2.1.0
     # via jinja2
 matplotlib-inline==0.1.3
     # via ipython
@@ -271,9 +273,9 @@ mitol-django-mail==3.0.1
     #   mitol-django-authentication
 mitol-django-oauth-toolkit-extensions==1.0.1
     # via -r requirements.in
-newrelic==7.4.0.172
+newrelic==7.6.0.173
     # via -r requirements.in
-oauthlib==3.1.1
+oauthlib==3.2.0
     # via
     #   django-oauth-toolkit
     #   requests-oauthlib
@@ -298,7 +300,7 @@ pluggy==0.13.1
     # via pytest
 premailer==3.10.0
     # via mitol-django-mail
-prompt-toolkit==3.0.24
+prompt-toolkit==3.0.28
     # via
     #   click-repl
     #   ipython
@@ -377,7 +379,7 @@ requests==2.27.1
     #   social-auth-core
     #   wagtail
     #   zeep
-requests-oauthlib==1.3.0
+requests-oauthlib==1.3.1
     # via
     #   google-auth-oauthlib
     #   social-auth-core
@@ -387,7 +389,7 @@ rsa==4.8
     # via google-auth
 s3transfer==0.3.7
     # via boto3
-sentry-sdk==1.5.4
+sentry-sdk==1.5.6
     # via -r requirements.in
 six==1.16.0
     # via
@@ -417,14 +419,12 @@ soupsieve==2.3.1
     # via beautifulsoup4
 sqlparse==0.4.2
     # via django
-tablib[xls,xlsx]==3.1.0
+tablib[xls,xlsx]==3.2.0
     # via wagtail
 telepath==0.2
     # via wagtail
 tenacity==8.0.1
     # via celery-redbeat
-text-unidecode==1.3
-    # via faker
 toml==0.10.2
     # via pytest
 toolz==0.11.2
@@ -433,7 +433,7 @@ traitlets==5.1.1
     # via
     #   ipython
     #   matplotlib-inline
-typing-extensions==4.0.1
+typing-extensions==4.1.1
     # via
     #   asgiref
     #   faker
@@ -450,7 +450,7 @@ uritemplate==3.0.1
 urllib3==1.26.8
     # via
     #   botocore
-    #   elasticsearch
+    #   elastic-transport
     #   requests
     #   sentry-sdk
 user-agents==2.0
@@ -476,7 +476,7 @@ wcwidth==0.2.5
     # via prompt-toolkit
 webencodings==0.5.1
     # via html5lib
-willow==1.4
+willow==1.4.1
     # via wagtail
 xlrd==2.0.1
     # via tablib
