@@ -9166,7 +9166,6 @@ __metadata:
     unzipper: ^0.10.1
     url-join: ^4.0.0
     url-loader: ^4.1.0
-    validator: ^10.11.0
     waait: ^1.0.4
     webpack: ^4.46.0
     webpack-bundle-tracker: ^0.4.3
@@ -13559,13 +13558,6 @@ __metadata:
   version: 2.3.0
   resolution: "v8-compile-cache@npm:2.3.0"
   checksum: adb0a271eaa2297f2f4c536acbfee872d0dd26ec2d76f66921aa7fc437319132773483344207bdbeee169225f4739016d8d2dbf0553913a52bb34da6d0334f8e
-  languageName: node
-  linkType: hard
-
-"validator@npm:^10.11.0":
-  version: 10.11.0
-  resolution: "validator@npm:10.11.0"
-  checksum: b945e5712af888fc5c984312cf9a7736d16a03f989556291d7984e5747efaaee6cdff671f6b0ef2630a6e2866a2728ab0f341877b878a9ffb8ad770dfcad7170
   languageName: node
   linkType: hard
 
