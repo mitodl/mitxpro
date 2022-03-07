@@ -4,7 +4,6 @@ import logging
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.templatetags.static import static
@@ -651,7 +650,7 @@ class Receipt(TimestampedModel):
     """
 
     order = models.ForeignKey(Order, null=True, on_delete=models.PROTECT)
-    data = JSONField()
+    data = models.JSONField()
 
     def __str__(self):
         """Description of Receipt"""
