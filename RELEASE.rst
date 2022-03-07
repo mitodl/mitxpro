@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.100.1
+Version 0.100.1 (Released March 07, 2022)
 ---------------
 
 - bundle optimization in webpack (#2350)
