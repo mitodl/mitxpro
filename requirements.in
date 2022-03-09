@@ -18,7 +18,7 @@ django-user-agents==0.4.0
 djangorestframework==3.12.4
 djoser==2.1.0
 edx-api-client==0.10.0
-django-storages==1.7.1
+django-storages==1.11.1
 drf-flex-fields==0.8.5
 google-api-python-client==1.7.11
 google-auth==1.6.3

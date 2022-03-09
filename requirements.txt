@@ -146,7 +146,7 @@ django-robots==4.0
     # via -r requirements.in
 django-server-status==0.6.0
     # via -r requirements.in
-django-storages==1.7.1
+django-storages==1.11.1
     # via -r requirements.in
 django-taggit==1.5.1
     # via wagtail
