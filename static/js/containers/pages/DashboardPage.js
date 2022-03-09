@@ -480,7 +480,7 @@ export class DashboardPage extends React.Component<Props, State> {
 
   digitalCredentialsDialogText = (): string => {
     if (this.isAndroidOrIOSMobile()) {
-      return "To retrieve your credential, install the CredWallet app and then click Download Digital Credential.\n"
+      return "To retrieve your credential, install the Learner Credential Wallet app and then click Download Digital Credential.\n"
     }
     return "To retrieve your credential, please open the xPRO dashboard on an iOS or Android device and follow the instructions.\n"
   }
@@ -526,7 +526,7 @@ export class DashboardPage extends React.Component<Props, State> {
                 </div>
                 <div className="row digital-credential-store-button">
                   {isIOS && isMobile && (
-                    <a href="https://testflight.apple.com/join/fERBVJoU">
+                    <a href="https://apps.apple.com/app/learner-credential-wallet/id1590615710">
                       <img
                         src="/static/images/app-store-badge.svg"
                         alt="AppStore Image"
@@ -534,7 +534,7 @@ export class DashboardPage extends React.Component<Props, State> {
                     </a>
                   )}
                   {isAndroid && isMobile && (
-                    <a href="https://play.google.com/store/apps">
+                    <a href="https://play.google.com/store/apps/details?id=app.lcw">
                       <img
                         src="/static/images/google-play-badge.png"
                         alt="Playstore Image"
@@ -562,7 +562,7 @@ export class DashboardPage extends React.Component<Props, State> {
                   </div>
                 )}
                 <div className="row learn-more-button">
-                  <a href="https://digitalcredentials.mit.edu/">Learn More</a>
+                  <a href="https://lcw.app/">Learn More</a>
                 </div>
               </div>
             </div>
