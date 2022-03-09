@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.100.2
+---------------
+
+- Upgrade django-storage (#2363)
+- asadiqbal08/ Django Version bump (#2343)
+- chore: remove unused dependency (validator) (#2357)
+
 Version 0.100.1 (Released March 07, 2022)
 ---------------
 
