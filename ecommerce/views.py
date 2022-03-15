@@ -101,13 +101,17 @@ class ProductViewSet(ReadOnlyModelViewSet):
             .values_list("id", flat=True)
         )
 
-        unused_programruns = Program.objects.annotate(
-            valid_runs=Count(
-                "programruns",
-                filter=Q(programruns__end_date__gt=now)
-                | Q(programruns__end_date=None)
+        unused_programruns = (
+            Program.objects.annotate(
+                valid_runs=Count(
+                    "programruns",
+                    filter=Q(programruns__end_date__gt=now)
+                    | Q(programruns__end_date=None),
+                )
             )
-        ).filter(valid_runs=0).values_list('id', flat=True)
+            .filter(valid_runs=0)
+            .values_list("id", flat=True)
+        )
 
         expired_programs = (
             Program.objects.filter(
