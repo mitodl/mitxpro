@@ -30,7 +30,7 @@ from mitol.common.settings.webpack import *  # pylint: disable=wildcard-import,u
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
-VERSION = "0.100.1"
+VERSION = "0.101.0"
 
 ENVIRONMENT = get_string(
     name="MITXPRO_ENVIRONMENT",
