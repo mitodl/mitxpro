@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.101.0 (Released March 21, 2022)
+---------------
+
+- Split the queries to evaluate (#2368)
+- Digital Credentials: UI Changes for DCC integration (#2364)
+- Upgrade django-storage (#2363)
+- asadiqbal08/ Django Version bump (#2343)
+- chore: remove unused dependency (validator) (#2357)
+
 Version 0.100.1 (Released March 07, 2022)
 ---------------
 
