@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.102.0
+---------------
+
+- set the react version to get rid of a lint warning
+
 Version 0.101.0 (Released March 21, 2022)
 ---------------
 
