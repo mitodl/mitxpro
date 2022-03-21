@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.101.0
+Version 0.101.0 (Released March 21, 2022)
 ---------------
 
 - Split the queries to evaluate (#2368)
