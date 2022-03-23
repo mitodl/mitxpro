@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.102.1
+---------------
+
+- Fixed password reset url
+
 Version 0.102.0 (Released March 21, 2022)
 ---------------
 
