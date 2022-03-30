@@ -101,7 +101,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
             .values_list("id", flat=True)
         )
 
-        unused_programruns = (
+        unused_program_id = (
             Program.objects.annotate(
                 valid_runs=Count(
                     "programruns",
@@ -116,7 +116,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
         expired_programs = (
             Program.objects.filter(
                 Q(programruns__isnull=True)
-                | Q(programruns__in=unused_programruns)
+                | Q(id__in=unused_program_id)
                 | Q(courses__in=expired_courses)
             )
             .values_list("id", flat=True)
