@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.102.2
+---------------
+
+- Updated the query to filter correct data (#2376)
+
 Version 0.102.1 (Released March 23, 2022)
 ---------------
 
