@@ -1385,25 +1385,19 @@ def test_products_viewset_detail(user_drf_client, coupon_product_ids):
 
 
 def test_products_viewset_expired_programs(user_drf_client):
-    """ Test that the ProductViewSet returns contains only valid programs products and exclude the expired programs correctly"""
+    """ Test that the ProductViewSet returns only valid programs products and excludes the expired programs correctly"""
     now = now_in_utc()
-    programs = ProgramFactory.create_batch(3)
+    programs = ProgramFactory.create_batch(4)
     runs = CourseRunFactory.create_batch(2, course__program=factory.Iterator(programs))
-    index = 0
-    while index < len(programs):
-        ProgramRunFactory.create(
-            program=programs[index],
-            start_date=(now + timedelta(days=1))
-            if index < (len(programs) - 1)
-            else (now - timedelta(days=3)),
-            end_date=(now + timedelta(days=2))
-            if index < (len(programs) - 1)
-            else (now - timedelta(days=1)),
-        )
-        index += 1
+    ProgramRunFactory.create_batch(
+        3,
+        program=factory.Iterator(programs[:3]),
+        end_date=factory.Iterator([None, now + timedelta(1)]),
+    )
+    ProgramRunFactory.create(program=programs[3], end_date=now - timedelta(1))
 
     ProductVersionFactory.create_batch(
-        4, product__content_object=factory.Iterator(runs + programs)
+        6, product__content_object=factory.Iterator(runs + programs)
     )
     response = user_drf_client.get(reverse("products_api-list"))
     assert response.status_code == status.HTTP_200_OK
@@ -1417,9 +1411,9 @@ def test_products_viewset_expired_programs(user_drf_client):
         if product["product_type"] == "program"
     ]
     # For all the programs in the list there should be on enrollable course run for each associated course
-    assert set(program_ids) == {programs[0].id, programs[1].id}
+    assert set(program_ids) == {programs[0].id, programs[1].id, programs[2].id}
     # Expired program should be excluded.
-    assert programs[2].id not in program_ids
+    assert programs[3].id not in program_ids
     for program_id in program_ids:
         program = Program.objects.get(pk=program_id)
         count = (
