@@ -1164,6 +1164,22 @@ def test_validate_basket_product_inactive(basket_and_coupons):
     assert "This item cannot be purchased" in ex.value.args[0]["items"]
 
 
+def test_validate_basket_product_requires_enrollment_code(basket_and_coupons):
+    """
+    If the product version requires enrollment code, a validation error should be raised if we don't pass the enrollment code
+    """
+    product_version = basket_and_coupons.product_version
+    product_version.id = None
+    product_version.requires_enrollment_code = True
+    product_version.save()
+
+    CouponSelection.objects.all().delete()
+
+    with pytest.raises(ValidationError) as ex:
+        validate_basket_for_checkout(basket_and_coupons.basket.user)
+    assert "Enrollment / Promotional Code is required" in ex.value.args[0]["coupons"]
+
+
 def test_validate_basket_not_live(basket_and_coupons):
     """
     If the pprogram/courserun in a basket is not live, a validation error should be raised

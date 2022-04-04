@@ -200,6 +200,10 @@ class ProductVersion(TimestampedModel):
     price = models.DecimalField(decimal_places=2, max_digits=20)
     description = models.TextField()
     text_id = models.TextField(null=True)
+    requires_enrollment_code = models.BooleanField(
+        default=False,
+        help_text="Requires enrollment code will require the learner to enter an enrollment code to enroll in the course at the checkout.",
+    )
 
     class Meta:
         indexes = [models.Index(fields=["created_on"])]
