@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.102.3
+---------------
+
+- Bump django from 3.2.5 to 3.2.12 (#2359)
+- Added unittest for expired program runs (#2379)
+
 Version 0.102.2 (Released March 30, 2022)
 ---------------
 
