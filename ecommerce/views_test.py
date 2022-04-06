@@ -1402,9 +1402,6 @@ def test_products_viewset_expired_programs(user_drf_client):
     response = user_drf_client.get(reverse("products_api-list"))
     assert response.status_code == status.HTTP_200_OK
     products = response.json()
-    expired_courseruns = CourseRun.objects.filter(enrollment_end__lt=now).values_list(
-        "id", flat=True
-    )
     program_ids = [
         product["latest_version"]["object_id"]
         for product in products
