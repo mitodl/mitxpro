@@ -1414,6 +1414,8 @@ def test_products_viewset_expired_programs(user_drf_client):
     assert set(program_ids) == {programs[0].id, programs[1].id, programs[2].id}
     # Expired program should be excluded.
     assert programs[3].id not in program_ids
+    
+    # For all the programs in the list there should be on enrollable course run for each associated course
     for program_id in program_ids:
         program = Program.objects.get(pk=program_id)
         count = (
