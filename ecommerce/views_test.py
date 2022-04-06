@@ -1410,7 +1410,7 @@ def test_products_viewset_expired_programs(user_drf_client):
         for product in products
         if product["product_type"] == "program"
     ]
-    # For all the programs in the list there should be on enrollable course run for each associated course
+    # assert non expired programs are in list.
     assert set(program_ids) == {programs[0].id, programs[1].id, programs[2].id}
 
     # Expired program should be excluded.
