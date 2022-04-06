@@ -1384,6 +1384,36 @@ def test_products_viewset_detail(user_drf_client, coupon_product_ids):
     )
 
 
+def test_products_viewset_expired_programs(user_drf_client):
+    """ Test that the ProductViewSet returns only valid programs products and excludes the expired programs correctly"""
+    now = now_in_utc()
+    programs = ProgramFactory.create_batch(4)
+    runs = CourseRunFactory.create_batch(2, course__program=factory.Iterator(programs))
+    ProgramRunFactory.create_batch(
+        3,
+        program=factory.Iterator(programs[:3]),
+        end_date=factory.Iterator([None, now + timedelta(1)]),
+    )
+    ProgramRunFactory.create(program=programs[3], end_date=now - timedelta(1))
+
+    ProductVersionFactory.create_batch(
+        6, product__content_object=factory.Iterator(runs + programs)
+    )
+    response = user_drf_client.get(reverse("products_api-list"))
+    assert response.status_code == status.HTTP_200_OK
+    products = response.json()
+    program_ids = [
+        product["latest_version"]["object_id"]
+        for product in products
+        if product["product_type"] == "program"
+    ]
+    # assert non expired programs are in list.
+    assert set(program_ids) == {programs[0].id, programs[1].id, programs[2].id}
+
+    # Expired program should be excluded.
+    assert programs[3].id not in program_ids
+
+
 @pytest.mark.django_db
 def test_products_viewset_performance(
     user_drf_client, coupon_product_ids, django_assert_num_queries
