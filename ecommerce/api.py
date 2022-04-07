@@ -964,6 +964,10 @@ def validate_basket_for_checkout(user):
     )
     coupon_version = _validate_coupon_selection(basket, product)
 
+    # check for require enrollment code
+    if product_version.requires_enrollment_code and not coupon_version:
+        raise ValidationError({"coupons": "Enrollment / Promotional Code is required"})
+
     # User must have signed any data consent agreements necessary for the basket
     data_consent_users = get_or_create_data_consent_users(basket)
     for data_consent_user in data_consent_users:
