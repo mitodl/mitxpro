@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.102.4
+Version 0.102.4 (Released April 11, 2022)
 ---------------
 
 - Add option to require enrollment code at checkout for specified products (#2380)
