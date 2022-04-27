@@ -910,6 +910,11 @@ HIJACK_LOGOUT_REDIRECT_URL = "/admin/users/user"
 HIJACK_REGISTER_ADMIN = False
 
 # Wagtail
+
+WAGTAILSEARCH_BACKENDS = {
+    "default": {"BACKEND": "wagtail.search.backends.database", "ATOMIC_REBUILD": True}
+}
+
 WAGTAIL_CACHE_BACKEND = get_string(
     name="WAGTAIL_CACHE_BACKEND",
     default="django_redis.cache.RedisCache",

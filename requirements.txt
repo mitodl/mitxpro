@@ -292,7 +292,7 @@ pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-pillow==8.3.2
+pillow==9.1.0
     # via
     #   -r requirements.in
     #   wagtail
@@ -466,11 +466,11 @@ vine==5.0.0
     #   amqp
     #   celery
     #   kombu
-wagtail==2.13.4
+wagtail==2.15.5
     # via
     #   -r requirements.in
     #   wagtail-metadata
-wagtail-metadata==3.3.0
+wagtail-metadata==3.5.0
     # via -r requirements.in
 wcwidth==0.2.5
     # via prompt-toolkit
