@@ -241,7 +241,7 @@ def delete_wagtail_pages(specific_page_cls, filter_dict=None):
     )
 
 
-def get_home_page():
+def get_home_page_from_site():
     """
     Importing the Site model from the registry means if we access the root page from this
     model we will get an instance of the Page with only the basic model methods so we simply extract
@@ -271,7 +271,7 @@ def create_index_pages_and_nest_detail():
     ProgramPage = apps.get_model("cms", "ProgramPage")
 
     # Home page
-    home_page = get_home_page()
+    home_page = get_home_page_from_site()
 
     course_index = CourseIndexPage.objects.first()
     if not course_index:
@@ -300,7 +300,7 @@ def unnest_detail_and_delete_index_pages():
     ProgramPage = apps.get_model("cms", "ProgramPage")
 
     # Move course/program detail pages to be children of the home page
-    home_page = get_home_page()
+    home_page = get_home_page_from_site()
     top_level_child_ids = [child.id for child in home_page.get_children()]
     for page_id in CoursePage.objects.values_list("id", flat=True):
         if page_id not in top_level_child_ids:
@@ -324,7 +324,7 @@ def create_catalog_page():
     catalog_content_type, _ = ContentType.objects.get_or_create(
         app_label="cms", model="catalogpage"
     )
-    home_page = get_home_page()
+    home_page = get_home_page_from_site()
 
     catalog = CatalogPage.objects.first()
     if not catalog:
@@ -369,7 +369,7 @@ def create_certificate_index_page():
     index_content_type, _ = ContentType.objects.get_or_create(
         app_label="cms", model="certificateindexpage"
     )
-    home_page = get_home_page()
+    home_page = get_home_page_from_site()
 
     index_page = CertificateIndexPage.objects.first()
 
