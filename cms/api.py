@@ -1,4 +1,5 @@
 """API for the CMS app"""
+# pylint: disable=redefined-outer-name
 import itertools
 from datetime import MINYEAR, datetime
 import logging
