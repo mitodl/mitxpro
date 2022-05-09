@@ -2,15 +2,14 @@
 import itertools
 from datetime import MINYEAR, datetime
 import logging
-import pytz
 import json
+import pytz
 
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
-from wagtail.core.models import Page, Site
+from wagtail.core.models import Page, Site, PageRevision
 from cms import models as cms_models
 from cms.constants import CERTIFICATE_INDEX_SLUG
-from wagtail.core.models import Page, PageRevision
 
 log = logging.getLogger(__name__)
 DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")
