@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.103.0
+Version 0.103.0 (Released May 24, 2022)
 ---------------
 
 - Update canius-lite (#2395)
