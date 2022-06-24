@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from mitol.common.decorators import cache_control_max_age_jitter
 
 from django.conf import settings
 from django.conf.urls import include
@@ -104,7 +105,7 @@ urlpatterns = (
                 name="wagtailimages_serve",
             )
         ],
-        cache_control(max_age=WAGTAIL_IMG_CACHE_AGE),
+        cache_control_max_age_jitter(cache_control, max_age=WAGTAIL_IMG_CACHE_AGE),
     )
     + [
         path("", include(wagtail_urls)),
