@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.104.0
+Version 0.104.0 (Released June 27, 2022)
 ---------------
 
 - Integrate the cache control max_age jitter decorator form mitol-django-common (#2390)
