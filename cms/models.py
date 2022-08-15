@@ -1711,6 +1711,15 @@ class CertificatePage(CourseProgramChildPage):
         help_text="Optional text field for CEU (continuing education unit).",
     )
 
+    partner_logo = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Optional Partner logo",
+    )
+
     signatories = StreamField(
         StreamBlock(
             [
@@ -1735,6 +1744,7 @@ class CertificatePage(CourseProgramChildPage):
     content_panels = [
         FieldPanel("product_name"),
         FieldPanel("CEUs"),
+        ImageChooserPanel("partner_logo"),
         StreamFieldPanel("overrides"),
         StreamFieldPanel("signatories"),
     ]

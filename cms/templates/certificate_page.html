@@ -59,9 +59,20 @@
         <div class="col certificate-wrapper">
             <div class="certificate">
                 <div class="certificate-holder">
+                    {% if page.partner_logo %}
+                    <div class="certificate-dual-logo">
+                        <div class="column">
+                            <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
+                        </div>
+                        <div class="column">
+                            <img src="{% image_version_url page.partner_logo 'max-1000x1000' %}" alt="MIT Partner" />
+                        </div>
+                    </div>
+                    {% else %}
                     <div class="certificate-logo">
                         <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
                     </div>
+                    {% endif %}
                     <span class="institute-text">Massachusetts Institute of Technology</span>
                     <div class="institute-logo">
                         <img src="{% static 'images/certificates/certificate-logo.png' %}" alt="MIT">

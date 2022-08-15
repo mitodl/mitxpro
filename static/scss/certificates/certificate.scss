@@ -34,6 +34,21 @@ $text-gray-light: #d2d0d1;
       }
     }
   }
+  .certificate-dual-logo {
+    display: table;
+    max-width: 625px;
+    margin: 0 auto 15px;
+
+    .column {
+      float: left;
+      width: 40%;
+      margin-left: 10%;
+
+      img {
+        width: 100%;
+      }
+    }
+  }
 }
 
 .cer-head {
