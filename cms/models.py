@@ -8,6 +8,7 @@ from decimal import Decimal
 from urllib.parse import urljoin
 
 import pytz
+from django import forms
 from django.conf import settings
 from django.templatetags.static import static
 from django.db import models
@@ -1693,6 +1694,11 @@ class CertificatePage(CourseProgramChildPage):
     """
     CMS page representing a Certificate.
     """
+    class Placement(models.IntegerChoices):
+        FIRST = 1, 'First'
+        SECOND = 2, 'Second'
+
+        __empty__ = 'Do not display'
 
     template = "certificate_page.html"
     parent_page_types = ["CoursePage", "ProgramPage"]
@@ -1702,6 +1708,13 @@ class CertificatePage(CourseProgramChildPage):
         null=False,
         blank=False,
         help_text="Specify the course/program name.",
+    )
+
+    institute_text = models.CharField(
+        max_length=250,
+        null=True,
+        blank=True,
+        help_text="Specify the institute text",
     )
 
     CEUs = models.CharField(
@@ -1718,6 +1731,14 @@ class CertificatePage(CourseProgramChildPage):
         on_delete=models.SET_NULL,
         related_name="+",
         help_text="Optional Partner logo",
+    )
+
+    partner_logo_placement = models.IntegerField(
+        choices=Placement.choices,
+        default=Placement.SECOND,
+        null=True,
+        blank=True,
+        help_text="Partner logo placement on certificate",
     )
 
     signatories = StreamField(
@@ -1743,8 +1764,10 @@ class CertificatePage(CourseProgramChildPage):
 
     content_panels = [
         FieldPanel("product_name"),
+        FieldPanel("institute_text"),
         FieldPanel("CEUs"),
         ImageChooserPanel("partner_logo"),
+        FieldPanel("partner_logo_placement", widget=forms.Select),
         StreamFieldPanel("overrides"),
         StreamFieldPanel("signatories"),
     ]

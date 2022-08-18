@@ -60,6 +60,7 @@
             <div class="certificate">
                 <div class="certificate-holder">
                     {% if page.partner_logo %}
+                    {% if page.partner_logo_placement == page.Placement.SECOND %}
                     <div class="certificate-dual-logo">
                         <div class="column">
                             <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
@@ -68,15 +69,35 @@
                             <img src="{% image_version_url page.partner_logo 'max-1000x1000' %}" alt="MIT Partner" />
                         </div>
                     </div>
+                    {% elif page.partner_logo_placement == page.Placement.FIRST %}
+                    <div class="certificate-dual-logo">
+                        <div class="column">
+                            <img src="{% image_version_url page.partner_logo 'max-1000x1000' %}" alt="MIT Partner" />
+                        </div>
+                        <div class="column">
+                            <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
+                        </div>
+                    </div>
                     {% else %}
                     <div class="certificate-logo">
                         <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
                     </div>
                     {% endif %}
+                    {% else %}
+                    <div class="certificate-logo">
+                        <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
+                    </div>
+                    {% endif %}
+                    {% if page.institute_text %}
+                    <span class="institute-text">{{ page.institute_text }}</span>
+                    {% else %}
                     <span class="institute-text">Massachusetts Institute of Technology</span>
+                    {% endif %}
+                    {% if page.partner_logo == None or page.partner_logo_placement == None %}
                     <div class="institute-logo">
                         <img src="{% static 'images/certificates/certificate-logo.png' %}" alt="MIT">
                     </div>
+                    {% endif %}
                     <span class="certify-text">This is to certify that</span>
                     <span class="certify-name">{{ learner_name }}</span>
                     <span class="success-text">has successfully completed{% if is_program_certificate %} the{% endif %}</span>
