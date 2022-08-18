@@ -1694,11 +1694,15 @@ class CertificatePage(CourseProgramChildPage):
     """
     CMS page representing a Certificate.
     """
-    class Placement(models.IntegerChoices):
-        FIRST = 1, 'First'
-        SECOND = 2, 'Second'
 
-        __empty__ = 'Do not display'
+    class Placement(models.IntegerChoices):
+        """
+        Partner Logo placment choices.
+        """
+        FIRST = 1, "First"
+        SECOND = 2, "Second"
+
+        __empty__ = "Do not display"
 
     template = "certificate_page.html"
     parent_page_types = ["CoursePage", "ProgramPage"]
@@ -1711,10 +1715,7 @@ class CertificatePage(CourseProgramChildPage):
     )
 
     institute_text = models.CharField(
-        max_length=250,
-        null=True,
-        blank=True,
-        help_text="Specify the institute text",
+        max_length=250, null=True, blank=True, help_text="Specify the institute text"
     )
 
     CEUs = models.CharField(
