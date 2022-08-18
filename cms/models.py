@@ -1699,6 +1699,7 @@ class CertificatePage(CourseProgramChildPage):
         """
         Partner Logo placment choices.
         """
+
         FIRST = 1, "First"
         SECOND = 2, "Second"
 
