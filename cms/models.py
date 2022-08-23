@@ -1695,7 +1695,7 @@ class CertificatePage(CourseProgramChildPage):
     CMS page representing a Certificate.
     """
 
-    class Placement(models.IntegerChoices):
+    class PartnerLogoPlacement(models.IntegerChoices):
         """
         Partner Logo placment choices.
         """
@@ -1703,7 +1703,7 @@ class CertificatePage(CourseProgramChildPage):
         FIRST = 1, "First"
         SECOND = 2, "Second"
 
-        __empty__ = "Do not display"
+        __empty__ = "No display"
 
     template = "certificate_page.html"
     parent_page_types = ["CoursePage", "ProgramPage"]
@@ -1716,7 +1716,7 @@ class CertificatePage(CourseProgramChildPage):
     )
 
     institute_text = models.CharField(
-        max_length=250, null=True, blank=True, help_text="Specify the institute text"
+        max_length=255, null=True, blank=True, help_text="Specify the institute text"
     )
 
     CEUs = models.CharField(
@@ -1732,15 +1732,15 @@ class CertificatePage(CourseProgramChildPage):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="+",
-        help_text="Optional Partner logo",
+        help_text="Optional Partner logo size must be at least 250x100 pixel",
     )
 
     partner_logo_placement = models.IntegerField(
-        choices=Placement.choices,
-        default=Placement.SECOND,
+        choices=PartnerLogoPlacement.choices,
+        default=PartnerLogoPlacement.SECOND,
         null=True,
         blank=True,
-        help_text="Partner logo placement on certificate",
+        help_text="Partner logo placement on certificate, logo size must be at least 250x100 pixel",
     )
 
     signatories = StreamField(

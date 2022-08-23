@@ -60,19 +60,19 @@
             <div class="certificate">
                 <div class="certificate-holder">
                     {% if page.partner_logo %}
-                    {% if page.partner_logo_placement == page.Placement.SECOND %}
+                    {% if page.partner_logo_placement == page.PartnerLogoPlacement.SECOND %}
                     <div class="certificate-dual-logo">
                         <div class="column">
                             <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
                         </div>
                         <div class="column">
-                            <img src="{% image_version_url page.partner_logo 'max-1000x1000' %}" alt="MIT Partner" />
+                            <img src="{% image_version_url page.partner_logo 'max-600x200' %}" alt="MIT Partner" />
                         </div>
                     </div>
-                    {% elif page.partner_logo_placement == page.Placement.FIRST %}
+                    {% elif page.partner_logo_placement == page.PartnerLogoPlacement.FIRST %}
                     <div class="certificate-dual-logo">
                         <div class="column">
-                            <img src="{% image_version_url page.partner_logo 'max-1000x1000' %}" alt="MIT Partner" />
+                            <img src="{% image_version_url page.partner_logo 'max-600x200' %}" alt="MIT Partner" />
                         </div>
                         <div class="column">
                             <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">

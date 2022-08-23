@@ -1192,7 +1192,7 @@ def test_certificate_for_course_page():
         parent=course_page,
         product_name="product_name",
         CEUs="1.8",
-        partner_logo__title="Logo",
+        partner_logo__title="Partner Logo",
         signatories__0__signatory__name="Name",
         signatories__0__signatory__title_1="Title_1",
         signatories__0__signatory__title_2="Title_2",
@@ -1202,7 +1202,7 @@ def test_certificate_for_course_page():
     assert certificate_page.get_parent() == course_page
     assert certificate_page.CEUs == "1.8"
     assert certificate_page.product_name == "product_name"
-    assert certificate_page.partner_logo.title == "Logo"
+    assert certificate_page.partner_logo.title == "Partner Logo"
     for signatory in certificate_page.signatories:  # pylint: disable=not-an-iterable
         assert signatory.value.name == "Name"
         assert signatory.value.title_1 == "Title_1"
@@ -1223,7 +1223,7 @@ def test_certificate_for_program_page():
         parent=program_page,
         product_name="product_name",
         CEUs="2.8",
-        partner_logo__title="Logo",
+        partner_logo__title="Partner Logo",
         signatories__0__signatory__name="Name",
         signatories__0__signatory__title_1="Title_1",
         signatories__0__signatory__title_2="Title_2",
@@ -1234,7 +1234,7 @@ def test_certificate_for_program_page():
     assert certificate_page.get_parent() == program_page
     assert certificate_page.CEUs == "2.8"
     assert certificate_page.product_name == "product_name"
-    assert certificate_page.partner_logo.title == "Logo"
+    assert certificate_page.partner_logo.title == "Partner Logo"
     for signatory in certificate_page.signatories:  # pylint: disable=not-an-iterable
         assert signatory.value.name == "Name"
         assert signatory.value.title_1 == "Title_1"
