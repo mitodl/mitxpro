@@ -8,6 +8,7 @@ from decimal import Decimal
 from urllib.parse import urljoin
 
 import pytz
+from django import forms
 from django.conf import settings
 from django.templatetags.static import static
 from django.db import models
@@ -1694,6 +1695,16 @@ class CertificatePage(CourseProgramChildPage):
     CMS page representing a Certificate.
     """
 
+    class PartnerLogoPlacement(models.IntegerChoices):
+        """
+        Partner Logo placment choices.
+        """
+
+        FIRST = 1, "First"
+        SECOND = 2, "Second"
+
+        __empty__ = "No display"
+
     template = "certificate_page.html"
     parent_page_types = ["CoursePage", "ProgramPage"]
 
@@ -1704,11 +1715,32 @@ class CertificatePage(CourseProgramChildPage):
         help_text="Specify the course/program name.",
     )
 
+    institute_text = models.CharField(
+        max_length=255, null=True, blank=True, help_text="Specify the institute text"
+    )
+
     CEUs = models.CharField(
         max_length=250,
         null=True,
         blank=True,
         help_text="Optional text field for CEU (continuing education unit).",
+    )
+
+    partner_logo = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Optional Partner logo size must be at least 250x100 pixel",
+    )
+
+    partner_logo_placement = models.IntegerField(
+        choices=PartnerLogoPlacement.choices,
+        default=PartnerLogoPlacement.SECOND,
+        null=True,
+        blank=True,
+        help_text="Partner logo placement on certificate, logo size must be at least 250x100 pixel",
     )
 
     signatories = StreamField(
@@ -1734,7 +1766,10 @@ class CertificatePage(CourseProgramChildPage):
 
     content_panels = [
         FieldPanel("product_name"),
+        FieldPanel("institute_text"),
         FieldPanel("CEUs"),
+        ImageChooserPanel("partner_logo"),
+        FieldPanel("partner_logo_placement", widget=forms.Select),
         StreamFieldPanel("overrides"),
         StreamFieldPanel("signatories"),
     ]

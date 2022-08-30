@@ -447,6 +447,7 @@ class CertificatePageFactory(wagtail_factories.PageFactory):
 
     product_name = factory.fuzzy.FuzzyText(prefix="product_name")
     CEUs = factory.Faker("pystr_format", string_format="#.#")
+    partner_logo = factory.SubFactory(wagtail_factories.ImageFactory)
     signatories = wagtail_factories.StreamFieldFactory(
         {"signatory": SignatoryPageFactory}
     )
