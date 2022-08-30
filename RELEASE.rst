@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.106.0
+---------------
+
+- Partner logo in certificate template (#2407)
+
 Version 0.105.0 (Released July 07, 2022)
 ---------------
 
