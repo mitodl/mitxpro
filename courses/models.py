@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.utils.functional import cached_property
+from wagtail.core.models import PageRevision
 
 from cms.urls import detail_path_char_pattern
 from courses.constants import (
@@ -29,7 +30,6 @@ from mitxpro.utils import (
     now_in_utc,
     serialize_model_object,
 )
-from wagtail.core.models import PageRevision
 
 
 User = get_user_model()
@@ -825,7 +825,7 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
             user=self.user.username, course_run=self.course_run.text_id, uuid=self.uuid
         )
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # pylint: disable=signature-differs
         if not self.certificate_page_revision:
             certificate_page = (
                 self.course_run.course.page.certificate_page
@@ -834,7 +834,7 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
             )
             if certificate_page:
                 self.certificate_page_revision = certificate_page.get_latest_revision()
-        super(CourseRunCertificate, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 
 class ProgramCertificate(TimestampedModel, BaseCertificate):
@@ -892,11 +892,11 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
             user=self.user.username, program=self.program.text_id, uuid=self.uuid
         )
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # pylint: disable=signature-differs
         if not self.certificate_page_revision:
             certificate_page = (
                 self.program.page.certificate_page if self.program.page else None
             )
             if certificate_page:
                 self.certificate_page_revision = certificate_page.get_latest_revision()
-        super(ProgramCertificate, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
