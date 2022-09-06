@@ -29,6 +29,7 @@ from mitxpro.utils import (
     now_in_utc,
     serialize_model_object,
 )
+from wagtail.core.models import PageRevision
 
 
 User = get_user_model()
@@ -785,6 +786,9 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
     """
 
     course_run = models.ForeignKey(CourseRun, null=False, on_delete=models.CASCADE)
+    certificate_page_revision = models.ForeignKey(
+        PageRevision, null=True, on_delete=models.CASCADE
+    )
 
     objects = ActiveCertificates()
     all_objects = models.Manager()
@@ -821,6 +825,17 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
             user=self.user.username, course_run=self.course_run.text_id, uuid=self.uuid
         )
 
+    def save(self, *args, **kwargs):
+        if not self.certificate_page_revision:
+            certificate_page = (
+                self.course_run.course.page.certificate_page
+                if self.course_run.course.page
+                else None
+            )
+            if certificate_page:
+                self.certificate_page_revision = certificate_page.get_latest_revision()
+        super(CourseRunCertificate, self).save(*args, **kwargs)
+
 
 class ProgramCertificate(TimestampedModel, BaseCertificate):
     """
@@ -828,6 +843,9 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
     """
 
     program = models.ForeignKey(Program, null=False, on_delete=models.CASCADE)
+    certificate_page_revision = models.ForeignKey(
+        PageRevision, null=True, on_delete=models.CASCADE
+    )
 
     objects = ActiveCertificates()
     all_objects = models.Manager()
@@ -873,3 +891,12 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
         return 'ProgramCertificate for user={user}, program={program} ({uuid})"'.format(
             user=self.user.username, program=self.program.text_id, uuid=self.uuid
         )
+
+    def save(self, *args, **kwargs):
+        if not self.certificate_page_revision:
+            certificate_page = (
+                self.program.page.certificate_page if self.program.page else None
+            )
+            if certificate_page:
+                self.certificate_page_revision = certificate_page.get_latest_revision()
+        super(ProgramCertificate, self).save(*args, **kwargs)
