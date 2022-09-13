@@ -338,6 +338,8 @@ $text-gray-light: #d2d0d1;
   }
 
   .certificate-page {
+    background: white;
+
     .certificate-logo {
       max-width: 170px;
       margin: 0 auto 10px;
@@ -354,6 +356,12 @@ $text-gray-light: #d2d0d1;
           max-width: 140px;
           margin-bottom: 10px;
         }
+      }
+
+      .content-center {
+        display: flex;
+        min-height: 100vh;
+        align-items: center;
       }
 
       .certificate-holder {
