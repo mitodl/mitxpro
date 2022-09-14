@@ -4,6 +4,42 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def set_current_certificate_revision(apps, schema_editor):
+    """
+    Fetch all CourseRunCertificates and ProgramCertificate to update certificate_page_revision to latest revision
+    """
+    from cms.models import CertificatePage
+    from courses.models import CourseRunCertificate, ProgramCertificate
+
+    course_run_certificates = CourseRunCertificate.objects.all()
+    for cert in course_run_certificates:
+        certificate_page = (
+            cert.course_run.course.page.get_children()
+            .type(CertificatePage)
+            .live()
+            .first()
+            if cert.course_run.course.page
+            else None
+        )
+        if certificate_page:
+            cert.certificate_page_revision = (
+                certificate_page.specific.get_latest_revision()
+            )
+    CourseRunCertificate.objects.bulk_update(
+        course_run_certificates, ["certificate_page_revision"]
+    )
+    program_certificates = ProgramCertificate.objects.all()
+    for cert in program_certificates:
+        certificate_page = (
+            cert.program.page.certificate_page if cert.program.page else None
+        )
+        if certificate_page:
+            cert.certificate_page_revision = certificate_page.get_latest_revision()
+    ProgramCertificate.objects.bulk_update(
+        program_certificates, ["certificate_page_revision"]
+    )
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -29,5 +65,8 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 to="wagtailcore.pagerevision",
             ),
+        ),
+        migrations.RunPython(
+            set_current_certificate_revision, migrations.RunPython.noop
         ),
     ]
