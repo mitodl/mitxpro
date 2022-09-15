@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.107.0
+Version 0.107.0 (Released September 15, 2022)
 ---------------
 
 - centered css for certificate (#2418)
