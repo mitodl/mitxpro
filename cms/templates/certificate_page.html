@@ -105,15 +105,15 @@
                     {% if is_program_certificate %}
                         <span class="program-degree-text">Professional Certificate Program<br></span>
                     {% endif %}
-                    {% if page.CEUs %}
-                        <span class="award-text">Awarded {{ CEUs }} Continuing Education Units (CEUs) <br>
-                            {% if is_program_certificate %}
-                                {{ end_date|date }}
-                            {% else %}
-                                {{ start_date|date }} - {{ end_date|date }}
-                            {% endif %}
-                        </span>
-                    {% endif %}
+                    <span class="award-text">
+                        {% if page.CEUs %} Awarded {{ CEUs }} Continuing Education Units (CEUs) <br> {% endif %}
+                        
+                        {% if is_program_certificate %}
+                            {{ end_date|date }}
+                        {% else %}
+                            {{ start_date|date }} - {{ end_date|date }}
+                        {% endif %}
+                    </span>
                     <div class="row justify-content-center certify-by-row">
                         {% for signatory in page.signatory_pages %}
                             <div class="col-sm-4 col-24 certify-by">
