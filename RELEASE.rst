@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.107.1
+---------------
+
+- display start and end date on certificate template (#2421)
+
 Version 0.107.0 (Released September 15, 2022)
 ---------------
 
