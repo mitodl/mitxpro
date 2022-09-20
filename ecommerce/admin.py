@@ -536,7 +536,7 @@ class DataConsentAgreementAdmin(TimestampedModelAdmin):
     include_created_on_in_list = True
     list_filter = ("company",)
     list_display = ("id", "company")
-    search_fields = ("company", "content")
+    search_fields = ("company__name", "content")
     raw_id_fields = ("courses",)
 
     form = DataConsentAgreementForm
