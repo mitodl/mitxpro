@@ -186,14 +186,6 @@ def ensure_index_pages():
         )
         home_page.add_child(instance=certificate_index)
 
-    if (
-        certificate_index.get_children_count()
-        != cms_models.CertificatePage.objects.count()
-    ):
-        for cert_page in cms_models.CertificatePage.objects.all():
-            cert_page.move(certificate_index, "last-child")
-        log.info("Moved certificate pages under certificate index page")
-
 
 def configure_wagtail():
     """
