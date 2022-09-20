@@ -294,7 +294,13 @@ class CourseRunCertificateAdmin(TimestampedModelAdmin):
 
     model = CourseRunCertificate
     include_timestamps_in_list = True
-    list_display = ["uuid", "user", "course_run", "get_revoked_state"]
+    list_display = [
+        "uuid",
+        "user",
+        "course_run",
+        "get_revoked_state",
+        "certificate_page_revision",
+    ]
     search_fields = [
         "course_run__courseware_id",
         "course_run__title",
@@ -321,7 +327,13 @@ class ProgramCertificateAdmin(TimestampedModelAdmin):
 
     model = ProgramCertificate
     include_timestamps_in_list = True
-    list_display = ["uuid", "user", "program", "get_revoked_state"]
+    list_display = [
+        "uuid",
+        "user",
+        "program",
+        "get_revoked_state",
+        "certificate_page_revision",
+    ]
     search_fields = [
         "program__readable_id",
         "program__title",

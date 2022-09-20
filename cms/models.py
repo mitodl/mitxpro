@@ -325,12 +325,21 @@ class CertificateIndexPage(RoutablePageMixin, Page):
 
         # Get a CertificatePage to serve this request
         certificate_page = (
-            certificate.program.page.certificate_page
-            if certificate.program.page
-            else None
+            certificate.certificate_page_revision.as_page_object()
+            if certificate.certificate_page_revision
+            else (
+                certificate.program.page.certificate_page
+                if certificate.program.page
+                else None
+            )
         )
         if not certificate_page:
             raise Http404()
+
+        if not certificate.certificate_page_revision:
+            # It'll save the certificate page revision
+            # If certificate page is available and revision is not saved
+            certificate.save()
 
         certificate_page.certificate = certificate
         return certificate_page.serve(request)
@@ -350,12 +359,19 @@ class CertificateIndexPage(RoutablePageMixin, Page):
 
         # Get a CertificatePage to serve this request
         certificate_page = (
-            certificate.course_run.course.page.certificate_page
-            if certificate.course_run.course.page
-            else None
+            certificate.certificate_page_revision.as_page_object()
+            if certificate.certificate_page_revision
+            else (
+                certificate.course_run.course.page.certificate_page
+                if certificate.course_run.course.page
+                else None
+            )
         )
         if not certificate_page:
             raise Http404()
+
+        if not certificate.certificate_page_revision:
+            certificate.save()
 
         certificate_page.certificate = certificate
         return certificate_page.serve(request)
