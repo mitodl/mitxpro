@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.107.2 (Released September 20, 2022)
+---------------
+
+- Versioning of certificate template (#2416)
+- xPro-2411 Fix search for data consent agreements admin
+- certificate page should not be moved from course child to certificate index child (#2422)
+
 Version 0.107.1 (Released September 15, 2022)
 ---------------
 
