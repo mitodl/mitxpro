@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.107.2
+Version 0.107.2 (Released September 20, 2022)
 ---------------
 
 - Versioning of certificate template (#2416)
