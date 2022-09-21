@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.107.3
+Version 0.107.3 (Released September 21, 2022)
 ---------------
 
 - Bump django from 3.2.14 to 3.2.15 (#2405)
