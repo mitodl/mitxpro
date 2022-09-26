@@ -23,8 +23,11 @@ index_page_pattern = r"(?:{}|{})".format(COURSE_INDEX_SLUG, PROGRAM_INDEX_SLUG)
 detail_path_char_pattern = r"\w\-+:"
 
 if WAGTAIL_APPEND_SLASH:
-    custom_serve_pattern = r"^({index_page_pattern}/(?:[{resource_pattern}]+/)*)$".format(
-        index_page_pattern=index_page_pattern, resource_pattern=detail_path_char_pattern
+    custom_serve_pattern = (
+        r"^({index_page_pattern}/(?:[{resource_pattern}]+/)*)$".format(
+            index_page_pattern=index_page_pattern,
+            resource_pattern=detail_path_char_pattern,
+        )
     )
 else:
     custom_serve_pattern = r"^({index_page_pattern}/[{resource_pattern}/]*)$".format(

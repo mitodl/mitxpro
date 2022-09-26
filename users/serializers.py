@@ -68,7 +68,7 @@ class LegalAddressSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "street_address list must be 5 items or less"
             )
-        if any([len(line) > 60 for line in value]):
+        if any(len(line) > 60 for line in value):
             raise serializers.ValidationError(
                 "street_address lines must be 60 characters or less"
             )

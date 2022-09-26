@@ -513,7 +513,7 @@ def enroll_in_edx_course_runs(user, course_runs):
                 raise EdxApiEnrollErrorException(user, course_run, exc) from exc
             error_msg = exc.response.json().get("message", "")
             is_enroll_mode_error = any(
-                [error_text in error_msg for error_text in PRO_ENROLL_MODE_ERROR_TEXTS]
+                error_text in error_msg for error_text in PRO_ENROLL_MODE_ERROR_TEXTS
             )
             if not is_enroll_mode_error:
                 raise EdxApiEnrollErrorException(user, course_run, exc) from exc
