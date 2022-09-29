@@ -5,6 +5,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const { config, babelSharedLoader } = require(path.resolve(
   "./webpack.config.shared.js"
 ))
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
 
 const prodBabelConfig = Object.assign({}, babelSharedLoader)
 
@@ -50,6 +51,9 @@ module.exports = Object.assign(prodConfig, {
     new webpack.optimize.AggressiveMergingPlugin(),
     new MiniCssExtractPlugin({
       filename: "[name]-[contenthash].css"
+    }),
+    new BundleAnalyzerPlugin({
+      analyzerMode: "static",
     })
   ],
   optimization: {
