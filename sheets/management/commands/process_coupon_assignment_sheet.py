@@ -85,9 +85,11 @@ class Command(BaseCommand):
         coupon_assignment_handler = CouponAssignmentHandler(
             spreadsheet_id=spreadsheet.id, bulk_assignment=bulk_assignment
         )
-        bulk_assignment, num_created, num_removed = (
-            coupon_assignment_handler.process_assignment_spreadsheet()
-        )
+        (
+            bulk_assignment,
+            num_created,
+            num_removed,
+        ) = coupon_assignment_handler.process_assignment_spreadsheet()
 
         self.stdout.write(
             self.style.SUCCESS(

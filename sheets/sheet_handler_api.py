@@ -300,7 +300,10 @@ class EnrollmentChangeRequestHandler(SheetHandler):
             self.sheet_metadata.get_form_input_columns(row_data)
         )
         with transaction.atomic():
-            enroll_change_request, created = self.request_model_cls.objects.select_for_update().get_or_create(
+            (
+                enroll_change_request,
+                created,
+            ) = self.request_model_cls.objects.select_for_update().get_or_create(
                 form_response_id=form_response_id,
                 defaults=dict(raw_data=user_input_json),
             )
