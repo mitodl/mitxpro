@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.108.0
+---------------
+
+- chore: add support for Heroku-22 stack (#2430)
+- add webpack bundle analyzer
+
 Version 0.107.3 (Released September 21, 2022)
 ---------------
 
