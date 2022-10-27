@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.108.0
+Version 0.108.0 (Released October 27, 2022)
 ---------------
 
 - chore: add support for Heroku-22 stack (#2430)
