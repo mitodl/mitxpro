@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.108.2
+---------------
+
+- revert: certificate revisions prior to August 8 2022 (#2440)
+- Update canius-lite (#2442)
+
 Version 0.108.1 (Released October 31, 2022)
 ---------------
 
