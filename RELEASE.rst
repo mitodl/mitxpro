@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.108.2
+Version 0.108.2 (Released November 02, 2022)
 ---------------
 
 - revert: certificate revisions prior to August 8 2022 (#2440)
