@@ -4,12 +4,18 @@ import logging
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.templatetags.static import static
 from django.utils.functional import cached_property
 
 from courses.constants import DEFAULT_COURSE_IMG_PATH
-from ecommerce.constants import REFERENCE_NUMBER_PREFIX, ORDERED_VERSIONS_QSET_ATTR, DISCOUNT_TYPES, DISCOUNT_TYPE_PERCENT_OFF
+from ecommerce.constants import (
+    REFERENCE_NUMBER_PREFIX,
+    ORDERED_VERSIONS_QSET_ATTR,
+    DISCOUNT_TYPES,
+    DISCOUNT_TYPE_PERCENT_OFF,
+)
 from ecommerce.utils import get_order_id_by_reference_number, validate_amount
 from mitxpro.models import (
     AuditableModel,
@@ -19,7 +25,6 @@ from mitxpro.models import (
 )
 from mitxpro.utils import serialize_model_object, first_or_none
 from mail.constants import MAILGUN_EVENT_CHOICES
-from django.core.exceptions import ValidationError
 
 log = logging.getLogger()
 
@@ -522,7 +527,11 @@ class CouponPaymentVersion(TimestampedModel):
     coupon_type = models.CharField(
         choices=[(_type, _type) for _type in COUPON_TYPES], max_length=30
     )
-    discount_type = models.CharField(choices=list(zip(DISCOUNT_TYPES, DISCOUNT_TYPES)), max_length=30, default=DISCOUNT_TYPE_PERCENT_OFF)
+    discount_type = models.CharField(
+        choices=list(zip(DISCOUNT_TYPES, DISCOUNT_TYPES)),
+        max_length=30,
+        default=DISCOUNT_TYPE_PERCENT_OFF,
+    )
 
     num_coupon_codes = models.PositiveIntegerField()
     max_redemptions = models.PositiveIntegerField()
@@ -556,14 +565,12 @@ class CouponPaymentVersion(TimestampedModel):
     class Meta:
         indexes = [models.Index(fields=["created_on"])]
 
-    def clean(self, ):
+    def clean(
+        self,
+    ):
         error_message = validate_amount(self.discount_type, self.amount)
         if error_message:
-            raise ValidationError(
-                {
-                    "amount": error_message
-                }
-            )
+            raise ValidationError({"amount": error_message})
 
     def __str__(self):
         """Description for CouponPaymentVersion"""

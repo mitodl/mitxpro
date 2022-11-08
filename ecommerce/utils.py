@@ -97,7 +97,7 @@ def validate_amount(discount_type, amount):
         Case 1: If discount type is percent-off the amount can be between 0-1
         Case 2: If discount type is dollars-off the amount can be any value above 0
     """
-    if discount_type == DISCOUNT_TYPE_PERCENT_OFF and not (0 < amount <= 1):
+    if discount_type == DISCOUNT_TYPE_PERCENT_OFF and not 0 < amount <= 1:
         return "The amount should be between (0 - 1) when discount type is percent-off."
 
     if discount_type == DISCOUNT_TYPE_DOLLARS_OFF and amount <= 0:

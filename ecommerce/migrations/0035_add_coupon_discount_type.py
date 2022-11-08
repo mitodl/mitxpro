@@ -6,13 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ecommerce', '0034_productversion_requires_enrollment_code'),
+        ("ecommerce", "0034_productversion_requires_enrollment_code"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='couponpaymentversion',
-            name='discount_type',
-            field=models.CharField(choices=[('percent-off', 'percent-off'), ('dollars-off', 'dollars-off')], default='percent-off', max_length=30),
+            model_name="couponpaymentversion",
+            name="discount_type",
+            field=models.CharField(
+                choices=[
+                    ("percent-off", "percent-off"),
+                    ("dollars-off", "dollars-off"),
+                ],
+                default="percent-off",
+                max_length=30,
+            ),
         ),
     ]

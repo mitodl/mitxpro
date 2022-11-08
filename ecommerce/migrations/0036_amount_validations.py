@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ecommerce', '0035_add_coupon_discount_type'),
+        ("ecommerce", "0035_add_coupon_discount_type"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='couponpaymentversion',
-            name='amount',
-            field=models.DecimalField(decimal_places=5, help_text='Percent discount for a coupon. (Between 0 and 1 if discount type is percent-off)', max_digits=20),
+            model_name="couponpaymentversion",
+            name="amount",
+            field=models.DecimalField(
+                decimal_places=5,
+                help_text="Percent discount for a coupon. (Between 0 and 1 if discount type is percent-off)",
+                max_digits=20,
+            ),
         ),
     ]

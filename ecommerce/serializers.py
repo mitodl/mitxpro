@@ -23,7 +23,10 @@ from ecommerce.api import (
     get_product_version_price_with_discount,
     get_product_from_querystring_id,
 )
-from ecommerce.constants import CYBERSOURCE_CARD_TYPES, DISCOUNT_TYPE_PERCENT_OFF, DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPES
+from ecommerce.constants import (
+    CYBERSOURCE_CARD_TYPES,
+    DISCOUNT_TYPES,
+)
 from ecommerce.models import Basket
 from ecommerce.utils import validate_amount
 from mitxpro.serializers import WriteableSerializerMethodField
@@ -754,9 +757,7 @@ class BaseCouponSerializer(serializers.Serializer):
         )
     )
     discount_type = serializers.ChoiceField(
-        choices=list(
-            zip(DISCOUNT_TYPES, DISCOUNT_TYPES)
-        )
+        choices=list(zip(DISCOUNT_TYPES, DISCOUNT_TYPES))
     )
 
     company = serializers.CharField(
@@ -769,11 +770,7 @@ class BaseCouponSerializer(serializers.Serializer):
         # If neither of product_ids or is_global was set we need to bail
         error_message = validate_amount(attrs.get("discount_type"), attrs.get("amount"))
         if error_message:
-            raise ValidationError(
-                {
-                    "discount": error_message
-                }
-            )
+            raise ValidationError({"discount": error_message})
 
         if (not attrs["product_ids"] or len(attrs["product_ids"]) == 0) and not attrs[
             "is_global"
