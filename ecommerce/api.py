@@ -1121,6 +1121,7 @@ def create_coupons(
     activation_date=None,
     expiration_date=None,
     payment_type=None,
+    discount_type=None,
     payment_transaction=None,
     coupon_code=None,
     product_program_run_map=None,
@@ -1141,6 +1142,7 @@ def create_coupons(
         coupon_type (str): The type of coupon
         max_redemptions (int): The number of times a coupon can be redeemed before it becomes invalid
         payment_type (str): The type of payment
+        discount_type (str): The type of discount (percent-off or dollars-off)
         payment_transaction (str): The transaction string
         coupon_code (str):
             If specified, the coupon code to use when creating the coupon. If not a random one will be generated.
@@ -1173,6 +1175,7 @@ def create_coupons(
         max_redemptions=max_redemptions,
         max_redemptions_per_user=max_redemptions_per_user,
         payment_type=payment_type,
+        discount_type=discount_type,
         payment_transaction=payment_transaction,
     )
 
