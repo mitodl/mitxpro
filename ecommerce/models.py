@@ -10,7 +10,7 @@ from django.templatetags.static import static
 from django.utils.functional import cached_property
 
 from courses.constants import DEFAULT_COURSE_IMG_PATH
-from ecommerce.constants import REFERENCE_NUMBER_PREFIX, ORDERED_VERSIONS_QSET_ATTR
+from ecommerce.constants import REFERENCE_NUMBER_PREFIX, ORDERED_VERSIONS_QSET_ATTR, DISCOUNT_TYPES, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.utils import get_order_id_by_reference_number
 from mitxpro.models import (
     AuditableModel,
@@ -522,6 +522,8 @@ class CouponPaymentVersion(TimestampedModel):
     coupon_type = models.CharField(
         choices=[(_type, _type) for _type in COUPON_TYPES], max_length=30
     )
+    discount_type = models.CharField(choices=list(zip(DISCOUNT_TYPES, DISCOUNT_TYPES)), max_length=30, default=DISCOUNT_TYPE_PERCENT_OFF)
+
     num_coupon_codes = models.PositiveIntegerField()
     max_redemptions = models.PositiveIntegerField()
     max_redemptions_per_user = models.PositiveIntegerField()
