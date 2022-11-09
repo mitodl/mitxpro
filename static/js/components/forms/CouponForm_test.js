@@ -62,10 +62,9 @@ describe("CouponForm", () => {
     ["name", "", "Coupon name is required"],
     ["name", "Valid_name", ""],
     ["name", "Invalid name", "Only letters, numbers, and underscores allowed"],
-    ["discount", "", "Percentage discount is required"],
+    ["discount", "", "Discount amount is required"],
     ["discount", "0.5", "Must be at least 1"],
     ["discount", "-1", "Must be at least 1"],
-    ["discount", "200", "Must be at most 100"],
     ["discount", "1", ""],
     ["discount", "100", ""],
     ["payment_transaction", "", "Payment transaction is required"],
@@ -251,6 +250,31 @@ describe("CouponForm", () => {
     )} for single-use coupons`, async () => {
       const wrapper = renderForm()
       wrapper.find(`input[value="single-use"]`).simulate("click")
+      const input = wrapper.find(`select[name="${name}"]`)
+      input.simulate("change", { persist: () => {}, target: { name, value } })
+      input.simulate("blur")
+      await wait()
+      wrapper.update()
+      assert.deepEqual(
+        findFormikErrorByName(wrapper, name).text(),
+        errorMessage
+      )
+    })
+  })
+
+  //
+  ;[
+    ["discount_type", "", "Discount type is required"],
+    ["discount_type", "percent-off", ""],
+    ["discount_type", "dollars-off", ""]
+  ].forEach(([name, value, errorMessage]) => {
+    it(`validates the field name=${name}, value=${JSON.stringify(
+      value
+    )} and expects error=${JSON.stringify(
+      errorMessage
+    )} for percent-off coupons`, async () => {
+      const wrapper = renderForm()
+      // wrapper.find(`input[value="percent-off"]`).simulate("click")
       const input = wrapper.find(`select[name="${name}"]`)
       input.simulate("change", { persist: () => {}, target: { name, value } })
       input.simulate("blur")

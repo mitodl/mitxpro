@@ -11,7 +11,12 @@ import {
   makeCourseRunProduct,
   makeProgramProduct
 } from "../../../factories/ecommerce"
-import { COUPON_TYPE_PROMO, COUPON_TYPE_SINGLE_USE } from "../../../constants"
+import {
+  COUPON_DISCOUNT_TYPE_DOLLARS_OFF,
+  COUPON_DISCOUNT_TYPE_PERCENT_OFF,
+  COUPON_TYPE_PROMO,
+  COUPON_TYPE_SINGLE_USE
+} from "../../../constants"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 
 describe("CreateCouponPage", () => {
@@ -147,6 +152,41 @@ describe("CreateCouponPage", () => {
         "X-CSRFTOKEN": null
       },
       credentials: undefined
+    })
+  })
+
+  ;[
+    [COUPON_DISCOUNT_TYPE_PERCENT_OFF, 50, 0.5],
+    [COUPON_DISCOUNT_TYPE_DOLLARS_OFF, 50, 50],
+  ].forEach(([discountType, discount, amount]) => {
+    it("Amount is converted for percent-off discount", async () => {
+      const testCouponData = {
+        coupon_type:      COUPON_TYPE_SINGLE_USE,
+        discount_type:    discountType,
+        products:         [products[0]],
+        num_coupon_codes: 100,
+        discount:         discount
+      }
+      const {inner} = await renderCreateCouponPage(
+        {},
+        {
+          createCoupon: helper.handleRequestStub
+        }
+      )
+      await inner.instance().onSubmit(testCouponData, {
+        setSubmitting: setSubmittingStub,
+        setErrors:     setErrorsStub
+      })
+      sinon.assert.calledWith(helper.handleRequestStub, "/api/coupons/", "POST", {
+        body: {
+          ...testCouponData,
+          amount: amount,
+        },
+        headers: {
+          "X-CSRFTOKEN": null
+        },
+        credentials: undefined
+      })
     })
   })
 
