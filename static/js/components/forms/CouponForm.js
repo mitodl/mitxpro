@@ -9,6 +9,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik"
 import * as yup from "yup"
 
 import {
+  COUPON_DISCOUNT_TYPE_PERCENT_OFF,
   COUPON_TYPE_PROMO,
   COUPON_TYPE_SINGLE_USE,
   PRODUCT_TYPE_COURSERUN,
@@ -47,9 +48,15 @@ const couponValidations = yup.object().shape({
     .required("Valid expiration date required"),
   discount: yup
     .number()
-    .required("Percentage discount is required")
+    .required("Discount amount is required")
     .min(1, "Must be at least ${min}")
-    .max(100, "Must be at most ${max}"),
+    .when("discount_type", {
+      is:   COUPON_DISCOUNT_TYPE_PERCENT_OFF,
+      then: yup
+        .number()
+        .max(100, "Discount amount cannot be more than 100 when discount type is percent-off")
+    }),
+  discount_type:   yup.string().required("Discount type is required"),
   max_redemptions: yup.number().when("coupon_type", {
     is:   COUPON_TYPE_PROMO,
     then: yup
@@ -114,6 +121,7 @@ export const CouponForm = ({
       product_type:             PRODUCT_TYPE_COURSERUN,
       products:                 [],
       num_coupon_codes:         1,
+      discount_type:            "",
       max_redemptions:          1000000,
       max_redemptions_per_user: 1,
       discount:                 "",
@@ -188,8 +196,19 @@ export const CouponForm = ({
 
         <div>
           <div className="block">
+            <label htmlFor="discount_type">
+              Discount type*
+              <Field component="select" name="discount_type">
+                <option value="">-----</option>
+                <option value="percent-off">Percent Off</option>
+                <option value="dollars-off">Dollars Off</option>
+              </Field>
+            </label>
+            <ErrorMessage name="discount_type" component={FormError} />
+          </div>
+          <div className="block">
             <label htmlFor="discount">
-              Percentage Discount (1 to 100)*
+              Discount Amount (1 to 100 for percent-off discount)*
               <Field name="discount" />
             </label>
             <ErrorMessage name="discount" component={FormError} />
