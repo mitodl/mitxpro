@@ -1121,7 +1121,7 @@ def create_coupons(
     activation_date=None,
     expiration_date=None,
     payment_type=None,
-    discount_type=None,
+    discount_type,
     payment_transaction=None,
     coupon_code=None,
     product_program_run_map=None,
