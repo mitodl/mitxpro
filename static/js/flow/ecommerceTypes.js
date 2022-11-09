@@ -165,6 +165,7 @@ export type CouponPaymentVersion = {
   automatic: boolean,
   coupon_type: string,
   num_coupon_codes: number,
+  discount_type: string,
   max_redemptions: number,
   max_redemptions_per_user: number,
   amount: number,
