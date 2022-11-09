@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.109.0
+---------------
+
+- Process coupon requests if spreadsheet got updated (#2426)
+
 Version 0.108.2 (Released November 02, 2022)
 ---------------
 
