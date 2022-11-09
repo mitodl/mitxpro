@@ -67,10 +67,10 @@ class Command(BaseCommand):
             file_id=spreadsheet.id, fields="modifiedTime"
         )
         sheet_last_modified = google_date_string_to_datetime(metadata["modifiedTime"])
-        bulk_assignment, created = BulkCouponAssignment.objects.update_or_create(
-            assignment_sheet_id=spreadsheet.id,
-            defaults=dict(sheet_last_modified_date=sheet_last_modified),
+        bulk_assignment, created = BulkCouponAssignment.objects.get_or_create(
+            assignment_sheet_id=spreadsheet.id
         )
+
         if (
             not created
             and sheet_last_modified <= bulk_assignment.sheet_last_modified_date
@@ -90,7 +90,8 @@ class Command(BaseCommand):
             num_created,
             num_removed,
         ) = coupon_assignment_handler.process_assignment_spreadsheet()
-
+        bulk_assignment.sheet_last_modified_date = sheet_last_modified
+        bulk_assignment.save()
         self.stdout.write(
             self.style.SUCCESS(
                 "Successfully processed coupon assignment sheet ({}).\n"
