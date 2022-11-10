@@ -23,8 +23,12 @@ from ecommerce.api import (
     get_product_version_price_with_discount,
     get_product_from_querystring_id,
 )
-from ecommerce.constants import CYBERSOURCE_CARD_TYPES
+from ecommerce.constants import (
+    CYBERSOURCE_CARD_TYPES,
+    DISCOUNT_TYPES,
+)
 from ecommerce.models import Basket
+from ecommerce.utils import validate_amount
 from mitxpro.serializers import WriteableSerializerMethodField
 from mitxpro.utils import now_in_utc
 from users.serializers import ExtendedLegalAddressSerializer
@@ -732,7 +736,6 @@ class BaseCouponSerializer(serializers.Serializer):
     amount = serializers.DecimalField(
         decimal_places=5,
         max_digits=20,
-        validators=[MinValueValidator(0), MaxValueValidator(1)],
     )
     automatic = serializers.BooleanField(default=False)
     is_global = serializers.BooleanField(default=False)
@@ -753,6 +756,10 @@ class BaseCouponSerializer(serializers.Serializer):
             )
         )
     )
+    discount_type = serializers.ChoiceField(
+        choices=list(zip(DISCOUNT_TYPES, DISCOUNT_TYPES))
+    )
+
     company = serializers.CharField(
         max_length=512, allow_null=True, allow_blank=True, required=False
     )
@@ -761,6 +768,10 @@ class BaseCouponSerializer(serializers.Serializer):
     def validate(self, attrs):
         """Determine if product_ids was supplied or is_global was set"""
         # If neither of product_ids or is_global was set we need to bail
+        error_message = validate_amount(attrs.get("discount_type"), attrs.get("amount"))
+        if error_message:
+            raise ValidationError({"discount": error_message})
+
         if (not attrs["product_ids"] or len(attrs["product_ids"]) == 0) and not attrs[
             "is_global"
         ]:
@@ -799,6 +810,7 @@ class BaseCouponSerializer(serializers.Serializer):
             amount=validated_data.get("amount"),
             num_coupon_codes=validated_data.get("num_coupon_codes"),
             coupon_type=validated_data.get("coupon_type"),
+            discount_type=validated_data.get("discount_type"),
             max_redemptions=validated_data.get("max_redemptions", 1),
             max_redemptions_per_user=validated_data.get("max_redemptions_per_user", 1),
             payment_type=validated_data.get("payment_type"),
