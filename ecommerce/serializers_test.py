@@ -273,7 +273,7 @@ def test_serialize_coupon_single_use(
         ],
         [
             False,
-            "The amount should be between (0 - 1) when discount type is percent-off.",
+            "The amount is invalid, please specify a value greater than 0.",
         ],
     ],
 )
@@ -339,7 +339,7 @@ def test_serialize_coupon_promo(
         ],
         [
             False,
-            "The amount should be between (0 - 1) when discount type is percent-off.",
+            "The amount is invalid, please specify a value greater than 0.",
         ],
     ],
 )
