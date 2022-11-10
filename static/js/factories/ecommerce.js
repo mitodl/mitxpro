@@ -27,7 +27,7 @@ import type {
 } from "../flow/ecommerceTypes"
 import type { BaseCourseRun, Program } from "../flow/courseTypes"
 import {
-  COUPON_DISCOUNT_TYPE_PERCENT_OFF,
+  DISCOUNT_TYPE_PERCENT_OFF,
   ENROLLABLE_ITEM_ID_SEPARATOR,
   PRODUCT_TYPE_COURSERUN,
   PRODUCT_TYPE_PROGRAM
@@ -253,7 +253,7 @@ export const makeCouponPaymentVersion = (
   automatic:                false,
   coupon_type:              isPromo ? "promo" : "single-use",
   num_coupon_codes:         casual.integer(0, 15),
-  discount_type:            COUPON_DISCOUNT_TYPE_PERCENT_OFF,
+  discount_type:            DISCOUNT_TYPE_PERCENT_OFF,
   max_redemptions:          casual.integer(0, 15),
   max_redemptions_per_user: 1,
   amount:                   casual.random,

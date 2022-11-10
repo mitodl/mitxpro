@@ -2,7 +2,7 @@
 /* global SETTINGS: false */
 import React from "react"
 import DocumentTitle from "react-document-title"
-import { COUPON_DISCOUNT_TYPE_PERCENT_OFF, CREATE_COUPON_PAGE_TITLE } from "../../../constants"
+import { DISCOUNT_TYPE_PERCENT_OFF, CREATE_COUPON_PAGE_TITLE } from "../../../constants"
 import { mergeAll } from "ramda"
 import { connectRequest, mutateAsync } from "redux-query"
 import { compose } from "redux"
@@ -60,7 +60,7 @@ export class CreateCouponPage extends React.Component<Props, State> {
     } else {
       couponData.num_coupon_codes = 1
     }
-    if (couponData.discount_type === COUPON_DISCOUNT_TYPE_PERCENT_OFF) {
+    if (couponData.discount_type === DISCOUNT_TYPE_PERCENT_OFF) {
       couponData.amount = couponData.discount / 100
     } else {
       couponData.amount = couponData.discount
