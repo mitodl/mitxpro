@@ -539,7 +539,7 @@ class CouponPaymentVersion(TimestampedModel):
     amount = models.DecimalField(
         decimal_places=5,
         max_digits=20,
-        help_text="Percent discount for a coupon. (Between 0 and 1 if discount type is percent-off)",
+        help_text="Discount value for a coupon. (Between 0 and 1 if discount type is percent-off)",
     )
     activation_date = models.DateTimeField(
         null=True,
@@ -565,9 +565,8 @@ class CouponPaymentVersion(TimestampedModel):
     class Meta:
         indexes = [models.Index(fields=["created_on"])]
 
-    def clean(
-        self,
-    ):
+    def clean(self):
+        """Check if the amount validation has returned an error message that should be raised"""
         error_message = validate_amount(self.discount_type, self.amount)
         if error_message:
             raise ValidationError({"amount": error_message})
