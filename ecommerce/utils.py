@@ -6,7 +6,7 @@ from django.conf import settings
 from django.urls import reverse
 
 from courses.constants import ENROLLABLE_ITEM_ID_SEPARATOR
-from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF, DISCOUNT_TYPE_DOLLARS_OFF
+from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.exceptions import ParseException
 
 log = logging.getLogger(__name__)
@@ -97,8 +97,9 @@ def validate_amount(discount_type, amount):
         Case 1: If discount type is percent-off the amount can be between 0-1
         Case 2: If discount type is dollars-off the amount can be any value above 0
     """
-    if discount_type == DISCOUNT_TYPE_PERCENT_OFF and not 0 < amount <= 1:
-        return "The amount should be between (0 - 1) when discount type is percent-off."
 
-    if discount_type == DISCOUNT_TYPE_DOLLARS_OFF and amount <= 0:
-        return "The amount is invalid, please specify a value greater then 0."
+    if amount <= 0:
+        return "The amount is invalid, please specify a value greater than 0."
+
+    if discount_type == DISCOUNT_TYPE_PERCENT_OFF and amount > 1:
+        return "The amount should be between (0 - 1) when discount type is percent-off."

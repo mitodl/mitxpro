@@ -35,7 +35,7 @@ def test_get_order_id_by_reference_number_parse_error(reference_number, error):
         (
             DISCOUNT_TYPE_DOLLARS_OFF,
             0,
-            "The amount is invalid, please specify a value greater then 0.",
+            "The amount is invalid, please specify a value greater than 0.",
         ),
         (DISCOUNT_TYPE_PERCENT_OFF, 1, None),
         (DISCOUNT_TYPE_DOLLARS_OFF, 1, None),
