@@ -12,10 +12,10 @@ import {
   makeProgramProduct
 } from "../../../factories/ecommerce"
 import {
-  COUPON_DISCOUNT_TYPE_DOLLARS_OFF,
-  COUPON_DISCOUNT_TYPE_PERCENT_OFF,
+  DISCOUNT_TYPE_DOLLARS_OFF,
+  DISCOUNT_TYPE_PERCENT_OFF,
   COUPON_TYPE_PROMO,
-  COUPON_TYPE_SINGLE_USE
+  COUPON_TYPE_SINGLE_USE,
 } from "../../../constants"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 
@@ -156,8 +156,8 @@ describe("CreateCouponPage", () => {
   })
 
   ;[
-    [COUPON_DISCOUNT_TYPE_PERCENT_OFF, 50, 0.5],
-    [COUPON_DISCOUNT_TYPE_DOLLARS_OFF, 50, 50],
+    [DISCOUNT_TYPE_PERCENT_OFF, 50, 0.5],
+    [DISCOUNT_TYPE_DOLLARS_OFF, 50, 50],
   ].forEach(([discountType, discount, amount]) => {
     it("Amount is converted for percent-off discount", async () => {
       const testCouponData = {

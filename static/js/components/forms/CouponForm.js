@@ -9,7 +9,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik"
 import * as yup from "yup"
 
 import {
-  COUPON_DISCOUNT_TYPE_PERCENT_OFF,
+  DISCOUNT_TYPE_PERCENT_OFF,
   COUPON_TYPE_PROMO,
   COUPON_TYPE_SINGLE_USE,
   PRODUCT_TYPE_COURSERUN,
@@ -51,7 +51,7 @@ const couponValidations = yup.object().shape({
     .required("Discount amount is required")
     .min(1, "Must be at least ${min}")
     .when("discount_type", {
-      is:   COUPON_DISCOUNT_TYPE_PERCENT_OFF,
+      is:   DISCOUNT_TYPE_PERCENT_OFF,
       then: yup
         .number()
         .max(100, "The amount should be between (0 - 1) when discount type is percent-off.")
@@ -121,7 +121,7 @@ export const CouponForm = ({
       product_type:             PRODUCT_TYPE_COURSERUN,
       products:                 [],
       num_coupon_codes:         1,
-      discount_type:            "",
+      discount_type:            DISCOUNT_TYPE_PERCENT_OFF,
       max_redemptions:          1000000,
       max_redemptions_per_user: 1,
       discount:                 "",
@@ -208,7 +208,7 @@ export const CouponForm = ({
           </div>
           <div className="block">
             <label htmlFor="discount">
-              Discount Amount (1 to 100 for percent-off discount)*
+              Discount Amount*
               <Field name="discount" />
             </label>
             <ErrorMessage name="discount" component={FormError} />
