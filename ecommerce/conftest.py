@@ -7,6 +7,7 @@ import pytest
 
 # pylint:disable=redefined-outer-name
 from ecommerce.api import ValidatedBasket
+from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.factories import (
     BasketItemFactory,
     CouponEligibilityFactory,
@@ -142,6 +143,7 @@ def promo_coupon_json(coupon_product_ids):
         "coupon_type": "promo",
         "company": CompanyFactory.create().id,
         "payment_type": "purchase_order",
+        "discount_type": DISCOUNT_TYPE_PERCENT_OFF,
         "payment_transaction": "fake_transaction_num",
         "product_ids": coupon_product_ids,
         "include_future_runs": False,
@@ -162,6 +164,7 @@ def single_use_coupon_json(coupon_product_ids):
         "coupon_type": "single-use",
         "company": CompanyFactory.create().id,
         "payment_type": "credit_card",
+        "discount_type": DISCOUNT_TYPE_PERCENT_OFF,
         "payment_transaction": "fake_transaction_num",
         "product_ids": coupon_product_ids,
         "include_future_runs": False,

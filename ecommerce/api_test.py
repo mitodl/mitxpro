@@ -51,6 +51,7 @@ from ecommerce.api import (
     get_product_from_querystring_id,
     best_coupon_for_product,
 )
+from ecommerce.constants import DISCOUNT_TYPES, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.factories import (
     BasketFactory,
     CompanyFactory,
@@ -1488,6 +1489,7 @@ def test_create_coupons(use_defaults):
         amount=amount,
         num_coupon_codes=num_coupon_codes,
         coupon_type=coupon_type,
+        discount_type=DISCOUNT_TYPE_PERCENT_OFF,
         **optional,
     )
     assert payment_version.payment.name == name
@@ -1506,6 +1508,8 @@ def test_create_coupons(use_defaults):
     assert payment_version.payment_type == (
         None if use_defaults else optional["payment_type"]
     )
+    assert payment_version.discount_type in DISCOUNT_TYPES
+
     assert payment_version.payment_transaction == (
         None if use_defaults else optional["payment_transaction"]
     )

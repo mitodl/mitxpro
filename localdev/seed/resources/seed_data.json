@@ -555,6 +555,7 @@
             "activation_date": "2018-05-07T00:00:00",
             "coupon_type": "single-use",
             "payment_type": "staff",
+            "discount_type": "percent-off",
             "payment_transaction": "123",
             "_company": "Boeing",
             "_courseruns": [
@@ -570,6 +571,7 @@
             "activation_date": "2018-05-07T00:00:00",
             "coupon_type": "single-use",
             "payment_type": "staff",
+            "discount_type": "percent-off",
             "payment_transaction": "123",
             "_company": "Boeing",
             "_courseruns": [

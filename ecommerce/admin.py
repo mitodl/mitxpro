@@ -273,6 +273,7 @@ class CouponPaymentVersionAdmin(admin.ModelAdmin):
         "get_payment_name",
         "get_company_name",
         "payment_type",
+        "discount_type",
         "amount",
         "num_coupon_codes",
         "activation_date",
