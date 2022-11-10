@@ -54,7 +54,7 @@ const couponValidations = yup.object().shape({
       is:   COUPON_DISCOUNT_TYPE_PERCENT_OFF,
       then: yup
         .number()
-        .max(100, "Discount amount cannot be more than 100 when discount type is percent-off")
+        .max(100, "The amount should be between (0 - 1) when discount type is percent-off.")
     }),
   discount_type:   yup.string().required("Discount type is required"),
   max_redemptions: yup.number().when("coupon_type", {
