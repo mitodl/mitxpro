@@ -5,27 +5,24 @@ Django settings for mitxpro.
 import logging
 import os
 import platform
-from urllib.parse import urljoin, urlparse
 from datetime import timedelta
-
-import pytz
-from celery.schedules import crontab
-from redbeat import RedBeatScheduler
+from urllib.parse import urljoin, urlparse
 
 import dj_database_url
+import pytz
+from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 from mitol.common.envs import (
-    get_features,
     get_bool,
+    get_delimited_list,
+    get_features,
     get_int,
     get_string,
-    get_delimited_list,
     import_settings_modules,
 )
-
-# wildcard import boilerplate digital credentials settings
-from mitol.digitalcredentials.settings import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from mitol.common.settings.webpack import *  # pylint: disable=wildcard-import,unused-wildcard-import
+from mitol.digitalcredentials.settings import *  # pylint: disable=wildcard-import,unused-wildcard-import
+from redbeat import RedBeatScheduler
 
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
@@ -116,27 +113,6 @@ ZENDESK_CONFIG = {
     ),
 }
 
-HUBSPOT_CONFIG = {
-    "HUBSPOT_NEW_COURSES_FORM_GUID": get_string(
-        name="HUBSPOT_NEW_COURSES_FORM_GUID",
-        default="b9220dc1-4e48-4097-8539-9f2907f18b1e",
-        description="Form guid over hub spot for new courses email subscription form.",
-    ),
-    "HUBSPOT_FOOTER_FORM_GUID": get_string(
-        name="HUBSPOT_FOOTER_FORM_GUID",
-        default="ff810010-c33c-4e99-9285-32d283fbc816",
-        description="Form guid over hub spot for footer block.",
-    ),
-    "HUBSPOT_PORTAL_ID": get_string(
-        name="HUBSPOT_PORTAL_ID", default="5890463", description="Hub spot portal id."
-    ),
-    "HUBSPOT_CREATE_USER_FORM_ID": get_string(
-        name="HUBSPOT_CREATE_USER_FORM_ID",
-        default=None,
-        description="Form ID for Hubspot Forms API",
-    ),
-}
-
 WEBPACK_LOADER = {
     "DEFAULT": {
         "CACHE": not DEBUG,
@@ -205,14 +181,15 @@ INSTALLED_APPS = (
     "sheets",
     "affiliate",
     # must be after "users" to pick up custom user model
+    "b2b_ecommerce",
     "compat",
+    "ecommerce",
     "hijack",
     "hijack_admin",
-    "ecommerce",
+    "hubspot_xpro",
     "voucher",
-    "hubspot",
-    "b2b_ecommerce",
     # ol-dango apps, must be after this project's apps for template precedence
+    "mitol.hubspot_api.apps.HubspotApiApp",
     "mitol.common.apps.CommonApp",
     "mitol.digitalcredentials.apps.DigitalCredentialsApp",
     "mitol.mail.apps.MailApp",
@@ -394,7 +371,7 @@ SOCIAL_AUTH_PIPELINE = (
     # Send a validation email to the user to verify its email address.
     # Disabled by default.
     "social_core.pipeline.mail.mail_validation",
-    # Send the email address and hubspot cookie if it exists to hubspot.
+    # Send the email address and hubspot cookie if it exists to hubspot_xpro.
     "authentication.pipeline.user.send_user_to_hubspot",
     # Generate a username for the user
     # NOTE: needs to be right before create_user so nothing overrides the username
@@ -832,14 +809,6 @@ SHEETS_TASK_OFFSET = get_int(
 )
 
 CELERY_BEAT_SCHEDULE = {
-    "check-hubspot-api-errors": {
-        "task": "hubspot.tasks.check_hubspot_api_errors",
-        "schedule": get_int(
-            name="HUBSPOT_ERROR_CHECK_FREQUENCY",
-            default=600,
-            description="How many seconds between Hubspot API error checks",
-        ),
-    },
     "retry-failed-edx-enrollments": {
         "task": "courseware.tasks.retry_failed_edx_enrollments",
         "schedule": RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY,
@@ -1022,7 +991,7 @@ MITOL_DIGITAL_CREDENTIALS_BUILD_CREDENTIAL_FUNC = (
 
 # mitol-django-authenticaton
 # import_settings_module, imports the default settings defined in ol-django-authentication app
-import_settings_modules(globals(), "mitol.authentication.settings.djoser_settings")
+import_settings_modules("mitol.authentication.settings.djoser_settings")
 MITOL_AUTHENTICATION_FROM_EMAIL = MAILGUN_FROM_EMAIL
 MITOL_AUTHENTICATION_REPLY_TO_EMAIL = MITXPRO_REPLY_TO_ADDRESS
 
@@ -1228,12 +1197,57 @@ VOUCHER_COMPANY_ID = get_int(
 )
 
 # Hubspot sync settings
-HUBSPOT_API_KEY = get_string(
-    name="HUBSPOT_API_KEY", default=None, description="API key for Hubspot"
+MITOL_HUBSPOT_API_PRIVATE_TOKEN = get_string(
+    name="MITOL_HUBSPOT_API_PRIVATE_TOKEN",
+    default=None,
+    description="Hubspot private token to authenticate with API",
 )
-HUBSPOT_ID_PREFIX = get_string(
-    name="HUBSPOT_ID_PREFIX", default="xpronew", description="Hub spot id prefix."
+MITOL_HUBSPOT_API_RETRIES = get_int(
+    name="MITOL_HUBSPOT_API_RETRIES",
+    default=3,
+    description="Number of times to retry a failed hubspot API request",
 )
+MITOL_HUBSPOT_API_ID_PREFIX = get_string(
+    name="MITOL_HUBSPOT_API_ID_PREFIX",
+    default="XPRO",
+    description="The prefix to use for hubspot unique_app_id field values",
+)
+HUBSPOT_PIPELINE_ID = get_string(
+    name="HUBSPOT_PIPELINE_ID",
+    default="default",
+    description="Hubspot ID for the ecommerce pipeline",
+)
+HUBSPOT_MAX_CONCURRENT_TASKS = get_int(
+    name="HUBSPOT_MAX_CONCURRENT_TASKS",
+    default=4,
+    description="Max number of concurrent Hubspot tasks to run",
+)
+HUBSPOT_TASK_DELAY = get_int(
+    name="HUBSPOT_TASK_DELAY",
+    default=1000,
+    description="Number of milliseconds to wait between consecutive Hubspot calls",
+)
+HUBSPOT_CONFIG = {
+    "HUBSPOT_NEW_COURSES_FORM_GUID": get_string(
+        name="HUBSPOT_NEW_COURSES_FORM_GUID",
+        default="b9220dc1-4e48-4097-8539-9f2907f18b1e",
+        description="Form guid over hub spot for new courses email subscription form.",
+    ),
+    "HUBSPOT_FOOTER_FORM_GUID": get_string(
+        name="HUBSPOT_FOOTER_FORM_GUID",
+        default="ff810010-c33c-4e99-9285-32d283fbc816",
+        description="Form guid over hub spot for footer block.",
+    ),
+    "HUBSPOT_PORTAL_ID": get_string(
+        name="HUBSPOT_PORTAL_ID", default="5890463", description="Hub spot portal id."
+    ),
+    "HUBSPOT_CREATE_USER_FORM_ID": get_string(
+        name="HUBSPOT_CREATE_USER_FORM_ID",
+        default=None,
+        description="Form ID for Hubspot Forms API",
+    ),
+}
+
 
 # Sheets settings
 DRIVE_SERVICE_ACCOUNT_CREDS = get_string(

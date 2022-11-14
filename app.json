@@ -147,12 +147,12 @@
       "description": "Issuer identifier for digital credentials",
       "required": false
     },
-    "DIGITAL_CREDENTIALS_VERIFICATION_METHOD": {
-      "description": "Verification method for digital credentials",
-      "required": false
-    },
     "DIGITAL_CREDENTIALS_SUPPORTED_RUNS": {
       "description": "Comma separated string of course/program runs/Ids that support digital credentials",
+      "required": false
+    },
+    "DIGITAL_CREDENTIALS_VERIFICATION_METHOD": {
+      "description": "Verification method for digital credentials",
       "required": false
     },
     "DJANGO_LOG_LEVEL": {
@@ -235,32 +235,32 @@
       "description": "This server's host IP",
       "required": false
     },
-    "HUBSPOT_API_KEY": {
-      "description": "API key for Hubspot",
-      "required": false
-    },
     "HUBSPOT_CREATE_USER_FORM_ID": {
       "description": "Form ID for Hubspot Forms API",
-      "required": false
-    },
-    "HUBSPOT_ERROR_CHECK_FREQUENCY": {
-      "description": "How many seconds between Hubspot API error checks",
       "required": false
     },
     "HUBSPOT_FOOTER_FORM_GUID": {
       "description": "Form guid over hub spot for footer block.",
       "required": false
     },
-    "HUBSPOT_ID_PREFIX": {
-      "description": "Hub spot id prefix.",
+    "HUBSPOT_MAX_CONCURRENT_TASKS": {
+      "description": "Max number of concurrent Hubspot tasks to run",
       "required": false
     },
     "HUBSPOT_NEW_COURSES_FORM_GUID": {
       "description": "Form guid over hub spot for new courses email subscription form.",
       "required": false
     },
+    "HUBSPOT_PIPELINE_ID": {
+      "description": "Hubspot ID for the ecommerce pipeline",
+      "required": false
+    },
     "HUBSPOT_PORTAL_ID": {
       "description": "Hub spot portal id.",
+      "required": false
+    },
+    "HUBSPOT_TASK_DELAY": {
+      "description": "Number of milliseconds to wait between consecutive Hubspot calls",
       "required": false
     },
     "LOGOUT_REDIRECT_URL": {
@@ -287,6 +287,14 @@
       "description": "The root directory for locally stored media. Typically not used.",
       "required": false
     },
+    "MITOL_AUTHENTICATION_FROM_EMAIL": {
+      "description": "E-mail to use for the from field",
+      "required": false
+    },
+    "MITOL_AUTHENTICATION_REPLY_TO_ADDRESS": {
+      "description": "E-mail to use for reply-to address of emails",
+      "required": false
+    },
     "MITOL_DIGITAL_CREDENTIALS_AUTH_TYPE": {
       "description": "Auth type that is passed to the digital credentials wallet app",
       "required": false
@@ -301,6 +309,18 @@
     },
     "MITOL_DIGITAL_CREDENTIALS_VERIFY_SERVICE_BASE_URL": {
       "description": "Base URL for sing-and-verify service to call for digital credentials",
+      "required": false
+    },
+    "MITOL_HUBSPOT_API_ID_PREFIX": {
+      "description": "The prefix to use for hubspot unique_app_id field values",
+      "required": false
+    },
+    "MITOL_HUBSPOT_API_PRIVATE_TOKEN": {
+      "description": "Hubspot private token to authenticate with API",
+      "required": false
+    },
+    "MITOL_HUBSPOT_API_RETRIES": {
+      "description": "Number of times to retry a failed hubspot API request",
       "required": false
     },
     "MITXPRO_ADMIN_EMAIL": {

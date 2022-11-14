@@ -42,3 +42,5 @@ CYBERSOURCE_CARD_TYPES = {
     "061": "RuPay",
     "062": "China UnionPay",
 }
+
+ORDER_PREFIX = "XPRO-ORDER"

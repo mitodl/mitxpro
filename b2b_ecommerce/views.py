@@ -1,7 +1,7 @@
 """Views for business to business ecommerce"""
 
 import logging
-from urllib.parse import urljoin, urlencode
+from urllib.parse import urlencode, urljoin
 
 from django.conf import settings
 from django.db import transaction
@@ -18,15 +18,16 @@ from b2b_ecommerce.api import (
     generate_b2b_cybersource_sa_payload,
 )
 from b2b_ecommerce.models import B2BCoupon, B2BCouponRedemption, B2BOrder, B2BReceipt
-from ecommerce.utils import make_checkout_url
-from ecommerce.models import ProductVersion, Coupon
-from ecommerce.serializers import FullProductVersionSerializer
-from ecommerce.constants import CYBERSOURCE_CARD_TYPES
-from ecommerce.api import get_product_from_text_id
-from mitxpro.utils import make_csv_http_response
-from hubspot.task_helpers import sync_hubspot_b2b_deal, sync_hubspot_b2b_contact
-from users.models import User
 from courses.models import ProgramRun
+from ecommerce.api import get_product_from_text_id
+from ecommerce.constants import CYBERSOURCE_CARD_TYPES
+from ecommerce.models import Coupon, ProductVersion
+from ecommerce.serializers import FullProductVersionSerializer
+from ecommerce.utils import make_checkout_url
+from hubspot_xpro.task_helpers import sync_hubspot_b2b_deal
+from mitxpro.utils import make_csv_http_response
+from users.models import User
+
 
 log = logging.getLogger(__name__)
 
@@ -123,9 +124,6 @@ class B2BCheckoutView(APIView):
             )
             url = settings.CYBERSOURCE_SECURE_ACCEPTANCE_URL
             method = "POST"
-
-        if not User.objects.filter(email=email).exists():
-            sync_hubspot_b2b_contact(email)
         if order:
             sync_hubspot_b2b_deal(order)
         return Response({"payload": payload, "url": url, "method": method})

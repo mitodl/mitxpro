@@ -28,7 +28,7 @@ from ecommerce.models import (
     ProductCouponAssignment,
 )
 
-from hubspot.task_helpers import sync_hubspot_deal
+from hubspot_xpro.task_helpers import sync_hubspot_deal
 from mitxpro.admin import AuditableModelAdmin, TimestampedModelAdmin
 from mitxpro.utils import get_field_names
 
