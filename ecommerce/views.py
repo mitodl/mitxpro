@@ -64,7 +64,7 @@ from ecommerce.serializers import (
     ProgramRunSerializer,
 )
 from ecommerce.utils import make_checkout_url
-from hubspot.task_helpers import sync_hubspot_deal
+from hubspot_xpro.task_helpers import sync_hubspot_deal
 from mitxpro.utils import (
     make_csv_http_response,
     first_or_none,

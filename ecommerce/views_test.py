@@ -192,7 +192,7 @@ def test_zero_price_checkout(
     """
     If the order total is $0, we should just fulfill the order and direct the user to our order receipt page
     """
-    settings.HUBSPOT_API_KEY = hubspot_api_key
+    settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
     line = LineFactory.create(
         order__status=Order.CREATED,
@@ -253,7 +253,7 @@ def test_order_fulfilled(
     """
     Test the happy case
     """
-    settings.HUBSPOT_API_KEY = hubspot_api_key
+    settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
     order = create_unfulfilled_order(validated_basket)
 

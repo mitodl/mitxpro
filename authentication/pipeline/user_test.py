@@ -422,8 +422,8 @@ def test_create_profile(
     Tests that create_profile creates a profile
     """
     user = UserFactory.create(profile__incomplete=True)
-    settings.HUBSPOT_API_KEY = hubspot_key
-    mock_user_sync = mocker.patch("hubspot.tasks.sync_contact_with_hubspot.delay")
+    settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_key
+    mock_user_sync = mocker.patch("hubspot_xpro.tasks.sync_contact_with_hubspot.delay")
     response = user_actions.create_profile(
         mock_create_profile_strategy,
         mock_email_backend,

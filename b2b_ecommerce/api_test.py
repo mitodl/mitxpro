@@ -6,16 +6,17 @@ import pytest
 
 from b2b_ecommerce.api import (
     complete_b2b_order,
-    generate_b2b_cybersource_sa_payload,
     fulfill_b2b_order,
+    generate_b2b_cybersource_sa_payload,
 )
-from b2b_ecommerce.factories import B2BOrderFactory, B2BCouponFactory
+from b2b_ecommerce.factories import B2BCouponFactory, B2BOrderFactory
 from b2b_ecommerce.models import B2BOrder, B2BOrderAudit
 from ecommerce.api import ISO_8601_FORMAT, generate_cybersource_sa_signature
 from ecommerce.exceptions import EcommerceException
 from ecommerce.factories import CouponPaymentVersionFactory
 from ecommerce.models import CouponPaymentVersion
 from mitxpro.utils import dict_without_keys, now_in_utc
+
 
 FAKE = faker.Factory.create()
 

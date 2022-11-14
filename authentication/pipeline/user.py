@@ -24,7 +24,7 @@ from authentication.api import create_user_with_generated_username
 
 from compliance import api as compliance_api
 from courseware import api as courseware_api, tasks as courseware_tasks
-from hubspot.task_helpers import sync_hubspot_user
+from hubspot_xpro.task_helpers import sync_hubspot_user
 from users.serializers import UserSerializer, ProfileSerializer
 from users.utils import usernameify
 

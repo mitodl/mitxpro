@@ -172,7 +172,6 @@ def single_use_coupon_json(coupon_product_ids):
 def mock_hubspot_syncs(mocker):
     """Mock the sync_deal_with_hubspot task"""
     return SimpleNamespace(
-        order=mocker.patch("hubspot.tasks.sync_deal_with_hubspot.delay"),
-        line=mocker.patch("hubspot.tasks.sync_line_item_with_hubspot.delay"),
-        product=mocker.patch("hubspot.tasks.sync_product_with_hubspot.delay"),
+        order=mocker.patch("hubspot_xpro.tasks.sync_deal_with_hubspot.delay"),
+        product=mocker.patch("hubspot_xpro.tasks.sync_product_with_hubspot.delay"),
     )

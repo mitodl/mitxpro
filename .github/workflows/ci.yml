@@ -15,7 +15,7 @@ jobs:
           --health-retries 5
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: postgres  # pragma: allowlist secret
           POSTGRES_DB: postgres
         ports:
           - 5432:5432
@@ -85,14 +85,15 @@ jobs:
           CELERY_TASK_ALWAYS_EAGER: 'True'
           CELERY_BROKER_URL: redis://localhost:6379/4
           CELERY_RESULT_BACKEND: redis://localhost:6379/4
-          SECRET_KEY: local_unsafe_key
+          SECRET_KEY: local_unsafe_key  # pragma: allowlist secret
+          MITOL_HUBSPOT_API_PRIVATE_TOKEN: test-token
           MITXPRO_BASE_URL: http://localhost:8053
           MAILGUN_SENDER_DOMAIN: other.fake.site
           MAILGUN_KEY: fake_mailgun_key
           MITXPRO_ADMIN_EMAIL: example@localhost
           OPENEDX_API_CLIENT_ID: fake_client_id
           OPENEDX_API_CLIENT_SECRET: fake_client_secret
-          OPENEDX_API_KEY: test-openedx-api-key
+          OPENEDX_API_KEY: test-openedx-api-key  # pragma: allowlist secret
 
       - name: Tests
         run: |
@@ -104,13 +105,14 @@ jobs:
           CELERY_TASK_ALWAYS_EAGER: 'True'
           CELERY_BROKER_URL: redis://localhost:6379/4
           CELERY_RESULT_BACKEND: redis://localhost:6379/4
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres  # pragma: allowlist secret
           WEBPACK_DISABLE_LOADER_STATS: 'True'
           ELASTICSEARCH_URL: localhost:9200
           MAILGUN_KEY: fake_mailgun_key
           MAILGUN_SENDER_DOMAIN: other.fake.site
           MITOL_DIGITAL_CREDENTIALS_VERIFY_SERVICE_BASE_URL: http://localhost:5000
           MITOL_DIGITAL_CREDENTIALS_HMAC_SECRET: fake.hmac.secret
+          MITOL_HUBSPOT_API_PRIVATE_TOKEN: test-token
           MITXPRO_ADMIN_EMAIL: example@localhost
           MITXPRO_BASE_URL: http://localhost:8053
           MITXPRO_DB_DISABLE_SSL: 'True'
@@ -121,8 +123,8 @@ jobs:
           OPENEDX_API_BASE_URL: http://localhost:18000
           OPENEDX_API_CLIENT_ID: fake_client_id
           OPENEDX_API_CLIENT_SECRET: fake_client_secret
-          OPENEDX_API_KEY: test-openedx-api-key
-          SECRET_KEY: local_unsafe_key
+          OPENEDX_API_KEY: test-openedx-api-key  # pragma: allowlist secret
+          SECRET_KEY: local_unsafe_key  # pragma: allowlist secret
 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v1
