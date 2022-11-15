@@ -72,7 +72,7 @@ class Command(BaseCommand):
         )
 
         if (
-            not created
+            bulk_assignment.sheet_last_modified_date
             and sheet_last_modified <= bulk_assignment.sheet_last_modified_date
             and not options["force"]
         ):
