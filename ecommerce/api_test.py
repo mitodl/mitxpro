@@ -497,17 +497,6 @@ def test_best_coupon_return_best_coupon_between_discount_types(
     product = ProductVersionFactory.create(price=Decimal(100)).product
     assert best_coupon_for_product(product, user) == best_coupon
 
-    # # Clear the se
-    # CouponSelection.objects.all().delete()
-    #
-    # product = ProductVersionFactory.create(price=Decimal(200)).product
-    #
-    # coupon_percent_100 = CouponVersionFactory.create(coupon__is_global=True,
-    #                                                  payment_version__discount_type=DISCOUNT_TYPE_PERCENT_OFF,
-    #                                                  payment_version__amount=1.0)
-    #
-    # assert best_coupon_for_product(product, user) == coupon_percent_100
-
 
 def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):
     """
