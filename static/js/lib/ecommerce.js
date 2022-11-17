@@ -14,7 +14,8 @@ import type {
 import {
   COUPON_TYPE_PROMO,
   PRODUCT_TYPE_COURSERUN,
-  PRODUCT_TYPE_PROGRAM
+  DISCOUNT_TYPE_PERCENT_OFF,
+  DISCOUNT_TYPE_DOLLARS_OFF
 } from "../constants"
 import type { Course, CourseRun } from "../flow/courseTypes"
 
@@ -23,9 +24,13 @@ export const calculateDiscount = (
   coupon: ?CouponSelection
 ): Decimal => {
   if (coupon && coupon.targets.includes(item.id)) {
-    return new Decimal(coupon.amount)
-      .times(new Decimal(item.price))
-      .toFixed(2, Decimal.ROUND_HALF_UP)
+    if (coupon.discount_type === DISCOUNT_TYPE_PERCENT_OFF) {
+      return new Decimal(coupon.amount)
+        .times(new Decimal(item.price))
+        .toFixed(2, Decimal.ROUND_HALF_UP)
+    } else if (coupon.discount_type === DISCOUNT_TYPE_DOLLARS_OFF) {
+      return coupon.amount
+    }
   }
 
   return new Decimal(0)
@@ -34,7 +39,15 @@ export const calculateDiscount = (
 export const calculatePrice = (
   item: BasketItem,
   coupon: ?CouponSelection
-): Decimal => new Decimal(item.price).minus(calculateDiscount(item, coupon))
+): Decimal => {
+  const price = new Decimal(item.price).minus(calculateDiscount(item, coupon)
+  )
+  if (price < 0) {
+    return 0
+  } else {
+    return price
+  }
+}
 
 const determinePreselectRunTag = (
   item: BasketItem,

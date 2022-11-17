@@ -103,3 +103,8 @@ def validate_amount(discount_type, amount):
 
     if discount_type == DISCOUNT_TYPE_PERCENT_OFF and amount > 1:
         return "The amount should be between (0 - 1) when discount type is percent-off."
+
+
+def positive_or_zero(number):
+    """Return 0 if a number is negative otherwise return number"""
+    return 0 if number < 0 else number

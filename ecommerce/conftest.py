@@ -130,7 +130,7 @@ def coupon_product_ids():
 
 
 @pytest.fixture
-def promo_coupon_json(coupon_product_ids):
+def promo_coupon_json(coupon_product_ids, discount_type):
     """ JSON for creating a promo coupon """
     return {
         "tag": None,
@@ -138,12 +138,12 @@ def promo_coupon_json(coupon_product_ids):
         "automatic": True,
         "activation_date": "2018-01-01T00:00:00Z",
         "expiration_date": "2019-12-31T00:00:00Z",
-        "amount": 0.75,
+        "amount": 0.75 if (discount_type == DISCOUNT_TYPE_PERCENT_OFF) else 75,
         "coupon_code": "TESTPROMOCODE",
         "coupon_type": "promo",
         "company": CompanyFactory.create().id,
         "payment_type": "purchase_order",
-        "discount_type": DISCOUNT_TYPE_PERCENT_OFF,
+        "discount_type": discount_type,
         "payment_transaction": "fake_transaction_num",
         "product_ids": coupon_product_ids,
         "include_future_runs": False,
@@ -151,7 +151,7 @@ def promo_coupon_json(coupon_product_ids):
 
 
 @pytest.fixture
-def single_use_coupon_json(coupon_product_ids):
+def single_use_coupon_json(coupon_product_ids, discount_type):
     """JSON for creating a batch of single-use coupons"""
     return {
         "tag": "TEST TAG 1",
@@ -159,12 +159,12 @@ def single_use_coupon_json(coupon_product_ids):
         "automatic": True,
         "activation_date": "2018-01-01T00:00:00Z",
         "expiration_date": "2019-12-31T00:00:00Z",
-        "amount": 0.75,
+        "amount": 0.75 if (discount_type == DISCOUNT_TYPE_PERCENT_OFF) else 75,
         "num_coupon_codes": 5,
         "coupon_type": "single-use",
         "company": CompanyFactory.create().id,
         "payment_type": "credit_card",
-        "discount_type": DISCOUNT_TYPE_PERCENT_OFF,
+        "discount_type": discount_type,
         "payment_transaction": "fake_transaction_num",
         "product_ids": coupon_product_ids,
         "include_future_runs": False,
