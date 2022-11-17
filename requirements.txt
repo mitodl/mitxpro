@@ -390,7 +390,7 @@ rsa==4.8
     # via google-auth
 s3transfer==0.3.7
     # via boto3
-sentry-sdk==1.5.6
+sentry-sdk==1.11.0
     # via -r requirements.in
 six==1.16.0
     # via
@@ -445,7 +445,7 @@ uritemplate==3.0.1
     # via
     #   coreapi
     #   google-api-python-client
-urllib3==1.26.8
+urllib3==1.26.12
     # via
     #   botocore
     #   elastic-transport
