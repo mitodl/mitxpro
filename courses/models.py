@@ -101,8 +101,10 @@ class PageProperties(models.Model):
     @property
     def background_image_url(self):
         """Gets the url for the background image (if that image exists)"""
+        from wagtail.images.views.serve import generate_image_url
+
         return (
-            self.background_image.get_rendition(COURSE_BG_IMG_WAGTAIL_FILL).url
+            generate_image_url(self.background_image, COURSE_BG_IMG_WAGTAIL_FILL)
             if self.background_image
             else None
         )
@@ -110,8 +112,10 @@ class PageProperties(models.Model):
     @property
     def background_image_mobile_url(self):
         """Gets the url for the background image (if that image exists)"""
+        from wagtail.images.views.serve import generate_image_url
+
         return (
-            self.background_image.get_rendition(COURSE_BG_IMG_MOBILE_WAGTAIL_FILL).url
+            generate_image_url(self.background_image, COURSE_BG_IMG_MOBILE_WAGTAIL_FILL)
             if self.background_image
             else None
         )
@@ -119,8 +123,12 @@ class PageProperties(models.Model):
     @property
     def catalog_image_url(self):
         """Gets the url for the thumbnail image as it appears in the catalog (if that image exists)"""
+        from wagtail.images.views.serve import generate_image_url
+
         return (
-            self.page.thumbnail_image.get_rendition(CATALOG_COURSE_IMG_WAGTAIL_FILL).url
+            generate_image_url(
+                self.page.thumbnail_image, CATALOG_COURSE_IMG_WAGTAIL_FILL
+            )
             if self.page and self.page.thumbnail_image
             else None
         )
