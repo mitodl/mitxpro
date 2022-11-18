@@ -480,11 +480,6 @@ def round_half_up(number):
     return number.quantize(decimal.Decimal("0.01"), rounding=decimal.ROUND_HALF_UP)
 
 
-def get_percent_discount(amount, price):
-    """Utility method to calculate percent based discount"""
-    return round_half_up(amount * price)
-
-
 def get_product_version_price_with_discount(*, coupon_version, product_version):
     """
     Determine the new discounted price for a product after the coupon discount is applied
@@ -497,24 +492,18 @@ def get_product_version_price_with_discount(*, coupon_version, product_version):
         Decimal: the discounted price for the Product
     """
     price = product_version.price
+    discount_amount = 0
+
     if coupon_version and (
         coupon_version.coupon.is_global
         or CouponEligibility.objects.filter(
             coupon__versions=coupon_version, product__productversions=product_version
         ).exists()
     ):
-        discount_type = coupon_version.payment_version.discount_type
-        amount = coupon_version.payment_version.amount
-
-        if discount_type == DISCOUNT_TYPE_PERCENT_OFF:
-            discount = get_percent_discount(amount, price)
-        elif discount_type == DISCOUNT_TYPE_DOLLARS_OFF:
-            discount = round_half_up(amount)
-        else:
-            discount = 0
-    else:
-        discount = 0
-    return positive_or_zero(price - discount)
+        discount_amount = coupon_version.payment_version.calculate_discount_amount(
+            price=price
+        )
+    return positive_or_zero(price - discount_amount)
 
 
 def redeem_coupon(coupon_version, order):

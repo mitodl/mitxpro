@@ -6,12 +6,8 @@ from rest_framework import serializers
 from b2b_ecommerce import models as b2b_models
 from b2b_ecommerce.constants import B2B_ORDER_PREFIX
 from ecommerce import models
-from ecommerce.api import (
-    get_product_version_price_with_discount,
-    round_half_up,
-    get_percent_discount,
-)
-from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF, DISCOUNT_TYPE_DOLLARS_OFF
+from ecommerce.api import get_product_version_price_with_discount, round_half_up
+from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.models import CouponRedemption, CouponVersion, ProductVersion
 from hubspot_xpro.api import format_product_name, get_hubspot_id_for_object
 
@@ -319,16 +315,10 @@ class OrderToDealSerializer(serializers.ModelSerializer):
             return "0.0000"
 
         payment_version = coupon_version.payment_version
-
-        if payment_version.discount_type == DISCOUNT_TYPE_PERCENT_OFF:
-            return get_percent_discount(
-                payment_version.amount,
-                self._get_product_version(instance).price,
-            ).to_eng_string()
-        elif payment_version.discount_type == DISCOUNT_TYPE_DOLLARS_OFF:
-            return payment_version.amount.to_eng_string()
-
-        return "0.0000"
+        discount_amount = payment_version.calculate_discount_amount(
+            price=self._get_product_version(instance).price
+        )
+        return discount_amount.to_eng_string()
 
     def get_discount_percent(self, instance):
         """ Get the discount percentage if any """
@@ -337,17 +327,10 @@ class OrderToDealSerializer(serializers.ModelSerializer):
             return "0"
 
         payment_version = coupon_version.payment_version
-
-        if payment_version.discount_type == DISCOUNT_TYPE_PERCENT_OFF:
-            return (payment_version.amount * 100).to_eng_string()
-
-        elif payment_version.discount_type == DISCOUNT_TYPE_DOLLARS_OFF:
-            return (
-                (payment_version.amount / self._get_product_version(instance).price)
-                * 100
-            ).to_eng_string()
-
-        return "0"
+        discount_percent = payment_version.calculate_discount_percent(
+            price=self._get_product_version(instance).price
+        )
+        return discount_percent.to_eng_string()
 
     def get_company(self, instance):
         """ Get the company id if any """

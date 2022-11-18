@@ -16,8 +16,7 @@ from b2b_ecommerce.constants import B2B_ORDER_PREFIX
 from b2b_ecommerce.factories import B2BCouponFactory
 from b2b_ecommerce.models import B2BOrder
 from courses.factories import CourseRunFactory
-from ecommerce.api import round_half_up
-from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
+from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF, DISCOUNT_TYPE_DOLLARS_OFF
 from ecommerce.factories import (
     CouponRedemptionFactory,
     ProductFactory,
@@ -111,13 +110,25 @@ def test_serialize_order(settings, hubspot_order, status):
     }
 
 
-def test_serialize_order_with_coupon(settings, hubspot_order):
+@pytest.mark.parametrize(
+    "discount_type, amount",
+    [
+        [DISCOUNT_TYPE_PERCENT_OFF, Decimal(0.75)],
+        [DISCOUNT_TYPE_DOLLARS_OFF, Decimal(75)],
+    ],
+)
+def test_serialize_order_with_coupon(settings, hubspot_order, discount_type, amount):
     """Test that OrderToDealSerializer produces the correct serialized data for an order with coupon"""
     line = hubspot_order.lines.first()
-    coupon_redemption = CouponRedemptionFactory.create(order=hubspot_order)
-    discount = round_half_up(
-        coupon_redemption.coupon_version.payment_version.amount
-        * line.product_version.price
+    coupon_redemption = CouponRedemptionFactory.create(
+        order=hubspot_order,
+        coupon_version__payment_version__amount=amount,
+        coupon_version__payment_version__discount_type=discount_type,
+    )
+    discount = (
+        coupon_redemption.coupon_version.payment_version.calculate_discount_amount(
+            price=line.product_version.price
+        )
     )
     serialized_data = OrderToDealSerializer(instance=hubspot_order).data
     assert serialized_data == {
@@ -136,8 +147,8 @@ def test_serialize_order_with_coupon(settings, hubspot_order):
         "payment_type": coupon_redemption.coupon_version.payment_version.payment_type,
         "discount_type": coupon_redemption.coupon_version.payment_version.discount_type,
         "payment_transaction": coupon_redemption.coupon_version.payment_version.payment_transaction,
-        "discount_percent": (
-            coupon_redemption.coupon_version.payment_version.amount * 100
+        "discount_percent": coupon_redemption.coupon_version.payment_version.calculate_discount_percent(
+            price=line.product_version.price
         ).to_eng_string(),
         "status": hubspot_order.status,
         "pipeline": settings.HUBSPOT_PIPELINE_ID,
