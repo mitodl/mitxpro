@@ -140,6 +140,8 @@ def test_serialize_basket_product_version_programrun(mock_context):
 
 def test_basket_thumbnail_courserun(basket_and_coupons, mock_context):
     """Basket thumbnail should be serialized for a courserun"""
+    from wagtail.images.views.serve import generate_image_url
+
     thumbnail_filename = "abcde.jpg"
     course_page = CoursePageFactory.create(
         thumbnail_image__file__filename=thumbnail_filename
@@ -149,16 +151,15 @@ def test_basket_thumbnail_courserun(basket_and_coupons, mock_context):
     data = FullProductVersionSerializer(
         instance=product_version, context=mock_context
     ).data
-    assert (
-        data["thumbnail_url"]
-        == course_page.thumbnail_image.get_rendition(
-            CATALOG_COURSE_IMG_WAGTAIL_FILL
-        ).url
+    assert data["thumbnail_url"] == generate_image_url(
+        course_page.thumbnail_image, CATALOG_COURSE_IMG_WAGTAIL_FILL
     )
 
 
 def test_basket_thumbnail_program(basket_and_coupons, mock_context):
     """Basket thumbnail should be serialized for a program"""
+    from wagtail.images.views.serve import generate_image_url
+
     thumbnail_filename = "abcde.jpg"
     program_page = ProgramPageFactory.create(
         thumbnail_image__file__filename=thumbnail_filename
@@ -168,11 +169,8 @@ def test_basket_thumbnail_program(basket_and_coupons, mock_context):
     data = FullProductVersionSerializer(
         instance=product_version, context=mock_context
     ).data
-    assert (
-        data["thumbnail_url"]
-        == program_page.thumbnail_image.get_rendition(
-            CATALOG_COURSE_IMG_WAGTAIL_FILL
-        ).url
+    assert data["thumbnail_url"] == generate_image_url(
+        program_page.thumbnail_image, CATALOG_COURSE_IMG_WAGTAIL_FILL
     )
 
 

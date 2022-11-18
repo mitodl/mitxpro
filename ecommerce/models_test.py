@@ -169,22 +169,18 @@ def test_thumbnail_url():
     """
     thumbnail_url should return a url of the Product's thumbnail
     """
+    from wagtail.images.views.serve import generate_image_url
+
     program = ProgramFactory.create()
     program_product = ProductFactory.create(content_object=program)
     run = CourseRunFactory.create()
     run_product = ProductFactory.create(content_object=run)
 
-    assert (
-        program_product.thumbnail_url
-        == program.page.thumbnail_image.get_rendition(
-            CATALOG_COURSE_IMG_WAGTAIL_FILL
-        ).url
+    assert program_product.thumbnail_url == generate_image_url(
+        program.page.thumbnail_image, CATALOG_COURSE_IMG_WAGTAIL_FILL
     )
-    assert (
-        run_product.thumbnail_url
-        == run.course.page.thumbnail_image.get_rendition(
-            CATALOG_COURSE_IMG_WAGTAIL_FILL
-        ).url
+    assert run_product.thumbnail_url == generate_image_url(
+        run.course.page.thumbnail_image, CATALOG_COURSE_IMG_WAGTAIL_FILL
     )
 
 
