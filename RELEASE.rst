@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.111.0
+---------------
+
+- Fixed improper usages of get_rendition
+
 Version 0.110.0 (Released November 21, 2022)
 ---------------
 
