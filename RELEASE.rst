@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.110.0 (Released November 21, 2022)
+---------------
+
+- Upgrade sentry sdk
+- bulk assignment instance already created (#2461)
+- Replace Ecommerce Bridge API with CRM API for hubspot syncing (#2437)
+
 Version 0.109.0 (Released November 14, 2022)
 ---------------
 
