@@ -11,23 +11,28 @@ Following steps are inspired by [edx-devstack](https://github.com/edx/devstack).
 #### Clone edx/devstack
 
 ```
+$ mkdir openedx
+$ cd openedx
 $ git clone https://github.com/edx/devstack
 $ cd devstack
-$ git checkout open-release/ironwood.master
+$ git checkout open-release/maple.master
 $ make requirements
-$ export OPENEDX_RELEASE=ironwood.master
+$ export OPENEDX_RELEASE=maple.master
 $ make dev.clone
 ```
 
 #### Clone and checkout edx-platform (if not already).
 ```
+$ cd ..
 $ git clone https://github.com/mitodl/edx-platform
-$ git checkout xpro/ironwood
+$ cd edx-platform
+$ git checkout xpro/maple
 ```
 
 #### Pull latest images and run provision
 
 ```
+$ cd devstack
 $ make pull
 $ make dev.provision 
 ```
@@ -97,38 +102,22 @@ In xPro:
 
 In Open edX (derived from instructions [here](https://edx.readthedocs.io/projects/edx-installing-configuring-and-running/en/latest/configuration/tpa/tpa_integrate_open/tpa_oauth.html#additional-oauth2-providers-advanced)):
 - `make lms-shell` into the LMS container and ensure the following settings:
-  - `/edx/app/edxapp/lms.env.json`:
+  - `/edx/etc/lms.yml`:
     ```
-    {
-      ...
-      "FEATURES": {
+    FEATURES:
+        ALLOW_PUBLIC_ACCOUNT_CREATION: true
+        ENABLE_COMBINED_LOGIN_REGISTRATION: true
+        ENABLE_OAUTH2_PROVIDER: true
+        ENABLE_THIRD_PARTY_AUTH: true
         ...
-        "ALLOW_PUBLIC_ACCOUNT_CREATION": true,
-        "ENABLE_COMBINED_LOGIN_REGISTRATION": true,
-        "ENABLE_THIRD_PARTY_AUTH": true,
-        "ENABLE_OAUTH2_PROVIDER": true,
+    REGISTRATION_EXTRA_FIELDS:
         ...
-      },
-      ...
-      "REGISTRATION_EXTRA_FIELDS": {
+        country: hidden
         ...
-        "country": "hidden",
-        ...
-      },
-      ...
-      "THIRD_PARTY_AUTH_BACKENDS": ["social_auth_mitxpro.backends.MITxProOAuth2"],
-      ...
-    }
-    ```
-  - `/edx/app/edxapp/lms.auth.json`:
-    ```
-    {
-      ...
-      "SOCIAL_AUTH_OAUTH_SECRETS": {
-        "mitxpro-oauth2": "<xpro_application_client_secret>"
-      },
-      ...
-    }
+    SOCIAL_AUTH_OAUTH_SECRETS:
+        mitxpro-oauth2: <xpro_application_client_secret>
+    THIRD_PARTY_AUTH_BACKENDS:
+        - social_auth_mitxpro.backends.MITxProOAuth2
     ```
 - `make lms-restart` to pick up the configuration changes
 - Login to django-admin, go to `http://<EDX_HOSTNAME>:18000/admin/third_party_auth/oauth2providerconfig/`, and create a new config:
