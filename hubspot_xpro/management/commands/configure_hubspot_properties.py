@@ -120,6 +120,14 @@ CUSTOM_ECOMMERCE_PROPERTIES = {
                 "fieldType": "text",
             },
             {
+                "name": "discount_type",
+                "label": "Discount Type",
+                "description": "Type of discount (percent-off or dollars-off)",
+                "groupName": "coupon",
+                "type": "string",
+                "fieldType": "text",
+            },
+            {
                 "name": "coupon_code",
                 "label": "Coupon Code",
                 "description": "The coupon code used for the purchase",

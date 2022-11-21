@@ -137,7 +137,7 @@ def get_eligible_coupon_choices(voucher):
 
 def get_valid_voucher_coupons_version(voucher, product):
     """
-    Return valid coupon versions fo a voucher and product
+    Return valid coupon versions for a voucher and product
 
     Args:
         voucher (Voucher): voucher provides the user to check coupons for

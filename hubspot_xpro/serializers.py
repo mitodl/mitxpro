@@ -7,6 +7,7 @@ from b2b_ecommerce import models as b2b_models
 from b2b_ecommerce.constants import B2B_ORDER_PREFIX
 from ecommerce import models
 from ecommerce.api import get_product_version_price_with_discount, round_half_up
+from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.models import CouponRedemption, CouponVersion, ProductVersion
 from hubspot_xpro.api import format_product_name, get_hubspot_id_for_object
 
@@ -141,6 +142,7 @@ class B2BOrderToDealSerializer(serializers.ModelSerializer):
     amount = serializers.SerializerMethodField()
     discount_amount = serializers.SerializerMethodField()
     discount_percent = serializers.SerializerMethodField()
+    discount_type = serializers.SerializerMethodField()
     coupon_code = serializers.SerializerMethodField(allow_null=True)
     company = serializers.SerializerMethodField(allow_null=True)
     payment_type = serializers.SerializerMethodField(allow_null=True)
@@ -181,6 +183,11 @@ class B2BOrderToDealSerializer(serializers.ModelSerializer):
         if instance.coupon:
             return round_half_up(instance.coupon.discount_percent * 100).to_eng_string()
 
+    def get_discount_type(self, instance):
+        """We are only supporting percent-off for b2b as of now"""
+        if instance.coupon:
+            return DISCOUNT_TYPE_PERCENT_OFF
+
     def get_company(self, instance):
         """ Get the company id if any """
         if instance.coupon:
@@ -216,6 +223,7 @@ class B2BOrderToDealSerializer(serializers.ModelSerializer):
             "status",
             "discount_amount",
             "discount_percent",
+            "discount_type",
             "closedate",
             "coupon_code",
             "num_seats",
@@ -238,6 +246,7 @@ class OrderToDealSerializer(serializers.ModelSerializer):
     amount = serializers.SerializerMethodField()
     discount_amount = serializers.SerializerMethodField()
     discount_percent = serializers.SerializerMethodField()
+    discount_type = serializers.SerializerMethodField()
     coupon_code = serializers.SerializerMethodField(allow_null=True)
     company = serializers.SerializerMethodField(allow_null=True)
     order_type = serializers.SerializerMethodField()
@@ -285,6 +294,13 @@ class OrderToDealSerializer(serializers.ModelSerializer):
         if instance.status == models.Order.FULFILLED:
             return int(instance.updated_on.timestamp() * 1000)
 
+    def get_discount_type(self, instance):
+        """ Get the discount type of the applied coupon """
+
+        coupon_version = self._get_coupon_version(instance)
+        if coupon_version:
+            return coupon_version.payment_version.discount_type
+
     def get_amount(self, instance):
         """ Get the amount paid after discount """
         return get_product_version_price_with_discount(
@@ -294,24 +310,27 @@ class OrderToDealSerializer(serializers.ModelSerializer):
 
     def get_discount_amount(self, instance):
         """ Get the discount amount if any """
-
         coupon_version = self._get_coupon_version(instance)
         if not coupon_version:
             return "0.0000"
 
-        return round_half_up(
-            coupon_version.payment_version.amount
-            * self._get_product_version(instance).price
-        ).to_eng_string()
+        payment_version = coupon_version.payment_version
+        discount_amount = payment_version.calculate_discount_amount(
+            price=self._get_product_version(instance).price
+        )
+        return discount_amount.to_eng_string()
 
     def get_discount_percent(self, instance):
         """ Get the discount percentage if any """
-
         coupon_version = self._get_coupon_version(instance)
         if not coupon_version:
             return "0"
 
-        return (coupon_version.payment_version.amount * 100).to_eng_string()
+        payment_version = coupon_version.payment_version
+        discount_percent = payment_version.calculate_discount_percent(
+            price=self._get_product_version(instance).price
+        )
+        return discount_percent.to_eng_string()
 
     def get_company(self, instance):
         """ Get the company id if any """
@@ -362,6 +381,7 @@ class OrderToDealSerializer(serializers.ModelSerializer):
             "status",
             "discount_amount",
             "discount_percent",
+            "discount_type",
             "closedate",
             "coupon_code",
             "company",

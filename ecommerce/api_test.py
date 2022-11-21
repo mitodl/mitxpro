@@ -51,7 +51,11 @@ from ecommerce.api import (
     get_product_from_querystring_id,
     best_coupon_for_product,
 )
-from ecommerce.constants import DISCOUNT_TYPES, DISCOUNT_TYPE_PERCENT_OFF
+from ecommerce.constants import (
+    DISCOUNT_TYPES,
+    DISCOUNT_TYPE_PERCENT_OFF,
+    DISCOUNT_TYPE_DOLLARS_OFF,
+)
 from ecommerce.factories import (
     BasketFactory,
     CompanyFactory,
@@ -367,11 +371,19 @@ def test_get_valid_coupon_versions_after_redemption(user, is_global):
 
 
 @pytest.mark.parametrize("is_global", [True, False])
-def test_get_valid_coupon_versions_with_max_redemptions_per_user(user, is_global):
+@pytest.mark.parametrize(
+    "discount_type, amount",
+    [
+        [DISCOUNT_TYPE_DOLLARS_OFF, 100],
+        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],
+    ],
+)
+def test_get_valid_coupon_versions_with_max_redemptions_per_user(
+    user, is_global, discount_type, amount
+):
     """
     Verify that the correct CouponPaymentVersions are returned before and after redemption
     """
-    amount = "1.00000"
     coupon_code = "TESTCOUPON1"
     coupon_type = CouponPaymentVersion.PROMO
     max_redemptions = 3
@@ -383,6 +395,7 @@ def test_get_valid_coupon_versions_with_max_redemptions_per_user(user, is_global
         max_redemptions=max_redemptions,
         max_redemptions_per_user=max_redemptions_per_user,
         num_coupon_codes=1,
+        discount_type=discount_type,
     )
     coupon_version = CouponVersionFactory.create(
         payment_version=coupon_payment_version,
@@ -417,7 +430,14 @@ def test_get_valid_coupon_versions_with_max_redemptions_per_user(user, is_global
     assert list(get_valid_coupon_versions(products[2], user, code=coupon_code)) == []
 
 
-def test_global_coupons_apply_all_products(user):
+@pytest.mark.parametrize(
+    "discount_type, amount",
+    [
+        [DISCOUNT_TYPE_DOLLARS_OFF, 100],
+        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],
+    ],
+)
+def test_global_coupons_apply_all_products(user, discount_type, amount):
     """
     Verify that a coupon created with is_global=True is valid for all products, even those
     created after the coupon.
@@ -427,7 +447,9 @@ def test_global_coupons_apply_all_products(user):
 
     coupon_version = coupon.versions.first()
 
-    CouponPaymentVersionFactory(payment=coupon.payment, amount=Decimal(1))
+    CouponPaymentVersionFactory(
+        payment=coupon.payment, amount=amount, discount_type=discount_type
+    )
     product = ProductVersionFactory.create().product
     product_2 = ProductVersionFactory.create().product
     versions = get_valid_coupon_versions(product, user)
@@ -440,6 +462,40 @@ def test_global_coupons_apply_all_products(user):
     # Check that the global coupon is applied to all products
     assert best_coupon_for_product(product, user) == coupon_version
     assert best_coupon_for_product(product_2, user) == coupon_version
+
+
+@pytest.mark.parametrize(
+    "best_discount_type, best_discount_amount, lesser_coupons_type, lesser_coupons_amounts",
+    [
+        [DISCOUNT_TYPE_DOLLARS_OFF, 100, DISCOUNT_TYPE_PERCENT_OFF, [0.1, 0.2, 0.5]],
+        [DISCOUNT_TYPE_PERCENT_OFF, 1.0, DISCOUNT_TYPE_DOLLARS_OFF, [10, 20, 80]],
+    ],
+)
+def test_best_coupon_return_best_coupon_between_discount_types(
+    user,
+    best_discount_type,
+    best_discount_amount,
+    lesser_coupons_type,
+    lesser_coupons_amounts,
+):
+    """
+    Verify that the get_best_coupon returns a best coupon irrespective of the discount_type.
+    """
+    CouponVersionFactory.create_batch(
+        3,
+        coupon__is_global=True,
+        payment_version__discount_type=lesser_coupons_type,
+        payment_version__amount=factory.Iterator(lesser_coupons_amounts),
+    )
+
+    best_coupon = CouponVersionFactory.create(
+        coupon__is_global=True,
+        payment_version__discount_type=best_discount_type,
+        payment_version__amount=best_discount_amount,
+    )
+
+    product = ProductVersionFactory.create(price=Decimal(100)).product
+    assert best_coupon_for_product(product, user) == best_coupon
 
 
 def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):
@@ -602,7 +658,16 @@ def test_get_product_price(basket_and_coupons):
 
 
 @pytest.mark.parametrize("has_coupon", [True, False])
-def test_get_product_version_price_with_discount(has_coupon, basket_and_coupons):
+@pytest.mark.parametrize(
+    "discount_type, amount, price, discounted_price",
+    [
+        [DISCOUNT_TYPE_PERCENT_OFF, 0.5, 100, 50],
+        [DISCOUNT_TYPE_DOLLARS_OFF, 50, 100, 50],
+    ],
+)
+def test_get_product_version_price_with_discount(
+    has_coupon, basket_and_coupons, discount_type, amount, price, discounted_price
+):
     """
     get_product_version_price_with_discount should check if the coupon exists and if so calculate price based on its
     discount.
@@ -613,17 +678,18 @@ def test_get_product_version_price_with_discount(has_coupon, basket_and_coupons)
                 "-created_on"
             ).first()
         )
-        product_version.price = Decimal("123.45")
+        product_version.price = Decimal(price)
         product_version.save()
 
     coupon_version = basket_and_coupons.coupongroup_best.coupon_version
     # Make sure to test that we round the results
-    coupon_version.payment_version.amount = Decimal("0.5")
+    coupon_version.payment_version.amount = Decimal(amount)
+    coupon_version.payment_version.discount_type = discount_type
     price = get_product_version_price_with_discount(
         coupon_version=coupon_version if has_coupon else None,
         product_version=product_version,
     )
-    assert price == (Decimal("61.72") if has_coupon else Decimal("123.45"))
+    assert price == (Decimal(discounted_price) if has_coupon else Decimal(price))
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])

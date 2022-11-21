@@ -9,6 +9,7 @@ import faker
 
 from courses.factories import CourseRunFactory, ProgramRunFactory
 from ecommerce import models
+from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.test_utils import gen_fake_receipt_data
 from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
@@ -117,6 +118,7 @@ class CouponPaymentVersionFactory(DjangoModelFactory):
     payment = SubFactory(CouponPaymentFactory)
     tag = fuzzy.FuzzyText()
     coupon_type = fuzzy.FuzzyChoice(models.CouponPaymentVersion.COUPON_TYPES)
+    discount_type = DISCOUNT_TYPE_PERCENT_OFF  # Keeping it default since we are not supporting dollars-off for b2b
     num_coupon_codes = fuzzy.FuzzyInteger(1, 10)
     max_redemptions = fuzzy.FuzzyInteger(1, 10)
     max_redemptions_per_user = fuzzy.FuzzyInteger(1, 3)

@@ -1,5 +1,6 @@
 """Models for ecommerce"""
 import logging
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -15,6 +16,7 @@ from ecommerce.constants import (
     ORDERED_VERSIONS_QSET_ATTR,
     DISCOUNT_TYPES,
     DISCOUNT_TYPE_PERCENT_OFF,
+    DISCOUNT_TYPE_DOLLARS_OFF,
 )
 from ecommerce.utils import get_order_id_by_reference_number, validate_amount
 from mitxpro.models import (
@@ -574,6 +576,44 @@ class CouponPaymentVersion(TimestampedModel):
     def __str__(self):
         """Description for CouponPaymentVersion"""
         return f"CouponPaymentVersion for {self.num_coupon_codes} of type {self.coupon_type}"
+
+    def calculate_discount_amount(self, product_version=None, price=None):
+        """If discount_type is in "percent-off", it would need price and calculate the amount of discount in currency,
+        otherwise for dollars-off the discount value is equal to amount and doesn't depend upon product price"""
+
+        from ecommerce.api import round_half_up
+
+        price = price or (product_version.price if product_version else None)
+
+        if not price:
+            return Decimal(0.00)
+
+        price = Decimal(price)
+
+        if self.discount_type == DISCOUNT_TYPE_PERCENT_OFF:
+            return round_half_up(self.amount * price)
+        elif self.discount_type == DISCOUNT_TYPE_DOLLARS_OFF:
+            return round_half_up(self.amount)
+        else:
+            return Decimal(0.00)
+
+    def calculate_discount_percent(self, product_version=None, price=None):
+        """Vice versa of calculate_discount_amount, it calculates the percentage of discount applied on a specific
+        product, so in this case we convert the dollars-off to percentage"""
+
+        from ecommerce.api import round_half_up
+
+        price = price or (product_version.price if product_version else None)
+
+        if not price:
+            return Decimal(0.00)
+
+        if self.discount_type == DISCOUNT_TYPE_PERCENT_OFF:
+            return round_half_up(self.amount * 100)
+        elif self.discount_type == DISCOUNT_TYPE_DOLLARS_OFF:
+            return round_half_up((self.amount / price) * 100)
+        else:
+            return Decimal(0.00)
 
 
 class Coupon(TimestampedModel):

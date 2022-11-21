@@ -56,6 +56,7 @@ export type BasketItem = ProductVersion & {
 export type CouponSelection = {
   code: string,
   amount: string,
+  discount_type: string,
   targets: Array<number>
 }
 
