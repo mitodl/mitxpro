@@ -329,8 +329,15 @@ def get_valid_coupon_versions(
             ).distinct()
 
             global_coupon_version_subquery = global_coupon_version_subquery.filter(
-                payment_version__amount=decimal.Decimal(1)
-            )
+                Q(
+                    payment_version__discount_type=DISCOUNT_TYPE_PERCENT_OFF,
+                    payment_version__amount=decimal.Decimal(1),
+                )
+                | Q(
+                    payment_version__discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+                    payment_version__amount__gte=product_version.price,
+                )
+            ).distinct()
 
     if auto_only:
         coupon_version_subquery = coupon_version_subquery.filter(
