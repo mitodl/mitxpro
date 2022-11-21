@@ -17,7 +17,7 @@ $ git clone https://github.com/edx/devstack
 $ cd devstack
 $ git checkout open-release/maple.master
 $ make requirements
-$ export OPENEDX_RELEASE=maple.master`
+$ export OPENEDX_RELEASE=maple.master
 $ make dev.clone
 ```
 
