@@ -13,7 +13,7 @@ from ecommerce.api import fetch_and_serialize_unused_coupons
 from mail import verification_api
 from mitxpro.serializers import WriteableSerializerMethodField
 from users.models import LegalAddress, User, Profile, ChangeEmailRequest
-from hubspot_xpro.task_helpers import sync_hubspot_user
+from hubspot.task_helpers import sync_hubspot_user
 
 log = logging.getLogger()
 

@@ -201,15 +201,17 @@ def test_start_date():
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
 def test_hubspot_syncs(mock_hubspot_syncs, settings, hubspot_api_key):
     """ Test that hubspot sync tasks are called only if API key is set"""
-    settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
+    settings.HUBSPOT_API_KEY = hubspot_api_key
     order = OrderFactory.create()
     order.save_and_log(None)
     if hubspot_api_key is not None:
         for line in order.lines.all():
+            mock_hubspot_syncs.line.assert_called_with(line.id)
             mock_hubspot_syncs.product.assert_called_with(
                 line.product_version.product.id
             )
     else:
+        mock_hubspot_syncs.line.assert_not_called()
         mock_hubspot_syncs.product.assert_not_called()
 
 

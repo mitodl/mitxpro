@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from b2b_ecommerce.factories import B2BCouponFactory, B2BOrderFactory
+from b2b_ecommerce.factories import B2BOrderFactory, B2BCouponFactory
 from b2b_ecommerce.models import B2BCouponRedemption, B2BOrder
 
 

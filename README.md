@@ -147,13 +147,6 @@ otherwise do in a Django shell. To get started:
 From there, you should be able to run code snippets with a live Django app just like you
 would in a Django shell.
 
-### Hubspot integration
-- For testing/dev purposes, [create a sandbox account under your enterprise account](https://knowledge.hubspot.com/account/set-up-a-hubspot-standard-sandbox-account) if one doesn't exist yet.
-- You will also need a [private app for your sandbox account](https://developers.hubspot.com/docs/api/migrate-an-api-key-integration-to-a-private-app)
-  - Scopes: 
-    - CRM: everything except quotes and feedback
-    - Standard: crm.export, crm.import, e-commerce, integration-sync
-- Set `MITOL_HUBSPOT_API_PRIVATE_TOKEN` to the private app token in your .env file
 
 ## Commits
 

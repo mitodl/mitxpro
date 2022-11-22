@@ -699,7 +699,7 @@ def test_get_by_reference_number(
     """
     get_by_reference_number returns an Order with status created
     """
-    settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
+    settings.HUBSPOT_API_KEY = hubspot_api_key
     order = create_unfulfilled_order(validated_basket)
     same_order = Order.objects.get_by_reference_number(order.reference_number)
     assert same_order.id == order.id
@@ -735,7 +735,7 @@ def test_create_unfulfilled_order(
     """
     create_unfulfilled_order should create an Order from a purchasable course
     """
-    settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
+    settings.HUBSPOT_API_KEY = hubspot_api_key
     new_validated_basket = validated_basket
     if not has_coupon:
         new_validated_basket = update_namespace(validated_basket, coupon_version=None)

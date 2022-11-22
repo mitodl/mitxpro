@@ -62,7 +62,7 @@ from ecommerce.models import (
 from ecommerce.mail_api import send_ecommerce_order_receipt
 from ecommerce.utils import positive_or_zero
 import sheets.tasks
-from hubspot_xpro.task_helpers import sync_hubspot_deal
+from hubspot.task_helpers import sync_hubspot_deal
 from mitxpro.utils import now_in_utc, first_or_none, case_insensitive_equal
 
 log = logging.getLogger(__name__)

@@ -1,40 +1,36 @@
 """
-Tests for hubspot_xpro serializers
+Tests for hubspot serializers
 """
 # pylint: disable=unused-argument, redefined-outer-name
 
 from decimal import Decimal
-
 import pytest
-from django.contrib.contenttypes.models import ContentType
-from django.urls import reverse
-from mitol.hubspot_api.api import format_app_id
-from mitol.hubspot_api.models import HubspotObject
 from rest_framework import status
-
-from b2b_ecommerce.constants import B2B_ORDER_PREFIX
-from b2b_ecommerce.factories import B2BCouponFactory
+from django.urls import reverse
+from b2b_ecommerce.factories import B2BOrderFactory, B2BCouponFactory
 from b2b_ecommerce.models import B2BOrder
 from courses.factories import CourseRunFactory
 from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF, DISCOUNT_TYPE_DOLLARS_OFF
 from ecommerce.factories import (
+    LineFactory,
+    OrderFactory,
     CouponRedemptionFactory,
-    ProductFactory,
     ProductVersionFactory,
+    ProductFactory,
 )
-from ecommerce.models import Order, Product
-from hubspot_xpro.serializers import (
-    ORDER_STATUS_MAPPING,
-    ORDER_TYPE_B2B,
-    ORDER_TYPE_B2C,
-    B2BOrderToDealSerializer,
-    B2BOrderToLineItemSerializer,
+from ecommerce.models import Product, Order
+
+from hubspot.api import format_hubspot_id
+from hubspot.serializers import (
+    ProductSerializer,
     LineSerializer,
     OrderToDealSerializer,
-    ProductSerializer,
-    format_product_name,
+    B2BOrderToDealSerializer,
+    ORDER_STATUS_MAPPING,
+    ORDER_TYPE_B2C,
+    ORDER_TYPE_B2B,
+    B2BProductVersionToLineSerializer,
 )
-
 
 pytestmark = [pytest.mark.django_db]
 
@@ -57,43 +53,42 @@ def test_serialize_product(text_id, expected):
     product = Product.objects.get(id=product_version.product.id)
     run = product.content_object
     serialized_data = ProductSerializer(instance=product).data
-    assert serialized_data.get("name") == f"{run.title}: {expected}"
+    assert serialized_data.get("title") == f"{run.title}: {expected}"
+    assert serialized_data.get("product_type") == "courserun"
+    assert serialized_data.get("id") == product.id
     assert serialized_data.get("price") == product.latest_version.price.to_eng_string()
     assert serialized_data.get("description") == product.latest_version.description
-    assert serialized_data.get("unique_app_id") == format_app_id(product.id)
 
 
-def test_serialize_line(hubspot_order, hubspot_b2b_order_id):
+def test_serialize_line():
     """Test that LineSerializer produces the correct serialized data"""
-    line = hubspot_order.lines.first()
+    line = LineFactory.create()
     serialized_data = LineSerializer(instance=line).data
     assert serialized_data == {
-        "hs_product_id": HubspotObject.objects.get(
-            content_type=ContentType.objects.get_for_model(Product),
-            object_id=line.product_version.product.id,
-        ).hubspot_id,
+        "id": line.id,
+        "product": format_hubspot_id(line.product_version.product.id),
+        "order": format_hubspot_id(line.order_id),
         "quantity": line.quantity,
         "status": line.order.status,
         "product_id": line.product_version.text_id,
-        "name": format_product_name(line.product_version.product),
-        "price": line.product_version.price.to_eng_string(),
-        "unique_app_id": format_app_id(line.id),
     }
 
 
 @pytest.mark.parametrize("status", [Order.FULFILLED, Order.CREATED])
-def test_serialize_order(settings, hubspot_order, status):
+def test_serialize_order(status):
     """Test that OrderToDealSerializer produces the correct serialized data"""
-    hubspot_order.status = status
-    line = hubspot_order.lines.first()
-    serialized_data = OrderToDealSerializer(instance=hubspot_order).data
+    order = OrderFactory.create(status=status)
+    line = LineFactory.create(order=order)
+    serialized_data = OrderToDealSerializer(instance=order).data
     assert serialized_data == {
-        "dealname": f"XPRO-ORDER-{hubspot_order.id}",
-        "dealstage": ORDER_STATUS_MAPPING[status],
+        "id": order.id,
+        "name": f"XPRO-ORDER-{order.id}",
+        "purchaser": format_hubspot_id(order.purchaser.id),
+        "stage": ORDER_STATUS_MAPPING[status],
         "amount": line.product_version.price.to_eng_string(),
         "discount_amount": "0.0000",
-        "closedate": (
-            int(hubspot_order.updated_on.timestamp() * 1000)
+        "close_date": (
+            int(order.updated_on.timestamp() * 1000)
             if status == Order.FULFILLED
             else None
         ),
@@ -104,9 +99,8 @@ def test_serialize_order(settings, hubspot_order, status):
         "discount_type": None,
         "discount_percent": "0",
         "order_type": ORDER_TYPE_B2C,
-        "status": hubspot_order.status,
-        "pipeline": settings.HUBSPOT_PIPELINE_ID,
-        "unique_app_id": format_app_id(hubspot_order.id),
+        "lines": [LineSerializer(instance=line).data],
+        "status": order.status,
     }
 
 
@@ -117,11 +111,12 @@ def test_serialize_order(settings, hubspot_order, status):
         [DISCOUNT_TYPE_DOLLARS_OFF, Decimal(75)],
     ],
 )
-def test_serialize_order_with_coupon(settings, hubspot_order, discount_type, amount):
+def test_serialize_order_with_coupon(settings, discount_type, amount):
     """Test that OrderToDealSerializer produces the correct serialized data for an order with coupon"""
-    line = hubspot_order.lines.first()
+    line = LineFactory.create()
+    order = line.order
     coupon_redemption = CouponRedemptionFactory.create(
-        order=hubspot_order,
+        order=order,
         coupon_version__payment_version__amount=amount,
         coupon_version__payment_version__discount_type=discount_type,
     )
@@ -130,15 +125,17 @@ def test_serialize_order_with_coupon(settings, hubspot_order, discount_type, amo
             price=line.product_version.price
         )
     )
-    serialized_data = OrderToDealSerializer(instance=hubspot_order).data
+    serialized_data = OrderToDealSerializer(instance=order).data
     assert serialized_data == {
-        "dealname": f"XPRO-ORDER-{hubspot_order.id}",
-        "dealstage": ORDER_STATUS_MAPPING[hubspot_order.status],
+        "id": order.id,
+        "name": f"XPRO-ORDER-{order.id}",
+        "purchaser": format_hubspot_id(order.purchaser.id),
+        "stage": ORDER_STATUS_MAPPING[order.status],
         "amount": line.product_version.price.to_eng_string(),
         "discount_amount": discount.to_eng_string(),
-        "closedate": (
-            int(hubspot_order.updated_on.timestamp() * 1000)
-            if hubspot_order.status == Order.FULFILLED
+        "close_date": (
+            int(order.updated_on.timestamp() * 1000)
+            if order.status == Order.FULFILLED
             else None
         ),
         "coupon_code": coupon_redemption.coupon_version.coupon.coupon_code,
@@ -150,24 +147,29 @@ def test_serialize_order_with_coupon(settings, hubspot_order, discount_type, amo
         "discount_percent": coupon_redemption.coupon_version.payment_version.calculate_discount_percent(
             price=line.product_version.price
         ).to_eng_string(),
-        "status": hubspot_order.status,
-        "pipeline": settings.HUBSPOT_PIPELINE_ID,
-        "unique_app_id": format_app_id(hubspot_order.id),
+        "lines": [LineSerializer(instance=line).data],
+        "status": order.status,
     }
 
 
 @pytest.mark.parametrize("status", [Order.FULFILLED, Order.CREATED])
-def test_serialize_b2b_order(settings, hubspot_b2b_order, status):
+@pytest.mark.parametrize("existing_user", [True, False])
+def test_serialize_b2b_order(status, existing_user, user):
     """Test that B2BOrderToDealSerializer produces the correct serialized data"""
-    hubspot_b2b_order.status = status
-    serialized_data = B2BOrderToDealSerializer(instance=hubspot_b2b_order).data
+    order = B2BOrderFactory.create(status=status, num_seats=10)
+    purchaser_id = order.email
+    if existing_user:
+        order.email = user.email
+        purchaser_id = user.id
+    serialized_data = B2BOrderToDealSerializer(instance=order).data
     assert serialized_data == {
-        "dealname": f"{B2B_ORDER_PREFIX}-{hubspot_b2b_order.id}",
-        "dealstage": ORDER_STATUS_MAPPING[status],
-        "amount": hubspot_b2b_order.total_price.to_eng_string(),
+        "id": order.id,
+        "name": f"XPRO-B2BORDER-{order.id}",
+        "stage": ORDER_STATUS_MAPPING[status],
+        "amount": order.total_price.to_eng_string(),
         "discount_amount": None,
-        "closedate": (
-            int(hubspot_b2b_order.updated_on.timestamp() * 1000)
+        "close_date": (
+            int(order.updated_on.timestamp() * 1000)
             if status == Order.FULFILLED
             else None
         ),
@@ -177,39 +179,30 @@ def test_serialize_b2b_order(settings, hubspot_b2b_order, status):
         "payment_transaction": None,
         "discount_percent": None,
         "discount_type": None,
-        "num_seats": hubspot_b2b_order.num_seats,
-        "status": hubspot_b2b_order.status,
-        "pipeline": settings.HUBSPOT_PIPELINE_ID,
-        "order_type": ORDER_TYPE_B2B,
-        "unique_app_id": f"{settings.MITOL_HUBSPOT_API_ID_PREFIX}-{B2B_ORDER_PREFIX}-{hubspot_b2b_order.id}",
+        "num_seats": 10,
+        "status": order.status,
+        "purchaser": format_hubspot_id(purchaser_id),
     }
 
 
-def test_serialize_b2b_line_item(settings, hubspot_b2b_order, hubspot_b2b_order_id):
+def test_serialize_b2b_product_version():
     """Test that B2BProductVersionToLineSerializer produces the correct serialized data"""
-    serialized_data = B2BOrderToLineItemSerializer(instance=hubspot_b2b_order).data
+    order = B2BOrderFactory.create(status=Order.FULFILLED, num_seats=10)
+    serialized_data = B2BProductVersionToLineSerializer(instance=order).data
     assert serialized_data == {
-        "hs_product_id": HubspotObject.objects.get(
-            content_type=ContentType.objects.get_for_model(Product),
-            object_id=hubspot_b2b_order.product_version.product.id,
-        ).hubspot_id,
-        "quantity": hubspot_b2b_order.num_seats,
-        "status": hubspot_b2b_order.status,
-        "product_id": hubspot_b2b_order.product_version.text_id,
-        "price": hubspot_b2b_order.product_version.price.to_eng_string(),
-        "name": format_product_name(hubspot_b2b_order.product_version.product),
-        "unique_app_id": f"{settings.MITOL_HUBSPOT_API_ID_PREFIX}-{B2B_ORDER_PREFIX}-{hubspot_b2b_order.line.id}",
+        "id": format_hubspot_id(order.product_version.id),
+        "product": format_hubspot_id(order.product_version.product.id),
+        "order": format_hubspot_id(order.integration_id),
+        "quantity": order.num_seats,
+        "status": order.status,
+        "product_id": order.product_version.text_id,
     }
 
 
-def test_serialize_b2b_order_with_coupon(settings, client, mocker):
+def test_serialize_b2b_order_with_coupon(client, mocker):
     """Test that B2BOrderToDealSerializer produces the correct serialized data for an order with coupon"""
 
     product_version = ProductVersionFactory.create(price=10)
-    HubspotObject.objects.create(
-        content_type=ContentType.objects.get_for_model(Product),
-        object_id=product_version.product.id,
-    )
     payload = {"a": "payload"}
     mocker.patch(
         "b2b_ecommerce.views.generate_b2b_cybersource_sa_payload",
@@ -233,16 +226,16 @@ def test_serialize_b2b_order_with_coupon(settings, client, mocker):
 
     assert resp.status_code == status.HTTP_200_OK
     assert B2BOrder.objects.count() == 1
-
     order = B2BOrder.objects.first()
     discount = round(Decimal(coupon.discount_percent) * 100, 2)
     serialized_data = B2BOrderToDealSerializer(instance=order).data
     assert serialized_data == {
-        "dealname": f"{B2B_ORDER_PREFIX}-{order.id}",
-        "dealstage": ORDER_STATUS_MAPPING[order.status],
+        "id": order.id,
+        "name": f"XPRO-B2BORDER-{order.id}",
+        "stage": ORDER_STATUS_MAPPING[order.status],
         "discount_amount": discount.to_eng_string(),
         "amount": order.total_price.to_eng_string(),
-        "closedate": (
+        "close_date": (
             int(order.updated_on.timestamp() * 1000)
             if order.status == Order.FULFILLED
             else None
@@ -257,7 +250,5 @@ def test_serialize_b2b_order_with_coupon(settings, client, mocker):
         ).to_eng_string(),
         "discount_type": DISCOUNT_TYPE_PERCENT_OFF,  # B2B Orders only support percent-off discounts
         "status": order.status,
-        "order_type": ORDER_TYPE_B2B,
-        "pipeline": settings.HUBSPOT_PIPELINE_ID,
-        "unique_app_id": f"{settings.MITOL_HUBSPOT_API_ID_PREFIX}-{B2B_ORDER_PREFIX}-{order.id}",
+        "purchaser": format_hubspot_id(order.email),
     }

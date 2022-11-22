@@ -1,10 +1,10 @@
 """Views for b2b_ecommerce"""
+from urllib.parse import urljoin, urlencode
 import uuid
-from urllib.parse import urlencode, urljoin
 
+from django.urls import reverse
 import faker
 import pytest
-from django.urls import reverse
 from rest_framework import status
 
 from b2b_ecommerce.factories import (
@@ -12,15 +12,14 @@ from b2b_ecommerce.factories import (
     B2BOrderFactory,
     ProductVersionFactory,
 )
-from b2b_ecommerce.models import B2BCoupon, B2BCouponRedemption, B2BOrder, B2BReceipt
+from b2b_ecommerce.models import B2BCoupon, B2BOrder, B2BCouponRedemption, B2BReceipt
 from courses.factories import ProgramRunFactory
+from ecommerce.utils import make_checkout_url
 from ecommerce.factories import CouponVersionFactory
 from ecommerce.serializers import FullProductVersionSerializer
-from ecommerce.utils import make_checkout_url
-from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import dict_without_keys
+from mitxpro.test_utils import assert_drf_json_equal
 from users.factories import UserFactory
-
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_ACCESS_KEY = "access"

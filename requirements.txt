@@ -51,7 +51,6 @@ celery-redbeat==2.0.0
 certifi==2021.10.8
     # via
     #   elastic-transport
-    #   hubspot-api-client
     #   requests
     #   sentry-sdk
 cffi==1.15.0
@@ -110,7 +109,6 @@ django==3.2.15
     #   mitol-django-authentication
     #   mitol-django-common
     #   mitol-django-digital-credentials
-    #   mitol-django-hubspot-api
     #   mitol-django-mail
     #   mitol-django-oauth-toolkit-extensions
     #   wagtail
@@ -191,7 +189,6 @@ factory-boy==3.2.1
     # via
     #   mitol-django-common
     #   mitol-django-digital-credentials
-    #   mitol-django-hubspot-api
     #   mitol-django-oauth-toolkit-extensions
 faker==13.2.0
     # via factory-boy
@@ -219,8 +216,6 @@ httplib2==0.20.4
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-hubspot-api-client==6.0.0
-    # via -r requirements.in
 idna==3.3
     # via requests
 importlib-metadata==1.7.0
@@ -261,25 +256,22 @@ markupsafe==2.1.0
     # via jinja2
 matplotlib-inline==0.1.3
     # via ipython
-mitol-django-authentication==1.5.1
+mitol-django-authentication==1.5.0
     # via -r requirements.in
-mitol-django-common==2.6.0
+mitol-django-common==2.5.0
     # via
     #   -r requirements.in
     #   mitol-django-authentication
     #   mitol-django-digital-credentials
-    #   mitol-django-hubspot-api
     #   mitol-django-mail
     #   mitol-django-oauth-toolkit-extensions
-mitol-django-digital-credentials==3.2.1
+mitol-django-digital-credentials==3.2.0
     # via -r requirements.in
-mitol-django-hubspot-api==1.0.0
-    # via -r requirements.in
-mitol-django-mail==3.2.1
+mitol-django-mail==3.2.0
     # via
     #   -r requirements.in
     #   mitol-django-authentication
-mitol-django-oauth-toolkit-extensions==1.2.1
+mitol-django-oauth-toolkit-extensions==1.2.0
     # via -r requirements.in
 newrelic==7.6.0.173
     # via -r requirements.in
@@ -347,16 +339,13 @@ pyparsing==3.0.7
     #   httplib2
     #   packaging
 pytest==6.1.2
-    # via
-    #   mitol-django-common
-    #   mitol-django-hubspot-api
+    # via mitol-django-common
 python-dateutil==2.5.3
     # via
     #   botocore
     #   celery-redbeat
     #   edx-api-client
     #   faker
-    #   hubspot-api-client
 python3-openid==3.2.0
     # via social-auth-core
 pytz==2021.3
@@ -412,7 +401,6 @@ six==1.16.0
     #   google-auth
     #   google-auth-httplib2
     #   html5lib
-    #   hubspot-api-client
     #   isodate
     #   l18n
     #   pynacl
@@ -463,7 +451,6 @@ urllib3==1.26.12
     # via
     #   botocore
     #   elastic-transport
-    #   hubspot-api-client
     #   requests
     #   sentry-sdk
 user-agents==2.0

@@ -1,16 +1,16 @@
 """ Serializers for HubSpot"""
-from django.conf import settings
-from mitol.hubspot_api.api import format_app_id
+import re
+
 from rest_framework import serializers
 
 from b2b_ecommerce import models as b2b_models
-from b2b_ecommerce.constants import B2B_ORDER_PREFIX
 from ecommerce import models
 from ecommerce.api import get_product_version_price_with_discount, round_half_up
+
 from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.models import CouponRedemption, CouponVersion, ProductVersion
-from hubspot_xpro.api import format_product_name, get_hubspot_id_for_object
-
+from hubspot.api import format_hubspot_id
+from users.models import User
 
 ORDER_STATUS_MAPPING = {
     models.Order.FULFILLED: "processed",
@@ -26,28 +26,18 @@ ORDER_TYPE_B2C = "B2C"
 class LineSerializer(serializers.ModelSerializer):
     """ Line Serializer for Hubspot """
 
-    unique_app_id = serializers.SerializerMethodField()
-    name = serializers.SerializerMethodField()
-    hs_product_id = serializers.SerializerMethodField()
+    product = serializers.SerializerMethodField()
+    order = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     product_id = serializers.SerializerMethodField()
-    price = serializers.SerializerMethodField()
 
-    def get_unique_app_id(self, instance):
-        """Get the app_id for the object"""
-        return format_app_id(instance.id)
+    def get_order(self, instance):
+        """ Get the order id and return the hubspot deal integratorObject id"""
+        return format_hubspot_id(instance.order.id)
 
-    def get_name(self, instance):
-        """Get the product version name"""
-        if instance.product_version:
-            return format_product_name(instance.product_version.product)
-        return ""
-
-    def get_hs_product_id(self, instance):
-        """ Return the hubspot id for the product"""
-        if not instance.product_version:
-            return None
-        return get_hubspot_id_for_object(instance.product_version.product)
+    def get_product(self, instance):
+        """ Get the product id and return the hubspot product integratorObject id"""
+        return format_hubspot_id(instance.product_version.product.id)
 
     def get_status(self, instance):
         """ Get status of the associated Order """
@@ -55,41 +45,36 @@ class LineSerializer(serializers.ModelSerializer):
 
     def get_product_id(self, instance):
         """Return the product version text_id"""
-        return instance.product_version.text_id
-
-    def get_price(self, instance):
-        """Get the product version price"""
-        return instance.product_version.price.to_eng_string()
+        if instance.product_version:
+            return instance.product_version.text_id
+        return ""
 
     class Meta:
-        fields = (
-            "unique_app_id",
-            "name",
-            "hs_product_id",
-            "quantity",
-            "status",
-            "product_id",
-            "price",
-        )
+        fields = ("id", "product", "order", "quantity", "status", "product_id")
         model = models.Line
 
 
-class B2BOrderToLineItemSerializer(serializers.ModelSerializer):
+class B2BProductVersionToLineSerializer(serializers.ModelSerializer):
     """ B2B product version to line serializer for Hubspot """
 
-    unique_app_id = serializers.SerializerMethodField()
-    hs_product_id = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField()
+    product = serializers.SerializerMethodField()
+    order = serializers.SerializerMethodField()
     quantity = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     product_id = serializers.SerializerMethodField()
-    price = serializers.SerializerMethodField()
-    name = serializers.SerializerMethodField()
 
-    def get_unique_app_id(self, instance):
-        """Get the app_id for the object"""
-        return (
-            f"{settings.MITOL_HUBSPOT_API_ID_PREFIX}-{B2B_ORDER_PREFIX}-{instance.id}"
-        )
+    def get_id(self, instance):
+        """ Get the product version id"""
+        return format_hubspot_id(instance.product_version.id)
+
+    def get_product(self, instance):
+        """ Get the product id and return the hubspot product integratorObject id"""
+        return format_hubspot_id(instance.product_version.product.id)
+
+    def get_order(self, instance):
+        """ Get the order id and return the hubspot deal integratorObject id"""
+        return format_hubspot_id(instance.integration_id)
 
     def get_quantity(self, instance):
         """return the number of seats associated with the b2b order"""
@@ -99,46 +84,23 @@ class B2BOrderToLineItemSerializer(serializers.ModelSerializer):
         """ Get status of the associated Order """
         return instance.status
 
-    def get_hs_product_id(self, instance):
-        """Get the hubspot id of the product"""
-        return get_hubspot_id_for_object(instance.product_version.product)
-
     def get_product_id(self, instance):
         """Return the product version text_id"""
         if instance.product_version:
             return instance.product_version.text_id
         return ""
 
-    def get_price(self, instance):
-        """Get the product version price"""
-        return instance.product_version.price.to_eng_string()
-
-    def get_name(self, instance):
-        """ Get the product name"""
-        if instance.product_version:
-            return format_product_name(instance.product_version.product)
-        return ""
-
     class Meta:
-        fields = (
-            "unique_app_id",
-            "hs_product_id",
-            "quantity",
-            "status",
-            "price",
-            "product_id",
-            "name",
-        )
+        fields = ("id", "product", "order", "quantity", "status", "product_id")
         model = b2b_models.B2BOrder
 
 
 class B2BOrderToDealSerializer(serializers.ModelSerializer):
     """ B2BOrder/Deal Serializer for Hubspot """
 
-    unique_app_id = serializers.SerializerMethodField()
-    dealname = serializers.SerializerMethodField()
-    dealstage = serializers.SerializerMethodField()
-    closedate = serializers.SerializerMethodField(allow_null=True)
+    name = serializers.SerializerMethodField()
+    stage = serializers.SerializerMethodField()
+    close_date = serializers.SerializerMethodField(allow_null=True)
     amount = serializers.SerializerMethodField()
     discount_amount = serializers.SerializerMethodField()
     discount_percent = serializers.SerializerMethodField()
@@ -147,24 +109,17 @@ class B2BOrderToDealSerializer(serializers.ModelSerializer):
     company = serializers.SerializerMethodField(allow_null=True)
     payment_type = serializers.SerializerMethodField(allow_null=True)
     payment_transaction = serializers.SerializerMethodField(allow_null=True)
-    pipeline = serializers.ReadOnlyField(default=settings.HUBSPOT_PIPELINE_ID)
-    order_type = serializers.ReadOnlyField(default=ORDER_TYPE_B2B)
+    purchaser = serializers.SerializerMethodField(allow_null=True)
 
-    def get_unique_app_id(self, instance):
-        """Get the app_id for the object"""
-        return (
-            f"{settings.MITOL_HUBSPOT_API_ID_PREFIX}-{B2B_ORDER_PREFIX}-{instance.id}"
-        )
-
-    def get_dealname(self, instance):
+    def get_name(self, instance):
         """ Return the order/deal name """
-        return f"{B2B_ORDER_PREFIX}-{instance.id}"
+        return f"XPRO-B2BORDER-{instance.id}"
 
-    def get_dealstage(self, instance):
-        """ Return the status mapped to the hubspot_xpro equivalent """
+    def get_stage(self, instance):
+        """ Return the status mapped to the hubspot equivalent """
         return ORDER_STATUS_MAPPING[instance.status]
 
-    def get_closedate(self, instance):
+    def get_close_date(self, instance):
         """ Return the updated_on date (as a timestamp in milliseconds) if fulfilled """
         if instance.status == b2b_models.B2BOrder.FULFILLED:
             return int(instance.updated_on.timestamp() * 1000)
@@ -214,24 +169,30 @@ class B2BOrderToDealSerializer(serializers.ModelSerializer):
             if payment_transaction:
                 return payment_transaction
 
+    def get_purchaser(self, instance):
+        """Get the purchaser id"""
+        if instance.email:
+            existing_user = User.objects.filter(email=instance.email).first()
+            user_id = existing_user.id if existing_user else instance.email
+            return format_hubspot_id(user_id)
+
     class Meta:
         fields = (
-            "unique_app_id",
-            "dealname",
+            "id",
+            "name",
             "amount",
-            "dealstage",
+            "stage",
             "status",
             "discount_amount",
             "discount_percent",
             "discount_type",
-            "closedate",
+            "close_date",
             "coupon_code",
             "num_seats",
             "company",
-            "order_type",
             "payment_type",
             "payment_transaction",
-            "pipeline",
+            "purchaser",
         )
         model = b2b_models.B2BOrder
 
@@ -239,27 +200,23 @@ class B2BOrderToDealSerializer(serializers.ModelSerializer):
 class OrderToDealSerializer(serializers.ModelSerializer):
     """ Order/Deal Serializer for Hubspot """
 
-    unique_app_id = serializers.SerializerMethodField()
-    dealname = serializers.SerializerMethodField()
-    dealstage = serializers.SerializerMethodField()
-    closedate = serializers.SerializerMethodField(allow_null=True)
+    name = serializers.SerializerMethodField()
+    stage = serializers.SerializerMethodField()
+    close_date = serializers.SerializerMethodField(allow_null=True)
     amount = serializers.SerializerMethodField()
     discount_amount = serializers.SerializerMethodField()
     discount_percent = serializers.SerializerMethodField()
     discount_type = serializers.SerializerMethodField()
     coupon_code = serializers.SerializerMethodField(allow_null=True)
     company = serializers.SerializerMethodField(allow_null=True)
+    lines = LineSerializer(many=True)
+    purchaser = serializers.SerializerMethodField()
     order_type = serializers.SerializerMethodField()
     payment_type = serializers.SerializerMethodField(allow_null=True)
     payment_transaction = serializers.SerializerMethodField(allow_null=True)
-    pipeline = serializers.ReadOnlyField(default=settings.HUBSPOT_PIPELINE_ID)
 
     _coupon_version = None
     _product_version = None
-
-    def get_unique_app_id(self, instance):
-        """Get the app_id for the object"""
-        return format_app_id(instance.id)
 
     def _get_coupon_version(self, instance):
         """Return the order coupon version"""
@@ -281,15 +238,15 @@ class OrderToDealSerializer(serializers.ModelSerializer):
         """Return the order coupon redemption"""
         return CouponRedemption.objects.filter(order=instance).first()
 
-    def get_dealname(self, instance):
+    def get_name(self, instance):
         """ Return the order/deal name """
         return f"XPRO-ORDER-{instance.id}"
 
-    def get_dealstage(self, instance):
-        """ Return the status mapped to the hubspot_xpro equivalent """
+    def get_stage(self, instance):
+        """ Return the status mapped to the hubspot equivalent """
         return ORDER_STATUS_MAPPING[instance.status]
 
-    def get_closedate(self, instance):
+    def get_close_date(self, instance):
         """ Return the updated_on date (as a timestamp in milliseconds) if fulfilled """
         if instance.status == models.Order.FULFILLED:
             return int(instance.updated_on.timestamp() * 1000)
@@ -310,6 +267,7 @@ class OrderToDealSerializer(serializers.ModelSerializer):
 
     def get_discount_amount(self, instance):
         """ Get the discount amount if any """
+
         coupon_version = self._get_coupon_version(instance)
         if not coupon_version:
             return "0.0000"
@@ -322,6 +280,7 @@ class OrderToDealSerializer(serializers.ModelSerializer):
 
     def get_discount_percent(self, instance):
         """ Get the discount percentage if any """
+
         coupon_version = self._get_coupon_version(instance)
         if not coupon_version:
             return "0"
@@ -372,23 +331,28 @@ class OrderToDealSerializer(serializers.ModelSerializer):
                 return ORDER_TYPE_B2B
         return ORDER_TYPE_B2C
 
+    def get_purchaser(self, instance):
+        """ Get the Hubspot ID for the purchaser"""
+        return format_hubspot_id(instance.purchaser.id)
+
     class Meta:
         fields = (
-            "unique_app_id",
-            "dealname",
+            "id",
+            "name",
             "amount",
-            "dealstage",
+            "stage",
             "status",
             "discount_amount",
             "discount_percent",
             "discount_type",
-            "closedate",
+            "close_date",
             "coupon_code",
+            "lines",
+            "purchaser",
             "company",
             "order_type",
             "payment_type",
             "payment_transaction",
-            "pipeline",
         )
         model = models.Order
 
@@ -396,18 +360,23 @@ class OrderToDealSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     """ Product Serializer for Hubspot """
 
-    unique_app_id = serializers.SerializerMethodField()
-    name = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
+    product_type = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
 
-    def get_unique_app_id(self, instance):
-        """Get the app_id for the object"""
-        return format_app_id(instance.id)
-
-    def get_name(self, instance):
+    def get_title(self, instance):
         """ Return the product title and Courserun number or ProductVersion text_id"""
-        return format_product_name(instance)
+        product_obj = instance.content_type.get_object_for_this_type(
+            pk=instance.object_id
+        )
+        title_run_id = re.findall(r"\+R(\d+)$", product_obj.text_id)
+        title_suffix = f"Run {title_run_id[0]}" if title_run_id else product_obj.text_id
+        return f"{product_obj.title}: {title_suffix}"
+
+    def get_product_type(self, instance):
+        """ Return the product type """
+        return instance.content_type.model
 
     def get_price(self, instance):
         """Return the latest product version price"""
@@ -424,25 +393,5 @@ class ProductSerializer(serializers.ModelSerializer):
         return ""
 
     class Meta:
-        fields = ["unique_app_id", "name", "price", "description"]
-        read_only_fields = fields
+        fields = "__all__"
         model = models.Product
-
-
-def get_hubspot_serializer(obj: object) -> serializers.ModelSerializer:
-    """Get the appropriate serializer for an object"""
-    if isinstance(obj, b2b_models.B2BOrder):
-        serializer_class = B2BOrderToDealSerializer
-    elif isinstance(obj, models.Order):
-        serializer_class = OrderToDealSerializer
-    elif isinstance(obj, b2b_models.B2BLine):
-        serializer_class = B2BOrderToLineItemSerializer
-        # B2BLine is a special case, needs to be based of parent B2BOrder
-        return serializer_class(obj.order)
-    elif isinstance(obj, models.Line):
-        serializer_class = LineSerializer
-    elif isinstance(obj, models.Product):
-        serializer_class = ProductSerializer
-    else:
-        raise NotImplementedError("Not a supported class")
-    return serializer_class(obj)

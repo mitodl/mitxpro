@@ -1,8 +1,8 @@
 """models for b2b_ecommerce"""
 from datetime import timedelta
 
-import pytest
 from django.utils import timezone
+import pytest
 
 from b2b_ecommerce.constants import REFERENCE_NUMBER_PREFIX
 from b2b_ecommerce.factories import B2BOrderFactory

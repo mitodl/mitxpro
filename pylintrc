@@ -22,4 +22,4 @@ ignored-modules=
 	pdftotext,
 
 [MESSAGES CONTROL]
-disable = no-member, old-style-class, no-init, too-few-public-methods, abstract-method, invalid-name, too-many-ancestors, line-too-long, no-self-use, len-as-condition, no-else-return, cyclic-import, duplicate-code, inconsistent-return-statements, bad-continuation, import-outside-toplevel, raise-missing-from, superfluous-parens
+disable = no-member, old-style-class, no-init, too-few-public-methods, abstract-method, invalid-name, too-many-ancestors, line-too-long, no-self-use, len-as-condition, no-else-return, cyclic-import, duplicate-code, inconsistent-return-statements, bad-continuation, import-outside-toplevel, raise-missing-from

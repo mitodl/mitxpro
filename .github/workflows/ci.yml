@@ -86,7 +86,6 @@ jobs:
           CELERY_BROKER_URL: redis://localhost:6379/4
           CELERY_RESULT_BACKEND: redis://localhost:6379/4
           SECRET_KEY: local_unsafe_key  # pragma: allowlist secret
-          MITOL_HUBSPOT_API_PRIVATE_TOKEN: test-token
           MITXPRO_BASE_URL: http://localhost:8053
           MAILGUN_SENDER_DOMAIN: other.fake.site
           MAILGUN_KEY: fake_mailgun_key
@@ -112,7 +111,6 @@ jobs:
           MAILGUN_SENDER_DOMAIN: other.fake.site
           MITOL_DIGITAL_CREDENTIALS_VERIFY_SERVICE_BASE_URL: http://localhost:5000
           MITOL_DIGITAL_CREDENTIALS_HMAC_SECRET: fake.hmac.secret
-          MITOL_HUBSPOT_API_PRIVATE_TOKEN: test-token
           MITXPRO_ADMIN_EMAIL: example@localhost
           MITXPRO_BASE_URL: http://localhost:8053
           MITXPRO_DB_DISABLE_SSL: 'True'

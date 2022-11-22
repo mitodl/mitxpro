@@ -15,8 +15,8 @@ from users.serializers import LegalAddressSerializer, UserSerializer
 
 @pytest.fixture()
 def mock_user_sync(mocker):
-    """ Yield a mock hubspot_xpro update task for contacts """
-    yield mocker.patch("hubspot_xpro.tasks.sync_contact_with_hubspot.delay")
+    """ Yield a mock hubspot update task for contacts """
+    yield mocker.patch("hubspot.tasks.sync_contact_with_hubspot.delay")
 
 
 @pytest.fixture()
@@ -141,8 +141,8 @@ def test_validate_optional_country_data(sample_address):
 def test_update_user_serializer(
     mock_user_sync, settings, user, sample_address, hubspot_api_key
 ):
-    """ Test that a UserSerializer can be updated properly and hubspot_xpro sync called if appropriate """
-    settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
+    """ Test that a UserSerializer can be updated properly and hubspot sync called if appropriate """
+    settings.HUBSPOT_API_KEY = hubspot_api_key
     serializer = UserSerializer(
         instance=user,
         data={"password": "AgJw0123", "legal_address": sample_address},
@@ -162,8 +162,8 @@ def test_update_user_serializer(
 def test_create_user_serializer(
     mock_user_sync, settings, sample_address, hubspot_api_key
 ):
-    """ Test that a UserSerializer can be created properly and hubspot_xpro sync called if appropriate """
-    settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
+    """ Test that a UserSerializer can be created properly and hubspot sync called if appropriate """
+    settings.HUBSPOT_API_KEY = hubspot_api_key
     serializer = UserSerializer(
         data={
             "username": "fakename",

@@ -1,6 +1,6 @@
 """Functions for b2b_ecommerce"""
-import uuid
 from decimal import Decimal
+import uuid
 
 from django.conf import settings
 from django.db import transaction
@@ -8,15 +8,15 @@ from rest_framework.validators import ValidationError
 
 from b2b_ecommerce.models import B2BCoupon, B2BOrder, B2BReceipt
 from ecommerce.api import (
-    ISO_8601_FORMAT,
     create_coupons,
     determine_order_status_change,
+    ISO_8601_FORMAT,
     sign_cybersource_payload,
 )
 from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.mail_api import send_b2b_receipt_email
 from ecommerce.models import CouponPaymentVersion
-from hubspot_xpro.task_helpers import sync_hubspot_b2b_deal
+from hubspot.task_helpers import sync_hubspot_b2b_deal
 from mitxpro.utils import now_in_utc
 
 

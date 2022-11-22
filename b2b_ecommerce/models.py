@@ -2,23 +2,21 @@
 import uuid
 
 from django.conf import settings
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Now
-
 from b2b_ecommerce.constants import REFERENCE_NUMBER_PREFIX
 from ecommerce.models import (
     Company,
     CouponPaymentVersion,
-    OrderAbstract,
-    OrderManager,
     Product,
     ProductVersion,
+    OrderAbstract,
+    OrderManager,
 )
-from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
+from mitxpro.models import AuditModel, AuditableModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
-
 
 B2B_INTEGRATION_PREFIX = "B2B-"
 
@@ -201,14 +199,6 @@ class B2BOrder(OrderAbstract, AuditableModel):
             str: the integration id
         """
         return f"{B2B_INTEGRATION_PREFIX}{self.id}"
-
-
-class B2BLine(TimestampedModel):
-    """Dummy class for tracking which Hubspot line is associated with each B2B order"""
-
-    order = models.OneToOneField(
-        B2BOrder, null=False, on_delete=models.CASCADE, related_name="line"
-    )
 
 
 class B2BOrderAudit(AuditModel):

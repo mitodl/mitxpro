@@ -3,7 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from ecommerce.models import ProductVersion, Product, CouponEligibility
-from hubspot_xpro.task_helpers import sync_hubspot_product
+from hubspot.task_helpers import sync_hubspot_product
 
 from courses.models import CourseRun
 
