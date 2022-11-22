@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.111.1
+---------------
+
+- Upgrade uwsgi
+
 Version 0.111.0 (Released November 22, 2022)
 ---------------
 
