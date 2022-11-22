@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.111.0
+---------------
+
+- feat: Add support for dollars-off coupons (#2475)
+- Update openedx setup doc (#2474)
+- Fixed improper usages of get_rendition
+
 Version 0.110.0 (Released November 21, 2022)
 ---------------
 
