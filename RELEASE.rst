@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.111.0
+Version 0.111.0 (Released November 22, 2022)
 ---------------
 
 - feat: Add support for dollars-off coupons (#2475)
