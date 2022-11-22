@@ -27,6 +27,7 @@ import type {
 } from "../flow/ecommerceTypes"
 import type { BaseCourseRun, Program } from "../flow/courseTypes"
 import {
+  DISCOUNT_TYPE_PERCENT_OFF,
   ENROLLABLE_ITEM_ID_SEPARATOR,
   PRODUCT_TYPE_COURSERUN,
   PRODUCT_TYPE_PROGRAM
@@ -96,9 +97,10 @@ export const makeItem = (
 }
 
 export const makeCouponSelection = (item: ?BasketItem): CouponSelection => ({
-  code:    casual.word,
-  amount:  String(casual.double(0, 1)),
-  targets: item ? [item.id] : []
+  code:           casual.word,
+  amount:         String(casual.double(0, 1)),
+  discount_type:  DISCOUNT_TYPE_PERCENT_OFF,
+  targets:        item ? [item.id] : []
 })
 
 export const makeBasketResponse = (itemType: ?string): BasketResponse => {
@@ -252,6 +254,7 @@ export const makeCouponPaymentVersion = (
   automatic:                false,
   coupon_type:              isPromo ? "promo" : "single-use",
   num_coupon_codes:         casual.integer(0, 15),
+  discount_type:            DISCOUNT_TYPE_PERCENT_OFF,
   max_redemptions:          casual.integer(0, 15),
   max_redemptions_per_user: 1,
   amount:                   casual.random,

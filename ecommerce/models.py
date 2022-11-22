@@ -1,17 +1,24 @@
 """Models for ecommerce"""
 import logging
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.templatetags.static import static
 from django.utils.functional import cached_property
 
 from courses.constants import DEFAULT_COURSE_IMG_PATH
-from ecommerce.constants import REFERENCE_NUMBER_PREFIX, ORDERED_VERSIONS_QSET_ATTR
-from ecommerce.utils import get_order_id_by_reference_number
+from ecommerce.constants import (
+    REFERENCE_NUMBER_PREFIX,
+    ORDERED_VERSIONS_QSET_ATTR,
+    DISCOUNT_TYPES,
+    DISCOUNT_TYPE_PERCENT_OFF,
+    DISCOUNT_TYPE_DOLLARS_OFF,
+)
+from ecommerce.utils import get_order_id_by_reference_number, validate_amount
 from mitxpro.models import (
     AuditableModel,
     AuditModel,
@@ -522,14 +529,19 @@ class CouponPaymentVersion(TimestampedModel):
     coupon_type = models.CharField(
         choices=[(_type, _type) for _type in COUPON_TYPES], max_length=30
     )
+    discount_type = models.CharField(
+        choices=list(zip(DISCOUNT_TYPES, DISCOUNT_TYPES)),
+        max_length=30,
+        default=DISCOUNT_TYPE_PERCENT_OFF,
+    )
+
     num_coupon_codes = models.PositiveIntegerField()
     max_redemptions = models.PositiveIntegerField()
     max_redemptions_per_user = models.PositiveIntegerField()
     amount = models.DecimalField(
         decimal_places=5,
         max_digits=20,
-        help_text="Percent discount for a coupon. Between 0 and 1.",
-        validators=[MinValueValidator(0), MaxValueValidator(1)],
+        help_text="Discount value for a coupon. (Between 0 and 1 if discount type is percent-off)",
     )
     activation_date = models.DateTimeField(
         null=True,
@@ -555,9 +567,53 @@ class CouponPaymentVersion(TimestampedModel):
     class Meta:
         indexes = [models.Index(fields=["created_on"])]
 
+    def clean(self):
+        """Check if the amount validation has returned an error message that should be raised"""
+        error_message = validate_amount(self.discount_type, self.amount)
+        if error_message:
+            raise ValidationError({"amount": error_message})
+
     def __str__(self):
         """Description for CouponPaymentVersion"""
         return f"CouponPaymentVersion for {self.num_coupon_codes} of type {self.coupon_type}"
+
+    def calculate_discount_amount(self, product_version=None, price=None):
+        """If discount_type is in "percent-off", it would need price and calculate the amount of discount in currency,
+        otherwise for dollars-off the discount value is equal to amount and doesn't depend upon product price"""
+
+        from ecommerce.api import round_half_up
+
+        price = price or (product_version.price if product_version else None)
+
+        if not price:
+            return Decimal(0.00)
+
+        price = Decimal(price)
+
+        if self.discount_type == DISCOUNT_TYPE_PERCENT_OFF:
+            return round_half_up(self.amount * price)
+        elif self.discount_type == DISCOUNT_TYPE_DOLLARS_OFF:
+            return round_half_up(self.amount)
+        else:
+            return Decimal(0.00)
+
+    def calculate_discount_percent(self, product_version=None, price=None):
+        """Vice versa of calculate_discount_amount, it calculates the percentage of discount applied on a specific
+        product, so in this case we convert the dollars-off to percentage"""
+
+        from ecommerce.api import round_half_up
+
+        price = price or (product_version.price if product_version else None)
+
+        if not price:
+            return Decimal(0.00)
+
+        if self.discount_type == DISCOUNT_TYPE_PERCENT_OFF:
+            return round_half_up(self.amount * 100)
+        elif self.discount_type == DISCOUNT_TYPE_DOLLARS_OFF:
+            return round_half_up((self.amount / price) * 100)
+        else:
+            return Decimal(0.00)
 
 
 class Coupon(TimestampedModel):

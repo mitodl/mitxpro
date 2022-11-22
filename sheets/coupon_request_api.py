@@ -9,6 +9,7 @@ from django.db import transaction
 from django.utils.functional import cached_property
 
 import ecommerce.api
+from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.models import Company, Coupon, CouponPaymentVersion, BulkCouponAssignment
 from ecommerce.utils import make_checkout_url
 from mitxpro.utils import now_in_utc, item_at_index_or_none, item_at_index_or_blank
@@ -63,6 +64,7 @@ def create_coupons_for_request_row(row, company_id):
         activation_date=row.activation,
         expiration_date=row.expiration,
         payment_type=CouponPaymentVersion.PAYMENT_PO,
+        discount_type=DISCOUNT_TYPE_PERCENT_OFF,  # Default to percent-off, There won't be dollars-off coupons in sheets
         payment_transaction=row.purchase_order_id,
         product_program_run_map=product_program_run_map,
         **BULK_PURCHASE_DEFAULTS,

@@ -13,6 +13,7 @@ from ecommerce.api import (
     determine_order_status_change,
     sign_cybersource_payload,
 )
+from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.mail_api import send_b2b_receipt_email
 from ecommerce.models import CouponPaymentVersion
 from hubspot_xpro.task_helpers import sync_hubspot_b2b_deal
@@ -45,6 +46,7 @@ def complete_b2b_order(order):
             num_coupon_codes=order.num_seats,
             coupon_type=CouponPaymentVersion.SINGLE_USE,
             payment_type=CouponPaymentVersion.PAYMENT_SALE,
+            discount_type=DISCOUNT_TYPE_PERCENT_OFF,
             payment_transaction=order.contract_number or order.reference_number,
         )
         order.coupon_payment_version = payment_version

@@ -12,6 +12,7 @@ from b2b_ecommerce.api import (
 from b2b_ecommerce.factories import B2BCouponFactory, B2BOrderFactory
 from b2b_ecommerce.models import B2BOrder, B2BOrderAudit
 from ecommerce.api import ISO_8601_FORMAT, generate_cybersource_sa_signature
+from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.exceptions import EcommerceException
 from ecommerce.factories import CouponPaymentVersionFactory
 from ecommerce.models import CouponPaymentVersion
@@ -150,6 +151,7 @@ def test_complete_b2b_order(mocker, contract_number, b2b_coupon_code):
         num_coupon_codes=order.num_seats,
         coupon_type=CouponPaymentVersion.SINGLE_USE,
         payment_type=CouponPaymentVersion.PAYMENT_SALE,
+        discount_type=DISCOUNT_TYPE_PERCENT_OFF,
         payment_transaction=order.contract_number or order.reference_number,
     )
     send_email_mock.assert_called_once_with(order)

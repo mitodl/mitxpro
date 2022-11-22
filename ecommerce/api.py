@@ -28,7 +28,12 @@ from courses.constants import (
 )
 from courses.models import CourseRun, Program, ProgramRun
 from courses.utils import is_program_text_id
-from ecommerce.constants import CYBERSOURCE_DECISION_ACCEPT, CYBERSOURCE_DECISION_CANCEL
+from ecommerce.constants import (
+    CYBERSOURCE_DECISION_ACCEPT,
+    CYBERSOURCE_DECISION_CANCEL,
+    DISCOUNT_TYPE_PERCENT_OFF,
+    DISCOUNT_TYPE_DOLLARS_OFF,
+)
 from ecommerce.exceptions import EcommerceException
 from ecommerce.models import (
     Basket,
@@ -55,6 +60,7 @@ from ecommerce.models import (
     LineRunSelection,
 )
 from ecommerce.mail_api import send_ecommerce_order_receipt
+from ecommerce.utils import positive_or_zero
 import sheets.tasks
 from hubspot_xpro.task_helpers import sync_hubspot_deal
 from mitxpro.utils import now_in_utc, first_or_none, case_insensitive_equal
@@ -299,12 +305,39 @@ def get_valid_coupon_versions(
     )
 
     if full_discount:
-        coupon_version_subquery = coupon_version_subquery.filter(
-            payment_version__amount=decimal.Decimal(1)
-        )
-        global_coupon_version_subquery = global_coupon_version_subquery.filter(
-            payment_version__amount=decimal.Decimal(1)
-        )
+        # We can only get full discount for dollars-off when we know the price
+
+        if product is None or not product.productversions.exists():
+
+            coupon_version_subquery = coupon_version_subquery.filter(
+                payment_version__amount=decimal.Decimal(1)
+            )
+            global_coupon_version_subquery = global_coupon_version_subquery.filter(
+                payment_version__amount=decimal.Decimal(1)
+            )
+        else:
+            product_version = latest_product_version(product)
+            coupon_version_subquery = coupon_version_subquery.filter(
+                Q(
+                    payment_version__discount_type=DISCOUNT_TYPE_PERCENT_OFF,
+                    payment_version__amount=decimal.Decimal(1),
+                )
+                | Q(
+                    payment_version__discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+                    payment_version__amount__gte=product_version.price,
+                )
+            ).distinct()
+
+            global_coupon_version_subquery = global_coupon_version_subquery.filter(
+                Q(
+                    payment_version__discount_type=DISCOUNT_TYPE_PERCENT_OFF,
+                    payment_version__amount=decimal.Decimal(1),
+                )
+                | Q(
+                    payment_version__discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+                    payment_version__amount__gte=product_version.price,
+                )
+            ).distinct()
 
     if auto_only:
         coupon_version_subquery = coupon_version_subquery.filter(
@@ -399,7 +432,18 @@ def best_coupon_for_product(product, user, auto_only=False, code=None):
     """
     validated_versions = get_valid_coupon_versions(product, user, auto_only, code=code)
     if validated_versions:
-        return validated_versions[0]
+        product_version = latest_product_version(product)
+        best_price = product_version.price
+        best_coupon = validated_versions[0]
+        # Let's calculate the discount for the valid coupons and return the best one
+        for valid_coupon in validated_versions:
+            calculated_discount_price = get_product_version_price_with_discount(
+                product_version=product_version, coupon_version=valid_coupon
+            )
+            if calculated_discount_price < best_price:
+                best_price = calculated_discount_price
+                best_coupon = valid_coupon
+        return best_coupon
     return None
 
 
@@ -455,16 +499,18 @@ def get_product_version_price_with_discount(*, coupon_version, product_version):
         Decimal: the discounted price for the Product
     """
     price = product_version.price
+    discount_amount = 0
+
     if coupon_version and (
         coupon_version.coupon.is_global
         or CouponEligibility.objects.filter(
             coupon__versions=coupon_version, product__productversions=product_version
         ).exists()
     ):
-        discount = round_half_up(coupon_version.payment_version.amount * price)
-    else:
-        discount = 0
-    return price - discount
+        discount_amount = coupon_version.payment_version.calculate_discount_amount(
+            price=price
+        )
+    return positive_or_zero(price - discount_amount)
 
 
 def redeem_coupon(coupon_version, order):
@@ -1121,6 +1167,7 @@ def create_coupons(
     activation_date=None,
     expiration_date=None,
     payment_type=None,
+    discount_type,
     payment_transaction=None,
     coupon_code=None,
     product_program_run_map=None,
@@ -1141,6 +1188,7 @@ def create_coupons(
         coupon_type (str): The type of coupon
         max_redemptions (int): The number of times a coupon can be redeemed before it becomes invalid
         payment_type (str): The type of payment
+        discount_type (str): The type of discount (percent-off or dollars-off)
         payment_transaction (str): The transaction string
         coupon_code (str):
             If specified, the coupon code to use when creating the coupon. If not a random one will be generated.
@@ -1173,6 +1221,7 @@ def create_coupons(
         max_redemptions=max_redemptions,
         max_redemptions_per_user=max_redemptions_per_user,
         payment_type=payment_type,
+        discount_type=discount_type,
         payment_transaction=payment_transaction,
     )
 

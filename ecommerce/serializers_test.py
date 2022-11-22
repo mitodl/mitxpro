@@ -19,7 +19,11 @@ from courses.factories import (
 from courses.serializers import CourseSerializer
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import get_readable_id, round_half_up
-from ecommerce.constants import ORDERED_VERSIONS_QSET_ATTR, CYBERSOURCE_CARD_TYPES
+from ecommerce.constants import (
+    ORDERED_VERSIONS_QSET_ATTR,
+    CYBERSOURCE_CARD_TYPES,
+    DISCOUNT_TYPE_PERCENT_OFF,
+)
 from ecommerce.factories import (
     ProductVersionFactory,
     ProductFactory,
@@ -181,6 +185,7 @@ def test_serialize_basket_coupon_selection(basket_and_coupons):
     assert data == {
         "code": selection.coupon.coupon_code,
         "amount": str(basket_and_coupons.coupongroup_best.payment_version.amount),
+        "discount_type": basket_and_coupons.coupongroup_best.payment_version.discount_type,
         "targets": [basket_and_coupons.product_version.id],
     }
 
@@ -249,6 +254,7 @@ def test_serialize_coupon_single_use(
         "coupon_type": "single-use",
         "company": "Acme Corp.",
         "payment_type": "credit_card",
+        "discount_type": DISCOUNT_TYPE_PERCENT_OFF,
         "payment_transaction": ("fake123" if has_payment_transaction else None),
         "product_ids": (coupon_product_ids if has_products else []),
         "include_future_runs": False,
@@ -260,8 +266,14 @@ def test_serialize_coupon_single_use(
 @pytest.mark.parametrize(
     "too_high, expected_message",
     [
-        [True, "Ensure this value is less than or equal to 1."],
-        [False, "Ensure this value is greater than or equal to 0."],
+        [
+            True,
+            "The amount should be between (0 - 1) when discount type is percent-off.",
+        ],
+        [
+            False,
+            "The amount is invalid, please specify a value greater than 0.",
+        ],
     ],
 )
 def test_serialize_coupon_invalid_amount(
@@ -279,6 +291,7 @@ def test_serialize_coupon_invalid_amount(
         "coupon_type": "single-use",
         "company": "Acme Corp.",
         "payment_type": "credit_card",
+        "discount_type": DISCOUNT_TYPE_PERCENT_OFF,
         "payment_transaction": "fake123",
         "product_ids": coupon_product_ids,
         "include_future_runs": False,
@@ -286,7 +299,7 @@ def test_serialize_coupon_invalid_amount(
     serializer = SingleUseCouponSerializer(data=data)
     with pytest.raises(ValidationError) as ex:
         serializer.is_valid(raise_exception=True)
-    assert ex.value.args[0] == {"amount": [expected_message]}
+    assert ex.value.args[0] == {"discount": [expected_message]}
 
 
 @pytest.mark.parametrize("has_coupon_code", [True, False])
@@ -305,6 +318,7 @@ def test_serialize_coupon_promo(
         "expiration_date": "2019-12-31T00:00:00Z",
         "amount": 0.75,
         "coupon_type": "promo",
+        "discount_type": DISCOUNT_TYPE_PERCENT_OFF,
         "company": "Acme Corp.",
         "payment_type": "credit_card",
         "payment_transaction": ("fake123" if has_payment_transaction else None),
@@ -318,8 +332,14 @@ def test_serialize_coupon_promo(
 @pytest.mark.parametrize(
     "too_high, expected_message",
     [
-        [True, "Ensure this value is less than or equal to 1."],
-        [False, "Ensure this value is greater than or equal to 0."],
+        [
+            True,
+            "The amount should be between (0 - 1) when discount type is percent-off.",
+        ],
+        [
+            False,
+            "The amount is invalid, please specify a value greater than 0.",
+        ],
     ],
 )
 def test_serialize_coupon_promo_invalid_amount(
@@ -335,6 +355,7 @@ def test_serialize_coupon_promo_invalid_amount(
         "expiration_date": "2019-12-31T00:00:00Z",
         "amount": 1.75 if too_high else -0.25,
         "coupon_type": "promo",
+        "discount_type": DISCOUNT_TYPE_PERCENT_OFF,
         "company": "Acme Corp.",
         "payment_type": "credit_card",
         "payment_transaction": None,
@@ -344,7 +365,7 @@ def test_serialize_coupon_promo_invalid_amount(
     serializer = PromoCouponSerializer(data=data)
     with pytest.raises(ValidationError) as ex:
         serializer.is_valid(raise_exception=True)
-    assert ex.value.args[0] == {"amount": [expected_message]}
+    assert ex.value.args[0] == {"discount": [expected_message]}
 
 
 def test_serialize_coupon_payment_version_serializer(basket_and_coupons):
@@ -394,6 +415,7 @@ def test_coupon_payment_version_serializer():
         "expiration_date": payment_version.expiration_date.strftime(datetime_format),
         "activation_date": payment_version.activation_date.strftime(datetime_format),
         "payment_type": payment_version.payment_type,
+        "discount_type": DISCOUNT_TYPE_PERCENT_OFF,
         "payment_transaction": payment_version.payment_transaction,
         "company": payment_version.company.id,
         "payment": payment_version.payment.id,

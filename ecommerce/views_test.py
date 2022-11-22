@@ -25,6 +25,7 @@ from courses.factories import (
 )
 from courses.models import Program, CourseRun
 from ecommerce.api import create_unfulfilled_order, make_receipt_url
+from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF, DISCOUNT_TYPE_DOLLARS_OFF
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
     CouponEligibilityFactory,
@@ -646,6 +647,7 @@ def test_patch_basket_clear_coupon_auto(
         {
             "code": auto_coupon.coupon_code,
             "amount": str(basket_and_coupons.coupongroup_worst.payment_version.amount),
+            "discount_type": basket_and_coupons.coupongroup_worst.payment_version.discount_type,
             "targets": [basket_and_coupons.product_version.id],
         }
     ]
@@ -1004,6 +1006,9 @@ def test_patch_basket_bad_data_consents(basket_and_agreement):
     }
 
 
+@pytest.mark.parametrize(
+    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+)
 def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     """ Test that the correct model objects are created for a batch of single-use coupons """
     data = single_use_coupon_json
@@ -1025,6 +1030,9 @@ def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     )
 
 
+@pytest.mark.parametrize(
+    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+)
 def test_post_global_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     """ Test that the correct model objects are created for a batch of single-use coupons (global coupon) """
     data = single_use_coupon_json
@@ -1050,9 +1058,18 @@ def test_post_global_singleuse_coupons(admin_drf_client, single_use_coupon_json)
     )
 
 
-def test_post_promo_coupon(admin_drf_client, promo_coupon_json):
+@pytest.mark.parametrize(
+    "discount_type, amount",
+    [
+        [DISCOUNT_TYPE_PERCENT_OFF, 0.5],
+        [DISCOUNT_TYPE_DOLLARS_OFF, 50],
+    ],
+)
+def test_post_promo_coupon(admin_drf_client, promo_coupon_json, discount_type, amount):
     """ Test that the correct model objects are created for a promo coupon """
     data = promo_coupon_json
+    data["discount_type"] = discount_type
+    data["amount"] = amount
     resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     model_version = CouponPaymentVersion.objects.get(id=resp.json().get("id"))
@@ -1060,6 +1077,7 @@ def test_post_promo_coupon(admin_drf_client, promo_coupon_json):
     assert model_version.payment.coupon_set.count() == 1
     assert model_version.amount == data.get("amount")
     assert model_version.coupon_type == "promo"
+    assert model_version.discount_type == discount_type
     assert model_version.payment_transaction == data.get("payment_transaction")
     assert model_version.payment.coupon_set.first().coupon_code == data.get(
         "coupon_code"
@@ -1071,6 +1089,9 @@ def test_post_promo_coupon(admin_drf_client, promo_coupon_json):
     )
 
 
+@pytest.mark.parametrize(
+    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+)
 def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
     """ Test that the correct model objects are created for a promo coupon (global coupon) """
     data = promo_coupon_json
@@ -1113,6 +1134,9 @@ def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
         ["coupon_code", "AlreadyExists", "This field must be unique."],
     ],
 )
+@pytest.mark.parametrize(
+    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+)
 def test_create_promo_coupon_bad_product(
     admin_drf_client, promo_coupon_json, attribute, bad_value, error
 ):
@@ -1126,6 +1150,9 @@ def test_create_promo_coupon_bad_product(
     assert resp.json().get("errors")[0].get(attribute) == error
 
 
+@pytest.mark.parametrize(
+    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+)
 def test_create_promo_coupon_no_payment_info(admin_drf_client, promo_coupon_json):
     """ Test that a promo CouponPaymentVersion can be created without payment info """
     data = promo_coupon_json
@@ -1139,6 +1166,9 @@ def test_create_promo_coupon_no_payment_info(admin_drf_client, promo_coupon_json
         assert getattr(cpv, attr) is None
 
 
+@pytest.mark.parametrize(
+    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+)
 def test_create_singleuse_coupon_no_payment_info(
     admin_drf_client, single_use_coupon_json
 ):
@@ -1155,6 +1185,9 @@ def test_create_singleuse_coupon_no_payment_info(
     assert {"payment_type": "This field may not be null."} in resp.json().get("errors")
 
 
+@pytest.mark.parametrize(
+    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+)
 def test_create_coupon_permission(user_drf_client, promo_coupon_json):
     """ Test that non-admins cannot create coupons """
     data = promo_coupon_json
@@ -1162,6 +1195,9 @@ def test_create_coupon_permission(user_drf_client, promo_coupon_json):
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
 
+@pytest.mark.parametrize(
+    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+)
 def test_coupon_csv_view(admin_client, admin_drf_client, single_use_coupon_json):
     """ Test that a valid csv response is returned for a CouponPaymentVersion """
     data = single_use_coupon_json
