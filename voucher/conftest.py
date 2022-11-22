@@ -128,17 +128,22 @@ def voucher_and_partial_matches(voucher_and_user_client):
         start_date=datetime.combine(
             voucher.course_start_date_input, datetime.min.time(), tzinfo=pytz.UTC
         ),
+        end_date=None,
         live=True,
     )
     course_run_2 = CourseRunFactory(
-        course__readable_id=voucher.course_id_input, live=True
+        course__readable_id=voucher.course_id_input,
+        live=True,
+        end_date=None,
     )
-    course_run_3 = CourseRunFactory(course__title=voucher.course_title_input, live=True)
+    course_run_3 = CourseRunFactory(
+        course__title=voucher.course_title_input, live=True, end_date=None
+    )
     course_run_4 = CourseRunFactory(
-        course__readable_id=f"{voucher.course_id_input}-noise", live=True
+        course__readable_id=f"{voucher.course_id_input}-noise", live=True, end_date=None
     )
     course_run_5 = CourseRunFactory(
-        course__title=f"{voucher.course_title_input}-noise", live=True
+        course__title=f"{voucher.course_title_input}-noise", live=True, end_date=None
     )
     return SimpleNamespace(
         **vars(voucher_and_user_client),

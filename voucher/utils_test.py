@@ -232,16 +232,32 @@ def test_partial_course_matches(voucher_and_partial_matches_with_coupons, settin
     _test_eligible_coupon_version(eligible_coupons, context)
 
 
-@pytest.mark.parametrize("empty_field", ["course_id_input", "course_title_input"])
-def test_partial_course_matches_with_missing_inputs(
-    voucher_and_partial_matches_with_coupons, settings, empty_field
+def test_partial_course_matches_with_missing_title(
+    voucher_and_partial_matches_with_coupons, settings
 ):
     """
     Test match_courses_to_voucher returns correct eligible choices when there are partial matches
     """
     context = voucher_and_partial_matches_with_coupons
     voucher = context.voucher
-    setattr(voucher, empty_field, "")
+    voucher.course_title_input = ""
+    settings.VOUCHER_COMPANY_ID = context.company.id
+    eligible_coupons = get_eligible_coupon_choices(voucher)
+    # reduce number of expected matches by the number of matches that depend on the empty search field
+    assert len(eligible_coupons) == len(context.coupon_eligibility_list) - 2
+    _test_eligible_coupon_version(eligible_coupons, context)
+
+
+def test_partial_course_matches_with_missing_id(
+    voucher_and_partial_matches_with_coupons, settings
+):
+    """
+    Test match_courses_to_voucher returns correct eligible choices when there are partial matches
+    """
+    context = voucher_and_partial_matches_with_coupons
+    voucher = context.voucher
+    voucher.course_id_input = ""
+    voucher.save()
     settings.VOUCHER_COMPANY_ID = context.company.id
     eligible_coupons = get_eligible_coupon_choices(voucher)
     # reduce number of expected matches by the number of matches that depend on the empty search field
