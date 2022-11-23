@@ -1,30 +1,31 @@
 """
 Functions for ecommerce
 """
-import re
-from base64 import b64encode
 import decimal
 import hashlib
 import hmac
 import logging
+import re
+import uuid
+from base64 import b64encode
 from collections import defaultdict
 from datetime import timedelta
+from typing import Iterable, NamedTuple, Optional
 from urllib.parse import quote_plus, urljoin
-import uuid
-from typing import NamedTuple, Optional, Iterable
 
 from django.conf import settings
-from django.db.models import Q, Max, F, Count, Subquery, Prefetch
 from django.db import transaction
+from django.db.models import Count, F, Max, Prefetch, Q, Subquery
 from django.urls import reverse
 from rest_framework.exceptions import ValidationError
 
+import sheets.tasks
 from affiliate.models import AffiliateReferralAction
-from courses.api import create_run_enrollments, create_program_enrollments
+from courses.api import create_program_enrollments, create_run_enrollments
 from courses.constants import (
-    CONTENT_TYPE_MODEL_PROGRAM,
     CONTENT_TYPE_MODEL_COURSE,
     CONTENT_TYPE_MODEL_COURSERUN,
+    CONTENT_TYPE_MODEL_PROGRAM,
     PROGRAM_RUN_ID_PATTERN,
 )
 from courses.models import CourseRun, Program, ProgramRun
@@ -32,39 +33,39 @@ from courses.utils import is_program_text_id
 from ecommerce.constants import (
     CYBERSOURCE_DECISION_ACCEPT,
     CYBERSOURCE_DECISION_CANCEL,
-    DISCOUNT_TYPE_PERCENT_OFF,
     DISCOUNT_TYPE_DOLLARS_OFF,
+    DISCOUNT_TYPE_PERCENT_OFF,
 )
 from ecommerce.exceptions import EcommerceException
+from ecommerce.mail_api import send_ecommerce_order_receipt
 from ecommerce.models import (
     Basket,
     BasketItem,
+    BulkCouponAssignment,
     Company,
     Coupon,
     CouponEligibility,
-    CouponVersion,
-    CouponRedemption,
     CouponPayment,
     CouponPaymentVersion,
+    CouponRedemption,
     CouponSelection,
+    CouponVersion,
     CourseRunSelection,
     DataConsentAgreement,
     DataConsentUser,
-    Product,
-    ProductVersion,
-    ProductCouponAssignment,
-    BulkCouponAssignment,
     Line,
-    Order,
-    Receipt,
-    ProgramRunLine,
     LineRunSelection,
+    Order,
+    Product,
+    ProductCouponAssignment,
+    ProductVersion,
+    ProgramRunLine,
+    Receipt,
 )
-from ecommerce.mail_api import send_ecommerce_order_receipt
 from ecommerce.utils import positive_or_zero
-import sheets.tasks
 from hubspot_xpro.task_helpers import sync_hubspot_deal
-from mitxpro.utils import now_in_utc, first_or_none, case_insensitive_equal
+from mitxpro.utils import case_insensitive_equal, first_or_none, now_in_utc
+
 
 log = logging.getLogger(__name__)
 
@@ -793,30 +794,6 @@ def get_full_price_coupon_product_set():
         )
         if products.exists():
             yield coupon_payment, products
-
-
-def get_available_bulk_product_coupons(coupon_payment_id, product_id):
-    """
-    Queries the database for bulk enrollment product coupons that haven't already been sent to other users
-
-    Args:
-        coupon_payment_id (int): Id for a CouponPayment
-        product_id (int): Id for a Product
-
-    Returns:
-        CouponEligibility queryset: Product coupons that can be used for bulk enrollment
-    """
-    return (
-        CouponEligibility.objects.select_related("product")
-        .select_related("coupon__payment")
-        .annotate(existing_assignments=Count("productcouponassignment"))
-        .filter(
-            coupon__enabled=True,
-            coupon__payment=coupon_payment_id,
-            product__id=product_id,
-            existing_assignments=0,
-        )
-    )
 
 
 def bulk_assign_product_coupons(desired_assignments, bulk_assignment=None):

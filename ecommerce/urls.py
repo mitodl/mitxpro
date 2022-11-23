@@ -1,21 +1,21 @@
 """URLs for ecommerce"""
-from django.conf.urls import url, re_path, include
+from django.conf.urls import include, re_path, url
 from rest_framework.routers import SimpleRouter
 
 from ecommerce.views import (
     BasketView,
-    CheckoutView,
-    OrderFulfillmentView,
-    CouponListView,
     BulkEnrollCouponListView,
-    BulkEnrollmentSubmitView,
-    ProductViewSet,
-    coupon_code_csv_view,
-    bulk_assignment_csv_view,
+    CheckoutView,
     CompanyViewSet,
+    CouponListView,
+    OrderFulfillmentView,
     OrderReceiptView,
+    ProductViewSet,
     ProgramRunsViewSet,
+    bulk_assignment_csv_view,
+    coupon_code_csv_view,
 )
+
 
 router = SimpleRouter()
 router.register(r"products", ProductViewSet, basename="products_api")
@@ -48,11 +48,6 @@ urlpatterns = [
         r"^api/bulk_coupons/$",
         BulkEnrollCouponListView.as_view(),
         name="bulk_coupons_api",
-    ),
-    re_path(
-        r"^api/bulk_enroll/$",
-        BulkEnrollmentSubmitView.as_view(),
-        name="bulk_enroll_submit_api",
     ),
     re_path(
         r"^api/bulk_assignments/(?P<bulk_assignment_id>[0-9]+)/$",

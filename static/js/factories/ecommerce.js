@@ -177,28 +177,6 @@ export const makeProgramProduct = (
   latest_version:       makeItem(PRODUCT_TYPE_PROGRAM, readableId)
 })
 
-export const makeCourseRunOrProgram = (
-  productType: string = PRODUCT_TYPE_COURSERUN,
-  courseWareId: ?string
-): [BaseCourseRun | Program] => {
-  // $FlowFixMe
-  const product = {}
-  product.id = genProductId.next().value
-  product.title = casual.title
-  product.description = casual.description
-  product.thumbnail_url = casual.url
-  if (productType === PRODUCT_TYPE_COURSERUN) {
-    if (courseWareId) {
-      product.courseware_id = courseWareId
-    } else {
-      product.courseware_id = casual.string.replace(/ /g, "+")
-    }
-  } else {
-    product.readable_id = casual.string.replace(/ /g, "+")
-  }
-  return product
-}
-
 export const makeProgramRun = (
   program: BaseProductVersion
 ): ProgramRunDetail => ({
@@ -271,17 +249,6 @@ export const makeCouponPaymentVersion = (
   created_on:          casual.moment.format(),
   updated_on:          casual.moment.format(),
   include_future_runs: true
-})
-
-const genBulkCouponPaymentId = incrementer()
-export const makeBulkCouponPayment = (): BulkCouponPayment => ({
-  // $FlowFixMe
-  id:         genBulkCouponPaymentId.next().value,
-  name:       casual.word,
-  version:    makeCouponPaymentVersion(),
-  products:   [makeCourseRunProduct()],
-  created_on: casual.moment.format(),
-  updated_on: casual.moment.format()
 })
 
 export const makeB2BOrderStatus = (): B2BOrderStatus => {

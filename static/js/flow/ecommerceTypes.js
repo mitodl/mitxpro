@@ -251,16 +251,6 @@ export type BulkCouponPayment = {
   updated_on: Date
 }
 
-export type BulkCouponPaymentsResponse = {
-  coupon_payments: Array<BulkCouponPayment>,
-  product_map: ProductMap
-}
-
-export type BulkCouponSendResponse = {
-  emails: Array<string>,
-  bulk_assignment_id: number
-}
-
 export type B2BCheckoutPayload = {
   num_seats: number,
   product_version_id: number,

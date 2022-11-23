@@ -1,23 +1,22 @@
 """Views for ecommerce"""
-import csv
 import logging
 from collections import defaultdict
 from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q, Count
+from django.db.models import Count, Q
 from django.http import Http404
 from django_filters import rest_framework as filters
 from ipware import get_client_ip
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.generics import (
-    get_object_or_404,
-    RetrieveUpdateAPIView,
     RetrieveAPIView,
+    RetrieveUpdateAPIView,
+    get_object_or_404,
 )
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -25,52 +24,50 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from affiliate.api import get_affiliate_id_from_request
 from b2b_ecommerce.api import fulfill_b2b_order
 from b2b_ecommerce.models import B2BOrder
-from courses.models import CourseRun, ProgramRun, Program, Course
+from courses.models import Course, CourseRun, Program, ProgramRun
 from courses.serializers import BaseCourseRunSerializer, BaseProgramSerializer
 from ecommerce.api import (
+    complete_order,
     create_unfulfilled_order,
     fulfill_order,
     generate_cybersource_sa_payload,
     get_full_price_coupon_product_set,
-    get_available_bulk_product_coupons,
     make_receipt_url,
     validate_basket_for_checkout,
-    complete_order,
-    bulk_assign_product_coupons,
 )
-from ecommerce.filters import ProductFilter
 from ecommerce.exceptions import ParseException
-from ecommerce.mail_api import send_bulk_enroll_emails, send_ecommerce_order_receipt
+from ecommerce.filters import ProductFilter
+from ecommerce.mail_api import send_ecommerce_order_receipt
 from ecommerce.models import (
     Basket,
+    BulkCouponAssignment,
     Company,
     CouponPaymentVersion,
     Order,
     Product,
     Receipt,
-    CouponPayment,
-    BulkCouponAssignment,
 )
 from ecommerce.permissions import IsSignedByCyberSource
 from ecommerce.serializers import (
     BasketSerializer,
-    CouponPaymentVersionDetailSerializer,
     CompanySerializer,
-    ProductSerializer,
-    PromoCouponSerializer,
-    SingleUseCouponSerializer,
+    CouponPaymentVersionDetailSerializer,
     CurrentCouponPaymentSerializer,
     OrderReceiptSerializer,
+    ProductSerializer,
     ProgramRunSerializer,
+    PromoCouponSerializer,
+    SingleUseCouponSerializer,
 )
 from ecommerce.utils import make_checkout_url
 from hubspot_xpro.task_helpers import sync_hubspot_deal
 from mitxpro.utils import (
-    make_csv_http_response,
     first_or_none,
     format_datetime_for_filename,
+    make_csv_http_response,
     now_in_utc,
 )
+
 
 log = logging.getLogger(__name__)
 
@@ -360,56 +357,6 @@ class BulkEnrollCouponListView(APIView):
             )
 
         return Response(status=status.HTTP_200_OK, data=serialized)
-
-
-class BulkEnrollmentSubmitView(APIView):
-    """
-    Admin view for submitting bulk enrollment requests
-    """
-
-    permission_classes = (IsAdminUser,)
-    authentication_classes = (SessionAuthentication,)
-
-    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
-        """View to send an enrollment email to all users in an uploaded csv file"""
-        product_id = int(request.data["product_id"])
-        coupon_payment_id = int(request.data["coupon_payment_id"])
-        coupon_payment = CouponPayment.objects.get(pk=coupon_payment_id)
-
-        # Extract emails of users to enroll from the uploaded user csv file
-        users_file = request.data["users_file"]
-        reader = csv.reader(users_file.read().decode("utf-8").splitlines())
-        emails = [email_row[0] for email_row in reader]
-
-        available_product_coupons = get_available_bulk_product_coupons(
-            coupon_payment_id, product_id
-        )
-
-        coupon_limit_error = ""
-        if len(emails) > coupon_payment.latest_version.num_coupon_codes:
-            coupon_limit_error = "The given coupon has {} code(s) available, but {} users were submitted".format(
-                coupon_payment.latest_version.num_coupon_codes, len(emails)
-            )
-        elif len(emails) > available_product_coupons.count():
-            coupon_limit_error = "Only {} coupon(s) left that have not already been sent to users, but {} users were submitted".format(
-                available_product_coupons.count(), len(emails)
-            )
-
-        if coupon_limit_error:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={"errors": [{"users_file": coupon_limit_error}]},
-            )
-
-        bulk_assignment, product_coupon_assignments = bulk_assign_product_coupons(
-            zip(emails, available_product_coupons.values_list("id", flat=True))
-        )
-        send_bulk_enroll_emails(bulk_assignment.id, product_coupon_assignments)
-
-        return Response(
-            status=status.HTTP_200_OK,
-            data={"emails": emails, "bulk_assignment_id": bulk_assignment.id},
-        )
 
 
 class CouponListView(APIView):

@@ -114,18 +114,6 @@ export function* incrementer(): Generator<number, *, *> {
 export const toArray = (obj: any) =>
   Array.isArray(obj) ? obj : obj ? [obj] : undefined
 
-export const objectToFormData = (object: Object) => {
-  const formData = new FormData()
-
-  Object.entries(object).forEach(([k, v]) => {
-    if (!isNil(v)) {
-      // $FlowFixMe: flow things that 'v' here can only be a Blob or File
-      formData.append(k, v)
-    }
-  })
-  return formData
-}
-
 // Example return values: "January 1, 2019", "December 31, 2019"
 export const formatPrettyDate = (momentDate: Moment) =>
   momentDate.format("MMMM D, YYYY")
@@ -166,11 +154,6 @@ export const newSetWithout = (set: Set<*>, valueToDelete: any): Set<*> => {
   const newSet = new Set(set)
   newSet.delete(valueToDelete)
   return newSet
-}
-
-export const parseIntOrUndefined = (value: any): ?number => {
-  const parsed = parseInt(value)
-  return isNaN(parsed) ? undefined : parsed
 }
 
 /**

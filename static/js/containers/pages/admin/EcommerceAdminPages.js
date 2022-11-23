@@ -4,7 +4,6 @@ import { Redirect, Route, Switch, Link } from "react-router-dom"
 
 import { routes } from "../../../lib/urls"
 
-import BulkEnrollmentPage from "./BulkEnrollmentPage"
 import CouponCreationPage from "./CreateCouponPage"
 
 const EcommerceAdminIndexPage = () => (
@@ -13,9 +12,6 @@ const EcommerceAdminIndexPage = () => (
     <ul>
       <li>
         <Link to={routes.ecommerceAdmin.coupons}>Create a Coupon</Link>
-      </li>
-      <li>
-        <Link to={routes.ecommerceAdmin.bulkEnroll}>Bulk Enrollment</Link>
       </li>
     </ul>
   </div>
@@ -28,11 +24,6 @@ const EcommerceAdminPages = () => (
         exact
         path={routes.ecommerceAdmin.index}
         component={EcommerceAdminIndexPage}
-      />
-      <Route
-        exact
-        path={routes.ecommerceAdmin.bulkEnroll}
-        component={BulkEnrollmentPage}
       />
       <Route
         exact
