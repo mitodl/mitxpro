@@ -42,6 +42,8 @@ services:
       - "8053:8053"
     links:
       - web
+    volumes:
+      - nginx:/tmp/nginx
     networks:
       default:
         aliases:
@@ -57,18 +59,22 @@ services:
       sleep 3 &&
       python3 manage.py collectstatic --noinput &&
       python3 manage.py migrate --noinput &&
-      uwsgi uwsgi.ini --honour-stdin'
+      uwsgi --honour-stdin --emperor config/uwsgi/'
     stdin_open: true
     tty: true
     ports:
       - "8051:8051"
+      - "8054:8054"
     environment:
       << : *py-environment
       PORT: 8051
+      PORT_IMAGE_SERVE: 8054
     env_file: .env
     links:
       - db
       - redis
+    volumes:
+      - nginx:/tmp/nginx
     extra_hosts: *default-extra-hosts
 
   watch:
@@ -98,3 +104,6 @@ services:
       - db
       - redis
     extra_hosts: *default-extra-hosts
+
+volumes:
+  nginx:

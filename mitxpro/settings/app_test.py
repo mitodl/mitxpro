@@ -47,13 +47,13 @@ def settings_sandbox(monkeypatch):
     """Cleanup settings after a test"""
 
     monkeypatch.delenv("MITXPRO_DB_DISABLE_SSL", raising=False)
-    monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "mitxpro.settings")
+    monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "mitxpro.settings.app")
     monkeypatch.setenv("MAILGUN_SENDER_DOMAIN", "mailgun.fake.domain")
     monkeypatch.setenv("MAILGUN_KEY", "fake_mailgun_key")
     monkeypatch.setenv("MITXPRO_BASE_URL", "http://localhost:8053")
 
     def _get():
-        return vars(sys.modules["mitxpro.settings"])
+        return vars(sys.modules["mitxpro.settings.app"])
 
     def _patch(overrides):
 
