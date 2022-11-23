@@ -27,19 +27,17 @@ from mitxpro.views import (
 WAGTAIL_IMG_CACHE_AGE = 31_536_000  # 1 year
 
 
-urlpatterns = (
-    decorate_urlpatterns(
-        # NOTE: This route enables dynamic Wagtail image loading. It comes directly from the Wagtail docs:
-        #       https://docs.wagtail.io/en/v2.7/advanced_topics/images/image_serve_view.html#setup
-        [
-            re_path(
-                r"^images/([^/]*)/(\d*)/([^/]*)/[^/]*$",
-                ServeView.as_view(),
-                name="wagtailimages_serve",
-            )
-        ],
-        cache_control_max_age_jitter(cache_control, max_age=WAGTAIL_IMG_CACHE_AGE),
-    )
+urlpatterns = decorate_urlpatterns(
+    # NOTE: This route enables dynamic Wagtail image loading. It comes directly from the Wagtail docs:
+    #       https://docs.wagtail.io/en/v2.7/advanced_topics/images/image_serve_view.html#setup
+    [
+        re_path(
+            r"^images/([^/]*)/(\d*)/([^/]*)/[^/]*$",
+            ServeView.as_view(),
+            name="wagtailimages_serve",
+        )
+    ],
+    cache_control_max_age_jitter(cache_control, max_age=WAGTAIL_IMG_CACHE_AGE),
 )
 
 handler404 = not_found_handler
