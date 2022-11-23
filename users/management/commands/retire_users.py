@@ -6,6 +6,7 @@ from argparse import RawTextHelpFormatter
 from urllib.parse import urlparse
 import sys
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
 from authentication.utils import block_user_email
@@ -15,7 +16,6 @@ from user_util import user_util
 from users.api import fetch_users
 from users.models import BlockList
 
-from mitxpro import settings
 
 User = get_user_model()
 
