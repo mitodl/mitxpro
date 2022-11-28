@@ -87,7 +87,7 @@ http {
             try_files /fastly_verification.html =404;
         }
 
-        location /images {
+        location ~* ^/images/.*$ {
             uwsgi_pass unix:/tmp/image-serve.socket;
         }
 
