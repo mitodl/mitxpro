@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.112.0
+---------------
+
+- Upgrade cryptography, remove django-server-status (#2483)
+
 Version 0.111.1 (Released November 22, 2022)
 ---------------
 
