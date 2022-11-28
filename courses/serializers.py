@@ -4,10 +4,12 @@ Course model serializers
 from urllib.parse import urljoin
 
 from django.conf import settings
+from django.db.models import Prefetch
 from django.templatetags.static import static
 from rest_framework import serializers
 
 from courses import models
+from ecommerce.models import Product
 from ecommerce.serializers import CompanySerializer
 
 
@@ -79,7 +81,7 @@ class CourseRunSerializer(BaseCourseRunSerializer):
 
     def get_product_id(self, instance):
         """ Get the product id for a course run """
-        return instance.products.values_list("id", flat=True).first()
+        return instance.products.all()[0].id if instance.products.all() else None
 
     def get_instructors(self, instance):
         """Get the list of instructors"""
@@ -212,7 +214,16 @@ class ProgramSerializer(serializers.ModelSerializer):
     def get_courses(self, instance):
         """Serializer for courses"""
         return CourseSerializer(
-            instance.courses.filter(live=True).order_by("position_in_program"),
+            instance.courses.filter(live=True)
+            .select_related("coursepage")
+            .prefetch_related(
+                "topics",
+                Prefetch(
+                    "courseruns__products",
+                    queryset=Product.objects.all().with_ordered_versions(),
+                ),
+            )
+            .order_by("position_in_program"),
             many=True,
             context={"filter_products": False},
         ).data
@@ -275,11 +286,10 @@ class ProgramSerializer(serializers.ModelSerializer):
 
     def get_topics(self, instance):
         """List all topics in all courses in the program"""
-        topics = (
-            models.CourseTopic.objects.filter(course__program=instance)
-            .values("name")
-            .distinct("name")
-        )
+        topics = set()
+        for course in instance.courses.all():
+            for topic in course.topics.all():
+                topics.add(topic.name)
         return list(topics)
 
     class Meta:
