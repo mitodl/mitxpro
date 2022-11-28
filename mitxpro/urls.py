@@ -43,7 +43,6 @@ WAGTAIL_IMG_CACHE_AGE = 31_536_000  # 1 year
 urlpatterns = (
     [
         path("admin/", admin.site.urls),
-        path("status/", include("server_status.urls")),
         # NOTE: we only bring in base_urlpatterns so applications can only be created via django-admin
         path(
             "oauth2/",

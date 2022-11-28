@@ -562,10 +562,6 @@
       "description": "Name of the site. e.g MIT xPRO",
       "required": false
     },
-    "STATUS_TOKEN": {
-      "description": "Token to access the status API.",
-      "required": false
-    },
     "USE_X_FORWARDED_HOST": {
       "description": "Set HOST header to original domain accessed by user",
       "required": false
