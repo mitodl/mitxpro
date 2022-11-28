@@ -145,7 +145,6 @@ INSTALLED_APPS = (
     "django.contrib.sites",
     "django_user_agents",
     "social_django",
-    "server_status",
     "oauth2_provider",
     "rest_framework",
     "anymail",
@@ -602,12 +601,6 @@ LOGGING = {
     },
     "root": {"handlers": ["console", "syslog"], "level": LOG_LEVEL},
 }
-
-# server-status
-STATUS_TOKEN = get_string(
-    name="STATUS_TOKEN", default="", description="Token to access the status API."
-)
-HEALTH_CHECK = ["CELERY", "REDIS", "POSTGRES"]
 
 GTM_TRACKING_ID = get_string(
     name="GTM_TRACKING_ID", default="", description="Google Tag Manager container ID"
