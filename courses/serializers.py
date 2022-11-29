@@ -4,12 +4,10 @@ Course model serializers
 from urllib.parse import urljoin
 
 from django.conf import settings
-from django.db.models import Prefetch
 from django.templatetags.static import static
 from rest_framework import serializers
 
 from courses import models
-from ecommerce.models import Product
 from ecommerce.serializers import CompanySerializer
 
 
@@ -81,7 +79,7 @@ class CourseRunSerializer(BaseCourseRunSerializer):
 
     def get_product_id(self, instance):
         """ Get the product id for a course run """
-        return instance.products.all()[0].id if instance.products.all() else None
+        return instance.products.values_list("id", flat=True).first()
 
     def get_instructors(self, instance):
         """Get the list of instructors"""
@@ -286,10 +284,11 @@ class ProgramSerializer(serializers.ModelSerializer):
 
     def get_topics(self, instance):
         """List all topics in all courses in the program"""
-        topics = set()
-        for course in instance.courses.all():
-            for topic in course.topics.all():
-                topics.add(topic.name)
+        topics = (
+            models.CourseTopic.objects.filter(course__program=instance)
+            .values("name")
+            .distinct("name")
+        )
         return list(topics)
 
     class Meta:
