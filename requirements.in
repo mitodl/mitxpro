@@ -31,7 +31,7 @@ mitol-django-oauth-toolkit-extensions==1.2.1
 mitol-django-authentication==1.5.1
 newrelic
 pdftotext==2.1.1
-Pillow==8.3.2
+Pillow==9.3.0
 psycopg2==2.8.3
 pycountry==19.7.15
 pygsheets==2.0.2
@@ -45,7 +45,7 @@ ua-parser==0.8.0
 user-agents==2.0
 user-util==0.1.5
 uwsgi>=2.0.21
-wagtail==2.13.4
-wagtail-metadata==3.3.0
+wagtail==3.0.3
+wagtail-metadata==4.0.2
 zeep==3.4.0
 flaky==3.7.0

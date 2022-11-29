@@ -1,6 +1,6 @@
 """Custom hooks to configure wagtail behavior"""
 from wagtail.admin.api.views import PagesAdminAPIViewSet
-from wagtail.core import hooks
+from wagtail import hooks
 
 
 @hooks.register("construct_explorer_page_queryset")

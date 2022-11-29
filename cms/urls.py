@@ -13,8 +13,8 @@ The pattern(s) defined here serve the same Wagtail view that the library-defined
 """
 from django.conf.urls import url
 
-from wagtail.core import views
-from wagtail.core.utils import WAGTAIL_APPEND_SLASH
+from wagtail import views
+from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 
 from cms.constants import COURSE_INDEX_SLUG, PROGRAM_INDEX_SLUG
 

@@ -3,7 +3,7 @@
 from django.db import migrations, models
 import django.db.models.deletion
 import modelcluster.fields
-import wagtail.core.fields
+import wagtail.fields
 
 
 class Migration(migrations.Migration):
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                     models.IntegerField(blank=True, editable=False, null=True),
                 ),
                 ("question", models.TextField()),
-                ("answer", wagtail.core.fields.RichTextField()),
+                ("answer", wagtail.fields.RichTextField()),
             ],
             options={"ordering": ["sort_order"], "abstract": False},
         ),

@@ -5,7 +5,7 @@ import pytest
 import responses
 from django.test.client import Client
 from rest_framework.test import APIClient
-from wagtail.core.models import Site
+from wagtail.models import Site
 
 from users.factories import UserFactory
 

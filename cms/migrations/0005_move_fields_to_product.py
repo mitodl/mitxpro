@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import wagtail.core.fields
+import wagtail.fields
 
 
 class Migration(migrations.Migration):
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="programpage",
             name="video_title",
-            field=wagtail.core.fields.RichTextField(
+            field=wagtail.fields.RichTextField(
                 blank=True,
                 help_text="The title to be displayed for the program/course video",
             ),
@@ -77,7 +77,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="coursepage",
             name="video_title",
-            field=wagtail.core.fields.RichTextField(
+            field=wagtail.fields.RichTextField(
                 blank=True,
                 help_text="The title to be displayed for the program/course video",
             ),

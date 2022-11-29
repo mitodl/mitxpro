@@ -2,8 +2,8 @@
 
 import cms.blocks
 from django.db import migrations
-import wagtail.core.blocks
-import wagtail.core.fields
+import wagtail.blocks
+import wagtail.fields
 
 
 class Migration(migrations.Migration):
@@ -14,11 +14,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="certificatepage",
             name="overrides",
-            field=wagtail.core.fields.StreamField(
+            field=wagtail.fields.StreamField(
                 [
                     (
                         "course_run",
-                        wagtail.core.blocks.StructBlock(
+                        wagtail.blocks.StructBlock(
                             [
                                 (
                                     "readable_id",
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                                 ),
                                 (
                                     "CEUs",
-                                    wagtail.core.blocks.DecimalBlock(
+                                    wagtail.blocks.DecimalBlock(
                                         help_text="CEUs to override for this CourseRun, for display on the certificate"
                                     ),
                                 ),

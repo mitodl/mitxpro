@@ -2,8 +2,8 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import wagtail.core.blocks
-import wagtail.core.fields
+import wagtail.blocks
+import wagtail.fields
 import wagtail.images.blocks
 
 
@@ -45,15 +45,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "members",
-                    wagtail.core.fields.StreamField(
+                    wagtail.fields.StreamField(
                         [
                             (
                                 "member",
-                                wagtail.core.blocks.StructBlock(
+                                wagtail.blocks.StructBlock(
                                     [
                                         (
                                             "name",
-                                            wagtail.core.blocks.CharBlock(
+                                            wagtail.blocks.CharBlock(
                                                 help_text="Name of the faculty member.",
                                                 max_length=100,
                                             ),
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
                                         ),
                                         (
                                             "description",
-                                            wagtail.core.blocks.RichTextBlock(
+                                            wagtail.blocks.RichTextBlock(
                                                 help_text="A brief description about the faculty member."
                                             ),
                                         ),

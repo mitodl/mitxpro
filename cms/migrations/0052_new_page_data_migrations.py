@@ -17,7 +17,7 @@ import json
 
 import pytz
 from django.db import migrations
-from wagtail.core.models import Page, PageRevision
+from wagtail.models import Page, PageRevision
 
 COURSE_INDEX_PAGE_PROPERTIES = dict(title="Courses")
 PROGRAM_INDEX_PAGE_PROPERTIES = dict(title="Programs")

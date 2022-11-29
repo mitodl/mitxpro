@@ -1,7 +1,7 @@
 """Wagtail page factories"""
 import pytz
 from django.core.exceptions import ObjectDoesNotExist
-from wagtail.core.rich_text import RichText
+from wagtail.rich_text import RichText
 
 import factory
 from factory.django import DjangoModelFactory

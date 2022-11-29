@@ -93,7 +93,9 @@ django==3.2.15
     #   -r requirements.in
     #   django-anymail
     #   django-filter
+    #   django-modelcluster
     #   django-oauth-toolkit
+    #   django-permissionedforms
     #   django-redis
     #   django-storages
     #   django-taggit
@@ -129,20 +131,22 @@ django-hijack-admin==2.1.10
     # via -r requirements.in
 django-ipware==3.0.0
     # via -r requirements.in
-django-modelcluster==5.2
+django-modelcluster==6.0
     # via wagtail
 django-oauth-toolkit==1.4.0
     # via
     #   -r requirements.in
     #   mitol-django-digital-credentials
     #   mitol-django-oauth-toolkit-extensions
+django-permissionedforms==0.1
+    # via wagtail
 django-redis==5.0.0
     # via -r requirements.in
 django-robots==4.0
     # via -r requirements.in
 django-storages==1.13.1
     # via -r requirements.in
-django-taggit==1.5.1
+django-taggit==2.1.0
     # via wagtail
 django-templated-mail==1.1.1
     # via djoser
@@ -278,7 +282,7 @@ pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-pillow==8.3.2
+pillow==9.3.0
     # via
     #   -r requirements.in
     #   wagtail
@@ -445,11 +449,11 @@ vine==5.0.0
     #   amqp
     #   celery
     #   kombu
-wagtail==2.13.4
+wagtail==3.0.3
     # via
     #   -r requirements.in
     #   wagtail-metadata
-wagtail-metadata==3.3.0
+wagtail-metadata==4.0.2
     # via -r requirements.in
 wcwidth==0.2.5
     # via prompt-toolkit

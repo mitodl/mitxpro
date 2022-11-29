@@ -9,7 +9,7 @@ import pytz
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from wagtail.core.models import Page
+from wagtail.models import Page
 from rest_framework.exceptions import ValidationError
 
 from courses.constants import CONTENT_TYPE_MODEL_COURSERUN

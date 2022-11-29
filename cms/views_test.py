@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pytest
 from django.urls import reverse
 from rest_framework import status
-from wagtail.core.models import Site
+from wagtail.models import Site
 
 from cms.factories import (
     CatalogPageFactory,

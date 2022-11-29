@@ -5,7 +5,7 @@ import logging
 import pytz
 
 from django.contrib.contenttypes.models import ContentType
-from wagtail.core.models import Page, Site
+from wagtail.models import Page, Site
 from cms import models as cms_models
 from cms.constants import CERTIFICATE_INDEX_SLUG
 

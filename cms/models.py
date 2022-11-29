@@ -18,15 +18,14 @@ from django.utils.text import slugify
 from django.core.validators import MinValueValidator
 
 from modelcluster.fields import ParentalKey
-from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
+from wagtail.admin.panels import FieldPanel, InlinePanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
-from wagtail.core import blocks
-from wagtail.core.blocks import PageChooserBlock, RawHTMLBlock, StreamBlock
-from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.models import Orderable, Page
-from wagtail.core.utils import WAGTAIL_APPEND_SLASH
+from wagtail import blocks
+from wagtail.blocks import PageChooserBlock, RawHTMLBlock, StreamBlock
+from wagtail.fields import RichTextField, StreamField
+from wagtail.models import Orderable, Page
+from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 from wagtail.images.blocks import ImageChooserBlock
-from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.images.models import Image
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
@@ -576,6 +575,7 @@ class ProductPage(MetadataPageMixin, Page):
         ],
         blank=True,
         help_text="The content of this tab on the program page",
+        use_json_field=True,
     )
 
     content_panels = Page.content_panels + [
@@ -589,7 +589,7 @@ class ProductPage(MetadataPageMixin, Page):
         FieldPanel("background_image"),
         FieldPanel("thumbnail_image"),
         FieldPanel("featured"),
-        StreamFieldPanel("content"),
+        FieldPanel("content"),
     ]
 
     subpage_types = [
@@ -1196,11 +1196,12 @@ class UserTestimonialsPage(CourseProgramChildPage):
         [("testimonial", UserTestimonialBlock())],
         blank=False,
         help_text="Add testimonials to display in this section.",
+        use_json_field=True,
     )
     content_panels = [
         FieldPanel("heading"),
         FieldPanel("subhead"),
-        StreamFieldPanel("items"),
+        FieldPanel("items"),
     ]
 
     class Meta:
@@ -1231,8 +1232,9 @@ class NewsAndEventsPage(Page):
         [("news_and_events", NewsAndEventsBlock())],
         blank=False,
         help_text="Add news and events updates to display in this section.",
+        use_json_field=True,
     )
-    content_panels = [FieldPanel("heading"), StreamFieldPanel("items")]
+    content_panels = [FieldPanel("heading"), FieldPanel("items")]
 
     class Meta:
         verbose_name = "News and Events"
@@ -1283,12 +1285,13 @@ class LearningOutcomesPage(CourseProgramChildPage):
         [("outcome", blocks.TextBlock(icon="plus"))],
         blank=False,
         help_text="Detail about What you'll learn as learning outcome.",
+        use_json_field=True,
     )
 
     content_panels = [
         FieldPanel("heading"),
         FieldPanel("sub_heading"),
-        StreamFieldPanel("outcome_items"),
+        FieldPanel("outcome_items"),
     ]
 
 
@@ -1302,12 +1305,13 @@ class LearningTechniquesPage(CourseProgramChildPage):
         [("techniques", LearningTechniqueBlock())],
         blank=False,
         help_text="Enter detail about how you'll learn.",
+        use_json_field=True,
     )
 
     class Meta:
         verbose_name = "Icon Grid"
 
-    content_panels = [FieldPanel("title"), StreamFieldPanel("technique_items")]
+    content_panels = [FieldPanel("title"), FieldPanel("technique_items")]
 
 
 class ForTeamsPage(CourseProgramChildPage):
@@ -1353,7 +1357,7 @@ class ForTeamsPage(CourseProgramChildPage):
         FieldPanel("action_url"),
         FieldPanel("dark_theme"),
         FieldPanel("switch_layout"),
-        ImageChooserPanel("image"),
+        FieldPanel("image"),
     ]
 
 
@@ -1465,6 +1469,7 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
         ],
         blank=False,
         help_text='Contents of the "Who Should Enroll" section.',
+        use_json_field=True,
     )
     switch_layout = models.BooleanField(
         blank=True,
@@ -1474,8 +1479,8 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
 
     content_panels = [
         FieldPanel("heading"),
-        StreamFieldPanel("content"),
-        ImageChooserPanel("image"),
+        FieldPanel("content"),
+        FieldPanel("image"),
         FieldPanel("switch_layout"),
     ]
 
@@ -1518,6 +1523,7 @@ class CoursesInProgramPage(CourseProgramChildPage):
         ],
         help_text="The courseware to display in this carousel",
         blank=True,
+        use_json_field=True,
     )
 
     @property
@@ -1538,7 +1544,7 @@ class CoursesInProgramPage(CourseProgramChildPage):
         FieldPanel("heading"),
         FieldPanel("body"),
         FieldPanel("override_contents"),
-        StreamFieldPanel("contents"),
+        FieldPanel("contents"),
     ]
 
 
@@ -1560,11 +1566,12 @@ class FacultyMembersPage(CourseProgramChildPage):
     members = StreamField(
         [("member", FacultyBlock())],
         help_text="The faculty members to display on this page",
+        use_json_field=True,
     )
     content_panels = [
         FieldPanel("heading"),
         FieldPanel("subhead"),
-        StreamFieldPanel("members"),
+        FieldPanel("members"),
     ]
 
 
@@ -1577,9 +1584,10 @@ class ImageCarouselPage(CourseProgramChildPage):
         [("image", ImageChooserBlock(help_text="Choose an image to upload."))],
         blank=False,
         help_text="Add images for this section.",
+        use_json_field=True,
     )
 
-    content_panels = Page.content_panels + [StreamFieldPanel("images")]
+    content_panels = Page.content_panels + [FieldPanel("images")]
 
     class Meta:
         verbose_name = "Image Carousel"
@@ -1627,11 +1635,12 @@ class ResourcePage(Page):
         [("content", ResourceBlock())],
         blank=False,
         help_text="Enter details of content.",
+        use_json_field=True,
     )
 
     content_panels = Page.content_panels + [
         FieldPanel("sub_heading"),
-        StreamFieldPanel("content"),
+        FieldPanel("content"),
     ]
 
     def get_context(self, request, *args, **kwargs):
@@ -1687,7 +1696,7 @@ class SignatoryPage(Page):
         FieldPanel("title_1"),
         FieldPanel("title_2"),
         FieldPanel("organization"),
-        ImageChooserPanel("signature_image"),
+        FieldPanel("signature_image"),
     ]
 
     def save(self, clean=True, user=None, log_action=False, **kwargs):
@@ -1771,6 +1780,7 @@ class CertificatePage(CourseProgramChildPage):
             max_num=5,
         ),
         help_text="You can choose upto 5 signatories.",
+        use_json_field=True,
     )
 
     overrides = StreamField(
@@ -1778,16 +1788,17 @@ class CertificatePage(CourseProgramChildPage):
         blank=True,
         help_text="Overrides for specific runs of this Course/Program",
         validators=[validate_unique_readable_ids],
+        use_json_field=True,
     )
 
     content_panels = [
         FieldPanel("product_name"),
         FieldPanel("institute_text"),
         FieldPanel("CEUs"),
-        ImageChooserPanel("partner_logo"),
+        FieldPanel("partner_logo"),
         FieldPanel("partner_logo_placement", widget=forms.Select),
-        StreamFieldPanel("overrides"),
-        StreamFieldPanel("signatories"),
+        FieldPanel("overrides"),
+        FieldPanel("signatories"),
     ]
 
     base_form_class = CertificatePageForm

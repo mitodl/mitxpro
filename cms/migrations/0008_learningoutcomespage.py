@@ -2,8 +2,8 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import wagtail.core.blocks
-import wagtail.core.fields
+import wagtail.blocks
+import wagtail.fields
 
 
 class Migration(migrations.Migration):
@@ -45,8 +45,8 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "outcome_items",
-                    wagtail.core.fields.StreamField(
-                        [("outcome", wagtail.core.blocks.TextBlock(icon="plus"))],
+                    wagtail.fields.StreamField(
+                        [("outcome", wagtail.blocks.TextBlock(icon="plus"))],
                         help_text="Detail about What you'll learn as learning outcome.",
                     ),
                 ),
