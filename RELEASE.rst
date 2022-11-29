@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.112.1
+---------------
+
+- Bump django-storages and boto3
+
 Version 0.112.0 (Released November 29, 2022)
 ---------------
 
