@@ -4,10 +4,12 @@ Course model serializers
 from urllib.parse import urljoin
 
 from django.conf import settings
+from django.db.models import Prefetch
 from django.templatetags.static import static
 from rest_framework import serializers
 
 from courses import models
+from ecommerce.models import Product
 from ecommerce.serializers import CompanySerializer
 
 
