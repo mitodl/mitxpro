@@ -2,8 +2,8 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import wagtail.core.blocks
-import wagtail.core.fields
+import wagtail.blocks
+import wagtail.fields
 
 
 class Migration(migrations.Migration):
@@ -46,11 +46,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "signatories",
-                    wagtail.core.fields.StreamField(
+                    wagtail.fields.StreamField(
                         [
                             (
                                 "signatory",
-                                wagtail.core.blocks.PageChooserBlock(
+                                wagtail.blocks.PageChooserBlock(
                                     page_type=["cms.SignatoryPage"], required=True
                                 ),
                             )

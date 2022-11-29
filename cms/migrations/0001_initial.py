@@ -2,8 +2,8 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import wagtail.core.blocks
-import wagtail.core.fields
+import wagtail.blocks
+import wagtail.fields
 import wagtail.images.blocks
 
 
@@ -34,22 +34,22 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    wagtail.core.fields.RichTextField(
+                    wagtail.fields.RichTextField(
                         blank=True,
                         help_text="The description shown on the program page",
                     ),
                 ),
                 (
                     "content",
-                    wagtail.core.fields.StreamField(
+                    wagtail.fields.StreamField(
                         [
                             (
                                 "heading",
-                                wagtail.core.blocks.CharBlock(classname="full title"),
+                                wagtail.blocks.CharBlock(classname="full title"),
                             ),
-                            ("paragraph", wagtail.core.blocks.RichTextBlock()),
+                            ("paragraph", wagtail.blocks.RichTextBlock()),
                             ("image", wagtail.images.blocks.ImageChooserBlock()),
-                            ("raw_html", wagtail.core.blocks.RawHTMLBlock()),
+                            ("raw_html", wagtail.blocks.RawHTMLBlock()),
                         ],
                         blank=True,
                         help_text="The content of this tab on the program page",
@@ -95,22 +95,22 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    wagtail.core.fields.RichTextField(
+                    wagtail.fields.RichTextField(
                         blank=True,
                         help_text="The description shown on the program page",
                     ),
                 ),
                 (
                     "content",
-                    wagtail.core.fields.StreamField(
+                    wagtail.fields.StreamField(
                         [
                             (
                                 "heading",
-                                wagtail.core.blocks.CharBlock(classname="full title"),
+                                wagtail.blocks.CharBlock(classname="full title"),
                             ),
-                            ("paragraph", wagtail.core.blocks.RichTextBlock()),
+                            ("paragraph", wagtail.blocks.RichTextBlock()),
                             ("image", wagtail.images.blocks.ImageChooserBlock()),
-                            ("raw_html", wagtail.core.blocks.RawHTMLBlock()),
+                            ("raw_html", wagtail.blocks.RawHTMLBlock()),
                         ],
                         blank=True,
                         help_text="The content of this tab on the program page",

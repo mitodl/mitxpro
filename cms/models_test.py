@@ -8,7 +8,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.test.client import RequestFactory
 from django.urls import resolve
-from wagtail.core.utils import WAGTAIL_APPEND_SLASH
+from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 
 from cms.constants import (
     ON_DEMAND_WEBINAR,
@@ -279,7 +279,7 @@ def test_custom_detail_page_urls_handled():
     CoursePageFactory.create(course__readable_id=readable_id)
     resolver_match = resolve("/courses/{}/".format(readable_id))
     assert (
-        resolver_match.func.__module__ == "wagtail.core.views"
+        resolver_match.func.__module__ == "wagtail.views"
     )  # pylint: disable=protected-access
     assert resolver_match.func.__name__ == "serve"  # pylint: disable=protected-access
 

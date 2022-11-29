@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import wagtail.core.fields
+import wagtail.fields
 import wagtail.images.blocks
 
 
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "images",
-                    wagtail.core.fields.StreamField(
+                    wagtail.fields.StreamField(
                         [
                             (
                                 "image",

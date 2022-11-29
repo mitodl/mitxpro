@@ -8,7 +8,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from rest_framework import status
-from wagtail.core.models import Site
+from wagtail.models import Site
 
 from cms.constants import (
     ALL_TOPICS,

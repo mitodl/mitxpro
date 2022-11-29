@@ -5,7 +5,7 @@ import wagtail_factories
 from django.core.exceptions import ObjectDoesNotExist
 from factory.django import DjangoModelFactory
 from faker.providers import internet
-from wagtail.core.rich_text import RichText
+from wagtail.rich_text import RichText
 
 from cms.blocks import (
     FacultyBlock,

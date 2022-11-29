@@ -12,7 +12,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.utils.functional import cached_property
-from wagtail.core.models import PageRevision
+from wagtail.models import PageRevision
 
 from cms.urls import detail_path_char_pattern
 from courses.constants import (
