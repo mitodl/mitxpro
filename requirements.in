@@ -1,7 +1,7 @@
 beautifulsoup4==4.8.2
 celery==5.2.2
 celery-redbeat==2.0.0
-boto3==1.16.63
+boto3==1.26.18
 dj-database-url==0.5.0
 django==3.2.15
 django-anymail[mailgun]==8.4
@@ -17,7 +17,7 @@ django-user-agents==0.4.0
 djangorestframework==3.12.4
 djoser==2.1.0
 edx-api-client==0.10.0
-django-storages==1.11.1
+django-storages==1.13.1
 drf-flex-fields==0.8.5
 google-api-python-client==1.7.11
 google-auth==1.6.3
