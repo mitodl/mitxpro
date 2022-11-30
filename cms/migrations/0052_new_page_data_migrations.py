@@ -12,4 +12,4 @@ class Migration(migrations.Migration):
         ("wagtailcore", "0062_comment_models_and_pagesubscription"),
         ("cms", "0051_new_page_data_migrations"),
     ]
-    operations = migrations.RunPython(migrations.RunPython.noop, migrations.RunPython.noop)
+    operations = [migrations.RunPython(migrations.RunPython.noop, migrations.RunPython.noop)]
