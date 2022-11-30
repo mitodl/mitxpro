@@ -60,9 +60,10 @@ class Command(BaseCommand):
             spreadsheet_id=bulk_assignment.assignment_sheet_id,
             bulk_assignment=bulk_assignment,
         )
-        row_updates, unsent_assignments = (
-            coupon_assignment_handler.get_out_of_sync_sheet_data()
-        )
+        (
+            row_updates,
+            unsent_assignments,
+        ) = coupon_assignment_handler.get_out_of_sync_sheet_data()
 
         if len(row_updates) == 0 and len(unsent_assignments) == 0:
             self.stdout.write(
@@ -85,8 +86,10 @@ class Command(BaseCommand):
                     for row_update in row_updates
                 ]
             )
-            row_update_results = "Request sent to the Google API to update {} row(s):\n{}".format(
-                len(row_updates), row_update_summary
+            row_update_results = (
+                "Request sent to the Google API to update {} row(s):\n{}".format(
+                    len(row_updates), row_update_summary
+                )
             )
 
         if unsent_assignments and not options["skip_confirm"]:

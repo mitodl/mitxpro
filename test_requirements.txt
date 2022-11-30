@@ -1,5 +1,5 @@
 astroid==2.4.2
-black==18.9b0
+black==20.8b1
 bpython
 codecov
 django-debug-toolbar
