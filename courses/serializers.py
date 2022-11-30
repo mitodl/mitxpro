@@ -4,12 +4,10 @@ Course model serializers
 from urllib.parse import urljoin
 
 from django.conf import settings
-from django.db.models import Prefetch
 from django.templatetags.static import static
 from rest_framework import serializers
 
 from courses import models
-from ecommerce.models import Product
 from ecommerce.serializers import CompanySerializer
 
 
@@ -214,16 +212,7 @@ class ProgramSerializer(serializers.ModelSerializer):
     def get_courses(self, instance):
         """Serializer for courses"""
         return CourseSerializer(
-            instance.courses.filter(live=True)
-            .select_related("coursepage")
-            .prefetch_related(
-                "topics",
-                Prefetch(
-                    "courseruns__products",
-                    queryset=Product.objects.all().with_ordered_versions(),
-                ),
-            )
-            .order_by("position_in_program"),
+            instance.courses.filter(live=True).order_by("position_in_program"),
             many=True,
             context={"filter_products": False},
         ).data
