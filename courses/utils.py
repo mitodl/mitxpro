@@ -45,10 +45,7 @@ def ensure_course_run_grade(user, course_run, edx_grade, should_update=False):
     updated = False
     if should_update:
         with transaction.atomic():
-            (
-                run_grade,
-                created,
-            ) = CourseRunGrade.objects.select_for_update().get_or_create(
+            run_grade, created = CourseRunGrade.objects.select_for_update().get_or_create(
                 course_run=course_run, user=user, defaults=grade_properties
             )
 
@@ -202,12 +199,12 @@ def revoke_program_certificate(
 
 def revoke_course_run_certificate(user, courseware_id, revoke_state):
     """
-    Revoked a course run certificate.
+        Revoked a course run certificate.
 
-    Args:
-        user (User): a Django user.
-        courseware_id: represents the course run.
-        revoke_state: represents the course run (courseware_id) for revoking a CourseRunCertificate.
+        Args:
+            user (User): a Django user.
+            courseware_id: represents the course run.
+            revoke_state: represents the course run (courseware_id) for revoking a CourseRunCertificate.
     """
     course_run = CourseRun.objects.get(courseware_id=courseware_id)
     try:

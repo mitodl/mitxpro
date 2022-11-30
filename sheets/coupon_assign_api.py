@@ -970,10 +970,7 @@ class CouponAssignmentHandler:
         if self.bulk_assignment.assignments_started_date:
             existing_assignment_qset = self.bulk_assignment.assignments
             existing_assignment_count = existing_assignment_qset.count()
-            (
-                assignments_to_create,
-                assignment_ids_to_remove,
-            ) = self.get_assignments_to_create_and_remove(
+            assignments_to_create, assignment_ids_to_remove = self.get_assignments_to_create_and_remove(
                 existing_assignment_qset, desired_assignments
             )
         else:

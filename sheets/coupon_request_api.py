@@ -374,10 +374,7 @@ class CouponRequestHandler(SheetHandler):
             self.sheet_metadata.get_form_input_columns(row_data)
         )
         with transaction.atomic():
-            (
-                coupon_gen_request,
-                created,
-            ) = CouponGenerationRequest.objects.select_for_update().get_or_create(
+            coupon_gen_request, created = CouponGenerationRequest.objects.select_for_update().get_or_create(
                 coupon_name=coupon_name,
                 defaults=dict(
                     purchase_order_id=purchase_order_id, raw_data=user_input_json
@@ -437,11 +434,9 @@ class CouponRequestHandler(SheetHandler):
     def process_row(
         self, row_index, row_data
     ):  # pylint: disable=too-many-return-statements
-        (
-            coupon_gen_request,
-            request_created,
-            request_updated,
-        ) = self.get_or_create_request(row_data)
+        coupon_gen_request, request_created, request_updated = self.get_or_create_request(
+            row_data
+        )
         try:
             coupon_req_row = CouponRequestRow.parse_raw_data(row_index, row_data)
         except SheetRowParsingException as exc:

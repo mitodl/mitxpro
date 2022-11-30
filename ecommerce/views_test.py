@@ -1390,8 +1390,8 @@ def test_products_viewset_valid_programs(user_drf_client):
 
 
 def test_products_viewset_list_missing_unchecked_bulk_visibility(user_drf_client):
-    """Test that the ProductViewSet returns all products
-    which are visible_in_bulk_form
+    """ Test that the ProductViewSet returns all products
+        which are visible_in_bulk_form
     """
     response = user_drf_client.get(reverse("products_api-list"))
     assert response.status_code == status.HTTP_200_OK

@@ -377,10 +377,7 @@ class TestDeactivateEnrollments:
         expected_inactive_run_enrollments = course_run_enrollments[0:2]
         expected_ignored_run_enrollment = course_run_enrollments[2]
 
-        (
-            returned_program_enrollment,
-            returned_run_enrollments,
-        ) = deactivate_program_enrollment(
+        returned_program_enrollment, returned_run_enrollments = deactivate_program_enrollment(
             program_enrollment, change_status=ENROLL_CHANGE_STATUS_REFUNDED
         )
         program_enrollment.refresh_from_db()

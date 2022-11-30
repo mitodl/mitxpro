@@ -1,5 +1,5 @@
-astroid==2.6.6
-black==20.8b1
+astroid==2.4.2
+black==18.9b0
 bpython
 codecov
 django-debug-toolbar
@@ -10,7 +10,7 @@ nplusone>=0.8.1
 pdbpp
 pip-tools
 hypothesis==4.23.4
-pylint==2.7.4
+pylint==2.6.0
 pylint-django==2.1.0
 pytest-cov>=2.6.1
 pytest-django

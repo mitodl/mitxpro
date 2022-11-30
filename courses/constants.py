@@ -11,10 +11,8 @@ ENROLLABLE_ITEM_ID_SEPARATOR = "+"
 TEXT_ID_RUN_TAG_PATTERN = r"\{separator}(?P<run_tag>R\d+)$".format(
     separator=ENROLLABLE_ITEM_ID_SEPARATOR
 )
-PROGRAM_RUN_ID_PATTERN = (
-    r"^(?P<text_id_base>{program_prefix}.*){run_tag_pattern}".format(
-        program_prefix=PROGRAM_TEXT_ID_PREFIX, run_tag_pattern=TEXT_ID_RUN_TAG_PATTERN
-    )
+PROGRAM_RUN_ID_PATTERN = r"^(?P<text_id_base>{program_prefix}.*){run_tag_pattern}".format(
+    program_prefix=PROGRAM_TEXT_ID_PREFIX, run_tag_pattern=TEXT_ID_RUN_TAG_PATTERN
 )
 
 ENROLL_CHANGE_STATUS_DEFERRED = "deferred"

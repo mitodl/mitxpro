@@ -829,12 +829,8 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
         return self.course_run.start_date, self.course_run.end_date
 
     def __str__(self):
-        return (
-            'CourseRunCertificate for user={user}, run={course_run} ({uuid})"'.format(
-                user=self.user.username,
-                course_run=self.course_run.text_id,
-                uuid=self.uuid,
-            )
+        return 'CourseRunCertificate for user={user}, run={course_run} ({uuid})"'.format(
+            user=self.user.username, course_run=self.course_run.text_id, uuid=self.uuid
         )
 
     def save(self, *args, **kwargs):  # pylint: disable=signature-differs

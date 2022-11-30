@@ -82,11 +82,9 @@ def process_coupon_assignment_sheet(*, file_id, change_date=None):
     coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler(
         spreadsheet_id=file_id, bulk_assignment=bulk_assignment
     )
-    (
-        _,
-        num_created,
-        num_removed,
-    ) = coupon_assignment_handler.process_assignment_spreadsheet()
+    _, num_created, num_removed = (
+        coupon_assignment_handler.process_assignment_spreadsheet()
+    )
     return {
         "sheet_id": file_id,
         "assignments_created": num_created,
@@ -160,10 +158,8 @@ def update_incomplete_assignment_delivery_statuses():
     delivery status for each depending on what has been sent.
     """
     bulk_assignments = coupon_assign_api.fetch_update_eligible_bulk_assignments()
-    updated_assignments = (
-        coupon_assign_api.update_incomplete_assignment_message_statuses(
-            bulk_assignments
-        )
+    updated_assignments = coupon_assign_api.update_incomplete_assignment_message_statuses(
+        bulk_assignments
     )
     return [
         (bulk_assignment_id, len(product_coupon_assignments))

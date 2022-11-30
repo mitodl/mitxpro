@@ -60,10 +60,10 @@ class Command(EnrollmentChangeCommand):
         enrollment, enrolled_obj = self.fetch_enrollment(from_user, options)
 
         if options["program"]:
-            to_user_existing_enrolled_run_ids = (
-                CourseRunEnrollment.get_program_run_enrollments(
-                    user=to_user, program=enrolled_obj
-                ).values_list("run__courseware_id", flat=True)
+            to_user_existing_enrolled_run_ids = CourseRunEnrollment.get_program_run_enrollments(
+                user=to_user, program=enrolled_obj
+            ).values_list(
+                "run__courseware_id", flat=True
             )
             if len(to_user_existing_enrolled_run_ids) > 0:
                 raise CommandError(
@@ -72,10 +72,7 @@ class Command(EnrollmentChangeCommand):
                     )
                 )
 
-            (
-                new_program_enrollment,
-                new_run_enrollments,
-            ) = self.create_program_enrollment(
+            new_program_enrollment, new_run_enrollments = self.create_program_enrollment(
                 enrollment,
                 to_user=to_user,
                 keep_failed_enrollments=keep_failed_enrollments,
