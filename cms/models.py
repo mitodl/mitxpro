@@ -815,7 +815,9 @@ class ProgramPage(ProductPage):
         """
         Gets a list of pages (CoursePage) of all the courses associated with this program
         """
-        courses = self.program.courses.all()
+        courses = sorted(
+            self.program.courses.all(), key=lambda course: course.position_in_program
+        )
         return [course.coursepage for course in courses]
 
     @property
