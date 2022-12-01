@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.112.2
+---------------
+
+- Remove commented breakpoint
+- Fix course page ordering
+- Fix prefetch
+- Optimize properties
+- Prefetch program products
+- Add default for next
+- Optimized some queries
+- Revert API changes
+- Add imports
+- Revert changes in serializers
+- Improve Backend Performance
+
 Version 0.112.1 (Released November 30, 2022)
 ---------------
 
