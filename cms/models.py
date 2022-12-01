@@ -10,13 +10,13 @@ from urllib.parse import urljoin
 import pytz
 from django import forms
 from django.conf import settings
-from django.templatetags.static import static
+from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import Prefetch, prefetch_related_objects
 from django.http.response import Http404
 from django.shortcuts import reverse
+from django.templatetags.static import static
 from django.utils.text import slugify
-from django.core.validators import MinValueValidator
-
 from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
@@ -31,6 +31,7 @@ from wagtail.images.models import Image
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
+from cms.api import filter_and_sort_catalog_pages
 from cms.blocks import (
     CourseRunCertificateOverrides,
     FacultyBlock,
@@ -47,9 +48,9 @@ from cms.constants import (
     SIGNATORY_INDEX_SLUG,
 )
 from cms.forms import CertificatePageForm
-from cms.api import filter_and_sort_catalog_pages
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
-from courses.models import CourseRunCertificate, ProgramCertificate, ProgramRun
+from courses.models import Course, CourseRunCertificate, ProgramCertificate, ProgramRun
+from ecommerce.models import Product
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
 
@@ -238,35 +239,76 @@ class CatalogPage(Page):
         """
         Populate the context with live programs, courses and programs + courses
         """
-        program_page_qset = (
+        program_page_qset = list(
             ProgramPage.objects.live()
             .filter(program__live=True)
             .order_by("id")
-            .select_related("program", "thumbnail_image")
-            .prefetch_related("program__courses__courseruns")
+            .select_related("program")
+            .prefetch_related(
+                Prefetch(
+                    "program__courses",
+                    Course.objects.order_by("position_in_program").select_related(
+                        "coursepage"
+                    ),
+                ),
+            )
         )
-        course_page_qset = (
+        course_page_qset = list(
             CoursePage.objects.live()
             .filter(course__live=True)
             .order_by("id")
-            .select_related("course", "thumbnail_image")
-            .prefetch_related("course__courseruns")
+            .select_related("course")
         )
-        external_course_qset = (
-            ExternalCoursePage.objects.live()
-            .order_by("title")
-            .select_related("thumbnail_image")
+        external_course_qset = list(ExternalCoursePage.objects.live().order_by("title"))
+
+        external_program_qset = list(
+            ExternalProgramPage.objects.live().order_by("title")
         )
 
-        external_program_qset = (
-            ExternalProgramPage.objects.live()
-            .order_by("title")
-            .select_related("thumbnail_image")
+        # prefetch thumbnail images for all the pages in one query
+        prefetch_related_objects(
+            [
+                *program_page_qset,
+                *course_page_qset,
+                *external_course_qset,
+                *external_program_qset,
+            ],
+            "thumbnail_image",
         )
 
-        featured_product = program_page_qset.filter(
-            featured=True
-        ) or course_page_qset.filter(featured=True)
+        programs = [page.program for page in program_page_qset]
+        courses = [
+            *[page.course for page in course_page_qset],
+            *[course for program in programs for course in program.courses.all()],
+        ]
+
+        # prefetch all course runs in one query
+        prefetch_related_objects(courses, "courseruns")
+
+        # prefetch all products in one query
+        prefetch_related_objects(
+            [
+                *[run for course in courses for run in course.courseruns.all()],
+                *programs,
+            ],
+            Prefetch(
+                "products",
+                queryset=Product.objects.all().with_ordered_versions(),
+            ),
+        )
+
+        featured_product = next(
+            (
+                page
+                for page in [
+                    *program_page_qset,
+                    *course_page_qset,
+                ]
+                if page.featured
+            ),
+            None,
+        )
+
         all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
             program_page_qset,
             course_page_qset,
@@ -279,7 +321,7 @@ class CatalogPage(Page):
             all_pages=all_pages,
             program_pages=program_pages,
             course_pages=course_pages,
-            featured_product=featured_product.first(),
+            featured_product=featured_product,
             default_image_path=DEFAULT_COURSE_IMG_PATH,
             hubspot_portal_id=settings.HUBSPOT_CONFIG.get("HUBSPOT_PORTAL_ID"),
             hubspot_new_courses_form_guid=settings.HUBSPOT_CONFIG.get(
@@ -773,12 +815,10 @@ class ProgramPage(ProductPage):
         """
         Gets a list of pages (CoursePage) of all the courses associated with this program
         """
-        courses = self.program.courses.all()
-        return (
-            CoursePage.objects.filter(course_id__in=courses)
-            .select_related("course", "thumbnail_image")
-            .order_by("course__position_in_program")
+        courses = sorted(
+            self.program.courses.all(), key=lambda course: course.position_in_program
         )
+        return [course.coursepage for course in courses]
 
     @property
     def course_lineup(self):
