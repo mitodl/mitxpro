@@ -12,7 +12,7 @@ from django import forms
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Prefetch
+from django.db.models import Prefetch, prefetch_related_objects
 from django.http.response import Http404
 from django.shortcuts import reverse
 from django.templatetags.static import static
@@ -239,48 +239,64 @@ class CatalogPage(Page):
         """
         Populate the context with live programs, courses and programs + courses
         """
-        program_page_qset = (
+        program_page_qset = list(
             ProgramPage.objects.live()
             .filter(program__live=True)
             .order_by("id")
-            .select_related("program", "thumbnail_image")
-            .prefetch_related(
-                "program__courses__courseruns",
-                Prefetch(
-                    "program__products",
-                    queryset=Product.objects.all().with_ordered_versions(),
-                ),
-            )
+            .select_related("program")
+            .prefetch_related("program__courses")
         )
-        course_page_qset = (
+        course_page_qset = list(
             CoursePage.objects.live()
             .filter(course__live=True)
             .order_by("id")
-            .select_related("course", "thumbnail_image")
-            .prefetch_related(
-                "course__courseruns",
-                Prefetch(
-                    "course__courseruns__products",
-                    queryset=Product.objects.all().with_ordered_versions(),
-                ),
-            )
+            .select_related("course")
         )
-        external_course_qset = (
+        external_course_qset = list(
             ExternalCoursePage.objects.live()
             .order_by("title")
-            .select_related("thumbnail_image")
         )
 
-        external_program_qset = (
+        external_program_qset = list(
             ExternalProgramPage.objects.live()
             .order_by("title")
-            .select_related("thumbnail_image")
+        )
+        
+        # prefetch thumbnail images for all the pages in one query
+        prefetch_related_objects(
+            [
+                *program_page_qset,
+                *course_page_qset,
+                *external_course_qset,
+                *external_program_qset,
+            ],
+            "thumbnail_image",
         )
 
-        featured_product = (
-            program_page_qset.filter(featured=True).first()
-            or course_page_qset.filter(featured=True).first()
+        programs = [page.program for page in program_page_qset]
+        courses = [
+            *[page.course for page in course_page_qset],
+            *[course for program in programs for course in program.courses.all()]
+        ]
+
+        # prefetch all course runs in one query
+        prefetch_related_objects(courses, "courseruns")
+
+        # prefetch all products in one query
+        prefetch_related_objects(
+            [run for course in courses for run in course.courseruns.all()],
+            Prefetch(
+                "products",
+                queryset=Product.objects.all().with_ordered_versions(),
+            ),
         )
+
+        featured_product = next(page for page in [
+                *program_page_qset,
+                *course_page_qset,
+            ] if page.featured
+        )
+
         all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
             program_page_qset,
             course_page_qset,
