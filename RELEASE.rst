@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.112.3
+Version 0.112.3 (Released December 01, 2022)
 ---------------
 
 - Updated nginx to drop wagtail images Vary header
