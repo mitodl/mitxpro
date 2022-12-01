@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.112.2
+Version 0.112.2 (Released December 01, 2022)
 ---------------
 
 - Remove commented breakpoint
