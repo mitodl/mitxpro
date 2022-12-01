@@ -244,7 +244,14 @@ class CatalogPage(Page):
             .filter(program__live=True)
             .order_by("id")
             .select_related("program")
-            .prefetch_related("program__courses")
+            .prefetch_related(
+                "program__courses",
+                Prefetch(
+                    "program__courses__coursepage",
+                    CoursePage.objects.all().order_by("course__position_in_program"),
+                    to_attr="prefetched_course_pages",
+                ),
+            )
         )
         course_page_qset = list(
             CoursePage.objects.live()
@@ -252,14 +259,10 @@ class CatalogPage(Page):
             .order_by("id")
             .select_related("course")
         )
-        external_course_qset = list(
-            ExternalCoursePage.objects.live()
-            .order_by("title")
-        )
+        external_course_qset = list(ExternalCoursePage.objects.live().order_by("title"))
 
         external_program_qset = list(
-            ExternalProgramPage.objects.live()
-            .order_by("title")
+            ExternalProgramPage.objects.live().order_by("title")
         )
 
         # prefetch thumbnail images for all the pages in one query
@@ -276,7 +279,7 @@ class CatalogPage(Page):
         programs = [page.program for page in program_page_qset]
         courses = [
             *[page.course for page in course_page_qset],
-            *[course for program in programs for course in program.courses.all()]
+            *[course for program in programs for course in program.courses.all()],
         ]
 
         # prefetch all course runs in one query
@@ -286,7 +289,7 @@ class CatalogPage(Page):
         prefetch_related_objects(
             [
                 *[run for course in courses for run in course.courseruns.all()],
-                *programs
+                *programs,
             ],
             Prefetch(
                 "products",
@@ -295,11 +298,15 @@ class CatalogPage(Page):
         )
 
         featured_product = next(
-            (page for page in [
-                *program_page_qset,
-                *course_page_qset,
-            ] if page.featured),
-            None
+            (
+                page
+                for page in [
+                    *program_page_qset,
+                    *course_page_qset,
+                ]
+                if page.featured
+            ),
+            None,
         )
 
         all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(

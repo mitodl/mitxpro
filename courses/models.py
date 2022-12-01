@@ -166,7 +166,14 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     @cached_property
     def next_run_date(self):
         """Gets the start date of the next CourseRun of the first course (position_in_program=1) if one exists"""
-        first_course = self.courses.filter(position_in_program=1, live=True).first()
+        first_course = next(
+            (
+                course
+                for course in self.courses.all()
+                if course.position_in_program == 1 and course.live
+            ),
+            None,
+        )
         if first_course:
             return first_course.next_run_date
 
