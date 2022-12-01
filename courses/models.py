@@ -186,7 +186,6 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     @property
     def current_price(self):
         """Gets the price if it exists"""
-        # breakpoint()
         product = list(self.products.all())[0] if self.products.all() else None
         if not product:
             return None
