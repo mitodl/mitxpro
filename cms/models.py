@@ -261,7 +261,7 @@ class CatalogPage(Page):
             ExternalProgramPage.objects.live()
             .order_by("title")
         )
-        
+
         # prefetch thumbnail images for all the pages in one query
         prefetch_related_objects(
             [
@@ -291,10 +291,12 @@ class CatalogPage(Page):
             ),
         )
 
-        featured_product = next(page for page in [
+        featured_product = next(
+            (page for page in [
                 *program_page_qset,
                 *course_page_qset,
-            ] if page.featured
+            ] if page.featured),
+            None
         )
 
         all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
