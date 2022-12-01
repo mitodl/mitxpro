@@ -284,7 +284,10 @@ class CatalogPage(Page):
 
         # prefetch all products in one query
         prefetch_related_objects(
-            [run for course in courses for run in course.courseruns.all()],
+            [
+                *[run for course in courses for run in course.courseruns.all()],
+                *programs
+            ],
             Prefetch(
                 "products",
                 queryset=Product.objects.all().with_ordered_versions(),
