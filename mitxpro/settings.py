@@ -27,7 +27,7 @@ from redbeat import RedBeatScheduler
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
-VERSION = "0.112.2"
+VERSION = "0.112.3"
 
 ENVIRONMENT = get_string(
     name="MITXPRO_ENVIRONMENT",
