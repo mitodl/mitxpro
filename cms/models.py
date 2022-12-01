@@ -49,7 +49,7 @@ from cms.constants import (
 )
 from cms.forms import CertificatePageForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
-from courses.models import CourseRunCertificate, ProgramCertificate, ProgramRun
+from courses.models import Course, CourseRunCertificate, ProgramCertificate, ProgramRun
 from ecommerce.models import Product
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
@@ -245,11 +245,11 @@ class CatalogPage(Page):
             .order_by("id")
             .select_related("program")
             .prefetch_related(
-                "program__courses",
                 Prefetch(
-                    "program__courses__coursepage",
-                    CoursePage.objects.all().order_by("course__position_in_program"),
-                    to_attr="prefetched_course_pages",
+                    "program__courses",
+                    Course.objects.order_by("position_in_program").select_related(
+                        "coursepage"
+                    ),
                 ),
             )
         )
@@ -816,11 +816,7 @@ class ProgramPage(ProductPage):
         Gets a list of pages (CoursePage) of all the courses associated with this program
         """
         courses = self.program.courses.all()
-        return (
-            CoursePage.objects.filter(course_id__in=courses)
-            .select_related("course", "thumbnail_image")
-            .order_by("course__position_in_program")
-        )
+        return [course.coursepage for course in courses]
 
     @property
     def course_lineup(self):
