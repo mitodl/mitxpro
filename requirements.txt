@@ -18,6 +18,8 @@ attrs==21.4.0
     # via
     #   pytest
     #   zeep
+autopep8==2.0.0
+    # via django-silk
 backcall==0.2.0
     # via ipython
 beautifulsoup4==4.8.2
@@ -95,6 +97,7 @@ django==3.2.15
     #   django-filter
     #   django-oauth-toolkit
     #   django-redis
+    #   django-silk
     #   django-storages
     #   django-taggit
     #   django-treebeard
@@ -139,6 +142,8 @@ django-oauth-toolkit==1.4.0
 django-redis==5.0.0
     # via -r requirements.in
 django-robots==4.0
+    # via -r requirements.in
+django-silk==5.0.2
     # via -r requirements.in
 django-storages==1.13.1
     # via -r requirements.in
@@ -199,6 +204,8 @@ google-auth-httplib2==0.1.0
     # via google-api-python-client
 google-auth-oauthlib==0.5.0
     # via pygsheets
+gprof2dot==2022.7.29
+    # via django-silk
 html5lib==1.1
     # via
     #   mitol-django-mail
@@ -222,7 +229,9 @@ itypes==1.2.0
 jedi==0.18.1
     # via ipython
 jinja2==3.0.3
-    # via coreschema
+    # via
+    #   coreschema
+    #   django-silk
 jmespath==0.10.0
     # via
     #   boto3
@@ -302,6 +311,8 @@ pyasn1==0.4.8
     #   rsa
 pyasn1-modules==0.2.8
     # via google-auth
+pycodestyle==2.10.0
+    # via autopep8
 pycountry==19.7.15
     # via -r requirements.in
 pycparser==2.21
@@ -328,6 +339,7 @@ python-dateutil==2.5.3
     # via
     #   botocore
     #   celery-redbeat
+    #   django-silk
     #   edx-api-client
     #   faker
     #   hubspot-api-client
@@ -353,6 +365,7 @@ requests==2.27.1
     #   coreapi
     #   django-anymail
     #   django-oauth-toolkit
+    #   django-silk
     #   edx-api-client
     #   mitol-django-common
     #   mitol-django-digital-credentials
@@ -401,7 +414,9 @@ social-auth-core==4.2.0
 soupsieve==2.3.1
     # via beautifulsoup4
 sqlparse==0.4.2
-    # via django
+    # via
+    #   django
+    #   django-silk
 tablib[xls,xlsx]==3.2.0
     # via wagtail
 telepath==0.2
@@ -410,6 +425,8 @@ tenacity==8.0.1
     # via celery-redbeat
 toml==0.10.2
     # via pytest
+tomli==2.0.1
+    # via autopep8
 toolz==0.11.2
     # via mitol-django-mail
 traitlets==5.1.1

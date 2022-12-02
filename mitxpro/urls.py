@@ -94,6 +94,14 @@ urlpatterns = (
         re_path(r"^cms/", include(wagtailadmin_urls)),
         re_path(r"^documents/", include(wagtaildocs_urls)),
     ]
+    + (
+        [
+            path("__debug__/", include("debug_toolbar.urls")),
+            path("silk/", include("silk.urls", namespace="silk")),
+        ]
+        if settings.DEBUG
+        else []
+    )
     + decorate_urlpatterns(
         # NOTE: This route enables dynamic Wagtail image loading. It comes directly from the Wagtail docs:
         #       https://docs.wagtail.io/en/v2.7/advanced_topics/images/image_serve_view.html#setup
@@ -120,8 +128,3 @@ urlpatterns = (
 
 handler404 = not_found_handler
 handler500 = server_error_handler
-
-if settings.DEBUG:
-    import debug_toolbar  # pylint: disable=wrong-import-position, wrong-import-order
-
-    urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
