@@ -10,7 +10,6 @@ from urllib.parse import urljoin
 import pytz
 from django import forms
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Prefetch, prefetch_related_objects
@@ -50,7 +49,7 @@ from cms.constants import (
 )
 from cms.forms import CertificatePageForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
-from courses.models import Course, CourseRunCertificate, ProgramCertificate, ProgramRun, Program, CourseRun
+from courses.models import Course, CourseRunCertificate, ProgramCertificate, ProgramRun
 from ecommerce.models import Product
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
@@ -671,7 +670,9 @@ class ProductPage(MetadataPageMixin, Page):
         )
 
     def get_context(self, request, *args, **kwargs):
-        self.child_pages = self.get_children().select_related("content_type").live()
+        self.child_pages = (  # pylint: disable=attribute-defined-outside-init
+            self.get_children().select_related("content_type").live()
+        )
         return {
             **super().get_context(request, *args, **kwargs),
             **get_base_context(request),
@@ -696,10 +697,11 @@ class ProductPage(MetadataPageMixin, Page):
         if hasattr(self, "child_pages"):
             child = next(
                 (
-                    page for page in self.child_pages
+                    page
+                    for page in self.child_pages
                     if page.content_type.model == cls.__name__.lower()
                 ),
-                None
+                None,
             )
         else:
             child = self.get_children().type(cls).live().first()
@@ -848,25 +850,29 @@ class ProgramPage(ProductPage):
         now = now_in_utc()
         program = self.program
         prefetch_related_objects(
-            [program],
-            Prefetch("products", Product.objects.with_ordered_versions())
+            [program], Prefetch("products", Product.objects.with_ordered_versions())
         )
         prefetch_related_objects(
             [program],
-            Prefetch("programruns", ProgramRun.objects.filter(start_date__gt=now).order_by("start_date"))
+            Prefetch(
+                "programruns",
+                ProgramRun.objects.filter(start_date__gt=now).order_by("start_date"),
+            ),
         )
         prefetch_related_objects(
             [program],
             Prefetch(
                 "courses",
-                Course.objects.select_related(
-                    "coursepage"
-                ).prefetch_related(
+                Course.objects.select_related("coursepage").prefetch_related(
                     "courseruns"
-                )
-            )
+                ),
+            ),
         )
-        product = list(program.products.all())[0] if program and program.products.all() else None
+        product = (
+            list(program.products.all())[0]
+            if program and program.products.all()
+            else None
+        )
         is_anonymous = request.user.is_anonymous
         enrolled = (
             ProgramEnrollment.objects.filter(
@@ -876,7 +882,9 @@ class ProgramPage(ProductPage):
             else False
         )
 
-        soonest_future_program_run = program.programruns.all()[0] if program.programruns.all() else None
+        soonest_future_program_run = (
+            program.programruns.all()[0] if program.programruns.all() else None
+        )
         if soonest_future_program_run:
             checkout_product_id = soonest_future_program_run.full_readable_id
         elif product:
@@ -961,14 +969,17 @@ class CoursePage(ProductPage):
         # Hits a circular import at the top of the module
         from courses.models import CourseRunEnrollment
 
-        self.course = Course.objects.filter(
-            id=self.course_id
-        ).select_related(
-            "program", "program__programpage"
-        ).prefetch_related(
-            "courseruns",
-            Prefetch("courseruns__products", Product.objects.with_ordered_versions())
-        ).first()
+        self.course = (
+            Course.objects.filter(id=self.course_id)
+            .select_related("program", "program__programpage")
+            .prefetch_related(
+                "courseruns",
+                Prefetch(
+                    "courseruns__products", Product.objects.with_ordered_versions()
+                ),
+            )
+            .first()
+        )
         course = self.course
         run = course.first_unexpired_run
         product = list(run.products.all())[0] if run and run.products.all() else None
