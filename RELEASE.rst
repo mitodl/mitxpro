@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.112.4
+---------------
+
+- Fixed index on ProductCouponAssignment
+
 Version 0.112.3 (Released December 01, 2022)
 ---------------
 
