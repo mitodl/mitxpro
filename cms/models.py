@@ -484,49 +484,59 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
         """
         Gets the "Learning Experience" section subpage
         """
-        return self._get_child_page_of_type(LearningTechniquesPage)
+        return list(LearningTechniquesPage.objects.child_of(self))[0]
+
+        # return self._get_child_page_of_type(LearningTechniquesPage)
 
     @property
     def testimonials(self):
         """
         Gets the testimonials section subpage
         """
-        return self._get_child_page_of_type(UserTestimonialsPage)
+        # breakpoint()
+        return list(UserTestimonialsPage.objects.child_of(self))[0]
+        # return self._get_child_page_of_type(UserTestimonialsPage)
 
     @property
     def news_and_events(self):
         """
         Gets the news and events section subpage
         """
-        return self._get_child_page_of_type(NewsAndEventsPage)
+        return list(NewsAndEventsPage.objects.child_of(self))[0]
+        # return self._get_child_page_of_type(NewsAndEventsPage)
 
     @property
     def upcoming_courseware(self):
         """
         Gets the upcoming courseware section subpage
         """
-        return self._get_child_page_of_type(CoursesInProgramPage)
+        return list(CoursesInProgramPage.objects.child_of(self))[0]
+        # return self._get_child_page_of_type(CoursesInProgramPage)
 
     @property
     def inquiry_section(self):
         """
         Gets the "inquire now" section subpage
         """
-        return self._get_child_page_of_type(ForTeamsPage)
+        return list(ForTeamsPage.objects.child_of(self))[0]
+        # return self._get_child_page_of_type(ForTeamsPage)
 
     @property
     def about_mit_xpro(self):
         """
         Gets the "about mit xpro" section subpage
         """
-        return self._get_child_page_of_type(TextVideoSection)
+        return list(TextVideoSection.objects.child_of(self))[0]
+
+        # return self._get_child_page_of_type(TextVideoSection)
 
     @property
     def image_carousel_section(self):
         """
         Gets the "image carousel" section sub page.
         """
-        return self._get_child_page_of_type(ImageCarouselPage)
+        return list(ImageCarouselPage.objects.child_of(self))[0]
+        # return self._get_child_page_of_type(ImageCarouselPage)
 
     def get_context(self, request, *args, **kwargs):
         return {
