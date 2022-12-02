@@ -197,14 +197,24 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     @property
     def first_unexpired_run(self):
         """Gets the earliest unexpired CourseRun of the first course (position_in_program=1) if one exists"""
-        first_course = self.courses.filter(position_in_program=1, live=True).first()
+        first_course = next(
+            (
+                course for course in self.courses.all() if course.position_in_program == 1 and course.live
+            ),
+            None
+        )
         if first_course:
             return first_course.first_unexpired_run
 
     @property
     def first_course_unexpired_runs(self):
         """Gets the unexpired course runs for the first course (position_in_program=1) in this program"""
-        first_course = self.courses.filter(position_in_program=1, live=True).first()
+        first_course = next(
+            (
+                course for course in self.courses.all() if course.position_in_program == 1 and course.live
+            ),
+            None
+        )
         if first_course:
             return first_course.unexpired_runs
 
@@ -356,7 +366,10 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         return list(
             filter(
                 op.attrgetter("is_unexpired"),
-                self.courseruns.filter(live=True).order_by("start_date"),
+                sorted(
+                    [course_run for course_run in self.courseruns.all()],
+                    key=lambda course_run: course_run.start_date
+                ),
             )
         )
 
