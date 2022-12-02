@@ -7,6 +7,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.functions import Upper
 from django.templatetags.static import static
 from django.utils.functional import cached_property
 
@@ -785,7 +786,7 @@ class ProductCouponAssignment(TimestampedModel):
     product coupon can only be redeemed by a User with the given email address)
     """
 
-    email = models.EmailField(blank=False, db_index=True)
+    email = models.EmailField(blank=False)
     original_email = models.EmailField(null=True, blank=True)
     product_coupon = models.ForeignKey(CouponEligibility, on_delete=models.PROTECT)
     redeemed = models.BooleanField(default=False)
@@ -803,3 +804,12 @@ class ProductCouponAssignment(TimestampedModel):
 
     def __str__(self):
         return f"ProductCouponAssignment for {self.email}, product coupon {self.product_coupon_id} (redeemed: {self.redeemed})"
+
+    class Meta:
+        indexes = (
+            models.Index(
+                Upper("email"),
+                name="uppercased_email_idx",
+                condition=models.Q(redeemed=False),
+            ),
+        )
