@@ -220,8 +220,14 @@ MIDDLEWARE = (
 
 # enable the nplusone profiler only in debug mode
 if DEBUG:
-    INSTALLED_APPS += ("nplusone.ext.django",)
-    MIDDLEWARE += ("nplusone.ext.django.NPlusOneMiddleware",)
+    INSTALLED_APPS += (
+        "nplusone.ext.django",
+        "silk",
+    )
+    MIDDLEWARE += (
+        "nplusone.ext.django.NPlusOneMiddleware",
+        "silk.middleware.SilkyMiddleware",
+    )
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
@@ -314,6 +320,10 @@ ROBOTS_CACHE_TIMEOUT = get_int(
     default=60 * 60 * 24,
     description="How long the robots.txt file should be cached",
 )
+
+# profiling
+
+SILKY_ANALYZE_QUERIES = True
 
 # social auth
 AUTHENTICATION_BACKENDS = (
