@@ -8,6 +8,7 @@ import hashlib
 import hmac
 import logging
 from collections import defaultdict
+from datetime import timedelta
 from urllib.parse import quote_plus, urljoin
 import uuid
 from typing import NamedTuple, Optional, Iterable
@@ -1055,7 +1056,7 @@ def fetch_and_serialize_unused_coupons(user):
     now = now_in_utc()
     coupons_data = (
         CouponEligibility.objects.filter(id__in=unused_product_coupon_ids)
-        .select_related("coupon__payment")
+        .select_related("coupon", "coupon__payment", "product")
         .annotate(max_created_on=Max("coupon__payment__versions__created_on"))
         .filter(max_created_on=F("coupon__payment__versions__created_on"))
         .filter(
@@ -1063,35 +1064,24 @@ def fetch_and_serialize_unused_coupons(user):
             | Q(coupon__payment__versions__expiration_date__gt=now)
         )
         .exclude(product__is_active=False)
-        .order_by("coupon__payment__versions__expiration_date")
-        .values(
-            "product__id",
-            "coupon__payment__versions__expiration_date",
-            "coupon__coupon_code",
-        )
+        .distinct()
     )
 
-    unused_coupons = []
-    for coupon_data in coupons_data:
-        try:
-            product = Product.objects.get(id=coupon_data["product__id"])
-        except Product.DoesNotExist:
-            pass
-        else:
-            unused_coupons.append(
-                {
-                    "coupon_code": coupon_data["coupon__coupon_code"],
-                    "product_id": coupon_data["product__id"],
-                    "expiration_date": coupon_data[
-                        "coupon__payment__versions__expiration_date"
-                    ],
-                    "product_title": product.title,
-                    "product_type": product.type_string,
-                    "thumbnail_url": product.thumbnail_url,
-                    "start_date": product.start_date,
-                }
-            )
-    return unused_coupons
+    return sorted(
+        [
+            {
+                "coupon_code": coupon_eligibility.coupon.coupon_code,
+                "product_id": coupon_eligibility.product.id,
+                "expiration_date": coupon_eligibility.coupon.payment.latest_version.expiration_date,
+                "product_title": coupon_eligibility.product.title,
+                "product_type": coupon_eligibility.product.type_string,
+                "thumbnail_url": coupon_eligibility.product.thumbnail_url,
+                "start_date": coupon_eligibility.product.start_date,
+            }
+            for coupon_eligibility in coupons_data
+        ],
+        key=lambda coupon: coupon["expiration_date"] or now + timedelta(weeks=9999),
+    )
 
 
 def get_or_create_data_consent_users(basket):
