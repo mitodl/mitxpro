@@ -933,8 +933,8 @@ class CoursePage(ProductPage):
         Gets the program page associated with this course, if it exists
         """
         return (
-            self.course_with_related_program.program.page
-            if self.course_with_related_program.program
+            self.course_with_related_objects.program.page
+            if self.course_with_related_objects.program
             else None
         )
 
@@ -960,22 +960,22 @@ class CoursePage(ProductPage):
         return (
             (
                 CoursePage.objects.filter(
-                    course__program=self.course_with_related_program.program
+                    course__program=self.course_with_related_objects.program
                 )
                 .select_related("course", "thumbnail_image")
                 .order_by("course__position_in_program")
             )
-            if self.course_with_related_program.program
+            if self.course_with_related_objects.program
             else []
         )
 
     @property
     def product(self):
         """Gets the product associated with this page"""
-        return self.course_with_related_program
+        return self.course_with_related_objects
 
     @cached_property
-    def course_with_related_program(self):
+    def course_with_related_objects(self):
         """
         Gets the course with related objects.
         """
@@ -995,7 +995,7 @@ class CoursePage(ProductPage):
         # Hits a circular import at the top of the module
         from courses.models import CourseRunEnrollment
 
-        run = self.course_with_related_program.first_unexpired_run
+        run = self.course_with_related_objects.first_unexpired_run
         product = list(run.products.all())[0] if run and run.products.all() else None
         is_anonymous = request.user.is_anonymous
         enrolled = (
