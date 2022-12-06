@@ -259,7 +259,7 @@ mitol-django-mail==3.2.1
     #   mitol-django-authentication
 mitol-django-oauth-toolkit-extensions==1.2.1
     # via -r requirements.in
-newrelic==7.6.0.173
+newrelic==8.04
     # via -r requirements.in
 oauthlib==3.2.0
     # via
