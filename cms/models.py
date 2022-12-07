@@ -16,6 +16,7 @@ from django.db.models import Prefetch, prefetch_related_objects
 from django.http.response import Http404
 from django.shortcuts import reverse
 from django.templatetags.static import static
+from django.utils.functional import cached_property
 from django.utils.text import slugify
 from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
@@ -691,7 +692,14 @@ class ProductPage(MetadataPageMixin, Page):
 
     def _get_child_page_of_type(self, cls):
         """Gets the first child page of the given type if it exists"""
-        child = self.get_children().type(cls).live().first()
+        child = next(
+            (
+                page
+                for page in self.child_pages
+                if page.content_type.model == cls.__name__.lower()
+            ),
+            None,
+        )
         return child.specific if child else None
 
     def save(self, clean=True, user=None, log_action=False, **kwargs):
@@ -705,6 +713,11 @@ class ProductPage(MetadataPageMixin, Page):
     def product(self):
         """Returns the courseware object (Course, Program) associated with this page"""
         raise NotImplementedError
+
+    @cached_property
+    def child_pages(self):
+        """Gets child pages for the product detail page"""
+        return self.get_children().select_related("content_type").live()
 
     @property
     def outcomes(self):
@@ -834,8 +847,32 @@ class ProgramPage(ProductPage):
         # Hits a circular import at the top of the module
         from courses.models import ProgramEnrollment
 
+        now = now_in_utc()
         program = self.program
-        product = program.products.first() if program else None
+        prefetch_related_objects(
+            [program], Prefetch("products", Product.objects.with_ordered_versions())
+        )
+        prefetch_related_objects(
+            [program],
+            Prefetch(
+                "programruns",
+                ProgramRun.objects.filter(start_date__gt=now).order_by("start_date"),
+            ),
+        )
+        prefetch_related_objects(
+            [program],
+            Prefetch(
+                "courses",
+                Course.objects.select_related("coursepage").prefetch_related(
+                    "courseruns"
+                ),
+            ),
+        )
+        product = (
+            list(program.products.all())[0]
+            if program and program.products.all()
+            else None
+        )
         is_anonymous = request.user.is_anonymous
         enrolled = (
             ProgramEnrollment.objects.filter(
@@ -844,11 +881,9 @@ class ProgramPage(ProductPage):
             if program and not is_anonymous
             else False
         )
-        now = now_in_utc()
+
         soonest_future_program_run = (
-            program.programruns.filter(start_date__gt=now)
-            .order_by("start_date")
-            .first()
+            program.programruns.all()[0] if program.programruns.all() else None
         )
         if soonest_future_program_run:
             checkout_product_id = soonest_future_program_run.full_readable_id
@@ -894,7 +929,11 @@ class CoursePage(ProductPage):
         """
         Gets the program page associated with this course, if it exists
         """
-        return self.course.program.page if self.course.program else None
+        return (
+            self.course_with_related_objects.program.page
+            if self.course_with_related_objects.program
+            else None
+        )
 
     @property
     def course_lineup(self):
@@ -917,26 +956,44 @@ class CoursePage(ProductPage):
         """
         return (
             (
-                CoursePage.objects.filter(course__program=self.course.program)
+                CoursePage.objects.filter(
+                    course__program=self.course_with_related_objects.program
+                )
                 .select_related("course", "thumbnail_image")
                 .order_by("course__position_in_program")
             )
-            if self.course.program
+            if self.course_with_related_objects.program
             else []
         )
 
     @property
     def product(self):
         """Gets the product associated with this page"""
-        return self.course
+        return self.course_with_related_objects
+
+    @cached_property
+    def course_with_related_objects(self):
+        """
+        Gets the course with related objects.
+        """
+        return (
+            Course.objects.filter(id=self.course_id)
+            .select_related("program", "program__programpage")
+            .prefetch_related(
+                "courseruns",
+                Prefetch(
+                    "courseruns__products", Product.objects.with_ordered_versions()
+                ),
+            )
+            .first()
+        )
 
     def get_context(self, request, *args, **kwargs):
         # Hits a circular import at the top of the module
         from courses.models import CourseRunEnrollment
 
-        course = self.course
-        run = course.first_unexpired_run
-        product = run.products.first() if run else None
+        run = self.course_with_related_objects.first_unexpired_run
+        product = list(run.products.all())[0] if run and run.products.all() else None
         is_anonymous = request.user.is_anonymous
         enrolled = (
             CourseRunEnrollment.objects.filter(user=request.user, run=run).exists()

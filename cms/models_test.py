@@ -1,48 +1,49 @@
 """ Tests for cms pages. """
 # pylint: disable=too-many-lines
 import json
-import pytest
-import factory
 
+import factory
+import pytest
 from django.core.exceptions import ValidationError
 from django.urls import resolve
 from wagtail.core.utils import WAGTAIL_APPEND_SLASH
 
 from cms.factories import (
-    ResourcePageFactory,
-    SiteNotificationFactory,
-    ForTeamsPageFactory,
-    UserTestimonialsPageFactory,
-    NewsAndEventsPageFactory,
-    CoursesInProgramPageFactory,
-    HomePageFactory,
-    ProgramPageFactory,
-    CoursePageFactory,
-    TextVideoSectionFactory,
-    ImageCarouselPageFactory,
-    FacultyMembersPageFactory,
-    LearningTechniquesPageFactory,
-    FrequentlyAskedQuestionPageFactory,
-    FrequentlyAskedQuestionFactory,
-    LearningOutcomesPageFactory,
-    WhoShouldEnrollPageFactory,
-    TextSectionFactory,
     CertificatePageFactory,
+    CoursePageFactory,
+    CoursesInProgramPageFactory,
     ExternalCoursePageFactory,
     ExternalProgramPageFactory,
+    FacultyMembersPageFactory,
+    ForTeamsPageFactory,
+    FrequentlyAskedQuestionFactory,
+    FrequentlyAskedQuestionPageFactory,
+    HomePageFactory,
+    ImageCarouselPageFactory,
+    LearningOutcomesPageFactory,
+    LearningTechniquesPageFactory,
+    NewsAndEventsPageFactory,
+    ProgramPageFactory,
+    ResourcePageFactory,
+    SiteNotificationFactory,
+    TextSectionFactory,
+    TextVideoSectionFactory,
+    UserTestimonialsPageFactory,
+    WhoShouldEnrollPageFactory,
 )
 from cms.models import (
-    UserTestimonialsPage,
-    ForTeamsPage,
+    CertificatePage,
     CoursesInProgramPage,
+    ForTeamsPage,
     FrequentlyAskedQuestionPage,
     LearningOutcomesPage,
     LearningTechniquesPage,
-    WhoShouldEnrollPage,
-    CertificatePage,
     SignatoryPage,
+    UserTestimonialsPage,
+    WhoShouldEnrollPage,
 )
 from courses.factories import CourseFactory
+
 
 pytestmark = [pytest.mark.django_db]
 
@@ -365,6 +366,9 @@ def _get_faculty_members():
 
 def _assert_faculty_members(obj):
     """Verifies `faculty` property returns expected value"""
+    # invalidate cached property
+    del obj.child_pages
+
     assert obj.faculty
     for block in obj.faculty.members:
         assert block.block_type == "member"
@@ -806,6 +810,10 @@ def test_course_page_learning_outcomes():
     ) in learning_outcomes_page.outcome_items:  # pylint: disable=not-an-iterable
         assert block.block_type == "outcome"
         assert block.value == "benefit"
+
+    # invalidate cached property
+    del course_page.child_pages
+
     assert course_page.outcomes == learning_outcomes_page
     assert not LearningOutcomesPage.can_create_at(course_page)
 
@@ -833,6 +841,10 @@ def test_external_course_page_learning_outcomes():
     ) in learning_outcomes_page.outcome_items:  # pylint: disable=not-an-iterable
         assert block.block_type == "outcome"
         assert block.value == "benefit"
+
+    # invalidate cached property
+    del external_course_page.child_pages
+
     assert external_course_page.outcomes == learning_outcomes_page
     assert not LearningOutcomesPage.can_create_at(external_course_page)
 
@@ -1271,6 +1283,10 @@ def test_product_program_page_news_and_events():
     program_page = ProgramPageFactory.create()
     assert not program_page.news_and_events
     news_and_events_page = create_news_and_events(parent=program_page)
+
+    # invalidate cached property
+    del program_page.child_pages
+
     assert program_page.news_and_events == news_and_events_page
     assert news_and_events_page.heading == "heading"
     _assert_news_and_events_values(news_and_events_page)
@@ -1284,6 +1300,10 @@ def test_product_course_page_news_and_events_without_program():
     course_page = CoursePageFactory.create(course__program=None)
     assert not course_page.news_and_events
     news_and_events_page = create_news_and_events(parent=course_page)
+
+    # invalidate cached property
+    del course_page.child_pages
+
     assert course_page.news_and_events == news_and_events_page
     assert news_and_events_page.heading == "heading"
     _assert_news_and_events_values(news_and_events_page)
@@ -1302,6 +1322,10 @@ def test_product_course_page_news_and_events_with_program():
     )
     course_news_and_events_page = create_news_and_events(parent=course_page)
 
+    # invalidate cached property
+    del course_page.child_pages
+    del course_page.program_page.child_pages
+
     assert course_page.news_and_events == program_news_and_events_page
     assert course_page.news_and_events != course_news_and_events_page
     assert program_news_and_events_page.heading == "heading program"
@@ -1315,6 +1339,10 @@ def test_external_program_page_news_and_events():
     external_program_page = ExternalProgramPageFactory.create()
     assert not external_program_page.news_and_events
     news_and_events_page = create_news_and_events(parent=external_program_page)
+
+    # invalidate cached property
+    del external_program_page.child_pages
+
     assert external_program_page.news_and_events == news_and_events_page
     assert news_and_events_page.heading == "heading"
     _assert_news_and_events_values(news_and_events_page)
@@ -1327,6 +1355,10 @@ def test_external_course_page_news_and_events():
     external_course_page = ExternalCoursePageFactory.create()
     assert not external_course_page.news_and_events
     news_and_events_page = create_news_and_events(parent=external_course_page)
+
+    # invalidate cached property
+    del external_course_page.child_pages
+
     assert external_course_page.news_and_events == news_and_events_page
     assert news_and_events_page.heading == "heading"
     _assert_news_and_events_values(news_and_events_page)
