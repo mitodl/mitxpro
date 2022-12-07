@@ -2,40 +2,41 @@
 # pylint: disable=redefined-outer-name
 import itertools
 from datetime import timedelta
+from types import SimpleNamespace
 from urllib.parse import parse_qsl
 
 import pytest
-from oauth2_provider.models import Application, AccessToken
-from oauthlib.common import generate_token
-from freezegun import freeze_time
 import responses
+from django.contrib.auth import get_user_model
+from freezegun import freeze_time
+from oauth2_provider.models import AccessToken, Application
+from oauthlib.common import generate_token
 from requests.exceptions import HTTPError
 from rest_framework import status
-from django.contrib.auth import get_user_model
 
-from courses.factories import CourseRunFactory, CourseRunEnrollmentFactory
+from courses.factories import CourseRunEnrollmentFactory, CourseRunFactory
 from courseware.api import (
-    create_user,
-    create_edx_user,
+    ACCESS_TOKEN_HEADER_NAME,
+    OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS,
     create_edx_auth_token,
-    update_edx_user_email,
-    repair_faulty_edx_user,
-    repair_faulty_courseware_users,
-    get_valid_edx_api_auth,
-    get_edx_api_client,
+    create_edx_user,
+    create_user,
     enroll_in_edx_course_runs,
+    get_edx_api_client,
+    get_valid_edx_api_auth,
+    repair_faulty_courseware_users,
+    repair_faulty_edx_user,
     retry_failed_edx_enrollments,
     unenroll_edx_course_run,
-    OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS,
-    ACCESS_TOKEN_HEADER_NAME,
+    update_edx_user_email,
     update_edx_user_name,
 )
 from courseware.constants import (
-    PLATFORM_EDX,
-    EDX_ENROLLMENT_PRO_MODE,
-    EDX_ENROLLMENT_AUDIT_MODE,
-    PRO_ENROLL_MODE_ERROR_TEXTS,
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
+    EDX_ENROLLMENT_AUDIT_MODE,
+    EDX_ENROLLMENT_PRO_MODE,
+    PLATFORM_EDX,
+    PRO_ENROLL_MODE_ERROR_TEXTS,
 )
 from courseware.exceptions import (
     CoursewareUserCreateError,
@@ -43,10 +44,10 @@ from courseware.exceptions import (
     UnknownEdxApiEnrollException,
     UserNameUpdateFailedException,
 )
-from courseware.factories import OpenEdxApiAuthFactory, CoursewareUserFactory
+from courseware.factories import CoursewareUserFactory, OpenEdxApiAuthFactory
 from courseware.models import CoursewareUser, OpenEdxApiAuth
+from mitxpro.test_utils import MockHttpError, MockResponse
 from mitxpro.utils import now_in_utc
-from mitxpro.test_utils import MockResponse, MockHttpError
 from users.factories import UserFactory
 
 
@@ -67,6 +68,77 @@ def application(settings):
         client_type="confidential",
         authorization_grant_type="authorization-code",
         skip_authorization=True,
+    )
+
+
+@pytest.fixture()
+def update_token_response(settings):
+    """mock response for updating an auth token"""
+    refresh_token = "abc123"
+    access_token = "def456"
+
+    responses.add(
+        responses.POST,
+        f"{settings.OPENEDX_API_BASE_URL}/oauth2/access_token",
+        json=dict(
+            refresh_token=refresh_token, access_token=access_token, expires_in=3600
+        ),
+        status=status.HTTP_200_OK,
+    )
+    return SimpleNamespace(refresh_token=refresh_token, access_token=access_token)
+
+
+@pytest.fixture()
+def update_token_response_error(settings):
+    """mock response for updating an auth token"""
+    refresh_token = "abc123"
+    access_token = "def456"
+
+    responses.add(
+        responses.POST,
+        f"{settings.OPENEDX_API_BASE_URL}/oauth2/access_token",
+        json=dict(
+            refresh_token=refresh_token, access_token=access_token, expires_in=3600
+        ),
+        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    )
+    return SimpleNamespace(refresh_token=refresh_token, access_token=access_token)
+
+
+@pytest.fixture()
+def create_token_responses(settings):
+    """Mock responses for creating an auth token"""
+    refresh_token = "abc123"
+    access_token = "def456"
+    code = "ghi789"
+    responses.add(
+        responses.GET,
+        f"{settings.OPENEDX_API_BASE_URL}/auth/login/mitxpro-oauth2/?auth_entry=login",
+        status=status.HTTP_200_OK,
+    )
+    responses.add(
+        responses.GET,
+        f"{settings.OPENEDX_API_BASE_URL}/oauth2/authorize",
+        headers={
+            "Location": f"{settings.SITE_BASE_URL}/login/_private/complete?code={code}"
+        },
+        status=status.HTTP_302_FOUND,
+    )
+    responses.add(
+        responses.GET,
+        f"{settings.SITE_BASE_URL}/login/_private/complete",
+        status=status.HTTP_200_OK,
+    )
+    responses.add(
+        responses.POST,
+        f"{settings.OPENEDX_API_BASE_URL}/oauth2/access_token",
+        json=dict(
+            refresh_token=refresh_token, access_token=access_token, expires_in=3600
+        ),
+        status=status.HTTP_200_OK,
+    )
+    return SimpleNamespace(
+        refresh_token=refresh_token, access_token=access_token, code=code
     )
 
 
@@ -142,43 +214,13 @@ def test_create_edx_user_conflict(settings, user):
 
 @responses.activate
 @freeze_time("2019-03-24 11:50:36")
-def test_create_edx_auth_token(settings, user):
+def test_create_edx_auth_token(settings, user, create_token_responses):
     """Tests create_edx_auth_token makes the expected incantations to create a OpenEdxApiAuth"""
-    refresh_token = "abc123"
-    access_token = "def456"
-    code = "ghi789"
-    responses.add(
-        responses.GET,
-        f"{settings.OPENEDX_API_BASE_URL}/auth/login/mitxpro-oauth2/?auth_entry=login",
-        status=status.HTTP_200_OK,
-    )
-    responses.add(
-        responses.GET,
-        f"{settings.OPENEDX_API_BASE_URL}/oauth2/authorize",
-        headers={
-            "Location": f"{settings.SITE_BASE_URL}/login/_private/complete?code={code}"
-        },
-        status=status.HTTP_302_FOUND,
-    )
-    responses.add(
-        responses.GET,
-        f"{settings.SITE_BASE_URL}/login/_private/complete",
-        status=status.HTTP_200_OK,
-    )
-    responses.add(
-        responses.POST,
-        f"{settings.OPENEDX_API_BASE_URL}/oauth2/access_token",
-        json=dict(
-            refresh_token=refresh_token, access_token=access_token, expires_in=3600
-        ),
-        status=status.HTTP_200_OK,
-    )
-
     create_edx_auth_token(user)
 
     assert len(responses.calls) == 4
     assert dict(parse_qsl(responses.calls[3].request.body)) == dict(
-        code=code,
+        code=create_token_responses.code,
         grant_type="authorization_code",
         client_id=settings.OPENEDX_API_CLIENT_ID,
         client_secret=settings.OPENEDX_API_CLIENT_SECRET,
@@ -189,8 +231,8 @@ def test_create_edx_auth_token(settings, user):
 
     auth = OpenEdxApiAuth.objects.get(user=user)
 
-    assert auth.refresh_token == refresh_token
-    assert auth.access_token == access_token
+    assert auth.refresh_token == create_token_responses.refresh_token
+    assert auth.access_token == create_token_responses.access_token
     # plus expires_in, minutes 10 seconds
     assert auth.access_token_expires_on == now_in_utc() + timedelta(
         minutes=59, seconds=50
@@ -258,20 +300,9 @@ def test_get_valid_edx_api_auth_unexpired():
 
 @responses.activate
 @freeze_time("2019-03-24 11:50:36")
-def test_get_valid_edx_api_auth_expired(settings):
+def test_get_valid_edx_api_auth_expired(settings, update_token_response):
     """Tests get_valid_edx_api_auth fetches and updates the auth credentials if expired"""
     auth = OpenEdxApiAuthFactory.create(expired=True)
-    refresh_token = "abc123"
-    access_token = "def456"
-
-    responses.add(
-        responses.POST,
-        f"{settings.OPENEDX_API_BASE_URL}/oauth2/access_token",
-        json=dict(
-            refresh_token=refresh_token, access_token=access_token, expires_in=3600
-        ),
-        status=status.HTTP_200_OK,
-    )
 
     updated_auth = get_valid_edx_api_auth(auth.user)
 
@@ -284,12 +315,59 @@ def test_get_valid_edx_api_auth_expired(settings):
         client_secret=settings.OPENEDX_API_CLIENT_SECRET,
     )
 
-    assert updated_auth.refresh_token == refresh_token
-    assert updated_auth.access_token == access_token
+    assert updated_auth.refresh_token == update_token_response.refresh_token
+    assert updated_auth.access_token == update_token_response.access_token
     # plus expires_in, minutes 10 seconds
     assert updated_auth.access_token_expires_on == now_in_utc() + timedelta(
         minutes=59, seconds=50
     )
+
+
+@responses.activate
+@freeze_time("2019-03-24 11:50:36")
+def test_get_valid_edx_api_auth_expired_and_broken(
+    settings,
+    update_token_response_error,  # pylint:disable=unused-argument
+    create_token_responses,
+):
+    """Tests get_valid_edx_api_auth fetches and creates new auth credentials if expired/broken"""
+    auth = OpenEdxApiAuthFactory.create(expired=True)
+
+    updated_auth = get_valid_edx_api_auth(auth.user)
+
+    assert updated_auth is not None
+    assert len(responses.calls) == 5
+    assert dict(parse_qsl(responses.calls[0].request.body)) == dict(
+        refresh_token=auth.refresh_token,
+        grant_type="refresh_token",
+        client_id=settings.OPENEDX_API_CLIENT_ID,
+        client_secret=settings.OPENEDX_API_CLIENT_SECRET,
+    )
+
+    assert updated_auth.refresh_token == create_token_responses.refresh_token
+    assert updated_auth.access_token == create_token_responses.access_token
+    # plus expires_in, minutes 10 seconds
+    assert updated_auth.access_token_expires_on == now_in_utc() + timedelta(
+        minutes=59, seconds=50
+    )
+
+
+@responses.activate
+@freeze_time("2019-03-24 11:50:36")
+def test_get_valid_edx_api_auth_deleted(create_token_responses):
+    """Tests get_valid_edx_api_auth creates the auth credentials if they don't exist"""
+    user = UserFactory.create()
+
+    assert OpenEdxApiAuth.objects.filter(user=user).first() is None
+
+    updated_auth = get_valid_edx_api_auth(user)
+
+    assert updated_auth is not None
+    assert len(responses.calls) == 4
+
+    assert updated_auth.refresh_token == create_token_responses.refresh_token
+    assert updated_auth.access_token == create_token_responses.access_token
+    assert OpenEdxApiAuth.objects.filter(user=user).exists()
 
 
 def test_get_edx_api_client(mocker, settings, user):
