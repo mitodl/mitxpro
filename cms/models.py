@@ -707,7 +707,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             "news_and_events": self.news_and_events,
         }
 
-
     def save(self, clean=True, user=None, log_action=False, **kwargs):
         """If featured is True then set False in any existing product page(s)."""
         if self.featured:
