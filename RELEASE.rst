@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.112.5 (Released December 07, 2022)
+---------------
+
+- upgrade newrelic (#2511)
+
 Version 0.112.4 (Released December 05, 2022)
 ---------------
 
