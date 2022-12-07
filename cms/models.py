@@ -430,9 +430,6 @@ class CertificateIndexPage(RoutablePageMixin, Page):
 class WagtailCachedPageMixin:
     """Mixin for common properties and child page queries for a WagtailPage"""
 
-    def __init__(self, *args, **kwargs):
-        super(WagtailCachedPageMixin, self).__init__(*args, **kwargs)
-
     @cached_property
     def child_pages(self):
         """Gets child pages for the wagtail page"""
