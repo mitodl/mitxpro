@@ -692,17 +692,14 @@ class ProductPage(MetadataPageMixin, Page):
 
     def _get_child_page_of_type(self, cls):
         """Gets the first child page of the given type if it exists"""
-        if hasattr(self, "child_pages"):
-            child = next(
-                (
-                    page
-                    for page in self.child_pages
-                    if page.content_type.model == cls.__name__.lower()
-                ),
-                None,
-            )
-        else:
-            child = self.get_children().type(cls).live().first()
+        child = next(
+            (
+                page
+                for page in self.child_pages
+                if page.content_type.model == cls.__name__.lower()
+            ),
+            None,
+        )
         return child.specific if child else None
 
     def save(self, clean=True, user=None, log_action=False, **kwargs):
