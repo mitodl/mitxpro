@@ -430,12 +430,15 @@ class CertificateIndexPage(RoutablePageMixin, Page):
 class WagtailCachedPageMixin:
     """Mixin for common properties and child page queries for a WagtailPage"""
 
+    def __init__(self, *args, **kwargs):
+        super(WagtailCachedPageMixin, self).__init__(*args, **kwargs)
+
     @cached_property
     def child_pages(self):
-        """Gets child pages for the product detail page"""
+        """Gets child pages for the wagtail page"""
         return self.get_children().select_related("content_type").live()
 
-    def get_child_page_of_type(self, cls):
+    def _get_child_page_of_type(self, cls):
         """Gets the first child page of the given type if it exists"""
 
         child = next(
@@ -501,49 +504,49 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         """
         Gets the "Learning Experience" section subpage
         """
-        return self.get_child_page_of_type(LearningTechniquesPage)
+        return self._get_child_page_of_type(LearningTechniquesPage)
 
     @property
     def testimonials(self):
         """
         Gets the testimonials section subpage
         """
-        return self.get_child_page_of_type(UserTestimonialsPage)
+        return self._get_child_page_of_type(UserTestimonialsPage)
 
     @property
     def news_and_events(self):
         """
         Gets the news and events section subpage
         """
-        return self.get_child_page_of_type(NewsAndEventsPage)
+        return self._get_child_page_of_type(NewsAndEventsPage)
 
     @property
     def upcoming_courseware(self):
         """
         Gets the upcoming courseware section subpage
         """
-        return self.get_child_page_of_type(CoursesInProgramPage)
+        return self._get_child_page_of_type(CoursesInProgramPage)
 
     @property
     def inquiry_section(self):
         """
         Gets the "inquire now" section subpage
         """
-        return self.get_child_page_of_type(ForTeamsPage)
+        return self._get_child_page_of_type(ForTeamsPage)
 
     @property
     def about_mit_xpro(self):
         """
         Gets the "about mit xpro" section subpage
         """
-        return self.get_child_page_of_type(TextVideoSection)
+        return self._get_child_page_of_type(TextVideoSection)
 
     @property
     def image_carousel_section(self):
         """
         Gets the "image carousel" section sub page.
         """
-        return self.get_child_page_of_type(ImageCarouselPage)
+        return self._get_child_page_of_type(ImageCarouselPage)
 
     def get_context(self, request, *args, **kwargs):
         return {
@@ -707,17 +710,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             "news_and_events": self.news_and_events,
         }
 
-    # def _get_child_page_of_type(self, cls):
-    #     """Gets the first child page of the given type if it exists"""
-    #     child = next(
-    #         (
-    #             page
-    #             for page in self.child_pages
-    #             if page.content_type.model == cls.__name__.lower()
-    #         ),
-    #         None,
-    #     )
-    #     return child.specific if child else None
 
     def save(self, clean=True, user=None, log_action=False, **kwargs):
         """If featured is True then set False in any existing product page(s)."""
@@ -739,48 +731,48 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     @property
     def outcomes(self):
         """Gets the learning outcomes child page"""
-        return self.get_child_page_of_type(LearningOutcomesPage)
+        return self._get_child_page_of_type(LearningOutcomesPage)
 
     @property
     def who_should_enroll(self):
         """Gets the who should enroll child page"""
-        return self.get_child_page_of_type(WhoShouldEnrollPage)
+        return self._get_child_page_of_type(WhoShouldEnrollPage)
 
     @property
     def techniques(self):
         """Gets the learning techniques child page"""
-        return self.get_child_page_of_type(LearningTechniquesPage)
+        return self._get_child_page_of_type(LearningTechniquesPage)
 
     @property
     def testimonials(self):
         """Gets the testimonials carousel child page"""
-        return self.get_child_page_of_type(UserTestimonialsPage)
+        return self._get_child_page_of_type(UserTestimonialsPage)
 
     @property
     def faculty(self):
         """Gets the faculty carousel page"""
-        return self.get_child_page_of_type(FacultyMembersPage)
+        return self._get_child_page_of_type(FacultyMembersPage)
 
     @property
     def for_teams(self):
         """Gets the for teams section child page"""
-        return self.get_child_page_of_type(ForTeamsPage)
+        return self._get_child_page_of_type(ForTeamsPage)
 
     @property
     def faqs(self):
         """Gets the FAQs list from FAQs child page"""
-        faqs_page = self.get_child_page_of_type(FrequentlyAskedQuestionPage)
+        faqs_page = self._get_child_page_of_type(FrequentlyAskedQuestionPage)
         return FrequentlyAskedQuestion.objects.filter(faqs_page=faqs_page)
 
     @property
     def propel_career(self):
         """Gets the propel your career section child page"""
-        return self.get_child_page_of_type(TextSection)
+        return self._get_child_page_of_type(TextSection)
 
     @property
     def certificate_page(self):
         """Gets the certificate child page"""
-        return self.get_child_page_of_type(CertificatePage)
+        return self._get_child_page_of_type(CertificatePage)
 
     @property
     def is_course_page(self):
@@ -812,7 +804,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         """
         Gets the news and events section subpage
         """
-        return self.get_child_page_of_type(NewsAndEventsPage)
+        return self._get_child_page_of_type(NewsAndEventsPage)
 
 
 class ProgramPage(ProductPage):
@@ -853,7 +845,7 @@ class ProgramPage(ProductPage):
     @property
     def course_lineup(self):
         """Gets the course carousel page"""
-        return self.get_child_page_of_type(CoursesInProgramPage)
+        return self._get_child_page_of_type(CoursesInProgramPage)
 
     @property
     def product(self):
@@ -964,7 +956,7 @@ class CoursePage(ProductPage):
         """
         if self.program_page and self.program_page.news_and_events:
             return self.program_page.news_and_events
-        return self.get_child_page_of_type(NewsAndEventsPage)
+        return self._get_child_page_of_type(NewsAndEventsPage)
 
     @property
     def course_pages(self):
