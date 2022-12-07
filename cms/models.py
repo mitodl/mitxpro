@@ -427,7 +427,8 @@ class CertificateIndexPage(RoutablePageMixin, Page):
         raise Http404()
 
 
-class WagtailCachedPageMixin(object):
+class WagtailCachedPageMixin:
+    """Mixin for common properties and child page queries for a WagtailPage"""
 
     @cached_property
     def child_pages(self):
