@@ -159,6 +159,9 @@ def test_home_page_testimonials():
     """
     home_page = HomePageFactory.create()
     assert not home_page.testimonials
+
+    del home_page.child_pages
+
     testimonials_page = UserTestimonialsPageFactory.create(
         parent=home_page,
         heading="heading",
@@ -188,6 +191,8 @@ def test_home_page_news_and_events():
     """
     home_page = HomePageFactory.create()
     assert not home_page.news_and_events
+    del home_page.child_pages
+
     news_and_events_page = NewsAndEventsPageFactory.create(
         parent=home_page,
         heading="heading",
@@ -221,6 +226,9 @@ def test_home_page_inquiry_section():
     """
     home_page = HomePageFactory.create()
     assert not home_page.inquiry_section
+
+    del home_page.child_pages
+
     inquiry_page = ForTeamsPageFactory.create(
         parent=home_page,
         content="<p>content</p>",
@@ -241,6 +249,9 @@ def test_home_page_upcoming_courseware():
     """
     home_page = HomePageFactory.create()
     assert not home_page.upcoming_courseware
+
+    del home_page.child_pages
+
     course = CourseFactory.create(page=None)
     carousel_page = CoursesInProgramPageFactory.create(
         parent=home_page,
@@ -262,6 +273,9 @@ def test_home_page_about_mit_xpro():
     """
     home_page = HomePageFactory.create()
     assert not home_page.about_mit_xpro
+
+    del home_page.child_pages
+
     about_page = TextVideoSectionFactory.create(
         parent=home_page,
         content="<p>content</p>",
@@ -284,6 +298,9 @@ def test_image_carousel_section():
     """
     home_page = HomePageFactory.create()
     assert not home_page.image_carousel_section
+
+    del home_page.child_pages
+
     image_carousel_page = ImageCarouselPageFactory.create(
         parent=home_page,
         title="title",

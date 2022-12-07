@@ -427,7 +427,28 @@ class CertificateIndexPage(RoutablePageMixin, Page):
         raise Http404()
 
 
-class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
+class WagtailCachedPageMixin(object):
+
+    @cached_property
+    def child_pages(self):
+        """Gets child pages for the product detail page"""
+        return self.get_children().select_related("content_type").live()
+
+    def get_child_page_of_type(self, cls):
+        """Gets the first child page of the given type if it exists"""
+
+        child = next(
+            (
+                page
+                for page in self.child_pages
+                if page.content_type.model == cls.__name__.lower()
+            ),
+            None,
+        )
+        return child.specific if child else None
+
+
+class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Page):
     """
     CMS Page representing the home/root route
     """
@@ -474,69 +495,54 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
         "SignatoryIndexPage",
     ]
 
-    def _get_child_page_of_type(self, cls):
-        """Gets the first child page of the given type if it exists"""
-        child = self.get_children().type(cls).live().first()
-        return child.specific if child else None
-
     @property
     def learning_experience(self):
         """
         Gets the "Learning Experience" section subpage
         """
-        return list(LearningTechniquesPage.objects.child_of(self))[0]
-
-        # return self._get_child_page_of_type(LearningTechniquesPage)
+        return self.get_child_page_of_type(LearningTechniquesPage)
 
     @property
     def testimonials(self):
         """
         Gets the testimonials section subpage
         """
-        # breakpoint()
-        return list(UserTestimonialsPage.objects.child_of(self))[0]
-        # return self._get_child_page_of_type(UserTestimonialsPage)
+        return self.get_child_page_of_type(UserTestimonialsPage)
 
     @property
     def news_and_events(self):
         """
         Gets the news and events section subpage
         """
-        return list(NewsAndEventsPage.objects.child_of(self))[0]
-        # return self._get_child_page_of_type(NewsAndEventsPage)
+        return self.get_child_page_of_type(NewsAndEventsPage)
 
     @property
     def upcoming_courseware(self):
         """
         Gets the upcoming courseware section subpage
         """
-        return list(CoursesInProgramPage.objects.child_of(self))[0]
-        # return self._get_child_page_of_type(CoursesInProgramPage)
+        return self.get_child_page_of_type(CoursesInProgramPage)
 
     @property
     def inquiry_section(self):
         """
         Gets the "inquire now" section subpage
         """
-        return list(ForTeamsPage.objects.child_of(self))[0]
-        # return self._get_child_page_of_type(ForTeamsPage)
+        return self.get_child_page_of_type(ForTeamsPage)
 
     @property
     def about_mit_xpro(self):
         """
         Gets the "about mit xpro" section subpage
         """
-        return list(TextVideoSection.objects.child_of(self))[0]
-
-        # return self._get_child_page_of_type(TextVideoSection)
+        return self.get_child_page_of_type(TextVideoSection)
 
     @property
     def image_carousel_section(self):
         """
         Gets the "image carousel" section sub page.
         """
-        return list(ImageCarouselPage.objects.child_of(self))[0]
-        # return self._get_child_page_of_type(ImageCarouselPage)
+        return self.get_child_page_of_type(ImageCarouselPage)
 
     def get_context(self, request, *args, **kwargs):
         return {
