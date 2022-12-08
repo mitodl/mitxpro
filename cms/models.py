@@ -427,7 +427,29 @@ class CertificateIndexPage(RoutablePageMixin, Page):
         raise Http404()
 
 
-class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
+class WagtailCachedPageMixin:
+    """Mixin for common properties and child page queries for a WagtailPage"""
+
+    @cached_property
+    def child_pages(self):
+        """Gets child pages for the wagtail page"""
+        return self.get_children().select_related("content_type").live()
+
+    def _get_child_page_of_type(self, cls):
+        """Gets the first child page of the given type if it exists"""
+
+        child = next(
+            (
+                page
+                for page in self.child_pages
+                if page.content_type.model == cls.__name__.lower()
+            ),
+            None,
+        )
+        return child.specific if child else None
+
+
+class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Page):
     """
     CMS Page representing the home/root route
     """
@@ -473,11 +495,6 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
         "CertificateIndexPage",
         "SignatoryIndexPage",
     ]
-
-    def _get_child_page_of_type(self, cls):
-        """Gets the first child page of the given type if it exists"""
-        child = self.get_children().type(cls).live().first()
-        return child.specific if child else None
 
     @property
     def learning_experience(self):
@@ -545,7 +562,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, Page):
         }
 
 
-class ProductPage(MetadataPageMixin, Page):
+class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     """
     Abstract product page
     """
@@ -690,18 +707,6 @@ class ProductPage(MetadataPageMixin, Page):
             "news_and_events": self.news_and_events,
         }
 
-    def _get_child_page_of_type(self, cls):
-        """Gets the first child page of the given type if it exists"""
-        child = next(
-            (
-                page
-                for page in self.child_pages
-                if page.content_type.model == cls.__name__.lower()
-            ),
-            None,
-        )
-        return child.specific if child else None
-
     def save(self, clean=True, user=None, log_action=False, **kwargs):
         """If featured is True then set False in any existing product page(s)."""
         if self.featured:
@@ -713,11 +718,6 @@ class ProductPage(MetadataPageMixin, Page):
     def product(self):
         """Returns the courseware object (Course, Program) associated with this page"""
         raise NotImplementedError
-
-    @cached_property
-    def child_pages(self):
-        """Gets child pages for the product detail page"""
-        return self.get_children().select_related("content_type").live()
 
     @property
     def outcomes(self):
