@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.112.6
+---------------
+
+- fix: enhance home page queries wagtail (#2501)
+- Improve unused coupon query (#2509)
+- Refactor condition
+- Fix tests
+- Rename property
+- Use cached_property
+- fmt
+- Reduce queries for Product pages
+
 Version 0.112.5 (Released December 07, 2022)
 ---------------
 
