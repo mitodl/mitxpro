@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.112.6
+Version 0.112.6 (Released December 09, 2022)
 ---------------
 
 - fix: enhance home page queries wagtail (#2501)
