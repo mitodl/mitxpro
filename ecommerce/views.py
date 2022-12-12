@@ -1,6 +1,5 @@
 """Views for ecommerce"""
 import logging
-from collections import defaultdict
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -25,13 +24,11 @@ from affiliate.api import get_affiliate_id_from_request
 from b2b_ecommerce.api import fulfill_b2b_order
 from b2b_ecommerce.models import B2BOrder
 from courses.models import Course, CourseRun, Program, ProgramRun
-from courses.serializers import BaseCourseRunSerializer, BaseProgramSerializer
 from ecommerce.api import (
     complete_order,
     create_unfulfilled_order,
     fulfill_order,
     generate_cybersource_sa_payload,
-    get_full_price_coupon_product_set,
     make_receipt_url,
     validate_basket_for_checkout,
 )
@@ -52,7 +49,6 @@ from ecommerce.serializers import (
     BasketSerializer,
     CompanySerializer,
     CouponPaymentVersionDetailSerializer,
-    CurrentCouponPaymentSerializer,
     OrderReceiptSerializer,
     ProductSerializer,
     ProgramRunSerializer,
@@ -62,7 +58,6 @@ from ecommerce.serializers import (
 from ecommerce.utils import make_checkout_url
 from hubspot_xpro.task_helpers import sync_hubspot_deal
 from mitxpro.utils import (
-    first_or_none,
     format_datetime_for_filename,
     make_csv_http_response,
     now_in_utc,
@@ -292,71 +287,6 @@ class BasketView(RetrieveUpdateAPIView):
         """Get basket for user"""
         basket, _ = Basket.objects.get_or_create(user=self.request.user)
         return basket
-
-
-class BulkEnrollCouponListView(APIView):
-    """
-    Admin view for fetching coupons that can be used for bulk enrollment
-    """
-
-    permission_classes = (IsAdminUser,)
-    authentication_classes = (SessionAuthentication,)
-
-    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
-        """
-        Handles GET requests. Response data is of this form:
-
-        {
-            "coupon_payments": [
-                {
-                    <serialized CouponPayment>,
-                    "products": [
-                        <basic serialized data for a Product that the CouponPayment applies to>,
-                        ...
-                    ]
-                },
-                ...
-            ],
-            "product_map": {
-                "courserun": {
-                    "<Product.id>": {<serialized CourseRun>},
-                    ...
-                },
-                "program": {
-                    "<Product.id>": {<serialized Program>},
-                    ...
-                }
-            }
-        """
-        product_set = set()
-        serialized = {"coupon_payments": []}
-        for coupon_payment, products in get_full_price_coupon_product_set():
-            for product in products:
-                if product not in product_set:
-                    product_set.add(product)
-            serialized["coupon_payments"].append(
-                {
-                    **CurrentCouponPaymentSerializer(
-                        coupon_payment,
-                        context={
-                            "latest_version": first_or_none(
-                                coupon_payment.ordered_versions
-                            )
-                        },
-                    ).data,
-                    "products": ProductSerializer(products, many=True).data,
-                }
-            )
-        serialized["product_map"] = defaultdict(dict)
-        for product in product_set:
-            product_object = product.content_object
-            serialized["product_map"][product.content_type.model][str(product.id)] = (
-                BaseCourseRunSerializer(product_object).data
-                if isinstance(product_object, CourseRun)
-                else BaseProgramSerializer(product_object).data
-            )
-
-        return Response(status=status.HTTP_200_OK, data=serialized)
 
 
 class CouponListView(APIView):

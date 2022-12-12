@@ -242,15 +242,6 @@ export type ProductMap = {
   }
 }
 
-export type BulkCouponPayment = {
-  id: number,
-  name: string,
-  version: CouponPaymentVersion,
-  products: Array<Product>,
-  created_on: Date,
-  updated_on: Date
-}
-
 export type B2BCheckoutPayload = {
   num_seats: number,
   product_version_id: number,

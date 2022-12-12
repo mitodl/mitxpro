@@ -4,7 +4,6 @@ from rest_framework.routers import SimpleRouter
 
 from ecommerce.views import (
     BasketView,
-    BulkEnrollCouponListView,
     CheckoutView,
     CompanyViewSet,
     CouponListView,
@@ -43,11 +42,6 @@ urlpatterns = [
     url(r"^api/coupons/$", CouponListView.as_view(), name="coupon_api"),
     url(
         r"^couponcodes/(?P<version_id>[0-9]+)", coupon_code_csv_view, name="coupons_csv"
-    ),
-    re_path(
-        r"^api/bulk_coupons/$",
-        BulkEnrollCouponListView.as_view(),
-        name="bulk_coupons_api",
     ),
     re_path(
         r"^api/bulk_assignments/(?P<bulk_assignment_id>[0-9]+)/$",

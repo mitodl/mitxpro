@@ -758,44 +758,6 @@ def get_product_courses(product):
         )
 
 
-def get_full_price_coupon_product_set():
-    """
-    Queries the database for CouponPayments that give a 100% off discount and returns those
-    CouponPayments in a tuple with the Product that they apply to.
-
-    Returns:
-        iterable of tuple(CouponPayment, CouponEligibility): An iterable of CouponPayments paired with the
-            CouponEligibility objects associated with them
-    """
-    full_coupon_payments = (
-        CouponPayment.objects.annotate(max_created_on=Max("versions__created_on"))
-        .filter(
-            versions__coupon_type=CouponPaymentVersion.SINGLE_USE,
-            max_created_on=F("versions__created_on"),
-            versions__amount=1,
-        )
-        .with_ordered_versions()
-    )
-    for coupon_payment in full_coupon_payments:
-        products = (
-            Product.objects.annotate(
-                product_coupon_ct=Count(
-                    "couponeligibility",
-                    filter=Q(
-                        couponeligibility__coupon__enabled=True,
-                        couponeligibility__coupon__payment=coupon_payment,
-                    ),
-                )
-            )
-            .filter(product_coupon_ct__gt=0, is_active=True)
-            .with_ordered_versions()
-            .order_by("id")
-            .select_related("content_type")
-        )
-        if products.exists():
-            yield coupon_payment, products
-
-
 def bulk_assign_product_coupons(desired_assignments, bulk_assignment=None):
     """
     Assign product coupons to emails in bulk and create a record of this bulk creation

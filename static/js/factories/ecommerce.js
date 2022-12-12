@@ -9,13 +9,11 @@ import { incrementer } from "./util"
 import type {
   BasketItem,
   BasketResponse,
-  BulkCouponPayment,
   CouponSelection,
   CouponPayment,
   CouponPaymentVersion,
   Company,
   DataConsentUser,
-  Product,
   B2BOrderStatus,
   B2BCouponStatusResponse,
   ProgramRunDetail,
@@ -25,7 +23,6 @@ import type {
   CourseRunProduct,
   BaseProductVersion
 } from "../flow/ecommerceTypes"
-import type { BaseCourseRun, Program } from "../flow/courseTypes"
 import {
   DISCOUNT_TYPE_PERCENT_OFF,
   ENROLLABLE_ITEM_ID_SEPARATOR,

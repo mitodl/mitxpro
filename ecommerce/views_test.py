@@ -1,6 +1,5 @@
 """ecommerce tests for views"""
 import json
-import operator as op
 from datetime import datetime, timedelta
 from urllib.parse import quote_plus, urljoin
 
@@ -31,7 +30,6 @@ from ecommerce.factories import (
     CouponEligibilityFactory,
     CouponFactory,
     CouponPaymentFactory,
-    CouponPaymentVersionFactory,
     LineFactory,
     ProductCouponAssignmentFactory,
     ProductVersionFactory,
@@ -43,7 +41,6 @@ from ecommerce.models import (
     Company,
     Coupon,
     CouponEligibility,
-    CouponPayment,
     CouponPaymentVersion,
     CouponSelection,
     CourseRunSelection,
@@ -57,7 +54,6 @@ from ecommerce.serializers import (
     BasketSerializer,
     CompanySerializer,
     CouponSelectionSerializer,
-    CurrentCouponPaymentSerializer,
     DataConsentUserSerializer,
     ProductSerializer,
     ProgramRunSerializer,
@@ -1519,77 +1515,6 @@ def test_companies_viewset_post_forbidden(admin_drf_client):
     """ Test that post requests to the companies API viewset is not allowed"""
     response = admin_drf_client.post(reverse("companies_api-list"), data={})
     assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
-
-
-def test_bulk_enroll_list_view(mocker, admin_drf_client):
-    """
-    Test that BulkEnrollCouponListView returns a list of CouponPayments paired with the Product ids that
-    they apply to, and a dict that maps Product ids to serialized versions of those Products, grouped by type
-    """
-    payment_versions = CouponPaymentVersionFactory.create_batch(2)
-    payment_ids = list(map(op.attrgetter("payment_id"), payment_versions))
-    product_versions = ProductVersionFactory.create_batch(2)
-    products = list(map(op.attrgetter("product"), product_versions))
-    # ProductFactory creates CourseRuns as the product object by default. Create a Program for one of them.
-    program = ProgramFactory.create()
-    products[1].content_object = program
-    products[1].save()
-
-    payment_product_pairs = [
-        (
-            CouponPayment.objects.filter(id=payment_ids[0])
-            .with_ordered_versions()
-            .first(),
-            Product.objects.filter(id=products[0].id).with_ordered_versions(),
-        ),
-        (
-            CouponPayment.objects.filter(id=payment_ids[1])
-            .with_ordered_versions()
-            .first(),
-            Product.objects.filter(
-                id__in=[p.id for p in products]
-            ).with_ordered_versions(),
-        ),
-    ]
-    patched_get_product_coupons = mocker.patch(
-        "ecommerce.views.get_full_price_coupon_product_set",
-        return_value=payment_product_pairs,
-    )
-    patched_course_run_serializer = mocker.patch(
-        "ecommerce.views.BaseCourseRunSerializer",
-        return_value=mocker.Mock(data={"id": products[0].content_object.id}),
-    )
-    patched_program_serializer = mocker.patch(
-        "ecommerce.views.BaseProgramSerializer",
-        return_value=mocker.Mock(data={"id": products[1].content_object.id}),
-    )
-
-    response = admin_drf_client.get(reverse("bulk_coupons_api"))
-    response_data = response.json()
-    patched_get_product_coupons.assert_called_once()
-    assert len(response_data["coupon_payments"]) == len(payment_ids)
-    assert response_data["coupon_payments"][0] == {
-        **CurrentCouponPaymentSerializer(payment_versions[0].payment).data,
-        "products": [ProductSerializer(products[0]).data],
-    }
-    # This test is flaky in CI for unknown reasons. The "products" lists end up being out of order by id despite
-    # using a query that is ordered by id. These assertions are a hack to get around it.
-    second_serialized_payment = response_data["coupon_payments"][1]
-    assert dict_without_keys(
-        second_serialized_payment, "products"
-    ) == dict_without_keys(
-        CurrentCouponPaymentSerializer(payment_versions[1].payment).data, "products"
-    )
-    assert sorted(
-        second_serialized_payment["products"], key=op.itemgetter("id")
-    ) == sorted(ProductSerializer(products, many=True).data, key=op.itemgetter("id"))
-    assert sorted(response_data["product_map"].keys()) == ["courserun", "program"]
-    assert response_data["product_map"]["courserun"] == {
-        str(products[0].id): patched_course_run_serializer.return_value.data
-    }
-    assert response_data["product_map"]["program"] == {
-        str(products[1].id): patched_program_serializer.return_value.data
-    }
 
 
 def test_patch_basket_expired_run(basket_client, basket_and_coupons):

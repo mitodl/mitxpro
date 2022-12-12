@@ -694,23 +694,6 @@ class CouponPaymentSerializer(serializers.ModelSerializer):
         model = models.CouponPayment
 
 
-class CurrentCouponPaymentSerializer(serializers.ModelSerializer):
-    """ Serializer for coupon payments with their most recent version """
-
-    version = serializers.SerializerMethodField()
-
-    def get_version(self, instance):
-        """ Serializes the most recent associated CouponPaymentVersion """
-        latest_version = (
-            self.context.get("latest_version", None) or instance.latest_version
-        )
-        return CouponPaymentVersionSerializer(latest_version).data
-
-    class Meta:
-        fields = "__all__"
-        model = models.CouponPayment
-
-
 class CouponPaymentVersionSerializer(serializers.ModelSerializer):
     """ Serializer for coupon payment versions """
 
