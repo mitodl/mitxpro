@@ -2,11 +2,10 @@ version: '3.6'
 
 x-environment:
   &py-environment
-  DEBUG: 'False'
   NODE_ENV: 'production'
   DEV_ENV: 'True'  # necessary to have nginx connect to web container
   SECRET_KEY: local_unsafe_key
-  DATABASE_URL: postgres://postgres@db:5432/postgres
+  DATABASE_URL: postgres://postgres:localpassword@pg_bouncer:6432/postgres
   MITOL_DIGITAL_CREDENTIALS_HMAC_SECRET: test-hmac-secret
   MITXPRO_BASE_URL: ${MITXPRO_BASE_URL:-http://xpro.odl.local:8053}
   MITXPRO_SECURE_SSL_REDIRECT: 'False'
@@ -28,8 +27,24 @@ x-extra-hosts:
 services:
   db:
     image: postgres:11.6
+    environment:
+      POSTGRES_PASSWORD: localpassword
     ports:
       - "5432"
+
+  pg_bouncer:
+    image: bitnami/pgbouncer
+    ports: 
+      - "6432"
+    environment:
+      POSTGRESQL_HOST: db
+      POSTGRESQL_PASSWORD: localpassword
+      # these match heroku pgbouncer
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_DEFAULT_POOL_SIZE: 5
+      PGBOUNCER_RESERVE_POOL_SIZE: 1
+    depends_on:
+      - db
 
   redis:
     image: redis:5.0.5
@@ -67,7 +82,7 @@ services:
       PORT: 8051
     env_file: .env
     links:
-      - db
+      - pg_bouncer
       - redis
     extra_hosts: *default-extra-hosts
 
@@ -95,6 +110,6 @@ services:
       sleep 3;
       celery -A mitxpro.celery:app worker -B -l ${MITXPRO_LOG_LEVEL:-INFO}'
     links:
-      - db
+      - pg_bouncer
       - redis
     extra_hosts: *default-extra-hosts
