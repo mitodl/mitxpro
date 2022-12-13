@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.113.0
+---------------
+
+- Remove uwsgi worker reload settings
+
 Version 0.112.6 (Released December 09, 2022)
 ---------------
 
