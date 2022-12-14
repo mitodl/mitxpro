@@ -54,10 +54,32 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
 class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for Courses"""
 
-    permission_classes = []
+    PRODUCTS_PREFETCH = Prefetch("products", Product.objects.with_ordered_versions())
+    COURSE_RUNS_PREFETCH = Prefetch(
+        "courseruns", CourseRun.objects.prefetch_related(PRODUCTS_PREFETCH)
+    )
 
+    permission_classes = []
     serializer_class = CourseSerializer
-    queryset = Course.objects.filter(live=True)
+    queryset = (
+        Course.objects.filter(live=True)
+        .select_related("coursepage")
+        .prefetch_related("topics", COURSE_RUNS_PREFETCH)
+    )
+
+    def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return self.queryset
+
+        return self.queryset.prefetch_related(
+            Prefetch(
+                "courseruns",
+                queryset=CourseRun.objects.filter(
+                    courserunenrollment__user=self.request.user
+                ).only("id", "course_id"),
+                to_attr="enrolled_runs",
+            )
+        )
 
 
 class CourseRunViewSet(viewsets.ReadOnlyModelViewSet):

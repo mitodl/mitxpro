@@ -411,9 +411,12 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             list of CourseRun: Unexpired and unenrolled Course runs
 
         """
-        enrolled_runs = user.courserunenrollment_set.filter(
-            run__course=self
-        ).values_list("run__id", flat=True)
+        if hasattr(self, "enrolled_runs"):
+            enrolled_runs = [run.id for run in self.enrolled_runs]
+        else:
+            enrolled_runs = user.courserunenrollment_set.filter(
+                run__course=self
+            ).values_list("run__id", flat=True)
         return [run for run in self.unexpired_runs if run.id not in enrolled_runs]
 
     class Meta:
