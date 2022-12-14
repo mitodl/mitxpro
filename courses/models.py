@@ -411,6 +411,8 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             list of CourseRun: Unexpired and unenrolled Course runs
 
         """
+        # `enrolled_runs` is a prefetched attribute.
+        # Added a conditional to avoid issues when prefetched attribute is not there.
         if hasattr(self, "enrolled_runs"):
             enrolled_runs = [run.id for run in self.enrolled_runs]
         else:
