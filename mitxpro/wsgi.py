@@ -15,6 +15,9 @@ import sys
 import wsgiref.util
 
 import uwsgidecorators
+from django.conf import settings
+from django.core import wsgi
+from django.db import connections
 
 
 # pylint: disable=global-statement,unused-argument
@@ -36,8 +39,6 @@ def setup_postfork():
 
 def warmup_django(close_connections=False):
     """Warm up the lazy django app"""
-    from django.conf import settings
-
     global application
 
     log.debug("warming up")
@@ -66,8 +67,6 @@ def warmup_django(close_connections=False):
 
     if close_connections:
         # Close connections before forking
-        from django.db import connections
-
         log.debug("Closing connection")
         for conn in connections.all():
             conn.close()
@@ -75,8 +74,6 @@ def warmup_django(close_connections=False):
 
 def get_wsgi_application():
     """Call the standard wsgi.get_wsgi_application() and then the warmup function"""
-    from django.core import wsgi
-
     global application
     application = wsgi.get_wsgi_application()
     if DJANGO_WARMUP_URL:
