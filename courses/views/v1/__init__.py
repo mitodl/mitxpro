@@ -1,8 +1,8 @@
 """Course views verson 1"""
+from django.db.models import Prefetch
 from mitol.digitalcredentials.mixins import DigitalCredentialsRequestViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -24,15 +24,31 @@ from courses.serializers import (
     ProgramEnrollmentSerializer,
     ProgramSerializer,
 )
+from ecommerce.models import Product
 
 
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for Programs"""
 
-    permission_classes = []
+    PRODUCTS_PREFETCH = Prefetch("products", Product.objects.with_ordered_versions())
+    COURSE_RUNS_PREFETCH = Prefetch(
+        "courseruns", CourseRun.objects.prefetch_related(PRODUCTS_PREFETCH)
+    )
+    COURSES_PREFETCH = Prefetch(
+        "courses",
+        Course.objects.select_related("coursepage").prefetch_related(
+            COURSE_RUNS_PREFETCH, "topics"
+        ),
+    )
 
+    permission_classes = []
     serializer_class = ProgramSerializer
-    queryset = Program.objects.filter(live=True).exclude(products=None)
+    queryset = (
+        Program.objects.filter(live=True)
+        .exclude(products=None)
+        .select_related("programpage")
+        .prefetch_related(COURSES_PREFETCH, PRODUCTS_PREFETCH)
+    )
 
 
 class CourseViewSet(viewsets.ReadOnlyModelViewSet):

@@ -241,6 +241,11 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             else []
         )
 
+    @property
+    def course_runs(self):
+        """All course runs related to a program"""
+        return [run for course in self.courses.all() for run in course.courseruns.all()]
+
     def __str__(self):
         title = f"{self.readable_id} | {self.title}"
         return title if len(title) <= 100 else title[:97] + "..."
