@@ -9,10 +9,6 @@ export const DISCOUNT_TYPE_DOLLARS_OFF = "dollars-off"
 export const ENROLLABLE_ITEM_ID_SEPARATOR = "+"
 export const PRODUCT_TYPE_PROGRAM = "program"
 export const PRODUCT_TYPE_COURSERUN = "courserun"
-export const PRODUCT_TYPE_LABELS = {
-  [PRODUCT_TYPE_COURSERUN]: "Course Run",
-  [PRODUCT_TYPE_PROGRAM]:   "Program"
-}
 
 export const GENDER_CHOICES = [
   ["m", "Male"],
@@ -118,7 +114,6 @@ export const ALTER_TYPE_B2B_ORDER_STATUS = "b2b-order-status"
 // HTML title for different pages
 export const CHECKOUT_PAGE_TITLE = "Checkout"
 export const DASHBOARD_PAGE_TITLE = "Dashboard"
-export const BULK_ENROLLMENT_PAGE_TITLE = "Bulk Enrollment"
 export const CREATE_COUPON_PAGE_TITLE = "Create Coupon"
 
 export const LOGIN_EMAIL_PAGE_TITLE = "Sign In"

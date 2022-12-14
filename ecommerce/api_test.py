@@ -1,101 +1,100 @@
 """
 Test for ecommerce functions
 """
-from base64 import b64encode
-from collections import defaultdict
-from decimal import Decimal
-from datetime import timedelta
 import hashlib
 import hmac
-from unittest.mock import PropertyMock
 import uuid
+from base64 import b64encode
+from collections import defaultdict
+from datetime import timedelta
+from decimal import Decimal
+from unittest.mock import PropertyMock
 
 import factory
+import pytest
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import ValidationError
-import pytest
 
 from affiliate.factories import AffiliateFactory
-from courses.models import CourseRunEnrollment, ProgramEnrollment, CourseRun, Program
 from courses.factories import (
     CourseFactory,
-    ProgramFactory,
-    CourseRunFactory,
     CourseRunEnrollmentFactory,
+    CourseRunFactory,
+    ProgramFactory,
     ProgramRunFactory,
 )
+from courses.models import CourseRun, CourseRunEnrollment, Program, ProgramEnrollment
 from ecommerce.api import (
+    ISO_8601_FORMAT,
+    best_coupon_for_product,
+    bulk_assign_product_coupons,
+    complete_order,
     create_coupons,
     create_unfulfilled_order,
-    generate_cybersource_sa_payload,
-    generate_cybersource_sa_signature,
-    get_readable_id,
-    ISO_8601_FORMAT,
-    redeem_coupon,
-    get_product_price,
-    get_product_version_price_with_discount,
-    get_valid_coupon_versions,
-    latest_product_version,
-    latest_coupon_version,
-    make_receipt_url,
-    get_product_courses,
-    get_available_bulk_product_coupons,
-    get_full_price_coupon_product_set,
-    get_or_create_data_consent_users,
-    bulk_assign_product_coupons,
-    validate_basket_for_checkout,
-    complete_order,
     enroll_user_in_order_items,
     fetch_and_serialize_unused_coupons,
-    get_product_from_text_id,
+    generate_cybersource_sa_payload,
+    generate_cybersource_sa_signature,
+    get_or_create_data_consent_users,
+    get_product_courses,
     get_product_from_querystring_id,
-    best_coupon_for_product,
+    get_product_from_text_id,
+    get_product_price,
+    get_product_version_price_with_discount,
+    get_readable_id,
+    get_valid_coupon_versions,
+    latest_coupon_version,
+    latest_product_version,
+    make_receipt_url,
+    redeem_coupon,
+    validate_basket_for_checkout,
 )
 from ecommerce.constants import (
-    DISCOUNT_TYPES,
-    DISCOUNT_TYPE_PERCENT_OFF,
     DISCOUNT_TYPE_DOLLARS_OFF,
+    DISCOUNT_TYPE_PERCENT_OFF,
+    DISCOUNT_TYPES,
 )
 from ecommerce.factories import (
     BasketFactory,
+    BasketItemFactory,
+    BulkCouponAssignmentFactory,
     CompanyFactory,
+    CouponEligibilityFactory,
+    CouponFactory,
+    CouponPaymentFactory,
+    CouponPaymentVersionFactory,
     CouponRedemptionFactory,
     CouponSelectionFactory,
     CouponVersionFactory,
-    CouponFactory,
-    CouponPaymentVersionFactory,
+    CourseRunSelectionFactory,
     DataConsentAgreementFactory,
     LineFactory,
-    OrderFactory,
-    ProductVersionFactory,
-    ProductFactory,
-    CourseRunSelectionFactory,
-    CouponEligibilityFactory,
-    ProductCouponAssignmentFactory,
-    BulkCouponAssignmentFactory,
-    BasketItemFactory,
     LineRunSelectionFactory,
-    CouponPaymentFactory,
+    OrderFactory,
+    ProductCouponAssignmentFactory,
+    ProductFactory,
+    ProductVersionFactory,
 )
 from ecommerce.models import (
     BasketItem,
     Coupon,
     CouponPaymentVersion,
-    CouponSelection,
     CouponRedemption,
+    CouponSelection,
     CourseRunSelection,
     DataConsentUser,
+    LineRunSelection,
     Order,
     OrderAudit,
     Product,
     ProductCouponAssignment,
-    LineRunSelection,
 )
 from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.test_utils import update_namespace
 from mitxpro.utils import now_in_utc
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
+
 
 pytestmark = pytest.mark.django_db
 lazy = pytest.lazy_fixture
@@ -826,102 +825,6 @@ def test_get_product_courses():
     assert list(get_product_courses(program_product)) == list(
         program_product.content_object.courses.all().order_by("position_in_program")
     )
-
-
-def test_get_available_bulk_product_coupons():
-    """
-    get_available_bulk_product_coupons should return a queryset of CouponEligibility objects that can be sent out in
-    bulk enrollment invitations
-    """
-    first_product_coupon = CouponEligibilityFactory.create(coupon__enabled=True)
-    assert str(
-        first_product_coupon
-    ) == "CouponProduct for product {}, coupon {}".format(
-        first_product_coupon.product, first_product_coupon.coupon
-    )
-    # Create more valid product coupons that apply to the same payment and product
-    additional_product_coupons = CouponEligibilityFactory.create_batch(
-        3,
-        coupon__enabled=True,
-        coupon__payment=first_product_coupon.coupon.payment,
-        product=first_product_coupon.product,
-    )
-    # Create existing deliveries for the last two, rendering them invalid
-    ProductCouponAssignmentFactory.create_batch(
-        2, product_coupon=factory.Iterator(additional_product_coupons[1:])
-    )
-    # Create another product coupon that should not be valid due to it not being enabled
-    CouponEligibilityFactory.create(
-        coupon__enabled=False,
-        coupon__payment=first_product_coupon.coupon.payment,
-        product=first_product_coupon.product,
-    )
-
-    available_qset = get_available_bulk_product_coupons(
-        first_product_coupon.coupon.payment.id, first_product_coupon.product.id
-    )
-    assert available_qset.count() == 2
-    assert list(available_qset) == [first_product_coupon, additional_product_coupons[0]]
-
-
-def test_get_full_price_coupon_product_set():
-    """get_full_price_coupon_product_set should yield 100%-off coupons paired with the products they apply to"""
-    coupons = CouponFactory.create_batch(
-        4, enabled=factory.Iterator([True, True, True, False])
-    )
-    # Create two 100% coupons
-    valid_payment_versions = CouponPaymentVersionFactory.create_batch(
-        2,
-        amount=1,
-        payment=factory.Iterator([coupon.payment for coupon in coupons[0:2]]),
-        coupon_type=CouponPaymentVersion.SINGLE_USE,
-    )
-    # Create another 100% coupon, then deprecate it with a newer 50% version
-    CouponPaymentVersionFactory.create_batch(
-        2,
-        amount=factory.Iterator([1, 0.5]),
-        payment=coupons[2].payment,
-        coupon_type=CouponPaymentVersion.SINGLE_USE,
-    )
-    # Create another 100% coupon with a disabled Coupon
-    CouponPaymentVersionFactory.create(
-        amount=1,
-        payment=coupons[3].payment,
-        coupon_type=CouponPaymentVersion.SINGLE_USE,
-    )
-    product_coupons = CouponEligibilityFactory.create_batch(
-        len(coupons), coupon=factory.Iterator(coupons)
-    )
-    # Also apply the second full price coupon payment to the same product as that the first applies to. This will test
-    # to make sure that the "products" map doesn't have repeat entries for the same product.
-    first_coupon_product = product_coupons[0].product
-    product_coupons.insert(
-        2,
-        CouponEligibilityFactory.create(
-            product=first_coupon_product, coupon=product_coupons[1].coupon
-        ),
-    )
-
-    coupon_product_pairs = list(get_full_price_coupon_product_set())
-    assert len(coupon_product_pairs) == len(valid_payment_versions)
-    try:
-        assert [pair[0] for pair in coupon_product_pairs] == [
-            payment_version.payment for payment_version in valid_payment_versions
-        ]
-    except AssertionError:
-        assert [pair[0] for pair in reversed(coupon_product_pairs)] == [
-            payment_version.payment for payment_version in valid_payment_versions
-        ]
-
-    first_product_qset = coupon_product_pairs[0][1]
-    assert first_product_qset.first() == product_coupons[0].product
-    second_product_qset = coupon_product_pairs[1][1]
-    try:
-        assert set(second_product_qset) == {
-            product_coupon.product for product_coupon in product_coupons[1:3]
-        }
-    except AssertionError:
-        assert second_product_qset.first() == product_coupons[2:3][0].product
 
 
 def test_bulk_assign_product_coupons():

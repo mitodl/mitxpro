@@ -5,7 +5,6 @@ Tests for ecommerce serializers
 from decimal import Decimal
 
 import pytest
-from django.db.models import Prefetch
 from rest_framework.exceptions import ValidationError
 
 from mitxpro.test_utils import any_instance_of
@@ -20,7 +19,6 @@ from courses.serializers import CourseSerializer
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import get_readable_id, round_half_up
 from ecommerce.constants import (
-    ORDERED_VERSIONS_QSET_ATTR,
     CYBERSOURCE_CARD_TYPES,
     DISCOUNT_TYPE_PERCENT_OFF,
 )
@@ -37,8 +35,6 @@ from ecommerce.factories import (
 )
 from ecommerce.models import (
     CouponSelection,
-    CouponPayment,
-    CouponPaymentVersion,
     CourseRunSelection,
     DataConsentUser,
     Order,
@@ -51,7 +47,6 @@ from ecommerce.serializers import (
     CouponPaymentVersionDetailSerializer,
     CouponPaymentVersionSerializer,
     CouponPaymentSerializer,
-    CurrentCouponPaymentSerializer,
     FullProductVersionSerializer,
     CompanySerializer,
     DataConsentUserSerializer,
@@ -423,45 +418,6 @@ def test_coupon_payment_version_serializer():
         "created_on": any_instance_of(str),
         "updated_on": any_instance_of(str),
     }
-
-
-def test_current_coupon_payment_version_serializer():
-    """ Test that the CurrentCouponPaymentSerializer has correct data """
-    payment_version = CouponPaymentVersionFactory.create()
-    serialized = CurrentCouponPaymentSerializer(instance=payment_version.payment).data
-    assert serialized == {
-        **CouponPaymentSerializer(payment_version.payment).data,
-        "version": CouponPaymentVersionSerializer(payment_version).data,
-    }
-
-
-def test_current_coupon_payment_version_serializer_latest(mocker):
-    """
-    Test that CurrentCouponPaymentSerializer does not try to get the latest CouponPaymentVersion
-    from the model object if it is passed in via context
-    """
-    # Since we're testing the preference of the 'latest_version' context var
-    # over CouponPayment.latest_version, we patch CouponPayment.latest_version to return None.
-    # If that property is used instead of the context var, the results will be invalid.
-    mocker.patch(
-        "ecommerce.models.CouponPayment.latest_version",
-        new_callable=mocker.PropertyMock,
-        return_value=None,
-    )
-    payment = CouponPaymentFactory.create()
-    versions = CouponPaymentVersionFactory.create_batch(3, payment=payment)
-    payment_qset = CouponPayment.objects.prefetch_related(
-        Prefetch(
-            "versions",
-            queryset=CouponPaymentVersion.objects.order_by("-created_on"),
-            to_attr=ORDERED_VERSIONS_QSET_ATTR,
-        )
-    )
-    expected_version = versions[2]
-    serialized = CurrentCouponPaymentSerializer(
-        instance=payment_qset.first(), context={"latest_version": expected_version}
-    ).data
-    assert serialized["version"]["id"] == expected_version.id
 
 
 @pytest.mark.parametrize(

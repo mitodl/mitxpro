@@ -8,8 +8,6 @@ import type {
   BasketItem,
   CouponSelection,
   Product,
-  ProductMap,
-  BulkCouponPayment
 } from "../flow/ecommerceTypes"
 import {
   COUPON_TYPE_PROMO,

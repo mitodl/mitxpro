@@ -1,78 +1,69 @@
 """ecommerce tests for views"""
 import json
 from datetime import datetime, timedelta
-from types import SimpleNamespace
 from urllib.parse import quote_plus, urljoin
-import operator as op
 
-import pytz
-from django.urls import reverse
-from django.db.models import Count, Q
+import factory
 import faker
 import pytest
+import pytz
 import rest_framework.status as status  # pylint: disable=useless-import-alias
+from django.db.models import Count, Q
+from django.urls import reverse
 from rest_framework.renderers import JSONRenderer
 from rest_framework.test import APIClient
-import factory
 
 from affiliate.constants import AFFILIATE_QS_PARAM
 from affiliate.factories import AffiliateFactory
 from courses.factories import (
-    CourseRunFactory,
     CourseRunEnrollmentFactory,
+    CourseRunFactory,
     ProgramFactory,
     ProgramRunFactory,
 )
-from courses.models import Program, CourseRun
+from courses.models import CourseRun, Program
 from ecommerce.api import create_unfulfilled_order, make_receipt_url
-from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF, DISCOUNT_TYPE_DOLLARS_OFF
+from ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
+    CompanyFactory,
     CouponEligibilityFactory,
-    LineFactory,
-    ProductVersionFactory,
     CouponFactory,
     CouponPaymentFactory,
-    CouponPaymentVersionFactory,
-    CompanyFactory,
+    LineFactory,
     ProductCouponAssignmentFactory,
+    ProductVersionFactory,
 )
 from ecommerce.models import (
     Basket,
     BasketItem,
+    BulkCouponAssignment,
+    Company,
+    Coupon,
+    CouponEligibility,
+    CouponPaymentVersion,
     CouponSelection,
+    CourseRunSelection,
+    DataConsentUser,
     Order,
     OrderAudit,
-    Receipt,
-    CouponPayment,
-    CouponPaymentVersion,
-    CourseRunSelection,
-    Company,
-    CouponEligibility,
     Product,
-    DataConsentUser,
-    BulkCouponAssignment,
-    ProductCouponAssignment,
-    Coupon,
+    Receipt,
 )
 from ecommerce.serializers import (
     BasketSerializer,
     CompanySerializer,
     CouponSelectionSerializer,
-    CurrentCouponPaymentSerializer,
     DataConsentUserSerializer,
-    ProgramRunSerializer,
     ProductSerializer,
+    ProgramRunSerializer,
 )
 from ecommerce.serializers_test import datetime_format
 from ecommerce.test_utils import unprotect_version_tables
-from mitxpro.test_utils import (
-    create_tempfile_csv,
-    assert_drf_json_equal,
-    any_instance_of,
-)
+from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import dict_without_keys, now_in_utc
 from users.factories import UserFactory
+
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_ACCESS_KEY = "access"
@@ -1524,184 +1515,6 @@ def test_companies_viewset_post_forbidden(admin_drf_client):
     """ Test that post requests to the companies API viewset is not allowed"""
     response = admin_drf_client.post(reverse("companies_api-list"), data={})
     assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
-
-
-def test_bulk_enroll_list_view(mocker, admin_drf_client):
-    """
-    Test that BulkEnrollCouponListView returns a list of CouponPayments paired with the Product ids that
-    they apply to, and a dict that maps Product ids to serialized versions of those Products, grouped by type
-    """
-    payment_versions = CouponPaymentVersionFactory.create_batch(2)
-    payment_ids = list(map(op.attrgetter("payment_id"), payment_versions))
-    product_versions = ProductVersionFactory.create_batch(2)
-    products = list(map(op.attrgetter("product"), product_versions))
-    # ProductFactory creates CourseRuns as the product object by default. Create a Program for one of them.
-    program = ProgramFactory.create()
-    products[1].content_object = program
-    products[1].save()
-
-    payment_product_pairs = [
-        (
-            CouponPayment.objects.filter(id=payment_ids[0])
-            .with_ordered_versions()
-            .first(),
-            Product.objects.filter(id=products[0].id).with_ordered_versions(),
-        ),
-        (
-            CouponPayment.objects.filter(id=payment_ids[1])
-            .with_ordered_versions()
-            .first(),
-            Product.objects.filter(
-                id__in=[p.id for p in products]
-            ).with_ordered_versions(),
-        ),
-    ]
-    patched_get_product_coupons = mocker.patch(
-        "ecommerce.views.get_full_price_coupon_product_set",
-        return_value=payment_product_pairs,
-    )
-    patched_course_run_serializer = mocker.patch(
-        "ecommerce.views.BaseCourseRunSerializer",
-        return_value=mocker.Mock(data={"id": products[0].content_object.id}),
-    )
-    patched_program_serializer = mocker.patch(
-        "ecommerce.views.BaseProgramSerializer",
-        return_value=mocker.Mock(data={"id": products[1].content_object.id}),
-    )
-
-    response = admin_drf_client.get(reverse("bulk_coupons_api"))
-    response_data = response.json()
-    patched_get_product_coupons.assert_called_once()
-    assert len(response_data["coupon_payments"]) == len(payment_ids)
-    assert response_data["coupon_payments"][0] == {
-        **CurrentCouponPaymentSerializer(payment_versions[0].payment).data,
-        "products": [ProductSerializer(products[0]).data],
-    }
-    # This test is flaky in CI for unknown reasons. The "products" lists end up being out of order by id despite
-    # using a query that is ordered by id. These assertions are a hack to get around it.
-    second_serialized_payment = response_data["coupon_payments"][1]
-    assert dict_without_keys(
-        second_serialized_payment, "products"
-    ) == dict_without_keys(
-        CurrentCouponPaymentSerializer(payment_versions[1].payment).data, "products"
-    )
-    assert sorted(
-        second_serialized_payment["products"], key=op.itemgetter("id")
-    ) == sorted(ProductSerializer(products, many=True).data, key=op.itemgetter("id"))
-    assert sorted(response_data["product_map"].keys()) == ["courserun", "program"]
-    assert response_data["product_map"]["courserun"] == {
-        str(products[0].id): patched_course_run_serializer.return_value.data
-    }
-    assert response_data["product_map"]["program"] == {
-        str(products[1].id): patched_program_serializer.return_value.data
-    }
-
-
-class TestBulkEnrollmentSubmitView:
-    """Tests for BulkEnrollmentSubmitView"""
-
-    @pytest.fixture()
-    def scenario(self, mocker):
-        """Fixtures needed for view test cases"""
-        url = reverse("bulk_enroll_submit_api")
-        patched_send_emails = mocker.patch("ecommerce.views.send_bulk_enroll_emails")
-        patched_available_product_coupons = mocker.patch(
-            "ecommerce.views.get_available_bulk_product_coupons"
-        )
-        emails = ["a@b.com", "c@d.com", "e@f.com"]
-        # Make each email into a single-element list to represent a csv with one email per row
-        user_csv = create_tempfile_csv([[email] for email in emails])
-        return SimpleNamespace(
-            patched_send_emails=patched_send_emails,
-            patched_available_product_coupons=patched_available_product_coupons,
-            emails=emails,
-            num_emails=len(emails),
-            user_csv=user_csv,
-            url=url,
-        )
-
-    def test_bulk_enroll_submit_view(self, mocker, admin_drf_client, scenario):
-        """Test that BulkEnrollmentSubmitView sends an enrollment email to a set of recipients in a CSV"""
-        coupon_payment_version = CouponPaymentVersionFactory.create(
-            num_coupon_codes=scenario.num_emails + 1
-        )
-        available_coupons = CouponEligibilityFactory.create_batch(
-            scenario.num_emails + 1
-        )
-        scenario.patched_available_product_coupons.return_value = mocker.Mock(
-            count=mocker.Mock(return_value=len(available_coupons)),
-            all=mocker.Mock(return_value=available_coupons),
-            values_list=mocker.Mock(return_value=[pc.id for pc in available_coupons]),
-        )
-        product_id = 1
-        coupon_payment_id = coupon_payment_version.payment.id
-
-        response = admin_drf_client.post(
-            scenario.url,
-            data={
-                "product_id": product_id,
-                "coupon_payment_id": coupon_payment_id,
-                "users_file": scenario.user_csv,
-            },
-            format="multipart",
-        )
-
-        assert response.data["emails"] == scenario.emails
-        assert response.data["bulk_assignment_id"] == any_instance_of(int)
-        scenario.patched_available_product_coupons.assert_called_once_with(
-            coupon_payment_id, product_id
-        )
-        scenario.patched_send_emails.assert_called_once()
-        product_coupon_assignments = ProductCouponAssignment.objects.all()
-        assert len(product_coupon_assignments) == len(scenario.emails)
-        assert (
-            scenario.patched_send_emails.call_args_list[0][0][0]
-            == response.data["bulk_assignment_id"]
-        )
-        assert list(scenario.patched_send_emails.call_args_list[0][0][1]) == list(
-            product_coupon_assignments
-        )
-
-    @pytest.mark.parametrize(
-        "num_codes,unsent_coupon_count,expected_error",
-        [
-            [0, 10, "The given coupon has 0 code(s) available"],
-            [10, 0, "Only 0 coupon(s) left that have not already been sent to users"],
-        ],
-    )
-    def test_bulk_enroll_submit_view_errors(
-        self,
-        mocker,
-        admin_drf_client,
-        scenario,
-        num_codes,
-        unsent_coupon_count,
-        expected_error,
-    ):  # pylint: disable=too-many-arguments
-        """Test that BulkEnrollmentSubmitView returns errors when not enough product coupons are available"""
-        coupon_payment_version = CouponPaymentVersionFactory.create(
-            num_coupon_codes=num_codes
-        )
-        scenario.patched_available_product_coupons.return_value = mocker.Mock(
-            count=mocker.Mock(return_value=unsent_coupon_count)
-        )
-        product_id = 1
-        coupon_payment_id = coupon_payment_version.payment.id
-
-        response = admin_drf_client.post(
-            scenario.url,
-            data={
-                "product_id": product_id,
-                "coupon_payment_id": coupon_payment_id,
-                "users_file": scenario.user_csv,
-            },
-            format="multipart",
-        )
-
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        resp_data = response.json()
-        assert isinstance(resp_data.get("errors"), list)
-        assert expected_error in resp_data["errors"][0]["users_file"]
 
 
 def test_patch_basket_expired_run(basket_client, basket_and_coupons):
