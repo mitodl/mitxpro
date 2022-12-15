@@ -3,6 +3,7 @@ from datetime import timedelta
 from types import SimpleNamespace
 
 import pytest
+from django.core.cache import cache
 from django.urls import reverse
 from rest_framework import status
 from wagtail.core.models import Site
@@ -98,6 +99,8 @@ def test_home_page_view(client, wagtail_basics):
         '<a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="#">Watch Now</a>'
         not in content
     )
+
+    cache.clear()
 
     # add video section
     about_page = TextVideoSection(
