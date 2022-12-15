@@ -64,6 +64,9 @@ jobs:
       - name: Lint
         run: pylint ./**/*.py
 
+      - name: Black Formatting
+        run: black . --check
+
       # Configurations required for elasticsearch.
       - name: Configure sysctl limits
         run: |

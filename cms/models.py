@@ -456,8 +456,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
 
     template = "home_page.html"
 
-    subhead = models.CharField(
-        max_length=255,
+    subhead = models.CharField(max_length=255,
         help_text="The subhead to display in the hero section on the home page.",
     )
     background_image = models.ForeignKey(
