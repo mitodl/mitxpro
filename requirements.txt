@@ -270,7 +270,7 @@ mitol-django-oauth-toolkit-extensions==1.2.1
     # via -r requirements.in
 newrelic==8.04
     # via -r requirements.in
-oauthlib==3.2.0
+oauthlib==3.2.1
     # via
     #   django-oauth-toolkit
     #   requests-oauthlib
