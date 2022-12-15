@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load static wagtailcore_tags wagtailimages_tags wagtailmetadata_tags render_bundle %}
+{% load static wagtailcore_tags wagtailimages_tags wagtailmetadata_tags render_bundle cache%}
 
 {% block title %}{{ site_name }}{% endblock %}
 
@@ -19,6 +19,7 @@
 {% endblock %}
 
 {% block content %}
+  {% cache 86400 self.id %}
   {% include "partials/hero.html" with action_title="Watch Now" action_url="#" %}
   {% if upcoming_courseware %}
     {% pageurl catalog_page as catalog_url %}
@@ -30,6 +31,7 @@
   {% if news_and_events %} {% include "partials/news-and-events-carousel.html" with page=news_and_events %} {% endif %}
   {% if inquiry_section %} {% include "partials/for-teams.html" with page=inquiry_section %} {% endif %}
   {% if image_carousel_section %} {% include "partials/image-carousel.html" with page=image_carousel_section %} {% endif %}
+  {% endcache %}
 {% endblock %}
 {% block contact-us %}
     {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
