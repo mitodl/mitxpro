@@ -969,7 +969,7 @@ class CoursePage(ProductPage):
     @property
     def product(self):
         """Gets the product associated with this page"""
-        return self.course_with_related_objects
+        return self.course
 
     @cached_property
     def course_with_related_objects(self):
