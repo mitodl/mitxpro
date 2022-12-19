@@ -32,6 +32,7 @@ from wagtail.images.models import Image
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
+from caching.api import get_course_with_related_objects
 from cms.api import filter_and_sort_catalog_pages
 from cms.blocks import (
     CourseRunCertificateOverrides,
@@ -976,17 +977,7 @@ class CoursePage(ProductPage):
         """
         Gets the course with related objects.
         """
-        return (
-            Course.objects.filter(id=self.course_id)
-            .select_related("program", "program__programpage")
-            .prefetch_related(
-                "courseruns",
-                Prefetch(
-                    "courseruns__products", Product.objects.with_ordered_versions()
-                ),
-            )
-            .first()
-        )
+        return get_course_with_related_objects(self.course_id)
 
     def get_context(self, request, *args, **kwargs):
         # Hits a circular import at the top of the module
