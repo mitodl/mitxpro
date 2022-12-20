@@ -36,7 +36,6 @@ def get_course_with_related_objects(course_id):
     cache_key = get_course_key(course_id)
     course = cache.get(cache_key)
     course = loads(course) if course else None
-    print("\n\n\nCOURSE FROM CACHE:", course)
 
     if not course:
         course = (
@@ -47,15 +46,18 @@ def get_course_with_related_objects(course_id):
                 Prefetch(
                     "courseruns__products", Product.objects.with_ordered_versions()
                 ),
-            ).first()
+            )
+            .first()
         )
         if course:
-            print("\n\n\nAdding Course Cache for:", course_id)
             cache.set(cache_key, dumps(course), 24 * 60 * 60)
 
     return course
 
 
 def invalidate_course_cache(course_id):
+    """
+    Invalidates course cache
+    """
     cache_key = get_course_key(course_id)
     cache.delete(cache_key)

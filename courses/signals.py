@@ -6,9 +6,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from caching.api import invalidate_course_cache
-from courses.models import CourseRunCertificate, Course, CourseRun, Program
-from courses.utils import generate_program_certificate
 from cms.models import ProgramPage
+from courses.models import Course, CourseRun, CourseRunCertificate, Program
+from courses.utils import generate_program_certificate
 from ecommerce.models import Product, ProductVersion
 
 
@@ -35,9 +35,14 @@ def handle_create_course_run_certificate(
 @receiver(post_save, sender=Program)
 @receiver(post_save, sender=ProgramPage)
 @receiver(post_save, sender=Product)
-def handle_course_cache_invalidation(sender, instance, created, **kwargs):
+@receiver(post_save, sender=ProductVersion)
+def handle_course_cache_invalidation(
+    sender, instance, created, **kwargs
+):  # pylint: disable=unused-argument
+    """
+    Handler to invalidate course cache.
+    """
     if sender == Course and created:
-        print("\n\n\nCreated a course object. No Cache to invalidate")
         return
 
     course_ids = []
@@ -45,16 +50,14 @@ def handle_course_cache_invalidation(sender, instance, created, **kwargs):
         course_ids = [instance.id]
     elif sender == CourseRun:
         course_ids = [instance.course_id]
-    elif sender == Program:
-        course_ids = instance.courses.all().values_list('id', flat=True)
-    elif sender == ProgramPage:
-        course_ids = instance.program.courses.all().values_list('id', flat=True)
-    elif sender == Product:
-        if instance.content_type.model == CourseRun.__name__.lower():
-            course_run = instance.run_queryset.first()
-            course_ids = [course_run.id]
+    elif sender in (Program, ProgramPage):
+        program = instance if sender == Program else instance.program
+        course_ids = program.courses.all().values_list("id", flat=True)
+    elif sender in (Product, ProductVersion):
+        product = instance if sender == Product else instance.product
+        if product.content_type.model == CourseRun.__name__.lower():
+            course_run = product.run_queryset.first()
+            course_ids = [course_run.course.id]
 
-    if course_ids:
-        print("\n\n\nClear cache for Course IDs:", course_ids)
-        for course_id in course_ids:
-            invalidate_course_cache(course_id)
+    for course_id in course_ids:
+        invalidate_course_cache(course_id)
