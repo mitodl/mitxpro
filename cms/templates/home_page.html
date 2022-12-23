@@ -20,7 +20,7 @@
 
 {% block content %}
   {% include "partials/hero.html" with action_title="Watch Now" action_url="#" %}
-  {% cache 86400 self.id %}
+  {% cache 300 self.id %}
   {% if upcoming_courseware %}
     {% pageurl catalog_page as catalog_url %}
     {% include "partials/course-carousel.html" with page=upcoming_courseware button_title="View All" button_url=catalog_url %}
