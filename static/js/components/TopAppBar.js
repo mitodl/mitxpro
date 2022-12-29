@@ -10,7 +10,7 @@ import type { Location } from "react-router"
 import type { CurrentUser } from "../flow/authTypes"
 
 type Props = {
-  currentUser: CurrentUser,
+  currentUser: ?CurrentUser,
   location: ?Location,
   errorPageHeader: ?boolean
 }

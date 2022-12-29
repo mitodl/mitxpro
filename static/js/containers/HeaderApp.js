@@ -20,7 +20,7 @@ type Props = {
   addUserNotification: Function
 }
 
-const errorPageHeader = !!document.getElementsByClassName("error-page-header")
+const errorPageHeader = document.getElementsByClassName("error-page-header").length > 0 ? true : false
 
 export class HeaderApp extends React.Component<Props, void> {
   componentDidUpdate(prevProps: Props) {
@@ -48,6 +48,11 @@ export class HeaderApp extends React.Component<Props, void> {
 
   render() {
     const { currentUser } = this.props
+
+    if (!currentUser && !errorPageHeader){
+      // application is still loading
+      return <div />
+    }
 
     return <Header currentUser={currentUser} location={null} errorPageHeader={errorPageHeader} />
   }

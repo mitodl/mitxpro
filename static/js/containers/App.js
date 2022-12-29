@@ -74,7 +74,7 @@ export class App extends React.Component<Props, void> {
 
     return (
       <div className="app">
-        <Header currentUser={currentUser} location={location} />
+        <Header currentUser={currentUser} location={location} errorPageHeader={null} />
         <Switch>
           <PrivateRoute
             exact
