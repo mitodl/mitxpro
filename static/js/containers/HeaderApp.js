@@ -49,7 +49,7 @@ export class HeaderApp extends React.Component<Props, void> {
   render() {
     const { currentUser } = this.props
 
-    if (!currentUser && !errorPageHeader){
+    if (!currentUser && !errorPageHeader) {
       // application is still loading
       return <div />
     }
