@@ -256,7 +256,9 @@ def test_batch_create_hubspot_objects_chunked(mocker, id_count):
     )
 
 
-def test_batch_upsert_associations(settings, mocker, mocked_celery):
+def test_batch_upsert_associations(
+    settings, mocker, mocked_celery
+):  # pylint:disable=unused-argument
     """
     batch_upsert_associations should call batch_upsert_associations_chunked w/correct lists of ids
     """
@@ -278,7 +280,7 @@ def test_batch_upsert_associations(settings, mocker, mocked_celery):
     mock_assoc_chunked.s.assert_any_call([order_ids[4]])
 
 
-def test_batch_upsert_associations_chunked(settings, mocker):
+def test_batch_upsert_associations_chunked(mocker):
     """
     batch_upsert_associations_chunked should make expected API calls
     """

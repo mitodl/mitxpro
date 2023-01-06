@@ -283,7 +283,7 @@ def batch_update_hubspot_objects_chunked(
 
 
 @app.task(bind=True)
-def batch_upsert_hubspot_objects(
+def batch_upsert_hubspot_objects(  # pylint:disable=too-many-arguments
     self,
     hubspot_type: str,
     model_name: str,
