@@ -6,6 +6,7 @@ from typing import List
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management import BaseCommand
+from mitol.hubspot_api.models import HubspotObject
 
 from b2b_ecommerce.models import B2BLine, B2BOrder
 from ecommerce.models import Line, Order, Product
@@ -14,7 +15,6 @@ from hubspot_xpro.api import (
     sync_deal_hubspot_ids_to_db,
     sync_product_hubspot_ids_to_db,
 )
-from mitol.hubspot_api.models import HubspotObject
 from users.models import User
 
 
