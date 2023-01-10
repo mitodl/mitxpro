@@ -1,8 +1,8 @@
 """Course views verson 1"""
+from django.db.models import Prefetch
 from mitol.digitalcredentials.mixins import DigitalCredentialsRequestViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -24,31 +24,73 @@ from courses.serializers import (
     ProgramEnrollmentSerializer,
     ProgramSerializer,
 )
+from ecommerce.models import Product
 
 
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for Programs"""
 
-    permission_classes = []
+    products_prefetch = Prefetch("products", Product.objects.with_ordered_versions())
+    course_runs_prefetch = Prefetch(
+        "courseruns", CourseRun.objects.prefetch_related(products_prefetch)
+    )
+    courses_prefetch = Prefetch(
+        "courses",
+        Course.objects.select_related("coursepage").prefetch_related(
+            course_runs_prefetch, "topics"
+        ),
+    )
 
+    permission_classes = []
     serializer_class = ProgramSerializer
-    queryset = Program.objects.filter(live=True).exclude(products=None)
+    queryset = (
+        Program.objects.filter(live=True)
+        .exclude(products=None)
+        .select_related("programpage")
+        .prefetch_related(courses_prefetch, products_prefetch)
+    )
 
 
 class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for Courses"""
 
-    permission_classes = []
+    products_prefetch = Prefetch("products", Product.objects.with_ordered_versions())
+    course_runs_prefetch = Prefetch(
+        "courseruns", CourseRun.objects.prefetch_related(products_prefetch)
+    )
 
+    permission_classes = []
     serializer_class = CourseSerializer
-    queryset = Course.objects.filter(live=True)
+
+    def get_queryset(self):
+        queryset = (
+            Course.objects.filter(live=True)
+            .select_related("coursepage")
+            .prefetch_related("topics", self.course_runs_prefetch)
+        )
+
+        if self.request.user.is_authenticated:
+            enrolled_courseruns_prefetch = Prefetch(
+                "courseruns",
+                queryset=CourseRun.objects.filter(
+                    courserunenrollment__user=self.request.user
+                ).only("id", "course_id"),
+                to_attr="enrolled_runs",
+            )
+            queryset = queryset.prefetch_related(enrolled_courseruns_prefetch)
+
+        return queryset
 
 
 class CourseRunViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for CourseRuns"""
 
+    products_prefetch = Prefetch("products", Product.objects.with_ordered_versions())
+
     serializer_class = CourseRunSerializer
-    queryset = CourseRun.objects.all()
+    queryset = CourseRun.objects.select_related(
+        "course", "course__coursepage"
+    ).prefetch_related(products_prefetch)
 
 
 class UserEnrollmentsView(APIView):

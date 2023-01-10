@@ -241,6 +241,11 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             else []
         )
 
+    @property
+    def course_runs(self):
+        """All course runs related to a program"""
+        return [run for course in self.courses.all() for run in course.courseruns.all()]
+
     def __str__(self):
         title = f"{self.readable_id} | {self.title}"
         return title if len(title) <= 100 else title[:97] + "..."
@@ -406,9 +411,14 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             list of CourseRun: Unexpired and unenrolled Course runs
 
         """
-        enrolled_runs = user.courserunenrollment_set.filter(
-            run__course=self
-        ).values_list("run__id", flat=True)
+        # `enrolled_runs` is a prefetched attribute.
+        # Added a conditional to avoid issues when prefetched attribute is not there.
+        if hasattr(self, "enrolled_runs"):
+            enrolled_runs = [run.id for run in self.enrolled_runs]
+        else:
+            enrolled_runs = user.courserunenrollment_set.filter(
+                run__course=self
+            ).values_list("run__id", flat=True)
         return [run for run in self.unexpired_runs if run.id not in enrolled_runs]
 
     class Meta:

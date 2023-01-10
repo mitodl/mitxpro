@@ -79,7 +79,8 @@ class CourseRunSerializer(BaseCourseRunSerializer):
 
     def get_product_id(self, instance):
         """ Get the product id for a course run """
-        return instance.products.values_list("id", flat=True).first()
+        products = instance.products.all()
+        return products[0].id if products else None
 
     def get_instructors(self, instance):
         """Get the list of instructors"""
@@ -212,7 +213,10 @@ class ProgramSerializer(serializers.ModelSerializer):
     def get_courses(self, instance):
         """Serializer for courses"""
         return CourseSerializer(
-            instance.courses.filter(live=True).order_by("position_in_program"),
+            sorted(
+                [course for course in instance.courses.all() if course.live],
+                key=lambda course: course.position_in_program,
+            ),
             many=True,
             context={"filter_products": False},
         ).data
@@ -232,12 +236,8 @@ class ProgramSerializer(serializers.ModelSerializer):
         Returns:
             datetime: The starting date
         """
-        return (
-            models.CourseRun.objects.filter(course__program=instance, live=True)
-            .order_by("start_date")
-            .values_list("start_date", flat=True)
-            .first()
-        )
+        sorted_runs = sorted(instance.course_runs, key=lambda run: run.start_date)
+        return sorted_runs[0].start_date if sorted_runs else None
 
     def get_end_date(self, instance):
         """
@@ -246,23 +246,18 @@ class ProgramSerializer(serializers.ModelSerializer):
         Returns:
             datetime: The ending date
         """
-        return (
-            models.CourseRun.objects.filter(course__program=instance, live=True)
-            .order_by("end_date")
-            .values_list("end_date", flat=True)
-            .last()
-        )
+        sorted_runs = sorted(instance.course_runs, key=lambda run: run.end_date)
+        return sorted_runs[-1].end_date if sorted_runs else None
 
     def get_enrollment_start(self, instance):
         """
         enrollment_start is first date where enrollment starts for any live course run
         """
-        return (
-            models.CourseRun.objects.filter(course__program=instance, live=True)
-            .order_by("enrollment_start")
-            .values_list("enrollment_start", flat=True)
-            .first()
+        sorted_runs = sorted(
+            (run for run in instance.course_runs if run.enrollment_start),
+            key=lambda run: run.enrollment_start,
         )
+        return sorted_runs[0].enrollment_start if sorted_runs else None
 
     def get_url(self, instance):
         """Get URL"""
@@ -275,12 +270,12 @@ class ProgramSerializer(serializers.ModelSerializer):
 
     def get_topics(self, instance):
         """List all topics in all courses in the program"""
-        topics = (
-            models.CourseTopic.objects.filter(course__program=instance)
-            .values("name")
-            .distinct("name")
+        topics = set(
+            topic.name
+            for course in instance.courses.all()
+            for topic in course.topics.all()
         )
-        return list(topics)
+        return [{"name": topic} for topic in sorted(topics)]
 
     class Meta:
         model = models.Program
