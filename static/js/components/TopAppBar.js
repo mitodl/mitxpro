@@ -10,8 +10,9 @@ import type { Location } from "react-router"
 import type { CurrentUser } from "../flow/authTypes"
 
 type Props = {
-  currentUser: CurrentUser,
-  location: ?Location
+  currentUser: ?CurrentUser,
+  location: ?Location,
+  errorPageHeader: ?boolean
 }
 
 const shouldShowLoginSignup = location =>
@@ -21,12 +22,12 @@ const shouldShowLoginSignup = location =>
     location.pathname === routes.ecommerceBulk.receipt
   )
 
-const TopAppBar = ({ currentUser, location }: Props) => (
+const TopAppBar = ({ currentUser, location, errorPageHeader }: Props) => (
   <header className="header-holder">
     <div className="container">
       <nav
         className={`sub-nav navbar navbar-expand-md link-section ${
-          currentUser.is_authenticated ? "nowrap login" : ""
+          currentUser && currentUser.is_authenticated ? "nowrap login" : ""
         }`}
       >
         <div className="navbar-brand">
@@ -45,7 +46,7 @@ const TopAppBar = ({ currentUser, location }: Props) => (
             height={47.5}
           />
         </div>
-        {currentUser.is_authenticated ? null : (
+        {(currentUser && currentUser.is_authenticated) || errorPageHeader ? null : (
           <button
             className="navbar-toggler nav-opener"
             type="button"
@@ -59,46 +60,48 @@ const TopAppBar = ({ currentUser, location }: Props) => (
             Menu
           </button>
         )}
-        <ul
-          id="nav"
-          className={`${
-            currentUser.is_authenticated ? "" : "collapse"
-          } navbar-collapse px-0 justify-content-end`}
-        >
-          <li>
-            <a href={routes.catalog} className="" aria-label="catalog">
-              Catalog
-            </a>
-          </li>
-          {shouldShowLoginSignup(location) ? (
-            currentUser.is_authenticated ? (
-              <li>
-                <UserMenu currentUser={currentUser} />
-              </li>
-            ) : (
-              <React.Fragment>
+        {errorPageHeader ? null : (
+          <ul
+            id="nav"
+            className={`${
+              currentUser && currentUser.is_authenticated ? "" : "collapse"
+            } navbar-collapse px-0 justify-content-end`}
+          >
+            <li>
+              <a href={routes.catalog} className="" aria-label="catalog">
+                Catalog
+              </a>
+            </li>
+            {shouldShowLoginSignup(location) ? (
+              currentUser && currentUser.is_authenticated ? (
                 <li>
-                  <MixedLink
-                    dest={routes.login.begin}
-                    className="button"
-                    aria-label="Login"
-                  >
-                    Sign In
-                  </MixedLink>
+                  <UserMenu currentUser={currentUser} />
                 </li>
-                <li>
-                  <MixedLink
-                    dest={routes.register.begin}
-                    className="button"
-                    aria-label="Login"
-                  >
-                    Create Account
-                  </MixedLink>
-                </li>
-              </React.Fragment>
-            )
-          ) : null}
-        </ul>
+              ) : (
+                <React.Fragment>
+                  <li>
+                    <MixedLink
+                      dest={routes.login.begin}
+                      className="button"
+                      aria-label="Login"
+                    >
+                      Sign In
+                    </MixedLink>
+                  </li>
+                  <li>
+                    <MixedLink
+                      dest={routes.register.begin}
+                      className="button"
+                      aria-label="Login"
+                    >
+                      Create Account
+                    </MixedLink>
+                  </li>
+                </React.Fragment>
+              )
+            ) : null}
+          </ul>
+        )}
       </nav>
     </div>
   </header>

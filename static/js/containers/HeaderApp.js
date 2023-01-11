@@ -20,6 +20,8 @@ type Props = {
   addUserNotification: Function
 }
 
+const errorPageHeader = document.getElementsByClassName("error-page-header").length > 0 ? true : false
+
 export class HeaderApp extends React.Component<Props, void> {
   componentDidUpdate(prevProps: Props) {
     if (this.shouldShowUnusedCouponAlert(prevProps, this.props)) {
@@ -47,12 +49,12 @@ export class HeaderApp extends React.Component<Props, void> {
   render() {
     const { currentUser } = this.props
 
-    if (!currentUser) {
+    if (!currentUser && !errorPageHeader) {
       // application is still loading
       return <div />
     }
 
-    return <Header currentUser={currentUser} location={null} />
+    return <Header currentUser={currentUser} location={null} errorPageHeader={errorPageHeader} />
   }
 }
 
@@ -60,7 +62,7 @@ const mapStateToProps = createStructuredSelector({
   currentUser: currentUserSelector
 })
 
-const mapPropsToConfig = () => [users.currentUserQuery()]
+const mapPropsToConfig = () => errorPageHeader ? [] : [users.currentUserQuery()]
 
 const mapDispatchToProps = {
   addUserNotification
