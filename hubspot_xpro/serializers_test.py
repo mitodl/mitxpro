@@ -16,7 +16,7 @@ from b2b_ecommerce.constants import B2B_ORDER_PREFIX
 from b2b_ecommerce.factories import B2BCouponFactory
 from b2b_ecommerce.models import B2BOrder
 from courses.factories import CourseRunFactory
-from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF, DISCOUNT_TYPE_DOLLARS_OFF
+from ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.factories import (
     CouponRedemptionFactory,
     ProductFactory,

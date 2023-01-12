@@ -9,14 +9,16 @@ from typing import List, Tuple
 import celery
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
 from hubspot.crm.objects import BatchInputSimplePublicObjectInput
 from mitol.common.utils import chunks
-from mitol.hubspot_api.api import HubspotApi
+from mitol.hubspot_api.api import HubspotApi, HubspotAssociationType, HubspotObjectType
 from mitol.hubspot_api.models import HubspotObject
 
 from b2b_ecommerce.models import B2BOrder
 from ecommerce.models import Order
 from hubspot_xpro import api
+from hubspot_xpro.api import get_hubspot_id_for_object
 from mitxpro.celery import app
 from users.models import User
 
@@ -212,6 +214,9 @@ def batch_create_hubspot_objects_chunked(
           list(str): list of processed hubspot ids
     """
     created_ids = []
+    content_type = ContentType.objects.exclude(app_label="auth").get(
+        model=ct_model_name
+    )
     # Chunk again, by max allowed for object type (10 for contacts, 100 for all else)
     chunked_ids = batched_chunks(hubspot_type, object_ids)
     for chunk in chunked_ids:
@@ -227,12 +232,12 @@ def batch_create_hubspot_objects_chunked(
         for result in response.results:
             if ct_model_name == "user":
                 object_id = User.objects.get(
-                    email__iexact=result.properties["email"]
+                    email__iexact=result.properties["email"], is_active=True
                 ).id
             else:
                 object_id = result.properties["unique_app_id"].split("-")[-1]
             HubspotObject.objects.update_or_create(
-                content_type=ContentType.objects.get(model=ct_model_name),
+                content_type=content_type,
                 hubspot_id=result.id,
                 object_id=object_id,
             )
@@ -278,8 +283,13 @@ def batch_update_hubspot_objects_chunked(
 
 
 @app.task(bind=True)
-def batch_upsert_hubspot_objects(
-    self, hubspot_type: str, model_name: str, app_label: str, create: bool = True
+def batch_upsert_hubspot_objects(  # pylint:disable=too-many-arguments
+    self,
+    hubspot_type: str,
+    model_name: str,
+    app_label: str,
+    create: bool = True,
+    object_ids: List[int] = None,
 ):
     """
     Batch create or update objects in hubspot, no associations (so ideal for contacts and products)
@@ -291,15 +301,20 @@ def batch_upsert_hubspot_objects(
         create(bool): Create if true, update if false
     """
     content_type = ContentType.objects.get_by_natural_key(app_label, model_name)
-    synced_object_ids = HubspotObject.objects.filter(
-        content_type=content_type
-    ).values_list("object_id", "hubspot_id")
-    unsynced_object_ids = (
-        content_type.model_class()
-        .objects.exclude(id__in=[id[0] for id in synced_object_ids])
-        .values_list("id", flat=True)
-    )
-    object_ids = sorted(unsynced_object_ids if create else synced_object_ids)
+    if not object_ids:
+        synced_object_ids = HubspotObject.objects.filter(
+            content_type=content_type
+        ).values_list("object_id", "hubspot_id")
+        unsynced_object_ids = (
+            content_type.model_class()
+            .objects.exclude(id__in=[id[0] for id in synced_object_ids])
+            .values_list("id", flat=True)
+        )
+        object_ids = sorted(unsynced_object_ids if create else synced_object_ids)
+    elif not create:
+        object_ids = HubspotObject.objects.filter(
+            content_type=content_type, object_id__in=object_ids
+        ).values_list("object_id", "hubspot_id")
     # Limit number of chunks to avoid rate limit
     chunk_size = max_concurrent_chunk_size(len(object_ids))
     chunk_func = (
@@ -310,5 +325,83 @@ def batch_upsert_hubspot_objects(
     chunked_tasks = [
         chunk_func.s(hubspot_type, model_name, chunk)
         for chunk in chunks(object_ids, chunk_size=chunk_size)
+    ]
+    raise self.replace(celery.group(chunked_tasks))
+
+
+@app.task(acks_late=True)
+def batch_upsert_associations_chunked(order_ids: List[int]):
+    """
+    Upsert batches of deal-contact and line-deal associations
+
+    Args:
+        order_ids(list): List of Order IDs
+    """
+    contact_associations_batch = []
+    line_associations_batch = []
+    hubspot_client = HubspotApi()
+    deal_count = len(order_ids)
+    for idx, order_id in enumerate(order_ids):
+        deal = Order.objects.get(id=order_id)
+        contact_id = get_hubspot_id_for_object(deal.purchaser)
+        deal_id = get_hubspot_id_for_object(deal)
+        for line in deal.lines.iterator():
+            line_id = get_hubspot_id_for_object(line)
+            if contact_id and deal_id:
+                contact_associations_batch.append(
+                    PublicAssociation(
+                        _from=deal_id,
+                        to=contact_id,
+                        type=HubspotAssociationType.DEAL_CONTACT.value,
+                    )
+                )
+            if line_id and deal_id:
+                line_associations_batch.append(
+                    PublicAssociation(
+                        _from=line_id,
+                        to=deal_id,
+                        type=HubspotAssociationType.LINE_DEAL.value,
+                    )
+                )
+            if (
+                len(contact_associations_batch) == 100
+                or len(line_associations_batch) == 100
+                or idx == deal_count - 1
+            ):
+                hubspot_client.crm.associations.batch_api.create(
+                    HubspotObjectType.LINES.value,
+                    HubspotObjectType.DEALS.value,
+                    batch_input_public_association=BatchInputPublicAssociation(
+                        inputs=line_associations_batch
+                    ),
+                )
+                line_associations_batch = []
+                hubspot_client.crm.associations.batch_api.create(
+                    HubspotObjectType.DEALS.value,
+                    HubspotObjectType.CONTACTS.value,
+                    batch_input_public_association=BatchInputPublicAssociation(
+                        inputs=contact_associations_batch
+                    ),
+                )
+                contact_associations_batch = []
+    return order_ids
+
+
+@app.task(bind=True)
+def batch_upsert_associations(self, order_ids: List[int] = None):
+    """
+    Upsert chunked batches of deal-contact and line-deal associations
+
+    Args:
+        order_ids(list): List of Order IDs
+    """
+    deal_ids = Order.objects.all()
+    if order_ids:
+        deal_ids = deal_ids.filter(id__in=order_ids)
+    deal_ids = deal_ids.values_list("id", flat=True)
+    chunk_size = max_concurrent_chunk_size(len(deal_ids))
+    chunked_tasks = [
+        batch_upsert_associations_chunked.s(chunk)
+        for chunk in chunks(sorted(deal_ids), chunk_size=chunk_size)
     ]
     raise self.replace(celery.group(chunked_tasks))

@@ -4,9 +4,6 @@ Management command to configure custom Hubspot properties for Contacts, Deals, P
 import sys
 
 from django.core.management import BaseCommand
-
-from ecommerce import models
-from hubspot_xpro.serializers import ORDER_TYPE_B2B, ORDER_TYPE_B2C
 from mitol.hubspot_api.api import (
     delete_object_property,
     delete_property_group,
@@ -15,6 +12,9 @@ from mitol.hubspot_api.api import (
     sync_object_property,
     sync_property_group,
 )
+
+from ecommerce import models
+from hubspot_xpro.serializers import ORDER_TYPE_B2B, ORDER_TYPE_B2C
 
 
 CUSTOM_ECOMMERCE_PROPERTIES = {

@@ -7,14 +7,15 @@ import sys
 from django.contrib.contenttypes.models import ContentType
 from django.core.management import BaseCommand
 from mitol.common.utils import now_in_utc
+from mitol.hubspot_api.api import HubspotObjectType
 
-from ecommerce.models import Product
+from ecommerce.models import Line, Order, Product
 from hubspot_xpro.tasks import (
+    batch_upsert_associations,
     batch_upsert_hubspot_b2b_deals,
     batch_upsert_hubspot_deals,
     batch_upsert_hubspot_objects,
 )
-from mitol.hubspot_api.api import HubspotObjectType
 from users.models import User
 
 
@@ -24,6 +25,7 @@ class Command(BaseCommand):
     """
 
     create = None
+    object_ids = None
     help = (
         "Sync all Users, Orders, Products, and Lines with Hubspot. Hubspot API key must be set and Hubspot settings"
         "must be configured with configure_hubspot_settings"
@@ -89,12 +91,54 @@ class Command(BaseCommand):
         Sync all orders with deals in hubspot
         """
         sys.stdout.write("  Syncing orders with hubspot deals...\n")
-        task = batch_upsert_hubspot_deals.delay(self.create)
+        task = batch_upsert_hubspot_objects.delay(
+            HubspotObjectType.DEALS.value,
+            ContentType.objects.get_for_model(Order).model,
+            Order._meta.app_label,
+            self.create,
+            object_ids=self.object_ids,
+        )
         start = now_in_utc()
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
             "Syncing of orders/lines to hubspot finished, took {} seconds\n".format(
+                total_seconds
+            )
+        )
+
+    def sync_lines(self):
+        """
+        Sync all orders with line_items in hubspot
+        """
+        sys.stdout.write("  Syncing order lines with hubspot line_items...\n")
+        task = batch_upsert_hubspot_objects.delay(
+            HubspotObjectType.LINES.value,
+            ContentType.objects.get_for_model(Line).model,
+            Line._meta.app_label,
+            self.create,
+            object_ids=self.object_ids,
+        )
+        start = now_in_utc()
+        task.get()
+        total_seconds = (now_in_utc() - start).total_seconds()
+        self.stdout.write(
+            "Syncing of order lines to hubspot finished, took {} seconds\n".format(
+                total_seconds
+            )
+        )
+
+    def sync_associations(self):
+        """
+        Sync all deal associations in hubspot
+        """
+        sys.stdout.write("  Syncing deal associations with hubspot...\n")
+        task = batch_upsert_associations.delay(order_ids=self.object_ids)
+        start = now_in_utc()
+        task.get()
+        total_seconds = (now_in_utc() - start).total_seconds()
+        self.stdout.write(
+            "Syncing of deal associations to hubspot finished, took {} seconds\n".format(
                 total_seconds
             )
         )
@@ -106,13 +150,22 @@ class Command(BaseCommand):
         """
         self.sync_contacts()
         self.sync_products()
-        self.sync_deals()
         self.sync_b2b_deals()
+        self.sync_deals()
+        self.sync_lines()
+        self.sync_associations()
 
     def add_arguments(self, parser):
         """
         Definition of arguments this command accepts
         """
+        parser.add_argument(
+            "--ids",
+            type=int,
+            help="List of object ids to process, must be used for a specific object model",
+            nargs="+",
+            required=False,
+        )
         parser.add_argument(
             "--contacts",
             "--users",
@@ -141,6 +194,19 @@ class Command(BaseCommand):
             help="Sync all b2b orders",
         )
         parser.add_argument(
+            "--lines",
+            "--line_items",
+            dest="sync_lines",
+            action="store_true",
+            help="Sync all order line items",
+        )
+        parser.add_argument(
+            "--associations",
+            dest="sync_associations",
+            action="store_true",
+            help="Sync all order associations",
+        )
+        parser.add_argument(
             "mode",
             type=str,
             nargs="?",
@@ -153,12 +219,16 @@ class Command(BaseCommand):
             sys.stderr.write("You must specify mode ('create' or 'update')\n")
             sys.exit(1)
         self.create = options["mode"].lower() == "create"
+        self.object_ids = options["ids"]
+
         sys.stdout.write("Syncing with hubspot...\n")
         if not (
             options["sync_contacts"]
             or options["sync_products"]
             or options["sync_deals"]
+            or options["sync_lines"]
             or options["sync_b2b_deals"]
+            or options["sync_associations"]
         ):
             # If no flags are set, sync everything
             self.sync_all()
@@ -170,6 +240,10 @@ class Command(BaseCommand):
                 self.sync_products()
             if options["sync_deals"]:
                 self.sync_deals()
+            if options["sync_lines"]:
+                self.sync_lines()
             if options["sync_b2b_deals"]:
                 self.sync_b2b_deals()
+            if options["sync_associations"]:
+                self.sync_associations()
         sys.stdout.write("Hubspot sync complete\n")

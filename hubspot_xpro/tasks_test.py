@@ -2,18 +2,26 @@
 Tests for hubspot_xpro tasks
 """
 # pylint: disable=redefined-outer-name
+from decimal import Decimal
 from math import ceil
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
 from faker import Faker
+from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
 from hubspot.crm.objects import BatchInputSimplePublicObjectInput
-from mitol.hubspot_api.api import HubspotObjectType
+from mitol.hubspot_api.api import HubspotAssociationType, HubspotObjectType
 from mitol.hubspot_api.factories import HubspotObjectFactory, SimplePublicObjectFactory
+from mitol.hubspot_api.models import HubspotObject
 
 from b2b_ecommerce.factories import B2BOrderFactory
 from b2b_ecommerce.models import B2BOrder
-from ecommerce.factories import OrderFactory, ProductFactory
+from ecommerce.factories import (
+    LineFactory,
+    OrderFactory,
+    ProductFactory,
+    ProductVersionFactory,
+)
 from ecommerce.models import Order, Product
 from hubspot_xpro import tasks
 from hubspot_xpro.api import make_contact_sync_message
@@ -244,5 +252,88 @@ def test_batch_create_hubspot_objects_chunked(mocker, id_count):
                 make_contact_sync_message(mock_id)
                 for mock_id in mock_ids[0 : min(id_count, 10)]
             ]
+        ),
+    )
+
+
+def test_batch_upsert_associations(
+    settings, mocker, mocked_celery
+):  # pylint:disable=unused-argument
+    """
+    batch_upsert_associations should call batch_upsert_associations_chunked w/correct lists of ids
+    """
+    mock_assoc_chunked = mocker.patch(
+        "hubspot_xpro.tasks.batch_upsert_associations_chunked"
+    )
+    settings.HUBSPOT_MAX_CONCURRENT_TASKS = 4
+    order_ids = sorted([app.id for app in OrderFactory.create_batch(10)])
+    with pytest.raises(TabError):
+        tasks.batch_upsert_associations.delay()
+    mock_assoc_chunked.s.assert_any_call(order_ids[0:3])
+    mock_assoc_chunked.s.assert_any_call(order_ids[6:9])
+    mock_assoc_chunked.s.assert_any_call([order_ids[9]])
+    assert mock_assoc_chunked.s.call_count == 4
+
+    with pytest.raises(TabError):
+        tasks.batch_upsert_associations.delay(order_ids[3:5])
+    mock_assoc_chunked.s.assert_any_call([order_ids[3]])
+    mock_assoc_chunked.s.assert_any_call([order_ids[4]])
+
+
+def test_batch_upsert_associations_chunked(mocker):
+    """
+    batch_upsert_associations_chunked should make expected API calls
+    """
+    mock_hubspot_api = mocker.patch("hubspot_xpro.tasks.HubspotApi")
+    orders = OrderFactory.create_batch(5)
+    for order in orders:
+        LineFactory.create(
+            order=order,
+            product_version=ProductVersionFactory.create(price=Decimal(200.00)),
+        )
+    expected_line_associations = [
+        PublicAssociation(
+            _from=HubspotObjectFactory.create(
+                content_type=ContentType.objects.get_for_model(order.lines.first()),
+                object_id=order.lines.first().id,
+                content_object=order.lines.first(),
+            ).hubspot_id,
+            to=HubspotObjectFactory.create(
+                content_type=ContentType.objects.get_for_model(order),
+                object_id=order.id,
+                content_object=order,
+            ).hubspot_id,
+            type=HubspotAssociationType.LINE_DEAL.value,
+        )
+        for order in orders
+    ]
+    expected_contact_associations = [
+        PublicAssociation(
+            _from=HubspotObject.objects.get(
+                content_type=ContentType.objects.get_for_model(order),
+                object_id=order.id,
+            ).hubspot_id,
+            to=HubspotObjectFactory.create(
+                content_type=ContentType.objects.get_for_model(order.purchaser),
+                object_id=order.purchaser.id,
+                content_object=order.purchaser,
+            ).hubspot_id,
+            type=HubspotAssociationType.DEAL_CONTACT.value,
+        )
+        for order in orders
+    ]
+    tasks.batch_upsert_associations_chunked.delay([order.id for order in orders])
+    mock_hubspot_api.return_value.crm.associations.batch_api.create.assert_any_call(
+        HubspotObjectType.LINES.value,
+        HubspotObjectType.DEALS.value,
+        batch_input_public_association=BatchInputPublicAssociation(
+            inputs=expected_line_associations
+        ),
+    )
+    mock_hubspot_api.return_value.crm.associations.batch_api.create.assert_any_call(
+        HubspotObjectType.DEALS.value,
+        HubspotObjectType.CONTACTS.value,
+        batch_input_public_association=BatchInputPublicAssociation(
+            inputs=expected_contact_associations
         ),
     )
