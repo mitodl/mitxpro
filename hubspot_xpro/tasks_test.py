@@ -9,10 +9,11 @@ import pytest
 from django.contrib.contenttypes.models import ContentType
 from faker import Faker
 from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
-from hubspot.crm.objects import BatchInputSimplePublicObjectInput
+from hubspot.crm.objects import BatchInputSimplePublicObjectInput, ApiException
 from mitol.hubspot_api.api import HubspotAssociationType, HubspotObjectType
 from mitol.hubspot_api.factories import HubspotObjectFactory, SimplePublicObjectFactory
 from mitol.hubspot_api.models import HubspotObject
+from mitol.hubspot_api.exceptions import TooManyRequestsException
 
 from b2b_ecommerce.factories import B2BOrderFactory
 from b2b_ecommerce.models import B2BOrder
@@ -33,15 +34,14 @@ pytestmark = [pytest.mark.django_db]
 fake = Faker()
 
 
-@pytest.mark.parametrize(
-    "task_func",
-    [
-        "sync_contact_with_hubspot",
-        "sync_product_with_hubspot",
-        "sync_deal_with_hubspot",
-        "sync_b2b_deal_with_hubspot",
-    ],
-)
+SYNC_FUNCTIONS = [
+    "sync_contact_with_hubspot",
+    "sync_product_with_hubspot",
+    "sync_deal_with_hubspot",
+]
+
+
+@pytest.mark.parametrize("task_func", SYNC_FUNCTIONS)
 def test_task_functions(mocker, task_func):
     """These task functions should call the api function of the same name and return a hubspot id"""
     mock_result = SimplePublicObjectFactory()
@@ -51,6 +51,19 @@ def test_task_functions(mocker, task_func):
     mock_object_id = 101
     assert getattr(tasks, task_func)(mock_object_id) == mock_result.id
     mock_api_call.assert_called_once_with(mock_object_id)
+
+
+@pytest.mark.parametrize("task_func", SYNC_FUNCTIONS)
+@pytest.mark.parametrize(
+    "status, expected_error", [[429, TooManyRequestsException], [500, ApiException]]
+)
+def test_task_functions_error(mocker, task_func, status, expected_error):
+    """These task functions should return the expected exception class"""
+    mocker.patch(
+        f"hubspot_xpro.tasks.api.{task_func}", side_effect=expected_error(status=status)
+    )
+    with pytest.raises(expected_error):
+        getattr(tasks, task_func)(101)
 
 
 @pytest.mark.parametrize("create", [True, False])
