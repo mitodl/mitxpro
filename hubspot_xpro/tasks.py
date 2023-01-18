@@ -29,7 +29,9 @@ from users.models import User
 log = logging.getLogger()
 
 
-def task_obj_lock(func_name: str, args: List[object], kwargs: dict) -> str:
+def task_obj_lock(
+    func_name: str, args: List[object], kwargs: dict  # pylint:disable=unused-argument
+) -> str:
     """
     Determine a task lock name for a specific task function and object id
 
