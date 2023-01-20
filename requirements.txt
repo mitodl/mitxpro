@@ -470,7 +470,7 @@ vine==5.0.0
     #   amqp
     #   celery
     #   kombu
-wagtail==2.13.4
+wagtail==2.15.2
     # via
     #   -r requirements.in
     #   wagtail-metadata
