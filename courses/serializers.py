@@ -98,11 +98,17 @@ class CourseRunSerializer(BaseCourseRunSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     """Course model serializer - also serializes child course runs"""
 
+    url = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
     courseruns = serializers.SerializerMethodField()
     next_run_id = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
+
+    def get_url(self, instance):
+        """Get CMS Page URL for the course"""
+        page = instance.page
+        return page.get_full_url() if page else None
 
     def get_thumbnail_url(self, instance):
         """Thumbnail URL"""
@@ -149,6 +155,7 @@ class CourseSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "description",
+            "url",
             "thumbnail_url",
             "readable_id",
             "courseruns",

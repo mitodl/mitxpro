@@ -166,6 +166,7 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
         {
             "title": course.title,
             "description": course.page.description,
+            "url": f"http://localhost{course.page.get_url()}",
             "readable_id": course.readable_id,
             "id": course.id,
             "courseruns": [
