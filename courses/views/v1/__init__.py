@@ -44,13 +44,10 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = []
     serializer_class = ProgramSerializer
     queryset = (
-        (
-            Program.objects.filter(live=True)
-            .exclude(products=None)
-            .select_related("programpage")
-            .prefetch_related(courses_prefetch, products_prefetch)
-        )
-        .exclude(programpage__isnull=True)
+        Program.objects.filter(live=True)
+        .exclude(products=None)
+        .select_related("programpage")
+        .prefetch_related(courses_prefetch, products_prefetch)
         .filter(programpage__live=True)
     )
 
@@ -68,12 +65,9 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         queryset = (
-            (
-                Course.objects.filter(live=True)
-                .select_related("coursepage")
-                .prefetch_related("topics", self.course_runs_prefetch)
-            )
-            .exclude(coursepage__isnull=True)
+            Course.objects.filter(live=True)
+            .select_related("coursepage")
+            .prefetch_related("topics", self.course_runs_prefetch)
             .filter(coursepage__live=True)
         )
 
