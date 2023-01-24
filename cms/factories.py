@@ -68,6 +68,7 @@ class ProgramPageFactory(wagtail_factories.PageFactory):
     certificate_page = factory.RelatedFactory(
         "cms.factories.CertificatePageFactory", "parent"
     )
+    live = True
 
     class Meta:
         model = ProgramPage
@@ -97,6 +98,7 @@ class CoursePageFactory(wagtail_factories.PageFactory):
     certificate_page = factory.RelatedFactory(
         "cms.factories.CertificatePageFactory", "parent"
     )
+    live = True
 
     class Meta:
         model = CoursePage
