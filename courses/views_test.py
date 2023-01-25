@@ -12,6 +12,7 @@ from mitol.digitalcredentials.models import DigitalCredentialRequest
 from mitol.digitalcredentials.serializers import DigitalCredentialRequestSerializer
 from rest_framework import status
 
+from cms.factories import ProgramPageFactory, CoursePageFactory
 from courses.api import UserEnrollments
 from courses.factories import (
     CourseFactory,
@@ -60,6 +61,11 @@ def course_runs():
 
 def test_get_programs(user_drf_client, programs):
     """Test the view that handles requests for all Programs"""
+    ProgramPageFactory.create_batch(
+        2, live=False
+    )  # create live programs with draft pages
+    ProgramFactory.create(live=False)  # draft program
+    ProgramFactory.create(page=None)  # live program, no CMS page
     resp = user_drf_client.get(reverse("programs_api-list"))
     programs_data = sorted(resp.json(), key=op.itemgetter("id"))
     assert len(programs_data) == len(programs)
@@ -108,6 +114,11 @@ def test_delete_program(user_drf_client, programs):
 @pytest.mark.parametrize("is_anonymous", [True, False])
 def test_get_courses(user_drf_client, courses, mock_context, is_anonymous):
     """Test the view that handles requests for all Courses"""
+    CoursePageFactory.create_batch(
+        2, live=False
+    )  # create live courses with draft pages
+    CourseFactory.create(page=None)  # live course with no cms page
+    CourseFactory.create(live=False)  # Draft course
     if is_anonymous:
         user_drf_client.logout()
     resp = user_drf_client.get(reverse("courses_api-list"))

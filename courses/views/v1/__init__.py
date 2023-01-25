@@ -48,6 +48,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
         .exclude(products=None)
         .select_related("programpage")
         .prefetch_related(courses_prefetch, products_prefetch)
+        .filter(programpage__live=True)
     )
 
 
@@ -67,6 +68,7 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
             Course.objects.filter(live=True)
             .select_related("coursepage")
             .prefetch_related("topics", self.course_runs_prefetch)
+            .filter(coursepage__live=True)
         )
 
         if self.request.user.is_authenticated:
