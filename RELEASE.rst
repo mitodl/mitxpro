@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.113.0
+Version 0.113.0 (Released January 25, 2023)
 ---------------
 
 - fix: Catalog page performance (#2532)
