@@ -1,6 +1,20 @@
 Release Notes
 =============
 
+Version 0.114.0
+---------------
+
+- Bump cookiejar from 2.1.3 to 2.1.4 (#2544)
+- Course urls in catalog API (#2540)
+- Bump decode-uri-component from 0.2.0 to 0.2.2 (#2506)
+- Update README.md
+- single_task and raise_429 decorators for hubspot tasks (#2537)
+- Bump json5 from 1.0.1 to 1.0.2 (#2536)
+- Hubspot batch sync improvements (#2535)
+- fix: 404 page doesn't need authentication (#2534)
+- perf: Optimize database queries (#2525)
+- Force django app to load ASAP after uwsgi workers are restarted/forked (#2527)
+
 Version 0.113.0 (Released January 25, 2023)
 ---------------
 
