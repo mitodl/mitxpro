@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.113.0 (Released January 25, 2023)
+---------------
+
+- fix: Catalog page performance (#2532)
+- Setup django-silk when DEBUG=True
+- Adds a separate step for black formatting check (#2528)
+- Remove bulk enrollment form (#2482)
+- Remove uwsgi worker reload settings
+
 Version 0.112.6 (Released December 09, 2022)
 ---------------
 
