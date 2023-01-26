@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.114.0
+Version 0.114.0 (Released January 26, 2023)
 ---------------
 
 - Revert "Force django app to load ASAP after uwsgi workers are restarted/forked (#2527)" (#2548)
