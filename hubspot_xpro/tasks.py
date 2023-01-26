@@ -43,7 +43,15 @@ def task_obj_lock(
     Returns:
         str: The lock id for the task and object
     """
-    return f"{func_name}_{args[0]}"
+    if args:
+        # Assumes first arg is object id
+        return f"{func_name}_{args[0]}"
+    elif kwargs:
+        # Assumes there is one key:value, for the object id
+        # For tasks where this isn't true, a different function should be used
+        return f"{func_name}_{list(kwargs.values())[0]}"
+    else:
+        return func_name
 
 
 def max_concurrent_chunk_size(obj_count: int) -> int:
