@@ -353,13 +353,16 @@ def test_batch_upsert_associations_chunked(mocker):
     )
 
 
-@pytest.mark.parametrize("func_name,args,kwargs,result", [
-    ["func1", [2345], None, "func1_2345"],
-    ["func2", None, {"order_id": 5678}, "func2_5678"],
-    ["func2a", [], {"user_id": 5678}, "func2a_5678"],
-    ["func3", None, None, "func3"],
-    ["func3a", None, {}, "func3a"],
-])
+@pytest.mark.parametrize(
+    "func_name,args,kwargs,result",
+    [
+        ["func1", [2345], None, "func1_2345"],
+        ["func2", None, {"order_id": 5678}, "func2_5678"],
+        ["func2a", [], {"user_id": 5678}, "func2a_5678"],
+        ["func3", None, None, "func3"],
+        ["func3a", None, {}, "func3a"],
+    ],
+)
 def test_task_obj_lock(func_name, args, kwargs, result):
     """task_obj_lock should return expected result string"""
     assert task_obj_lock(func_name, args, kwargs) == result
