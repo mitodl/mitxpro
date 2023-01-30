@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.114.1
+Version 0.114.1 (Released January 30, 2023)
 ---------------
 
 - Fix bug with calling b2b deal sync function from helper task (#2551)
