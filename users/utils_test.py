@@ -1,8 +1,10 @@
 """User utils tests"""
+import re
 from unittest.mock import patch
 
 import pytest
 
+from users.factories import UserFactory
 from users.utils import (
     ensure_active_user,
     format_recipient,
@@ -73,6 +75,18 @@ def test_ensure_active_user(mock_repair_faulty_edx_user, user):
     assert user.is_active
 
 
-def test_format_recipient(user):
+@pytest.mark.parametrize(
+    "name, email",
+    [
+        ["Mrs. Tammy Smith DDS", "HeSNMtNMfVdo@example.com"],
+        ["John Doe", "jd_123@example.com"],
+        ["Doe, Jane", "jd_456@example.com"],
+    ],
+)
+def test_format_recipient(name, email):
     """Verify that format_recipient correctly format's a user's name and email"""
-    assert format_recipient(user) == f"{user.name} <{user.email}>"
+    user = UserFactory.build(name=name, email=email)
+    assert (
+        re.fullmatch(fr"(\"?){user.name}(\"?)\s+<{user.email}>", format_recipient(user))
+        is not None
+    )
