@@ -1,0 +1,12 @@
+---
+name: Add new issues to mitodl/hq
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  add-to-hq:
+    uses: mitodl/ol-github-workflows/.github/workflows/add-to-ol-hq.yaml@main
+    secrets: inherit
