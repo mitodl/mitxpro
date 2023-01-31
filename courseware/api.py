@@ -16,7 +16,7 @@ from requests.exceptions import HTTPError
 from rest_framework import status
 
 from authentication import api as auth_api
-from courses.models import CourseRunEnrollment
+from courses.models import CourseRunEnrollment, CourseRun
 from courseware.constants import (
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
     EDX_ENROLLMENT_AUDIT_MODE,
@@ -496,6 +496,24 @@ def get_edx_grades_with_users(course_run, user=None):
                 yield edx_grade, user
 
 
+def get_enrollment(user: User, course_run: CourseRun):
+    """
+    Return a user's enrollment for a course run if it exists
+
+    Args:
+        user(User): The user to check enrollments for
+        course_run(CourseRun): The run enrollment to look for
+
+    Returns:
+        edx_api.enrollments.Enrollment or None: The edx enrollment if it exists, or None
+
+    """
+    edx_client = get_edx_api_client(user)
+    return edx_client.enrollments.get_student_enrollments().enrollments.get(
+        course_run.courseware_id
+    )
+
+
 def enroll_in_edx_course_runs(user, course_runs):
     """
     Enrolls a user in edx course runs
@@ -578,12 +596,22 @@ def retry_failed_edx_enrollments():
         course_run = enrollment.run
         try:
             enroll_in_edx_course_runs(user, [course_run])
+        except HTTPError as exc:
+            # Check if user is already enrolled
+            if get_enrollment(user, course_run) is None:
+                log.exception(str(exc))
+                continue
+            log.warning(
+                "User %s was already enrolled in %s",
+                user.email,
+                course_run.courseware_id,
+            )
         except Exception as exc:  # pylint: disable=broad-except
             log.exception(str(exc))
-        else:
-            enrollment.edx_enrolled = True
-            enrollment.save_and_log(None)
-            succeeded.append(enrollment)
+            continue
+        enrollment.edx_enrolled = True
+        enrollment.save_and_log(None)
+        succeeded.append(enrollment)
     return succeeded
 
 
