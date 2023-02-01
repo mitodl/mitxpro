@@ -510,7 +510,9 @@ def test_retry_failed_edx_enrollments_exists(mocker, edx_enrollment_exists):
         CourseRunEnrollmentFactory.create(edx_enrolled=False, user__is_active=False)
     patched_enroll_in_edx = mocker.patch(
         "courseware.api.enroll_in_edx_course_runs",
-        side_effect=MockHttpError(),
+        side_effect=EdxApiEnrollErrorException(
+            failed_enrollment.user, failed_enrollment.run, MockHttpError()
+        ),
     )
     edx_enrollments = (
         {f"{failed_enrollment.run.courseware_id}": "foo"}

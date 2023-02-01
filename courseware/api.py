@@ -596,7 +596,7 @@ def retry_failed_edx_enrollments():
         course_run = enrollment.run
         try:
             enroll_in_edx_course_runs(user, [course_run])
-        except HTTPError as exc:
+        except EdxApiEnrollErrorException as exc:
             # Check if user is already enrolled
             if get_enrollment(user, course_run) is None:
                 log.exception(str(exc))
