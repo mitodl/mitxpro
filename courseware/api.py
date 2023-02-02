@@ -251,6 +251,9 @@ def _create_tokens_and_update_auth(auth, params):
     resp = requests.post(edx_url(OPENEDX_OAUTH2_ACCESS_TOKEN_PATH), data=params)
     if resp.status_code != 200:
         # The auth is likely broken for reasons unknown, delete and return None
+        log.info(
+            "Auth token for user %s failed, creating a new one", auth.user.username
+        )
         auth.delete()
         return None
 
@@ -350,7 +353,7 @@ def get_valid_edx_api_auth(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECO
     auth = OpenEdxApiAuth.objects.filter(
         user=user, access_token_expires_on__gt=expires_after
     ).first()
-    if not auth:
+    if auth is None:
         # if the auth was no longer valid, try to update/create it
         with transaction.atomic():
             auth = OpenEdxApiAuth.objects.select_for_update().filter(user=user).first()
