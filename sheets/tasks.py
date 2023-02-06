@@ -1,5 +1,4 @@
 """Sheets app tasks"""
-import json
 import logging
 from datetime import datetime, timedelta
 from itertools import chain, repeat
