@@ -8,6 +8,7 @@ from urllib.parse import parse_qsl
 import pytest
 import responses
 from django.contrib.auth import get_user_model
+from edx_api.enrollments import Enrollments
 from freezegun import freeze_time
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
@@ -497,8 +498,10 @@ def test_retry_failed_edx_enrollments(mocker, exception_raised):
         }
 
 
-@pytest.mark.parametrize("edx_enrollment_exists", [True, False])
-def test_retry_failed_edx_enrollments_exists(mocker, edx_enrollment_exists):
+@pytest.mark.parametrize(
+    "edx_enrollment_exists, is_active", [[False, False], [True, True], [True, False]]
+)
+def test_retry_failed_edx_enrollments_exists(mocker, edx_enrollment_exists, is_active):
     """
     Tests that retry_failed_edx_enrollments loops through enrollments that failed in edX
     and attempts to enroll them again
@@ -514,25 +517,32 @@ def test_retry_failed_edx_enrollments_exists(mocker, edx_enrollment_exists):
             failed_enrollment.user, failed_enrollment.run, MockHttpError()
         ),
     )
-    edx_enrollments = (
-        {f"{failed_enrollment.run.courseware_id}": "foo"}
+    edx_enrollments = [
+        {
+            "is_active": is_active,
+            "course_details": {"course_id": failed_enrollment.run.courseware_id},
+        }
         if edx_enrollment_exists
         else {"foo": "bar"}
-    )
+    ]
     mock_edx_client = mocker.patch("courseware.api.get_edx_api_client", autospec=True)
-    mock_edx_client.return_value.enrollments.get_student_enrollments.return_value.enrollments = (
-        edx_enrollments
+    mock_edx_client.return_value.enrollments.get_student_enrollments.return_value = (
+        Enrollments(edx_enrollments)
     )
 
     patched_log = mocker.patch("courseware.api.log")
     successful_enrollments = retry_failed_edx_enrollments()
 
     assert patched_enroll_in_edx.call_count == 1
-    assert len(successful_enrollments) == (1 if edx_enrollment_exists else 0)
-    assert patched_log.exception.called == bool(not edx_enrollment_exists)
-    assert patched_log.warning.called == bool(edx_enrollment_exists)
+    assert len(successful_enrollments) == (
+        1 if edx_enrollment_exists and is_active else 0
+    )
+    assert patched_log.exception.called == bool(
+        not edx_enrollment_exists or not is_active
+    )
+    assert patched_log.warning.called == bool(edx_enrollment_exists and is_active)
     failed_enrollment.refresh_from_db()
-    assert failed_enrollment.edx_enrolled is edx_enrollment_exists
+    assert failed_enrollment.edx_enrolled is (edx_enrollment_exists and is_active)
 
 
 def test_retry_failed_enroll_grace_period(mocker):

@@ -509,7 +509,7 @@ def get_enrollment(user: User, course_run: CourseRun):
 
     """
     edx_client = get_edx_api_client(user)
-    return edx_client.enrollments.get_student_enrollments().enrollments.get(
+    return edx_client.enrollments.get_student_enrollments().get_enrollment_for_course(
         course_run.courseware_id
     )
 
@@ -597,15 +597,17 @@ def retry_failed_edx_enrollments():
         try:
             enroll_in_edx_course_runs(user, [course_run])
         except EdxApiEnrollErrorException as exc:
-            # Check if user is already enrolled
-            if get_enrollment(user, course_run) is None:
+            # Check if user is already actively enrolled
+            edx_enrollment = get_enrollment(user, course_run)
+            if edx_enrollment and edx_enrollment.is_active:
+                log.warning(
+                    "User %s was already enrolled in %s",
+                    user.email,
+                    course_run.courseware_id,
+                )
+            else:
                 log.exception(str(exc))
                 continue
-            log.warning(
-                "User %s was already enrolled in %s",
-                user.email,
-                course_run.courseware_id,
-            )
         except Exception as exc:  # pylint: disable=broad-except
             log.exception(str(exc))
             continue
