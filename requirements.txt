@@ -326,7 +326,7 @@ pygments==2.11.2
     # via ipython
 pygsheets==2.0.2
     # via -r requirements.in
-pyjwt==2.3.0
+pyjwt==2.4.0
     # via
     #   djangorestframework-simplejwt
     #   social-auth-core
