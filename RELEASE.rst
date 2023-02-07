@@ -1,6 +1,20 @@
 Release Notes
 =============
 
+Version 0.115.0
+---------------
+
+- Fix processing of scheduled sheet coupon assignment tasks (#2565)
+- Bump pyjwt from 2.3.0 to 2.4.0 (#2397)
+- Bump minimist from 1.2.5 to 1.2.6 (#2382)
+- Bump loader-utils from 1.4.0 to 1.4.2 (#2466)
+- Bump ua-parser-js from 0.7.31 to 0.7.33 (#2552)
+- Bump django from 3.2.15 to 3.2.17 (#2563)
+- Fix flaky test (#2557)
+- Add frontend caching for homepage (#2529)
+- Add a workflow for new issues
+- Change ubuntu-latest to ubuntu-22.04 (#2554)
+
 Version 0.114.1 (Released January 30, 2023)
 ---------------
 
