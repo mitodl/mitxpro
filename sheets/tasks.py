@@ -1,5 +1,4 @@
 """Sheets app tasks"""
-import json
 import logging
 from datetime import datetime, timedelta
 from itertools import chain, repeat
@@ -112,15 +111,11 @@ def _get_scheduled_assignment_task_ids(file_id):
     # provided the given file_id as a kwarg, add its task id to the list
     for scheduled in chain.from_iterable(app.control.inspect().scheduled().values()):
         task_metadata = scheduled["request"]
-        if task_metadata["name"] == task_name:
-            # NOTE: Celery provides metadata for scheduled tasks, and the args/kwargs passed to
-            # that task are stored as serialized strings (e.g.: "{'file_id': '123'}"). Here the kwargs
-            # are being parsed as JSON after coercing the string to use double-quotes.
-            task_kwargs = json.loads(
-                task_metadata.get("kwargs", "{}").replace("'", '"')
-            )
-            if task_kwargs.get("file_id") == file_id:
-                already_scheduled_task_ids.append(task_metadata["id"])
+        if (
+            task_metadata["name"] == task_name
+            and task_metadata.get("kwargs", {}).get("file_id") == file_id
+        ):
+            already_scheduled_task_ids.append(task_metadata["id"])
     return already_scheduled_task_ids
 
 
