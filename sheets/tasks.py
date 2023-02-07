@@ -111,7 +111,10 @@ def _get_scheduled_assignment_task_ids(file_id):
     # provided the given file_id as a kwarg, add its task id to the list
     for scheduled in chain.from_iterable(app.control.inspect().scheduled().values()):
         task_metadata = scheduled["request"]
-        if task_metadata["name"] == task_name and task_metadata.get("kwargs", {}).get("file_id") == file_id:
+        if (
+            task_metadata["name"] == task_name
+            and task_metadata.get("kwargs", {}).get("file_id") == file_id
+        ):
             already_scheduled_task_ids.append(task_metadata["id"])
     return already_scheduled_task_ids
 
