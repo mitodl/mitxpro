@@ -75,7 +75,7 @@ coreapi==2.3.3
     # via djoser
 coreschema==0.0.4
     # via coreapi
-cryptography==38.0.3
+cryptography==39.0.1
     # via social-auth-core
 cssselect==1.1.0
     # via premailer
