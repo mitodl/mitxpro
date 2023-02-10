@@ -50,3 +50,4 @@ wagtail==2.13.4
 wagtail-metadata==3.3.0
 zeep==3.4.0
 flaky==3.7.0
+dill==0.3.6
