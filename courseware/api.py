@@ -1,45 +1,46 @@
 """Courseware API functions"""
 import logging
 from datetime import timedelta
-from urllib.parse import urljoin, urlparse, parse_qs
+from urllib.parse import parse_qs, urljoin, urlparse
+
 import requests
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ImproperlyConfigured
+from django.db import transaction
+from django.shortcuts import reverse
+from edx_api.client import EdxApi
+from oauth2_provider.models import AccessToken, Application
+from oauthlib.common import generate_token
 from requests.exceptions import HTTPError
 from rest_framework import status
 
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-from django.contrib.auth import get_user_model
-from django.db import transaction
-from django.shortcuts import reverse
-from oauth2_provider.models import Application, AccessToken
-from oauthlib.common import generate_token
-from edx_api.client import EdxApi
-
 from authentication import api as auth_api
 from courses.models import CourseRunEnrollment
+from courseware.constants import (
+    COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
+    EDX_ENROLLMENT_AUDIT_MODE,
+    EDX_ENROLLMENT_PRO_MODE,
+    PLATFORM_EDX,
+    PRO_ENROLL_MODE_ERROR_TEXTS,
+)
 from courseware.exceptions import (
-    OpenEdXOAuth2Error,
     CoursewareUserCreateError,
-    NoEdxApiAuthError,
     EdxApiEnrollErrorException,
+    NoEdxApiAuthError,
+    OpenEdXOAuth2Error,
     UnknownEdxApiEnrollException,
     UserNameUpdateFailedException,
 )
 from courseware.models import CoursewareUser, OpenEdxApiAuth
-from courseware.constants import (
-    PLATFORM_EDX,
-    EDX_ENROLLMENT_PRO_MODE,
-    EDX_ENROLLMENT_AUDIT_MODE,
-    PRO_ENROLL_MODE_ERROR_TEXTS,
-    COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
-)
 from courseware.utils import edx_url
 from mitxpro.utils import (
-    now_in_utc,
     find_object_with_matching_attr,
     get_error_response_summary,
     is_json_response,
+    now_in_utc,
 )
+
 
 log = logging.getLogger(__name__)
 User = get_user_model()
@@ -248,7 +249,13 @@ def _create_tokens_and_update_auth(auth, params):
             the updated auth records
     """
     resp = requests.post(edx_url(OPENEDX_OAUTH2_ACCESS_TOKEN_PATH), data=params)
-    resp.raise_for_status()
+    if resp.status_code != 200:
+        # The auth is likely broken for reasons unknown, delete and return None
+        log.info(
+            "Auth token for user %s failed, creating a new one", auth.user.username
+        )
+        auth.delete()
+        return None
 
     result = resp.json()
 
@@ -287,8 +294,7 @@ def repair_faulty_edx_user(user):
         create_edx_user(user)
         created_user = True
     if not hasattr(user, "openedx_api_auth"):
-        create_edx_auth_token(user)
-        created_auth_token = True
+        created_auth_token = create_edx_auth_token(user) is not None
     return created_user, created_auth_token
 
 
@@ -347,15 +353,23 @@ def get_valid_edx_api_auth(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECO
     auth = OpenEdxApiAuth.objects.filter(
         user=user, access_token_expires_on__gt=expires_after
     ).first()
-    if not auth:
-        # if the auth was no longer valid, try to update it
+    if auth is None:
+        # if the auth was no longer valid, try to update/create it
         with transaction.atomic():
-            auth = OpenEdxApiAuth.objects.select_for_update().get(user=user)
-            # check again once we have an exclusive lock, something else may have refreshed it for us
-            if auth.access_token_expires_on > expires_after:
-                return auth
-            # it's still invalid, so refresh it now
-            return _refresh_edx_api_auth(auth)
+            auth = OpenEdxApiAuth.objects.select_for_update().filter(user=user).first()
+            # if a record doesn't exist, create it create scratch
+            auth = auth or create_edx_auth_token(user)
+            # if the auth is valid, use it, otherwise refresh it
+            auth = (
+                auth
+                if _is_valid_auth(auth, expires_after)
+                else (
+                    _refresh_edx_api_auth(auth)
+                    or
+                    # if can't refresh the token, recreate it
+                    create_edx_auth_token(user)
+                )
+            )
     # got a valid auth on first attempt
     return auth
 
@@ -623,3 +637,18 @@ def update_edx_user_name(user):
         raise UserNameUpdateFailedException(
             "Error updating user's full name in edX.", exc
         )
+
+
+def _is_valid_auth(auth, expires_after):
+    """
+    Returns whether an auth is valid
+
+    Args:
+        user (users.models.User): the user to get an auth for
+        expires_after (datetime.datetime): the datetime the auth should be valid until
+
+    Returns:
+        auth:
+            updated OpenEdxApiAuth
+    """
+    return auth is not None and auth.access_token_expires_on > expires_after
