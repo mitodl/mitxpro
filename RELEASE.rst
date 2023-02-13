@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.116.0
+---------------
+
+- Prevent promo code from applying to products that require enrollment code
+- Create a new auth token if the old one fails to work/refresh (#2473)
+
 Version 0.115.0 (Released February 13, 2023)
 ---------------
 
