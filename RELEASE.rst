@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.115.0
+Version 0.115.0 (Released February 13, 2023)
 ---------------
 
 - Fix processing of scheduled sheet coupon assignment tasks (#2565)
