@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.116.0
+Version 0.116.0 (Released February 13, 2023)
 ---------------
 
 - Prevent promo code from applying to products that require enrollment code
