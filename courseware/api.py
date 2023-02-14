@@ -16,7 +16,7 @@ from requests.exceptions import HTTPError
 from rest_framework import status
 
 from authentication import api as auth_api
-from courses.models import CourseRunEnrollment, CourseRun
+from courses.models import CourseRun, CourseRunEnrollment
 from courseware.constants import (
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
     EDX_ENROLLMENT_AUDIT_MODE,
@@ -599,11 +599,17 @@ def retry_failed_edx_enrollments():
         except EdxApiEnrollErrorException as exc:
             # Check if user is already actively enrolled
             edx_enrollment = get_enrollment(user, course_run)
-            if edx_enrollment and edx_enrollment.is_active:
+            if (
+                edx_enrollment
+                and edx_enrollment.is_active
+                and edx_enrollment.mode
+                in (EDX_ENROLLMENT_PRO_MODE, EDX_ENROLLMENT_AUDIT_MODE)
+            ):
                 log.warning(
-                    "User %s was already enrolled in %s",
+                    "User %s was already enrolled in %s with mode %s",
                     user.email,
                     course_run.courseware_id,
+                    edx_enrollment.mode,
                 )
             else:
                 log.exception(str(exc))

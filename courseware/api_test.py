@@ -499,13 +499,19 @@ def test_retry_failed_edx_enrollments(mocker, exception_raised):
 
 
 @pytest.mark.parametrize(
+    "mode", [EDX_ENROLLMENT_PRO_MODE, EDX_ENROLLMENT_AUDIT_MODE, "other"]
+)
+@pytest.mark.parametrize(
     "edx_enrollment_exists, is_active", [[False, False], [True, True], [True, False]]
 )
-def test_retry_failed_edx_enrollments_exists(mocker, edx_enrollment_exists, is_active):
+def test_retry_failed_edx_enrollments_exists(
+    mocker, edx_enrollment_exists, is_active, mode
+):
     """
     Tests that retry_failed_edx_enrollments loops through enrollments that failed in edX
     and attempts to enroll them again
     """
+    is_valid_mode = mode in [EDX_ENROLLMENT_PRO_MODE, EDX_ENROLLMENT_AUDIT_MODE]
     with freeze_time(now_in_utc() - timedelta(days=1)):
         failed_enrollment = CourseRunEnrollmentFactory.create(
             edx_enrolled=False, user__is_active=True
@@ -521,6 +527,7 @@ def test_retry_failed_edx_enrollments_exists(mocker, edx_enrollment_exists, is_a
         {
             "is_active": is_active,
             "course_details": {"course_id": failed_enrollment.run.courseware_id},
+            "mode": mode,
         }
         if edx_enrollment_exists
         else {"foo": "bar"}
@@ -535,14 +542,18 @@ def test_retry_failed_edx_enrollments_exists(mocker, edx_enrollment_exists, is_a
 
     assert patched_enroll_in_edx.call_count == 1
     assert len(successful_enrollments) == (
-        1 if edx_enrollment_exists and is_active else 0
+        1 if edx_enrollment_exists and is_active and is_valid_mode else 0
     )
     assert patched_log.exception.called == bool(
-        not edx_enrollment_exists or not is_active
+        not edx_enrollment_exists or not is_active or not is_valid_mode
     )
-    assert patched_log.warning.called == bool(edx_enrollment_exists and is_active)
+    assert patched_log.warning.called == bool(
+        edx_enrollment_exists and is_active and is_valid_mode
+    )
     failed_enrollment.refresh_from_db()
-    assert failed_enrollment.edx_enrolled is (edx_enrollment_exists and is_active)
+    assert failed_enrollment.edx_enrolled is (
+        edx_enrollment_exists and is_active and is_valid_mode
+    )
 
 
 def test_retry_failed_enroll_grace_period(mocker):
