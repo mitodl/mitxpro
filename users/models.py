@@ -149,7 +149,7 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
     # value here now until we are ready to migrate the max length at the database level.
     username = models.CharField(unique=True, max_length=50)
     email = models.EmailField(blank=False, unique=True)
-    name = models.TextField(blank=True, default="")
+    name = models.CharField(blank=True, default="", max_length=255)
     is_staff = models.BooleanField(
         default=False, help_text="The user can access the admin site"
     )
