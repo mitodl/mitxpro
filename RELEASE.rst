@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.116.1
+Version 0.116.1 (Released February 16, 2023)
 ---------------
 
 - Check if edx enrollment already exists for failed enrollments (#2559)
