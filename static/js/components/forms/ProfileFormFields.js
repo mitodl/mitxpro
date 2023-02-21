@@ -36,6 +36,7 @@ export const legalAddressValidation = yup.object().shape({
     .label("Full Name")
     .trim()
     .required()
+    .max(255)
     .min(2),
   legal_address: yup.object().shape({
     first_name: yup

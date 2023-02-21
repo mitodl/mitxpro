@@ -78,7 +78,10 @@ describe("EditProfileForm", () => {
     ["profile.company", "MIT", ""],
     ["profile.job_title", "", "Job Title is a required field"],
     ["profile.job_title", "  ", "Job Title is a required field"],
-    ["profile.job_title", "QA Tester", ""]
+    ["profile.job_title", "QA Tester", ""],
+    ["name", "Full Name", ""],
+    ["name", "", "Full Name is a required field"],
+    ["name", "a".repeat(256), "Full Name must be at most 255 characters"],
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value
