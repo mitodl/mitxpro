@@ -120,9 +120,7 @@ def generate_program_certificate(user, program):
         user=user, program=program
     )
     if existing_cert_queryset.exists():
-        ProgramEnrollment.objects.get_or_create(
-            program=program, user=user, defaults={"active": True, "change_status": None}
-        )
+        get_or_create_program_enrollment(user, program)
         return existing_cert_queryset.first(), False
 
     courses_in_program_ids = set(program.courses.values_list("id", flat=True))
@@ -144,9 +142,7 @@ def generate_program_certificate(user, program):
             user.username,
             program.title,
         )
-        _, created = ProgramEnrollment.objects.get_or_create(
-            program=program, user=user, defaults={"active": True, "change_status": None}
-        )
+        _, created = get_or_create_program_enrollment(user, program)
 
         if created:
             log.info(
@@ -156,6 +152,31 @@ def generate_program_certificate(user, program):
             )
 
     return program_cert, True
+
+
+def get_or_create_program_enrollment(user, program):
+    """
+    Get or create new program enrollment.
+
+    Args:
+        user (User): a Django user.
+        program (programs.models.Program): program where the user is enrolled.
+    Returns:
+        (ProgramEnrollment, bool): A tuple containing a
+        ProgramEnrollment object paired with a boolean
+        indicating whether the enrollment was newly created.
+    """
+    if not ProgramEnrollment.objects.filter(program=program, user=user).exists():
+        return (
+            ProgramEnrollment.objects.create(
+                program=program, user=user, active=True, change_status=None
+            ),
+            True,
+        )
+    return (
+        ProgramEnrollment.objects.filter(program=program, user=user).first(),
+        False,
+    )
 
 
 def revoke_program_certificate(
