@@ -95,15 +95,12 @@ def is_user_exists_on_edx(user):
             API_KEY_HEADER_NAME: settings.OPENEDX_API_KEY,
         }
     )
-    get_response = req_session.get(
+    response = req_session.get(
         edx_url(f"{OPENEDX_USER_ACCOUNT_DETAIL_PATH}/{user.username}")
     )
     # user already exists on edx
-    if (
-        get_response.status_code == status.HTTP_200_OK
-        and get_response.json().get("email") == user.email
-    ):
-        return True
+    if response.status_code == status.HTTP_200_OK and is_json_response(response):
+        return response.json().get("email") == user.email
     return False
 
 

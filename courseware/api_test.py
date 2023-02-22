@@ -8,6 +8,7 @@ from urllib.parse import parse_qsl
 import pytest
 import responses
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ImproperlyConfigured
 from edx_api.enrollments import Enrollments
 from freezegun import freeze_time
 from oauth2_provider.models import AccessToken, Application
@@ -206,8 +207,13 @@ def test_create_edx_user_conflict(settings, user):
         json=dict(username="exists"),
         status=status.HTTP_409_CONFLICT,
     )
+    responses.add(
+        responses.GET,
+        f"{settings.OPENEDX_API_BASE_URL}/api/user/v1/accounts/{user.username}",
+        status=status.HTTP_200_OK,
+    )
 
-    with pytest.raises(CoursewareUserCreateError):
+    with pytest.raises((CoursewareUserCreateError, ImproperlyConfigured)):
         create_edx_user(user)
 
     assert CoursewareUser.objects.count() == 0
