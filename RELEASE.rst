@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.117.0
+---------------
+
+- Limit full name length to 255 characters (#2578)
+
 Version 0.116.1 (Released February 16, 2023)
 ---------------
 
