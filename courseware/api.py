@@ -45,6 +45,7 @@ from mitxpro.utils import (
 log = logging.getLogger(__name__)
 User = get_user_model()
 
+OPENEDX_USER_ACCOUNT_DETAIL_PATH = "/api/user/v1/accounts"
 OPENEDX_REGISTER_USER_PATH = "/user_api/v1/account/registration/"
 OPENEDX_REQUEST_DEFAULTS = dict(country="US", honor_code=True)
 
@@ -59,6 +60,8 @@ OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS = 60
 OPENEDX_AUTH_MAX_TTL_IN_SECONDS = 60 * 60
 
 ACCESS_TOKEN_HEADER_NAME = "X-Access-Token"
+AUTH_TOKEN_HEADER_NAME = "Authorization"
+API_KEY_HEADER_NAME = "X-EdX-Api-Key"
 
 
 def create_user(user):
@@ -70,6 +73,38 @@ def create_user(user):
     """
     create_edx_user(user)
     create_edx_auth_token(user)
+
+
+def is_user_exists_on_edx(user):
+    """
+    Checks if a user already exists on edx
+
+    Args:
+        user (user.models.User): the application user
+    Returns:
+       (bool): Returns True if user is already exists on edx else False
+    """
+    if settings.OPENEDX_SERVICE_WORKER_API_TOKEN is None:
+        raise ImproperlyConfigured("OPENEDX_SERVICE_WORKER_API_TOKEN is not set")
+    req_session = requests.Session()
+    req_session.headers.update(
+        {
+            AUTH_TOKEN_HEADER_NAME: "Bearer {}".format(
+                settings.OPENEDX_SERVICE_WORKER_API_TOKEN
+            ),
+            API_KEY_HEADER_NAME: settings.OPENEDX_API_KEY,
+        }
+    )
+    get_response = req_session.get(
+        edx_url(f"{OPENEDX_USER_ACCOUNT_DETAIL_PATH}/{user.username}")
+    )
+    # user already exists on edx
+    if (
+        get_response.status_code == status.HTTP_200_OK
+        and get_response.json().get("email") == user.email
+    ):
+        return True
+    return False
 
 
 def create_edx_user(user):
@@ -112,6 +147,8 @@ def create_edx_user(user):
         )
         # edX responds with 200 on success, not 201
         if resp.status_code != status.HTTP_200_OK:
+            if is_user_exists_on_edx(user):
+                return
             raise CoursewareUserCreateError(
                 f"Error creating Open edX user. {get_error_response_summary(resp)}"
             )
