@@ -166,17 +166,15 @@ def get_or_create_program_enrollment(user, program):
         ProgramEnrollment object paired with a boolean
         indicating whether the enrollment was newly created.
     """
-    if not ProgramEnrollment.objects.filter(program=program, user=user).exists():
-        return (
-            ProgramEnrollment.objects.create(
-                program=program, user=user, active=True, change_status=None
-            ),
-            True,
+    try:
+        return ProgramEnrollment.objects.get_or_create(
+            program=program, user=user, defaults={"active": True, "change_status": None}
         )
-    return (
-        ProgramEnrollment.objects.filter(program=program, user=user).first(),
-        False,
-    )
+    except ProgramEnrollment.MultipleObjectsReturned:
+        return (
+            ProgramEnrollment.objects.filter(program=program, user=user).first(),
+            False,
+        )
 
 
 def revoke_program_certificate(
