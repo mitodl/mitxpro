@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.118.0
+---------------
+
+- Bump django from 3.2.17 to 3.2.18 (#2576)
+- fix: certificates jobs should continue on errors rather than halting (#2580)
+
 Version 0.117.0 (Released February 23, 2023)
 ---------------
 
