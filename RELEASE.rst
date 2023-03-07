@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.118.0
+Version 0.118.0 (Released March 07, 2023)
 ---------------
 
 - Bump django from 3.2.17 to 3.2.18 (#2576)
