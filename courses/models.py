@@ -152,6 +152,7 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     )
     live = models.BooleanField(default=False)
     products = GenericRelation(Product, related_query_name="programs")
+    is_external = models.BooleanField(default=False)
 
     @property
     def page(self):
@@ -305,6 +306,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     )
     live = models.BooleanField(default=False)
     topics = models.ManyToManyField(CourseTopic, blank=True)
+    is_external = models.BooleanField(default=False)
 
     @property
     def page(self):

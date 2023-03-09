@@ -2,12 +2,7 @@
 <div class="tiles-block">
   <div class="container">
     <ul class="tiles-list">
-      {% if page.is_external_page and page.next_run_date %}
-        <li>
-          <span class="title">START DATE</span>
-          <span class="text">{{ page.next_run_date|date:"F j, Y" }}</span>
-        </li>
-      {% elif page.product.first_unexpired_run.start_date %}
+      {% if page.product.first_unexpired_run.start_date %}
         <li>
           <span class="title">START DATE</span>
           <span class="text">{{ page.product.first_unexpired_run.start_date|date:"F j, Y" }}</span>
@@ -66,17 +61,13 @@
         <span class="title">FORMAT</span>
         <span class="text">Online</span>
       </li>
-      {% if page.is_external_page and page.price %}
-        <li>
-          <span class="title">PRICE</span>
-          <span class="text">${{ page.price|floatformat:"0"|intcomma }}</span>
-        </li>
-      {% elif page.product.current_price %}
+
+      {% if page.product.current_price %}
         <li>
           <span class="title">PRICE</span>
           <span class="text">${{ page.product.current_price|floatformat:"0"|intcomma }}</span>
         </li>
-      {% elif page.is_course_page and page.product.first_unexpired_run.current_price %}
+      {% elif page.is_internal_or_external_course_page and page.product.first_unexpired_run.current_price %}
         <li>
           <span class="title">PRICE</span>
           <span class="text">${{ page.product.first_unexpired_run.current_price|floatformat:"0"|intcomma }}</span>

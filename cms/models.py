@@ -3,11 +3,10 @@ Page models for the CMS
 """
 # pylint: disable=too-many-lines
 import re
-from datetime import date, datetime, timedelta
 from decimal import Decimal
+from datetime import datetime, timedelta
 from urllib.parse import urljoin
 
-import pytz
 from django import forms
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -83,22 +82,6 @@ class CourseObjectIndexPage(Page):
         """Fetch a child page by a Program/Course readable_id value"""
         raise NotImplementedError
 
-    def get_external_course_child_by_readable_id(self, readable_id):
-        """Fetch a child page by slug: typically used in external courseware pages"""
-        return (
-            self.get_children()
-            .type(ExternalCoursePage)
-            .get(externalcoursepage__readable_id=readable_id)
-        )
-
-    def get_external_program_child_by_readable_id(self, readable_id):
-        """Fetch a child page by slug: typically used in external program pages"""
-        return (
-            self.get_children()
-            .type(ExternalProgramPage)
-            .get(externalprogrampage__readable_id=readable_id)
-        )
-
     def route(self, request, path_components):
         if path_components:
             # request is for a child of this page
@@ -110,19 +93,7 @@ class CourseObjectIndexPage(Page):
                 # instead of the page slug (as Wagtail does by default)
                 subpage = self.get_child_by_readable_id(child_readable_id)
             except Page.DoesNotExist:
-                try:
-                    # Try to find an external course page
-                    subpage = self.get_external_course_child_by_readable_id(
-                        readable_id=child_readable_id
-                    )
-                except Page.DoesNotExist:
-                    try:
-                        # Try to find an external program page
-                        subpage = self.get_external_program_child_by_readable_id(
-                            readable_id=child_readable_id
-                        )
-                    except Page.DoesNotExist:
-                        raise Http404
+                raise Http404
 
             return subpage.specific.route(request, remaining_components)
         return super().route(request, path_components)
@@ -177,7 +148,13 @@ class CourseIndexPage(CourseObjectIndexPage):
 
     def get_child_by_readable_id(self, readable_id):
         """Fetch a child page by the related Course's readable_id value"""
-        return self.get_children().get(coursepage__course__readable_id=readable_id)
+        # Try to find internal course page otherwise return external course page
+        try:
+            return self.get_children().get(coursepage__course__readable_id=readable_id)
+        except Exception:  # pylint: disable=broad-except
+            return self.get_children().get(
+                externalcoursepage__course__readable_id=readable_id
+            )
 
 
 class ProgramIndexPage(CourseObjectIndexPage):
@@ -202,7 +179,15 @@ class ProgramIndexPage(CourseObjectIndexPage):
                 # readable_id (example: `program-v1:my+program+R1` -> `program-v1:my+program`)
                 readable_id = match_dict["text_id_base"]
 
-        return self.get_children().get(programpage__program__readable_id=readable_id)
+        # Try to find internal program page otherwise try to get external program page
+        try:
+            return self.get_children().get(
+                programpage__program__readable_id=readable_id
+            )
+        except Exception:  # pylint: disable=broad-except
+            return self.get_children().get(
+                externalprogrampage__program__readable_id=readable_id
+            )
 
 
 class SignatoryIndexPage(SignatoryObjectIndexPage):
@@ -771,6 +756,11 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         return isinstance(self, CoursePage)
 
     @property
+    def is_internal_or_external_course_page(self):
+        """Gets the product page type, this is used for sorting product pages."""
+        return isinstance(self, (CoursePage, ExternalCoursePage))
+
+    @property
     def is_external_course_page(self):
         """Checks whether the page in question is for an external course or not."""
         return isinstance(self, ExternalCoursePage)
@@ -1022,6 +1012,12 @@ class ExternalCoursePage(ProductPage):
 
     parent_page_types = ["CourseIndexPage"]
 
+    course = models.OneToOneField(
+        "courses.Course",
+        null=True,
+        on_delete=models.SET_NULL,
+        help_text="The course for this page",
+    )
     external_url = models.URLField(
         null=False, blank=False, help_text="The URL of the external course web page."
     )
@@ -1053,58 +1049,59 @@ class ExternalCoursePage(ProductPage):
         FieldPanel("price"),
     ] + ProductPage.content_panels
 
-    def get_url_parts(self, request=None):
-        # We need to skip `ProductPage` in the MRO and get to `Page.get_url_parts`
-        # pylint: disable=bad-super-call
-        url_parts = super(ProductPage, self).get_url_parts(request=request)
-        if not url_parts:
-            return None
-        return (
-            url_parts[0],
-            url_parts[1],
-            # Wagtail generates the 'page_path' part of the url tuple with the
-            # parent page slug followed by this page's slug (e.g.: "/courses/my-page-title").
-            # We want to generate that path with the parent page slug followed by the readable_id
-            # of the external course instead (e.g.: "/courses/external:some+external+course")
-            re.sub(
-                self.slugged_page_path_pattern,
-                r"\1{}\3".format(self.readable_id),
-                url_parts[2],
-            ),
-        )
-
     @property
     def program_page(self):
         """
         External courses are not related to local programs
         """
-        return None
+        return (
+            self.course_with_related_objects.program.page
+            if self.course_with_related_objects.program
+            else None
+        )
 
     @property
     def course_lineup(self):
-        """There is no course lineup for external courses"""
-        return None
+        """Gets the course carousel page"""
+        return self.program_page.course_lineup if self.program_page else None
 
     @property
     def course_pages(self):
         """
-        There is no program associated with external courses so there would be
-        no course_pages value
+        Gets a list of pages (CoursePage) of all the courses from the associated program
         """
-        return None
+        return (
+            (
+                ExternalCoursePage.objects.filter(
+                    course__program=self.course_with_related_objects.program
+                )
+                .select_related("course", "thumbnail_image")
+                .order_by("course__position_in_program")
+            )
+            if self.course_with_related_objects.program
+            else []
+        )
 
     @property
     def product(self):
         """There is no product associated with external courses"""
-        return None
+        return self.course
 
-    @property
-    def next_run_date(self):
-        """The next run date should be only if `start_date` is in the future"""
+    @cached_property
+    def course_with_related_objects(self):
+        """
+        Gets the course with related objects.
+        """
         return (
-            datetime.combine(self.start_date, datetime.min.time(), tzinfo=pytz.UTC)
-            if self.start_date and self.start_date > date.today()
-            else None
+            Course.objects.filter(id=self.course.id)
+            .select_related("program", "program__programpage")
+            .prefetch_related(
+                "courseruns",
+                Prefetch(
+                    "courseruns__products", Product.objects.with_ordered_versions()
+                ),
+            )
+            .first()
         )
 
 
@@ -1117,6 +1114,12 @@ class ExternalProgramPage(ProductPage):
 
     parent_page_types = ["ProgramIndexPage"]
 
+    program = models.OneToOneField(
+        "courses.Program",
+        null=True,
+        on_delete=models.SET_NULL,
+        help_text="The program for this page",
+    )
     external_url = models.URLField(
         null=False, blank=False, help_text="The URL of the external program web page."
     )
@@ -1155,59 +1158,32 @@ class ExternalProgramPage(ProductPage):
         FieldPanel("price"),
     ] + ProductPage.content_panels
 
-    def get_url_parts(self, request=None):
-        # We need to skip `ProductPage` in the MRO and get to `Page.get_url_parts`
-        # pylint: disable=bad-super-call
-        url_parts = super(ProductPage, self).get_url_parts(request=request)
-        if not url_parts:
-            return None
-        return (
-            url_parts[0],
-            url_parts[1],
-            # Wagtail generates the 'page_path' part of the url tuple with the
-            # parent page slug followed by this page's slug (e.g.: "/programs/my-page-title").
-            # We want to generate that path with the parent page slug followed by the readable_id
-            # of the external program instead (e.g.: "/programs/external:some+external+program")
-            re.sub(
-                self.slugged_page_path_pattern,
-                r"\1{}\3".format(self.readable_id),
-                url_parts[2],
-            ),
-        )
-
     @property
     def program_page(self):
         """
         External programs are not related to local programs
         """
-        return None
-
-    @property
-    def course_lineup(self):
-        """Gets the (course carousel page/course lineup) for external program"""
-        return self._get_child_page_of_type(CoursesInProgramPage)
+        return self
 
     @property
     def course_pages(self):
         """
-        There is no program associated with external programs so there would be
-        no course_pages value
+        Gets a list of pages (CoursePage) of all the courses associated with this program
         """
-        return None
+        courses = sorted(
+            self.program.courses.all(), key=lambda course: course.position_in_program
+        )
+        return [course.externalcoursepage for course in courses]
+
+    @property
+    def course_lineup(self):
+        """Gets the course carousel page"""
+        return self._get_child_page_of_type(CoursesInProgramPage)
 
     @property
     def product(self):
         """There is no product associated with external programs"""
-        return None
-
-    @property
-    def next_run_date(self):
-        """The next run date should be only if `start_date` is in the future"""
-        return (
-            datetime.combine(self.start_date, datetime.min.time(), tzinfo=pytz.UTC)
-            if self.start_date and self.start_date > date.today()
-            else None
-        )
+        return self.program
 
 
 class CourseProgramChildPage(Page):
