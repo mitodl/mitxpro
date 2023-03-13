@@ -55,7 +55,7 @@ def migrate_external_courses():
             title=generated_course.title,
             start_date=get_zone_aware_datetime(external_course.start_date),
             courseware_id=external_course.readable_id,
-            courseware_url_path=external_course.external_url,
+            external_marketing_url=external_course.external_url,
             live=generated_course.live,
             run_tag="R1",
         )
@@ -87,6 +87,7 @@ def migrate_external_programs():
 
         generated_program_run, _ = ProgramRun.objects.get_or_create(
             program=generated_program,
+            external_marketing_url=external_program.external_url,
             start_date=get_zone_aware_datetime(external_program.start_date),
             run_tag="R1",
         )
@@ -105,7 +106,7 @@ def migrate_external_courseware(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("courses", "0030_add_is_external_courseware"),
+        ("courses", "0030_add_courseware_external_fields"),
         ("cms", "0053_certificatepage_partner_logo"),
     ]
 

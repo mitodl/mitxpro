@@ -258,6 +258,7 @@ class ProgramRun(TimestampedModel, ValidateOnSaveMixin):
     program = models.ForeignKey(
         Program, on_delete=models.CASCADE, related_name="programruns"
     )
+    external_marketing_url = models.CharField(max_length=500, blank=True, null=True)
     run_tag = models.CharField(max_length=10, validators=[validate_url_path_field])
     start_date = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True, db_index=True)
@@ -462,6 +463,7 @@ class CourseRun(TimestampedModel):
         help_text="A string that identifies the set of runs that this run belongs to (example: 'R2')",
     )
     courseware_url_path = models.CharField(max_length=500, blank=True, null=True)
+    external_marketing_url = models.CharField(max_length=500, blank=True, null=True)
     start_date = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True, db_index=True)
     enrollment_start = models.DateTimeField(null=True, blank=True, db_index=True)
