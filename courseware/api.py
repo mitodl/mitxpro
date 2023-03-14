@@ -75,7 +75,7 @@ def create_user(user):
     create_edx_auth_token(user)
 
 
-def is_user_exists_on_edx(user):
+def is_existing_edx_user(user):
     """
     Checks if a user already exists on edx
 
@@ -144,7 +144,7 @@ def create_edx_user(user):
         )
         # edX responds with 200 on success, not 201
         if resp.status_code != status.HTTP_200_OK:
-            if is_user_exists_on_edx(user):
+            if is_existing_edx_user(user):
                 return
             raise CoursewareUserCreateError(
                 f"Error creating Open edX user. {get_error_response_summary(resp)}"
