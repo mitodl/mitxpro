@@ -6,28 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('courses', '0029_revert_certificates_prior_aug_8'),
+        ("courses", "0029_revert_certificates_prior_aug_8"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='course',
-            name='is_external',
+            model_name="course",
+            name="is_external",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='courserun',
-            name='external_marketing_url',
+            model_name="courserun",
+            name="external_marketing_url",
             field=models.CharField(blank=True, max_length=500, null=True),
         ),
         migrations.AddField(
-            model_name='program',
-            name='is_external',
+            model_name="program",
+            name="is_external",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='programrun',
-            name='external_marketing_url',
+            model_name="programrun",
+            name="external_marketing_url",
             field=models.CharField(blank=True, max_length=500, null=True),
         ),
     ]

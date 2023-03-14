@@ -1,7 +1,7 @@
 """
 Page models for the CMS
 """
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines, too-many-public-methods
 import re
 from decimal import Decimal
 from datetime import datetime, timedelta
@@ -761,6 +761,11 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         return isinstance(self, (CoursePage, ExternalCoursePage))
 
     @property
+    def external_courseware_url(self):
+        """Gets the product page type, this is used for sorting product pages."""
+        return self.product.first_unexpired_run.external_marketing_url
+
+    @property
     def is_external_course_page(self):
         """Checks whether the page in question is for an external course or not."""
         return isinstance(self, ExternalCoursePage)
@@ -769,6 +774,11 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     def is_external_program_page(self):
         """Checks whether the page in question is for an external program or not."""
         return isinstance(self, ExternalProgramPage)
+
+    @property
+    def is_external_courseware(self):
+        """Checks whether the page in question is for an external program or course."""
+        return self.is_external_program_page or self.is_external_course_page
 
     @property
     def is_program_page(self):
