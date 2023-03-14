@@ -77,12 +77,12 @@ def create_user(user):
 
 def is_existing_edx_user(user):
     """
-    Checks if a user already exists on edx
+    Checks if the user already exists on edX
 
     Args:
         user (user.models.User): the application user
     Returns:
-       (bool): Returns True if user is already exists on edx else False
+       bool: True if the user already exists on edX else False
     """
     if settings.OPENEDX_SERVICE_WORKER_API_TOKEN is None:
         raise ImproperlyConfigured("OPENEDX_SERVICE_WORKER_API_TOKEN is not set")
