@@ -763,7 +763,9 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     @property
     def external_courseware_url(self):
         """Gets the product page type, this is used for sorting product pages."""
-        return self.product.first_unexpired_run.external_marketing_url
+        if self.product and self.product.first_unexpired_run:
+            return self.product.first_unexpired_run.external_marketing_url
+        return ""
 
     @property
     def is_external_course_page(self):
@@ -774,11 +776,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     def is_external_program_page(self):
         """Checks whether the page in question is for an external program or not."""
         return isinstance(self, ExternalProgramPage)
-
-    @property
-    def is_external_courseware(self):
-        """Checks whether the page in question is for an external program or course."""
-        return self.is_external_program_page or self.is_external_course_page
 
     @property
     def is_program_page(self):
@@ -798,14 +795,16 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         return self._get_child_page_of_type(NewsAndEventsPage)
 
 
-class ProgramPage(ProductPage):
-    """
-    CMS page representing the a Program
-    """
+class ProgramProductPage(ProductPage):
 
-    template = "product_page.html"
+    class Meta:
+        abstract = True
+
+    # template = "product_page.html"
 
     parent_page_types = ["ProgramIndexPage"]
+
+    content_panels = [FieldPanel("program")] + ProductPage.content_panels
 
     program = models.OneToOneField(
         "courses.Program",
@@ -813,15 +812,6 @@ class ProgramPage(ProductPage):
         on_delete=models.SET_NULL,
         help_text="The program for this page",
     )
-
-    content_panels = [FieldPanel("program")] + ProductPage.content_panels
-
-    @property
-    def program_page(self):
-        """
-        Just here for uniformity in model API for templates
-        """
-        return self
 
     @property
     def course_pages(self):
@@ -831,7 +821,7 @@ class ProgramPage(ProductPage):
         courses = sorted(
             self.program.courses.all(), key=lambda course: course.position_in_program
         )
-        return [course.coursepage for course in courses]
+        return [course.page for course in courses]
 
     @property
     def course_lineup(self):
@@ -842,6 +832,21 @@ class ProgramPage(ProductPage):
     def product(self):
         """Gets the product associated with this page"""
         return self.program
+
+
+class ProgramPage(ProgramProductPage):
+    """
+    CMS page representing the a Program
+    """
+
+    template = "product_page.html"
+
+    @property
+    def program_page(self):
+        """
+        Just here for uniformity in model API for templates
+        """
+        return self
 
     def get_context(self, request, *args, **kwargs):
         # Hits a circular import at the top of the module
@@ -906,14 +911,10 @@ class ProgramPage(ProductPage):
         }
 
 
-class CoursePage(ProductPage):
-    """
-    CMS page representing a Course
-    """
+class CourseProductPage(ProductPage):
 
-    template = "product_page.html"
-
-    parent_page_types = ["CourseIndexPage"]
+    class Meta:
+        abstract = True
 
     course = models.OneToOneField(
         "courses.Course",
@@ -922,17 +923,34 @@ class CoursePage(ProductPage):
         help_text="The course for this page",
     )
 
+    parent_page_types = ["CourseIndexPage"]
+
     content_panels = [FieldPanel("course")] + ProductPage.content_panels
+
+    @cached_property
+    def course_with_related_objects(self):
+        """
+        Gets the course with related objects.
+        """
+        return (
+            Course.objects.filter(id=self.course_id)
+                .select_related("program", "program__programpage")
+                .prefetch_related(
+                "courseruns",
+                Prefetch(
+                    "courseruns__products", Product.objects.with_ordered_versions()
+                ),
+            )
+                .first()
+        )
 
     @property
     def program_page(self):
         """
         Gets the program page associated with this course, if it exists
         """
-        return (
-            self.course_with_related_objects.program.page
-            if self.course_with_related_objects.program
-            else None
+        return getattr(
+            self.course_with_related_objects.program, "page", None
         )
 
     @property
@@ -954,9 +972,12 @@ class CoursePage(ProductPage):
         """
         Gets a list of pages (CoursePage) of all the courses from the associated program
         """
+        filter_model = CoursePage
+        if self.is_external_course_page:
+            filter_model = ExternalCoursePage
         return (
             (
-                CoursePage.objects.filter(
+                filter_model.objects.filter(
                     course__program=self.course_with_related_objects.program
                 )
                 .select_related("course", "thumbnail_image")
@@ -971,22 +992,13 @@ class CoursePage(ProductPage):
         """Gets the product associated with this page"""
         return self.course
 
-    @cached_property
-    def course_with_related_objects(self):
-        """
-        Gets the course with related objects.
-        """
-        return (
-            Course.objects.filter(id=self.course_id)
-            .select_related("program", "program__programpage")
-            .prefetch_related(
-                "courseruns",
-                Prefetch(
-                    "courseruns__products", Product.objects.with_ordered_versions()
-                ),
-            )
-            .first()
-        )
+
+class CoursePage(CourseProductPage):
+    """
+    CMS page representing a Course
+    """
+
+    template = "product_page.html"
 
     def get_context(self, request, *args, **kwargs):
         # Hits a circular import at the top of the module
@@ -1013,21 +1025,13 @@ class CoursePage(ProductPage):
         }
 
 
-class ExternalCoursePage(ProductPage):
+class ExternalCoursePage(CourseProductPage):
     """
     CMS page representing an external course
     """
 
     template = "product_page.html"
 
-    parent_page_types = ["CourseIndexPage"]
-
-    course = models.OneToOneField(
-        "courses.Course",
-        null=True,
-        on_delete=models.SET_NULL,
-        help_text="The course for this page",
-    )
     external_url = models.URLField(
         null=False, blank=False, help_text="The URL of the external course web page."
     )
@@ -1052,84 +1056,21 @@ class ExternalCoursePage(ProductPage):
         help_text="The price of the external course.",
     )
 
-    content_panels = [
+    content_panels = CourseProductPage.content_panels + [
         FieldPanel("external_url"),
         FieldPanel("readable_id"),
         FieldPanel("start_date"),
         FieldPanel("price"),
-    ] + ProductPage.content_panels
-
-    @property
-    def program_page(self):
-        """
-        External courses are not related to local programs
-        """
-        return (
-            self.course_with_related_objects.program.page
-            if self.course_with_related_objects.program
-            else None
-        )
-
-    @property
-    def course_lineup(self):
-        """Gets the course carousel page"""
-        return self.program_page.course_lineup if self.program_page else None
-
-    @property
-    def course_pages(self):
-        """
-        Gets a list of pages (CoursePage) of all the courses from the associated program
-        """
-        return (
-            (
-                ExternalCoursePage.objects.filter(
-                    course__program=self.course_with_related_objects.program
-                )
-                .select_related("course", "thumbnail_image")
-                .order_by("course__position_in_program")
-            )
-            if self.course_with_related_objects.program
-            else []
-        )
-
-    @property
-    def product(self):
-        """There is no product associated with external courses"""
-        return self.course
-
-    @cached_property
-    def course_with_related_objects(self):
-        """
-        Gets the course with related objects.
-        """
-        return (
-            Course.objects.filter(id=self.course.id)
-            .select_related("program", "program__programpage")
-            .prefetch_related(
-                "courseruns",
-                Prefetch(
-                    "courseruns__products", Product.objects.with_ordered_versions()
-                ),
-            )
-            .first()
-        )
+    ]
 
 
-class ExternalProgramPage(ProductPage):
+class ExternalProgramPage(ProgramProductPage):
     """
     CMS page representing an external program.
     """
 
     template = "product_page.html"
 
-    parent_page_types = ["ProgramIndexPage"]
-
-    program = models.OneToOneField(
-        "courses.Program",
-        null=True,
-        on_delete=models.SET_NULL,
-        help_text="The program for this page",
-    )
     external_url = models.URLField(
         null=False, blank=False, help_text="The URL of the external program web page."
     )
@@ -1160,13 +1101,13 @@ class ExternalProgramPage(ProductPage):
         help_text="The number of total courses in the external program.",
     )
 
-    content_panels = [
+    content_panels = ProgramProductPage.content_panels + [
         FieldPanel("external_url"),
         FieldPanel("readable_id"),
         FieldPanel("course_count"),
         FieldPanel("start_date"),
         FieldPanel("price"),
-    ] + ProductPage.content_panels
+    ]
 
     @property
     def program_page(self):
@@ -1174,26 +1115,6 @@ class ExternalProgramPage(ProductPage):
         External programs are not related to local programs
         """
         return self
-
-    @property
-    def course_pages(self):
-        """
-        Gets a list of pages (CoursePage) of all the courses associated with this program
-        """
-        courses = sorted(
-            self.program.courses.all(), key=lambda course: course.position_in_program
-        )
-        return [course.externalcoursepage for course in courses]
-
-    @property
-    def course_lineup(self):
-        """Gets the course carousel page"""
-        return self._get_child_page_of_type(CoursesInProgramPage)
-
-    @property
-    def product(self):
-        """There is no product associated with external programs"""
-        return self.program
 
 
 class CourseProgramChildPage(Page):

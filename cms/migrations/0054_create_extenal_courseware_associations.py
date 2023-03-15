@@ -4,10 +4,7 @@ import pytz
 from datetime import datetime
 from django.db import migrations, models
 import django.db.models.deletion
-from django.contrib.contenttypes.models import ContentType
-from cms.models import ExternalProgramPage, ExternalCoursePage
-from courses.models import Course, CourseRun, Program, ProgramRun
-from ecommerce.models import Product, ProductVersion
+from cms.models import ExternalProgramPage
 
 
 def get_zone_aware_datetime(date):
@@ -15,8 +12,13 @@ def get_zone_aware_datetime(date):
     return datetime.combine(date, datetime.max.time(), pytz.UTC) if date else None
 
 
-def check_and_generate_associated_product(external_courseware, courseware_run_id):
+def check_and_generate_associated_product(apps, schema_editor, external_courseware, courseware_run_id):
     """Check and create an associated product if needed"""
+    ContentType = apps.get_model("contenttypes", "ContentType")
+    ExternalCoursePage = apps.get_model("cms", "ExternalCoursePage")
+    Product = apps.get_model("ecommerce", "Product")
+    ProductVersion = apps.get_model("ecommerce", "ProductVersion")
+
     if external_courseware.price:
         if isinstance(external_courseware, ExternalCoursePage):
             courseware_content_type = ContentType.objects.get(
@@ -40,8 +42,12 @@ def check_and_generate_associated_product(external_courseware, courseware_run_id
         )
 
 
-def migrate_external_courses():
+def migrate_external_courses(apps, schema_editor):
     """Associate external course pages to Django course models"""
+    Course = apps.get_model("courses", "Course")
+    CourseRun = apps.get_model("courses", "CourseRun")
+    ExternalCoursePage = apps.get_model("cms", "ExternalCoursePage")
+
     external_courses = ExternalCoursePage.objects.all()
     for external_course in external_courses:
         generated_course, _ = Course.objects.get_or_create(
@@ -59,14 +65,17 @@ def migrate_external_courses():
             live=generated_course.live,
             run_tag="R1",
         )
-        check_and_generate_associated_product(external_course, generated_course_run.id)
+        check_and_generate_associated_product(apps, schema_editor, external_course, generated_course_run.id)
         external_course.course = generated_course
         external_course.save()
 
 
-def migrate_external_programs():
+def migrate_external_programs(apps, schema_editor):
     """Associate external program pages to Django program models"""
     # Migrate external programs
+    Program = apps.get_model("courses", "Program")
+    ProgramRun = apps.get_model("courses", "ProgramRun")
+
     external_programs = ExternalProgramPage.objects.all()
     for external_program in external_programs:
         generated_program, _ = Program.objects.get_or_create(
@@ -81,7 +90,7 @@ def migrate_external_programs():
             else []
         )
         for idx, course_in_program in enumerate(program_course_lineup):
-            course_in_program.course.program = generated_program
+            course_in_program.course.program_id = generated_program.id
             course_in_program.course.position_in_program = idx + 1
             course_in_program.course.save()
 
@@ -91,45 +100,36 @@ def migrate_external_programs():
             start_date=get_zone_aware_datetime(external_program.start_date),
             run_tag="R1",
         )
-        check_and_generate_associated_product(external_program, generated_program.id)
+        check_and_generate_associated_product(apps, schema_editor, external_program, generated_program.id)
 
-        external_program.program = generated_program
+        external_program.program_id = generated_program.id
         external_program.save()
 
 
 def migrate_external_courseware(apps, schema_editor):
     """Migrate the existing external courseware pages to Courseware(Course, Program) Django models"""
 
-    migrate_external_courses()
-    migrate_external_programs()
+    migrate_external_courses(apps, schema_editor)
+    migrate_external_programs(apps, schema_editor)
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
-        ("courses", "0030_add_courseware_external_fields"),
-        ("cms", "0053_certificatepage_partner_logo"),
+        ('courses', '0030_add_courseware_external_fields'),
+        ('cms', '0053_certificatepage_partner_logo'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name="externalcoursepage",
-            name="course",
-            field=models.OneToOneField(
-                help_text="The course for this page",
-                null=True,
-                on_delete=django.db.models.deletion.SET_NULL,
-                to="courses.course",
-            ),
+            model_name='externalcoursepage',
+            name='course',
+            field=models.OneToOneField(help_text='The course for this page', null=True, on_delete=django.db.models.deletion.SET_NULL, to='courses.course'),
         ),
         migrations.AddField(
-            model_name="externalprogrampage",
-            name="program",
-            field=models.OneToOneField(
-                help_text="The program for this page",
-                null=True,
-                on_delete=django.db.models.deletion.SET_NULL,
-                to="courses.program",
-            ),
+            model_name='externalprogrampage',
+            name='program',
+            field=models.OneToOneField(help_text='The program for this page', null=True, on_delete=django.db.models.deletion.SET_NULL, to='courses.program'),
         ),
         migrations.RunPython(migrate_external_courseware, migrations.RunPython.noop),
     ]

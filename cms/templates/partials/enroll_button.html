@@ -1,6 +1,6 @@
 {% if page.about_mit_xpro.video_url and action_title and action_url %}
 <a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="{{ action_url }}">{{ action_title }}</a>
-{% elif page.is_external_courseware %}
+{% elif page.is_external_page %}
 <a class="enroll-button enroll-now" href="{{ page.external_courseware_url }}">
   Learn More
 </a>

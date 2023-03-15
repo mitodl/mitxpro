@@ -312,6 +312,8 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     @property
     def page(self):
         """Gets the associated CoursePage"""
+        if self.is_external:
+            return getattr(self, "externalcoursepage", None)
         return getattr(self, "coursepage", None)
 
     @cached_property
