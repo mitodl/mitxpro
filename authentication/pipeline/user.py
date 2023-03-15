@@ -6,6 +6,7 @@ from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException
 from social_core.pipeline.partial import partial
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 
 from affiliate.api import get_affiliate_id_from_request
@@ -29,6 +30,8 @@ from users.serializers import UserSerializer, ProfileSerializer
 from users.utils import usernameify
 
 log = logging.getLogger()
+
+User = get_user_model()
 
 CREATE_COURSEWARE_USER_RETRY_DELAY = 60
 NAME_MIN_LENGTH = 2
@@ -107,18 +110,26 @@ def create_user_via_email(
 
     data["email"] = kwargs.get("email", kwargs.get("details", {}).get("email"))
     username = usernameify(data["name"], email=data["email"])
-    data["username"] = username
 
     affiliate_id = get_affiliate_id_from_request(strategy.request)
     if affiliate_id is not None:
         context["affiliate_id"] = affiliate_id
 
-    serializer = UserSerializer(data=data, context=context)
+    try:
+        user = User.objects.get(email=data["email"])
+        serializer = UserSerializer(user, data=data, context=context)
+    except User.DoesNotExist:
+        data["username"] = username
+        serializer = UserSerializer(data=data, context=context)
 
     if not serializer.is_valid():
         raise RequirePasswordAndPersonalInfoException(
             backend, current_partial, errors=serializer.errors
         )
+
+    if user:
+        updated_user = serializer.save()
+        return {"is_new": True, "user": updated_user, "username": updated_user.username}
 
     try:
         created_user = create_user_with_generated_username(serializer, username)
