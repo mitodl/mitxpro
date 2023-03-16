@@ -157,7 +157,9 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     @property
     def page(self):
         """Gets the associated ProgramPage"""
-        return getattr(self, "programpage", None)
+        return getattr(self, "programpage", None) or getattr(
+            self, "externalprogrampage", None
+        )
 
     @property
     def num_courses(self):
@@ -312,9 +314,9 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     @property
     def page(self):
         """Gets the associated CoursePage"""
-        if self.is_external:
-            return getattr(self, "externalcoursepage", None)
-        return getattr(self, "coursepage", None)
+        return getattr(self, "coursepage", None) or getattr(
+            self, "externalcoursepage", None
+        )
 
     @cached_property
     def next_run_date(self):

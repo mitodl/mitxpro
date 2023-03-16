@@ -695,7 +695,10 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     def save(self, clean=True, user=None, log_action=False, **kwargs):
         """If featured is True then set False in any existing product page(s)."""
         if self.featured:
-            for child_class in ProductPage.__subclasses__():
+            courseware_subclasses = (
+                ProgramProductPage.__subclasses__() + CourseProductPage.__subclasses__()
+            )
+            for child_class in courseware_subclasses:
                 child_class.objects.filter(featured=True).update(featured=False)
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
@@ -796,11 +799,12 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
 
 
 class ProgramProductPage(ProductPage):
+    """
+    Abstract Product page for Programs
+    """
 
     class Meta:
         abstract = True
-
-    # template = "product_page.html"
 
     parent_page_types = ["ProgramIndexPage"]
 
@@ -821,7 +825,8 @@ class ProgramProductPage(ProductPage):
         courses = sorted(
             self.program.courses.all(), key=lambda course: course.position_in_program
         )
-        return [course.page for course in courses]
+        # We only want actual page values, Wagtail's 'pageurl' template tag breaks with None
+        return [course.page for course in courses if course.page]
 
     @property
     def course_lineup(self):
@@ -912,6 +917,9 @@ class ProgramPage(ProgramProductPage):
 
 
 class CourseProductPage(ProductPage):
+    """
+    Abstract Product page for Courses
+    """
 
     class Meta:
         abstract = True
@@ -934,14 +942,16 @@ class CourseProductPage(ProductPage):
         """
         return (
             Course.objects.filter(id=self.course_id)
-                .select_related("program", "program__programpage")
-                .prefetch_related(
+            .select_related(
+                "program", "program__programpage", "program__externalprogrampage"
+            )
+            .prefetch_related(
                 "courseruns",
                 Prefetch(
                     "courseruns__products", Product.objects.with_ordered_versions()
                 ),
             )
-                .first()
+            .first()
         )
 
     @property
@@ -949,9 +959,7 @@ class CourseProductPage(ProductPage):
         """
         Gets the program page associated with this course, if it exists
         """
-        return getattr(
-            self.course_with_related_objects.program, "page", None
-        )
+        return getattr(self.course_with_related_objects.program, "page", None)
 
     @property
     def course_lineup(self):
@@ -972,9 +980,11 @@ class CourseProductPage(ProductPage):
         """
         Gets a list of pages (CoursePage) of all the courses from the associated program
         """
-        filter_model = CoursePage
-        if self.is_external_course_page:
-            filter_model = ExternalCoursePage
+
+        filter_model = (
+            ExternalCoursePage if self.is_external_course_page else CoursePage
+        )
+
         return (
             (
                 filter_model.objects.filter(
@@ -1033,13 +1043,13 @@ class ExternalCoursePage(CourseProductPage):
     template = "product_page.html"
 
     external_url = models.URLField(
-        null=False, blank=False, help_text="The URL of the external course web page."
+        null=True, blank=True, help_text="The URL of the external course web page."
     )
     readable_id = models.CharField(
         max_length=64,
-        null=False,
-        blank=False,
-        unique=True,
+        null=True,
+        blank=True,
+        unique=False,
         help_text="The readable ID of the external course. Appears in URL, has to be unique.",
     )
     start_date = models.DateField(
@@ -1056,13 +1066,6 @@ class ExternalCoursePage(CourseProductPage):
         help_text="The price of the external course.",
     )
 
-    content_panels = CourseProductPage.content_panels + [
-        FieldPanel("external_url"),
-        FieldPanel("readable_id"),
-        FieldPanel("start_date"),
-        FieldPanel("price"),
-    ]
-
 
 class ExternalProgramPage(ProgramProductPage):
     """
@@ -1072,13 +1075,13 @@ class ExternalProgramPage(ProgramProductPage):
     template = "product_page.html"
 
     external_url = models.URLField(
-        null=False, blank=False, help_text="The URL of the external program web page."
+        null=True, blank=True, help_text="The URL of the external program web page."
     )
     readable_id = models.CharField(
         max_length=64,
-        null=False,
-        blank=False,
-        unique=True,
+        null=True,
+        blank=True,
+        unique=False,
         help_text="The readable ID of the external program. Appears in URL, has to be unique.",
     )
     start_date = models.DateField(
@@ -1096,18 +1099,10 @@ class ExternalProgramPage(ProgramProductPage):
     )
 
     course_count = models.PositiveIntegerField(
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         help_text="The number of total courses in the external program.",
     )
-
-    content_panels = ProgramProductPage.content_panels + [
-        FieldPanel("external_url"),
-        FieldPanel("readable_id"),
-        FieldPanel("course_count"),
-        FieldPanel("start_date"),
-        FieldPanel("price"),
-    ]
 
     @property
     def program_page(self):
