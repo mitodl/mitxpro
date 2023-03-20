@@ -7,7 +7,7 @@ import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.shortcuts import reverse
 from edx_api.client import EdxApi
 from oauth2_provider.models import AccessToken, Application
@@ -40,6 +40,8 @@ from mitxpro.utils import (
     is_json_response,
     now_in_utc,
 )
+from users.api import find_available_username
+from users.utils import usernameify
 
 
 log = logging.getLogger(__name__)
@@ -75,6 +77,46 @@ def create_user(user):
     create_edx_auth_token(user)
 
 
+def update_xpro_user_username(user, username):
+    """
+    Try to update xpro user's username. If another
+    user already exists with the given username, a unique
+    username will be generated and assigned to that user
+    before updating the given user's username.
+
+    Args:
+        user (user.models.User): the application user
+        username (str): username received from edX
+
+    Returns:
+        bool: True if the user's username is updated successfully on xpro
+    """
+    existing_user = User.objects.filter(username=username).first()
+    if existing_user and existing_user != user:
+        unique_username = usernameify(existing_user.name, email=existing_user.email)
+        if existing_user.username == unique_username or len(unique_username) < 2:
+            unique_username += "11"
+
+        for _ in range(auth_api.USERNAME_COLLISION_ATTEMPTS):
+            if not User.objects.filter(username=unique_username).exists():
+                break
+            unique_username = find_available_username(unique_username)
+
+        existing_user.username = unique_username
+        try:
+            existing_user.save()
+        except IntegrityError:
+            return False
+
+    user.username = username
+    try:
+        user.save()
+    except IntegrityError:
+        return False
+
+    return True
+
+
 def is_existing_edx_user(user):
     """
     Checks if the user already exists on edX
@@ -96,11 +138,18 @@ def is_existing_edx_user(user):
         }
     )
     response = req_session.get(
-        edx_url(f"{OPENEDX_USER_ACCOUNT_DETAIL_PATH}/{user.username}")
+        edx_url(f"{OPENEDX_USER_ACCOUNT_DETAIL_PATH}"), params={"email": user.email}
     )
     # user already exists on edx
     if response.status_code == status.HTTP_200_OK and is_json_response(response):
-        return response.json().get("email") == user.email
+        users = response.json()
+        if len(users) <= 0:
+            return False
+        username = users[0].get("username")
+        if username == user.username:
+            return True
+        return update_xpro_user_username(user, username)
+
     return False
 
 
