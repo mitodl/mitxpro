@@ -231,6 +231,7 @@ class CatalogPage(Page):
         """
         Populate the context with live programs, courses and programs + courses
         """
+        topic_filter = request.GET.get("topic", "All Topics")
         program_page_qset = list(
             ProgramPage.objects.live()
             .filter(program__live=True)
@@ -245,12 +246,17 @@ class CatalogPage(Page):
                 ),
             )
         )
-        course_page_qset = list(
-            CoursePage.objects.live()
-            .filter(course__live=True)
-            .order_by("id")
-            .select_related("course")
-        )
+        course_page_qset = CoursePage.objects.live().filter(
+            course__live=True
+        ).order_by(
+            "id"
+        ).select_related("course")
+
+        if topic_filter and topic_filter != "All Topics":
+            course_page_qset = course_page_qset.filter(course__topics__name=topic_filter)
+
+        course_page_qset = list(course_page_qset)
+
         external_course_qset = list(ExternalCoursePage.objects.live().order_by("title"))
 
         external_program_qset = list(
@@ -307,7 +313,7 @@ class CatalogPage(Page):
             external_course_qset,
             external_program_qset,
         )
-        return dict(
+        context = dict(
             **super().get_context(request),
             **get_base_context(request),
             all_pages=all_pages,
@@ -319,7 +325,10 @@ class CatalogPage(Page):
             hubspot_new_courses_form_guid=settings.HUBSPOT_CONFIG.get(
                 "HUBSPOT_NEW_COURSES_FORM_GUID"
             ),
+            topics=["All Topics"] + list(CourseTopic.objects.values_list("name", flat=True)),
+            selected_topic=request.GET.get('topic', "All Topics"),
         )
+        return context
 
 
 class CertificateIndexPage(RoutablePageMixin, Page):

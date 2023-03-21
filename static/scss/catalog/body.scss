@@ -10,6 +10,19 @@ h1, h2, h3, h4, h5 {
 .course-catalog {
   background-color: #ffffff;
 
+  .catalog-content {
+    display: flex;
+    margin: 0 306px;
+
+    @include media-breakpoint-down(md) {
+      display: contents;
+    }
+
+    @include media-breakpoint-down(lg) {
+      margin: 0;
+    }
+  }
+
   header {
     display: flex;
     flex-direction: column;
@@ -35,6 +48,49 @@ h1, h2, h3, h4, h5 {
   }
 }
 
+.topics {
+  padding-inline-start: 0px;
+  margin-top: 10%;
+
+  @include media-breakpoint-down(md) {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: 8%;
+    margin-top: 35px;
+  }
+
+  .topic {
+    height: 70px;
+    width: 220px;
+    text-align: left;
+    padding: 22px 15px;
+    margin: 2px;
+    border-style: solid;
+    border-radius: 5px;
+    color: white;
+
+    @include media-breakpoint-down(md) {
+      //flex: 1 0 33%;
+      height: 50px;
+      width: fit-content;
+      padding: 10px;
+      //border: 1px solid black;
+    }
+
+    &.selected {
+      background: #F3F3F7;
+
+      a {
+        color: $primary;
+      }
+    }
+
+    a {
+      color: $navy-blue;
+    }
+  }
+}
+
 .course-catalog .catalog-body {
   max-width: 860px;
   margin: 0 15px;
@@ -51,7 +107,7 @@ h1, h2, h3, h4, h5 {
     border-radius: 5px;
 
     &.featured {
-      margin: 31px 0 35px;
+      margin: 31px 0 0px;
       box-sizing: border-box;
       border: 5px solid $navy-blue;
     }
