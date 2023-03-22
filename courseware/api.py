@@ -211,7 +211,9 @@ def create_edx_user(user):
                     f"Error creating Open edX user. {get_error_response_summary(resp)}"
                 )
             if not openedx_user.is_username_match():
-                if not update_xpro_user_username(openedx_user):
+                if not update_xpro_user_username(
+                    user, openedx_user.openedx_data["username"]
+                ):
                     raise CoursewareUserCreateError(
                         f"Error creating Open edX user. {get_error_response_summary(resp)}"
                     )
