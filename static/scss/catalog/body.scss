@@ -12,7 +12,7 @@ h1, h2, h3, h4, h5 {
 
   .catalog-content {
     display: flex;
-    margin: 0 306px;
+    margin: 0 206px;
 
     @include media-breakpoint-down(md) {
       display: contents;
@@ -50,7 +50,8 @@ h1, h2, h3, h4, h5 {
 
 .topics {
   padding-inline-start: 0px;
-  margin-top: 10%;
+  margin-top: 15%;
+  margin-right: 3%;
 
   @include media-breakpoint-down(md) {
     display: flex;
@@ -106,12 +107,6 @@ h1, h2, h3, h4, h5 {
     margin-bottom: 50px;
     border-radius: 5px;
 
-    &.featured {
-      margin: 31px 0 0px;
-      box-sizing: border-box;
-      border: 5px solid $navy-blue;
-    }
-
     .rectangle {
       position: absolute;
       top: 12px;
@@ -119,9 +114,9 @@ h1, h2, h3, h4, h5 {
       padding: 4px 19px;
       background-color: $featured-banner-background;
       color: white;
-      font-size: 28px;
+      font-size: 16px;
       letter-spacing: 1.05px;
-      line-height: 36px;
+      line-height: 26px;
 
       &:before {
         content: '';

@@ -32,11 +32,6 @@
         {% endfor %}
       </div>
       <div class="courseware">
-        {% if featured_product.program %}
-          {% include "partials/featured_card.html" with courseware_page=featured_product object_type="program" %}
-        {% elif featured_product.course %}
-          {% include "partials/featured_card.html" with courseware_page=featured_product object_type="course"%}
-        {% endif %}
         <div class="tab-block">
           <div class="container">
             <ul class="nav nav-tabs" role="tablist">
@@ -51,6 +46,11 @@
               </li>
             </ul>
             <div class="tab-content">
+              {% if featured_product.program %}
+                {% include "partials/featured_card.html" with courseware_page=featured_product object_type="program" %}
+              {% elif featured_product.course %}
+                {% include "partials/featured_card.html" with courseware_page=featured_product object_type="course"%}
+              {% endif %}
               <div class="tab-pane catalog-body fade in show active" id="all" role="tabpanel" aria-labelledby="all-tab">
                 {% for page in all_pages %}
                   {% if page.program or page.is_external_program_page %}

@@ -102,5 +102,9 @@
     position: relative;
     z-index: 9;
     padding: 30px 0 0;
+
+    @include media-breakpoint-down(md) {
+      padding-left: 20px;
+    }
   }
 }

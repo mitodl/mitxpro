@@ -1,16 +1,12 @@
 {% load static humanize wagtailcore_tags wagtailimages_tags %}
-<div class="tab-content">
-  <div class="container">
-    <div class="catalog-body show">
-      <div class="catalog-card featured" role="region" aria-label="{{ courseware_page.title }}">
-        <div class="top">
-          <div class="rectangle">
-            FEATURED
-          </div>
-          {% include "partials/card_details_top.html" %}
-        </div>
-        {% include "partials/card_details_bottom.html" with card_type="featured" %}
+<div class="catalog-body show">
+  <div class="catalog-card featured" role="region" aria-label="{{ courseware_page.title }}">
+    <div class="top">
+      <div class="rectangle">
+        FEATURED
       </div>
+      {% include "partials/card_details_top.html" %}
     </div>
+    {% include "partials/card_details_bottom.html" with card_type="featured" %}
   </div>
 </div>
