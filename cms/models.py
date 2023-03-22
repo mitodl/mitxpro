@@ -246,14 +246,17 @@ class CatalogPage(Page):
                 ),
             )
         )
-        course_page_qset = CoursePage.objects.live().filter(
-            course__live=True
-        ).order_by(
-            "id"
-        ).select_related("course")
+        course_page_qset = (
+            CoursePage.objects.live()
+            .filter(course__live=True)
+            .order_by("id")
+            .select_related("course")
+        )
 
         if topic_filter != "All Topics":
-            course_page_qset = course_page_qset.filter(course__topics__name=topic_filter)
+            course_page_qset = course_page_qset.filter(
+                course__topics__name=topic_filter
+            )
 
         course_page_qset = list(course_page_qset)
 
@@ -325,8 +328,9 @@ class CatalogPage(Page):
             hubspot_new_courses_form_guid=settings.HUBSPOT_CONFIG.get(
                 "HUBSPOT_NEW_COURSES_FORM_GUID"
             ),
-            topics=["All Topics"] + list(CourseTopic.objects.values_list("name", flat=True)),
-            selected_topic=request.GET.get('topic', "All Topics"),
+            topics=["All Topics"]
+            + list(CourseTopic.objects.values_list("name", flat=True)),
+            selected_topic=request.GET.get("topic", "All Topics"),
         )
 
 
