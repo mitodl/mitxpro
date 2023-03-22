@@ -252,7 +252,7 @@ class CatalogPage(Page):
             "id"
         ).select_related("course")
 
-        if topic_filter and topic_filter != "All Topics":
+        if topic_filter != "All Topics":
             course_page_qset = course_page_qset.filter(course__topics__name=topic_filter)
 
         course_page_qset = list(course_page_qset)
@@ -313,7 +313,7 @@ class CatalogPage(Page):
             external_course_qset,
             external_program_qset,
         )
-        context = dict(
+        return dict(
             **super().get_context(request),
             **get_base_context(request),
             all_pages=all_pages,
@@ -328,7 +328,6 @@ class CatalogPage(Page):
             topics=["All Topics"] + list(CourseTopic.objects.values_list("name", flat=True)),
             selected_topic=request.GET.get('topic', "All Topics"),
         )
-        return context
 
 
 class CertificateIndexPage(RoutablePageMixin, Page):
