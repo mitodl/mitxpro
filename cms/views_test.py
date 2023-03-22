@@ -8,6 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 from wagtail.core.models import Site
 
+from cms.constants import ALL_TOPICS
 from cms.factories import (
     CatalogPageFactory,
     CourseIndexPageFactory,
@@ -341,6 +342,65 @@ def test_catalog_page_product(client, wagtail_basics):
         active_program_1.page,
         active_program_2.page,
     ]
+
+
+@pytest.mark.parametrize("filter_courses", [True, False])
+def test_catalog_page_topics(client, wagtail_basics, filter_courses):
+    """
+    Verify that the catalog page does not include cards for either product pages
+    that are not live (unpublished) or pages that have a product with live=False
+    """
+    # pylint:disable=too-many-locals
+    homepage = wagtail_basics.root
+    catalog_page = CatalogPageFactory.create(parent=homepage)
+    catalog_page.save_revision().publish()
+
+    program_1 = ProgramFactory.create()
+    program_2 = ProgramFactory.create()
+
+    now = now_in_utc()
+    start_date = now + timedelta(days=2)
+    end_date = now + timedelta(days=10)
+    run1 = CourseRunFactory.create(
+        course__program=program_1,
+        course__live=True,
+        start_date=start_date,
+        end_date=end_date,
+        live=True,
+    )
+
+    run2 = CourseRunFactory.create(
+        course__program=program_2,
+        course__live=True,
+        start_date=start_date,
+        end_date=end_date,
+        live=True,
+    )
+
+    topics = []
+    topic1 = CourseTopicFactory.create(name="Engineering")
+    topic2 = CourseTopicFactory.create(name="Business")
+    run1.course.topics.add(topic1)
+    run2.course.topics.add(topic2)
+    topics.append(topic1)
+    topics.append(topic2)
+
+    if filter_courses:
+        resp = client.get(f"{catalog_page.get_url()}?topic=Engineering")
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.context_data["topics"] == [ALL_TOPICS] + [
+            topic.name for topic in topics
+        ]
+        assert resp.context_data["selected_topic"] == "Engineering"
+        assert len(resp.context_data["course_pages"]) == 1
+    else:
+        resp = client.get(catalog_page.get_url())
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.context_data["topics"] == [ALL_TOPICS] + [
+            topic.name for topic in topics
+        ]
+        assert resp.context_data["selected_topic"] == ALL_TOPICS
+        assert len(resp.context_data["course_pages"]) == 2
 
 
 def test_program_page_checkout_url_product(client, wagtail_basics):

@@ -42,6 +42,7 @@ from cms.blocks import (
     validate_unique_readable_ids,
 )
 from cms.constants import (
+    ALL_TOPICS,
     CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
     PROGRAM_INDEX_SLUG,
@@ -231,7 +232,7 @@ class CatalogPage(Page):
         """
         Populate the context with live programs, courses and programs + courses
         """
-        topic_filter = request.GET.get("topic", "All Topics")
+        topic_filter = request.GET.get("topic", ALL_TOPICS)
         program_page_qset = list(
             ProgramPage.objects.live()
             .filter(program__live=True)
@@ -253,7 +254,7 @@ class CatalogPage(Page):
             .select_related("course")
         )
 
-        if topic_filter != "All Topics":
+        if topic_filter != ALL_TOPICS:
             course_page_qset = course_page_qset.filter(
                 course__topics__name=topic_filter
             )
@@ -328,9 +329,9 @@ class CatalogPage(Page):
             hubspot_new_courses_form_guid=settings.HUBSPOT_CONFIG.get(
                 "HUBSPOT_NEW_COURSES_FORM_GUID"
             ),
-            topics=["All Topics"]
+            topics=[ALL_TOPICS]
             + list(CourseTopic.objects.values_list("name", flat=True)),
-            selected_topic=request.GET.get("topic", "All Topics"),
+            selected_topic=topic_filter,
         )
 
 
