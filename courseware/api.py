@@ -41,8 +41,6 @@ from mitxpro.utils import (
     is_json_response,
     now_in_utc,
 )
-from users.api import find_available_username
-from users.utils import usernameify
 
 
 log = logging.getLogger(__name__)
@@ -73,7 +71,7 @@ class OpenEdxUser:
     Data class representing a user in Open edX platform.
 
     Attributes:
-        user (User): User object representing the user in xpro.
+        user (user.models.User): User object representing the user in xpro.
         openedx_data (dict): Dictionary containing user data retrieved from
         openedx platform.
     """
@@ -111,7 +109,7 @@ def get_existing_openedx_user(user):
     object and the fetched openedx user data.
 
     Args:
-        user: The application User object to search for on Open edX.
+        user (user.models.User): The application User object to search for on Open edX.
 
     Returns:
         If a matching openedx user is found, an courseware.api.OpenEdxUser instance that
@@ -146,42 +144,21 @@ def get_existing_openedx_user(user):
     return None
 
 
-def update_xpro_user_username(openedx_user):
+def update_xpro_user_username(user, username):
     """
-    Try to update xpro user's username. If another
-    user already exists with the given username, a unique
-    username will be generated and assigned to that user
-    before updating the given user's username.
+    Update the username of an xPro user by the given username.
 
     Args:
-        openedx_user (courseware.api.OpenEdxUser): the dataclass containing application
-        user and user's data from openedx
+        user (users.models.User): The user to update.
+        username (str): The new username.
 
     Returns:
-        bool: True if the user's username is updated successfully on xpro
+        bool: True if the user's username is updated successfully on Xpro,
+        False if the update failed due to a database integrity error.
     """
-    existing_user = User.objects.filter(
-        username=openedx_user.openedx_data["username"]
-    ).first()
-    if existing_user and existing_user != openedx_user.user:
-        unique_username = usernameify(existing_user.name, email=existing_user.email)
-        if existing_user.username == unique_username or len(unique_username) < 2:
-            unique_username += "11"
-
-        for _ in range(auth_api.USERNAME_COLLISION_ATTEMPTS):
-            if not User.objects.filter(username=unique_username).exists():
-                break
-            unique_username = find_available_username(unique_username)
-
-        existing_user.username = unique_username
-        try:
-            existing_user.save()
-        except IntegrityError:
-            return False
-
-    openedx_user.user.username = openedx_user.openedx_data["username"]
+    user.username = username
     try:
-        openedx_user.user.save()
+        user.save()
     except IntegrityError:
         return False
 
