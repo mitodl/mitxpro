@@ -1,5 +1,6 @@
 """Courseware API functions"""
 import logging
+from dataclasses import dataclass
 from datetime import timedelta
 from urllib.parse import parse_qs, urljoin, urlparse
 
@@ -66,6 +67,32 @@ AUTH_TOKEN_HEADER_NAME = "Authorization"
 API_KEY_HEADER_NAME = "X-EdX-Api-Key"
 
 
+@dataclass(frozen=True)
+class OpenEdxUser:
+    """
+    Data class representing a user in Open edX platform.
+
+    Attributes:
+        user (User): User object representing the user in xpro.
+        openedx_data (dict): Dictionary containing user data retrieved from
+        openedx platform.
+    """
+
+    user: User
+    openedx_data: dict
+
+    def is_username_match(self):
+        """
+        Check if the username of the OpenEdxUser's associated User object matches
+        the 'username' field in its 'openedx_data' dictionary.
+
+        Returns:
+            True if the username of the User object matches the 'username' field in
+            'openedx_data', False otherwise.
+        """
+        return self.user.username == self.openedx_data["username"]
+
+
 def create_user(user):
     """
     Creates a user and any related artifacts in the courseware
@@ -77,54 +104,26 @@ def create_user(user):
     create_edx_auth_token(user)
 
 
-def update_xpro_user_username(user, username):
+def get_existing_openedx_user(user):
     """
-    Try to update xpro user's username. If another
-    user already exists with the given username, a unique
-    username will be generated and assigned to that user
-    before updating the given user's username.
+    Fetches the openedx user data associated with the given application User object,
+    and returns an courseware.api.OpenEdxUser instance that wraps both the User
+    object and the fetched openedx user data.
 
     Args:
-        user (user.models.User): the application user
-        username (str): username received from edX
+        user: The application User object to search for on Open edX.
 
     Returns:
-        bool: True if the user's username is updated successfully on xpro
-    """
-    existing_user = User.objects.filter(username=username).first()
-    if existing_user and existing_user != user:
-        unique_username = usernameify(existing_user.name, email=existing_user.email)
-        if existing_user.username == unique_username or len(unique_username) < 2:
-            unique_username += "11"
+        If a matching openedx user is found, an courseware.api.OpenEdxUser instance that
+        wraps both the given User object and the fetched Open edX user data. Otherwise,
+        returns None.
 
-        for _ in range(auth_api.USERNAME_COLLISION_ATTEMPTS):
-            if not User.objects.filter(username=unique_username).exists():
-                break
-            unique_username = find_available_username(unique_username)
+    Raises:
+        ImproperlyConfigured: If OPENEDX_SERVICE_WORKER_API_TOKEN is not set in settings.
 
-        existing_user.username = unique_username
-        try:
-            existing_user.save()
-        except IntegrityError:
-            return False
-
-    user.username = username
-    try:
-        user.save()
-    except IntegrityError:
-        return False
-
-    return True
-
-
-def is_existing_edx_user(user):
-    """
-    Checks if the user already exists on edX
-
-    Args:
-        user (user.models.User): the application user
-    Returns:
-       bool: True if the user already exists on edX else False
+    Note:
+        This function requires an Open edX service worker API token and API key to be set
+        in the settings module.
     """
     if settings.OPENEDX_SERVICE_WORKER_API_TOKEN is None:
         raise ImproperlyConfigured("OPENEDX_SERVICE_WORKER_API_TOKEN is not set")
@@ -140,17 +139,53 @@ def is_existing_edx_user(user):
     response = req_session.get(
         edx_url(f"{OPENEDX_USER_ACCOUNT_DETAIL_PATH}"), params={"email": user.email}
     )
-    # user already exists on edx
     if response.status_code == status.HTTP_200_OK and is_json_response(response):
-        users = response.json()
-        if len(users) <= 0:
-            return False
-        username = users[0].get("username")
-        if username == user.username:
-            return True
-        return update_xpro_user_username(user, username)
+        users_data = response.json()
+        if len(users_data) > 0:
+            return OpenEdxUser(user, users_data[0])
+    return None
 
-    return False
+
+def update_xpro_user_username(openedx_user):
+    """
+    Try to update xpro user's username. If another
+    user already exists with the given username, a unique
+    username will be generated and assigned to that user
+    before updating the given user's username.
+
+    Args:
+        openedx_user (courseware.api.OpenEdxUser): the dataclass containing application
+        user and user's data from openedx
+
+    Returns:
+        bool: True if the user's username is updated successfully on xpro
+    """
+    existing_user = User.objects.filter(
+        username=openedx_user.openedx_data["username"]
+    ).first()
+    if existing_user and existing_user != openedx_user.user:
+        unique_username = usernameify(existing_user.name, email=existing_user.email)
+        if existing_user.username == unique_username or len(unique_username) < 2:
+            unique_username += "11"
+
+        for _ in range(auth_api.USERNAME_COLLISION_ATTEMPTS):
+            if not User.objects.filter(username=unique_username).exists():
+                break
+            unique_username = find_available_username(unique_username)
+
+        existing_user.username = unique_username
+        try:
+            existing_user.save()
+        except IntegrityError:
+            return False
+
+    openedx_user.user.username = openedx_user.openedx_data["username"]
+    try:
+        openedx_user.user.save()
+    except IntegrityError:
+        return False
+
+    return True
 
 
 def create_edx_user(user):
@@ -193,11 +228,16 @@ def create_edx_user(user):
         )
         # edX responds with 200 on success, not 201
         if resp.status_code != status.HTTP_200_OK:
-            if is_existing_edx_user(user):
-                return
-            raise CoursewareUserCreateError(
-                f"Error creating Open edX user. {get_error_response_summary(resp)}"
-            )
+            openedx_user = get_existing_openedx_user(user)
+            if not openedx_user:
+                raise CoursewareUserCreateError(
+                    f"Error creating Open edX user. {get_error_response_summary(resp)}"
+                )
+            if not openedx_user.is_username_match():
+                if not update_xpro_user_username(openedx_user):
+                    raise CoursewareUserCreateError(
+                        f"Error creating Open edX user. {get_error_response_summary(resp)}"
+                    )
 
 
 @transaction.atomic
