@@ -2,3 +2,29 @@
   padding-top: 45px;
   padding-bottom: 40px;
 }
+
+.catalog-topics {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.topic {
+  height: 70px;
+  width: fit-content;
+  text-align: center;
+  padding: 20px;
+  border-style: solid;
+  border-radius: 26px;
+  color: $primary;
+  margin: 10px;
+  flex: 1 0 25%;
+
+  &:hover {
+    background: $primary;
+    cursor: pointer;
+
+    a {
+      color: white;
+    }
+  }
+}

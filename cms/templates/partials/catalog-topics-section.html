@@ -1,0 +1,14 @@
+{% load wagtailcore_tags wagtailembeds_tags %}
+
+<div class="tv-block">
+  <div class="container">
+    <h1>DISCOVER THE xPRO CATALOG</h1>
+    <div class="row catalog-topics">
+      {% for topic in topics %}
+        <div class="topic">
+          <a href="catalog/?topic={{ topic | urlencode }}">{{ topic }}</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
