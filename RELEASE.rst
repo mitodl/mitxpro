@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.119.0
+---------------
+
+- feat: associate external courseware with Django models (#2585)
+- fix: Error creating Open edX user. user already exists or invalid name (#2579)
+
 Version 0.118.0 (Released March 07, 2023)
 ---------------
 
