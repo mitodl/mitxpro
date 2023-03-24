@@ -1,0 +1,51 @@
+.tv-block {
+  background: white;
+
+  .container {
+
+    .catalog-topics {
+      display: flex;
+      flex-wrap: wrap;
+
+      .topic {
+        height: 80px;
+        width: fit-content;
+        text-align: center;
+        padding: 25px;
+        border-style: solid;
+        border-radius: 40px;
+        color: $primary;
+        margin: 10px;
+        flex: 1 0 25%;
+
+        &:hover {
+          background: $primary;
+          cursor: pointer;
+
+          a {
+            color: white;
+          }
+        }
+      }
+    }
+
+    .view-catalog {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 16px;
+
+      a {
+        &:after {
+          content: "arrow_circle_up";
+          font-family: Material Icons;
+          text-transform: none;
+          transform: rotate(90deg);
+          display: inline-block;
+          vertical-align: top;
+          line-height: 21px;
+          margin: 3px 0 0 5px;
+        }
+      }
+    }
+  }
+}
