@@ -114,19 +114,24 @@ def test_custom_detail_page_urls():
         2, program__readable_id=factory.Iterator([readable_id, "non-matching-id"])
     )
     external_program_pages = ExternalProgramPageFactory.create_batch(
-        2, readable_id=factory.Iterator([readable_id, "non-matching-external-id"])
+        2,
+        program__readable_id=factory.Iterator(
+            [external_readable_id, "non-matching-external-id"]
+        ),
     )
     course_pages = CoursePageFactory.create_batch(
         2, course__readable_id=factory.Iterator([readable_id, "non-matching-id"])
     )
     external_course_pages = ExternalCoursePageFactory.create_batch(
         2,
-        readable_id=factory.Iterator(
+        course__readable_id=factory.Iterator(
             [external_readable_id, "non-matching-external-id"]
         ),
     )
     assert program_pages[0].get_url() == "/programs/{}/".format(readable_id)
-    assert external_program_pages[0].get_url() == "/programs/{}/".format(readable_id)
+    assert external_program_pages[0].get_url() == "/programs/{}/".format(
+        external_readable_id
+    )
     assert course_pages[0].get_url() == "/courses/{}/".format(readable_id)
     assert external_course_pages[0].get_url() == "/courses/{}/".format(
         external_readable_id
@@ -718,13 +723,6 @@ def test_external_course_page_properties():
         background_image__title="background-image",
     )
 
-    # Saving an External Course should fail with ValidationError if price is negative
-    external_course_page.price = -1.0
-    with pytest.raises(ValidationError):
-        external_course_page.save()
-    external_course_page.price = 1.0
-    external_course_page.save()
-
     assert external_course_page.title == "<p>page title</p>"
     assert external_course_page.subhead == "subhead"
     assert external_course_page.description == "<p>desc</p>"
@@ -733,11 +731,10 @@ def test_external_course_page_properties():
     assert external_course_page.video_title == "<p>title</p>"
     assert external_course_page.video_url == "http://test.com/mock.mp4"
     assert external_course_page.background_image.title == "background-image"
-    assert not external_course_page.program_page
+    assert external_course_page.program_page == external_course_page.course.program.page
     assert not external_course_page.course_lineup
-    assert not external_course_page.course_pages
-    assert not external_course_page.product
-    assert not external_course_page.next_run_date
+    assert external_course_page.course_pages
+    assert external_course_page.product == external_course_page.course
 
 
 def test_program_page_properties():

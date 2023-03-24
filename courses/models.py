@@ -152,11 +152,14 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     )
     live = models.BooleanField(default=False)
     products = GenericRelation(Product, related_query_name="programs")
+    is_external = models.BooleanField(default=False)
 
     @property
     def page(self):
         """Gets the associated ProgramPage"""
-        return getattr(self, "programpage", None)
+        return getattr(self, "programpage", None) or getattr(
+            self, "externalprogrampage", None
+        )
 
     @property
     def num_courses(self):
@@ -257,6 +260,7 @@ class ProgramRun(TimestampedModel, ValidateOnSaveMixin):
     program = models.ForeignKey(
         Program, on_delete=models.CASCADE, related_name="programruns"
     )
+    external_marketing_url = models.CharField(max_length=500, blank=True, null=True)
     run_tag = models.CharField(max_length=10, validators=[validate_url_path_field])
     start_date = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True, db_index=True)
@@ -305,11 +309,14 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     )
     live = models.BooleanField(default=False)
     topics = models.ManyToManyField(CourseTopic, blank=True)
+    is_external = models.BooleanField(default=False)
 
     @property
     def page(self):
         """Gets the associated CoursePage"""
-        return getattr(self, "coursepage", None)
+        return getattr(self, "coursepage", None) or getattr(
+            self, "externalcoursepage", None
+        )
 
     @cached_property
     def next_run_date(self):
@@ -460,6 +467,7 @@ class CourseRun(TimestampedModel):
         help_text="A string that identifies the set of runs that this run belongs to (example: 'R2')",
     )
     courseware_url_path = models.CharField(max_length=500, blank=True, null=True)
+    external_marketing_url = models.CharField(max_length=500, blank=True, null=True)
     start_date = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True, db_index=True)
     enrollment_start = models.DateTimeField(null=True, blank=True, db_index=True)

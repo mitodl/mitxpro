@@ -119,6 +119,8 @@ class CoursePageFactory(wagtail_factories.PageFactory):
 class ExternalCoursePageFactory(wagtail_factories.PageFactory):
     """ExternalCoursePage factory class"""
 
+    course = factory.SubFactory(CourseFactory, page=None)
+
     title = factory.Sequence("Test page - External Course {0}".format)
     start_date = factory.Faker(
         "date_time_this_month", before_now=True, after_now=False, tzinfo=pytz.utc
@@ -151,6 +153,8 @@ class ExternalCoursePageFactory(wagtail_factories.PageFactory):
 
 class ExternalProgramPageFactory(wagtail_factories.PageFactory):
     """ExternalProgramPage factory class"""
+
+    program = factory.SubFactory(ProgramFactory, page=None)
 
     title = factory.Sequence("Test page - External Program {0}".format)
     start_date = factory.Faker(

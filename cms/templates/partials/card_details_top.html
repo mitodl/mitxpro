@@ -35,11 +35,7 @@
     {% if object_type == "program" %}
       <li>
         <strong>Number of Courses:</strong>
-          {% if courseware_page.is_external_program_page %}
-            {{ courseware_page.course_count }}
-          {% else %}
-            {{ courseware_page.product.courses.count }}
-          {% endif %}
+        {{ courseware_page.product.courses.count }}
       </li>
     {% endif %}
     {% if courseware_page.duration %}
