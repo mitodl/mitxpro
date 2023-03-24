@@ -49,7 +49,13 @@ from cms.constants import (
 )
 from cms.forms import CertificatePageForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
-from courses.models import Course, CourseRunCertificate, CourseTopic, ProgramCertificate, ProgramRun
+from courses.models import (
+    Course,
+    CourseRunCertificate,
+    CourseTopic,
+    ProgramCertificate,
+    ProgramRun,
+)
 from ecommerce.models import Product
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context

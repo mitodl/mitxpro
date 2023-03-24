@@ -1,5 +1,15 @@
-.tv-block {
+.catalog-topics-section {
+  padding: 90px 0;
+  position: relative;
+  color: black;
+  text-align: center;
   background: white;
+
+  h1 {
+    color: $primary;
+    margin: 0 0 50px;
+    text-align: center;
+  }
 
   .container {
 
