@@ -10,6 +10,8 @@ from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
     modeladmin_register,
 )
+from wagtail.contrib.modeladmin.views import DeleteView
+
 from mitxpro.utils import get_field_names
 from mitxpro.admin import AuditableModelAdmin, TimestampedModelAdmin
 from .models import (
@@ -356,10 +358,24 @@ class ProgramCertificateAdmin(TimestampedModelAdmin):
         return self.model.all_objects.get_queryset().select_related("user", "program")
 
 
+class TopicsWagtailDeleteView(DeleteView):
+    """Custom view for Topics admin in Wagtail"""
+
+    def confirmation_message(self):
+        child_count = self.instance.subtopics.count()
+        if child_count > 0:
+            return (
+                f"This topic has {child_count} sub-topic(s) that will be deleted as well. Are you sure you want to "
+                f"delete? "
+            )
+        return "Are you sure you want to delete this topic?"
+
+
 class CourseTopicAdmin(ModelAdmin, admin.ModelAdmin):
     """Admin for CourseTopic"""
 
     model = CourseTopic
+    delete_view_class = TopicsWagtailDeleteView
 
 
 modeladmin_register(CourseTopicAdmin)
