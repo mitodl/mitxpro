@@ -769,7 +769,7 @@ def test_update_edx_user_name_failure(
 @pytest.fixture
 def test_user():
     """
-    Fixture that creates a `User` object for testing.
+    Fixture that creates a `User` with username="test_user" object for testing.
     """
     return UserFactory.create(username="test_user")
 
@@ -777,7 +777,7 @@ def test_user():
 @pytest.fixture
 def openedx_data():
     """
-    Fixture that creates a `User` object for testing.
+    Fixture providing a sample dictionary with OpenEdx user data.
     """
     return {"username": "test_user"}
 
