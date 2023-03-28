@@ -6,7 +6,10 @@ from django.contrib import admin
 from django.db import models
 from django.forms import TextInput
 
-
+from wagtail.contrib.modeladmin.options import (
+    ModelAdmin,
+    modeladmin_register,
+)
 from mitxpro.utils import get_field_names
 from mitxpro.admin import AuditableModelAdmin, TimestampedModelAdmin
 from .models import (
@@ -50,7 +53,7 @@ class CourseAdmin(admin.ModelAdmin):
     search_fields = ["title", "topics__name", "readable_id"]
     list_display = ("id", "title", "get_program", "position_in_program")
     list_filter = ["live", "program", "topics"]
-
+    readonly_fields = ("topics",)
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
     }
@@ -353,12 +356,13 @@ class ProgramCertificateAdmin(TimestampedModelAdmin):
         return self.model.all_objects.get_queryset().select_related("user", "program")
 
 
-class CourseTopicAdmin(admin.ModelAdmin):
+class CourseTopicAdmin(ModelAdmin, admin.ModelAdmin):
     """Admin for CourseTopic"""
 
     model = CourseTopic
 
 
+modeladmin_register(CourseTopicAdmin)
 admin.site.register(Program, ProgramAdmin)
 admin.site.register(ProgramRun, ProgramRunAdmin)
 admin.site.register(Course, CourseAdmin)
@@ -371,4 +375,3 @@ admin.site.register(CourseRunGrade, CourseRunGradeAdmin)
 admin.site.register(CourseRunGradeAudit, CourseRunGradeAuditAdmin)
 admin.site.register(CourseRunCertificate, CourseRunCertificateAdmin)
 admin.site.register(ProgramCertificate, ProgramCertificateAdmin)
-admin.site.register(CourseTopic, CourseTopicAdmin)

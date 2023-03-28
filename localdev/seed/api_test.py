@@ -95,7 +95,7 @@ def test_topics(seeded):
         ]
 
         def name_key(topic):
-            """Helper function to get a name for sorting purporses"""
+            """Helper function to get a name for sorting purposes"""
             return topic["name"]
 
         assert sorted(topics, key=name_key) == sorted(

@@ -39,6 +39,7 @@ from mitxpro.utils import (
 from cms.models import (
     ProgramPage,
     CoursePage,
+    ProgramProductPage,
     ResourcePage,
     CourseIndexPage,
     ProgramIndexPage,
@@ -368,13 +369,17 @@ class SeedDataLoader:
                 return None
             courseware_obj = serialized.save()
             self.seed_result.add_created(courseware_obj)
-        if courseware_obj is not None and len(topics) > 0:
-            topic_objs = [
-                CourseTopic.objects.get_or_create(name=topic["name"])[0]
-                for topic in topics
-            ]
+
+        topic_objs = self._get_topic_objects(topics)
+        if courseware_obj is not None and len(topic_objs) > 0:
             courseware_obj.topics.set(topic_objs)
         return courseware_obj
+
+    def _get_topic_objects(self, topics):
+        topic_objs = [
+            CourseTopic.objects.get_or_create(name=topic["name"])[0] for topic in topics
+        ]
+        return topic_objs
 
     def _deserialize_product(self, courseware_obj, product_data):
         """
@@ -471,18 +476,33 @@ class SeedDataLoader:
             **filter_for_model_fields(cms_page_cls, data),
             field_name: seeded_value,
         }
+
+        # The page/topics relation is m2m and we can't use update on that so we set them independent of
+        # QuerySet's update.
+        topics = cms_model_data.pop("topics", [])
         if existing_page_qset.exists():
             existing_page_qset.update(**cms_model_data)
             existing_page = existing_page_qset.first()
+            self._set_page_topics(topics, existing_page)
             self.seed_result.add_updated(existing_page)
             return existing_page
         else:
             page_obj = cms_page_cls(**cms_model_data)
             courseware_page_parent = get_courseware_page_parent(courseware_obj)
             courseware_page_parent.add_child(instance=page_obj)
+            self._set_page_topics(topics, page_obj)
             page_obj.save()
+
             self.seed_result.add_created(page_obj)
             return page_obj
+
+    def _set_page_topics(self, topics, page=None):
+        """Associate topics to course page"""
+        topic_objs = self._get_topic_objects(topics)
+
+        if page and not isinstance(page, ProgramProductPage):
+            page.topics.set(topic_objs)
+            page.save()
 
     def _deserialize_cms_resource_page(self, resource_page_data):
         """Create/update Wagtail resource pages."""
