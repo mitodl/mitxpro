@@ -17,6 +17,7 @@ import textVideoSection from "../text_video_section.js"
 import imageCarousel from "../image_carousel.js"
 import facultyCarousel from "../faculty_carousel.js"
 import productDetails from "../product_detail.js"
+import topicsCarousel from "../catalog-topics-carousel.js"
 
 document.addEventListener("DOMContentLoaded", function() {
   notifications()
@@ -25,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
   testimonialsCarousel()
   newsAndEventsCarousel()
   coursewareCarousel()
+  topicsCarousel()
   textVideoSection()
   imageCarousel()
   facultyCarousel()

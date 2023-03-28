@@ -13,13 +13,17 @@
 
   .container {
 
-    .catalog-topics {
+    .topics-slider {
       display: flex;
       flex-wrap: wrap;
 
+      .slick-prev, .slick-next {
+        margin: -3% 0 0 !important;
+      }
+
       .topic {
         height: 80px;
-        width: fit-content;
+        width: 300px !important;
         text-align: center;
         padding: 25px;
         border-style: solid;
@@ -27,6 +31,10 @@
         color: $primary;
         margin: 10px;
         flex: 1 0 25%;
+
+        @include media-breakpoint-down(lg) {
+          width: 250px !important;
+        }
 
         &:hover {
           background: $primary;

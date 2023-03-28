@@ -3,9 +3,9 @@
 <div class="catalog-topics-section">
   <div class="container">
     <h1>DISCOVER THE xPRO CATALOG</h1>
-    <div class="row catalog-topics">
+    <div class="row topics-slider">
       {% for topic in topics %}
-        <div class="topic">
+        <div class="topic slide" data-url="catalog/?topic={{ topic | urlencode }}">
           <a href="catalog/?topic={{ topic | urlencode }}">{{ topic }}</a>
         </div>
       {% endfor %}
