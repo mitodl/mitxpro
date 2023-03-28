@@ -29,10 +29,6 @@
         color: $primary;
         margin: 10px;
 
-        @include media-breakpoint-down(lg) {
-          width: 250px !important;
-        }
-
         &:hover {
           background: $primary;
           cursor: pointer;
@@ -40,6 +36,10 @@
           a {
             color: white;
           }
+        }
+
+        @include media-breakpoint-down(lg) {
+          width: 250px !important;
         }
       }
     }
