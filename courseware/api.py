@@ -88,7 +88,7 @@ class OpenEdxUser:
             True if the username of the User object matches the 'username' field in
             'openedx_data', False otherwise.
         """
-        return self.user.username == self.openedx_data["username"]
+        return self.user.username == self.openedx_data.get("username")
 
 
 def create_user(user):
