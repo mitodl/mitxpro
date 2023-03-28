@@ -808,12 +808,11 @@ def test_is_username_match_returns_false(test_user, openedx_data):
     assert open_edx_user.is_username_match() is False
 
 
-def test_is_username_match_with_mock(mocker, test_user, openedx_data):
+def test_is_username_match_with_mock(mocker, openedx_data):
     """
     Test that `is_username_match()` works correctly when the `user` argument is replaced by a
     `MagicMock` object with a different username.
     """
-    test_user.username = "new_username"
     magic_mock_user = mocker.MagicMock(spec=User)
     open_edx_user = OpenEdxUser(user=magic_mock_user, openedx_data=openedx_data)
     assert not open_edx_user.is_username_match()
