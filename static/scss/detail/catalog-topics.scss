@@ -14,8 +14,6 @@
   .container {
 
     .topics-slider {
-      display: flex;
-      flex-wrap: wrap;
 
       .slick-prev, .slick-next {
         margin: -3% 0 0 !important;
@@ -30,7 +28,6 @@
         border-radius: 40px;
         color: $primary;
         margin: 10px;
-        flex: 1 0 25%;
 
         @include media-breakpoint-down(lg) {
           width: 250px !important;
