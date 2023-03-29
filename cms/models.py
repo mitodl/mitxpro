@@ -11,7 +11,7 @@ from django import forms
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Prefetch, prefetch_related_objects
+from django.db.models import Prefetch, Q, prefetch_related_objects
 from django.http.response import Http404
 from django.shortcuts import reverse
 from django.templatetags.static import static
@@ -233,7 +233,7 @@ class CatalogPage(Page):
         Populate the context with live programs, courses and programs + courses
         """
         topic_filter = request.GET.get("topic", ALL_TOPICS)
-        program_page_qset = list(
+        program_page_qset = (
             ProgramPage.objects.live()
             .filter(program__live=True)
             .order_by("id")
@@ -256,10 +256,15 @@ class CatalogPage(Page):
 
         if topic_filter != ALL_TOPICS:
             course_page_qset = course_page_qset.filter(
-                course__topics__name=topic_filter
-            )
+                Q(topics__name=topic_filter) | Q(topics__parent__name=topic_filter)
+            ).distinct()
+            program_page_qset = program_page_qset.filter(
+                Q(program__courses__coursepage__topics__name=topic_filter)
+                | Q(program__courses__coursepage__topics__parent__name=topic_filter)
+            ).distinct()
 
         course_page_qset = list(course_page_qset)
+        program_page_qset = list(program_page_qset)
 
         external_course_qset = list(ExternalCoursePage.objects.live().order_by("title"))
 
@@ -330,7 +335,11 @@ class CatalogPage(Page):
                 "HUBSPOT_NEW_COURSES_FORM_GUID"
             ),
             topics=[ALL_TOPICS]
-            + list(CourseTopic.objects.values_list("name", flat=True)),
+            + list(
+                CourseTopic.objects.filter(parent__isnull=True).values_list(
+                    "name", flat=True
+                )
+            ),
             selected_topic=topic_filter,
         )
 

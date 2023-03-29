@@ -20,7 +20,13 @@ from cms.factories import (
     TextSectionFactory,
     UserTestimonialsPageFactory,
 )
-from cms.models import CourseIndexPage, HomePage, ProgramIndexPage, TextVideoSection
+from cms.models import (
+    CourseIndexPage,
+    CoursePage,
+    HomePage,
+    ProgramIndexPage,
+    TextVideoSection,
+)
 from courses.factories import (
     CourseRunCertificateFactory,
     CourseRunFactory,
@@ -347,8 +353,7 @@ def test_catalog_page_product(client, wagtail_basics):
 @pytest.mark.parametrize("filter_courses", [True, False])
 def test_catalog_page_topics(client, wagtail_basics, filter_courses):
     """
-    Verify that the catalog page does not include cards for either product pages
-    that are not live (unpublished) or pages that have a product with live=False
+    Test that topic filters are working fine.
     """
     # pylint:disable=too-many-locals
     homepage = wagtail_basics.root
@@ -376,31 +381,55 @@ def test_catalog_page_topics(client, wagtail_basics, filter_courses):
         end_date=end_date,
         live=True,
     )
+    course_page1 = run1.course.coursepage
+    course_page2 = run2.course.coursepage
 
-    topics = []
-    topic1 = CourseTopicFactory.create(name="Engineering")
-    topic2 = CourseTopicFactory.create(name="Business")
-    run1.course.topics.add(topic1)
-    run2.course.topics.add(topic2)
-    topics.append(topic1)
-    topics.append(topic2)
+    parent_topics = []
+    child_topics = []
+
+    parent_topic1 = CourseTopicFactory.create(name="Engineering")
+    parent_topic2 = CourseTopicFactory.create(name="Business")
+    child_topic1 = CourseTopicFactory.create(
+        name="Systems Engineering", parent=parent_topic1
+    )
+    child_topic2 = CourseTopicFactory.create(name="Commerce", parent=parent_topic2)
+
+    CoursePage.topics.through.objects.create(
+        coursepage_id=course_page1.id, coursetopic_id=parent_topic1.id
+    )
+    CoursePage.topics.through.objects.create(
+        coursepage_id=course_page1.id, coursetopic_id=child_topic1.id
+    )
+    CoursePage.topics.through.objects.create(
+        coursepage_id=course_page2.id, coursetopic_id=parent_topic2.id
+    )
+    CoursePage.topics.through.objects.create(
+        coursepage_id=course_page2.id, coursetopic_id=child_topic2.id
+    )
+
+    parent_topics.append(parent_topic1)
+    parent_topics.append(parent_topic2)
+    child_topics.append(child_topic1)
+    child_topics.append(child_topic2)
 
     if filter_courses:
         resp = client.get(f"{catalog_page.get_url()}?topic=Engineering")
         assert resp.status_code == status.HTTP_200_OK
         assert resp.context_data["topics"] == [ALL_TOPICS] + [
-            topic.name for topic in topics
+            topic.name for topic in parent_topics
         ]
         assert resp.context_data["selected_topic"] == "Engineering"
         assert len(resp.context_data["course_pages"]) == 1
+        assert len(resp.context_data["program_pages"]) == 1
     else:
         resp = client.get(catalog_page.get_url())
         assert resp.status_code == status.HTTP_200_OK
         assert resp.context_data["topics"] == [ALL_TOPICS] + [
-            topic.name for topic in topics
+            topic.name for topic in parent_topics
         ]
         assert resp.context_data["selected_topic"] == ALL_TOPICS
         assert len(resp.context_data["course_pages"]) == 2
+        assert len(resp.context_data["program_pages"]) == 2
 
 
 def test_program_page_checkout_url_product(client, wagtail_basics):
