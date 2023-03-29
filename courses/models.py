@@ -290,6 +290,13 @@ class CourseTopic(TimestampedModel):
     """
 
     name = models.CharField(max_length=128, unique=True)
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="subtopics",
+    )
 
     def __str__(self):
         return self.name
