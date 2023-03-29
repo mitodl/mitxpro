@@ -17,7 +17,7 @@ from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.functional import cached_property
 from django.utils.text import slugify
-from modelcluster.fields import ParentalKey
+from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.core import blocks
@@ -622,7 +622,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         blank=True,
         help_text="The content of this tab on the program page",
     )
-
     content_panels = Page.content_panels + [
         FieldPanel("subhead"),
         FieldPanel("video_title"),
@@ -928,10 +927,17 @@ class CourseProductPage(ProductPage):
         on_delete=models.SET_NULL,
         help_text="The course for this page",
     )
+    topics = ParentalManyToManyField(
+        "courses.CourseTopic",
+        help_text="The topics for this course page.",
+    )
 
     parent_page_types = ["CourseIndexPage"]
 
-    content_panels = [FieldPanel("course")] + ProductPage.content_panels
+    content_panels = [
+        FieldPanel("course"),
+        FieldPanel("topics"),
+    ] + ProductPage.content_panels
 
     @cached_property
     def course_with_related_objects(self):
@@ -999,6 +1005,11 @@ class CourseProductPage(ProductPage):
     def product(self):
         """Gets the product associated with this page"""
         return self.course
+
+    def save(self, clean=True, user=None, log_action=False, **kwargs):
+        """Override save to set the topics to Django course models backwards"""
+        self.course.topics.set(self.topics.all())
+        super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
 
 class CoursePage(CourseProductPage):
