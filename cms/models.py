@@ -3,8 +3,8 @@ Page models for the CMS
 """
 # pylint: disable=too-many-lines, too-many-public-methods
 import re
-from decimal import Decimal
 from datetime import datetime, timedelta
+from decimal import Decimal
 from urllib.parse import urljoin
 
 from django import forms
@@ -541,6 +541,11 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
             **super().get_context(request),
             **get_base_context(request),
             "catalog_page": CatalogPage.objects.first(),
+            "topics": list(
+                CourseTopic.objects.filter(parent__isnull=True).values_list(
+                    "name", flat=True
+                )
+            ),
             # The context variables below are added to avoid duplicate queries within the templates
             "about_mit_xpro": self.about_mit_xpro,
             "background_video_url": self.background_video_url,
@@ -550,7 +555,6 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
             "news_and_events": self.news_and_events,
             "testimonials": self.testimonials,
             "upcoming_courseware": self.upcoming_courseware,
-            "topics": list(CourseTopic.objects.values_list("name", flat=True)),
         }
 
 
