@@ -13,14 +13,11 @@
 
   h1 {
     color: white;
-    padding: 15px;
     font-size: 40px;
     line-height: 50px;
     font-weight: 500;
-    margin: 0 0 15px;
 
     @include media-breakpoint-up(md) {
-      padding: 15px 30px;
       font-size: 48px;
       line-height: 54px;
     }

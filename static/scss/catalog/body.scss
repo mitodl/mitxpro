@@ -51,13 +51,15 @@ h1, h2, h3, h4, h5 {
 .topics {
   padding-inline-start: 0px;
   margin-top: 15%;
-  margin-right: 3%;
+  margin-right: 18px;
+  width: 231px;
 
   @include media-breakpoint-down(md) {
     display: flex;
     flex-wrap: wrap;
-    margin-left: 8%;
+    margin-left: 20px;
     margin-top: 35px;
+    width: fit-content;
   }
 
   .topic {
@@ -65,10 +67,11 @@ h1, h2, h3, h4, h5 {
     width: 220px;
     text-align: left;
     padding: 22px 15px;
-    margin: 2px;
     border-style: solid;
-    border-radius: 5px;
+    border-radius: 6px;
     color: white;
+    font-size: 18px;
+    font-weight: 600;
 
     @include media-breakpoint-down(md) {
       height: 50px;
@@ -108,7 +111,7 @@ h1, h2, h3, h4, h5 {
     .rectangle {
       position: absolute;
       top: 12px;
-      left: -32px;
+      left: -10px;
       padding: 4px 19px;
       background-color: $featured-banner-background;
       color: white;
