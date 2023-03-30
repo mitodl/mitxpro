@@ -141,6 +141,16 @@ class CourseRunGradeFactory(DjangoModelFactory):
         model = CourseRunGrade
 
 
+class CourseTopicFactory(DjangoModelFactory):
+    """Factory for CourseTopic"""
+
+    name = fuzzy.FuzzyText(prefix="Topic ")
+    parent = None
+
+    class Meta:
+        model = CourseTopic
+
+
 class ProgramCertificateFactory(DjangoModelFactory):
     """Factory for ProgramCertificate"""
 
@@ -177,13 +187,3 @@ class ProgramEnrollmentFactory(DjangoModelFactory):
 
     class Meta:
         model = ProgramEnrollment
-
-
-class CourseTopicFactory(DjangoModelFactory):
-    """Factory for `CourseTopic`"""
-
-    name = fuzzy.FuzzyText(prefix="Topic ")
-    parent = None
-
-    class Meta:
-        model = CourseTopic
