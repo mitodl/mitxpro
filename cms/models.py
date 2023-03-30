@@ -335,11 +335,7 @@ class CatalogPage(Page):
                 "HUBSPOT_NEW_COURSES_FORM_GUID"
             ),
             topics=[ALL_TOPICS]
-            + list(
-                CourseTopic.objects.filter(parent__isnull=True).values_list(
-                    "name", flat=True
-                )
-            ),
+            + list(CourseTopic.objects.parent_topics().values_list("name", flat=True)),
             selected_topic=topic_filter,
         )
 
