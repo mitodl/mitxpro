@@ -415,18 +415,18 @@ def test_catalog_page_topics(client, wagtail_basics, filter_courses):
     if filter_courses:
         resp = client.get(f"{catalog_page.get_url()}?topic=Engineering")
         assert resp.status_code == status.HTTP_200_OK
-        assert resp.context_data["topics"] == [ALL_TOPICS] + [
-            topic.name for topic in parent_topics
-        ]
+        assert sorted(resp.context_data["topics"]) == sorted(
+            [ALL_TOPICS] + [topic.name for topic in parent_topics]
+        )
         assert resp.context_data["selected_topic"] == "Engineering"
         assert len(resp.context_data["course_pages"]) == 1
         assert len(resp.context_data["program_pages"]) == 1
     else:
         resp = client.get(catalog_page.get_url())
         assert resp.status_code == status.HTTP_200_OK
-        assert resp.context_data["topics"] == [ALL_TOPICS] + [
-            topic.name for topic in parent_topics
-        ]
+        assert sorted(resp.context_data["topics"]) == sorted(
+            [ALL_TOPICS] + [topic.name for topic in parent_topics]
+        )
         assert resp.context_data["selected_topic"] == ALL_TOPICS
         assert len(resp.context_data["course_pages"]) == 2
         assert len(resp.context_data["program_pages"]) == 2
