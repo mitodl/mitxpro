@@ -7,7 +7,7 @@
 
   h1 {
     color: $primary;
-    margin: 0 0 50px;
+    margin: 0 0 60px;
     text-align: center;
   }
 
@@ -20,14 +20,18 @@
       }
 
       .topic {
-        height: 80px;
-        width: 300px !important;
+        height: 88px;
+        width: 344px !important;
         text-align: center;
-        padding: 25px;
+        padding: 30px;
         border-style: solid;
-        border-radius: 40px;
+        border-radius: 44px;
         color: $primary;
         margin: 10px;
+
+        a {
+          font-size: 22px;
+        }
 
         &:hover {
           background: $primary;
@@ -39,7 +43,7 @@
         }
 
         @include media-breakpoint-down(lg) {
-          width: 250px !important;
+          width: 300px !important;
         }
       }
     }
