@@ -334,8 +334,7 @@ class CatalogPage(Page):
             hubspot_new_courses_form_guid=settings.HUBSPOT_CONFIG.get(
                 "HUBSPOT_NEW_COURSES_FORM_GUID"
             ),
-            topics=[ALL_TOPICS]
-            + list(CourseTopic.objects.parent_topics().values_list("name", flat=True)),
+            topics=[ALL_TOPICS] + CourseTopic.objects.parent_topic_names(),
             selected_topic=topic_filter,
         )
 
