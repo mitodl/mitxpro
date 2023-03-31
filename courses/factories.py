@@ -1,8 +1,8 @@
 """Factories for creating course data in tests"""
-import pytz
-import faker
 import factory
-from factory import fuzzy, SubFactory, Trait
+import faker
+import pytz
+from factory import SubFactory, Trait, fuzzy
 from factory.django import DjangoModelFactory
 
 from courses.constants import PROGRAM_TEXT_ID_PREFIX
@@ -10,16 +10,18 @@ from ecommerce.models import Company
 from users.factories import UserFactory
 
 from .models import (
-    Program,
-    ProgramRun,
     Course,
     CourseRun,
-    ProgramEnrollment,
-    CourseRunEnrollment,
     CourseRunCertificate,
-    ProgramCertificate,
+    CourseRunEnrollment,
     CourseRunGrade,
+    CourseTopic,
+    Program,
+    ProgramCertificate,
+    ProgramEnrollment,
+    ProgramRun,
 )
+
 
 FAKE = faker.Factory.create()
 
@@ -137,6 +139,16 @@ class CourseRunGradeFactory(DjangoModelFactory):
 
     class Meta:
         model = CourseRunGrade
+
+
+class CourseTopicFactory(DjangoModelFactory):
+    """Factory for CourseTopic"""
+
+    name = fuzzy.FuzzyText(prefix="Topic ")
+    parent = None
+
+    class Meta:
+        model = CourseTopic
 
 
 class ProgramCertificateFactory(DjangoModelFactory):
