@@ -249,6 +249,15 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         """All course runs related to a program"""
         return [run for course in self.courses.all() for run in course.courseruns.all()]
 
+    @property
+    def marketing_url(self):
+        """Return the marketing URL for this program from it's latest program run"""
+        return getattr(
+            self.programruns.order_by("-start_date").first(),
+            "external_marketing_url",
+            "",
+        )
+
     def __str__(self):
         title = f"{self.readable_id} | {self.title}"
         return title if len(title) <= 100 else title[:97] + "..."
@@ -427,6 +436,11 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
                 run__course=self
             ).values_list("run__id", flat=True)
         return [run for run in self.unexpired_runs if run.id not in enrolled_runs]
+
+    @property
+    def marketing_url(self):
+        """Return the marketing URL for this course"""
+        return getattr(self.first_unexpired_run, "external_marketing_url", "")
 
     class Meta:
         ordering = ("program", "title")

@@ -15,6 +15,7 @@ from courses.factories import (
     CourseFactory,
     CourseRunFactory,
     ProgramFactory,
+    ProgramRunFactory,
     CourseRunEnrollmentFactory,
     ProgramEnrollmentFactory,
     CourseRunCertificateFactory,
@@ -172,6 +173,42 @@ def test_program_current_price():
         product=ProductFactory(content_object=program), price=price
     )
     assert program.current_price == price
+
+
+def test_external_courseware_marketing_url():
+    """
+    External courseware objects should return expected marketing url
+    """
+    course = CourseFactory.create()
+    program = ProgramFactory.create()
+    external_course_urls = [
+        "http://www.testexternalcourse1.com",
+        "http://www.testexternalcourse2.com",
+    ]
+    external_program_urls = [
+        "http://www.testexternalprogram1.com",
+        "http://www.testexternalprogram2.com",
+    ]
+
+    course_runs = CourseRunFactory.create_batch(
+        2, course=course, external_marketing_url=factory.Iterator(external_course_urls)
+    )
+    # Create multiple runs, Check the url returned by course is from the latest one starting
+    course_runs[0].start_date = now_in_utc() + timedelta(hours=2)
+    course_runs[1].start_date = now_in_utc() + timedelta(hours=1)
+
+    course_runs[0].save()
+    course_runs[1].save()
+
+    program_runs = ProgramRunFactory.create_batch(
+        2,
+        program=program,
+        external_marketing_url=factory.Iterator(external_program_urls),
+    )
+    program_runs[1].start_date = now_in_utc() + timedelta(hours=1)
+
+    assert course.marketing_url == "http://www.testexternalcourse2.com"
+    assert program.marketing_url == "http://www.testexternalprogram2.com"
 
 
 def test_program_page():
