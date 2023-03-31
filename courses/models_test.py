@@ -193,8 +193,13 @@ def test_external_courseware_marketing_url():
     course_runs = CourseRunFactory.create_batch(
         2, course=course, external_marketing_url=factory.Iterator(external_course_urls)
     )
-    # Create a run further in the past soe that we know we get the marketing url from that
+    # Create multiple runs, Check the url returned by course is from the latest one starting
+    course_runs[0].start_date = now_in_utc() + timedelta(hours=2)
     course_runs[1].start_date = now_in_utc() + timedelta(hours=1)
+
+    course_runs[0].save()
+    course_runs[1].save()
+
     program_runs = ProgramRunFactory.create_batch(
         2,
         program=program,

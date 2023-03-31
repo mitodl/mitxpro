@@ -440,7 +440,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     @property
     def marketing_url(self):
         """Return the marketing URL for this course"""
-        return getattr(self.first_unexpired_run, "external_marketing_url", None)
+        return getattr(self.first_unexpired_run, "external_marketing_url", "")
 
     class Meta:
         ordering = ("program", "title")

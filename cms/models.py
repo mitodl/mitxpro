@@ -766,7 +766,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     @property
     def external_courseware_url(self):
         """Gets the product page type, this is used for sorting product pages."""
-        return getattr(self.product, "marketing_url", "")
+        return getattr(self.product, "marketing_url", "") or ""
 
     @property
     def is_external_course_page(self):
