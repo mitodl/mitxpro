@@ -25,6 +25,7 @@
     {% pageurl catalog_page as catalog_url %}
     {% include "partials/course-carousel.html" with page=upcoming_courseware button_title="View All" button_url=catalog_url %}
   {% endif %}
+  {% if topics %} {% include "partials/catalog-topics-section.html" with topics=topics %} {% endif %}
   {% if about_mit_xpro %} {% include "partials/text-video-section.html" with page=about_mit_xpro %} {% endif %}
   {% if learning_experience %} {% include "partials/learning-techniques.html" with page=learning_experience %} {% endif %}
   {% if testimonials %} {% include "partials/testimonial-carousel.html" with page=testimonials %} {% endif %}

@@ -3,8 +3,8 @@ Page models for the CMS
 """
 # pylint: disable=too-many-lines, too-many-public-methods
 import re
-from decimal import Decimal
 from datetime import datetime, timedelta
+from decimal import Decimal
 from urllib.parse import urljoin
 
 from django import forms
@@ -49,7 +49,13 @@ from cms.constants import (
 )
 from cms.forms import CertificatePageForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
-from courses.models import Course, CourseRunCertificate, ProgramCertificate, ProgramRun
+from courses.models import (
+    Course,
+    CourseRunCertificate,
+    CourseTopic,
+    ProgramCertificate,
+    ProgramRun,
+)
 from ecommerce.models import Product
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
@@ -535,6 +541,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
             **super().get_context(request),
             **get_base_context(request),
             "catalog_page": CatalogPage.objects.first(),
+            "topics": CourseTopic.objects.parent_topic_names(),
             # The context variables below are added to avoid duplicate queries within the templates
             "about_mit_xpro": self.about_mit_xpro,
             "background_video_url": self.background_video_url,

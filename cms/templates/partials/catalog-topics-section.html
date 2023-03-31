@@ -1,0 +1,17 @@
+{% load wagtailcore_tags wagtailembeds_tags %}
+
+<div class="catalog-topics-section">
+  <div class="container">
+    <h1>DISCOVER THE xPRO CATALOG</h1>
+    <div class="row topics-slider">
+      {% for topic in topics %}
+        <div class="topic slide" data-url="catalog/?topic={{ topic | urlencode }}">
+          <a href="catalog/?topic={{ topic | urlencode }}">{{ topic }}</a>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="view-catalog">
+      <a href="/catalog/" class="read-more">VIEW CATALOG</a>
+    </div>
+  </div>
+</div>

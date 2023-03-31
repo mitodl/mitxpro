@@ -10,26 +10,27 @@ from wagtail.core.models import Site
 
 from cms.factories import (
     CatalogPageFactory,
-    CoursePageFactory,
-    ProgramPageFactory,
-    TextSectionFactory,
-    HomePageFactory,
-    UserTestimonialsPageFactory,
     CourseIndexPageFactory,
+    CoursePageFactory,
+    HomePageFactory,
     ProgramIndexPageFactory,
+    ProgramPageFactory,
     SignatoryPageFactory,
+    TextSectionFactory,
+    UserTestimonialsPageFactory,
 )
 from cms.models import CourseIndexPage, HomePage, ProgramIndexPage, TextVideoSection
 from courses.factories import (
-    CourseRunFactory,
     CourseRunCertificateFactory,
+    CourseRunFactory,
+    CourseTopicFactory,
     ProgramCertificateFactory,
     ProgramFactory,
     ProgramRunFactory,
 )
 from ecommerce.factories import ProductVersionFactory
-
 from mitxpro.utils import now_in_utc
+
 
 pytestmark = pytest.mark.django_db
 # pylint: disable=redefined-outer-name,unused-argument
@@ -119,6 +120,22 @@ def test_home_page_view(client, wagtail_basics):
 
     assert reverse("user-dashboard") not in content
     assert reverse("checkout-page") not in content
+
+
+def test_home_page_context_topics(client, wagtail_basics):
+    """
+    Test that parent course topics are included in homepage context.
+    """
+    page = HomePage(title="Home Page", subhead="<p>subhead</p>")
+    wagtail_basics.root.add_child(instance=page)
+
+    parent_topic = CourseTopicFactory.create()
+    child_topic = CourseTopicFactory.create(parent=parent_topic)
+
+    resp = client.get(page.get_url())
+    context = resp.context_data
+    assert parent_topic.name in context["topics"]
+    assert child_topic.name not in context["topics"]
 
 
 def test_courses_index_view(client, wagtail_basics):
