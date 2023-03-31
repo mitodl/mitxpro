@@ -23,7 +23,7 @@ from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.core import blocks
 from wagtail.core.blocks import PageChooserBlock, RawHTMLBlock, StreamBlock
 from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.models import Orderable, Page
+from wagtail.core.models import Orderable, Page, PageManager, PageQuerySet
 from wagtail.core.utils import WAGTAIL_APPEND_SLASH
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.edit_handlers import ImageChooserPanel
@@ -247,30 +247,27 @@ class CatalogPage(Page):
                 ),
             )
         )
+        external_program_qset = ExternalProgramPage.objects.live().order_by("title")
+
         course_page_qset = (
             CoursePage.objects.live()
             .filter(course__live=True)
             .order_by("id")
             .select_related("course")
         )
+        external_course_qset = ExternalCoursePage.objects.live().order_by("title")
 
         if topic_filter != ALL_TOPICS:
-            course_page_qset = course_page_qset.filter(
-                Q(topics__name=topic_filter) | Q(topics__parent__name=topic_filter)
-            ).distinct()
-            program_page_qset = program_page_qset.filter(
-                Q(program__courses__coursepage__topics__name=topic_filter)
-                | Q(program__courses__coursepage__topics__parent__name=topic_filter)
-            ).distinct()
+            program_page_qset = program_page_qset.related_pages(topic_filter)
+            external_program_qset = external_program_qset.related_pages(topic_filter)
 
-        course_page_qset = list(course_page_qset)
+            course_page_qset = course_page_qset.related_pages(topic_filter)
+            external_course_qset = external_course_qset.related_pages(topic_filter)
+
         program_page_qset = list(program_page_qset)
-
-        external_course_qset = list(ExternalCoursePage.objects.live().order_by("title"))
-
-        external_program_qset = list(
-            ExternalProgramPage.objects.live().order_by("title")
-        )
+        external_program_qset = list(external_program_qset)
+        course_page_qset = list(course_page_qset)
+        external_course_qset = list(external_course_qset)
 
         # prefetch thumbnail images for all the pages in one query
         prefetch_related_objects(
@@ -821,6 +818,37 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         return self._get_child_page_of_type(NewsAndEventsPage)
 
 
+class ProgramProductPageQuerySet(PageQuerySet):
+    """QuerySet for ProgramProductPage"""
+
+    def related_pages(self, topic_name):
+        """
+        ProgramProductPage QuerySet filter for topics
+        """
+        return self.filter(
+            Q(program__courses__coursepage__topics__name=topic_name)
+            | Q(program__courses__coursepage__topics__parent__name=topic_name)
+        ).distinct()
+
+
+ProgramProductPageManager = PageManager.from_queryset(ProgramProductPageQuerySet)
+
+
+class CourseProductPageQuerySet(PageQuerySet):
+    """QuerySet for CourseProductPage"""
+
+    def related_pages(self, topic_name):
+        """
+        CourseProductPage QuerySet filter for topics
+        """
+        return self.filter(
+            Q(topics__name=topic_name) | Q(topics__parent__name=topic_name)
+        ).distinct()
+
+
+CourseProductPageManager = PageManager.from_queryset(CourseProductPageQuerySet)
+
+
 class ProgramProductPage(ProductPage):
     """
     Abstract Product page for Programs
@@ -829,6 +857,7 @@ class ProgramProductPage(ProductPage):
     class Meta:
         abstract = True
 
+    objects = ProgramProductPageManager()
     parent_page_types = ["ProgramIndexPage"]
 
     content_panels = [FieldPanel("program")] + ProductPage.content_panels
@@ -947,6 +976,7 @@ class CourseProductPage(ProductPage):
     class Meta:
         abstract = True
 
+    objects = CourseProductPageManager()
     course = models.OneToOneField(
         "courses.Course",
         null=True,
