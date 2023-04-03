@@ -64,7 +64,6 @@ from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import dict_without_keys, now_in_utc
 from users.factories import UserFactory
 
-
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_ACCESS_KEY = "access"
 CYBERSOURCE_PROFILE_ID = "profile"
@@ -74,6 +73,8 @@ FAKE = faker.Factory.create()
 lazy = pytest.lazy_fixture
 
 pytestmark = pytest.mark.django_db
+
+
 # pylint: disable=redefined-outer-name,unused-argument,too-many-lines,too-many-arguments
 
 
@@ -997,6 +998,25 @@ def test_patch_basket_bad_data_consents(basket_and_agreement):
     }
 
 
+def test_patch_basket_external_product(basket_and_coupons):
+    """ Test that a patch request with external product results in a validation error  """
+    user = basket_and_coupons.basket.user
+    client = APIClient()
+    client.force_authenticate(user=user)
+    basket_and_coupons.run.course.is_external = True
+    basket_and_coupons.run.course.save()
+
+    resp = client.patch(
+        reverse("basket_api"),
+        type="json",
+        data={"items": [{"product_id": basket_and_coupons.basket_item.product.id}]},
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json().get("errors") == [
+        "We're sorry, This product cannot be purchased on this web site."
+    ]
+
+
 @pytest.mark.parametrize(
     "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
 )
@@ -1324,7 +1344,7 @@ def test_products_viewset_list_ordering(user_drf_client):
 
 
 def test_products_viewset_valid_courses(user_drf_client):
-    """ Test that the ProductViewSet returns contains only valid course products """
+    """ Test that the ProductViewSet returns only valid course products """
 
     runs = CourseRunFactory.create_batch(2)
     ProductVersionFactory.create_batch(
@@ -1343,7 +1363,7 @@ def test_products_viewset_valid_courses(user_drf_client):
 
 
 def test_products_viewset_valid_programs(user_drf_client):
-    """ Test that the ProductViewSet returns contains only valid programs products"""
+    """ Test that the ProductViewSet returns only valid programs products"""
     now = now_in_utc()
     programs = ProgramFactory.create_batch(2)
     runs = CourseRunFactory.create_batch(2, course__program=factory.Iterator(programs))
@@ -1378,6 +1398,56 @@ def test_products_viewset_valid_programs(user_drf_client):
             .count()
         )
         assert count == 0
+
+
+def test_products_viewset_external_courses(user_drf_client):
+    """ Test that the ProductViewSet returns contains only internal course products """
+    external_runs = CourseRunFactory.create_batch(
+        2,
+        course__is_external=True,
+        start_date=now_in_utc() - timedelta(hours=2),
+        end_date=now_in_utc() + timedelta(hours=2),
+    )
+    external_programs = ProgramFactory.create_batch(2, is_external=True)
+
+    ProductVersionFactory.create_batch(
+        4, product__content_object=factory.Iterator(external_runs + external_programs)
+    )
+
+    # External products should not be part of Products API
+    response = user_drf_client.get(reverse("products_api-list"))
+    assert response.status_code == status.HTTP_200_OK
+    products = response.json()
+    assert products == []
+
+    # Only internal products should not be part of Products API
+    internal_runs = CourseRunFactory.create_batch(
+        2,
+        start_date=now_in_utc() - timedelta(hours=2),
+        end_date=now_in_utc() + timedelta(hours=2),
+    )
+    internal_programs_runs = ProgramRunFactory.create_batch(2)
+
+    internal_product_versions = ProductVersionFactory.create_batch(
+        4,
+        product__content_object=factory.Iterator(
+            internal_runs
+            + [
+                internal_program_run.program
+                for internal_program_run in internal_programs_runs
+            ]
+        ),
+    )
+
+    response = user_drf_client.get(reverse("products_api-list"))
+    assert response.status_code == status.HTTP_200_OK
+    products = response.json()
+    generated_product_ids = [
+        product_version.product.id for product_version in internal_product_versions
+    ]
+    response_product_ids = [product.get("id") for product in products]
+
+    assert set(generated_product_ids) == set(response_product_ids)
 
 
 def test_products_viewset_list_missing_unchecked_bulk_visibility(user_drf_client):

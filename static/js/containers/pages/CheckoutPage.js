@@ -310,6 +310,12 @@ export class CheckoutPage extends React.Component<Props, State> {
           <React.Fragment>
             No item in basket
             {formatErrors(loadingErrorMessages)}
+            <br/>
+            {"Please contact "}
+            <a href={`mailto:${SETTINGS.support_email}`}>
+              customer support
+            </a>
+            {" for more information."}
           </React.Fragment>
         ) : (
           renderGenericError()
