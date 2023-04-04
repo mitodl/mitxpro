@@ -868,13 +868,13 @@ class CouponAssignmentHandler:
                 assignments_to_remove, lambda assignment: assignment.redeemed
             )
             if already_redeemed_assignments:
-                log.error(
+                log.info(
                     "Cannot remove ProductCouponAssignments that are already redeemed - "
                     "The following assignments will not be removed: %s",
                     list(already_redeemed_assignments),
                 )
                 # If any of the assignments we want to create have the same product coupon as one
-                # of these already-redeemed assignments, filter them out and log an error.
+                # of these already-redeemed assignments, filter them out and log an info message.
                 product_coupon_ids = set(
                     assignment.product_coupon_id
                     for assignment in already_redeemed_assignments
@@ -885,7 +885,7 @@ class CouponAssignmentHandler:
                 )
                 tuple_set_to_create = set(adjusted_create_iter)
                 if cannot_create_iter:
-                    log.error(
+                    log.info(
                         "Cannot create ProductCouponAssignments for codes that have already been redeemed. "
                         "The following assignments will be not be created: %s",
                         list(cannot_create_iter),
