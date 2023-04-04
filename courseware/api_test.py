@@ -9,7 +9,6 @@ import pytest
 import responses
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
-from django.db.utils import IntegrityError
 from django.db import transaction
 from edx_api.enrollments import Enrollments
 from freezegun import freeze_time
