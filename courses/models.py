@@ -77,6 +77,13 @@ class CourseRunQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
             models.Q(end_date__isnull=True) | models.Q(end_date__gt=now_in_utc())
         )
 
+    def enrollment_available(self):
+        """Applies a filter for Course runs with enrollment_end in future"""
+        return self.filter(
+            models.Q(enrollment_end__isnull=True)
+            | models.Q(enrollment_end__gt=now_in_utc())
+        )
+
     def with_text_id(self, text_id):
         """Applies a filter for the CourseRun's courseware_id"""
         return self.filter(courseware_id=text_id)
