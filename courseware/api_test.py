@@ -10,6 +10,7 @@ import responses
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
 from django.db.utils import IntegrityError
+from django.db import transaction
 from edx_api.enrollments import Enrollments
 from freezegun import freeze_time
 from oauth2_provider.models import AccessToken, Application
@@ -258,12 +259,14 @@ def test_update_xpro_user_username_successfully(user):
     assert user.username == new_username
 
 
-def test_update_xpro_user_username_integrity_error(user, mocker):
+def test_update_xpro_user_username_integrity_error(user):
     """Tests update_xpro_user_username raises IntegrityError"""
-    mocker.patch("users.models.User.save", side_effect=IntegrityError())
     old_username = user.username
     new_username = "new_username"
-    assert update_xpro_user_username(user, new_username) is False
+    # create duplicate user with given username
+    UserFactory.create(username=new_username)
+    with transaction.atomic():
+        assert update_xpro_user_username(user, new_username) is False
     # reload user object from database to get latest value of username
     user.refresh_from_db()
     assert user.username == old_username
