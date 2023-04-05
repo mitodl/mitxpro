@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.119.0 (Released April 05, 2023)
+---------------
+
+- fix: don't allow external products to be sellable (#2602)
+- fix: UserCreationFailedException (#2588)
+- fix: external program URL on Program Details/Product page (#2599)
+- feat: associate external courseware with Django models (#2585)
+- fix: Error creating Open edX user. user already exists or invalid name (#2579)
+
 Version 0.118.0 (Released March 07, 2023)
 ---------------
 
