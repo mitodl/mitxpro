@@ -82,9 +82,9 @@ h1, h2, h3, h4, h5 {
     &.selected {
       background: #f3f3f7;
 
-        &:last-child {
-          margin-bottom: 10px;
-        }
+      &:last-child {
+        margin-bottom: 10px;
+      }
 
       a {
         color: $primary;
