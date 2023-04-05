@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.119.0
+Version 0.119.0 (Released April 05, 2023)
 ---------------
 
 - fix: don't allow external products to be sellable (#2602)
