@@ -2,6 +2,7 @@
 from datetime import timedelta
 from types import SimpleNamespace
 
+import factory
 import pytest
 from django.core.cache import cache
 from django.urls import reverse
@@ -22,7 +23,6 @@ from cms.factories import (
 )
 from cms.models import (
     CourseIndexPage,
-    CoursePage,
     HomePage,
     ProgramIndexPage,
     TextVideoSection,
@@ -350,8 +350,22 @@ def test_catalog_page_product(client, wagtail_basics):
     ]
 
 
-@pytest.mark.parametrize("filter_courses", [True, False])
-def test_catalog_page_topics(client, wagtail_basics, filter_courses):
+@pytest.mark.parametrize(
+    "topic_filter, expected_courses_count, expected_program_count, expected_selected_topic",
+    [
+        [None, 2, 2, ALL_TOPICS],
+        ["Engineering", 1, 1, "Engineering"],
+        ["RandomTopic", 0, 0, "RandomTopic"],
+    ],
+)
+def test_catalog_page_topics(  # pylint: disable=too-many-arguments
+    client,
+    wagtail_basics,
+    topic_filter,
+    expected_courses_count,
+    expected_program_count,
+    expected_selected_topic,
+):
     """
     Test that topic filters are working fine.
     """
@@ -360,76 +374,45 @@ def test_catalog_page_topics(client, wagtail_basics, filter_courses):
     catalog_page = CatalogPageFactory.create(parent=homepage)
     catalog_page.save_revision().publish()
 
-    program_1 = ProgramFactory.create()
-    program_2 = ProgramFactory.create()
-
     now = now_in_utc()
     start_date = now + timedelta(days=2)
     end_date = now + timedelta(days=10)
-    run1 = CourseRunFactory.create(
-        course__program=program_1,
+
+    programs = ProgramFactory.create_batch(2)
+    runs = CourseRunFactory.create_batch(
+        2,
+        course__program=factory.Iterator(programs),
         course__live=True,
         start_date=start_date,
         end_date=end_date,
         live=True,
     )
 
-    run2 = CourseRunFactory.create(
-        course__program=program_2,
-        course__live=True,
-        start_date=start_date,
-        end_date=end_date,
-        live=True,
+    course_pages = [run.course.coursepage for run in runs]
+    parent_topics = CourseTopicFactory.create_batch(
+        2, name=factory.Iterator(["Engineering", "Business"])
     )
-    course_page1 = run1.course.coursepage
-    course_page2 = run2.course.coursepage
-
-    parent_topics = []
-    child_topics = []
-
-    parent_topic1 = CourseTopicFactory.create(name="Engineering")
-    parent_topic2 = CourseTopicFactory.create(name="Business")
-    child_topic1 = CourseTopicFactory.create(
-        name="Systems Engineering", parent=parent_topic1
-    )
-    child_topic2 = CourseTopicFactory.create(name="Commerce", parent=parent_topic2)
-
-    CoursePage.topics.through.objects.create(
-        coursepage_id=course_page1.id, coursetopic_id=parent_topic1.id
-    )
-    CoursePage.topics.through.objects.create(
-        coursepage_id=course_page1.id, coursetopic_id=child_topic1.id
-    )
-    CoursePage.topics.through.objects.create(
-        coursepage_id=course_page2.id, coursetopic_id=parent_topic2.id
-    )
-    CoursePage.topics.through.objects.create(
-        coursepage_id=course_page2.id, coursetopic_id=child_topic2.id
+    child_topics = CourseTopicFactory.create_batch(
+        2,
+        name=factory.Iterator(["Systems Engineering", "Commerce"]),
+        parent=factory.Iterator(parent_topics),
     )
 
-    parent_topics.append(parent_topic1)
-    parent_topics.append(parent_topic2)
-    child_topics.append(child_topic1)
-    child_topics.append(child_topic2)
+    for idx, course_page in enumerate(course_pages):
+        course_page.topics.set([parent_topics[idx].id, child_topics[idx].id])
 
-    if filter_courses:
-        resp = client.get(f"{catalog_page.get_url()}?topic=Engineering")
-        assert resp.status_code == status.HTTP_200_OK
-        assert sorted(resp.context_data["topics"]) == sorted(
-            [ALL_TOPICS] + [topic.name for topic in parent_topics]
-        )
-        assert resp.context_data["selected_topic"] == "Engineering"
-        assert len(resp.context_data["course_pages"]) == 1
-        assert len(resp.context_data["program_pages"]) == 1
+    if topic_filter:
+        resp = client.get(f"{catalog_page.get_url()}?topic={topic_filter}")
     else:
         resp = client.get(catalog_page.get_url())
-        assert resp.status_code == status.HTTP_200_OK
-        assert sorted(resp.context_data["topics"]) == sorted(
-            [ALL_TOPICS] + [topic.name for topic in parent_topics]
-        )
-        assert resp.context_data["selected_topic"] == ALL_TOPICS
-        assert len(resp.context_data["course_pages"]) == 2
-        assert len(resp.context_data["program_pages"]) == 2
+
+    assert resp.status_code == status.HTTP_200_OK
+    assert sorted(resp.context_data["topics"]) == sorted(
+        [ALL_TOPICS] + [topic.name for topic in parent_topics]
+    )
+    assert resp.context_data["selected_topic"] == expected_selected_topic
+    assert len(resp.context_data["course_pages"]) == expected_courses_count
+    assert len(resp.context_data["program_pages"]) == expected_program_count
 
 
 def test_program_page_checkout_url_product(client, wagtail_basics):
