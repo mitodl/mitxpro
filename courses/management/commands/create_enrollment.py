@@ -103,12 +103,14 @@ class Command(BaseCommand):
             )
 
             try:
-                _, edx_request_success = create_run_enrollments(
+                successful_enrollments, edx_request_success = create_run_enrollments(
                     user,
                     [run],
                     keep_failed_enrollments=options["keep_failed_enrollments"],
                     order=order,
                 )
+                if not successful_enrollments:
+                    raise EdxEnrollmentCreateError
             except EdxEnrollmentCreateError:
                 raise CommandError("Failed to create the enrollment record")
 

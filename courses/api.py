@@ -333,12 +333,12 @@ def defer_enrollment(
             company=from_enrollment.company,
             keep_failed_enrollments=keep_failed_enrollments,
         )
+        if to_enrollments:
+            from_enrollment = deactivate_run_enrollment(
+                from_enrollment,
+                ENROLL_CHANGE_STATUS_DEFERRED,
+                keep_failed_enrollments=keep_failed_enrollments,
+            )
     except EdxEnrollmentCreateError:  # pylint: disable=try-except-raise
         raise
-
-    from_enrollment = deactivate_run_enrollment(
-        from_enrollment,
-        ENROLL_CHANGE_STATUS_DEFERRED,
-        keep_failed_enrollments=keep_failed_enrollments,
-    )
     return from_enrollment, first_or_none(to_enrollments)
