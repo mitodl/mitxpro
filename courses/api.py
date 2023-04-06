@@ -12,6 +12,7 @@ from courses.constants import ENROLL_CHANGE_STATUS_DEFERRED
 from courses.models import CourseRun, CourseRunEnrollment, ProgramEnrollment
 from courseware.api import enroll_in_edx_course_runs, unenroll_edx_course_run
 from courseware.exceptions import (
+    EdxEnrollmentCreateError,
     EdxApiEnrollErrorException,
     NoEdxApiAuthError,
     UnknownEdxApiEnrollException,
@@ -116,7 +117,7 @@ def create_run_enrollments(
         HTTPError,
         RequestsConnectionError,
     ):
-        log.exception(
+        error_message = (
             "edX enrollment failure for user: %s, runs: %s (order: %s)",
             user,
             [run.courseware_id for run in runs],
@@ -124,7 +125,8 @@ def create_run_enrollments(
         )
         edx_request_success = False
         if not keep_failed_enrollments:
-            return successful_enrollments, edx_request_success
+            raise EdxEnrollmentCreateError(str(error_message))
+        log.exception(str(error_message))
     else:
         edx_request_success = True
 
@@ -323,13 +325,17 @@ def defer_enrollment(
                 from_enrollment.run.course.title, to_run.course.title
             )
         )
-    to_enrollments, _ = create_run_enrollments(
-        user,
-        [to_run],
-        order=from_enrollment.order,
-        company=from_enrollment.company,
-        keep_failed_enrollments=keep_failed_enrollments,
-    )
+    try:
+        to_enrollments, _ = create_run_enrollments(
+            user,
+            [to_run],
+            order=from_enrollment.order,
+            company=from_enrollment.company,
+            keep_failed_enrollments=keep_failed_enrollments,
+        )
+    except EdxEnrollmentCreateError:  # pylint: disable=try-except-raise
+        raise
+
     from_enrollment = deactivate_run_enrollment(
         from_enrollment,
         ENROLL_CHANGE_STATUS_DEFERRED,

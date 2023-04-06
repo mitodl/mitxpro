@@ -2,6 +2,10 @@
 from mitxpro.utils import get_error_response_summary
 
 
+class EdxEnrollmentCreateError(Exception):
+    """Exception creating the CoursewareUser"""
+
+
 class CoursewareUserCreateError(Exception):
     """Exception creating the CoursewareUser"""
 

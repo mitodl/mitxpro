@@ -7,6 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from courses.api import defer_enrollment
 from courses.models import CourseRunEnrollment, CourseRun
+from courseware.exceptions import EdxEnrollmentCreateError
 from mitxpro.utils import now_in_utc
 from sheets.constants import GOOGLE_API_TRUE_VAL
 from sheets.sheet_handler_api import EnrollmentChangeRequestHandler
@@ -204,6 +205,14 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
                 row_object=None,
                 result_type=ResultType.FAILED,
                 message="Invalid deferral: {}".format(exc),
+            )
+        except EdxEnrollmentCreateError as exc:
+            return RowResult(
+                row_index=row_index,
+                row_db_record=deferral_request,
+                row_object=None,
+                result_type=ResultType.FAILED,
+                message="Unable to defer enrollment: {}".format(exc),
             )
 
         deferral_request.date_completed = now_in_utc()

@@ -2,6 +2,7 @@
 from datetime import timedelta
 from types import SimpleNamespace
 
+import contextlib
 import pytest
 import factory
 from django.core.exceptions import ValidationError
@@ -30,6 +31,7 @@ from courses.factories import (
 # pylint: disable=redefined-outer-name
 from courses.models import CourseRunEnrollment, ProgramEnrollment
 from courseware.exceptions import (
+    EdxEnrollmentCreateError,
     UnknownEdxApiEnrollException,
     EdxApiEnrollErrorException,
     NoEdxApiAuthError,
@@ -207,16 +209,24 @@ def test_create_run_enrollments_enroll_api_fail(
     patched_send_enrollment_email = mocker.patch(
         "courses.api.mail_api.send_course_run_enrollment_email"
     )
+    successful_enrollments = []
+    edx_request_success = False
 
-    successful_enrollments, edx_request_success = create_run_enrollments(
-        user,
-        runs,
-        order=None,
-        company=None,
-        keep_failed_enrollments=keep_failed_enrollments,
-    )
+    with pytest.raises(
+        EdxEnrollmentCreateError
+    ) if not keep_failed_enrollments else contextlib.suppress():
+        successful_enrollments, edx_request_success = create_run_enrollments(
+            user,
+            runs,
+            order=None,
+            company=None,
+            keep_failed_enrollments=keep_failed_enrollments,
+        )
     patched_edx_enroll.assert_called_once_with(user, runs)
-    patched_log_exception.assert_called_once()
+    if keep_failed_enrollments:
+        patched_log_exception.assert_called_once()
+    else:
+        patched_log_exception.assert_not_called()
     patched_send_enrollment_email.assert_not_called()
     expected_enrollments = 0 if not keep_failed_enrollments else num_runs
     assert len(successful_enrollments) == expected_enrollments
