@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load static wagtailimages_tags wagtailmetadata_tags render_bundle %}
+{% load static wagtailimages_tags wagtailmetadata_tags render_bundle wagtailcore_tags %}
 
 {% block title %}Catalog | {{ site_name }}{% endblock %}
 
@@ -15,16 +15,23 @@
       <div class="sub-banner">
         <div class="container">
           <h1>{{ site_name }}—Professional Development, the MIT Way</h1>
-          <h2>Explore MIT's courses for game-changing professionals</h2>
         </div>
       </div>
-      {% endblock %}
-      {% if featured_product.program %}
-          {% include "partials/featured_card.html" with courseware_page=featured_product object_type="program" %}
-      {% elif featured_product.course %}
-          {% include "partials/featured_card.html" with courseware_page=featured_product object_type="course"%}
-      {% endif %}
-      <div class="tab-block">
+    {% endblock %}
+    <div class="catalog-content">
+      <div class="topics">
+        {% for topic in topics %}
+          {% if selected_topic == topic %}
+          <div class="topic selected">
+          {% else %}
+          <div class="topic">
+          {% endif %}
+            <a href="{% pageurl page %}?topic={{ topic | urlencode }}">{{ topic }}</a>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="courseware">
+        <div class="tab-block">
           <div class="container">
             <ul class="nav nav-tabs" role="tablist">
               <li class="nav-item">
@@ -38,6 +45,11 @@
               </li>
             </ul>
             <div class="tab-content">
+              {% if featured_product.program %}
+                {% include "partials/featured_card.html" with courseware_page=featured_product object_type="program" %}
+              {% elif featured_product.course %}
+                {% include "partials/featured_card.html" with courseware_page=featured_product object_type="course"%}
+              {% endif %}
               <div class="tab-pane catalog-body fade in show active" id="all" role="tabpanel" aria-labelledby="all-tab">
                 {% for page in all_pages %}
                   {% if page.program or page.is_external_program_page %}
@@ -62,6 +74,8 @@
             </div>
           </div>
       </div>
+      </div>
+    </div>
   </div>
 {% endblock %}
 

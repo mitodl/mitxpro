@@ -10,6 +10,19 @@ h1, h2, h3, h4, h5 {
 .course-catalog {
   background-color: #ffffff;
 
+  .catalog-content {
+    display: flex;
+    margin: 0 206px;
+
+    @include media-breakpoint-down(md) {
+      display: contents;
+    }
+
+    @include media-breakpoint-down(lg) {
+      margin: 0;
+    }
+  }
+
   header {
     display: flex;
     flex-direction: column;
@@ -35,6 +48,56 @@ h1, h2, h3, h4, h5 {
   }
 }
 
+.topics {
+  padding-inline-start: 0px;
+  margin-top: 15%;
+  margin-right: 18px;
+  width: 231px;
+
+  @include media-breakpoint-down(md) {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: 20px;
+    margin-top: 35px;
+    width: fit-content;
+  }
+
+  .topic {
+    height: 70px;
+    width: 220px;
+    text-align: left;
+    padding: 21px 15px;
+    border-style: solid;
+    border-radius: 6px;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+
+    @include media-breakpoint-down(md) {
+      height: 50px;
+      width: fit-content;
+      padding: 10px;
+    }
+
+    &.selected {
+      background: #f3f3f7;
+
+      &:last-child {
+        margin-bottom: 10px;
+      }
+
+      a {
+        color: $primary;
+      }
+    }
+
+    a {
+      color: $navy-blue;
+      text-decoration-line: none;
+    }
+  }
+}
+
 .course-catalog .catalog-body {
   max-width: 860px;
   margin: 0 15px;
@@ -50,22 +113,16 @@ h1, h2, h3, h4, h5 {
     margin-bottom: 50px;
     border-radius: 5px;
 
-    &.featured {
-      margin: 31px 0 35px;
-      box-sizing: border-box;
-      border: 5px solid $navy-blue;
-    }
-
     .rectangle {
       position: absolute;
       top: 12px;
-      left: -32px;
+      left: -10px;
       padding: 4px 19px;
       background-color: $featured-banner-background;
       color: white;
-      font-size: 28px;
+      font-size: 16px;
       letter-spacing: 1.05px;
-      line-height: 36px;
+      line-height: 26px;
 
       &:before {
         content: '';
