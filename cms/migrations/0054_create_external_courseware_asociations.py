@@ -88,11 +88,12 @@ def migrate_external_courses(apps, schema_editor):
                 live=generated_course.live,
                 run_tag="R1",
             )
-        # To be safe, Let's create products only if there was no existing course run and we created the first one ever
-        if generated_course_run:
+            # To be safe, Let's create products only if there was no existing course run and we created
+            # the first one ever.
             check_and_generate_associated_product(
                 apps, schema_editor, external_course, generated_course_run.id
             )
+
         external_course.course = generated_course
         external_course.save()
 
@@ -116,8 +117,13 @@ def migrate_external_programs(apps, schema_editor):
                 "live": external_program.live,
             },
         )
+        # To be safe, Let's create product only if there was no existing program we created the first one ever
+        if is_created:
+            check_and_generate_associated_product(
+                apps, schema_editor, external_program, generated_program.id
+            )
         # If already exists, Just set value for newly added field
-        if not is_created:
+        else:
             generated_program.is_external = True
             generated_program.save()
 
@@ -132,9 +138,9 @@ def migrate_external_programs(apps, schema_editor):
             course_in_program.course.save()
 
         # It's possible that we might have existing runs for this program
-        existing_programs = ProgramRun.objects.filter(program=generated_program)
-        if existing_programs.exists():
-            existing_programs.objects.update(
+        existing_program_runs = ProgramRun.objects.filter(program=generated_program)
+        if existing_program_runs.exists():
+            existing_program_runs.update(
                 external_marketing_url=external_program.external_url
             )
         else:
@@ -143,11 +149,6 @@ def migrate_external_programs(apps, schema_editor):
                 external_marketing_url=external_program.external_url,
                 start_date=get_zone_aware_datetime(external_program.start_date),
                 run_tag="R1",
-            )
-        # To be safe, Let's create product only if there was no existing program we created the first one ever
-        if is_created:
-            check_and_generate_associated_product(
-                apps, schema_editor, external_program, generated_program.id
             )
 
         external_program.program_id = generated_program.id
