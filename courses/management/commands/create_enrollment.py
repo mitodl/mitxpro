@@ -5,6 +5,7 @@ from django.db import transaction
 
 from courses.api import create_run_enrollments
 from courses.models import CourseRun
+from courseware.exceptions import EdxEnrollmentCreateError
 from ecommerce.api import (
     best_coupon_for_product,
     get_product_version_price_with_discount,
@@ -101,13 +102,16 @@ class Command(BaseCommand):
                 total_price_paid=total_price_paid,
             )
 
-            successful_enrollments, edx_request_success = create_run_enrollments(
-                user,
-                [run],
-                keep_failed_enrollments=options["keep_failed_enrollments"],
-                order=order,
-            )
-            if not successful_enrollments:
+            try:
+                successful_enrollments, edx_request_success = create_run_enrollments(
+                    user,
+                    [run],
+                    keep_failed_enrollments=options["keep_failed_enrollments"],
+                    order=order,
+                )
+                if not successful_enrollments:
+                    raise EdxEnrollmentCreateError
+            except EdxEnrollmentCreateError:
                 raise CommandError("Failed to create the enrollment record")
 
         ProductCouponAssignment.objects.filter(
