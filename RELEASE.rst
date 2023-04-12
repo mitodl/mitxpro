@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.119.1
+---------------
+
+- fix: data collision issue with existing external courseware Readable Ids (#2612)
+- fix: do not display courses with closed enrollment in boeing voucher upload (#2603)
+- fix: Cannot create ProductCouponAssignments for codes that have already been redeemed error message to info message (#2607)
+
 Version 0.119.0 (Released April 05, 2023)
 ---------------
 
