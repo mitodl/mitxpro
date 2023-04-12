@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.119.1
+Version 0.119.1 (Released April 12, 2023)
 ---------------
 
 - fix: data collision issue with existing external courseware Readable Ids (#2612)
