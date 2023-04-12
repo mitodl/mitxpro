@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.119.2
+Version 0.119.2 (Released April 12, 2023)
 ---------------
 
 - fix: remove codecov package due to its PyPI distribution issue (#2618)
