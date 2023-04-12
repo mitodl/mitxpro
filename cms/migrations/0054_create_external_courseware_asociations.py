@@ -55,24 +55,45 @@ def migrate_external_courses(apps, schema_editor):
 
     external_courses = ExternalCoursePage.objects.all()
     for external_course in external_courses:
-        generated_course, _ = Course.objects.get_or_create(
-            is_external=True,
-            title=external_course.title,
+        # It is possible that we might find a course with same readable Id, In this case let's just mark that
+        # as external and not change other things to keep on safe side from overwriting data.
+        generated_course, is_created = Course.objects.get_or_create(
             readable_id=external_course.readable_id,
-            live=external_course.live,
+            defaults={
+                "is_external": True,
+                "title": external_course.title,
+                "live" "": external_course.live,
+            },
         )
-        generated_course_run, _ = CourseRun.objects.get_or_create(
-            course=generated_course,
-            title=generated_course.title,
-            start_date=get_zone_aware_datetime(external_course.start_date),
-            courseware_id=external_course.readable_id,
-            external_marketing_url=external_course.external_url,
-            live=generated_course.live,
-            run_tag="R1",
-        )
-        check_and_generate_associated_product(
-            apps, schema_editor, external_course, generated_course_run.id
-        )
+        # If already exists, Just set value for newly added field
+        if not is_created:
+            generated_course.is_external = True
+            generated_course.save()
+
+        # It's possible for a course to have multiple runs already created in the system, To be on safe side if we get
+        # existing course runs let's just update the external URL in them to be on safe side
+        generated_course_run = None
+        existing_course_runs = CourseRun.objects.filter(course=generated_course)
+        if existing_course_runs.exists():
+            existing_course_runs.update(
+                external_marketing_url=external_course.external_url
+            )
+        else:
+            generated_course_run, _ = CourseRun.objects.get_or_create(
+                course=generated_course,
+                title=generated_course.title,
+                start_date=get_zone_aware_datetime(external_course.start_date),
+                courseware_id=external_course.readable_id,
+                external_marketing_url=external_course.external_url,
+                live=generated_course.live,
+                run_tag="R1",
+            )
+            # To be safe, Let's create products only if there was no existing course run and we created
+            # the first one ever.
+            check_and_generate_associated_product(
+                apps, schema_editor, external_course, generated_course_run.id
+            )
+
         external_course.course = generated_course
         external_course.save()
 
@@ -85,12 +106,27 @@ def migrate_external_programs(apps, schema_editor):
 
     external_programs = ExternalProgramPage.objects.all()
     for external_program in external_programs:
-        generated_program, _ = Program.objects.get_or_create(
-            is_external=True,
-            title=external_program.title,
+        # It is possible that we might find a program with same readable Id, In this case let's just mark that
+        # as external and not change other things to be on safe side from overwriting data.
+
+        generated_program, is_created = Program.objects.get_or_create(
             readable_id=external_program.readable_id,
-            live=external_program.live,
+            defaults={
+                "is_external": True,
+                "title": external_program.title,
+                "live": external_program.live,
+            },
         )
+        # To be safe, Let's create product only if there was no existing program we created the first one ever
+        if is_created:
+            check_and_generate_associated_product(
+                apps, schema_editor, external_program, generated_program.id
+            )
+        # If already exists, Just set value for newly added field
+        else:
+            generated_program.is_external = True
+            generated_program.save()
+
         program_course_lineup = (
             external_program.course_lineup.content_pages
             if external_program.course_lineup
@@ -101,15 +137,19 @@ def migrate_external_programs(apps, schema_editor):
             course_in_program.course.position_in_program = idx + 1
             course_in_program.course.save()
 
-        generated_program_run, _ = ProgramRun.objects.get_or_create(
-            program=generated_program,
-            external_marketing_url=external_program.external_url,
-            start_date=get_zone_aware_datetime(external_program.start_date),
-            run_tag="R1",
-        )
-        check_and_generate_associated_product(
-            apps, schema_editor, external_program, generated_program.id
-        )
+        # It's possible that we might have existing runs for this program
+        existing_program_runs = ProgramRun.objects.filter(program=generated_program)
+        if existing_program_runs.exists():
+            existing_program_runs.update(
+                external_marketing_url=external_program.external_url
+            )
+        else:
+            generated_program_run, _ = ProgramRun.objects.get_or_create(
+                program=generated_program,
+                external_marketing_url=external_program.external_url,
+                start_date=get_zone_aware_datetime(external_program.start_date),
+                run_tag="R1",
+            )
 
         external_program.program_id = generated_program.id
         external_program.save()
