@@ -118,11 +118,13 @@ def create_run_enrollments(
         RequestsConnectionError,
     ):
         error_message = (
-            "edX enrollment failure for user: %s, runs: %s (order: %s)",
-            user,
-            [run.courseware_id for run in runs],
-            order.id if order else None,
+            "edX enrollment failure for user: {}, runs: {} (order: {})".format(
+                user,
+                [run.courseware_id for run in runs],
+                order.id if order else None,
+            )
         )
+
         edx_request_success = False
         if not keep_failed_enrollments:
             raise EdxEnrollmentCreateError(str(error_message))
