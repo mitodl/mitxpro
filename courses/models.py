@@ -1,6 +1,7 @@
 """
 Course models
 """
+# pylint: disable=too-many-lines
 import logging
 import operator as op
 import uuid
