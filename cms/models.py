@@ -824,7 +824,7 @@ class ProgramProductPage(ProductPage):
             self.program.courses.all(), key=lambda course: course.position_in_program
         )
         # We only want actual page values, Wagtail's 'pageurl' template tag breaks with None
-        return [course.page for course in courses if course.page]
+        return [course.page for course in courses if (course.page and course.page.live)]
 
     @property
     def course_lineup(self):
