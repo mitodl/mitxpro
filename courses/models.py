@@ -171,7 +171,7 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     @property
     def num_courses(self):
         """Gets the number of courses in this program"""
-        return self.courses.count()
+        return self.courses.live().count()
 
     @cached_property
     def next_run_date(self):
