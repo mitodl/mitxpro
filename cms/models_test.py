@@ -106,6 +106,20 @@ def test_program_page_course_pages():
     assert list(program_page.course_pages) == [course_page]
 
 
+def test_program_page_course_pages_live_only():
+    """
+    Verify `course_pages` property from the program page returns only live course pages
+    """
+    program_page = ProgramPageFactory.create()
+    assert list(program_page.course_pages) == []
+    course_pages = CoursePageFactory.create_batch(
+        2, course__program=program_page.program
+    )
+    # The below page should not be included in course pages
+    CoursePageFactory.create(course__program=program_page.program, live=False)
+    assert list(program_page.course_pages) == course_pages
+
+
 def test_custom_detail_page_urls():
     """Verify that course/external-course/program detail pages return our custom URL path"""
     readable_id = "some:readable-id"
