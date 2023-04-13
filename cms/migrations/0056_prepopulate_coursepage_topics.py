@@ -23,7 +23,8 @@ def migrate_associate_existing_topics(apps, app_schema):
             topics = CourseTopic.objects.filter(course=external_course_page.course)
             for topic in topics:
                 ExternalCoursePage.topics.through.objects.create(
-                    externalcoursepage_id=external_course_page.id, coursetopic_id=topic.id
+                    externalcoursepage_id=external_course_page.id,
+                    coursetopic_id=topic.id,
                 )
 
 
