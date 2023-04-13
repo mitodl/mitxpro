@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.120.0
+---------------
+
+- feat: view courses by topic (#2609)
+- fix: Only link courses in programs that have live CMS page (#2620)
+- fix: Sheets deferral failed but no error was recorded in sheet (#2610)
+
 Version 0.119.2 (Released April 12, 2023)
 ---------------
 
