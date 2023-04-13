@@ -3,27 +3,27 @@ Page models for the CMS
 """
 # pylint: disable=too-many-lines, too-many-public-methods
 import re
-from decimal import Decimal
 from datetime import datetime, timedelta
+from decimal import Decimal
 from urllib.parse import urljoin
 
 from django import forms
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Prefetch, prefetch_related_objects
+from django.db.models import Prefetch, Q, prefetch_related_objects
 from django.http.response import Http404
 from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.functional import cached_property
 from django.utils.text import slugify
-from modelcluster.fields import ParentalKey
+from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.core import blocks
 from wagtail.core.blocks import PageChooserBlock, RawHTMLBlock, StreamBlock
 from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.models import Orderable, Page
+from wagtail.core.models import Orderable, Page, PageManager, PageQuerySet
 from wagtail.core.utils import WAGTAIL_APPEND_SLASH
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.edit_handlers import ImageChooserPanel
@@ -42,6 +42,7 @@ from cms.blocks import (
     validate_unique_readable_ids,
 )
 from cms.constants import (
+    ALL_TOPICS,
     CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
     PROGRAM_INDEX_SLUG,
@@ -49,7 +50,13 @@ from cms.constants import (
 )
 from cms.forms import CertificatePageForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
-from courses.models import Course, CourseRunCertificate, ProgramCertificate, ProgramRun
+from courses.models import (
+    Course,
+    CourseRunCertificate,
+    CourseTopic,
+    ProgramCertificate,
+    ProgramRun,
+)
 from ecommerce.models import Product
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
@@ -225,7 +232,8 @@ class CatalogPage(Page):
         """
         Populate the context with live programs, courses and programs + courses
         """
-        program_page_qset = list(
+        topic_filter = request.GET.get("topic", ALL_TOPICS)
+        program_page_qset = (
             ProgramPage.objects.live()
             .filter(program__live=True)
             .order_by("id")
@@ -239,17 +247,27 @@ class CatalogPage(Page):
                 ),
             )
         )
-        course_page_qset = list(
+        external_program_qset = ExternalProgramPage.objects.live().order_by("title")
+
+        course_page_qset = (
             CoursePage.objects.live()
             .filter(course__live=True)
             .order_by("id")
             .select_related("course")
         )
-        external_course_qset = list(ExternalCoursePage.objects.live().order_by("title"))
+        external_course_qset = ExternalCoursePage.objects.live().order_by("title")
 
-        external_program_qset = list(
-            ExternalProgramPage.objects.live().order_by("title")
-        )
+        if topic_filter != ALL_TOPICS:
+            program_page_qset = program_page_qset.related_pages(topic_filter)
+            external_program_qset = external_program_qset.related_pages(topic_filter)
+
+            course_page_qset = course_page_qset.related_pages(topic_filter)
+            external_course_qset = external_course_qset.related_pages(topic_filter)
+
+        program_page_qset = list(program_page_qset)
+        external_program_qset = list(external_program_qset)
+        course_page_qset = list(course_page_qset)
+        external_course_qset = list(external_course_qset)
 
         # prefetch thumbnail images for all the pages in one query
         prefetch_related_objects(
@@ -313,6 +331,8 @@ class CatalogPage(Page):
             hubspot_new_courses_form_guid=settings.HUBSPOT_CONFIG.get(
                 "HUBSPOT_NEW_COURSES_FORM_GUID"
             ),
+            topics=[ALL_TOPICS] + CourseTopic.objects.parent_topic_names(),
+            selected_topic=topic_filter,
         )
 
 
@@ -535,6 +555,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
             **super().get_context(request),
             **get_base_context(request),
             "catalog_page": CatalogPage.objects.first(),
+            "topics": CourseTopic.objects.parent_topic_names(),
             # The context variables below are added to avoid duplicate queries within the templates
             "about_mit_xpro": self.about_mit_xpro,
             "background_video_url": self.background_video_url,
@@ -622,7 +643,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         blank=True,
         help_text="The content of this tab on the program page",
     )
-
     content_panels = Page.content_panels + [
         FieldPanel("subhead"),
         FieldPanel("video_title"),
@@ -796,6 +816,37 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         return self._get_child_page_of_type(NewsAndEventsPage)
 
 
+class ProgramProductPageQuerySet(PageQuerySet):
+    """QuerySet for ProgramProductPage"""
+
+    def related_pages(self, topic_name):
+        """
+        ProgramProductPage QuerySet filter for topics
+        """
+        return self.filter(
+            Q(program__courses__coursepage__topics__name=topic_name)
+            | Q(program__courses__coursepage__topics__parent__name=topic_name)
+        ).distinct()
+
+
+ProgramProductPageManager = PageManager.from_queryset(ProgramProductPageQuerySet)
+
+
+class CourseProductPageQuerySet(PageQuerySet):
+    """QuerySet for CourseProductPage"""
+
+    def related_pages(self, topic_name):
+        """
+        CourseProductPage QuerySet filter for topics
+        """
+        return self.filter(
+            Q(topics__name=topic_name) | Q(topics__parent__name=topic_name)
+        ).distinct()
+
+
+CourseProductPageManager = PageManager.from_queryset(CourseProductPageQuerySet)
+
+
 class ProgramProductPage(ProductPage):
     """
     Abstract Product page for Programs
@@ -804,6 +855,7 @@ class ProgramProductPage(ProductPage):
     class Meta:
         abstract = True
 
+    objects = ProgramProductPageManager()
     parent_page_types = ["ProgramIndexPage"]
 
     content_panels = [FieldPanel("program")] + ProductPage.content_panels
@@ -922,16 +974,24 @@ class CourseProductPage(ProductPage):
     class Meta:
         abstract = True
 
+    objects = CourseProductPageManager()
     course = models.OneToOneField(
         "courses.Course",
         null=True,
         on_delete=models.SET_NULL,
         help_text="The course for this page",
     )
+    topics = ParentalManyToManyField(
+        "courses.CourseTopic",
+        help_text="The topics for this course page.",
+    )
 
     parent_page_types = ["CourseIndexPage"]
 
-    content_panels = [FieldPanel("course")] + ProductPage.content_panels
+    content_panels = [
+        FieldPanel("course"),
+        FieldPanel("topics"),
+    ] + ProductPage.content_panels
 
     @cached_property
     def course_with_related_objects(self):
@@ -999,6 +1059,11 @@ class CourseProductPage(ProductPage):
     def product(self):
         """Gets the product associated with this page"""
         return self.course
+
+    def save(self, clean=True, user=None, log_action=False, **kwargs):
+        """Override save to set the topics to Django course models backwards"""
+        self.course.topics.set(self.topics.all())
+        super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
 
 class CoursePage(CourseProductPage):
