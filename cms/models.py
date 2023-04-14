@@ -45,6 +45,7 @@ from cms.constants import (
     COURSE_INDEX_SLUG,
     PROGRAM_INDEX_SLUG,
     SIGNATORY_INDEX_SLUG,
+    WEBINAR_INDEX_SLUG,
 )
 from cms.forms import CertificatePageForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
@@ -141,6 +142,90 @@ class SignatoryObjectIndexPage(Page):
         of their own and we do not expect a page to available at their slug.
         """
         raise Http404
+
+
+class WebinarObjectIndexPage(Page):
+    """
+    A placeholder page to group webinars under it as well
+    as consequently add /webinars/ to the course page urls
+    """
+
+    class Meta:
+        abstract = True
+
+    parent_page_types = ["HomePage"]
+    subpage_types = ["WebinarPage"]
+
+    @classmethod
+    def can_create_at(cls, parent):
+        """
+        You can only create one of these pages under the home page.
+        The parent is limited via the `parent_page_type` list.
+        """
+        return (
+            super().can_create_at(parent)
+            and not parent.get_children().type(cls).exists()
+        )
+
+    def serve(self, request, *args, **kwargs):
+        """
+        We need to serve the webinars index template for list view.
+        """
+        return Page.serve(self, request, *args, **kwargs)
+
+
+class WebinarIndexPage(WebinarObjectIndexPage):
+    slug = WEBINAR_INDEX_SLUG
+    template = "webinars_list_page.html"
+    parent_page_types = ["HomePage"]
+
+    def get_context(self, request, *args, **kwargs):
+        return dict(
+            **super().get_context(request),
+            **get_base_context(request),
+            webinars=WebinarPage.objects.live()
+        )
+
+
+WEBINAR_CATEGORY_CHOICES = [
+    ('upcoming', 'Upcoming'),
+    ('ondemand', 'On-Demand'),
+]
+
+
+class WebinarPage(MetadataPageMixin, Page):
+    """
+    Webinar page model
+    """
+
+    parent_page_types = [WebinarIndexPage]
+
+    register_url = models.URLField(
+        null=True,
+        blank=True,
+        help_text="Registration URL",
+    )
+    recording_url = models.URLField(
+        null=True,
+        blank=True,
+        help_text="Recording URL",
+    )
+    start_datetime = models.DateTimeField(
+        null=True, blank=True, help_text="The start date and time of the webinar."
+    )
+    duration = models.PositiveIntegerField(
+        null=True, blank=True, help_text="The duration of the webinar."
+    )
+    category = models.CharField(max_length=20, choices=WEBINAR_CATEGORY_CHOICES)
+
+    content_panels = [
+        FieldPanel("title"),
+        FieldPanel("register_url"),
+        FieldPanel("recording_url"),
+        FieldPanel("start_datetime"),
+        FieldPanel("duration"),
+        FieldPanel("category"),
+    ]
 
 
 class CourseIndexPage(CourseObjectIndexPage):
@@ -497,6 +582,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         "ImageCarouselPage",
         "CertificateIndexPage",
         "SignatoryIndexPage",
+        "WebinarIndexPage",
     ]
 
     @property
@@ -554,6 +640,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
             **get_base_context(request),
             "catalog_page": CatalogPage.objects.first(),
             "topics": CourseTopic.objects.parent_topic_names(),
+            "webinars_list_page": WebinarIndexPage.objects.first(),
             # The context variables below are added to avoid duplicate queries within the templates
             "about_mit_xpro": self.about_mit_xpro,
             "background_video_url": self.background_video_url,

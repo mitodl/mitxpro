@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% load static wagtailimages_tags wagtailmetadata_tags render_bundle %}
+
+{% block title %}Webinars{% endblock %}
+
+{% block headercontent %}
+  <div id="header"></div>
+  {% render_bundle 'header' %}
+{% endblock %}
+
+{% block content %}
+  <div class="webinars">
+    {% block banner %}
+      <div class="sub-banner">
+        <div class="container">
+          <h1>Webinars</h1>
+        </div>
+      </div>
+      {% endblock %}
+      <div class="tab-block">
+          <div class="container">
+          </div>
+      </div>
+  </div>
+{% endblock %}
+
+{% block contact-us %}
+  {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
+    {% include "subscription.html" %}
+  {% endif %}
+{% endblock %}
