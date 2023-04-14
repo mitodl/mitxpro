@@ -9,6 +9,8 @@ from typing import List, Tuple
 import celery
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
 from hubspot.crm.objects import BatchInputSimplePublicObjectInput
 from mitol.common.decorators import single_task
@@ -219,6 +221,10 @@ def batch_upsert_hubspot_b2b_deals_chunked(ids: List[int]) -> List[str]:
     """
     results = []
     for order in B2BOrder.objects.filter(id__in=ids):
+        try:
+            validate_email(order.email)
+        except ValidationError:  # pylint: disable=try-except-raise
+            raise
         results.append(api.sync_b2b_deal_with_hubspot(order.id).id)
         time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
     return results

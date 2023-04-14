@@ -4,6 +4,7 @@ import logging
 from urllib.parse import urlencode, urljoin
 
 from django.conf import settings
+from django.core.validators import validate_email
 from django.db import transaction
 from django.http.response import Http404
 from django.urls import reverse
@@ -57,6 +58,11 @@ class B2BCheckoutView(APIView):
             run_id = request.data.get("run_id")
         except KeyError as ex:
             raise ValidationError(f"Missing parameter {ex.args[0]}")
+
+        try:
+            validate_email(email)
+        except ValidationError:  # pylint: disable=try-except-raise
+            raise
 
         try:
             num_seats = int(num_seats)

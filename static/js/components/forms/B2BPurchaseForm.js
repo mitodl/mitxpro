@@ -38,8 +38,12 @@ export const validate = (values: Object) => {
     errors.num_seats = "Number of Seats is required"
   }
 
+  const emailRegex = new RegExp(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w+)+$/)
+
   if (!values.email.includes("@")) {
     errors.email = "Email is required"
+  } else if (!emailRegex.test(values.email)) {
+    errors.email = "Invalid email address"
   }
 
   if (!values.product.productId) {
