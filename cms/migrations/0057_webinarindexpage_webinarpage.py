@@ -8,36 +8,96 @@ import wagtailmetadata.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wagtailimages', '0023_add_choose_permissions'),
-        ('wagtailcore', '0062_comment_models_and_pagesubscription'),
-        ('cms', '0056_prepopulate_coursepage_topics'),
+        ("wagtailimages", "0023_add_choose_permissions"),
+        ("wagtailcore", "0062_comment_models_and_pagesubscription"),
+        ("cms", "0056_prepopulate_coursepage_topics"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='WebinarIndexPage',
+            name="WebinarIndexPage",
             fields=[
-                ('page_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='wagtailcore.page')),
+                (
+                    "page_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="wagtailcore.page",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
-            bases=('wagtailcore.page',),
+            bases=("wagtailcore.page",),
         ),
         migrations.CreateModel(
-            name='WebinarPage',
+            name="WebinarPage",
             fields=[
-                ('page_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='wagtailcore.page')),
-                ('register_url', models.URLField(blank=True, help_text='Registration URL', null=True)),
-                ('recording_url', models.URLField(blank=True, help_text='Recording URL', null=True)),
-                ('start_datetime', models.DateTimeField(blank=True, help_text='The start date and time of the webinar.', null=True)),
-                ('duration', models.PositiveIntegerField(blank=True, help_text='The duration of the webinar.', null=True)),
-                ('category', models.CharField(choices=[('upcoming', 'Upcoming'), ('ondemand', 'On-Demand')], max_length=20)),
-                ('search_image', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='wagtailimages.image', verbose_name='Search image')),
+                (
+                    "page_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="wagtailcore.page",
+                    ),
+                ),
+                (
+                    "register_url",
+                    models.URLField(
+                        blank=True, help_text="Registration URL", null=True
+                    ),
+                ),
+                (
+                    "recording_url",
+                    models.URLField(blank=True, help_text="Recording URL", null=True),
+                ),
+                (
+                    "start_datetime",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="The start date and time of the webinar.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "duration",
+                    models.PositiveIntegerField(
+                        blank=True, help_text="The duration of the webinar.", null=True
+                    ),
+                ),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[("upcoming", "Upcoming"), ("ondemand", "On-Demand")],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "search_image",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="wagtailimages.image",
+                        verbose_name="Search image",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
-            bases=(wagtailmetadata.models.MetadataMixin, 'wagtailcore.page', models.Model),
+            bases=(
+                wagtailmetadata.models.MetadataMixin,
+                "wagtailcore.page",
+                models.Model,
+            ),
         ),
     ]

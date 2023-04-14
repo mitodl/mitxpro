@@ -144,6 +144,12 @@ class SignatoryObjectIndexPage(Page):
         raise Http404
 
 
+WEBINAR_CATEGORY_CHOICES = [
+    ("upcoming", "Upcoming"),
+    ("ondemand", "On-Demand"),
+]
+
+
 class WebinarObjectIndexPage(Page):
     """
     A placeholder page to group webinars under it as well
@@ -175,6 +181,10 @@ class WebinarObjectIndexPage(Page):
 
 
 class WebinarIndexPage(WebinarObjectIndexPage):
+    """
+    Webinars index page
+    """
+
     slug = WEBINAR_INDEX_SLUG
     template = "webinars_list_page.html"
     parent_page_types = ["HomePage"]
@@ -183,14 +193,9 @@ class WebinarIndexPage(WebinarObjectIndexPage):
         return dict(
             **super().get_context(request),
             **get_base_context(request),
-            webinars=WebinarPage.objects.live()
+            upcoming_webinars=WebinarPage.objects.live().filter(category="upcoming"),
+            ondemand_webinars=WebinarPage.objects.live().filter(category="ondemand"),
         )
-
-
-WEBINAR_CATEGORY_CHOICES = [
-    ('upcoming', 'Upcoming'),
-    ('ondemand', 'On-Demand'),
-]
 
 
 class WebinarPage(MetadataPageMixin, Page):
@@ -200,6 +205,14 @@ class WebinarPage(MetadataPageMixin, Page):
 
     parent_page_types = [WebinarIndexPage]
 
+    banner_image = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Image for the Webinar.",
+    )
     register_url = models.URLField(
         null=True,
         blank=True,
@@ -220,6 +233,7 @@ class WebinarPage(MetadataPageMixin, Page):
 
     content_panels = [
         FieldPanel("title"),
+        ImageChooserPanel("banner_image"),
         FieldPanel("register_url"),
         FieldPanel("recording_url"),
         FieldPanel("start_datetime"),

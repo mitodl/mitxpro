@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load static wagtailimages_tags wagtailmetadata_tags render_bundle %}
+{% load static wagtailimages_tags wagtailmetadata_tags render_bundle image_version_url wagtailcore_tags %}
 
 {% block title %}Webinars{% endblock %}
 
@@ -13,15 +13,33 @@
   <div class="webinars">
     {% block banner %}
       <div class="sub-banner">
-        <div class="container">
-          <h1>Webinars</h1>
-        </div>
+        <h1>Webinars</h1>
       </div>
-      {% endblock %}
-      <div class="tab-block">
-          <div class="container">
+    {% endblock %}
+    <h1 class="webinar-category">UPCOMING WEBINARS</h1>
+    <div class="upcoming-webinars">
+      {% for upcoming_webinar in upcoming_webinars %}
+        <div class="webinar">
+          <div class="webinar-holder">
+            <img src="{% image_version_url upcoming_webinar.banner_image "fill-330x200" %}" alt="{{ upcoming_webinar.title }}" width="330" height="200" loading="lazy"/>
+            <p class="title">{{ upcoming_webinar.title }}</p>
+            <a href="{{ upcoming_webinar.register_url }}" class="read-more">REGISTER</a>
           </div>
-      </div>
+        </div>
+      {% endfor %}
+    </div>
+    <h1 class="webinar-category">ON-DEMAND WEBINARS</h1>
+    <div class="ondemand-webinars">
+      {% for ondemand_webinar in ondemand_webinars %}
+        <div class="webinar">
+          <div class="webinar-holder">
+            <img src="{% image_version_url ondemand_webinar.banner_image "fill-330x200" %}" alt="{{ ondemand_webinar.title }}" width="330" height="200" loading="lazy"/>
+            <p class="title">{{ ondemand_webinar.title }}</p>
+            <a href="{{ ondemand_webinar.recording_url }}" class="read-more">VIEW RECORDING</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
   </div>
 {% endblock %}
 
