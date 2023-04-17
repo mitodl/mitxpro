@@ -1784,7 +1784,12 @@ class CertificatePage(CourseProgramChildPage):
         __empty__ = "No display"
 
     template = "certificate_page.html"
-    parent_page_types = ["CoursePage", "ProgramPage"]
+    parent_page_types = [
+        "CoursePage",
+        "ExternalCoursePage",
+        "ProgramPage",
+        "ExternalProgramPage",
+    ]
 
     product_name = models.CharField(
         max_length=250,
