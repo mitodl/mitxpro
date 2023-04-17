@@ -1,5 +1,5 @@
 """Course views verson 1"""
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from mitol.digitalcredentials.mixins import DigitalCredentialsRequestViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
@@ -46,9 +46,9 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = (
         Program.objects.filter(live=True)
         .exclude(products=None)
-        .select_related("programpage")
+        .select_related("programpage", "externalprogrampage")
         .prefetch_related(courses_prefetch, products_prefetch)
-        .filter(programpage__live=True)
+        .filter(Q(programpage__live=True) | Q(externalprogrampage__live=True))
     )
 
 
@@ -66,9 +66,9 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         queryset = (
             Course.objects.filter(live=True)
-            .select_related("coursepage")
+            .select_related("coursepage", "externalcoursepage")
             .prefetch_related("topics", self.course_runs_prefetch)
-            .filter(coursepage__live=True)
+            .filter(Q(coursepage__live=True) | Q(externalcoursepage__live=True))
         )
 
         if self.request.user.is_authenticated:

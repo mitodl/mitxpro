@@ -428,7 +428,9 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
                 sorted(
                     [
                         course_run
-                        for course_run in self.courseruns.all()
+                        for course_run in self.courseruns.filter(
+                            start_date__isnull=False
+                        )
                         if course_run.live
                     ],
                     key=lambda course_run: course_run.start_date,
