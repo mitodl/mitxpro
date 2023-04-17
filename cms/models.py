@@ -213,15 +213,13 @@ class WebinarPage(MetadataPageMixin, Page):
         related_name="+",
         help_text="Image for the Webinar.",
     )
-    register_url = models.URLField(
-        null=True,
-        blank=True,
-        help_text="Registration URL",
+    action_title = models.CharField(
+        max_length=255, null=True, blank=True, help_text="The text to show on the call to action button i.e. REGISTER, VIEW RECORDING",
     )
-    recording_url = models.URLField(
+    action_url = models.URLField(
         null=True,
         blank=True,
-        help_text="Recording URL",
+        help_text="The URL to go to when the action button is clicked.",
     )
     start_datetime = models.DateTimeField(
         null=True, blank=True, help_text="The start date and time of the webinar."
@@ -234,8 +232,8 @@ class WebinarPage(MetadataPageMixin, Page):
     content_panels = [
         FieldPanel("title"),
         ImageChooserPanel("banner_image"),
-        FieldPanel("register_url"),
-        FieldPanel("recording_url"),
+        FieldPanel("action_title"),
+        FieldPanel("action_url"),
         FieldPanel("start_datetime"),
         FieldPanel("duration"),
         FieldPanel("category"),

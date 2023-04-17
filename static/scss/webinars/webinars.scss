@@ -45,16 +45,17 @@
           letter-spacing: -0.45px;
           line-height: 25px;
           margin-bottom: 19px;
+          //height: 75px;
         }
 
-        //.time {
-        //  margin-bottom: auto;
-        //}
+        .time {
+          //margin-bottom: 79px;
+        }
 
         .read-more {
-          position: relative;
+          position: absolute;
           //left: 15px;
-          bottom: 10px;
+          bottom: 20px;
           //margin-top: auto;
           //margin-bottom: auto;
           background: $primary;
