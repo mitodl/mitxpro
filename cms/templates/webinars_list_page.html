@@ -23,6 +23,7 @@
           <div class="webinar-holder">
             <img src="{% image_version_url upcoming_webinar.banner_image "fill-330x200" %}" alt="{{ upcoming_webinar.title }}" width="330" height="200" loading="lazy"/>
             <p class="title">{{ upcoming_webinar.title }}</p>
+            <p class="time">{{ upcoming_webinar.start_datetime }}</p>
             <a href="{{ upcoming_webinar.register_url }}" class="read-more">REGISTER</a>
           </div>
         </div>
@@ -35,6 +36,7 @@
           <div class="webinar-holder">
             <img src="{% image_version_url ondemand_webinar.banner_image "fill-330x200" %}" alt="{{ ondemand_webinar.title }}" width="330" height="200" loading="lazy"/>
             <p class="title">{{ ondemand_webinar.title }}</p>
+            <p class="time">{{ ondemand_webinar.start_datetime }}</p>
             <a href="{{ ondemand_webinar.recording_url }}" class="read-more">VIEW RECORDING</a>
           </div>
         </div>
