@@ -8,37 +8,111 @@ import wagtailmetadata.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wagtailimages', '0023_add_choose_permissions'),
-        ('wagtailcore', '0062_comment_models_and_pagesubscription'),
-        ('cms', '0057_mark_topics_not_required'),
+        ("wagtailimages", "0023_add_choose_permissions"),
+        ("wagtailcore", "0062_comment_models_and_pagesubscription"),
+        ("cms", "0057_mark_topics_not_required"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='WebinarIndexPage',
+            name="WebinarIndexPage",
             fields=[
-                ('page_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='wagtailcore.page')),
+                (
+                    "page_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="wagtailcore.page",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
-            bases=('wagtailcore.page',),
+            bases=("wagtailcore.page",),
         ),
         migrations.CreateModel(
-            name='WebinarPage',
+            name="WebinarPage",
             fields=[
-                ('page_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='wagtailcore.page')),
-                ('action_title', models.CharField(help_text='The text to show on the call to action button i.e. REGISTER, VIEW RECORDING', max_length=255)),
-                ('action_url', models.URLField(help_text='The URL to go to when the action button is clicked.')),
-                ('start_datetime', models.DateTimeField(blank=True, help_text='The start date and time of the webinar.', null=True)),
-                ('duration', models.PositiveIntegerField(blank=True, help_text='The duration of the webinar in Minutes.', null=True)),
-                ('category', models.CharField(choices=[('UPCOMING', 'UPCOMING'), ('ON-DEMAND', 'ON-DEMAND')], max_length=20)),
-                ('banner_image', models.ForeignKey(help_text='Image for the Webinar.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='wagtailimages.image')),
-                ('search_image', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='wagtailimages.image', verbose_name='Search image')),
+                (
+                    "page_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="wagtailcore.page",
+                    ),
+                ),
+                (
+                    "action_title",
+                    models.CharField(
+                        help_text="The text to show on the call to action button i.e. REGISTER, VIEW RECORDING",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "action_url",
+                    models.URLField(
+                        help_text="The URL to go to when the action button is clicked."
+                    ),
+                ),
+                (
+                    "start_datetime",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="The start date and time of the webinar.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "duration",
+                    models.PositiveIntegerField(
+                        blank=True,
+                        help_text="The duration of the webinar in Minutes.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[("UPCOMING", "UPCOMING"), ("ON-DEMAND", "ON-DEMAND")],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "banner_image",
+                    models.ForeignKey(
+                        help_text="Image for the Webinar.",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="wagtailimages.image",
+                    ),
+                ),
+                (
+                    "search_image",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="wagtailimages.image",
+                        verbose_name="Search image",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
-            bases=(wagtailmetadata.models.MetadataMixin, 'wagtailcore.page', models.Model),
+            bases=(
+                wagtailmetadata.models.MetadataMixin,
+                "wagtailcore.page",
+                models.Model,
+            ),
         ),
     ]
