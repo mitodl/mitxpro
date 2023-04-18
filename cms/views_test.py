@@ -9,7 +9,7 @@ from django.urls import reverse
 from rest_framework import status
 from wagtail.core.models import Site
 
-from cms.constants import ALL_TOPICS
+from cms.constants import ALL_TOPICS, ON_DEMAND_WEBINAR, UPCOMING_WEBINAR
 from cms.factories import (
     CatalogPageFactory,
     CourseIndexPageFactory,
@@ -20,13 +20,10 @@ from cms.factories import (
     SignatoryPageFactory,
     TextSectionFactory,
     UserTestimonialsPageFactory,
+    WebinarIndexPageFactory,
+    WebinarPageFactory,
 )
-from cms.models import (
-    CourseIndexPage,
-    HomePage,
-    ProgramIndexPage,
-    TextVideoSection,
-)
+from cms.models import CourseIndexPage, HomePage, ProgramIndexPage, TextVideoSection
 from courses.factories import (
     CourseRunCertificateFactory,
     CourseRunFactory,
@@ -510,3 +507,24 @@ def test_program_page_for_program_run(client):
     bad_url = "{}+R2/".format(page_base_url)
     resp = client.get(bad_url)
     assert resp.status_code == 404
+
+
+def test_webinar_page_context(client, wagtail_basics):
+    """
+    Test that the WebinarIndexPage returns the desired context
+    """
+    homepage = wagtail_basics.root
+    webinar_index_page = WebinarIndexPageFactory.create(parent=homepage)
+    webinar_index_page.save_revision().publish()
+
+    WebinarPageFactory.create_batch(3, parent=webinar_index_page)
+    WebinarPageFactory.create_batch(
+        2, category=ON_DEMAND_WEBINAR, parent=webinar_index_page
+    )
+
+    resp = client.get(webinar_index_page.get_url())
+    context = resp.context_data
+
+    assert "webinars" in context
+    assert len(context["webinars"][ON_DEMAND_WEBINAR]) == 2
+    assert len(context["webinars"][UPCOMING_WEBINAR]) == 3
