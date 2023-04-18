@@ -24,12 +24,11 @@
               <div class="webinar-holder">
                 <img src="{% image_version_url webinar.banner_image "fill-330x200" %}" alt="{{ webinar.title }}" width="330" height="200" loading="lazy"/>
                 <p class="title">{{ webinar.title }}</p>
+                {% if webinar.description %}
+                  <p class="description">{{ webinar.description }}</p>
+                {% endif %}
                 {% if webinar.start_datetime %}
                   <p class="time">{{ webinar.formatted_start_time }}</p>
-                {% endif %}
-                <p class="description">Watch as MIT's Dr. Bruce Cameron discusses the opportunities and challenges of Model-Based Systems Engineering (MBSE) and get an inside look at the p…</p>
-                {% if webinar.description %}
-                  <p>{{ webinar.description }}</p>
                 {% endif %}
                 <a href="{{ webinar.action_url }}" class="read-more">{{ webinar.action_title }}</a>
               </div>

@@ -197,12 +197,22 @@ class WebinarPage(MetadataPageMixin, Page):
         (ON_DEMAND_WEBINAR, ON_DEMAND_WEBINAR),
     ]
 
+    category = models.CharField(max_length=20, choices=WEBINAR_CATEGORY_CHOICES)
     banner_image = models.ForeignKey(
         Image,
         null=True,
         on_delete=models.SET_NULL,
         related_name="+",
         help_text="Image for the Webinar.",
+    )
+    start_datetime = models.DateTimeField(
+        null=True, blank=True, help_text="The start date and time of the webinar."
+    )
+    duration = models.PositiveIntegerField(
+        null=True, blank=True, help_text="The duration of the webinar in Minutes."
+    )
+    description = models.TextField(
+        null=True, blank=True, help_text="Description for the webinar."
     )
     action_title = models.CharField(
         max_length=255,
@@ -211,22 +221,16 @@ class WebinarPage(MetadataPageMixin, Page):
     action_url = models.URLField(
         help_text="The URL to go to when the action button is clicked.",
     )
-    start_datetime = models.DateTimeField(
-        null=True, blank=True, help_text="The start date and time of the webinar."
-    )
-    duration = models.PositiveIntegerField(
-        null=True, blank=True, help_text="The duration of the webinar in Minutes."
-    )
-    category = models.CharField(max_length=20, choices=WEBINAR_CATEGORY_CHOICES)
 
     content_panels = [
+        FieldPanel("category"),
         FieldPanel("title"),
         ImageChooserPanel("banner_image"),
-        FieldPanel("action_title"),
-        FieldPanel("action_url"),
         FieldPanel("start_datetime"),
         FieldPanel("duration"),
-        FieldPanel("category"),
+        FieldPanel("description"),
+        FieldPanel("action_title"),
+        FieldPanel("action_url"),
     ]
 
     @property

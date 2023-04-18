@@ -72,6 +72,14 @@
           line-height: 20px;
         }
 
+        .description {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          -webkit-line-clamp: 3; // sass-lint:disable-line no-vendor-prefixes
+          -webkit-box-orient: vertical; // sass-lint:disable-line no-vendor-prefixes
+          display: -webkit-box; // sass-lint:disable-line no-vendor-prefixes
+        }
+
         .title {
           color: $primary;
           font-size: 22px;

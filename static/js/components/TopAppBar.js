@@ -68,6 +68,11 @@ const TopAppBar = ({ currentUser, location, errorPageHeader }: Props) => (
             } navbar-collapse px-0 justify-content-end`}
           >
             <li>
+              <a href={routes.webinars} className="" aria-label="webinars">
+                Webinars
+              </a>
+            </li>
+            <li>
               <a href={routes.catalog} className="" aria-label="catalog">
                 Catalog
               </a>
