@@ -43,8 +43,10 @@ from cms.constants import (
     ALL_TOPICS,
     CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
+    ON_DEMAND_WEBINAR,
     PROGRAM_INDEX_SLUG,
     SIGNATORY_INDEX_SLUG,
+    UPCOMING_WEBINAR,
     WEBINAR_INDEX_SLUG,
 )
 from cms.forms import CertificatePageForm
@@ -144,21 +146,13 @@ class SignatoryObjectIndexPage(Page):
         raise Http404
 
 
-WEBINAR_CATEGORY_CHOICES = [
-    ("upcoming", "Upcoming"),
-    ("ondemand", "On-Demand"),
-]
-
-
-class WebinarObjectIndexPage(Page):
+class WebinarIndexPage(Page):
     """
-    A placeholder page to group webinars under it as well
-    as consequently add /webinars/ to the course page urls
+    A placeholder page to group webinars under it as well as consequently add /webinars/ to the course page urls
     """
 
-    class Meta:
-        abstract = True
-
+    slug = WEBINAR_INDEX_SLUG
+    template = "webinars_list_page.html"
     parent_page_types = ["HomePage"]
     subpage_types = ["WebinarPage"]
 
@@ -179,22 +173,15 @@ class WebinarObjectIndexPage(Page):
         """
         return Page.serve(self, request, *args, **kwargs)
 
-
-class WebinarIndexPage(WebinarObjectIndexPage):
-    """
-    Webinars index page
-    """
-
-    slug = WEBINAR_INDEX_SLUG
-    template = "webinars_list_page.html"
-    parent_page_types = ["HomePage"]
-
     def get_context(self, request, *args, **kwargs):
+        """Populate the context with a dict of categories and live webinars"""
         return dict(
             **super().get_context(request),
             **get_base_context(request),
-            upcoming_webinars=WebinarPage.objects.live().filter(category="upcoming"),
-            ondemand_webinars=WebinarPage.objects.live().filter(category="ondemand"),
+            webinars={
+                category: WebinarPage.objects.live().filter(category=category)
+                for category in [UPCOMING_WEBINAR, ON_DEMAND_WEBINAR]
+            },
         )
 
 
@@ -205,27 +192,30 @@ class WebinarPage(MetadataPageMixin, Page):
 
     parent_page_types = [WebinarIndexPage]
 
+    WEBINAR_CATEGORY_CHOICES = [
+        (UPCOMING_WEBINAR, UPCOMING_WEBINAR),
+        (ON_DEMAND_WEBINAR, ON_DEMAND_WEBINAR),
+    ]
+
     banner_image = models.ForeignKey(
         Image,
         null=True,
-        blank=True,
         on_delete=models.SET_NULL,
         related_name="+",
         help_text="Image for the Webinar.",
     )
     action_title = models.CharField(
-        max_length=255, null=True, blank=True, help_text="The text to show on the call to action button i.e. REGISTER, VIEW RECORDING",
+        max_length=255,
+        help_text="The text to show on the call to action button i.e. REGISTER, VIEW RECORDING",
     )
     action_url = models.URLField(
-        null=True,
-        blank=True,
         help_text="The URL to go to when the action button is clicked.",
     )
     start_datetime = models.DateTimeField(
         null=True, blank=True, help_text="The start date and time of the webinar."
     )
     duration = models.PositiveIntegerField(
-        null=True, blank=True, help_text="The duration of the webinar."
+        null=True, blank=True, help_text="The duration of the webinar in Minutes."
     )
     category = models.CharField(max_length=20, choices=WEBINAR_CATEGORY_CHOICES)
 
@@ -238,6 +228,21 @@ class WebinarPage(MetadataPageMixin, Page):
         FieldPanel("duration"),
         FieldPanel("category"),
     ]
+
+    @property
+    def formatted_start_time(self):
+        """Formatted time information for the webinar list page"""
+        end_time = self.start_datetime + timedelta(minutes=self.duration)
+        if self.start_datetime.strftime("%p") != end_time.strftime("%p"):
+            formatted_start_time = self.start_datetime.strftime(
+                "%A, %B %-d, %Y | %-I %p - "
+            )
+        else:
+            formatted_start_time = self.start_datetime.strftime(
+                "%A, %B %-d, %Y | %-I - "
+            )
+        formatted_end_time = end_time.strftime("%-I %p %Z")
+        return formatted_start_time + formatted_end_time
 
 
 class CourseIndexPage(CourseObjectIndexPage):

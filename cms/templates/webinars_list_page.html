@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load static wagtailimages_tags wagtailmetadata_tags render_bundle image_version_url wagtailcore_tags %}
+{% load static wagtailimages_tags wagtailmetadata_tags render_bundle image_version_url wagtailcore_tags tz %}
 
 {% block title %}Webinars{% endblock %}
 
@@ -16,32 +16,27 @@
         <h1>Webinars</h1>
       </div>
     {% endblock %}
-    <h1 class="webinar-category">UPCOMING WEBINARS</h1>
-    <div class="upcoming-webinars">
-      {% for upcoming_webinar in upcoming_webinars %}
-        <div class="webinar">
-          <div class="webinar-holder">
-            <img src="{% image_version_url upcoming_webinar.banner_image "fill-330x200" %}" alt="{{ upcoming_webinar.title }}" width="330" height="200" loading="lazy"/>
-            <p class="title">{{ upcoming_webinar.title }}</p>
-            <p class="time">{{ upcoming_webinar.start_datetime }}</p>
-            <a href="{{ upcoming_webinar.action_url }}" class="read-more">{{ upcoming_webinar.action_title }}</a>
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-    <h1 class="webinar-category">ON-DEMAND WEBINARS</h1>
-    <div class="ondemand-webinars">
-      {% for ondemand_webinar in ondemand_webinars %}
-        <div class="webinar">
-          <div class="webinar-holder">
-            <img src="{% image_version_url ondemand_webinar.banner_image "fill-330x200" %}" alt="{{ ondemand_webinar.title }}" width="330" height="200" loading="lazy"/>
-            <p class="title">{{ ondemand_webinar.title }}</p>
-            <p class="time">{{ ondemand_webinar.start_datetime }}</p>
-            <a href="{{ ondemand_webinar.action_url }}" class="read-more">{{ ondemand_webinar.action_title }}</a>
-          </div>
-        </div>
-      {% endfor %}
-    </div>
+    {% for webinar_category, webinars_list in webinars.items %}
+      <h1 class="webinar-category">{{ webinar_category }} WEBINARS</h1>
+      <div class="webinars-list">
+        {% for webinar in webinars_list %}
+            <div class="webinar">
+              <div class="webinar-holder">
+                <img src="{% image_version_url webinar.banner_image "fill-330x200" %}" alt="{{ webinar.title }}" width="330" height="200" loading="lazy"/>
+                <p class="title">{{ webinar.title }}</p>
+                {% if webinar.start_datetime %}
+                  <p class="time">{{ webinar.formatted_start_time }}</p>
+                {% endif %}
+                <p class="description">Watch as MIT's Dr. Bruce Cameron discusses the opportunities and challenges of Model-Based Systems Engineering (MBSE) and get an inside look at the p…</p>
+                {% if webinar.description %}
+                  <p>{{ webinar.description }}</p>
+                {% endif %}
+                <a href="{{ webinar.action_url }}" class="read-more">{{ webinar.action_title }}</a>
+              </div>
+            </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
   </div>
 {% endblock %}
 
