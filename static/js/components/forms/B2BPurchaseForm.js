@@ -38,7 +38,7 @@ export const validate = (values: Object) => {
     errors.num_seats = "Number of Seats is required"
   }
 
-  const emailRegex = new RegExp(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w+)+$/)
+  const emailRegex = new RegExp(/^\w+([.\-+]?\w+)*@\w+([.-]?\w+)*(\.\w+)+$/)
 
   if (!values.email.includes("@")) {
     errors.email = "Email is required"
