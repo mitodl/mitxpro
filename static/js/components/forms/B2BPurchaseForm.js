@@ -5,7 +5,6 @@ import { ErrorMessage, Field, Formik, Form } from "formik"
 import Decimal from "decimal.js-light"
 import { curry } from "ramda"
 import { EmailInput } from "./elements/inputs"
-import FormError from "./elements/FormError"
 import { emailFieldValidation } from "../../lib/validation"
 
 import B2BPurchaseSummary from "../B2BPurchaseSummary"
