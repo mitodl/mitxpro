@@ -1,8 +1,12 @@
 // @flow
 import React from "react"
+import * as yup from "yup"
 import { ErrorMessage, Field, Formik, Form } from "formik"
 import Decimal from "decimal.js-light"
 import { curry } from "ramda"
+import { EmailInput } from "./elements/inputs"
+import FormError from "./elements/FormError"
+import { emailFieldValidation } from "../../lib/validation"
 
 import B2BPurchaseSummary from "../B2BPurchaseSummary"
 import ProductSelector from "../input/ProductSelector"
@@ -28,6 +32,10 @@ type Props = {
   seats: ?string
 }
 
+const emailValidation = yup.object().shape({
+  email: emailFieldValidation
+})
+
 const errorMessageRenderer = msg => <span className="error">{msg}</span>
 
 export const validate = (values: Object) => {
@@ -38,12 +46,8 @@ export const validate = (values: Object) => {
     errors.num_seats = "Number of Seats is required"
   }
 
-  const emailRegex = new RegExp(/^\w+([.\-+]?\w+)*@\w+([.-]?\w+)*(\.\w+)+$/)
-
   if (!values.email.includes("@")) {
     errors.email = "Email is required"
-  } else if (!emailRegex.test(values.email)) {
-    errors.email = "Invalid email address"
   }
 
   if (!values.product.productId) {
@@ -180,7 +184,7 @@ class B2BPurchaseForm extends React.Component<Props> {
 
             <label htmlFor="email">
               <span className="description">*Your email address:</span>
-              <Field type="text" name="email" />
+              <Field type="email" name="email" autoComplete="email" component={EmailInput} />
               <span className="explanation">
                 * We will email the enrollment codes to this address.
               </span>
@@ -265,6 +269,7 @@ class B2BPurchaseForm extends React.Component<Props> {
           coupon:          this.props.discountCode || "",
           contract_number: this.props.contractNumber || ""
         }}
+        validationSchema={emailValidation}
         validate={validate}
         render={this.renderForm}
         ref={this.formikRef}
