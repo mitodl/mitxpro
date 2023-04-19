@@ -225,7 +225,9 @@ def batch_upsert_hubspot_b2b_deals_chunked(ids: List[int]) -> List[str]:
             validate_email(order.email)
         except ValidationError as exc:
             log.error(
-                f"Validation error for B2BOrder id {order.id} in Hubspot sync task: {exc}"
+                "Validation error for B2BOrder id %s in Hubspot sync task: %s",
+                order.id,
+                exc,
             )
         else:
             results.append(api.sync_b2b_deal_with_hubspot(order.id).id)
