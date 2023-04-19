@@ -454,6 +454,7 @@ class CertificatePageFactory(wagtail_factories.PageFactory):
 
 class WebinarIndexPageFactory(wagtail_factories.PageFactory):
     """WebinarIndexPage factory"""
+
     class Meta:
         model = WebinarIndexPage
 
