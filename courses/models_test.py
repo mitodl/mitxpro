@@ -179,8 +179,12 @@ def test_external_courseware_marketing_url():
     """
     External courseware objects should return expected marketing url
     """
-    course = CourseFactory.create(page__external_marketing_url="http://www.testexternalcourse.com")
-    program = ProgramFactory.create(page__external_marketing_url="http://www.testexternalprogram.com")
+    course = CourseFactory.create(
+        page__external_marketing_url="http://www.testexternalcourse.com"
+    )
+    program = ProgramFactory.create(
+        page__external_marketing_url="http://www.testexternalprogram.com"
+    )
 
     course_runs = CourseRunFactory.create_batch(2, course=course)
     # Create multiple runs, Check the url returned by course is from the latest one starting
