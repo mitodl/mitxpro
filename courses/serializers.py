@@ -536,3 +536,18 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
             "certificate",
             "receipt",
         ]
+
+
+class CourseTopicSerializer(serializers.ModelSerializer):
+    """
+    CourseTopic model serializer
+    """
+
+    course_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.CourseTopic
+        fields = ["name", "parent", "course_count"]
+
+    def get_course_count(self, instance):
+        return instance.course_count

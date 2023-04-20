@@ -1,5 +1,5 @@
 """Course views verson 1"""
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch, Q, Count
 from mitol.digitalcredentials.mixins import DigitalCredentialsRequestViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
@@ -14,6 +14,7 @@ from courses.models import (
     CourseRunCertificate,
     Program,
     ProgramCertificate,
+    CourseTopic,
 )
 from courses.serializers import (
     CourseRunCertificateSerializer,
@@ -23,6 +24,7 @@ from courses.serializers import (
     ProgramCertificateSerializer,
     ProgramEnrollmentSerializer,
     ProgramSerializer,
+    CourseTopicSerializer,
 )
 from ecommerce.models import Product
 
@@ -178,3 +180,13 @@ class ProgramCertificateViewSet(
     def get_learner_for_obj(self, certificate: ProgramCertificate):
         """Get the learner for the ProgramCertificate"""
         return certificate.user
+
+
+class CourseTopicViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Readonly viewset for parent course topics.
+    """
+
+    permission_classes = []
+    serializer_class = CourseTopicSerializer
+    queryset = CourseTopic.objects.filter(parent__isnull=True).annotate(course_count=Count("coursepage"))
