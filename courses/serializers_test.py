@@ -53,14 +53,27 @@ def test_base_program_serializer():
 @pytest.mark.parametrize("has_product", [True, False])
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus",
+    "duration, time_commitment, video_url, ceus, external_marketing_url",
     [
-        ("2 Months", "2 Hours", "http://www.testvideourl.com", "2 Test CEUs"),
-        (None, None, None, None),
+        (
+            "2 Months",
+            "2 Hours",
+            "http://www.testvideourl.com",
+            "2 Test CEUs",
+            "https://www.testexternalcourse1.com",
+        ),
+        (None, None, None, None, None),
     ],
 )
 def test_serialize_program(
-    mock_context, has_product, is_external, duration, time_commitment, video_url, ceus
+    mock_context,
+    has_product,
+    is_external,
+    duration,
+    time_commitment,
+    video_url,
+    ceus,
+    external_marketing_url,
 ):  # pylint: disable=too-many-arguments,too-many-locals
     """Test Program serialization"""
     program = ProgramFactory.create(
@@ -69,6 +82,7 @@ def test_serialize_program(
         page__duration=duration,
         page__time_commitment=time_commitment,
         page__video_url=video_url,
+        page__external_marketing_url=external_marketing_url,
     )
     run1 = CourseRunFactory.create(course__program=program)
     course1 = run1.course
@@ -130,6 +144,7 @@ def test_serialize_program(
             "credits": ceus,
             "format": "Online",
             "is_external": is_external,
+            "external_marketing_url": external_marketing_url,
         },
     )
 
@@ -151,10 +166,16 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("all_runs", [True, False])
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus",
+    "duration, time_commitment, video_url, ceus, external_marketing_url",
     [
-        ("2 Months", "2 Hours", "http://www.testvideourl.com", "2 Test CEUs"),
-        (None, None, None, None),
+        (
+            "2 Months",
+            "2 Hours",
+            "http://www.testvideourl.com",
+            "2 Test CEUs",
+            "http://www.testexternalmarketingurl.com",
+        ),
+        (None, None, None, None, None),
     ],
 )
 def test_serialize_course(
@@ -166,6 +187,7 @@ def test_serialize_course(
     time_commitment,
     video_url,
     ceus,
+    external_marketing_url,
 ):  # pylint: disable=too-many-arguments,too-many-locals
     """Test Course serialization"""
     now = datetime.now(tz=pytz.UTC)
@@ -181,6 +203,7 @@ def test_serialize_course(
         course__is_external=is_external,
         course__page__certificate_page__CEUs=ceus,
         course__no_program=True,
+        course__page__external_marketing_url=external_marketing_url,
         live=True,
     )
     course = course_run.course
@@ -231,18 +254,16 @@ def test_serialize_course(
             "credits": ceus,
             "format": "Online",
             "is_external": is_external,
+            "external_marketing_url": external_marketing_url,
         },
     )
 
 
 @pytest.mark.parametrize("has_product", [True, False])
-@pytest.mark.parametrize(
-    "external_marketing_url", ["https://www.testexternalcourse1.com", None]
-)
-def test_serialize_course_run(has_product, external_marketing_url):
+def test_serialize_course_run(has_product):
     """Test CourseRun serialization"""
     faculty_names = ["Emma Jones", "Joe Smith"]
-    course_run = CourseRunFactory.create(external_marketing_url=external_marketing_url)
+    course_run = CourseRunFactory.create()
     FacultyMembersPageFactory.create(
         parent=course_run.course.page,
         **{
@@ -275,7 +296,6 @@ def test_serialize_course_run(has_product, external_marketing_url):
             "instructors": course_run.instructors,
             "id": course_run.id,
             "product_id": product_id,
-            "external_marketing_url": external_marketing_url,
         },
     )
 

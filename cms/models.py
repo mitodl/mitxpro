@@ -579,6 +579,9 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     description = RichTextField(
         blank=True, help_text="The description shown on the product page"
     )
+    external_marketing_url = models.URLField(
+        null=True, blank=True, help_text="The URL of the external course web page."
+    )
     catalog_details = RichTextField(
         blank=True,
         help_text="The description shown on the catalog page for this product",
@@ -644,6 +647,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         help_text="The content of this tab on the program page",
     )
     content_panels = Page.content_panels + [
+        FieldPanel("external_marketing_url"),
         FieldPanel("subhead"),
         FieldPanel("video_title"),
         FieldPanel("video_url"),
@@ -1107,9 +1111,6 @@ class ExternalCoursePage(CourseProductPage):
 
     template = "product_page.html"
 
-    external_url = models.URLField(
-        null=True, blank=True, help_text="The URL of the external course web page."
-    )
     readable_id = models.CharField(
         max_length=64,
         null=True,
@@ -1139,9 +1140,6 @@ class ExternalProgramPage(ProgramProductPage):
 
     template = "product_page.html"
 
-    external_url = models.URLField(
-        null=True, blank=True, help_text="The URL of the external program web page."
-    )
     readable_id = models.CharField(
         max_length=64,
         null=True,
