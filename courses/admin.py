@@ -46,7 +46,7 @@ class ProgramRunAdmin(admin.ModelAdmin):
     model = ProgramRun
     list_display = ("id", "program", "run_tag", "full_readable_id")
     list_filter = ["program"]
-    # TODO: This should be removed in the field cleanup once the data migration cms/0058 has run
+    # FIXME: This should be removed in the field cleanup once the data migration cms/0058 has run
     exclude = ("external_marketing_url",)
 
 
@@ -86,7 +86,7 @@ class CourseRunAdmin(TimestampedModelAdmin):
     )
     list_filter = ["live", "course"]
 
-    # TODO: This should be removed in the field cleanup once the data migration cms/0058 has run
+    # FIXME: This should be removed in the field cleanup once the data migration cms/0058 has run
     exclude = ("external_marketing_url",)
 
     formfield_overrides = {
