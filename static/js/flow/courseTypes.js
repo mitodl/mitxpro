@@ -70,3 +70,9 @@ export type UserEnrollments = {
   past_program_enrollments: Array<ProgramEnrollment>,
   past_course_run_enrollments: Array<CourseRunEnrollment>
 }
+
+export type CourseTopic = {
+  name: string,
+  parent: ?number,
+  course_count: ?number
+}
