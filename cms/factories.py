@@ -126,7 +126,7 @@ class ExternalCoursePageFactory(wagtail_factories.PageFactory):
         "date_time_this_month", before_now=True, after_now=False, tzinfo=pytz.utc
     )
     price = factory.fuzzy.FuzzyDecimal(low=1, high=123)
-    external_url = factory.Faker("uri")
+    external_marketing_url = factory.Faker("uri")
     readable_id = factory.Sequence(
         lambda number: "external-course:/v{}/{}".format(number, FAKE.slug())
     )
@@ -161,7 +161,7 @@ class ExternalProgramPageFactory(wagtail_factories.PageFactory):
         "date_time_this_month", before_now=True, after_now=False, tzinfo=pytz.utc
     )
     price = factory.fuzzy.FuzzyDecimal(low=1, high=123)
-    external_url = factory.Faker("uri")
+    external_marketing_url = factory.Faker("uri")
     readable_id = factory.Sequence(
         lambda number: "external-course:/v{}/{}".format(number, FAKE.slug())
     )

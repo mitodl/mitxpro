@@ -275,15 +275,6 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         """All course runs related to a program"""
         return [run for course in self.courses.all() for run in course.courseruns.all()]
 
-    @property
-    def marketing_url(self):
-        """Return the marketing URL for this program from it's latest program run"""
-        return getattr(
-            self.programruns.order_by("-start_date").first(),
-            "external_marketing_url",
-            "",
-        )
-
     def __str__(self):
         title = f"{self.readable_id} | {self.title}"
         return title if len(title) <= 100 else title[:97] + "..."
@@ -295,6 +286,7 @@ class ProgramRun(TimestampedModel, ValidateOnSaveMixin):
     program = models.ForeignKey(
         Program, on_delete=models.CASCADE, related_name="programruns"
     )
+    # Below field should be removed in the field cleanup once the data migration cms/0058 has run
     external_marketing_url = models.CharField(max_length=500, blank=True, null=True)
     run_tag = models.CharField(max_length=10, validators=[validate_url_path_field])
     start_date = models.DateTimeField(null=True, blank=True, db_index=True)
@@ -473,11 +465,6 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             ).values_list("run__id", flat=True)
         return [run for run in self.unexpired_runs if run.id not in enrolled_runs]
 
-    @property
-    def marketing_url(self):
-        """Return the marketing URL for this course"""
-        return getattr(self.first_unexpired_run, "external_marketing_url", "")
-
     class Meta:
         ordering = ("program", "title")
 
@@ -517,6 +504,7 @@ class CourseRun(TimestampedModel):
         help_text="A string that identifies the set of runs that this run belongs to (example: 'R2')",
     )
     courseware_url_path = models.CharField(max_length=500, blank=True, null=True)
+    # Below field should be removed in the field cleanup once the data migration cms/0058 has run
     external_marketing_url = models.CharField(max_length=500, blank=True, null=True)
     start_date = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True, db_index=True)

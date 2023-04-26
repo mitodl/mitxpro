@@ -92,7 +92,6 @@ class CourseRunSerializer(BaseCourseRunSerializer):
             "product_id",
             "instructors",
             "current_price",
-            "external_marketing_url",
         ]
 
 
@@ -100,6 +99,7 @@ class CourseSerializer(serializers.ModelSerializer):
     """Course model serializer - also serializes child course runs"""
 
     url = serializers.SerializerMethodField()
+    external_marketing_url = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
     courseruns = serializers.SerializerMethodField()
@@ -115,6 +115,10 @@ class CourseSerializer(serializers.ModelSerializer):
         """Get CMS Page URL for the course"""
         page = instance.page
         return page.get_full_url() if page else None
+
+    def get_external_marketing_url(self, instance):
+        """Returns the external marketing URL for the course that's set in CMS page"""
+        return instance.page.external_marketing_url if instance.page else None
 
     def get_thumbnail_url(self, instance):
         """Thumbnail URL"""
@@ -188,6 +192,7 @@ class CourseSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "url",
+            "external_marketing_url",
             "thumbnail_url",
             "readable_id",
             "courseruns",
@@ -252,6 +257,7 @@ class ProgramSerializer(serializers.ModelSerializer):
     end_date = serializers.SerializerMethodField()
     enrollment_start = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
+    external_marketing_url = serializers.SerializerMethodField()
     instructors = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
     time_commitment = serializers.SerializerMethodField()
@@ -320,6 +326,10 @@ class ProgramSerializer(serializers.ModelSerializer):
         page = instance.page
         return page.get_full_url() if page else None
 
+    def get_external_marketing_url(self, instance):
+        """Returns the external marketing URL for this program that's set in CMS page"""
+        return instance.page.external_marketing_url if instance.page else None
+
     def get_instructors(self, instance):
         """List all instructors who are a part of any course run within a program"""
         return instance.instructors
@@ -374,6 +384,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             "end_date",
             "enrollment_start",
             "url",
+            "external_marketing_url",
             "instructors",
             "topics",
             "time_commitment",

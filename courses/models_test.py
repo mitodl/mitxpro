@@ -179,20 +179,14 @@ def test_external_courseware_marketing_url():
     """
     External courseware objects should return expected marketing url
     """
-    course = CourseFactory.create()
-    program = ProgramFactory.create()
-    external_course_urls = [
-        "http://www.testexternalcourse1.com",
-        "http://www.testexternalcourse2.com",
-    ]
-    external_program_urls = [
-        "http://www.testexternalprogram1.com",
-        "http://www.testexternalprogram2.com",
-    ]
-
-    course_runs = CourseRunFactory.create_batch(
-        2, course=course, external_marketing_url=factory.Iterator(external_course_urls)
+    course = CourseFactory.create(
+        page__external_marketing_url="http://www.testexternalcourse.com"
     )
+    program = ProgramFactory.create(
+        page__external_marketing_url="http://www.testexternalprogram.com"
+    )
+
+    course_runs = CourseRunFactory.create_batch(2, course=course)
     # Create multiple runs, Check the url returned by course is from the latest one starting
     course_runs[0].start_date = now_in_utc() + timedelta(hours=2)
     course_runs[1].start_date = now_in_utc() + timedelta(hours=1)
@@ -200,15 +194,11 @@ def test_external_courseware_marketing_url():
     course_runs[0].save()
     course_runs[1].save()
 
-    program_runs = ProgramRunFactory.create_batch(
-        2,
-        program=program,
-        external_marketing_url=factory.Iterator(external_program_urls),
-    )
+    program_runs = ProgramRunFactory.create_batch(2, program=program)
     program_runs[1].start_date = now_in_utc() + timedelta(hours=1)
 
-    assert course.marketing_url == "http://www.testexternalcourse2.com"
-    assert program.marketing_url == "http://www.testexternalprogram2.com"
+    assert course.page.external_marketing_url == "http://www.testexternalcourse.com"
+    assert program.page.external_marketing_url == "http://www.testexternalprogram.com"
 
 
 def test_program_page():
