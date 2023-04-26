@@ -99,13 +99,15 @@ class CourseTopicQuerySet(models.QuerySet):
         """
         Applies a filter for course topics with parent=None
         """
-        return self.filter(parent__isnull=True)
+        return self.filter(parent__isnull=True).order_by("name")
 
     def parent_topic_names(self):
         """
         Returns a list of all parent topic names.
         """
-        return list(self.parent_topics().values_list("name", flat=True))
+        return list(
+            self.parent_topics().order_by("name").values_list("name", flat=True)
+        )
 
 
 class ActiveEnrollmentManager(models.Manager):

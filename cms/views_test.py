@@ -145,6 +145,21 @@ def test_home_page_context_topics(client, wagtail_basics):
     assert child_topic.name not in context["topics"]
 
 
+def test_home_page_context_topics_ordering(client, wagtail_basics):
+    """
+    Test that course topics on HomePage are ordered alphabetically.
+    """
+    page = HomePage(title="Home Page", subhead="<p>subhead</p>")
+    wagtail_basics.root.add_child(instance=page)
+
+    topic_name_list = ["Analog", "Computer", "Business", "Technology", "Engineering"]
+    CourseTopicFactory.create_batch(5, name=factory.Iterator(topic_name_list))
+
+    resp = client.get(page.get_url())
+    context = resp.context_data
+    assert sorted(topic_name_list) == context["topics"]
+
+
 def test_courses_index_view(client, wagtail_basics):
     """
     Test that the courses index page shows a 404
@@ -413,6 +428,27 @@ def test_catalog_page_topics(  # pylint: disable=too-many-arguments
     assert resp.context_data["selected_topic"] == expected_selected_topic
     assert len(resp.context_data["course_pages"]) == expected_courses_count
     assert len(resp.context_data["program_pages"]) == expected_program_count
+
+
+def test_catalog_page_topics_ordering(client, wagtail_basics):
+    """
+    Test that topics are ordered alphabetically on Catalog Page
+    """
+    homepage = wagtail_basics.root
+    catalog_page = CatalogPageFactory.create(parent=homepage)
+    catalog_page.save_revision().publish()
+
+    topic_name_list = ["Analog", "Computer", "Business", "Technology", "Engineering"]
+
+    parent_topics = CourseTopicFactory.create_batch(
+        5, name=factory.Iterator(topic_name_list)
+    )
+
+    resp = client.get(catalog_page.get_url())
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.context_data["topics"] == sorted(
+        [ALL_TOPICS] + [topic.name for topic in parent_topics]
+    )
 
 
 def test_program_page_checkout_url_product(client, wagtail_basics):
