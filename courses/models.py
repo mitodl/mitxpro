@@ -99,7 +99,7 @@ class CourseTopicQuerySet(models.QuerySet):
         """
         Applies a filter for course topics with parent=None
         """
-        return self.filter(parent__isnull=True)
+        return self.filter(parent__isnull=True).order_by("name")
 
     def parent_topic_names(self):
         """
