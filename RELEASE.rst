@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.121.0
+---------------
+
+- feat: order topics alphabetically on HomePage and CatalogPage (#2634)
+- fix: Error creating Open edX user. user already exists or invalid name (follow-up) (#2592)
+- feat: mimic Learn more feat for Internal courseware as well (#2628)
+
 Version 0.120.0 (Released April 20, 2023)
 ---------------
 
