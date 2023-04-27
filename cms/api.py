@@ -1,13 +1,15 @@
 """API for the CMS app"""
 import itertools
-from datetime import MINYEAR, datetime
 import logging
-import pytz
+from datetime import MINYEAR, datetime
 
+import pytz
 from django.contrib.contenttypes.models import ContentType
 from wagtail.core.models import Page, Site
+
 from cms import models as cms_models
 from cms.constants import CERTIFICATE_INDEX_SLUG
+
 
 log = logging.getLogger(__name__)
 DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")
@@ -145,6 +147,7 @@ def ensure_index_pages():
     program_index = cms_models.ProgramIndexPage.objects.first()
     signatory_index = cms_models.SignatoryIndexPage.objects.first()
     certificate_index = cms_models.CertificateIndexPage.objects.first()
+    webinars_index = cms_models.WebinarIndexPage.objects.first()
 
     if not course_index:
         course_index = cms_models.CourseIndexPage(title="Courses")
@@ -183,6 +186,10 @@ def ensure_index_pages():
             slug=CERTIFICATE_INDEX_SLUG,
         )
         home_page.add_child(instance=certificate_index)
+
+    if not webinars_index:
+        webinars_index = cms_models.WebinarIndexPage(title="Webinars")
+        home_page.add_child(instance=webinars_index)
 
 
 def configure_wagtail():

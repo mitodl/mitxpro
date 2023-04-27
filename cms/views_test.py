@@ -517,6 +517,13 @@ def test_webinar_page_context(client, wagtail_basics):
     webinar_index_page = WebinarIndexPageFactory.create(parent=homepage)
     webinar_index_page.save_revision().publish()
 
+    resp = client.get(webinar_index_page.get_url())
+    context = resp.context_data
+
+    assert "webinars" in context
+    assert len(context["webinars"][ON_DEMAND_WEBINAR]) == 0
+    assert len(context["webinars"][UPCOMING_WEBINAR]) == 0
+
     WebinarPageFactory.create_batch(3, parent=webinar_index_page)
     WebinarPageFactory.create_batch(
         2, category=ON_DEMAND_WEBINAR, parent=webinar_index_page
