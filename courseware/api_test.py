@@ -3,12 +3,13 @@
 import itertools
 from datetime import timedelta
 from types import SimpleNamespace
-from urllib.parse import parse_qsl
+from urllib.parse import parse_qsl, urlencode
 
 import pytest
 import responses
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
+from django.db import transaction
 from edx_api.enrollments import Enrollments
 from freezegun import freeze_time
 from oauth2_provider.models import AccessToken, Application
@@ -18,6 +19,7 @@ from rest_framework import status
 
 from courses.factories import CourseRunEnrollmentFactory, CourseRunFactory
 from courseware.api import (
+    OpenEdxUser,
     ACCESS_TOKEN_HEADER_NAME,
     OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS,
     create_edx_auth_token,
@@ -32,6 +34,7 @@ from courseware.api import (
     unenroll_edx_course_run,
     update_edx_user_email,
     update_edx_user_name,
+    update_xpro_user_username,
 )
 from courseware.constants import (
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
@@ -209,7 +212,7 @@ def test_create_edx_user_conflict(settings, user):
     )
     responses.add(
         responses.GET,
-        f"{settings.OPENEDX_API_BASE_URL}/api/user/v1/accounts/{user.username}",
+        f"{settings.OPENEDX_API_BASE_URL}/api/user/v1/accounts?{urlencode({'email': user.email})}",
         status=status.HTTP_200_OK,
     )
 
@@ -244,6 +247,28 @@ def test_create_edx_auth_token(settings, user, create_token_responses):
     assert auth.access_token_expires_on == now_in_utc() + timedelta(
         minutes=59, seconds=50
     )
+
+
+def test_update_xpro_user_username_successfully(user):
+    """Tests update_xpro_user_username updates user successfully"""
+    new_username = "new_username"
+    assert update_xpro_user_username(user, new_username) is True
+    # reload user object from database to get latest value of username
+    user.refresh_from_db()
+    assert user.username == new_username
+
+
+def test_update_xpro_user_username_integrity_error(user):
+    """Tests update_xpro_user_username raises IntegrityError"""
+    old_username = user.username
+    new_username = "new_username"
+    # create duplicate user with given username
+    UserFactory.create(username=new_username)
+    with transaction.atomic():
+        assert update_xpro_user_username(user, new_username) is False
+    # reload user object from database to get latest value of username
+    user.refresh_from_db()
+    assert user.username == old_username
 
 
 @responses.activate
@@ -741,3 +766,74 @@ def test_update_edx_user_name_failure(
     mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
     with pytest.raises(expected_exception):
         update_edx_user_name(user)
+
+
+@pytest.fixture
+def test_user():
+    """
+    Fixture that creates a `User` with username="test_user" object for testing.
+    """
+    return UserFactory.create(username="test_user")
+
+
+@pytest.fixture
+def openedx_data():
+    """
+    Fixture providing a sample dictionary with OpenEdx user data.
+    """
+    return {"username": "test_user"}
+
+
+@pytest.fixture
+def open_edx_user(test_user, openedx_data):
+    """
+    Fixture that creates an `OpenEdxUser` object for testing.
+    """
+    return OpenEdxUser(user=test_user, openedx_data=openedx_data)
+
+
+def test_is_username_match_returns_true(open_edx_user):
+    """
+    Test that `is_username_match()` returns True when the username of the `User` object matches
+    the 'username' field in `openedx_data`.
+    """
+    assert open_edx_user.is_username_match() is True
+
+
+def test_is_username_match_returns_false(test_user, openedx_data):
+    """
+    Test that `is_username_match()` returns False when the username of the `User` object does not
+    match the 'username' field in `openedx_data`.
+    """
+    openedx_data["username"] = "wrong_username"
+    open_edx_user = OpenEdxUser(user=test_user, openedx_data=openedx_data)
+    assert open_edx_user.is_username_match() is False
+
+
+def test_is_username_match_with_mock(mocker, openedx_data):
+    """
+    Test that `is_username_match()` works correctly when the `user` argument is replaced by a
+    `MagicMock` object with a different username.
+    """
+    magic_mock_user = mocker.MagicMock(spec=User)
+    open_edx_user = OpenEdxUser(user=magic_mock_user, openedx_data=openedx_data)
+    assert not open_edx_user.is_username_match()
+
+
+def test_is_username_match_with_empty_openedx_data(test_user):
+    """
+    Test that `is_username_match()` returns False when `openedx_data` is an empty dictionary.
+    """
+    open_edx_user = OpenEdxUser(user=test_user, openedx_data={})
+    assert open_edx_user.is_username_match() is False
+
+
+def test_is_username_match_with_missing_openedx_data(test_user):
+    """
+    Test that `is_username_match()` returns False when `openedx_data` does not contain a 'username'
+    field.
+    """
+    open_edx_user = OpenEdxUser(
+        user=test_user, openedx_data={"email": "test@example.com"}
+    )
+    assert open_edx_user.is_username_match() is False
