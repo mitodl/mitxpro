@@ -106,7 +106,7 @@ class CourseTopicQuerySet(models.QuerySet):
         Returns a list of all parent topic names.
         """
         return list(
-            self.parent_topics().order_by("name").values_list("name", flat=True)
+            self.parent_topics().values_list("name", flat=True)
         )
 
 
