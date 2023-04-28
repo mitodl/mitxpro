@@ -66,7 +66,7 @@ from mitxpro.views import get_base_context
 
 class CanCreatePageMixin:
     """
-    Mixin to create only a single page
+    Mixin to make sure that only a single page can be created under the home page.
     """
 
     @classmethod
@@ -217,7 +217,6 @@ class WebinarPage(MetadataPageMixin, Page):
     category = models.CharField(max_length=20, choices=WEBINAR_CATEGORY_CHOICES)
     banner_image = models.ForeignKey(
         Image,
-        null=True,
         on_delete=models.SET_NULL,
         related_name="+",
         help_text="Banner image for the Webinar.",
@@ -229,21 +228,21 @@ class WebinarPage(MetadataPageMixin, Page):
         null=True, blank=True, help_text="The duration of the webinar in Minutes."
     )
     description = models.TextField(
-        null=True, blank=True, help_text="Description for the webinar."
+        null=True, blank=True, help_text="Description of the webinar."
     )
     action_title = models.CharField(
         max_length=255,
-        help_text="The text to show on the call to action button i.e. REGISTER, VIEW RECORDING",
+        help_text="Specify the webinar call-to-action text here (e.g: 'REGISTER, VIEW RECORDING').",
     )
     action_url = models.URLField(
-        help_text="The URL to go to when the action button is clicked.",
+        help_text="Specify the webinar action-url here (like a link to an article e.g: https://www.google.com/search?q=article).",
     )
 
     content_panels = [
         FieldPanel("category"),
         FieldPanel("title"),
         ImageChooserPanel("banner_image"),
-        FieldPanel("start_datetime"),
+        FieldPanel("start_datetime", heading="Start Date and Time"),
         FieldPanel("duration"),
         FieldPanel("description"),
         FieldPanel("action_title"),

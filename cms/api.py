@@ -147,7 +147,7 @@ def ensure_index_pages():
     program_index = cms_models.ProgramIndexPage.objects.first()
     signatory_index = cms_models.SignatoryIndexPage.objects.first()
     certificate_index = cms_models.CertificateIndexPage.objects.first()
-    webinars_index = cms_models.WebinarIndexPage.objects.first()
+    webinar_index = cms_models.WebinarIndexPage.objects.first()
 
     if not course_index:
         course_index = cms_models.CourseIndexPage(title="Courses")
@@ -187,9 +187,14 @@ def ensure_index_pages():
         )
         home_page.add_child(instance=certificate_index)
 
-    if not webinars_index:
-        webinars_index = cms_models.WebinarIndexPage(title="Webinars")
-        home_page.add_child(instance=webinars_index)
+    if not webinar_index:
+        webinar_index = cms_models.WebinarIndexPage(title="Webinars")
+        home_page.add_child(instance=webinar_index)
+
+    if webinar_index.get_children_count() != cms_models.WebinarPage.objects.count():
+        for webinar_page in cms_models.WebinarPage.objects.all():
+            webinar_page.move(webinar_index, "last-child")
+        log.info("Moved webinar pages under program index page")
 
 
 def configure_wagtail():
