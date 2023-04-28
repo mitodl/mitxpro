@@ -28,12 +28,15 @@ import EmailConfirmPage from "./pages/settings/EmailConfirmPage"
 
 import type { Match, Location } from "react-router"
 import type { CurrentUser } from "../flow/authTypes"
+import catalog from "../lib/queries/catalog"
+import type {CourseTopic} from "../flow/courseTypes";
 
 type Props = {
   match: Match,
   location: Location,
   currentUser: ?CurrentUser,
-  addUserNotification: Function
+  addUserNotification: Function,
+  courseTopics: Array<CourseTopic>
 }
 
 export class App extends React.Component<Props, void> {
@@ -65,7 +68,7 @@ export class App extends React.Component<Props, void> {
         prevProps.location.pathname === routes.checkout))
 
   render() {
-    const { match, currentUser, location } = this.props
+    const { match, currentUser, location, courseTopics } = this.props
 
     if (!currentUser) {
       // application is still loading
@@ -74,7 +77,7 @@ export class App extends React.Component<Props, void> {
 
     return (
       <div className="app">
-        <Header currentUser={currentUser} location={location} errorPageHeader={null} />
+        <Header currentUser={currentUser} location={location} errorPageHeader={null} courseTopics={courseTopics}/>
         <Switch>
           <PrivateRoute
             exact
@@ -124,14 +127,15 @@ export class App extends React.Component<Props, void> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  currentUser: currentUserSelector
+  currentUser:  currentUserSelector,
+  courseTopics: catalog.courseTopicsSelector
 })
 
 const mapDispatchToProps = {
   addUserNotification
 }
 
-const mapPropsToConfig = () => [users.currentUserQuery()]
+const mapPropsToConfig = () => [users.currentUserQuery(), catalog.courseTopicsQuery()]
 
 export default compose(
   connect(

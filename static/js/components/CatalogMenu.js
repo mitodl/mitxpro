@@ -2,13 +2,7 @@
 /* global SETTINGS:false */
 import React from "react"
 
-import MixedLink from "./MixedLink"
-import { routes } from "../lib/urls"
-
-import type { User } from "../flow/authTypes"
 import type {CourseTopic} from "../flow/courseTypes"
-import {Field} from "formik"
-import {formatRunTitle} from "../lib/ecommerce"
 
 type Props = {
   /* This is here for future use when we have custom profile avatars */
@@ -28,13 +22,16 @@ const CatalogMenu = ({ courseTopics }: Props) => {
         Courses
       </div>
       <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a className="dropdown-item bold" href="/catalog/" aria-label="All Topics">All Topics</a>
         {
           courseTopics.map(courseTopic =>
             (
-              <MixedLink className="dropdown-item" dest="/catalog/" aria-label={courseTopic.name}>{courseTopic.name} ({courseTopic.course_count})</MixedLink>
+              <a className="dropdown-item" href={`/catalog/?topic=${  courseTopic.name}`} aria-label={courseTopic.name}>{courseTopic.name} ({courseTopic.course_count})</a>
             )
           )
         }
+        <div className="dropdown-divider" />
+        <a className="dropdown-item bold" href="/catalog/" aria-label="All Topics">Programs</a>
       </div>
     </div>
   )

@@ -7,12 +7,13 @@
 }
 
 .dropdown-menu {
-  background-color: $white-smoke;
-  box-shadow: -5px 5px 10px grey;
+  background-color: $tile-background;
+  box-shadow: 0 9px 8px 9px rgba(0,0,0,0.07);
   border-color: $white-smoke;
-  border-radius: 5px;
   right: 0px;
   left: unset;
+  max-height: 390px;
+  overflow: scroll;
 
   .dropdown-divider {
     border-top: 1px dashed $black;
@@ -21,18 +22,24 @@
 
   .dropdown-item {
     display: flex;
-    margin-top: 10px;
+    margin-top: 0;
     align-items: center;
-    font-family: Roboto;
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 500;
     color: $black;
-    line-height: 14px;
+    line-height: 44px;
+    padding: 0 10px;
+    letter-spacing: 0;
+    font-family: Rajdhani;
 
     &:active {
       background-color: $soft-light-gray;
     }
 
+  }
+
+  .bold {
+    font-weight: 600;
   }
 }
 
@@ -42,10 +49,14 @@
 
   .dropdown-toggle {
     max-width: 100%;
-    padding: 0px;
+    padding: 0;
 
     &:hover {
       cursor: pointer;
     }
+  }
+
+  @include media-breakpoint-down(sm) {
+    padding: 5px 0 0 0;
   }
 }

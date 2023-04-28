@@ -62,7 +62,7 @@ export class HeaderApp extends React.Component<Props, void> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  currentUser: currentUserSelector,
+  currentUser:  currentUserSelector,
   courseTopics: catalog.courseTopicsSelector
 })
 
