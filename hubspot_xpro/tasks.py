@@ -221,17 +221,8 @@ def batch_upsert_hubspot_b2b_deals_chunked(ids: List[int]) -> List[str]:
     """
     results = []
     for order in B2BOrder.objects.filter(id__in=ids):
-        try:
-            validate_email(order.email)
-        except ValidationError as exc:
-            log.error(
-                "Validation error for B2BOrder id %s in Hubspot sync task: %s",
-                order.id,
-                exc,
-            )
-        else:
-            results.append(api.sync_b2b_deal_with_hubspot(order.id).id)
-            time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
+        results.append(api.sync_b2b_deal_with_hubspot(order.id).id)
+        time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
     return results
 
 

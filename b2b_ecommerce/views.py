@@ -4,6 +4,7 @@ import logging
 from urllib.parse import urlencode, urljoin
 
 from django.conf import settings
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.validators import validate_email
 from django.db import transaction
 from django.http.response import Http404
@@ -61,8 +62,8 @@ class B2BCheckoutView(APIView):
 
         try:
             validate_email(email)
-        except ValidationError:  # pylint: disable=try-except-raise
-            raise
+        except DjangoValidationError:
+            raise ValidationError({"email": "Invalid email"})
 
         try:
             num_seats = int(num_seats)

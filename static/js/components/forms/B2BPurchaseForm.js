@@ -31,7 +31,7 @@ type Props = {
   seats: ?string
 }
 
-const emailValidation = yup.object().shape({
+export const emailValidation = yup.object().shape({
   email: emailFieldValidation
 })
 
@@ -43,10 +43,6 @@ export const validate = (values: Object) => {
   const numSeats = parseInt(values.num_seats)
   if (isNaN(numSeats) || numSeats <= 0) {
     errors.num_seats = "Number of Seats is required"
-  }
-
-  if (!values.email.includes("@")) {
-    errors.email = "Email is required"
   }
 
   if (!values.product.productId) {

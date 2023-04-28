@@ -168,6 +168,27 @@ def test_create_order_with_invalid_code(client):
     assert resp.json() == {"errors": ["Invalid coupon code"]}
 
 
+def test_create_order_with_invalid_email(client):
+    """
+    An order is created with an invalid email, so a validation error is returned
+    """
+
+    product_version = ProductVersionFactory.create()
+    coupon = B2BCouponFactory.create(product=product_version.product)
+    resp = client.post(
+        reverse("b2b-checkout"),
+        {
+            "num_seats": 5,
+            "email": "invalid-email",
+            "product_version_id": product_version.id,
+            "discount_code": coupon.coupon_code,
+            "contract_number": "",
+        },
+    )
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json() == {"errors": {"email": "Invalid email"}}
+
+
 @pytest.mark.parametrize("key", ["num_seats", "email", "product_version_id"])
 def test_create_order_missing_parameters(key, client):
     """
