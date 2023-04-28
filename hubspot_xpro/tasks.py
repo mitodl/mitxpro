@@ -9,8 +9,6 @@ from typing import List, Tuple
 import celery
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
 from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
 from hubspot.crm.objects import BatchInputSimplePublicObjectInput
 from mitol.common.decorators import single_task
