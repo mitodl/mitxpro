@@ -124,22 +124,22 @@ describe("B2BPurchaseForm", () => {
     })
 
     it("should validate email field", async () => {
-      const values = { email: "" }
-      try {
-        await emailValidation.validate(values)
-        assert.fail("Email validation should have thrown an error")
-      } catch (error) {
-        assert.strictEqual(error.message, "Email is a required field")
-      }
-    })
-
-    it("should validate email field is invalid", async () => {
-      const values = { email: "invalid-email" }
-      try {
-        await emailValidation.validate(values)
-        assert.fail("Email validation should have thrown an error")
-      } catch (error) {
-        assert.strictEqual(error.message, "Invalid email")
+      const testCases = [
+        { input: "", expectedError: "Email is a required field" },
+        { input: "something", expectedError: "Invalid email" },
+        { input: "something@", expectedError: "Invalid email" },
+        { input: "@something", expectedError: "Invalid email" },
+      ];
+    
+      for (const { input, expectedError } of testCases) {
+        const values = { email: input };
+    
+        try {
+          await emailValidation.validate(values);
+          assert.fail("Email validation should have thrown an error");
+        } catch (error) {
+          assert.strictEqual(error.message, expectedError);
+        }
       }
     })
 

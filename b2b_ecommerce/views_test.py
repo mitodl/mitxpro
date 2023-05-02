@@ -168,7 +168,8 @@ def test_create_order_with_invalid_code(client):
     assert resp.json() == {"errors": ["Invalid coupon code"]}
 
 
-def test_create_order_with_invalid_email(client):
+@pytest.mark.parametrize("email", ["", "something", "something@", "@something"])
+def test_create_order_with_invalid_email(client, email):
     """
     An order is created with an invalid email, so a validation error is returned
     """
@@ -179,7 +180,7 @@ def test_create_order_with_invalid_email(client):
         reverse("b2b-checkout"),
         {
             "num_seats": 5,
-            "email": "invalid-email",
+            "email": email,
             "product_version_id": product_version.id,
             "discount_code": coupon.coupon_code,
             "contract_number": "",
