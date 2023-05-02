@@ -129,16 +129,16 @@ describe("B2BPurchaseForm", () => {
         { input: "something", expectedError: "Invalid email" },
         { input: "something@", expectedError: "Invalid email" },
         { input: "@something", expectedError: "Invalid email" },
-      ];
-    
+      ]
+
       for (const { input, expectedError } of testCases) {
-        const values = { email: input };
-    
+        const values = { email: input }
+
         try {
-          await emailValidation.validate(values);
-          assert.fail("Email validation should have thrown an error");
+          await emailValidation.validate(values)
+          assert.fail("Email validation should have thrown an error")
         } catch (error) {
-          assert.strictEqual(error.message, expectedError);
+          assert.strictEqual(error.message, expectedError)
         }
       }
     })
