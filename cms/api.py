@@ -194,7 +194,7 @@ def ensure_index_pages():
     if webinar_index.get_children_count() != cms_models.WebinarPage.objects.count():
         for webinar_page in cms_models.WebinarPage.objects.all():
             webinar_page.move(webinar_index, "last-child")
-        log.info("Moved webinar pages under program index page")
+        log.info("Moved webinar pages under webinar index page")
 
 
 def configure_wagtail():

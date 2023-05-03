@@ -8,6 +8,8 @@ from urllib.parse import urljoin
 
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Prefetch, Q, prefetch_related_objects
 from django.http.response import Http404
@@ -17,7 +19,6 @@ from django.utils.functional import cached_property
 from django.utils.text import slugify
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
-from wagtail.admin.forms import WagtailAdminPageForm
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.core import blocks
 from wagtail.core.blocks import PageChooserBlock, RawHTMLBlock, StreamBlock
@@ -166,39 +167,10 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
             webinars={
                 category: WebinarPage.objects.live()
                 .filter(category=category)
-                .filter(
-                    Q(start_datetime__isnull=True) | Q(start_datetime__gt=now_in_utc())
-                )
+                .filter(Q(date__isnull=True) | Q(date__gte=now_in_utc().date()))
                 for category in [UPCOMING_WEBINAR, ON_DEMAND_WEBINAR]
             },
         )
-
-
-class WebinarAdminForm(WagtailAdminPageForm):
-    """
-    Custom form for webinars to add validations.
-    """
-
-    def clean(self):
-        """Validates start_datetime and duration for upcoming webinars."""
-        cleaned_data = super().clean()
-
-        category = cleaned_data.get("category")
-        if category and category == UPCOMING_WEBINAR:
-            start_datetime = cleaned_data.get("start_datetime")
-            if not start_datetime:
-                self.add_error(
-                    "start_datetime",
-                    "Start datetime cannot be empty for Upcoming Webinars.",
-                )
-
-            duration = cleaned_data.get("duration")
-            if not duration:
-                self.add_error(
-                    "duration", "Duration cannot be empty for Upcoming Webinars."
-                )
-
-        return cleaned_data
 
 
 class WebinarPage(MetadataPageMixin, Page):
@@ -206,7 +178,6 @@ class WebinarPage(MetadataPageMixin, Page):
     Webinar page model
     """
 
-    base_form_class = WebinarAdminForm
     parent_page_types = [WebinarIndexPage]
 
     WEBINAR_CATEGORY_CHOICES = [
@@ -217,15 +188,19 @@ class WebinarPage(MetadataPageMixin, Page):
     category = models.CharField(max_length=20, choices=WEBINAR_CATEGORY_CHOICES)
     banner_image = models.ForeignKey(
         Image,
+        null=True,
+        blank=True,
         on_delete=models.SET_NULL,
         related_name="+",
         help_text="Banner image for the Webinar.",
     )
-    start_datetime = models.DateTimeField(
-        null=True, blank=True, help_text="The start date and time of the webinar."
+    date = models.DateField(
+        null=True, blank=True, help_text="The start date of the webinar."
     )
-    duration = models.PositiveIntegerField(
-        null=True, blank=True, help_text="The duration of the webinar in Minutes."
+    time = models.TextField(
+        null=True,
+        blank=True,
+        help_text="The timings of the webinar e.g (11 AM - 12 PM ET).",
     )
     description = models.TextField(
         null=True, blank=True, help_text="Description of the webinar."
@@ -242,27 +217,31 @@ class WebinarPage(MetadataPageMixin, Page):
         FieldPanel("category"),
         FieldPanel("title"),
         ImageChooserPanel("banner_image"),
-        FieldPanel("start_datetime", heading="Start Date and Time"),
-        FieldPanel("duration"),
+        FieldPanel("date", heading="Start Date"),
+        FieldPanel("time"),
         FieldPanel("description"),
         FieldPanel("action_title"),
         FieldPanel("action_url"),
     ]
 
     @property
-    def formatted_start_time(self):
-        """Formatted time information for the webinar list page"""
-        end_time = self.start_datetime + timedelta(minutes=self.duration)
-        if self.start_datetime.strftime("%p") != end_time.strftime("%p"):
-            formatted_start_time = self.start_datetime.strftime(
-                "%A, %B %-d, %Y | %-I %p - "
-            )
-        else:
-            formatted_start_time = self.start_datetime.strftime(
-                "%A, %B %-d, %Y | %-I - "
-            )
-        formatted_end_time = end_time.strftime("%-I %p %Z")
-        return formatted_start_time + formatted_end_time
+    def formatted_date(self):
+        """Formatted date information for the webinar list page"""
+        return self.date.strftime("%A, %B %-d, %Y")
+
+    def clean(self):
+        """Validates date and time for upcoming webinars."""
+        super().clean()
+        if self.category and self.category == UPCOMING_WEBINAR:
+            errors = {}
+            if not self.date:
+                errors["date"] = "Date cannot be empty for Upcoming Webinars."
+
+            if not self.time:
+                errors["time"] = "Time cannot be empty for Upcoming Webinars."
+
+            if errors:
+                raise ValidationError(errors)
 
 
 class CourseIndexPage(CourseObjectIndexPage):

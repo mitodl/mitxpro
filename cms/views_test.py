@@ -1,10 +1,11 @@
 """Tests for CMS views"""
-from datetime import timedelta
+from datetime import datetime, timedelta
 from types import SimpleNamespace
 
 import factory
 import pytest
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from rest_framework import status
 from wagtail.core.models import Site
@@ -490,7 +491,7 @@ def test_program_page_checkout_url_program_run(client, wagtail_basics):
 
 def test_program_page_for_program_run(client):
     """
-    Test that prgram page URL works with program run id
+    Test that program page URL works with program run id
     """
     program_page = ProgramPageFactory.create()
     program_page.save_revision().publish()
@@ -535,3 +536,29 @@ def test_webinar_page_context(client, wagtail_basics):
     assert "webinars" in context
     assert len(context["webinars"][ON_DEMAND_WEBINAR]) == 2
     assert len(context["webinars"][UPCOMING_WEBINAR]) == 3
+
+
+def test_webinar_formatted_date(wagtail_basics):
+    """
+    Test that `WebinarPage.formatted_date` returns date in specific format.
+    """
+    homepage = wagtail_basics.root
+    webinar_index_page = WebinarIndexPageFactory.create(parent=homepage)
+    webinar_index_page.save_revision().publish()
+
+    start_date = datetime.strptime("Tuesday, May 2, 2023", "%A, %B %d, %Y")
+    webinar = WebinarPageFactory.create(parent=webinar_index_page, date=start_date)
+
+    assert webinar.formatted_date == "Tuesday, May 2, 2023"
+
+
+def test_upcoming_webinar_datetime_validations(wagtail_basics):
+    """
+    Test that the webinar page raises ValidationError when Date and Time is not provided for the upcoming webinars.
+    """
+    homepage = wagtail_basics.root
+    webinar_index_page = WebinarIndexPageFactory.create(parent=homepage)
+    webinar_index_page.save_revision().publish()
+
+    with pytest.raises(ValidationError, match="cannot be empty for Upcoming Webinars."):
+        WebinarPageFactory.create(parent=webinar_index_page, date=None, time=None)

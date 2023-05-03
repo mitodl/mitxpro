@@ -31,8 +31,8 @@
                 {% if webinar.description %}
                   <p class="description">{{ webinar.description }}</p>
                 {% endif %}
-                {% if webinar.start_datetime %}
-                  <p class="time">{{ webinar.formatted_start_time }}</p>
+                {% if webinar.date and webinar.time %}
+                  <p class="time">{{ webinar.formatted_date }} | {{ webinar.time }}</p>
                 {% endif %}
                 <a href="{{ webinar.action_url }}" class="read-more">{{ webinar.action_title }}</a>
               </div>

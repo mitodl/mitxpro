@@ -465,7 +465,8 @@ class WebinarPageFactory(wagtail_factories.PageFactory):
     title = factory.fuzzy.FuzzyText(prefix="Webinar ")
     category = UPCOMING_WEBINAR
     banner_image = factory.SubFactory(wagtail_factories.ImageFactory)
-    duration = 60
+    date = factory.Faker("date_this_month", after_today=True)
+    time = "11 AM - 12 PM ET"
     description = factory.fuzzy.FuzzyText()
     action_title = "REGISTER"
     action_url = factory.Faker("uri")
