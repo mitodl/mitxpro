@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.121.0
+Version 0.121.0 (Released May 03, 2023)
 ---------------
 
 - feat: order topics alphabetically on HomePage and CatalogPage (#2634)
