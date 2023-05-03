@@ -164,10 +164,12 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
         return dict(
             **super().get_context(request),
             **get_base_context(request),
+            default_image_path=DEFAULT_COURSE_IMG_PATH,
             webinars={
                 category: WebinarPage.objects.live()
                 .filter(category=category)
                 .filter(Q(date__isnull=True) | Q(date__gte=now_in_utc().date()))
+                .order_by("date")
                 for category in [UPCOMING_WEBINAR, ON_DEMAND_WEBINAR]
             },
         )
@@ -210,7 +212,7 @@ class WebinarPage(MetadataPageMixin, Page):
         help_text="Specify the webinar call-to-action text here (e.g: 'REGISTER, VIEW RECORDING').",
     )
     action_url = models.URLField(
-        help_text="Specify the webinar action-url here (like a link to an article e.g: https://www.google.com/search?q=article).",
+        help_text="Specify the webinar action-url here (like a link to an external webinar page).",
     )
 
     content_panels = [

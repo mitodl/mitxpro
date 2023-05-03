@@ -137,7 +137,7 @@ def ensure_catalog_page():
         catalog_page.refresh_from_db()
 
 
-def ensure_index_pages():
+def ensure_index_pages():  # pylint: disable=too-many-branches
     """
     Ensures that the proper index pages exist as children of the home page, and that
     any pages that should belong to those index pages are set as children.

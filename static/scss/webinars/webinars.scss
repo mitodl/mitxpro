@@ -24,7 +24,7 @@
     }
 
     @include media-breakpoint-down (md) {
-      margin: 0 10px 84px 10px;
+      margin: 0 10px 84px 0;
     }
 
     .webinar {
@@ -53,6 +53,7 @@
 
         img {
           margin-bottom: 12px;
+          max-width: 330px;
 
           @include media-breakpoint-down (lg) {
             max-width: 280px;
