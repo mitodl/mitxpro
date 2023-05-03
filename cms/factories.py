@@ -1,5 +1,4 @@
 """Wagtail page factories"""
-import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from wagtail.core.rich_text import RichText
 
@@ -122,14 +121,7 @@ class ExternalCoursePageFactory(wagtail_factories.PageFactory):
     course = factory.SubFactory(CourseFactory, page=None)
 
     title = factory.Sequence("Test page - External Course {0}".format)
-    start_date = factory.Faker(
-        "date_time_this_month", before_now=True, after_now=False, tzinfo=pytz.utc
-    )
-    price = factory.fuzzy.FuzzyDecimal(low=1, high=123)
     external_marketing_url = factory.Faker("uri")
-    readable_id = factory.Sequence(
-        lambda number: "external-course:/v{}/{}".format(number, FAKE.slug())
-    )
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
@@ -157,18 +149,10 @@ class ExternalProgramPageFactory(wagtail_factories.PageFactory):
     program = factory.SubFactory(ProgramFactory, page=None)
 
     title = factory.Sequence("Test page - External Program {0}".format)
-    start_date = factory.Faker(
-        "date_time_this_month", before_now=True, after_now=False, tzinfo=pytz.utc
-    )
-    price = factory.fuzzy.FuzzyDecimal(low=1, high=123)
     external_marketing_url = factory.Faker("uri")
-    readable_id = factory.Sequence(
-        lambda number: "external-course:/v{}/{}".format(number, FAKE.slug())
-    )
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
-    course_count = factory.fuzzy.FuzzyInteger(1)
     parent = factory.SubFactory(wagtail_factories.PageFactory)
 
     class Meta:

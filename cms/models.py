@@ -4,12 +4,10 @@ Page models for the CMS
 # pylint: disable=too-many-lines, too-many-public-methods
 import re
 from datetime import datetime, timedelta
-from decimal import Decimal
 from urllib.parse import urljoin
 
 from django import forms
 from django.conf import settings
-from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Prefetch, Q, prefetch_related_objects
 from django.http.response import Http404
@@ -1111,27 +1109,6 @@ class ExternalCoursePage(CourseProductPage):
 
     template = "product_page.html"
 
-    readable_id = models.CharField(
-        max_length=64,
-        null=True,
-        blank=True,
-        unique=False,
-        help_text="The readable ID of the external course. Appears in URL, has to be unique.",
-    )
-    start_date = models.DateField(
-        null=True, blank=True, help_text="The start date of the external course."
-    )
-    price = models.DecimalField(
-        null=True,
-        blank=True,
-        decimal_places=2,
-        max_digits=20,
-        validators=[
-            MinValueValidator(Decimal("0"), message="Price cannot be negative")
-        ],
-        help_text="The price of the external course.",
-    )
-
 
 class ExternalProgramPage(ProgramProductPage):
     """
@@ -1139,33 +1116,6 @@ class ExternalProgramPage(ProgramProductPage):
     """
 
     template = "product_page.html"
-
-    readable_id = models.CharField(
-        max_length=64,
-        null=True,
-        blank=True,
-        unique=False,
-        help_text="The readable ID of the external program. Appears in URL, has to be unique.",
-    )
-    start_date = models.DateField(
-        null=True, blank=True, help_text="The start date of the external program."
-    )
-    price = models.DecimalField(
-        null=True,
-        blank=True,
-        decimal_places=2,
-        max_digits=20,
-        validators=[
-            MinValueValidator(Decimal("0"), message="Price cannot be negative")
-        ],
-        help_text="The price of the external program.",
-    )
-
-    course_count = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-        help_text="The number of total courses in the external program.",
-    )
 
     @property
     def program_page(self):
