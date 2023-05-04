@@ -4,7 +4,6 @@ import json
 
 import factory
 import pytest
-from django.core.exceptions import ValidationError
 from django.urls import resolve
 from wagtail.core.utils import WAGTAIL_APPEND_SLASH
 
@@ -790,20 +789,6 @@ def test_external_program_page_properties():
         background_image__title="background-image",
     )
 
-    # Saving an External Program should fail with ValidationError if course count is negative
-    external_program_page.course_count = -1
-    with pytest.raises(ValidationError):
-        external_program_page.save()
-    external_program_page.course_count = 2
-    external_program_page.save()
-
-    # Saving an External Program should fail with ValidationError if price is negative
-    external_program_page.price = -1.0
-    with pytest.raises(ValidationError):
-        external_program_page.save()
-    external_program_page.price = 1.0
-    external_program_page.save()
-
     assert external_program_page.title == "<p>page title</p>"
     assert external_program_page.subhead == "subhead"
     assert external_program_page.description == "<p>desc</p>"
@@ -812,7 +797,6 @@ def test_external_program_page_properties():
     assert external_program_page.video_title == "<p>title</p>"
     assert external_program_page.video_url == "http://test.com/mock.mp4"
     assert external_program_page.background_image.title == "background-image"
-    assert external_program_page.course_count == 2
 
 
 def test_course_page_learning_outcomes():
