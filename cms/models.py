@@ -180,6 +180,7 @@ class WebinarPage(MetadataPageMixin, Page):
     """
 
     parent_page_types = [WebinarIndexPage]
+    subpage_types = []
 
     WEBINAR_CATEGORY_CHOICES = [
         (UPCOMING_WEBINAR, UPCOMING_WEBINAR),
