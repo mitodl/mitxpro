@@ -1,7 +1,6 @@
 """Wagtail page factories"""
 import factory
 import faker
-import pytz
 import wagtail_factories
 
 from django.core.exceptions import ObjectDoesNotExist
