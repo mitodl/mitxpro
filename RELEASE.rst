@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.121.1
+---------------
+
+- Bump redis from 3.5.3 to 4.4.4 (#2605)
+
 Version 0.121.0 (Released May 03, 2023)
 ---------------
 
