@@ -54,7 +54,7 @@ type Props = {|
 |}
 
 type State = {
-  state: string | null | undefined
+  state: string | null
 }
 
 export class RegisterDetailsPage extends React.Component<Props, State> {
@@ -80,9 +80,8 @@ export class RegisterDetailsPage extends React.Component<Props, State> {
         // eslint-disable-next-line camelcase
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
           setErrors(field_errors),
-        [STATE_EXISTING_ACCOUNT]: ({state}: AuthResponse) => {
+        [STATE_EXISTING_ACCOUNT]: ({state}: AuthResponse) =>
           this.setState({ state })
-        }
       })
     } finally {
       setSubmitting(false)

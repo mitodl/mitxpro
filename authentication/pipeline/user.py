@@ -2,7 +2,6 @@
 import json
 import logging
 import requests
-from mitol.common.utils import dict_without_keys
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthException, InvalidEmail
 from social_core.pipeline.partial import partial
@@ -109,7 +108,9 @@ def create_user_via_email(
             errors=["Full name must be at least 2 characters long."],
         )
 
-    data["email"] = kwargs.get("email", kwargs.get("details", {}).get("email")).strip().lower()
+    data["email"] = (
+        kwargs.get("email", kwargs.get("details", {}).get("email")).strip().lower()
+    )
     username = usernameify(data["name"], email=data["email"])
 
     affiliate_id = get_affiliate_id_from_request(strategy.request)

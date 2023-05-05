@@ -4,6 +4,7 @@
 from django.contrib.sessions.middleware import SessionMiddleware
 import pytest
 from social_core.backends.email import EmailAuth
+from social_core.exceptions import InvalidEmail
 from social_django.utils import load_strategy, load_backend
 
 from affiliate.factories import AffiliateFactory
@@ -350,6 +351,23 @@ def test_create_user_via_email_existing_user_raises(
             mock_create_user_strategy,
             mock_email_backend,
             user=user,
+            pipeline_index=0,
+            flow=SocialAuthState.FLOW_REGISTER,
+        )
+
+
+@pytest.mark.django_db
+def test_create_user_via_email_existing_email_case_insensitive_user_raises(
+    mock_email_backend, mock_create_user_strategy
+):
+    """Tests that create_user_via_email raises an error if a user already exists in the pipeline"""
+    email = "user@example.com"
+    UserFactory.create(email=email.upper())
+    with pytest.raises(InvalidEmail):
+        user_actions.create_user_via_email(
+            mock_create_user_strategy,
+            mock_email_backend,
+            details=dict(email=email),
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,
         )
