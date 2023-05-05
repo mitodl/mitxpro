@@ -24,14 +24,14 @@ const CatalogMenu = ({ courseTopics }: Props) => {
       <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
         <a className="dropdown-item bold" href="/catalog/" aria-label="All Topics">All Topics</a>
         {
-          courseTopics.map(courseTopic =>
+          courseTopics ? courseTopics.map(courseTopic =>
             (
               <a className="dropdown-item" href={`/catalog/?topic=${  courseTopic.name}`} aria-label={courseTopic.name}>{courseTopic.name} ({courseTopic.course_count})</a>
             )
-          )
+          ) : null
         }
         <div className="dropdown-divider" />
-        <a className="dropdown-item bold" href="/catalog/" aria-label="All Topics">Programs</a>
+        <a className="dropdown-item bold" href="/catalog/?active-tab=programs-tab" aria-label="All Topics">Programs</a>
       </div>
     </div>
   )

@@ -189,4 +189,19 @@ class CourseTopicViewSet(viewsets.ReadOnlyModelViewSet):
 
     permission_classes = []
     serializer_class = CourseTopicSerializer
-    queryset = CourseTopic.objects.filter(parent__isnull=True).annotate(course_count=Count("coursepage"))
+
+    def get_queryset(self):
+        return CourseTopic.objects.filter(
+            parent__isnull=True
+        ).annotate(
+            course_count=Count("coursepage")
+        ).prefetch_related(
+            Prefetch(
+                "subtopics",
+                CourseTopic.objects.filter(
+                    parent__isnull=False
+                ).annotate(
+                    course_count=Count("coursepage")
+                )
+            ),
+        ).order_by("name")

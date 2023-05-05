@@ -426,6 +426,19 @@ class CatalogPage(Page):
             external_course_qset,
             external_program_qset,
         )
+
+        active_tab = request.GET.get("active-tab", "all-tab")
+        tab_visibility = {
+            "all_tab": "active" if active_tab == "all-tab" else "",
+            "programs_tab": "active" if active_tab == "programs-tab" else "",
+            "courses_tab": "active" if active_tab == "courses-tab" else "",
+        }
+        tab_content_class = {
+            "all_tab": "in show active" if active_tab == "all-tab" else "",
+            "programs_tab": "in show active" if active_tab == "programs-tab" else "",
+            "courses_tab": "in show active" if active_tab == "courses-tab" else "",
+        }
+
         return dict(
             **super().get_context(request),
             **get_base_context(request),
@@ -440,6 +453,8 @@ class CatalogPage(Page):
             ),
             topics=[ALL_TOPICS] + CourseTopic.objects.parent_topic_names(),
             selected_topic=topic_filter,
+            tab_visibility=tab_visibility,
+            tab_content_class=tab_content_class,
         )
 
 
