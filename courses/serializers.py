@@ -550,6 +550,11 @@ class CourseTopicSerializer(serializers.ModelSerializer):
         fields = ["name", "parent", "course_count"]
 
     def get_course_count(self, instance):
-        return instance.course_count + sum(
-            [topic.course_count for topic in instance.subtopics.all()]
+        return sum(
+            [
+                instance.internal_course_count,
+                instance.external_course_count,
+                *[topic.internal_course_count for topic in instance.subtopics.all()],
+                *[topic.external_course_count for topic in instance.subtopics.all()],
+            ]
         )
