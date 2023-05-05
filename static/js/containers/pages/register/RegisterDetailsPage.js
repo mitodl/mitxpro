@@ -12,7 +12,7 @@ import { createStructuredSelector } from "reselect"
 import auth from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
-import { STATE_ERROR, handleAuthResponse } from "../../../lib/auth"
+import { STATE_ERROR, STATE_EXISTING_ACCOUNT, handleAuthResponse } from "../../../lib/auth"
 import queries from "../../../lib/queries"
 import { qsPartialTokenSelector } from "../../../lib/selectors"
 
@@ -53,7 +53,14 @@ type Props = {|
   ...DispatchProps
 |}
 
-export class RegisterDetailsPage extends React.Component<Props> {
+type State = {
+  state: string | null | undefined
+}
+
+export class RegisterDetailsPage extends React.Component<Props, State> {
+  state = {
+    state: null
+  }
   async onSubmit(detailsData: any, { setSubmitting, setErrors }: any) {
     const {
       history,
@@ -72,7 +79,10 @@ export class RegisterDetailsPage extends React.Component<Props> {
       handleAuthResponse(history, body, {
         // eslint-disable-next-line camelcase
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
-          setErrors(field_errors)
+          setErrors(field_errors),
+        [STATE_EXISTING_ACCOUNT]: ({state}: AuthResponse) => {
+          this.setState({ state })
+        }
       })
     } finally {
       setSubmitting(false)
@@ -81,39 +91,57 @@ export class RegisterDetailsPage extends React.Component<Props> {
 
   render() {
     const { countries } = this.props
+    const { state } = this.state
 
     return (
       <DocumentTitle
         title={`${SETTINGS.site_name} | ${REGISTER_DETAILS_PAGE_TITLE}`}
       >
-        <div className="container auth-page registration-page">
-          <div className="auth-header row d-flex flex-row align-items-center justify-content-between flex-nowrap">
-            <div className="col-auto flex-shrink-1">
-              <h1>Create an Account</h1>
-            </div>
-            <div className="col-auto align-text-right gray-text">
-              <h4>Step 1 of 2</h4>
-            </div>
-          </div>
-          <div className="auth-card card-shadow row">
-            <div className="container">
-              <div className="row">
-                <div className="col-12 form-group">
-                  {`Already have an ${SETTINGS.site_name} account? `}
-                  <Link to={routes.login.begin}>Click here</Link>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-12 auth-form">
-                  <RegisterDetailsForm
-                    onSubmit={this.onSubmit.bind(this)}
-                    countries={countries}
-                  />
-                </div>
+        {state && state !== undefined ? (
+          <div className="container auth-page">
+            <div className="row">
+              <div className="col">
+                <React.Fragment>
+                  <span className={"confirmation-message"}>
+                    {"You already have an xPRO account. Please"}{" "}
+                    <Link className={"action-link"} to={routes.login.begin}>
+                      click here {"to sign in"}
+                    </Link>
+                  </span>
+                </React.Fragment>
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="container auth-page registration-page">
+            <div className="auth-header row d-flex flex-row align-items-center justify-content-between flex-nowrap">
+              <div className="col-auto flex-shrink-1">
+                <h1>Create an Account</h1>
+              </div>
+              <div className="col-auto align-text-right gray-text">
+                <h4>Step 1 of 2</h4>
+              </div>
+            </div>
+            <div className="auth-card card-shadow row">
+              <div className="container">
+                <div className="row">
+                  <div className="col-12 form-group">
+                    {`Already have an ${SETTINGS.site_name} account? `}
+                    <Link to={routes.login.begin}>Click here</Link>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-12 auth-form">
+                    <RegisterDetailsForm
+                      onSubmit={this.onSubmit.bind(this)}
+                      countries={countries}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </DocumentTitle>
     )
   }

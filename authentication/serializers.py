@@ -95,7 +95,7 @@ class SocialAuthSerializer(serializers.Serializer):
                     authentication_flow
                     and authentication_flow == SocialAuthState.FLOW_REGISTER
                 ):
-                    email = partial.data.get("kwargs").get("details").get("email")
+                    email = partial.data.get("kwargs").get("details").get("email").strip().lower()
                     user_exists = User.objects.filter(email=email).exists()
 
                     if user_exists:
