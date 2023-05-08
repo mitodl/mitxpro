@@ -335,7 +335,7 @@ class CatalogPage(Page):
 
     slug = "catalog"
 
-    def get_context(self, request, *args, **kwargs):
+    def get_context(self, request, *args, **kwargs):  # pylint: disable=too-many-locals
         """
         Populate the context with live programs, courses and programs + courses
         """

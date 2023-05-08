@@ -550,6 +550,9 @@ class CourseTopicSerializer(serializers.ModelSerializer):
         fields = ["name", "parent", "course_count"]
 
     def get_course_count(self, instance):
+        """
+        Returns the sum of annotated course counts.
+        """
         return sum(
             [
                 instance.internal_course_count,
