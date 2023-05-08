@@ -12,13 +12,14 @@ from mitol.digitalcredentials.models import DigitalCredentialRequest
 from mitol.digitalcredentials.serializers import DigitalCredentialRequestSerializer
 from rest_framework import status
 
-from cms.factories import ProgramPageFactory, CoursePageFactory
+from cms.factories import CoursePageFactory, ProgramPageFactory
 from courses.api import UserEnrollments
 from courses.factories import (
     CourseFactory,
     CourseRunCertificateFactory,
     CourseRunEnrollmentFactory,
     CourseRunFactory,
+    CourseTopicFactory,
     ProgramCertificateFactory,
     ProgramEnrollmentFactory,
     ProgramFactory,
@@ -527,3 +528,52 @@ def test_course_run_certificate_api(
     assert dcr.credentialed_object == cert
 
     assert resp.json() == DigitalCredentialRequestSerializer(dcr).data
+
+
+def test_course_topics_api(client, django_assert_num_queries):
+    """
+    Test that course topics API returns the expected topics and correct course count.
+    """
+    resp = client.get(reverse("parent_course_topics_api-list"))
+    assert resp.status_code == status.HTTP_200_OK
+    assert len(resp.json()) == 0
+
+    parent_topic = CourseTopicFactory.create()
+    child_topic = CourseTopicFactory.create(parent=parent_topic)
+
+    now = now_in_utc()
+    future_start_date = now + timedelta(days=2)
+    future_end_date = now + timedelta(days=10)
+    past_start_date = now - timedelta(days=10)
+    past_end_date = now - timedelta(days=2)
+
+    future_runs = CourseRunFactory.create_batch(
+        2,
+        course__live=True,
+        start_date=future_start_date,
+        end_date=future_end_date,
+        live=True,
+    )
+    past_runs = CourseRunFactory.create_batch(
+        2,
+        course__live=True,
+        start_date=past_start_date,
+        end_date=past_end_date,
+        enrollment_end=None,
+        live=True,
+    )
+
+    for run, topic in zip(future_runs, [parent_topic, child_topic]):
+        run.course.coursepage.topics.set([topic.id])
+
+    for run, topic in zip(past_runs, [parent_topic, child_topic]):
+        run.course.coursepage.topics.set([topic.id])
+
+    with django_assert_num_queries(2):
+        resp = client.get(reverse("parent_course_topics_api-list"))
+        assert resp.status_code == status.HTTP_200_OK
+
+        resp_json = resp.json()
+        assert len(resp_json) == 1
+        assert resp_json[0]["name"] == parent_topic.name
+        assert resp_json[0]["course_count"] == 2
