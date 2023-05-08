@@ -24,10 +24,9 @@ const CatalogMenu = ({ courseTopics }: Props) => {
       <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
         <a className="dropdown-item bold" href="/catalog/" aria-label="All Topics">All Topics</a>
         {
-          courseTopics ? courseTopics.map(courseTopic =>
+          courseTopics ? courseTopics.map((courseTopic, index) =>
             (
-              // eslint-disable-next-line react/jsx-key
-              <a className="dropdown-item" href={`/catalog/?topic=${  courseTopic.name}`} aria-label={courseTopic.name}>{courseTopic.name} ({courseTopic.course_count})</a>
+              <a className="dropdown-item" key={index} href={`/catalog/?topic=${  courseTopic.name}`} aria-label={courseTopic.name}>{courseTopic.name} ({courseTopic.course_count})</a>
             )
           ) : null
         }
