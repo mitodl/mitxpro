@@ -111,19 +111,18 @@ def create_user_via_email(
     data["email"] = (
         kwargs.get("email", kwargs.get("details", {}).get("email")).strip().lower()
     )
+
+    if User.objects.filter(email__iexact=data["email"]).exists():
+        raise InvalidEmail(backend)
+
     username = usernameify(data["name"], email=data["email"])
+    data["username"] = username
 
     affiliate_id = get_affiliate_id_from_request(strategy.request)
     if affiliate_id is not None:
         context["affiliate_id"] = affiliate_id
 
-    try:
-        user = User.objects.get(email__iexact=data["email"])
-    except User.DoesNotExist:
-        data["username"] = username
-        serializer = UserSerializer(data=data, context=context)
-    else:
-        raise InvalidEmail(backend)
+    serializer = UserSerializer(data=data, context=context)
 
     if not serializer.is_valid():
         raise RequirePasswordAndPersonalInfoException(

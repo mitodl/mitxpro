@@ -5,7 +5,6 @@ import DocumentTitle from "react-document-title"
 import { REGISTER_CONFIRM_PAGE_TITLE } from "../../../constants"
 import { compose } from "redux"
 import { connect } from "react-redux"
-import { Link } from "react-router-dom"
 import { mutateAsync, connectRequest } from "redux-query"
 import { path } from "ramda"
 import { createStructuredSelector } from "reselect"
@@ -13,14 +12,11 @@ import { createStructuredSelector } from "reselect"
 import { addUserNotification } from "../../../actions"
 import { ALERT_TYPE_TEXT } from "../../../constants"
 import queries from "../../../lib/queries"
-import { routes } from "../../../lib/urls"
+import { getAppropriateInformationFragment } from "../../../lib/util"
 import {
   STATE_REGISTER_DETAILS,
-  STATE_INVALID_EMAIL,
   handleAuthResponse,
-  INFORMATIVE_STATES,
-  STATE_INVALID_LINK,
-  STATE_EXISTING_ACCOUNT
+  INFORMATIVE_STATES
 } from "../../../lib/auth"
 
 import { authSelector } from "../../../lib/queries/auth"
@@ -73,7 +69,7 @@ export class RegisterConfirmPage extends React.Component<Props> {
           <div className="row">
             <div className="col">
               {auth && INFORMATIVE_STATES.indexOf(auth.state) > -1 ? (
-                this.getAppropriateInformationFragment(auth.state)
+                getAppropriateInformationFragment(auth.state)
               ) : (
                 <p>Confirming...</p>
               )}
@@ -81,36 +77,6 @@ export class RegisterConfirmPage extends React.Component<Props> {
           </div>
         </div>
       </DocumentTitle>
-    )
-  }
-
-  getAppropriateInformationFragment(state: string) {
-    let preLinkText = ""
-    let postLinkText = ""
-    let linkRoute = null
-    if (state === STATE_INVALID_LINK) {
-      preLinkText = "This invitation is invalid or has expired. Please"
-      postLinkText = "to register again"
-      linkRoute = routes.register.begin
-    } else if (state === STATE_EXISTING_ACCOUNT) {
-      preLinkText = "You already have an xPRO account. Please"
-      postLinkText = "to sign in"
-      linkRoute = routes.login.begin
-    } else if (state === STATE_INVALID_EMAIL) {
-      preLinkText = "No confirmation code was provided or it has expired."
-      postLinkText = "to register again"
-      linkRoute = routes.register.begin
-    }
-    return (
-      <React.Fragment>
-        <span className={"confirmation-message"}>
-          {preLinkText}{" "}
-          <Link class={"action-link"} to={linkRoute}>
-            click here {postLinkText}
-          </Link>
-          .
-        </span>
-      </React.Fragment>
     )
   }
 }

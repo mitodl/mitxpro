@@ -9,9 +9,11 @@ import { Link } from "react-router-dom"
 import { connectRequest, mutateAsync, requestAsync } from "redux-query"
 import { createStructuredSelector } from "reselect"
 
+import { authSelector } from "../../../lib/queries/auth"
 import auth from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
+import { getAppropriateInformationFragment } from "../../../lib/util"
 import { STATE_ERROR, STATE_EXISTING_ACCOUNT, handleAuthResponse } from "../../../lib/auth"
 import queries from "../../../lib/queries"
 import { qsPartialTokenSelector } from "../../../lib/selectors"
@@ -30,6 +32,7 @@ import type {
 type RegisterProps = {|
   location: Location,
   history: RouterHistory,
+  authResponse: ?AuthResponse,
   params: { partialToken: string }
 |}
 
@@ -53,14 +56,7 @@ type Props = {|
   ...DispatchProps
 |}
 
-type State = {
-  state: string | null
-}
-
-export class RegisterDetailsPage extends React.Component<Props, State> {
-  state = {
-    state: null
-  }
+export class RegisterDetailsPage extends React.Component<Props> {
   async onSubmit(detailsData: any, { setSubmitting, setErrors }: any) {
     const {
       history,
@@ -79,9 +75,7 @@ export class RegisterDetailsPage extends React.Component<Props, State> {
       handleAuthResponse(history, body, {
         // eslint-disable-next-line camelcase
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
-          setErrors(field_errors),
-        [STATE_EXISTING_ACCOUNT]: ({state}: AuthResponse) =>
-          this.setState({ state })
+          setErrors(field_errors)
       })
     } finally {
       setSubmitting(false)
@@ -89,25 +83,17 @@ export class RegisterDetailsPage extends React.Component<Props, State> {
   }
 
   render() {
-    const { countries } = this.props
-    const { state } = this.state
+    const { authResponse, countries } = this.props
 
     return (
       <DocumentTitle
         title={`${SETTINGS.site_name} | ${REGISTER_DETAILS_PAGE_TITLE}`}
       >
-        {state && state !== undefined ? (
-          <div className="container auth-page">
-            <div className="row">
-              <div className="col">
-                <React.Fragment>
-                  <span className={"confirmation-message"}>
-                    {"You already have an xPRO account. Please"}{" "}
-                    <Link className={"action-link"} to={routes.login.begin}>
-                      click here {"to sign in"}
-                    </Link>
-                  </span>
-                </React.Fragment>
+        {authResponse && authResponse.state === STATE_EXISTING_ACCOUNT ? (
+          <div className="container auth-page registration-page">
+            <div className="auth-header row d-flex flex-row align-items-center justify-content-between flex-nowrap">
+              <div className="col-auto flex-shrink-1">
+                {getAppropriateInformationFragment(authResponse.state)}
               </div>
             </div>
           </div>
@@ -147,8 +133,9 @@ export class RegisterDetailsPage extends React.Component<Props, State> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  params:    createStructuredSelector({ partialToken: qsPartialTokenSelector }),
-  countries: queries.users.countriesSelector
+  authResponse: authSelector,
+  params:       createStructuredSelector({ partialToken: qsPartialTokenSelector }),
+  countries:    queries.users.countriesSelector
 })
 
 const mapPropsToConfig = () => [queries.users.countriesQuery()]

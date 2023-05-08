@@ -11,7 +11,8 @@ import {
   STATE_USER_BLOCKED,
   STATE_ERROR,
   STATE_ERROR_TEMPORARY,
-  FLOW_REGISTER
+  FLOW_REGISTER,
+  STATE_EXISTING_ACCOUNT
 } from "../../../lib/auth"
 import { routes } from "../../../lib/urls"
 import { makeRegisterAuthResponse } from "../../../factories/auth"
@@ -148,5 +149,24 @@ describe("RegisterDetailsPage", () => {
       }
       sinon.assert.calledWith(setSubmittingStub, false)
     })
+  })
+
+  it("displays a message with a login link for existing account", async () => {
+    helper.handleRequestStub.returns({})
+    const { inner } = await renderPage({
+      entities: {
+        auth: {
+          state:         STATE_EXISTING_ACCOUNT,
+          partial_token: partialToken,
+          extra_data:    {}
+        }
+      }
+    })
+    const confirmationMessage = inner.find(".confirmation-message")
+    assert.isNotNull(confirmationMessage)
+    assert.equal(
+      confirmationMessage.text().replace("<Link />", ""),
+      "You already have an xPRO account. Please ."
+    )
   })
 })

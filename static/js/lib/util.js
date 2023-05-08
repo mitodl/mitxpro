@@ -1,5 +1,6 @@
 // @flow
 /* global SETTINGS:false */
+import React from "react"
 import {
   all,
   complement,
@@ -17,6 +18,7 @@ import _truncate from "lodash/truncate"
 import qs from "query-string"
 import * as R from "ramda"
 import moment from "moment"
+import { Link } from "react-router-dom"
 
 import type Moment from "moment"
 import type {
@@ -29,6 +31,12 @@ import type { Product } from "../flow/ecommerceTypes"
 
 import { PRODUCT_TYPE_COURSERUN } from "../constants"
 import type { HttpRespErrorMessage, HttpResponse } from "../flow/httpTypes"
+import { routes } from "./urls"
+import {
+  STATE_INVALID_EMAIL,
+  STATE_INVALID_LINK,
+  STATE_EXISTING_ACCOUNT
+} from "./auth"
 
 /**
  * Returns a promise which resolves after a number of milliseconds have elapsed
@@ -234,4 +242,34 @@ export const getErrorMessages = (
     return null
   }
   return response.body.errors
+}
+
+export const getAppropriateInformationFragment = (state: string) => {
+  let preLinkText = ""
+  let postLinkText = ""
+  let linkRoute = null
+  if (state === STATE_INVALID_LINK) {
+    preLinkText = "This invitation is invalid or has expired. Please"
+    postLinkText = "to register again"
+    linkRoute = routes.register.begin
+  } else if (state === STATE_EXISTING_ACCOUNT) {
+    preLinkText = "You already have an xPRO account. Please"
+    postLinkText = "to sign in"
+    linkRoute = routes.login.begin
+  } else if (state === STATE_INVALID_EMAIL) {
+    preLinkText = "No confirmation code was provided or it has expired."
+    postLinkText = "to register again"
+    linkRoute = routes.register.begin
+  }
+  return (
+    <React.Fragment>
+      <span className={"confirmation-message"}>
+        {preLinkText}{" "}
+        <Link className={"action-link"} to={linkRoute}>
+          click here {postLinkText}
+        </Link>
+        .
+      </span>
+    </React.Fragment>
+  )
 }
