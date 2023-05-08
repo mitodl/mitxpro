@@ -29,7 +29,7 @@ import EmailConfirmPage from "./pages/settings/EmailConfirmPage"
 import type { Match, Location } from "react-router"
 import type { CurrentUser } from "../flow/authTypes"
 import catalog from "../lib/queries/catalog"
-import type {CourseTopic} from "../flow/courseTypes";
+import type {CourseTopic} from "../flow/courseTypes"
 
 type Props = {
   match: Match,

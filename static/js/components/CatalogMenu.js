@@ -26,6 +26,7 @@ const CatalogMenu = ({ courseTopics }: Props) => {
         {
           courseTopics ? courseTopics.map(courseTopic =>
             (
+              // eslint-disable-next-line react/jsx-key
               <a className="dropdown-item" href={`/catalog/?topic=${  courseTopic.name}`} aria-label={courseTopic.name}>{courseTopic.name} ({courseTopic.course_count})</a>
             )
           ) : null

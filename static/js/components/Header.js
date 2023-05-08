@@ -7,7 +7,7 @@ import NotificationContainer from "./NotificationContainer"
 
 import type { CurrentUser } from "../flow/authTypes"
 import type { Location } from "react-router"
-import type {CourseTopic} from "../flow/courseTypes";
+import type {CourseTopic} from "../flow/courseTypes"
 
 type Props = {
   currentUser: ?CurrentUser,
