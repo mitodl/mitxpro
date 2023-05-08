@@ -6,7 +6,7 @@ import { assert } from "chai"
 
 import { Field, Formik } from "formik"
 
-import B2BPurchaseForm, { validate } from "./B2BPurchaseForm"
+import B2BPurchaseForm, { validate, emailValidation } from "./B2BPurchaseForm"
 import ProductSelector from "../input/ProductSelector"
 import configureStoreMain from "../../store/configureStore"
 
@@ -103,11 +103,9 @@ describe("B2BPurchaseForm", () => {
       assert.deepEqual(
         validate({
           num_seats: "",
-          email:     "",
           product:   { productId: null, programId: null }
         }),
         {
-          email:     "Email is required",
           num_seats: "Number of Seats is required",
           product:   "No product selected"
         }
@@ -123,6 +121,24 @@ describe("B2BPurchaseForm", () => {
         }).num_seats,
         "Number of Seats is required"
       )
+    })
+    ;[
+      ["", "Email is a required field"],
+      ["something", "Invalid email"],
+      ["something@", "Invalid email"],
+      ["@something", "Invalid email"],
+      ["abc@example.com", null]
+    ].forEach(([email, expectedError]) => {
+      it("should validate email field", async () => {
+        const values = { email: email }
+        try {
+          const result = await emailValidation.validate(values)
+          assert.strictEqual(result["email"], "abc@example.com")
+          assert.strictEqual(null, expectedError)
+        } catch (error) {
+          assert.strictEqual(error.message, expectedError)
+        }
+      })
     })
 
     it("passes validation", () => {
