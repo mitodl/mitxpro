@@ -231,6 +231,7 @@ class PublicUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ("id", "username", "name", "created_on", "updated_on")
 
+
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for users"""
 

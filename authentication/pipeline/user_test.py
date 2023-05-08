@@ -357,19 +357,22 @@ def test_create_user_via_email_existing_user_raises(
 
 
 @pytest.mark.django_db
-def test_create_user_via_email_existing_email_case_insensitive_user_raises(
+def test_create_user_via_email_with_email_case_insensitive_existing_user(
     mock_email_backend, mock_create_user_strategy
 ):
-    """Tests that create_user_via_email raises an error if a user already exists in the pipeline"""
+    """
+    Tests that create_user_via_email raises InvalidEmail exception
+    if a user already exists with different case email
+    """
     email = "user@example.com"
     UserFactory.create(email=email.upper())
     with pytest.raises(InvalidEmail):
         user_actions.create_user_via_email(
             mock_create_user_strategy,
             mock_email_backend,
-            details=dict(email=email),
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,
+            details=dict(email=email),
         )
 
 

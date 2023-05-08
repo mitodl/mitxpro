@@ -118,11 +118,12 @@ def create_user_via_email(
         context["affiliate_id"] = affiliate_id
 
     try:
-        user = User.objects.get(email=data["email"])
-        raise InvalidEmail(backend)
+        user = User.objects.get(email__iexact=data["email"])
     except User.DoesNotExist:
         data["username"] = username
         serializer = UserSerializer(data=data, context=context)
+    else:
+        raise InvalidEmail(backend)
 
     if not serializer.is_valid():
         raise RequirePasswordAndPersonalInfoException(
