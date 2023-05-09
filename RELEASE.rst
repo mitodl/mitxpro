@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.121.2
+Version 0.121.2 (Released May 09, 2023)
 ---------------
 
 - chore: external courseware unused fields cleanup (#2587)
