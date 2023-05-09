@@ -154,10 +154,11 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_topics(self, instance):
         """List topics of a course"""
-        return sorted(
-            [{"name": topic.name} for topic in instance.page.topics.all()],
-            key=lambda topic: topic["name"],
-        )
+        if instance.page:
+            return sorted(
+                [{"name": topic.name} for topic in instance.page.topics.all()],
+                key=lambda topic: topic["name"],
+            )
 
     def get_time_commitment(self, instance):
         """Returns the time commitment for this course that's set in CMS page"""
