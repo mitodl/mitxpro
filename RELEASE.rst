@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.121.3
+---------------
+
+- fix: checkout when there is a course without course page (#2644)
+- fix: Bad B2BOrder email values cause exceptions when syncing to Hubspot (#2626)
+
 Version 0.121.2 (Released May 09, 2023)
 ---------------
 
