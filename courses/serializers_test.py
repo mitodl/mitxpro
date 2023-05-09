@@ -199,7 +199,7 @@ def test_serialize_course(
         mock_context["all_runs"] = True
     user = mock_context["request"].user
 
-    # Only create course page is required
+    # Only create course page if required
     if course_page:
         course = CourseFactory.create(
             is_external=is_external,
@@ -217,7 +217,6 @@ def test_serialize_course(
         course__no_program=True,
         live=True,
     )
-    # course = course_run.course
     topic = "a course topic"
     if course_page:
         course.page.topics.set([CourseTopic.objects.create(name=topic)])

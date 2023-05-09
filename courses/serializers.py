@@ -159,6 +159,7 @@ class CourseSerializer(serializers.ModelSerializer):
                 [{"name": topic.name} for topic in instance.page.topics.all()],
                 key=lambda topic: topic["name"],
             )
+        return []
 
     def get_time_commitment(self, instance):
         """Returns the time commitment for this course that's set in CMS page"""
