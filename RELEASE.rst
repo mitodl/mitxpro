@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.121.3
+Version 0.121.3 (Released May 09, 2023)
 ---------------
 
 - fix: checkout when there is a course without course page (#2644)
