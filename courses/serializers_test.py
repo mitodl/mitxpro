@@ -165,6 +165,7 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("is_anonymous", [True, False])
 @pytest.mark.parametrize("all_runs", [True, False])
 @pytest.mark.parametrize("is_external", [True, False])
+@pytest.mark.parametrize("course_page", [True, False])
 @pytest.mark.parametrize(
     "duration, time_commitment, video_url, ceus, external_marketing_url",
     [
@@ -183,6 +184,7 @@ def test_serialize_course(
     is_anonymous,
     all_runs,
     is_external,
+    course_page,
     duration,
     time_commitment,
     video_url,
@@ -196,19 +198,28 @@ def test_serialize_course(
     if all_runs:
         mock_context["all_runs"] = True
     user = mock_context["request"].user
+
+    if course_page:
+        course = CourseFactory.create(
+            is_external=is_external,
+            page__time_commitment=time_commitment,
+            page__duration=duration,
+            page__video_url=video_url,
+            page__certificate_page__CEUs=ceus,
+            page__external_marketing_url=external_marketing_url,
+        )
+    else:
+        course = CourseFactory.create(page=None, is_external=is_external)
+
     course_run = CourseRunFactory.create(
-        course__page__time_commitment=time_commitment,
-        course__page__duration=duration,
-        course__page__video_url=video_url,
-        course__is_external=is_external,
-        course__page__certificate_page__CEUs=ceus,
+        course=course,
         course__no_program=True,
-        course__page__external_marketing_url=external_marketing_url,
         live=True,
     )
-    course = course_run.course
+    # course = course_run.course
     topic = "a course topic"
-    course.page.topics.set([CourseTopic.objects.create(name=topic)])
+    if course_page:
+        course.page.topics.set([CourseTopic.objects.create(name=topic)])
 
     # Create expired, enrollment_ended, future, and enrolled course runs
     CourseRunFactory.create(course=course, end_date=now - timedelta(1), live=True)
@@ -237,24 +248,24 @@ def test_serialize_course(
         data,
         {
             "title": course.title,
-            "description": course.page.description,
-            "url": f"http://localhost{course.page.get_url()}",
+            "description": course.page.description if course_page else None,
+            "url": f"http://localhost{course.page.get_url()}" if course_page else None,
             "readable_id": course.readable_id,
             "id": course.id,
             "courseruns": [
                 CourseRunSerializer(run).data
                 for run in sorted(expected_runs, key=lambda run: run.start_date)
             ],
-            "thumbnail_url": f"http://localhost:8053{course.page.thumbnail_image.file.url}",
+            "thumbnail_url": f"http://localhost:8053{course.page.thumbnail_image.file.url if course_page else '/static/images/mit-dome.png'}",
             "next_run_id": course.first_unexpired_run.id,
-            "topics": [{"name": topic}],
-            "time_commitment": time_commitment,
-            "duration": duration,
-            "video_url": video_url,
-            "credits": ceus,
+            "topics": [{"name": topic}] if course_page else None,
+            "time_commitment": time_commitment if course_page else None,
+            "duration": duration if course_page else None,
+            "video_url": video_url if course_page else None,
+            "credits": ceus if course_page else None,
             "format": "Online",
             "is_external": is_external,
-            "external_marketing_url": external_marketing_url,
+            "external_marketing_url": external_marketing_url if course_page else None,
         },
     )
 
