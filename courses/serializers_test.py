@@ -258,7 +258,7 @@ def test_serialize_course(
             ],
             "thumbnail_url": f"http://localhost:8053{course.page.thumbnail_image.file.url if course_page else '/static/images/mit-dome.png'}",
             "next_run_id": course.first_unexpired_run.id,
-            "topics": [{"name": topic}] if course_page else None,
+            "topics": [{"name": topic}] if course_page else [],
             "time_commitment": time_commitment if course_page else None,
             "duration": duration if course_page else None,
             "video_url": video_url if course_page else None,
