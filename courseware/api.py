@@ -616,7 +616,7 @@ def get_enrollment(user: User, course_run: CourseRun):
     )
 
 
-def enroll_in_edx_course_runs(user, course_runs):
+def enroll_in_edx_course_runs(user, course_runs, force_enrollment=False):
     """
     Enrolls a user in edx course runs
 
@@ -632,12 +632,20 @@ def enroll_in_edx_course_runs(user, course_runs):
         EdxApiEnrollErrorException: Raised if the underlying edX API HTTP request fails
         UnknownEdxApiEnrollException: Raised if an unknown error was encountered during the edX API request
     """
-    edx_client = get_edx_api_client(user)
+    username = None
+    if force_enrollment:
+        edx_client = get_edx_api_service_client()
+        username = user.username
+    else:
+        edx_client = get_edx_api_client(user)
     results = []
     for course_run in course_runs:
         try:
             result = edx_client.enrollments.create_student_enrollment(
-                course_run.courseware_id, mode=EDX_ENROLLMENT_PRO_MODE
+                course_run.courseware_id,
+                mode=EDX_ENROLLMENT_PRO_MODE,
+                username=username,
+                force_enrollment=force_enrollment,
             )
             results.append(result)
         except HTTPError as exc:
@@ -661,7 +669,10 @@ def enroll_in_edx_course_runs(user, course_runs):
             )
             try:
                 result = edx_client.enrollments.create_student_enrollment(
-                    course_run.courseware_id, mode=EDX_ENROLLMENT_AUDIT_MODE
+                    course_run.courseware_id,
+                    mode=EDX_ENROLLMENT_AUDIT_MODE,
+                    username=username,
+                    force_enrollment=force_enrollment,
                 )
             except HTTPError as inner_exc:
                 raise EdxApiEnrollErrorException(

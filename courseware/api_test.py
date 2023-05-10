@@ -428,10 +428,16 @@ def test_enroll_in_edx_course_runs(mocker, user):
     course_runs = CourseRunFactory.build_batch(2)
     enroll_results = enroll_in_edx_course_runs(user, course_runs)
     mock_client.enrollments.create_student_enrollment.assert_any_call(
-        course_runs[0].courseware_id, mode=EDX_ENROLLMENT_PRO_MODE
+        course_runs[0].courseware_id,
+        mode=EDX_ENROLLMENT_PRO_MODE,
+        username=None,
+        force_enrollment=False,
     )
     mock_client.enrollments.create_student_enrollment.assert_any_call(
-        course_runs[1].courseware_id, mode=EDX_ENROLLMENT_PRO_MODE
+        course_runs[1].courseware_id,
+        mode=EDX_ENROLLMENT_PRO_MODE,
+        username=None,
+        force_enrollment=False,
     )
     assert enroll_results == enroll_return_values
 
@@ -452,10 +458,16 @@ def test_enroll_in_edx_course_runs_audit(mocker, user, error_text):
     results = enroll_in_edx_course_runs(user, [course_run])
     assert mock_client.enrollments.create_student_enrollment.call_count == 2
     mock_client.enrollments.create_student_enrollment.assert_any_call(
-        course_run.courseware_id, mode=EDX_ENROLLMENT_PRO_MODE
+        course_run.courseware_id,
+        mode=EDX_ENROLLMENT_PRO_MODE,
+        username=None,
+        force_enrollment=False,
     )
     mock_client.enrollments.create_student_enrollment.assert_any_call(
-        course_run.courseware_id, mode=EDX_ENROLLMENT_AUDIT_MODE
+        course_run.courseware_id,
+        mode=EDX_ENROLLMENT_AUDIT_MODE,
+        username=None,
+        force_enrollment=False,
     )
     assert results == [audit_result]
     patched_log_error.assert_called_once()
