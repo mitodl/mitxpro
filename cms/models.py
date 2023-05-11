@@ -48,6 +48,7 @@ from cms.constants import (
     PROGRAM_INDEX_SLUG,
     SIGNATORY_INDEX_SLUG,
     UPCOMING_WEBINAR,
+    WEBINAR_DEFAULT_IMAGES,
     WEBINAR_INDEX_SLUG,
 )
 from cms.forms import CertificatePageForm
@@ -171,6 +172,7 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
                 .order_by("date")
                 for category in [UPCOMING_WEBINAR, ON_DEMAND_WEBINAR]
             },
+            webinar_default_images=WEBINAR_DEFAULT_IMAGES,
         )
 
 

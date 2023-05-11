@@ -29,7 +29,7 @@
                 {% if webinar.banner_image %}
                   <img src="{% image_version_url webinar.banner_image "fill-330x200" %}" alt="{{ webinar.title }}" width="330" height="200" loading="lazy"/>
                 {% else %}
-                  <img src="{% static default_image_path %}" alt="Preview image" />
+                  <img src="{% static webinar_default_images|random %}" alt="Preview image" />
                 {% endif %}
                 <p class="title">{{ webinar.title }}</p>
                 {% if webinar.description %}

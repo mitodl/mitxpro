@@ -9,3 +9,10 @@ WEBINAR_INDEX_SLUG = "webinars"
 ALL_TOPICS = "All Topics"
 UPCOMING_WEBINAR = "UPCOMING"
 ON_DEMAND_WEBINAR = "ON-DEMAND"
+WEBINAR_DEFAULT_IMAGES = [
+    "images/webinars/webinar-default-001.jpg",
+    "images/webinars/webinar-default-002.jpg",
+    "images/webinars/webinar-default-003.jpg",
+    "images/webinars/webinar-default-004.jpg",
+    "images/webinars/webinar-default-005.jpg",
+]

@@ -2,7 +2,6 @@
 import factory
 import faker
 import wagtail_factories
-
 from django.core.exceptions import ObjectDoesNotExist
 from factory.django import DjangoModelFactory
 from faker.providers import internet
@@ -464,7 +463,7 @@ class WebinarPageFactory(wagtail_factories.PageFactory):
     title = factory.fuzzy.FuzzyText(prefix="Webinar ")
     category = UPCOMING_WEBINAR
     banner_image = factory.SubFactory(wagtail_factories.ImageFactory)
-    date = factory.Faker("date_this_month", after_today=True)
+    date = factory.Faker("future_date")
     time = "11 AM - 12 PM ET"
     description = factory.fuzzy.FuzzyText()
     action_title = "REGISTER"

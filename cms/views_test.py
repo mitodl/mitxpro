@@ -10,7 +10,12 @@ from django.urls import reverse
 from rest_framework import status
 from wagtail.core.models import Site
 
-from cms.constants import ALL_TOPICS, ON_DEMAND_WEBINAR, UPCOMING_WEBINAR
+from cms.constants import (
+    ALL_TOPICS,
+    ON_DEMAND_WEBINAR,
+    UPCOMING_WEBINAR,
+    WEBINAR_DEFAULT_IMAGES,
+)
 from cms.factories import (
     CatalogPageFactory,
     CourseIndexPageFactory,
@@ -527,7 +532,7 @@ def test_webinar_page_context(client, wagtail_basics):
 
     WebinarPageFactory.create_batch(3, parent=webinar_index_page)
     WebinarPageFactory.create_batch(
-        2, category=ON_DEMAND_WEBINAR, parent=webinar_index_page
+        2, category=ON_DEMAND_WEBINAR, date=None, parent=webinar_index_page
     )
 
     resp = client.get(webinar_index_page.get_url())
@@ -536,6 +541,7 @@ def test_webinar_page_context(client, wagtail_basics):
     assert "webinars" in context
     assert len(context["webinars"][ON_DEMAND_WEBINAR]) == 2
     assert len(context["webinars"][UPCOMING_WEBINAR]) == 3
+    assert context["webinar_default_images"] == WEBINAR_DEFAULT_IMAGES
 
 
 def test_webinar_formatted_date(wagtail_basics):
