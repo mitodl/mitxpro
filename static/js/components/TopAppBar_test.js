@@ -72,8 +72,8 @@ describe("TopAppBar component", () => {
       )
     })
 
-    it("does not have a button to collapse the menu", () => {
-      assert.isNotOk(
+    it("does have a button to collapse the menu", () => {
+      assert.isOk(
         shallow(<TopAppBar currentUser={user} location={null} errorPageHeader={null} />)
           .find("button")
           .exists()
