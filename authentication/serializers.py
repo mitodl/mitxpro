@@ -99,10 +99,8 @@ class SocialAuthSerializer(serializers.Serializer):
                         partial.data.get("kwargs")
                         .get("details")
                         .get("email")
-                        .strip()
-                        .lower()
                     )
-                    user_exists = User.objects.filter(email=email).exists()
+                    user_exists = User.objects.filter(email__iexact=email).exists()
 
                     if user_exists:
                         return SocialAuthState(SocialAuthState.STATE_EXISTING_ACCOUNT)
