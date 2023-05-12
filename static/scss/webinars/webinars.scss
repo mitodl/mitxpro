@@ -19,6 +19,7 @@
   .webinars-list {
     position: relative;
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     margin: 0 auto 84px auto;
     max-width: 1150px;
