@@ -108,9 +108,7 @@ def create_user_via_email(
             errors=["Full name must be at least 2 characters long."],
         )
 
-    data["email"] = (
-        kwargs.get("email", kwargs.get("details", {}).get("email"))
-    )
+    data["email"] = kwargs.get("email", kwargs.get("details", {}).get("email"))
 
     if User.objects.filter(email__iexact=data["email"]).exists():
         raise InvalidEmail(backend)
