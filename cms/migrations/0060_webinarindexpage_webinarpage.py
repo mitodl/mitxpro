@@ -59,7 +59,9 @@ def delete_webinar_index_page(apps, app_schema):
     webinar_index_content_type, _ = ContentType.objects.get_or_create(
         app_label="cms", model="webinarindexpage"
     )
-    webinar_index_page = Page.objects.filter(content_type_id=webinar_index_content_type.id).first()
+    webinar_index_page = Page.objects.filter(
+        content_type_id=webinar_index_content_type.id
+    ).first()
     if webinar_index_page:
         webinar_index_page.delete()
 
