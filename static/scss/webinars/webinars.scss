@@ -16,6 +16,15 @@
     margin: 60px 0;
   }
 
+  .no-available-webinars {
+    font-size: 1.75rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 473px;
+  }
+
   .webinars-list {
     position: relative;
     display: flex;

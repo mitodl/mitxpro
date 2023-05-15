@@ -527,8 +527,8 @@ def test_webinar_page_context(client, wagtail_basics):
     context = resp.context_data
 
     assert "webinars" in context
-    assert len(context["webinars"][ON_DEMAND_WEBINAR]) == 0
-    assert len(context["webinars"][UPCOMING_WEBINAR]) == 0
+    assert ON_DEMAND_WEBINAR not in context["webinars"]
+    assert UPCOMING_WEBINAR not in context["webinars"]
 
     WebinarPageFactory.create_batch(3, parent=webinar_index_page)
     WebinarPageFactory.create_batch(

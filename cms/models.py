@@ -3,6 +3,7 @@ Page models for the CMS
 """
 # pylint: disable=too-many-lines, too-many-public-methods
 import re
+from collections import defaultdict
 from datetime import datetime, timedelta
 from urllib.parse import urljoin
 
@@ -161,17 +162,20 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
 
     def get_context(self, request, *args, **kwargs):
         """Populate the context with a dict of categories and live webinars"""
+        webinars = (
+            WebinarPage.objects.live()
+            .filter(Q(date__isnull=True) | Q(date__gte=now_in_utc().date()))
+            .order_by("-category", "date")
+        )
+        webinars_dict = defaultdict(lambda: [])
+        for webinar in webinars:
+            webinars_dict[webinar.category].append(webinar)
+
         return dict(
             **super().get_context(request),
             **get_base_context(request),
             default_image_path=DEFAULT_COURSE_IMG_PATH,
-            webinars={
-                category: WebinarPage.objects.live()
-                .filter(category=category)
-                .filter(Q(date__isnull=True) | Q(date__gte=now_in_utc().date()))
-                .order_by("date")
-                for category in [UPCOMING_WEBINAR, ON_DEMAND_WEBINAR]
-            },
+            webinars=dict(webinars_dict),
             webinar_default_images=WEBINAR_DEFAULT_IMAGES,
         )
 

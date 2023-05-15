@@ -15,6 +15,9 @@
       <div class="sub-banner webinar-sub-banner">
         <h1>Webinars</h1>
       </div>
+      {% if not webinars %}
+          <div class="no-available-webinars">There are currently no webinars available.</div>
+      {% endif %}
     {% endblock %}
 
     {% for webinar_category, webinars_list in webinars.items %}
