@@ -5,7 +5,6 @@ import React from "react"
 import type {CourseTopic} from "../flow/courseTypes"
 
 type Props = {
-  /* This is here for future use when we have custom profile avatars */
   courseTopics: Array<CourseTopic>
 }
 
@@ -18,6 +17,7 @@ const CatalogMenu = ({ courseTopics }: Props) => {
         data-toggle="dropdown"
         aria-haspopup="true"
         aria-expanded="false"
+        aria-label="courses"
       >
         Courses
       </div>

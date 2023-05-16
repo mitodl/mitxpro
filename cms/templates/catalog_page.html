@@ -35,13 +35,13 @@
           <div class="container">
             <ul class="nav nav-tabs" role="tablist">
               <li class="nav-item">
-                <a id="all-tab" class="nav-link {{ tab_visibility.all_tab }}" data-toggle="tab" href="#all" role="tab" aria-controls="all" aria-selected="true">All</a>
+                <a id="all-tab" class="nav-link {{ tab_classes.ALL_TAB.visibility_class }}" data-toggle="tab" href="#all" role="tab" aria-controls="all" aria-selected="true">All</a>
               </li>
               <li class="nav-item" data-toggle="tooltip" title="Multi-course offerings" data-placement="bottom">
-                <a id="programs-tab" class="nav-link {{ tab_visibility.programs_tab }}" data-toggle="tab" href="#programs" role="tab" aria-controls="programs" aria-selected="false">programs</a>
+                <a id="programs-tab" class="nav-link {{ tab_classes.PROGRAMS_TAB.visibility_class }}" data-toggle="tab" href="#programs" role="tab" aria-controls="programs" aria-selected="false">programs</a>
               </li>
               <li class="nav-item" data-toggle="tooltip" title="Single course offerings" data-placement="bottom">
-                <a id="courses-tab" class="nav-link {{ tab_visibility.courses_tab }}" data-toggle="tab" href="#courses" role="tab" aria-controls="courses" aria-selected="false">Courses</a>
+                <a id="courses-tab" class="nav-link {{ tab_classes.COURSES_TAB.visibility_class }}" data-toggle="tab" href="#courses" role="tab" aria-controls="courses" aria-selected="false">Courses</a>
               </li>
             </ul>
             <div class="tab-content">
@@ -50,7 +50,7 @@
               {% elif featured_product.course %}
                 {% include "partials/featured_card.html" with courseware_page=featured_product object_type="course"%}
               {% endif %}
-              <div class="tab-pane catalog-body fade {{ tab_content_class.all_tab }}" id="all" role="tabpanel" aria-labelledby="all-tab">
+              <div class="tab-pane catalog-body fade {{ tab_classes.ALL_TAB.content_class }}" id="all" role="tabpanel" aria-labelledby="all-tab">
                 {% for page in all_pages %}
                   {% if page.program or page.is_external_program_page %}
                       {% include "partials/catalog_card.html" with courseware_page=page object_type="program" tab="all" %}
@@ -59,13 +59,13 @@
                   {% endif %}
                 {% endfor %}
               </div>
-              <div class="tab-pane catalog-body fade {{ tab_content_class.programs_tab }}" id="programs" role="tabpanel" aria-labelledby="programs-tab">
+              <div class="tab-pane catalog-body fade {{ tab_classes.PROGRAMS_TAB.content_class }}" id="programs" role="tabpanel" aria-labelledby="programs-tab">
                 <h1>PROGRAMS</h1>
                 {% for program_page in program_pages %}
                     {% include "partials/catalog_card.html" with courseware_page=program_page object_type="program" tab="program" %}
                 {% endfor %}
               </div>
-              <div class="tab-pane catalog-body fade {{ tab_content_class.courses_tab }}" id="courses" role="tabpanel" aria-labelledby="courses-tab">
+              <div class="tab-pane catalog-body fade {{ tab_classes.COURSES_TAB.content_class }}" id="courses" role="tabpanel" aria-labelledby="courses-tab">
                 <h1>COURSES</h1>
                 {% for course_page in course_pages %}
                     {% include "partials/catalog_card.html" with courseware_page=course_page object_type="course" tab="course" %}

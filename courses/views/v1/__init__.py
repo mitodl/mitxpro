@@ -26,6 +26,7 @@ from courses.serializers import (
     ProgramEnrollmentSerializer,
     ProgramSerializer,
 )
+from courses.utils import get_catalog_course_filter
 from ecommerce.models import Product
 from mitxpro.utils import now_in_utc
 
@@ -188,51 +189,56 @@ class CourseTopicViewSet(viewsets.ReadOnlyModelViewSet):
     Readonly viewset for parent course topics.
     """
 
-    CATALOG_VISIBLE_COURSE_FILTER = (
-        Q(coursepage__course__live=True)
-        & Q(coursepage__course__courseruns__live=True)
-        & Q(
-            Q(
-                Q(coursepage__course__courseruns__start_date__isnull=False)
-                & Q(coursepage__course__courseruns__start_date__gt=now_in_utc())
-            )
-            | Q(
-                Q(coursepage__course__courseruns__enrollment_end__isnull=False)
-                & Q(coursepage__course__courseruns__enrollment_end__gt=now_in_utc())
-            )
-        )
-    )
+    # CATALOG_VISIBLE_COURSE_FILTER = (
+    #     Q(coursepage__course__live=True)
+    #     & Q(coursepage__course__courseruns__live=True)
+    #     & Q(
+    #         Q(
+    #             Q(coursepage__course__courseruns__start_date__isnull=False)
+    #             & Q(coursepage__course__courseruns__start_date__gt=now_in_utc())
+    #         )
+    #         | Q(
+    #             Q(coursepage__course__courseruns__enrollment_end__isnull=False)
+    #             & Q(coursepage__course__courseruns__enrollment_end__gt=now_in_utc())
+    #         )
+    #     )
+    # )
 
     permission_classes = []
     serializer_class = CourseTopicSerializer
-    queryset = (
-        CourseTopic.objects.filter(parent__isnull=True)
-        .annotate(
-            internal_course_count=Count(
-                "coursepage", filter=CATALOG_VISIBLE_COURSE_FILTER, distinct=True
-            ),
-            external_course_count=Count(
-                "externalcoursepage",
-                filter=Q(externalcoursepage__course__live=True),
-                distinct=True,
-            ),
+
+    def get_queryset(self):
+        catalog_course_visible_filter = get_catalog_course_filter(
+            relative_filter="coursepage__"
         )
-        .prefetch_related(
-            Prefetch(
-                "subtopics",
-                CourseTopic.objects.filter(parent__isnull=False).annotate(
-                    internal_course_count=Count(
-                        "coursepage",
-                        filter=CATALOG_VISIBLE_COURSE_FILTER,
-                        distinct=True,
-                    ),
-                    external_course_count=Count(
-                        "externalcoursepage",
-                        filter=Q(externalcoursepage__course__live=True),
-                        distinct=True,
+        return (
+            CourseTopic.objects.filter(parent__isnull=True)
+            .annotate(
+                internal_course_count=Count(
+                    "coursepage", filter=catalog_course_visible_filter, distinct=True
+                ),
+                external_course_count=Count(
+                    "externalcoursepage",
+                    filter=Q(externalcoursepage__course__live=True),
+                    distinct=True,
+                ),
+            )
+            .prefetch_related(
+                Prefetch(
+                    "subtopics",
+                    CourseTopic.objects.filter(parent__isnull=False).annotate(
+                        internal_course_count=Count(
+                            "coursepage",
+                            filter=catalog_course_visible_filter,
+                            distinct=True,
+                        ),
+                        external_course_count=Count(
+                            "externalcoursepage",
+                            filter=Q(externalcoursepage__course__live=True),
+                            distinct=True,
+                        ),
                     ),
                 ),
-            ),
+            )
+            .order_by("name")
         )
-        .order_by("name")
-    )

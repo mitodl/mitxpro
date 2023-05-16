@@ -53,6 +53,7 @@ from cms.constants import (
     WEBINAR_INDEX_SLUG,
 )
 from cms.forms import CertificatePageForm
+from cms.utils import CatalogTab
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
 from courses.models import (
     Course,
@@ -427,16 +428,13 @@ class CatalogPage(Page):
             external_program_qset,
         )
 
-        active_tab = request.GET.get("active-tab", "all-tab")
-        tab_visibility = {
-            "all_tab": "active" if active_tab == "all-tab" else "",
-            "programs_tab": "active" if active_tab == "programs-tab" else "",
-            "courses_tab": "active" if active_tab == "courses-tab" else "",
-        }
-        tab_content_class = {
-            "all_tab": "in show active" if active_tab == "all-tab" else "",
-            "programs_tab": "in show active" if active_tab == "programs-tab" else "",
-            "courses_tab": "in show active" if active_tab == "courses-tab" else "",
+        active_tab = request.GET.get("active-tab", CatalogTab.ALL_TAB.value)
+        tab_classes = {
+            tab.name: {
+                "visibility_class": "active" if tab.value == active_tab else "",
+                "content_class": "in show active" if tab.value == active_tab else "",
+            }
+            for tab in list(CatalogTab)
         }
 
         return dict(
@@ -453,8 +451,7 @@ class CatalogPage(Page):
             ),
             topics=[ALL_TOPICS] + CourseTopic.objects.parent_topic_names(),
             selected_topic=topic_filter,
-            tab_visibility=tab_visibility,
-            tab_content_class=tab_content_class,
+            tab_classes=tab_classes,
         )
 
 
