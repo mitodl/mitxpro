@@ -7,6 +7,7 @@ import TopAppBar from "./TopAppBar"
 
 import { routes } from "../lib/urls"
 import { makeUser, makeAnonymousUser } from "../factories/user"
+import {makeCourseTopics} from "../factories/course"
 
 describe("TopAppBar component", () => {
   describe("for anonymous users", () => {
@@ -63,11 +64,20 @@ describe("TopAppBar component", () => {
   })
   describe("for logged in users", () => {
     const user = makeUser()
+    const courseTopics = makeCourseTopics()
 
     it("has a UserMenu component", () => {
       assert.isOk(
         shallow(<TopAppBar currentUser={user} location={null} errorPageHeader={null} courseTopics={[]} />)
           .find("UserMenu")
+          .exists()
+      )
+    })
+
+    it("has a CatalogMenu component", () => {
+      assert.isOk(
+        shallow(<TopAppBar currentUser={user} location={null} errorPageHeader={null} courseTopics={courseTopics} />)
+          .find("CatalogMenu")
           .exists()
       )
     })
