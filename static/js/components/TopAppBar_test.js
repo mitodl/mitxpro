@@ -114,9 +114,10 @@ describe("TopAppBar component", () => {
         search:   ""
       }
       const wrapper = shallow(
-        <TopAppBar currentUser={user} location={location} errorPageHeader={null} courseTopics={[]} />
+        <TopAppBar currentUser={user} location={location} errorPageHeader={null} courseTopics={courseTopics} />
       )
       assert.isNotOk(wrapper.find("UserMenu").exists())
+      assert.isOk(wrapper.find("CatalogMenu").exists())
       assert.isNotOk(wrapper.find("MixedLink").exists())
     })
   })

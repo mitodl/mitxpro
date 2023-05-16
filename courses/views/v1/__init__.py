@@ -189,25 +189,14 @@ class CourseTopicViewSet(viewsets.ReadOnlyModelViewSet):
     Readonly viewset for parent course topics.
     """
 
-    # CATALOG_VISIBLE_COURSE_FILTER = (
-    #     Q(coursepage__course__live=True)
-    #     & Q(coursepage__course__courseruns__live=True)
-    #     & Q(
-    #         Q(
-    #             Q(coursepage__course__courseruns__start_date__isnull=False)
-    #             & Q(coursepage__course__courseruns__start_date__gt=now_in_utc())
-    #         )
-    #         | Q(
-    #             Q(coursepage__course__courseruns__enrollment_end__isnull=False)
-    #             & Q(coursepage__course__courseruns__enrollment_end__gt=now_in_utc())
-    #         )
-    #     )
-    # )
-
     permission_classes = []
     serializer_class = CourseTopicSerializer
 
     def get_queryset(self):
+        """
+        Returns parent course topics annotated with course count. Also, prefetches child topics
+        with annotated course count.
+        """
         catalog_course_visible_filter = get_catalog_course_filter(
             relative_filter="coursepage__"
         )

@@ -31,6 +31,7 @@ const Header = ({ currentUser, location, errorPageHeader, courseTopics }: Props)
       scope.setUser(null)
     })
   }
+  console.log(courseTopics)
   return (
     <React.Fragment>
       <TopAppBar currentUser={currentUser} location={location} errorPageHeader={errorPageHeader} courseTopics={courseTopics}/>
