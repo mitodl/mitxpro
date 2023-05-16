@@ -1,18 +1,19 @@
 """Wagtail page factories"""
+import factory
+import faker
+import wagtail_factories
 from django.core.exceptions import ObjectDoesNotExist
+from factory.django import DjangoModelFactory
+from faker.providers import internet
 from wagtail.core.rich_text import RichText
 
-import factory
-from factory.django import DjangoModelFactory
-import faker
-from faker.providers import internet
-import wagtail_factories
 from cms.blocks import (
     FacultyBlock,
     LearningTechniqueBlock,
     ResourceBlock,
     UserTestimonialBlock,
 )
+from cms.constants import UPCOMING_WEBINAR
 from cms.models import (
     CatalogPage,
     CertificatePage,
@@ -39,9 +40,12 @@ from cms.models import (
     TextSection,
     TextVideoSection,
     UserTestimonialsPage,
+    WebinarIndexPage,
+    WebinarPage,
     WhoShouldEnrollPage,
 )
 from courses.factories import CourseFactory, ProgramFactory
+
 
 factory.Faker.add_provider(internet)
 
@@ -444,3 +448,28 @@ class CertificatePageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = CertificatePage
+
+
+class WebinarIndexPageFactory(wagtail_factories.PageFactory):
+    """WebinarIndexPage factory"""
+
+    class Meta:
+        model = WebinarIndexPage
+
+
+class WebinarPageFactory(wagtail_factories.PageFactory):
+    """WebinarPage factory class"""
+
+    title = factory.fuzzy.FuzzyText(prefix="Webinar ")
+    category = UPCOMING_WEBINAR
+    banner_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    date = factory.Faker("future_date")
+    time = "11 AM - 12 PM ET"
+    description = factory.fuzzy.FuzzyText()
+    action_title = "REGISTER"
+    action_url = factory.Faker("uri")
+    parent = factory.SubFactory(WebinarIndexPageFactory)
+    live = True
+
+    class Meta:
+        model = WebinarPage

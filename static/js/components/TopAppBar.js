@@ -26,9 +26,7 @@ const TopAppBar = ({ currentUser, location, errorPageHeader }: Props) => (
   <header className="header-holder">
     <div className="container">
       <nav
-        className={`sub-nav navbar navbar-expand-md link-section ${
-          currentUser && currentUser.is_authenticated ? "nowrap login" : ""
-        }`}
+        className="sub-nav navbar navbar-expand-md link-section"
       >
         <div className="navbar-brand">
           <a
@@ -46,7 +44,7 @@ const TopAppBar = ({ currentUser, location, errorPageHeader }: Props) => (
             height={47.5}
           />
         </div>
-        {(currentUser && currentUser.is_authenticated) || errorPageHeader ? null : (
+        {errorPageHeader ? null : (
           <button
             className="navbar-toggler nav-opener"
             type="button"
@@ -63,10 +61,13 @@ const TopAppBar = ({ currentUser, location, errorPageHeader }: Props) => (
         {errorPageHeader ? null : (
           <ul
             id="nav"
-            className={`${
-              currentUser && currentUser.is_authenticated ? "" : "collapse"
-            } navbar-collapse px-0 justify-content-end`}
+            className="collapse navbar-collapse px-0 justify-content-end"
           >
+            <li>
+              <a href={routes.webinars} className="" aria-label="webinars">
+                Webinars
+              </a>
+            </li>
             <li>
               <a href={routes.catalog} className="" aria-label="catalog">
                 Catalog

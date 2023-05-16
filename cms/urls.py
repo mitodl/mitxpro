@@ -12,14 +12,15 @@ the "+" characters.
 The pattern(s) defined here serve the same Wagtail view that the library-defined pattern serves.
 """
 from django.conf.urls import url
-
 from wagtail.core import views
 from wagtail.core.utils import WAGTAIL_APPEND_SLASH
 
-from cms.constants import COURSE_INDEX_SLUG, PROGRAM_INDEX_SLUG
+from cms.constants import COURSE_INDEX_SLUG, PROGRAM_INDEX_SLUG, WEBINAR_INDEX_SLUG
 
 
-index_page_pattern = r"(?:{}|{})".format(COURSE_INDEX_SLUG, PROGRAM_INDEX_SLUG)
+index_page_pattern = r"(?:{}|{}|{})".format(
+    COURSE_INDEX_SLUG, PROGRAM_INDEX_SLUG, WEBINAR_INDEX_SLUG
+)
 detail_path_char_pattern = r"\w\-+:"
 
 if WAGTAIL_APPEND_SLASH:

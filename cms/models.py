@@ -3,11 +3,13 @@ Page models for the CMS
 """
 # pylint: disable=too-many-lines, too-many-public-methods
 import re
+from collections import defaultdict
 from datetime import datetime, timedelta
 from urllib.parse import urljoin
 
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Prefetch, Q, prefetch_related_objects
 from django.http.response import Http404
@@ -43,8 +45,12 @@ from cms.constants import (
     ALL_TOPICS,
     CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
+    ON_DEMAND_WEBINAR,
     PROGRAM_INDEX_SLUG,
     SIGNATORY_INDEX_SLUG,
+    UPCOMING_WEBINAR,
+    WEBINAR_DEFAULT_IMAGES,
+    WEBINAR_INDEX_SLUG,
 )
 from cms.forms import CertificatePageForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
@@ -60,17 +66,10 @@ from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
 
 
-class CourseObjectIndexPage(Page):
+class CanCreatePageMixin:
     """
-    A placeholder class to group courseware object pages as children.
-    This class logically acts as no more than a "folder" to organize
-    pages and add parent slug segment to the page url.
+    Mixin to make sure that only a single page can be created under the home page.
     """
-
-    class Meta:
-        abstract = True
-
-    parent_page_types = ["HomePage"]
 
     @classmethod
     def can_create_at(cls, parent):
@@ -82,6 +81,19 @@ class CourseObjectIndexPage(Page):
             super().can_create_at(parent)
             and not parent.get_children().type(cls).exists()
         )
+
+
+class CourseObjectIndexPage(Page, CanCreatePageMixin):
+    """
+    A placeholder class to group courseware object pages as children.
+    This class logically acts as no more than a "folder" to organize
+    pages and add parent slug segment to the page url.
+    """
+
+    class Meta:
+        abstract = True
+
+    parent_page_types = ["HomePage"]
 
     def get_child_by_readable_id(self, readable_id):
         """Fetch a child page by a Program/Course readable_id value"""
@@ -111,7 +123,7 @@ class CourseObjectIndexPage(Page):
         raise Http404
 
 
-class SignatoryObjectIndexPage(Page):
+class SignatoryObjectIndexPage(Page, CanCreatePageMixin):
     """
     A placeholder class to group signatory object pages as children.
     This class logically acts as no more than a "folder" to organize
@@ -124,23 +136,120 @@ class SignatoryObjectIndexPage(Page):
     parent_page_types = ["HomePage"]
     subpage_types = ["SignatoryPage"]
 
-    @classmethod
-    def can_create_at(cls, parent):
-        """
-        You can only create one of these pages under the home page.
-        The parent is limited via the `parent_page_type` list.
-        """
-        return (
-            super().can_create_at(parent)
-            and not parent.get_children().type(cls).exists()
-        )
-
     def serve(self, request, *args, **kwargs):
         """
         For index pages we raise a 404 because these pages do not have a template
         of their own and we do not expect a page to available at their slug.
         """
         raise Http404
+
+
+class WebinarIndexPage(Page, CanCreatePageMixin):
+    """
+    A placeholder page to group webinars under it as well as consequently add /webinars/
+    """
+
+    slug = WEBINAR_INDEX_SLUG
+    template = "webinars_list_page.html"
+    parent_page_types = ["HomePage"]
+    subpage_types = ["WebinarPage"]
+
+    def serve(self, request, *args, **kwargs):
+        """
+        We need to serve the webinars index template for list view.
+        """
+        return Page.serve(self, request, *args, **kwargs)
+
+    def get_context(self, request, *args, **kwargs):
+        """Populate the context with a dict of categories and live webinars"""
+        webinars = (
+            WebinarPage.objects.live()
+            .filter(Q(date__isnull=True) | Q(date__gte=now_in_utc().date()))
+            .order_by("-category", "date")
+        )
+        webinars_dict = defaultdict(lambda: [])
+        for webinar in webinars:
+            webinars_dict[webinar.category].append(webinar)
+
+        return dict(
+            **super().get_context(request),
+            **get_base_context(request),
+            default_image_path=DEFAULT_COURSE_IMG_PATH,
+            webinars=dict(webinars_dict),
+            webinar_default_images=WEBINAR_DEFAULT_IMAGES,
+        )
+
+
+class WebinarPage(MetadataPageMixin, Page):
+    """
+    Webinar page model
+    """
+
+    parent_page_types = [WebinarIndexPage]
+    subpage_types = []
+
+    WEBINAR_CATEGORY_CHOICES = [
+        (UPCOMING_WEBINAR, UPCOMING_WEBINAR),
+        (ON_DEMAND_WEBINAR, ON_DEMAND_WEBINAR),
+    ]
+
+    category = models.CharField(max_length=20, choices=WEBINAR_CATEGORY_CHOICES)
+    banner_image = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Banner image for the Webinar.",
+    )
+    date = models.DateField(
+        null=True, blank=True, help_text="The start date of the webinar."
+    )
+    time = models.TextField(
+        null=True,
+        blank=True,
+        help_text="The timings of the webinar e.g (11 AM - 12 PM ET).",
+    )
+    description = models.TextField(
+        null=True, blank=True, help_text="Description of the webinar."
+    )
+    action_title = models.CharField(
+        max_length=255,
+        help_text="Specify the webinar call-to-action text here (e.g: 'REGISTER, VIEW RECORDING').",
+    )
+    action_url = models.URLField(
+        help_text="Specify the webinar action-url here (like a link to an external webinar page).",
+    )
+
+    content_panels = [
+        FieldPanel("category"),
+        FieldPanel("title"),
+        ImageChooserPanel("banner_image"),
+        FieldPanel("date", heading="Start Date"),
+        FieldPanel("time"),
+        FieldPanel("description"),
+        FieldPanel("action_title"),
+        FieldPanel("action_url"),
+    ]
+
+    @property
+    def formatted_date(self):
+        """Formatted date information for the webinar list page"""
+        return self.date.strftime("%A, %B %-d, %Y")
+
+    def clean(self):
+        """Validates date and time for upcoming webinars."""
+        super().clean()
+        if self.category and self.category == UPCOMING_WEBINAR:
+            errors = {}
+            if not self.date:
+                errors["date"] = "Date cannot be empty for Upcoming Webinars."
+
+            if not self.time:
+                errors["time"] = "Time cannot be empty for Upcoming Webinars."
+
+            if errors:
+                raise ValidationError(errors)
 
 
 class CourseIndexPage(CourseObjectIndexPage):
@@ -497,6 +606,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         "ImageCarouselPage",
         "CertificateIndexPage",
         "SignatoryIndexPage",
+        "WebinarIndexPage",
     ]
 
     @property
@@ -554,6 +664,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
             **get_base_context(request),
             "catalog_page": CatalogPage.objects.first(),
             "topics": CourseTopic.objects.parent_topic_names(),
+            "webinars_list_page": WebinarIndexPage.objects.first(),
             # The context variables below are added to avoid duplicate queries within the templates
             "about_mit_xpro": self.about_mit_xpro,
             "background_video_url": self.background_video_url,
