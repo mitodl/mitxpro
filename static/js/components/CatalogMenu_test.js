@@ -26,7 +26,7 @@ describe("CatalogMenu component", () => {
     courseTopics.map(
       (topic, index) => {
         assert.equal(wrapper.find("a").at(index + 1).text(), `${ topic.name } (${ topic.course_count })`)
-        assert.equal(wrapper.find("a").at(index + 1).prop("href"), `/catalog/?topic=${  topic.name}`)
+        assert.equal(wrapper.find("a").at(index + 1).prop("href"), `/catalog/?topic=${  topic.name }`)
       }
     )
   })

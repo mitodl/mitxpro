@@ -73,6 +73,5 @@ export type UserEnrollments = {
 
 export type CourseTopic = {
   name: string,
-  parent: ?number,
   course_count: ?number
 }

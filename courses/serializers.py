@@ -547,7 +547,7 @@ class CourseTopicSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.CourseTopic
-        fields = ["name", "parent", "course_count"]
+        fields = ["name", "course_count"]
 
     def get_course_count(self, instance):
         """

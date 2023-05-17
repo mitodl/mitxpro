@@ -121,17 +121,14 @@ export const makeProgramCertificate = (): ProgramCertificate => ({
 export const makeCourseTopics = () => [
   {
     name:         "Business",
-    parent:       null,
     course_count: 1
   },
   {
     name:         "Engineering",
-    parent:       null,
     course_count: 2
   },
   {
     name:         "Commerce",
-    parent:       null,
     course_count: 5
   },
 ]

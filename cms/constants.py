@@ -16,3 +16,5 @@ WEBINAR_DEFAULT_IMAGES = [
     "images/webinars/webinar-default-004.jpg",
     "images/webinars/webinar-default-005.jpg",
 ]
+
+ALL_TAB = "all-tab"

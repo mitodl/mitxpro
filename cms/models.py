@@ -42,6 +42,7 @@ from cms.blocks import (
     validate_unique_readable_ids,
 )
 from cms.constants import (
+    ALL_TAB,
     ALL_TOPICS,
     CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
@@ -53,7 +54,6 @@ from cms.constants import (
     WEBINAR_INDEX_SLUG,
 )
 from cms.forms import CertificatePageForm
-from cms.utils import CatalogTab
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
 from courses.models import (
     Course,
@@ -428,15 +428,6 @@ class CatalogPage(Page):
             external_program_qset,
         )
 
-        active_tab = request.GET.get("active-tab", CatalogTab.ALL_TAB.value)
-        tab_classes = {
-            tab.name: {
-                "visibility_class": "active" if tab.value == active_tab else "",
-                "content_class": "in show active" if tab.value == active_tab else "",
-            }
-            for tab in list(CatalogTab)
-        }
-
         return dict(
             **super().get_context(request),
             **get_base_context(request),
@@ -451,7 +442,7 @@ class CatalogPage(Page):
             ),
             topics=[ALL_TOPICS] + CourseTopic.objects.parent_topic_names(),
             selected_topic=topic_filter,
-            tab_classes=tab_classes,
+            active_tab=request.GET.get("active-tab", ALL_TAB),
         )
 
 
