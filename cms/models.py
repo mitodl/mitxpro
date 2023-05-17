@@ -336,7 +336,7 @@ class CatalogPage(Page):
 
     slug = "catalog"
 
-    def get_context(self, request, *args, **kwargs):  # pylint: disable=too-many-locals
+    def get_context(self, request, *args, **kwargs):
         """
         Populate the context with live programs, courses and programs + courses
         """
@@ -427,7 +427,6 @@ class CatalogPage(Page):
             external_course_qset,
             external_program_qset,
         )
-
         return dict(
             **super().get_context(request),
             **get_base_context(request),

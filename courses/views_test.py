@@ -534,7 +534,9 @@ def test_course_run_certificate_api(
     assert resp.json() == DigitalCredentialRequestSerializer(dcr).data
 
 
-def test_course_topics_api(client, django_assert_num_queries):  # pylint:disable=too-many-locals
+def test_course_topics_api(
+    client, django_assert_num_queries
+):  # pylint:disable=too-many-locals
     """
     Test that course topics API returns the expected topics and correct course count.
     """
