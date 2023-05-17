@@ -405,7 +405,6 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         max_length=255, unique=True, validators=[validate_url_path_field]
     )
     live = models.BooleanField(default=False)
-    topics = models.ManyToManyField(CourseTopic, blank=True)
     is_external = models.BooleanField(default=False)
 
     @property
