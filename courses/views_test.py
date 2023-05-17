@@ -12,7 +12,11 @@ from mitol.digitalcredentials.models import DigitalCredentialRequest
 from mitol.digitalcredentials.serializers import DigitalCredentialRequestSerializer
 from rest_framework import status
 
-from cms.factories import CoursePageFactory, ProgramPageFactory
+from cms.factories import (
+    CoursePageFactory,
+    ExternalCoursePageFactory,
+    ProgramPageFactory,
+)
 from courses.api import UserEnrollments
 from courses.factories import (
     CourseFactory,
@@ -530,7 +534,7 @@ def test_course_run_certificate_api(
     assert resp.json() == DigitalCredentialRequestSerializer(dcr).data
 
 
-def test_course_topics_api(client, django_assert_num_queries):
+def test_course_topics_api(client, django_assert_num_queries):  # pylint:disable=too-many-locals
     """
     Test that course topics API returns the expected topics and correct course count.
     """
@@ -563,11 +567,18 @@ def test_course_topics_api(client, django_assert_num_queries):
         live=True,
     )
 
+    external_course_pages = ExternalCoursePageFactory.create_batch(2, live=True)
+
     for run, topic in zip(future_runs, [parent_topic, child_topic]):
         run.course.coursepage.topics.set([topic.id])
 
     for run, topic in zip(past_runs, [parent_topic, child_topic]):
         run.course.coursepage.topics.set([topic.id])
+
+    for external_course_page, topic in zip(
+        external_course_pages, [parent_topic, child_topic]
+    ):
+        external_course_page.topics.set([topic.id])
 
     with django_assert_num_queries(2):
         resp = client.get(reverse("parent_course_topics_api-list"))
@@ -576,4 +587,4 @@ def test_course_topics_api(client, django_assert_num_queries):
         resp_json = resp.json()
         assert len(resp_json) == 1
         assert resp_json[0]["name"] == parent_topic.name
-        assert resp_json[0]["course_count"] == 2
+        assert resp_json[0]["course_count"] == 4
