@@ -553,11 +553,4 @@ class CourseTopicSerializer(serializers.ModelSerializer):
         """
         Returns the sum of annotated course counts.
         """
-        return sum(
-            [
-                instance.internal_course_count,
-                instance.external_course_count,
-                *[topic.internal_course_count for topic in instance.subtopics.all()],
-                *[topic.external_course_count for topic in instance.subtopics.all()],
-            ]
-        )
+        return instance.course_count

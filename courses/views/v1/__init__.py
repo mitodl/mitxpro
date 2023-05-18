@@ -26,7 +26,6 @@ from courses.serializers import (
     ProgramEnrollmentSerializer,
     ProgramSerializer,
 )
-from courses.utils import get_catalog_course_filter
 from ecommerce.models import Product
 from mitxpro.utils import now_in_utc
 
@@ -197,37 +196,8 @@ class CourseTopicViewSet(viewsets.ReadOnlyModelViewSet):
         Returns parent course topics annotated with course count. Also, prefetches child topics
         with annotated course count.
         """
-        catalog_course_visible_filter = get_catalog_course_filter(
-            relative_filter="coursepage__"
-        )
-        return (
-            CourseTopic.objects.filter(parent__isnull=True)
-            .annotate(
-                internal_course_count=Count(
-                    "coursepage", filter=catalog_course_visible_filter, distinct=True
-                ),
-                external_course_count=Count(
-                    "externalcoursepage",
-                    filter=Q(externalcoursepage__course__live=True),
-                    distinct=True,
-                ),
-            )
-            .prefetch_related(
-                Prefetch(
-                    "subtopics",
-                    CourseTopic.objects.filter(parent__isnull=False).annotate(
-                        internal_course_count=Count(
-                            "coursepage",
-                            filter=catalog_course_visible_filter,
-                            distinct=True,
-                        ),
-                        external_course_count=Count(
-                            "externalcoursepage",
-                            filter=Q(externalcoursepage__course__live=True),
-                            distinct=True,
-                        ),
-                    ),
-                ),
-            )
-            .order_by("name")
-        )
+        return [
+            topic
+            for topic in CourseTopic.objects.parent_topics_with_annotated_course_counts()
+            if topic.course_count > 0
+        ]
