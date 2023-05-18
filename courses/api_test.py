@@ -218,7 +218,7 @@ def test_create_run_enrollments_enroll_api_fail(
     force_enrollment,
     exception_cls,
     inner_exception,
-):
+):  # pylint: disable=too-many-arguments
     """
     create_run_enrollments should log a message and still create local enrollment records when an enrollment exception
     is raised if a flag is set to true
