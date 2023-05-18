@@ -3,7 +3,7 @@ import json
 import logging
 import requests
 from social_core.backends.email import EmailAuth
-from social_core.exceptions import AuthException, InvalidEmail
+from social_core.exceptions import AuthAlreadyAssociated, AuthException, InvalidEmail
 from social_core.pipeline.partial import partial
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -111,7 +111,7 @@ def create_user_via_email(
     data["email"] = kwargs.get("email", kwargs.get("details", {}).get("email"))
 
     if User.objects.filter(email__iexact=data["email"]).exists():
-        raise InvalidEmail(backend)
+        raise AuthAlreadyAssociated(backend)
 
     username = usernameify(data["name"], email=data["email"])
     data["username"] = username

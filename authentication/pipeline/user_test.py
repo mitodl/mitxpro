@@ -4,7 +4,7 @@
 from django.contrib.sessions.middleware import SessionMiddleware
 import pytest
 from social_core.backends.email import EmailAuth
-from social_core.exceptions import InvalidEmail
+from social_core.exceptions import AuthAlreadyAssociated
 from social_django.utils import load_strategy, load_backend
 
 from affiliate.factories import AffiliateFactory
@@ -366,7 +366,7 @@ def test_create_user_via_email_with_email_case_insensitive_existing_user(
     """
     email = "user@example.com"
     UserFactory.create(email=email.upper())
-    with pytest.raises(InvalidEmail):
+    with pytest.raises(AuthAlreadyAssociated):
         user_actions.create_user_via_email(
             mock_create_user_strategy,
             mock_email_backend,

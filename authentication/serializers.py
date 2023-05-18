@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
 from social_django.views import _do_login as login
 from social_core.backends.email import EmailAuth
-from social_core.exceptions import InvalidEmail, AuthException
+from social_core.exceptions import InvalidEmail, AuthException, AuthAlreadyAssociated
 from social_core.utils import (
     user_is_authenticated,
     user_is_active,
@@ -102,6 +102,8 @@ class SocialAuthSerializer(serializers.Serializer):
                         return SocialAuthState(SocialAuthState.STATE_EXISTING_ACCOUNT)
                     return SocialAuthState(SocialAuthState.STATE_INVALID_LINK)
                 return SocialAuthState(SocialAuthState.STATE_INVALID_EMAIL)
+            except AuthAlreadyAssociated:
+                return SocialAuthState(SocialAuthState.STATE_EXISTING_ACCOUNT)
             # clean partial data after usage
             strategy.clean_partial_pipeline(partial.token)
         else:
