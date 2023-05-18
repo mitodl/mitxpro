@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.122.0 (Released May 18, 2023)
+---------------
+
+- Bump terser from 4.8.0 to 4.8.1 (#2459)
+- Bump moment from 2.29.1 to 2.29.4 (#2460)
+- chore: bump sentry version to 1.22.0 (#2641)
+- chore: remove external_marketing_url from course and program run (#2639)
+
 Version 0.121.3 (Released May 09, 2023)
 ---------------
 
