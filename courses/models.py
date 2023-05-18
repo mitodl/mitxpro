@@ -109,7 +109,7 @@ class CourseTopicQuerySet(models.QuerySet):
 
     def parent_topics_with_annotated_course_counts(self):
         """
-        Returns parent course topics with course count including the child topic course count as well.
+        Returns parent course topics with annotated course counts including the child topic course counts as well.
         """
         from courses.utils import get_catalog_course_filter
 

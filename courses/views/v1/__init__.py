@@ -193,8 +193,7 @@ class CourseTopicViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         """
-        Returns parent course topics annotated with course count. Also, prefetches child topics
-        with annotated course count.
+        Returns parent topics with course count > 0.
         """
         return [
             topic
