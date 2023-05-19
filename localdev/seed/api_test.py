@@ -91,7 +91,8 @@ def test_topics(seeded):
     for course_data in seeded.raw_data["courses"]:
         course = Course.objects.get(readable_id=course_data["readable_id"])
         topics = [
-            {"name": topic.name} for topic in CourseTopic.objects.filter(course=course)
+            {"name": topic.name}
+            for topic in CourseTopic.objects.filter(coursepage=course.page)
         ]
 
         def name_key(topic):

@@ -39,8 +39,10 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     )
     courses_prefetch = Prefetch(
         "courses",
-        Course.objects.select_related("coursepage").prefetch_related(
-            course_runs_prefetch, "topics"
+        Course.objects.select_related(
+            "coursepage", "externalcoursepage"
+        ).prefetch_related(
+            course_runs_prefetch, "coursepage__topics", "externalcoursepage__topics"
         ),
     )
 
@@ -70,7 +72,11 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = (
             Course.objects.filter(live=True)
             .select_related("coursepage", "externalcoursepage")
-            .prefetch_related("topics", self.course_runs_prefetch)
+            .prefetch_related(
+                "coursepage__topics",
+                "externalcoursepage__topics",
+                self.course_runs_prefetch,
+            )
             .filter(Q(coursepage__live=True) | Q(externalcoursepage__live=True))
         )
 
