@@ -161,16 +161,10 @@ def test_create_run_enrollments(mocker, user, force_enrollment):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "exception_cls, force_enrollment",
-    [
-        (NoEdxApiAuthError, True),
-        (HTTPError, True),
-        (RequestsConnectionError, True),
-        (NoEdxApiAuthError, False),
-        (HTTPError, False),
-        (RequestsConnectionError, False),
-    ],
+    "exception_cls",
+    [NoEdxApiAuthError, HTTPError, RequestsConnectionError],
 )
+@pytest.mark.parametrize("force_enrollment", [True, False])
 def test_create_run_enrollments_api_fail(mocker, user, exception_cls, force_enrollment):
     """
     create_run_enrollments should log a message and still create local enrollment records when certain exceptions

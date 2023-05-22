@@ -399,7 +399,6 @@ six==1.16.0
     # via
     #   click-repl
     #   django-compat
-    #   edx-api-client
     #   google-api-python-client
     #   google-auth
     #   google-auth-httplib2
