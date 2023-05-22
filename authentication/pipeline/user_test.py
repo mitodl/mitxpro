@@ -361,7 +361,7 @@ def test_create_user_via_email_with_email_case_insensitive_existing_user(
     mock_email_backend, mock_create_user_strategy
 ):
     """
-    Tests that create_user_via_email raises InvalidEmail exception
+    Tests that create_user_via_email raises AuthAlreadyAssociated exception
     if a user already exists with different case email
     """
     email = "user@example.com"
