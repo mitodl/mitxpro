@@ -245,7 +245,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
         """Empty validation function, but this is required for WriteableSerializerMethodField"""
-        return {"email": value}
+        return {"email": value.strip().lower()}
 
     def validate_username(self, value):
         """Empty validation function, but this is required for WriteableSerializerMethodField"""

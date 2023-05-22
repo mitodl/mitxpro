@@ -5,6 +5,7 @@ export type AuthStates =
   | "success"
   | "inactive"
   | "invalid-email"
+  | "existing-account"
   | "user-blocked"
   | "error"
   | "error-temporary"

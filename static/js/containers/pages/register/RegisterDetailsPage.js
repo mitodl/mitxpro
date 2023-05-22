@@ -9,10 +9,12 @@ import { Link } from "react-router-dom"
 import { connectRequest, mutateAsync, requestAsync } from "redux-query"
 import { createStructuredSelector } from "reselect"
 
+import { authSelector } from "../../../lib/queries/auth"
 import auth from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
-import { STATE_ERROR, handleAuthResponse } from "../../../lib/auth"
+import { getAppropriateInformationFragment } from "../../../lib/util"
+import { STATE_ERROR, STATE_EXISTING_ACCOUNT, handleAuthResponse } from "../../../lib/auth"
 import queries from "../../../lib/queries"
 import { qsPartialTokenSelector } from "../../../lib/selectors"
 
@@ -30,6 +32,7 @@ import type {
 type RegisterProps = {|
   location: Location,
   history: RouterHistory,
+  authResponse: ?AuthResponse,
   params: { partialToken: string }
 |}
 
@@ -80,48 +83,59 @@ export class RegisterDetailsPage extends React.Component<Props> {
   }
 
   render() {
-    const { countries } = this.props
+    const { authResponse, countries } = this.props
 
     return (
       <DocumentTitle
         title={`${SETTINGS.site_name} | ${REGISTER_DETAILS_PAGE_TITLE}`}
       >
-        <div className="container auth-page registration-page">
-          <div className="auth-header row d-flex flex-row align-items-center justify-content-between flex-nowrap">
-            <div className="col-auto flex-shrink-1">
-              <h1>Create an Account</h1>
-            </div>
-            <div className="col-auto align-text-right gray-text">
-              <h4>Step 1 of 2</h4>
-            </div>
-          </div>
-          <div className="auth-card card-shadow row">
-            <div className="container">
-              <div className="row">
-                <div className="col-12 form-group">
-                  {`Already have an ${SETTINGS.site_name} account? `}
-                  <Link to={routes.login.begin}>Click here</Link>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-12 auth-form">
-                  <RegisterDetailsForm
-                    onSubmit={this.onSubmit.bind(this)}
-                    countries={countries}
-                  />
-                </div>
+        {authResponse && authResponse.state === STATE_EXISTING_ACCOUNT ? (
+          <div className="container auth-page registration-page">
+            <div className="auth-header row d-flex flex-row align-items-center justify-content-between flex-nowrap">
+              <div className="col-auto flex-shrink-1">
+                {getAppropriateInformationFragment(authResponse.state)}
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="container auth-page registration-page">
+            <div className="auth-header row d-flex flex-row align-items-center justify-content-between flex-nowrap">
+              <div className="col-auto flex-shrink-1">
+                <h1>Create an Account</h1>
+              </div>
+              <div className="col-auto align-text-right gray-text">
+                <h4>Step 1 of 2</h4>
+              </div>
+            </div>
+            <div className="auth-card card-shadow row">
+              <div className="container">
+                <div className="row">
+                  <div className="col-12 form-group">
+                    {`Already have an ${SETTINGS.site_name} account? `}
+                    <Link to={routes.login.begin}>Click here</Link>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-12 auth-form">
+                    <RegisterDetailsForm
+                      onSubmit={this.onSubmit.bind(this)}
+                      countries={countries}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </DocumentTitle>
     )
   }
 }
 
 const mapStateToProps = createStructuredSelector({
-  params:    createStructuredSelector({ partialToken: qsPartialTokenSelector }),
-  countries: queries.users.countriesSelector
+  authResponse: authSelector,
+  params:       createStructuredSelector({ partialToken: qsPartialTokenSelector }),
+  countries:    queries.users.countriesSelector
 })
 
 const mapPropsToConfig = () => [queries.users.countriesQuery()]

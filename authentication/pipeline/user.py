@@ -3,7 +3,7 @@ import json
 import logging
 import requests
 from social_core.backends.email import EmailAuth
-from social_core.exceptions import AuthException
+from social_core.exceptions import AuthAlreadyAssociated, AuthException
 from social_core.pipeline.partial import partial
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -109,27 +109,23 @@ def create_user_via_email(
         )
 
     data["email"] = kwargs.get("email", kwargs.get("details", {}).get("email"))
+
+    if User.objects.filter(email__iexact=data["email"]).exists():
+        raise AuthAlreadyAssociated(backend)
+
     username = usernameify(data["name"], email=data["email"])
+    data["username"] = username
 
     affiliate_id = get_affiliate_id_from_request(strategy.request)
     if affiliate_id is not None:
         context["affiliate_id"] = affiliate_id
 
-    try:
-        user = User.objects.get(email=data["email"])
-        serializer = UserSerializer(user, data=data, context=context)
-    except User.DoesNotExist:
-        data["username"] = username
-        serializer = UserSerializer(data=data, context=context)
+    serializer = UserSerializer(data=data, context=context)
 
     if not serializer.is_valid():
         raise RequirePasswordAndPersonalInfoException(
             backend, current_partial, errors=serializer.errors
         )
-
-    if user:
-        updated_user = serializer.save()
-        return {"is_new": True, "user": updated_user, "username": updated_user.username}
 
     try:
         created_user = create_user_with_generated_username(serializer, username)

@@ -4,6 +4,7 @@
 from django.contrib.sessions.middleware import SessionMiddleware
 import pytest
 from social_core.backends.email import EmailAuth
+from social_core.exceptions import AuthAlreadyAssociated
 from social_django.utils import load_strategy, load_backend
 
 from affiliate.factories import AffiliateFactory
@@ -352,6 +353,26 @@ def test_create_user_via_email_existing_user_raises(
             user=user,
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,
+        )
+
+
+@pytest.mark.django_db
+def test_create_user_via_email_with_email_case_insensitive_existing_user(
+    mock_email_backend, mock_create_user_strategy
+):
+    """
+    Tests that create_user_via_email raises AuthAlreadyAssociated exception
+    if a user already exists with different case email
+    """
+    email = "user@example.com"
+    UserFactory.create(email=email.upper())
+    with pytest.raises(AuthAlreadyAssociated):
+        user_actions.create_user_via_email(
+            mock_create_user_strategy,
+            mock_email_backend,
+            pipeline_index=0,
+            flow=SocialAuthState.FLOW_REGISTER,
+            details=dict(email=email),
         )
 
 
