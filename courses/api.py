@@ -87,8 +87,13 @@ def get_user_enrollments(user):
 
 
 def create_run_enrollments(
-    user, runs, keep_failed_enrollments=False, order=None, company=None
-):
+    user,
+    runs,
+    keep_failed_enrollments=False,
+    order=None,
+    company=None,
+    force_enrollment=False,
+):  # pylint: disable=too-many-arguments
     """
     Creates local records of a user's enrollment in course runs, and attempts to enroll them
     in edX via API
@@ -109,7 +114,7 @@ def create_run_enrollments(
     """
     successful_enrollments = []
     try:
-        enroll_in_edx_course_runs(user, runs)
+        enroll_in_edx_course_runs(user, runs, force_enrollment=force_enrollment)
     except (
         EdxApiEnrollErrorException,
         UnknownEdxApiEnrollException,
@@ -314,7 +319,7 @@ def defer_enrollment(
         raise ValidationError(
             "Cannot defer to the same course run (run: {})".format(to_run.courseware_id)
         )
-    if not to_run.is_not_beyond_enrollment:
+    if not force and not to_run.is_not_beyond_enrollment:
         raise ValidationError(
             "Cannot defer to a course run that is outside of its enrollment period (run: {}).".format(
                 to_run.courseware_id
@@ -334,6 +339,7 @@ def defer_enrollment(
             order=from_enrollment.order,
             company=from_enrollment.company,
             keep_failed_enrollments=keep_failed_enrollments,
+            force_enrollment=force,
         )
         if to_enrollments:
             from_enrollment = deactivate_run_enrollment(

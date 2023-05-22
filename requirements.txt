@@ -181,7 +181,7 @@ draftjs-exporter==2.1.7
     # via wagtail
 drf-flex-fields==0.8.5
     # via -r requirements.in
-edx-api-client==0.10.0
+edx-api-client==1.7.0
     # via -r requirements.in
 et-xmlfile==1.1.0
     # via openpyxl
@@ -399,7 +399,6 @@ six==1.16.0
     # via
     #   click-repl
     #   django-compat
-    #   edx-api-client
     #   google-api-python-client
     #   google-auth
     #   google-auth-httplib2

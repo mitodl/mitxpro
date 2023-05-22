@@ -118,7 +118,8 @@ def test_get_user_enrollments(user):
 
 
 @pytest.mark.django_db
-def test_create_run_enrollments(mocker, user):
+@pytest.mark.parametrize("force_enrollment", [True, False])
+def test_create_run_enrollments(mocker, user, force_enrollment):
     """
     create_run_enrollments should call the edX API to create enrollments, create or reactivate local
     enrollment records, and notify enrolled users via email
@@ -141,9 +142,11 @@ def test_create_run_enrollments(mocker, user):
     )
 
     successful_enrollments, edx_request_success = create_run_enrollments(
-        user, runs, order=order, company=company
+        user, runs, order=order, company=company, force_enrollment=force_enrollment
     )
-    patched_edx_enroll.assert_called_once_with(user, runs)
+    patched_edx_enroll.assert_called_once_with(
+        user, runs, force_enrollment=force_enrollment
+    )
     assert patched_send_enrollment_email.call_count == num_runs
     assert edx_request_success is True
     assert len(successful_enrollments) == num_runs
@@ -158,9 +161,11 @@ def test_create_run_enrollments(mocker, user):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "exception_cls", [NoEdxApiAuthError, HTTPError, RequestsConnectionError]
+    "exception_cls",
+    [NoEdxApiAuthError, HTTPError, RequestsConnectionError],
 )
-def test_create_run_enrollments_api_fail(mocker, user, exception_cls):
+@pytest.mark.parametrize("force_enrollment", [True, False])
+def test_create_run_enrollments_api_fail(mocker, user, exception_cls, force_enrollment):
     """
     create_run_enrollments should log a message and still create local enrollment records when certain exceptions
     are raised if a flag is set to true
@@ -174,9 +179,16 @@ def test_create_run_enrollments_api_fail(mocker, user, exception_cls):
     )
     run = CourseRunFactory.create()
     successful_enrollments, edx_request_success = create_run_enrollments(
-        user, [run], order=None, company=None, keep_failed_enrollments=True
+        user,
+        [run],
+        order=None,
+        company=None,
+        keep_failed_enrollments=True,
+        force_enrollment=force_enrollment,
     )
-    patched_edx_enroll.assert_called_once_with(user, [run])
+    patched_edx_enroll.assert_called_once_with(
+        user, [run], force_enrollment=force_enrollment
+    )
     patched_log_exception.assert_called_once()
     patched_send_enrollment_email.assert_not_called()
     assert len(successful_enrollments) == 1
@@ -185,6 +197,7 @@ def test_create_run_enrollments_api_fail(mocker, user, exception_cls):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("keep_failed_enrollments", [True, False])
+@pytest.mark.parametrize("force_enrollment", [True, False])
 @pytest.mark.parametrize(
     "exception_cls,inner_exception",
     [
@@ -193,8 +206,13 @@ def test_create_run_enrollments_api_fail(mocker, user, exception_cls):
     ],
 )
 def test_create_run_enrollments_enroll_api_fail(
-    mocker, user, keep_failed_enrollments, exception_cls, inner_exception
-):
+    mocker,
+    user,
+    keep_failed_enrollments,
+    force_enrollment,
+    exception_cls,
+    inner_exception,
+):  # pylint: disable=too-many-arguments
     """
     create_run_enrollments should log a message and still create local enrollment records when an enrollment exception
     is raised if a flag is set to true
@@ -221,8 +239,11 @@ def test_create_run_enrollments_enroll_api_fail(
             order=None,
             company=None,
             keep_failed_enrollments=keep_failed_enrollments,
+            force_enrollment=force_enrollment,
         )
-    patched_edx_enroll.assert_called_once_with(user, runs)
+    patched_edx_enroll.assert_called_once_with(
+        user, runs, force_enrollment=force_enrollment
+    )
     if keep_failed_enrollments:
         patched_log_exception.assert_called_once()
     else:
@@ -234,7 +255,8 @@ def test_create_run_enrollments_enroll_api_fail(
 
 
 @pytest.mark.django_db
-def test_create_run_enrollments_creation_fail(mocker, user):
+@pytest.mark.parametrize("force_enrollment", [True, False])
+def test_create_run_enrollments_creation_fail(mocker, user, force_enrollment):
     """
     create_run_enrollments should log a message and send an admin email if there's an error during the
     creation of local enrollment records
@@ -250,9 +272,11 @@ def test_create_run_enrollments_creation_fail(mocker, user):
     patched_mail_api = mocker.patch("courses.api.mail_api")
 
     successful_enrollments, edx_request_success = create_run_enrollments(
-        user, runs, order=None, company=None
+        user, runs, order=None, company=None, force_enrollment=force_enrollment
     )
-    patched_edx_enroll.assert_called_once_with(user, runs)
+    patched_edx_enroll.assert_called_once_with(
+        user, runs, force_enrollment=force_enrollment
+    )
     patched_log_exception.assert_called_once()
     patched_mail_api.send_course_run_enrollment_email.assert_not_called()
     patched_mail_api.send_enrollment_failure_message.assert_called_once()
@@ -412,8 +436,9 @@ class TestDeactivateEnrollments:
 
 
 @pytest.mark.parametrize("keep_failed_enrollments", [True, False])
+@pytest.mark.parametrize("force_enrollment", [True, False])
 @pytest.mark.django_db
-def test_defer_enrollment(mocker, keep_failed_enrollments):
+def test_defer_enrollment(mocker, keep_failed_enrollments, force_enrollment):
     """
     defer_enrollment should deactivate a user's existing enrollment and create an enrollment in another
     course run
@@ -443,6 +468,7 @@ def test_defer_enrollment(mocker, keep_failed_enrollments):
         existing_enrollment.run.courseware_id,
         course_runs[1].courseware_id,
         keep_failed_enrollments=keep_failed_enrollments,
+        force=force_enrollment,
     )
     assert returned_from_enrollment == patched_deactivate_enrollments.return_value
     assert returned_to_enrollment == patched_create_enrollments.return_value[0][0]
@@ -452,6 +478,7 @@ def test_defer_enrollment(mocker, keep_failed_enrollments):
         order=order,
         company=company,
         keep_failed_enrollments=keep_failed_enrollments,
+        force_enrollment=force_enrollment,
     )
     patched_deactivate_enrollments.assert_called_once_with(
         existing_enrollment,
