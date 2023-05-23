@@ -267,7 +267,7 @@ mitol-django-common==2.7.0
     #   mitol-django-oauth-toolkit-extensions
 mitol-django-digital-credentials==3.3.0
     # via -r requirements.in
-mitol-django-hubspot-api==1.1.0
+mitol-django-hubspot-api==2023.5.22
     # via -r requirements.in
 mitol-django-mail==3.3.0
     # via
@@ -376,6 +376,7 @@ requests==2.27.1
     #   edx-api-client
     #   mitol-django-common
     #   mitol-django-digital-credentials
+    #   mitol-django-hubspot-api
     #   mitol-django-oauth-toolkit-extensions
     #   premailer
     #   requests-oauthlib
