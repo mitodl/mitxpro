@@ -536,3 +536,13 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
             "certificate",
             "receipt",
         ]
+
+
+class CourseTopicSerializer(serializers.ModelSerializer):
+    """
+    CourseTopic model serializer
+    """
+
+    class Meta:
+        model = models.CourseTopic
+        fields = ["name", "course_count"]

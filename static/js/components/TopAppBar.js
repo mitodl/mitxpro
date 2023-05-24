@@ -5,14 +5,17 @@ import React from "react"
 import { routes } from "../lib/urls"
 import MixedLink from "./MixedLink"
 import UserMenu from "./UserMenu"
+import CatalogMenu from "./CatalogMenu"
 import type { Location } from "react-router"
 
 import type { CurrentUser } from "../flow/authTypes"
+import type {CourseTopic} from "../flow/courseTypes"
 
 type Props = {
   currentUser: ?CurrentUser,
   location: ?Location,
-  errorPageHeader: ?boolean
+  errorPageHeader: ?boolean,
+  courseTopics: Array<CourseTopic>
 }
 
 const shouldShowLoginSignup = location =>
@@ -22,7 +25,7 @@ const shouldShowLoginSignup = location =>
     location.pathname === routes.ecommerceBulk.receipt
   )
 
-const TopAppBar = ({ currentUser, location, errorPageHeader }: Props) => (
+const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Props) => (
   <header className="header-holder">
     <div className="container">
       <nav
@@ -69,9 +72,7 @@ const TopAppBar = ({ currentUser, location, errorPageHeader }: Props) => (
               </a>
             </li>
             <li>
-              <a href={routes.catalog} className="" aria-label="catalog">
-                Catalog
-              </a>
+              <CatalogMenu courseTopics={courseTopics} />
             </li>
             {shouldShowLoginSignup(location) ? (
               currentUser && currentUser.is_authenticated ? (

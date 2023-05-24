@@ -107,6 +107,47 @@ class CourseTopicQuerySet(models.QuerySet):
         """
         return list(self.parent_topics().values_list("name", flat=True))
 
+    def parent_topics_with_annotated_course_counts(self):
+        """
+        Returns parent course topics with annotated course counts including the child topic course counts as well.
+        """
+        from courses.utils import get_catalog_course_filter
+
+        catalog_course_visible_filter = get_catalog_course_filter(
+            relative_filter="coursepage__"
+        )
+        topics_queryset = (
+            self.parent_topics()
+            .annotate(
+                internal_course_count=models.Count(
+                    "coursepage", filter=catalog_course_visible_filter, distinct=True
+                ),
+                external_course_count=models.Count(
+                    "externalcoursepage",
+                    filter=models.Q(externalcoursepage__course__live=True),
+                    distinct=True,
+                ),
+            )
+            .prefetch_related(
+                models.Prefetch(
+                    "subtopics",
+                    self.filter(parent__isnull=False).annotate(
+                        internal_course_count=models.Count(
+                            "coursepage",
+                            filter=catalog_course_visible_filter,
+                            distinct=True,
+                        ),
+                        external_course_count=models.Count(
+                            "externalcoursepage",
+                            filter=models.Q(externalcoursepage__course__live=True),
+                            distinct=True,
+                        ),
+                    ),
+                ),
+            )
+        )
+        return topics_queryset
+
 
 class ActiveEnrollmentManager(models.Manager):
     """Query manager for active enrollment model objects"""
@@ -326,6 +367,29 @@ class CourseTopic(TimestampedModel):
 
     def __str__(self):
         return self.name
+
+    @cached_property
+    def course_count(self):
+        """
+        Returns the sum of course count and child topic course count.
+
+        To avoid the DB queries it assumes that the course counts are annotated.
+        `CourseTopicQuerySet.parent_topics_with_annotated_course_counts` annotates course counts for parent topics.
+        """
+        return sum(
+            [
+                getattr(self, "internal_course_count", 0),
+                getattr(self, "external_course_count", 0),
+                *[
+                    getattr(subtopic, "internal_course_count", 0)
+                    for subtopic in self.subtopics.all()
+                ],
+                *[
+                    getattr(subtopic, "external_course_count", 0)
+                    for subtopic in self.subtopics.all()
+                ],
+            ]
+        )
 
 
 class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):

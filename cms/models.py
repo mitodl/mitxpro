@@ -42,6 +42,7 @@ from cms.blocks import (
     validate_unique_readable_ids,
 )
 from cms.constants import (
+    ALL_TAB,
     ALL_TOPICS,
     CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
@@ -440,6 +441,7 @@ class CatalogPage(Page):
             ),
             topics=[ALL_TOPICS] + CourseTopic.objects.parent_topic_names(),
             selected_topic=topic_filter,
+            active_tab=request.GET.get("active-tab", ALL_TAB),
         )
 
 
