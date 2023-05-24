@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.123.0
+Version 0.123.0 (Released May 24, 2023)
 ---------------
 
 - feat: webinars (#2624)
