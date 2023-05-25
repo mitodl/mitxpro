@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.123.1
+---------------
+
+- hotfix: hide the Webinars link from top app bar (#2658)
+
 Version 0.123.0 (Released May 24, 2023)
 ---------------
 
