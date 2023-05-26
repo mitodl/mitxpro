@@ -405,7 +405,7 @@ SOCIAL_AUTH_PIPELINE = (
     # Update the user record with any changed info from the auth service.
     "social_core.pipeline.user.user_details",
     # Sync user data with hubspot
-    "authentication.pipeline.user.sync_user_to_hubspot",    
+    "authentication.pipeline.user.sync_user_to_hubspot",
 )
 
 AUTH_CHANGE_EMAIL_TTL_IN_MINUTES = get_int(
