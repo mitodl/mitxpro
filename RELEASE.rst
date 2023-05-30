@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.124.0
+---------------
+
+- hotfix: hide the Webinars link from top app bar (#2658)
+- feat: catalog topics dropdown (#2635)
+- Bump oauthlib from 3.2.0 to 3.2.2 (#2564)
+- Bump http-cache-semantics from 4.1.0 to 4.1.1 (#2562)
+- feat: Update management command for user deferrals to include courses with closed enrollments (#2646)
+- fix: Two accounts with the same email (#2642)
+
 Version 0.123.1 (Released May 25, 2023)
 ---------------
 
