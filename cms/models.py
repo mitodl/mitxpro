@@ -1177,11 +1177,6 @@ class CourseProductPage(ProductPage):
         """Gets the product associated with this page"""
         return self.course
 
-    def save(self, clean=True, user=None, log_action=False, **kwargs):
-        """Override save to set the topics to Django course models backwards"""
-        self.course.topics.set(self.topics.all())
-        super().save(clean=clean, user=user, log_action=log_action, **kwargs)
-
 
 class CoursePage(CourseProductPage):
     """

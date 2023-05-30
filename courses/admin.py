@@ -52,10 +52,9 @@ class CourseAdmin(admin.ModelAdmin):
     """Admin for Course"""
 
     model = Course
-    search_fields = ["title", "topics__name", "readable_id"]
+    search_fields = ["title", "readable_id"]
     list_display = ("id", "title", "get_program", "position_in_program")
-    list_filter = ["live", "program", "topics"]
-    readonly_fields = ("topics",)
+    list_filter = ["live", "program"]
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
     }

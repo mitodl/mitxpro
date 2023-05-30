@@ -350,10 +350,6 @@ class SeedDataLoader:
             **filter_for_model_fields(model_cls, data),
             **{seeded_field_name: seeded_value},
         }
-
-        topics = []
-        if model_cls == Course and "topics" in adjusted_data:
-            topics = adjusted_data.pop("topics")
         existing_qset = model_cls.objects.filter(**{seeded_field_name: seeded_value})
         if existing_qset.exists():
             existing_qset.update(**adjusted_data)
@@ -369,10 +365,6 @@ class SeedDataLoader:
                 return None
             courseware_obj = serialized.save()
             self.seed_result.add_created(courseware_obj)
-
-        topic_objs = self._get_topic_objects(topics)
-        if courseware_obj is not None and len(topic_objs) > 0:
-            courseware_obj.topics.set(topic_objs)
         return courseware_obj
 
     def _get_topic_objects(self, topics):
