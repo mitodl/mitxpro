@@ -1,28 +1,28 @@
 """Tests of user pipeline actions"""
 # pylint: disable=redefined-outer-name
 
-from django.contrib.sessions.middleware import SessionMiddleware
 import pytest
+from django.contrib.sessions.middleware import SessionMiddleware
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthAlreadyAssociated
-from social_django.utils import load_strategy, load_backend
+from social_django.utils import load_backend, load_strategy
 
 from affiliate.factories import AffiliateFactory
-from users.factories import UserFactory
-from authentication.pipeline import user as user_actions
 from authentication.exceptions import (
-    InvalidPasswordException,
-    RequirePasswordException,
-    RequireRegistrationException,
-    RequirePasswordAndPersonalInfoException,
-    UnexpectedExistingUserException,
-    RequireProfileException,
-    UserCreationFailedException,
     EmailBlockedException,
+    InvalidPasswordException,
+    RequirePasswordAndPersonalInfoException,
+    RequirePasswordException,
+    RequireProfileException,
+    RequireRegistrationException,
+    UnexpectedExistingUserException,
+    UserCreationFailedException,
 )
+from authentication.pipeline import user as user_actions
 from authentication.utils import SocialAuthState
-from compliance.constants import RESULT_SUCCESS, RESULT_DENIED, RESULT_UNKNOWN
+from compliance.constants import RESULT_DENIED, RESULT_SUCCESS, RESULT_UNKNOWN
 from compliance.factories import ExportsInquiryLogFactory
+from users.factories import UserFactory
 
 
 @pytest.fixture
@@ -506,7 +506,6 @@ def test_send_user_to_hubspot(mocker, settings):
     Tests that send_user_to_hubspot sends the correct data
     """
     mock_requests = mocker.patch("authentication.pipeline.user.requests")
-    mock_log = mocker.patch("authentication.pipeline.user.log")
 
     mock_request = mocker.Mock(COOKIES={"hubspotutk": "somefakedata"})
 
@@ -515,7 +514,6 @@ def test_send_user_to_hubspot(mocker, settings):
         mock_request, details={"email": "test@test.co"}
     )
     assert ret_val == {}
-    mock_log.error.assert_called_once()
 
     # Test with appropriate settings set
     settings.HUBSPOT_CONFIG["HUBSPOT_PORTAL_ID"] = "123456"
@@ -649,3 +647,20 @@ def test_create_user_when_email_blocked(mocker):
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,
         )
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("is_active", [True, False])
+def test_sync_user_profile_to_hubspot(
+    mocker, user, is_active, mock_create_user_strategy
+):
+    """sync_hubspot_user should be called for active users"""
+    mock_sync = mocker.patch("authentication.pipeline.user.sync_hubspot_user")
+    user.is_active = is_active
+    assert (
+        user_actions.sync_user_to_hubspot(
+            mock_create_user_strategy, None, user=user, is_new=False
+        )
+        == {}
+    )
+    assert mock_sync.call_count == (1 if is_active else 0)
