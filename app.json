@@ -207,6 +207,10 @@
       "description": "Timeout (in seconds) for requests made via the edX API client",
       "required": false
     },
+    "ENABLE_COURSE_DROPDOWN": {
+      "description": "Set to True to enable course dropdown in header.",
+      "required": false
+    },
     "ENABLE_ORDER_RECEIPTS": {
       "description": "Enable enrollment order receipts.",
       "required": false
