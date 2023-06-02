@@ -66,13 +66,25 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
             id="nav"
             className="collapse navbar-collapse px-0 justify-content-end"
           >
+            {
+              SETTINGS.webinars ? (
+                <li>
+                  <a href={routes.webinars} className="" aria-label="webinars">
+                    Webinars
+                  </a>
+                </li>
+              ) : null
+            }
             <li>
-              <a href={routes.webinars} className="" aria-label="webinars" style = {{display: "None" }}>
-                Webinars
-              </a>
-            </li>
-            <li>
-              <CatalogMenu courseTopics={courseTopics} />
+              {
+                SETTINGS.course_dropdown ? (
+                  <CatalogMenu courseTopics={courseTopics} />
+                ) : (
+                  <a href={routes.catalog} className="" aria-label="catalog">
+                    Catalog
+                  </a>
+                )
+              }
             </li>
             {shouldShowLoginSignup(location) ? (
               currentUser && currentUser.is_authenticated ? (

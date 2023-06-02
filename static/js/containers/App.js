@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
 import { compose } from "redux"
 import { connect } from "react-redux"
@@ -135,7 +136,7 @@ const mapDispatchToProps = {
   addUserNotification
 }
 
-const mapPropsToConfig = () => [users.currentUserQuery(), catalog.courseTopicsQuery()]
+const mapPropsToConfig = () => [users.currentUserQuery(), SETTINGS.course_dropdown ? catalog.courseTopicsQuery() : []]
 
 export default compose(
   connect(

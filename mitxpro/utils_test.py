@@ -465,6 +465,8 @@ def test_get_js_settings(settings, rf):
     }
     settings.FEATURES["DIGITAL_CREDENTIALS"] = True
     settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS = "test_run1,test_run2"
+    settings.FEATURES["COURSE_DROPDOWN"] = False
+    settings.FEATURES["WEBINARS"] = False
 
     request = rf.get("/")
 
@@ -481,4 +483,6 @@ def test_get_js_settings(settings, rf):
         "zendesk_config": {"help_widget_enabled": False, "help_widget_key": "fake_key"},
         "digital_credentials": settings.FEATURES.get("DIGITAL_CREDENTIALS", False),
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
+        "course_dropdown": settings.FEATURES.get("COURSE_DROPDOWN", False),
+        "webinars": settings.FEATURES.get("WEBINARS", False),
     }
