@@ -84,11 +84,24 @@ describe("TopAppBar component", () => {
               .find("CatalogMenu")
               .exists()
           )
+          assert.isNotOk(
+            shallow(<TopAppBar currentUser={user} location={null} errorPageHeader={null} courseTopics={courseTopics} />)
+              .find("a")
+              .at(2)
+              .exists()
+          )
         } else {
           assert.isNotOk(
             shallow(<TopAppBar currentUser={user} location={null} errorPageHeader={null} courseTopics={courseTopics} />)
               .find("CatalogMenu")
               .exists()
+          )
+          assert.equal(
+            shallow(<TopAppBar currentUser={user} location={null} errorPageHeader={null} courseTopics={courseTopics} />)
+              .find("a")
+              .at(2)
+              .prop("href"),
+            routes.catalog
           )
         }
       })
