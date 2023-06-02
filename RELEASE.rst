@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.124.0
+---------------
+
+- feat: add feat flag for courses dropdown & webinars (#2666)
+- Manually bump cryptography from 38.0.3 to 40.0.2 (#2654)
+- Do not log an error if HUBSPOT_CREATE_USER_FORM_ID is unset; sync hubspot contact on login (#2662)
+- Use new hubspot_api version and try to sync contacts individually if a batched sync chunk fails (#2653)
+- chore: remove course/course topic association (#2649)
+- hotfix: hide the Webinars link from top app bar (#2658)
+- feat: catalog topics dropdown (#2635)
+- Bump oauthlib from 3.2.0 to 3.2.2 (#2564)
+- Bump http-cache-semantics from 4.1.0 to 4.1.1 (#2562)
+- feat: Update management command for user deferrals to include courses with closed enrollments (#2646)
+- fix: Two accounts with the same email (#2642)
+
 Version 0.123.1 (Released May 25, 2023)
 ---------------
 
