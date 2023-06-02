@@ -1432,16 +1432,4 @@ DIGITAL_CREDENTIALS_SUPPORTED_RUNS = get_delimited_list(
     description="Comma separated string of course/program runs/Ids that support digital credentials",
 )
 
-ENABLE_COURSE_DROPDOWN = get_bool(
-    name="ENABLE_COURSE_DROPDOWN",
-    default=False,
-    description="Set to True to enable course dropdown in header.",
-)
-
-ENABLE_WEBINARS = get_bool(
-    name="ENABLE_WEBINARS",
-    default=False,
-    description="Set to True to enable webinars.",
-)
-
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

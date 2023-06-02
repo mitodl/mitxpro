@@ -67,7 +67,7 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
             className="collapse navbar-collapse px-0 justify-content-end"
           >
             {
-              SETTINGS.enable_webinars ? (
+              SETTINGS.webinars ? (
                 <li>
                   <a href={routes.webinars} className="" aria-label="webinars">
                     Webinars
@@ -77,7 +77,7 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
             }
             <li>
               {
-                SETTINGS.enable_course_dropdown ? (
+                SETTINGS.course_dropdown ? (
                   <CatalogMenu courseTopics={courseTopics} />
                 ) : (
                   <a href={routes.catalog} className="" aria-label="catalog">

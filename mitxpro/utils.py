@@ -594,6 +594,6 @@ def get_js_settings(request: HttpRequest):
         },
         "digital_credentials": settings.FEATURES.get("DIGITAL_CREDENTIALS", False),
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
-        "enable_course_dropdown": settings.ENABLE_COURSE_DROPDOWN,
-        "enable_webinars": settings.ENABLE_WEBINARS,
+        "course_dropdown": settings.FEATURES.get("COURSE_DROPDOWN", False),
+        "webinars": settings.FEATURES.get("WEBINARS", False),
     }

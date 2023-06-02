@@ -136,9 +136,7 @@ const mapDispatchToProps = {
   addUserNotification
 }
 
-const courseTopicsQuery = SETTINGS.enable_course_dropdown ? catalog.courseTopicsQuery() : []
-
-const mapPropsToConfig = () => [users.currentUserQuery(), courseTopicsQuery]
+const mapPropsToConfig = () => [users.currentUserQuery(), SETTINGS.course_dropdown ? catalog.courseTopicsQuery() : []]
 
 export default compose(
   connect(

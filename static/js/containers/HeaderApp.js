@@ -67,9 +67,7 @@ const mapStateToProps = createStructuredSelector({
   courseTopics: catalog.courseTopicsSelector
 })
 
-const courseTopicsQuery = SETTINGS.enable_course_dropdown ? catalog.courseTopicsQuery() : []
-
-const mapPropsToConfig = () => errorPageHeader ? [] : [users.currentUserQuery(), courseTopicsQuery]
+const mapPropsToConfig = () => errorPageHeader ? [] : [users.currentUserQuery(), SETTINGS.course_dropdown ? catalog.courseTopicsQuery() : []]
 
 const mapDispatchToProps = {
   addUserNotification

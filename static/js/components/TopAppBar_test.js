@@ -75,22 +75,23 @@ describe("TopAppBar component", () => {
       )
     })
 
-    it("has a CatalogMenu component", () => {
-      SETTINGS.enable_course_dropdown = true
-      assert.isOk(
-        shallow(<TopAppBar currentUser={user} location={null} errorPageHeader={null} courseTopics={courseTopics} />)
-          .find("CatalogMenu")
-          .exists()
-      )
-    })
-
-    it("does not have a CatalogMenu component when feature flag is disabled", () => {
-      SETTINGS.enable_course_dropdown = false
-      assert.isNotOk(
-        shallow(<TopAppBar currentUser={user} location={null} errorPageHeader={null} courseTopics={courseTopics} />)
-          .find("CatalogMenu")
-          .exists()
-      )
+    ;[true, false].forEach(courseDropdown => {
+      it("has a CatalogMenu component", () => {
+        SETTINGS.course_dropdown = courseDropdown
+        if (courseDropdown) {
+          assert.isOk(
+            shallow(<TopAppBar currentUser={user} location={null} errorPageHeader={null} courseTopics={courseTopics}/>)
+              .find("CatalogMenu")
+              .exists()
+          )
+        } else {
+          assert.isNotOk(
+            shallow(<TopAppBar currentUser={user} location={null} errorPageHeader={null} courseTopics={courseTopics} />)
+              .find("CatalogMenu")
+              .exists()
+          )
+        }
+      })
     })
 
     it("does have a button to collapse the menu", () => {
@@ -119,7 +120,7 @@ describe("TopAppBar component", () => {
     })
 
     it("does not have a login/register on ecommerce bulk receipt page", () => {
-      SETTINGS.enable_course_dropdown = true
+      SETTINGS.course_dropdown = true
       const location = {
         pathname: "/ecommerce/bulk/receipt/",
         hash:     "",
