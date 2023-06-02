@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
 import { compose } from "redux"
 import { connect } from "react-redux"
@@ -66,7 +67,9 @@ const mapStateToProps = createStructuredSelector({
   courseTopics: catalog.courseTopicsSelector
 })
 
-const mapPropsToConfig = () => errorPageHeader ? [] : [users.currentUserQuery(), catalog.courseTopicsQuery()]
+const courseTopicsQuery = SETTINGS.enable_course_dropdown ? catalog.courseTopicsQuery() : []
+
+const mapPropsToConfig = () => errorPageHeader ? [] : [users.currentUserQuery(), courseTopicsQuery]
 
 const mapDispatchToProps = {
   addUserNotification

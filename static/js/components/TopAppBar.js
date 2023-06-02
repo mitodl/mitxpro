@@ -72,7 +72,15 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
               </a>
             </li>
             <li>
-              <CatalogMenu courseTopics={courseTopics} />
+              {
+                SETTINGS.enable_course_dropdown ? (
+                  <CatalogMenu courseTopics={courseTopics} />
+                ) : (
+                  <a href={routes.catalog} className="" aria-label="catalog">
+                    Catalog
+                  </a>
+                )
+              }
             </li>
             {shouldShowLoginSignup(location) ? (
               currentUser && currentUser.is_authenticated ? (

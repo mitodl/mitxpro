@@ -17,7 +17,8 @@ declare type Settings = {
     help_widget_key: ?string
   },
   digital_credentials: boolean,
-  digital_credentials_supported_runs: Array<string>
+  digital_credentials_supported_runs: Array<string>,
+  enable_course_dropdown: boolean,
 }
 declare var SETTINGS: Settings
 
