@@ -466,6 +466,7 @@ def test_get_js_settings(settings, rf):
     settings.FEATURES["DIGITAL_CREDENTIALS"] = True
     settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS = "test_run1,test_run2"
     settings.ENABLE_COURSE_DROPDOWN = False
+    settings.ENABLE_WEBINARS = False
 
     request = rf.get("/")
 
@@ -483,4 +484,5 @@ def test_get_js_settings(settings, rf):
         "digital_credentials": settings.FEATURES.get("DIGITAL_CREDENTIALS", False),
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
         "enable_course_dropdown": settings.ENABLE_COURSE_DROPDOWN,
+        "enable_webinars": settings.ENABLE_WEBINARS,
     }

@@ -66,11 +66,15 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
             id="nav"
             className="collapse navbar-collapse px-0 justify-content-end"
           >
-            <li>
-              <a href={routes.webinars} className="" aria-label="webinars" style = {{display: "None" }}>
-                Webinars
-              </a>
-            </li>
+            {
+              SETTINGS.enable_webinars ? (
+                <li>
+                  <a href={routes.webinars} className="" aria-label="webinars">
+                    Webinars
+                  </a>
+                </li>
+              ) : null
+            }
             <li>
               {
                 SETTINGS.enable_course_dropdown ? (
