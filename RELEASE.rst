@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.124.0
+Version 0.124.0 (Released June 05, 2023)
 ---------------
 
 - feat: add feat flag for courses dropdown & webinars (#2666)
