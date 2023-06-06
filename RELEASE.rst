@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.124.1
+Version 0.124.1 (Released June 06, 2023)
 ---------------
 
 - fix: create enrollments when token creation fails (#2656)
