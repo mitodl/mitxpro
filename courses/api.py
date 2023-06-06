@@ -6,15 +6,16 @@ from collections import namedtuple
 from traceback import format_exc
 
 from django.core.exceptions import ValidationError
-from requests.exceptions import HTTPError, ConnectionError as RequestsConnectionError
+from requests.exceptions import ConnectionError as RequestsConnectionError, HTTPError
 
 from courses.constants import ENROLL_CHANGE_STATUS_DEFERRED
 from courses.models import CourseRun, CourseRunEnrollment, ProgramEnrollment
 from courseware.api import enroll_in_edx_course_runs, unenroll_edx_course_run
 from courseware.exceptions import (
-    EdxEnrollmentCreateError,
     EdxApiEnrollErrorException,
+    EdxEnrollmentCreateError,
     NoEdxApiAuthError,
+    OpenEdXOAuth2Error,
     UnknownEdxApiEnrollException,
 )
 from ecommerce import mail_api
@@ -121,6 +122,7 @@ def create_run_enrollments(
         NoEdxApiAuthError,
         HTTPError,
         RequestsConnectionError,
+        OpenEdXOAuth2Error,
     ):
         error_message = (
             "edX enrollment failure for user: {}, runs: {} (order: {})".format(

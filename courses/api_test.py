@@ -1,42 +1,43 @@
 """Courses API tests"""
+import contextlib
 from datetime import timedelta
 from types import SimpleNamespace
 
-import contextlib
-import pytest
 import factory
+import pytest
 from django.core.exceptions import ValidationError
-from requests import HTTPError, ConnectionError as RequestsConnectionError
+from requests import ConnectionError as RequestsConnectionError, HTTPError
 
 from courses.api import (
-    get_user_enrollments,
-    deactivate_run_enrollment,
-    deactivate_program_enrollment,
-    create_run_enrollments,
     create_program_enrollments,
+    create_run_enrollments,
+    deactivate_program_enrollment,
+    deactivate_run_enrollment,
     defer_enrollment,
+    get_user_enrollments,
 )
 from courses.constants import (
-    ENROLL_CHANGE_STATUS_REFUNDED,
     ENROLL_CHANGE_STATUS_DEFERRED,
+    ENROLL_CHANGE_STATUS_REFUNDED,
 )
 from courses.factories import (
-    ProgramFactory,
-    CourseRunFactory,
-    CourseRunEnrollmentFactory,
-    ProgramEnrollmentFactory,
     CourseFactory,
+    CourseRunEnrollmentFactory,
+    CourseRunFactory,
+    ProgramEnrollmentFactory,
+    ProgramFactory,
 )
 
 # pylint: disable=redefined-outer-name
 from courses.models import CourseRunEnrollment, ProgramEnrollment
 from courseware.exceptions import (
-    EdxEnrollmentCreateError,
-    UnknownEdxApiEnrollException,
     EdxApiEnrollErrorException,
+    EdxEnrollmentCreateError,
     NoEdxApiAuthError,
+    OpenEdXOAuth2Error,
+    UnknownEdxApiEnrollException,
 )
-from ecommerce.factories import OrderFactory, CompanyFactory
+from ecommerce.factories import CompanyFactory, OrderFactory
 from mitxpro.test_utils import MockHttpError
 from mitxpro.utils import now_in_utc
 
@@ -162,7 +163,7 @@ def test_create_run_enrollments(mocker, user, force_enrollment):
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "exception_cls",
-    [NoEdxApiAuthError, HTTPError, RequestsConnectionError],
+    [NoEdxApiAuthError, HTTPError, RequestsConnectionError, OpenEdXOAuth2Error],
 )
 @pytest.mark.parametrize("force_enrollment", [True, False])
 def test_create_run_enrollments_api_fail(mocker, user, exception_cls, force_enrollment):
