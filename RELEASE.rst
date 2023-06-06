@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.124.1
+---------------
+
+- fix: create enrollments when token creation fails (#2656)
+- Bump sqlparse from 0.4.2 to 0.4.4 (#2632)
+- fix: dependabot security alert regarding django validation (#2664)
+
 Version 0.124.0 (Released June 05, 2023)
 ---------------
 
