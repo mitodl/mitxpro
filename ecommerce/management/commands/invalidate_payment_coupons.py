@@ -57,12 +57,14 @@ class Command(BaseCommand):
         else:
             try:
                 with open(kwargs["codefile"], "r") as file:
-                  procCodes = []
+                    procCodes = []
 
-                  for line in file:
-                      procCodes.append(line.strip())
+                    for line in file:
+                        procCodes.append(line.strip())
             except Exception as e:
-                raise CommandError(f"Specified file {kwargs['codefile']} could not be opened: {e}")
+                raise CommandError(
+                    f"Specified file {kwargs['codefile']} could not be opened: {e}"
+                )
 
             codes = Coupon.objects.filter(coupon_code__in=procCodes, enabled=True).all()
 
