@@ -1,11 +1,21 @@
 """
-Disables coupons in a batch, either by parsing a CSV file or by iterating
-through a coupon payment. 
+Disables coupons in a batch, either by reading a file or by iterating through a
+coupon payment. 
+
+Codes that are already disabled will not be re-disabled, and any invalid codes
+will be skipped.
+
+Arguments:
+* --file <filename> - a filename to read codes from (one per line, no header)
+* --payment <payment name> - a CouponPayment to iterate through
+
+You must specify one of these options. Specifying --payment will take precedence
+over --file.
 """
 
 from django.core.management import BaseCommand, CommandError
 
-from ecommerce.models import CouponPayment, Coupon
+from ecommerce.models import Coupon, CouponPayment
 
 
 class Command(BaseCommand):
@@ -35,12 +45,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **kwargs):
-        if (
-            "payment" not in kwargs
-            or "codefile" not in kwargs
-            or kwargs["payment"] == ""
-            or kwargs["codefile"] == ""
-        ):
+        if not kwargs["payment"] and not kwargs["codefile"]:
             raise CommandError(
                 "Please specify a payment to deactivate or a code file to process."
             )
@@ -72,8 +77,8 @@ class Command(BaseCommand):
             raise CommandError("No codes found.")
 
         for code in codes:
-            self.stdout.write(f"Disabling code {code.coupon_code}")
             code.enabled = False
-            code.save()
 
-        self.stdout.write(f"Disabled {len(codes)} successfully.")
+        Coupon.objects.bulk_update(codes, ["enabled"])
+
+        self.stdout.write(f"Disabled {len(codes)} codes successfully.")
