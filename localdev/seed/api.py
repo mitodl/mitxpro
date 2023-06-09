@@ -2,6 +2,7 @@
 import datetime
 import os
 import json
+import re
 from types import SimpleNamespace
 from collections import defaultdict, namedtuple
 import pytz
@@ -29,6 +30,7 @@ from localdev.seed.serializers import (
     CourseRunSerializer,
     CompanySerializer,
 )
+from localdev.seed.exceptions import InvalidCoursewareKeyFormat
 from mitxpro.utils import (
     dict_without_keys,
     filter_dict_by_key_set,
@@ -342,6 +344,8 @@ class SeedDataLoader:
         and creates it if it doesn't exist.
         """
         model_cls = serializer_cls.Meta.model
+        invalid_courseware_re = re.compile('course.*?\+[a-zA-Z0-9-]+?\+[a-zA-Z0-9-_]+\+')
+        
         seeded_field_name, seeded_value = self._seeded_field_and_value(model_cls, data)
         adjusted_data = {
             # Set 'live' to True for seeded objects by default
@@ -350,6 +354,12 @@ class SeedDataLoader:
             **filter_for_model_fields(model_cls, data),
             **{seeded_field_name: seeded_value},
         }
+        
+        # Validate courseware_id if applicable
+        courseware_id = data.get('courseware_id')
+        if courseware_id and invalid_courseware_re.match(courseware_id):
+            raise InvalidCoursewareKeyFormat(f"Invalid courseware key: {courseware_id}")
+
         existing_qset = model_cls.objects.filter(**{seeded_field_name: seeded_value})
         if existing_qset.exists():
             existing_qset.update(**adjusted_data)
@@ -365,6 +375,7 @@ class SeedDataLoader:
                 return None
             courseware_obj = serialized.save()
             self.seed_result.add_created(courseware_obj)
+
         return courseware_obj
 
     def _get_topic_objects(self, topics):
