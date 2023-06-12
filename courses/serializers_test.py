@@ -51,9 +51,39 @@ def test_base_program_serializer():
 
 
 @pytest.mark.parametrize("has_product", [True, False])
-def test_serialize_program(mock_context, has_product):
+@pytest.mark.parametrize("is_external", [True, False])
+@pytest.mark.parametrize(
+    "duration, time_commitment, video_url, ceus, external_marketing_url",
+    [
+        (
+            "2 Months",
+            "2 Hours",
+            "http://www.testvideourl.com",
+            "2 Test CEUs",
+            "https://www.testexternalcourse1.com",
+        ),
+        (None, None, None, None, None),
+    ],
+)
+def test_serialize_program(
+    mock_context,
+    has_product,
+    is_external,
+    duration,
+    time_commitment,
+    video_url,
+    ceus,
+    external_marketing_url,
+):  # pylint: disable=too-many-arguments,too-many-locals
     """Test Program serialization"""
-    program = ProgramFactory.create()
+    program = ProgramFactory.create(
+        is_external=is_external,
+        page__certificate_page__CEUs=ceus,
+        page__duration=duration,
+        page__time_commitment=time_commitment,
+        page__video_url=video_url,
+        page__external_marketing_url=external_marketing_url,
+    )
     run1 = CourseRunFactory.create(course__program=program)
     course1 = run1.course
     run2 = CourseRunFactory.create(course__program=program)
@@ -74,8 +104,10 @@ def test_serialize_program(mock_context, has_product):
     if has_product:
         ProductVersionFactory.create(product__content_object=program)
     topics = [CourseTopic.objects.create(name=f"topic{num}") for num in range(3)]
-    course1.topics.set([topics[0], topics[1]])
-    course2.topics.set([topics[1], topics[2]])
+    course1.page.topics.set([topics[0], topics[1]])
+    course2.page.topics.set([topics[1], topics[2]])
+    course1.page.save()
+    course2.page.save()
 
     data = ProgramSerializer(instance=program, context=mock_context).data
 
@@ -106,6 +138,13 @@ def test_serialize_program(mock_context, has_product):
             "url": f"http://localhost{program.page.get_url()}",
             "instructors": [{"name": name} for name in faculty_names],
             "topics": [{"name": topic.name} for topic in topics],
+            "time_commitment": time_commitment,
+            "duration": duration,
+            "video_url": video_url,
+            "credits": ceus,
+            "format": "Online",
+            "is_external": is_external,
+            "external_marketing_url": external_marketing_url,
         },
     )
 
@@ -125,7 +164,33 @@ def test_base_course_serializer():
 
 @pytest.mark.parametrize("is_anonymous", [True, False])
 @pytest.mark.parametrize("all_runs", [True, False])
-def test_serialize_course(mock_context, is_anonymous, all_runs):
+@pytest.mark.parametrize("is_external", [True, False])
+@pytest.mark.parametrize("course_page", [True, False])
+@pytest.mark.parametrize(
+    "duration, time_commitment, video_url, ceus, external_marketing_url",
+    [
+        (
+            "2 Months",
+            "2 Hours",
+            "http://www.testvideourl.com",
+            "2 Test CEUs",
+            "http://www.testexternalmarketingurl.com",
+        ),
+        (None, None, None, None, None),
+    ],
+)
+def test_serialize_course(
+    mock_context,
+    is_anonymous,
+    all_runs,
+    is_external,
+    course_page,
+    duration,
+    time_commitment,
+    video_url,
+    ceus,
+    external_marketing_url,
+):  # pylint: disable=too-many-arguments,too-many-locals
     """Test Course serialization"""
     now = datetime.now(tz=pytz.UTC)
     if is_anonymous:
@@ -133,10 +198,28 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
     if all_runs:
         mock_context["all_runs"] = True
     user = mock_context["request"].user
-    course_run = CourseRunFactory.create(course__no_program=True, live=True)
-    course = course_run.course
+
+    # Only create course page if required
+    if course_page:
+        course = CourseFactory.create(
+            is_external=is_external,
+            page__time_commitment=time_commitment,
+            page__duration=duration,
+            page__video_url=video_url,
+            page__certificate_page__CEUs=ceus,
+            page__external_marketing_url=external_marketing_url,
+        )
+    else:
+        course = CourseFactory.create(page=None, is_external=is_external)
+
+    course_run = CourseRunFactory.create(
+        course=course,
+        course__no_program=True,
+        live=True,
+    )
     topic = "a course topic"
-    course.topics.set([CourseTopic.objects.create(name=topic)])
+    if course_page:
+        course.page.topics.set([CourseTopic.objects.create(name=topic)])
 
     # Create expired, enrollment_ended, future, and enrolled course runs
     CourseRunFactory.create(course=course, end_date=now - timedelta(1), live=True)
@@ -165,17 +248,24 @@ def test_serialize_course(mock_context, is_anonymous, all_runs):
         data,
         {
             "title": course.title,
-            "description": course.page.description,
-            "url": f"http://localhost{course.page.get_url()}",
+            "description": course.page.description if course_page else None,
+            "url": f"http://localhost{course.page.get_url()}" if course_page else None,
             "readable_id": course.readable_id,
             "id": course.id,
             "courseruns": [
                 CourseRunSerializer(run).data
                 for run in sorted(expected_runs, key=lambda run: run.start_date)
             ],
-            "thumbnail_url": f"http://localhost:8053{course.page.thumbnail_image.file.url}",
+            "thumbnail_url": f"http://localhost:8053{course.page.thumbnail_image.file.url if course_page else '/static/images/mit-dome.png'}",
             "next_run_id": course.first_unexpired_run.id,
-            "topics": [{"name": topic}],
+            "topics": [{"name": topic}] if course_page else [],
+            "time_commitment": time_commitment if course_page else None,
+            "duration": duration if course_page else None,
+            "video_url": video_url if course_page else None,
+            "credits": ceus if course_page else None,
+            "format": "Online",
+            "is_external": is_external,
+            "external_marketing_url": external_marketing_url if course_page else None,
         },
     )
 

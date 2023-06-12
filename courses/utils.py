@@ -2,22 +2,24 @@
 Utilities for courses/certificates
 """
 import logging
-from requests.exceptions import HTTPError
-from rest_framework.status import HTTP_404_NOT_FOUND
+
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Q
+from requests.exceptions import HTTPError
+from rest_framework.status import HTTP_404_NOT_FOUND
 
 from courses.constants import PROGRAM_TEXT_ID_PREFIX
 from courses.models import (
-    CourseRunGrade,
-    CourseRunCertificate,
-    ProgramCertificate,
-    Program,
     CourseRun,
+    CourseRunCertificate,
+    CourseRunGrade,
+    Program,
+    ProgramCertificate,
     ProgramEnrollment,
 )
-from mitxpro.utils import has_equal_properties
 from courseware.api import get_edx_api_course_detail_client
+from mitxpro.utils import has_equal_properties, now_in_utc
 
 
 log = logging.getLogger(__name__)
@@ -120,9 +122,7 @@ def generate_program_certificate(user, program):
         user=user, program=program
     )
     if existing_cert_queryset.exists():
-        ProgramEnrollment.objects.get_or_create(
-            program=program, user=user, defaults={"active": True, "change_status": None}
-        )
+        get_or_create_program_enrollment(user, program)
         return existing_cert_queryset.first(), False
 
     courses_in_program_ids = set(program.courses.values_list("id", flat=True))
@@ -144,9 +144,7 @@ def generate_program_certificate(user, program):
             user.username,
             program.title,
         )
-        _, created = ProgramEnrollment.objects.get_or_create(
-            program=program, user=user, defaults={"active": True, "change_status": None}
-        )
+        _, created = get_or_create_program_enrollment(user, program)
 
         if created:
             log.info(
@@ -156,6 +154,29 @@ def generate_program_certificate(user, program):
             )
 
     return program_cert, True
+
+
+def get_or_create_program_enrollment(user, program):
+    """
+    Get or create new program enrollment.
+
+    Args:
+        user (User): a Django user.
+        program (programs.models.Program): program where the user is enrolled.
+    Returns:
+        (ProgramEnrollment, bool): A tuple containing a
+        ProgramEnrollment object paired with a boolean
+        indicating whether the enrollment was newly created.
+    """
+    try:
+        return ProgramEnrollment.objects.get_or_create(
+            program=program, user=user, defaults={"active": True, "change_status": None}
+        )
+    except ProgramEnrollment.MultipleObjectsReturned:
+        return (
+            ProgramEnrollment.objects.filter(program=program, user=user).first(),
+            False,
+        )
 
 
 def revoke_program_certificate(
@@ -299,3 +320,27 @@ def is_program_text_id(item_text_id):
         bool: True if the given id is a program id
     """
     return item_text_id.startswith(PROGRAM_TEXT_ID_PREFIX)
+
+
+def get_catalog_course_filter(relative_filter=""):
+    """
+    Generates course filter for the catalog visible course pages.
+    """
+    courseware_live_filter = {
+        f"{relative_filter}course__live": True,
+        f"{relative_filter}course__courseruns__live": True,
+        f"{relative_filter}live": True,
+    }
+    courserun_start_date_filter = {
+        f"{relative_filter}course__courseruns__start_date__isnull": False,
+        f"{relative_filter}course__courseruns__start_date__gt": now_in_utc(),
+    }
+    courserun_enrollment_end_filter = {
+        f"{relative_filter}course__courseruns__enrollment_end__isnull": False,
+        f"{relative_filter}course__courseruns__enrollment_end__gt": now_in_utc(),
+    }
+
+    return Q(
+        Q(**courseware_live_filter)
+        & Q(Q(**courserun_start_date_filter) | Q(**courserun_enrollment_end_filter))
+    )

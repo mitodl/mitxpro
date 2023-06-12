@@ -1,0 +1,70 @@
+.catalog-topics-section {
+  padding: 90px 0;
+  position: relative;
+  color: black;
+  text-align: center;
+  background: white;
+
+  h1 {
+    color: $primary;
+    margin: 0 0 60px;
+    text-align: center;
+  }
+
+  .container {
+
+    .topics-slider {
+
+      .slick-prev, .slick-next {
+        margin: -3% 0 0 !important;
+      }
+
+      .topic {
+        width: 344px !important;
+        text-align: center;
+        padding: 30px;
+        border-style: solid;
+        border-radius: 44px;
+        color: $primary;
+        margin: 10px;
+
+        a {
+          font-size: 22px;
+          text-decoration-line: none;
+        }
+
+        &:hover {
+          background: $primary;
+          cursor: pointer;
+
+          a {
+            color: white;
+          }
+        }
+
+        @include media-breakpoint-down(lg) {
+          width: 300px !important;
+        }
+      }
+    }
+
+    .view-catalog {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 18px;
+
+      a {
+        &:after {
+          content: "arrow_circle_up";
+          font-family: Material Icons;
+          text-transform: none;
+          transform: rotate(90deg);
+          display: inline-block;
+          vertical-align: top;
+          line-height: 21px;
+          margin: 3px 0 0 5px;
+        }
+      }
+    }
+  }
+}

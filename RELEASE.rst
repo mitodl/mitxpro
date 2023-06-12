@@ -1,6 +1,137 @@
 Release Notes
 =============
 
+Version 0.124.1 (Released June 06, 2023)
+---------------
+
+- fix: create enrollments when token creation fails (#2656)
+- Bump sqlparse from 0.4.2 to 0.4.4 (#2632)
+- fix: dependabot security alert regarding django validation (#2664)
+
+Version 0.124.0 (Released June 05, 2023)
+---------------
+
+- feat: add feat flag for courses dropdown & webinars (#2666)
+- Manually bump cryptography from 38.0.3 to 40.0.2 (#2654)
+- Do not log an error if HUBSPOT_CREATE_USER_FORM_ID is unset; sync hubspot contact on login (#2662)
+- Use new hubspot_api version and try to sync contacts individually if a batched sync chunk fails (#2653)
+- chore: remove course/course topic association (#2649)
+- hotfix: hide the Webinars link from top app bar (#2658)
+- feat: catalog topics dropdown (#2635)
+- Bump oauthlib from 3.2.0 to 3.2.2 (#2564)
+- Bump http-cache-semantics from 4.1.0 to 4.1.1 (#2562)
+- feat: Update management command for user deferrals to include courses with closed enrollments (#2646)
+- fix: Two accounts with the same email (#2642)
+
+Version 0.123.1 (Released May 25, 2023)
+---------------
+
+- hotfix: hide the Webinars link from top app bar (#2658)
+
+Version 0.123.0 (Released May 24, 2023)
+---------------
+
+- feat: webinars (#2624)
+
+Version 0.122.0 (Released May 18, 2023)
+---------------
+
+- Bump terser from 4.8.0 to 4.8.1 (#2459)
+- Bump moment from 2.29.1 to 2.29.4 (#2460)
+- chore: bump sentry version to 1.22.0 (#2641)
+- chore: remove external_marketing_url from course and program run (#2639)
+
+Version 0.121.3 (Released May 09, 2023)
+---------------
+
+- fix: checkout when there is a course without course page (#2644)
+- fix: Bad B2BOrder email values cause exceptions when syncing to Hubspot (#2626)
+
+Version 0.121.2 (Released May 09, 2023)
+---------------
+
+- chore: external courseware unused fields cleanup (#2587)
+
+Version 0.121.1 (Released May 04, 2023)
+---------------
+
+- Bump redis from 3.5.3 to 4.4.4 (#2605)
+
+Version 0.121.0 (Released May 03, 2023)
+---------------
+
+- feat: order topics alphabetically on HomePage and CatalogPage (#2634)
+- fix: Error creating Open edX user. user already exists or invalid name (follow-up) (#2592)
+- feat: mimic Learn more feat for Internal courseware as well (#2628)
+
+Version 0.120.0 (Released April 20, 2023)
+---------------
+
+- fix: make the course topics selection optional in CMS (#2627)
+- fix: fix topic height when line length increases (#2625)
+- feat: update APIs to support external courseware data and additional API fields (#2608)
+- fix: update the migrations to handle external course topics as well (#2622)
+- feat: view courses by topic (#2609)
+- fix: Only link courses in programs that have live CMS page (#2620)
+- fix: Sheets deferral failed but no error was recorded in sheet (#2610)
+
+Version 0.119.2 (Released April 12, 2023)
+---------------
+
+- fix: remove codecov package due to its PyPI distribution issue (#2618)
+
+Version 0.119.1 (Released April 12, 2023)
+---------------
+
+- fix: data collision issue with existing external courseware Readable Ids (#2612)
+- fix: do not display courses with closed enrollment in boeing voucher upload (#2603)
+- fix: Cannot create ProductCouponAssignments for codes that have already been redeemed error message to info message (#2607)
+
+Version 0.119.0 (Released April 05, 2023)
+---------------
+
+- fix: don't allow external products to be sellable (#2602)
+- fix: UserCreationFailedException (#2588)
+- fix: external program URL on Program Details/Product page (#2599)
+- feat: associate external courseware with Django models (#2585)
+- fix: Error creating Open edX user. user already exists or invalid name (#2579)
+
+Version 0.118.0 (Released March 07, 2023)
+---------------
+
+- Bump django from 3.2.17 to 3.2.18 (#2576)
+- fix: certificates jobs should continue on errors rather than halting (#2580)
+
+Version 0.117.0 (Released February 23, 2023)
+---------------
+
+- Limit full name length to 255 characters (#2578)
+
+Version 0.116.1 (Released February 16, 2023)
+---------------
+
+- Check if edx enrollment already exists for failed enrollments (#2559)
+
+Version 0.116.0 (Released February 13, 2023)
+---------------
+
+- Prevent promo code from applying to products that require enrollment code
+- Create a new auth token if the old one fails to work/refresh (#2473)
+
+Version 0.115.0 (Released February 13, 2023)
+---------------
+
+- Fix processing of scheduled sheet coupon assignment tasks (#2565)
+- Bump pyjwt from 2.3.0 to 2.4.0 (#2397)
+- Bump minimist from 1.2.5 to 1.2.6 (#2382)
+- Bump loader-utils from 1.4.0 to 1.4.2 (#2466)
+- Bump ua-parser-js from 0.7.31 to 0.7.33 (#2552)
+- Bump django from 3.2.15 to 3.2.17 (#2563)
+- Fix flaky test (#2557)
+- Add frontend caching for homepage (#2529)
+- Add a workflow for new issues
+- Change ubuntu-latest to ubuntu-22.04 (#2554)
+
 Version 0.114.1 (Released January 30, 2023)
 ---------------
 

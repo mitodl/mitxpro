@@ -5,14 +5,17 @@ import React from "react"
 import { routes } from "../lib/urls"
 import MixedLink from "./MixedLink"
 import UserMenu from "./UserMenu"
+import CatalogMenu from "./CatalogMenu"
 import type { Location } from "react-router"
 
 import type { CurrentUser } from "../flow/authTypes"
+import type {CourseTopic} from "../flow/courseTypes"
 
 type Props = {
   currentUser: ?CurrentUser,
   location: ?Location,
-  errorPageHeader: ?boolean
+  errorPageHeader: ?boolean,
+  courseTopics: Array<CourseTopic>
 }
 
 const shouldShowLoginSignup = location =>
@@ -22,13 +25,11 @@ const shouldShowLoginSignup = location =>
     location.pathname === routes.ecommerceBulk.receipt
   )
 
-const TopAppBar = ({ currentUser, location, errorPageHeader }: Props) => (
+const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Props) => (
   <header className="header-holder">
     <div className="container">
       <nav
-        className={`sub-nav navbar navbar-expand-md link-section ${
-          currentUser && currentUser.is_authenticated ? "nowrap login" : ""
-        }`}
+        className="sub-nav navbar navbar-expand-md link-section"
       >
         <div className="navbar-brand">
           <a
@@ -46,7 +47,7 @@ const TopAppBar = ({ currentUser, location, errorPageHeader }: Props) => (
             height={47.5}
           />
         </div>
-        {(currentUser && currentUser.is_authenticated) || errorPageHeader ? null : (
+        {errorPageHeader ? null : (
           <button
             className="navbar-toggler nav-opener"
             type="button"
@@ -63,14 +64,27 @@ const TopAppBar = ({ currentUser, location, errorPageHeader }: Props) => (
         {errorPageHeader ? null : (
           <ul
             id="nav"
-            className={`${
-              currentUser && currentUser.is_authenticated ? "" : "collapse"
-            } navbar-collapse px-0 justify-content-end`}
+            className="collapse navbar-collapse px-0 justify-content-end"
           >
+            {
+              SETTINGS.webinars ? (
+                <li>
+                  <a href={routes.webinars} className="" aria-label="webinars">
+                    Webinars
+                  </a>
+                </li>
+              ) : null
+            }
             <li>
-              <a href={routes.catalog} className="" aria-label="catalog">
-                Catalog
-              </a>
+              {
+                SETTINGS.course_dropdown ? (
+                  <CatalogMenu courseTopics={courseTopics} />
+                ) : (
+                  <a href={routes.catalog} className="" aria-label="catalog">
+                    Catalog
+                  </a>
+                )
+              }
             </li>
             {shouldShowLoginSignup(location) ? (
               currentUser && currentUser.is_authenticated ? (

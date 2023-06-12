@@ -306,6 +306,13 @@ def get_valid_coupon_versions(
         coupon__in=global_coupon_subquery.values_list("pk", flat=True)
     )
 
+    if product:
+        product_version = latest_product_version(product)
+        if product_version and product_version.requires_enrollment_code:
+            global_coupon_version_subquery = global_coupon_version_subquery.exclude(
+                payment_version__coupon_type=CouponPaymentVersion.PROMO
+            )
+
     if full_discount:
         # We can only get full discount for dollars-off when we know the price
 
@@ -952,7 +959,7 @@ def validate_basket_for_checkout(user):
 
     # check for require enrollment code
     if product_version.requires_enrollment_code and not coupon_version:
-        raise ValidationError({"coupons": "Enrollment / Promotional Code is required"})
+        raise ValidationError({"coupons": "Enrollment Code is required"})
 
     # User must have signed any data consent agreements necessary for the basket
     data_consent_users = get_or_create_data_consent_users(basket)

@@ -99,16 +99,26 @@ class CourseSerializer(serializers.ModelSerializer):
     """Course model serializer - also serializes child course runs"""
 
     url = serializers.SerializerMethodField()
+    external_marketing_url = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
     courseruns = serializers.SerializerMethodField()
     next_run_id = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
+    time_commitment = serializers.SerializerMethodField()
+    duration = serializers.SerializerMethodField()
+    format = serializers.SerializerMethodField()
+    video_url = serializers.SerializerMethodField()
+    credits = serializers.SerializerMethodField()
 
     def get_url(self, instance):
         """Get CMS Page URL for the course"""
         page = instance.page
         return page.get_full_url() if page else None
+
+    def get_external_marketing_url(self, instance):
+        """Returns the external marketing URL for the course that's set in CMS page"""
+        return instance.page.external_marketing_url if instance.page else None
 
     def get_thumbnail_url(self, instance):
         """Thumbnail URL"""
@@ -144,10 +154,38 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_topics(self, instance):
         """List topics of a course"""
-        return sorted(
-            [{"name": topic.name} for topic in instance.topics.all()],
-            key=lambda topic: topic["name"],
+        if instance.page:
+            return sorted(
+                [{"name": topic.name} for topic in instance.page.topics.all()],
+                key=lambda topic: topic["name"],
+            )
+        return []
+
+    def get_time_commitment(self, instance):
+        """Returns the time commitment for this course that's set in CMS page"""
+        return instance.page.time_commitment if instance.page else None
+
+    def get_duration(self, instance):
+        """Returns the duration for this course that's set in CMS page"""
+        return instance.page.duration if instance.page else None
+
+    def get_video_url(self, instance):
+        """Video URL"""
+        return instance.page.video_url if instance.page else None
+
+    def get_credits(self, instance):
+        """Returns the credits for this Course"""
+        return (
+            instance.page.certificate_page.CEUs
+            if instance.page and instance.page.certificate_page
+            else None
         )
+
+    def get_format(self, instance):  # pylint: disable=unused-argument
+        """Returns the format of the course"""
+        # Currently hardcoded at the frontend as well, At some point we'll need to move it into CMS to make it
+        # configurable.
+        return "Online"
 
     class Meta:
         model = models.Course
@@ -156,11 +194,18 @@ class CourseSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "url",
+            "external_marketing_url",
             "thumbnail_url",
             "readable_id",
             "courseruns",
             "next_run_id",
             "topics",
+            "time_commitment",
+            "duration",
+            "video_url",
+            "format",
+            "credits",
+            "is_external",
         ]
 
 
@@ -214,8 +259,14 @@ class ProgramSerializer(serializers.ModelSerializer):
     end_date = serializers.SerializerMethodField()
     enrollment_start = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
+    external_marketing_url = serializers.SerializerMethodField()
     instructors = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
+    time_commitment = serializers.SerializerMethodField()
+    duration = serializers.SerializerMethodField()
+    format = serializers.SerializerMethodField()
+    video_url = serializers.SerializerMethodField()
+    credits = serializers.SerializerMethodField()
 
     def get_courses(self, instance):
         """Serializer for courses"""
@@ -243,7 +294,10 @@ class ProgramSerializer(serializers.ModelSerializer):
         Returns:
             datetime: The starting date
         """
-        sorted_runs = sorted(instance.course_runs, key=lambda run: run.start_date)
+        filtered_start_runs = filter(
+            lambda run: run.start_date is not None, instance.course_runs
+        )
+        sorted_runs = sorted(filtered_start_runs, key=lambda run: run.start_date)
         return sorted_runs[0].start_date if sorted_runs else None
 
     def get_end_date(self, instance):
@@ -253,7 +307,10 @@ class ProgramSerializer(serializers.ModelSerializer):
         Returns:
             datetime: The ending date
         """
-        sorted_runs = sorted(instance.course_runs, key=lambda run: run.end_date)
+        filtered_end_runs = filter(
+            lambda run: run.end_date is not None, instance.course_runs
+        )
+        sorted_runs = sorted(filtered_end_runs, key=lambda run: run.end_date)
         return sorted_runs[-1].end_date if sorted_runs else None
 
     def get_enrollment_start(self, instance):
@@ -271,6 +328,10 @@ class ProgramSerializer(serializers.ModelSerializer):
         page = instance.page
         return page.get_full_url() if page else None
 
+    def get_external_marketing_url(self, instance):
+        """Returns the external marketing URL for this program that's set in CMS page"""
+        return instance.page.external_marketing_url if instance.page else None
+
     def get_instructors(self, instance):
         """List all instructors who are a part of any course run within a program"""
         return instance.instructors
@@ -280,9 +341,36 @@ class ProgramSerializer(serializers.ModelSerializer):
         topics = set(
             topic.name
             for course in instance.courses.all()
-            for topic in course.topics.all()
+            if course.page
+            for topic in course.page.topics.all()
         )
         return [{"name": topic} for topic in sorted(topics)]
+
+    def get_time_commitment(self, instance):
+        """Returns the time commitment for this program that's set in CMS page"""
+        return instance.page.time_commitment if instance.page else None
+
+    def get_duration(self, instance):
+        """Returns the duration for this course that's set in CMS page"""
+        return instance.page.duration if instance.page else None
+
+    def get_video_url(self, instance):
+        """Video URL"""
+        return instance.page.video_url if instance.page else None
+
+    def get_credits(self, instance):
+        """Returns the credits for this Course"""
+        return (
+            instance.page.certificate_page.CEUs
+            if instance.page and instance.page.certificate_page
+            else None
+        )
+
+    def get_format(self, instance):  # pylint: disable=unused-argument
+        """Returns the format of the course"""
+        # Currently hardcoded at the frontend as well, At some point we'll need to move it into CMS to make it
+        # configurable.
+        return "Online"
 
     class Meta:
         model = models.Program
@@ -298,8 +386,15 @@ class ProgramSerializer(serializers.ModelSerializer):
             "end_date",
             "enrollment_start",
             "url",
+            "external_marketing_url",
             "instructors",
             "topics",
+            "time_commitment",
+            "duration",
+            "video_url",
+            "format",
+            "credits",
+            "is_external",
         ]
 
 
@@ -441,3 +536,13 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
             "certificate",
             "receipt",
         ]
+
+
+class CourseTopicSerializer(serializers.ModelSerializer):
+    """
+    CourseTopic model serializer
+    """
+
+    class Meta:
+        model = models.CourseTopic
+        fields = ["name", "course_count"]

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% load static wagtailimages_tags wagtailmetadata_tags render_bundle image_version_url wagtailcore_tags tz %}
+
+{% block title %}Webinars{% endblock %}
+
+{% block headercontent %}
+  <div id="header"></div>
+  {% render_bundle 'header' %}
+{% endblock %}
+
+{% block content %}
+  <div class="webinars">
+    {% block banner %}
+      <div class="sub-banner webinar-sub-banner">
+        <h1>Webinars</h1>
+      </div>
+      {% if not webinars %}
+          <div class="no-available-webinars">There are currently no webinars available.</div>
+      {% endif %}
+    {% endblock %}
+
+    {% for webinar_category, webinars_list in webinars.items %}
+      {% if webinars_list %}
+
+        <h1 class="webinar-category">{{ webinar_category }} WEBINARS</h1>
+
+        <div class="webinars-list">
+          {% for webinar in webinars_list %}
+            <div class="webinar">
+              <div class="webinar-holder">
+                {% if webinar.banner_image %}
+                  <img src="{% image_version_url webinar.banner_image "fill-330x200" %}" alt="{{ webinar.title }}" width="330" height="200" loading="lazy"/>
+                {% else %}
+                  <img src="{% static webinar_default_images|random %}" alt="Preview image" />
+                {% endif %}
+                <p class="title">{{ webinar.title }}</p>
+                {% if webinar.description %}
+                  <p class="description">{{ webinar.description }}</p>
+                {% endif %}
+                {% if webinar.date and webinar.time %}
+                  <p class="time">{{ webinar.formatted_date }} | {{ webinar.time }}</p>
+                {% endif %}
+                <a href="{{ webinar.action_url }}" class="read-more">{{ webinar.action_title }}</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+      {% endif %}
+    {% endfor %}
+
+  </div>
+{% endblock %}
+
+{% block contact-us %}
+  {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
+    {% include "subscription.html" %}
+  {% endif %}
+{% endblock %}

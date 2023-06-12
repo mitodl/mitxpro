@@ -1,34 +1,38 @@
 """Auth pipline functions for user authentication"""
 import json
 import logging
+
 import requests
-from social_core.backends.email import EmailAuth
-from social_core.exceptions import AuthException
-from social_core.pipeline.partial import partial
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import IntegrityError
+from social_core.backends.email import EmailAuth
+from social_core.exceptions import AuthAlreadyAssociated, AuthException
+from social_core.pipeline.partial import partial
 
 from affiliate.api import get_affiliate_id_from_request
+from authentication.api import create_user_with_generated_username
 from authentication.exceptions import (
+    EmailBlockedException,
     InvalidPasswordException,
-    RequirePasswordException,
     RequirePasswordAndPersonalInfoException,
+    RequirePasswordException,
     RequireProfileException,
     RequireRegistrationException,
     UnexpectedExistingUserException,
     UserCreationFailedException,
-    EmailBlockedException,
 )
 from authentication.utils import SocialAuthState, is_user_email_blocked
-from authentication.api import create_user_with_generated_username
-
 from compliance import api as compliance_api
 from courseware import api as courseware_api, tasks as courseware_tasks
 from hubspot_xpro.task_helpers import sync_hubspot_user
-from users.serializers import UserSerializer, ProfileSerializer
+from users.serializers import ProfileSerializer, UserSerializer
 from users.utils import usernameify
 
+
 log = logging.getLogger()
+
+User = get_user_model()
 
 CREATE_COURSEWARE_USER_RETRY_DELAY = 60
 NAME_MIN_LENGTH = 2
@@ -106,6 +110,10 @@ def create_user_via_email(
         )
 
     data["email"] = kwargs.get("email", kwargs.get("details", {}).get("email"))
+
+    if User.objects.filter(email__iexact=data["email"]).exists():
+        raise AuthAlreadyAssociated(backend)
+
     username = usernameify(data["name"], email=data["email"])
     data["username"] = username
 
@@ -297,9 +305,6 @@ def send_user_to_hubspot(request, **kwargs):
     form_id = settings.HUBSPOT_CONFIG.get("HUBSPOT_CREATE_USER_FORM_ID")
 
     if not (portal_id and form_id):
-        log.error(
-            "HUBSPOT_PORTAL_ID or HUBSPOT_CREATE_USER_FORM_ID not set. Can't submit to Hubspot forms api."
-        )
         return {}
 
     hutk = request.COOKIES.get("hubspotutk")
@@ -316,4 +321,15 @@ def send_user_to_hubspot(request, **kwargs):
 
     requests.post(url=url, data=data, headers=headers)
 
+    return {}
+
+
+def sync_user_to_hubspot(
+    strategy, backend, user=None, is_new=False, **kwargs
+):  # pylint: disable=unused-argument
+    """
+    Sync the user's latest profile data with hubspot on login
+    """
+    if user.is_active:
+        sync_hubspot_user(user)
     return {}

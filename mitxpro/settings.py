@@ -27,7 +27,7 @@ from redbeat import RedBeatScheduler
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
-VERSION = "0.114.1"
+VERSION = "0.124.1"
 
 ENVIRONMENT = get_string(
     name="MITXPRO_ENVIRONMENT",
@@ -154,6 +154,7 @@ INSTALLED_APPS = (
     "wagtail.contrib.redirects",
     "wagtail.contrib.table_block",
     "wagtail.contrib.routable_page",
+    "wagtail.contrib.modeladmin",
     "wagtail.embeds",
     "wagtail.sites",
     "wagtail.users",
@@ -403,6 +404,8 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.load_extra_data",
     # Update the user record with any changed info from the auth service.
     "social_core.pipeline.user.user_details",
+    # Sync user data with hubspot
+    "authentication.pipeline.user.sync_user_to_hubspot",
 )
 
 AUTH_CHANGE_EMAIL_TTL_IN_MINUTES = get_int(

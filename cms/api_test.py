@@ -5,7 +5,7 @@ import pytest
 from cms.factories import ExternalCoursePageFactory, ExternalProgramPageFactory
 from cms.models import ExternalCoursePage
 from cms.api import filter_and_sort_catalog_pages
-from courses.factories import CourseRunFactory
+from courses.factories import CourseRunFactory, ProgramRunFactory
 from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
@@ -18,23 +18,28 @@ def test_filter_and_sort_catalog_pages():  # pylint:disable=too-many-locals
     """
     now = now_in_utc()
 
-    earlier_external_course_page = ExternalCoursePageFactory.create(start_date=now)
-    earlier_external_program_page = ExternalProgramPageFactory.create(
-        start_date=now, course_count=2
+    earlier_external_course_page = ExternalCoursePageFactory.create()
+    CourseRunFactory.create(course=earlier_external_course_page.course, start_date=now)
+    earlier_external_program_page = ExternalProgramPageFactory.create()
+    ProgramRunFactory.create(
+        program=earlier_external_program_page.program, start_date=now
     )
+
     non_program_run = CourseRunFactory.create(
         course__no_program=True, start_date=(now + timedelta(days=1))
     )
     first_program_run = CourseRunFactory.create(start_date=(now + timedelta(days=2)))
     second_program_run = CourseRunFactory.create(start_date=(now + timedelta(days=3)))
-    later_external_course_page = ExternalCoursePageFactory.create(
-        start_date=now + timedelta(days=4)
+    later_external_course_page = ExternalCoursePageFactory.create()
+    CourseRunFactory.create(
+        course=later_external_course_page.course, start_date=now + timedelta(days=4)
     )
-
-    later_external_program_page = ExternalProgramPageFactory.create(
-        start_date=now + timedelta(days=4)
-    )
+    later_external_program_page = ExternalProgramPageFactory.create()
     # Create course run with past start_date and future enrollment_end, which should appear in the catalog
+    CourseRunFactory.create(
+        course__program=later_external_program_page.program,
+        start_date=now + timedelta(days=4),
+    )
     future_enrollment_end_run = CourseRunFactory.create(
         past_start=True,
         enrollment_end=(now + timedelta(days=1)),
@@ -93,14 +98,11 @@ def test_filter_and_sort_catalog_pages():  # pylint:disable=too-many-locals
     )
 
     # Pages should be sorted by next run date
-    assert [
-        page if page.is_external_program_page else page.program
-        for page in program_pages
-    ] == [
-        earlier_external_program_page,
+    assert [page.program for page in program_pages] == [
+        earlier_external_program_page.program,
         first_program_run.course.program,
         second_program_run.course.program,
-        later_external_program_page,
+        later_external_program_page.program,
     ]
     expected_course_run_sort = [
         future_enrollment_end_run,

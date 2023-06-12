@@ -1152,10 +1152,52 @@ def test_validate_basket_product_requires_enrollment_code(basket_and_coupons):
     product_version.save()
 
     CouponSelection.objects.all().delete()
-
     with pytest.raises(ValidationError) as ex:
         validate_basket_for_checkout(basket_and_coupons.basket.user)
-    assert "Enrollment / Promotional Code is required" in ex.value.args[0]["coupons"]
+    assert "Enrollment Code is required" in ex.value.args[0]["coupons"]
+
+
+def test_apply_coupon_to_product_requires_enrollment_code(user, basket_and_coupons):
+    """
+    if product that requires enrollment code, a promo coupon is not valid and can't be applied in checkout;
+    An enrollment code is valid if it's eligible for the product
+    """
+
+    product_version = basket_and_coupons.product_version
+    product_version.id = None
+    product_version.requires_enrollment_code = True
+    product_version.save()
+
+    promo_code = "PROMO"
+    coupon_payment_version = CouponPaymentVersionFactory.create(
+        coupon_type=CouponPaymentVersion.PROMO,
+    )
+    coupon_version = CouponVersionFactory.create(
+        payment_version=coupon_payment_version,
+        coupon__coupon_code=promo_code,
+        coupon__is_global=True,
+    )
+    # Check that the promo coupon isn't applied
+    assert (
+        list(get_valid_coupon_versions(product_version.product, user, code=promo_code))
+        == []
+    )
+
+    enrollment_code = "ENROLLMENT_CODE"
+    coupon_payment_version = CouponPaymentVersionFactory.create(
+        coupon_type=CouponPaymentVersion.SINGLE_USE,
+    )
+    coupon_version = CouponVersionFactory.create(
+        payment_version=coupon_payment_version,
+        coupon__coupon_code=enrollment_code,
+    )
+    CouponEligibilityFactory.create(
+        coupon=coupon_version.coupon, product=product_version.product
+    )
+    # Check that eligible enrollment code is applied
+    assert list(
+        get_valid_coupon_versions(product_version.product, user, code=enrollment_code)
+    ) == [coupon_version]
 
 
 def test_validate_basket_not_live(basket_and_coupons):

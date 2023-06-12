@@ -1,6 +1,7 @@
 """
 Course models
 """
+# pylint: disable=too-many-lines
 import logging
 import operator as op
 import uuid
@@ -77,9 +78,75 @@ class CourseRunQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
             models.Q(end_date__isnull=True) | models.Q(end_date__gt=now_in_utc())
         )
 
+    def enrollment_available(self):
+        """Applies a filter for Course runs with enrollment_end in future"""
+        return self.filter(
+            models.Q(enrollment_end__isnull=True)
+            | models.Q(enrollment_end__gt=now_in_utc())
+        )
+
     def with_text_id(self, text_id):
         """Applies a filter for the CourseRun's courseware_id"""
         return self.filter(courseware_id=text_id)
+
+
+class CourseTopicQuerySet(models.QuerySet):
+    """
+    Custom QuerySet for `CourseTopic`
+    """
+
+    def parent_topics(self):
+        """
+        Applies a filter for course topics with parent=None
+        """
+        return self.filter(parent__isnull=True).order_by("name")
+
+    def parent_topic_names(self):
+        """
+        Returns a list of all parent topic names.
+        """
+        return list(self.parent_topics().values_list("name", flat=True))
+
+    def parent_topics_with_annotated_course_counts(self):
+        """
+        Returns parent course topics with annotated course counts including the child topic course counts as well.
+        """
+        from courses.utils import get_catalog_course_filter
+
+        catalog_course_visible_filter = get_catalog_course_filter(
+            relative_filter="coursepage__"
+        )
+        topics_queryset = (
+            self.parent_topics()
+            .annotate(
+                internal_course_count=models.Count(
+                    "coursepage", filter=catalog_course_visible_filter, distinct=True
+                ),
+                external_course_count=models.Count(
+                    "externalcoursepage",
+                    filter=models.Q(externalcoursepage__course__live=True),
+                    distinct=True,
+                ),
+            )
+            .prefetch_related(
+                models.Prefetch(
+                    "subtopics",
+                    self.filter(parent__isnull=False).annotate(
+                        internal_course_count=models.Count(
+                            "coursepage",
+                            filter=catalog_course_visible_filter,
+                            distinct=True,
+                        ),
+                        external_course_count=models.Count(
+                            "externalcoursepage",
+                            filter=models.Q(externalcoursepage__course__live=True),
+                            distinct=True,
+                        ),
+                    ),
+                ),
+            )
+        )
+        return topics_queryset
 
 
 class ActiveEnrollmentManager(models.Manager):
@@ -152,16 +219,19 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     )
     live = models.BooleanField(default=False)
     products = GenericRelation(Product, related_query_name="programs")
+    is_external = models.BooleanField(default=False)
 
     @property
     def page(self):
         """Gets the associated ProgramPage"""
-        return getattr(self, "programpage", None)
+        return getattr(self, "programpage", None) or getattr(
+            self, "externalprogrampage", None
+        )
 
     @property
     def num_courses(self):
         """Gets the number of courses in this program"""
-        return self.courses.count()
+        return self.courses.live().count()
 
     @cached_property
     def next_run_date(self):
@@ -286,9 +356,40 @@ class CourseTopic(TimestampedModel):
     """
 
     name = models.CharField(max_length=128, unique=True)
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="subtopics",
+    )
+    objects = CourseTopicQuerySet.as_manager()
 
     def __str__(self):
         return self.name
+
+    @cached_property
+    def course_count(self):
+        """
+        Returns the sum of course count and child topic course count.
+
+        To avoid the DB queries it assumes that the course counts are annotated.
+        `CourseTopicQuerySet.parent_topics_with_annotated_course_counts` annotates course counts for parent topics.
+        """
+        return sum(
+            [
+                getattr(self, "internal_course_count", 0),
+                getattr(self, "external_course_count", 0),
+                *[
+                    getattr(subtopic, "internal_course_count", 0)
+                    for subtopic in self.subtopics.all()
+                ],
+                *[
+                    getattr(subtopic, "external_course_count", 0)
+                    for subtopic in self.subtopics.all()
+                ],
+            ]
+        )
 
 
 class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
@@ -304,12 +405,14 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         max_length=255, unique=True, validators=[validate_url_path_field]
     )
     live = models.BooleanField(default=False)
-    topics = models.ManyToManyField(CourseTopic, blank=True)
+    is_external = models.BooleanField(default=False)
 
     @property
     def page(self):
         """Gets the associated CoursePage"""
-        return getattr(self, "coursepage", None)
+        return getattr(self, "coursepage", None) or getattr(
+            self, "externalcoursepage", None
+        )
 
     @cached_property
     def next_run_date(self):
@@ -378,7 +481,9 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
                 sorted(
                     [
                         course_run
-                        for course_run in self.courseruns.all()
+                        for course_run in self.courseruns.filter(
+                            start_date__isnull=False
+                        )
                         if course_run.live
                     ],
                     key=lambda course_run: course_run.start_date,

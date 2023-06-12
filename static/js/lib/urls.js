@@ -10,6 +10,7 @@ export const bulkReceiptCsvUrl = (hash: string) =>
 export const routes = {
   root:            "/",
   catalog:         "/catalog/",
+  webinars:         "/webinars/",
   dashboard:       "/dashboard/",
   accountSettings: "/account-settings/",
   logout:          "/logout/",

@@ -1,5 +1,6 @@
 """Courseware API functions"""
 import logging
+from dataclasses import dataclass
 from datetime import timedelta
 from urllib.parse import parse_qs, urljoin, urlparse
 
@@ -7,7 +8,7 @@ import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.shortcuts import reverse
 from edx_api.client import EdxApi
 from oauth2_provider.models import AccessToken, Application
@@ -16,7 +17,7 @@ from requests.exceptions import HTTPError
 from rest_framework import status
 
 from authentication import api as auth_api
-from courses.models import CourseRunEnrollment
+from courses.models import CourseRun, CourseRunEnrollment
 from courseware.constants import (
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
     EDX_ENROLLMENT_AUDIT_MODE,
@@ -45,6 +46,7 @@ from mitxpro.utils import (
 log = logging.getLogger(__name__)
 User = get_user_model()
 
+OPENEDX_USER_ACCOUNT_DETAIL_PATH = "/api/user/v1/accounts"
 OPENEDX_REGISTER_USER_PATH = "/user_api/v1/account/registration/"
 OPENEDX_REQUEST_DEFAULTS = dict(country="US", honor_code=True)
 
@@ -59,6 +61,34 @@ OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS = 60
 OPENEDX_AUTH_MAX_TTL_IN_SECONDS = 60 * 60
 
 ACCESS_TOKEN_HEADER_NAME = "X-Access-Token"
+AUTH_TOKEN_HEADER_NAME = "Authorization"
+API_KEY_HEADER_NAME = "X-EdX-Api-Key"
+
+
+@dataclass(frozen=True)
+class OpenEdxUser:
+    """
+    Data class representing a user in Open edX platform.
+
+    Attributes:
+        user (user.models.User): User object representing the user in xpro.
+        openedx_data (dict): Dictionary containing user data retrieved from
+        openedx platform.
+    """
+
+    user: User
+    openedx_data: dict
+
+    def is_username_match(self):
+        """
+        Check if the username of the OpenEdxUser's associated User object matches
+        the 'username' field in its 'openedx_data' dictionary.
+
+        Returns:
+            True if the username of the User object matches the 'username' field in
+            'openedx_data', False otherwise.
+        """
+        return self.user.username == self.openedx_data.get("username")
 
 
 def create_user(user):
@@ -70,6 +100,69 @@ def create_user(user):
     """
     create_edx_user(user)
     create_edx_auth_token(user)
+
+
+def get_existing_openedx_user(user):
+    """
+    Fetches the openedx user data associated with the given application User object,
+    and returns an courseware.api.OpenEdxUser instance that wraps both the User
+    object and the fetched openedx user data.
+
+    Args:
+        user (user.models.User): The application User object to search for on Open edX.
+
+    Returns:
+        If a matching openedx user is found, an courseware.api.OpenEdxUser instance that
+        wraps both the given User object and the fetched Open edX user data. Otherwise,
+        returns None.
+
+    Raises:
+        ImproperlyConfigured: If OPENEDX_SERVICE_WORKER_API_TOKEN is not set in settings.
+
+    Note:
+        This function requires an Open edX service worker API token and API key to be set
+        in the settings module.
+    """
+    if settings.OPENEDX_SERVICE_WORKER_API_TOKEN is None:
+        raise ImproperlyConfigured("OPENEDX_SERVICE_WORKER_API_TOKEN is not set")
+    req_session = requests.Session()
+    req_session.headers.update(
+        {
+            AUTH_TOKEN_HEADER_NAME: "Bearer {}".format(
+                settings.OPENEDX_SERVICE_WORKER_API_TOKEN
+            ),
+            API_KEY_HEADER_NAME: settings.OPENEDX_API_KEY,
+        }
+    )
+    response = req_session.get(
+        edx_url(f"{OPENEDX_USER_ACCOUNT_DETAIL_PATH}"), params={"email": user.email}
+    )
+    if response.status_code == status.HTTP_200_OK and is_json_response(response):
+        users_data = response.json()
+        if len(users_data) > 0:
+            return OpenEdxUser(user, users_data[0])
+    return None
+
+
+def update_xpro_user_username(user, username):
+    """
+    Update the username of an xPro user by the given username.
+
+    Args:
+        user (users.models.User): The user to update.
+        username (str): The new username.
+
+    Returns:
+        bool: True if the user's username is updated successfully on Xpro,
+        False if the update failed due to a database integrity error.
+    """
+    user.username = username
+    try:
+        user.save()
+    except IntegrityError:
+        return False
+
+    return True
 
 
 def create_edx_user(user):
@@ -112,9 +205,18 @@ def create_edx_user(user):
         )
         # edX responds with 200 on success, not 201
         if resp.status_code != status.HTTP_200_OK:
-            raise CoursewareUserCreateError(
-                f"Error creating Open edX user. {get_error_response_summary(resp)}"
-            )
+            openedx_user = get_existing_openedx_user(user)
+            if not openedx_user:
+                raise CoursewareUserCreateError(
+                    f"Error creating Open edX user. {get_error_response_summary(resp)}"
+                )
+            if not openedx_user.is_username_match():
+                if not update_xpro_user_username(
+                    user, openedx_user.openedx_data["username"]
+                ):
+                    raise CoursewareUserCreateError(
+                        f"Error creating Open edX user. {get_error_response_summary(resp)}"
+                    )
 
 
 @transaction.atomic
@@ -496,7 +598,25 @@ def get_edx_grades_with_users(course_run, user=None):
                 yield edx_grade, user
 
 
-def enroll_in_edx_course_runs(user, course_runs):
+def get_enrollment(user: User, course_run: CourseRun):
+    """
+    Return a user's enrollment for a course run if it exists
+
+    Args:
+        user(User): The user to check enrollments for
+        course_run(CourseRun): The run enrollment to look for
+
+    Returns:
+        edx_api.enrollments.Enrollment or None: The edx enrollment if it exists, or None
+
+    """
+    edx_client = get_edx_api_client(user)
+    return edx_client.enrollments.get_student_enrollments().get_enrollment_for_course(
+        course_run.courseware_id
+    )
+
+
+def enroll_in_edx_course_runs(user, course_runs, force_enrollment=False):
     """
     Enrolls a user in edx course runs
 
@@ -512,12 +632,20 @@ def enroll_in_edx_course_runs(user, course_runs):
         EdxApiEnrollErrorException: Raised if the underlying edX API HTTP request fails
         UnknownEdxApiEnrollException: Raised if an unknown error was encountered during the edX API request
     """
-    edx_client = get_edx_api_client(user)
+    username = None
+    if force_enrollment:
+        edx_client = get_edx_api_service_client()
+        username = user.username
+    else:
+        edx_client = get_edx_api_client(user)
     results = []
     for course_run in course_runs:
         try:
             result = edx_client.enrollments.create_student_enrollment(
-                course_run.courseware_id, mode=EDX_ENROLLMENT_PRO_MODE
+                course_run.courseware_id,
+                mode=EDX_ENROLLMENT_PRO_MODE,
+                username=username,
+                force_enrollment=force_enrollment,
             )
             results.append(result)
         except HTTPError as exc:
@@ -541,7 +669,10 @@ def enroll_in_edx_course_runs(user, course_runs):
             )
             try:
                 result = edx_client.enrollments.create_student_enrollment(
-                    course_run.courseware_id, mode=EDX_ENROLLMENT_AUDIT_MODE
+                    course_run.courseware_id,
+                    mode=EDX_ENROLLMENT_AUDIT_MODE,
+                    username=username,
+                    force_enrollment=force_enrollment,
                 )
             except HTTPError as inner_exc:
                 raise EdxApiEnrollErrorException(
@@ -578,12 +709,30 @@ def retry_failed_edx_enrollments():
         course_run = enrollment.run
         try:
             enroll_in_edx_course_runs(user, [course_run])
+        except EdxApiEnrollErrorException as exc:
+            # Check if user is already actively enrolled
+            edx_enrollment = get_enrollment(user, course_run)
+            if (
+                edx_enrollment
+                and edx_enrollment.is_active
+                and edx_enrollment.mode
+                in (EDX_ENROLLMENT_PRO_MODE, EDX_ENROLLMENT_AUDIT_MODE)
+            ):
+                log.warning(
+                    "User %s was already enrolled in %s with mode %s",
+                    user.email,
+                    course_run.courseware_id,
+                    edx_enrollment.mode,
+                )
+            else:
+                log.exception(str(exc))
+                continue
         except Exception as exc:  # pylint: disable=broad-except
             log.exception(str(exc))
-        else:
-            enrollment.edx_enrolled = True
-            enrollment.save_and_log(None)
-            succeeded.append(enrollment)
+            continue
+        enrollment.edx_enrolled = True
+        enrollment.save_and_log(None)
+        succeeded.append(enrollment)
     return succeeded
 
 

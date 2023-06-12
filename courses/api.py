@@ -6,14 +6,16 @@ from collections import namedtuple
 from traceback import format_exc
 
 from django.core.exceptions import ValidationError
-from requests.exceptions import HTTPError, ConnectionError as RequestsConnectionError
+from requests.exceptions import ConnectionError as RequestsConnectionError, HTTPError
 
 from courses.constants import ENROLL_CHANGE_STATUS_DEFERRED
 from courses.models import CourseRun, CourseRunEnrollment, ProgramEnrollment
 from courseware.api import enroll_in_edx_course_runs, unenroll_edx_course_run
 from courseware.exceptions import (
     EdxApiEnrollErrorException,
+    EdxEnrollmentCreateError,
     NoEdxApiAuthError,
+    OpenEdXOAuth2Error,
     UnknownEdxApiEnrollException,
 )
 from ecommerce import mail_api
@@ -86,8 +88,13 @@ def get_user_enrollments(user):
 
 
 def create_run_enrollments(
-    user, runs, keep_failed_enrollments=False, order=None, company=None
-):
+    user,
+    runs,
+    keep_failed_enrollments=False,
+    order=None,
+    company=None,
+    force_enrollment=False,
+):  # pylint: disable=too-many-arguments
     """
     Creates local records of a user's enrollment in course runs, and attempts to enroll them
     in edX via API
@@ -108,23 +115,27 @@ def create_run_enrollments(
     """
     successful_enrollments = []
     try:
-        enroll_in_edx_course_runs(user, runs)
+        enroll_in_edx_course_runs(user, runs, force_enrollment=force_enrollment)
     except (
         EdxApiEnrollErrorException,
         UnknownEdxApiEnrollException,
         NoEdxApiAuthError,
         HTTPError,
         RequestsConnectionError,
+        OpenEdXOAuth2Error,
     ):
-        log.exception(
-            "edX enrollment failure for user: %s, runs: %s (order: %s)",
-            user,
-            [run.courseware_id for run in runs],
-            order.id if order else None,
+        error_message = (
+            "edX enrollment failure for user: {}, runs: {} (order: {})".format(
+                user,
+                [run.courseware_id for run in runs],
+                order.id if order else None,
+            )
         )
+
         edx_request_success = False
         if not keep_failed_enrollments:
-            return successful_enrollments, edx_request_success
+            raise EdxEnrollmentCreateError(str(error_message))
+        log.exception(str(error_message))
     else:
         edx_request_success = True
 
@@ -310,7 +321,7 @@ def defer_enrollment(
         raise ValidationError(
             "Cannot defer to the same course run (run: {})".format(to_run.courseware_id)
         )
-    if not to_run.is_not_beyond_enrollment:
+    if not force and not to_run.is_not_beyond_enrollment:
         raise ValidationError(
             "Cannot defer to a course run that is outside of its enrollment period (run: {}).".format(
                 to_run.courseware_id
@@ -323,16 +334,21 @@ def defer_enrollment(
                 from_enrollment.run.course.title, to_run.course.title
             )
         )
-    to_enrollments, _ = create_run_enrollments(
-        user,
-        [to_run],
-        order=from_enrollment.order,
-        company=from_enrollment.company,
-        keep_failed_enrollments=keep_failed_enrollments,
-    )
-    from_enrollment = deactivate_run_enrollment(
-        from_enrollment,
-        ENROLL_CHANGE_STATUS_DEFERRED,
-        keep_failed_enrollments=keep_failed_enrollments,
-    )
+    try:
+        to_enrollments, _ = create_run_enrollments(
+            user,
+            [to_run],
+            order=from_enrollment.order,
+            company=from_enrollment.company,
+            keep_failed_enrollments=keep_failed_enrollments,
+            force_enrollment=force,
+        )
+        if to_enrollments:
+            from_enrollment = deactivate_run_enrollment(
+                from_enrollment,
+                ENROLL_CHANGE_STATUS_DEFERRED,
+                keep_failed_enrollments=keep_failed_enrollments,
+            )
+    except EdxEnrollmentCreateError:  # pylint: disable=try-except-raise
+        raise
     return from_enrollment, first_or_none(to_enrollments)

@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react"
 import { compose } from "redux"
 import { connect } from "react-redux"
@@ -6,6 +7,7 @@ import { connectRequest } from "redux-query"
 import { createStructuredSelector } from "reselect"
 
 import users, { currentUserSelector } from "../lib/queries/users"
+import catalog from "../lib/queries/catalog"
 import { addUserNotification } from "../actions"
 import { ALERT_TYPE_UNUSED_COUPON } from "../constants"
 
@@ -13,11 +15,13 @@ import Header from "../components/Header"
 
 import type { Store } from "redux"
 import type { CurrentUser } from "../flow/authTypes"
+import type { CourseTopic } from "../flow/courseTypes"
 
 type Props = {
   currentUser: ?CurrentUser,
   store: Store<*, *>,
-  addUserNotification: Function
+  addUserNotification: Function,
+  courseTopics: Array<CourseTopic>,
 }
 
 const errorPageHeader = document.getElementsByClassName("error-page-header").length > 0 ? true : false
@@ -47,22 +51,23 @@ export class HeaderApp extends React.Component<Props, void> {
     props.currentUser.unused_coupons.length > 0
 
   render() {
-    const { currentUser } = this.props
+    const { currentUser, courseTopics } = this.props
 
-    if (!currentUser && !errorPageHeader) {
+    if (!currentUser && !errorPageHeader && !courseTopics) {
       // application is still loading
       return <div />
     }
 
-    return <Header currentUser={currentUser} location={null} errorPageHeader={errorPageHeader} />
+    return <Header currentUser={currentUser} location={null} errorPageHeader={errorPageHeader} courseTopics={courseTopics}/>
   }
 }
 
 const mapStateToProps = createStructuredSelector({
-  currentUser: currentUserSelector
+  currentUser:  currentUserSelector,
+  courseTopics: catalog.courseTopicsSelector
 })
 
-const mapPropsToConfig = () => errorPageHeader ? [] : [users.currentUserQuery()]
+const mapPropsToConfig = () => errorPageHeader ? [] : [users.currentUserQuery(), SETTINGS.course_dropdown ? catalog.courseTopicsQuery() : []]
 
 const mapDispatchToProps = {
   addUserNotification

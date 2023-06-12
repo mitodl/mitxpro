@@ -115,14 +115,27 @@ class ProductViewSet(ReadOnlyModelViewSet):
             .distinct()
         )
 
+        external_programs = Program.objects.filter(is_external=True).values_list(
+            "id", flat=True
+        )
+        external_course_runs = CourseRun.objects.filter(
+            course__is_external=True
+        ).values_list("id", flat=True)
+
+        unsellable_course_runs = expired_courseruns.union(external_course_runs)
+        unsellable_programs = expired_programs.union(external_programs)
+
         return (
             Product.objects.exclude(
                 Q(productversions=None)
                 | (
-                    Q(object_id__in=expired_courseruns)
+                    Q(object_id__in=unsellable_course_runs)
                     & Q(content_type__model="courserun")
                 )
-                | (Q(object_id__in=expired_programs) & Q(content_type__model="program"))
+                | (
+                    Q(object_id__in=unsellable_programs)
+                    & Q(content_type__model="program")
+                )
             )
             .order_by("programs__title", "course_run__course__title")
             .select_related("content_type")

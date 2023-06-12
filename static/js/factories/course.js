@@ -117,3 +117,18 @@ export const makeProgramCertificate = (): ProgramCertificate => ({
   uuid: "some-uuid",
   link: "some-link"
 })
+
+export const makeCourseTopics = () => [
+  {
+    name:         "Business",
+    course_count: 1
+  },
+  {
+    name:         "Engineering",
+    course_count: 2
+  },
+  {
+    name:         "Commerce",
+    course_count: 5
+  },
+]

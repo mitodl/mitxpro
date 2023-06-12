@@ -1,13 +1,15 @@
 """API for the CMS app"""
 import itertools
-from datetime import MINYEAR, datetime
 import logging
-import pytz
+from datetime import MINYEAR, datetime
 
+import pytz
 from django.contrib.contenttypes.models import ContentType
 from wagtail.core.models import Page, Site
+
 from cms import models as cms_models
 from cms.constants import CERTIFICATE_INDEX_SLUG
+
 
 log = logging.getLogger(__name__)
 DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")
@@ -43,9 +45,7 @@ def filter_and_sort_catalog_pages(
     valid_external_program_pages = list(external_program_pages)
 
     page_run_dates = {
-        page: (
-            page.next_run_date if page.is_external_page else page.product.next_run_date
-        )
+        page: page.product.next_run_date
         or datetime(year=MINYEAR, month=1, day=1, tzinfo=pytz.UTC)
         for page in itertools.chain(
             valid_program_pages,
@@ -137,7 +137,7 @@ def ensure_catalog_page():
         catalog_page.refresh_from_db()
 
 
-def ensure_index_pages():
+def ensure_index_pages():  # pylint: disable=too-many-branches
     """
     Ensures that the proper index pages exist as children of the home page, and that
     any pages that should belong to those index pages are set as children.
@@ -147,6 +147,7 @@ def ensure_index_pages():
     program_index = cms_models.ProgramIndexPage.objects.first()
     signatory_index = cms_models.SignatoryIndexPage.objects.first()
     certificate_index = cms_models.CertificateIndexPage.objects.first()
+    webinar_index = cms_models.WebinarIndexPage.objects.first()
 
     if not course_index:
         course_index = cms_models.CourseIndexPage(title="Courses")
@@ -185,6 +186,15 @@ def ensure_index_pages():
             slug=CERTIFICATE_INDEX_SLUG,
         )
         home_page.add_child(instance=certificate_index)
+
+    if not webinar_index:
+        webinar_index = cms_models.WebinarIndexPage(title="Webinars")
+        home_page.add_child(instance=webinar_index)
+
+    if webinar_index.get_children_count() != cms_models.WebinarPage.objects.count():
+        for webinar_page in cms_models.WebinarPage.objects.all():
+            webinar_page.move(webinar_index, "last-child")
+        log.info("Moved webinar pages under webinar index page")
 
 
 def configure_wagtail():

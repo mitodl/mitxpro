@@ -486,17 +486,22 @@ class BasketSerializer(serializers.ModelSerializer):
             items (list of dict): The items from the request body
 
         Returns:
-            (models.Product, courses.models.ProgramRun): The Product paired with an asociated ProgramRun
+            (models.Product, courses.models.ProgramRun): The Product paired with an associated ProgramRun
                 if one exists (or None if one does not exist)
         """
         item = items[0]
         request_product_id = item.get("product_id")
         try:
-            product, _, program_run = get_product_from_querystring_id(
+            product, product_content_obj, program_run = get_product_from_querystring_id(
                 request_product_id
             )
-            if isinstance(_, CourseRun):
-                if _.end_date and _.end_date < now_in_utc():
+            self._validate_internal_product(product_content_obj)
+
+            if isinstance(product_content_obj, CourseRun):
+                if (
+                    product_content_obj.end_date
+                    and product_content_obj.end_date < now_in_utc()
+                ):
                     raise ValidationError(
                         "We're sorry, this course or program is no longer available for enrollment."
                     )
@@ -510,6 +515,25 @@ class BasketSerializer(serializers.ModelSerializer):
                 {"items": f"Invalid product id {request_product_id}"}
             ) from exc
         return product, program_run
+
+    def _validate_internal_product(self, product_content_obj):
+        """
+        Check if the product being bought is an external product, We don't sell external products
+
+        Args:
+            product_content_obj (Course, CourseRun, Program or ProgramRun): Ideally, there should only be
+            CourseRun or Program but it could be either of those since we can add these as content types in products.
+        """
+
+        course_or_program = (
+            getattr(product_content_obj, "course", None)
+            or getattr(product_content_obj, "program", None)
+            or product_content_obj
+        )
+        if course_or_program.is_external:
+            raise ValidationError(
+                "We're sorry, This product cannot be purchased on this web site."
+            )
 
     def _validate_and_compare_runs(self, basket, items, product):
         """

@@ -6,6 +6,11 @@ from django.contrib import admin
 from django.db import models
 from django.forms import TextInput
 
+from wagtail.contrib.modeladmin.options import (
+    ModelAdmin,
+    modeladmin_register,
+)
+from wagtail.contrib.modeladmin.views import DeleteView
 
 from mitxpro.utils import get_field_names
 from mitxpro.admin import AuditableModelAdmin, TimestampedModelAdmin
@@ -47,10 +52,9 @@ class CourseAdmin(admin.ModelAdmin):
     """Admin for Course"""
 
     model = Course
-    search_fields = ["title", "topics__name", "readable_id"]
+    search_fields = ["title", "readable_id"]
     list_display = ("id", "title", "get_program", "position_in_program")
-    list_filter = ["live", "program", "topics"]
-
+    list_filter = ["live", "program"]
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
     }
@@ -353,12 +357,27 @@ class ProgramCertificateAdmin(TimestampedModelAdmin):
         return self.model.all_objects.get_queryset().select_related("user", "program")
 
 
-class CourseTopicAdmin(admin.ModelAdmin):
+class TopicsWagtailDeleteView(DeleteView):
+    """Custom view for Topics admin in Wagtail"""
+
+    def confirmation_message(self):
+        child_count = self.instance.subtopics.count()
+        if child_count > 0:
+            return (
+                f"This topic has {child_count} sub-topic(s) that will be deleted as well. Are you sure you want to "
+                f"delete? "
+            )
+        return "Are you sure you want to delete this topic?"
+
+
+class CourseTopicAdmin(ModelAdmin, admin.ModelAdmin):
     """Admin for CourseTopic"""
 
     model = CourseTopic
+    delete_view_class = TopicsWagtailDeleteView
 
 
+modeladmin_register(CourseTopicAdmin)
 admin.site.register(Program, ProgramAdmin)
 admin.site.register(ProgramRun, ProgramRunAdmin)
 admin.site.register(Course, CourseAdmin)
@@ -371,4 +390,3 @@ admin.site.register(CourseRunGrade, CourseRunGradeAdmin)
 admin.site.register(CourseRunGradeAudit, CourseRunGradeAuditAdmin)
 admin.site.register(CourseRunCertificate, CourseRunCertificateAdmin)
 admin.site.register(ProgramCertificate, ProgramCertificateAdmin)
-admin.site.register(CourseTopic, CourseTopicAdmin)

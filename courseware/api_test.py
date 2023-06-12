@@ -3,11 +3,14 @@
 import itertools
 from datetime import timedelta
 from types import SimpleNamespace
-from urllib.parse import parse_qsl
+from urllib.parse import parse_qsl, urlencode
 
 import pytest
 import responses
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ImproperlyConfigured
+from django.db import transaction
+from edx_api.enrollments import Enrollments
 from freezegun import freeze_time
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
@@ -16,6 +19,7 @@ from rest_framework import status
 
 from courses.factories import CourseRunEnrollmentFactory, CourseRunFactory
 from courseware.api import (
+    OpenEdxUser,
     ACCESS_TOKEN_HEADER_NAME,
     OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS,
     create_edx_auth_token,
@@ -30,6 +34,7 @@ from courseware.api import (
     unenroll_edx_course_run,
     update_edx_user_email,
     update_edx_user_name,
+    update_xpro_user_username,
 )
 from courseware.constants import (
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
@@ -205,8 +210,13 @@ def test_create_edx_user_conflict(settings, user):
         json=dict(username="exists"),
         status=status.HTTP_409_CONFLICT,
     )
+    responses.add(
+        responses.GET,
+        f"{settings.OPENEDX_API_BASE_URL}/api/user/v1/accounts?{urlencode({'email': user.email})}",
+        status=status.HTTP_200_OK,
+    )
 
-    with pytest.raises(CoursewareUserCreateError):
+    with pytest.raises((CoursewareUserCreateError, ImproperlyConfigured)):
         create_edx_user(user)
 
     assert CoursewareUser.objects.count() == 0
@@ -237,6 +247,28 @@ def test_create_edx_auth_token(settings, user, create_token_responses):
     assert auth.access_token_expires_on == now_in_utc() + timedelta(
         minutes=59, seconds=50
     )
+
+
+def test_update_xpro_user_username_successfully(user):
+    """Tests update_xpro_user_username updates user successfully"""
+    new_username = "new_username"
+    assert update_xpro_user_username(user, new_username) is True
+    # reload user object from database to get latest value of username
+    user.refresh_from_db()
+    assert user.username == new_username
+
+
+def test_update_xpro_user_username_integrity_error(user):
+    """Tests update_xpro_user_username raises IntegrityError"""
+    old_username = user.username
+    new_username = "new_username"
+    # create duplicate user with given username
+    UserFactory.create(username=new_username)
+    with transaction.atomic():
+        assert update_xpro_user_username(user, new_username) is False
+    # reload user object from database to get latest value of username
+    user.refresh_from_db()
+    assert user.username == old_username
 
 
 @responses.activate
@@ -385,21 +417,38 @@ def test_get_edx_api_client(mocker, settings, user):
     )
 
 
-def test_enroll_in_edx_course_runs(mocker, user):
+@pytest.mark.parametrize("force_enrollment", [True, False])
+def test_enroll_in_edx_course_runs(mocker, user, force_enrollment):
     """Tests that enroll_in_edx_course_runs uses the EdxApi client to enroll in course runs"""
     mock_client = mocker.MagicMock()
     enroll_return_values = ["result1", "result2"]
     mock_client.enrollments.create_student_enrollment = mocker.Mock(
         side_effect=enroll_return_values
     )
-    mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+    if force_enrollment:
+        mocker.patch(
+            "courseware.api.get_edx_api_service_client", return_value=mock_client
+        )
+    else:
+        mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
     course_runs = CourseRunFactory.build_batch(2)
-    enroll_results = enroll_in_edx_course_runs(user, course_runs)
+    enroll_results = enroll_in_edx_course_runs(
+        user,
+        course_runs,
+        force_enrollment=force_enrollment,
+    )
+    expected_username = user.username if force_enrollment else None
     mock_client.enrollments.create_student_enrollment.assert_any_call(
-        course_runs[0].courseware_id, mode=EDX_ENROLLMENT_PRO_MODE
+        course_runs[0].courseware_id,
+        mode=EDX_ENROLLMENT_PRO_MODE,
+        username=expected_username,
+        force_enrollment=force_enrollment,
     )
     mock_client.enrollments.create_student_enrollment.assert_any_call(
-        course_runs[1].courseware_id, mode=EDX_ENROLLMENT_PRO_MODE
+        course_runs[1].courseware_id,
+        mode=EDX_ENROLLMENT_PRO_MODE,
+        username=expected_username,
+        force_enrollment=force_enrollment,
     )
     assert enroll_results == enroll_return_values
 
@@ -420,10 +469,16 @@ def test_enroll_in_edx_course_runs_audit(mocker, user, error_text):
     results = enroll_in_edx_course_runs(user, [course_run])
     assert mock_client.enrollments.create_student_enrollment.call_count == 2
     mock_client.enrollments.create_student_enrollment.assert_any_call(
-        course_run.courseware_id, mode=EDX_ENROLLMENT_PRO_MODE
+        course_run.courseware_id,
+        mode=EDX_ENROLLMENT_PRO_MODE,
+        username=None,
+        force_enrollment=False,
     )
     mock_client.enrollments.create_student_enrollment.assert_any_call(
-        course_run.courseware_id, mode=EDX_ENROLLMENT_AUDIT_MODE
+        course_run.courseware_id,
+        mode=EDX_ENROLLMENT_AUDIT_MODE,
+        username=None,
+        force_enrollment=False,
     )
     assert results == [audit_result]
     patched_log_error.assert_called_once()
@@ -495,6 +550,64 @@ def test_retry_failed_edx_enrollments(mocker, exception_raised):
         assert {e.id for e in successful_enrollments} == {
             e.id for e in expected_successful_enrollments
         }
+
+
+@pytest.mark.parametrize(
+    "mode", [EDX_ENROLLMENT_PRO_MODE, EDX_ENROLLMENT_AUDIT_MODE, "other"]
+)
+@pytest.mark.parametrize(
+    "edx_enrollment_exists, is_active", [[False, False], [True, True], [True, False]]
+)
+def test_retry_failed_edx_enrollments_exists(
+    mocker, edx_enrollment_exists, is_active, mode
+):
+    """
+    Tests that retry_failed_edx_enrollments loops through enrollments that failed in edX
+    and attempts to enroll them again
+    """
+    is_valid_mode = mode in [EDX_ENROLLMENT_PRO_MODE, EDX_ENROLLMENT_AUDIT_MODE]
+    with freeze_time(now_in_utc() - timedelta(days=1)):
+        failed_enrollment = CourseRunEnrollmentFactory.create(
+            edx_enrolled=False, user__is_active=True
+        )
+        CourseRunEnrollmentFactory.create(edx_enrolled=False, user__is_active=False)
+    patched_enroll_in_edx = mocker.patch(
+        "courseware.api.enroll_in_edx_course_runs",
+        side_effect=EdxApiEnrollErrorException(
+            failed_enrollment.user, failed_enrollment.run, MockHttpError()
+        ),
+    )
+    edx_enrollments = [
+        {
+            "is_active": is_active,
+            "course_details": {"course_id": failed_enrollment.run.courseware_id},
+            "mode": mode,
+        }
+        if edx_enrollment_exists
+        else {"foo": "bar"}
+    ]
+    mock_edx_client = mocker.patch("courseware.api.get_edx_api_client", autospec=True)
+    mock_edx_client.return_value.enrollments.get_student_enrollments.return_value = (
+        Enrollments(edx_enrollments)
+    )
+
+    patched_log = mocker.patch("courseware.api.log")
+    successful_enrollments = retry_failed_edx_enrollments()
+
+    assert patched_enroll_in_edx.call_count == 1
+    assert len(successful_enrollments) == (
+        1 if edx_enrollment_exists and is_active and is_valid_mode else 0
+    )
+    assert patched_log.exception.called == bool(
+        not edx_enrollment_exists or not is_active or not is_valid_mode
+    )
+    assert patched_log.warning.called == bool(
+        edx_enrollment_exists and is_active and is_valid_mode
+    )
+    failed_enrollment.refresh_from_db()
+    assert failed_enrollment.edx_enrolled is (
+        edx_enrollment_exists and is_active and is_valid_mode
+    )
 
 
 def test_retry_failed_enroll_grace_period(mocker):
@@ -676,3 +789,74 @@ def test_update_edx_user_name_failure(
     mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
     with pytest.raises(expected_exception):
         update_edx_user_name(user)
+
+
+@pytest.fixture
+def test_user():
+    """
+    Fixture that creates a `User` with username="test_user" object for testing.
+    """
+    return UserFactory.create(username="test_user")
+
+
+@pytest.fixture
+def openedx_data():
+    """
+    Fixture providing a sample dictionary with OpenEdx user data.
+    """
+    return {"username": "test_user"}
+
+
+@pytest.fixture
+def open_edx_user(test_user, openedx_data):
+    """
+    Fixture that creates an `OpenEdxUser` object for testing.
+    """
+    return OpenEdxUser(user=test_user, openedx_data=openedx_data)
+
+
+def test_is_username_match_returns_true(open_edx_user):
+    """
+    Test that `is_username_match()` returns True when the username of the `User` object matches
+    the 'username' field in `openedx_data`.
+    """
+    assert open_edx_user.is_username_match() is True
+
+
+def test_is_username_match_returns_false(test_user, openedx_data):
+    """
+    Test that `is_username_match()` returns False when the username of the `User` object does not
+    match the 'username' field in `openedx_data`.
+    """
+    openedx_data["username"] = "wrong_username"
+    open_edx_user = OpenEdxUser(user=test_user, openedx_data=openedx_data)
+    assert open_edx_user.is_username_match() is False
+
+
+def test_is_username_match_with_mock(mocker, openedx_data):
+    """
+    Test that `is_username_match()` works correctly when the `user` argument is replaced by a
+    `MagicMock` object with a different username.
+    """
+    magic_mock_user = mocker.MagicMock(spec=User)
+    open_edx_user = OpenEdxUser(user=magic_mock_user, openedx_data=openedx_data)
+    assert not open_edx_user.is_username_match()
+
+
+def test_is_username_match_with_empty_openedx_data(test_user):
+    """
+    Test that `is_username_match()` returns False when `openedx_data` is an empty dictionary.
+    """
+    open_edx_user = OpenEdxUser(user=test_user, openedx_data={})
+    assert open_edx_user.is_username_match() is False
+
+
+def test_is_username_match_with_missing_openedx_data(test_user):
+    """
+    Test that `is_username_match()` returns False when `openedx_data` does not contain a 'username'
+    field.
+    """
+    open_edx_user = OpenEdxUser(
+        user=test_user, openedx_data={"email": "test@example.com"}
+    )
+    assert open_edx_user.is_username_match() is False

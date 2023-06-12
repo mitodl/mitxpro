@@ -1,5 +1,5 @@
 """Course views verson 1"""
-from django.db.models import Prefetch
+from django.db.models import Count, Prefetch, Q
 from mitol.digitalcredentials.mixins import DigitalCredentialsRequestViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
@@ -12,6 +12,7 @@ from courses.models import (
     Course,
     CourseRun,
     CourseRunCertificate,
+    CourseTopic,
     Program,
     ProgramCertificate,
 )
@@ -20,11 +21,13 @@ from courses.serializers import (
     CourseRunEnrollmentSerializer,
     CourseRunSerializer,
     CourseSerializer,
+    CourseTopicSerializer,
     ProgramCertificateSerializer,
     ProgramEnrollmentSerializer,
     ProgramSerializer,
 )
 from ecommerce.models import Product
+from mitxpro.utils import now_in_utc
 
 
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
@@ -36,8 +39,10 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     )
     courses_prefetch = Prefetch(
         "courses",
-        Course.objects.select_related("coursepage").prefetch_related(
-            course_runs_prefetch, "topics"
+        Course.objects.select_related(
+            "coursepage", "externalcoursepage"
+        ).prefetch_related(
+            course_runs_prefetch, "coursepage__topics", "externalcoursepage__topics"
         ),
     )
 
@@ -46,9 +51,9 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = (
         Program.objects.filter(live=True)
         .exclude(products=None)
-        .select_related("programpage")
+        .select_related("programpage", "externalprogrampage")
         .prefetch_related(courses_prefetch, products_prefetch)
-        .filter(programpage__live=True)
+        .filter(Q(programpage__live=True) | Q(externalprogrampage__live=True))
     )
 
 
@@ -66,9 +71,13 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         queryset = (
             Course.objects.filter(live=True)
-            .select_related("coursepage")
-            .prefetch_related("topics", self.course_runs_prefetch)
-            .filter(coursepage__live=True)
+            .select_related("coursepage", "externalcoursepage")
+            .prefetch_related(
+                "coursepage__topics",
+                "externalcoursepage__topics",
+                self.course_runs_prefetch,
+            )
+            .filter(Q(coursepage__live=True) | Q(externalcoursepage__live=True))
         )
 
         if self.request.user.is_authenticated:
@@ -178,3 +187,22 @@ class ProgramCertificateViewSet(
     def get_learner_for_obj(self, certificate: ProgramCertificate):
         """Get the learner for the ProgramCertificate"""
         return certificate.user
+
+
+class CourseTopicViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Readonly viewset for parent course topics.
+    """
+
+    permission_classes = []
+    serializer_class = CourseTopicSerializer
+
+    def get_queryset(self):
+        """
+        Returns parent topics with course count > 0.
+        """
+        return [
+            topic
+            for topic in CourseTopic.objects.parent_topics_with_annotated_course_counts()
+            if topic.course_count > 0
+        ]

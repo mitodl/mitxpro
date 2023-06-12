@@ -1,35 +1,46 @@
 """Tests for CMS views"""
-from datetime import timedelta
+from datetime import datetime, timedelta
 from types import SimpleNamespace
 
+import factory
 import pytest
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from rest_framework import status
 from wagtail.core.models import Site
 
+from cms.constants import (
+    ALL_TOPICS,
+    ON_DEMAND_WEBINAR,
+    UPCOMING_WEBINAR,
+    WEBINAR_DEFAULT_IMAGES,
+)
 from cms.factories import (
     CatalogPageFactory,
-    CoursePageFactory,
-    ProgramPageFactory,
-    TextSectionFactory,
-    HomePageFactory,
-    UserTestimonialsPageFactory,
     CourseIndexPageFactory,
+    CoursePageFactory,
+    HomePageFactory,
     ProgramIndexPageFactory,
+    ProgramPageFactory,
     SignatoryPageFactory,
+    TextSectionFactory,
+    UserTestimonialsPageFactory,
+    WebinarIndexPageFactory,
+    WebinarPageFactory,
 )
 from cms.models import CourseIndexPage, HomePage, ProgramIndexPage, TextVideoSection
 from courses.factories import (
-    CourseRunFactory,
     CourseRunCertificateFactory,
+    CourseRunFactory,
+    CourseTopicFactory,
     ProgramCertificateFactory,
     ProgramFactory,
     ProgramRunFactory,
 )
 from ecommerce.factories import ProductVersionFactory
-
 from mitxpro.utils import now_in_utc
+
 
 pytestmark = pytest.mark.django_db
 # pylint: disable=redefined-outer-name,unused-argument
@@ -119,6 +130,37 @@ def test_home_page_view(client, wagtail_basics):
 
     assert reverse("user-dashboard") not in content
     assert reverse("checkout-page") not in content
+
+
+def test_home_page_context_topics(client, wagtail_basics):
+    """
+    Test that parent course topics are included in homepage context.
+    """
+    page = HomePage(title="Home Page", subhead="<p>subhead</p>")
+    wagtail_basics.root.add_child(instance=page)
+
+    parent_topic = CourseTopicFactory.create()
+    child_topic = CourseTopicFactory.create(parent=parent_topic)
+
+    resp = client.get(page.get_url())
+    context = resp.context_data
+    assert parent_topic.name in context["topics"]
+    assert child_topic.name not in context["topics"]
+
+
+def test_home_page_context_topics_ordering(client, wagtail_basics):
+    """
+    Test that course topics on HomePage are ordered alphabetically.
+    """
+    page = HomePage(title="Home Page", subhead="<p>subhead</p>")
+    wagtail_basics.root.add_child(instance=page)
+
+    topic_name_list = ["Analog", "Computer", "Business", "Technology", "Engineering"]
+    CourseTopicFactory.create_batch(5, name=factory.Iterator(topic_name_list))
+
+    resp = client.get(page.get_url())
+    context = resp.context_data
+    assert sorted(topic_name_list) == context["topics"]
 
 
 def test_courses_index_view(client, wagtail_basics):
@@ -326,6 +368,92 @@ def test_catalog_page_product(client, wagtail_basics):
     ]
 
 
+@pytest.mark.parametrize(
+    "topic_filter, expected_courses_count, expected_program_count, expected_selected_topic",
+    [
+        [None, 2, 2, ALL_TOPICS],
+        ["Engineering", 1, 1, "Engineering"],
+        ["RandomTopic", 0, 0, "RandomTopic"],
+    ],
+)
+def test_catalog_page_topics(  # pylint: disable=too-many-arguments
+    client,
+    wagtail_basics,
+    topic_filter,
+    expected_courses_count,
+    expected_program_count,
+    expected_selected_topic,
+):
+    """
+    Test that topic filters are working fine.
+    """
+    # pylint:disable=too-many-locals
+    homepage = wagtail_basics.root
+    catalog_page = CatalogPageFactory.create(parent=homepage)
+    catalog_page.save_revision().publish()
+
+    now = now_in_utc()
+    start_date = now + timedelta(days=2)
+    end_date = now + timedelta(days=10)
+
+    programs = ProgramFactory.create_batch(2)
+    runs = CourseRunFactory.create_batch(
+        2,
+        course__program=factory.Iterator(programs),
+        course__live=True,
+        start_date=start_date,
+        end_date=end_date,
+        live=True,
+    )
+
+    course_pages = [run.course.coursepage for run in runs]
+    parent_topics = CourseTopicFactory.create_batch(
+        2, name=factory.Iterator(["Engineering", "Business"])
+    )
+    child_topics = CourseTopicFactory.create_batch(
+        2,
+        name=factory.Iterator(["Systems Engineering", "Commerce"]),
+        parent=factory.Iterator(parent_topics),
+    )
+
+    for idx, course_page in enumerate(course_pages):
+        course_page.topics.set([parent_topics[idx].id, child_topics[idx].id])
+
+    if topic_filter:
+        resp = client.get(f"{catalog_page.get_url()}?topic={topic_filter}")
+    else:
+        resp = client.get(catalog_page.get_url())
+
+    assert resp.status_code == status.HTTP_200_OK
+    assert sorted(resp.context_data["topics"]) == sorted(
+        [ALL_TOPICS] + [topic.name for topic in parent_topics]
+    )
+    assert resp.context_data["selected_topic"] == expected_selected_topic
+    assert len(resp.context_data["course_pages"]) == expected_courses_count
+    assert len(resp.context_data["program_pages"]) == expected_program_count
+
+
+def test_catalog_page_topics_ordering(client, wagtail_basics):
+    """
+    Test that topics are ordered alphabetically on Catalog Page
+    """
+    homepage = wagtail_basics.root
+    catalog_page = CatalogPageFactory.create(parent=homepage)
+    catalog_page.save_revision().publish()
+
+    topic_name_list = ["Analog", "Computer", "Business", "Technology", "Engineering"]
+
+    parent_topics = CourseTopicFactory.create_batch(
+        5, name=factory.Iterator(topic_name_list)
+    )
+
+    resp = client.get(catalog_page.get_url())
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.context_data["topics"] == sorted(
+        [ALL_TOPICS] + [topic.name for topic in parent_topics]
+    )
+
+
 def test_program_page_checkout_url_product(client, wagtail_basics):
     """
     The checkout URL in the program page context should include the product ID if a product exists
@@ -368,7 +496,7 @@ def test_program_page_checkout_url_program_run(client, wagtail_basics):
 
 def test_program_page_for_program_run(client):
     """
-    Test that prgram page URL works with program run id
+    Test that program page URL works with program run id
     """
     program_page = ProgramPageFactory.create()
     program_page.save_revision().publish()
@@ -385,3 +513,58 @@ def test_program_page_for_program_run(client):
     bad_url = "{}+R2/".format(page_base_url)
     resp = client.get(bad_url)
     assert resp.status_code == 404
+
+
+def test_webinar_page_context(client, wagtail_basics):
+    """
+    Test that the WebinarIndexPage returns the desired context
+    """
+    homepage = wagtail_basics.root
+    webinar_index_page = WebinarIndexPageFactory.create(parent=homepage)
+    webinar_index_page.save_revision().publish()
+
+    resp = client.get(webinar_index_page.get_url())
+    context = resp.context_data
+
+    assert "webinars" in context
+    assert ON_DEMAND_WEBINAR not in context["webinars"]
+    assert UPCOMING_WEBINAR not in context["webinars"]
+
+    WebinarPageFactory.create_batch(3, parent=webinar_index_page)
+    WebinarPageFactory.create_batch(
+        2, category=ON_DEMAND_WEBINAR, date=None, parent=webinar_index_page
+    )
+
+    resp = client.get(webinar_index_page.get_url())
+    context = resp.context_data
+
+    assert "webinars" in context
+    assert len(context["webinars"][ON_DEMAND_WEBINAR]) == 2
+    assert len(context["webinars"][UPCOMING_WEBINAR]) == 3
+    assert context["webinar_default_images"] == WEBINAR_DEFAULT_IMAGES
+
+
+def test_webinar_formatted_date(wagtail_basics):
+    """
+    Test that `WebinarPage.formatted_date` returns date in specific format.
+    """
+    homepage = wagtail_basics.root
+    webinar_index_page = WebinarIndexPageFactory.create(parent=homepage)
+    webinar_index_page.save_revision().publish()
+
+    start_date = datetime.strptime("Tuesday, May 2, 2023", "%A, %B %d, %Y")
+    webinar = WebinarPageFactory.create(parent=webinar_index_page, date=start_date)
+
+    assert webinar.formatted_date == "Tuesday, May 2, 2023"
+
+
+def test_upcoming_webinar_datetime_validations(wagtail_basics):
+    """
+    Test that the webinar page raises ValidationError when Date and Time is not provided for the upcoming webinars.
+    """
+    homepage = wagtail_basics.root
+    webinar_index_page = WebinarIndexPageFactory.create(parent=homepage)
+    webinar_index_page.save_revision().publish()
+
+    with pytest.raises(ValidationError, match="cannot be empty for Upcoming Webinars."):
+        WebinarPageFactory.create(parent=webinar_index_page, date=None, time=None)

@@ -10,6 +10,9 @@ router.register(r"programs", v1.ProgramViewSet, basename="programs_api")
 router.register(r"courses", v1.CourseViewSet, basename="courses_api")
 router.register(r"course_runs", v1.CourseRunViewSet, basename="course_runs_api")
 router.register(
+    r"parent_course_topics", v1.CourseTopicViewSet, basename="parent_course_topics_api"
+)
+router.register(
     r"course_run_certificates",
     v1.CourseRunCertificateViewSet,
     basename="course_run_certificates_api",
