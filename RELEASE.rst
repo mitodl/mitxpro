@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.124.2
+---------------
+
+- Fixing stuff from comments
+- fix: Unintended leak of Proxy-Authorization header in requests (#2670)
+- fix: bump certifi from 2021.10.8 to 2022.12.7 (#2669)
+- ran black
+- Adding command to invalidate coupons
+
 Version 0.124.1 (Released June 06, 2023)
 ---------------
 
