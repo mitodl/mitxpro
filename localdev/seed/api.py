@@ -344,8 +344,10 @@ class SeedDataLoader:
         and creates it if it doesn't exist.
         """
         model_cls = serializer_cls.Meta.model
-        invalid_courseware_re = re.compile('course.*?\+[a-zA-Z0-9-]+?\+[a-zA-Z0-9-_]+\+')
-        
+        invalid_courseware_re = re.compile(
+            "course.*?\+[a-zA-Z0-9-]+?\+[a-zA-Z0-9-_]+\+"
+        )
+
         seeded_field_name, seeded_value = self._seeded_field_and_value(model_cls, data)
         adjusted_data = {
             # Set 'live' to True for seeded objects by default
@@ -354,9 +356,9 @@ class SeedDataLoader:
             **filter_for_model_fields(model_cls, data),
             **{seeded_field_name: seeded_value},
         }
-        
+
         # Validate courseware_id if applicable
-        courseware_id = data.get('courseware_id')
+        courseware_id = data.get("courseware_id")
         if courseware_id and invalid_courseware_re.match(courseware_id):
             raise InvalidCoursewareKeyFormat(f"Invalid courseware key: {courseware_id}")
 
