@@ -35,21 +35,21 @@ class Command(BaseCommand):
         self, *args, **options
     ):  # pylint: disable=too-many-locals,too-many-branches
         """Handle command execution"""
-        program = options["readable_id"]
-        user = options["user"] and fetch_user(options["user"])
+        program = options.get("readable_id")
+        if not program:
+            raise CommandError("Please provide a valid program readable_id.")
+        
+        user = options.get("user") and fetch_user(options["user"])
         base_query = (
             Q(program__readable_id=program, user=user)
             if user
             else Q(program__readable_id=program)
         )
 
-        try:
-            enrollments = ProgramEnrollment.objects.filter(base_query)
-        except ProgramEnrollment.DoesNotExist:
+        enrollments = ProgramEnrollment.objects.filter(base_query)
+        if not enrollments:
             raise CommandError(
-                "Could not find program enrollment with readable_id={}".format(
-                    options["readable_id"]
-                )
+                f"Could not find program enrollment(s) with readable_id={program}"
             )
 
         results = []
@@ -58,11 +58,9 @@ class Command(BaseCommand):
             cert, is_created = generate_program_certificate(user, enrollment.program)
 
             if not cert and not is_created:
-                results.append(
-                    self.style.ERROR(
-                        f"Certificate creation failed for {user.username} ({user.email}) in program {enrollment.program} due to incomplete courses"
-                    )
-                )
+                self.stdout.write(self.style.ERROR(
+                    f"Certificate creation failed for {user.username} ({user.email}) in program {enrollment.program} due to incomplete courses"
+                ))
                 continue
 
             results.append(
