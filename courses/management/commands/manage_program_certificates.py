@@ -38,7 +38,7 @@ class Command(BaseCommand):
         program = options.get("readable_id")
         if not program:
             raise CommandError("Please provide a valid program readable_id.")
-        
+
         user = options.get("user") and fetch_user(options["user"])
         base_query = (
             Q(program__readable_id=program, user=user)
@@ -58,9 +58,11 @@ class Command(BaseCommand):
             cert, is_created = generate_program_certificate(user, enrollment.program)
 
             if not cert and not is_created:
-                self.stdout.write(self.style.ERROR(
-                    f"Certificate creation failed for {user.username} ({user.email}) in program {enrollment.program} due to incomplete courses"
-                ))
+                self.stdout.write(
+                    self.style.ERROR(
+                        f"Certificate creation failed for {user.username} ({user.email}) in program {enrollment.program} due to incomplete courses"
+                    )
+                )
                 continue
 
             results.append(
