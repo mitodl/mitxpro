@@ -90,27 +90,31 @@ class Command(BaseCommand):
 
         results = []
         for edx_grade, user in edx_grade_user_iter:
-            course_run_grade, created_grade, updated_grade = ensure_course_run_grade(
-                user=user,
-                course_run=run,
-                edx_grade=edx_grade,
-                should_update=should_update,
-            )
+            try:
+                (
+                    course_run_grade,
+                    created_grade,
+                    updated_grade,
+                ) = ensure_course_run_grade(
+                    user=user,
+                    course_run=run,
+                    edx_grade=edx_grade,
+                    should_update=should_update,
+                )
 
-            if override_grade is not None:
-                course_run_grade.grade = override_grade
-                course_run_grade.passed = bool(override_grade)
-                course_run_grade.letter_grade = None
-                course_run_grade.set_by_admin = True
-                try:
+                if override_grade is not None:
+                    course_run_grade.grade = override_grade
+                    course_run_grade.passed = bool(override_grade)
+                    course_run_grade.letter_grade = None
+                    course_run_grade.set_by_admin = True
                     course_run_grade.save_and_log(None)
-                except Exception as e:
-                    self.stdout.write(
-                        self.style.ERROR(
-                            f"Course certificate creation failed for {user.email} due to following reason(s),\n{e}"
-                        )
+            except Exception as e:
+                self.stdout.write(
+                    self.style.ERROR(
+                        f"Course certificate creation failed for {user.email} due to following reason(s),\n{e}"
                     )
-                    continue
+                )
+                continue
 
             _, created_cert, deleted_cert = process_course_run_grade_certificate(
                 course_run_grade=course_run_grade
