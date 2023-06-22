@@ -53,7 +53,7 @@ def test_program_certificate_creation(user):
     CourseRunCertificateFactory.create(user=user, course_run=course_run)
 
     manage_program_certificates.Command().handle(
-        readable_id=program.readable_id, user=user.username
+        program=program.readable_id, user=user.username
     )
 
     generated_certificates = ProgramCertificate.objects.filter(
@@ -63,7 +63,7 @@ def test_program_certificate_creation(user):
     assert generated_certificates.count() == 1
 
 
-def test_program_certificate_creation(user):
+def test_incomplete_course_program_certificate(user):
     """
     Test that create operation for program certificate management command
     Testing program certificate creation for incomplete courses
