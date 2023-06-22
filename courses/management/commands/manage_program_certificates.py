@@ -52,11 +52,13 @@ class Command(BaseCommand):
             else Q(run__course__program__readable_id=program, active=True)
         )
 
-        enrollments = CourseRunEnrollment.objects.filter(base_query).distinct('user__email', 'run__course__program')
+        enrollments = CourseRunEnrollment.objects.filter(base_query).distinct(
+            "user__email", "run__course__program"
+        )
         if not enrollments:
             raise CommandError(
                 f"Could not find course enrollment(s) with provided program readable_id={program}"
-            ) 
+            )
 
         results = []
         for enrollment in enrollments:
