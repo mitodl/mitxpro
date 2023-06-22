@@ -1,20 +1,26 @@
 """
-Management command to sync grades and certificates for a course run
+Management command to create program certificate(s)
+
+Arguments:
+* --user <username/ email> - an email or a username for a user to generate certificate for
+* --program <readable_id> - Program readable_id for certificate generation
+
+You must specify --program, since that will be used to filter programs for certificate generation
 """
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 
-from courses.models import ProgramEnrollment
+from courses.models import CourseRunEnrollment
 from courses.utils import generate_program_certificate
 from users.api import fetch_user
 
 
 class Command(BaseCommand):
     """
-    Command to create program certificates for users.
+    Command to create program certificate for users.
     """
 
-    help = "Create program certifificates, specific or all, for user(s)."
+    help = "Create program certifificate, specific or all, for user(s)."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -24,7 +30,7 @@ class Command(BaseCommand):
             required=False,
         )
         parser.add_argument(
-            "--readable_id",
+            "--program",
             type=str,
             help="The 'readable_id' value for a Program",
             required=True,
@@ -35,39 +41,37 @@ class Command(BaseCommand):
         self, *args, **options
     ):  # pylint: disable=too-many-locals,too-many-branches
         """Handle command execution"""
-        program = options.get("readable_id")
+        program = options.get("program")
         if not program:
             raise CommandError("Please provide a valid program readable_id.")
 
         user = options.get("user") and fetch_user(options["user"])
         base_query = (
-            Q(program__readable_id=program, user=user)
+            Q(run__course__program__readable_id=program, active=True, user=user)
             if user
-            else Q(program__readable_id=program)
+            else Q(run__course__program__readable_id=program, active=True)
         )
 
-        enrollments = ProgramEnrollment.objects.filter(base_query)
+        enrollments = CourseRunEnrollment.objects.filter(base_query).distinct('user__email', 'run__course__program')
         if not enrollments:
             raise CommandError(
-                f"Could not find program enrollment(s) with readable_id={program}"
-            )
+                f"Could not find course enrollment(s) with provided program readable_id={program}"
+            ) 
 
         results = []
         for enrollment in enrollments:
             user = enrollment.user
-            cert, is_created = generate_program_certificate(user, enrollment.program)
+            course_program = enrollment.run.course.program
+            _, is_created = generate_program_certificate(user, course_program)
 
-            if not cert and not is_created:
-                self.stdout.write(
-                    self.style.ERROR(
-                        f"Certificate creation failed for {user.username} ({user.email}) in program {enrollment.program} due to incomplete courses"
-                    )
-                )
-                continue
+            if not is_created:
+                status = "failed"
+            else:
+                status = "successful"
 
             results.append(
                 self.style.SUCCESS(
-                    f"Certificate successfully created for {user.username} ({user.email}) in program {enrollment.program}"
+                    f"Certificate creation {status} for {user} in program {course_program}"
                 )
             )
 
