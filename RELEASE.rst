@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.124.2
+Version 0.124.2 (Released June 22, 2023)
 ---------------
 
 - Fixing stuff from comments
