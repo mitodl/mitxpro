@@ -11,7 +11,6 @@ from courses.factories import (
     CourseRunCertificateFactory,
     CourseRunEnrollmentFactory,
     ProgramFactory,
-    ProgramEnrollmentFactory,
 )
 
 pytestmark = [pytest.mark.django_db]
