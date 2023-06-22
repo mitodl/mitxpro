@@ -9,6 +9,7 @@ from courses.factories import (
     CourseRunFactory,
     CourseRunGradeFactory,
     CourseRunCertificateFactory,
+    CourseRunEnrollmentFactory,
     ProgramFactory,
     ProgramEnrollmentFactory,
 )
@@ -31,10 +32,10 @@ def test_program_certificate_management_invalid_program():
     """
 
     with pytest.raises(CommandError) as command_error:
-        manage_program_certificates.Command().handle(readable_id="test")
+        manage_program_certificates.Command().handle(program="test")
     assert (
         str(command_error.value)
-        == "Could not find program enrollment(s) with readable_id=test"
+        == "Could not find course enrollment(s) with provided program readable_id=test"
     )
 
 
@@ -44,11 +45,13 @@ def test_program_certificate_creation(user):
     creates the program certificate for a user
     """
     program = ProgramFactory.create()
-    ProgramEnrollmentFactory.create(user=user, program=program)
     course = CourseFactory.create(program=program)
     course_run = CourseRunFactory.create(course=course)
+
+    CourseRunEnrollmentFactory.create(user=user, run=course_run)
     CourseRunGradeFactory.create(course_run=course_run, user=user, passed=True, grade=1)
     CourseRunCertificateFactory.create(user=user, course_run=course_run)
+
     manage_program_certificates.Command().handle(
         readable_id=program.readable_id, user=user.username
     )
@@ -58,3 +61,40 @@ def test_program_certificate_creation(user):
     )
 
     assert generated_certificates.count() == 1
+
+
+def test_program_certificate_creation(user):
+    """
+    Test that create operation for program certificate management command
+    Testing program certificate creation for incomplete courses
+    """
+    program = ProgramFactory.create()
+    courses = CourseFactory.create_batch(size=2, program=program)
+    course_runs = [CourseRunFactory.create(course=course) for course in courses]
+
+    list(
+        map(
+            lambda run: CourseRunEnrollmentFactory.create(user=user, run=run),
+            course_runs,
+        )
+    )
+    list(
+        map(
+            lambda run: CourseRunGradeFactory.create(
+                course_run=run, user=user, passed=True, grade=1
+            ),
+            course_runs,
+        )
+    )
+
+    # Generating certificate only for a single course
+    CourseRunCertificateFactory.create(user=user, course_run=course_runs[0])
+    manage_program_certificates.Command().handle(
+        program=program.readable_id, user=user.username
+    )
+
+    generated_certificates = ProgramCertificate.objects.filter(
+        user=user, program=program
+    )
+
+    assert generated_certificates.count() == 0
