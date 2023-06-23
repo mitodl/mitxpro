@@ -10,7 +10,7 @@ You must specify --program, since that will be used to filter programs for certi
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 
-from courses.models import CourseRunEnrollment
+from courses.models import CourseRunEnrollment, Program
 from courses.utils import generate_program_certificate
 from users.api import fetch_user
 
@@ -20,7 +20,7 @@ class Command(BaseCommand):
     Command to create program certificate for users.
     """
 
-    help = "Create program certifificate, specific or all, for user(s)."
+    help = "Create program certificate, for a single user or all users in the program."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -45,11 +45,18 @@ class Command(BaseCommand):
         if not program:
             raise CommandError("Please provide a valid program readable_id.")
 
+        try:
+            program = Program.objects.get(readable_id=program)
+        except Program.DoesNotExist:
+            raise CommandError(
+                f"Could not find any program with provided readable_id={program}"
+            )
+
         user = options.get("user") and fetch_user(options["user"])
         base_query = (
-            Q(run__course__program__readable_id=program, active=True, user=user)
+            Q(run__course__program=program, user=user)
             if user
-            else Q(run__course__program__readable_id=program, active=True)
+            else Q(run__course__program=program)
         )
 
         enrollments = CourseRunEnrollment.objects.filter(base_query).distinct(
@@ -57,14 +64,13 @@ class Command(BaseCommand):
         )
         if not enrollments:
             raise CommandError(
-                f"Could not find course enrollment(s) with provided program readable_id={program}"
+                f"Could not find course enrollment(s) with provided program readable_id={program.readable_id}"
             )
 
         results = []
         for enrollment in enrollments:
             user = enrollment.user
-            course_program = enrollment.run.course.program
-            _, is_created = generate_program_certificate(user, course_program)
+            _, is_created = generate_program_certificate(user, program)
 
             if not is_created:
                 status = "failed"
@@ -73,7 +79,7 @@ class Command(BaseCommand):
 
             results.append(
                 self.style.SUCCESS(
-                    f"Certificate creation {status} for {user} in program {course_program}"
+                    f"Certificate creation {status} for {user} in program {program}"
                 )
             )
 
