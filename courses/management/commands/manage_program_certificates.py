@@ -75,7 +75,7 @@ class Command(BaseCommand):
             if _ and not is_created:
                 status = (self.style.SUCCESS, "already exists")
             elif not is_created:
-                status = (self.style.ERROR, "failed")
+                status = (self.style.ERROR, "creation failed")
             else:
                 status = (self.style.SUCCESS, "successfully created")
 

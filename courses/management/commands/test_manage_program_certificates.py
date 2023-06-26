@@ -108,8 +108,7 @@ def test_program_certificate_creation_single_user(user):
 
 def test_incomplete_course_program_certificate(user):
     """
-    Test that create operation for program certificate management command
-    Testing program certificate creation for incomplete courses
+    Test that create operation for program certificate management command doesn't create a certificate for incomplete courses
     """
 
     def create_course_grades(run):
