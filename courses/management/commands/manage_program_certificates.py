@@ -80,9 +80,7 @@ class Command(BaseCommand):
                 status = (self.style.SUCCESS, "successfully created")
 
             results.append(
-                status[0](
-                    f"Certificate {status[1]} for {user} in program {program}"
-                )
+                status[0](f"Certificate {status[1]} for {user} in program {program}")
             )
 
         for result in results:
