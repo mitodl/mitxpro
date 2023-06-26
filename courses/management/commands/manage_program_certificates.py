@@ -72,14 +72,16 @@ class Command(BaseCommand):
             user = enrollment.user
             _, is_created = generate_program_certificate(user, program)
 
-            if not is_created:
-                status = "failed"
+            if _ and not is_created:
+                status = (self.style.SUCCESS, "already exists")
+            elif not is_created:
+                status = (self.style.ERROR, "failed")
             else:
-                status = "successful"
+                status = (self.style.SUCCESS, "successfully created")
 
             results.append(
-                self.style.SUCCESS(
-                    f"Certificate creation {status} for {user} in program {program}"
+                status[0](
+                    f"Certificate {status[1]} for {user} in program {program}"
                 )
             )
 
