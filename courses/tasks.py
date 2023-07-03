@@ -99,8 +99,8 @@ def sync_courseruns_data():
     """
     now = now_in_utc()
     runs = CourseRun.objects.live().filter(
-        Q(expiration_date__isnull=True) | Q(expiration_date__gt=now), 
-        course__is_external=False
+        Q(expiration_date__isnull=True) | Q(expiration_date__gt=now),
+        course__is_external=False,
     )
 
     # `sync_course_runs` logs internally so no need to capture/output the returned values
