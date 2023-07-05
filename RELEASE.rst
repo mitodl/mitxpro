@@ -1,6 +1,29 @@
 Release Notes
 =============
 
+Version 0.124.3
+---------------
+
+- refactor: Minor code changes
+- style: linting issues resolved
+- fix: Added new message
+- test: Added new tests and updated existing ones
+- refactor: Added code changes
+- style: unused import removed
+- fix: fixed broken test
+- fix: added tests and fixed broken tests
+- style: liniting
+- fix: Certificate generation via course enrollments
+- Review changes
+- Code refactored
+- :sparkles: Black formatted
+- Tests added for the management command
+- Code refactored, error messages improved
+- Manage program Certificates Command
+- Certificates creation does not halt entire process
+- Bump express from 4.17.1 to 4.17.3
+- Bump ipython from 7.32.0 to 8.10.0
+
 Version 0.124.2 (Released June 22, 2023)
 ---------------
 
