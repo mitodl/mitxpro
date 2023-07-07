@@ -3,30 +3,20 @@
 import itertools
 import logging
 from collections import namedtuple
-from datetime import timedelta
 from traceback import format_exc
 
 from django.core.exceptions import ValidationError
-from django.conf import settings
-from django.db.models import Q
 from requests.exceptions import ConnectionError as RequestsConnectionError, HTTPError
 
 from courses.constants import ENROLL_CHANGE_STATUS_DEFERRED
 from courses.models import (
     CourseRun,
-    CourseRunCertificate,
     CourseRunEnrollment,
     ProgramEnrollment,
-)
-from courses.utils import (
-    ensure_course_run_grade,
-    process_course_run_grade_certificate,
-    sync_course_runs,
 )
 from courseware.api import (
     enroll_in_edx_course_runs,
     unenroll_edx_course_run,
-    get_edx_grades_with_users,
 )
 from courseware.exceptions import (
     EdxApiEnrollErrorException,
@@ -36,7 +26,7 @@ from courseware.exceptions import (
     UnknownEdxApiEnrollException,
 )
 from ecommerce import mail_api
-from mitxpro.utils import first_or_none, partition, now_in_utc
+from mitxpro.utils import first_or_none, partition
 
 
 log = logging.getLogger(__name__)
@@ -369,82 +359,3 @@ def defer_enrollment(
     except EdxEnrollmentCreateError:  # pylint: disable=try-except-raise
         raise
     return from_enrollment, first_or_none(to_enrollments)
-
-
-def generate_course_run_certificates():
-    """Task to generate certificates for course runs"""
-    now = now_in_utc()
-    course_runs = (
-        CourseRun.objects.live()
-        .filter(
-            end_date__lt=now
-            - timedelta(hours=settings.CERTIFICATE_CREATION_DELAY_IN_HOURS)
-        )
-        .exclude(
-            id__in=CourseRunCertificate.objects.values_list("course_run__id", flat=True)
-        )
-    )
-
-    for run in course_runs:
-        edx_grade_user_iter = exception_logging_generator(
-            get_edx_grades_with_users(run)
-        )
-        created_grades_count, updated_grades_count, generated_certificates_count = (
-            0,
-            0,
-            0,
-        )
-        for edx_grade, user in edx_grade_user_iter:
-            course_run_grade, created, updated = ensure_course_run_grade(
-                user=user, course_run=run, edx_grade=edx_grade, should_update=True
-            )
-
-            if created:
-                created_grades_count += 1
-            elif updated:
-                updated_grades_count += 1
-
-            _, created, deleted = process_course_run_grade_certificate(
-                course_run_grade=course_run_grade
-            )
-
-            if deleted:
-                log.warning(
-                    "Certificate deleted for user %s and course_run %s", user, run
-                )
-            elif created:
-                generated_certificates_count += 1
-
-        log.info(
-            "Finished processing course run %s: created grades for %d users, "
-            "updated grades for %d users, generated certificates for %d users",
-            run,
-            created_grades_count,
-            updated_grades_count,
-            generated_certificates_count,
-        )
-
-
-def exception_logging_generator(generator):
-    """Returns a new generator that logs exceptions from the given generator and continues with iteration"""
-    while True:
-        try:
-            yield next(generator)
-        except StopIteration:
-            return
-        except HTTPError as exc:
-            log.exception("EdX API error for fetching user grades %s:", exc)
-        except Exception as exp:  # pylint: disable=broad-except
-            log.exception("Error fetching user grades from edX %s:", exp)
-
-
-def sync_course_runs_data():
-    """Sync titles and dates for course runs from edX."""
-    now = now_in_utc()
-    runs = CourseRun.objects.live().filter(
-        Q(expiration_date__isnull=True) | Q(expiration_date__gt=now),
-        course__is_external=False,
-    )
-
-    # `sync_course_runs` logs internally so no need to capture/output the returned values
-    sync_course_runs(runs)
