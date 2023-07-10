@@ -12,6 +12,7 @@ from courses.models import CourseRun, CourseRunCertificate
 from courses.utils import (
     ensure_course_run_grade,
     process_course_run_grade_certificate,
+    sync_course_runs
 )
 from courseware.api import get_edx_grades_with_users
 from mitxpro.celery import app
@@ -104,6 +105,4 @@ def sync_courseruns_data():
     )
 
     # `sync_course_runs` logs internally so no need to capture/output the returned values
-    from courses.utils import sync_course_runs
-
     sync_course_runs(runs)
