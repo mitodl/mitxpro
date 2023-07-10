@@ -3,7 +3,7 @@
 import pytest
 
 from courses.tasks import sync_courseruns_data
-from courses.factories import CourseFactory, CourseRunFactory
+from courses.factories import CourseRunFactory
 
 pytestmark = [pytest.mark.django_db]
 
@@ -13,7 +13,7 @@ def test_sync_courseruns_data(mocker):
     sync_course_runs = mocker.patch("courses.utils.sync_course_runs")
 
     course_runs = CourseRunFactory.create_batch(size=3)
-    external_course_runs = CourseRunFactory.create_batch(
+    _ = CourseRunFactory.create_batch(
         size=3, course__is_external=True
     )
 
