@@ -13,9 +13,7 @@ def test_sync_courseruns_data(mocker):
     sync_course_runs = mocker.patch("courses.utils.sync_course_runs")
 
     course_runs = CourseRunFactory.create_batch(size=3)
-    _ = CourseRunFactory.create_batch(
-        size=3, course__is_external=True
-    )
+    _ = CourseRunFactory.create_batch(size=3, course__is_external=True)
 
     sync_courseruns_data.delay()
     sync_course_runs.assert_called_once_with(course_runs)
