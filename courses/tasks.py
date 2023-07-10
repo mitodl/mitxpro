@@ -94,7 +94,7 @@ def exception_logging_generator(generator):
 @app.task
 def sync_courseruns_data():
     """
-    Task to sync only internal course runs data
+    Task to sync titles and dates for course runs from edX. (Only internal courses)
     """
     now = now_in_utc()
     runs = list(
