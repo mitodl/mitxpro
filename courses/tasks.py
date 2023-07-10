@@ -18,7 +18,6 @@ from courseware.api import get_edx_grades_with_users
 from mitxpro.celery import app
 from mitxpro.utils import now_in_utc
 
-
 log = logging.getLogger(__name__)
 
 
@@ -95,11 +94,14 @@ def exception_logging_generator(generator):
 @app.task
 def sync_courseruns_data():
     """
-    Task to sync titles and dates for course runs from edX.
+    Task to sync titles and dates for course runs from edX. (Only internal courses)
     """
     now = now_in_utc()
-    runs = CourseRun.objects.live().filter(
-        Q(expiration_date__isnull=True) | Q(expiration_date__gt=now)
+    runs = list(
+        CourseRun.objects.live().filter(
+            Q(expiration_date__isnull=True) | Q(expiration_date__gt=now),
+            course__is_external=False,
+        )
     )
 
     # `sync_course_runs` logs internally so no need to capture/output the returned values

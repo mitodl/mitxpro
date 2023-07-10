@@ -9,8 +9,15 @@ from django.core.exceptions import ValidationError
 from requests.exceptions import ConnectionError as RequestsConnectionError, HTTPError
 
 from courses.constants import ENROLL_CHANGE_STATUS_DEFERRED
-from courses.models import CourseRun, CourseRunEnrollment, ProgramEnrollment
-from courseware.api import enroll_in_edx_course_runs, unenroll_edx_course_run
+from courses.models import (
+    CourseRun,
+    CourseRunEnrollment,
+    ProgramEnrollment,
+)
+from courseware.api import (
+    enroll_in_edx_course_runs,
+    unenroll_edx_course_run,
+)
 from courseware.exceptions import (
     EdxApiEnrollErrorException,
     EdxEnrollmentCreateError,
