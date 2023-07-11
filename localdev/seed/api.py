@@ -29,7 +29,6 @@ from localdev.seed.serializers import (
     CourseRunSerializer,
     CompanySerializer,
 )
-from localdev.seed.utils import validate_courseware_id
 from mitxpro.utils import (
     dict_without_keys,
     filter_dict_by_key_set,
@@ -343,7 +342,6 @@ class SeedDataLoader:
         and creates it if it doesn't exist.
         """
         model_cls = serializer_cls.Meta.model
-
         seeded_field_name, seeded_value = self._seeded_field_and_value(model_cls, data)
         adjusted_data = {
             # Set 'live' to True for seeded objects by default
@@ -352,9 +350,6 @@ class SeedDataLoader:
             **filter_for_model_fields(model_cls, data),
             **{seeded_field_name: seeded_value},
         }
-
-        # Validate courseware_id if applicable
-        validate_courseware_id(data.get("courseware_id"))
 
         existing_qset = model_cls.objects.filter(**{seeded_field_name: seeded_value})
         if existing_qset.exists():
