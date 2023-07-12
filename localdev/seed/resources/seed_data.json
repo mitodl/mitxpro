@@ -148,7 +148,7 @@
             "course_runs": [
                 {
                     "title": "Digital Learning 100 - August 2021",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+100+R4",
+                    "courseware_id": "course-v1:MITx+Digital-Learning-100+R4",
                     "run_tag": "R4",
                     "start_date": "2021-08-15T00:00:00+00:00",
                     "end_date": "2021-12-15T00:00:00+00:00",
@@ -156,7 +156,7 @@
                 },
                 {
                     "title": "Digital Learning 100 - August 2020",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+100+R3",
+                    "courseware_id": "course-v1:MITx+Digital-Learning-100+R3",
                     "run_tag": "R3",
                     "start_date": "2020-08-15T00:00:00+00:00",
                     "end_date": "2020-12-15T00:00:00+00:00",
@@ -164,7 +164,7 @@
                 },
                 {
                     "title": "Digital Learning 100 - January 2016",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+100+R2",
+                    "courseware_id": "course-v1:MITx+Digital-Learning-100+R2",
                     "run_tag": "R2",
                     "end_date": "2016-05-15T00:00:00+00:00",
                     "start_date": "2016-01-15T00:00:00+00:00",
@@ -172,7 +172,7 @@
                 },
                 {
                     "title": "Digital Learning 100 - August 2015",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+100+R1",
+                    "courseware_id": "course-v1:MITx+Digital-Learning-100+R1",
                     "run_tag": "R1",
                     "end_date": "2015-12-15T00:00:00+00:00",
                     "start_date": "2015-08-15T00:00:00+00:00",
@@ -191,7 +191,7 @@
             "course_runs": [
                 {
                     "title": "Digital Learning 200 - August 2016",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+200+R3",
+                    "courseware_id": "course-v1:MITx+Digital-Learning-200+R3",
                     "run_tag": "R3",
                     "end_date": "2016-12-15T00:00:00+00:00",
                     "start_date": "2016-08-15T00:00:00+00:00",
@@ -199,7 +199,7 @@
                 },
                 {
                     "title": "Digital Learning 200 - January 2016",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+200+R2",
+                    "courseware_id": "course-v1:MITx+Digital-Learning-200+R2",
                     "run_tag": "R2",
                     "end_date": "2016-05-15T00:00:00+00:00",
                     "start_date": "2016-01-15T00:00:00+00:00",
@@ -207,7 +207,7 @@
                 },
                 {
                     "title": "Digital Learning 200 - August 2015",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+200+R1",
+                    "courseware_id": "course-v1:MITx+Digital-Learning-200+R1",
                     "run_tag": "R1",
                     "end_date": "2015-12-15T00:00:00+00:00",
                     "start_date": "2015-08-15T00:00:00+00:00",
@@ -226,7 +226,7 @@
             "course_runs": [
                 {
                     "title": "Digital Learning 300 - August 2016",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+300+R3",
+                    "courseware_id": "course-v1:MITx+Digital-Learning-300+R3",
                     "run_tag": "R3",
                     "enrollment_start": "2016-08-15T00:00:00+00:00",
                     "end_date": "2016-12-15T00:00:00+00:00",
@@ -235,7 +235,7 @@
                 },
                 {
                     "title": "Digital Learning 300 - January 2016",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+300+R2",
+                    "courseware_id": "course-v1:MITx+Digital-Learning-300+R2",
                     "run_tag": "R2",
                     "enrollment_start": "2016-01-15T00:00:00+00:00",
                     "end_date": "2016-05-15T00:00:00+00:00",
@@ -244,7 +244,7 @@
                 },
                 {
                     "title": "Digital Learning 300 - August 2015",
-                    "courseware_id": "course-v1:MITx+Digital+Learning+300+R1",
+                    "courseware_id": "course-v1:MITx+Digital-Learning-300+R1",
                     "run_tag": "R1",
                     "enrollment_start": "2015-08-15T00:00:00+00:00",
                     "end_date": "2015-12-15T00:00:00+00:00",
@@ -264,7 +264,7 @@
             "course_runs": [
                 {
                     "title": "Analog Learning 100 - August 2016",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+100+R3",
+                    "courseware_id": "course-v1:MITx+Analog-Learning-100+R3",
                     "run_tag": "R3",
                     "enrollment_start": "2016-08-15T00:00:00+00:00",
                     "end_date": "2016-12-15T00:00:00+00:00",
@@ -273,7 +273,7 @@
                 },
                 {
                     "title": "Analog Learning 100 - January 2016",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+100+R2",
+                    "courseware_id": "course-v1:MITx+Analog-Learning-100+R2",
                     "run_tag": "R2",
                     "enrollment_start": "2016-01-15T00:00:00+00:00",
                     "end_date": "2016-05-15T00:00:00+00:00",
@@ -282,7 +282,7 @@
                 },
                 {
                     "title": "Analog Learning 100 - August 2015",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+100+R1",
+                    "courseware_id": "course-v1:MITx+Analog-Learning-100+R1",
                     "run_tag": "R1",
                     "enrollment_start": "2015-08-15T00:00:00+00:00",
                     "end_date": "2015-12-15T00:00:00+00:00",
@@ -302,7 +302,7 @@
             "course_runs": [
                 {
                     "title": "Analog Learning 200 - August 2016",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+200+R3",
+                    "courseware_id": "course-v1:MITx+Analog-Learning-200+R3",
                     "run_tag": "R3",
                     "enrollment_start": "2016-08-15T00:00:00+00:00",
                     "end_date": "2016-12-15T00:00:00+00:00",
@@ -311,7 +311,7 @@
                 },
                 {
                     "title": "Analog Learning 200 - January 2016",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+200+R2",
+                    "courseware_id": "course-v1:MITx+Analog-Learning-200+R2",
                     "run_tag": "R2",
                     "enrollment_start": "2016-01-15T00:00:00+00:00",
                     "end_date": "2016-05-15T00:00:00+00:00",
@@ -320,7 +320,7 @@
                 },
                 {
                     "title": "Analog Learning 200 - August 2015",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+200+R1",
+                    "courseware_id": "course-v1:MITx+Analog-Learning-200+R1",
                     "run_tag": "R1",
                     "enrollment_start": "2015-08-15T00:00:00+00:00",
                     "end_date": "2015-12-15T00:00:00+00:00",
@@ -340,7 +340,7 @@
             "course_runs": [
                 {
                     "title": "Analog Learning 300 - August 2016",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+300+R3",
+                    "courseware_id": "course-v1:MITx+Analog-Learning-300+R3",
                     "run_tag": "R3",
                     "enrollment_start": "2016-08-15T00:00:00+00:00",
                     "end_date": "2016-12-15T00:00:00+00:00",
@@ -352,7 +352,7 @@
                 },
                 {
                     "title": "Analog Learning 300 - January 2016",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+300+R2",
+                    "courseware_id": "course-v1:MITx+Analog-Learning-300+R2",
                     "run_tag": "R2",
                     "enrollment_start": "2016-01-15T00:00:00+00:00",
                     "end_date": "2016-05-15T00:00:00+00:00",
@@ -361,7 +361,7 @@
                 },
                 {
                     "title": "Analog Learning 300 - August 2015",
-                    "courseware_id": "course-v1:MITx+Analog+Learning+300+R1",
+                    "courseware_id": "course-v1:MITx+Analog-Learning-300+R1",
                     "run_tag": "R1",
                     "enrollment_start": "2015-08-15T00:00:00+00:00",
                     "end_date": "2015-12-15T00:00:00+00:00",
