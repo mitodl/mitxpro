@@ -172,7 +172,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
                 user,
                 from_courseware_id=deferral_req_row.from_courseware_id,
                 to_courseware_id=deferral_req_row.to_courseware_id,
-                force=True
+                force=True,
             )
             # When #1838 is completed, this logic can be removed
             if not from_enrollment and not to_enrollment:
