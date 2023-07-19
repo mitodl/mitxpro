@@ -188,6 +188,7 @@ class WebinarPage(MetadataPageMixin, Page):
 
     parent_page_types = [WebinarIndexPage]
     subpage_types = []
+    template = "webinar_page.html"
 
     WEBINAR_CATEGORY_CHOICES = [
         (UPCOMING_WEBINAR, UPCOMING_WEBINAR),
@@ -214,22 +215,27 @@ class WebinarPage(MetadataPageMixin, Page):
     description = models.TextField(
         null=True, blank=True, help_text="Description of the webinar."
     )
-    action_title = models.CharField(
-        max_length=255,
-        help_text="Specify the webinar call-to-action text here (e.g: 'REGISTER, VIEW RECORDING').",
-    )
     action_url = models.URLField(
         help_text="Specify the webinar action-url here (like a link to an external webinar page).",
+        null=True, blank=True,
     )
+    sub_heading = models.CharField(
+        max_length=250,
+        null=True,
+        blank=True,
+        help_text="Sub heading of the resource page.",
+    )
+    course = models.ForeignKey(Course, on_delete=models.DO_NOTHING)
 
     content_panels = [
+        FieldPanel("course"),
         FieldPanel("category"),
         FieldPanel("title"),
+        FieldPanel("sub_heading"),
         ImageChooserPanel("banner_image"),
         FieldPanel("date", heading="Start Date"),
         FieldPanel("time"),
         FieldPanel("description"),
-        FieldPanel("action_title"),
         FieldPanel("action_url"),
     ]
 
