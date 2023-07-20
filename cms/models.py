@@ -223,7 +223,7 @@ class WebinarPage(MetadataPageMixin, Page):
         max_length=250,
         null=True,
         blank=True,
-        help_text="Sub heading of the resource page.",
+        help_text="Sub heading of the webinar page.",
     )
     course = models.ForeignKey(Course, on_delete=models.DO_NOTHING)
 

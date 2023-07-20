@@ -7,6 +7,7 @@ import pytest
 from django.urls import resolve
 from wagtail.core.utils import WAGTAIL_APPEND_SLASH
 
+from cms.constants import UPCOMING_WEBINAR, ON_DEMAND_WEBINAR
 from cms.factories import (
     CertificatePageFactory,
     CoursePageFactory,
@@ -28,6 +29,8 @@ from cms.factories import (
     TextSectionFactory,
     TextVideoSectionFactory,
     UserTestimonialsPageFactory,
+    WebinarIndexPageFactory,
+    WebinarPageFactory,
     WhoShouldEnrollPageFactory,
 )
 from cms.models import (
@@ -85,6 +88,25 @@ def test_notification_snippet():
 
     assert str(notification) == message_text
 
+def test_webinar_course():
+    """
+    Verify `course` property from the webinar page returns expected value
+    """
+    course = CourseFactory.create()
+    webinar_page = WebinarPageFactory.create(course=course)
+    assert webinar_page.course == course
+
+def test_upcoming_webinar_date_time():
+    webinar = WebinarPageFactory.create()
+    assert webinar.category == UPCOMING_WEBINAR
+    assert webinar.date
+    assert webinar.time
+
+def test_on_demand_webinar_fields():
+    webinar_index = WebinarIndexPageFactory.create()
+    webinar = WebinarPageFactory.create(category=ON_DEMAND_WEBINAR, parent=webinar_index)
+    assert webinar.category == ON_DEMAND_WEBINAR
+    assert webinar.course
 
 def test_course_page_program_page():
     """
