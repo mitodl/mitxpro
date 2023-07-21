@@ -217,7 +217,8 @@ class WebinarPage(MetadataPageMixin, Page):
     )
     action_url = models.URLField(
         help_text="Specify the webinar action-url here (like a link to an external webinar page).",
-        null=True, blank=True,
+        null=True,
+        blank=True,
     )
     sub_heading = models.CharField(
         max_length=250,
@@ -257,7 +258,7 @@ class WebinarPage(MetadataPageMixin, Page):
 
             if errors:
                 raise ValidationError(errors)
-    
+
     def get_context(self, request, *args, **kwargs):
         return {
             **super().get_context(request),
