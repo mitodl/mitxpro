@@ -23,19 +23,23 @@
 <div class="container resource-container">
   <div class="row">
     <div class="col-md-12">
-        {% if page.date %}
-            <p>{{ page.formatted_date }} | {{ page.time }}</p>
-        {% endif %}
-        <div class="col-md-12 resource-video">
-          {% if page.action_url %}
-            <iframe src="{{page.action_url}}" width="80%" height="500" frameborder="0" allow="autoplay" scrolling="no" allowfullscreen></iframe>
-          {% endif %}
-        </div>
-        <div>
-        {% if page.category|lower == 'upcoming' %}
-          <a href="{{page.action_url}}" class="read-more">REGISTER</a>
+      {% if page.date %}
+      <p>{{ page.formatted_date }} | {{ page.time }}</p>
+      {% endif %}
+      <div class="col-md-12 resource-video">
+        {% if page.action_url %}
+        <iframe src="{{page.action_url}}" width="80%" height="500" frameborder="0" allow="autoplay" scrolling="no" allowfullscreen></iframe>
         {% endif %}
       </div>
+      <div>
+        {% if page.category|lower == 'upcoming' %}
+        <a href="{{page.action_url}}" class="read-more">REGISTER</a>
+        {% endif %}
+        <a href="{% pageurl coursepage %}" class="read-more">
+          Learn more about this course or enroll
+        </a>
+      </div>
+      <a href="{% pageurl page.get_parent %}" class="back-to-top">Back to webinars</a>
     </div>
   </div>
 </div>

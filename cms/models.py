@@ -225,7 +225,7 @@ class WebinarPage(MetadataPageMixin, Page):
         blank=True,
         help_text="Sub heading of the webinar page.",
     )
-    course = models.ForeignKey(Course, on_delete=models.DO_NOTHING)
+    course = models.ForeignKey(Course, null=True, on_delete=models.DO_NOTHING)
 
     content_panels = [
         FieldPanel("course"),
@@ -257,6 +257,13 @@ class WebinarPage(MetadataPageMixin, Page):
 
             if errors:
                 raise ValidationError(errors)
+    
+    def get_context(self, request, *args, **kwargs):
+        return {
+            **super().get_context(request),
+            **get_base_context(request),
+            "coursepage": CoursePage.objects.get(course=self.course),
+        }
 
 
 class CourseIndexPage(CourseObjectIndexPage):
