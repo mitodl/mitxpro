@@ -99,6 +99,9 @@ def test_webinar_course():
 
 
 def test_upcoming_webinar_date_time():
+    """
+    Verify `date` and `time` property for the upcoming webinar to be present
+    """
     webinar = WebinarPageFactory.create()
     assert webinar.category == UPCOMING_WEBINAR
     assert webinar.date
@@ -106,6 +109,9 @@ def test_upcoming_webinar_date_time():
 
 
 def test_on_demand_webinar_fields():
+    """
+    Verify essential on-demand webinar fields. 
+    """
     webinar_index = WebinarIndexPageFactory.create()
     webinar = WebinarPageFactory.create(
         category=ON_DEMAND_WEBINAR, parent=webinar_index
