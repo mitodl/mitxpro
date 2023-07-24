@@ -110,7 +110,7 @@ def test_upcoming_webinar_date_time():
 
 def test_on_demand_webinar_fields():
     """
-    Verify essential on-demand webinar fields. 
+    Verify essential on-demand webinar fields.
     """
     webinar_index = WebinarIndexPageFactory.create()
     webinar = WebinarPageFactory.create(
