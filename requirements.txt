@@ -330,7 +330,7 @@ pycountry==19.7.15
     # via -r requirements.in
 pycparser==2.21
     # via cffi
-pygments==2.11.2
+pygments==2.15.0
     # via ipython
 pygsheets==2.0.2
     # via -r requirements.in
