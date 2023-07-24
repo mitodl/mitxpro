@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0061_auto_20230721_1145'),
+        ("cms", "0061_auto_20230721_1145"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='webinarpage',
-            name='action_title',
-            field=models.TextField(blank=True, help_text='Description of the webinar.', null=True),
+            model_name="webinarpage",
+            name="action_title",
+            field=models.TextField(
+                blank=True, help_text="Description of the webinar.", null=True
+            ),
         ),
     ]
