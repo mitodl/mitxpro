@@ -260,10 +260,12 @@ class WebinarPage(MetadataPageMixin, Page):
                 raise ValidationError(errors)
 
     def get_context(self, request, *args, **kwargs):
+        course = CoursePage.objects.get(course=self.course)
+        course_url = course.get_url() if course else ""
         return {
             **super().get_context(request),
             **get_base_context(request),
-            "coursepage": CoursePage.objects.get(course=self.course),
+            "course_url": course_url,
         }
 
 

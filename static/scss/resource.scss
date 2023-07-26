@@ -75,6 +75,8 @@ html {
 
   .back-to-top {
     text-decoration: none;
+    display: block;
+    margin-bottom: 10px;
 
     &:after {
       font-size: 24px;
@@ -86,15 +88,15 @@ html {
   }
 
   .read-more {
-    display: inline-block;
     text-decoration: none;
+    display: block;
 
     &:after {
       content: "arrow_circle_up";
       font-size: 24px;
       display: inline-block;
       font-family: Material Icons;
-      margin: 0 0 15px 5px;
+      margin: 0 0 10px 5px;
       transform: rotate(90deg);
       vertical-align: top;
     }

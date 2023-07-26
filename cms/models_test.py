@@ -1,6 +1,7 @@
 """ Tests for cms pages. """
 # pylint: disable=too-many-lines
 import json
+from datetime import datetime, timedelta
 
 import factory
 import pytest
@@ -102,22 +103,26 @@ def test_upcoming_webinar_date_time():
     """
     Verify `date` and `time` property for the upcoming webinar to be present
     """
-    webinar = WebinarPageFactory.create()
+    todays_date = datetime.today()
+    future_date = todays_date + timedelta(days=10)
+    webinar = WebinarPageFactory.create(date=future_date, time="11 am")
+    
     assert webinar.category == UPCOMING_WEBINAR
-    assert webinar.date
-    assert webinar.time
+    assert webinar.date == future_date.date()
+    assert webinar.time == "11 am"
 
 
 def test_on_demand_webinar_fields():
     """
     Verify essential on-demand webinar fields.
     """
+    course = CourseFactory.create()
     webinar_index = WebinarIndexPageFactory.create()
     webinar = WebinarPageFactory.create(
-        category=ON_DEMAND_WEBINAR, parent=webinar_index
+        category=ON_DEMAND_WEBINAR, parent=webinar_index, course=course
     )
     assert webinar.category == ON_DEMAND_WEBINAR
-    assert webinar.course
+    assert webinar.course == course
 
 
 def test_course_page_program_page():
