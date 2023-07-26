@@ -106,7 +106,7 @@ def test_upcoming_webinar_date_time():
     todays_date = datetime.today()
     future_date = todays_date + timedelta(days=10)
     webinar = WebinarPageFactory.create(date=future_date, time="11 am")
-    
+
     assert webinar.category == UPCOMING_WEBINAR
     assert webinar.date == future_date.date()
     assert webinar.time == "11 am"
