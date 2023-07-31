@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static render_bundle image_version_url wagtailcore_tags tz %}
+{% load static render_bundle image_version_url wagtailcore_tags wagtailimages_tags wagtailmetadata_tags tz %}
 
 {% block title %}{{ site_name }} | {{ page.title }}{% endblock %}
 
@@ -10,7 +10,11 @@
 
 {% block content %}
 
-  <div class="resource-banner" style="background:url('{% image_version_url page.banner_image "original" %}') no-repeat center center;">
+  {% if page.banner_image %}
+    <div class="resource-banner" style="background:url('{% image_version_url page.banner_image "original" %}') no-repeat center center;">
+  {% else %}
+    <div class="resource-banner" style="background-image:url('{% static webinar_default_images|random %}');background-size:cover;">
+  {% endif %}
     <div class="container">
       <h1 class="text-uppercase">{{ page.title }}</h1>
       {% if page.sub_heading %}
@@ -25,13 +29,13 @@
       {% if page.date %}
       <p>{{ page.formatted_date }} | {{ page.time }}</p>
       {% endif %}
-      <div class="col-md-12 resource-video">
-        {% if page.action_url and page.category|lower != 'upcoming' %}
-        <iframe src="{{page.action_url}}" width="80%" height="500" frameborder="0" allow="autoplay" scrolling="no" allowfullscreen></iframe>
-        {% endif %}
-      </div>
+      {% if page.action_url and page.category|lower != 'upcoming' %}
+        <div class="col-md-12 resource-video">
+          <iframe src="{{page.action_url}}" width="80%" height="500" frameborder="0" allow="autoplay" scrolling="no" allowfullscreen></iframe>
+        </div>
+      {% endif %}
       {% if page.category|lower == 'upcoming' %}
-      <a href="{{page.action_url}}" class="read-more">REGISTER</a>
+        <a href="{{page.action_url}}" class="read-more">REGISTER</a>
       {% endif %}
       <a href="{{ course_url }}" class="read-more">
         Learn more about this course or enroll

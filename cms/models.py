@@ -266,6 +266,7 @@ class WebinarPage(MetadataPageMixin, Page):
             **super().get_context(request),
             **get_base_context(request),
             "course_url": course_url,
+            "webinar_default_images": WEBINAR_DEFAULT_IMAGES
         }
 
 
