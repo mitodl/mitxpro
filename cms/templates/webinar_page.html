@@ -11,7 +11,7 @@
 {% block content %}
 
   {% if page.banner_image %}
-    <div class="resource-banner" style="background:url('{% image_version_url page.banner_image "original" %}') no-repeat center center;">
+    <div class="resource-banner" style="background-image:url('{% image_version_url page.banner_image "original" %}');background-size:cover">
   {% else %}
     <div class="resource-banner" style="background-image:url('{% static webinar_default_images|random %}');background-size:cover;">
   {% endif %}
