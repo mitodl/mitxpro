@@ -59,6 +59,7 @@ from courses.models import (
     Course,
     CourseRunCertificate,
     CourseTopic,
+    Program,
     ProgramCertificate,
     ProgramRun,
 )
@@ -226,10 +227,16 @@ class WebinarPage(MetadataPageMixin, Page):
         blank=True,
         help_text="Sub heading of the webinar page.",
     )
-    course = models.ForeignKey(Course, null=True, on_delete=models.DO_NOTHING)
+    course = models.ForeignKey(
+        Course, blank=True, null=True, on_delete=models.DO_NOTHING
+    )
+    program = models.ForeignKey(
+        Program, blank=True, null=True, on_delete=models.DO_NOTHING
+    )
 
     content_panels = [
         FieldPanel("course"),
+        FieldPanel("program"),
         FieldPanel("category"),
         FieldPanel("title"),
         FieldPanel("sub_heading"),
@@ -260,12 +267,15 @@ class WebinarPage(MetadataPageMixin, Page):
                 raise ValidationError(errors)
 
     def get_context(self, request, *args, **kwargs):
-        course = CoursePage.objects.get(course=self.course)
-        course_url = course.get_url() if course else ""
+        course = CoursePage.objects.filter(course=self.course).first()
+        program = ProgramPage.objects.filter(program=self.program).first()
+        courseware = program or course
+        courseware_url = courseware.get_url() if courseware else ""
+
         return {
             **super().get_context(request),
             **get_base_context(request),
-            "course_url": course_url,
+            "courseware_url": courseware_url,
             "webinar_default_images": WEBINAR_DEFAULT_IMAGES,
         }
 

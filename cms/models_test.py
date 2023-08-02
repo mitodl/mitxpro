@@ -1,14 +1,16 @@
 """ Tests for cms pages. """
 # pylint: disable=too-many-lines
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 import factory
 import pytest
 from django.urls import resolve
+from django.core.exceptions import ValidationError
+from django.test.client import RequestFactory
 from wagtail.core.utils import WAGTAIL_APPEND_SLASH
 
-from cms.constants import UPCOMING_WEBINAR, ON_DEMAND_WEBINAR
+from cms.constants import UPCOMING_WEBINAR, ON_DEMAND_WEBINAR, WEBINAR_DEFAULT_IMAGES
 from cms.factories import (
     CertificatePageFactory,
     CoursePageFactory,
@@ -24,6 +26,7 @@ from cms.factories import (
     LearningOutcomesPageFactory,
     LearningTechniquesPageFactory,
     NewsAndEventsPageFactory,
+    ProgramFactory,
     ProgramPageFactory,
     ResourcePageFactory,
     SiteNotificationFactory,
@@ -99,17 +102,56 @@ def test_webinar_course():
     assert webinar_page.course == course
 
 
-def test_upcoming_webinar_date_time():
+def test_webinar_program():
     """
-    Verify `date` and `time` property for the upcoming webinar to be present
+    Verify `program` property from the webinar page returns expected value
     """
-    todays_date = datetime.today()
-    future_date = todays_date + timedelta(days=10)
-    webinar = WebinarPageFactory.create(date=future_date, time="11 am")
+    program = ProgramFactory.create()
+    webinar_page = WebinarPageFactory.create(program=program)
+    assert webinar_page.program == program
 
-    assert webinar.category == UPCOMING_WEBINAR
-    assert webinar.date == future_date.date()
-    assert webinar.time == "11 am"
+
+def test_webinar_context(staff_user):
+    """
+    Verify the context bring passed to the webinar_page.html
+    """
+    program_page = ProgramPageFactory.create()
+    webinar_page = WebinarPageFactory.create(program=program_page.program)
+
+    rf = RequestFactory()
+    request = rf.get("/")
+    request.user = staff_user
+    context = webinar_page.get_context(request=request)
+
+    assert context == {
+        "self": webinar_page,
+        "page": webinar_page,
+        "request": request,
+        "courseware_url": program_page.get_url(),
+        "webinar_default_images": WEBINAR_DEFAULT_IMAGES,
+    }
+
+
+@pytest.mark.parametrize(
+    "time, webinar_date,",
+    (
+        ["11 am", datetime.today() + timedelta(days=1)],
+        [None, None],
+    ),
+)
+def test_upcoming_webinar_date_time(time, webinar_date):
+    """
+    Verify `date` and `time` property for the upcoming webinar to be valid
+    """
+
+    if not time or not webinar_date:
+        with pytest.raises(ValidationError):
+            WebinarPageFactory.create(date=webinar_date, time=time)
+    else:
+        webinar = WebinarPageFactory.create(date=webinar_date, time=time)
+        assert webinar.category == UPCOMING_WEBINAR
+        assert webinar.time == "11 am"
+        assert isinstance(webinar.date, date)
 
 
 def test_on_demand_webinar_fields():

@@ -37,9 +37,11 @@
       {% if page.category|lower == 'upcoming' %}
         <a href="{{page.action_url}}" class="read-more">REGISTER</a>
       {% endif %}
-      <a href="{{ course_url }}" class="read-more">
-        Learn more about this course or enroll
-      </a>
+      {% if page.course or page.program %}
+        <a href="{{ courseware_url }}" class="read-more">
+          Learn more about this courseware or enroll
+        </a>
+      {% endif %}
       <a href="{% pageurl page.get_parent %}" class="back-to-top">Back to webinars</a>
     </div>
   </div>
