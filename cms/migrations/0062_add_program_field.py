@@ -7,19 +7,29 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('courses', '0033_remove_course_coursetopic_association'),
-        ('cms', '0061_add_new_fields_in_webinarpage'),
+        ("courses", "0033_remove_course_coursetopic_association"),
+        ("cms", "0061_add_new_fields_in_webinarpage"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='webinarpage',
-            name='program',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='courses.program'),
+            model_name="webinarpage",
+            name="program",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                to="courses.program",
+            ),
         ),
         migrations.AlterField(
-            model_name='webinarpage',
-            name='course',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='courses.course'),
+            model_name="webinarpage",
+            name="course",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                to="courses.course",
+            ),
         ),
     ]
