@@ -1,7 +1,7 @@
 """API for the CMS app"""
 import itertools
 import logging
-from datetime import MINYEAR, datetime
+from datetime import MAXYEAR, datetime
 
 import pytz
 from django.contrib.contenttypes.models import ContentType
@@ -46,7 +46,7 @@ def filter_and_sort_catalog_pages(
 
     page_run_dates = {
         page: page.product.next_run_date
-        or datetime(year=MINYEAR, month=1, day=1, tzinfo=pytz.UTC)
+        or datetime(year=MAXYEAR, month=1, day=1, tzinfo=pytz.UTC)
         for page in itertools.chain(
             valid_program_pages,
             valid_course_pages,
