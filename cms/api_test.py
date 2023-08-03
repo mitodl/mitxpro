@@ -99,18 +99,18 @@ def test_filter_and_sort_catalog_pages():  # pylint:disable=too-many-locals
 
     # Pages should be sorted by next run date
     assert [page.program for page in program_pages] == [
-        earlier_external_program_page.program,
         first_program_run.course.program,
         second_program_run.course.program,
         later_external_program_page.program,
+        earlier_external_program_page.program,
     ]
     expected_course_run_sort = [
-        future_enrollment_end_run,
-        earlier_external_course_page,
         non_program_run,
         first_program_run,
         second_program_run,
         later_external_course_page,
+        future_enrollment_end_run,
+        earlier_external_course_page,
     ]
 
     # The sort should also include external course pages as expected
