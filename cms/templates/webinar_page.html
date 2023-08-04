@@ -34,7 +34,7 @@
           <iframe src="{{page.action_url}}" width="80%" height="500" frameborder="0" allow="autoplay" scrolling="no" allowfullscreen></iframe>
         </div>
       {% endif %}
-      {% if page.category|lower == 'upcoming' %}
+      {% if page.category|lower == 'upcoming' and page.action_url %}
         <a href="{{page.action_url}}" class="read-more">REGISTER</a>
       {% endif %}
       {% if page.course or page.program %}
