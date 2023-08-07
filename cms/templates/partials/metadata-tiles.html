@@ -16,11 +16,17 @@
                       <p>Click below to enroll in one of these dates</p>
                     </div>
                     {% for course_run in course_runs %}
+                    {% if course_run.course.page.external_marketing_url %}
+                      <div>
+                        <a class='date-link' href={{ course_run.course.page.external_marketing_url }}>Start Date {{ course_run.start_date|date:'F j, Y' }}</a>
+                      </div>
+                    {% else %}
                       <div>
                         <a class='date-link' href='{% url 'checkout-page' %}?product={{ course_run.products.first.id }}'>Start Date {{ course_run.start_date|date:'F j, Y' }}</a>
                       </div>
+                    {% endif %}
                     {% endfor %}">
-                  More Dates
+                    More Dates
                 </a>
               </span>
             {% endwith %}
