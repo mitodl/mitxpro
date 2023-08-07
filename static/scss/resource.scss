@@ -9,6 +9,7 @@ html {
   padding: 75px 0;
   background: rgba(53, 53, 53, .97) url("#{$static-path}/images/resource-page-banner-bg.png") repeat-x 0 0;
   min-height: 200px;
+  margin-bottom: 20px;
 
   .container {
     max-width: 880px;
@@ -75,6 +76,8 @@ html {
 
   .back-to-top {
     text-decoration: none;
+    display: block;
+    margin-bottom: 10px;
 
     &:after {
       font-size: 24px;
@@ -84,4 +87,24 @@ html {
       vertical-align: middle;
     }
   }
+
+  .read-more {
+    text-decoration: none;
+    display: block;
+
+    &:after {
+      content: "arrow_circle_up";
+      font-size: 24px;
+      display: inline-block;
+      font-family: Material Icons;
+      margin: 0 0 10px 5px;
+      transform: rotate(90deg);
+      vertical-align: top;
+    }
+  }
+
+  .resource-video {
+    margin-left: 100px;
+  }
+
 }

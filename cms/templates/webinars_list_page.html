@@ -34,14 +34,20 @@
                 {% else %}
                   <img src="{% static webinar_default_images|random %}" alt="Preview image" />
                 {% endif %}
-                <p class="title">{{ webinar.title }}</p>
+                <a href="{% pageurl webinar %}" class="title">{{ webinar.title }}</a>
                 {% if webinar.description %}
                   <p class="description">{{ webinar.description }}</p>
                 {% endif %}
                 {% if webinar.date and webinar.time %}
                   <p class="time">{{ webinar.formatted_date }} | {{ webinar.time }}</p>
                 {% endif %}
-                <a href="{{ webinar.action_url }}" class="read-more">{{ webinar.action_title }}</a>
+                <a href="{{ webinar.action_url }}" class="read-more">
+                  {% if webinar.category|lower == "upcoming" %}
+                    REGISTER
+                  {% else %}
+                    VIEW RECORDING
+                  {% endif %}
+                </a>
               </div>
             </div>
           {% endfor %}

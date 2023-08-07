@@ -59,6 +59,7 @@ from courses.models import (
     Course,
     CourseRunCertificate,
     CourseTopic,
+    Program,
     ProgramCertificate,
     ProgramRun,
 )
@@ -188,6 +189,7 @@ class WebinarPage(MetadataPageMixin, Page):
 
     parent_page_types = [WebinarIndexPage]
     subpage_types = []
+    template = "webinar_page.html"
 
     WEBINAR_CATEGORY_CHOICES = [
         (UPCOMING_WEBINAR, UPCOMING_WEBINAR),
@@ -214,22 +216,34 @@ class WebinarPage(MetadataPageMixin, Page):
     description = models.TextField(
         null=True, blank=True, help_text="Description of the webinar."
     )
-    action_title = models.CharField(
-        max_length=255,
-        help_text="Specify the webinar call-to-action text here (e.g: 'REGISTER, VIEW RECORDING').",
-    )
     action_url = models.URLField(
         help_text="Specify the webinar action-url here (like a link to an external webinar page).",
+        null=True,
+        blank=True,
+    )
+    sub_heading = models.CharField(
+        max_length=250,
+        null=True,
+        blank=True,
+        help_text="Sub heading of the webinar page.",
+    )
+    course = models.ForeignKey(
+        Course, blank=True, null=True, on_delete=models.DO_NOTHING
+    )
+    program = models.ForeignKey(
+        Program, blank=True, null=True, on_delete=models.DO_NOTHING
     )
 
     content_panels = [
+        FieldPanel("course"),
+        FieldPanel("program"),
         FieldPanel("category"),
         FieldPanel("title"),
+        FieldPanel("sub_heading"),
         ImageChooserPanel("banner_image"),
         FieldPanel("date", heading="Start Date"),
         FieldPanel("time"),
         FieldPanel("description"),
-        FieldPanel("action_title"),
         FieldPanel("action_url"),
     ]
 
@@ -251,6 +265,19 @@ class WebinarPage(MetadataPageMixin, Page):
 
             if errors:
                 raise ValidationError(errors)
+
+    def get_context(self, request, *args, **kwargs):
+        course = CoursePage.objects.filter(course=self.course).first()
+        program = ProgramPage.objects.filter(program=self.program).first()
+        courseware = program or course
+        courseware_url = courseware.get_url() if courseware else ""
+
+        return {
+            **super().get_context(request),
+            **get_base_context(request),
+            "courseware_url": courseware_url,
+            "webinar_default_images": WEBINAR_DEFAULT_IMAGES,
+        }
 
 
 class CourseIndexPage(CourseObjectIndexPage):
