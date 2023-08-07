@@ -1,6 +1,38 @@
 Release Notes
 =============
 
+Version 0.125.0
+---------------
+
+- feat: Added webinars detail page (#2690)
+- feat: update catalog ordering (#2694)
+- chore(deps): bump qs from 6.10.1 to 6.11.0 (#2688)
+- chore(deps): bump pygments from 2.11.2 to 2.15.0 (#2691)
+- Force enrollment when deferring enrollment (#2685)
+- chore(deps): bump word-wrap from 1.2.3 to 1.2.4 (#2689)
+- chore(deps): bump django from 3.2.19 to 3.2.20 (#2683)
+- Seed Data updated, data validation added in seed command (#2673)
+- fix: course not found errros on sentry (#2681)
+- refactor: Minor code changes
+- style: linting issues resolved
+- fix: Added new message
+- test: Added new tests and updated existing ones
+- refactor: Added code changes
+- style: unused import removed
+- fix: fixed broken test
+- fix: added tests and fixed broken tests
+- style: liniting
+- fix: Certificate generation via course enrollments
+- Review changes
+- Code refactored
+- :sparkles: Black formatted
+- Tests added for the management command
+- Code refactored, error messages improved
+- Manage program Certificates Command
+- Certificates creation does not halt entire process
+- Bump express from 4.17.1 to 4.17.3
+- Bump ipython from 7.32.0 to 8.10.0
+
 Version 0.124.2 (Released June 22, 2023)
 ---------------
 
