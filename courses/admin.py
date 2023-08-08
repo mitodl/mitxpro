@@ -5,29 +5,27 @@ Admin site bindings for profiles
 from django.contrib import admin
 from django.db import models
 from django.forms import TextInput
-
-from wagtail.contrib.modeladmin.options import (
-    ModelAdmin,
-    modeladmin_register,
-)
+from wagtail.contrib.modeladmin.options import ModelAdmin, modeladmin_register
 from wagtail.contrib.modeladmin.views import DeleteView
 
-from mitxpro.utils import get_field_names
 from mitxpro.admin import AuditableModelAdmin, TimestampedModelAdmin
+from mitxpro.utils import get_field_names
+
 from .models import (
-    Program,
-    ProgramRun,
     Course,
     CourseRun,
-    ProgramEnrollment,
+    CourseRunCertificate,
     CourseRunEnrollment,
-    ProgramEnrollmentAudit,
     CourseRunEnrollmentAudit,
     CourseRunGrade,
     CourseRunGradeAudit,
-    CourseRunCertificate,
     CourseTopic,
+    Partner,
+    Program,
     ProgramCertificate,
+    ProgramEnrollment,
+    ProgramEnrollmentAudit,
+    ProgramRun,
 )
 
 
@@ -377,6 +375,14 @@ class CourseTopicAdmin(ModelAdmin, admin.ModelAdmin):
     delete_view_class = TopicsWagtailDeleteView
 
 
+class PartnerAdmin(admin.ModelAdmin):
+    """Admin for Partner"""
+
+    model = Partner
+    list_display = ["id", "name"]
+    search_fields = ["name"]
+
+
 modeladmin_register(CourseTopicAdmin)
 admin.site.register(Program, ProgramAdmin)
 admin.site.register(ProgramRun, ProgramRunAdmin)
@@ -390,3 +396,4 @@ admin.site.register(CourseRunGrade, CourseRunGradeAdmin)
 admin.site.register(CourseRunGradeAudit, CourseRunGradeAuditAdmin)
 admin.site.register(CourseRunCertificate, CourseRunCertificateAdmin)
 admin.site.register(ProgramCertificate, ProgramCertificateAdmin)
+admin.site.register(Partner, PartnerAdmin)

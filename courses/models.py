@@ -209,6 +209,14 @@ validate_url_path_field = RegexValidator(
 )
 
 
+class Partner(models.Model):
+    """
+    Model for course partner
+    """
+
+    name = models.CharField(max_length=255)
+
+
 class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     """Model for a course program"""
 
@@ -220,6 +228,9 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     live = models.BooleanField(default=False)
     products = GenericRelation(Product, related_query_name="programs")
     is_external = models.BooleanField(default=False)
+    partner = models.ForeignKey(
+        Partner, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     @property
     def page(self):
@@ -406,6 +417,9 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     )
     live = models.BooleanField(default=False)
     is_external = models.BooleanField(default=False)
+    partner = models.ForeignKey(
+        Partner, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     @property
     def page(self):
