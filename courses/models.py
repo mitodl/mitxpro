@@ -906,6 +906,21 @@ class CourseRunGradeAudit(AuditModel):
         return "course_run_grade"
 
 
+def limit_to_certificate_pages():
+    """
+    A callable for the limit_choices_to param in the FKs for certificate pages
+    to limit the choices to certificate pages, rather than every page in the
+    CMS.
+    """
+    from cms.models import CertificatePage
+
+    available_revisions = CertificatePage.objects.filter(live=True).values_list(
+        "id", flat=True
+    )
+
+    return {"page_id__in": available_revisions}
+
+
 class BaseCertificate(models.Model):
     """
     Common properties for certificate models
@@ -938,7 +953,11 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
 
     course_run = models.ForeignKey(CourseRun, null=False, on_delete=models.CASCADE)
     certificate_page_revision = models.ForeignKey(
-        PageRevision, null=True, on_delete=models.CASCADE
+        PageRevision,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        limit_choices_to=limit_to_certificate_pages,
     )
 
     objects = ActiveCertificates()
@@ -991,6 +1010,36 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
                 self.certificate_page_revision = certificate_page.get_latest_revision()
         super().save(*args, **kwargs)
 
+    def clean(self):
+        from cms.models import CertificatePage, CoursePage
+
+        # If user has not selected a revision, Let create the certificate since we have made the revision nullable
+        if not self.certificate_page_revision:
+            return
+
+        certpage = CertificatePage.objects.filter(
+            pk=self.certificate_page_revision.page_id,
+        )
+
+        if not certpage.exists():
+            raise ValidationError(
+                {
+                    "certificate_page_revision": f"The selected page {self.certificate_page_revision.page} is not a certificate page."
+                }
+            )
+
+        certpage = certpage.get()
+
+        if (
+            not isinstance(certpage.parent, CoursePage)
+            or not certpage.parent.course == self.course_run.course
+        ):
+            raise ValidationError(
+                {
+                    "certificate_page_revision": f"The selected certificate page {certpage} is not for this course {self.course_run.course}."
+                }
+            )
+
 
 class ProgramCertificate(TimestampedModel, BaseCertificate):
     """
@@ -999,7 +1048,11 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
 
     program = models.ForeignKey(Program, null=False, on_delete=models.CASCADE)
     certificate_page_revision = models.ForeignKey(
-        PageRevision, null=True, on_delete=models.CASCADE
+        PageRevision,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        limit_choices_to=limit_to_certificate_pages,
     )
 
     objects = ActiveCertificates()
@@ -1046,6 +1099,36 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
         return 'ProgramCertificate for user={user}, program={program} ({uuid})"'.format(
             user=self.user.username, program=self.program.text_id, uuid=self.uuid
         )
+
+    def clean(self):
+        from cms.models import CertificatePage, ProgramPage
+
+        # If user has not selected a revision, Let create the certificate since we have made the revision nullable
+        if not self.certificate_page_revision:
+            return
+
+        certpage = CertificatePage.objects.filter(
+            pk=self.certificate_page_revision.page_id,
+        )
+
+        if not certpage.exists():
+            raise ValidationError(
+                {
+                    "certificate_page_revision": f"The selected page {self.certificate_page_revision.page} is not a certificate page."
+                }
+            )
+
+        certpage = certpage.get()
+
+        if (
+            not isinstance(certpage.parent, ProgramPage)
+            or not certpage.parent.program == self.program
+        ):
+            raise ValidationError(
+                {
+                    "certificate_page_revision": f"The selected certificate page {certpage} is not for this program {self.program}."
+                }
+            )
 
     def save(self, *args, **kwargs):  # pylint: disable=signature-differs
         if not self.certificate_page_revision:

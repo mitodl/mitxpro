@@ -6,6 +6,7 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from cms.factories import (
+    CertificatePageFactory,
     CoursePageFactory,
     ProgramPageFactory,
     FacultyMembersPageFactory,
@@ -22,7 +23,7 @@ from courses.factories import (
     ProgramCertificateFactory,
 )
 from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
-from courses.models import CourseRunEnrollment
+from courses.models import CourseRunEnrollment, limit_to_certificate_pages
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import format_as_iso8601
 from mitxpro.utils import now_in_utc
@@ -356,6 +357,83 @@ def test_course_first_unexpired_run():
         enrollment_end=enr_end_date,
     )
     assert course.first_unexpired_run == first_run
+
+
+def test_certificate_revision_choice_limits():
+    """
+    The limit_choices_to callable should return just certificate page IDs as
+    options. We'll make two - one for a course and one for a program - and they
+    both should show up.
+    """
+    course_page = CoursePageFactory.create(certificate_page=None)
+    course_certificate_page = CertificatePageFactory.create(parent=course_page)
+    program_page = ProgramPageFactory.create(certificate_page=None)
+    program_certificate_page = CertificatePageFactory.create(parent=program_page)
+
+    choices = limit_to_certificate_pages()
+    assert "page_id__in" in choices
+
+    assert course_certificate_page.id in choices["page_id__in"]
+    assert program_certificate_page.id in choices["page_id__in"]
+
+
+def test_certificate_validations():
+    """
+    Test that the certificate models throw a proper error if the selected revision is invalid w.r.t
+    courseware run selection
+    """
+    course_runs = CourseRunFactory.create_batch(2)
+    programs = ProgramFactory.create_batch(2)
+
+    course_runs[0].course.page.certificate_page.save_revision()
+    course_runs[1].course.page.certificate_page.save_revision()
+
+    programs[0].page.certificate_page.save_revision()
+    programs[1].page.certificate_page.save_revision()
+
+    course_certificate = CourseRunCertificateFactory(
+        course_run=course_runs[0],
+        certificate_page_revision=course_runs[
+            1
+        ].course.page.certificate_page.get_latest_revision(),
+    )
+    program_certificate = ProgramCertificateFactory(
+        program=programs[0],
+        certificate_page_revision=programs[
+            1
+        ].page.certificate_page.get_latest_revision(),
+    )
+
+    # When the revision doesn't match the courseware
+    with pytest.raises(
+        ValidationError,
+        match=f"The selected certificate page {course_certificate} is not for this course {course_runs[0].course}.",
+    ):
+        course_certificate.clean()
+
+    with pytest.raises(
+        ValidationError,
+        match=f"The selected certificate page {program_certificate} is not for this program {programs[0]}.",
+    ):
+        program_certificate.clean()
+
+    # When the revision passed is not a certificate page
+    test_page = CoursePageFactory.create()
+    test_page.save_revision()
+
+    course_certificate.certificate_page_revision = test_page.get_latest_revision()
+    with pytest.raises(
+        ValidationError,
+        match=f"The selected page {test_page} is not a certificate page.",
+    ):
+        course_certificate.clean()
+
+    program_certificate.certificate_page_revision = test_page.get_latest_revision()
+    with pytest.raises(
+        ValidationError,
+        match=f"The selected page {test_page} is not a certificate page.",
+    ):
+        program_certificate.clean()
 
 
 def test_course_run_certificate_start_end_dates():
