@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.124.3
+Version 0.124.3 (Released July 17, 2023)
 ---------------
 
 - refactor: Minor code changes
