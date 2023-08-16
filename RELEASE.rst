@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.125.0
+---------------
+
+- feat: Added webinars detail page (#2690)
+- feat: update catalog ordering (#2694)
+- chore(deps): bump qs from 6.10.1 to 6.11.0 (#2688)
+- chore(deps): bump pygments from 2.11.2 to 2.15.0 (#2691)
+- Force enrollment when deferring enrollment (#2685)
+- chore(deps): bump word-wrap from 1.2.3 to 1.2.4 (#2689)
+- chore(deps): bump django from 3.2.19 to 3.2.20 (#2683)
+- Seed Data updated, data validation added in seed command (#2673)
+- fix: course not found errros on sentry (#2681)
+
 Version 0.124.3 (Released July 17, 2023)
 ---------------
 
