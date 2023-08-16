@@ -276,7 +276,7 @@ def test_serialize_course(
             "format": "Online",
             "is_external": is_external,
             "external_marketing_url": external_marketing_url if course_page else None,
-            "partner": None,
+            "partner": partner_name,
         },
     )
 
