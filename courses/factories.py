@@ -16,6 +16,7 @@ from .models import (
     CourseRunEnrollment,
     CourseRunGrade,
     CourseTopic,
+    Partner,
     Program,
     ProgramCertificate,
     ProgramEnrollment,
@@ -33,6 +34,15 @@ class CompanyFactory(DjangoModelFactory):
 
     class Meta:
         model = Company
+
+
+class PartnerFactory(DjangoModelFactory):
+    """Factory for Company"""
+
+    name = factory.Faker("partner")
+
+    class Meta:
+        model = Partner
 
 
 class ProgramFactory(DjangoModelFactory):

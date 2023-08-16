@@ -209,7 +209,7 @@ validate_url_path_field = RegexValidator(
 )
 
 
-class Partner(models.Model):
+class Partner(TimestampedModel):
     """
     Model for course partner
     """

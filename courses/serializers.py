@@ -110,6 +110,7 @@ class CourseSerializer(serializers.ModelSerializer):
     format = serializers.SerializerMethodField()
     video_url = serializers.SerializerMethodField()
     credits = serializers.SerializerMethodField()
+    partner = serializers.SerializerMethodField()
 
     def get_url(self, instance):
         """Get CMS Page URL for the course"""
@@ -187,6 +188,10 @@ class CourseSerializer(serializers.ModelSerializer):
         # configurable.
         return "Online"
 
+    def get_partner(self, instance):
+        """Returns the partner of the course"""
+        return instance.partner.name if instance.partner else None
+
     class Meta:
         model = models.Course
         fields = [
@@ -206,6 +211,7 @@ class CourseSerializer(serializers.ModelSerializer):
             "format",
             "credits",
             "is_external",
+            "partner",
         ]
 
 

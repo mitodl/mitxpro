@@ -379,7 +379,7 @@ class PartnerAdmin(admin.ModelAdmin):
     """Admin for Partner"""
 
     model = Partner
-    list_display = ["id", "name"]
+    list_display = ["id", "name", "created_on", "updated_on"]
     search_fields = ["name"]
 
 
