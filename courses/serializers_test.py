@@ -13,6 +13,7 @@ from cms.factories import FacultyMembersPageFactory
 from courses.factories import (
     CourseFactory,
     CourseRunFactory,
+    PartnerFactory,
     ProgramFactory,
     CourseRunEnrollmentFactory,
     ProgramEnrollmentFactory,
@@ -167,7 +168,7 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize("course_page", [True, False])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url",
+    "duration, time_commitment, video_url, ceus, external_marketing_url, partner_name",
     [
         (
             "2 Months",
@@ -175,8 +176,9 @@ def test_base_course_serializer():
             "http://www.testvideourl.com",
             "2 Test CEUs",
             "http://www.testexternalmarketingurl.com",
+            "Emeritus",
         ),
-        (None, None, None, None, None),
+        (None, None, None, None, None, None),
     ],
 )
 def test_serialize_course(
@@ -190,6 +192,7 @@ def test_serialize_course(
     video_url,
     ceus,
     external_marketing_url,
+    partner_name,
 ):  # pylint: disable=too-many-arguments,too-many-locals
     """Test Course serialization"""
     now = datetime.now(tz=pytz.UTC)
@@ -198,6 +201,10 @@ def test_serialize_course(
     if all_runs:
         mock_context["all_runs"] = True
     user = mock_context["request"].user
+
+    partner = None
+    if partner_name:
+        partner = PartnerFactory(name=partner_name)
 
     # Only create course page if required
     if course_page:
@@ -208,9 +215,12 @@ def test_serialize_course(
             page__video_url=video_url,
             page__certificate_page__CEUs=ceus,
             page__external_marketing_url=external_marketing_url,
+            partner=partner,
         )
     else:
-        course = CourseFactory.create(page=None, is_external=is_external)
+        course = CourseFactory.create(
+            page=None, is_external=is_external, partner=partner
+        )
 
     course_run = CourseRunFactory.create(
         course=course,
@@ -266,6 +276,7 @@ def test_serialize_course(
             "format": "Online",
             "is_external": is_external,
             "external_marketing_url": external_marketing_url if course_page else None,
+            "partner": None,
         },
     )
 
