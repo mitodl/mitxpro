@@ -27,14 +27,17 @@
   <div class="row">
     <div class="col-md-12">
       {% if page.date %}
-      <p>{{ page.formatted_date }} | {{ page.time }}</p>
+        <p>{{ page.formatted_date }} | {{ page.time }}</p>
       {% endif %}
-      {% if page.action_url and page.category|lower != 'upcoming' %}
+      {% if page.action_url and not page.is_upcoming_webinar %}
         <div class="col-md-12 resource-video">
           <iframe src="{{page.action_url}}" width="80%" height="500" frameborder="0" allow="autoplay" scrolling="no" allowfullscreen></iframe>
         </div>
       {% endif %}
-      {% if page.category|lower == 'upcoming' and page.action_url %}
+      <div class="body_text">
+        {{ page.body_text|richtext }}
+      </div>
+      {% if page.is_upcoming_webinar and page.action_url %}
         <a href="{{page.action_url}}" class="read-more">REGISTER</a>
       {% endif %}
       {% if page.course or page.program %}

@@ -167,6 +167,18 @@ def test_on_demand_webinar_fields():
     assert webinar.course == course
 
 
+def test_is_upcoming_webinar():
+    webinar_index = WebinarIndexPageFactory.create()
+    ondemand_webinar = WebinarPageFactory.create(
+        category=ON_DEMAND_WEBINAR, parent=webinar_index
+    )
+    assert not ondemand_webinar.is_upcoming_webinar
+    upcoming_webinar = WebinarPageFactory.create(
+        category=UPCOMING_WEBINAR, parent=webinar_index
+    )
+    assert upcoming_webinar.is_upcoming_webinar
+
+
 def test_course_page_program_page():
     """
     Verify `program_page` property from the course page returns expected value

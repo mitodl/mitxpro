@@ -216,6 +216,9 @@ class WebinarPage(MetadataPageMixin, Page):
     description = models.TextField(
         null=True, blank=True, help_text="Description of the webinar."
     )
+    body_text = RichTextField(
+        null=True, blank=True, help_text="Longer description text of the webinar."
+    )
     action_url = models.URLField(
         help_text="Specify the webinar action-url here (like a link to an external webinar page).",
         null=True,
@@ -244,6 +247,7 @@ class WebinarPage(MetadataPageMixin, Page):
         FieldPanel("date", heading="Start Date"),
         FieldPanel("time"),
         FieldPanel("description"),
+        FieldPanel("body_text"),
         FieldPanel("action_url"),
     ]
 
@@ -278,6 +282,10 @@ class WebinarPage(MetadataPageMixin, Page):
             "courseware_url": courseware_url,
             "webinar_default_images": WEBINAR_DEFAULT_IMAGES,
         }
+
+    @property
+    def is_upcoming_webinar(self):
+        return self.category == UPCOMING_WEBINAR
 
 
 class CourseIndexPage(CourseObjectIndexPage):
