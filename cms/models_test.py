@@ -1,16 +1,22 @@
 """ Tests for cms pages. """
 # pylint: disable=too-many-lines
 import json
-from datetime import datetime, timedelta, date
+from datetime import date, datetime, timedelta
 
 import factory
 import pytest
-from django.urls import resolve
 from django.core.exceptions import ValidationError
 from django.test.client import RequestFactory
+from django.urls import resolve
 from wagtail.core.utils import WAGTAIL_APPEND_SLASH
 
-from cms.constants import UPCOMING_WEBINAR, ON_DEMAND_WEBINAR, WEBINAR_DEFAULT_IMAGES
+from cms.constants import (
+    ON_DEMAND_WEBINAR,
+    ON_DEMAND_WEBINAR_BUTTON_TITLE,
+    UPCOMING_WEBINAR,
+    UPCOMING_WEBINAR_BUTTON_TITLE,
+    WEBINAR_HEADER_BANNER,
+)
 from cms.factories import (
     CertificatePageFactory,
     CoursePageFactory,
@@ -116,7 +122,9 @@ def test_webinar_context(staff_user):
     Verify the context bring passed to the webinar_page.html
     """
     program_page = ProgramPageFactory.create()
-    webinar_page = WebinarPageFactory.create(program=program_page.program)
+    webinar_page = WebinarPageFactory.create(
+        program=program_page.program, category=ON_DEMAND_WEBINAR
+    )
 
     rf = RequestFactory()
     request = rf.get("/")
@@ -128,7 +136,8 @@ def test_webinar_context(staff_user):
         "page": webinar_page,
         "request": request,
         "courseware_url": program_page.get_url(),
-        "webinar_default_images": WEBINAR_DEFAULT_IMAGES,
+        "webinar_default_banner": WEBINAR_HEADER_BANNER,
+        "detail_page_url": webinar_page.get_url(request=request),
     }
 
 
@@ -180,6 +189,21 @@ def test_is_upcoming_webinar():
         category=UPCOMING_WEBINAR, parent=webinar_index
     )
     assert upcoming_webinar.is_upcoming_webinar
+
+
+def test_webinar_detail_page_button_title():
+    """
+    Tests `detail_page_button_title` property from the webinar page.
+    """
+    webinar_index = WebinarIndexPageFactory.create()
+    ondemand_webinar = WebinarPageFactory.create(
+        category=ON_DEMAND_WEBINAR, parent=webinar_index
+    )
+    assert ondemand_webinar.detail_page_button_title == ON_DEMAND_WEBINAR_BUTTON_TITLE
+    upcoming_webinar = WebinarPageFactory.create(
+        category=UPCOMING_WEBINAR, parent=webinar_index
+    )
+    assert upcoming_webinar.detail_page_button_title == UPCOMING_WEBINAR_BUTTON_TITLE
 
 
 def test_course_page_program_page():

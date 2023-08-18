@@ -47,10 +47,13 @@ from cms.constants import (
     CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
     ON_DEMAND_WEBINAR,
+    ON_DEMAND_WEBINAR_BUTTON_TITLE,
     PROGRAM_INDEX_SLUG,
     SIGNATORY_INDEX_SLUG,
     UPCOMING_WEBINAR,
+    UPCOMING_WEBINAR_BUTTON_TITLE,
     WEBINAR_DEFAULT_IMAGES,
+    WEBINAR_HEADER_BANNER,
     WEBINAR_INDEX_SLUG,
 )
 from cms.forms import CertificatePageForm
@@ -156,6 +159,20 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
     parent_page_types = ["HomePage"]
     subpage_types = ["WebinarPage"]
 
+    banner_image = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Banner image for the Webinar list page.",
+    )
+
+    content_panels = [
+        FieldPanel("title"),
+        ImageChooserPanel("banner_image"),
+    ]
+
     def serve(self, request, *args, **kwargs):
         """
         We need to serve the webinars index template for list view.
@@ -171,6 +188,7 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
         )
         webinars_dict = defaultdict(lambda: [])
         for webinar in webinars:
+            webinar.detail_page_url = webinar.detail_page_url(request)
             webinars_dict[webinar.category].append(webinar)
 
         return dict(
@@ -179,6 +197,7 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
             default_image_path=DEFAULT_COURSE_IMG_PATH,
             webinars=dict(webinars_dict),
             webinar_default_images=WEBINAR_DEFAULT_IMAGES,
+            banner_image=self.banner_image,
         )
 
 
@@ -280,12 +299,31 @@ class WebinarPage(MetadataPageMixin, Page):
             **super().get_context(request),
             **get_base_context(request),
             "courseware_url": courseware_url,
-            "webinar_default_images": WEBINAR_DEFAULT_IMAGES,
+            "webinar_default_banner": WEBINAR_HEADER_BANNER,
+            "detail_page_url": self.detail_page_url(request),
         }
 
     @property
     def is_upcoming_webinar(self):
+        """returns a boolean that indicates whether a webinar is upcoming or not"""
         return self.category == UPCOMING_WEBINAR
+
+    def detail_page_url(self, request):
+        """returns the detail page url for the webinar"""
+        return (
+            self.action_url
+            if self.is_upcoming_webinar
+            else self.get_url(request=request)
+        )
+
+    @property
+    def detail_page_button_title(self):
+        """returns the title of the webinar detail page button"""
+        return (
+            UPCOMING_WEBINAR_BUTTON_TITLE
+            if self.is_upcoming_webinar
+            else ON_DEMAND_WEBINAR_BUTTON_TITLE
+        )
 
 
 class CourseIndexPage(CourseObjectIndexPage):

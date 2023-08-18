@@ -16,5 +16,8 @@ WEBINAR_DEFAULT_IMAGES = [
     "images/webinars/webinar-default-004.jpg",
     "images/webinars/webinar-default-005.jpg",
 ]
+WEBINAR_HEADER_BANNER = "images/webinars/webinar-header-banner.jpg"
+UPCOMING_WEBINAR_BUTTON_TITLE = "REGISTER"
+ON_DEMAND_WEBINAR_BUTTON_TITLE = "VIEW RECORDING"
 
 ALL_TAB = "all-tab"
