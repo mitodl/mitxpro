@@ -1019,16 +1019,7 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
 
         certpage = CertificatePage.objects.filter(
             pk=self.certificate_page_revision.page_id,
-        )
-
-        if not certpage.exists():
-            raise ValidationError(
-                {
-                    "certificate_page_revision": f"The selected page {self.certificate_page_revision.page} is not a certificate page."
-                }
-            )
-
-        certpage = certpage.get()
+        ).first()
 
         if (
             not isinstance(certpage.parent, CoursePage)
@@ -1109,16 +1100,7 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
 
         certpage = CertificatePage.objects.filter(
             pk=self.certificate_page_revision.page_id,
-        )
-
-        if not certpage.exists():
-            raise ValidationError(
-                {
-                    "certificate_page_revision": f"The selected page {self.certificate_page_revision.page} is not a certificate page."
-                }
-            )
-
-        certpage = certpage.get()
+        ).first()
 
         if (
             not isinstance(certpage.parent, ProgramPage)

@@ -417,24 +417,6 @@ def test_certificate_validations():
     ):
         program_certificate.clean()
 
-    # When the revision passed is not a certificate page
-    test_page = CoursePageFactory.create()
-    test_page.save_revision()
-
-    course_certificate.certificate_page_revision = test_page.get_latest_revision()
-    with pytest.raises(
-        ValidationError,
-        match=f"The selected page {test_page} is not a certificate page.",
-    ):
-        course_certificate.clean()
-
-    program_certificate.certificate_page_revision = test_page.get_latest_revision()
-    with pytest.raises(
-        ValidationError,
-        match=f"The selected page {test_page} is not a certificate page.",
-    ):
-        program_certificate.clean()
-
 
 def test_course_run_certificate_start_end_dates():
     """
