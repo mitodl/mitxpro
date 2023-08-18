@@ -168,6 +168,9 @@ def test_on_demand_webinar_fields():
 
 
 def test_is_upcoming_webinar():
+    """
+    Tests `is_upcoming_webinar` property from the webinar page.
+    """
     webinar_index = WebinarIndexPageFactory.create()
     ondemand_webinar = WebinarPageFactory.create(
         category=ON_DEMAND_WEBINAR, parent=webinar_index
