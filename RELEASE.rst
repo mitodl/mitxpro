@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.126.0
+---------------
+
+- fix: certificate revision validation in Django Admin Certificate model (#2701)
+- fix: more dates links for external courseware (#2696)
+
 Version 0.125.0 (Released August 16, 2023)
 ---------------
 
