@@ -209,15 +209,27 @@ validate_url_path_field = RegexValidator(
 )
 
 
-class Partner(TimestampedModel):
+class Partner(TimestampedModel, ValidateOnSaveMixin):
     """
     Model for course partner
     """
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.name
+
+    def validate_unique(self, exclude=None):
+        """
+        Validates case insensitive partner name uniqueness.
+        """
+        if (
+            self._state.adding
+            and Partner.objects.filter(name__iexact=self.name).exists()
+        ):
+            raise ValidationError({"name": "A partner with this name already exists."})
+
+        super().validate_unique(exclude=exclude)
 
 
 class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):

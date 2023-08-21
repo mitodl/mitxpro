@@ -375,7 +375,7 @@ class CourseTopicAdmin(ModelAdmin, admin.ModelAdmin):
     delete_view_class = TopicsWagtailDeleteView
 
 
-class PartnerAdmin(admin.ModelAdmin):
+class PartnerAdmin(TimestampedModelAdmin):
     """Admin for Partner"""
 
     model = Partner

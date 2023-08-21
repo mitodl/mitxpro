@@ -189,7 +189,7 @@ class CourseSerializer(serializers.ModelSerializer):
         return "Online"
 
     def get_partner(self, instance):
-        """Returns the partner of the course"""
+        """Returns the partner name of the course"""
         return instance.partner.name if instance.partner else None
 
     class Meta:
