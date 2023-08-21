@@ -190,7 +190,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_partner(self, instance):
         """Returns the partner name of the course"""
-        return instance.partner.name if instance.partner else None
+        return getattr(instance.partner, "name", None)
 
     class Meta:
         model = models.Course
