@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.126.0
+Version 0.126.0 (Released August 23, 2023)
 ---------------
 
 - fix: certificate revision validation in Django Admin Certificate model (#2701)
