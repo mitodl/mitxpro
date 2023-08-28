@@ -11,9 +11,9 @@
 {% block content %}
 
   {% if page.banner_image %}
-    <div class="webinar-resource-banner sub-banner" style="background-image:url('{% image_version_url page.banner_image "fill-1440x200" %}');background-size:cover">
+    <div class="webinar-resource-banner sub-banner" style="background-image:url('{% image_version_url page.banner_image "fill-1440x200" %}');">
   {% else %}
-    <div class="webinar-resource-banner sub-banner">
+    <div class="webinar-resource-banner sub-banner" style="background-image:url('{% static default_banner_image %}');">
   {% endif %}
     <div class="container">
       <h1 class="text-uppercase">{{ page.title }}</h1>

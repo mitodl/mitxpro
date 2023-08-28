@@ -136,7 +136,7 @@ def test_webinar_context(staff_user):
         "page": webinar_page,
         "request": request,
         "courseware_url": program_page.get_url(),
-        "webinar_default_banner": WEBINAR_HEADER_BANNER,
+        "default_banner_image": WEBINAR_HEADER_BANNER,
         "detail_page_url": webinar_page.get_url(request=request),
     }
 

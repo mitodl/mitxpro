@@ -183,7 +183,10 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
         """Populate the context with a dict of categories and live webinars"""
         webinars = (
             WebinarPage.objects.live()
-            .filter(Q(date__isnull=True) | Q(date__gte=now_in_utc().date()))
+            .exclude(
+                Q(category=UPCOMING_WEBINAR)
+                & Q(Q(date__isnull=True) | Q(date__gte=now_in_utc().date()))
+            )
             .order_by("-category", "date")
         )
         webinars_dict = defaultdict(lambda: [])
@@ -192,12 +195,12 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
             webinars_dict[webinar.category].append(webinar)
 
         return dict(
-            **super().get_context(request),
+            **super().get_context(request, *args, **kwargs),
             **get_base_context(request),
             default_image_path=DEFAULT_COURSE_IMG_PATH,
             webinars=dict(webinars_dict),
             webinar_default_images=WEBINAR_DEFAULT_IMAGES,
-            banner_image=self.banner_image,
+            default_banner_image=WEBINAR_HEADER_BANNER,
         )
 
 
@@ -299,7 +302,7 @@ class WebinarPage(MetadataPageMixin, Page):
             **super().get_context(request),
             **get_base_context(request),
             "courseware_url": courseware_url,
-            "webinar_default_banner": WEBINAR_HEADER_BANNER,
+            "default_banner_image": WEBINAR_HEADER_BANNER,
             "detail_page_url": self.detail_page_url(request),
         }
 
@@ -310,11 +313,10 @@ class WebinarPage(MetadataPageMixin, Page):
 
     def detail_page_url(self, request):
         """returns the detail page url for the webinar"""
-        return (
-            self.action_url
-            if self.is_upcoming_webinar
-            else self.get_url(request=request)
-        )
+        if self.is_upcoming_webinar:
+            return self.action_url if self.action_url else ""
+
+        return self.get_url(request=request)
 
     @property
     def detail_page_button_title(self):

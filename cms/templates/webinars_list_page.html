@@ -12,10 +12,10 @@
 {% block content %}
   <div class="webinars">
     {% block banner %}
-      {% if banner_image %}
-        <div class="sub-banner webinar-sub-banner" style="background-image:url('{% image_version_url banner_image "fill-1440x200" %}')">
+      {% if page.banner_image %}
+        <div class="sub-banner webinar-sub-banner" style="background-image:url('{% image_version_url page.banner_image "fill-1440x200" %}')">
       {% else %}
-        <div class="sub-banner webinar-sub-banner">
+        <div class="sub-banner webinar-sub-banner" style="background-image:url('{% static default_banner_image %}')">
       {% endif %}
         <h1>Webinars</h1>
       </div>
