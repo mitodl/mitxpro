@@ -12,7 +12,11 @@
 {% block content %}
   <div class="webinars">
     {% block banner %}
-      <div class="sub-banner webinar-sub-banner">
+      {% if page.banner_image %}
+        <div class="sub-banner webinar-sub-banner" style="background-image:url('{% image_version_url page.banner_image "fill-1440x200" %}')">
+      {% else %}
+        <div class="sub-banner webinar-sub-banner" style="background-image:url('{% static default_banner_image %}')">
+      {% endif %}
         <h1>Webinars</h1>
       </div>
       {% if not webinars %}
@@ -34,20 +38,14 @@
                 {% else %}
                   <img src="{% static webinar_default_images|random %}" alt="Preview image" />
                 {% endif %}
-                <a href="{% pageurl webinar %}" class="title">{{ webinar.title }}</a>
+                <a href="{{ webinar.detail_page_url }}" class="title">{{ webinar.title }}</a>
                 {% if webinar.description %}
                   <p class="description">{{ webinar.description }}</p>
                 {% endif %}
                 {% if webinar.date and webinar.time %}
                   <p class="time">{{ webinar.formatted_date }} | {{ webinar.time }}</p>
                 {% endif %}
-                <a href="{{ webinar.action_url }}" class="read-more">
-                  {% if webinar.category|lower == "upcoming" %}
-                    REGISTER
-                  {% else %}
-                    VIEW RECORDING
-                  {% endif %}
-                </a>
+                  <a href="{{ webinar.detail_page_url }}" class="read-more">{{ webinar.detail_page_button_title }}</a>
               </div>
             </div>
           {% endfor %}

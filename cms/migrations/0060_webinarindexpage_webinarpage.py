@@ -183,5 +183,7 @@ class Migration(migrations.Migration):
                 models.Model,
             ),
         ),
-        migrations.RunPython(create_webinar_index_page, delete_webinar_index_page),
+        # This is not required moving forward as seed data creates the webinar index page.
+        # This causes migration errors when we change the webinar index page.
+        # migrations.RunPython(create_webinar_index_page, delete_webinar_index_page),
     ]

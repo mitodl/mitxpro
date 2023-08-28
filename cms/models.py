@@ -47,10 +47,13 @@ from cms.constants import (
     CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
     ON_DEMAND_WEBINAR,
+    ON_DEMAND_WEBINAR_BUTTON_TITLE,
     PROGRAM_INDEX_SLUG,
     SIGNATORY_INDEX_SLUG,
     UPCOMING_WEBINAR,
+    UPCOMING_WEBINAR_BUTTON_TITLE,
     WEBINAR_DEFAULT_IMAGES,
+    WEBINAR_HEADER_BANNER,
     WEBINAR_INDEX_SLUG,
 )
 from cms.forms import CertificatePageForm
@@ -156,6 +159,20 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
     parent_page_types = ["HomePage"]
     subpage_types = ["WebinarPage"]
 
+    banner_image = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Banner image for the Webinar list page.",
+    )
+
+    content_panels = [
+        FieldPanel("title"),
+        ImageChooserPanel("banner_image"),
+    ]
+
     def serve(self, request, *args, **kwargs):
         """
         We need to serve the webinars index template for list view.
@@ -166,19 +183,21 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
         """Populate the context with a dict of categories and live webinars"""
         webinars = (
             WebinarPage.objects.live()
-            .filter(Q(date__isnull=True) | Q(date__gte=now_in_utc().date()))
+            .exclude(Q(category=UPCOMING_WEBINAR) & Q(date__lte=now_in_utc().date()))
             .order_by("-category", "date")
         )
         webinars_dict = defaultdict(lambda: [])
         for webinar in webinars:
+            webinar.detail_page_url = webinar.detail_page_url(request)
             webinars_dict[webinar.category].append(webinar)
 
         return dict(
-            **super().get_context(request),
+            **super().get_context(request, *args, **kwargs),
             **get_base_context(request),
             default_image_path=DEFAULT_COURSE_IMG_PATH,
             webinars=dict(webinars_dict),
             webinar_default_images=WEBINAR_DEFAULT_IMAGES,
+            default_banner_image=WEBINAR_HEADER_BANNER,
         )
 
 
@@ -216,6 +235,9 @@ class WebinarPage(MetadataPageMixin, Page):
     description = models.TextField(
         null=True, blank=True, help_text="Description of the webinar."
     )
+    body_text = RichTextField(
+        null=True, blank=True, help_text="Longer description text of the webinar."
+    )
     action_url = models.URLField(
         help_text="Specify the webinar action-url here (like a link to an external webinar page).",
         null=True,
@@ -244,6 +266,7 @@ class WebinarPage(MetadataPageMixin, Page):
         FieldPanel("date", heading="Start Date"),
         FieldPanel("time"),
         FieldPanel("description"),
+        FieldPanel("body_text"),
         FieldPanel("action_url"),
     ]
 
@@ -276,8 +299,30 @@ class WebinarPage(MetadataPageMixin, Page):
             **super().get_context(request),
             **get_base_context(request),
             "courseware_url": courseware_url,
-            "webinar_default_images": WEBINAR_DEFAULT_IMAGES,
+            "default_banner_image": WEBINAR_HEADER_BANNER,
+            "detail_page_url": self.detail_page_url(request),
         }
+
+    @property
+    def is_upcoming_webinar(self):
+        """returns a boolean that indicates whether a webinar is upcoming or not"""
+        return self.category == UPCOMING_WEBINAR
+
+    def detail_page_url(self, request):
+        """returns the detail page url for the webinar"""
+        if self.is_upcoming_webinar:
+            return self.action_url if self.action_url else ""
+
+        return self.get_url(request=request)
+
+    @property
+    def detail_page_button_title(self):
+        """returns the title of the webinar detail page button"""
+        return (
+            UPCOMING_WEBINAR_BUTTON_TITLE
+            if self.is_upcoming_webinar
+            else ON_DEMAND_WEBINAR_BUTTON_TITLE
+        )
 
 
 class CourseIndexPage(CourseObjectIndexPage):
