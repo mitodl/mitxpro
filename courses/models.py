@@ -233,7 +233,7 @@ class Partner(TimestampedModel, ValidateOnSaveMixin):
         partners = Partner.objects.filter(name__iexact=self.name)
         if self._state.adding and partners:
             raise ValidationError({"name": "A partner with this name already exists."})
-        elif len(partners) == 1 and partners[0].id != self.id:
+        if len(partners) == 1 and partners[0].id != self.id:
             raise ValidationError({"name": "A partner with this name already exists."})
 
         super().validate_unique(exclude=exclude)
