@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.127.0
+---------------
+
+- feat: add ondemand webinar body text field (#2704)
+- Add renovate.json (#2680)
+
 Version 0.126.0 (Released August 23, 2023)
 ---------------
 
