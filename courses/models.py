@@ -219,14 +219,21 @@ class Partner(TimestampedModel, ValidateOnSaveMixin):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        """
+        Call full_clean to validate the case-insensitive partner name.
+        """
+        self.full_clean()
+        super().save(*args, **kwargs)
+
     def validate_unique(self, exclude=None):
         """
         Validates case insensitive partner name uniqueness.
         """
-        if (
-            self._state.adding
-            and Partner.objects.filter(name__iexact=self.name).exists()
-        ):
+        partners = Partner.objects.filter(name__iexact=self.name)
+        if self._state.adding and partners:
+            raise ValidationError({"name": "A partner with this name already exists."})
+        elif len(partners) == 1 and partners[0].id != self.id:
             raise ValidationError({"name": "A partner with this name already exists."})
 
         super().validate_unique(exclude=exclude)
