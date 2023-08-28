@@ -183,7 +183,7 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
         """Populate the context with a dict of categories and live webinars"""
         webinars = (
             WebinarPage.objects.live()
-            .exclude(Q(category=UPCOMING_WEBINAR) & Q(date__lte=now_in_utc().date()))
+            .exclude(Q(category=UPCOMING_WEBINAR) & Q(date__lt=now_in_utc().date()))
             .order_by("-category", "date")
         )
         webinars_dict = defaultdict(lambda: [])
