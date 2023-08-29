@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.127.0
+Version 0.127.0 (Released August 29, 2023)
 ---------------
 
 - fix: include todays webinars in upcoming webinars list (#2713)
