@@ -64,6 +64,7 @@ from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import dict_without_keys, now_in_utc
 from users.factories import UserFactory
 
+
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_ACCESS_KEY = "access"
 CYBERSOURCE_PROFILE_ID = "profile"
@@ -1450,14 +1451,12 @@ def test_products_viewset_external_courses(user_drf_client):
     assert set(generated_product_ids) == set(response_product_ids)
 
 
-def test_products_viewset_list_missing_unchecked_bulk_visibility(user_drf_client):
-    """Test that the ProductViewSet returns all products
-    which are visible_in_bulk_form
-    """
+def test_products_api_returns_public_products(user_drf_client):
+    """Test that the ProductViewSet returns all public products"""
     response = user_drf_client.get(reverse("products_api-list"))
     assert response.status_code == status.HTTP_200_OK
     products = response.json()
-    assert len(products) == Product.objects.filter(visible_in_bulk_form=True).count()
+    assert len(products) == Product.objects.filter(is_private=False).count()
 
 
 def test_products_viewset_list_missing_versions(user_drf_client):

@@ -13,21 +13,22 @@ from django.utils.functional import cached_property
 
 from courses.constants import DEFAULT_COURSE_IMG_PATH
 from ecommerce.constants import (
-    REFERENCE_NUMBER_PREFIX,
-    ORDERED_VERSIONS_QSET_ATTR,
-    DISCOUNT_TYPES,
-    DISCOUNT_TYPE_PERCENT_OFF,
     DISCOUNT_TYPE_DOLLARS_OFF,
+    DISCOUNT_TYPE_PERCENT_OFF,
+    DISCOUNT_TYPES,
+    ORDERED_VERSIONS_QSET_ATTR,
+    REFERENCE_NUMBER_PREFIX,
 )
 from ecommerce.utils import get_order_id_by_reference_number, validate_amount
+from mail.constants import MAILGUN_EVENT_CHOICES
 from mitxpro.models import (
     AuditableModel,
     AuditModel,
-    TimestampedModel,
     PrefetchGenericQuerySet,
+    TimestampedModel,
 )
-from mitxpro.utils import serialize_model_object, first_or_none
-from mail.constants import MAILGUN_EVENT_CHOICES
+from mitxpro.utils import first_or_none, serialize_model_object
+
 
 log = logging.getLogger()
 
@@ -88,10 +89,10 @@ class Product(TimestampedModel):
         help_text="If it is unchecked then users will not be "
         "able to load the product on the checkout page.",
     )
-    visible_in_bulk_form = models.BooleanField(
-        default=True,
+    is_private = models.BooleanField(
+        default=False,
         null=False,
-        help_text="If it is unchecked then this product will not be listed in the "
+        help_text="Products can be Private or Public. Public products are listed in the "
         "product drop-down on the bulk purchase form at /ecommerce/bulk.",
     )
     content_object = GenericForeignKey("content_type", "object_id")
