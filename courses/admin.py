@@ -312,7 +312,7 @@ class CourseRunCertificateAdmin(TimestampedModelAdmin):
     raw_id_fields = ("user",)
 
     def get_revoked_state(self, obj):
-        """ return the revoked state"""
+        """return the revoked state"""
         return obj.is_revoked is not True
 
     get_revoked_state.short_description = "Active"
@@ -345,7 +345,7 @@ class ProgramCertificateAdmin(TimestampedModelAdmin):
     raw_id_fields = ("user",)
 
     def get_revoked_state(self, obj):
-        """ return the revoked state"""
+        """return the revoked state"""
         return obj.is_revoked is not True
 
     get_revoked_state.short_description = "Active"

@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     dependencies = [("users", "0004_user_legaladdress")]
 
     def add_profiles(apps, schema_editor):
-        """ Create profiles for all existing test users, with some defaults for required fields"""
+        """Create profiles for all existing test users, with some defaults for required fields"""
         User = apps.get_model("users", "User")
         Profile = apps.get_model("users", "Profile")
 

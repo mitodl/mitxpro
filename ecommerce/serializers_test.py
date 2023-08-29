@@ -237,7 +237,7 @@ def test_serialize_basket(basket_and_agreement, mock_context, is_live):
 def test_serialize_coupon_single_use(
     has_payment_transaction, has_products, coupon_product_ids
 ):
-    """ Test the SingleUseCouponSerializer """
+    """Test the SingleUseCouponSerializer"""
     data = {
         "name": "FAKETAG",
         "tag": None,
@@ -303,7 +303,7 @@ def test_serialize_coupon_invalid_amount(
 def test_serialize_coupon_promo(
     coupon_product_ids, has_payment_transaction, has_coupon_code, has_products
 ):
-    """ Test the PromoCouponSerializer """
+    """Test the PromoCouponSerializer"""
     data = {
         "name": "FAKETAG",
         "tag": None,
@@ -340,7 +340,7 @@ def test_serialize_coupon_promo(
 def test_serialize_coupon_promo_invalid_amount(
     coupon_product_ids, too_high, expected_message
 ):
-    """ Test the PromoCouponSerializer """
+    """Test the PromoCouponSerializer"""
     data = {
         "name": "FAKETAG",
         "tag": None,
@@ -364,7 +364,7 @@ def test_serialize_coupon_promo_invalid_amount(
 
 
 def test_serialize_coupon_payment_version_serializer(basket_and_coupons):
-    """ Test that the CouponPaymentVersionDetailSerializer has correct data """
+    """Test that the CouponPaymentVersionDetailSerializer has correct data"""
     serializer = CouponPaymentVersionDetailSerializer(
         instance=basket_and_coupons.coupongroup_best.payment_version
     )
@@ -383,7 +383,7 @@ def test_serialize_coupon_payment_version_serializer(basket_and_coupons):
 
 
 def test_coupon_payment_serializer():
-    """ Test that the CouponPaymentSerializer has correct data """
+    """Test that the CouponPaymentSerializer has correct data"""
     payment = CouponPaymentFactory.build()
     assert str(payment) == "CouponPayment {}".format(payment.name)
     serialized = CouponPaymentSerializer(payment).data
@@ -396,7 +396,7 @@ def test_coupon_payment_serializer():
 
 
 def test_coupon_payment_version_serializer():
-    """ Test that the CouponPaymentVersionSerializer has correct data """
+    """Test that the CouponPaymentVersionSerializer has correct data"""
     payment_version = CouponPaymentVersionFactory.create()
     serialized = CouponPaymentVersionSerializer(payment_version).data
     assert serialized == {
@@ -436,7 +436,7 @@ def test_coupon_payment_version_serializer():
     ],
 )
 def test_serialize_order_receipt(receipt_data):
-    """ Test that the OrderReceiptSerializer has correct data """
+    """Test that the OrderReceiptSerializer has correct data"""
     line = LineFactory.create(order__status=Order.FULFILLED)
     product_version = line.product_version
     order = line.order
@@ -510,14 +510,14 @@ def test_serialize_order_receipt(receipt_data):
 
 
 def test_serialize_company():
-    """ Test that CompanySerializer has correct data """
+    """Test that CompanySerializer has correct data"""
     company = CompanyFactory.create()
     serialized_data = CompanySerializer(instance=company).data
     assert serialized_data == {"id": company.id, "name": company.name}
 
 
 def test_serialize_data_consent_user():
-    """ Test that DataConsentUserSerializer has correct data """
+    """Test that DataConsentUserSerializer has correct data"""
     consent_user = DataConsentUserFactory.create()
     serialized_data = DataConsentUserSerializer(instance=consent_user).data
     assert serialized_data == {

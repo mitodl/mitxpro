@@ -521,32 +521,26 @@ def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):
 
 def test_get_valid_coupon_versions_full_discount(basket_and_coupons):
     """Verify that only 100% coupons are returned if full_discount kwarg is True"""
-    assert (
-        list(
-            get_valid_coupon_versions(
-                basket_and_coupons.basket_item.product,
-                basket_and_coupons.basket_item.basket.user,
-                full_discount=True,
-            )
+    assert list(
+        get_valid_coupon_versions(
+            basket_and_coupons.basket_item.product,
+            basket_and_coupons.basket_item.basket.user,
+            full_discount=True,
         )
-        == [basket_and_coupons.coupongroup_best.coupon_version]
-    )
+    ) == [basket_and_coupons.coupongroup_best.coupon_version]
     assert basket_and_coupons.coupongroup_best.payment_version.amount == Decimal(1.0)
 
 
 def test_get_valid_coupon_versions_by_company(basket_and_coupons):
     """Verify that valid coupons are filtered by company"""
     company = basket_and_coupons.coupongroup_worst.payment_version.company
-    assert (
-        list(
-            get_valid_coupon_versions(
-                basket_and_coupons.basket_item.product,
-                basket_and_coupons.basket_item.basket.user,
-                company=company,
-            )
+    assert list(
+        get_valid_coupon_versions(
+            basket_and_coupons.basket_item.product,
+            basket_and_coupons.basket_item.basket.user,
+            company=company,
         )
-        == [basket_and_coupons.coupongroup_worst.coupon_version]
-    )
+    ) == [basket_and_coupons.coupongroup_worst.coupon_version]
 
 
 @pytest.mark.parametrize(
@@ -876,7 +870,7 @@ def test_validate_basket_no_item(basket_and_coupons):
 
 
 def test_validate_basket_two_items(basket_and_coupons):
-    """A basket with multiple items should be rejected """
+    """A basket with multiple items should be rejected"""
     BasketItem.objects.create(
         product=Product.objects.first(), quantity=1, basket=basket_and_coupons.basket
     )

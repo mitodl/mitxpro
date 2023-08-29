@@ -168,3 +168,14 @@ To automatically install precommit hooks when cloning a repo, you can run this:
 git config --global init.templateDir ~/.git-template
 pre-commit init-templatedir ~/.git-template
 ```    
+
+
+# Updating python dependencies
+
+Python dependencies are managed with poetry.  If you need to add a new dependency, run this command:
+
+```
+docker compose run --rm web poetry add <dependency>
+```
+This will update the `pyproject.toml` and `poetry.lock` files.  Then run `docker-compose build web celery` to make the change permanent in your docker images.
+Refer to the [poetry documentation](https://python-poetry.org/docs/cli/) for particulars about specifying versions, removing dependencies, etc.

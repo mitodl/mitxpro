@@ -12,3 +12,102 @@ exclude = '''
   | node_modules
 )/
 '''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.poetry]
+name = "MITx Pro"
+version = "0.1.0"
+description = "MITx Pro"
+authors = ["MIT ODL"]
+license = "BSD-3"
+readme = "README.md"
+packages = []
+
+[tool.poetry.dependencies]
+python = "3.9.14"
+
+beautifulsoup4 = "4.8.2"
+boto3 = "1.26.18"
+celery = "5.2.2"
+celery-redbeat = "2.0.0"
+dj-database-url = "0.5.0"
+django = "3.2.21"
+django-anymail = { version = "8.4", extras = ["mailgun"] }
+django-filter = "2.4.0"
+django-hijack = "2.1.10"
+django-hijack-admin = "2.1.10"
+django-ipware = "3.0.7"
+django-redis = "5.0.0"
+django-robots = "4.0.0"
+django-silk = "^5.0.3"
+django-webpack-loader = "0.7.0"
+django-oauth-toolkit = "1.4.0"
+django-user-agents = "0.4.0"
+djangorestframework = "3.12.4"
+djoser = "2.1.0"
+edx-api-client = "1.7.0"
+django-storages = "1.13.1"
+drf-flex-fields = "0.8.5"
+google-api-python-client = "1.7.11"
+google-auth = "1.6.3"
+hubspot-api-client = "^6.1.0"
+ipython = "^8.10.0"
+mitol-django-common = "2.7.0"
+mitol-django-digital-credentials = "3.3.0"
+mitol-django-hubspot-api = { version = "2023.5.22", extras = [] }
+mitol-django-mail = "3.3.0"
+mitol-django-oauth-toolkit-extensions = "1.3.0"
+mitol-django-authentication = "1.6.0"
+newrelic = "^8.4.0"
+pdftotext = "2.1.1"
+Pillow = "8.3.2"
+psycopg2 = "2.8.3"
+pycountry = "19.7.15"
+pygsheets = "2.0.2"
+PyNaCl = "1.3.0"
+redis = "4.4.4"
+requests = "^2.31.0"
+sentry-sdk = "^1.22.0"
+social-auth-app-django = "4.0.0"
+ulid-py = "^1.1.0"
+ua-parser = "0.8.0"
+user-agents = "2.0"
+user-util = "0.1.5"
+uwsgi = "2.0.22"
+wagtail = "2.13.4"
+wagtail-metadata = "3.3.0"
+zeep = "3.4.0"
+flaky = "3.7.0"
+
+[tool.poetry.group.dev.dependencies]
+astroid = "2.6.6"
+black = "22.10.0"
+bpython = "*"
+django-debug-toolbar = "*"
+factory-boy = "3.2.1"
+faker = "13.2.0"
+freezegun = "0.3.12"
+ipdb = "*"
+isort = "4.3.21"
+nplusone = ">=0.8.1"
+pdbpp = "*"
+hypothesis = "4.23.4"
+pylint = "2.7.4"
+pylint-django = "2.1.0"
+pytest = "6.1.2"
+pytest-cov = ">=2.6.1"
+pytest-django = "*"
+pytest-env = "*"
+pytest-mock = "*"
+pytest-lazy-fixture = "0.6.3"
+responses = "*"
+safety = "*"
+semantic-version = "*"
+wagtail-factories = "*"
+
+[build-system]
+requires = ["poetry-core^1.0.0"]
+build-backend = "poetry.core.masonry.api"

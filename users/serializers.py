@@ -177,7 +177,7 @@ class ExtendedLegalAddressSerializer(LegalAddressSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    """Serializer for Profile """
+    """Serializer for Profile"""
 
     class Meta:
         model = Profile
@@ -444,31 +444,31 @@ class ChangeEmailRequestUpdateSerializer(serializers.ModelSerializer):
 
 
 class StateProvinceSerializer(serializers.Serializer):
-    """ Serializer for pycountry states/provinces"""
+    """Serializer for pycountry states/provinces"""
 
     code = serializers.CharField()
     name = serializers.CharField()
 
 
 class CountrySerializer(serializers.Serializer):
-    """ Serializer for pycountry countries, with states for US/CA"""
+    """Serializer for pycountry countries, with states for US/CA"""
 
     code = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     states = serializers.SerializerMethodField()
 
     def get_code(self, instance):
-        """ Get the country alpha_2 code """
+        """Get the country alpha_2 code"""
         return instance.alpha_2
 
     def get_name(self, instance):
-        """ Get the country name (common name preferred if available)"""
+        """Get the country name (common name preferred if available)"""
         if hasattr(instance, "common_name"):
             return instance.common_name
         return instance.name
 
     def get_states(self, instance):
-        """ Get a list of states/provinces if USA or Canada """
+        """Get a list of states/provinces if USA or Canada"""
         if instance.alpha_2 in ("US", "CA"):
             return StateProvinceSerializer(
                 instance=sorted(

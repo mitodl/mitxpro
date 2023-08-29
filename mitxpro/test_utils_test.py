@@ -64,7 +64,7 @@ def test_assert_drf_json_equall():
     ],
 )
 def test_mock_response(content, expected_content, expected_json):
-    """ assert MockResponse returns correct values """
+    """assert MockResponse returns correct values"""
     response = MockResponse(content, 404)
     assert response.status_code == 404
     assert response.content == expected_content
