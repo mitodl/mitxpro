@@ -211,7 +211,7 @@ validate_url_path_field = RegexValidator(
 
 class Platform(TimestampedModel, ValidateOnSaveMixin):
     """
-    Model for course platform
+    Model for courseware platform
     """
 
     name = models.CharField(max_length=255, unique=True)

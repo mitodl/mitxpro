@@ -273,6 +273,7 @@ class ProgramSerializer(serializers.ModelSerializer):
     format = serializers.SerializerMethodField()
     video_url = serializers.SerializerMethodField()
     credits = serializers.SerializerMethodField()
+    platform = serializers.SerializerMethodField()
 
     def get_courses(self, instance):
         """Serializer for courses"""
@@ -378,6 +379,10 @@ class ProgramSerializer(serializers.ModelSerializer):
         # configurable.
         return "Online"
 
+    def get_platform(self, instance):
+        """Returns the platform name of the program"""
+        return getattr(instance.platform, "name", None)
+
     class Meta:
         model = models.Program
         fields = [
@@ -401,6 +406,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             "format",
             "credits",
             "is_external",
+            "platform",
         ]
 
 
