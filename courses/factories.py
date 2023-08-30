@@ -17,7 +17,7 @@ from .models import (
     CourseRunEnrollment,
     CourseRunGrade,
     CourseTopic,
-    Partner,
+    Platform,
     Program,
     ProgramCertificate,
     ProgramEnrollment,
@@ -37,13 +37,13 @@ class CompanyFactory(DjangoModelFactory):
         model = Company
 
 
-class PartnerFactory(DjangoModelFactory):
-    """Factory for Company"""
+class PlatformFactory(DjangoModelFactory):
+    """Factory for Platform"""
 
-    name = FuzzyText(prefix="Partner-", length=100)
+    name = FuzzyText(prefix="Platform-", length=100)
 
     class Meta:
-        model = Partner
+        model = Platform
 
 
 class ProgramFactory(DjangoModelFactory):

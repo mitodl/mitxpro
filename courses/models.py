@@ -209,9 +209,9 @@ validate_url_path_field = RegexValidator(
 )
 
 
-class Partner(TimestampedModel, ValidateOnSaveMixin):
+class Platform(TimestampedModel, ValidateOnSaveMixin):
     """
-    Model for course partner
+    Model for course platform
     """
 
     name = models.CharField(max_length=255, unique=True)
@@ -221,20 +221,20 @@ class Partner(TimestampedModel, ValidateOnSaveMixin):
 
     def save(self, *args, **kwargs):
         """
-        Call full_clean to validate the case-insensitive partner name.
+        Call full_clean to validate the case-insensitive platform name.
         """
         self.full_clean()
         super().save(*args, **kwargs)
 
     def validate_unique(self, exclude=None):
         """
-        Validates case insensitive partner name uniqueness.
+        Validates case insensitive platform name uniqueness.
         """
-        partners = Partner.objects.filter(name__iexact=self.name)
-        if self._state.adding and partners:
-            raise ValidationError({"name": "A partner with this name already exists."})
-        if len(partners) == 1 and partners[0].id != self.id:
-            raise ValidationError({"name": "A partner with this name already exists."})
+        platforms = Platform.objects.filter(name__iexact=self.name)
+        if self._state.adding and platforms:
+            raise ValidationError({"name": "A platform with this name already exists."})
+        if len(platforms) == 1 and platforms[0].id != self.id:
+            raise ValidationError({"name": "A platform with this name already exists."})
 
         super().validate_unique(exclude=exclude)
 
@@ -250,8 +250,8 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     live = models.BooleanField(default=False)
     products = GenericRelation(Product, related_query_name="programs")
     is_external = models.BooleanField(default=False)
-    partner = models.ForeignKey(
-        Partner, on_delete=models.SET_NULL, null=True, blank=True
+    platform = models.ForeignKey(
+        Platform, on_delete=models.SET_NULL, null=True, blank=True
     )
 
     @property
@@ -439,8 +439,8 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     )
     live = models.BooleanField(default=False)
     is_external = models.BooleanField(default=False)
-    partner = models.ForeignKey(
-        Partner, on_delete=models.SET_NULL, null=True, blank=True
+    platform = models.ForeignKey(
+        Platform, on_delete=models.SET_NULL, null=True, blank=True
     )
 
     @property

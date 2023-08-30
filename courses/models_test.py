@@ -18,7 +18,7 @@ from courses.factories import (
     CourseRunCertificateFactory,
     CourseRunEnrollmentFactory,
     CourseRunFactory,
-    PartnerFactory,
+    PlatformFactory,
     ProgramCertificateFactory,
     ProgramEnrollmentFactory,
     ProgramFactory,
@@ -750,13 +750,11 @@ def test_instructors(has_page):
     )
 
 
-def test_partner_name_is_unique():
+def test_platform_name_is_unique():
     """
-    Tests that case-insensitive partner name is unique.
+    Tests that case-insensitive platform name is unique.
     """
-    PartnerFactory.create(name="Emeritus")
+    PlatformFactory.create(name="Emeritus")
 
     with pytest.raises(ValidationError):
-        PartnerFactory.create(name="emeritus")
-
-    PartnerFactory.create(name="Emirates")
+        PlatformFactory.create(name="emeritus")

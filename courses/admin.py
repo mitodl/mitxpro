@@ -20,7 +20,7 @@ from .models import (
     CourseRunGrade,
     CourseRunGradeAudit,
     CourseTopic,
-    Partner,
+    Platform,
     Program,
     ProgramCertificate,
     ProgramEnrollment,
@@ -375,10 +375,10 @@ class CourseTopicAdmin(ModelAdmin, admin.ModelAdmin):
     delete_view_class = TopicsWagtailDeleteView
 
 
-class PartnerAdmin(TimestampedModelAdmin):
-    """Admin for Partner"""
+class PlatformAdmin(TimestampedModelAdmin):
+    """Admin for Platform"""
 
-    model = Partner
+    model = Platform
     list_display = ["id", "name", "created_on", "updated_on"]
     search_fields = ["name"]
 
@@ -396,4 +396,4 @@ admin.site.register(CourseRunGrade, CourseRunGradeAdmin)
 admin.site.register(CourseRunGradeAudit, CourseRunGradeAuditAdmin)
 admin.site.register(CourseRunCertificate, CourseRunCertificateAdmin)
 admin.site.register(ProgramCertificate, ProgramCertificateAdmin)
-admin.site.register(Partner, PartnerAdmin)
+admin.site.register(Platform, PlatformAdmin)
