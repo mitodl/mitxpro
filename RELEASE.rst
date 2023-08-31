@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.127.1
+---------------
+
+- feat: Add platform model and associated fields in Course and Program models (#2699)
+- chore(deps): bump cryptography from 40.0.2 to 41.0.3 (#2693)
+- chore(deps): bump certifi from 2022.12.7 to 2023.7.22 (#2692)
+- chore(deps): bump tough-cookie from 4.0.0 to 4.1.3 (#2684)
+
 Version 0.127.0 (Released August 29, 2023)
 ---------------
 
