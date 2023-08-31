@@ -8,26 +8,28 @@ from django.core.exceptions import ValidationError
 from cms.factories import (
     CertificatePageFactory,
     CoursePageFactory,
-    ProgramPageFactory,
     FacultyMembersPageFactory,
+    ProgramPageFactory,
 )
+from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from courses.factories import (
     CompanyFactory,
     CourseFactory,
+    CourseRunCertificateFactory,
+    CourseRunEnrollmentFactory,
     CourseRunFactory,
+    PlatformFactory,
+    ProgramCertificateFactory,
+    ProgramEnrollmentFactory,
     ProgramFactory,
     ProgramRunFactory,
-    CourseRunEnrollmentFactory,
-    ProgramEnrollmentFactory,
-    CourseRunCertificateFactory,
-    ProgramCertificateFactory,
 )
-from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from courses.models import CourseRunEnrollment, limit_to_certificate_pages
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import format_as_iso8601
 from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
+
 
 pytestmark = [pytest.mark.django_db]
 
@@ -746,3 +748,13 @@ def test_instructors(has_page):
     assert course_run.instructors == (
         [{"name": name} for name in faculty_names] if has_page else []
     )
+
+
+def test_platform_name_is_unique():
+    """
+    Tests that case-insensitive platform name is unique.
+    """
+    PlatformFactory.create(name="Emeritus")
+
+    with pytest.raises(ValidationError):
+        PlatformFactory.create(name="emeritus")

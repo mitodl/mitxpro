@@ -5,34 +5,36 @@ Tests for course serializers
 from datetime import datetime, timedelta
 
 import factory
-from django.contrib.auth.models import AnonymousUser
 import pytest
 import pytz
+from django.contrib.auth.models import AnonymousUser
 
 from cms.factories import FacultyMembersPageFactory
 from courses.factories import (
     CourseFactory,
-    CourseRunFactory,
-    ProgramFactory,
     CourseRunEnrollmentFactory,
+    CourseRunFactory,
+    PlatformFactory,
     ProgramEnrollmentFactory,
+    ProgramFactory,
 )
-from courses.models import CourseTopic, CourseRun
+from courses.models import CourseRun, CourseTopic
 from courses.serializers import (
-    ProgramSerializer,
-    CourseSerializer,
-    CourseRunSerializer,
-    BaseProgramSerializer,
     BaseCourseSerializer,
+    BaseProgramSerializer,
     CourseRunDetailSerializer,
     CourseRunEnrollmentSerializer,
+    CourseRunSerializer,
+    CourseSerializer,
     ProgramEnrollmentSerializer,
+    ProgramSerializer,
 )
 from ecommerce.factories import ProductVersionFactory
 from ecommerce.models import Order
 from ecommerce.serializers import CompanySerializer
 from ecommerce.serializers_test import datetime_format
-from mitxpro.test_utils import drf_datetime, assert_drf_json_equal
+from mitxpro.test_utils import assert_drf_json_equal, drf_datetime
+
 
 pytestmark = [pytest.mark.django_db]
 
@@ -53,7 +55,7 @@ def test_base_program_serializer():
 @pytest.mark.parametrize("has_product", [True, False])
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url",
+    "duration, time_commitment, video_url, ceus, external_marketing_url, platform_name",
     [
         (
             "2 Months",
@@ -61,8 +63,9 @@ def test_base_program_serializer():
             "http://www.testvideourl.com",
             "2 Test CEUs",
             "https://www.testexternalcourse1.com",
+            "Emeritus",
         ),
-        (None, None, None, None, None),
+        (None, None, None, None, None, None),
     ],
 )
 def test_serialize_program(
@@ -74,8 +77,13 @@ def test_serialize_program(
     video_url,
     ceus,
     external_marketing_url,
+    platform_name,
 ):  # pylint: disable=too-many-arguments,too-many-locals
     """Test Program serialization"""
+    platform = None
+    if platform_name:
+        platform = PlatformFactory.create(name=platform_name)
+
     program = ProgramFactory.create(
         is_external=is_external,
         page__certificate_page__CEUs=ceus,
@@ -83,6 +91,7 @@ def test_serialize_program(
         page__time_commitment=time_commitment,
         page__video_url=video_url,
         page__external_marketing_url=external_marketing_url,
+        platform=platform,
     )
     run1 = CourseRunFactory.create(course__program=program)
     course1 = run1.course
@@ -145,6 +154,7 @@ def test_serialize_program(
             "format": "Online",
             "is_external": is_external,
             "external_marketing_url": external_marketing_url,
+            "platform": platform_name,
         },
     )
 
@@ -167,7 +177,7 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize("course_page", [True, False])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url",
+    "duration, time_commitment, video_url, ceus, external_marketing_url, platform_name",
     [
         (
             "2 Months",
@@ -175,8 +185,9 @@ def test_base_course_serializer():
             "http://www.testvideourl.com",
             "2 Test CEUs",
             "http://www.testexternalmarketingurl.com",
+            "Emeritus",
         ),
-        (None, None, None, None, None),
+        (None, None, None, None, None, None),
     ],
 )
 def test_serialize_course(
@@ -190,6 +201,7 @@ def test_serialize_course(
     video_url,
     ceus,
     external_marketing_url,
+    platform_name,
 ):  # pylint: disable=too-many-arguments,too-many-locals
     """Test Course serialization"""
     now = datetime.now(tz=pytz.UTC)
@@ -198,6 +210,10 @@ def test_serialize_course(
     if all_runs:
         mock_context["all_runs"] = True
     user = mock_context["request"].user
+
+    platform = None
+    if platform_name:
+        platform = PlatformFactory(name=platform_name)
 
     # Only create course page if required
     if course_page:
@@ -208,9 +224,12 @@ def test_serialize_course(
             page__video_url=video_url,
             page__certificate_page__CEUs=ceus,
             page__external_marketing_url=external_marketing_url,
+            platform=platform,
         )
     else:
-        course = CourseFactory.create(page=None, is_external=is_external)
+        course = CourseFactory.create(
+            page=None, is_external=is_external, platform=platform
+        )
 
     course_run = CourseRunFactory.create(
         course=course,
@@ -266,6 +285,7 @@ def test_serialize_course(
             "format": "Online",
             "is_external": is_external,
             "external_marketing_url": external_marketing_url if course_page else None,
+            "platform": platform_name,
         },
     )
 

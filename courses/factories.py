@@ -4,6 +4,7 @@ import faker
 import pytz
 from factory import SubFactory, Trait, fuzzy
 from factory.django import DjangoModelFactory
+from factory.fuzzy import FuzzyText
 
 from courses.constants import PROGRAM_TEXT_ID_PREFIX
 from ecommerce.models import Company
@@ -16,6 +17,7 @@ from .models import (
     CourseRunEnrollment,
     CourseRunGrade,
     CourseTopic,
+    Platform,
     Program,
     ProgramCertificate,
     ProgramEnrollment,
@@ -33,6 +35,15 @@ class CompanyFactory(DjangoModelFactory):
 
     class Meta:
         model = Company
+
+
+class PlatformFactory(DjangoModelFactory):
+    """Factory for Platform"""
+
+    name = FuzzyText(prefix="Platform-", length=100)
+
+    class Meta:
+        model = Platform
 
 
 class ProgramFactory(DjangoModelFactory):

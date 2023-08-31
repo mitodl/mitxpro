@@ -209,6 +209,36 @@ validate_url_path_field = RegexValidator(
 )
 
 
+class Platform(TimestampedModel, ValidateOnSaveMixin):
+    """
+    Model for courseware platform
+    """
+
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        """
+        Call full_clean to validate the case-insensitive platform name.
+        """
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def validate_unique(self, exclude=None):
+        """
+        Validates case insensitive platform name uniqueness.
+        """
+        platforms = Platform.objects.filter(name__iexact=self.name)
+        if self._state.adding and platforms:
+            raise ValidationError({"name": "A platform with this name already exists."})
+        if len(platforms) == 1 and platforms[0].id != self.id:
+            raise ValidationError({"name": "A platform with this name already exists."})
+
+        super().validate_unique(exclude=exclude)
+
+
 class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     """Model for a course program"""
 
@@ -220,6 +250,9 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     live = models.BooleanField(default=False)
     products = GenericRelation(Product, related_query_name="programs")
     is_external = models.BooleanField(default=False)
+    platform = models.ForeignKey(
+        Platform, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     @property
     def page(self):
@@ -406,6 +439,9 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     )
     live = models.BooleanField(default=False)
     is_external = models.BooleanField(default=False)
+    platform = models.ForeignKey(
+        Platform, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     @property
     def page(self):
