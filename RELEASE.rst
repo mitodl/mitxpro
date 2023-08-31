@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.127.1
+Version 0.127.1 (Released August 31, 2023)
 ---------------
 
 - feat: Add platform model and associated fields in Course and Program models (#2699)
