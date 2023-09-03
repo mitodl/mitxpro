@@ -6,7 +6,7 @@
 #
 amqp==5.0.9
     # via kombu
-anyascii==0.3.0
+anyascii==0.3.2
     # via wagtail
 appdirs==1.4.4
     # via zeep
