@@ -16,7 +16,7 @@ asgiref==3.5.0
     #   djoser
 asttokens==2.2.1
     # via stack-data
-async-timeout==4.0.2
+async-timeout==4.0.3
     # via redis
 attrs==21.4.0
     # via
