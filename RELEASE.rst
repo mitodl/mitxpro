@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.128.0
+---------------
+
+- refactor!: rename visible_in_bulk_form to is_private in product model (#2716)
+- chore(deps): update dependency async-timeout to v4.0.3
+- chore(deps): update dependency anyascii to v0.3.2
+
 Version 0.127.1 (Released August 31, 2023)
 ---------------
 
