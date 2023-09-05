@@ -71,7 +71,7 @@ describe("B2BPurchasePage", () => {
     const props = inner.find("B2BPurchaseForm").props()
     assert.deepEqual(
       props.products,
-      products.filter(product => product.visible_in_bulk_form === true)
+      products.filter(product => product.is_private === false)
     )
   })
 

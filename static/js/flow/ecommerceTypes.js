@@ -220,7 +220,7 @@ export type BaseProduct = {
   id: number,
   title: string,
   product_type: ProductType,
-  visible_in_bulk_form: boolean,
+  is_private: boolean,
   latest_version: ProductVersion
 }
 

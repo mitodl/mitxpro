@@ -2,36 +2,34 @@
 # pylint: disable=too-many-lines
 import logging
 
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db import transaction, models as dj_models
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models as dj_models, transaction
 from django.templatetags.static import static
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
 from courses.constants import DEFAULT_COURSE_IMG_PATH
-from courses.models import Course, CourseRun, Program, CourseRunEnrollment, ProgramRun
+from courses.models import Course, CourseRun, CourseRunEnrollment, Program, ProgramRun
 from ecommerce import models
 from ecommerce.api import (
     best_coupon_for_product,
     create_coupons,
+    get_or_create_data_consent_users,
+    get_product_from_querystring_id,
+    get_product_version_price_with_discount,
     get_valid_coupon_versions,
     latest_coupon_version,
     latest_product_version,
-    get_or_create_data_consent_users,
-    get_product_version_price_with_discount,
-    get_product_from_querystring_id,
 )
-from ecommerce.constants import (
-    CYBERSOURCE_CARD_TYPES,
-    DISCOUNT_TYPES,
-)
+from ecommerce.constants import CYBERSOURCE_CARD_TYPES, DISCOUNT_TYPES
 from ecommerce.models import Basket
 from ecommerce.utils import validate_amount
 from mitxpro.serializers import WriteableSerializerMethodField
 from mitxpro.utils import now_in_utc
 from users.serializers import ExtendedLegalAddressSerializer
+
 
 log = logging.getLogger(__name__)
 
@@ -235,7 +233,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "product_type",
-            "visible_in_bulk_form",
+            "is_private",
             "latest_version",
             "content_object",
         ]

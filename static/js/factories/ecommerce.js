@@ -157,7 +157,7 @@ export const makeCourseRunProduct = (
   id:                   genProductId.next().value,
   title:                casual.word,
   product_type:         PRODUCT_TYPE_COURSERUN,
-  visible_in_bulk_form: casual.boolean,
+  is_private:           casual.boolean,
   content_object:       makeCourseRunContentObject(readableId),
   latest_version:       makeItem(PRODUCT_TYPE_COURSERUN, readableId)
 })
@@ -169,7 +169,7 @@ export const makeProgramProduct = (
   id:                   genProductId.next().value,
   title:                casual.word,
   product_type:         PRODUCT_TYPE_PROGRAM,
-  visible_in_bulk_form: casual.boolean,
+  is_private:           casual.boolean,
   content_object:       makeProgramContentObject(readableId),
   latest_version:       makeItem(PRODUCT_TYPE_PROGRAM, readableId)
 })

@@ -130,7 +130,7 @@ export class B2BPurchasePage extends React.Component<Props, State> {
           <B2BPurchaseForm
             onSubmit={this.onSubmit}
             products={products.filter(
-              product => product.visible_in_bulk_form === true
+              product => product.is_private === false
             )}
             checkout={checkout}
             couponStatus={couponStatus}
