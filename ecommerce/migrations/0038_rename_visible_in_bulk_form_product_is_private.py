@@ -36,5 +36,5 @@ class Migration(migrations.Migration):
                 help_text="Products can be Private or Public. Public products are listed in the product drop-down on the bulk purchase form at /ecommerce/bulk.",
             ),
         ),
-        migrations.RunPython(invert_is_private, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(invert_is_private, reverse_code=invert_is_private),
     ]
