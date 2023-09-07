@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.128.0
+Version 0.128.0 (Released September 07, 2023)
 ---------------
 
 - refactor!: rename visible_in_bulk_form to is_private in product model (#2716)
