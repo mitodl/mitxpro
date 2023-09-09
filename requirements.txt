@@ -149,7 +149,7 @@ django-redis==5.0.0
     #   mitol-django-common
 django-robots==4.0
     # via -r requirements.in
-django-silk==5.0.2
+django-silk==5.0.3
     # via -r requirements.in
 django-storages==1.13.1
     # via -r requirements.in
