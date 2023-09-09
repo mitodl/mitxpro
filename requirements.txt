@@ -56,7 +56,7 @@ certifi==2023.7.22
     #   hubspot-api-client
     #   requests
     #   sentry-sdk
-cffi==1.15.0
+cffi==1.15.1
     # via
     #   cryptography
     #   pynacl
