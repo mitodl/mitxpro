@@ -22,7 +22,7 @@ attrs==21.4.0
     # via
     #   pytest
     #   zeep
-autopep8==2.0.0
+autopep8==2.0.4
     # via django-silk
 backcall==0.2.0
     # via ipython
