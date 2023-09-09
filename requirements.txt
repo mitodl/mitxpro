@@ -255,7 +255,7 @@ lxml==4.9.3
     # via
     #   premailer
     #   zeep
-markupsafe==2.1.0
+markupsafe==2.1.3
     # via jinja2
 matplotlib-inline==0.1.3
     # via ipython
