@@ -251,7 +251,7 @@ kombu==5.2.3
     # via celery
 l18n==2021.3
     # via wagtail
-lxml==4.9.1
+lxml==4.9.3
     # via
     #   premailer
     #   zeep
