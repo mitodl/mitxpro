@@ -474,7 +474,7 @@ user-agents==2.0
     #   django-user-agents
 user-util==0.1.5
     # via -r requirements.in
-uwsgi==2.0.21
+uwsgi==2.0.22
     # via -r requirements.in
 vine==5.0.0
     # via
