@@ -257,7 +257,7 @@ lxml==4.9.3
     #   zeep
 markupsafe==2.1.3
     # via jinja2
-matplotlib-inline==0.1.3
+matplotlib-inline==0.1.6
     # via ipython
 mitol-django-authentication==1.6.0
     # via -r requirements.in
