@@ -306,7 +306,7 @@ pluggy==0.13.1
     # via pytest
 premailer==3.10.0
     # via mitol-django-mail
-prompt-toolkit==3.0.36
+prompt-toolkit==3.0.39
     # via
     #   click-repl
     #   ipython
