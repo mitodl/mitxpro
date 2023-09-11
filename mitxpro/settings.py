@@ -1236,16 +1236,16 @@ HUBSPOT_TASK_DELAY = get_int(
 HUBSPOT_CONFIG = {
     "HUBSPOT_NEW_COURSES_FORM_GUID": get_string(
         name="HUBSPOT_NEW_COURSES_FORM_GUID",
-        default="b9220dc1-4e48-4097-8539-9f2907f18b1e",
+        default="",
         description="Form guid over hub spot for new courses email subscription form.",
     ),
     "HUBSPOT_FOOTER_FORM_GUID": get_string(
         name="HUBSPOT_FOOTER_FORM_GUID",
-        default="ff810010-c33c-4e99-9285-32d283fbc816",
+        default="",
         description="Form guid over hub spot for footer block.",
     ),
     "HUBSPOT_PORTAL_ID": get_string(
-        name="HUBSPOT_PORTAL_ID", default="5890463", description="Hub spot portal id."
+        name="HUBSPOT_PORTAL_ID", default="", description="Hub spot portal id."
     ),
     "HUBSPOT_CREATE_USER_FORM_ID": get_string(
         name="HUBSPOT_CREATE_USER_FORM_ID",
@@ -1253,7 +1253,6 @@ HUBSPOT_CONFIG = {
         description="Form ID for Hubspot Forms API",
     ),
 }
-
 
 # Sheets settings
 DRIVE_SERVICE_ACCOUNT_CREDS = get_string(
