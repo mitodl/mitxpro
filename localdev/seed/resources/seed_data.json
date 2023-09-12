@@ -5,6 +5,7 @@
             "subhead": "A four-course online program leading to a Professional Certificate from the Massachusetts Institute of Technology.",
             "description": "<p>A four-course online program leading to a Professional Certificate from the Massachusetts Institute of Technology.</p>",
             "readable_id": "program-v1:xPRO+SysEngx",
+            "format": "Other",
             "_product": {
                 "price": 2499
             }
@@ -14,6 +15,7 @@
             "subhead": "Learn stuff about digital learning.",
             "description": "<p>Learn stuff about digital learning.</p>",
             "readable_id": "program-v1:xPRO+DgtlLearn",
+            "format": "Online",
             "_product": {
                 "price": 2501
             }
@@ -22,7 +24,8 @@
             "title": "Analog Learning",
             "subhead": "Learn stuff about analog learning.",
             "description": "<p>Learn stuff about analog learning.</p>",
-            "readable_id": "program-v1:xPRO+AnlgLearn"
+            "readable_id": "program-v1:xPRO+AnlgLearn",
+            "format": "Online"
         }
     ],
     "courses": [
@@ -31,6 +34,7 @@
             "description": "<p>This is edX's demo course</p>",
             "subhead": "This is edX's demo course",
             "readable_id": "course-v1:edX+DemoX+Demo_Course",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "edX Demonstration Course - Spring 2013",
@@ -52,6 +56,7 @@
             "position_in_program": 1,
             "description": "<p>Course 1 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program.</p>",
             "readable_id": "course-v1:xPRO+SysEngxB1",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "Architecture of Complex Systems - Fall 2019",
@@ -75,6 +80,7 @@
             "position_in_program": 2,
             "description": "<p>Course 2 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.</p>",
             "readable_id": "course-v1:xPRO+SysEngxB2",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "Models in Engineering - Spring 2020",
@@ -98,6 +104,7 @@
             "position_in_program": 3,
             "description": "<p>Course 3 of 4 that comprises the Architecture and Systems Engineering Professional Certificate Program. This course may be taken individually, without enrolling in the professional certificate program.</p>",
             "readable_id": "course-v1:xPRO+SysEngxB3",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "Model-Based Systems Engineering: Documentation and Analysis - Fall 2020",
@@ -121,6 +128,7 @@
             "position_in_program": 4,
             "description": "<p>The course where the methods are quantitative and the systems are engineered.</p>",
             "readable_id": "course-v1:xPRO+SysEngxB4",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "Quantitative Methods in Systems Engineering - August 2019",
@@ -145,6 +153,7 @@
             "position_in_program": 1,
             "description": "<p>An introductory course to Digital Learning</p>",
             "readable_id": "course-v1:xPRO+DgtlLearn1",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "Digital Learning 100 - August 2021",
@@ -188,6 +197,7 @@
             "position_in_program": 2,
             "description": "<p>A more advanced course in Digital Learning</p>",
             "readable_id": "course-v1:xPRO+DgtlLearn2",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "Digital Learning 200 - August 2016",
@@ -223,6 +233,7 @@
             "position_in_program": 3,
             "description": "<p>The most advancedest course in Digital Learning</p>",
             "readable_id": "course-v1:xPRO+DgtlLearn3",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "Digital Learning 300 - August 2016",
@@ -261,6 +272,7 @@
             "position_in_program": 1,
             "description": "<p>An introductory course to Analog Learning</p>",
             "readable_id": "course-v1:xPRO+AnlgLearn1",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "Analog Learning 100 - August 2016",
@@ -299,6 +311,7 @@
             "position_in_program": 2,
             "description": "<p>A more advanced course in Analog Learning</p>",
             "readable_id": "course-v1:xPRO+AnlgLearn2",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "Analog Learning 200 - August 2016",
@@ -337,6 +350,7 @@
             "position_in_program": 3,
             "description": "<p>The most advancedest course in Analog Learning</p>",
             "readable_id": "course-v1:xPRO+AnlgLearn3",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "Analog Learning 300 - August 2016",
@@ -376,6 +390,7 @@
             "subhead": "An introduction to a type of computing, and that type of computing is quantum.",
             "description": "<p>An introduction to a type of computing, and that type of computing is quantum.</p>",
             "readable_id": "course-v1:xPRO+QuantCompx1",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "Quantum Computing - August 2019",
@@ -395,6 +410,7 @@
             "subhead": "A course that is not live.",
             "description": "<p>A course that is not live.</p>",
             "readable_id": "course-v1:xPRO+NotLive1",
+            "format": "Online",
             "live": false,
             "course_runs": [
                 {
@@ -414,6 +430,7 @@
             "subhead": "Additive Manufacturing for Innovative Design and Production.",
             "description": "<p>Additive Manufacturing for Innovative Design and Production.</p>",
             "readable_id": "course-v1:SEED+AMx",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "Additive Manufacturing for Innovative Design and Production - April 2018",
@@ -447,6 +464,7 @@
             "subhead": "Model-Based Systems Engineering: Documentation and Analysis 1.",
             "description": "<p>Model-Based Systems Engineering: Documentation and Analysis 1.</p>",
             "readable_id": "course-v1:SEED+SysEngBx3",
+            "format": "Online",
             "course_runs": [
                 {
                     "title": "Model-Based Systems Engineering: Documentation and Analysis - April 2018",

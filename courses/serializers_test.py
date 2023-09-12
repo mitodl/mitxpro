@@ -10,6 +10,7 @@ import pytz
 from django.contrib.auth.models import AnonymousUser
 
 from cms.factories import FacultyMembersPageFactory
+from cms.constants import FORMAT_ONLINE, FORMAT_OTHER
 from courses.factories import (
     CourseFactory,
     CourseRunEnrollmentFactory,
@@ -34,7 +35,6 @@ from ecommerce.serializers import CompanySerializer
 from ecommerce.serializers_test import datetime_format
 from mitxpro.test_utils import assert_drf_json_equal, drf_datetime
 
-
 pytestmark = [pytest.mark.django_db]
 
 
@@ -53,6 +53,7 @@ def test_base_program_serializer():
 
 @pytest.mark.parametrize("has_product", [True, False])
 @pytest.mark.parametrize("is_external", [True, False])
+@pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_OTHER])
 @pytest.mark.parametrize(
     "duration, time_commitment, video_url, ceus, external_marketing_url",
     [
@@ -76,6 +77,7 @@ def test_serialize_program(
     mock_context,
     has_product,
     is_external,
+    program_format,
     duration,
     time_commitment,
     video_url,
@@ -88,6 +90,7 @@ def test_serialize_program(
         is_external=is_external,
         page__certificate_page__CEUs=ceus,
         page__duration=duration,
+        page__format=program_format,
         page__time_commitment=time_commitment,
         page__video_url=video_url,
         page__external_marketing_url=external_marketing_url,
@@ -147,9 +150,9 @@ def test_serialize_program(
             "topics": [{"name": topic.name} for topic in topics],
             "time_commitment": time_commitment,
             "duration": duration,
+            "format": program_format,
             "video_url": video_url,
             "credits": ceus,
-            "format": "Online",
             "is_external": is_external,
             "external_marketing_url": external_marketing_url,
             "platform": program.platform.name,
@@ -174,6 +177,7 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("all_runs", [True, False])
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize("course_page", [True, False])
+@pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_OTHER])
 @pytest.mark.parametrize(
     "duration, time_commitment, video_url, ceus, external_marketing_url",
     [
@@ -199,6 +203,7 @@ def test_serialize_course(
     all_runs,
     is_external,
     course_page,
+    course_format,
     duration,
     time_commitment,
     video_url,
@@ -219,6 +224,7 @@ def test_serialize_course(
             is_external=is_external,
             page__time_commitment=time_commitment,
             page__duration=duration,
+            page__format=course_format,
             page__video_url=video_url,
             page__certificate_page__CEUs=ceus,
             page__external_marketing_url=external_marketing_url,
@@ -275,9 +281,9 @@ def test_serialize_course(
             "topics": [{"name": topic}] if course_page else [],
             "time_commitment": time_commitment if course_page else None,
             "duration": duration if course_page else None,
+            "format": course_format if course_page else None,
             "video_url": video_url if course_page else None,
             "credits": ceus if course_page else None,
-            "format": "Online",
             "is_external": is_external,
             "external_marketing_url": external_marketing_url if course_page else None,
             "platform": course.platform.name,
