@@ -1,6 +1,30 @@
 Release Notes
 =============
 
+Version 0.129.0
+---------------
+
+- fix: update hubspot settings default values (#2724)
+- fix(deps): update dependency react-hot-loader to v4.13.1
+- fix(deps): update dependency object.entries to v1.1.7
+- fix(deps): update dependency enzyme-adapter-react-16 to v1.15.7
+- fix(deps): update dependency chai to v4.3.8
+- fix(deps): update dependency bootstrap to v4.6.2
+- chore(deps): update dependency wcwidth to v0.2.6
+- chore(deps): update dependency uwsgi to v2.0.22
+- chore(deps): update dependency s3transfer to v0.6.2
+- chore(deps): update dependency urllib3 to v1.26.16
+- chore(deps): update dependency prompt-toolkit to v3.0.39
+- chore(deps): update dependency minimist to v1.2.8
+- chore(deps): update dependency matplotlib-inline to v0.1.6
+- chore(deps): update dependency markupsafe to v2.1.3
+- chore(deps): update dependency lxml to v4.9.3
+- chore(deps): update dependency django-silk to v5.0.3
+- chore(deps): update dependency django to v3.2.21
+- chore(deps): update dependency django-ipware to v3.0.7
+- chore(deps): update dependency autopep8 to v2.0.4
+- chore(deps): update dependency cffi to v1.15.1
+
 Version 0.128.0 (Released September 07, 2023)
 ---------------
 
