@@ -8,7 +8,7 @@ readme = "README.md"
 packages = []
 
 [tool.poetry.dependencies]
-python = "3.9.14"
+python = "3.9.15"
 
 beautifulsoup4 = "4.8.2"
 boto3 = "1.34.98"
@@ -41,7 +41,7 @@ mitol-django-mail = "2023.12.19"
 mitol-django-oauth-toolkit-extensions = "2023.12.19.1"
 mitol-django-authentication = "2023.12.19"
 newrelic = "^8.4.0"
-pdftotext = "2.1.1"
+pdftotext = "^2.1.1"
 Pillow = "10.3.0"
 psycopg2 = "2.8.4"
 pycountry = "19.7.15"
@@ -63,7 +63,6 @@ flaky = "3.8.1"
 xmltodict = "^0.13.0"
 
 [tool.poetry.group.dev.dependencies]
-astroid = "2.15.8"
 bpython = "*"
 django-debug-toolbar = "*"
 factory-boy = "3.3.0"
