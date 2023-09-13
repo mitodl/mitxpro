@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.129.0
+Version 0.129.0 (Released September 13, 2023)
 ---------------
 
 - fix: update hubspot settings default values (#2724)
