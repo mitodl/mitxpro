@@ -23,7 +23,7 @@ pytestmark = [pytest.mark.django_db]
 
 @pytest.fixture
 def mock_logger(mocker):
-    """ Mock the log """
+    """Mock the log"""
     yield mocker.patch("voucher.utils.log")
 
 

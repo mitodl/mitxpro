@@ -327,7 +327,7 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 
     @property
     def text_id(self):
-        """ Gets the readable_id"""
+        """Gets the readable_id"""
         return self.readable_id
 
     @property
@@ -683,7 +683,7 @@ class CourseRun(TimestampedModel):
 
     @property
     def text_id(self):
-        """ Gets the courseware_id"""
+        """Gets the courseware_id"""
         return self.courseware_id
 
     @property

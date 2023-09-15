@@ -45,27 +45,27 @@ jobs:
       - name: Apt install
         run: cat Aptfile | sudo xargs apt-get install
 
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.5.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.9.14"
-
-      - id: cache
-        uses: actions/cache@v1
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/test_requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          cache: 'poetry'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt -r test_requirements.txt
+        run: poetry install --no-interaction
 
       - name: Lint
-        run: pylint ./**/*.py
+        run: poetry run pylint ./**/*.py
 
       - name: Code Formatting (Black)
-        run: black --check .
+        run: poetry run black --check .
 
       # Configurations required for elasticsearch.
       - name: Configure sysctl limits
@@ -101,7 +101,7 @@ jobs:
       - name: Tests
         run: |
           export MEDIA_ROOT="$(mktemp -d)"
-          ./scripts/test/python_tests.sh
+          poetry run ./scripts/test/python_tests.sh
         env:
           DEBUG: False
           NODE_ENV: 'production'

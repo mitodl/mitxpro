@@ -81,7 +81,7 @@ class MockResponse:
             self.url = url
 
     def json(self):
-        """ Return json content"""
+        """Return json content"""
         return json.loads(self.content)
 
 

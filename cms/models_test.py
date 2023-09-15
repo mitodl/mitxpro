@@ -770,7 +770,7 @@ def test_program_page_course_lineup():
 
 
 def test_course_page_faq_property():
-    """ Faqs property should return list of faqs related to given CoursePage"""
+    """Faqs property should return list of faqs related to given CoursePage"""
     course_page = CoursePageFactory.create()
     assert FrequentlyAskedQuestionPage.can_create_at(course_page)
 
@@ -782,7 +782,7 @@ def test_course_page_faq_property():
 
 
 def test_external_course_page_faq_property():
-    """ Faqs property should return list of faqs related to given ExternalCoursePage"""
+    """Faqs property should return list of faqs related to given ExternalCoursePage"""
     external_course_page = ExternalCoursePageFactory.create()
     assert FrequentlyAskedQuestionPage.can_create_at(external_course_page)
 
@@ -794,7 +794,7 @@ def test_external_course_page_faq_property():
 
 
 def test_program_page_faq_property():
-    """ Faqs property should return list of faqs related to given ProgramPage"""
+    """Faqs property should return list of faqs related to given ProgramPage"""
     program_page = ProgramPageFactory.create()
     assert FrequentlyAskedQuestionPage.can_create_at(program_page)
 
@@ -806,7 +806,7 @@ def test_program_page_faq_property():
 
 
 def test_external_program_page_faq_property():
-    """ Faqs property should return list of faqs related to given ExternalProgramPage"""
+    """Faqs property should return list of faqs related to given ExternalProgramPage"""
     external_program_page = ExternalProgramPageFactory.create()
     assert FrequentlyAskedQuestionPage.can_create_at(external_program_page)
 

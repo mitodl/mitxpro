@@ -48,7 +48,7 @@ def user_drf_client(user):
 
 @pytest.fixture
 def admin_drf_client(admin_user):
-    """DRF API test client with admin user """
+    """DRF API test client with admin user"""
     client = APIClient()
     client.force_authenticate(user=admin_user)
     return client

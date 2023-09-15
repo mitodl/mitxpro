@@ -1834,7 +1834,7 @@ class ResourcePage(Page):
 
 
 class SignatoryPage(Page):
-    """ CMS page representing a Signatory. """
+    """CMS page representing a Signatory."""
 
     promote_panels = []
     parent_page_types = [SignatoryIndexPage]
@@ -2098,7 +2098,7 @@ class CertificatePage(CourseProgramChildPage):
 
 @register_snippet
 class SiteNotification(models.Model):
-    """ Snippet model for showing site notifications. """
+    """Snippet model for showing site notifications."""
 
     message = RichTextField(
         max_length=255, features=["bold", "italic", "link", "document-link"]

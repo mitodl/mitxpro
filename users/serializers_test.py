@@ -15,13 +15,13 @@ from users.serializers import LegalAddressSerializer, UserSerializer
 
 @pytest.fixture()
 def mock_user_sync(mocker):
-    """ Yield a mock hubspot_xpro update task for contacts """
+    """Yield a mock hubspot_xpro update task for contacts"""
     yield mocker.patch("hubspot_xpro.tasks.sync_contact_with_hubspot.delay")
 
 
 @pytest.fixture()
 def sample_address():
-    """ Return a legal address"""
+    """Return a legal address"""
     return {
         "first_name": "Test",
         "last_name": "User",
@@ -35,7 +35,7 @@ def sample_address():
 
 
 def test_validate_legal_address(sample_address):
-    """ Test that correct address data validates"""
+    """Test that correct address data validates"""
     serializer = LegalAddressSerializer(data=sample_address)
     assert serializer.is_valid() is True
 
@@ -74,7 +74,7 @@ def test_validate_legal_address(sample_address):
     ],
 )
 def test_validate_required_fields_US_CA(sample_address, field, value, error):
-    """ Test that missing required fields causes a validation error"""
+    """Test that missing required fields causes a validation error"""
     sample_address[field] = value
     serializer = LegalAddressSerializer(data=sample_address)
     assert serializer.is_valid() is False
@@ -141,7 +141,7 @@ def test_validate_optional_country_data(sample_address):
 def test_update_user_serializer(
     mock_user_sync, settings, user, sample_address, hubspot_api_key
 ):
-    """ Test that a UserSerializer can be updated properly and hubspot_xpro sync called if appropriate """
+    """Test that a UserSerializer can be updated properly and hubspot_xpro sync called if appropriate"""
     settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
     serializer = UserSerializer(
         instance=user,
@@ -162,7 +162,7 @@ def test_update_user_serializer(
 def test_create_user_serializer(
     mock_user_sync, settings, sample_address, hubspot_api_key
 ):
-    """ Test that a UserSerializer can be created properly and hubspot_xpro sync called if appropriate """
+    """Test that a UserSerializer can be created properly and hubspot_xpro sync called if appropriate"""
     settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
     serializer = UserSerializer(
         data={

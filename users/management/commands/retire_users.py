@@ -78,7 +78,7 @@ class Command(BaseCommand):
         )
 
     def get_retired_email(self, email):
-        """ Convert user email to retired email format. """
+        """Convert user email to retired email format."""
         return user_util.get_retired_email(email, RETIRED_USER_SALTS, RETIRED_EMAIL_FMT)
 
     def handle(self, *args, **kwargs):

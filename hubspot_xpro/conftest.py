@@ -53,13 +53,13 @@ def mocked_celery(mocker):
 
 @pytest.fixture
 def mock_logger(mocker):
-    """ Mock the logger """
+    """Mock the logger"""
     yield mocker.patch("hubspot_xpro.tasks.log.error")
 
 
 @pytest.fixture
 def hubspot_order():
-    """ Return an order for testing with hubspot_xpro"""
+    """Return an order for testing with hubspot_xpro"""
     order = factories.OrderFactory()
     product_version = factories.ProductVersionFactory()
     factories.LineFactory(order=order, product_version=product_version)
@@ -90,7 +90,7 @@ def hubspot_order_id(hubspot_order):
 
 @pytest.fixture
 def hubspot_b2b_order():
-    """ Return an B2B order for testing with hubspot_xpro"""
+    """Return an B2B order for testing with hubspot_xpro"""
     order = b2b_factories.B2BOrderFactory.create(status="created")
     coupon = b2b_factories.B2BCouponFactory.create(
         product=order.product_version.product

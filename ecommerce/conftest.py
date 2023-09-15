@@ -124,14 +124,14 @@ def basket_and_agreement(basket_and_coupons):
 
 @pytest.fixture
 def coupon_product_ids():
-    """ Product ids for creating coupons """
+    """Product ids for creating coupons"""
     product_versions = ProductVersionFactory.create_batch(3)
     return [product_version.product.id for product_version in product_versions]
 
 
 @pytest.fixture
 def promo_coupon_json(coupon_product_ids, discount_type):
-    """ JSON for creating a promo coupon """
+    """JSON for creating a promo coupon"""
     return {
         "tag": None,
         "name": "TEST NAME 2",

@@ -35,7 +35,7 @@ log = logging.getLogger(__name__)
 
 
 class CompanySerializer(serializers.ModelSerializer):
-    """ Company Serializer """
+    """Company Serializer"""
 
     class Meta:
         fields = ["id", "name"]
@@ -96,7 +96,7 @@ class FullProductVersionSerializer(ProductVersionSerializer):
     courses = serializers.SerializerMethodField()
 
     def get_courses(self, instance):
-        """ Return the courses in the product """
+        """Return the courses in the product"""
         from courses.serializers import CourseSerializer
 
         model_class = instance.product.content_type.model_class()
@@ -249,20 +249,20 @@ class CouponSelectionSerializer(serializers.ModelSerializer):
     discount_type = serializers.SerializerMethodField()
 
     def get_code(self, instance):
-        """ Get the coupon code"""
+        """Get the coupon code"""
         return instance.coupon.coupon_code
 
     def get_amount(self, instance):
-        """ Get the coupon discount amount """
+        """Get the coupon discount amount"""
         # decimal fields should be represented as strings to prevent floating point parsing problems
         return str(latest_coupon_version(instance.coupon).payment_version.amount)
 
     def get_discount_type(self, instance):
-        """ Get the coupon discount type """
+        """Get the coupon discount type"""
         return latest_coupon_version(instance.coupon).payment_version.discount_type
 
     def get_targets(self, instance):
-        """ Get the product version id(s) in the basket the coupon applies to"""
+        """Get the product version id(s) in the basket the coupon applies to"""
         if instance.coupon.enabled and instance.coupon.is_global:
             eligible_product_ids = instance.basket.basketitems.values_list(
                 "product", flat=True
@@ -342,7 +342,7 @@ class BasketSerializer(serializers.ModelSerializer):
         return {**serialized_product_version, "run_ids": run_ids}
 
     def get_items(self, instance):
-        """ Get the basket items """
+        """Get the basket items"""
         return [
             self._serialize_item(
                 basket_item=item, basket=instance, context=self.context
@@ -351,13 +351,13 @@ class BasketSerializer(serializers.ModelSerializer):
         ]
 
     def get_coupons(self, instance):
-        """ Get the basket coupons """
+        """Get the basket coupons"""
         return CouponSelectionSerializer(
             instance.couponselection_set.all(), many=True
         ).data
 
     def get_data_consents(self, instance):
-        """ Get the DataConsentUser objects associated with the basket via coupon and product"""
+        """Get the DataConsentUser objects associated with the basket via coupon and product"""
         data_consents = get_or_create_data_consent_users(instance)
         return DataConsentUserSerializer(instance=data_consents, many=True).data
 
@@ -709,7 +709,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
 
 class CouponPaymentSerializer(serializers.ModelSerializer):
-    """ Serializer for coupon payments """
+    """Serializer for coupon payments"""
 
     class Meta:
         fields = "__all__"
@@ -717,7 +717,7 @@ class CouponPaymentSerializer(serializers.ModelSerializer):
 
 
 class CouponPaymentVersionSerializer(serializers.ModelSerializer):
-    """ Serializer for coupon payment versions """
+    """Serializer for coupon payment versions"""
 
     class Meta:
         fields = "__all__"
@@ -725,7 +725,7 @@ class CouponPaymentVersionSerializer(serializers.ModelSerializer):
 
 
 class CouponPaymentVersionDetailSerializer(serializers.ModelSerializer):
-    """ Serializer for coupon payment versions and related objects """
+    """Serializer for coupon payment versions and related objects"""
 
     payment = CouponPaymentSerializer()
     company = CompanySerializer()
@@ -736,7 +736,7 @@ class CouponPaymentVersionDetailSerializer(serializers.ModelSerializer):
 
 
 class BaseCouponSerializer(serializers.Serializer):
-    """ Base serializer for coupon creation data """
+    """Base serializer for coupon creation data"""
 
     name = serializers.CharField(
         max_length=256,
@@ -832,7 +832,7 @@ class BaseCouponSerializer(serializers.Serializer):
 
 
 class SingleUseCouponSerializer(BaseCouponSerializer):
-    """ Serializer for creating single-use coupons """
+    """Serializer for creating single-use coupons"""
 
     num_coupon_codes = serializers.IntegerField(required=True)
     payment_transaction = serializers.CharField(max_length=256)
@@ -847,7 +847,7 @@ class SingleUseCouponSerializer(BaseCouponSerializer):
 
 
 class PromoCouponSerializer(BaseCouponSerializer):
-    """ Serializer for creating promo coupons """
+    """Serializer for creating promo coupons"""
 
     num_coupon_codes = serializers.IntegerField(default=1, required=False)
     coupon_code = serializers.CharField(
@@ -871,7 +871,7 @@ class PromoCouponSerializer(BaseCouponSerializer):
 
 
 class DataConsentUserSerializer(serializers.ModelSerializer):
-    """ Serializer for DataConsentUsers """
+    """Serializer for DataConsentUsers"""
 
     company = serializers.SerializerMethodField()
     consent_text = serializers.SerializerMethodField()
@@ -890,7 +890,7 @@ class DataConsentUserSerializer(serializers.ModelSerializer):
 
 
 class LineSummarySerializer(serializers.ModelSerializer):
-    """ Summary serializer for Line model """
+    """Summary serializer for Line model"""
 
     product_version = BaseProductVersionSerializer()
 
@@ -900,7 +900,7 @@ class LineSummarySerializer(serializers.ModelSerializer):
 
 
 class OrderReceiptSerializer(serializers.ModelSerializer):
-    """ Serializer for extracting receipt info from an Order object"""
+    """Serializer for extracting receipt info from an Order object"""
 
     lines = serializers.SerializerMethodField()
     purchaser = serializers.SerializerMethodField()
@@ -944,7 +944,7 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
         return None
 
     def get_lines(self, instance):
-        """ Get product information along with applied discounts """
+        """Get product information along with applied discounts"""
         coupon_redemption = instance.couponredemption_set.first()
         lines = []
         for line in instance.lines.all():

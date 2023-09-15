@@ -78,7 +78,7 @@ class CourseRunSerializer(BaseCourseRunSerializer):
     instructors = serializers.SerializerMethodField()
 
     def get_product_id(self, instance):
-        """ Get the product id for a course run """
+        """Get the product id for a course run"""
         products = instance.products.all()
         return products[0].id if products else None
 

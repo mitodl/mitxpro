@@ -48,7 +48,7 @@ pytestmark = [pytest.mark.django_db]
     ],
 )
 def test_serialize_product(text_id, expected):
-    """ Test that ProductSerializer has correct data """
+    """Test that ProductSerializer has correct data"""
     product_version = ProductVersionFactory.create(
         product=ProductFactory.create(
             content_object=CourseRunFactory.create(courseware_id=text_id)

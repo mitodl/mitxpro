@@ -8,7 +8,7 @@ fail() {
     exit 1
 }
 
-MIGRATIONS_OUTPUT="$(./manage.py makemigrations --no-input --dry-run 2>&1)"
+MIGRATIONS_OUTPUT="$(poetry run python ./manage.py makemigrations --no-input --dry-run 2>&1)"
 if [[ $? -ne 0 ]]
 then
     # makemigrations has returned a non-zero for some reason, possibly

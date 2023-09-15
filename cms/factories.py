@@ -209,7 +209,7 @@ class LearningTechniquesPageFactory(wagtail_factories.PageFactory):
 
 
 class FrequentlyAskedQuestionPageFactory(wagtail_factories.PageFactory):
-    """ FrequentlyAskedQuestionPage factory class"""
+    """FrequentlyAskedQuestionPage factory class"""
 
     class Meta:
         model = FrequentlyAskedQuestionPage

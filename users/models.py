@@ -279,7 +279,7 @@ class LegalAddress(TimestampedModel):
 
 
 class Profile(TimestampedModel):
-    """ A user's profile and employment info """
+    """A user's profile and employment info"""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
 
@@ -314,6 +314,6 @@ class Profile(TimestampedModel):
 
 
 class BlockList(TimestampedModel):
-    """ A user's blocklist model """
+    """A user's blocklist model"""
 
     hashed_email = models.CharField(max_length=128)

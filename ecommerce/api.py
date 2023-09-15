@@ -674,7 +674,7 @@ def enroll_user_in_order_items(order):
 
 
 def get_company_affiliation(order):
-    """ Get a company affiliated with an order via coupon """
+    """Get a company affiliated with an order via coupon"""
     redemption = CouponRedemption.objects.filter(order=order).last()
     if redemption:
         return redemption.coupon_version.payment_version.company

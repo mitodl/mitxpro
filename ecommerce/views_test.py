@@ -561,7 +561,7 @@ def test_patch_basket_replace_item_with_same(basket_client, basket_and_agreement
 
 
 def test_patch_basket_multiple_products(basket_client, basket_and_coupons):
-    """ Test that an update with multiple products is rejected """
+    """Test that an update with multiple products is rejected"""
     data = {"items": [{"product_id": 10}, {"product_id": 11}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -579,7 +579,7 @@ def test_patch_basket_invalid_coupon_format(basket_client, basket_and_coupons):
 
 
 def test_patch_basket_multiple_coupons(basket_client, basket_and_coupons):
-    """ Test that an update with multiple coupons is rejected """
+    """Test that an update with multiple coupons is rejected"""
     data = {"coupons": [{"code": "FOO"}, {"code": "BAR"}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -592,7 +592,7 @@ def test_patch_basket_multiple_coupons(basket_client, basket_and_coupons):
 def test_patch_basket_update_coupon_valid(
     basket_client, mock_context, basket_and_coupons, basket_and_agreement
 ):
-    """ Test that a valid coupon is successfully applied to the basket """
+    """Test that a valid coupon is successfully applied to the basket"""
     basket = basket_and_coupons.basket
     original_coupon = basket_and_coupons.coupongroup_best.coupon
     original_basket = BasketSerializer(instance=basket, context=mock_context).data
@@ -610,7 +610,7 @@ def test_patch_basket_update_coupon_valid(
 
 
 def test_patch_basket_update_coupon_invalid(basket_client, basket_and_coupons):
-    """ Test that an invalid coupon is rejected"""
+    """Test that an invalid coupon is rejected"""
     bad_code = "FAKE_CODE"
     data = {"coupons": [{"code": bad_code}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
@@ -625,7 +625,7 @@ def test_patch_basket_update_coupon_invalid(basket_client, basket_and_coupons):
 def test_patch_basket_clear_coupon_auto(
     basket_client, basket_and_coupons, mock_context
 ):
-    """ Test that an auto coupon is applied to basket when it exists and coupons cleared """
+    """Test that an auto coupon is applied to basket when it exists and coupons cleared"""
     basket = basket_and_coupons.basket
     auto_coupon = basket_and_coupons.coupongroup_worst.coupon
     original_basket = render_json(
@@ -651,7 +651,7 @@ def test_patch_basket_clear_coupon_auto(
 def test_patch_basket_clear_coupon_no_auto(
     basket_client, basket_and_coupons, mock_context
 ):
-    """ Test that all coupons are cleared from basket  """
+    """Test that all coupons are cleared from basket"""
     basket = basket_and_coupons.basket
 
     with unprotect_version_tables():
@@ -674,7 +674,7 @@ def test_patch_basket_clear_coupon_no_auto(
 def test_patch_basket_update_valid_product_valid_coupon(
     basket_client, basket_and_coupons
 ):
-    """ Test that product is updated and coupon remains the same """
+    """Test that product is updated and coupon remains the same"""
     basket = basket_and_coupons.basket
     best_coupon = basket_and_coupons.coupongroup_best.coupon
 
@@ -693,7 +693,7 @@ def test_patch_basket_update_valid_product_valid_coupon(
 def test_patch_basket_update_valid_product_invalid_coupon_auto(
     basket_client, basket_and_coupons
 ):
-    """ Test that product is updated and invalid coupon replaced with auto coupon """
+    """Test that product is updated and invalid coupon replaced with auto coupon"""
     basket = basket_and_coupons.basket
     auto_coupon = basket_and_coupons.coupongroup_worst.coupon
 
@@ -713,7 +713,7 @@ def test_patch_basket_update_valid_product_invalid_coupon_auto(
 def test_patch_basket_update_valid_product_invalid_coupon_no_auto(
     basket_client, basket_and_coupons, has_coupon
 ):
-    """ Test that product is updated and invalid coupon removed """
+    """Test that product is updated and invalid coupon removed"""
     basket = basket_and_coupons.basket
     product_version = ProductVersionFactory()
 
@@ -731,7 +731,7 @@ def test_patch_basket_update_valid_product_invalid_coupon_no_auto(
 
 
 def test_patch_basket_update_invalid_product(basket_client, basket_and_coupons):
-    """ Test that invalid product id is rejected with no changes to basket """
+    """Test that invalid product id is rejected with no changes to basket"""
     bad_id = 9999
     data = {"items": [{"product_id": bad_id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
@@ -741,7 +741,7 @@ def test_patch_basket_update_invalid_product(basket_client, basket_and_coupons):
 
 
 def test_patch_basket_update_active_inactive_product(basket_client, basket_and_coupons):
-    """ Test that inactive product id is rejected with no changes to basket but not the active ones. """
+    """Test that inactive product id is rejected with no changes to basket but not the active ones."""
     product = ProductVersionFactory.create().product
     product.is_active = False
     product.save()
@@ -776,7 +776,7 @@ def test_patch_basket_update_inactive_product(basket_client, basket_and_coupons)
 
 @pytest.mark.parametrize("section", ["items", "coupons"])
 def test_patch_basket_update_invalid_data(basket_client, basket_and_coupons, section):
-    """ Test that invalid product data is rejected with no changes to basket """
+    """Test that invalid product data is rejected with no changes to basket"""
     data = dict()
     data[section] = [{"foo": "bar"}]
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
@@ -787,7 +787,7 @@ def test_patch_basket_update_invalid_data(basket_client, basket_and_coupons, sec
 
 @pytest.mark.parametrize("data", [{"items": [], "coupons": []}, {"items": []}])
 def test_patch_basket_clear_product(basket_client, basket_and_coupons, data):
-    """ Test that product, coupon, and runs are cleared  """
+    """Test that product, coupon, and runs are cleared"""
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     resp_data = resp.json()
@@ -798,7 +798,7 @@ def test_patch_basket_clear_product(basket_client, basket_and_coupons, data):
 
 
 def test_patch_basket_nodata(basket_client, basket_and_coupons):
-    """ Test that a patch request with no items or coupons keys is invalidated  """
+    """Test that a patch request with no items or coupons keys is invalidated"""
     resp = basket_client.patch(reverse("basket_api"), type="json", data={})
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
@@ -958,7 +958,7 @@ def test_patch_basket_other_user_enrolled(basket_client, basket_and_coupons):
 
 @pytest.mark.parametrize("as_owner", [True, False])
 def test_patch_basket_data_consents(basket_and_agreement, as_owner):
-    """ Test that a patch request with DataConsentUser ids updates those objects with consent dates  """
+    """Test that a patch request with DataConsentUser ids updates those objects with consent dates"""
     user = basket_and_agreement.basket.user if as_owner else UserFactory.create()
     client = APIClient()
     client.force_authenticate(user=user)
@@ -986,7 +986,7 @@ def test_patch_basket_data_consents(basket_and_agreement, as_owner):
 
 
 def test_patch_basket_bad_data_consents(basket_and_agreement):
-    """ Test that a patch request with bad DataConsentUser raises a validation error  """
+    """Test that a patch request with bad DataConsentUser raises a validation error"""
     user = basket_and_agreement.basket.user
     client = APIClient()
     client.force_authenticate(user=user)
@@ -1000,7 +1000,7 @@ def test_patch_basket_bad_data_consents(basket_and_agreement):
 
 
 def test_patch_basket_external_product(basket_and_coupons):
-    """ Test that a patch request with external product results in a validation error  """
+    """Test that a patch request with external product results in a validation error"""
     user = basket_and_coupons.basket.user
     client = APIClient()
     client.force_authenticate(user=user)
@@ -1022,7 +1022,7 @@ def test_patch_basket_external_product(basket_and_coupons):
     "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
 )
 def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
-    """ Test that the correct model objects are created for a batch of single-use coupons """
+    """Test that the correct model objects are created for a batch of single-use coupons"""
     data = single_use_coupon_json
     resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
@@ -1046,7 +1046,7 @@ def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
 )
 def test_post_global_singleuse_coupons(admin_drf_client, single_use_coupon_json):
-    """ Test that the correct model objects are created for a batch of single-use coupons (global coupon) """
+    """Test that the correct model objects are created for a batch of single-use coupons (global coupon)"""
     data = single_use_coupon_json
     data["is_global"] = True
     resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
@@ -1078,7 +1078,7 @@ def test_post_global_singleuse_coupons(admin_drf_client, single_use_coupon_json)
     ],
 )
 def test_post_promo_coupon(admin_drf_client, promo_coupon_json, discount_type, amount):
-    """ Test that the correct model objects are created for a promo coupon """
+    """Test that the correct model objects are created for a promo coupon"""
     data = promo_coupon_json
     data["discount_type"] = discount_type
     data["amount"] = amount
@@ -1105,7 +1105,7 @@ def test_post_promo_coupon(admin_drf_client, promo_coupon_json, discount_type, a
     "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
 )
 def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
-    """ Test that the correct model objects are created for a promo coupon (global coupon) """
+    """Test that the correct model objects are created for a promo coupon (global coupon)"""
     data = promo_coupon_json
     data["is_global"] = True
     resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
@@ -1152,7 +1152,7 @@ def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
 def test_create_promo_coupon_bad_product(
     admin_drf_client, promo_coupon_json, attribute, bad_value, error
 ):
-    """ Test that an error is returned if submitted coupon data is invalid  """
+    """Test that an error is returned if submitted coupon data is invalid"""
     CouponPaymentFactory.create(name="AlreadyExists")
     CouponFactory.create(coupon_code="AlreadyExists")
     data = promo_coupon_json
@@ -1166,7 +1166,7 @@ def test_create_promo_coupon_bad_product(
     "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
 )
 def test_create_promo_coupon_no_payment_info(admin_drf_client, promo_coupon_json):
-    """ Test that a promo CouponPaymentVersion can be created without payment info """
+    """Test that a promo CouponPaymentVersion can be created without payment info"""
     data = promo_coupon_json
     payment_attrs = ("company", "payment_type", "payment_transaction")
     for attr in payment_attrs:
@@ -1184,7 +1184,7 @@ def test_create_promo_coupon_no_payment_info(admin_drf_client, promo_coupon_json
 def test_create_singleuse_coupon_no_payment_info(
     admin_drf_client, single_use_coupon_json
 ):
-    """ Test that a single-use CouponPaymentVersion cannot be created without payment type, transaction info """
+    """Test that a single-use CouponPaymentVersion cannot be created without payment type, transaction info"""
     data = single_use_coupon_json
     payment_attrs = ("company", "payment_type", "payment_transaction")
     for attr in payment_attrs:
@@ -1201,7 +1201,7 @@ def test_create_singleuse_coupon_no_payment_info(
     "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
 )
 def test_create_coupon_permission(user_drf_client, promo_coupon_json):
-    """ Test that non-admins cannot create coupons """
+    """Test that non-admins cannot create coupons"""
     data = promo_coupon_json
     resp = user_drf_client.post(reverse("coupon_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_403_FORBIDDEN
@@ -1211,7 +1211,7 @@ def test_create_coupon_permission(user_drf_client, promo_coupon_json):
     "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
 )
 def test_coupon_csv_view(admin_client, admin_drf_client, single_use_coupon_json):
-    """ Test that a valid csv response is returned for a CouponPaymentVersion """
+    """Test that a valid csv response is returned for a CouponPaymentVersion"""
     data = single_use_coupon_json
     api_response = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
     cpv = CouponPaymentVersion.objects.get(id=api_response.json().get("id"))
@@ -1228,7 +1228,7 @@ def test_coupon_csv_view(admin_client, admin_drf_client, single_use_coupon_json)
 
 
 def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
-    """ Test that the bulk assignment CSV includes the correct product coupon assignment data """
+    """Test that the bulk assignment CSV includes the correct product coupon assignment data"""
     settings.SITE_BASE_URL = "http://test.com/"
 
     bulk_assignment = BulkCouponAssignment.objects.create()
@@ -1294,7 +1294,7 @@ def test_csv_views_errors(url_name, url_kwarg_name, test_client, expected_status
 
 
 def test_products_viewset_list(user_drf_client, coupon_product_ids):
-    """ Test that the ProductViewSet returns all products """
+    """Test that the ProductViewSet returns all products"""
     response = user_drf_client.get(reverse("products_api-list"))
     assert response.status_code == status.HTTP_200_OK
     products = response.json()
@@ -1345,7 +1345,7 @@ def test_products_viewset_list_ordering(user_drf_client):
 
 
 def test_products_viewset_valid_courses(user_drf_client):
-    """ Test that the ProductViewSet returns only valid course products """
+    """Test that the ProductViewSet returns only valid course products"""
 
     runs = CourseRunFactory.create_batch(2)
     ProductVersionFactory.create_batch(
@@ -1364,7 +1364,7 @@ def test_products_viewset_valid_courses(user_drf_client):
 
 
 def test_products_viewset_valid_programs(user_drf_client):
-    """ Test that the ProductViewSet returns only valid programs products"""
+    """Test that the ProductViewSet returns only valid programs products"""
     now = now_in_utc()
     programs = ProgramFactory.create_batch(2)
     runs = CourseRunFactory.create_batch(2, course__program=factory.Iterator(programs))
@@ -1402,7 +1402,7 @@ def test_products_viewset_valid_programs(user_drf_client):
 
 
 def test_products_viewset_external_courses(user_drf_client):
-    """ Test that the ProductViewSet returns contains only internal course products """
+    """Test that the ProductViewSet returns contains only internal course products"""
     external_runs = CourseRunFactory.create_batch(
         2,
         course__is_external=True,
@@ -1469,7 +1469,7 @@ def test_products_viewset_list_missing_versions(user_drf_client):
 
 
 def test_products_viewset_detail(user_drf_client, coupon_product_ids):
-    """ Test that the ProductViewSet returns details for a product """
+    """Test that the ProductViewSet returns details for a product"""
     response = user_drf_client.get(
         reverse("products_api-detail", kwargs={"pk": coupon_product_ids[0]})
     )
@@ -1481,7 +1481,7 @@ def test_products_viewset_detail(user_drf_client, coupon_product_ids):
 
 
 def test_products_viewset_expired_programs(user_drf_client):
-    """ Test that the ProductViewSet returns only valid programs products and excludes the expired programs correctly"""
+    """Test that the ProductViewSet returns only valid programs products and excludes the expired programs correctly"""
     now = now_in_utc()
     programs = ProgramFactory.create_batch(4)
     runs = CourseRunFactory.create_batch(2, course__program=factory.Iterator(programs))
@@ -1514,7 +1514,7 @@ def test_products_viewset_expired_programs(user_drf_client):
 def test_products_viewset_performance(
     user_drf_client, coupon_product_ids, django_assert_num_queries
 ):
-    """ Test that the ProductViewSet returns the expected number of queries hit. """
+    """Test that the ProductViewSet returns the expected number of queries hit."""
     with django_assert_num_queries(10):
         response = user_drf_client.get(
             reverse("products_api-detail", kwargs={"pk": coupon_product_ids[0]})
@@ -1529,13 +1529,13 @@ def test_products_viewset_performance(
 
 
 def test_products_viewset_post_forbidden(admin_drf_client):
-    """ Test that post requests to the products API viewset is not allowed"""
+    """Test that post requests to the products API viewset is not allowed"""
     response = admin_drf_client.post(reverse("products_api-list"), data={})
     assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
 def test_products_viewset_nested_param(user_drf_client, coupon_product_ids):
-    """ Test that the ProductViewSet returns details for a product """
+    """Test that the ProductViewSet returns details for a product"""
     response = user_drf_client.get(
         urljoin(reverse("products_api-list"), "?nested=false")
     )
@@ -1550,7 +1550,7 @@ def test_products_viewset_nested_param(user_drf_client, coupon_product_ids):
 
 
 def test_companies_viewset_list(user_drf_client):
-    """ Test that the CompanyViewSet returns all companies """
+    """Test that the CompanyViewSet returns all companies"""
     companies = CompanyFactory.create_batch(3)
     response = user_drf_client.get(reverse("companies_api-list"))
     assert response.status_code == status.HTTP_200_OK
@@ -1563,7 +1563,7 @@ def test_companies_viewset_list(user_drf_client):
 
 
 def test_companies_viewset_detail(user_drf_client):
-    """ Test that the CompanyViewSet returns details for a company """
+    """Test that the CompanyViewSet returns details for a company"""
     company = CompanyFactory.create()
     response = user_drf_client.get(
         reverse("companies_api-detail", kwargs={"pk": company.id})
@@ -1574,14 +1574,14 @@ def test_companies_viewset_detail(user_drf_client):
 
 
 def test_companies_viewset_forbidden():
-    """ Test that an anonymous user cannot access the companies list """
+    """Test that an anonymous user cannot access the companies list"""
     client = APIClient()
     response = client.get(reverse("companies_api-list"))
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_companies_viewset_post_forbidden(admin_drf_client):
-    """ Test that post requests to the companies API viewset is not allowed"""
+    """Test that post requests to the companies API viewset is not allowed"""
     response = admin_drf_client.post(reverse("companies_api-list"), data={})
     assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 

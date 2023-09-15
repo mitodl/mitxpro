@@ -87,6 +87,6 @@ def test_format_recipient(name, email):
     """Verify that format_recipient correctly format's a user's name and email"""
     user = UserFactory.build(name=name, email=email)
     assert (
-        re.fullmatch(fr"(\"?){user.name}(\"?)\s+<{user.email}>", format_recipient(user))
+        re.fullmatch(rf"(\"?){user.name}(\"?)\s+<{user.email}>", format_recipient(user))
         is not None
     )

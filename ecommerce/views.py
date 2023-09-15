@@ -283,14 +283,14 @@ class OrderReceiptView(RetrieveAPIView):
         return Order.objects.filter(purchaser=self.request.user, status=Order.FULFILLED)
 
     def get(self, request, *args, **kwargs):
-        """ Return a 404 for all requests if the feature is not enabled """
+        """Return a 404 for all requests if the feature is not enabled"""
         if not settings.ENABLE_ORDER_RECEIPTS:
             raise Http404
         return self.retrieve(request, *args, **kwargs)
 
 
 class BasketView(RetrieveUpdateAPIView):
-    """ API view for viewing and updating a basket """
+    """API view for viewing and updating a basket"""
 
     permission_classes = (IsAuthenticated,)
     authentication_classes = (SessionAuthentication,)
@@ -311,7 +311,7 @@ class CouponListView(APIView):
     authentication_classes = (SessionAuthentication,)
 
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
-        """ Create coupon(s) and related objects """
+        """Create coupon(s) and related objects"""
         # Determine what kind of coupon this is.
         if request.data.get("coupon_type") == CouponPaymentVersion.SINGLE_USE:
             coupon_serializer = SingleUseCouponSerializer(data=request.data)
