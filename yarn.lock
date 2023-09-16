@@ -11072,13 +11072,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"querystring@npm:^0.2.0":
-  version: 0.2.1
-  resolution: "querystring@npm:0.2.1"
-  checksum: 7b83b45d641e75fd39cd6625ddfd44e7618e741c61e95281b57bbae8fde0afcc12cf851924559e5cc1ef9baa3b1e06e22b164ea1397d65dd94b801f678d9c8ce
-  languageName: node
-  linkType: hard
-
 "querystringify@npm:^2.1.1":
   version: 2.2.0
   resolution: "querystringify@npm:2.2.0"
@@ -14360,14 +14353,13 @@ __metadata:
   linkType: hard
 
 "webpack-hot-middleware@npm:^2.24.3":
-  version: 2.25.1
-  resolution: "webpack-hot-middleware@npm:2.25.1"
+  version: 2.25.4
+  resolution: "webpack-hot-middleware@npm:2.25.4"
   dependencies:
     ansi-html-community: 0.0.8
     html-entities: ^2.1.0
-    querystring: ^0.2.0
     strip-ansi: ^6.0.0
-  checksum: 49f05023a1e95fab2703a885c3321dfd2ff832bcece9cbfafe9dbe68bcf16a25cd5c3c455b0534e93b7448f2dd05de2ef9009394c95dfae9bbbcc740189416f7
+  checksum: 4fa257e05ab03ffd9a25640a70a498feb1f055054c51e313a99d5e8a55e9d555ab50258ed4046687e067cdd90b460eab7c58131bf1577e8408c7ab66a3d49a5d
   languageName: node
   linkType: hard
 
