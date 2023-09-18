@@ -1,6 +1,20 @@
 Release Notes
 =============
 
+Version 0.130.0
+---------------
+
+- chore(deps): update dependency faker to v13.16.0
+- chore(deps): update dependency factory-boy to v3.3.0
+- chore(deps): update dependency black to v22.12.0
+- fix(deps): update dependency webpack-hot-middleware to v2.25.4
+- fix(deps): update dependency unzipper to v0.10.14
+- fix(deps): update dependency shelljs to v0.8.5
+- fix(deps): update dependency reselect to v4.1.8
+- fix(deps): update dependency redux-asserts to ^0.0.12
+- chore(deps): update dependency freezegun to v0.3.15
+- feat: Use poetry instead of requirements files (#2715)
+
 Version 0.129.0 (Released September 13, 2023)
 ---------------
 
