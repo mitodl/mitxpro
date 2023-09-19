@@ -19,9 +19,9 @@ from rest_framework import status
 
 from courses.factories import CourseRunEnrollmentFactory, CourseRunFactory
 from courseware.api import (
-    OpenEdxUser,
     ACCESS_TOKEN_HEADER_NAME,
     OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS,
+    OpenEdxUser,
     create_edx_auth_token,
     create_edx_user,
     create_user,
@@ -417,38 +417,31 @@ def test_get_edx_api_client(mocker, settings, user):
     )
 
 
-@pytest.mark.parametrize("force_enrollment", [True, False])
-def test_enroll_in_edx_course_runs(mocker, user, force_enrollment):
+def test_enroll_in_edx_course_runs(mocker, user):
     """Tests that enroll_in_edx_course_runs uses the EdxApi client to enroll in course runs"""
     mock_client = mocker.MagicMock()
     enroll_return_values = ["result1", "result2"]
     mock_client.enrollments.create_student_enrollment = mocker.Mock(
         side_effect=enroll_return_values
     )
-    if force_enrollment:
-        mocker.patch(
-            "courseware.api.get_edx_api_service_client", return_value=mock_client
-        )
-    else:
-        mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+    mocker.patch("courseware.api.get_edx_api_service_client", return_value=mock_client)
     course_runs = CourseRunFactory.build_batch(2)
     enroll_results = enroll_in_edx_course_runs(
         user,
         course_runs,
-        force_enrollment=force_enrollment,
     )
-    expected_username = user.username if force_enrollment else None
+    expected_username = user.username
     mock_client.enrollments.create_student_enrollment.assert_any_call(
         course_runs[0].courseware_id,
         mode=EDX_ENROLLMENT_PRO_MODE,
         username=expected_username,
-        force_enrollment=force_enrollment,
+        force_enrollment=True,
     )
     mock_client.enrollments.create_student_enrollment.assert_any_call(
         course_runs[1].courseware_id,
         mode=EDX_ENROLLMENT_PRO_MODE,
         username=expected_username,
-        force_enrollment=force_enrollment,
+        force_enrollment=True,
     )
     assert enroll_results == enroll_return_values
 
@@ -463,7 +456,7 @@ def test_enroll_in_edx_course_runs_audit(mocker, user, error_text):
         side_effect=[HTTPError(response=pro_enrollment_response), audit_result]
     )
     patched_log_error = mocker.patch("courseware.api.log.error")
-    mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+    mocker.patch("courseware.api.get_edx_api_service_client", return_value=mock_client)
 
     course_run = CourseRunFactory.build()
     results = enroll_in_edx_course_runs(user, [course_run])
@@ -471,14 +464,14 @@ def test_enroll_in_edx_course_runs_audit(mocker, user, error_text):
     mock_client.enrollments.create_student_enrollment.assert_any_call(
         course_run.courseware_id,
         mode=EDX_ENROLLMENT_PRO_MODE,
-        username=None,
-        force_enrollment=False,
+        username=user.username,
+        force_enrollment=True,
     )
     mock_client.enrollments.create_student_enrollment.assert_any_call(
         course_run.courseware_id,
         mode=EDX_ENROLLMENT_AUDIT_MODE,
-        username=None,
-        force_enrollment=False,
+        username=user.username,
+        force_enrollment=True,
     )
     assert results == [audit_result]
     patched_log_error.assert_called_once()
@@ -494,7 +487,7 @@ def test_enroll_pro_api_fail(mocker, user):
     mock_client.enrollments.create_student_enrollment = mocker.Mock(
         side_effect=HTTPError(response=pro_enrollment_response)
     )
-    mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+    mocker.patch("courseware.api.get_edx_api_service_client", return_value=mock_client)
     course_run = CourseRunFactory.build()
 
     with pytest.raises(EdxApiEnrollErrorException):
