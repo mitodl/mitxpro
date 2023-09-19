@@ -494,7 +494,7 @@ def test_enroll_pro_api_fail(mocker, user):
         enroll_in_edx_course_runs(user, [course_run])
 
 
-def test_enroll_pro_unknown_fail(mocker, user):
+def test_enroll_pro_unknown_fail(mocker, user, settings):
     """
     Tests that enroll_in_edx_course_runs raises an UnknownEdxApiEnrollException if an unexpected exception
     is encountered
@@ -505,6 +505,7 @@ def test_enroll_pro_unknown_fail(mocker, user):
     )
     mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
     course_run = CourseRunFactory.build()
+    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"
 
     with pytest.raises(UnknownEdxApiEnrollException):
         enroll_in_edx_course_runs(user, [course_run])
