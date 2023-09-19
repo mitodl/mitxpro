@@ -27,6 +27,7 @@ from courses.factories import (
     ProgramEnrollmentFactory,
     ProgramFactory,
 )
+
 # pylint: disable=redefined-outer-name
 from courses.models import CourseRunEnrollment, ProgramEnrollment
 from courseware.exceptions import (
