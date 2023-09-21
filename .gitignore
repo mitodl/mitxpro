@@ -90,6 +90,8 @@ codekit-config.json
 
 *.DS_Store
 
+.vscode/
+
 # Django static
 staticfiles/
 

@@ -581,7 +581,8 @@ class CouponPaymentVersion(TimestampedModel):
 
     def calculate_discount_amount(self, product_version=None, price=None):
         """If discount_type is in "percent-off", it would need price and calculate the amount of discount in currency,
-        otherwise for dollars-off the discount value is equal to amount and doesn't depend upon product price"""
+        otherwise for dollars-off the discount value is equal to amount and doesn't depend upon product price
+        """
 
         from ecommerce.api import round_half_up
 
@@ -814,3 +815,13 @@ class ProductCouponAssignment(TimestampedModel):
                 condition=models.Q(redeemed=False),
             ),
         )
+
+
+class TaxRate(TimestampedModel):
+    """
+    Stores tax rates for countries. Generally, this should be a VAT rate.
+    """
+
+    country_code = models.CharField(max_length=2)
+    tax_rate = models.DecimalField(max_digits=6, decimal_places=4)
+    active = models.BooleanField(default=True)
