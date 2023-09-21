@@ -187,6 +187,12 @@ export class ReceiptPage extends React.Component<Props> {
                         {orderReceipt.purchaser.email}
                       </dd>
                     </dl>
+                    <dl>
+                      <dt>VAT Number:</dt>
+                      <dd id="purchaserVATNumber">
+                        {orderReceipt.purchaser.vat_number}
+                      </dd>
+                    </dl>
                   </div>
                   <h3>Payment Information</h3>
                   {orderReceipt.receipt ? (

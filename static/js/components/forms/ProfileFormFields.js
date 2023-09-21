@@ -493,5 +493,18 @@ export const ProfileFields = () => (
         </div>
       </div>
     </div>
+    <div className="form-group">
+      <div className="row">
+        <div className="col">
+          <label htmlFor="profile.vat_number" className="font-weight-bold">
+            VAT Number
+          </label>
+          <Field type="text" name="profile.vat_number" className="form-control" />
+          <ErrorMessage name="profile.vat_number" component={FormError} />
+        </div>
+        <div className="col">
+        </div>
+      </div>
+    </div>
   </React.Fragment>
 )

@@ -44,7 +44,8 @@ export const makeUser = (username: ?string): LoggedInUser => ({
     job_function:      "",
     leadership_level:  "",
     years_experience:  20,
-    highest_education: "Doctorate"
+    highest_education: "Doctorate",
+    vat_number:        "PL1011000",
   },
   legal_address: {
     street_address:     [casual.street],

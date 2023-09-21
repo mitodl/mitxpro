@@ -191,6 +191,12 @@ export class ViewProfilePage extends React.Component<Props> {
                         {currentUser.profile.highest_education}
                       </div>
                     </div>
+                    <div className="row">
+                      <div className="col">VAT Number</div>
+                      <div className="col">
+                        {currentUser.profile.vat_number}
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="col-12 auth-form">
