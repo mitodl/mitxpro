@@ -7,6 +7,7 @@ import hmac
 import logging
 import re
 import uuid
+import requests
 from base64 import b64encode
 from collections import defaultdict
 from datetime import timedelta
@@ -61,6 +62,7 @@ from ecommerce.models import (
     ProductVersion,
     ProgramRunLine,
     Receipt,
+    TaxRate,
 )
 from ecommerce.utils import positive_or_zero
 from hubspot_xpro.task_helpers import sync_hubspot_deal
@@ -70,6 +72,26 @@ from mitxpro.utils import case_insensitive_equal, first_or_none, now_in_utc
 log = logging.getLogger(__name__)
 
 ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+
+
+# Calculated Tax Rate is (rate applied, adjusted amount)
+CalculatedTaxRate = tuple[decimal.Decimal, decimal.Decimal]
+
+
+def calculate_tax(request_ip: str, item_price: decimal.Decimal) -> CalculatedTaxRate:
+    """
+    Calculate the tax to be assessed for the given amount.
+
+    This uses
+
+    Args:
+        request_ip (str): The user's IP address, for geolocation.
+        item_price (Decimal): The amount to be taxed.
+    Returns:
+        tuple(rate applied, adjusted amount): The rate applied and the adjusted amount.
+    """
+
+    return (0, item_price)
 
 
 # pylint: disable=too-many-lines
@@ -317,7 +339,6 @@ def get_valid_coupon_versions(
         # We can only get full discount for dollars-off when we know the price
 
         if product is None or not product.productversions.exists():
-
             coupon_version_subquery = coupon_version_subquery.filter(
                 payment_version__amount=decimal.Decimal(1)
             )

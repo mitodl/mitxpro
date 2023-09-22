@@ -819,9 +819,11 @@ class ProductCouponAssignment(TimestampedModel):
 
 class TaxRate(TimestampedModel):
     """
-    Stores tax rates for countries. Generally, this should be a VAT rate.
+    Stores tax rates for countries. Generally, this should be a VAT rate, but
+    a text field is supplied to store the name of the tax assessed
     """
 
     country_code = models.CharField(max_length=2)
     tax_rate = models.DecimalField(max_digits=6, decimal_places=4)
+    tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")
     active = models.BooleanField(default=True)

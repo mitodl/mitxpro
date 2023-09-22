@@ -188,6 +188,7 @@ INSTALLED_APPS = (
     "hijack_admin",
     "hubspot_xpro",
     "voucher",
+    "maxmind",
     # ol-dango apps, must be after this project's apps for template precedence
     "mitol.hubspot_api.apps.HubspotApiApp",
     "mitol.common.apps.CommonApp",
