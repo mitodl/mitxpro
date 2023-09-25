@@ -1,9 +1,12 @@
-import ipaddress
 import csv
-
+import ipaddress
 from decimal import Decimal
+
 from django.db import transaction
+from django.db.models import Q
+
 from maxmind import models
+
 
 MAXMIND_CSV_COUNTRY_LOCATIONS_LITE = "geolite2-country-locations"
 MAXMIND_CSV_COUNTRY_BLOCKS_IPV4_LITE = "geolite2-country-ipv4"
@@ -162,14 +165,24 @@ def ip_to_country_code(ip_address: str, locale: str = "en") -> str:
 
     netaddr = ipaddress.ip_address(ip_address)
 
+    print(f"{int(netaddr)} - {netaddr}")
+
     ip_qset = models.NetBlock.objects.filter(
-        decimal_ip_start_gte=int(netaddr), decimal_ip_end_lte=int(netaddr)
+        decimal_ip_start__lte=int(netaddr), decimal_ip_end__gte=int(netaddr)
     )
 
     if not ip_qset.exists():
         return None
 
     netblock = ip_qset.get()
-    location = models.Geoname.objects.filter(locale=locale).filter(models.Q(geoname_id=netblock.geoname_id) | models.Q(registered_country_geoname_id=netblock.geoname_id) | models.Q(represented_country_geoname_id=netblock.geoname_id)).order_by("-geoname_id").first()
+    location = (
+        models.Geoname.objects.filter(locale_code=locale)
+        .filter(
+            Q(geoname_id=netblock.geoname_id)
+            | Q(geoname_id=netblock.registered_country_geoname_id)
+            | Q(geoname_id=netblock.represented_country_geoname_id)
+        )
+        .first()
+    )
 
     return location.country_iso_code
