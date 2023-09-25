@@ -71,10 +71,10 @@ def import_maxmind_database(import_type: str, import_filename: str) -> None:
                         else None,
                     )
                 )
-            elif (
-                import_type == MAXMIND_CSV_COUNTRY_BLOCKS_IPV4_LITE
-                or import_type == MAXMIND_CSV_COUNTRY_BLOCKS_IPV6_LITE
-            ):
+            elif import_type in [
+                MAXMIND_CSV_COUNTRY_BLOCKS_IPV4_LITE,
+                MAXMIND_CSV_COUNTRY_BLOCKS_IPV6_LITE,
+            ]:
                 if len(row["geoname_id"]) == 0:
                     continue
 
