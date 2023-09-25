@@ -9,15 +9,8 @@ from django.core.exceptions import ValidationError
 from requests.exceptions import ConnectionError as RequestsConnectionError, HTTPError
 
 from courses.constants import ENROLL_CHANGE_STATUS_DEFERRED
-from courses.models import (
-    CourseRun,
-    CourseRunEnrollment,
-    ProgramEnrollment,
-)
-from courseware.api import (
-    enroll_in_edx_course_runs,
-    unenroll_edx_course_run,
-)
+from courses.models import CourseRun, CourseRunEnrollment, ProgramEnrollment
+from courseware.api import enroll_in_edx_course_runs, unenroll_edx_course_run
 from courseware.exceptions import (
     EdxApiEnrollErrorException,
     EdxEnrollmentCreateError,
@@ -100,7 +93,6 @@ def create_run_enrollments(
     keep_failed_enrollments=False,
     order=None,
     company=None,
-    force_enrollment=False,
 ):  # pylint: disable=too-many-arguments
     """
     Creates local records of a user's enrollment in course runs, and attempts to enroll them
@@ -122,7 +114,7 @@ def create_run_enrollments(
     """
     successful_enrollments = []
     try:
-        enroll_in_edx_course_runs(user, runs, force_enrollment=force_enrollment)
+        enroll_in_edx_course_runs(user, runs)
     except (
         EdxApiEnrollErrorException,
         UnknownEdxApiEnrollException,
@@ -348,7 +340,6 @@ def defer_enrollment(
             order=from_enrollment.order,
             company=from_enrollment.company,
             keep_failed_enrollments=keep_failed_enrollments,
-            force_enrollment=force,
         )
         if to_enrollments:
             from_enrollment = deactivate_run_enrollment(

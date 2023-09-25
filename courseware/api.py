@@ -8,7 +8,7 @@ import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
-from django.db import transaction, IntegrityError
+from django.db import IntegrityError, transaction
 from django.shortcuts import reverse
 from edx_api.client import EdxApi
 from oauth2_provider.models import AccessToken, Application
@@ -616,13 +616,14 @@ def get_enrollment(user: User, course_run: CourseRun):
     )
 
 
-def enroll_in_edx_course_runs(user, course_runs, force_enrollment=False):
+def enroll_in_edx_course_runs(user, course_runs, force_enrollment=True):
     """
     Enrolls a user in edx course runs
 
     Args:
         user (users.models.User): The user to enroll
         course_runs (iterable of CourseRun): The course runs to enroll in
+        force_enrollment (bool): Force enrollments in edX
 
     Returns:
         list of edx_api.enrollments.models.Enrollment:
@@ -632,12 +633,8 @@ def enroll_in_edx_course_runs(user, course_runs, force_enrollment=False):
         EdxApiEnrollErrorException: Raised if the underlying edX API HTTP request fails
         UnknownEdxApiEnrollException: Raised if an unknown error was encountered during the edX API request
     """
-    username = None
-    if force_enrollment:
-        edx_client = get_edx_api_service_client()
-        username = user.username
-    else:
-        edx_client = get_edx_api_client(user)
+    edx_client = get_edx_api_service_client()
+    username = user.username
     results = []
     for course_run in course_runs:
         try:
