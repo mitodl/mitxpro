@@ -94,7 +94,7 @@ from ecommerce.models import (
     ProductCouponAssignment,
 )
 from ecommerce.test_utils import unprotect_version_tables
-from maxmind.factories import GeonameFactory, NetBlockIPv4Factory, NetBlockIPv6Factory
+from maxmind.factories import GeonameFactory, NetBlockIPv4Factory
 from mitxpro.test_utils import update_namespace
 from mitxpro.utils import now_in_utc
 from voucher.factories import VoucherFactory

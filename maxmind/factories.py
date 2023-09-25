@@ -14,6 +14,8 @@ fake = faker.Faker()
 
 
 class GeonameFactory(DjangoModelFactory):
+    """Factory for Geoname"""
+
     geoname_id = fuzzy.FuzzyInteger(0, 2147483647)
     locale_code = "en"
     continent_code = fuzzy.FuzzyText(length=2)
@@ -26,6 +28,8 @@ class GeonameFactory(DjangoModelFactory):
 
 
 class NetBlockIPv4Factory(DjangoModelFactory):
+    """Factory for NetBlock (IPv4 version)"""
+
     is_ipv6 = False
 
     network = fake.unique.ipv4(network=True)
@@ -46,6 +50,8 @@ class NetBlockIPv4Factory(DjangoModelFactory):
 
 
 class NetBlockIPv6Factory(DjangoModelFactory):
+    """Factory for NetBlock (IPv6 version)"""
+
     is_ipv6 = True
 
     network = fake.unique.ipv6(network=True)

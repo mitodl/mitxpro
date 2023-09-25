@@ -104,7 +104,7 @@ def calculate_tax(request_ip: str, item_price: decimal.Decimal) -> CalculatedTax
             )
 
             return (tax_rate.tax_rate, new_amt)
-        except Exception:
+        except TaxRate.DoesNotExist:
             pass
 
     return (0, item_price)

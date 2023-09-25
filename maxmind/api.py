@@ -1,3 +1,5 @@
+"""MaxMind API functions"""
+
 import csv
 import ipaddress
 from decimal import Decimal
@@ -140,10 +142,10 @@ def import_maxmind_database(import_type: str, import_filename: str) -> None:
         elif import_type == MAXMIND_CSV_COUNTRY_BLOCKS_IPV6_LITE:
             models.NetBlock.objects.filter(is_ipv6=False).delete()
 
-        if (
-            import_type == MAXMIND_CSV_COUNTRY_BLOCKS_IPV4_LITE
-            or import_type == MAXMIND_CSV_COUNTRY_BLOCKS_IPV6_LITE
-        ):
+        if import_type in [
+            MAXMIND_CSV_COUNTRY_BLOCKS_IPV4_LITE,
+            MAXMIND_CSV_COUNTRY_BLOCKS_IPV6_LITE,
+        ]:
             models.NetBlock.objects.bulk_create(rows)
 
 
