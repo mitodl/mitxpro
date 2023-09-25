@@ -3,6 +3,7 @@ Test for ecommerce functions
 """
 import hashlib
 import hmac
+import ipaddress
 import uuid
 from base64 import b64encode
 from collections import defaultdict
@@ -11,6 +12,7 @@ from decimal import Decimal
 from unittest.mock import PropertyMock
 
 import factory
+import faker
 import pytest
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import ValidationError
@@ -28,6 +30,7 @@ from ecommerce.api import (
     ISO_8601_FORMAT,
     best_coupon_for_product,
     bulk_assign_product_coupons,
+    calculate_tax,
     complete_order,
     create_coupons,
     create_unfulfilled_order,
@@ -74,6 +77,7 @@ from ecommerce.factories import (
     ProductCouponAssignmentFactory,
     ProductFactory,
     ProductVersionFactory,
+    TaxRateFactory,
 )
 from ecommerce.models import (
     BasketItem,
@@ -90,12 +94,14 @@ from ecommerce.models import (
     ProductCouponAssignment,
 )
 from ecommerce.test_utils import unprotect_version_tables
+from maxmind.factories import GeonameFactory, NetBlockIPv4Factory, NetBlockIPv6Factory
 from mitxpro.test_utils import update_namespace
 from mitxpro.utils import now_in_utc
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
 
 
+FAKE = faker.Factory.create()
 pytestmark = pytest.mark.django_db
 lazy = pytest.lazy_fixture
 # pylint: disable=redefined-outer-name,too-many-lines,unused-argument,too-many-arguments
@@ -1620,3 +1626,39 @@ def test_get_product_from_querystring_id(mocker, qs_product_id, exp_text_id):
     assert patched_get_product.called is (exp_text_id is not None)
     if exp_text_id is not None:
         patched_get_product.assert_called_once_with(exp_text_id)
+
+
+def test_tax_calc_from_ip():
+    """
+    Tests calculation of the tax rate based on a supplied IP address. This
+    creates a tax rate, then a geoname and a netblock for that.
+    """
+    taxrate = TaxRateFactory.create()
+    applicable_geoname = GeonameFactory.create(country_iso_code=taxrate.country_code)
+    applicable_netblock = NetBlockIPv4Factory.create()
+    applicable_netblock.geoname_id = applicable_geoname.geoname_id
+    applicable_netblock.save()
+    applicable_ip = ipaddress.ip_address(
+        applicable_netblock.decimal_ip_end
+        - int(
+            (applicable_netblock.decimal_ip_end - applicable_netblock.decimal_ip_start)
+            / 2
+        )
+    )
+
+    applicable_tax = calculate_tax(applicable_ip, 1000)
+
+    assert applicable_tax[0] == taxrate.tax_rate
+    assert applicable_tax[1] == 1000 + (1000 * Decimal(taxrate.tax_rate / 100))
+
+    nonapplicable_ip = str(
+        ipaddress.ip_address(
+            applicable_netblock.decimal_ip_start - 35
+            if applicable_netblock.decimal_ip_start > 35
+            else applicable_netblock.decimal_ip_end + 35
+        )
+    )
+
+    nonapplicable_tax = calculate_tax(nonapplicable_ip, 1000)
+
+    assert nonapplicable_tax == (0, 1000)

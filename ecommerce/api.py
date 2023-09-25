@@ -7,7 +7,6 @@ import hmac
 import logging
 import re
 import uuid
-import requests
 from base64 import b64encode
 from collections import defaultdict
 from datetime import timedelta
@@ -66,6 +65,7 @@ from ecommerce.models import (
 )
 from ecommerce.utils import positive_or_zero
 from hubspot_xpro.task_helpers import sync_hubspot_deal
+from maxmind.api import ip_to_country_code
 from mitxpro.utils import case_insensitive_equal, first_or_none, now_in_utc
 
 
@@ -90,6 +90,22 @@ def calculate_tax(request_ip: str, item_price: decimal.Decimal) -> CalculatedTax
     Returns:
         tuple(rate applied, adjusted amount): The rate applied and the adjusted amount.
     """
+
+    translated_ip = ip_to_country_code(request_ip)
+
+    if translated_ip:
+        try:
+            tax_rate = TaxRate.objects.filter(
+                active=True, country_code__iexact=translated_ip
+            ).get()
+
+            new_amt = item_price + (
+                decimal.Decimal(item_price) * (tax_rate.tax_rate / 100)
+            )
+
+            return (tax_rate.tax_rate, new_amt)
+        except Exception:
+            pass
 
     return (0, item_price)
 

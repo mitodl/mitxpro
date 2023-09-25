@@ -4,22 +4,22 @@ Factories for MaxMind data
 import ipaddress
 
 import faker
-from factory import LazyFunction, PostGeneration, SubFactory, fuzzy
+from factory import LazyAttribute, LazyFunction, fuzzy
 from factory.django import DjangoModelFactory
 
 from maxmind import models
 
 
-fake = faker.Factory.create()
+fake = faker.Faker()
 
 
 class GeonameFactory(DjangoModelFactory):
     geoname_id = fuzzy.FuzzyInteger(0, 2147483647)
     locale_code = "en"
     continent_code = fuzzy.FuzzyText(length=2)
-    continent_name = fake.last_name()
-    country_iso_code = fake.country_code()
-    country_name = fake.country()
+    continent_name = fake.unique.last_name()
+    country_iso_code = fake.unique.country_code()
+    country_name = fake.unique.country()
 
     class Meta:
         model = models.Geoname
@@ -28,26 +28,18 @@ class GeonameFactory(DjangoModelFactory):
 class NetBlockIPv4Factory(DjangoModelFactory):
     is_ipv6 = False
 
-    network = fake.ipv4(network=True)
+    network = fake.unique.ipv4(network=True)
 
     geoname_id = LazyFunction(lambda: GeonameFactory.create().id)
 
-    decimal_ip_start = PostGeneration(
-        lambda obj, create, extracted, **kwargs: int(
-            ipaddress.IPv4Network(obj.network)[0]
-        )
+    decimal_ip_start = LazyAttribute(
+        lambda obj: int(ipaddress.IPv4Network(obj.network)[0])
     )
-    decimal_ip_end = PostGeneration(
-        lambda obj, create, extracted, **kwargs: int(
-            ipaddress.IPv4Network(obj.network)[-1]
-        )
+    decimal_ip_end = LazyAttribute(
+        lambda obj: int(ipaddress.IPv4Network(obj.network)[-1])
     )
-    ip_start = PostGeneration(
-        lambda obj, create, extracted, **kwargs: ipaddress.IPv4Network(obj.network)[0]
-    )
-    ip_end = PostGeneration(
-        lambda obj, create, extracted, **kwargs: ipaddress.IPv4Network(obj.network)[-1]
-    )
+    ip_start = LazyAttribute(lambda obj: ipaddress.IPv4Network(obj.network)[0])
+    ip_end = LazyAttribute(lambda obj: ipaddress.IPv4Network(obj.network)[-1])
 
     class Meta:
         model = models.NetBlock
@@ -56,26 +48,18 @@ class NetBlockIPv4Factory(DjangoModelFactory):
 class NetBlockIPv6Factory(DjangoModelFactory):
     is_ipv6 = True
 
-    network = fake.ipv6(network=True)
+    network = fake.unique.ipv6(network=True)
 
     geoname_id = LazyFunction(lambda: GeonameFactory.create().id)
 
-    decimal_ip_start = PostGeneration(
-        lambda obj, create, extracted, **kwargs: int(
-            ipaddress.IPv6Network(obj.network)[0]
-        )
+    decimal_ip_start = LazyAttribute(
+        lambda obj: int(ipaddress.IPv6Network(obj.network)[0])
     )
-    decimal_ip_end = PostGeneration(
-        lambda obj, create, extracted, **kwargs: int(
-            ipaddress.IPv6Network(obj.network)[-1]
-        )
+    decimal_ip_end = LazyAttribute(
+        lambda obj: int(ipaddress.IPv6Network(obj.network)[-1])
     )
-    ip_start = PostGeneration(
-        lambda obj, create, extracted, **kwargs: ipaddress.IPv6Network(obj.network)[0]
-    )
-    ip_end = PostGeneration(
-        lambda obj, create, extracted, **kwargs: ipaddress.IPv6Network(obj.network)[-1]
-    )
+    ip_start = LazyAttribute(lambda obj: ipaddress.IPv6Network(obj.network)[0])
+    ip_end = LazyAttribute(lambda obj: ipaddress.IPv6Network(obj.network)[-1])
 
     class Meta:
         model = models.NetBlock

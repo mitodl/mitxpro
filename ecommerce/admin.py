@@ -1,33 +1,33 @@
 """admin classes for ecommerce"""
+from django import forms
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
-from django import forms
 from django.core.exceptions import ValidationError
 
 from courses.models import Course
 from ecommerce.models import (
-    Line,
-    LineRunSelection,
-    ProgramRunLine,
-    Order,
-    OrderAudit,
-    Receipt,
+    BulkCouponAssignment,
+    Company,
     Coupon,
-    CouponVersion,
-    CouponPaymentVersion,
-    CouponPayment,
-    CouponSelection,
     CouponEligibility,
+    CouponPayment,
+    CouponPaymentVersion,
     CouponRedemption,
-    Product,
-    ProductVersion,
+    CouponSelection,
+    CouponVersion,
     DataConsentAgreement,
     DataConsentUser,
-    Company,
-    BulkCouponAssignment,
+    Line,
+    LineRunSelection,
+    Order,
+    OrderAudit,
+    Product,
     ProductCouponAssignment,
+    ProductVersion,
+    ProgramRunLine,
+    Receipt,
+    TaxRate,
 )
-
 from hubspot_xpro.task_helpers import sync_hubspot_deal
 from mitxpro.admin import AuditableModelAdmin, TimestampedModelAdmin
 from mitxpro.utils import get_field_names
@@ -600,6 +600,14 @@ class ProductCouponAssignmentAdmin(admin.ModelAdmin):
     get_product.admin_order_field = "product_coupon__product"
 
 
+class TaxRateAdmin(admin.ModelAdmin):
+    """Admin for TaxRate"""
+
+    list_display = ("id", "country_code", "tax_rate", "tax_rate_name", "active")
+    search_fields = ("country_code", "tax_rate_name", "tax_rate")
+    model = TaxRate
+
+
 admin.site.register(Line, LineAdmin)
 admin.site.register(LineRunSelection, LineRunSelectionAdmin)
 admin.site.register(ProgramRunLine, ProgramRunLineAdmin)
@@ -620,3 +628,4 @@ admin.site.register(DataConsentUser, DataConsentUserAdmin)
 admin.site.register(BulkCouponAssignment, BulkCouponAssignmentAdmin)
 admin.site.register(ProductCouponAssignment, ProductCouponAssignmentAdmin)
 admin.site.register(Company, CompanyAdmin)
+admin.site.register(TaxRate, TaxRateAdmin)

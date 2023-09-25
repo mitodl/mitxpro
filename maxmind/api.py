@@ -165,8 +165,6 @@ def ip_to_country_code(ip_address: str, locale: str = "en") -> str:
 
     netaddr = ipaddress.ip_address(ip_address)
 
-    print(f"{int(netaddr)} - {netaddr}")
-
     ip_qset = models.NetBlock.objects.filter(
         decimal_ip_start__lte=int(netaddr), decimal_ip_end__gte=int(netaddr)
     )
