@@ -17,16 +17,18 @@ The app stores the MaxMind data in its own tables for these reasons:
 - Ease of lookup: Since we just store the data in Postgres, it's available for adhoc queries, and can be optimized with custom indexing if so requierd
 
 The model consists of two tables:
-- Geoname: stores the locations that a given netblock is assigned to, potentially in a variety of locales/languages.
+- `Geoname`: stores the locations that a given netblock is assigned to, potentially in a variety of locales/languages.
    - The available location data is dependent on the import file used. MaxMind provides several options here with varying subsets of data - for example, if you just need country code lookups, you can just import country data.
    - MaxMind provides location data in several localizations, all of which can be loaded simultaneously. The code _expects_ the English locale version to be there. 
    - Because the data is localized, there is a unique constraint on the geoname ID and locale code fields. Also, notably, the `NetBlock` table does _not_ have a foreign key relationship because the key is a composite key.
-- NetBlock: stores the known netblocks, both IPv4 and v6, and maps them to a Geoname entry.
+- `NetBlock`: stores the known netblocks, both IPv4 and v6, and maps them to a Geoname entry.
   - The model supports IPv4 and IPv6, denoted by the `is_ipv6` flag. 
   - While you do not need to load both sets of netblocks, it is recommended as some users may access your service via IPv6 only. If your service is not configured for IPv6, you can get away with just loading the IPv4 netblock data.
 
 There is some transformation of the base MaxMind data that is done before it is
-stored locally. Specifically, the import functionality calculates and stores the first and last IP address in each netblock, in both IP address format (dotted quad or IPv6) and in decimal format. 
+stored locally. Specifically, the import functionality calculates and stores the
+first and last IP address in each netblock, in both IP address format (dotted
+quad or IPv6) and in decimal format. 
 
 ### API
 
