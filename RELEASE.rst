@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.130.0
+Version 0.130.0 (Released September 26, 2023)
 ---------------
 
 - chore(deps): update dependency faker to v13.16.0
