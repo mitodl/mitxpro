@@ -14,7 +14,9 @@ from unittest.mock import PropertyMock
 import factory
 import faker
 import pytest
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ObjectDoesNotExist
+from django.test import RequestFactory
 from rest_framework.exceptions import ValidationError
 
 from affiliate.factories import AffiliateFactory
@@ -1628,25 +1630,54 @@ def test_get_product_from_querystring_id(mocker, qs_product_id, exp_text_id):
         patched_get_product.assert_called_once_with(exp_text_id)
 
 
-def test_tax_calc_from_ip():
+@pytest.mark.parametrize("applicable_rate_and_user_country_match", [[True, False]])
+def test_tax_calc_from_ip(user, applicable_rate_and_user_country_match):
     """
-    Tests calculation of the tax rate based on a supplied IP address. This
-    creates a tax rate, then a geoname and a netblock for that.
+    Tests calculation of the tax rate. Here's the truth table for this:
+
+                                        IP in country       IP not in country
+    Tax rate country = user's country   Tax assessed        No tax assessed
+    Tax rate country != user's country  Tax assessed        No tax assessed
+
     """
-    taxrate = TaxRateFactory.create()
+
+    class FakeRequest:
+        user = AnonymousUser
+        META = {"REMOTE_ADDR": ""}
+
+    request = FakeRequest()
+    request.user = user
+
+    if applicable_rate_and_user_country_match:
+        country_code = user.legal_address.country
+    else:
+        country_code = FAKE.country_code()
+
+        while country_code != user.legal_address.country:
+            country_code = FAKE.country_code()
+
+    taxrate = TaxRateFactory.create(country_code=country_code)
+
     applicable_geoname = GeonameFactory.create(country_iso_code=taxrate.country_code)
     applicable_netblock = NetBlockIPv4Factory.create()
     applicable_netblock.geoname_id = applicable_geoname.geoname_id
     applicable_netblock.save()
-    applicable_ip = ipaddress.ip_address(
-        applicable_netblock.decimal_ip_end
-        - int(
-            (applicable_netblock.decimal_ip_end - applicable_netblock.decimal_ip_start)
-            / 2
+
+    applicable_ip = str(
+        ipaddress.ip_address(
+            applicable_netblock.decimal_ip_end
+            - int(
+                (
+                    applicable_netblock.decimal_ip_end
+                    - applicable_netblock.decimal_ip_start
+                )
+                / 2
+            )
         )
     )
 
-    applicable_tax = calculate_tax(applicable_ip, 1000)
+    request.META["REMOTE_ADDR"] = applicable_ip
+    applicable_tax = calculate_tax(request, 1000)
 
     assert applicable_tax[0] == taxrate.tax_rate
     assert applicable_tax[1] == 1000 + (1000 * Decimal(taxrate.tax_rate / 100))
@@ -1659,6 +1690,7 @@ def test_tax_calc_from_ip():
         )
     )
 
-    nonapplicable_tax = calculate_tax(nonapplicable_ip, 1000)
+    request.META["REMOTE_ADDR"] = nonapplicable_ip
+    nonapplicable_tax = calculate_tax(request, 1000)
 
     assert nonapplicable_tax == (0, 1000)

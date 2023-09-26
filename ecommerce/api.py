@@ -16,7 +16,9 @@ from urllib.parse import quote_plus, urljoin
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Count, F, Max, Prefetch, Q, Subquery
+from django.http import HttpRequest
 from django.urls import reverse
+from ipware import get_client_ip
 from rest_framework.exceptions import ValidationError
 
 import sheets.tasks
@@ -78,11 +80,16 @@ ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 CalculatedTaxRate = tuple[decimal.Decimal, decimal.Decimal]
 
 
-def calculate_tax(request_ip: str, item_price: decimal.Decimal) -> CalculatedTaxRate:
+def calculate_tax(
+    request: HttpRequest, item_price: decimal.Decimal
+) -> CalculatedTaxRate:
     """
     Calculate the tax to be assessed for the given amount.
 
-    This uses
+    This uses the logged in user's profile and their IP to determine whether or
+    not to charge tax - if _both_ the IP's country and the profile country code
+    match, _and_ there's a TaxRate for the country, then we charge tax.
+    Otherwise, we don't.
 
     Args:
         request_ip (str): The user's IP address, for geolocation.
@@ -91,12 +98,19 @@ def calculate_tax(request_ip: str, item_price: decimal.Decimal) -> CalculatedTax
         tuple(rate applied, adjusted amount): The rate applied and the adjusted amount.
     """
 
-    translated_ip = ip_to_country_code(request_ip)
+    client_ip, is_routable = get_client_ip(request)
+    ip_country_code = ip_to_country_code(client_ip)
+    profile_country_code = (
+        request.user.legal_address.country if request.user.is_authenticated else None
+    )
 
-    if translated_ip:
+    if ip_country_code != profile_country_code:
+        return (0, item_price)
+
+    if ip_country_code:
         try:
             tax_rate = TaxRate.objects.filter(
-                active=True, country_code__iexact=translated_ip
+                active=True, country_code__iexact=ip_country_code
             ).get()
 
             new_amt = item_price + (
