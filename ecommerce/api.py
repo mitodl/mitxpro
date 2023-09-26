@@ -98,7 +98,7 @@ def calculate_tax(
         tuple(rate applied, adjusted amount): The rate applied and the adjusted amount.
     """
 
-    client_ip, is_routable = get_client_ip(request)
+    client_ip, _ = get_client_ip(request)
     ip_country_code = ip_to_country_code(client_ip)
     profile_country_code = (
         request.user.legal_address.country if request.user.is_authenticated else None

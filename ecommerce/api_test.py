@@ -16,7 +16,6 @@ import faker
 import pytest
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ObjectDoesNotExist
-from django.test import RequestFactory
 from rest_framework.exceptions import ValidationError
 
 from affiliate.factories import AffiliateFactory
@@ -1642,6 +1641,8 @@ def test_tax_calc_from_ip(user, applicable_rate_and_user_country_match):
     """
 
     class FakeRequest:
+        """Simple class to fake a request for testing - don't need much"""
+
         user = AnonymousUser
         META = {"REMOTE_ADDR": ""}
 
