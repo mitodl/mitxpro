@@ -107,7 +107,11 @@ def determine_visitor_country(request: HttpRequest or None) -> str or None:
     if settings.ECOMMERCE_FORCE_PROFILE_COUNTRY:
         return profile_country_code
 
-    client_ip, _ = get_client_ip(request)
+    try:
+        client_ip, _ = get_client_ip(request)
+    except TypeError:
+        return None
+
     ip_country_code = ip_to_country_code(client_ip)
 
     if ip_country_code == profile_country_code:
