@@ -178,8 +178,11 @@ def test_serialize_basket_coupon_selection(basket_and_coupons):
     }
 
 
-def test_serialize_basket_data_consents(basket_and_agreement, mock_context):
+def test_serialize_basket_data_consents(basket_and_agreement, mock_context, mocker):
     """Test DataConsentUser serialization inside basket"""
+
+    mocker.patch("ipware.get_client_ip", return_value="127.0.0.1")
+
     basket = basket_and_agreement.basket
     serialized_basket = BasketSerializer(
         instance=basket_and_agreement.basket, context=mock_context
@@ -200,8 +203,9 @@ def test_serialize_basket_data_consents(basket_and_agreement, mock_context):
 
 
 @pytest.mark.parametrize("is_live", [True, False])
-def test_serialize_basket(basket_and_agreement, mock_context, is_live):
+def test_serialize_basket(basket_and_agreement, mock_context, is_live, mocker):
     """Test Basket serialization"""
+    mocker.patch("ipware.get_client_ip", return_value="127.0.0.1")
     basket = basket_and_agreement.basket
     selection = CouponSelection.objects.get(basket=basket)
     run = CourseRunSelection.objects.get(basket=basket).run
