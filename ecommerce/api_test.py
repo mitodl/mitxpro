@@ -1681,7 +1681,7 @@ def test_tax_calc_from_ip(user, applicable_rate_and_user_country_match):
     applicable_tax = calculate_tax(request, 1000)
 
     assert applicable_tax[0] == taxrate.tax_rate
-    assert applicable_tax[1] == 1000 + (1000 * Decimal(taxrate.tax_rate / 100))
+    assert applicable_tax[2] == 1000 + (1000 * Decimal(taxrate.tax_rate / 100))
 
     nonapplicable_ip = str(
         ipaddress.ip_address(
@@ -1694,4 +1694,4 @@ def test_tax_calc_from_ip(user, applicable_rate_and_user_country_match):
     request.META["REMOTE_ADDR"] = nonapplicable_ip
     nonapplicable_tax = calculate_tax(request, 1000)
 
-    assert nonapplicable_tax == (0, 1000)
+    assert nonapplicable_tax == (0, "", 1000)

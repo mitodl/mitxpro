@@ -15,16 +15,19 @@ from courses.models import Course, CourseRun, CourseRunEnrollment, Program, Prog
 from ecommerce import models
 from ecommerce.api import (
     best_coupon_for_product,
+    calculate_tax,
     create_coupons,
+    determine_visitor_country,
     get_or_create_data_consent_users,
     get_product_from_querystring_id,
     get_product_version_price_with_discount,
+    get_product_version_price_with_discount_tax,
     get_valid_coupon_versions,
     latest_coupon_version,
     latest_product_version,
 )
 from ecommerce.constants import CYBERSOURCE_CARD_TYPES, DISCOUNT_TYPES
-from ecommerce.models import Basket
+from ecommerce.models import Basket, TaxRate
 from ecommerce.utils import validate_amount
 from mitxpro.serializers import WriteableSerializerMethodField
 from mitxpro.utils import now_in_utc
@@ -309,6 +312,7 @@ class BasketSerializer(serializers.ModelSerializer):
     items = WriteableSerializerMethodField()
     coupons = WriteableSerializerMethodField()
     data_consents = WriteableSerializerMethodField()
+    tax_info = serializers.SerializerMethodField()
 
     @classmethod
     def _serialize_item(cls, *, basket_item, basket, context):
@@ -360,6 +364,32 @@ class BasketSerializer(serializers.ModelSerializer):
         """Get the DataConsentUser objects associated with the basket via coupon and product"""
         data_consents = get_or_create_data_consent_users(instance)
         return DataConsentUserSerializer(instance=data_consents, many=True).data
+
+    def get_tax_info(self, instance):
+        """Get the tax information for the current basket"""
+        request = self.context.get("request", None)
+        tax_info = {
+            "country_code": "",
+            "tax_rate": 0,
+            "tax_rate_name": "",
+        }
+
+        if request and hasattr(request, "user"):
+            # country_code = determine_visitor_country(request)
+            country_code = request.user.legal_address.country
+            if country_code is not None:
+                try:
+                    rate = TaxRate.objects.get(country_code=country_code)
+                except TaxRate.DoesNotExist:
+                    return tax_info
+
+                tax_info["country_code"] = country_code
+                tax_info["tax_rate"] = rate.tax_rate
+                tax_info["tax_rate_name"] = rate.tax_rate_name
+        else:
+            log.error("No request object in get_tax_info")
+
+        return tax_info
 
     @classmethod
     def _get_applicable_coupon_version(cls, basket, product, coupons):
@@ -704,7 +734,7 @@ class BasketSerializer(serializers.ModelSerializer):
         return {"data_consents": data_consents}
 
     class Meta:
-        fields = ["items", "coupons", "data_consents"]
+        fields = ["items", "coupons", "data_consents", "tax_info"]
         model = models.Basket
 
 

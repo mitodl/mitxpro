@@ -145,7 +145,7 @@ class Product(TimestampedModel):
         Returns:
             str: String representing the product title
         """
-        from courses.models import Program, CourseRun
+        from courses.models import CourseRun, Program
 
         content_object = self.content_object
         if isinstance(content_object, Program):
@@ -163,7 +163,7 @@ class Product(TimestampedModel):
         Returns:
             thumbnail_url: image url of the product
         """
-        from courses.models import Program, CourseRun
+        from courses.models import CourseRun, Program
 
         content_object = self.content_object
         if isinstance(content_object, Program):
@@ -182,7 +182,7 @@ class Product(TimestampedModel):
         Returns:
             start_date: start date of the product
         """
-        from courses.models import Program, CourseRun
+        from courses.models import CourseRun, Program
 
         content_object = self.content_object
         if isinstance(content_object, Program):
@@ -322,6 +322,12 @@ class Order(OrderAbstract, AuditableModel):
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders"
     )
     total_price_paid = models.DecimalField(decimal_places=2, max_digits=20)
+    # These represent the tax collected for the entire order.
+    tax_country_code = models.CharField(max_length=2, blank=True, null=True)
+    tax_rate = models.DecimalField(
+        max_digits=6, decimal_places=4, null=True, blank=True, default=0
+    )
+    tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")
 
     objects = OrderManager()
 
@@ -342,7 +348,10 @@ class Order(OrderAbstract, AuditableModel):
         """
         Get a serialized representation of the Order and any attached Basket and Lines
         """
-        from ecommerce.api import get_product_version_price_with_discount
+        from ecommerce.api import (
+            get_product_version_price_with_discount,
+            get_product_version_price_with_discount_tax,
+        )
 
         # should be 0 or 1 coupons, and only one line and product
         coupon_redemption = self.couponredemption_set.first()
@@ -395,6 +404,19 @@ class Order(OrderAbstract, AuditableModel):
                 if line is not None
                 else ""
             ),
+            "total_tax": str(
+                get_product_version_price_with_discount_tax(
+                    coupon_version=coupon_redemption.coupon_version
+                    if coupon_redemption is not None
+                    else None,
+                    product_version=line.product_version,
+                    tax_rate=self.tax_rate,
+                )
+                if line is not None
+                else ""
+            ),
+            "tax_rate": self.tax_rate,
+            "tax_name": self.tax_rate_name,
             "receipts": [
                 serialize_model_object(receipt) for receipt in self.receipt_set.all()
             ],

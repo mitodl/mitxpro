@@ -77,7 +77,39 @@ ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
 # Calculated Tax Rate is (rate applied, adjusted amount)
-CalculatedTaxRate = tuple[decimal.Decimal, decimal.Decimal]
+CalculatedTaxRate = tuple[decimal.Decimal, str, decimal.Decimal]
+
+
+def determine_visitor_country(request: HttpRequest) -> str or None:
+    """
+    Determines the country the user is in for tax purposes.
+
+    For this, we require that the user has a country specified and that the IP
+    they're connecting from is assigned to the same country.
+
+    Args:
+        request (HttpRequest): the current request object
+    Returns:
+        The resolved country, or None
+    """
+
+    if not request.user.is_authenticated or request.user.legal_address.country is None:
+        return None
+
+    profile_country_code = (
+        request.user.legal_address.country if request.user.is_authenticated else None
+    )
+
+    if settings.ECOMMERCE_FORCE_PROFILE_COUNTRY:
+        return profile_country_code
+
+    client_ip, _ = get_client_ip(request)
+    ip_country_code = ip_to_country_code(client_ip)
+
+    if ip_country_code == profile_country_code:
+        return ip_country_code
+
+    return None
 
 
 def calculate_tax(
@@ -95,33 +127,29 @@ def calculate_tax(
         request_ip (str): The user's IP address, for geolocation.
         item_price (Decimal): The amount to be taxed.
     Returns:
-        tuple(rate applied, adjusted amount): The rate applied and the adjusted amount.
+        tuple(rate applied, country, adjusted amount): The rate applied and the adjusted amount.
     """
 
-    client_ip, _ = get_client_ip(request)
-    ip_country_code = ip_to_country_code(client_ip)
-    profile_country_code = (
-        request.user.legal_address.country if request.user.is_authenticated else None
-    )
+    resolved_country_code = determine_visitor_country(request)
 
-    if ip_country_code != profile_country_code:
-        return (0, item_price)
+    if resolved_country_code is None:
+        return (0, "", item_price)
 
-    if ip_country_code:
+    if resolved_country_code:
         try:
             tax_rate = TaxRate.objects.filter(
-                active=True, country_code__iexact=ip_country_code
+                active=True, country_code__iexact=resolved_country_code
             ).get()
 
             new_amt = item_price + (
                 decimal.Decimal(item_price) * (tax_rate.tax_rate / 100)
             )
 
-            return (tax_rate.tax_rate, new_amt)
+            return (tax_rate.tax_rate, resolved_country_code, new_amt)
         except TaxRate.DoesNotExist:
             pass
 
-    return (0, item_price)
+    return (0, "", item_price)
 
 
 # pylint: disable=too-many-lines
@@ -222,19 +250,26 @@ def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addre
 
     line_items = {}
     total = 0
+    total_tax_assessed = 0
     for i, line in enumerate(order.lines.all()):
         product_version = line.product_version
         unit_price = get_product_version_price_with_discount(
             coupon_version=coupon_version, product_version=product_version
         )
+        tax_assessed = get_product_version_price_with_discount_tax(
+            coupon_version=coupon_version,
+            product_version=product_version,
+            tax_rate=order.tax_rate,
+        )
         line_items[f"item_{i}_code"] = str(product_version.product.content_type)
         line_items[f"item_{i}_name"] = str(product_version.description)[:254]
         line_items[f"item_{i}_quantity"] = line.quantity
         line_items[f"item_{i}_sku"] = product_version.product.content_object.id
-        line_items[f"item_{i}_tax_amount"] = "0"
+        line_items[f"item_{i}_tax_amount"] = str(tax_assessed)
         line_items[f"item_{i}_unit_price"] = str(unit_price)
 
         total += unit_price
+        total_tax_assessed += tax_assessed
 
     # At the moment there should only be one line
     product_version = order.lines.first().product_version
@@ -264,7 +299,8 @@ def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addre
 
     return {
         "access_key": settings.CYBERSOURCE_ACCESS_KEY,
-        "amount": str(total),
+        "amount": str(total + total_tax_assessed),
+        "tax_amount": str(total_tax_assessed),
         "consumer_id": order.purchaser.username,
         "currency": "USD",
         "locale": "en-us",
@@ -573,6 +609,34 @@ def get_product_version_price_with_discount(*, coupon_version, product_version):
     return positive_or_zero(price - discount_amount)
 
 
+def get_product_version_price_with_discount_tax(
+    *, coupon_version, product_version, tax_rate
+):
+    """
+    Uses get_product_version_price_with_discount to get the price for the item
+    and then add the specified tax amount to it.
+
+    Args:
+        coupon_version (CouponVersion): the CouponVersion object
+        product_version (ProductVersion): the ProductVersion object
+        tax_rate (Decimal): the tax rate to apply
+
+    Returns:
+        Decimal: the tax that should be applied to the product
+    """
+
+    return (
+        0
+        if not tax_rate
+        else decimal.Decimal(
+            get_product_version_price_with_discount(
+                coupon_version=coupon_version, product_version=product_version
+            )
+        )
+        * (100 / tax_rate)
+    )
+
+
 def redeem_coupon(coupon_version, order):
     """
     Redeem a coupon for an order by creating/updating the CouponRedemption for that order.
@@ -749,14 +813,20 @@ def get_order_programs(order):
     ]
 
 
-def create_unfulfilled_order(validated_basket, affiliate_id=None):
+def create_unfulfilled_order(validated_basket, affiliate_id=None, **kwargs):
     """
     Create a new Order which is not fulfilled for a purchasable Product. Note that validation should
     be done in the basket REST API so the validation is not done here (different from MicroMasters).
 
+    This now also takes the request as an argument, so that the necessary tax
+    fields can be filled out and tax calculated as well.
+
     Args:
         validated_basket (ValidatedBasket): The validated Basket and related objects
         affiliate_id (Optional[int]): The id of the Affiliate record to associate with this order
+
+    Keyword Args:
+        request (HttpRequest): The current request object, for tax calculation.
 
     Returns:
         Order: A newly created Order for the Product in the basket
@@ -766,10 +836,21 @@ def create_unfulfilled_order(validated_basket, affiliate_id=None):
             coupon_version=validated_basket.coupon_version,
             product_version=validated_basket.product_version,
         )
+        country_code = determine_visitor_country(kwargs["request"])
+
+        try:
+            tax_rate_info = TaxRate.objects.get(country_code=country_code)
+        except TaxRate.DoesNotExist or TaxRate.MultipleObjectsReturned:
+            # not using get_or_create here because we don't want the rate to stick around
+            tax_rate_info = TaxRate()
+
         order = Order.objects.create(
             status=Order.CREATED,
             purchaser=validated_basket.basket.user,
             total_price_paid=total_price_paid,
+            tax_country_code=country_code,
+            tax_rate=tax_rate_info.tax_rate,
+            tax_rate_name=tax_rate_info.tax_rate_name,
         )
         line = Line.objects.create(
             order=order,
