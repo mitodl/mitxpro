@@ -375,8 +375,7 @@ class BasketSerializer(serializers.ModelSerializer):
         }
 
         if request and hasattr(request, "user"):
-            # country_code = determine_visitor_country(request)
-            country_code = request.user.legal_address.country
+            country_code = determine_visitor_country(request)
             if country_code is not None:
                 try:
                     rate = TaxRate.objects.get(country_code=country_code)
@@ -1040,6 +1039,9 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
             id=instance.id,
             created_on=instance.created_on,
             reference_number=instance.reference_number,
+            tax_rate=instance.tax_rate,
+            tax_rate_name=instance.tax_rate_name,
+            tax_country_code=instance.tax_country_code,
         )
 
     def get_coupon(self, instance):

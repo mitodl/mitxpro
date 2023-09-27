@@ -1,4 +1,6 @@
 {% extends "email_base.html" %}
+{% load calculate_tax %}
+{% load calculate_tax_total %}
 
 {% block content %}
 <tr class="receipt-new-wrapper" style="font: 14px/22px 'Arial', sans-serif; margin: 0 auto; padding: 0 20px">
@@ -18,7 +20,7 @@
             <p>
                 {% if order.reference_number  %}<strong style="font-weight: 700;">Order Number:</strong> {{ order.reference_number }}<br> {% endif %}
                 <strong style="font-weight: 700;">Order Date:</strong><span> {{ order.created_on|date:"F j, Y"}} </span><br>
-                <strong style="font-weight: 700;">Order Total:</strong> ${{ order_total }}<br>
+                <strong style="font-weight: 700;">Order Total:</strong> ${{ order_total|calculate_tax_total:order.tax_rate }}<br>
             </p>
             {% for line in lines %}
             <p>
@@ -30,7 +32,8 @@
                 <strong style="font-weight: 700;">Quantity:</strong>  {{ line.quantity }}<br>
                 <strong style="font-weight: 700;">Unit Price:</strong> ${{ line.price }}<br>
                 <strong style="font-weight: 700;">Discount:</strong> ${{ line.discount }}<br>
-                <strong style="font-weight: 700;">Total Paid:</strong> ${{ line.total_paid }}
+                <strong style="font-weight: 700;">Tax:</strong> ${{ line.total_pad|calculate_tax:order.tax_rate }}<br>
+                <strong style="font-weight: 700;">Total Paid:</strong> ${{ line.total_paid|calculate_tax_total:order.tax_rate }}
             </p>
             {% endfor %}
 
