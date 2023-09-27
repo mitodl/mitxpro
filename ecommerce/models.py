@@ -415,7 +415,7 @@ class Order(OrderAbstract, AuditableModel):
                 if line is not None
                 else ""
             ),
-            "tax_rate": self.tax_rate,
+            "tax_rate": str(self.tax_rate),
             "tax_name": self.tax_rate_name,
             "receipts": [
                 serialize_model_object(receipt) for receipt in self.receipt_set.all()

@@ -77,6 +77,9 @@ class OrderFactory(DjangoModelFactory):
     purchaser = SubFactory(UserFactory)
     status = fuzzy.FuzzyChoice(choices=models.Order.STATUSES)
     total_price_paid = fuzzy.FuzzyDecimal(low=0, high=100)
+    tax_rate = 0
+    tax_rate_name = ""
+    tax_country_code = ""
 
     class Meta:
         model = models.Order

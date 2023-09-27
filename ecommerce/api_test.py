@@ -14,6 +14,7 @@ from unittest.mock import PropertyMock
 import factory
 import faker
 import pytest
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import ValidationError
@@ -236,6 +237,7 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product, use
     assert payload == {
         "access_key": CYBERSOURCE_ACCESS_KEY,
         "amount": str(total_price),
+        "tax_amount": "0.00",
         "consumer_id": username,
         "currency": "USD",
         "item_0_code": "courses | program"
@@ -244,19 +246,19 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product, use
         "item_0_name": line1.product_version.description,
         "item_0_quantity": line1.quantity,
         "item_0_sku": line1.product_version.product.content_object.id,
-        "item_0_tax_amount": "0",
+        "item_0_tax_amount": "0.00",
         "item_0_unit_price": str(line1.product_version.price),
         "item_1_code": "courses | course run",
         "item_1_name": line2.product_version.description,
         "item_1_quantity": line2.quantity,
         "item_1_sku": line2.product_version.product.content_object.id,
-        "item_1_tax_amount": "0",
+        "item_1_tax_amount": "0.00",
         "item_1_unit_price": str(line2.product_version.price),
         "item_2_code": "courses | program",
         "item_2_name": line3.product_version.description,
         "item_2_quantity": line3.quantity,
         "item_2_sku": line3.product_version.product.content_object.id,
-        "item_2_tax_amount": "0",
+        "item_2_tax_amount": "0.00",
         "item_2_unit_price": str(line3.product_version.price),
         "line_item_count": 3,
         "locale": "en-us",
@@ -1629,7 +1631,7 @@ def test_get_product_from_querystring_id(mocker, qs_product_id, exp_text_id):
         patched_get_product.assert_called_once_with(exp_text_id)
 
 
-@pytest.mark.parametrize("applicable_rate_and_user_country_match", [[True, False]])
+@pytest.mark.parametrize("applicable_rate_and_user_country_match", [True, False])
 def test_tax_calc_from_ip(user, applicable_rate_and_user_country_match):
     """
     Tests calculation of the tax rate. Here's the truth table for this:
@@ -1639,6 +1641,8 @@ def test_tax_calc_from_ip(user, applicable_rate_and_user_country_match):
     Tax rate country != user's country  Tax assessed        No tax assessed
 
     """
+
+    settings.ECOMMERCE_FORCE_PROFILE_COUNTRY = False
 
     class FakeRequest:
         """Simple class to fake a request for testing - don't need much"""

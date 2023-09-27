@@ -15,13 +15,11 @@ from courses.models import Course, CourseRun, CourseRunEnrollment, Program, Prog
 from ecommerce import models
 from ecommerce.api import (
     best_coupon_for_product,
-    calculate_tax,
     create_coupons,
     determine_visitor_country,
     get_or_create_data_consent_users,
     get_product_from_querystring_id,
     get_product_version_price_with_discount,
-    get_product_version_price_with_discount_tax,
     get_valid_coupon_versions,
     latest_coupon_version,
     latest_product_version,
@@ -365,7 +363,7 @@ class BasketSerializer(serializers.ModelSerializer):
         data_consents = get_or_create_data_consent_users(instance)
         return DataConsentUserSerializer(instance=data_consents, many=True).data
 
-    def get_tax_info(self, instance):
+    def get_tax_info(self, _):
         """Get the tax information for the current basket"""
         request = self.context.get("request", None)
         tax_info = {

@@ -80,7 +80,7 @@ ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 CalculatedTaxRate = tuple[decimal.Decimal, str, decimal.Decimal]
 
 
-def determine_visitor_country(request: HttpRequest) -> str or None:
+def determine_visitor_country(request: HttpRequest or None) -> str or None:
     """
     Determines the country the user is in for tax purposes.
 
@@ -93,7 +93,11 @@ def determine_visitor_country(request: HttpRequest) -> str or None:
         The resolved country, or None
     """
 
-    if not request.user.is_authenticated or request.user.legal_address.country is None:
+    if (
+        not request
+        or not request.user.is_authenticated
+        or request.user.legal_address.country is None
+    ):
         return None
 
     profile_country_code = (
@@ -844,11 +848,13 @@ def create_unfulfilled_order(validated_basket, affiliate_id=None, **kwargs):
             coupon_version=validated_basket.coupon_version,
             product_version=validated_basket.product_version,
         )
-        country_code = determine_visitor_country(kwargs["request"])
+        country_code = determine_visitor_country(
+            kwargs["request"] if "request" in kwargs else None
+        )
 
         try:
             tax_rate_info = TaxRate.objects.get(country_code=country_code)
-        except TaxRate.DoesNotExist or TaxRate.MultipleObjectsReturned:
+        except (TaxRate.DoesNotExist, TaxRate.MultipleObjectsReturned):
             # not using get_or_create here because we don't want the rate to stick around
             tax_rate_info = TaxRate()
 
