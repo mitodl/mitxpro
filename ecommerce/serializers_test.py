@@ -7,53 +7,46 @@ from decimal import Decimal
 import pytest
 from rest_framework.exceptions import ValidationError
 
-from mitxpro.test_utils import any_instance_of
 from cms.factories import CoursePageFactory, ProgramPageFactory
+from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from courses.factories import (
     CourseFactory,
-    ProgramFactory,
     CourseRunFactory,
+    ProgramFactory,
     ProgramRunFactory,
 )
 from courses.serializers import CourseSerializer
-from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from ecommerce.api import get_readable_id, round_half_up
-from ecommerce.constants import (
-    CYBERSOURCE_CARD_TYPES,
-    DISCOUNT_TYPE_PERCENT_OFF,
-)
+from ecommerce.constants import CYBERSOURCE_CARD_TYPES, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.factories import (
-    ProductVersionFactory,
-    ProductFactory,
     CompanyFactory,
-    DataConsentUserFactory,
     CouponFactory,
-    CouponPaymentVersionFactory,
     CouponPaymentFactory,
+    CouponPaymentVersionFactory,
+    DataConsentUserFactory,
     LineFactory,
+    ProductFactory,
+    ProductVersionFactory,
     ReceiptFactory,
 )
-from ecommerce.models import (
-    CouponSelection,
-    CourseRunSelection,
-    DataConsentUser,
-    Order,
-)
+from ecommerce.models import CouponSelection, CourseRunSelection, DataConsentUser, Order
 from ecommerce.serializers import (
-    CouponSelectionSerializer,
     BasketSerializer,
-    SingleUseCouponSerializer,
-    PromoCouponSerializer,
+    CompanySerializer,
+    CouponPaymentSerializer,
     CouponPaymentVersionDetailSerializer,
     CouponPaymentVersionSerializer,
-    CouponPaymentSerializer,
-    FullProductVersionSerializer,
-    CompanySerializer,
-    DataConsentUserSerializer,
+    CouponSelectionSerializer,
     CouponSerializer,
+    DataConsentUserSerializer,
+    FullProductVersionSerializer,
     OrderReceiptSerializer,
     ProgramRunSerializer,
+    PromoCouponSerializer,
+    SingleUseCouponSerializer,
 )
+from mitxpro.test_utils import any_instance_of
+
 
 pytestmark = [pytest.mark.django_db]
 
@@ -229,6 +222,11 @@ def test_serialize_basket(basket_and_agreement, mock_context, is_live):
         ],
         "coupons": [CouponSelectionSerializer(selection).data],
         "data_consents": [DataConsentUserSerializer(data_consent).data],
+        "tax_info": {
+            "country_code": "",
+            "tax_rate": 0,
+            "tax_rate_name": "",
+        },
     }
 
 
@@ -464,6 +462,9 @@ def test_serialize_order_receipt(receipt_data):
             "id": order.id,
             "created_on": order.created_on,
             "reference_number": order.reference_number,
+            "tax_country_code": "",
+            "tax_rate": 0,
+            "tax_rate_name": "",
         },
         "purchaser": {
             "first_name": purchaser.first_name,

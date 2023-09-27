@@ -294,7 +294,7 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
                                     sum(float(line["total_paid"]) for line in lines)
                                     + (
                                         sum(float(line["total_paid"]) for line in lines)
-                                        * (order.tax_rate / 100)
+                                        * (order["tax_rate"] / 100)
                                     ),
                                     ".2f",
                                 ),

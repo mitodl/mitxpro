@@ -318,7 +318,8 @@ def test_order_affiliate(basket_client, mocker, basket_and_coupons):
     basket_client.get(f"/?{AFFILIATE_QS_PARAM}={affiliate.code}")
     resp = basket_client.post(reverse("checkout"))
     assert resp.status_code == status.HTTP_200_OK
-    assert create_order_mock.call_args_list[0][1] == dict(affiliate_id=affiliate.id)
+    assert "affiliate_id" in create_order_mock.call_args_list[0][1]
+    assert create_order_mock.call_args_list[0][1]["affiliate_id"] == affiliate.id
 
 
 def test_missing_fields(basket_client, mocker):
