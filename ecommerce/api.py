@@ -634,21 +634,23 @@ def get_product_version_price_with_discount_tax(
         tax_rate (Decimal): the tax rate to apply
 
     Returns:
-        tuple: product price and tax assessed
+        dict:
+        - price (Decimal): discounted price for the Product
+        - tax_assessed (Decimal): tax assessed for the discounted price
     """
 
     product_version_price = get_product_version_price_with_discount(
         coupon_version=coupon_version, product_version=product_version
     )
 
-    return (
-        product_version_price,
-        (
+    return {
+        "price": product_version_price,
+        "tax_assessed": (
             0
             if not tax_rate
             else decimal.Decimal(product_version_price * (tax_rate / 100))
         ),
-    )
+    }
 
 
 def redeem_coupon(coupon_version, order):

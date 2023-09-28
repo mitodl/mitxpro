@@ -108,7 +108,7 @@ def test_order_audit(has_user, has_lines):
                 product_version=lines[0].product_version,
                 coupon_version=order.couponredemption_set.first().coupon_version,
                 tax_rate=order.tax_rate,
-            )[1]
+            )["tax_assessed"]
         )
         if has_lines
         else "",

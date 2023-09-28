@@ -362,7 +362,7 @@ class Order(OrderAbstract, AuditableModel):
                 tax_rate=self.tax_rate,
             )
             if line is not None
-            else ["", ""]
+            else {"price": "", "tax_assessed": ""}
         )
 
         return {
@@ -402,8 +402,8 @@ class Order(OrderAbstract, AuditableModel):
                 enrollment.run.courseware_id
                 for enrollment in self.courserunenrollment_set.all()
             ],
-            "total_price": str(price_with_tax[0]),
-            "total_tax": str(price_with_tax[1]),
+            "total_price": str(price_with_tax["price"]),
+            "total_tax": str(price_with_tax["tax_assessed"]),
             "tax_rate": str(self.tax_rate),
             "tax_name": self.tax_rate_name,
             "receipts": [
