@@ -967,26 +967,26 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
         coupon_redemption = instance.couponredemption_set.first()
         lines = []
         for line in instance.lines.all():
-            total_paid = line.product_version.price * line.quantity
+            coupon_version = coupon_redemption.coupon_version if coupon_redemption else None
             tax_paid = get_product_version_price_with_discount_tax(
-                coupon_version=coupon_redemption.coupon_version, product_version=line.product_version, tax_rate=instance.tax_rate
+                coupon_version=coupon_version, product_version=line.product_version, tax_rate=instance.tax_rate
+            ) * line.quantity
+            total_price = (
+                get_product_version_price_with_discount(
+                    coupon_version=coupon_version,
+                    product_version=line.product_version,
+                )
+                * line.quantity
             )
-            discount = 0.0
+            total_paid = total_price + tax_paid
+            discount = (line.product_version.price * line.quantity) - total_price
+
             dates = CourseRunEnrollment.objects.filter(
                 order_id=instance.id, change_status__isnull=True
             ).aggregate(
                 start_date=dj_models.Min("run__start_date"),
                 end_date=dj_models.Max("run__end_date"),
             )
-            if coupon_redemption:
-                total_paid = (
-                    get_product_version_price_with_discount(
-                        coupon_version=coupon_redemption.coupon_version,
-                        product_version=line.product_version,
-                    )
-                    * line.quantity
-                )
-                discount = line.product_version.price - total_paid
 
             content_object = line.product_version.product.content_object
             (course, program, certificate_page, CEUs) = (None, None, None, None)
