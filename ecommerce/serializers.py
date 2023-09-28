@@ -20,6 +20,7 @@ from ecommerce.api import (
     get_or_create_data_consent_users,
     get_product_from_querystring_id,
     get_product_version_price_with_discount,
+    get_product_version_price_with_discount_tax,
     get_valid_coupon_versions,
     latest_coupon_version,
     latest_product_version,
@@ -967,6 +968,9 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
         lines = []
         for line in instance.lines.all():
             total_paid = line.product_version.price * line.quantity
+            tax_paid = get_product_version_price_with_discount_tax(
+                coupon_version=coupon_redemption.coupon_version, product_version=line.product_version, tax_rate=instance.tax_rate
+            )
             discount = 0.0
             dates = CourseRunEnrollment.objects.filter(
                 order_id=instance.id, change_status__isnull=True
@@ -1013,6 +1017,7 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                 dict(
                     quantity=line.quantity,
                     total_paid=str(total_paid),
+                    tax_paid=tax_paid,
                     discount=str(discount),
                     CEUs=str(CEUs) if CEUs else None,
                     **BaseProductVersionSerializer(line.product_version).data,

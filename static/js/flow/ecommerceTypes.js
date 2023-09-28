@@ -105,16 +105,24 @@ type BasketItemPayload = {
   run_ids?: Array<number>
 }
 
+type TaxInfo = {
+  country_code: string,
+  tax_rate: number,
+  tax_rate_name: string,
+}
+
 export type BasketPayload = {
   items?: Array<BasketItemPayload>,
   coupons?: Array<{ code: string }>,
-  data_consents?: Array<number>
+  data_consents?: Array<number>,
+  tax_info?: TaxInfo,
 }
 
 export type OrderLine = {
   price: string,
   quantity: number,
   total_paid: string,
+  tax_paid: string,
   discount: string,
   content_title: string,
   readable_id: string,

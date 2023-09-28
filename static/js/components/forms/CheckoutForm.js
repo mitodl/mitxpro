@@ -12,6 +12,8 @@ import { formatErrors, formatSuccessMessage } from "../../lib/form"
 import {
   calculateDiscount,
   calculatePrice,
+  calculateTax,
+  calculateTotalAfterTax,
   formatPrice,
   formatRunTitle
 } from "../../lib/ecommerce"
@@ -344,9 +346,18 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                   </div>
                 ) : null}
                 <div className="bar" />
+                <div className="flex-row total-before-tax-row">
+                  <span>Total before tax:</span>
+                  <span>{formatPrice(calculatePrice(item, coupon))}</span>
+                </div>
+                <div className="flex-row tax-row">
+                  <span>Tax:</span>
+                  <span>{formatPrice(calculateTax(item, coupon, basket.tax_info.tax_rate))}</span>
+                </div>
+                <div className="bar" />
                 <div className="flex-row total-row">
                   <span>Total:</span>
-                  <span>{formatPrice(calculatePrice(item, coupon))}</span>
+                  <span>{formatPrice(calculateTotalAfterTax(item, coupon, basket.tax_info.tax_rate))}</span>
                 </div>
               </div>
               <div>
