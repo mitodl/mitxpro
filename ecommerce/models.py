@@ -349,7 +349,6 @@ class Order(OrderAbstract, AuditableModel):
         Get a serialized representation of the Order and any attached Basket and Lines
         """
         from ecommerce.api import (
-            get_product_version_price_with_discount,
             get_product_version_price_with_discount_tax,
         )
 
@@ -357,11 +356,12 @@ class Order(OrderAbstract, AuditableModel):
         coupon_redemption = self.couponredemption_set.first()
         line = self.lines.first()
         price_with_tax = (
-            get_product_version_price_with_discount(
+            get_product_version_price_with_discount_tax(
                 coupon_version=coupon_redemption.coupon_version
                 if coupon_redemption is not None
                 else None,
                 product_version=line.product_version,
+                tax_rate=self.tax_rate,
             )
             if line is not None
             else ""
