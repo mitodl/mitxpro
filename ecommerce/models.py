@@ -840,6 +840,7 @@ class TaxRate(TimestampedModel):
     active = models.BooleanField(default=True)
 
     def to_dict(self):
+        """Returns object data as dict"""
         return {
             "country_code": self.country_code,
             "tax_rate": self.tax_rate,
