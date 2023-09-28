@@ -97,7 +97,8 @@ export type B2BCouponStatusResponse = {
 export type BasketResponse = {
   items: Array<BasketItem>,
   coupons: Array<CouponSelection>,
-  data_consents: Array<DataConsentUser>
+  data_consents: Array<DataConsentUser>,
+  tax_info: TaxInfo,
 }
 
 type BasketItemPayload = {
@@ -105,7 +106,7 @@ type BasketItemPayload = {
   run_ids?: Array<number>
 }
 
-type TaxInfo = {
+export type TaxInfo = {
   country_code: string,
   tax_rate: number,
   tax_rate_name: string,
