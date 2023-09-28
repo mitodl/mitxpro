@@ -967,10 +967,17 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
         coupon_redemption = instance.couponredemption_set.first()
         lines = []
         for line in instance.lines.all():
-            coupon_version = coupon_redemption.coupon_version if coupon_redemption else None
-            tax_paid = get_product_version_price_with_discount_tax(
-                coupon_version=coupon_version, product_version=line.product_version, tax_rate=instance.tax_rate
-            ) * line.quantity
+            coupon_version = (
+                coupon_redemption.coupon_version if coupon_redemption else None
+            )
+            tax_paid = (
+                get_product_version_price_with_discount_tax(
+                    coupon_version=coupon_version,
+                    product_version=line.product_version,
+                    tax_rate=instance.tax_rate,
+                )
+                * line.quantity
+            )
             total_price = (
                 get_product_version_price_with_discount(
                     coupon_version=coupon_version,
