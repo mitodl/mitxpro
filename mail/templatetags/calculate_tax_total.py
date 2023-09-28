@@ -1,4 +1,6 @@
 """Calculate tax charged for an item"""
+from decimal import Decimal
+
 from django import template
 
 from mail.templatetags.calculate_tax import calculate_tax
@@ -17,6 +19,8 @@ def calculate_tax_total(total_paid, tax_rate):
         tax_rate (Decimal): Tax rate to assess as a whole number (18 rather than 0.18)
 
     Returns:
-        datetime: the parsed datetime
+        Decimal: the total plus tax assessed, quantized to .01
     """
-    return calculate_tax(total_paid, tax_rate) + total_paid
+    return Decimal(calculate_tax(total_paid, tax_rate) + total_paid).quantize(
+        Decimal("0.01")
+    )

@@ -366,27 +366,18 @@ class BasketSerializer(serializers.ModelSerializer):
     def get_tax_info(self, _):
         """Get the tax information for the current basket"""
         request = self.context.get("request", None)
-        tax_info = {
-            "country_code": "",
-            "tax_rate": 0,
-            "tax_rate_name": "",
-        }
 
-        if request and hasattr(request, "user"):
-            country_code = determine_visitor_country(request)
-            if country_code is not None:
-                try:
-                    rate = TaxRate.objects.get(country_code=country_code)
-                except TaxRate.DoesNotExist:
-                    return tax_info
+        try:
+            if request and hasattr(request, "user"):
+                country_code = determine_visitor_country(request)
+                if country_code is not None:
+                    return TaxRate.objects.get(country_code=country_code).__dict__
+            else:
+                log.error("No request object in get_tax_info")
+        except TaxRate.DoesNotExist:
+            pass
 
-                tax_info["country_code"] = country_code
-                tax_info["tax_rate"] = rate.tax_rate
-                tax_info["tax_rate_name"] = rate.tax_rate_name
-        else:
-            log.error("No request object in get_tax_info")
-
-        return tax_info
+        return TaxRate().__dict__
 
     @classmethod
     def _get_applicable_coupon_version(cls, basket, product, coupons):

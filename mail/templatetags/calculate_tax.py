@@ -1,4 +1,6 @@
 """Calculate tax charged for an item"""
+from decimal import Decimal
+
 from django import template
 
 
@@ -15,6 +17,6 @@ def calculate_tax(total_paid, tax_rate):
         tax_rate (Decimal): Tax rate to assess as a whole number (18 rather than 0.18)
 
     Returns:
-        datetime: the parsed datetime
+        Decimal: the tax assessed, quantized to .01
     """
-    return total_paid * (tax_rate / 100)
+    return Decimal(total_paid * (tax_rate / 100)).quantize(Decimal(".01"))

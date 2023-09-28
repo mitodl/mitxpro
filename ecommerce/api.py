@@ -132,7 +132,7 @@ def calculate_tax(
     Otherwise, we don't.
 
     Args:
-        request_ip (str): The user's IP address, for geolocation.
+        request_ip (HttpRequest): The current request.
         item_price (Decimal): The amount to be taxed.
     Returns:
         tuple(rate applied, country, adjusted amount): The rate applied and the adjusted amount.
@@ -143,19 +143,18 @@ def calculate_tax(
     if resolved_country_code is None:
         return (0, "", item_price)
 
-    if resolved_country_code:
-        try:
-            tax_rate = TaxRate.objects.filter(
-                active=True, country_code__iexact=resolved_country_code
-            ).get()
+    try:
+        tax_rate = TaxRate.objects.filter(
+            active=True, country_code__iexact=resolved_country_code
+        ).get()
 
-            new_amt = item_price + (
-                decimal.Decimal(item_price) * (tax_rate.tax_rate / 100)
-            )
+        tax_inclusive_amt = item_price + (
+            decimal.Decimal(item_price) * (tax_rate.tax_rate / 100)
+        )
 
-            return (tax_rate.tax_rate, resolved_country_code, new_amt)
-        except TaxRate.DoesNotExist:
-            pass
+        return (tax_rate.tax_rate, resolved_country_code, tax_inclusive_amt)
+    except TaxRate.DoesNotExist:
+        pass
 
     return (0, "", item_price)
 
@@ -261,10 +260,7 @@ def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addre
     total_tax_assessed = 0
     for i, line in enumerate(order.lines.all()):
         product_version = line.product_version
-        unit_price = get_product_version_price_with_discount(
-            coupon_version=coupon_version, product_version=product_version
-        )
-        tax_assessed = get_product_version_price_with_discount_tax(
+        (unit_price, tax_assessed) = get_product_version_price_with_discount_tax(
             coupon_version=coupon_version,
             product_version=product_version,
             tax_rate=order.tax_rate,
@@ -638,18 +634,16 @@ def get_product_version_price_with_discount_tax(
         tax_rate (Decimal): the tax rate to apply
 
     Returns:
-        Decimal: the tax that should be applied to the product
+        tuple: product price and tax assessed
     """
 
+    product_version_price = get_product_version_price_with_discount(
+        coupon_version=coupon_version, product_version=product_version
+    )
+
     return (
-        0
-        if not tax_rate
-        else decimal.Decimal(
-            get_product_version_price_with_discount(
-                coupon_version=coupon_version, product_version=product_version
-            )
-        )
-        * (tax_rate / 100)
+        product_version_price,
+        (0 if not tax_rate else decimal.Decimal() * (tax_rate / 100)),
     )
 
 

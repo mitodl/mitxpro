@@ -356,6 +356,16 @@ class Order(OrderAbstract, AuditableModel):
         # should be 0 or 1 coupons, and only one line and product
         coupon_redemption = self.couponredemption_set.first()
         line = self.lines.first()
+        price_with_tax = (
+            get_product_version_price_with_discount(
+                coupon_version=coupon_redemption.coupon_version
+                if coupon_redemption is not None
+                else None,
+                product_version=line.product_version,
+            )
+            if line is not None
+            else ""
+        )
 
         return {
             **serialize_model_object(self),
@@ -394,27 +404,8 @@ class Order(OrderAbstract, AuditableModel):
                 enrollment.run.courseware_id
                 for enrollment in self.courserunenrollment_set.all()
             ],
-            "total_price": str(
-                get_product_version_price_with_discount(
-                    coupon_version=coupon_redemption.coupon_version
-                    if coupon_redemption is not None
-                    else None,
-                    product_version=line.product_version,
-                )
-                if line is not None
-                else ""
-            ),
-            "total_tax": str(
-                get_product_version_price_with_discount_tax(
-                    coupon_version=coupon_redemption.coupon_version
-                    if coupon_redemption is not None
-                    else None,
-                    product_version=line.product_version,
-                    tax_rate=self.tax_rate,
-                )
-                if line is not None
-                else ""
-            ),
+            "total_price": str(price_with_tax[0]),
+            "total_tax": str(price_with_tax[1]),
             "tax_rate": str(self.tax_rate),
             "tax_name": self.tax_rate_name,
             "receipts": [
