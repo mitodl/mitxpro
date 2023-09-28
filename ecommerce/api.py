@@ -643,7 +643,11 @@ def get_product_version_price_with_discount_tax(
 
     return (
         product_version_price,
-        (0 if not tax_rate else decimal.Decimal() * (tax_rate / 100)),
+        (
+            0
+            if not tax_rate
+            else decimal.Decimal(product_version_price * (tax_rate / 100))
+        ),
     )
 
 

@@ -228,8 +228,9 @@ def test_serialize_basket(basket_and_agreement, mock_context, is_live, mocker):
         "data_consents": [DataConsentUserSerializer(data_consent).data],
         "tax_info": {
             "country_code": "",
-            "tax_rate": 0,
-            "tax_rate_name": "",
+            "tax_rate": None,
+            "tax_rate_name": "VAT",
+            "active": True,
         },
     }
 

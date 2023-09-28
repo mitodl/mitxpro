@@ -348,9 +348,7 @@ class Order(OrderAbstract, AuditableModel):
         """
         Get a serialized representation of the Order and any attached Basket and Lines
         """
-        from ecommerce.api import (
-            get_product_version_price_with_discount_tax,
-        )
+        from ecommerce.api import get_product_version_price_with_discount_tax
 
         # should be 0 or 1 coupons, and only one line and product
         coupon_redemption = self.couponredemption_set.first()
@@ -364,7 +362,7 @@ class Order(OrderAbstract, AuditableModel):
                 tax_rate=self.tax_rate,
             )
             if line is not None
-            else ""
+            else ["", ""]
         )
 
         return {
@@ -840,3 +838,11 @@ class TaxRate(TimestampedModel):
     tax_rate = models.DecimalField(max_digits=6, decimal_places=4)
     tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")
     active = models.BooleanField(default=True)
+
+    def to_dict(self):
+        return {
+            "country_code": self.country_code,
+            "tax_rate": self.tax_rate,
+            "tax_rate_name": self.tax_rate_name,
+            "active": self.active,
+        }
