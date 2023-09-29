@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.131.0
+---------------
+
+- feat: display tax in regular checkout (#2773)
+- chore(deps): lock file maintenance
+- Adds tax rate calculation support (#2772)
+- feat: force all enrollments (#2763)
+
 Version 0.130.0 (Released September 26, 2023)
 ---------------
 
