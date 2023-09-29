@@ -9,6 +9,7 @@ import { incrementer } from "./util"
 import type {
   BasketItem,
   BasketResponse,
+  TaxInfo,
   CouponSelection,
   CouponPayment,
   CouponPaymentVersion,
@@ -105,9 +106,16 @@ export const makeBasketResponse = (itemType: ?string): BasketResponse => {
   return {
     items:         [item],
     coupons:       [makeCouponSelection(item)],
-    data_consents: [makeDataConsent()]
+    data_consents: [makeDataConsent()],
+    tax_info:      makeTaxInfo(),
   }
 }
+
+export const makeTaxInfo = (): TaxInfo => ({
+  country_code:  "",
+  tax_rate:      0,
+  tax_rate_name: ""
+})
 
 export const makeProductVersion = (
   productType: string = PRODUCT_TYPE_COURSERUN,

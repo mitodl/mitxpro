@@ -254,6 +254,7 @@ export class ReceiptPage extends React.Component<Props> {
                         <th>Quantity</th>
                         <th>Unit Price</th>
                         <th>Discount</th>
+                        <th>Tax</th>
                         <th>Total Paid</th>
                       </tr>
                     </thead>
@@ -284,6 +285,9 @@ export class ReceiptPage extends React.Component<Props> {
                             </td>
                             <td>
                               <div>${line.discount}</div>
+                            </td>
+                            <td>
+                              <div>${line.tax_paid}</div>
                             </td>
                             <td>
                               <div>${line.total_paid}</div>

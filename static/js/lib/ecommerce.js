@@ -47,6 +47,25 @@ export const calculatePrice = (
   }
 }
 
+export const calculateTax = (
+  item: BasketItem,
+  coupon: ?CouponSelection,
+  taxRate: number,
+): Decimal => {
+  const priceAfterDiscount = calculatePrice(item, coupon)
+  return taxRate ? priceAfterDiscount * (taxRate / 100) : 0
+}
+
+export const calculateTotalAfterTax = (
+  item: BasketItem,
+  coupon: ?CouponSelection,
+  taxRate: number,
+): Decimal => {
+  const priceAfterDiscount = calculatePrice(item, coupon)
+  const taxAmount = calculateTax(item, coupon, taxRate)
+  return priceAfterDiscount.add(taxAmount)
+}
+
 const determinePreselectRunTag = (
   item: BasketItem,
   preselectId: number = 0

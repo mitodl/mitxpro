@@ -228,7 +228,7 @@ def test_serialize_basket(basket_and_agreement, mock_context, is_live, mocker):
         "data_consents": [DataConsentUserSerializer(data_consent).data],
         "tax_info": {
             "country_code": "",
-            "tax_rate": None,
+            "tax_rate": 0,
             "tax_rate_name": "VAT",
             "active": True,
         },
@@ -454,11 +454,12 @@ def test_serialize_order_receipt(receipt_data):
             {
                 "readable_id": get_readable_id(product_version.product.content_object),
                 "content_title": product_version.product.content_object.title,
-                "discount": "0.0",
+                "discount": "0.00",
                 "start_date": None,
                 "end_date": None,
                 "price": str(product_version.price),
                 "total_paid": str(line.quantity * product_version.price),
+                "tax_paid": 0,
                 "quantity": line.quantity,
                 "CEUs": product_version.product.content_object.course.page.certificate_page.CEUs,
             }
