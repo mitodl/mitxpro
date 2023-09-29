@@ -135,7 +135,7 @@ def calculate_tax(
         request_ip (HttpRequest): The current request.
         item_price (Decimal): The amount to be taxed.
     Returns:
-        tuple(rate applied, country, adjusted amount): The rate applied and the adjusted amount.
+        tuple(rate applied, country code, adjusted amount): The rate applied and the adjusted amount based on the determined country code.
     """
 
     resolved_country_code = determine_visitor_country(request)
@@ -260,7 +260,7 @@ def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addre
     total_tax_assessed = 0
     for i, line in enumerate(order.lines.all()):
         product_version = line.product_version
-        product_price = get_product_version_price_with_discount_tax(
+        product_price_dict = get_product_version_price_with_discount_tax(
             coupon_version=coupon_version,
             product_version=product_version,
             tax_rate=order.tax_rate,
@@ -270,14 +270,14 @@ def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addre
         line_items[f"item_{i}_quantity"] = line.quantity
         line_items[f"item_{i}_sku"] = product_version.product.content_object.id
         line_items[f"item_{i}_tax_amount"] = str(
-            decimal.Decimal(product_price["tax_assessed"]).quantize(
+            decimal.Decimal(product_price_dict["tax_assessed"]).quantize(
                 decimal.Decimal("0.01")
             )
         )
-        line_items[f"item_{i}_unit_price"] = str(product_price["price"])
+        line_items[f"item_{i}_unit_price"] = str(product_price_dict["price"])
 
-        total += product_price["price"]
-        total_tax_assessed += product_price["tax_assessed"]
+        total += product_price_dict["price"]
+        total_tax_assessed += product_price_dict["tax_assessed"]
 
     # At the moment there should only be one line
     product_version = order.lines.first().product_version

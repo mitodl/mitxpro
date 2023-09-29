@@ -847,3 +847,10 @@ class TaxRate(TimestampedModel):
             "tax_rate_name": self.tax_rate_name,
             "active": self.active,
         }
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["country_code"], name="unique_country"
+            )
+        ]
