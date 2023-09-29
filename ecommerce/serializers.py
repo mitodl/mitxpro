@@ -19,7 +19,6 @@ from ecommerce.api import (
     determine_visitor_country,
     get_or_create_data_consent_users,
     get_product_from_querystring_id,
-    get_product_version_price_with_discount,
     get_product_version_price_with_discount_tax,
     get_valid_coupon_versions,
     latest_coupon_version,
@@ -964,27 +963,20 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
 
     def get_lines(self, instance):
         """Get product information along with applied discounts"""
+        # pylint: disable=too-many-locals
         coupon_redemption = instance.couponredemption_set.first()
         lines = []
         for line in instance.lines.all():
             coupon_version = (
                 coupon_redemption.coupon_version if coupon_redemption else None
             )
-            tax_paid = (
-                get_product_version_price_with_discount_tax(
-                    coupon_version=coupon_version,
-                    product_version=line.product_version,
-                    tax_rate=instance.tax_rate,
-                )
-                * line.quantity
+            product_price_and_tax = get_product_version_price_with_discount_tax(
+                coupon_version=coupon_version,
+                product_version=line.product_version,
+                tax_rate=instance.tax_rate,
             )
-            total_price = (
-                get_product_version_price_with_discount(
-                    coupon_version=coupon_version,
-                    product_version=line.product_version,
-                )
-                * line.quantity
-            )
+            tax_paid = product_price_and_tax["tax_assessed"] * line.quantity
+            total_price = product_price_and_tax["price"] * line.quantity
             total_paid = total_price + tax_paid
             discount = (line.product_version.price * line.quantity) - total_price
 

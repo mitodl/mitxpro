@@ -448,17 +448,18 @@ def test_serialize_order_receipt(receipt_data):
         ReceiptFactory.create(order=order, data=receipt_data) if receipt_data else None
     )
     serialized_data = OrderReceiptSerializer(instance=order).data
-    assert serialized_data == {
+    expected_data = {
         "coupon": None,
         "lines": [
             {
                 "readable_id": get_readable_id(product_version.product.content_object),
                 "content_title": product_version.product.content_object.title,
-                "discount": "0.0",
+                "discount": "0.00",
                 "start_date": None,
                 "end_date": None,
                 "price": str(product_version.price),
                 "total_paid": str(line.quantity * product_version.price),
+                "tax_paid": 0,
                 "quantity": line.quantity,
                 "CEUs": product_version.product.content_object.course.page.certificate_page.CEUs,
             }
@@ -513,6 +514,9 @@ def test_serialize_order_receipt(receipt_data):
         if receipt
         else None,
     }
+    print("\n\n\n", serialized_data, "\n\n\n")
+    print("\n\n\n", expected_data, "\n\n\n")
+    assert serialized_data == expected_data
 
 
 def test_serialize_company():
