@@ -859,7 +859,9 @@ def create_unfulfilled_order(validated_basket, affiliate_id=None, **kwargs):
         )
 
         try:
-            tax_rate_info = TaxRate.objects.get(country_code=country_code)
+            tax_rate_info = TaxRate.objects.filter(active=True).get(
+                country_code=country_code
+            )
         except (TaxRate.DoesNotExist, TaxRate.MultipleObjectsReturned):
             # not using get_or_create here because we don't want the rate to stick around
             tax_rate_info = TaxRate()
