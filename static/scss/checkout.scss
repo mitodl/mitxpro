@@ -127,12 +127,19 @@
       }
 
       .price-row,
-      .discount-row {
-        font-size: 24px;
+      .discount-row,
+      .total-before-tax-row,
+      .tax-row {
+        font-size: 22px;
       }
 
-      .discount-row {
+      .discount-row,
+      .tax-row {
         margin-top: 10px;
+      }
+
+      .total-before-tax-row {
+        margin-top: 25px;
       }
 
       .total-row {
