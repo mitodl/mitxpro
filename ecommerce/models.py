@@ -850,7 +850,5 @@ class TaxRate(TimestampedModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
-                fields=["country_code"], name="unique_country"
-            )
+            models.UniqueConstraint(fields=["country_code"], name="unique_country")
         ]
