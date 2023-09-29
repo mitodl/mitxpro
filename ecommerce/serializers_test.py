@@ -448,7 +448,7 @@ def test_serialize_order_receipt(receipt_data):
         ReceiptFactory.create(order=order, data=receipt_data) if receipt_data else None
     )
     serialized_data = OrderReceiptSerializer(instance=order).data
-    expected_data = {
+    assert serialized_data == {
         "coupon": None,
         "lines": [
             {
@@ -514,9 +514,6 @@ def test_serialize_order_receipt(receipt_data):
         if receipt
         else None,
     }
-    print("\n\n\n", serialized_data, "\n\n\n")
-    print("\n\n\n", expected_data, "\n\n\n")
-    assert serialized_data == expected_data
 
 
 def test_serialize_company():
