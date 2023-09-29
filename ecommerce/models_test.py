@@ -2,9 +2,12 @@
 import pytest
 from django.db.utils import IntegrityError
 
-from courses.factories import CourseFactory, CourseRunFactory, ProgramFactory
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
-from ecommerce.api import get_product_version_price_with_discount
+from courses.factories import CourseFactory, CourseRunFactory, ProgramFactory
+from ecommerce.api import (
+    get_product_version_price_with_discount,
+    get_product_version_price_with_discount_tax,
+)
 from ecommerce.constants import REFERENCE_NUMBER_PREFIX
 from ecommerce.factories import (
     CouponPaymentVersionFactory,
@@ -18,6 +21,7 @@ from ecommerce.factories import (
 from ecommerce.models import OrderAudit
 from mitxpro.utils import serialize_model_object
 from users.factories import UserFactory
+
 
 pytestmark = pytest.mark.django_db
 
@@ -99,6 +103,17 @@ def test_order_audit(has_user, has_lines):
         )
         if has_lines
         else "",
+        "total_tax": str(
+            get_product_version_price_with_discount_tax(
+                product_version=lines[0].product_version,
+                coupon_version=order.couponredemption_set.first().coupon_version,
+                tax_rate=order.tax_rate,
+            )["tax_assessed"]
+        )
+        if has_lines
+        else "",
+        "tax_rate": str(order.tax_rate),
+        "tax_name": order.tax_rate_name,
         "receipts": [
             serialize_model_object(receipt) for receipt in order.receipt_set.all()
         ],

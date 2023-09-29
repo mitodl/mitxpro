@@ -206,6 +206,10 @@
       "description": "The maximum time difference (in minutes) from the present time to a webhook expiration date to consider a webhook 'fresh', i.e.: not in need of renewal. If the time difference is less than this value, the webhook should be renewed.",
       "required": false
     },
+    "ECOMMERCE_FORCE_PROFILE_COUNTRY": {
+      "description": "Force the country determination to be done with the user profile only",
+      "required": false
+    },
     "EDX_API_CLIENT_TIMEOUT": {
       "description": "Timeout (in seconds) for requests made via the edX API client",
       "required": false

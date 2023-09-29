@@ -188,6 +188,7 @@ INSTALLED_APPS = (
     "hijack_admin",
     "hubspot_xpro",
     "voucher",
+    "maxmind",
     # ol-dango apps, must be after this project's apps for template precedence
     "mitol.hubspot_api.apps.HubspotApiApp",
     "mitol.common.apps.CommonApp",
@@ -1432,3 +1433,11 @@ DIGITAL_CREDENTIALS_SUPPORTED_RUNS = get_delimited_list(
 )
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
+# Force the country determination code to use the user's profile only
+# This is for local testing, since your IP won't belong to a country
+ECOMMERCE_FORCE_PROFILE_COUNTRY = get_bool(
+    name="ECOMMERCE_FORCE_PROFILE_COUNTRY",
+    default=False,
+    description="Force the country determination to be done with the user profile only",
+)

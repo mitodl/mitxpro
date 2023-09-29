@@ -145,7 +145,7 @@ class Product(TimestampedModel):
         Returns:
             str: String representing the product title
         """
-        from courses.models import Program, CourseRun
+        from courses.models import CourseRun, Program
 
         content_object = self.content_object
         if isinstance(content_object, Program):
@@ -163,7 +163,7 @@ class Product(TimestampedModel):
         Returns:
             thumbnail_url: image url of the product
         """
-        from courses.models import Program, CourseRun
+        from courses.models import CourseRun, Program
 
         content_object = self.content_object
         if isinstance(content_object, Program):
@@ -182,7 +182,7 @@ class Product(TimestampedModel):
         Returns:
             start_date: start date of the product
         """
-        from courses.models import Program, CourseRun
+        from courses.models import CourseRun, Program
 
         content_object = self.content_object
         if isinstance(content_object, Program):
@@ -322,6 +322,12 @@ class Order(OrderAbstract, AuditableModel):
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders"
     )
     total_price_paid = models.DecimalField(decimal_places=2, max_digits=20)
+    # These represent the tax collected for the entire order.
+    tax_country_code = models.CharField(max_length=2, blank=True, null=True)
+    tax_rate = models.DecimalField(
+        max_digits=6, decimal_places=4, null=True, blank=True, default=0
+    )
+    tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")
 
     objects = OrderManager()
 
@@ -342,11 +348,22 @@ class Order(OrderAbstract, AuditableModel):
         """
         Get a serialized representation of the Order and any attached Basket and Lines
         """
-        from ecommerce.api import get_product_version_price_with_discount
+        from ecommerce.api import get_product_version_price_with_discount_tax
 
         # should be 0 or 1 coupons, and only one line and product
         coupon_redemption = self.couponredemption_set.first()
         line = self.lines.first()
+        price_with_tax = (
+            get_product_version_price_with_discount_tax(
+                coupon_version=coupon_redemption.coupon_version
+                if coupon_redemption is not None
+                else None,
+                product_version=line.product_version,
+                tax_rate=self.tax_rate,
+            )
+            if line is not None
+            else {"price": "", "tax_assessed": ""}
+        )
 
         return {
             **serialize_model_object(self),
@@ -385,16 +402,10 @@ class Order(OrderAbstract, AuditableModel):
                 enrollment.run.courseware_id
                 for enrollment in self.courserunenrollment_set.all()
             ],
-            "total_price": str(
-                get_product_version_price_with_discount(
-                    coupon_version=coupon_redemption.coupon_version
-                    if coupon_redemption is not None
-                    else None,
-                    product_version=line.product_version,
-                )
-                if line is not None
-                else ""
-            ),
+            "total_price": str(price_with_tax["price"]),
+            "total_tax": str(price_with_tax["tax_assessed"]),
+            "tax_rate": str(self.tax_rate),
+            "tax_name": self.tax_rate_name,
             "receipts": [
                 serialize_model_object(receipt) for receipt in self.receipt_set.all()
             ],
@@ -581,7 +592,8 @@ class CouponPaymentVersion(TimestampedModel):
 
     def calculate_discount_amount(self, product_version=None, price=None):
         """If discount_type is in "percent-off", it would need price and calculate the amount of discount in currency,
-        otherwise for dollars-off the discount value is equal to amount and doesn't depend upon product price"""
+        otherwise for dollars-off the discount value is equal to amount and doesn't depend upon product price
+        """
 
         from ecommerce.api import round_half_up
 
@@ -814,3 +826,29 @@ class ProductCouponAssignment(TimestampedModel):
                 condition=models.Q(redeemed=False),
             ),
         )
+
+
+class TaxRate(TimestampedModel):
+    """
+    Stores tax rates for countries. Generally, this should be a VAT rate, but
+    a text field is supplied to store the name of the tax assessed
+    """
+
+    country_code = models.CharField(max_length=2)
+    tax_rate = models.DecimalField(max_digits=6, decimal_places=4)
+    tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")
+    active = models.BooleanField(default=True)
+
+    def to_dict(self):
+        """Returns object data as dict"""
+        return {
+            "country_code": self.country_code,
+            "tax_rate": self.tax_rate,
+            "tax_rate_name": self.tax_rate_name,
+            "active": self.active,
+        }
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["country_code"], name="unique_country")
+        ]

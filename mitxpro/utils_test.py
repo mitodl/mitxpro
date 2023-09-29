@@ -1,8 +1,8 @@
 """Utils tests"""
 import datetime
+import operator as op
 import os
 from decimal import Decimal
-import operator as op
 from types import SimpleNamespace
 
 import pytest
@@ -10,42 +10,42 @@ import pytz
 from rest_framework import status
 
 from ecommerce.models import Order
+from mitxpro.test_utils import MockResponse
 from mitxpro.utils import (
-    format_price,
-    get_field_names,
-    now_in_utc,
-    is_near_now,
-    format_datetime_for_filename,
-    dict_without_keys,
-    filter_dict_by_key_set,
-    make_csv_http_response,
-    partition,
-    partition_to_lists,
-    has_equal_properties,
-    remove_password_from_url,
-    first_or_none,
-    find_object_with_matching_attr,
-    unique,
-    unique_ignore_case,
-    max_or_none,
-    item_at_index_or_none,
-    item_at_index_or_blank,
     all_equal,
     all_unique,
-    has_all_keys,
-    group_into_dict,
-    request_get_with_timeout_retry,
-    get_error_response_summary,
-    is_json_response,
-    first_matching_item,
-    matching_item_index,
-    public_path,
+    dict_without_keys,
     ensure_trailing_slash,
+    filter_dict_by_key_set,
+    find_object_with_matching_attr,
+    first_matching_item,
+    first_or_none,
+    format_datetime_for_filename,
+    format_price,
+    get_error_response_summary,
+    get_field_names,
+    get_js_settings,
+    group_into_dict,
+    has_all_keys,
+    has_equal_properties,
+    is_json_response,
+    is_near_now,
+    item_at_index_or_blank,
+    item_at_index_or_none,
+    make_csv_http_response,
+    matching_item_index,
+    max_or_none,
+    now_in_utc,
+    partition,
+    partition_to_lists,
+    public_path,
+    remove_password_from_url,
+    request_get_with_timeout_retry,
+    unique,
+    unique_ignore_case,
     webpack_dev_server_host,
     webpack_dev_server_url,
-    get_js_settings,
 )
-from mitxpro.test_utils import MockResponse
 
 
 def test_ensure_trailing_slash():
@@ -147,6 +147,9 @@ def test_get_field_names():
         "created_on",
         "updated_on",
         "total_price_paid",
+        "tax_rate",
+        "tax_rate_name",
+        "tax_country_code",
     }
 
 

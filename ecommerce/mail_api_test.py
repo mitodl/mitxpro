@@ -1,10 +1,11 @@
 """Ecommerce mail API tests"""
-from urllib.parse import urljoin, quote_plus
 import datetime
-import pytest
+from urllib.parse import quote_plus, urljoin
+
 import factory
-from pytz import UTC
+import pytest
 from django.urls import reverse
+from pytz import UTC
 
 from b2b_ecommerce.factories import B2BOrderFactory
 from courses.factories import (
@@ -13,36 +14,37 @@ from courses.factories import (
     ProgramFactory,
 )
 from ecommerce.api import get_readable_id
+from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG
 from ecommerce.factories import (
-    CouponPaymentVersionFactory,
     BulkCouponAssignmentFactory,
-    ProductCouponAssignmentFactory,
     CompanyFactory,
+    CouponPaymentVersionFactory,
     LineFactory,
-    ReceiptFactory,
-    ProductVersionFactory,
+    ProductCouponAssignmentFactory,
     ProductFactory,
+    ProductVersionFactory,
+    ReceiptFactory,
 )
 from ecommerce.mail_api import (
+    EMAIL_DATE_FORMAT,
+    ENROLL_ERROR_EMAIL_SUBJECT,
     send_b2b_receipt_email,
     send_bulk_enroll_emails,
     send_course_run_enrollment_email,
     send_ecommerce_order_receipt,
     send_enrollment_failure_message,
-    ENROLL_ERROR_EMAIL_SUBJECT,
-    EMAIL_DATE_FORMAT,
 )
-from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG
 from ecommerce.models import Order
-from mail.api import UserMessageProps, EmailMetadata
+from mail.api import EmailMetadata, UserMessageProps
 from mail.constants import (
+    EMAIL_B2B_RECEIPT,
     EMAIL_BULK_ENROLL,
     EMAIL_COURSE_RUN_ENROLLMENT,
-    EMAIL_B2B_RECEIPT,
     EMAIL_PRODUCT_ORDER_RECEIPT,
 )
 from mitxpro.utils import format_price
 from users.factories import UserFactory
+
 
 lazy = pytest.lazy_fixture
 
@@ -272,10 +274,14 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                 }
             ],
             "order_total": "100.00",
+            "order_total_tax": "100.00",
             "order": {
                 "id": 1,
                 "created_on": line.order.created_on,
                 "reference_number": "xpro-b2c-dev-1",
+                "tax_country_code": "",
+                "tax_rate": 0,
+                "tax_rate_name": "",
             },
             "receipt": {
                 "card_number": "1234",

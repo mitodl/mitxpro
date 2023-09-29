@@ -318,7 +318,8 @@ def test_order_affiliate(basket_client, mocker, basket_and_coupons):
     basket_client.get(f"/?{AFFILIATE_QS_PARAM}={affiliate.code}")
     resp = basket_client.post(reverse("checkout"))
     assert resp.status_code == status.HTTP_200_OK
-    assert create_order_mock.call_args_list[0][1] == dict(affiliate_id=affiliate.id)
+    assert "affiliate_id" in create_order_mock.call_args_list[0][1]
+    assert create_order_mock.call_args_list[0][1]["affiliate_id"] == affiliate.id
 
 
 def test_missing_fields(basket_client, mocker):
@@ -424,8 +425,10 @@ def test_no_permission(basket_client, mocker):
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_get_basket(basket_client, basket_and_coupons, mock_context):
+def test_get_basket(basket_client, basket_and_coupons, mock_context, mocker):
     """Test the view that handles a get request for basket"""
+    mocker.patch("ipware.get_client_ip", return_value="127.0.0.1")
+
     basket = basket_and_coupons.basket
 
     resp = basket_client.get(reverse("basket_api"))
@@ -476,9 +479,10 @@ def test_patch_basket_new_user(basket_and_coupons, user, user_drf_client):
 
 
 def test_patch_basket_new_item_with_product_id(
-    basket_client, basket_and_coupons, mock_context
+    basket_client, basket_and_coupons, mock_context, mocker
 ):
     """Test that a user can add an item to their basket"""
+    mocker.patch("ipware.get_client_ip", return_value="127.0.0.1")
     data = {"items": [{"product_id": basket_and_coupons.product_version.product.id}]}
     basket_item = BasketItem.objects.all().first()
     assert str(basket_item) == "BasketItem of product {} (qty: {})".format(
@@ -493,9 +497,10 @@ def test_patch_basket_new_item_with_product_id(
 
 
 def test_patch_basket_new_item_with_text_id(
-    basket_client, basket_and_coupons, mock_context
+    basket_client, basket_and_coupons, mock_context, mocker
 ):
     """Test that a user can add an item to their basket using the text id of the course run/program"""
+    mocker.patch("ipware.get_client_ip", return_value="127.0.0.1")
     data = {
         "items": [
             {
@@ -590,9 +595,10 @@ def test_patch_basket_multiple_coupons(basket_client, basket_and_coupons):
 
 
 def test_patch_basket_update_coupon_valid(
-    basket_client, mock_context, basket_and_coupons, basket_and_agreement
+    basket_client, mock_context, basket_and_coupons, basket_and_agreement, mocker
 ):
     """Test that a valid coupon is successfully applied to the basket"""
+    mocker.patch("ipware.get_client_ip", return_value="127.0.0.1")
     basket = basket_and_coupons.basket
     original_coupon = basket_and_coupons.coupongroup_best.coupon
     original_basket = BasketSerializer(instance=basket, context=mock_context).data
@@ -623,9 +629,10 @@ def test_patch_basket_update_coupon_invalid(basket_client, basket_and_coupons):
 
 
 def test_patch_basket_clear_coupon_auto(
-    basket_client, basket_and_coupons, mock_context
+    basket_client, basket_and_coupons, mock_context, mocker
 ):
     """Test that an auto coupon is applied to basket when it exists and coupons cleared"""
+    mocker.patch("ipware.get_client_ip", return_value="127.0.0.1")
     basket = basket_and_coupons.basket
     auto_coupon = basket_and_coupons.coupongroup_worst.coupon
     original_basket = render_json(
@@ -649,9 +656,10 @@ def test_patch_basket_clear_coupon_auto(
 
 
 def test_patch_basket_clear_coupon_no_auto(
-    basket_client, basket_and_coupons, mock_context
+    basket_client, basket_and_coupons, mock_context, mocker
 ):
     """Test that all coupons are cleared from basket"""
+    mocker.patch("ipware.get_client_ip", return_value="127.0.0.1")
     basket = basket_and_coupons.basket
 
     with unprotect_version_tables():

@@ -188,7 +188,9 @@ class CheckoutView(APIView):
         """
         validated_basket = validate_basket_for_checkout(request.user)
         affiliate_id = get_affiliate_id_from_request(request)
-        order = create_unfulfilled_order(validated_basket, affiliate_id=affiliate_id)
+        order = create_unfulfilled_order(
+            validated_basket, affiliate_id=affiliate_id, request=request
+        )
         base_url = request.build_absolute_uri("/")
         text_id = validated_basket.product_version.product.content_object.text_id
         receipt_url = make_receipt_url(base_url=base_url, readable_id=text_id)

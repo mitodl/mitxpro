@@ -2,11 +2,14 @@
 import logging
 from urllib.parse import urlencode, urljoin
 
+import pycountry
 from django.conf import settings
 from django.core import mail
 from django.urls import reverse
-import pycountry
+
 from courses.models import CourseRun
+from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG, CYBERSOURCE_CARD_TYPES
+from ecommerce.utils import make_checkout_url
 from mail import api
 from mail.constants import (
     EMAIL_B2B_RECEIPT,
@@ -15,9 +18,8 @@ from mail.constants import (
     EMAIL_COURSE_RUN_UNENROLLMENT,
     EMAIL_PRODUCT_ORDER_RECEIPT,
 )
-from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG, CYBERSOURCE_CARD_TYPES
-from ecommerce.utils import make_checkout_url
 from mitxpro.utils import format_price
+
 
 log = logging.getLogger()
 ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
@@ -286,6 +288,14 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
                                 "lines": lines,
                                 "order_total": format(
                                     sum(float(line["total_paid"]) for line in lines),
+                                    ".2f",
+                                ),
+                                "order_total_tax": format(
+                                    sum(float(line["total_paid"]) for line in lines)
+                                    + (
+                                        sum(float(line["total_paid"]) for line in lines)
+                                        * float(order["tax_rate"] / 100)
+                                    ),
                                     ".2f",
                                 ),
                                 "order": order,

@@ -16,6 +16,7 @@ from ecommerce import models
 from ecommerce.api import (
     best_coupon_for_product,
     create_coupons,
+    determine_visitor_country,
     get_or_create_data_consent_users,
     get_product_from_querystring_id,
     get_product_version_price_with_discount,
@@ -24,7 +25,7 @@ from ecommerce.api import (
     latest_product_version,
 )
 from ecommerce.constants import CYBERSOURCE_CARD_TYPES, DISCOUNT_TYPES
-from ecommerce.models import Basket
+from ecommerce.models import Basket, TaxRate
 from ecommerce.utils import validate_amount
 from mitxpro.serializers import WriteableSerializerMethodField
 from mitxpro.utils import now_in_utc
@@ -309,6 +310,7 @@ class BasketSerializer(serializers.ModelSerializer):
     items = WriteableSerializerMethodField()
     coupons = WriteableSerializerMethodField()
     data_consents = WriteableSerializerMethodField()
+    tax_info = serializers.SerializerMethodField()
 
     @classmethod
     def _serialize_item(cls, *, basket_item, basket, context):
@@ -360,6 +362,22 @@ class BasketSerializer(serializers.ModelSerializer):
         """Get the DataConsentUser objects associated with the basket via coupon and product"""
         data_consents = get_or_create_data_consent_users(instance)
         return DataConsentUserSerializer(instance=data_consents, many=True).data
+
+    def get_tax_info(self, _):
+        """Get the tax information for the current basket"""
+        request = self.context.get("request", None)
+
+        try:
+            if request and hasattr(request, "user"):
+                country_code = determine_visitor_country(request)
+                if country_code is not None:
+                    return TaxRate.objects.get(country_code=country_code).to_dict()
+            else:
+                log.error("No request object in get_tax_info")
+        except TaxRate.DoesNotExist:
+            pass
+
+        return TaxRate().to_dict()
 
     @classmethod
     def _get_applicable_coupon_version(cls, basket, product, coupons):
@@ -704,7 +722,7 @@ class BasketSerializer(serializers.ModelSerializer):
         return {"data_consents": data_consents}
 
     class Meta:
-        fields = ["items", "coupons", "data_consents"]
+        fields = ["items", "coupons", "data_consents", "tax_info"]
         model = models.Basket
 
 
@@ -1010,6 +1028,9 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
             id=instance.id,
             created_on=instance.created_on,
             reference_number=instance.reference_number,
+            tax_rate=instance.tax_rate,
+            tax_rate_name=instance.tax_rate_name,
+            tax_country_code=instance.tax_country_code,
         )
 
     def get_coupon(self, instance):

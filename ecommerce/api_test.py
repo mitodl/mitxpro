@@ -3,6 +3,7 @@ Test for ecommerce functions
 """
 import hashlib
 import hmac
+import ipaddress
 import uuid
 from base64 import b64encode
 from collections import defaultdict
@@ -11,7 +12,10 @@ from decimal import Decimal
 from unittest.mock import PropertyMock
 
 import factory
+import faker
 import pytest
+from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import ValidationError
 
@@ -28,6 +32,7 @@ from ecommerce.api import (
     ISO_8601_FORMAT,
     best_coupon_for_product,
     bulk_assign_product_coupons,
+    calculate_tax,
     complete_order,
     create_coupons,
     create_unfulfilled_order,
@@ -74,6 +79,7 @@ from ecommerce.factories import (
     ProductCouponAssignmentFactory,
     ProductFactory,
     ProductVersionFactory,
+    TaxRateFactory,
 )
 from ecommerce.models import (
     BasketItem,
@@ -90,12 +96,14 @@ from ecommerce.models import (
     ProductCouponAssignment,
 )
 from ecommerce.test_utils import unprotect_version_tables
+from maxmind.factories import GeonameFactory, NetBlockIPv4Factory
 from mitxpro.test_utils import update_namespace
 from mitxpro.utils import now_in_utc
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
 
 
+FAKE = faker.Factory.create()
 pytestmark = pytest.mark.django_db
 lazy = pytest.lazy_fixture
 # pylint: disable=redefined-outer-name,too-many-lines,unused-argument,too-many-arguments
@@ -229,6 +237,7 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product, use
     assert payload == {
         "access_key": CYBERSOURCE_ACCESS_KEY,
         "amount": str(total_price),
+        "tax_amount": "0.00",
         "consumer_id": username,
         "currency": "USD",
         "item_0_code": "courses | program"
@@ -237,19 +246,19 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product, use
         "item_0_name": line1.product_version.description,
         "item_0_quantity": line1.quantity,
         "item_0_sku": line1.product_version.product.content_object.id,
-        "item_0_tax_amount": "0",
+        "item_0_tax_amount": "0.00",
         "item_0_unit_price": str(line1.product_version.price),
         "item_1_code": "courses | course run",
         "item_1_name": line2.product_version.description,
         "item_1_quantity": line2.quantity,
         "item_1_sku": line2.product_version.product.content_object.id,
-        "item_1_tax_amount": "0",
+        "item_1_tax_amount": "0.00",
         "item_1_unit_price": str(line2.product_version.price),
         "item_2_code": "courses | program",
         "item_2_name": line3.product_version.description,
         "item_2_quantity": line3.quantity,
         "item_2_sku": line3.product_version.product.content_object.id,
-        "item_2_tax_amount": "0",
+        "item_2_tax_amount": "0.00",
         "item_2_unit_price": str(line3.product_version.price),
         "line_item_count": 3,
         "locale": "en-us",
@@ -1620,3 +1629,73 @@ def test_get_product_from_querystring_id(mocker, qs_product_id, exp_text_id):
     assert patched_get_product.called is (exp_text_id is not None)
     if exp_text_id is not None:
         patched_get_product.assert_called_once_with(exp_text_id)
+
+
+@pytest.mark.parametrize("applicable_rate_and_user_country_match", [True, False])
+def test_tax_calc_from_ip(user, applicable_rate_and_user_country_match):
+    """
+    Tests calculation of the tax rate. Here's the truth table for this:
+
+                                        IP in country       IP not in country
+    Tax rate country = user's country   Tax assessed        No tax assessed
+    Tax rate country != user's country  Tax assessed        No tax assessed
+
+    """
+
+    settings.ECOMMERCE_FORCE_PROFILE_COUNTRY = False
+
+    class FakeRequest:
+        """Simple class to fake a request for testing - don't need much"""
+
+        user = AnonymousUser
+        META = {"REMOTE_ADDR": ""}
+
+    request = FakeRequest()
+    request.user = user
+
+    if applicable_rate_and_user_country_match:
+        country_code = user.legal_address.country
+    else:
+        country_code = FAKE.country_code()
+
+        while country_code != user.legal_address.country:
+            country_code = FAKE.country_code()
+
+    taxrate = TaxRateFactory.create(country_code=country_code)
+
+    applicable_geoname = GeonameFactory.create(country_iso_code=taxrate.country_code)
+    applicable_netblock = NetBlockIPv4Factory.create()
+    applicable_netblock.geoname_id = applicable_geoname.geoname_id
+    applicable_netblock.save()
+
+    applicable_ip = str(
+        ipaddress.ip_address(
+            applicable_netblock.decimal_ip_end
+            - int(
+                (
+                    applicable_netblock.decimal_ip_end
+                    - applicable_netblock.decimal_ip_start
+                )
+                / 2
+            )
+        )
+    )
+
+    request.META["REMOTE_ADDR"] = applicable_ip
+    applicable_tax = calculate_tax(request, 1000)
+
+    assert applicable_tax[0] == taxrate.tax_rate
+    assert applicable_tax[2] == 1000 + (1000 * Decimal(taxrate.tax_rate / 100))
+
+    nonapplicable_ip = str(
+        ipaddress.ip_address(
+            applicable_netblock.decimal_ip_start - 35
+            if applicable_netblock.decimal_ip_start > 35
+            else applicable_netblock.decimal_ip_end + 35
+        )
+    )
+
+    request.META["REMOTE_ADDR"] = nonapplicable_ip
+    nonapplicable_tax = calculate_tax(request, 1000)
+
+    assert nonapplicable_tax == (0, "", 1000)

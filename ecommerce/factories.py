@@ -3,9 +3,9 @@ Factories for ecommerce models
 """
 from datetime import timezone
 
-from factory import fuzzy, Faker, LazyAttribute, SubFactory, Trait, post_generation
-from factory.django import DjangoModelFactory
 import faker
+from factory import Faker, LazyAttribute, SubFactory, Trait, fuzzy, post_generation
+from factory.django import DjangoModelFactory
 
 from courses.factories import CourseRunFactory, ProgramRunFactory
 from ecommerce import models
@@ -77,6 +77,9 @@ class OrderFactory(DjangoModelFactory):
     purchaser = SubFactory(UserFactory)
     status = fuzzy.FuzzyChoice(choices=models.Order.STATUSES)
     total_price_paid = fuzzy.FuzzyDecimal(low=0, high=100)
+    tax_rate = 0
+    tax_rate_name = ""
+    tax_country_code = ""
 
     class Meta:
         model = models.Order
@@ -258,3 +261,13 @@ class ProductCouponAssignmentFactory(DjangoModelFactory):
 
     class Meta:
         model = models.ProductCouponAssignment
+
+
+class TaxRateFactory(DjangoModelFactory):
+    """Factory for TaxRate"""
+
+    country_code = FAKE.country_code()
+    tax_rate = fuzzy.FuzzyDecimal(low=0, high=99, precision=4)
+
+    class Meta:
+        model = models.TaxRate
