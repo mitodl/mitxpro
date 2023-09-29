@@ -835,7 +835,7 @@ class TaxRate(TimestampedModel):
     """
 
     country_code = models.CharField(max_length=2)
-    tax_rate = models.DecimalField(max_digits=6, decimal_places=4)
+    tax_rate = models.DecimalField(max_digits=6, decimal_places=4, default=0)
     tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")
     active = models.BooleanField(default=True)
 
