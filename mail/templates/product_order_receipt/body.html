@@ -30,7 +30,7 @@
                 <strong style="font-weight: 700;">Quantity:</strong>  {{ line.quantity }}<br>
                 <strong style="font-weight: 700;">Unit Price:</strong> ${{ line.price }}<br>
                 <strong style="font-weight: 700;">Discount:</strong> ${{ line.discount }}<br>
-                <strong style="font-weight: 700;">Tax:</strong> ${{ line.tax_paid }}<br>
+                <strong style="font-weight: 700;">Tax:</strong> ${{ line.tax_paid|floatformat:2 }}<br>
                 <strong style="font-weight: 700;">Total Paid:</strong> ${{ line.total_paid }}
             </p>
             {% endfor %}
