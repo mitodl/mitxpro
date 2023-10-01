@@ -372,7 +372,11 @@ class BasketSerializer(serializers.ModelSerializer):
             if request and hasattr(request, "user"):
                 country_code = determine_visitor_country(request)
                 if country_code is not None:
-                    return TaxRate.objects.get(country_code=country_code).to_dict()
+                    return (
+                        TaxRate.objects.filter(active=True)
+                        .get(country_code=country_code)
+                        .to_dict()
+                    )
             else:
                 log.error("No request object in get_tax_info")
         except TaxRate.DoesNotExist:
