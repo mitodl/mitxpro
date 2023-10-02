@@ -14,7 +14,11 @@ import auth from "../../../lib/queries/auth"
 import users from "../../../lib/queries/users"
 import { routes } from "../../../lib/urls"
 import { getAppropriateInformationFragment } from "../../../lib/util"
-import { STATE_ERROR, STATE_EXISTING_ACCOUNT, handleAuthResponse } from "../../../lib/auth"
+import {
+  STATE_ERROR,
+  STATE_EXISTING_ACCOUNT,
+  handleAuthResponse,
+} from "../../../lib/auth"
 import queries from "../../../lib/queries"
 import { qsPartialTokenSelector } from "../../../lib/selectors"
 
@@ -26,18 +30,18 @@ import type {
   AuthResponse,
   LegalAddress,
   User,
-  Country
+  Country,
 } from "../../../flow/authTypes"
 
 type RegisterProps = {|
   location: Location,
   history: RouterHistory,
   authResponse: ?AuthResponse,
-  params: { partialToken: string }
+  params: { partialToken: string },
 |}
 
 type StateProps = {|
-  countries: Array<Country>
+  countries: Array<Country>,
 |}
 
 type DispatchProps = {|
@@ -45,15 +49,15 @@ type DispatchProps = {|
     name: string,
     password: string,
     legalAddress: LegalAddress,
-    partialToken: string
+    partialToken: string,
   ) => Promise<Response<AuthResponse>>,
-  getCurrentUser: () => Promise<Response<User>>
+  getCurrentUser: () => Promise<Response<User>>,
 |}
 
 type Props = {|
   ...RegisterProps,
   ...StateProps,
-  ...DispatchProps
+  ...DispatchProps,
 |}
 
 export class RegisterDetailsPage extends React.Component<Props> {
@@ -61,7 +65,7 @@ export class RegisterDetailsPage extends React.Component<Props> {
     const {
       history,
       registerDetails,
-      params: { partialToken }
+      params: { partialToken },
     } = this.props
 
     try {
@@ -69,13 +73,13 @@ export class RegisterDetailsPage extends React.Component<Props> {
         detailsData.name,
         detailsData.password,
         detailsData.legal_address,
-        partialToken
+        partialToken,
       )
 
       handleAuthResponse(history, body, {
         // eslint-disable-next-line camelcase
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
-          setErrors(field_errors)
+          setErrors(field_errors),
       })
     } finally {
       setSubmitting(false)
@@ -135,7 +139,7 @@ export class RegisterDetailsPage extends React.Component<Props> {
 const mapStateToProps = createStructuredSelector({
   authResponse: authSelector,
   params:       createStructuredSelector({ partialToken: qsPartialTokenSelector }),
-  countries:    queries.users.countriesSelector
+  countries:    queries.users.countriesSelector,
 })
 
 const mapPropsToConfig = () => [queries.users.countriesQuery()]
@@ -144,27 +148,24 @@ const registerDetails = (
   name: string,
   password: string,
   legalAddress: LegalAddress,
-  partialToken: string
+  partialToken: string,
 ) =>
   mutateAsync(
-    auth.registerDetailsMutation(name, password, legalAddress, partialToken)
+    auth.registerDetailsMutation(name, password, legalAddress, partialToken),
   )
 
 const getCurrentUser = () =>
   requestAsync({
     ...users.currentUserQuery(),
-    force: true
+    force: true,
   })
 
 const mapDispatchToProps = {
   registerDetails,
-  getCurrentUser
+  getCurrentUser,
 }
 
 export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
-  connectRequest(mapPropsToConfig)
+  connect(mapStateToProps, mapDispatchToProps),
+  connectRequest(mapPropsToConfig),
 )(RegisterDetailsPage)

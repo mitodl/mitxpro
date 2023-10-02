@@ -4,7 +4,6 @@ from collections import defaultdict
 
 from django.db import migrations, models
 
-
 MAX_RUN_TAG_LENGTH = 10
 ENROLLABLE_ITEM_ID_SEPARATOR = "+"
 TEXT_ID_RUN_SUFFIX_PATTERN = r"\+(?P<run_tag>R\d+)$"
@@ -19,8 +18,8 @@ def backfill_run_tags_from_text_id(course_run_qset):
         run_tag_map[potential_run_tag].append(run)
 
     for run_tag, matching_runs in run_tag_map.items():
-        # If multiple course runs have the same potential run_tag value in the same course,
-        # just set it for the first course run and ignore the rest. They will be assigned a
+        # If multiple course runs have the same potential run_tag value in the same course,  # noqa: E501
+        # just set it for the first course run and ignore the rest. They will be assigned a  # noqa: E501
         # different run_tag value in the next step.
         run_to_update = matching_runs[0]
         run_to_update.run_tag = run_tag
@@ -33,13 +32,13 @@ def backfill_run_tags_from_id(course_run_qset):
         run.save()
 
 
-def backfill_course_run_run_tags(apps, schema_editor):
+def backfill_course_run_run_tags(apps, schema_editor):  # noqa: ARG001
     Course = apps.get_model("courses", "Course")
     CourseRun = apps.get_model("courses", "CourseRun")
 
-    # For all course runs with a start date and a courseware id suffix that is short enough
-    # (e.g.: "+R5", "+1T2019"), use that suffix as the run_tag value. Runs without start dates
-    # are ignored because it's assumed that they are most likely meant for testing and aren't
+    # For all course runs with a start date and a courseware id suffix that is short enough  # noqa: E501
+    # (e.g.: "+R5", "+1T2019"), use that suffix as the run_tag value. Runs without start dates  # noqa: E501
+    # are ignored because it's assumed that they are most likely meant for testing and aren't  # noqa: E501
     # important enough to need a valid run_tag.
     for course_id in Course.objects.values_list("id", flat=True):
         course_runs_qset = (
@@ -49,14 +48,13 @@ def backfill_course_run_run_tags(apps, schema_editor):
         )
         backfill_run_tags_from_text_id(course_runs_qset)
 
-    # For all remaining runs, use the course run's own id as the run_tag value. This is just to fill
+    # For all remaining runs, use the course run's own id as the run_tag value. This is just to fill  # noqa: E501
     # in values so the field can be set to non-null in a future migration.
     remaining_course_runs_qset = CourseRun.objects.filter(run_tag=None)
     backfill_run_tags_from_id(remaining_course_runs_qset)
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("courses", "0024_programrun")]
 
     operations = [
@@ -68,7 +66,10 @@ class Migration(migrations.Migration):
             name="run_tag",
             field=models.CharField(
                 blank=True,
-                help_text="A string that identifies the set of runs that this run belongs to (example: 'R2')",
+                help_text=(
+                    "A string that identifies the set of runs that this run belongs to"
+                    " (example: 'R2')"
+                ),
                 max_length=10,
                 null=True,
             ),
@@ -83,7 +84,10 @@ class Migration(migrations.Migration):
             model_name="courserun",
             name="run_tag",
             field=models.CharField(
-                help_text="A string that identifies the set of runs that this run belongs to (example: 'R2')",
+                help_text=(
+                    "A string that identifies the set of runs that this run belongs to"
+                    " (example: 'R2')"
+                ),
                 max_length=10,
             ),
         ),

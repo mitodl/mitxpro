@@ -6,14 +6,14 @@ import {
   qsNextSelector,
   qsVerificationCodeSelector,
   qsErrorSelector,
-  qsEmailSelector
+  qsEmailSelector,
 } from "./selectors"
 
 describe("selector utils", () => {
   const makeSearchProps = search => ({
     location: {
-      search
-    }
+      search,
+    },
   })
 
   describe("qsPartialTokenSelector", () => {
@@ -21,9 +21,9 @@ describe("selector utils", () => {
       assert.equal(
         qsPartialTokenSelector(
           {},
-          makeSearchProps("abc=123&partial_token=tokenvalue")
+          makeSearchProps("abc=123&partial_token=tokenvalue"),
         ),
-        "tokenvalue"
+        "tokenvalue",
       )
     })
 
@@ -38,15 +38,15 @@ describe("selector utils", () => {
       assert.equal(
         qsVerificationCodeSelector(
           {},
-          makeSearchProps("abc=123&verification_code=codevalue")
+          makeSearchProps("abc=123&verification_code=codevalue"),
         ),
-        "codevalue"
+        "codevalue",
       )
     })
 
     it("should return undefined if no verification_code param", () => {
       assert.isUndefined(
-        qsVerificationCodeSelector({}, makeSearchProps("abc=123"))
+        qsVerificationCodeSelector({}, makeSearchProps("abc=123")),
       )
       assert.isUndefined(qsVerificationCodeSelector({}, makeSearchProps("")))
     })
@@ -58,9 +58,9 @@ describe("selector utils", () => {
       assert.equal(
         qsNextSelector(
           {},
-          makeSearchProps(`abc=123&next=${encodeURIComponent(url)}`)
+          makeSearchProps(`abc=123&next=${encodeURIComponent(url)}`),
         ),
-        url
+        url,
       )
     })
 
@@ -74,7 +74,7 @@ describe("selector utils", () => {
     it("should return the error param", () => {
       assert.equal(
         qsErrorSelector({}, makeSearchProps("abc=123&error=codevalue")),
-        "codevalue"
+        "codevalue",
       )
     })
 
@@ -88,7 +88,7 @@ describe("selector utils", () => {
     it("should return the email param", () => {
       assert.equal(
         qsEmailSelector({}, makeSearchProps("email=test@example.com")),
-        "test@example.com"
+        "test@example.com",
       )
     })
 

@@ -17,24 +17,24 @@ export default function imageCarousel() {
         breakpoint: 1200,
         settings:   {
           slidesToShow: 4,
-          dots:         numLogoSlides > 4
-        }
+          dots:         numLogoSlides > 4,
+        },
       },
       {
         breakpoint: 992,
         settings:   {
           slidesToShow: 3,
-          dots:         numLogoSlides > 3
-        }
+          dots:         numLogoSlides > 3,
+        },
       },
       {
         breakpoint: 767,
         settings:   {
           slidesToShow:   2,
           slidesToScroll: 2,
-          dots:           numLogoSlides > 2
-        }
-      }
-    ]
+          dots:           numLogoSlides > 2,
+        },
+      },
+    ],
   });
 }

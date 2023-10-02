@@ -5,10 +5,10 @@ Test voucher views.py
 import json
 from urllib.parse import urljoin
 
-from django.urls import reverse
 import pytest
+from django.urls import reverse
 
-from ecommerce.factories import CouponVersionFactory, CouponEligibilityFactory
+from ecommerce.factories import CouponEligibilityFactory, CouponVersionFactory
 from users.factories import UserFactory
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
@@ -18,29 +18,38 @@ from voucher.models import Voucher
 pytestmark = [pytest.mark.django_db]
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_logger(mocker):
     """Mock the log"""
-    yield mocker.patch("voucher.views.log")
+    return mocker.patch("voucher.views.log")
 
 
 def test_anonymous_user_permissions(client):
     """
     Verify an anonymous user cannot access the voucher pages
     """
-    assert client.get(reverse("voucher:upload")).status_code == 302
-    assert client.get(reverse("voucher:enroll")).status_code == 302
-    assert client.get(reverse("voucher:resubmit")).status_code == 302
-    assert client.get(reverse("voucher:redeemed")).status_code == 302
+    assert client.get(reverse("voucher:upload")).status_code == 302  # noqa: PLR2004
+    assert client.get(reverse("voucher:enroll")).status_code == 302  # noqa: PLR2004
+    assert client.get(reverse("voucher:resubmit")).status_code == 302  # noqa: PLR2004
+    assert client.get(reverse("voucher:redeemed")).status_code == 302  # noqa: PLR2004
 
 
 def test_authenticated_user_permissions(authenticated_client):
     """
     Verify an authenticated user can access the voucher pages
     """
-    assert authenticated_client.get(reverse("voucher:upload")).status_code == 200
-    assert authenticated_client.get(reverse("voucher:resubmit")).status_code == 200
-    assert authenticated_client.get(reverse("voucher:redeemed")).status_code == 200
+    assert (
+        authenticated_client.get(reverse("voucher:upload")).status_code
+        == 200  # noqa: PLR2004
+    )  # noqa: PLR2004, RUF100
+    assert (
+        authenticated_client.get(reverse("voucher:resubmit")).status_code
+        == 200  # noqa: PLR2004
+    )  # noqa: PLR2004, RUF100
+    assert (
+        authenticated_client.get(reverse("voucher:redeemed")).status_code
+        == 200  # noqa: PLR2004
+    )  # noqa: PLR2004, RUF100
 
 
 def test_upload_voucher_form_view_voucher_create(
@@ -48,9 +57,9 @@ def test_upload_voucher_form_view_voucher_create(
 ):
     """
     Test UploadVoucherFormView POST creates a voucher if one doesn't already exist matching the given voucher values
-    """
+    """  # noqa: E501
     response = upload_voucher_form_view.form_valid(upload_voucher_form)
-    assert response.status_code == 302
+    assert response.status_code == 302  # noqa: PLR2004
     assert response.url == reverse("voucher:enroll")
     assert response.url.startswith("/boeing")
     assert (
@@ -68,7 +77,7 @@ def test_upload_voucher_form_view_parse_error(
     response = upload_voucher_form_view.form_invalid(
         upload_voucher_form_with_parse_error
     )
-    assert response.status_code == 302
+    assert response.status_code == 302  # noqa: PLR2004
     assert response.url == reverse("voucher:resubmit")
     assert response.url.startswith("/boeing")
     username = upload_voucher_form_view.request.user.username
@@ -82,14 +91,14 @@ def test_upload_voucher_form_view_voucher_update(
 ):
     """
     Test UploadVoucherFormView POST retrieves a voucher if one already exists matching the given voucher values
-    """
+    """  # noqa: E501
     values = upload_voucher_form.cleaned_data["voucher"]
     values["pdf"] = "/vouchers/another_name.pdf"
     voucher = Voucher.objects.create(
         **values, user=upload_voucher_form_view.request.user
     )
     response = upload_voucher_form_view.form_valid(upload_voucher_form)
-    assert response.status_code == 302
+    assert response.status_code == 302  # noqa: PLR2004
     assert response.url == reverse("voucher:enroll")
 
     values.pop("pdf")
@@ -102,12 +111,12 @@ def test_upload_voucher_form_view_voucher_other_user(
 ):
     """
     Test UploadVoucherFormView POST does not allow an upload of the same voucher from another user
-    """
+    """  # noqa: E501
     values = upload_voucher_form.cleaned_data["voucher"]
     new_user = UserFactory.create()
     voucher = Voucher.objects.create(**values, user=new_user)
     response = upload_voucher_form_view.form_valid(upload_voucher_form)
-    assert response.status_code == 302
+    assert response.status_code == 302  # noqa: PLR2004
     assert response.url == reverse("voucher:resubmit")
 
     values.pop("pdf")
@@ -125,7 +134,7 @@ def test_get_enroll_view_with_no_voucher(authenticated_client):
     Test the EnrollView GET method when there is no current voucher for the user
     """
     response = authenticated_client.get(reverse("voucher:enroll"))
-    assert response.status_code == 302
+    assert response.status_code == 302  # noqa: PLR2004
     assert response.url == reverse("voucher:upload")
     assert response.url.startswith("/boeing")
 
@@ -136,7 +145,7 @@ def test_get_enroll_view_with_redeemed_voucher(redeemed_voucher_and_user_client)
     """
     client = redeemed_voucher_and_user_client.client
     response = client.get(reverse("voucher:enroll"))
-    assert response.status_code == 302
+    assert response.status_code == 302  # noqa: PLR2004
     assert response.url == reverse("voucher:redeemed")
 
 
@@ -146,7 +155,7 @@ def test_get_enroll_view_with_no_matches(voucher_and_user_client):
     """
     client = voucher_and_user_client.client
     response = client.get(reverse("voucher:enroll"))
-    assert response.status_code == 302
+    assert response.status_code == 302  # noqa: PLR2004
     assert response.url == reverse("voucher:resubmit")
 
 
@@ -160,7 +169,7 @@ def test_get_enroll_view_with_matches(
     client = context.client
     settings.VOUCHER_COMPANY_ID = context.company.id
     response = client.get(reverse("voucher:enroll"))
-    assert response.status_code == 200
+    assert response.status_code == 200  # noqa: PLR2004
 
     product_ids = [product.id for product in context.products]
     coupon_ids = [
@@ -194,9 +203,10 @@ def test_post_enroll_view_with_coupon_choice(
         reverse("voucher:enroll"),
         {"coupon_version": json.dumps((product.id, coupon_version.coupon.id))},
     )
-    assert response.status_code == 302
-    assert response.url == (
-        f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}?"
+    assert response.status_code == 302  # noqa: PLR2004
+    assert (
+        response.url
+        == f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}?"
         f"product={product.id}&code={coupon_version.coupon.coupon_code}"
     )
     assert Voucher.objects.get(id=voucher.id).coupon == coupon_version.coupon
@@ -212,7 +222,7 @@ def test_post_enroll_view_without_coupon_choice(
     client = context.client
     settings.VOUCHER_COMPANY_ID = context.company.id
     response = client.post(reverse("voucher:enroll"), {"coupon_version": ""})
-    assert response.status_code == 200
+    assert response.status_code == 200  # noqa: PLR2004
     assert b"Coupon Version is required." in response.content
 
 
@@ -226,7 +236,7 @@ def test_post_enroll_view_with_empty_coupon_choice(
     client = context.client
     settings.VOUCHER_COMPANY_ID = context.company.id
     response = client.post(reverse("voucher:enroll"), {"coupon_version": ("", "")})
-    assert response.status_code == 200
+    assert response.status_code == 200  # noqa: PLR2004
     assert b"Coupon Version is required." in response.content
 
 
@@ -235,7 +245,7 @@ def test_post_enroll_view_with_stolen_only_coupon(
 ):
     """
     Test the EnrollView POST logs an error if the coupon is stolen and there aren't any more
-    """
+    """  # noqa: E501
     context = voucher_and_exact_match_with_coupon
     settings.VOUCHER_COMPANY_ID = context.company.id
     client = context.client
@@ -248,7 +258,7 @@ def test_post_enroll_view_with_stolen_only_coupon(
         reverse("voucher:enroll"),
         {"coupon_version": json.dumps((product.id, coupon_version.coupon.id))},
     )
-    assert response.status_code == 302
+    assert response.status_code == 302  # noqa: PLR2004
     assert response.url == reverse("voucher:resubmit")
     mock_logger.error.assert_called_once_with(
         "Found no valid coupons for matches for voucher %s", context.voucher.id
@@ -280,9 +290,10 @@ def test_post_enroll_view_with_stolen_coupon(
         reverse("voucher:enroll"),
         {"coupon_version": json.dumps((product.id, coupon_version1.coupon.id))},
     )
-    assert response.status_code == 302
-    assert response.url == (
-        f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}?"
+    assert response.status_code == 302  # noqa: PLR2004
+    assert (
+        response.url
+        == f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}?"
         f"product={product.id}&code={coupon_version2.coupon.coupon_code}"
     )
     assert Voucher.objects.get(id=voucher.id).coupon == coupon_version2.coupon

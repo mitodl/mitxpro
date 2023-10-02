@@ -1,26 +1,34 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ site_name }} | Google OAuth{% endblock %}
+{% block title %}{{ site_name }}
+| Google OAuth{% endblock %}
 
 {% block content %}
-  <div style="padding: 50px">
-    <h2>Coupon Sheets Admin</h2>
-    <fieldset style="border: 1px black solid; border-radius: 12px; padding: 15px; margin-bottom: 15px;">
-      <legend style="width: inherit;">Google Auth via Personal Account</legend>
-      {% if auth_completed %}
-        <h3 style="color: green">Authentication successful!</h3>
-      {% endif %}
-      {% if auth_completed %}
-        <p style="border: 3px #ffbb33 solid; border-radius: 10px; padding: 10px;">
-          ⚠️ You have an existing API auth record with an access token and refresh token.
-          Clicking the button below and completing authorization with Google will overwrite
-          that record. ⚠️
-        </p>
-      {% endif %}
-      <form action="{% url "request-google-auth" %}">
-        <input type="submit" value="Authenticate and authorize with Google" />
-      </form>
-    </fieldset>
-  </div>
+<div style="padding: 50px">
+  <h2>Coupon Sheets Admin</h2>
+  <fieldset
+    style="
+      border: 1px black solid;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+    "
+  >
+    <legend style="width: inherit">Google Auth via Personal Account</legend>
+    {% if auth_completed %}
+    <h3 style="color: green">Authentication successful!</h3>
+    {% endif %}
+    {% if auth_completed %}
+    <p style="border: 3px #ffbb33 solid; border-radius: 10px; padding: 10px">
+      ⚠️ You have an existing API auth record with an access token and refresh
+      token. Clicking the button below and completing authorization with Google
+      will overwrite that record. ⚠️
+    </p>
+    {% endif %}
+    <form action="{% url "request-google-auth" %}">
+      <input type="submit" value="Authenticate and authorize with Google" />
+    </form>
+  </fieldset>
+</div>
 {% endblock %}

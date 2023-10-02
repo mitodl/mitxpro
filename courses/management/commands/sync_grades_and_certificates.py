@@ -1,13 +1,13 @@
 """
 Management command to sync grades and certificates for a course run
-"""
+"""  # noqa: INP001
 from django.core.management.base import BaseCommand, CommandError
 
 from courses.models import CourseRun
 from courses.utils import ensure_course_run_grade, process_course_run_grade_certificate
 from courseware.api import get_edx_grades_with_users
-from users.api import fetch_user
 from mitxpro.utils import now_in_utc
+from users.api import fetch_user
 
 
 class Command(BaseCommand):
@@ -15,7 +15,10 @@ class Command(BaseCommand):
     Command to sync grades and certificates for a course run.
     """
 
-    help = "Sync grades and certificates for a course run for all enrolled users or a specified user."
+    help = (  # noqa: A003
+        "Sync grades and certificates for a course run for all enrolled users or a"
+        " specified user."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -33,8 +36,11 @@ class Command(BaseCommand):
         parser.add_argument(
             "--grade",
             type=float,
-            help="Override a grade. Setting grade to 0.0 blocks certificate creation. Setting a passing grade \
-                (>0.0) allows certificate creation. Range: 0.0 - 1.0",
+            help=(
+                "Override a grade. Setting grade to 0.0 blocks certificate creation."
+                " Setting a passing grade                 (>0.0) allows certificate"
+                " creation. Range: 0.0 - 1.0"
+            ),
             required=False,
         )
         parser.add_argument(
@@ -47,35 +53,38 @@ class Command(BaseCommand):
             "--force",
             action="store_true",
             dest="force",
-            help="Sync grades/certificates even if the given course run has not ended yet",
+            help=(
+                "Sync grades/certificates even if the given course run has not"
+                " ended yet"
+            ),
         )
         super().add_arguments(parser)
 
-    def handle(
-        self, *args, **options
+    def handle(  # noqa: C901, PLR0912, PLR0915
+        self, *args, **options  # noqa: ARG002
     ):  # pylint: disable=too-many-locals,too-many-branches
         """Handle command execution"""
         # Grade override for all users for the course run. Disallowed.
         if options["grade"] is not None and not options["user"]:
-            raise CommandError(
-                "No user supplied with override grade. Overwrite of grade is not supported for all users. Grade should only be supplied when a specific user is targeted."
-            )
+            msg = "No user supplied with override grade. Overwrite of grade is not supported for all users. Grade should only be supplied when a specific user is targeted."  # noqa: E501
+            raise CommandError(msg)
         try:
             run = CourseRun.objects.get(courseware_id=options["run"])
         except CourseRun.DoesNotExist:
-            raise CommandError(
-                "Could not find run with courseware_id={}".format(options["run"])
-            )
+            msg = "Could not find run with courseware_id={}".format(options["run"])
+            raise CommandError(msg)  # noqa: B904, TRY200
         now = now_in_utc()
         if not options.get("force") and (run.end_date is None or run.end_date > now):
-            raise CommandError(
-                "The given course run has not yet finished, so the course grades should not be "
-                "considered final (courseware_id={}, end_date={}).\n"
-                "Add the -f/--force flag if grades/certificates should be synced anyway.".format(
+            msg = (
+                "The given course run has not yet finished, so the course grades should"
+                " not be considered final (courseware_id={}, end_date={}).\nAdd the"
+                " -f/--force flag if grades/certificates should be synced anyway."
+                .format(
                     options["run"],
                     "None" if run.end_date is None else run.end_date.isoformat(),
                 )
             )
+            raise CommandError(msg)
 
         user = fetch_user(options["user"]) if options["user"] else None
         override_grade = None
@@ -83,8 +92,11 @@ class Command(BaseCommand):
 
         if options["grade"] is not None:
             override_grade = float(options["grade"])
-            if override_grade and (override_grade < 0.0 or override_grade > 1.0):
-                raise CommandError("Invalid value for grade. Allowed range: 0.0 - 1.0")
+            if override_grade and (
+                override_grade < 0.0 or override_grade > 1.0  # noqa: PLR2004
+            ):  # noqa: PLR2004, RUF100
+                msg = "Invalid value for grade. Allowed range: 0.0 - 1.0"
+                raise CommandError(msg)
 
         edx_grade_user_iter = get_edx_grades_with_users(run, user=user)
 
@@ -112,10 +124,11 @@ class Command(BaseCommand):
                 _, created_cert, deleted_cert = process_course_run_grade_certificate(
                     course_run_grade=course_run_grade
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 self.stdout.write(
                     self.style.ERROR(
-                        f"Course certificate creation failed for {user} due to following reason(s),\n{e}"
+                        f"Course certificate creation failed for {user} due to"
+                        f" following reason(s),\n{e}"
                     )
                 )
                 continue
@@ -127,11 +140,9 @@ class Command(BaseCommand):
             else:
                 grade_status = "already exists"
 
-            grade_summary = ["passed: {}".format(course_run_grade.passed)]
+            grade_summary = [f"passed: {course_run_grade.passed}"]
             if override_grade is not None:
-                grade_summary.append(
-                    "value override: {}".format(course_run_grade.grade)
-                )
+                grade_summary.append(f"value override: {course_run_grade.grade}")
 
             if created_cert:
                 cert_status = "created"
@@ -147,7 +158,8 @@ class Command(BaseCommand):
             )
 
             results.append(
-                f"Processed {user} in course run {run.courseware_id}. Result - {result_summary}"
+                f"Processed {user} in course run {run.courseware_id}. Result -"
+                f" {result_summary}"
             )
 
         for result in results:

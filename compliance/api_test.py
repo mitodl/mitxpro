@@ -10,8 +10,8 @@ from nacl.public import SealedBox
 
 from compliance import api
 from compliance.constants import (
-    RESULT_SUCCESS,
     RESULT_DENIED,
+    RESULT_SUCCESS,
     RESULT_UNKNOWN,
     TEMPORARY_FAILURE_REASON_CODES,
 )
@@ -61,7 +61,7 @@ def test_log_exports_inquiry(mocker, cybersource_private_key, user):
     log = api.log_exports_inquiry(user, mock_response, last_sent, last_received)
 
     assert log.user == user
-    assert log.reason_code == 100
+    assert log.reason_code == 100  # noqa: PLR2004
     assert log.info_code == "102"
 
     decrypted = api.decrypt_exports_inquiry(log, cybersource_private_key)
@@ -71,17 +71,17 @@ def test_log_exports_inquiry(mocker, cybersource_private_key, user):
 
 
 @pytest.mark.parametrize(
-    "cybersource_mock_client_responses, expected_result",
+    ("cybersource_mock_client_responses", "expected_result"),
     [
-        ["700_reject", RESULT_DENIED],
-        ["100_success_match", RESULT_DENIED],
-        ["100_success", RESULT_SUCCESS],
-        ["978_unknown", RESULT_UNKNOWN],
+        ["700_reject", RESULT_DENIED],  # noqa: PT007
+        ["100_success_match", RESULT_DENIED],  # noqa: PT007
+        ["100_success", RESULT_SUCCESS],  # noqa: PT007
+        ["978_unknown", RESULT_UNKNOWN],  # noqa: PT007
     ],
     indirect=["cybersource_mock_client_responses"],
 )
 def test_verify_user_with_exports(
-    user, cybersource_mock_client_responses, expected_result
+    user, cybersource_mock_client_responses, expected_result  # noqa: ARG001
 ):  # pylint: disable=unused-argument
     """Test that verify_user_with_exports handles"""
     result = api.verify_user_with_exports(user)
@@ -117,7 +117,8 @@ def test_verify_user_with_exports_temporary_errors(mocker, user, reason_code):
 
 
 @pytest.mark.parametrize(
-    "sanctions_lists, expect_passed", [[None, False], ["", False], ["OFAC", True]]
+    ("sanctions_lists", "expect_passed"),
+    [[None, False], ["", False], ["OFAC", True]],  # noqa: PT007
 )
 def test_verify_user_with_exports_sanctions_lists(
     mocker, user, cybersource_settings, sanctions_lists, expect_passed

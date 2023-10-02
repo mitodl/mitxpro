@@ -1,8 +1,7 @@
 """
 Management command to sync hubspot ids to database
-"""
+"""  # noqa: INP001
 import sys
-from typing import List
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management import BaseCommand
@@ -18,9 +17,9 @@ from hubspot_xpro.api import (
 from users.models import User
 
 
-def format_missing(missing: List[int]) -> str:
+def format_missing(missing: list[int]) -> str:
     """Return a string of missing ids"""
-    return f"\n {','.join([str(id) for id in sorted(missing)])}\n\n"
+    return f"\n {','.join([str(id) for id in sorted(missing)])}\n\n"  # noqa: A001
 
 
 class Command(BaseCommand):
@@ -28,7 +27,7 @@ class Command(BaseCommand):
     Management command to sync hubspot ids to database
     """
 
-    help = "Management command to sync hubspot ids to database"
+    help = "Management command to sync hubspot ids to database"  # noqa: A003
 
     def sync_contacts(self):
         """
@@ -43,7 +42,8 @@ class Command(BaseCommand):
         ).values_list("username", flat=True)
         if not result and missing.count() > 0:
             sys.stderr.write(
-                f"Some users could not be matched with hubspot ids:\n {','.join([username for username in missing])}\n\n"
+                "Some users could not be matched with hubspot ids:\n"
+                f" {','.join(list(missing))}\n\n"
             )
         else:
             sys.stdout.write("All users matched with hubspot ids\n\n")
@@ -61,7 +61,8 @@ class Command(BaseCommand):
         ).values_list("id", flat=True)
         if not result and missing.count() > 0:
             sys.stderr.write(
-                f"Some products could not be matched with hubspot ids:{format_missing(missing)}"
+                "Some products could not be matched with hubspot"
+                f" ids:{format_missing(missing)}"
             )
         else:
             sys.stdout.write("All products matched with hubspot ids\n\n")
@@ -85,11 +86,13 @@ class Command(BaseCommand):
             ).values_list("id", flat=True)
             if missing_b2b.count() > 0:
                 sys.stderr.write(
-                    f"Some B2BOrders could not be matched with hubspot ids:{format_missing(missing_b2b)}\n\n"
+                    "Some B2BOrders could not be matched with hubspot"
+                    f" ids:{format_missing(missing_b2b)}\n\n"
                 )
             if missing_b2c.count() > 0:
                 sys.stderr.write(
-                    f"Some Orders could not be matched with hubspot ids:{format_missing(missing_b2c)}\n\n"
+                    "Some Orders could not be matched with hubspot"
+                    f" ids:{format_missing(missing_b2c)}\n\n"
                 )
             missing_b2b_lines = B2BLine.objects.exclude(
                 id__in=HubspotObject.objects.filter(
@@ -103,11 +106,13 @@ class Command(BaseCommand):
             ).values_list("id", flat=True)
             if missing_b2b_lines.count() > 0:
                 sys.stderr.write(
-                    f"Some B2BLines could not be matched with hubspot ids:{format_missing(missing_b2b_lines)}\n\n"
+                    "Some B2BLines could not be matched with hubspot"
+                    f" ids:{format_missing(missing_b2b_lines)}\n\n"
                 )
             if missing_b2c_lines.count() > 0:
                 sys.stderr.write(
-                    f"Some Lines could not be matched with hubspot ids:{format_missing(missing_b2c_lines)}\n\n"
+                    "Some Lines could not be matched with hubspot"
+                    f" ids:{format_missing(missing_b2c_lines)}\n\n"
                 )
         else:
             sys.stdout.write("All orders and lines matched with hubspot ids\n\n")
@@ -145,7 +150,7 @@ class Command(BaseCommand):
             help="Sync all orders",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         sys.stdout.write("Syncing hubspot ids...\n")
         if not (
             options["sync_contacts"]

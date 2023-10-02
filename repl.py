@@ -4,15 +4,22 @@ if __name__ == "__main__":
     import os
 
     if not os.environ.get("PYTHONSTARTUP"):
-        from subprocess import check_call
         import sys
+        from subprocess import check_call
 
-        base_dir = os.path.dirname(os.path.abspath(__file__))
+        base_dir = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH100, PTH120
 
         sys.exit(
             check_call(
-                [os.path.join(base_dir, "manage.py"), "shell", *sys.argv[1:]],
-                env={**os.environ, "PYTHONSTARTUP": os.path.join(base_dir, "repl.py")},
+                [  # noqa: S603
+                    os.path.join(base_dir, "manage.py"),  # noqa: PTH118
+                    "shell",
+                    *sys.argv[1:],
+                ],  # noqa: PTH118, RUF100, S603
+                env={
+                    **os.environ,
+                    "PYTHONSTARTUP": os.path.join(base_dir, "repl.py"),  # noqa: PTH118
+                },  # noqa: PTH118, RUF100
             )
         )
 
@@ -20,9 +27,9 @@ if __name__ == "__main__":
     from django.conf import settings
 
     for app in settings.INSTALLED_APPS:
-        try:
-            exec(  # pylint: disable=exec-used
-                "from {app}.models import *".format(app=app)
+        try:  # noqa: SIM105
+            exec(  # pylint: disable=exec-used  # noqa: S102
+                f"from {app}.models import *"
             )
         except ModuleNotFoundError:
             pass

@@ -6,7 +6,7 @@ Arguments:
 * --program <readable_id> - Program readable_id for certificate generation
 
 You must specify --program, since that will be used to filter programs for certificate generation
-"""
+"""  # noqa: INP001, E501
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 
@@ -20,7 +20,7 @@ class Command(BaseCommand):
     Command to create program certificate for users.
     """
 
-    help = "Create program certificate, for a single user or all users in the program."
+    help = "Create program certificate, for a single user or all users in the program."  # noqa: A003, E501
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -38,19 +38,19 @@ class Command(BaseCommand):
         super().add_arguments(parser)
 
     def handle(
-        self, *args, **options
+        self, *args, **options  # noqa: ARG002
     ):  # pylint: disable=too-many-locals,too-many-branches
         """Handle command execution"""
         program = options.get("program")
         if not program:
-            raise CommandError("Please provide a valid program readable_id.")
+            msg = "Please provide a valid program readable_id."
+            raise CommandError(msg)
 
         try:
             program = Program.objects.get(readable_id=program)
         except Program.DoesNotExist:
-            raise CommandError(
-                f"Could not find any program with provided readable_id={program}"
-            )
+            msg = f"Could not find any program with provided readable_id={program}"
+            raise CommandError(msg)  # noqa: B904, TRY200
 
         user = options.get("user") and fetch_user(options["user"])
         base_query = (
@@ -63,9 +63,8 @@ class Command(BaseCommand):
             "user__email", "run__course__program"
         )
         if not enrollments:
-            raise CommandError(
-                f"Could not find course enrollment(s) with provided program readable_id={program.readable_id}"
-            )
+            msg = f"Could not find course enrollment(s) with provided program readable_id={program.readable_id}"  # noqa: E501
+            raise CommandError(msg)
 
         results = []
         for enrollment in enrollments:

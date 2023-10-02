@@ -63,10 +63,15 @@ class NewsAndEventsBlock(blocks.StructBlock):
     content = blocks.TextBlock(help_text="Specify the news/events content here.")
     call_to_action = blocks.CharBlock(
         max_length=100,
-        help_text="Specify the news/events call-to-action text here (e.g: 'Read More').",
+        help_text=(
+            "Specify the news/events call-to-action text here (e.g: 'Read More')."
+        ),
     )
     action_url = blocks.URLBlock(
-        help_text="Specify the news/events action-url here (like a link to an article e.g: https://www.google.com/search?q=article)."
+        help_text=(
+            "Specify the news/events action-url here (like a link to an article e.g:"
+            " https://www.google.com/search?q=article)."
+        )
     )
 
 
@@ -108,7 +113,7 @@ class CourseRunFieldBlock(blocks.FieldBlock):
 class CourseRunCertificateOverrides(blocks.StructBlock):
     """
     Block class that defines override values for a course run to be displayed on the certificate
-    """
+    """  # noqa: E501
 
     readable_id = CourseRunFieldBlock(help_text="Course run to add the override for")
     CEUs = blocks.DecimalBlock(
@@ -120,9 +125,9 @@ def validate_unique_readable_ids(value):
     """
     Validates that all of the course run override blocks in this stream field have
     unique readable IDs
-    """
+    """  # noqa: D401
     # We want to validate the overall stream not underlying blocks individually
-    if len(value) < 2:
+    if len(value) < 2:  # noqa: PLR2004
         return
     items = [
         stream_block.value.get("readable_id")

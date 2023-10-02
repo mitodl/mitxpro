@@ -1,14 +1,14 @@
-"""retire user test"""
+"""retire user test"""  # noqa: INP001
 import hashlib
+
 import pytest
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from social_django.models import UserSocialAuth
 
 from users.factories import UserFactory, UserSocialAuthFactory
 from users.management.commands import retire_users, unblock_users
 from users.models import BlockList
-from django.test import TestCase
-
 
 User = get_user_model()
 
@@ -23,15 +23,17 @@ class TestUnblockUsers(TestCase):
         self.RETIRE_USER_COMMAND = retire_users.Command()
         self.UNBLOCK_USER_COMMAND = unblock_users.Command()
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db()
     def test_user_unblocking_with_email(self):
-        """test unblock_users command success with user email"""
+        """Test unblock_users command success with user email"""
         test_email = "test@email.com"
 
         user = UserFactory.create(email=test_email, is_active=True)
         UserSocialAuthFactory.create(user=user, provider="edX")
         email = user.email
-        hashed_email = hashlib.md5(email.lower().encode("utf-8")).hexdigest()
+        hashed_email = hashlib.md5(  # noqa: S324
+            email.lower().encode("utf-8")
+        ).hexdigest()  # noqa: RUF100, S324
         assert user.is_active is True
         assert "retired_email" not in user.email
         assert UserSocialAuth.objects.filter(user=user).count() == 1
@@ -53,9 +55,9 @@ class TestUnblockUsers(TestCase):
         assert BlockList.objects.all().count() == 0
         assert BlockList.objects.filter(hashed_email=hashed_email).count() == 0
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db()
     def test_multiple_success_unblocking_user(self):
-        """test unblock_users command unblocking emails success with more than one user"""
+        """Test unblock_users command unblocking emails success with more than one user"""  # noqa: E501
         test_users = ["foo@email.com", "bar@email.com", "baz@email.com"]
 
         for email in test_users:
@@ -70,21 +72,21 @@ class TestUnblockUsers(TestCase):
         self.RETIRE_USER_COMMAND.handle(
             "retire_users", users=test_users, block_users=True
         )
-        assert BlockList.objects.all().count() == 3
+        assert BlockList.objects.all().count() == 3  # noqa: PLR2004
 
         # Now we need to unblock the user from block list.
         self.UNBLOCK_USER_COMMAND.handle("unblock_users", users=test_users)
         assert BlockList.objects.all().count() == 0
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db()
     def test_user_unblocking_with_invalid_email(self):
-        """test unblock_users command system exit if not provided a valid email address"""
+        """Test unblock_users command system exit if not provided a valid email address"""  # noqa: E501
         test_email = "test.com"
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             self.UNBLOCK_USER_COMMAND.handle("unblock_users", users=[test_email])
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db()
     def test_user_unblocking_with_no_users(self):
-        """test unblock_users command system exit if not any users provided"""
-        with self.assertRaises(SystemExit):
+        """Test unblock_users command system exit if not any users provided"""
+        with pytest.raises(SystemExit):
             self.UNBLOCK_USER_COMMAND.handle("unblock_users", users=[])

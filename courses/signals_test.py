@@ -2,14 +2,15 @@
 Tests for signals
 """
 from unittest.mock import patch
-import pytest
-from courses.factories import (
-    CourseRunFactory,
-    CourseRunCertificateFactory,
-    UserFactory,
-    CourseFactory,
-)
 
+import pytest
+
+from courses.factories import (
+    CourseFactory,
+    CourseRunCertificateFactory,
+    CourseRunFactory,
+    UserFactory,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -17,7 +18,9 @@ pytestmark = pytest.mark.django_db
 # pylint: disable=unused-argument
 @patch("courses.signals.transaction.on_commit", side_effect=lambda callback: callback())
 @patch("courses.signals.generate_program_certificate", autospec=True)
-def test_create_course_certificate(generate_program_cert_mock, mock_on_commit):
+def test_create_course_certificate(
+    generate_program_cert_mock, mock_on_commit  # noqa: ARG001
+):  # noqa: ARG001, RUF100
     """
     Test that generate_program_certificate is called when a course
     certificate is created
@@ -38,7 +41,7 @@ def test_create_course_certificate(generate_program_cert_mock, mock_on_commit):
 @patch("courses.signals.transaction.on_commit", side_effect=lambda callback: callback())
 @patch("courses.signals.generate_program_certificate", autospec=True)
 def test_generate_program_certificate_not_called(
-    generate_program_cert_mock, mock_on_commit
+    generate_program_cert_mock, mock_on_commit  # noqa: ARG001
 ):
     """
     Test that generate_program_certificate is not called when a course

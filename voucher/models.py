@@ -13,7 +13,7 @@ class Voucher(TimestampedModel):
     """
     Voucher stores values parsed from a raw PDF as well as mid-enrollment process information such as
     an attached coupon and a selected product (course_run)
-    """
+    """  # noqa: E501
 
     voucher_id = models.CharField(max_length=32, null=True, blank=True)
     employee_id = models.CharField(max_length=32)
@@ -41,7 +41,7 @@ class Voucher(TimestampedModel):
     )
 
     def is_redeemed(self):
-        """Return True if a voucher has a coupon attached and a CouponRedemption object exists for that coupon"""
+        """Return True if a voucher has a coupon attached and a CouponRedemption object exists for that coupon"""  # noqa: E501
         return (
             self.coupon is not None
             and CouponRedemption.objects.filter(

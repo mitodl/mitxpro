@@ -9,7 +9,7 @@ import {
   connectRequest,
   mutateAsync,
   requestAsync,
-  updateEntities
+  updateEntities,
 } from "redux-query"
 
 import B2BPurchaseForm from "../../../components/forms/B2BPurchaseForm"
@@ -21,7 +21,7 @@ import type {
   B2BCheckoutPayload,
   B2BCouponStatusPayload,
   B2BCouponStatusResponse,
-  Product
+  Product,
 } from "../../../flow/ecommerceTypes"
 import { findProductById } from "../../../lib/ecommerce"
 
@@ -36,17 +36,17 @@ type Props = {
   contractNumber: ?string,
   productId: string,
   discountCode: string,
-  isLoading: boolean
+  isLoading: boolean,
 }
 type State = {
-  errors: string | Object | null
+  errors: string | Object | null,
 }
 type Values = {
   // these are form fields so they all start off as strings
   num_seats: string,
   product: Object,
   email: string,
-  contract_number: string
+  contract_number: string,
 }
 export class B2BPurchasePage extends React.Component<Props, State> {
   onSubmit = async (values: Values, { setErrors, setSubmitting }: Object) => {
@@ -56,7 +56,7 @@ export class B2BPurchasePage extends React.Component<Props, State> {
     const product = findProductById(products, productId)
     if (!product) {
       throw new Error(
-        "No product found. This should have been caught in validation."
+        "No product found. This should have been caught in validation.",
       )
     }
 
@@ -69,7 +69,7 @@ export class B2BPurchasePage extends React.Component<Props, State> {
         product_version_id: productVersion.id,
         discount_code:      couponStatus ? couponStatus.code : null,
         contract_number:    values.contract_number || null,
-        run_id:             programRunId
+        run_id:             programRunId,
       })
 
       if (checkoutResponse.status !== 200) {
@@ -101,7 +101,7 @@ export class B2BPurchasePage extends React.Component<Props, State> {
       fetchCouponStatus,
       products,
       requestPending,
-      isLoading
+      isLoading,
     } = this.props
 
     const params = new URLSearchParams(this.props.location.search)
@@ -130,7 +130,7 @@ export class B2BPurchasePage extends React.Component<Props, State> {
           <B2BPurchaseForm
             onSubmit={this.onSubmit}
             products={products.filter(
-              product => product.is_private === false
+              product => product.is_private === false,
             )}
             checkout={checkout}
             couponStatus={couponStatus}
@@ -155,9 +155,9 @@ const mapStateToProps = state =>
     requestPending: pathOr(false, [
       "queries",
       "b2bCheckoutMutation",
-      "isPending"
+      "isPending",
     ]),
-    isLoading: pathOr(true, ["queries", "products", "isPending"])
+    isLoading: pathOr(true, ["queries", "products", "isPending"]),
   })
 const mapDispatchToProps = dispatch => ({
   checkout: (payload: B2BCheckoutPayload) =>
@@ -165,19 +165,16 @@ const mapDispatchToProps = dispatch => ({
   clearCouponStatus: () =>
     dispatch(
       updateEntities({
-        b2b_coupon_status: () => null
-      })
+        b2b_coupon_status: () => null,
+      }),
     ),
   fetchCouponStatus: (payload: B2BCouponStatusPayload) =>
-    dispatch(requestAsync(queries.ecommerce.b2bCouponStatus(payload)))
+    dispatch(requestAsync(queries.ecommerce.b2bCouponStatus(payload))),
 })
 
 const mapPropsToConfig = () => [queries.ecommerce.productsQuery()]
 
 export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
-  connectRequest(mapPropsToConfig)
+  connect(mapStateToProps, mapDispatchToProps),
+  connectRequest(mapPropsToConfig),
 )(B2BPurchasePage)

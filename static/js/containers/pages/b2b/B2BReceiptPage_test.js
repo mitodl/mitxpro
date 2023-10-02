@@ -8,7 +8,7 @@ import qs from "query-string"
 import casual from "casual-browserify"
 
 import B2BReceiptPage, {
-  B2BReceiptPage as InnerB2BReceiptPage
+  B2BReceiptPage as InnerB2BReceiptPage,
 } from "./B2BReceiptPage"
 
 import * as utilFuncs from "../../../lib/util"
@@ -27,21 +27,21 @@ describe("B2BReceiptPage", () => {
       .withArgs(`/api/b2b/orders/${orderHash}/status/`, "GET")
       .returns({
         body:   orderStatus,
-        status: 200
+        status: 200,
       })
     renderPage = helper.configureHOCRenderer(
       B2BReceiptPage,
       InnerB2BReceiptPage,
       {
         entities: {
-          b2b_order_status: orderStatus
-        }
+          b2b_order_status: orderStatus,
+        },
       },
       {
         location: {
-          search: qs.stringify({ hash: orderHash })
-        }
-      }
+          search: qs.stringify({ hash: orderHash }),
+        },
+      },
     )
   })
 
@@ -55,13 +55,13 @@ describe("B2BReceiptPage", () => {
       inner
         .find(".course-or-program")
         .text()
-        .includes(orderStatus.product_version.content_title)
+        .includes(orderStatus.product_version.content_title),
     )
     assert.isTrue(
       inner
         .find(".course-or-program")
         .text()
-        .includes(orderStatus.product_version.readable_id)
+        .includes(orderStatus.product_version.readable_id),
     )
     assert.isTrue(
       inner
@@ -69,16 +69,11 @@ describe("B2BReceiptPage", () => {
         .text()
         .includes(
           `${orderStatus.num_seats} (at ${formatPrice(
-            orderStatus.item_price
-          )} per seat)`
-        )
+            orderStatus.item_price,
+          )} per seat)`,
+        ),
     )
-    assert.isTrue(
-      inner
-        .find(".email")
-        .text()
-        .includes(orderStatus.email)
-    )
+    assert.isTrue(inner.find(".email").text().includes(orderStatus.email))
     const summaryProps = inner.find("B2BPurchaseSummary").props()
     assert.equal(String(summaryProps.itemPrice), orderStatus.item_price)
     assert.equal(String(summaryProps.totalPrice), orderStatus.total_price)
@@ -99,21 +94,21 @@ describe("B2BReceiptPage", () => {
       .withArgs(`/api/b2b/orders/${newHash}/status/`, "GET")
       .returns({
         status: 200,
-        body:   newOrderStatus
+        body:   newOrderStatus,
       })
 
     const { wrapper } = await renderPage(
       {},
       {
         location: {
-          search: qs.stringify({ hash: newHash })
-        }
-      }
+          search: qs.stringify({ hash: newHash }),
+        },
+      },
     )
     sinon.assert.calledWith(
       helper.handleRequestStub,
       `/api/b2b/orders/${newHash}/status/`,
-      "GET"
+      "GET",
     )
     assert.equal(wrapper.prop("orderStatus"), newOrderStatus)
   })
@@ -134,7 +129,7 @@ describe("B2BReceiptPage", () => {
       orderStatus.status = "created"
       const fulfilledOrderStatus = {
         ...orderStatus,
-        status: "fulfilled"
+        status: "fulfilled",
       }
       const { store } = await renderPage()
       helper.handleRequestStub.resetHistory()
@@ -144,7 +139,7 @@ describe("B2BReceiptPage", () => {
         .withArgs(`/api/b2b/orders/${orderHash}/status/`, "GET")
         .returns({
           body:   fulfilledOrderStatus,
-          status: 200
+          status: 200,
         })
       helper.sandbox.stub(momentProto, "isBefore").returns(!outOfTime)
       // $FlowFixMe
@@ -155,13 +150,13 @@ describe("B2BReceiptPage", () => {
         assert.deepEqual(store.getState().ui.userNotifications, {
           "b2b-order-status": {
             color: "danger",
-            type:  "b2b-order-status"
-          }
+            type:  "b2b-order-status",
+          },
         })
       } else {
         sinon.assert.calledWith(
           helper.handleRequestStub,
-          `/api/b2b/orders/${orderHash}/status/`
+          `/api/b2b/orders/${orderHash}/status/`,
         )
       }
     })

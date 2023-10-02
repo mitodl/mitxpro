@@ -1,8 +1,8 @@
 """
 Unblock user(s) from MIT xPRO
-"""
-from argparse import RawTextHelpFormatter
+"""  # noqa: INP001
 import sys
+from argparse import RawTextHelpFormatter
 
 from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
@@ -11,7 +11,6 @@ from authentication.utils import get_md5_hash
 from mail.api import validate_email_addresses
 from mail.exceptions import MultiEmailValidationError
 from users.models import BlockList
-
 
 User = get_user_model()
 
@@ -30,7 +29,7 @@ class Command(BaseCommand):
 
     For multiple users, add arg `--user` for each user i.e:\n
     `./manage.py unblock_users --user=foo@email.com --user=bar@email.com --user=abc@email.com` or do \n
-    """
+    """  # noqa: A003, E501
 
     def create_parser(self, prog_name, subcommand):  # pylint: disable=arguments-differ
         """
@@ -41,7 +40,7 @@ class Command(BaseCommand):
         return parser
 
     def add_arguments(self, parser):
-        """parse arguments"""
+        """Parse arguments"""
 
         # pylint: disable=expression-not-assigned
         parser.add_argument(
@@ -53,7 +52,7 @@ class Command(BaseCommand):
             help="Single or multiple email(s)",
         )
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **kwargs):  # noqa: ARG002
         users = kwargs.get("users", [])
         if not users:
             self.stderr.write(
@@ -82,16 +81,13 @@ class Command(BaseCommand):
                 blocked_user.delete()
                 self.stdout.write(
                     self.style.SUCCESS(
-                        "Email {email} has been removed from the blocklist of MIT xPRO.".format(
-                            email=user_email
-                        )
+                        "Email {email} has been removed from the blocklist of MIT xPRO."
+                        .format(email=user_email)
                     )
                 )
             else:
                 self.stdout.write(
                     self.style.WARNING(
-                        "Email {email} was not found in the blocklist.".format(
-                            email=user_email
-                        )
+                        f"Email {user_email} was not found in the blocklist."
                     )
                 )

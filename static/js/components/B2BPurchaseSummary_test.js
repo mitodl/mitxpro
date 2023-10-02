@@ -25,13 +25,13 @@ describe("B2BPurchaseSummary", () => {
             numSeats={numSeats}
             alreadyPaid={alreadyPaid}
             discount={discount}
-          />
+          />,
         )
         assert.equal(wrapper.find(".quantity").text(), String(numSeats))
         assert.equal(wrapper.find(".item-price").text(), formatPrice(itemPrice))
         assert.equal(
           wrapper.find(".total-price").text(),
-          formatPrice(totalPrice)
+          formatPrice(totalPrice),
         )
         if (hasDiscount) {
           assert.equal(wrapper.find(".discount").text(), formatPrice(discount))
@@ -40,7 +40,7 @@ describe("B2BPurchaseSummary", () => {
         }
         assert.equal(
           wrapper.find(".total-paid").text(),
-          `Total ${alreadyPaid ? "Paid" : "Cost"}`
+          `Total ${alreadyPaid ? "Paid" : "Cost"}`,
         )
       })
     })

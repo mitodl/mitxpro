@@ -7,9 +7,9 @@ import factory
 import faker
 import pytest
 import pytz
-import rest_framework.status as status  # pylint: disable=useless-import-alias
 from django.db.models import Count, Q
 from django.urls import reverse
+from rest_framework import status  # pylint: disable=useless-import-alias
 from rest_framework.renderers import JSONRenderer
 from rest_framework.test import APIClient
 
@@ -64,7 +64,6 @@ from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import dict_without_keys, now_in_utc
 from users.factories import UserFactory
 
-
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_ACCESS_KEY = "access"
 CYBERSOURCE_PROFILE_ID = "profile"
@@ -94,7 +93,7 @@ def render_json(serializer):
 
 
 @pytest.fixture(autouse=True)
-def ecommerce_settings(settings):
+def ecommerce_settings(settings):  # noqa: PT004
     """
     Set cybersource settings
     """
@@ -107,7 +106,7 @@ def ecommerce_settings(settings):
 
 
 # pylint: disable=redefined-outer-name
-@pytest.fixture
+@pytest.fixture()
 def basket_client(basket_and_coupons):
     """DRF Client with logged in user with basket"""
     user = basket_and_coupons.basket_item.basket.user
@@ -175,7 +174,7 @@ def test_creates_order(basket_client, mocker, basket_and_coupons):
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
-def test_zero_price_checkout(
+def test_zero_price_checkout(  # noqa: PLR0913
     basket_client,
     mocker,
     basket_and_coupons,
@@ -185,7 +184,7 @@ def test_zero_price_checkout(
 ):  # pylint:disable=too-many-arguments
     """
     If the order total is $0, we should just fulfill the order and direct the user to our order receipt page
-    """
+    """  # noqa: E501
     settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
     line = LineFactory.create(
@@ -210,11 +209,11 @@ def test_zero_price_checkout(
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json() == {
         "payload": {
-            "transaction_id": "T-{}".format(order.id),
+            "transaction_id": f"T-{order.id}",
             "transaction_total": 0.0,
             "product_type": line.product_version.product.type_string,
             "courseware_id": text_id,
-            "reference_number": "REF-{}".format(order.id),
+            "reference_number": f"REF-{order.id}",
         },
         "url": f"http://testserver/dashboard/?status=purchased&purchased={quote_plus(text_id)}",
         "method": "GET",
@@ -229,13 +228,13 @@ def test_zero_price_checkout(
     assert CourseRunSelection.objects.filter(basket__user=user).count() == 0
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
     if hubspot_api_key:
-        assert mock_hubspot_syncs.order.called_with(order.id)
+        assert mock_hubspot_syncs.order.called_with(order.id)  # noqa: PGH005
     else:
-        assert mock_hubspot_syncs.order.not_called()
+        assert mock_hubspot_syncs.order.not_called()  # noqa: PGH005
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
-def test_order_fulfilled(
+def test_order_fulfilled(  # noqa: PLR0913
     mocker,
     settings,
     basket_client,
@@ -272,7 +271,7 @@ def test_order_fulfilled(
     assert order.status == Order.FULFILLED
     assert order.receipt_set.count() == 1
     receipt = order.receipt_set.first()
-    assert str(receipt) == "Receipt for order {}".format(receipt.order.id)
+    assert str(receipt) == f"Receipt for order {receipt.order.id}"
     assert receipt.data == data
     enroll_user.assert_called_with(order)
 
@@ -291,16 +290,16 @@ def test_order_fulfilled(
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
 
     if hubspot_api_key:
-        assert mock_hubspot_syncs.order.called_with(order.id)
+        assert mock_hubspot_syncs.order.called_with(order.id)  # noqa: PGH005
     else:
-        assert mock_hubspot_syncs.order.not_called()
+        assert mock_hubspot_syncs.order.not_called()  # noqa: PGH005
 
 
 def test_order_affiliate(basket_client, mocker, basket_and_coupons):
     """
     The order view should pass an affiliate id into the order creation API function if an affiliate id exists
     in the session.
-    """
+    """  # noqa: E501
     user = basket_and_coupons.basket_item.basket.user
     line = LineFactory.create(
         order__status=Order.CREATED,
@@ -327,14 +326,14 @@ def test_missing_fields(basket_client, mocker):
     If CyberSource POSTs with fields missing, we should at least save it in a receipt.
     It is very unlikely for Cybersource to POST invalid data but it also provides a way to test
     that we save a Receipt in the event of an error.
-    """
+    """  # noqa: E501
     data = {}
     for _ in range(5):
         data[FAKE.text()] = FAKE.text()
     mocker.patch(
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )
-    try:
+    try:  # noqa: SIM105
         # Missing fields from Cybersource POST will cause a ParseException.
         # In this test we just care that we saved the data in Receipt for later
         # analysis.
@@ -349,7 +348,11 @@ def test_missing_fields(basket_client, mocker):
 
 @pytest.mark.parametrize("decision", ["CANCEL", "something else"])
 def test_not_accept(
-    mocker, validated_basket, basket_client, basket_and_coupons, decision
+    mocker,
+    validated_basket,
+    basket_client,
+    basket_and_coupons,  # noqa: ARG001
+    decision,  # noqa: ARG001, RUF100
 ):
     """
     If the decision is not ACCEPT then the order should be marked as failed
@@ -369,11 +372,11 @@ def test_not_accept(
 
 
 def test_ignore_duplicate_cancel(
-    mocker, validated_basket, basket_client, basket_and_coupons
+    mocker, validated_basket, basket_client, basket_and_coupons  # noqa: ARG001
 ):
     """
     If the decision is CANCEL and we already have a duplicate failed order, don't change anything.
-    """
+    """  # noqa: E501
     order = create_unfulfilled_order(validated_basket)
     order.status = Order.FAILED
     order.save()
@@ -390,11 +393,16 @@ def test_ignore_duplicate_cancel(
 
 
 @pytest.mark.parametrize(
-    "order_status, decision",
+    ("order_status", "decision"),
     [(Order.FAILED, "ERROR"), (Order.FULFILLED, "ERROR"), (Order.FULFILLED, "SUCCESS")],
 )
-def test_error_on_duplicate_order(
-    mocker, validated_basket, basket_client, basket_and_coupons, order_status, decision
+def test_error_on_duplicate_order(  # noqa: PLR0913
+    mocker,
+    validated_basket,
+    basket_client,
+    basket_and_coupons,  # noqa: ARG001
+    order_status,
+    decision,  # noqa: ARG001, RUF100
 ):
     """If there is a duplicate message (except for CANCEL), raise an exception"""
     order = create_unfulfilled_order(validated_basket)
@@ -439,17 +447,17 @@ def test_get_basket(basket_client, basket_and_coupons, mock_context, mocker):
 
 
 @pytest.mark.parametrize(
-    "receipts_enabled, order_status, expected_status_code",
+    ("receipts_enabled", "order_status", "expected_status_code"),
     [
-        [True, Order.FULFILLED, status.HTTP_200_OK],
-        [True, Order.CREATED, status.HTTP_404_NOT_FOUND],
-        [True, Order.REFUNDED, status.HTTP_404_NOT_FOUND],
-        [False, Order.FULFILLED, status.HTTP_404_NOT_FOUND],
-        [False, Order.CREATED, status.HTTP_404_NOT_FOUND],
-        [False, Order.REFUNDED, status.HTTP_404_NOT_FOUND],
+        [True, Order.FULFILLED, status.HTTP_200_OK],  # noqa: PT007
+        [True, Order.CREATED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
+        [True, Order.REFUNDED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
+        [False, Order.FULFILLED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
+        [False, Order.CREATED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
+        [False, Order.REFUNDED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
     ],
 )
-def test_get_order_configuration(  # pylint: disable=too-many-arguments
+def test_get_order_configuration(  # pylint: disable=too-many-arguments  # noqa: PLR0913
     settings, user, user_client, receipts_enabled, order_status, expected_status_code
 ):
     """Test the view that handles order receipts functions as expected"""
@@ -459,22 +467,24 @@ def test_get_order_configuration(  # pylint: disable=too-many-arguments
     assert resp.status_code == expected_status_code
 
 
-def test_get_basket_new_user(basket_and_coupons, user, user_drf_client):
-    """Test that the view creates a basket returns a 200 if a user doesn't already have a basket"""
+def test_get_basket_new_user(basket_and_coupons, user, user_drf_client):  # noqa: ARG001
+    """Test that the view creates a basket returns a 200 if a user doesn't already have a basket"""  # noqa: E501
     basket = Basket.objects.all().first()
-    assert str(basket) == "Basket for {}".format(str(basket.user))
+    assert str(basket) == f"Basket for {basket.user!s}"
     assert Basket.objects.filter(user=user).exists() is False
     resp = user_drf_client.get(reverse("basket_api"))
-    assert resp.status_code == 200
-    assert Basket.objects.count() == 2
+    assert resp.status_code == 200  # noqa: PLR2004
+    assert Basket.objects.count() == 2  # noqa: PLR2004
     assert Basket.objects.filter(user=user).exists() is True
 
 
-def test_patch_basket_new_user(basket_and_coupons, user, user_drf_client):
-    """Test that the view creates a basket and patches it basket does not already exist for user"""
+def test_patch_basket_new_user(
+    basket_and_coupons, user, user_drf_client  # noqa: ARG001
+):  # noqa: ARG001, RUF100
+    """Test that the view creates a basket and patches it basket does not already exist for user"""  # noqa: E501
     assert Basket.objects.filter(user=user).exists() is False
     resp = user_drf_client.patch(reverse("basket_api"), {"items": []})
-    assert resp.status_code == 200
+    assert resp.status_code == 200  # noqa: PLR2004
     assert Basket.objects.filter(user=user).exists() is True
 
 
@@ -499,12 +509,14 @@ def test_patch_basket_new_item_with_product_id(
 def test_patch_basket_new_item_with_text_id(
     basket_client, basket_and_coupons, mock_context, mocker
 ):
-    """Test that a user can add an item to their basket using the text id of the course run/program"""
+    """Test that a user can add an item to their basket using the text id of the course run/program"""  # noqa: E501
     mocker.patch("ipware.get_client_ip", return_value="127.0.0.1")
     data = {
         "items": [
             {
-                "product_id": basket_and_coupons.product_version.product.content_object.text_id
+                "product_id": (
+                    basket_and_coupons.product_version.product.content_object.text_id
+                )
             }
         ]
     }
@@ -520,8 +532,8 @@ def test_patch_basket_new_item_with_text_id(
     )
 
 
-def test_patch_basket_replace_item(basket_client, basket_and_agreement):
-    """If a user changes the item in the basket it should clear away old selected runs and coupons"""
+def test_patch_basket_replace_item(basket_client, basket_and_agreement):  # noqa: ARG001
+    """If a user changes the item in the basket it should clear away old selected runs and coupons"""  # noqa: E501
     new_product = ProductVersionFactory.create().product
     data = {"items": [{"product_id": new_product.id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
@@ -565,7 +577,9 @@ def test_patch_basket_replace_item_with_same(basket_client, basket_and_agreement
     assert resp.json()["coupons"] == [CouponSelectionSerializer(selection).data]
 
 
-def test_patch_basket_multiple_products(basket_client, basket_and_coupons):
+def test_patch_basket_multiple_products(
+    basket_client, basket_and_coupons  # noqa: ARG001
+):  # noqa: ARG001, RUF100
     """Test that an update with multiple products is rejected"""
     data = {"items": [{"product_id": 10}, {"product_id": 11}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
@@ -574,7 +588,9 @@ def test_patch_basket_multiple_products(basket_client, basket_and_coupons):
     assert "Basket cannot contain more than one item" in resp_data["errors"]["items"]
 
 
-def test_patch_basket_invalid_coupon_format(basket_client, basket_and_coupons):
+def test_patch_basket_invalid_coupon_format(
+    basket_client, basket_and_coupons  # noqa: ARG001
+):  # noqa: ARG001, RUF100
     """Test that an update with an invalid coupon code format is rejected"""
     resp = basket_client.patch(
         reverse("basket_api"), type="json", data={"coupons": ["coupon code"]}
@@ -583,7 +599,9 @@ def test_patch_basket_invalid_coupon_format(basket_client, basket_and_coupons):
     assert resp.json().get("errors") == {"coupons": "Invalid request"}
 
 
-def test_patch_basket_multiple_coupons(basket_client, basket_and_coupons):
+def test_patch_basket_multiple_coupons(
+    basket_client, basket_and_coupons  # noqa: ARG001
+):  # noqa: ARG001, RUF100
     """Test that an update with multiple coupons is rejected"""
     data = {"coupons": [{"code": "FOO"}, {"code": "BAR"}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
@@ -595,7 +613,11 @@ def test_patch_basket_multiple_coupons(basket_client, basket_and_coupons):
 
 
 def test_patch_basket_update_coupon_valid(
-    basket_client, mock_context, basket_and_coupons, basket_and_agreement, mocker
+    basket_client,
+    mock_context,
+    basket_and_coupons,
+    basket_and_agreement,  # noqa: ARG001
+    mocker,  # noqa: ARG001, RUF100
 ):
     """Test that a valid coupon is successfully applied to the basket"""
     mocker.patch("ipware.get_client_ip", return_value="127.0.0.1")
@@ -615,7 +637,9 @@ def test_patch_basket_update_coupon_valid(
     assert resp_data["data_consents"] == []
 
 
-def test_patch_basket_update_coupon_invalid(basket_client, basket_and_coupons):
+def test_patch_basket_update_coupon_invalid(
+    basket_client, basket_and_coupons  # noqa: ARG001
+):  # noqa: ARG001, RUF100
     """Test that an invalid coupon is rejected"""
     bad_code = "FAKE_CODE"
     data = {"coupons": [{"code": bad_code}]}
@@ -631,7 +655,7 @@ def test_patch_basket_update_coupon_invalid(basket_client, basket_and_coupons):
 def test_patch_basket_clear_coupon_auto(
     basket_client, basket_and_coupons, mock_context, mocker
 ):
-    """Test that an auto coupon is applied to basket when it exists and coupons cleared"""
+    """Test that an auto coupon is applied to basket when it exists and coupons cleared"""  # noqa: E501
     mocker.patch("ipware.get_client_ip", return_value="127.0.0.1")
     basket = basket_and_coupons.basket
     auto_coupon = basket_and_coupons.coupongroup_worst.coupon
@@ -647,7 +671,9 @@ def test_patch_basket_clear_coupon_auto(
         {
             "code": auto_coupon.coupon_code,
             "amount": str(basket_and_coupons.coupongroup_worst.payment_version.amount),
-            "discount_type": basket_and_coupons.coupongroup_worst.payment_version.discount_type,
+            "discount_type": (
+                basket_and_coupons.coupongroup_worst.payment_version.discount_type
+            ),
             "targets": [basket_and_coupons.product_version.id],
         }
     ]
@@ -738,18 +764,22 @@ def test_patch_basket_update_valid_product_invalid_coupon_no_auto(
     assert CouponSelection.objects.filter(basket=basket).first() is None
 
 
-def test_patch_basket_update_invalid_product(basket_client, basket_and_coupons):
+def test_patch_basket_update_invalid_product(
+    basket_client, basket_and_coupons  # noqa: ARG001
+):  # noqa: ARG001, RUF100
     """Test that invalid product id is rejected with no changes to basket"""
     bad_id = 9999
     data = {"items": [{"product_id": bad_id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert "Invalid product id {}".format(bad_id) in resp_data["errors"]["items"]
+    assert f"Invalid product id {bad_id}" in resp_data["errors"]["items"]
 
 
-def test_patch_basket_update_active_inactive_product(basket_client, basket_and_coupons):
-    """Test that inactive product id is rejected with no changes to basket but not the active ones."""
+def test_patch_basket_update_active_inactive_product(
+    basket_client, basket_and_coupons  # noqa: ARG001
+):  # noqa: ARG001, RUF100
+    """Test that inactive product id is rejected with no changes to basket but not the active ones."""  # noqa: E501
     product = ProductVersionFactory.create().product
     product.is_active = False
     product.save()
@@ -757,10 +787,7 @@ def test_patch_basket_update_active_inactive_product(basket_client, basket_and_c
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert (
-        "Invalid product id {product_id}".format(product_id=product.id)
-        in resp_data["errors"]["items"]
-    )
+    assert f"Invalid product id {product.id}" in resp_data["errors"]["items"]
 
     product.is_active = True
     product.save()
@@ -768,7 +795,9 @@ def test_patch_basket_update_active_inactive_product(basket_client, basket_and_c
     assert resp.status_code == status.HTTP_200_OK
 
 
-def test_patch_basket_update_inactive_product(basket_client, basket_and_coupons):
+def test_patch_basket_update_inactive_product(
+    basket_client, basket_and_coupons  # noqa: ARG001
+):  # noqa: ARG001, RUF100
     """Test that an inactive product id is rejected when updating the basket"""
     product = ProductVersionFactory.create(product__is_active=False).product
     text_id = product.content_object.text_id
@@ -776,16 +805,15 @@ def test_patch_basket_update_inactive_product(basket_client, basket_and_coupons)
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert (
-        "Invalid product id {product_id}".format(product_id=text_id)
-        in resp_data["errors"]["items"]
-    )
+    assert f"Invalid product id {text_id}" in resp_data["errors"]["items"]
 
 
 @pytest.mark.parametrize("section", ["items", "coupons"])
-def test_patch_basket_update_invalid_data(basket_client, basket_and_coupons, section):
+def test_patch_basket_update_invalid_data(
+    basket_client, basket_and_coupons, section  # noqa: ARG001
+):  # noqa: ARG001, RUF100
     """Test that invalid product data is rejected with no changes to basket"""
-    data = dict()
+    data = {}
     data[section] = [{"foo": "bar"}]
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -794,7 +822,9 @@ def test_patch_basket_update_invalid_data(basket_client, basket_and_coupons, sec
 
 
 @pytest.mark.parametrize("data", [{"items": [], "coupons": []}, {"items": []}])
-def test_patch_basket_clear_product(basket_client, basket_and_coupons, data):
+def test_patch_basket_clear_product(
+    basket_client, basket_and_coupons, data  # noqa: ARG001
+):  # noqa: ARG001, RUF100
     """Test that product, coupon, and runs are cleared"""
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
@@ -805,7 +835,7 @@ def test_patch_basket_clear_product(basket_client, basket_and_coupons, data):
     assert CourseRunSelection.objects.count() == 0
 
 
-def test_patch_basket_nodata(basket_client, basket_and_coupons):
+def test_patch_basket_nodata(basket_client, basket_and_coupons):  # noqa: ARG001
     """Test that a patch request with no items or coupons keys is invalidated"""
     resp = basket_client.patch(reverse("basket_api"), type="json", data={})
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -815,7 +845,7 @@ def test_patch_basket_nodata(basket_client, basket_and_coupons):
 
 @pytest.mark.parametrize("add_new_runs", [True, False])
 def test_patch_basket_update_runs(basket_client, basket_and_coupons, add_new_runs):
-    """A patch request with run ids should update and replace the existing run ids for that item"""
+    """A patch request with run ids should update and replace the existing run ids for that item"""  # noqa: E501
     product_version = basket_and_coupons.product_version
     product = product_version.product
     run1 = CourseRunFactory.create()
@@ -847,17 +877,17 @@ def test_patch_basket_update_runs(basket_client, basket_and_coupons, add_new_run
 def test_patch_basket_invalid_run(
     basket_client, basket_and_coupons, is_program, is_selected
 ):
-    """A patch request with a run for a different product should result in a 400 error"""
+    """A patch request with a run for a different product should result in a 400 error"""  # noqa: E501
     product_version = basket_and_coupons.product_version
     product = product_version.product
     run = CourseRunFactory.create()
     product.content_object = run.course.program if is_program else run
     product.save()
 
-    # If the product is a course, create a new run on a different course which is invalid.
+    # If the product is a course, create a new run on a different course which is invalid.  # noqa: E501
     # If the product is a program, create a new run on a different program.
     course_run_params = (
-        dict(course__program=product.content_object.course.program)
+        {"course__program": product.content_object.course.program}
         if not is_program
         else {}
     )
@@ -918,7 +948,7 @@ def test_patch_basket_multiple_runs(
 
 
 def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
-    """A patch request for a run for a course that the user has already enrolled in should result in a 400 error"""
+    """A patch request for a run for a course that the user has already enrolled in should result in a 400 error"""  # noqa: E501
     run = basket_and_coupons.run
     line = LineFactory.create(order__status=Order.FULFILLED)
     CourseRunEnrollmentFactory.create(
@@ -944,7 +974,7 @@ def test_patch_basket_already_enrolled(basket_client, basket_and_coupons):
 
 
 def test_patch_basket_other_user_enrolled(basket_client, basket_and_coupons):
-    """A patch request for a course run that another user has already enrolled in should succeed"""
+    """A patch request for a course run that another user has already enrolled in should succeed"""  # noqa: E501
     run = basket_and_coupons.run
     order = LineFactory.create(order__status=Order.FULFILLED).order
     CourseRunEnrollmentFactory.create(run=run, user=order.purchaser, order=order)
@@ -966,7 +996,7 @@ def test_patch_basket_other_user_enrolled(basket_client, basket_and_coupons):
 
 @pytest.mark.parametrize("as_owner", [True, False])
 def test_patch_basket_data_consents(basket_and_agreement, as_owner):
-    """Test that a patch request with DataConsentUser ids updates those objects with consent dates"""
+    """Test that a patch request with DataConsentUser ids updates those objects with consent dates"""  # noqa: E501
     user = basket_and_agreement.basket.user if as_owner else UserFactory.create()
     client = APIClient()
     client.force_authenticate(user=user)
@@ -1027,10 +1057,11 @@ def test_patch_basket_external_product(basket_and_coupons):
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
-    """Test that the correct model objects are created for a batch of single-use coupons"""
+    """Test that the correct model objects are created for a batch of single-use coupons"""  # noqa: E501
     data = single_use_coupon_json
     resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
@@ -1038,23 +1069,24 @@ def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     assert str(model_version) == "CouponPaymentVersion for {} of type {}".format(
         model_version.num_coupon_codes, model_version.coupon_type
     )
-    assert model_version.couponversion_set.count() == 5
-    assert model_version.payment.coupon_set.count() == 5
+    assert model_version.couponversion_set.count() == 5  # noqa: PLR2004
+    assert model_version.payment.coupon_set.count() == 5  # noqa: PLR2004
     assert model_version.amount == data.get("amount")
     assert model_version.coupon_type == "single-use"
     assert model_version.payment_transaction == data.get("payment_transaction")
     assert Company.objects.filter(id=data.get("company")).first() is not None
     assert (
         CouponEligibility.objects.filter(product__in=data.get("product_ids")).count()
-        == 15
+        == 15  # noqa: PLR2004
     )
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_post_global_singleuse_coupons(admin_drf_client, single_use_coupon_json):
-    """Test that the correct model objects are created for a batch of single-use coupons (global coupon)"""
+    """Test that the correct model objects are created for a batch of single-use coupons (global coupon)"""  # noqa: E501
     data = single_use_coupon_json
     data["is_global"] = True
     resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
@@ -1063,8 +1095,8 @@ def test_post_global_singleuse_coupons(admin_drf_client, single_use_coupon_json)
     assert str(model_version) == "CouponPaymentVersion for {} of type {}".format(
         model_version.num_coupon_codes, model_version.coupon_type
     )
-    assert model_version.couponversion_set.count() == 5
-    assert model_version.payment.coupon_set.count() == 5
+    assert model_version.couponversion_set.count() == 5  # noqa: PLR2004
+    assert model_version.payment.coupon_set.count() == 5  # noqa: PLR2004
     assert model_version.amount == data.get("amount")
     assert model_version.coupon_type == "single-use"
     assert model_version.payment_transaction == data.get("payment_transaction")
@@ -1074,15 +1106,15 @@ def test_post_global_singleuse_coupons(admin_drf_client, single_use_coupon_json)
     )
     assert (
         CouponEligibility.objects.filter(product__in=data.get("product_ids")).count()
-        == 15
+        == 15  # noqa: PLR2004
     )
 
 
 @pytest.mark.parametrize(
-    "discount_type, amount",
+    ("discount_type", "amount"),
     [
-        [DISCOUNT_TYPE_PERCENT_OFF, 0.5],
-        [DISCOUNT_TYPE_DOLLARS_OFF, 50],
+        [DISCOUNT_TYPE_PERCENT_OFF, 0.5],  # noqa: PT007
+        [DISCOUNT_TYPE_DOLLARS_OFF, 50],  # noqa: PT007
     ],
 )
 def test_post_promo_coupon(admin_drf_client, promo_coupon_json, discount_type, amount):
@@ -1105,15 +1137,16 @@ def test_post_promo_coupon(admin_drf_client, promo_coupon_json, discount_type, a
     assert Company.objects.filter(id=data.get("company")).first() is not None
     assert (
         CouponEligibility.objects.filter(product__in=data.get("product_ids")).count()
-        == 3
+        == 3  # noqa: PLR2004
     )
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
-    """Test that the correct model objects are created for a promo coupon (global coupon)"""
+    """Test that the correct model objects are created for a promo coupon (global coupon)"""  # noqa: E501
     data = promo_coupon_json
     data["is_global"] = True
     resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
@@ -1133,29 +1166,30 @@ def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
     )
     assert (
         CouponEligibility.objects.filter(product__in=data.get("product_ids")).count()
-        == 3
+        == 3  # noqa: PLR2004
     )
 
 
 @pytest.mark.parametrize(
-    "attribute,bad_value,error",
+    ("attribute", "bad_value", "error"),
     [
-        [
+        [  # noqa: PT007
             "product_ids",
             [9998, 9999],
             "Product with id(s) 9998,9999 could not be found",
         ],
-        [
+        [  # noqa: PT007
             "product_ids",
             [],
             "At least one product must be selected or coupon should be global.",
         ],
-        ["name", "AlreadyExists", "This field must be unique."],
-        ["coupon_code", "AlreadyExists", "This field must be unique."],
+        ["name", "AlreadyExists", "This field must be unique."],  # noqa: PT007
+        ["coupon_code", "AlreadyExists", "This field must be unique."],  # noqa: PT007
     ],
 )
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_create_promo_coupon_bad_product(
     admin_drf_client, promo_coupon_json, attribute, bad_value, error
@@ -1171,7 +1205,8 @@ def test_create_promo_coupon_bad_product(
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_create_promo_coupon_no_payment_info(admin_drf_client, promo_coupon_json):
     """Test that a promo CouponPaymentVersion can be created without payment info"""
@@ -1187,12 +1222,13 @@ def test_create_promo_coupon_no_payment_info(admin_drf_client, promo_coupon_json
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_create_singleuse_coupon_no_payment_info(
     admin_drf_client, single_use_coupon_json
 ):
-    """Test that a single-use CouponPaymentVersion cannot be created without payment type, transaction info"""
+    """Test that a single-use CouponPaymentVersion cannot be created without payment type, transaction info"""  # noqa: E501
     data = single_use_coupon_json
     payment_attrs = ("company", "payment_type", "payment_transaction")
     for attr in payment_attrs:
@@ -1206,7 +1242,8 @@ def test_create_singleuse_coupon_no_payment_info(
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_create_coupon_permission(user_drf_client, promo_coupon_json):
     """Test that non-admins cannot create coupons"""
@@ -1216,7 +1253,8 @@ def test_create_coupon_permission(user_drf_client, promo_coupon_json):
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_coupon_csv_view(admin_client, admin_drf_client, single_use_coupon_json):
     """Test that a valid csv response is returned for a CouponPaymentVersion"""
@@ -1226,7 +1264,7 @@ def test_coupon_csv_view(admin_client, admin_drf_client, single_use_coupon_json)
     csv_response = admin_client.get(
         reverse("coupons_csv", kwargs={"version_id": cpv.id})
     )
-    assert csv_response.status_code == 200
+    assert csv_response.status_code == 200  # noqa: PLR2004
     rows = [line.split(",") for line in csv_response.content.decode().split()]
     assert rows[0] == ["code"]
     codes = [row[0] for row in rows[1:]]
@@ -1235,8 +1273,10 @@ def test_coupon_csv_view(admin_client, admin_drf_client, single_use_coupon_json)
     )
 
 
-def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
-    """Test that the bulk assignment CSV includes the correct product coupon assignment data"""
+def test_bulk_assignment_csv_view(
+    settings, admin_client, admin_drf_client  # noqa: ARG001
+):  # noqa: ARG001, RUF100
+    """Test that the bulk assignment CSV includes the correct product coupon assignment data"""  # noqa: E501
     settings.SITE_BASE_URL = "http://test.com/"
 
     bulk_assignment = BulkCouponAssignment.objects.create()
@@ -1253,7 +1293,7 @@ def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
     csv_response = admin_client.get(
         reverse("bulk_assign_csv", kwargs={"bulk_assignment_id": bulk_assignment.id})
     )
-    assert csv_response.status_code == 200
+    assert csv_response.status_code == 200  # noqa: PLR2004
     rows = [line.split(",") for line in csv_response.content.decode().split()]
     assert len(rows) == (len(individual_assignments) + 1)
     assert rows[0] == ["email", "enrollment_url", "coupon_code"]
@@ -1274,17 +1314,27 @@ def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
 
 
 @pytest.mark.parametrize(
-    "url_name,url_kwarg_name,test_client,expected_status_code",
+    ("url_name", "url_kwarg_name", "test_client", "expected_status_code"),
     [
-        ["coupons_csv", "version_id", lazy("admin_client"), status.HTTP_404_NOT_FOUND],
-        ["coupons_csv", "version_id", lazy("user_client"), status.HTTP_403_FORBIDDEN],
-        [
+        [  # noqa: PT007
+            "coupons_csv",
+            "version_id",
+            lazy("admin_client"),
+            status.HTTP_404_NOT_FOUND,
+        ],  # noqa: PT007, RUF100
+        [  # noqa: PT007
+            "coupons_csv",
+            "version_id",
+            lazy("user_client"),
+            status.HTTP_403_FORBIDDEN,
+        ],  # noqa: PT007, RUF100
+        [  # noqa: PT007
             "bulk_assign_csv",
             "bulk_assignment_id",
             lazy("admin_client"),
             status.HTTP_404_NOT_FOUND,
         ],
-        [
+        [  # noqa: PT007
             "bulk_assign_csv",
             "bulk_assignment_id",
             lazy("user_client"),
@@ -1296,7 +1346,7 @@ def test_csv_views_errors(url_name, url_kwarg_name, test_client, expected_status
     """
     Test that the views that return a CSV containing user ecommerce data is protected and returns a 404 if
     a non-existent id is requested
-    """
+    """  # noqa: E501
     response = test_client.get(reverse(url_name, kwargs={url_kwarg_name: 9999}))
     assert response.status_code == expected_status_code
 
@@ -1337,7 +1387,7 @@ def test_products_viewset_list_ordering(user_drf_client):
     product_object_ids = [
         product["latest_version"]["object_id"] for product in products
     ]
-    # Results should be returned with programs before course runs, then alphabetized by title
+    # Results should be returned with programs before course runs, then alphabetized by title  # noqa: E501
     assert product_object_ids == [
         programs[1].id,
         programs[0].id,
@@ -1395,7 +1445,7 @@ def test_products_viewset_valid_programs(user_drf_client):
         for product in products
         if product["product_type"] == "program"
     ]
-    # For all the programs in the list there should be on enrollable course run for each associated course
+    # For all the programs in the list there should be on enrollable course run for each associated course  # noqa: E501
     assert set(program_ids) == {programs[0].id, programs[1].id}
     for program_id in program_ids:
         program = Program.objects.get(pk=program_id)
@@ -1489,7 +1539,7 @@ def test_products_viewset_detail(user_drf_client, coupon_product_ids):
 
 
 def test_products_viewset_expired_programs(user_drf_client):
-    """Test that the ProductViewSet returns only valid programs products and excludes the expired programs correctly"""
+    """Test that the ProductViewSet returns only valid programs products and excludes the expired programs correctly"""  # noqa: E501
     now = now_in_utc()
     programs = ProgramFactory.create_batch(4)
     runs = CourseRunFactory.create_batch(2, course__program=factory.Iterator(programs))
@@ -1518,7 +1568,7 @@ def test_products_viewset_expired_programs(user_drf_client):
     assert programs[3].id not in program_ids
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_products_viewset_performance(
     user_drf_client, coupon_product_ids, django_assert_num_queries
 ):
@@ -1576,7 +1626,7 @@ def test_companies_viewset_detail(user_drf_client):
     response = user_drf_client.get(
         reverse("companies_api-detail", kwargs={"pk": company.id})
     )
-    assert str(company) == "Company {}".format(company.name)
+    assert str(company) == f"Company {company.name}"
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == CompanySerializer(instance=company).data
 

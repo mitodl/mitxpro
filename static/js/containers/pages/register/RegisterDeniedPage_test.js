@@ -3,7 +3,7 @@
 import { assert } from "chai"
 
 import RegisterDeniedPage, {
-  RegisterDeniedPage as InnerRegisterDeniedPage
+  RegisterDeniedPage as InnerRegisterDeniedPage,
 } from "./RegisterDeniedPage"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import { isIf, shouldIf } from "../../../lib/test_utils"
@@ -25,9 +25,9 @@ describe("RegisterDeniedPage", () => {
       {},
       {
         location: {
-          search: ""
-        }
-      }
+          search: "",
+        },
+      },
     )
   })
 
@@ -44,17 +44,17 @@ describe("RegisterDeniedPage", () => {
   //
   ;[true, false].forEach(hasError => {
     it(`${shouldIf(hasError)} show an error message if ${isIf(
-      hasError
+      hasError,
     )} in the query string`, async () => {
       const { inner } = await renderPage(
         {},
         hasError
           ? {
             location: {
-              search: `?error=${error}`
-            }
+              search: `?error=${error}`,
+            },
           }
-          : {}
+          : {},
       )
 
       const detail = inner.find(".error-detail")

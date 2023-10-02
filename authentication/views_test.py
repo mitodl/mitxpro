@@ -1,28 +1,30 @@
 """Tests for authentication views"""
 # pylint: disable=redefined-outer-name
-from contextlib import contextmanager, ExitStack
+from contextlib import ExitStack, contextmanager
 from unittest.mock import patch
 
+import factory
+import pytest
+import responses
 from django.conf import settings
 from django.contrib.auth import get_user, get_user_model
 from django.core import mail
 from django.db import transaction
-from django.urls import reverse
 from django.test import Client, override_settings
-import factory
+from django.urls import reverse
 from faker import Faker
-from hypothesis import settings as hypothesis_settings, strategies as st, Verbosity
+from hypothesis import Verbosity
+from hypothesis import settings as hypothesis_settings
+from hypothesis import strategies as st
+from hypothesis.extra.django import TestCase as HTestCase
 from hypothesis.stateful import (
+    Bundle,
+    HealthCheck,
+    RuleBasedStateMachine,
     consumes,
     precondition,
     rule,
-    Bundle,
-    RuleBasedStateMachine,
-    HealthCheck,
 )
-from hypothesis.extra.django import TestCase as HTestCase
-import pytest
-import responses
 from rest_framework import status
 from social_core.backends.email import EmailAuth
 
@@ -35,8 +37,8 @@ from compliance.test_utils import (
     mock_cybersource_wsdl,
     mock_cybersource_wsdl_operation,
 )
+from mitxpro.test_utils import MockResponse, any_instance_of
 from users.factories import UserFactory, UserSocialAuthFactory
-from mitxpro.test_utils import any_instance_of, MockResponse
 
 pytestmark = [pytest.mark.django_db]
 
@@ -50,7 +52,7 @@ fake = Faker()
 # pylint: disable=too-many-public-methods
 
 
-@pytest.fixture
+@pytest.fixture()
 def email_user(user):
     """Fixture for a user that has an 'email' type UserSocialAuth"""
     UserSocialAuthFactory.create(user=user, provider=EmailAuth.name, uid=user.email)
@@ -58,14 +60,14 @@ def email_user(user):
 
 
 # pylint: disable=too-many-arguments
-def assert_api_call(
+def assert_api_call(  # noqa: PLR0913
     client,
     url,
     payload,
     expected,
-    expect_authenticated=False,
+    expect_authenticated=False,  # noqa: FBT002
     expect_status=status.HTTP_200_OK,
-    use_defaults=True,
+    use_defaults=True,  # noqa: FBT002
 ):
     """Run the API call and perform basic assertions"""
     assert bool(get_user(client).is_authenticated) is False
@@ -95,21 +97,22 @@ def assert_api_call(
 @pytest.fixture()
 def mock_email_send(mocker):
     """Mock the email send API"""
-    yield mocker.patch("mail.verification_api.send_verification_email")
+    return mocker.patch("mail.verification_api.send_verification_email")
 
 
 @contextmanager
 def noop():
-    """A no-op context manager"""
+    """A no-op context manager"""  # noqa: D401
     yield
 
 
 @contextmanager
 def export_check_response(response_name):
     """Context manager for configuring export check responses"""
-    with override_settings(
-        **get_cybersource_test_settings()
-    ), responses.RequestsMock() as mocked_responses:
+    with (
+        override_settings(**get_cybersource_test_settings()),
+        responses.RequestsMock() as mocked_responses,
+    ):
         mock_cybersource_wsdl(mocked_responses, settings)
         mock_cybersource_wsdl_operation(mocked_responses, response_name)
         yield
@@ -126,7 +129,7 @@ class AuthStateMachine(RuleBasedStateMachine):
 
     If you add a new state to the auth flows, create a new bundle to represent that state and define
     methods to define transitions into and (optionally) out of that state.
-    """
+    """  # noqa: E501
 
     # pylint: disable=too-many-instance-attributes
 
@@ -150,7 +153,7 @@ class AuthStateMachine(RuleBasedStateMachine):
     courseware_tasks_patcher = patch("authentication.pipeline.user.courseware_tasks")
 
     def __init__(self):
-        """Setup the machine"""
+        """Setup the machine"""  # noqa: D401
         super().__init__()
         # wrap the execution in a django transaction, similar to django's TestCase
         self.atomic = transaction.atomic()
@@ -167,7 +170,7 @@ class AuthStateMachine(RuleBasedStateMachine):
         # shared data
         self.email = fake.email()
         self.user = None
-        self.password = "password123"
+        self.password = "password123"  # noqa: S105
 
         # track whether we've hit an action that starts a flow or not
         self.flow_started = False
@@ -183,7 +186,7 @@ class AuthStateMachine(RuleBasedStateMachine):
         self.courseware_tasks_patcher.stop()
 
         # end the transaction with a rollback to cleanup any state
-        transaction.set_rollback(True)
+        transaction.set_rollback(True)  # noqa: FBT003
         self.atomic.__exit__(None, None, None)
 
     def create_existing_user(self):
@@ -268,14 +271,15 @@ class AuthStateMachine(RuleBasedStateMachine):
     def register_email_not_exists_with_recaptcha_invalid(self):
         """Yield a function for this step"""
         self.flow_started = True
-        with patch(
-            "authentication.views.requests.post",
-            return_value=MockResponse(
-                content='{"success": false, "error-codes": ["bad-request"]}',
-                status_code=status.HTTP_200_OK,
-            ),
-        ) as mock_recaptcha_failure, override_settings(
-            **{"RECAPTCHA_SITE_KEY": "fakse"}
+        with (
+            patch(
+                "authentication.views.requests.post",
+                return_value=MockResponse(
+                    content='{"success": false, "error-codes": ["bad-request"]}',
+                    status_code=status.HTTP_200_OK,
+                ),
+            ) as mock_recaptcha_failure,
+            override_settings(**{"RECAPTCHA_SITE_KEY": "fakse"}),
         ):
             assert_api_call(
                 self.client,
@@ -337,12 +341,13 @@ class AuthStateMachine(RuleBasedStateMachine):
         auth_state=consumes(RegisterExtraDetailsAuthStates),
     )
     @precondition(lambda self: self.flow_started)
-    def login_email_abandoned(self, auth_state):  # pylint: disable=unused-argument
+    def login_email_abandoned(
+        self, auth_state  # noqa: ARG002
+    ):  # pylint: disable=unused-argument  # noqa: ARG002, RUF100
         """Login with a user that abandoned the register flow"""
         # NOTE: This works by "consuming" an extra details auth state,
         #       but discarding the state and starting a new login.
         #       It then re-targets the new state into the extra details again.
-        auth_state = None  # assign None to ensure no accidental usage here
 
         return assert_api_call(
             self.client,
@@ -412,7 +417,9 @@ class AuthStateMachine(RuleBasedStateMachine):
             },
             {
                 "field_errors": {
-                    "password": "Unable to login with that email and password combination"
+                    "password": (
+                        "Unable to login with that email and password combination"
+                    )
                 },
                 "flow": auth_state["flow"],
                 "state": SocialAuthState.STATE_ERROR,
@@ -451,9 +458,12 @@ class AuthStateMachine(RuleBasedStateMachine):
     @rule(auth_state=consumes(LoginPasswordAuthStates))
     def login_password_exports_temporary_error(self, auth_state):
         """Login for a user who hasn't been OFAC verified yet"""
-        with override_settings(**get_cybersource_test_settings()), patch(
-            "authentication.pipeline.compliance.api.verify_user_with_exports",
-            side_effect=Exception("register_details_export_temporary_error"),
+        with (
+            override_settings(**get_cybersource_test_settings()),
+            patch(
+                "authentication.pipeline.compliance.api.verify_user_with_exports",
+                side_effect=Exception("register_details_export_temporary_error"),
+            ),
         ):
             assert_api_call(
                 self.client,
@@ -517,7 +527,7 @@ class AuthStateMachine(RuleBasedStateMachine):
 
     @rule(auth_state=consumes(ConfirmationRedeemedAuthStates))
     def redeem_confirmation_code_twice_existing_user(self, auth_state):
-        """Redeeming a code twice with an existing user should fail with existing account state"""
+        """Redeeming a code twice with an existing user should fail with existing account state"""  # noqa: E501
         _, _, code, partial_token = self.mock_email_send.call_args[0]
         self.create_existing_user()
         assert_api_call(
@@ -647,10 +657,13 @@ class AuthStateMachine(RuleBasedStateMachine):
 
     @rule(auth_state=consumes(ConfirmationRedeemedAuthStates))
     def register_details_export_temporary_error(self, auth_state):
-        """Complete the register confirmation details page with exports raising a temporary error"""
-        with override_settings(**get_cybersource_test_settings()), patch(
-            "authentication.pipeline.compliance.api.verify_user_with_exports",
-            side_effect=Exception("register_details_export_temporary_error"),
+        """Complete the register confirmation details page with exports raising a temporary error"""  # noqa: E501
+        with (
+            override_settings(**get_cybersource_test_settings()),
+            patch(
+                "authentication.pipeline.compliance.api.verify_user_with_exports",
+                side_effect=Exception("register_details_export_temporary_error"),
+            ),
         ):
             assert_api_call(
                 self.client,
@@ -724,7 +737,7 @@ def test_new_register_no_session_partial(client):
     When a user registers for the first time and a verification email is sent, the partial
     token should be cleared from the session. The Partial object associated with that token should
     only be used when it's matched from the email verification link.
-    """
+    """  # noqa: E501
     assert_api_call(
         client,
         "psa-register-email",
@@ -735,7 +748,7 @@ def test_new_register_no_session_partial(client):
             "state": SocialAuthState.STATE_REGISTER_CONFIRM_SENT,
         },
     )
-    assert PARTIAL_PIPELINE_TOKEN_KEY not in client.session.keys()
+    assert PARTIAL_PIPELINE_TOKEN_KEY not in client.session
 
 
 def test_login_email_error(client, mocker):
@@ -770,27 +783,27 @@ def test_login_email_error(client, mocker):
 def test_login_email_hijacked(client, user, admin_user):
     """Test that a 403 response is returned for email login view if user is hijacked"""
     client.force_login(admin_user)
-    client.post("/hijack/{}/".format(user.id))
+    client.post(f"/hijack/{user.id}/")
     response = client.post(
         reverse("psa-login-email"),
         {"flow": SocialAuthState.FLOW_LOGIN, "email": "anything@example.com"},
     )
-    assert response.status_code == 403
+    assert response.status_code == 403  # noqa: PLR2004
 
 
 def test_register_email_hijacked(client, user, admin_user):
-    """Test that a 403 response is returned for email register view if user is hijacked"""
+    """Test that a 403 response is returned for email register view if user is hijacked"""  # noqa: E501
     client.force_login(admin_user)
-    client.post("/hijack/{}/".format(user.id))
+    client.post(f"/hijack/{user.id}/")
     response = client.post(
         reverse("psa-register-email"),
         {"flow": SocialAuthState.FLOW_LOGIN, "email": "anything@example.com"},
     )
-    assert response.status_code == 403
+    assert response.status_code == 403  # noqa: PLR2004
 
 
 def test_get_social_auth_types(client, user):
-    """Verify that get_social_auth_types returns a list of providers that the user has authenticated with"""
+    """Verify that get_social_auth_types returns a list of providers that the user has authenticated with"""  # noqa: E501
     social_auth_providers = ["provider1", "provider2"]
     url = reverse("get-auth-types-api")
     UserSocialAuthFactory.create_batch(

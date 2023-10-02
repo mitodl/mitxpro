@@ -4,10 +4,10 @@ Tests for signals
 """
 from unittest.mock import Mock
 
+import pytest
 from edx_api.course_detail import CourseDetail, CourseDetails
 from requests.exceptions import HTTPError
 
-import pytest
 from courses.factories import (
     CourseFactory,
     CourseRunCertificateFactory,
@@ -47,14 +47,14 @@ def course():
 
 # pylint: disable=too-many-arguments
 @pytest.mark.parametrize(
-    "grade, passed, exp_certificate, exp_created, exp_deleted",
+    ("grade", "passed", "exp_certificate", "exp_created", "exp_deleted"),
     [
-        [0.25, True, True, True, False],
-        [0.0, True, False, False, False],
-        [1.0, False, False, False, False],
+        [0.25, True, True, True, False],  # noqa: PT007
+        [0.0, True, False, False, False],  # noqa: PT007
+        [1.0, False, False, False, False],  # noqa: PT007
     ],
 )
-def test_course_run_certificate(
+def test_course_run_certificate(  # noqa: PLR0913
     user, course, grade, passed, exp_certificate, exp_created, exp_deleted
 ):
     """
@@ -117,7 +117,7 @@ def test_generate_program_certificate_already_exist(user, program):
     """
     Test that generate_program_certificate return (None, False) and not create program certificate
     if program certificate already exist.
-    """
+    """  # noqa: E501
     program_certificate = ProgramCertificateFactory.create(program=program, user=user)
     result = generate_program_certificate(user=user, program=program)
     assert result == (program_certificate, False)
@@ -128,7 +128,7 @@ def test_generate_program_certificate_failure(user, program):
     """
     Test that generate_program_certificate return (None, False) and not create program certificate
     if there is not any course_run certificate for the given course.
-    """
+    """  # noqa: E501
     course = CourseFactory.create(program=program)
     CourseRunFactory.create_batch(3, course=course)
 
@@ -153,9 +153,9 @@ def test_generate_program_certificate_success(user, program):
 
 
 @pytest.mark.parametrize(
-    "mocked_api_response, expect_success",
+    ("mocked_api_response", "expect_success"),
     [
-        [
+        [  # noqa: PT007
             CourseDetail(
                 {
                     "id": "course-v1:edX+DemoX+2020_T1",
@@ -168,7 +168,7 @@ def test_generate_program_certificate_success(user, program):
             ),
             True,
         ],
-        [
+        [  # noqa: PT007
             CourseDetail(
                 {
                     "id": "course-v1:edX+DemoX+2020_T1",
@@ -181,17 +181,17 @@ def test_generate_program_certificate_success(user, program):
             ),
             False,
         ],
-        [HTTPError(response=Mock(status_code=404)), False],
-        [HTTPError(response=Mock(status_code=400)), False],
-        [ConnectionError(), False],
+        [HTTPError(response=Mock(status_code=404)), False],  # noqa: PT007
+        [HTTPError(response=Mock(status_code=400)), False],  # noqa: PT007
+        [ConnectionError(), False],  # noqa: PT007
     ],
 )
 def test_sync_course_runs(settings, mocker, mocked_api_response, expect_success):
     """
     Test that sync_course_runs fetches data from edX API. Should fail on API responding with
     an error, as well as trying to set the course run title to None
-    """
-    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"
+    """  # noqa: E501
+    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
     mocker.patch.object(CourseDetails, "get_detail", side_effect=[mocked_api_response])
     course_run = CourseRunFactory.create()
 

@@ -8,7 +8,7 @@ import {
   fetchJSONWithCSRF,
   fetchWithCSRF,
   csrfSafeMethod,
-  patchThing
+  patchThing,
 } from "./api"
 import * as api from "./api"
 
@@ -30,7 +30,7 @@ describe("api", function() {
 
   describe("REST functions", () => {
     const THING_RESPONSE = {
-      a: "thing"
+      a: "thing",
     }
 
     let fetchStub
@@ -45,8 +45,8 @@ describe("api", function() {
         assert.ok(
           fetchStub.calledWith("/api/v0/thing/jane/", {
             method: "PATCH",
-            body:   JSON.stringify(THING_RESPONSE)
-          })
+            body:   JSON.stringify(THING_RESPONSE),
+          }),
         )
         assert.deepEqual(thing, THING_RESPONSE)
       })
@@ -58,8 +58,8 @@ describe("api", function() {
         assert.ok(
           fetchStub.calledWith("/api/v0/thing/jane/", {
             method: "PATCH",
-            body:   JSON.stringify(THING_RESPONSE)
-          })
+            body:   JSON.stringify(THING_RESPONSE),
+          }),
         )
       })
     })
@@ -85,17 +85,17 @@ describe("api", function() {
             credentials: "same-origin",
             headers:     {},
             body:        body,
-            method:      "GET"
+            method:      "GET",
           })
 
           return {
             status: 200,
-            body:   "Some text"
+            body:   "Some text",
           }
         })
 
         return fetchWithCSRF("/url", {
-          body: body
+          body: body,
         }).then(responseBody => {
           assert.equal(responseBody, "Some text")
         })
@@ -109,21 +109,21 @@ describe("api", function() {
             assert.deepEqual(opts, {
               credentials: "same-origin",
               headers:     {
-                "X-CSRFToken": CSRF_TOKEN
+                "X-CSRFToken": CSRF_TOKEN,
               },
               body:   body,
-              method: method
+              method: method,
             })
 
             return {
               status: 200,
-              body:   "Some text"
+              body:   "Some text",
             }
           })
 
           return fetchWithCSRF("/url", {
             body,
-            method
+            method,
           }).then(responseBody => {
             assert.equal(responseBody, "Some text")
           })
@@ -149,23 +149,23 @@ describe("api", function() {
             headers:     {
               Accept:         "application/json",
               "Content-Type": "application/json",
-              "X-CSRFToken":  CSRF_TOKEN
+              "X-CSRFToken":  CSRF_TOKEN,
             },
             body:   JSON.stringify(expectedJSON),
-            method: "PATCH"
+            method: "PATCH",
           })
           return {
             status: 200,
-            body:   '{"json": "here"}'
+            body:   '{"json": "here"}',
           }
         })
 
         return fetchJSONWithCSRF("/url", {
           method: "PATCH",
-          body:   JSON.stringify(expectedJSON)
+          body:   JSON.stringify(expectedJSON),
         }).then(responseBody => {
           assert.deepEqual(responseBody, {
-            json: "here"
+            json: "here",
           })
         })
       })
@@ -180,19 +180,19 @@ describe("api", function() {
             headers:     {
               Accept:         "application/json",
               "Content-Type": "application/json",
-              "X-CSRFToken":  CSRF_TOKEN
+              "X-CSRFToken":  CSRF_TOKEN,
             },
             body:   JSON.stringify(expectedJSON),
-            method: "PATCH"
+            method: "PATCH",
           })
           return {
-            status: 200
+            status: 200,
           }
         })
 
         return fetchJSONWithCSRF("/url", {
           method: "PATCH",
-          body:   JSON.stringify(expectedJSON)
+          body:   JSON.stringify(expectedJSON),
         }).then(responseBody => {
           assert.deepEqual(responseBody, {})
         })
@@ -203,8 +203,8 @@ describe("api", function() {
           fetchMock.mock("/url", {
             status: statusCode,
             body:   JSON.stringify({
-              error: "an error"
-            })
+              error: "an error",
+            }),
           })
 
           return assert
@@ -212,7 +212,7 @@ describe("api", function() {
             .then(responseBody => {
               assert.deepEqual(responseBody, {
                 error:           "an error",
-                errorStatusCode: statusCode
+                errorStatusCode: statusCode,
               })
             })
         })
@@ -228,7 +228,7 @@ describe("api", function() {
             .isRejected(fetchJSONWithCSRF("/url", {}, true))
             .then(() => {
               const redirectUrl = `/logout?next=${encodeURIComponent(
-                "/login/edxorg/"
+                "/login/edxorg/",
               )}`
               assert.include(window.location.toString(), redirectUrl)
             })

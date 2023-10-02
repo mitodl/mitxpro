@@ -4,33 +4,30 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
-from django.views.decorators.http import require_http_methods
 from django.db import transaction
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, Http404
-from django.shortcuts import render, redirect
+from django.http import Http404, HttpResponse
+from django.shortcuts import redirect, render
 from django.urls import reverse
-from rest_framework import status
+from django.views.decorators.csrf import csrf_exempt
+from google.auth.exceptions import GoogleAuthError  # pylint: disable-all
 
 # NOTE: Due to an unresolved bug (https://github.com/PyCQA/pylint/issues/2108), the
 # `google` package (and other packages without an __init__.py file) will break pylint.
 # The `disable-all` rules are here until that bug is fixed.
 from google_auth_oauthlib.flow import Flow  # pylint: disable-all
-from google.auth.exceptions import GoogleAuthError  # pylint: disable-all
+from rest_framework import status
 
 from mitxpro.utils import now_in_utc
+from sheets import tasks
 from sheets.api import get_sheet_metadata_from_type
-from sheets.models import GoogleApiAuth, GoogleFileWatch
 from sheets.constants import (
     REQUIRED_GOOGLE_API_SCOPES,
+    SHEET_TYPE_COUPON_ASSIGN,
     SHEET_TYPE_COUPON_REQUEST,
     SHEET_TYPE_ENROLL_CHANGE,
-    SHEET_TYPE_COUPON_ASSIGN,
 )
+from sheets.models import GoogleApiAuth, GoogleFileWatch
 from sheets.utils import generate_google_client_config
-from sheets import tasks
-from sheets.coupon_assign_api import CouponAssignmentHandler
-from sheets.coupon_request_api import CouponRequestHandler
 
 log = logging.getLogger(__name__)
 
@@ -76,9 +73,8 @@ def complete_google_auth(request):
         raise Http404
     state = request.session.get("state")
     if not state:
-        raise GoogleAuthError(
-            "Could not complete Google auth - 'state' was not found in the session"
-        )
+        msg = "Could not complete Google auth - 'state' was not found in the session"
+        raise GoogleAuthError(msg)
     flow = Flow.from_client_config(
         generate_google_client_config(), scopes=REQUIRED_GOOGLE_API_SCOPES, state=state
     )
@@ -103,22 +99,22 @@ def handle_watched_sheet_update(request):
     """
     View that handles requests sent from Google's push notification service when changes are made to the
     a sheet with a file watch applied.
-    """
+    """  # noqa: E501
     if not settings.FEATURES.get("COUPON_SHEETS"):
         raise Http404
     channel_id = request.META.get("HTTP_X_GOOG_CHANNEL_ID")
     if not channel_id:
         log.error(
-            "Google file watch request received without a Channel ID in the expected header field "
-            "(HTTP_X_GOOG_CHANNEL_ID)."
+            "Google file watch request received without a Channel ID in the expected"
+            " header field (HTTP_X_GOOG_CHANNEL_ID)."
         )
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
 
     sheet_type = request.GET.get("sheet", SHEET_TYPE_COUPON_REQUEST)
     try:
         sheet_metadata = get_sheet_metadata_from_type(sheet_type)
-    except:
-        log.error(
+    except:  # noqa: E722
+        log.error(  # noqa: TRY400
             "Unknown sheet type '%s' (passed via 'sheet' query parameter)", sheet_type
         )
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
@@ -139,17 +135,17 @@ def handle_watched_sheet_update(request):
             req_sheet_file_watch.last_request_received = now_in_utc()
             req_sheet_file_watch.save()
     except GoogleFileWatch.DoesNotExist:
-        log.error(
-            "Google file watch request for %s received (%s), but no local file watch record exists "
-            "in the database.",
+        log.error(  # noqa: TRY400
+            "Google file watch request for %s received (%s), but no local file watch"
+            " record exists in the database.",
             sheet_metadata.sheet_name,
             file_id,
         )
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
     if channel_id != req_sheet_file_watch.channel_id:
         log.warning(
-            "Google file watch request for %s received, but the Channel ID does not match the "
-            "active file watch channel ID in the app (%s, %s)",
+            "Google file watch request for %s received, but the Channel ID does not"
+            " match the active file watch channel ID in the app (%s, %s)",
             sheet_metadata.sheet_name,
             channel_id,
             req_sheet_file_watch.channel_id,

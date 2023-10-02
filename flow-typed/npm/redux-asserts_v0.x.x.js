@@ -1,5 +1,5 @@
 // Not flow-typed, this was created manually
-import type { Action, Dispatch, Reducer } from 'redux';
+import type { Action, Dispatch, Reducer } from 'redux'
 
 declare module 'redux-asserts' {
   declare type State = any;

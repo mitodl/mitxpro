@@ -1,18 +1,18 @@
 """URL configurations for authentication"""
 from django.urls import path
 from django.urls.conf import include
+
 from authentication.views import (
+    CustomLogoutView,
     LoginEmailView,
     LoginPasswordView,
-    RegisterEmailView,
     RegisterConfirmView,
     RegisterDetailsView,
+    RegisterEmailView,
     RegisterExtraDetailsView,
     get_social_auth_types,
-    CustomLogoutView,
     well_known_openid_configuration,
 )
-
 
 urlpatterns = [
     path("api/login/email/", LoginEmailView.as_view(), name="psa-login-email"),

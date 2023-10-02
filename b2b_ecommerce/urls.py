@@ -9,7 +9,6 @@ from b2b_ecommerce.views import (
 )
 from mitxpro.views import index
 
-
 urlpatterns = [
     path("api/b2b/checkout/", B2BCheckoutView.as_view(), name="b2b-checkout"),
     path(

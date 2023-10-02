@@ -18,13 +18,12 @@ from hubspot_xpro.serializers import (
 )
 from users.factories import UserFactory
 
-
 pytestmark = [pytest.mark.django_db]
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_make_contact_sync_message(user):
-    """Test make_contact_sync_message serializes a user and returns a properly formatted sync message"""
+    """Test make_contact_sync_message serializes a user and returns a properly formatted sync message"""  # noqa: E501
     contact_sync_message = api.make_contact_sync_message(user.id)
     assert contact_sync_message.properties == {
         "address": "\n".join(user.legal_address.street_address),
@@ -48,9 +47,9 @@ def test_make_contact_sync_message(user):
     }
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_make_deal_sync_message(hubspot_order):
-    """Test make_deal_sync_message serializes an order and returns a properly formatted sync message"""
+    """Test make_deal_sync_message serializes an order and returns a properly formatted sync message"""  # noqa: E501
     deal_sync_message = api.make_deal_sync_message(hubspot_order.id)
     serialized_order = OrderToDealSerializer(hubspot_order).data
 
@@ -73,9 +72,9 @@ def test_make_deal_sync_message(hubspot_order):
     }
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_make_b2b_deal_sync_message(hubspot_b2b_order):
-    """Test make_b2b_deal_sync_message serializes a b2b order and returns a properly formatted sync message"""
+    """Test make_b2b_deal_sync_message serializes a b2b order and returns a properly formatted sync message"""  # noqa: E501
     deal_sync_message = api.make_b2b_deal_sync_message(hubspot_b2b_order.id)
     serialized_order = B2BOrderToDealSerializer(hubspot_b2b_order).data
     assert deal_sync_message.properties == {
@@ -98,9 +97,9 @@ def test_make_b2b_deal_sync_message(hubspot_b2b_order):
     }
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_make_b2b_line_sync_message(hubspot_b2b_order):
-    """Test make_b2b_line_sync_message serializes a b2b line and returns a properly formatted sync message"""
+    """Test make_b2b_line_sync_message serializes a b2b line and returns a properly formatted sync message"""  # noqa: E501
     serialized_line = B2BOrderToLineItemSerializer(hubspot_b2b_order).data
     line_item_sync_message = api.make_b2b_line_sync_message(hubspot_b2b_order.id)
     assert line_item_sync_message.properties == {
@@ -114,9 +113,9 @@ def test_make_b2b_line_sync_message(hubspot_b2b_order):
     }
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_make_line_item_sync_message(hubspot_order):
-    """Test make_line_item_sync_message serializes an order line and returns a properly formatted sync message"""
+    """Test make_line_item_sync_message serializes an order line and returns a properly formatted sync message"""  # noqa: E501
     line = hubspot_order.lines.first()
     serialized_line = LineSerializer(line).data
     line_item_sync_message = api.make_line_item_sync_message(line.id)
@@ -132,9 +131,9 @@ def test_make_line_item_sync_message(hubspot_order):
     }
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_make_product_sync_message():
-    """Test make_product_sync_message serializes a product and returns a properly formatted sync message"""
+    """Test make_product_sync_message serializes a product and returns a properly formatted sync message"""  # noqa: E501
     product = ProductFactory()
     serialized_product = ProductSerializer(product).data
     product_sync_message = api.make_product_sync_message(product.id)
@@ -280,7 +279,7 @@ def test_sync_b2b_contact_with_hubspot(
 
 @pytest.mark.parametrize("match_all", [True, False])
 def test_sync_contact_hubspot_ids_to_hubspot(mocker, mock_hubspot_api, match_all):
-    """sync_contact_hubspot_ids_to_hubspot should create HubspotObjects and return True if all users matched"""
+    """sync_contact_hubspot_ids_to_hubspot should create HubspotObjects and return True if all users matched"""  # noqa: E501
     matches = 3 if match_all else 2
     users = UserFactory.create_batch(3)
     contacts = [
@@ -296,7 +295,7 @@ def test_sync_contact_hubspot_ids_to_hubspot(mocker, mock_hubspot_api, match_all
 
 @pytest.mark.parametrize("multiple_emails", [True, False])
 def test_sync_contact_hubspot_ids_alternate(mocker, mock_hubspot_api, multiple_emails):
-    """sync_contact_hubspot_ids_to_hubspot should be able to match by alternate emails"""
+    """sync_contact_hubspot_ids_to_hubspot should be able to match by alternate emails"""  # noqa: E501
     user = UserFactory.create()
     additional_emails = (
         f"{user.email.capitalize()};other_email@fake.edu"
@@ -320,7 +319,7 @@ def test_sync_contact_hubspot_ids_alternate(mocker, mock_hubspot_api, multiple_e
 
 @pytest.mark.parametrize("match_all", [True, False])
 def test_sync_product_hubspot_ids_to_hubspot(mocker, mock_hubspot_api, match_all):
-    """sync_product_hubspot_ids_to_db should create HubspotObjects and return True if all products matched"""
+    """sync_product_hubspot_ids_to_db should create HubspotObjects and return True if all products matched"""  # noqa: E501
     matches = 3 if match_all else 2
     db_products = ProductFactory.create_batch(3)
     hs_products = [
@@ -352,7 +351,10 @@ def test_sync_product_hubspot_ids_dupe_names(mocker, mock_hubspot_api):
         mocker.Mock(results=hs_products, paging=None)
     ]
     assert api.sync_product_hubspot_ids_to_db() is True
-    assert HubspotObject.objects.filter(content_type__model="product").count() == 2
+    assert (
+        HubspotObject.objects.filter(content_type__model="product").count()
+        == 2  # noqa: PLR2004
+    )  # noqa: PLR2004, RUF100
 
 
 @pytest.mark.parametrize("match_all_lines", [True, False])
@@ -360,7 +362,7 @@ def test_sync_product_hubspot_ids_dupe_names(mocker, mock_hubspot_api):
 def test_sync_deal_hubspot_ids_to_hubspot(
     mocker, mock_hubspot_api, match_all_deals, match_all_lines
 ):
-    """sync_deal_hubspot_ids_to_hubspot should create HubspotObjects and return True if all deals & lines matched"""
+    """sync_deal_hubspot_ids_to_hubspot should create HubspotObjects and return True if all deals & lines matched"""  # noqa: E501
     deal_matches = 3 if match_all_deals else 2
     line_matches = 3 if match_all_lines else 2
     lines = LineFactory.create_batch(3, quantity=1)

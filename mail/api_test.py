@@ -1,18 +1,19 @@
 """API tests"""
 from email.utils import formataddr
+
 import pytest
 
 from mail.api import (
-    context_for_user,
-    safe_format_recipients,
-    render_email_templates,
-    send_messages,
-    messages_for_recipients,
+    EmailMetadata,
+    UserMessageProps,
+    build_message,
     build_messages,
     build_user_specific_messages,
-    build_message,
-    UserMessageProps,
-    EmailMetadata,
+    context_for_user,
+    messages_for_recipients,
+    render_email_templates,
+    safe_format_recipients,
+    send_messages,
 )
 from mitxpro.test_utils import any_instance_of
 from users.factories import UserFactory
@@ -21,9 +22,9 @@ pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("email_settings")]
 lazy = pytest.lazy_fixture
 
 
-@pytest.fixture
-def email_settings(settings):
-    """Default settings for email tests"""
+@pytest.fixture()
+def email_settings(settings):  # noqa: PT004
+    """Default settings for email tests"""  # noqa: D401
     settings.MAILGUN_RECIPIENT_OVERRIDE = None
 
 
@@ -65,8 +66,9 @@ def test_render_email_templates(user):
     subject, text_body, html_body = render_email_templates("sample", context)
     assert subject == "Welcome Jane Smith"
     assert text_body == "html link (http://example.com)"
-    assert html_body == (
-        '<style type="text/css">\n'
+    assert (
+        html_body
+        == '<style type="text/css">\n'
         "a {\n"
         "  color: red;\n"
         "}\n"
@@ -99,13 +101,13 @@ def test_messages_for_recipients():
 
     for user, msg in zip(users, messages):
         assert user.email in str(msg.to[0])
-        assert msg.subject == "Welcome {}".format(user.name)
+        assert msg.subject == f"Welcome {user.name}"
 
 
 def test_build_messages(mocker):
     """
     Tests that build_messages creates message objects for a set of recipients with the correct context
-    """
+    """  # noqa: E501
     patched_build_message = mocker.patch("mail.api.build_message")
     patched_base_context = mocker.patch(
         "mail.api.get_base_context", return_value={"base": "context"}
@@ -137,7 +139,7 @@ def test_build_user_specific_messages(mocker):
     """
     Tests that build_user_specific_messages loops through an iterable of user message properties
     and builds a message object from each one
-    """
+    """  # noqa: E501
     patched_build_message = mocker.patch("mail.api.build_message")
     mocker.patch("mail.api.get_base_context", return_value={"base": "context"})
     mocker.patch("mail.api.mail.get_connection")
@@ -202,7 +204,7 @@ def test_build_message(mocker, settings):
 
 
 def test_build_message_optional_params(mocker):
-    """Tests that build_message correctly handles optional/None values for certain arguments"""
+    """Tests that build_message correctly handles optional/None values for certain arguments"""  # noqa: E501
     template_name = "my_template"
     patched_render = mocker.patch(
         "mail.api.render_email_templates",
@@ -218,8 +220,8 @@ def test_build_message_optional_params(mocker):
         metadata=None,
     )
     patched_render.assert_called_once_with(template_name, {})
-    # The "esp_extra" property should not have been assigned any value since metadata=None.
-    # Since AnymailMessage is patched, that means this property should just be a Mock object.
+    # The "esp_extra" property should not have been assigned any value since metadata=None.  # noqa: E501
+    # Since AnymailMessage is patched, that means this property should just be a Mock object.  # noqa: E501
     assert isinstance(msg.esp_extra, mocker.Mock)
 
 

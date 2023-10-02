@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("cms", "0020_section_fixes")]
 
     operations = [
@@ -14,7 +13,10 @@ class Migration(migrations.Migration):
             field=models.BooleanField(
                 blank=True,
                 default=False,
-                help_text="When checked, switches to dark theme (light text on dark background).",
+                help_text=(
+                    "When checked, switches to dark theme (light text on dark"
+                    " background)."
+                ),
             ),
         )
     ]

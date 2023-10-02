@@ -1,11 +1,12 @@
-""" ecommerce serializers """
+"""ecommerce serializers"""
 # pylint: disable=too-many-lines
 import logging
 from decimal import Decimal
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models as dj_models, transaction
+from django.db import models as dj_models
+from django.db import transaction
 from django.templatetags.static import static
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -31,7 +32,6 @@ from ecommerce.utils import validate_amount
 from mitxpro.serializers import WriteableSerializerMethodField
 from mitxpro.utils import now_in_utc
 from users.serializers import ExtendedLegalAddressSerializer
-
 
 log = logging.getLogger(__name__)
 
@@ -73,19 +73,20 @@ class ProductVersionSerializer(BaseProductVersionSerializer):
 
     object_id = serializers.IntegerField(source="product.object_id", read_only=True)
     product_id = serializers.IntegerField(source="product.id", read_only=True)
-    type = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField()  # noqa: A003
 
     def get_type(self, instance):
         """Return the content type of the product version's product"""
         return instance.product.content_type.model
 
     class Meta:
-        fields = BaseProductVersionSerializer.Meta.fields + [
+        fields = [
+            *BaseProductVersionSerializer.Meta.fields,
             "id",
             "object_id",
             "product_id",
             "type",
-        ]
+        ]  # noqa: E501, RUF100
         model = models.ProductVersion
 
 
@@ -103,7 +104,7 @@ class FullProductVersionSerializer(ProductVersionSerializer):
 
         model_class = instance.product.content_type.model_class()
         if model_class is CourseRun:
-            # filter_products=True because the course run must have an associated product.
+            # filter_products=True because the course run must have an associated product.  # noqa: E501
             return [
                 CourseSerializer(
                     instance.product.content_object.course,
@@ -115,13 +116,14 @@ class FullProductVersionSerializer(ProductVersionSerializer):
                 program=instance.product.content_object
             ).order_by("position_in_program")
 
-            # filter_products=False because we want to show course runs even if they don't have
+            # filter_products=False because we want to show course runs even if they don't have  # noqa: E501
             # products, since the product is for the program.
             return CourseSerializer(
                 courses, many=True, context={**self.context, "filter_products": False}
             ).data
         else:
-            raise ValueError(f"Unexpected product for {model_class}")
+            msg = f"Unexpected product for {model_class}"
+            raise ValueError(msg)
 
     def get_thumbnail_url(self, instance):
         """Return the thumbnail for the courserun or program"""
@@ -131,7 +133,8 @@ class FullProductVersionSerializer(ProductVersionSerializer):
         elif isinstance(content_object, CourseRun):
             catalog_image_url = content_object.course.catalog_image_url
         else:
-            raise ValueError(f"Unexpected product {content_object}")
+            msg = f"Unexpected product {content_object}"
+            raise ValueError(msg)  # noqa: TRY004
         return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
     def get_run_tag(self, instance):
@@ -144,7 +147,7 @@ class FullProductVersionSerializer(ProductVersionSerializer):
             return content_object.run_tag
 
     def get_start_date(self, instance):
-        """Returns the start date of the program or course run"""
+        """Returns the start date of the program or course run"""  # noqa: D401
         content_object = instance.product.content_object
         if isinstance(content_object, CourseRun) and content_object.start_date:
             return content_object.start_date.isoformat()
@@ -157,14 +160,15 @@ class FullProductVersionSerializer(ProductVersionSerializer):
         return None
 
     class Meta:
-        fields = ProductVersionSerializer.Meta.fields + [
+        fields = [
+            *ProductVersionSerializer.Meta.fields,
             "start_date",
             "thumbnail_url",
             "run_tag",
             "courses",
             "description",
             "created_on",
-        ]
+        ]  # noqa: E501, RUF100
         model = models.ProductVersion
 
 
@@ -206,14 +210,13 @@ class ProductContentObjectField(serializers.RelatedField):
     """Serializer field for related content objects"""
 
     def to_representation(self, value):
-        """Serialize the content object using a serializer that matches the model type"""
+        """Serialize the content object using a serializer that matches the model type"""  # noqa: E501
         if isinstance(value, Program):
             return ProgramProductContentObjectSerializer(instance=value).data
         elif isinstance(value, CourseRun):
             return CourseRunProductContentObjectSerializer(instance=value).data
-        raise Exception(
-            "Unexpected to find type for Product.content_object:", value.__class__
-        )
+        msg = "Unexpected to find type for Product.content_object:"
+        raise Exception(msg, value.__class__)  # noqa: TRY002
 
 
 class ProgramRunSerializer(serializers.ModelSerializer):
@@ -256,7 +259,7 @@ class CouponSelectionSerializer(serializers.ModelSerializer):
 
     def get_amount(self, instance):
         """Get the coupon discount amount"""
-        # decimal fields should be represented as strings to prevent floating point parsing problems
+        # decimal fields should be represented as strings to prevent floating point parsing problems  # noqa: E501
         return str(latest_coupon_version(instance.coupon).payment_version.amount)
 
     def get_discount_type(self, instance):
@@ -360,7 +363,7 @@ class BasketSerializer(serializers.ModelSerializer):
         ).data
 
     def get_data_consents(self, instance):
-        """Get the DataConsentUser objects associated with the basket via coupon and product"""
+        """Get the DataConsentUser objects associated with the basket via coupon and product"""  # noqa: E501
         data_consents = get_or_create_data_consent_users(instance)
         return DataConsentUserSerializer(instance=data_consents, many=True).data
 
@@ -397,7 +400,7 @@ class BasketSerializer(serializers.ModelSerializer):
         Returns:
             CouponVersion: CouponVersion object to assign to basket, if any.
 
-        """
+        """  # noqa: E501, D401
         product_version = product.latest_version
         if coupons:
             coupon_code = coupons[0].get("code")
@@ -408,18 +411,18 @@ class BasketSerializer(serializers.ModelSerializer):
             if coupon_version is None:
                 raise ValidationError(
                     {
-                        "coupons": "Enrollment / Promotional Code '{}' is invalid".format(
-                            coupon_code
+                        "coupons": (
+                            f"Enrollment / Promotional Code '{coupon_code}' is invalid"
                         )
                     }
                 )
         elif coupons is not None:
-            # Coupon was cleared, get the best available auto coupon for the product instead
+            # Coupon was cleared, get the best available auto coupon for the product instead  # noqa: E501
             coupon_version = best_coupon_for_product(
                 product_version.product, basket.user, auto_only=True
             )
         else:
-            # coupon was not changed, make sure it is still valid; if not, replace with best auto coupon if any.
+            # coupon was not changed, make sure it is still valid; if not, replace with best auto coupon if any.  # noqa: E501
             coupon_selection = basket.couponselection_set.first()
             if coupon_selection:
                 coupon_version = latest_coupon_version(coupon_selection.coupon)
@@ -435,16 +438,16 @@ class BasketSerializer(serializers.ModelSerializer):
         return coupon_version
 
     @classmethod
-    def _update_basket_data(
+    def _update_basket_data(  # noqa: PLR0913
         cls,
         basket,
         updated_product=None,
         updated_run_ids=None,
         program_run=None,
-        should_update_program_run=False,
+        should_update_program_run=False,  # noqa: FBT002
         coupon_version=None,
         data_consents=None,
-        clear_all=False,
+        clear_all=False,  # noqa: FBT002
     ):  # pylint: disable=too-many-arguments
         """
         Creates/updates/deletes Basket-related data
@@ -463,9 +466,9 @@ class BasketSerializer(serializers.ModelSerializer):
             data_consents (iterable of int): Data consent ids
             clear_all (boolean): If True, clears the basket, i.e.: all basket items, course run selections,
                 and coupon selections are deleted
-        """
+        """  # noqa: E501
         with transaction.atomic():
-            # Fetching the basket again using select_for_update to avoid ending up in a weird state
+            # Fetching the basket again using select_for_update to avoid ending up in a weird state  # noqa: E501
             # if concurrent requests are received.
             basket = Basket.objects.select_for_update().get(id=basket.id)
             if clear_all is True:
@@ -476,7 +479,7 @@ class BasketSerializer(serializers.ModelSerializer):
                 basket.couponselection_set.all().delete()
 
             if updated_product is not None or should_update_program_run is True:
-                update_dict = dict(quantity=1)
+                update_dict = {"quantity": 1}
                 if updated_product is not None:
                     update_dict["product"] = updated_product
                 if should_update_program_run is True:
@@ -509,7 +512,7 @@ class BasketSerializer(serializers.ModelSerializer):
         Returns:
             (models.Product, courses.models.ProgramRun): The Product paired with an associated ProgramRun
                 if one exists (or None if one does not exist)
-        """
+        """  # noqa: E501, D401
         item = items[0]
         request_product_id = item.get("product_id")
         try:
@@ -518,18 +521,16 @@ class BasketSerializer(serializers.ModelSerializer):
             )
             self._validate_internal_product(product_content_obj)
 
-            if isinstance(product_content_obj, CourseRun):
-                if (
-                    product_content_obj.end_date
-                    and product_content_obj.end_date < now_in_utc()
-                ):
-                    raise ValidationError(
-                        "We're sorry, this course or program is no longer available for enrollment."
-                    )
+            if isinstance(product_content_obj, CourseRun) and (
+                product_content_obj.end_date
+                and product_content_obj.end_date < now_in_utc()
+            ):
+                msg = "We're sorry, this course or program is no longer available for enrollment."  # noqa: E501
+                raise ValidationError(msg)
 
         except (ObjectDoesNotExist, MultipleObjectsReturned) as exc:
             if isinstance(exc, MultipleObjectsReturned):
-                log.error(
+                log.error(  # noqa: TRY400
                     "Multiple Products found with identical ids: %s", request_product_id
                 )
             raise ValidationError(
@@ -544,7 +545,7 @@ class BasketSerializer(serializers.ModelSerializer):
         Args:
             product_content_obj (Course, CourseRun, Program or ProgramRun): Ideally, there should only be
             CourseRun or Program but it could be either of those since we can add these as content types in products.
-        """
+        """  # noqa: E501
 
         course_or_program = (
             getattr(product_content_obj, "course", None)
@@ -552,9 +553,8 @@ class BasketSerializer(serializers.ModelSerializer):
             or product_content_obj
         )
         if course_or_program.is_external:
-            raise ValidationError(
-                "We're sorry, This product cannot be purchased on this web site."
-            )
+            msg = "We're sorry, This product cannot be purchased on this web site."
+            raise ValidationError(msg)
 
     def _validate_and_compare_runs(self, basket, items, product):
         """
@@ -568,7 +568,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
         Returns:
             set of int: A set of updated course run id selections (or None if they were not changed)
-        """
+        """  # noqa: E501, D401
         item = items[0]
         run_ids = set(item.get("run_ids", []))
         self._validate_runs(run_ids, product)
@@ -586,7 +586,8 @@ class BasketSerializer(serializers.ModelSerializer):
         self._validate_coupons(coupons)
 
         if items is None and coupons is None and data_consents is None:
-            raise ValidationError("Invalid request")
+            msg = "Invalid request"
+            raise ValidationError(msg)
 
         if items == []:
             self._update_basket_data(
@@ -618,7 +619,7 @@ class BasketSerializer(serializers.ModelSerializer):
         if updated_product or existing_product:
             coupon_version = self._get_applicable_coupon_version(
                 basket,
-                # Whether or not the product was updated, we want to make sure that there is a valid
+                # Whether or not the product was updated, we want to make sure that there is a valid  # noqa: E501
                 # coupon associated with the basket
                 product=updated_product or existing_product,
                 coupons=coupons,
@@ -649,7 +650,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
         Raises:
             ValidationError: Raised if the coupon data is in the wrong format
-        """
+        """  # noqa: E501, D401
         if coupons:
             if len(coupons) > 1:
                 raise ValidationError(
@@ -674,7 +675,7 @@ class BasketSerializer(serializers.ModelSerializer):
             product (models.Product): The Product referred to in the request
         Raises:
             ValidationError: Raised if the run ids provided are invalid
-        """
+        """  # noqa: E501, D401
         if run_ids is not None and len(run_ids) > 0:
             if None in run_ids:
                 raise ValidationError(
@@ -685,7 +686,10 @@ class BasketSerializer(serializers.ModelSerializer):
             ).exists():
                 raise ValidationError(
                     {
-                        "runs": "User has already enrolled in one of the selected course runs"
+                        "runs": (
+                            "User has already enrolled in one of the selected course"
+                            " runs"
+                        )
                     }
                 )
         product_run_course_map = dict(
@@ -700,11 +704,13 @@ class BasketSerializer(serializers.ModelSerializer):
         """Validate some basic things about items"""
         if items:
             if len(items) > 1:
-                raise ValidationError("Basket cannot contain more than one item")
+                msg = "Basket cannot contain more than one item"
+                raise ValidationError(msg)
             item = items[0]
             product_id = item.get("product_id")
             if product_id is None:
-                raise ValidationError("Invalid request")
+                msg = "Invalid request"
+                raise ValidationError(msg)
         return {"items": items}
 
     def validate_coupons(self, coupons):
@@ -721,9 +727,8 @@ class BasketSerializer(serializers.ModelSerializer):
             )
             invalid_consent_ids = set(data_consents) - valid_consent_ids
             if invalid_consent_ids:
-                raise ValidationError(
-                    f"Invalid data consent id {','.join([str(consent_id) for consent_id in invalid_consent_ids])}"
-                )
+                msg = f"Invalid data consent id {','.join([str(consent_id) for consent_id in invalid_consent_ids])}"  # noqa: E501
+                raise ValidationError(msg)
         return {"data_consents": data_consents}
 
     class Meta:
@@ -810,7 +815,10 @@ class BaseCouponSerializer(serializers.Serializer):
         ]:
             raise ValidationError(
                 {
-                    "product_ids": "At least one product must be selected or coupon should be global."
+                    "product_ids": (
+                        "At least one product must be selected or coupon should be"
+                        " global."
+                    )
                 }
             )
 
@@ -824,8 +832,10 @@ class BaseCouponSerializer(serializers.Serializer):
             if products_missing:
                 raise ValidationError(
                     {
-                        "product_ids": "Product with id(s) {} could not be found".format(
-                            ",".join(str(pid) for pid in products_missing)
+                        "product_ids": (
+                            "Product with id(s) {} could not be found".format(
+                                ",".join(str(pid) for pid in products_missing)
+                            )
                         )
                     }
                 )
@@ -960,9 +970,9 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                 "req_bill_to_forename" in receipt.data
                 or "req_bill_to_surname" in receipt.data
             ):
-                data[
-                    "name"
-                ] = f"{receipt.data.get('req_bill_to_forename')} {receipt.data.get('req_bill_to_surname')}"
+                data["name"] = (
+                    f"{receipt.data.get('req_bill_to_forename')} {receipt.data.get('req_bill_to_surname')}"  # noqa: E501
+                )
             return data
         return None
 
@@ -1035,14 +1045,14 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
 
     def get_order(self, instance):
         """Get order-specific information"""
-        return dict(
-            id=instance.id,
-            created_on=instance.created_on,
-            reference_number=instance.reference_number,
-            tax_rate=instance.tax_rate,
-            tax_rate_name=instance.tax_rate_name,
-            tax_country_code=instance.tax_country_code,
-        )
+        return {
+            "id": instance.id,
+            "created_on": instance.created_on,
+            "reference_number": instance.reference_number,
+            "tax_rate": instance.tax_rate,
+            "tax_rate_name": instance.tax_rate_name,
+            "tax_country_code": instance.tax_country_code,
+        }
 
     def get_coupon(self, instance):
         """Get coupon code from the coupon redemption if available"""

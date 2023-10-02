@@ -2,15 +2,15 @@
 import pytest
 
 from sheets.tasks import (
-    handle_unprocessed_coupon_requests,
     _get_scheduled_assignment_task_ids,
+    handle_unprocessed_coupon_requests,
 )
 
 
 def test_handle_unprocessed_coupon_requests(mocker):
     """
     handle_unprocessed_coupon_requests should call a method to process the request spreadsheet
-    """
+    """  # noqa: E501
     patched_req_handler = mocker.patch(
         "sheets.coupon_request_api.CouponRequestHandler", autospec=True
     )

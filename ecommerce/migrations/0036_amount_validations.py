@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("ecommerce", "0035_add_coupon_discount_type"),
     ]
@@ -15,7 +14,10 @@ class Migration(migrations.Migration):
             name="amount",
             field=models.DecimalField(
                 decimal_places=5,
-                help_text="Discount value for a coupon. (Between 0 and 1 if discount type is percent-off)",
+                help_text=(
+                    "Discount value for a coupon. (Between 0 and 1 if discount type is"
+                    " percent-off)"
+                ),
                 max_digits=20,
             ),
         ),

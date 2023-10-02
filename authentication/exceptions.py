@@ -92,5 +92,5 @@ class UserTryAgainLaterException(AuthException):
     """The user should try to register again later"""
 
 
-class UserMissingSocialAuthException(Exception):
+class UserMissingSocialAuthException(Exception):  # noqa: N818
     """Raised if the user doesn't have a social auth"""

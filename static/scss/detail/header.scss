@@ -18,7 +18,7 @@
     left: 50%;
     transform: translateX(-50%) translateY(0%);
 
-    @include media-breakpoint-down (sm) {
+    @include media-breakpoint-down(sm) {
       display: none;
     }
   }
@@ -53,6 +53,7 @@
       font-size: 44px;
       line-height: 50px;
       font-weight: 500;
+
       @include media-breakpoint-up(xl) {
         font-size: 56px;
         line-height: 56px;

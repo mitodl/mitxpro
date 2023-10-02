@@ -12,7 +12,7 @@ import ProductSelector, {
   productTypeLabels,
   productDateSortCompare,
   programRunDateSortCompare,
-  ProductSelector as InnerProductSelector
+  ProductSelector as InnerProductSelector,
 } from "./ProductSelector"
 
 import { makeCourse } from "../../factories/course"
@@ -20,13 +20,13 @@ import {
   makeProgramRun,
   makePastProgramRun,
   makeCourseRunProduct,
-  makeProgramProduct
+  makeProgramProduct,
 } from "../../factories/ecommerce"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 import {
   findRunInProduct,
   formatCoursewareDate,
-  formatRunTitle
+  formatRunTitle,
 } from "../../lib/ecommerce"
 import { shouldIf } from "../../lib/test_utils"
 import IntegrationTestHelper from "../../util/integration_test_helper"
@@ -59,25 +59,25 @@ describe("ProductSelector", () => {
       runProduct2,
       programProduct,
       runProduct1Course1,
-      runProduct2Course1
+      runProduct2Course1,
     ]
     defaultProps = {
       field: {
         name:     "derp",
         value:    null,
         onChange: onChangeStub,
-        onBlur:   () => {}
+        onBlur:   () => {},
       },
       form: {
         touched: false,
         errors:  {},
-        values:  {}
+        values:  {},
       },
       products:           products,
       selectedProduct:    null,
       programRunsLoading: false,
       programRuns:        [],
-      fetchProgramRuns:   () => {}
+      fetchProgramRuns:   () => {},
     }
   })
   ;[PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM].forEach(productType => {
@@ -89,16 +89,16 @@ describe("ProductSelector", () => {
         assert.deepEqual(select.prop("options"), [
           {
             label: "Course",
-            value: PRODUCT_TYPE_COURSERUN
+            value: PRODUCT_TYPE_COURSERUN,
           },
           {
             label: "Program",
-            value: PRODUCT_TYPE_PROGRAM
-          }
+            value: PRODUCT_TYPE_PROGRAM,
+          },
         ])
         assert.equal(
           wrapper.find(".product-row .description").text(),
-          `Select ${productTypeLabels[productType]}:`
+          `Select ${productTypeLabels[productType]}:`,
         )
         const coursewareObjSelect = wrapper.find(SelectComponentSelector).at(1)
         assert.isNull(coursewareObjSelect.prop("value"))
@@ -114,7 +114,7 @@ describe("ProductSelector", () => {
         const selectWrapper = wrapper.find(SelectComponentSelector).at(0)
         selectWrapper.prop("onChange")({
           value: opposite,
-          label: productTypeLabels[productType]
+          label: productTypeLabels[productType],
         })
         assert.equal(wrapper.state().productType, opposite)
       })
@@ -128,8 +128,8 @@ describe("ProductSelector", () => {
     assert.deepEqual(selectWrapper.prop("options"), [
       {
         label: programProduct.latest_version.content_title,
-        value: programProduct.id
-      }
+        value: programProduct.id,
+      },
     ])
   })
 
@@ -139,12 +139,12 @@ describe("ProductSelector", () => {
       <InnerProductSelector
         {...defaultProps}
         selectedProduct={selectedProduct}
-      />
+      />,
     )
     const selectWrapper = wrapper.find(SelectComponentSelector).at(1)
     assert.deepEqual(selectWrapper.prop("value"), {
       value: selectedProduct.id,
-      label: selectedProduct.latest_version.content_title
+      label: selectedProduct.latest_version.content_title,
     })
   })
 
@@ -153,18 +153,18 @@ describe("ProductSelector", () => {
     wrapper.setState({ productType: PRODUCT_TYPE_COURSERUN })
     const selectWrapper = wrapper.find(SelectComponentSelector).at(1)
     const courseProducts = products.filter(
-      product => product.product_type === PRODUCT_TYPE_COURSERUN
+      product => product.product_type === PRODUCT_TYPE_COURSERUN,
     )
     // If multiple runs belong to the same course, that course should only show up once in the options
     const expectedOptions = [
       {
         label: runProduct2.content_object.course.title,
-        value: runProduct2.content_object.course.id
+        value: runProduct2.content_object.course.id,
       },
       {
         label: runProduct1Course1.content_object.course.title,
-        value: runProduct1Course1.content_object.course.id
-      }
+        value: runProduct1Course1.content_object.course.id,
+      },
     ]
     assert.deepEqual(selectWrapper.prop("options"), expectedOptions)
     assert.isAbove(courseProducts.length, expectedOptions.length)
@@ -176,26 +176,21 @@ describe("ProductSelector", () => {
       <InnerProductSelector
         {...defaultProps}
         selectedProduct={selectedProduct}
-      />
+      />,
     )
     const selectWrapper = wrapper.find(SelectComponentSelector).at(1)
     assert.deepEqual(selectWrapper.prop("value"), {
       value: selectedProduct.content_object.course.id,
-      label: selectedProduct.content_object.course.title
+      label: selectedProduct.content_object.course.title,
     })
   })
 
   it("doesn't render a list of course run dates if the program type is selected", () => {
     const wrapper = shallow(<InnerProductSelector {...defaultProps} />)
     wrapper.setState({
-      productType: PRODUCT_TYPE_PROGRAM
+      productType: PRODUCT_TYPE_PROGRAM,
     })
-    assert.isFalse(
-      wrapper
-        .find(SelectComponentSelector)
-        .at(2)
-        .exists()
-    )
+    assert.isFalse(wrapper.find(SelectComponentSelector).at(2).exists())
   })
 
   it("renders a list of course run dates if the course type is selected", () => {
@@ -204,8 +199,8 @@ describe("ProductSelector", () => {
       productType:           PRODUCT_TYPE_COURSERUN,
       selectedCoursewareObj: {
         label: runProduct2Course1.content_object.course.title,
-        value: runProduct2Course1.content_object.course.id
-      }
+        value: runProduct2Course1.content_object.course.id,
+      },
     })
 
     const selectWrapper = wrapper.find(SelectComponentSelector).at(2)
@@ -214,43 +209,43 @@ describe("ProductSelector", () => {
       selectWrapper.prop("options"),
       expectedProducts.sort(productDateSortCompare).map(product => ({
         label: `${formatCoursewareDate(
-          product.content_object.start_date
+          product.content_object.start_date,
         )} - ${formatCoursewareDate(product.content_object.end_date)}`,
-        value: product.id
-      }))
+        value: product.id,
+      })),
     )
   })
 
   it("sets the selected product when a program is selected", () => {
     const wrapper = shallow(<InnerProductSelector {...defaultProps} />)
     wrapper.setState({
-      productType: PRODUCT_TYPE_PROGRAM
+      productType: PRODUCT_TYPE_PROGRAM,
     })
     sinon.assert.calledWith(onChangeStub, {
       target: {
         name:  defaultProps.field.name,
-        value: { productId: null, programRunId: null }
-      }
+        value: { productId: null, programRunId: null },
+      },
     })
     wrapper.setState({
       selectedCoursewareObj: {
         label: programProduct.latest_version.content_title,
-        value: programProduct.id
+        value: programProduct.id,
       },
-      selectedCourseDate: null
+      selectedCourseDate: null,
     })
     sinon.assert.calledWith(onChangeStub, {
       target: {
         name:  defaultProps.field.name,
-        value: { productId: programProduct.id, programRunId: null }
-      }
+        value: { productId: programProduct.id, programRunId: null },
+      },
     })
   })
 
   it("renders a list of available program runs when a program is selected", () => {
     const programRuns = [
       makeProgramRun(programProduct.latest_version),
-      makeProgramRun(programProduct.latest_version)
+      makeProgramRun(programProduct.latest_version),
     ]
     const props = Object.assign(defaultProps, { programRuns })
     const wrapper = shallow(<InnerProductSelector {...props} />)
@@ -258,25 +253,25 @@ describe("ProductSelector", () => {
       productType:           PRODUCT_TYPE_PROGRAM,
       selectedCoursewareObj: {
         label: programProduct.latest_version.content_title,
-        value: programProduct.id
-      }
+        value: programProduct.id,
+      },
     })
     const selectWrapper = wrapper.find(SelectComponentSelector).at(2)
     assert.deepEqual(
       selectWrapper.prop("options"),
       programRuns.sort(programRunDateSortCompare).map(programRun => ({
         label: `${formatCoursewareDate(
-          programRun.start_date
+          programRun.start_date,
         )} - ${formatCoursewareDate(programRun.end_date)}`,
-        value: programRun.id
-      }))
+        value: programRun.id,
+      })),
     )
   })
 
   it("not renders a list of available program runs when a program start_date is in past", () => {
     const programRuns = [
       makePastProgramRun(programProduct.latest_version),
-      makePastProgramRun(programProduct.latest_version)
+      makePastProgramRun(programProduct.latest_version),
     ]
     const props = Object.assign(defaultProps, { programRuns })
     const wrapper = shallow(<InnerProductSelector {...props} />)
@@ -284,8 +279,8 @@ describe("ProductSelector", () => {
       productType:           PRODUCT_TYPE_PROGRAM,
       selectedCoursewareObj: {
         label: programProduct.latest_version.content_title,
-        value: programProduct.id
-      }
+        value: programProduct.id,
+      },
     })
     assert.deepEqual(undefined)
   })
@@ -293,7 +288,7 @@ describe("ProductSelector", () => {
   it("sets the selected program run when one is selected", () => {
     const programRuns = [
       makeProgramRun(programProduct.latest_version),
-      makeProgramRun(programProduct.latest_version)
+      makeProgramRun(programProduct.latest_version),
     ]
     const props = Object.assign(defaultProps, { programRuns })
     const wrapper = shallow(<InnerProductSelector {...props} />)
@@ -301,15 +296,15 @@ describe("ProductSelector", () => {
       productType:           PRODUCT_TYPE_PROGRAM,
       selectedCoursewareObj: {
         label: programProduct.latest_version.content_title,
-        value: programProduct.id
+        value: programProduct.id,
       },
-      selectedCourseDate: null
+      selectedCourseDate: null,
     })
     sinon.assert.calledWith(onChangeStub, {
       target: {
         name:  defaultProps.field.name,
-        value: { productId: programProduct.id, programRunId: null }
-      }
+        value: { productId: programProduct.id, programRunId: null },
+      },
     })
     const dateSelectWrapper = wrapper.find(SelectComponentSelector).at(2)
     const option = dateSelectWrapper.prop("options")[0]
@@ -317,8 +312,8 @@ describe("ProductSelector", () => {
     sinon.assert.calledWith(onChangeStub, {
       target: {
         name:  defaultProps.field.name,
-        value: { productId: programProduct.id, programRunId: option.value }
-      }
+        value: { productId: programProduct.id, programRunId: option.value },
+      },
     })
   })
 
@@ -329,14 +324,14 @@ describe("ProductSelector", () => {
       productType:           PRODUCT_TYPE_COURSERUN,
       selectedCoursewareObj: {
         label: product.content_object.course.title,
-        value: product.content_object.course.id
-      }
+        value: product.content_object.course.id,
+      },
     })
     sinon.assert.calledWith(onChangeStub, {
       target: {
         name:  defaultProps.field.name,
-        value: { productId: null, programRunId: null }
-      }
+        value: { productId: null, programRunId: null },
+      },
     })
     const dateSelectWrapper = wrapper.find(SelectComponentSelector).at(2)
     const option = dateSelectWrapper.prop("options")[0]
@@ -344,8 +339,8 @@ describe("ProductSelector", () => {
     sinon.assert.calledWith(onChangeStub, {
       target: {
         name:  defaultProps.field.name,
-        value: { productId: option.value, programRunId: null }
-      }
+        value: { productId: option.value, programRunId: null },
+      },
     })
   })
 })

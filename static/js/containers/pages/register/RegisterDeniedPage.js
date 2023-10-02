@@ -9,13 +9,13 @@ import { createStructuredSelector } from "reselect"
 import { qsErrorSelector } from "../../../lib/selectors"
 
 type Props = {|
-  params: { error: ?string }
+  params: { error: ?string },
 |}
 
 export class RegisterDeniedPage extends React.Component<Props> {
   render() {
     const {
-      params: { error }
+      params: { error },
     } = this.props
 
     return (
@@ -43,7 +43,7 @@ export class RegisterDeniedPage extends React.Component<Props> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  params: createStructuredSelector({ error: qsErrorSelector })
+  params: createStructuredSelector({ error: qsErrorSelector }),
 })
 
 export default connect(mapStateToProps)(RegisterDeniedPage)

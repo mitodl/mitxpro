@@ -1,6 +1,6 @@
 """Digital courseware credentials"""
 import logging
-from typing import Dict, Union
+from typing import Union
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -9,25 +9,28 @@ from mitol.digitalcredentials.models import LearnerDID
 
 from courses.models import CourseRunCertificate, ProgramCertificate
 
-
 log = logging.getLogger(__name__)
 
 
-def build_program_credential(certificate: ProgramCertificate) -> Dict:
+def build_program_credential(certificate: ProgramCertificate) -> dict:
     """Build a credential object for a ProgramCertificate"""
     start_date, end_date = certificate.start_end_dates
 
     if not start_date or not end_date:
-        raise Exception("Program has no start or end date")
+        msg = "Program has no start or end date"
+        raise Exception(msg)  # noqa: TRY002
 
     if not certificate.program.page:
-        raise Exception("Program has no CMS program page")
+        msg = "Program has no CMS program page"
+        raise Exception(msg)  # noqa: TRY002
 
     if not certificate.program.page.certificate_page:
-        raise Exception("Program has no CMS program certificate page")
+        msg = "Program has no CMS program certificate page"
+        raise Exception(msg)  # noqa: TRY002
 
     if not certificate.program.page.certificate_page.CEUs:
-        raise Exception("Program has no CEUs defined")
+        msg = "Program has no CEUs defined"
+        raise Exception(msg)  # noqa: TRY002
 
     return {
         "type": ["EducationalOccupationalCredential", "ProgramCompletionCredential"],
@@ -47,22 +50,26 @@ def build_program_credential(certificate: ProgramCertificate) -> Dict:
     }
 
 
-def build_course_run_credential(certificate: CourseRunCertificate) -> Dict:
+def build_course_run_credential(certificate: CourseRunCertificate) -> dict:
     """Build a credential object for a CourseRunCertificate"""
     course = certificate.course_run.course
     start_date, end_date = certificate.start_end_dates
 
     if not start_date or not end_date:
-        raise Exception("CourseRun has no start or end date")
+        msg = "CourseRun has no start or end date"
+        raise Exception(msg)  # noqa: TRY002
 
     if not course.page:
-        raise Exception("Course has no CMS course page")
+        msg = "Course has no CMS course page"
+        raise Exception(msg)  # noqa: TRY002
 
     if not course.page.certificate_page:
-        raise Exception("Course has no CMS course certificate page")
+        msg = "Course has no CMS course certificate page"
+        raise Exception(msg)  # noqa: TRY002
 
     if not course.page.certificate_page.CEUs:
-        raise Exception("Course has no CEUs defined")
+        msg = "Course has no CEUs defined"
+        raise Exception(msg)  # noqa: TRY002
 
     return {
         "type": ["EducationalOccupationalCredential", "CourseCompletionCredential"],
@@ -83,16 +90,15 @@ def build_course_run_credential(certificate: CourseRunCertificate) -> Dict:
 def build_digital_credential(
     certificate: Union[ProgramCertificate, CourseRunCertificate],
     learner_did: LearnerDID,
-) -> Dict:
-    """Function for building certificate digital credentials"""
+) -> dict:
+    """Function for building certificate digital credentials"""  # noqa: D401
     if isinstance(certificate, ProgramCertificate):
         has_credential = build_program_credential(certificate)
     elif isinstance(certificate, CourseRunCertificate):
         has_credential = build_course_run_credential(certificate)
     else:
-        raise Exception(
-            f"Unexpected courseware object type for digital credentials: {type(certificate)}"
-        )
+        msg = f"Unexpected courseware object type for digital credentials: {type(certificate)}"  # noqa: E501
+        raise Exception(msg)  # noqa: TRY002, TRY004
 
     return {
         "credential": {

@@ -9,8 +9,9 @@ import re
 import uuid
 from base64 import b64encode
 from collections import defaultdict
+from collections.abc import Iterable
 from datetime import timedelta
-from typing import Iterable, NamedTuple, Optional
+from typing import NamedTuple, Optional
 from urllib.parse import quote_plus, urljoin
 
 from django.conf import settings
@@ -70,7 +71,6 @@ from hubspot_xpro.task_helpers import sync_hubspot_deal
 from maxmind.api import ip_to_country_code
 from mitxpro.utils import case_insensitive_equal, first_or_none, now_in_utc
 
-
 log = logging.getLogger(__name__)
 
 ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -91,7 +91,7 @@ def determine_visitor_country(request: HttpRequest or None) -> str or None:
         request (HttpRequest): the current request object
     Returns:
         The resolved country, or None
-    """
+    """  # noqa: D401
 
     if (
         not request
@@ -136,7 +136,7 @@ def calculate_tax(
         item_price (Decimal): The amount to be taxed.
     Returns:
         tuple(rate applied, country code, adjusted amount): The rate applied and the adjusted amount based on the determined country code.
-    """
+    """  # noqa: E501
 
     resolved_country_code = determine_visitor_country(request)
 
@@ -152,7 +152,11 @@ def calculate_tax(
             decimal.Decimal(item_price) * (tax_rate.tax_rate / 100)
         )
 
-        return (tax_rate.tax_rate, resolved_country_code, tax_inclusive_amt)
+        return (  # noqa: TRY300
+            tax_rate.tax_rate,
+            resolved_country_code,
+            tax_inclusive_amt,
+        )  # noqa: RUF100, TRY300
     except TaxRate.DoesNotExist:
         pass
 
@@ -212,7 +216,8 @@ def get_readable_id(run_or_program):
     elif isinstance(run_or_program, Program):
         return run_or_program.readable_id
     else:
-        raise Exception(f"Unexpected object {run_or_program}")
+        msg = f"Unexpected object {run_or_program}"
+        raise Exception(msg)  # noqa: TRY002, TRY004
 
 
 def sign_cybersource_payload(payload):
@@ -226,7 +231,7 @@ def sign_cybersource_payload(payload):
         dict:
             A signed payload to be sent to CyberSource
     """
-    field_names = sorted(list(payload.keys()) + ["signed_field_names"])
+    field_names = sorted([*list(payload.keys()), "signed_field_names"])
     payload = {**payload, "signed_field_names": ",".join(field_names)}
     return {**payload, "signature": generate_cybersource_sa_signature(payload)}
 
@@ -242,12 +247,12 @@ def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addre
         ip_address (str): The user's IP address
     Returns:
         dict: the payload to send to CyberSource via Secure Acceptance
-    """
+    """  # noqa: E501, D401
     # http://apps.cybersource.com/library/documentation/dev_guides/Secure_Acceptance_WM/Secure_Acceptance_WM.pdf
     # Section: API Fields
 
     # NOTE: be careful about max length here, many (all?) string fields have a max
-    # length of 255. At the moment none of these fields should go over that, due to database
+    # length of 255. At the moment none of these fields should go over that, due to database  # noqa: E501
     # constraints or other reasons
 
     coupon_redemption = CouponRedemption.objects.filter(order=order).first()
@@ -343,7 +348,7 @@ def generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addres
         ip_address (str): The user's IP address
     Returns:
         dict: the payload to send to CyberSource via Secure Acceptance
-    """
+    """  # noqa: E501, D401
     return sign_cybersource_payload(
         _generate_cybersource_sa_payload(
             order=order,
@@ -367,8 +372,13 @@ def latest_coupon_version(coupon):
     return coupon.versions.order_by("-created_on").first()
 
 
-def get_valid_coupon_versions(
-    product, user, auto_only=False, code=None, full_discount=False, company=None
+def get_valid_coupon_versions(  # noqa: PLR0913
+    product,
+    user,
+    auto_only=False,  # noqa: FBT002
+    code=None,
+    full_discount=False,  # noqa: FBT002
+    company=None,  # noqa: FBT002, RUF100
 ):  # pylint:disable=too-many-arguments
     """
     Given a list of coupon ids, determine which of them are valid based on payment version dates and redemptions.
@@ -383,7 +393,7 @@ def get_valid_coupon_versions(
 
     Returns:
         list of CouponVersion: CouponVersion objects sorted by discount, highest first.
-    """
+    """  # noqa: E501
     now = now_in_utc()
 
     # Get enabled coupons eligible for the product
@@ -527,7 +537,7 @@ def get_valid_coupon_versions(
     return query.order_by("-payment_version__amount")
 
 
-def best_coupon_for_product(product, user, auto_only=False, code=None):
+def best_coupon_for_product(product, user, auto_only=False, code=None):  # noqa: FBT002
     """
     Get the best eligible coupon for a product and user.
 
@@ -593,7 +603,7 @@ def round_half_up(number):
     Returns:
         decimal.Decimal:
             A rounded decimal number
-    """
+    """  # noqa: E501
     return number.quantize(decimal.Decimal("0.01"), rounding=decimal.ROUND_HALF_UP)
 
 
@@ -607,7 +617,7 @@ def get_product_version_price_with_discount(*, coupon_version, product_version):
 
     Returns:
         Decimal: the discounted price for the Product
-    """
+    """  # noqa: E501
     price = product_version.price
     discount_amount = 0
 
@@ -639,7 +649,7 @@ def get_product_version_price_with_discount_tax(
         dict:
         - price (Decimal): discounted price for the Product
         - tax_assessed (Decimal): tax assessed for the discounted price
-    """
+    """  # noqa: D401
 
     product_version_price = get_product_version_price_with_discount(
         coupon_version=coupon_version, product_version=product_version
@@ -667,7 +677,7 @@ def redeem_coupon(coupon_version, order):
     Returns:
         CouponRedemption: a CouponRedemption object
 
-    """
+    """  # noqa: E501
     coupon_redemption, _ = CouponRedemption.objects.update_or_create(
         order=order, defaults={"coupon_version": coupon_version}
     )
@@ -682,7 +692,7 @@ def set_coupons_to_redeemed(redeemed_email, coupon_ids):
     Args:
         redeemed_email (str): The email address that was used to redeem the given coupons
         coupon_ids (iterable of int): ecommerce.models.Coupon id values for the Coupons that were redeemed
-    """
+    """  # noqa: E501, D401
     updated_assignments = []
     with transaction.atomic():
         assignments = (
@@ -693,14 +703,14 @@ def set_coupons_to_redeemed(redeemed_email, coupon_ids):
         for assignment in assignments:
             if not assignment.redeemed:
                 assignment.redeemed = True
-                # We allow codes to be redeemed by an email other than the one that was assigned. If the user that
-                # redeemed this code does not match the email on the ProductCouponAssignment, update the db record.
+                # We allow codes to be redeemed by an email other than the one that was assigned. If the user that  # noqa: E501
+                # redeemed this code does not match the email on the ProductCouponAssignment, update the db record.  # noqa: E501
                 if not case_insensitive_equal(redeemed_email, assignment.email):
                     assignment.original_email = assignment.email
                     assignment.email = redeemed_email
                 assignment.save()
                 updated_assignments.append(assignment)
-    # If the redeemed coupons were assigned in bulk enrollment spreadsheets, update those spreadsheets
+    # If the redeemed coupons were assigned in bulk enrollment spreadsheets, update those spreadsheets  # noqa: E501
     # to reflect that they were redeemed
     updated_assignments_in_bulk = [
         assignment
@@ -723,10 +733,10 @@ def complete_order(order):
 
     Args:
         order (Order): A fulfilled order
-    """
+    """  # noqa: E501
     enroll_user_in_order_items(order)
 
-    # If this order included assigned coupons, update them to indicate that they're redeemed
+    # If this order included assigned coupons, update them to indicate that they're redeemed  # noqa: E501
     order_coupon_ids = order.couponredemption_set.values_list(
         "coupon_version__coupon__id", flat=True
     )
@@ -747,7 +757,7 @@ def enroll_user_in_order_items(order):
 
     Args:
         order (Order): An order
-    """
+    """  # noqa: E501
     order_line = Line.objects.prefetch_related("line_selections__run").get(order=order)
     runs = [line_selection.run for line_selection in order_line.line_selections.all()]
     programs = get_order_programs(order)
@@ -755,8 +765,8 @@ def enroll_user_in_order_items(order):
 
     if programs and not runs:
         log.error(
-            "An order is being completed for a program, but does not have any course run selections. "
-            "(Order: %d, purchaser: '%s', program(s): %s)",
+            "An order is being completed for a program, but does not have any course"
+            " run selections. (Order: %d, purchaser: '%s', program(s): %s)",
             order.id,
             order.purchaser.email,
             [program.readable_id for program in programs],
@@ -790,11 +800,9 @@ def enroll_user_in_order_items(order):
     ):
         voucher_target = voucher.product.content_object
     voucher_enrollment = first_or_none(
-        (
-            enrollment
-            for enrollment in successful_run_enrollments
-            if enrollment.run == voucher_target
-        )
+        enrollment
+        for enrollment in successful_run_enrollments
+        if enrollment.run == voucher_target
     )
     if voucher_enrollment is not None:
         voucher.enrollment = voucher_enrollment
@@ -823,7 +831,7 @@ def get_order_programs(order):
 
     Returns:
         list of Program: A list of Programs that were purchased in the order
-    """
+    """  # noqa: D401
     return [
         line.product_version.product.content_object
         for line in order.lines.select_related("product_version__product").all()
@@ -848,7 +856,7 @@ def create_unfulfilled_order(validated_basket, affiliate_id=None, **kwargs):
 
     Returns:
         Order: A newly created Order for the Product in the basket
-    """
+    """  # noqa: E501
     with transaction.atomic():
         total_price_paid = get_product_version_price_with_discount(
             coupon_version=validated_basket.coupon_version,
@@ -863,7 +871,7 @@ def create_unfulfilled_order(validated_basket, affiliate_id=None, **kwargs):
                 country_code=country_code
             )
         except (TaxRate.DoesNotExist, TaxRate.MultipleObjectsReturned):
-            # not using get_or_create here because we don't want the rate to stick around
+            # not using get_or_create here because we don't want the rate to stick around  # noqa: E501
             tax_rate_info = TaxRate()
 
         order = Order.objects.create(
@@ -917,6 +925,7 @@ def get_product_courses(product):
         return list(
             product.content_object.courses.all().order_by("position_in_program")
         )
+    return None
 
 
 def bulk_assign_product_coupons(desired_assignments, bulk_assignment=None):
@@ -932,7 +941,7 @@ def bulk_assign_product_coupons(desired_assignments, bulk_assignment=None):
     Returns:
         (BulkCouponAssignment, List[ProductCouponAssignment]): The BulkCouponAssignment object paired with
             all of the ProductCouponAssignments that were created for it
-    """
+    """  # noqa: E501
     bulk_assignment = bulk_assignment or BulkCouponAssignment.objects.create()
     return (
         bulk_assignment,
@@ -948,7 +957,7 @@ def bulk_assign_product_coupons(desired_assignments, bulk_assignment=None):
 
 
 class ValidatedBasket(NamedTuple):
-    """An object representing a Basket and related objects that have been validated to be ready for checkout"""
+    """An object representing a Basket and related objects that have been validated to be ready for checkout"""  # noqa: E501
 
     basket: Basket
     basket_item: BasketItem
@@ -969,7 +978,7 @@ def _validate_basket_contents(basket):
     Returns:
         (BasketItem, Product, ProductVersion): The basket item, product, and product version associated with
             the basket
-    """
+    """  # noqa: E501, D401
     # A basket is expected to have a one item (which in turn will create one Line)
     basket_items = basket.basketitems.all()
     if len(basket_items) == 0:
@@ -978,20 +987,25 @@ def _validate_basket_contents(basket):
         )
     if len(basket_items) > 1:
         log.error(
-            "User %s is checking out %d items in their basket. Baskets should only have one BasketItem.",
+            "User %s is checking out %d items in their basket. Baskets should only have"
+            " one BasketItem.",
             basket.user.email,
             len(basket_items),
         )
         raise ValidationError(
             {
-                "items": "Something went wrong with the items being purchased. Please contact support."
+                "items": (
+                    "Something went wrong with the items being purchased. Please"
+                    " contact support."
+                )
             }
         )
     basket_item = basket_items[0]
     product = basket_item.product
     if product.is_active is False or product.content_object.live is False:
         log.error(
-            "User %s is checking out with a product in their basket that was not live (%s).",
+            "User %s is checking out with a product in their basket that was not live"
+            " (%s).",
             basket.user.email,
             product.content_object.text_id,
         )
@@ -1013,7 +1027,7 @@ def _validate_basket_run_selections(basket, product_object):
 
     Returns:
         set of int: The course run IDs of the selected course runs
-    """
+    """  # noqa: E501, D401
     course_run_selections = basket.courserunselection_set.all()
     if len(course_run_selections) == 0:
         raise ValidationError({"runs": "You must select a date for each course."})
@@ -1036,7 +1050,9 @@ def _validate_basket_run_selections(basket, product_object):
         if not selection.run.is_unexpired:
             raise ValidationError(
                 {
-                    "runs": f"Course '{selection.run.title}' is not accepting enrollments."
+                    "runs": (
+                        f"Course '{selection.run.title}' is not accepting enrollments."
+                    )
                 }
             )
     selected_course_run_ids = {
@@ -1063,16 +1079,20 @@ def _validate_coupon_selection(basket, product):
     Returns:
         Optional(CouponVersion): The coupon version associated with the applied coupon code (or None if no code was
             applied to the basket)
-    """
+    """  # noqa: E501, D401
     coupon_selections = basket.couponselection_set
     if coupon_selections.count() > 1:
         log.error(
-            "User %s is checking out with multiple coupon selections. There should be one or zero.",
+            "User %s is checking out with multiple coupon selections. There should be"
+            " one or zero.",
             basket.user.email,
         )
         raise ValidationError(
             {
-                "coupons": "Something went wrong with your coupon. Please clear it and try again."
+                "coupons": (
+                    "Something went wrong with your coupon. Please clear it and try"
+                    " again."
+                )
             }
         )
     coupon_selection = first_or_none(coupon_selections.all())
@@ -1146,7 +1166,7 @@ def fetch_and_serialize_unused_coupons(user):
                 "product_id": 123,
                 "expiration_date": "2050-01-01T00:00:00.000000Z"
             }
-    """
+    """  # noqa: E501, D401
     unused_product_coupon_ids = ProductCouponAssignment.objects.filter(
         email__iexact=user.email, redeemed=False
     ).values_list("product_coupon", flat=True)
@@ -1172,7 +1192,9 @@ def fetch_and_serialize_unused_coupons(user):
             {
                 "coupon_code": coupon_eligibility.coupon.coupon_code,
                 "product_id": coupon_eligibility.product.id,
-                "expiration_date": coupon_eligibility.coupon.payment.latest_version.expiration_date,
+                "expiration_date": (
+                    coupon_eligibility.coupon.payment.latest_version.expiration_date
+                ),
                 "product_title": coupon_eligibility.product.title,
                 "product_type": coupon_eligibility.product.type_string,
                 "thumbnail_url": coupon_eligibility.product.thumbnail_url,
@@ -1207,7 +1229,7 @@ def get_or_create_data_consent_users(basket):
                 coupon_selection.coupon
             ).payment_version.company
             if company:
-                # We will give priority to the course based consent if one exists, otherwise we'll try to fetch global
+                # We will give priority to the course based consent if one exists, otherwise we'll try to fetch global  # noqa: E501
                 # consent
                 agreements = (
                     DataConsentAgreement.objects.filter(company=company)
@@ -1216,7 +1238,7 @@ def get_or_create_data_consent_users(basket):
                 )
 
                 if not agreements:
-                    # Ideally, There should always be only one global consent agreement for a company at maximum
+                    # Ideally, There should always be only one global consent agreement for a company at maximum  # noqa: E501
                     global_agreement = DataConsentAgreement.objects.filter(
                         company=company, is_global=True
                     )
@@ -1241,7 +1263,7 @@ def get_or_create_data_consent_users(basket):
     return data_consents
 
 
-def create_coupons(
+def create_coupons(  # noqa: PLR0913
     *,
     name,
     product_ids,
@@ -1292,11 +1314,8 @@ def create_coupons(
         CouponPaymentVersion:
         A CouponPaymentVersion. Other instances will be created at the same time and linked via foreign keys.
 
-    """
-    if company_id:
-        company = Company.objects.get(id=company_id)
-    else:
-        company = None
+    """  # noqa: E501
+    company = Company.objects.get(id=company_id) if company_id else None
     payment = CouponPayment.objects.create(name=name)
     payment_version = CouponPaymentVersion.objects.create(
         payment=payment,
@@ -1361,11 +1380,13 @@ def determine_order_status_change(order, decision):
         return None
 
     if order.status != Order.CREATED:
-        raise EcommerceException(f"{order} is expected to have status 'created'")
+        msg = f"{order} is expected to have status 'created'"
+        raise EcommerceException(msg)
 
     if decision != CYBERSOURCE_DECISION_ACCEPT:
         log.warning(
-            "Order fulfillment failed: received a decision that wasn't ACCEPT for order %s",
+            "Order fulfillment failed: received a decision that wasn't ACCEPT for"
+            " order %s",
             order,
         )
         return Order.FAILED
@@ -1406,7 +1427,7 @@ def fulfill_order(request_data):
                 order=order, cyber_source_provided_email=req_bill_to_email
             )
 
-    # Save to log everything to an audit table including enrollments created in complete_order
+    # Save to log everything to an audit table including enrollments created in complete_order  # noqa: E501
     order.save_and_log(None)
 
 
@@ -1422,16 +1443,16 @@ def get_product_from_text_id(text_id):
         (Product, Program or CourseRun, ProgramRun): A tuple containing the Product for the CourseRun/Program,
             the Program/CourseRun associated with the text id, and a matching ProgramRun if the text id
             indicated one
-    """
+    """  # noqa: E501, D401
     program_run_id_match = re.match(PROGRAM_RUN_ID_PATTERN, text_id)
     # This text id matches the pattern of a program text id with a program run attached
     if program_run_id_match:
         match_dict = program_run_id_match.groupdict()
         potential_prog_run_id = match_dict["run_tag"]
         potential_text_id_base = match_dict["text_id_base"]
-        # A Program's own text id may end with something that looks like a ProgramRun suffix, but has
-        # no associated ProgramRun (ex: program.readable_id == "program-v1:my+program+R1"). This query looks
-        # for a Program with a ProgramRun that matches the suffix, or one that matches the full given text id
+        # A Program's own text id may end with something that looks like a ProgramRun suffix, but has  # noqa: E501
+        # no associated ProgramRun (ex: program.readable_id == "program-v1:my+program+R1"). This query looks  # noqa: E501
+        # for a Program with a ProgramRun that matches the suffix, or one that matches the full given text id  # noqa: E501
         # without a ProgramRun. The version with a matching ProgramRun is preferred.
         program = (
             Program.objects.filter(
@@ -1453,35 +1474,34 @@ def get_product_from_text_id(text_id):
             .first()
         )
         if not program:
-            raise Program.DoesNotExist(
-                f"Could not find Program with readable_id={text_id} "
-                "or readable_id={potential_text_id_base} with program run {potential_prog_run_id}"
-            )
+            msg = f"Could not find Program with readable_id={text_id} or readable_id={{potential_text_id_base}} with program run {{potential_prog_run_id}}"  # noqa: E501
+            raise Program.DoesNotExist(msg)
         program_run = first_or_none(program.matching_program_runs)
         product = first_or_none(program.products.all())
         if not product:
-            raise Product.DoesNotExist(f"Product for {program} does not exist")
+            msg = f"Product for {program} does not exist"
+            raise Product.DoesNotExist(msg)
         return product, program, program_run
     # This is a "normal" text id that should match a CourseRun/Program
     else:
         if is_program_text_id(text_id):
             content_object_model = Program
-            content_object_filter = dict(readable_id=text_id)
+            content_object_filter = {"readable_id": text_id}
         else:
             content_object_model = CourseRun
-            content_object_filter = dict(courseware_id=text_id)
+            content_object_filter = {"courseware_id": text_id}
         content_object = (
             content_object_model.objects.filter(**content_object_filter)
             .prefetch_related("products")
             .first()
         )
         if not content_object:
-            raise content_object_model.DoesNotExist(
-                f"{content_object_model._meta.model} matching filter {content_object_filter} does not exist"
-            )
+            msg = f"{content_object_model._meta.model} matching filter {content_object_filter} does not exist"  # noqa: SLF001, E501
+            raise content_object_model.DoesNotExist(msg)
         product = first_or_none(content_object.products.all())
         if not product:
-            raise Product.DoesNotExist(f"Product for {content_object} does not exist")
+            msg = f"Product for {content_object} does not exist"
+            raise Product.DoesNotExist(msg)
         return product, content_object, None
 
 
@@ -1496,11 +1516,11 @@ def get_product_from_querystring_id(qs_product_id):
         (Product, Program or CourseRun, ProgramRun): A tuple containing the Product that matches the id,
             the Program/CourseRun associated with that product, and a matching ProgramRun if the product id
             indicated one
-    """
+    """  # noqa: E501, D401
     if isinstance(qs_product_id, int) or qs_product_id.isdigit():
         product = Product.objects.get(id=int(qs_product_id))
         return product, product.content_object, None
     else:
-        # Text IDs for Programs/CourseRuns have '+' characters, which represent spaces in URL-encoded strings
+        # Text IDs for Programs/CourseRuns have '+' characters, which represent spaces in URL-encoded strings  # noqa: E501
         parsed_product_text_id = qs_product_id.replace(" ", "+")
         return get_product_from_text_id(parsed_product_text_id)

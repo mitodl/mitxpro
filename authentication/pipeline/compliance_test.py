@@ -9,7 +9,6 @@ from authentication.exceptions import (
 from authentication.pipeline import compliance
 from compliance.factories import ExportsInquiryLogFactory
 
-
 pytestmark = pytest.mark.django_db
 
 
@@ -22,15 +21,15 @@ def test_verify_exports_compliance_disabled(mocker):
 
 
 @pytest.mark.parametrize(
-    "is_active, inquiry_exists, should_verify",
+    ("is_active", "inquiry_exists", "should_verify"),
     [
-        [True, True, False],
-        [True, False, True],
-        [False, True, True],
-        [False, False, True],
+        [True, True, False],  # noqa: PT007
+        [True, False, True],  # noqa: PT007
+        [False, True, True],  # noqa: PT007
+        [False, False, True],  # noqa: PT007
     ],
 )
-def test_verify_exports_compliance_user_active(
+def test_verify_exports_compliance_user_active(  # noqa: PLR0913
     mailoutbox, mocker, user, is_active, inquiry_exists, should_verify
 ):  # pylint: disable=too-many-arguments
     """Assert that the user is verified only if they already haven't been"""
@@ -51,7 +50,7 @@ def test_verify_exports_compliance_user_active(
 
 
 def test_verify_exports_compliance_no_record(mocker, user):
-    """Assert that an error to try again later is raised if no ExportsInquiryLog is created"""
+    """Assert that an error to try again later is raised if no ExportsInquiryLog is created"""  # noqa: E501
 
     mock_api = mocker.patch("authentication.pipeline.compliance.api")
     mock_api.verify_user_with_exports.return_value = None
@@ -63,7 +62,7 @@ def test_verify_exports_compliance_no_record(mocker, user):
 
 
 def test_verify_exports_compliance_api_raises_exception(mocker, user):
-    """Assert that an error to try again later is raised if the export api raises an exception"""
+    """Assert that an error to try again later is raised if the export api raises an exception"""  # noqa: E501
 
     mock_api = mocker.patch("authentication.pipeline.compliance.api")
     mock_api.verify_user_with_exports.side_effect = Exception("error")
@@ -76,7 +75,7 @@ def test_verify_exports_compliance_api_raises_exception(mocker, user):
 
 @pytest.mark.parametrize("email_fails", [True, False])
 def test_verify_exports_compliance_denied(mailoutbox, mocker, user, email_fails):
-    """Assert that a UserExportBlockedException is raised if the inquiry result is denied"""
+    """Assert that a UserExportBlockedException is raised if the inquiry result is denied"""  # noqa: E501
     reason_code = 100
     mock_api = mocker.patch("authentication.pipeline.compliance.api")
     mock_api.verify_user_with_exports.return_value = mocker.Mock(
@@ -100,7 +99,7 @@ def test_verify_exports_compliance_denied(mailoutbox, mocker, user, email_fails)
 
 
 def test_verify_exports_compliance_unknown(mailoutbox, mocker, user):
-    """Assert that a UserExportBlockedException is raised if the inquiry result is unknown"""
+    """Assert that a UserExportBlockedException is raised if the inquiry result is unknown"""  # noqa: E501
     mock_api = mocker.patch("authentication.pipeline.compliance.api")
     mock_api.verify_user_with_exports.return_value = mocker.Mock(
         is_denied=False, is_unknown=True

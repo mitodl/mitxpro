@@ -2,21 +2,20 @@
 Common model classes
 """
 import copy
-from typing import Iterable
+from collections.abc import Iterable
 
 from django.conf import settings
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models, transaction
 from django.db.models import (
+    PROTECT,
     DateTimeField,
     ForeignKey,
     Manager,
     Model,
-    PROTECT,
     prefetch_related_objects,
 )
 from django.db.models.query import QuerySet
-from django.db import transaction
 
 from mitxpro.utils import now_in_utc
 
@@ -31,7 +30,7 @@ class TimestampedModelQuerySet(QuerySet):
         Automatically update updated_on timestamp when .update(). This is because .update()
         does not go through .save(), thus will not auto_now, because it happens on the
         database level without loading objects into memory.
-        """
+        """  # noqa: E501, D402
         if "updated_on" not in kwargs:
             kwargs["updated_on"] = now_in_utc()
         return super().update(**kwargs)
@@ -45,13 +44,13 @@ class TimestampedModelManager(Manager):
     def update(self, **kwargs):
         """
         Allows access to TimestampedModelQuerySet's update method on the manager
-        """
+        """  # noqa: D401
         return self.get_queryset().update(**kwargs)
 
     def get_queryset(self):
         """
         Returns custom queryset
-        """
+        """  # noqa: D401
         return TimestampedModelQuerySet(self.model, using=self._db)
 
 
@@ -83,7 +82,7 @@ class AuditModel(TimestampedModel):
         """
         Returns:
             str: A field name which links the Auditable model to this model
-        """
+        """  # noqa: D401
         raise NotImplementedError
 
 
@@ -98,7 +97,7 @@ class AuditableModel(Model):
         Returns:
             dict:
                 A serialized representation of the model object
-        """
+        """  # noqa: D401
         raise NotImplementedError
 
     @classmethod
@@ -110,7 +109,7 @@ class AuditableModel(Model):
 
         Returns:
              django.db.models.manager.Manager: The correct model manager for the auditable model
-        """
+        """  # noqa: E501, D401
         return cls.objects
 
     @classmethod
@@ -119,7 +118,7 @@ class AuditableModel(Model):
         Returns:
             class of Model:
                 A class of a Django model used as the audit table
-        """
+        """  # noqa: D401
         raise NotImplementedError
 
     @transaction.atomic
@@ -130,7 +129,7 @@ class AuditableModel(Model):
         Args:
             acting_user (User):
                 The user who made the change to the model. May be None if inapplicable.
-        """
+        """  # noqa: D401
         before_obj = self.objects_for_audit().filter(id=self.id).first()
         self.save(*args, **kwargs)
         self.refresh_from_db()
@@ -138,25 +137,32 @@ class AuditableModel(Model):
         if before_obj is not None:
             before_dict = before_obj.to_dict()
 
-        audit_kwargs = dict(
-            acting_user=acting_user, data_before=before_dict, data_after=self.to_dict()
-        )
+        audit_kwargs = {
+            "acting_user": acting_user,
+            "data_before": before_dict,
+            "data_after": self.to_dict(),  # noqa: E501, RUF100
+        }
         audit_class = self.get_audit_class()
         audit_kwargs[audit_class.get_related_field_name()] = self
         audit_class.objects.create(**audit_kwargs)
 
 
 class SingletonModel(Model):
-    """Model class for models representing tables that should only have a single record"""
+    """Model class for models representing tables that should only have a single record"""  # noqa: E501
 
     def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
+        self,
+        force_insert=False,  # noqa: FBT002
+        force_update=False,  # noqa: FBT002
+        using=None,
+        update_fields=None,  # noqa: FBT002, RUF100
     ):
         if force_insert and self._meta.model.objects.count() > 0:
-            raise ValidationError(
-                "Only one {} object should exist. Update the existing object instead "
-                "of creating a new one.".format(self.__class__.__name__)
+            msg = (
+                "Only one {} object should exist. Update the existing object instead of"
+                " creating a new one.".format(self.__class__.__name__)
             )
+            raise ValidationError(msg)
         return super().save(
             force_insert=force_insert,
             force_update=force_update,
@@ -169,7 +175,7 @@ class SingletonModel(Model):
 
 
 def _items_for_class(content_type_field, items, model_cls):
-    """Returns a list of items that matches a class by content_type"""
+    """Returns a list of items that matches a class by content_type"""  # noqa: D401
     return [
         item
         for item in items
@@ -202,7 +208,7 @@ class PrefetchGenericQuerySet(QuerySet):
 
         for model_classes, lookups in model_lookups.items():
             # pylint: disable=isinstance-second-argument-not-valid-type
-            model_classes = (
+            model_classes = (  # noqa: PLW2901
                 model_classes
                 if isinstance(model_classes, Iterable)
                 else [model_classes]
@@ -210,8 +216,8 @@ class PrefetchGenericQuerySet(QuerySet):
             for model_cls in model_classes:
                 key = (content_type_field, model_cls)
                 # pylint: disable=protected-access
-                qs._prefetch_generic_related_lookups[key] = [
-                    *qs._prefetch_generic_related_lookups.get(key, []),
+                qs._prefetch_generic_related_lookups[key] = [  # noqa: SLF001
+                    *qs._prefetch_generic_related_lookups.get(key, []),  # noqa: SLF001
                     *lookups,
                 ]
 
@@ -228,8 +234,8 @@ class PrefetchGenericQuerySet(QuerySet):
         self._prefetch_generic_done = True
 
     def _fetch_all(self):
-        """Called when a query is evaluated"""
-        # first fetch non-generic data, this avoid N+1 issues on the generic items themselves
+        """Called when a query is evaluated"""  # noqa: D401
+        # first fetch non-generic data, this avoid N+1 issues on the generic items themselves  # noqa: E501
         super()._fetch_all()
 
         if self._prefetch_generic_related_lookups and not self._prefetch_generic_done:
@@ -239,7 +245,7 @@ class PrefetchGenericQuerySet(QuerySet):
         """Clone the queryset"""
         # pylint: disable=protected-access
         c = super()._clone()
-        c._prefetch_generic_related_lookups = copy.deepcopy(
+        c._prefetch_generic_related_lookups = copy.deepcopy(  # noqa: SLF001
             self._prefetch_generic_related_lookups
         )
         return c

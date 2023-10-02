@@ -1,7 +1,7 @@
 """
 Compares assignment sheet rows to enrollment records in the database and message delivery data in Mailgun.
 If the data in the sheet does not match, a request is sent to update/"sync" the sheet data.
-"""
+"""  # noqa: INP001, E501
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.mail_api import send_bulk_enroll_emails
@@ -15,9 +15,9 @@ class Command(BaseCommand):
     """
     Compares assignment sheet rows to enrollment records in the database and message delivery data in Mailgun.
     If the data in the sheet does not match, a request is sent to update/"sync" the sheet data.
-    """
+    """  # noqa: E501
 
-    help = __doc__
+    help = __doc__  # noqa: A003
 
     def add_arguments(self, parser):  # pylint:disable=missing-docstring
         group = parser.add_mutually_exclusive_group()
@@ -29,31 +29,38 @@ class Command(BaseCommand):
             "-t",
             "--title",
             type=str,
-            help="The title of the coupon assignment Sheet (should match exactly one sheet)",
+            help=(
+                "The title of the coupon assignment Sheet (should match exactly one"
+                " sheet)"
+            ),
         )
         parser.add_argument(
             "--skip-confirm",
             action="store_true",
-            help="Skip the confirmation step for sending enrollment code emails that should have been sent",
+            help=(
+                "Skip the confirmation step for sending enrollment code emails that"
+                " should have been sent"
+            ),
         )
         super().add_arguments(parser)
 
     def handle(
-        self, *args, **options
+        self, *args, **options  # noqa: ARG002
     ):  # pylint:disable=missing-docstring,too-many-locals
         if not any([options["id"], options["sheet_id"], options["title"]]):
-            raise CommandError("Need to provide --id, --sheet-id, or --title")
+            msg = "Need to provide --id, --sheet-id, or --title"
+            raise CommandError(msg)
 
         if options["id"]:
-            qset_kwargs = dict(id=options["id"])
+            qset_kwargs = {"id": options["id"]}
         elif options["sheet_id"]:
-            qset_kwargs = dict(assignment_sheet_id=options["sheet_id"])
+            qset_kwargs = {"assignment_sheet_id": options["sheet_id"]}
         else:
             pygsheets_client = get_authorized_pygsheets_client()
             spreadsheet = get_assignment_spreadsheet_by_title(
                 pygsheets_client, options["title"]
             )
-            qset_kwargs = dict(assignment_sheet_id=spreadsheet.id)
+            qset_kwargs = {"assignment_sheet_id": spreadsheet.id}
 
         bulk_assignment = BulkCouponAssignment.objects.get(**qset_kwargs)
         coupon_assignment_handler = CouponAssignmentHandler(
@@ -68,7 +75,8 @@ class Command(BaseCommand):
         if len(row_updates) == 0 and len(unsent_assignments) == 0:
             self.stdout.write(
                 self.style.WARNING(
-                    "Spreadsheet data appears to be synced. No updates needed. Exiting..."
+                    "Spreadsheet data appears to be synced. No updates needed."
+                    " Exiting..."
                 )
             )
             return
@@ -80,9 +88,7 @@ class Command(BaseCommand):
             )
             row_update_summary = "\n".join(
                 [
-                    "Row: {}, Status: {}".format(
-                        row_update.row_index, row_update.status
-                    )
+                    f"Row: {row_update.row_index}, Status: {row_update.status}"
                     for row_update in row_updates
                 ]
             )
@@ -94,13 +100,14 @@ class Command(BaseCommand):
 
         if unsent_assignments and not options["skip_confirm"]:
             user_input = input(
-                "{} users(s) will be sent an enrollment code email:\n"
-                "{}\n"
-                "Enter 'y' to confirm and send the emails, or any other key to skip this step: ".format(
+                "{} users(s) will be sent an enrollment code email:\n{}\nEnter 'y' to"
+                " confirm and send the emails, or any other key to skip this step: "
+                .format(
                     len(unsent_assignments),
                     "\n".join(
                         [
-                            f"  {assignment.email} (code: {assignment.product_coupon.coupon.coupon_code})"
+                            f"  {assignment.email} (code:"
+                            f" {assignment.product_coupon.coupon.coupon_code})"
                             for assignment in unsent_assignments
                         ]
                     ),

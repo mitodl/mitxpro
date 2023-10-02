@@ -1,9 +1,9 @@
-"""Management command to change enrollment status"""
+"""Management command to change enrollment status"""  # noqa: INP001
 from django.contrib.auth import get_user_model
 
 from courses.api import deactivate_program_enrollment, deactivate_run_enrollment
-from courses.management.utils import EnrollmentChangeCommand, enrollment_summaries
 from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
+from courses.management.utils import EnrollmentChangeCommand, enrollment_summaries
 from ecommerce.models import Order
 from users.api import fetch_user
 
@@ -13,7 +13,7 @@ User = get_user_model()
 class Command(EnrollmentChangeCommand):
     """Sets a user's enrollment to 'refunded' and deactivates it"""
 
-    help = "Sets a user's enrollment to 'refunded' and deactivates it"
+    help = "Sets a user's enrollment to 'refunded' and deactivates it"  # noqa: A003
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -41,12 +41,15 @@ class Command(EnrollmentChangeCommand):
             "--keep-failed-enrollments",
             action="store_true",
             dest="keep_failed_enrollments",
-            help="If provided, enrollment records will be kept even if edX enrollment fails",
+            help=(
+                "If provided, enrollment records will be kept even if edX enrollment"
+                " fails"
+            ),
         )
 
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
         user = fetch_user(options["user"])
         keep_failed_enrollments = options["keep_failed_enrollments"]
@@ -70,12 +73,15 @@ class Command(EnrollmentChangeCommand):
                 run_enrollments.append(run_enrollment)
 
         if program_enrollment or run_enrollments:
-            success_msg = "Refunded enrollments for user: {} ({})\nEnrollments affected: {}".format(
-                enrollment.user.username,
-                enrollment.user.email,
-                enrollment_summaries(
-                    filter(bool, [program_enrollment] + run_enrollments)
-                ),
+            success_msg = (
+                "Refunded enrollments for user: {} ({})\nEnrollments affected: {}"
+                .format(
+                    enrollment.user.username,
+                    enrollment.user.email,
+                    enrollment_summaries(
+                        filter(bool, [program_enrollment, *run_enrollments])
+                    ),
+                )
             )
 
             if enrollment.order:
@@ -87,7 +93,8 @@ class Command(EnrollmentChangeCommand):
             else:
                 self.stdout.write(
                     self.style.WARNING(
-                        "The given enrollment is not associated with an order, so no order status will be changed."
+                        "The given enrollment is not associated with an order, so no"
+                        " order status will be changed."
                     )
                 )
 
@@ -95,7 +102,8 @@ class Command(EnrollmentChangeCommand):
         else:
             self.stdout.write(
                 self.style.ERROR(
-                    "Failed to refund the enrollment – 'for' user: {} ({}) from course / program ({})\n".format(
+                    "Failed to refund the enrollment – 'for' user: {} ({}) from course"  # noqa: E501, RUF001
+                    " / program ({})\n".format(
                         user.username, user.email, options["run"] or options["program"]
                     )
                 )

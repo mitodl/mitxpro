@@ -3,7 +3,7 @@
 from django.db import migrations, models
 
 
-def backpopulate_incomplete_profiles(apps, schema):
+def backpopulate_incomplete_profiles(apps, schema):  # noqa: ARG001
     """Backpopulate users who don't have a profile record"""
     User = apps.get_model("users", "User")
     Profile = apps.get_model("users", "Profile")
@@ -14,7 +14,7 @@ def backpopulate_incomplete_profiles(apps, schema):
         Profile.objects.get_or_create(user=user)
 
 
-def remove_incomplete_profiles(apps, schema):
+def remove_incomplete_profiles(apps, schema):  # noqa: ARG001
     """Delete records that will cause rollbacks on nullable/blankable fields to fail"""
     Profile = apps.get_model("users", "Profile")
 
@@ -27,7 +27,6 @@ def remove_incomplete_profiles(apps, schema):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("users", "0007_validate_country_and_state")]
 
     operations = [

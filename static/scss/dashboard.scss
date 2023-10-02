@@ -111,12 +111,11 @@
 }
 
 .certificate-link {
-
   @media (max-width: 768px) {
     width: 100%;
   }
 
-  >a {
+  > a {
     color: white;
     font-weight: 600;
     background-color: $denim-blue;
@@ -209,7 +208,6 @@
   }
 
   .learn-more-button {
-
     @media (min-width: 768px) {
       float: right;
     }
@@ -231,7 +229,6 @@
       text-decoration: underline;
     }
   }
-
 
   .download-digital-credential-button {
     display: none;
@@ -298,7 +295,8 @@
       width: 100%;
     }
 
-    .course-enrollment, .enrollment-code {
+    .course-enrollment,
+    .enrollment-code {
       margin-top: 15px;
       margin-bottom: 15px;
     }
@@ -322,7 +320,9 @@
     color: $gray;
     text-decoration: none;
 
-    &:hover, &:active, &:focus {
+    &:hover,
+    &:active,
+    &:focus {
       color: $gray !important;
       background-color: inherit !important;
       outline: none !important;

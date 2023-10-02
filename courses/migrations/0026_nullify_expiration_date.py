@@ -3,7 +3,7 @@
 from django.db import migrations, models
 
 
-def nullify_courserun_expiration_dates(apps, schema_editor):
+def nullify_courserun_expiration_dates(apps, schema_editor):  # noqa: ARG001
     """
     Unset all of the expiration dates set automatically by the previous code.
     We are moving to empty expiration dates by default and only explicitly setting them
@@ -14,7 +14,6 @@ def nullify_courserun_expiration_dates(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("courses", "0025_run_tag")]
 
     operations = [
@@ -24,7 +23,10 @@ class Migration(migrations.Migration):
             field=models.DateTimeField(
                 blank=True,
                 db_index=True,
-                help_text="The date beyond which the learner should not see link to this course run on their dashboard.",
+                help_text=(
+                    "The date beyond which the learner should not see link to this"
+                    " course run on their dashboard."
+                ),
                 null=True,
             ),
         ),

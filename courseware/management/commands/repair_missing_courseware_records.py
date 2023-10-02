@@ -1,8 +1,8 @@
 """
 Management command to repair missing courseware records
 """
-from django.core.management import BaseCommand
 from django.contrib.auth import get_user_model
+from django.core.management import BaseCommand
 from requests.exceptions import HTTPError
 
 from courseware.api import repair_faulty_edx_user
@@ -16,9 +16,9 @@ class Command(BaseCommand):
     Management command to repair missing courseware records
     """
 
-    help = "Repairs missing courseware records"
+    help = "Repairs missing courseware records"  # noqa: A003
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Walk all users who are missing records and repair them"""
 
         users_to_repair = User.faulty_courseware_users
@@ -39,10 +39,11 @@ class Command(BaseCommand):
                     )
                 )
                 error_count += 1
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:  # pylint: disable=broad-except  # noqa: BLE001
                 self.stderr.write(
                     self.style.ERROR(
-                        f"{user.username} ({user.email}): Failed to repair (Exception: {str(exc)})"
+                        f"{user.username} ({user.email}): Failed to repair (Exception:"
+                        f" {exc!s})"
                     )
                 )
                 error_count += 1

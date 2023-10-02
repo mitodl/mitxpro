@@ -102,7 +102,6 @@ from mitxpro.utils import now_in_utc
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
 
-
 FAKE = faker.Factory.create()
 pytestmark = pytest.mark.django_db
 lazy = pytest.lazy_fixture
@@ -114,7 +113,7 @@ CYBERSOURCE_SECURITY_KEY = "security"
 
 
 @pytest.fixture(autouse=True)
-def cybersource_settings(settings):
+def cybersource_settings(settings):  # noqa: PT004
     """
     Set cybersource settings
     """
@@ -126,7 +125,7 @@ def cybersource_settings(settings):
 def test_valid_signature():
     """
     Signature is made up of a ordered key value list signed using HMAC 256 with a security key
-    """
+    """  # noqa: E501
     payload = {"x": "y", "abc": "def", "key": "value", "signed_field_names": "abc,x"}
     signature = generate_cybersource_sa_signature(payload)
 
@@ -142,7 +141,7 @@ def test_valid_signature():
 
 
 def test_make_receipt_url():
-    """make_receipt_url should generate a URL for use by users returning from a successful CyberSource payment"""
+    """make_receipt_url should generate a URL for use by users returning from a successful CyberSource payment"""  # noqa: E501
     assert (
         make_receipt_url(base_url="https://mit.edu/", readable_id="a readable id")
         == "https://mit.edu/dashboard/?status=purchased&purchased=a+readable+id"
@@ -167,9 +166,9 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product, use
     A valid payload should be signed appropriately
     """
     line1 = LineFactory.create(
-        product_version__product__content_object=ProgramFactory.create()
-        if is_program_product
-        else CourseRunFactory.create()
+        product_version__product__content_object=(
+            ProgramFactory.create() if is_program_product else CourseRunFactory.create()
+        )
     )
     line2 = LineFactory.create(
         order=line1.order,
@@ -224,9 +223,11 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product, use
     other_merchant_fields = (
         {
             "merchant_defined_data4": coupon_version.coupon.coupon_code,
-            "merchant_defined_data5": coupon_version.payment_version.company.name
-            if coupon_version.payment_version.company
-            else "",
+            "merchant_defined_data5": (
+                coupon_version.payment_version.company.name
+                if coupon_version.payment_version.company
+                else ""
+            ),
             "merchant_defined_data6": payment_transaction_number,
             "merchant_defined_data7": CouponPaymentVersion.PAYMENT_PO,
         }
@@ -240,9 +241,9 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product, use
         "tax_amount": "0.00",
         "consumer_id": username,
         "currency": "USD",
-        "item_0_code": "courses | program"
-        if is_program_product
-        else "courses | course run",
+        "item_0_code": (
+            "courses | program" if is_program_product else "courses | course run"
+        ),
         "item_0_name": line1.product_version.description,
         "item_0_quantity": line1.quantity,
         "item_0_sku": line1.product_version.product.content_object.id,
@@ -271,12 +272,14 @@ def test_signed_payload(mocker, has_coupon, has_company, is_program_product, use
         "transaction_type": "sale",
         "transaction_uuid": transaction_uuid,
         "unsigned_field_names": "",
-        "merchant_defined_data1": "courses | program"
-        if is_program_product
-        else "courses | course run",
-        "merchant_defined_data2": content_object.readable_id
-        if is_program_product
-        else content_object.courseware_id,
+        "merchant_defined_data1": (
+            "courses | program" if is_program_product else "courses | course run"
+        ),
+        "merchant_defined_data2": (
+            content_object.readable_id
+            if is_program_product
+            else content_object.courseware_id
+        ),
         "merchant_defined_data3": "1",
         **other_merchant_fields,
         "customer_ip_address": user_ip if user_ip else None,
@@ -327,7 +330,7 @@ def test_payload_coupons():
 def test_get_valid_coupon_versions(basket_and_coupons, auto_only):
     """
     Verify that the correct valid CouponPaymentVersions are returned for a list of coupons
-    """
+    """  # noqa: E501
     best_versions = list(
         get_valid_coupon_versions(
             basket_and_coupons.basket_item.product,
@@ -345,7 +348,7 @@ def test_get_valid_coupon_versions(basket_and_coupons, auto_only):
 def test_get_valid_coupon_versions_after_redemption(user, is_global):
     """
     Verify that the correct valid CouponPaymentVersions are returned before and after redemption
-    """
+    """  # noqa: E501
     payment = CouponPaymentFactory()
     civ_old = CouponPaymentVersionFactory(
         payment=payment,
@@ -380,10 +383,10 @@ def test_get_valid_coupon_versions_after_redemption(user, is_global):
 
 @pytest.mark.parametrize("is_global", [True, False])
 @pytest.mark.parametrize(
-    "discount_type, amount",
+    ("discount_type", "amount"),
     [
-        [DISCOUNT_TYPE_DOLLARS_OFF, 100],
-        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],
+        [DISCOUNT_TYPE_DOLLARS_OFF, 100],  # noqa: PT007
+        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],  # noqa: PT007
     ],
 )
 def test_get_valid_coupon_versions_with_max_redemptions_per_user(
@@ -391,7 +394,7 @@ def test_get_valid_coupon_versions_with_max_redemptions_per_user(
 ):
     """
     Verify that the correct CouponPaymentVersions are returned before and after redemption
-    """
+    """  # noqa: E501
     coupon_code = "TESTCOUPON1"
     coupon_type = CouponPaymentVersion.PROMO
     max_redemptions = 3
@@ -434,22 +437,22 @@ def test_get_valid_coupon_versions_with_max_redemptions_per_user(
         order=OrderFactory.create(purchaser=user, status=Order.FULFILLED),
     )
 
-    # max_redemptions_per_user was set to 2, so the coupon should no longer be valid for this user
+    # max_redemptions_per_user was set to 2, so the coupon should no longer be valid for this user  # noqa: E501
     assert list(get_valid_coupon_versions(products[2], user, code=coupon_code)) == []
 
 
 @pytest.mark.parametrize(
-    "discount_type, amount",
+    ("discount_type", "amount"),
     [
-        [DISCOUNT_TYPE_DOLLARS_OFF, 100],
-        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],
+        [DISCOUNT_TYPE_DOLLARS_OFF, 100],  # noqa: PT007
+        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],  # noqa: PT007
     ],
 )
 def test_global_coupons_apply_all_products(user, discount_type, amount):
     """
     Verify that a coupon created with is_global=True is valid for all products, even those
     created after the coupon.
-    """
+    """  # noqa: E501
     coupon = CouponVersionFactory(coupon__is_global=True, coupon__enabled=True).coupon
     CouponVersionFactory.create(coupon__enabled=True)
 
@@ -473,10 +476,25 @@ def test_global_coupons_apply_all_products(user, discount_type, amount):
 
 
 @pytest.mark.parametrize(
-    "best_discount_type, best_discount_amount, lesser_coupons_type, lesser_coupons_amounts",
+    (
+        "best_discount_type",
+        "best_discount_amount",
+        "lesser_coupons_type",
+        "lesser_coupons_amounts",
+    ),  # noqa: E501, RUF100
     [
-        [DISCOUNT_TYPE_DOLLARS_OFF, 100, DISCOUNT_TYPE_PERCENT_OFF, [0.1, 0.2, 0.5]],
-        [DISCOUNT_TYPE_PERCENT_OFF, 1.0, DISCOUNT_TYPE_DOLLARS_OFF, [10, 20, 80]],
+        [  # noqa: PT007
+            DISCOUNT_TYPE_DOLLARS_OFF,
+            100,
+            DISCOUNT_TYPE_PERCENT_OFF,
+            [0.1, 0.2, 0.5],
+        ],  # noqa: PT007, RUF100
+        [  # noqa: PT007
+            DISCOUNT_TYPE_PERCENT_OFF,
+            1.0,
+            DISCOUNT_TYPE_DOLLARS_OFF,
+            [10, 20, 80],
+        ],  # noqa: PT007, RUF100
     ],
 )
 def test_best_coupon_return_best_coupon_between_discount_types(
@@ -488,7 +506,7 @@ def test_best_coupon_return_best_coupon_between_discount_types(
 ):
     """
     Verify that the get_best_coupon returns a best coupon irrespective of the discount_type.
-    """
+    """  # noqa: E501
     CouponVersionFactory.create_batch(
         3,
         coupon__is_global=True,
@@ -509,7 +527,7 @@ def test_best_coupon_return_best_coupon_between_discount_types(
 def test_get_valid_coupon_versions_bad_dates(basket_and_coupons):
     """
     Verify that expired or future CouponPaymentVersions are not returned for a list of coupons
-    """
+    """  # noqa: E501
     today = now_in_utc()
     with unprotect_version_tables():
         civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.payment_version
@@ -558,7 +576,7 @@ def test_get_valid_coupon_versions_by_company(basket_and_coupons):
 def test_get_valid_coupon_versions_over_redeemed(basket_and_coupons, order_status):
     """
     Verify that CouponPaymentVersions that have exceeded redemption limits are not returned
-    """
+    """  # noqa: E501
     with unprotect_version_tables():
         civ_worst = basket_and_coupons.coupongroup_worst.coupon_version.payment_version
         civ_worst.max_redemptions = 1
@@ -661,19 +679,19 @@ def test_get_product_price(basket_and_coupons):
 
 @pytest.mark.parametrize("has_coupon", [True, False])
 @pytest.mark.parametrize(
-    "discount_type, amount, price, discounted_price",
+    ("discount_type", "amount", "price", "discounted_price"),
     [
-        [DISCOUNT_TYPE_PERCENT_OFF, 0.5, 100, 50],
-        [DISCOUNT_TYPE_DOLLARS_OFF, 50, 100, 50],
+        [DISCOUNT_TYPE_PERCENT_OFF, 0.5, 100, 50],  # noqa: PT007
+        [DISCOUNT_TYPE_DOLLARS_OFF, 50, 100, 50],  # noqa: PT007
     ],
 )
-def test_get_product_version_price_with_discount(
+def test_get_product_version_price_with_discount(  # noqa: PLR0913
     has_coupon, basket_and_coupons, discount_type, amount, price, discounted_price
 ):
     """
     get_product_version_price_with_discount should check if the coupon exists and if so calculate price based on its
     discount.
-    """
+    """  # noqa: E501
     with unprotect_version_tables():
         product_version = (
             basket_and_coupons.basket_item.product.productversions.order_by(
@@ -696,7 +714,11 @@ def test_get_product_version_price_with_discount(
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
 def test_get_by_reference_number(
-    settings, validated_basket, basket_and_coupons, mock_hubspot_syncs, hubspot_api_key
+    settings,
+    validated_basket,
+    basket_and_coupons,  # noqa: ARG001
+    mock_hubspot_syncs,
+    hubspot_api_key,  # noqa: ARG001, RUF100
 ):
     """
     get_by_reference_number returns an Order with status created
@@ -706,9 +728,9 @@ def test_get_by_reference_number(
     same_order = Order.objects.get_by_reference_number(order.reference_number)
     assert same_order.id == order.id
     if hubspot_api_key:
-        assert mock_hubspot_syncs.order.called_with(order.id)
+        assert mock_hubspot_syncs.order.called_with(order.id)  # noqa: PGH005
     else:
-        assert mock_hubspot_syncs.order.not_called()
+        assert mock_hubspot_syncs.order.not_called()  # noqa: PGH005
 
 
 def test_get_by_reference_number_missing(validated_basket):
@@ -726,7 +748,7 @@ def test_get_by_reference_number_missing(validated_basket):
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
 @pytest.mark.parametrize("has_coupon", [True, False])
-def test_create_unfulfilled_order(
+def test_create_unfulfilled_order(  # noqa: PLR0913
     settings,
     validated_basket,
     has_coupon,
@@ -772,9 +794,9 @@ def test_create_unfulfilled_order(
         assert CouponRedemption.objects.count() == 0
 
     if hubspot_api_key:
-        assert mock_hubspot_syncs.order.called_with(order.id)
+        assert mock_hubspot_syncs.order.called_with(order.id)  # noqa: PGH005
     else:
-        assert mock_hubspot_syncs.order.not_called()
+        assert mock_hubspot_syncs.order.not_called()  # noqa: PGH005
 
 
 @pytest.mark.parametrize("has_program_run", [True, False])
@@ -782,7 +804,7 @@ def test_create_unfulfilled_order_program_run(validated_basket, has_program_run)
     """
     create_unfulfilled_order should associate a ProgramRunLine with a Line in an order if
     the basket item has a program run attached
-    """
+    """  # noqa: E501
     basket_item = BasketItemFactory.create(
         basket=validated_basket.basket, with_program_run=has_program_run
     )
@@ -798,13 +820,13 @@ def test_create_unfulfilled_order_program_run(validated_basket, has_program_run)
         assert line.programrunline.program_run == basket_item.program_run
     else:
         with pytest.raises(ObjectDoesNotExist):
-            line.programrunline  # pylint: disable=pointless-statement
+            line.programrunline  # pylint: disable=pointless-statement  # noqa: B018
 
 
 def test_create_unfulfilled_order_affiliate(validated_basket):
     """
     create_unfulfilled_order should add a database record tracking the order creation if an affiliate id is passed in
-    """
+    """  # noqa: E501
     affiliate = AffiliateFactory.create()
     order = create_unfulfilled_order(validated_basket, affiliate_id=affiliate.id)
     affiliate_referral_action = order.affiliate_order_actions.first()
@@ -834,12 +856,12 @@ def test_bulk_assign_product_coupons():
     """
     bulk_assign_product_coupons should pair emails with available coupons, assign the coupons to those
     emails, and group them by a bulk assignment record.
-    """
+    """  # noqa: E501
     emails = sorted(["abc@example.com", "def@example.com", "ghi@example.com"])
     product_coupons = CouponEligibilityFactory.create_batch(len(emails) + 2)
     paired_email_coupon_assignments = list(zip(emails, product_coupons))
 
-    # Pass in generators to make sure there isn't any issue with email/product coupon iterables being exhausted
+    # Pass in generators to make sure there isn't any issue with email/product coupon iterables being exhausted  # noqa: E501
     bulk_assignment, new_assignments = bulk_assign_product_coupons(
         zip(emails, [pc.id for pc in product_coupons])
     )
@@ -1029,7 +1051,7 @@ def test_validate_basket_unsigned_data_consent(basket_and_agreement, is_signed):
 def test_validate_global_data_consent(basket_and_agreement):
     """
     Basket should contain the global data consent agreement if no course specific agreement exists
-    """
+    """  # noqa: E501
     course_agreement = get_or_create_data_consent_users(basket_and_agreement.basket)
     assert len(course_agreement) >= 1
     assert (
@@ -1054,7 +1076,7 @@ def test_validate_global_data_consent(basket_and_agreement):
 def test_company_multiple_global_consent_error(mocker, basket_and_agreement):
     """
     An error should be logged if there are more than one global consent available for a single company
-    """
+    """  # noqa: E501
     patched_log = mocker.patch("ecommerce.api.log")
     DataConsentAgreementFactory.create(
         company=basket_and_agreement.agreement.company, is_global=True
@@ -1073,7 +1095,7 @@ def test_company_multiple_global_consent_error(mocker, basket_and_agreement):
 def test_complete_order(mocker, user, basket_and_coupons):
     """
     Test that complete_order enrolls a user in the items in their order and clears out checkout-related objects
-    """
+    """  # noqa: E501
     patched_enroll = mocker.patch("ecommerce.api.enroll_user_in_order_items")
     basket_and_coupons.basket.user = user
     basket_and_coupons.basket.save()
@@ -1108,7 +1130,7 @@ def test_complete_order_coupon_assignments(mocker, user, basket_and_coupons):
     )
     coupon_assignments = ProductCouponAssignmentFactory.create_batch(
         len(coupon_redemptions),
-        # Set assignment email as uppercase to test that the email match is case-insensitive
+        # Set assignment email as uppercase to test that the email match is case-insensitive  # noqa: E501
         email=order.purchaser.email.upper(),
         product_coupon__coupon=factory.Iterator(order_coupons),
         bulk_assignment=factory.Iterator(
@@ -1135,7 +1157,7 @@ def test_complete_order_coupon_assignments(mocker, user, basket_and_coupons):
 def test_validate_basket_product_inactive(basket_and_coupons):
     """
     If the product or program/courserun in a basket is inactive, a validation error should be raised
-    """
+    """  # noqa: E501
     product = basket_and_coupons.product_version.product
     product.is_active = False
     product.save()
@@ -1148,7 +1170,7 @@ def test_validate_basket_product_inactive(basket_and_coupons):
 def test_validate_basket_product_requires_enrollment_code(basket_and_coupons):
     """
     If the product version requires enrollment code, a validation error should be raised if we don't pass the enrollment code
-    """
+    """  # noqa: E501
     product_version = basket_and_coupons.product_version
     product_version.id = None
     product_version.requires_enrollment_code = True
@@ -1164,7 +1186,7 @@ def test_apply_coupon_to_product_requires_enrollment_code(user, basket_and_coupo
     """
     if product that requires enrollment code, a promo coupon is not valid and can't be applied in checkout;
     An enrollment code is valid if it's eligible for the product
-    """
+    """  # noqa: E501
 
     product_version = basket_and_coupons.product_version
     product_version.id = None
@@ -1206,7 +1228,7 @@ def test_apply_coupon_to_product_requires_enrollment_code(user, basket_and_coupo
 def test_validate_basket_not_live(basket_and_coupons):
     """
     If the pprogram/courserun in a basket is not live, a validation error should be raised
-    """
+    """  # noqa: E501
     course_run = basket_and_coupons.product_version.product.content_object
     course_run.live = False
     course_run.save()
@@ -1221,7 +1243,7 @@ def test_enroll_user_in_order_items(mocker, user, has_redemption):
     """
     Test that enroll_user_in_order_items creates objects that represent a user's enrollment
     in course runs and programs
-    """
+    """  # noqa: E501
     patched_enroll = mocker.patch("courses.api.enroll_in_edx_course_runs")
     patched_send_email = mocker.patch(
         "ecommerce.mail_api.send_course_run_enrollment_email"
@@ -1272,7 +1294,7 @@ def test_enroll_user_in_order_items(mocker, user, has_redemption):
 def test_enroll_user_in_order_items_with_voucher(mocker, user):
     """
     Test that enroll_user_in_order_items attaches the enrollment to a voucher if a suitable one exists
-    """
+    """  # noqa: E501
     run = CourseRunFactory.create()
     line = LineFactory.create(
         order__purchaser=user,
@@ -1306,7 +1328,7 @@ def test_enroll_user_program_no_runs(mocker, user):
     """
     Test that enroll_user_in_order_items logs an error if an order for a program is being completed
     without any course run selections.
-    """
+    """  # noqa: E501
     patched_log = mocker.patch("ecommerce.api.log")
     order = OrderFactory.create(purchaser=user, status=Order.FULFILLED)
     BasketFactory.create(user=user)
@@ -1316,7 +1338,8 @@ def test_enroll_user_program_no_runs(mocker, user):
     enroll_user_in_order_items(order)
     patched_log.error.assert_called_once()
     assert (
-        "An order is being completed for a program, but does not have any course run selections"
+        "An order is being completed for a program, but does not have any course run"
+        " selections"
         in patched_log.error.call_args[0][0]
     )
 
@@ -1335,14 +1358,14 @@ def test_fetch_and_serialize_unused_coupons(user):
     """
     Test that fetch_and_serialize_unused_coupons returns an serialized coupon assignments
     if those coupons are the most recent versions and are unexpired
-    """
+    """  # noqa: E501
     now = now_in_utc()
     near_future = now + timedelta(days=2)
     far_future = now + timedelta(days=5)
     past = now - timedelta(days=5)
 
     coupons = CouponFactory.create_batch(2)
-    # Create 3 payment versions – the first 2 will apply to the same coupon, and the
+    # Create 3 payment versions – the first 2 will apply to the same coupon, and the  # noqa: E501, RUF003
     # second will be the most recent version for the coupon. The last payment version
     # will be set to expired.
     payment_versions = CouponPaymentVersionFactory.create_batch(
@@ -1361,7 +1384,7 @@ def test_fetch_and_serialize_unused_coupons(user):
     # Create assignments for the user and set all to be unredeemed/unused
     ProductCouponAssignmentFactory.create_batch(
         len(product_coupons),
-        # Set assignment email as uppercase to test that the email match is case-insensitive
+        # Set assignment email as uppercase to test that the email match is case-insensitive  # noqa: E501
         email=user.email.upper(),
         redeemed=False,
         product_coupon=factory.Iterator(product_coupons),
@@ -1386,7 +1409,7 @@ def test_fetch_and_serialize_unused_coupons_for_active_products(user):
     """
     Test that fetch_and_serialize_unused_coupons returns an serialized coupon assignments
     if those coupons are the most recent versions and are unexpired and exclude the inactive products.
-    """
+    """  # noqa: E501
     now = now_in_utc()
     future = now + timedelta(days=5)
     past = now - timedelta(days=5)
@@ -1421,7 +1444,7 @@ def test_fetch_and_serialize_unused_coupons_for_active_products(user):
     # Create assignments for the user and set all to be unredeemed/unused
     ProductCouponAssignmentFactory.create_batch(
         len(product_coupons),
-        # Set assignment email as uppercase to test that the email match is case-insensitive
+        # Set assignment email as uppercase to test that the email match is case-insensitive  # noqa: E501
         email=user.email.upper(),
         redeemed=False,
         product_coupon=factory.Iterator(product_coupons),
@@ -1463,7 +1486,7 @@ def test_fetch_and_serialize_unused_coupons_for_all_inactive_products(user):
     # Create assignments for the user and set all to be unredeemed/unused
     ProductCouponAssignmentFactory.create_batch(
         len(product_coupons),
-        # Set assignment email as uppercase to test that the email match is case-insensitive
+        # Set assignment email as uppercase to test that the email match is case-insensitive  # noqa: E501
         email=user.email.upper(),
         redeemed=False,
         product_coupon=factory.Iterator(product_coupons),
@@ -1543,12 +1566,27 @@ def test_create_coupons(use_defaults):
 
 
 @pytest.mark.parametrize(
-    "input_text_id,run_text_id,program_text_id,prog_run_tag",
+    ("input_text_id", "run_text_id", "program_text_id", "prog_run_tag"),
     [
-        ["course-v1:some+run", "course-v1:some+run", None, None],
-        ["program-v1:some+program", None, "program-v1:some+program", None],
-        ["program-v1:some+program+R1", None, "program-v1:some+program+R1", None],
-        ["program-v1:some+program+R1", None, "program-v1:some+program", "R1"],
+        ["course-v1:some+run", "course-v1:some+run", None, None],  # noqa: PT007
+        [  # noqa: PT007
+            "program-v1:some+program",
+            None,
+            "program-v1:some+program",
+            None,
+        ],  # noqa: PT007, RUF100
+        [  # noqa: PT007
+            "program-v1:some+program+R1",
+            None,
+            "program-v1:some+program+R1",
+            None,
+        ],  # noqa: PT007, RUF100
+        [  # noqa: PT007
+            "program-v1:some+program+R1",
+            None,
+            "program-v1:some+program",
+            "R1",
+        ],  # noqa: PT007, RUF100
     ],
 )
 def test_get_product_from_text_id(
@@ -1557,7 +1595,7 @@ def test_get_product_from_text_id(
     """
     get_product_from_text_id should fetch a Product, Program/CourseRun, and (if applicable) a ProgramRun
     based on the given text id
-    """
+    """  # noqa: E501
     expected_content_object = None
     if run_text_id:
         expected_content_object = CourseRunFactory.create(courseware_id=run_text_id)
@@ -1583,7 +1621,7 @@ def test_get_product_from_text_id_failure():
     """
     get_product_from_text_id should raise exceptions if the object(s) indicated by the text id don't exist
     or they don't have associated products
-    """
+    """  # noqa: E501
     program_without_product = ProgramFactory.create()
     run_without_product = CourseRunFactory.create()
     program_run = ProgramRunFactory.create(program=program_without_product)
@@ -1604,18 +1642,18 @@ def test_get_product_from_text_id_failure():
 
 
 @pytest.mark.parametrize(
-    "qs_product_id,exp_text_id",
+    ("qs_product_id", "exp_text_id"),
     [
-        ["123", None],
-        ["course-v1:some+id", "course-v1:some+id"],
-        ["course-v1:some id", "course-v1:some+id"],
+        ["123", None],  # noqa: PT007
+        ["course-v1:some+id", "course-v1:some+id"],  # noqa: PT007
+        ["course-v1:some id", "course-v1:some+id"],  # noqa: PT007
     ],
 )
 def test_get_product_from_querystring_id(mocker, qs_product_id, exp_text_id):
     """
     get_product_from_querystring_id should fetch a Product, Program/CourseRun, and (if applicable) a ProgramRun
     based on a querystring product id value.
-    """
+    """  # noqa: E501
     product = ProductFactory.create(id=123)
     patched_get_product = mocker.patch(
         "ecommerce.api.get_product_from_text_id",
@@ -1690,7 +1728,7 @@ def test_tax_calc_from_ip(user, applicable_rate_and_user_country_match):
     nonapplicable_ip = str(
         ipaddress.ip_address(
             applicable_netblock.decimal_ip_start - 35
-            if applicable_netblock.decimal_ip_start > 35
+            if applicable_netblock.decimal_ip_start > 35  # noqa: PLR2004
             else applicable_netblock.decimal_ip_end + 35
         )
     )

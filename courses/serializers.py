@@ -44,7 +44,7 @@ class BaseCourseSerializer(serializers.ModelSerializer):
         return _get_thumbnail_url(instance.page)
 
     def get_description(self, instance):
-        """Description"""
+        """Description"""  # noqa: D401
         return instance.page.description if instance.page else None
 
     class Meta:
@@ -88,11 +88,12 @@ class CourseRunSerializer(BaseCourseRunSerializer):
 
     class Meta:
         model = models.CourseRun
-        fields = BaseCourseRunSerializer.Meta.fields + [
+        fields = [
+            *BaseCourseRunSerializer.Meta.fields,
             "product_id",
             "instructors",
             "current_price",
-        ]
+        ]  # noqa: E501, RUF100
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -107,9 +108,9 @@ class CourseSerializer(serializers.ModelSerializer):
     topics = serializers.SerializerMethodField()
     time_commitment = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
-    format = serializers.SerializerMethodField()
+    format = serializers.SerializerMethodField()  # noqa: A003
     video_url = serializers.SerializerMethodField()
-    credits = serializers.SerializerMethodField()
+    credits = serializers.SerializerMethodField()  # noqa: A003
     platform = serializers.SerializerMethodField()
 
     def get_url(self, instance):
@@ -118,7 +119,7 @@ class CourseSerializer(serializers.ModelSerializer):
         return page.get_full_url() if page else None
 
     def get_external_marketing_url(self, instance):
-        """Returns the external marketing URL for the course that's set in CMS page"""
+        """Returns the external marketing URL for the course that's set in CMS page"""  # noqa: D401, E501
         return instance.page.external_marketing_url if instance.page else None
 
     def get_thumbnail_url(self, instance):
@@ -131,7 +132,7 @@ class CourseSerializer(serializers.ModelSerializer):
         return run.id if run is not None else None
 
     def get_description(self, instance):
-        """Description"""
+        """Description"""  # noqa: D401
         return instance.page.description if instance.page else None
 
     def get_courseruns(self, instance):
@@ -163,11 +164,11 @@ class CourseSerializer(serializers.ModelSerializer):
         return []
 
     def get_time_commitment(self, instance):
-        """Returns the time commitment for this course that's set in CMS page"""
+        """Returns the time commitment for this course that's set in CMS page"""  # noqa: D401, E501
         return instance.page.time_commitment if instance.page else None
 
     def get_duration(self, instance):
-        """Returns the duration for this course that's set in CMS page"""
+        """Returns the duration for this course that's set in CMS page"""  # noqa: D401
         return instance.page.duration if instance.page else None
 
     def get_video_url(self, instance):
@@ -175,21 +176,21 @@ class CourseSerializer(serializers.ModelSerializer):
         return instance.page.video_url if instance.page else None
 
     def get_credits(self, instance):
-        """Returns the credits for this Course"""
+        """Returns the credits for this Course"""  # noqa: D401
         return (
             instance.page.certificate_page.CEUs
             if instance.page and instance.page.certificate_page
             else None
         )
 
-    def get_format(self, instance):  # pylint: disable=unused-argument
-        """Returns the format of the course"""
-        # Currently hardcoded at the frontend as well, At some point we'll need to move it into CMS to make it
+    def get_format(self, instance):  # pylint: disable=unused-argument  # noqa: ARG002
+        """Returns the format of the course"""  # noqa: D401
+        # Currently hardcoded at the frontend as well, At some point we'll need to move it into CMS to make it  # noqa: E501
         # configurable.
         return "Online"
 
     def get_platform(self, instance):
-        """Returns the platform name of the course"""
+        """Returns the platform name of the course"""  # noqa: D401
         return getattr(instance.platform, "name", None)
 
     class Meta:
@@ -247,7 +248,7 @@ class BaseProgramSerializer(serializers.ModelSerializer):
         return _get_thumbnail_url(instance.page)
 
     def get_description(self, instance):
-        """Description"""
+        """Description"""  # noqa: D401
         return instance.page.description if instance.page else None
 
     class Meta:
@@ -270,13 +271,13 @@ class ProgramSerializer(serializers.ModelSerializer):
     topics = serializers.SerializerMethodField()
     time_commitment = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
-    format = serializers.SerializerMethodField()
+    format = serializers.SerializerMethodField()  # noqa: A003
     video_url = serializers.SerializerMethodField()
-    credits = serializers.SerializerMethodField()
+    credits = serializers.SerializerMethodField()  # noqa: A003
     platform = serializers.SerializerMethodField()
 
     def get_courses(self, instance):
-        """Serializer for courses"""
+        """Serializer for courses"""  # noqa: D401
         return CourseSerializer(
             sorted(
                 [course for course in instance.courses.all() if course.live],
@@ -291,7 +292,7 @@ class ProgramSerializer(serializers.ModelSerializer):
         return _get_thumbnail_url(instance.page)
 
     def get_description(self, instance):
-        """Description"""
+        """Description"""  # noqa: D401
         return instance.page.description if instance.page else None
 
     def get_start_date(self, instance):
@@ -300,7 +301,7 @@ class ProgramSerializer(serializers.ModelSerializer):
 
         Returns:
             datetime: The starting date
-        """
+        """  # noqa: E501
         filtered_start_runs = filter(
             lambda run: run.start_date is not None, instance.course_runs
         )
@@ -313,7 +314,7 @@ class ProgramSerializer(serializers.ModelSerializer):
 
         Returns:
             datetime: The ending date
-        """
+        """  # noqa: E501
         filtered_end_runs = filter(
             lambda run: run.end_date is not None, instance.course_runs
         )
@@ -336,7 +337,7 @@ class ProgramSerializer(serializers.ModelSerializer):
         return page.get_full_url() if page else None
 
     def get_external_marketing_url(self, instance):
-        """Returns the external marketing URL for this program that's set in CMS page"""
+        """Returns the external marketing URL for this program that's set in CMS page"""  # noqa: D401, E501
         return instance.page.external_marketing_url if instance.page else None
 
     def get_instructors(self, instance):
@@ -345,20 +346,20 @@ class ProgramSerializer(serializers.ModelSerializer):
 
     def get_topics(self, instance):
         """List all topics in all courses in the program"""
-        topics = set(
+        topics = {
             topic.name
             for course in instance.courses.all()
             if course.page
             for topic in course.page.topics.all()
-        )
+        }
         return [{"name": topic} for topic in sorted(topics)]
 
     def get_time_commitment(self, instance):
-        """Returns the time commitment for this program that's set in CMS page"""
+        """Returns the time commitment for this program that's set in CMS page"""  # noqa: D401, E501
         return instance.page.time_commitment if instance.page else None
 
     def get_duration(self, instance):
-        """Returns the duration for this course that's set in CMS page"""
+        """Returns the duration for this course that's set in CMS page"""  # noqa: D401
         return instance.page.duration if instance.page else None
 
     def get_video_url(self, instance):
@@ -366,21 +367,21 @@ class ProgramSerializer(serializers.ModelSerializer):
         return instance.page.video_url if instance.page else None
 
     def get_credits(self, instance):
-        """Returns the credits for this Course"""
+        """Returns the credits for this Course"""  # noqa: D401
         return (
             instance.page.certificate_page.CEUs
             if instance.page and instance.page.certificate_page
             else None
         )
 
-    def get_format(self, instance):  # pylint: disable=unused-argument
-        """Returns the format of the course"""
-        # Currently hardcoded at the frontend as well, At some point we'll need to move it into CMS to make it
+    def get_format(self, instance):  # pylint: disable=unused-argument  # noqa: ARG002
+        """Returns the format of the course"""  # noqa: D401
+        # Currently hardcoded at the frontend as well, At some point we'll need to move it into CMS to make it  # noqa: E501
         # configurable.
         return "Online"
 
     def get_platform(self, instance):
-        """Returns the platform name of the program"""
+        """Returns the platform name of the program"""  # noqa: D401
         return getattr(instance.platform, "name", None)
 
     class Meta:
@@ -446,7 +447,7 @@ class CourseRunEnrollmentSerializer(serializers.ModelSerializer):
         ):
             return None
 
-        # Using IDs because we don't need the actual record and this avoids redundant queries
+        # Using IDs because we don't need the actual record and this avoids redundant queries  # noqa: E501
         user_id = enrollment.user_id
         course_run_id = enrollment.run_id
         try:
@@ -493,7 +494,7 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
         if not enrollment.program.page or not enrollment.program.page.certificate_page:
             return None
 
-        # Using IDs because we don't need the actual record and this avoids redundant queries
+        # Using IDs because we don't need the actual record and this avoids redundant queries  # noqa: E501
         user_id = enrollment.user_id
         program_id = enrollment.program_id
         try:
@@ -517,15 +518,19 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
                 and settings.ENABLE_ORDER_RECEIPTS
                 else None
             )
+        return None
 
     def __init__(self, *args, **kwargs):
-        assert (
+        assert (  # noqa: S101, PT018
             "context" in kwargs and "course_run_enrollments" in kwargs["context"]
-        ), "An iterable of course run enrollments must be passed in the context (key: course_run_enrollments)"
+        ), (  # noqa: PT018, RUF100, S101
+            "An iterable of course run enrollments must be passed in the context (key:"
+            " course_run_enrollments)"
+        )
         super().__init__(*args, **kwargs)
 
     def get_course_run_enrollments(self, instance):
-        """Returns a serialized list of course run enrollments that belong to this program (in position order)"""
+        """Returns a serialized list of course run enrollments that belong to this program (in position order)"""  # noqa: E501, D401
         return CourseRunEnrollmentSerializer(
             sorted(
                 (

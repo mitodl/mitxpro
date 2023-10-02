@@ -1,11 +1,10 @@
-""" Generate Hubspot message bodies for various model objects"""
+"""Generate Hubspot message bodies for various model objects"""
 import logging
 import re
 from decimal import Decimal
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
-from hubspot.crm.objects import SimplePublicObject, SimplePublicObjectInput
 from mitol.hubspot_api.api import (
     HubspotApi,
     HubspotAssociationType,
@@ -26,8 +25,8 @@ from mitol.hubspot_api.models import HubspotObject
 from b2b_ecommerce.constants import B2B_ORDER_PREFIX
 from b2b_ecommerce.models import B2BLine, B2BOrder
 from ecommerce.models import Line, Order, Product, ProductVersion
+from hubspot.crm.objects import SimplePublicObject, SimplePublicObjectInput
 from users.models import User
-
 
 log = logging.getLogger(__name__)
 
@@ -42,7 +41,7 @@ def make_contact_sync_message(user_id: int) -> SimplePublicObjectInput:
 
     Returns:
         SimplePublicObjectInput: input object for upserting User data to Hubspot
-    """
+    """  # noqa: E501
     from users.serializers import UserSerializer
 
     contact_properties_map = {
@@ -272,7 +271,7 @@ def sync_deal_hubspot_ids_to_db() -> bool:
 
     Returns:
         bool: True if matches found for all Orders and B2BOrders (and optionally their lines)
-    """
+    """  # noqa: E501
     ct_order = ContentType.objects.get_for_model(Order)
     ct_b2b_order = ContentType.objects.get_for_model(B2BOrder)
     deals = get_all_objects(
@@ -323,7 +322,7 @@ def sync_deal_line_hubspot_ids_to_db(order, hubspot_order_id) -> bool:
     Returns:
         bool: True if matches found for all the order lines
 
-    """
+    """  # noqa: E501
     client = HubspotApi()
     line_items = get_line_items_for_deal(hubspot_order_id)
     is_b2b = isinstance(order, B2BOrder)
@@ -364,7 +363,7 @@ def sync_deal_line_hubspot_ids_to_db(order, hubspot_order_id) -> bool:
 
 def get_hubspot_id_for_object(
     obj: Order or B2BOrder or Product or Line or B2BLine or User,
-    raise_error: bool = False,
+    raise_error: bool = False,  # noqa: FBT001, FBT002
 ) -> str:
     """
     Get the hubspot id for an object, querying Hubspot if necessary
@@ -376,7 +375,7 @@ def get_hubspot_id_for_object(
     Returns:
         The hubspot id for the object if it has been previously synced to Hubspot.
         Raises a ValueError if no matching Hubspot object can be found.
-    """
+    """  # noqa: E501
     from hubspot_xpro.serializers import get_hubspot_serializer
 
     content_type = ContentType.objects.get_for_model(obj)
@@ -387,14 +386,14 @@ def get_hubspot_id_for_object(
         return hubspot_obj.hubspot_id
     if isinstance(obj, User):
         hubspot_obj = find_contact(obj.email)
-    elif isinstance(obj, (B2BOrder, Order)):
+    elif isinstance(obj, B2BOrder | Order):
         serialized_deal = get_hubspot_serializer(obj).data
         hubspot_obj = find_deal(
             name=serialized_deal["dealname"],
             amount=serialized_deal["amount"],
             raise_count_error=raise_error,
         )
-    elif isinstance(obj, (Line, B2BLine)):
+    elif isinstance(obj, Line | B2BLine):
         serialized_line = get_hubspot_serializer(obj).data
         order_id = get_hubspot_id_for_object(obj.order)
         if order_id:
@@ -423,6 +422,7 @@ def get_hubspot_id_for_object(
             "Hubspot id could not be found for %s for id %d"
             % (content_type.name, obj.id)
         )
+    return None
 
 
 def sync_b2b_contact_with_hubspot(order_id: int) -> SimplePublicObject:

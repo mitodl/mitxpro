@@ -3,7 +3,7 @@ import { assert } from "chai"
 import sinon from "sinon"
 
 import AccountSettingsPage, {
-  AccountSettingsPage as InnerAccountSettingsPage
+  AccountSettingsPage as InnerAccountSettingsPage,
 } from "./AccountSettingsPage"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import { routes } from "../../../lib/urls"
@@ -28,7 +28,7 @@ describe("AccountSettingsPage", () => {
       AccountSettingsPage,
       InnerAccountSettingsPage,
       {},
-      {}
+      {},
     )
   })
 
@@ -48,21 +48,21 @@ describe("AccountSettingsPage", () => {
       200,
       routes.accountSettings,
       "success",
-      "Your password has been updated successfully."
+      "Your password has been updated successfully.",
     ],
 
     [
       400,
       routes.accountSettings,
       "danger",
-      "Unable to reset your password, please try again later."
-    ]
+      "Unable to reset your password, please try again later.",
+    ],
   ].forEach(([status, expectedUrl, expectedColor, expectedMessage]) => {
     it(`handles onSubmit with status=${status}`, async () => {
       const { inner, store } = await renderPage()
 
       helper.handleRequestStub.returns({
-        status
+        status,
       })
 
       const onSubmit = inner.find("ChangePasswordForm").prop("onSubmit")
@@ -71,7 +71,7 @@ describe("AccountSettingsPage", () => {
 
       await onSubmit(
         { oldPassword, newPassword, confirmPassword },
-        { setSubmitting: setSubmittingStub, resetForm: resetFormStub }
+        { setSubmitting: setSubmittingStub, resetForm: resetFormStub },
       )
       sinon.assert.calledWith(
         helper.handleRequestStub,
@@ -80,17 +80,17 @@ describe("AccountSettingsPage", () => {
         {
           body: {
             current_password: oldPassword,
-            new_password:     newPassword
+            new_password:     newPassword,
           },
           credentials: undefined,
-          headers:     { "X-CSRFTOKEN": null }
-        }
+          headers:     { "X-CSRFTOKEN": null },
+        },
       )
 
       assert.lengthOf(helper.browserHistory, 2)
       assert.include(helper.browserHistory.location, {
         pathname: expectedUrl,
-        search:   ""
+        search:   "",
       })
       sinon.assert.calledWith(setSubmittingStub, false)
       sinon.assert.calledWith(resetFormStub)
@@ -101,9 +101,9 @@ describe("AccountSettingsPage", () => {
           type:  ALERT_TYPE_TEXT,
           color: expectedColor,
           props: {
-            text: expectedMessage
-          }
-        }
+            text: expectedMessage,
+          },
+        },
       })
     })
   })
@@ -114,25 +114,25 @@ describe("AccountSettingsPage", () => {
       200,
       routes.accountSettings,
       "success",
-      "You have been sent a verification email on your updated address. Please click on the link in the email to finish email address update."
+      "You have been sent a verification email on your updated address. Please click on the link in the email to finish email address update.",
     ],
 
     [
       400,
       routes.accountSettings,
       "danger",
-      "Unable to update your email address, please try again later."
-    ]
+      "Unable to update your email address, please try again later.",
+    ],
   ].forEach(([status, expectedUrl, expectedColor, expectedMessage]) => {
     it(`handles onSubmit with status=${status}`, async () => {
       const { inner, store } = await renderPage({
         entities: {
-          currentUser: user
-        }
+          currentUser: user,
+        },
       })
 
       helper.handleRequestStub.returns({
-        status
+        status,
       })
 
       const onSubmit = inner.find("ChangeEmailForm").prop("onSubmit")
@@ -141,7 +141,7 @@ describe("AccountSettingsPage", () => {
 
       await onSubmit(
         { email, oldPassword, newPassword, user },
-        { setSubmitting: setSubmittingStub, resetForm: resetFormStub }
+        { setSubmitting: setSubmittingStub, resetForm: resetFormStub },
       )
       sinon.assert.calledWith(
         helper.handleRequestStub,
@@ -150,17 +150,17 @@ describe("AccountSettingsPage", () => {
         {
           body: {
             new_email: email,
-            password:  undefined
+            password:  undefined,
           },
           credentials: undefined,
-          headers:     { "X-CSRFTOKEN": null }
-        }
+          headers:     { "X-CSRFTOKEN": null },
+        },
       )
 
       assert.lengthOf(helper.browserHistory, 2)
       assert.include(helper.browserHistory.location, {
         pathname: expectedUrl,
-        search:   ""
+        search:   "",
       })
       sinon.assert.calledWith(setSubmittingStub, false)
       sinon.assert.calledWith(resetFormStub)
@@ -171,9 +171,9 @@ describe("AccountSettingsPage", () => {
           type:  ALERT_TYPE_TEXT,
           color: expectedColor,
           props: {
-            text: expectedMessage
-          }
-        }
+            text: expectedMessage,
+          },
+        },
       })
     })
   })

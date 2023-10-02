@@ -35,7 +35,6 @@ from ecommerce.serializers import CompanySerializer
 from ecommerce.serializers_test import datetime_format
 from mitxpro.test_utils import assert_drf_json_equal, drf_datetime
 
-
 pytestmark = [pytest.mark.django_db]
 
 
@@ -48,14 +47,23 @@ def test_base_program_serializer():
         "readable_id": program.readable_id,
         "id": program.id,
         "description": program.page.description,
-        "thumbnail_url": f"http://localhost:8053{program.page.thumbnail_image.file.url}",
+        "thumbnail_url": (
+            f"http://localhost:8053{program.page.thumbnail_image.file.url}"
+        ),
     }
 
 
 @pytest.mark.parametrize("has_product", [True, False])
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url, platform_name",
+    (
+        "duration",
+        "time_commitment",
+        "video_url",
+        "ceus",
+        "external_marketing_url",
+        "platform_name",
+    ),  # noqa: E501, RUF100
     [
         (
             "2 Months",
@@ -68,7 +76,7 @@ def test_base_program_serializer():
         (None, None, None, None, None, None),
     ],
 )
-def test_serialize_program(
+def test_serialize_program(  # noqa: PLR0913
     mock_context,
     has_product,
     is_external,
@@ -133,7 +141,9 @@ def test_serialize_program(
                 ).data
                 for course in [course1, course2]
             ],
-            "thumbnail_url": f"http://localhost:8053{program.page.thumbnail_image.file.url}",
+            "thumbnail_url": (
+                f"http://localhost:8053{program.page.thumbnail_image.file.url}"
+            ),
             "current_price": program.current_price,
             "start_date": sorted(runs, key=lambda run: run.start_date)[
                 0
@@ -177,7 +187,14 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize("course_page", [True, False])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url, platform_name",
+    (
+        "duration",
+        "time_commitment",
+        "video_url",
+        "ceus",
+        "external_marketing_url",
+        "platform_name",
+    ),  # noqa: E501, RUF100
     [
         (
             "2 Months",
@@ -190,7 +207,7 @@ def test_base_course_serializer():
         (None, None, None, None, None, None),
     ],
 )
-def test_serialize_course(
+def test_serialize_course(  # noqa: PLR0913
     mock_context,
     is_anonymous,
     all_runs,
@@ -258,10 +275,7 @@ def test_serialize_course(
 
     data = CourseSerializer(instance=course, context=mock_context).data
 
-    if all_runs or is_anonymous:
-        expected_runs = unexpired_runs
-    else:
-        expected_runs = [course_run]
+    expected_runs = unexpired_runs if all_runs or is_anonymous else [course_run]
 
     assert_drf_json_equal(
         data,
@@ -275,7 +289,9 @@ def test_serialize_course(
                 CourseRunSerializer(run).data
                 for run in sorted(expected_runs, key=lambda run: run.start_date)
             ],
-            "thumbnail_url": f"http://localhost:8053{course.page.thumbnail_image.file.url if course_page else '/static/images/mit-dome.png'}",
+            "thumbnail_url": (  # noqa: E501, RUF100  # noqa: E501  # noqa: E501  # noqa: E501
+                f"http://localhost:8053{course.page.thumbnail_image.file.url if course_page else '/static/images/mit-dome.png'}"
+            ),
             "next_run_id": course.first_unexpired_run.id,
             "topics": [{"name": topic}] if course_page else [],
             "time_commitment": time_commitment if course_page else None,
@@ -350,8 +366,8 @@ def test_serialize_course_run_detail():
 
 
 @pytest.mark.parametrize(
-    "has_company, receipts_enabled",
-    [[True, False], [False, False], [False, True], [True, True]],
+    ("has_company", "receipts_enabled"),
+    [[True, False], [False, False], [False, True], [True, True]],  # noqa: PT007
 )
 def test_serialize_course_run_enrollments(settings, has_company, receipts_enabled):
     """Test that CourseRunEnrollmentSerializer has correct data"""
@@ -368,22 +384,25 @@ def test_serialize_course_run_enrollments(settings, has_company, receipts_enable
             else None
         ),
         "certificate": None,
-        "receipt": course_run_enrollment.order_id
-        if course_run_enrollment.order.status == Order.FULFILLED and receipts_enabled
-        else None,
+        "receipt": (
+            course_run_enrollment.order_id
+            if course_run_enrollment.order.status == Order.FULFILLED
+            and receipts_enabled
+            else None
+        ),
     }
 
 
 def test_serialize_program_enrollments_assert():
-    """Test that ProgramEnrollmentSerializer throws an error when course run enrollments aren't provided"""
+    """Test that ProgramEnrollmentSerializer throws an error when course run enrollments aren't provided"""  # noqa: E501
     program_enrollment = ProgramEnrollmentFactory.build()
     with pytest.raises(AssertionError):
         ProgramEnrollmentSerializer(program_enrollment)
 
 
 @pytest.mark.parametrize(
-    "has_company, receipts_enabled",
-    [[True, False], [False, False], [False, True], [True, True]],
+    ("has_company", "receipts_enabled"),
+    [[True, False], [False, False], [False, True], [True, True]],  # noqa: PT007
 )
 def test_serialize_program_enrollments(settings, has_company, receipts_enabled):
     """Test that ProgramEnrollmentSerializer has correct data"""
@@ -406,13 +425,15 @@ def test_serialize_program_enrollments(settings, has_company, receipts_enabled):
         "company": (
             CompanySerializer(program_enrollment.company).data if has_company else None
         ),
-        # Only enrollments for the given program should be serialized, and they should be
+        # Only enrollments for the given program should be serialized, and they should be  # noqa: E501
         # sorted by position in program.
         "course_run_enrollments": CourseRunEnrollmentSerializer(
             [course_run_enrollments[1], course_run_enrollments[0]], many=True
         ).data,
         "certificate": None,
-        "receipt": program_enrollment.order_id
-        if program_enrollment.order.status == Order.FULFILLED and receipts_enabled
-        else None,
+        "receipt": (
+            program_enrollment.order_id
+            if program_enrollment.order.status == Order.FULFILLED and receipts_enabled
+            else None
+        ),
     }

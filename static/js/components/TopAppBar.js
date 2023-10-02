@@ -9,13 +9,13 @@ import CatalogMenu from "./CatalogMenu"
 import type { Location } from "react-router"
 
 import type { CurrentUser } from "../flow/authTypes"
-import type {CourseTopic} from "../flow/courseTypes"
+import type { CourseTopic } from "../flow/courseTypes"
 
 type Props = {
   currentUser: ?CurrentUser,
   location: ?Location,
   errorPageHeader: ?boolean,
-  courseTopics: Array<CourseTopic>
+  courseTopics: Array<CourseTopic>,
 }
 
 const shouldShowLoginSignup = location =>
@@ -25,12 +25,15 @@ const shouldShowLoginSignup = location =>
     location.pathname === routes.ecommerceBulk.receipt
   )
 
-const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Props) => (
+const TopAppBar = ({
+  currentUser,
+  location,
+  errorPageHeader,
+  courseTopics,
+}: Props) => (
   <header className="header-holder">
     <div className="container">
-      <nav
-        className="sub-nav navbar navbar-expand-md link-section"
-      >
+      <nav className="sub-nav navbar navbar-expand-md link-section">
         <div className="navbar-brand">
           <a
             href="https://web.mit.edu/"
@@ -66,25 +69,21 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
             id="nav"
             className="collapse navbar-collapse px-0 justify-content-end"
           >
-            {
-              SETTINGS.webinars ? (
-                <li>
-                  <a href={routes.webinars} className="" aria-label="webinars">
-                    Webinars
-                  </a>
-                </li>
-              ) : null
-            }
+            {SETTINGS.webinars ? (
+              <li>
+                <a href={routes.webinars} className="" aria-label="webinars">
+                  Webinars
+                </a>
+              </li>
+            ) : null}
             <li>
-              {
-                SETTINGS.course_dropdown ? (
-                  <CatalogMenu courseTopics={courseTopics} />
-                ) : (
-                  <a href={routes.catalog} className="" aria-label="catalog">
-                    Catalog
-                  </a>
-                )
-              }
+              {SETTINGS.course_dropdown ? (
+                <CatalogMenu courseTopics={courseTopics} />
+              ) : (
+                <a href={routes.catalog} className="" aria-label="catalog">
+                  Catalog
+                </a>
+              )}
             </li>
             {shouldShowLoginSignup(location) ? (
               currentUser && currentUser.is_authenticated ? (

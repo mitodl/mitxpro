@@ -1,16 +1,17 @@
 """Seed data API tests"""
 # pylint: disable=unused-argument, redefined-outer-name
 from types import SimpleNamespace
+
 import pytest
 
-from courses.models import Program, Course, CourseRun, CourseTopic
-from cms.models import ProgramPage, CoursePage, ResourcePage
+from cms.models import CoursePage, ProgramPage, ResourcePage
+from courses.models import Course, CourseRun, CourseTopic, Program
 from ecommerce.models import Product, ProductVersion
 from ecommerce.test_utils import unprotect_version_tables
 from localdev.seed.api import SeedDataLoader, get_raw_seed_data_from_file
 
 
-@pytest.fixture
+@pytest.fixture()
 def seeded(settings):
     """Fixture for a scenario where course data has been loaded from our JSON file"""
     settings.VOUCHER_DOMESTIC_EMPLOYEE_KEY = ""
@@ -22,14 +23,14 @@ def seeded(settings):
     return SimpleNamespace(raw_data=data, loader=seed_data_loader)
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_seed_prefix(seeded):
     """
     Tests that the seed data functions add a prefix to a field values that indicates which objects are seed data
-    """
+    """  # noqa: E501
     # Test helper functions
     seeded_value = seeded.loader.seed_prefixed("Some Title")
-    assert seeded_value == "{} Some Title".format(SeedDataLoader.SEED_DATA_PREFIX)
+    assert seeded_value == f"{SeedDataLoader.SEED_DATA_PREFIX} Some Title"
     assert seeded.loader.is_seed_value(seeded_value) is True
     # Test saved object titles
     assert (
@@ -52,7 +53,7 @@ def test_seed_prefix(seeded):
     )
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_seed_and_unseed_data(seeded):
     """Tests that the seed data functions can create and delete seed data"""
     expected_programs = len(seeded.raw_data["programs"])
@@ -85,7 +86,7 @@ def test_seed_and_unseed_data(seeded):
     assert ProductVersion.objects.count() == 0
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_topics(seeded):
     """Tests that the seed data functions can deserialize topics"""
     for course_data in seeded.raw_data["courses"]:
@@ -96,7 +97,7 @@ def test_topics(seeded):
         ]
 
         def name_key(topic):
-            """Helper function to get a name for sorting purposes"""
+            """Helper function to get a name for sorting purposes"""  # noqa: D401
             return topic["name"]
 
         assert sorted(topics, key=name_key) == sorted(
@@ -107,5 +108,5 @@ def test_topics(seeded):
 
     with unprotect_version_tables():
         seeded.loader.delete_seed_data(seeded.raw_data)
-    # unseeding will not cause topics to be deleted since they could be referenced by other courses
+    # unseeding will not cause topics to be deleted since they could be referenced by other courses  # noqa: E501
     assert CourseTopic.objects.count() == before_count

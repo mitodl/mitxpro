@@ -4,10 +4,10 @@ from django.db import models
 
 from compliance.constants import (
     RESULT_CHOICES,
-    RESULT_SUCCESS,
     RESULT_DENIED,
-    RESULT_UNKNOWN,
     RESULT_MANUALLY_APPROVED,
+    RESULT_SUCCESS,
+    RESULT_UNKNOWN,
 )
 from mitxpro.models import TimestampedModel
 

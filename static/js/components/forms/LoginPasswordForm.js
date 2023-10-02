@@ -11,11 +11,11 @@ import { passwordFieldValidation } from "../../lib/validation"
 import { routes } from "../../lib/urls"
 
 const passwordValidation = yup.object().shape({
-  password: passwordFieldValidation
+  password: passwordFieldValidation,
 })
 
 type LoginPasswordFormProps = {
-  onSubmit: Function
+  onSubmit: Function,
 }
 
 const LoginPasswordForm = ({ onSubmit }: LoginPasswordFormProps) => (

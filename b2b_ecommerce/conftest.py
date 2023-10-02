@@ -7,7 +7,7 @@ from b2b_ecommerce.factories import B2BCouponFactory, B2BOrderFactory
 from b2b_ecommerce.models import B2BCouponRedemption, B2BOrder
 
 
-@pytest.fixture
+@pytest.fixture()
 def order_with_coupon():
     """Create a unfulfilled order with a coupon which is valid for it"""
     order = B2BOrderFactory.create(status=B2BOrder.CREATED)

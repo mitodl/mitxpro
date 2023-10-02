@@ -7,7 +7,8 @@ html {
 .resource-banner {
   width: 100%;
   padding: 75px 0;
-  background: rgba(53, 53, 53, .97) url("#{$static-path}/images/resource-page-banner-bg.png") repeat-x 0 0;
+  background: rgb(53 53 53 / 97%)
+    url("#{$static-path}/images/resource-page-banner-bg.png") repeat-x 0 0;
   min-height: 200px;
   margin-bottom: 20px;
 
@@ -17,7 +18,7 @@ html {
   }
 
   h1 {
-    background: rgba($primary, .8);
+    background: rgba($primary, 0.8);
     color: white;
     padding: 15px;
     line-height: 50px;
@@ -41,7 +42,6 @@ html {
 }
 
 .resource-container {
-
   h2 {
     color: $blue;
     margin-top: 50px;
@@ -79,9 +79,9 @@ html {
     display: block;
     margin-bottom: 10px;
 
-    &:after {
+    &::after {
       font-size: 24px;
-      font-family: Material Icons;
+      font-family: "Material Icons";
       content: "arrow_circle_up";
       margin-left: 5px;
       vertical-align: middle;
@@ -92,11 +92,11 @@ html {
     text-decoration: none;
     display: block;
 
-    &:after {
+    &::after {
       content: "arrow_circle_up";
       font-size: 24px;
       display: inline-block;
-      font-family: Material Icons;
+      font-family: "Material Icons";
       margin: 0 0 10px 5px;
       transform: rotate(90deg);
       vertical-align: top;
@@ -106,5 +106,4 @@ html {
   .resource-video {
     margin-left: 100px;
   }
-
 }

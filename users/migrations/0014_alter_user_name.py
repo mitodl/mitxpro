@@ -4,7 +4,7 @@ from django.db import migrations, models
 from django.db.models.functions import Length
 
 
-def truncate_long_user_names(apps, schema):
+def truncate_long_user_names(apps, schema):  # noqa: ARG001
     """Truncate any User.name values > 255 characters"""
     User = apps.get_model("users", "User")
     for user in User.objects.annotate(namelen=Length("name")).filter(namelen__gt=255):
@@ -13,7 +13,6 @@ def truncate_long_user_names(apps, schema):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("users", "0013_blocklist"),
     ]

@@ -11,7 +11,8 @@
     max-width: 300px;
   }
 
-  $combinations: ("left", 2px, 0px) ("top", 0px, 2px) ("right", -2px, 0px) ("bottom", 0px, -2px);
+  $combinations: ("left", 2px, 0px) ("top", 0px, 2px) ("right", -2px, 0px)
+    ("bottom", 0px, -2px);
 
   @each $position, $h-offset, $v-offset in $combinations {
     &.bs-tooltip-#{$position} {
@@ -56,7 +57,7 @@
 
     @include media-breakpoint-down(sm) {
       margin-left: 15px;
-  }
+    }
 
     li {
       letter-spacing: normal;

@@ -1,26 +1,30 @@
 """Tests for command utils"""
 from datetime import timedelta
+
 import pytest
 from django.contrib.auth import get_user_model
 
-from courses.factories import CourseRunEnrollmentFactory, ProgramEnrollmentFactory
-from courses.management.utils import EnrollmentChangeCommand
-from courses.factories import CourseRunFactory
-from courseware.exceptions import (
-    UnknownEdxApiEnrollException,
-    EdxApiEnrollErrorException,
+from courses.factories import (
+    CourseRunEnrollmentFactory,
+    CourseRunFactory,
+    ProgramEnrollmentFactory,
 )
-from users.factories import UserFactory
+from courses.management.utils import EnrollmentChangeCommand
+from courseware.exceptions import (
+    EdxApiEnrollErrorException,
+    UnknownEdxApiEnrollException,
+)
 from mitxpro.test_utils import MockHttpError
 from mitxpro.utils import now_in_utc
+from users.factories import UserFactory
 
 User = get_user_model()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 @pytest.mark.parametrize("order", [True, False])
 def test_fetch_enrollment(order):
-    """Test that method return enrollment and enrolled object, include order while querying if passed"""
+    """Test that method return enrollment and enrolled object, include order while querying if passed"""  # noqa: E501
     user = UserFactory()
     run_enrollment = CourseRunEnrollmentFactory(user=user)
     program_enrollment = ProgramEnrollmentFactory(user=user)
@@ -46,19 +50,19 @@ def test_fetch_enrollment(order):
     assert enrollment_obj == program_enrollment
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 @pytest.mark.parametrize("keep_failed_enrollments", [True, False])
 @pytest.mark.parametrize(
-    "exception_cls,inner_exception",
+    ("exception_cls", "inner_exception"),
     [
-        [EdxApiEnrollErrorException, MockHttpError()],
-        [UnknownEdxApiEnrollException, Exception()],
+        [EdxApiEnrollErrorException, MockHttpError()],  # noqa: PT007
+        [UnknownEdxApiEnrollException, Exception()],  # noqa: PT007
     ],
 )
 def test_create_run_enrollment_edx_failure(
     mocker, keep_failed_enrollments, exception_cls, inner_exception
 ):
-    """Test that create_run_enrollment behaves as expected when the enrollment fails in edX"""
+    """Test that create_run_enrollment behaves as expected when the enrollment fails in edX"""  # noqa: E501
     now = now_in_utc()
     user = UserFactory()
     existing_enrollment = CourseRunEnrollmentFactory(user=user)

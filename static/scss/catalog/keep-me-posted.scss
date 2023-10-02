@@ -2,19 +2,23 @@
 .posted-block {
   width: 100%;
   padding: 75px 0;
-  background: url('#{$static-path}/images/bg-contact.jpg') repeat-x 50% 50%;
+  background: url("#{$static-path}/images/bg-contact.jpg") repeat-x 50% 50%;
   min-height: 200px;
   background-size: cover;
   position: relative;
 
-  &:after {
+  &::after {
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
-    content: '';
+    content: "";
     height: 10px;
-    background: linear-gradient(to right, rgba(61,189,191,1) 0%,rgba(241,186,70,1) 100%);
+    background: linear-gradient(
+      to right,
+      rgb(61 189 191 / 100%) 0%,
+      rgb(241 186 70 / 100%) 100%
+    );
   }
 
   h1 {
@@ -33,7 +37,6 @@
       position: relative;
 
       &.form-columns-2 {
-
         .input {
           margin: 0;
         }
@@ -50,7 +53,6 @@
       }
 
       &.form-columns-1 {
-
         .hs_email {
           padding: 0 15px;
           width: 100%;
@@ -88,7 +90,8 @@
       display: none;
     }
 
-    input[type="text"], input[type="email"] {
+    input[type="text"],
+    input[type="email"] {
       width: 100% !important;
       margin: 0 0 30px;
       font-family: inherit;
@@ -105,6 +108,7 @@
     input[type="submit"] {
       @extend .btn;
       @extend .btn-primary;
+
       width: 230px;
       height: 70px;
       font-size: x-large;

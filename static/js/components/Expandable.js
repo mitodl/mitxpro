@@ -5,14 +5,14 @@ import { Button } from "reactstrap"
 type Props = {
   title: string,
   children: any,
-  className?: string
+  className?: string,
 }
 type State = {
-  expanded: boolean
+  expanded: boolean,
 }
 export default class Expandable extends React.Component<Props, State> {
   state = {
-    expanded: false
+    expanded: false,
   }
 
   render() {
@@ -25,7 +25,7 @@ export default class Expandable extends React.Component<Props, State> {
           className="header"
           onClick={() =>
             this.setState({
-              expanded: !expanded
+              expanded: !expanded,
             })
           }
         >

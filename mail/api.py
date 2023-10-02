@@ -18,10 +18,10 @@ messages = messages_for_recipients([
 # send the emails
 send_messages(messages)
 """
-from email.utils import formataddr
 import logging
 import re
 from collections import namedtuple
+from email.utils import formataddr
 
 from anymail.message import AnymailMessage
 from bs4 import BeautifulSoup
@@ -36,7 +36,7 @@ from mail.exceptions import MultiEmailValidationError
 log = logging.getLogger()
 
 
-EmailMetadata = namedtuple("EmailMetadata", ["tags", "user_variables"])
+EmailMetadata = namedtuple("EmailMetadata", ["tags", "user_variables"])  # noqa: PYI024
 
 
 class UserMessageProps:
@@ -48,7 +48,7 @@ class UserMessageProps:
             recipient (str): Recipient email address
             context (dict or None): Dict containing message context (defaults to empty dict)
             metadata (EmailMetadata or None): An object containing metadata to attach to the message
-        """
+        """  # noqa: E501
         self.recipient = recipient
         self.context = context or {}
         self.metadata = metadata
@@ -64,7 +64,7 @@ def safe_format_recipients(recipients):
 
     Returns:
         list of User: list of users to send to
-    """
+    """  # noqa: D401
     if not recipients:
         return []
 
@@ -88,12 +88,12 @@ def can_email_user(user):
 
     Returns:
         bool: True if we can email this user
-    """
+    """  # noqa: D401
     return bool(user.email)
 
 
 def get_base_context():
-    """Returns a dict of context variables that are needed in all emails"""
+    """Returns a dict of context variables that are needed in all emails"""  # noqa: D401, E501
     return {"base_url": settings.SITE_BASE_URL, "site_name": settings.SITE_NAME}
 
 
@@ -107,7 +107,7 @@ def context_for_user(*, user=None, extra_context=None):
 
     Returns:
         dict: the context for this user
-    """
+    """  # noqa: D401
     context = get_base_context()
 
     if user:
@@ -129,15 +129,13 @@ def render_email_templates(template_name, context):
 
     Returns:
         (str, str, str): tuple of the templates for subject, text_body, html_body
-    """
-    subject_text = render_to_string(
-        "{}/subject.txt".format(template_name), context
-    ).rstrip()
+    """  # noqa: E501, D401
+    subject_text = render_to_string(f"{template_name}/subject.txt", context).rstrip()
 
     context.update({"subject": subject_text})
-    html_text = render_to_string("{}/body.html".format(template_name), context)
+    html_text = render_to_string(f"{template_name}/body.html", context)
 
-    # pynliner internally uses bs4, which we can now modify the inlined version into a plaintext version
+    # pynliner internally uses bs4, which we can now modify the inlined version into a plaintext version  # noqa: E501
     # this avoids parsing the body twice in bs4
     soup = BeautifulSoup(html_text, "html5lib")
     for link in soup.find_all("a"):
@@ -168,7 +166,7 @@ def messages_for_recipients(recipients_and_contexts, template_name):
 
     Yields:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
-    """
+    """  # noqa: E501, D401
     with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
         for recipient, context in recipients_and_contexts:
             yield build_message(
@@ -190,8 +188,8 @@ def message_for_recipient(recipient, context, template_name):
 
     Returns:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
-    """
-    return list(messages_for_recipients([(recipient, context)], template_name))[0]
+    """  # noqa: E501, D401
+    return next(iter(messages_for_recipients([(recipient, context)], template_name)))
 
 
 def build_messages(template_name, recipients, extra_context, metadata=None):
@@ -207,7 +205,7 @@ def build_messages(template_name, recipients, extra_context, metadata=None):
 
     Yields:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
-    """
+    """  # noqa: E501, D401
     context = {**get_base_context(), **(extra_context or {})}
     with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
         for recipient in recipients:
@@ -230,7 +228,7 @@ def build_user_specific_messages(template_name, user_message_props_iter):
 
     Yields:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
-    """
+    """  # noqa: E501, D401
     with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
         for user_message_props in user_message_props_iter:
             yield build_message(
@@ -255,7 +253,7 @@ def build_message(connection, template_name, recipient, context, metadata=None):
 
     Returns:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
-    """
+    """  # noqa: E501, D401
     subject, text_body, html_body = render_email_templates(template_name, context or {})
     msg = AnymailMessage(
         subject=subject,
@@ -270,9 +268,7 @@ def build_message(connection, template_name, recipient, context, metadata=None):
         if metadata.tags:
             esp_extra.update({"o:tag": metadata.tags})
         if metadata.user_variables:
-            esp_extra.update(
-                {"v:{}".format(k): v for k, v in metadata.user_variables.items()}
-            )
+            esp_extra.update({f"v:{k}": v for k, v in metadata.user_variables.items()})
     if esp_extra:
         msg.esp_extra = esp_extra
     msg.attach_alternative(html_body, "text/html")
@@ -285,11 +281,11 @@ def send_messages(messages):
 
     Args:
         messages (list of django.core.mail.EmailMultiAlternatives): list of messages to send
-    """
+    """  # noqa: E501, D401
     for msg in messages:
         try:
             msg.send()
-        except:  # pylint: disable=bare-except
+        except:  # pylint: disable=bare-except  # noqa: E722
             log.exception("Error sending email '%s' to %s", msg.subject, msg.to)
 
 
@@ -299,7 +295,7 @@ def send_message(message):
 
     Args:
         message (django.core.mail.EmailMultiAlternatives): message to send
-    """
+    """  # noqa: D401
     send_messages([message])
 
 
@@ -313,7 +309,7 @@ def validate_email_addresses(email_addresses):
 
     Raises:
         MultiEmailValidationError: Raised if any of the emails fail validation
-    """
+    """  # noqa: E501, D401
     invalid_emails = set()
     for email in email_addresses:
         try:

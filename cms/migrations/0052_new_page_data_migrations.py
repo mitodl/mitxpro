@@ -10,7 +10,7 @@ Data migration to do the following:
 NOTE: Data migrations are liable to fail if the Wagtail Page model (or potentially other Wagtail models) are changed
 from version to version. In those cases, we can set the existing data migration(s) to be a no-op in both directions,
 then create a new data migration with the same contents, and add the relevant Wagtail migration as a dependency.
-"""
+"""  # noqa: E501
 
 import datetime
 import json
@@ -19,8 +19,8 @@ import pytz
 from django.db import migrations
 from wagtail.core.models import Page, PageRevision
 
-COURSE_INDEX_PAGE_PROPERTIES = dict(title="Courses")
-PROGRAM_INDEX_PAGE_PROPERTIES = dict(title="Programs")
+COURSE_INDEX_PAGE_PROPERTIES = {"title": "Courses"}
+PROGRAM_INDEX_PAGE_PROPERTIES = {"title": "Programs"}
 CERTIFICATE_INDEX_SLUG = "certificate"
 
 
@@ -38,7 +38,7 @@ def delete_wagtail_pages(specific_page_cls, filter_dict=None):
     """
     Completely deletes Wagtail CMS pages that match a filter. Wagtail overrides standard delete functionality,
     making it difficult to actually delete Page objects and get information about what was deleted.
-    """
+    """  # noqa: E501
     page_ids_to_delete = specific_page_cls.objects.values_list("id", flat=True)
     if filter_dict:
         page_ids_to_delete = page_ids_to_delete.filter(**filter_dict)
@@ -49,7 +49,9 @@ def delete_wagtail_pages(specific_page_cls, filter_dict=None):
     base_pages_qset.delete()
     return (
         num_pages,
-        {specific_page_cls._meta.label: num_pages},  # pylint: disable=protected-access
+        {
+            specific_page_cls._meta.label: num_pages  # noqa: SLF001
+        },  # pylint: disable=protected-access  # noqa: RUF100, SLF001
     )
 
 
@@ -58,21 +60,19 @@ def get_home_page(apps):
     Importing the Site model from the registry means if we access the root page from this
     model we will get an instance of the Page with only the basic model methods so we simply extract
     the ID of the page and hand it to the Page model imported directly.
-    """
+    """  # noqa: E501, D401
     Site = apps.get_model("wagtailcore", "Site")
     site = Site.objects.filter(is_default_site=True).first()
     if not site:
-        raise Exception(
-            "A default site is not set up. Please setup a default site before running this migration"
-        )
+        msg = "A default site is not set up. Please setup a default site before running this migration"  # noqa: E501
+        raise Exception(msg)  # noqa: TRY002
     if not site.root_page:
-        raise Exception(
-            "No root (home) page set up. Please setup a root (home) page for the default site before running this migration"
-        )
+        msg = "No root (home) page set up. Please setup a root (home) page for the default site before running this migration"  # noqa: E501
+        raise Exception(msg)  # noqa: TRY002
     return Page.objects.get(id=site.root_page.id)
 
 
-def create_index_pages_and_nest_detail(apps, schema_editor):
+def create_index_pages_and_nest_detail(apps, schema_editor):  # noqa: ARG001
     """
     Create index pages for courses and programs and move the respective
     course and program pages under these index pages.
@@ -102,7 +102,7 @@ def create_index_pages_and_nest_detail(apps, schema_editor):
         page.move(program_index, "last-child")
 
 
-def unnest_detail_and_delete_index_pages(apps, schema_editor):
+def unnest_detail_and_delete_index_pages(apps, schema_editor):  # noqa: ARG001
     """
     Move course and program pages under the home page and remove index pages.
     """
@@ -127,7 +127,7 @@ def unnest_detail_and_delete_index_pages(apps, schema_editor):
     delete_wagtail_pages(CourseIndexPage)
 
 
-def create_catalog_page(apps, schema_editor):
+def create_catalog_page(apps, schema_editor):  # noqa: ARG001
     """
     Create a catalog page under the home page
     """
@@ -140,15 +140,15 @@ def create_catalog_page(apps, schema_editor):
 
     catalog = CatalogPage.objects.first()
     if not catalog:
-        catalog_page_content = dict(
-            title="Courseware Catalog",
-            content_type_id=catalog_content_type.id,
-            slug="catalog",
-            locale_id=home_page.get_default_locale().id,
-        )
+        catalog_page_content = {
+            "title": "Courseware Catalog",
+            "content_type_id": catalog_content_type.id,
+            "slug": "catalog",
+            "locale_id": home_page.get_default_locale().id,
+        }
         catalog_page_obj = CatalogPage(**catalog_page_content)
         home_page.add_child(instance=catalog_page_obj)
-        # NOTE: This block of code creates page revision and publishes it. There may be an easier way to do this.
+        # NOTE: This block of code creates page revision and publishes it. There may be an easier way to do this.  # noqa: E501
         content_json = json.dumps(dict(**catalog_page_content, pk=catalog_page_obj.id))
         revision = PageRevision.objects.create(
             page_id=catalog_page_obj.id,
@@ -159,7 +159,7 @@ def create_catalog_page(apps, schema_editor):
         revision.publish()
 
 
-def remove_catalog_page(apps, schema_editor):
+def remove_catalog_page(apps, schema_editor):  # noqa: ARG001
     """
     Remove the catalog page
     """
@@ -172,7 +172,7 @@ def remove_catalog_page(apps, schema_editor):
         catalog.delete()
 
 
-def create_certificate_index_page(apps, schema_editor):
+def create_certificate_index_page(apps, schema_editor):  # noqa: ARG001
     """
     Create a certificate index page under the home page
     """
@@ -186,15 +186,15 @@ def create_certificate_index_page(apps, schema_editor):
     index_page = CertificateIndexPage.objects.first()
 
     if not index_page:
-        index_page_content = dict(
-            title="Certificate Index Page",
-            content_type_id=index_content_type.id,
-            slug=CERTIFICATE_INDEX_SLUG,
-            locale_id=home_page.get_default_locale().id,
-        )
+        index_page_content = {
+            "title": "Certificate Index Page",
+            "content_type_id": index_content_type.id,
+            "slug": CERTIFICATE_INDEX_SLUG,
+            "locale_id": home_page.get_default_locale().id,
+        }
         index_page_obj = CertificateIndexPage(**index_page_content)
         home_page.add_child(instance=index_page_obj)
-        # NOTE: This block of code creates page revision and publishes it. There may be an easier way to do this.
+        # NOTE: This block of code creates page revision and publishes it. There may be an easier way to do this.  # noqa: E501
         content_json = json.dumps(dict(**index_page_content, pk=index_page_obj.id))
         revision = PageRevision.objects.create(
             page_id=index_page_obj.id,
@@ -205,7 +205,7 @@ def create_certificate_index_page(apps, schema_editor):
         revision.publish()
 
 
-def remove_certificate_index_page(apps, schema_editor):
+def remove_certificate_index_page(apps, schema_editor):  # noqa: ARG001
     """
     Remove the certificate index page
     """

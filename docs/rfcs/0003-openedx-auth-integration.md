@@ -13,7 +13,7 @@ We need to make a decision on where we want the user identity source of truth fo
   - Pros:
     - Users can login to Open edX without having to go through xPro first
   - Cons:
-    - Speculation: this *might* complicate the story around merging user data in xPro regarding pulling in historical data from edX.org
+    - Speculation: this _might_ complicate the story around merging user data in xPro regarding pulling in historical data from edX.org
     - Users will be subject to the same Discussions -> xPro -> edX -> xPro -> Discussions authentication flow that MicroMasters currently has
     - We'd need to figure out how to direct the user to xPro for purchasing and enrolling
   - Pro/Con?:
@@ -35,7 +35,6 @@ We need to make a decision on where we want the user identity source of truth fo
     - For local development, running both Discussions and xPro is required
   - Known Unknowns:
     - Where/how will users update/modify their user/profile information?
-
 
 #### Architecture Changes
 

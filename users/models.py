@@ -1,15 +1,15 @@
 """User models"""
-from datetime import timedelta
 import uuid
+from datetime import timedelta
 
+import pycountry
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models import Q, Count
+from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _
-import pycountry
 
 from affiliate.models import AffiliateReferralAction
 from mitxpro.models import TimestampedModel
@@ -111,15 +111,17 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_active", True)
 
         if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser must have is_staff=True.")
+            msg = "Superuser must have is_staff=True."
+            raise ValueError(msg)
         if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser must have is_superuser=True.")
+            msg = "Superuser must have is_superuser=True."
+            raise ValueError(msg)
 
         return self._create_user(username, email, password, **extra_fields)
 
 
 class FaultyCoursewareUserManager(BaseUserManager):
-    """User manager that defines a queryset of Users that are incorrectly configured in the courseware"""
+    """User manager that defines a queryset of Users that are incorrectly configured in the courseware"""  # noqa: E501
 
     def get_queryset(self):  # pylint: disable=missing-docstring
         return (
@@ -145,7 +147,7 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email", "name"]
 
-    # NOTE: Username max length was set to 50 before we lowered it. We're hardcoding this
+    # NOTE: Username max length was set to 50 before we lowered it. We're hardcoding this  # noqa: E501
     # value here now until we are ready to migrate the max length at the database level.
     username = models.CharField(unique=True, max_length=50)
     email = models.EmailField(blank=False, unique=True)
@@ -161,7 +163,7 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
     faulty_courseware_users = FaultyCoursewareUserManager()
 
     def get_full_name(self):
-        """Returns the user's fullname"""
+        """Returns the user's fullname"""  # noqa: D401
         return self.name
 
     def __str__(self):
@@ -170,12 +172,12 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
 
 
 def generate_change_email_code():
-    """Generates a new change email code"""
+    """Generates a new change email code"""  # noqa: D401
     return uuid.uuid4().hex
 
 
 def generate_change_email_expires():
-    """Generates the expiry datetime for a change email request"""
+    """Generates the expiry datetime for a change email request"""  # noqa: D401
     return now_in_utc() + timedelta(minutes=settings.AUTH_CHANGE_EMAIL_TTL_IN_MINUTES)
 
 

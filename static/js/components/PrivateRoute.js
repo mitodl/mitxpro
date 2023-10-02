@@ -13,7 +13,7 @@ import type { CurrentUser } from "../flow/authTypes"
 type PrivateRouteProps = {
   component: ComponentType<any>,
   currentUser: ?CurrentUser,
-  [key: string]: any
+  [key: string]: any,
 }
 
 export const PrivateRoute = ({
@@ -36,7 +36,7 @@ export const PrivateRoute = ({
 }
 
 const mapStateToProps = createStructuredSelector({
-  currentUser: currentUserSelector
+  currentUser: currentUserSelector,
 })
 
 export default compose(connect(mapStateToProps))(PrivateRoute)

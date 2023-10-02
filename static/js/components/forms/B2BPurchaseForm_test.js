@@ -12,7 +12,7 @@ import configureStoreMain from "../../store/configureStore"
 
 import {
   makeB2BCouponStatus,
-  makeCourseRunProduct
+  makeCourseRunProduct,
 } from "../../factories/ecommerce"
 import { Provider } from "react-redux"
 
@@ -34,7 +34,7 @@ describe("B2BPurchaseForm", () => {
     products = [
       makeCourseRunProduct(),
       makeCourseRunProduct(),
-      makeCourseRunProduct()
+      makeCourseRunProduct(),
     ]
     couponStatus = makeB2BCouponStatus()
   })
@@ -60,7 +60,7 @@ describe("B2BPurchaseForm", () => {
           seats="1"
           {...props}
         />
-      </Provider>
+      </Provider>,
     )
 
   const shallowRender = props => _render(shallow, props)
@@ -88,7 +88,7 @@ describe("B2BPurchaseForm", () => {
       const wrapper = mountRender({ requestPending })
       assert.equal(
         wrapper.find("button[type='submit']").prop("disabled"),
-        requestPending
+        requestPending,
       )
     })
   })
@@ -103,12 +103,12 @@ describe("B2BPurchaseForm", () => {
       assert.deepEqual(
         validate({
           num_seats: "",
-          product:   { productId: null, programId: null }
+          product:   { productId: null, programId: null },
         }),
         {
           num_seats: "Number of Seats is required",
-          product:   "No product selected"
-        }
+          product:   "No product selected",
+        },
       )
     })
 
@@ -117,9 +117,9 @@ describe("B2BPurchaseForm", () => {
         validate({
           num_seats: "-2",
           email:     "",
-          product:   { productId: null, programId: null }
+          product:   { productId: null, programId: null },
         }).num_seats,
-        "Number of Seats is required"
+        "Number of Seats is required",
       )
     })
     ;[
@@ -127,7 +127,7 @@ describe("B2BPurchaseForm", () => {
       ["something", "Invalid email"],
       ["something@", "Invalid email"],
       ["@something", "Invalid email"],
-      ["abc@example.com", null]
+      ["abc@example.com", null],
     ].forEach(([email, expectedError]) => {
       it("should validate email field", async () => {
         const values = { email: email }
@@ -146,9 +146,9 @@ describe("B2BPurchaseForm", () => {
         validate({
           num_seats: "3",
           email:     "a@email.address",
-          product:   { productId: "4", programRunId: null }
+          product:   { productId: "4", programRunId: null },
         }),
-        {}
+        {},
       )
     })
   })

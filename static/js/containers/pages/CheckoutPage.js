@@ -15,7 +15,7 @@ import { pathOr } from "ramda"
 
 import {
   CheckoutForm,
-  renderGenericError
+  renderGenericError,
 } from "../../components/forms/CheckoutForm"
 
 import queries from "../../lib/queries"
@@ -26,7 +26,7 @@ import {
   getErrorMessages,
   isErrorResponse,
   isSuccessResponse,
-  isUnauthorizedResponse
+  isUnauthorizedResponse,
 } from "../../lib/util"
 
 import type { Response } from "redux-query"
@@ -35,13 +35,13 @@ import type {
   BasketPayload,
   CheckoutResponse,
   BasketItem,
-  CheckoutPayload
+  CheckoutPayload,
 } from "../../flow/ecommerceTypes"
 import type { HttpRespErrorMessage, HttpResponse } from "../../flow/httpTypes"
 import type {
   Actions,
   SetFieldError,
-  Values
+  Values,
 } from "../../components/forms/CheckoutForm"
 
 type Props = RouteComponentProps & {
@@ -49,7 +49,7 @@ type Props = RouteComponentProps & {
   requestPending: boolean,
   checkout: () => Promise<Response<CheckoutResponse>>,
   fetchBasket: () => Promise<*>,
-  updateBasket: (payload: BasketPayload) => Promise<*>
+  updateBasket: (payload: BasketPayload) => Promise<*>,
 }
 type State = {
   appliedInitialCoupon: boolean,
@@ -58,7 +58,7 @@ type State = {
   isLoading: boolean,
   isSubmitting: boolean,
   isLoggedOut: boolean,
-  basketProduct: string
+  basketProduct: string,
 }
 
 export class CheckoutPage extends React.Component<Props, State> {
@@ -69,18 +69,18 @@ export class CheckoutPage extends React.Component<Props, State> {
     isLoading:            true,
     isSubmitting:         false,
     isLoggedOut:          false,
-    basketProduct:        ""
+    basketProduct:        "",
   }
 
   getQueryParams = () => {
     const {
-      location: { search }
+      location: { search },
     } = this.props
     const params = queryString.parse(search)
     return {
       productId:   params.product,
       preselectId: parseInt(params.preselect),
-      couponCode:  params.code
+      couponCode:  params.code,
     }
   }
 
@@ -91,13 +91,13 @@ export class CheckoutPage extends React.Component<Props, State> {
     if (!productId) {
       await fetchBasket()
       this.setState({
-        isLoading: false
+        isLoading: false,
       })
       return
     }
 
     const basketResponse = await updateBasket({
-      items: [{ product_id: productId }]
+      items: [{ product_id: productId }],
     })
     if (isSuccessResponse(basketResponse)) {
       if (basketResponse.body && basketResponse.body.items) {
@@ -106,7 +106,7 @@ export class CheckoutPage extends React.Component<Props, State> {
       this.setState({
         isLoading:     false,
         loadingFailed: false,
-        basketProduct: productId
+        basketProduct: productId,
       })
     } else {
       const errors = this.getErrorsOrRedirect(basketResponse)
@@ -116,7 +116,7 @@ export class CheckoutPage extends React.Component<Props, State> {
       this.setState({
         isLoading:            false,
         loadingFailed:        true,
-        loadingErrorMessages: errors
+        loadingErrorMessages: errors,
       })
     }
   }
@@ -135,7 +135,7 @@ export class CheckoutPage extends React.Component<Props, State> {
       dataLayer.push({
         event:          "addToCart",
         "course-id":    items[0].readable_id,
-        "course-price": items[0].price || "0"
+        "course-price": items[0].price || "0",
       })
     }
   }
@@ -154,13 +154,13 @@ export class CheckoutPage extends React.Component<Props, State> {
           setTimeout(() => {
             window.location = url
           }, 1500)
-        }
+        },
       })
     }
   }
 
   getErrorsOrRedirect = (
-    errorResponse: HttpResponse
+    errorResponse: HttpResponse,
   ): ?HttpRespErrorMessage => {
     if (isUnauthorizedResponse(errorResponse)) {
       this.setState({ isLoggedOut: true, isLoading: false })
@@ -183,10 +183,10 @@ export class CheckoutPage extends React.Component<Props, State> {
     const basketPayload = {
       items: basket.items.map(item => ({
         product_id: basketProduct,
-        run_ids:    Object.values(values.runs).map(runId => parseInt(runId))
+        run_ids:    Object.values(values.runs).map(runId => parseInt(runId)),
       })),
       coupons:       values.couponCode ? [{ code: values.couponCode }] : [],
-      data_consents: values.dataConsent ? [basket.data_consents[0].id] : []
+      data_consents: values.dataConsent ? [basket.data_consents[0].id] : [],
     }
     try {
       const basketResponse = await updateBasket(basketPayload)
@@ -197,8 +197,8 @@ export class CheckoutPage extends React.Component<Props, State> {
         }
         actions.setErrors(
           basketErrors || {
-            genericBasket: true
-          }
+            genericBasket: true,
+          },
         )
         return
       }
@@ -211,8 +211,8 @@ export class CheckoutPage extends React.Component<Props, State> {
         }
         actions.setErrors(
           checkoutErrors || {
-            genericSubmit: true
-          }
+            genericSubmit: true,
+          },
         )
         return
       }
@@ -242,10 +242,10 @@ export class CheckoutPage extends React.Component<Props, State> {
       coupons: couponCode
         ? [
           {
-            code: couponCode.trim()
-          }
+            code: couponCode.trim(),
+          },
         ]
-        : []
+        : [],
     })
     if (isSuccessResponse(response)) {
       setFieldError("coupons", null)
@@ -265,11 +265,11 @@ export class CheckoutPage extends React.Component<Props, State> {
   updateProduct = async (
     productId: number | string,
     runId: number,
-    setFieldError: SetFieldError
+    setFieldError: SetFieldError,
   ) => {
     const { updateBasket, history } = this.props
     const response = await updateBasket({
-      items: [{ product_id: productId, run_ids: runId ? [runId] : [] }]
+      items: [{ product_id: productId, run_ids: runId ? [runId] : [] }],
     })
     if (isSuccessResponse(response)) {
       setFieldError("runs", "")
@@ -310,11 +310,9 @@ export class CheckoutPage extends React.Component<Props, State> {
           <React.Fragment>
             No item in basket
             {formatErrors(loadingErrorMessages)}
-            <br/>
+            <br />
             {"Please contact "}
-            <a href={`mailto:${SETTINGS.support_email}`}>
-              customer support
-            </a>
+            <a href={`mailto:${SETTINGS.support_email}`}>customer support</a>
             {" for more information."}
           </React.Fragment>
         ) : (
@@ -337,7 +335,7 @@ export class CheckoutPage extends React.Component<Props, State> {
       pageBody = this.renderLoadingError()
     } else {
       const coupon = basket.coupons.find(coupon =>
-        coupon.targets.includes(item.id)
+        coupon.targets.includes(item.id),
       )
       const { couponCode, preselectId } = this.getQueryParams()
       const selectedRuns = calcSelectedRunIds(item, preselectId)
@@ -368,18 +366,15 @@ const mapStateToProps = state => ({
   requestPending:
     pathOr(false, ["queries", "basketMutation", "isPending"], state) ||
     pathOr(false, ["queries", "couponsMutation", "isPending"], state) ||
-    pathOr(false, ["queries", "checkoutMutation", "isPending"], state)
+    pathOr(false, ["queries", "checkoutMutation", "isPending"], state),
 })
 const mapDispatchToProps = dispatch => ({
   checkout:     () => dispatch(mutateAsync(queries.ecommerce.checkoutMutation())),
   fetchBasket:  () => dispatch(requestAsync(queries.ecommerce.basketQuery())),
   updateBasket: (payload: BasketPayload) =>
-    dispatch(mutateAsync(queries.ecommerce.basketMutation(payload)))
+    dispatch(mutateAsync(queries.ecommerce.basketMutation(payload))),
 })
 
-export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )
-)(CheckoutPage)
+export default compose(connect(mapStateToProps, mapDispatchToProps))(
+  CheckoutPage,
+)

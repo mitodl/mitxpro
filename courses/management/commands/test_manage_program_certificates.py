@@ -1,18 +1,20 @@
-"""Tests for Program Certificates management command"""
+"""Tests for Program Certificates management command"""  # noqa: INP001
+
+from itertools import product
 
 import pytest
-from itertools import product
-from courses.management.commands import manage_program_certificates
-from courses.models import ProgramCertificate
 from django.core.management.base import CommandError
+
 from courses.factories import (
     CourseFactory,
-    CourseRunFactory,
-    CourseRunGradeFactory,
     CourseRunCertificateFactory,
     CourseRunEnrollmentFactory,
+    CourseRunFactory,
+    CourseRunGradeFactory,
     ProgramFactory,
 )
+from courses.management.commands import manage_program_certificates
+from courses.models import ProgramCertificate
 from users.factories import UserFactory
 
 pytestmark = [pytest.mark.django_db]
@@ -32,7 +34,8 @@ def test_program_certificate_management_no_user_argument():
         manage_program_certificates.Command().handle(program=program.readable_id)
     assert (
         str(command_error.value)
-        == f"Could not find course enrollment(s) with provided program readable_id={program.readable_id}"
+        == "Could not find course enrollment(s) with provided program"
+        f" readable_id={program.readable_id}"
     )
 
 
@@ -40,7 +43,7 @@ def test_program_certificate_management_no_program_argument(user):
     """Test that command generates error when the program is not passed"""
     with pytest.raises(CommandError) as command_error:
         manage_program_certificates.Command().handle(user=user)
-    assert str(command_error.value) == f"Please provide a valid program readable_id."
+    assert str(command_error.value) == "Please provide a valid program readable_id."
 
 
 def test_program_certificate_creation_multiple_users():
@@ -109,7 +112,7 @@ def test_program_certificate_creation_single_user(user):
 def test_incomplete_course_program_certificate(user):
     """
     Test that create operation for program certificate management command doesn't create a certificate for incomplete courses
-    """
+    """  # noqa: E501
 
     def create_course_grades(run):
         CourseRunEnrollmentFactory.create(user=user, run=run)

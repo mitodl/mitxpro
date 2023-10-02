@@ -17,25 +17,25 @@ export default function facultyCarousel() {
         settings:   {
           slidesToShow:   3,
           slidesToScroll: 3,
-          dots:           numFacultySlides > 3
-        }
+          dots:           numFacultySlides > 3,
+        },
       },
       {
         breakpoint: 992,
         settings:   {
           slidesToShow:   2,
           slidesToScroll: 1,
-          dots:           numFacultySlides > 2
-        }
+          dots:           numFacultySlides > 2,
+        },
       },
       {
         breakpoint: 767,
         settings:   {
           slidesToShow:   1,
           slidesToScroll: 1,
-          dots:           numFacultySlides > 1
-        }
-      }
-    ]
+          dots:           numFacultySlides > 1,
+        },
+      },
+    ],
   });
 }

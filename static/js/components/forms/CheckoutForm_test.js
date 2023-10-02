@@ -16,7 +16,7 @@ import {
   calculatePrice,
   formatPrice,
   formatRunTitle,
-  calcSelectedRunIds
+  calcSelectedRunIds,
 } from "../../lib/ecommerce"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants"
 import { isIf, shouldIf } from "../../lib/test_utils"
@@ -42,7 +42,7 @@ describe("CheckoutForm", () => {
     updateProductStub = sandbox.stub()
     SETTINGS.zendesk_config = {
       help_widget_enabled: false,
-      help_widget_key:     "fake_key"
+      help_widget_key:     "fake_key",
     }
   })
 
@@ -63,7 +63,7 @@ describe("CheckoutForm", () => {
         selectedRuns={{}}
         updateProduct={updateProductStub}
         {...props}
-      />
+      />,
     )
 
   ;[true, false].forEach(hasCoupon => {
@@ -72,12 +72,12 @@ describe("CheckoutForm", () => {
     } a coupon`, async () => {
       basketItem.type = "program"
       const inner = await renderForm({
-        coupon: hasCoupon ? coupon : null
+        coupon: hasCoupon ? coupon : null,
       })
       assert.equal(inner.find(".item-type").text(), "Program")
       assert.equal(
         inner.find(".header .description").text(),
-        basketItem.content_title
+        basketItem.content_title,
       )
       assert.equal(inner.find(".item-row").length, basketItem.courses.length)
       basketItem.courses.forEach((course, i) => {
@@ -88,13 +88,13 @@ describe("CheckoutForm", () => {
       })
       assert.equal(
         inner.find(".price-row").text(),
-        `Price:${formatPrice(basketItem.price)}`
+        `Price:${formatPrice(basketItem.price)}`,
       )
 
       if (hasCoupon) {
         assert.equal(
           inner.find(".discount-row").text(),
-          `Discount:${formatPrice(calculateDiscount(basketItem, coupon))}`
+          `Discount:${formatPrice(calculateDiscount(basketItem, coupon))}`,
         )
       } else {
         assert.isFalse(inner.find(".discount-row").exists())
@@ -103,8 +103,8 @@ describe("CheckoutForm", () => {
       assert.equal(
         inner.find(".total-row").text(),
         `Total:${formatPrice(
-          calculatePrice(basketItem, hasCoupon ? coupon : null)
-        )}`
+          calculatePrice(basketItem, hasCoupon ? coupon : null),
+        )}`,
       )
     })
   })
@@ -120,7 +120,7 @@ describe("CheckoutForm", () => {
     assert.equal(inner.find("img").prop("alt"), basketItem.content_title)
     assert.equal(
       inner.find(".item-row .title").text(),
-      basketItem.content_title
+      basketItem.content_title,
     )
   })
 
@@ -135,7 +135,7 @@ describe("CheckoutForm", () => {
         }
       }
       const inner = await renderForm({
-        selectedRuns: runs
+        selectedRuns: runs,
       })
       const errors = inner.find(Formik).prop("validate")({ runs })
 
@@ -145,7 +145,7 @@ describe("CheckoutForm", () => {
           ? undefined
           : `No run selected for ${basketItem.courses
             .map(course => course.title)
-            .join(", ")}`
+            .join(", ")}`,
       )
     })
   })
@@ -155,7 +155,7 @@ describe("CheckoutForm", () => {
     [true, true, false],
     [true, false, true],
     [false, true, false],
-    [false, false, false]
+    [false, false, false],
   ].forEach(([hasDataConsent, checkedDataConsent, shouldHaveError]) => {
     it(`validates data consent ${
       hasDataConsent ? "with" : "without"
@@ -168,13 +168,13 @@ describe("CheckoutForm", () => {
       const inner = await renderForm()
       const errors = inner.find(Formik).prop("validate")({
         dataConsent: checkedDataConsent,
-        runs:        {}
+        runs:        {},
       })
       assert.equal(
         errors.data_consents,
         shouldHaveError
           ? "User must consent to the Data Sharing Policy to use the coupon."
-          : undefined
+          : undefined,
       )
     })
   })
@@ -189,7 +189,7 @@ describe("CheckoutForm", () => {
         values={{ dataConsent: false }}
         errors={{ data_consents: errorMessage }}
         onMount={sandbox.stub()}
-      />
+      />,
     )
     assert.equal(inner.find(".data-consent .error").text(), errorMessage)
   })
@@ -200,12 +200,12 @@ describe("CheckoutForm", () => {
       hasQueryParam ? " from a query parameter" : " from the coupon object"
     }`, async () => {
       const inner = await renderForm({
-        couponCode: hasQueryParam ? couponCode : ""
+        couponCode: hasQueryParam ? couponCode : "",
       })
       inner.update()
       assert.equal(
         inner.find(".coupon-code-row input").prop("value"),
-        hasQueryParam ? couponCode : coupon.code
+        hasQueryParam ? couponCode : coupon.code,
       )
     })
   })
@@ -238,7 +238,7 @@ describe("CheckoutForm", () => {
     } the coupon code after the apply button is clicked`, async () => {
       const inner = await renderForm({
         couponCode: hasCouponCode ? couponCode : "",
-        coupon:     hasCouponCode ? coupon : null
+        coupon:     hasCouponCode ? coupon : null,
       })
       submitCouponStub.reset()
 
@@ -251,13 +251,13 @@ describe("CheckoutForm", () => {
     } the coupon code after the enter key is pressed`, async () => {
       const inner = await renderForm({
         couponCode: hasCouponCode ? couponCode : "",
-        coupon:     hasCouponCode ? coupon : null
+        coupon:     hasCouponCode ? coupon : null,
       })
       submitCouponStub.reset()
 
       inner.find("input.coupon-code-entry").prop("onKeyDown")({
         key:            "Enter",
-        preventDefault: sandbox.stub()
+        preventDefault: sandbox.stub(),
       })
       sinon.assert.calledWith(submitCouponStub, hasCouponCode ? couponCode : "")
     })
@@ -267,7 +267,7 @@ describe("CheckoutForm", () => {
     const inner = await renderForm()
     submitCouponStub.reset()
     inner.find("input.coupon-code-entry").prop("onKeyDown")({
-      key: "x"
+      key: "x",
     })
     sinon.assert.notCalled(submitCouponStub)
   })
@@ -279,7 +279,7 @@ describe("CheckoutForm", () => {
       }
       const selectedRuns = calcSelectedRunIds(basketItem)
       const inner = await renderForm({
-        selectedRuns
+        selectedRuns,
       })
       assert.equal(inner.find("select").length, basketItem.courses.length)
       basketItem.courses.forEach((course, i) => {
@@ -318,7 +318,7 @@ describe("CheckoutForm", () => {
         resetForm={resetFormStub}
         updateProduct={updateProductStub}
         values={{}}
-      />
+      />,
     )
 
     await inner
@@ -340,12 +340,10 @@ describe("CheckoutForm", () => {
       const inner = await renderForm()
       assert.equal(
         inner.find(".data-consent-row").length,
-        hasDataConsent ? 1 : 0
+        hasDataConsent ? 1 : 0,
       )
       if (hasDataConsent) {
-        const expected = `*By checking this box, I give my consent to MIT to disclose data to ${
-          basket.data_consents[0].company.name
-        }.`
+        const expected = `*By checking this box, I give my consent to MIT to disclose data to ${basket.data_consents[0].company.name}.`
         assert.isTrue(inner.text().includes(expected))
       }
     })
@@ -363,16 +361,13 @@ describe("CheckoutForm", () => {
           onMount={sandbox.stub()}
           updateProduct={updateProductStub}
           values={{
-            dataConsent: checked
+            dataConsent: checked,
           }}
-        />
+        />,
       )
       assert.equal(
-        inner
-          .find(".data-consent-row")
-          .find(Field)
-          .prop("checked"),
-        checked
+        inner.find(".data-consent-row").find(Field).prop("checked"),
+        checked,
       )
     }
   })
@@ -388,7 +383,7 @@ describe("CheckoutForm", () => {
         onMount={sandbox.stub()}
         updateProduct={updateProductStub}
         values={{}}
-      />
+      />,
     )
     const toggle = inner.find(".data-consent-row a").prop("onClick")
     assert.isFalse(inner.state().dataSharingModalVisibility)
@@ -417,7 +412,7 @@ describe("CheckoutForm", () => {
             onMount={sandbox.stub()}
             updateProduct={updateProductStub}
             values={{}}
-          />
+          />,
         )
         inner.setState({ dataSharingModalVisibility: modalVisible })
 
@@ -431,7 +426,7 @@ describe("CheckoutForm", () => {
           assert.equal(inner.state().dataSharingModalVisibility, modalVisible)
           assert.equal(
             inner.find(Markdown).prop("source"),
-            basket.data_consents[0].consent_text
+            basket.data_consents[0].consent_text,
           )
         }
       })
@@ -444,7 +439,7 @@ describe("CheckoutForm", () => {
     const linkPairs = [
       ["Terms of Service", "/terms-of-service/"],
       ["Refund Policy", "/terms-of-service/#registration"],
-      ["Privacy Policy", "/privacy-policy/"]
+      ["Privacy Policy", "/privacy-policy/"],
     ]
 
     inner.find(".submit-links a").forEach((linkWrapper, i) => {
@@ -457,17 +452,17 @@ describe("CheckoutForm", () => {
   //
   ;[true, false].forEach(requestPending => {
     it(`${shouldIf(
-      requestPending
+      requestPending,
     )} disable submit buttons while the request ${isIf(
-      requestPending
+      requestPending,
     )} in progress`, async () => {
       const inner = await renderForm({
-        requestPending
+        requestPending,
       })
 
       assert.equal(
         inner.find(".checkout-button").prop("disabled"),
-        requestPending
+        requestPending,
       )
       assert.equal(inner.find(".apply-button").prop("disabled"), requestPending)
     })

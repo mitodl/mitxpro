@@ -15,7 +15,6 @@ from ecommerce.views import (
     coupon_code_csv_view,
 )
 
-
 router = SimpleRouter()
 router.register(r"products", ProductViewSet, basename="products_api")
 router.register(

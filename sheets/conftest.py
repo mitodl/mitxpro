@@ -4,8 +4,8 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
-def sheets_settings(settings):
-    """Default settings for sheets tests"""
+def sheets_settings(settings):  # noqa: PT004
+    """Default settings for sheets tests"""  # noqa: D401
     settings.FEATURES["COUPON_SHEETS"] = True
     settings.SHEETS_REQ_EMAIL_COL = 7
     settings.SHEETS_REQ_PROCESSED_COL = 8

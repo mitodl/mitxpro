@@ -23,7 +23,7 @@ describe("Register forms", () => {
       const wrapper = shallow(<RegisterEmailForm onSubmit={onSubmitStub} />)
       return {
         wrapper,
-        form: wrapper.find("Formik").dive()
+        form: wrapper.find("Formik").dive(),
       }
     }
 

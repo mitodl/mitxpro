@@ -1,10 +1,10 @@
-"""Management command to change enrollment status"""
-from django.core.management.base import CommandError
+"""Management command to change enrollment status"""  # noqa: INP001
 from django.contrib.auth import get_user_model
+from django.core.management.base import CommandError
 
 from courses.api import deactivate_program_enrollment, deactivate_run_enrollment
-from courses.management.utils import EnrollmentChangeCommand, enrollment_summaries
 from courses.constants import ENROLL_CHANGE_STATUS_TRANSFERRED
+from courses.management.utils import EnrollmentChangeCommand, enrollment_summaries
 from courses.models import CourseRunEnrollment
 from users.api import fetch_user
 
@@ -12,9 +12,12 @@ User = get_user_model()
 
 
 class Command(EnrollmentChangeCommand):
-    """Sets a user's enrollment to 'transferred' and creates an enrollment for a different user"""
+    """Sets a user's enrollment to 'transferred' and creates an enrollment for a different user"""  # noqa: E501
 
-    help = "Sets a user's enrollment to 'transferred' and creates an enrollment for a different user"
+    help = (  # noqa: A003
+        "Sets a user's enrollment to 'transferred' and creates an enrollment for a"
+        " different user"
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -26,7 +29,10 @@ class Command(EnrollmentChangeCommand):
         parser.add_argument(
             "--to-user",
             type=str,
-            help="The id, email, or username of the User to whom the enrollment will be transferred",
+            help=(
+                "The id, email, or username of the User to whom the enrollment will be"
+                " transferred"
+            ),
             required=True,
         )
         parser.add_argument(
@@ -48,12 +54,15 @@ class Command(EnrollmentChangeCommand):
             "--keep-failed-enrollments",
             action="store_true",
             dest="keep_failed_enrollments",
-            help="If provided, enrollment records will be kept even if edX enrollment fails",
+            help=(
+                "If provided, enrollment records will be kept even if edX enrollment"
+                " fails"
+            ),
         )
 
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         from_user = fetch_user(options["from_user"])
         to_user = fetch_user(options["to_user"])
         keep_failed_enrollments = options["keep_failed_enrollments"]
@@ -66,11 +75,10 @@ class Command(EnrollmentChangeCommand):
                 ).values_list("run__courseware_id", flat=True)
             )
             if len(to_user_existing_enrolled_run_ids) > 0:
-                raise CommandError(
-                    "'to' user is already enrolled in program runs ({})".format(
-                        list(to_user_existing_enrolled_run_ids)
-                    )
-                )
+                msg = "'to' user is already enrolled in program runs ({})".format(
+                    list(to_user_existing_enrolled_run_ids)
+                )  # noqa: E501, RUF100
+                raise CommandError(msg)
 
             (
                 new_program_enrollment,
@@ -105,14 +113,14 @@ class Command(EnrollmentChangeCommand):
         if new_program_enrollment or new_run_enrollments:
             self.stdout.write(
                 self.style.SUCCESS(
-                    "Transferred enrollment – 'from' user: {} ({}), 'to' user: {} ({})\n"
-                    "Enrollments created/updated: {}".format(
+                    "Transferred enrollment – 'from' user: {} ({}), 'to' user: {}"  # noqa: E501, RUF001
+                    " ({})\nEnrollments created/updated: {}".format(
                         from_user.username,
                         from_user.email,
                         to_user.username,
                         to_user.email,
                         enrollment_summaries(
-                            filter(bool, [new_program_enrollment] + new_run_enrollments)
+                            filter(bool, [new_program_enrollment, *new_run_enrollments])
                         ),
                     )
                 )
@@ -120,7 +128,8 @@ class Command(EnrollmentChangeCommand):
         else:
             self.stdout.write(
                 self.style.ERROR(
-                    "Failed to transfer enrollment – 'from' user: {} ({}), 'to' user: {} ({})\n".format(
+                    "Failed to transfer enrollment – 'from' user: {} ({}), 'to' user:"  # noqa: E501, RUF001
+                    " {} ({})\n".format(
                         from_user.username,
                         from_user.email,
                         to_user.username,

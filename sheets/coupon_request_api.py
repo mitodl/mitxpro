@@ -1,8 +1,8 @@
 """Coupon request API"""
 import itertools
 import json
-from decimal import Decimal
 import logging
+from decimal import Decimal
 
 from django.conf import settings
 from django.db import transaction
@@ -10,33 +10,33 @@ from django.utils.functional import cached_property
 
 import ecommerce.api
 from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
-from ecommerce.models import Company, Coupon, CouponPaymentVersion, BulkCouponAssignment
+from ecommerce.models import BulkCouponAssignment, Company, Coupon, CouponPaymentVersion
 from ecommerce.utils import make_checkout_url
-from mitxpro.utils import now_in_utc, item_at_index_or_none, item_at_index_or_blank
+from mitxpro.utils import item_at_index_or_blank, item_at_index_or_none, now_in_utc
 from sheets.api import (
+    create_or_renew_sheet_file_watch,
     get_authorized_pygsheets_client,
     share_drive_file_with_emails,
-    create_or_renew_sheet_file_watch,
 )
 from sheets.constants import GOOGLE_API_TRUE_VAL
 from sheets.exceptions import SheetRowParsingException
 from sheets.models import CouponGenerationRequest
 from sheets.sheet_handler_api import SheetHandler
 from sheets.utils import (
+    ResultType,
     RowResult,
-    format_datetime_for_sheet_formula,
-    build_protected_range_request_body,
+    assign_sheet_metadata,
     assignment_sheet_file_name,
+    build_protected_range_request_body,
+    format_datetime_for_sheet_formula,
+    get_column_letter,
     parse_sheet_datetime_str,
     request_sheet_metadata,
-    assign_sheet_metadata,
-    ResultType,
-    get_column_letter,
 )
 
 log = logging.getLogger(__name__)
 
-BULK_PURCHASE_DEFAULTS = dict(amount=Decimal("1.0"), automatic=False)
+BULK_PURCHASE_DEFAULTS = {"amount": Decimal("1.0"), "automatic": False}
 
 
 def create_coupons_for_request_row(row, company_id):
@@ -50,7 +50,7 @@ def create_coupons_for_request_row(row, company_id):
     Returns:
         CouponPaymentVersion:
             A CouponPaymentVersion. Other instances will be created at the same time and linked via foreign keys.
-    """
+    """  # noqa: E501, D401
     product_program_run_map = (
         {row.product.id: row.program_run.id} if row.program_run else None
     )
@@ -64,7 +64,7 @@ def create_coupons_for_request_row(row, company_id):
         activation_date=row.activation,
         expiration_date=row.expiration,
         payment_type=CouponPaymentVersion.PAYMENT_PO,
-        discount_type=DISCOUNT_TYPE_PERCENT_OFF,  # Default to percent-off, There won't be dollars-off coupons in sheets
+        discount_type=DISCOUNT_TYPE_PERCENT_OFF,  # Default to percent-off, There won't be dollars-off coupons in sheets  # noqa: E501
         payment_transaction=row.purchase_order_id,
         product_program_run_map=product_program_run_map,
         **BULK_PURCHASE_DEFAULTS,
@@ -74,7 +74,7 @@ def create_coupons_for_request_row(row, company_id):
 class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
     """Represents a row of a coupon request sheet"""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         row_index,
         purchase_order_id,
@@ -122,7 +122,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
 
         Raises:
             SheetRowParsingException: Raised if the row could not be parsed
-        """
+        """  # noqa: D401
         try:
             return cls(
                 row_index=row_index,
@@ -157,7 +157,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
                 )
                 == GOOGLE_API_TRUE_VAL,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             raise SheetRowParsingException(str(exc)) from exc
 
 
@@ -170,7 +170,7 @@ def is_row_ignored_or_complete(raw_row_data):
 
     Returns:
         bool: True if the data in the given row indicates that it is complete (processed) or should be ignored
-    """
+    """  # noqa: E501, D401
     return item_at_index_or_blank(
         raw_row_data, request_sheet_metadata.SKIP_ROW_COL
     ).strip() == GOOGLE_API_TRUE_VAL or bool(
@@ -207,7 +207,7 @@ class CouponRequestHandler(SheetHandler):
 
         Returns:
             dict: The response body from the Google Sheets API batch update request
-        """
+        """  # noqa: E501, D401
         header_range_req = build_protected_range_request_body(
             worksheet_id=worksheet_id,
             start_row_index=0,
@@ -249,21 +249,22 @@ class CouponRequestHandler(SheetHandler):
 
         Returns:
             pygsheets.Spreadsheet: The Spreadsheet object representing the newly-created sheet
-        """
+        """  # noqa: E501, D401
         # Get coupon codes created by the request
         coupon_codes = Coupon.objects.filter(
             payment__name=coupon_req_row.coupon_name
         ).values_list("coupon_code", flat=True)
         if not coupon_codes:
             log.error(
-                "Cannot create bulk coupon sheet - No coupon codes found matching the name '%s'",
+                "Cannot create bulk coupon sheet - No coupon codes found matching the"
+                " name '%s'",
                 coupon_req_row.coupon_name,
             )
-            return
+            return None
         # Create sheet
         spreadsheet_title = assignment_sheet_file_name(coupon_req_row)
         create_kwargs = (
-            dict(folder=settings.DRIVE_OUTPUT_FOLDER_ID)
+            {"folder": settings.DRIVE_OUTPUT_FOLDER_ID}
             if settings.DRIVE_OUTPUT_FOLDER_ID
             else {}
         )
@@ -273,18 +274,21 @@ class CouponRequestHandler(SheetHandler):
         worksheet = bulk_coupon_sheet.sheet1
         # Add headers
         worksheet.update_values(
-            crange="A1:{}1".format(assign_sheet_metadata.LAST_COL_LETTER),
+            crange=f"A1:{assign_sheet_metadata.LAST_COL_LETTER}1",
             values=[assign_sheet_metadata.column_headers],
         )
         # Write enrollment codes to the appropriate column of the worksheet
         last_data_row_idx = len(coupon_codes) + assign_sheet_metadata.first_data_row
         worksheet.update_values(
-            crange="{enroll_col_letter}{first_data_row}:{enroll_col_letter}{last_data_row}".format(
-                enroll_col_letter=get_column_letter(
-                    assign_sheet_metadata.ENROLL_CODE_COL
-                ),
-                first_data_row=assign_sheet_metadata.first_data_row,
-                last_data_row=last_data_row_idx,
+            crange=(
+                "{enroll_col_letter}{first_data_row}:{enroll_col_letter}{last_data_row}"
+                .format(
+                    enroll_col_letter=get_column_letter(
+                        assign_sheet_metadata.ENROLL_CODE_COL
+                    ),
+                    first_data_row=assign_sheet_metadata.first_data_row,
+                    last_data_row=last_data_row_idx,
+                )
             ),
             values=[[coupon_code] for coupon_code in coupon_codes],
         )
@@ -293,12 +297,15 @@ class CouponRequestHandler(SheetHandler):
             itertools.repeat(coupon_req_row.product.id, len(coupon_codes)), coupon_codes
         )
         worksheet.update_values(
-            crange="{enroll_url_letter}{first_data_row}:{enroll_url_letter}{last_data_row}".format(
-                enroll_url_letter=get_column_letter(
-                    assign_sheet_metadata.ENROLL_URL_COL
-                ),
-                first_data_row=assign_sheet_metadata.first_data_row,
-                last_data_row=last_data_row_idx,
+            crange=(
+                "{enroll_url_letter}{first_data_row}:{enroll_url_letter}{last_data_row}"
+                .format(
+                    enroll_url_letter=get_column_letter(
+                        assign_sheet_metadata.ENROLL_URL_COL
+                    ),
+                    first_data_row=assign_sheet_metadata.first_data_row,
+                    last_data_row=last_data_row_idx,
+                )
             ),
             values=[
                 [make_checkout_url(product_id=product_id, code=coupon_code)]
@@ -311,13 +318,13 @@ class CouponRequestHandler(SheetHandler):
         # Format header cells with bold text
         header_range = worksheet.get_values(
             start="A1",
-            end="{}1".format(assign_sheet_metadata.LAST_COL_LETTER),
+            end=f"{assign_sheet_metadata.LAST_COL_LETTER}1",
             returnas="range",
         )
         first_cell = header_range.cells[0][0]
-        first_cell.set_text_format("bold", True)
+        first_cell.set_text_format("bold", True)  # noqa: FBT003
         header_range.apply_format(first_cell)
-        # Protect ranges of cells that should not be edited (everything besides the email column)
+        # Protect ranges of cells that should not be edited (everything besides the email column)  # noqa: E501
         self.protect_coupon_assignment_ranges(
             spreadsheet_id=bulk_coupon_sheet.id,
             worksheet_id=worksheet.id,
@@ -379,9 +386,10 @@ class CouponRequestHandler(SheetHandler):
                 created,
             ) = CouponGenerationRequest.objects.select_for_update().get_or_create(
                 coupon_name=coupon_name,
-                defaults=dict(
-                    purchase_order_id=purchase_order_id, raw_data=user_input_json
-                ),
+                defaults={
+                    "purchase_order_id": purchase_order_id,
+                    "raw_data": user_input_json,
+                },
             )
             raw_data_changed = coupon_gen_request.raw_data != user_input_json
             if raw_data_changed:
@@ -403,7 +411,7 @@ class CouponRequestHandler(SheetHandler):
                 observed_coupon_names.add(coupon_name)
 
         # If any coupon names were found on multiple rows, create a failed request
-        # object for each row with a non-unique coupon name (except for the row with the first instance
+        # object for each row with a non-unique coupon name (except for the row with the first instance  # noqa: E501
         # of that name).
         for row_index, coupon_name in invalid_coupon_name_row_dict.items():
             sheet_error_text = "Coupon name '{}' already exists in the sheet".format(
@@ -421,14 +429,14 @@ class CouponRequestHandler(SheetHandler):
 
         valid_data_rows = filter(
             lambda data_row_tuple: data_row_tuple[0]
-            not in invalid_coupon_name_row_dict.keys(),
+            not in invalid_coupon_name_row_dict,
             enumerated_data_rows_2,
         )
         return valid_data_rows, invalid_rows
 
     def filter_ignored_rows(self, enumerated_rows):
         return filter(
-            # If the "ignore" column is set to TRUE for this row, or it has already been processed,
+            # If the "ignore" column is set to TRUE for this row, or it has already been processed,  # noqa: E501
             # it should be skipped
             lambda data_row_tuple: not is_row_ignored_or_complete(data_row_tuple[1]),
             enumerated_rows,
@@ -450,7 +458,7 @@ class CouponRequestHandler(SheetHandler):
                 row_db_record=coupon_gen_request,
                 row_object=None,
                 result_type=ResultType.FAILED,
-                message="Parsing failure: {}".format(str(exc)),
+                message=f"Parsing failure: {exc!s}",
             )
         is_unchanged_error_row = (
             coupon_req_row.errors and not request_created and not request_updated
@@ -476,7 +484,7 @@ class CouponRequestHandler(SheetHandler):
 
         company, created = Company.objects.get_or_create(
             name__iexact=coupon_req_row.company_name,
-            defaults=dict(name=coupon_req_row.company_name),
+            defaults={"name": coupon_req_row.company_name},
         )
         if created:
             log.info("Created new Company '%s'...", coupon_req_row.company_name)

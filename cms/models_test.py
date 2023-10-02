@@ -1,4 +1,4 @@
-""" Tests for cms pages. """
+"""Tests for cms pages."""
 # pylint: disable=too-many-lines
 import json
 from datetime import date, datetime, timedelta
@@ -55,7 +55,6 @@ from cms.models import (
     WhoShouldEnrollPage,
 )
 from courses.factories import CourseFactory
-
 
 pytestmark = [pytest.mark.django_db]
 
@@ -142,10 +141,10 @@ def test_webinar_context(staff_user):
 
 
 @pytest.mark.parametrize(
-    "time, webinar_date,",
-    (
-        ["11 am", datetime.today() + timedelta(days=1)],
-        [None, None],
+    ("time", "webinar_date"),
+    (  # noqa: PT007
+        ["11 am", datetime.today() + timedelta(days=1)],  # noqa: DTZ002, PT007
+        [None, None],  # noqa: PT007
     ),
 )
 def test_upcoming_webinar_date_time(time, webinar_date):
@@ -240,7 +239,7 @@ def test_program_page_course_pages_live_only():
 
 
 def test_custom_detail_page_urls():
-    """Verify that course/external-course/program detail pages return our custom URL path"""
+    """Verify that course/external-course/program detail pages return our custom URL path"""  # noqa: E501
     readable_id = "some:readable-id"
     external_readable_id = "some:external-readable-id"
     program_pages = ProgramPageFactory.create_batch(
@@ -261,21 +260,17 @@ def test_custom_detail_page_urls():
             [external_readable_id, "non-matching-external-id"]
         ),
     )
-    assert program_pages[0].get_url() == "/programs/{}/".format(readable_id)
-    assert external_program_pages[0].get_url() == "/programs/{}/".format(
-        external_readable_id
-    )
-    assert course_pages[0].get_url() == "/courses/{}/".format(readable_id)
-    assert external_course_pages[0].get_url() == "/courses/{}/".format(
-        external_readable_id
-    )
+    assert program_pages[0].get_url() == f"/programs/{readable_id}/"
+    assert external_program_pages[0].get_url() == f"/programs/{external_readable_id}/"
+    assert course_pages[0].get_url() == f"/courses/{readable_id}/"
+    assert external_course_pages[0].get_url() == f"/courses/{external_readable_id}/"
 
 
 def test_custom_detail_page_urls_handled():
-    """Verify that custom URL paths for our course/program are served by the standard Wagtail view"""
+    """Verify that custom URL paths for our course/program are served by the standard Wagtail view"""  # noqa: E501
     readable_id = "some:readable-id"
     CoursePageFactory.create(course__readable_id=readable_id)
-    resolver_match = resolve("/courses/{}/".format(readable_id))
+    resolver_match = resolve(f"/courses/{readable_id}/")
     assert (
         resolver_match.func.__module__ == "wagtail.core.views"
     )  # pylint: disable=protected-access
@@ -450,7 +445,7 @@ def test_image_carousel_section():
     assert home_page.image_carousel_section == image_carousel_page
     assert image_carousel_page.title == "title"
     for index, image in enumerate(image_carousel_page.images):
-        assert image.value.title == "image-title-{}".format(index)
+        assert image.value.title == f"image-title-{index}"
 
 
 def test_program_page_faculty_subpage():
@@ -469,7 +464,7 @@ def test_program_page_faculty_subpage():
 def test_external_program_page_faculty_subpage():
     """
     FacultyMembersPage should return expected values if associated with ExternalProgramPage
-    """
+    """  # noqa: E501
     external_program_page = ExternalProgramPageFactory.create()
 
     assert not external_program_page.faculty
@@ -495,7 +490,7 @@ def test_course_page_faculty_subpage():
 def test_external_course_page_faculty_subpage():
     """
     FacultyMembersPage should return expected values if associated with ExternalCoursePage
-    """
+    """  # noqa: E501
     external_course_page = ExternalCoursePageFactory.create()
 
     assert not external_course_page.faculty
@@ -506,7 +501,7 @@ def test_external_course_page_faculty_subpage():
 
 
 def _get_faculty_members():
-    """Provides a `faculty` property instantiation data"""
+    """Provides a `faculty` property instantiation data"""  # noqa: D401
     return [
         {
             "type": "member",
@@ -520,7 +515,7 @@ def _get_faculty_members():
 
 
 def _assert_faculty_members(obj):
-    """Verifies `faculty` property returns expected value"""
+    """Verifies `faculty` property returns expected value"""  # noqa: D401
     # invalidate cached property
     del obj.child_pages
 
@@ -559,7 +554,7 @@ def test_course_page_testimonials():
 def test_external_course_page_testimonials():
     """
     testimonials property should return expected value if associated with an ExternalCoursePage
-    """
+    """  # noqa: E501
     external_course_page = ExternalCoursePageFactory.create()
     assert UserTestimonialsPage.can_create_at(external_course_page)
     testimonials_page = UserTestimonialsPageFactory.create(
@@ -609,7 +604,7 @@ def test_program_page_testimonials():
 def test_external_program_page_testimonials():
     """
     testimonials property should return expected value if associated with an ExternalProgramPage
-    """
+    """  # noqa: E501
     external_program_page = ExternalProgramPageFactory.create()
     assert UserTestimonialsPage.can_create_at(external_program_page)
     testimonials_page = UserTestimonialsPageFactory.create(
@@ -652,9 +647,9 @@ def test_program_page_child_page_url():
     child_page_url = child_page.get_full_url()
 
     if WAGTAIL_APPEND_SLASH:
-        assert child_page_url == "{}{}/".format(program_page_url, child_page.slug)
+        assert child_page_url == f"{program_page_url}{child_page.slug}/"
     else:
-        assert child_page_url == "{}/{}".format(program_page_url, child_page.slug)
+        assert child_page_url == f"{program_page_url}/{child_page.slug}"
 
 
 def test_course_page_child_page_url():
@@ -669,9 +664,9 @@ def test_course_page_child_page_url():
     child_page_url = child_page.get_full_url()
 
     if WAGTAIL_APPEND_SLASH:
-        assert child_page_url == "{}{}/".format(course_page_url, child_page.slug)
+        assert child_page_url == f"{course_page_url}{child_page.slug}/"
     else:
-        assert child_page_url == "{}/{}".format(course_page_url, child_page.slug)
+        assert child_page_url == f"{course_page_url}/{child_page.slug}"
 
 
 def test_course_page_for_teams():
@@ -697,7 +692,7 @@ def test_course_page_for_teams():
 def test_external_course_page_for_teams():
     """
     The ForTeams property should return expected values if associated with a ExternalCoursePage
-    """
+    """  # noqa: E501
     external_course_page = ExternalCoursePageFactory.create()
     assert ForTeamsPage.can_create_at(external_course_page)
     teams_page = ForTeamsPageFactory.create(
@@ -738,7 +733,7 @@ def test_program_page_for_teams():
 def test_external_program_page_for_teams():
     """
     The ForTeams property should return expected values if associated with an ExternalProgramPage
-    """
+    """  # noqa: E501
     external_program_page = ExternalProgramPageFactory.create()
     assert ForTeamsPage.can_create_at(external_program_page)
     teams_page = ForTeamsPageFactory.create(
@@ -758,7 +753,7 @@ def test_external_program_page_for_teams():
 def test_program_page_course_lineup():
     """
     course_lineup property should return expected values if associated with a ProgramPage
-    """
+    """  # noqa: E501
     program_page = ProgramPageFactory.create()
     assert CoursesInProgramPage.can_create_at(program_page)
     courses_page = CoursesInProgramPageFactory.create(
@@ -873,7 +868,7 @@ def test_external_course_page_properties():
 def test_program_page_properties():
     """
     Wagtail-page-related properties should return expected values if the Wagtail page exists
-    """
+    """  # noqa: E501
     program_page = ProgramPageFactory.create(
         title="<p>page title</p>",
         subhead="subhead",
@@ -897,7 +892,7 @@ def test_program_page_properties():
 def test_external_program_page_properties():
     """
     Wagtail-page-related properties for ExternalProgramPage should return expected values
-    """
+    """  # noqa: E501
     external_program_page = ExternalProgramPageFactory.create(
         title="<p>page title</p>",
         subhead="subhead",
@@ -953,7 +948,7 @@ def test_course_page_learning_outcomes():
 def test_external_course_page_learning_outcomes():
     """
     ExternalCoursePage related LearningOutcomesPage should return expected values if it exists
-    """
+    """  # noqa: E501
     external_course_page = ExternalCoursePageFactory.create()
 
     assert external_course_page.outcomes is None
@@ -1009,7 +1004,7 @@ def test_program_learning_outcomes():
 def test_external_program_learning_outcomes():
     """
     ExternalProgramPage related LearningOutcomesPage should return expected values if it exists
-    """
+    """  # noqa: E501
     external_program_page = ExternalProgramPageFactory.create()
 
     assert LearningOutcomesPage.can_create_at(external_program_page)
@@ -1058,7 +1053,7 @@ def test_external_course_page_learning_techniques():
     """
     ExternalCoursePage related subpages should return expected values if they exist
     ExternalCoursePage related LearningTechniquesPage should return expected values if it exists
-    """
+    """  # noqa: E501
     external_course_page = ExternalCoursePageFactory.create()
 
     assert LearningTechniquesPage.can_create_at(external_course_page)
@@ -1081,7 +1076,7 @@ def test_program_page_learning_techniques():
     """
     ProgramPage related subpages should return expected values if they exist
     ProgramPage related LearningTechniquesPage should return expected values if it exists
-    """
+    """  # noqa: E501
     program_page = ProgramPageFactory.create(
         description="<p>desc</p>", duration="1 week"
     )
@@ -1106,7 +1101,7 @@ def test_external_program_page_learning_techniques():
     """
     ExternalProgramPage related subpages should return expected values if they exist
     ExternalProgramPage related LearningTechniquesPage should return expected values if it exists
-    """
+    """  # noqa: E501
     external_program_page = ExternalProgramPageFactory.create(
         description="<p>desc</p>", duration="1 week"
     )
@@ -1144,7 +1139,7 @@ def test_program_page_who_should_enroll():
         ),
     )
     assert who_should_enroll_page.get_parent() == program_page
-    assert len(who_should_enroll_page.content) == 2
+    assert len(who_should_enroll_page.content) == 2  # noqa: PLR2004
     for block in who_should_enroll_page.content:  # pylint: disable=not-an-iterable
         assert block.block_type == "item"
         assert block.value.source == "<p>item</p>"
@@ -1165,7 +1160,7 @@ def test_program_page_who_should_enroll():
 def test_external_program_page_who_should_enroll():
     """
     ExternalProgramPage related WhoShouldEnrollPage should return expected values if it exists
-    """
+    """  # noqa: E501
     external_program_page = ExternalProgramPageFactory.create()
 
     assert WhoShouldEnrollPage.can_create_at(external_program_page)
@@ -1179,7 +1174,7 @@ def test_external_program_page_who_should_enroll():
         ),
     )
     assert who_should_enroll_page.get_parent() == external_program_page
-    assert len(who_should_enroll_page.content) == 2
+    assert len(who_should_enroll_page.content) == 2  # noqa: PLR2004
     for block in who_should_enroll_page.content:  # pylint: disable=not-an-iterable
         assert block.block_type == "item"
         assert block.value.source == "<p>item</p>"
@@ -1200,7 +1195,7 @@ def test_external_program_page_who_should_enroll():
 def test_course_page_propel_career():
     """
     The propel_career property should return expected values if associated with a CoursePage
-    """
+    """  # noqa: E501
     course_page = CoursePageFactory.create()
     propel_career_page = TextSectionFactory.create(
         parent=course_page,
@@ -1218,7 +1213,7 @@ def test_course_page_propel_career():
 def test_external_course_page_propel_career():
     """
     The propel_career property should return expected values if associated with an ExternalCoursePage
-    """
+    """  # noqa: E501
     external_course_page = ExternalCoursePageFactory.create()
     propel_career_page = TextSectionFactory.create(
         parent=external_course_page,
@@ -1236,7 +1231,7 @@ def test_external_course_page_propel_career():
 def test_program_page_propel_career():
     """
     The propel_career property should return expected values if associated with a ProgramPage
-    """
+    """  # noqa: E501
     program_page = ProgramPageFactory.create()
     propel_career_page = TextSectionFactory.create(
         parent=program_page,
@@ -1253,7 +1248,7 @@ def test_program_page_propel_career():
 def test_external_program_page_propel_career():
     """
     The propel_career property should return expected values if associated with a ExternalProgramPage
-    """
+    """  # noqa: E501
     external_program_page = ExternalProgramPageFactory.create()
     propel_career_page = TextSectionFactory.create(
         parent=external_program_page,
@@ -1327,7 +1322,7 @@ def test_featured_product():
 def test_certificate_for_course_page():
     """
     The Certificate property should return expected values if associated with a CertificatePage
-    """
+    """  # noqa: E501
     course_page = CoursePageFactory.create(certificate_page=None)
     assert CertificatePage.can_create_at(course_page)
     assert not SignatoryPage.can_create_at(course_page)
@@ -1358,7 +1353,7 @@ def test_certificate_for_course_page():
 def test_certificate_for_program_page():
     """
     The Certificate property should return expected values if associated with a CertificatePage
-    """
+    """  # noqa: E501
     program_page = ProgramPageFactory.create(certificate_page=None)
     assert CertificatePage.can_create_at(program_page)
     assert not SignatoryPage.can_create_at(program_page)
@@ -1390,7 +1385,7 @@ def test_certificate_for_program_page():
 def test_program_course_order():
     """
     The course pages in program page should be ordered on the basis of position_in_program
-    """
+    """  # noqa: E501
     program_page = ProgramPageFactory.create()
     course_pages = CoursePageFactory.create_batch(
         3,
@@ -1445,7 +1440,7 @@ def test_product_course_page_news_and_events_with_program():
     """
     NewsAndEvents subpage should provide expected values of program 'news and events' if comes under CoursePage
     and CoursePage is associated with a program.
-    """
+    """  # noqa: E501
     program_page = ProgramPageFactory.create()
     course_page = CoursePageFactory.create(course__program=program_page.program)
     assert not course_page.news_and_events

@@ -7,7 +7,7 @@ describe("auth reducers", () => {
   describe("authSelector", () => {
     it("should return the auth state", () => {
       const auth = {
-        key: "value"
+        key: "value",
       }
       assert.equal(authSelector({ entities: { auth } }), auth)
     })

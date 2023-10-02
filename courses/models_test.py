@@ -30,20 +30,19 @@ from mitxpro.test_utils import format_as_iso8601
 from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
 
-
 pytestmark = [pytest.mark.django_db]
 
 
 def test_program_course_auto_position():
     """
     If a course is added to a program with no position specified, it should be given the last position
-    """
+    """  # noqa: E501
     first_course = CourseFactory.create(position_in_program=None)
     assert first_course.position_in_program == 1
     second_course = CourseFactory.create(
         program=first_course.program, position_in_program=None
     )
-    assert second_course.position_in_program == 2
+    assert second_course.position_in_program == 2  # noqa: PLR2004
 
 
 def test_program_num_courses():
@@ -57,14 +56,14 @@ def test_program_num_courses():
     assert program.num_courses == 1
 
     CourseFactory.create(program=program)
-    assert program.num_courses == 2
+    assert program.num_courses == 2  # noqa: PLR2004
 
 
 def test_program_next_run_date():
     """
     next_run_date should return the date of the CourseRun with the nearest future start date
     and first position in program (course__position_in_program=1)
-    """
+    """  # noqa: E501
     program = ProgramFactory.create()
     CourseRunFactory.create_batch(
         2,
@@ -100,7 +99,7 @@ def test_program_is_catalog_visible():
     """
     is_catalog_visible should return True if a program has any course run that has a start date or enrollment end
     date in the future
-    """
+    """  # noqa: E501
     program = ProgramFactory.create()
     runs = CourseRunFactory.create_batch(
         2, course__program=program, past_start=True, past_enrollment_end=True
@@ -123,7 +122,7 @@ def test_program_first_course_unexpired_runs():
     """
     first_course_unexpired_runs should return the unexpired course runs of the first course
     in the program (position_in_program=1)
-    """
+    """  # noqa: E501
     program = ProgramFactory.create()
 
     now = now_in_utc()
@@ -162,7 +161,7 @@ def test_program_first_course_unexpired_runs():
         enrollment_end=factory.Iterator(future_end_dates),
         live=True,
     )
-    assert len(program.first_course_unexpired_runs) == 3
+    assert len(program.first_course_unexpired_runs) == 3  # noqa: PLR2004
 
 
 def test_program_current_price():
@@ -190,7 +189,7 @@ def test_external_courseware_marketing_url():
     )
 
     course_runs = CourseRunFactory.create_batch(2, course=course)
-    # Create multiple runs, Check the url returned by course is from the latest one starting
+    # Create multiple runs, Check the url returned by course is from the latest one starting  # noqa: E501
     course_runs[0].start_date = now_in_utc() + timedelta(hours=2)
     course_runs[1].start_date = now_in_utc() + timedelta(hours=1)
 
@@ -223,7 +222,9 @@ def test_courseware_url(settings):
     assert course_run_no_path.courseware_url is None
 
 
-@pytest.mark.parametrize("end_days,expected", [[-1, True], [1, False], [None, False]])
+@pytest.mark.parametrize(
+    ("end_days", "expected"), [[-1, True], [1, False], [None, False]]  # noqa: PT007
+)  # noqa: E501, PT007, RUF100
 def test_course_run_past(end_days, expected):
     """
     Test that CourseRun.is_past returns the expected boolean value
@@ -234,7 +235,8 @@ def test_course_run_past(end_days, expected):
 
 
 @pytest.mark.parametrize(
-    "start_delta, end_delta, expiration_delta", [[-1, 2, 3], [1, 3, 4], [10, 20, 30]]
+    ("start_delta", "end_delta", "expiration_delta"),
+    [[-1, 2, 3], [1, 3, 4], [10, 20, 30]],  # noqa: E501, PT007, RUF100
 )
 def test_course_run_expiration_date(start_delta, end_delta, expiration_delta):
     """
@@ -253,12 +255,13 @@ def test_course_run_expiration_date(start_delta, end_delta, expiration_delta):
 
 
 @pytest.mark.parametrize(
-    "start_delta, end_delta, expiration_delta", [[1, 2, 1], [1, 2, -1]]
+    ("start_delta", "end_delta", "expiration_delta"),
+    [[1, 2, 1], [1, 2, -1]],  # noqa: PT007
 )
 def test_course_run_invalid_expiration_date(start_delta, end_delta, expiration_delta):
     """
     Test that CourseRun.expiration_date raises ValidationError if expiration_date is before start_date or end_date
-    """
+    """  # noqa: E501
     now = now_in_utc()
     with pytest.raises(ValidationError):
         CourseRunFactory.create(
@@ -269,16 +272,16 @@ def test_course_run_invalid_expiration_date(start_delta, end_delta, expiration_d
 
 
 @pytest.mark.parametrize(
-    "end_days, enroll_start_days, enroll_end_days, expected",
+    ("end_days", "enroll_start_days", "enroll_end_days", "expected"),
     [
-        [None, None, None, True],
-        [None, None, 1, True],
-        [None, None, -1, False],
-        [1, None, None, True],
-        [-1, None, None, False],
-        [1, None, -1, False],
-        [None, 1, None, False],
-        [None, -1, None, True],
+        [None, None, None, True],  # noqa: PT007
+        [None, None, 1, True],  # noqa: PT007
+        [None, None, -1, False],  # noqa: PT007
+        [1, None, None, True],  # noqa: PT007
+        [-1, None, None, False],  # noqa: PT007
+        [1, None, -1, False],  # noqa: PT007
+        [None, 1, None, False],  # noqa: PT007
+        [None, -1, None, True],  # noqa: PT007
     ],
 )
 def test_course_run_not_beyond_enrollment(
@@ -307,7 +310,8 @@ def test_course_run_not_beyond_enrollment(
 
 
 @pytest.mark.parametrize(
-    "end_days,enroll_days,expected", [[-1, 1, False], [1, -1, False], [1, 1, True]]
+    ("end_days", "enroll_days", "expected"),
+    [[-1, 1, False], [1, -1, False], [1, 1, True]],  # noqa: E501, PT007, RUF100
 )
 def test_course_run_unexpired(end_days, enroll_days, expected):
     """
@@ -383,7 +387,7 @@ def test_certificate_validations():
     """
     Test that the certificate models throw a proper error if the selected revision is invalid w.r.t
     courseware run selection
-    """
+    """  # noqa: E501
     course_runs = CourseRunFactory.create_batch(2)
     programs = ProgramFactory.create_batch(2)
 
@@ -409,13 +413,19 @@ def test_certificate_validations():
     # When the revision doesn't match the courseware
     with pytest.raises(
         ValidationError,
-        match=f"The selected certificate page {course_certificate} is not for this course {course_runs[0].course}.",
+        match=(
+            f"The selected certificate page {course_certificate} is not for this course"
+            f" {course_runs[0].course}."
+        ),
     ):
         course_certificate.clean()
 
     with pytest.raises(
         ValidationError,
-        match=f"The selected certificate page {program_certificate} is not for this program {programs[0]}.",
+        match=(
+            f"The selected certificate page {program_certificate} is not for this"
+            f" program {programs[0]}."
+        ),
     ):
         program_certificate.clean()
 
@@ -492,7 +502,7 @@ def test_program_first_unexpired_run():
 def test_course_next_run_date():
     """
     next_run_date should return the date of the CourseRun with the nearest future start date
-    """
+    """  # noqa: E501
     course = CourseFactory.create()
     CourseRunFactory.create_batch(2, course=course, past_start=True, live=True)
     assert course.next_run_date is None
@@ -513,7 +523,7 @@ def test_course_is_catalog_visible():
     """
     is_catalog_visible should return True if a course has any course run that has a start date or enrollment end
     date in the future
-    """
+    """  # noqa: E501
     course = CourseFactory.create()
     runs = CourseRunFactory.create_batch(
         2, course=course, past_start=True, past_enrollment_end=True
@@ -568,7 +578,7 @@ def test_course_unexpired_runs():
 
 
 def test_course_available_runs():
-    """enrolled runs for a user should not be in the list of available runs"""
+    """Enrolled runs for a user should not be in the list of available runs"""
     user = UserFactory.create()
     course = CourseFactory.create()
     runs = CourseRunFactory.create_batch(2, course=course, live=True)
@@ -579,7 +589,7 @@ def test_course_available_runs():
 
 
 def test_reactivate_and_save():
-    """Test that the reactivate_and_save method in enrollment models sets properties and saves"""
+    """Test that the reactivate_and_save method in enrollment models sets properties and saves"""  # noqa: E501
     course_run_enrollment = CourseRunEnrollmentFactory.create(
         active=False, change_status=ENROLL_CHANGE_STATUS_REFUNDED
     )
@@ -595,7 +605,7 @@ def test_reactivate_and_save():
 
 
 def test_deactivate_and_save():
-    """Test that the deactivate_and_save method in enrollment models sets properties and saves"""
+    """Test that the deactivate_and_save method in enrollment models sets properties and saves"""  # noqa: E501
     course_run_enrollment = CourseRunEnrollmentFactory.create(
         active=True, change_status=None
     )
@@ -656,7 +666,7 @@ def test_get_program_run_enrollments(user):
     """
     Test that the get_program_run_enrollments helper method for CourseRunEnrollment returns
     the appropriate course run enrollments for a program
-    """
+    """  # noqa: E501
     programs = ProgramFactory.create_batch(2)
     program = programs[0]
     course_run_enrollments = CourseRunEnrollmentFactory.create_batch(
@@ -695,9 +705,11 @@ def test_audit(user, is_program, has_company):
         "full_name": enrollment.user.name,
         "id": enrollment.id,
         "order": enrollment.order.id,
-        "text_id": enrollment.program.readable_id
-        if is_program
-        else enrollment.run.courseware_id,
+        "text_id": (
+            enrollment.program.readable_id
+            if is_program
+            else enrollment.run.courseware_id
+        ),
         "updated_on": format_as_iso8601(enrollment.updated_on),
         "user": enrollment.user.id,
         "username": enrollment.user.username,
@@ -714,7 +726,7 @@ def test_audit(user, is_program, has_company):
 
 
 def test_enrollment_is_ended():
-    """Verify that is_ended returns True, if all of course runs in a program/course are ended."""
+    """Verify that is_ended returns True, if all of course runs in a program/course are ended."""  # noqa: E501
     past_date = now_in_utc() - timedelta(days=1)
     past_program = ProgramFactory.create()
     past_course = CourseFactory.create()
@@ -732,7 +744,7 @@ def test_enrollment_is_ended():
 
 @pytest.mark.parametrize("has_page", [True, False])
 def test_instructors(has_page):
-    """CourseRun.instructors should list instructors from the related CMS page, or provide an empty list"""
+    """CourseRun.instructors should list instructors from the related CMS page, or provide an empty list"""  # noqa: E501
     faculty_names = ["Teacher One", "Teacher Two"]
     course_run = CourseRunFactory.create(course__page=None)
     if has_page:

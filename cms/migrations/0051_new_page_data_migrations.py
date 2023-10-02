@@ -2,7 +2,7 @@
 
 """
 Data migrations moved to cms/migrations/0052_new_page_data_migrations.py in response to Page model change
-"""
+"""  # noqa: E501
 
 from django.db import migrations
 

@@ -21,7 +21,6 @@ from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import dict_without_keys
 from users.factories import UserFactory
 
-
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_ACCESS_KEY = "access"
 CYBERSOURCE_PROFILE_ID = "profile"
@@ -34,7 +33,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture(autouse=True)
-def ecommerce_settings(settings):
+def ecommerce_settings(settings):  # noqa: PT004
     """
     Set cybersource settings
     """
@@ -85,7 +84,7 @@ def test_create_order(client, mocker):
     assert order.num_seats == num_seats
     assert order.b2breceipt_set.count() == 0
     base_url = "http://testserver/"
-    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'
+    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={order.unique_id!s}'  # noqa: E501
     assert generate_mock.call_count == 1
     assert generate_mock.call_args[0] == ()
     assert generate_mock.call_args[1] == {
@@ -138,7 +137,7 @@ def test_create_order_with_coupon(client, mocker):
     assert order.num_seats == num_seats
     assert order.b2breceipt_set.count() == 0
     base_url = "http://testserver/"
-    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'
+    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={order.unique_id!s}'  # noqa: E501
     assert generate_payload_mock.call_count == 1
     assert generate_payload_mock.call_args[0] == ()
     assert generate_payload_mock.call_args[1] == {
@@ -234,7 +233,9 @@ def test_create_order_duplicate_reference_number(client):
             "email": "a@example.com",
             "product_version_id": 987,
             "discount_code": "",
-            "contract_number": duplicate_test_contract_number.lower(),  # additional step for case insensitivity
+            "contract_number": (
+                duplicate_test_contract_number.lower()
+            ),  # additional step for case insensitivity
         },
     )
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -263,7 +264,7 @@ def test_create_order_product_version(client):
 def test_zero_price_checkout(client, mocker):  # pylint:disable=too-many-arguments
     """
     If the order total is $0, we should just fulfill the order and direct the user to our order receipt page
-    """
+    """  # noqa: E501
     complete_order_mock = mocker.patch("b2b_ecommerce.views.complete_b2b_order")
     product_version = ProductVersionFactory.create()
     resp = client.post(
@@ -279,7 +280,7 @@ def test_zero_price_checkout(client, mocker):  # pylint:disable=too-many-argumen
     assert B2BOrder.objects.count() == 1
     order = B2BOrder.objects.first()
     base_url = "http://testserver"
-    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'
+    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={order.unique_id!s}'  # noqa: E501
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json() == {"payload": {}, "url": receipt_url, "method": "GET"}
 
@@ -294,7 +295,7 @@ def test_zero_price_checkout(client, mocker):  # pylint:disable=too-many-argumen
 def test_order_status(client):
     """
     The order status API should provide information about the order based on its unique_id.
-    """
+    """  # noqa: E501
     order = B2BOrderFactory.create()
     resp = client.get(
         reverse("b2b-order-status", kwargs={"hash": str(order.unique_id)})
@@ -331,13 +332,13 @@ def test_order_status_customer_name(client):
         reverse("b2b-order-status", kwargs={"hash": str(order.unique_id)})
     )
 
-    # Order status API returns no customer name if there is no existing user associated with order email and there is no
+    # Order status API returns no customer name if there is no existing user associated with order email and there is no  # noqa: E501
     # receipt associated with order
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json().get("customer_name") == ""
     receipt_date = {"req_bill_to_forename": "Test", "req_bill_to_surname": "Name"}
 
-    # Order status API returns customer name from the receipt data when there is no user account with order email
+    # Order status API returns customer name from the receipt data when there is no user account with order email  # noqa: E501
 
     B2BReceipt.objects.create(order=order, data=receipt_date)
     resp = client.get(
@@ -346,7 +347,7 @@ def test_order_status_customer_name(client):
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json().get("customer_name") == "Test Name"
 
-    # Order status API returns name of the existing user if there exists an order's email matching user account
+    # Order status API returns name of the existing user if there exists an order's email matching user account  # noqa: E501
 
     test_user = UserFactory.create(email=order.email)
     resp = client.get(
@@ -386,7 +387,8 @@ def test_enrollment_codes(client):
     )
     rows = [line.split(",") for line in resp.content.decode().split("\r\n")]
     assert rows[0] == [
-        "Distribute the links below to each of your learners. Additional instructions are available at:"
+        "Distribute the links below to each of your learners. Additional instructions"
+        " are available at:"
     ]
     assert sorted(rows[3 : len(rows) - 1]) == sorted(
         [
@@ -401,7 +403,7 @@ def test_enrollment_codes(client):
 
 
 def test_program_run_enrollment_codes(client):
-    """A CSV file with enrollment codes should be provided for the B2BOrder that is attached to a ProgramRun"""
+    """A CSV file with enrollment codes should be provided for the B2BOrder that is attached to a ProgramRun"""  # noqa: E501
     program_run = ProgramRunFactory()
     coupon_version = CouponVersionFactory.create()
     coupons = [
@@ -445,7 +447,7 @@ def test_coupon_view(client):
     B2BCouponRedemption.objects.create(coupon=coupon, order=order)
     response = client.get(
         f'{reverse("b2b-coupon-view")}?'
-        f'{urlencode({"code": coupon.coupon_code, "product_id": order.product_version.product_id})}'
+        f'{urlencode({"code": coupon.coupon_code, "product_id": order.product_version.product_id})}'  # noqa: E501
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
@@ -462,7 +464,7 @@ def test_coupon_view_product_with_text_id(client):
     B2BCouponRedemption.objects.create(coupon=coupon, order=order)
     response = client.get(
         f'{reverse("b2b-coupon-view")}?'
-        f'{urlencode({"code": coupon.coupon_code, "product_id": order.product_version.text_id})}'
+        f'{urlencode({"code": coupon.coupon_code, "product_id": order.product_version.text_id})}'  # noqa: E501
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
@@ -481,7 +483,7 @@ def test_reusable_coupon_order_fulfilled(client, reusable, order_status):
     B2BCouponRedemption.objects.create(coupon=coupon, order=order)
     response = client.get(
         f'{reverse("b2b-coupon-view")}?'
-        f'{urlencode({"code": coupon.coupon_code, "product_id": order.product_version.product_id})}'
+        f'{urlencode({"code": coupon.coupon_code, "product_id": order.product_version.product_id})}'  # noqa: E501
     )
 
     if reusable:
@@ -501,7 +503,7 @@ def test_coupon_view_invalid(client, mocker):
         B2BCoupon.objects, "get_unexpired_coupon", side_effect=B2BCoupon.DoesNotExist
     )
     params = {"code": "x", "product_id": 3}
-    response = client.get(f'{reverse("b2b-coupon-view")}?' f"{urlencode(params)}")
+    response = client.get(f'{reverse("b2b-coupon-view")}?{urlencode(params)}')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     patched.assert_called_once_with(
         coupon_code=params["code"], product_id=params["product_id"]

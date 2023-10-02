@@ -6,14 +6,13 @@ from django.core.exceptions import ValidationError
 
 from voucher.utils import read_pdf
 
-
 VOUCHER_PARSE_ERROR = "Failed to parse PDF"
 
 
 class UploadVoucherForm(forms.Form):
     """
     UploadVoucherForm is a single field form for uploading a voucher and parsing it for cleaned data
-    """
+    """  # noqa: E501
 
     voucher = forms.FileField()
 

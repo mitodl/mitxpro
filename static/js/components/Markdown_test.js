@@ -6,7 +6,7 @@ import { assert } from "chai"
 import Markdown from "./Markdown"
 
 describe("Markdown", () => {
-  const render = source => mount(<Markdown source={source} />)
+  const render = (source) => mount(<Markdown source={source} />)
 
   it("should render markdown", () => {
     const wrapper = render("# MARKDOWN\n\nyeah markdown")
@@ -17,7 +17,7 @@ describe("Markdown", () => {
 
   it("should not render images", () => {
     const wrapper = render(
-      "![](https://upload.wikimedia.org/wikipedia/commons/4/4c/Chihuahua1_bvdb.jpg)"
+      "![](https://upload.wikimedia.org/wikipedia/commons/4/4c/Chihuahua1_bvdb.jpg)",
     )
     assert.isNotOk(wrapper.find("img").exists())
   })

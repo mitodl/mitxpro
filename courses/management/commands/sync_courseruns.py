@@ -1,6 +1,6 @@
 """
 Management command to sync dates and title for all or a specific course run from edX
-"""
+"""  # noqa: INP001
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 
@@ -14,7 +14,7 @@ class Command(BaseCommand):
     Command to sync course run dates and title from edX.
     """
 
-    help = "Sync dates and title for all or a specific course run from edX."
+    help = "Sync dates and title for all or a specific course run from edX."  # noqa: A003, E501
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -25,19 +25,20 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # pylint: disable=too-many-locals
+    def handle(
+        self, *args, **options  # noqa: ARG002
+    ):  # pylint: disable=too-many-locals  # noqa: ARG002, RUF100
         """Handle command execution"""
         runs = []
         if options["run"]:
             try:
                 runs = [CourseRun.objects.get(courseware_id=options["run"])]
             except CourseRun.DoesNotExist:
-                raise CommandError(
-                    "Could not find run with courseware_id={}".format(options["run"])
-                )
+                msg = "Could not find run with courseware_id={}".format(options["run"])
+                raise CommandError(msg)  # noqa: B904, TRY200
         else:
-            # We pick up all the course runs that do not have an expiration date (implies not having
-            # an end_date) or those that are not expired yet, in case the user has not specified any
+            # We pick up all the course runs that do not have an expiration date (implies not having  # noqa: E501
+            # an end_date) or those that are not expired yet, in case the user has not specified any  # noqa: E501
             # course run id.
             now = now_in_utc()
             runs = CourseRun.objects.live().filter(

@@ -30,7 +30,6 @@ from hubspot_xpro.task_helpers import sync_hubspot_b2b_deal
 from mitxpro.utils import make_csv_http_response
 from users.models import User
 
-
 log = logging.getLogger(__name__)
 
 
@@ -38,13 +37,13 @@ class B2BCheckoutView(APIView):
     """
     View for checkout API. This creates an Order in our system and provides a dictionary to
     send to Cybersource
-    """
+    """  # noqa: E501
 
     authentication_classes = ()
     permission_classes = ()
 
     def post(
-        self, request, *args, **kwargs
+        self, request, *args, **kwargs  # noqa: ARG002
     ):  # pylint: disable=too-many-locals,unused-argument
         """
         Create a new unfulfilled Order from the user's basket
@@ -58,17 +57,20 @@ class B2BCheckoutView(APIView):
             contract_number = request.data.get("contract_number")
             run_id = request.data.get("run_id")
         except KeyError as ex:
-            raise ValidationError(f"Missing parameter {ex.args[0]}")
+            msg = f"Missing parameter {ex.args[0]}"
+            raise ValidationError(msg)  # noqa: B904, TRY200
 
         try:
             validate_email(email)
         except DjangoValidationError:
-            raise ValidationError({"email": "Invalid email"})
+            raise ValidationError({"email": "Invalid email"})  # noqa: B904, TRY200
 
         try:
             num_seats = int(num_seats)
         except ValueError:
-            raise ValidationError({"num_seats": "num_seats must be a number"})
+            raise ValidationError(  # noqa: B904, TRY200
+                {"num_seats": "num_seats must be a number"}
+            )  # noqa: B904, RUF100, TRY200
 
         if (
             contract_number
@@ -125,7 +127,7 @@ class B2BCheckoutView(APIView):
             url = receipt_url
             method = "GET"
         else:
-            # This generates a signed payload which is submitted as an HTML form to CyberSource
+            # This generates a signed payload which is submitted as an HTML form to CyberSource  # noqa: E501
             payload = generate_b2b_cybersource_sa_payload(
                 order=order, receipt_url=receipt_url, cancel_url=cancel_url
             )
@@ -144,8 +146,10 @@ class B2BOrderStatusView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
-        """Return B2B order status and other information about the order needed to display the receipt"""
+    def get(
+        self, request, *args, **kwargs  # noqa: ARG002
+    ):  # pylint: disable=unused-argument  # noqa: ARG002, RUF100
+        """Return B2B order status and other information about the order needed to display the receipt"""  # noqa: E501
         order_hash = kwargs["hash"]
         order = get_object_or_404(B2BOrder, unique_id=order_hash)
 
@@ -196,7 +200,9 @@ class B2BEnrollmentCodesView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def get(
+        self, request, *args, **kwargs  # noqa: ARG002
+    ):  # pylint: disable=unused-argument  # noqa: ARG002, RUF100
         """Create a CSV with enrollment codes"""
         order_hash = kwargs["hash"]
         order = get_object_or_404(
@@ -217,7 +223,10 @@ class B2BEnrollmentCodesView(APIView):
         )
 
         instructions = [
-            "Distribute the links below to each of your learners. Additional instructions are available at:",
+            (
+                "Distribute the links below to each of your learners. Additional"
+                " instructions are available at:"
+            ),
             '=HYPERLINK("https://xpro.zendesk.com/hc/en-us/articles/360048166292-How-to-I-distribute-my-enrollment-codes-that-I-purchased-in-a-bulk-order-")',
         ]
 
@@ -231,19 +240,22 @@ class B2BEnrollmentCodesView(APIView):
 class B2BCouponView(APIView):
     """
     View to show information about whether a coupon code would work with an order, and what discount it would provide.
-    """
+    """  # noqa: E501
 
     authentication_classes = ()
     permission_classes = ()
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def get(
+        self, request, *args, **kwargs  # noqa: ARG002
+    ):  # pylint: disable=unused-argument  # noqa: ARG002, RUF100
         """Get information about a coupon"""
         product = None
         try:
             coupon_code = request.GET["code"]
             product_id = request.GET["product_id"]
         except KeyError as ex:
-            raise ValidationError(f"Missing parameter {ex.args[0]}")
+            msg = f"Missing parameter {ex.args[0]}"
+            raise ValidationError(msg)  # noqa: B904, TRY200
 
         try:
             # product_id can be an integer e.g. 1234 or
@@ -259,7 +271,7 @@ class B2BCouponView(APIView):
                 coupon_code=coupon_code, product_id=product_id
             )
         except B2BCoupon.DoesNotExist:
-            raise Http404
+            raise Http404  # noqa: B904
 
         return Response(
             data={

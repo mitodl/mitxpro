@@ -1,7 +1,7 @@
 """Test for user views"""
 from datetime import timedelta
-import pytest
 
+import pytest
 from django.urls import reverse
 from factory import fuzzy
 from rest_framework import status
@@ -14,7 +14,7 @@ from users.factories import UserFactory
 from users.models import ChangeEmailRequest
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_cannot_create_user(client):
     """Verify the api to create a user is nonexistent"""
     resp = client.post("/api/users/", data={"name": "Name"})
@@ -112,12 +112,12 @@ def test_get_user_by_me(mocker, client, user, is_anonymous, show_enrollment_code
         assert response["unused_coupons"] == patched_unused_coupon_api.return_value
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_countries_states_view(client):
     """Test that a list of countries and states is returned"""
     resp = client.get(reverse("countries_api-list"))
     countries = {country["code"]: country for country in resp.json()}
-    assert len(countries.get("US").get("states")) > 50
+    assert len(countries.get("US").get("states")) > 50  # noqa: PLR2004
     assert {"code": "CA-QC", "name": "Quebec"} in countries.get("CA").get("states")
     assert len(countries.get("FR").get("states")) == 0
     assert countries.get("US").get("name") == "United States"
@@ -138,7 +138,7 @@ def test_create_email_change_request_invalid_password(user_drf_client, user):
 
 
 def test_create_email_change_request_existing_email(user_drf_client, user):
-    """Test that create change email request gives validation error for existing user email"""
+    """Test that create change email request gives validation error for existing user email"""  # noqa: E501
     new_user = UserFactory.create()
     user_password = user.password
     user.set_password(user.password)
@@ -184,7 +184,7 @@ def test_create_email_change_request_valid_email(user_drf_client, user, mocker):
 
     old_email = user.email
     resp = user_drf_client.patch(
-        "/api/change-emails/{}/".format(code), data={"confirmed": True}
+        f"/api/change-emails/{code}/", data={"confirmed": True}
     )
     assert not UserSocialAuth.objects.filter(uid=old_email, user=user).exists()
     assert resp.status_code == status.HTTP_200_OK
@@ -201,7 +201,7 @@ def test_create_email_change_request_expired_code(user_drf_client, user):
     )
 
     resp = user_drf_client.patch(
-        "/api/change-emails/{}/".format(change_request.code), data={"confirmed": True}
+        f"/api/change-emails/{change_request.code}/", data={"confirmed": True}
     )
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
@@ -234,7 +234,7 @@ def test_update_user_name_change(mocker, user_client, user, valid_address_dict):
 
 
 def test_update_user_name_change_edx(mocker, user_client, user, valid_address_dict):
-    """Test that PATCH on user/me also calls update user's name api in edX if there is a name change in xPRO"""
+    """Test that PATCH on user/me also calls update user's name api in edX if there is a name change in xPRO"""  # noqa: E501
     new_name = fuzzy.FuzzyText(prefix="Test-").fuzz()
     update_edx_mock = mocker.patch("courseware.api.update_edx_user_name")
     payload = {
@@ -247,12 +247,12 @@ def test_update_user_name_change_edx(mocker, user_client, user, valid_address_di
     )
 
     assert resp.status_code == status.HTTP_200_OK
-    # Checks that update edx user was called and only once when there was a change in user's name(Full Name)
+    # Checks that update edx user was called and only once when there was a change in user's name(Full Name)  # noqa: E501
     update_edx_mock.assert_called_once_with(user)
 
 
 def test_update_user_no_name_change_edx(mocker, user_client, user, valid_address_dict):
-    """Test that PATCH on user/me without name change doesn't call update user's name in edX"""
+    """Test that PATCH on user/me without name change doesn't call update user's name in edX"""  # noqa: E501
     update_edx_mock = mocker.patch("courseware.api.update_edx_user_name")
     resp = user_client.patch(
         reverse("users_api-me"),
@@ -265,5 +265,5 @@ def test_update_user_no_name_change_edx(mocker, user_client, user, valid_address
     )
 
     assert resp.status_code == status.HTTP_200_OK
-    # Checks that update edx user was called not called when there is no change in user's name(Full Name)
+    # Checks that update edx user was called not called when there is no change in user's name(Full Name)  # noqa: E501
     update_edx_mock.assert_not_called()

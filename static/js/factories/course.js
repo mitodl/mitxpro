@@ -14,7 +14,7 @@ import type {
   ProgramEnrollment,
   UserEnrollments,
   CourseRunCertificate,
-  ProgramCertificate
+  ProgramCertificate,
 } from "../flow/courseTypes"
 
 const genCourseRunId = incrementer()
@@ -34,7 +34,7 @@ export const makeCourseRun = (): CourseRun => ({
   run_tag:          casual.word.concat(genRunTagNumber.next().value),
   // $FlowFixMe
   id:               genCourseRunId.next().value,
-  product_id:       genProductId.next().value
+  product_id:       genProductId.next().value,
 })
 
 const genCourseId = incrementer()
@@ -45,7 +45,7 @@ const makeBaseCourse = (nextRunId: ?number): BaseCourse => ({
   description:   casual.text,
   thumbnail_url: casual.url,
   readable_id:   casual.word,
-  next_run_id:   nextRunId
+  next_run_id:   nextRunId,
 })
 
 export const makeCourse = (): Course => {
@@ -54,7 +54,7 @@ export const makeCourse = (): Course => {
 
   return {
     ...baseCourse,
-    courseruns: runs
+    courseruns: runs,
   }
 }
 
@@ -65,21 +65,21 @@ export const makeProgram = (): Program => ({
   title:         casual.text,
   description:   casual.text,
   thumbnail_url: casual.url,
-  readable_id:   casual.word.concat(genReadableId.next().value)
+  readable_id:   casual.word.concat(genReadableId.next().value),
 })
 
 export const makeCourseRunDetail = (): CourseRunDetail => {
   const run = makeCourseRun()
   return {
     ...makeCourseRun(),
-    course: makeBaseCourse(run.id)
+    course: makeBaseCourse(run.id),
   }
 }
 
 export const makeCourseRunEnrollment = (): CourseRunEnrollment => ({
   run:         makeCourseRunDetail(),
   certificate: makeCourseCertificate(),
-  receipt:     null
+  receipt:     null,
 })
 
 const genProgramEnrollmentId = incrementer()
@@ -89,46 +89,46 @@ export const makeProgramEnrollment = (): ProgramEnrollment => ({
   program:                makeProgram(),
   course_run_enrollments: [
     makeCourseRunEnrollment(),
-    makeCourseRunEnrollment()
+    makeCourseRunEnrollment(),
   ],
   certificate: makeProgramCertificate(),
-  receipt:     null
+  receipt:     null,
 })
 
 export const makeUserEnrollments = (): UserEnrollments => ({
   program_enrollments:    [makeProgramEnrollment()],
   course_run_enrollments: [
     makeCourseRunEnrollment(),
-    makeCourseRunEnrollment()
+    makeCourseRunEnrollment(),
   ],
   past_program_enrollments:    [makeProgramEnrollment()],
   past_course_run_enrollments: [
     makeCourseRunEnrollment(),
-    makeCourseRunEnrollment()
-  ]
+    makeCourseRunEnrollment(),
+  ],
 })
 
 export const makeCourseCertificate = (): CourseRunCertificate => ({
   uuid: "some-uuid",
-  link: "some-link"
+  link: "some-link",
 })
 
 export const makeProgramCertificate = (): ProgramCertificate => ({
   uuid: "some-uuid",
-  link: "some-link"
+  link: "some-link",
 })
 
 export const makeCourseTopics = () => [
   {
     name:         "Business",
-    course_count: 1
+    course_count: 1,
   },
   {
     name:         "Engineering",
-    course_count: 2
+    course_count: 2,
   },
   {
     name:         "Commerce",
-    course_count: 5
+    course_count: 5,
   },
 ]

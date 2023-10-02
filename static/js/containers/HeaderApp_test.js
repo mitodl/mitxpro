@@ -33,16 +33,16 @@ describe("Top-level HeaderApp", () => {
     beforeEach(() => {
       unusedCoupon = makeUnusedCoupon()
       userWithUnusedCoupons = mergeRight(makeUser(), {
-        unused_coupons: [unusedCoupon]
+        unused_coupons: [unusedCoupon],
       })
       expectedNotificationState = {
         "unused-coupon": {
           type:  ALERT_TYPE_UNUSED_COUPON,
           props: {
             productId:  unusedCoupon.product_id,
-            couponCode: unusedCoupon.coupon_code
-          }
-        }
+            couponCode: unusedCoupon.coupon_code,
+          },
+        },
       }
     })
 

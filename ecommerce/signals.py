@@ -2,14 +2,15 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from ecommerce.models import ProductVersion, Product, CouponEligibility
-from hubspot_xpro.task_helpers import sync_hubspot_product
-
 from courses.models import CourseRun
+from ecommerce.models import CouponEligibility, Product, ProductVersion
+from hubspot_xpro.task_helpers import sync_hubspot_product
 
 
 @receiver(post_save, sender=ProductVersion, dispatch_uid="product_version_post_save")
-def sync_product(sender, instance, created, **kwargs):  # pylint:disable=unused-argument
+def sync_product(
+    sender, instance, created, **kwargs  # noqa: ARG001
+):  # pylint:disable=unused-argument  # noqa: ARG001, RUF100
     """
     Sync product to hubspot
     """
@@ -18,7 +19,7 @@ def sync_product(sender, instance, created, **kwargs):  # pylint:disable=unused-
 
 @receiver(post_save, sender=Product, dispatch_uid="product_post_save")
 def apply_coupon_on_all_runs(
-    sender, instance, created, **kwargs
+    sender, instance, created, **kwargs  # noqa: ARG001
 ):  # pylint:disable=unused-argument
     """
     Apply coupons to all courseruns of a course, if `include_future_runs = True`

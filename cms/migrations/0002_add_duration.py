@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("cms", "0001_initial")]
 
     operations = [
@@ -13,7 +12,10 @@ class Migration(migrations.Migration):
             name="duration",
             field=models.CharField(
                 blank=True,
-                help_text="A short description indicating how long it takes to complete (e.g. '4 weeks')",
+                help_text=(
+                    "A short description indicating how long it takes to complete (e.g."
+                    " '4 weeks')"
+                ),
                 max_length=50,
                 null=True,
             ),
@@ -23,7 +25,10 @@ class Migration(migrations.Migration):
             name="duration",
             field=models.CharField(
                 blank=True,
-                help_text="A short description indicating how long it takes to complete (e.g. '4 weeks')",
+                help_text=(
+                    "A short description indicating how long it takes to complete (e.g."
+                    " '4 weeks')"
+                ),
                 max_length=50,
                 null=True,
             ),

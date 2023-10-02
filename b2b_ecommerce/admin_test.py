@@ -5,7 +5,6 @@ from b2b_ecommerce.admin import B2BCouponAdmin, B2BOrderAdmin
 from b2b_ecommerce.factories import B2BCouponFactory, B2BOrderFactory
 from b2b_ecommerce.models import B2BCouponAudit, B2BOrderAudit
 
-
 pytestmark = pytest.mark.django_db
 
 
@@ -26,7 +25,7 @@ def test_save_and_log_order(mocker):
 
 
 def test_save_and_log_coupon(mocker):
-    """Tests that the save_model() function on B2BOrderAdmin creates an B2BOrderAudit entry"""
+    """Tests that the save_model() function on B2BOrderAdmin creates an B2BOrderAudit entry"""  # noqa: E501
     assert B2BCouponAudit.objects.count() == 0
     coupon = B2BCouponFactory.create()
     admin = B2BCouponAdmin(model=coupon, admin_site=mocker.Mock())

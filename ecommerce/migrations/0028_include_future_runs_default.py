@@ -3,14 +3,13 @@
 from django.db import migrations, models
 
 
-def reset_existing_include_future_runs(apps, schema_editor):
+def reset_existing_include_future_runs(apps, schema_editor):  # noqa: ARG001
     """Reset any existing values to the default: False"""
     Coupon = apps.get_model("ecommerce", "Coupon")
     Coupon.objects.update(include_future_runs=False)
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("ecommerce", "0027_coupon_code_is_global")]
 
     operations = [

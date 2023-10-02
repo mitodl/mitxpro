@@ -10,19 +10,19 @@ from wagtail.core.models import Site
 from users.factories import UserFactory
 
 
-@pytest.fixture
-def user(db):
-    """Creates a user"""
+@pytest.fixture()
+def user(db):  # noqa: ARG001
+    """Creates a user"""  # noqa: D401
     return UserFactory.create()
 
 
-@pytest.fixture
-def staff_user(db):
+@pytest.fixture()
+def staff_user(db):  # noqa: ARG001
     """Staff user fixture"""
     return UserFactory.create(is_staff=True)
 
 
-@pytest.fixture
+@pytest.fixture()
 def user_client(user):
     """Django test client that is authenticated with the user"""
     client = Client()
@@ -30,7 +30,7 @@ def user_client(user):
     return client
 
 
-@pytest.fixture
+@pytest.fixture()
 def staff_client(staff_user):
     """Django test client that is authenticated with the staff user"""
     client = Client()
@@ -38,7 +38,7 @@ def staff_client(staff_user):
     return client
 
 
-@pytest.fixture
+@pytest.fixture()
 def user_drf_client(user):
     """DRF API test client that is authenticated with the user"""
     client = APIClient()
@@ -46,7 +46,7 @@ def user_drf_client(user):
     return client
 
 
-@pytest.fixture
+@pytest.fixture()
 def admin_drf_client(admin_user):
     """DRF API test client with admin user"""
     client = APIClient()
@@ -54,16 +54,16 @@ def admin_drf_client(admin_user):
     return client
 
 
-@pytest.fixture
+@pytest.fixture()
 def mocked_responses():
-    """Mocked responses for requests library"""
+    """Mocked responses for requests library"""  # noqa: D401
     with responses.RequestsMock() as rsps:
         yield rsps
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_context(mocker, user):
-    """Mocked context for serializers"""
+    """Mocked context for serializers"""  # noqa: D401
     return {"request": mocker.Mock(user=user)}
 
 
@@ -79,21 +79,21 @@ def home_page(wagtail_site):
     return wagtail_site.root_page
 
 
-@pytest.fixture
+@pytest.fixture()
 def valid_address_dict():
-    """Yields a dict that will deserialize into a valid legal address"""
-    return dict(
-        first_name="Test",
-        last_name="User",
-        street_address_1="1 Main St",
-        state_or_territory="US-MA",
-        city="Cambridge",
-        country="US",
-        postal_code="02139",
-    )
+    """Yields a dict that will deserialize into a valid legal address"""  # noqa: D401
+    return {
+        "first_name": "Test",
+        "last_name": "User",
+        "street_address_1": "1 Main St",
+        "state_or_territory": "US-MA",
+        "city": "Cambridge",
+        "country": "US",
+        "postal_code": "02139",
+    }
 
 
 @pytest.fixture()
-def nplusone_fail(settings):
-    """Configures the nplusone app to raise errors"""
+def nplusone_fail(settings):  # noqa: PT004
+    """Configures the nplusone app to raise errors"""  # noqa: D401
     settings.NPLUSONE_RAISE = True

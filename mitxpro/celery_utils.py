@@ -10,7 +10,7 @@ class OffsettingSchedule(schedule):
     scheduled task (e.g.: the task should run every 30, but it should start after a 15 second offset)
 
     Inspired by this SO answer: https://stackoverflow.com/a/41700962
-    """
+    """  # noqa: E501
 
     def __init__(self, run_every=None, offset=None):
         self._run_every = run_every

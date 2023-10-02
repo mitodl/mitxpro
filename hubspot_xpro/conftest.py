@@ -7,14 +7,13 @@ from types import SimpleNamespace
 import pytest
 import pytz
 from django.contrib.contenttypes.models import ContentType
-from hubspot.crm.objects import SimplePublicObject
 from mitol.hubspot_api.factories import HubspotObjectFactory
 
 from b2b_ecommerce import factories as b2b_factories
 from ecommerce import factories
 from ecommerce.models import Order, Product
+from hubspot.crm.objects import SimplePublicObject
 from users.models import User
-
 
 # pylint: disable=redefined-outer-name
 
@@ -33,7 +32,7 @@ FAKE_OBJECT_ID = 1234
 FAKE_HUBSPOT_ID = "1231213123"
 
 
-@pytest.fixture
+@pytest.fixture()
 def mocked_celery(mocker):
     """Mock object that patches certain celery functions"""
     exception_class = TabError
@@ -43,7 +42,7 @@ def mocked_celery(mocker):
     group_mock = mocker.patch("celery.group", autospec=True)
     chain_mock = mocker.patch("celery.chain", autospec=True)
 
-    yield SimpleNamespace(
+    return SimpleNamespace(
         replace=replace_mock,
         group=group_mock,
         chain=chain_mock,
@@ -51,13 +50,13 @@ def mocked_celery(mocker):
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_logger(mocker):
     """Mock the logger"""
-    yield mocker.patch("hubspot_xpro.tasks.log.error")
+    return mocker.patch("hubspot_xpro.tasks.log.error")
 
 
-@pytest.fixture
+@pytest.fixture()
 def hubspot_order():
     """Return an order for testing with hubspot_xpro"""
     order = factories.OrderFactory()
@@ -78,7 +77,7 @@ def hubspot_order():
     return order
 
 
-@pytest.fixture
+@pytest.fixture()
 def hubspot_order_id(hubspot_order):
     """Create a HubspotObject for hubspot_order"""
     return HubspotObjectFactory.create(
@@ -88,7 +87,7 @@ def hubspot_order_id(hubspot_order):
     ).hubspot_id
 
 
-@pytest.fixture
+@pytest.fixture()
 def hubspot_b2b_order():
     """Return an B2B order for testing with hubspot_xpro"""
     order = b2b_factories.B2BOrderFactory.create(status="created")
@@ -104,7 +103,7 @@ def hubspot_b2b_order():
     return order
 
 
-@pytest.fixture
+@pytest.fixture()
 def hubspot_b2b_order_id(hubspot_b2b_order):
     """Return a HubspotObject ID for hubspot_b2b_order"""
     return HubspotObjectFactory.create(
@@ -114,11 +113,11 @@ def hubspot_b2b_order_id(hubspot_b2b_order):
     ).hubspot_id
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_hubspot_api(mocker):
     """Mock the Hubspot CRM API"""
     mock_api = mocker.patch("mitol.hubspot_api.api.HubspotApi")
     mock_api.return_value.crm.objects.basic_api.create.return_value = (
         SimplePublicObject(id=FAKE_HUBSPOT_ID)
     )
-    yield mock_api
+    return mock_api

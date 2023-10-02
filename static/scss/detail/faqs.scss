@@ -29,9 +29,9 @@
     vertical-align: top;
     font-weight: 600;
 
-    &:after {
+    &::after {
       content: "arrow_circle_up";
-      font-family: Material Icons;
+      font-family: "Material Icons";
       margin-left: 20px;
       text-transform: none;
       transform: rotate(90deg);
@@ -68,18 +68,18 @@
       text-decoration: none;
       position: relative;
 
-      &:after {
+      &::after {
         position: absolute;
         right: 20px;
         top: 40%;
-        content: '';
+        content: "";
         border-left: 8px solid transparent;
         border-right: 8px solid transparent;
         border-bottom: 8px solid $primary;
       }
 
       &.collapsed {
-        &:after {
+        &::after {
           transform: rotate(180deg);
         }
       }

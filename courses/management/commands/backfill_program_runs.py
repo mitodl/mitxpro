@@ -1,4 +1,4 @@
-"""Management command to create program runs for programs that have a complete sets of course runs"""
+"""Management command to create program runs for programs that have a complete sets of course runs"""  # noqa: INP001, E501
 import re
 from collections import defaultdict
 
@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
 
 from courses.constants import TEXT_ID_RUN_TAG_PATTERN
-from courses.models import Program, ProgramRun, CourseRun
+from courses.models import CourseRun, Program, ProgramRun
 
 User = get_user_model()
 
@@ -16,16 +16,19 @@ class Command(BaseCommand):
     Creates program runs for programs that have a complete sets of course runs.
     Example: If there is a "+R1" course run for every course in the program, and no "R1" program run exists,
     this command will create that program run.
-    """
+    """  # noqa: E501
 
-    help = __doc__
+    help = __doc__  # noqa: A003
 
     def add_arguments(self, parser):
         parser.add_argument(
             "-p",
             "--program",
             type=str,
-            help="The 'readable_id' value for a Program (leave blank to backfill runs for all Programs)",
+            help=(
+                "The 'readable_id' value for a Program (leave blank to backfill runs"
+                " for all Programs)"
+            ),
             required=False,
         )
 
@@ -47,7 +50,7 @@ class Command(BaseCommand):
         Returns:
             dict: A dictionary mapping a run suffix to a two-item tuple containing the overall
                 start and end dates for the course runs matching that suffix.
-        """
+        """  # noqa: E501, D401
         course_ids = program.courses.values_list("id", flat=True)
         num_program_courses = len(course_ids)
         all_program_runs = (
@@ -63,7 +66,7 @@ class Command(BaseCommand):
                 run_tag = run_tag_match.groupdict()["run_tag"]
                 run_map[run_tag].append(run)
 
-        # Validate run dates and add them to a dict if there are runs for every course in the program
+        # Validate run dates and add them to a dict if there are runs for every course in the program  # noqa: E501
         complete_run_map = {}
         for run_tag, all_program_runs in run_map.items():
             if len(all_program_runs) != num_program_courses:
@@ -84,7 +87,8 @@ class Command(BaseCommand):
             elif first_run.start_date > last_run.end_date:
                 self.stdout.write(
                     self.style.WARNING(
-                        f"First run start date is after the last run end date  ({first_run}, {last_run}). Skipping..."
+                        "First run start date is after the last run end date "
+                        f" ({first_run}, {last_run}). Skipping..."
                     )
                 )
             complete_run_map[run_tag] = (first_run.start_date, last_run.end_date)
@@ -101,7 +105,7 @@ class Command(BaseCommand):
 
         Returns:
             list of ProgramRun: The created ProgramRun objects
-        """
+        """  # noqa: E501, D401
         existing_program_run_tags = set(
             program.programruns.values_list("run_tag", flat=True)
         )
@@ -119,7 +123,7 @@ class Command(BaseCommand):
             for run_tag in run_tags_to_create
         ]
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
         programs = Program.objects.prefetch_related("programruns", "courses")
         if options["program"]:

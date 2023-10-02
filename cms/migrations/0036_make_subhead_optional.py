@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("cms", "0035_alter_helptext_video_url")]
 
     operations = [
@@ -13,7 +12,9 @@ class Migration(migrations.Migration):
             name="subhead",
             field=models.CharField(
                 blank=True,
-                help_text="The subhead to display for this section on the product page.",
+                help_text=(
+                    "The subhead to display for this section on the product page."
+                ),
                 max_length=255,
                 null=True,
             ),

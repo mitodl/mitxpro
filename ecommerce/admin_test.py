@@ -2,8 +2,8 @@
 import pytest
 
 from courses.factories import CourseFactory
-from ecommerce.admin import OrderAdmin, DataConsentAgreementForm
-from ecommerce.factories import OrderFactory, DataConsentAgreementFactory
+from ecommerce.admin import DataConsentAgreementForm, OrderAdmin
+from ecommerce.factories import DataConsentAgreementFactory, OrderFactory
 from ecommerce.models import OrderAudit
 from users.factories import UserFactory
 
@@ -68,7 +68,7 @@ def test_consent_agreement_clean_model_validation_error():
 def test_global_consent_agreement_clear_courses():
     """
     Tests that the DataConsentAgreementForm clears the associated courses when is_global is True
-    """
+    """  # noqa: E501
     courses = CourseFactory.create()
     consent_agreement = DataConsentAgreementFactory.create(courses=[courses])
     consent_agreement_form = DataConsentAgreementForm(

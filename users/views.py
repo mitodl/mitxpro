@@ -9,13 +9,13 @@ from rest_framework.response import Response
 from courseware import tasks
 from mitxpro.permissions import UserIsOwnerPermission
 from mitxpro.utils import now_in_utc
-from users.models import User, ChangeEmailRequest
+from users.models import ChangeEmailRequest, User
 from users.serializers import (
-    PublicUserSerializer,
-    UserSerializer,
-    CountrySerializer,
     ChangeEmailRequestCreateSerializer,
     ChangeEmailRequestUpdateSerializer,
+    CountrySerializer,
+    PublicUserSerializer,
+    UserSerializer,
 )
 
 
@@ -33,12 +33,12 @@ class CurrentUserRetrieveUpdateViewSet(
 ):
     """User retrieve and update viewsets for the current user"""
 
-    # NOTE: this is a separate viewset from UserRetrieveViewSet because of the differences in permission requirements
+    # NOTE: this is a separate viewset from UserRetrieveViewSet because of the differences in permission requirements  # noqa: E501
     serializer_class = UserSerializer
     permission_classes = []
 
     def get_object(self):
-        """Returns the current request user"""
+        """Returns the current request user"""  # noqa: D401
         # NOTE: this may be a logged in or anonymous user
         return self.request.user
 
@@ -76,6 +76,7 @@ class ChangeEmailRequestViewSet(
             return ChangeEmailRequestCreateSerializer
         elif self.action == "partial_update":
             return ChangeEmailRequestUpdateSerializer
+        return None
 
 
 class CountriesStatesViewSet(viewsets.ViewSet):
@@ -83,8 +84,8 @@ class CountriesStatesViewSet(viewsets.ViewSet):
 
     permission_classes = []
 
-    def list(self, request):  # pylint:disable=unused-argument
+    def list(self, request):  # pylint:disable=unused-argument  # noqa: A003, ARG002
         """Get generator for countries/states list"""
-        queryset = sorted(list(pycountry.countries), key=lambda country: country.name)
+        queryset = sorted(pycountry.countries, key=lambda country: country.name)
         serializer = CountrySerializer(queryset, many=True)
         return Response(serializer.data)

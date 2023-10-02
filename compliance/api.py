@@ -1,6 +1,6 @@
 """Compliance API"""
-from collections import namedtuple
 import logging
+from collections import namedtuple
 
 from django.conf import settings
 from lxml import etree
@@ -11,19 +11,18 @@ from zeep.plugins import HistoryPlugin
 from zeep.wsse.username import UsernameToken
 
 from compliance.constants import (
-    REASON_CODE_SUCCESS,
     EXPORTS_BLOCKED_REASON_CODES,
-    TEMPORARY_FAILURE_REASON_CODES,
+    REASON_CODE_SUCCESS,
     RESULT_DENIED,
     RESULT_SUCCESS,
     RESULT_UNKNOWN,
+    TEMPORARY_FAILURE_REASON_CODES,
 )
 from compliance.models import ExportsInquiryLog
 
-
 log = logging.getLogger()
 
-DecryptedLog = namedtuple("DecryptedLog", ["request", "response"])
+DecryptedLog = namedtuple("DecryptedLog", ["request", "response"])  # noqa: PYI024
 
 
 EXPORTS_REQUIRED_KEYS = [
@@ -35,7 +34,7 @@ EXPORTS_REQUIRED_KEYS = [
 
 
 def is_exports_verification_enabled():
-    """Returns True if the exports verification is configured"""
+    """Returns True if the exports verification is configured"""  # noqa: D401
     return all(getattr(settings, key) for key in EXPORTS_REQUIRED_KEYS)
 
 
@@ -46,7 +45,7 @@ def get_cybersource_client():
     Returns:
         (zeep.Client, zeep.plugins.HistoryPlugin):
             a tuple of the configured client and the history plugin instance
-    """
+    """  # noqa: D401
     wsse = UsernameToken(
         settings.CYBERSOURCE_MERCHANT_ID, settings.CYBERSOURCE_TRANSACTION_KEY
     )
@@ -66,9 +65,9 @@ def compute_result_from_codes(reason_code, info_code):
     Returns:
         str:
             the computed result
-    """
+    """  # noqa: D401
     # if there's either an explicit denial or any block list was triggered
-    # NOTE: reason_code can indicate a success but a block list still be triggered and indicated in info_code
+    # NOTE: reason_code can indicate a success but a block list still be triggered and indicated in info_code  # noqa: E501
     if reason_code in EXPORTS_BLOCKED_REASON_CODES or info_code:
         return RESULT_DENIED
 
@@ -85,7 +84,7 @@ def compute_result_from_codes(reason_code, info_code):
 
 
 def get_encryption_public_key():
-    """Returns the public key for encryption of export requests/responses"""
+    """Returns the public key for encryption of export requests/responses"""  # noqa: D401, E501
     return PublicKey(
         settings.CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY, encoder=Base64Encoder
     )
@@ -112,7 +111,7 @@ def log_exports_inquiry(user, response, last_sent, last_received):
     log.debug("Received: %s", xml_response)
 
     # overall status code of the response
-    # NOTE: reason_code can indicate a success but a block list still be triggered and indicated in info_code
+    # NOTE: reason_code can indicate a success but a block list still be triggered and indicated in info_code  # noqa: E501
     reason_code = int(response.reasonCode)
 
     if reason_code in TEMPORARY_FAILURE_REASON_CODES:
@@ -195,7 +194,7 @@ def get_bill_to_address(user):
         "country": legal_address.country,
     }
 
-    # these are required for certain countries, we presume here that data was validated before it was written
+    # these are required for certain countries, we presume here that data was validated before it was written  # noqa: E501
     if legal_address.state_or_territory:
         # State is in US-MA format and we want that send part
         billing_address["state"] = legal_address.state_or_territory.split("-")[1]
@@ -215,7 +214,9 @@ def verify_user_with_exports(user):
         "merchantReferenceCode": user.id,
         "billTo": get_bill_to_address(user),
         "exportService": {
-            "run": "true",  # NOTE: *must* be a string otherwise it will serialize incorrectly to "True"
+            "run": (
+                "true"
+            ),  # NOTE: *must* be a string otherwise it will serialize incorrectly to "True"  # noqa: E501
             "addressOperator": settings.CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR,
             "addressWeight": settings.CYBERSOURCE_EXPORT_SERVICE_ADDRESS_WEIGHT,
             "nameWeight": settings.CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT,
@@ -242,5 +243,5 @@ def get_latest_exports_inquiry(user):
     Returns:
         ExportsInquiryLog:
             the latest record sorted by created_on
-    """
+    """  # noqa: D401
     return user.exports_inquiries.order_by("-created_on").first()

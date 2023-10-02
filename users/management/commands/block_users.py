@@ -1,10 +1,12 @@
 """
 block user(s) from MIT xPRO
-"""
+"""  # noqa: INP001
 
-from argparse import RawTextHelpFormatter
 import sys
+from argparse import RawTextHelpFormatter
+
 from django.core.management import BaseCommand
+
 from authentication.utils import block_user_email
 from mail.api import validate_email_addresses
 from mail.exceptions import MultiEmailValidationError
@@ -23,7 +25,7 @@ class Command(BaseCommand):
 
     For multiple users, add arg `--user` for each user i.e:\n
     `./manage.py block_users --user=foo@email.com --user=bar@email.com --user=abc@email.com` or do \n
-    """
+    """  # noqa: A003, E501
 
     def create_parser(self, prog_name, subcommand):  # pylint: disable=arguments-differ
         """
@@ -34,7 +36,7 @@ class Command(BaseCommand):
         return parser
 
     def add_arguments(self, parser):
-        """parse arguments"""
+        """Parse arguments"""
 
         # pylint: disable=expression-not-assigned
         parser.add_argument(
@@ -46,7 +48,7 @@ class Command(BaseCommand):
             help="Single or multiple username(s) or email(s)",
         )
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **kwargs):  # noqa: ARG002
         users = kwargs.get("users", [])
         if not users:
             self.stderr.write(

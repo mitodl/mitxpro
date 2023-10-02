@@ -11,20 +11,18 @@ from wagtail.core.models import Page, PageRevision
 import cms.models
 
 
-def create_webinar_index_page(apps, app_schema):
+def create_webinar_index_page(apps, app_schema):  # noqa: ARG001
     """
     Creates index page for webinars
-    """
+    """  # noqa: D401
     Site = apps.get_model("wagtailcore", "Site")
     site = Site.objects.filter(is_default_site=True).first()
     if not site:
-        raise Exception(
-            "A default site is not set up. Please setup a default site before running this migration"
-        )
+        msg = "A default site is not set up. Please setup a default site before running this migration"  # noqa: E501
+        raise Exception(msg)  # noqa: TRY002
     if not site.root_page:
-        raise Exception(
-            "No root (home) page set up. Please setup a root (home) page for the default site before running this migration"
-        )
+        msg = "No root (home) page set up. Please setup a root (home) page for the default site before running this migration"  # noqa: E501
+        raise Exception(msg)  # noqa: TRY002
 
     home_page = Page.objects.get(id=site.root_page.id)
     WebinarIndexPage = apps.get_model("cms", "WebinarIndexPage")
@@ -36,14 +34,14 @@ def create_webinar_index_page(apps, app_schema):
     webinar_index = WebinarIndexPage.objects.first()
 
     if not webinar_index:
-        webinar_page_content = dict(
-            title="Webinars",
-            content_type_id=webinar_index_content_type.id,
-            locale_id=home_page.get_default_locale().id,
-        )
+        webinar_page_content = {
+            "title": "Webinars",
+            "content_type_id": webinar_index_content_type.id,
+            "locale_id": home_page.get_default_locale().id,
+        }
         webinar_page_obj = WebinarIndexPage(**webinar_page_content)
         home_page.add_child(instance=webinar_page_obj)
-        # NOTE: This block of code creates page revision and publishes it. There may be an easier way to do this.
+        # NOTE: This block of code creates page revision and publishes it. There may be an easier way to do this.  # noqa: E501
         content_json = json.dumps(dict(**webinar_page_content, pk=webinar_page_obj.id))
         revision = PageRevision.objects.create(
             page_id=webinar_page_obj.id,
@@ -54,7 +52,7 @@ def create_webinar_index_page(apps, app_schema):
         revision.publish()
 
 
-def delete_webinar_index_page(apps, app_schema):
+def delete_webinar_index_page(apps, app_schema):  # noqa: ARG001
     ContentType = apps.get_model("contenttypes.ContentType")
     webinar_index_content_type, _ = ContentType.objects.get_or_create(
         app_label="cms", model="webinarindexpage"
@@ -67,7 +65,6 @@ def delete_webinar_index_page(apps, app_schema):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("wagtailimages", "0023_add_choose_permissions"),
         ("wagtailcore", "0062_comment_models_and_pagesubscription"),
@@ -141,14 +138,20 @@ class Migration(migrations.Migration):
                 (
                     "action_title",
                     models.CharField(
-                        help_text="Specify the webinar call-to-action text here (e.g: 'REGISTER, VIEW RECORDING').",
+                        help_text=(
+                            "Specify the webinar call-to-action text here (e.g:"
+                            " 'REGISTER, VIEW RECORDING')."
+                        ),
                         max_length=255,
                     ),
                 ),
                 (
                     "action_url",
                     models.URLField(
-                        help_text="Specify the webinar action-url here (like a link to an external webinar page)."
+                        help_text=(
+                            "Specify the webinar action-url here (like a link to an"
+                            " external webinar page)."
+                        )
                     ),
                 ),
                 (
@@ -183,7 +186,6 @@ class Migration(migrations.Migration):
                 models.Model,
             ),
         ),
-        # This is not required moving forward as seed data creates the webinar index page.
+        # This is not required moving forward as seed data creates the webinar index page.  # noqa: E501
         # This causes migration errors when we change the webinar index page.
-        # migrations.RunPython(create_webinar_index_page, delete_webinar_index_page),
     ]

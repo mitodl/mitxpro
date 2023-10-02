@@ -4,7 +4,7 @@ import { nthArg, objOf, pathOr } from "ramda"
 import type {
   CurrentUser,
   Country,
-  UserProfileForm
+  UserProfileForm,
 } from "../../flow/authTypes"
 import { getCookie } from "../api"
 
@@ -18,23 +18,23 @@ const nextState = nthArg(1)
 const transformCurrentUser = objOf("currentUser")
 
 const updateResult = {
-  currentUser: nextState
+  currentUser: nextState,
 }
 
 const DEFAULT_OPTIONS = {
   options: {
     method:  "PATCH",
     headers: {
-      "X-CSRFTOKEN": getCookie("csrftoken")
-    }
-  }
+      "X-CSRFTOKEN": getCookie("csrftoken"),
+    },
+  },
 }
 
 export default {
   currentUserQuery: () => ({
     url:       "/api/users/me",
     transform: transformCurrentUser,
-    update:    updateResult
+    update:    updateResult,
   }),
   countriesSelector: pathOr(null, ["entities", "countries"]),
   countriesQuery:    () => ({
@@ -42,8 +42,8 @@ export default {
     url:       "/api/countries/",
     transform: objOf("countries"),
     update:    {
-      countries: (prev: Array<Country>, next: Array<Country>) => next
-    }
+      countries: (prev: Array<Country>, next: Array<Country>) => next,
+    },
   }),
   editProfileMutation: (profileData: UserProfileForm) => ({
     ...DEFAULT_OPTIONS,
@@ -51,7 +51,7 @@ export default {
     update:    updateResult,
     url:       "/api/users/me",
     body:      {
-      ...profileData
-    }
-  })
+      ...profileData,
+    },
+  }),
 }

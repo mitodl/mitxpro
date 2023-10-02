@@ -4,14 +4,14 @@ from affiliate.constants import AFFILIATE_CODE_SESSION_KEY
 
 
 class AffiliateMiddleware:
-    """Middleware that adds an affiliate code to the request object if one is found in the querystring or the session"""
+    """Middleware that adds an affiliate code to the request object if one is found in the querystring or the session"""  # noqa: E501
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         request.affiliate_code = None
-        session = getattr(request, "session")
+        session = request.session
         if session is None:
             return self.get_response(request)
         qs_affiliate_code = get_affiliate_code_from_qstring(request)

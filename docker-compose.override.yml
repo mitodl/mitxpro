@@ -1,13 +1,12 @@
-version: '3.6'
+version: "3.6"
 services:
-
   web:
     volumes:
       - .:/src
       - django_media:/var/media
     environment:
-      NODE_ENV: 'development'
-      WEBPACK_USE_DEV_SERVER: 'True'
+      NODE_ENV: "development"
+      WEBPACK_USE_DEV_SERVER: "True"
       WEBPACK_DEV_SERVER_PORT: ${WEBPACK_DEV_SERVER_PORT:-8052}
 
   celery:
@@ -15,8 +14,8 @@ services:
       - .:/src
       - django_media:/var/media
     environment:
-      NODE_ENV: 'development'
-      WEBPACK_USE_DEV_SERVER: 'True'
+      NODE_ENV: "development"
+      WEBPACK_USE_DEV_SERVER: "True"
       WEBPACK_DEV_SERVER_PORT: ${WEBPACK_DEV_SERVER_PORT:-8052}
 
   nginx:
@@ -29,7 +28,7 @@ services:
       - .:/src
       - yarn-cache:/home/mitodl/.cache/yarn
     environment:
-      NODE_ENV: 'development'
+      NODE_ENV: "development"
 
 volumes:
   django_media: {}

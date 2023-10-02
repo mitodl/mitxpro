@@ -6,7 +6,7 @@ import moment from "moment"
 import * as coursesApi from "./courses"
 import {
   makeCourseRunEnrollment,
-  makeProgramEnrollment
+  makeProgramEnrollment,
 } from "../factories/course"
 import { formatPrettyDate, formatPrettyDateTimeAmPm } from "./util"
 
@@ -18,10 +18,10 @@ describe("courses API function", () => {
       const programRunEnrollments = R.compose(
         R.map(
           R.mergeDeepLeft({
-            run: { start_date: now.toISOString(), end_date: now.toISOString() }
-          })
+            run: { start_date: now.toISOString(), end_date: now.toISOString() },
+          }),
         ),
-        R.times(makeCourseRunEnrollment)
+        R.times(makeCourseRunEnrollment),
       )(2)
       // Set a couple start and end dates to create a range
       const twoDaysAgo = moment(now).add(-2, "days")
@@ -52,7 +52,7 @@ describe("courses API function", () => {
       courseRunEnrollment.run.start_date = future.toISOString()
       assert.deepEqual(coursesApi.getDateSummary(courseRunEnrollment), {
         text:       `Starts: ${formatPrettyDateTimeAmPm(future)}`,
-        inProgress: false
+        inProgress: false,
       })
     })
 
@@ -61,7 +61,7 @@ describe("courses API function", () => {
       courseRunEnrollment.run.end_date = future.toISOString()
       assert.deepEqual(coursesApi.getDateSummary(courseRunEnrollment), {
         text:       `Ends: ${formatPrettyDateTimeAmPm(future)}`,
-        inProgress: true
+        inProgress: true,
       })
     })
 
@@ -70,7 +70,7 @@ describe("courses API function", () => {
       courseRunEnrollment.run.end_date = null
       assert.deepEqual(coursesApi.getDateSummary(courseRunEnrollment), {
         text:       `Started: ${formatPrettyDate(past)}`,
-        inProgress: true
+        inProgress: true,
       })
     })
 
@@ -79,7 +79,7 @@ describe("courses API function", () => {
       courseRunEnrollment.run.end_date = null
       assert.deepEqual(coursesApi.getDateSummary(courseRunEnrollment), {
         text:       "Start and end dates pending",
-        inProgress: false
+        inProgress: false,
       })
     })
   })

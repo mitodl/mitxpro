@@ -45,7 +45,6 @@ from mail.constants import (
 from mitxpro.utils import format_price
 from users.factories import UserFactory
 
-
 lazy = pytest.lazy_fixture
 
 pytestmark = pytest.mark.django_db
@@ -112,7 +111,9 @@ def test_send_bulk_enroll_emails(mocker, settings):
             user_variables={
                 "bulk_assignment": bulk_assignment.id,
                 "enrollment_code": assignment.product_coupon.coupon.coupon_code,
-                product_type_str: assignment.product_coupon.product.content_object.text_id,
+                product_type_str: (
+                    assignment.product_coupon.product.content_object.text_id
+                ),
             },
         )
 
@@ -165,7 +166,7 @@ def test_send_b2b_receipt_email(mocker, settings, has_discount):
     send_b2b_receipt_email(order)
 
     run = order.product_version.product.content_object
-    download_url = f'{urljoin(settings.SITE_BASE_URL, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'
+    download_url = f'{urljoin(settings.SITE_BASE_URL, reverse("bulk-enrollment-code-receipt"))}?hash={order.unique_id!s}'  # noqa: E501
 
     patched_mail_api.context_for_user.assert_called_once_with(
         user=None,
@@ -177,7 +178,10 @@ def test_send_b2b_receipt_email(mocker, settings, has_discount):
             "num_seats": str(order.num_seats),
             "contract_number": order.contract_number,
             "readable_id": get_readable_id(run),
-            "run_date_range": f"{run.start_date.strftime(EMAIL_DATE_FORMAT)} - {run.end_date.strftime(EMAIL_DATE_FORMAT)}",
+            "run_date_range": (
+                f"{run.start_date.strftime(EMAIL_DATE_FORMAT)} -"
+                f" {run.end_date.strftime(EMAIL_DATE_FORMAT)}"
+            ),
             "title": run.title,
             "download_url": download_url,
             "email": order.email,
@@ -194,7 +198,7 @@ def test_send_b2b_receipt_email(mocker, settings, has_discount):
 
 
 def test_send_b2b_receipt_email_error(mocker):
-    """send_b2b_receipt_email should log an error and silence the exception if sending mail fails"""
+    """send_b2b_receipt_email should log an error and silence the exception if sending mail fails"""  # noqa: E501
     order = B2BOrderFactory.create()
     patched_mail_api = mocker.patch("ecommerce.mail_api.api")
     patched_log = mocker.patch("ecommerce.mail_api.log")
@@ -244,7 +248,9 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
         product_version__product__content_object=CourseRunFactory.create(
             title="test_run_title"
         ),
-        product_version__product__content_object__course__readable_id="course:/v7/choose-agency",
+        product_version__product__content_object__course__readable_id=(
+            "course:/v7/choose-agency"
+        ),
     )
     # pylint: disable=expression-not-assigned
     (
@@ -271,7 +277,9 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                     "start_date": None,
                     "end_date": None,
                     "content_title": "test_run_title",
-                    "CEUs": line.product_version.product.content_object.course.page.certificate_page.CEUs,
+                    "CEUs": (
+                        line.product_version.product.content_object.course.page.certificate_page.CEUs
+                    ),
                 }
             ],
             "order_total": "100.00",
@@ -292,7 +300,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                 "bill_to_email": "doof@mit.edu",
             },
             "purchaser": {
-                "name": " ".join(["Test", "User"]),
+                "name": "Test User",
                 "email": "test@example.com",
                 "street_address": ["11 Main Street"],
                 "state_code": "CO",
@@ -311,7 +319,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
 
 @pytest.mark.parametrize("is_program", [True, False])
 def test_send_enrollment_failure_message(mocker, is_program):
-    """Test that send_enrollment_failure_message sends a message with proper formatting"""
+    """Test that send_enrollment_failure_message sends a message with proper formatting"""  # noqa: E501
     patched_django_mail = mocker.patch("ecommerce.mail_api.mail")
     product_object = (
         ProgramFactory.create() if is_program else CourseRunFactory.create()
@@ -321,14 +329,17 @@ def test_send_enrollment_failure_message(mocker, is_program):
     )
     order = LineFactory.create(product_version=product_version).order
     details = "TestException on line 21"
-    expected_message = "{name}({email}): Order #{order_id}, {error_obj} #{obj_id} ({obj_title})\n\n{details}".format(
-        name=order.purchaser.username,
-        email=order.purchaser.email,
-        order_id=order.id,
-        error_obj=("Program" if is_program else "Run"),
-        obj_id=product_object.id,
-        obj_title=product_object.title,
-        details=details,
+    expected_message = (
+        "{name}({email}): Order #{order_id}, {error_obj} #{obj_id}"
+        " ({obj_title})\n\n{details}".format(
+            name=order.purchaser.username,
+            email=order.purchaser.email,
+            order_id=order.id,
+            error_obj=("Program" if is_program else "Run"),
+            obj_id=product_object.id,
+            obj_title=product_object.title,
+            details=details,
+        )
     )
 
     send_enrollment_failure_message(order, product_object, details)

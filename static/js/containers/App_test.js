@@ -21,9 +21,9 @@ describe("Top-level App", () => {
       {
         match:    { url: routes.root },
         location: {
-          pathname: routes.root
-        }
-      }
+          pathname: routes.root,
+        },
+      },
     )
   })
 
@@ -44,16 +44,16 @@ describe("Top-level App", () => {
     beforeEach(() => {
       unusedCoupon = makeUnusedCoupon()
       userWithUnusedCoupons = mergeRight(makeUser(), {
-        unused_coupons: [unusedCoupon]
+        unused_coupons: [unusedCoupon],
       })
       expectedNotificationState = {
         "unused-coupon": {
           type:  ALERT_TYPE_UNUSED_COUPON,
           props: {
             productId:  unusedCoupon.product_id,
-            couponCode: unusedCoupon.coupon_code
-          }
-        }
+            couponCode: unusedCoupon.coupon_code,
+          },
+        },
       }
     })
 
@@ -71,8 +71,8 @@ describe("Top-level App", () => {
       const { inner, store } = await renderPage(
         {},
         {
-          location: { pathname: routes.checkout }
-        }
+          location: { pathname: routes.checkout },
+        },
       )
 
       inner.setProps({ currentUser: userWithUnusedCoupons })

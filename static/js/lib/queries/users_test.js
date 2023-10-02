@@ -7,11 +7,11 @@ describe("users reducers", () => {
   describe("currentUserSelector", () => {
     it("should return the user context", () => {
       const currentUser = {
-        key: "value"
+        key: "value",
       }
       assert.equal(
         currentUserSelector({ entities: { currentUser } }),
-        currentUser
+        currentUser,
       )
     })
   })

@@ -41,7 +41,6 @@ from courses.factories import (
 from ecommerce.factories import ProductVersionFactory
 from mitxpro.utils import now_in_utc
 
-
 pytestmark = pytest.mark.django_db
 # pylint: disable=redefined-outer-name,unused-argument
 
@@ -58,7 +57,7 @@ def test_custom_wagtail_api(client, admin_user):
     """
     We have a hook that alters the sorting of pages in the default Wagtail admin API. This test asserts that
     the admin API does not return an error as a result of that change.
-    """
+    """  # noqa: E501
     client.force_login(admin_user)
     resp = client.get("/cms/api/main/pages/?child_of=1&for_explorer=1")
     assert resp.status_code == status.HTTP_200_OK
@@ -81,9 +80,7 @@ def test_wagtail_items_ordering(client, admin_user):
     )
     catalog_page = CatalogPageFactory.create(parent=home_page, title="Catalog")
 
-    resp = client.get(
-        "/cms/api/main/pages/?child_of={}&for_explorer=1".format(home_page.id)
-    )
+    resp = client.get(f"/cms/api/main/pages/?child_of={home_page.id}&for_explorer=1")
     assert resp.status_code == status.HTTP_200_OK
     items = list(resp.data.items())[1][1]  # Pages in response
     response_page_titles = [item["title"] for item in items]
@@ -107,7 +104,8 @@ def test_home_page_view(client, wagtail_basics):
 
     # without watch now button
     assert (
-        '<a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="#">Watch Now</a>'
+        '<a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2'
+        ' action-button" href="#">Watch Now</a>'
         not in content
     )
 
@@ -123,7 +121,8 @@ def test_home_page_view(client, wagtail_basics):
 
     # with watch now button
     assert (
-        '<a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="#">Watch Now</a>'
+        '<a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2'
+        ' action-button" href="#">Watch Now</a>'
         in content
     )
     assert "dropdown-menu" not in content
@@ -202,7 +201,7 @@ def test_course_program_child_view(client, wagtail_basics):
 def test_course_certificate_invalid_view(user_client, user, wagtail_basics):
     """
     Test that certificate page returns a 404 if CertificatePage does not exist for that course
-    """
+    """  # noqa: E501
     home = HomePageFactory.create(parent=wagtail_basics.root, slug="home")
     home.save_revision().publish()
 
@@ -267,7 +266,7 @@ def test_course_certificate_view_revoked_state(user_client, user, wagtail_basics
 def test_program_certificate_invalid_view(user_client, user, wagtail_basics):
     """
     Test that program certificate page returns a 404 if CertificatePage does not exist for that program
-    """
+    """  # noqa: E501
     home = HomePageFactory.create(parent=wagtail_basics.root, slug="home")
     home.save_revision().publish()
 
@@ -318,7 +317,7 @@ def test_catalog_page_product(client, wagtail_basics):
     active_program_1 = ProgramFactory.create()
     active_program_2 = ProgramFactory.create()
 
-    # Live course page and course with a future course run. Should be included in upcoming context
+    # Live course page and course with a future course run. Should be included in upcoming context  # noqa: E501
     active_course_run = CourseRunFactory.create(
         course__program=active_program_1,
         course__live=True,
@@ -327,7 +326,7 @@ def test_catalog_page_product(client, wagtail_basics):
         live=True,
     )
 
-    # The course isn't live however it has a valid and live run and page. This should be filtered out in the
+    # The course isn't live however it has a valid and live run and page. This should be filtered out in the  # noqa: E501
     # upcoming template context
     CourseRunFactory.create(
         course__program=active_program_1,
@@ -337,7 +336,7 @@ def test_catalog_page_product(client, wagtail_basics):
         live=True,
     )
 
-    # The course is live but it has no page. This should be filtered out in the upcoming template context
+    # The course is live but it has no page. This should be filtered out in the upcoming template context  # noqa: E501
     CourseRunFactory.create(
         course__program=active_program_2,
         course__live=True,
@@ -369,14 +368,19 @@ def test_catalog_page_product(client, wagtail_basics):
 
 
 @pytest.mark.parametrize(
-    "topic_filter, expected_courses_count, expected_program_count, expected_selected_topic",
+    (
+        "topic_filter",
+        "expected_courses_count",
+        "expected_program_count",
+        "expected_selected_topic",
+    ),  # noqa: E501, RUF100
     [
-        [None, 2, 2, ALL_TOPICS],
-        ["Engineering", 1, 1, "Engineering"],
-        ["RandomTopic", 0, 0, "RandomTopic"],
+        [None, 2, 2, ALL_TOPICS],  # noqa: PT007
+        ["Engineering", 1, 1, "Engineering"],  # noqa: PT007
+        ["RandomTopic", 0, 0, "RandomTopic"],  # noqa: PT007
     ],
 )
-def test_catalog_page_topics(  # pylint: disable=too-many-arguments
+def test_catalog_page_topics(  # pylint: disable=too-many-arguments  # noqa: PLR0913
     client,
     wagtail_basics,
     topic_filter,
@@ -454,11 +458,11 @@ def test_catalog_page_topics_ordering(client, wagtail_basics):
     )
 
 
-def test_program_page_checkout_url_product(client, wagtail_basics):
+def test_program_page_checkout_url_product(client, wagtail_basics):  # noqa: ARG001
     """
     The checkout URL in the program page context should include the product ID if a product exists
     for the given program
-    """
+    """  # noqa: E501
     program_page = ProgramPageFactory.create()
     program_page.save_revision().publish()
     product_version = ProductVersionFactory.create(
@@ -469,10 +473,10 @@ def test_program_page_checkout_url_product(client, wagtail_basics):
     assert f"product={product_version.product.id}" in checkout_url
 
 
-def test_program_page_checkout_url_program_run(client, wagtail_basics):
+def test_program_page_checkout_url_program_run(client, wagtail_basics):  # noqa: ARG001
     """
     The checkout URL in the program page context should include the program run text ID if a program run exists
-    """
+    """  # noqa: E501
     program_page = ProgramPageFactory.create()
     program_page.save_revision().publish()
     program_run = ProgramRunFactory.create(
@@ -484,7 +488,7 @@ def test_program_page_checkout_url_program_run(client, wagtail_basics):
 
     program_run.start_date = now_in_utc() + timedelta(days=1)
     program_run.save()
-    # If multiple future program runs exist, the one with the earliest start date should be used
+    # If multiple future program runs exist, the one with the earliest start date should be used  # noqa: E501
     ProgramRunFactory.create(
         program=program_page.program,
         start_date=(program_run.start_date + timedelta(days=1)),
@@ -507,12 +511,12 @@ def test_program_page_for_program_run(client):
     )
 
     page_base_url = program_page.get_url().rstrip("/")
-    good_url = "{}+{}/".format(page_base_url, program_run.run_tag)
+    good_url = f"{page_base_url}+{program_run.run_tag}/"
     resp = client.get(good_url)
-    assert resp.status_code == 200
-    bad_url = "{}+R2/".format(page_base_url)
+    assert resp.status_code == 200  # noqa: PLR2004
+    bad_url = f"{page_base_url}+R2/"
     resp = client.get(bad_url)
-    assert resp.status_code == 404
+    assert resp.status_code == 404  # noqa: PLR2004
 
 
 def test_webinar_page_context(client, wagtail_basics):
@@ -539,8 +543,8 @@ def test_webinar_page_context(client, wagtail_basics):
     context = resp.context_data
 
     assert "webinars" in context
-    assert len(context["webinars"][ON_DEMAND_WEBINAR]) == 2
-    assert len(context["webinars"][UPCOMING_WEBINAR]) == 3
+    assert len(context["webinars"][ON_DEMAND_WEBINAR]) == 2  # noqa: PLR2004
+    assert len(context["webinars"][UPCOMING_WEBINAR]) == 3  # noqa: PLR2004
     assert context["webinar_default_images"] == WEBINAR_DEFAULT_IMAGES
 
 
@@ -552,7 +556,9 @@ def test_webinar_formatted_date(wagtail_basics):
     webinar_index_page = WebinarIndexPageFactory.create(parent=homepage)
     webinar_index_page.save_revision().publish()
 
-    start_date = datetime.strptime("Tuesday, May 2, 2023", "%A, %B %d, %Y")
+    start_date = datetime.strptime(  # noqa: DTZ007
+        "Tuesday, May 2, 2023", "%A, %B %d, %Y"
+    )  # noqa: DTZ007, RUF100
     webinar = WebinarPageFactory.create(parent=webinar_index_page, date=start_date)
 
     assert webinar.formatted_date == "Tuesday, May 2, 2023"
@@ -561,7 +567,7 @@ def test_webinar_formatted_date(wagtail_basics):
 def test_upcoming_webinar_datetime_validations(wagtail_basics):
     """
     Test that the webinar page raises ValidationError when Date and Time is not provided for the upcoming webinars.
-    """
+    """  # noqa: E501
     homepage = wagtail_basics.root
     webinar_index_page = WebinarIndexPageFactory.create(parent=homepage)
     webinar_index_page.save_revision().publish()

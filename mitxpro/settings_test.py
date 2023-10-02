@@ -10,11 +10,10 @@ from django.core import mail
 from django.core.exceptions import ImproperlyConfigured
 from mitol.common import envs
 
-
 # pylint: disable=redefined-outer-name, unused-argument
 
 
-# NOTE: this is temporarily inlined here until I can stabilize the test upstream in the library
+# NOTE: this is temporarily inlined here until I can stabilize the test upstream in the library  # noqa: E501
 def test_app_json_modified():
     """
     Pytest test that verifies app.json is up-to-date
@@ -26,14 +25,15 @@ def test_app_json_modified():
     import json
     import logging
 
-    with open("app.json") as app_json_file:
+    with open("app.json") as app_json_file:  # noqa: PTH123
         app_json = json.load(app_json_file)
 
     generated_app_json = envs.generate_app_json()
 
     if app_json != generated_app_json:
         logging.error(
-            "Generated app.json does not match the app.json file. To fix this, run `./manage.py generate_app_json`"
+            "Generated app.json does not match the app.json file. To fix this, run"
+            " `./manage.py generate_app_json`"
         )
 
     # pytest will print the difference
@@ -56,7 +56,6 @@ def settings_sandbox(monkeypatch):
         return vars(sys.modules["mitxpro.settings"])
 
     def _patch(overrides):
-
         for key, value in overrides.items():
             monkeypatch.setenv(key, value)
 
@@ -143,7 +142,7 @@ def test_csrf_trusted_origins(settings_sandbox):
     ]
 
 
-def test_db_ssl_enable(monkeypatch, settings_sandbox):
+def test_db_ssl_enable(monkeypatch, settings_sandbox):  # noqa: ARG001
     """Verify that we can enable/disable database SSL with a var"""
     # Check default state is SSL on
     settings_vars = settings_sandbox.reload()
@@ -174,7 +173,7 @@ def test_server_side_cursors_disabled(settings_sandbox):
 
 
 def test_server_side_cursors_enabled(settings_sandbox):
-    """DISABLE_SERVER_SIDE_CURSORS should be false if MITXPRO_DB_DISABLE_SS_CURSORS is false"""
+    """DISABLE_SERVER_SIDE_CURSORS should be false if MITXPRO_DB_DISABLE_SS_CURSORS is false"""  # noqa: E501
     settings_vars = settings_sandbox.patch({"MITXPRO_DB_DISABLE_SS_CURSORS": "False"})
     assert (
         settings_vars["DEFAULT_DATABASE_CONFIG"]["DISABLE_SERVER_SIDE_CURSORS"] is False

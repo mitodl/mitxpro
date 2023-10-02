@@ -34,7 +34,7 @@ class ExportsInquiryLogAdmin(admin.ModelAdmin):
         country = pycountry.countries.get(alpha_2=instance.user.legal_address.country)
         return country.name if country else "N/A"
 
-    def manually_approve_inquiry(self, request, queryset):
+    def manually_approve_inquiry(self, request, queryset):  # noqa: ARG002
         """Admin action to manually approve export compliance inquiry records"""
         eligible_objects = queryset.exclude(
             computed_result__in=[RESULT_MANUALLY_APPROVED, RESULT_SUCCESS]
@@ -45,11 +45,11 @@ class ExportsInquiryLogAdmin(admin.ModelAdmin):
 
     manually_approve_inquiry.short_description = "Manually approve selected records"
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002
         # We want to allow this while debugging
         return settings.DEBUG
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         # We want to allow this while debugging
         return settings.DEBUG
 

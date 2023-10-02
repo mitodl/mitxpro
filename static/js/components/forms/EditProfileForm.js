@@ -7,7 +7,7 @@ import {
   profileValidation,
   legalAddressValidation,
   LegalAddressFields,
-  ProfileFields
+  ProfileFields,
 } from "./ProfileFormFields"
 
 import type { Country, User } from "../../flow/authTypes"
@@ -15,7 +15,7 @@ import type { Country, User } from "../../flow/authTypes"
 type Props = {
   onSubmit: Function,
   countries: Array<Country>,
-  user: User
+  user: User,
 }
 
 const getInitialValues = (user: User) => ({
@@ -30,8 +30,8 @@ const getInitialValues = (user: User) => ({
     company_size:      pathOr("", ["company_size"], user.profile),
     leadership_level:  pathOr("", ["leadership_level"], user.profile),
     years_experience:  pathOr("", ["years_experience"], user.profile),
-    highest_education: pathOr("", ["highest_education"], user.profile)
-  }
+    highest_education: pathOr("", ["highest_education"], user.profile),
+  },
 })
 
 const EditProfileForm = ({ onSubmit, countries, user }: Props) => (

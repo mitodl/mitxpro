@@ -39,7 +39,10 @@ class Geoname(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.geoname_id} {self.locale_code}: {self.subdivision_2_iso_code} {self.subdivision_1_iso_code} {self.country_iso_code} {self.continent_code}"
+        return (
+            f"{self.geoname_id} {self.locale_code}:"
+            f" {self.subdivision_2_iso_code} {self.subdivision_1_iso_code} {self.country_iso_code} {self.continent_code}"  # noqa: E501
+        )
 
 
 class NetBlock(models.Model):
@@ -99,4 +102,7 @@ class NetBlock(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.geoname_id}: {self.network} (IPv6 {self.is_ipv6}) start {self.ip_start} end {self.ip_end}"
+        return (
+            f"{self.geoname_id}: {self.network} (IPv6 {self.is_ipv6}) start"
+            f" {self.ip_start} end {self.ip_end}"
+        )

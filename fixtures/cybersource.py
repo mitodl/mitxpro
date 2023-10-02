@@ -1,8 +1,8 @@
 """Fxitures for CyberSource tests"""
 # pylint: disable=redefined-outer-name
 
-from nacl.public import PrivateKey
 import pytest
+from nacl.public import PrivateKey
 
 from compliance.test_utils import (
     get_cybersource_test_settings,
@@ -11,15 +11,15 @@ from compliance.test_utils import (
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def cybersource_private_key():
-    """Creates a new NaCl private key"""
+    """Creates a new NaCl private key"""  # noqa: D401
     return PrivateKey.generate()
 
 
-@pytest.fixture
+@pytest.fixture()
 def cybersource_settings(settings, cybersource_private_key):
-    """Configured CyberSource settings"""
+    """Configured CyberSource settings"""  # noqa: D401
     for attr_name, value in get_cybersource_test_settings(
         cybersource_private_key
     ).items():

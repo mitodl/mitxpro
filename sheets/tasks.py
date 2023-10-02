@@ -3,25 +3,27 @@ import logging
 from datetime import datetime, timedelta
 from itertools import chain, repeat
 
-from googleapiclient.errors import HttpError
-from django.conf import settings
 import celery
+from django.conf import settings
+from googleapiclient.errors import HttpError
 
 from ecommerce.models import BulkCouponAssignment
 from mitxpro.celery import app
-from mitxpro.utils import now_in_utc, case_insensitive_equal
+from mitxpro.utils import case_insensitive_equal, now_in_utc
 from sheets import (
     api as sheets_api,
+)
+from sheets import (
     coupon_assign_api,
     coupon_request_api,
-    refund_request_api,
     deferral_request_api,
+    refund_request_api,
 )
 from sheets.constants import (
     ASSIGNMENT_SHEET_ENROLLED_STATUS,
+    SHEET_TYPE_COUPON_ASSIGN,
     SHEET_TYPE_COUPON_REQUEST,
     SHEET_TYPE_ENROLL_CHANGE,
-    SHEET_TYPE_COUPON_ASSIGN,
 )
 from sheets.utils import AssignmentRowUpdate
 
@@ -36,8 +38,7 @@ def handle_unprocessed_coupon_requests():
     the necessary coupon assignment sheets.
     """
     coupon_request_handler = coupon_request_api.CouponRequestHandler()
-    results = coupon_request_handler.process_sheet()
-    return results
+    return coupon_request_handler.process_sheet()
 
 
 @app.task
@@ -46,10 +47,9 @@ def handle_unprocessed_refund_requests():
     Ensures that all non-legacy rows in the spreadsheet are correctly represented in the database,
     reverses/refunds enrollments if appropriate, updates the spreadsheet to reflect any changes
     made, and returns a summary of those changes.
-    """
+    """  # noqa: E501, D401
     refund_request_handler = refund_request_api.RefundRequestHandler()
-    results = refund_request_handler.process_sheet()
-    return results
+    return refund_request_handler.process_sheet()
 
 
 @app.task
@@ -58,10 +58,9 @@ def handle_unprocessed_deferral_requests():
     Ensures that all non-legacy rows in the spreadsheet are correctly represented in the database,
     defers user enrollments where appropriate, updates the spreadsheet to reflect any changes
     made, and returns a summary of those changes.
-    """
+    """  # noqa: E501, D401
     deferral_request_handler = deferral_request_api.DeferralRequestHandler()
-    results = deferral_request_handler.process_sheet()
-    return results
+    return deferral_request_handler.process_sheet()
 
 
 @app.task
@@ -73,10 +72,10 @@ def process_coupon_assignment_sheet(*, file_id, change_date=None):
         file_id (str): The file id of the assignment spreadsheet (visible in the spreadsheet URL)
         change_date (str): ISO-8601-formatted string indicating the datetime when this spreadsheet
             was changed
-    """
+    """  # noqa: E501, D401
     change_dt = datetime.fromisoformat(change_date) if change_date else now_in_utc()
     bulk_assignment, _ = BulkCouponAssignment.objects.update_or_create(
-        assignment_sheet_id=file_id, defaults=dict(sheet_last_modified_date=change_dt)
+        assignment_sheet_id=file_id, defaults={"sheet_last_modified_date": change_dt}
     )
     coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler(
         spreadsheet_id=file_id, bulk_assignment=bulk_assignment
@@ -104,10 +103,10 @@ def _get_scheduled_assignment_task_ids(file_id):
     Returns:
         list of str: Task ids of currently-scheduled but not-yet-executed tasks to process the
             assignment spreadsheet with the given id
-    """
+    """  # noqa: E501, D401
     task_name = process_coupon_assignment_sheet.name
     already_scheduled_task_ids = []
-    # If the scheduled task name matches the 'process_coupon_assignment_sheet' task, and it was
+    # If the scheduled task name matches the 'process_coupon_assignment_sheet' task, and it was  # noqa: E501
     # provided the given file_id as a kwarg, add its task id to the list
     for scheduled in chain.from_iterable(app.control.inspect().scheduled().values()):
         task_metadata = scheduled["request"]
@@ -130,12 +129,13 @@ def schedule_coupon_assignment_sheet_handling(file_id):
 
     Args:
         file_id (str): The file id of the assignment spreadsheet (visible in the spreadsheet URL)
-    """
+    """  # noqa: E501
     # Cancel any already-scheduled tasks to process this particular assignment sheet
     already_scheduled_task_ids = _get_scheduled_assignment_task_ids(file_id)
     if already_scheduled_task_ids:
         log.warning(
-            "Canceling existing task(s) for processing coupon assignment sheet (id: '%s')...",
+            "Canceling existing task(s) for processing coupon assignment sheet (id:"
+            " '%s')...",
             file_id,
         )
         app.control.revoke(already_scheduled_task_ids)
@@ -153,7 +153,7 @@ def update_incomplete_assignment_delivery_statuses():
     """
     Fetches all BulkCouponAssignments that have assignments but have not yet finished delivery, then updates the
     delivery status for each depending on what has been sent.
-    """
+    """  # noqa: E501, D401
     bulk_assignments = coupon_assign_api.fetch_update_eligible_bulk_assignments()
     updated_assignments = (
         coupon_assign_api.update_incomplete_assignment_message_statuses(
@@ -162,7 +162,7 @@ def update_incomplete_assignment_delivery_statuses():
     )
     return [
         (bulk_assignment_id, len(product_coupon_assignments))
-        for bulk_assignment_id, product_coupon_assignments in updated_assignments.items()
+        for bulk_assignment_id, product_coupon_assignments in updated_assignments.items()  # noqa: E501
     ]
 
 
@@ -180,7 +180,7 @@ def set_assignment_rows_to_enrolled(sheet_update_map):
     Returns:
         dict: A summary of execution results. The id of each provided sheet is mapped to the
             number of updated assignments in that sheet.
-    """
+    """  # noqa: E501, D401
     now = now_in_utc()
     result_summary = {}
     for sheet_id, assignment_code_email_dict in sheet_update_map.items():
@@ -225,9 +225,9 @@ def renew_file_watch(*, sheet_type, file_id):
     Renews push notifications for changes to a certain spreadsheet via the Google API.
     """
     sheet_metadata = sheets_api.get_sheet_metadata_from_type(sheet_type)
-    # These renewal tasks are run on a schedule and ensure that there is an unexpired file watch
-    # on each sheet we want to watch. If a file watch was manually created/updated at any
-    # point, this task might be run while that file watch is still unexpired. If the file
+    # These renewal tasks are run on a schedule and ensure that there is an unexpired file watch  # noqa: E501
+    # on each sheet we want to watch. If a file watch was manually created/updated at any  # noqa: E501
+    # point, this task might be run while that file watch is still unexpired. If the file  # noqa: E501
     # watch renewal was skipped, the task might not run again until after expiration. To
     # avoid that situation, the file watch is always renewed here (force=True).
     file_watch, created, _ = sheets_api.create_or_renew_sheet_file_watch(
@@ -235,8 +235,8 @@ def renew_file_watch(*, sheet_type, file_id):
     )
     return {
         "type": sheet_metadata.sheet_type,
-        "file_watch_channel_id": getattr(file_watch, "channel_id"),
-        "file_watch_file_id": getattr(file_watch, "file_id"),
+        "file_watch_channel_id": file_watch.channel_id,
+        "file_watch_file_id": file_watch.file_id,
         "created": created,
     }
 
@@ -245,7 +245,7 @@ def renew_file_watch(*, sheet_type, file_id):
 def renew_all_file_watches():
     """
     Renews push notifications for changes to all relevant spreadsheets via the Google API.
-    """
+    """  # noqa: E501
     assignment_sheet_ids_to_renew = (
         coupon_assign_api.fetch_webhook_eligible_assign_sheet_ids()
     )

@@ -12,7 +12,7 @@ BASE_URL = "http://localhost"
 
 @pytest.mark.parametrize("full_url", [True, False])
 def test_image_version_url(settings, full_url):
-    """image_version_url should produce an image URL with the file hash set as the file version in the querystring"""
+    """image_version_url should produce an image URL with the file hash set as the file version in the querystring"""  # noqa: E501
     settings.SITE_BASE_URL = BASE_URL
     view_name = "wagtailimages_serve"
     image_id = 1

@@ -22,7 +22,7 @@ export default function notifications() {
     const $notification = $(this).closest(".notification");
     localStorage.setItem(
       "dismissedNotification",
-      $notification.data("notification-id")
+      $notification.data("notification-id"),
     );
     $notification.remove();
   });

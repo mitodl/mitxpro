@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("courses", "0008_enrollment_company")]
 
     operations = [
@@ -13,7 +12,10 @@ class Migration(migrations.Migration):
             name="active",
             field=models.BooleanField(
                 default=True,
-                help_text="Indicates whether or not this enrollment should be considered active",
+                help_text=(
+                    "Indicates whether or not this enrollment should be considered"
+                    " active"
+                ),
             ),
         ),
         migrations.AddField(
@@ -21,7 +23,10 @@ class Migration(migrations.Migration):
             name="edx_enrolled",
             field=models.BooleanField(
                 default=False,
-                help_text="Indicates whether or not the request succeeded to enroll via the edX API",
+                help_text=(
+                    "Indicates whether or not the request succeeded to enroll via the"
+                    " edX API"
+                ),
             ),
         ),
         migrations.AddField(
@@ -29,7 +34,10 @@ class Migration(migrations.Migration):
             name="active",
             field=models.BooleanField(
                 default=True,
-                help_text="Indicates whether or not this enrollment should be considered active",
+                help_text=(
+                    "Indicates whether or not this enrollment should be considered"
+                    " active"
+                ),
             ),
         ),
     ]

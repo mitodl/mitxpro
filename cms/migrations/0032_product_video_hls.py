@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("cms", "0031_setup_catalog_page")]
 
     operations = [
@@ -13,7 +12,10 @@ class Migration(migrations.Migration):
             name="video_url",
             field=models.URLField(
                 blank=True,
-                help_text="URL to the video to be displayed for this program/course. Must be an HLS video URL.",
+                help_text=(
+                    "URL to the video to be displayed for this program/course. Must be"
+                    " an HLS video URL."
+                ),
                 null=True,
             ),
         ),
@@ -22,7 +24,10 @@ class Migration(migrations.Migration):
             name="video_url",
             field=models.URLField(
                 blank=True,
-                help_text="URL to the video to be displayed for this program/course. Must be an HLS video URL.",
+                help_text=(
+                    "URL to the video to be displayed for this program/course. Must be"
+                    " an HLS video URL."
+                ),
                 null=True,
             ),
         ),

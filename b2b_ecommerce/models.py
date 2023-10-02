@@ -19,7 +19,6 @@ from ecommerce.models import (
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 
-
 B2B_INTEGRATION_PREFIX = "B2B-"
 
 
@@ -39,7 +38,7 @@ class B2BCouponManager(models.Manager):
         Returns:
             B2BCoupon:
                 The coupon instance. If no coupon is found a B2BCoupon.DoesNotExist error is raised
-        """
+        """  # noqa: E501, D401
         coupon = (
             self.filter(
                 Q(coupon_code=coupon_code),
@@ -127,7 +126,7 @@ class B2BOrder(OrderAbstract, AuditableModel):
     An order containing information for the purchase of enrollment codes by businesses or other bulk purchasers.
     Orders which are fulfilled represent successful completion of a purchase and are the source of truth
     for this information.
-    """
+    """  # noqa: E501
 
     num_seats = models.PositiveIntegerField()
     email = models.EmailField()
@@ -157,11 +156,11 @@ class B2BOrder(OrderAbstract, AuditableModel):
 
     @staticmethod
     def get_reference_number_prefix():
-        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""
+        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""  # noqa: E501, D401
         return f"{REFERENCE_NUMBER_PREFIX}{settings.ENVIRONMENT}"
 
     def __str__(self):
-        """Description for CouponOrder"""
+        """Description for CouponOrder"""  # noqa: D401
         return f"B2BOrder #{self.id}, status={self.status}"
 
     @classmethod
@@ -215,7 +214,7 @@ class B2BOrderAudit(AuditModel):
     """
     Audit model for CouponOrder. This table is only meant for recordkeeping purposes. The serialized
     orders will also include information from any related tables.
-    """
+    """  # noqa: E501
 
     order = models.ForeignKey(B2BOrder, null=True, on_delete=models.PROTECT)
 
@@ -228,13 +227,13 @@ class B2BReceipt(TimestampedModel):
     """
     The contents of the message from CyberSource about an Order fulfillment or cancellation. The order
     should always exist but it's nullable in case there is a problem matching the CyberSource response to the order.
-    """
+    """  # noqa: E501
 
     order = models.ForeignKey(B2BOrder, null=True, on_delete=models.PROTECT)
     data = models.JSONField()
 
     def __str__(self):
-        """Description of B2BReceipt"""
+        """Description of B2BReceipt"""  # noqa: D401
         if self.order:
             return f"B2BReceipt for order {self.order.id}"
         else:

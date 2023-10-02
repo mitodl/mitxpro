@@ -36,16 +36,16 @@ def test_get_affiliate_code_from_request():
     request = RequestFactory().get("/")
     code = get_affiliate_code_from_request(request)
     assert code is None
-    setattr(request, "affiliate_code", affiliate_code)
+    request.affiliate_code = affiliate_code
     code = get_affiliate_code_from_request(request)
     assert code == affiliate_code
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_get_affiliate_id_from_code():
     """
     get_affiliate_id_from_code should fetch the Affiliate id from the database that matches the affiliate code
-    """
+    """  # noqa: E501
     affiliate_code = "abc"
     affiliate_id = get_affiliate_id_from_code(affiliate_code)
     assert affiliate_id is None
@@ -54,15 +54,15 @@ def test_get_affiliate_id_from_code():
     assert affiliate_id == affiliate.id
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_get_affiliate_id_from_request():
     """
     get_affiliate_id_from_request should fetch the Affiliate id from the database that matches the
     affiliate code from the request
-    """
+    """  # noqa: E501
     affiliate_code = "abc"
     request = RequestFactory().get("/")
-    setattr(request, "affiliate_code", affiliate_code)
+    request.affiliate_code = affiliate_code
     affiliate_id = get_affiliate_id_from_request(request)
     assert affiliate_id is None
     affiliate = AffiliateFactory.create(code=affiliate_code)

@@ -20,7 +20,6 @@ from mail.constants import (
 )
 from mitxpro.utils import format_price
 
-
 log = logging.getLogger()
 ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
 EMAIL_DATE_FORMAT = "%b %-d, %Y"
@@ -45,9 +44,11 @@ def get_b2b_receipt_data(order):
         receipt_data = {
             "card_number": receipt.data.get("req_card_number"),
             "card_type": CYBERSOURCE_CARD_TYPES.get(receipt.data.get("req_card_type")),
-            "payment_method": receipt.data.get("req_payment_method")
-            if "req_payment_method" in receipt.data
-            else None,
+            "payment_method": (
+                receipt.data.get("req_payment_method")
+                if "req_payment_method" in receipt.data
+                else None
+            ),
             "purchaser": {
                 "name": " ".join(
                     [
@@ -83,7 +84,7 @@ def get_bulk_enroll_message_data(bulk_assignment_id, recipient, product_coupon):
 
     Returns:
         ecommerce.api.UserMessageProps: An object containing user-specific message data
-    """
+    """  # noqa: E501, D401
     product_object = product_coupon.product.content_object
     if product_coupon.program_run:
         email_product_id = product_coupon.program_run.full_readable_id
@@ -131,7 +132,7 @@ def send_bulk_enroll_emails(bulk_assignment_id, product_coupon_assignments):
         bulk_assignment_id (int): The id for the BulkCouponAssignment that the assignments belong to
         product_coupon_assignments (iterable of ProductCouponAssignments):
             Product coupon assignments about which we want to notify the recipients
-    """
+    """  # noqa: E501, D401
     api.send_messages(
         api.build_user_specific_messages(
             EMAIL_BULK_ENROLL,
@@ -165,7 +166,7 @@ def send_course_run_enrollment_email(enrollment):
                 EMAIL_COURSE_RUN_ENROLLMENT,
             )
         )
-    except:  # pylint: disable=bare-except
+    except:  # pylint: disable=bare-except  # noqa: E722
         log.exception("Error sending enrollment success email")
 
 
@@ -188,7 +189,9 @@ def send_course_run_unenrollment_email(enrollment):
             )
         )
     except Exception as exp:  # pylint: disable=broad-except
-        log.exception("Error sending unenrollment success email: %s", exp)
+        log.exception(
+            "Error sending unenrollment success email: %s", exp  # noqa: TRY401
+        )  # noqa: RUF100, TRY401
 
 
 def send_b2b_receipt_email(order):
@@ -210,7 +213,10 @@ def send_b2b_receipt_email(order):
         and course_run_or_program.end_date is not None
     ):
         run = course_run_or_program
-        date_range = f"{run.start_date.strftime(EMAIL_DATE_FORMAT)} - {run.end_date.strftime(EMAIL_DATE_FORMAT)}"
+        date_range = (
+            f"{run.start_date.strftime(EMAIL_DATE_FORMAT)} -"
+            f" {run.end_date.strftime(EMAIL_DATE_FORMAT)}"
+        )
     else:
         date_range = ""
 
@@ -228,9 +234,11 @@ def send_b2b_receipt_email(order):
                         "purchase_date": order.updated_on.strftime(EMAIL_DATE_FORMAT),
                         "total_price": format_price(order.total_price),
                         "item_price": format_price(order.per_item_price),
-                        "discount": format_price(order.discount)
-                        if order.discount is not None
-                        else None,
+                        "discount": (
+                            format_price(order.discount)
+                            if order.discount is not None
+                            else None
+                        ),
                         "contract_number": order.contract_number,
                         "num_seats": str(order.num_seats),
                         "readable_id": get_readable_id(
@@ -247,7 +255,7 @@ def send_b2b_receipt_email(order):
                 EMAIL_B2B_RECEIPT,
             )
         )
-    except:  # pylint: disable=bare-except
+    except:  # pylint: disable=bare-except  # noqa: E722
         log.exception("Error sending receipt email")
 
 
@@ -258,7 +266,7 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
     Args:
         cyber_source_provided_email: Include the email address if user provide though CyberSource payment process.
         order: An order.
-    """
+    """  # noqa: E501
     from ecommerce.serializers import OrderReceiptSerializer
 
     data = OrderReceiptSerializer(instance=order).data
@@ -282,9 +290,9 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
                             user=None,
                             extra_context={
                                 "coupon": coupon,
-                                "content_title": lines[0].get("content_title")
-                                if lines
-                                else None,
+                                "content_title": (
+                                    lines[0].get("content_title") if lines else None
+                                ),
                                 "lines": lines,
                                 "order_total": format(
                                     sum(float(line["total_paid"]) for line in lines),
@@ -327,7 +335,7 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
         )
         api.send_messages(messages)
 
-    except:  # pylint: disable=bare-except
+    except:  # pylint: disable=bare-except  # noqa: E722
         log.exception("Error sending order receipt email.")
 
 
@@ -348,7 +356,7 @@ def send_support_email(subject, message):
                 [settings.EMAIL_SUPPORT],
                 connection=connection,
             )
-    except:  # pylint: disable=bare-except
+    except:  # pylint: disable=bare-except  # noqa: E722
         log.exception("Exception sending email to admins")
 
 
@@ -362,13 +370,16 @@ def send_enrollment_failure_message(order, obj, details):
     Returns:
         str: The formatted error message
     """
-    message = "{name}({email}): Order #{order_id}, {error_obj} #{obj_id} ({obj_title})\n\n{details}".format(
-        name=order.purchaser.username,
-        email=order.purchaser.email,
-        order_id=order.id,
-        error_obj=("Run" if isinstance(obj, CourseRun) else "Program"),
-        obj_id=obj.id,
-        obj_title=obj.title,
-        details=details,
+    message = (
+        "{name}({email}): Order #{order_id}, {error_obj} #{obj_id}"
+        " ({obj_title})\n\n{details}".format(
+            name=order.purchaser.username,
+            email=order.purchaser.email,
+            order_id=order.id,
+            error_obj=("Run" if isinstance(obj, CourseRun) else "Program"),
+            obj_id=obj.id,
+            obj_title=obj.title,
+            details=details,
+        )
     )
     send_support_email(ENROLL_ERROR_EMAIL_SUBJECT, message)

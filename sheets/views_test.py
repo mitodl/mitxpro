@@ -1,13 +1,13 @@
 """Tests for sheets app views"""
 import pytest
-from django.urls import reverse
 from django.test.client import Client, RequestFactory
+from django.urls import reverse
 from rest_framework import status
 
-from sheets.views import complete_google_auth
-from sheets.models import GoogleApiAuth
-from sheets.factories import GoogleApiAuthFactory, GoogleFileWatchFactory
 from mitxpro.test_utils import set_request_session
+from sheets.factories import GoogleApiAuthFactory, GoogleFileWatchFactory
+from sheets.models import GoogleApiAuth
+from sheets.views import complete_google_auth
 
 lazy = pytest.lazy_fixture
 
@@ -54,17 +54,17 @@ def test_request_auth(mocker, settings, staff_client):
 
 
 @pytest.mark.parametrize("existing_auth", [lazy("google_api_auth"), None])
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_complete_auth(
-    mocker, settings, user, existing_auth
+    mocker, settings, user, existing_auth  # noqa: ARG001
 ):  # pylint: disable=unused-argument
     """
     View that handles Google auth completion should fetch a token and save/update a
     GoogleApiAuth object
     """
     settings.SITE_BASE_URL = "http://example.com"
-    access_token = "access-token-123"
-    refresh_token = "refresh-token-123"
+    access_token = "access-token-123"  # noqa: S105
+    refresh_token = "refresh-token-123"  # noqa: S105
     code = "auth-code"
     flow_mock = mocker.Mock(
         credentials=mocker.Mock(token=access_token, refresh_token=refresh_token)
@@ -100,12 +100,12 @@ def test_complete_auth(
     assert response.url.startswith(reverse("sheets-admin-view"))
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_handle_coupon_request_sheet_update(mocker, settings):
     """
     View that handles push notifications for file changes in Google should call a task to
     create coupons and write the results to the necessary Sheets.
-    """
+    """  # noqa: E501
     settings.COUPON_REQUEST_SHEET_ID = "abc123"
     GoogleFileWatchFactory.create(
         file_id=settings.COUPON_REQUEST_SHEET_ID, channel_id="file-watch-channel"

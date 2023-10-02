@@ -7,33 +7,33 @@ from django.conf import settings
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseNotFound, HttpResponseServerError
-from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.template.loader import render_to_string
-from rest_framework.views import APIView
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from mitxpro.serializers import AppContextSerializer
 
 
-def get_base_context(request):
+def get_base_context(request):  # noqa: ARG001
     """
     Returns the template context key/values needed for the base template and all templates that extend it
-    """
+    """  # noqa: E501, D401
     context = {}
     if settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE:
-        context[
-            "domain_verification_tag"
-        ] = settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE
+        context["domain_verification_tag"] = (
+            settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE
+        )
     return context
 
 
 @csrf_exempt
-def index(request, **kwargs):  # pylint: disable=unused-argument
+def index(request, **kwargs):  # pylint: disable=unused-argument  # noqa: ARG001
     """
     The index view
-    """
+    """  # noqa: D401
     context = get_base_context(request)
 
     # pylint: disable=too-many-boolean-expressions
@@ -62,7 +62,7 @@ def index(request, **kwargs):  # pylint: disable=unused-argument
     return render(request, "index.html", context=context)
 
 
-def handler404(request, exception):  # pylint: disable=unused-argument
+def handler404(request, exception):  # pylint: disable=unused-argument  # noqa: ARG001
     """404: NOT FOUND ERROR handler"""
     response = render_to_string(
         "404.html", request=request, context=get_base_context(request)
@@ -78,7 +78,7 @@ def handler500(request):
     return HttpResponseServerError(response)
 
 
-def cms_signin_redirect_to_site_signin(request):
+def cms_signin_redirect_to_site_signin(request):  # noqa: ARG001
     """Redirect wagtail admin signin to site signin page"""
     return redirect_to_login(reverse("wagtailadmin_home"), login_url="/signin")
 
@@ -86,7 +86,7 @@ def cms_signin_redirect_to_site_signin(request):
 def restricted(request):
     """
     Views restricted to admins
-    """
+    """  # noqa: D401
     if not (request.user and request.user.is_staff):
         raise PermissionDenied
     return render(request, "index.html", context=get_base_context(request))
@@ -97,6 +97,8 @@ class AppContextView(APIView):
 
     permission_classes = []
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def get(
+        self, request, *args, **kwargs  # noqa: ARG002
+    ):  # pylint: disable=unused-argument  # noqa: ARG002, RUF100
         """Read-only access"""
         return Response(AppContextSerializer(request).data)

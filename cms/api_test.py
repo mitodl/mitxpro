@@ -2,9 +2,10 @@
 from datetime import timedelta
 
 import pytest
+
+from cms.api import filter_and_sort_catalog_pages
 from cms.factories import ExternalCoursePageFactory, ExternalProgramPageFactory
 from cms.models import ExternalCoursePage
-from cms.api import filter_and_sort_catalog_pages
 from courses.factories import CourseRunFactory, ProgramRunFactory
 from mitxpro.utils import now_in_utc
 
@@ -15,7 +16,7 @@ def test_filter_and_sort_catalog_pages():  # pylint:disable=too-many-locals
     """
     Test that filter_and_sort_catalog_pages removes program/course/external course pages that do not have a future start date
     or enrollment end date, and returns appropriately sorted lists of pages
-    """
+    """  # noqa: E501
     now = now_in_utc()
 
     earlier_external_course_page = ExternalCoursePageFactory.create()
@@ -35,7 +36,7 @@ def test_filter_and_sort_catalog_pages():  # pylint:disable=too-many-locals
         course=later_external_course_page.course, start_date=now + timedelta(days=4)
     )
     later_external_program_page = ExternalProgramPageFactory.create()
-    # Create course run with past start_date and future enrollment_end, which should appear in the catalog
+    # Create course run with past start_date and future enrollment_end, which should appear in the catalog  # noqa: E501
     CourseRunFactory.create(
         course__program=later_external_program_page.program,
         start_date=now + timedelta(days=4),
@@ -45,7 +46,7 @@ def test_filter_and_sort_catalog_pages():  # pylint:disable=too-many-locals
         enrollment_end=(now + timedelta(days=1)),
         course__no_program=True,
     )
-    # Create course run with past start_date and enrollment_end, which should NOT appear in the catalog
+    # Create course run with past start_date and enrollment_end, which should NOT appear in the catalog  # noqa: E501
     past_run = CourseRunFactory.create(
         past_start=True, past_enrollment_end=True, course__no_program=True
     )

@@ -32,7 +32,6 @@ from mitxpro.utils import (
     serialize_model_object,
 )
 
-
 User = get_user_model()
 
 log = logging.getLogger(__name__)
@@ -47,46 +46,46 @@ class ActiveCertificates(models.Manager):
         """
         Returns:
             QuerySet: queryset for un-revoked certificates
-        """
+        """  # noqa: D401
         return super().get_queryset().filter(is_revoked=False)
 
 
 class ProgramQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
     def live(self):
-        """Applies a filter for Programs with live=True"""
+        """Applies a filter for Programs with live=True"""  # noqa: D401
         return self.filter(live=True)
 
     def with_text_id(self, text_id):
-        """Applies a filter for the Program's readable_id"""
+        """Applies a filter for the Program's readable_id"""  # noqa: D401
         return self.filter(readable_id=text_id)
 
 
 class CourseQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
     def live(self):
-        """Applies a filter for Courses with live=True"""
+        """Applies a filter for Courses with live=True"""  # noqa: D401
         return self.filter(live=True)
 
 
 class CourseRunQuerySet(models.QuerySet):  # pylint: disable=missing-docstring
     def live(self):
-        """Applies a filter for Course runs with live=True"""
+        """Applies a filter for Course runs with live=True"""  # noqa: D401
         return self.filter(live=True)
 
     def available(self):
-        """Applies a filter for Course runs with end_date in future"""
+        """Applies a filter for Course runs with end_date in future"""  # noqa: D401
         return self.filter(
             models.Q(end_date__isnull=True) | models.Q(end_date__gt=now_in_utc())
         )
 
     def enrollment_available(self):
-        """Applies a filter for Course runs with enrollment_end in future"""
+        """Applies a filter for Course runs with enrollment_end in future"""  # noqa: D401, E501
         return self.filter(
             models.Q(enrollment_end__isnull=True)
             | models.Q(enrollment_end__gt=now_in_utc())
         )
 
     def with_text_id(self, text_id):
-        """Applies a filter for the CourseRun's courseware_id"""
+        """Applies a filter for the CourseRun's courseware_id"""  # noqa: D401
         return self.filter(courseware_id=text_id)
 
 
@@ -98,25 +97,25 @@ class CourseTopicQuerySet(models.QuerySet):
     def parent_topics(self):
         """
         Applies a filter for course topics with parent=None
-        """
+        """  # noqa: D401
         return self.filter(parent__isnull=True).order_by("name")
 
     def parent_topic_names(self):
         """
         Returns a list of all parent topic names.
-        """
+        """  # noqa: D401
         return list(self.parent_topics().values_list("name", flat=True))
 
     def parent_topics_with_annotated_course_counts(self):
         """
         Returns parent course topics with annotated course counts including the child topic course counts as well.
-        """
+        """  # noqa: E501, D401
         from courses.utils import get_catalog_course_filter
 
         catalog_course_visible_filter = get_catalog_course_filter(
             relative_filter="coursepage__"
         )
-        topics_queryset = (
+        return (
             self.parent_topics()
             .annotate(
                 internal_course_count=models.Count(
@@ -146,14 +145,13 @@ class CourseTopicQuerySet(models.QuerySet):
                 ),
             )
         )
-        return topics_queryset
 
 
 class ActiveEnrollmentManager(models.Manager):
     """Query manager for active enrollment model objects"""
 
     def get_queryset(self):
-        """Manager queryset"""
+        """Manager queryset"""  # noqa: D401
         return super().get_queryset().filter(active=True)
 
 
@@ -189,7 +187,7 @@ class PageProperties(models.Model):
 
     @property
     def catalog_image_url(self):
-        """Gets the url for the thumbnail image as it appears in the catalog (if that image exists)"""
+        """Gets the url for the thumbnail image as it appears in the catalog (if that image exists)"""  # noqa: E501
         from wagtail.images.views.serve import generate_image_url
 
         return (
@@ -202,10 +200,9 @@ class PageProperties(models.Model):
 
 
 validate_url_path_field = RegexValidator(
-    r"^[{}]+$".format(detail_path_char_pattern),
-    "This field is used to produce URL paths. It must contain only characters that match this pattern: [{}]".format(
-        detail_path_char_pattern
-    ),
+    rf"^[{detail_path_char_pattern}]+$",
+    "This field is used to produce URL paths. It must contain only characters that"
+    f" match this pattern: [{detail_path_char_pattern}]",
 )
 
 
@@ -229,7 +226,7 @@ class Platform(TimestampedModel, ValidateOnSaveMixin):
     def validate_unique(self, exclude=None):
         """
         Validates case insensitive platform name uniqueness.
-        """
+        """  # noqa: D401
         platforms = Platform.objects.filter(name__iexact=self.name)
         if self._state.adding and platforms:
             raise ValidationError({"name": "A platform with this name already exists."})
@@ -268,7 +265,7 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 
     @cached_property
     def next_run_date(self):
-        """Gets the start date of the next CourseRun of the first course (position_in_program=1) if one exists"""
+        """Gets the start date of the next CourseRun of the first course (position_in_program=1) if one exists"""  # noqa: E501, D401
         first_course = next(
             (
                 course
@@ -279,17 +276,18 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         )
         if first_course:
             return first_course.next_run_date
+        return None
 
     @property
     def is_catalog_visible(self):
         """Returns True if this program should be shown on in the catalog"""
-        # NOTE: This is implemented with courses.all() to allow for prefetch_related optimization.
+        # NOTE: This is implemented with courses.all() to allow for prefetch_related optimization.  # noqa: E501
         return any(course.is_catalog_visible for course in self.courses.all())
 
     @property
     def current_price(self):
         """Gets the price if it exists"""
-        product = list(self.products.all())[0] if self.products.all() else None
+        product = next(iter(self.products.all())) if self.products.all() else None
         if not product:
             return None
         latest_version = product.latest_version
@@ -299,7 +297,7 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 
     @property
     def first_unexpired_run(self):
-        """Gets the earliest unexpired CourseRun of the first course (position_in_program=1) if one exists"""
+        """Gets the earliest unexpired CourseRun of the first course (position_in_program=1) if one exists"""  # noqa: E501
         first_course = next(
             (
                 course
@@ -310,10 +308,11 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         )
         if first_course:
             return first_course.first_unexpired_run
+        return None
 
     @property
     def first_course_unexpired_runs(self):
-        """Gets the unexpired course runs for the first course (position_in_program=1) in this program"""
+        """Gets the unexpired course runs for the first course (position_in_program=1) in this program"""  # noqa: E501
         first_course = next(
             (
                 course
@@ -324,6 +323,7 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         )
         if first_course:
             return first_course.unexpired_runs
+        return None
 
     @property
     def text_id(self):
@@ -332,7 +332,7 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 
     @property
     def instructors(self):
-        """Gets a list of instructors from the related program page, or an empty list if none"""
+        """Gets a list of instructors from the related program page, or an empty list if none"""  # noqa: E501
         if self.page is not None:
             faculty_page = self.page.faculty
         else:
@@ -351,11 +351,11 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 
     def __str__(self):
         title = f"{self.readable_id} | {self.title}"
-        return title if len(title) <= 100 else title[:97] + "..."
+        return title if len(title) <= 100 else title[:97] + "..."  # noqa: PLR2004
 
 
 class ProgramRun(TimestampedModel, ValidateOnSaveMixin):
-    """Model for program run (a specific offering of a program, used for sales purposes)"""
+    """Model for program run (a specific offering of a program, used for sales purposes)"""  # noqa: E501
 
     program = models.ForeignKey(
         Program, on_delete=models.CASCADE, related_name="programruns"
@@ -408,7 +408,7 @@ class CourseTopic(TimestampedModel):
 
         To avoid the DB queries it assumes that the course counts are annotated.
         `CourseTopicQuerySet.parent_topics_with_annotated_course_counts` annotates course counts for parent topics.
-        """
+        """  # noqa: E501, D401
         return sum(
             [
                 getattr(self, "internal_course_count", 0),
@@ -452,10 +452,10 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 
     @cached_property
     def next_run_date(self):
-        """Gets the start date of the next CourseRun if one exists"""
+        """Gets the start date of the next CourseRun if one exists"""  # noqa: D401
         now = now_in_utc()
-        # NOTE: This is implemented with min() and courseruns.all() to allow for prefetch_related
-        #   optimization. You can get the desired start_date with a filtered and sorted query, but
+        # NOTE: This is implemented with min() and courseruns.all() to allow for prefetch_related  # noqa: E501
+        #   optimization. You can get the desired start_date with a filtered and sorted query, but  # noqa: E501
         #   that would run a new query even if prefetch_related was used.
         return min(
             (
@@ -472,7 +472,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     def is_catalog_visible(self):
         """Returns True if this course should be shown on in the catalog"""
         now = now_in_utc()
-        # NOTE: This is implemented with courseruns.all() to allow for prefetch_related optimization.
+        # NOTE: This is implemented with courseruns.all() to allow for prefetch_related optimization.  # noqa: E501
         return any(
             course_run
             for course_run in self.courseruns.all()
@@ -494,7 +494,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         # NOTE: This is implemented with sorted() and courseruns.all() to allow for prefetch_related
         #   optimization. You can get the desired course_run with a filter, but
         #   that would run a new query even if prefetch_related was used.
-        """
+        """  # noqa: E501
         course_runs = self.courseruns.all()
         eligible_course_runs = [
             course_run
@@ -503,7 +503,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         ]
         return first_matching_item(
             sorted(eligible_course_runs, key=lambda course_run: course_run.start_date),
-            lambda course_run: True,
+            lambda course_run: True,  # noqa: ARG005
         )
 
     @property
@@ -529,7 +529,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 
     @property
     def instructors(self):
-        """Return a list of instructors from the related CMS page, or an empty list if there is no page"""
+        """Return a list of instructors from the related CMS page, or an empty list if there is no page"""  # noqa: E501
         if self.page is not None:
             faculty_page = self.page.faculty
         else:
@@ -567,10 +567,10 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 
     def save(self, *args, **kwargs):  # pylint: disable=signature-differs
         """Overridden save method"""
-        # If adding a Course to a Program without position specified, set it as the highest position + 1.
-        # WARNING: This is open to a race condition. Two near-simultaneous queries could end up with
-        #    the same position_in_program value for multiple Courses in one Program. This is very
-        #    unlikely (adding courses will be an admin-only task, and the position can be explicitly
+        # If adding a Course to a Program without position specified, set it as the highest position + 1.  # noqa: E501
+        # WARNING: This is open to a race condition. Two near-simultaneous queries could end up with  # noqa: E501
+        #    the same position_in_program value for multiple Courses in one Program. This is very  # noqa: E501
+        #    unlikely (adding courses will be an admin-only task, and the position can be explicitly  # noqa: E501
         #    provided), easily fixed, and the resulting bug would be very minor.
         if self.program and not self.position_in_program:
             last_position = (
@@ -583,7 +583,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 
     def __str__(self):
         title = f"{self.readable_id} | {self.title}"
-        return title if len(title) <= 100 else title[:97] + "..."
+        return title if len(title) <= 100 else title[:97] + "..."  # noqa: PLR2004
 
 
 class CourseRun(TimestampedModel):
@@ -598,7 +598,10 @@ class CourseRun(TimestampedModel):
     courseware_id = models.CharField(max_length=255, unique=True)
     run_tag = models.CharField(
         max_length=10,
-        help_text="A string that identifies the set of runs that this run belongs to (example: 'R2')",
+        help_text=(
+            "A string that identifies the set of runs that this run belongs to"
+            " (example: 'R2')"
+        ),
     )
     courseware_url_path = models.CharField(max_length=500, blank=True, null=True)
     start_date = models.DateTimeField(null=True, blank=True, db_index=True)
@@ -609,7 +612,10 @@ class CourseRun(TimestampedModel):
         null=True,
         blank=True,
         db_index=True,
-        help_text="The date beyond which the learner should not see link to this course run on their dashboard.",
+        help_text=(
+            "The date beyond which the learner should not see link to this course run"
+            " on their dashboard."
+        ),
     )
     live = models.BooleanField(default=False)
     products = GenericRelation(Product, related_query_name="courseruns")
@@ -673,7 +679,7 @@ class CourseRun(TimestampedModel):
     @property
     def current_price(self):
         """Gets the price if it exists"""
-        product = list(self.products.all())[0] if self.products.all() else None
+        product = next(iter(self.products.all())) if self.products.all() else None
         if not product:
             return None
         latest_version = product.latest_version
@@ -688,12 +694,12 @@ class CourseRun(TimestampedModel):
 
     @property
     def instructors(self):
-        """List instructors for a course run if they are specified in a related CMS page"""
+        """List instructors for a course run if they are specified in a related CMS page"""  # noqa: E501
         return self.course.instructors
 
     def __str__(self):
         title = f"{self.courseware_id} | {self.title}"
-        return title if len(title) <= 100 else title[:97] + "..."
+        return title if len(title) <= 100 else title[:97] + "..."  # noqa: PLR2004
 
     def clean(self):
         """
@@ -709,17 +715,23 @@ class CourseRun(TimestampedModel):
             return
 
         if self.start_date and self.expiration_date < self.start_date:
-            raise ValidationError("Expiration date must be later than start date.")
+            msg = "Expiration date must be later than start date."
+            raise ValidationError(msg)
 
         if self.end_date and self.expiration_date < self.end_date:
-            raise ValidationError("Expiration date must be later than end date.")
+            msg = "Expiration date must be later than end date."
+            raise ValidationError(msg)
 
     def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
+        self,
+        force_insert=False,  # noqa: FBT002
+        force_update=False,  # noqa: FBT002
+        using=None,
+        update_fields=None,  # noqa: FBT002, RUF100
     ):
         """
         Overriding the save method to inject clean into it
-        """
+        """  # noqa: D401
         self.clean()
         super().save(
             force_insert=force_insert,
@@ -745,7 +757,9 @@ class EnrollmentModel(TimestampedModel, AuditableModel):
     )
     active = models.BooleanField(
         default=True,
-        help_text="Indicates whether or not this enrollment should be considered active",
+        help_text=(
+            "Indicates whether or not this enrollment should be considered active"
+        ),
     )
 
     objects = ActiveEnrollmentManager()
@@ -768,14 +782,14 @@ class EnrollmentModel(TimestampedModel, AuditableModel):
             "company_name": self.company.name if self.company else None,
         }
 
-    def deactivate_and_save(self, change_status, no_user=False):
-        """Sets an enrollment to inactive, sets the status, and saves"""
+    def deactivate_and_save(self, change_status, no_user=False):  # noqa: FBT002
+        """Sets an enrollment to inactive, sets the status, and saves"""  # noqa: D401
         self.active = False
         self.change_status = change_status
         return self.save_and_log(None if no_user else self.user)
 
-    def reactivate_and_save(self, no_user=False):
-        """Sets an enrollment to be active again and saves"""
+    def reactivate_and_save(self, no_user=False):  # noqa: FBT002
+        """Sets an enrollment to be active again and saves"""  # noqa: D401
         self.active = True
         self.change_status = None
         return self.save_and_log(None if no_user else self.user)
@@ -789,7 +803,9 @@ class CourseRunEnrollment(EnrollmentModel):
     run = models.ForeignKey("courses.CourseRun", on_delete=models.PROTECT)
     edx_enrolled = models.BooleanField(
         default=False,
-        help_text="Indicates whether or not the request succeeded to enroll via the edX API",
+        help_text=(
+            "Indicates whether or not the request succeeded to enroll via the edX API"
+        ),
     )
 
     class Meta:
@@ -815,8 +831,8 @@ class CourseRunEnrollment(EnrollmentModel):
 
         Returns:
             queryset of CourseRunEnrollment: Course run enrollments associated with a user/program
-        """
-        added_filters = {} if order_id is None else dict(order_id=order_id)
+        """  # noqa: E501, D401
+        added_filters = {} if order_id is None else {"order_id": order_id}
         return cls.objects.filter(
             user=user, run__course__program=program, **added_filters
         )
@@ -868,8 +884,8 @@ class ProgramEnrollment(EnrollmentModel):
 
         Returns:
             queryset of CourseRunEnrollment: Associated course run enrollments
-        """
-        added_filters = {} if order_id is None else dict(order_id=order_id)
+        """  # noqa: E501, D401
+        added_filters = {} if order_id is None else {"order_id": order_id}
         return CourseRunEnrollment.get_program_run_enrollments(
             user=self.user, program=self.program, **added_filters
         )
@@ -919,7 +935,7 @@ class CourseRunGrade(TimestampedModel, AuditableModel, ValidateOnSaveMixin):
 
     @property
     def grade_percent(self):
-        """Returns the grade field value as a number out of 100 (or None if the value is None)"""
+        """Returns the grade field value as a number out of 100 (or None if the value is None)"""  # noqa: E501
         return self.grade * 100 if self.grade is not None else None
 
     def __str__(self):
@@ -947,7 +963,7 @@ def limit_to_certificate_pages():
     A callable for the limit_choices_to param in the FKs for certificate pages
     to limit the choices to certificate pages, rather than every page in the
     CMS.
-    """
+    """  # noqa: D401
     from cms.models import CertificatePage
 
     available_revisions = CertificatePage.objects.filter(live=True).values_list(
@@ -974,7 +990,7 @@ class BaseCertificate(models.Model):
         abstract = True
 
     def get_certified_object_id(self):
-        """Gets the id of the certificate's program/run"""
+        """Gets the id of the certificate's program/run"""  # noqa: D401
         raise NotImplementedError
 
     def get_courseware_object_readable_id(self):
@@ -1006,7 +1022,7 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
         return self.course_run_id
 
     def get_courseware_object_id(self):
-        """Gets the course id instead of the course run id"""
+        """Gets the course id instead of the course run id"""  # noqa: D401
         return self.course_run.course_id
 
     def get_courseware_object_readable_id(self):
@@ -1019,7 +1035,7 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
         Format: /certificate/<uuid>/
         Example: /certificate/93ebd74e-5f88-4b47-bb09-30a6d575328f/
         """
-        return "/certificate/{}/".format(str(self.uuid))
+        return f"/certificate/{self.uuid!s}/"
 
     @property
     def start_end_dates(self):
@@ -1049,7 +1065,7 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
     def clean(self):
         from cms.models import CertificatePage, CoursePage
 
-        # If user has not selected a revision, Let create the certificate since we have made the revision nullable
+        # If user has not selected a revision, Let create the certificate since we have made the revision nullable  # noqa: E501
         if not self.certificate_page_revision:
             return
 
@@ -1063,7 +1079,10 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
         ):
             raise ValidationError(
                 {
-                    "certificate_page_revision": f"The selected certificate page {certpage} is not for this course {self.course_run.course}."
+                    "certificate_page_revision": (
+                        f"The selected certificate page {certpage} is not for this"
+                        f" course {self.course_run.course}."
+                    )
                 }
             )
 
@@ -1092,7 +1111,7 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
         return self.program_id
 
     def get_courseware_object_id(self):
-        """Gets the program id"""
+        """Gets the program id"""  # noqa: D401
         return self.program_id
 
     def get_courseware_object_readable_id(self):
@@ -1105,7 +1124,7 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
         Format: /certificate/program/<uuid>/
         Example: /certificate/program/93ebd74e-5f88-4b47-bb09-30a6d575328f/
         """
-        return "/certificate/program/{}/".format(str(self.uuid))
+        return f"/certificate/program/{self.uuid!s}/"
 
     @property
     def start_end_dates(self):
@@ -1130,7 +1149,7 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
     def clean(self):
         from cms.models import CertificatePage, ProgramPage
 
-        # If user has not selected a revision, Let create the certificate since we have made the revision nullable
+        # If user has not selected a revision, Let create the certificate since we have made the revision nullable  # noqa: E501
         if not self.certificate_page_revision:
             return
 
@@ -1144,7 +1163,10 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
         ):
             raise ValidationError(
                 {
-                    "certificate_page_revision": f"The selected certificate page {certpage} is not for this program {self.program}."
+                    "certificate_page_revision": (
+                        f"The selected certificate page {certpage} is not for this"
+                        f" program {self.program}."
+                    )
                 }
             )
 

@@ -3,11 +3,11 @@
 from django.db import migrations, models
 
 
-def backfill_last_assignment_date(apps, schema_editor):
+def backfill_last_assignment_date(apps, schema_editor):  # noqa: ARG001
     """
     Backfills the last_assignment_date field value using most recently created ProductCouponAssignment
     associated with each BulkCouponAssignment
-    """
+    """  # noqa: E501
     BulkCouponAssignment = apps.get_model("ecommerce", "BulkCouponAssignment")
     for bulk_assignment in BulkCouponAssignment.objects.exclude(
         assignment_sheet_id=None
@@ -21,7 +21,6 @@ def backfill_last_assignment_date(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("ecommerce", "0028_include_future_runs_default")]
 
     operations = [

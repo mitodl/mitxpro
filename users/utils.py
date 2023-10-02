@@ -9,7 +9,6 @@ from requests.exceptions import HTTPError
 from mitxpro.utils import get_error_response_summary
 from users.constants import USERNAME_MAX_LEN
 
-
 User = get_user_model()
 log = logging.getLogger(__name__)
 
@@ -64,22 +63,21 @@ def usernameify(full_name, email=""):
     Raises:
         ValueError: Raised if generated username was blank after trying both the
             full name and email
-    """
+    """  # noqa: D401
     username = _reformat_for_username(full_name)
 
     if not username and email:
         log.error(
-            "User's full name could not be used to generate a username (full name: '%s'). "
-            "Trying email instead...",
+            "User's full name could not be used to generate a username (full name:"
+            " '%s'). Trying email instead...",
             full_name,
         )
         username = _reformat_for_username(email.split("@")[0])
     if not username:
-        raise ValueError(
-            "Username could not be generated (full_name: '{}', email: '{}')".format(
-                full_name, email
-            )
-        )
+        msg = "Username could not be generated (full_name: '{}', email: '{}')".format(
+            full_name, email
+        )  # noqa: E501, RUF100
+        raise ValueError(msg)
     return username[0:USERNAME_MAX_LEN]
 
 
@@ -93,7 +91,7 @@ def is_duplicate_username_error(exc):
 
     Returns:
         bool: Whether or not the exception indicates a duplicate username error
-    """
+    """  # noqa: E501, D401
     return re.search(r"\(username\)=\([^\s]+\) already exists", str(exc)) is not None
 
 
@@ -104,7 +102,7 @@ def ensure_active_user(user):
 
     Args:
         user (users.models.User): The user to activate/verify as functional
-    """
+    """  # noqa: E501
     from courseware.api import repair_faulty_edx_user  # circular import issues
 
     if not user.is_active:
@@ -122,7 +120,7 @@ def ensure_active_user(user):
             if created_auth_token:
                 log.info("Created edX auth token for %s", user.email)
         except HTTPError as exc:
-            log.error(
+            log.error(  # noqa: TRY400
                 "%s (%s): Failed to repair (%s)",
                 user.username,
                 user.email,

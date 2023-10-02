@@ -10,7 +10,7 @@ def test_affiliate_middleware(mocker):
     """
     AffiliateMiddleware should add the affiliate code to the session if a code was passed in the querystring,
     and add an attribute to the request object
-    """
+    """  # noqa: E501
     affiliate_code = "abc"
     request = RequestFactory().get(f"/?{AFFILIATE_QS_PARAM}={affiliate_code}")
 
@@ -25,7 +25,7 @@ def test_affiliate_middleware(mocker):
 
 
 def test_affiliate_middleware_session(mocker):
-    """AffiliateMiddleware should add add an attribute to the request object if a code exists in the session"""
+    """AffiliateMiddleware should add add an attribute to the request object if a code exists in the session"""  # noqa: E501
     affiliate_code = "abc"
     request = RequestFactory().get("/")
 

@@ -1,7 +1,7 @@
-"""Management command to change enrollment status"""
+"""Management command to change enrollment status"""  # noqa: INP001
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.management.base import CommandError
-from django.contrib.auth import get_user_model
 
 from courses.api import defer_enrollment
 from courses.management.utils import EnrollmentChangeCommand, enrollment_summary
@@ -12,9 +12,12 @@ User = get_user_model()
 
 
 class Command(EnrollmentChangeCommand):
-    """Sets a user's enrollment to 'deferred' and creates an enrollment for a different course run"""
+    """Sets a user's enrollment to 'deferred' and creates an enrollment for a different course run"""  # noqa: E501
 
-    help = "Sets a user's enrollment to 'deferred' and creates an enrollment for a different course run"
+    help = (  # noqa: A003
+        "Sets a user's enrollment to 'deferred' and creates an enrollment for a"
+        " different course run"
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -32,7 +35,9 @@ class Command(EnrollmentChangeCommand):
         parser.add_argument(
             "--to-run",
             type=str,
-            help="The 'courseware_id' value for the CourseRun that you are deferring to",
+            help=(
+                "The 'courseware_id' value for the CourseRun that you are deferring to"
+            ),
             required=True,
         )
         parser.add_argument(
@@ -40,11 +45,14 @@ class Command(EnrollmentChangeCommand):
             "--keep-failed-enrollments",
             action="store_true",
             dest="keep_failed_enrollments",
-            help="If provided, enrollment records will be kept even if edX enrollment fails",
+            help=(
+                "If provided, enrollment records will be kept even if edX enrollment"
+                " fails"
+            ),
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
         user = fetch_user(options["user"])
         from_courseware_id = options["from_run"]
@@ -64,28 +72,24 @@ class Command(EnrollmentChangeCommand):
                     from_courseware_id
                 )
             elif isinstance(exc, CourseRun.DoesNotExist):
-                message = "'to' course does not exist ({})".format(to_courseware_id)
+                message = f"'to' course does not exist ({to_courseware_id})"
             else:
                 message = str(exc)
-            raise CommandError(message)
+            raise CommandError(message)  # noqa: B904, TRY200
         except ValidationError as exc:
-            raise CommandError("Invalid enrollment deferral - {}".format(exc))
+            msg = f"Invalid enrollment deferral - {exc}"
+            raise CommandError(msg)  # noqa: B904, TRY200
         else:
             if not to_enrollment:
-                raise CommandError(
-                    "Failed to create/update the target enrollment ({})".format(
-                        to_courseware_id
-                    )
-                )
+                msg = "Failed to create/update the target enrollment ({})".format(
+                    to_courseware_id
+                )  # noqa: E501, RUF100
+                raise CommandError(msg)
 
         self.stdout.write(
             self.style.SUCCESS(
-                "Deferred enrollment for user: {}\n"
-                "Enrollment deactivated: {}\n"
-                "Enrollment created/updated: {}".format(
-                    user,
-                    enrollment_summary(from_enrollment),
-                    enrollment_summary(to_enrollment),
-                )
+                f"Deferred enrollment for user: {user}\n"
+                f"Enrollment deactivated: {enrollment_summary(from_enrollment)}\n"
+                f"Enrollment created/updated: {enrollment_summary(to_enrollment)}"
             )
         )

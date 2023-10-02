@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from django.core.management import CommandError
+
 from sheets.management import utils
 
 
@@ -43,7 +44,7 @@ def test_get_assignment_sheet_by_title():
 
 
 def test_get_assignment_sheet_by_title_multiple():
-    """Test that the get_assignment_sheet_by_title raises an error when multiple sheets are returned"""
+    """Test that the get_assignment_sheet_by_title raises an error when multiple sheets are returned"""  # noqa: E501
     mock_pygsheets_client = MagicMock(
         open_all=MagicMock(return_value=["mock-sheet-obj", "mock-second-sheet-obj"])
     )

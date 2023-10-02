@@ -3,8 +3,8 @@
 from django.db import migrations
 
 
-def migrate_associate_existing_topics(apps, app_schema):
-    """Pre-populate the existing course pages with the topics from their associated courses"""
+def migrate_associate_existing_topics(apps, app_schema):  # noqa: ARG001
+    """Pre-populate the existing course pages with the topics from their associated courses"""  # noqa: E501
 
     CoursePage = apps.get_model("cms", "CoursePage")
     ExternalCoursePage = apps.get_model("cms", "ExternalCoursePage")

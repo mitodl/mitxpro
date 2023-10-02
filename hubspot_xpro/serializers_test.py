@@ -35,16 +35,15 @@ from hubspot_xpro.serializers import (
     format_product_name,
 )
 
-
 pytestmark = [pytest.mark.django_db]
 
 
 @pytest.mark.parametrize(
-    "text_id, expected",
+    ("text_id", "expected"),
     [
-        ["course-v1:xPRO+SysEngxNAV+R1", "Run 1"],
-        ["course-v1:xPRO+SysEngxNAV+R10", "Run 10"],
-        ["course-v1:xPRO+SysEngxNAV", "course-v1:xPRO+SysEngxNAV"],
+        ["course-v1:xPRO+SysEngxNAV+R1", "Run 1"],  # noqa: PT007
+        ["course-v1:xPRO+SysEngxNAV+R10", "Run 10"],  # noqa: PT007
+        ["course-v1:xPRO+SysEngxNAV", "course-v1:xPRO+SysEngxNAV"],  # noqa: PT007
     ],
 )
 def test_serialize_product(text_id, expected):
@@ -63,7 +62,7 @@ def test_serialize_product(text_id, expected):
     assert serialized_data.get("unique_app_id") == format_app_id(product.id)
 
 
-def test_serialize_line(hubspot_order, hubspot_b2b_order_id):
+def test_serialize_line(hubspot_order, hubspot_b2b_order_id):  # noqa: ARG001
     """Test that LineSerializer produces the correct serialized data"""
     line = hubspot_order.lines.first()
     serialized_data = LineSerializer(instance=line).data
@@ -111,14 +110,14 @@ def test_serialize_order(settings, hubspot_order, status):
 
 
 @pytest.mark.parametrize(
-    "discount_type, amount",
+    ("discount_type", "amount"),
     [
-        [DISCOUNT_TYPE_PERCENT_OFF, Decimal(0.75)],
-        [DISCOUNT_TYPE_DOLLARS_OFF, Decimal(75)],
+        [DISCOUNT_TYPE_PERCENT_OFF, Decimal(0.75)],  # noqa: PT007
+        [DISCOUNT_TYPE_DOLLARS_OFF, Decimal(75)],  # noqa: PT007
     ],
 )
 def test_serialize_order_with_coupon(settings, hubspot_order, discount_type, amount):
-    """Test that OrderToDealSerializer produces the correct serialized data for an order with coupon"""
+    """Test that OrderToDealSerializer produces the correct serialized data for an order with coupon"""  # noqa: E501
     line = hubspot_order.lines.first()
     coupon_redemption = CouponRedemptionFactory.create(
         order=hubspot_order,
@@ -146,10 +145,14 @@ def test_serialize_order_with_coupon(settings, hubspot_order, discount_type, amo
         "order_type": ORDER_TYPE_B2B,
         "payment_type": coupon_redemption.coupon_version.payment_version.payment_type,
         "discount_type": coupon_redemption.coupon_version.payment_version.discount_type,
-        "payment_transaction": coupon_redemption.coupon_version.payment_version.payment_transaction,
-        "discount_percent": coupon_redemption.coupon_version.payment_version.calculate_discount_percent(
-            price=line.product_version.price
-        ).to_eng_string(),
+        "payment_transaction": (
+            coupon_redemption.coupon_version.payment_version.payment_transaction
+        ),
+        "discount_percent": (
+            coupon_redemption.coupon_version.payment_version.calculate_discount_percent(
+                price=line.product_version.price
+            ).to_eng_string()
+        ),
         "status": hubspot_order.status,
         "pipeline": settings.HUBSPOT_PIPELINE_ID,
         "unique_app_id": format_app_id(hubspot_order.id),
@@ -181,12 +184,14 @@ def test_serialize_b2b_order(settings, hubspot_b2b_order, status):
         "status": hubspot_b2b_order.status,
         "pipeline": settings.HUBSPOT_PIPELINE_ID,
         "order_type": ORDER_TYPE_B2B,
-        "unique_app_id": f"{settings.MITOL_HUBSPOT_API_ID_PREFIX}-{B2B_ORDER_PREFIX}-{hubspot_b2b_order.id}",
+        "unique_app_id": f"{settings.MITOL_HUBSPOT_API_ID_PREFIX}-{B2B_ORDER_PREFIX}-{hubspot_b2b_order.id}",  # noqa: E501
     }
 
 
-def test_serialize_b2b_line_item(settings, hubspot_b2b_order, hubspot_b2b_order_id):
-    """Test that B2BProductVersionToLineSerializer produces the correct serialized data"""
+def test_serialize_b2b_line_item(
+    settings, hubspot_b2b_order, hubspot_b2b_order_id  # noqa: ARG001
+):  # noqa: ARG001, RUF100
+    """Test that B2BProductVersionToLineSerializer produces the correct serialized data"""  # noqa: E501
     serialized_data = B2BOrderToLineItemSerializer(instance=hubspot_b2b_order).data
     assert serialized_data == {
         "hs_product_id": HubspotObject.objects.get(
@@ -198,12 +203,12 @@ def test_serialize_b2b_line_item(settings, hubspot_b2b_order, hubspot_b2b_order_
         "product_id": hubspot_b2b_order.product_version.text_id,
         "price": hubspot_b2b_order.product_version.price.to_eng_string(),
         "name": format_product_name(hubspot_b2b_order.product_version.product),
-        "unique_app_id": f"{settings.MITOL_HUBSPOT_API_ID_PREFIX}-{B2B_ORDER_PREFIX}-{hubspot_b2b_order.line.id}",
+        "unique_app_id": f"{settings.MITOL_HUBSPOT_API_ID_PREFIX}-{B2B_ORDER_PREFIX}-{hubspot_b2b_order.line.id}",  # noqa: E501
     }
 
 
 def test_serialize_b2b_order_with_coupon(settings, client, mocker):
-    """Test that B2BOrderToDealSerializer produces the correct serialized data for an order with coupon"""
+    """Test that B2BOrderToDealSerializer produces the correct serialized data for an order with coupon"""  # noqa: E501
 
     product_version = ProductVersionFactory.create(price=10)
     HubspotObject.objects.create(
@@ -255,9 +260,13 @@ def test_serialize_b2b_order_with_coupon(settings, client, mocker):
         "discount_percent": round(
             Decimal(coupon.discount_percent) * 100, 2
         ).to_eng_string(),
-        "discount_type": DISCOUNT_TYPE_PERCENT_OFF,  # B2B Orders only support percent-off discounts
+        "discount_type": (
+            DISCOUNT_TYPE_PERCENT_OFF
+        ),  # B2B Orders only support percent-off discounts
         "status": order.status,
         "order_type": ORDER_TYPE_B2B,
         "pipeline": settings.HUBSPOT_PIPELINE_ID,
-        "unique_app_id": f"{settings.MITOL_HUBSPOT_API_ID_PREFIX}-{B2B_ORDER_PREFIX}-{order.id}",
+        "unique_app_id": (
+            f"{settings.MITOL_HUBSPOT_API_ID_PREFIX}-{B2B_ORDER_PREFIX}-{order.id}"
+        ),
     }

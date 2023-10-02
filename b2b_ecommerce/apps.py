@@ -2,11 +2,10 @@
 from django.apps import AppConfig
 
 
-class B2B_EcommerceConfig(AppConfig):
+class B2B_EcommerceConfig(AppConfig):  # noqa: N801
     """AppConfig for B2B_Ecommerce"""
 
     name = "b2b_ecommerce"
 
     def ready(self):
         """Application is ready"""
-        import b2b_ecommerce.signals  # pylint:disable=unused-import

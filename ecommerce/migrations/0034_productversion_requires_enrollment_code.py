@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("ecommerce", "0033_jsonField_from_django_models")]
 
     operations = [
@@ -13,7 +12,10 @@ class Migration(migrations.Migration):
             name="requires_enrollment_code",
             field=models.BooleanField(
                 default=False,
-                help_text="Requires enrollment code will require the learner to enter an enrollment code to enroll in the course at the checkout.",
+                help_text=(
+                    "Requires enrollment code will require the learner to enter an"
+                    " enrollment code to enroll in the course at the checkout."
+                ),
             ),
         )
     ]

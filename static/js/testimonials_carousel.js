@@ -17,25 +17,25 @@ export default function testimonialsCarousel() {
         settings:   {
           slidesToShow:   3,
           slidesToScroll: 3,
-          dots:           numTestimonialSlides > 3
-        }
+          dots:           numTestimonialSlides > 3,
+        },
       },
       {
         breakpoint: 992,
         settings:   {
           slidesToShow:   2,
           slidesToScroll: 1,
-          dots:           numTestimonialSlides > 2
-        }
+          dots:           numTestimonialSlides > 2,
+        },
       },
       {
         breakpoint: 767,
         settings:   {
           slidesToShow:   1,
           slidesToScroll: 1,
-          dots:           numTestimonialSlides > 1
-        }
-      }
-    ]
+          dots:           numTestimonialSlides > 1,
+        },
+      },
+    ],
   });
 }

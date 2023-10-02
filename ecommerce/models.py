@@ -29,7 +29,6 @@ from mitxpro.models import (
 )
 from mitxpro.utils import first_or_none, serialize_model_object
 
-
 log = logging.getLogger()
 
 
@@ -41,13 +40,13 @@ class Company(TimestampedModel):
     name = models.CharField(max_length=512, unique=True)
 
     def __str__(self):
-        """Description for Company"""
+        """Description for Company"""  # noqa: D401
         return f"Company {self.name}"
 
 
 class ProductQuerySet(PrefetchGenericQuerySet):  # pylint: disable=missing-docstring
     def active(self):
-        """Filters for active products only"""
+        """Filters for active products only"""  # noqa: D401
         return self.filter(is_active=True)
 
     def with_ordered_versions(self):
@@ -74,7 +73,7 @@ class Product(TimestampedModel):
     """
     Representation of a purchasable product. There is a GenericForeignKey to a Course or Program.
     Other about the product like price is stored in ProductVersion.
-    """
+    """  # noqa: E501
 
     content_type = models.ForeignKey(
         ContentType,
@@ -86,14 +85,18 @@ class Product(TimestampedModel):
     is_active = models.BooleanField(
         default=True,
         null=False,
-        help_text="If it is unchecked then users will not be "
-        "able to load the product on the checkout page.",
+        help_text=(
+            "If it is unchecked then users will not be "
+            "able to load the product on the checkout page."
+        ),
     )
     is_private = models.BooleanField(
         default=False,
         null=False,
-        help_text="Products can be Private or Public. Public products are listed in the "
-        "product drop-down on the bulk purchase form at /ecommerce/bulk.",
+        help_text=(
+            "Products can be Private or Public. Public products are listed in the "
+            "product drop-down on the bulk purchase form at /ecommerce/bulk."
+        ),
     )
     content_object = GenericForeignKey("content_type", "object_id")
     objects = ProductManager()
@@ -109,7 +112,7 @@ class Product(TimestampedModel):
 
     @cached_property
     def latest_version(self):
-        """Gets the most recently created ProductVersion associated with this Product"""
+        """Gets the most recently created ProductVersion associated with this Product"""  # noqa: D401, E501
         return first_or_none(self.ordered_versions)
 
     @property
@@ -118,12 +121,13 @@ class Product(TimestampedModel):
         from courses.models import CourseRun
 
         if self.content_type.model == "courserun":
-            # This looks strange since we just filtered by id but we want to make sure they overlap
+            # This looks strange since we just filtered by id but we want to make sure they overlap  # noqa: E501
             return CourseRun.objects.filter(id=self.object_id)
         elif self.content_type.model == "program":
             return CourseRun.objects.filter(course__program__id=self.object_id)
         else:
-            raise ValueError(f"Unexpected content type for {self.content_type.model}")
+            msg = f"Unexpected content type for {self.content_type.model}"
+            raise ValueError(msg)
 
     @property
     def type_string(self):
@@ -153,7 +157,8 @@ class Product(TimestampedModel):
         elif isinstance(content_object, CourseRun):
             return content_object.course.title
         else:
-            raise ValueError(f"Unexpected content type for {self.content_type.model}")
+            msg = f"Unexpected content type for {self.content_type.model}"
+            raise ValueError(msg)  # noqa: TRY004
 
     @property
     def thumbnail_url(self):
@@ -171,7 +176,8 @@ class Product(TimestampedModel):
         elif isinstance(content_object, CourseRun):
             catalog_image_url = content_object.course.catalog_image_url
         else:
-            raise ValueError(f"Unexpected product {content_object}")
+            msg = f"Unexpected product {content_object}"
+            raise ValueError(msg)  # noqa: TRY004
         return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
     @property
@@ -190,10 +196,11 @@ class Product(TimestampedModel):
         elif isinstance(content_object, CourseRun):
             return content_object.course.next_run_date
         else:
-            raise ValueError(f"Unexpected product {content_object}")
+            msg = f"Unexpected product {content_object}"
+            raise ValueError(msg)  # noqa: TRY004
 
     def __str__(self):
-        """Description of a product"""
+        """Description of a product"""  # noqa: D401
         return f"Product for {self.content_object}"
 
 
@@ -211,7 +218,10 @@ class ProductVersion(TimestampedModel):
     text_id = models.TextField(null=True)
     requires_enrollment_code = models.BooleanField(
         default=False,
-        help_text="Requires enrollment code will require the learner to enter an enrollment code to enroll in the course at the checkout.",
+        help_text=(
+            "Requires enrollment code will require the learner to enter an enrollment"
+            " code to enroll in the course at the checkout."
+        ),
     )
 
     class Meta:
@@ -219,16 +229,17 @@ class ProductVersion(TimestampedModel):
 
     def save(self, *args, **kwargs):  # pylint: disable=signature-differs
         try:
-            self.text_id = getattr(self.product.content_object, "text_id")
+            self.text_id = self.product.content_object.text_id
         except AttributeError:
-            log.error(
-                "The content object for this ProductVersion (%s) does not have a `text_id` property",
+            log.error(  # noqa: TRY400
+                "The content object for this ProductVersion (%s) does not have a"
+                " `text_id` property",
                 str(self.id),
             )
         super().save(*args, **kwargs)
 
     def __str__(self):
-        """Description of a ProductVersion"""
+        """Description of a ProductVersion"""  # noqa: D401
         return f"ProductVersion for {self.description}, ${self.price}"
 
 
@@ -236,12 +247,12 @@ class Basket(TimestampedModel):
     """
     Represents a User's basket. A Basket is made up of BasketItems. Each Basket is assigned to one user and
     it is reused for each checkout.
-    """
+    """  # noqa: E501
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
 
     def __str__(self):
-        """Description of Basket"""
+        """Description of Basket"""  # noqa: D401
         return f"Basket for {self.user}"
 
 
@@ -260,7 +271,7 @@ class BasketItem(TimestampedModel):
     )
 
     def __str__(self):
-        """Description of BasketItem"""
+        """Description of BasketItem"""  # noqa: D401
         return f"BasketItem of product {self.product} (qty: {self.quantity})"
 
 
@@ -277,7 +288,7 @@ class OrderManager(models.Manager):
             reference_number (str): A reference number, a string passed with the Cybersource payload
         Returns:
             Order or B2BOrder: An order
-        """
+        """  # noqa: E501
         order_id = get_order_id_by_reference_number(
             reference_number=reference_number,
             prefix=self.model.get_reference_number_prefix(),
@@ -305,7 +316,7 @@ class OrderAbstract(TimestampedModel):
 
     @property
     def reference_number(self):
-        """Create a string with the order id and a unique prefix so we can lookup the order during order fulfillment"""
+        """Create a string with the order id and a unique prefix so we can lookup the order during order fulfillment"""  # noqa: E501
         return f"{self.get_reference_number_prefix()}-{self.id}"
 
     class Meta:
@@ -316,7 +327,7 @@ class Order(OrderAbstract, AuditableModel):
     """
     An order containing information for a purchase. Orders which are fulfilled represent successful
     completion of a purchase and are the source of truth for this information.
-    """
+    """  # noqa: E501
 
     purchaser = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders"
@@ -333,11 +344,11 @@ class Order(OrderAbstract, AuditableModel):
 
     @staticmethod
     def get_reference_number_prefix():
-        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""
+        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""  # noqa: E501, D401
         return f"{REFERENCE_NUMBER_PREFIX}{settings.ENVIRONMENT}"
 
     def __str__(self):
-        """Description for Order"""
+        """Description for Order"""  # noqa: D401
         return f"Order #{self.id}, status={self.status}"
 
     @classmethod
@@ -355,9 +366,11 @@ class Order(OrderAbstract, AuditableModel):
         line = self.lines.first()
         price_with_tax = (
             get_product_version_price_with_discount_tax(
-                coupon_version=coupon_redemption.coupon_version
-                if coupon_redemption is not None
-                else None,
+                coupon_version=(
+                    coupon_redemption.coupon_version
+                    if coupon_redemption is not None
+                    else None
+                ),
                 product_version=line.product_version,
                 tax_rate=self.tax_rate,
             )
@@ -416,7 +429,7 @@ class OrderAudit(AuditModel):
     """
     Audit model for Order. This table is only meant for recordkeeping purposes. The serialized
     orders will also include information from any related tables.
-    """
+    """  # noqa: E501
 
     order = models.ForeignKey(Order, null=True, on_delete=models.PROTECT)
 
@@ -428,22 +441,25 @@ class OrderAudit(AuditModel):
 class Line(TimestampedModel):
     """
     A line in an Order. This contains information about a specific item which is purchased.
-    """
+    """  # noqa: E501
 
     order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name="lines")
     product_version = models.ForeignKey(ProductVersion, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField()
 
     def __str__(self):
-        """Description for Line"""
-        return f"Line for order #{self.order.id}, {self.product_version} (qty: {self.quantity})"
+        """Description for Line"""  # noqa: D401
+        return (
+            f"Line for order #{self.order.id}, {self.product_version} (qty:"
+            f" {self.quantity})"
+        )
 
 
 class LineRunSelection(TimestampedModel):
     """
     A mapping from a selection of a run in a program to the order line. Represents a course run selection in a
     submitted order.
-    """
+    """  # noqa: E501
 
     line = models.ForeignKey(
         Line, on_delete=models.CASCADE, related_name="line_selections"
@@ -454,7 +470,10 @@ class LineRunSelection(TimestampedModel):
         unique_together = ("line", "run")
 
     def __str__(self):
-        return f"LineRunSelection for order {self.line.order.id}, line {self.line}, run {self.run.courseware_id}"
+        return (
+            f"LineRunSelection for order {self.line.order.id}, line {self.line}, run"
+            f" {self.run.courseware_id}"
+        )
 
 
 class ProgramRunLine(TimestampedModel):
@@ -468,7 +487,10 @@ class ProgramRunLine(TimestampedModel):
     program_run = models.ForeignKey("courses.ProgramRun", on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"ProgramRunLine for line: {self.id}, order: {self.line.order.id}, text id: {self.program_run.full_readable_id}"
+        return (
+            f"ProgramRunLine for line: {self.id}, order: {self.line.order.id}, text id:"
+            f" {self.program_run.full_readable_id}"
+        )
 
 
 class CouponPaymentQueryset(models.QuerySet):  # pylint: disable=missing-docstring
@@ -485,7 +507,7 @@ class CouponPaymentQueryset(models.QuerySet):  # pylint: disable=missing-docstri
 
 class CouponPaymentManager(models.Manager):  # pylint: disable=missing-docstring
     def get_queryset(self):
-        """Sets the custom queryset"""
+        """Sets the custom queryset"""  # noqa: D401
         return CouponPaymentQueryset(self.model, using=self._db)
 
     def with_ordered_versions(self):
@@ -497,7 +519,7 @@ class CouponPayment(TimestampedModel):
     """
     Information about creation of one or more coupons. Most information will go in CouponPaymentVersion.
     name should be a string which never changes and is unique for the coupon payment.
-    """
+    """  # noqa: E501
 
     name = models.CharField(max_length=256, unique=True)
     objects = CouponPaymentManager()
@@ -509,11 +531,11 @@ class CouponPayment(TimestampedModel):
 
         Returns:
             CouponPaymentVersion: The latest CouponPaymentVersion
-        """
+        """  # noqa: E501
         return self.versions.order_by("-created_on").first()
 
     def __str__(self):
-        """Description for CouponPayment"""
+        """Description for CouponPayment"""  # noqa: D401
         return f"CouponPayment {self.name}"
 
 
@@ -521,7 +543,7 @@ class CouponPaymentVersion(TimestampedModel):
     """
     An append-only table for CouponPayment information. Payment information and coupon details are stored here
     and the latest version for a particular payment is the source of truth for this information.
-    """
+    """  # noqa: E501
 
     PROMO = "promo"
     SINGLE_USE = "single-use"
@@ -554,7 +576,10 @@ class CouponPaymentVersion(TimestampedModel):
     amount = models.DecimalField(
         decimal_places=5,
         max_digits=20,
-        help_text="Discount value for a coupon. (Between 0 and 1 if discount type is percent-off)",
+        help_text=(
+            "Discount value for a coupon. (Between 0 and 1 if discount type is"
+            " percent-off)"
+        ),
     )
     activation_date = models.DateTimeField(
         null=True,
@@ -581,19 +606,22 @@ class CouponPaymentVersion(TimestampedModel):
         indexes = [models.Index(fields=["created_on"])]
 
     def clean(self):
-        """Check if the amount validation has returned an error message that should be raised"""
+        """Check if the amount validation has returned an error message that should be raised"""  # noqa: E501
         error_message = validate_amount(self.discount_type, self.amount)
         if error_message:
             raise ValidationError({"amount": error_message})
 
     def __str__(self):
-        """Description for CouponPaymentVersion"""
-        return f"CouponPaymentVersion for {self.num_coupon_codes} of type {self.coupon_type}"
+        """Description for CouponPaymentVersion"""  # noqa: D401
+        return (
+            f"CouponPaymentVersion for {self.num_coupon_codes} of type"
+            f" {self.coupon_type}"
+        )
 
     def calculate_discount_amount(self, product_version=None, price=None):
         """If discount_type is in "percent-off", it would need price and calculate the amount of discount in currency,
         otherwise for dollars-off the discount value is equal to amount and doesn't depend upon product price
-        """
+        """  # noqa: E501
 
         from ecommerce.api import round_half_up
 
@@ -613,7 +641,8 @@ class CouponPaymentVersion(TimestampedModel):
 
     def calculate_discount_percent(self, product_version=None, price=None):
         """Vice versa of calculate_discount_amount, it calculates the percentage of discount applied on a specific
-        product, so in this case we convert the dollars-off to percentage"""
+        product, so in this case we convert the dollars-off to percentage
+        """  # noqa: E501
 
         from ecommerce.api import round_half_up
 
@@ -634,7 +663,7 @@ class Coupon(TimestampedModel):
     """
     Represents a coupon with a code. The latest CouponVersion for this instance is the source of truth for
     coupon information. Since the coupon_code is the identifier for the coupon, this should never be changed.
-    """
+    """  # noqa: E501
 
     coupon_code = models.CharField(max_length=50)
     payment = models.ForeignKey(CouponPayment, on_delete=models.PROTECT)
@@ -643,7 +672,7 @@ class Coupon(TimestampedModel):
     include_future_runs = models.BooleanField(default=False)
 
     def __str__(self):
-        """Description for Coupon"""
+        """Description for Coupon"""  # noqa: D401
         return f"Coupon {self.coupon_code} for {self.payment}"
 
 
@@ -651,7 +680,7 @@ class CouponVersion(TimestampedModel):
     """
     An append-only table for coupon codes. This should contain any mutable information specific to a coupon
     (at the moment this is only a link to a corresponding CouponPaymentVersion).
-    """
+    """  # noqa: E501
 
     coupon = models.ForeignKey(
         Coupon, on_delete=models.PROTECT, related_name="versions"
@@ -659,7 +688,7 @@ class CouponVersion(TimestampedModel):
     payment_version = models.ForeignKey(CouponPaymentVersion, on_delete=models.PROTECT)
 
     def __str__(self):
-        """Description for CouponVersion"""
+        """Description for CouponVersion"""  # noqa: D401
         return f"CouponVersion {self.coupon.coupon_code} for {self.payment_version}"
 
 
@@ -667,7 +696,7 @@ class CouponEligibility(TimestampedModel):
     """
     A link from a coupon to product which the coupon would apply to. There may be many coupons
     which could apply to a product, or a coupon can be valid for many different products.
-    """
+    """  # noqa: E501
 
     coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
@@ -679,7 +708,7 @@ class CouponEligibility(TimestampedModel):
         unique_together = ("coupon", "product")
 
     def __str__(self):
-        """Description of CouponProduct"""
+        """Description of CouponProduct"""  # noqa: D401
         return f"CouponProduct for product {self.product}, coupon {self.coupon}"
 
 
@@ -687,7 +716,7 @@ class CouponSelection(TimestampedModel):
     """
     A link from a Coupon to a Basket the coupon is being used with. At the moment there should only be one
     coupon per basket but this is a many to many table for future flexibility.
-    """
+    """  # noqa: E501
 
     coupon = models.ForeignKey(Coupon, on_delete=models.PROTECT)
     basket = models.ForeignKey(Basket, on_delete=models.PROTECT)
@@ -696,7 +725,7 @@ class CouponSelection(TimestampedModel):
         unique_together = ("coupon", "basket")
 
     def __str__(self):
-        """Description of CouponSelection"""
+        """Description of CouponSelection"""  # noqa: D401
         return f"CouponSelection for basket {self.basket}, coupon {self.coupon}"
 
 
@@ -704,7 +733,7 @@ class CouponRedemption(TimestampedModel):
     """
     A link from a CouponVersion to an Order. This indicates that a coupon has been used (if the order is fulfilled)
     or that it is intended to be used soon.
-    """
+    """  # noqa: E501
 
     coupon_version = models.ForeignKey(CouponVersion, on_delete=models.PROTECT)
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
@@ -713,21 +742,24 @@ class CouponRedemption(TimestampedModel):
         unique_together = ("coupon_version", "order")
 
     def __str__(self):
-        """Description of CouponRedemption"""
-        return f"CouponRedemption for order {self.order}, coupon version {self.coupon_version}"
+        """Description of CouponRedemption"""  # noqa: D401
+        return (
+            f"CouponRedemption for order {self.order}, coupon version"
+            f" {self.coupon_version}"
+        )
 
 
 class Receipt(TimestampedModel):
     """
     The contents of the message from CyberSource about an Order fulfillment or cancellation. The order
     should always exist but it's nullable in case there is a problem matching the CyberSource response to the order.
-    """
+    """  # noqa: E501
 
     order = models.ForeignKey(Order, null=True, on_delete=models.PROTECT)
     data = models.JSONField()
 
     def __str__(self):
-        """Description of Receipt"""
+        """Description of Receipt"""  # noqa: D401
         if self.order:
             return f"Receipt for order {self.order.id}"
         else:
@@ -764,7 +796,10 @@ class DataConsentAgreement(TimestampedModel):
     courses = models.ManyToManyField("courses.Course", blank=True)
 
     def __str__(self):
-        return f"DataConsentAgreement for {self.company.name}, products {'(All)' if self.is_global else ','.join([str(course.id) for course in self.courses.all()])}"
+        return (
+            f"DataConsentAgreement for {self.company.name}, products"
+            f" {'(All)' if self.is_global else ','.join([str(course.id) for course in self.courses.all()])}"  # noqa: E501
+        )
 
 
 class DataConsentUser(TimestampedModel):
@@ -778,7 +813,10 @@ class DataConsentUser(TimestampedModel):
     consent_date = models.DateTimeField(null=True)
 
     def __str__(self):
-        return f"DataConsentUser {self.user} for {self.agreement}, consent date {self.consent_date}"
+        return (
+            f"DataConsentUser {self.user} for {self.agreement}, consent date"
+            f" {self.consent_date}"
+        )
 
 
 class BulkCouponAssignment(models.Model):
@@ -797,7 +835,7 @@ class ProductCouponAssignment(TimestampedModel):
     """
     Records the assignment of a product coupon to an email address (in other words, the given
     product coupon can only be redeemed by a User with the given email address)
-    """
+    """  # noqa: E501
 
     email = models.EmailField(blank=False)
     original_email = models.EmailField(null=True, blank=True)
@@ -816,7 +854,10 @@ class ProductCouponAssignment(TimestampedModel):
     )
 
     def __str__(self):
-        return f"ProductCouponAssignment for {self.email}, product coupon {self.product_coupon_id} (redeemed: {self.redeemed})"
+        return (
+            f"ProductCouponAssignment for {self.email}, product coupon"
+            f" {self.product_coupon_id} (redeemed: {self.redeemed})"
+        )
 
     class Meta:
         indexes = (
@@ -840,7 +881,7 @@ class TaxRate(TimestampedModel):
     active = models.BooleanField(default=True)
 
     def to_dict(self):
-        """Returns object data as dict"""
+        """Returns object data as dict"""  # noqa: D401
         return {
             "country_code": self.country_code,
             "tax_rate": self.tax_rate,

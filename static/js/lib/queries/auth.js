@@ -8,7 +8,7 @@ import { getCookie } from "../api"
 import type {
   AuthResponse,
   LegalAddress,
-  ProfileForm
+  ProfileForm,
 } from "../../flow/authTypes"
 
 import type { updateEmailResponse } from "../../flow/authTypes"
@@ -23,34 +23,34 @@ const nextState = nthArg(1)
 const DEFAULT_OPTIONS = {
   transform: (auth: AuthResponse) => ({ auth }),
   update:    {
-    auth: nextState
+    auth: nextState,
   },
   options: {
-    method: "POST"
-  }
+    method: "POST",
+  },
 }
 
 export default {
   loginEmailMutation: (email: string, next: ?string) => ({
     ...DEFAULT_OPTIONS,
     url:  "/api/login/email/",
-    body: { email, next, flow: FLOW_LOGIN }
+    body: { email, next, flow: FLOW_LOGIN },
   }),
 
   loginPasswordMutation: (password: string, partialToken: string) => ({
     ...DEFAULT_OPTIONS,
     url:  "/api/login/password/",
-    body: { password, partial_token: partialToken, flow: FLOW_LOGIN }
+    body: { password, partial_token: partialToken, flow: FLOW_LOGIN },
   }),
 
   registerEmailMutation: (
     email: string,
     recaptcha: ?string,
-    next: ?string
+    next: ?string,
   ) => ({
     ...DEFAULT_OPTIONS,
     url:  "/api/register/email/",
-    body: { email, recaptcha, next, flow: FLOW_REGISTER }
+    body: { email, recaptcha, next, flow: FLOW_REGISTER },
   }),
 
   registerConfirmEmailMutation: (qsParams: Object) => ({
@@ -58,15 +58,15 @@ export default {
     url:  "/api/register/confirm/",
     body: {
       flow: FLOW_REGISTER,
-      ...qsParams
-    }
+      ...qsParams,
+    },
   }),
 
   registerDetailsMutation: (
     name: string,
     password: string,
     legalAddress: LegalAddress,
-    partialToken: string
+    partialToken: string,
   ) => ({
     ...DEFAULT_OPTIONS,
     url:  "/api/register/details/",
@@ -75,21 +75,21 @@ export default {
       password,
       legal_address: legalAddress,
       flow:          FLOW_REGISTER,
-      partial_token: partialToken
-    }
+      partial_token: partialToken,
+    },
   }),
 
   registerExtraDetailsMutation: (
     profileData: ProfileForm,
-    partialToken: string
+    partialToken: string,
   ) => ({
     ...DEFAULT_OPTIONS,
     url:  "/api/register/extra/",
     body: {
       flow:          FLOW_REGISTER,
       partial_token: partialToken,
-      ...profileData.profile
-    }
+      ...profileData.profile,
+    },
   }),
 
   forgotPasswordMutation: (email: string) => ({
@@ -98,43 +98,43 @@ export default {
     options: {
       method:  "POST",
       headers: {
-        "X-CSRFTOKEN": getCookie("csrftoken")
-      }
-    }
+        "X-CSRFTOKEN": getCookie("csrftoken"),
+      },
+    },
   }),
 
   changePasswordMutation: (oldPassword: string, newPassword: string) => ({
     url:     "/api/set_password/",
     options: {
       headers: {
-        "X-CSRFTOKEN": getCookie("csrftoken")
-      }
+        "X-CSRFTOKEN": getCookie("csrftoken"),
+      },
     },
     body: {
       current_password: oldPassword,
-      new_password:     newPassword
-    }
+      new_password:     newPassword,
+    },
   }),
 
   forgotPasswordConfirmMutation: (
     newPassword: string,
     reNewPassword: string,
     token: string,
-    uid: string
+    uid: string,
   ) => ({
     url:  "/api/password_reset/confirm/",
     body: {
       new_password:    newPassword,
       re_new_password: reNewPassword,
       token,
-      uid
+      uid,
     },
     options: {
       method:  "POST",
       headers: {
-        "X-CSRFTOKEN": getCookie("csrftoken")
-      }
-    }
+        "X-CSRFTOKEN": getCookie("csrftoken"),
+      },
+    },
   }),
 
   changeEmailMutation: (newEmail: string, password: string) => ({
@@ -142,33 +142,33 @@ export default {
     options: {
       method:  "POST",
       headers: {
-        "X-CSRFTOKEN": getCookie("csrftoken")
-      }
+        "X-CSRFTOKEN": getCookie("csrftoken"),
+      },
     },
     body: {
       new_email: newEmail,
-      password:  password
-    }
+      password:  password,
+    },
   }),
 
   confirmEmailMutation: (code: string) => ({
     queryKey:  "updateEmail",
     url:       `/api/change-emails/${code}/`,
     transform: (json: updateEmailResponse) => ({
-      updateEmail: json
+      updateEmail: json,
     }),
     update: {
       updateEmail: (prev: updateEmailResponse, next: updateEmailResponse) =>
-        next
+        next,
     },
     options: {
       method:  "PATCH",
       headers: {
-        "X-CSRFTOKEN": getCookie("csrftoken")
-      }
+        "X-CSRFTOKEN": getCookie("csrftoken"),
+      },
     },
     body: {
-      confirmed: true
-    }
-  })
+      confirmed: true,
+    },
+  }),
 }

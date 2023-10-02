@@ -47,7 +47,6 @@ from ecommerce.serializers import (
 )
 from mitxpro.test_utils import any_instance_of
 
-
 pytestmark = [pytest.mark.django_db]
 
 datetime_format = "%Y-%m-%dT%H:%M:%SZ"
@@ -78,9 +77,11 @@ def test_serialize_basket_product_version_courserun(mock_context):
         "readable_id": get_readable_id(product_version.product.content_object),
         "run_tag": courserun.run_tag,
         "created_on": product_version.created_on.strftime(datetime_millis_format),
-        "start_date": product_version.product.content_object.start_date.isoformat()
-        if product_version.product.content_object.start_date
-        else None,
+        "start_date": (
+            product_version.product.content_object.start_date.isoformat()
+            if product_version.product.content_object.start_date
+            else None
+        ),
     }
 
 
@@ -111,9 +112,11 @@ def test_serialize_basket_product_version_program(mock_context):
         "readable_id": get_readable_id(product_version.product.content_object),
         "run_tag": None,
         "created_on": product_version.created_on.strftime(datetime_millis_format),
-        "start_date": product_version.product.content_object.next_run_date.isoformat()
-        if product_version.product.content_object.next_run_date
-        else None,
+        "start_date": (
+            product_version.product.content_object.next_run_date.isoformat()
+            if product_version.product.content_object.next_run_date
+            else None
+        ),
     }
 
 
@@ -123,14 +126,14 @@ def test_serialize_basket_product_version_programrun(mock_context):
     product_version = ProductVersionFactory.create(
         product=ProductFactory(content_object=program_run.program)
     )
-    context = {**mock_context, **{"program_run": program_run}}
+    context = {**mock_context, **{"program_run": program_run}}  # noqa: PIE800
 
     data = FullProductVersionSerializer(instance=product_version, context=context).data
     assert data["object_id"] == program_run.program.id
     assert data["run_tag"] == program_run.run_tag
 
 
-def test_basket_thumbnail_courserun(basket_and_coupons, mock_context):
+def test_basket_thumbnail_courserun(basket_and_coupons, mock_context):  # noqa: ARG001
     """Basket thumbnail should be serialized for a courserun"""
     from wagtail.images.views.serve import generate_image_url
 
@@ -148,7 +151,7 @@ def test_basket_thumbnail_courserun(basket_and_coupons, mock_context):
     )
 
 
-def test_basket_thumbnail_program(basket_and_coupons, mock_context):
+def test_basket_thumbnail_program(basket_and_coupons, mock_context):  # noqa: ARG001
     """Basket thumbnail should be serialized for a program"""
     from wagtail.images.views.serve import generate_image_url
 
@@ -173,7 +176,9 @@ def test_serialize_basket_coupon_selection(basket_and_coupons):
     assert data == {
         "code": selection.coupon.coupon_code,
         "amount": str(basket_and_coupons.coupongroup_best.payment_version.amount),
-        "discount_type": basket_and_coupons.coupongroup_best.payment_version.discount_type,
+        "discount_type": (
+            basket_and_coupons.coupongroup_best.payment_version.discount_type
+        ),
         "targets": [basket_and_coupons.product_version.id],
     }
 
@@ -253,8 +258,8 @@ def test_serialize_coupon_single_use(
         "company": "Acme Corp.",
         "payment_type": "credit_card",
         "discount_type": DISCOUNT_TYPE_PERCENT_OFF,
-        "payment_transaction": ("fake123" if has_payment_transaction else None),
-        "product_ids": (coupon_product_ids if has_products else []),
+        "payment_transaction": "fake123" if has_payment_transaction else None,
+        "product_ids": coupon_product_ids if has_products else [],
         "include_future_runs": False,
     }
     serializer = SingleUseCouponSerializer(data=data)
@@ -262,13 +267,13 @@ def test_serialize_coupon_single_use(
 
 
 @pytest.mark.parametrize(
-    "too_high, expected_message",
+    ("too_high", "expected_message"),
     [
-        [
+        [  # noqa: PT007
             True,
             "The amount should be between (0 - 1) when discount type is percent-off.",
         ],
-        [
+        [  # noqa: PT007
             False,
             "The amount is invalid, please specify a value greater than 0.",
         ],
@@ -310,7 +315,7 @@ def test_serialize_coupon_promo(
     data = {
         "name": "FAKETAG",
         "tag": None,
-        "coupon_code": ("FAKE_CODE" if has_coupon_code else None),
+        "coupon_code": "FAKE_CODE" if has_coupon_code else None,
         "automatic": True,
         "activation_date": "2018-01-01T00:00:00Z",
         "expiration_date": "2019-12-31T00:00:00Z",
@@ -319,8 +324,8 @@ def test_serialize_coupon_promo(
         "discount_type": DISCOUNT_TYPE_PERCENT_OFF,
         "company": "Acme Corp.",
         "payment_type": "credit_card",
-        "payment_transaction": ("fake123" if has_payment_transaction else None),
-        "product_ids": (coupon_product_ids if has_products else []),
+        "payment_transaction": "fake123" if has_payment_transaction else None,
+        "product_ids": coupon_product_ids if has_products else [],
         "include_future_runs": False,
     }
     serializer = PromoCouponSerializer(data=data)
@@ -328,13 +333,13 @@ def test_serialize_coupon_promo(
 
 
 @pytest.mark.parametrize(
-    "too_high, expected_message",
+    ("too_high", "expected_message"),
     [
-        [
+        [  # noqa: PT007
             True,
             "The amount should be between (0 - 1) when discount type is percent-off.",
         ],
-        [
+        [  # noqa: PT007
             False,
             "The amount is invalid, please specify a value greater than 0.",
         ],
@@ -388,7 +393,7 @@ def test_serialize_coupon_payment_version_serializer(basket_and_coupons):
 def test_coupon_payment_serializer():
     """Test that the CouponPaymentSerializer has correct data"""
     payment = CouponPaymentFactory.build()
-    assert str(payment) == "CouponPayment {}".format(payment.name)
+    assert str(payment) == f"CouponPayment {payment.name}"
     serialized = CouponPaymentSerializer(payment).data
     assert serialized == {
         "name": payment.name,
@@ -461,7 +466,9 @@ def test_serialize_order_receipt(receipt_data):
                 "total_paid": str(line.quantity * product_version.price),
                 "tax_paid": "0.00",
                 "quantity": line.quantity,
-                "CEUs": product_version.product.content_object.course.page.certificate_page.CEUs,
+                "CEUs": (
+                    product_version.product.content_object.course.page.certificate_page.CEUs
+                ),
             }
         ],
         "order": {
@@ -493,26 +500,38 @@ def test_serialize_order_receipt(receipt_data):
                 if line
             ],
         },
-        "receipt": {
-            "card_number": receipt_data["req_card_number"]
-            if "req_card_number" in receipt_data
-            else None,
-            "card_type": CYBERSOURCE_CARD_TYPES[receipt_data["req_card_type"]]
-            if "req_card_type" in receipt_data
-            else None,
-            "payment_method": receipt.data["req_payment_method"]
-            if "req_payment_method" in receipt.data
-            else None,
-            "bill_to_email": receipt.data["req_bill_to_email"]
-            if "req_bill_to_email" in receipt.data
-            else None,
-            "name": f"{receipt.data.get('req_bill_to_forename')} {receipt.data.get('req_bill_to_surname')}"
-            if "req_bill_to_forename" in receipt.data
-            or "req_bill_to_surname" in receipt.data
-            else None,
-        }
-        if receipt
-        else None,
+        "receipt": (
+            {
+                "card_number": (
+                    receipt_data["req_card_number"]
+                    if "req_card_number" in receipt_data
+                    else None
+                ),
+                "card_type": (
+                    CYBERSOURCE_CARD_TYPES[receipt_data["req_card_type"]]
+                    if "req_card_type" in receipt_data
+                    else None
+                ),
+                "payment_method": (
+                    receipt.data["req_payment_method"]
+                    if "req_payment_method" in receipt.data
+                    else None
+                ),
+                "bill_to_email": (
+                    receipt.data["req_bill_to_email"]
+                    if "req_bill_to_email" in receipt.data
+                    else None
+                ),
+                "name": (
+                    f"{receipt.data.get('req_bill_to_forename')} {receipt.data.get('req_bill_to_surname')}"  # noqa: E501
+                    if "req_bill_to_forename" in receipt.data
+                    or "req_bill_to_surname" in receipt.data
+                    else None
+                ),
+            }
+            if receipt
+            else None
+        ),
     }
 
 
@@ -540,9 +559,7 @@ def test_serialize_coupon():
     name = "Some Coupon"
     code = "1234"
     coupon = CouponFactory.build(payment__name=name, coupon_code=code, enabled=True)
-    assert str(coupon) == "Coupon {} for {}".format(
-        coupon.coupon_code, str(coupon.payment)
-    )
+    assert str(coupon) == f"Coupon {coupon.coupon_code} for {coupon.payment!s}"
     serialized_data = CouponSerializer(instance=coupon).data
     assert serialized_data == {
         "id": None,
@@ -555,7 +572,7 @@ def test_serialize_coupon():
 
 
 def test_serialize_global_coupon():
-    """Test that CouponSerializer produces the correct serialized data for a global coupon"""
+    """Test that CouponSerializer produces the correct serialized data for a global coupon"""  # noqa: E501
     name = "FAKE"
     code = "1111"
     coupon = CouponFactory.build(

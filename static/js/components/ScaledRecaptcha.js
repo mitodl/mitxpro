@@ -6,11 +6,11 @@ import debounce from "lodash/debounce"
 
 type Props = {
   onRecaptcha: Function,
-  recaptchaKey: string
+  recaptchaKey: string,
 }
 
 type State = {
-  recaptchaScale: number
+  recaptchaScale: number,
 }
 
 // These needs to stay in sync with ReCAPTCHA's runtime width
@@ -28,7 +28,7 @@ export default class ScaledRecaptcha extends React.Component<Props, State> {
 
   constructor(props: Props) {
     window.recaptchaOptions = {
-      useRecaptchaNet: true
+      useRecaptchaNet: true,
     }
     super(props)
     // use old-style ref so we can resize when it mounts
@@ -36,7 +36,7 @@ export default class ScaledRecaptcha extends React.Component<Props, State> {
     // only rescale up to 4x a second to salvage some performance
     this.scaleRecaptcha = debounce(this.scaleRecaptcha.bind(this), 250)
     this.state = {
-      recaptchaScale: 1.0
+      recaptchaScale: 1.0,
     }
   }
 
@@ -51,7 +51,7 @@ export default class ScaledRecaptcha extends React.Component<Props, State> {
   scaleRecaptcha = () => {
     if (this.recaptcha) {
       const {
-        captcha: { clientWidth }
+        captcha: { clientWidth },
       } = this.recaptcha
       // compute this as a fractional scale of the scale that ReCAPTCHA wants to render at if our container is smaller
       const recaptchaScale =

@@ -30,14 +30,14 @@ import EmailConfirmPage from "./pages/settings/EmailConfirmPage"
 import type { Match, Location } from "react-router"
 import type { CurrentUser } from "../flow/authTypes"
 import catalog from "../lib/queries/catalog"
-import type {CourseTopic} from "../flow/courseTypes"
+import type { CourseTopic } from "../flow/courseTypes"
 
 type Props = {
   match: Match,
   location: Location,
   currentUser: ?CurrentUser,
   addUserNotification: Function,
-  courseTopics: Array<CourseTopic>
+  courseTopics: Array<CourseTopic>,
 }
 
 export class App extends React.Component<Props, void> {
@@ -51,9 +51,9 @@ export class App extends React.Component<Props, void> {
           type:  ALERT_TYPE_UNUSED_COUPON,
           props: {
             productId:  unusedCoupon.product_id,
-            couponCode: unusedCoupon.coupon_code
-          }
-        }
+            couponCode: unusedCoupon.coupon_code,
+          },
+        },
       })
     }
   }
@@ -78,7 +78,12 @@ export class App extends React.Component<Props, void> {
 
     return (
       <div className="app">
-        <Header currentUser={currentUser} location={location} errorPageHeader={null} courseTopics={courseTopics}/>
+        <Header
+          currentUser={currentUser}
+          location={location}
+          errorPageHeader={null}
+          courseTopics={courseTopics}
+        />
         <Switch>
           <PrivateRoute
             exact
@@ -129,19 +134,19 @@ export class App extends React.Component<Props, void> {
 
 const mapStateToProps = createStructuredSelector({
   currentUser:  currentUserSelector,
-  courseTopics: catalog.courseTopicsSelector
+  courseTopics: catalog.courseTopicsSelector,
 })
 
 const mapDispatchToProps = {
-  addUserNotification
+  addUserNotification,
 }
 
-const mapPropsToConfig = () => [users.currentUserQuery(), SETTINGS.course_dropdown ? catalog.courseTopicsQuery() : []]
+const mapPropsToConfig = () => [
+  users.currentUserQuery(),
+  SETTINGS.course_dropdown ? catalog.courseTopicsQuery() : [],
+]
 
 export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
-  connectRequest(mapPropsToConfig)
+  connect(mapStateToProps, mapDispatchToProps),
+  connectRequest(mapPropsToConfig),
 )(App)

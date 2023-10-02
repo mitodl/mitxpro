@@ -7,5 +7,5 @@ import ui from "./ui"
 export default combineReducers<any, any>({
   entities: entitiesReducer,
   queries:  queriesReducer,
-  ui
+  ui,
 })

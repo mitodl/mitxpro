@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from hijack_admin.admin import HijackUserAdminMixin
 
 from mitxpro.admin import TimestampedModelAdmin
-from users.models import LegalAddress, User, Profile, BlockList
+from users.models import BlockList, LegalAddress, Profile, User
 
 
 class UserLegalAddressInline(admin.StackedInline):
@@ -32,7 +32,7 @@ class UserLegalAddressInline(admin.StackedInline):
         ),
     )
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
 
@@ -42,18 +42,18 @@ class UserProfileInline(admin.StackedInline):
     model = Profile
     classes = ["collapse"]
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return True
 
 
 _username_warning = """
 <div style="background-color: #dc3545; color: #fff; padding: 10px; font-size: 16px; border-radius: 5px;">
-   <strong>WARNING:</strong> 
+   <strong>WARNING:</strong>
    Changing this username will require you to apply the same change in edX immediately after.<br /><br>
    Do not make this change unless you can perform the same change to the edX username, or you have someone
    else lined up to do it.
 </div>
-"""
+"""  # noqa: E501
 
 
 class UserAdmin(ContribUserAdmin, HijackUserAdminMixin, TimestampedModelAdmin):
@@ -99,7 +99,7 @@ class BlockListAdmin(admin.ModelAdmin):
     model = BlockList
     list_display = ("hashed_email",)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002
         return False
 
 

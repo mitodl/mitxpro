@@ -2,16 +2,16 @@ const webpack = require("webpack")
 const path = require("path")
 const BundleTracker = require("webpack-bundle-tracker")
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
-const { config, babelSharedLoader } = require(path.resolve(
-  "./webpack.config.shared.js"
-))
+const { config, babelSharedLoader } = require(
+  path.resolve("./webpack.config.shared.js"),
+)
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
 
 const prodBabelConfig = Object.assign({}, babelSharedLoader)
 
 prodBabelConfig.query.plugins.push(
   "@babel/plugin-transform-react-constant-elements",
-  "@babel/plugin-transform-react-inline-elements"
+  "@babel/plugin-transform-react-inline-elements",
 )
 
 const prodConfig = Object.assign({}, config)
@@ -22,13 +22,13 @@ prodConfig.module.rules = [
     test: /\.css$|\.scss$/,
     use:  [
       {
-        loader: MiniCssExtractPlugin.loader
+        loader: MiniCssExtractPlugin.loader,
       },
       "css-loader",
       "postcss-loader",
-      "sass-loader"
-    ]
-  }
+      "sass-loader",
+    ],
+  },
 ]
 
 module.exports = Object.assign(prodConfig, {
@@ -38,39 +38,39 @@ module.exports = Object.assign(prodConfig, {
     path:               path.resolve("./static/bundles/"),
     filename:           "[name]-[chunkhash].js",
     chunkFilename:      "[id]-[chunkhash].js",
-    crossOriginLoading: "anonymous"
+    crossOriginLoading: "anonymous",
   },
 
   plugins: [
     new BundleTracker({
-      filename: "./webpack-stats.json"
+      filename: "./webpack-stats.json",
     }),
     new webpack.LoaderOptionsPlugin({
-      minimize: true
+      minimize: true,
     }),
     new webpack.optimize.AggressiveMergingPlugin(),
     new MiniCssExtractPlugin({
-      filename: "[name]-[contenthash].css"
+      filename: "[name]-[contenthash].css",
     }),
     new BundleAnalyzerPlugin({
       analyzerMode: "static",
-    })
+    }),
   ],
   optimization: {
-    minimize: true,
-    chunkIds: 'named',
+    minimize:    true,
+    chunkIds:    "named",
     splitChunks: {
-      chunks: "all",
-      minChunks: 2,
-      automaticNameDelimiter: '-',
-      cacheGroups: {
+      chunks:                 "all",
+      minChunks:              2,
+      automaticNameDelimiter: "-",
+      cacheGroups:            {
         common: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'common',
-          chunks: 'all',
-        }
+          test:   /[\\/]node_modules[\\/]/,
+          name:   "common",
+          chunks: "all",
+        },
       },
     },
   },
-  devtool: "source-map"
+  devtool: "source-map",
 })

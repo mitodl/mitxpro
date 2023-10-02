@@ -8,7 +8,7 @@ import wait from "waait"
 import EditProfileForm from "./EditProfileForm"
 import {
   findFormikFieldByName,
-  findFormikErrorByName
+  findFormikErrorByName,
 } from "../../lib/test_utils"
 import { makeCountries, makeUser } from "../../factories/user"
 
@@ -24,7 +24,7 @@ describe("EditProfileForm", () => {
         onSubmit={onSubmitStub}
         countries={countries}
         user={user}
-      />
+      />,
     )
 
   beforeEach(() => {
@@ -54,14 +54,14 @@ describe("EditProfileForm", () => {
     const street = wrapper.find(`input[name="legal_address.street_address[0]"]`)
     street.simulate("change", {
       persist: () => {},
-      target:  { name: "legal_address.street_address[0]", value: "" }
+      target:  { name: "legal_address.street_address[0]", value: "" },
     })
     street.simulate("blur")
     await wait()
     wrapper.update()
     assert.deepEqual(
       findFormikErrorByName(wrapper, "legal_address.street_address").text(),
-      "Street address is a required field"
+      "Street address is a required field",
     )
   })
 
@@ -84,7 +84,7 @@ describe("EditProfileForm", () => {
     ["name", "a".repeat(256), "Full Name must be at most 255 characters"],
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
-      value
+      value,
     )} and expects error=${JSON.stringify(errorMessage)}`, async () => {
       const wrapper = renderForm()
 
@@ -95,7 +95,7 @@ describe("EditProfileForm", () => {
       wrapper.update()
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
-        errorMessage
+        errorMessage,
       )
     })
   })
@@ -105,10 +105,10 @@ describe("EditProfileForm", () => {
     ["profile.gender", "", "Gender is a required field"],
     ["profile.gender", "f", ""],
     ["profile.birth_year", "", "Birth Year is a required field"],
-    ["profile.birth_year", "2000", ""]
+    ["profile.birth_year", "2000", ""],
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
-      value
+      value,
     )} and expects error=${JSON.stringify(errorMessage)}`, async () => {
       const wrapper = renderForm()
 
@@ -119,7 +119,7 @@ describe("EditProfileForm", () => {
       wrapper.update()
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
-        errorMessage
+        errorMessage,
       )
     })
   })
@@ -134,7 +134,7 @@ describe("EditProfileForm", () => {
         "company_size",
         "leadership_level",
         "years_experience",
-        "highest_education"
+        "highest_education",
       ]
       for (const key of keys) {
         // $FlowFixMe

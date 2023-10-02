@@ -1,23 +1,23 @@
 """
 Fetches a coupon assignment spreadsheet, parses it, creates product coupon assignments
 based on the sheet data, and sends a message to all recipients who received a coupon assignment.
-"""
+"""  # noqa: INP001, E501
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.models import BulkCouponAssignment
-from sheets.api import get_authorized_pygsheets_client, ExpandedSheetsClient
+from sheets.api import ExpandedSheetsClient, get_authorized_pygsheets_client
 from sheets.coupon_assign_api import CouponAssignmentHandler
-from sheets.utils import spreadsheet_repr, google_date_string_to_datetime
 from sheets.management.utils import get_assignment_spreadsheet_by_title
+from sheets.utils import google_date_string_to_datetime, spreadsheet_repr
 
 
 class Command(BaseCommand):
     """
     Fetches a coupon assignment spreadsheet, parses it, creates product coupon assignments
     based on the sheet data, and sends a message to all recipients who received a coupon assignment.
-    """
+    """  # noqa: E501
 
-    help = __doc__
+    help = __doc__  # noqa: A003
 
     def add_arguments(self, parser):  # pylint:disable=missing-docstring
         group = parser.add_mutually_exclusive_group()
@@ -31,21 +31,30 @@ class Command(BaseCommand):
             "-t",
             "--title",
             type=str,
-            help="The title of the coupon assignment Sheet (should match exactly one sheet)",
+            help=(
+                "The title of the coupon assignment Sheet (should match exactly one"
+                " sheet)"
+            ),
         )
         parser.add_argument(
             "-f",
             "--force",
             action="store_true",
             help=(
-                "Process coupon assignment sheet even if the file is unchanged since the last time it was processed.",
+                (
+                    "Process coupon assignment sheet even if the file is unchanged"
+                    " since the last time it was processed."
+                ),
             ),
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # pylint:disable=missing-docstring
+    def handle(
+        self, *args, **options  # noqa: ARG002
+    ):  # pylint:disable=missing-docstring  # noqa: ARG002, RUF100
         if not options["id"] and not options["title"]:
-            raise CommandError("Need to provide --id or --title")
+            msg = "Need to provide --id or --title"
+            raise CommandError(msg)
 
         pygsheets_client = get_authorized_pygsheets_client()
         # Fetch the correct spreadsheet
@@ -57,9 +66,7 @@ class Command(BaseCommand):
             )
         # Process the sheet
         self.stdout.write(
-            "Found spreadsheet ({}). Processing...".format(
-                spreadsheet_repr(spreadsheet)
-            )
+            f"Found spreadsheet ({spreadsheet_repr(spreadsheet)}). Processing..."
         )
 
         expanded_sheets_client = ExpandedSheetsClient(pygsheets_client)
@@ -77,9 +84,11 @@ class Command(BaseCommand):
             and not options["force"]
         ):
             raise CommandError(
-                "Spreadsheet is unchanged since it was last processed (%s, last modified: %s). "
-                "Add the '-f/--force' flag to process it anyway."
-                % (spreadsheet_repr(spreadsheet), sheet_last_modified.isoformat())
+                "Spreadsheet is unchanged since it was last processed ({}, last"  # noqa: E501, EM103
+                " modified: {}). Add the '-f/--force' flag to process it anyway."
+                .format(
+                    spreadsheet_repr(spreadsheet), sheet_last_modified.isoformat()
+                )  # noqa: E501, RUF100
             )
 
         coupon_assignment_handler = CouponAssignmentHandler(
@@ -94,8 +103,9 @@ class Command(BaseCommand):
         bulk_assignment.save()
         self.stdout.write(
             self.style.SUCCESS(
-                "Successfully processed coupon assignment sheet ({}).\n"
-                "{} individual coupon assignment(s) added, {} deleted (BulkCouponAssignment id: {}).".format(
+                "Successfully processed coupon assignment sheet ({}).\n{} individual"
+                " coupon assignment(s) added, {} deleted (BulkCouponAssignment id: {})."
+                .format(
                     spreadsheet_repr(spreadsheet),
                     num_created,
                     num_removed,

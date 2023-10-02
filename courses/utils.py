@@ -21,11 +21,12 @@ from courses.models import (
 from courseware.api import get_edx_api_course_detail_client
 from mitxpro.utils import has_equal_properties, now_in_utc
 
-
 log = logging.getLogger(__name__)
 
 
-def ensure_course_run_grade(user, course_run, edx_grade, should_update=False):
+def ensure_course_run_grade(
+    user, course_run, edx_grade, should_update=False  # noqa: FBT002
+):  # noqa: FBT002, RUF100
     """
     Ensure that the local grades repository has the grade for the User/CourseRun combination supplied.
 
@@ -37,7 +38,7 @@ def ensure_course_run_grade(user, course_run, edx_grade, should_update=False):
 
     Returns:
         (courses.models.CourseRunGrade, bool, bool) that depicts the CourseRunGrade, created and updated values
-    """
+    """  # noqa: E501
     grade_properties = {
         "grade": edx_grade.percent,
         "passed": edx_grade.passed,
@@ -82,7 +83,7 @@ def process_course_run_grade_certificate(course_run_grade):
 
     Returns:
         (courses.models.CourseRunCertificate, bool, bool) that depicts the CourseRunCertificate, created, deleted values
-    """
+    """  # noqa: E501
     user = course_run_grade.user
     course_run = course_run_grade.course_run
 
@@ -190,7 +191,7 @@ def revoke_program_certificate(
         readable_id: represents the program (readable_id) for revoking a ProgramCertificate.
         revoke_state: (bool) override the is_revoked state of ProgramCertificate.
         include_program_courses: (bool) Indicate to revoke/un-revoke all course runs that are associated with a program.
-    """
+    """  # noqa: E501
     program = Program.objects.get(readable_id=readable_id)
     try:
         program_certificate = ProgramCertificate.all_objects.get(
@@ -229,7 +230,7 @@ def revoke_course_run_certificate(user, courseware_id, revoke_state):
         user (User): a Django user.
         courseware_id: represents the course run.
         revoke_state: represents the course run (courseware_id) for revoking a CourseRunCertificate.
-    """
+    """  # noqa: E501
     course_run = CourseRun.objects.get(courseware_id=courseware_id)
     try:
         course_run_certificate = CourseRunCertificate.all_objects.get(
@@ -274,14 +275,14 @@ def sync_course_runs(runs):
         except HTTPError as e:
             failure_count += 1
             if e.response.status_code == HTTP_404_NOT_FOUND:
-                log.error(
+                log.error(  # noqa: TRY400
                     "Course not found on edX for readable id: %s", run.courseware_id
                 )
             else:
-                log.error("%s: %s", str(e), run.courseware_id)
-        except Exception as e:  # pylint: disable=broad-except
+                log.error("%s: %s", str(e), run.courseware_id)  # noqa: TRY400
+        except Exception as e:  # pylint: disable=broad-except  # noqa: BLE001
             failure_count += 1
-            log.error("%s: %s", str(e), run.courseware_id)
+            log.error("%s: %s", str(e), run.courseware_id)  # noqa: TRY400
         else:
             # Reset the expiration_date so it is calculated automatically and
             # does not raise a validation error now that the start or end date
@@ -301,9 +302,9 @@ def sync_course_runs(runs):
                 run.save()
                 success_count += 1
                 log.info("Updated course run: %s", run.courseware_id)
-            except Exception as e:  # pylint: disable=broad-except
+            except Exception as e:  # pylint: disable=broad-except  # noqa: BLE001
                 # Report any validation or otherwise model errors
-                log.error("%s: %s", str(e), run.courseware_id)
+                log.error("%s: %s", str(e), run.courseware_id)  # noqa: TRY400
                 failure_count += 1
 
     return success_count, failure_count
@@ -325,7 +326,7 @@ def is_program_text_id(item_text_id):
 def get_catalog_course_filter(relative_filter=""):
     """
     Generates course filter for the catalog visible course pages.
-    """
+    """  # noqa: D401
     courseware_live_filter = {
         f"{relative_filter}course__live": True,
         f"{relative_filter}course__courseruns__live": True,

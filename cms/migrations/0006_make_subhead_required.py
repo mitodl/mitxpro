@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("cms", "0005_move_fields_to_product")]
 
     operations = [
@@ -13,7 +12,10 @@ class Migration(migrations.Migration):
             name="subhead",
             field=models.CharField(
                 default="",
-                help_text="A short subheading to appear below the title on the program/course page",
+                help_text=(
+                    "A short subheading to appear below the title on the program/course"
+                    " page"
+                ),
                 max_length=255,
             ),
             preserve_default=False,
@@ -23,7 +25,10 @@ class Migration(migrations.Migration):
             name="subhead",
             field=models.CharField(
                 default="",
-                help_text="A short subheading to appear below the title on the program/course page",
+                help_text=(
+                    "A short subheading to appear below the title on the program/course"
+                    " page"
+                ),
                 max_length=255,
             ),
             preserve_default=False,

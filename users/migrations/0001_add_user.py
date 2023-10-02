@@ -2,16 +2,16 @@
 
 import ulid
 from django.db import migrations, models
+
 import users.models
 
 
 def generate_username():
-    """Generates a new username"""
+    """Generates a new username"""  # noqa: D401
     return ulid.new().str
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [("auth", "0009_alter_user_last_name_max_length")]
@@ -40,7 +40,10 @@ class Migration(migrations.Migration):
                     "is_superuser",
                     models.BooleanField(
                         default=False,
-                        help_text="Designates that this user has all permissions without explicitly assigning them.",
+                        help_text=(
+                            "Designates that this user has all permissions without"
+                            " explicitly assigning them."
+                        ),
                         verbose_name="superuser status",
                     ),
                 ),
@@ -70,7 +73,10 @@ class Migration(migrations.Migration):
                     "groups",
                     models.ManyToManyField(
                         blank=True,
-                        help_text="The groups this user belongs to. A user will get all permissions granted to each of their groups.",
+                        help_text=(
+                            "The groups this user belongs to. A user will get all"
+                            " permissions granted to each of their groups."
+                        ),
                         related_name="user_set",
                         related_query_name="user",
                         to="auth.Group",

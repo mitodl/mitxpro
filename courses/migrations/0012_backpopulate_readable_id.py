@@ -6,7 +6,7 @@ from django.db import migrations
 from django.utils.text import slugify
 
 
-def backpopulate_readable_id(apps, schema_editor):
+def backpopulate_readable_id(apps, schema_editor):  # noqa: ARG001
     """
     Fetch all Courses/Programs without a readable_id and set that field to
     a slug-ified version of the object's title

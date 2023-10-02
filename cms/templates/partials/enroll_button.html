@@ -1,49 +1,62 @@
 {% if page.about_mit_xpro.video_url and action_title and action_url %}
-<a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="{{ action_url }}">{{ action_title }}</a>
+<a
+  id="actionButton"
+  class="btn btn-primary text-uppercase px-5 py-2 action-button"
+  href="{{ action_url }}"
+  >{{ action_title }}</a
+>
 {% elif page.external_marketing_url %}
 <a class="enroll-button enroll-now" href="{{ page.external_marketing_url }}">
   Learn More
 </a>
 {% elif page.product %}
-  {% if not user.is_anonymous %}
-    {% if not enrolled and product_id and page.product.first_unexpired_run %}
-      <a class="enroll-button enroll-now" href="{{ checkout_url }}">
-        Enroll Now
-      </a>
-    {% elif enrolled %}
-      <a class="enroll-button enrolled" href="{% url "user-dashboard" %}">
-        Enrolled <i class="material-icons">check</i>
-      </a>
-    {% endif %}
-  {% elif product_id and page.product.first_unexpired_run %}
-    <div class="enroll-dropdown">
-      <a class="enroll-button dropdown-toggle" data-toggle="dropdown" data-flip="false" aria-haspopup="true" aria-expanded="true">
-        Enroll Now
-      </a>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <div class="login-popup">
-          <div class="triangle"></div>
-          <h4>
-            <span>Sign In/Create Account</span>
-            <a class="close-btn">
-              ×
-            </a>
-          </h4>
-          <div class="popup-text">
-            Please Sign In to MITx PRO to enroll in a course
-          </div>
-          <div class="bottom-row">
-            <div class="popup-buttons">
-              <a class="sign-in-link link-button" href="{% url 'login' %}?next={{ checkout_url|urlencode:'' }}">
-                Sign In
-              </a>
-              <a class="create-account-link link-button" href="{% url 'signup' %}?next={{ checkout_url|urlencode:'' }}">
-                Create Account
-              </a>
-            </div>
-          </div>
+{% if not user.is_anonymous %}
+{% if not enrolled and product_id and page.product.first_unexpired_run %}
+<a class="enroll-button enroll-now" href="{{ checkout_url }}"> Enroll Now </a>
+{% elif enrolled %}
+<a class="enroll-button enrolled" href="{% url "user-dashboard" %}">
+  Enrolled <i class="material-icons">check</i>
+</a>
+{% endif %}
+{% elif product_id and page.product.first_unexpired_run %}
+<div class="enroll-dropdown">
+  <a
+    class="enroll-button dropdown-toggle"
+    data-toggle="dropdown"
+    data-flip="false"
+    aria-haspopup="true"
+    aria-expanded="true"
+  >
+    Enroll Now
+  </a>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <div class="login-popup">
+      <div class="triangle"></div>
+      <h4>
+        <span>Sign In/Create Account</span>
+        <a class="close-btn"> × </a>
+      </h4>
+      <div class="popup-text">
+        Please Sign In to MITx PRO to enroll in a course
+      </div>
+      <div class="bottom-row">
+        <div class="popup-buttons">
+          <a
+            class="sign-in-link link-button"
+            href="{% url 'login' %}?next={{ checkout_url|urlencode:'' }}"
+          >
+            Sign In
+          </a>
+          <a
+            class="create-account-link link-button"
+            href="{% url 'signup' %}?next={{ checkout_url|urlencode:'' }}"
+          >
+            Create Account
+          </a>
         </div>
       </div>
     </div>
-  {% endif %}
+  </div>
+</div>
+{% endif %}
 {% endif %}

@@ -16,7 +16,7 @@ describe("UserMenu component", () => {
         .find("MixedLink")
         .at(0)
         .prop("dest"),
-      routes.profile.view
+      routes.profile.view,
     )
   })
 
@@ -26,7 +26,7 @@ describe("UserMenu component", () => {
         .find("MixedLink")
         .at(1)
         .prop("dest"),
-      routes.dashboard
+      routes.dashboard,
     )
   })
 
@@ -36,7 +36,7 @@ describe("UserMenu component", () => {
         .find("a")
         .at(0)
         .prop("href"),
-      routes.logout
+      routes.logout,
     )
   })
 })

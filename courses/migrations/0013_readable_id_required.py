@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("courses", "0012_backpopulate_readable_id")]
 
     operations = [
@@ -18,7 +17,8 @@ class Migration(migrations.Migration):
                 validators=[
                     django.core.validators.RegexValidator(
                         "^[\\w\\-+:]+$",
-                        "This field is used to produce URL paths. It must contain only characters that match this pattern: [\\w\\-+:]",
+                        "This field is used to produce URL paths. It must contain only"
+                        " characters that match this pattern: [\\w\\-+:]",
                     )
                 ],
             ),
@@ -32,7 +32,8 @@ class Migration(migrations.Migration):
                 validators=[
                     django.core.validators.RegexValidator(
                         "^[\\w\\-+:]+$",
-                        "This field is used to produce URL paths. It must contain only characters that match this pattern: [\\w\\-+:]",
+                        "This field is used to produce URL paths. It must contain only"
+                        " characters that match this pattern: [\\w\\-+:]",
                     )
                 ],
             ),

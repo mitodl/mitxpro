@@ -20,7 +20,7 @@ def get_product_version_price_with_discount(
 
     Returns:
         Decimal: the discounted price for the Product
-    """
+    """  # noqa: E501
     price = product_version.price
     if (
         coupon_version
@@ -36,7 +36,7 @@ def get_product_version_price_with_discount(
     return price - discount
 
 
-def populate_total_price(apps, schema_editor):
+def populate_total_price(apps, schema_editor):  # noqa: ARG001
     """
     Populate the total_price_paid field.
     """
@@ -49,9 +49,9 @@ def populate_total_price(apps, schema_editor):
         redemption = order.couponredemption_set.first()
         if line is not None:
             total = get_product_version_price_with_discount(
-                coupon_version=redemption.coupon_version
-                if redemption is not None
-                else None,
+                coupon_version=(
+                    redemption.coupon_version if redemption is not None else None
+                ),
                 product_version=line.product_version,
                 CouponEligibility=CouponEligibility,
             )
@@ -63,7 +63,6 @@ def populate_total_price(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("ecommerce", "0016_payment_type_choices")]
 
     operations = [

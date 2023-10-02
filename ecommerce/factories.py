@@ -1,7 +1,7 @@
 """
 Factories for ecommerce models
 """
-from datetime import timezone
+from datetime import UTC
 
 import faker
 from factory import Faker, LazyAttribute, SubFactory, Trait, fuzzy, post_generation
@@ -13,7 +13,6 @@ from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.test_utils import gen_fake_receipt_data
 from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
-
 
 FAKE = faker.Factory.create()
 
@@ -121,17 +120,17 @@ class CouponPaymentVersionFactory(DjangoModelFactory):
     payment = SubFactory(CouponPaymentFactory)
     tag = fuzzy.FuzzyText()
     coupon_type = fuzzy.FuzzyChoice(models.CouponPaymentVersion.COUPON_TYPES)
-    discount_type = DISCOUNT_TYPE_PERCENT_OFF  # Keeping it default since we are not supporting dollars-off for b2b
+    discount_type = DISCOUNT_TYPE_PERCENT_OFF  # Keeping it default since we are not supporting dollars-off for b2b  # noqa: E501
     num_coupon_codes = fuzzy.FuzzyInteger(1, 10)
     max_redemptions = fuzzy.FuzzyInteger(1, 10)
     max_redemptions_per_user = fuzzy.FuzzyInteger(1, 3)
     amount = fuzzy.FuzzyDecimal(0, 1, precision=5)
     company = SubFactory(CompanyFactory)
     activation_date = Faker(
-        "date_time_this_year", before_now=True, after_now=False, tzinfo=timezone.utc
+        "date_time_this_year", before_now=True, after_now=False, tzinfo=UTC
     )
     expiration_date = Faker(
-        "date_time_this_year", before_now=False, after_now=True, tzinfo=timezone.utc
+        "date_time_this_year", before_now=False, after_now=True, tzinfo=UTC
     )
 
     class Meta:
@@ -218,7 +217,7 @@ class DataConsentAgreementFactory(DjangoModelFactory):
 
     @post_generation
     # pylint: disable=unused-argument
-    def courses(self, create, extracted, **kwargs):
+    def courses(self, create, extracted, **kwargs):  # noqa: ARG002
         """Create courses for DCA"""
         if not create:
             return

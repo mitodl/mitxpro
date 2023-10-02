@@ -1,6 +1,6 @@
-"""Management command to change enrollment status"""
-from django.core.management.base import BaseCommand, CommandError
+"""Management command to change enrollment status"""  # noqa: INP001
 from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from courses.api import create_run_enrollments
@@ -12,7 +12,7 @@ from ecommerce.api import (
     latest_product_version,
     redeem_coupon,
 )
-from ecommerce.models import Coupon, Product, ProductCouponAssignment, Order, Line
+from ecommerce.models import Coupon, Line, Order, Product, ProductCouponAssignment
 from users.api import fetch_user
 
 User = get_user_model()
@@ -21,7 +21,7 @@ User = get_user_model()
 class Command(BaseCommand):
     """creates an enrollment for a course run"""
 
-    help = "Creates an enrollment for a course run"
+    help = "Creates an enrollment for a course run"  # noqa: A003
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -44,37 +44,39 @@ class Command(BaseCommand):
             "--keep-failed-enrollments",
             action="store_true",
             dest="keep_failed_enrollments",
-            help="If provided, enrollment records will be kept even if edX enrollment fails",
+            help=(
+                "If provided, enrollment records will be kept even if edX enrollment"
+                " fails"
+            ),
         )
         super().add_arguments(parser)
         # pylint: disable=too-many-locals
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
 
         user = fetch_user(options["user"])
 
         run = CourseRun.objects.filter(courseware_id=options["run"]).first()
         if run is None:
-            raise CommandError(
-                "Could not find course run with courseware_id={}".format(options["run"])
-            )
+            msg = "Could not find course run with courseware_id={}".format(
+                options["run"]
+            )  # noqa: E501, RUF100
+            raise CommandError(msg)
 
         product = Product.objects.filter(
             courseruns__courseware_id=options["run"]
         ).first()
         if product is None:
-            raise CommandError(
-                "No product found for that course with courseware_id={}".format(
-                    options["run"]
-                )
-            )
+            msg = "No product found for that course with courseware_id={}".format(
+                options["run"]
+            )  # noqa: E501, RUF100
+            raise CommandError(msg)
 
         coupon = Coupon.objects.filter(coupon_code=options["code"]).first()
         if not coupon:
-            raise CommandError(
-                "That enrollment code {} does not exist".format(options["code"])
-            )
+            msg = "That enrollment code {} does not exist".format(options["code"])
+            raise CommandError(msg)
 
         # Check if the coupon is valid for the product
         coupon_version = best_coupon_for_product(product, user, code=coupon.coupon_code)
@@ -110,9 +112,10 @@ class Command(BaseCommand):
                     order=order,
                 )
                 if not successful_enrollments:
-                    raise EdxEnrollmentCreateError
+                    raise EdxEnrollmentCreateError  # noqa: TRY301
             except EdxEnrollmentCreateError:
-                raise CommandError("Failed to create the enrollment record")
+                msg = "Failed to create the enrollment record"
+                raise CommandError(msg)  # noqa: B904, TRY200
 
         ProductCouponAssignment.objects.filter(
             email__iexact=user.email, redeemed=False, product_coupon__coupon=coupon
@@ -120,9 +123,8 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                "Enrollment created for user {} in {} (edX enrollment success: {})".format(
-                    user, options["run"], edx_request_success
-                )
+                "Enrollment created for user {} in {} (edX enrollment success: {})"
+                .format(user, options["run"], edx_request_success)
             )
         )
 
@@ -134,8 +136,6 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                "Order {} with line {} is created for user {} ".format(
-                    order, line, user
-                )
+                f"Order {order} with line {line} is created for user {user} "
             )
         )

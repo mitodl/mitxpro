@@ -1,12 +1,11 @@
 """Tests for user api"""
-import pytest
 import factory
-
+import pytest
 from django.contrib.auth import get_user_model
 
-from users.api import get_user_by_id, fetch_user, fetch_users, find_available_username
-from users.utils import usernameify
+from users.api import fetch_user, fetch_users, find_available_username, get_user_by_id
 from users.factories import UserFactory
+from users.utils import usernameify
 
 User = get_user_model()
 
@@ -16,14 +15,14 @@ def test_get_user_by_id(user):
     assert get_user_by_id(user.id) == user
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 @pytest.mark.parametrize(
-    "prop,value,db_value",
+    ("prop", "value", "db_value"),
     [
-        ["username", "abcdefgh", None],
-        ["id", 100, None],
-        ["id", "100", 100],
-        ["email", "abc@example.com", None],
+        ["username", "abcdefgh", None],  # noqa: PT007
+        ["id", 100, None],  # noqa: PT007
+        ["id", "100", 100],  # noqa: PT007
+        ["email", "abc@example.com", None],  # noqa: PT007
     ],
 )
 def test_fetch_user(prop, value, db_value):
@@ -36,7 +35,7 @@ def test_fetch_user(prop, value, db_value):
     assert user == found_user
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_fetch_user_case_sens():
     """fetch_user should be able to fetch a User with a case-insensitive filter"""
     email = "abc@example.com"
@@ -47,28 +46,32 @@ def test_fetch_user_case_sens():
     assert fetch_user(upper_email, ignore_case=True) == user
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_fetch_user_fail():
     """fetch_user should raise an exception if a matching User was not found"""
     with pytest.raises(User.DoesNotExist):
         fetch_user("missingemail@example.com")
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 @pytest.mark.parametrize(
-    "prop,values,db_values",
+    ("prop", "values", "db_values"),
     [
-        ["username", ["abcdefgh", "ijklmnop", "qrstuvwxyz"], None],
-        ["id", [100, 101, 102], None],
-        ["id", ["100", "101", "102"], [100, 101, 102]],
-        ["email", ["abc@example.com", "def@example.com", "ghi@example.com"], None],
+        ["username", ["abcdefgh", "ijklmnop", "qrstuvwxyz"], None],  # noqa: PT007
+        ["id", [100, 101, 102], None],  # noqa: PT007
+        ["id", ["100", "101", "102"], [100, 101, 102]],  # noqa: PT007
+        [  # noqa: PT007
+            "email",
+            ["abc@example.com", "def@example.com", "ghi@example.com"],
+            None,
+        ],  # noqa: PT007, RUF100
     ],
 )
 def test_fetch_users(prop, values, db_values):
     """
     fetch_users should return a set of Users that match some provided values which represent
     ids, emails, or usernames
-    """
+    """  # noqa: E501
     users = UserFactory.create_batch(
         len(values), **{prop: factory.Iterator(db_values or values)}
     )
@@ -76,7 +79,7 @@ def test_fetch_users(prop, values, db_values):
     assert set(users) == set(found_users)
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_fetch_users_case_sens():
     """fetch_users should be able to fetch Users with a case-insensitive filter"""
     emails = ["abc@example.com", "def@example.com", "ghi@example.com"]
@@ -87,52 +90,56 @@ def test_fetch_users_case_sens():
     assert set(fetch_users(upper_emails, ignore_case=True)) == set(users)
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 @pytest.mark.parametrize(
-    "prop,existing_values,missing_values",
+    ("prop", "existing_values", "missing_values"),
     [
-        ["username", ["abcdefgh"], ["ijklmnop", "qrstuvwxyz"]],
-        ["id", [100], [101, 102]],
-        ["email", ["abc@example.com"], ["def@example.com", "ghi@example.com"]],
+        ["username", ["abcdefgh"], ["ijklmnop", "qrstuvwxyz"]],  # noqa: PT007
+        ["id", [100], [101, 102]],  # noqa: PT007
+        [  # noqa: PT007
+            "email",
+            ["abc@example.com"],
+            ["def@example.com", "ghi@example.com"],
+        ],  # noqa: PT007, RUF100
     ],
 )
 def test_fetch_users_fail(prop, existing_values, missing_values):
     """
     fetch_users should raise an exception if any provided values did not match a User, and
     the exception message should contain info about the values that did not match.
-    """
+    """  # noqa: E501
     fetch_users_values = existing_values + missing_values
     UserFactory.create_batch(
         len(existing_values), **{prop: factory.Iterator(existing_values)}
     )
-    expected_missing_value_output = str(sorted(list(missing_values)))
+    expected_missing_value_output = str(sorted(missing_values))
     with pytest.raises(User.DoesNotExist, match=expected_missing_value_output):
         fetch_users(fetch_users_values)
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 @pytest.mark.parametrize(
-    "username_base,suffixed_to_create,expected_available_username",
+    ("username_base", "suffixed_to_create", "expected_available_username"),
     [
-        ["someuser", 0, "someuser1"],
-        ["someuser", 5, "someuser6"],
-        ["abcdefghij", 10, "abcdefgh11"],
-        ["abcdefghi", 99, "abcdefg100"],
+        ["someuser", 0, "someuser1"],  # noqa: PT007
+        ["someuser", 5, "someuser6"],  # noqa: PT007
+        ["abcdefghij", 10, "abcdefgh11"],  # noqa: PT007
+        ["abcdefghi", 99, "abcdefg100"],  # noqa: PT007
     ],
 )
 def test_find_available_username(
     mocker, username_base, suffixed_to_create, expected_available_username
 ):
-    """find_available_username should return an available username with the lowest possible suffix"""
+    """find_available_username should return an available username with the lowest possible suffix"""  # noqa: E501
     # Change the username max length to 10 for test data simplicity's sake
     temp_username_max_len = 10
     mocker.patch("users.api.USERNAME_MAX_LEN", temp_username_max_len)
 
     def suffixed_username_generator():
-        """Generator for usernames with suffixes that will not exceed the username character limit"""
+        """Generator for usernames with suffixes that will not exceed the username character limit"""  # noqa: E501, D401
         for suffix_int in range(1, suffixed_to_create + 1):
             suffix = str(suffix_int)
-            username = "{}{}".format(username_base, suffix)
+            username = f"{username_base}{suffix}"
             if len(username) <= temp_username_max_len:
                 yield username
             else:
@@ -149,18 +156,18 @@ def test_find_available_username(
     assert available_username == expected_available_username
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_full_username_creation():
     """
     Integration test to ensure that the USERNAME_MAX_LEN constant is set correctly, and that
     generated usernames do not exceed it.
-    """
+    """  # noqa: E501
     expected_username_max = 30
     user_full_name = "Longerton McLongernamenbergenstein"
     generated_username = usernameify(user_full_name)
     assert len(generated_username) == expected_username_max
     UserFactory.create(username=generated_username, name=user_full_name)
-    new_user_full_name = "{} Jr.".format(user_full_name)
+    new_user_full_name = f"{user_full_name} Jr."
     new_generated_username = usernameify(new_user_full_name)
     assert new_generated_username == generated_username
     available_username = find_available_username(new_generated_username)

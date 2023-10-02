@@ -34,7 +34,7 @@ See `CouponSelection` below.
 #### Order and Line
 
 An `Order` represents an attempt to purchase some items. It has a foreign key to `User`,
-the person who is purchasing the items. 
+the person who is purchasing the items.
 
 An `Order` can have several different statuses. At first
 it is `created`. Since a user may check out and then decide not to complete the purchase in
@@ -51,15 +51,16 @@ See `CouponRedemption` below.
 
 A `CouponInvoice` represents the information provided by an admin when they create coupons
 through the admin interface. For example:
- - type of coupon (single use coupon code or multi use promo code)
- - number of coupon codes to generate
- - validity date range
- - purchase order number
- - tag and other record keeping information
- - max number of redemptions
- - max number of redemptions for one user (usually just 1)
- - percent off
- - products the coupon can be used with (link via `CouponEligibility` to `Product`)
+
+- type of coupon (single use coupon code or multi use promo code)
+- number of coupon codes to generate
+- validity date range
+- purchase order number
+- tag and other record keeping information
+- max number of redemptions
+- max number of redemptions for one user (usually just 1)
+- percent off
+- products the coupon can be used with (link via `CouponEligibility` to `Product`)
 
 `CouponInvoice` instances should not be edited because they are the source of truth for discounts.
 If an admin user needs to make changes they should
@@ -108,7 +109,7 @@ was just attempted.
 
 TODO: There is a race condition when a user uses the last remaining redemption of a coupon on an `Order` but
 never pays so the `Order` is not fulfilled. If another user uses the coupon and then CyberSource
-fulfills the `Order`, the coupon would be used twice where it could be used only once. What to do about this? 
+fulfills the `Order`, the coupon would be used twice where it could be used only once. What to do about this?
 
 #### OrderAudit
 
@@ -123,7 +124,7 @@ This stores the raw data received from CyberSource. This should have a foreign k
 `Order`, determined using the reference id passed to CyberSource and received back in the POST body.
 If this is missing or invalid the `Receipt` should still be created for debugging and reporting.
 
-## Workflow 
+## Workflow
 
 An admin creates 100 coupons through the admin interface. A `CouponInvoice` is created for this info
 as well as a `CouponInvoiceVersion`. 100 `Coupon` instances are created with links to `CouponInvoice`.
@@ -134,7 +135,7 @@ put that item in the basket. Any other items in the basket will be cleared first
 how many items can be in the basket. They are directed to the checkout page.
 
 On the backend a `Basket` is created and a `BasketItem` is created for the item to be purchased. The
-`BasketItem` will link the `Basket` to a `Product` matching the item to be purchased. 
+`BasketItem` will link the `Basket` to a `Product` matching the item to be purchased.
 
 They paste the coupon code in the checkout page and click submit. The view checks that the coupon
 is valid then adds a `CouponSelection` attaching the `Basket` to the `Coupon` matching the code.
@@ -149,7 +150,7 @@ cannot tamper with the information. The dict is returned in the POST response to
 If the user successfully completes a payment CyberSource will POST back to our order fulfillment
 API which will record the response in `Receipt` and change the `Order` status to `fulfilled`. If
 the status in the order POST back is not a success, `Order.status` will be `failed`.
- 
+
 At some future time we will implement refund handling and this will set the `Order` status
 to `refunded`.
 

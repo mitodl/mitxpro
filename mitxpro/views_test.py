@@ -1,9 +1,9 @@
 """
 Test end to end django views.
 """
+import pytest
 from django.test import Client
 from django.urls import reverse
-import pytest
 from rest_framework import status
 
 pytestmark = [pytest.mark.django_db]
@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.django_db]
 def test_index_view(client):
     """Verify the index view is as expected"""
     response = client.get(reverse("wagtail_serve", args=[""]))
-    assert response.status_code == 200
+    assert response.status_code == 200  # noqa: PLR2004
 
 
 def test_not_found_view(client):
@@ -26,8 +26,10 @@ def test_not_found_view(client):
 
 def test_restricted_view(client, admin_client):
     """Verify the restricted view is only available to admins"""
-    assert client.get(reverse("ecommerce-admin")).status_code == 403
-    assert admin_client.get(reverse("ecommerce-admin")).status_code == 200
+    assert client.get(reverse("ecommerce-admin")).status_code == 403  # noqa: PLR2004
+    assert (
+        admin_client.get(reverse("ecommerce-admin")).status_code == 200  # noqa: PLR2004
+    )  # noqa: PLR2004, RUF100
 
 
 def test_cms_signin_redirect_to_site_signin(client):
@@ -61,7 +63,7 @@ def test_app_context(settings, client):
 
 @pytest.mark.parametrize("verb", ["get", "post"])
 def test_dashboard(verb):
-    """Anonymous users should be able to POST to the dashboard and see the same content as a GET"""
+    """Anonymous users should be able to POST to the dashboard and see the same content as a GET"""  # noqa: E501
     client = Client(enforce_csrf_checks=True)
     method = getattr(client, verb)
     response = method(reverse("user-dashboard"))

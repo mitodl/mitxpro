@@ -1,7 +1,7 @@
 """API with general functionality for all enrollment change spreadsheets"""
 import json
-import operator as op
 import logging
+import operator as op
 
 from django.conf import settings
 from django.db import transaction
@@ -15,11 +15,11 @@ from sheets.constants import (
     GOOGLE_SHEET_FIRST_ROW,
 )
 from sheets.utils import (
-    get_data_rows,
-    get_data_rows_after_start,
-    format_datetime_for_sheet_formula,
     ResultType,
     RowResult,
+    format_datetime_for_sheet_formula,
+    get_data_rows,
+    get_data_rows_after_start,
 )
 
 log = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class SheetHandler:
     """
     Base class for managing the processing of a spreadsheet which contains requests for work to be done
     (creating enrollment codes, changing enrollments, etc.).
-    """
+    """  # noqa: E501
 
     pygsheets_client = None
     spreadsheet = None
@@ -42,7 +42,7 @@ class SheetHandler:
 
         Returns:
              pygsheets.worksheet.Worksheet: The Worksheet object
-        """
+        """  # noqa: D401
         # By default, the first worksheet of the spreadsheet should be used
         return self.spreadsheet.sheet1
 
@@ -53,7 +53,7 @@ class SheetHandler:
         Yields:
             Tuple[int, List[str]]: Row index (according to the Google Sheet, NOT zero-indexed) paired with the list
                 of strings representing the data in each column of the row
-        """
+        """  # noqa: E501, D401
         yield from enumerate(
             get_data_rows(self.worksheet, include_trailing_empty=False),
             start=GOOGLE_SHEET_FIRST_ROW + 1,
@@ -65,7 +65,7 @@ class SheetHandler:
 
         Args:
             success_row_results (Iterable[RowResult]): Objects representing the results of processing a row
-        """
+        """  # noqa: E501, D401
         raise NotImplementedError
 
     def update_row_errors(self, failed_row_results):
@@ -74,12 +74,10 @@ class SheetHandler:
 
         Args:
             failed_row_results (Iterable[RowResult]): Objects representing the results of processing a row
-        """
+        """  # noqa: E501, D401
         for row_result in failed_row_results:
             self.worksheet.update_value(
-                "{}{}".format(
-                    self.sheet_metadata.ERROR_COL_LETTER, row_result.row_index
-                ),
+                f"{self.sheet_metadata.ERROR_COL_LETTER}{row_result.row_index}",
                 row_result.message,
             )
 
@@ -90,7 +88,7 @@ class SheetHandler:
         Args:
             grouped_row_results (Dict[str, Iterable[RowResult]]): Objects representing the results of processing rows
                 grouped by result type (success, failed, etc.)
-        """
+        """  # noqa: E501, D401
         processed_row_results = grouped_row_results.get(ResultType.PROCESSED, [])
         if processed_row_results:
             self.update_completed_rows(processed_row_results)
@@ -100,7 +98,8 @@ class SheetHandler:
         out_of_sync_row_results = grouped_row_results.get(ResultType.OUT_OF_SYNC, [])
         if out_of_sync_row_results:
             log.warning(
-                "Rows found without a completed date, but local records indicate that they were completed: %s",
+                "Rows found without a completed date, but local records indicate that"
+                " they were completed: %s",
                 [row_result.row_index for row_result in out_of_sync_row_results],
             )
             self.update_completed_rows(out_of_sync_row_results)
@@ -120,7 +119,7 @@ class SheetHandler:
         Args:
             grouped_row_results (Dict[str, Iterable[RowResult]]): Objects representing the results of processing rows
                 grouped by result type (success, failed, etc.)
-        """
+        """  # noqa: E501, D401
         return grouped_row_results
 
     def get_or_create_request(self, row_data):
@@ -135,7 +134,7 @@ class SheetHandler:
             Tuple[Type(EnrollmentChangeRequestModel), bool, bool]: A tuple containing an object representing the
                 request, a flag that indicates whether or not it was newly created, and a flag that indicates
                 whether or not it was updated.
-        """
+        """  # noqa: E501, D401
         raise NotImplementedError
 
     @staticmethod
@@ -152,7 +151,7 @@ class SheetHandler:
         Returns:
             Tuple[ Iterable[Tuple[int, List[str]]], List[RowResult] ]: Enumerated data rows with invalidated rows
                 filtered out, paired with objects representing the rows that failed validation.
-        """
+        """  # noqa: E501, D401
         return enumerated_rows, []
 
     def filter_ignored_rows(self, enumerated_rows):
@@ -166,7 +165,7 @@ class SheetHandler:
 
         Returns:
             Iterable[Tuple[int, List[str]]]: Iterable of data rows without the ones that should be ignored.
-        """
+        """  # noqa: E501, D401
         return enumerated_rows
 
     def process_row(self, row_index, row_data):
@@ -182,7 +181,7 @@ class SheetHandler:
         Returns:
             Optional[RowResult]: An object representing the results of processing the row, or None if
                 nothing needs to be done with this row.
-        """
+        """  # noqa: E501, D401
         raise NotImplementedError
 
     def process_sheet(self, limit_row_index=None):
@@ -193,7 +192,7 @@ class SheetHandler:
 
         Returns:
             dict: A summary of the changes made while processing the enrollment change request sheet
-        """
+        """  # noqa: E501, D401
         if limit_row_index is None:
             enumerated_rows = self.get_enumerated_rows()
         else:
@@ -207,13 +206,13 @@ class SheetHandler:
             row_result = None
             try:
                 row_result = self.process_row(row_index, row_data)
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:  # pylint: disable=broad-except  # noqa: BLE001
                 row_result = RowResult(
                     row_index=row_index,
                     row_db_record=None,
                     row_object=None,
                     result_type=ResultType.FAILED,
-                    message="Error: {}".format(str(exc)),
+                    message=f"Error: {exc!s}",
                 )
             finally:
                 if row_result:
@@ -234,7 +233,7 @@ class SheetHandler:
 class EnrollmentChangeRequestHandler(SheetHandler):
     """
     Base class for managing the processing of enrollment change requests from a spreadsheet
-    """
+    """  # noqa: E501
 
     def __init__(self, worksheet_id, start_row, sheet_metadata, request_model_cls):
         """
@@ -260,7 +259,7 @@ class EnrollmentChangeRequestHandler(SheetHandler):
 
     def get_enumerated_rows(self):
         # Only yield rows in the spreadsheet that come after the legacy rows
-        # (i.e.: the rows of data that were manually entered before we started automating this process)
+        # (i.e.: the rows of data that were manually entered before we started automating this process)  # noqa: E501
         return enumerate(
             get_data_rows_after_start(
                 self.worksheet,
@@ -305,7 +304,7 @@ class EnrollmentChangeRequestHandler(SheetHandler):
                 created,
             ) = self.request_model_cls.objects.select_for_update().get_or_create(
                 form_response_id=form_response_id,
-                defaults=dict(raw_data=user_input_json),
+                defaults={"raw_data": user_input_json},
             )
             raw_data_changed = enroll_change_request.raw_data != user_input_json
             if raw_data_changed:

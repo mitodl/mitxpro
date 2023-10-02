@@ -12,7 +12,7 @@ import { routes, getNextParam } from "../../../lib/urls"
 import {
   STATE_ERROR,
   STATE_REGISTER_REQUIRED,
-  handleAuthResponse
+  handleAuthResponse,
 } from "../../../lib/auth"
 
 import EmailForm from "../../../components/forms/EmailForm"
@@ -25,13 +25,13 @@ import { Link } from "react-router-dom"
 type Props = {
   location: Location,
   history: RouterHistory,
-  loginEmail: (email: string, next: ?string) => Promise<Response<AuthResponse>>
+  loginEmail: (email: string, next: ?string) => Promise<Response<AuthResponse>>,
 }
 
 export class LoginEmailPage extends React.Component<Props> {
   async onSubmit(
     { email }: EmailFormValues,
-    { setSubmitting, setErrors }: any
+    { setSubmitting, setErrors }: any,
   ) {
     const { loginEmail, location, history } = this.props
     const nextUrl = getNextParam(location.search)
@@ -45,7 +45,7 @@ export class LoginEmailPage extends React.Component<Props> {
           setErrors(field_errors),
         // eslint-disable-next-line camelcase
         [STATE_REGISTER_REQUIRED]: ({ field_errors }: AuthResponse) =>
-          setErrors(field_errors)
+          setErrors(field_errors),
       })
     } finally {
       setSubmitting(false)
@@ -85,12 +85,7 @@ const loginEmail = (email: string, nextUrl: ?string) =>
   mutateAsync(auth.loginEmailMutation(email, nextUrl))
 
 const mapDispatchToProps = {
-  loginEmail
+  loginEmail,
 }
 
-export default compose(
-  connect(
-    null,
-    mapDispatchToProps
-  )
-)(LoginEmailPage)
+export default compose(connect(null, mapDispatchToProps))(LoginEmailPage)

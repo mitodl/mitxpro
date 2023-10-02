@@ -3,31 +3,31 @@ import logging
 
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
-from social_django.views import _do_login as login
+from rest_framework import serializers
 from social_core.backends.email import EmailAuth
-from social_core.exceptions import InvalidEmail, AuthException, AuthAlreadyAssociated
+from social_core.exceptions import AuthAlreadyAssociated, AuthException, InvalidEmail
 from social_core.utils import (
-    user_is_authenticated,
-    user_is_active,
     partial_pipeline_data,
     sanitize_redirect,
+    user_is_active,
+    user_is_authenticated,
 )
-from rest_framework import serializers
+from social_django.views import _do_login as login
 
 from authentication.exceptions import (
+    EmailBlockedException,
     InvalidPasswordException,
-    RequirePasswordException,
     RequirePasswordAndPersonalInfoException,
+    RequirePasswordException,
+    RequireProfileException,
     RequireProviderException,
     RequireRegistrationException,
-    RequireProfileException,
     UserExportBlockedException,
     UserTryAgainLaterException,
-    EmailBlockedException,
 )
 from authentication.utils import SocialAuthState
 
-PARTIAL_PIPELINE_TOKEN_KEY = "partial_pipeline_token"
+PARTIAL_PIPELINE_TOKEN_KEY = "partial_pipeline_token"  # noqa: S105
 
 log = logging.getLogger()
 
@@ -58,22 +58,23 @@ class SocialAuthSerializer(serializers.Serializer):
         return {}
 
     def _save_next(self, data):
-        """Persists the next url to the session"""
+        """Persists the next url to the session"""  # noqa: D401
         if "next" in data:
             backend = self.context["backend"]
             # Check and sanitize a user-defined GET/POST next field value
             redirect_uri = data["next"]
-            if backend.setting("SANITIZE_REDIRECTS", True):
-                allowed_hosts = backend.setting("ALLOWED_REDIRECT_HOSTS", []) + [
-                    backend.strategy.request_host()
-                ]
+            if backend.setting("SANITIZE_REDIRECTS", True):  # noqa: FBT003
+                allowed_hosts = [
+                    *backend.setting("ALLOWED_REDIRECT_HOSTS", []),
+                    backend.strategy.request_host(),
+                ]  # noqa: E501, RUF100
                 redirect_uri = sanitize_redirect(allowed_hosts, redirect_uri)
             backend.strategy.session_set(
                 "next", redirect_uri or backend.setting("LOGIN_REDIRECT_URL")
             )
 
     # pylint: disable=too-many-return-statements
-    def _authenticate(self, flow):
+    def _authenticate(self, flow):  # noqa: PLR0911, PLR0912
         """Authenticate the current request"""
         request = self.context["request"]
         strategy = self.context["strategy"]
@@ -140,13 +141,13 @@ class SocialAuthSerializer(serializers.Serializer):
             else:
                 return SocialAuthState(SocialAuthState.STATE_INACTIVE)
         else:  # pragma: no cover
-            # this follows similar code in PSA itself, but wasn't reachable through normal testing
+            # this follows similar code in PSA itself, but wasn't reachable through normal testing  # noqa: E501
             log.error("Unexpected authentication result")
             return SocialAuthState(
                 SocialAuthState.STATE_ERROR, errors=["Unexpected authentication result"]
             )
 
-    def save(self, **kwargs):
+    def save(self, **kwargs):  # noqa: C901, PLR0912
         """'Save' the auth request"""
         try:
             result = super().save(**kwargs)
@@ -185,11 +186,11 @@ class SocialAuthSerializer(serializers.Serializer):
                 strategy = self.context["strategy"]
                 strategy.storage.partial.store(result.partial)
             if result.state == SocialAuthState.STATE_REGISTER_CONFIRM_SENT:
-                # If the user has just signed up and a verification link has been emailed, we need
-                # to remove the partial token from the session. The partial token refers to a Partial
-                # object, and we only want to continue the pipeline with that object if the user has
-                # clicked the email verification link and the Partial has been matched from
-                # the verification URL (that URL also contains the verification code, which we need
+                # If the user has just signed up and a verification link has been emailed, we need  # noqa: E501
+                # to remove the partial token from the session. The partial token refers to a Partial  # noqa: E501
+                # object, and we only want to continue the pipeline with that object if the user has  # noqa: E501
+                # clicked the email verification link and the Partial has been matched from  # noqa: E501
+                # the verification URL (that URL also contains the verification code, which we need  # noqa: E501
                 # to continue the pipeline).
                 self.context["backend"].strategy.session.pop(PARTIAL_PIPELINE_TOKEN_KEY)
         else:
@@ -198,7 +199,7 @@ class SocialAuthSerializer(serializers.Serializer):
             result = SocialAuthState(SocialAuthState.STATE_ERROR)
 
         # return the passed flow back to the caller
-        # this way they know if they're on a particular page because of an attempted registration or login
+        # this way they know if they're on a particular page because of an attempted registration or login  # noqa: E501
         result.flow = self.validated_data["flow"]
 
         if result.provider is None:
@@ -217,7 +218,7 @@ class LoginEmailSerializer(SocialAuthSerializer):
         source="get_partial_token", read_only=True, default=None
     )
     email = serializers.EmailField(write_only=True)
-    next = serializers.CharField(write_only=True, required=False)
+    next = serializers.CharField(write_only=True, required=False)  # noqa: A003
 
     def create(self, validated_data):
         """Try to 'save' the request"""
@@ -247,7 +248,7 @@ class LoginPasswordSerializer(SocialAuthSerializer):
 
     password = serializers.CharField(min_length=8, write_only=True)
 
-    def create(self, validated_data):
+    def create(self, validated_data):  # noqa: ARG002
         """Try to 'save' the request"""
         try:
             result = super()._authenticate(SocialAuthState.FLOW_LOGIN)
@@ -264,16 +265,18 @@ class RegisterEmailSerializer(SocialAuthSerializer):
     """Serializer for email register"""
 
     email = serializers.EmailField(write_only=True, required=False)
-    next = serializers.CharField(write_only=True, required=False)
+    next = serializers.CharField(write_only=True, required=False)  # noqa: A003
 
     def validate(self, attrs):
         token = (attrs.get("partial", {}) or {}).get("token", None)
         email = attrs.get("email", None)
         if not email and not token:
-            raise serializers.ValidationError("One of 'partial' or 'email' is required")
+            msg = "One of 'partial' or 'email' is required"
+            raise serializers.ValidationError(msg)
 
         if email and token:
-            raise serializers.ValidationError("Pass only one of 'partial' or 'email'")
+            msg = "Pass only one of 'partial' or 'email'"
+            raise serializers.ValidationError(msg)
 
         return attrs
 
@@ -307,7 +310,7 @@ class RegisterConfirmSerializer(SocialAuthSerializer):
     partial_token = serializers.CharField(source="get_partial_token")
     verification_code = serializers.CharField(write_only=True)
 
-    def create(self, validated_data):
+    def create(self, validated_data):  # noqa: ARG002
         """Try to 'save' the request"""
         return super()._authenticate(SocialAuthState.FLOW_REGISTER)
 
@@ -318,7 +321,7 @@ class RegisterDetailsSerializer(SocialAuthSerializer):
     password = serializers.CharField(min_length=8, write_only=True)
     name = serializers.CharField(write_only=True)
 
-    def create(self, validated_data):
+    def create(self, validated_data):  # noqa: ARG002
         """Try to 'save' the request"""
         return super()._authenticate(SocialAuthState.FLOW_REGISTER)
 
@@ -347,6 +350,6 @@ class RegisterExtraDetailsSerializer(SocialAuthSerializer):
         write_only=True, allow_blank=True, required=False
     )
 
-    def create(self, validated_data):
+    def create(self, validated_data):  # noqa: ARG002
         """Try to 'save' the request"""
         return super()._authenticate(SocialAuthState.FLOW_REGISTER)

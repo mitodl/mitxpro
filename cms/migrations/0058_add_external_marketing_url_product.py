@@ -3,7 +3,7 @@
 from django.db import migrations, models
 
 
-def migrate_external_marketing_url(apps, app_schema):
+def migrate_external_marketing_url(apps, app_schema):  # noqa: ARG001
     """Populate the external marketing URL from the course/program run"""
     # As of now, Only external courseware should've had external marketing URLs
     ExternalCoursePage = apps.get_model("cms", "ExternalCoursePage")
@@ -75,7 +75,6 @@ class Migration(migrations.Migration):
                 null=True,
             ),
         ),
-        # Commenting this because we won't need to run data migration after the data has been migrated
+        # Commenting this because we won't need to run data migration after the data has been migrated  # noqa: E501
         # The data migration was done in https://github.com/mitodl/mitxpro/pull/2628/
-        # migrations.RunPython(migrate_external_marketing_url, migrations.RunPython.noop),
     ]

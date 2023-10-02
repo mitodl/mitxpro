@@ -1,8 +1,10 @@
 // sass-lint:disable mixins-before-declarations
 .webinars {
-
   .webinar-sub-banner {
-    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)), url('#{$static-path}/images/webinars/webinar-header-banner.jpg') no-repeat 50% 50%;
+    background:
+      linear-gradient(rgb(0 0 0 / 30%), rgb(0 0 0 / 50%)),
+      url("#{$static-path}/images/webinars/webinar-header-banner.jpg") no-repeat
+        50% 50%;
     background-size: cover;
   }
 
@@ -31,10 +33,10 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    margin: 0 auto 84px auto;
+    margin: 0 auto 84px;
     max-width: 1150px;
 
-    @include media-breakpoint-down (lg) {
+    @include media-breakpoint-down(lg) {
       width: 100%;
     }
 
@@ -49,35 +51,35 @@
       padding: 10px 9px 0 11px;
       background-color: #fff;
       box-sizing: border-box;
-      box-shadow: 2px 2px 8px 4px rgba(0,0,0,0.06);
+      box-shadow: 2px 2px 8px 4px rgb(0 0 0 / 6%);
       border-radius: 4px;
 
-      @include media-breakpoint-down (lg) {
+      @include media-breakpoint-down(lg) {
         max-width: 300px;
       }
 
-      @include media-breakpoint-down (md) {
+      @include media-breakpoint-down(md) {
         max-width: 310px;
       }
 
       .webinar-holder {
-
         img {
           margin-bottom: 12px;
           max-width: 330px;
           height: 200px;
 
-          @include media-breakpoint-down (lg) {
+          @include media-breakpoint-down(lg) {
             max-width: 280px;
           }
 
-          @include media-breakpoint-down (md) {
+          @include media-breakpoint-down(md) {
             max-width: 290px;
           }
         }
 
-        .time, .description {
-          color: #000000;
+        .time,
+        .description {
+          color: #000;
           font-family: Rajdhani;
           font-size: 18px;
           font-weight: 500;
@@ -85,7 +87,8 @@
           line-height: 20px;
         }
 
-        .title, .description {
+        .title,
+        .description {
           overflow: hidden;
           text-overflow: ellipsis;
           -webkit-line-clamp: 3; // sass-lint:disable-line no-vendor-prefixes
@@ -116,10 +119,10 @@
           text-transform: uppercase;
           color: white;
 
-          &:after {
+          &::after {
             content: "arrow_circle_up";
             display: inline-block;
-            font-family: Material Icons;
+            font-family: "Material Icons";
             line-height: 24px;
             margin: 0 0 0 10px;
             text-transform: none;

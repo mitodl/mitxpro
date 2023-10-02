@@ -25,24 +25,26 @@ from compliance.factories import ExportsInquiryLogFactory
 from users.factories import UserFactory
 
 
-@pytest.fixture
+@pytest.fixture()
 def backend_settings(settings):
-    """A dictionary of settings for the backend"""
+    """A dictionary of settings for the backend"""  # noqa: D401
     return {"USER_FIELDS": settings.SOCIAL_AUTH_EMAIL_USER_FIELDS}
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_email_backend(mocker, backend_settings):
     """Fixture that returns a fake EmailAuth backend object"""
     backend = mocker.Mock()
     backend.name = "email"
-    backend.setting.side_effect = lambda key, default, **kwargs: backend_settings.get(
-        key, default
+    backend.setting.side_effect = (
+        lambda key, default, **kwargs: backend_settings.get(  # noqa: ARG005
+            key, default
+        )
     )
     return backend
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_create_user_strategy(mocker):
     """Fixture that returns a valid strategy for create_user_via_email"""
     strategy = mocker.Mock()
@@ -63,7 +65,7 @@ def mock_create_user_strategy(mocker):
     return strategy
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_create_profile_strategy(mocker):
     """Fixture that returns a valid strategy for create_profile"""
     strategy = mocker.Mock()
@@ -77,7 +79,7 @@ def mock_create_profile_strategy(mocker):
 
 
 def validate_email_auth_request_not_email_backend(mocker):
-    """Tests that validate_email_auth_request return if not using the email backend"""
+    """Tests that validate_email_auth_request return if not using the email backend"""  # noqa: D401, E501
     mock_strategy = mocker.Mock()
     mock_backend = mocker.Mock()
     mock_backend.name = "notemail"
@@ -85,9 +87,10 @@ def validate_email_auth_request_not_email_backend(mocker):
 
 
 @pytest.mark.parametrize(
-    "has_user,expected", [(True, {"flow": SocialAuthState.FLOW_LOGIN}), (False, {})]
+    ("has_user", "expected"),
+    [(True, {"flow": SocialAuthState.FLOW_LOGIN}), (False, {})],  # noqa: E501, RUF100
 )
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_validate_email_auth_request(rf, has_user, expected):
     """Test that validate_email_auth_request returns correctly given the input"""
     request = rf.post("/complete/email")
@@ -149,7 +152,7 @@ def test_user_password_not_email_backend(mocker):
 @pytest.mark.parametrize("user_password", ["abc123", "def456"])
 def test_user_password_login(rf, user, user_password):
     """Tests that user_password works for login case"""
-    request_password = "abc123"
+    request_password = "abc123"  # noqa: S105
     user.set_password(user_password)
     user.save()
     request = rf.post(
@@ -229,7 +232,7 @@ def test_user_password_not_exists(rf):
 
 
 @pytest.mark.parametrize(
-    "backend_name,flow",
+    ("backend_name", "flow"),
     [
         ("notemail", None),
         ("notemail", SocialAuthState.FLOW_REGISTER),
@@ -242,7 +245,7 @@ def test_create_user_via_email_exit(mocker, backend_name, flow):
     """
     Tests that create_user_via_email returns if not using the email backend and attempting the
     'register' step of the auth flow
-    """
+    """  # noqa: E501
     mock_strategy = mocker.Mock()
     mock_backend = mocker.Mock()
     mock_backend.name = backend_name
@@ -256,12 +259,12 @@ def test_create_user_via_email_exit(mocker, backend_name, flow):
     mock_strategy.request_data.assert_not_called()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_create_user_via_email(mocker, mock_email_backend, mock_create_user_strategy):
     """
     Tests that create_user_via_email creates a user via social_core.pipeline.user.create_user_via_email,
     generates a username, and sets a name and password
-    """
+    """  # noqa: E501
     email = "user@example.com"
     generated_username = "testuser123"
     fake_user = UserFactory.build(username=generated_username)
@@ -276,7 +279,7 @@ def test_create_user_via_email(mocker, mock_email_backend, mock_create_user_stra
     response = user_actions.create_user_via_email(
         mock_create_user_strategy,
         mock_email_backend,
-        details=dict(email=email),
+        details={"email": email},
         pipeline_index=0,
         flow=SocialAuthState.FLOW_REGISTER,
     )
@@ -288,7 +291,7 @@ def test_create_user_via_email(mocker, mock_email_backend, mock_create_user_stra
     request_data = mock_create_user_strategy.request_data()
     patched_usernameify.assert_called_once_with(request_data["name"], email=email)
     patched_create_user.assert_called_once()
-    # Confirm that a UserSerializer object was passed to create_user_with_generated_username, and
+    # Confirm that a UserSerializer object was passed to create_user_with_generated_username, and  # noqa: E501
     # that it was instantiated with the data we expect.
     serializer = patched_create_user.call_args_list[0][0][0]
     assert serializer.initial_data["username"] == generated_username
@@ -297,9 +300,9 @@ def test_create_user_via_email(mocker, mock_email_backend, mock_create_user_stra
     assert serializer.initial_data["password"] == request_data["password"]
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_create_user_via_email_no_data(mocker, mock_email_backend):
-    """Tests that create_user_via_email raises an error if no data for name and password provided"""
+    """Tests that create_user_via_email raises an error if no data for name and password provided"""  # noqa: E501
     mock_strategy = mocker.Mock()
     mock_strategy.request_data.return_value = {}
     with pytest.raises(RequirePasswordAndPersonalInfoException):
@@ -311,9 +314,9 @@ def test_create_user_via_email_no_data(mocker, mock_email_backend):
         )
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_create_user_via_email_with_shorter_name(mocker, mock_email_backend):
-    """Tests that create_user_via_email raises an error if name field is shorter than 2 characters"""
+    """Tests that create_user_via_email raises an error if name field is shorter than 2 characters"""  # noqa: E501
     mock_strategy = mocker.Mock()
     mock_strategy.request_data.return_value = {
         "name": "a",
@@ -333,7 +336,7 @@ def test_create_user_via_email_with_shorter_name(mocker, mock_email_backend):
         user_actions.create_user_via_email(
             mock_strategy,
             mock_email_backend,
-            details=dict(email="test@example.com"),
+            details={"email": "test@example.com"},
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,
         )
@@ -341,11 +344,11 @@ def test_create_user_via_email_with_shorter_name(mocker, mock_email_backend):
     assert exc.value.errors == ["Full name must be at least 2 characters long."]
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_create_user_via_email_existing_user_raises(
     user, mock_email_backend, mock_create_user_strategy
 ):
-    """Tests that create_user_via_email raises an error if a user already exists in the pipeline"""
+    """Tests that create_user_via_email raises an error if a user already exists in the pipeline"""  # noqa: E501
     with pytest.raises(UnexpectedExistingUserException):
         user_actions.create_user_via_email(
             mock_create_user_strategy,
@@ -356,7 +359,7 @@ def test_create_user_via_email_existing_user_raises(
         )
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_create_user_via_email_with_email_case_insensitive_existing_user(
     mock_email_backend, mock_create_user_strategy
 ):
@@ -372,14 +375,14 @@ def test_create_user_via_email_with_email_case_insensitive_existing_user(
             mock_email_backend,
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,
-            details=dict(email=email),
+            details={"email": email},
         )
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 @pytest.mark.parametrize(
-    "create_user_return_val,create_user_exception",
-    [[None, None], [UserFactory.build(), ValueError("bad value")]],
+    ("create_user_return_val", "create_user_exception"),
+    [[None, None], [UserFactory.build(), ValueError("bad value")]],  # noqa: PT007
 )
 def test_create_user_via_email_create_fail(
     mocker,
@@ -398,21 +401,21 @@ def test_create_user_via_email_create_fail(
         user_actions.create_user_via_email(
             mock_create_user_strategy,
             mock_email_backend,
-            details=dict(email="someuser@example.com"),
+            details={"email": "someuser@example.com"},
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,
         )
     patched_create_user.assert_called_once()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_create_user_via_email_affiliate(
     mocker, mock_create_user_strategy, mock_email_backend
 ):
     """
     create_user_via_email passes an affiliate id into the user serializer if the affiliate code exists
     on the request object
-    """
+    """  # noqa: E501
     affiliate = AffiliateFactory.create()
     mock_create_user_strategy.request.affiliate_code = affiliate.code
     patched_create_user = mocker.patch(
@@ -422,19 +425,19 @@ def test_create_user_via_email_affiliate(
     user_actions.create_user_via_email(
         mock_create_user_strategy,
         mock_email_backend,
-        details=dict(email="someuser@example.com"),
+        details={"email": "someuser@example.com"},
         pipeline_index=0,
         flow=SocialAuthState.FLOW_REGISTER,
     )
     patched_create_user.assert_called_once()
-    # Confirm that a UserSerializer object was passed to create_user_with_generated_username, and
+    # Confirm that a UserSerializer object was passed to create_user_with_generated_username, and  # noqa: E501
     # that it was instantiated with the affiliate id in the context.
     serializer = patched_create_user.call_args_list[0][0][0]
     assert "affiliate_id" in serializer.context
     assert serializer.context["affiliate_id"] == affiliate.id
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 @pytest.mark.parametrize("hubspot_key", [None, "fake-key"])
 def test_create_profile(
     mock_email_backend, mock_create_profile_strategy, hubspot_key, settings, mocker
@@ -465,9 +468,9 @@ def test_create_profile(
         mock_user_sync.assert_not_called()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_create_profile_no_data(mocker, mock_email_backend):
-    """Tests that create_profile raises an error if no data for name and password provided"""
+    """Tests that create_profile raises an error if no data for name and password provided"""  # noqa: E501
     user = UserFactory.create(profile__incomplete=True)
     mock_strategy = mocker.Mock()
     mock_strategy.request_data.return_value = {}
@@ -495,7 +498,7 @@ def test_forbid_hijack(mocker, hijacked):
     kwargs = {"flow": SocialAuthState.FLOW_LOGIN}
 
     if hijacked:
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             user_actions.forbid_hijack(*args, **kwargs)
     else:
         assert user_actions.forbid_hijack(*args, **kwargs) == {}
@@ -533,16 +536,31 @@ def test_send_user_to_hubspot(mocker, settings):
 @pytest.mark.parametrize("is_active", [True, False])
 @pytest.mark.parametrize("is_new", [True, False])
 @pytest.mark.parametrize(
-    "is_enabled, has_inquiry, computed_result, expected",
+    ("is_enabled", "has_inquiry", "computed_result", "expected"),
     [
-        [True, True, RESULT_SUCCESS, True],  # feature enabled, result is success
-        [True, True, RESULT_DENIED, False],  # feature enabled, result is denied
-        [True, True, RESULT_UNKNOWN, False],  # feature enabled, result is unknown
-        [False, False, None, True],  # feature disabled
-        [True, False, None, False],  # feature enabled, no result
+        [  # noqa: PT007
+            True,
+            True,
+            RESULT_SUCCESS,
+            True,
+        ],  # feature enabled, result is success  # noqa: PT007, RUF100
+        [  # noqa: PT007
+            True,
+            True,
+            RESULT_DENIED,
+            False,
+        ],  # feature enabled, result is denied  # noqa: PT007, RUF100
+        [  # noqa: PT007
+            True,
+            True,
+            RESULT_UNKNOWN,
+            False,
+        ],  # feature enabled, result is unknown  # noqa: PT007, RUF100
+        [False, False, None, True],  # feature disabled  # noqa: PT007
+        [True, False, None, False],  # feature enabled, no result  # noqa: PT007
     ],
 )
-def test_activate_user(
+def test_activate_user(  # noqa: PLR0913
     mocker, user, is_active, is_new, is_enabled, has_inquiry, computed_result, expected
 ):  # pylint: disable=too-many-arguments
     """Test that activate_user takes the correct action"""
@@ -564,15 +582,15 @@ def test_activate_user(
 
 @pytest.mark.parametrize("raises_error", [True, False])
 @pytest.mark.parametrize(
-    "is_active, is_new, creates_records",
+    ("is_active", "is_new", "creates_records"),
     [
-        [True, True, True],
-        [True, False, False],
-        [False, True, False],
-        [False, False, False],
+        [True, True, True],  # noqa: PT007
+        [True, False, False],  # noqa: PT007
+        [False, True, False],  # noqa: PT007
+        [False, False, False],  # noqa: PT007
     ],
 )
-def test_create_courseware_user(
+def test_create_courseware_user(  # noqa: PLR0913
     mocker, user, raises_error, is_active, is_new, creates_records
 ):  # pylint: disable=too-many-arguments
     """Test that activate_user takes the correct action"""
@@ -606,10 +624,10 @@ def test_create_courseware_user(
 
 
 @pytest.mark.parametrize(
-    "backend_name,flow,data",
+    ("backend_name", "flow", "data"),
     [
         ("notemail", SocialAuthState.FLOW_REGISTER, {}),
-        ("notemail", SocialAuthState.FLOW_LOGIN, dict(email="test@example.com")),
+        ("notemail", SocialAuthState.FLOW_LOGIN, {"email": "test@example.com"}),
     ],
 )
 def test_validate_email_backend(mocker, backend_name, flow, data):
@@ -628,7 +646,7 @@ def test_validate_email_backend(mocker, backend_name, flow, data):
     mock_strategy.request_data.assert_called_once()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_create_user_when_email_blocked(mocker):
     """Tests that validate_email raises an error if user email is blocked"""
     mock_strategy = mocker.Mock()
@@ -649,7 +667,7 @@ def test_create_user_when_email_blocked(mocker):
         )
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 @pytest.mark.parametrize("is_active", [True, False])
 def test_sync_user_profile_to_hubspot(
     mocker, user, is_active, mock_create_user_strategy

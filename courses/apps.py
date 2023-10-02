@@ -13,4 +13,3 @@ class CoursesConfig(AppConfig):
         """
         Ready handler. Import signals.
         """
-        import courses.signals  # pylint: disable=unused-import

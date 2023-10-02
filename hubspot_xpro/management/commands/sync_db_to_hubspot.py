@@ -1,7 +1,7 @@
 """
 Management command to sync all Users, Orders, Products, and Lines with Hubspot
 and Line Items
-"""
+"""  # noqa: INP001
 import sys
 
 from django.contrib.contenttypes.models import ContentType
@@ -13,7 +13,6 @@ from ecommerce.models import Line, Order, Product
 from hubspot_xpro.tasks import (
     batch_upsert_associations,
     batch_upsert_hubspot_b2b_deals,
-    batch_upsert_hubspot_deals,
     batch_upsert_hubspot_objects,
 )
 from users.models import User
@@ -26,9 +25,9 @@ class Command(BaseCommand):
 
     create = None
     object_ids = None
-    help = (
-        "Sync all Users, Orders, Products, and Lines with Hubspot. Hubspot API key must be set and Hubspot settings"
-        "must be configured with configure_hubspot_settings"
+    help = (  # noqa: A003
+        "Sync all Users, Orders, Products, and Lines with Hubspot. Hubspot API key must"
+        " be set and Hubspot settingsmust be configured with configure_hubspot_settings"
     )
 
     def sync_contacts(self):
@@ -39,7 +38,7 @@ class Command(BaseCommand):
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.CONTACTS.value,
             ContentType.objects.get_for_model(User).model,
-            User._meta.app_label,
+            User._meta.app_label,  # noqa: SLF001
             create=self.create,
         )
         start = now_in_utc()
@@ -59,16 +58,14 @@ class Command(BaseCommand):
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.PRODUCTS.value,
             ContentType.objects.get_for_model(Product).model,
-            Product._meta.app_label,
+            Product._meta.app_label,  # noqa: SLF001
             create=self.create,
         )
         start = now_in_utc()
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            "Syncing of products to hubspot finished, took {} seconds\n".format(
-                total_seconds
-            )
+            f"Syncing of products to hubspot finished, took {total_seconds} seconds\n"
         )
 
     def sync_b2b_deals(self):
@@ -94,7 +91,7 @@ class Command(BaseCommand):
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.DEALS.value,
             ContentType.objects.get_for_model(Order).model,
-            Order._meta.app_label,
+            Order._meta.app_label,  # noqa: SLF001
             self.create,
             object_ids=self.object_ids,
         )
@@ -115,7 +112,7 @@ class Command(BaseCommand):
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.LINES.value,
             ContentType.objects.get_for_model(Line).model,
-            Line._meta.app_label,
+            Line._meta.app_label,  # noqa: SLF001
             self.create,
             object_ids=self.object_ids,
         )
@@ -138,9 +135,8 @@ class Command(BaseCommand):
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            "Syncing of deal associations to hubspot finished, took {} seconds\n".format(
-                total_seconds
-            )
+            "Syncing of deal associations to hubspot finished, took {} seconds\n"
+            .format(total_seconds)
         )
 
     def sync_all(self):
@@ -162,7 +158,10 @@ class Command(BaseCommand):
         parser.add_argument(
             "--ids",
             type=int,
-            help="List of object ids to process, must be used for a specific object model",
+            help=(
+                "List of object ids to process, must be used for a specific object"
+                " model"
+            ),
             nargs="+",
             required=False,
         )
@@ -214,7 +213,7 @@ class Command(BaseCommand):
             help="create or update",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         if not options["mode"]:
             sys.stderr.write("You must specify mode ('create' or 'update')\n")
             sys.exit(1)

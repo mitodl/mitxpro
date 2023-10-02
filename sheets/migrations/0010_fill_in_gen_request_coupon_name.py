@@ -5,7 +5,7 @@ import json
 from django.db import migrations
 
 
-def set_coupon_name_to_none(apps, schema_editor):
+def set_coupon_name_to_none(apps, schema_editor):  # noqa: ARG001
     """
     Set all coupon_name field values to None
     """
@@ -13,23 +13,26 @@ def set_coupon_name_to_none(apps, schema_editor):
     CouponGenerationRequest.objects.exclude(coupon_name=None).update(coupon_name=None)
 
 
-def fill_in_coupon_name(apps, schema_editor):
+def fill_in_coupon_name(apps, schema_editor):  # noqa: ARG001
     """
     Set coupon_name field values to match the coupon name captured in the raw data of the
     CouponGenerationRequest, or to a string indicating the need for manual update if that raw
     data is invalid
-    """
+    """  # noqa: E501
     CouponGenerationRequest = apps.get_model("sheets", "CouponGenerationRequest")
     coupon_gen_requests = CouponGenerationRequest.objects.all()
     for coupon_gen_request in coupon_gen_requests:
         try:
             raw_data = json.loads(coupon_gen_request.raw_data)
-            if not isinstance(raw_data, list) or len(raw_data) < 2 or not raw_data[1]:
-                raise ValueError(
-                    "raw_data is either not a list, or does not include a valid coupon name"
-                )
-        except Exception:
-            coupon_name = "COUPON NAME NEEDED ({})".format(coupon_gen_request.id)
+            if (
+                not isinstance(raw_data, list)
+                or len(raw_data) < 2  # noqa: PLR2004
+                or not raw_data[1]  # noqa: PLR2004, RUF100
+            ):  # noqa: PLR2004, RUF100
+                msg = "raw_data is either not a list, or does not include a valid coupon name"  # noqa: E501
+                raise ValueError(msg)  # noqa: TRY301
+        except Exception:  # noqa: BLE001
+            coupon_name = f"COUPON NAME NEEDED ({coupon_gen_request.id})"
         else:
             coupon_name = raw_data[1]
         coupon_gen_request.coupon_name = coupon_name
@@ -37,7 +40,6 @@ def fill_in_coupon_name(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("sheets", "0009_add_gen_request_coupon_name")]
 
     operations = [migrations.RunPython(fill_in_coupon_name, set_coupon_name_to_none)]

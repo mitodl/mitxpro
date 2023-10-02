@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("ecommerce", "0031_productcouponassignment_original_email")]
 
     operations = [
@@ -13,7 +12,10 @@ class Migration(migrations.Migration):
             name="is_global",
             field=models.BooleanField(
                 default=False,
-                help_text="When selected it will override the value of the courses field below",
+                help_text=(
+                    "When selected it will override the value of the courses field"
+                    " below"
+                ),
                 verbose_name="All Courses",
             ),
         ),

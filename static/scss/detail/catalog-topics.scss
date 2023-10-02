@@ -12,10 +12,9 @@
   }
 
   .container {
-
     .topics-slider {
-
-      .slick-prev, .slick-next {
+      .slick-prev,
+      .slick-next {
         margin: -3% 0 0 !important;
       }
 
@@ -54,9 +53,9 @@
       font-size: 18px;
 
       a {
-        &:after {
+        &::after {
           content: "arrow_circle_up";
-          font-family: Material Icons;
+          font-family: "Material Icons";
           text-transform: none;
           transform: rotate(90deg);
           display: inline-block;

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("courses", "0020_course_run_grade_optional_letter_grade")]
 
     operations = [

@@ -58,7 +58,7 @@ class CourseAdmin(admin.ModelAdmin):
     }
 
     def get_program(self, obj):
-        """Returns the related User email"""
+        """Returns the related User email"""  # noqa: D401
         return obj.program.readable_id if obj.program is not None else None
 
     get_program.short_description = "Program"
@@ -105,7 +105,7 @@ class ProgramEnrollmentAdmin(AuditableModelAdmin):
         """
         Overrides base method. A filter was applied to the default queryset, so
         this method ensures that Django admin uses an unfiltered queryset.
-        """
+        """  # noqa: D401
         qs = self.model.all_objects.get_queryset()
         # Code below was copied/pasted from the base method
         ordering = self.get_ordering(request)
@@ -114,14 +114,14 @@ class ProgramEnrollmentAdmin(AuditableModelAdmin):
         return qs.select_related("user", "program")
 
     def get_user_email(self, obj):
-        """Returns the related User email"""
+        """Returns the related User email"""  # noqa: D401
         return obj.user.email
 
     get_user_email.short_description = "User Email"
     get_user_email.admin_order_field = "user__email"
 
     def get_program_readable_id(self, obj):
-        """Returns the related Program readable_id"""
+        """Returns the related Program readable_id"""  # noqa: D401
         return obj.program.readable_id
 
     get_program_readable_id.short_description = "Program"
@@ -137,23 +137,23 @@ class ProgramEnrollmentAuditAdmin(TimestampedModelAdmin):
     readonly_fields = get_field_names(ProgramEnrollmentAudit)
 
     def get_program_readable_id(self, obj):
-        """Returns the related Program readable_id"""
+        """Returns the related Program readable_id"""  # noqa: D401
         return obj.enrollment.program.readable_id
 
     get_program_readable_id.short_description = "Program"
     get_program_readable_id.admin_order_field = "enrollment__program__readable_id"
 
     def get_user(self, obj):
-        """Returns the related User's email"""
+        """Returns the related User's email"""  # noqa: D401
         return obj.enrollment.user.email
 
     get_user.short_description = "User"
     get_user.admin_order_field = "enrollment__user__email"
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
 
@@ -176,7 +176,7 @@ class CourseRunEnrollmentAdmin(AuditableModelAdmin):
         """
         Overrides base method. A filter was applied to the default queryset, so
         this method ensures that Django admin uses an unfiltered queryset.
-        """
+        """  # noqa: D401
         qs = self.model.all_objects.get_queryset()
         # Code below was copied/pasted from the base method
         ordering = self.get_ordering(request)
@@ -185,14 +185,14 @@ class CourseRunEnrollmentAdmin(AuditableModelAdmin):
         return qs.select_related("user", "run")
 
     def get_user_email(self, obj):
-        """Returns the related User email"""
+        """Returns the related User email"""  # noqa: D401
         return obj.user.email
 
     get_user_email.short_description = "User Email"
     get_user_email.admin_order_field = "user__email"
 
     def get_run_courseware_id(self, obj):
-        """Returns the related CourseRun courseware_id"""
+        """Returns the related CourseRun courseware_id"""  # noqa: D401
         return obj.run.courseware_id
 
     get_run_courseware_id.short_description = "Course Run"
@@ -208,23 +208,23 @@ class CourseRunEnrollmentAuditAdmin(TimestampedModelAdmin):
     readonly_fields = get_field_names(CourseRunEnrollmentAudit)
 
     def get_run_courseware_id(self, obj):
-        """Returns the related CourseRun courseware_id"""
+        """Returns the related CourseRun courseware_id"""  # noqa: D401
         return obj.enrollment.run.courseware_id
 
     get_run_courseware_id.short_description = "Course Run"
     get_run_courseware_id.admin_order_field = "enrollment__run__courseware_id"
 
     def get_user(self, obj):
-        """Returns the related User's email"""
+        """Returns the related User's email"""  # noqa: D401
         return obj.enrollment.user.email
 
     get_user.short_description = "User"
     get_user.admin_order_field = "enrollment__user__email"
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
 
@@ -237,18 +237,18 @@ class CourseRunGradeAdmin(admin.ModelAdmin):
     raw_id_fields = ("user",)
     search_fields = ["user__email", "user__username"]
 
-    def get_queryset(self, request):
+    def get_queryset(self, request):  # noqa: ARG002
         return self.model.objects.get_queryset().select_related("user", "course_run")
 
     def get_user_email(self, obj):
-        """Returns the related User email"""
+        """Returns the related User email"""  # noqa: D401
         return obj.user.email
 
     get_user_email.short_description = "User Email"
     get_user_email.admin_order_field = "user__email"
 
     def get_run_courseware_id(self, obj):
-        """Returns the related CourseRun courseware_id"""
+        """Returns the related CourseRun courseware_id"""  # noqa: D401
         return obj.course_run.courseware_id
 
     get_run_courseware_id.short_description = "Course Run"
@@ -269,14 +269,14 @@ class CourseRunGradeAuditAdmin(TimestampedModelAdmin):
     readonly_fields = get_field_names(CourseRunGradeAudit)
 
     def get_user_email(self, obj):
-        """Returns the related User email"""
+        """Returns the related User email"""  # noqa: D401
         return obj.course_run_grade.user.email
 
     get_user_email.short_description = "User Email"
     get_user_email.admin_order_field = "course_run_grade__user__email"
 
     def get_run_courseware_id(self, obj):
-        """Returns the related CourseRun courseware_id"""
+        """Returns the related CourseRun courseware_id"""  # noqa: D401
         return obj.course_run_grade.course_run.courseware_id
 
     get_run_courseware_id.short_description = "Course Run"
@@ -284,10 +284,10 @@ class CourseRunGradeAuditAdmin(TimestampedModelAdmin):
         "course_run_grade__course_run__courseware_id"
     )
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
 
@@ -312,13 +312,13 @@ class CourseRunCertificateAdmin(TimestampedModelAdmin):
     raw_id_fields = ("user",)
 
     def get_revoked_state(self, obj):
-        """return the revoked state"""
+        """Return the revoked state"""
         return obj.is_revoked is not True
 
     get_revoked_state.short_description = "Active"
     get_revoked_state.boolean = True
 
-    def get_queryset(self, request):
+    def get_queryset(self, request):  # noqa: ARG002
         return self.model.all_objects.get_queryset().select_related(
             "user", "course_run"
         )
@@ -345,13 +345,13 @@ class ProgramCertificateAdmin(TimestampedModelAdmin):
     raw_id_fields = ("user",)
 
     def get_revoked_state(self, obj):
-        """return the revoked state"""
+        """Return the revoked state"""
         return obj.is_revoked is not True
 
     get_revoked_state.short_description = "Active"
     get_revoked_state.boolean = True
 
-    def get_queryset(self, request):
+    def get_queryset(self, request):  # noqa: ARG002
         return self.model.all_objects.get_queryset().select_related("user", "program")
 
 
@@ -362,8 +362,8 @@ class TopicsWagtailDeleteView(DeleteView):
         child_count = self.instance.subtopics.count()
         if child_count > 0:
             return (
-                f"This topic has {child_count} sub-topic(s) that will be deleted as well. Are you sure you want to "
-                f"delete? "
+                f"This topic has {child_count} sub-topic(s) that will be deleted as"
+                " well. Are you sure you want to delete? "
             )
         return "Are you sure you want to delete this topic?"
 

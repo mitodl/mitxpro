@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("ecommerce", "0017_order_total_price_paid")]
 
     operations = [
@@ -13,7 +12,10 @@ class Migration(migrations.Migration):
             name="is_active",
             field=models.BooleanField(
                 default=True,
-                help_text="If it is unchecked then users will not be able to load the product on the checkout page.",
+                help_text=(
+                    "If it is unchecked then users will not be able to load the product"
+                    " on the checkout page."
+                ),
             ),
         )
     ]

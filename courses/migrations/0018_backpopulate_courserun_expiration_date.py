@@ -6,11 +6,11 @@ from django.db import migrations
 from django.db.models import F
 
 
-def backpopulate_expiration_date(apps, schema_editor):
+def backpopulate_expiration_date(apps, schema_editor):  # noqa: ARG001
     """
     Fetch all CourseRuns with an end_date and without an expiration_date and set that field
     to end_date + 90 days.
-    """
+    """  # noqa: E501
     CourseRun = apps.get_model("courses", "CourseRun")
     CourseRun.objects.filter(
         end_date__isnull=False, expiration_date__isnull=True
@@ -18,7 +18,6 @@ def backpopulate_expiration_date(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("courses", "0017_courserun_expiration_date")]
 
     operations = [

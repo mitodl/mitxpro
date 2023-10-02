@@ -5,28 +5,28 @@ import { Formik, Form } from "formik"
 import {
   passwordValidation,
   legalAddressValidation,
-  LegalAddressFields
+  LegalAddressFields,
 } from "./ProfileFormFields"
 
 import type { Country } from "../../flow/authTypes"
 
 type Props = {
   onSubmit: Function,
-  countries: Array<Country>
+  countries: Array<Country>,
 }
 
 const INITIAL_VALUES = {
-  name:          "",
-  password:      "",
+  name: "",
+  password: "",
   legal_address: {
-    first_name:         "",
-    last_name:          "",
-    street_address:     ["", ""],
-    city:               "",
-    country:            "",
+    first_name: "",
+    last_name: "",
+    street_address: ["", ""],
+    city: "",
+    country: "",
     state_or_territory: "",
-    postal_code:        ""
-  }
+    postal_code: "",
+  },
 }
 
 const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (

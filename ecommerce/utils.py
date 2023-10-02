@@ -1,6 +1,6 @@
 """Utility functions for ecommerce"""
 import logging
-from urllib.parse import urljoin, urlencode
+from urllib.parse import urlencode, urljoin
 
 from django.conf import settings
 from django.urls import reverse
@@ -13,22 +13,28 @@ log = logging.getLogger(__name__)
 
 
 def create_delete_rule(table_name):
-    """Helper function to make SQL to create a rule to prevent deleting from the ecommerce table"""
-    return f"CREATE RULE delete_protect AS ON DELETE TO ecommerce_{table_name} DO INSTEAD NOTHING"
+    """Helper function to make SQL to create a rule to prevent deleting from the ecommerce table"""  # noqa: E501, D401
+    return (
+        f"CREATE RULE delete_protect AS ON DELETE TO ecommerce_{table_name} DO INSTEAD"
+        " NOTHING"
+    )
 
 
 def create_update_rule(table_name):
-    """Helper function to make SQL to create a rule to prevent updating a row in the ecommerce table"""
-    return f"CREATE RULE update_protect AS ON UPDATE TO ecommerce_{table_name} DO INSTEAD NOTHING"
+    """Helper function to make SQL to create a rule to prevent updating a row in the ecommerce table"""  # noqa: E501, D401
+    return (
+        f"CREATE RULE update_protect AS ON UPDATE TO ecommerce_{table_name} DO INSTEAD"
+        " NOTHING"
+    )
 
 
 def rollback_delete_rule(table_name):
-    """Helper function to make SQL to create a rule to allow deleting from the ecommerce table"""
+    """Helper function to make SQL to create a rule to allow deleting from the ecommerce table"""  # noqa: E501, D401
     return f"DROP RULE delete_protect ON ecommerce_{table_name}"
 
 
 def rollback_update_rule(table_name):
-    """Helper function to make SQL to create a rule to allow updating from the ecommerce table"""
+    """Helper function to make SQL to create a rule to allow updating from the ecommerce table"""  # noqa: E501, D401
     return f"DROP RULE update_protect ON ecommerce_{table_name}"
 
 
@@ -45,7 +51,7 @@ def get_order_id_by_reference_number(*, reference_number, prefix):
 
     Returns:
         int: An order id
-    """
+    """  # noqa: E501
     prefix_with_dash = f"{prefix}-"
     if not reference_number.startswith(prefix_with_dash):
         log.error(
@@ -53,11 +59,13 @@ def get_order_id_by_reference_number(*, reference_number, prefix):
             prefix_with_dash,
             reference_number,
         )
-        raise ParseException(f"Reference number must start with {prefix_with_dash}")
+        msg = f"Reference number must start with {prefix_with_dash}"
+        raise ParseException(msg)
     try:
         order_id = int(reference_number[len(prefix_with_dash) :])
     except ValueError:
-        raise ParseException("Unable to parse order number")
+        msg = "Unable to parse order number"
+        raise ParseException(msg)  # noqa: B904, TRY200
 
     return order_id
 
@@ -73,7 +81,7 @@ def make_checkout_url(*, product_id=None, code=None, run_tag=None):
 
     Returns:
         str: The URL for the checkout page, including product and coupon code if available
-    """
+    """  # noqa: E501, D401
     base_checkout_url = urljoin(settings.SITE_BASE_URL, reverse("checkout-page"))
     if product_id is None and code is None:
         return base_checkout_url
@@ -103,6 +111,7 @@ def validate_amount(discount_type, amount):
 
     if discount_type == DISCOUNT_TYPE_PERCENT_OFF and amount > 1:
         return "The amount should be between (0 - 1) when discount type is percent-off."
+    return None
 
 
 def positive_or_zero(number):

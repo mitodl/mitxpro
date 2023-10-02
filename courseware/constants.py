@@ -11,7 +11,7 @@ PRO_ENROLL_MODE_ERROR_TEXTS = (
     "The [{}] course mode is expired or otherwise unavailable for course run".format(
         EDX_ENROLLMENT_PRO_MODE
     ),
-    "Specified course mode '{}' unavailable for course".format(EDX_ENROLLMENT_PRO_MODE),
+    f"Specified course mode '{EDX_ENROLLMENT_PRO_MODE}' unavailable for course",
 )
-# The amount of minutes after creation that a courseware model record should be eligible for repair
+# The amount of minutes after creation that a courseware model record should be eligible for repair  # noqa: E501
 COURSEWARE_REPAIR_GRACE_PERIOD_MINS = 5

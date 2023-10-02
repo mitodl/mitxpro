@@ -5,31 +5,30 @@ Fixtures for voucher tests
 from datetime import datetime
 from types import SimpleNamespace
 
+import factory
 import pytest
 import pytz
-import factory
 from django.http import HttpRequest
-
 from faker import Faker
+
 from courses.factories import CourseRunFactory
 from ecommerce.factories import (
+    CompanyFactory,
     CouponEligibilityFactory,
-    ProductFactory,
     CouponFactory,
+    CouponPaymentVersionFactory,
     CouponRedemptionFactory,
     CouponVersionFactory,
-    CouponPaymentVersionFactory,
-    CompanyFactory,
+    ProductFactory,
 )
 from voucher.factories import VoucherFactory
 from voucher.forms import VOUCHER_PARSE_ERROR
 from voucher.views import UploadVoucherFormView
 
-
 fake = Faker()
 
 
-@pytest.fixture
+@pytest.fixture()
 def upload_voucher_form():
     """
     Mock form to pass in fake cleaned data
@@ -49,7 +48,7 @@ def upload_voucher_form():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def upload_voucher_form_with_file_field():
     """
     Mock form to pass in a fake file param
@@ -57,7 +56,7 @@ def upload_voucher_form_with_file_field():
     return SimpleNamespace(cleaned_data={"voucher": fake.file_name()})
 
 
-@pytest.fixture
+@pytest.fixture()
 def upload_voucher_form_with_parse_error():
     """
     Mock form to pass in fake cleaned data
@@ -65,49 +64,49 @@ def upload_voucher_form_with_parse_error():
     return SimpleNamespace(errors={"voucher": [VOUCHER_PARSE_ERROR]})
 
 
-@pytest.fixture
+@pytest.fixture()
 def upload_voucher_form_view(user):
     """
     Returns a mock instance of an UploadVoucherFormView with an attached User
-    """
+    """  # noqa: D401
     request = HttpRequest()
     request.user = user
     return UploadVoucherFormView(request=request)
 
 
-@pytest.fixture
+@pytest.fixture()
 def voucher_and_user(user):
     """
     Returns a voucher and matching user object
-    """
+    """  # noqa: D401
     voucher = VoucherFactory(user=user)
     return SimpleNamespace(voucher=voucher, user=user)
 
 
-@pytest.fixture
+@pytest.fixture()
 def authenticated_client(client, user):
     """
     Returns an authenticated client
-    """
+    """  # noqa: D401
     client.force_login(user)
     return client
 
 
-@pytest.fixture
+@pytest.fixture()
 def voucher_and_user_client(voucher_and_user, client):
     """
     Returns a voucher, user, and authenticated client
-    """
+    """  # noqa: D401
     user = voucher_and_user.user
     client.force_login(user)
     return SimpleNamespace(**vars(voucher_and_user), client=client)
 
 
-@pytest.fixture
+@pytest.fixture()
 def redeemed_voucher_and_user_client(voucher_and_user, client):
     """
     Returns a voucher, user, and authenticated client
-    """
+    """  # noqa: D401
     user = voucher_and_user.user
     voucher = voucher_and_user.voucher
     client.force_login(user)
@@ -117,11 +116,11 @@ def redeemed_voucher_and_user_client(voucher_and_user, client):
     return SimpleNamespace(**vars(voucher_and_user), client=client)
 
 
-@pytest.fixture
+@pytest.fixture()
 def voucher_and_partial_matches(voucher_and_user_client):
     """
     Returns a voucher with partial matching CourseRuns
-    """
+    """  # noqa: D401
     voucher = voucher_and_user_client.voucher
     company = CompanyFactory()
     course_run_1 = CourseRunFactory(
@@ -153,11 +152,11 @@ def voucher_and_partial_matches(voucher_and_user_client):
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def voucher_and_exact_match(voucher_and_user_client):
     """
     Returns a voucher with and an exact matching and partial matching CourseRuns
-    """
+    """  # noqa: D401
     voucher = voucher_and_user_client.voucher
     exact_match = CourseRunFactory(
         start_date=datetime.combine(
@@ -174,11 +173,11 @@ def voucher_and_exact_match(voucher_and_user_client):
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def voucher_and_partial_matches_with_coupons(voucher_and_partial_matches):
     """
     Returns a voucher with partial matching CourseRuns and valid coupons
-    """
+    """  # noqa: D401
     context = voucher_and_partial_matches
     products = [
         ProductFactory(content_object=course_run)
@@ -208,11 +207,11 @@ def voucher_and_partial_matches_with_coupons(voucher_and_partial_matches):
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def voucher_and_exact_match_with_coupon(voucher_and_exact_match):
     """
     Returns a voucher with exact matching and partial matching CourseRuns and valid coupons
-    """
+    """  # noqa: E501, D401
     context = voucher_and_exact_match
     company = context.company
     exact_match = context.exact_match

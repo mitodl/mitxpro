@@ -10,13 +10,13 @@ import { routes } from "../../../lib/urls"
 import { qsEmailSelector } from "../../../lib/selectors"
 
 type Props = {|
-  params: { email: ?string }
+  params: { email: ?string },
 |}
 
 export class RegisterConfirmSentPage extends React.Component<Props> {
   render() {
     const {
-      params: { email }
+      params: { email },
     } = this.props
 
     return (
@@ -73,7 +73,7 @@ export class RegisterConfirmSentPage extends React.Component<Props> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  params: createStructuredSelector({ email: qsEmailSelector })
+  params: createStructuredSelector({ email: qsEmailSelector }),
 })
 
 export default connect(mapStateToProps)(RegisterConfirmSentPage)

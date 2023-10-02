@@ -6,7 +6,7 @@ from django.conf import settings
 # pylint: disable=unused-argument
 
 
-def api_keys(request):
+def api_keys(request):  # noqa: ARG001
     """
     Pass a `APIKEYS` dictionary into the template context, which holds
     IDs and secret keys for the various APIs used in this project.
@@ -19,10 +19,10 @@ def api_keys(request):
     }
 
 
-def configuration_context(request):
+def configuration_context(request):  # noqa: ARG001
     """
     Configuration context for django templates.
-    """
+    """  # noqa: D401
     return {
         "hubspot_portal_id": settings.HUBSPOT_CONFIG.get("HUBSPOT_PORTAL_ID"),
         "hubspot_new_courses_form_guid": settings.HUBSPOT_CONFIG.get(

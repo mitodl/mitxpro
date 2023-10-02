@@ -24,11 +24,11 @@ from authentication.exceptions import (
 )
 from authentication.utils import SocialAuthState, is_user_email_blocked
 from compliance import api as compliance_api
-from courseware import api as courseware_api, tasks as courseware_tasks
+from courseware import api as courseware_api
+from courseware import tasks as courseware_tasks
 from hubspot_xpro.task_helpers import sync_hubspot_user
 from users.serializers import ProfileSerializer, UserSerializer
 from users.utils import usernameify
-
 
 log = logging.getLogger()
 
@@ -41,7 +41,7 @@ NAME_MIN_LENGTH = 2
 
 
 def validate_email_auth_request(
-    strategy, backend, user=None, *args, **kwargs
+    strategy, backend, user=None, *args, **kwargs  # noqa: ARG001
 ):  # pylint: disable=unused-argument
     """
     Validates an auth request for email
@@ -50,7 +50,7 @@ def validate_email_auth_request(
         strategy (social_django.strategy.DjangoStrategy): the strategy used to authenticate
         backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
         user (User): the current user
-    """
+    """  # noqa: E501, D401
     if backend.name != EmailAuth.name:
         return {}
 
@@ -62,7 +62,7 @@ def validate_email_auth_request(
 
 
 def get_username(
-    strategy, backend, user=None, *args, **kwargs
+    strategy, backend, user=None, *args, **kwargs  # noqa: ARG001
 ):  # pylint: disable=unused-argument
     """
     Gets the username for a user
@@ -71,13 +71,19 @@ def get_username(
         strategy (social_django.strategy.DjangoStrategy): the strategy used to authenticate
         backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
         user (User): the current user
-    """
+    """  # noqa: E501, D401
     return {"username": None if not user else strategy.storage.user.get_username(user)}
 
 
 @partial
 def create_user_via_email(
-    strategy, backend, user=None, flow=None, current_partial=None, *args, **kwargs
+    strategy,
+    backend,
+    user=None,
+    flow=None,
+    current_partial=None,
+    *args,  # noqa: ARG001
+    **kwargs,  # noqa: ARG001, RUF100
 ):  # pylint: disable=too-many-arguments,unused-argument
     """
     Creates a new user if needed and sets the password and name.
@@ -91,7 +97,7 @@ def create_user_via_email(
 
     Raises:
         RequirePasswordAndPersonalInfoException: if the user hasn't set password or name
-    """
+    """  # noqa: E501, D401
     if backend.name != EmailAuth.name or flow != SocialAuthState.FLOW_REGISTER:
         return {}
 
@@ -131,10 +137,9 @@ def create_user_via_email(
     try:
         created_user = create_user_with_generated_username(serializer, username)
         if created_user is None:
-            raise IntegrityError(
-                "Failed to create User with generated username ({})".format(username)
-            )
-    except Exception as exc:
+            msg = f"Failed to create User with generated username ({username})"
+            raise IntegrityError(msg)  # noqa: TRY301
+    except Exception as exc:  # noqa: BLE001
         raise UserCreationFailedException(backend, current_partial) from exc
 
     return {"is_new": True, "user": created_user, "username": created_user.username}
@@ -142,7 +147,13 @@ def create_user_via_email(
 
 @partial
 def create_profile(
-    strategy, backend, user=None, flow=None, current_partial=None, *args, **kwargs
+    strategy,
+    backend,
+    user=None,
+    flow=None,  # noqa: ARG001
+    current_partial=None,
+    *args,  # noqa: ARG001
+    **kwargs,  # noqa: ARG001
 ):  # pylint: disable=too-many-arguments,unused-argument
     """
     Creates a new profile for the user
@@ -155,7 +166,7 @@ def create_profile(
 
     Raises:
         RequireProfileException: if the profile data is missing or invalid
-    """
+    """  # noqa: E501, D401
     if backend.name != EmailAuth.name or user.profile.is_complete:
         return {}
 
@@ -173,7 +184,13 @@ def create_profile(
 
 @partial
 def validate_email(
-    strategy, backend, user=None, flow=None, current_partial=None, *args, **kwargs
+    strategy,
+    backend,
+    user=None,  # noqa: ARG001
+    flow=None,  # noqa: ARG001
+    current_partial=None,
+    *args,  # noqa: ARG001
+    **kwargs,  # noqa: ARG001
 ):  # pylint: disable=unused-argument
     """
     Validates a user's email for register
@@ -187,10 +204,12 @@ def validate_email(
 
     Raises:
         EmailBlockedException: if the user email is blocked
-    """
+    """  # noqa: E501, D401
     data = strategy.request_data()
     authentication_flow = data.get("flow")
-    if authentication_flow == SocialAuthState.FLOW_REGISTER and "email" in data:
+    if (  # noqa: SIM102
+        authentication_flow == SocialAuthState.FLOW_REGISTER and "email" in data
+    ):  # noqa: RUF100, SIM102
         if is_user_email_blocked(data["email"]):
             raise EmailBlockedException(backend, current_partial)
     return {}
@@ -198,7 +217,13 @@ def validate_email(
 
 @partial
 def validate_password(
-    strategy, backend, user=None, flow=None, current_partial=None, *args, **kwargs
+    strategy,
+    backend,
+    user=None,
+    flow=None,
+    current_partial=None,
+    *args,  # noqa: ARG001
+    **kwargs,  # noqa: ARG001
 ):  # pylint: disable=unused-argument
     """
     Validates a user's password for login
@@ -212,7 +237,7 @@ def validate_password(
 
     Raises:
         RequirePasswordException: if the user password is invalid
-    """
+    """  # noqa: E501, D401
     if backend.name != EmailAuth.name or flow != SocialAuthState.FLOW_LOGIN:
         return {}
 
@@ -231,22 +256,25 @@ def validate_password(
     return {}
 
 
-def forbid_hijack(strategy, backend, **kwargs):  # pylint: disable=unused-argument
+def forbid_hijack(
+    strategy, backend, **kwargs  # noqa: ARG001
+):  # pylint: disable=unused-argument  # noqa: ARG001, RUF100
     """
     Forbid an admin user from trying to login/register while hijacking another user
 
     Args:
         strategy (social_django.strategy.DjangoStrategy): the strategy used to authenticate
         backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
-    """
+    """  # noqa: E501
     # As first step in pipeline, stop a hijacking admin from going any further
     if strategy.session_get("is_hijacked_user"):
-        raise AuthException("You are hijacking another user, don't try to login again")
+        msg = "You are hijacking another user, don't try to login again"
+        raise AuthException(msg)
     return {}
 
 
 def activate_user(
-    strategy, backend, user=None, is_new=False, **kwargs
+    strategy, backend, user=None, is_new=False, **kwargs  # noqa: FBT002, ARG001
 ):  # pylint: disable=unused-argument
     """
     Activate the user's account if they passed export controls
@@ -255,7 +283,7 @@ def activate_user(
         strategy (social_django.strategy.DjangoStrategy): the strategy used to authenticate
         backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
         user (User): the current user
-    """
+    """  # noqa: E501
     if user.is_active:
         return {}
 
@@ -272,7 +300,7 @@ def activate_user(
 
 
 def create_courseware_user(
-    strategy, backend, user=None, is_new=False, **kwargs
+    strategy, backend, user=None, is_new=False, **kwargs  # noqa: FBT002, ARG001
 ):  # pylint: disable=unused-argument
     """
     Create a user in the courseware, deferring a retry via celery if it fails
@@ -319,13 +347,13 @@ def send_user_to_hubspot(request, **kwargs):
 
     url = f"https://forms.hubspot.com/uploads/form/v2/{portal_id}/{form_id}?&"
 
-    requests.post(url=url, data=data, headers=headers)
+    requests.post(url=url, data=data, headers=headers)  # noqa: S113
 
     return {}
 
 
 def sync_user_to_hubspot(
-    strategy, backend, user=None, is_new=False, **kwargs
+    strategy, backend, user=None, is_new=False, **kwargs  # noqa: FBT002, ARG001
 ):  # pylint: disable=unused-argument
     """
     Sync the user's latest profile data with hubspot on login

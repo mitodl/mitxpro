@@ -15,26 +15,26 @@ import {
   calculateTax,
   calculateTotalAfterTax,
   formatPrice,
-  formatRunTitle
+  formatRunTitle,
 } from "../../lib/ecommerce"
 
 import type {
   BasketItem,
   BasketResponse,
-  CouponSelection
+  CouponSelection,
 } from "../../flow/ecommerceTypes"
 export type SetFieldError = (fieldName: string, fieldValue: any) => void
 export type Values = {
   runs: { [number]: string },
   couponCode: ?string,
-  dataConsent: boolean
+  dataConsent: boolean,
 }
 export type Actions = {
   setFieldError: SetFieldError,
   setErrors: (errors: Object) => void,
   setSubmitting: (submitting: boolean) => void,
   setValues: (values: Values) => void,
-  resetForm: () => void
+  resetForm: () => void,
 }
 type Errors = {
   runs?: string,
@@ -42,7 +42,7 @@ type Errors = {
   items?: string,
   data_consents?: string,
   genericBasket: boolean,
-  genericSubmit: boolean
+  genericSubmit: boolean,
 }
 type CommonProps = {
   item: BasketItem,
@@ -52,28 +52,28 @@ type CommonProps = {
   onSubmit: (Values, Actions) => Promise<void>,
   submitCoupon: (
     couponCode: ?string,
-    setFieldError: SetFieldError
+    setFieldError: SetFieldError,
   ) => Promise<void>,
   updateProduct: (
     productId: number | string,
     runId: number,
-    setFieldError: SetFieldError
-  ) => Promise<void>
+    setFieldError: SetFieldError,
+  ) => Promise<void>,
 }
 type OuterProps = CommonProps & {
   couponCode: ?string,
   selectedRuns: Object,
-  basket: BasketResponse
+  basket: BasketResponse,
 }
 type InnerProps = CommonProps &
   Actions & {
     errors: Errors,
     values: Values,
-    onMount: () => void
+    onMount: () => void,
   }
 
 type InnerState = {
-  dataSharingModalVisibility: boolean
+  dataSharingModalVisibility: boolean,
 }
 
 export const renderGenericError = () => {
@@ -102,7 +102,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
   constructor(props: InnerProps) {
     super(props)
     this.state = {
-      dataSharingModalVisibility: false
+      dataSharingModalVisibility: false,
     }
   }
 
@@ -116,14 +116,8 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
   }
 
   renderBasketItem = () => {
-    const {
-      item,
-      values,
-      setFieldError,
-      setValues,
-      resetForm,
-      updateProduct
-    } = this.props
+    const { item, values, setFieldError, setValues, resetForm, updateProduct } =
+      this.props
 
     if (item.type === "program") {
       return (
@@ -172,8 +166,8 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                   ...values,
                   runs: {
                     ...values.runs,
-                    [course.id]: e.target.value
-                  }
+                    [course.id]: e.target.value,
+                  },
                 })
 
                 if (!e.target.value) {
@@ -182,7 +176,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
 
                 const selectedRunId = parseInt(e.target.value)
                 const run = course.courseruns.find(
-                  run => run.id === selectedRunId
+                  run => run.id === selectedRunId,
                 )
                 if (run && run.product_id) {
                   await updateProduct(run.product_id, run.id, setFieldError)
@@ -200,7 +194,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                   <option value={run.id} key={run.id}>
                     {formatRunTitle(run)}
                   </option>
-                ) : null
+                ) : null,
               )}
             </Field>
           </div>
@@ -212,7 +206,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
   toggleDataSharingModalVisibility = () => {
     const { dataSharingModalVisibility } = this.state
     this.setState({
-      dataSharingModalVisibility: !dataSharingModalVisibility
+      dataSharingModalVisibility: !dataSharingModalVisibility,
     })
   }
 
@@ -238,7 +232,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
       setFieldError,
       item,
       coupon,
-      submitCoupon
+      submitCoupon,
     } = this.props
     const { dataSharingModalVisibility } = this.state
 
@@ -249,7 +243,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
     const dataConsent = basket.data_consents[0]
     if (SETTINGS.zendesk_config.help_widget_enabled) {
       ZendeskAPI("webWidget", "helpCenter:setSuggestions", {
-        search: item.content_title
+        search: item.content_title,
       })
     }
 
@@ -352,12 +346,24 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                 </div>
                 <div className="flex-row tax-row">
                   <span>Tax:</span>
-                  <span>{formatPrice(calculateTax(item, coupon, basket.tax_info.tax_rate))}</span>
+                  <span>
+                    {formatPrice(
+                      calculateTax(item, coupon, basket.tax_info.tax_rate),
+                    )}
+                  </span>
                 </div>
                 <div className="bar" />
                 <div className="flex-row total-row">
                   <span>Total:</span>
-                  <span>{formatPrice(calculateTotalAfterTax(item, coupon, basket.tax_info.tax_rate))}</span>
+                  <span>
+                    {formatPrice(
+                      calculateTotalAfterTax(
+                        item,
+                        coupon,
+                        basket.tax_info.tax_rate,
+                      ),
+                    )}
+                  </span>
                 </div>
               </div>
               <div>
@@ -444,7 +450,7 @@ export class CheckoutForm extends React.Component<OuterProps> {
       requestPending,
       selectedRuns,
       submitCoupon,
-      updateProduct
+      updateProduct,
     } = this.props
 
     return (
@@ -453,7 +459,7 @@ export class CheckoutForm extends React.Component<OuterProps> {
         initialValues={{
           couponCode:  couponCode || (coupon ? coupon.code : ""),
           runs:        selectedRuns,
-          dataConsent: false
+          dataConsent: false,
         }}
         validate={this.validate}
         render={props => (

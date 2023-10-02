@@ -1,9 +1,9 @@
 """Tests for verification_api"""
 from urllib.parse import quote_plus
-import pytest
 
-from django.core.mail import EmailMessage
+import pytest
 from django.contrib.sessions.middleware import SessionMiddleware
+from django.core.mail import EmailMessage
 from django.shortcuts import reverse
 from django.test.client import RequestFactory
 from social_core.backends.email import EmailAuth
@@ -41,7 +41,7 @@ def test_send_verification_email_affiliate(mocker, rf):
     """
     send_verification_email should send a verification link with an affiliate code in the URL if there is an
     affiliate code attached to the request
-    """
+    """  # noqa: E501
     send_messages_mock = mocker.patch("mail.api.send_messages")
     code = mocker.Mock(code="abc")
     request = rf.post(

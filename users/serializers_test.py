@@ -1,14 +1,15 @@
 """Tests for users.serializers"""
 import pytest
-
 from rest_framework.exceptions import ValidationError
 
 from affiliate.factories import AffiliateFactory
 from users.factories import UserFactory
 from users.models import ChangeEmailRequest
-from users.serializers import ChangeEmailRequestUpdateSerializer
-from users.serializers import LegalAddressSerializer, UserSerializer
-
+from users.serializers import (
+    ChangeEmailRequestUpdateSerializer,
+    LegalAddressSerializer,
+    UserSerializer,
+)
 
 # pylint:disable=redefined-outer-name
 
@@ -16,7 +17,7 @@ from users.serializers import LegalAddressSerializer, UserSerializer
 @pytest.fixture()
 def mock_user_sync(mocker):
     """Yield a mock hubspot_xpro update task for contacts"""
-    yield mocker.patch("hubspot_xpro.tasks.sync_contact_with_hubspot.delay")
+    return mocker.patch("hubspot_xpro.tasks.sync_contact_with_hubspot.delay")
 
 
 @pytest.fixture()
@@ -41,39 +42,49 @@ def test_validate_legal_address(sample_address):
 
 
 @pytest.mark.parametrize(
-    "field,value,error",
+    ("field", "value", "error"),
     [
-        ["first_name", "", "This field may not be blank."],
-        ["last_name", "", "This field may not be blank."],
-        ["street_address", [], "street_address must be a list of street lines"],
-        [
+        ["first_name", "", "This field may not be blank."],  # noqa: PT007
+        ["last_name", "", "This field may not be blank."],  # noqa: PT007
+        [  # noqa: PT007
+            "street_address",
+            [],
+            "street_address must be a list of street lines",
+        ],  # noqa: PT007, RUF100
+        [  # noqa: PT007
             "street_address",
             ["a", "b", "c", "d", "e", "f"],
             "street_address list must be 5 items or less",
         ],
-        [
+        [  # noqa: PT007
             "street_address",
             ["x" * 61],
             "street_address lines must be 60 characters or less",
         ],
-        ["country", "", "This field may not be blank."],
-        ["country", None, "This field may not be null."],
-        ["state_or_territory", "", "State/territory is required for United States"],
-        [
+        ["country", "", "This field may not be blank."],  # noqa: PT007
+        ["country", None, "This field may not be null."],  # noqa: PT007
+        [  # noqa: PT007
+            "state_or_territory",
+            "",
+            "State/territory is required for United States",
+        ],  # noqa: PT007, RUF100
+        [  # noqa: PT007
             "state_or_territory",
             "CA-QC",
             "Quebec is not a valid state or territory of United States",
         ],
-        ["city", "", "This field may not be blank."],
-        ["postal_code", "", "Postal Code is required for United States"],
-        [
+        ["city", "", "This field may not be blank."],  # noqa: PT007
+        ["postal_code", "", "Postal Code is required for United States"],  # noqa: PT007
+        [  # noqa: PT007
             "postal_code",
             "3082",
             "Postal Code must be in the format 'NNNNN' or 'NNNNN-NNNNN'",
         ],
     ],
 )
-def test_validate_required_fields_US_CA(sample_address, field, value, error):
+def test_validate_required_fields_US_CA(  # noqa: N802
+    sample_address, field, value, error
+):  # noqa: N802, RUF100
     """Test that missing required fields causes a validation error"""
     sample_address[field] = value
     serializer = LegalAddressSerializer(data=sample_address)
@@ -82,13 +93,13 @@ def test_validate_required_fields_US_CA(sample_address, field, value, error):
 
 
 @pytest.mark.parametrize(
-    "data,error",
+    ("data", "error"),
     [
-        [
+        [  # noqa: PT007
             {"country": "US", "state_or_territory": "US-MA", "postal_code": "2183"},
             "Postal Code must be in the format 'NNNNN' or 'NNNNN-NNNNN'",
         ],
-        [
+        [  # noqa: PT007
             {"country": "CA", "state_or_territory": "CA-BC", "postal_code": "AFA D"},
             "Postal Code must be in the format 'ANA NAN'",
         ],
@@ -130,7 +141,7 @@ def test_invalid_ca_postal_codes(sample_address, postal_code):
 
 
 def test_validate_optional_country_data(sample_address):
-    """Test that state_or_territory and postal_code are optional for other countries besides US/CA"""
+    """Test that state_or_territory and postal_code are optional for other countries besides US/CA"""  # noqa: E501
     sample_address.update(
         {"country": "FR", "state_or_territory": "", "postal_code": ""}
     )
@@ -141,7 +152,7 @@ def test_validate_optional_country_data(sample_address):
 def test_update_user_serializer(
     mock_user_sync, settings, user, sample_address, hubspot_api_key
 ):
-    """Test that a UserSerializer can be updated properly and hubspot_xpro sync called if appropriate"""
+    """Test that a UserSerializer can be updated properly and hubspot_xpro sync called if appropriate"""  # noqa: E501
     settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
     serializer = UserSerializer(
         instance=user,
@@ -157,12 +168,12 @@ def test_update_user_serializer(
         mock_user_sync.assert_not_called()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
 def test_create_user_serializer(
     mock_user_sync, settings, sample_address, hubspot_api_key
 ):
-    """Test that a UserSerializer can be created properly and hubspot_xpro sync called if appropriate"""
+    """Test that a UserSerializer can be created properly and hubspot_xpro sync called if appropriate"""  # noqa: E501
     settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
     serializer = UserSerializer(
         data={
@@ -181,9 +192,9 @@ def test_create_user_serializer(
         mock_user_sync.assert_not_called()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_create_user_serializer_affiliate(sample_address):
-    """UserSerializer should create a new affiliate tracking record if an affiliate id was passed in the context"""
+    """UserSerializer should create a new affiliate tracking record if an affiliate id was passed in the context"""  # noqa: E501
     affiliate = AffiliateFactory.create()
     serializer = UserSerializer(
         data={
@@ -203,24 +214,24 @@ def test_create_user_serializer_affiliate(sample_address):
 
 
 def test_update_email_change_request_existing_email(user):
-    """Test that update change email request gives validation error for existing user email"""
+    """Test that update change email request gives validation error for existing user email"""  # noqa: E501
     new_user = UserFactory.create()
     change_request = ChangeEmailRequest.objects.create(
         user=user, new_email=new_user.email
     )
     serializer = ChangeEmailRequestUpdateSerializer(change_request, {"confirmed": True})
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError):  # noqa: PT012
         serializer.is_valid()
         serializer.save()
 
 
 def test_create_email_change_request_same_email(user):
-    """Test that update change email request gives validation error for same user email"""
+    """Test that update change email request gives validation error for same user email"""  # noqa: E501
     change_request = ChangeEmailRequest.objects.create(user=user, new_email=user.email)
     serializer = ChangeEmailRequestUpdateSerializer(change_request, {"confirmed": True})
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError):  # noqa: PT012
         serializer.is_valid()
         serializer.save()
 
@@ -261,13 +272,13 @@ def test_update_user_email(
 
 
 def test_legal_address_serializer_invalid_name(sample_address):
-    """Test that LegalAddressSerializer raises an exception if any if the first or last name is not valid"""
+    """Test that LegalAddressSerializer raises an exception if any if the first or last name is not valid"""  # noqa: E501
 
-    # To make sure that this test isn't flaky, Checking all the character and sequences that should match our name regex
+    # To make sure that this test isn't flaky, Checking all the character and sequences that should match our name regex  # noqa: E501
 
     # Case 1: Make sure that invalid character(s) doesn't exist within the name
     for invalid_character in "~!@&)(+:'.?/,`-":
-        # Replace the invalid character on 3 different places within name for rigorous testing of this case
+        # Replace the invalid character on 3 different places within name for rigorous testing of this case  # noqa: E501
         sample_address["first_name"] = "{0}First{0} Name{0}".format(invalid_character)
         sample_address["last_name"] = "{0}Last{0} Name{0}".format(invalid_character)
         serializer = LegalAddressSerializer(data=sample_address)
@@ -277,8 +288,8 @@ def test_legal_address_serializer_invalid_name(sample_address):
     # Case 2: Make sure that name doesn't start with valid special character(s)
     # These characters are valid for a name but they shouldn't be at the start
     for valid_character in '^/$#*=[]`%_;<>{}"|':
-        sample_address["first_name"] = "{}First".format(valid_character)
-        sample_address["last_name"] = "{}Last".format(valid_character)
+        sample_address["first_name"] = f"{valid_character}First"
+        sample_address["last_name"] = f"{valid_character}Last"
         serializer = LegalAddressSerializer(data=sample_address)
         with pytest.raises(ValidationError):
             serializer.is_valid(raise_exception=True)

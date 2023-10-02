@@ -20,9 +20,9 @@ def test_create_user_with_generated_username(mocker, valid_address_dict):
     """
     Integration test to assert that create_user_with_generated_username tries to find an available
     username and try again to save a User if there was a username collision
-    """
+    """  # noqa: E501
     username = "testuser"
-    # Create a user with the desired username before calling the function so we get a collision
+    # Create a user with the desired username before calling the function so we get a collision  # noqa: E501
     UserFactory.create(username=username)
     data = {
         "username": username,
@@ -47,7 +47,7 @@ def test_create_user_reattempt(mocker):
     """
     Test that create_user_with_generated_username reattempts User creation multiple times when
     username collisions are experienced repeatedly
-    """
+    """  # noqa: E501
     username = "testuser"
     fake_user = UserFactory.build()
     patched_find_username = mocker.patch(
@@ -68,14 +68,14 @@ def test_create_user_reattempt(mocker):
     created_user = api.create_user_with_generated_username(
         UserSerializer(data={}), username
     )
-    assert patched_save.call_count == 4
+    assert patched_save.call_count == 4  # noqa: PLR2004
     patched_save.assert_any_call(username="testuser")
     patched_save.assert_any_call(username="testuser1")
     patched_save.assert_any_call(username="testuser2")
     patched_save.assert_any_call(username="testuser3")
-    # `find_available_username` should be called as many times as serializer.save() failed
+    # `find_available_username` should be called as many times as serializer.save() failed  # noqa: E501
     # with a duplicate username error
-    assert patched_find_username.call_count == 3
+    assert patched_find_username.call_count == 3  # noqa: PLR2004
     patched_find_username.assert_called_with(username)
     assert created_user == fake_user
 
@@ -106,10 +106,10 @@ def test_create_user_exception(mocker):
     """
     Test that create_user_with_generated_username does not reattempt if an exception was raised that
     does not indicate a username collision
-    """
+    """  # noqa: E501
     patched_save = mocker.patch.object(
         UserSerializer, "save", side_effect=ValueError("idk")
     )
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         api.create_user_with_generated_username(UserSerializer(data={}), "testuser")
     patched_save.assert_called_once()

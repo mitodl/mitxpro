@@ -12,12 +12,11 @@ from authentication.exceptions import (
 )
 from compliance import api
 
-
 log = logging.getLogger()
 
 
 def verify_exports_compliance(
-    strategy, backend, user=None, **kwargs
+    strategy, backend, user=None, **kwargs  # noqa: ARG001
 ):  # pylint: disable=unused-argument
     """
     Verify that the user is allowed by exports compliance
@@ -26,19 +25,19 @@ def verify_exports_compliance(
         strategy (social_django.strategy.DjangoStrategy): the strategy used to authenticate
         backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
         user (User): the current user
-    """
+    """  # noqa: E501
     if not api.is_exports_verification_enabled():
         log.warning("Export compliance checks are disabled")
         return {}
 
-    # skip this step if the user is active or they have an existing export inquiry logged
+    # skip this step if the user is active or they have an existing export inquiry logged  # noqa: E501
     if user.is_active and user.exports_inquiries.exists():
         return {}
 
     try:
         export_inquiry = api.verify_user_with_exports(user)
     except Exception as exc:  # pylint: disable=broad-except
-        # hard failure to request the exports API, log an error but don't let the user proceed
+        # hard failure to request the exports API, log an error but don't let the user proceed  # noqa: E501
         log.exception("Unable to verify exports compliance")
         raise UserTryAgainLaterException(backend) from exc
 
@@ -46,7 +45,8 @@ def verify_exports_compliance(
         raise UserTryAgainLaterException(backend)
     if export_inquiry.is_denied:
         log.info(
-            "User with email '%s' was denied due to exports violation, for reason_code=%s, info_code=%s",
+            "User with email '%s' was denied due to exports violation, for"
+            " reason_code=%s, info_code=%s",
             user.email,
             export_inquiry.reason_code,
             export_inquiry.info_code,
@@ -73,17 +73,24 @@ def verify_exports_compliance(
 
                 mail.send_mail(
                     f"Exports Compliance: denied {user.email}",
-                    f"User with first name '{user.legal_address.first_name}', last name '{user.legal_address.last_name}, address '{' '.join(user.legal_address.street_address)}{city}{state}{postal_code}{country}' , and email '{user.email}' was denied due to exports violation, for reason_code={export_inquiry.reason_code}, info_code={export_inquiry.info_code}",
+                    f"User with first name '{user.legal_address.first_name}', last name"
+                    f" '{user.legal_address.last_name}, address"
+                    f" '{' '.join(user.legal_address.street_address)}{city}{state}{postal_code}{country}'"  # noqa: E501
+                    f" , and email '{user.email}' was denied due to exports violation,"
+                    f" for reason_code={export_inquiry.reason_code},"
+                    f" info_code={export_inquiry.info_code}",
                     settings.EMAIL_SUPPORT,
                     [settings.ADMIN_EMAIL],
                     connection=connection,
                 )
         except Exception:  # pylint: disable=broad-except
             log.exception(
-                "Exception sending email to support regarding export compliance check failure"
+                "Exception sending email to support regarding export compliance check"
+                " failure"
             )
         raise UserExportBlockedException(backend, export_inquiry.reason_code)
     if export_inquiry.is_unknown:
-        raise AuthException("Unable to authenticate, please contact support")
+        msg = "Unable to authenticate, please contact support"
+        raise AuthException(msg)
 
     return {}

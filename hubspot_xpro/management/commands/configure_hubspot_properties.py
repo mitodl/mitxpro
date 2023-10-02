@@ -1,6 +1,6 @@
 """
 Management command to configure custom Hubspot properties for Contacts, Deals, Products, and Line Items
-"""
+"""  # noqa: INP001, E501
 import sys
 
 from django.core.management import BaseCommand
@@ -16,10 +16,9 @@ from mitol.hubspot_api.api import (
 from ecommerce import models
 from hubspot_xpro.serializers import ORDER_TYPE_B2B, ORDER_TYPE_B2C
 
-
 CUSTOM_ECOMMERCE_PROPERTIES = {
-    # defines which hubspot properties are mapped with which local properties when objects are synced.
-    # See https://developers.hubspot.com/docs/methods/ecomm-bridge/ecomm-bridge-overview for more details
+    # defines which hubspot properties are mapped with which local properties when objects are synced.  # noqa: E501
+    # See https://developers.hubspot.com/docs/methods/ecomm-bridge/ecomm-bridge-overview for more details  # noqa: E501
     "deals": {
         "groups": [{"name": "coupon", "label": "Coupon"}],
         "properties": [
@@ -206,7 +205,9 @@ CUSTOM_ECOMMERCE_PROPERTIES = {
             {
                 "name": "status",
                 "label": "Order Status",
-                "description": "The current status of the order associated with the line item",
+                "description": (
+                    "The current status of the order associated with the line item"
+                ),
                 "groupName": "lineiteminformation",
                 "type": "enumeration",
                 "fieldType": "select",
@@ -292,9 +293,9 @@ def delete_custom_properties():
 class Command(BaseCommand):
     """
     Command to create/update or delete custom hubspot object properties and property groups
-    """
+    """  # noqa: E501
 
-    help = "Upsert or delete custom properties and property groups for Hubspot objects"
+    help = "Upsert or delete custom properties and property groups for Hubspot objects"  # noqa: A003, E501
 
     def add_arguments(self, parser):
         """
@@ -306,13 +307,13 @@ class Command(BaseCommand):
             help="Delete custom hubspot properties/groups",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         if options["delete"]:
-            print("Uninstalling custom groups and properties...")
+            print("Uninstalling custom groups and properties...")  # noqa: T201
             delete_custom_properties()
-            print("Uninstall successful")
+            print("Uninstall successful")  # noqa: T201
             return
         else:
-            print("Configuring custom groups and properties...")
+            print("Configuring custom groups and properties...")  # noqa: T201
             upsert_custom_properties()
-            print("Custom properties configured")
+            print("Custom properties configured")  # noqa: T201

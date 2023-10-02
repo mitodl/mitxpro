@@ -8,12 +8,10 @@ from math import ceil
 import pytest
 from django.contrib.contenttypes.models import ContentType
 from faker import Faker
-from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
-from hubspot.crm.objects import BatchInputSimplePublicObjectInput, ApiException
 from mitol.hubspot_api.api import HubspotAssociationType, HubspotObjectType
+from mitol.hubspot_api.exceptions import TooManyRequestsException
 from mitol.hubspot_api.factories import HubspotObjectFactory, SimplePublicObjectFactory
 from mitol.hubspot_api.models import HubspotObject
-from mitol.hubspot_api.exceptions import TooManyRequestsException
 
 from b2b_ecommerce.factories import B2BOrderFactory
 from b2b_ecommerce.models import B2BOrder
@@ -24,11 +22,12 @@ from ecommerce.factories import (
     ProductVersionFactory,
 )
 from ecommerce.models import Order, Product
+from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
+from hubspot.crm.objects import ApiException, BatchInputSimplePublicObjectInput
 from hubspot_xpro import tasks
 from hubspot_xpro.api import make_contact_sync_message
 from hubspot_xpro.tasks import task_obj_lock
 from users.factories import UserFactory
-
 
 pytestmark = [pytest.mark.django_db]
 
@@ -44,7 +43,7 @@ SYNC_FUNCTIONS = [
 
 @pytest.mark.parametrize("task_func", SYNC_FUNCTIONS)
 def test_task_functions(mocker, task_func):
-    """These task functions should call the api function of the same name and return a hubspot id"""
+    """These task functions should call the api function of the same name and return a hubspot id"""  # noqa: E501
     mock_result = SimplePublicObjectFactory()
     mock_api_call = mocker.patch(
         f"hubspot_xpro.tasks.api.{task_func}", return_value=mock_result
@@ -56,7 +55,8 @@ def test_task_functions(mocker, task_func):
 
 @pytest.mark.parametrize("task_func", SYNC_FUNCTIONS)
 @pytest.mark.parametrize(
-    "status, expected_error", [[429, TooManyRequestsException], [500, ApiException]]
+    ("status", "expected_error"),
+    [[429, TooManyRequestsException], [500, ApiException]],  # noqa: PT007
 )
 def test_task_functions_error(mocker, task_func, status, expected_error):
     """These task functions should return the expected exception class"""
@@ -106,7 +106,7 @@ def test_batch_upsert_hubspot_deals_chunked(mocker):
         "hubspot_xpro.tasks.api.sync_deal_with_hubspot", side_effect=mock_results
     )
     result = tasks.batch_upsert_hubspot_deals_chunked([order.id for order in orders])
-    assert mock_sync_deal.call_count == 3
+    assert mock_sync_deal.call_count == 3  # noqa: PLR2004
     assert result == [result.id for result in mock_results]
 
 
@@ -148,13 +148,13 @@ def test_batch_upsert_hubspot_b2b_deals_chunked(mocker):
     result = tasks.batch_upsert_hubspot_b2b_deals_chunked(
         [order.id for order in orders]
     )
-    assert mock_sync_deal.call_count == 3
+    assert mock_sync_deal.call_count == 3  # noqa: PLR2004
     assert result == [result.id for result in mock_results]
 
 
 @pytest.mark.parametrize("create", [True, False])
 def test_batch_upsert_hubspot_objects(settings, mocker, mocked_celery, create):
-    """batch_upsert_hubspot_objects should call batch_upsert_hubspot_objects_chunked w/correct args"""
+    """batch_upsert_hubspot_objects should call batch_upsert_hubspot_objects_chunked w/correct args"""  # noqa: E501
     settings.HUBSPOT_MAX_CONCURRENT_TASKS = 5
     mock_create = mocker.patch(
         "hubspot_xpro.tasks.batch_create_hubspot_objects_chunked.s"
@@ -177,7 +177,7 @@ def test_batch_upsert_hubspot_objects(settings, mocker, mocked_celery, create):
         )
     mocked_celery.replace.assert_called_once()
     if create:
-        assert mock_create.call_count == 2
+        assert mock_create.call_count == 2  # noqa: PLR2004
         mock_create.assert_any_call(
             HubspotObjectType.PRODUCTS.value, "product", [unsynced_products[0].id]
         )
@@ -186,7 +186,7 @@ def test_batch_upsert_hubspot_objects(settings, mocker, mocked_celery, create):
         )
         mock_update.assert_not_called()
     else:
-        assert mock_update.call_count == 5
+        assert mock_update.call_count == 5  # noqa: PLR2004
         mock_update.assert_any_call(
             HubspotObjectType.PRODUCTS.value,
             "product",
@@ -205,11 +205,9 @@ def test_batch_update_hubspot_objects_chunked(mocker, id_count):
     """batch_update_hubspot_objects_chunked should make expected api calls and args"""
     contacts = UserFactory.create_batch(id_count)
     mock_ids = sorted(
-        list(
-            zip(
-                [contact.id for contact in contacts],
-                [f"10001{i}" for i in range(id_count)],
-            )
+        zip(
+            [contact.id for contact in contacts],
+            [f"10001{i}" for i in range(id_count)],
         )
     )
     mock_hubspot_api = mocker.patch("hubspot_xpro.tasks.HubspotApi")
@@ -218,7 +216,7 @@ def test_batch_update_hubspot_objects_chunked(mocker, id_count):
             results=[SimplePublicObjectFactory(id=mock_id[1]) for mock_id in mock_ids]
         )
     )
-    expected_batches = 1 if id_count == 5 else 2
+    expected_batches = 1 if id_count == 5 else 2  # noqa: PLR2004
     tasks.batch_update_hubspot_objects_chunked(
         HubspotObjectType.CONTACTS.value, "user", mock_ids
     )
@@ -241,7 +239,8 @@ def test_batch_update_hubspot_objects_chunked(mocker, id_count):
 
 
 @pytest.mark.parametrize(
-    "status, expected_error", [[429, TooManyRequestsException], [500, ApiException]]
+    ("status", "expected_error"),
+    [[429, TooManyRequestsException], [500, ApiException]],  # noqa: PT007
 )
 def test_batch_update_hubspot_objects_chunked_error(mocker, status, expected_error):
     """batch_update_hubspot_objects_chunked raise expected exception"""
@@ -275,7 +274,7 @@ def test_batch_create_hubspot_objects_chunked(mocker, id_count):
             results=[SimplePublicObjectFactory(id=mock_id) for mock_id in mock_ids]
         )
     )
-    expected_batches = 1 if id_count == 5 else 2
+    expected_batches = 1 if id_count == 5 else 2  # noqa: PLR2004
     tasks.batch_create_hubspot_objects_chunked(
         HubspotObjectType.CONTACTS.value, "user", mock_ids
     )
@@ -295,7 +294,8 @@ def test_batch_create_hubspot_objects_chunked(mocker, id_count):
 
 
 @pytest.mark.parametrize(
-    "status, expected_error", [[429, TooManyRequestsException], [500, ApiException]]
+    ("status", "expected_error"),
+    [[429, TooManyRequestsException], [500, ApiException]],  # noqa: PT007
 )
 def test_batch_create_hubspot_objects_chunked_error(mocker, status, expected_error):
     """batch_create_hubspot_objects_chunked raise expected exception"""
@@ -319,11 +319,11 @@ def test_batch_create_hubspot_objects_chunked_error(mocker, status, expected_err
 
 
 def test_batch_upsert_associations(
-    settings, mocker, mocked_celery
+    settings, mocker, mocked_celery  # noqa: ARG001
 ):  # pylint:disable=unused-argument
     """
     batch_upsert_associations should call batch_upsert_associations_chunked w/correct lists of ids
-    """
+    """  # noqa: E501
     mock_assoc_chunked = mocker.patch(
         "hubspot_xpro.tasks.batch_upsert_associations_chunked"
     )
@@ -334,7 +334,7 @@ def test_batch_upsert_associations(
     mock_assoc_chunked.s.assert_any_call(order_ids[0:3])
     mock_assoc_chunked.s.assert_any_call(order_ids[6:9])
     mock_assoc_chunked.s.assert_any_call([order_ids[9]])
-    assert mock_assoc_chunked.s.call_count == 4
+    assert mock_assoc_chunked.s.call_count == 4  # noqa: PLR2004
 
     with pytest.raises(TabError):
         tasks.batch_upsert_associations.delay(order_ids[3:5])
@@ -402,13 +402,13 @@ def test_batch_upsert_associations_chunked(mocker):
 
 
 @pytest.mark.parametrize(
-    "func_name,args,kwargs,result",
+    ("func_name", "args", "kwargs", "result"),
     [
-        ["func1", [2345], None, "func1_2345"],
-        ["func2", None, {"order_id": 5678}, "func2_5678"],
-        ["func2a", [], {"user_id": 5678}, "func2a_5678"],
-        ["func3", None, None, "func3"],
-        ["func3a", None, {}, "func3a"],
+        ["func1", [2345], None, "func1_2345"],  # noqa: PT007
+        ["func2", None, {"order_id": 5678}, "func2_5678"],  # noqa: PT007
+        ["func2a", [], {"user_id": 5678}, "func2a_5678"],  # noqa: PT007
+        ["func3", None, None, "func3"],  # noqa: PT007
+        ["func3a", None, {}, "func3a"],  # noqa: PT007
     ],
 )
 def test_task_obj_lock(func_name, args, kwargs, result):
@@ -417,7 +417,7 @@ def test_task_obj_lock(func_name, args, kwargs, result):
 
 
 def test_sync_failed_contacts(mocker):
-    """sync_failed_contacts should try to sync each contact and return a list of failed contact ids"""
+    """sync_failed_contacts should try to sync each contact and return a list of failed contact ids"""  # noqa: E501
     user_ids = sorted(user.id for user in UserFactory.create_batch(4))
     mock_sync = mocker.patch(
         "hubspot_xpro.tasks.api.sync_contact_with_hubspot",
@@ -429,14 +429,14 @@ def test_sync_failed_contacts(mocker):
         ],
     )
     result = tasks.sync_failed_contacts(user_ids)
-    assert mock_sync.call_count == 4
+    assert mock_sync.call_count == 4  # noqa: PLR2004
     assert result == [user_ids[1], user_ids[3]]
 
 
 @pytest.mark.parametrize("for_contacts", [True, False])
 @pytest.mark.parametrize("has_errors", [True, False])
 def test_handle_failed_batch_chunk(mocker, for_contacts, has_errors):
-    """handle_failed_batch_chunk should retry contacts only and log exceptions as appropriate"""
+    """handle_failed_batch_chunk should retry contacts only and log exceptions as appropriate"""  # noqa: E501
     object_ids = [1, 2, 3, 4]
     expected_sync_result = object_ids if has_errors or not for_contacts else []
     hubspot_type = (

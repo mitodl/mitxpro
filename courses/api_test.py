@@ -6,7 +6,8 @@ from types import SimpleNamespace
 import factory
 import pytest
 from django.core.exceptions import ValidationError
-from requests import ConnectionError as RequestsConnectionError, HTTPError
+from requests import ConnectionError as RequestsConnectionError
+from requests import HTTPError
 
 from courses.api import (
     create_program_enrollments,
@@ -42,9 +43,9 @@ from mitxpro.test_utils import MockHttpError
 from mitxpro.utils import now_in_utc
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_get_user_enrollments(user):
-    """Test that get_user_enrollments returns an object with a user's program and course enrollments"""
+    """Test that get_user_enrollments returns an object with a user's program and course enrollments"""  # noqa: E501
     past_date = now_in_utc() - timedelta(days=1)
     past_start_dates = [
         now_in_utc() - timedelta(days=2),
@@ -85,7 +86,7 @@ def test_get_user_enrollments(user):
     CourseRunEnrollmentFactory.create(user=user, active=False)
 
     def key_func(enrollment):
-        """Function for sorting runs by start_date"""
+        """Function for sorting runs by start_date"""  # noqa: D401
         return enrollment.run.start_date
 
     user_enrollments = get_user_enrollments(user)
@@ -118,12 +119,12 @@ def test_get_user_enrollments(user):
     )
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_create_run_enrollments(mocker, user):
     """
     create_run_enrollments should call the edX API to create enrollments, create or reactivate local
     enrollment records, and notify enrolled users via email
-    """
+    """  # noqa: E501
     num_runs = 3
     order = OrderFactory.create()
     company = CompanyFactory.create()
@@ -149,7 +150,7 @@ def test_create_run_enrollments(mocker, user):
     assert edx_request_success is True
     assert len(successful_enrollments) == num_runs
     enrollments = CourseRunEnrollment.objects.order_by("run__id").all()
-    for (run, enrollment) in zip(runs, enrollments):
+    for run, enrollment in zip(runs, enrollments):
         assert enrollment.change_status is None
         assert enrollment.active is True
         assert enrollment.edx_enrolled is True
@@ -157,7 +158,7 @@ def test_create_run_enrollments(mocker, user):
         patched_send_enrollment_email.assert_any_call(enrollment)
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 @pytest.mark.parametrize(
     "exception_cls",
     [NoEdxApiAuthError, HTTPError, RequestsConnectionError, OpenEdXOAuth2Error],
@@ -166,7 +167,7 @@ def test_create_run_enrollments_api_fail(mocker, user, exception_cls):
     """
     create_run_enrollments should log a message and still create local enrollment records when certain exceptions
     are raised if a flag is set to true
-    """
+    """  # noqa: E501
     patched_edx_enroll = mocker.patch(
         "courses.api.enroll_in_edx_course_runs", side_effect=exception_cls
     )
@@ -189,13 +190,13 @@ def test_create_run_enrollments_api_fail(mocker, user, exception_cls):
     assert edx_request_success is False
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 @pytest.mark.parametrize("keep_failed_enrollments", [True, False])
 @pytest.mark.parametrize(
-    "exception_cls,inner_exception",
+    ("exception_cls", "inner_exception"),
     [
-        [EdxApiEnrollErrorException, MockHttpError()],
-        [UnknownEdxApiEnrollException, Exception()],
+        [EdxApiEnrollErrorException, MockHttpError()],  # noqa: PT007
+        [UnknownEdxApiEnrollException, Exception()],  # noqa: PT007
     ],
 )
 def test_create_run_enrollments_enroll_api_fail(
@@ -208,7 +209,7 @@ def test_create_run_enrollments_enroll_api_fail(
     """
     create_run_enrollments should log a message and still create local enrollment records when an enrollment exception
     is raised if a flag is set to true
-    """
+    """  # noqa: E501
     num_runs = 3
     runs = CourseRunFactory.create_batch(num_runs)
     patched_edx_enroll = mocker.patch(
@@ -222,9 +223,11 @@ def test_create_run_enrollments_enroll_api_fail(
     successful_enrollments = []
     edx_request_success = False
 
-    with pytest.raises(
-        EdxEnrollmentCreateError
-    ) if not keep_failed_enrollments else contextlib.suppress():
+    with (
+        pytest.raises(EdxEnrollmentCreateError)
+        if not keep_failed_enrollments
+        else contextlib.suppress()  # noqa: B022
+    ):
         successful_enrollments, edx_request_success = create_run_enrollments(
             user,
             runs,
@@ -243,12 +246,12 @@ def test_create_run_enrollments_enroll_api_fail(
     assert edx_request_success is False
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_create_run_enrollments_creation_fail(mocker, user):
     """
     create_run_enrollments should log a message and send an admin email if there's an error during the
     creation of local enrollment records
-    """
+    """  # noqa: E501
     runs = CourseRunFactory.create_batch(2)
     enrollment = CourseRunEnrollmentFactory.build(run=runs[1])
     mocker.patch(
@@ -270,7 +273,7 @@ def test_create_run_enrollments_creation_fail(mocker, user):
     assert edx_request_success is True
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_create_program_enrollments(user):
     """
     create_program_enrollments should create or reactivate local enrollment records
@@ -294,18 +297,18 @@ def test_create_program_enrollments(user):
     assert len(successful_enrollments) == num_programs
     enrollments = ProgramEnrollment.objects.order_by("program__id").all()
     assert len(enrollments) == len(programs)
-    for (program, enrollment) in zip(programs, enrollments):
+    for program, enrollment in zip(programs, enrollments):
         assert enrollment.change_status is None
         assert enrollment.active is True
         assert enrollment.program == program
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_create_program_enrollments_creation_fail(mocker, user):
     """
     create_program_enrollments should log a message and send an admin email if there's an error during the
     creation of local enrollment records
-    """
+    """  # noqa: E501
     programs = ProgramFactory.create_batch(2)
     enrollment = ProgramEnrollmentFactory.build(program=programs[1])
     mocker.patch(
@@ -339,12 +342,12 @@ class TestDeactivateEnrollments:
             log_exception=log_exception,
         )
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db()
     def test_deactivate_run_enrollment(self, patches):
         """
         deactivate_run_enrollment should attempt to unenroll a user in a course run in edX and set the
         local enrollment record to inactive
-        """
+        """  # noqa: E501
         enrollment = CourseRunEnrollmentFactory.create(edx_enrolled=True)
 
         returned_enrollment = deactivate_run_enrollment(
@@ -359,11 +362,11 @@ class TestDeactivateEnrollments:
         assert returned_enrollment == enrollment
 
     @pytest.mark.parametrize("keep_failed_enrollments", [True, False])
-    @pytest.mark.django_db
+    @pytest.mark.django_db()
     def test_deactivate_run_enrollment_api_fail(self, patches, keep_failed_enrollments):
         """
         If a flag is provided, deactivate_run_enrollment should set local enrollment record to inactive even if the API call fails
-        """
+        """  # noqa: E501
         enrollment = CourseRunEnrollmentFactory.create(edx_enrolled=True)
         patches.edx_unenroll.side_effect = Exception
 
@@ -378,12 +381,12 @@ class TestDeactivateEnrollments:
         enrollment.refresh_from_db()
         assert enrollment.active is not keep_failed_enrollments
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db()
     def test_deactivate_program_enrollment(self, user, patches):
         """
         deactivate_program_enrollment set the local program enrollment record to inactive as well as all
         associated course run enrollments
-        """
+        """  # noqa: E501
         order = OrderFactory.create()
         program_enrollment = ProgramEnrollmentFactory.create(user=user, order=order)
         course = CourseFactory.create(program=program_enrollment.program)
@@ -423,12 +426,12 @@ class TestDeactivateEnrollments:
 
 @pytest.mark.parametrize("keep_failed_enrollments", [True, False])
 @pytest.mark.parametrize("force_enrollment", [True, False])
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_defer_enrollment(mocker, keep_failed_enrollments, force_enrollment):
     """
     defer_enrollment should deactivate a user's existing enrollment and create an enrollment in another
     course run
-    """
+    """  # noqa: E501
     course = CourseFactory.create()
     course_runs = CourseRunFactory.create_batch(3, course=course)
     order = OrderFactory.create()
@@ -472,11 +475,11 @@ def test_defer_enrollment(mocker, keep_failed_enrollments, force_enrollment):
     )
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_defer_enrollment_validation(mocker, user):
     """
     defer_enrollment should raise an exception if the 'from' or 'to' course runs are invalid
-    """
+    """  # noqa: E501
     courses = CourseFactory.create_batch(2)
     enrollments = CourseRunEnrollmentFactory.create_batch(
         3,
@@ -500,7 +503,7 @@ def test_defer_enrollment_validation(mocker, user):
     patched_create_enrollments.assert_not_called()
 
     with pytest.raises(ValidationError):
-        # Deferring to a course run that is outside of its enrollment period should raise a validation error
+        # Deferring to a course run that is outside of its enrollment period should raise a validation error  # noqa: E501
         defer_enrollment(
             user, enrollments[0].run.courseware_id, unenrollable_run.courseware_id
         )
@@ -514,13 +517,13 @@ def test_defer_enrollment_validation(mocker, user):
     patched_create_enrollments.assert_not_called()
 
     with pytest.raises(ValidationError):
-        # Deferring to a course run in a different course should raise a validation error
+        # Deferring to a course run in a different course should raise a validation error  # noqa: E501
         defer_enrollment(
             user, enrollments[1].run.courseware_id, enrollments[2].run.courseware_id
         )
     patched_create_enrollments.assert_not_called()
 
-    # The last two cases should not raise an exception if the 'force' flag is set to True
+    # The last two cases should not raise an exception if the 'force' flag is set to True  # noqa: E501
     defer_enrollment(
         user,
         enrollments[0].run.courseware_id,
@@ -534,4 +537,4 @@ def test_defer_enrollment_validation(mocker, user):
         enrollments[2].run.courseware_id,
         force=True,
     )
-    assert patched_create_enrollments.call_count == 2
+    assert patched_create_enrollments.call_count == 2  # noqa: PLR2004

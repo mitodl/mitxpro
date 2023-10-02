@@ -2,7 +2,7 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
-from courses.models import Program, Course, CourseRun
+from courses.models import Course, CourseRun, Program
 from localdev.seed.api import SeedDataLoader, get_raw_seed_data_from_file
 
 User = get_user_model()
@@ -12,14 +12,14 @@ OBJECT_TYPE_CHOICES = {"courserun": CourseRun, "course": Course, "program": Prog
 
 
 def get_program_objects_for_deletion(program):
-    """Generator that yield all objects that should be deleted as part of a program deletion"""
+    """Generator that yield all objects that should be deleted as part of a program deletion"""  # noqa: E501, D401
     for course in program.courses.all():
         yield from get_course_objects_for_deletion(course)
     yield program
 
 
 def get_course_objects_for_deletion(course):
-    """Generator that yield all objects that should be deleted as part of a course deletion"""
+    """Generator that yield all objects that should be deleted as part of a course deletion"""  # noqa: E501, D401
     yield from course.courseruns.all()
     yield course
 
@@ -27,7 +27,7 @@ def get_course_objects_for_deletion(course):
 class Command(BaseCommand):
     """Deletes seeded data based on raw seed data file or specific properties"""
 
-    help = "Deletes seeded data based on raw seed data file or specific properties"
+    help = "Deletes seeded data based on raw seed data file or specific properties"  # noqa: A003, E501
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -42,19 +42,21 @@ class Command(BaseCommand):
             help="The title of the seeded object you want to delete",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
         seed_data_loader = SeedDataLoader()
         if options["type"]:
             if not options["title"]:
-                raise CommandError("'title' must be specified with 'type'")
+                msg = "'title' must be specified with 'type'"
+                raise CommandError(msg)
             if not seed_data_loader.is_seed_value(options["title"]):
-                raise CommandError(
-                    "This command should only be run to delete seeded objects. Seeded objects are indicated "
-                    "by a prefixed title (example: {})".format(
+                msg = (
+                    "This command should only be run to delete seeded objects. Seeded"
+                    " objects are indicated by a prefixed title (example: {})".format(
                         seed_data_loader.seed_prefixed("Some Title")
                     )
                 )
+                raise CommandError(msg)
             model_cls = OBJECT_TYPE_CHOICES[options["type"]]
             model_obj = model_cls.objects.get(title=options["title"])
             if model_cls == Program:
@@ -78,4 +80,4 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.SUCCESS("RESULTS"))
             for k, v in results.report.items():
-                self.stdout.write("{}: {}".format(k, v))
+                self.stdout.write(f"{k}: {v}")

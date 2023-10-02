@@ -12,7 +12,7 @@ import {
   isNil,
   lensPath,
   trim,
-  view
+  view,
 } from "ramda"
 import _truncate from "lodash/truncate"
 import qs from "query-string"
@@ -24,7 +24,7 @@ import type Moment from "moment"
 import type {
   CourseRunDetail,
   Program,
-  UserEnrollments
+  UserEnrollments,
 } from "../flow/courseTypes"
 
 import type { Product } from "../flow/ecommerceTypes"
@@ -35,7 +35,7 @@ import { routes } from "./urls"
 import {
   STATE_INVALID_EMAIL,
   STATE_INVALID_LINK,
-  STATE_EXISTING_ACCOUNT
+  STATE_EXISTING_ACCOUNT,
 } from "./auth"
 
 /**
@@ -48,7 +48,7 @@ export const wait = (millis: number): Promise<void> =>
  * Adds on an index for each item in an iterable
  */
 export function* enumerate<T>(
-  iterable: Iterable<T>
+  iterable: Iterable<T>,
 ): Generator<[number, T], void, void> {
   let i = 0
   for (const item of iterable) {
@@ -57,11 +57,7 @@ export function* enumerate<T>(
   }
 }
 
-export const isEmptyText = compose(
-  isEmpty,
-  trim,
-  defaultTo("")
-)
+export const isEmptyText = compose(isEmpty, trim, defaultTo(""))
 
 export const notNil = complement(isNil)
 
@@ -142,11 +138,8 @@ const getDateExtreme = R.curry(
     if (filteredDates.length === 0) {
       return null
     }
-    return R.compose(
-      moment,
-      R.apply(compareFunc)
-    )(filteredDates)
-  }
+    return R.compose(moment, R.apply(compareFunc))(filteredDates)
+  },
 )
 
 export const getMinDate = getDateExtreme(Math.min)
@@ -169,19 +162,19 @@ export const newSetWithout = (set: Set<*>, valueToDelete: any): Set<*> => {
  */
 export const timeoutPromise = (
   funcToExecute: Function,
-  timeoutMs: number
+  timeoutMs: number,
 ): Promise<*> => {
   return new Promise(resolve =>
     setTimeout(() => {
       funcToExecute()
       resolve()
-    }, timeoutMs)
+    }, timeoutMs),
   )
 }
 
 export const findItemWithTextId = (
   enrollments: UserEnrollments,
-  textId: ?string
+  textId: ?string,
 ): Program | CourseRunDetail | null => {
   for (const programEnrollment of enrollments.program_enrollments) {
     if (textId === programEnrollment.program.readable_id) {
@@ -205,15 +198,13 @@ export const findItemWithTextId = (
 }
 
 export const getProductSelectLabel = (product: Product) => {
-  const label = `${product.content_object.readable_id} | ${
-    product.content_object.title
-  }`
+  const label = `${product.content_object.readable_id} | ${product.content_object.title}`
   if (
     product.product_type === PRODUCT_TYPE_COURSERUN &&
     product.content_object.start_date !== null
   ) {
     return `${label} | ${formatPrettyDate(
-      moment(product.content_object.start_date)
+      moment(product.content_object.start_date),
     )}`
   } else {
     return label
@@ -222,7 +213,7 @@ export const getProductSelectLabel = (product: Product) => {
 
 export const sameDayOrLater = (
   momentDate1: Moment,
-  momentDate2: Moment
+  momentDate2: Moment,
 ): boolean =>
   momentDate1.startOf("day").isSameOrAfter(momentDate2.startOf("day"))
 
@@ -236,7 +227,7 @@ export const isUnauthorizedResponse = (response: HttpResponse<*>): boolean =>
   response.status === 401 || response.status === 403
 
 export const getErrorMessages = (
-  response: HttpResponse<*>
+  response: HttpResponse<*>,
 ): HttpRespErrorMessage => {
   if (!response.body || !response.body.errors) {
     return null

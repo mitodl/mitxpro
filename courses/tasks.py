@@ -79,16 +79,20 @@ def generate_course_certificates():
 
 
 def exception_logging_generator(generator):
-    """Returns a new generator that logs exceptions from the given generator and continues with iteration"""
+    """Returns a new generator that logs exceptions from the given generator and continues with iteration"""  # noqa: E501, D401
     while True:
         try:
             yield next(generator)
         except StopIteration:
             return
         except HTTPError as exc:
-            log.exception("EdX API error for fetching user grades %s:", exc)
+            log.exception(
+                "EdX API error for fetching user grades %s:", exc  # noqa: TRY401
+            )  # noqa: RUF100, TRY401
         except Exception as exp:  # pylint: disable=broad-except
-            log.exception("Error fetching user grades from edX %s:", exp)
+            log.exception(
+                "Error fetching user grades from edX %s:", exp  # noqa: TRY401
+            )  # noqa: RUF100, TRY401
 
 
 @app.task
@@ -104,5 +108,5 @@ def sync_courseruns_data():
         )
     )
 
-    # `sync_course_runs` logs internally so no need to capture/output the returned values
+    # `sync_course_runs` logs internally so no need to capture/output the returned values  # noqa: E501
     sync_course_runs(runs)

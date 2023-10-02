@@ -63,7 +63,6 @@ from mitxpro.utils import (
     now_in_utc,
 )
 
-
 log = logging.getLogger(__name__)
 
 
@@ -174,13 +173,13 @@ class CheckoutView(APIView):
     """
     View for checkout API. This creates an Order in our system and provides a dictionary to
     send to Cybersource
-    """
+    """  # noqa: E501
 
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
 
     def post(
-        self, request, *args, **kwargs
+        self, request, *args, **kwargs  # noqa: ARG002
     ):  # pylint: disable=too-many-locals,unused-argument
         """
         Create a new unfulfilled Order from the user's basket
@@ -211,11 +210,11 @@ class CheckoutView(APIView):
             # for GTM in order to track these purchases as well. Actual tracking
             # call is sent from the frontend.
             payload = {
-                "transaction_id": "T-{}".format(order.id),
+                "transaction_id": f"T-{order.id}",
                 "transaction_total": 0.00,
                 "product_type": product.type_string,
                 "courseware_id": text_id,
-                "reference_number": "REF-{}".format(order.id),
+                "reference_number": f"REF-{order.id}",
             }
 
             # This redirects the user to our order success page
@@ -224,7 +223,7 @@ class CheckoutView(APIView):
                 send_ecommerce_order_receipt(order)
             method = "GET"
         else:
-            # This generates a signed payload which is submitted as an HTML form to CyberSource
+            # This generates a signed payload which is submitted as an HTML form to CyberSource  # noqa: E501
             cancel_url = urljoin(base_url, "checkout/")
             payload = generate_cybersource_sa_payload(
                 order=order,
@@ -243,15 +242,17 @@ class OrderFulfillmentView(APIView):
     View for order fulfillment API. This API is special in that only CyberSource should talk to it.
     Instead of authenticating with OAuth or via session this looks at the signature of the message
     to verify authenticity.
-    """
+    """  # noqa: E501
 
     authentication_classes = ()
     permission_classes = (IsSignedByCyberSource,)
 
-    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def post(
+        self, request, *args, **kwargs  # noqa: ARG002
+    ):  # pylint: disable=unused-argument  # noqa: ARG002, RUF100
         """
         Confirmation from CyberSource which fulfills an existing Order.
-        """
+        """  # noqa: D401
         try:
             reference_number = request.data.get("req_reference_number", "")
             if reference_number.startswith(B2BOrder.get_reference_number_prefix()):
@@ -259,9 +260,8 @@ class OrderFulfillmentView(APIView):
             elif reference_number.startswith(Order.get_reference_number_prefix()):
                 fulfill_order(request.data)
             else:
-                raise ParseException(
-                    f"Unknown prefix '{reference_number}' for reference number"
-                )
+                msg = f"Unknown prefix '{reference_number}' for reference number"
+                raise ParseException(msg)
         except:
             # Not sure what would cause an error here but make sure we save the receipt
             Receipt.objects.create(data=request.data)
@@ -312,7 +312,9 @@ class CouponListView(APIView):
     permission_classes = (IsAdminUser,)
     authentication_classes = (SessionAuthentication,)
 
-    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def post(
+        self, request, *args, **kwargs  # noqa: ARG002
+    ):  # pylint: disable=unused-argument  # noqa: ARG002, RUF100
         """Create coupon(s) and related objects"""
         # Determine what kind of coupon this is.
         if request.data.get("coupon_type") == CouponPaymentVersion.SINGLE_USE:
@@ -370,7 +372,7 @@ def bulk_assignment_csv_view(request, bulk_assignment_id):
     if not bulk_assignment:
         raise Http404
 
-    # It's assumed that the bulk assignment will have the same coupon payment for all of the individual assignments, so
+    # It's assumed that the bulk assignment will have the same coupon payment for all of the individual assignments, so  # noqa: E501
     # use the name value for the first coupon payment for the filename.
     first_assignment = bulk_assignment.assignments.first()
     first_coupon_name = first_assignment.product_coupon.coupon.payment.name
@@ -382,7 +384,9 @@ def bulk_assignment_csv_view(request, bulk_assignment_id):
                     product_id=product_coupon_assignment.product_coupon.product.id,
                     code=product_coupon_assignment.product_coupon.coupon.coupon_code,
                 ),
-                "coupon_code": product_coupon_assignment.product_coupon.coupon.coupon_code,
+                "coupon_code": (
+                    product_coupon_assignment.product_coupon.coupon.coupon_code
+                ),
             }
             for product_coupon_assignment in bulk_assignment.assignments.all()
         ),

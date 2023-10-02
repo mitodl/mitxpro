@@ -1,17 +1,21 @@
 """
 Management command to revoke and un revoke a certificate for a course run or program for the given user.
-"""
+"""  # noqa: INP001, E501
 from django.core.management.base import BaseCommand, CommandError
-from courses.utils import revoke_program_certificate, revoke_course_run_certificate
+
+from courses.utils import revoke_course_run_certificate, revoke_program_certificate
 from users.api import fetch_user
 
 
 class Command(BaseCommand):
     """
     Command to revoke/un-revoke a course run or program certificate for a specified user.
-    """
+    """  # noqa: E501
 
-    help = "Revoke and un revoke a certificate for a specified user against a program or course run."
+    help = (  # noqa: A003
+        "Revoke and un revoke a certificate for a specified user against a program or"
+        " course run."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -38,14 +42,19 @@ class Command(BaseCommand):
             dest="include_program_courses",
             action="store_true",
             required=False,
-            help="Either should consider the corresponding course runs or not associated with the program.",
+            help=(
+                "Either should consider the corresponding course runs or not associated"
+                " with the program."
+            ),
         )
 
         parser.set_defaults(revoke=True)
 
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # pylint: disable=too-many-locals
+    def handle(
+        self, *args, **options  # noqa: ARG002
+    ):  # pylint: disable=too-many-locals  # noqa: ARG002, RUF100
         """Handle command execution"""
 
         user = fetch_user(options["user"]) if options["user"] else None
@@ -55,14 +64,15 @@ class Command(BaseCommand):
         include_program_courses = options.get("include_program_courses")
 
         if program and run:
-            raise CommandError(
-                "Either 'program' or 'run' should be provided, not both."
-            )
+            msg = "Either 'program' or 'run' should be provided, not both."
+            raise CommandError(msg)
         if not program and not run:
-            raise CommandError("Either 'program' or 'run' must be provided.")
+            msg = "Either 'program' or 'run' must be provided."
+            raise CommandError(msg)
 
         if (program or run) and not user:
-            raise CommandError("A valid user must be provided.")
+            msg = "A valid user must be provided."
+            raise CommandError(msg)
 
         updated = False
         if program:
@@ -79,7 +89,7 @@ class Command(BaseCommand):
 
         if updated:
             msg = "Certificate for {} has been {}".format(
-                "run: {}".format(run) if run else "program: {}".format(program),
+                f"run: {run}" if run else f"program: {program}",
                 "revoked" if revoke else "un-revoked",
             )
             self.stdout.write(self.style.SUCCESS(msg))

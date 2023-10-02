@@ -20,8 +20,8 @@ from mitol.common.envs import (
     get_string,
     import_settings_modules,
 )
-from mitol.common.settings.webpack import *  # pylint: disable=wildcard-import,unused-wildcard-import
-from mitol.digitalcredentials.settings import *  # pylint: disable=wildcard-import,unused-wildcard-import
+from mitol.common.settings.webpack import *  # pylint: disable=wildcard-import,unused-wildcard-import  # noqa: E501, F403
+from mitol.digitalcredentials.settings import *  # pylint: disable=wildcard-import,unused-wildcard-import  # noqa: E501, F403
 from redbeat import RedBeatScheduler
 
 from mitxpro.celery_utils import OffsettingSchedule
@@ -32,7 +32,9 @@ VERSION = "0.130.0"
 ENVIRONMENT = get_string(
     name="MITXPRO_ENVIRONMENT",
     default="dev",
-    description="The execution environment that the app is in (e.g. dev, staging, prod)",
+    description=(
+        "The execution environment that the app is in (e.g. dev, staging, prod)"
+    ),
     required=True,
 )
 # this is only available to heroku review apps
@@ -56,7 +58,9 @@ init_sentry(
 )
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(  # noqa: PTH120
+    os.path.dirname(os.path.abspath(__file__))  # noqa: PTH100, PTH120
+)  # noqa: PTH100, PTH120, RUF100
 
 SITE_BASE_URL = get_string(
     name="MITXPRO_BASE_URL",
@@ -96,8 +100,9 @@ SECURE_SSL_REDIRECT = get_bool(
 SECURE_SSL_HOST = get_string(
     name="MITXPRO_SECURE_SSL_HOST",
     default=None,
-    description="Hostame to redirect non-secure requests to. "
-    "Overrides value from HOST header.",
+    description=(
+        "Hostame to redirect non-secure requests to. Overrides value from HOST header."
+    ),
 )
 
 ZENDESK_CONFIG = {
@@ -117,7 +122,7 @@ WEBPACK_LOADER = {
     "DEFAULT": {
         "CACHE": not DEBUG,
         "BUNDLE_DIR_NAME": "bundles/",
-        "STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),
+        "STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),  # noqa: PTH118
         "POLL_INTERVAL": 0.1,
         "TIMEOUT": None,
         "IGNORE": [r".+\.hot-update\.+", r".+\.js\.map"],
@@ -202,7 +207,7 @@ if ENVIRONMENT not in ("production", "prod"):
     INSTALLED_APPS += ("localdev.seed",)
 
 
-if not WEBPACK_DISABLE_LOADER_STATS:
+if not WEBPACK_DISABLE_LOADER_STATS:  # noqa: F405
     INSTALLED_APPS += ("webpack_loader",)
 
 MIDDLEWARE = (
@@ -247,7 +252,7 @@ ROOT_URLCONF = "mitxpro.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],  # noqa: PTH118
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -272,7 +277,9 @@ WSGI_APPLICATION = "mitxpro.wsgi.application"
 DEFAULT_DATABASE_CONFIG = dj_database_url.parse(
     get_string(
         name="DATABASE_URL",
-        default="sqlite:///{0}".format(os.path.join(BASE_DIR, "db.sqlite3")),
+        default="sqlite:///{}".format(
+            os.path.join(BASE_DIR, "db.sqlite3")  # noqa: PTH118
+        ),  # noqa: PTH118, RUF100
         description="The connection url to the Postgres database",
         required=True,
         write_app_json=False,
@@ -283,7 +290,7 @@ DEFAULT_DATABASE_CONFIG["CONN_MAX_AGE"] = get_int(
     default=0,
     description="Maximum age of connection to Postgres in seconds",
 )
-# If True, disables server-side database cursors to prevent invalid cursor errors when using pgbouncer
+# If True, disables server-side database cursors to prevent invalid cursor errors when using pgbouncer  # noqa: E501
 DEFAULT_DATABASE_CONFIG["DISABLE_SERVER_SIDE_CURSORS"] = get_bool(
     name="MITXPRO_DB_DISABLE_SS_CURSORS",
     default=True,
@@ -371,7 +378,7 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.auth_allowed",
     # Checks if the current social-account is already associated in the site.
     "social_core.pipeline.social_auth.social_user",
-    # Associates the current social details with another user account with the same email address.
+    # Associates the current social details with another user account with the same email address.  # noqa: E501
     "social_core.pipeline.social_auth.associate_by_email",
     # validate an incoming email auth request
     "authentication.pipeline.user.validate_email_auth_request",
@@ -412,7 +419,9 @@ SOCIAL_AUTH_PIPELINE = (
 AUTH_CHANGE_EMAIL_TTL_IN_MINUTES = get_int(
     name="AUTH_CHANGE_EMAIL_TTL_IN_MINUTES",
     default=60 * 24,
-    description="Expiry time for a change email request, default is 1440 minutes(1 day)",
+    description=(
+        "Expiry time for a change email request, default is 1440 minutes(1 day)"
+    ),
 )
 
 # Static files (CSS, JavaScript, Images)
@@ -426,9 +435,7 @@ CLOUDFRONT_DIST = get_string(
     description="The Cloundfront distribution to use for static assets",
 )
 if CLOUDFRONT_DIST:
-    STATIC_URL = urljoin(
-        "https://{dist}.cloudfront.net".format(dist=CLOUDFRONT_DIST), STATIC_URL
-    )
+    STATIC_URL = urljoin(f"https://{CLOUDFRONT_DIST}.cloudfront.net", STATIC_URL)
 
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -436,7 +443,7 @@ STATICFILES_FINDERS = [
 ]
 
 STATIC_ROOT = "staticfiles"
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)  # noqa: PTH118
 
 
 # Important to define this so DEBUG works properly
@@ -450,7 +457,11 @@ INTERNAL_IPS = (
 EMAIL_BACKEND = get_string(
     name="MITXPRO_EMAIL_BACKEND",
     default="django.core.mail.backends.smtp.EmailBackend",
-    description="The default email backend to use for outgoing email. This is used in some places by django itself. See `NOTIFICATION_EMAIL_BACKEND` for the backend used for most application emails.",
+    description=(
+        "The default email backend to use for outgoing email. This is used in some"
+        " places by django itself. See `NOTIFICATION_EMAIL_BACKEND` for the backend"
+        " used for most application emails."
+    ),
 )
 EMAIL_HOST = get_string(
     name="MITXPRO_EMAIL_HOST",
@@ -538,10 +549,7 @@ ADMIN_EMAIL = get_string(
     description="E-mail to send 500 reports to.",
     required=True,
 )
-if ADMIN_EMAIL != "":
-    ADMINS = (("Admins", ADMIN_EMAIL),)
-else:
-    ADMINS = ()
+ADMINS = (("Admins", ADMIN_EMAIL),) if ADMIN_EMAIL != "" else ()
 
 # Logging configuration
 LOG_LEVEL = get_string(
@@ -576,8 +584,8 @@ LOGGING = {
             "format": (
                 "[%(asctime)s] %(levelname)s %(process)d [%(name)s] "
                 "%(filename)s:%(lineno)d - "
-                "[{hostname}] - %(message)s"
-            ).format(hostname=HOSTNAME),
+                f"[{HOSTNAME}] - %(message)s"
+            ),
             "datefmt": "%Y-%m-%d %H:%M:%S",
         }
     },
@@ -678,14 +686,11 @@ AWS_QUERYSTRING_AUTH = get_bool(
 if MITXPRO_USE_S3 and (
     not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_STORAGE_BUCKET_NAME
 ):
-    raise ImproperlyConfigured(
-        "You have enabled S3 support, but are missing one of "
-        "AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, or "
-        "AWS_STORAGE_BUCKET_NAME"
-    )
+    msg = "You have enabled S3 support, but are missing one of AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, or AWS_STORAGE_BUCKET_NAME"  # noqa: E501
+    raise ImproperlyConfigured(msg)
 if MITXPRO_USE_S3:
     if CLOUDFRONT_DIST:
-        AWS_S3_CUSTOM_DOMAIN = "{dist}.cloudfront.net".format(dist=CLOUDFRONT_DIST)
+        AWS_S3_CUSTOM_DOMAIN = f"{CLOUDFRONT_DIST}.cloudfront.net"
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 FEATURES = get_features()
@@ -693,7 +698,10 @@ FEATURES = get_features()
 CERTIFICATE_CREATION_DELAY_IN_HOURS = get_int(
     name="CERTIFICATE_CREATION_DELAY_IN_HOURS",
     default=48,
-    description="The number of hours to delay automated certificate creation after a course run ends.",
+    description=(
+        "The number of hours to delay automated certificate creation after a course run"
+        " ends."
+    ),
 )
 
 # Redis
@@ -735,22 +743,34 @@ CELERY_TASK_EAGER_PROPAGATES = get_bool(
 CRON_COURSE_CERTIFICATES_HOURS = get_string(
     name="CRON_COURSE_CERTIFICATES_HOURS",
     default=0,
-    description="'hours' value for the 'generate-course-certificate' scheduled task (defaults to midnight)",
+    description=(
+        "'hours' value for the 'generate-course-certificate' scheduled task (defaults"
+        " to midnight)"
+    ),
 )
 CRON_COURSE_CERTIFICATES_DAYS = get_string(
     name="CRON_COURSE_CERTIFICATES_DAYS",
     default=None,
-    description="'day_of_week' value for 'generate-course-certificate' scheduled task (default will run once a day).",
+    description=(
+        "'day_of_week' value for 'generate-course-certificate' scheduled task (default"
+        " will run once a day)."
+    ),
 )
 CRON_COURSERUN_SYNC_HOURS = get_string(
     name="CRON_COURSERUN_SYNC_HOURS",
     default=0,
-    description="'hours' value for the 'sync-courseruns-data' scheduled task (defaults to midnight)",
+    description=(
+        "'hours' value for the 'sync-courseruns-data' scheduled task (defaults to"
+        " midnight)"
+    ),
 )
 CRON_COURSERUN_SYNC_DAYS = get_string(
     name="CRON_COURSERUN_SYNC_DAYS",
     default=None,
-    description="'day_of_week' value for 'sync-courseruns-data' scheduled task (default will run once a day).",
+    description=(
+        "'day_of_week' value for 'sync-courseruns-data' scheduled task (default will"
+        " run once a day)."
+    ),
 )
 
 
@@ -766,53 +786,62 @@ RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY = get_int(
 REPAIR_COURSEWARE_USERS_FREQUENCY = get_int(
     name="REPAIR_COURSEWARE_USERS_FREQUENCY",
     default=60 * 30,
-    description="How many seconds between repairing courseware records for faulty users",
+    description=(
+        "How many seconds between repairing courseware records for faulty users"
+    ),
 )
 REPAIR_COURSEWARE_USERS_OFFSET = int(REPAIR_COURSEWARE_USERS_FREQUENCY / 2)
 DRIVE_WEBHOOK_EXPIRATION_MINUTES = get_int(
     name="DRIVE_WEBHOOK_EXPIRATION_MINUTES",
     default=60 * 24,
     description=(
-        "The number of minutes after creation that a webhook (push notification) for a Drive "
-        "file will expire (Google does not accept an expiration beyond 24 hours, and if the "
-        "expiration is not provided via API, it defaults to 1 hour)."
+        "The number of minutes after creation that a webhook (push notification) for a"
+        " Drive file will expire (Google does not accept an expiration beyond 24 hours,"
+        " and if the expiration is not provided via API, it defaults to 1 hour)."
     ),
 )
 DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES = get_int(
     name="DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES",
     default=60 * 3,
     description=(
-        "The maximum time difference (in minutes) from the present time to a webhook expiration "
-        "date to consider a webhook 'fresh', i.e.: not in need of renewal. If the time difference "
-        "is less than this value, the webhook should be renewed."
+        "The maximum time difference (in minutes) from the present time to a webhook"
+        " expiration date to consider a webhook 'fresh', i.e.: not in need of renewal."
+        " If the time difference is less than this value, the webhook should be"
+        " renewed."
     ),
 )
 DRIVE_WEBHOOK_ASSIGNMENT_WAIT = get_int(
     name="DRIVE_WEBHOOK_ASSIGNMENT_WAIT",
     default=60 * 5,
     description=(
-        "The number of seconds to wait to process a coupon assignment sheet after we receive "
-        "a webhook request from that sheet. The task to process the sheet is scheduled this many "
-        "seconds in the future."
+        "The number of seconds to wait to process a coupon assignment sheet after we"
+        " receive a webhook request from that sheet. The task to process the sheet is"
+        " scheduled this many seconds in the future."
     ),
 )
 DRIVE_WEBHOOK_ASSIGNMENT_MAX_AGE_DAYS = get_int(
     name="DRIVE_WEBHOOK_ASSIGNMENT_MAX_AGE_DAYS",
     default=30,
     description=(
-        "The number of days from the last update that a coupon assignment sheet should still be "
-        "considered 'fresh', i.e.: should still be monitored for changes via webhook/file watch."
+        "The number of days from the last update that a coupon assignment sheet should"
+        " still be considered 'fresh', i.e.: should still be monitored for changes via"
+        " webhook/file watch."
     ),
 )
 SHEETS_MONITORING_FREQUENCY = get_int(
     name="SHEETS_MONITORING_FREQUENCY",
     default=60 * 60 * 2,
-    description="The frequency that the Drive folder should be checked for bulk coupon Sheets that need processing",
+    description=(
+        "The frequency that the Drive folder should be checked for bulk coupon Sheets"
+        " that need processing"
+    ),
 )
 SHEETS_TASK_OFFSET = get_int(
     name="SHEETS_TASK_OFFSET",
     default=60 * 5,
-    description="How many seconds to wait in between executing different Sheets tasks in series",
+    description=(
+        "How many seconds to wait in between executing different Sheets tasks in series"
+    ),
 )
 
 CELERY_BEAT_SCHEDULE = {
@@ -853,8 +882,7 @@ if FEATURES.get("COUPON_SHEETS"):
         "task": "sheets.tasks.renew_all_file_watches",
         "schedule": (
             DRIVE_WEBHOOK_EXPIRATION_MINUTES - DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES
-        )
-        * 60,
+        ) * 60,
     }
     alt_sheets_processing = FEATURES.get("COUPON_SHEETS_ALT_PROCESSING")
     if alt_sheets_processing:
@@ -937,9 +965,9 @@ AUTHENTICATION_BACKENDS = (
 
 
 # required for migrations
-OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "oauth2_provider.AccessToken"
+OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "oauth2_provider.AccessToken"  # noqa: S105
 OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
-OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "oauth2_provider.RefreshToken"
+OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "oauth2_provider.RefreshToken"  # noqa: S105
 
 OAUTH2_PROVIDER = {
     # this is the list of available scopes
@@ -950,7 +978,9 @@ OAUTH2_PROVIDER = {
         "digitalcredentials": "Can read and write Digital Credentials data",
     },
     "DEFAULT_SCOPES": ["user:read"],
-    "SCOPES_BACKEND_CLASS": "mitol.oauth_toolkit_extensions.backends.ApplicationAccessOrSettingsScopes",
+    "SCOPES_BACKEND_CLASS": (
+        "mitol.oauth_toolkit_extensions.backends.ApplicationAccessOrSettingsScopes"
+    ),
     "ERROR_RESPONSE_WITH_SCOPES": DEBUG,
     "ALLOWED_REDIRECT_URI_SCHEMES": get_delimited_list(
         name="OAUTH2_PROVIDER_ALLOWED_REDIRECT_URI_SCHEMES",
@@ -973,7 +1003,7 @@ REST_FRAMEWORK = {
 
 # Relative URL to be used by Djoser for the link in the password reset email
 # (see: http://djoser.readthedocs.io/en/stable/settings.html#password-reset-confirm-url)
-PASSWORD_RESET_CONFIRM_URL = "password_reset/confirm/{uid}/{token}/"
+PASSWORD_RESET_CONFIRM_URL = "password_reset/confirm/{uid}/{token}/"  # noqa: S105
 
 # mitol-django-common
 MITOL_COMMON_USER_FACTORY = "users.factories.UserFactory"
@@ -984,7 +1014,7 @@ MITOL_MAIL_REPLY_TO_ADDRESS = MITXPRO_REPLY_TO_ADDRESS
 MITOL_MAIL_MESSAGE_CLASSES = ["courses.messages.DigitalCredentialAvailableMessage"]
 MITOL_MAIL_RECIPIENT_OVERRIDE = MAILGUN_RECIPIENT_OVERRIDE
 MITOL_MAIL_FORMAT_RECIPIENT_FUNC = "users.utils.format_recipient"
-MITOL_MAIL_ENABLE_EMAIL_DEBUGGER = get_bool(  # NOTE: this will override the legacy mail debugger defined in this project
+MITOL_MAIL_ENABLE_EMAIL_DEBUGGER = get_bool(  # NOTE: this will override the legacy mail debugger defined in this project  # noqa: E501
     name="MITOL_MAIL_ENABLE_EMAIL_DEBUGGER",
     default=False,
     description="Enable the mitol-mail email debugger",
@@ -997,7 +1027,7 @@ MITOL_DIGITAL_CREDENTIALS_BUILD_CREDENTIAL_FUNC = (
 )
 
 # mitol-django-authenticaton
-# import_settings_module, imports the default settings defined in ol-django-authentication app
+# import_settings_module, imports the default settings defined in ol-django-authentication app  # noqa: E501
 import_settings_modules("mitol.authentication.settings.djoser_settings")
 MITOL_AUTHENTICATION_FROM_EMAIL = MAILGUN_FROM_EMAIL
 MITOL_AUTHENTICATION_REPLY_TO_EMAIL = MITXPRO_REPLY_TO_ADDRESS
@@ -1024,7 +1054,9 @@ OPENEDX_BASE_REDIRECT_URL = get_string(
 OPENEDX_TOKEN_EXPIRES_HOURS = get_int(
     name="OPENEDX_TOKEN_EXPIRES_HOURS",
     default=1000,
-    description="The number of hours until an access token for the Open edX API expires",
+    description=(
+        "The number of hours until an access token for the Open edX API expires"
+    ),
 )
 OPENEDX_API_CLIENT_ID = get_string(
     name="OPENEDX_API_CLIENT_ID",
@@ -1054,12 +1086,18 @@ MITXPRO_REGISTRATION_ACCESS_TOKEN = get_string(
 OPENEDX_SERVICE_WORKER_API_TOKEN = get_string(
     name="OPENEDX_SERVICE_WORKER_API_TOKEN",
     default=None,
-    description="Active access token with staff level permissions to use with OpenEdX API client for service tasks",
+    description=(
+        "Active access token with staff level permissions to use with OpenEdX API"
+        " client for service tasks"
+    ),
 )
 OPENEDX_SERVICE_WORKER_USERNAME = get_string(
     name="OPENEDX_SERVICE_WORKER_USERNAME",
     default=None,
-    description="Username of the user whose token has been set in OPENEDX_SERVICE_WORKER_API_TOKEN",
+    description=(
+        "Username of the user whose token has been set in"
+        " OPENEDX_SERVICE_WORKER_API_TOKEN"
+    ),
 )
 EDX_API_CLIENT_TIMEOUT = get_int(
     name="EDX_API_CLIENT_TIMEOUT",
@@ -1071,7 +1109,7 @@ EDX_API_CLIENT_TIMEOUT = get_int(
 if DEBUG:
     INSTALLED_APPS += ("debug_toolbar",)
     # it needs to be enabled before other middlewares
-    MIDDLEWARE = ("debug_toolbar.middleware.DebugToolbarMiddleware",) + MIDDLEWARE
+    MIDDLEWARE = ("debug_toolbar.middleware.DebugToolbarMiddleware", *MIDDLEWARE)
 
 # Cybersource
 CYBERSOURCE_ACCESS_KEY = get_string(
@@ -1106,28 +1144,42 @@ CYBERSOURCE_TRANSACTION_KEY = get_string(
 CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY = get_string(
     name="CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY",
     default=None,
-    description="The public key to encrypt export results with for our own security purposes. Should be a base64 encoded NaCl public key.",
+    description=(
+        "The public key to encrypt export results with for our own security purposes."
+        " Should be a base64 encoded NaCl public key."
+    ),
 )
 CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR = get_string(
     name="CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR",
     default="AND",
-    description="Whether just the name or the name and address should be used in exports verification. Refer to Cybersource docs.",
+    description=(
+        "Whether just the name or the name and address should be used in exports"
+        " verification. Refer to Cybersource docs."
+    ),
 )
 CYBERSOURCE_EXPORT_SERVICE_ADDRESS_WEIGHT = get_string(
     name="CYBERSOURCE_EXPORT_SERVICE_ADDRESS_WEIGHT",
     default="high",
-    description="The weight of the address in determining whether a user passes exports checks. Refer to Cybersource docs.",
+    description=(
+        "The weight of the address in determining whether a user passes exports checks."
+        " Refer to Cybersource docs."
+    ),
 )
 CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT = get_string(
     name="CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT",
     default="high",
-    description="The weight of the name in determining whether a user passes exports checks. Refer to Cybersource docs.",
+    description=(
+        "The weight of the name in determining whether a user passes exports checks."
+        " Refer to Cybersource docs."
+    ),
 )
 
 CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS = get_string(
     name="CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS",
     default=None,
-    description="Additional sanctions lists to validate for exports. Refer to Cybersource docs.",
+    description=(
+        "Additional sanctions lists to validate for exports. Refer to Cybersource docs."
+    ),
 )
 
 ENABLE_ORDER_RECEIPTS = get_bool(
@@ -1259,7 +1311,10 @@ HUBSPOT_CONFIG = {
 DRIVE_SERVICE_ACCOUNT_CREDS = get_string(
     name="DRIVE_SERVICE_ACCOUNT_CREDS",
     default=None,
-    description="The contents of the Service Account credentials JSON to use for Google API auth",
+    description=(
+        "The contents of the Service Account credentials JSON to use for Google API"
+        " auth"
+    ),
 )
 DRIVE_CLIENT_ID = get_string(
     name="DRIVE_CLIENT_ID",
@@ -1279,12 +1334,17 @@ DRIVE_API_PROJECT_ID = get_string(
 DRIVE_WEBHOOK_CHANNEL_ID = get_string(
     name="DRIVE_WEBHOOK_CHANNEL_ID",
     default="mitxpro-sheets-app",
-    description="Channel ID to use for requests to get push notifications for file changes",
+    description=(
+        "Channel ID to use for requests to get push notifications for file changes"
+    ),
 )
 DRIVE_SHARED_ID = get_string(
     name="DRIVE_SHARED_ID",
     default=None,
-    description="ID of the Shared Drive (a.k.a. Team Drive). This is equal to the top-level folder ID.",
+    description=(
+        "ID of the Shared Drive (a.k.a. Team Drive). This is equal to the top-level"
+        " folder ID."
+    ),
 )
 DRIVE_OUTPUT_FOLDER_ID = get_string(
     name="DRIVE_OUTPUT_FOLDER_ID",
@@ -1300,50 +1360,65 @@ ENROLLMENT_CHANGE_SHEET_ID = get_string(
     name="ENROLLMENT_CHANGE_SHEET_ID",
     default=None,
     description=(
-        "ID of the Google Sheet that contains the enrollment change request worksheets (refunds, transfers, etc)"
+        "ID of the Google Sheet that contains the enrollment change request worksheets"
+        " (refunds, transfers, etc)"
     ),
 )
 REFUND_REQUEST_WORKSHEET_ID = get_string(
     name="REFUND_REQUEST_WORKSHEET_ID",
     default="0",
     description=(
-        "ID of the worksheet within the enrollment change request spreadsheet that contains enrollment refund requests"
+        "ID of the worksheet within the enrollment change request spreadsheet that"
+        " contains enrollment refund requests"
     ),
 )
 DEFERRAL_REQUEST_WORKSHEET_ID = get_string(
     name="DEFERRAL_REQUEST_WORKSHEET_ID",
     default=None,
     description=(
-        "ID of the worksheet within the enrollment change request spreadsheet that contains "
-        "enrollment deferral requests"
+        "ID of the worksheet within the enrollment change request spreadsheet that"
+        " contains enrollment deferral requests"
     ),
 )
 GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
     name="GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE",
     default=None,
-    description="The value of the meta tag used by Google to verify the owner of a domain (used for enabling push notifications)",
+    description=(
+        "The value of the meta tag used by Google to verify the owner of a domain (used"
+        " for enabling push notifications)"
+    ),
 )
 SHEETS_ADMIN_EMAILS = get_delimited_list(
     name="SHEETS_ADMIN_EMAILS",
     default=[],
-    description="Comma-separated list of emails for users that should be added as an editor for all newly created Sheets",
+    description=(
+        "Comma-separated list of emails for users that should be added as an editor for"
+        " all newly created Sheets"
+    ),
 )
 SHEETS_DATE_FORMAT = get_string(
     name="SHEETS_DATE_FORMAT",
     default="%m/%d/%Y %H:%M:%S",
-    description="Python strptime format for datetime columns in enrollment management spreadsheets",
+    description=(
+        "Python strptime format for datetime columns in enrollment management"
+        " spreadsheets"
+    ),
 )
 SHEETS_DATE_ONLY_FORMAT = get_string(
     name="SHEETS_DATE_ONLY_FORMAT",
     default="%m/%d/%Y",
-    description="Python strptime format for date columns (no time) in enrollment management spreadsheets",
+    description=(
+        "Python strptime format for date columns (no time) in enrollment management"
+        " spreadsheets"
+    ),
 )
 _sheets_date_timezone = get_string(
     name="SHEETS_DATE_TIMEZONE",
     default="UTC",
     description=(
-        "The name of the timezone that should be assumed for date/time values in spreadsheets. "
-        "Choose from a value in the TZ database (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)."
+        "The name of the timezone that should be assumed for date/time values in"
+        " spreadsheets. Choose from a value in the TZ database"
+        " (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)."
     ),
 )
 SHEETS_DATE_TIMEZONE = pytz.timezone(_sheets_date_timezone)
@@ -1352,16 +1427,16 @@ SHEETS_REFUND_FIRST_ROW = get_int(
     name="SHEETS_REFUND_FIRST_ROW",
     default=4,
     description=(
-        "The first row (as it appears in the spreadsheet) of data that our scripts should consider "
-        "processing in the refund request spreadsheet"
+        "The first row (as it appears in the spreadsheet) of data that our scripts"
+        " should consider processing in the refund request spreadsheet"
     ),
 )
 SHEETS_DEFERRAL_FIRST_ROW = get_int(
     name="SHEETS_DEFERRAL_FIRST_ROW",
     default=5,
     description=(
-        "The first row (as it appears in the spreadsheet) of data that our scripts should consider "
-        "processing in the deferral request spreadsheet"
+        "The first row (as it appears in the spreadsheet) of data that our scripts"
+        " should consider processing in the deferral request spreadsheet"
     ),
 )
 # Specify the zero-based index of certain request sheet columns
@@ -1382,28 +1457,32 @@ SHEETS_REFUND_PROCESSOR_COL = get_int(
     name="SHEETS_REFUND_PROCESSOR_COL",
     default=11,
     description=(
-        "The zero-based index of the enrollment change sheet column that contains the user that processed the row"
+        "The zero-based index of the enrollment change sheet column that contains the"
+        " user that processed the row"
     ),
 )
 SHEETS_REFUND_COMPLETED_DATE_COL = get_int(
     name="SHEETS_REFUND_COMPLETED_DATE_COL",
     default=12,
     description=(
-        "The zero-based index of the enrollment change sheet column that contains the row completion date"
+        "The zero-based index of the enrollment change sheet column that contains the"
+        " row completion date"
     ),
 )
 SHEETS_REFUND_ERROR_COL = get_int(
     name="SHEETS_REFUND_ERROR_COL",
     default=13,
     description=(
-        "The zero-based index of the enrollment change sheet column that contains row processing error messages"
+        "The zero-based index of the enrollment change sheet column that contains row"
+        " processing error messages"
     ),
 )
 SHEETS_REFUND_SKIP_ROW_COL = get_int(
     name="SHEETS_REFUND_SKIP_ROW_COL",
     default=14,
     description=(
-        "The zero-based index of the enrollment change sheet column that indicates whether the row should be skipped"
+        "The zero-based index of the enrollment change sheet column that indicates"
+        " whether the row should be skipped"
     ),
 )
 
@@ -1411,7 +1490,9 @@ SHEETS_REFUND_SKIP_ROW_COL = get_int(
 DIGITAL_CREDENTIALS_DEEP_LINK_URL = get_string(
     name="DIGITAL_CREDENTIALS_DEEP_LINK_URL",
     default=None,
-    description="URL at which to deep link the learner to for the digital credentials wallet",
+    description=(
+        "URL at which to deep link the learner to for the digital credentials wallet"
+    ),
 )
 DIGITAL_CREDENTIALS_ISSUER_ID = get_string(
     name="DIGITAL_CREDENTIALS_ISSUER_ID",
@@ -1424,12 +1505,15 @@ DIGITAL_CREDENTIALS_VERIFICATION_METHOD = get_string(
     description="Verification method for digital credentials",
 )
 # pylint:disable=fixme
-# FIXME: This setting is meant to be temporary and it should be removed once we decide to support digital credentials
+# FIXME: This setting is meant to be temporary and it should be removed once we decide to support digital credentials  # noqa: FIX001, TD001, TD002, TD003, E501
 #  for all courses/programs.
 DIGITAL_CREDENTIALS_SUPPORTED_RUNS = get_delimited_list(
     name="DIGITAL_CREDENTIALS_SUPPORTED_RUNS",
     default=[],
-    description="Comma separated string of course/program runs/Ids that support digital credentials",
+    description=(
+        "Comma separated string of course/program runs/Ids that support digital"
+        " credentials"
+    ),
 )
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

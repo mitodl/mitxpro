@@ -1,18 +1,24 @@
 {% extends "course_app_base.html" %}
 {% load static %}
 
-{% block title %}{{ site_name }} | Boeing Course Enroll{% endblock %}
+{% block title %}{{ site_name }}
+| Boeing Course Enroll{% endblock %}
 
 {% block content %}
-    <div class="container voucher-container">
-        <h1>Boeing employee enrollment page</h1>
-        <div class="voucher-card">
-            <h2>Upload Voucher</h2>
-            <hr/>
-            <p class="form-error">We are sorry but we were not able to complete your enrollment.</p>
-            <p>Please contact us and attach the voucher:</p>
-            <a href="https://xpro.zendesk.com/hc/en-us/requests/new" class="btn btn-primary btn-light-blue">CONTACT US</a>
-        </div>
-
-    </div>
+<div class="container voucher-container">
+  <h1>Boeing employee enrollment page</h1>
+  <div class="voucher-card">
+    <h2>Upload Voucher</h2>
+    <hr />
+    <p class="form-error">
+      We are sorry but we were not able to complete your enrollment.
+    </p>
+    <p>Please contact us and attach the voucher:</p>
+    <a
+      href="https://xpro.zendesk.com/hc/en-us/requests/new"
+      class="btn btn-primary btn-light-blue"
+      >CONTACT US</a
+    >
+  </div>
+</div>
 {% endblock content %}

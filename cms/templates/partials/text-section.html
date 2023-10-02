@@ -1,14 +1,21 @@
 {% load static wagtailimages_tags wagtailcore_tags %}
-<div id="textSection" class="text-block {% if page.dark_theme %} dark-theme {% endif %}">
+<div
+  id="textSection"
+  class="text-block {% if page.dark_theme %} dark-theme {% endif %}"
+>
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10">
-        <h1 class="text-center" >{{ page.title }}</h1>
+        <h1 class="text-center">{{ page.title }}</h1>
         {{ page.content|richtext }}
         {% if page.action_url and page.action_title %}
-          <div class="text-center">
-            <a href="{{ page.action_url }}" class="btn btn-primary text-uppercase px-5 py-2 action-button">{{ page.action_title }}</a>
-          </div>
+        <div class="text-center">
+          <a
+            href="{{ page.action_url }}"
+            class="btn btn-primary text-uppercase px-5 py-2 action-button"
+            >{{ page.action_title }}</a
+          >
+        </div>
         {% endif %}
       </div>
     </div>

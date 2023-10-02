@@ -7,13 +7,15 @@
     </div>
     <div class="course-slider">
       {% if page.override_contents %}
-        {% include "partials/courseware-carousel-base.html" with pages=page.content_pages %}
+      {% include "partials/courseware-carousel-base.html" with pages=page.content_pages %}
       {% else %}
-        {% include "partials/courseware-carousel-base.html" with pages=courseware_pages %}
-      {% endif  %}
+      {% include "partials/courseware-carousel-base.html" with pages=courseware_pages %}
+      {% endif %}
     </div>
     {% if button_title and button_url %}
-      <a href="{{ button_url }}" class="btn btn-primary text-uppercase px-5">{{ button_title }}</a>
+    <a href="{{ button_url }}" class="btn btn-primary text-uppercase px-5"
+      >{{ button_title }}</a
+    >
     {% endif %}
   </div>
 </div>

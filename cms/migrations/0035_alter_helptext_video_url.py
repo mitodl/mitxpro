@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("cms", "0034_alter_helpttext_thumbnail")]
 
     operations = [
@@ -13,7 +12,10 @@ class Migration(migrations.Migration):
             name="video_url",
             field=models.URLField(
                 blank=True,
-                help_text="URL to the video to be displayed for this program/course. It can be an HLS or Youtube video URL.",
+                help_text=(
+                    "URL to the video to be displayed for this program/course. It can"
+                    " be an HLS or Youtube video URL."
+                ),
                 null=True,
             ),
         ),
@@ -22,7 +24,10 @@ class Migration(migrations.Migration):
             name="video_url",
             field=models.URLField(
                 blank=True,
-                help_text="URL to the video to be displayed for this program/course. It can be an HLS or Youtube video URL.",
+                help_text=(
+                    "URL to the video to be displayed for this program/course. It can"
+                    " be an HLS or Youtube video URL."
+                ),
                 null=True,
             ),
         ),
@@ -31,7 +36,10 @@ class Migration(migrations.Migration):
             name="video_url",
             field=models.URLField(
                 blank=True,
-                help_text="The URL of the video to display. It can be an HLS or Youtube video URL.",
+                help_text=(
+                    "The URL of the video to display. It can be an HLS or Youtube video"
+                    " URL."
+                ),
                 null=True,
             ),
         ),

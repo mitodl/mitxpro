@@ -14,16 +14,16 @@ const emailValidation = yup.object().shape({
   email:     emailFieldValidation,
   recaptcha: SETTINGS.recaptchaKey
     ? yup.string().required("Please verify you're not a robot")
-    : yup.mixed().notRequired()
+    : yup.mixed().notRequired(),
 })
 
 type Props = {
-  onSubmit: Function
+  onSubmit: Function,
 }
 
 export type RegisterEmailFormValues = {
   email: string,
-  recaptcha: ?string
+  recaptcha: ?string,
 }
 
 const RegisterEmailForm = ({ onSubmit }: Props) => (
@@ -32,7 +32,7 @@ const RegisterEmailForm = ({ onSubmit }: Props) => (
     validationSchema={emailValidation}
     initialValues={{
       email:     "",
-      recaptcha: SETTINGS.recaptchaKey ? "" : undefined
+      recaptcha: SETTINGS.recaptchaKey ? "" : undefined,
     }}
     render={({ isSubmitting, setFieldValue }) => (
       <Form>

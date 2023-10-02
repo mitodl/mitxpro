@@ -6,21 +6,21 @@ import { incrementer } from "../lib/util"
 import type {
   AnonymousUser,
   LoggedInUser,
-  UnusedCoupon
+  UnusedCoupon,
 } from "../flow/authTypes"
 
 const incr = incrementer()
 
 export const makeAnonymousUser = (): AnonymousUser => ({
   is_anonymous:     true,
-  is_authenticated: false
+  is_authenticated: false,
 })
 
 export const makeUnusedCoupon = (): UnusedCoupon => ({
   // $FlowFixMe: Flow thinks incr.next().value may be undefined, but it won't ever be
   product_id:      incr.next().value,
   coupon_code:     casual.word,
-  expiration_date: casual.moment.format()
+  expiration_date: casual.moment.format(),
 })
 
 export const makeUser = (username: ?string): LoggedInUser => ({
@@ -44,7 +44,7 @@ export const makeUser = (username: ?string): LoggedInUser => ({
     job_function:      "",
     leadership_level:  "",
     years_experience:  20,
-    highest_education: "Doctorate"
+    highest_education: "Doctorate",
   },
   legal_address: {
     street_address:     [casual.street],
@@ -53,9 +53,9 @@ export const makeUser = (username: ?string): LoggedInUser => ({
     city:               casual.city,
     state_or_territory: "US-MA",
     country:            "US",
-    postal_code:        "02090"
+    postal_code:        "02090",
   },
-  unused_coupons: []
+  unused_coupons: [],
 })
 
 export const makeCountries = () => [
@@ -64,17 +64,17 @@ export const makeCountries = () => [
     name:   "United States",
     states: [
       { code: "US-CO", name: "Colorado" },
-      { code: "US-MA", name: "Massachusetts" }
-    ]
+      { code: "US-MA", name: "Massachusetts" },
+    ],
   },
   {
     code:   "CA",
     name:   "Canada",
     states: [
       { code: "CA-QC", name: "Quebec" },
-      { code: "CA-NS", name: "Nova Scotia" }
-    ]
+      { code: "CA-NS", name: "Nova Scotia" },
+    ],
   },
   { code: "FR", name: "France", states: [] },
-  { code: "GB", name: "United Kingdom", states: [] }
+  { code: "GB", name: "United Kingdom", states: [] },
 ]

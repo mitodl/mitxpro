@@ -104,8 +104,8 @@ def test_is_near_now():
 def test_format_datetime_for_filename():
     """
     Test that format_datetime_for_filename formats a datetime object to a string for use in a filename
-    """
-    dt = datetime.datetime(
+    """  # noqa: E501
+    dt = datetime.datetime(  # noqa: DTZ001
         year=2019, month=1, day=1, hour=20, minute=21, second=22, microsecond=100
     )
     assert format_datetime_for_filename(dt) == "20190101"
@@ -156,20 +156,20 @@ def test_get_field_names():
 def test_has_equal_properties():
     """
     Assert that has_equal_properties returns True if an object has equivalent properties to a given dict
-    """
+    """  # noqa: E501
     obj = SimpleNamespace(a=1, b=2, c=3)
     assert has_equal_properties(obj, {}) is True
-    assert has_equal_properties(obj, dict(a=1, b=2)) is True
-    assert has_equal_properties(obj, dict(a=1, b=2, c=3)) is True
-    assert has_equal_properties(obj, dict(a=2)) is False
-    assert has_equal_properties(obj, dict(d=4)) is False
+    assert has_equal_properties(obj, {"a": 1, "b": 2}) is True
+    assert has_equal_properties(obj, {"a": 1, "b": 2, "c": 3}) is True
+    assert has_equal_properties(obj, {"a": 2}) is False
+    assert has_equal_properties(obj, {"d": 4}) is False
 
 
 def test_find_object_with_matching_attr():
     """
     Assert that find_object_with_matching_attr returns the first object in an iterable that has the given
     attribute value (or None if there is no match)
-    """
+    """  # noqa: E501
     objects = [
         SimpleNamespace(a=0),
         SimpleNamespace(a=1),
@@ -200,7 +200,7 @@ def test_partition():
 def test_partition_to_lists():
     """
     Assert that partition_to_lists splits an iterable into two lists according to a condition
-    """
+    """  # noqa: E501
     nums = [1, 2, 1, 3, 1, 4, 0, None, None]
     not_ones, ones = partition_to_lists(nums, lambda n: n == 1)
     assert not_ones == [2, 3, 4, 0, None, None]
@@ -212,15 +212,21 @@ def test_partition_to_lists():
 
 
 @pytest.mark.parametrize(
-    "url, expected",
+    ("url", "expected"),
     [
-        ["", ""],
-        ["http://url.com/url/here#other", "http://url.com/url/here#other"],
-        ["https://user:pass@sentry.io/12345", "https://user@sentry.io/12345"],
+        ["", ""],  # noqa: PT007
+        [  # noqa: PT007
+            "http://url.com/url/here#other",
+            "http://url.com/url/here#other",
+        ],  # noqa: PT007, RUF100
+        [  # noqa: PT007
+            "https://user:pass@sentry.io/12345",
+            "https://user@sentry.io/12345",
+        ],  # noqa: PT007, RUF100
     ],
 )
 def test_remove_password_from_url(url, expected):
-    """Assert that the url is parsed and the password is not present in the returned value, if provided"""
+    """Assert that the url is parsed and the password is not present in the returned value, if provided"""  # noqa: E501
     assert remove_password_from_url(url) == expected
 
 
@@ -228,17 +234,19 @@ def test_first_matching_item():
     """first_matching_item should return an item that matches a predicate, or None"""
     assert first_matching_item(["a", "b", "c", "b"], lambda x: x == "b") == "b"
     number_iter = (i for i in [2, 4, 6, 8, 9, 10])
-    assert first_matching_item(number_iter, lambda i: i % 2 == 1) == 9
-    assert first_matching_item([1, 2, 3, 4, 5], lambda i: i == 6) is None
+    assert first_matching_item(number_iter, lambda i: i % 2 == 1) == 9  # noqa: PLR2004
+    assert (
+        first_matching_item([1, 2, 3, 4, 5], lambda i: i == 6) is None  # noqa: PLR2004
+    )  # noqa: PLR2004, RUF100
 
 
 def test_matching_item_index():
-    """matching_item_index should return the index of an item equal to the given value, or raises an exception"""
+    """matching_item_index should return the index of an item equal to the given value, or raises an exception"""  # noqa: E501
     assert matching_item_index(["a", "b", "c", "d"], "b") == 1
     with pytest.raises(StopIteration):
         matching_item_index(["a", "b", "c", "d"], "e")
     number_iter = (i for i in [0, 1, 2, 3, 4])
-    assert matching_item_index(number_iter, 2) == 2
+    assert matching_item_index(number_iter, 2) == 2  # noqa: PLR2004
 
 
 def test_first_or_none():
@@ -254,9 +262,9 @@ def test_first_or_none():
 def test_max_or_none():
     """
     Assert that max_or_none returns the max of some iterable, or None if the iterable has no items
-    """
-    assert max_or_none(i for i in [5, 4, 3, 2, 1]) == 5
-    assert max_or_none([1, 3, 5, 4, 2]) == 5
+    """  # noqa: E501
+    assert max_or_none(i for i in [5, 4, 3, 2, 1]) == 5  # noqa: PLR2004
+    assert max_or_none([1, 3, 5, 4, 2]) == 5  # noqa: PLR2004
     assert max_or_none([]) is None
 
 
@@ -272,7 +280,7 @@ def test_unique_ignore_case():
     """
     Assert that unique_ignore_case() returns a generator of unique lowercase strings from a
     provided iterable
-    """
+    """  # noqa: E501
     assert list(unique_ignore_case(["ABC", "def", "AbC", "DEf"])) == ["abc", "def"]
 
 
@@ -280,9 +288,9 @@ def test_item_at_index_or_none():
     """
     Assert that item_at_index_or_none returns an item at a given index, or None if that index
     doesn't exist
-    """
+    """  # noqa: E501
     arr = [1, 2, 3]
-    assert item_at_index_or_none(arr, 1) == 2
+    assert item_at_index_or_none(arr, 1) == 2  # noqa: PLR2004
     assert item_at_index_or_none(arr, 10) is None
 
 
@@ -290,7 +298,7 @@ def test_item_at_index_or_blank():
     """
     Assert that item_at_index_or_blank returns an item at a given index, or a blank string if that index
     doesn't exist
-    """
+    """  # noqa: E501
     arr = ["string 1", "string 2"]
     assert item_at_index_or_blank(arr, 0) == "string 1"
     assert item_at_index_or_blank(arr, 1) == "string 2"
@@ -300,7 +308,7 @@ def test_item_at_index_or_blank():
 def test_all_equal():
     """
     Assert that all_equal returns True if all of the provided args are equal to each other
-    """
+    """  # noqa: E501
     assert all_equal(1, 1, 1) is True
     assert all_equal(1, 2, 1) is False
     assert all_equal() is True
@@ -309,7 +317,7 @@ def test_all_equal():
 def test_all_unique():
     """
     Assert that all_unique returns True if all of the items in the iterable argument are unique
-    """
+    """  # noqa: E501
     assert all_unique([1, 2, 3, 4]) is True
     assert all_unique((1, 2, 3, 4)) is True
     assert all_unique([1, 2, 3, 1]) is False
@@ -318,7 +326,7 @@ def test_all_unique():
 def test_has_all_keys():
     """
     Assert that has_all_keys returns True if the given dict has all of the specified keys
-    """
+    """  # noqa: E501
     d = {"a": 1, "b": 2, "c": 3}
     assert has_all_keys(d, ["a", "c"]) is True
     assert has_all_keys(d, ["a", "z"]) is False
@@ -328,7 +336,7 @@ def test_group_into_dict():
     """
     Assert that group_into_dict takes an iterable of items and returns a dictionary of those items
     grouped by generated keys
-    """
+    """  # noqa: E501
 
     class Car:  # pylint: disable=missing-docstring
         def __init__(self, make, model):
@@ -356,8 +364,8 @@ def test_group_into_dict():
 
 
 @pytest.mark.parametrize(
-    "price,expected",
-    [[Decimal("0"), "$0.00"], [Decimal("1234567.89"), "$1,234,567.89"]],
+    ("price", "expected"),
+    [[Decimal("0"), "$0.00"], [Decimal("1234567.89"), "$1,234,567.89"]],  # noqa: PT007
 )
 def test_format_price(price, expected):
     """Format a decimal value into a price"""
@@ -365,11 +373,16 @@ def test_format_price(price, expected):
 
 
 @pytest.mark.parametrize(
-    "content,content_type,exp_summary_content,exp_url_in_summary",
+    ("content", "content_type", "exp_summary_content", "exp_url_in_summary"),
     [
-        ['{"bad": "response"}', "application/json", '{"bad": "response"}', False],
-        ["plain text", "text/plain", "plain text", False],
-        [
+        [  # noqa: PT007
+            '{"bad": "response"}',
+            "application/json",
+            '{"bad": "response"}',
+            False,
+        ],  # noqa: PT007, RUF100
+        ["plain text", "text/plain", "plain text", False],  # noqa: PT007
+        [  # noqa: PT007
             "<div>HTML content</div>",
             "text/html; charset=utf-8",
             "(HTML body ignored)",
@@ -383,7 +396,7 @@ def test_get_error_response_summary(
     """
     get_error_response_summary should provide a summary of an error HTTP response object with the correct bits of
     information depending on the type of content.
-    """
+    """  # noqa: E501
     status_code = 400
     url = "http://example.com"
     mock_response = MockResponse(
@@ -396,17 +409,17 @@ def test_get_error_response_summary(
 
 
 @pytest.mark.parametrize(
-    "content,content_type,expected",
+    ("content", "content_type", "expected"),
     [
-        ['{"bad": "response"}', "application/json", True],
-        ["plain text", "text/plain", False],
-        ["<div>HTML content</div>", "text/html; charset=utf-8", False],
+        ['{"bad": "response"}', "application/json", True],  # noqa: PT007
+        ["plain text", "text/plain", False],  # noqa: PT007
+        ["<div>HTML content</div>", "text/html; charset=utf-8", False],  # noqa: PT007
     ],
 )
 def test_is_json_response(content, content_type, expected):
     """
     is_json_response should return True if the given response's content type indicates JSON content
-    """
+    """  # noqa: E501
     mock_response = MockResponse(
         status_code=400, content=content, content_type=content_type
     )
@@ -416,7 +429,7 @@ def test_is_json_response(content, content_type, expected):
 def test_make_csv_http_response():
     """
     make_csv_http_response should make a HttpResponse object suitable for serving a CSV file.
-    """
+    """  # noqa: E501
     rows = [{"a": "B", "c": "d"}, {"a": "e", "c": "f"}]
     response = make_csv_http_response(csv_rows=rows, filename="test_filename")
     out_rows = [line.split(",") for line in response.content.decode().splitlines()]
@@ -437,7 +450,7 @@ def test_make_csv_http_response_empty():
 
 
 def test_request_get_with_timeout_retry(mocker):
-    """request_get_with_timeout_retry should make a GET request and retry if the response status is 504 (timeout)"""
+    """request_get_with_timeout_retry should make a GET request and retry if the response status is 504 (timeout)"""  # noqa: E501
     mock_response = mocker.Mock(status_code=status.HTTP_504_GATEWAY_TIMEOUT)
     patched_request_get = mocker.patch(
         "mitxpro.utils.requests.get", return_value=mock_response
@@ -485,7 +498,9 @@ def test_get_js_settings(settings, rf):
         "site_name": settings.SITE_NAME,
         "zendesk_config": {"help_widget_enabled": False, "help_widget_key": "fake_key"},
         "digital_credentials": settings.FEATURES.get("DIGITAL_CREDENTIALS", False),
-        "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
+        "digital_credentials_supported_runs": (
+            settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS
+        ),
         "course_dropdown": settings.FEATURES.get("COURSE_DROPDOWN", False),
         "webinars": settings.FEATURES.get("WEBINARS", False),
     }

@@ -16,15 +16,14 @@ def get_assignment_spreadsheet_by_title(pygsheets_client, title):
 
     Returns:
         pygsheets.spreadsheet.Spreadsheet: A pygsheets spreadsheet object
-    """
+    """  # noqa: E501, D401
     matching_spreadsheets = pygsheets_client.open_all(
-        "{base_query} and name contains '{title}'".format(
-            base_query=CouponAssignmentHandler.ASSIGNMENT_SHEETS_QUERY, title=title
-        )
+        f"{CouponAssignmentHandler.ASSIGNMENT_SHEETS_QUERY} and name contains '{title}'"
     )
     if len(matching_spreadsheets) != 1:
-        raise CommandError(
-            "There should be 1 coupon assignment sheet that matches the given title ('{}'). "
-            "{} were found.".format(title, len(matching_spreadsheets))
+        msg = (
+            "There should be 1 coupon assignment sheet that matches the given title"  # noqa: E501, RUF100, UP032
+            " ('{}'). {} were found.".format(title, len(matching_spreadsheets))
         )
+        raise CommandError(msg)
     return matching_spreadsheets[0]

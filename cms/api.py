@@ -10,10 +10,9 @@ from wagtail.core.models import Page, Site
 from cms import models as cms_models
 from cms.constants import CERTIFICATE_INDEX_SLUG
 
-
 log = logging.getLogger(__name__)
-DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")
-DEFAULT_SITE_PROPS = dict(hostname="localhost", port=80)
+DEFAULT_HOMEPAGE_PROPS = {"title": "Home Page", "subhead": "This is the home page"}
+DEFAULT_SITE_PROPS = {"hostname": "localhost", "port": 80}
 
 
 def filter_and_sort_catalog_pages(
@@ -32,7 +31,7 @@ def filter_and_sort_catalog_pages(
     Returns:
         tuple of (list of Pages): A tuple containing a list of combined ProgramPages, CoursePages, ExternalCoursePages and ExternalProgramPages, a list of
             ProgramPages and ExternalProgramPages, and a list of CoursePages and ExternalCoursePages, all sorted by the next course/program run date and title
-    """
+    """  # noqa: E501, D401
     valid_program_pages = [
         page for page in program_pages if page.product.is_catalog_visible
     ]
@@ -45,8 +44,9 @@ def filter_and_sort_catalog_pages(
     valid_external_program_pages = list(external_program_pages)
 
     page_run_dates = {
-        page: page.product.next_run_date
-        or datetime(year=MAXYEAR, month=1, day=1, tzinfo=pytz.UTC)
+        page: page.product.next_run_date or datetime(
+            year=MAXYEAR, month=1, day=1, tzinfo=pytz.UTC
+        )
         for page in itertools.chain(
             valid_program_pages,
             valid_course_pages,
@@ -60,7 +60,7 @@ def filter_and_sort_catalog_pages(
             + valid_external_program_pages
             + valid_course_pages
             + valid_external_course_pages,
-            # ProgramPages with the same next run date as a CoursePage should be sorted first
+            # ProgramPages with the same next run date as a CoursePage should be sorted first  # noqa: E501
             key=lambda page: (
                 page_run_dates[page],
                 page.is_course_page or page.is_external_course_page,
@@ -84,7 +84,7 @@ def get_home_page():
 
     Returns:
         Page: The home page object
-    """
+    """  # noqa: E501, D401
     return Page.objects.get(
         content_type=ContentType.objects.get_for_model(cms_models.HomePage)
     )
@@ -94,7 +94,7 @@ def ensure_home_page_and_site():
     """
     Ensures that Wagtail is configured with a home page of the right type, and that
     the home page is configured as the default site.
-    """
+    """  # noqa: D401
     site = Site.objects.filter(is_default_site=True).first()
     valid_home_page = Page.objects.filter(
         content_type=ContentType.objects.get_for_model(cms_models.HomePage)
@@ -123,7 +123,7 @@ def ensure_catalog_page():
     """
     Ensures that a catalog page with the correct slug exists. If this page doesn't
     exist with the correct slug, the course catalog cannot be accessed.
-    """
+    """  # noqa: D401
     catalog_page = Page.objects.filter(
         content_type=ContentType.objects.get_for_model(cms_models.CatalogPage)
     ).first()
@@ -137,11 +137,11 @@ def ensure_catalog_page():
         catalog_page.refresh_from_db()
 
 
-def ensure_index_pages():  # pylint: disable=too-many-branches
+def ensure_index_pages():  # pylint: disable=too-many-branches  # noqa: C901, PLR0912
     """
     Ensures that the proper index pages exist as children of the home page, and that
     any pages that should belong to those index pages are set as children.
-    """
+    """  # noqa: D401
     home_page = get_home_page()
     course_index = cms_models.CourseIndexPage.objects.first()
     program_index = cms_models.ProgramIndexPage.objects.first()
@@ -201,7 +201,7 @@ def configure_wagtail():
     """
     Ensures that all appropriate changes have been made to Wagtail that will
     make the site navigable.
-    """
+    """  # noqa: D401
     ensure_home_page_and_site()
     ensure_catalog_page()
     ensure_index_pages()

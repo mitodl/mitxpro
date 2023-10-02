@@ -19,22 +19,22 @@ import type { RouterHistory } from "react-router"
 
 type StateProps = {|
   countries: ?Array<Country>,
-  currentUser: CurrentUser
+  currentUser: CurrentUser,
 |}
 
 type DispatchProps = {|
   editProfile: (userProfileData: User) => Promise<Response<User>>,
-  getCurrentUser: () => Promise<Response<User>>
+  getCurrentUser: () => Promise<Response<User>>,
 |}
 
 type ProfileProps = {|
-  history: RouterHistory
+  history: RouterHistory,
 |}
 
 type Props = {|
   ...StateProps,
   ...DispatchProps,
-  ...ProfileProps
+  ...ProfileProps,
 |}
 
 export class EditProfilePage extends React.Component<Props> {
@@ -54,20 +54,20 @@ export class EditProfilePage extends React.Component<Props> {
             years_experience:
                 profileData.profile.years_experience === ""
                   ? null
-                  : profileData.profile.years_experience
-          }
+                  : profileData.profile.years_experience,
+          },
         }
-        : {})
+        : {}),
     }
 
     try {
       const {
-        body: { errors }
+        body: { errors },
       }: { body: Object } = await editProfile(payload)
 
       if (errors && errors.length > 0) {
         setErrors({
-          email: errors[0]
+          email: errors[0],
         })
       } else {
         history.push(routes.profile.view)
@@ -120,25 +120,22 @@ const editProfile = (userProfileData: User) =>
 const getCurrentUser = () =>
   requestAsync({
     ...users.currentUserQuery(),
-    force: true
+    force: true,
   })
 
 const mapStateToProps = createStructuredSelector({
   currentUser: currentUserSelector,
-  countries:   queries.users.countriesSelector
+  countries:   queries.users.countriesSelector,
 })
 
 const mapDispatchToProps = {
   editProfile: editProfile,
-  getCurrentUser
+  getCurrentUser,
 }
 
 const mapPropsToConfigs = () => [queries.users.countriesQuery()]
 
 export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
-  connectRequest(mapPropsToConfigs)
+  connect(mapStateToProps, mapDispatchToProps),
+  connectRequest(mapPropsToConfigs),
 )(EditProfilePage)

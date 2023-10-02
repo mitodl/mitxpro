@@ -1,22 +1,18 @@
 // sass-lint:disable mixins-before-declarations
+
 /* Slider */
 .slick-slider {
   position: relative;
-
   display: block;
   box-sizing: border-box;
-
   user-select: none;
-
   touch-action: pan-y;
 }
 
 .slick-list {
   position: relative;
-
   display: block;
   overflow: hidden;
-
   margin: 0;
   padding: 0;
 }
@@ -43,14 +39,13 @@
   margin-right: auto;
 }
 
-.slick-track:before,
-.slick-track:after {
+.slick-track::before,
+.slick-track::after {
   display: table;
-
   content: "";
 }
 
-.slick-track:after {
+.slick-track::after {
   clear: both;
 }
 
@@ -61,7 +56,6 @@
 .slick-slide {
   display: none;
   float: left;
-
   height: inherit !important;
   min-height: 1px;
 }
@@ -92,9 +86,7 @@
 
 .slick-vertical .slick-slide {
   display: block;
-
   height: auto;
-
   border: 1px solid transparent;
 }
 
@@ -105,7 +97,7 @@
 .slick-prev,
 .slick-next {
   position: absolute;
-  left: 0px;
+  left: 0;
   z-index: 99;
   top: 50%;
   font-size: 0;
@@ -118,7 +110,7 @@
   height: 30px;
   border-radius: 50%;
   outline: none;
-  box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 5px 5px 10px 0 rgb(0 0 0 / 10%);
   margin: -75px 0 0;
   cursor: pointer;
   padding: 0;
@@ -135,12 +127,14 @@
     height: 50px;
     padding: 15px 0;
   }
-  @media (min-width: 1275px) {
+
+  @media (width >= 1275px) {
     left: -65px;
     width: 70px;
     height: 70px;
   }
-  @media (min-width: 1450px) {
+
+  @media (width >= 1450px) {
     left: -135px;
   }
 
@@ -153,16 +147,18 @@
     outline: none;
   }
 
-  &:after {
+  &::after {
     font-size: 30px;
     line-height: 30px;
-    font-family: Material Icons;
+    font-family: "Material Icons";
     content: "chevron_left";
+
     @include media-breakpoint-up(md) {
       font-size: 34px;
       line-height: 20px;
     }
-    @media (min-width: 1275px) {
+
+    @media (width >= 1275px) {
       font-size: 50px;
       line-height: 40px;
     }
@@ -171,20 +167,21 @@
 
 .slick-next {
   left: auto;
-  right: 0px;
+  right: 0;
 
   @include media-breakpoint-up(md) {
     right: -25px;
   }
 
-  &:after {
+  &::after {
     content: "chevron_right";
   }
-  @media (min-width: 1275px) {
+
+  @media (width >= 1275px) {
     right: -65px;
   }
 
-  @media (min-width: 1450px) {
+  @media (width >= 1450px) {
     right: -135px;
   }
 }

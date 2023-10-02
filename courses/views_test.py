@@ -39,7 +39,6 @@ from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import now_in_utc
 
-
 pytestmark = [pytest.mark.django_db]
 
 
@@ -234,12 +233,12 @@ def test_delete_course_run(user_drf_client, course_runs):
 @pytest.mark.parametrize("has_unexpired_run", [True, False])
 @pytest.mark.parametrize("has_product", [True, False])
 @pytest.mark.parametrize("is_anonymous", [True, False])
-def test_course_view(
+def test_course_view(  # noqa: PLR0913
     client, user, home_page, is_enrolled, has_unexpired_run, has_product, is_anonymous
 ):
     """
     Test that the course detail view has the right context and shows the right HTML for the enroll/view button
-    """
+    """  # noqa: E501
     course = CourseFactory.create(live=True, page__parent=home_page)
 
     if has_unexpired_run:
@@ -266,9 +265,9 @@ def test_course_view(
 
     # Anynoymous users don't see the enrolled/enroll-now button.
     # For logged in users:
-    # a) product should exist, next courserun should be there, user not enrolled (enroll now button)
+    # a) product should exist, next courserun should be there, user not enrolled (enroll now button)  # noqa: E501
     # b) user is enrolled (enrolled button)
-    # NOTE: added `has_unexpired_run` to test for case (b) only because of the way the test is written,
+    # NOTE: added `has_unexpired_run` to test for case (b) only because of the way the test is written,  # noqa: E501
     #       enrollment isn't actually created unless the course has an unexpired run.
     has_button = (
         (has_product and has_unexpired_run and not is_enrolled)
@@ -285,25 +284,23 @@ def test_course_view(
             class_name = "enrolled"
 
     assert (
-        f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")
-        in resp.content
+        f'<a class="enroll-button {class_name}" href="{url}">'.encode() in resp.content
     ) is has_button
-    assert (
-        "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")
-        in resp.content
-    ) is (is_anonymous and has_product and has_unexpired_run)
+    assert (b"Please Sign In to MITx PRO to enroll in a course" in resp.content) is (
+        is_anonymous and has_product and has_unexpired_run
+    )
 
 
 @pytest.mark.parametrize("is_enrolled", [True, False])
 @pytest.mark.parametrize("has_product", [True, False])
 @pytest.mark.parametrize("has_unexpired_run", [True, False])
 @pytest.mark.parametrize("is_anonymous", [True, False])
-def test_program_view(
+def test_program_view(  # noqa: PLR0913
     client, user, home_page, is_enrolled, has_product, has_unexpired_run, is_anonymous
 ):
     """
     Test that the program detail view has the right context and shows the right HTML for the enroll/view button
-    """
+    """  # noqa: E501
     program = ProgramFactory.create(live=True, page__parent=home_page)
 
     if has_unexpired_run:
@@ -335,7 +332,7 @@ def test_program_view(
 
     # Anynoymous users don't see the enrolled/enroll-now button.
     # For logged in users:
-    # a) product should exist, next courserun should be there, user not enrolled (enroll now button)
+    # a) product should exist, next courserun should be there, user not enrolled (enroll now button)  # noqa: E501
     # b) user is enrolled (enrolled button)
     has_button = (
         (has_product and has_unexpired_run and not is_enrolled) or is_enrolled
@@ -351,19 +348,17 @@ def test_program_view(
             class_name = "enrolled"
 
     assert (
-        f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")
-        in resp.content
+        f'<a class="enroll-button {class_name}" href="{url}">'.encode() in resp.content
     ) is has_button
-    assert (
-        "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")
-        in resp.content
-    ) is (is_anonymous and has_product and has_unexpired_run)
+    assert (b"Please Sign In to MITx PRO to enroll in a course" in resp.content) is (
+        is_anonymous and has_product and has_unexpired_run
+    )
 
 
 def test_user_enrollments_view(mocker, client, user):
     """
     Test that UserEnrollmentsView returns serialized information about a user's enrollments
-    """
+    """  # noqa: E501
     user_enrollments = UserEnrollments(
         programs=[],
         past_programs=[],
@@ -394,8 +389,8 @@ def test_user_enrollments_view(mocker, client, user):
     }
 
     patched_get_user_enrollments.assert_called_with(user)
-    assert patched_program_enroll_serializer.call_count == 2
-    assert patched_course_enroll_serializer.call_count == 2
+    assert patched_program_enroll_serializer.call_count == 2  # noqa: PLR2004
+    assert patched_course_enroll_serializer.call_count == 2  # noqa: PLR2004
 
 
 @pytest.mark.parametrize("live", [True, False])
@@ -445,7 +440,7 @@ def test_course_runs_not_live_in_courses_api(client, live):
 
 @pytest.mark.parametrize("has_product", [True, False])
 def test_course_runs_without_product_in_courses_api(client, has_product):
-    """Course runs should be filtered out of the courses API if they don't have an associated product"""
+    """Course runs should be filtered out of the courses API if they don't have an associated product"""  # noqa: E501
     run = CourseRunFactory.create(live=True, course__live=True)
     if has_product:
         ProductVersionFactory.create(product=ProductFactory(content_object=run))
@@ -459,7 +454,7 @@ def test_course_runs_without_product_in_courses_api(client, has_product):
 
 @pytest.mark.parametrize("has_product", [True, False])
 def test_program_without_product_in_programs_api(client, has_product):
-    """Programs should be filtered out of the programs API if they don't have an associated product"""
+    """Programs should be filtered out of the programs API if they don't have an associated product"""  # noqa: E501
     program = ProgramFactory.create(live=True)
     if has_product:
         ProductVersionFactory.create(product=ProductFactory(content_object=program))
@@ -472,7 +467,7 @@ def test_program_without_product_in_programs_api(client, has_product):
 
 @pytest.mark.parametrize("has_product", [True, False])
 def test_course_runs_without_product_in_programs_api(client, has_product):
-    """Regardless of whether course runs have a product, runs should **not** be filtered out of the programs API"""
+    """Regardless of whether course runs have a product, runs should **not** be filtered out of the programs API"""  # noqa: E501
     run = CourseRunFactory.create(live=True, course__live=True)
     ProductVersionFactory.create(
         product=ProductFactory(content_object=run.course.program)
@@ -487,7 +482,7 @@ def test_course_runs_without_product_in_programs_api(client, has_product):
 
 
 @pytest.mark.parametrize(
-    "factory, serializer_cls, api_name",
+    ("factory", "serializer_cls", "api_name"),
     [
         (
             CourseRunCertificateFactory,
@@ -501,7 +496,7 @@ def test_course_runs_without_product_in_programs_api(client, has_product):
         ),
     ],
 )
-def test_course_run_certificate_api(
+def test_course_run_certificate_api(  # noqa: PLR0913
     settings, user, user_drf_client, factory, serializer_cls, api_name
 ):
     """Verify that the certificates APIs function as expected"""
@@ -514,14 +509,14 @@ def test_course_run_certificate_api(
     assert resp.json() == [serializer_cls(cert).data]
 
     resp = user_drf_client.get(
-        reverse(f"{api_name}-detail", kwargs=dict(uuid=cert.uuid))
+        reverse(f"{api_name}-detail", kwargs={"uuid": cert.uuid})
     )
     assert resp.json() == serializer_cls(cert).data
 
     assert DigitalCredentialRequest.objects.count() == 0
 
     resp = user_drf_client.post(
-        reverse(f"{api_name}-request_digital_credentials", kwargs=dict(uuid=cert.uuid))
+        reverse(f"{api_name}-request_digital_credentials", kwargs={"uuid": cert.uuid})
     )
 
     assert DigitalCredentialRequest.objects.count() == 1
@@ -589,4 +584,4 @@ def test_course_topics_api(
         resp_json = resp.json()
         assert len(resp_json) == 1
         assert resp_json[0]["name"] == parent_topic.name
-        assert resp_json[0]["course_count"] == 4
+        assert resp_json[0]["course_count"] == 4  # noqa: PLR2004

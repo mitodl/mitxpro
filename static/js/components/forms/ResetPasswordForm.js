@@ -9,12 +9,12 @@ import FormError from "./elements/FormError"
 import { resetPasswordFormValidation } from "../../lib/validation"
 
 type Props = {
-  onSubmit: Function
+  onSubmit: Function,
 }
 
 export type ResetPasswordFormValues = {
   newPassword: string,
-  confirmPassword: string
+  confirmPassword: string,
 }
 
 const ResetPasswordForm = ({ onSubmit }: Props) => (
@@ -23,7 +23,7 @@ const ResetPasswordForm = ({ onSubmit }: Props) => (
     validationSchema={resetPasswordFormValidation}
     initialValues={{
       newPassword:   "",
-      reNewPassword: ""
+      reNewPassword: "",
     }}
     render={({ isSubmitting }) => (
       <Form>

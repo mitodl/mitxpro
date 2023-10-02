@@ -1,19 +1,19 @@
 """Tests for utils.py"""
+import difflib
 import json
 import re
 from datetime import datetime
-import difflib
 
 import pytest
 import pytz
 
 from voucher.factories import VoucherFactory
 from voucher.utils import (
-    read_pdf,
     get_current_voucher,
     get_eligible_coupon_choices,
-    voucher_upload_path,
+    read_pdf,
     remove_extra_spaces,
+    voucher_upload_path,
 )
 
 # pylint: disable=redefined-outer-name
@@ -21,10 +21,10 @@ from voucher.utils import (
 pytestmark = [pytest.mark.django_db]
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_logger(mocker):
     """Mock the log"""
-    yield mocker.patch("voucher.utils.log")
+    return mocker.patch("voucher.utils.log")
 
 
 def setup_pdf_parsing(settings):
@@ -63,36 +63,42 @@ def test_remove_extra_spaces():
 def test_pdf_parsing_domestic(settings):
     """Test that pdf parsing correctly parses domestic voucher pdfs"""
     setup_pdf_parsing(settings)
-    with open("voucher/.test/domestic_voucher.pdf", "rb") as pdf_file:
+    with open("voucher/.test/domestic_voucher.pdf", "rb") as pdf_file:  # noqa: PTH123
         values = read_pdf(pdf_file)
         expected_values = {
             "pdf": pdf_file,
             "employee_id": "1234567",
             "voucher_id": "299152-01",
-            "course_start_date_input": datetime.strptime(
+            "course_start_date_input": datetime.strptime(  # noqa: DTZ007
                 "04/30/2018", "%m/%d/%Y"
             ).date(),
             "course_id_input": "AMxB",
-            "course_title_input": "Additive Manufacturing for Innovative Design and Production",
+            "course_title_input": (
+                "Additive Manufacturing for Innovative Design and Production"
+            ),
             "employee_name": "Stark, Anthony E",
         }
         assert values == expected_values
 
 
 def test_pdf_parsing_domestic_offset_credits(settings):
-    """Test that pdf parsing handles when the credits value is part of the course name column"""
+    """Test that pdf parsing handles when the credits value is part of the course name column"""  # noqa: E501
     setup_pdf_parsing(settings)
-    with open("voucher/.test/domestic_voucher_test_credits.pdf", "rb") as pdf_file:
+    with open(  # noqa: PTH123
+        "voucher/.test/domestic_voucher_test_credits.pdf", "rb"
+    ) as pdf_file:  # noqa: PTH123, RUF100
         values = read_pdf(pdf_file)
         expected_values = {
             "pdf": pdf_file,
             "employee_id": "1234567",
             "voucher_id": "291510-03",
-            "course_start_date_input": datetime.strptime(
+            "course_start_date_input": datetime.strptime(  # noqa: DTZ007
                 "04/09/2018", "%m/%d/%Y"
             ).date(),
             "course_id_input": "SysEngxB3",
-            "course_title_input": "Model-Based Systems Engineering: Documentation and Analysis",
+            "course_title_input": (
+                "Model-Based Systems Engineering: Documentation and Analysis"
+            ),
             "employee_name": "Stark, Anthony E",
         }
         assert values == expected_values
@@ -101,13 +107,15 @@ def test_pdf_parsing_domestic_offset_credits(settings):
 def test_pdf_parsing_international(settings):
     """Test that pdf parsing correctly parses international voucher pdfs"""
     setup_pdf_parsing(settings)
-    with open("voucher/.test/international_voucher.pdf", "rb") as pdf_file:
+    with open(  # noqa: PTH123
+        "voucher/.test/international_voucher.pdf", "rb"
+    ) as pdf_file:  # noqa: PTH123, RUF100
         values = read_pdf(pdf_file)
         expected_values = {
             "pdf": pdf_file,
             "employee_id": "7654321",
             "voucher_id": None,
-            "course_start_date_input": datetime.strptime(
+            "course_start_date_input": datetime.strptime(  # noqa: DTZ007
                 "9-Apr-2018", "%d-%b-%Y"
             ).date(),
             "course_id_input": "SysEngBx3",
@@ -118,7 +126,7 @@ def test_pdf_parsing_international(settings):
 
 
 def test_parse_not_pdf(mock_logger, settings):
-    """Test that pdf parsing correctly throws an error when handed something that isn't a PDF"""
+    """Test that pdf parsing correctly throws an error when handed something that isn't a PDF"""  # noqa: E501
     setup_pdf_parsing(settings)
     read_pdf("abc")
     mock_logger.exception.assert_called_with("Could not parse PDF")
@@ -154,7 +162,7 @@ def test_partial_course_matches_without_coupons(
 ):
     """
     Test match_courses_to_voucher logs an error if there are partial matches with no coupons
-    """
+    """  # noqa: E501
     context = voucher_and_partial_matches
     voucher = context.voucher
     settings.VOUCHER_COMPANY_ID = context.company.id
@@ -169,7 +177,7 @@ def test_exact_course_match_without_coupon(
 ):
     """
     Test match_courses_to_voucher logs an error if there is an exact match with no coupons
-    """
+    """  # noqa: E501
     context = voucher_and_exact_match
     voucher = context.voucher
     settings.VOUCHER_COMPANY_ID = context.company.id
@@ -203,7 +211,7 @@ def _test_eligible_coupon_version(eligible_coupons, context):
 def test_partial_course_matches(voucher_and_partial_matches_with_coupons, settings):
     """
     Test match_courses_to_voucher returns correct eligible choices when there are partial matches
-    """
+    """  # noqa: E501
     context = voucher_and_partial_matches_with_coupons
     voucher = context.voucher
     settings.VOUCHER_COMPANY_ID = context.company.id
@@ -238,13 +246,13 @@ def test_partial_course_matches_with_missing_inputs(
 ):
     """
     Test match_courses_to_voucher returns correct eligible choices when there are partial matches
-    """
+    """  # noqa: E501
     context = voucher_and_partial_matches_with_coupons
     voucher = context.voucher
     setattr(voucher, empty_field, "")
     settings.VOUCHER_COMPANY_ID = context.company.id
     eligible_coupons = get_eligible_coupon_choices(voucher)
-    # reduce number of expected matches by the number of matches that depend on the empty search field
+    # reduce number of expected matches by the number of matches that depend on the empty search field  # noqa: E501
     assert len(eligible_coupons) == len(context.coupon_eligibility_list) - 2
     _test_eligible_coupon_version(eligible_coupons, context)
 
@@ -252,7 +260,7 @@ def test_partial_course_matches_with_missing_inputs(
 def test_exact_course_match(voucher_and_exact_match_with_coupon, settings):
     """
     Test match_courses_to_voucher returns correct eligible choices when there is an exact match
-    """
+    """  # noqa: E501
     context = voucher_and_exact_match_with_coupon
     voucher = context.voucher
     settings.VOUCHER_COMPANY_ID = context.company.id

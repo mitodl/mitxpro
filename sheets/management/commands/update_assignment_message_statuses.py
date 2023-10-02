@@ -1,7 +1,7 @@
 """
 Updates the database records and coupon assignment Sheet associated with a bulk coupon assignment record depending
 on what messages were delivered, failed delivery, etc.
-"""
+"""  # noqa: INP001, E501
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.models import BulkCouponAssignment
@@ -14,9 +14,9 @@ class Command(BaseCommand):
     """
     Updates the database records and coupon assignment Sheet associated with a bulk coupon assignment record depending
     on what messages were delivered, failed delivery, etc.
-    """
+    """  # noqa: E501
 
-    help = __doc__
+    help = __doc__  # noqa: A003
 
     def add_arguments(self, parser):  # pylint:disable=missing-docstring
         group = parser.add_mutually_exclusive_group()
@@ -28,30 +28,39 @@ class Command(BaseCommand):
             "-t",
             "--title",
             type=str,
-            help="The title of the coupon assignment Sheet (should match exactly one sheet)",
+            help=(
+                "The title of the coupon assignment Sheet (should match exactly one"
+                " sheet)"
+            ),
         )
         parser.add_argument(
             "-f",
             "--force",
             action="store_true",
-            help="Update message status even if the record indicates that all messages were already delivered",
+            help=(
+                "Update message status even if the record indicates that all messages"
+                " were already delivered"
+            ),
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # pylint:disable=missing-docstring
+    def handle(
+        self, *args, **options  # noqa: ARG002
+    ):  # pylint:disable=missing-docstring  # noqa: ARG002, RUF100
         if not any([options["id"], options["sheet_id"], options["title"]]):
-            raise CommandError("Need to provide --id, --sheet-id, or --title")
+            msg = "Need to provide --id, --sheet-id, or --title"
+            raise CommandError(msg)
 
         if options["id"]:
-            qset_kwargs = dict(id=options["id"])
+            qset_kwargs = {"id": options["id"]}
         elif options["sheet_id"]:
-            qset_kwargs = dict(assignment_sheet_id=options["sheet_id"])
+            qset_kwargs = {"assignment_sheet_id": options["sheet_id"]}
         else:
             pygsheets_client = get_authorized_pygsheets_client()
             spreadsheet = get_assignment_spreadsheet_by_title(
                 pygsheets_client, options["title"]
             )
-            qset_kwargs = dict(assignment_sheet_id=spreadsheet.id)
+            qset_kwargs = {"assignment_sheet_id": spreadsheet.id}
 
         bulk_assignment = BulkCouponAssignment.objects.get(**qset_kwargs)
         self.stdout.write(
@@ -68,7 +77,7 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.SUCCESS(
                     "Successfully updated message status for bulk coupon assignment "
-                    "({} individual status(es) added/updated).".format(update_count)
+                    f"({update_count} individual status(es) added/updated)."
                 )
             )
         else:

@@ -4,10 +4,10 @@ from django.urls import path
 from rest_framework import routers
 
 from users.views import (
-    UserRetrieveViewSet,
-    CurrentUserRetrieveUpdateViewSet,
-    CountriesStatesViewSet,
     ChangeEmailRequestViewSet,
+    CountriesStatesViewSet,
+    CurrentUserRetrieveUpdateViewSet,
+    UserRetrieveViewSet,
 )
 
 router = routers.DefaultRouter()

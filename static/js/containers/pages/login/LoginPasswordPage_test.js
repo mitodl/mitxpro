@@ -3,13 +3,13 @@ import { assert } from "chai"
 import sinon from "sinon"
 
 import LoginPasswordPage, {
-  LoginPasswordPage as InnerLoginPasswordPage
+  LoginPasswordPage as InnerLoginPasswordPage,
 } from "./LoginPasswordPage"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import {
   STATE_SUCCESS,
   STATE_ERROR,
-  STATE_LOGIN_PASSWORD
+  STATE_LOGIN_PASSWORD,
 } from "../../../lib/auth"
 import { makeLoginAuthResponse } from "../../../factories/auth"
 import { routes } from "../../../lib/urls"
@@ -24,7 +24,7 @@ describe("LoginPasswordPage", () => {
     setSubmittingStub = helper.sandbox.stub()
     setErrorsStub = helper.sandbox.stub()
     auth = makeLoginAuthResponse({
-      state: STATE_LOGIN_PASSWORD
+      state: STATE_LOGIN_PASSWORD,
     })
 
     renderPage = helper.configureHOCRenderer(
@@ -32,10 +32,10 @@ describe("LoginPasswordPage", () => {
       InnerLoginPasswordPage,
       {
         entities: {
-          auth
-        }
+          auth,
+        },
       },
-      {}
+      {},
     )
   })
 
@@ -52,21 +52,21 @@ describe("LoginPasswordPage", () => {
   it("handles onSubmit for an error response", async () => {
     const { inner } = await renderPage()
     const fieldErrors = {
-      email: "error message"
+      email: "error message",
     }
 
     helper.handleRequestStub.returns({
       body: makeLoginAuthResponse({
         state:        STATE_ERROR,
-        field_errors: fieldErrors
-      })
+        field_errors: fieldErrors,
+      }),
     })
 
     const onSubmit = inner.find("LoginPasswordForm").prop("onSubmit")
 
     await onSubmit(
       { password },
-      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub }
+      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
     )
 
     assert.lengthOf(helper.browserHistory, 1)
@@ -79,15 +79,15 @@ describe("LoginPasswordPage", () => {
 
     helper.handleRequestStub.returns({
       body: makeLoginAuthResponse({
-        state: STATE_SUCCESS
-      })
+        state: STATE_SUCCESS,
+      }),
     })
 
     const onSubmit = inner.find("LoginPasswordForm").prop("onSubmit")
 
     await onSubmit(
       { password },
-      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub }
+      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
     )
 
     assert.equal(window.location.href, `http://fake${routes.dashboard}`)

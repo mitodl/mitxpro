@@ -1,15 +1,15 @@
 """Sheets app models"""
 from django.conf import settings
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.db.models import DateTimeField, Model, PositiveSmallIntegerField
 
-from mitxpro.models import TimestampedModel, SingletonModel
+from mitxpro.models import SingletonModel, TimestampedModel
 from sheets.constants import VALID_SHEET_TYPES
 
 
 class GoogleApiAuth(TimestampedModel, SingletonModel):
-    """Model that stores OAuth credentials to be used to authenticate with the Google API"""
+    """Model that stores OAuth credentials to be used to authenticate with the Google API"""  # noqa: E501
 
     requesting_user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True
@@ -27,11 +27,14 @@ class CouponGenerationRequest(TimestampedModel):
     raw_data = models.CharField(max_length=300, null=True, blank=True)
 
     def __str__(self):
-        return "CouponGenerationRequest: id={}, coupon_name={}, purchase_order_id={}, completed={}".format(
-            self.id,
-            self.coupon_name,
-            self.purchase_order_id,
-            self.date_completed is not None,
+        return (
+            "CouponGenerationRequest: id={}, coupon_name={}, purchase_order_id={},"
+            " completed={}".format(
+                self.id,
+                self.coupon_name,
+                self.purchase_order_id,
+                self.date_completed is not None,
+            )
         )
 
 
@@ -68,7 +71,7 @@ class GoogleFileWatch(TimestampedModel):
     """
     Model that represents a file watch/push notification/webhook that was set up via the Google API for
     some Google Drive file
-    """
+    """  # noqa: E501
 
     file_id = models.CharField(max_length=100, db_index=True, null=False)
     channel_id = models.CharField(max_length=100, db_index=True, null=False)
@@ -81,18 +84,22 @@ class GoogleFileWatch(TimestampedModel):
         unique_together = ("file_id", "version")
 
     def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
+        self,
+        force_insert=False,  # noqa: FBT002
+        force_update=False,  # noqa: FBT002
+        using=None,
+        update_fields=None,  # noqa: FBT002, RUF100
     ):
         if (
             force_insert
             and self._meta.model.objects.filter(file_id=self.file_id).count() > 0
         ):
-            raise ValidationError(
-                "Only one {} object should exist for each unique file_id (file_id provided: {}). "
-                "Update the existing object instead of creating a new one.".format(
-                    self.__class__.__name__, self.file_id
-                )
+            msg = (
+                "Only one {} object should exist for each unique file_id (file_id"
+                " provided: {}). Update the existing object instead of creating a new"
+                " one.".format(self.__class__.__name__, self.file_id)
             )
+            raise ValidationError(msg)
         return super().save(
             force_insert=force_insert,
             force_update=force_update,

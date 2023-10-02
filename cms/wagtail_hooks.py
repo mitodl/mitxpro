@@ -5,14 +5,14 @@ from wagtail.core import hooks
 
 @hooks.register("construct_explorer_page_queryset")
 def sort_pages_alphabetically(
-    parent_page, pages, request
+    parent_page, pages, request  # noqa: ARG001
 ):  # pylint: disable=unused-argument
     """Sort all pages by title alphabetically"""
     return pages.order_by("title")
 
 
 class OrderedPagesAPIEndpoint(PagesAdminAPIViewSet):
-    """A clone of the default Wagtail admin API that additionally orders all responses by page title alphabetically"""
+    """A clone of the default Wagtail admin API that additionally orders all responses by page title alphabetically"""  # noqa: E501
 
     def filter_queryset(self, queryset):
         """Sort all pages by title alphabetically"""

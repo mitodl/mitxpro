@@ -24,7 +24,7 @@ type Props = {
   countries: Array<Country>,
   match: Match,
   currentUser: CurrentUser,
-  forceRequest: () => Promise<*>
+  forceRequest: () => Promise<*>,
 }
 
 export class ReceiptPage extends React.Component<Props> {
@@ -46,13 +46,8 @@ export class ReceiptPage extends React.Component<Props> {
   }
 
   render() {
-    const {
-      orderReceipt,
-      isLoading,
-      countries,
-      match,
-      currentUser
-    } = this.props
+    const { orderReceipt, isLoading, countries, match, currentUser } =
+      this.props
     let orderDate = null
     let stateCode = null
     let countryName = null
@@ -62,7 +57,7 @@ export class ReceiptPage extends React.Component<Props> {
 
       if (countries) {
         const country = countries.find(
-          element => element.code === orderReceipt.purchaser.country
+          element => element.code === orderReceipt.purchaser.country,
         )
         if (country) {
           countryName = country.name
@@ -313,15 +308,15 @@ const mapStateToProps = state => ({
   orderReceipt: state.entities.orderReceipt,
   isLoading:
     pathOr(true, ["queries", "countries", "isPending"], state) ||
-    pathOr(true, ["queries", "orderReceipt", "isPending"], state)
+    pathOr(true, ["queries", "orderReceipt", "isPending"], state),
 })
 
 const mapPropsToConfigs = props => [
   queries.users.countriesQuery(),
-  queries.ecommerce.orderReceipt(props.match.params.orderId)
+  queries.ecommerce.orderReceipt(props.match.params.orderId),
 ]
 
 export default compose(
   connect(mapStateToProps),
-  connectRequest(mapPropsToConfigs)
+  connectRequest(mapPropsToConfigs),
 )(ReceiptPage)

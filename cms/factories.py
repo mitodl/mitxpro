@@ -46,7 +46,6 @@ from cms.models import (
 )
 from courses.factories import CourseFactory, ProgramFactory
 
-
 factory.Faker.add_provider(internet)
 
 FAKE = faker.Factory.create()
@@ -77,7 +76,9 @@ class ProgramPageFactory(wagtail_factories.PageFactory):
         model = ProgramPage
 
     @factory.post_generation
-    def post_gen(obj, create, extracted, **kwargs):  # pylint:disable=unused-argument
+    def post_gen(
+        obj, create, extracted, **kwargs  # noqa: ARG002, N805
+    ):  # pylint:disable=unused-argument  # noqa: ARG002, N805, RUF100
         """Post-generation hook"""
         if create:
             # Move the created page to be a child of the program index page
@@ -107,7 +108,9 @@ class CoursePageFactory(wagtail_factories.PageFactory):
         model = CoursePage
 
     @factory.post_generation
-    def post_gen(obj, create, extracted, **kwargs):  # pylint:disable=unused-argument
+    def post_gen(
+        obj, create, extracted, **kwargs  # noqa: ARG002, N805
+    ):  # pylint:disable=unused-argument  # noqa: ARG002, N805, RUF100
         """Post-generation hook"""
         if create:
             # Move the created page to be a child of the course index page
@@ -135,7 +138,9 @@ class ExternalCoursePageFactory(wagtail_factories.PageFactory):
         model = ExternalCoursePage
 
     @factory.post_generation
-    def post_gen(obj, create, extracted, **kwargs):  # pylint:disable=unused-argument
+    def post_gen(
+        obj, create, extracted, **kwargs  # noqa: ARG002, N805
+    ):  # pylint:disable=unused-argument  # noqa: ARG002, N805, RUF100
         """Post-generation hook"""
         if create:
             # Move the created page to be a child of the course index page
@@ -163,7 +168,9 @@ class ExternalProgramPageFactory(wagtail_factories.PageFactory):
         model = ExternalProgramPage
 
     @factory.post_generation
-    def post_gen(obj, create, extracted, **kwargs):  # pylint:disable=unused-argument
+    def post_gen(
+        obj, create, extracted, **kwargs  # noqa: ARG002, N805
+    ):  # pylint:disable=unused-argument  # noqa: ARG002, N805, RUF100
         """Post-generation hook"""
         if create:
             # Move the created page to be a child of the program index page
@@ -357,7 +364,7 @@ class FacultyBlockFactory(wagtail_factories.StructBlockFactory):
 
     name = factory.Faker("name")
     image = factory.SubFactory(wagtail_factories.ImageFactory)
-    text = factory.LazyFunction(lambda: RichText("<p>{}</p>".format(FAKE.paragraph())))
+    text = factory.LazyFunction(lambda: RichText(f"<p>{FAKE.paragraph()}</p>"))
 
     class Meta:
         model = FacultyBlock

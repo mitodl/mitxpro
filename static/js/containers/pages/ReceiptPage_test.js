@@ -6,7 +6,7 @@ import ReceiptPage, { ReceiptPage as InnerReceiptPage } from "./ReceiptPage"
 import {
   makeAnonymousUser,
   makeCountries,
-  makeUser
+  makeUser,
 } from "../../factories/user"
 import IntegrationTestHelper from "../../util/integration_test_helper"
 import { formatPrettyDate, parseDateString } from "../../lib/util"
@@ -25,7 +25,7 @@ describe("ReceiptPage", () => {
       country:            "US",
       postal_code:        "90640",
       company:            "ABC",
-      email:              "john.doe@acme.com"
+      email:              "john.doe@acme.com",
     },
     lines: [
       {
@@ -36,21 +36,21 @@ describe("ReceiptPage", () => {
         content_title: "Demon Course",
         readable_id:   "course-v1:edX+DemoX+Demo_Course",
         start_date:    "2018-04-30T00:00:00Z",
-        end_date:      "2018-07-02T00:00:00Z"
-      }
+        end_date:      "2018-07-02T00:00:00Z",
+      },
     ],
     coupon: "50OFF",
     order:  {
       id:               1,
       created_on:       "2019-10-09T09:47:09.219354Z",
-      reference_number: "xpro-b2c-dev-1"
+      reference_number: "xpro-b2c-dev-1",
     },
     receipt: {
       bill_to_forename: "John",
       card_number:      "xxxxxxxxxxxx1234",
       card_type:        "Visa",
-      payment_method:   "card"
-    }
+      payment_method:   "card",
+    },
   }
 
   beforeEach(() => {
@@ -63,24 +63,24 @@ describe("ReceiptPage", () => {
         entities: {
           currentUser:  user,
           countries:    countries,
-          orderReceipt: receiptObject
+          orderReceipt: receiptObject,
         },
         queries: {
           countries: {
-            isPending: false
+            isPending: false,
           },
           orderReceipt: {
-            isPending: false
-          }
-        }
+            isPending: false,
+          },
+        },
       },
       {
         match: {
           params: {
-            orderId: 1
-          }
-        }
-      }
+            orderId: 1,
+          },
+        },
+      },
     )
   })
 
@@ -98,7 +98,7 @@ describe("ReceiptPage", () => {
     assert.isTrue(inner.find(".receipt-wrapper").exists())
     assert.equal(
       inner.find("#orderNumber").text(),
-      receiptObject.order.reference_number
+      receiptObject.order.reference_number,
     )
 
     const dateString = parseDateString(receiptObject.order.created_on)
@@ -109,16 +109,14 @@ describe("ReceiptPage", () => {
 
     assert.equal(
       inner.find("#purchaserName").text(),
-      `${receiptObject.purchaser.first_name} ${
-        receiptObject.purchaser.last_name
-      }`
+      `${receiptObject.purchaser.first_name} ${receiptObject.purchaser.last_name}`,
     )
     assert.equal(
       inner.find("#purchaserEmail").text(),
-      receiptObject.purchaser.email
+      receiptObject.purchaser.email,
     )
     receiptObject.purchaser.street_address.map(item =>
-      assert.equal(inner.find(`#${item}`).text(), item)
+      assert.equal(inner.find(`#${item}`).text(), item),
     )
     assert.equal(
       inner.find("#purchaserState").text(),
@@ -126,19 +124,17 @@ describe("ReceiptPage", () => {
         receiptObject.purchaser.city
       }, ${receiptObject.purchaser.state_or_territory.split("-").pop()} ${
         receiptObject.purchaser.postal_code
-      }`
+      }`,
     )
     // $FlowFixMe: Flow doesn't know we will definitely find a match here
     const countryName = countries.find(
-      country => country.code === receiptObject.purchaser.country
+      country => country.code === receiptObject.purchaser.country,
     ).name
     assert.equal(inner.find("#purchaserCountry").text(), countryName)
     if (inner.find("#paymentMethod").text() === "card") {
       assert.equal(
         inner.find("#paymentMethod").text(),
-        `${receiptObject.receipt.card_type} | ${
-          receiptObject.receipt.card_number
-        }`
+        `${receiptObject.receipt.card_type} | ${receiptObject.receipt.card_number}`,
       )
     }
     assert.equal(inner.find("#discountCode").text(), receiptObject.coupon)
@@ -149,23 +145,23 @@ describe("ReceiptPage", () => {
       {
         entities: {
           currentUser: makeAnonymousUser(),
-          countries:   countries
-        }
+          countries:   countries,
+        },
       },
       {
         match: {
           params: {
-            orderId: 1
-          }
-        }
-      }
+            orderId: 1,
+          },
+        },
+      },
     )
     assert.isFalse(inner.find(".receipt-wrapper").exists())
     assert.isTrue(
       inner
         .find(".user-dashboard")
         .text()
-        .includes("You must be logged in to view order receipts.")
+        .includes("You must be logged in to view order receipts."),
     )
   })
 })
