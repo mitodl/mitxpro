@@ -1,6 +1,7 @@
 """ ecommerce serializers """
 # pylint: disable=too-many-lines
 import logging
+from decimal import Decimal
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -371,7 +372,11 @@ class BasketSerializer(serializers.ModelSerializer):
             if request and hasattr(request, "user"):
                 country_code = determine_visitor_country(request)
                 if country_code is not None:
-                    return TaxRate.objects.get(country_code=country_code).to_dict()
+                    return (
+                        TaxRate.objects.filter(active=True)
+                        .get(country_code=country_code)
+                        .to_dict()
+                    )
             else:
                 log.error("No request object in get_tax_info")
         except TaxRate.DoesNotExist:
@@ -975,9 +980,11 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                 product_version=line.product_version,
                 tax_rate=instance.tax_rate,
             )
-            tax_paid = product_price_and_tax["tax_assessed"] * line.quantity
+            tax_paid = Decimal(
+                product_price_and_tax["tax_assessed"] * line.quantity
+            ).quantize(Decimal(".01"))
             total_price = product_price_and_tax["price"] * line.quantity
-            total_paid = total_price + tax_paid
+            total_paid = Decimal(total_price + tax_paid).quantize(Decimal(".01"))
             discount = (line.product_version.price * line.quantity) - total_price
 
             dates = CourseRunEnrollment.objects.filter(
@@ -1016,7 +1023,7 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                 dict(
                     quantity=line.quantity,
                     total_paid=str(total_paid),
-                    tax_paid=tax_paid,
+                    tax_paid=str(tax_paid),
                     discount=str(discount),
                     CEUs=str(CEUs) if CEUs else None,
                     **BaseProductVersionSerializer(line.product_version).data,
