@@ -97,6 +97,11 @@ class NetBlock(models.Model):
                 name="at_least_one_geoname_id",
             )
         ]
+        indexes = [
+            models.Index(fields=["decimal_ip_start"]),
+            models.Index(fields=["decimal_ip_end"]),
+            models.Index(fields=["decimal_ip_start", "decimal_ip_end"]),
+        ]
 
     def __str__(self):
         return f"{self.geoname_id}: {self.network} (IPv6 {self.is_ipv6}) start {self.ip_start} end {self.ip_end}"
