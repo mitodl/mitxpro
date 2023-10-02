@@ -8,6 +8,8 @@ import { makeItem, makeCouponSelection } from "../factories/ecommerce"
 import {
   calcSelectedRunIds,
   calculatePrice,
+  calculateTax,
+  calculateTotalAfterTax,
   formatPrice,
   formatRunTitle
 } from "./ecommerce"
@@ -37,6 +39,46 @@ describe("ecommerce", () => {
         calculatePrice(item, coupon).toString(),
         new Decimal("61.72").toString()
       )
+    })
+  })
+
+  describe("calculateTax", () => {
+    [
+      ["100", "0", 20, "20"],
+      ["123", "1", 20, "0"],
+      ["200", "0.5", 20, "20"],
+    ].forEach(([price, discountAmount, taxRate, tax]) => {
+      it("calculates the tax of an item price", () => {
+        const item = {
+          ...makeItem(),
+          price: price
+        }
+        const coupon = {
+          ...makeCouponSelection(item),
+          amount: discountAmount
+        }
+        assert.equal(calculateTax(item, coupon, taxRate), tax)
+      })
+    })
+  })
+
+  describe("calculateTotalAfterTax", () => {
+    [
+      ["100", "0", 20, "120"],
+      ["123", "1", 20, "0"],
+      ["200", "0.5", 20, "120"],
+    ].forEach(([price, discountAmount, taxRate, tax]) => {
+      it("calculates the total including the tax for an item", () => {
+        const item = {
+          ...makeItem(),
+          price: price
+        }
+        const coupon = {
+          ...makeCouponSelection(item),
+          amount: discountAmount
+        }
+        assert.equal(calculateTotalAfterTax(item, coupon, taxRate), tax)
+      })
     })
   })
 
