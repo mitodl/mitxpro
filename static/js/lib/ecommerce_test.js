@@ -8,6 +8,8 @@ import { makeItem, makeCouponSelection } from "../factories/ecommerce"
 import {
   calcSelectedRunIds,
   calculatePrice,
+  calculateTax,
+  calculateTotalAfterTax,
   formatPrice,
   formatRunTitle
 } from "./ecommerce"
@@ -37,6 +39,82 @@ describe("ecommerce", () => {
         calculatePrice(item, coupon).toString(),
         new Decimal("61.72").toString()
       )
+    })
+  })
+
+  describe("calculateTax", () => {
+    it("calculates the tax of an item", () => {
+      const item = {
+        ...makeItem(),
+        price: "100"
+      }
+      const coupon = {
+        ...makeCouponSelection(item),
+        amount: "0"
+      }
+      assert.equal(calculateTax(item, coupon, 20), 20)
+    })
+
+    it("calculates the tax of an item including the 100% off coupon", () => {
+      const item = {
+        ...makeItem(),
+        price: "123"
+      }
+      const coupon = {
+        ...makeCouponSelection(item),
+        amount: "1"
+      }
+      assert.equal(calculateTax(item, coupon, 20), 0)
+    })
+
+    it("calculates the tax of an item including the 50% off coupon", () => {
+      const item = {
+        ...makeItem(),
+        price: "200"
+      }
+      const coupon = {
+        ...makeCouponSelection(item),
+        amount: "0.5"
+      }
+      assert.equal(calculateTax(item, coupon, 20), 20)
+    })
+  })
+
+  describe("calculateTotalAfterTax", () => {
+    it("calculates the total including the tax for an item", () => {
+      const item = {
+        ...makeItem(),
+        price: "100"
+      }
+      const coupon = {
+        ...makeCouponSelection(item),
+        amount: "0"
+      }
+      assert.equal(calculateTotalAfterTax(item, coupon, 20), 120)
+    })
+
+    it("calculates the total including tax for an item including the 100% off coupon", () => {
+      const item = {
+        ...makeItem(),
+        price: "123"
+      }
+      const coupon = {
+        ...makeCouponSelection(item),
+        amount: "1"
+      }
+      assert.equal(calculateTotalAfterTax(item, coupon, 20), 0)
+    })
+
+    it("calculates the total including tax for an item including the 50% off coupon", () => {
+      const item = {
+        ...makeItem(),
+        price: "200"
+      }
+      const coupon = {
+        ...makeCouponSelection(item),
+        amount: "0.5"
+      }
+      assert.equal(calculateTotalAfterTax(item, coupon, 20), 120)
     })
   })
 
