@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.131.0
+---------------
+
+- Adds indexes to the netblock table (#2780)
+- tests: adds frontend tests for the taxes (#2779)
+- Fixing formatting errors on receipt page, should not charge tax if TaxRate (#2775)
+- fix(deps): update dependency chai to v4.3.10
+- feat: display tax in regular checkout (#2773)
+- chore(deps): lock file maintenance
+- Adds tax rate calculation support (#2772)
+- feat: force all enrollments (#2763)
+
 Version 0.130.0 (Released September 26, 2023)
 ---------------
 
