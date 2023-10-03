@@ -345,7 +345,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                     <span>{formatPrice(calculateDiscount(item, coupon))}</span>
                   </div>
                 ) : null}
-                {basket.tax_info.tax_rate ? (
+                {SETTINGS.enable_taxes_display ? (
                   <div>
                     <div className="bar" />
                     <div className="flex-row total-before-tax-row">
