@@ -56,7 +56,6 @@ export class ReceiptPage extends React.Component<Props> {
     let orderDate = null
     let stateCode = null
     let countryName = null
-    let linesWithTax = []
 
     if (orderReceipt) {
       orderDate = parseDateString(orderReceipt.order.created_on)
