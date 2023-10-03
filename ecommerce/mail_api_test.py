@@ -301,6 +301,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                 "country": "United States",
                 "company": user.profile.company,
             },
+            "enable_taxes_display": False,
         },
     )
     patched_mail_api.messages_for_recipients.assert_called_once_with(
