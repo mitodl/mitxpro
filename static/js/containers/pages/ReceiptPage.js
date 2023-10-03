@@ -60,7 +60,6 @@ export class ReceiptPage extends React.Component<Props> {
 
     if (orderReceipt) {
       orderDate = parseDateString(orderReceipt.order.created_on)
-      linesWithTax = orderReceipt.lines.filter(line => line.tax_paid !== "0.00")
 
       if (countries) {
         const country = countries.find(
