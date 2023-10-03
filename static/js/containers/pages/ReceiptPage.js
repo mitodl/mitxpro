@@ -56,9 +56,11 @@ export class ReceiptPage extends React.Component<Props> {
     let orderDate = null
     let stateCode = null
     let countryName = null
+    let linesWithTax = []
 
     if (orderReceipt) {
       orderDate = parseDateString(orderReceipt.order.created_on)
+      linesWithTax = orderReceipt.lines.filter(line => line.tax_paid !== "0.00")
 
       if (countries) {
         const country = countries.find(
@@ -254,7 +256,7 @@ export class ReceiptPage extends React.Component<Props> {
                         <th>Quantity</th>
                         <th>Unit Price</th>
                         <th>Discount</th>
-                        <th>Tax</th>
+                        {linesWithTax.length !== 0 ? <th>Tax</th> : null}
                         <th>Total Paid</th>
                       </tr>
                     </thead>
@@ -286,9 +288,11 @@ export class ReceiptPage extends React.Component<Props> {
                             <td>
                               <div>${line.discount}</div>
                             </td>
-                            <td>
-                              <div>${line.tax_paid}</div>
-                            </td>
+                            {linesWithTax.length !== 0 ? (
+                              <td>
+                                <div>${line.tax_paid}</div>
+                              </td>
+                            ) : null}
                             <td>
                               <div>${line.total_paid}</div>
                             </td>
