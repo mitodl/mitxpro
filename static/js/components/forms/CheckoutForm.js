@@ -345,15 +345,19 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                     <span>{formatPrice(calculateDiscount(item, coupon))}</span>
                   </div>
                 ) : null}
-                <div className="bar" />
-                <div className="flex-row total-before-tax-row">
-                  <span>Total before tax:</span>
-                  <span>{formatPrice(calculatePrice(item, coupon))}</span>
-                </div>
-                <div className="flex-row tax-row">
-                  <span>Tax:</span>
-                  <span>{formatPrice(calculateTax(item, coupon, basket.tax_info.tax_rate))}</span>
-                </div>
+                {SETTINGS.enable_taxes_display ? (
+                  <div>
+                    <div className="bar" />
+                    <div className="flex-row total-before-tax-row">
+                      <span>Total before tax:</span>
+                      <span>{formatPrice(calculatePrice(item, coupon))}</span>
+                    </div>
+                    <div className="flex-row tax-row">
+                      <span>Tax:</span>
+                      <span>{formatPrice(calculateTax(item, coupon, basket.tax_info.tax_rate))}</span>
+                    </div>
+                  </div>
+                ) : null}
                 <div className="bar" />
                 <div className="flex-row total-row">
                   <span>Total:</span>

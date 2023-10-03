@@ -254,7 +254,7 @@ export class ReceiptPage extends React.Component<Props> {
                         <th>Quantity</th>
                         <th>Unit Price</th>
                         <th>Discount</th>
-                        <th>Tax</th>
+                        {SETTINGS.enable_taxes_display ? <th>Tax</th> : null}
                         <th>Total Paid</th>
                       </tr>
                     </thead>
@@ -286,9 +286,11 @@ export class ReceiptPage extends React.Component<Props> {
                             <td>
                               <div>${line.discount}</div>
                             </td>
-                            <td>
-                              <div>${line.tax_paid}</div>
-                            </td>
+                            {SETTINGS.enable_taxes_display ? (
+                              <td>
+                                <div>${line.tax_paid}</div>
+                              </td>
+                            ) : null}
                             <td>
                               <div>${line.total_paid}</div>
                             </td>

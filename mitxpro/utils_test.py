@@ -470,6 +470,7 @@ def test_get_js_settings(settings, rf):
     settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS = "test_run1,test_run2"
     settings.FEATURES["COURSE_DROPDOWN"] = False
     settings.FEATURES["WEBINARS"] = False
+    settings.FEATURES["ENABLE_TAXES_DISPLAY"] = False
 
     request = rf.get("/")
 
@@ -488,4 +489,5 @@ def test_get_js_settings(settings, rf):
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
         "course_dropdown": settings.FEATURES.get("COURSE_DROPDOWN", False),
         "webinars": settings.FEATURES.get("WEBINARS", False),
+        "enable_taxes_display": settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False),
     }

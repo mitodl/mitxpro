@@ -317,6 +317,9 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
                                     "country": country.name if country else None,
                                     "company": purchaser.get("company"),
                                 },
+                                "enable_taxes_display": settings.FEATURES.get(
+                                    "ENABLE_TAXES_DISPLAY", False
+                                ),
                             },
                         ),
                     )
