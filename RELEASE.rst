@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.131.0
+Version 0.131.0 (Released October 03, 2023)
 ---------------
 
 - feat: Add feat flag for taxes display (#2783)
