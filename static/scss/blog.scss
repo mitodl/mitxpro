@@ -1,0 +1,22 @@
+@import "common";
+
+.top-posts-container {
+    display: flex;
+    overflow: hidden;
+    height: 485px;
+
+    .featured-post {
+        flex: 1 1 auto;
+        position: relative;
+        width: 68%;
+        background-color: red;
+    }
+
+    .posts-sidebar {
+        background-color: black;
+        color: hsla(0,0%,100%,.6);
+        flex: 1 1 auto;
+        width: 32%;
+        margin-left: 50px;
+    }
+}

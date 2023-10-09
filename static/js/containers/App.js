@@ -17,6 +17,7 @@ import Header from "../components/Header"
 import PrivateRoute from "../components/PrivateRoute"
 
 import CheckoutPage from "./pages/CheckoutPage"
+import BlogPage from "./pages/BlogPage"
 import DashboardPage from "./pages/DashboardPage"
 import ReceiptPage from "./pages/ReceiptPage"
 import LoginPages from "./pages/login/LoginPages"
@@ -84,6 +85,11 @@ export class App extends React.Component<Props, void> {
             exact
             path={urljoin(match.url, routes.dashboard)}
             component={DashboardPage}
+          />
+          <Route
+            exact
+            path={urljoin(match.url, routes.blog)}
+            component={BlogPage}
           />
           <PrivateRoute
             path={urljoin(match.url, routes.receipt)}
