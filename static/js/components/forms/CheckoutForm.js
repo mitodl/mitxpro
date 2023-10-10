@@ -353,7 +353,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                       <span>{formatPrice(calculatePrice(item, coupon))}</span>
                     </div>
                     <div className="flex-row tax-row">
-                      <span>Tax:</span>
+                      <span>Tax ({basket.tax_info.tax_rate}%):</span>
                       <span>{formatPrice(calculateTax(item, coupon, basket.tax_info.tax_rate))}</span>
                     </div>
                   </div>
