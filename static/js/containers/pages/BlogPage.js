@@ -16,7 +16,6 @@ import users, { currentUserSelector } from "../../lib/queries/users"
 export class BlogPage extends React.Component {
 
   render() {
-
     return (
       <React.Fragment>
         <DocumentTitle
@@ -73,43 +72,43 @@ export class BlogPage extends React.Component {
                 </div>
               </div>
             </div>
-            <div class="categories-section">
-              <div class="container">
+            <div className="categories-section">
+              <div className="container">
                 <div className="categories-header">
                   Explore more from&nbsp;
                   <div className="bold">MIT xPRO Categories</div>
                 </div>
-                <div class="row category-slider">
-                    <div class="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div class="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div class="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div class="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div class="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div class="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div class="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div class="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div class="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div class="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
+                <div className="row category-slider">
+                  <div className="category slide" data-url="">
+                    <a href="">Category</a>
+                  </div>
+                  <div className="category slide" data-url="">
+                    <a href="">Category</a>
+                  </div>
+                  <div className="category slide" data-url="">
+                    <a href="">Category</a>
+                  </div>
+                  <div className="category slide" data-url="">
+                    <a href="">Category</a>
+                  </div>
+                  <div className="category slide" data-url="">
+                    <a href="">Category</a>
+                  </div>
+                  <div className="category slide" data-url="">
+                    <a href="">Category</a>
+                  </div>
+                  <div className="category slide" data-url="">
+                    <a href="">Category</a>
+                  </div>
+                  <div className="category slide" data-url="">
+                    <a href="">Category</a>
+                  </div>
+                  <div className="category slide" data-url="">
+                    <a href="">Category</a>
+                  </div>
+                  <div className="category slide" data-url="">
+                    <a href="">Category</a>
+                  </div>
                 </div>
                 <div className="subscribe">
                   <a href="">Subscribe Now</a>
