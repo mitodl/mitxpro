@@ -2,7 +2,9 @@
 mitxpro views
 """
 import json
+import requests
 
+import xmltodict
 from django.conf import settings
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
@@ -13,6 +15,7 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.http import JsonResponse
 
 from mitxpro.serializers import AppContextSerializer
 
@@ -100,3 +103,14 @@ class AppContextView(APIView):
     def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Read-only access"""
         return Response(AppContextSerializer(request).data)
+
+
+def blog_view(request, **kwargs):
+    """Fetch blogs and convert to a JSON format"""  # noqa: E501
+    rss_feed_url = "https://curve.mit.edu/rss.xml"
+
+    resp = requests.get(rss_feed_url, timeout=60)
+    resp.raise_for_status()
+    resp_dict = xmltodict.parse(resp.content)
+    items = resp_dict.get("rss", {}).get("channel", {}).get("item", [])
+    return JsonResponse({"items": items})

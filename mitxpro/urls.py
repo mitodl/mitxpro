@@ -35,6 +35,7 @@ from mitxpro.views import (
     handler404 as not_found_handler,
     handler500 as server_error_handler,
     cms_signin_redirect_to_site_signin,
+    blog_view,
 )
 
 WAGTAIL_IMG_CACHE_AGE = 31_536_000  # 1 year
@@ -86,6 +87,7 @@ urlpatterns = (
         path("", include("social_django.urls", namespace="social")),
         re_path(r"^dashboard/", index, name="user-dashboard"),
         re_path(r"^blog/", index, name="blogs"),
+        re_path(r"^blogs/", blog_view, name="blogs-list"),
         re_path(r"^receipt/(?P<pk>\d+)/", index, name="order-receipt"),
         re_path(r"^account-settings/", index, name="account-settings"),
         # Wagtail
