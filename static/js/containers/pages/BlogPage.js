@@ -76,84 +76,86 @@ export class BlogPage extends React.Component {
                 </div>
               </div>
             </div>
-            <div className="all-blog-container">
-              <div className="categories-section">
-                <div className="container">
-                  <div className="categories-header">
-                    Explore more from&nbsp;
-                    <div className="bold">MIT xPRO Categories</div>
-                  </div>
-                  <div className="row category-slider">
-                    <div className="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div className="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div className="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div className="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div className="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div className="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div className="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div className="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div className="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                    <div className="category slide" data-url="">
-                      <a href="">Category</a>
-                    </div>
-                  </div>
-                  <div className="subscribe">
-                    <a href="">Subscribe Now</a>
-                  </div>
-                </div>
-              </div>
-              <div className="suggested-reading-heading">
-                <div className="from-mit">More From MIT</div>
-                <div className="suggested-readings">Suggested Readings</div>
-              </div>
+            <div className="all-posts-container">
               <div className="all-posts">
-                <div className="post">
-                  <img src="/static/images/mit-dome.png" alt="Preview image" />
-                  <a className="title" href="">What to Read Next: Recommendations from MIT xPRO Faculty</a>
-                  <p className="description">Wondering what to read next? Ready to stimulate your brain with topics ranging from systems engineering to artificial intelligence? You’ve come to the right place.</p>
+                <div className="categories-section">
+                  <div className="container">
+                    <div className="categories-header">
+                      Explore more from&nbsp;
+                      <div className="bold">MIT xPRO Categories</div>
+                    </div>
+                    <div className="row category-slider">
+                      <div className="category slide" data-url="">
+                        <a href="">Category</a>
+                      </div>
+                      <div className="category slide" data-url="">
+                        <a href="">Category</a>
+                      </div>
+                      <div className="category slide" data-url="">
+                        <a href="">Category</a>
+                      </div>
+                      <div className="category slide" data-url="">
+                        <a href="">Category</a>
+                      </div>
+                      <div className="category slide" data-url="">
+                        <a href="">Category</a>
+                      </div>
+                      <div className="category slide" data-url="">
+                        <a href="">Category</a>
+                      </div>
+                      <div className="category slide" data-url="">
+                        <a href="">Category</a>
+                      </div>
+                      <div className="category slide" data-url="">
+                        <a href="">Category</a>
+                      </div>
+                      <div className="category slide" data-url="">
+                        <a href="">Category</a>
+                      </div>
+                      <div className="category slide" data-url="">
+                        <a href="">Category</a>
+                      </div>
+                    </div>
+                    <div className="subscribe">
+                      <a href="">Subscribe Now</a>
+                    </div>
+                  </div>
                 </div>
-                <div className="post">
-                  <img src="/static/images/mit-dome.png" alt="Preview image" />
-                  <a className="title" href="">What to Read Next: Recommendations from MIT xPRO Faculty</a>
-                  <p className="description">Wondering what to read next? Ready to stimulate your brain with topics ranging from systems engineering to artificial intelligence? You’ve come to the right place.</p>
+                <div className="suggested-reading-heading">
+                  <div className="from-mit">More From MIT</div>
+                  <div className="suggested-readings">Suggested Readings</div>
                 </div>
-                <div className="post">
-                  <img src="/static/images/mit-dome.png" alt="Preview image" />
-                  <a className="title" href="">What to Read Next: Recommendations from MIT xPRO Faculty</a>
-                  <p className="description">Wondering what to read next? Ready to stimulate your brain with topics ranging from systems engineering to artificial intelligence? You’ve come to the right place.</p>
-                </div>
-                <div className="post">
-                  <img src="/static/images/mit-dome.png" alt="Preview image" />
-                  <a className="title" href="">What to Read Next: Recommendations from MIT xPRO Faculty</a>
-                  <p className="description">Wondering what to read next? Ready to stimulate your brain with topics ranging from systems engineering to artificial intelligence? You’ve come to the right place.</p>
-                </div>
-                <div className="post">
-                  <img src="/static/images/mit-dome.png" alt="Preview image" />
-                  <a className="title" href="">What to Read Next: Recommendations from MIT xPRO Faculty</a>
-                  <p className="description">Wondering what to read next? Ready to stimulate your brain with topics ranging from systems engineering to artificial intelligence? You’ve come to the right place.</p>
-                </div>
-                <div className="post">
-                  <img src="/static/images/mit-dome.png" alt="Preview image" />
-                  <a className="title" href="">What to Read Next: Recommendations from MIT xPRO Faculty</a>
-                  <p className="description">Wondering what to read next? Ready to stimulate your brain with topics ranging from systems engineering to artificial intelligence? You’ve come to the right place.</p>
+                <div className="posts-list">
+                  <div className="post">
+                    <img src="/static/images/mit-dome.png" alt="Preview image" />
+                    <a className="title" href="">What to Read Next: Recommendations from MIT xPRO Faculty</a>
+                    <p className="description">Wondering what to read next? Ready to stimulate your brain with topics ranging from systems engineering to artificial intelligence? You’ve come to the right place.</p>
+                  </div>
+                  <div className="post">
+                    <img src="/static/images/mit-dome.png" alt="Preview image" />
+                    <a className="title" href="">What to Read Next: Recommendations from MIT xPRO Faculty</a>
+                    <p className="description">Wondering what to read next? Ready to stimulate your brain with topics ranging from systems engineering to artificial intelligence? You’ve come to the right place.</p>
+                  </div>
+                  <div className="post">
+                    <img src="/static/images/mit-dome.png" alt="Preview image" />
+                    <a className="title" href="">What to Read Next: Recommendations from MIT xPRO Faculty</a>
+                    <p className="description">Wondering what to read next? Ready to stimulate your brain with topics ranging from systems engineering to artificial intelligence? You’ve come to the right place.</p>
+                  </div>
+                  <div className="post">
+                    <img src="/static/images/mit-dome.png" alt="Preview image" />
+                    <a className="title" href="">What to Read Next: Recommendations from MIT xPRO Faculty</a>
+                    <p className="description">Wondering what to read next? Ready to stimulate your brain with topics ranging from systems engineering to artificial intelligence? You’ve come to the right place.</p>
+                  </div>
+                  <div className="post">
+                    <img src="/static/images/mit-dome.png" alt="Preview image" />
+                    <a className="title" href="">What to Read Next: Recommendations from MIT xPRO Faculty</a>
+                    <p className="description">Wondering what to read next? Ready to stimulate your brain with topics ranging from systems engineering to artificial intelligence? You’ve come to the right place.</p>
+                  </div>
+                  <div className="post">
+                    <img src="/static/images/mit-dome.png" alt="Preview image" />
+                    <a className="title" href="">What to Read Next: Recommendations from MIT xPRO Faculty</a>
+                    <p className="description">Wondering what to read next? Ready to stimulate your brain with topics ranging from systems engineering to artificial intelligence? You’ve come to the right place.</p>
+                  </div>
                 </div>
               </div>
             </div>
