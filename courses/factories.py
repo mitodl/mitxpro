@@ -53,6 +53,7 @@ class ProgramFactory(DjangoModelFactory):
     readable_id = factory.Sequence(
         lambda number: "{}{}".format(PROGRAM_TEXT_ID_PREFIX, number)
     )
+    platform = factory.SubFactory(PlatformFactory)
     live = True
 
     page = factory.RelatedFactory("cms.factories.ProgramPageFactory", "program")
@@ -78,6 +79,7 @@ class CourseFactory(DjangoModelFactory):
     position_in_program = None  # will get populated in save()
     title = fuzzy.FuzzyText(prefix="Course ")
     readable_id = factory.Sequence("course-{0}".format)
+    platform = factory.SubFactory(PlatformFactory)
     live = True
 
     page = factory.RelatedFactory("cms.factories.CoursePageFactory", "course")

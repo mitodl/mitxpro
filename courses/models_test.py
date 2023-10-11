@@ -619,10 +619,13 @@ def test_readable_id_valid(readable_id_value):
     Test that the Program/Course readable_id field accepts valid values, and that
     validation is performed when a save is attempted.
     """
-    program = ProgramFactory.build(readable_id=readable_id_value)
+    platform = PlatformFactory.create()
+    program = ProgramFactory.build(readable_id=readable_id_value, platform=platform)
     program.save()
     assert program.id is not None
-    course = CourseFactory.build(program=None, readable_id=readable_id_value)
+    course = CourseFactory.build(
+        program=None, readable_id=readable_id_value, platform=platform
+    )
     course.save()
     assert course.id is not None
 

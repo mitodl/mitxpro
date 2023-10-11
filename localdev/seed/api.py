@@ -22,6 +22,7 @@ from courses.models import (
     CourseTopic,
     ProgramEnrollment,
     ProgramEnrollmentAudit,
+    Platform,
 )
 from localdev.seed.serializers import (
     ProgramSerializer,
@@ -336,6 +337,13 @@ class SeedDataLoader:
             field_name = "payment__{}".format(field_name)
         return model_cls.objects.filter(**{field_name: seeded_value})
 
+    def _get_platform(self, data):
+        """Check the data dictionary and return approriate platform"""
+        if data.get("platform", None) is not None:
+            return Platform.objects.get_or_create(name=data.get("platform"))[0]
+        else:
+            return Platform.objects.get_or_create(name="xPRO")[0]
+
     def _deserialize_courseware_object(self, serializer_cls, data):
         """
         Attempts to deserialize and save a courseware object (Program/Course/CourseRun),
@@ -343,6 +351,7 @@ class SeedDataLoader:
         """
         model_cls = serializer_cls.Meta.model
         seeded_field_name, seeded_value = self._seeded_field_and_value(model_cls, data)
+
         adjusted_data = {
             # Set 'live' to True for seeded objects by default
             "live": True,
@@ -350,6 +359,8 @@ class SeedDataLoader:
             **filter_for_model_fields(model_cls, data),
             **{seeded_field_name: seeded_value},
         }
+
+        adjusted_data["platform"] = self._get_platform(data).id
 
         existing_qset = model_cls.objects.filter(**{seeded_field_name: seeded_value})
         if existing_qset.exists():

@@ -251,7 +251,7 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     products = GenericRelation(Product, related_query_name="programs")
     is_external = models.BooleanField(default=False)
     platform = models.ForeignKey(
-        Platform, on_delete=models.SET_NULL, null=True, blank=True
+        Platform, on_delete=models.PROTECT, null=False, blank=False
     )
 
     @property
@@ -440,7 +440,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     live = models.BooleanField(default=False)
     is_external = models.BooleanField(default=False)
     platform = models.ForeignKey(
-        Platform, on_delete=models.SET_NULL, null=True, blank=True
+        Platform, on_delete=models.PROTECT, null=False, blank=False
     )
 
     @property
