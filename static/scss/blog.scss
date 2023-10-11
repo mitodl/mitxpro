@@ -1,101 +1,103 @@
 @import "common";
 
 .blog-page {
+
   .recent-posts-container {
+    height: 740px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, #F0F5F7 100%), url(/static/images/blog-bg.png), lightgray 50% / cover no-repeat;
-  }
-  .header-and-recent-posts {
-    max-width: 1140px;
-    margin: auto;
 
-    .header {
-      display: flex;
-      width: 100%;
-      padding: 50px 0px 40px 0px;
-      justify-content: space-between;
-      align-items: center;
+    .header-and-recent-posts {
+      max-width: 1140px;
+      margin: auto;
 
-      .blog-heading {
-        .blog-heading-bold {
-          color: var(--Brand-Blue-1, #03152D);
-          // leading-trim: both;
-          // text-edge: cap;
-          font-size: 40px;
-          font-style: normal;
-          font-weight: 700;
-          line-height: 140%; /* 56px */
-          margin-top: 30px;
-        }
+      .header {
+        display: flex;
+        width: 100%;
+        padding: 50px 0px 40px 0px;
+        justify-content: space-between;
+        align-items: center;
 
-        .blog-heading-normal {
-          color: var(--Brand-Blue-1, #03152D);
-          font-size: 28px;
-          font-style: normal;
-          font-weight: 500;
-          line-height: 140%;
-        }
-      }
-    }
-    .top-posts-container {
-      display: flex;
-      overflow: hidden;
-      height: 485px;
-      flex-shrink: 0;
-
-      .featured-post {
-        flex: 1 1 auto;
-        position: relative;
-        width: 68%;
-        // background-color: red;
-        border-radius: 5px;
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, #A31F34 67.71%);
-        /* Shadow-1 */
-        box-shadow: 0px 2px 3px 0px rgba(3, 21, 45, 0.10);
-      }
-
-      .posts-sidebar {
-        flex: 1 1 auto;
-        width: 32%;
-        margin-left: 50px;
-
-        .sidebar-post-card {
-          display: flex;
-          padding: 8px 15px 8px 8px;
-          align-items: center;
-          gap: 10px;
-          border-radius: 5px;
-          background: white;
-          /* Shadow-1 */
-          box-shadow: 0 2px 3px 0 rgba(3, 21, 45, 0.10);
-          margin-bottom: 7px;
-
-          img {
-            width: 100px;
-            height: 100px;
-            flex-shrink: 0;
-            border-radius: 5px;
-            background: url("/static/images/mit-dome.png"), lightgray 50% / cover no-repeat;
-          }
-
-          .post-title, .post-description {
-            height: 33px;
-            align-self: stretch;
-            overflow: hidden;
+        .blog-heading {
+          .blog-heading-bold {
             color: var(--Brand-Blue-1, #03152D);
             // leading-trim: both;
             // text-edge: cap;
-            text-overflow: ellipsis;
-            // whitespace: nowrap;
-            //font-family: Rajdhani;
-            font-size: 14px;
+            font-size: 40px;
             font-style: normal;
             font-weight: 700;
-            line-height: 120%; /* 16.8px */
+            line-height: 140%; /* 56px */
           }
 
-          .post-description {
+          .blog-heading-normal {
+            color: var(--Brand-Blue-1, #03152D);
+            font-size: 28px;
+            font-style: normal;
             font-weight: 500;
-            margin-top: 10px;
+            line-height: 140%;
+          }
+        }
+      }
+      .top-posts-container {
+        display: flex;
+        overflow: hidden;
+        height: 485px;
+        flex-shrink: 0;
+
+        .featured-post {
+          flex: 1 1 auto;
+          position: relative;
+          width: 68%;
+          // background-color: red;
+          border-radius: 5px;
+          background: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, #A31F34 67.71%);
+          /* Shadow-1 */
+          box-shadow: 0px 2px 3px 0px rgba(3, 21, 45, 0.10);
+        }
+
+        .posts-sidebar {
+          flex: 1 1 auto;
+          width: 32%;
+          margin-left: 50px;
+
+          .sidebar-post-card {
+            display: flex;
+            padding: 8px 15px 8px 8px;
+            align-items: center;
+            gap: 10px;
+            border-radius: 5px;
+            background: white;
+            /* Shadow-1 */
+            box-shadow: 0 2px 3px 0 rgba(3, 21, 45, 0.10);
+            margin-bottom: 7px;
+
+            img {
+              width: 100px;
+              height: 100px;
+              flex-shrink: 0;
+              border-radius: 5px;
+              background: url("/static/images/mit-dome.png"), lightgray 50% / cover no-repeat;
+            }
+
+            .post-title, .post-description {
+              height: 33px;
+              align-self: stretch;
+              overflow: hidden;
+              color: var(--Brand-Blue-1, #03152D);
+              // leading-trim: both;
+              // text-edge: cap;
+              text-overflow: ellipsis;
+              // whitespace: nowrap;
+              //font-family: Rajdhani;
+              font-size: 14px;
+              font-style: normal;
+              font-weight: 700;
+              line-height: 120%; /* 16.8px */
+            }
+
+            .post-description {
+              font-weight: 500;
+              margin-top: 10px;
+            }
           }
         }
       }
