@@ -342,7 +342,7 @@ class SeedDataLoader:
         if data.get("platform", None) is not None:
             return Platform.objects.get_or_create(name=data.get("platform"))[0]
         else:
-            return Platform.objects.get_or_create("xPRO")[0]
+            return Platform.objects.get_or_create(name="xPRO")[0]
 
     def _deserialize_courseware_object(self, serializer_cls, data):
         """

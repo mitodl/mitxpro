@@ -7,38 +7,30 @@ import django.db.models.deletion
 DEFAULT_PLATFORM_NAME = "xPRO"
 
 
-def setup_course_platform(apps, schema_editor):
-    """Associate a platform to all the courses without a platform"""
+def setup_courseware_platform(apps, shcema_editor, courseware_cls):
+    """Associate a platform to the courseware entries without a platform"""
 
-    Platform = apps.get_model("courses", "Platform")
+    courseware_without_platform = courseware_cls.objects.filter(platform__isnull=True)
+
+    if courseware_without_platform.count() > 0:
+        # Get a default platform only if needed
+        Platform = apps.get_model("courses", "Platform")
+        default_platform, _ = Platform.objects.get_or_create(name=DEFAULT_PLATFORM_NAME)
+
+        for courseware in courseware_without_platform:
+            courseware.platform = default_platform
+
+        courseware_cls.objects.bulk_update(courseware_without_platform, ["platform"])
+
+
+def populate_courseware_platform(apps, schema_editor):
+    """Populate courseware with a platform if they do not have one"""
+
     Course = apps.get_model("courses", "Course")
-
-    default_platform, _ = Platform.objects.get_or_create(name=DEFAULT_PLATFORM_NAME)
-    courses_without_platform = Course.objects.filter(platform__isnull=True)
-    for course in courses_without_platform:
-        course.platform = default_platform
-
-    Course.objects.bulk_update(courses_without_platform, ["platform"])
-
-
-def setup_program_platform(apps, schema_editor):
-    """Associate a platform to all the programs without a platform"""
-
-    Platform = apps.get_model("courses", "Platform")
     Program = apps.get_model("courses", "Program")
 
-    default_platform, _ = Platform.objects.get_or_create(name=DEFAULT_PLATFORM_NAME)
-    programs_without_platform = Program.objects.filter(platform__isnull=True)
-    for program in programs_without_platform:
-        program.platform = default_platform
-
-    Program.objects.bulk_update(programs_without_platform, ["platform"])
-
-
-def populate_platform(apps, schema_editor):
-    """Associate courses and programs to a platform if they do not have one"""
-    setup_course_platform(apps, schema_editor)
-    setup_program_platform(apps, schema_editor)
+    setup_courseware_platform(apps, schema_editor, Course)
+    setup_courseware_platform(apps, schema_editor, Program)
 
 
 class Migration(migrations.Migration):
@@ -48,8 +40,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # Populate all the existing coruses and programs with a plarform before we make the field required.
-        migrations.RunPython(populate_platform, migrations.RunPython.noop),
+        # Populate all the existing courses and programs with a platform before we make the field required.
+        migrations.RunPython(populate_courseware_platform, migrations.RunPython.noop),
         migrations.AlterField(
             model_name="course",
             name="platform",
