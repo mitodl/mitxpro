@@ -20,12 +20,10 @@
         .blog-heading {
           .blog-heading-bold {
             color: var(--Brand-Blue-1, #03152D);
-            // leading-trim: both;
-            // text-edge: cap;
             font-size: 40px;
             font-style: normal;
             font-weight: 700;
-            line-height: 140%; /* 56px */
+            line-height: 140%;
           }
 
           .blog-heading-normal {
@@ -49,7 +47,6 @@
           width: 68%;
           border-radius: 5px;
           box-shadow: 0 2px 3px 0 rgba(3, 21, 45, 0.10);
-          //background: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, #A31F34 67.71%), url(/static/images/mit-dome.png), ;
           background: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, #A31F34 67.71%), url(/static/images/rectangle-2.png) no-repeat;
           background-size: cover;
 
@@ -78,7 +75,7 @@
               font-size: 12px;
               font-style: normal;
               font-weight: 700;
-              line-height: 140%; /* 16.8px */
+              line-height: 140%;
               text-transform: uppercase;
             }
 
@@ -89,7 +86,7 @@
               font-size: 24px;
               font-style: normal;
               font-weight: 700;
-              line-height: 130%; /* 31.2px */
+              line-height: 130%;
               margin-bottom: 17px;
             }
             .featured-post-description {
@@ -97,7 +94,7 @@
               font-size: 16px;
               font-style: normal;
               font-weight: 500;
-              line-height: 140%; /* 22.4px */
+              line-height: 140%;
             }
 
           }
@@ -115,7 +112,6 @@
             gap: 10px;
             border-radius: 5px;
             background: white;
-            /* Shadow-1 */
             box-shadow: 0 2px 3px 0 rgba(3, 21, 45, 0.10);
             margin-bottom: 7px;
 
@@ -132,15 +128,11 @@
               align-self: stretch;
               overflow: hidden;
               color: var(--Brand-Blue-1, #03152D);
-              // leading-trim: both;
-              // text-edge: cap;
               text-overflow: ellipsis;
-              // whitespace: nowrap;
-              //font-family: Rajdhani;
               font-size: 14px;
               font-style: normal;
               font-weight: 700;
-              line-height: 120%; /* 16.8px */
+              line-height: 120%;
             }
 
             .post-description {
@@ -167,23 +159,18 @@
           display: flex;
           width: 1440px;
           padding: 20px 30px;
-          //margin-top: 60px;
           flex-direction: column;
           align-items: center;
           gap: 20px;
           border-radius: 5px;
-          // background: var(--Grey-Lite-02, #F0F5F7);
 
           .categories-header {
             color: var(--Brand-Blue-1, #03152D);
             text-align: center;
-            // leading-trim: both;
-            // text-edge: cap;
-            // font-family: Rajdhani;
             font-size: 20px;
             font-style: normal;
             font-weight: 500;
-            line-height: 120%; /* 24px */
+            line-height: 120%;
             display: flex;
 
             .bold {
@@ -200,8 +187,6 @@
             border-radius: 100px;
             border: 1px solid #EEF1F9;
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, rgba(176, 192, 212, 0.05) 100%), #FFF;
-
-            /* Shadow-2 */
             box-shadow: 0px 1px 1px 0px rgba(3, 21, 45, 0.05);
 
             a {
@@ -258,10 +243,7 @@
               max-width: 330px;
               height: 200px;
               border-radius: 5px;
-              //opacity: 0.5;
               background: var(--Brand-Blue-1, #03152D);
-
-              /* Shadow-1 */
               box-shadow: 0 2px 3px 0 rgba(3, 21, 45, 0.10);
 
               @include media-breakpoint-down (lg) {
@@ -293,15 +275,6 @@
             }
           }
 
-          .time, .description {
-            color: #000000;
-            font-family: Rajdhani;
-            font-size: 18px;
-            font-weight: 500;
-            letter-spacing: -0.52px;
-            line-height: 20px;
-          }
-
           .title, .description {
             overflow: hidden;
             text-overflow: ellipsis;
@@ -314,13 +287,10 @@
             height: 61px;
             align-self: stretch;
             color: var(--Brand-Blue-1, #03152D);
-            //leading-trim: both;
-            //text-edge: cap;
-            //font-family: Rajdhani;
             font-size: 19px;
             font-style: normal;
             font-weight: 700;
-            line-height: 120%; /* 22.8px */
+            line-height: 120%;
           }
 
           .description {
@@ -328,33 +298,26 @@
             align-self: stretch;
             overflow: hidden;
             color: var(--Brand-Blue-1, #03152D);
-            //leading-trim: both;
-            //text-edge: cap;
             text-overflow: ellipsis;
-            //whitespace: nowrap;
-            //font-family: Rajdhani;
             font-size: 16px;
             font-style: normal;
             font-weight: 500;
-            line-height: 140%; /* 22.4px */
+            line-height: 140%;
           }
 
           .card-bottom {
             display: flex;
-            padding: 10px 0px;
+            padding: 10px 0;
             align-items: flex-start;
             align-self: stretch;
 
             .author-and-duration {
               flex: 1 0 0;
               color: var(--Grey-Text, #7E868E);
-              //leading-trim: both;
-              //text-edge: cap;
-              font-family: Rajdhani;
               font-size: 14px;
               font-style: normal;
               font-weight: 600;
-              line-height: 140%; /* 19.6px */
+              line-height: 140%;
               text-transform: uppercase;
             }
 
@@ -387,13 +350,10 @@
 
   a {
     color: #FFF;
-    // leading-trim: both;
-    // text-edge: cap;
-    font-family: Rajdhani;
     font-size: 20px;
     font-style: normal;
     font-weight: 600;
-    line-height: 120%; /* 24px */
+    line-height: 120%;
   }
 }
 
@@ -404,19 +364,14 @@
   align-items: center;
   gap: 15px;
   border-left: 1px solid var(--Brand-red, #A31F34);
-
   color: #000;
-  // leading-trim: both;
-  // text-edge: cap;
   font-size: 16px;
   font-style: normal;
   font-weight: 500;
-  line-height: 120%; /* 19.2px */
+  line-height: 120%;
 
   .recent-posts-text, .suggested-readings {
     color: #000;
-    // leading-trim: both;
-    // text-edge: cap;
     font-size: 20px;
     font-style: normal;
     font-weight: 700;
