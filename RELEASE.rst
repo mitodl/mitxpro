@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.132.0
+---------------
+
+- feat: display tax rate on checkout, receipt and email (#2790)
+- fix: make `platform` a required field for Courses/Programs (#2786)
+- fix(deps): update dependency ipython to v8.16.1
+
 Version 0.131.0 (Released October 03, 2023)
 ---------------
 
