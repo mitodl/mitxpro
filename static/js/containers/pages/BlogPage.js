@@ -42,11 +42,7 @@ export class BlogPage extends React.Component {
                   <div className="recent-posts-text">Top Most Recent Posts</div>
                 </div>
                 <div className="top-posts-container">
-                  {/*<div className="featured-post-container" style={{backgroundImage: "url(/static/images/mit-dome.png)"}}>*/}
-                  <div className="featured-post-container">
-                    {/*<div className="image-container">*/}
-                    {/*  <img src="" alt=""/>*/}
-                    {/*</div>*/}
+                  <div className="featured-post-container" style={{background: "linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, #A31F34 67.71%), url(/static/images/rectangle-2.png) no-repeat"}}>
                     <div className="post-content">
                       <span className="post-tag">ONLINE EDUCATION</span>
                       <div className="featured-post-title">The Competitive Advantages of Online Corporate LearningThe Competitive Advantages of Online Corporate Learning</div>
