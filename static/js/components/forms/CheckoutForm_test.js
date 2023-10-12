@@ -14,6 +14,7 @@ import { makeBasketResponse } from "../../factories/ecommerce"
 import {
   calculateDiscount,
   calculatePrice,
+  calculateTax,
   formatPrice,
   formatRunTitle,
   calcSelectedRunIds
@@ -105,6 +106,51 @@ describe("CheckoutForm", () => {
         `Total:${formatPrice(
           calculatePrice(basketItem, hasCoupon ? coupon : null)
         )}`
+      )
+    })
+  })
+
+
+  ;[true, false].forEach(taxDisplayEnabled => {
+    it(`handles basket tax details display as per feature flag`, async () => {
+      SETTINGS.enable_taxes_display = taxDisplayEnabled
+
+      const inner = await renderForm()
+
+      if (!taxDisplayEnabled) {
+        assert.isFalse(inner.find(".tax-row").exists())
+        assert.isFalse(inner.find(".total-before-tax-row").exists())
+      } else {
+        assert.isTrue(inner.find(".tax-row").exists())
+        assert.isTrue(inner.find(".total-before-tax-row").exists())
+      }
+    })
+  })
+
+  ;[
+    [true, 5],
+    [true, 10],
+    [false, 15],
+    [false, 20]
+  ].forEach(([hasCoupon, taxRate]) => {
+    it(`Calculates and displayes the tax correctly ${
+      hasCoupon ? "with" : "without"
+    } a coupon`, async () => {
+      SETTINGS.enable_taxes_display = true
+      basket.tax_info.tax_rate = taxRate
+
+      const inner = await renderForm({
+        coupon: hasCoupon ? coupon : null
+      })
+
+      assert.equal(
+        inner.find(".tax-row").text(),
+        `Tax (${basket.tax_info.tax_rate}%):${formatPrice(calculateTax(basketItem, hasCoupon ? coupon : null, basket.tax_info.tax_rate))}`
+      )
+
+      assert.equal(
+        inner.find(".total-before-tax-row").text(),
+        `Total before tax:${formatPrice(calculatePrice(basketItem, hasCoupon ? coupon : null))}`
       )
     })
   })

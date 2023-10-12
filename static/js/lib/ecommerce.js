@@ -117,19 +117,27 @@ export const calcSelectedRunIds = (
     : {}
 }
 
-export const formatPrice = (price: ?string | number | Decimal): string => {
-  if (price === null || price === undefined) {
+export const formatNumber = (number: ?string | number | Decimal): string => {
+  if (number === null || number === undefined) {
     return ""
   } else {
-    let formattedPrice: Decimal = Decimal(price)
+    let formattedNumber: Decimal = Decimal(number)
 
-    if (formattedPrice.isInteger()) {
-      formattedPrice = formattedPrice.toFixed(0)
+    if (formattedNumber.isInteger()) {
+      formattedNumber = formattedNumber.toFixed(0)
     } else {
-      formattedPrice = formattedPrice.toFixed(2, Decimal.ROUND_HALF_UP)
+      formattedNumber = formattedNumber.toFixed(2, Decimal.ROUND_HALF_UP)
     }
-    return `$${formattedPrice}`
+    return formattedNumber
   }
+}
+
+export const formatPrice = (price: ?string | number | Decimal): string => {
+  let formattedPrice = formatNumber(price)
+  if (formattedPrice) {
+    formattedPrice = `$${formattedPrice}`
+  }
+  return formattedPrice
 }
 
 export const formatCoursewareDate = (dateString: ?string) =>

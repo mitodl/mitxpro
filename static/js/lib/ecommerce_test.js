@@ -11,6 +11,7 @@ import {
   calculateTax,
   calculateTotalAfterTax,
   formatPrice,
+  formatNumber,
   formatRunTitle
 } from "./ecommerce"
 import { makeCourseRun } from "../factories/course"
@@ -95,6 +96,22 @@ describe("ecommerce", () => {
     it("returns an empty string if null or undefined", () => {
       assert.equal(formatPrice(null), "")
       assert.equal(formatPrice(undefined), "")
+    })
+  })
+
+  describe("formatNumber", () => {
+    it("format a number", () => {
+      assert.equal(formatNumber(20), "20")
+      assert.equal(formatNumber(20.005), "20.01")
+      assert.equal(formatNumber(20.1), "20.10")
+      assert.equal(formatNumber(20.6059), "20.61")
+      assert.equal(formatNumber(20.6959), "20.70")
+      assert.equal(formatNumber(20.1234567), "20.12")
+    })
+
+    it("returns an empty string if null or undefined", () => {
+      assert.equal(formatNumber(null), "")
+      assert.equal(formatNumber(undefined), "")
     })
   })
 
