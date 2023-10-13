@@ -33,7 +33,7 @@ class ProgramAdmin(admin.ModelAdmin):
     """Admin for Program"""
 
     model = Program
-    search_fields = ["title", "readable_id", "platform"]
+    search_fields = ["title", "readable_id", "platform__name"]
     list_display = ("id", "title", "readable_id", "platform")
     list_filter = ["live", "platform"]
 
@@ -50,7 +50,7 @@ class CourseAdmin(admin.ModelAdmin):
     """Admin for Course"""
 
     model = Course
-    search_fields = ["title", "readable_id", "platform"]
+    search_fields = ["title", "readable_id", "platform__name"]
     list_display = ("id", "title", "get_program", "position_in_program", "platform")
     list_filter = ["live", "program", "platform"]
     formfield_overrides = {
