@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.132.0
+Version 0.132.0 (Released October 16, 2023)
 ---------------
 
 - fix: platform name search in Django Admin Courses/Programs (#2792)
