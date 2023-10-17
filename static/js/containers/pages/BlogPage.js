@@ -47,12 +47,14 @@ export class BlogPage extends React.Component<Props> {
                 </div>
                 <div className="top-posts-container">
                   {featuredPost !== null ? (
-                    <div className="featured-post-container" style={{background: `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, #A31F34 67.71%), url(${featuredPost.banner_image}) no-repeat`}}>
-                      <div className="post-content">
-                        <span className="post-tag">{featuredPost.category}</span>
-                        <div className="featured-post-title">{featuredPost.title}</div>
-                        <div className="featured-post-description">{featuredPost.description}</div>
-                      </div>
+                    <div className="featured-post-container" style={{background: `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, #A31F34 67.71%), url(${featuredPost.banner_image}) no-repeat`, backgroundSize: "contain"}}>
+                      <a href={featuredPost.link}>
+                        <div className="post-content">
+                          <span className="post-tag">{featuredPost.category}</span>
+                          <div className="featured-post-title">{featuredPost.title}</div>
+                          <div className="featured-post-description">{featuredPost.description}</div>
+                        </div>
+                      </a>
                     </div>
                   ) : null}
 
@@ -61,10 +63,12 @@ export class BlogPage extends React.Component<Props> {
                       blogs !== null ? blogs.posts.slice(1).map(post => (
                         <div className="sidebar-post-card" key={post.guid}>
                           <img src={post.banner_image}/>
-                          <div className="details">
-                            <div className="post-title">{post.title}</div>
-                            <div className="post-description">{post.description}</div>
-                          </div>
+                          <a href={post.link}>
+                            <div className="details">
+                              <div className="post-title">{post.title}</div>
+                              <div className="post-description">{post.description}</div>
+                            </div>
+                          </a>
                         </div>
                       )) : null
                     }
@@ -101,9 +105,13 @@ export class BlogPage extends React.Component<Props> {
                     <div className="post" key={post.guid}>
                       <div className="card-top">
                         <img src={post.banner_image} alt={post.title} />
-                        <span className="post-tag">ONLINE EDUCATION</span>
+                        <div className="post-tags">
+                          {post.category.map(tag => (
+                            <span className="tag" key={tag}>{tag}</span>
+                          ))}
+                        </div>
                       </div>
-                      <a className="title" href="">{post.title}</a>
+                      <a className="title" href={post.link}>{post.title}</a>
                       <p className="description">{post.description}</p>
                       <div className="card-bottom">
                         <div className="author-and-duration">
@@ -111,7 +119,7 @@ export class BlogPage extends React.Component<Props> {
                           <div className="duration">5 MINUTE READ</div>
                         </div>
                         <div className="read-more">
-                          <a href="">READ MORE</a>
+                          <a href={post.link}>READ MORE</a>
                         </div>
                       </div>
                     </div>

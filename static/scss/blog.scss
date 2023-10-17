@@ -47,7 +47,6 @@
           width: 68%;
           border-radius: 5px;
           box-shadow: 0 2px 3px 0 rgba(3, 21, 45, 0.10);
-          background: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, #A31F34 67.71%), url(/static/images/rectangle-2.png) no-repeat;
           background-size: cover;
 
           .image-container {
@@ -100,6 +99,11 @@
           }
         }
 
+        a:link { text-decoration: none; }
+        a:visited { text-decoration: none; }
+        a:hover { text-decoration: none; }
+        a:active { text-decoration: none; }
+
         .posts-sidebar {
           flex: 1 1 auto;
           width: 32%;
@@ -120,7 +124,6 @@
               height: 100px;
               flex-shrink: 0;
               border-radius: 5px;
-              background: url("/static/images/mit-dome.png"), lightgray 50% / cover no-repeat;
             }
 
             .post-title, .post-description {
@@ -255,23 +258,27 @@
               }
             }
 
-            .post-tag {
+            .post-tags {
               display: flex;
-              padding: 5px;
-              justify-content: center;
-              align-items: center;
-              border-radius: 2px;
-              background: var(--Brand-Blue-1, #03152D);
               position: absolute;
               left: 3px;
               top: 162px;
-              color: #FFF;
-              text-align: center;
-              font-size: 12px;
-              font-style: normal;
-              font-weight: 700;
-              line-height: 140%; /* 16.8px */
-              text-transform: uppercase;
+
+              .tag {
+                display: flex;
+                padding: 5px;
+                justify-content: center;
+                align-items: center;
+                border-radius: 2px;
+                background: var(--Brand-Blue-1, #03152D);
+                color: #FFF;
+                text-align: center;
+                font-size: 12px;
+                font-style: normal;
+                font-weight: 700;
+                line-height: 140%; /* 16.8px */
+                text-transform: uppercase;
+              }
             }
           }
 

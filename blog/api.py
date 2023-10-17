@@ -16,3 +16,5 @@ def transform_blog_item(item):
     published_date = parse_datetime(item["dc:date"])
     df = DateFormat(published_date)
     item["published_date"] = df.format("F jS, Y")
+
+    item["category"] = item["category"] if type(item["category"]) == list else [item["category"]]
