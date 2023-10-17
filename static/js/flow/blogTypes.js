@@ -1,5 +1,5 @@
 
-export type Blog = {
+export type blogPost = {
   title: string,
   link: string,
   description: string,
@@ -9,3 +9,7 @@ export type Blog = {
   published_date: string,
 }
 
+export type Blogs = {
+  posts: Array<blogPost>,
+  categories: Array<string>,
+}

@@ -6,14 +6,13 @@ import { compose } from "redux"
 import { connect } from "react-redux"
 import { connectRequest } from "redux-query"
 import { createStructuredSelector } from "reselect"
-import Slider from "react-slick"
 
 
 import queries from "../../lib/queries"
-import type {Blog} from "../../flow/blogTypes"
+import type { Blogs } from "../../flow/blogTypes"
 
 type Props = {
-  blogs: Array<Blog>,
+  blogs: Array<Blogs>,
 }
 
 export class BlogPage extends React.Component<Props> {
@@ -27,6 +26,7 @@ export class BlogPage extends React.Component<Props> {
     }
     const { blogs } = this.props
     console.log("BLOGS:", blogs)
+    // console.log("Categories:", blogs.categories)
 
     return (
       <React.Fragment>
