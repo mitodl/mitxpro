@@ -2,13 +2,12 @@ import requests
 
 import xmltodict
 from rest_framework.views import APIView
-from django.views import View
-from django.shortcuts import render
 from rest_framework.response import Response
+
+from blog.api import transform_blog_item
 
 
 class BlogListView(APIView):
-# class BlogListView(View):
     """Fetch blogs and convert to a JSON format"""
     permission_classes = []
 
@@ -19,5 +18,15 @@ class BlogListView(APIView):
         resp.raise_for_status()
         resp_dict = xmltodict.parse(resp.content)
         items = resp_dict.get("rss", {}).get("channel", {}).get("item", [])
-        # return render(request, "blog.html")
-        return Response({"blogs": items})
+        categories = set()
+        for item in items:
+            transform_blog_item(item)
+            item_categories = item["category"] if type(item["category"]) == list else [item["category"]]
+            for category in item_categories:
+                categories.add(category)
+
+            del item["content:encoded"]
+            del item["pubDate"]
+            del item["guid"]
+            del item["dc:date"]
+        return Response({"blogs": items, "categories": categories})

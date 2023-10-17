@@ -4,26 +4,29 @@ import React from "react"
 import DocumentTitle from "react-document-title"
 import { compose } from "redux"
 import { connect } from "react-redux"
-import { connectRequest, requestAsync } from "redux-query"
+import { connectRequest } from "redux-query"
 import { createStructuredSelector } from "reselect"
+import Slider from "react-slick"
 
 
-import { addUserNotification } from "../../actions"
 import queries from "../../lib/queries"
-import users, { currentUserSelector } from "../../lib/queries/users"
 import type {Blog} from "../../flow/blogTypes"
-import type {UserEnrollments} from "../../flow/courseTypes"
 
 type Props = {
   blogs: Array<Blog>,
-  enrollments: UserEnrollments,
 }
 
 export class BlogPage extends React.Component<Props> {
   render() {
-    const {blogs, enrollments} = this.props
+    const settings = {
+      dots:           true,
+      infinite:       true,
+      speed:          500,
+      slidesToShow:   1,
+      slidesToScroll: 1
+    }
+    const { blogs } = this.props
     console.log("BLOGS:", blogs)
-    console.log("ENROLLMENTS:", enrollments)
 
     return (
       <React.Fragment>
@@ -43,7 +46,7 @@ export class BlogPage extends React.Component<Props> {
                     </div>
                   </div>
                   <div className="subscribe">
-                    <a href="">Subscribe</a>
+                    <a href="https://learn-xpro.mit.edu/the-curve-subscribe">Subscribe</a>
                   </div>
                 </div>
                 <div className="recent-posts-heading">
@@ -132,7 +135,7 @@ export class BlogPage extends React.Component<Props> {
                       </div>
                     </div>
                     <div className="subscribe">
-                      <a href="">Subscribe Now</a>
+                      <a href="https://learn-xpro.mit.edu/the-curve-subscribe">Subscribe Now</a>
                     </div>
                   </div>
                 </div>
@@ -254,12 +257,10 @@ export class BlogPage extends React.Component<Props> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  enrollments: queries.enrollment.enrollmentsSelector,
-  blogs:       queries.blog.blogsSelector,
+  blogs: queries.blog.blogsSelector,
 })
 
 const mapPropsToConfigs = () => [
-  queries.enrollment.enrollmentsQuery(),
   queries.blog.blogsQuery(),
 ]
 
