@@ -7,6 +7,7 @@ export type blogPost = {
   author: string,
   banner_image: string,
   published_date: string,
+  guid: string,
 }
 
 export type Blogs = {

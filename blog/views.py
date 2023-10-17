@@ -27,6 +27,5 @@ class BlogListView(APIView):
 
             del item["content:encoded"]
             del item["pubDate"]
-            del item["guid"]
             del item["dc:date"]
-        return Response({"blogs": items, "categories": categories})
+        return Response({"posts": items, "categories": categories})
