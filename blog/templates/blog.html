@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% load static render_bundle image_version_url tz %}
+
+{% block title %}Webinars{% endblock %}
+
+{% block headercontent %}
+  <div id="header"></div>
+  {% render_bundle 'header' %}
+{% endblock %}
+
+{% block content %}
+  <div class="webinars">
+      <h1>HELLLLLOOOOOOO</h1>
+  </div>
+{% endblock %}
+
+{% block contact-us %}
+  {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
+    {% include "subscription.html" %}
+  {% endif %}
+{% endblock %}

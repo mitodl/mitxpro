@@ -11,11 +11,20 @@ import { createStructuredSelector } from "reselect"
 import { addUserNotification } from "../../actions"
 import queries from "../../lib/queries"
 import users, { currentUserSelector } from "../../lib/queries/users"
+import type {Blog} from "../../flow/blogTypes"
+import type {UserEnrollments} from "../../flow/courseTypes"
 
+type Props = {
+  blogs: Array<Blog>,
+  enrollments: UserEnrollments,
+}
 
-export class BlogPage extends React.Component {
-
+export class BlogPage extends React.Component<Props> {
   render() {
+    const {blogs, enrollments} = this.props
+    console.log("BLOGS:", blogs)
+    console.log("ENROLLMENTS:", enrollments)
+
     return (
       <React.Fragment>
         <DocumentTitle
@@ -246,29 +255,15 @@ export class BlogPage extends React.Component {
 
 const mapStateToProps = createStructuredSelector({
   enrollments: queries.enrollment.enrollmentsSelector,
-  currentUser: currentUserSelector
+  blogs:       queries.blog.blogsSelector,
 })
 
 const mapPropsToConfigs = () => [
   queries.enrollment.enrollmentsQuery(),
-  users.currentUserQuery()
+  queries.blog.blogsQuery(),
 ]
 
-const requestDigitalCredentials = (uuid: string, isCourse: boolean) =>
-  requestAsync({
-    ...queries.digitalCredentials.requestDigitalCredentials(uuid, isCourse),
-    force: true
-  })
-
-const mapDispatchToProps = {
-  requestDigitalCredentials,
-  addUserNotification
-}
-
 export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps),
   connectRequest(mapPropsToConfigs)
 )(BlogPage)
