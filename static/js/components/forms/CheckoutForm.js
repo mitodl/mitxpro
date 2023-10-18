@@ -344,7 +344,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                 {coupon ? (
                   <div className="flex-row discount-row">
                     <span>Discount:</span>
-                    <span>{formatDiscount(formatNumber(calculateDiscount(item, coupon)))}</span>
+                    <span>{formatDiscount(calculateDiscount(item, coupon))}</span>
                   </div>
                 ) : null}
                 {SETTINGS.enable_taxes_display ? (
