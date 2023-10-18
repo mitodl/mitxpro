@@ -1,4 +1,9 @@
 
+type blogCategory = {
+  name: string,
+  link: string
+}
+
 export type blogPost = {
   title: string,
   link: string,
