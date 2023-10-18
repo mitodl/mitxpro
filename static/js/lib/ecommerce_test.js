@@ -12,6 +12,7 @@ import {
   calculateTotalAfterTax,
   formatPrice,
   formatNumber,
+  formatDiscount,
   formatRunTitle
 } from "./ecommerce"
 import { makeCourseRun } from "../factories/course"
@@ -107,11 +108,35 @@ describe("ecommerce", () => {
       assert.equal(formatNumber(20.6059), "20.61")
       assert.equal(formatNumber(20.6959), "20.70")
       assert.equal(formatNumber(20.1234567), "20.12")
+      assert.equal(formatNumber(0), "0")
     })
 
     it("returns an empty string if null or undefined", () => {
       assert.equal(formatNumber(null), "")
       assert.equal(formatNumber(undefined), "")
+    })
+  })
+
+  describe("formatDiscount", () => {
+    it("format a discount", () => {
+      assert.equal(formatDiscount(20), "-$20")
+      assert.equal(formatDiscount(-20), "-$20")
+      assert.equal(formatDiscount(20, true), "-$20.00")
+      assert.equal(formatDiscount(20.00), "-$20")
+      assert.equal(formatDiscount(20.00, true), "-$20.00")
+      assert.equal(formatDiscount(-20.00, true), "-$20.00")
+      assert.equal(formatDiscount(20.1), "-$20.1")
+      assert.equal(formatDiscount(20.1, true), "-$20.10")
+      assert.equal(formatDiscount(20.6959), "-$20.7")
+      assert.equal(formatDiscount(-20.6959), "-$20.7")
+      assert.equal(formatDiscount(20.6959, true), "-$20.70")
+      assert.equal(formatDiscount(0.00), "$0")
+      assert.equal(formatDiscount(0.00, true), "$0.00")
+    })
+
+    it("returns $0 string if null or undefined", () => {
+      assert.equal(formatDiscount(null), "$0")
+      assert.equal(formatDiscount(undefined), "$0")
     })
   })
 

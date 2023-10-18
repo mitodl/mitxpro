@@ -95,7 +95,7 @@ describe("CheckoutForm", () => {
       if (hasCoupon) {
         assert.equal(
           inner.find(".discount-row").text(),
-          `Discount:${formatPrice(calculateDiscount(basketItem, coupon))}`
+          `Discount:-${formatPrice(calculateDiscount(basketItem, coupon))}`
         )
       } else {
         assert.isFalse(inner.find(".discount-row").exists())
