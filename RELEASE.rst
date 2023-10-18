@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.132.1
+---------------
+
+- fix: configure course or program format (#2747)
+
 Version 0.132.0 (Released October 16, 2023)
 ---------------
 
