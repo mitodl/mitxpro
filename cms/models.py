@@ -55,6 +55,8 @@ from cms.constants import (
     WEBINAR_DEFAULT_IMAGES,
     WEBINAR_HEADER_BANNER,
     WEBINAR_INDEX_SLUG,
+    FORMAT_ONLINE,
+    FORMAT_OTHER,
 )
 from cms.forms import CertificatePageForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
@@ -787,6 +789,16 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         blank=True,
         help_text="A short description indicating how long it takes to complete (e.g. '4 weeks')",
     )
+    FORMAT_CHOICES = [
+        (FORMAT_ONLINE, FORMAT_ONLINE),
+        (FORMAT_OTHER, FORMAT_OTHER),
+    ]
+    format = models.CharField(
+        max_length=20,
+        choices=FORMAT_CHOICES,
+        default=FORMAT_ONLINE,
+        help_text="A short description indicating the format of a program or course",
+    )
     background_image = models.ForeignKey(
         Image,
         null=True,
@@ -835,6 +847,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         FieldPanel("video_title"),
         FieldPanel("video_url"),
         FieldPanel("duration"),
+        FieldPanel("format"),
         FieldPanel("time_commitment"),
         FieldPanel("description", classname="full"),
         FieldPanel("catalog_details", classname="full"),

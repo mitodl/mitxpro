@@ -16,6 +16,8 @@ from cms.constants import (
     UPCOMING_WEBINAR,
     UPCOMING_WEBINAR_BUTTON_TITLE,
     WEBINAR_HEADER_BANNER,
+    FORMAT_ONLINE,
+    FORMAT_OTHER,
 )
 from cms.factories import (
     CertificatePageFactory,
@@ -827,6 +829,7 @@ def test_course_page_properties():
         description="<p>desc</p>",
         catalog_details="<p>catalog desc</p>",
         duration="1 week",
+        format=FORMAT_ONLINE,
         video_title="<p>title</p>",
         video_url="http://test.com/mock.mp4",
         background_image__title="background-image",
@@ -836,6 +839,7 @@ def test_course_page_properties():
     assert course_page.description == "<p>desc</p>"
     assert course_page.catalog_details == "<p>catalog desc</p>"
     assert course_page.duration == "1 week"
+    assert course_page.format == FORMAT_ONLINE
     assert course_page.video_title == "<p>title</p>"
     assert course_page.video_url == "http://test.com/mock.mp4"
     assert course_page.background_image.title == "background-image"
@@ -851,6 +855,7 @@ def test_external_course_page_properties():
         description="<p>desc</p>",
         catalog_details="<p>catalog desc</p>",
         duration="1 week",
+        format=FORMAT_OTHER,
         video_title="<p>title</p>",
         video_url="http://test.com/mock.mp4",
         background_image__title="background-image",
@@ -861,6 +866,7 @@ def test_external_course_page_properties():
     assert external_course_page.description == "<p>desc</p>"
     assert external_course_page.catalog_details == "<p>catalog desc</p>"
     assert external_course_page.duration == "1 week"
+    assert external_course_page.format == FORMAT_OTHER
     assert external_course_page.video_title == "<p>title</p>"
     assert external_course_page.video_url == "http://test.com/mock.mp4"
     assert external_course_page.background_image.title == "background-image"
@@ -868,6 +874,33 @@ def test_external_course_page_properties():
     assert not external_course_page.course_lineup
     assert external_course_page.course_pages
     assert external_course_page.product == external_course_page.course
+
+
+def test_course_page_format_field_default_value():
+    """
+    Verifies that the "format" field in a course page has the default value FORMAT_ONLINE.
+    """
+    course_page = CoursePageFactory.create()
+
+    assert course_page.format == FORMAT_ONLINE
+
+
+@pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_OTHER])
+def test_course_page_format_field_choices(course_format, staff_user):
+    """
+    Verifies that if the "format" field in a course page contains the values FORMAT_ONLINE and FORMAT_OTHER,
+    and they are in the same context.
+    """
+    course_page = CoursePageFactory.create(format=course_format)
+
+    rf = RequestFactory()
+    request = rf.get("/")
+    request.user = staff_user
+
+    context = course_page.get_context(request=request)
+    context_format = context.get("page").format
+
+    assert context_format == course_format
 
 
 def test_program_page_properties():
@@ -880,6 +913,7 @@ def test_program_page_properties():
         description="<p>desc</p>",
         catalog_details="<p>catalog desc</p>",
         duration="1 week",
+        format=FORMAT_ONLINE,
         video_title="<p>title</p>",
         video_url="http://test.com/mock.mp4",
         background_image__title="background-image",
@@ -889,6 +923,7 @@ def test_program_page_properties():
     assert program_page.description == "<p>desc</p>"
     assert program_page.catalog_details == "<p>catalog desc</p>"
     assert program_page.duration == "1 week"
+    assert program_page.format == FORMAT_ONLINE
     assert program_page.video_title == "<p>title</p>"
     assert program_page.video_url == "http://test.com/mock.mp4"
     assert program_page.background_image.title == "background-image"
@@ -904,6 +939,7 @@ def test_external_program_page_properties():
         description="<p>desc</p>",
         catalog_details="<p>catalog desc</p>",
         duration="1 week",
+        format=FORMAT_OTHER,
         video_title="<p>title</p>",
         video_url="http://test.com/mock.mp4",
         background_image__title="background-image",
@@ -914,9 +950,37 @@ def test_external_program_page_properties():
     assert external_program_page.description == "<p>desc</p>"
     assert external_program_page.catalog_details == "<p>catalog desc</p>"
     assert external_program_page.duration == "1 week"
+    assert external_program_page.format == FORMAT_OTHER
     assert external_program_page.video_title == "<p>title</p>"
     assert external_program_page.video_url == "http://test.com/mock.mp4"
     assert external_program_page.background_image.title == "background-image"
+
+
+def test_program_page_format_field_default_value():
+    """
+    Verifies that the "format" field in a program page has the default value FORMAT_ONLINE.
+    """
+    program_page = ProgramPageFactory.create()
+
+    assert program_page.format == FORMAT_ONLINE
+
+
+@pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_OTHER])
+def test_program_page_format_field_choices(program_format, staff_user):
+    """
+    Verifies that if the "format" field in a program page contains the values FORMAT_ONLINE and FORMAT_OTHER,
+    and they are in the same context.
+    """
+    program_page = ProgramPageFactory.create(format=program_format)
+
+    rf = RequestFactory()
+    request = rf.get("/")
+    request.user = staff_user
+
+    context = program_page.get_context(request=request)
+    context_format = context.get("page").format
+
+    assert context_format == program_format
 
 
 def test_course_page_learning_outcomes():

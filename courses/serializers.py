@@ -184,9 +184,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_format(self, instance):  # pylint: disable=unused-argument
         """Returns the format of the course"""
-        # Currently hardcoded at the frontend as well, At some point we'll need to move it into CMS to make it
-        # configurable.
-        return "Online"
+        return instance.page.format if instance.page and instance.page.format else None
 
     def get_platform(self, instance):
         """Returns the platform name of the course"""
@@ -374,10 +372,8 @@ class ProgramSerializer(serializers.ModelSerializer):
         )
 
     def get_format(self, instance):  # pylint: disable=unused-argument
-        """Returns the format of the course"""
-        # Currently hardcoded at the frontend as well, At some point we'll need to move it into CMS to make it
-        # configurable.
-        return "Online"
+        """Returns the format of the program"""
+        return instance.page.format if instance.page and instance.page.format else None
 
     def get_platform(self, instance):
         """Returns the platform name of the program"""
