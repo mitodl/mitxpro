@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.132.2
+---------------
+
+- fix: display discount amount as negative (#2794)
+
 Version 0.132.1 (Released October 18, 2023)
 ---------------
 
