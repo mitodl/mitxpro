@@ -140,6 +140,26 @@ export const formatPrice = (price: ?string | number | Decimal): string => {
   return formattedPrice
 }
 
+export const formatDiscount = (discount: ?string | number | Decimal, forcePrecision: boolean = false): string => {
+  if (discount === null || discount === undefined) {
+    return "$0"
+  }
+
+  let formattedDiscount = new Decimal(formatNumber(discount))
+
+  formattedDiscount = Math.abs(formattedDiscount)
+  if (forcePrecision) {
+    formattedDiscount = formattedDiscount.toFixed(2)
+  }
+
+  // $FlowFixMe: formatted_discount is a Decimal here
+  if (formattedDiscount == 0) {  // eslint-disable-line eqeqeq
+    return `$${formattedDiscount}`
+  } else {
+    return `-$${formattedDiscount}`
+  }
+}
+
 export const formatCoursewareDate = (dateString: ?string) =>
   dateString ? moment(dateString).format("ll") : "?"
 
