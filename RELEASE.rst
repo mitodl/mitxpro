@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.132.2
+Version 0.132.2 (Released October 23, 2023)
 ---------------
 
 - fix: receipt email typo (#2799)
