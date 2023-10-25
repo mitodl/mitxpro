@@ -44,6 +44,10 @@
         <a href="{{ courseware_url }}" class="read-more">
           Learn more about this courseware or enroll
         </a>
+      {% else %}
+        <a href="/catalog" class="read-more">
+          Explore MITx PRO Catalog
+        </a>
       {% endif %}
       <a href="{% pageurl page.get_parent %}" class="back-to-top">Back to webinars</a>
     </div>
