@@ -58,7 +58,7 @@ ipython = "^8.10.0"
 mitol-django-common = "2.7.0"
 mitol-django-digital-credentials = "3.3.0"
 mitol-django-hubspot-api = { version = "2023.5.22", extras = [] }
-mitol-django-mail = "3.3.0"
+mitol-django-mail = "2023.1.17"
 mitol-django-oauth-toolkit-extensions = "1.3.0"
 mitol-django-authentication = "1.6.0"
 newrelic = "^8.4.0"
