@@ -2164,13 +2164,13 @@ files = [
 
 [[package]]
 name = "mitol-django-authentication"
-version = "1.6.0"
+version = "2023.1.17"
 description = "MIT Open Learning django app extensions for oauth toolkit"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "mitol-django-authentication-1.6.0.tar.gz", hash = "sha256:bc8ce5b408751b6bc946d2f38a5e2cc061f8a8e6d09d01346ef23b4b19a60d5d"},
-    {file = "mitol_django_authentication-1.6.0-py3-none-any.whl", hash = "sha256:84a348d1465263622b0b77d29b2ce6139e66bc4dcf6e3b7aae23909df64c891b"},
+    {file = "mitol-django-authentication-2023.1.17.tar.gz", hash = "sha256:58bbfecd86796b70cb6781ad69dfa045e29fbd1f01bc2f7297084e3568f3244e"},
+    {file = "mitol_django_authentication-2023.1.17-py3-none-any.whl", hash = "sha256:5b08e5faa968f8a2d083e5312e9f19ed5584e60b06fa28ad0baf58a654fb2a40"},
 ]
 
 [package.dependencies]
@@ -2178,8 +2178,8 @@ django = ">=2.2.12,<4.0"
 django-anymail = ">=6.0"
 djangorestframework = ">=3.0.0"
 djoser = "2.1.0"
-mitol-django-common = ">=2.7.0,<2.8.0"
-mitol-django-mail = ">=3.3.0,<3.4.0"
+mitol-django-common = "*"
+mitol-django-mail = "*"
 social-auth-app-django = ">=3.1.0"
 
 [[package]]
@@ -3905,4 +3905,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.14"
-content-hash = "d6a76636aee7361f1eda311b5a20542d4910f8b98a80bc534936a1a56e4b271c"
+content-hash = "1ab34451d2465feb5ecf6c90a28802801cf2baebd27e218e10e3e6129589f540"
