@@ -2206,13 +2206,13 @@ typing-extensions = "*"
 
 [[package]]
 name = "mitol-django-digital-credentials"
-version = "3.3.0"
+version = "2023.1.17"
 description = "Django application to support digital credentials"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "mitol-django-digital-credentials-3.3.0.tar.gz", hash = "sha256:1b1e02057b1a756ffee879ac93def0705ad0ec34365ea981e6a6eeca02969d0d"},
-    {file = "mitol_django_digital_credentials-3.3.0-py3-none-any.whl", hash = "sha256:e273240eea5e40f887f9ac61f76c29613a6f3d04f019e4a9c2758db615d6648c"},
+    {file = "mitol-django-digital-credentials-2023.1.17.tar.gz", hash = "sha256:401015d268a1482235fc14f8ac7345571e19fbcd967c6e98ca521873ca7b2360"},
+    {file = "mitol_django_digital_credentials-2023.1.17-py3-none-any.whl", hash = "sha256:d96089ad115c2981cf5154d9976998dea8d709240bed50d6a53e3fad0aab2044"},
 ]
 
 [package.dependencies]
@@ -2220,7 +2220,7 @@ django = ">=2.2.12,<4.0"
 django-oauth-toolkit = ">=1.3.3"
 djangorestframework = ">=3.0.0"
 factory-boy = ">=3.2,<4.0"
-mitol-django-common = ">=2.7.0,<2.8.0"
+mitol-django-common = "*"
 requests = ">=2.20.0"
 
 [[package]]
@@ -3905,4 +3905,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.14"
-content-hash = "d6a76636aee7361f1eda311b5a20542d4910f8b98a80bc534936a1a56e4b271c"
+content-hash = "8a44f851ddd0602da284ea62fbd3a62026e006954a0226a86679799cc504f78f"
