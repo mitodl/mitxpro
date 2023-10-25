@@ -918,13 +918,13 @@ files = [
 
 [[package]]
 name = "django"
-version = "3.2.21"
+version = "3.2.22"
 description = "A high-level Python Web framework that encourages rapid development and clean, pragmatic design."
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "Django-3.2.21-py3-none-any.whl", hash = "sha256:d31b06c58aa2cd73998ca5966bc3001243d3c4e77ee2d0c479bced124765fd99"},
-    {file = "Django-3.2.21.tar.gz", hash = "sha256:a5de4c484e7b7418e6d3e52a5b8794f0e6b9f9e4ce3c037018cf1c489fa87f3c"},
+    {file = "Django-3.2.22-py3-none-any.whl", hash = "sha256:c5e7b668025a6e06cad9ba6d4de1fd1a21212acebb51ea34abb400c6e4d33430"},
+    {file = "Django-3.2.22.tar.gz", hash = "sha256:83b6d66b06e484807d778263fdc7f9186d4dc1862fcfa6507830446ac6b060ba"},
 ]
 
 [package.dependencies]
@@ -3905,4 +3905,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.14"
-content-hash = "1999ed112c122beb3e83fb9d8645b69aa260789a09741dca2f762ca6b731e03d"
+content-hash = "d6a76636aee7361f1eda311b5a20542d4910f8b98a80bc534936a1a56e4b271c"
