@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.133.0
+---------------
+
+- fix(deps): update dependency pytest and mitol-django-* (#2809)
+- feat: add xpro catalog link when no courseware is associated (#2801)
+- chore(deps): update dependency pytest-mock to v3.12.0 (#2803)
+- fix(deps): update dependency django to v3.2.22 (#2802)
+
 Version 0.132.2 (Released October 23, 2023)
 ---------------
 
