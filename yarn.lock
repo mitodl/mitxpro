@@ -3365,17 +3365,17 @@ __metadata:
   linkType: hard
 
 "babel-loader@npm:^8.0.5":
-  version: 8.2.3
-  resolution: "babel-loader@npm:8.2.3"
+  version: 8.3.0
+  resolution: "babel-loader@npm:8.3.0"
   dependencies:
     find-cache-dir: ^3.3.1
-    loader-utils: ^1.4.0
+    loader-utils: ^2.0.0
     make-dir: ^3.1.0
     schema-utils: ^2.6.5
   peerDependencies:
     "@babel/core": ^7.0.0
     webpack: ">=2"
-  checksum: 78e1e1a91954d644b6ce66366834d4d245febbc0fde33e4e2831725e83d6e760d12b3a78e9534ce92af69067bef1d9d9674df36d8c1f20ee127bc2354b2203ba
+  checksum: d48bcf9e030e598656ad3ff5fb85967db2eaaf38af5b4a4b99d25618a2057f9f100e6b231af2a46c1913206db506115ca7a8cbdf52c9c73d767070dae4352ab5
   languageName: node
   linkType: hard
 
