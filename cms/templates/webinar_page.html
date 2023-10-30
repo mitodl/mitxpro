@@ -28,9 +28,9 @@
     <div class="col-md-12">
       {% if page.date %}
         {% if page.is_upcoming_webinar %}
-        <p>{{ page.formatted_date }} | {{ page.time }}</p>
+          <p>{{ page.formatted_date }} | {{ page.time }}</p>
         {% else %}
-        <p>{{ page.formatted_date }}</p>
+          <p>{{ page.formatted_date }}</p>
         {% endif %}
       {% endif %}
       {% if page.action_url and not page.is_upcoming_webinar %}
