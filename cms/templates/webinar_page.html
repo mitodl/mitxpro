@@ -24,10 +24,14 @@
   </div>
 
 <div class="container resource-container">
-  <div class="row">
+  <div class="row webinar-row">
     <div class="col-md-12">
       {% if page.date %}
+        {% if page.is_upcoming_webinar %}
         <p>{{ page.formatted_date }} | {{ page.time }}</p>
+        {% else %}
+        <p>{{ page.formatted_date }}</p>
+        {% endif %}
       {% endif %}
       {% if page.action_url and not page.is_upcoming_webinar %}
         <div class="col-md-12 resource-video">
@@ -42,14 +46,18 @@
       {% endif %}
       {% if page.course or page.program %}
         <a href="{{ courseware_url }}" class="read-more">
-          Learn more about this courseware or enroll
+          {% if page.course %}
+            Learn more about this course or enroll
+          {% else %}
+            Learn more about this program or enroll
+          {% endif %}
         </a>
       {% else %}
         <a href="/catalog/" class="read-more">
           Explore MITx PRO Catalog
         </a>
       {% endif %}
-      <a href="{% pageurl page.get_parent %}" class="back-to-top">Back to webinars</a>
+      <a href="{% pageurl page.get_parent %}" class="back-to-top back-to-webinars">Back to webinars</a>
     </div>
   </div>
 </div>

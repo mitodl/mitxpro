@@ -108,11 +108,11 @@
           background: $primary;
           border-radius: 3px;
           padding: 5px 5px 5px 10px;
-          font-size: 18px;
+          font-size: 20px;
           line-height: 24px;
           display: inline-block;
           vertical-align: top;
-          font-weight: 600;
+          font-weight: 800;
           text-transform: uppercase;
           color: white;
 
@@ -142,4 +142,12 @@
   h2 {
     color: white;
   }
+}
+
+.webinar-row {
+  padding-top: 30px;
+}
+
+.back-to-webinars {
+  float: right;
 }
