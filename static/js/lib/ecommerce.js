@@ -117,13 +117,13 @@ export const calcSelectedRunIds = (
     : {}
 }
 
-export const formatNumber = (number: ?string | number | Decimal): string => {
+export const formatNumber = (number: ?string | number | Decimal, trimTrailingZeros: boolean = true): Decimal => {
   if (number === null || number === undefined) {
     return ""
   } else {
     let formattedNumber: Decimal = Decimal(number)
 
-    if (formattedNumber.isInteger()) {
+    if (formattedNumber.isInteger() && trimTrailingZeros) {
       formattedNumber = formattedNumber.toFixed(0)
     } else {
       formattedNumber = formattedNumber.toFixed(2, Decimal.ROUND_HALF_UP)
@@ -132,32 +132,29 @@ export const formatNumber = (number: ?string | number | Decimal): string => {
   }
 }
 
-export const formatPrice = (price: ?string | number | Decimal): string => {
-  let formattedPrice = formatNumber(price)
+export const formatPrice = (price: ?string | number | Decimal, trimTrailingZeros: boolean = false): string => {
+  let formattedPrice = formatNumber(price, trimTrailingZeros)
   if (formattedPrice) {
     formattedPrice = `$${formattedPrice}`
   }
   return formattedPrice
 }
 
-export const formatDiscount = (discount: ?string | number | Decimal, forcePrecision: boolean = false): string => {
+export const formatDiscount = (discount: ?string | number | Decimal, trimTrailingZeros: boolean = false): string => {
   if (discount === null || discount === undefined) {
-    return "$0"
+    return "$0.00"
   }
 
-  let formattedDiscount = new Decimal(formatNumber(discount))
+  let formattedDiscount = formatNumber(discount, trimTrailingZeros)
 
-  formattedDiscount = Math.abs(formattedDiscount)
-  if (forcePrecision) {
-    formattedDiscount = formattedDiscount.toFixed(2)
-  }
-
-  // $FlowFixMe: formatted_discount is a Decimal here
   if (formattedDiscount == 0) {  // eslint-disable-line eqeqeq
     return `$${formattedDiscount}`
-  } else {
-    return `-$${formattedDiscount}`
   }
+  else if (formattedDiscount < 0) {
+    formattedDiscount = (formattedDiscount * -1).toFixed(2)
+  }
+  // $FlowFixMe: formatted_discount is a Decimal here
+    return `-$${formattedDiscount}`
 }
 
 export const formatCoursewareDate = (dateString: ?string) =>
