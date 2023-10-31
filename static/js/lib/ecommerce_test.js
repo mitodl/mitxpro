@@ -120,11 +120,11 @@ describe("ecommerce", () => {
   describe("formatDiscount", () => {
     it("format a discount", () => {
       assert.equal(formatDiscount(20), "-$20.00")
-      // assert.equal(formatDiscount(-20), "-$20.00")
+      assert.equal(formatDiscount(-20), "-$20.00")
       assert.equal(formatDiscount(20), "-$20.00")
       assert.equal(formatDiscount(20.00), "-$20.00")
       assert.equal(formatDiscount(20.00), "-$20.00")
-      // assert.equal(formatDiscount(-20.00), "-$20.00")
+      assert.equal(formatDiscount(-20.00), "-$20.00")
       assert.equal(formatDiscount(20.1), "-$20.10")
       assert.equal(formatDiscount(20.1), "-$20.10")
       assert.equal(formatDiscount(20.6959), "-$20.70")

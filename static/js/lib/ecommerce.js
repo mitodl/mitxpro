@@ -149,12 +149,11 @@ export const formatDiscount = (discount: ?string | number | Decimal, trimTrailin
 
   if (formattedDiscount == 0) {  // eslint-disable-line eqeqeq
     return `$${formattedDiscount}`
-  }
-  else if (formattedDiscount < 0) {
+  } else if (formattedDiscount < 0) {
     formattedDiscount = (formattedDiscount * -1).toFixed(2)
   }
   // $FlowFixMe: formatted_discount is a Decimal here
-    return `-$${formattedDiscount}`
+  return `-$${formattedDiscount}`
 }
 
 export const formatCoursewareDate = (dateString: ?string) =>
