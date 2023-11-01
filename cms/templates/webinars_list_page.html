@@ -42,8 +42,12 @@
                 {% if webinar.description %}
                   <p class="description">{{ webinar.description }}</p>
                 {% endif %}
-                {% if webinar.date and webinar.time %}
-                  <p class="time">{{ webinar.formatted_date }} | {{ webinar.time }}</p>
+                {% if webinar.date %}
+                  {% if webinar.is_upcoming_webinar and webinar.time %}
+                    <p class="time">{{ webinar.formatted_date }} | {{ webinar.time }}</p>
+                  {% else %}
+                    <p class="time">{{ webinar.formatted_date }} </p>
+                  {% endif %}
                 {% endif %}
                   <a href="{{ webinar.detail_page_url }}" class="read-more">{{ webinar.detail_page_button_title }}</a>
               </div>
