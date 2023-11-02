@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.133.0
+Version 0.133.0 (Released November 02, 2023)
 ---------------
 
 - fix(deps): update dependency pytest and mitol-django-* (#2809)
