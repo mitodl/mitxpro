@@ -284,7 +284,7 @@ export class ReceiptPage extends React.Component<Props> {
                               <div>${line.price}</div>
                             </td>
                             <td>
-                              <div>{formatDiscount(line.discount, true)}</div>
+                              <div>{formatDiscount(line.discount)}</div>
                             </td>
                             {SETTINGS.enable_taxes_display ? (
                               <td>
