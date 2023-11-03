@@ -3,8 +3,8 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
+from courses.constants import DEFAULT_PLATFORM_NAME
 
-DEFAULT_PLATFORM_NAME = "xPRO"
 
 
 def setup_courseware_platform(apps, shcema_editor, courseware_cls):

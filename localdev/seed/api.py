@@ -12,7 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from wagtail.core.models import Page
 from rest_framework.exceptions import ValidationError
 
-from courses.constants import CONTENT_TYPE_MODEL_COURSERUN
+from courses.constants import CONTENT_TYPE_MODEL_COURSERUN, DEFAULT_PLATFORM_NAME
 from courses.models import (
     Program,
     Course,
@@ -337,13 +337,6 @@ class SeedDataLoader:
             field_name = "payment__{}".format(field_name)
         return model_cls.objects.filter(**{field_name: seeded_value})
 
-    def _get_platform(self, data):
-        """Check the data dictionary and return approriate platform"""
-        if data.get("platform", None) is not None:
-            return Platform.objects.get_or_create(name=data.get("platform"))[0]
-        else:
-            return Platform.objects.get_or_create(name="xPRO")[0]
-
     def _deserialize_courseware_object(self, serializer_cls, data):
         """
         Attempts to deserialize and save a courseware object (Program/Course/CourseRun),
@@ -359,8 +352,6 @@ class SeedDataLoader:
             **filter_for_model_fields(model_cls, data),
             **{seeded_field_name: seeded_value},
         }
-
-        adjusted_data["platform"] = self._get_platform(data).id
 
         existing_qset = model_cls.objects.filter(**{seeded_field_name: seeded_value})
         if existing_qset.exists():
@@ -613,8 +604,19 @@ class SeedDataLoader:
         """
         Iterate through raw seed data and yields the specification for models that will be created/updated/deleted
         """
+
+        def get_platform_id(platform_name):
+            """Assure that each Course and Program gets a platfrom even when not provided by seed_data"""
+            return Platform.objects.get_or_create(name=platform_name if platform_name else DEFAULT_PLATFORM_NAME)[0].id
+
         for raw_program_data in raw_data["programs"]:
-            yield SeedDataSpec(model_cls=Program, data=raw_program_data, parent=None)
+            platfrom_id = get_platform_id(raw_program_data.pop("platform", None))
+
+            yield SeedDataSpec(
+                model_cls=Program,
+                data={**raw_program_data, "platform": platfrom_id},
+                parent=None,
+            )
 
         for raw_course_data in raw_data["courses"]:
             program_title = raw_course_data.get("program")
@@ -627,6 +629,7 @@ class SeedDataLoader:
                 if program_title
                 else None
             )
+            platform_id = get_platform_id(raw_course_data.get("platform", None))
             course_runs_data = raw_course_data.get("course_runs", [])
             course_spec = SeedDataSpec(
                 model_cls=Course,
@@ -635,6 +638,7 @@ class SeedDataLoader:
                     # so it has to be excluded
                     **dict_without_keys(raw_course_data, "course_runs"),
                     "program": program_id,
+                    "platform": platform_id,
                 },
                 parent=None,
             )
