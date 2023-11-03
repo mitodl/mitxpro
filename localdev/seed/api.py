@@ -606,15 +606,17 @@ class SeedDataLoader:
         """
 
         def get_platform_id(platform_name):
-            """Assure that each Course and Program gets a platfrom even when not provided by seed_data"""
-            return Platform.objects.get_or_create(name=platform_name if platform_name else DEFAULT_PLATFORM_NAME)[0].id
+            """Assure that each Course and Program gets a platform even when not provided by seed_data"""
+            return Platform.objects.get_or_create(
+                name=platform_name if platform_name else DEFAULT_PLATFORM_NAME
+            )[0].id
 
         for raw_program_data in raw_data["programs"]:
-            platfrom_id = get_platform_id(raw_program_data.pop("platform", None))
+            platform_id = get_platform_id(raw_program_data.pop("platform", None))
 
             yield SeedDataSpec(
                 model_cls=Program,
-                data={**raw_program_data, "platform": platfrom_id},
+                data={**raw_program_data, "platform": platform_id},
                 parent=None,
             )
 

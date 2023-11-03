@@ -6,7 +6,6 @@ import django.db.models.deletion
 from courses.constants import DEFAULT_PLATFORM_NAME
 
 
-
 def setup_courseware_platform(apps, shcema_editor, courseware_cls):
     """Associate a platform to the courseware entries without a platform"""
 
