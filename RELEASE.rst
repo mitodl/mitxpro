@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.134.0
+Version 0.134.0 (Released November 07, 2023)
 ---------------
 
 - fix: postgres startup error without password (#2822)
