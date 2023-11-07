@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.134.0 (Released November 07, 2023)
+---------------
+
+- fix: postgres startup error without password (#2822)
+- fix(deps): update dependency django to v3.2.23 [security]
+- fix: Unify decimal places for price and discount (#2821)
+- style: design tweaks in webinar designs (#2820)
+- fix(deps): update dependency babel-loader to v8.3.0
+- fix(deps): update babel monorepo
+- chore(deps): update yarn to v3.6.4
+- chore(deps): update postgres docker tag to v11.16
+- chore(deps): update nginx docker tag to v1.25.3
+- chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v6.8.23
+- chore(deps): update dependency safety to v2.3.5
+
 Version 0.133.0 (Released November 02, 2023)
 ---------------
 
