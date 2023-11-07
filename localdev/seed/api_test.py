@@ -3,7 +3,7 @@
 from types import SimpleNamespace
 import pytest
 
-from courses.models import Program, Course, CourseRun, CourseTopic
+from courses.models import Program, Course, CourseRun, CourseTopic, Platform
 from cms.models import ProgramPage, CoursePage, ResourcePage
 from ecommerce.models import Product, ProductVersion
 from ecommerce.test_utils import unprotect_version_tables
@@ -72,6 +72,9 @@ def test_seed_and_unseed_data(seeded):
     assert ResourcePage.objects.count() == expected_resource_pages
     assert Product.objects.count() == expected_products
     assert ProductVersion.objects.count() == expected_products
+    # We have one named platform in SeedData Json, and the remaining should be created as default.
+    # Total=3 because platforms are re-used based on name. 2 from Json, 1 by default
+    assert Platform.objects.count() == 3
 
     with unprotect_version_tables():
         seeded.loader.delete_seed_data(seeded.raw_data)

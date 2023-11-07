@@ -8,7 +8,8 @@
             "format": "Other",
             "_product": {
                 "price": 2499
-            }
+            },
+            "platform": "xPRO-SysEng"
         },
         {
             "title": "Digital Learning",
@@ -35,6 +36,7 @@
             "subhead": "This is edX's demo course",
             "readable_id": "course-v1:edX+DemoX+Demo_Course",
             "format": "Online",
+            "platform": "xPRO-Demo",
             "course_runs": [
                 {
                     "title": "edX Demonstration Course - Spring 2013",
