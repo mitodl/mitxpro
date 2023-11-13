@@ -7,13 +7,12 @@ from django.conf import settings
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseNotFound, HttpResponseServerError
-from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.template.loader import render_to_string
-from rest_framework.views import APIView
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
-from django.http import JsonResponse
+from rest_framework.views import APIView
 
 from mitxpro.serializers import AppContextSerializer
 
