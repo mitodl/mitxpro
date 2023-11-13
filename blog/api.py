@@ -18,7 +18,7 @@ def transform_blog_item(item):
     df = DateFormat(published_date)
     item["published_date"] = df.format("F jS, Y")
 
-    item["category"] = (
+    item["categories"] = (
         item["category"] if type(item["category"]) == list else [item["category"]]
     )
 

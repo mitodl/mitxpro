@@ -18,6 +18,7 @@ import imageCarousel from "../image_carousel.js"
 import facultyCarousel from "../faculty_carousel.js"
 import productDetails from "../product_detail.js"
 import topicsCarousel from "../catalog-topics-carousel.js"
+import blogPostsCarousel from "../blog_posts_carousel"
 
 document.addEventListener("DOMContentLoaded", function() {
   notifications()
@@ -27,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
   newsAndEventsCarousel()
   coursewareCarousel()
   topicsCarousel()
+  blogPostsCarousel()
   textVideoSection()
   imageCarousel()
   facultyCarousel()

@@ -2,7 +2,7 @@
 
 {% load static render_bundle image_version_url tz %}
 
-{% block title %}Webinars{% endblock %}
+{% block title %}Blog{% endblock %}
 
 {% block headercontent %}
   <div id="header"></div>
@@ -10,9 +10,73 @@
 {% endblock %}
 
 {% block content %}
-  <div class="webinars">
-      <h1>HELLLLLOOOOOOO</h1>
+<div class="blog-page">
+  <div class="blog-header">
+    <div class="heading-container">
+      <h1 class="heading">Blog</h1>
+      <div class="title">Online learning stories for professionals, from MIT</div>
+    </div>
+    <a class="subscribe" href="https://learn-xpro.mit.edu/the-curve-subscribe">Subscribe</a>
   </div>
+  <div class="most-recent-posts">
+    <div class="recent-posts-heading">Top Most Recent Posts</div>
+    <div class="recent-posts">
+      <div class="container">
+        <div class="row posts-slider">
+          {% for post in posts %}
+            <div class="post slide" data-url={{ post.link }}>
+              <div class="card-top">
+                <img src={{ post.banner_image }}>
+                <div class="post-tags">
+                  {% for category in post.categories %}
+                    <span class="tag">{{ category }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+              <a class="title" href={{ post.link }}>{{ post.title }}</a>
+              <p class="description">{{ post.description }}</p>
+              <div class="card-bottom">
+                <div class="author-and-duration">
+                  <div class="author">BY: MIT XPRO | {{ post.published_date }}</div>
+                  <div class="duration">5 MINUTE READ</div>
+                </div>
+                <a class="read-more" href={{ post.link }}>READ MORE</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="all-posts">
+    <div class="more-posts-heading">More From MIT</div>
+    <div class="all-posts-container">
+      <div class="posts-list">
+        {% for post in posts %}
+          <div class="post">
+            <div class="card-top">
+              <img src={{ post.banner_image }}>
+              <div class="post-tags">
+                {% for category in post.categories %}
+                  <span class="tag">{{ category }}</span>
+                {% endfor %}
+              </div>
+            </div>
+            <a class="title" href={{ post.link }}>{{ post.title }}</a>
+            <p class="description">{{ post.description }}</p>
+            <div class="card-bottom">
+              <div class="author-and-duration">
+                <div class="author">BY: MIT XPRO | {{ post.published_date }}</div>
+                <div class="duration">5 MINUTE READ</div>
+              </div>
+              <a class="read-more" href={{ post.link }}>READ MORE</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block contact-us %}

@@ -1,8 +1,8 @@
 """Blog url routes"""
 from django.urls import path
 
-from blog.views import BlogListView
+from blog.views import BlogView
 
 urlpatterns = [
-    path("api/blog/list/", BlogListView.as_view(), name="blog-list-api"),
+    path("blogs/", BlogView.as_view(), name="blog-view"),
 ]
