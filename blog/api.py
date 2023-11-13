@@ -1,12 +1,13 @@
 """API for the Blog app"""
-from datetime import datetime
-
 from bs4 import BeautifulSoup
 from django.utils.dateformat import DateFormat
 from django.utils.dateparse import parse_datetime
 
 
 def transform_blog_item(item):
+    """
+    Makes transformation to a blog item object.
+    """
     description = item["description"]
     soup = BeautifulSoup(description, "html.parser")
     item["description"] = soup.text.strip()
@@ -19,7 +20,7 @@ def transform_blog_item(item):
     item["published_date"] = df.format("F jS, Y")
 
     item["categories"] = (
-        item["category"] if type(item["category"]) == list else [item["category"]]
+        item["category"] if isinstance(item["category"], list) else [item["category"]]
     )
 
     del item["content:encoded"]

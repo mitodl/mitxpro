@@ -12,9 +12,14 @@ from blog.api import transform_blog_item
 
 
 class BlogView(View):
+    """View for blogs"""
+
     template_name = "blog.html"
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        """
+        Fetch blog xml.
+        """
         items = cache.get("blog-items")
         if items:
             return render(request, self.template_name, {"posts": items})

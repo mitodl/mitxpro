@@ -86,11 +86,6 @@ export class App extends React.Component<Props, void> {
             path={urljoin(match.url, routes.dashboard)}
             component={DashboardPage}
           />
-          <Route
-            exact
-            path={urljoin(match.url, routes.blog)}
-            component={BlogPage}
-          />
           <PrivateRoute
             path={urljoin(match.url, routes.receipt)}
             component={ReceiptPage}

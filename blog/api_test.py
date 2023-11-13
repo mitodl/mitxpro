@@ -15,6 +15,9 @@ from blog.api import transform_blog_item
     ],
 )
 def test_transform_blog_item(category, expected_category):
+    """
+    Tests that `transform_blog_item` transforms a blog post as required.
+    """
     item = {
         "title": "Ask an MIT Professor: The Science Behind Oppenheimer",
         "link": "https://curve.mit.edu/ask-an-mit-professor-the-science-behind-oppenheimer",
