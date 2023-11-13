@@ -1,17 +1,10 @@
+// sass-lint:disable mixins-before-declarations
 @import "common";
 
 .blog-page {
   background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)), url("/static/images/header-banner.jpg");
   background-repeat: no-repeat;
   background-size: 100% 300px;
-
-  @include media-breakpoint-down (md) {
-    background-size: 100% 350px;
-  }
-
-  @include media-breakpoint-down (sm) {
-    background-size: 100% 380px;
-  }
 
   .blog-header {
     display: flex;
@@ -20,16 +13,6 @@
     justify-content: space-between;
     align-items: center;
     margin: auto;
-
-    @include media-breakpoint-down (lg) {
-      max-width: 80%;
-    }
-
-    @include media-breakpoint-down (md) {
-      display: inherit;
-      padding: 30px 10px;
-      text-align: center;
-    }
 
     .heading-container {
       color: $tile-background;
@@ -66,7 +49,18 @@
         }
       }
     }
+
+    @include media-breakpoint-down (lg) {
+      max-width: 80%;
+    }
+
+    @include media-breakpoint-down (md) {
+      display: inherit;
+      padding: 30px 10px;
+      text-align: center;
+    }
   }
+
   .most-recent-posts {
     .recent-posts-heading {
       color: $tile-background;
@@ -104,6 +98,7 @@
       }
     }
   }
+
   .all-posts {
     .more-posts-heading {
       color: $dark-blue;
@@ -123,7 +118,7 @@
         width: 1140px;
         align-items: flex-start;
         align-content: flex-start;
-        gap: 30px;
+        gap: 30px; // sass-lint:disable no-misspelled-properties
         flex-wrap: wrap;
         margin-left: auto;
         margin-right: auto;
@@ -135,6 +130,14 @@
       }
     }
   }
+
+  @include media-breakpoint-down (md) {
+    background-size: 100% 350px;
+  }
+
+  @include media-breakpoint-down (sm) {
+    background-size: 100% 380px;
+  }
 }
 
 .subscribe {
@@ -142,7 +145,7 @@
   padding: 14px 40px;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 10px; // sass-lint:disable no-misspelled-properties
   border-radius: 5px;
   background: $primary;
   color: $tile-background;
@@ -204,11 +207,9 @@
       background: $dark-blue;
       box-shadow: 0 2px 3px 0 rgba(3, 21, 45, 0.10);
       filter: brightness(75%);
-      -webkit-transition: all 1s ease;
       transition: all 1s ease;
 
       &:hover {
-        -webkit-filter: brightness(100%);
         filter: brightness(100%);
       }
 
@@ -251,8 +252,8 @@
   .title, .description {
     overflow: hidden;
     text-overflow: ellipsis;
-    -webkit-box-orient: vertical;
-    display: -webkit-box;
+    -webkit-box-orient: vertical; // sass-lint:disable no-vendor-prefixes
+    display: -webkit-box; // sass-lint:disable no-vendor-prefixes
     align-self: stretch;
     color: $dark-blue;
     font-style: normal;
@@ -262,7 +263,7 @@
     font-size: 19px;
     font-weight: 700;
     line-height: 120%;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 2; // sass-lint:disable no-vendor-prefixes
     margin-bottom: 5px;
 
     &:hover {
@@ -276,7 +277,7 @@
     font-weight: 500;
     line-height: 140%;
     min-height: 110px;
-    -webkit-line-clamp: 5;
+    -webkit-line-clamp: 5; // sass-lint:disable no-vendor-prefixes
   }
 
   .card-bottom {
@@ -288,7 +289,7 @@
 
     .author-and-duration {
       flex: 1 0 0;
-      color: #7E868E;
+      color: #7e868e;
       font-size: 14px;
       font-style: normal;
       font-weight: 600;

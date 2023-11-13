@@ -17,7 +17,6 @@ import Header from "../components/Header"
 import PrivateRoute from "../components/PrivateRoute"
 
 import CheckoutPage from "./pages/CheckoutPage"
-import BlogPage from "./pages/BlogPage"
 import DashboardPage from "./pages/DashboardPage"
 import ReceiptPage from "./pages/ReceiptPage"
 import LoginPages from "./pages/login/LoginPages"
