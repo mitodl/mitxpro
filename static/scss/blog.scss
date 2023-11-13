@@ -118,7 +118,8 @@
         width: 1140px;
         align-items: flex-start;
         align-content: flex-start;
-        gap: 30px; // sass-lint:disable no-misspelled-properties
+        // sass-lint:disable no-misspelled-properties
+        gap: 30px;
         flex-wrap: wrap;
         margin-left: auto;
         margin-right: auto;
@@ -252,7 +253,8 @@
   .title, .description {
     overflow: hidden;
     text-overflow: ellipsis;
-    -webkit-box-orient: vertical; // sass-lint:disable no-vendor-prefixes
+    // sass-lint:disable no-vendor-prefixes
+    -webkit-box-orient: vertical;
     display: -webkit-box; // sass-lint:disable no-vendor-prefixes
     align-self: stretch;
     color: $dark-blue;
