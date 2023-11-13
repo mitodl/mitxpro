@@ -596,6 +596,6 @@ def get_js_settings(request: HttpRequest):
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
         "course_dropdown": settings.FEATURES.get("COURSE_DROPDOWN", False),
         "webinars": settings.FEATURES.get("WEBINARS", False),
-        "enable_blogs": settings.FEATURES.get("enable_blogs", True),
+        "enable_blogs": settings.FEATURES.get("ENABLE_BLOGS", False),
         "enable_taxes_display": settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False),
     }
