@@ -6,9 +6,7 @@
   padding-bottom: 150px;
 
   .body {
-    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)), url("/static/images/header-banner.jpg");
-    background-repeat: no-repeat;
-    background-size: 100% 300px;
+    background: url("/static/images/blog-header-bg.png") repeat-x;
 
     .blog-header {
       display: flex;
@@ -179,7 +177,7 @@
   flex-shrink: 0;
   border-radius: 5px;
   background: $tile-background;
-  box-shadow: 2px 2px 8px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 3px 0 rgba(3, 21, 45, 0.10);
   border: 2px solid $tile-background;
   cursor: pointer;
 
