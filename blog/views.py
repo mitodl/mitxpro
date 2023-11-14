@@ -21,6 +21,7 @@ class BlogView(View):
         Fetch blog xml.
         """
         items = cache.get("blog-items")
+        print("\n\n\nCached Items", items, "\n\n\n")
         if items:
             return render(request, self.template_name, {"posts": items})
 
@@ -32,5 +33,6 @@ class BlogView(View):
         items = resp_dict.get("rss", {}).get("channel", {}).get("item", [])
         for item in items:
             transform_blog_item(item)
+        print("\n\n\nNon Cached Items", items, "\n\n\n")
         cache.set("blog-items", items, 24 * 60 * 60)
         return render(request, self.template_name, {"posts": items})
