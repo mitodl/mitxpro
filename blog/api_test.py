@@ -55,7 +55,14 @@ def test_transform_blog_item(category, expected_category):
     transform_blog_item(item)
     assert all(
         key not in item
-        for key in ["pubDate", "dc:date", "content:encoded", "author", "guid"]
+        for key in [
+            "pubDate",
+            "dc:date",
+            "content:encoded",
+            "author",
+            "guid",
+            "category",
+        ]
     )
     assert all(
         key in item
@@ -63,7 +70,7 @@ def test_transform_blog_item(category, expected_category):
             "title",
             "link",
             "description",
-            "category",
+            "categories",
             "banner_image",
             "published_date",
         ]

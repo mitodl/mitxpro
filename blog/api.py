@@ -28,3 +28,4 @@ def transform_blog_item(item):
     del item["dc:date"]
     del item["author"]
     del item["guid"]
+    del item["category"]
