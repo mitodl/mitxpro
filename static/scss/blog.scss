@@ -64,6 +64,7 @@
         text-align: center;
       }
     }
+
     .most-recent-posts {
       .recent-posts-heading {
         color: $tile-background;
@@ -102,6 +103,7 @@
         }
       }
     }
+
     .all-posts {
       .more-posts-heading {
         color: $dark-blue;
@@ -182,16 +184,17 @@
   cursor: pointer;
 
   &:hover {
+    border: 2px solid $primary;
+
     .title {
       color: $primary;
     }
+
     .card-top {
       img {
-        filter: brightness(100%)
+        filter: brightness(100%);
       }
     }
-
-    border: 2px solid $primary;
   }
 
   @include media-breakpoint-down (lg) {
