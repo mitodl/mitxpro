@@ -15,13 +15,14 @@ class BlogView(View):
     """View for blogs"""
 
     template_name = "blog.html"
+    CACHE_KEY = "blog-items"
+    CACHE_TIMEOUT = 24 * 60 * 60
 
     def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """
         Fetch blog xml.
         """
-        items = cache.get("blog-items")
-        print("\n\n\nCached Items", items, "\n\n\n")
+        items = cache.get(self.CACHE_KEY)
         if items:
             return render(request, self.template_name, {"posts": items})
 
@@ -33,6 +34,5 @@ class BlogView(View):
         items = resp_dict.get("rss", {}).get("channel", {}).get("item", [])
         for item in items:
             transform_blog_item(item)
-        print("\n\n\nNon Cached Items", items, "\n\n\n")
-        cache.set("blog-items", items, 24 * 60 * 60)
+        cache.set(self.CACHE_KEY, items, self.CACHE_TIMEOUT)
         return render(request, self.template_name, {"posts": items})
