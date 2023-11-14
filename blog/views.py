@@ -13,11 +13,11 @@ class BlogView(View):
 
     template_name = "blog.html"
     CACHE_KEY = "blog-items"
-    CACHE_TIMEOUT = 24 * 60 * 60
+    CACHE_TIMEOUT = 24 * 60 * 60  # 24 hours
 
     def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """
-        Fetch blog xml.
+        Fetch blogs
         """
         items = cache.get(self.CACHE_KEY)
         if items:

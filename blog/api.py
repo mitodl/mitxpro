@@ -18,8 +18,8 @@ def transform_blog_item(item):
     item["banner_image"] = image_tags[0].get("src")
 
     published_date = parse_datetime(item["dc:date"])
-    df = DateFormat(published_date)
-    item["published_date"] = df.format("F jS, Y")
+    published_date_format = DateFormat(published_date)
+    item["published_date"] = published_date_format.format("F jS, Y")
 
     item["categories"] = (
         item["category"] if isinstance(item["category"], list) else [item["category"]]

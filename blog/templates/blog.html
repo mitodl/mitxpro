@@ -25,25 +25,7 @@
         <div class="container">
           <div class="row posts-slider">
             {% for post in posts %}
-              <div class="post slide" data-url={{ post.link }}>
-                <div class="card-top">
-                  <img src={{ post.banner_image }}>
-                  <div class="post-tags">
-                    {% for category in post.categories %}
-                      <span class="tag">{{ category }}</span>
-                    {% endfor %}
-                  </div>
-                </div>
-                <a class="title" href={{ post.link }}>{{ post.title }}</a>
-                <p class="description">{{ post.description }}</p>
-                <div class="card-bottom">
-                  <div class="author-and-duration">
-                    <div class="author">BY: MIT XPRO | {{ post.published_date }}</div>
-                    <div class="duration">5 MINUTE READ</div>
-                  </div>
-                  <a class="read-more" href={{ post.link }}>READ MORE</a>
-                </div>
-              </div>
+              {% include "post_card.html" with post=post %}
             {% endfor %}
           </div>
         </div>
@@ -54,25 +36,7 @@
       <div class="all-posts-container">
         <div class="posts-list">
           {% for post in posts %}
-            <div class="post">
-              <div class="card-top">
-                <img src={{ post.banner_image }}>
-                <div class="post-tags">
-                  {% for category in post.categories %}
-                    <span class="tag">{{ category }}</span>
-                  {% endfor %}
-                </div>
-              </div>
-              <a class="title" href={{ post.link }}>{{ post.title }}</a>
-              <p class="description">{{ post.description }}</p>
-              <div class="card-bottom">
-                <div class="author-and-duration">
-                  <div class="author">BY: MIT XPRO | {{ post.published_date }}</div>
-                  <div class="duration">5 MINUTE READ</div>
-                </div>
-                <a class="read-more" href={{ post.link }}>READ MORE</a>
-              </div>
-            </div>
+            {% include "post_card.html" with post=post %}
           {% endfor %}
         </div>
       </div>
