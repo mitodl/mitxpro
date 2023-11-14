@@ -1,14 +1,11 @@
 """
 Views for the Blog app
 """
-import requests
-
-import xmltodict
 from django.core.cache import cache
-from django.views import View
 from django.shortcuts import render
+from django.views import View
 
-from blog.api import transform_blog_item
+from blog.api import fetch_blogs
 
 
 class BlogView(View):
@@ -26,13 +23,6 @@ class BlogView(View):
         if items:
             return render(request, self.template_name, {"posts": items})
 
-        rss_feed_url = "https://curve.mit.edu/rss.xml"
-        resp = requests.get(rss_feed_url, timeout=60)
-        resp.raise_for_status()
-        resp_dict = xmltodict.parse(resp.content)
-
-        items = resp_dict.get("rss", {}).get("channel", {}).get("item", [])
-        for item in items:
-            transform_blog_item(item)
+        items = fetch_blogs()
         cache.set(self.CACHE_KEY, items, self.CACHE_TIMEOUT)
         return render(request, self.template_name, {"posts": items})

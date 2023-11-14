@@ -1,4 +1,6 @@
 """API for the Blog app"""
+import requests
+import xmltodict
 from bs4 import BeautifulSoup
 from django.utils.dateformat import DateFormat
 from django.utils.dateparse import parse_datetime
@@ -6,7 +8,7 @@ from django.utils.dateparse import parse_datetime
 
 def transform_blog_item(item):
     """
-    Makes transformation to a blog item object.
+    Transforms a blog item
     """
     description = item["description"]
     soup = BeautifulSoup(description, "html.parser")
@@ -29,3 +31,19 @@ def transform_blog_item(item):
     del item["author"]
     del item["guid"]
     del item["category"]
+
+
+def fetch_blogs():
+    """
+    Fetch and parse RSS feed
+    """
+    rss_feed_url = "https://curve.mit.edu/rss.xml"
+    resp = requests.get(rss_feed_url, timeout=60)
+    resp.raise_for_status()
+    resp_dict = xmltodict.parse(resp.content)
+
+    items = resp_dict.get("rss", {}).get("channel", {}).get("item", [])
+    for item in items:
+        transform_blog_item(item)
+
+    return items

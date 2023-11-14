@@ -1,7 +1,7 @@
 """Tests for Blog API"""
 import pytest
 
-from blog.api import transform_blog_item
+from blog.api import fetch_blogs, transform_blog_item
 
 
 @pytest.mark.parametrize(
@@ -93,3 +93,22 @@ def test_transform_blog_item(category, expected_category):
         == "https://curve.mit.edu/hubfs/Screenshot%202023-10-05%20at%203.55.25%20PM.png"
     )
     assert item["published_date"] == "October 6th, 2023"
+
+
+def test_fetch_blogs():
+    """Test that `fetch_blogs` fetches the RSS feed and returns transformed blogs"""
+    items = fetch_blogs()
+    assert isinstance(items, list)
+    assert len(items) > 0
+    first_blog = items[0]
+    assert all(
+        key in first_blog
+        for key in [
+            "title",
+            "link",
+            "description",
+            "categories",
+            "banner_image",
+            "published_date",
+        ]
+    )
