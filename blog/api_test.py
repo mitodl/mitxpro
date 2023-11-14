@@ -80,7 +80,7 @@ def test_transform_blog_item(category, expected_category):
         "summer movie. Yet Christopher Nolan’s Oppenheimer has dazzled audiences everywhere"
         " and is on track to earn nearly $1 billion at the global box office."
     )
-    assert item["category"] == expected_category
+    assert item["categories"] == expected_category
     assert (
         item["banner_image"]
         == "https://curve.mit.edu/hubfs/Screenshot%202023-10-05%20at%203.55.25%20PM.png"
