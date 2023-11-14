@@ -293,7 +293,7 @@
     padding-top: 20px;
     align-items: flex-start;
     align-self: stretch;
-    min-height: 80px;
+    min-height: 50px;
 
     .author-and-duration {
       flex: 1 0 0;
@@ -326,6 +326,13 @@
         background: $primary !important;
         color: $tile-background !important;
       }
+    }
+
+    @include media-breakpoint-down (lg) {
+      min-height: 80px;
+    }
+    @include media-breakpoint-down (md) {
+      min-height: 50px;
     }
   }
 }
