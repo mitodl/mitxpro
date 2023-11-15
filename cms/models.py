@@ -175,7 +175,7 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
 
     content_panels = [
         FieldPanel("title"),
-        ImageChooserPanel("banner_image"),
+        FieldPanel("banner_image"),
     ]
 
     def serve(self, request, *args, **kwargs):
@@ -337,7 +337,7 @@ class WebinarPage(MetadataPageMixin, Page):
         FieldPanel("category"),
         FieldPanel("title"),
         FieldPanel("sub_heading"),
-        ImageChooserPanel("banner_image"),
+        FieldPanel("banner_image"),
         FieldPanel("date", heading="Start Date"),
         FieldPanel("time"),
         FieldPanel("description"),

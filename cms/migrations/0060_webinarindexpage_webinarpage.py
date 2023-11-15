@@ -6,7 +6,7 @@ import django.db.models.deletion
 import pytz
 import wagtailmetadata.models
 from django.db import migrations, models
-from wagtail.core.models import Page, PageRevision
+from wagtail.models import Page, PageRevision
 
 import cms.models
 
