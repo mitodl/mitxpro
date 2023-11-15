@@ -46,9 +46,7 @@ class Migration(migrations.Migration):
                                     [
                                         (
                                             "heading",
-                                            wagtail.blocks.CharBlock(
-                                                max_length=100
-                                            ),
+                                            wagtail.blocks.CharBlock(max_length=100),
                                         ),
                                         ("detail", wagtail.blocks.RichTextBlock()),
                                     ]

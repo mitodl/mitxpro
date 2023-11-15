@@ -39,15 +39,11 @@ class Migration(migrations.Migration):
                                     [
                                         (
                                             "heading",
-                                            wagtail.blocks.CharBlock(
-                                                max_length=100
-                                            ),
+                                            wagtail.blocks.CharBlock(max_length=100),
                                         ),
                                         (
                                             "sub_heading",
-                                            wagtail.blocks.CharBlock(
-                                                max_length=250
-                                            ),
+                                            wagtail.blocks.CharBlock(max_length=250),
                                         ),
                                         (
                                             "image",
