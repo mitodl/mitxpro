@@ -19,16 +19,15 @@ from django.templatetags.static import static
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
-from django.core.validators import MinValueValidator
-from wagtail.admin.panels import FieldPanel, InlinePanel
-from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail import blocks
+from wagtail.admin.panels import FieldPanel, InlinePanel
 from wagtail.blocks import PageChooserBlock, RawHTMLBlock, StreamBlock
-from wagtail.fields import RichTextField, StreamField
-from wagtail.models import Orderable, Page, PageManager, PageQuerySet
+from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.coreutils import WAGTAIL_APPEND_SLASH
+from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.models import Image
+from wagtail.models import Orderable, Page, PageManager, PageQuerySet
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
@@ -49,6 +48,8 @@ from cms.constants import (
     BLOG_INDEX_SLUG,
     CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
+    FORMAT_ONLINE,
+    FORMAT_OTHER,
     ON_DEMAND_WEBINAR,
     ON_DEMAND_WEBINAR_BUTTON_TITLE,
     PROGRAM_INDEX_SLUG,
@@ -58,8 +59,6 @@ from cms.constants import (
     WEBINAR_DEFAULT_IMAGES,
     WEBINAR_HEADER_BANNER,
     WEBINAR_INDEX_SLUG,
-    FORMAT_ONLINE,
-    FORMAT_OTHER,
 )
 from cms.forms import CertificatePageForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
