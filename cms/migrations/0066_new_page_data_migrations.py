@@ -11,7 +11,6 @@ then create a new data migration with the same contents, and add the relevant Wa
 """
 
 import datetime
-import json
 
 import pytz
 from django.db import migrations
@@ -146,12 +145,12 @@ def create_catalog_page(apps, schema_editor):
         catalog_page_obj = CatalogPage(**catalog_page_content)
         home_page.add_child(instance=catalog_page_obj)
         # NOTE: This block of code creates page revision and publishes it. There may be an easier way to do this.
-        content_json = json.dumps(dict(**catalog_page_content, pk=catalog_page_obj.id))
+        content = dict(**catalog_page_content, pk=catalog_page_obj.id)
         revision = PageRevision.objects.create(
             page_id=catalog_page_obj.id,
             submitted_for_moderation=False,
             created_at=now_in_utc(),
-            content_json=content_json,
+            content=content,
         )
         revision.publish()
 
@@ -192,12 +191,12 @@ def create_certificate_index_page(apps, schema_editor):
         index_page_obj = CertificateIndexPage(**index_page_content)
         home_page.add_child(instance=index_page_obj)
         # NOTE: This block of code creates page revision and publishes it. There may be an easier way to do this.
-        content_json = json.dumps(dict(**index_page_content, pk=index_page_obj.id))
+        content = dict(**index_page_content, pk=index_page_obj.id)
         revision = PageRevision.objects.create(
             page_id=index_page_obj.id,
             submitted_for_moderation=False,
             created_at=now_in_utc(),
-            content_json=content_json,
+            content=content,
         )
         revision.publish()
 
