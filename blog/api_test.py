@@ -4,21 +4,10 @@ import pytest
 from blog.api import fetch_blog, parse_blog
 
 
-@pytest.mark.parametrize(
-    "category, expected_category",
-    [
-        ["Quantum Computing", ["Quantum Computing"]],
-        [
-            ["Quantum Computing", "Online Education"],
-            ["Quantum Computing", "Online Education"],
-        ],
-    ],
-)
-def test_parse_blog(category, expected_category):
-    """
-    Tests that `parse_blog` parses a blog post as required.
-    """
-    item = {
+@pytest.fixture
+def valid_blog_post():
+    """Fixture that returns a blog post item"""
+    return {
         "title": "Ask an MIT Professor: The Science Behind Oppenheimer",
         "link": "https://curve.mit.edu/ask-an-mit-professor-the-science-behind-oppenheimer",
         "description": '<div class="hs-featured-image-wrapper"> \n <a '
@@ -45,16 +34,34 @@ def test_parse_blog(category, expected_category):
         'href="https://www.forbes.com/sites/markhughes/2023/09/23/can-oppenheimer-top-1-billion-box'
         '-office-the-clock-is-ticking/?sh=164424195cfe">$1 billion at the global box '
         "office</a>.&nbsp;</p>",
-        "category": category,
+        "category": "Online Learning",
         "pubDate": "Fri, 06 Oct 2023 13:30:00 GMT",
         "author": "mitxpro@mit.edu (MIT xPRO)",
         "guid": "https://curve.mit.edu/ask-an-mit-professor-the-science-behind-oppenheimer",
         "dc:date": "2023-10-06T13:30:00Z",
     }
 
-    parse_blog(item)
+
+@pytest.mark.parametrize(
+    "category, expected_category",
+    [
+        ["Quantum Computing", ["Quantum Computing"]],
+        [
+            ["Quantum Computing", "Online Education"],
+            ["Quantum Computing", "Online Education"],
+        ],
+    ],
+)
+def test_parse_blog(
+    category, expected_category, valid_blog_post
+):  # pylint: disable=redefined-outer-name
+    """
+    Tests that `parse_blog` parses a blog post as required.
+    """
+    valid_blog_post["category"] = category
+    parse_blog(valid_blog_post)
     assert all(
-        key not in item
+        key not in valid_blog_post
         for key in [
             "pubDate",
             "dc:date",
@@ -65,7 +72,7 @@ def test_parse_blog(category, expected_category):
         ]
     )
     assert all(
-        key in item
+        key in valid_blog_post
         for key in [
             "title",
             "link",
@@ -76,23 +83,26 @@ def test_parse_blog(category, expected_category):
         ]
     )
 
-    assert item["title"] == "Ask an MIT Professor: The Science Behind Oppenheimer"
     assert (
-        item["link"]
+        valid_blog_post["title"]
+        == "Ask an MIT Professor: The Science Behind Oppenheimer"
+    )
+    assert (
+        valid_blog_post["link"]
         == "https://curve.mit.edu/ask-an-mit-professor-the-science-behind-oppenheimer"
     )
     assert (
-        item["description"]
+        valid_blog_post["description"]
         == "It’s not every day you see a topic like quantum physics represented in a hit "
         "summer movie. Yet Christopher Nolan’s Oppenheimer has dazzled audiences everywhere"
         " and is on track to earn nearly $1 billion at the global box office."
     )
-    assert item["categories"] == expected_category
+    assert valid_blog_post["categories"] == expected_category
     assert (
-        item["banner_image"]
+        valid_blog_post["banner_image"]
         == "https://curve.mit.edu/hubfs/Screenshot%202023-10-05%20at%203.55.25%20PM.png"
     )
-    assert item["published_date"] == "October 6th, 2023"
+    assert valid_blog_post["published_date"] == "October 6th, 2023"
 
 
 def test_fetch_blog():
@@ -111,4 +121,29 @@ def test_fetch_blog():
             "banner_image",
             "published_date",
         ]
+    )
+
+
+def test_parse_blog_invalid_type_and_data(
+    mocker, valid_blog_post
+):  # pylint: disable=redefined-outer-name
+    """
+    Test that `parse_blog` logs error when post item type or data is not valid.
+    """
+    mock_log = mocker.patch("blog.api.log")
+
+    random_object = object()
+    parse_blog(random_object)
+    mock_log.error.assert_called_with(
+        "Could not parse blog post. Expecting a dict type but got: %s",
+        type(random_object),
+    )
+
+    valid_blog_post.pop("description", None)
+    valid_blog_post.pop("dc:date", None)
+    valid_blog_post.pop("category", None)
+    parse_blog(valid_blog_post)
+    mock_log.error.assert_called_with(
+        "Could not parse blog post. Expected data is missing. Post Data: %s",
+        valid_blog_post,
     )
