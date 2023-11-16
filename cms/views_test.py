@@ -576,7 +576,6 @@ def test_blog_page_context(client, wagtail_basics):
     Test that the BlogIndexPage returns the desired context
     """
     homepage = wagtail_basics.root
-    breakpoint()
     blog_index_page = BlogIndexPageFactory.create(parent=homepage)
     blog_index_page.save_revision().publish()
 
