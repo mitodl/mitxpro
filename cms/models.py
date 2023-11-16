@@ -212,7 +212,6 @@ class BlogIndexPage(Page):
     """
 
     CACHE_KEY = "blog-items"
-    CACHE_TIMEOUT = 24 * 60 * 60  # 24 hours
 
     slug = BLOG_INDEX_SLUG
     template = "blog.html"
@@ -268,7 +267,7 @@ class BlogIndexPage(Page):
         items = cache.get(self.CACHE_KEY)
         if not items:
             items = fetch_blog()
-            cache.set(self.CACHE_KEY, items, self.CACHE_TIMEOUT)
+            cache.set(self.CACHE_KEY, items, settings.BLOG_CACHE_TIMEOUT)
 
         return dict(
             **super().get_context(request, *args, **kwargs),

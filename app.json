@@ -46,6 +46,10 @@
       "description": "S3 Bucket name.",
       "required": false
     },
+    "BLOG_CACHE_TIMEOUT": {
+      "description": "How long the blog should be cached",
+      "required": false
+    },
     "CELERY_BROKER_URL": {
       "description": "Where celery should get tasks, default is Redis URL",
       "required": false
