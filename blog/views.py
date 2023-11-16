@@ -5,11 +5,11 @@ from django.core.cache import cache
 from django.shortcuts import render
 from django.views import View
 
-from blog.api import fetch_blogs
+from blog.api import fetch_blog
 
 
 class BlogView(View):
-    """View for blogs"""
+    """View for blog"""
 
     template_name = "blog.html"
     CACHE_KEY = "blog-items"
@@ -17,12 +17,12 @@ class BlogView(View):
 
     def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """
-        Fetch blogs
+        Fetch blog
         """
         items = cache.get(self.CACHE_KEY)
         if items:
             return render(request, self.template_name, {"posts": items})
 
-        items = fetch_blogs()
+        items = fetch_blog()
         cache.set(self.CACHE_KEY, items, self.CACHE_TIMEOUT)
         return render(request, self.template_name, {"posts": items})

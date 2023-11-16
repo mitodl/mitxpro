@@ -1,4 +1,6 @@
 """API for the Blog app"""
+import logging
+
 import requests
 import xmltodict
 from bs4 import BeautifulSoup
@@ -6,10 +8,26 @@ from django.utils.dateformat import DateFormat
 from django.utils.dateparse import parse_datetime
 
 
-def transform_blog_item(item):
+log = logging.getLogger()
+
+RSS_FEED_URL = "https://curve.mit.edu/rss.xml"
+
+
+def parse_blog(item: dict):
     """
-    Transforms a blog item
+    Parses a blog item
+
+    Args:
+        item (dict): Dict of blog post data
     """
+    if not isinstance(item, dict):
+        log.error(
+            "Could not parse blog post. Expecting a dict type but got: ", type(item)
+        )
+
+    if not all(key in item for key in ["description", "dc:date", "category"]):
+        log.error("Could not parse blog post. Expected data is missing", item)
+
     description = item["description"]
     soup = BeautifulSoup(description, "html.parser")
     item["description"] = soup.text.strip()
@@ -25,25 +43,24 @@ def transform_blog_item(item):
         item["category"] if isinstance(item["category"], list) else [item["category"]]
     )
 
-    del item["content:encoded"]
-    del item["pubDate"]
-    del item["dc:date"]
-    del item["author"]
-    del item["guid"]
-    del item["category"]
+    item.pop("content:encoded", None)
+    item.pop("pubDate", None)
+    item.pop("dc:date", None)
+    item.pop("author", None)
+    item.pop("guid", None)
+    item.pop("category", None)
 
 
-def fetch_blogs():
+def fetch_blog():
     """
     Fetch and parse RSS feed
     """
-    rss_feed_url = "https://curve.mit.edu/rss.xml"
-    resp = requests.get(rss_feed_url, timeout=60)
+    resp = requests.get(RSS_FEED_URL, timeout=60)
     resp.raise_for_status()
     resp_dict = xmltodict.parse(resp.content)
 
     items = resp_dict.get("rss", {}).get("channel", {}).get("item", [])
     for item in items:
-        transform_blog_item(item)
+        parse_blog(item)
 
     return items

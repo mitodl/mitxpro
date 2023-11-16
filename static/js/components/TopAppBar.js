@@ -87,9 +87,9 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
               }
             </li>
             {
-              SETTINGS.enable_blogs ? (
+              SETTINGS.enable_blog ? (
                 <li>
-                  <a href={routes.blogs} className="" aria-label="blogs">
+                  <a href={routes.blog} className="" aria-label="blog">
                     Blog
                   </a>
                 </li>

@@ -44,9 +44,3 @@
   </div>
 </div>
 {% endblock %}
-
-{% block contact-us %}
-  {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
-    {% include "subscription.html" %}
-  {% endif %}
-{% endblock %}
