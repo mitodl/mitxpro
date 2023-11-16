@@ -148,6 +148,7 @@ def ensure_index_pages():  # pylint: disable=too-many-branches
     signatory_index = cms_models.SignatoryIndexPage.objects.first()
     certificate_index = cms_models.CertificateIndexPage.objects.first()
     webinar_index = cms_models.WebinarIndexPage.objects.first()
+    blog_index = cms_models.BlogIndexPage.objects.first()
 
     if not course_index:
         course_index = cms_models.CourseIndexPage(title="Courses")
@@ -195,6 +196,10 @@ def ensure_index_pages():  # pylint: disable=too-many-branches
         for webinar_page in cms_models.WebinarPage.objects.all():
             webinar_page.move(webinar_index, "last-child")
         log.info("Moved webinar pages under webinar index page")
+
+    if not blog_index:
+        blog_index = cms_models.BlogIndexPage(title="Blog")
+        home_page.add_child(instance=blog_index)
 
 
 def configure_wagtail():

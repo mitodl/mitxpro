@@ -6,7 +6,6 @@
   padding-bottom: 150px;
 
   .body {
-    background: url("/static/images/blog-header-bg.png") repeat-x;
 
     .blog-header {
       display: flex;
@@ -21,7 +20,7 @@
         font-style: normal;
         line-height: 200%;
 
-        .heading {
+        .title {
           font-size: 48px;
           font-weight: 700;
           display: flex;
@@ -36,7 +35,7 @@
           }
         }
 
-        .title {
+        .heading {
           font-size: 26px;
           font-weight: 400;
           display: flex;
@@ -296,7 +295,7 @@
     align-self: stretch;
     min-height: 50px;
 
-    .author-and-duration {
+    .author {
       flex: 1 0 0;
       color: #7e868e;
       font-size: 14px;
@@ -304,6 +303,7 @@
       font-weight: 600;
       line-height: 140%;
       text-transform: uppercase;
+      padding-top: 7px;
     }
 
     .read-more {

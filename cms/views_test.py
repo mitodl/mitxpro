@@ -17,6 +17,7 @@ from cms.constants import (
     WEBINAR_DEFAULT_IMAGES,
 )
 from cms.factories import (
+    BlogIndexPageFactory,
     CatalogPageFactory,
     CourseIndexPageFactory,
     CoursePageFactory,
@@ -568,3 +569,18 @@ def test_upcoming_webinar_datetime_validations(wagtail_basics):
 
     with pytest.raises(ValidationError, match="cannot be empty for Upcoming Webinars."):
         WebinarPageFactory.create(parent=webinar_index_page, date=None, time=None)
+
+
+def test_blog_page_context(client, wagtail_basics):
+    """
+    Test that the BlogIndexPage returns the desired context
+    """
+    homepage = wagtail_basics.root
+    breakpoint()
+    blog_index_page = BlogIndexPageFactory.create(parent=homepage)
+    blog_index_page.save_revision().publish()
+
+    resp = client.get(blog_index_page.get_url())
+    context = resp.context_data
+
+    assert "posts" in context

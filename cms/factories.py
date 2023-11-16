@@ -15,6 +15,7 @@ from cms.blocks import (
 )
 from cms.constants import UPCOMING_WEBINAR
 from cms.models import (
+    BlogIndexPage,
     CatalogPage,
     CertificatePage,
     CourseIndexPage,
@@ -474,3 +475,10 @@ class WebinarPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = WebinarPage
+
+
+class BlogIndexPageFactory(wagtail_factories.PageFactory):
+    """BlogIndexPage factory"""
+
+    class Meta:
+        model = BlogIndexPage

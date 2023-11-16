@@ -57,7 +57,6 @@ urlpatterns = (
         path("", include("users.urls")),
         path("", include("sheets.urls")),
         path("", include("mail.urls")),
-        path("", include("blog.urls")),
         path("api/v1/", include("mitol.digitalcredentials.urls")),
         path("", include("mitol.mail.urls")),
         path("boeing/", include(("voucher.urls", "voucher"))),

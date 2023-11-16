@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% load render_bundle image_version_url %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block headercontent %}
+  <div id="header"></div>
+  {% render_bundle 'header' %}
+{% endblock %}
+
+{% block content %}
+<div class="blog-page">
+  {% if page.banner_image %}
+    <div class="body" style="background:url('{% image_version_url page.banner_image "fill-1440x300" %}') repeat-x;">
+  {% else %}
+    <div class="body" style="background: url('/static/images/blog-header-bg.png') repeat-x;">
+  {% endif %}
+    <div class="blog-header">
+      <div class="heading-container">
+        <h1 class="title">{{ page.title }}</h1>
+        <div class="heading">{{ page.sub_heading }}</div>
+      </div>
+      <a class="subscribe" target="_blank" href="https://learn-xpro.mit.edu/the-curve-subscribe">Subscribe</a>
+    </div>
+    <div class="most-recent-posts">
+      <div class="recent-posts-heading">{{ page.recent_posts_heading }}</div>
+      <div class="recent-posts">
+        <div class="container">
+          <div class="row posts-slider">
+            {% for post in posts %}
+              {% include "partials/blog_post_card.html" with post=post %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="all-posts">
+      <div class="more-posts-heading">{{ page.more_posts_heading }}</div>
+      <div class="all-posts-container">
+        <div class="posts-list">
+          {% for post in posts %}
+            {% include "partials/blog_post_card.html" with post=post %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block contact-us %}
+    {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
+        {% include "subscription.html" %}
+    {% endif %}
+{% endblock %}

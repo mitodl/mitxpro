@@ -33,9 +33,4 @@ export default function blogPostsCarousel() {
       }
     ]
   });
-
-  $(".posts-slider .slide").on("click", function() {
-    const targetUrl = $(this).data("url");
-    window.location.href = targetUrl;
-  });
 }
