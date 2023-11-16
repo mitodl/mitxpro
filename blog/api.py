@@ -22,18 +22,22 @@ def parse_blog(item: dict):
     """
     if not isinstance(item, dict):
         log.error(
-            "Could not parse blog post. Expecting a dict type but got: ", type(item)
+            "Could not parse blog post. Expecting a dict type but got: %s", type(item)
         )
+        return
 
     if not all(key in item for key in ["description", "dc:date", "category"]):
-        log.error("Could not parse blog post. Expected data is missing", item)
+        log.error(
+            "Could not parse blog post. Expected data is missing. Post Data: %s", item
+        )
+        return
 
     description = item["description"]
     soup = BeautifulSoup(description, "html.parser")
     item["description"] = soup.text.strip()
 
     image_tags = soup.find_all("img")
-    item["banner_image"] = image_tags[0].get("src")
+    item["banner_image"] = image_tags[0].get("src", None) if image_tags else None
 
     published_date = parse_datetime(item["dc:date"])
     published_date_format = DateFormat(published_date)
