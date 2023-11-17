@@ -55,18 +55,6 @@ def create_blog_index_page(apps, app_schema):
         revision.publish()
 
 
-def delete_blog_index_page(apps, app_schema):
-    ContentType = apps.get_model("contenttypes.ContentType")
-    blog_index_content_type, _ = ContentType.objects.get_or_create(
-        app_label="cms", model="blogindexpage"
-    )
-    blog_index_page = Page.objects.filter(
-        content_type_id=blog_index_content_type.id
-    ).first()
-    if blog_index_page:
-        blog_index_page.delete()
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -137,5 +125,5 @@ class Migration(migrations.Migration):
             },
             bases=("wagtailcore.page",),
         ),
-        migrations.RunPython(create_blog_index_page, delete_blog_index_page),
+        migrations.RunPython(create_blog_index_page, migrations.RunPython.noop),
     ]

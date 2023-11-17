@@ -6,7 +6,7 @@ from blog.api import fetch_blog, parse_blog
 
 @pytest.fixture
 def valid_blog_post():
-    """Fixture that returns a blog post item"""
+    """Fixture that returns a valid blog post"""
     return {
         "title": "Ask an MIT Professor: The Science Behind Oppenheimer",
         "link": "https://curve.mit.edu/ask-an-mit-professor-the-science-behind-oppenheimer",

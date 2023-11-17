@@ -12,7 +12,7 @@
 {% block content %}
 <div class="blog-page">
   {% if page.banner_image %}
-    <div class="body" style="background:url('{% image_version_url page.banner_image "fill-1440x300" %}') repeat-x;">
+    <div class="body" style="background:url('{% image_version_url page.banner_image "max-1440x300" %}') repeat-x;">
   {% else %}
     <div class="body" style="background: url('/static/images/blog-header-bg.png') repeat-x;">
   {% endif %}
