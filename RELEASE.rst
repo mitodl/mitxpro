@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.135.0
+---------------
+
+- feat: xPro blog (#2789)
+- refactor: local seed command to support platforms (#2825)
+
 Version 0.134.0 (Released November 07, 2023)
 ---------------
 
