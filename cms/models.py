@@ -263,7 +263,7 @@ class BlogIndexPage(Page):
         return Page.serve(self, request, *args, **kwargs)
 
     def get_context(self, request, *args, **kwargs):
-        """Populate the context with a dict of categories and live webinars"""
+        """Populate the context with the blog posts"""
         items = cache.get(self.CACHE_KEY)
         if not items:
             items = fetch_blog()
