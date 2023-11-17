@@ -9,6 +9,7 @@ from urllib.parse import urljoin
 
 from django import forms
 from django.conf import settings
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Prefetch, Q, prefetch_related_objects
@@ -31,6 +32,7 @@ from wagtail.images.models import Image
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
+from blog.api import fetch_blog
 from cms.api import filter_and_sort_catalog_pages
 from cms.blocks import (
     CourseRunCertificateOverrides,
@@ -44,6 +46,7 @@ from cms.blocks import (
 from cms.constants import (
     ALL_TAB,
     ALL_TOPICS,
+    BLOG_INDEX_SLUG,
     CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
     ON_DEMAND_WEBINAR,
@@ -200,6 +203,76 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
             webinars=dict(webinars_dict),
             webinar_default_images=WEBINAR_DEFAULT_IMAGES,
             default_banner_image=WEBINAR_HEADER_BANNER,
+        )
+
+
+class BlogIndexPage(Page):
+    """
+    A placeholder page for blog
+    """
+
+    CACHE_KEY = "blog-items"
+
+    slug = BLOG_INDEX_SLUG
+    template = "blog.html"
+    parent_page_types = ["HomePage"]
+    subpage_types = []
+
+    banner_image = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Banner image for the Blog page.",
+    )
+    sub_heading = models.CharField(
+        max_length=250,
+        null=True,
+        blank=True,
+        help_text="Sub heading of the blog page.",
+        default="Online learning stories for professionals, from MIT",
+    )
+    recent_posts_heading = models.CharField(
+        max_length=250,
+        null=True,
+        blank=True,
+        help_text="Heading of the recent posts section.",
+        default="Top Most Recent Posts",
+    )
+    more_posts_heading = models.CharField(
+        max_length=250,
+        null=True,
+        blank=True,
+        help_text="Heading of the more posts section.",
+        default="More From MIT",
+    )
+
+    content_panels = [
+        FieldPanel("title"),
+        FieldPanel("sub_heading"),
+        FieldPanel("recent_posts_heading"),
+        FieldPanel("more_posts_heading"),
+        ImageChooserPanel("banner_image"),
+    ]
+
+    def serve(self, request, *args, **kwargs):
+        """
+        We need to serve the blog index template for list view.
+        """
+        return Page.serve(self, request, *args, **kwargs)
+
+    def get_context(self, request, *args, **kwargs):
+        """Populate the context with the blog posts"""
+        items = cache.get(self.CACHE_KEY)
+        if not items:
+            items = fetch_blog()
+            cache.set(self.CACHE_KEY, items, settings.BLOG_CACHE_TIMEOUT)
+
+        return dict(
+            **super().get_context(request, *args, **kwargs),
+            **get_base_context(request),
+            posts=items,
         )
 
 
@@ -683,6 +756,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         "CertificateIndexPage",
         "SignatoryIndexPage",
         "WebinarIndexPage",
+        "BlogIndexPage",
     ]
 
     @property

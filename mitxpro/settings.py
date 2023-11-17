@@ -906,6 +906,12 @@ WAGTAILEMBEDS_FINDERS = [
     {"class": "wagtail.embeds.finders.oembed"},
 ]
 
+BLOG_CACHE_TIMEOUT = get_int(
+    name="BLOG_CACHE_TIMEOUT",
+    default=60 * 60 * 24,
+    description="How long the blog should be cached",
+)
+
 # django cache back-ends
 CACHES = {
     "default": {

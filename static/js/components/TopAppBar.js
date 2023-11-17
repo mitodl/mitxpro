@@ -86,6 +86,15 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
                 )
               }
             </li>
+            {
+              SETTINGS.enable_blog ? (
+                <li>
+                  <a href={routes.blog} className="" aria-label="blog">
+                    Blog
+                  </a>
+                </li>
+              ) : null
+            }
             {shouldShowLoginSignup(location) ? (
               currentUser && currentUser.is_authenticated ? (
                 <li>

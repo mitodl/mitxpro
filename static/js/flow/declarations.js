@@ -20,6 +20,7 @@ declare type Settings = {
   digital_credentials_supported_runs: Array<string>,
   course_dropdown: boolean,
   webinars: boolean,
+  enable_blog: boolean,
   enable_taxes_display: boolean,
 }
 declare var SETTINGS: Settings

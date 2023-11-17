@@ -11,6 +11,7 @@ export const routes = {
   root:            "/",
   catalog:         "/catalog/",
   webinars:         "/webinars/",
+  blog:            "/blog/",
   dashboard:       "/dashboard/",
   accountSettings: "/account-settings/",
   logout:          "/logout/",

@@ -5,6 +5,7 @@ PROGRAM_INDEX_SLUG = "programs"
 SIGNATORY_INDEX_SLUG = "signatories"
 CERTIFICATE_INDEX_SLUG = "certificate"
 WEBINAR_INDEX_SLUG = "webinars"
+BLOG_INDEX_SLUG = "blog"
 
 ALL_TOPICS = "All Topics"
 ALL_TAB = "all-tab"
