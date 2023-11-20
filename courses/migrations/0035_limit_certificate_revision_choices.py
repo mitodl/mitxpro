@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("wagtailcore", "0062_comment_models_and_pagesubscription"),
+        ("wagtailcore", "0076_modellogentry_revision"),
         ("courses", "0034_make_certificate_revision_nullable"),
     ]
 
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 limit_choices_to=courses.models.limit_to_certificate_pages,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="wagtailcore.pagerevision",
+                to="wagtailcore.revision",
             ),
         ),
         migrations.AlterField(
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 limit_choices_to=courses.models.limit_to_certificate_pages,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="wagtailcore.pagerevision",
+                to="wagtailcore.revision",
             ),
         ),
     ]

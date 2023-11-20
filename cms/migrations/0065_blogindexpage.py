@@ -7,7 +7,7 @@ import django.db.models.deletion
 import pytz
 import wagtailmetadata.models
 from django.db import migrations, models
-from wagtail.models import Page, PageRevision
+from wagtail.models import Page, Revision
 
 import cms.models
 
@@ -41,25 +41,27 @@ def create_blog_index_page(apps, app_schema):
             title="Blog",
             content_type_id=blog_index_content_type.id,
             locale_id=home_page.get_default_locale().id,
+            live=True,
         )
         blog_page_obj = BlogIndexPage(**blog_page_content)
         home_page.add_child(instance=blog_page_obj)
         # NOTE: This block of code creates page revision and publishes it. There may be an easier way to do this.
         content = dict(**blog_page_content, pk=blog_page_obj.id)
-        revision = PageRevision.objects.create(
-            page_id=blog_page_obj.id,
+        Revision.objects.create(
+            content_object=blog_page_obj,
+            base_content_type=home_page.content_type,
             submitted_for_moderation=False,
             created_at=datetime.datetime.now(tz=pytz.UTC),
             content=content,
         )
-        revision.publish()
+        # blog_page_obj.publish(revision)
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
         ("wagtailimages", "0023_add_choose_permissions"),
-        ("wagtailcore", "0062_comment_models_and_pagesubscription"),
+        ("wagtailcore", "0076_modellogentry_revision"),
         ("wagtailredirects", "0008_add_verbose_name_plural"),
         ("cms", "0064_productpage_format_field"),
     ]

@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("wagtailcore", "0062_comment_models_and_pagesubscription"),
+        ("wagtailcore", "0076_modellogentry_revision"),
         ("courses", "0033_remove_course_coursetopic_association"),
     ]
 
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="wagtailcore.pagerevision",
+                to="wagtailcore.revision",
             ),
         ),
         migrations.AlterField(
@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="wagtailcore.pagerevision",
+                to="wagtailcore.revision",
             ),
         ),
     ]

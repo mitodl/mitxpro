@@ -274,6 +274,24 @@ class BlogIndexPage(Page):
             posts=items,
         )
 
+    def publish(
+        self,
+        revision,
+        user=None,
+        changed=True,
+        log_action=True,
+        previous_revision=None,
+        skip_permission_checks=False,
+    ):
+        return super().publish(
+            revision,
+            user=user,
+            changed=changed,
+            log_action=log_action,
+            previous_revision=previous_revision,
+            skip_permission_checks=skip_permission_checks,
+        )
+
 
 class WebinarPage(MetadataPageMixin, Page):
     """
@@ -631,7 +649,7 @@ class CertificateIndexPage(RoutablePageMixin, Page):
 
         # Get a CertificatePage to serve this request
         certificate_page = (
-            certificate.certificate_page_revision.as_page_object()
+            certificate.certificate_page_revision.as_object()
             if certificate.certificate_page_revision
             else (
                 certificate.program.page.certificate_page
@@ -665,7 +683,7 @@ class CertificateIndexPage(RoutablePageMixin, Page):
 
         # Get a CertificatePage to serve this request
         certificate_page = (
-            certificate.certificate_page_revision.as_page_object()
+            certificate.certificate_page_revision.as_object()
             if certificate.certificate_page_revision
             else (
                 certificate.course_run.course.page.certificate_page

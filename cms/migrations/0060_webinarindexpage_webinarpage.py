@@ -5,7 +5,7 @@ import django.db.models.deletion
 import pytz
 import wagtailmetadata.models
 from django.db import migrations, models
-from wagtail.models import Page, PageRevision
+from wagtail.models import Page, Revision
 
 import cms.models
 
@@ -39,18 +39,21 @@ def create_webinar_index_page(apps, app_schema):
             title="Webinars",
             content_type_id=webinar_index_content_type.id,
             locale_id=home_page.get_default_locale().id,
+            live=True,
         )
         webinar_page_obj = WebinarIndexPage(**webinar_page_content)
         home_page.add_child(instance=webinar_page_obj)
         # NOTE: This block of code creates page revision and publishes it. There may be an easier way to do this.
         content = dict(**webinar_page_content, pk=webinar_page_obj.id)
-        revision = PageRevision.objects.create(
-            page_id=webinar_page_obj.id,
+        Revision.objects.create(
+            content_object=webinar_page_obj,
+            content_type=webinar_page_obj.content_type,
+            base_content_type=home_page.content_type,
             submitted_for_moderation=False,
             created_at=datetime.datetime.now(tz=pytz.UTC),
             content=content,
         )
-        revision.publish()
+        # revision.publish()
 
 
 def delete_webinar_index_page(apps, app_schema):
@@ -69,7 +72,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("wagtailimages", "0023_add_choose_permissions"),
-        ("wagtailcore", "0062_comment_models_and_pagesubscription"),
+        ("wagtailcore", "0076_modellogentry_revision"),
         ("cms", "0059_remove_unused_external_courseware_fields"),
     ]
 

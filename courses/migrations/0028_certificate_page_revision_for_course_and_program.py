@@ -43,7 +43,7 @@ def set_current_certificate_revision(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("wagtailcore", "0062_comment_models_and_pagesubscription"),
+        ("wagtailcore", "0076_modellogentry_revision"),
         ("courses", "0027_jsonField_from_django_models"),
     ]
 
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="wagtailcore.pagerevision",
+                to="wagtailcore.revision",
             ),
         ),
         migrations.AddField(
@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="wagtailcore.pagerevision",
+                to="wagtailcore.revision",
             ),
         ),
         migrations.RunPython(
