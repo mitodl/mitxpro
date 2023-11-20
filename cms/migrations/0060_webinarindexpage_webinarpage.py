@@ -53,7 +53,6 @@ def create_webinar_index_page(apps, app_schema):
             created_at=datetime.datetime.now(tz=pytz.UTC),
             content=content,
         )
-        # revision.publish()
 
 
 def delete_webinar_index_page(apps, app_schema):

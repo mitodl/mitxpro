@@ -154,7 +154,6 @@ def create_catalog_page(apps, schema_editor):
             created_at=now_in_utc(),
             content=content,
         )
-        # revision.publish()
 
 
 def remove_catalog_page(apps, schema_editor):
@@ -202,7 +201,6 @@ def create_certificate_index_page(apps, schema_editor):
             created_at=now_in_utc(),
             content=content,
         )
-        # revision.publish()
 
 
 def remove_certificate_index_page(apps, schema_editor):

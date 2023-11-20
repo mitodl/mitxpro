@@ -54,7 +54,6 @@ def create_blog_index_page(apps, app_schema):
             created_at=datetime.datetime.now(tz=pytz.UTC),
             content=content,
         )
-        # blog_page_obj.publish(revision)
 
 
 class Migration(migrations.Migration):
