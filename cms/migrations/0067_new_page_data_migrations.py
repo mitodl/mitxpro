@@ -237,7 +237,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("wagtailcore", "0069_log_entry_jsonfield"),
         ("wagtailsearch", "0006_customise_indexentry"),
-        ("cms", "0065_wagtail_3_upgrade"),
+        ("cms", "0066_wagtail_3_upgrade"),
     ]
 
     operations = [migrations.RunPython(migrate_data, reverse_migrate_data)]

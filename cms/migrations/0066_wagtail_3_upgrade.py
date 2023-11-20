@@ -10,7 +10,7 @@ import wagtail.images.blocks
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("cms", "0064_productpage_format_field"),
+        ("cms", "0065_productpage_format_field"),
     ]
 
     operations = [
