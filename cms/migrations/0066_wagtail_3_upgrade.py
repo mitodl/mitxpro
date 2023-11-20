@@ -10,83 +10,359 @@ import wagtail.images.blocks
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0065_blogindexpage'),
+        ("cms", "0065_blogindexpage"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='certificatepage',
-            name='overrides',
-            field=wagtail.fields.StreamField([('course_run', wagtail.blocks.StructBlock([('readable_id', cms.blocks.CourseRunFieldBlock(help_text='Course run to add the override for')), ('CEUs', wagtail.blocks.DecimalBlock(help_text='CEUs to override for this CourseRun, for display on the certificate'))]))], blank=True, help_text='Overrides for specific runs of this Course/Program', use_json_field=True, validators=[cms.blocks.validate_unique_readable_ids]),
+            model_name="certificatepage",
+            name="overrides",
+            field=wagtail.fields.StreamField(
+                [
+                    (
+                        "course_run",
+                        wagtail.blocks.StructBlock(
+                            [
+                                (
+                                    "readable_id",
+                                    cms.blocks.CourseRunFieldBlock(
+                                        help_text="Course run to add the override for"
+                                    ),
+                                ),
+                                (
+                                    "CEUs",
+                                    wagtail.blocks.DecimalBlock(
+                                        help_text="CEUs to override for this CourseRun, for display on the certificate"
+                                    ),
+                                ),
+                            ]
+                        ),
+                    )
+                ],
+                blank=True,
+                help_text="Overrides for specific runs of this Course/Program",
+                use_json_field=True,
+                validators=[cms.blocks.validate_unique_readable_ids],
+            ),
         ),
         migrations.AlterField(
-            model_name='certificatepage',
-            name='signatories',
-            field=wagtail.fields.StreamField([('signatory', wagtail.blocks.PageChooserBlock(page_type=['cms.SignatoryPage'], required=True))], help_text='You can choose upto 5 signatories.', use_json_field=True),
+            model_name="certificatepage",
+            name="signatories",
+            field=wagtail.fields.StreamField(
+                [
+                    (
+                        "signatory",
+                        wagtail.blocks.PageChooserBlock(
+                            page_type=["cms.SignatoryPage"], required=True
+                        ),
+                    )
+                ],
+                help_text="You can choose upto 5 signatories.",
+                use_json_field=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='coursepage',
-            name='content',
-            field=wagtail.fields.StreamField([('heading', wagtail.blocks.CharBlock(form_classname='full title')), ('paragraph', wagtail.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('raw_html', wagtail.blocks.RawHTMLBlock())], blank=True, help_text='The content of this tab on the program page', use_json_field=True),
+            model_name="coursepage",
+            name="content",
+            field=wagtail.fields.StreamField(
+                [
+                    ("heading", wagtail.blocks.CharBlock(form_classname="full title")),
+                    ("paragraph", wagtail.blocks.RichTextBlock()),
+                    ("image", wagtail.images.blocks.ImageChooserBlock()),
+                    ("raw_html", wagtail.blocks.RawHTMLBlock()),
+                ],
+                blank=True,
+                help_text="The content of this tab on the program page",
+                use_json_field=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='coursesinprogrampage',
-            name='contents',
-            field=wagtail.fields.StreamField([('item', wagtail.blocks.PageChooserBlock(page_type=['cms.CoursePage', 'cms.ProgramPage', 'cms.ExternalCoursePage'], required=False))], blank=True, help_text='The courseware to display in this carousel', use_json_field=True),
+            model_name="coursesinprogrampage",
+            name="contents",
+            field=wagtail.fields.StreamField(
+                [
+                    (
+                        "item",
+                        wagtail.blocks.PageChooserBlock(
+                            page_type=[
+                                "cms.CoursePage",
+                                "cms.ProgramPage",
+                                "cms.ExternalCoursePage",
+                            ],
+                            required=False,
+                        ),
+                    )
+                ],
+                blank=True,
+                help_text="The courseware to display in this carousel",
+                use_json_field=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='externalcoursepage',
-            name='content',
-            field=wagtail.fields.StreamField([('heading', wagtail.blocks.CharBlock(form_classname='full title')), ('paragraph', wagtail.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('raw_html', wagtail.blocks.RawHTMLBlock())], blank=True, help_text='The content of this tab on the program page', use_json_field=True),
+            model_name="externalcoursepage",
+            name="content",
+            field=wagtail.fields.StreamField(
+                [
+                    ("heading", wagtail.blocks.CharBlock(form_classname="full title")),
+                    ("paragraph", wagtail.blocks.RichTextBlock()),
+                    ("image", wagtail.images.blocks.ImageChooserBlock()),
+                    ("raw_html", wagtail.blocks.RawHTMLBlock()),
+                ],
+                blank=True,
+                help_text="The content of this tab on the program page",
+                use_json_field=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='externalprogrampage',
-            name='content',
-            field=wagtail.fields.StreamField([('heading', wagtail.blocks.CharBlock(form_classname='full title')), ('paragraph', wagtail.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('raw_html', wagtail.blocks.RawHTMLBlock())], blank=True, help_text='The content of this tab on the program page', use_json_field=True),
+            model_name="externalprogrampage",
+            name="content",
+            field=wagtail.fields.StreamField(
+                [
+                    ("heading", wagtail.blocks.CharBlock(form_classname="full title")),
+                    ("paragraph", wagtail.blocks.RichTextBlock()),
+                    ("image", wagtail.images.blocks.ImageChooserBlock()),
+                    ("raw_html", wagtail.blocks.RawHTMLBlock()),
+                ],
+                blank=True,
+                help_text="The content of this tab on the program page",
+                use_json_field=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='facultymemberspage',
-            name='members',
-            field=wagtail.fields.StreamField([('member', wagtail.blocks.StructBlock([('name', wagtail.blocks.CharBlock(help_text='Name of the faculty member.', max_length=100)), ('image', wagtail.images.blocks.ImageChooserBlock(help_text='Profile image size must be at least 300x300 pixels.')), ('description', wagtail.blocks.RichTextBlock(help_text='A brief description about the faculty member.'))]))], help_text='The faculty members to display on this page', use_json_field=True),
+            model_name="facultymemberspage",
+            name="members",
+            field=wagtail.fields.StreamField(
+                [
+                    (
+                        "member",
+                        wagtail.blocks.StructBlock(
+                            [
+                                (
+                                    "name",
+                                    wagtail.blocks.CharBlock(
+                                        help_text="Name of the faculty member.",
+                                        max_length=100,
+                                    ),
+                                ),
+                                (
+                                    "image",
+                                    wagtail.images.blocks.ImageChooserBlock(
+                                        help_text="Profile image size must be at least 300x300 pixels."
+                                    ),
+                                ),
+                                (
+                                    "description",
+                                    wagtail.blocks.RichTextBlock(
+                                        help_text="A brief description about the faculty member."
+                                    ),
+                                ),
+                            ]
+                        ),
+                    )
+                ],
+                help_text="The faculty members to display on this page",
+                use_json_field=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='imagecarouselpage',
-            name='images',
-            field=wagtail.fields.StreamField([('image', wagtail.images.blocks.ImageChooserBlock(help_text='Choose an image to upload.'))], help_text='Add images for this section.', use_json_field=True),
+            model_name="imagecarouselpage",
+            name="images",
+            field=wagtail.fields.StreamField(
+                [
+                    (
+                        "image",
+                        wagtail.images.blocks.ImageChooserBlock(
+                            help_text="Choose an image to upload."
+                        ),
+                    )
+                ],
+                help_text="Add images for this section.",
+                use_json_field=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='learningoutcomespage',
-            name='outcome_items',
-            field=wagtail.fields.StreamField([('outcome', wagtail.blocks.TextBlock(icon='plus'))], help_text="Detail about What you'll learn as learning outcome.", use_json_field=True),
+            model_name="learningoutcomespage",
+            name="outcome_items",
+            field=wagtail.fields.StreamField(
+                [("outcome", wagtail.blocks.TextBlock(icon="plus"))],
+                help_text="Detail about What you'll learn as learning outcome.",
+                use_json_field=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='learningtechniquespage',
-            name='technique_items',
-            field=wagtail.fields.StreamField([('techniques', wagtail.blocks.StructBlock([('heading', wagtail.blocks.CharBlock(max_length=100)), ('sub_heading', wagtail.blocks.CharBlock(max_length=250)), ('image', wagtail.images.blocks.ImageChooserBlock())]))], help_text="Enter detail about how you'll learn.", use_json_field=True),
+            model_name="learningtechniquespage",
+            name="technique_items",
+            field=wagtail.fields.StreamField(
+                [
+                    (
+                        "techniques",
+                        wagtail.blocks.StructBlock(
+                            [
+                                ("heading", wagtail.blocks.CharBlock(max_length=100)),
+                                (
+                                    "sub_heading",
+                                    wagtail.blocks.CharBlock(max_length=250),
+                                ),
+                                ("image", wagtail.images.blocks.ImageChooserBlock()),
+                            ]
+                        ),
+                    )
+                ],
+                help_text="Enter detail about how you'll learn.",
+                use_json_field=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='newsandeventspage',
-            name='items',
-            field=wagtail.fields.StreamField([('news_and_events', wagtail.blocks.StructBlock([('content_type', wagtail.blocks.CharBlock(help_text='Specify the news/events type here.', max_length=100)), ('title', wagtail.blocks.CharBlock(help_text='Specify the news/events title here.', max_length=255)), ('image', wagtail.images.blocks.ImageChooserBlock(blank=True, help_text='Specify the image for news/events section.', null=True)), ('content', wagtail.blocks.TextBlock(help_text='Specify the news/events content here.')), ('call_to_action', wagtail.blocks.CharBlock(help_text="Specify the news/events call-to-action text here (e.g: 'Read More').", max_length=100)), ('action_url', wagtail.blocks.URLBlock(help_text='Specify the news/events action-url here (like a link to an article e.g: https://www.google.com/search?q=article).'))]))], help_text='Add news and events updates to display in this section.', use_json_field=True),
+            model_name="newsandeventspage",
+            name="items",
+            field=wagtail.fields.StreamField(
+                [
+                    (
+                        "news_and_events",
+                        wagtail.blocks.StructBlock(
+                            [
+                                (
+                                    "content_type",
+                                    wagtail.blocks.CharBlock(
+                                        help_text="Specify the news/events type here.",
+                                        max_length=100,
+                                    ),
+                                ),
+                                (
+                                    "title",
+                                    wagtail.blocks.CharBlock(
+                                        help_text="Specify the news/events title here.",
+                                        max_length=255,
+                                    ),
+                                ),
+                                (
+                                    "image",
+                                    wagtail.images.blocks.ImageChooserBlock(
+                                        blank=True,
+                                        help_text="Specify the image for news/events section.",
+                                        null=True,
+                                    ),
+                                ),
+                                (
+                                    "content",
+                                    wagtail.blocks.TextBlock(
+                                        help_text="Specify the news/events content here."
+                                    ),
+                                ),
+                                (
+                                    "call_to_action",
+                                    wagtail.blocks.CharBlock(
+                                        help_text="Specify the news/events call-to-action text here (e.g: 'Read More').",
+                                        max_length=100,
+                                    ),
+                                ),
+                                (
+                                    "action_url",
+                                    wagtail.blocks.URLBlock(
+                                        help_text="Specify the news/events action-url here (like a link to an article e.g: https://www.google.com/search?q=article)."
+                                    ),
+                                ),
+                            ]
+                        ),
+                    )
+                ],
+                help_text="Add news and events updates to display in this section.",
+                use_json_field=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='programpage',
-            name='content',
-            field=wagtail.fields.StreamField([('heading', wagtail.blocks.CharBlock(form_classname='full title')), ('paragraph', wagtail.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('raw_html', wagtail.blocks.RawHTMLBlock())], blank=True, help_text='The content of this tab on the program page', use_json_field=True),
+            model_name="programpage",
+            name="content",
+            field=wagtail.fields.StreamField(
+                [
+                    ("heading", wagtail.blocks.CharBlock(form_classname="full title")),
+                    ("paragraph", wagtail.blocks.RichTextBlock()),
+                    ("image", wagtail.images.blocks.ImageChooserBlock()),
+                    ("raw_html", wagtail.blocks.RawHTMLBlock()),
+                ],
+                blank=True,
+                help_text="The content of this tab on the program page",
+                use_json_field=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='resourcepage',
-            name='content',
-            field=wagtail.fields.StreamField([('content', wagtail.blocks.StructBlock([('heading', wagtail.blocks.CharBlock(max_length=100)), ('detail', wagtail.blocks.RichTextBlock())]))], help_text='Enter details of content.', use_json_field=True),
+            model_name="resourcepage",
+            name="content",
+            field=wagtail.fields.StreamField(
+                [
+                    (
+                        "content",
+                        wagtail.blocks.StructBlock(
+                            [
+                                ("heading", wagtail.blocks.CharBlock(max_length=100)),
+                                ("detail", wagtail.blocks.RichTextBlock()),
+                            ]
+                        ),
+                    )
+                ],
+                help_text="Enter details of content.",
+                use_json_field=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='usertestimonialspage',
-            name='items',
-            field=wagtail.fields.StreamField([('testimonial', wagtail.blocks.StructBlock([('name', wagtail.blocks.CharBlock(help_text='Name of the attestant.', max_length=100)), ('title', wagtail.blocks.CharBlock(help_text='The title to display after the name.', max_length=255)), ('image', wagtail.images.blocks.ImageChooserBlock(blank=True, help_text='The image to display on the testimonial', null=True)), ('quote', wagtail.blocks.TextBlock(help_text='The quote that appears on the testimonial.'))]))], help_text='Add testimonials to display in this section.', use_json_field=True),
+            model_name="usertestimonialspage",
+            name="items",
+            field=wagtail.fields.StreamField(
+                [
+                    (
+                        "testimonial",
+                        wagtail.blocks.StructBlock(
+                            [
+                                (
+                                    "name",
+                                    wagtail.blocks.CharBlock(
+                                        help_text="Name of the attestant.",
+                                        max_length=100,
+                                    ),
+                                ),
+                                (
+                                    "title",
+                                    wagtail.blocks.CharBlock(
+                                        help_text="The title to display after the name.",
+                                        max_length=255,
+                                    ),
+                                ),
+                                (
+                                    "image",
+                                    wagtail.images.blocks.ImageChooserBlock(
+                                        blank=True,
+                                        help_text="The image to display on the testimonial",
+                                        null=True,
+                                    ),
+                                ),
+                                (
+                                    "quote",
+                                    wagtail.blocks.TextBlock(
+                                        help_text="The quote that appears on the testimonial."
+                                    ),
+                                ),
+                            ]
+                        ),
+                    )
+                ],
+                help_text="Add testimonials to display in this section.",
+                use_json_field=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='whoshouldenrollpage',
-            name='content',
-            field=wagtail.fields.StreamField([('item', wagtail.blocks.RichTextBlock(features=['bold', 'italic', 'ol', 'ul'], icon='plus'))], help_text='Contents of the "Who Should Enroll" section.', use_json_field=True),
+            model_name="whoshouldenrollpage",
+            name="content",
+            field=wagtail.fields.StreamField(
+                [
+                    (
+                        "item",
+                        wagtail.blocks.RichTextBlock(
+                            features=["bold", "italic", "ol", "ul"], icon="plus"
+                        ),
+                    )
+                ],
+                help_text='Contents of the "Who Should Enroll" section.',
+                use_json_field=True,
+            ),
         ),
     ]

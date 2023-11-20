@@ -60,6 +60,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("wagtailimages", "0023_add_choose_permissions"),
         ("wagtailcore", "0062_comment_models_and_pagesubscription"),
+        ("wagtailredirects", "0008_add_verbose_name_plural"),
         ("cms", "0064_productpage_format_field"),
     ]
 
