@@ -252,7 +252,7 @@ class BlogIndexPage(Page):
         FieldPanel("sub_heading"),
         FieldPanel("recent_posts_heading"),
         FieldPanel("more_posts_heading"),
-        ImageChooserPanel("banner_image"),
+        FieldPanel("banner_image"),
     ]
 
     def serve(self, request, *args, **kwargs):
