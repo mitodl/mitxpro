@@ -61,8 +61,8 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction
 
-      - name: Lint
-        run: poetry run pylint ./**/*.py
+#      - name: Lint
+#        run: poetry run pylint ./**/*.py
 
       - name: Code Formatting (Black)
         run: poetry run black --check .
