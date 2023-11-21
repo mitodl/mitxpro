@@ -216,6 +216,115 @@ def remove_certificate_index_page(apps, schema_editor):
         index_page.delete()
 
 
+def create_webinar_index_page(apps, app_schema):
+    """
+    Creates index page for webinars
+    """
+    Site = apps.get_model("wagtailcore", "Site")
+    site = Site.objects.filter(is_default_site=True).first()
+    if not site:
+        raise Exception(
+            "A default site is not set up. Please setup a default site before running this migration"
+        )
+    if not site.root_page:
+        raise Exception(
+            "No root (home) page set up. Please setup a root (home) page for the default site before running this migration"
+        )
+
+    home_page = Page.objects.get(id=site.root_page.id)
+    WebinarIndexPage = apps.get_model("cms", "WebinarIndexPage")
+    ContentType = apps.get_model("contenttypes", "ContentType")
+
+    webinar_index_content_type, _ = ContentType.objects.get_or_create(
+        app_label="cms", model="webinarindexpage"
+    )
+    webinar_index = WebinarIndexPage.objects.first()
+
+    if not webinar_index:
+        webinar_page_content = dict(
+            title="Webinars",
+            content_type_id=webinar_index_content_type.id,
+            locale_id=home_page.get_default_locale().id,
+            live=True,
+        )
+        webinar_page_obj = WebinarIndexPage(**webinar_page_content)
+        home_page.add_child(instance=webinar_page_obj)
+        # NOTE: This block of code creates page revision and publishes it. There may be an easier way to do this.
+        content = dict(**webinar_page_content, pk=webinar_page_obj.id)
+        Revision.objects.create(
+            content_object=webinar_page_obj,
+            content_type=webinar_page_obj.content_type,
+            base_content_type=home_page.content_type,
+            submitted_for_moderation=False,
+            created_at=datetime.datetime.now(tz=pytz.UTC),
+            content=content,
+        )
+
+
+def remove_webinar_index_page(apps, app_schema):
+    ContentType = apps.get_model("contenttypes.ContentType")
+    index_content_type, _ = ContentType.objects.get_or_create(
+        app_label="cms", model="webinarindexpage"
+    )
+    index_page = Page.objects.get(content_type_id=index_content_type.id)
+    if index_page:
+        index_page.delete()
+
+
+def create_blog_index_page(apps, app_schema):
+    """
+    Creates index page for blog
+    """
+    Site = apps.get_model("wagtailcore", "Site")
+    site = Site.objects.filter(is_default_site=True).first()
+    if not site:
+        raise Exception(
+            "A default site is not set up. Please setup a default site before running this migration"
+        )
+    if not site.root_page:
+        raise Exception(
+            "No root (home) page set up. Please setup a root (home) page for the default site before running this migration"
+        )
+
+    home_page = Page.objects.get(id=site.root_page.id)
+    BlogIndexPage = apps.get_model("cms", "BlogIndexPage")
+    ContentType = apps.get_model("contenttypes", "ContentType")
+
+    blog_index_content_type, _ = ContentType.objects.get_or_create(
+        app_label="cms", model="blogindexpage"
+    )
+    blog_index = BlogIndexPage.objects.first()
+
+    if not blog_index:
+        blog_page_content = dict(
+            title="Blog",
+            content_type_id=blog_index_content_type.id,
+            locale_id=home_page.get_default_locale().id,
+            live=True,
+        )
+        blog_page_obj = BlogIndexPage(**blog_page_content)
+        home_page.add_child(instance=blog_page_obj)
+        # NOTE: This block of code creates page revision and publishes it. There may be an easier way to do this.
+        content = dict(**blog_page_content, pk=blog_page_obj.id)
+        Revision.objects.create(
+            content_object=blog_page_obj,
+            base_content_type=home_page.content_type,
+            submitted_for_moderation=False,
+            created_at=datetime.datetime.now(tz=pytz.UTC),
+            content=content,
+        )
+
+
+def remove_blog_index_page(apps, app_schema):
+    ContentType = apps.get_model("contenttypes.ContentType")
+    index_content_type, _ = ContentType.objects.get_or_create(
+        app_label="cms", model="blogindexpage"
+    )
+    index_page = Page.objects.get(content_type_id=index_content_type.id)
+    if index_page:
+        index_page.delete()
+
+
 def migrate_data(apps, schema_editor):
     """
     Apply all data migrations in order
@@ -223,12 +332,16 @@ def migrate_data(apps, schema_editor):
     create_index_pages_and_nest_detail(apps, schema_editor)
     create_catalog_page(apps, schema_editor)
     create_certificate_index_page(apps, schema_editor)
+    create_webinar_index_page(apps, schema_editor)
+    create_blog_index_page(apps, schema_editor)
 
 
 def reverse_migrate_data(apps, schema_editor):
     """
     Reverse all data migrations in the opposite order from which they were applied
     """
+    remove_blog_index_page(apps, schema_editor)
+    remove_webinar_index_page(apps, schema_editor)
     remove_certificate_index_page(apps, schema_editor)
     remove_catalog_page(apps, schema_editor)
     unnest_detail_and_delete_index_pages(apps, schema_editor)
