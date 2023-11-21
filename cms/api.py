@@ -1,4 +1,5 @@
 """API for the CMS app"""
+# pylint: skip-file
 import itertools
 import logging
 from datetime import MAXYEAR, datetime

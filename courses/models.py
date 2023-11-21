@@ -964,7 +964,7 @@ def limit_to_certificate_pages():
         "id", flat=True
     )
 
-    return {"page_id__in": available_revisions}
+    return {"object_id__in": map(str, available_revisions)}
 
 
 class BaseCertificate(models.Model):

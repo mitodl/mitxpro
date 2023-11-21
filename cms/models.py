@@ -1,7 +1,8 @@
 """
 Page models for the CMS
 """
-# pylint: disable=too-many-lines, too-many-public-methods
+# TODO: use  ruff or upgrade pylint to support String based model references.
+# pylint: skip-file
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -272,24 +273,6 @@ class BlogIndexPage(Page):
             **super().get_context(request, *args, **kwargs),
             **get_base_context(request),
             posts=items,
-        )
-
-    def publish(
-        self,
-        revision,
-        user=None,
-        changed=True,
-        log_action=True,
-        previous_revision=None,
-        skip_permission_checks=False,
-    ):
-        return super().publish(
-            revision,
-            user=user,
-            changed=changed,
-            log_action=log_action,
-            previous_revision=previous_revision,
-            skip_permission_checks=skip_permission_checks,
         )
 
 
