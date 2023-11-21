@@ -1,5 +1,4 @@
 """Tests for CMS views"""
-# pylint: skip-file
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 

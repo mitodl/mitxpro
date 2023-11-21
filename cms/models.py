@@ -2,7 +2,6 @@
 Page models for the CMS
 """
 # TODO: use  ruff or upgrade pylint to support String based model references.
-# pylint: skip-file
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta
