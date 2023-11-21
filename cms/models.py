@@ -20,7 +20,7 @@ from django.utils.functional import cached_property
 from django.utils.text import slugify
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from wagtail import blocks
-from wagtail.admin.panels import FieldPanel, InlinePanel
+from wagtail.admin.panels import FieldPanel, InlinePanel, TitleFieldPanel
 from wagtail.blocks import PageChooserBlock, RawHTMLBlock, StreamBlock
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.coreutils import WAGTAIL_APPEND_SLASH
@@ -173,7 +173,7 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
     )
 
     content_panels = [
-        FieldPanel("title"),
+        TitleFieldPanel("title"),
         FieldPanel("banner_image"),
     ]
 
@@ -248,7 +248,7 @@ class BlogIndexPage(Page):
     )
 
     content_panels = [
-        FieldPanel("title"),
+        TitleFieldPanel("title"),
         FieldPanel("sub_heading"),
         FieldPanel("recent_posts_heading"),
         FieldPanel("more_posts_heading"),
@@ -334,7 +334,7 @@ class WebinarPage(MetadataPageMixin, Page):
         FieldPanel("course"),
         FieldPanel("program"),
         FieldPanel("category"),
-        FieldPanel("title"),
+        TitleFieldPanel("title"),
         FieldPanel("sub_heading"),
         FieldPanel("banner_image"),
         FieldPanel("date", heading="Start Date"),
@@ -1599,7 +1599,7 @@ class LearningTechniquesPage(CourseProgramChildPage):
     class Meta:
         verbose_name = "Icon Grid"
 
-    content_panels = [FieldPanel("title"), FieldPanel("technique_items")]
+    content_panels = [TitleFieldPanel("title"), FieldPanel("technique_items")]
 
 
 class ForTeamsPage(CourseProgramChildPage):
@@ -1639,7 +1639,7 @@ class ForTeamsPage(CourseProgramChildPage):
         verbose_name = "Text-Image Section"
 
     content_panels = [
-        FieldPanel("title"),
+        TitleFieldPanel("title"),
         FieldPanel("content"),
         FieldPanel("action_title"),
         FieldPanel("action_url"),
@@ -1673,7 +1673,7 @@ class TextSection(CourseProgramChildPage):
     )
 
     content_panels = [
-        FieldPanel("title"),
+        TitleFieldPanel("title"),
         FieldPanel("content"),
         FieldPanel("action_title"),
         FieldPanel("action_url"),
@@ -1715,7 +1715,7 @@ class TextVideoSection(CourseProgramChildPage):
     )
 
     content_panels = [
-        FieldPanel("title"),
+        TitleFieldPanel("title"),
         FieldPanel("content"),
         FieldPanel("video_url"),
         FieldPanel("action_title"),
