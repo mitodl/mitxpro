@@ -253,7 +253,6 @@ def create_webinar_index_page(apps, app_schema):
         content = dict(**webinar_page_content, pk=webinar_page_obj.id)
         Revision.objects.create(
             content_object=webinar_page_obj,
-            content_type=webinar_page_obj.content_type,
             base_content_type=home_page.content_type,
             submitted_for_moderation=False,
             created_at=datetime.datetime.now(tz=pytz.UTC),

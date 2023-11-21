@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 limit_choices_to=courses.models.limit_to_certificate_pages,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="wagtailcore.pagerevision",
+                to="wagtailcore.revision",
             ),
         ),
         migrations.AlterField(
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 limit_choices_to=courses.models.limit_to_certificate_pages,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="wagtailcore.pagerevision",
+                to="wagtailcore.revision",
             ),
         ),
     ]
