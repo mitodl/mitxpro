@@ -150,6 +150,7 @@ def test_get_field_names():
         "tax_rate",
         "tax_rate_name",
         "tax_country_code",
+        "mit_tax_identifier",
     }
 
 

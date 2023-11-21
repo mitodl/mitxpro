@@ -329,6 +329,10 @@ class Order(OrderAbstract, AuditableModel):
     )
     tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")
 
+    mit_tax_identifier = models.ForeignKey(
+        "ecommerce.TaxRate", on_delete=models.DO_NOTHING, blank=True, null=True
+    )
+
     objects = OrderManager()
 
     @staticmethod
@@ -837,6 +841,8 @@ class TaxRate(TimestampedModel):
     country_code = models.CharField(max_length=2)
     tax_rate = models.DecimalField(max_digits=6, decimal_places=4, default=0)
     tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")
+    tax_identifier = models.TextField(default="")
+    tax_identifier_name = models.CharField(max_length=100, null=True, default="GSTIN")
     active = models.BooleanField(default=True)
 
     def to_dict(self):
@@ -845,6 +851,8 @@ class TaxRate(TimestampedModel):
             "country_code": self.country_code,
             "tax_rate": self.tax_rate,
             "tax_rate_name": self.tax_rate_name,
+            "tax_identifier": self.tax_identifier,
+            "tax_identifier_name": self.tax_identifier_name,
             "active": self.active,
         }
 

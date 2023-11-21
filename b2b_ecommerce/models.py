@@ -15,6 +15,7 @@ from ecommerce.models import (
     OrderManager,
     Product,
     ProductVersion,
+    TaxRate,
 )
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
@@ -151,6 +152,24 @@ class B2BOrder(OrderAbstract, AuditableModel):
         null=True,
         help_text="Program run to associate this order with",
         on_delete=models.PROTECT,
+    )
+
+    # These represent the tax collected for the entire order.
+    tax_country_code = models.CharField(max_length=2, blank=True, null=True)
+    tax_rate = models.DecimalField(
+        max_digits=6, decimal_places=4, null=True, blank=True, default=0
+    )
+    tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")
+
+    # These represent the customer's tax identifier for the order
+    customer_tax_identifier = models.TextField(default="")
+    customer_tax_identifier_name = models.CharField(
+        max_length=100, null=True, default=""
+    )
+
+    # This is the FK to the tax rate for MIT's tax identifier
+    mit_tax_identifier = models.ForeignKey(
+        TaxRate, on_delete=models.DO_NOTHING, blank=True, null=True
     )
 
     objects = OrderManager()
