@@ -373,10 +373,10 @@ def test_certificate_revision_choice_limits():
     program_certificate_page = CertificatePageFactory.create(parent=program_page)
 
     choices = limit_to_certificate_pages()
-    assert "page_id__in" in choices
+    assert "object_id__in" in choices
 
-    assert course_certificate_page.id in choices["page_id__in"]
-    assert program_certificate_page.id in choices["page_id__in"]
+    assert str(course_certificate_page.id) in choices["object_id__in"]
+    assert str(program_certificate_page.id) in choices["object_id__in"]
 
 
 def test_certificate_validations():
