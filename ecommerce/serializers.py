@@ -986,7 +986,7 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
             total_price = product_price_and_tax["price"] * line.quantity
             total_paid = Decimal(total_price + tax_paid).quantize(Decimal(".01"))
             discount = (line.product_version.price * line.quantity) - total_price
-
+            total_before_tax = Decimal(total_paid - tax_paid).quantize(Decimal(".01"))
             dates = CourseRunEnrollment.objects.filter(
                 order_id=instance.id, change_status__isnull=True
             ).aggregate(
@@ -1018,13 +1018,13 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                     ):
                         CEUs = override.value.get("CEUs")
                         break
-
             lines.append(
                 dict(
                     quantity=line.quantity,
                     total_paid=str(total_paid),
                     tax_paid=str(tax_paid),
                     discount=str(discount),
+                    total_before_tax=str(total_before_tax),
                     CEUs=str(CEUs) if CEUs else None,
                     **BaseProductVersionSerializer(line.product_version).data,
                     start_date=dates["start_date"],

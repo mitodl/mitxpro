@@ -12,7 +12,7 @@ import { pathOr } from "ramda"
 
 import queries from "../../lib/queries"
 import { formatPrettyDate, parseDateString } from "../../lib/util"
-import { formatNumber, formatDiscount } from "../../lib/ecommerce"
+import { calculatePriceAfterDiscount, formatNumber, formatDiscount, formatPrice } from "../../lib/ecommerce"
 import type Moment from "moment"
 import type { Match } from "react-router"
 import type { OrderReceiptResponse } from "../../flow/ecommerceTypes"
@@ -129,7 +129,7 @@ export class ReceiptPage extends React.Component<Props> {
                   </div>
                   <div className="receipt-col p-t-50">
                     <dl>
-                      <dt>Order Number:</dt>
+                      <dt>Invoice Number:</dt>
                       <dd id="orderNumber">
                         {orderReceipt.order.reference_number}
                       </dd>
@@ -254,6 +254,7 @@ export class ReceiptPage extends React.Component<Props> {
                         <th>Quantity</th>
                         <th>Unit Price</th>
                         <th>Discount</th>
+                        {SETTINGS.enable_taxes_display ? <th>Total Before Tax</th> : null}
                         {SETTINGS.enable_taxes_display ? <th>Tax ({formatNumber(orderReceipt.order.tax_rate)}%)</th> : null}
                         <th>Total Paid</th>
                       </tr>
@@ -288,6 +289,12 @@ export class ReceiptPage extends React.Component<Props> {
                             </td>
                             {SETTINGS.enable_taxes_display ? (
                               <td>
+                                <div>{formatPrice(line.total_paid - line.tax_paid)}</div>
+                              </td>
+                            ) : null}
+
+                            {SETTINGS.enable_taxes_display ? (
+                              <td>
                                 <div>${line.tax_paid}</div>
                               </td>
                             ) : null}
@@ -299,6 +306,7 @@ export class ReceiptPage extends React.Component<Props> {
                       })}
                     </tbody>
                   </table>
+                  <div className="receipt-hsn">HSN: 9992</div>
                 </div>
               </div>
             )}
