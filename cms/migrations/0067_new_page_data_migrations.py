@@ -349,9 +349,9 @@ def reverse_migrate_data(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("wagtailcore", "0076_modellogentry_revision"),
-        ("wagtailsearch", "0006_customise_indexentry"),
-        ("cms", "0066_wagtail_4_upgrade"),
+        ("wagtailcore", "0089_log_entry_data_json_null_to_object"),
+        ("wagtailsearch", "0007_delete_editorspick"),
+        ("cms", "0066_wagtail_5_upgrade"),
     ]
 
     operations = [migrations.RunPython(migrate_data, reverse_migrate_data)]
