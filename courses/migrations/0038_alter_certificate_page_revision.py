@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("wagtailcore", "0076_modellogentry_revision"),
+        ("wagtailcore", "0089_log_entry_data_json_null_to_object"),
         ("courses", "0037_make_platform_non_nullable"),
     ]
 

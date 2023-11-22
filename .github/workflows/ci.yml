@@ -61,6 +61,7 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction
 
+# TODO: use ruff or upgrade pylint, pylint-django, and asteroid to support String based model references.
 #      - name: Lint
 #        run: poetry run pylint ./**/*.py
 
