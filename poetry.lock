@@ -3851,17 +3851,17 @@ test = ["coverage (==4.5.3)", "flake8 (==3.7.8)", "flake8-blind-except (==0.1.1)
 
 [[package]]
 name = "wagtail-metadata"
-version = "4.0.2"
+version = "5.0.0"
 description = "A tool to assist with metadata for social media."
 optional = false
 python-versions = ">=3"
 files = [
-    {file = "wagtail-metadata-4.0.2.tar.gz", hash = "sha256:46e4854a6ba15f7d1aeccf330be63530cc28d3ab26a1a514a663a796581e1ae1"},
-    {file = "wagtail_metadata-4.0.2-py2.py3-none-any.whl", hash = "sha256:28436201e308921ec6a4e15ac45b3bd09cdd61f699a0973d968653a8e2fff5a7"},
+    {file = "wagtail-metadata-5.0.0.tar.gz", hash = "sha256:3b9109928bad53306b21b64cf9205d84cbb88fc625bac0a38305bebb9c26e64a"},
+    {file = "wagtail_metadata-5.0.0-py2.py3-none-any.whl", hash = "sha256:fcc2bbb71e83b353ceef05d69a4cde3f2fbe645c9e5035e46f7829fc234a6405"},
 ]
 
 [package.dependencies]
-wagtail = ">=3.0"
+wagtail = ">=5.0"
 
 [[package]]
 name = "wcwidth"
@@ -3977,4 +3977,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.14"
-content-hash = "61c6a4d0d55b7aab8d4f1edf2e9cac16d4891bd26b4e8d6743153caa0f4bfc82"
+content-hash = "5991db8e2652d5ff5cfa4fa826c01530d332dabaf2f2ddd331f3fa88aaaec3d1"
