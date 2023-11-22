@@ -3832,22 +3832,22 @@ testing = ["Jinja2 (>=3.0,<3.2)", "azure-mgmt-cdn (>=12.0,<13.0)", "azure-mgmt-f
 
 [[package]]
 name = "wagtail-factories"
-version = "2.0.1"
+version = "4.1.0"
 description = "Factory boy classes for wagtail"
 optional = false
 python-versions = "*"
 files = [
-    {file = "wagtail_factories-2.0.1-py2.py3-none-any.whl", hash = "sha256:e2bd1a22e67b70e1603fc292e97f6f998ee0169477e1f71b5c53368630f1d088"},
-    {file = "wagtail_factories-2.0.1.tar.gz", hash = "sha256:3eeb55199f2c9ffbfe14979a94766d724c9e9f4d8f561df61097884e63bd537f"},
+    {file = "wagtail_factories-4.1.0-py2.py3-none-any.whl", hash = "sha256:6abd435518fdf0cdd3d9920acb2abbd9005936d6fecfdf6fdde3e404834d4b0c"},
+    {file = "wagtail_factories-4.1.0.tar.gz", hash = "sha256:067e3e1a30721a90eaa1514c8214aae7a171490bbedf026eeaa904a2ed9abcd0"},
 ]
 
 [package.dependencies]
-factory-boy = ">=2.8.0"
-wagtail = ">=2.0"
+factory-boy = ">=3.2"
+wagtail = ">=4.1"
 
 [package.extras]
 docs = ["sphinx (>=1.4.0)"]
-test = ["coverage (==4.5.3)", "flake8 (==3.7.8)", "flake8-blind-except (==0.1.1)", "flake8-debugger (==3.1.0)", "isort (==4.3.21)", "psycopg2 (>=2.3.1)", "pytest (==6.0.1)", "pytest-cov (==2.7.1)", "pytest-django (==3.9.0)", "pytest-pythonpath (==0.7.3)"]
+test = ["coverage (==6.0)", "flake8 (==4.0.0)", "flake8-blind-except (==0.1.1)", "flake8-debugger (==4.1.2)", "isort (==5.10.0)", "psycopg2 (>=2.3.1)", "pytest (==6.2.5)", "pytest-cov (==3.0.0)", "pytest-django (==4.5.0)", "pytest-pythonpath (==0.7.3)"]
 
 [[package]]
 name = "wagtail-metadata"
