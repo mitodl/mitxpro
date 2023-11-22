@@ -192,7 +192,7 @@ class LearningTechniquesItemFactory(wagtail_factories.StructBlockFactory):
 
     heading = factory.fuzzy.FuzzyText(prefix="heading ")
     sub_heading = factory.fuzzy.FuzzyText(prefix="Sub-heading ")
-    image = factory.SubFactory(wagtail_factories.ImageFactory)
+    image = factory.SubFactory(wagtail_factories.ImageChooserBlockFactory)
 
     class Meta:
         model = LearningTechniqueBlock
@@ -202,7 +202,7 @@ class LearningTechniquesPageFactory(wagtail_factories.PageFactory):
     """LearningTechniquesPage factory class"""
 
     technique_items = wagtail_factories.StreamFieldFactory(
-        {"techniques": LearningTechniquesItemFactory}
+        {"techniques": factory.SubFactory(LearningTechniquesItemFactory)}
     )
 
     class Meta:
@@ -269,12 +269,21 @@ class WhoShouldEnrollPageFactory(wagtail_factories.PageFactory):
         model = WhoShouldEnrollPage
 
 
+class CoursePageChooserBlockFactory(wagtail_factories.PageChooserBlockFactory):
+    """CoursePage chooser factory"""
+
+    class Meta:
+        model = CoursePage
+
+
 class CoursesInProgramPageFactory(wagtail_factories.PageFactory):
     """CoursesInProgramPage factory class"""
 
     heading = factory.fuzzy.FuzzyText(prefix="Heading ")
     body = factory.fuzzy.FuzzyText(prefix="Body ")
-    contents = wagtail_factories.StreamFieldFactory({"item": CoursePageFactory})
+    contents = wagtail_factories.StreamFieldFactory(
+        {"item": factory.SubFactory(CoursePageChooserBlockFactory)}
+    )
 
     class Meta:
         model = CoursesInProgramPage
@@ -306,7 +315,7 @@ class UserTestimonialBlockFactory(wagtail_factories.StructBlockFactory):
 
     name = factory.fuzzy.FuzzyText(prefix="name ")
     title = factory.fuzzy.FuzzyText(prefix="title ")
-    image = factory.SubFactory(wagtail_factories.ImageFactory)
+    image = factory.SubFactory(wagtail_factories.ImageChooserBlockFactory)
     quote = factory.fuzzy.FuzzyText(prefix="quote ")
 
     class Meta:
@@ -320,7 +329,7 @@ class UserTestimonialsPageFactory(wagtail_factories.PageFactory):
     heading = factory.fuzzy.FuzzyText(prefix="heading ")
     subhead = factory.fuzzy.FuzzyText(prefix="subhead ")
     items = wagtail_factories.StreamFieldFactory(
-        {"testimonial": UserTestimonialBlockFactory}
+        {"testimonial": factory.SubFactory(UserTestimonialBlockFactory)}
     )
 
     class Meta:
@@ -332,7 +341,7 @@ class NewsAndEventsBlockFactory(wagtail_factories.StructBlockFactory):
 
     content_type = factory.fuzzy.FuzzyText(prefix="content_type ")
     title = factory.fuzzy.FuzzyText(prefix="title ")
-    image = factory.SubFactory(wagtail_factories.ImageFactory)
+    image = factory.SubFactory(wagtail_factories.ImageChooserBlockFactory)
     content = factory.fuzzy.FuzzyText(prefix="content ")
     call_to_action = factory.fuzzy.FuzzyText(prefix="call_to_action ")
     action_url = factory.Faker("uri")
@@ -346,7 +355,7 @@ class NewsAndEventsPageFactory(wagtail_factories.PageFactory):
 
     heading = factory.fuzzy.FuzzyText(prefix="heading ")
     items = wagtail_factories.StreamFieldFactory(
-        {"news_and_events": NewsAndEventsBlockFactory}
+        {"news_and_events": factory.SubFactory(NewsAndEventsBlockFactory)}
     )
 
     class Meta:
@@ -357,8 +366,10 @@ class FacultyBlockFactory(wagtail_factories.StructBlockFactory):
     """FacultyBlock factory class"""
 
     name = factory.Faker("name")
-    image = factory.SubFactory(wagtail_factories.ImageFactory)
-    text = factory.LazyFunction(lambda: RichText("<p>{}</p>".format(FAKE.paragraph())))
+    image = factory.SubFactory(wagtail_factories.ImageChooserBlockFactory)
+    description = factory.LazyFunction(
+        lambda: RichText("<p>{}</p>".format(FAKE.paragraph()))
+    )
 
     class Meta:
         model = FacultyBlock
@@ -369,7 +380,9 @@ class FacultyMembersPageFactory(wagtail_factories.PageFactory):
 
     heading = factory.fuzzy.FuzzyText(prefix="heading ")
     subhead = factory.fuzzy.FuzzyText(prefix="subhead ")
-    members = wagtail_factories.StreamFieldFactory({"member": FacultyBlockFactory})
+    members = wagtail_factories.StreamFieldFactory(
+        {"member": factory.SubFactory(FacultyBlockFactory)}
+    )
 
     class Meta:
         model = FacultyMembersPage
@@ -431,8 +444,13 @@ class SignatoryPageFactory(wagtail_factories.PageFactory):
     title_1 = factory.fuzzy.FuzzyText(prefix="Title_1")
     title_2 = factory.fuzzy.FuzzyText(prefix="Title_2")
     organization = factory.fuzzy.FuzzyText(prefix="Organization")
-    signature_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    signature_image = factory.SubFactory(wagtail_factories.ImageChooserBlockFactory)
 
+    class Meta:
+        model = SignatoryPage
+
+
+class SignatoryChooserBlockFactory(wagtail_factories.PageChooserBlockFactory):
     class Meta:
         model = SignatoryPage
 
@@ -442,9 +460,9 @@ class CertificatePageFactory(wagtail_factories.PageFactory):
 
     product_name = factory.fuzzy.FuzzyText(prefix="product_name")
     CEUs = factory.Faker("pystr_format", string_format="#.#")
-    partner_logo = factory.SubFactory(wagtail_factories.ImageFactory)
+    partner_logo = factory.SubFactory(wagtail_factories.ImageChooserBlockFactory)
     signatories = wagtail_factories.StreamFieldFactory(
-        {"signatory": SignatoryPageFactory}
+        {"signatory": factory.SubFactory(SignatoryChooserBlockFactory)}
     )
 
     class Meta:
