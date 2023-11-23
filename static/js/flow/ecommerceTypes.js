@@ -124,6 +124,7 @@ export type OrderLine = {
   quantity: number,
   total_paid: string,
   tax_paid: string,
+  total_before_tax: string,
   discount: string,
   content_title: string,
   readable_id: string,

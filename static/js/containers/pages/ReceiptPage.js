@@ -12,7 +12,7 @@ import { pathOr } from "ramda"
 
 import queries from "../../lib/queries"
 import { formatPrettyDate, parseDateString } from "../../lib/util"
-import { calculatePriceAfterDiscount, formatNumber, formatDiscount, formatPrice } from "../../lib/ecommerce"
+import { formatNumber, formatDiscount, formatPrice } from "../../lib/ecommerce"
 import type Moment from "moment"
 import type { Match } from "react-router"
 import type { OrderReceiptResponse } from "../../flow/ecommerceTypes"
@@ -289,7 +289,7 @@ export class ReceiptPage extends React.Component<Props> {
                             </td>
                             {SETTINGS.enable_taxes_display ? (
                               <td>
-                                <div>{formatPrice(line.total_paid - line.tax_paid)}</div>
+                                <div>{formatPrice(line.total_before_tax)}</div>
                               </td>
                             ) : null}
 
