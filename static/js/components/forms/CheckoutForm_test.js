@@ -150,7 +150,7 @@ describe("CheckoutForm", () => {
 
       assert.equal(
         inner.find(".total-before-tax-row").text(),
-        `Total before tax:${formatPrice(calculatePrice(basketItem, hasCoupon ? coupon : null))}`
+        `Total Before Tax:${formatPrice(calculatePrice(basketItem, hasCoupon ? coupon : null))}`
       )
     })
   })

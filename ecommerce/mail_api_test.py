@@ -264,6 +264,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                     "total_paid": "100.00",
                     "tax_paid": "0.00",
                     "discount": "0.00",
+                    "total_before_tax": "100.00",
                     "price": "100.00",
                     "readable_id": get_readable_id(
                         line.product_version.product.content_object
