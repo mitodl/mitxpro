@@ -402,7 +402,7 @@ class ImageCarouselPageFactory(wagtail_factories.PageFactory):
 
     title = factory.fuzzy.FuzzyText(prefix="title")
     images = wagtail_factories.StreamFieldFactory(
-        {"image": wagtail_factories.ImageChooserBlockFactory}
+        {"image": factory.SubFactory(wagtail_factories.ImageChooserBlockFactory)}
     )
 
     class Meta:
