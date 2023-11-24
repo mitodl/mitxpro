@@ -43,7 +43,7 @@ def set_current_certificate_revision(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("wagtailcore", "0066_collection_management_permissions"),
+        ("wagtailcore", "0062_comment_models_and_pagesubscription"),
         ("courses", "0027_jsonField_from_django_models"),
     ]
     # run_before = [("wagtailcore", "0067_alter_pagerevision_content_json"),]
