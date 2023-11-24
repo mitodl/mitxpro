@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
         ("courses", "0033_remove_course_coursetopic_association"),
     ]
 
+    run_before = [("wagtailcore", "0067_alter_pagerevision_content_json"),]
+    
     operations = [
         migrations.AlterField(
             model_name="courseruncertificate",
