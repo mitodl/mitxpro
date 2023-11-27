@@ -12,7 +12,9 @@ class Migration(migrations.Migration):
         ("courses", "0034_make_certificate_revision_nullable"),
     ]
 
-    run_before = [("wagtailcore", "0067_alter_pagerevision_content_json"),]
+    run_before = [
+        ("wagtailcore", "0067_alter_pagerevision_content_json"),
+    ]
 
     operations = [
         migrations.AlterField(

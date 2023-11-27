@@ -356,5 +356,4 @@ class Migration(migrations.Migration):
 
     # run_before = [("wagtailcore", "0067_alter_pagerevision_content_json"),]
 
-
     operations = [migrations.RunPython(migrate_data, reverse_migrate_data)]

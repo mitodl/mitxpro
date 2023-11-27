@@ -48,7 +48,6 @@ class Migration(migrations.Migration):
     ]
     # run_before = [("wagtailcore", "0067_alter_pagerevision_content_json"),]
 
-
     operations = [
         migrations.AddField(
             model_name="courseruncertificate",

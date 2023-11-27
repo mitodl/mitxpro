@@ -1241,7 +1241,7 @@ class ProgramPage(ProgramProductPage):
             "checkout_url": (
                 None
                 if not checkout_product_id
-                else f"{reverse('checkout-page')}?product={ checkout_product_id }"
+                else f"{reverse('checkout-page')}?product={checkout_product_id}"
             ),
             "enrolled": enrolled,
             "user": request.user,
@@ -1369,7 +1369,7 @@ class CoursePage(CourseProductPage):
             **super().get_context(request, **kwargs),
             **get_base_context(request),
             "product_id": product.id if product else None,
-            "checkout_url": f"{reverse('checkout-page')}?product={ product.id }"
+            "checkout_url": f"{reverse('checkout-page')}?product={product.id}"
             if product
             else None,
             "enrolled": enrolled,
@@ -1598,7 +1598,7 @@ class LearningTechniquesPage(CourseProgramChildPage):
     class Meta:
         verbose_name = "Icon Grid"
 
-    content_panels = [TitleFieldPanel("title"), FieldPanel("technique_items")]
+    content_panels = [FieldPanel("title"), FieldPanel("technique_items")]
 
 
 class ForTeamsPage(CourseProgramChildPage):
@@ -1638,7 +1638,7 @@ class ForTeamsPage(CourseProgramChildPage):
         verbose_name = "Text-Image Section"
 
     content_panels = [
-        TitleFieldPanel("title"),
+        FieldPanel("title"),
         FieldPanel("content"),
         FieldPanel("action_title"),
         FieldPanel("action_url"),
@@ -1672,7 +1672,7 @@ class TextSection(CourseProgramChildPage):
     )
 
     content_panels = [
-        TitleFieldPanel("title"),
+        FieldPanel("title"),
         FieldPanel("content"),
         FieldPanel("action_title"),
         FieldPanel("action_url"),
@@ -1714,7 +1714,7 @@ class TextVideoSection(CourseProgramChildPage):
     )
 
     content_panels = [
-        TitleFieldPanel("title"),
+        FieldPanel("title"),
         FieldPanel("content"),
         FieldPanel("video_url"),
         FieldPanel("action_title"),
@@ -1874,7 +1874,7 @@ class ImageCarouselPage(CourseProgramChildPage):
         use_json_field=True,
     )
 
-    content_panels = Page.content_panels + [FieldPanel("images")]
+    content_panels = [FieldPanel("title"), FieldPanel("images")]
 
     class Meta:
         verbose_name = "Image Carousel"

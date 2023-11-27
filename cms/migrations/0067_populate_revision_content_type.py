@@ -29,7 +29,9 @@ class Migration(migrations.Migration):
         ("cms", "0066_wagtail_5_upgrade"),
     ]
 
-    run_before = [("wagtailcore", "0072_alter_revision_content_type_notnull"),]
+    run_before = [
+        ("wagtailcore", "0072_alter_revision_content_type_notnull"),
+    ]
 
     operations = [
         migrations.RunPython(
