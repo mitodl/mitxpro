@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.135.0
+Version 0.135.0 (Released November 27, 2023)
 ---------------
 
 - feat: xPro blog (#2789)
