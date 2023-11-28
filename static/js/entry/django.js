@@ -19,6 +19,8 @@ import facultyCarousel from "../faculty_carousel.js"
 import productDetails from "../product_detail.js"
 import topicsCarousel from "../catalog-topics-carousel.js"
 import blogPostsCarousel from "../blog_posts_carousel"
+import companiesLogoCarousel from "../companies_logo_carousel.js"
+import successStoriesCarousel from "../success_stories_carousel.js"
 
 document.addEventListener("DOMContentLoaded", function() {
   notifications()
@@ -33,4 +35,6 @@ document.addEventListener("DOMContentLoaded", function() {
   imageCarousel()
   facultyCarousel()
   productDetails()
+  companiesLogoCarousel()
+  successStoriesCarousel()
 })

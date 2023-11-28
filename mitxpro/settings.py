@@ -1261,6 +1261,11 @@ HUBSPOT_CONFIG = {
         default=None,
         description="Form ID for Hubspot Forms API",
     ),
+    "HUBSPOT_ENTERPRISE_PAGE_FORM_ID": get_string(
+        name="HUBSPOT_ENTERPRISE_PAGE_FORM_ID",
+        default=None,
+        description="Form ID for Hubspot for Enterprise Page",
+    ),
 }
 
 # Sheets settings

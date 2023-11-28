@@ -1,0 +1,24 @@
+{% load static image_version_url %}
+
+<div class="success-stories-block">
+    <div class="container">
+        <div class="success-stories-heading">
+            <h1>{{ page.heading|upper }}</h1>
+            <h3>{{ page.subhead }}</h3>
+        </div>
+        <div class="success-stories-slider">
+            {% for block in page.success_stories %}
+            <div class="slide">
+                <div class="slide-holder">
+                    <img src="{% image_version_url block.value.image "max-231x272" %}" alt="MIT xPro"/>
+                    <div class="slide-content">
+                        <h2 class="success-stories-title">{{ block.value.title }}</h2>
+                        <p class="success-stories-content">{{ block.value.content }}</p>
+                        <a href="{{ block.value.action_url }}">{{ block.value.call_to_action }}</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

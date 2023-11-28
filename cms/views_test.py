@@ -17,6 +17,7 @@ from cms.constants import (
     WEBINAR_DEFAULT_IMAGES,
 )
 from cms.factories import (
+    EnterprisePageFactory,
     BlogIndexPageFactory,
     CatalogPageFactory,
     CourseIndexPageFactory,
@@ -580,3 +581,18 @@ def test_blog_page_context(client, wagtail_basics):
     context = resp.context_data
 
     assert "posts" in context
+
+
+def test_enterprise_page_context(client, wagtail_basics):
+    """
+    Test that enterprise page show correctly
+    """
+    enterprise_page = EnterprisePageFactory.create(
+        parent=wagtail_basics.root, action_title="Read More", description="description"
+    )
+    enterprise_page.save_revision().publish()
+
+    resp = client.get(enterprise_page.get_url())
+
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.context_data["page"] == enterprise_page

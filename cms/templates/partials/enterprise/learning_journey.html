@@ -1,0 +1,24 @@
+{% load static image_version_url wagtailcore_tags %}
+
+<div class="learning-journey-block">
+    <div class="container">
+        <h1>{{ page.heading|upper|richtext }}</h1>
+        <div class="learning-journey-container">
+            <div class="learning-journey-content">
+                <ul>
+                    {% for journey_item in page.journey_items %}
+                        <li>{{ journey_item }}</li>
+                    {% endfor %}
+                </ul>
+                <p>{{ page.description|richtext }}</p>
+                <a href="{{ page.button_url }}" target="_blank">{{ page.call_to_action|upper }}</a>
+            </div>
+            {% if page.journey_image %}
+                <img class="learning-journey-hero-img" src="{% image_version_url page.journey_image "fill-560x618" %}" alt="Learning Journey"/>
+            {% else %}
+                <img class="learning-journey-hero-img" src="{% static 'images/enterprise/enterprise-page-learning-path.png' %}" alt="Learning Journey"/>
+            {% endif %}
+        </div>
+    </div>
+    <img  class="learning-journey-bg" src="{% static 'images/enterprise/enterprise-page-dots-bg.png' %}" alt="Learning Journey Background"/>
+</div>

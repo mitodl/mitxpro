@@ -1,0 +1,225 @@
+// sass-lint:disable mixins-before-declarations placeholder-in-extend
+
+.learning-strategy-block {
+  width: 100%;
+  padding: 65px 0 0;
+  background: url('#{$static-path}/images/enterprise-page-dots-bg.png') repeat-x 0% 60% $alice-blue;
+  background-size: contain;
+
+  @include media-breakpoint-down (sm) {
+    padding: 30px 5px 40px 5px;
+    background: $alice-blue;
+  }
+
+  h1 {
+    color: $black;
+    text-align: center;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    margin-bottom: 10px;
+
+    @include media-breakpoint-down (sm) {
+      font-size: 24px;
+      text-align: initial;
+      margin-bottom: 15px;
+    }
+  }
+
+  h2 {
+    color: $black;
+    text-align: center;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    margin-bottom: 45px;
+
+    @include media-breakpoint-down (sm) {
+      font-size: 18px;
+      text-align: initial;
+      font-weight: 500;
+      line-height: 27px;
+      margin-bottom: 0px;
+    }
+  }
+}
+
+.learning-strategy-form {
+  border-radius: 5px 5px 0px 0px;
+  background: $white;
+  margin: 0px 45px;
+  padding: 40px 35px;
+
+  @include media-breakpoint-down (sm) {
+    background: none;
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+  }
+
+  .consent {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    background: $alice-blue;
+    margin: 10px 15px 0px;
+
+    @include media-breakpoint-down (sm) {
+      margin: 20px 0px 0px;
+      background: $white;
+    }
+
+    p {
+      color: $black;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: normal;
+      text-align: center;
+      margin: 0px;
+      padding: 15px;
+
+      @include media-breakpoint-down (sm) {
+        margin: 0px;
+        padding: 20px;
+        text-align: initial;
+      }
+    }
+  }
+}
+
+.hbspt-form {
+
+  form {
+
+    .hs-form-field:first-child {
+      width: 100%;
+    }
+
+    .hs-form-field {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: initial;
+      padding: 0px 15px 30px 15px;
+      width: 50%;
+
+      @include media-breakpoint-down (sm) {
+        display: block;
+        padding: 0px;
+        width: 100%;
+        margin-bottom: 0px;
+      }
+
+      label {
+        color: rgba(0, 0, 0, 0.60);
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+
+        @include media-breakpoint-down (sm) {
+          padding-top: 20px;
+        }
+      }
+
+      input[type="text"],
+      input[type="email"],
+      input[type="tel"],
+      select {
+        height: 50px;
+        width: 100%;
+        align-self: stretch;
+        border-radius: 5px;
+        border: 1px solid #dbe3eb;
+        background: $white;
+        box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.05);
+        padding: 10px 15px;
+        color: $black;
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+      }
+
+      .hs-error-msgs {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+
+        @include media-breakpoint-down(sm) {
+          left: 0;
+          right: 0;
+        }
+
+        label {
+          color: $primary;
+          display: block;
+        }
+      }
+    }
+
+    .hs-form-field:nth-child(n+2) {
+      box-sizing: border-box;
+    }
+
+    .hs-submit {
+      padding: 20px 155px;
+
+      @include media-breakpoint-down(sm) {
+        padding: 0px;
+        margin: 20px 0px 0px;
+      }
+
+      input[type="submit"] {
+        @extend .btn;
+        @extend .btn-primary;
+        border-radius: 5px;
+        background: $primary;
+        width: 500px;
+        height: 55px;
+        margin: 0px auto 0px;
+        display: block;
+        position: relative;
+        padding: 5px 10px;
+        font-family: Rajdhani;
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: normal;
+        text-transform: uppercase;
+
+        @include media-breakpoint-down(sm) {
+          width: 100%;
+          height: auto;
+          padding: 15px;
+        }
+
+        &:hover {
+          background: $dark-blue;
+          text-decoration: none;
+          transition: all .2s ease-in;
+        }
+      }
+    }
+
+    .hs-recaptcha {
+      align-items: center;
+      width: 100%;
+      padding: 10px 0px;
+
+      @include media-breakpoint-down(sm) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0px;
+        margin: 20px 0px 0px;
+      }
+    }
+
+    .hs_error_rollup {
+      display: none;
+    }
+  }
+}

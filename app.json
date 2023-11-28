@@ -250,6 +250,10 @@
       "description": "Form ID for Hubspot Forms API",
       "required": false
     },
+    "HUBSPOT_ENTERPRISE_PAGE_FORM_ID": {
+      "description": "Form ID for Hubspot for Enterprise Page",
+      "required": false
+    },
     "HUBSPOT_FOOTER_FORM_GUID": {
       "description": "Form guid over hub spot for footer block.",
       "required": false

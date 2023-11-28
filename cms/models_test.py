@@ -11,18 +11,20 @@ from django.urls import resolve
 from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 
 from cms.constants import (
+    FORMAT_ONLINE,
+    FORMAT_OTHER,
     ON_DEMAND_WEBINAR,
     ON_DEMAND_WEBINAR_BUTTON_TITLE,
     UPCOMING_WEBINAR,
     UPCOMING_WEBINAR_BUTTON_TITLE,
     WEBINAR_HEADER_BANNER,
-    FORMAT_ONLINE,
-    FORMAT_OTHER,
 )
 from cms.factories import (
     CertificatePageFactory,
+    CompaniesLogoCarouselPageFactory,
     CoursePageFactory,
     CoursesInProgramPageFactory,
+    EnterprisePageFactory,
     ExternalCoursePageFactory,
     ExternalProgramPageFactory,
     FacultyMembersPageFactory,
@@ -31,7 +33,9 @@ from cms.factories import (
     FrequentlyAskedQuestionPageFactory,
     HomePageFactory,
     ImageCarouselPageFactory,
+    LearningJourneyPageFactory,
     LearningOutcomesPageFactory,
+    LearningStrategyFormPageFactory,
     LearningTechniquesPageFactory,
     NewsAndEventsPageFactory,
     ProgramFactory,
@@ -39,6 +43,7 @@ from cms.factories import (
     ResourcePageFactory,
     SignatoryPageFactory,
     SiteNotificationFactory,
+    SuccessStoriesPageFactory,
     TextSectionFactory,
     TextVideoSectionFactory,
     UserTestimonialsPageFactory,
@@ -51,6 +56,7 @@ from cms.models import (
     CoursesInProgramPage,
     ForTeamsPage,
     FrequentlyAskedQuestionPage,
+    LearningJourneySection,
     LearningOutcomesPage,
     LearningTechniquesPage,
     SignatoryPage,
@@ -1602,3 +1608,131 @@ def _assert_news_and_events_values(news_and_events_page):
         assert news_and_events.value.get("content") == f"content-{count}"
         assert news_and_events.value.get("call_to_action") == f"call_to_action-{count}"
         assert news_and_events.value.get("action_url") == f"action_url-{count}"
+
+
+def test_enterprise_page_companies_logo_carousel():
+    """
+    companies_logo_carousel property should return expected values.
+    """
+
+    enterprise_page = EnterprisePageFactory.create(
+        action_title="title", description="description"
+    )
+    assert not enterprise_page.companies_logo_carousel
+
+    del enterprise_page.child_pages
+
+    companies_logo_carousel = CompaniesLogoCarouselPageFactory.create(
+        parent=enterprise_page,
+        heading="heading",
+        images__0__image__image__title="image-title-0",
+        images__1__image__image__title="image-title-1",
+        images__2__image__image__title="image-title-2",
+        images__3__image__image__title="image-title-3",
+    )
+
+    assert enterprise_page.companies_logo_carousel == companies_logo_carousel
+    assert companies_logo_carousel.heading == "heading"
+
+    for index, image in enumerate(companies_logo_carousel.images):
+        assert image.value.title == "image-title-{}".format(index)
+
+
+def test_enterprise_page_learning_journey():
+    """
+    LearningJourneyPage should return expected values if it exists
+    """
+
+    enterprise_page = EnterprisePageFactory.create(
+        action_title="title", description="description"
+    )
+
+    assert not enterprise_page.learning_journey
+    assert LearningJourneySection.can_create_at(enterprise_page)
+
+    learning_journey = LearningJourneyPageFactory(
+        parent=enterprise_page,
+        heading="heading",
+        description="description",
+        journey_items=json.dumps([{"type": "journey", "value": "value"}]),
+        journey_image__title="background-image",
+    )
+
+    assert learning_journey.get_parent() == enterprise_page
+    assert learning_journey.heading == "heading"
+    assert learning_journey.description == "description"
+
+    for block in learning_journey.journey_items:  # pylint: disable=not-an-iterable
+        assert block.block_type == "journey"
+        assert block.value == "value"
+
+    assert learning_journey.action_url
+    assert learning_journey.pdf_file
+
+    del enterprise_page.child_pages
+
+    assert enterprise_page.learning_journey == learning_journey
+    assert not LearningOutcomesPage.can_create_at(enterprise_page)
+
+
+def test_enterprise_page_success_stories():
+    """
+    SuccessStories subpage should provide expected values
+    """
+
+    enterprise_page = EnterprisePageFactory.create(
+        action_title="title", description="description"
+    )
+
+    assert not enterprise_page.success_stories_carousel
+    del enterprise_page.child_pages
+
+    success_stories_carousel = SuccessStoriesPageFactory.create(
+        parent=enterprise_page,
+        heading="heading",
+        subhead="subhead",
+        success_stories__0__success_story__title="title",
+        success_stories__0__success_story__image__image__title="image",
+        success_stories__0__success_story__content="content",
+        success_stories__0__success_story__call_to_action="call_to_action",
+        success_stories__0__success_story__action_url="action_url",
+        success_stories__1__success_story__title="title",
+        success_stories__1__success_story__image__image__title="image",
+        success_stories__1__success_story__content="content",
+        success_stories__1__success_story__call_to_action="call_to_action",
+        success_stories__1__success_story__action_url="action_url",
+    )
+
+    assert enterprise_page.success_stories_carousel == success_stories_carousel
+    assert success_stories_carousel.heading == "heading"
+    assert success_stories_carousel.subhead == "subhead"
+
+    for success_stories in success_stories_carousel.success_stories:
+        assert success_stories.value.get("title") == "title"
+        assert success_stories.value.get("image").title == "image"
+        assert success_stories.value.get("content") == "content"
+        assert success_stories.value.get("call_to_action") == "call_to_action"
+        assert success_stories.value.get("action_url") == "action_url"
+
+
+def test_enterprise_page_learning_strategy_form():
+    """
+    LearningStrategyForm subpage should provide expected values
+    """
+
+    enterprise_page = EnterprisePageFactory.create(
+        action_title="title", description="description"
+    )
+
+    assert not enterprise_page.learning_strategy_form
+    del enterprise_page.child_pages
+
+    learning_strategy_form = LearningStrategyFormPageFactory.create(
+        parent=enterprise_page,
+        heading="heading",
+        subhead="subhead",
+    )
+
+    assert enterprise_page.learning_strategy_form == learning_strategy_form
+    assert learning_strategy_form.heading == "heading"
+    assert learning_strategy_form.subhead == "subhead"
