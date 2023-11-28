@@ -1,3 +1,5 @@
+# This migration is ported from wagtailcore/0071 as we were facing null content_type_id values in wagtailcore/0072.
+
 from django.db import migrations, models
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast

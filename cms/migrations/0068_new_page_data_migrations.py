@@ -5,6 +5,8 @@ Data migration to do the following:
 1) Ensure the correct state for course/program index pages and correct depth for course/program detail pages
 2) Ensure that a catalog page exists in the right place
 3) Ensure that a certificate index page exists in the right place
+3) Ensure that a webinar index page exists in the right place
+3) Ensure that a blog index page exists in the right place
 NOTE: Data migrations are liable to fail if the Wagtail Page model (or potentially other Wagtail models) are changed
 from version to version. In those cases, we can set the existing data migration(s) to be a no-op in both directions,
 then create a new data migration with the same contents, and add the relevant Wagtail migration as a dependency.
@@ -261,6 +263,9 @@ def create_webinar_index_page(apps, app_schema):
 
 
 def remove_webinar_index_page(apps, app_schema):
+    """
+    Remove the webinar index page
+    """
     ContentType = apps.get_model("contenttypes.ContentType")
     index_content_type, _ = ContentType.objects.get_or_create(
         app_label="cms", model="webinarindexpage"
@@ -315,6 +320,9 @@ def create_blog_index_page(apps, app_schema):
 
 
 def remove_blog_index_page(apps, app_schema):
+    """
+    Remove the certificate index page
+    """
     ContentType = apps.get_model("contenttypes.ContentType")
     index_content_type, _ = ContentType.objects.get_or_create(
         app_label="cms", model="blogindexpage"
@@ -353,7 +361,5 @@ class Migration(migrations.Migration):
         ("wagtailsearch", "0007_delete_editorspick"),
         ("cms", "0067_populate_revision_content_type"),
     ]
-
-    # run_before = [("wagtailcore", "0067_alter_pagerevision_content_json"),]
 
     operations = [migrations.RunPython(migrate_data, reverse_migrate_data)]
