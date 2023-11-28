@@ -1,6 +1,7 @@
 """
 Page models for the CMS
 """
+# pylint: disable=too-many-lines, too-many-public-methods
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta

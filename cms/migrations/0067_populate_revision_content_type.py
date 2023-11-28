@@ -12,7 +12,7 @@ def populate_revision_content_type(apps, schema_editor):
     Revision.objects.all().update(
         base_content_type=page_type,
         content_type_id=Cast(
-            KeyTextTransform("content_type_id", models.F("content")),
+            KeyTextTransform("content_type", models.F("content")),
             output_field=models.PositiveIntegerField(),
         ),
     )
