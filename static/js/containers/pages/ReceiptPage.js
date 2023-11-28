@@ -112,6 +112,8 @@ export class ReceiptPage extends React.Component<Props> {
                         <br />
                         Cambridge, MA 02139 USA
                         <br />
+                        GSTIN: Pending
+                        <br />
                         Support:{" "}
                         <a href="mailto:support@xpro.mit.edu">
                           support@xpro.mit.edu
@@ -307,6 +309,9 @@ export class ReceiptPage extends React.Component<Props> {
                     </tbody>
                   </table>
                   <div className="receipt-hsn">HSN: 9992</div>
+                </div>
+                <div className="receipt-signature">
+                  <img src="static/images/receipts/invoice_signature.png" alt="" />
                 </div>
               </div>
             )}
