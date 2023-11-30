@@ -124,6 +124,18 @@ $label-color: #8a8b8c;
   }
 }
 
+.receipt-signature {
+  width: 150px;
+  margin: auto;
+  padding-top: 40px;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
 .receipt-mit-info {
   max-width: 226px;
   font-size: 16px;
