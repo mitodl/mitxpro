@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.135.1
+Version 0.135.1 (Released November 30, 2023)
 ---------------
 
 - feat: enable header links and disable new and events on homepage (#2836)
