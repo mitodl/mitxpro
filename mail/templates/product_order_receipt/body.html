@@ -49,7 +49,7 @@
             {% for line in lines %}
             <p>
                 <strong style="font-weight: 700;">Order Item:</strong> {{ line.content_title }}<br>
-                <strong style="font-weight: 700;">HSN: 9992</strong><br>
+                <strong style="font-weight: 700;">HSN:</strong> 9992<br>
                 <strong style="font-weight: 700;">Product Number:</strong> {{ line.readable_id }}<br>
                 <strong style="font-weight: 700;">Dates:</strong>   {{ line.start_date|date:"F j, Y" }} - {{ line.end_date|date:"F j, Y" }}
             </p>
