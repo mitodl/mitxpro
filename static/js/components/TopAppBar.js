@@ -66,15 +66,6 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
             id="nav"
             className="collapse navbar-collapse px-0 justify-content-end"
           >
-            {
-              SETTINGS.webinars ? (
-                <li>
-                  <a href={routes.webinars} className="" aria-label="webinars">
-                    Webinars
-                  </a>
-                </li>
-              ) : null
-            }
             <li>
               {
                 SETTINGS.course_dropdown ? (
@@ -87,9 +78,18 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
               }
             </li>
             {
+              SETTINGS.webinars ? (
+                <li>
+                  <a href={routes.webinars} className="webinar-link" aria-label="webinars">
+                    Webinars
+                  </a>
+                </li>
+              ) : null
+            }
+            {
               SETTINGS.enable_blog ? (
                 <li>
-                  <a href={routes.blog} className="" aria-label="blog">
+                  <a href={routes.blog} className="blog-link" aria-label="blog">
                     Blog
                   </a>
                 </li>
