@@ -41,6 +41,7 @@ class LegalAddressSerializer(serializers.ModelSerializer):
     street_address = WriteableSerializerMethodField()
     city = serializers.CharField(max_length=50)
     country = serializers.CharField(max_length=2)
+    vat_id = serializers.CharField(max_length=255, allow_blank=True)
 
     # only required in the US/CA
     state_or_territory = serializers.CharField(max_length=255, allow_blank=True)
@@ -146,6 +147,7 @@ class LegalAddressSerializer(serializers.ModelSerializer):
             "state_or_territory",
             "country",
             "postal_code",
+            "vat_id",
         )
         extra_kwargs = {
             "street_address_1": {"write_only": True},
@@ -161,7 +163,7 @@ class ExtendedLegalAddressSerializer(LegalAddressSerializer):
 
     email = serializers.SerializerMethodField()
     company = serializers.SerializerMethodField()
-    vat_number = serializers.SerializerMethodField()
+    vat_id = serializers.SerializerMethodField()
 
     def get_email(self, instance):
         """Get email from the linked user object"""
@@ -171,13 +173,13 @@ class ExtendedLegalAddressSerializer(LegalAddressSerializer):
         """Get company from the linked user object"""
         return instance.user.profile.company
 
-    def get_vat_number(self, instance):
-        """Get vat_number from the linked user object"""
-        return instance.user.profile.vat_number
+    def get_vat_id(self, instance):
+        """Get vat_id from the linked user object"""
+        return instance.user.profile.vat_id
 
     class Meta:
         model = LegalAddress
-        fields = LegalAddressSerializer.Meta.fields + ("email", "company", "vat_number")
+        fields = LegalAddressSerializer.Meta.fields + ("email", "company", "vat_id")
         extra_kwargs = LegalAddressSerializer.Meta.extra_kwargs
 
 
@@ -198,7 +200,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "years_experience",
             "leadership_level",
             "highest_education",
-            "vat_number",
+            "vat_id",
             "created_on",
             "updated_on",
         )
@@ -227,7 +229,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "years_experience",
             "leadership_level",
             "highest_education",
-            "vat_number",
+            "vat_id",
         )
 
 

@@ -190,7 +190,7 @@ export class ReceiptPage extends React.Component<Props> {
                     <dl>
                       <dt>VAT Number:</dt>
                       <dd id="purchaserVATNumber">
-                        {orderReceipt.purchaser.vat_number}
+                        {orderReceipt.purchaser.vat_id}
                       </dd>
                     </dl>
                   </div>

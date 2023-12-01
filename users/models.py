@@ -257,6 +257,7 @@ class LegalAddress(TimestampedModel):
         max_length=6, blank=True, validators=[validate_iso_3166_2_code]
     )  # ISO 3166-2
     postal_code = models.CharField(max_length=10, blank=True)
+    vat_id = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         """Str representation for the legal address"""
@@ -302,7 +303,7 @@ class Profile(TimestampedModel):
     highest_education = models.CharField(
         max_length=60, blank=True, default="", choices=HIGHEST_EDUCATION_CHOICES
     )
-    vat_number = models.CharField(max_length=255, blank=True, null=True)
+    vat_id = models.CharField(max_length=255, blank=True, null=True)
 
     @property
     def is_complete(self):

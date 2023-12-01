@@ -51,6 +51,10 @@ export const legalAddressValidation = yup.object().shape({
       .trim()
       .matches(NAME_REGEX, NAME_REGEX_FAIL_MESSAGE)
       .required(),
+    vat_id: yup
+      .string()
+      .label("VAT ID")
+      .trim(),
     city: yup
       .string()
       .label("City")
@@ -127,7 +131,9 @@ type LegalAddressProps = {
   setFieldValue: Function,
   setFieldTouched: Function,
   values: Object,
-  includePassword: boolean
+  includePassword: boolean,
+  isVatEnabled: boolean,
+  enableVatID: Function
 }
 
 export const LegalAddressFields = ({
@@ -135,7 +141,9 @@ export const LegalAddressFields = ({
   setFieldValue,
   setFieldTouched,
   values,
-  includePassword
+  includePassword,
+  isVatEnabled,
+  enableVatID
 }: LegalAddressProps) => (
   <React.Fragment>
     <div className="form-group">
@@ -176,6 +184,23 @@ export const LegalAddressFields = ({
       />
       <ErrorMessage name="name" component={FormError} />
     </div>
+    {isVatEnabled ? (
+      <div className="form-group">
+        <label htmlFor="legal_address.vat_id" className="font-weight-bold">
+          VAT ID
+        </label>
+        <Field type="text" name="legal_address.vat_id" className="form-control" />
+        <ErrorMessage name="legal_address.vat_id" component={FormError} />
+      </div>
+    ) : (
+      <button
+        type="button"
+        className="add-vat-id"
+        onClick={enableVatID}
+      >
+        Add VAT ID
+      </button>
+    )}
     {includePassword ? (
       <div className="form-group">
         <label htmlFor="password" className="font-weight-bold">
@@ -490,19 +515,6 @@ export const ProfileFields = () => (
               </option>
             ))}
           </Field>
-        </div>
-      </div>
-    </div>
-    <div className="form-group">
-      <div className="row">
-        <div className="col">
-          <label htmlFor="profile.vat_number" className="font-weight-bold">
-            VAT Number
-          </label>
-          <Field type="text" name="profile.vat_number" className="form-control" />
-          <ErrorMessage name="profile.vat_number" component={FormError} />
-        </div>
-        <div className="col">
         </div>
       </div>
     </div>

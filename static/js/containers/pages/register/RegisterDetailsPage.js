@@ -56,7 +56,15 @@ type Props = {|
   ...DispatchProps
 |}
 
-export class RegisterDetailsPage extends React.Component<Props> {
+type State = {
+  isVatEnabled: boolean
+}
+
+export class RegisterDetailsPage extends React.Component<Props, State> {
+  state = {
+    isVatEnabled: false
+  }
+
   async onSubmit(detailsData: any, { setSubmitting, setErrors }: any) {
     const {
       history,
@@ -81,6 +89,8 @@ export class RegisterDetailsPage extends React.Component<Props> {
       setSubmitting(false)
     }
   }
+
+  enableVatID = () => this.setState({isVatEnabled: true})
 
   render() {
     const { authResponse, countries } = this.props
@@ -120,6 +130,8 @@ export class RegisterDetailsPage extends React.Component<Props> {
                     <RegisterDetailsForm
                       onSubmit={this.onSubmit.bind(this)}
                       countries={countries}
+                      isVatEnabled={this.state.isVatEnabled}
+                      enableVatID={this.enableVatID.bind(this)}
                     />
                   </div>
                 </div>

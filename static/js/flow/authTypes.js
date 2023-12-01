@@ -49,7 +49,7 @@ export type LegalAddress = {
   state_or_territory?: string,
   postal_code?: string,
   company?: string,
-  vat_number?: string,
+  vat_id?: string,
 }
 
 export type ExtendedLegalAddress = LegalAddress & {
@@ -74,7 +74,6 @@ export type Profile = {
   company_size: ?number,
   leadership_level: ?string,
   highest_education: ?string,
-  vat_number: ?string,
 }
 
 export type User = {

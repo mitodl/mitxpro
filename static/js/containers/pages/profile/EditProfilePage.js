@@ -37,7 +37,23 @@ type Props = {|
   ...ProfileProps
 |}
 
-export class EditProfilePage extends React.Component<Props> {
+type State = {
+  isVatEnabled: boolean
+}
+
+export class EditProfilePage extends React.Component<Props, State> {
+  state = {
+    isVatEnabled: false
+  }
+  componentDidMount() {
+    const {currentUser} = this.props
+    if (currentUser.legal_address.vat_id) {
+      this.setState({isVatEnabled: true})
+    }
+  }
+
+  enableVatID = () => this.setState({isVatEnabled: true})
+
   async onSubmit(profileData: User, { setSubmitting, setErrors }: Object) {
     const { editProfile, history } = this.props
 
@@ -98,6 +114,8 @@ export class EditProfilePage extends React.Component<Props> {
                       countries={countries}
                       user={currentUser}
                       onSubmit={this.onSubmit.bind(this)}
+                      isVatEnabled={this.state.isVatEnabled}
+                      enableVatID={this.enableVatID.bind(this)}
                     />
                   ) : (
                     <div className="row">

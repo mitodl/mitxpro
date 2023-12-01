@@ -27,6 +27,7 @@ class UserLegalAddressInline(admin.StackedInline):
                     "street_address_5",
                     ("city", "state_or_territory", "postal_code"),
                     "country",
+                    "vat_id",
                 )
             },
         ),
@@ -48,7 +49,7 @@ class UserProfileInline(admin.StackedInline):
 
 _username_warning = """
 <div style="background-color: #dc3545; color: #fff; padding: 10px; font-size: 16px; border-radius: 5px;">
-   <strong>WARNING:</strong> 
+   <strong>WARNING:</strong>
    Changing this username will require you to apply the same change in edX immediately after.<br /><br>
    Do not make this change unless you can perform the same change to the edX username, or you have someone
    else lined up to do it.

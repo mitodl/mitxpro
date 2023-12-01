@@ -87,6 +87,12 @@ export class ViewProfilePage extends React.Component<Props> {
                       </div>
                     </div>
                     <div className="row">
+                      <div className="col">VAT ID</div>
+                      <div className="col">
+                        {currentUser.legal_address.vat_id}
+                      </div>
+                    </div>
+                    <div className="row">
                       <div className="col">Joined</div>
                       <div className="col">
                         {moment(currentUser.created_on).format("MMMM YYYY")}
@@ -189,12 +195,6 @@ export class ViewProfilePage extends React.Component<Props> {
                       <div className="col">Highest Level of Education</div>
                       <div className="col">
                         {currentUser.profile.highest_education}
-                      </div>
-                    </div>
-                    <div className="row">
-                      <div className="col">VAT Number</div>
-                      <div className="col">
-                        {currentUser.profile.vat_number}
                       </div>
                     </div>
                   </div>

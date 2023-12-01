@@ -316,7 +316,7 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
                                     "city": purchaser.get("city"),
                                     "country": country.name if country else None,
                                     "company": purchaser.get("company"),
-                                    "vat_number": purchaser.get("vat_number"),
+                                    "vat_id": purchaser.get("vat_id"),
                                 },
                                 "enable_taxes_display": settings.FEATURES.get(
                                     "ENABLE_TAXES_DISPLAY", False

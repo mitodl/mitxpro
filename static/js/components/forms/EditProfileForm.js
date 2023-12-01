@@ -15,7 +15,9 @@ import type { Country, User } from "../../flow/authTypes"
 type Props = {
   onSubmit: Function,
   countries: Array<Country>,
-  user: User
+  user: User,
+  isVatEnabled: boolean,
+  enableVatID: Function,
 }
 
 const getInitialValues = (user: User) => ({
@@ -34,7 +36,7 @@ const getInitialValues = (user: User) => ({
   }
 })
 
-const EditProfileForm = ({ onSubmit, countries, user }: Props) => (
+const EditProfileForm = ({ onSubmit, countries, user, isVatEnabled, enableVatID }: Props) => (
   <Formik
     onSubmit={onSubmit}
     validationSchema={legalAddressValidation.concat(profileValidation)}
@@ -47,6 +49,8 @@ const EditProfileForm = ({ onSubmit, countries, user }: Props) => (
           setFieldTouched={setFieldTouched}
           values={values}
           includePassword={false}
+          isVatEnabled={isVatEnabled}
+          enableVatID={enableVatID}
         />
         <ProfileFields />
         <div className="row-inner justify-content-end">
