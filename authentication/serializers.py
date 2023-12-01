@@ -331,7 +331,6 @@ class RegisterExtraDetailsSerializer(SocialAuthSerializer):
     company = serializers.CharField(write_only=True)
     job_title = serializers.CharField(write_only=True)
     industry = serializers.CharField(write_only=True, allow_blank=True, required=False)
-    vat_id = serializers.CharField(write_only=True, allow_blank=True, required=False)
     job_function = serializers.CharField(
         write_only=True, allow_blank=True, required=False
     )
