@@ -303,7 +303,6 @@ class Profile(TimestampedModel):
     highest_education = models.CharField(
         max_length=60, blank=True, default="", choices=HIGHEST_EDUCATION_CHOICES
     )
-    vat_id = models.CharField(max_length=255, blank=True, null=True)
 
     @property
     def is_complete(self):

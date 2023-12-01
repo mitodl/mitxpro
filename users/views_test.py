@@ -98,7 +98,6 @@ def test_get_user_by_me(mocker, client, user, is_anonymous, show_enrollment_code
                 "years_experience": user.profile.years_experience,
                 "highest_education": user.profile.highest_education,
                 "industry": user.profile.industry,
-                "vat_id": user.profile.vat_id,
             },
             "unused_coupons": patched_unused_coupon_api.return_value,
             "is_anonymous": False,

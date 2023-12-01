@@ -163,7 +163,6 @@ class ExtendedLegalAddressSerializer(LegalAddressSerializer):
 
     email = serializers.SerializerMethodField()
     company = serializers.SerializerMethodField()
-    vat_id = serializers.SerializerMethodField()
 
     def get_email(self, instance):
         """Get email from the linked user object"""
@@ -173,13 +172,9 @@ class ExtendedLegalAddressSerializer(LegalAddressSerializer):
         """Get company from the linked user object"""
         return instance.user.profile.company
 
-    def get_vat_id(self, instance):
-        """Get vat_id from the linked user object"""
-        return instance.user.profile.vat_id
-
     class Meta:
         model = LegalAddress
-        fields = LegalAddressSerializer.Meta.fields + ("email", "company", "vat_id")
+        fields = LegalAddressSerializer.Meta.fields + ("email", "company")
         extra_kwargs = LegalAddressSerializer.Meta.extra_kwargs
 
 
@@ -200,7 +195,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             "years_experience",
             "leadership_level",
             "highest_education",
-            "vat_id",
             "created_on",
             "updated_on",
         )
@@ -229,7 +223,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "years_experience",
             "leadership_level",
             "highest_education",
-            "vat_id",
         )
 
 
