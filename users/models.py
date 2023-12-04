@@ -251,13 +251,13 @@ class LegalAddress(TimestampedModel):
     country = models.CharField(
         max_length=2, blank=True, validators=[validate_iso_3166_1_code]
     )  # ISO-3166-1
+    vat_id = models.CharField(max_length=255, blank=True, null=True)
 
     # only required in the US/CA
     state_or_territory = models.CharField(
         max_length=6, blank=True, validators=[validate_iso_3166_2_code]
     )  # ISO 3166-2
     postal_code = models.CharField(max_length=10, blank=True)
-    vat_id = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         """Str representation for the legal address"""
