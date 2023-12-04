@@ -481,6 +481,7 @@ def test_serialize_order_receipt(receipt_data):
             "state_or_territory": purchaser.state_or_territory,
             "city": purchaser.city,
             "postal_code": purchaser.postal_code,
+            "vat_id": purchaser.vat_id,
             "company": order.purchaser.profile.company,
             "street_address": [
                 line

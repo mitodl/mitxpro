@@ -41,7 +41,7 @@ class LegalAddressSerializer(serializers.ModelSerializer):
     street_address = WriteableSerializerMethodField()
     city = serializers.CharField(max_length=50)
     country = serializers.CharField(max_length=2)
-    vat_id = serializers.CharField(max_length=255, allow_blank=True)
+    vat_id = serializers.CharField(max_length=255, allow_blank=True, required=False)
 
     # only required in the US/CA
     state_or_territory = serializers.CharField(max_length=255, allow_blank=True)

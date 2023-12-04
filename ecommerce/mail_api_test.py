@@ -218,8 +218,9 @@ def test_send_b2b_receipt_email_error(mocker):
         }
     ],
 )
-def test_send_ecommerce_order_receipt(mocker, receipt_data):
+def test_send_ecommerce_order_receipt(mocker, receipt_data, settings):
     """send_ecommerce_order_receipt should send a receipt email"""
+    settings.FEATURES["ENABLE_TAXES_DISPLAY"] = False
     patched_mail_api = mocker.patch("ecommerce.mail_api.api")
     date = datetime.datetime(2010, 1, 1, 0, tzinfo=UTC)
     user = UserFactory.create(
@@ -232,6 +233,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
         legal_address__state_or_territory="US-CO",
         legal_address__city="Boulder",
         legal_address__postal_code="80309",
+        legal_address__vat_id=None,
     )
     line = LineFactory.create(
         order__status=Order.CREATED,
@@ -301,6 +303,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data):
                 "city": "Boulder",
                 "country": "United States",
                 "company": user.profile.company,
+                "vat_id": None,
             },
             "enable_taxes_display": False,
         },
