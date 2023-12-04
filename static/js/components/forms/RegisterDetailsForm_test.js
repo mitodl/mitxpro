@@ -18,8 +18,8 @@ describe("RegisterDetailsForm", () => {
 
   const countries = makeCountries()
 
-  const renderForm = () =>
-    mount(<RegisterDetailsForm onSubmit={onSubmitStub} countries={countries} isVatEnabled={false} enableVatID={enableVatIDStub}/>)
+  const renderForm = (isVatEnabled = false) =>
+    mount(<RegisterDetailsForm onSubmit={onSubmitStub} countries={countries} isVatEnabled={isVatEnabled} enableVatID={enableVatIDStub}/>)
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
@@ -39,6 +39,18 @@ describe("RegisterDetailsForm", () => {
     assert.ok(findFormikFieldByName(form, "name").exists())
     assert.ok(findFormikFieldByName(form, "password").exists())
     assert.ok(form.find("button[type='submit']").exists())
+    assert.ok(form.find(".add-vat-id").exists())
+  })
+
+  ;[true, false].forEach(isVatEnabled => {
+    it(`Validate that VAT ID is ${
+      isVatEnabled ? "enabled" : "disabled"
+    }`, () => {
+      const wrapper = renderForm(isVatEnabled)
+      const form = wrapper.find("Formik")
+      assert.equal(form.find(".add-vat-id").exists(), !isVatEnabled)
+      assert.equal(wrapper.find(`input[name="legal_address.vat_id"]`).exists(), isVatEnabled)
+    })
   })
 
   //
