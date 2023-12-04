@@ -14,12 +14,12 @@ import {
 import { makeCountries } from "../../factories/user"
 
 describe("RegisterDetailsForm", () => {
-  let sandbox, onSubmitStub
+  let sandbox, onSubmitStub, enableVatIDStub
 
   const countries = makeCountries()
 
   const renderForm = () =>
-    mount(<RegisterDetailsForm onSubmit={onSubmitStub} countries={countries} isVatEnabled={false} enableVatID={false}/>)
+    mount(<RegisterDetailsForm onSubmit={onSubmitStub} countries={countries} isVatEnabled={false} enableVatID={enableVatIDStub}/>)
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()

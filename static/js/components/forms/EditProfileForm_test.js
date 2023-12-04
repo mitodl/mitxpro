@@ -13,7 +13,7 @@ import {
 import { makeCountries, makeUser } from "../../factories/user"
 
 describe("EditProfileForm", () => {
-  let sandbox, onSubmitStub
+  let sandbox, onSubmitStub, enableVatIDStub
 
   const countries = makeCountries()
   const user = makeUser()
@@ -25,7 +25,7 @@ describe("EditProfileForm", () => {
         countries={countries}
         user={user}
         isVatEnabled={false}
-        enableVatID={false}
+        enableVatID={enableVatIDStub}
       />
     )
 
