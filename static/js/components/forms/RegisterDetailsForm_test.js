@@ -45,7 +45,7 @@ describe("RegisterDetailsForm", () => {
   ;[true, false].forEach(isVatEnabled => {
     it(`Validate that VAT ID is ${
       isVatEnabled ? "enabled" : "disabled"
-    }`, () => {
+    } for RegisterDetailsForm`, () => {
       const wrapper = renderForm(isVatEnabled)
       const form = wrapper.find("Formik")
       assert.equal(form.find(".add-vat-id").exists(), !isVatEnabled)

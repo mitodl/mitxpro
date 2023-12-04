@@ -18,13 +18,13 @@ describe("EditProfileForm", () => {
   const countries = makeCountries()
   const user = makeUser()
 
-  const renderForm = () =>
+  const renderForm = (isVatEnabled = false) =>
     mount(
       <EditProfileForm
         onSubmit={onSubmitStub}
         countries={countries}
         user={user}
-        isVatEnabled={false}
+        isVatEnabled={isVatEnabled}
         enableVatID={enableVatIDStub}
       />
     )
@@ -48,7 +48,19 @@ describe("EditProfileForm", () => {
     assert.ok(findFormikFieldByName(form, "profile.birth_year").exists())
     assert.ok(findFormikFieldByName(form, "profile.company_size").exists())
     assert.ok(findFormikFieldByName(form, "legal_address.city").exists())
+    assert.ok(form.find(".add-vat-id").exists())
     assert.ok(form.find("button[type='submit']").exists())
+  })
+
+  ;[true, false].forEach(isVatEnabled => {
+    it(`Validate that VAT ID is ${
+      isVatEnabled ? "enabled" : "disabled"
+    } for EditProfileForm`, () => {
+      const wrapper = renderForm(isVatEnabled)
+      const form = wrapper.find("Formik")
+      assert.equal(form.find(".add-vat-id").exists(), !isVatEnabled)
+      assert.equal(wrapper.find(`input[name="legal_address.vat_id"]`).exists(), isVatEnabled)
+    })
   })
 
   it(`validates that street address[0] is required`, async () => {

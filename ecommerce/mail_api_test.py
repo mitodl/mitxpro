@@ -233,7 +233,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data, settings):
         legal_address__state_or_territory="US-CO",
         legal_address__city="Boulder",
         legal_address__postal_code="80309",
-        legal_address__vat_id=None,
+        legal_address__vat_id="AT12349876",
     )
     line = LineFactory.create(
         order__status=Order.CREATED,
@@ -303,7 +303,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data, settings):
                 "city": "Boulder",
                 "country": "United States",
                 "company": user.profile.company,
-                "vat_id": None,
+                "vat_id": "AT12349876",
             },
             "enable_taxes_display": False,
         },
