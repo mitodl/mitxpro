@@ -19,7 +19,7 @@ describe("RegisterDetailsForm", () => {
   const countries = makeCountries()
 
   const renderForm = () =>
-    mount(<RegisterDetailsForm onSubmit={onSubmitStub} countries={countries} />)
+    mount(<RegisterDetailsForm onSubmit={onSubmitStub} countries={countries} isVatEnabled={false} enableVatID={false}/>)
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()

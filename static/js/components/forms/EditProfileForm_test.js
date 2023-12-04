@@ -24,6 +24,8 @@ describe("EditProfileForm", () => {
         onSubmit={onSubmitStub}
         countries={countries}
         user={user}
+        isVatEnabled={false}
+        enableVatID={false}
       />
     )
 

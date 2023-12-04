@@ -14,12 +14,12 @@ import queries from "../../../lib/queries"
 import EditProfileForm from "../../../components/forms/EditProfileForm"
 
 import type { Response } from "redux-query"
-import type { Country, CurrentUser, User } from "../../../flow/authTypes"
+import type { Country, LoggedInUser, User } from "../../../flow/authTypes"
 import type { RouterHistory } from "react-router"
 
 type StateProps = {|
   countries: ?Array<Country>,
-  currentUser: CurrentUser
+  currentUser: LoggedInUser
 |}
 
 type DispatchProps = {|
@@ -46,8 +46,8 @@ export class EditProfilePage extends React.Component<Props, State> {
     isVatEnabled: false
   }
   componentDidMount() {
-    const {currentUser} = this.props
-    if (currentUser.legal_address.vat_id) {
+    const { currentUser } = this.props
+    if (currentUser && currentUser.legal_address && currentUser.legal_address.vat_id) {
       this.setState({isVatEnabled: true})
     }
   }
