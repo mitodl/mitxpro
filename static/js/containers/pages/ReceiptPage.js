@@ -111,20 +111,10 @@ export class ReceiptPage extends React.Component<Props> {
                         NE49-2000
                         <br />
                         Cambridge, MA 02139 USA
-                        <br />
-                        GSTIN: Pending
-                        <br />
+                        {SETTINGS.enable_taxes_display ? <div>GSTIN: Pending</div> : null}
                         Support:{" "}
-                        <a href="mailto:support@xpro.mit.edu">
-                          support@xpro.mit.edu
-                        </a>
-                        <br />
-                        <a
-                          target="_blank"
-                          href="https://xpro.mit.edu"
-                          rel="noreferrer"
-                        >
-                          xpro.mit.edu
+                        <a href={`mailto:${SETTINGS.support_email}`}>
+                          { SETTINGS.support_email }
                         </a>
                       </p>
                     </div>
@@ -308,11 +298,11 @@ export class ReceiptPage extends React.Component<Props> {
                       })}
                     </tbody>
                   </table>
-                  <div className="receipt-hsn">HSN: 9992</div>
+                  {SETTINGS.enable_taxes_display ? <div className="receipt-hsn">HSN: 9992</div> : null}
                 </div>
-                <div className="receipt-signature">
+                { SETTINGS.enable_taxes_display ? <div className="receipt-signature">
                   <img src="static/images/receipts/invoice_signature.png" alt="" />
-                </div>
+                </div> : null }
               </div>
             )}
           </div>

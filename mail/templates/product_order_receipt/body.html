@@ -21,8 +21,10 @@
       <br />
       Cambridge, MA 02139 USA
       <br />
+      {% if enable_taxes_display %}
       GSTIN: Pending
       <br />
+      {% endif %}
       Support: 
       <a href="mailto:support@xpro.mit.edu">
         support@xpro.mit.edu
@@ -49,7 +51,9 @@
             {% for line in lines %}
             <p>
                 <strong style="font-weight: 700;">Order Item:</strong> {{ line.content_title }}<br>
+                {% if enable_taxes_display %}
                 <strong style="font-weight: 700;">HSN:</strong> 9992<br>
+                {% endif %}
                 <strong style="font-weight: 700;">Product Number:</strong> {{ line.readable_id }}<br>
                 <strong style="font-weight: 700;">Dates:</strong>   {{ line.start_date|date:"F j, Y" }} - {{ line.end_date|date:"F j, Y" }}
             </p>
