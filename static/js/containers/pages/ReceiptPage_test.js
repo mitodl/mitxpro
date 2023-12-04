@@ -25,7 +25,8 @@ describe("ReceiptPage", () => {
       country:            "US",
       postal_code:        "90640",
       company:            "ABC",
-      email:              "john.doe@acme.com"
+      email:              "john.doe@acme.com",
+      vat_id:             "AT12349876"
     },
     lines: [
       {
@@ -116,6 +117,10 @@ describe("ReceiptPage", () => {
     assert.equal(
       inner.find("#purchaserEmail").text(),
       receiptObject.purchaser.email
+    )
+    assert.equal(
+      inner.find("#purchaserVATNumber").text(),
+      receiptObject.purchaser.vat_id
     )
     receiptObject.purchaser.street_address.map(item =>
       assert.equal(inner.find(`#${item}`).text(), item)
