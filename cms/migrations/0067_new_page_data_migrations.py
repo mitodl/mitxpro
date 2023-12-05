@@ -359,7 +359,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("wagtailcore", "0089_log_entry_data_json_null_to_object"),
         ("wagtailsearch", "0007_delete_editorspick"),
-        ("cms", "0067_populate_revision_content_type"),
+        ("cms", "0066_wagtail_5_upgrade"),
     ]
 
     operations = [migrations.RunPython(migrate_data, reverse_migrate_data)]
