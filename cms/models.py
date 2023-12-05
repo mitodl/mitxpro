@@ -586,7 +586,10 @@ class CatalogPage(Page):
             hubspot_new_courses_form_guid=settings.HUBSPOT_CONFIG.get(
                 "HUBSPOT_NEW_COURSES_FORM_GUID"
             ),
-            topics=[ALL_TOPICS] + CourseTopic.objects.parent_topic_names(),
+            topics=[
+                ALL_TOPICS,
+                *[topic.name for topic in CourseTopic.parent_topics_with_courses()],
+            ],
             selected_topic=topic_filter,
             active_tab=request.GET.get("active-tab", ALL_TAB),
         )
