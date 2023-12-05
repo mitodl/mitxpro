@@ -20,7 +20,14 @@ from django.utils.functional import cached_property
 from django.utils.text import slugify
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from wagtail.admin.panels import FieldPanel, InlinePanel, TitleFieldPanel
-from wagtail.blocks import PageChooserBlock, RawHTMLBlock, StreamBlock, TextBlock, RichTextBlock, CharBlock
+from wagtail.blocks import (
+    CharBlock,
+    PageChooserBlock,
+    RawHTMLBlock,
+    RichTextBlock,
+    StreamBlock,
+    TextBlock,
+)
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 from wagtail.fields import RichTextField, StreamField
@@ -1749,9 +1756,7 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
         [
             (
                 "item",
-                RichTextBlock(
-                    icon="plus", features=["bold", "italic", "ol", "ul"]
-                ),
+                RichTextBlock(icon="plus", features=["bold", "italic", "ol", "ul"]),
             )
         ],
         blank=False,
