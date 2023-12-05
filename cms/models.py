@@ -19,9 +19,8 @@ from django.templatetags.static import static
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
-from wagtail import blocks
 from wagtail.admin.panels import FieldPanel, InlinePanel, TitleFieldPanel
-from wagtail.blocks import PageChooserBlock, RawHTMLBlock, StreamBlock
+from wagtail.blocks import PageChooserBlock, RawHTMLBlock, StreamBlock, TextBlock, RichTextBlock, CharBlock
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 from wagtail.fields import RichTextField, StreamField
@@ -915,8 +914,8 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     )
     content = StreamField(
         [
-            ("heading", blocks.CharBlock(classname="full title")),
-            ("paragraph", blocks.RichTextBlock()),
+            ("heading", CharBlock(classname="full title")),
+            ("paragraph", RichTextBlock()),
             ("image", ImageChooserBlock()),
             ("raw_html", RawHTMLBlock()),
         ],
@@ -1570,7 +1569,7 @@ class LearningOutcomesPage(CourseProgramChildPage):
     )
 
     outcome_items = StreamField(
-        [("outcome", blocks.TextBlock(icon="plus"))],
+        [("outcome", TextBlock(icon="plus"))],
         blank=False,
         help_text="Detail about What you'll learn as learning outcome.",
         use_json_field=True,
@@ -1750,7 +1749,7 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
         [
             (
                 "item",
-                blocks.RichTextBlock(
+                RichTextBlock(
                     icon="plus", features=["bold", "italic", "ol", "ul"]
                 ),
             )
