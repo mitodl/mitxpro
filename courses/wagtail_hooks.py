@@ -1,14 +1,9 @@
-"""Wagtail Snippets for courses app"""
-from wagtail.snippets.models import register_snippet
-from wagtail.snippets.views.snippets import DeleteView, SnippetViewSet
+"""Wagtail hooks for courses app"""
+from wagtail import hooks
 
-from courses.models import CourseTopic
-
-
-class CourseTopicSnippet(SnippetViewSet):
-    """Snippet for CourseTopic"""
-
-    model = CourseTopic
+from courses.wagtail_views import CourseTopicViewSet
 
 
-register_snippet(CourseTopicSnippet)
+@hooks.register("register_admin_viewset")
+def register_viewset():
+    return CourseTopicViewSet("topics")
