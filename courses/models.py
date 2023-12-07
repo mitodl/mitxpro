@@ -424,6 +424,17 @@ class CourseTopic(TimestampedModel):
             ]
         )
 
+    @classmethod
+    def parent_topics_with_courses(cls):
+        """
+        Returns parent topics with count > 0
+        """
+        return [
+            topic
+            for topic in cls.objects.parent_topics_with_annotated_course_counts()
+            if topic.course_count > 0
+        ]
+
 
 class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     """Model for a course"""

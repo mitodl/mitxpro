@@ -201,8 +201,4 @@ class CourseTopicViewSet(viewsets.ReadOnlyModelViewSet):
         """
         Returns parent topics with course count > 0.
         """
-        return [
-            topic
-            for topic in CourseTopic.objects.parent_topics_with_annotated_course_counts()
-            if topic.course_count > 0
-        ]
+        return CourseTopic.parent_topics_with_courses()

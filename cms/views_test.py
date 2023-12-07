@@ -442,16 +442,21 @@ def test_catalog_page_topics_ordering(client, wagtail_basics):
     catalog_page = CatalogPageFactory.create(parent=homepage)
     catalog_page.save_revision().publish()
 
-    topic_name_list = ["Analog", "Computer", "Business", "Technology", "Engineering"]
+    topic_name_without_courses_list = ["Analog", "Computer", "Business"]
+    topic_name_with_courses_list = ["Technology", "Engineering"]
 
-    parent_topics = CourseTopicFactory.create_batch(
-        5, name=factory.Iterator(topic_name_list)
+    CourseTopicFactory.create_batch(
+        3, name=factory.Iterator(topic_name_without_courses_list)
     )
+    parent_topics_with_courses = CourseTopicFactory.create_batch(
+        2, name=factory.Iterator(topic_name_with_courses_list)
+    )
+    CourseRunFactory.create(course__page__topics=parent_topics_with_courses)
 
     resp = client.get(catalog_page.get_url())
     assert resp.status_code == status.HTTP_200_OK
     assert resp.context_data["topics"] == sorted(
-        [ALL_TOPICS] + [topic.name for topic in parent_topics]
+        [ALL_TOPICS, *topic_name_with_courses_list]
     )
 
 
