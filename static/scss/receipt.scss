@@ -124,17 +124,17 @@ $label-color: #8a8b8c;
   }
 }
 
-.receipt-signature {
-  width: 150px;
-  margin: auto;
-  padding-top: 40px;
+.footnote-signature {
+  padding-top: 10px;
+  text-align: center;
 
-  img {
+  small {
     display: block;
-    width: 100%;
-    height: auto;
+    font-size: 16px;
+    font-weight: 400;
   }
 }
+
 
 .receipt-mit-info {
   max-width: 226px;
@@ -198,7 +198,7 @@ $label-color: #8a8b8c;
         width: 100%;
       }
 
-      &:before {
+      p {
         display: none;
         color: black;
         white-space: nowrap;
@@ -214,41 +214,6 @@ $label-color: #8a8b8c;
 
       div {
         overflow: hidden;
-      }
-
-      &:nth-child(1) {
-
-        &:before {
-          content: "Title";
-        }
-      }
-
-      &:nth-child(2) {
-
-        &:before {
-          content: "Quantity";
-        }
-      }
-
-      &:nth-child(3) {
-
-        &:before {
-          content: "Unit Price";
-        }
-      }
-
-      &:nth-child(4) {
-
-        &:before {
-          content: "Discount";
-        }
-      }
-
-      &:nth-child(5) {
-
-        &:before {
-          content: "Total Paid";
-        }
       }
     }
   }

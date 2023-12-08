@@ -258,6 +258,7 @@ export class ReceiptPage extends React.Component<Props> {
                         return (
                           <tr key={line.readable_id}>
                             <td>
+                              <p>Title</p>
                               <div>
                                 {line.content_title} <br />
                                 {line.readable_id} <br />
@@ -271,26 +272,32 @@ export class ReceiptPage extends React.Component<Props> {
                               </div>
                             </td>
                             <td>
+                              <p>Quantity</p>
                               <div>{line.quantity}</div>
                             </td>
                             <td>
+                              <p>Unit Price</p>
                               <div>${line.price}</div>
                             </td>
                             <td>
+                              <p>Discount</p>
                               <div>{formatDiscount(line.discount)}</div>
                             </td>
                             {SETTINGS.enable_taxes_display ? (
                               <td>
+                                <p>Total Before Tax</p>
                                 <div>{formatPrice(line.total_before_tax)}</div>
                               </td>
                             ) : null}
 
                             {SETTINGS.enable_taxes_display ? (
                               <td>
+                                <p>Tax ({formatNumber(orderReceipt.order.tax_rate)}%)</p>
                                 <div>${line.tax_paid}</div>
                               </td>
                             ) : null}
                             <td>
+                              <p>Total Paid</p>
                               <div>${line.total_paid}</div>
                             </td>
                           </tr>
@@ -300,8 +307,10 @@ export class ReceiptPage extends React.Component<Props> {
                   </table>
                   {SETTINGS.enable_taxes_display ? <div className="receipt-hsn">HSN: 9992</div> : null}
                 </div>
-                { SETTINGS.enable_taxes_display ? <div className="receipt-signature">
-                  <img src="static/images/receipts/invoice_signature.png" alt="" />
+                { SETTINGS.enable_taxes_display ? <div className="footnote-signature">
+                  <img src="static/images/receipts/signature_only.png" alt=""></img>
+                  <small>Bryan Adkison</small>
+                  <small>MIT Open Learning - A/R Manager</small>
                 </div> : null }
               </div>
             )}
