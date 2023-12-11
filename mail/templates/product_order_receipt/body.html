@@ -1,19 +1,46 @@
 {% extends "email_base.html" %}
 {% load format_discount %}
 
+{% block pre-logo-text %}
+<div class="rec-head" style="color: rgba(0,0,0,0.85); font: 14px/20px 'Arial', sans-serif; max-width: 696px; ">
+    <p style="font-weight: normal; margin: 0 0 20px;">Dear {{ purchaser.name }},</p>
+    <p style="font-weight: normal; margin: 0 0 20px;">You have been enrolled {% if content_title %} in {{ content_title }}{% endif %}.
+        The course should now appear on your MIT xPRO <a href="{{ base_url }}{% url 'user-dashboard' %}" style="color: #0070DA">dashboard</a>. You can also access your receipt by <a style="color: #0070DA" href="{{ base_url }}/receipt/{{order.id }}">clicking here</a>.
+    </p>
+    <p style="font-weight: normal; margin: 0 0 20px;">Below you will find a copy of your receipt:</p>
+
+</div>
+{% endblock %}
+
+{% block post-logo-text %}
+<div className="receipt-mit-info">
+    <p>
+      600 Technology Square
+      <br />
+      NE49-2000
+      <br />
+      Cambridge, MA 02139 USA
+      <br />
+      {% if enable_taxes_display %}
+      GSTIN: Pending
+      <br />
+      {% endif %}
+      Support: 
+      <a href="mailto:support@xpro.mit.edu">
+        support@xpro.mit.edu
+      </a>
+      <br />
+    </p>
+  </div>
+
+{% endblock %}
+
+
 {% block content %}
 <tr class="receipt-new-wrapper" style="font: 14px/22px 'Arial', sans-serif; margin: 0 auto; padding: 0 20px">
     <table style="margin: 0 20px !important;">
-    <td class="rec-head" style="color: rgba(0,0,0,0.85); font: 14px/20px 'Arial', sans-serif; max-width: 696px; ">
-        <p style="font-weight: normal; margin: 0 0 20px;">Dear {{ purchaser.name }},</p>
-        <p style="font-weight: normal; margin: 0 0 20px;">You have been enrolled {% if content_title %} in {{ content_title }}{% endif %}.
-            The course should now appear on your MIT xPRO <a href="{{ base_url }}{% url 'user-dashboard' %}" style="color: #0070DA">dashboard</a>. You can also access your receipt by <a style="color: #0070DA" href="{{ base_url }}/receipt/{{order.id }}">clicking here</a>.
-        </p>
-        <p style="font-weight: normal; margin: 0 0 20px;">Below you will find a copy of your receipt:</p>
-    </td>
     <tr>
         <td>
-            <h1 style="color: #000000; font-size: 24px; font-weight: 700; line-height: 26px; margin: 0 0 24px;">MIT xPRO</h1>
             <h2 style="color: #000000; font-size: 22px; font-weight: 700; line-height: 24px; margin: 0 0 22px;">Receipt</h2>
             <h3 style="color: #000000; font-size: 16px; font-weight: 700; line-height: 18px; margin: 0 0 20px;">Order Information</h3>
             <p>
@@ -24,6 +51,9 @@
             {% for line in lines %}
             <p>
                 <strong style="font-weight: 700;">Order Item:</strong> {{ line.content_title }}<br>
+                {% if enable_taxes_display %}
+                <strong style="font-weight: 700;">HSN:</strong> 9992<br>
+                {% endif %}
                 <strong style="font-weight: 700;">Product Number:</strong> {{ line.readable_id }}<br>
                 <strong style="font-weight: 700;">Dates:</strong>   {{ line.start_date|date:"F j, Y" }} - {{ line.end_date|date:"F j, Y" }}
             </p>
@@ -32,7 +62,8 @@
                 <strong style="font-weight: 700;">Unit Price:</strong> ${{ line.price }}<br>
                 <strong style="font-weight: 700;">Discount:</strong> {{ line.discount|format_discount }}<br>
                 {% if enable_taxes_display %}
-                    <strong style="font-weight: 700;">Tax ({{ order.tax_rate|floatformat:"-2" }}%):</strong> ${{ line.tax_paid|floatformat:2 }}<br>
+                <strong style="font-weight: 700;">Total Before Tax:</strong> ${{ line.total_before_tax|floatformat:2 }}<br>
+                <strong style="font-weight: 700;">Tax ({{ order.tax_rate|floatformat:"-2" }}%):</strong> ${{ line.tax_paid|floatformat:2 }}<br>
                 {% endif %}
                 <strong style="font-weight: 700;">Total Paid:</strong> ${{ line.total_paid|floatformat:2 }}
             </p>

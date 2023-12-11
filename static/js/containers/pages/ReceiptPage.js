@@ -12,7 +12,7 @@ import { pathOr } from "ramda"
 
 import queries from "../../lib/queries"
 import { formatPrettyDate, parseDateString } from "../../lib/util"
-import { formatNumber, formatDiscount } from "../../lib/ecommerce"
+import { formatNumber, formatDiscount, formatPrice } from "../../lib/ecommerce"
 import type Moment from "moment"
 import type { Match } from "react-router"
 import type { OrderReceiptResponse } from "../../flow/ecommerceTypes"
@@ -111,25 +111,17 @@ export class ReceiptPage extends React.Component<Props> {
                         NE49-2000
                         <br />
                         Cambridge, MA 02139 USA
-                        <br />
+                        {SETTINGS.enable_taxes_display ? <div>GSTIN: Pending</div> : null}
                         Support:{" "}
-                        <a href="mailto:support@xpro.mit.edu">
-                          support@xpro.mit.edu
-                        </a>
-                        <br />
-                        <a
-                          target="_blank"
-                          href="https://xpro.mit.edu"
-                          rel="noreferrer"
-                        >
-                          xpro.mit.edu
+                        <a href={`mailto:${SETTINGS.support_email}`}>
+                          { SETTINGS.support_email }
                         </a>
                       </p>
                     </div>
                   </div>
                   <div className="receipt-col p-t-50">
                     <dl>
-                      <dt>Order Number:</dt>
+                      <dt>Invoice Number:</dt>
                       <dd id="orderNumber">
                         {orderReceipt.order.reference_number}
                       </dd>
@@ -254,6 +246,7 @@ export class ReceiptPage extends React.Component<Props> {
                         <th>Quantity</th>
                         <th>Unit Price</th>
                         <th>Discount</th>
+                        {SETTINGS.enable_taxes_display ? <th>Total Before Tax</th> : null}
                         {SETTINGS.enable_taxes_display ? <th>Tax ({formatNumber(orderReceipt.order.tax_rate)}%)</th> : null}
                         <th>Total Paid</th>
                       </tr>
@@ -265,6 +258,7 @@ export class ReceiptPage extends React.Component<Props> {
                         return (
                           <tr key={line.readable_id}>
                             <td>
+                              <p>Title</p>
                               <div>
                                 {line.content_title} <br />
                                 {line.readable_id} <br />
@@ -278,20 +272,32 @@ export class ReceiptPage extends React.Component<Props> {
                               </div>
                             </td>
                             <td>
+                              <p>Quantity</p>
                               <div>{line.quantity}</div>
                             </td>
                             <td>
+                              <p>Unit Price</p>
                               <div>${line.price}</div>
                             </td>
                             <td>
+                              <p>Discount</p>
                               <div>{formatDiscount(line.discount)}</div>
                             </td>
                             {SETTINGS.enable_taxes_display ? (
                               <td>
+                                <p>Total Before Tax</p>
+                                <div>{formatPrice(line.total_before_tax)}</div>
+                              </td>
+                            ) : null}
+
+                            {SETTINGS.enable_taxes_display ? (
+                              <td>
+                                <p>Tax ({formatNumber(orderReceipt.order.tax_rate)}%)</p>
                                 <div>${line.tax_paid}</div>
                               </td>
                             ) : null}
                             <td>
+                              <p>Total Paid</p>
                               <div>${line.total_paid}</div>
                             </td>
                           </tr>
@@ -299,7 +305,13 @@ export class ReceiptPage extends React.Component<Props> {
                       })}
                     </tbody>
                   </table>
+                  {SETTINGS.enable_taxes_display ? <div className="receipt-hsn">HSN: 9992</div> : null}
                 </div>
+                { SETTINGS.enable_taxes_display ? <div className="footnote-signature">
+                  <img src="static/images/receipts/signature_only.png" alt=""></img>
+                  <small>Bryan Adkison</small>
+                  <small>MIT Open Learning - A/R Manager</small>
+                </div> : null }
               </div>
             )}
           </div>

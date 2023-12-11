@@ -351,7 +351,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                   <div>
                     <div className="bar" />
                     <div className="flex-row total-before-tax-row">
-                      <span>Total before tax:</span>
+                      <span>Total Before Tax:</span>
                       <span>{formatPrice(calculatePrice(item, coupon))}</span>
                     </div>
                     <div className="flex-row tax-row">
