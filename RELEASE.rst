@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.135.2
+---------------
+
+- style: Order receipt design tweaks (#2833)
+- fix: return topics with more than zero courses (#2839)
+
 Version 0.135.1 (Released November 30, 2023)
 ---------------
 
