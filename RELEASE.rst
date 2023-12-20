@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.135.2
+Version 0.135.2 (Released December 20, 2023)
 ---------------
 
 - style: Order receipt design tweaks (#2833)
