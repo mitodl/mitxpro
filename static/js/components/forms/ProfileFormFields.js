@@ -54,6 +54,7 @@ export const legalAddressValidation = yup.object().shape({
     vat_id: yup
       .string()
       .label("VAT ID")
+      .max(30)
       .trim(),
     city: yup
       .string()

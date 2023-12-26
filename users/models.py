@@ -1,19 +1,20 @@
 """User models"""
-from datetime import timedelta
 import uuid
+from datetime import timedelta
 
+import pycountry
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models import Q, Count
+from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _
-import pycountry
 
 from affiliate.models import AffiliateReferralAction
 from mitxpro.models import TimestampedModel
 from mitxpro.utils import now_in_utc
+
 
 # Defined in edX Profile model
 MALE = "m"
@@ -251,7 +252,7 @@ class LegalAddress(TimestampedModel):
     country = models.CharField(
         max_length=2, blank=True, validators=[validate_iso_3166_1_code]
     )  # ISO-3166-1
-    vat_id = models.CharField(max_length=255, blank=True, null=True)
+    vat_id = models.CharField(max_length=30, blank=True, null=True)
 
     # only required in the US/CA
     state_or_territory = models.CharField(
