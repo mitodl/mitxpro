@@ -45,6 +45,7 @@ def test_make_contact_sync_message(user):
         "name": user.name,
         "state": user.legal_address.state_or_territory,
         "zip": user.legal_address.postal_code,
+        "vat_id": user.legal_address.vat_id or "",
     }
 
 

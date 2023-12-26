@@ -53,7 +53,8 @@ export const makeUser = (username: ?string): LoggedInUser => ({
     city:               casual.city,
     state_or_territory: "US-MA",
     country:            "US",
-    postal_code:        "02090"
+    postal_code:        "02090",
+    vat_id:             ""
   },
   unused_coupons: []
 })

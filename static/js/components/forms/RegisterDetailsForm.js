@@ -12,7 +12,9 @@ import type { Country } from "../../flow/authTypes"
 
 type Props = {
   onSubmit: Function,
-  countries: Array<Country>
+  countries: Array<Country>,
+  isVatEnabled: boolean,
+  enableVatID: Function,
 }
 
 const INITIAL_VALUES = {
@@ -25,11 +27,12 @@ const INITIAL_VALUES = {
     city:               "",
     country:            "",
     state_or_territory: "",
-    postal_code:        ""
+    postal_code:        "",
+    vat_id:             "",
   }
 }
 
-const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
+const RegisterDetailsForm = ({ onSubmit, countries, isVatEnabled, enableVatID }: Props) => (
   <Formik
     onSubmit={onSubmit}
     validationSchema={legalAddressValidation.concat(passwordValidation)}
@@ -42,6 +45,8 @@ const RegisterDetailsForm = ({ onSubmit, countries }: Props) => (
           setFieldTouched={setFieldTouched}
           values={values}
           includePassword={true}
+          isVatEnabled={isVatEnabled}
+          enableVatID={enableVatID}
         />
         <div className="row submit-row no-gutters justify-content-end">
           <button

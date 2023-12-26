@@ -64,6 +64,7 @@ def make_contact_sync_message(user_id: int) -> SimplePublicObjectInput:
         "job_function": "job_function",
         "leadership_level": "leadership_level",
         "highest_education": "highest_education",
+        "vat_id": "vat_id",
     }
 
     user = User.objects.get(id=user_id)

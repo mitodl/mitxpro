@@ -48,7 +48,8 @@ export type LegalAddress = {
   country: string,
   state_or_territory?: string,
   postal_code?: string,
-  company?: string
+  company?: string,
+  vat_id?: string
 }
 
 export type ExtendedLegalAddress = LegalAddress & {
