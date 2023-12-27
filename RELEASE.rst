@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.136.0
+---------------
+
+- feat: add vat number (#2764)
+
 Version 0.135.2 (Released December 20, 2023)
 ---------------
 
