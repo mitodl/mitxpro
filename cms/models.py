@@ -19,16 +19,21 @@ from django.templatetags.static import static
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
-from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
+from wagtail.admin.panels import FieldPanel, InlinePanel, TitleFieldPanel
+from wagtail.blocks import (
+    CharBlock,
+    PageChooserBlock,
+    RawHTMLBlock,
+    RichTextBlock,
+    StreamBlock,
+    TextBlock,
+)
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
-from wagtail.core import blocks
-from wagtail.core.blocks import PageChooserBlock, RawHTMLBlock, StreamBlock
-from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.models import Orderable, Page, PageManager, PageQuerySet
-from wagtail.core.utils import WAGTAIL_APPEND_SLASH
+from wagtail.coreutils import WAGTAIL_APPEND_SLASH
+from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageChooserBlock
-from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.images.models import Image
+from wagtail.models import Orderable, Page, PageManager, PageQuerySet
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
@@ -49,6 +54,8 @@ from cms.constants import (
     BLOG_INDEX_SLUG,
     CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
+    FORMAT_ONLINE,
+    FORMAT_OTHER,
     ON_DEMAND_WEBINAR,
     ON_DEMAND_WEBINAR_BUTTON_TITLE,
     PROGRAM_INDEX_SLUG,
@@ -58,8 +65,6 @@ from cms.constants import (
     WEBINAR_DEFAULT_IMAGES,
     WEBINAR_HEADER_BANNER,
     WEBINAR_INDEX_SLUG,
-    FORMAT_ONLINE,
-    FORMAT_OTHER,
 )
 from cms.forms import CertificatePageForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
@@ -174,8 +179,8 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
     )
 
     content_panels = [
-        FieldPanel("title"),
-        ImageChooserPanel("banner_image"),
+        TitleFieldPanel("title"),
+        FieldPanel("banner_image"),
     ]
 
     def serve(self, request, *args, **kwargs):
@@ -249,11 +254,11 @@ class BlogIndexPage(Page):
     )
 
     content_panels = [
-        FieldPanel("title"),
+        TitleFieldPanel("title"),
         FieldPanel("sub_heading"),
         FieldPanel("recent_posts_heading"),
         FieldPanel("more_posts_heading"),
-        ImageChooserPanel("banner_image"),
+        FieldPanel("banner_image"),
     ]
 
     def serve(self, request, *args, **kwargs):
@@ -335,9 +340,9 @@ class WebinarPage(MetadataPageMixin, Page):
         FieldPanel("course"),
         FieldPanel("program"),
         FieldPanel("category"),
-        FieldPanel("title"),
+        TitleFieldPanel("title"),
         FieldPanel("sub_heading"),
-        ImageChooserPanel("banner_image"),
+        FieldPanel("banner_image"),
         FieldPanel("date", heading="Start Date"),
         FieldPanel("time"),
         FieldPanel("description"),
@@ -632,7 +637,7 @@ class CertificateIndexPage(RoutablePageMixin, Page):
 
         # Get a CertificatePage to serve this request
         certificate_page = (
-            certificate.certificate_page_revision.as_page_object()
+            certificate.certificate_page_revision.as_object()
             if certificate.certificate_page_revision
             else (
                 certificate.program.page.certificate_page
@@ -666,7 +671,7 @@ class CertificateIndexPage(RoutablePageMixin, Page):
 
         # Get a CertificatePage to serve this request
         certificate_page = (
-            certificate.certificate_page_revision.as_page_object()
+            certificate.certificate_page_revision.as_object()
             if certificate.certificate_page_revision
             else (
                 certificate.course_run.course.page.certificate_page
@@ -916,13 +921,14 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     )
     content = StreamField(
         [
-            ("heading", blocks.CharBlock(classname="full title")),
-            ("paragraph", blocks.RichTextBlock()),
+            ("heading", CharBlock(classname="full title")),
+            ("paragraph", RichTextBlock()),
             ("image", ImageChooserBlock()),
             ("raw_html", RawHTMLBlock()),
         ],
         blank=True,
         help_text="The content of this tab on the program page",
+        use_json_field=True,
     )
     content_panels = Page.content_panels + [
         FieldPanel("external_marketing_url"),
@@ -937,7 +943,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         FieldPanel("background_image"),
         FieldPanel("thumbnail_image"),
         FieldPanel("featured"),
-        StreamFieldPanel("content"),
+        FieldPanel("content"),
     ]
 
     subpage_types = [
@@ -1242,7 +1248,7 @@ class ProgramPage(ProgramProductPage):
             "checkout_url": (
                 None
                 if not checkout_product_id
-                else f"{reverse('checkout-page')}?product={ checkout_product_id }"
+                else f"{reverse('checkout-page')}?product={checkout_product_id}"
             ),
             "enrolled": enrolled,
             "user": request.user,
@@ -1370,7 +1376,7 @@ class CoursePage(CourseProductPage):
             **super().get_context(request, **kwargs),
             **get_base_context(request),
             "product_id": product.id if product else None,
-            "checkout_url": f"{reverse('checkout-page')}?product={ product.id }"
+            "checkout_url": f"{reverse('checkout-page')}?product={product.id}"
             if product
             else None,
             "enrolled": enrolled,
@@ -1484,11 +1490,12 @@ class UserTestimonialsPage(CourseProgramChildPage):
         [("testimonial", UserTestimonialBlock())],
         blank=False,
         help_text="Add testimonials to display in this section.",
+        use_json_field=True,
     )
     content_panels = [
         FieldPanel("heading"),
         FieldPanel("subhead"),
-        StreamFieldPanel("items"),
+        FieldPanel("items"),
     ]
 
     class Meta:
@@ -1519,8 +1526,9 @@ class NewsAndEventsPage(Page):
         [("news_and_events", NewsAndEventsBlock())],
         blank=False,
         help_text="Add news and events updates to display in this section.",
+        use_json_field=True,
     )
-    content_panels = [FieldPanel("heading"), StreamFieldPanel("items")]
+    content_panels = [FieldPanel("heading"), FieldPanel("items")]
 
     class Meta:
         verbose_name = "News and Events"
@@ -1568,15 +1576,16 @@ class LearningOutcomesPage(CourseProgramChildPage):
     )
 
     outcome_items = StreamField(
-        [("outcome", blocks.TextBlock(icon="plus"))],
+        [("outcome", TextBlock(icon="plus"))],
         blank=False,
         help_text="Detail about What you'll learn as learning outcome.",
+        use_json_field=True,
     )
 
     content_panels = [
         FieldPanel("heading"),
         FieldPanel("sub_heading"),
-        StreamFieldPanel("outcome_items"),
+        FieldPanel("outcome_items"),
     ]
 
 
@@ -1590,12 +1599,13 @@ class LearningTechniquesPage(CourseProgramChildPage):
         [("techniques", LearningTechniqueBlock())],
         blank=False,
         help_text="Enter detail about how you'll learn.",
+        use_json_field=True,
     )
 
     class Meta:
         verbose_name = "Icon Grid"
 
-    content_panels = [FieldPanel("title"), StreamFieldPanel("technique_items")]
+    content_panels = [FieldPanel("title"), FieldPanel("technique_items")]
 
 
 class ForTeamsPage(CourseProgramChildPage):
@@ -1641,7 +1651,7 @@ class ForTeamsPage(CourseProgramChildPage):
         FieldPanel("action_url"),
         FieldPanel("dark_theme"),
         FieldPanel("switch_layout"),
-        ImageChooserPanel("image"),
+        FieldPanel("image"),
     ]
 
 
@@ -1746,13 +1756,12 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
         [
             (
                 "item",
-                blocks.RichTextBlock(
-                    icon="plus", features=["bold", "italic", "ol", "ul"]
-                ),
+                RichTextBlock(icon="plus", features=["bold", "italic", "ol", "ul"]),
             )
         ],
         blank=False,
         help_text='Contents of the "Who Should Enroll" section.',
+        use_json_field=True,
     )
     switch_layout = models.BooleanField(
         blank=True,
@@ -1762,8 +1771,8 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
 
     content_panels = [
         FieldPanel("heading"),
-        StreamFieldPanel("content"),
-        ImageChooserPanel("image"),
+        FieldPanel("content"),
+        FieldPanel("image"),
         FieldPanel("switch_layout"),
     ]
 
@@ -1806,6 +1815,7 @@ class CoursesInProgramPage(CourseProgramChildPage):
         ],
         help_text="The courseware to display in this carousel",
         blank=True,
+        use_json_field=True,
     )
 
     @property
@@ -1826,7 +1836,7 @@ class CoursesInProgramPage(CourseProgramChildPage):
         FieldPanel("heading"),
         FieldPanel("body"),
         FieldPanel("override_contents"),
-        StreamFieldPanel("contents"),
+        FieldPanel("contents"),
     ]
 
 
@@ -1848,11 +1858,12 @@ class FacultyMembersPage(CourseProgramChildPage):
     members = StreamField(
         [("member", FacultyBlock())],
         help_text="The faculty members to display on this page",
+        use_json_field=True,
     )
     content_panels = [
         FieldPanel("heading"),
         FieldPanel("subhead"),
-        StreamFieldPanel("members"),
+        FieldPanel("members"),
     ]
 
 
@@ -1865,9 +1876,10 @@ class ImageCarouselPage(CourseProgramChildPage):
         [("image", ImageChooserBlock(help_text="Choose an image to upload."))],
         blank=False,
         help_text="Add images for this section.",
+        use_json_field=True,
     )
 
-    content_panels = Page.content_panels + [StreamFieldPanel("images")]
+    content_panels = [FieldPanel("title"), FieldPanel("images")]
 
     class Meta:
         verbose_name = "Image Carousel"
@@ -1915,11 +1927,12 @@ class ResourcePage(Page):
         [("content", ResourceBlock())],
         blank=False,
         help_text="Enter details of content.",
+        use_json_field=True,
     )
 
     content_panels = Page.content_panels + [
         FieldPanel("sub_heading"),
-        StreamFieldPanel("content"),
+        FieldPanel("content"),
     ]
 
     def get_context(self, request, *args, **kwargs):
@@ -1975,7 +1988,7 @@ class SignatoryPage(Page):
         FieldPanel("title_1"),
         FieldPanel("title_2"),
         FieldPanel("organization"),
-        ImageChooserPanel("signature_image"),
+        FieldPanel("signature_image"),
     ]
 
     def save(self, clean=True, user=None, log_action=False, **kwargs):
@@ -2064,6 +2077,7 @@ class CertificatePage(CourseProgramChildPage):
             max_num=5,
         ),
         help_text="You can choose upto 5 signatories.",
+        use_json_field=True,
     )
 
     overrides = StreamField(
@@ -2071,16 +2085,17 @@ class CertificatePage(CourseProgramChildPage):
         blank=True,
         help_text="Overrides for specific runs of this Course/Program",
         validators=[validate_unique_readable_ids],
+        use_json_field=True,
     )
 
     content_panels = [
         FieldPanel("product_name"),
         FieldPanel("institute_text"),
         FieldPanel("CEUs"),
-        ImageChooserPanel("partner_logo"),
+        FieldPanel("partner_logo"),
         FieldPanel("partner_logo_placement", widget=forms.Select),
-        StreamFieldPanel("overrides"),
-        StreamFieldPanel("signatories"),
+        FieldPanel("overrides"),
+        FieldPanel("signatories"),
     ]
 
     base_form_class = CertificatePageForm

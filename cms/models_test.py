@@ -8,7 +8,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.test.client import RequestFactory
 from django.urls import resolve
-from wagtail.core.utils import WAGTAIL_APPEND_SLASH
+from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 
 from cms.constants import (
     ON_DEMAND_WEBINAR,
@@ -37,6 +37,7 @@ from cms.factories import (
     ProgramFactory,
     ProgramPageFactory,
     ResourcePageFactory,
+    SignatoryPageFactory,
     SiteNotificationFactory,
     TextSectionFactory,
     TextVideoSectionFactory,
@@ -279,7 +280,7 @@ def test_custom_detail_page_urls_handled():
     CoursePageFactory.create(course__readable_id=readable_id)
     resolver_match = resolve("/courses/{}/".format(readable_id))
     assert (
-        resolver_match.func.__module__ == "wagtail.core.views"
+        resolver_match.func.__module__ == "wagtail.views"
     )  # pylint: disable=protected-access
     assert resolver_match.func.__name__ == "serve"  # pylint: disable=protected-access
 
@@ -308,11 +309,11 @@ def test_home_page_testimonials():
         subhead="subhead",
         items__0__testimonial__name="name",
         items__0__testimonial__title="title",
-        items__0__testimonial__image__title="image",
+        items__0__testimonial__image__image__title="image",
         items__0__testimonial__quote="quote",
         items__1__testimonial__name="name",
         items__1__testimonial__title="title",
-        items__1__testimonial__image__title="image",
+        items__1__testimonial__image__image__title="image",
         items__1__testimonial__quote="quote",
     )
     assert home_page.testimonials == testimonials_page
@@ -338,13 +339,13 @@ def test_home_page_news_and_events():
         heading="heading",
         items__0__news_and_events__content_type="content_type-0",
         items__0__news_and_events__title="title-0",
-        items__0__news_and_events__image__title="image-0",
+        items__0__news_and_events__image__image__title="image-0",
         items__0__news_and_events__content="content-0",
         items__0__news_and_events__call_to_action="call_to_action-0",
         items__0__news_and_events__action_url="action_url-0",
         items__1__news_and_events__content_type="content_type-1",
         items__1__news_and_events__title="title-1",
-        items__1__news_and_events__image__title="image-1",
+        items__1__news_and_events__image__image__title="image-1",
         items__1__news_and_events__content="content-1",
         items__1__news_and_events__call_to_action="call_to_action-1",
         items__1__news_and_events__action_url="action_url-1",
@@ -393,12 +394,13 @@ def test_home_page_upcoming_courseware():
     del home_page.child_pages
 
     course = CourseFactory.create(page=None)
+    page = CoursePageFactory(course=course)
     carousel_page = CoursesInProgramPageFactory.create(
         parent=home_page,
         heading="heading",
         body="<p>body</p>",
         override_contents=True,
-        contents__0__item__course=course,
+        contents__0__item__page=page,
     )
     assert home_page.upcoming_courseware == carousel_page
     assert carousel_page.heading == "heading"
@@ -545,7 +547,7 @@ def test_course_page_testimonials():
         subhead="subhead",
         items__0__testimonial__name="name",
         items__0__testimonial__title="title",
-        items__0__testimonial__image__title="image",
+        items__0__testimonial__image__image__title="image",
         items__0__testimonial__quote="quote",
     )
     assert course_page.testimonials == testimonials_page
@@ -570,7 +572,7 @@ def test_external_course_page_testimonials():
         subhead="subhead",
         items__0__testimonial__name="name",
         items__0__testimonial__title="title",
-        items__0__testimonial__image__title="image",
+        items__0__testimonial__image__image__title="image",
         items__0__testimonial__quote="quote",
     )
     assert external_course_page.testimonials == testimonials_page
@@ -595,7 +597,7 @@ def test_program_page_testimonials():
         subhead="subhead",
         items__0__testimonial__name="name",
         items__0__testimonial__title="title",
-        items__0__testimonial__image__title="image",
+        items__0__testimonial__image__image__title="image",
         items__0__testimonial__quote="quote",
     )
     assert program_page.testimonials == testimonials_page
@@ -620,7 +622,7 @@ def test_external_program_page_testimonials():
         subhead="subhead",
         items__0__testimonial__name="name",
         items__0__testimonial__title="title",
-        items__0__testimonial__image__title="image",
+        items__0__testimonial__image__image__title="image",
         items__0__testimonial__quote="quote",
     )
     assert external_program_page.testimonials == testimonials_page
@@ -1107,7 +1109,7 @@ def test_course_page_learning_techniques():
         parent=course_page,
         technique_items__0__techniques__heading="heading",
         technique_items__0__techniques__sub_heading="sub_heading",
-        technique_items__0__techniques__image__title="image-title",
+        technique_items__0__techniques__image__image__title="image-title",
     )
     assert learning_techniques_page.get_parent() == course_page
     for (
@@ -1130,7 +1132,7 @@ def test_external_course_page_learning_techniques():
         parent=external_course_page,
         technique_items__0__techniques__heading="heading",
         technique_items__0__techniques__sub_heading="sub_heading",
-        technique_items__0__techniques__image__title="image-title",
+        technique_items__0__techniques__image__image__title="image-title",
     )
     assert learning_techniques_page.get_parent() == external_course_page
     for (
@@ -1155,7 +1157,7 @@ def test_program_page_learning_techniques():
         parent=program_page,
         technique_items__0__techniques__heading="heading",
         technique_items__0__techniques__sub_heading="sub_heading",
-        technique_items__0__techniques__image__title="image-title",
+        technique_items__0__techniques__image__image__title="image-title",
     )
     assert learning_techniques_page.get_parent() == program_page
     for (
@@ -1180,7 +1182,7 @@ def test_external_program_page_learning_techniques():
         parent=external_program_page,
         technique_items__0__techniques__heading="heading",
         technique_items__0__techniques__sub_heading="sub_heading",
-        technique_items__0__techniques__image__title="image-title",
+        technique_items__0__techniques__image__image__title="image-title",
     )
     assert learning_techniques_page.get_parent() == external_program_page
     for (
@@ -1396,16 +1398,19 @@ def test_certificate_for_course_page():
     assert CertificatePage.can_create_at(course_page)
     assert not SignatoryPage.can_create_at(course_page)
 
+    signatory = SignatoryPageFactory(
+        name="Name",
+        title_1="Title_1",
+        title_2="Title_2",
+        organization="Organization",
+        signature_image__image__title="Image",
+    )
     certificate_page = CertificatePageFactory.create(
         parent=course_page,
         product_name="product_name",
         CEUs="1.8",
-        partner_logo__title="Partner Logo",
-        signatories__0__signatory__name="Name",
-        signatories__0__signatory__title_1="Title_1",
-        signatories__0__signatory__title_2="Title_2",
-        signatories__0__signatory__organization="Organization",
-        signatories__0__signatory__signature_image__title="Image",
+        partner_logo__image__title="Partner Logo",
+        signatories__0__signatory__page=signatory,
     )
     assert certificate_page.get_parent() == course_page
     assert certificate_page.CEUs == "1.8"
@@ -1427,16 +1432,20 @@ def test_certificate_for_program_page():
     assert CertificatePage.can_create_at(program_page)
     assert not SignatoryPage.can_create_at(program_page)
 
+    signatory = SignatoryPageFactory(
+        name="Name",
+        title_1="Title_1",
+        title_2="Title_2",
+        organization="Organization",
+        signature_image__image__title="Image",
+    )
+
     certificate_page = CertificatePageFactory.create(
         parent=program_page,
         product_name="product_name",
         CEUs="2.8",
-        partner_logo__title="Partner Logo",
-        signatories__0__signatory__name="Name",
-        signatories__0__signatory__title_1="Title_1",
-        signatories__0__signatory__title_2="Title_2",
-        signatories__0__signatory__organization="Organization",
-        signatories__0__signatory__signature_image__title="Image",
+        partner_logo__image__title="Partner Logo",
+        signatories__0__signatory__page=signatory,
     )
 
     assert certificate_page.get_parent() == program_page
@@ -1569,13 +1578,13 @@ def create_news_and_events(parent, heading="heading"):
         heading=heading,
         items__0__news_and_events__content_type="content_type-0",
         items__0__news_and_events__title="title-0",
-        items__0__news_and_events__image__title="image-0",
+        items__0__news_and_events__image__image__title="image-0",
         items__0__news_and_events__content="content-0",
         items__0__news_and_events__call_to_action="call_to_action-0",
         items__0__news_and_events__action_url="action_url-0",
         items__1__news_and_events__content_type="content_type-1",
         items__1__news_and_events__title="title-1",
-        items__1__news_and_events__image__title="image-1",
+        items__1__news_and_events__image__image__title="image-1",
         items__1__news_and_events__content="content-1",
         items__1__news_and_events__call_to_action="call_to_action-1",
         items__1__news_and_events__action_url="action_url-1",

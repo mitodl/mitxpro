@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 )
             ],
             options={"abstract": False},
-            bases=(cms.models.CourseObjectIndexPage, "wagtailcore.page"),
+            bases=("wagtailcore.page",),
         ),
         migrations.CreateModel(
             name="ProgramIndexPage",
@@ -47,6 +47,6 @@ class Migration(migrations.Migration):
                 )
             ],
             options={"abstract": False},
-            bases=(cms.models.CourseObjectIndexPage, "wagtailcore.page"),
+            bases=("wagtailcore.page",),
         ),
     ]

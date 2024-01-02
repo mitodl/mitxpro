@@ -2,8 +2,8 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import wagtail.core.blocks
-import wagtail.core.fields
+import wagtail.blocks
+import wagtail.fields
 import wagtail.images.blocks
 
 
@@ -31,23 +31,19 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "technique_items",
-                    wagtail.core.fields.StreamField(
+                    wagtail.fields.StreamField(
                         [
                             (
                                 "techniques",
-                                wagtail.core.blocks.StructBlock(
+                                wagtail.blocks.StructBlock(
                                     [
                                         (
                                             "heading",
-                                            wagtail.core.blocks.CharBlock(
-                                                max_length=100
-                                            ),
+                                            wagtail.blocks.CharBlock(max_length=100),
                                         ),
                                         (
                                             "sub_heading",
-                                            wagtail.core.blocks.CharBlock(
-                                                max_length=250
-                                            ),
+                                            wagtail.blocks.CharBlock(max_length=250),
                                         ),
                                         (
                                             "image",

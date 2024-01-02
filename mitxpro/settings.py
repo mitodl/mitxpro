@@ -154,7 +154,6 @@ INSTALLED_APPS = (
     "wagtail.contrib.redirects",
     "wagtail.contrib.table_block",
     "wagtail.contrib.routable_page",
-    "wagtail.contrib.modeladmin",
     "wagtail.embeds",
     "wagtail.sites",
     "wagtail.users",
@@ -163,7 +162,7 @@ INSTALLED_APPS = (
     "wagtail.images",
     "wagtail.search",
     "wagtail.admin",
-    "wagtail.core",
+    "wagtail",
     "wagtailmetadata",
     "modelcluster",
     "taggit",
@@ -901,6 +900,9 @@ WAGTAIL_CACHE_MAX_ENTRIES = get_int(
     default=200,
     description="The maximum number of cache entries for Wagtail images",
 )
+
+WAGTAILADMIN_BASE_URL = SITE_BASE_URL
+
 WAGTAILEMBEDS_FINDERS = [
     {"class": "cms.embeds.YouTubeEmbedFinder"},
     {"class": "wagtail.embeds.finders.oembed"},

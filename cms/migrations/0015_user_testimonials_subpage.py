@@ -2,8 +2,8 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import wagtail.core.blocks
-import wagtail.core.fields
+import wagtail.blocks
+import wagtail.fields
 import wagtail.images.blocks
 
 
@@ -45,22 +45,22 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "items",
-                    wagtail.core.fields.StreamField(
+                    wagtail.fields.StreamField(
                         [
                             (
                                 "testimonial",
-                                wagtail.core.blocks.StructBlock(
+                                wagtail.blocks.StructBlock(
                                     [
                                         (
                                             "name",
-                                            wagtail.core.blocks.CharBlock(
+                                            wagtail.blocks.CharBlock(
                                                 help_text="Name of the attestant.",
                                                 max_length=100,
                                             ),
                                         ),
                                         (
                                             "title",
-                                            wagtail.core.blocks.CharBlock(
+                                            wagtail.blocks.CharBlock(
                                                 help_text="The title to display after the name.",
                                                 max_length=255,
                                             ),
@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
                                         ),
                                         (
                                             "quote",
-                                            wagtail.core.blocks.TextBlock(
+                                            wagtail.blocks.TextBlock(
                                                 help_text="The quote that appears on the testimonial."
                                             ),
                                         ),

@@ -12,7 +12,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.utils.functional import cached_property
-from wagtail.core.models import PageRevision
 
 from cms.urls import detail_path_char_pattern
 from courses.constants import (
@@ -965,7 +964,7 @@ def limit_to_certificate_pages():
         "id", flat=True
     )
 
-    return {"page_id__in": available_revisions}
+    return {"object_id__in": list(map(str, available_revisions))}
 
 
 class BaseCertificate(models.Model):
@@ -1000,7 +999,7 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
 
     course_run = models.ForeignKey(CourseRun, null=False, on_delete=models.CASCADE)
     certificate_page_revision = models.ForeignKey(
-        PageRevision,
+        "wagtailcore.Revision",
         null=True,
         blank=True,
         on_delete=models.CASCADE,
@@ -1065,7 +1064,7 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
             return
 
         certpage = CertificatePage.objects.filter(
-            pk=self.certificate_page_revision.page_id,
+            pk=int(self.certificate_page_revision.object_id),
         ).first()
 
         if (
@@ -1086,7 +1085,7 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
 
     program = models.ForeignKey(Program, null=False, on_delete=models.CASCADE)
     certificate_page_revision = models.ForeignKey(
-        PageRevision,
+        "wagtailcore.Revision",
         null=True,
         blank=True,
         on_delete=models.CASCADE,
@@ -1146,7 +1145,7 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
             return
 
         certpage = CertificatePage.objects.filter(
-            pk=self.certificate_page_revision.page_id,
+            pk=int(self.certificate_page_revision.object_id),
         ).first()
 
         if (

@@ -2,8 +2,8 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import wagtail.core.blocks
-import wagtail.core.fields
+import wagtail.blocks
+import wagtail.fields
 import wagtail.images.blocks
 
 
@@ -38,22 +38,22 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "items",
-                    wagtail.core.fields.StreamField(
+                    wagtail.fields.StreamField(
                         [
                             (
                                 "news_and_events",
-                                wagtail.core.blocks.StructBlock(
+                                wagtail.blocks.StructBlock(
                                     [
                                         (
                                             "content_type",
-                                            wagtail.core.blocks.CharBlock(
+                                            wagtail.blocks.CharBlock(
                                                 help_text="Specify the news/events type here.",
                                                 max_length=100,
                                             ),
                                         ),
                                         (
                                             "title",
-                                            wagtail.core.blocks.CharBlock(
+                                            wagtail.blocks.CharBlock(
                                                 help_text="Specify the news/events title here.",
                                                 max_length=255,
                                             ),
@@ -68,20 +68,20 @@ class Migration(migrations.Migration):
                                         ),
                                         (
                                             "content",
-                                            wagtail.core.blocks.TextBlock(
+                                            wagtail.blocks.TextBlock(
                                                 help_text="Specify the news/events content here."
                                             ),
                                         ),
                                         (
                                             "call_to_action",
-                                            wagtail.core.blocks.CharBlock(
+                                            wagtail.blocks.CharBlock(
                                                 help_text="Specify the news/events call-to-action text here (e.g: 'Read More').",
                                                 max_length=100,
                                             ),
                                         ),
                                         (
                                             "action_url",
-                                            wagtail.core.blocks.URLBlock(
+                                            wagtail.blocks.URLBlock(
                                                 help_text="Specify the news/events action-url here (like a link to an article e.g: https://www.google.com/search?q=article)."
                                             ),
                                         ),
