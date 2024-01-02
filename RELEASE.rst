@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.136.0
+Version 0.136.0 (Released January 02, 2024)
 ---------------
 
 - feat: add vat number (#2764)
