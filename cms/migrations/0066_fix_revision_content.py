@@ -9,6 +9,8 @@ def migrate_content_type_id(apps, schema_editor):
 
     BlogIndexPage and WebinarIndexPage were created through the data migrations.
     We didn't add `content_type` to `Revision.content` that was previously named `PageRevision.content_json`.
+    Now, during the upgrade, wagtail expects `content_type` to be present in `Revision.content` but it isn't
+    and hence this issue.
     """
     ContentType = apps.get_model("contenttypes", "ContentType")
     Revision = apps.get_model("wagtailcore", "Revision")
@@ -24,6 +26,7 @@ def migrate_content_type_id(apps, schema_editor):
             blog_page_content = dict(revision.content)
             blog_page_content["content_type"] = blog_page_content["content_type_id"]
             revision.content = blog_page_content
+            revision.content_type_id = blog_page_content["content_type_id"]
             revision.save()
 
     WebinarIndexPage = apps.get_model("cms", "WebinarIndexPage")
@@ -37,6 +40,7 @@ def migrate_content_type_id(apps, schema_editor):
             webinar_page_content = dict(revision.content)
             webinar_page_content["content_type"] = webinar_page_content["content_type_id"]
             revision.content = webinar_page_content
+            revision.content_type_id = webinar_page_content["content_type_id"]
             revision.save()
 
 
