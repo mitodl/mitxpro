@@ -5,6 +5,7 @@ from django.db import migrations
 
 def migrate_content_type_id(apps, schema_editor):
     ContentType = apps.get_model("contenttypes", "ContentType")
+    Revision = apps.get_model("wagtailcore", "Revision")
     BlogIndexPage = apps.get_model("cms", "BlogIndexPage")
     blog_index_content_type, _ = ContentType.objects.get_or_create(
         app_label="cms", model="blogindexpage"
