@@ -35,10 +35,14 @@ def migrate_content_type_id(apps, schema_editor):
     )
     webinar_index_page_ids = list(WebinarIndexPage.objects.values_list("id", flat=True))
     if webinar_index_page_ids:
-        webinar_page_revisions = Revision.objects.filter(object_id__in=webinar_index_page_ids)
+        webinar_page_revisions = Revision.objects.filter(
+            object_id__in=webinar_index_page_ids
+        )
         for revision in webinar_page_revisions:
             webinar_page_content = dict(revision.content)
-            webinar_page_content["content_type"] = webinar_page_content["content_type_id"]
+            webinar_page_content["content_type"] = webinar_page_content[
+                "content_type_id"
+            ]
             revision.content = webinar_page_content
             revision.content_type_id = webinar_page_content["content_type_id"]
             revision.save()
@@ -46,10 +50,14 @@ def migrate_content_type_id(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('cms', '0065_blogindexpage'),
-        ('wagtailcore', '0071_populate_revision_content_type'),
+        ("cms", "0065_blogindexpage"),
+        ("wagtailcore", "0071_populate_revision_content_type"),
     ]
 
-    run_before = [("wagtailcore", "0072_alter_revision_content_type_notnull"), ]
+    run_before = [
+        ("wagtailcore", "0072_alter_revision_content_type_notnull"),
+    ]
 
-    operations = [migrations.RunPython(migrate_content_type_id, migrations.RunPython.noop)]
+    operations = [
+        migrations.RunPython(migrate_content_type_id, migrations.RunPython.noop)
+    ]
