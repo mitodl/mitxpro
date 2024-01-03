@@ -4,15 +4,22 @@ from django.db import migrations
 
 
 def migrate_content_type_id(apps, schema_editor):
+    """
+    Fixes the revisions of BlogIndexPage and WebinarIndexPage.
+
+    BlogIndexPage and WebinarIndexPage were created through the data migrations.
+    We didn't add `content_type` to `Revision.content` that was previously named `PageRevision.content_json`.
+    """
     ContentType = apps.get_model("contenttypes", "ContentType")
     Revision = apps.get_model("wagtailcore", "Revision")
+
     BlogIndexPage = apps.get_model("cms", "BlogIndexPage")
     blog_index_content_type, _ = ContentType.objects.get_or_create(
         app_label="cms", model="blogindexpage"
     )
-    blog_index = BlogIndexPage.objects.first()
-    if blog_index:
-        blog_page_revisions = Revision.objects.filter(object_id=blog_index.id)
+    blog_index_page_ids = list(BlogIndexPage.objects.values_list("id", flat=True))
+    if blog_index_page_ids:
+        blog_page_revisions = Revision.objects.filter(object_id__in=blog_index_page_ids)
         for revision in blog_page_revisions:
             blog_page_content = dict(revision.content)
             blog_page_content["content_type"] = blog_page_content["content_type_id"]
@@ -23,9 +30,9 @@ def migrate_content_type_id(apps, schema_editor):
     webinar_index_content_type, _ = ContentType.objects.get_or_create(
         app_label="cms", model="webinarindexpage"
     )
-    webinar_index = WebinarIndexPage.objects.first()
-    if webinar_index:
-        webinar_page_revisions = Revision.objects.filter(object_id=webinar_index.id)
+    webinar_index_page_ids = list(WebinarIndexPage.objects.values_list("id", flat=True))
+    if webinar_index_page_ids:
+        webinar_page_revisions = Revision.objects.filter(object_id__in=webinar_index_page_ids)
         for revision in webinar_page_revisions:
             webinar_page_content = dict(revision.content)
             webinar_page_content["content_type"] = webinar_page_content["content_type_id"]
