@@ -5,9 +5,18 @@ import shutil
 
 import pytest
 from django.conf import settings
+from wagtail.models import Page, Site
 
-from fixtures.common import *
+from cms.models import (
+    BlogIndexPage,
+    CertificateIndexPage,
+    CourseIndexPage,
+    ProgramIndexPage,
+    SignatoryIndexPage,
+    WebinarIndexPage,
+)
 from fixtures.autouse import *
+from fixtures.common import *
 from fixtures.cybersource import *
 
 
@@ -57,3 +66,27 @@ def clean_up_files():
     yield
     if os.path.exists(settings.MEDIA_ROOT):
         shutil.rmtree(settings.MEDIA_ROOT)
+
+
+@pytest.fixture(scope="session")
+def django_db_setup(django_db_setup, django_db_blocker):
+    """
+    Creates all the index pages during the tests setup as index pages are required by the factories.
+    """
+    with django_db_blocker.unblock():
+        site = Site.objects.filter(is_default_site=True).first()
+        home_page = Page.objects.get(id=site.root_page.id)
+
+        program_index = ProgramIndexPage(title="Programs")
+        course_index = CourseIndexPage(title="Courses")
+        certificate_index = CertificateIndexPage(title="Certificates")
+        signatory_index = SignatoryIndexPage(title="Signatories")
+        blog_index = BlogIndexPage(title="Blogs")
+        webinar_index = WebinarIndexPage(title="Webinars")
+
+        home_page.add_child(instance=program_index)
+        home_page.add_child(instance=course_index)
+        home_page.add_child(instance=certificate_index)
+        home_page.add_child(instance=signatory_index)
+        home_page.add_child(instance=blog_index)
+        home_page.add_child(instance=webinar_index)
