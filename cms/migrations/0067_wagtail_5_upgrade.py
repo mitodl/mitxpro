@@ -10,7 +10,7 @@ import wagtail.images.blocks
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("cms", "0065_blogindexpage"),
+        ("cms", "0066_fix_revision_content"),
     ]
 
     operations = [
