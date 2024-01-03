@@ -7,6 +7,7 @@ import pytest
 from django.conf import settings
 from wagtail.models import Page, Site
 
+from cms.constants import CERTIFICATE_INDEX_SLUG
 from cms.models import (
     BlogIndexPage,
     CertificateIndexPage,
@@ -79,7 +80,9 @@ def django_db_setup(django_db_setup, django_db_blocker):
 
         program_index = ProgramIndexPage(title="Programs")
         course_index = CourseIndexPage(title="Courses")
-        certificate_index = CertificateIndexPage(title="Certificates")
+        certificate_index = CertificateIndexPage(
+            title="Certificates", slug=CERTIFICATE_INDEX_SLUG
+        )
         signatory_index = SignatoryIndexPage(title="Signatories")
         blog_index = BlogIndexPage(title="Blogs")
         webinar_index = WebinarIndexPage(title="Webinars")
