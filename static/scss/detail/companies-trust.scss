@@ -2,7 +2,7 @@
 
 .companies-trust-block {
   padding: 90px 0 80px;
-  background: white url('#{$static-path}/images/countries-trust-bg.png') repeat-x 0 0;
+  background: white repeat-x 0 0;
   position: relative;
   text-align: center;
 
@@ -15,6 +15,10 @@
     margin: 0 0 50px;
     text-align: center;
   }
+}
+
+.companies-trust-block.lazy-background {
+  background-image: url('#{$static-path}/images/countries-trust-bg.png');
 }
 
 .logos-slider {

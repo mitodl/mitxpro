@@ -1,7 +1,7 @@
 // sass-lint:disable mixins-before-declarations
 .learners-block {
   padding: 100px 0 50px;
-  background: white url("#{$static-path}/images/testimonial-carousel-bg.jpg") no-repeat 50% 0;
+  background: white no-repeat 50% 0;
   min-height: 400px;
   overflow: hidden;
   position: relative;
@@ -39,6 +39,10 @@
       margin: 0 0 25px;
     }
   }
+}
+
+.learners-block.lazy-background {
+  background-image: url("#{$static-path}/images/testimonial-carousel-bg.jpg");
 }
 
 .learners-slider {

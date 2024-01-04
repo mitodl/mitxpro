@@ -2,7 +2,7 @@
 .text-block {
   width: 100%;
   padding: 100px 0 50px;
-  background: white url("#{$static-path}/images/transparent-pixels-bg.png") repeat-x 0 100%;
+  background: white repeat-x 0 100%;
   min-height: 400px;
   overflow: hidden;
   position: relative;
@@ -29,6 +29,10 @@
   p {
     margin: 0 0 30px;
   }
+}
+
+.text-block.lazy-background {
+  background-image: url("#{$static-path}/images/transparent-pixels-bg.png");
 }
 
 // Dark theme
