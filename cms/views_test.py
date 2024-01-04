@@ -168,11 +168,7 @@ def test_courses_index_view(client, wagtail_basics):
     """
     Test that the courses index page shows a 404
     """
-    page, created = CourseIndexPage.objects.get_or_create()
-
-    if created:
-        wagtail_basics.root.add_child(instance=page)
-
+    page = CourseIndexPage.objects.first()
     resp = client.get(page.get_url())
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
@@ -181,11 +177,7 @@ def test_programs_index_view(client, wagtail_basics):
     """
     Test that the programs index page shows a 404
     """
-    page, created = ProgramIndexPage.objects.get_or_create()
-
-    if created:
-        wagtail_basics.root.add_child(instance=page)
-
+    page = ProgramIndexPage.objects.first()
     resp = client.get(page.get_url())
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
