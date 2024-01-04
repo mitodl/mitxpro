@@ -21,7 +21,9 @@ def migrate_content_type_id(apps, schema_editor):
     )
     blog_index_page_ids = list(BlogIndexPage.objects.values_list("id", flat=True))
     if blog_index_page_ids:
-        blog_page_revisions = Revision.objects.filter(object_id__in=blog_index_page_ids)
+        blog_page_revisions = Revision.objects.filter(
+            object_id__in=blog_index_page_ids, content_type_id__isnull=True
+        )
         for revision in blog_page_revisions:
             blog_page_content = dict(revision.content)
             blog_page_content["content_type"] = blog_page_content["content_type_id"]
@@ -36,7 +38,7 @@ def migrate_content_type_id(apps, schema_editor):
     webinar_index_page_ids = list(WebinarIndexPage.objects.values_list("id", flat=True))
     if webinar_index_page_ids:
         webinar_page_revisions = Revision.objects.filter(
-            object_id__in=webinar_index_page_ids
+            object_id__in=webinar_index_page_ids, content_type_id__isnull=True
         )
         for revision in webinar_page_revisions:
             webinar_page_content = dict(revision.content)
