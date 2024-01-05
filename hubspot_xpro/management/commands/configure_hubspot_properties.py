@@ -68,13 +68,13 @@ CUSTOM_ECOMMERCE_PROPERTIES = {
                     {
                         "value": models.Order.CREATED,
                         "label": models.Order.CREATED,
-                        "displayOrder": 0,
+                        "displayOrder": 2,
                         "hidden": False,
                     },
                     {
                         "value": models.Order.REFUNDED,
                         "label": models.Order.REFUNDED,
-                        "displayOrder": 1,
+                        "displayOrder": 3,
                         "hidden": False,
                     },
                 ],
@@ -198,6 +198,14 @@ CUSTOM_ECOMMERCE_PROPERTIES = {
                 "type": "string",
                 "fieldType": "text",
             },
+            {
+                "name": "vat_id",
+                "label": "VAT ID",
+                "description": "Customer VAT ID",
+                "groupName": "contactinformation",
+                "type": "string",
+                "fieldType": "text",
+            },
         ],
     },
     "line_items": {
@@ -226,13 +234,13 @@ CUSTOM_ECOMMERCE_PROPERTIES = {
                     {
                         "value": models.Order.CREATED,
                         "label": models.Order.CREATED,
-                        "displayOrder": 0,
+                        "displayOrder": 2,
                         "hidden": False,
                     },
                     {
                         "value": models.Order.REFUNDED,
                         "label": models.Order.REFUNDED,
-                        "displayOrder": 1,
+                        "displayOrder": 3,
                         "hidden": False,
                     },
                 ],
