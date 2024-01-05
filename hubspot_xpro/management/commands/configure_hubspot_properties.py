@@ -198,6 +198,15 @@ CUSTOM_ECOMMERCE_PROPERTIES = {
                 "type": "string",
                 "fieldType": "text",
             },
+            {
+                "name": "vat_id",
+                "label": "VAT ID",
+                "description": "Customer VAT ID",
+                "groupName": "contactinformation",
+                "type": "string",
+                "fieldType": "text",
+            },
+
         ],
     },
     "line_items": {
