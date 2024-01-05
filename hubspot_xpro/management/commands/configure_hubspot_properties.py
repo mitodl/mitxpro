@@ -206,7 +206,6 @@ CUSTOM_ECOMMERCE_PROPERTIES = {
                 "type": "string",
                 "fieldType": "text",
             },
-
         ],
     },
     "line_items": {
