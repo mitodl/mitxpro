@@ -3776,12 +3776,12 @@ Click = ">=6.0"
 
 [[package]]
 name = "uwsgi"
-version = "2.0.22"
+version = "2.0.23"
 description = "The uWSGI server"
 optional = false
 python-versions = "*"
 files = [
-    {file = "uwsgi-2.0.22.tar.gz", hash = "sha256:4cc4727258671ac5fa17ab422155e9aaef8a2008ebb86e4404b66deaae965db2"},
+    {file = "uwsgi-2.0.23.tar.gz", hash = "sha256:0cafda0c16f921db7fe42cfaf81b167cf884ee17350efbdd87d1ecece2d7de37"},
 ]
 
 [[package]]
@@ -3976,4 +3976,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.14"
-content-hash = "25c7ede2aa4e4630e4882ba9d45cae0ff06c02c9b750b0fad30c537dbbe00e16"
+content-hash = "7c6201f9972726249c952113a88991f6ac8b840e4739ce3213fb62fa38c4209c"
