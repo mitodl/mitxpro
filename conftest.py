@@ -7,7 +7,14 @@ import pytest
 from django.conf import settings
 from wagtail.models import Page, Site
 
-from cms.constants import CERTIFICATE_INDEX_SLUG
+from cms.constants import (
+    BLOG_INDEX_SLUG,
+    CERTIFICATE_INDEX_SLUG,
+    COURSE_INDEX_SLUG,
+    PROGRAM_INDEX_SLUG,
+    SIGNATORY_INDEX_SLUG,
+    WEBINAR_INDEX_SLUG,
+)
 from cms.models import (
     BlogIndexPage,
     CertificateIndexPage,
@@ -78,18 +85,18 @@ def django_db_setup(django_db_setup, django_db_blocker):
         site = Site.objects.filter(is_default_site=True).first()
         home_page = Page.objects.get(id=site.root_page.id)
 
-        program_index = ProgramIndexPage(title="Programs")
-        course_index = CourseIndexPage(title="Courses")
-        certificate_index = CertificateIndexPage(
-            title="Certificates", slug=CERTIFICATE_INDEX_SLUG
-        )
-        signatory_index = SignatoryIndexPage(title="Signatories")
-        blog_index = BlogIndexPage(title="Blogs")
-        webinar_index = WebinarIndexPage(title="Webinars")
-
-        home_page.add_child(instance=program_index)
-        home_page.add_child(instance=course_index)
-        home_page.add_child(instance=certificate_index)
-        home_page.add_child(instance=signatory_index)
-        home_page.add_child(instance=blog_index)
-        home_page.add_child(instance=webinar_index)
+        index_page_data_mapping = {
+            ProgramIndexPage: {"title": "Programs", "slug": PROGRAM_INDEX_SLUG},
+            CourseIndexPage: {"title": "Courses", "slug": COURSE_INDEX_SLUG},
+            CertificateIndexPage: {
+                "title": "Certificates",
+                "slug": CERTIFICATE_INDEX_SLUG,
+            },
+            SignatoryIndexPage: {"title": "Signatories", "slug": SIGNATORY_INDEX_SLUG},
+            BlogIndexPage: {"title": "Blogs", "slug": BLOG_INDEX_SLUG},
+            WebinarIndexPage: {"title": "Webinars", "slug": WEBINAR_INDEX_SLUG},
+        }
+        for index_page_class, index_page_content in index_page_data_mapping.items():
+            if not index_page_class.objects.filter(**index_page_content).exists():
+                index_page = index_page_class(**index_page_content)
+                home_page.add_child(instance=index_page)
