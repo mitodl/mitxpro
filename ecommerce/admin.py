@@ -490,7 +490,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     model = Product
     inlines = [ProductVersionInline]
-    list_display = ("id", "content_object", "get_text_id", "get_price")
+    list_display = ("id", "content_object", "get_text_id", "price")
     list_filter = ("is_active", ProductContentTypeListFilter)
     search_fields = (
         "courseruns__title",
@@ -504,13 +504,6 @@ class ProductAdmin(admin.ModelAdmin):
         """Return the text id"""
         if obj.latest_version:
             return obj.latest_version.text_id
-
-    @admin.display(description="Price")
-    def get_price(self, obj):
-        """Return the price"""
-        if obj.latest_version:
-            return obj.latest_version.price
-
     def get_queryset(self, request):
         """Return all active and in_active products"""
         return Product.all_objects
