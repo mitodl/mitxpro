@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 import factory
 import pytest
+from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.urls import reverse
@@ -593,6 +594,16 @@ def test_enterprise_page_context(client, wagtail_basics):
     enterprise_page.save_revision().publish()
 
     resp = client.get(enterprise_page.get_url())
+    context = resp.context_data
 
     assert resp.status_code == status.HTTP_200_OK
-    assert resp.context_data["page"] == enterprise_page
+    assert context["page"] == enterprise_page
+
+    assert "companies_logo_carousel" in context
+    assert "learning_journey" in context
+    assert "success_stories_carousel" in context
+    assert "learning_strategy_form" in context
+
+    assert context["hubspot_enterprise_page_form_id"] == settings.HUBSPOT_CONFIG.get(
+        "HUBSPOT_ENTERPRISE_PAGE_FORM_ID"
+    )
