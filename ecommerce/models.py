@@ -192,6 +192,12 @@ class Product(TimestampedModel):
         else:
             raise ValueError(f"Unexpected product {content_object}")
 
+    @property
+    def price(self):
+        """Return the price"""
+        if self.latest_version:
+            return self.latest_version.price
+
     def __str__(self):
         """Description of a product"""
         return f"Product for {self.content_object}"
