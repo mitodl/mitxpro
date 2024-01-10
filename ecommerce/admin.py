@@ -504,6 +504,7 @@ class ProductAdmin(admin.ModelAdmin):
         """Return the text id"""
         if obj.latest_version:
             return obj.latest_version.text_id
+
     def get_queryset(self, request):
         """Return all active and in_active products"""
         return Product.all_objects
