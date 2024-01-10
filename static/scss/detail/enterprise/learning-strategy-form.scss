@@ -11,7 +11,7 @@
     background: $alice-blue;
   }
 
-  h1 {
+  .learning-strategy-heading {
     color: $black;
     text-align: center;
     font-size: 32px;
@@ -20,6 +20,10 @@
     line-height: normal;
     margin-bottom: 24px;
 
+    p {
+      margin-bottom: 0px;
+    }
+
     @include media-breakpoint-down (sm) {
       font-size: 24px;
       text-align: initial;
@@ -27,13 +31,17 @@
     }
   }
 
-  h2 {
+  .learning-strategy-subhead {
     color: $black;
     text-align: center;
     font-size: 20px;
     font-style: normal;
     font-weight: 400;
     margin-bottom: 50px;
+
+    p {
+      margin-bottom: 0px;
+    }
 
     @include media-breakpoint-down (sm) {
       font-size: 18px;

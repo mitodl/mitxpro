@@ -15,7 +15,7 @@
     padding: 50px 75px;
   }
 
-  .success-stories-heading {
+  .success-stories-headings {
     text-align: center;
     line-height: normal;
     font-style: normal;
@@ -24,15 +24,19 @@
       text-align: initial;
     }
 
-    h1 {
+    .success-stories-heading {
       color: #eeb84a;
       font-size: 32px;
       font-style: normal;
       font-weight: 500;
       margin-bottom: 25px;
+
+      p {
+        margin-bottom: 0px;
+      }
     }
 
-    h3 {
+    .success-stories-subhead {
       color: $white;
       overflow: hidden;
       font-size: 20px;
@@ -48,6 +52,10 @@
 
       @include media-breakpoint-only(md) {
         font-size: 18px;
+      }
+
+      p {
+        margin-bottom: 0px;
       }
     }
   }

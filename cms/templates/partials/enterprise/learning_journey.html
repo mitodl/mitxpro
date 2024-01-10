@@ -2,7 +2,7 @@
 
 <div class="learning-journey-block">
     <div class="container">
-        <h1>{{ page.heading|richtext }}</h1>
+        <div class="learning-journey-heading">{{ page.heading|richtext }}</div>
         <div class="learning-journey-container">
             <div class="learning-journey-content">
                 <ul>
@@ -10,7 +10,7 @@
                         <li>{{ journey_item }}</li>
                     {% endfor %}
                 </ul>
-                <p>{{ page.description|richtext }}</p>
+                <div class="learning-journey-description">{{ page.description|richtext }}</div>
                 <a href="{{ page.button_url }}" target="_blank">{{ page.call_to_action|upper }}</a>
             </div>
             {% if page.journey_image %}

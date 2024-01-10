@@ -2,7 +2,7 @@
 
 <div class="companies-logo-block">
     <div class="container">
-        <h1>{{ companies_logo_carousel.heading|richtext }}</h1>
+        <div class="companies-logo-heading">{{ companies_logo_carousel.heading|richtext }}</div>
         <div class="companies-logo-carousel">
             {% for image in companies_logo_carousel.images %}
                 <div class="slide">

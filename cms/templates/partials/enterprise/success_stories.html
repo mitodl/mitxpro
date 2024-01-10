@@ -2,9 +2,9 @@
 
 <div class="success-stories-block">
     <div class="container">
-        <div class="success-stories-heading">
-            <h1>{{ page.heading|richtext }}</h1>
-            <h3>{{ page.subhead|richtext }}</h3>
+        <div class="success-stories-headings">
+            <div class="success-stories-heading">{{ page.heading|richtext }}</div>
+            <div class="success-stories-subhead">{{ page.subhead|richtext }}</div>
         </div>
         <div class="success-stories-slider">
             {% for block in page.success_stories %}

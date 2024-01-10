@@ -9,7 +9,7 @@
     padding: 30px 5px 0px 5px;
   }
 
-  h1 {
+  .learning-journey-heading {
     color: $black;
     text-align: center;
     font-size: 32px;
@@ -23,6 +23,10 @@
       font-size: 24px;
       font-weight: 400;
       margin-bottom: 25px;
+    }
+
+    p {
+      margin-bottom: 0px;
     }
   }
 
@@ -83,7 +87,7 @@
       }
     }
 
-    p {
+    .learning-journey-description {
       color: $black;
       font-size: 18px;
       font-style: normal;
@@ -102,6 +106,10 @@
       @include media-breakpoint-only(lg) {
         line-height: 25px;
         width: 300px;
+      }
+
+      p {
+        margin-bottom: 0px;
       }
     }
 
