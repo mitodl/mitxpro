@@ -2,10 +2,11 @@
 
 .learning-journey-block {
   padding-top: 70px;
-  background: linear-gradient(180deg, $alice-blue 0%, $white 100%);
+  background: url('#{$static-path}/images/enterprise-page-dots-bg.png') repeat-x 0% 100% $alice-blue;
   position: relative;
 
   @include media-breakpoint-down (sm) {
+    background: none;
     padding: 30px 5px 0px 5px;
   }
 
@@ -28,12 +29,6 @@
     p {
       margin-bottom: 0px;
     }
-  }
-
-  .learning-journey-bg {
-    position: absolute;
-    bottom: 0px;
-    max-width: 100%;
   }
 }
 

@@ -10,7 +10,7 @@
             {% for block in page.success_stories %}
             <div class="slide">
                 <div class="slide-holder">
-                    <img src="{% image_version_url block.value.image "max-231x272" %}" alt="MIT xPro"/>
+                    <img src="{% image_version_url block.value.image "max-231x272" %}" alt="{{ block.value.title }}"/>
                     <div class="slide-content">
                         <h2 class="success-stories-title">{{ block.value.title }}</h2>
                         <p class="success-stories-content">{{ block.value.content }}</p>
