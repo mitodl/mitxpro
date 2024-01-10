@@ -1,4 +1,4 @@
-{% load static wagtailembeds_tags image_version_url %}
+{% load static wagtailembeds_tags image_version_url wagtailcore_tags %}
 
 {% block extrahead %}
   <style>
@@ -42,7 +42,7 @@
 <div class="enterprise-careers-companies-block">
     <div class="container">
         <div class="careers-companies-content">
-            <p>{{ page.description }}</p>
+            <p>{{ page.description|richtext }}</p>
             <a href="#b2bform">{{ page.action_title }}</a>
         </div>
     </div>

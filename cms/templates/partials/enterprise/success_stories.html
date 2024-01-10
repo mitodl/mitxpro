@@ -1,10 +1,10 @@
-{% load static image_version_url %}
+{% load static image_version_url wagtailcore_tags %}
 
 <div class="success-stories-block">
     <div class="container">
         <div class="success-stories-heading">
-            <h1>{{ page.heading|upper }}</h1>
-            <h3>{{ page.subhead }}</h3>
+            <h1>{{ page.heading|richtext }}</h1>
+            <h3>{{ page.subhead|richtext }}</h3>
         </div>
         <div class="success-stories-slider">
             {% for block in page.success_stories %}

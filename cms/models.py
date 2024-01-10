@@ -2389,12 +2389,11 @@ class SuccessStoriesSection(EnterpriseChildPage):
     success stories.
     """
 
-    heading = models.CharField(
-        max_length=255, help_text="The main heading for the success stories section."
+    heading = RichTextField(
+        help_text="The main heading for the success stories section."
     )
-    subhead = models.CharField(
-        max_length=255,
-        help_text="An optional subheading to provide additional context or information.",
+    subhead = RichTextField(
+        help_text="A subheading to provide additional context or information.",
     )
     success_stories = StreamField(
         [("success_story", SuccessStoriesBlock())],
@@ -2421,13 +2420,11 @@ class LearningStrategyFormSection(EnterpriseChildPage):
     The actual form is added by Hubspot in template.
     """
 
-    heading = models.CharField(
-        max_length=255,
+    heading = RichTextField(
         help_text="Enter the main heading for the learning strategy form section.",
     )
-    subhead = models.CharField(
-        max_length=255,
-        help_text="Optional subheading to provide additional context or description.",
+    subhead = RichTextField(
+        help_text="A subheading to provide additional context or information.",
     )
 
     content_panels = [
@@ -2475,8 +2472,8 @@ class EnterprisePage(WagtailCachedPageMixin, Page):
         related_name="+",
         help_text="Select an overlay image for the banner section at leasr 544x444 pixels.",
     )
-    description = models.TextField(
-        help_text="Enter a description for the banner call-to-action."
+    description = RichTextField(
+        help_text="Enter a description for the call-to-action section under banner."
     )
     action_title = models.CharField(
         max_length=100,

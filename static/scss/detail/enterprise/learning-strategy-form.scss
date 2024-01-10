@@ -2,7 +2,7 @@
 
 .learning-strategy-block {
   width: 100%;
-  padding: 65px 0 0;
+  padding: 75px 0 0;
   background: url('#{$static-path}/images/enterprise-page-dots-bg.png') repeat-x 0% 60% $alice-blue;
   background-size: contain;
 
@@ -18,7 +18,7 @@
     font-style: normal;
     font-weight: 500;
     line-height: normal;
-    margin-bottom: 10px;
+    margin-bottom: 24px;
 
     @include media-breakpoint-down (sm) {
       font-size: 24px;
@@ -33,7 +33,7 @@
     font-size: 20px;
     font-style: normal;
     font-weight: 400;
-    margin-bottom: 45px;
+    margin-bottom: 50px;
 
     @include media-breakpoint-down (sm) {
       font-size: 18px;
@@ -167,7 +167,7 @@
     .hs-submit {
       padding: 20px 155px;
 
-      @include media-breakpoint-down(sm) {
+      @include media-breakpoint-down(md) {
         padding: 0px;
         margin: 20px 0px 0px;
       }

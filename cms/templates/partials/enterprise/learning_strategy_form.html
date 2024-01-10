@@ -1,7 +1,9 @@
+{% load wagtailcore_tags %}
+
 <div id="b2bform" class="learning-strategy-block">
     <div class="container">
-        <h1>{{ page.heading|upper }}</h1>
-        <h2>{{ page.subhead }}</h2>
+        <h1>{{ page.heading|richtext }}</h1>
+        <h2>{{ page.subhead|richtext }}</h2>
         <div class="learning-strategy-form">
             <!--[if lte IE 8]>
             <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2-legacy.js"></script>
