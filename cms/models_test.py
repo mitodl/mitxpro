@@ -1731,8 +1731,10 @@ def test_enterprise_page_learning_strategy_form():
         parent=enterprise_page,
         heading="heading",
         subhead="subhead",
+        consent="consent",
     )
 
     assert enterprise_page.learning_strategy_form == learning_strategy_form
     assert learning_strategy_form.heading == "heading"
     assert learning_strategy_form.subhead == "subhead"
+    assert learning_strategy_form.consent == "consent"
