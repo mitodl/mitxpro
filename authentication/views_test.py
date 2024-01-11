@@ -1,28 +1,29 @@
 """Tests for authentication views"""
-# pylint: disable=redefined-outer-name
-from contextlib import contextmanager, ExitStack
+from contextlib import ExitStack, contextmanager
 from unittest.mock import patch
 
+import factory
+import pytest
+import responses
 from django.conf import settings
 from django.contrib.auth import get_user, get_user_model
 from django.core import mail
 from django.db import transaction
-from django.urls import reverse
 from django.test import Client, override_settings
-import factory
+from django.urls import reverse
 from faker import Faker
-from hypothesis import settings as hypothesis_settings, strategies as st, Verbosity
+from hypothesis import Verbosity
+from hypothesis import settings as hypothesis_settings
+from hypothesis import strategies as st
+from hypothesis.extra.django import TestCase as HTestCase
 from hypothesis.stateful import (
+    Bundle,
+    HealthCheck,
+    RuleBasedStateMachine,
     consumes,
     precondition,
     rule,
-    Bundle,
-    RuleBasedStateMachine,
-    HealthCheck,
 )
-from hypothesis.extra.django import TestCase as HTestCase
-import pytest
-import responses
 from rest_framework import status
 from social_core.backends.email import EmailAuth
 
@@ -35,8 +36,8 @@ from compliance.test_utils import (
     mock_cybersource_wsdl,
     mock_cybersource_wsdl_operation,
 )
+from mitxpro.test_utils import MockResponse, any_instance_of
 from users.factories import UserFactory, UserSocialAuthFactory
-from mitxpro.test_utils import any_instance_of, MockResponse
 
 pytestmark = [pytest.mark.django_db]
 
@@ -47,8 +48,6 @@ User = get_user_model()
 
 fake = Faker()
 
-# pylint: disable=too-many-public-methods
-
 
 @pytest.fixture
 def email_user(user):
@@ -57,15 +56,14 @@ def email_user(user):
     return user
 
 
-# pylint: disable=too-many-arguments
-def assert_api_call(
+def assert_api_call(  # noqa: PLR0913
     client,
     url,
     payload,
     expected,
-    expect_authenticated=False,
+    expect_authenticated=False,  # noqa: FBT002
     expect_status=status.HTTP_200_OK,
-    use_defaults=True,
+    use_defaults=True,  # noqa: FBT002
 ):
     """Run the API call and perform basic assertions"""
     assert bool(get_user(client).is_authenticated) is False
@@ -92,15 +90,15 @@ def assert_api_call(
     return actual
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_email_send(mocker):
     """Mock the email send API"""
-    yield mocker.patch("mail.verification_api.send_verification_email")
+    return mocker.patch("mail.verification_api.send_verification_email")
 
 
 @contextmanager
 def noop():
-    """A no-op context manager"""
+    """A no-op context manager"""  # noqa: D401
     yield
 
 
@@ -128,8 +126,6 @@ class AuthStateMachine(RuleBasedStateMachine):
     methods to define transitions into and (optionally) out of that state.
     """
 
-    # pylint: disable=too-many-instance-attributes
-
     ConfirmationSentAuthStates = Bundle("confirmation-sent")
     ConfirmationRedeemedAuthStates = Bundle("confirmation-redeemed")
     RegisterExtraDetailsAuthStates = Bundle("register-details-extra")
@@ -150,7 +146,7 @@ class AuthStateMachine(RuleBasedStateMachine):
     courseware_tasks_patcher = patch("authentication.pipeline.user.courseware_tasks")
 
     def __init__(self):
-        """Setup the machine"""
+        """Setup the machine"""  # noqa: D401
         super().__init__()
         # wrap the execution in a django transaction, similar to django's TestCase
         self.atomic = transaction.atomic()
@@ -167,7 +163,7 @@ class AuthStateMachine(RuleBasedStateMachine):
         # shared data
         self.email = fake.email()
         self.user = None
-        self.password = "password123"
+        self.password = "password123"  # noqa: S105
 
         # track whether we've hit an action that starts a flow or not
         self.flow_started = False
@@ -183,7 +179,7 @@ class AuthStateMachine(RuleBasedStateMachine):
         self.courseware_tasks_patcher.stop()
 
         # end the transaction with a rollback to cleanup any state
-        transaction.set_rollback(True)
+        transaction.set_rollback(True)  # noqa: FBT003
         self.atomic.__exit__(None, None, None)
 
     def create_existing_user(self):
@@ -337,12 +333,14 @@ class AuthStateMachine(RuleBasedStateMachine):
         auth_state=consumes(RegisterExtraDetailsAuthStates),
     )
     @precondition(lambda self: self.flow_started)
-    def login_email_abandoned(self, auth_state):  # pylint: disable=unused-argument
+    def login_email_abandoned(self, auth_state):
         """Login with a user that abandoned the register flow"""
         # NOTE: This works by "consuming" an extra details auth state,
         #       but discarding the state and starting a new login.
         #       It then re-targets the new state into the extra details again.
-        auth_state = None  # assign None to ensure no accidental usage here
+        auth_state = (  # noqa: F841
+            None  # assign None to ensure no accidental usage here
+        )
 
         return assert_api_call(
             self.client,
@@ -735,7 +733,7 @@ def test_new_register_no_session_partial(client):
             "state": SocialAuthState.STATE_REGISTER_CONFIRM_SENT,
         },
     )
-    assert PARTIAL_PIPELINE_TOKEN_KEY not in client.session.keys()
+    assert PARTIAL_PIPELINE_TOKEN_KEY not in client.session.keys()  # noqa: SIM118
 
 
 def test_login_email_error(client, mocker):

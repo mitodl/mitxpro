@@ -6,7 +6,8 @@ from types import SimpleNamespace
 import factory
 import pytest
 from django.core.exceptions import ValidationError
-from requests import ConnectionError as RequestsConnectionError, HTTPError
+from requests import ConnectionError as RequestsConnectionError
+from requests import HTTPError
 
 from courses.api import (
     create_program_enrollments,
@@ -27,8 +28,6 @@ from courses.factories import (
     ProgramEnrollmentFactory,
     ProgramFactory,
 )
-
-# pylint: disable=redefined-outer-name
 from courses.models import CourseRunEnrollment, ProgramEnrollment
 from courseware.exceptions import (
     EdxApiEnrollErrorException,
@@ -85,7 +84,7 @@ def test_get_user_enrollments(user):
     CourseRunEnrollmentFactory.create(user=user, active=False)
 
     def key_func(enrollment):
-        """Function for sorting runs by start_date"""
+        """Function for sorting runs by start_date"""  # noqa: D401
         return enrollment.run.start_date
 
     user_enrollments = get_user_enrollments(user)
@@ -149,7 +148,7 @@ def test_create_run_enrollments(mocker, user):
     assert edx_request_success is True
     assert len(successful_enrollments) == num_runs
     enrollments = CourseRunEnrollment.objects.order_by("run__id").all()
-    for (run, enrollment) in zip(runs, enrollments):
+    for run, enrollment in zip(runs, enrollments):
         assert enrollment.change_status is None
         assert enrollment.active is True
         assert enrollment.edx_enrolled is True
@@ -192,10 +191,10 @@ def test_create_run_enrollments_api_fail(mocker, user, exception_cls):
 @pytest.mark.django_db
 @pytest.mark.parametrize("keep_failed_enrollments", [True, False])
 @pytest.mark.parametrize(
-    "exception_cls,inner_exception",
+    "exception_cls,inner_exception",  # noqa: PT006
     [
-        [EdxApiEnrollErrorException, MockHttpError()],
-        [UnknownEdxApiEnrollException, Exception()],
+        [EdxApiEnrollErrorException, MockHttpError()],  # noqa: PT007
+        [UnknownEdxApiEnrollException, Exception()],  # noqa: PT007
     ],
 )
 def test_create_run_enrollments_enroll_api_fail(
@@ -204,7 +203,7 @@ def test_create_run_enrollments_enroll_api_fail(
     keep_failed_enrollments,
     exception_cls,
     inner_exception,
-):  # pylint: disable=too-many-arguments
+):
     """
     create_run_enrollments should log a message and still create local enrollment records when an enrollment exception
     is raised if a flag is set to true
@@ -224,7 +223,7 @@ def test_create_run_enrollments_enroll_api_fail(
 
     with pytest.raises(
         EdxEnrollmentCreateError
-    ) if not keep_failed_enrollments else contextlib.suppress():
+    ) if not keep_failed_enrollments else contextlib.suppress():  # noqa: B022
         successful_enrollments, edx_request_success = create_run_enrollments(
             user,
             runs,
@@ -294,7 +293,7 @@ def test_create_program_enrollments(user):
     assert len(successful_enrollments) == num_programs
     enrollments = ProgramEnrollment.objects.order_by("program__id").all()
     assert len(enrollments) == len(programs)
-    for (program, enrollment) in zip(programs, enrollments):
+    for program, enrollment in zip(programs, enrollments):
         assert enrollment.change_status is None
         assert enrollment.active is True
         assert enrollment.program == program
@@ -326,8 +325,8 @@ def test_create_program_enrollments_creation_fail(mocker, user):
 class TestDeactivateEnrollments:
     """Test cases for functions that deactivate enrollments"""
 
-    @pytest.fixture()
-    def patches(self, mocker):  # pylint: disable=missing-docstring
+    @pytest.fixture
+    def patches(self, mocker):  # noqa: D102
         edx_unenroll = mocker.patch("courses.api.unenroll_edx_course_run")
         send_unenrollment_email = mocker.patch(
             "courses.api.mail_api.send_course_run_unenrollment_email"

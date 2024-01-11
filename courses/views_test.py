@@ -1,7 +1,6 @@
 """
 Tests for course views
 """
-# pylint: disable=unused-argument, redefined-outer-name
 import operator as op
 from datetime import timedelta
 
@@ -39,11 +38,10 @@ from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import now_in_utc
 
-
 pytestmark = [pytest.mark.django_db]
 
 
-@pytest.fixture()
+@pytest.fixture
 def programs():
     """Fixture for a set of Programs in the database"""
     programs = ProgramFactory.create_batch(3)
@@ -52,13 +50,13 @@ def programs():
     return programs
 
 
-@pytest.fixture()
+@pytest.fixture
 def courses():
     """Fixture for a set of Courses in the database"""
     return CourseFactory.create_batch(3)
 
 
-@pytest.fixture()
+@pytest.fixture
 def course_runs():
     """Fixture for a set of CourseRuns in the database"""
     return CourseRunFactory.create_batch(3)
@@ -229,12 +227,11 @@ def test_delete_course_run(user_drf_client, course_runs):
     assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
-# pylint: disable=too-many-arguments
 @pytest.mark.parametrize("is_enrolled", [True, False])
 @pytest.mark.parametrize("has_unexpired_run", [True, False])
 @pytest.mark.parametrize("has_product", [True, False])
 @pytest.mark.parametrize("is_anonymous", [True, False])
-def test_course_view(
+def test_course_view(  # noqa: PLR0913
     client, user, home_page, is_enrolled, has_unexpired_run, has_product, is_anonymous
 ):
     """
@@ -285,11 +282,11 @@ def test_course_view(
             class_name = "enrolled"
 
     assert (
-        f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")
+        f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")  # noqa: UP012
         in resp.content
     ) is has_button
     assert (
-        "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")
+        "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")  # noqa: UP012
         in resp.content
     ) is (is_anonymous and has_product and has_unexpired_run)
 
@@ -298,7 +295,7 @@ def test_course_view(
 @pytest.mark.parametrize("has_product", [True, False])
 @pytest.mark.parametrize("has_unexpired_run", [True, False])
 @pytest.mark.parametrize("is_anonymous", [True, False])
-def test_program_view(
+def test_program_view(  # noqa: PLR0913
     client, user, home_page, is_enrolled, has_product, has_unexpired_run, is_anonymous
 ):
     """
@@ -351,11 +348,11 @@ def test_program_view(
             class_name = "enrolled"
 
     assert (
-        f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")
+        f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")  # noqa: UP012
         in resp.content
     ) is has_button
     assert (
-        "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")
+        "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")  # noqa: UP012
         in resp.content
     ) is (is_anonymous and has_product and has_unexpired_run)
 
@@ -487,7 +484,7 @@ def test_course_runs_without_product_in_programs_api(client, has_product):
 
 
 @pytest.mark.parametrize(
-    "factory, serializer_cls, api_name",
+    "factory, serializer_cls, api_name",  # noqa: PT006
     [
         (
             CourseRunCertificateFactory,
@@ -501,7 +498,7 @@ def test_course_runs_without_product_in_programs_api(client, has_product):
         ),
     ],
 )
-def test_course_run_certificate_api(
+def test_course_run_certificate_api(  # noqa: PLR0913
     settings, user, user_drf_client, factory, serializer_cls, api_name
 ):
     """Verify that the certificates APIs function as expected"""
@@ -514,14 +511,14 @@ def test_course_run_certificate_api(
     assert resp.json() == [serializer_cls(cert).data]
 
     resp = user_drf_client.get(
-        reverse(f"{api_name}-detail", kwargs=dict(uuid=cert.uuid))
+        reverse(f"{api_name}-detail", kwargs=dict(uuid=cert.uuid))  # noqa: C408
     )
     assert resp.json() == serializer_cls(cert).data
 
     assert DigitalCredentialRequest.objects.count() == 0
 
     resp = user_drf_client.post(
-        reverse(f"{api_name}-request_digital_credentials", kwargs=dict(uuid=cert.uuid))
+        reverse(f"{api_name}-request_digital_credentials", kwargs=dict(uuid=cert.uuid))  # noqa: C408
     )
 
     assert DigitalCredentialRequest.objects.count() == 1
@@ -534,9 +531,7 @@ def test_course_run_certificate_api(
     assert resp.json() == DigitalCredentialRequestSerializer(dcr).data
 
 
-def test_course_topics_api(
-    client, django_assert_num_queries
-):  # pylint:disable=too-many-locals
+def test_course_topics_api(client, django_assert_num_queries):
     """
     Test that course topics API returns the expected topics and correct course count.
     """

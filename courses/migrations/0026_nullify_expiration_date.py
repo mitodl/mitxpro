@@ -14,7 +14,6 @@ def nullify_courserun_expiration_dates(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("courses", "0025_run_tag")]
 
     operations = [

@@ -2,9 +2,8 @@
 from django.conf import settings
 from django.db import models
 
-from mitxpro.models import TimestampedModel
-
 from courseware.constants import COURSEWARE_PLATFORM_CHOICES, PLATFORM_EDX
+from mitxpro.models import TimestampedModel
 
 
 class CoursewareUser(TimestampedModel):
@@ -40,7 +39,7 @@ class OpenEdxApiAuth(TimestampedModel):
     )
 
     refresh_token = models.CharField(max_length=128)
-    access_token = models.CharField(null=True, max_length=128)
+    access_token = models.CharField(null=True, max_length=128)  # noqa: DJ001
     access_token_expires_on = models.DateTimeField(null=True)
 
     def __str__(self):

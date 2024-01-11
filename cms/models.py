@@ -1,7 +1,6 @@
 """
 Page models for the CMS
 """
-# pylint: disable=too-many-lines, too-many-public-methods
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -131,7 +130,7 @@ class CourseObjectIndexPage(DisableSitemapURLMixin, Page, CanCreatePageMixin):
         """Fetch a child page by a Program/Course readable_id value"""
         raise NotImplementedError
 
-    def route(self, request, path_components):
+    def route(self, request, path_components):  # noqa: D102
         if path_components:
             # request is for a child of this page
             child_readable_id = path_components[0]
@@ -142,12 +141,12 @@ class CourseObjectIndexPage(DisableSitemapURLMixin, Page, CanCreatePageMixin):
                 # instead of the page slug (as Wagtail does by default)
                 subpage = self.get_child_by_readable_id(child_readable_id)
             except Page.DoesNotExist:
-                raise Http404
+                raise Http404  # noqa: B904
 
             return subpage.specific.route(request, remaining_components)
         return super().route(request, path_components)
 
-    def serve(self, request, *args, **kwargs):
+    def serve(self, request, *args, **kwargs):  # noqa: ARG002
         """
         For index pages we raise a 404 because these pages do not have a template
         of their own and we do not expect a page to available at their slug.
@@ -168,7 +167,7 @@ class SignatoryObjectIndexPage(DisableSitemapURLMixin, Page, CanCreatePageMixin)
     parent_page_types = ["HomePage"]
     subpage_types = ["SignatoryPage"]
 
-    def serve(self, request, *args, **kwargs):
+    def serve(self, request, *args, **kwargs):  # noqa: ARG002
         """
         For index pages we raise a 404 because these pages do not have a template
         of their own and we do not expect a page to available at their slug.
@@ -213,7 +212,7 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
             .exclude(Q(category=UPCOMING_WEBINAR) & Q(date__lt=now_in_utc().date()))
             .order_by("-category", "date")
         )
-        webinars_dict = defaultdict(lambda: [])
+        webinars_dict = defaultdict(lambda: [])  # noqa: PIE807
         for webinar in webinars:
             webinar.detail_page_url = webinar.detail_page_url(request)
             webinars_dict[webinar.category].append(webinar)
@@ -248,21 +247,21 @@ class BlogIndexPage(Page):
         related_name="+",
         help_text="Banner image for the Blog page.",
     )
-    sub_heading = models.CharField(
+    sub_heading = models.CharField(  # noqa: DJ001
         max_length=250,
         null=True,
         blank=True,
         help_text="Sub heading of the blog page.",
         default="Online learning stories for professionals, from MIT",
     )
-    recent_posts_heading = models.CharField(
+    recent_posts_heading = models.CharField(  # noqa: DJ001
         max_length=250,
         null=True,
         blank=True,
         help_text="Heading of the recent posts section.",
         default="Top Most Recent Posts",
     )
-    more_posts_heading = models.CharField(
+    more_posts_heading = models.CharField(  # noqa: DJ001
         max_length=250,
         null=True,
         blank=True,
@@ -324,23 +323,23 @@ class WebinarPage(MetadataPageMixin, Page):
     date = models.DateField(
         null=True, blank=True, help_text="The start date of the webinar."
     )
-    time = models.TextField(
+    time = models.TextField(  # noqa: DJ001
         null=True,
         blank=True,
         help_text="The timings of the webinar e.g (11 AM - 12 PM ET).",
     )
-    description = models.TextField(
+    description = models.TextField(  # noqa: DJ001
         null=True, blank=True, help_text="Description of the webinar."
     )
     body_text = RichTextField(
         null=True, blank=True, help_text="Longer description text of the webinar."
     )
-    action_url = models.URLField(
+    action_url = models.URLField(  # noqa: DJ001
         help_text="Specify the webinar action-url here (like a link to an external webinar page).",
         null=True,
         blank=True,
     )
-    sub_heading = models.CharField(
+    sub_heading = models.CharField(  # noqa: DJ001
         max_length=250,
         null=True,
         blank=True,
@@ -373,7 +372,7 @@ class WebinarPage(MetadataPageMixin, Page):
         return self.date.strftime("%A, %B %-d, %Y")
 
     def clean(self):
-        """Validates date and time for upcoming webinars."""
+        """Validates date and time for upcoming webinars."""  # noqa: D401
         super().clean()
         if self.category and self.category == UPCOMING_WEBINAR:
             errors = {}
@@ -386,7 +385,7 @@ class WebinarPage(MetadataPageMixin, Page):
             if errors:
                 raise ValidationError(errors)
 
-    def get_context(self, request, *args, **kwargs):
+    def get_context(self, request, *args, **kwargs):  # noqa: ARG002, D102
         course = CoursePage.objects.filter(course=self.course).first()
         program = ProgramPage.objects.filter(program=self.program).first()
         courseware = program or course
@@ -402,11 +401,11 @@ class WebinarPage(MetadataPageMixin, Page):
 
     @property
     def is_upcoming_webinar(self):
-        """returns a boolean that indicates whether a webinar is upcoming or not"""
+        """Returns a boolean that indicates whether a webinar is upcoming or not"""
         return self.category == UPCOMING_WEBINAR
 
     def detail_page_url(self, request):
-        """returns the detail page url for the webinar"""
+        """Returns the detail page url for the webinar"""  # noqa: D401
         if self.is_upcoming_webinar:
             return self.action_url if self.action_url else ""
 
@@ -414,7 +413,7 @@ class WebinarPage(MetadataPageMixin, Page):
 
     @property
     def detail_page_button_title(self):
-        """returns the title of the webinar detail page button"""
+        """Returns the title of the webinar detail page button"""
         return (
             UPCOMING_WEBINAR_BUTTON_TITLE
             if self.is_upcoming_webinar
@@ -435,7 +434,7 @@ class CourseIndexPage(CourseObjectIndexPage):
         # Try to find internal course page otherwise return external course page
         try:
             return self.get_children().get(coursepage__course__readable_id=readable_id)
-        except Exception:  # pylint: disable=broad-except
+        except Exception:  # noqa: BLE001
             return self.get_children().get(
                 externalcoursepage__course__readable_id=readable_id
             )
@@ -468,7 +467,7 @@ class ProgramIndexPage(CourseObjectIndexPage):
             return self.get_children().get(
                 programpage__program__readable_id=readable_id
             )
-        except Exception:  # pylint: disable=broad-except
+        except Exception:  # noqa: BLE001
             return self.get_children().get(
                 externalprogrampage__program__readable_id=readable_id
             )
@@ -505,7 +504,7 @@ class CatalogPage(Page):
 
     slug = "catalog"
 
-    def get_context(self, request, *args, **kwargs):
+    def get_context(self, request, *args, **kwargs):  # noqa: ARG002
         """
         Populate the context with live programs, courses and programs + courses
         """
@@ -641,8 +640,12 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
 
     @route(r"^program/([A-Fa-f0-9-]+)/?$")
     def program_certificate(
-        self, request, uuid, *args, **kwargs
-    ):  # pylint: disable=unused-argument
+        self,
+        request,
+        uuid,
+        *args,  # noqa: ARG002
+        **kwargs,  # noqa: ARG002
+    ):
         """
         Serve a program certificate by uuid
         """
@@ -650,7 +653,7 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
         try:
             certificate = ProgramCertificate.objects.get(uuid=uuid)
         except ProgramCertificate.DoesNotExist:
-            raise Http404()
+            raise Http404  # noqa: B904
 
         # Get a CertificatePage to serve this request
         certificate_page = (
@@ -663,7 +666,7 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
             )
         )
         if not certificate_page:
-            raise Http404()
+            raise Http404
 
         if not certificate.certificate_page_revision:
             # It'll save the certificate page revision
@@ -675,8 +678,12 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
 
     @route(r"^([A-Fa-f0-9-]+)/?$")
     def course_certificate(
-        self, request, uuid, *args, **kwargs
-    ):  # pylint: disable=unused-argument
+        self,
+        request,
+        uuid,
+        *args,  # noqa: ARG002
+        **kwargs,  # noqa: ARG002
+    ):
         """
         Serve a course certificate by uuid
         """
@@ -684,7 +691,7 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
         try:
             certificate = CourseRunCertificate.objects.get(uuid=uuid)
         except CourseRunCertificate.DoesNotExist:
-            raise Http404()
+            raise Http404  # noqa: B904
 
         # Get a CertificatePage to serve this request
         certificate_page = (
@@ -697,7 +704,7 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
             )
         )
         if not certificate_page:
-            raise Http404()
+            raise Http404
 
         if not certificate.certificate_page_revision:
             certificate.save()
@@ -706,11 +713,11 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
         return certificate_page.serve(request)
 
     @route(r"^$")
-    def index_route(self, request, *args, **kwargs):
+    def index_route(self, request, *args, **kwargs):  # noqa: ARG002
         """
         The index page is not meant to be served/viewed directly
-        """
-        raise Http404()
+        """  # noqa: D401
+        raise Http404
 
 
 class WagtailCachedPageMixin:
@@ -718,11 +725,11 @@ class WagtailCachedPageMixin:
 
     @cached_property
     def child_pages(self):
-        """Gets child pages for the wagtail page"""
+        """Gets child pages for the wagtail page"""  # noqa: D401
         return self.get_children().select_related("content_type").live()
 
     def _get_child_page_of_type(self, cls):
-        """Gets the first child page of the given type if it exists"""
+        """Gets the first child page of the given type if it exists"""  # noqa: D401
 
         child = next(
             (
@@ -754,13 +761,13 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         related_name="+",
         help_text="Background image size must be at least 1900x650 pixels.",
     )
-    background_video_url = models.URLField(
+    background_video_url = models.URLField(  # noqa: DJ001
         null=True,
         blank=True,
         help_text="Background video that should play over the hero section. Must be an HLS video URL. Will cover background image if selected.",
     )
 
-    content_panels = Page.content_panels + [
+    content_panels = Page.content_panels + [  # noqa: RUF005
         FieldPanel("subhead"),
         FieldPanel("background_image"),
         FieldPanel("background_video_url"),
@@ -840,7 +847,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         """
         return self._get_child_page_of_type(ImageCarouselPage)
 
-    def get_context(self, request, *args, **kwargs):
+    def get_context(self, request, *args, **kwargs):  # noqa: ARG002, D102
         return {
             **super().get_context(request),
             **get_base_context(request),
@@ -870,7 +877,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     description = RichTextField(
         blank=True, help_text="The description shown on the product page"
     )
-    external_marketing_url = models.URLField(
+    external_marketing_url = models.URLField(  # noqa: DJ001
         null=True, blank=True, help_text="The URL of the external course web page."
     )
     marketing_hubspot_form_id = models.CharField(
@@ -889,12 +896,12 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     video_title = RichTextField(
         blank=True, help_text="The title to be displayed for the program/course video"
     )
-    video_url = models.URLField(
+    video_url = models.URLField(  # noqa: DJ001
         null=True,
         blank=True,
         help_text="URL to the video to be displayed for this program/course. It can be an HLS or Youtube video URL.",
     )
-    duration = models.CharField(
+    duration = models.CharField(  # noqa: DJ001
         max_length=50,
         null=True,
         blank=True,
@@ -918,12 +925,12 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         related_name="+",
         help_text="Background image size must be at least 1900x650 pixels.",
     )
-    background_video_url = models.URLField(
+    background_video_url = models.URLField(  # noqa: DJ001
         null=True,
         blank=True,
         help_text="Background video that should play over the hero section. Must be an HLS video URL. Will cover background image if selected.",
     )
-    time_commitment = models.CharField(
+    time_commitment = models.CharField(  # noqa: DJ001
         max_length=100,
         null=True,
         blank=True,
@@ -953,7 +960,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         help_text="The content of this tab on the program page",
         use_json_field=True,
     )
-    content_panels = Page.content_panels + [
+    content_panels = Page.content_panels + [  # noqa: RUF005
         FieldPanel("external_marketing_url"),
         FieldPanel("marketing_hubspot_form_id"),
         FieldPanel("subhead"),
@@ -987,7 +994,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     # Matches the standard page path that Wagtail returns for this page type.
     slugged_page_path_pattern = re.compile(r"(^.*/)([^/]+)(/?$)")
 
-    def get_url_parts(self, request=None):
+    def get_url_parts(self, request=None):  # noqa: D102
         url_parts = super().get_url_parts(request=request)
         if not url_parts:
             return None
@@ -1000,12 +1007,12 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             # of the Course/Program instead (e.g.: "/courses/course-v1:edX+DemoX+Demo_Course")
             re.sub(
                 self.slugged_page_path_pattern,
-                r"\1{}\3".format(self.product.readable_id),
+                r"\1{}\3".format(self.product.readable_id),  # noqa: UP032
                 url_parts[2],
             ),
         )
 
-    def get_context(self, request, *args, **kwargs):
+    def get_context(self, request, *args, **kwargs):  # noqa: D102
         return {
             **super().get_context(request, *args, **kwargs),
             **get_base_context(request),
@@ -1025,7 +1032,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             "news_and_events": self.news_and_events,
         }
 
-    def save(self, clean=True, user=None, log_action=False, **kwargs):
+    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
         """If featured is True then set False in any existing product page(s)."""
         if self.featured:
             courseware_subclasses = (
@@ -1177,7 +1184,7 @@ class ProgramProductPage(ProductPage):
     parent_page_types = ["ProgramIndexPage"]
 
     content_panels = (
-        [FieldPanel("program")] + ProductPage.content_panels + [FieldPanel("price")]
+        [FieldPanel("program")] + ProductPage.content_panels + [FieldPanel("price")]  # noqa: RUF005
     )
     base_form_class = CoursewareForm
 
@@ -1224,7 +1231,7 @@ class ProgramPage(ProgramProductPage):
         """
         return self
 
-    def get_context(self, request, *args, **kwargs):
+    def get_context(self, request, *args, **kwargs):  # noqa: ARG002, D102
         # Hits a circular import at the top of the module
         from courses.models import ProgramEnrollment
 
@@ -1250,7 +1257,7 @@ class ProgramPage(ProgramProductPage):
             ),
         )
         product = (
-            list(program.products.all())[0]
+            list(program.products.all())[0]  # noqa: RUF015
             if program and program.products.all()
             else None
         )
@@ -1333,7 +1340,7 @@ class CourseProductPage(ProductPage):
     def course_with_related_objects(self):
         """
         Gets the course with related objects.
-        """
+        """  # noqa: D401
         return (
             Course.objects.filter(id=self.course_id)
             .select_related(
@@ -1404,12 +1411,12 @@ class CoursePage(CourseProductPage):
 
     template = "product_page.html"
 
-    def get_context(self, request, *args, **kwargs):
+    def get_context(self, request, *args, **kwargs):  # noqa: ARG002, D102
         # Hits a circular import at the top of the module
         from courses.models import CourseRunEnrollment
 
         run = self.course_with_related_objects.first_unexpired_run
-        product = list(run.products.all())[0] if run and run.products.all() else None
+        product = list(run.products.all())[0] if run and run.products.all() else None  # noqa: RUF015
         is_anonymous = request.user.is_anonymous
         enrolled = (
             CourseRunEnrollment.objects.filter(user=request.user, run=run).exists()
@@ -1472,18 +1479,18 @@ class CourseProgramChildPage(DisableSitemapURLMixin, Page):
     promote_panels = []
 
     @classmethod
-    def can_create_at(cls, parent):
+    def can_create_at(cls, parent):  # noqa: D102
         # You can only create one of these page under course / program.
         return (
-            super(CourseProgramChildPage, cls).can_create_at(parent)
+            super(CourseProgramChildPage, cls).can_create_at(parent)  # noqa: UP008
             and parent.get_children().type(cls).count() == 0
         )
 
-    def save(self, clean=True, user=None, log_action=False, **kwargs):
+    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: D102, FBT002
         # autogenerate a unique slug so we don't hit a ValidationError
         if not self.title:
-            self.title = self.__class__._meta.verbose_name.title()
-        self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
+            self.title = self.__class__._meta.verbose_name.title()  # noqa: SLF001
+        self.slug = slugify(f"{self.get_parent().id}-{self.title}")
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
     def get_url_parts(self, request=None):
@@ -1503,12 +1510,12 @@ class CourseProgramChildPage(DisableSitemapURLMixin, Page):
 
         # Depending on whether we have trailing slashes or not, build the correct path
         if WAGTAIL_APPEND_SLASH:
-            page_path = "{}{}/".format(parent_path, self.slug)
+            page_path = f"{parent_path}{self.slug}/"
         else:
-            page_path = "{}/{}".format(parent_path, self.slug)
+            page_path = f"{parent_path}/{self.slug}"
         return (site_id, site_root, page_path)
 
-    def serve(self, request, *args, **kwargs):
+    def serve(self, request, *args, **kwargs):  # noqa: ARG002
         """
         As the name suggests these pages are going to be children of some other page. They are not
         designed to be viewed on their own so we raise a 404 if someone tries to access their slug.
@@ -1525,7 +1532,7 @@ class UserTestimonialsPage(CourseProgramChildPage):
     heading = models.CharField(
         max_length=255, help_text="The heading to display on this section."
     )
-    subhead = models.CharField(
+    subhead = models.CharField(  # noqa: DJ001
         null=True,
         blank=True,
         max_length=255,
@@ -1578,15 +1585,15 @@ class NewsAndEventsPage(DisableSitemapURLMixin, Page):
     class Meta:
         verbose_name = "News and Events"
 
-    def save(self, clean=True, user=None, log_action=False, **kwargs):
+    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: D102, FBT002
         # auto generate a unique slug so we don't hit a ValidationError
         if not self.title:
-            self.title = self.__class__._meta.verbose_name.title()
+            self.title = self.__class__._meta.verbose_name.title()  # noqa: SLF001
 
-        self.slug = slugify("{}-{}".format(self.title, self.id))
+        self.slug = slugify(f"{self.title}-{self.id}")
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
-    def serve(self, request, *args, **kwargs):
+    def serve(self, request, *args, **kwargs):  # noqa: ARG002
         """
         As the name suggests these pages are going to be children of some other page. They are not
         designed to be viewed on their own so we raise a 404 if someone tries to access their slug.
@@ -1662,7 +1669,7 @@ class ForTeamsPage(CourseProgramChildPage):
     action_title = models.CharField(
         max_length=255, help_text="The text to show on the call to action button"
     )
-    action_url = models.URLField(
+    action_url = models.URLField(  # noqa: DJ001
         null=True,
         blank=True,
         help_text="The URL to go to when the action button is clicked.",
@@ -1706,13 +1713,13 @@ class TextSection(CourseProgramChildPage):
     """
 
     content = RichTextField(help_text="The content shown in the section")
-    action_title = models.CharField(
+    action_title = models.CharField(  # noqa: DJ001
         null=True,
         blank=True,
         max_length=255,
         help_text="The text to show on the call to action button. Note: action button is visible only when both url and title are configured.",
     )
-    action_url = models.URLField(
+    action_url = models.URLField(  # noqa: DJ001
         null=True,
         blank=True,
         help_text="The URL to go to when the action button is clicked. Note: action button is visible only when both url and title are configured.",
@@ -1738,13 +1745,13 @@ class TextVideoSection(CourseProgramChildPage):
     """
 
     content = RichTextField(help_text="The content shown in the section")
-    action_title = models.CharField(
+    action_title = models.CharField(  # noqa: DJ001
         null=True,
         blank=True,
         max_length=255,
         help_text="The text to show on the call to action button",
     )
-    action_url = models.URLField(
+    action_url = models.URLField(  # noqa: DJ001
         null=True,
         blank=True,
         help_text="The URL to go to when the action button is clicked.",
@@ -1759,7 +1766,7 @@ class TextVideoSection(CourseProgramChildPage):
         default=False,
         help_text="When checked, switches the position of the content and video, i.e. video on left and content on right.",
     )
-    video_url = models.URLField(
+    video_url = models.URLField(  # noqa: DJ001
         null=True,
         blank=True,
         help_text="The URL of the video to display. It can be an HLS or Youtube video URL.",
@@ -1868,11 +1875,7 @@ class CoursesInProgramPage(CourseProgramChildPage):
         """
         Extracts all the pages out of the `contents` stream into a list
         """
-        pages = []
-        for block in self.contents:  # pylint: disable=not-an-iterable
-            if block.value:
-                pages.append(block.value.specific)
-        return pages
+        return [block.value.specific for block in self.contents if block.value]
 
     class Meta:
         verbose_name = "Courseware Carousel"
@@ -1894,7 +1897,7 @@ class FacultyMembersPage(CourseProgramChildPage):
         max_length=255,
         help_text="The heading to display for this section on the product page.",
     )
-    subhead = models.CharField(
+    subhead = models.CharField(  # noqa: DJ001
         null=True,
         blank=True,
         max_length=255,
@@ -1946,10 +1949,10 @@ class FrequentlyAskedQuestionPage(CourseProgramChildPage):
 
     content_panels = [InlinePanel("faqs", label="Frequently Asked Questions")]
 
-    def save(self, clean=True, user=None, log_action=False, **kwargs):
+    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: D102, FBT002
         # autogenerate a unique slug so we don't hit a ValidationError
         self.title = "Frequently Asked Questions"
-        self.slug = slugify("{}-{}".format(self.get_parent().id, self.title))
+        self.slug = slugify(f"{self.get_parent().id}-{self.title}")
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
 
@@ -1970,7 +1973,7 @@ class ResourcePage(Page):
 
     template = "../../mitxpro/templates/resource_template.html"
 
-    sub_heading = models.CharField(
+    sub_heading = models.CharField(  # noqa: DJ001
         max_length=250,
         null=True,
         blank=True,
@@ -1984,12 +1987,12 @@ class ResourcePage(Page):
         use_json_field=True,
     )
 
-    content_panels = Page.content_panels + [
+    content_panels = Page.content_panels + [  # noqa: RUF005
         FieldPanel("sub_heading"),
         FieldPanel("content"),
     ]
 
-    def get_context(self, request, *args, **kwargs):
+    def get_context(self, request, *args, **kwargs):  # noqa: ARG002, D102
         context = super().get_context(request)
         context.update(**get_base_context(request))
 
@@ -2006,19 +2009,19 @@ class SignatoryPage(DisableSitemapURLMixin, Page):
     name = models.CharField(
         max_length=250, null=False, blank=False, help_text="Name of the signatory."
     )
-    title_1 = models.CharField(
+    title_1 = models.CharField(  # noqa: DJ001
         max_length=250,
         null=True,
         blank=True,
         help_text="Specify signatory first title in organization.",
     )
-    title_2 = models.CharField(
+    title_2 = models.CharField(  # noqa: DJ001
         max_length=250,
         null=True,
         blank=True,
         help_text="Specify signatory second title in organization.",
     )
-    organization = models.CharField(
+    organization = models.CharField(  # noqa: DJ001
         max_length=250,
         null=True,
         blank=True,
@@ -2045,15 +2048,15 @@ class SignatoryPage(DisableSitemapURLMixin, Page):
         FieldPanel("signature_image"),
     ]
 
-    def save(self, clean=True, user=None, log_action=False, **kwargs):
+    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: D102, FBT002
         # auto generate a unique slug so we don't hit a ValidationError
         if not self.title:
-            self.title = self.__class__._meta.verbose_name.title() + "-" + self.name
+            self.title = self.__class__._meta.verbose_name.title() + "-" + self.name  # noqa: SLF001
 
-        self.slug = slugify("{}-{}".format(self.title, self.id))
+        self.slug = slugify(f"{self.title}-{self.id}")
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
-    def serve(self, request, *args, **kwargs):
+    def serve(self, request, *args, **kwargs):  # noqa: ARG002
         """
         As the name suggests these pages are going to be children of some other page. They are not
         designed to be viewed on their own so we raise a 404 if someone tries to access their slug.
@@ -2091,11 +2094,11 @@ class CertificatePage(CourseProgramChildPage):
         help_text="Specify the course/program name.",
     )
 
-    institute_text = models.CharField(
+    institute_text = models.CharField(  # noqa: DJ001
         max_length=255, null=True, blank=True, help_text="Specify the institute text"
     )
 
-    CEUs = models.CharField(
+    CEUs = models.CharField(  # noqa: DJ001
         max_length=250,
         null=True,
         blank=True,
@@ -2161,15 +2164,15 @@ class CertificatePage(CourseProgramChildPage):
         self.certificate = None
         super().__init__(*args, **kwargs)
 
-    def save(self, clean=True, user=None, log_action=False, **kwargs):
+    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: D102, FBT002
         # auto generate a unique slug so we don't hit a ValidationError
         self.title = (
-            self.__class__._meta.verbose_name.title()
+            self.__class__._meta.verbose_name.title()  # noqa: SLF001
             + " For "
             + self.get_parent().title
         )
 
-        self.slug = slugify("certificate-{}".format(self.get_parent().id))
+        self.slug = slugify(f"certificate-{self.get_parent().id}")
         Page.save(self, clean=clean, user=user, log_action=log_action, **kwargs)
 
     def serve(self, request, *args, **kwargs):
@@ -2183,11 +2186,7 @@ class CertificatePage(CourseProgramChildPage):
         """
         Extracts all the pages out of the `signatories` stream into a list
         """
-        pages = []
-        for block in self.signatories:  # pylint: disable=not-an-iterable
-            if block.value:
-                pages.append(block.value.specific)
-        return pages
+        return [block.value.specific for block in self.signatories if block.value]
 
     @property
     def parent(self):
@@ -2196,7 +2195,7 @@ class CertificatePage(CourseProgramChildPage):
         """
         return self.get_parent().specific
 
-    def get_context(self, request, *args, **kwargs):
+    def get_context(self, request, *args, **kwargs):  # noqa: D102
         preview_context = {}
         context = {}
 
@@ -2205,20 +2204,20 @@ class CertificatePage(CourseProgramChildPage):
                 "learner_name": "Anthony M. Stark",
                 "start_date": self.parent.product.first_unexpired_run.start_date
                 if self.parent.product.first_unexpired_run
-                else datetime.now(),
+                else datetime.now(),  # noqa: DTZ005
                 "end_date": self.parent.product.first_unexpired_run.end_date
                 if self.parent.product.first_unexpired_run
-                else datetime.now() + timedelta(days=45),
+                else datetime.now() + timedelta(days=45),  # noqa: DTZ005
                 "CEUs": self.CEUs,
             }
         elif self.certificate:
             # Verify that the certificate in fact is for this same course
             if self.parent.product.id != self.certificate.get_courseware_object_id():
-                raise Http404()
+                raise Http404
             start_date, end_date = self.certificate.start_end_dates
             CEUs = self.CEUs
 
-            for override in self.overrides:  # pylint: disable=not-an-iterable
+            for override in self.overrides:
                 if (
                     override.value.get("readable_id")
                     == self.certificate.get_courseware_object_readable_id()
@@ -2240,7 +2239,7 @@ class CertificatePage(CourseProgramChildPage):
                 "is_program_certificate": is_program_certificate,
             }
         else:
-            raise Http404()
+            raise Http404
 
         # The share image url needs to be absolute
         return {

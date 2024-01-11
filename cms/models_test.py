@@ -1,5 +1,4 @@
-""" Tests for cms pages. """
-# pylint: disable=too-many-lines
+"""Tests for cms pages."""
 import json
 from datetime import date, datetime, timedelta
 
@@ -67,7 +66,6 @@ from cms.models import (
 )
 from courses.factories import CourseFactory, CourseRunFactory
 
-
 pytestmark = [pytest.mark.django_db]
 
 
@@ -94,7 +92,7 @@ def test_resource_page():
     assert page.title == "title of the page"
     assert page.sub_heading == "sub heading of the page"
 
-    for block in page.content:  # pylint: disable=not-an-iterable
+    for block in page.content:
         assert block.block_type == "content"
         assert block.value["heading"] == "Introduction"
         assert block.value["detail"].source == "details of introduction"
@@ -153,10 +151,10 @@ def test_webinar_context(staff_user):
 
 
 @pytest.mark.parametrize(
-    "time, webinar_date,",
-    (
-        ["11 am", datetime.today() + timedelta(days=1)],
-        [None, None],
+    "time, webinar_date,",  # noqa: PT006
+    (  # noqa: PT007
+        ["11 am", datetime.today() + timedelta(days=1)],  # noqa: DTZ002, PT007
+        [None, None],  # noqa: PT007
     ),
 )
 def test_upcoming_webinar_date_time(time, webinar_date):
@@ -272,25 +270,19 @@ def test_custom_detail_page_urls():
             [external_readable_id, "non-matching-external-id"]
         ),
     )
-    assert program_pages[0].get_url() == "/programs/{}/".format(readable_id)
-    assert external_program_pages[0].get_url() == "/programs/{}/".format(
-        external_readable_id
-    )
-    assert course_pages[0].get_url() == "/courses/{}/".format(readable_id)
-    assert external_course_pages[0].get_url() == "/courses/{}/".format(
-        external_readable_id
-    )
+    assert program_pages[0].get_url() == f"/programs/{readable_id}/"
+    assert external_program_pages[0].get_url() == f"/programs/{external_readable_id}/"
+    assert course_pages[0].get_url() == f"/courses/{readable_id}/"
+    assert external_course_pages[0].get_url() == f"/courses/{external_readable_id}/"
 
 
 def test_custom_detail_page_urls_handled():
     """Verify that custom URL paths for our course/program are served by the standard Wagtail view"""
     readable_id = "some:readable-id"
     CoursePageFactory.create(course__readable_id=readable_id)
-    resolver_match = resolve("/courses/{}/".format(readable_id))
-    assert (
-        resolver_match.func.__module__ == "wagtail.views"
-    )  # pylint: disable=protected-access
-    assert resolver_match.func.__name__ == "serve"  # pylint: disable=protected-access
+    resolver_match = resolve(f"/courses/{readable_id}/")
+    assert resolver_match.func.__module__ == "wagtail.views"
+    assert resolver_match.func.__name__ == "serve"
 
 
 def test_home_page():
@@ -327,7 +319,7 @@ def test_home_page_testimonials():
     assert home_page.testimonials == testimonials_page
     assert testimonials_page.heading == "heading"
     assert testimonials_page.subhead == "subhead"
-    for testimonial in testimonials_page.items:  # pylint: disable=not-an-iterable
+    for testimonial in testimonials_page.items:
         assert testimonial.value.get("name") == "name"
         assert testimonial.value.get("title") == "title"
         assert testimonial.value.get("image").title == "image"
@@ -448,7 +440,7 @@ def test_image_carousel_section():
     assert home_page.image_carousel_section == image_carousel_page
     assert image_carousel_page.title == "title"
     for index, image in enumerate(image_carousel_page.images):
-        assert image.value.title == "image-title-{}".format(index)
+        assert image.value.title == f"image-title-{index}"
 
 
 def test_program_page_faculty_subpage():
@@ -504,7 +496,7 @@ def test_external_course_page_faculty_subpage():
 
 
 def _get_faculty_members():
-    """Provides a `faculty` property instantiation data"""
+    """Provides a `faculty` property instantiation data"""  # noqa: D401
     return [
         {
             "type": "member",
@@ -518,7 +510,7 @@ def _get_faculty_members():
 
 
 def _assert_faculty_members(obj):
-    """Verifies `faculty` property returns expected value"""
+    """Verifies `faculty` property returns expected value"""  # noqa: D401
     # invalidate cached property
     del obj.child_pages
 
@@ -547,7 +539,7 @@ def test_course_page_testimonials():
     assert course_page.testimonials == testimonials_page
     assert testimonials_page.heading == "heading"
     assert testimonials_page.subhead == "subhead"
-    for testimonial in testimonials_page.items:  # pylint: disable=not-an-iterable
+    for testimonial in testimonials_page.items:
         assert testimonial.value.get("name") == "name"
         assert testimonial.value.get("title") == "title"
         assert testimonial.value.get("image").title == "image"
@@ -572,7 +564,7 @@ def test_external_course_page_testimonials():
     assert external_course_page.testimonials == testimonials_page
     assert testimonials_page.heading == "heading"
     assert testimonials_page.subhead == "subhead"
-    for testimonial in testimonials_page.items:  # pylint: disable=not-an-iterable
+    for testimonial in testimonials_page.items:
         assert testimonial.value.get("name") == "name"
         assert testimonial.value.get("title") == "title"
         assert testimonial.value.get("image").title == "image"
@@ -597,7 +589,7 @@ def test_program_page_testimonials():
     assert program_page.testimonials == testimonials_page
     assert testimonials_page.heading == "heading"
     assert testimonials_page.subhead == "subhead"
-    for testimonial in testimonials_page.items:  # pylint: disable=not-an-iterable
+    for testimonial in testimonials_page.items:
         assert testimonial.value.get("name") == "name"
         assert testimonial.value.get("title") == "title"
         assert testimonial.value.get("image").title == "image"
@@ -622,7 +614,7 @@ def test_external_program_page_testimonials():
     assert external_program_page.testimonials == testimonials_page
     assert testimonials_page.heading == "heading"
     assert testimonials_page.subhead == "subhead"
-    for testimonial in testimonials_page.items:  # pylint: disable=not-an-iterable
+    for testimonial in testimonials_page.items:
         assert testimonial.value.get("name") == "name"
         assert testimonial.value.get("title") == "title"
         assert testimonial.value.get("image").title == "image"
@@ -650,9 +642,9 @@ def test_program_page_child_page_url():
     child_page_url = child_page.get_full_url()
 
     if WAGTAIL_APPEND_SLASH:
-        assert child_page_url == "{}{}/".format(program_page_url, child_page.slug)
+        assert child_page_url == f"{program_page_url}{child_page.slug}/"
     else:
-        assert child_page_url == "{}/{}".format(program_page_url, child_page.slug)
+        assert child_page_url == f"{program_page_url}/{child_page.slug}"
 
 
 def test_course_page_child_page_url():
@@ -667,9 +659,9 @@ def test_course_page_child_page_url():
     child_page_url = child_page.get_full_url()
 
     if WAGTAIL_APPEND_SLASH:
-        assert child_page_url == "{}{}/".format(course_page_url, child_page.slug)
+        assert child_page_url == f"{course_page_url}{child_page.slug}/"
     else:
-        assert child_page_url == "{}/{}".format(course_page_url, child_page.slug)
+        assert child_page_url == f"{course_page_url}/{child_page.slug}"
 
 
 def test_course_page_for_teams():
@@ -997,9 +989,7 @@ def test_course_page_learning_outcomes():
     assert learning_outcomes_page.get_parent() == course_page
     assert learning_outcomes_page.heading == "heading"
     assert learning_outcomes_page.sub_heading == "<p>subheading</p>"
-    for (
-        block
-    ) in learning_outcomes_page.outcome_items:  # pylint: disable=not-an-iterable
+    for block in learning_outcomes_page.outcome_items:
         assert block.block_type == "outcome"
         assert block.value == "benefit"
 
@@ -1028,9 +1018,7 @@ def test_external_course_page_learning_outcomes():
     assert learning_outcomes_page.get_parent() == external_course_page
     assert learning_outcomes_page.heading == "heading"
     assert learning_outcomes_page.sub_heading == "<p>subheading</p>"
-    for (
-        block
-    ) in learning_outcomes_page.outcome_items:  # pylint: disable=not-an-iterable
+    for block in learning_outcomes_page.outcome_items:
         assert block.block_type == "outcome"
         assert block.value == "benefit"
 
@@ -1057,9 +1045,7 @@ def test_program_learning_outcomes():
     )
     assert learning_outcomes_page.get_parent() == program_page
     assert learning_outcomes_page.heading == "heading"
-    for (
-        block
-    ) in learning_outcomes_page.outcome_items:  # pylint: disable=not-an-iterable
+    for block in learning_outcomes_page.outcome_items:
         assert block.block_type == "outcome"
         assert block.value == "benefit"
     assert program_page.outcomes == learning_outcomes_page
@@ -1082,9 +1068,7 @@ def test_external_program_learning_outcomes():
     )
     assert learning_outcomes_page.get_parent() == external_program_page
     assert learning_outcomes_page.heading == "heading"
-    for (
-        block
-    ) in learning_outcomes_page.outcome_items:  # pylint: disable=not-an-iterable
+    for block in learning_outcomes_page.outcome_items:
         assert block.block_type == "outcome"
         assert block.value == "benefit"
     assert external_program_page.outcomes == learning_outcomes_page
@@ -1106,9 +1090,7 @@ def test_course_page_learning_techniques():
         technique_items__0__techniques__image__image__title="image-title",
     )
     assert learning_techniques_page.get_parent() == course_page
-    for (
-        technique
-    ) in learning_techniques_page.technique_items:  # pylint: disable=not-an-iterable
+    for technique in learning_techniques_page.technique_items:
         assert technique.value.get("heading") == "heading"
         assert technique.value.get("sub_heading") == "sub_heading"
         assert technique.value.get("image").title == "image-title"
@@ -1129,9 +1111,7 @@ def test_external_course_page_learning_techniques():
         technique_items__0__techniques__image__image__title="image-title",
     )
     assert learning_techniques_page.get_parent() == external_course_page
-    for (
-        technique
-    ) in learning_techniques_page.technique_items:  # pylint: disable=not-an-iterable
+    for technique in learning_techniques_page.technique_items:
         assert technique.value.get("heading") == "heading"
         assert technique.value.get("sub_heading") == "sub_heading"
         assert technique.value.get("image").title == "image-title"
@@ -1154,9 +1134,7 @@ def test_program_page_learning_techniques():
         technique_items__0__techniques__image__image__title="image-title",
     )
     assert learning_techniques_page.get_parent() == program_page
-    for (
-        technique
-    ) in learning_techniques_page.technique_items:  # pylint: disable=not-an-iterable
+    for technique in learning_techniques_page.technique_items:
         assert technique.value.get("heading") == "heading"
         assert technique.value.get("sub_heading") == "sub_heading"
         assert technique.value.get("image").title == "image-title"
@@ -1179,9 +1157,7 @@ def test_external_program_page_learning_techniques():
         technique_items__0__techniques__image__image__title="image-title",
     )
     assert learning_techniques_page.get_parent() == external_program_page
-    for (
-        technique
-    ) in learning_techniques_page.technique_items:  # pylint: disable=not-an-iterable
+    for technique in learning_techniques_page.technique_items:
         assert technique.value.get("heading") == "heading"
         assert technique.value.get("sub_heading") == "sub_heading"
         assert technique.value.get("image").title == "image-title"
@@ -1205,7 +1181,7 @@ def test_program_page_who_should_enroll():
     )
     assert who_should_enroll_page.get_parent() == program_page
     assert len(who_should_enroll_page.content) == 2
-    for block in who_should_enroll_page.content:  # pylint: disable=not-an-iterable
+    for block in who_should_enroll_page.content:
         assert block.block_type == "item"
         assert block.value.source == "<p>item</p>"
     assert program_page.who_should_enroll == who_should_enroll_page
@@ -1240,7 +1216,7 @@ def test_external_program_page_who_should_enroll():
     )
     assert who_should_enroll_page.get_parent() == external_program_page
     assert len(who_should_enroll_page.content) == 2
-    for block in who_should_enroll_page.content:  # pylint: disable=not-an-iterable
+    for block in who_should_enroll_page.content:
         assert block.block_type == "item"
         assert block.value.source == "<p>item</p>"
     assert external_program_page.who_should_enroll == who_should_enroll_page
@@ -1410,7 +1386,7 @@ def test_certificate_for_course_page():
     assert certificate_page.CEUs == "1.8"
     assert certificate_page.product_name == "product_name"
     assert certificate_page.partner_logo.title == "Partner Logo"
-    for signatory in certificate_page.signatories:  # pylint: disable=not-an-iterable
+    for signatory in certificate_page.signatories:
         assert signatory.value.name == "Name"
         assert signatory.value.title_1 == "Title_1"
         assert signatory.value.title_2 == "Title_2"
@@ -1446,7 +1422,7 @@ def test_certificate_for_program_page():
     assert certificate_page.CEUs == "2.8"
     assert certificate_page.product_name == "product_name"
     assert certificate_page.partner_logo.title == "Partner Logo"
-    for signatory in certificate_page.signatories:  # pylint: disable=not-an-iterable
+    for signatory in certificate_page.signatories:
         assert signatory.value.name == "Name"
         assert signatory.value.title_1 == "Title_1"
         assert signatory.value.title_2 == "Title_2"

@@ -61,12 +61,11 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction
 
-# TODO: use ruff or upgrade pylint, pylint-django, and asteroid to support String based model references.
-#      - name: Lint
-#        run: poetry run pylint ./**/*.py
+      - name: Lint (Ruff)
+        run: poetry run ruff check .
 
-      - name: Code Formatting (Black)
-        run: poetry run black --check .
+      - name: Code Formatting (Ruff)
+        run: poetry run ruff format --check .
 
       # Configurations required for elasticsearch.
       - name: Configure sysctl limits

@@ -11,7 +11,7 @@ def migrate_content_type_id(apps, schema_editor):
     We didn't add `content_type` to `Revision.content` that was previously named `PageRevision.content_json`.
     Now, during the upgrade, wagtail expects `content_type` to be present in `Revision.content` but it isn't
     and hence this issue.
-    """
+    """  # noqa: D401
     ContentType = apps.get_model("contenttypes", "ContentType")
     Revision = apps.get_model("wagtailcore", "Revision")
 

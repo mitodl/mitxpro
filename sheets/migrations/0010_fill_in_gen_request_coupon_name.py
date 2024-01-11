@@ -24,12 +24,12 @@ def fill_in_coupon_name(apps, schema_editor):
     for coupon_gen_request in coupon_gen_requests:
         try:
             raw_data = json.loads(coupon_gen_request.raw_data)
-            if not isinstance(raw_data, list) or len(raw_data) < 2 or not raw_data[1]:
-                raise ValueError(
-                    "raw_data is either not a list, or does not include a valid coupon name"
+            if not isinstance(raw_data, list) or len(raw_data) < 2 or not raw_data[1]:  # noqa: PLR2004
+                raise ValueError(  # noqa: TRY301
+                    "raw_data is either not a list, or does not include a valid coupon name"  # noqa: EM101
                 )
-        except Exception:
-            coupon_name = "COUPON NAME NEEDED ({})".format(coupon_gen_request.id)
+        except Exception:  # noqa: BLE001
+            coupon_name = "COUPON NAME NEEDED ({})".format(coupon_gen_request.id)  # noqa: UP032
         else:
             coupon_name = raw_data[1]
         coupon_gen_request.coupon_name = coupon_name
@@ -37,7 +37,6 @@ def fill_in_coupon_name(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("sheets", "0009_add_gen_request_coupon_name")]
 
     operations = [migrations.RunPython(fill_in_coupon_name, set_coupon_name_to_none)]

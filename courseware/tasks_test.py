@@ -1,8 +1,8 @@
 """Courseware tasks"""
 import pytest
-from users.factories import UserFactory
 
 from courseware import tasks
+from users.factories import UserFactory
 
 
 @pytest.mark.django_db

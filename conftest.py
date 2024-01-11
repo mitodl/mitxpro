@@ -1,5 +1,4 @@
 """Project conftest"""
-# pylint: disable=wildcard-import,unused-wildcard-import
 import os
 import shutil
 
@@ -23,10 +22,9 @@ from cms.models import (
     SignatoryIndexPage,
     WebinarIndexPage,
 )
-from fixtures.autouse import *
-from fixtures.common import *
-from fixtures.cybersource import *
-
+from fixtures.autouse import *  # noqa: F403
+from fixtures.common import *  # noqa: F403
+from fixtures.cybersource import *  # noqa: F403
 
 TEST_MEDIA_SUBDIR = "test_media_root"
 
@@ -42,7 +40,7 @@ def pytest_addoption(parser):
 
 def pytest_cmdline_main(config):
     """Pytest hook that runs after command line options are parsed"""
-    if getattr(config.option, "simple") is True:
+    if getattr(config.option, "simple") is True:  # noqa: B009
         config.option.pylint = False
         config.option.no_pylint = True
 
@@ -50,9 +48,9 @@ def pytest_cmdline_main(config):
 def pytest_configure(config):
     """Pytest hook to perform some initial configuration"""
     if not settings.MEDIA_ROOT.endswith(TEST_MEDIA_SUBDIR):
-        settings.MEDIA_ROOT = os.path.join(settings.MEDIA_ROOT, TEST_MEDIA_SUBDIR)
+        settings.MEDIA_ROOT = os.path.join(settings.MEDIA_ROOT, TEST_MEDIA_SUBDIR)  # noqa: PTH118
 
-    if getattr(config.option, "simple") is True:
+    if getattr(config.option, "simple") is True:  # noqa: B009
         # NOTE: These plugins are already configured by the time the pytest_cmdline_main hook is run, so we can't
         #       simply add/alter the command line options in that hook. This hook is being used to
         #       reconfigure/unregister plugins that we can't change via the pytest_cmdline_main hook.
@@ -66,21 +64,21 @@ def pytest_configure(config):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def clean_up_files():
+def clean_up_files():  # noqa: PT004
     """
     Fixture that removes the media root folder after the suite has finished running,
     effectively deleting any files that were created by factories over the course of the test suite.
     """
     yield
-    if os.path.exists(settings.MEDIA_ROOT):
+    if os.path.exists(settings.MEDIA_ROOT):  # noqa: PTH110
         shutil.rmtree(settings.MEDIA_ROOT)
 
 
 @pytest.fixture(scope="session")
-def django_db_setup(django_db_setup, django_db_blocker):
+def django_db_setup(django_db_setup, django_db_blocker):  # noqa: ARG001, PT004
     """
     Creates all the index pages during the tests setup as index pages are required by the factories.
-    """
+    """  # noqa: D401
     with django_db_blocker.unblock():
         site = Site.objects.filter(is_default_site=True).first()
         home_page = Page.objects.get(id=site.root_page.id)

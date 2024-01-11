@@ -3,8 +3,8 @@ Factories for voucher models
 """
 import factory
 from factory.django import DjangoModelFactory
-from users.factories import UserFactory
 
+from users.factories import UserFactory
 from voucher.models import Voucher
 
 

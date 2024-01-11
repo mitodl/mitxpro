@@ -1,10 +1,10 @@
 """Seed data API tests"""
-# pylint: disable=unused-argument, redefined-outer-name
 from types import SimpleNamespace
+
 import pytest
 
-from courses.models import Program, Course, CourseRun, CourseTopic, Platform
-from cms.models import ProgramPage, CoursePage, ResourcePage
+from cms.models import CoursePage, ProgramPage, ResourcePage
+from courses.models import Course, CourseRun, CourseTopic, Platform, Program
 from ecommerce.models import Product, ProductVersion
 from ecommerce.test_utils import unprotect_version_tables
 from localdev.seed.api import SeedDataLoader, get_raw_seed_data_from_file
@@ -29,7 +29,7 @@ def test_seed_prefix(seeded):
     """
     # Test helper functions
     seeded_value = seeded.loader.seed_prefixed("Some Title")
-    assert seeded_value == "{} Some Title".format(SeedDataLoader.SEED_DATA_PREFIX)
+    assert seeded_value == f"{SeedDataLoader.SEED_DATA_PREFIX} Some Title"
     assert seeded.loader.is_seed_value(seeded_value) is True
     # Test saved object titles
     assert (
@@ -99,7 +99,7 @@ def test_topics(seeded):
         ]
 
         def name_key(topic):
-            """Helper function to get a name for sorting purposes"""
+            """Helper function to get a name for sorting purposes"""  # noqa: D401
             return topic["name"]
 
         assert sorted(topics, key=name_key) == sorted(

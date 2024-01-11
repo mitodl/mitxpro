@@ -1,7 +1,6 @@
 """
 Tests for ecommerce serializers
 """
-# pylint: disable=unused-argument, redefined-outer-name
 from decimal import Decimal
 
 import pytest
@@ -46,7 +45,6 @@ from ecommerce.serializers import (
     SingleUseCouponSerializer,
 )
 from mitxpro.test_utils import any_instance_of
-
 
 pytestmark = [pytest.mark.django_db]
 
@@ -123,7 +121,7 @@ def test_serialize_basket_product_version_programrun(mock_context):
     product_version = ProductVersionFactory.create(
         product=ProductFactory(content_object=program_run.program)
     )
-    context = {**mock_context, **{"program_run": program_run}}
+    context = {**mock_context, **{"program_run": program_run}}  # noqa: PIE800
 
     data = FullProductVersionSerializer(instance=product_version, context=context).data
     assert data["object_id"] == program_run.program.id
@@ -262,13 +260,13 @@ def test_serialize_coupon_single_use(
 
 
 @pytest.mark.parametrize(
-    "too_high, expected_message",
+    "too_high, expected_message",  # noqa: PT006
     [
-        [
+        [  # noqa: PT007
             True,
             "The amount should be between (0 - 1) when discount type is percent-off.",
         ],
-        [
+        [  # noqa: PT007
             False,
             "The amount is invalid, please specify a value greater than 0.",
         ],
@@ -328,13 +326,13 @@ def test_serialize_coupon_promo(
 
 
 @pytest.mark.parametrize(
-    "too_high, expected_message",
+    "too_high, expected_message",  # noqa: PT006
     [
-        [
+        [  # noqa: PT007
             True,
             "The amount should be between (0 - 1) when discount type is percent-off.",
         ],
-        [
+        [  # noqa: PT007
             False,
             "The amount is invalid, please specify a value greater than 0.",
         ],
@@ -388,7 +386,7 @@ def test_serialize_coupon_payment_version_serializer(basket_and_coupons):
 def test_coupon_payment_serializer():
     """Test that the CouponPaymentSerializer has correct data"""
     payment = CouponPaymentFactory.build()
-    assert str(payment) == "CouponPayment {}".format(payment.name)
+    assert str(payment) == f"CouponPayment {payment.name}"
     serialized = CouponPaymentSerializer(payment).data
     assert serialized == {
         "name": payment.name,
@@ -542,9 +540,7 @@ def test_serialize_coupon():
     name = "Some Coupon"
     code = "1234"
     coupon = CouponFactory.build(payment__name=name, coupon_code=code, enabled=True)
-    assert str(coupon) == "Coupon {} for {}".format(
-        coupon.coupon_code, str(coupon.payment)
-    )
+    assert str(coupon) == f"Coupon {coupon.coupon_code} for {str(coupon.payment)}"  # noqa: RUF010
     serialized_data = CouponSerializer(instance=coupon).data
     assert serialized_data == {
         "id": None,

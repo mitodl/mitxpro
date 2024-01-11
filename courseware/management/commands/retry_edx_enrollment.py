@@ -1,12 +1,12 @@
 """
 Management command to retry edX enrollment for a user's course run enrollments
 """
-from django.core.management import BaseCommand
 from django.contrib.auth import get_user_model
+from django.core.management import BaseCommand
 
-from users.api import fetch_users
-from courseware.api import enroll_in_edx_course_runs
 from courses.models import CourseRunEnrollment
+from courseware.api import enroll_in_edx_course_runs
+from users.api import fetch_users
 
 User = get_user_model()
 
@@ -41,7 +41,7 @@ class Command(BaseCommand):
             ),
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Run the command"""
         enrollment_filter = {}
         if not options["force"]:
@@ -67,7 +67,7 @@ class Command(BaseCommand):
             course_run = enrollment.run
             try:
                 enroll_in_edx_course_runs(user, [course_run])
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:  # noqa: BLE001
                 self.stderr.write(self.style.ERROR(str(exc)))
             else:
                 enrollment.edx_enrolled = True

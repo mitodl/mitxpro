@@ -1,19 +1,19 @@
 """User serializers"""
-from collections import defaultdict
 import logging
 import re
+from collections import defaultdict
 
-from django.db import transaction
 import pycountry
+from django.db import transaction
 from rest_framework import serializers
 from social_django.models import UserSocialAuth
 
 from courseware.tasks import change_edx_user_email_async
 from ecommerce.api import fetch_and_serialize_unused_coupons
+from hubspot_xpro.task_helpers import sync_hubspot_user
 from mail import verification_api
 from mitxpro.serializers import WriteableSerializerMethodField
-from users.models import LegalAddress, User, Profile, ChangeEmailRequest
-from hubspot_xpro.task_helpers import sync_hubspot_user
+from users.models import ChangeEmailRequest, LegalAddress, Profile, User
 
 log = logging.getLogger()
 
@@ -48,30 +48,30 @@ class LegalAddressSerializer(serializers.ModelSerializer):
     postal_code = serializers.CharField(max_length=10, allow_blank=True)
 
     def validate_first_name(self, value):
-        """Validates the first name of the user"""
+        """Validate the first name of the user"""
         if value and not USER_NAME_RE.match(value):
-            raise serializers.ValidationError("First name is not valid")
+            raise serializers.ValidationError("First name is not valid")  # noqa: EM101
         return value
 
     def validate_last_name(self, value):
-        """Validates the last name of the user"""
+        """Validate the last name of the user"""
         if value and not USER_NAME_RE.match(value):
-            raise serializers.ValidationError("Last name is not valid")
+            raise serializers.ValidationError("Last name is not valid")  # noqa: EM101
         return value
 
     def validate_street_address(self, value):
-        """Validates an incoming street address list"""
+        """Validate an incoming street address list"""
         if not value or not isinstance(value, list):
             raise serializers.ValidationError(
-                "street_address must be a list of street lines"
+                "street_address must be a list of street lines"  # noqa: EM101
             )
-        if len(value) > 5:
+        if len(value) > 5:  # noqa: PLR2004
             raise serializers.ValidationError(
-                "street_address list must be 5 items or less"
+                "street_address list must be 5 items or less"  # noqa: EM101
             )
-        if any(len(line) > 60 for line in value):
+        if any(len(line) > 60 for line in value):  # noqa: PLR2004
             raise serializers.ValidationError(
-                "street_address lines must be 60 characters or less"
+                "street_address lines must be 60 characters or less"  # noqa: EM101
             )
         return {f"street_address_{idx+1}": line for idx, line in enumerate(value)}
 
@@ -117,15 +117,14 @@ class LegalAddressSerializer(serializers.ModelSerializer):
                 errors["postal_code"].append(
                     f"Postal Code is required for {country.name}"
                 )
-            else:
-                if country.alpha_2 == "US" and not US_POSTAL_RE.match(postal_code):
-                    errors["postal_code"].append(
-                        "Postal Code must be in the format 'NNNNN' or 'NNNNN-NNNNN'"
-                    )
-                elif country.alpha_2 == "CA" and not CA_POSTAL_RE.match(postal_code):
-                    errors["postal_code"].append(
-                        "Postal Code must be in the format 'ANA NAN'"
-                    )
+            elif country.alpha_2 == "US" and not US_POSTAL_RE.match(postal_code):
+                errors["postal_code"].append(
+                    "Postal Code must be in the format 'NNNNN' or 'NNNNN-NNNNN'"
+                )
+            elif country.alpha_2 == "CA" and not CA_POSTAL_RE.match(postal_code):
+                errors["postal_code"].append(
+                    "Postal Code must be in the format 'ANA NAN'"
+                )
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -174,7 +173,7 @@ class ExtendedLegalAddressSerializer(LegalAddressSerializer):
 
     class Meta:
         model = LegalAddress
-        fields = LegalAddressSerializer.Meta.fields + ("email", "company")
+        fields = LegalAddressSerializer.Meta.fields + ("email", "company")  # noqa: RUF005
         extra_kwargs = LegalAddressSerializer.Meta.extra_kwargs
 
 
@@ -254,15 +253,15 @@ class UserSerializer(serializers.ModelSerializer):
         return {"username": value}
 
     def get_email(self, instance):
-        """Returns the email or None in the case of AnonymousUser"""
+        """Return the email or None in the case of AnonymousUser"""
         return getattr(instance, "email", None)
 
     def get_username(self, instance):
-        """Returns the username or None in the case of AnonymousUser"""
+        """Return the username or None in the case of AnonymousUser"""
         return getattr(instance, "username", None)
 
     def get_unused_coupons(self, instance):
-        """Returns a list of unused coupons"""
+        """Return a list of unused coupons"""
         if not instance.is_anonymous:
             return fetch_and_serialize_unused_coupons(instance)
         return []
@@ -387,7 +386,7 @@ class ChangeEmailRequestCreateSerializer(serializers.ModelSerializer):
 
         # verify the password verifies for the current user
         if not user.check_password(password):
-            raise serializers.ValidationError("Invalid Password")
+            raise serializers.ValidationError("Invalid Password")  # noqa: EM101
 
         return attrs
 
@@ -414,12 +413,12 @@ class ChangeEmailRequestUpdateSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        """Updates an email change request"""
+        """Update an email change request"""
         if User.objects.filter(email=instance.new_email).exists():
             log.debug(
                 "User %s tried to change email address to one already in use", instance
             )
-            raise serializers.ValidationError("Unable to change email")
+            raise serializers.ValidationError("Unable to change email")  # noqa: EM101
 
         result = super().update(instance, validated_data)
 
@@ -474,7 +473,7 @@ class CountrySerializer(serializers.Serializer):
         if instance.alpha_2 in ("US", "CA"):
             return StateProvinceSerializer(
                 instance=sorted(
-                    list(pycountry.subdivisions.get(country_code=instance.alpha_2)),
+                    pycountry.subdivisions.get(country_code=instance.alpha_2),
                     key=lambda state: state.name,
                 ),
                 many=True,

@@ -20,7 +20,6 @@ from ecommerce.utils import CouponUtils
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 
-
 B2B_INTEGRATION_PREFIX = "B2B-"
 
 
@@ -40,7 +39,7 @@ class B2BCouponManager(models.Manager):
         Returns:
             B2BCoupon:
                 The coupon instance. If no coupon is found a B2BCoupon.DoesNotExist error is raised
-        """
+        """  # noqa: D401
         coupon = (
             self.filter(
                 Q(coupon_code=coupon_code),
@@ -106,7 +105,7 @@ class B2BCoupon(TimestampedModel, AuditableModel):
     objects = B2BCouponManager()
 
     @classmethod
-    def get_audit_class(cls):
+    def get_audit_class(cls):  # noqa: D102
         return B2BCouponAudit
 
     def to_dict(self):
@@ -123,7 +122,7 @@ class B2BCouponAudit(AuditModel):
     coupon = models.ForeignKey(B2BCoupon, null=True, on_delete=models.PROTECT)
 
     @classmethod
-    def get_related_field_name(cls):
+    def get_related_field_name(cls):  # noqa: D102
         return "coupon"
 
 
@@ -149,7 +148,7 @@ class B2BOrder(OrderAbstract, AuditableModel):
     discount = models.DecimalField(
         decimal_places=2, max_digits=20, null=True, blank=True
     )
-    contract_number = models.CharField(max_length=50, null=True, blank=True)
+    contract_number = models.CharField(max_length=50, null=True, blank=True)  # noqa: DJ001
     program_run = models.ForeignKey(
         "courses.ProgramRun",
         blank=True,
@@ -162,15 +161,15 @@ class B2BOrder(OrderAbstract, AuditableModel):
 
     @staticmethod
     def get_reference_number_prefix():
-        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""
+        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""  # noqa: D401
         return f"{REFERENCE_NUMBER_PREFIX}{settings.ENVIRONMENT}"
 
     def __str__(self):
-        """Description for CouponOrder"""
+        """Description for CouponOrder"""  # noqa: D401
         return f"B2BOrder #{self.id}, status={self.status}"
 
     @classmethod
-    def get_audit_class(cls):
+    def get_audit_class(cls):  # noqa: D102
         return B2BOrderAudit
 
     def to_dict(self):
@@ -225,7 +224,7 @@ class B2BOrderAudit(AuditModel):
     order = models.ForeignKey(B2BOrder, null=True, on_delete=models.PROTECT)
 
     @classmethod
-    def get_related_field_name(cls):
+    def get_related_field_name(cls):  # noqa: D102
         return "order"
 
 
@@ -239,7 +238,7 @@ class B2BReceipt(TimestampedModel):
     data = models.JSONField()
 
     def __str__(self):
-        """Description of B2BReceipt"""
+        """Description of B2BReceipt"""  # noqa: D401
         if self.order:
             return f"B2BReceipt for order {self.order.id}"
         else:

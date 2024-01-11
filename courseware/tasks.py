@@ -1,13 +1,13 @@
 """Courseware tasks"""
-from mitxpro.celery import app
 from courseware import api
+from mitxpro.celery import app
 from users.api import get_user_by_id
 from users.models import User
 
 
 @app.task(acks_late=True)
 def create_user_from_id(user_id):
-    """Loads user by id and calls the API method to create the user in edX"""
+    """Loads user by id and calls the API method to create the user in edX"""  # noqa: D401
     user = get_user_by_id(user_id)
     api.create_user(user)
 
@@ -31,7 +31,7 @@ def retry_failed_edx_enrollments():
 
 @app.task(acks_late=True)
 def repair_faulty_courseware_users():
-    """Calls the API method to repair faulty courseware users"""
+    """Calls the API method to repair faulty courseware users"""  # noqa: D401
     repaired_users = api.repair_faulty_courseware_users()
     return [user.email for user in repaired_users]
 

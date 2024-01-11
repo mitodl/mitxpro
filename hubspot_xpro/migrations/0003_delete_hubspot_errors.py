@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("hubspot_xpro", "0002_hubspotlineresync"),
     ]

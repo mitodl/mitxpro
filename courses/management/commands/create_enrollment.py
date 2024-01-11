@@ -1,6 +1,6 @@
 """Management command to change enrollment status"""
-from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from courses.api import create_run_enrollments
@@ -12,7 +12,7 @@ from ecommerce.api import (
     latest_product_version,
     redeem_coupon,
 )
-from ecommerce.models import Coupon, Product, ProductCouponAssignment, Order, Line
+from ecommerce.models import Coupon, Line, Order, Product, ProductCouponAssignment
 from users.api import fetch_user
 
 User = get_user_model()
@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
     help = "Creates an enrollment for a course run"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser):  # noqa: D102
         parser.add_argument(
             "--user",
             type=str,
@@ -47,9 +47,8 @@ class Command(BaseCommand):
             help="If provided, enrollment records will be kept even if edX enrollment fails",
         )
         super().add_arguments(parser)
-        # pylint: disable=too-many-locals
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
 
         user = fetch_user(options["user"])
@@ -57,7 +56,7 @@ class Command(BaseCommand):
         run = CourseRun.objects.filter(courseware_id=options["run"]).first()
         if run is None:
             raise CommandError(
-                "Could not find course run with courseware_id={}".format(options["run"])
+                "Could not find course run with courseware_id={}".format(options["run"])  # noqa: EM103
             )
 
         product = Product.objects.filter(
@@ -65,7 +64,7 @@ class Command(BaseCommand):
         ).first()
         if product is None:
             raise CommandError(
-                "No product found for that course with courseware_id={}".format(
+                "No product found for that course with courseware_id={}".format(  # noqa: EM103
                     options["run"]
                 )
             )
@@ -73,7 +72,7 @@ class Command(BaseCommand):
         coupon = Coupon.objects.filter(coupon_code=options["code"]).first()
         if not coupon:
             raise CommandError(
-                "That enrollment code {} does not exist".format(options["code"])
+                "That enrollment code {} does not exist".format(options["code"])  # noqa: EM103
             )
 
         # Check if the coupon is valid for the product
@@ -110,9 +109,9 @@ class Command(BaseCommand):
                     order=order,
                 )
                 if not successful_enrollments:
-                    raise EdxEnrollmentCreateError
+                    raise EdxEnrollmentCreateError  # noqa: TRY301
             except EdxEnrollmentCreateError:
-                raise CommandError("Failed to create the enrollment record")
+                raise CommandError("Failed to create the enrollment record")  # noqa: B904, EM101, TRY200
 
         ProductCouponAssignment.objects.filter(
             email__iexact=user.email, redeemed=False, product_coupon__coupon=coupon
@@ -134,7 +133,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                "Order {} with line {} is created for user {} ".format(
+                "Order {} with line {} is created for user {} ".format(  # noqa: UP032
                     order, line, user
                 )
             )

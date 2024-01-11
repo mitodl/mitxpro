@@ -13,7 +13,7 @@ def html_to_plain_text(html_str):
         html_str (str): A string containing HTML tags
     Returns:
         str: Plain text
-    """
+    """  # noqa: D401
     soup = BeautifulSoup(html_str, features="html.parser")
     return soup.get_text().replace("\n", " ")
 
@@ -23,7 +23,7 @@ def convert_to_plaintext(apps, schema_editor):
     Because going back from RichText to CharField we don't want any HTML to be embedded within
     the field content so the content will be extracted and any html stripped away.
     """
-    if not schema_editor.connection.alias == "default":
+    if schema_editor.connection.alias != "default":
         return
     LearningOutcomesPage = apps.get_model("cms", "LearningOutcomesPage")
     for page in LearningOutcomesPage.objects.all():
@@ -32,7 +32,6 @@ def convert_to_plaintext(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("cms", "0037_featured_product")]
 
     operations = [

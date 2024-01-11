@@ -4,13 +4,12 @@ Hubspot tasks
 import logging
 import time
 from math import ceil
-from typing import List, Tuple
 
 import celery
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
-from hubspot.crm.objects import BatchInputSimplePublicObjectInput, ApiException
+from hubspot.crm.objects import ApiException, BatchInputSimplePublicObjectInput
 from mitol.common.decorators import single_task
 from mitol.common.utils import chunks
 from mitol.hubspot_api.api import HubspotApi, HubspotAssociationType, HubspotObjectType
@@ -25,13 +24,10 @@ from hubspot_xpro.api import get_hubspot_id_for_object
 from mitxpro.celery import app
 from users.models import User
 
-
 log = logging.getLogger()
 
 
-def task_obj_lock(
-    func_name: str, args: List[object], kwargs: dict  # pylint:disable=unused-argument
-) -> str:
+def task_obj_lock(func_name: str, args: list[object], kwargs: dict) -> str:
     """
     Determine a task lock name for a specific task function and object id
 
@@ -49,7 +45,7 @@ def task_obj_lock(
     elif kwargs:
         # Assumes there is one key:value, for the object id
         # For tasks where this isn't true, a different function should be used
-        return f"{func_name}_{list(kwargs.values())[0]}"
+        return f"{func_name}_{list(kwargs.values())[0]}"  # noqa: RUF015
     else:
         return func_name
 
@@ -68,8 +64,8 @@ def max_concurrent_chunk_size(obj_count: int) -> int:
 
 
 def batched_chunks(
-    hubspot_type: str, batch_ids: List[int or (int, str)]
-) -> List[List[int or str]]:
+    hubspot_type: str, batch_ids: list[int or (int, str)]
+) -> list[list[int or str]]:
     """
     If list of ids exceed max allowed in a batch API call, chunk them up
 
@@ -100,7 +96,7 @@ def sync_failed_contacts(chunk: list[int]) -> list[int]:
         try:
             api.sync_contact_with_hubspot(user_id)
             time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
-        except ApiException:
+        except ApiException:  # noqa: PERF203
             failed_ids.append(user_id)
     return failed_ids
 
@@ -226,7 +222,7 @@ def sync_b2b_deal_with_hubspot(order_id: int) -> str:
     retry_jitter=True,
 )
 @raise_429
-def batch_upsert_hubspot_deals_chunked(ids: List[int]):
+def batch_upsert_hubspot_deals_chunked(ids: list[int]):
     """
     Batch sync hubspot deals with matching Order ids
 
@@ -251,7 +247,7 @@ def batch_upsert_hubspot_deals_chunked(ids: List[int]):
     retry_jitter=True,
 )
 @raise_429
-def batch_upsert_hubspot_b2b_deals_chunked(ids: List[int]) -> List[str]:
+def batch_upsert_hubspot_b2b_deals_chunked(ids: list[int]) -> list[str]:
     """
     Batch sync hubspot deals with matching B2BOrder ids
 
@@ -269,7 +265,7 @@ def batch_upsert_hubspot_b2b_deals_chunked(ids: List[int]) -> List[str]:
 
 
 @app.task(bind=True)
-def batch_upsert_hubspot_deals(self, create: bool):
+def batch_upsert_hubspot_deals(self, create: bool):  # noqa: FBT001
     """
     Batch create/update deals in hubspot
 
@@ -292,7 +288,7 @@ def batch_upsert_hubspot_deals(self, create: bool):
 
 
 @app.task(bind=True)
-def batch_upsert_hubspot_b2b_deals(self, create: bool):
+def batch_upsert_hubspot_b2b_deals(self, create: bool):  # noqa: FBT001
     """
     Batch create/update b2b deals in hubspot
 
@@ -325,8 +321,8 @@ def batch_upsert_hubspot_b2b_deals(self, create: bool):
 )
 @raise_429
 def batch_create_hubspot_objects_chunked(
-    hubspot_type: str, ct_model_name: str, object_ids: List[int]
-) -> List[str]:
+    hubspot_type: str, ct_model_name: str, object_ids: list[int]
+) -> list[str]:
     """
     Batch create or update a list of hubspot objects, no associations
 
@@ -393,8 +389,8 @@ def batch_create_hubspot_objects_chunked(
 )
 @raise_429
 def batch_update_hubspot_objects_chunked(
-    hubspot_type: str, ct_model_name: str, object_ids: List[Tuple[int, str]]
-) -> List[str]:
+    hubspot_type: str, ct_model_name: str, object_ids: list[tuple[int, str]]
+) -> list[str]:
     """
     Batch create or update hubspot objects, no associations
 
@@ -443,13 +439,13 @@ def batch_update_hubspot_objects_chunked(
 
 
 @app.task(bind=True)
-def batch_upsert_hubspot_objects(  # pylint:disable=too-many-arguments
+def batch_upsert_hubspot_objects(  # noqa: PLR0913
     self,
     hubspot_type: str,
     model_name: str,
     app_label: str,
-    create: bool = True,
-    object_ids: List[int] = None,
+    create: bool = True,  # noqa: FBT001, FBT002
+    object_ids: list[int] = None,  # noqa: RUF013
 ):
     """
     Batch create or update objects in hubspot, no associations (so ideal for contacts and products)
@@ -467,7 +463,7 @@ def batch_upsert_hubspot_objects(  # pylint:disable=too-many-arguments
         ).values_list("object_id", "hubspot_id")
         unsynced_object_ids = (
             content_type.model_class()
-            .objects.exclude(id__in=[id[0] for id in synced_object_ids])
+            .objects.exclude(id__in=[id[0] for id in synced_object_ids])  # noqa: A001
             .values_list("id", flat=True)
         )
         object_ids = sorted(unsynced_object_ids if create else synced_object_ids)
@@ -497,7 +493,7 @@ def batch_upsert_hubspot_objects(  # pylint:disable=too-many-arguments
     retry_jitter=True,
 )
 @raise_429
-def batch_upsert_associations_chunked(order_ids: List[int]):
+def batch_upsert_associations_chunked(order_ids: list[int]):
     """
     Upsert batches of deal-contact and line-deal associations
 
@@ -531,8 +527,8 @@ def batch_upsert_associations_chunked(order_ids: List[int]):
                     )
                 )
             if (
-                len(contact_associations_batch) == 100
-                or len(line_associations_batch) == 100
+                len(contact_associations_batch) == 100  # noqa: PLR2004
+                or len(line_associations_batch) == 100  # noqa: PLR2004
                 or idx == deal_count - 1
             ):
                 hubspot_client.crm.associations.batch_api.create(
@@ -555,7 +551,7 @@ def batch_upsert_associations_chunked(order_ids: List[int]):
 
 
 @app.task(bind=True)
-def batch_upsert_associations(self, order_ids: List[int] = None):
+def batch_upsert_associations(self, order_ids: list[int] = None):  # noqa: RUF013
     """
     Upsert chunked batches of deal-contact and line-deal associations
 

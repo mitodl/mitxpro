@@ -1,11 +1,13 @@
 """Authentication utils"""
 import hashlib
+
 from social_core.utils import get_strategy
 from social_django.utils import STORAGE
+
 from users.models import BlockList
 
 
-class SocialAuthState:  # pylint: disable=too-many-instance-attributes
+class SocialAuthState:
     """Social auth state"""
 
     FLOW_REGISTER = "register"
@@ -13,7 +15,7 @@ class SocialAuthState:  # pylint: disable=too-many-instance-attributes
 
     # login states
     STATE_LOGIN_EMAIL = "login/email"
-    STATE_LOGIN_PASSWORD = "login/password"
+    STATE_LOGIN_PASSWORD = "login/password"  # noqa: S105
     STATE_LOGIN_PROVIDER = "login/provider"
 
     # registration states
@@ -34,7 +36,7 @@ class SocialAuthState:  # pylint: disable=too-many-instance-attributes
     STATE_INVALID_LINK = "invalid-link"
     STATE_EXISTING_ACCOUNT = "existing-account"
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         state,
         *,
@@ -45,7 +47,7 @@ class SocialAuthState:  # pylint: disable=too-many-instance-attributes
         field_errors=None,
         redirect_url=None,
         user=None,
-    ):  # pylint: disable=too-many-arguments
+    ):
         self.state = state
         self.partial = partial
         self.flow = flow
@@ -61,19 +63,19 @@ class SocialAuthState:  # pylint: disable=too-many-instance-attributes
 
 
 def load_drf_strategy(request=None):
-    """Returns the DRF strategy"""
+    """Returns the DRF strategy"""  # noqa: D401
     return get_strategy(
         "authentication.strategy.DjangoRestFrameworkStrategy", STORAGE, request
     )
 
 
 def get_md5_hash(value):
-    """Returns the md5 hash object for the given value"""
-    return hashlib.md5(value.lower().encode("utf-8"))
+    """Returns the md5 hash object for the given value"""  # noqa: D401
+    return hashlib.md5(value.lower().encode("utf-8"))  # noqa: S324
 
 
 def is_user_email_blocked(email):
-    """Returns the user's email blocked status"""
+    """Returns the user's email blocked status"""  # noqa: D401
     hash_object = get_md5_hash(email)
     return BlockList.objects.filter(hashed_email=hash_object.hexdigest()).exists()
 
@@ -87,11 +89,7 @@ def block_user_email(email):
             hashed_email=hash_object.hexdigest()
         )
         if created:
-            msg = "Email {email} is added to the blocklist of MIT xPRO.".format(
-                email=email
-            )
+            msg = f"Email {email} is added to the blocklist of MIT xPRO."
         else:
-            msg = "Email {email} is already marked blocked for MIT xPRO.".format(
-                email=email
-            )
+            msg = f"Email {email} is already marked blocked for MIT xPRO."
     return msg

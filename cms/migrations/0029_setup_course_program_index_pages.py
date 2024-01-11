@@ -5,7 +5,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("cms", "0028_course_program_index_pages")]
 
     operations = [

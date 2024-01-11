@@ -39,22 +39,22 @@ class ProductContentTypeListFilter(admin.SimpleListFilter):
     title = "content type"
     parameter_name = "content_type"
 
-    def lookups(self, request, model_admin):
+    def lookups(self, request, model_admin):  # noqa: ARG002
         """
         Returns a list of tuples. The first element in each tuple is the coded value for the option that will
         appear in the URL query. The second element is the human-readable name for the option that will appear
         in the right sidebar.
-        """
+        """  # noqa: D401
         valid_content_types = ContentType.objects.filter(
             model__in=["courserun", "program"]
         ).values_list("model", flat=True)
         return zip(valid_content_types, valid_content_types)
 
-    def queryset(self, request, queryset):
+    def queryset(self, request, queryset):  # noqa: ARG002
         """
         Returns the filtered queryset based on the value provided in the query string and retrievable via
         `self.value()`.
-        """
+        """  # noqa: D401
         qset_filter = {} if not self.value() else {"content_type__model": self.value()}
         return queryset.filter(**qset_filter)
 
@@ -69,10 +69,10 @@ class LineAdmin(admin.ModelAdmin):
 
     readonly_fields = get_field_names(Line)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     @admin.display(
@@ -80,7 +80,7 @@ class LineAdmin(admin.ModelAdmin):
         ordering="product_version__text_id",
     )
     def get_product_version_text_id(self, obj):
-        """Returns the related ProductVersion text_id"""
+        """Returns the related ProductVersion text_id"""  # noqa: D401
         return obj.product_version.text_id
 
 
@@ -92,10 +92,10 @@ class LineRunSelectionAdmin(admin.ModelAdmin):
     list_display = ("id", "line", "get_order", "get_run_courseware_id")
     readonly_fields = get_field_names(LineRunSelection)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     @admin.display(
@@ -103,7 +103,7 @@ class LineRunSelectionAdmin(admin.ModelAdmin):
         ordering="line__order",
     )
     def get_order(self, obj):
-        """Returns the related Order"""
+        """Returns the related Order"""  # noqa: D401
         return obj.line.order
 
     @admin.display(
@@ -111,7 +111,7 @@ class LineRunSelectionAdmin(admin.ModelAdmin):
         ordering="run__courseware_id",
     )
     def get_run_courseware_id(self, obj):
-        """Returns the courseware_id of the associated CourseRun"""
+        """Returns the courseware_id of the associated CourseRun"""  # noqa: D401
         return obj.run.courseware_id
 
 
@@ -124,10 +124,10 @@ class ProgramRunLineAdmin(admin.ModelAdmin):
 
     readonly_fields = get_field_names(ProgramRunLine)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     @admin.display(
@@ -135,7 +135,7 @@ class ProgramRunLineAdmin(admin.ModelAdmin):
         ordering="line__order",
     )
     def get_order(self, obj):
-        """Returns the related Order"""
+        """Returns the related Order"""  # noqa: D401
         return obj.line.order
 
 
@@ -151,16 +151,16 @@ class OrderAdmin(AuditableModelAdmin, TimestampedModelAdmin):
 
     readonly_fields = [name for name in get_field_names(Order) if name != "status"]
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     def save_model(self, request, obj, form, change):
         """
         Saves object and logs change to object
-        """
+        """  # noqa: D401
         super().save_model(request, obj, form, change)
         sync_hubspot_deal(obj)
 
@@ -179,13 +179,13 @@ class OrderAuditAdmin(TimestampedModelAdmin):
         ordering="order__purchaser__email",
     )
     def get_order_user(self, obj):
-        """Returns the related Order's user email"""
+        """Returns the related Order's user email"""  # noqa: D401
         return obj.order.purchaser.email
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
 
@@ -204,13 +204,13 @@ class ReceiptAdmin(TimestampedModelAdmin):
         ordering="order__purchaser__email",
     )
     def get_order_user(self, obj):
-        """Returns the related Order's user email"""
+        """Returns the related Order's user email"""  # noqa: D401
         return obj.order.purchaser.email if obj.order is not None else None
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
 
@@ -253,7 +253,7 @@ class CouponAdmin(admin.ModelAdmin):
     inlines = [CouponVersionInline]
 
     def get_queryset(self, request):
-        """Overrides base queryset"""
+        """Overrides base queryset"""  # noqa: D401
         return super().get_queryset(request).select_related("payment")
 
     @admin.display(
@@ -261,7 +261,7 @@ class CouponAdmin(admin.ModelAdmin):
         ordering="payment__name",
     )
     def get_payment_name(self, obj):
-        """Returns the related CouponPayment name"""
+        """Returns the related CouponPayment name"""  # noqa: D401
         return obj.payment.name
 
 
@@ -297,7 +297,7 @@ class CouponPaymentVersionAdmin(admin.ModelAdmin):
     )
     raw_id_fields = ("payment",)
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     @admin.display(
@@ -305,12 +305,12 @@ class CouponPaymentVersionAdmin(admin.ModelAdmin):
         ordering="payment__name",
     )
     def get_payment_name(self, obj):
-        """Returns the related CouponPayment name"""
+        """Returns the related CouponPayment name"""  # noqa: D401
         return obj.payment.name
 
     @admin.display(description="Company Name")
     def get_company_name(self, obj):
-        """Returns the related Company name"""
+        """Returns the related Company name"""  # noqa: D401
         return None if not obj.company else obj.company.name
 
     class Media:
@@ -328,7 +328,7 @@ class CouponVersionAdmin(admin.ModelAdmin):
     list_display = ("id", "get_coupon_code", "get_payment_name")
     raw_id_fields = ("coupon", "payment_version")
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     @admin.display(
@@ -336,7 +336,7 @@ class CouponVersionAdmin(admin.ModelAdmin):
         ordering="coupon__coupon_code",
     )
     def get_coupon_code(self, obj):
-        """Returns the related Coupon code"""
+        """Returns the related Coupon code"""  # noqa: D401
         return obj.coupon.coupon_code
 
     @admin.display(
@@ -344,7 +344,7 @@ class CouponVersionAdmin(admin.ModelAdmin):
         ordering="payment__name",
     )
     def get_payment_name(self, obj):
-        """Returns the related CouponPayment name"""
+        """Returns the related CouponPayment name"""  # noqa: D401
         return obj.payment_version.payment.name
 
     class Media:
@@ -364,7 +364,7 @@ class CouponSelectionAdmin(admin.ModelAdmin):
         ordering="coupon__payment__name",
     )
     def get_payment_name(self, obj):
-        """Returns the related CouponPayment name"""
+        """Returns the related CouponPayment name"""  # noqa: D401
         return obj.coupon.payment.name
 
     @admin.display(
@@ -372,7 +372,7 @@ class CouponSelectionAdmin(admin.ModelAdmin):
         ordering="coupon__coupon_code",
     )
     def get_coupon_code(self, obj):
-        """Returns the related Coupon code"""
+        """Returns the related Coupon code"""  # noqa: D401
         return obj.coupon.coupon_code
 
     @admin.display(
@@ -380,7 +380,7 @@ class CouponSelectionAdmin(admin.ModelAdmin):
         ordering="basket__user__email",
     )
     def get_basket_user(self, obj):
-        """Returns the related Basket user's email"""
+        """Returns the related Basket user's email"""  # noqa: D401
         return obj.basket.user.email
 
 
@@ -400,7 +400,7 @@ class CouponEligibilityAdmin(admin.ModelAdmin):
         ordering="product__content_object__text_id",
     )
     def get_product_text_id(self, obj):
-        """Returns the text id of the related Product object"""
+        """Returns the text id of the related Product object"""  # noqa: D401
         return obj.product.content_object.text_id
 
 
@@ -418,7 +418,7 @@ class CouponRedemptionAdmin(admin.ModelAdmin):
     )
     raw_id_fields = ("coupon_version", "order")
 
-    def get_queryset(self, request):
+    def get_queryset(self, request):  # noqa: ARG002
         """Return all active and in_active products"""
         return self.model.objects.get_queryset().select_related(
             "coupon_version__coupon"
@@ -429,7 +429,7 @@ class CouponRedemptionAdmin(admin.ModelAdmin):
         ordering="coupon_version__coupon__coupon_code",
     )
     def get_coupon_code(self, obj):
-        """Returns the related Coupon"""
+        """Returns the related Coupon"""  # noqa: D401
         return obj.coupon_version.coupon.coupon_code
 
     @admin.display(
@@ -437,7 +437,7 @@ class CouponRedemptionAdmin(admin.ModelAdmin):
         ordering="coupon_version__payment_version",
     )
     def get_coupon_payment_version(self, obj):
-        """Returns the related Coupon"""
+        """Returns the related Coupon"""  # noqa: D401
         return obj.coupon_version.payment_version
 
 
@@ -461,11 +461,11 @@ class ProductVersionAdmin(admin.ModelAdmin):
         "product__programs__readable_id",
     )
 
-    def get_queryset(self, request):
+    def get_queryset(self, request):  # noqa: ARG002
         """Return all active and in_active products"""
         return self.model.objects.get_queryset().select_related("product")
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     class Media:
@@ -502,7 +502,7 @@ class ProductAdmin(admin.ModelAdmin):
     @admin.display(description="Text ID")
     def get_text_id(self, obj):
         """Return the text id"""
-        if obj.latest_version:
+        if obj.latest_version:  # noqa: RET503
             return obj.latest_version.text_id
 
     def get_queryset(self, request):
@@ -527,9 +527,9 @@ class DataConsentAgreementForm(forms.ModelForm):
 
     class Meta:
         model = DataConsentAgreement
-        fields = "__all__"
+        fields = "__all__"  # noqa: DJ007
 
-    def clean(self):
+    def clean(self):  # noqa: D102
         is_global = self.cleaned_data.get("is_global", False)
         courses = self.cleaned_data.get("courses", Course.objects.none())
         company = self.cleaned_data.get("company", None)
@@ -542,12 +542,12 @@ class DataConsentAgreementForm(forms.ModelForm):
             .exists()
         ):
             raise ValidationError(
-                "You already have a global consent agreement for this company"
+                "You already have a global consent agreement for this company"  # noqa: EM101
             )
         # Check that is_global flag is enabled or at least one course is associated with the agreement
         if not is_global and not courses.all():
             raise ValidationError(
-                "You must either check All Courses box or select courses for the agreement"
+                "You must either check All Courses box or select courses for the agreement"  # noqa: EM101
             )
         # If is_global flag is true, we will just clean the associated course list
         if is_global:
@@ -606,7 +606,7 @@ class ProductCouponAssignmentAdmin(admin.ModelAdmin):
     model = ProductCouponAssignment
 
     def get_queryset(self, request):
-        """Overrides base queryset"""
+        """Overrides base queryset"""  # noqa: D401
         return (
             super()
             .get_queryset(request)
@@ -618,7 +618,7 @@ class ProductCouponAssignmentAdmin(admin.ModelAdmin):
         ordering="product_coupon__coupon",
     )
     def get_coupon(self, obj):
-        """Returns the related Coupon"""
+        """Returns the related Coupon"""  # noqa: D401
         return obj.product_coupon.coupon
 
     @admin.display(
@@ -626,7 +626,7 @@ class ProductCouponAssignmentAdmin(admin.ModelAdmin):
         ordering="product_coupon__product",
     )
     def get_product(self, obj):
-        """Returns the related Product object"""
+        """Returns the related Product object"""  # noqa: D401
         return obj.product_coupon.product
 
 

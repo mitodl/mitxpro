@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     help = "Creates or updates seed data based on a raw seed data file"
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
         seed_data_loader = SeedDataLoader()
         raw_seed_data = get_raw_seed_data_from_file()
@@ -23,4 +23,4 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.SUCCESS("RESULTS"))
             for k, v in results.report.items():
-                self.stdout.write("{}: {}".format(k, v))
+                self.stdout.write("{}: {}".format(k, v))  # noqa: UP032

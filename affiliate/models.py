@@ -12,9 +12,7 @@ class Affiliate(TimestampedModel):
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
-        return "Affiliate: id={}, code={}, name={}".format(
-            self.id, self.code, self.name
-        )
+        return f"Affiliate: id={self.id}, code={self.code}, name={self.name}"
 
 
 class AffiliateReferralAction(TimestampedModel):

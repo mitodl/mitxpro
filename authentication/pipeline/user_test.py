@@ -1,5 +1,4 @@
 """Tests of user pipeline actions"""
-# pylint: disable=redefined-outer-name
 
 import pytest
 from django.contrib.sessions.middleware import SessionMiddleware
@@ -27,7 +26,7 @@ from users.factories import UserFactory
 
 @pytest.fixture
 def backend_settings(settings):
-    """A dictionary of settings for the backend"""
+    """A dictionary of settings for the backend"""  # noqa: D401
     return {"USER_FIELDS": settings.SOCIAL_AUTH_EMAIL_USER_FIELDS}
 
 
@@ -36,7 +35,7 @@ def mock_email_backend(mocker, backend_settings):
     """Fixture that returns a fake EmailAuth backend object"""
     backend = mocker.Mock()
     backend.name = "email"
-    backend.setting.side_effect = lambda key, default, **kwargs: backend_settings.get(
+    backend.setting.side_effect = lambda key, default, **kwargs: backend_settings.get(  # noqa: ARG005
         key, default
     )
     return backend
@@ -77,7 +76,7 @@ def mock_create_profile_strategy(mocker):
 
 
 def validate_email_auth_request_not_email_backend(mocker):
-    """Tests that validate_email_auth_request return if not using the email backend"""
+    """Tests that validate_email_auth_request return if not using the email backend"""  # noqa: D401
     mock_strategy = mocker.Mock()
     mock_backend = mocker.Mock()
     mock_backend.name = "notemail"
@@ -85,7 +84,8 @@ def validate_email_auth_request_not_email_backend(mocker):
 
 
 @pytest.mark.parametrize(
-    "has_user,expected", [(True, {"flow": SocialAuthState.FLOW_LOGIN}), (False, {})]
+    "has_user,expected",  # noqa: PT006
+    [(True, {"flow": SocialAuthState.FLOW_LOGIN}), (False, {})],
 )
 @pytest.mark.django_db
 def test_validate_email_auth_request(rf, has_user, expected, mocker):
@@ -149,7 +149,7 @@ def test_user_password_not_email_backend(mocker):
 @pytest.mark.parametrize("user_password", ["abc123", "def456"])
 def test_user_password_login(rf, user, user_password, mocker):
     """Tests that user_password works for login case"""
-    request_password = "abc123"
+    request_password = "abc123"  # noqa: S105
     user.set_password(user_password)
     user.save()
     request = rf.post(
@@ -229,7 +229,7 @@ def test_user_password_not_exists(rf, mocker):
 
 
 @pytest.mark.parametrize(
-    "backend_name,flow",
+    "backend_name,flow",  # noqa: PT006
     [
         ("notemail", None),
         ("notemail", SocialAuthState.FLOW_REGISTER),
@@ -276,7 +276,7 @@ def test_create_user_via_email(mocker, mock_email_backend, mock_create_user_stra
     response = user_actions.create_user_via_email(
         mock_create_user_strategy,
         mock_email_backend,
-        details=dict(email=email),
+        details=dict(email=email),  # noqa: C408
         pipeline_index=0,
         flow=SocialAuthState.FLOW_REGISTER,
     )
@@ -333,7 +333,7 @@ def test_create_user_via_email_with_shorter_name(mocker, mock_email_backend):
         user_actions.create_user_via_email(
             mock_strategy,
             mock_email_backend,
-            details=dict(email="test@example.com"),
+            details=dict(email="test@example.com"),  # noqa: C408
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,
         )
@@ -372,14 +372,14 @@ def test_create_user_via_email_with_email_case_insensitive_existing_user(
             mock_email_backend,
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,
-            details=dict(email=email),
+            details=dict(email=email),  # noqa: C408
         )
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "create_user_return_val,create_user_exception",
-    [[None, None], [UserFactory.build(), ValueError("bad value")]],
+    "create_user_return_val,create_user_exception",  # noqa: PT006
+    [[None, None], [UserFactory.build(), ValueError("bad value")]],  # noqa: PT007
 )
 def test_create_user_via_email_create_fail(
     mocker,
@@ -398,7 +398,7 @@ def test_create_user_via_email_create_fail(
         user_actions.create_user_via_email(
             mock_create_user_strategy,
             mock_email_backend,
-            details=dict(email="someuser@example.com"),
+            details=dict(email="someuser@example.com"),  # noqa: C408
             pipeline_index=0,
             flow=SocialAuthState.FLOW_REGISTER,
         )
@@ -422,7 +422,7 @@ def test_create_user_via_email_affiliate(
     user_actions.create_user_via_email(
         mock_create_user_strategy,
         mock_email_backend,
-        details=dict(email="someuser@example.com"),
+        details=dict(email="someuser@example.com"),  # noqa: C408
         pipeline_index=0,
         flow=SocialAuthState.FLOW_REGISTER,
     )
@@ -438,7 +438,7 @@ def test_create_user_via_email_affiliate(
 @pytest.mark.parametrize("hubspot_key", [None, "fake-key"])
 def test_create_profile(
     mock_email_backend, mock_create_profile_strategy, hubspot_key, settings, mocker
-):  # pylint:disable=too-many-arguments
+):
     """
     Tests that create_profile creates a profile
     """
@@ -495,7 +495,7 @@ def test_forbid_hijack(mocker, hijacked):
     kwargs = {"flow": SocialAuthState.FLOW_LOGIN}
 
     if hijacked:
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             user_actions.forbid_hijack(*args, **kwargs)
     else:
         assert user_actions.forbid_hijack(*args, **kwargs) == {}
@@ -533,18 +533,33 @@ def test_send_user_to_hubspot(mocker, settings):
 @pytest.mark.parametrize("is_active", [True, False])
 @pytest.mark.parametrize("is_new", [True, False])
 @pytest.mark.parametrize(
-    "is_enabled, has_inquiry, computed_result, expected",
+    "is_enabled, has_inquiry, computed_result, expected",  # noqa: PT006
     [
-        [True, True, RESULT_SUCCESS, True],  # feature enabled, result is success
-        [True, True, RESULT_DENIED, False],  # feature enabled, result is denied
-        [True, True, RESULT_UNKNOWN, False],  # feature enabled, result is unknown
-        [False, False, None, True],  # feature disabled
-        [True, False, None, False],  # feature enabled, no result
+        [  # noqa: PT007
+            True,
+            True,
+            RESULT_SUCCESS,
+            True,
+        ],  # feature enabled, result is success
+        [  # noqa: PT007
+            True,
+            True,
+            RESULT_DENIED,
+            False,
+        ],  # feature enabled, result is denied
+        [  # noqa: PT007
+            True,
+            True,
+            RESULT_UNKNOWN,
+            False,
+        ],  # feature enabled, result is unknown
+        [False, False, None, True],  # feature disabled  # noqa: PT007
+        [True, False, None, False],  # feature enabled, no result  # noqa: PT007
     ],
 )
-def test_activate_user(
+def test_activate_user(  # noqa: PLR0913
     mocker, user, is_active, is_new, is_enabled, has_inquiry, computed_result, expected
-):  # pylint: disable=too-many-arguments
+):
     """Test that activate_user takes the correct action"""
     user.is_active = is_active
     if has_inquiry:
@@ -564,17 +579,17 @@ def test_activate_user(
 
 @pytest.mark.parametrize("raises_error", [True, False])
 @pytest.mark.parametrize(
-    "is_active, is_new, creates_records",
+    "is_active, is_new, creates_records",  # noqa: PT006
     [
-        [True, True, True],
-        [True, False, False],
-        [False, True, False],
-        [False, False, False],
+        [True, True, True],  # noqa: PT007
+        [True, False, False],  # noqa: PT007
+        [False, True, False],  # noqa: PT007
+        [False, False, False],  # noqa: PT007
     ],
 )
-def test_create_courseware_user(
+def test_create_courseware_user(  # noqa: PLR0913
     mocker, user, raises_error, is_active, is_new, creates_records
-):  # pylint: disable=too-many-arguments
+):
     """Test that activate_user takes the correct action"""
     user.is_active = is_active
 
@@ -606,10 +621,10 @@ def test_create_courseware_user(
 
 
 @pytest.mark.parametrize(
-    "backend_name,flow,data",
+    "backend_name,flow,data",  # noqa: PT006
     [
         ("notemail", SocialAuthState.FLOW_REGISTER, {}),
-        ("notemail", SocialAuthState.FLOW_LOGIN, dict(email="test@example.com")),
+        ("notemail", SocialAuthState.FLOW_LOGIN, dict(email="test@example.com")),  # noqa: C408
     ],
 )
 def test_validate_email_backend(mocker, backend_name, flow, data):

@@ -11,7 +11,7 @@ from cms.models import ExternalProgramPage
 
 
 def get_zone_aware_datetime(date):
-    """Takes a date object and returns a zone aware datetime"""
+    """Takes a date object and returns a zone aware datetime"""  # noqa: D401
     return datetime.combine(date, datetime.max.time(), timezone.utc) if date else None
 
 
@@ -62,7 +62,7 @@ def migrate_external_courses(apps, schema_editor):
             defaults={
                 "is_external": True,
                 "title": external_course.title,
-                "live" "": external_course.live,
+                "live" "": external_course.live,  # noqa: ISC001
             },
         )
         # If already exists, Just set value for newly added field
@@ -163,7 +163,6 @@ def migrate_external_courseware(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("courses", "0030_add_courseware_external_fields"),
         ("cms", "0053_certificatepage_partner_logo"),
@@ -239,5 +238,5 @@ class Migration(migrations.Migration):
         ),
         # Commenting this, The fields in this data migration are being removed now as cleanup.
         # So the build fails on the fresh instance since it runs this migration
-        # migrations.RunPython(migrate_external_courseware, migrations.RunPython.noop),
+        # migrations.RunPython(migrate_external_courseware, migrations.RunPython.noop),  # noqa: ERA001
     ]

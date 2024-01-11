@@ -1,23 +1,23 @@
 """
 Makes a request to receive push notifications when xPro spreadsheets are updated
 """
-from collections import namedtuple
 import sys
+from collections import namedtuple
 
 from django.core.management import BaseCommand
 from googleapiclient.errors import HttpError
 
 from sheets.api import (
     create_or_renew_sheet_file_watch,
-    request_file_watch,
     get_sheet_metadata_from_type,
+    request_file_watch,
 )
+from sheets.constants import SHEET_TYPE_COUPON_ASSIGN, VALID_SHEET_TYPES
 from sheets.coupon_assign_api import fetch_webhook_eligible_assign_sheet_ids
-from sheets.constants import VALID_SHEET_TYPES, SHEET_TYPE_COUPON_ASSIGN
 from sheets.models import FileWatchRenewalAttempt
 
-SheetMap = namedtuple("SheetMap", ["metadata", "file_ids"])
-FileWatchResult = namedtuple(
+SheetMap = namedtuple("SheetMap", ["metadata", "file_ids"])  # noqa: PYI024
+FileWatchResult = namedtuple(  # noqa: PYI024
     "FileWatchResult", ["file_watch", "metadata", "created", "updated"]
 )
 
@@ -29,7 +29,7 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def add_arguments(self, parser):  # pylint:disable=missing-docstring
+    def add_arguments(self, parser):  # noqa: D102
         parser.add_argument(
             "-s",
             "--sheet-type",
@@ -68,10 +68,11 @@ class Command(BaseCommand):
             ),
         )
 
-    def handle(
-        self, *args, **options
-    ):  # pylint:disable=missing-docstring,too-many-branches,too-many-locals
-
+    def handle(  # noqa: D102, C901
+        self,
+        *args,  # noqa: ARG002
+        **options,
+    ):
         sheet_dict = {}
 
         # Build a map of sheets that should be renewed (and specific file IDs if applicable)
@@ -106,7 +107,7 @@ class Command(BaseCommand):
 
         # Make requests to renew the file watches for the given sheets and record the results
         file_watch_results = []
-        for sheet_type, sheet_map in sheet_dict.items():
+        for sheet_type, sheet_map in sheet_dict.items():  # noqa: B007
             for file_id in sheet_map.file_ids:
                 file_watch, created, updated = create_or_renew_sheet_file_watch(
                     sheet_map.metadata, force=options["force"], sheet_file_id=file_id
@@ -135,7 +136,7 @@ class Command(BaseCommand):
                     )
                 )
                 self.style.ERROR(
-                    "Failed to create/update file watch.{}".format(error_msg)
+                    "Failed to create/update file watch.{}".format(error_msg)  # noqa: UP032
                 )
                 continue
             if file_watch_result.created:
@@ -146,7 +147,7 @@ class Command(BaseCommand):
                 desc = "found (unexpired)"
             file_id_desc = ""
             if file_watch_result.metadata.sheet_type == SHEET_TYPE_COUPON_ASSIGN:
-                file_id_desc = " (file id: {})".format(file_watch.file_id)
+                file_id_desc = " (file id: {})".format(file_watch.file_id)  # noqa: UP032
 
             self.stdout.write(
                 self.style.SUCCESS(
@@ -197,7 +198,7 @@ class Command(BaseCommand):
                     )
                 else:
                     self.stdout.write(
-                        self.style.ERROR("Request failed: {}".format(exc))
+                        self.style.ERROR("Request failed: {}".format(exc))  # noqa: UP032
                     )
                     sys.exit(1)
             else:

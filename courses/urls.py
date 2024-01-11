@@ -5,7 +5,6 @@ from rest_framework import routers
 
 from courses.views import v1
 
-
 router = routers.SimpleRouter()
 router.register(r"programs", v1.ProgramViewSet, basename="programs_api")
 router.register(r"courses", v1.CourseViewSet, basename="courses_api")

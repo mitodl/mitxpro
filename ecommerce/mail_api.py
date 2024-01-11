@@ -20,7 +20,6 @@ from mail.constants import (
 )
 from mitxpro.utils import format_price
 
-
 log = logging.getLogger()
 ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
 EMAIL_DATE_FORMAT = "%b %-d, %Y"
@@ -83,7 +82,7 @@ def get_bulk_enroll_message_data(bulk_assignment_id, recipient, product_coupon):
 
     Returns:
         ecommerce.api.UserMessageProps: An object containing user-specific message data
-    """
+    """  # noqa: D401
     product_object = product_coupon.product.content_object
     if product_coupon.program_run:
         email_product_id = product_coupon.program_run.full_readable_id
@@ -131,7 +130,7 @@ def send_bulk_enroll_emails(bulk_assignment_id, product_coupon_assignments):
         bulk_assignment_id (int): The id for the BulkCouponAssignment that the assignments belong to
         product_coupon_assignments (iterable of ProductCouponAssignments):
             Product coupon assignments about which we want to notify the recipients
-    """
+    """  # noqa: D401
     api.send_messages(
         api.build_user_specific_messages(
             EMAIL_BULK_ENROLL,
@@ -165,7 +164,7 @@ def send_course_run_enrollment_email(enrollment):
                 EMAIL_COURSE_RUN_ENROLLMENT,
             )
         )
-    except:  # pylint: disable=bare-except
+    except:  # noqa: E722
         log.exception("Error sending enrollment success email")
 
 
@@ -187,8 +186,8 @@ def send_course_run_unenrollment_email(enrollment):
                 EMAIL_COURSE_RUN_UNENROLLMENT,
             )
         )
-    except Exception as exp:  # pylint: disable=broad-except
-        log.exception("Error sending unenrollment success email: %s", exp)
+    except Exception as exp:
+        log.exception("Error sending unenrollment success email: %s", exp)  # noqa: TRY401
 
 
 def send_b2b_receipt_email(order):
@@ -247,7 +246,7 @@ def send_b2b_receipt_email(order):
                 EMAIL_B2B_RECEIPT,
             )
         )
-    except:  # pylint: disable=bare-except
+    except:  # noqa: E722
         log.exception("Error sending receipt email")
 
 
@@ -331,7 +330,7 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
         )
         api.send_messages(messages)
 
-    except:  # pylint: disable=bare-except
+    except:  # noqa: E722
         log.exception("Error sending order receipt email.")
 
 
@@ -352,7 +351,7 @@ def send_support_email(subject, message):
                 [settings.EMAIL_SUPPORT],
                 connection=connection,
             )
-    except:  # pylint: disable=bare-except
+    except:  # noqa: E722
         log.exception("Exception sending email to admins")
 
 

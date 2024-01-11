@@ -1,4 +1,4 @@
-""" Task helper functions for ecommerce """
+"""Task helper functions for ecommerce"""
 from django.conf import settings
 
 from ecommerce.models import Order

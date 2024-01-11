@@ -2,31 +2,31 @@
 import datetime
 import email.utils
 from collections import namedtuple
-from urllib.parse import urljoin, quote_plus
 from enum import Enum
+from urllib.parse import quote_plus, urljoin
 
 from django.conf import settings
 from django.urls import reverse
 
 from mitxpro.utils import matching_item_index
 from sheets.constants import (
-    GOOGLE_AUTH_URI,
-    GOOGLE_TOKEN_URI,
-    GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
     ASSIGNMENT_SHEET_PREFIX,
-    GOOGLE_SHEET_FIRST_ROW,
+    GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
+    GOOGLE_AUTH_URI,
     GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN,
-    SHEETS_VALUE_REQUEST_PAGE_SIZE,
-    SHEET_TYPE_COUPON_REQUEST,
-    WORKSHEET_TYPE_REFUND,
+    GOOGLE_SHEET_FIRST_ROW,
+    GOOGLE_TOKEN_URI,
     SHEET_TYPE_COUPON_ASSIGN,
-    WORKSHEET_TYPE_DEFERRAL,
+    SHEET_TYPE_COUPON_REQUEST,
     SHEET_TYPE_ENROLL_CHANGE,
+    SHEETS_VALUE_REQUEST_PAGE_SIZE,
+    WORKSHEET_TYPE_DEFERRAL,
+    WORKSHEET_TYPE_REFUND,
 )
 
 
 def generate_google_client_config():
-    """Helper method to generate Google client config based on app settings"""
+    """Helper method to generate Google client config based on app settings"""  # noqa: D401
     return {
         "web": {
             "client_id": settings.DRIVE_CLIENT_ID,
@@ -44,7 +44,7 @@ def generate_google_client_config():
 
 def get_column_letter(column_index):
     """
-    Returns the spreadsheet column letter that corresponds to a given index (e.g.: 0 -> 'A', 3 -> 'D')
+    Return the spreadsheet column letter that corresponds to a given index (e.g.: 0 -> 'A', 3 -> 'D')
 
     Args:
         column_index (int):
@@ -52,8 +52,8 @@ def get_column_letter(column_index):
     Returns:
         str: The column index expressed as a letter
     """
-    if column_index > 25:
-        raise ValueError("Cannot generate a column letter past 'Z'")
+    if column_index > 25:  # noqa: PLR2004
+        raise ValueError("Cannot generate a column letter past 'Z'")  # noqa: EM101
     uppercase_a_ord = ord("A")
     return chr(column_index + uppercase_a_ord)
 
@@ -81,7 +81,7 @@ class SheetMetadata:
 
     def handler_url_stub(self, file_id=None):
         """
-        Returns the URL that Google should send requests to when a change is made to a watched
+        Return the URL that Google should send requests to when a change is made to a watched
         spreadsheet.
 
         Args:
@@ -91,7 +91,7 @@ class SheetMetadata:
         Returns:
             str: The URL that Google will send file watch requests to
         """
-        params = dict(sheet=quote_plus(self.sheet_type))
+        params = dict(sheet=quote_plus(self.sheet_type))  # noqa: C408
         if file_id:
             params["fileId"] = file_id
         param_str = "&".join([f"{k}={v}" for k, v in params.items()])
@@ -99,7 +99,7 @@ class SheetMetadata:
 
     def get_form_input_columns(self, row_data):
         """
-        Returns a list of column values for columns that contain data entered by a user in a form
+        Return a list of column values for columns that contain data entered by a user in a form
         (i.e.: no auto-generated values, or values entered by this app)
 
         Args:
@@ -121,9 +121,7 @@ class SingletonSheetMetadata(SheetMetadata):
     sheet_file_id = None
 
 
-class CouponRequestSheetMetadata(
-    SingletonSheetMetadata
-):  # pylint: disable=too-many-instance-attributes
+class CouponRequestSheetMetadata(SingletonSheetMetadata):
     """Metadata for the coupon request spreadsheet"""
 
     PURCHASE_ORDER_COL_INDEX = 0
@@ -132,7 +130,7 @@ class CouponRequestSheetMetadata(
     ERROR_COL = settings.SHEETS_REQ_ERROR_COL
     SKIP_ROW_COL = ERROR_COL + 1
 
-    def __init__(self):  # pylint: disable=too-many-instance-attributes
+    def __init__(self):
         self.sheet_type = SHEET_TYPE_COUPON_REQUEST
         self.sheet_name = "Coupon Request sheet"
         self.first_data_row = GOOGLE_SHEET_FIRST_ROW + 1
@@ -144,9 +142,7 @@ class CouponRequestSheetMetadata(
         self.ERROR_COL_LETTER = get_column_letter(self.ERROR_COL)
 
 
-class RefundRequestSheetMetadata(
-    SingletonSheetMetadata
-):  # pylint: disable=too-many-instance-attributes
+class RefundRequestSheetMetadata(SingletonSheetMetadata):
     """Metadata for the refund request spreadsheet"""
 
     FORM_RESPONSE_ID_COL = 0
@@ -165,7 +161,7 @@ class RefundRequestSheetMetadata(
         self.num_columns = self.SKIP_ROW_COL + 1
         self.non_input_column_indices = set(
             # Response ID column
-            [self.FORM_RESPONSE_ID_COL]
+            [self.FORM_RESPONSE_ID_COL]  # noqa: RUF005
             +
             # Every column from the finance columns to the end of the row
             list(range(8, self.num_columns))
@@ -176,9 +172,7 @@ class RefundRequestSheetMetadata(
         self.ERROR_COL_LETTER = get_column_letter(self.ERROR_COL)
 
 
-class DeferralRequestSheetMetadata(
-    SingletonSheetMetadata
-):  # pylint: disable=too-many-instance-attributes
+class DeferralRequestSheetMetadata(SingletonSheetMetadata):
     """Metadata for the deferral request spreadsheet"""
 
     FORM_RESPONSE_ID_COL = 0
@@ -196,7 +190,7 @@ class DeferralRequestSheetMetadata(
         self.num_columns = self.SKIP_ROW_COL + 1
         self.non_input_column_indices = set(
             # Response ID column
-            [self.FORM_RESPONSE_ID_COL]
+            [self.FORM_RESPONSE_ID_COL]  # noqa: RUF005
             +
             # Every column from the finance columns to the end of the row
             list(range(self.PROCESSOR_COL, self.num_columns))
@@ -207,9 +201,7 @@ class DeferralRequestSheetMetadata(
         self.ERROR_COL_LETTER = get_column_letter(self.ERROR_COL)
 
 
-class CouponAssignSheetMetadata(
-    SheetMetadata
-):  # pylint: disable=too-many-instance-attributes
+class CouponAssignSheetMetadata(SheetMetadata):
     """Metadata for a coupon assignment spreadsheet"""
 
     def __init__(self):
@@ -255,27 +247,27 @@ class ResultType(Enum):
     PROCESSED = "processed"
 
     def __lt__(self, other):
-        return self.value < other.value  # pylint: disable=comparison-with-callable
+        return self.value < other.value
 
 
-RowResult = namedtuple(
+RowResult = namedtuple(  # noqa: PYI024
     "RowResult", ["row_index", "row_db_record", "row_object", "message", "result_type"]
 )
-ProcessedRequest = namedtuple(
+ProcessedRequest = namedtuple(  # noqa: PYI024
     "ProcessedRequest", ["row_index", "coupon_req_row", "request_id", "date_processed"]
 )
-FailedRequest = namedtuple(
+FailedRequest = namedtuple(  # noqa: PYI024
     "FailedRequest", ["row_index", "exception", "sheet_error_text"]
 )
-IgnoredRequest = namedtuple("IgnoredRequest", ["row_index", "coupon_req_row", "reason"])
-AssignmentRowUpdate = namedtuple(
+IgnoredRequest = namedtuple("IgnoredRequest", ["row_index", "coupon_req_row", "reason"])  # noqa: PYI024
+AssignmentRowUpdate = namedtuple(  # noqa: PYI024
     "AssignmentRowUpdate", ["row_index", "status", "status_date", "alternate_email"]
 )
 
 
 def assignment_sheet_file_name(coupon_req_row):
     """
-    Generates the filename for a coupon assignment Sheet
+    Generate the filename for a coupon assignment Sheet
 
     Args:
         coupon_req_row (sheets.coupon_request_api.CouponRequestRow):
@@ -283,7 +275,7 @@ def assignment_sheet_file_name(coupon_req_row):
     Returns:
         str: File name for a coupon assignment Sheet
     """
-    return " - ".join(
+    return " - ".join(  # noqa: FLY002
         [
             ASSIGNMENT_SHEET_PREFIX,
             coupon_req_row.company_name,
@@ -293,9 +285,9 @@ def assignment_sheet_file_name(coupon_req_row):
     )
 
 
-def get_data_rows(worksheet, include_trailing_empty=False):
+def get_data_rows(worksheet, include_trailing_empty=False):  # noqa: FBT002
     """
-    Yields the data rows of a spreadsheet that has a header row
+    Yield the data rows of a spreadsheet that has a header row
 
     Args:
         worksheet (pygsheets.worksheet.Worksheet): Worksheet object
@@ -328,7 +320,7 @@ def get_data_rows_after_start(
     **kwargs,
 ):
     """
-    Yields the data rows of a spreadsheet starting with a given row and spanning a given column range
+    Yield the data rows of a spreadsheet starting with a given row and spanning a given column range
     until empty rows are encountered.
 
     Args:
@@ -361,7 +353,7 @@ def get_data_rows_after_start(
 
 def spreadsheet_repr(spreadsheet=None, spreadsheet_metadata=None):
     """
-    Returns a simple string representation of a Spreadsheet object
+    Return a simple string representation of a Spreadsheet object
 
     Args:
         spreadsheet (pygsheets.spreadsheet.Spreadsheet or None):
@@ -377,13 +369,13 @@ def spreadsheet_repr(spreadsheet=None, spreadsheet_metadata=None):
     else:
         sheet_id, title = None, None
     if not sheet_id or not title:
-        raise ValueError("Invalid spreadsheet/metadata provided")
-    return "'{}', id: {}".format(title, sheet_id)
+        raise ValueError("Invalid spreadsheet/metadata provided")  # noqa: EM101
+    return f"'{title}', id: {sheet_id}"
 
 
 def clean_sheet_value(value):
     """
-    Takes a spreadsheet cell value and returns a cleaned version
+    Take a spreadsheet cell value and returns a cleaned version
 
     Args:
         value (str): A raw spreadsheet cell value
@@ -410,8 +402,8 @@ def format_datetime_for_google_api(dt):
 
 def format_datetime_for_google_timestamp(dt):
     """
-    Formats a datetime for use in a Google API request that expects a timestamp
-    (e.g.: file watch expiration – https://developers.google.com/drive/api/v3/reference/files/watch#request-body)
+    Format a datetime for use in a Google API request that expects a timestamp
+    (e.g.: file watch expiration - https://developers.google.com/drive/api/v3/reference/files/watch#request-body)
 
     Args:
         dt (datetime.datetime):
@@ -451,7 +443,7 @@ def format_datetime_for_sheet_formula(dt):
 
 def _parse_sheet_date_str(date_str, date_format):
     """
-    Parses a string that represents a date/datetime and returns the UTC datetime (or None)
+    Parse a string that represents a date/datetime and returns the UTC datetime (or None)
 
     Args:
         date_str (str): The date/datetime string
@@ -474,7 +466,7 @@ def _parse_sheet_date_str(date_str, date_format):
 
 def parse_sheet_datetime_str(datetime_str):
     """
-    Parses a string that represents a datetime and returns the UTC datetime (or None)
+    Parse a string that represents a datetime and returns the UTC datetime (or None)
 
     Args:
         datetime_str (str): The datetime string
@@ -487,7 +479,7 @@ def parse_sheet_datetime_str(datetime_str):
 
 def parse_sheet_date_only_str(date_str):
     """
-    Parses a string that represents a date and returns the UTC datetime (or None)
+    Parse a string that represents a date and returns the UTC datetime (or None)
 
     Args:
         date_str (str): The datetime string
@@ -500,7 +492,7 @@ def parse_sheet_date_only_str(date_str):
 
 def google_timestamp_to_datetime(google_timestamp):
     """
-    Parses a timestamp value from a Google API response as a normal datetime (UTC)
+    Parse a timestamp value from a Google API response as a normal datetime (UTC)
 
     Args:
         google_timestamp (str or int): A timestamp value from a Google API response
@@ -515,7 +507,7 @@ def google_timestamp_to_datetime(google_timestamp):
 
 def google_date_string_to_datetime(google_date_str):
     """
-    Parses a datetime string value from a Google API response as a normal datetime (UTC)
+    Parse a datetime string value from a Google API response as a normal datetime (UTC)
 
     Args:
         google_date_str (str): A datetime string value from a Google API response
@@ -530,7 +522,7 @@ def google_date_string_to_datetime(google_date_str):
 
 def mailgun_timestamp_to_datetime(timestamp):
     """
-    Parses a timestamp value from a Mailgun API response as a datetime
+    Parse a timestamp value from a Mailgun API response as a datetime
 
     Args:
         timestamp (float): A timestamp value from a Mailgun API response
@@ -545,7 +537,7 @@ def build_multi_cell_update_request_body(
     row_index, column_index, values, worksheet_id=0
 ):
     """
-    Builds a dict for use in the body of a Google Sheets API batch update request
+    Build a dict for use in the body of a Google Sheets API batch update request
 
     Args:
         row_index (int): The index of the cell row that should be updated (starting with 0)
@@ -571,17 +563,17 @@ def build_multi_cell_update_request_body(
     }
 
 
-def build_protected_range_request_body(
+def build_protected_range_request_body(  # noqa: PLR0913
     start_row_index,
     num_rows,
     start_col_index,
     num_cols,
     worksheet_id=0,
-    warning_only=False,
+    warning_only=False,  # noqa: FBT002
     description=None,
-):  # pylint: disable=too-many-arguments
+):
     """
-    Builds a request body that will be sent to the Google Sheets API to create a protected range on a spreadsheet.
+    Build a request body that will be sent to the Google Sheets API to create a protected range on a spreadsheet.
 
     Args:
         start_row_index (int): The zero-based index of the row of the range that will be protected
@@ -616,7 +608,7 @@ def build_protected_range_request_body(
 
 def build_drive_file_email_share_request(file_id, email_to_share):
     """
-    Builds the body of a Drive file share request
+    Build the body of a Drive file share request
 
     Args:
         file_id (str): The file id of the Drive file being shared

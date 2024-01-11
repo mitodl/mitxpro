@@ -4,9 +4,8 @@ Custom wagtail embed providers and finders
 
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
-from django.core.exceptions import ImproperlyConfigured
-
 from bs4 import BeautifulSoup
+from django.core.exceptions import ImproperlyConfigured
 from wagtail.embeds.finders.oembed import OEmbedFinder
 from wagtail.embeds.oembed_providers import youtube
 
@@ -25,12 +24,12 @@ class YouTubeEmbedFinder(OEmbedFinder):
 
         if providers != [youtube]:
             raise ImproperlyConfigured(
-                "The YouTubeEmbedFinder only operates on the youtube provider"
+                "The YouTubeEmbedFinder only operates on the youtube provider"  # noqa: EM101
             )
 
         super().__init__(providers=providers, options=options)
 
-    def find_embed(self, url, max_width=None):  # pylint: disable=arguments-differ
+    def find_embed(self, url, max_width=None):  # noqa: D102
         embed = super().find_embed(url, max_width)
         embed_tag = BeautifulSoup(embed["html"], "html.parser")
         player_iframe = embed_tag.find("iframe")

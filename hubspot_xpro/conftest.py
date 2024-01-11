@@ -14,9 +14,6 @@ from ecommerce import factories
 from ecommerce.models import Order, Product
 from users.models import User
 
-
-# pylint: disable=redefined-outer-name
-
 TIMESTAMPS = [
     datetime(2017, 1, 1, tzinfo=timezone.utc),
     datetime(2017, 1, 2, tzinfo=timezone.utc),
@@ -42,7 +39,7 @@ def mocked_celery(mocker):
     group_mock = mocker.patch("celery.group", autospec=True)
     chain_mock = mocker.patch("celery.chain", autospec=True)
 
-    yield SimpleNamespace(
+    return SimpleNamespace(
         replace=replace_mock,
         group=group_mock,
         chain=chain_mock,
@@ -53,7 +50,7 @@ def mocked_celery(mocker):
 @pytest.fixture
 def mock_logger(mocker):
     """Mock the logger"""
-    yield mocker.patch("hubspot_xpro.tasks.log.error")
+    return mocker.patch("hubspot_xpro.tasks.log.error")
 
 
 @pytest.fixture
@@ -120,4 +117,4 @@ def mock_hubspot_api(mocker):
     mock_api.return_value.crm.objects.basic_api.create.return_value = (
         SimplePublicObject(id=FAKE_HUBSPOT_ID)
     )
-    yield mock_api
+    return mock_api

@@ -1,37 +1,34 @@
 """Tests for mitxpro models"""
-from random import sample, randint, choice
+from random import choice, randint, sample
 from types import SimpleNamespace
 
+import pytest
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection, models
-import pytest
 
 from mitxpro.models import PrefetchGenericQuerySet
 
 pytestmark = pytest.mark.django_db
 
-# pylint: disable=redefined-outer-name
-
 
 @pytest.fixture(scope="module")
-@pytest.mark.usefixtures("django_db_setup")
 def test_models(django_db_blocker):
     """Fixture that creates test-only models"""
     with django_db_blocker.unblock():
 
-        class SecondLevel1(models.Model):
+        class SecondLevel1(models.Model):  # noqa: DJ008
             """Test-only model"""
 
-        class SecondLevel2(models.Model):
+        class SecondLevel2(models.Model):  # noqa: DJ008
             """Test-only model"""
 
-        class FirstLevel1(models.Model):
+        class FirstLevel1(models.Model):  # noqa: DJ008
             """Test-only model"""
 
             second_level = models.ForeignKey(SecondLevel1, on_delete=models.CASCADE)
 
-        class FirstLevel2(models.Model):
+        class FirstLevel2(models.Model):  # noqa: DJ008
             """Test-only model"""
 
             second_levels = models.ManyToManyField(SecondLevel2)
@@ -39,12 +36,12 @@ def test_models(django_db_blocker):
         class TestModelQuerySet(PrefetchGenericQuerySet):
             """Test-only QuerySet"""
 
-        class Root(models.Model):
+        class Root(models.Model):  # noqa: DJ008
             """Test-only model"""
 
             objects = TestModelQuerySet.as_manager()
 
-            content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+            content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # noqa: DJ012
             object_id = models.PositiveIntegerField()
             content_object = GenericForeignKey("content_type", "object_id")
 
@@ -56,7 +53,7 @@ def test_models(django_db_blocker):
             editor.create_model(FirstLevel2)
             editor.create_model(Root)
 
-    yield SimpleNamespace(
+    return SimpleNamespace(
         SecondLevel1=SecondLevel1,
         SecondLevel2=SecondLevel2,
         FirstLevel1=FirstLevel1,
@@ -69,7 +66,7 @@ def test_prefetch_generic_related(django_assert_num_queries, test_models):
     """Test prefetch over a many-to-one relation"""
     second_levels1 = [test_models.SecondLevel1.objects.create() for _ in range(5)]
     first_levels1 = [
-        test_models.FirstLevel1.objects.create(second_level=choice(second_levels1))
+        test_models.FirstLevel1.objects.create(second_level=choice(second_levels1))  # noqa: S311
         for _ in range(10)
     ]
 
@@ -77,14 +74,14 @@ def test_prefetch_generic_related(django_assert_num_queries, test_models):
     first_levels2 = []
     for _ in range(10):
         first_level = test_models.FirstLevel2.objects.create()
-        first_level.second_levels.set(sample(second_levels2, randint(1, 3)))
+        first_level.second_levels.set(sample(second_levels2, randint(1, 3)))  # noqa: S311
         first_levels2.append(first_level)
 
     roots = [
-        test_models.Root.objects.create(content_object=choice(first_levels1))
+        test_models.Root.objects.create(content_object=choice(first_levels1))  # noqa: S311
         for _ in range(5)
     ] + [
-        test_models.Root.objects.create(content_object=choice(first_levels2))
+        test_models.Root.objects.create(content_object=choice(first_levels2))  # noqa: S311
         for _ in range(5)
     ]
 

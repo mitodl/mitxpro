@@ -63,7 +63,6 @@ from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import dict_without_keys, now_in_utc
 from users.factories import UserFactory
 
-
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_ACCESS_KEY = "access"
 CYBERSOURCE_PROFILE_ID = "profile"
@@ -73,9 +72,6 @@ FAKE = faker.Factory.create()
 lazy = pytest.lazy_fixture
 
 pytestmark = pytest.mark.django_db
-
-
-# pylint: disable=redefined-outer-name,unused-argument,too-many-lines,too-many-arguments
 
 
 def render_json(serializer):
@@ -93,7 +89,7 @@ def render_json(serializer):
 
 
 @pytest.fixture(autouse=True)
-def ecommerce_settings(settings):
+def ecommerce_settings(settings):  # noqa: PT004
     """
     Set cybersource settings
     """
@@ -105,7 +101,6 @@ def ecommerce_settings(settings):
     settings.EDXORG_BASE_URL = "http://edx_base"
 
 
-# pylint: disable=redefined-outer-name
 @pytest.fixture
 def basket_client(basket_and_coupons):
     """DRF Client with logged in user with basket"""
@@ -174,14 +169,14 @@ def test_creates_order(basket_client, mocker, basket_and_coupons):
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
-def test_zero_price_checkout(
+def test_zero_price_checkout(  # noqa: PLR0913
     basket_client,
     mocker,
     basket_and_coupons,
     mock_hubspot_syncs,
     settings,
     hubspot_api_key,
-):  # pylint:disable=too-many-arguments
+):
     """
     If the order total is $0, we should just fulfill the order and direct the user to our order receipt page
     """
@@ -209,11 +204,11 @@ def test_zero_price_checkout(
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json() == {
         "payload": {
-            "transaction_id": "T-{}".format(order.id),
+            "transaction_id": f"T-{order.id}",
             "transaction_total": 0.0,
             "product_type": line.product_version.product.type_string,
             "courseware_id": text_id,
-            "reference_number": "REF-{}".format(order.id),
+            "reference_number": f"REF-{order.id}",
         },
         "url": f"http://testserver/dashboard/?status=purchased&purchased={quote_plus(text_id)}",
         "method": "GET",
@@ -228,13 +223,13 @@ def test_zero_price_checkout(
     assert CourseRunSelection.objects.filter(basket__user=user).count() == 0
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
     if hubspot_api_key:
-        assert mock_hubspot_syncs.order.called_with(order.id)
+        assert mock_hubspot_syncs.order.called_with(order.id)  # noqa: PGH005
     else:
-        assert mock_hubspot_syncs.order.not_called()
+        assert mock_hubspot_syncs.order.not_called()  # noqa: PGH005
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
-def test_order_fulfilled(
+def test_order_fulfilled(  # noqa: PLR0913
     mocker,
     settings,
     basket_client,
@@ -242,7 +237,7 @@ def test_order_fulfilled(
     validated_basket,
     hubspot_api_key,
     mock_hubspot_syncs,
-):  # pylint:disable=too-many-arguments
+):
     """
     Test the happy case
     """
@@ -271,7 +266,7 @@ def test_order_fulfilled(
     assert order.status == Order.FULFILLED
     assert order.receipt_set.count() == 1
     receipt = order.receipt_set.first()
-    assert str(receipt) == "Receipt for order {}".format(receipt.order.id)
+    assert str(receipt) == f"Receipt for order {receipt.order.id}"
     assert receipt.data == data
     enroll_user.assert_called_with(order)
 
@@ -290,9 +285,9 @@ def test_order_fulfilled(
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
 
     if hubspot_api_key:
-        assert mock_hubspot_syncs.order.called_with(order.id)
+        assert mock_hubspot_syncs.order.called_with(order.id)  # noqa: PGH005
     else:
-        assert mock_hubspot_syncs.order.not_called()
+        assert mock_hubspot_syncs.order.not_called()  # noqa: PGH005
 
 
 def test_order_affiliate(basket_client, mocker, basket_and_coupons):
@@ -333,7 +328,7 @@ def test_missing_fields(basket_client, mocker):
     mocker.patch(
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )
-    try:
+    try:  # noqa: SIM105
         # Missing fields from Cybersource POST will cause a ParseException.
         # In this test we just care that we saved the data in Receipt for later
         # analysis.
@@ -389,10 +384,10 @@ def test_ignore_duplicate_cancel(
 
 
 @pytest.mark.parametrize(
-    "order_status, decision",
+    "order_status, decision",  # noqa: PT006
     [(Order.FAILED, "ERROR"), (Order.FULFILLED, "ERROR"), (Order.FULFILLED, "SUCCESS")],
 )
-def test_error_on_duplicate_order(
+def test_error_on_duplicate_order(  # noqa: PLR0913
     mocker, validated_basket, basket_client, basket_and_coupons, order_status, decision
 ):
     """If there is a duplicate message (except for CANCEL), raise an exception"""
@@ -438,17 +433,17 @@ def test_get_basket(basket_client, basket_and_coupons, mock_context, mocker):
 
 
 @pytest.mark.parametrize(
-    "receipts_enabled, order_status, expected_status_code",
+    "receipts_enabled, order_status, expected_status_code",  # noqa: PT006
     [
-        [True, Order.FULFILLED, status.HTTP_200_OK],
-        [True, Order.CREATED, status.HTTP_404_NOT_FOUND],
-        [True, Order.REFUNDED, status.HTTP_404_NOT_FOUND],
-        [False, Order.FULFILLED, status.HTTP_404_NOT_FOUND],
-        [False, Order.CREATED, status.HTTP_404_NOT_FOUND],
-        [False, Order.REFUNDED, status.HTTP_404_NOT_FOUND],
+        [True, Order.FULFILLED, status.HTTP_200_OK],  # noqa: PT007
+        [True, Order.CREATED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
+        [True, Order.REFUNDED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
+        [False, Order.FULFILLED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
+        [False, Order.CREATED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
+        [False, Order.REFUNDED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
     ],
 )
-def test_get_order_configuration(  # pylint: disable=too-many-arguments
+def test_get_order_configuration(  # noqa: PLR0913
     settings, user, user_client, receipts_enabled, order_status, expected_status_code
 ):
     """Test the view that handles order receipts functions as expected"""
@@ -461,7 +456,7 @@ def test_get_order_configuration(  # pylint: disable=too-many-arguments
 def test_get_basket_new_user(basket_and_coupons, user, user_drf_client):
     """Test that the view creates a basket returns a 200 if a user doesn't already have a basket"""
     basket = Basket.objects.all().first()
-    assert str(basket) == "Basket for {}".format(str(basket.user))
+    assert str(basket) == f"Basket for {str(basket.user)}"  # noqa: RUF010
     assert Basket.objects.filter(user=user).exists() is False
     resp = user_drf_client.get(reverse("basket_api"))
     assert resp.status_code == 200
@@ -744,7 +739,7 @@ def test_patch_basket_update_invalid_product(basket_client, basket_and_coupons):
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert "Invalid product id {}".format(bad_id) in resp_data["errors"]["items"]
+    assert f"Invalid product id {bad_id}" in resp_data["errors"]["items"]
 
 
 def test_patch_basket_update_active_inactive_product(basket_client, basket_and_coupons):
@@ -756,10 +751,7 @@ def test_patch_basket_update_active_inactive_product(basket_client, basket_and_c
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert (
-        "Invalid product id {product_id}".format(product_id=product.id)
-        in resp_data["errors"]["items"]
-    )
+    assert f"Invalid product id {product.id}" in resp_data["errors"]["items"]
 
     product.is_active = True
     product.save()
@@ -775,16 +767,13 @@ def test_patch_basket_update_inactive_product(basket_client, basket_and_coupons)
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     resp_data = resp.json()
-    assert (
-        "Invalid product id {product_id}".format(product_id=text_id)
-        in resp_data["errors"]["items"]
-    )
+    assert f"Invalid product id {text_id}" in resp_data["errors"]["items"]
 
 
 @pytest.mark.parametrize("section", ["items", "coupons"])
 def test_patch_basket_update_invalid_data(basket_client, basket_and_coupons, section):
     """Test that invalid product data is rejected with no changes to basket"""
-    data = dict()
+    data = dict()  # noqa: C408
     data[section] = [{"foo": "bar"}]
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -856,7 +845,7 @@ def test_patch_basket_invalid_run(
     # If the product is a course, create a new run on a different course which is invalid.
     # If the product is a program, create a new run on a different program.
     course_run_params = (
-        dict(course__program=product.content_object.course.program)
+        dict(course__program=product.content_object.course.program)  # noqa: C408
         if not is_program
         else {}
     )
@@ -1026,7 +1015,8 @@ def test_patch_basket_external_product(basket_and_coupons):
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     """Test that the correct model objects are created for a batch of single-use coupons"""
@@ -1050,7 +1040,8 @@ def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_post_global_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     """Test that the correct model objects are created for a batch of single-use coupons (global coupon)"""
@@ -1078,10 +1069,10 @@ def test_post_global_singleuse_coupons(admin_drf_client, single_use_coupon_json)
 
 
 @pytest.mark.parametrize(
-    "discount_type, amount",
+    "discount_type, amount",  # noqa: PT006
     [
-        [DISCOUNT_TYPE_PERCENT_OFF, 0.5],
-        [DISCOUNT_TYPE_DOLLARS_OFF, 50],
+        [DISCOUNT_TYPE_PERCENT_OFF, 0.5],  # noqa: PT007
+        [DISCOUNT_TYPE_DOLLARS_OFF, 50],  # noqa: PT007
     ],
 )
 def test_post_promo_coupon(admin_drf_client, promo_coupon_json, discount_type, amount):
@@ -1109,7 +1100,8 @@ def test_post_promo_coupon(admin_drf_client, promo_coupon_json, discount_type, a
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
     """Test that the correct model objects are created for a promo coupon (global coupon)"""
@@ -1137,24 +1129,25 @@ def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
 
 
 @pytest.mark.parametrize(
-    "attribute,bad_value,error",
+    "attribute,bad_value,error",  # noqa: PT006
     [
-        [
+        [  # noqa: PT007
             "product_ids",
             [9998, 9999],
             "Product with id(s) 9998,9999 could not be found",
         ],
-        [
+        [  # noqa: PT007
             "product_ids",
             [],
             "At least one product must be selected or coupon should be global.",
         ],
-        ["name", "AlreadyExists", "This field must be unique."],
-        ["coupon_code", "AlreadyExists", "Coupon code already exists in the platform."],
+        ["name", "AlreadyExists", "This field must be unique."],  # noqa: PT007
+        ["coupon_code", "AlreadyExists", "Coupon code already exists in the platform."],  # noqa: PT007
     ],
 )
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_create_promo_coupon_bad_product(
     admin_drf_client, promo_coupon_json, attribute, bad_value, error
@@ -1170,7 +1163,8 @@ def test_create_promo_coupon_bad_product(
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_create_promo_coupon_no_payment_info(admin_drf_client, promo_coupon_json):
     """Test that a promo CouponPaymentVersion can be created without payment info"""
@@ -1186,7 +1180,8 @@ def test_create_promo_coupon_no_payment_info(admin_drf_client, promo_coupon_json
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_create_singleuse_coupon_no_payment_info(
     admin_drf_client, single_use_coupon_json
@@ -1205,7 +1200,8 @@ def test_create_singleuse_coupon_no_payment_info(
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_create_coupon_permission(user_drf_client, promo_coupon_json):
     """Test that non-admins cannot create coupons"""
@@ -1215,7 +1211,8 @@ def test_create_coupon_permission(user_drf_client, promo_coupon_json):
 
 
 @pytest.mark.parametrize(
-    "discount_type", (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF)
+    "discount_type",
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_coupon_csv_view(admin_client, admin_drf_client, single_use_coupon_json):
     """Test that a valid csv response is returned for a CouponPaymentVersion"""
@@ -1273,17 +1270,17 @@ def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
 
 
 @pytest.mark.parametrize(
-    "url_name,url_kwarg_name,test_client,expected_status_code",
+    "url_name,url_kwarg_name,test_client,expected_status_code",  # noqa: PT006
     [
-        ["coupons_csv", "version_id", lazy("admin_client"), status.HTTP_404_NOT_FOUND],
-        ["coupons_csv", "version_id", lazy("user_client"), status.HTTP_403_FORBIDDEN],
-        [
+        ["coupons_csv", "version_id", lazy("admin_client"), status.HTTP_404_NOT_FOUND],  # noqa: PT007
+        ["coupons_csv", "version_id", lazy("user_client"), status.HTTP_403_FORBIDDEN],  # noqa: PT007
+        [  # noqa: PT007
             "bulk_assign_csv",
             "bulk_assignment_id",
             lazy("admin_client"),
             status.HTTP_404_NOT_FOUND,
         ],
-        [
+        [  # noqa: PT007
             "bulk_assign_csv",
             "bulk_assignment_id",
             lazy("user_client"),
@@ -1575,7 +1572,7 @@ def test_companies_viewset_detail(user_drf_client):
     response = user_drf_client.get(
         reverse("companies_api-detail", kwargs={"pk": company.id})
     )
-    assert str(company) == "Company {}".format(company.name)
+    assert str(company) == f"Company {company.name}"
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == CompanySerializer(instance=company).data
 

@@ -102,11 +102,9 @@ from mitxpro.utils import now_in_utc
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
 
-
 FAKE = faker.Factory.create()
 pytestmark = pytest.mark.django_db
 lazy = pytest.lazy_fixture
-# pylint: disable=redefined-outer-name,too-many-lines,unused-argument,too-many-arguments
 
 CYBERSOURCE_ACCESS_KEY = "access"
 CYBERSOURCE_PROFILE_ID = "profile"
@@ -114,7 +112,7 @@ CYBERSOURCE_SECURITY_KEY = "security"
 
 
 @pytest.fixture(autouse=True)
-def cybersource_settings(settings):
+def cybersource_settings(settings):  # noqa: PT004
     """
     Set cybersource settings
     """
@@ -156,7 +154,6 @@ def test_get_readable_id():
     assert get_readable_id(run.course.program) == run.course.program.readable_id
 
 
-# pylint: disable=too-many-locals
 @pytest.mark.parametrize("has_coupon", [True, False])
 @pytest.mark.parametrize("has_company", [True, False])
 @pytest.mark.parametrize("is_program_product", [True, False])
@@ -380,10 +377,10 @@ def test_get_valid_coupon_versions_after_redemption(user, is_global):
 
 @pytest.mark.parametrize("is_global", [True, False])
 @pytest.mark.parametrize(
-    "discount_type, amount",
+    "discount_type, amount",  # noqa: PT006
     [
-        [DISCOUNT_TYPE_DOLLARS_OFF, 100],
-        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],
+        [DISCOUNT_TYPE_DOLLARS_OFF, 100],  # noqa: PT007
+        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],  # noqa: PT007
     ],
 )
 def test_get_valid_coupon_versions_with_max_redemptions_per_user(
@@ -439,10 +436,10 @@ def test_get_valid_coupon_versions_with_max_redemptions_per_user(
 
 
 @pytest.mark.parametrize(
-    "discount_type, amount",
+    "discount_type, amount",  # noqa: PT006
     [
-        [DISCOUNT_TYPE_DOLLARS_OFF, 100],
-        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],
+        [DISCOUNT_TYPE_DOLLARS_OFF, 100],  # noqa: PT007
+        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],  # noqa: PT007
     ],
 )
 def test_global_coupons_apply_all_products(user, discount_type, amount):
@@ -473,10 +470,10 @@ def test_global_coupons_apply_all_products(user, discount_type, amount):
 
 
 @pytest.mark.parametrize(
-    "best_discount_type, best_discount_amount, lesser_coupons_type, lesser_coupons_amounts",
+    "best_discount_type, best_discount_amount, lesser_coupons_type, lesser_coupons_amounts",  # noqa: PT006
     [
-        [DISCOUNT_TYPE_DOLLARS_OFF, 100, DISCOUNT_TYPE_PERCENT_OFF, [0.1, 0.2, 0.5]],
-        [DISCOUNT_TYPE_PERCENT_OFF, 1.0, DISCOUNT_TYPE_DOLLARS_OFF, [10, 20, 80]],
+        [DISCOUNT_TYPE_DOLLARS_OFF, 100, DISCOUNT_TYPE_PERCENT_OFF, [0.1, 0.2, 0.5]],  # noqa: PT007
+        [DISCOUNT_TYPE_PERCENT_OFF, 1.0, DISCOUNT_TYPE_DOLLARS_OFF, [10, 20, 80]],  # noqa: PT007
     ],
 )
 def test_best_coupon_return_best_coupon_between_discount_types(
@@ -661,13 +658,13 @@ def test_get_product_price(basket_and_coupons):
 
 @pytest.mark.parametrize("has_coupon", [True, False])
 @pytest.mark.parametrize(
-    "discount_type, amount, price, discounted_price",
+    "discount_type, amount, price, discounted_price",  # noqa: PT006
     [
-        [DISCOUNT_TYPE_PERCENT_OFF, 0.5, 100, 50],
-        [DISCOUNT_TYPE_DOLLARS_OFF, 50, 100, 50],
+        [DISCOUNT_TYPE_PERCENT_OFF, 0.5, 100, 50],  # noqa: PT007
+        [DISCOUNT_TYPE_DOLLARS_OFF, 50, 100, 50],  # noqa: PT007
     ],
 )
-def test_get_product_version_price_with_discount(
+def test_get_product_version_price_with_discount(  # noqa: PLR0913
     has_coupon, basket_and_coupons, discount_type, amount, price, discounted_price
 ):
     """
@@ -706,9 +703,9 @@ def test_get_by_reference_number(
     same_order = Order.objects.get_by_reference_number(order.reference_number)
     assert same_order.id == order.id
     if hubspot_api_key:
-        assert mock_hubspot_syncs.order.called_with(order.id)
+        assert mock_hubspot_syncs.order.called_with(order.id)  # noqa: PGH005
     else:
-        assert mock_hubspot_syncs.order.not_called()
+        assert mock_hubspot_syncs.order.not_called()  # noqa: PGH005
 
 
 def test_get_by_reference_number_missing(validated_basket):
@@ -726,14 +723,14 @@ def test_get_by_reference_number_missing(validated_basket):
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
 @pytest.mark.parametrize("has_coupon", [True, False])
-def test_create_unfulfilled_order(
+def test_create_unfulfilled_order(  # noqa: PLR0913
     settings,
     validated_basket,
     has_coupon,
     basket_and_coupons,
     hubspot_api_key,
     mock_hubspot_syncs,
-):  # pylint: disable=too-many-locals
+):
     """
     create_unfulfilled_order should create an Order from a purchasable course
     """
@@ -772,9 +769,9 @@ def test_create_unfulfilled_order(
         assert CouponRedemption.objects.count() == 0
 
     if hubspot_api_key:
-        assert mock_hubspot_syncs.order.called_with(order.id)
+        assert mock_hubspot_syncs.order.called_with(order.id)  # noqa: PGH005
     else:
-        assert mock_hubspot_syncs.order.not_called()
+        assert mock_hubspot_syncs.order.not_called()  # noqa: PGH005
 
 
 @pytest.mark.parametrize("has_program_run", [True, False])
@@ -798,7 +795,7 @@ def test_create_unfulfilled_order_program_run(validated_basket, has_program_run)
         assert line.programrunline.program_run == basket_item.program_run
     else:
         with pytest.raises(ObjectDoesNotExist):
-            line.programrunline  # pylint: disable=pointless-statement
+            line.programrunline  # noqa: B018
 
 
 def test_create_unfulfilled_order_affiliate(validated_basket):
@@ -1342,7 +1339,7 @@ def test_fetch_and_serialize_unused_coupons(user):
     past = now - timedelta(days=5)
 
     coupons = CouponFactory.create_batch(2)
-    # Create 3 payment versions – the first 2 will apply to the same coupon, and the
+    # Create 3 payment versions - the first 2 will apply to the same coupon, and the
     # second will be the most recent version for the coupon. The last payment version
     # will be set to expired.
     payment_versions = CouponPaymentVersionFactory.create_batch(
@@ -1548,12 +1545,12 @@ def test_create_coupons(use_defaults, num_coupon_codes):
 
 
 @pytest.mark.parametrize(
-    "input_text_id,run_text_id,program_text_id,prog_run_tag",
+    "input_text_id,run_text_id,program_text_id,prog_run_tag",  # noqa: PT006
     [
-        ["course-v1:some+run", "course-v1:some+run", None, None],
-        ["program-v1:some+program", None, "program-v1:some+program", None],
-        ["program-v1:some+program+R1", None, "program-v1:some+program+R1", None],
-        ["program-v1:some+program+R1", None, "program-v1:some+program", "R1"],
+        ["course-v1:some+run", "course-v1:some+run", None, None],  # noqa: PT007
+        ["program-v1:some+program", None, "program-v1:some+program", None],  # noqa: PT007
+        ["program-v1:some+program+R1", None, "program-v1:some+program+R1", None],  # noqa: PT007
+        ["program-v1:some+program+R1", None, "program-v1:some+program", "R1"],  # noqa: PT007
     ],
 )
 def test_get_product_from_text_id(
@@ -1609,11 +1606,11 @@ def test_get_product_from_text_id_failure():
 
 
 @pytest.mark.parametrize(
-    "qs_product_id,exp_text_id",
+    "qs_product_id,exp_text_id",  # noqa: PT006
     [
-        ["123", None],
-        ["course-v1:some+id", "course-v1:some+id"],
-        ["course-v1:some id", "course-v1:some+id"],
+        ["123", None],  # noqa: PT007
+        ["course-v1:some+id", "course-v1:some+id"],  # noqa: PT007
+        ["course-v1:some id", "course-v1:some+id"],  # noqa: PT007
     ],
 )
 def test_get_product_from_querystring_id(mocker, qs_product_id, exp_text_id):

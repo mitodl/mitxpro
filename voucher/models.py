@@ -15,7 +15,7 @@ class Voucher(TimestampedModel):
     an attached coupon and a selected product (course_run)
     """
 
-    voucher_id = models.CharField(max_length=32, null=True, blank=True)
+    voucher_id = models.CharField(max_length=32, null=True, blank=True)  # noqa: DJ001
     employee_id = models.CharField(max_length=32)
     employee_name = models.CharField(max_length=128)
     course_start_date_input = models.DateField()

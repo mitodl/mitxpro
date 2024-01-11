@@ -1,5 +1,4 @@
 """Common fixtures"""
-# pylint: disable=unused-argument, redefined-outer-name
 
 import pytest
 import responses
@@ -11,13 +10,13 @@ from users.factories import UserFactory
 
 
 @pytest.fixture
-def user(db):
-    """Creates a user"""
+def user(db):  # noqa: ARG001
+    """Creates a user"""  # noqa: D401
     return UserFactory.create()
 
 
 @pytest.fixture
-def staff_user(db):
+def staff_user(db):  # noqa: ARG001
     """Staff user fixture"""
     return UserFactory.create(is_staff=True)
 
@@ -70,24 +69,24 @@ def admin_drf_client(admin_user):
 
 @pytest.fixture
 def mocked_responses():
-    """Mocked responses for requests library"""
+    """Mocked responses for requests library"""  # noqa: D401
     with responses.RequestsMock() as rsps:
         yield rsps
 
 
 @pytest.fixture
 def mock_context(mocker, user):
-    """Mocked context for serializers"""
+    """Mocked context for serializers"""  # noqa: D401
     return {"request": mocker.Mock(user=user)}
 
 
-@pytest.fixture()
+@pytest.fixture
 def wagtail_site():
     """Fixture for Wagtail default site"""
     return Site.objects.get(is_default_site=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def home_page(wagtail_site):
     """Fixture for the home page"""
     return wagtail_site.root_page
@@ -95,8 +94,8 @@ def home_page(wagtail_site):
 
 @pytest.fixture
 def valid_address_dict():
-    """Yields a dict that will deserialize into a valid legal address"""
-    return dict(
+    """Yields a dict that will deserialize into a valid legal address"""  # noqa: D401
+    return dict(  # noqa: C408
         first_name="Test",
         last_name="User",
         street_address_1="1 Main St",
@@ -107,7 +106,7 @@ def valid_address_dict():
     )
 
 
-@pytest.fixture()
-def nplusone_fail(settings):
-    """Configures the nplusone app to raise errors"""
+@pytest.fixture
+def nplusone_fail(settings):  # noqa: PT004
+    """Configures the nplusone app to raise errors"""  # noqa: D401
     settings.NPLUSONE_RAISE = True

@@ -6,8 +6,8 @@ from django.core.management.base import BaseCommand, CommandError
 from courses.models import CourseRun
 from courses.utils import ensure_course_run_grade, process_course_run_grade_certificate
 from courseware.api import get_edx_grades_with_users
-from users.api import fetch_user
 from mitxpro.utils import now_in_utc
+from users.api import fetch_user
 
 
 class Command(BaseCommand):
@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
     help = "Sync grades and certificates for a course run for all enrolled users or a specified user."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser):  # noqa: D102
         parser.add_argument(
             "--user",
             type=str,
@@ -51,25 +51,27 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(
-        self, *args, **options
-    ):  # pylint: disable=too-many-locals,too-many-branches
+    def handle(  # noqa: C901, PLR0915
+        self,
+        *args,  # noqa: ARG002
+        **options,
+    ):
         """Handle command execution"""
         # Grade override for all users for the course run. Disallowed.
         if options["grade"] is not None and not options["user"]:
             raise CommandError(
-                "No user supplied with override grade. Overwrite of grade is not supported for all users. Grade should only be supplied when a specific user is targeted."
+                "No user supplied with override grade. Overwrite of grade is not supported for all users. Grade should only be supplied when a specific user is targeted."  # noqa: EM101
             )
         try:
             run = CourseRun.objects.get(courseware_id=options["run"])
         except CourseRun.DoesNotExist:
-            raise CommandError(
-                "Could not find run with courseware_id={}".format(options["run"])
+            raise CommandError(  # noqa: B904, TRY200
+                "Could not find run with courseware_id={}".format(options["run"])  # noqa: EM103
             )
         now = now_in_utc()
         if not options.get("force") and (run.end_date is None or run.end_date > now):
             raise CommandError(
-                "The given course run has not yet finished, so the course grades should not be "
+                "The given course run has not yet finished, so the course grades should not be "  # noqa: EM103
                 "considered final (courseware_id={}, end_date={}).\n"
                 "Add the -f/--force flag if grades/certificates should be synced anyway.".format(
                     options["run"],
@@ -83,8 +85,8 @@ class Command(BaseCommand):
 
         if options["grade"] is not None:
             override_grade = float(options["grade"])
-            if override_grade and (override_grade < 0.0 or override_grade > 1.0):
-                raise CommandError("Invalid value for grade. Allowed range: 0.0 - 1.0")
+            if override_grade and (override_grade < 0.0 or override_grade > 1.0):  # noqa: PLR2004
+                raise CommandError("Invalid value for grade. Allowed range: 0.0 - 1.0")  # noqa: EM101
 
         edx_grade_user_iter = get_edx_grades_with_users(run, user=user)
 
@@ -112,7 +114,7 @@ class Command(BaseCommand):
                 _, created_cert, deleted_cert = process_course_run_grade_certificate(
                     course_run_grade=course_run_grade
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 self.stdout.write(
                     self.style.ERROR(
                         f"Course certificate creation failed for {user} due to following reason(s),\n{e}"
@@ -127,10 +129,10 @@ class Command(BaseCommand):
             else:
                 grade_status = "already exists"
 
-            grade_summary = ["passed: {}".format(course_run_grade.passed)]
+            grade_summary = ["passed: {}".format(course_run_grade.passed)]  # noqa: UP032
             if override_grade is not None:
                 grade_summary.append(
-                    "value override: {}".format(course_run_grade.grade)
+                    "value override: {}".format(course_run_grade.grade)  # noqa: UP032
                 )
 
             if created_cert:

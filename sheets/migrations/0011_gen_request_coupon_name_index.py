@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("sheets", "0010_fill_in_gen_request_coupon_name")]
 
     operations = [

@@ -63,7 +63,6 @@ def populate_total_price(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("ecommerce", "0016_payment_type_choices")]
 
     operations = [

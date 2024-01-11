@@ -18,7 +18,6 @@ from hubspot_xpro.serializers import (
 )
 from users.factories import UserFactory
 
-
 pytestmark = [pytest.mark.django_db]
 
 

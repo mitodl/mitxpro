@@ -6,12 +6,15 @@ from django.urls import reverse
 from affiliate.api import get_affiliate_code_from_request
 from affiliate.constants import AFFILIATE_QS_PARAM
 from mail import api
-from mail.constants import EMAIL_VERIFICATION, EMAIL_CHANGE_EMAIL
+from mail.constants import EMAIL_CHANGE_EMAIL, EMAIL_VERIFICATION
 
 
 def send_verification_email(
-    strategy, backend, code, partial_token
-):  # pylint: disable=unused-argument
+    strategy,
+    backend,  # noqa: ARG001
+    code,
+    partial_token,
+):
     """
     Sends a verification email for python-social-auth
 
@@ -20,7 +23,7 @@ def send_verification_email(
         backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
         code (social_django.models.Code): the confirmation code used to confirm the email address
         partial_token (str): token used to resume a halted pipeline
-    """
+    """  # noqa: D401
     url = "{}?verification_code={}&partial_token={}".format(
         strategy.build_absolute_uri(reverse("register-confirm")),
         quote_plus(code.code),
@@ -46,7 +49,7 @@ def send_verify_email_change_email(request, change_request):
     Args:
         request (django.http.Request): the http request we're sending this email for
         change_request (ChangeEmailRequest): the change request to send the confirmation for
-    """
+    """  # noqa: D401
 
     url = "{}?verification_code={}".format(
         request.build_absolute_uri(reverse("account-confirm-email-change")),

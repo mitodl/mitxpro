@@ -1,7 +1,7 @@
 """Test for user views"""
 from datetime import timedelta
-import pytest
 
+import pytest
 from django.urls import reverse
 from factory import fuzzy
 from rest_framework import status
@@ -185,7 +185,7 @@ def test_create_email_change_request_valid_email(user_drf_client, user, mocker):
 
     old_email = user.email
     resp = user_drf_client.patch(
-        "/api/change-emails/{}/".format(code), data={"confirmed": True}
+        f"/api/change-emails/{code}/", data={"confirmed": True}
     )
     assert not UserSocialAuth.objects.filter(uid=old_email, user=user).exists()
     assert resp.status_code == status.HTTP_200_OK
@@ -202,7 +202,7 @@ def test_create_email_change_request_expired_code(user_drf_client, user):
     )
 
     resp = user_drf_client.patch(
-        "/api/change-emails/{}/".format(change_request.code), data={"confirmed": True}
+        f"/api/change-emails/{change_request.code}/", data={"confirmed": True}
     )
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 

@@ -6,7 +6,8 @@ from collections import namedtuple
 from traceback import format_exc
 
 from django.core.exceptions import ValidationError
-from requests.exceptions import ConnectionError as RequestsConnectionError, HTTPError
+from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import HTTPError
 
 from courses.constants import ENROLL_CHANGE_STATUS_DEFERRED
 from courses.models import CourseRun, CourseRunEnrollment, ProgramEnrollment
@@ -21,9 +22,8 @@ from courseware.exceptions import (
 from ecommerce import mail_api
 from mitxpro.utils import first_or_none, partition
 
-
 log = logging.getLogger(__name__)
-UserEnrollments = namedtuple(
+UserEnrollments = namedtuple(  # noqa: PYI024
     "UserEnrollments",
     [
         "programs",
@@ -43,7 +43,7 @@ def get_user_enrollments(user):
         user (User): A user
     Returns:
         UserEnrollments: An object representing a user's program and course run enrollments
-    """
+    """  # noqa: D401
     program_enrollments = (
         ProgramEnrollment.objects.select_related("program__programpage")
         .prefetch_related("program__courses")
@@ -57,7 +57,7 @@ def get_user_enrollments(user):
             for program_enrollment in program_enrollments
         )
     )
-    program_course_ids = set(course.id for course in program_courses)
+    program_course_ids = set(course.id for course in program_courses)  # noqa: C401
     course_run_enrollments = (
         CourseRunEnrollment.objects.select_related("run__course__coursepage", "company")
         .filter(user=user)
@@ -90,10 +90,10 @@ def get_user_enrollments(user):
 def create_run_enrollments(
     user,
     runs,
-    keep_failed_enrollments=False,
+    keep_failed_enrollments=False,  # noqa: FBT002
     order=None,
     company=None,
-):  # pylint: disable=too-many-arguments
+):
     """
     Creates local records of a user's enrollment in course runs, and attempts to enroll them
     in edX via API
@@ -111,7 +111,7 @@ def create_run_enrollments(
         (list of CourseRunEnrollment, bool): A list of enrollment objects that were successfully
             created, paired with a boolean indicating whether or not edX enrollment was successful
             for all of the given course runs
-    """
+    """  # noqa: D401
     successful_enrollments = []
     try:
         enroll_in_edx_course_runs(user, runs)
@@ -133,7 +133,7 @@ def create_run_enrollments(
 
         edx_request_success = False
         if not keep_failed_enrollments:
-            raise EdxEnrollmentCreateError(str(error_message))
+            raise EdxEnrollmentCreateError(str(error_message))  # noqa: B904, TRY200
         log.exception(str(error_message))
     else:
         edx_request_success = True
@@ -144,12 +144,12 @@ def create_run_enrollments(
                 user=user,
                 run=run,
                 order=order,
-                defaults=dict(company=company, edx_enrolled=edx_request_success),
+                defaults=dict(company=company, edx_enrolled=edx_request_success),  # noqa: C408
             )
             if not created and not enrollment.active:
                 enrollment.edx_enrolled = edx_request_success
                 enrollment.reactivate_and_save()
-        except:  # pylint: disable=bare-except
+        except:  # noqa: E722, PERF203
             mail_api.send_enrollment_failure_message(order, run, details=format_exc())
             log.exception(
                 "Failed to create/update enrollment record (user: %s, run: %s, order: %s)",
@@ -177,16 +177,19 @@ def create_program_enrollments(user, programs, order=None, company=None):
 
     Returns:
         list of ProgramEnrollment: A list of enrollment objects that were successfully created
-    """
+    """  # noqa: D401
     successful_enrollments = []
     for program in programs:
         try:
             enrollment, created = ProgramEnrollment.all_objects.get_or_create(
-                user=user, program=program, order=order, defaults=dict(company=company)
+                user=user,
+                program=program,
+                order=order,
+                defaults=dict(company=company),  # noqa: C408
             )
             if not created and not enrollment.active:
                 enrollment.reactivate_and_save()
-        except:  # pylint: disable=bare-except
+        except:  # noqa: E722, PERF203
             mail_api.send_enrollment_failure_message(
                 order, program, details=format_exc()
             )
@@ -202,7 +205,9 @@ def create_program_enrollments(user, programs, order=None, company=None):
 
 
 def deactivate_run_enrollment(
-    run_enrollment, change_status, keep_failed_enrollments=False
+    run_enrollment,
+    change_status,
+    keep_failed_enrollments=False,  # noqa: FBT002
 ):
     """
     Helper method to deactivate a CourseRunEnrollment
@@ -215,10 +220,10 @@ def deactivate_run_enrollment(
 
     Returns:
         CourseRunEnrollment: The deactivated enrollment
-    """
+    """  # noqa: D401
     try:
         unenroll_edx_course_run(run_enrollment)
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         log.exception(
             "Failed to unenroll course run '%s' for user '%s' in edX",
             run_enrollment.run.courseware_id,
@@ -239,8 +244,8 @@ def deactivate_run_enrollment(
 def deactivate_program_enrollment(
     program_enrollment,
     change_status,
-    keep_failed_enrollments=False,
-    limit_to_order=True,
+    keep_failed_enrollments=False,  # noqa: FBT002
+    limit_to_order=True,  # noqa: FBT002
 ):
     """
     Helper method to deactivate a ProgramEnrollment
@@ -255,9 +260,9 @@ def deactivate_program_enrollment(
 
     Returns:
         tuple of ProgramEnrollment, list(CourseRunEnrollment): The deactivated enrollments
-    """
+    """  # noqa: D401
     run_enrollment_params = (
-        dict(order_id=program_enrollment.order_id)
+        dict(order_id=program_enrollment.order_id)  # noqa: C408
         if limit_to_order and program_enrollment.order_id
         else {}
     )
@@ -272,7 +277,7 @@ def deactivate_program_enrollment(
             change_status=change_status,
             keep_failed_enrollments=keep_failed_enrollments,
         ):
-            deactivated_course_runs.append(run_enrollment)
+            deactivated_course_runs.append(run_enrollment)  # noqa: PERF401
 
     if deactivated_course_runs:
         program_enrollment.deactivate_and_save(change_status, no_user=True)
@@ -286,8 +291,8 @@ def defer_enrollment(
     user,
     from_courseware_id,
     to_courseware_id,
-    keep_failed_enrollments=False,
-    force=False,
+    keep_failed_enrollments=False,  # noqa: FBT002
+    force=False,  # noqa: FBT002
 ):
     """
     Deactivates a user's existing enrollment in one course run and enrolls the user in another.
@@ -310,7 +315,7 @@ def defer_enrollment(
     )
     if not force and not from_enrollment.active:
         raise ValidationError(
-            "Cannot defer from inactive enrollment (id: {}, run: {}, user: {}). "
+            "Cannot defer from inactive enrollment (id: {}, run: {}, user: {}). "  # noqa: EM103
             "Set force=True to defer anyway.".format(
                 from_enrollment.id, from_enrollment.run.courseware_id, user.email
             )
@@ -318,17 +323,17 @@ def defer_enrollment(
     to_run = CourseRun.objects.get(courseware_id=to_courseware_id)
     if from_enrollment.run == to_run:
         raise ValidationError(
-            "Cannot defer to the same course run (run: {})".format(to_run.courseware_id)
+            "Cannot defer to the same course run (run: {})".format(to_run.courseware_id)  # noqa: EM103, UP032
         )
     if not force and not to_run.is_not_beyond_enrollment:
         raise ValidationError(
-            "Cannot defer to a course run that is outside of its enrollment period (run: {}).".format(
+            "Cannot defer to a course run that is outside of its enrollment period (run: {}).".format(  # noqa: EM103, UP032
                 to_run.courseware_id
             )
         )
     if not force and from_enrollment.run.course != to_run.course:
         raise ValidationError(
-            "Cannot defer to a course run of a different course ('{}' -> '{}'). "
+            "Cannot defer to a course run of a different course ('{}' -> '{}'). "  # noqa: EM103
             "Set force=True to defer anyway.".format(
                 from_enrollment.run.course.title, to_run.course.title
             )
@@ -347,6 +352,6 @@ def defer_enrollment(
                 ENROLL_CHANGE_STATUS_DEFERRED,
                 keep_failed_enrollments=keep_failed_enrollments,
             )
-    except EdxEnrollmentCreateError:  # pylint: disable=try-except-raise
+    except EdxEnrollmentCreateError:  # noqa: TRY302
         raise
     return from_enrollment, first_or_none(to_enrollments)

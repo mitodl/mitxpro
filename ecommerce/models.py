@@ -33,7 +33,6 @@ from mitxpro.models import (
 )
 from mitxpro.utils import first_or_none, serialize_model_object
 
-
 log = logging.getLogger()
 
 
@@ -45,13 +44,13 @@ class Company(TimestampedModel):
     name = models.CharField(max_length=512, unique=True)
 
     def __str__(self):
-        """Description for Company"""
+        """Description for Company"""  # noqa: D401
         return f"Company {self.name}"
 
 
-class ProductQuerySet(PrefetchGenericQuerySet):  # pylint: disable=missing-docstring
+class ProductQuerySet(PrefetchGenericQuerySet):  # noqa: D101
     def active(self):
-        """Filters for active products only"""
+        """Filters for active products only"""  # noqa: D401
         return self.filter(is_active=True)
 
     def with_ordered_versions(self):
@@ -65,7 +64,7 @@ class ProductQuerySet(PrefetchGenericQuerySet):  # pylint: disable=missing-docst
         )
 
 
-class _ProductManager(models.Manager):  # pylint: disable=missing-docstring
+class _ProductManager(models.Manager):
     def get_queryset(self):
         """Use the custom queryset, and filter by active products by default"""
         return ProductQuerySet(self.model, using=self._db).active()
@@ -113,7 +112,7 @@ class Product(TimestampedModel):
 
     @cached_property
     def latest_version(self):
-        """Gets the most recently created ProductVersion associated with this Product"""
+        """Gets the most recently created ProductVersion associated with this Product"""  # noqa: D401
         return first_or_none(self.ordered_versions)
 
     @property
@@ -127,7 +126,7 @@ class Product(TimestampedModel):
         elif self.content_type.model == "program":
             return CourseRun.objects.filter(course__program__id=self.object_id)
         else:
-            raise ValueError(f"Unexpected content type for {self.content_type.model}")
+            raise ValueError(f"Unexpected content type for {self.content_type.model}")  # noqa: EM102
 
     @property
     def type_string(self):
@@ -157,7 +156,7 @@ class Product(TimestampedModel):
         elif isinstance(content_object, CourseRun):
             return content_object.course.title
         else:
-            raise ValueError(f"Unexpected content type for {self.content_type.model}")
+            raise ValueError(f"Unexpected content type for {self.content_type.model}")  # noqa: EM102, TRY004
 
     @property
     def thumbnail_url(self):
@@ -175,7 +174,7 @@ class Product(TimestampedModel):
         elif isinstance(content_object, CourseRun):
             catalog_image_url = content_object.course.catalog_image_url
         else:
-            raise ValueError(f"Unexpected product {content_object}")
+            raise ValueError(f"Unexpected product {content_object}")  # noqa: EM102, TRY004
         return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
     @property
@@ -194,7 +193,7 @@ class Product(TimestampedModel):
         elif isinstance(content_object, CourseRun):
             return content_object.course.next_run_date
         else:
-            raise ValueError(f"Unexpected product {content_object}")
+            raise ValueError(f"Unexpected product {content_object}")  # noqa: EM102, TRY004
 
     @property
     def price(self):
@@ -203,7 +202,7 @@ class Product(TimestampedModel):
             return self.latest_version.price
 
     def __str__(self):
-        """Description of a product"""
+        """Description of a product"""  # noqa: D401
         return f"Product for {self.content_object}"
 
 
@@ -218,7 +217,7 @@ class ProductVersion(TimestampedModel):
     )
     price = models.DecimalField(decimal_places=2, max_digits=20)
     description = models.TextField()
-    text_id = models.TextField(null=True)
+    text_id = models.TextField(null=True)  # noqa: DJ001
     requires_enrollment_code = models.BooleanField(
         default=False,
         help_text="Requires enrollment code will require the learner to enter an enrollment code to enroll in the course at the checkout.",
@@ -227,18 +226,18 @@ class ProductVersion(TimestampedModel):
     class Meta:
         indexes = [models.Index(fields=["created_on"])]
 
-    def save(self, *args, **kwargs):  # pylint: disable=signature-differs
+    def save(self, *args, **kwargs):  # noqa: D102
         try:
-            self.text_id = getattr(self.product.content_object, "text_id")
+            self.text_id = getattr(self.product.content_object, "text_id")  # noqa: B009
         except AttributeError:
-            log.error(
+            log.error(  # noqa: TRY400
                 "The content object for this ProductVersion (%s) does not have a `text_id` property",
                 str(self.id),
             )
         super().save(*args, **kwargs)
 
     def __str__(self):
-        """Description of a ProductVersion"""
+        """Description of a ProductVersion"""  # noqa: D401
         return f"ProductVersion for {self.description}, ${self.price}"
 
 
@@ -251,7 +250,7 @@ class Basket(TimestampedModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
 
     def __str__(self):
-        """Description of Basket"""
+        """Description of Basket"""  # noqa: D401
         return f"Basket for {self.user}"
 
 
@@ -270,7 +269,7 @@ class BasketItem(TimestampedModel):
     )
 
     def __str__(self):
-        """Description of BasketItem"""
+        """Description of BasketItem"""  # noqa: D401
         return f"BasketItem of product {self.product} (qty: {self.quantity})"
 
 
@@ -333,25 +332,25 @@ class Order(OrderAbstract, AuditableModel):
     )
     total_price_paid = models.DecimalField(decimal_places=2, max_digits=20)
     # These represent the tax collected for the entire order.
-    tax_country_code = models.CharField(max_length=2, blank=True, null=True)
+    tax_country_code = models.CharField(max_length=2, blank=True, null=True)  # noqa: DJ001
     tax_rate = models.DecimalField(
         max_digits=6, decimal_places=4, null=True, blank=True, default=0
     )
-    tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")
+    tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")  # noqa: DJ001
 
     objects = OrderManager()
 
     @staticmethod
     def get_reference_number_prefix():
-        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""
+        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""  # noqa: D401
         return f"{REFERENCE_NUMBER_PREFIX}{settings.ENVIRONMENT}"
 
     def __str__(self):
-        """Description for Order"""
+        """Description for Order"""  # noqa: D401
         return f"Order #{self.id}, status={self.status}"
 
     @classmethod
-    def get_audit_class(cls):
+    def get_audit_class(cls):  # noqa: D102
         return OrderAudit
 
     def to_dict(self):
@@ -431,7 +430,7 @@ class OrderAudit(AuditModel):
     order = models.ForeignKey(Order, null=True, on_delete=models.PROTECT)
 
     @classmethod
-    def get_related_field_name(cls):
+    def get_related_field_name(cls):  # noqa: D102
         return "order"
 
 
@@ -445,7 +444,7 @@ class Line(TimestampedModel):
     quantity = models.PositiveIntegerField()
 
     def __str__(self):
-        """Description for Line"""
+        """Description for Line"""  # noqa: D401
         return f"Line for order #{self.order.id}, {self.product_version} (qty: {self.quantity})"
 
 
@@ -481,7 +480,7 @@ class ProgramRunLine(TimestampedModel):
         return f"ProgramRunLine for line: {self.id}, order: {self.line.order.id}, text id: {self.program_run.full_readable_id}"
 
 
-class CouponPaymentQueryset(models.QuerySet):  # pylint: disable=missing-docstring
+class CouponPaymentQueryset(models.QuerySet):  # noqa: D101
     def with_ordered_versions(self):
         """Prefetches related CouponPaymentVersions in reverse creation order"""
         return self.prefetch_related(
@@ -493,9 +492,9 @@ class CouponPaymentQueryset(models.QuerySet):  # pylint: disable=missing-docstri
         ).order_by("name")
 
 
-class CouponPaymentManager(models.Manager):  # pylint: disable=missing-docstring
+class CouponPaymentManager(models.Manager):  # noqa: D101
     def get_queryset(self):
-        """Sets the custom queryset"""
+        """Sets the custom queryset"""  # noqa: D401
         return CouponPaymentQueryset(self.model, using=self._db)
 
     def with_ordered_versions(self):
@@ -523,7 +522,7 @@ class CouponPayment(TimestampedModel):
         return self.versions.order_by("-created_on").first()
 
     def __str__(self):
-        """Description for CouponPayment"""
+        """Description for CouponPayment"""  # noqa: D401
         return f"CouponPayment {self.name}"
 
 
@@ -544,7 +543,7 @@ class CouponPaymentVersion(TimestampedModel):
     PAYMENT_STAFF = "staff"
     PAYMENT_TYPES = [PAYMENT_CC, PAYMENT_PO, PAYMENT_MKT, PAYMENT_SALE, PAYMENT_STAFF]
 
-    tag = models.CharField(max_length=256, null=True, blank=True)
+    tag = models.CharField(max_length=256, null=True, blank=True)  # noqa: DJ001
     payment = models.ForeignKey(
         CouponPayment, on_delete=models.PROTECT, related_name="versions"
     )
@@ -579,13 +578,13 @@ class CouponPaymentVersion(TimestampedModel):
     company = models.ForeignKey(
         Company, on_delete=models.PROTECT, null=True, blank=True
     )
-    payment_type = models.CharField(
+    payment_type = models.CharField(  # noqa: DJ001
         max_length=128,
         choices=[(paytype, paytype) for paytype in PAYMENT_TYPES],
         null=True,
         blank=True,
     )
-    payment_transaction = models.CharField(max_length=256, null=True, blank=True)
+    payment_transaction = models.CharField(max_length=256, null=True, blank=True)  # noqa: DJ001
 
     class Meta:
         indexes = [models.Index(fields=["created_on"])]
@@ -597,7 +596,7 @@ class CouponPaymentVersion(TimestampedModel):
             raise ValidationError({"amount": error_message})
 
     def __str__(self):
-        """Description for CouponPaymentVersion"""
+        """Description for CouponPaymentVersion"""  # noqa: D401
         return f"CouponPaymentVersion for {self.num_coupon_codes} of type {self.coupon_type}"
 
     def calculate_discount_amount(self, product_version=None, price=None):
@@ -622,9 +621,10 @@ class CouponPaymentVersion(TimestampedModel):
             return Decimal(0.00)
 
     def calculate_discount_percent(self, product_version=None, price=None):
-        """Vice versa of calculate_discount_amount, it calculates the percentage of discount applied on a specific
-        product, so in this case we convert the dollars-off to percentage"""
-
+        """
+        Vice versa of calculate_discount_amount, it calculates the percentage of discount applied on a specific
+        product, so in this case we convert the dollars-off to percentage
+        """
         from ecommerce.api import round_half_up
 
         price = price or (product_version.price if product_version else None)
@@ -657,7 +657,7 @@ class Coupon(TimestampedModel):
     include_future_runs = models.BooleanField(default=False)
 
     def __str__(self):
-        """Description for Coupon"""
+        """Description for Coupon"""  # noqa: D401
         return f"Coupon {self.coupon_code} for {self.payment}"
 
 
@@ -673,7 +673,7 @@ class CouponVersion(TimestampedModel):
     payment_version = models.ForeignKey(CouponPaymentVersion, on_delete=models.PROTECT)
 
     def __str__(self):
-        """Description for CouponVersion"""
+        """Description for CouponVersion"""  # noqa: D401
         return f"CouponVersion {self.coupon.coupon_code} for {self.payment_version}"
 
 
@@ -693,7 +693,7 @@ class CouponEligibility(TimestampedModel):
         unique_together = ("coupon", "product")
 
     def __str__(self):
-        """Description of CouponProduct"""
+        """Description of CouponProduct"""  # noqa: D401
         return f"CouponProduct for product {self.product}, coupon {self.coupon}"
 
 
@@ -710,7 +710,7 @@ class CouponSelection(TimestampedModel):
         unique_together = ("coupon", "basket")
 
     def __str__(self):
-        """Description of CouponSelection"""
+        """Description of CouponSelection"""  # noqa: D401
         return f"CouponSelection for basket {self.basket}, coupon {self.coupon}"
 
 
@@ -727,7 +727,7 @@ class CouponRedemption(TimestampedModel):
         unique_together = ("coupon_version", "order")
 
     def __str__(self):
-        """Description of CouponRedemption"""
+        """Description of CouponRedemption"""  # noqa: D401
         return f"CouponRedemption for order {self.order}, coupon version {self.coupon_version}"
 
 
@@ -741,7 +741,7 @@ class Receipt(TimestampedModel):
     data = models.JSONField()
 
     def __str__(self):
-        """Description of Receipt"""
+        """Description of Receipt"""  # noqa: D401
         if self.order:
             return f"Receipt for order {self.order.id}"
         else:
@@ -795,10 +795,10 @@ class DataConsentUser(TimestampedModel):
         return f"DataConsentUser {self.user} for {self.agreement}, consent date {self.consent_date}"
 
 
-class BulkCouponAssignment(models.Model):
+class BulkCouponAssignment(models.Model):  # noqa: DJ008
     """Records the bulk creation of ProductCouponAssignments"""
 
-    assignment_sheet_id = models.CharField(max_length=100, db_index=True, null=True)
+    assignment_sheet_id = models.CharField(max_length=100, db_index=True, null=True)  # noqa: DJ001
     sheet_last_modified_date = models.DateTimeField(null=True, blank=True)
     last_assignment_date = models.DateTimeField(null=True, blank=True)
     assignments_started_date = models.DateTimeField(null=True, blank=True)
@@ -814,10 +814,10 @@ class ProductCouponAssignment(TimestampedModel):
     """
 
     email = models.EmailField(blank=False)
-    original_email = models.EmailField(null=True, blank=True)
+    original_email = models.EmailField(null=True, blank=True)  # noqa: DJ001
     product_coupon = models.ForeignKey(CouponEligibility, on_delete=models.PROTECT)
     redeemed = models.BooleanField(default=False)
-    message_status = models.CharField(
+    message_status = models.CharField(  # noqa: DJ001
         choices=MAILGUN_EVENT_CHOICES, max_length=15, null=True, blank=True
     )
     message_status_date = models.DateTimeField(null=True, blank=True)
@@ -850,11 +850,11 @@ class TaxRate(TimestampedModel):
 
     country_code = models.CharField(max_length=2)
     tax_rate = models.DecimalField(max_digits=6, decimal_places=4, default=0)
-    tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")
+    tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")  # noqa: DJ001
     active = models.BooleanField(default=True)
 
     def to_dict(self):
-        """Returns object data as dict"""
+        """Returns object data as dict"""  # noqa: D401
         return {
             "country_code": self.country_code,
             "tax_rate": self.tax_rate,

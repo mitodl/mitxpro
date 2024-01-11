@@ -1,4 +1,4 @@
-""" Generate Hubspot message bodies for various model objects"""
+"""Generate Hubspot message bodies for various model objects"""
 import logging
 import re
 from decimal import Decimal
@@ -27,7 +27,6 @@ from b2b_ecommerce.constants import B2B_ORDER_PREFIX
 from b2b_ecommerce.models import B2BLine, B2BOrder
 from ecommerce.models import Line, Order, Product, ProductVersion
 from users.models import User
-
 
 log = logging.getLogger(__name__)
 
@@ -365,7 +364,7 @@ def sync_deal_line_hubspot_ids_to_db(order, hubspot_order_id) -> bool:
 
 def get_hubspot_id_for_object(
     obj: Order or B2BOrder or Product or Line or B2BLine or User,
-    raise_error: bool = False,
+    raise_error: bool = False,  # noqa: FBT001, FBT002
 ) -> str:
     """
     Get the hubspot id for an object, querying Hubspot if necessary
@@ -412,7 +411,7 @@ def get_hubspot_id_for_object(
             price=serialized_product["price"],
             raise_count_error=raise_error,
         )
-    if hubspot_obj and hubspot_obj.id:
+    if hubspot_obj and hubspot_obj.id:  # noqa: RET503
         HubspotObject.objects.update_or_create(
             object_id=obj.id,
             content_type=content_type,

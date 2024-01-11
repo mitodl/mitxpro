@@ -21,7 +21,6 @@ from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import dict_without_keys
 from users.factories import UserFactory
 
-
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_ACCESS_KEY = "access"
 CYBERSOURCE_PROFILE_ID = "profile"
@@ -30,11 +29,10 @@ FAKE = faker.Factory.create()
 
 
 pytestmark = pytest.mark.django_db
-# pylint: disable=redefined-outer-name,unused-argument,too-many-lines
 
 
 @pytest.fixture(autouse=True)
-def ecommerce_settings(settings):
+def ecommerce_settings(settings):  # noqa: PT004
     """
     Set cybersource settings
     """
@@ -85,7 +83,7 @@ def test_create_order(client, mocker):
     assert order.num_seats == num_seats
     assert order.b2breceipt_set.count() == 0
     base_url = "http://testserver/"
-    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'
+    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'  # noqa: RUF010
     assert generate_mock.call_count == 1
     assert generate_mock.call_args[0] == ()
     assert generate_mock.call_args[1] == {
@@ -138,7 +136,7 @@ def test_create_order_with_coupon(client, mocker):
     assert order.num_seats == num_seats
     assert order.b2breceipt_set.count() == 0
     base_url = "http://testserver/"
-    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'
+    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'  # noqa: RUF010
     assert generate_payload_mock.call_count == 1
     assert generate_payload_mock.call_args[0] == ()
     assert generate_payload_mock.call_args[1] == {
@@ -260,7 +258,7 @@ def test_create_order_product_version(client):
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_zero_price_checkout(client, mocker):  # pylint:disable=too-many-arguments
+def test_zero_price_checkout(client, mocker):
     """
     If the order total is $0, we should just fulfill the order and direct the user to our order receipt page
     """
@@ -279,7 +277,7 @@ def test_zero_price_checkout(client, mocker):  # pylint:disable=too-many-argumen
     assert B2BOrder.objects.count() == 1
     order = B2BOrder.objects.first()
     base_url = "http://testserver"
-    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'
+    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'  # noqa: RUF010
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json() == {"payload": {}, "url": receipt_url, "method": "GET"}
 
@@ -501,7 +499,7 @@ def test_coupon_view_invalid(client, mocker):
         B2BCoupon.objects, "get_unexpired_coupon", side_effect=B2BCoupon.DoesNotExist
     )
     params = {"code": "x", "product_id": 3}
-    response = client.get(f'{reverse("b2b-coupon-view")}?' f"{urlencode(params)}")
+    response = client.get(f'{reverse("b2b-coupon-view")}?' f"{urlencode(params)}")  # noqa: ISC001
     assert response.status_code == status.HTTP_404_NOT_FOUND
     patched.assert_called_once_with(
         coupon_code=params["code"], product_id=params["product_id"]

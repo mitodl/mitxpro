@@ -1,17 +1,17 @@
 """Testing utils"""
 import abc
-import json
-from contextlib import contextmanager
-import traceback
-from unittest.mock import Mock
 import csv
+import json
 import tempfile
+import traceback
+from contextlib import contextmanager
+from unittest.mock import Mock
 
 import pytest
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.files.uploadedfile import SimpleUploadedFile
-from rest_framework.renderers import JSONRenderer
 from requests.exceptions import HTTPError
+from rest_framework.renderers import JSONRenderer
 
 
 def any_instance_of(*cls):
@@ -23,9 +23,9 @@ def any_instance_of(*cls):
 
     Returns:
         AnyInstanceOf: dynamic class type with the desired equality
-    """
+    """  # noqa: D401
 
-    class AnyInstanceOf(metaclass=abc.ABCMeta):
+    class AnyInstanceOf(metaclass=abc.ABCMeta):  # noqa: B024
         """Dynamic class type for __eq__ in terms of isinstance"""
 
         def __eq__(self, other):
@@ -38,12 +38,12 @@ def any_instance_of(*cls):
 
 @contextmanager
 def assert_not_raises():
-    """Used to assert that the context does not raise an exception"""
+    """Used to assert that the context does not raise an exception"""  # noqa: D401
     try:
         yield
     except AssertionError:
         raise
-    except Exception:  # pylint: disable=broad-except
+    except Exception:  # noqa: BLE001
         pytest.fail(f"An exception was not raised: {traceback.format_exc()}")
 
 
@@ -55,7 +55,7 @@ def assert_drf_json_equal(obj1, obj2):
     Args:
         obj1 (object): the first object
         obj2 (object): the second object
-    """
+    """  # noqa: D401
     json_renderer = JSONRenderer()
     converted1 = json.loads(json_renderer.render(obj1))
     converted2 = json.loads(json_renderer.render(obj2))
@@ -90,7 +90,7 @@ class MockHttpError(HTTPError):
 
     def __init__(self, *args, **kwargs):
         response = MockResponse(content={"bad": "response"}, status_code=400)
-        super().__init__(*args, **{**kwargs, **{"response": response}})
+        super().__init__(*args, **{**kwargs, **{"response": response}})  # noqa: PIE800
 
 
 def drf_datetime(dt):
@@ -102,7 +102,7 @@ def drf_datetime(dt):
 
     Returns:
         str: ISO 8601 formatted datetime
-    """
+    """  # noqa: D401
     return dt.isoformat().replace("+00:00", "Z")
 
 
@@ -114,7 +114,7 @@ class PickleableMock(Mock):
     """
 
     def __reduce__(self):
-        """Required method for being pickleable"""
+        """Required method for being pickleable"""  # noqa: D401
         return (Mock, ())
 
 
@@ -128,20 +128,20 @@ def create_tempfile_csv(rows_iter):
 
     Returns:
         SimpleUploadedFile: A temporary CSV file with the given contents
-    """
+    """  # noqa: D401
     f = tempfile.NamedTemporaryFile(suffix=".csv", delete=False)
-    with open(f.name, "w", encoding="utf8", newline="") as f:
+    with open(f.name, "w", encoding="utf8", newline="") as f:  # noqa: PTH123
         writer = csv.writer(f, delimiter=",")
         for row in rows_iter:
             writer.writerow(row)
-    with open(f.name, "r") as user_csv:
+    with open(f.name, "r") as user_csv:  # noqa: PTH123, UP015
         return SimpleUploadedFile(
             f.name, user_csv.read().encode("utf8"), content_type="application/csv"
         )
 
 
 def format_as_iso8601(time):
-    """Helper function to format datetime with the Z at the end"""
+    """Helper function to format datetime with the Z at the end"""  # noqa: D401
     # Can't use datetime.isoformat() because format is slightly different from this
     iso_format = "%Y-%m-%dT%H:%M:%S"
     formatted_time = time.strftime(iso_format)
@@ -161,7 +161,7 @@ def list_of_dicts(specialty_dict_iter):
 
     Returns:
         list of dict: A list of dicts
-    """
+    """  # noqa: D401
     return list(map(dict, specialty_dict_iter))
 
 
@@ -174,7 +174,7 @@ def set_request_session(request, session_dict, mocker):
 
     Returns:
         RequestFactory: The same request object with session variables set
-    """
+    """  # noqa: D401
     middleware = SessionMiddleware(get_response=mocker.Mock())
     middleware.process_request(request)
     for key, value in session_dict.items():
@@ -194,10 +194,10 @@ def update_namespace(tuple_to_update, **updates):
 
     Returns:
         Union([types.namedtuple, typing.NamedTuple]): The updated namespace
-    """
+    """  # noqa: D401
     return tuple_to_update.__class__(
-        **{  # pylint: disable=protected-access
-            **tuple_to_update._asdict(),  # pylint: disable=protected-access
+        **{
+            **tuple_to_update._asdict(),
             **updates,
         }
     )

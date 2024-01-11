@@ -14,7 +14,6 @@ from ecommerce.test_utils import gen_fake_receipt_data
 from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
 
-
 FAKE = faker.Factory.create()
 
 
@@ -217,8 +216,7 @@ class DataConsentAgreementFactory(DjangoModelFactory):
     is_global = False
 
     @post_generation
-    # pylint: disable=unused-argument
-    def courses(self, create, extracted, **kwargs):
+    def courses(self, create, extracted, **kwargs):  # noqa: ARG002
         """Create courses for DCA"""
         if not create:
             return

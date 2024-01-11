@@ -2,7 +2,8 @@
 Management command to revoke and un revoke a certificate for a course run or program for the given user.
 """
 from django.core.management.base import BaseCommand, CommandError
-from courses.utils import revoke_program_certificate, revoke_course_run_certificate
+
+from courses.utils import revoke_course_run_certificate, revoke_program_certificate
 from users.api import fetch_user
 
 
@@ -13,7 +14,7 @@ class Command(BaseCommand):
 
     help = "Revoke and un revoke a certificate for a specified user against a program or course run."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser):  # noqa: D102
         parser.add_argument(
             "--user",
             type=str,
@@ -45,7 +46,7 @@ class Command(BaseCommand):
 
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # pylint: disable=too-many-locals
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
 
         user = fetch_user(options["user"]) if options["user"] else None
@@ -56,13 +57,13 @@ class Command(BaseCommand):
 
         if program and run:
             raise CommandError(
-                "Either 'program' or 'run' should be provided, not both."
+                "Either 'program' or 'run' should be provided, not both."  # noqa: EM101
             )
         if not program and not run:
-            raise CommandError("Either 'program' or 'run' must be provided.")
+            raise CommandError("Either 'program' or 'run' must be provided.")  # noqa: EM101
 
         if (program or run) and not user:
-            raise CommandError("A valid user must be provided.")
+            raise CommandError("A valid user must be provided.")  # noqa: EM101
 
         updated = False
         if program:
@@ -79,7 +80,7 @@ class Command(BaseCommand):
 
         if updated:
             msg = "Certificate for {} has been {}".format(
-                "run: {}".format(run) if run else "program: {}".format(program),
+                "run: {}".format(run) if run else "program: {}".format(program),  # noqa: UP032
                 "revoked" if revoke else "un-revoked",
             )
             self.stdout.write(self.style.SUCCESS(msg))
