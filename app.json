@@ -641,6 +641,10 @@
       "description": "URL for Wagtail image renditions cache",
       "required": false
     },
+    "ZENDESK_DOMAIN_VERIFICATION_TAG_VALUE": {
+      "description": "The value of the meta tag used by Zendesk to verify the owner of a domain",
+      "required": false
+    },
     "ZENDESK_HELP_WIDGET_ENABLED": {
       "description": "Enabled/disable state for Zendesk web help widget.",
       "required": false
