@@ -2381,7 +2381,9 @@ class LearningJourneySection(EnterpriseChildPage):
         """Validates that either action_url or pdf_file must be added."""
         super().clean()
         if not self.action_url and not self.pdf_file:
-            raise ValidationError("Please enter either an Action URL or select a PDF document.")
+            raise ValidationError(
+                "Please enter either an Action URL or select a PDF document."
+            )
 
     class Meta:
         verbose_name = "Learning Journey"

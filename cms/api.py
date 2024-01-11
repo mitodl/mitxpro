@@ -139,11 +139,11 @@ def ensure_catalog_page():
 def get_enterprise_page_data():
     return {
         "title": "Enterprise Page",
-        "description": "Deepen your team’s career knowledge and expand their abilities with"
-                       " MIT xPRO’s online courses for professionals. Develop customized learning"
-                       " for your team with bespoke courses and programs on your schedule. Set a"
-                       " standard of knowledge and skills, leading to effective communication among"
-                       " employees and consistency across the enterprise.",
+        "description": """Deepen your team’s career knowledge and expand their abilities with
+        MIT xPRO’s online courses for professionals. Develop customized learning
+        for your team with bespoke courses and programs on your schedule. Set a
+        standard of knowledge and skills, leading to effective communication among
+        employees and consistency across the enterprise.""",
         "action_title": "Find out what MIT xPRO can do for your team.",
         "headings": [
             {
