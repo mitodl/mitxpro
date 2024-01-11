@@ -1331,6 +1331,11 @@ GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
     default=None,
     description="The value of the meta tag used by Google to verify the owner of a domain (used for enabling push notifications)",
 )
+ZENDESK_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
+    name="ZENDESK_DOMAIN_VERIFICATION_TAG_VALUE",
+    default=None,
+    description="The value of the meta tag used by Zendesk to verify the owner of a domain",
+)
 SHEETS_ADMIN_EMAILS = get_delimited_list(
     name="SHEETS_ADMIN_EMAILS",
     default=[],
