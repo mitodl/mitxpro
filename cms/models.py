@@ -62,6 +62,7 @@ from cms.constants import (
     BLOG_INDEX_SLUG,
     CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
+    ENTERPRISE_PAGE_SLUG,
     FORMAT_ONLINE,
     FORMAT_OTHER,
     ON_DEMAND_WEBINAR,
@@ -2453,8 +2454,8 @@ class EnterprisePage(WagtailCachedPageMixin, Page):
     Represents an enterprise page in the CMS.
     """
 
+    slug = ENTERPRISE_PAGE_SLUG
     template = "enterprise_page.html"
-    slug = "enterprise"
     parent_page_types = ["HomePage"]
     subpage_types = [
         "CompaniesLogoCarouselSection",

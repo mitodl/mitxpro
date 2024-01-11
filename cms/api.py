@@ -7,7 +7,7 @@ import pytz
 from django.contrib.contenttypes.models import ContentType
 from wagtail.models import Page, Site
 from cms import models as cms_models
-from cms.constants import CERTIFICATE_INDEX_SLUG
+from cms.constants import CERTIFICATE_INDEX_SLUG, ENTERPRISE_PAGE_SLUG
 
 
 log = logging.getLogger(__name__)
@@ -139,6 +139,7 @@ def ensure_catalog_page():
 def get_enterprise_page_data():
     return {
         "title": "Enterprise Page",
+        "slug": ENTERPRISE_PAGE_SLUG,
         "description": """Deepen your team’s career knowledge and expand their abilities with
         MIT xPRO’s online courses for professionals. Develop customized learning
         for your team with bespoke courses and programs on your schedule. Set a
