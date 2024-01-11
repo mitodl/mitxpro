@@ -174,9 +174,11 @@
   background: linear-gradient(180deg, #f0f5f7 0%, rgba(240, 245, 247, 0) 100%);
   border-top: 1px rgba(0, 0, 0, 0.07) solid;
   padding: 50px 40px 50px 40px;
+  text-align: center;
 
   @include media-breakpoint-down (sm) {
     padding: 20px 5px 20px 5px;
+    text-align: unset;
   }
 
   .careers-companies-content {
@@ -199,6 +201,7 @@
     align-self: stretch;
     color: black;
     margin-bottom: 40px;
+    text-align: start;
 
     @include media-breakpoint-down (sm) {
       margin-bottom: 30px;

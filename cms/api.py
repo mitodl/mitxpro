@@ -136,29 +136,6 @@ def ensure_catalog_page():
         catalog_page.refresh_from_db()
 
 
-def get_enterprise_page_data():
-    return {
-        "title": "Enterprise Page",
-        "slug": ENTERPRISE_PAGE_SLUG,
-        "description": """Deepen your team’s career knowledge and expand their abilities with
-        MIT xPRO’s online courses for professionals. Develop customized learning
-        for your team with bespoke courses and programs on your schedule. Set a
-        standard of knowledge and skills, leading to effective communication among
-        employees and consistency across the enterprise.""",
-        "action_title": "Find out what MIT xPRO can do for your team.",
-        "headings": [
-            {
-                "type": "heading",
-                "value": {
-                    "upper_head": "THE BEST COMPANIES",
-                    "middle_head": "CONNECT WITH",
-                    "bottom_head": "THE BEST MINDS AT MIT",
-                },
-            },
-        ],
-    }
-
-
 def ensure_index_pages():  # pylint: disable=too-many-branches
     """
     Ensures that the proper index pages exist as children of the home page, and that
@@ -171,7 +148,6 @@ def ensure_index_pages():  # pylint: disable=too-many-branches
     certificate_index = cms_models.CertificateIndexPage.objects.first()
     webinar_index = cms_models.WebinarIndexPage.objects.first()
     blog_index = cms_models.BlogIndexPage.objects.first()
-    enterprise_page = cms_models.EnterprisePage.objects.first()
 
     if not course_index:
         course_index = cms_models.CourseIndexPage(title="Courses")
@@ -224,10 +200,39 @@ def ensure_index_pages():  # pylint: disable=too-many-branches
         blog_index = cms_models.BlogIndexPage(title="Blog")
         home_page.add_child(instance=blog_index)
 
-    if not enterprise_page:
-        enterprise_page_data = get_enterprise_page_data()
+
+def ensure_enterprise_page():
+    """
+    Ensures that an enterprise page with the correct slug exists.
+    """
+    enterprise_page = Page.objects.filter(
+        content_type=ContentType.objects.get_for_model(cms_models.EnterprisePage)
+    ).first()
+    if enterprise_page is not None and enterprise_page.slug != ENTERPRISE_PAGE_SLUG:
+        enterprise_page.delete()
+        enterprise_page = None
+    if enterprise_page is None:
+        enterprise_page_data = {
+            "title": "Enterprise Page",
+            "slug": ENTERPRISE_PAGE_SLUG,
+            "description": """Deepen your team’s career knowledge and expand their abilities with
+            MIT xPRO’s online courses for professionals.""",
+            "action_title": "Find out what MIT xPRO can do for your team.",
+            "headings": [
+                {
+                    "type": "heading",
+                    "value": {
+                        "upper_head": "THE BEST COMPANIES",
+                        "middle_head": "CONNECT WITH",
+                        "bottom_head": "THE BEST MINDS AT MIT",
+                    },
+                },
+            ],
+        }
         enterprise_page = cms_models.EnterprisePage(**enterprise_page_data)
+        home_page = get_home_page()
         home_page.add_child(instance=enterprise_page)
+        enterprise_page.refresh_from_db()
 
 
 def configure_wagtail():
@@ -238,3 +243,4 @@ def configure_wagtail():
     ensure_home_page_and_site()
     ensure_catalog_page()
     ensure_index_pages()
+    ensure_enterprise_page()

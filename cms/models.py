@@ -2383,7 +2383,7 @@ class LearningJourneySection(EnterpriseChildPage):
         super().clean()
         if not self.action_url and not self.pdf_file:
             raise ValidationError(
-                "Please enter either an Action URL or select a PDF document."
+                "Please enter an Action URL or select a PDF document."
             )
 
     class Meta:
