@@ -2377,6 +2377,12 @@ class LearningJourneySection(EnterpriseChildPage):
         """
         return self.pdf_file.url if self.pdf_file else self.action_url
 
+    def clean(self):
+        """Validates that either action_url or pdf_file must be added."""
+        super().clean()
+        if not self.action_url and not self.pdf_file:
+            raise ValidationError("Please enter either an Action URL or select a PDF document.")
+
     class Meta:
         verbose_name = "Learning Journey"
 
@@ -2426,10 +2432,14 @@ class LearningStrategyFormSection(EnterpriseChildPage):
     subhead = RichTextField(
         help_text="A subheading to provide additional context or information.",
     )
+    consent = RichTextField(
+        help_text="Enter the consent message to be displayed when users submit the form."
+    )
 
     content_panels = [
         FieldPanel("heading"),
         FieldPanel("subhead"),
+        FieldPanel("consent"),
     ]
 
     class Meta:

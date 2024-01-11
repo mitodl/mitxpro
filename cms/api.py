@@ -136,6 +136,28 @@ def ensure_catalog_page():
         catalog_page.refresh_from_db()
 
 
+def get_enterprise_page_data():
+    return {
+        "title": "Enterprise Page",
+        "description": "Deepen your team’s career knowledge and expand their abilities with"
+                       " MIT xPRO’s online courses for professionals. Develop customized learning"
+                       " for your team with bespoke courses and programs on your schedule. Set a"
+                       " standard of knowledge and skills, leading to effective communication among"
+                       " employees and consistency across the enterprise.",
+        "action_title": "Find out what MIT xPRO can do for your team.",
+        "headings": [
+            {
+                "type": "heading",
+                "value": {
+                    "upper_head": "THE BEST COMPANIES",
+                    "middle_head": "CONNECT WITH",
+                    "bottom_head": "THE BEST MINDS AT MIT",
+                },
+            },
+        ],
+    }
+
+
 def ensure_index_pages():  # pylint: disable=too-many-branches
     """
     Ensures that the proper index pages exist as children of the home page, and that
@@ -148,6 +170,7 @@ def ensure_index_pages():  # pylint: disable=too-many-branches
     certificate_index = cms_models.CertificateIndexPage.objects.first()
     webinar_index = cms_models.WebinarIndexPage.objects.first()
     blog_index = cms_models.BlogIndexPage.objects.first()
+    enterprise_page = cms_models.EnterprisePage.objects.first()
 
     if not course_index:
         course_index = cms_models.CourseIndexPage(title="Courses")
@@ -199,6 +222,11 @@ def ensure_index_pages():  # pylint: disable=too-many-branches
     if not blog_index:
         blog_index = cms_models.BlogIndexPage(title="Blog")
         home_page.add_child(instance=blog_index)
+
+    if not enterprise_page:
+        enterprise_page_data = get_enterprise_page_data()
+        enterprise_page = cms_models.EnterprisePage(**enterprise_page_data)
+        home_page.add_child(instance=enterprise_page)
 
 
 def configure_wagtail():

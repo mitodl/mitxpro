@@ -79,7 +79,7 @@
       background: $white;
     }
 
-    p {
+    .consent-msg {
       color: $black;
       font-size: 16px;
       font-style: normal;
@@ -93,6 +93,10 @@
         margin: 0px;
         padding: 20px;
         text-align: initial;
+      }
+
+      p {
+        margin-bottom: 0px;
       }
     }
   }
