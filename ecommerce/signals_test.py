@@ -4,9 +4,8 @@ Tests for signals
 import pytest
 
 from courses.factories import CourseFactory, CourseRunFactory
-from ecommerce.factories import CouponFactory, CouponEligibilityFactory, ProductFactory
+from ecommerce.factories import CouponEligibilityFactory, CouponFactory, ProductFactory
 from ecommerce.models import CouponEligibility
-
 
 pytestmark = pytest.mark.django_db
 

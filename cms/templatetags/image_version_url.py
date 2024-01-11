@@ -1,6 +1,7 @@
 """CMS templatetags"""
 
 from urllib.parse import quote_plus, urljoin
+
 from django import template
 from django.conf import settings
 from wagtail.images.templatetags.wagtailimages_tags import image_url
@@ -10,7 +11,10 @@ register = template.Library()
 
 @register.simple_tag()
 def image_version_url(
-    image, filter_spec, full_url=False, viewname="wagtailimages_serve"
+    image,
+    filter_spec,
+    full_url=False,  # noqa: FBT002
+    viewname="wagtailimages_serve",
 ):
     """
     Generates an image URL using Wagtail's library and appends a version to the path to enable effective caching
@@ -23,7 +27,7 @@ def image_version_url(
 
     Returns:
         str or None: The image URL, or None if the image doesn't exist
-    """
+    """  # noqa: D401
     if not image:
         return ""
     generated_image_url = image_url(image, filter_spec, viewname=viewname)

@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def add_arguments(self, parser):  # pylint:disable=missing-docstring
+    def add_arguments(self, parser):  # noqa: D102
         group = parser.add_mutually_exclusive_group()
         group.add_argument("--id", type=int, help="The BulkCouponAssignment ID")
         group.add_argument(
@@ -38,20 +38,20 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # pylint:disable=missing-docstring
+    def handle(self, *args, **options):  # noqa: ARG002, D102
         if not any([options["id"], options["sheet_id"], options["title"]]):
-            raise CommandError("Need to provide --id, --sheet-id, or --title")
+            raise CommandError("Need to provide --id, --sheet-id, or --title")  # noqa: EM101
 
         if options["id"]:
-            qset_kwargs = dict(id=options["id"])
+            qset_kwargs = dict(id=options["id"])  # noqa: C408
         elif options["sheet_id"]:
-            qset_kwargs = dict(assignment_sheet_id=options["sheet_id"])
+            qset_kwargs = dict(assignment_sheet_id=options["sheet_id"])  # noqa: C408
         else:
             pygsheets_client = get_authorized_pygsheets_client()
             spreadsheet = get_assignment_spreadsheet_by_title(
                 pygsheets_client, options["title"]
             )
-            qset_kwargs = dict(assignment_sheet_id=spreadsheet.id)
+            qset_kwargs = dict(assignment_sheet_id=spreadsheet.id)  # noqa: C408
 
         bulk_assignment = BulkCouponAssignment.objects.get(**qset_kwargs)
         self.stdout.write(
@@ -67,7 +67,7 @@ class Command(BaseCommand):
         if update_count:
             self.stdout.write(
                 self.style.SUCCESS(
-                    "Successfully updated message status for bulk coupon assignment "
+                    "Successfully updated message status for bulk coupon assignment "  # noqa: UP032
                     "({} individual status(es) added/updated).".format(update_count)
                 )
             )

@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("sheets", "0002_nullable_google_api_auth_user")]
 
     operations = [

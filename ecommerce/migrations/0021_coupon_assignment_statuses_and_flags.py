@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("ecommerce", "0020_add_bulk_coupon_assignment")]
 
     operations = [

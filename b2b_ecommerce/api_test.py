@@ -18,7 +18,6 @@ from ecommerce.factories import CouponPaymentVersionFactory
 from ecommerce.models import CouponPaymentVersion
 from mitxpro.utils import dict_without_keys, now_in_utc
 
-
 FAKE = faker.Factory.create()
 
 
@@ -31,7 +30,7 @@ CYBERSOURCE_SECURITY_KEY = "security"
 
 
 @pytest.fixture(autouse=True)
-def cybersource_settings(settings):
+def cybersource_settings(settings):  # noqa: PT004
     """
     Set cybersource settings
     """
@@ -88,7 +87,7 @@ def test_signed_payload(mocker, contract_number):
         "item_0_code": "enrollment_code",
         "item_0_name": f"Enrollment codes for {product_version.description}"[:254],
         "item_0_quantity": order.num_seats,
-        "item_0_sku": f"enrollment_code-{str(product.content_type)}-{product.content_object.id}",
+        "item_0_sku": f"enrollment_code-{str(product.content_type)}-{product.content_object.id}",  # noqa: RUF010
         "item_0_tax_amount": "0",
         "item_0_unit_price": str(total_price),
         "line_item_count": 1,
@@ -108,7 +107,7 @@ def test_signed_payload(mocker, contract_number):
 
 
 @pytest.mark.parametrize(
-    "contract_number, b2b_coupon_code",
+    "contract_number, b2b_coupon_code",  # noqa: PT006
     [
         ("contract_number", "code"),
         ("contract_number", None),
@@ -158,7 +157,7 @@ def test_complete_b2b_order(mocker, contract_number, b2b_coupon_code):
 
 
 @pytest.mark.parametrize(
-    "order_status, decision",
+    "order_status, decision",  # noqa: PT006
     [
         (B2BOrder.FAILED, "ERROR"),
         (B2BOrder.FULFILLED, "ERROR"),
@@ -209,7 +208,7 @@ def test_ignore_duplicate_cancel():
     assert B2BOrder.objects.get(id=order.id).status == B2BOrder.FAILED
 
 
-def test_order_fulfilled(mocker):  # pylint:disable=too-many-arguments
+def test_order_fulfilled(mocker):
     """
     Test the happy case
     """

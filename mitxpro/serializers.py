@@ -15,28 +15,28 @@ class AppContextSerializer(serializers.Serializer):
     release_version = serializers.SerializerMethodField()
     features = serializers.SerializerMethodField()
 
-    def get_features(self, request):
-        """Returns a dictionary of features"""
+    def get_features(self, request):  # noqa: ARG002
+        """Returns a dictionary of features"""  # noqa: D401
         return {}
 
-    def get_release_version(self, request):
-        """Returns a dictionary of features"""
+    def get_release_version(self, request):  # noqa: ARG002
+        """Returns a dictionary of features"""  # noqa: D401
         return settings.VERSION
 
-    def get_gtm_tracking_id(self, request):
-        """Returns the GTM container ID"""
+    def get_gtm_tracking_id(self, request):  # noqa: ARG002
+        """Returns the GTM container ID"""  # noqa: D401
         return settings.GTM_TRACKING_ID
 
-    def get_ga_tracking_id(self, request):
-        """Returns a dictionary of features"""
+    def get_ga_tracking_id(self, request):  # noqa: ARG002
+        """Returns a dictionary of features"""  # noqa: D401
         return settings.GA_TRACKING_ID
 
-    def get_environment(self, request):
-        """Returns a dictionary of features"""
+    def get_environment(self, request):  # noqa: ARG002
+        """Returns a dictionary of features"""  # noqa: D401
         return settings.ENVIRONMENT
 
     def get_public_path(self, request):
-        """Returns the public_path"""
+        """Returns the public_path"""  # noqa: D401
         return public_path(request)
 
 
@@ -49,5 +49,5 @@ class WriteableSerializerMethodField(serializers.SerializerMethodField):
         super().__init__(**kwargs)
         self.read_only = False
 
-    def to_internal_value(self, data):
+    def to_internal_value(self, data):  # noqa: D102
         return data

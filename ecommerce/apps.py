@@ -9,4 +9,4 @@ class EcommerceConfig(AppConfig):
 
     def ready(self):
         """Application is ready"""
-        import ecommerce.signals  # pylint:disable=unused-import, unused-variable
+        import ecommerce.signals  # noqa: F401

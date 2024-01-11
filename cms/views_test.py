@@ -44,12 +44,10 @@ from courses.factories import (
 from ecommerce.factories import ProductVersionFactory
 from mitxpro.utils import now_in_utc
 
-
 pytestmark = pytest.mark.django_db
-# pylint: disable=redefined-outer-name,unused-argument
 
 
-@pytest.fixture()
+@pytest.fixture
 def wagtail_basics():
     """Fixture for Wagtail objects that we expect to always exist"""
     site = Site.objects.get(is_default_site=True)
@@ -84,9 +82,7 @@ def test_wagtail_items_ordering(client, admin_user):
     )
     catalog_page = CatalogPageFactory.create(parent=home_page, title="Catalog")
 
-    resp = client.get(
-        "/cms/api/main/pages/?child_of={}&for_explorer=1".format(home_page.id)
-    )
+    resp = client.get(f"/cms/api/main/pages/?child_of={home_page.id}&for_explorer=1")
     assert resp.status_code == status.HTTP_200_OK
     items = list(resp.data.items())[1][1]  # Pages in response
     response_page_titles = [item["title"] for item in items]
@@ -364,14 +360,14 @@ def test_catalog_page_product(client, wagtail_basics):
 
 
 @pytest.mark.parametrize(
-    "topic_filter, expected_courses_count, expected_program_count, expected_selected_topic",
+    "topic_filter, expected_courses_count, expected_program_count, expected_selected_topic",  # noqa: PT006
     [
-        [None, 2, 2, ALL_TOPICS],
-        ["Engineering", 1, 1, "Engineering"],
-        ["RandomTopic", 0, 0, "RandomTopic"],
+        [None, 2, 2, ALL_TOPICS],  # noqa: PT007
+        ["Engineering", 1, 1, "Engineering"],  # noqa: PT007
+        ["RandomTopic", 0, 0, "RandomTopic"],  # noqa: PT007
     ],
 )
-def test_catalog_page_topics(  # pylint: disable=too-many-arguments
+def test_catalog_page_topics(  # noqa: PLR0913
     client,
     wagtail_basics,
     topic_filter,
@@ -382,7 +378,6 @@ def test_catalog_page_topics(  # pylint: disable=too-many-arguments
     """
     Test that topic filters are working fine.
     """
-    # pylint:disable=too-many-locals
     homepage = wagtail_basics.root
     catalog_page = CatalogPageFactory.create(parent=homepage)
     catalog_page.save_revision().publish()
@@ -507,10 +502,10 @@ def test_program_page_for_program_run(client):
     )
 
     page_base_url = program_page.get_url().rstrip("/")
-    good_url = "{}+{}/".format(page_base_url, program_run.run_tag)
+    good_url = f"{page_base_url}+{program_run.run_tag}/"
     resp = client.get(good_url)
     assert resp.status_code == 200
-    bad_url = "{}+R2/".format(page_base_url)
+    bad_url = f"{page_base_url}+R2/"
     resp = client.get(bad_url)
     assert resp.status_code == 404
 
@@ -552,7 +547,7 @@ def test_webinar_formatted_date(wagtail_basics):
     webinar_index_page = WebinarIndexPageFactory.create(parent=homepage)
     webinar_index_page.save_revision().publish()
 
-    start_date = datetime.strptime("Tuesday, May 2, 2023", "%A, %B %d, %Y")
+    start_date = datetime.strptime("Tuesday, May 2, 2023", "%A, %B %d, %Y")  # noqa: DTZ007
     webinar = WebinarPageFactory.create(parent=webinar_index_page, date=start_date)
 
     assert webinar.formatted_date == "Tuesday, May 2, 2023"

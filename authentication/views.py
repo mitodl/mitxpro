@@ -1,27 +1,27 @@
 """Authentication views"""
-from urllib.parse import quote, urlparse, urlencode, urljoin
+from urllib.parse import quote, urlencode, urljoin, urlparse
 
 import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LogoutView
 from django.shortcuts import render, reverse
-from social_core.backends.email import EmailAuth
-from social_django.models import UserSocialAuth
-from social_django.utils import load_backend
 from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from social_core.backends.email import EmailAuth
+from social_django.models import UserSocialAuth
+from social_django.utils import load_backend
 
 from authentication.serializers import (
     LoginEmailSerializer,
     LoginPasswordSerializer,
-    RegisterEmailSerializer,
     RegisterConfirmSerializer,
     RegisterDetailsSerializer,
+    RegisterEmailSerializer,
     RegisterExtraDetailsSerializer,
 )
 from authentication.utils import load_drf_strategy
@@ -37,10 +37,10 @@ class SocialAuthAPIView(APIView):
 
     def get_serializer_cls(self):  # pragma: no cover
         """Return the serializer cls"""
-        raise NotImplementedError("get_serializer_cls must be implemented")
+        raise NotImplementedError("get_serializer_cls must be implemented")  # noqa: EM101
 
     def post(self, request):
-        """Processes a request"""
+        """Processes a request"""  # noqa: D401
         if bool(request.session.get("hijack_history")):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -86,7 +86,7 @@ class RegisterEmailView(SocialAuthAPIView):
         if bool(request.session.get("hijack_history")):
             return Response(status=status.HTTP_403_FORBIDDEN)
         if settings.RECAPTCHA_SITE_KEY:
-            r = requests.post(
+            r = requests.post(  # noqa: S113
                 "https://www.google.com/recaptcha/api/siteverify?secret={key}&response={captcha}".format(
                     key=quote(settings.RECAPTCHA_SECRET_KEY),
                     captcha=quote(request.data["recaptcha"]),
@@ -134,15 +134,15 @@ def get_social_auth_types(request):
     return Response(data=social_auths, status=status.HTTP_200_OK)
 
 
-def confirmation_sent(request, **kwargs):  # pylint: disable=unused-argument
-    """The confirmation of an email being sent"""
+def confirmation_sent(request, **kwargs):  # noqa: ARG001
+    """The confirmation of an email being sent"""  # noqa: D401
     return render(request, "confirmation_sent.html")
 
 
 class CustomLogoutView(LogoutView):
     """Custom view to modify base functionality in django.contrib.auth.views.LogoutView"""
 
-    def get_next_page(self):
+    def get_next_page(self):  # noqa: D102
         next_page = super().get_next_page()
 
         if next_page in (self.next_page, self.request.path):
@@ -156,7 +156,7 @@ class CustomLogoutView(LogoutView):
 @api_view(["GET"])
 @renderer_classes([JSONRenderer])
 @permission_classes([])
-def well_known_openid_configuration(request):
+def well_known_openid_configuration(request):  # noqa: ARG001
     """View for openid configuration"""
     # See: https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
     # NOTE: this is intentionally incomplete because we don't fully support OpenID

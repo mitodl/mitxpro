@@ -1,19 +1,16 @@
-# pylint: disable=unused-import
 """
 Test voucher views.py
 """
 import json
 from urllib.parse import urljoin
 
-from django.urls import reverse
 import pytest
+from django.urls import reverse
 
-from ecommerce.factories import CouponVersionFactory, CouponEligibilityFactory
+from ecommerce.factories import CouponEligibilityFactory, CouponVersionFactory
 from users.factories import UserFactory
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
-
-# pylint: disable=redefined-outer-name
 
 pytestmark = [pytest.mark.django_db]
 
@@ -21,7 +18,7 @@ pytestmark = [pytest.mark.django_db]
 @pytest.fixture
 def mock_logger(mocker):
     """Mock the log"""
-    yield mocker.patch("voucher.views.log")
+    return mocker.patch("voucher.views.log")
 
 
 def test_anonymous_user_permissions(client):

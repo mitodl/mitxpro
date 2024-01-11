@@ -1,5 +1,5 @@
 """Course views verson 1"""
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Prefetch, Q
 from mitol.digitalcredentials.mixins import DigitalCredentialsRequestViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
@@ -27,7 +27,6 @@ from courses.serializers import (
     ProgramSerializer,
 )
 from ecommerce.models import Product
-from mitxpro.utils import now_in_utc
 
 
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
@@ -68,7 +67,7 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = []
     serializer_class = CourseSerializer
 
-    def get_queryset(self):
+    def get_queryset(self):  # noqa: D102
         queryset = (
             Course.objects.filter(live=True)
             .select_related("coursepage", "externalcoursepage")
@@ -112,7 +111,7 @@ class UserEnrollmentsView(APIView):
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def get(self, request, *args, **kwargs):  # noqa: ARG002
         """Read-only access"""
         user = request.user
         user_enrollments = get_user_enrollments(user)
@@ -137,12 +136,12 @@ class UserEnrollmentsView(APIView):
         )
 
     def _serialize_course_enrollments(self, enrollments):
-        """Helper method to serialize course enrollments"""
+        """Helper method to serialize course enrollments"""  # noqa: D401
 
         return CourseRunEnrollmentSerializer(enrollments, many=True).data
 
     def _serialize_program_enrollments(self, programs, program_runs):
-        """helper method to serialize program enrollments"""
+        """Helper method to serialize program enrollments"""  # noqa: D401
 
         return ProgramEnrollmentSerializer(
             programs, many=True, context={"course_run_enrollments": list(program_runs)}
@@ -200,5 +199,5 @@ class CourseTopicViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         """
         Returns parent topics with course count > 0.
-        """
+        """  # noqa: D401
         return CourseTopic.parent_topics_with_courses()

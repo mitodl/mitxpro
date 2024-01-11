@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("courses", "0006_update_related_name"),
         ("ecommerce", "0007_add_bulk_enrollment_delivery"),

@@ -17,10 +17,10 @@ from rest_framework.views import APIView
 from mitxpro.serializers import AppContextSerializer
 
 
-def get_base_context(request):
+def get_base_context(request):  # noqa: ARG001
     """
     Returns the template context key/values needed for the base template and all templates that extend it
-    """
+    """  # noqa: D401
     context = {}
     if settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE:
         context[
@@ -30,13 +30,12 @@ def get_base_context(request):
 
 
 @csrf_exempt
-def index(request, **kwargs):  # pylint: disable=unused-argument
+def index(request, **kwargs):  # noqa: ARG001
     """
     The index view
-    """
+    """  # noqa: D401
     context = get_base_context(request)
 
-    # pylint: disable=too-many-boolean-expressions
     if request.method == "POST" and (
         "auth_amount" in request.POST
         and "req_merchant_defined_data2" in request.POST
@@ -62,7 +61,7 @@ def index(request, **kwargs):  # pylint: disable=unused-argument
     return render(request, "index.html", context=context)
 
 
-def handler404(request, exception):  # pylint: disable=unused-argument
+def handler404(request, exception):  # noqa: ARG001
     """404: NOT FOUND ERROR handler"""
     response = render_to_string(
         "404.html", request=request, context=get_base_context(request)
@@ -78,7 +77,7 @@ def handler500(request):
     return HttpResponseServerError(response)
 
 
-def cms_signin_redirect_to_site_signin(request):
+def cms_signin_redirect_to_site_signin(request):  # noqa: ARG001
     """Redirect wagtail admin signin to site signin page"""
     return redirect_to_login(reverse("wagtailadmin_home"), login_url="/signin")
 
@@ -86,7 +85,7 @@ def cms_signin_redirect_to_site_signin(request):
 def restricted(request):
     """
     Views restricted to admins
-    """
+    """  # noqa: D401
     if not (request.user and request.user.is_staff):
         raise PermissionDenied
     return render(request, "index.html", context=get_base_context(request))
@@ -97,6 +96,6 @@ class AppContextView(APIView):
 
     permission_classes = []
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def get(self, request, *args, **kwargs):  # noqa: ARG002
         """Read-only access"""
         return Response(AppContextSerializer(request).data)

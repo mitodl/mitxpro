@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from hijack.contrib.admin import HijackUserAdminMixin
 
 from mitxpro.admin import TimestampedModelAdmin
-from users.models import LegalAddress, User, Profile, BlockList
+from users.models import BlockList, LegalAddress, Profile, User
 
 
 class UserLegalAddressInline(admin.StackedInline):
@@ -33,7 +33,7 @@ class UserLegalAddressInline(admin.StackedInline):
         ),
     )
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
 
@@ -43,7 +43,7 @@ class UserProfileInline(admin.StackedInline):
     model = Profile
     classes = ["collapse"]
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return True
 
 
@@ -101,5 +101,5 @@ class BlockListAdmin(admin.ModelAdmin):
     model = BlockList
     list_display = ("hashed_email",)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False

@@ -63,7 +63,6 @@ from mitxpro.utils import (
     now_in_utc,
 )
 
-
 log = logging.getLogger(__name__)
 
 
@@ -79,7 +78,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = ProductFilter
 
-    def get_queryset(self):
+    def get_queryset(self):  # noqa: D102
         now = now_in_utc()
         expired_courseruns = CourseRun.objects.filter(
             enrollment_end__lt=now
@@ -154,7 +153,7 @@ class ProgramRunsViewSet(ReadOnlyModelViewSet):
     permission_classes = ()
     serializer_class = ProgramRunSerializer
 
-    def get_queryset(self):
+    def get_queryset(self):  # noqa: D102
         return ProgramRun.objects.filter(
             program__products=self.kwargs["program_product_id"]
         )
@@ -180,8 +179,11 @@ class CheckoutView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(
-        self, request, *args, **kwargs
-    ):  # pylint: disable=too-many-locals,unused-argument
+        self,
+        request,
+        *args,  # noqa: ARG002
+        **kwargs,  # noqa: ARG002
+    ):
         """
         Create a new unfulfilled Order from the user's basket
         and return information used to submit to CyberSource.
@@ -211,11 +213,11 @@ class CheckoutView(APIView):
             # for GTM in order to track these purchases as well. Actual tracking
             # call is sent from the frontend.
             payload = {
-                "transaction_id": "T-{}".format(order.id),
+                "transaction_id": f"T-{order.id}",
                 "transaction_total": 0.00,
                 "product_type": product.type_string,
                 "courseware_id": text_id,
-                "reference_number": "REF-{}".format(order.id),
+                "reference_number": f"REF-{order.id}",
             }
 
             # This redirects the user to our order success page
@@ -248,10 +250,10 @@ class OrderFulfillmentView(APIView):
     authentication_classes = ()
     permission_classes = (IsSignedByCyberSource,)
 
-    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def post(self, request, *args, **kwargs):  # noqa: ARG002
         """
         Confirmation from CyberSource which fulfills an existing Order.
-        """
+        """  # noqa: D401
         try:
             reference_number = request.data.get("req_reference_number", "")
             if reference_number.startswith(B2BOrder.get_reference_number_prefix()):
@@ -260,7 +262,7 @@ class OrderFulfillmentView(APIView):
                 fulfill_order(request.data)
             else:
                 raise ParseException(
-                    f"Unknown prefix '{reference_number}' for reference number"
+                    f"Unknown prefix '{reference_number}' for reference number"  # noqa: EM102
                 )
         except:
             # Not sure what would cause an error here but make sure we save the receipt
@@ -281,7 +283,7 @@ class OrderReceiptView(RetrieveAPIView):
 
     serializer_class = OrderReceiptSerializer
 
-    def get_queryset(self):
+    def get_queryset(self):  # noqa: D102
         return Order.objects.filter(purchaser=self.request.user, status=Order.FULFILLED)
 
     def get(self, request, *args, **kwargs):
@@ -312,7 +314,7 @@ class CouponListView(APIView):
     permission_classes = (IsAdminUser,)
     authentication_classes = (SessionAuthentication,)
 
-    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def post(self, request, *args, **kwargs):  # noqa: ARG002
         """Create coupon(s) and related objects"""
         # Determine what kind of coupon this is.
         if request.data.get("coupon_type") == CouponPaymentVersion.SINGLE_USE:

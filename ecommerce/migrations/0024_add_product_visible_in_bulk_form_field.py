@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("ecommerce", "0023_bulkcouponassignment_assignment_sheet_last_modified")
     ]

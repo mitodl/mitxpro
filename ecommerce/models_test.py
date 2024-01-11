@@ -22,7 +22,6 @@ from ecommerce.models import OrderAudit
 from mitxpro.utils import serialize_model_object
 from users.factories import UserFactory
 
-
 pytestmark = pytest.mark.django_db
 
 
@@ -127,7 +126,7 @@ def test_latest_version():
     versions_to_create = 4
     product = ProductFactory.create()
     versions = ProductVersionFactory.create_batch(versions_to_create, product=product)
-    assert str(product) == "Product for {}".format(str(product.content_object))
+    assert str(product) == f"Product for {str(product.content_object)}"  # noqa: RUF010
     assert str(versions[0]) == "ProductVersion for {}, ${}".format(
         versions[0].description, versions[0].price
     )
@@ -253,7 +252,7 @@ def test_product_version_save_text_id_badproduct(mocker):
         product=ProductFactory.create(content_object=LineFactory())
     )
     assert product_version.text_id is None
-    assert mock_log.called_once_with(
+    assert mock_log.called_once_with(  # noqa: PGH005
         f"The content object for this ProductVersion ({product_version.id}) does not have a `text_id` property"
     )
 

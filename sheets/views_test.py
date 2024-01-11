@@ -1,18 +1,18 @@
 """Tests for sheets app views"""
 import pytest
-from django.urls import reverse
 from django.test.client import Client, RequestFactory
+from django.urls import reverse
 from rest_framework import status
 
-from sheets.views import complete_google_auth
-from sheets.models import GoogleApiAuth
-from sheets.factories import GoogleApiAuthFactory, GoogleFileWatchFactory
 from mitxpro.test_utils import set_request_session
+from sheets.factories import GoogleApiAuthFactory, GoogleFileWatchFactory
+from sheets.models import GoogleApiAuth
+from sheets.views import complete_google_auth
 
 lazy = pytest.lazy_fixture
 
 
-@pytest.fixture()
+@pytest.fixture
 def google_api_auth(user):
     """Fixture that creates a google auth object"""
     return GoogleApiAuthFactory.create(requesting_user=user)
@@ -55,16 +55,14 @@ def test_request_auth(mocker, settings, staff_client):
 
 @pytest.mark.parametrize("existing_auth", [lazy("google_api_auth"), None])
 @pytest.mark.django_db
-def test_complete_auth(
-    mocker, settings, user, existing_auth
-):  # pylint: disable=unused-argument
+def test_complete_auth(mocker, settings, user, existing_auth):
     """
     View that handles Google auth completion should fetch a token and save/update a
     GoogleApiAuth object
     """
     settings.SITE_BASE_URL = "http://example.com"
-    access_token = "access-token-123"
-    refresh_token = "refresh-token-123"
+    access_token = "access-token-123"  # noqa: S105
+    refresh_token = "refresh-token-123"  # noqa: S105
     code = "auth-code"
     flow_mock = mocker.Mock(
         credentials=mocker.Mock(token=access_token, refresh_token=refresh_token)

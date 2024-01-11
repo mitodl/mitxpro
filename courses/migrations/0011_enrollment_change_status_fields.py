@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("courses", "0010_enrollment_audit_tables")]
 
     operations = [

@@ -1,18 +1,22 @@
 """Tests for command utils"""
 from datetime import timedelta
+
 import pytest
 from django.contrib.auth import get_user_model
 
-from courses.factories import CourseRunEnrollmentFactory, ProgramEnrollmentFactory
-from courses.management.utils import EnrollmentChangeCommand
-from courses.factories import CourseRunFactory
-from courseware.exceptions import (
-    UnknownEdxApiEnrollException,
-    EdxApiEnrollErrorException,
+from courses.factories import (
+    CourseRunEnrollmentFactory,
+    CourseRunFactory,
+    ProgramEnrollmentFactory,
 )
-from users.factories import UserFactory
+from courses.management.utils import EnrollmentChangeCommand
+from courseware.exceptions import (
+    EdxApiEnrollErrorException,
+    UnknownEdxApiEnrollException,
+)
 from mitxpro.test_utils import MockHttpError
 from mitxpro.utils import now_in_utc
+from users.factories import UserFactory
 
 User = get_user_model()
 
@@ -49,10 +53,10 @@ def test_fetch_enrollment(order):
 @pytest.mark.django_db
 @pytest.mark.parametrize("keep_failed_enrollments", [True, False])
 @pytest.mark.parametrize(
-    "exception_cls,inner_exception",
+    "exception_cls,inner_exception",  # noqa: PT006
     [
-        [EdxApiEnrollErrorException, MockHttpError()],
-        [UnknownEdxApiEnrollException, Exception()],
+        [EdxApiEnrollErrorException, MockHttpError()],  # noqa: PT007
+        [UnknownEdxApiEnrollException, Exception()],  # noqa: PT007
     ],
 )
 def test_create_run_enrollment_edx_failure(

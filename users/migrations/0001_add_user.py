@@ -2,16 +2,16 @@
 
 import ulid
 from django.db import migrations, models
+
 import users.models
 
 
 def generate_username():
-    """Generates a new username"""
+    """Generate a new username"""
     return ulid.new().str
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [("auth", "0009_alter_user_last_name_max_length")]

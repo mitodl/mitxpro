@@ -21,11 +21,10 @@ from courses.models import (
 from courseware.api import get_edx_api_course_detail_client
 from mitxpro.utils import has_equal_properties, now_in_utc
 
-
 log = logging.getLogger(__name__)
 
 
-def ensure_course_run_grade(user, course_run, edx_grade, should_update=False):
+def ensure_course_run_grade(user, course_run, edx_grade, should_update=False):  # noqa: FBT002
     """
     Ensure that the local grades repository has the grade for the User/CourseRun combination supplied.
 
@@ -271,17 +270,17 @@ def sync_course_runs(runs):
                 course_id=run.courseware_id,
                 username=settings.OPENEDX_SERVICE_WORKER_USERNAME,
             )
-        except HTTPError as e:
+        except HTTPError as e:  # noqa: PERF203
             failure_count += 1
             if e.response.status_code == HTTP_404_NOT_FOUND:
-                log.error(
+                log.error(  # noqa: TRY400
                     "Course not found on edX for readable id: %s", run.courseware_id
                 )
             else:
-                log.error("%s: %s", str(e), run.courseware_id)
-        except Exception as e:  # pylint: disable=broad-except
+                log.error("%s: %s", str(e), run.courseware_id)  # noqa: TRY400
+        except Exception as e:  # noqa: BLE001
             failure_count += 1
-            log.error("%s: %s", str(e), run.courseware_id)
+            log.error("%s: %s", str(e), run.courseware_id)  # noqa: TRY400
         else:
             # Reset the expiration_date so it is calculated automatically and
             # does not raise a validation error now that the start or end date
@@ -301,9 +300,9 @@ def sync_course_runs(runs):
                 run.save()
                 success_count += 1
                 log.info("Updated course run: %s", run.courseware_id)
-            except Exception as e:  # pylint: disable=broad-except
+            except Exception as e:  # noqa: BLE001
                 # Report any validation or otherwise model errors
-                log.error("%s: %s", str(e), run.courseware_id)
+                log.error("%s: %s", str(e), run.courseware_id)  # noqa: TRY400
                 failure_count += 1
 
     return success_count, failure_count
@@ -325,7 +324,7 @@ def is_program_text_id(item_text_id):
 def get_catalog_course_filter(relative_filter=""):
     """
     Generates course filter for the catalog visible course pages.
-    """
+    """  # noqa: D401
     courseware_live_filter = {
         f"{relative_filter}course__live": True,
         f"{relative_filter}course__courseruns__live": True,

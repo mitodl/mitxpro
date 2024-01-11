@@ -5,10 +5,10 @@ based on the sheet data, and sends a message to all recipients who received a co
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.models import BulkCouponAssignment
-from sheets.api import get_authorized_pygsheets_client, ExpandedSheetsClient
+from sheets.api import ExpandedSheetsClient, get_authorized_pygsheets_client
 from sheets.coupon_assign_api import CouponAssignmentHandler
-from sheets.utils import spreadsheet_repr, google_date_string_to_datetime
 from sheets.management.utils import get_assignment_spreadsheet_by_title
+from sheets.utils import google_date_string_to_datetime, spreadsheet_repr
 
 
 class Command(BaseCommand):
@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def add_arguments(self, parser):  # pylint:disable=missing-docstring
+    def add_arguments(self, parser):  # noqa: D102
         group = parser.add_mutually_exclusive_group()
         group.add_argument(
             "-i",
@@ -43,9 +43,9 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # pylint:disable=missing-docstring
+    def handle(self, *args, **options):  # noqa: ARG002, D102
         if not options["id"] and not options["title"]:
-            raise CommandError("Need to provide --id or --title")
+            raise CommandError("Need to provide --id or --title")  # noqa: EM101
 
         pygsheets_client = get_authorized_pygsheets_client()
         # Fetch the correct spreadsheet
@@ -57,7 +57,7 @@ class Command(BaseCommand):
             )
         # Process the sheet
         self.stdout.write(
-            "Found spreadsheet ({}). Processing...".format(
+            "Found spreadsheet ({}). Processing...".format(  # noqa: UP032
                 spreadsheet_repr(spreadsheet)
             )
         )
@@ -77,7 +77,7 @@ class Command(BaseCommand):
             and not options["force"]
         ):
             raise CommandError(
-                "Spreadsheet is unchanged since it was last processed (%s, last modified: %s). "
+                "Spreadsheet is unchanged since it was last processed (%s, last modified: %s). "  # noqa: UP031
                 "Add the '-f/--force' flag to process it anyway."
                 % (spreadsheet_repr(spreadsheet), sheet_last_modified.isoformat())
             )

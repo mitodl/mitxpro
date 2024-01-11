@@ -10,18 +10,17 @@ import pytest
 from maxmind.api import ip_to_country_code
 from maxmind.factories import NetBlockIPv4Factory, NetBlockIPv6Factory
 
-
 fake = faker.Factory.create()
 
 
 @pytest.mark.django_db()
 @pytest.mark.parametrize(
-    "v4,in_block",
+    "v4,in_block",  # noqa: PT006
     [
-        [True, True],
-        [True, False],
-        [False, True],
-        [False, False],
+        [True, True],  # noqa: PT007
+        [True, False],  # noqa: PT007
+        [False, True],  # noqa: PT007
+        [False, False],  # noqa: PT007
     ],
 )
 def test_ipv4_lookup(v4, in_block):

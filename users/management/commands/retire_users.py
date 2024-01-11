@@ -1,21 +1,18 @@
 """
 Retire user(s) from MIT xPRO
 """
-import hashlib
+import sys
 from argparse import RawTextHelpFormatter
 from urllib.parse import urlparse
-import sys
 
 from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
-from authentication.utils import block_user_email
 from social_django.models import UserSocialAuth
-
 from user_util import user_util
-from users.api import fetch_users
-from users.models import BlockList
 
+from authentication.utils import block_user_email
 from mitxpro import settings
+from users.api import fetch_users
 
 User = get_user_model()
 
@@ -48,7 +45,7 @@ class Command(BaseCommand):
     `./manage.py retire_users -u foo@email.com -b` \n or do \n
     """
 
-    def create_parser(self, prog_name, subcommand):  # pylint: disable=arguments-differ
+    def create_parser(self, prog_name, subcommand):
         """
         create parser to add new line in help text.
         """
@@ -57,9 +54,7 @@ class Command(BaseCommand):
         return parser
 
     def add_arguments(self, parser):
-        """parse arguments"""
-
-        # pylint: disable=expression-not-assigned
+        """Parse arguments"""
         parser.add_argument(
             "-u",
             "--user",
@@ -81,7 +76,7 @@ class Command(BaseCommand):
         """Convert user email to retired email format."""
         return user_util.get_retired_email(email, RETIRED_USER_SALTS, RETIRED_EMAIL_FMT)
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **kwargs):  # noqa: ARG002, D102
         users = kwargs.get("users", [])
         block_users = kwargs.get("block_users")
 
@@ -96,11 +91,11 @@ class Command(BaseCommand):
         users = fetch_users(kwargs["users"])
 
         for user in users:
-            self.stdout.write("Retiring user: {user}".format(user=user))
+            self.stdout.write("Retiring user: {user}".format(user=user))  # noqa: UP032
             if not user.is_active:
                 self.stdout.write(
                     self.style.ERROR(
-                        "User: '{user}' is already deactivated in MIT xPRO".format(
+                        "User: '{user}' is already deactivated in MIT xPRO".format(  # noqa: UP032
                             user=user
                         )
                     )
@@ -122,7 +117,7 @@ class Command(BaseCommand):
             user.save()
 
             self.stdout.write(
-                "Email changed from {email} to {retired_email} and password is not useable now".format(
+                "Email changed from {email} to {retired_email} and password is not useable now".format(  # noqa: UP032
                     email=email, retired_email=user.email
                 )
             )
@@ -132,11 +127,11 @@ class Command(BaseCommand):
 
             if auth_deleted_count:
                 self.stdout.write(
-                    "For  user: '{user}' SocialAuth rows deleted".format(user=user)
+                    "For  user: '{user}' SocialAuth rows deleted".format(user=user)  # noqa: UP032
                 )
 
             self.stdout.write(
                 self.style.SUCCESS(
-                    "User: '{user}' is retired from MIT xPRO".format(user=user)
+                    "User: '{user}' is retired from MIT xPRO".format(user=user)  # noqa: UP032
                 )
             )

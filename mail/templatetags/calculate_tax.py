@@ -3,7 +3,6 @@ from decimal import Decimal
 
 from django import template
 
-
 register = template.Library()
 
 
@@ -18,5 +17,5 @@ def calculate_tax(total_paid, tax_rate):
 
     Returns:
         Decimal: the tax assessed, quantized to .01
-    """
+    """  # noqa: D401
     return Decimal(total_paid * (tax_rate / 100)).quantize(Decimal(".01"))

@@ -5,30 +5,29 @@ from types import SimpleNamespace
 
 import pytest
 
-# pylint:disable=redefined-outer-name
 from ecommerce.api import ValidatedBasket
 from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.factories import (
     BasketItemFactory,
+    CompanyFactory,
     CouponEligibilityFactory,
     CouponFactory,
     CouponPaymentFactory,
     CouponPaymentVersionFactory,
-    CouponVersionFactory,
     CouponSelectionFactory,
-    CompanyFactory,
+    CouponVersionFactory,
+    DataConsentAgreementFactory,
     DataConsentUserFactory,
     ProductVersionFactory,
-    DataConsentAgreementFactory,
 )
 from ecommerce.models import CourseRunSelection
 
-CouponGroup = namedtuple(
+CouponGroup = namedtuple(  # noqa: PYI024
     "CouponGroup", ["coupon", "coupon_version", "payment", "payment_version"]
 )
 
 
-@pytest.fixture()
+@pytest.fixture
 def basket_and_coupons():
     """
     Sample basket and coupon

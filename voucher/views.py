@@ -5,24 +5,23 @@ import json
 from datetime import datetime, timezone
 import logging
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import FormView
 from django.views.generic.base import View
-from django.contrib import messages
 
-
-from ecommerce.utils import make_checkout_url
 from ecommerce.models import Coupon, Product
+from ecommerce.utils import make_checkout_url
 from mitxpro.views import get_base_context
-from voucher.forms import UploadVoucherForm, VOUCHER_PARSE_ERROR
+from voucher.forms import VOUCHER_PARSE_ERROR, UploadVoucherForm
 from voucher.models import Voucher
 from voucher.utils import (
     get_current_voucher,
-    get_valid_voucher_coupons_version,
     get_eligible_coupon_choices,
+    get_valid_voucher_coupons_version,
 )
 
 log = logging.getLogger()
@@ -78,7 +77,7 @@ class UploadVoucherFormView(LoginRequiredMixin, FormView):
             return redirect(reverse("voucher:resubmit"))
         return super().form_invalid(form)
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs):  # noqa: D102
         return {**super().get_context_data(**kwargs), **get_base_context(self.request)}
 
 

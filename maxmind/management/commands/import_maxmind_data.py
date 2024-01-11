@@ -3,8 +3,9 @@ Imports the MaxMind GeoLite2 databases. (Or, acts as a thin wrapper around the
 API call that does.)
 """
 
-from django.core.management import BaseCommand, CommandError
 from os import path
+
+from django.core.management import BaseCommand, CommandError
 
 from maxmind import api
 
@@ -16,7 +17,7 @@ class Command(BaseCommand):
 
     help = "Imports the MaxMind GeoLite2 databases."
 
-    def add_arguments(self, parser) -> None:
+    def add_arguments(self, parser) -> None:  # noqa: D102
         parser.add_argument(
             "file",
             type=str,
@@ -30,9 +31,9 @@ class Command(BaseCommand):
             help="The type of file being imported.",
         )
 
-    def handle(self, *args, **kwargs):
-        if not path.exists(kwargs["file"]):
-            raise CommandError(f"Input file {kwargs['file']} does not exist.")
+    def handle(self, *args, **kwargs):  # noqa: ARG002, D102
+        if not path.exists(kwargs["file"]):  # noqa: PTH110
+            raise CommandError(f"Input file {kwargs['file']} does not exist.")  # noqa: EM102
 
         api.import_maxmind_database(kwargs["filetype"], kwargs["file"])
 

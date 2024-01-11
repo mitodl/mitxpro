@@ -162,9 +162,9 @@ def validate_unique_readable_ids(value):
     """
     Validates that all of the course run override blocks in this stream field have
     unique readable IDs
-    """
+    """  # noqa: D401
     # We want to validate the overall stream not underlying blocks individually
-    if len(value) < 2:
+    if len(value) < 2:  # noqa: PLR2004
         return
     items = [
         stream_block.value.get("readable_id")

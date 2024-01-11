@@ -36,7 +36,7 @@ def test_get_affiliate_code_from_request():
     request = RequestFactory().get("/")
     code = get_affiliate_code_from_request(request)
     assert code is None
-    setattr(request, "affiliate_code", affiliate_code)
+    setattr(request, "affiliate_code", affiliate_code)  # noqa: B010
     code = get_affiliate_code_from_request(request)
     assert code == affiliate_code
 
@@ -62,7 +62,7 @@ def test_get_affiliate_id_from_request():
     """
     affiliate_code = "abc"
     request = RequestFactory().get("/")
-    setattr(request, "affiliate_code", affiliate_code)
+    setattr(request, "affiliate_code", affiliate_code)  # noqa: B010
     affiliate_id = get_affiliate_id_from_request(request)
     assert affiliate_id is None
     affiliate = AffiliateFactory.create(code=affiliate_code)

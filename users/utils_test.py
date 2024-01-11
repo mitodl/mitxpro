@@ -14,23 +14,23 @@ from users.utils import (
 
 
 @pytest.mark.parametrize(
-    "full_name,email,expected_username",
+    "full_name,email,expected_username",  # noqa: PT006
     [
-        [" John  Doe ", None, "john-doe"],
-        ["Tabby	Tabberson", None, "tabby-tabberson"],
-        ["Àccèntèd Ñame, Ësq.", None, "àccèntèd-ñame-ësq"],
-        ["-Dashy_St._Underscores-", None, "dashy-st-underscores"],
-        ["Repeated-----Chars___Jr.", None, "repeated-chars-jr"],
-        ["Numbers123 !$!@ McStrange!!##^", None, "numbers-mcstrange"],
-        ["Кирил Френков", None, "кирил-френков"],
-        ["年號", None, "年號"],
-        ["abcdefghijklmnopqrstuvwxyz", None, "abcdefghijklmnopqrst"],
-        ["ai bi cı dI eİ fI", None, "ai-bi-ci-di-ei-fi"],
-        ["", "some.email@example.co.uk", "someemail"],
+        [" John  Doe ", None, "john-doe"],  # noqa: PT007
+        ["Tabby	Tabberson", None, "tabby-tabberson"],  # noqa: PT007
+        ["Àccèntèd Ñame, Ësq.", None, "àccèntèd-ñame-ësq"],  # noqa: PT007
+        ["-Dashy_St._Underscores-", None, "dashy-st-underscores"],  # noqa: PT007
+        ["Repeated-----Chars___Jr.", None, "repeated-chars-jr"],  # noqa: PT007
+        ["Numbers123 !$!@ McStrange!!##^", None, "numbers-mcstrange"],  # noqa: PT007
+        ["Кирил Френков", None, "кирил-френков"],  # noqa: PT007
+        ["年號", None, "年號"],  # noqa: PT007
+        ["abcdefghijklmnopqrstuvwxyz", None, "abcdefghijklmnopqrst"],  # noqa: PT007
+        ["ai bi cı dI eİ fI", None, "ai-bi-ci-di-ei-fi"],  # noqa: PT007, RUF001
+        ["", "some.email@example.co.uk", "someemail"],  # noqa: PT007
     ],
 )
 def test_usernameify(mocker, full_name, email, expected_username):
-    """usernameify should turn a user's name into a username, or use the email if necessary"""
+    """Usernameify should turn a user's name into a username, or use the email if necessary"""
     # Change the username max length to 20 for test data simplicity's sake
     temp_username_max_len = 20
     mocker.patch("users.utils.USERNAME_MAX_LEN", temp_username_max_len)
@@ -41,16 +41,16 @@ def test_usernameify(mocker, full_name, email, expected_username):
 
 
 def test_usernameify_fail():
-    """usernameify should raise an exception if the full name and email both fail to produce a username"""
-    with pytest.raises(ValueError):
+    """Usernameify should raise an exception if the full name and email both fail to produce a username"""
+    with pytest.raises(ValueError):  # noqa: PT011
         assert usernameify("!!!", email="???@example.com")
 
 
 @pytest.mark.parametrize(
-    "exception_text,expected_value",
+    "exception_text,expected_value",  # noqa: PT006
     [
-        ["DETAILS: (username)=(ABCDEFG) already exists", True],
-        ["DETAILS: (email)=(ABCDEFG) already exists", False],
+        ["DETAILS: (username)=(ABCDEFG) already exists", True],  # noqa: PT007
+        ["DETAILS: (email)=(ABCDEFG) already exists", False],  # noqa: PT007
     ],
 )
 def test_is_duplicate_username_error(exception_text, expected_value):
@@ -76,11 +76,11 @@ def test_ensure_active_user(mock_repair_faulty_edx_user, user):
 
 
 @pytest.mark.parametrize(
-    "name, email",
+    "name, email",  # noqa: PT006
     [
-        ["Mrs. Tammy Smith DDS", "HeSNMtNMfVdo@example.com"],
-        ["John Doe", "jd_123@example.com"],
-        ["Doe, Jane", "jd_456@example.com"],
+        ["Mrs. Tammy Smith DDS", "HeSNMtNMfVdo@example.com"],  # noqa: PT007
+        ["John Doe", "jd_123@example.com"],  # noqa: PT007
+        ["Doe, Jane", "jd_456@example.com"],  # noqa: PT007
     ],
 )
 def test_format_recipient(name, email):

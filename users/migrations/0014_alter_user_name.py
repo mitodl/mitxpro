@@ -13,7 +13,6 @@ def truncate_long_user_names(apps, schema):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("users", "0013_blocklist"),
     ]

@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("courses", "0004_change_courseware_url_field")]
 
     operations = [

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("ecommerce", "0034_productversion_requires_enrollment_code"),
     ]

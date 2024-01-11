@@ -63,12 +63,12 @@ class GoogleFileWatchAdmin(admin.ModelAdmin):
     )
     ordering = ["-expiration_date"]
 
-    def save_form(self, request, form, change):
+    def save_form(self, request, form, change):  # noqa: D102
         if not change:
             file_id = form.cleaned_data["file_id"]
             if self.model.objects.filter(file_id=file_id).exists():
                 raise ValidationError(
-                    "Only one GoogleFileWatch object should exist for each unique file_id (file_id provided: {}). "
+                    "Only one GoogleFileWatch object should exist for each unique file_id (file_id provided: {}). "  # noqa: EM103
                     "Update the existing object instead of creating a new one.".format(
                         file_id
                     )

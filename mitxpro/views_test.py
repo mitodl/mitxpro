@@ -1,9 +1,9 @@
 """
 Test end to end django views.
 """
+import pytest
 from django.test import Client
 from django.urls import reverse
-import pytest
 from rest_framework import status
 
 pytestmark = [pytest.mark.django_db]

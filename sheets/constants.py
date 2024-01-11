@@ -1,17 +1,17 @@
 """Sheets app constants"""
 
 from mail.constants import (
-    MAILGUN_FAILED,
-    MAILGUN_DELIVERED,
-    MAILGUN_OPENED,
     MAILGUN_CLICKED,
+    MAILGUN_DELIVERED,
+    MAILGUN_FAILED,
+    MAILGUN_OPENED,
 )
 
 REQUIRED_GOOGLE_API_SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive",
 ]
-DEFAULT_GOOGLE_EXPIRE_TIMEDELTA = dict(minutes=60)
+DEFAULT_GOOGLE_EXPIRE_TIMEDELTA = dict(minutes=60)  # noqa: C408
 
 SHEETS_VALUE_REQUEST_PAGE_SIZE = 50
 SHEET_TYPE_COUPON_REQUEST = "enrollrequest"
@@ -29,7 +29,7 @@ SHEET_RENEWAL_RECORD_LIMIT = 20
 # The index of the first row of a spreadsheet according to Google
 GOOGLE_SHEET_FIRST_ROW = 1
 GOOGLE_AUTH_URI = "https://accounts.google.com/o/oauth2/auth"
-GOOGLE_TOKEN_URI = "https://oauth2.googleapis.com/token"
+GOOGLE_TOKEN_URI = "https://oauth2.googleapis.com/token"  # noqa: S105
 GOOGLE_AUTH_PROVIDER_X509_CERT_URL = "https://www.googleapis.com/oauth2/v1/certs"
 GOOGLE_DATE_TIME_FORMAT = "DATE_TIME"
 GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN = "iam.gserviceaccount.com"
