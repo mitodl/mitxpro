@@ -17,9 +17,6 @@
 }
 
 .enterprise-banner-block {
-  background-size: cover;
-  background-position: 50% 50%;
-  position: relative;
 
   @include media-breakpoint-down (sm) {
     padding-bottom: 30px;

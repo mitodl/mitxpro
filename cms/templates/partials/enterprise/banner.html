@@ -4,17 +4,20 @@
   <style>
       {% if page.background_image %}
         .enterprise-banner-block {
-          background-image: url('{% image_version_url page.background_image "fill-390x575" %}');
+          background:
+                url('/static/images/enterprise/enterprise-page-dots-bg.png') 0% 100% repeat-x,
+                url('{% image_version_url page.background_image "fill-1440x613" %}') 0% 0% no-repeat;
+          background-position: center bottom, center top;
+          background-size: auto, cover;
         }
 
-        @media screen and (min-width: 768px) {
-          .enterprise-banner-block {
-            background-image: url('{% image_version_url page.background_image "fill-1440x613" %}');
-          }
-        }
       {% else %}
         .enterprise-banner-block {
-          background-image: url('/static/images/enterprise/enterprise-page-banner-bg.png');
+          background:
+                url('/static/images/enterprise/enterprise-page-dots-bg.png') 0% 100% repeat-x,
+                url('/static/images/enterprise/enterprise-page-banner-bg.png') 0% 0% no-repeat;
+          background-position: center bottom, center top;
+          background-size: auto, cover;
         }
       {% endif %}
   </style>
