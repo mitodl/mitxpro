@@ -205,34 +205,31 @@ def ensure_enterprise_page():
     """
     Ensures that an enterprise page with the correct slug exists.
     """
-    enterprise_page = Page.objects.filter(
-        content_type=ContentType.objects.get_for_model(cms_models.EnterprisePage)
-    ).first()
-    if enterprise_page is not None and enterprise_page.slug != ENTERPRISE_PAGE_SLUG:
-        enterprise_page.delete()
-        enterprise_page = None
-    if enterprise_page is None:
-        enterprise_page_data = {
-            "title": "Enterprise Page",
-            "slug": ENTERPRISE_PAGE_SLUG,
-            "description": """Deepen your team’s career knowledge and expand their abilities with
-            MIT xPRO’s online courses for professionals.""",
-            "action_title": "Find out what MIT xPRO can do for your team.",
-            "headings": [
-                {
-                    "type": "heading",
-                    "value": {
-                        "upper_head": "THE BEST COMPANIES",
-                        "middle_head": "CONNECT WITH",
-                        "bottom_head": "THE BEST MINDS AT MIT",
-                    },
+    enterprise_page = cms_models.EnterprisePage.objects.first()
+
+    if enterprise_page and enterprise_page.slug == ENTERPRISE_PAGE_SLUG:
+        return
+
+    enterprise_page_data = {
+        "title": "Enterprise Page",
+        "slug": ENTERPRISE_PAGE_SLUG,
+        "description": "Deepen your team’s career knowledge and expand their abilities with MIT xPRO’s online "
+        "courses for professionals.",
+        "action_title": "Find out what MIT xPRO can do for your team.",
+        "headings": [
+            {
+                "type": "heading",
+                "value": {
+                    "upper_head": "THE BEST COMPANIES",
+                    "middle_head": "CONNECT WITH",
+                    "bottom_head": "THE BEST MINDS AT MIT",
                 },
-            ],
-        }
-        enterprise_page = cms_models.EnterprisePage(**enterprise_page_data)
-        home_page = get_home_page()
-        home_page.add_child(instance=enterprise_page)
-        enterprise_page.refresh_from_db()
+            },
+        ],
+    }
+    enterprise_page = cms_models.EnterprisePage(**enterprise_page_data)
+    home_page = get_home_page()
+    home_page.add_child(instance=enterprise_page)
 
 
 def configure_wagtail():
