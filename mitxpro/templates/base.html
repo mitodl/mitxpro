@@ -1,4 +1,4 @@
-{% load static hijack_tags render_bundle js_interop %}
+{% load static hijack render_bundle js_interop %}
 {% load wagtailcore_tags latest_notification startswith %}
 
 <!DOCTYPE html>
@@ -45,7 +45,6 @@
   <body class="{% block bodyclass %}{% endblock %}">
   <div class="main-panel">
     {% include "partials/gtm_body.html" %}
-    {% hijack_notification %}
     {# Site-wide notifications should not show up on the ecommerce bulk pages #}
     {% if not request.path|startswith:'/ecommerce/bulk/,/certificate/' %}
       {% latest_notification %}

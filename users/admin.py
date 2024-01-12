@@ -2,7 +2,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as ContribUserAdmin
 from django.utils.translation import gettext_lazy as _
-from hijack_admin.admin import HijackUserAdminMixin
+from hijack.contrib.admin import HijackUserAdminMixin
 
 from mitxpro.admin import TimestampedModelAdmin
 from users.models import LegalAddress, User, Profile, BlockList
@@ -84,7 +84,7 @@ class UserAdmin(ContribUserAdmin, HijackUserAdminMixin, TimestampedModelAdmin):
         "email",
         "name",
         "is_staff",
-        "hijack_field",
+        # "hijack_field",
         "last_login",
     )
     list_filter = ("is_staff", "is_superuser", "is_active", "groups")

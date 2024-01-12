@@ -26,7 +26,7 @@ x-extra-hosts:
 
 services:
   db:
-    image: postgres:11.16
+    image: postgres:12
     environment:
       POSTGRES_HOST_AUTH_METHOD: 'trust'
     ports:

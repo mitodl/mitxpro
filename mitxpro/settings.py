@@ -183,10 +183,11 @@ INSTALLED_APPS = (
     "affiliate",
     # must be after "users" to pick up custom user model
     "b2b_ecommerce",
-    "compat",
+    # "compat",
     "ecommerce",
     "hijack",
-    "hijack_admin",
+    "hijack.contrib.admin",
+    # "hijack_admin",
     "hubspot_xpro",
     "voucher",
     "maxmind",
@@ -219,6 +220,7 @@ MIDDLEWARE = (
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
     "django_user_agents.middleware.UserAgentMiddleware",
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",
+    "hijack.middleware.HijackUserMiddleware",
 )
 
 # enable the nplusone profiler only in debug mode
