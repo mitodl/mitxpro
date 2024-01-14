@@ -8,5 +8,7 @@ urlpatterns = []
 
 if settings.DEBUG and not settings.MITOL_MAIL_ENABLE_EMAIL_DEBUGGER:
     urlpatterns += [
-        re_path(r"^__emaildebugger__/$", EmailDebuggerView.as_view(), name="email-debugger")
+        re_path(
+            r"^__emaildebugger__/$", EmailDebuggerView.as_view(), name="email-debugger"
+        )
     ]

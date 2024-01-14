@@ -66,6 +66,8 @@ from cms.models import (
 from courses.factories import CourseFactory
 
 
+lazy = pytest.lazy_fixture
+
 pytestmark = [pytest.mark.django_db]
 
 
@@ -332,30 +334,16 @@ def test_home_page_testimonials():
         assert testimonial.value.get("quote") == "quote"
 
 
-def test_home_page_news_and_events():
+def test_home_page_news_and_events(settings):
     """
     NewsAndEvents subpage should provide expected values
     """
     home_page = HomePageFactory.create()
     assert not home_page.news_and_events
-    del home_page.child_pages
-
-    news_and_events_page = NewsAndEventsPageFactory.create(
-        parent=home_page,
-        heading="heading",
-        items__0__news_and_events__content_type="content_type-0",
-        items__0__news_and_events__title="title-0",
-        items__0__news_and_events__image__image__title="image-0",
-        items__0__news_and_events__content="content-0",
-        items__0__news_and_events__call_to_action="call_to_action-0",
-        items__0__news_and_events__action_url="action_url-0",
-        items__1__news_and_events__content_type="content_type-1",
-        items__1__news_and_events__title="title-1",
-        items__1__news_and_events__image__image__title="image-1",
-        items__1__news_and_events__content="content-1",
-        items__1__news_and_events__call_to_action="call_to_action-1",
-        items__1__news_and_events__action_url="action_url-1",
-    )
+    news_and_events_page = create_news_and_events(parent=home_page)
+        
+    settings.FEATURES["WEBINARS"] = False
+    settings.FEATURES["ENABLE_BLOG"] = False
     assert home_page.news_and_events == news_and_events_page
     assert news_and_events_page.heading == "heading"
     for count, news_and_events in enumerate(news_and_events_page.items):

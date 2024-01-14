@@ -78,6 +78,7 @@ def test_complete_auth(
     request = set_request_session(
         RequestFactory().get(auth_complete_url),
         session_dict={"state": "some-state", "code_verifier": "some-verifier"},
+        mocker=mocker
     )
     request.user = user
 
