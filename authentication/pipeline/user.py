@@ -240,7 +240,7 @@ def forbid_hijack(strategy, backend, **kwargs):  # pylint: disable=unused-argume
         backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
     """
     # As first step in pipeline, stop a hijacking admin from going any further
-    if strategy.session_get("is_hijacked_user"):
+    if bool(strategy.session_get("hijack_history")):
         raise AuthException("You are hijacking another user, don't try to login again")
     return {}
 
