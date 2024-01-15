@@ -341,7 +341,7 @@ def test_home_page_news_and_events(settings):
     home_page = HomePageFactory.create()
     assert not home_page.news_and_events
     news_and_events_page = create_news_and_events(parent=home_page)
-        
+
     settings.FEATURES["WEBINARS"] = False
     settings.FEATURES["ENABLE_BLOG"] = False
     assert home_page.news_and_events == news_and_events_page
