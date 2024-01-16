@@ -1,6 +1,20 @@
 Release Notes
 =============
 
+Version 0.137.1
+---------------
+
+- feat: add zd-site-verification tag (#2864)
+- test: improve test fixture (#2863)
+- fix(deps): update dependency boto3 to v1.34.14
+- chore(deps): update dependency responses to v0.24.1
+- chore(deps): update dependency pytest-django to v4.7.0
+- fix(deps): update dependency uwsgi to v2.0.23
+- fix(deps): update dependency wagtail to v5.2.2
+- chore(deps): update dependency pytest-env to v1.1.3
+- chore(deps): update dependency pytest to v7.4.4
+- fix: Add vat id in hubspot properties sync (#2851)
+
 Version 0.137.0 (Released January 16, 2024)
 ---------------
 
