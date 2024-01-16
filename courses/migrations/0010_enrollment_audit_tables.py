@@ -30,15 +30,11 @@ class Migration(migrations.Migration):
                 ("updated_on", models.DateTimeField(auto_now=True)),
                 (
                     "data_before",
-                    django.contrib.postgres.fields.jsonb.JSONField(
-                        blank=True, null=True
-                    ),
+                    django.db.models.JSONField(blank=True, null=True),
                 ),
                 (
                     "data_after",
-                    django.contrib.postgres.fields.jsonb.JSONField(
-                        blank=True, null=True
-                    ),
+                    django.db.models.JSONField(blank=True, null=True),
                 ),
                 (
                     "acting_user",
@@ -75,15 +71,11 @@ class Migration(migrations.Migration):
                 ("updated_on", models.DateTimeField(auto_now=True)),
                 (
                     "data_before",
-                    django.contrib.postgres.fields.jsonb.JSONField(
-                        blank=True, null=True
-                    ),
+                    django.db.models.JSONField(blank=True, null=True),
                 ),
                 (
                     "data_after",
-                    django.contrib.postgres.fields.jsonb.JSONField(
-                        blank=True, null=True
-                    ),
+                    django.db.models.JSONField(blank=True, null=True),
                 ),
                 (
                     "acting_user",
