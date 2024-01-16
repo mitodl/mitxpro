@@ -33,7 +33,7 @@ def remove_edx_oauth_application(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [("oauth2_provider", "0001_initial")]
+    dependencies = [("oauth2_provider", "0004_auto_20200902_2022")]
 
     operations = [
         migrations.RunPython(create_edx_oauth_application, remove_edx_oauth_application)
