@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.137.0 (Released January 16, 2024)
+---------------
+
+- fix: filter revision created by wagtail (#2849)
+- fix: Add content_type to revision.content for blog and webinar index pages (#2846)
+- chore(deps): update dependency pylint-django to v2.5.5
+- chore!: Upgrade wagtail to 5.x (#2830)
+
 Version 0.136.0 (Released January 02, 2024)
 ---------------
 
