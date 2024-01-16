@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.137.0
+Version 0.137.0 (Released January 16, 2024)
 ---------------
 
 - fix: filter revision created by wagtail (#2849)
