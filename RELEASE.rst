@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.137.1
+Version 0.137.1 (Released January 16, 2024)
 ---------------
 
 - feat: add zd-site-verification tag (#2864)
