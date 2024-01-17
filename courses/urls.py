@@ -1,4 +1,5 @@
 """Course API URL routes"""
+from django.urls import path
 from django.urls import include, re_path
 from rest_framework import routers
 
@@ -24,8 +25,8 @@ router.register(
 )
 
 urlpatterns = [
-    re_path(r"^api/v1/", include(router.urls)),
-    re_path(r"^api/", include(router.urls)),
+    path("api/v1/", include(router.urls)),
+    path("api/", include(router.urls)),
     re_path(
         r"^api/enrollments/", v1.UserEnrollmentsView.as_view(), name="user-enrollments"
     ),

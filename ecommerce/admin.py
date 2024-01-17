@@ -59,6 +59,7 @@ class ProductContentTypeListFilter(admin.SimpleListFilter):
         return queryset.filter(**qset_filter)
 
 
+@admin.register(Line)
 class LineAdmin(admin.ModelAdmin):
     """Admin for Line"""
 
@@ -74,14 +75,16 @@ class LineAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+    @admin.display(
+        description="Product Object Text Id",
+        ordering="product_version__text_id",
+    )
     def get_product_version_text_id(self, obj):
         """Returns the related ProductVersion text_id"""
         return obj.product_version.text_id
 
-    get_product_version_text_id.short_description = "Product Object Text Id"
-    get_product_version_text_id.admin_order_field = "product_version__text_id"
 
-
+@admin.register(LineRunSelection)
 class LineRunSelectionAdmin(admin.ModelAdmin):
     """Admin for LineRunSelection"""
 
@@ -95,21 +98,24 @@ class LineRunSelectionAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+    @admin.display(
+        description="Order",
+        ordering="line__order",
+    )
     def get_order(self, obj):
         """Returns the related Order"""
         return obj.line.order
 
-    get_order.short_description = "Order"
-    get_order.admin_order_field = "line__order"
-
+    @admin.display(
+        description="Run Courseware Id",
+        ordering="run__courseware_id",
+    )
     def get_run_courseware_id(self, obj):
         """Returns the courseware_id of the associated CourseRun"""
         return obj.run.courseware_id
 
-    get_run_courseware_id.short_description = "Run Courseware Id"
-    get_run_courseware_id.admin_order_field = "run__courseware_id"
 
-
+@admin.register(ProgramRunLine)
 class ProgramRunLineAdmin(admin.ModelAdmin):
     """Admin for ProgramRunLine"""
 
@@ -124,14 +130,16 @@ class ProgramRunLineAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+    @admin.display(
+        description="Order",
+        ordering="line__order",
+    )
     def get_order(self, obj):
         """Returns the related Order"""
         return obj.line.order
 
-    get_order.short_description = "Order"
-    get_order.admin_order_field = "line__order"
 
-
+@admin.register(Order)
 class OrderAdmin(AuditableModelAdmin, TimestampedModelAdmin):
     """Admin for Order"""
 
@@ -157,6 +165,7 @@ class OrderAdmin(AuditableModelAdmin, TimestampedModelAdmin):
         sync_hubspot_deal(obj)
 
 
+@admin.register(OrderAudit)
 class OrderAuditAdmin(TimestampedModelAdmin):
     """Admin for OrderAudit"""
 
@@ -165,12 +174,13 @@ class OrderAuditAdmin(TimestampedModelAdmin):
     list_display = ("id", "order_id", "get_order_user")
     readonly_fields = get_field_names(OrderAudit)
 
+    @admin.display(
+        description="User",
+        ordering="order__purchaser__email",
+    )
     def get_order_user(self, obj):
         """Returns the related Order's user email"""
         return obj.order.purchaser.email
-
-    get_order_user.short_description = "User"
-    get_order_user.admin_order_field = "order__purchaser__email"
 
     def has_add_permission(self, request):
         return False
@@ -179,6 +189,7 @@ class OrderAuditAdmin(TimestampedModelAdmin):
         return False
 
 
+@admin.register(Receipt)
 class ReceiptAdmin(TimestampedModelAdmin):
     """Admin for Receipt"""
 
@@ -188,12 +199,13 @@ class ReceiptAdmin(TimestampedModelAdmin):
     readonly_fields = get_field_names(Receipt)
     ordering = ("-created_on",)
 
+    @admin.display(
+        description="User",
+        ordering="order__purchaser__email",
+    )
     def get_order_user(self, obj):
         """Returns the related Order's user email"""
         return obj.order.purchaser.email if obj.order is not None else None
-
-    get_order_user.short_description = "User"
-    get_order_user.admin_order_field = "order__purchaser__email"
 
     def has_add_permission(self, request):
         return False
@@ -227,6 +239,7 @@ class CouponVersionInline(admin.StackedInline):
     min_num = 0
 
 
+@admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
     """Admin for Coupons"""
 
@@ -243,14 +256,16 @@ class CouponAdmin(admin.ModelAdmin):
         """Overrides base queryset"""
         return super().get_queryset(request).select_related("payment")
 
+    @admin.display(
+        description="Coupon Payment Name",
+        ordering="payment__name",
+    )
     def get_payment_name(self, obj):
         """Returns the related CouponPayment name"""
         return obj.payment.name
 
-    get_payment_name.short_description = "Coupon Payment Name"
-    get_payment_name.admin_order_field = "payment__name"
 
-
+@admin.register(CouponPayment)
 class CouponPaymentAdmin(admin.ModelAdmin):
     """Admin for CouponPayments"""
 
@@ -261,6 +276,7 @@ class CouponPaymentAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
+@admin.register(CouponPaymentVersion)
 class CouponPaymentVersionAdmin(admin.ModelAdmin):
     """Admin for CouponPaymentVersions"""
 
@@ -284,23 +300,24 @@ class CouponPaymentVersionAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+    @admin.display(
+        description="Coupon Payment Name",
+        ordering="payment__name",
+    )
     def get_payment_name(self, obj):
         """Returns the related CouponPayment name"""
         return obj.payment.name
 
-    get_payment_name.short_description = "Coupon Payment Name"
-    get_payment_name.admin_order_field = "payment__name"
-
+    @admin.display(description="Company Name")
     def get_company_name(self, obj):
         """Returns the related Company name"""
         return None if not obj.company else obj.company.name
-
-    get_company_name.short_description = "Company Name"
 
     class Media:
         css = {"all": ("css/django-admin-version.css",)}
 
 
+@admin.register(CouponVersion)
 class CouponVersionAdmin(admin.ModelAdmin):
     """Admin for CouponVersions"""
 
@@ -314,24 +331,27 @@ class CouponVersionAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+    @admin.display(
+        description="Coupon Code",
+        ordering="coupon__coupon_code",
+    )
     def get_coupon_code(self, obj):
         """Returns the related Coupon code"""
         return obj.coupon.coupon_code
 
-    get_coupon_code.short_description = "Coupon Code"
-    get_coupon_code.admin_order_field = "coupon__coupon_code"
-
+    @admin.display(
+        description="Coupon Payment Name",
+        ordering="payment__name",
+    )
     def get_payment_name(self, obj):
         """Returns the related CouponPayment name"""
         return obj.payment_version.payment.name
-
-    get_payment_name.short_description = "Coupon Payment Name"
-    get_payment_name.admin_order_field = "payment__name"
 
     class Media:
         css = {"all": ("css/django-admin-version.css",)}
 
 
+@admin.register(CouponSelection)
 class CouponSelectionAdmin(admin.ModelAdmin):
     """Admin for CouponSelections"""
 
@@ -339,28 +359,32 @@ class CouponSelectionAdmin(admin.ModelAdmin):
     list_display = ("id", "get_payment_name", "get_coupon_code", "get_basket_user")
     raw_id_fields = ("coupon", "basket")
 
+    @admin.display(
+        description="Coupon Payment Name",
+        ordering="coupon__payment__name",
+    )
     def get_payment_name(self, obj):
         """Returns the related CouponPayment name"""
         return obj.coupon.payment.name
 
-    get_payment_name.short_description = "Coupon Payment Name"
-    get_payment_name.admin_order_field = "coupon__payment__name"
-
+    @admin.display(
+        description="Coupon Code",
+        ordering="coupon__coupon_code",
+    )
     def get_coupon_code(self, obj):
         """Returns the related Coupon code"""
         return obj.coupon.coupon_code
 
-    get_coupon_code.short_description = "Coupon Code"
-    get_coupon_code.admin_order_field = "coupon__coupon_code"
-
+    @admin.display(
+        description="Basket User",
+        ordering="basket__user__email",
+    )
     def get_basket_user(self, obj):
         """Returns the related Basket user's email"""
         return obj.basket.user.email
 
-    get_basket_user.short_description = "Basket User"
-    get_basket_user.admin_order_field = "basket__user__email"
 
-
+@admin.register(CouponEligibility)
 class CouponEligibilityAdmin(admin.ModelAdmin):
     """Admin for CouponEligibilitys"""
 
@@ -371,14 +395,16 @@ class CouponEligibilityAdmin(admin.ModelAdmin):
 
     model = CouponEligibility
 
+    @admin.display(
+        description="Product Object Text ID",
+        ordering="product__content_object__text_id",
+    )
     def get_product_text_id(self, obj):
         """Returns the text id of the related Product object"""
         return obj.product.content_object.text_id
 
-    get_product_text_id.short_description = "Product Object Text ID"
-    get_product_text_id.admin_order_field = "product__content_object__text_id"
 
-
+@admin.register(CouponRedemption)
 class CouponRedemptionAdmin(admin.ModelAdmin):
     """Admin for CouponRedemptions"""
 
@@ -398,21 +424,24 @@ class CouponRedemptionAdmin(admin.ModelAdmin):
             "coupon_version__coupon"
         )
 
+    @admin.display(
+        description="Coupon Code",
+        ordering="coupon_version__coupon__coupon_code",
+    )
     def get_coupon_code(self, obj):
         """Returns the related Coupon"""
         return obj.coupon_version.coupon.coupon_code
 
-    get_coupon_code.short_description = "Coupon Code"
-    get_coupon_code.admin_order_field = "coupon_version__coupon__coupon_code"
-
+    @admin.display(
+        description="Coupon Payment Version",
+        ordering="coupon_version__payment_version",
+    )
     def get_coupon_payment_version(self, obj):
         """Returns the related Coupon"""
         return obj.coupon_version.payment_version
 
-    get_coupon_payment_version.short_description = "Coupon Payment Version"
-    get_coupon_payment_version.admin_order_field = "coupon_version__payment_version"
 
-
+@admin.register(ProductVersion)
 class ProductVersionAdmin(admin.ModelAdmin):
     """Admin for ProductVersion"""
 
@@ -455,6 +484,7 @@ class ProductVersionInline(admin.StackedInline):
     min_num = 0
 
 
+@admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     """Admin for Product"""
 
@@ -469,11 +499,13 @@ class ProductAdmin(admin.ModelAdmin):
         "programs__readable_id",
     )
 
+    @admin.display(description="Text ID")
     def get_text_id(self, obj):
         """Return the text id"""
         if obj.latest_version:
             return obj.latest_version.text_id
 
+    @admin.display(description="Price")
     def get_price(self, obj):
         """Return the price"""
         if obj.latest_version:
@@ -483,10 +515,8 @@ class ProductAdmin(admin.ModelAdmin):
         """Return all active and in_active products"""
         return Product.all_objects
 
-    get_text_id.short_description = "Text ID"
-    get_price.short_description = "Price"
 
-
+@admin.register(DataConsentUser)
 class DataConsentUserAdmin(TimestampedModelAdmin):
     """Admin for DataConsentUser"""
 
@@ -531,6 +561,7 @@ class DataConsentAgreementForm(forms.ModelForm):
         return self.cleaned_data
 
 
+@admin.register(DataConsentAgreement)
 class DataConsentAgreementAdmin(TimestampedModelAdmin):
     """Admin for DataConsentAgreement"""
 
@@ -543,12 +574,14 @@ class DataConsentAgreementAdmin(TimestampedModelAdmin):
     form = DataConsentAgreementForm
 
 
+@admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
     """Admin for Company"""
 
     model = Company
 
 
+@admin.register(BulkCouponAssignment)
 class BulkCouponAssignmentAdmin(TimestampedModelAdmin):
     """Admin for BulkCouponAssignment"""
 
@@ -564,6 +597,7 @@ class BulkCouponAssignmentAdmin(TimestampedModelAdmin):
     model = BulkCouponAssignment
 
 
+@admin.register(ProductCouponAssignment)
 class ProductCouponAssignmentAdmin(admin.ModelAdmin):
     """Admin for ProductCouponAssignment"""
 
@@ -585,47 +619,27 @@ class ProductCouponAssignmentAdmin(admin.ModelAdmin):
             .select_related("product_coupon__coupon", "product_coupon__product")
         )
 
+    @admin.display(
+        description="Coupon",
+        ordering="product_coupon__coupon",
+    )
     def get_coupon(self, obj):
         """Returns the related Coupon"""
         return obj.product_coupon.coupon
 
-    get_coupon.short_description = "Coupon"
-    get_coupon.admin_order_field = "product_coupon__coupon"
-
+    @admin.display(
+        description="Product",
+        ordering="product_coupon__product",
+    )
     def get_product(self, obj):
         """Returns the related Product object"""
         return obj.product_coupon.product
 
-    get_product.short_description = "Product"
-    get_product.admin_order_field = "product_coupon__product"
 
-
+@admin.register(TaxRate)
 class TaxRateAdmin(admin.ModelAdmin):
     """Admin for TaxRate"""
 
     list_display = ("id", "country_code", "tax_rate", "tax_rate_name", "active")
     search_fields = ("country_code", "tax_rate_name", "tax_rate")
     model = TaxRate
-
-
-admin.site.register(Line, LineAdmin)
-admin.site.register(LineRunSelection, LineRunSelectionAdmin)
-admin.site.register(ProgramRunLine, ProgramRunLineAdmin)
-admin.site.register(Order, OrderAdmin)
-admin.site.register(OrderAudit, OrderAuditAdmin)
-admin.site.register(Receipt, ReceiptAdmin)
-admin.site.register(Product, ProductAdmin)
-admin.site.register(ProductVersion, ProductVersionAdmin)
-admin.site.register(Coupon, CouponAdmin)
-admin.site.register(CouponVersion, CouponVersionAdmin)
-admin.site.register(CouponPayment, CouponPaymentAdmin)
-admin.site.register(CouponPaymentVersion, CouponPaymentVersionAdmin)
-admin.site.register(CouponSelection, CouponSelectionAdmin)
-admin.site.register(CouponEligibility, CouponEligibilityAdmin)
-admin.site.register(CouponRedemption, CouponRedemptionAdmin)
-admin.site.register(DataConsentAgreement, DataConsentAgreementAdmin)
-admin.site.register(DataConsentUser, DataConsentUserAdmin)
-admin.site.register(BulkCouponAssignment, BulkCouponAssignmentAdmin)
-admin.site.register(ProductCouponAssignment, ProductCouponAssignmentAdmin)
-admin.site.register(Company, CompanyAdmin)
-admin.site.register(TaxRate, TaxRateAdmin)

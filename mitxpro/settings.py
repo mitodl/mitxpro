@@ -312,7 +312,6 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_L10N = True
 
 USE_TZ = True
 
@@ -885,6 +884,7 @@ if FEATURES.get("COUPON_SHEETS"):
 HIJACK_ALLOW_GET_REQUESTS = True
 HIJACK_LOGOUT_REDIRECT_URL = "/admin/users/user"
 HIJACK_REGISTER_ADMIN = False
+HIJACK_INSERT_BEFORE="</body>"
 
 # Wagtail
 WAGTAIL_CACHE_BACKEND = get_string(
