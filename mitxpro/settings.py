@@ -881,9 +881,6 @@ if FEATURES.get("COUPON_SHEETS"):
     )
 
 # Hijack
-HIJACK_ALLOW_GET_REQUESTS = True
-HIJACK_LOGOUT_REDIRECT_URL = "/admin/users/user"
-HIJACK_REGISTER_ADMIN = False
 HIJACK_INSERT_BEFORE = "</body>"
 
 # Wagtail
