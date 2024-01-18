@@ -4,7 +4,6 @@ import os
 import json
 from types import SimpleNamespace
 from collections import defaultdict, namedtuple
-import pytz
 
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
@@ -187,7 +186,7 @@ def parse_datetime_from_string(dt_string):
         datetime.datetime: The parsed datetime
     """
     return datetime.datetime.strptime(dt_string, "%Y-%m-%dT%H:%M:%S").astimezone(
-        pytz.UTC
+        datetime.timezone.utc
     )
 
 

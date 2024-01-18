@@ -1,11 +1,10 @@
 """
 Fixtures for hubspot_xpro tests
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from types import SimpleNamespace
 
 import pytest
-import pytz
 from django.contrib.contenttypes.models import ContentType
 from hubspot.crm.objects import SimplePublicObject
 from mitol.hubspot_api.factories import HubspotObjectFactory
@@ -19,14 +18,14 @@ from users.models import User
 # pylint: disable=redefined-outer-name
 
 TIMESTAMPS = [
-    datetime(2017, 1, 1, tzinfo=pytz.utc),
-    datetime(2017, 1, 2, tzinfo=pytz.utc),
-    datetime(2017, 1, 3, tzinfo=pytz.utc),
-    datetime(2017, 1, 4, tzinfo=pytz.utc),
-    datetime(2017, 1, 5, tzinfo=pytz.utc),
-    datetime(2017, 1, 6, tzinfo=pytz.utc),
-    datetime(2017, 1, 7, tzinfo=pytz.utc),
-    datetime(2017, 1, 8, tzinfo=pytz.utc),
+    datetime(2017, 1, 1, tzinfo=timezone.utc),
+    datetime(2017, 1, 2, tzinfo=timezone.utc),
+    datetime(2017, 1, 3, tzinfo=timezone.utc),
+    datetime(2017, 1, 4, tzinfo=timezone.utc),
+    datetime(2017, 1, 5, tzinfo=timezone.utc),
+    datetime(2017, 1, 6, tzinfo=timezone.utc),
+    datetime(2017, 1, 7, tzinfo=timezone.utc),
+    datetime(2017, 1, 8, tzinfo=timezone.utc),
 ]
 
 FAKE_OBJECT_ID = 1234

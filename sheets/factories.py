@@ -1,5 +1,5 @@
 """Factories for sheets app"""
-import pytz
+import datetime
 from factory import Faker, SubFactory, fuzzy
 from factory.django import DjangoModelFactory
 
@@ -29,8 +29,12 @@ class GoogleApiAuthFactory(DjangoModelFactory):  # pylint: disable=missing-docst
 class GoogleFileWatchFactory(DjangoModelFactory):  # pylint: disable=missing-docstring
     file_id = Faker("pystr", max_chars=15)
     channel_id = fuzzy.FuzzyText(prefix="Channel ")
-    activation_date = Faker("past_datetime", start_date="-30d", tzinfo=pytz.UTC)
-    expiration_date = Faker("future_datetime", end_date="+30d", tzinfo=pytz.UTC)
+    activation_date = Faker(
+        "past_datetime", start_date="-30d", tzinfo=datetime.timezone.utc
+    )
+    expiration_date = Faker(
+        "future_datetime", end_date="+30d", tzinfo=datetime.timezone.utc
+    )
 
     class Meta:
         model = models.GoogleFileWatch

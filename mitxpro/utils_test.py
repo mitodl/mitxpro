@@ -6,7 +6,6 @@ from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest
-import pytz
 from rest_framework import status
 
 from ecommerce.models import Order
@@ -86,14 +85,14 @@ def test_now_in_utc():
     """now_in_utc() should return the current time set to the UTC time zone"""
     now = now_in_utc()
     assert is_near_now(now)
-    assert now.tzinfo == pytz.UTC
+    assert now.tzinfo == datetime.timezone.utc
 
 
 def test_is_near_now():
     """
     Test is_near_now for now
     """
-    now = datetime.datetime.now(tz=pytz.UTC)
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
     assert is_near_now(now) is True
     later = now + datetime.timedelta(0, 6)
     assert is_near_now(later) is False

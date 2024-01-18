@@ -5,11 +5,11 @@ Django settings for mitxpro.
 import logging
 import os
 import platform
-from datetime import timedelta
+from datetime import timedelta, timezone
 from urllib.parse import urljoin, urlparse
 
 import dj_database_url
-import pytz
+from zoneinfo import ZoneInfo
 from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 from mitol.common.envs import (
@@ -1358,7 +1358,7 @@ _sheets_date_timezone = get_string(
         "Choose from a value in the TZ database (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)."
     ),
 )
-SHEETS_DATE_TIMEZONE = pytz.timezone(_sheets_date_timezone)
+SHEETS_DATE_TIMEZONE = ZoneInfo(_sheets_date_timezone)
 
 SHEETS_REFUND_FIRST_ROW = get_int(
     name="SHEETS_REFUND_FIRST_ROW",

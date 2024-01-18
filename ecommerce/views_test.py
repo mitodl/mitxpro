@@ -1,12 +1,11 @@
 """ecommerce tests for views"""
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus, urljoin
 
 import factory
 import faker
 import pytest
-import pytz
 import rest_framework.status as status  # pylint: disable=useless-import-alias
 from django.db.models import Count, Q
 from django.urls import reverse
@@ -987,7 +986,7 @@ def test_patch_basket_data_consents(basket_and_agreement, as_owner):
     )
     if as_owner:
         assert resp.json()["data_consents"][0]["consent_date"] >= datetime.now(
-            tz=pytz.UTC
+            tz=timezone.utc
         ).strftime("%Y-%m-%dT00:00:00Z")
     else:
         assert resp.json()["data_consents"] == []

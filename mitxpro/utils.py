@@ -13,7 +13,6 @@ from django.db import models
 from django.http import HttpRequest
 from django.http.response import HttpResponse
 from django.templatetags.static import static
-import pytz
 from rest_framework import status
 import requests
 
@@ -72,7 +71,7 @@ def is_near_now(time):
         bool:
             True if near now, false otherwise
     """
-    now = datetime.datetime.now(tz=pytz.UTC)
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
     five_seconds = datetime.timedelta(0, 5)
     return now - five_seconds < time < now + five_seconds
 
@@ -83,7 +82,7 @@ def now_in_utc():
     Returns:
         datetime.datetime: A datetime object for the current time
     """
-    return datetime.datetime.now(tz=pytz.UTC)
+    return datetime.datetime.now(tz=datetime.timezone.utc)
 
 
 def format_datetime_for_filename(datetime_object, include_time=False, include_ms=False):

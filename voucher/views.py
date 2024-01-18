@@ -2,10 +2,9 @@
 Voucher views
 """
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
-import pytz
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
@@ -61,7 +60,7 @@ class UploadVoucherFormView(LoginRequiredMixin, FormView):
                 )
                 return redirect("voucher:resubmit")
             voucher = old_voucher
-            voucher.uploaded = datetime.now(tz=pytz.UTC)
+            voucher.uploaded = datetime.now(tz=timezone.utc)
             voucher.save()
         else:
             Voucher.objects.create(**values, user=user)

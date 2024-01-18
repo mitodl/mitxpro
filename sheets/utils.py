@@ -4,7 +4,6 @@ import email.utils
 from collections import namedtuple
 from urllib.parse import urljoin, quote_plus
 from enum import Enum
-import pytz
 
 from django.conf import settings
 from django.urls import reverse
@@ -466,7 +465,11 @@ def _parse_sheet_date_str(date_str, date_format):
     dt = datetime.datetime.strptime(date_str, date_format).astimezone(
         settings.SHEETS_DATE_TIMEZONE
     )
-    return dt if settings.SHEETS_DATE_TIMEZONE == pytz.UTC else dt.astimezone(pytz.UTC)
+    return (
+        dt
+        if settings.SHEETS_DATE_TIMEZONE == datetime.timezone.utc
+        else dt.astimezone(datetime.timezone.utc)
+    )
 
 
 def parse_sheet_datetime_str(datetime_str):
@@ -507,7 +510,7 @@ def google_timestamp_to_datetime(google_timestamp):
     """
     # Google timestamps are expressed in milliseconds, hence the '/ 1000'
     timestamp_in_seconds = int(google_timestamp) / 1000
-    return datetime.datetime.fromtimestamp(timestamp_in_seconds, pytz.UTC)
+    return datetime.datetime.fromtimestamp(timestamp_in_seconds, datetime.timezone.utc)
 
 
 def google_date_string_to_datetime(google_date_str):
@@ -522,7 +525,7 @@ def google_date_string_to_datetime(google_date_str):
     """
     return datetime.datetime.strptime(
         google_date_str, "%Y-%m-%dT%H:%M:%S.%fZ"
-    ).astimezone(pytz.UTC)
+    ).astimezone(datetime.timezone.utc)
 
 
 def mailgun_timestamp_to_datetime(timestamp):
@@ -535,7 +538,7 @@ def mailgun_timestamp_to_datetime(timestamp):
     Returns:
         datetime.datetime: The parsed timestamp
     """
-    return datetime.datetime.fromtimestamp(timestamp, pytz.UTC)
+    return datetime.datetime.fromtimestamp(timestamp, datetime.timezone.utc)
 
 
 def build_multi_cell_update_request_body(
