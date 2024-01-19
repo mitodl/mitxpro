@@ -43,6 +43,12 @@
 @import "certificates/certificate";
 @import "expandable";
 @import "receipt";
+@import "enterprise";
+@import "detail/enterprise/companies-logo-carousel";
+@import "detail/enterprise/learning-journey";
+@import "detail/enterprise/success-stories";
+@import "detail/enterprise/learning-strategy-form";
+
 
 body {
   font-family: Rajdhani, "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;

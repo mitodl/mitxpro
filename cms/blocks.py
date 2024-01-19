@@ -116,6 +116,48 @@ class CourseRunCertificateOverrides(blocks.StructBlock):
     )
 
 
+class BannerHeadingBlock(blocks.StructBlock):
+    """
+    A custom block designed for creating banner headings on an enterprise page.
+    """
+
+    upper_head = blocks.CharBlock(max_length=25, help_text="The main heading.")
+    middle_head = blocks.CharBlock(max_length=25, help_text="Secondary heading.")
+    bottom_head = blocks.CharBlock(max_length=25, help_text="Lower heading.")
+
+    class Meta:
+        icon = "title"
+        label = "Banner Headings"
+
+
+class SuccessStoriesBlock(blocks.StructBlock):
+    """
+    A custom block designed to represent an individual success story.
+    """
+
+    title = blocks.CharBlock(
+        max_length=255, help_text="Enter the title of the success story."
+    )
+    image = ImageChooserBlock(
+        help_text="Select an image to accompany the success story.",
+    )
+    content = blocks.TextBlock(
+        help_text="Provide the detailed content or description of the success story."
+    )
+    call_to_action = blocks.CharBlock(
+        max_length=100,
+        default="Read More",
+        help_text="Enter the text for the call-to-action button (e.g., 'Read More').",
+    )
+    action_url = blocks.URLBlock(
+        help_text="Provide the URL that the call-to-action button should link to.",
+    )
+
+    class Meta:
+        icon = "tick-inverse"
+        label = "Success Story"
+
+
 def validate_unique_readable_ids(value):
     """
     Validates that all of the course run override blocks in this stream field have

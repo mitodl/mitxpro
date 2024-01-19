@@ -19,7 +19,12 @@ from django.templatetags.static import static
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
-from wagtail.admin.panels import FieldPanel, InlinePanel, TitleFieldPanel
+from wagtail.admin.panels import (
+    FieldPanel,
+    InlinePanel,
+    MultiFieldPanel,
+    TitleFieldPanel,
+)
 from wagtail.blocks import (
     CharBlock,
     PageChooserBlock,
@@ -30,6 +35,7 @@ from wagtail.blocks import (
 )
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.coreutils import WAGTAIL_APPEND_SLASH
+from wagtail.documents.models import Document
 from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.models import Image
@@ -40,11 +46,13 @@ from wagtailmetadata.models import MetadataPageMixin
 from blog.api import fetch_blog
 from cms.api import filter_and_sort_catalog_pages
 from cms.blocks import (
+    BannerHeadingBlock,
     CourseRunCertificateOverrides,
     FacultyBlock,
     LearningTechniqueBlock,
     NewsAndEventsBlock,
     ResourceBlock,
+    SuccessStoriesBlock,
     UserTestimonialBlock,
     validate_unique_readable_ids,
 )
@@ -54,6 +62,7 @@ from cms.constants import (
     BLOG_INDEX_SLUG,
     CERTIFICATE_INDEX_SLUG,
     COURSE_INDEX_SLUG,
+    ENTERPRISE_PAGE_SLUG,
     FORMAT_ONLINE,
     FORMAT_OTHER,
     ON_DEMAND_WEBINAR,
@@ -765,6 +774,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         "SignatoryIndexPage",
         "WebinarIndexPage",
         "BlogIndexPage",
+        "EnterprisePage",
     ]
 
     @property
@@ -1867,9 +1877,9 @@ class FacultyMembersPage(CourseProgramChildPage):
     ]
 
 
-class ImageCarouselPage(CourseProgramChildPage):
+class AbstractImageCarousel(Page):
     """
-    Page that holds image carousel.
+    Abstract class that holds image carousel.
     """
 
     images = StreamField(
@@ -1880,6 +1890,15 @@ class ImageCarouselPage(CourseProgramChildPage):
     )
 
     content_panels = [FieldPanel("title"), FieldPanel("images")]
+
+    class Meta:
+        abstract = True
+
+
+class ImageCarouselPage(CourseProgramChildPage, AbstractImageCarousel):
+    """
+    Page that holds image carousel.
+    """
 
     class Meta:
         verbose_name = "Image Carousel"
@@ -2219,3 +2238,321 @@ class SiteNotification(models.Model):
 
     def __str__(self):
         return str(self.message)
+
+
+class EnterpriseChildPage(Page):
+    """
+    Abstract base class for pages that are children of an Enterprise Page.
+
+    This model is not intended to be used directly but as a base for other specific page types.
+    It provides basic functionalities like auto-generating slugs and limiting page creation.
+    """
+
+    class Meta:
+        abstract = True
+
+    parent_page_types = ["EnterprisePage"]
+    promote_panels = []
+    subpage_types = []
+
+    @classmethod
+    def can_create_at(cls, parent):
+        """
+        Ensures that only one instance of this page type can be created
+        under each parent.
+        """
+        return (
+            super().can_create_at(parent)
+            and not parent.get_children().type(cls).exists()
+        )
+
+    def save(self, clean=True, user=None, log_action=False, **kwargs):
+        """
+        Auto-generates a slug for this page if it doesn't already have one.
+
+        The slug is generated from the page title and its ID to ensure uniqueness.
+        """
+        if not self.title:
+            self.title = self.__class__._meta.verbose_name.title()
+
+        if not self.slug:
+            self.slug = slugify(f"{self.title}-{self.id}")
+
+        super().save(clean=clean, user=user, log_action=log_action, **kwargs)
+
+    def serve(self, request, *args, **kwargs):
+        """
+        Prevents direct access to this page type by raising a 404 error.
+
+        These pages are not intended to be standalone and should not be accessible by URL.
+        """
+        raise Http404
+
+
+class CompaniesLogoCarouselSection(EnterpriseChildPage, AbstractImageCarousel):
+    """
+    A custom page model for displaying a carousel of company trust logos.
+    """
+
+    heading = RichTextField(
+        help_text="The main heading of the Companies Logo Carousel section."
+    )
+
+    content_panels = [FieldPanel("heading"), FieldPanel("images")]
+
+    class Meta:
+        verbose_name = "Companies Logo Carousel"
+
+
+class LearningJourneySection(EnterpriseChildPage):
+    """
+    A page model representing a section of a learning journey.
+
+    This model includes a heading, a descriptive text, an optional image, and
+    a call-to-action button. The call-to-action button can be linked to either
+    a URL or a PDF document. The section also contains a list of learning
+    journey items.
+    """
+
+    heading = RichTextField(
+        help_text="The main heading of the learning journey section."
+    )
+    description = RichTextField(
+        help_text="A detailed description of the learning journey section.",
+    )
+    journey_image = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Optional image to visually represent the learning journey at least 560x618 pixels.",
+    )
+    journey_items = StreamField(
+        [("journey", TextBlock(icon="plus"))],
+        blank=False,
+        help_text="Enter the text for this learning journey item.",
+        use_json_field=True,
+    )
+    call_to_action = models.CharField(
+        max_length=30,
+        default="View Full Diagram",
+        help_text="Text for the call-to-action button.",
+    )
+    action_url = models.URLField(
+        null=True,
+        blank=True,
+        help_text="URL for the call-to-action button, used if no PDF is linked.",
+    )
+    pdf_file = models.ForeignKey(
+        Document,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="PDF document linked to the call-to-action button, prioritized over the URL.",
+    )
+
+    content_panels = [
+        FieldPanel("heading"),
+        FieldPanel("journey_image"),
+        FieldPanel("journey_items"),
+        FieldPanel("description"),
+        MultiFieldPanel(
+            [
+                FieldPanel("call_to_action"),
+                FieldPanel("action_url"),
+                FieldPanel("pdf_file"),
+            ],
+            heading="Button Settings",
+        ),
+    ]
+
+    @property
+    def button_url(self):
+        """
+        Determines the URL for the call-to-action button.
+
+        The method gives priority to the linked PDF file's URL,
+        if no PDF is linked, it falls back to the action_url.
+        """
+        return self.pdf_file.url if self.pdf_file else self.action_url
+
+    def clean(self):
+        """Validates that either action_url or pdf_file must be added."""
+        super().clean()
+        if not self.action_url and not self.pdf_file:
+            raise ValidationError(
+                "Please enter an Action URL or select a PDF document."
+            )
+
+    class Meta:
+        verbose_name = "Learning Journey"
+
+
+class SuccessStoriesSection(EnterpriseChildPage):
+    """
+    A page model for showcasing success stories related to an enterprise.
+
+    This page includes a primary heading, an optional subheading, and a collection of
+    success stories.
+    """
+
+    heading = RichTextField(
+        help_text="The main heading for the success stories section."
+    )
+    subhead = RichTextField(
+        help_text="A subheading to provide additional context or information.",
+    )
+    success_stories = StreamField(
+        [("success_story", SuccessStoriesBlock())],
+        blank=False,
+        help_text="Manage the individual success stories. Each story is a separate block.",
+        use_json_field=True,
+    )
+
+    content_panels = [
+        FieldPanel("heading"),
+        FieldPanel("subhead"),
+        FieldPanel("success_stories"),
+    ]
+
+    class Meta:
+        verbose_name = "Success Stories"
+
+
+class LearningStrategyFormSection(EnterpriseChildPage):
+    """
+    A page model for a section dedicated to a learning strategy form.
+
+    This section includes a main heading and an optional subheading.
+    The actual form is added by Hubspot in template.
+    """
+
+    heading = RichTextField(
+        help_text="Enter the main heading for the learning strategy form section.",
+    )
+    subhead = RichTextField(
+        help_text="A subheading to provide additional context or information.",
+    )
+    consent = RichTextField(
+        help_text="Enter the consent message to be displayed when users submit the form."
+    )
+
+    content_panels = [
+        FieldPanel("heading"),
+        FieldPanel("subhead"),
+        FieldPanel("consent"),
+    ]
+
+    class Meta:
+        verbose_name = "Learning Strategy Form"
+
+
+class EnterprisePage(WagtailCachedPageMixin, Page):
+    """
+    Represents an enterprise page in the CMS.
+    """
+
+    slug = ENTERPRISE_PAGE_SLUG
+    template = "enterprise_page.html"
+    parent_page_types = ["HomePage"]
+    subpage_types = [
+        "CompaniesLogoCarouselSection",
+        "LearningJourneySection",
+        "SuccessStoriesSection",
+        "LearningStrategyFormSection",
+    ]
+
+    headings = StreamField(
+        [("heading", BannerHeadingBlock())],
+        help_text="Add banner headings for this page.",
+        use_json_field=True,
+    )
+    background_image = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Background image size must be at least 1440x613 pixels.",
+    )
+    overlay_image = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Select an overlay image for the banner section at leasr 544x444 pixels.",
+    )
+    description = RichTextField(
+        help_text="Enter a description for the call-to-action section under banner."
+    )
+    action_title = models.CharField(
+        max_length=100,
+        help_text="The text to show on the call to action button",
+    )
+
+    content_panels = Page.content_panels + [
+        FieldPanel("headings"),
+        FieldPanel("background_image"),
+        FieldPanel("overlay_image"),
+        FieldPanel("description"),
+        FieldPanel("action_title"),
+    ]
+
+    class Meta:
+        verbose_name = "Enterprise"
+
+    def serve(self, request, *args, **kwargs):
+        """
+        Serves the enterprise page.
+
+        This method is overridden to handle specific rendering needs for
+        the enterprise template, especially during previews.
+        """
+        return Page.serve(self, request, *args, **kwargs)
+
+    @property
+    def companies_logo_carousel(self):
+        """
+        Gets the "Companies Logo Carousel" section subpage
+        """
+        return self._get_child_page_of_type(CompaniesLogoCarouselSection)
+
+    @property
+    def learning_journey(self):
+        """
+        Gets the "Learning Journey" section subpage
+        """
+        return self._get_child_page_of_type(LearningJourneySection)
+
+    @property
+    def success_stories_carousel(self):
+        """
+        Gets the "Success Stories Carousel" section subpage
+        """
+        return self._get_child_page_of_type(SuccessStoriesSection)
+
+    @property
+    def learning_strategy_form(self):
+        """
+        Gets the "Learning Strategy Form" section subpage
+        """
+        return self._get_child_page_of_type(LearningStrategyFormSection)
+
+    def get_context(self, request, *args, **kwargs):
+        """
+        Builds the context for rendering the enterprise page.
+        """
+        return {
+            **super().get_context(request, *args, **kwargs),
+            **get_base_context(request),
+            "companies_logo_carousel": self.companies_logo_carousel,
+            "learning_journey": self.learning_journey,
+            "success_stories_carousel": self.success_stories_carousel,
+            "learning_strategy_form": self.learning_strategy_form,
+            "hubspot_enterprise_page_form_id": settings.HUBSPOT_CONFIG.get(
+                "HUBSPOT_ENTERPRISE_PAGE_FORM_ID"
+            ),
+        }

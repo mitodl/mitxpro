@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% load static render_bundle image_version_url %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block headercontent %}
+<div id="header"></div>
+{% render_bundle 'header' %}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="enterprise-page">
+    <div class="nav-line"></div>
+    {% include "partials/enterprise/banner.html" %}
+
+    {% if companies_logo_carousel %}
+        {% include "partials/enterprise/companies_logo_carousel.html" with page=companies_logo_carousel %}
+    {% endif %}
+
+    {% if learning_journey %}
+        <div class="section-line"></div>
+        {% include "partials/enterprise/learning_journey.html" with page=learning_journey %}
+    {% endif %}
+
+    {% if success_stories_carousel %}
+        {% include "partials/enterprise/success_stories.html" with page=success_stories_carousel %}
+    {% endif %}
+
+    {% if hubspot_portal_id and hubspot_enterprise_page_form_id %}
+        <div class="section-line"></div>
+        {% if learning_strategy_form %}
+            {% include "partials/enterprise/learning_strategy_form.html" with page=learning_strategy_form %}
+        {% endif %}
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -6,6 +6,7 @@ SIGNATORY_INDEX_SLUG = "signatories"
 CERTIFICATE_INDEX_SLUG = "certificate"
 WEBINAR_INDEX_SLUG = "webinars"
 BLOG_INDEX_SLUG = "blog"
+ENTERPRISE_PAGE_SLUG = "enterprise"
 
 ALL_TOPICS = "All Topics"
 ALL_TAB = "all-tab"

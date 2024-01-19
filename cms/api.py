@@ -7,7 +7,7 @@ import pytz
 from django.contrib.contenttypes.models import ContentType
 from wagtail.models import Page, Site
 from cms import models as cms_models
-from cms.constants import CERTIFICATE_INDEX_SLUG
+from cms.constants import CERTIFICATE_INDEX_SLUG, ENTERPRISE_PAGE_SLUG
 
 
 log = logging.getLogger(__name__)
@@ -201,6 +201,37 @@ def ensure_index_pages():  # pylint: disable=too-many-branches
         home_page.add_child(instance=blog_index)
 
 
+def ensure_enterprise_page():
+    """
+    Ensures that an enterprise page with the correct slug exists.
+    """
+    enterprise_page = cms_models.EnterprisePage.objects.first()
+
+    if enterprise_page and enterprise_page.slug == ENTERPRISE_PAGE_SLUG:
+        return
+
+    enterprise_page_data = {
+        "title": "Enterprise Page",
+        "slug": ENTERPRISE_PAGE_SLUG,
+        "description": "Deepen your team’s career knowledge and expand their abilities with MIT xPRO’s online "
+        "courses for professionals.",
+        "action_title": "Find out what MIT xPRO can do for your team.",
+        "headings": [
+            {
+                "type": "heading",
+                "value": {
+                    "upper_head": "THE BEST COMPANIES",
+                    "middle_head": "CONNECT WITH",
+                    "bottom_head": "THE BEST MINDS AT MIT",
+                },
+            },
+        ],
+    }
+    enterprise_page = cms_models.EnterprisePage(**enterprise_page_data)
+    home_page = get_home_page()
+    home_page.add_child(instance=enterprise_page)
+
+
 def configure_wagtail():
     """
     Ensures that all appropriate changes have been made to Wagtail that will
@@ -209,3 +240,4 @@ def configure_wagtail():
     ensure_home_page_and_site()
     ensure_catalog_page()
     ensure_index_pages()
+    ensure_enterprise_page()

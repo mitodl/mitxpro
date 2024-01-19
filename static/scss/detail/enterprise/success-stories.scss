@@ -1,0 +1,246 @@
+// sass-lint:disable mixins-before-declarations
+
+.success-stories-block {
+  background: $dark-blue;
+  padding: 75px 100px;
+  overflow: hidden;
+  position: relative;
+  background-size: cover;
+
+  @include media-breakpoint-down (sm) {
+    padding: 40px 5px 50px 5px;
+  }
+
+  @include media-breakpoint-only(md) {
+    padding: 50px 75px;
+  }
+
+  .success-stories-headings {
+    text-align: center;
+    line-height: normal;
+    font-style: normal;
+
+    @include media-breakpoint-down (sm) {
+      text-align: initial;
+    }
+
+    .success-stories-heading {
+      color: #eeb84a;
+      font-size: 32px;
+      font-style: normal;
+      font-weight: 500;
+      margin-bottom: 25px;
+
+      p {
+        margin-bottom: 0px;
+      }
+    }
+
+    .success-stories-subhead {
+      color: $white;
+      overflow: hidden;
+      font-size: 20px;
+      font-weight: 400;
+      margin-bottom: 40px;
+
+      @include media-breakpoint-down (sm) {
+        font-size: 18px;
+        font-weight: 500;
+        line-height: 27px;
+        margin-bottom: 25px;
+      }
+
+      @include media-breakpoint-only(md) {
+        font-size: 18px;
+      }
+
+      p {
+        margin-bottom: 0px;
+      }
+    }
+  }
+}
+
+.success-stories-slider {
+  position: relative;
+  margin: 0 -15px;
+
+  @include media-breakpoint-down (sm) {
+    display: block;
+  }
+
+  &:after {
+    display: block;
+    clear: both;
+    content: "";
+  }
+
+  .slide {
+    float: left;
+    width: 100%;
+    padding: 0 15px;
+    opacity: 0.3;
+
+    &.slick-active {
+      opacity: 1;
+    }
+  }
+
+  .slick-prev, .slick-next {
+    margin: -6% 0 0 !important;
+    background: transparent;
+    color: transparent;
+  }
+
+  .slick-prev {
+    background: url('#{$static-path}/images/enterprise/ctrl-left.png') no-repeat center center;
+    width: 64px;
+    height: 64px;
+    border: none;
+    left: 10px;
+    right: auto;
+
+    @include media-breakpoint-down (sm) {
+      background: none;
+    }
+
+    @include media-breakpoint-only(md) {
+      left: 0px;
+    }
+  }
+
+  .slick-next {
+    background: url('#{$static-path}/images/enterprise/ctrl-right.png') no-repeat center center;
+    width: 64px;
+    height: 64px;
+    border: none;
+    left: auto;
+    right: 10px;
+
+    @include media-breakpoint-down (sm) {
+      background: none;
+    }
+
+    @include media-breakpoint-only(md) {
+      right: 0px;
+    }
+  }
+
+  .slick-dots {
+    padding: 20px 0 0;
+  }
+
+  .slick-dots li {
+
+    &.slick-active {
+      button {
+        background: $primary;
+      }
+    }
+
+    button {
+      width: 60px;
+      border-radius: 5px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.15);
+
+      &:hover {
+        background: $primary;
+      }
+    }
+  }
+
+  .slick-list {
+    overflow: hidden;
+  }
+
+  .slide-holder {
+    display: flex;
+    align-items: center;
+    padding: 0px 80px;
+    font-style: normal;
+    color: $white;
+
+    @include media-breakpoint-down (sm) {
+      display: block;
+      align-items: initial;
+      margin-top: 2px;
+      padding: 0px;
+
+      img {
+        width: 350px;
+        height: 120px;
+      }
+    }
+
+    @include media-breakpoint-only(md) {
+      padding: 0px 20px;
+    }
+
+    h2 {
+      font-size: 25px;
+      font-weight: 700;
+      line-height: normal;
+
+      @include media-breakpoint-down (sm) {
+        font-size: 20px;
+        margin-bottom: 0px;
+      }
+
+      @include media-breakpoint-only(md) {
+        font-size: 18px;
+      }
+    }
+
+    p {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 27px;
+      margin: 18px 0px;
+      // sass-lint:disable no-vendor-prefixes
+      -webkit-line-clamp: 3;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      align-self: stretch;
+
+      @include media-breakpoint-down (sm) {
+        font-size: 18px;
+        // sass-lint:disable no-vendor-prefixes
+        -webkit-line-clamp: unset;
+        margin: 30px 0px;
+      }
+    }
+
+    a {
+      display: flex;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 0, 0, 0.10);
+      background: $white;
+      width: 113px;
+      height: 40px;
+      padding: 15px 20px;
+      align-items: center;
+      color: $primary;
+      font-size: 16px;
+      font-weight: 500;
+      margin-top: 10px;
+
+      &:hover {
+        background: $primary;
+        color: $white;
+        text-decoration: none;
+        transition: all .2s ease-in;
+      }
+    }
+
+    .slide-content {
+      padding: 30px;
+
+      @include media-breakpoint-down (sm) {
+        padding: 30px 5px 30px 5px;
+      }
+    }
+  }
+}

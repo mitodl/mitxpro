@@ -1,0 +1,110 @@
+// sass-lint:disable mixins-before-declarations
+
+.companies-logo-block {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0px 40px 50px 40px;
+  position: relative;
+  z-index: 1;
+
+  @include media-breakpoint-down (sm) {
+    width: 100%;
+    padding: 15px 5px;
+  }
+
+  @include media-breakpoint-only(md) {
+    padding: 0px 40px 50px 40px;
+  }
+
+  .companies-logo-heading {
+    color: $black;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 0px;
+
+    p {
+      margin-bottom: 0px;
+    }
+
+    @include media-breakpoint-down (sm) {
+      text-align: initial;
+      line-height: normal;
+    }
+  }
+}
+
+.companies-logo-carousel {
+
+  .slick-list {
+    margin: 30px 0px;
+
+    @include media-breakpoint-down (sm) {
+      margin: 20px 0px;
+    }
+  }
+
+  .img-holder {
+    height: 100%;
+    text-align: center;
+    padding: 0 15px;
+    letter-spacing: -.32em;
+
+    @include media-breakpoint-down (sm) {
+      padding: 0px 10px;
+    }
+
+    &:after {
+      display: inline-block;
+      vertical-align: middle;
+      content: '';
+      width: 2px;
+      margin: -2px;
+      height: inherit;
+    }
+
+    img {
+      display: inline-block;
+      max-width: 100%;
+      height: auto;
+      vertical-align: middle;
+    }
+  }
+
+  .slick-prev, .slick-next {
+    display: none !important;
+  }
+
+  .slick-dots {
+    padding: 0px;
+
+    @include media-breakpoint-down (sm) {
+      padding: 0px;
+    }
+  }
+
+  .slick-dots li {
+
+    @include media-breakpoint-down (sm) {
+      margin: 0 20px 10px;
+    }
+
+    &.slick-active {
+
+      button {
+        background: $primary;
+      }
+    }
+
+    button {
+      width: 60px;
+      border-radius: 5px;
+      height: 8px;
+      background: $events-background;
+
+      &:hover {
+        background: $primary;
+      }
+    }
+  }
+}

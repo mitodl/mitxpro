@@ -1,0 +1,237 @@
+// sass-lint:disable mixins-before-declarations
+
+.enterprise-page {
+  font-family: Rajdhani;
+
+  .nav-line {
+    background: linear-gradient(270deg, #f0ba46 0%, #95bb83 51.02%, #3dbdbf 100%);
+    height: 2px;
+    max-width: 100%;
+  }
+
+  .section-line {
+    background: linear-gradient(270deg, #f0ba46 0%, #95bb83 51.02%, #3dbdbf 100%);
+    height: 5px;
+    max-width: 100%;
+  }
+}
+
+.enterprise-banner-block {
+
+  @include media-breakpoint-down (sm) {
+    padding-bottom: 30px;
+  }
+
+  .enterprise-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 50px 0px;
+
+    @include media-breakpoint-down (sm) {
+      display: block;
+      padding: 16px 5px;
+    }
+
+    img {
+      width: 544px;
+      height: 444px;
+
+      @include media-breakpoint-down (sm) {
+        width: 100%;
+        height: auto;
+        padding-top: 13px;
+      }
+
+      @include media-breakpoint-only(md) {
+        width: 350px;
+        height: 270px;
+      }
+
+      @include media-breakpoint-only(lg) {
+        width: 500px;
+        height: 400px;
+      }
+    }
+
+    .enterprise-banner-content {
+      text-align: left;
+
+      @include media-breakpoint-down (sm) {
+        width: fit-content;
+        padding: 16px 0px;
+      }
+
+      h3 {
+        color: $primary;
+        font-size: 35px;
+        font-style: normal;
+        font-weight: 700;
+
+        @include media-breakpoint-down (sm) {
+          font-size: 25px;
+          padding: 0px;
+          margin: 0px;
+        }
+
+        @include media-breakpoint-only(md) {
+          font-size: 25px;
+          line-height: 10px;
+        }
+
+        @include media-breakpoint-only(lg) {
+          font-size: 25px;
+          line-height: 20px;
+        }
+      }
+
+      h1 {
+        color: $primary;
+        font-size: 71px;
+        font-style: normal;
+        font-weight: 700;
+        margin: 10px 0px;
+        line-height: 50px;
+
+        @include media-breakpoint-down (sm) {
+          font-size: 45px;
+          padding: 0px;
+          margin: 0px;
+          line-height: 55px;
+        }
+
+        @include media-breakpoint-only(md) {
+          font-size: 45px;
+          line-height: 40px;
+        }
+
+        @include media-breakpoint-only(lg) {
+          font-size: 55px;
+          line-height: 35px;
+        }
+      }
+
+      h2 {
+        color: $black;
+        font-size: 45px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 50px;
+
+        @include media-breakpoint-down (sm) {
+          font-size: 30px;
+          padding: 0px;
+          margin: 0px;
+          line-height: 25px;
+        }
+
+        @include media-breakpoint-only(md) {
+          font-size: 30px;
+          line-height: 15px;
+        }
+
+        @include media-breakpoint-only(lg) {
+          font-size: 35px;
+          line-height: 30px;
+        }
+      }
+
+      a {
+        border-radius: 5px;
+        background: $primary;
+        color: $white;
+        padding: 12px 20px;
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-top: 30px;
+        width: 63%;
+
+        &:hover {
+          background: $dark-blue;
+          text-decoration: none;
+          transition: all .2s ease-in;
+        }
+
+        @include media-breakpoint-down (sm) {
+          margin-bottom: 2px;
+          margin-top: 25px;
+          width: 95%;
+        }
+      }
+    }
+  }
+}
+
+.enterprise-careers-companies-block {
+  display: inline-flex;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #f0f5f7 0%, rgba(240, 245, 247, 0) 100%);
+  border-top: 1px rgba(0, 0, 0, 0.07) solid;
+  padding: 50px 40px 50px 40px;
+  text-align: center;
+
+  @include media-breakpoint-down (sm) {
+    padding: 20px 5px 20px 5px;
+    text-align: unset;
+  }
+
+  .careers-companies-content {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    display: inline-flex;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 27px;
+    word-wrap: break-word;
+
+    @include media-breakpoint-down (sm) {
+      font-size: 16px;
+      align-self: stretch;
+    }
+  }
+
+  .careers-companies-description {
+    align-self: stretch;
+    color: black;
+    margin-bottom: 40px;
+    text-align: start;
+
+    @include media-breakpoint-down (sm) {
+      margin-bottom: 30px;
+    }
+
+    p {
+      margin-bottom: 0px;
+    }
+  }
+
+  a {
+    padding: 10px 20px;
+    background: white;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.05);
+    border-radius: 5px;
+    border: 1px rgba(0, 0, 0, 0.07) solid;
+    color: $primary;
+    text-align: center;
+
+    &:hover {
+      background: $primary;
+      color: $white;
+      text-decoration: none;
+      transition: all .2s ease-in;
+    }
+
+    @include media-breakpoint-down (sm) {
+      font-weight: 600;
+      padding: 10px 15px;
+      width: 100%;
+    }
+  }
+}

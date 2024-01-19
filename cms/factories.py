@@ -11,6 +11,7 @@ from cms.blocks import (
     FacultyBlock,
     LearningTechniqueBlock,
     ResourceBlock,
+    SuccessStoriesBlock,
     UserTestimonialBlock,
 )
 from cms.constants import UPCOMING_WEBINAR
@@ -18,9 +19,11 @@ from cms.models import (
     BlogIndexPage,
     CatalogPage,
     CertificatePage,
+    CompaniesLogoCarouselSection,
     CourseIndexPage,
     CoursePage,
     CoursesInProgramPage,
+    EnterprisePage,
     ExternalCoursePage,
     ExternalProgramPage,
     FacultyMembersPage,
@@ -29,7 +32,9 @@ from cms.models import (
     FrequentlyAskedQuestionPage,
     HomePage,
     ImageCarouselPage,
+    LearningJourneySection,
     LearningOutcomesPage,
+    LearningStrategyFormSection,
     LearningTechniquesPage,
     NewsAndEventsBlock,
     NewsAndEventsPage,
@@ -38,6 +43,7 @@ from cms.models import (
     ResourcePage,
     SignatoryPage,
     SiteNotification,
+    SuccessStoriesSection,
     TextSection,
     TextVideoSection,
     UserTestimonialsPage,
@@ -500,3 +506,73 @@ class BlogIndexPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = BlogIndexPage
+
+
+class EnterprisePageFactory(wagtail_factories.PageFactory):
+    """EnterprisePage factory"""
+
+    class Meta:
+        model = EnterprisePage
+
+
+class CompaniesLogoCarouselPageFactory(wagtail_factories.PageFactory):
+    """CompaniesLogoCarouselPage factory class"""
+
+    heading = factory.fuzzy.FuzzyText(prefix="heading")
+    images = wagtail_factories.StreamFieldFactory(
+        {"image": factory.SubFactory(wagtail_factories.ImageChooserBlockFactory)}
+    )
+
+    class Meta:
+        model = CompaniesLogoCarouselSection
+
+
+class LearningJourneyPageFactory(wagtail_factories.PageFactory):
+    """LearningJourneyPage factory class"""
+
+    heading = factory.fuzzy.FuzzyText(prefix="heading ")
+    description = factory.fuzzy.FuzzyText()
+    journey_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    journey_items = factory.SubFactory(wagtail_factories.StreamFieldFactory)
+    call_to_action = factory.fuzzy.FuzzyText(prefix="call_to_action ")
+    action_url = factory.Faker("uri")
+    pdf_file = factory.SubFactory(wagtail_factories.DocumentFactory)
+
+    class Meta:
+        model = LearningJourneySection
+
+
+class SuccessStoriesBlockFactory(wagtail_factories.StructBlockFactory):
+    """SuccessStoriesBlock factory class"""
+
+    title = factory.fuzzy.FuzzyText(prefix="title ")
+    image = factory.SubFactory(wagtail_factories.ImageChooserBlockFactory)
+    content = factory.fuzzy.FuzzyText(prefix="content ")
+    call_to_action = factory.fuzzy.FuzzyText(prefix="call_to_action ")
+    action_url = factory.Faker("uri")
+
+    class Meta:
+        model = SuccessStoriesBlock
+
+
+class SuccessStoriesPageFactory(wagtail_factories.PageFactory):
+    """SuccessStoriesPage factory class"""
+
+    heading = factory.fuzzy.FuzzyText(prefix="heading ")
+    subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
+    success_stories = wagtail_factories.StreamFieldFactory(
+        {"success_story": factory.SubFactory(SuccessStoriesBlockFactory)}
+    )
+
+    class Meta:
+        model = SuccessStoriesSection
+
+
+class LearningStrategyFormPageFactory(wagtail_factories.PageFactory):
+    """LearningStrategyForm factory class"""
+
+    heading = factory.fuzzy.FuzzyText(prefix="heading ")
+    subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
+
+    class Meta:
+        model = LearningStrategyFormSection
