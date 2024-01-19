@@ -28,7 +28,7 @@ def create_edx_oauth_application(apps, schema_editor):
 
 def remove_edx_oauth_application(apps, schema_editor):
     """Removes an Application for creating a user in Open edX"""
-    
+
     from oauth2_provider.models import get_application_model
 
     Application = get_application_model()
