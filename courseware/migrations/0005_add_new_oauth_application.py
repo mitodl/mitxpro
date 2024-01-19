@@ -28,6 +28,7 @@ def create_edx_oauth_application(apps, schema_editor):
 
 def remove_edx_oauth_application(apps, schema_editor):
     """Removes an Application for creating a user in Open edX"""
+    
     from oauth2_provider.models import get_application_model
 
     Application = get_application_model()
@@ -35,9 +36,10 @@ def remove_edx_oauth_application(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("courseware", "0004_add_courseware_related_names"),
-        ("oauth2_provider", "0004_auto_20200902_2022")
+        ("oauth2_provider", "0004_auto_20200902_2022"),
     ]
 
     operations = [
