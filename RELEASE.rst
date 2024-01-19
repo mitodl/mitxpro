@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.138.0
+---------------
+
+- feat: enterprise page (#2834)
+
 Version 0.137.1 (Released January 16, 2024)
 ---------------
 
