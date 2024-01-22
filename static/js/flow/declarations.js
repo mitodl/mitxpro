@@ -22,6 +22,7 @@ declare type Settings = {
   webinars: boolean,
   enable_blog: boolean,
   enable_taxes_display: boolean,
+  enable_enterprise: boolean,
 }
 declare var SETTINGS: Settings
 
