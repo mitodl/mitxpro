@@ -288,7 +288,6 @@ def send_messages(messages):
     """
     for msg in messages:
         try:
-            print(msg.body)
             msg.send()
         except:  # pylint: disable=bare-except
             log.exception("Error sending email '%s' to %s", msg.subject, msg.to)
