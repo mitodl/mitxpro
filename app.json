@@ -654,11 +654,11 @@
       "required": false
     },
     "ZENDESK_PRODUCTION_DOMAIN_VERIFICATION_TAG_VALUE": {
-      "description": "The value of the meta tag used by Zendesk Production account to verify the owner of a domain",
+      "description": "The value of the meta tag used by Zendesk Production crawler to verify the owner of a domain",
       "required": false
     },
     "ZENDESK_SANDBOX_DOMAIN_VERIFICATION_TAG_VALUE": {
-      "description": "The value of the meta tag used by Zendesk Sandbox account to verify the owner of a domain",
+      "description": "The value of the meta tag used by Zendesk Sandbox crawler to verify the owner of a domain",
       "required": false
     }
   },

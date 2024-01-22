@@ -1341,12 +1341,12 @@ GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
 ZENDESK_PRODUCTION_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
     name="ZENDESK_PRODUCTION_DOMAIN_VERIFICATION_TAG_VALUE",
     default=None,
-    description="The value of the meta tag used by Zendesk Production account to verify the owner of a domain",
+    description="The value of the meta tag used by Zendesk Production crawler to verify the owner of a domain",
 )
 ZENDESK_SANDBOX_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
     name="ZENDESK_SANDBOX_DOMAIN_VERIFICATION_TAG_VALUE",
     default=None,
-    description="The value of the meta tag used by Zendesk Sandbox account to verify the owner of a domain",
+    description="The value of the meta tag used by Zendesk Sandbox crawler to verify the owner of a domain",
 )
 SHEETS_ADMIN_EMAILS = get_delimited_list(
     name="SHEETS_ADMIN_EMAILS",
