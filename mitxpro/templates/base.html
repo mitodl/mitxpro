@@ -33,11 +33,8 @@
     {% if domain_verification_tag %}
       <meta name="google-site-verification" content="{{ domain_verification_tag }}" />
     {% endif %}
-    {% if zendesk_production_domain_verification_tag %}
-      <meta name='zd-site-verification' content="{{ zendesk_production_domain_verification_tag }}" /> <!-- Production crawler snippet for Zendesk -->
-    {% endif %}
-    {% if zendesk_sandbox_domain_verification_tag %}
-      <meta name='zd-site-verification' content="{{ zendesk_sandbox_domain_verification_tag }}" />  <!-- Sandbox crawler snippet for Zendesk -->
+    {% if zendesk_domain_verification_tag %}
+      <meta name='zd-site-verification' content="{{ zendesk_domain_verification_tag }}" />
     {% endif %}
     {% block extrahead %}
     {% endblock %}

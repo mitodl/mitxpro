@@ -27,14 +27,10 @@ def get_base_context(request):
             "domain_verification_tag"
         ] = settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE
 
-    if settings.ZENDESK_PRODUCTION_DOMAIN_VERIFICATION_TAG_VALUE:
+    if settings.ZENDESK_DOMAIN_VERIFICATION_TAG_VALUE:
         context[
-            "zendesk_production_domain_verification_tag"
-        ] = settings.ZENDESK_PRODUCTION_DOMAIN_VERIFICATION_TAG_VALUE
-    if settings.ZENDESK_SANDBOX_DOMAIN_VERIFICATION_TAG_VALUE:
-        context[
-            "zendesk_sandbox_domain_verification_tag"
-        ] = settings.ZENDESK_SANDBOX_DOMAIN_VERIFICATION_TAG_VALUE
+            "zendesk_domain_verification_tag"
+        ] = settings.ZENDESK_DOMAIN_VERIFICATION_TAG_VALUE
     return context
 
 
