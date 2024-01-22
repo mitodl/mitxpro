@@ -13,29 +13,30 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from mitol.common.decorators import cache_control_max_age_jitter
-
 from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, re_path
 from django.views.decorators.cache import cache_control
+from mitol.common.decorators import cache_control_max_age_jitter
 from oauth2_provider.urls import base_urlpatterns
-from wagtail.admin import urls as wagtailadmin_urls
-from wagtail.documents import urls as wagtaildocs_urls
 from wagtail import urls as wagtail_urls
+from wagtail.admin import urls as wagtailadmin_urls
+from wagtail.contrib.sitemaps.views import sitemap
+from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.images.views.serve import ServeView
 from wagtail.utils.urlpatterns import decorate_urlpatterns
 
 from mitxpro.views import (
-    index,
-    restricted,
     AppContextView,
+    cms_signin_redirect_to_site_signin,
     handler404 as not_found_handler,
     handler500 as server_error_handler,
-    cms_signin_redirect_to_site_signin,
+    index,
+    restricted,
 )
+
 
 WAGTAIL_IMG_CACHE_AGE = 31_536_000  # 1 year
 
@@ -49,6 +50,7 @@ urlpatterns = (
             include((base_urlpatterns, "oauth2_provider"), namespace="oauth2_provider"),
         ),
         path("hijack/", include("hijack.urls")),
+        path("sitemap.xml", sitemap),
         path("", include("authentication.urls")),
         path("", include("b2b_ecommerce.urls")),
         path("", include("courses.urls")),

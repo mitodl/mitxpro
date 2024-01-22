@@ -90,6 +90,14 @@ from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
 
 
+class DisableSitemapURLMixin:
+    """Mixin to Disable sitemap URLs"""
+
+    def get_sitemap_urls(self, request):
+        """Disable sitemap urls for the page."""
+        return []
+
+
 class CanCreatePageMixin:
     """
     Mixin to make sure that only a single page can be created under the home page.
@@ -107,7 +115,7 @@ class CanCreatePageMixin:
         )
 
 
-class CourseObjectIndexPage(Page, CanCreatePageMixin):
+class CourseObjectIndexPage(DisableSitemapURLMixin, Page, CanCreatePageMixin):
     """
     A placeholder class to group courseware object pages as children.
     This class logically acts as no more than a "folder" to organize
@@ -147,7 +155,7 @@ class CourseObjectIndexPage(Page, CanCreatePageMixin):
         raise Http404
 
 
-class SignatoryObjectIndexPage(Page, CanCreatePageMixin):
+class SignatoryObjectIndexPage(DisableSitemapURLMixin, Page, CanCreatePageMixin):
     """
     A placeholder class to group signatory object pages as children.
     This class logically acts as no more than a "folder" to organize
@@ -609,7 +617,7 @@ class CatalogPage(Page):
         )
 
 
-class CertificateIndexPage(RoutablePageMixin, Page):
+class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
     """
     Certificate index page placeholder that handles routes for serving
     certificates given by UUID

@@ -27,6 +27,7 @@ from redbeat import RedBeatScheduler
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
+
 VERSION = "0.137.1"
 
 ENVIRONMENT = get_string(
@@ -143,6 +144,7 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "django.contrib.humanize",
     "django.contrib.sites",
+    "django.contrib.sitemaps",
     "django_user_agents",
     "social_django",
     "oauth2_provider",
@@ -1336,10 +1338,15 @@ GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
     default=None,
     description="The value of the meta tag used by Google to verify the owner of a domain (used for enabling push notifications)",
 )
-ZENDESK_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
-    name="ZENDESK_DOMAIN_VERIFICATION_TAG_VALUE",
+ZENDESK_PRODUCTION_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
+    name="ZENDESK_PRODUCTION_DOMAIN_VERIFICATION_TAG_VALUE",
     default=None,
-    description="The value of the meta tag used by Zendesk to verify the owner of a domain",
+    description="The value of the meta tag used by Zendesk Production account to verify the owner of a domain",
+)
+ZENDESK_SANDBOX_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
+    name="ZENDESK_SANDBOX_DOMAIN_VERIFICATION_TAG_VALUE",
+    default=None,
+    description="The value of the meta tag used by Zendesk Sandbox account to verify the owner of a domain",
 )
 SHEETS_ADMIN_EMAILS = get_delimited_list(
     name="SHEETS_ADMIN_EMAILS",
