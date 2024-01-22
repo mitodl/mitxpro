@@ -27,6 +27,7 @@ from redbeat import RedBeatScheduler
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
+
 VERSION = "0.137.1"
 
 ENVIRONMENT = get_string(
@@ -143,6 +144,7 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "django.contrib.humanize",
     "django.contrib.sites",
+    "django.contrib.sitemaps",
     "django_user_agents",
     "social_django",
     "oauth2_provider",
