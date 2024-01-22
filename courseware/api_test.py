@@ -25,6 +25,7 @@ from courseware.api import (
     create_edx_auth_token,
     create_edx_user,
     create_user,
+    create_oauth_application,
     enroll_in_edx_course_runs,
     get_edx_api_client,
     get_valid_edx_api_auth,
@@ -274,6 +275,7 @@ def test_update_xpro_user_username_integrity_error(user):
 @responses.activate
 def test_update_edx_user_email(settings, user):
     """Tests update_edx_user_email makes the expected incantations to update the user"""
+    create_oauth_application()
     responses.add(
         responses.POST,
         f"{settings.OPENEDX_API_BASE_URL}/user_api/v1/account/registration/",

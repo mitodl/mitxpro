@@ -106,7 +106,7 @@ def handle_watched_sheet_update(request):
     """
     if not settings.FEATURES.get("COUPON_SHEETS"):
         raise Http404
-    channel_id = request.headers.get("x-goog-channel-id")
+    channel_id = request.META.get("HTTP_X_GOOG_CHANNEL_ID")
     if not channel_id:
         log.error(
             "Google file watch request received without a Channel ID in the expected header field "

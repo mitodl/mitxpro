@@ -85,7 +85,6 @@ class UserAdmin(ContribUserAdmin, HijackUserAdminMixin, TimestampedModelAdmin):
         "email",
         "name",
         "is_staff",
-        # "hijack_field",
         "last_login",
     )
     list_filter = ("is_staff", "is_superuser", "is_active", "groups")

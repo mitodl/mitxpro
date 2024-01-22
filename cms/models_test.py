@@ -66,8 +66,6 @@ from cms.models import (
 from courses.factories import CourseFactory
 
 
-lazy = pytest.lazy_fixture
-
 pytestmark = [pytest.mark.django_db]
 
 
