@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.138.0
+---------------
+
+- feat: add enterprise page link in header (#2871)
+- feat: add sitemap (#2870)
+- feat: enterprise page (#2834)
+- Delete .github/PULL_REQUEST_TEMPLATE directory
+
 Version 0.137.1 (Released January 16, 2024)
 ---------------
 
