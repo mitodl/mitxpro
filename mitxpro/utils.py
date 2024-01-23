@@ -598,4 +598,5 @@ def get_js_settings(request: HttpRequest):
         "webinars": settings.FEATURES.get("WEBINARS", False),
         "enable_blog": settings.FEATURES.get("ENABLE_BLOG", False),
         "enable_taxes_display": settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False),
+        "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
     }

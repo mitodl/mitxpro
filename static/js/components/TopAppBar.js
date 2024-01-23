@@ -78,6 +78,15 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
               }
             </li>
             {
+              SETTINGS.enable_enterprise ? (
+                <li>
+                  <a href={routes.enterprise} className="enterprise-link" aria-label="enterprise">
+                    Enterprise
+                  </a>
+                </li>
+              ) : null
+            }
+            {
               SETTINGS.webinars ? (
                 <li>
                   <a href={routes.webinars} className="webinar-link" aria-label="webinars">

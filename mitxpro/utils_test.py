@@ -472,6 +472,7 @@ def test_get_js_settings(settings, rf):
     settings.FEATURES["WEBINARS"] = False
     settings.FEATURES["ENABLE_TAXES_DISPLAY"] = False
     settings.FEATURES["ENABLE_BLOG"] = False
+    settings.FEATURES["ENABLE_ENTERPRISE"] = False
 
     request = rf.get("/")
 
@@ -492,4 +493,5 @@ def test_get_js_settings(settings, rf):
         "webinars": settings.FEATURES.get("WEBINARS", False),
         "enable_taxes_display": settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False),
         "enable_blog": settings.FEATURES.get("ENABLE_BLOG", False),
+        "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
     }
