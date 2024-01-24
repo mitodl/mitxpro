@@ -1425,7 +1425,7 @@ class ExternalProgramPage(ProgramProductPage):
         return self
 
 
-class CourseProgramChildPage(Page):
+class CourseProgramChildPage(DisableSitemapURLMixin, Page):
     """
     Abstract page representing a child of Course/Program Page
     """
@@ -1520,7 +1520,7 @@ class UserTestimonialsPage(CourseProgramChildPage):
         verbose_name = "Testimonials Section"
 
 
-class NewsAndEventsPage(Page):
+class NewsAndEventsPage(DisableSitemapURLMixin, Page):
     """
     Page that holds news and events updates
     """
@@ -1926,7 +1926,7 @@ class FrequentlyAskedQuestionPage(CourseProgramChildPage):
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
 
-class FrequentlyAskedQuestion(Orderable):
+class FrequentlyAskedQuestion(DisableSitemapURLMixin, Orderable):
     """
     FAQs for the program/course page
     """
@@ -1969,7 +1969,7 @@ class ResourcePage(Page):
         return context
 
 
-class SignatoryPage(Page):
+class SignatoryPage(DisableSitemapURLMixin, Page):
     """CMS page representing a Signatory."""
 
     promote_panels = []
@@ -2248,7 +2248,7 @@ class SiteNotification(models.Model):
         return str(self.message)
 
 
-class EnterpriseChildPage(Page):
+class EnterpriseChildPage(DisableSitemapURLMixin, Page):
     """
     Abstract base class for pages that are children of an Enterprise Page.
 
