@@ -3,7 +3,7 @@
 .learning-strategy-block {
   width: 100%;
   padding: 75px 0 0;
-  background: url('#{$static-path}/images/enterprise-page-dots-bg.png') repeat-x 0% 60% $alice-blue;
+  background: url('#{$static-path}/images/enterprise/enterprise-page-dots-bg.png') repeat-x 0% 60% $alice-blue;
   background-size: contain;
 
   @include media-breakpoint-down (sm) {
