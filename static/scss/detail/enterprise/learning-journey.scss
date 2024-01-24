@@ -2,7 +2,7 @@
 
 .learning-journey-block {
   padding-top: 70px;
-  background: url('#{$static-path}/images/enterprise-page-dots-bg.png') repeat-x 0% 100% $alice-blue;
+  background: url('#{$static-path}/images/enterprise/enterprise-page-dots-bg.png') repeat-x 0% 100% $alice-blue;
   position: relative;
 
   @include media-breakpoint-down (sm) {
