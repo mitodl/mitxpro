@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.138.0
+Version 0.138.0 (Released January 25, 2024)
 ---------------
 
 - fix: fix static image path for enterprise page (#2878)
