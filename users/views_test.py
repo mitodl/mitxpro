@@ -86,7 +86,7 @@ def test_get_user_by_me(mocker, client, user, is_anonymous, show_enrollment_code
                 "state_or_territory": user.legal_address.state_or_territory,
                 "country": user.legal_address.country,
                 "postal_code": user.legal_address.postal_code,
-                "vat_id": None,
+                "vat_id": "",
             },
             "profile": {
                 "gender": user.profile.gender,

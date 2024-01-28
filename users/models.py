@@ -252,7 +252,7 @@ class LegalAddress(TimestampedModel):
     country = models.CharField(
         max_length=2, blank=True, validators=[validate_iso_3166_1_code]
     )  # ISO-3166-1
-    vat_id = models.CharField(max_length=30, blank=True, null=True)
+    vat_id = models.CharField(max_length=30, blank=True)
 
     # only required in the US/CA
     state_or_territory = models.CharField(
