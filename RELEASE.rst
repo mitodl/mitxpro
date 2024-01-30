@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.138.1
+---------------
+
+- fix: make vat_id blank only to fix profile update(#2880)
+- Delete more obsolete github templates (#2875)
+
 Version 0.138.0 (Released January 25, 2024)
 ---------------
 
