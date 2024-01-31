@@ -237,8 +237,8 @@ $text-gray-light: #d2d0d1;
 
   .certificate-logo {
     float: right;
-    width: 74px;
-    margin: 30px 0 0 20px;
+    width: 129px;
+    margin: 0 0 0 20px;
     position: relative;
 
     @include media-breakpoint-down(xs) {
@@ -250,15 +250,10 @@ $text-gray-light: #d2d0d1;
       position: absolute;
       left: 0;
       top: 2px;
-      width: 31px;
-      height: 18px;
+      width: 129px;
+      height: 33px;
 
-      &.xpro {
-        left: 44px;
-        top: 6px;
-        width: 30px;
-        height: 11px;
-      }
+      filter: brightness(0) saturate(100%) invert(0%) sepia(5%) saturate(7500%) hue-rotate(261deg) brightness(98%) contrast(106%);
     }
   }
 
