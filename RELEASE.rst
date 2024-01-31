@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.138.1
+Version 0.138.1 (Released January 31, 2024)
 ---------------
 
 - fix: make vat_id blank only to fix profile update(#2880)
