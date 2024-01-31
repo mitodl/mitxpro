@@ -85,13 +85,10 @@
   height: 35px;
 }
 
-.navbar-brand {
+.xpro-link {
+  z-index: 2;
   position: relative;
-
-  .xpro-link {
-    position: absolute;
-    z-index: 2;
-  }
+  padding: 10px 0 12px 0;
 }
 
 .navbar-toggler.nav-opener {
