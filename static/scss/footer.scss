@@ -104,8 +104,8 @@
     }
 
     img {
-      width: 78px;
-      height: 41px;
+      width: 129px;
+      height: 33px;
       margin: 0 auto 15px;
 
       @include media-breakpoint-up(md) {
@@ -114,7 +114,7 @@
       }
 
       @include media-breakpoint-up(lg) {
-        margin: 5px 45px 0 0;
+        margin: 5px 26px 0 0;
       }
     }
 

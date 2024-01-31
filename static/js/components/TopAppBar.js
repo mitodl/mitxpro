@@ -31,22 +31,13 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
       <nav
         className="sub-nav navbar navbar-expand-md link-section"
       >
-        <div className="navbar-brand">
-          <a
-            href="https://web.mit.edu/"
-            rel="noopener noreferrer"
-            target="_blank"
-            className="mit-link"
-          />
-          <a href={routes.root} className="xpro-link" />
+        <a href={routes.root} className="xpro-link">
           <img
-            src="/static/images/mitx-pro-logo.png"
+            src="/static/images/mit-xpro-logo.svg"
             className="site-logo"
             alt={SETTINGS.site_name}
-            width={154}
-            height={47.5}
           />
-        </div>
+        </a>
         {errorPageHeader ? null : (
           <button
             className="navbar-toggler nav-opener"

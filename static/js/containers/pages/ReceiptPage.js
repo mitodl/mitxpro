@@ -102,7 +102,7 @@ export class ReceiptPage extends React.Component<Props> {
                 <div className="receipt-row p-b-80">
                   <div className="receipt-col">
                     <div className="receipt-logo">
-                      <img src="static/images/mitx-pro-logo.png" alt="" />
+                      <img src="static/images/mit-xpro-logo.svg" alt="" />
                     </div>
                     <div className="receipt-mit-info">
                       <p>

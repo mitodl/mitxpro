@@ -87,7 +87,7 @@ describe("TopAppBar component", () => {
           assert.isNotOk(
             shallow(<TopAppBar currentUser={user} location={null} errorPageHeader={null} courseTopics={courseTopics} />)
               .find("a")
-              .at(2)
+              .at(1)
               .exists()
           )
         } else {
@@ -99,7 +99,7 @@ describe("TopAppBar component", () => {
           assert.equal(
             shallow(<TopAppBar currentUser={user} location={null} errorPageHeader={null} courseTopics={courseTopics} />)
               .find("a")
-              .at(2)
+              .at(1)
               .prop("href"),
             routes.catalog
           )
