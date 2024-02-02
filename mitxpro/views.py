@@ -26,11 +26,6 @@ def get_base_context(request):
         context[
             "domain_verification_tag"
         ] = settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE
-
-    if settings.ZENDESK_DOMAIN_VERIFICATION_TAG_VALUE:
-        context[
-            "zendesk_domain_verification_tag"
-        ] = settings.ZENDESK_DOMAIN_VERIFICATION_TAG_VALUE
     return context
 
 
