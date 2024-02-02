@@ -63,7 +63,7 @@
                     {% if page.partner_logo_placement == page.PartnerLogoPlacement.SECOND %}
                     <div class="certificate-dual-logo">
                         <div class="column">
-                            <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
+                            <img src="{% static 'images/mit-xpro-logo.svg' %}" alt="MIT xPro">
                         </div>
                         <div class="column">
                             <img src="{% image_version_url page.partner_logo 'max-600x200' %}" alt="MIT Partner" />
@@ -75,17 +75,17 @@
                             <img src="{% image_version_url page.partner_logo 'max-600x200' %}" alt="MIT Partner" />
                         </div>
                         <div class="column">
-                            <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
+                            <img src="{% static 'images/mit-xpro-logo.svg' %}" alt="MIT xPro">
                         </div>
                     </div>
                     {% else %}
                     <div class="certificate-logo">
-                        <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
+                        <img src="{% static 'images/mit-xpro-logo.svg' %}" alt="MIT xPro">
                     </div>
                     {% endif %}
                     {% else %}
                     <div class="certificate-logo">
-                        <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
+                        <img src="{% static 'images/mit-xpro-logo.svg' %}" alt="MIT xPro">
                     </div>
                     {% endif %}
                     {% if page.institute_text %}
@@ -148,9 +148,9 @@
     <div class="row no-print">
         <div class="col cer-footer">
             <div class="certificate-logo">
-                <a href="https://web.mit.edu/" class="mit"></a>
-                <a href="/" class="xpro"></a>
-                <img src="{% static 'images/certificates/transparent-mit-xpro-logo.png' %}" alt="MIT xPro">
+                <a href="/" class="mit">
+                    <img src="{% static 'images/mit-ol-logo.svg' %}" alt="MIT Open Learning">
+                </a>
             </div>
             <div class="cer-footer-info">
                 <ul class="links">

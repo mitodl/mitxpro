@@ -81,32 +81,14 @@
 }
 
 .site-logo {
-  width: 154px;
-  height: 47.5px;
+  width: 125px;
+  height: 35px;
 }
 
-.navbar-brand {
+.xpro-link {
+  z-index: 2;
   position: relative;
-
-  .mit-link, .xpro-link {
-    position: absolute;
-    z-index: 2;
-    opacity: .5;
-  }
-
-  .mit-link {
-    left: 0;
-    top: 11px;
-    width: 64px;
-    height: 35px;
-  }
-
-  .xpro-link {
-    left: 93px;
-    top: 19px;
-    width: 60px;
-    height: 21px;
-  }
+  padding: 10px 0 12px 0;
 }
 
 .navbar-toggler.nav-opener {
