@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.139.0
+---------------
+
+- style: update logo (#2881)
+
 Version 0.138.2 (Released February 02, 2024)
 ---------------
 
