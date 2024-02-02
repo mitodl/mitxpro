@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.138.2
+---------------
+
+- feat: add prod zd-site-verification and hard code it (#2883)
+
 Version 0.138.1 (Released January 31, 2024)
 ---------------
 
