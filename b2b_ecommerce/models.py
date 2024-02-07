@@ -114,9 +114,12 @@ class B2BCoupon(TimestampedModel, AuditableModel):
 
     def validate_unique(self, exclude=None):
         from ecommerce.filters import CouponUtils
+
         unique_coupon_code = CouponUtils.is_coupon_code_unique(self.coupon_code)
         if not unique_coupon_code:
-            raise ValidationError({"coupon_code": "Coupon code already exists in the plaform."})
+            raise ValidationError(
+                {"coupon_code": "Coupon code already exists in the plaform."}
+            )
         super(B2BCoupon, self).validate_unique(exclude=exclude)
 
 

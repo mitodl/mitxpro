@@ -635,6 +635,7 @@ class Coupon(TimestampedModel):
     Represents a coupon with a code. The latest CouponVersion for this instance is the source of truth for
     coupon information. Since the coupon_code is the identifier for the coupon, this should never be changed.
     """
+
     coupon_code = models.CharField(max_length=50, unique=True)
     payment = models.ForeignKey(CouponPayment, on_delete=models.PROTECT)
     is_global = models.BooleanField(default=False)
@@ -647,9 +648,12 @@ class Coupon(TimestampedModel):
 
     def validate_unique(self, exclude=None):
         from ecommerce.filters import CouponUtils
+
         unique_coupon_code = CouponUtils.is_coupon_code_unique(self.coupon_code)
         if not unique_coupon_code:
-            raise ValidationError({"coupon_code": "Coupon code already exists in the plaform."})
+            raise ValidationError(
+                {"coupon_code": "Coupon code already exists in the plaform."}
+            )
         super(Coupon, self).validate_unique(exclude=exclude)
 
 
