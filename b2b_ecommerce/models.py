@@ -2,6 +2,7 @@
 import uuid
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Q
@@ -66,7 +67,7 @@ class B2BCoupon(TimestampedModel, AuditableModel):
     """
 
     name = models.TextField()
-    coupon_code = models.CharField(max_length=50)
+    coupon_code = models.CharField(max_length=50, unique=True)
     discount_percent = models.DecimalField(
         decimal_places=5,
         max_digits=20,
@@ -110,6 +111,13 @@ class B2BCoupon(TimestampedModel, AuditableModel):
 
     def __str__(self):
         return f"B2BCoupon {self.coupon_code}"
+
+    def validate_unique(self, exclude=None):
+        from ecommerce.filters import CouponUtils
+        unique_coupon_code = CouponUtils.is_coupon_code_unique(self.coupon_code)
+        if not unique_coupon_code:
+            raise ValidationError({"coupon_code": "Coupon code already exists in the plaform."})
+        super(B2BCoupon, self).validate_unique(exclude=exclude)
 
 
 class B2BCouponAudit(AuditModel):

@@ -1315,14 +1315,20 @@ def create_coupons(
         payment_transaction=payment_transaction,
     )
 
+    # The probability of duplicate UUID extremely low in practice, but there is still a non-zero
+    # probability of collision, especially when generating a large number of UUIDs.
+    unique_coupon_codes = set()
+    while len(unique_coupon_codes) < num_coupon_codes:
+        unique_coupon_codes.add(coupon_code or uuid.uuid4().hex)
+
     coupons = [
         Coupon(
-            coupon_code=(coupon_code or uuid.uuid4().hex),
+            coupon_code=coupon_code,
             payment=payment,
             include_future_runs=include_future_runs,
             is_global=is_global,
         )
-        for _ in range(num_coupon_codes)
+        for coupon_code in unique_coupon_codes
     ]
     coupon_objs = Coupon.objects.bulk_create(coupons)
     versions = [
