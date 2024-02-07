@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ecommerce', '0040_alter_taxrate_tax_rate'),
+        ("ecommerce", "0040_alter_taxrate_tax_rate"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='coupon',
-            name='coupon_code',
+            model_name="coupon",
+            name="coupon_code",
             field=models.CharField(max_length=50, unique=True),
         ),
     ]
