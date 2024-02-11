@@ -43,7 +43,6 @@ $text-gray-light: #d2d0d1;
 
     .column {
       float: left;
-      width: 40%;
 
       img {
         width: auto;
@@ -52,7 +51,7 @@ $text-gray-light: #d2d0d1;
     }
 
     >:first-child {
-      margin-right: 60px;
+      margin-right: 40px;
     }
   }
 }
