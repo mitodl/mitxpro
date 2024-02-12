@@ -18,6 +18,11 @@ $text-gray-light: #d2d0d1;
     img {
       display: block;
       width: 100%;
+
+      @media (max-width: 480px) {
+        min-height: 40px;
+        height: 40px;
+      }
     }
 
     a {
@@ -37,21 +42,32 @@ $text-gray-light: #d2d0d1;
   }
 
   .certificate-dual-logo {
-    display: table;
+    display: flex;
     max-width: 625px;
     margin: 0 auto 15px;
+    align-items: center;
+    justify-content: center;
 
     .column {
-      float: left;
 
       img {
         width: auto;
+        min-height: 56px;
         height: 56px;
+
+        @media (max-width: 480px) {
+          min-height: 40px;
+          height: 40px;
+        }
       }
     }
 
     >:first-child {
       margin-right: 40px;
+
+      @media (max-width: 480px) {
+        margin-right: 20px;
+      }
     }
   }
 }
