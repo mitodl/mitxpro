@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.139.0
+---------------
+
+- style: add favicon and fix certificate partner logo design (#2891)
+- fix(deps): update dependency django to v3.2.24 [security]
+- style: update logo (#2881)
+
 Version 0.138.2 (Released February 02, 2024)
 ---------------
 
