@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.139.0
+Version 0.139.0 (Released February 13, 2024)
 ---------------
 
 - style: fix email logo (#2893)
