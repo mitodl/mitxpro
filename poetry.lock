@@ -2216,17 +2216,17 @@ social-auth-app-django = ">=3.1.0"
 
 [[package]]
 name = "mitol-django-common"
-version = "2023.6.27.1"
+version = "2023.12.19"
 description = "MIT Open Learning django app extensions for common utilities"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mitol-django-common-2023.6.27.1.tar.gz", hash = "sha256:48664143ad6170a853e4c1c98b4330be2ee6c248512d9b32214a08cb6e6757b6"},
-    {file = "mitol_django_common-2023.6.27.1-py3-none-any.whl", hash = "sha256:3920a44c6b3dc83291cab6ab208f9e3a47eaad21281e8f90641b4dc2811cc5c7"},
+    {file = "mitol-django-common-2023.12.19.tar.gz", hash = "sha256:b7df5f57fcc06d822e7465470e2279ff4ee5c3b9a108513dc10a6979dd92fdda"},
+    {file = "mitol_django_common-2023.12.19-py3-none-any.whl", hash = "sha256:5dd54a632dfdb5391287ac573758e19fa55e73e2c853eaaf60e5c8a4143e7776"},
 ]
 
 [package.dependencies]
-django = ">=2.2.12,<4.0"
+django = ">=3.0"
 django-redis = ">=5.0.0,<5.1.0"
 django-webpack-loader = ">=0.7.0"
 factory-boy = ">=3.2,<4.0"
@@ -3965,4 +3965,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.14"
-content-hash = "b89cf6f406ea34a8556cb3b05fbaaf422f884aef05fbe1c651d448fad69094b2"
+content-hash = "04d52816f3b87d85be5219d97aab2e621f7f7fdbe53de39440f3447f13173f73"
