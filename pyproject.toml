@@ -57,7 +57,7 @@ hubspot-api-client = "^6.1.0"
 ipython = "^8.10.0"
 mitol-django-common = "2023.12.19"
 mitol-django-digital-credentials = "2023.12.19"
-mitol-django-hubspot-api = { version = "2023.5.22", extras = [] }
+mitol-django-hubspot-api = { version = "2023.12.19", extras = [] }
 mitol-django-mail = "2023.1.17"
 mitol-django-oauth-toolkit-extensions = "2023.1.17"
 mitol-django-authentication = "2023.1.17"

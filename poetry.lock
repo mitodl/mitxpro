@@ -2257,22 +2257,21 @@ requests = ">=2.20.0"
 
 [[package]]
 name = "mitol-django-hubspot-api"
-version = "2023.5.22"
+version = "2023.12.19"
 description = "Django application for Hubspot API integration"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mitol-django-hubspot-api-2023.5.22.tar.gz", hash = "sha256:0da4970e476ca42e0f01efc0195f39dd46498b49f001a9781a55e1a8cbf8764d"},
-    {file = "mitol_django_hubspot_api-2023.5.22-py3-none-any.whl", hash = "sha256:4409431da202d6015add744b3d9e79d50b3838ca5b11fcd052785c390f5c7828"},
+    {file = "mitol-django-hubspot-api-2023.12.19.tar.gz", hash = "sha256:cdec5eb5ddd20dccdd6dca9a1bfee7cb04f70874367691da24017556f9b4bb58"},
+    {file = "mitol_django_hubspot_api-2023.12.19-py3-none-any.whl", hash = "sha256:5a761a238474bd5e2c20b4d72a31f7298b6196e453f6e2047cc67590d995068b"},
 ]
 
 [package.dependencies]
-django = ">=2.2.12,<4.0"
+django = ">=3.0"
 djangorestframework = ">=3.0.0"
 factory-boy = ">=3.2,<4.0"
 hubspot-api-client = "6.1.0"
 mitol-django-common = "*"
-pytest = "*"
 requests = ">=2.20.0"
 setuptools = "*"
 urllib3 = ">=1.26.5"
@@ -3965,4 +3964,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.14"
-content-hash = "04d52816f3b87d85be5219d97aab2e621f7f7fdbe53de39440f3447f13173f73"
+content-hash = "76294850d0e36c5a3ccc436284cc61f6571c7dad2849c8bd3342fc38acf4cb61"
