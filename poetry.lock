@@ -2278,18 +2278,18 @@ urllib3 = ">=1.26.5"
 
 [[package]]
 name = "mitol-django-mail"
-version = "2023.1.17"
+version = "2023.12.19"
 description = "MIT Open Learning django app extensions for mail"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mitol-django-mail-2023.1.17.tar.gz", hash = "sha256:0ca6823bec6212003d59eb1ce61cfb8f95bbf1d418ca47049dda77f2bd9c5070"},
-    {file = "mitol_django_mail-2023.1.17-py3-none-any.whl", hash = "sha256:e7dc968950c02854bde69b5cfcf282a20eb334ba469a126d451edd72dfe0020c"},
+    {file = "mitol-django-mail-2023.12.19.tar.gz", hash = "sha256:824f6ff0a7fb7b996962e608c61e5d02d06c174e466d00896eb43fdac864148f"},
+    {file = "mitol_django_mail-2023.12.19-py3-none-any.whl", hash = "sha256:a32853bfe7da39d4c34651d7e5bddc547678c1b5b3a54e56e492879276eab371"},
 ]
 
 [package.dependencies]
 beautifulsoup4 = ">=4.6.0"
-django = ">=2.2.12,<4.0"
+django = ">=3.0"
 django-anymail = ">=6.0"
 html5lib = ">=1.1"
 mitol-django-common = "*"
@@ -3964,4 +3964,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.14"
-content-hash = "76294850d0e36c5a3ccc436284cc61f6571c7dad2849c8bd3342fc38acf4cb61"
+content-hash = "eaf0b159fc05b80e7384737e40171a81c8b2584e68557f196cc3b39bbca15547"
