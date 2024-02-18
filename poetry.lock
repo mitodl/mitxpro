@@ -2298,17 +2298,17 @@ toolz = ">=0.10.0"
 
 [[package]]
 name = "mitol-django-oauth-toolkit-extensions"
-version = "2023.1.17"
+version = "2023.12.19.1"
 description = "MIT Open Learning django app extensions for oauth toolkit"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mitol-django-oauth-toolkit-extensions-2023.1.17.tar.gz", hash = "sha256:4f139350ea74f009a8995ad48d191505c782607d594719957525ad74725de4a4"},
-    {file = "mitol_django_oauth_toolkit_extensions-2023.1.17-py3-none-any.whl", hash = "sha256:79bfc3c033aec78e8005bea795cab7668d262a22330bf2c30e1a70344c93b0d4"},
+    {file = "mitol-django-oauth-toolkit-extensions-2023.12.19.1.tar.gz", hash = "sha256:3b28aa917c086708cd437c59fa729aa9701986f1645b0f35b82dcc97fa6effb8"},
+    {file = "mitol_django_oauth_toolkit_extensions-2023.12.19.1-py3-none-any.whl", hash = "sha256:44e0aa4ddb8c37cd63bb9429f8a0ce8064a04d19f0704b3a6a866e0f737a6428"},
 ]
 
 [package.dependencies]
-django = ">=2.2.12,<4.0"
+django = ">=3.0"
 django-oauth-toolkit = ">=1.3.3"
 factory-boy = ">=3.2,<4.0"
 mitol-django-common = "*"
@@ -3964,4 +3964,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.14"
-content-hash = "eaf0b159fc05b80e7384737e40171a81c8b2584e68557f196cc3b39bbca15547"
+content-hash = "7ef02281c0cdcce9ae333f3bbc0feb150e1adc8be388a5844f80e2b0a5c21549"
