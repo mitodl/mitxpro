@@ -31,7 +31,9 @@ class TestUnblockUsers(TestCase):
         user = UserFactory.create(email=test_email, is_active=True)
         UserSocialAuthFactory.create(user=user, provider="edX")
         email = user.email
-        hashed_email = hashlib.md5(email.lower().encode("utf-8"), usedforsecurity=False).hexdigest()
+        hashed_email = hashlib.md5(
+            email.lower().encode("utf-8"), usedforsecurity=False
+        ).hexdigest()
         assert user.is_active is True
         assert "retired_email" not in user.email
         assert UserSocialAuth.objects.filter(user=user).count() == 1

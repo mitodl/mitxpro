@@ -28,7 +28,9 @@ class TestblockUsers(TestCase):
 
         user = UserFactory.create(email=test_email, is_active=True)
         email = user.email
-        hashed_email = hashlib.md5(email.lower().encode("utf-8"), usedforsecurity=False).hexdigest()
+        hashed_email = hashlib.md5(
+            email.lower().encode("utf-8"), usedforsecurity=False
+        ).hexdigest()
         assert BlockList.objects.all().count() == 0
 
         COMMAND.handle("block_users", users=[test_email], block_users=True)
