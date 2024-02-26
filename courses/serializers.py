@@ -111,6 +111,7 @@ class CourseSerializer(serializers.ModelSerializer):
     video_url = serializers.SerializerMethodField()
     credits = serializers.SerializerMethodField()
     platform = serializers.SerializerMethodField()
+    marketing_hubspot_form_id = serializers.SerializerMethodField()
 
     def get_url(self, instance):
         """Get CMS Page URL for the course"""
@@ -120,6 +121,10 @@ class CourseSerializer(serializers.ModelSerializer):
     def get_external_marketing_url(self, instance):
         """Returns the external marketing URL for the course that's set in CMS page"""
         return instance.page.external_marketing_url if instance.page else None
+
+    def get_marketing_hubspot_form_id(self, instance):
+        """Returns the marketing HubSpot form ID associated with the course that's set in CMS page"""
+        return instance.page.marketing_hubspot_form_id if instance.page else None
 
     def get_thumbnail_url(self, instance):
         """Thumbnail URL"""
@@ -190,6 +195,7 @@ class CourseSerializer(serializers.ModelSerializer):
         """Returns the platform name of the course"""
         return getattr(instance.platform, "name", None)
 
+
     class Meta:
         model = models.Course
         fields = [
@@ -198,6 +204,7 @@ class CourseSerializer(serializers.ModelSerializer):
             "description",
             "url",
             "external_marketing_url",
+            "marketing_hubspot_form_id",
             "thumbnail_url",
             "readable_id",
             "courseruns",
@@ -264,6 +271,7 @@ class ProgramSerializer(serializers.ModelSerializer):
     enrollment_start = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
     external_marketing_url = serializers.SerializerMethodField()
+    marketing_hubspot_form_id = serializers.SerializerMethodField()
     instructors = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
     time_commitment = serializers.SerializerMethodField()
@@ -337,6 +345,10 @@ class ProgramSerializer(serializers.ModelSerializer):
         """Returns the external marketing URL for this program that's set in CMS page"""
         return instance.page.external_marketing_url if instance.page else None
 
+    def get_marketing_hubspot_form_id(self, instance):
+        """Returns the marketing HubSpot form ID associated with the program that's set in CMS page"""
+        return instance.page.marketing_hubspot_form_id if instance.page else None
+
     def get_instructors(self, instance):
         """List all instructors who are a part of any course run within a program"""
         return instance.instructors
@@ -394,6 +406,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             "enrollment_start",
             "url",
             "external_marketing_url",
+            "marketing_hubspot_form_id",
             "instructors",
             "topics",
             "time_commitment",

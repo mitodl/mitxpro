@@ -5,6 +5,9 @@
   <div class="sub-nav-enroll-button-block">
     {% include "partials/enroll_button.html" %}
   </div>
+  <div class="sub-nav-signup-button-block">
+    {% include "partials/keep_me_updated_button.html" with unique_identifier="subnav" %}
+  </div>
   <div id="subNavBar" class="collapse navbar-collapse justify-content-center">
     <ul class="navbar-nav container justify-content-center">
       {% if outcomes %} <li class="nav-item px-2 d-flex align-items-center"><a class="nav-link text-center" href="#learningOutcomes">What You Will Learn</a></li> {% endif %}
