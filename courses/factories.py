@@ -1,7 +1,7 @@
 """Factories for creating course data in tests"""
+from datetime import timezone
 import factory
 import faker
-import pytz
 from factory import SubFactory, Trait, fuzzy
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText
@@ -102,19 +102,19 @@ class CourseRunFactory(DjangoModelFactory):
     run_tag = factory.Sequence("R{0}".format)
     courseware_url_path = factory.Faker("uri")
     start_date = factory.Faker(
-        "date_time_this_month", before_now=True, after_now=False, tzinfo=pytz.utc
+        "date_time_this_month", before_now=True, after_now=False, tzinfo=timezone.utc
     )
     end_date = factory.Faker(
-        "date_time_this_year", before_now=False, after_now=True, tzinfo=pytz.utc
+        "date_time_this_year", before_now=False, after_now=True, tzinfo=timezone.utc
     )
     enrollment_start = factory.Faker(
-        "date_time_this_month", before_now=True, after_now=False, tzinfo=pytz.utc
+        "date_time_this_month", before_now=True, after_now=False, tzinfo=timezone.utc
     )
     enrollment_end = factory.Faker(
-        "date_time_this_month", before_now=False, after_now=True, tzinfo=pytz.utc
+        "date_time_this_month", before_now=False, after_now=True, tzinfo=timezone.utc
     )
     expiration_date = factory.Faker(
-        "date_time_between", start_date="+1y", end_date="+2y", tzinfo=pytz.utc
+        "date_time_between", start_date="+1y", end_date="+2y", tzinfo=timezone.utc
     )
     live = True
 
@@ -123,10 +123,10 @@ class CourseRunFactory(DjangoModelFactory):
 
     class Params:
         past_start = factory.Trait(
-            start_date=factory.Faker("past_datetime", tzinfo=pytz.utc)
+            start_date=factory.Faker("past_datetime", tzinfo=timezone.utc)
         )
         past_enrollment_end = factory.Trait(
-            enrollment_end=factory.Faker("past_datetime", tzinfo=pytz.utc)
+            enrollment_end=factory.Faker("past_datetime", tzinfo=timezone.utc)
         )
 
 

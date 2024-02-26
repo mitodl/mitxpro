@@ -7,6 +7,7 @@ from django.contrib import admin
 from courseware.models import CoursewareUser, OpenEdxApiAuth
 
 
+@admin.register(CoursewareUser)
 class CoursewareUserAdmin(admin.ModelAdmin):
     """Admin for CoursewareUser"""
 
@@ -21,6 +22,7 @@ class CoursewareUserAdmin(admin.ModelAdmin):
         return super().get_queryset(request).select_related("user")
 
 
+@admin.register(OpenEdxApiAuth)
 class OpenEdxApiAuthAdmin(admin.ModelAdmin):
     """Admin for OpenEdxApiAuth"""
 
@@ -32,7 +34,3 @@ class OpenEdxApiAuthAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         """Overrides base queryset"""
         return super().get_queryset(request).select_related("user")
-
-
-admin.site.register(CoursewareUser, CoursewareUserAdmin)
-admin.site.register(OpenEdxApiAuth, OpenEdxApiAuthAdmin)

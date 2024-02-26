@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
                 ),
                 ("created_on", models.DateTimeField(auto_now_add=True)),
                 ("updated_on", models.DateTimeField(auto_now=True)),
-                ("data", django.contrib.postgres.fields.jsonb.JSONField()),
+                ("data", django.db.models.JSONField()),
                 (
                     "order",
                     models.ForeignKey(
@@ -136,15 +136,11 @@ class Migration(migrations.Migration):
                 ("updated_on", models.DateTimeField(auto_now=True)),
                 (
                     "data_before",
-                    django.contrib.postgres.fields.jsonb.JSONField(
-                        blank=True, null=True
-                    ),
+                    django.db.models.JSONField(blank=True, null=True),
                 ),
                 (
                     "data_after",
-                    django.contrib.postgres.fields.jsonb.JSONField(
-                        blank=True, null=True
-                    ),
+                    django.db.models.JSONField(blank=True, null=True),
                 ),
                 (
                     "acting_user",

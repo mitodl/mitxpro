@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.conf.urls import include
+from django.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, re_path
@@ -66,7 +66,7 @@ urlpatterns = (
         # named routes mapped to the react app
         path("signin/", index, name="login"),
         path("signin/password/", index, name="login-password"),
-        re_path(r"^signin/forgot-password/$", index, name="password-reset"),
+        path("signin/forgot-password/", index, name="password-reset"),
         path(
             "signin/forgot-password/confirm/<slug:uid>/<slug:token>/",
             index,
@@ -93,8 +93,8 @@ urlpatterns = (
         re_path(
             r"^cms/login", cms_signin_redirect_to_site_signin, name="wagtailadmin_login"
         ),
-        re_path(r"^cms/", include(wagtailadmin_urls)),
-        re_path(r"^documents/", include(wagtaildocs_urls)),
+        path("cms/", include(wagtailadmin_urls)),
+        path("documents/", include(wagtaildocs_urls)),
     ]
     + (
         [

@@ -2,11 +2,10 @@
 """
 Fixtures for voucher tests
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from types import SimpleNamespace
 
 import pytest
-import pytz
 import factory
 from django.http import HttpRequest
 
@@ -126,7 +125,7 @@ def voucher_and_partial_matches(voucher_and_user_client):
     company = CompanyFactory()
     course_run_1 = CourseRunFactory(
         start_date=datetime.combine(
-            voucher.course_start_date_input, datetime.min.time(), tzinfo=pytz.UTC
+            voucher.course_start_date_input, datetime.min.time(), tzinfo=timezone.utc
         ),
         live=True,
     )
@@ -161,7 +160,7 @@ def voucher_and_exact_match(voucher_and_user_client):
     voucher = voucher_and_user_client.voucher
     exact_match = CourseRunFactory(
         start_date=datetime.combine(
-            voucher.course_start_date_input, datetime.min.time(), tzinfo=pytz.UTC
+            voucher.course_start_date_input, datetime.min.time(), tzinfo=timezone.utc
         ),
         course__readable_id=voucher.course_id_input,
         course__title=voucher.course_title_input,

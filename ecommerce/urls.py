@@ -1,5 +1,6 @@
 """URLs for ecommerce"""
-from django.conf.urls import include, re_path, url
+from django.urls import path
+from django.urls import include, re_path
 from rest_framework.routers import SimpleRouter
 
 from ecommerce.views import (
@@ -26,25 +27,25 @@ router.register(
 router.register(r"companies", CompanyViewSet, basename="companies_api")
 
 urlpatterns = [
-    re_path(r"^api/", include(router.urls)),
-    url(r"^api/checkout/$", CheckoutView.as_view(), name="checkout"),
-    url(
-        r"^api/order_fulfillment/$",
+    path("api/", include(router.urls)),
+    path("api/checkout/", CheckoutView.as_view(), name="checkout"),
+    path(
+        "api/order_fulfillment/",
         OrderFulfillmentView.as_view(),
         name="order-fulfillment",
     ),
-    url(
-        r"^api/order_receipt/(?P<pk>\d+)/$",
+    path(
+        "api/order_receipt/<int:pk>/",
         OrderReceiptView.as_view(),
         name="order_receipt_api",
     ),
-    url(r"^api/basket/$", BasketView.as_view(), name="basket_api"),
-    url(r"^api/coupons/$", CouponListView.as_view(), name="coupon_api"),
-    url(
+    path("api/basket/", BasketView.as_view(), name="basket_api"),
+    path("api/coupons/", CouponListView.as_view(), name="coupon_api"),
+    re_path(
         r"^couponcodes/(?P<version_id>[0-9]+)", coupon_code_csv_view, name="coupons_csv"
     ),
-    re_path(
-        r"^api/bulk_assignments/(?P<bulk_assignment_id>[0-9]+)/$",
+    path(
+        "api/bulk_assignments/<int:bulk_assignment_id>/",
         bulk_assignment_csv_view,
         name="bulk_assign_csv",
     ),

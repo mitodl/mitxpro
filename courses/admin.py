@@ -26,6 +26,7 @@ from .models import (
 )
 
 
+@admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
     """Admin for Program"""
 
@@ -35,6 +36,7 @@ class ProgramAdmin(admin.ModelAdmin):
     list_filter = ["live", "platform"]
 
 
+@admin.register(ProgramRun)
 class ProgramRunAdmin(admin.ModelAdmin):
     """Admin for ProgramRun"""
 
@@ -43,6 +45,7 @@ class ProgramRunAdmin(admin.ModelAdmin):
     list_filter = ["program"]
 
 
+@admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     """Admin for Course"""
 
@@ -54,14 +57,16 @@ class CourseAdmin(admin.ModelAdmin):
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
     }
 
+    @admin.display(
+        description="Program",
+        ordering="program__readable_id",
+    )
     def get_program(self, obj):
         """Returns the related User email"""
         return obj.program.readable_id if obj.program is not None else None
 
-    get_program.short_description = "Program"
-    get_program.admin_order_field = "program__readable_id"
 
-
+@admin.register(CourseRun)
 class CourseRunAdmin(TimestampedModelAdmin):
     """Admin for CourseRun"""
 
@@ -83,6 +88,7 @@ class CourseRunAdmin(TimestampedModelAdmin):
     }
 
 
+@admin.register(ProgramEnrollment)
 class ProgramEnrollmentAdmin(AuditableModelAdmin):
     """Admin for ProgramEnrollment"""
 
@@ -110,21 +116,24 @@ class ProgramEnrollmentAdmin(AuditableModelAdmin):
             qs = qs.order_by(*ordering)
         return qs.select_related("user", "program")
 
+    @admin.display(
+        description="User Email",
+        ordering="user__email",
+    )
     def get_user_email(self, obj):
         """Returns the related User email"""
         return obj.user.email
 
-    get_user_email.short_description = "User Email"
-    get_user_email.admin_order_field = "user__email"
-
+    @admin.display(
+        description="Program",
+        ordering="program__readable_id",
+    )
     def get_program_readable_id(self, obj):
         """Returns the related Program readable_id"""
         return obj.program.readable_id
 
-    get_program_readable_id.short_description = "Program"
-    get_program_readable_id.admin_order_field = "program__readable_id"
 
-
+@admin.register(ProgramEnrollmentAudit)
 class ProgramEnrollmentAuditAdmin(TimestampedModelAdmin):
     """Admin for ProgramEnrollmentAudit"""
 
@@ -133,19 +142,21 @@ class ProgramEnrollmentAuditAdmin(TimestampedModelAdmin):
     list_display = ("id", "enrollment_id", "get_program_readable_id", "get_user")
     readonly_fields = get_field_names(ProgramEnrollmentAudit)
 
+    @admin.display(
+        description="Program",
+        ordering="enrollment__program__readable_id",
+    )
     def get_program_readable_id(self, obj):
         """Returns the related Program readable_id"""
         return obj.enrollment.program.readable_id
 
-    get_program_readable_id.short_description = "Program"
-    get_program_readable_id.admin_order_field = "enrollment__program__readable_id"
-
+    @admin.display(
+        description="User",
+        ordering="enrollment__user__email",
+    )
     def get_user(self, obj):
         """Returns the related User's email"""
         return obj.enrollment.user.email
-
-    get_user.short_description = "User"
-    get_user.admin_order_field = "enrollment__user__email"
 
     def has_add_permission(self, request):
         return False
@@ -154,6 +165,7 @@ class ProgramEnrollmentAuditAdmin(TimestampedModelAdmin):
         return False
 
 
+@admin.register(CourseRunEnrollment)
 class CourseRunEnrollmentAdmin(AuditableModelAdmin):
     """Admin for CourseRunEnrollment"""
 
@@ -181,21 +193,24 @@ class CourseRunEnrollmentAdmin(AuditableModelAdmin):
             qs = qs.order_by(*ordering)
         return qs.select_related("user", "run")
 
+    @admin.display(
+        description="User Email",
+        ordering="user__email",
+    )
     def get_user_email(self, obj):
         """Returns the related User email"""
         return obj.user.email
 
-    get_user_email.short_description = "User Email"
-    get_user_email.admin_order_field = "user__email"
-
+    @admin.display(
+        description="Course Run",
+        ordering="run__courseware_id",
+    )
     def get_run_courseware_id(self, obj):
         """Returns the related CourseRun courseware_id"""
         return obj.run.courseware_id
 
-    get_run_courseware_id.short_description = "Course Run"
-    get_run_courseware_id.admin_order_field = "run__courseware_id"
 
-
+@admin.register(CourseRunEnrollmentAudit)
 class CourseRunEnrollmentAuditAdmin(TimestampedModelAdmin):
     """Admin for CourseRunEnrollmentAudit"""
 
@@ -204,19 +219,21 @@ class CourseRunEnrollmentAuditAdmin(TimestampedModelAdmin):
     list_display = ("id", "enrollment_id", "get_run_courseware_id", "get_user")
     readonly_fields = get_field_names(CourseRunEnrollmentAudit)
 
+    @admin.display(
+        description="Course Run",
+        ordering="enrollment__run__courseware_id",
+    )
     def get_run_courseware_id(self, obj):
         """Returns the related CourseRun courseware_id"""
         return obj.enrollment.run.courseware_id
 
-    get_run_courseware_id.short_description = "Course Run"
-    get_run_courseware_id.admin_order_field = "enrollment__run__courseware_id"
-
+    @admin.display(
+        description="User",
+        ordering="enrollment__user__email",
+    )
     def get_user(self, obj):
         """Returns the related User's email"""
         return obj.enrollment.user.email
-
-    get_user.short_description = "User"
-    get_user.admin_order_field = "enrollment__user__email"
 
     def has_add_permission(self, request):
         return False
@@ -225,6 +242,7 @@ class CourseRunEnrollmentAuditAdmin(TimestampedModelAdmin):
         return False
 
 
+@admin.register(CourseRunGrade)
 class CourseRunGradeAdmin(admin.ModelAdmin):
     """Admin for CourseRunGrade"""
 
@@ -237,21 +255,24 @@ class CourseRunGradeAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return self.model.objects.get_queryset().select_related("user", "course_run")
 
+    @admin.display(
+        description="User Email",
+        ordering="user__email",
+    )
     def get_user_email(self, obj):
         """Returns the related User email"""
         return obj.user.email
 
-    get_user_email.short_description = "User Email"
-    get_user_email.admin_order_field = "user__email"
-
+    @admin.display(
+        description="Course Run",
+        ordering="course_run__courseware_id",
+    )
     def get_run_courseware_id(self, obj):
         """Returns the related CourseRun courseware_id"""
         return obj.course_run.courseware_id
 
-    get_run_courseware_id.short_description = "Course Run"
-    get_run_courseware_id.admin_order_field = "course_run__courseware_id"
 
-
+@admin.register(CourseRunGradeAudit)
 class CourseRunGradeAuditAdmin(TimestampedModelAdmin):
     """Admin for CourseRunGradeAudit"""
 
@@ -265,21 +286,21 @@ class CourseRunGradeAuditAdmin(TimestampedModelAdmin):
     )
     readonly_fields = get_field_names(CourseRunGradeAudit)
 
+    @admin.display(
+        description="User Email",
+        ordering="course_run_grade__user__email",
+    )
     def get_user_email(self, obj):
         """Returns the related User email"""
         return obj.course_run_grade.user.email
 
-    get_user_email.short_description = "User Email"
-    get_user_email.admin_order_field = "course_run_grade__user__email"
-
+    @admin.display(
+        description="Course Run",
+        ordering="course_run_grade__course_run__courseware_id",
+    )
     def get_run_courseware_id(self, obj):
         """Returns the related CourseRun courseware_id"""
         return obj.course_run_grade.course_run.courseware_id
-
-    get_run_courseware_id.short_description = "Course Run"
-    get_run_courseware_id.admin_order_field = (
-        "course_run_grade__course_run__courseware_id"
-    )
 
     def has_add_permission(self, request):
         return False
@@ -288,6 +309,7 @@ class CourseRunGradeAuditAdmin(TimestampedModelAdmin):
         return False
 
 
+@admin.register(CourseRunCertificate)
 class CourseRunCertificateAdmin(TimestampedModelAdmin):
     """Admin for CourseRunCertificate"""
 
@@ -308,12 +330,13 @@ class CourseRunCertificateAdmin(TimestampedModelAdmin):
     ]
     raw_id_fields = ("user",)
 
+    @admin.display(
+        description="Active",
+        boolean=True,
+    )
     def get_revoked_state(self, obj):
         """return the revoked state"""
         return obj.is_revoked is not True
-
-    get_revoked_state.short_description = "Active"
-    get_revoked_state.boolean = True
 
     def get_queryset(self, request):
         return self.model.all_objects.get_queryset().select_related(
@@ -321,6 +344,7 @@ class CourseRunCertificateAdmin(TimestampedModelAdmin):
         )
 
 
+@admin.register(ProgramCertificate)
 class ProgramCertificateAdmin(TimestampedModelAdmin):
     """Admin for ProgramCertificate"""
 
@@ -341,35 +365,22 @@ class ProgramCertificateAdmin(TimestampedModelAdmin):
     ]
     raw_id_fields = ("user",)
 
+    @admin.display(
+        description="Active",
+        boolean=True,
+    )
     def get_revoked_state(self, obj):
         """return the revoked state"""
         return obj.is_revoked is not True
-
-    get_revoked_state.short_description = "Active"
-    get_revoked_state.boolean = True
 
     def get_queryset(self, request):
         return self.model.all_objects.get_queryset().select_related("user", "program")
 
 
+@admin.register(Platform)
 class PlatformAdmin(TimestampedModelAdmin):
     """Admin for Platform"""
 
     model = Platform
     list_display = ["id", "name", "created_on", "updated_on"]
     search_fields = ["name"]
-
-
-admin.site.register(Program, ProgramAdmin)
-admin.site.register(ProgramRun, ProgramRunAdmin)
-admin.site.register(Course, CourseAdmin)
-admin.site.register(CourseRun, CourseRunAdmin)
-admin.site.register(ProgramEnrollment, ProgramEnrollmentAdmin)
-admin.site.register(ProgramEnrollmentAudit, ProgramEnrollmentAuditAdmin)
-admin.site.register(CourseRunEnrollment, CourseRunEnrollmentAdmin)
-admin.site.register(CourseRunEnrollmentAudit, CourseRunEnrollmentAuditAdmin)
-admin.site.register(CourseRunGrade, CourseRunGradeAdmin)
-admin.site.register(CourseRunGradeAudit, CourseRunGradeAuditAdmin)
-admin.site.register(CourseRunCertificate, CourseRunCertificateAdmin)
-admin.site.register(ProgramCertificate, ProgramCertificateAdmin)
-admin.site.register(Platform, PlatformAdmin)

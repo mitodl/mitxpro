@@ -15,7 +15,7 @@ def test_affiliate_middleware(mocker):
     request = RequestFactory().get(f"/?{AFFILIATE_QS_PARAM}={affiliate_code}")
 
     # Add session capability to the request
-    SessionMiddleware().process_request(request)
+    SessionMiddleware(get_response=mocker.Mock()).process_request(request)
     request.session.save()
 
     middleware = AffiliateMiddleware(get_response=mocker.Mock())
@@ -30,7 +30,7 @@ def test_affiliate_middleware_session(mocker):
     request = RequestFactory().get("/")
 
     # Add session capability to the request and add the affiliate code to the session
-    SessionMiddleware().process_request(request)
+    SessionMiddleware(get_response=mocker.Mock()).process_request(request)
     request.session["affiliate_code"] = affiliate_code
     request.session.save()
 

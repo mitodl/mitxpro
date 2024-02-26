@@ -2,11 +2,10 @@
 Tests for course serializers
 """
 # pylint: disable=unused-argument, redefined-outer-name
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import factory
 import pytest
-import pytz
 from django.contrib.auth.models import AnonymousUser
 
 from cms.factories import FacultyMembersPageFactory
@@ -211,7 +210,7 @@ def test_serialize_course(
     external_marketing_url,
 ):  # pylint: disable=too-many-arguments,too-many-locals
     """Test Course serialization"""
-    now = datetime.now(tz=pytz.UTC)
+    now = datetime.now(tz=timezone.utc)
     if is_anonymous:
         mock_context["request"].user = AnonymousUser()
     if all_runs:

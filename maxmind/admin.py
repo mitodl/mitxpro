@@ -2,9 +2,10 @@
 
 from django.contrib import admin
 
-from maxmind import models
+from maxmind.models import Geoname, NetBlock
 
 
+@admin.register(NetBlock)
 class NetBlockAdmin(admin.ModelAdmin):
     """Admin for netblock"""
 
@@ -13,5 +14,4 @@ class NetBlockAdmin(admin.ModelAdmin):
     search_fields = ["ip_start", "ip_end", "network"]
 
 
-admin.site.register(models.Geoname)
-admin.site.register(models.NetBlock, NetBlockAdmin)
+admin.site.register(Geoname)

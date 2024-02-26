@@ -1,11 +1,10 @@
 """Tests for utils.py"""
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 import difflib
 
 import pytest
-import pytz
 
 from voucher.factories import VoucherFactory
 from voucher.utils import (
@@ -133,7 +132,7 @@ def test_get_current_voucher(user):
     assert get_current_voucher(user) == voucher1
     voucher2 = VoucherFactory(user=user)
     assert get_current_voucher(user) == voucher2
-    voucher1.uploaded = datetime.now(tz=pytz.UTC)
+    voucher1.uploaded = datetime.now(tz=timezone.utc)
     voucher1.save()
     assert get_current_voucher(user) == voucher1
 

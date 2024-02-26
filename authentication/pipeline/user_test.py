@@ -88,10 +88,10 @@ def validate_email_auth_request_not_email_backend(mocker):
     "has_user,expected", [(True, {"flow": SocialAuthState.FLOW_LOGIN}), (False, {})]
 )
 @pytest.mark.django_db
-def test_validate_email_auth_request(rf, has_user, expected):
+def test_validate_email_auth_request(rf, has_user, expected, mocker):
     """Test that validate_email_auth_request returns correctly given the input"""
     request = rf.post("/complete/email")
-    middleware = SessionMiddleware()
+    middleware = SessionMiddleware(get_response=mocker.Mock())
     middleware.process_request(request)
     request.session.save()
     strategy = load_strategy(request)
@@ -147,7 +147,7 @@ def test_user_password_not_email_backend(mocker):
 
 
 @pytest.mark.parametrize("user_password", ["abc123", "def456"])
-def test_user_password_login(rf, user, user_password):
+def test_user_password_login(rf, user, user_password, mocker):
     """Tests that user_password works for login case"""
     request_password = "abc123"
     user.set_password(user_password)
@@ -155,7 +155,7 @@ def test_user_password_login(rf, user, user_password):
     request = rf.post(
         "/complete/email", {"password": request_password, "email": user.email}
     )
-    middleware = SessionMiddleware()
+    middleware = SessionMiddleware(get_response=mocker.Mock())
     middleware.process_request(request)
     request.session.save()
     strategy = load_strategy(request)
@@ -183,7 +183,7 @@ def test_user_password_login(rf, user, user_password):
             )
 
 
-def test_user_password_not_login(rf, user):
+def test_user_password_not_login(rf, user, mocker):
     """
     Tests that user_password performs denies authentication
     for an existing user if password not provided regardless of auth_type
@@ -191,7 +191,7 @@ def test_user_password_not_login(rf, user):
     user.set_password("abc123")
     user.save()
     request = rf.post("/complete/email", {"email": user.email})
-    middleware = SessionMiddleware()
+    middleware = SessionMiddleware(get_response=mocker.Mock())
     middleware.process_request(request)
     request.session.save()
     strategy = load_strategy(request)
@@ -207,12 +207,12 @@ def test_user_password_not_login(rf, user):
         )
 
 
-def test_user_password_not_exists(rf):
+def test_user_password_not_exists(rf, mocker):
     """Tests that user_password raises auth error for nonexistent user"""
     request = rf.post(
         "/complete/email", {"password": "abc123", "email": "doesntexist@localhost"}
     )
-    middleware = SessionMiddleware()
+    middleware = SessionMiddleware(get_response=mocker.Mock())
     middleware.process_request(request)
     request.session.save()
     strategy = load_strategy(request)

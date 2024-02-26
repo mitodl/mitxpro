@@ -41,7 +41,7 @@ class SocialAuthAPIView(APIView):
 
     def post(self, request):
         """Processes a request"""
-        if request.session.get("is_hijacked_user", False):
+        if bool(request.session.get("hijack_history")):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         serializer_cls = self.get_serializer_cls()
@@ -83,7 +83,7 @@ class RegisterEmailView(SocialAuthAPIView):
 
     def post(self, request):
         """Verify recaptcha response before proceeding"""
-        if request.session.get("is_hijacked_user", False):
+        if bool(request.session.get("hijack_history")):
             return Response(status=status.HTTP_403_FORBIDDEN)
         if settings.RECAPTCHA_SITE_KEY:
             r = requests.post(

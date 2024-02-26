@@ -13,6 +13,7 @@ from .constants import RESULT_MANUALLY_APPROVED, RESULT_SUCCESS
 from .models import ExportsInquiryLog
 
 
+@admin.register(ExportsInquiryLog)
 class ExportsInquiryLogAdmin(admin.ModelAdmin):
     """Admin for ExportsInquiryLog"""
 
@@ -34,6 +35,7 @@ class ExportsInquiryLogAdmin(admin.ModelAdmin):
         country = pycountry.countries.get(alpha_2=instance.user.legal_address.country)
         return country.name if country else "N/A"
 
+    @admin.action(description="Manually approve selected records")
     def manually_approve_inquiry(self, request, queryset):
         """Admin action to manually approve export compliance inquiry records"""
         eligible_objects = queryset.exclude(
@@ -43,8 +45,6 @@ class ExportsInquiryLogAdmin(admin.ModelAdmin):
             ensure_active_user(obj.user)
         eligible_objects.update(computed_result=RESULT_MANUALLY_APPROVED)
 
-    manually_approve_inquiry.short_description = "Manually approve selected records"
-
     def has_add_permission(self, request):
         # We want to allow this while debugging
         return settings.DEBUG
@@ -52,6 +52,3 @@ class ExportsInquiryLogAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         # We want to allow this while debugging
         return settings.DEBUG
-
-
-admin.site.register(ExportsInquiryLog, ExportsInquiryLogAdmin)

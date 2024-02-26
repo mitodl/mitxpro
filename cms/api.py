@@ -1,9 +1,9 @@
 """API for the CMS app"""
 import itertools
 import logging
-from datetime import MAXYEAR, datetime
+from datetime import MAXYEAR, datetime, timezone
 
-import pytz
+
 from django.contrib.contenttypes.models import ContentType
 from wagtail.models import Page, Site
 from cms import models as cms_models
@@ -45,7 +45,7 @@ def filter_and_sort_catalog_pages(
 
     page_run_dates = {
         page: page.product.next_run_date
-        or datetime(year=MAXYEAR, month=1, day=1, tzinfo=pytz.UTC)
+        or datetime(year=MAXYEAR, month=1, day=1, tzinfo=timezone.utc)
         for page in itertools.chain(
             valid_program_pages,
             valid_course_pages,

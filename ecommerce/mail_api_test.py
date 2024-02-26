@@ -5,7 +5,6 @@ from urllib.parse import quote_plus, urljoin
 import factory
 import pytest
 from django.urls import reverse
-from pytz import UTC
 
 from b2b_ecommerce.factories import B2BOrderFactory
 from courses.factories import (
@@ -222,7 +221,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data, settings):
     """send_ecommerce_order_receipt should send a receipt email"""
     settings.FEATURES["ENABLE_TAXES_DISPLAY"] = False
     patched_mail_api = mocker.patch("ecommerce.mail_api.api")
-    date = datetime.datetime(2010, 1, 1, 0, tzinfo=UTC)
+    date = datetime.datetime(2010, 1, 1, 0, tzinfo=datetime.timezone.utc)
     user = UserFactory.create(
         name="test",
         email="test@example.com",

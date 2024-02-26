@@ -5,11 +5,11 @@ Django settings for mitxpro.
 import logging
 import os
 import platform
-from datetime import timedelta
+from datetime import timedelta, timezone
 from urllib.parse import urljoin, urlparse
 
 import dj_database_url
-import pytz
+from zoneinfo import ZoneInfo
 from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 from mitol.common.envs import (
@@ -183,10 +183,9 @@ INSTALLED_APPS = (
     "affiliate",
     # must be after "users" to pick up custom user model
     "b2b_ecommerce",
-    "compat",
     "ecommerce",
     "hijack",
-    "hijack_admin",
+    "hijack.contrib.admin",
     "hubspot_xpro",
     "voucher",
     "maxmind",
@@ -214,6 +213,7 @@ MIDDLEWARE = (
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "hijack.middleware.HijackUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
@@ -312,7 +312,6 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_L10N = True
 
 USE_TZ = True
 
@@ -882,9 +881,7 @@ if FEATURES.get("COUPON_SHEETS"):
     )
 
 # Hijack
-HIJACK_ALLOW_GET_REQUESTS = True
-HIJACK_LOGOUT_REDIRECT_URL = "/admin/users/user"
-HIJACK_REGISTER_ADMIN = False
+HIJACK_INSERT_BEFORE = "</body>"
 
 # Wagtail
 WAGTAIL_CACHE_BACKEND = get_string(
@@ -1361,7 +1358,7 @@ _sheets_date_timezone = get_string(
         "Choose from a value in the TZ database (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)."
     ),
 )
-SHEETS_DATE_TIMEZONE = pytz.timezone(_sheets_date_timezone)
+SHEETS_DATE_TIMEZONE = ZoneInfo(_sheets_date_timezone)
 
 SHEETS_REFUND_FIRST_ROW = get_int(
     name="SHEETS_REFUND_FIRST_ROW",

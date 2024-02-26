@@ -2,7 +2,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as ContribUserAdmin
 from django.utils.translation import gettext_lazy as _
-from hijack_admin.admin import HijackUserAdminMixin
+from hijack.contrib.admin import HijackUserAdminMixin
 
 from mitxpro.admin import TimestampedModelAdmin
 from users.models import LegalAddress, User, Profile, BlockList
@@ -57,6 +57,7 @@ _username_warning = """
 """
 
 
+@admin.register(User)
 class UserAdmin(ContribUserAdmin, HijackUserAdminMixin, TimestampedModelAdmin):
     """Admin views for user"""
 
@@ -84,7 +85,6 @@ class UserAdmin(ContribUserAdmin, HijackUserAdminMixin, TimestampedModelAdmin):
         "email",
         "name",
         "is_staff",
-        "hijack_field",
         "last_login",
     )
     list_filter = ("is_staff", "is_superuser", "is_active", "groups")
@@ -94,6 +94,7 @@ class UserAdmin(ContribUserAdmin, HijackUserAdminMixin, TimestampedModelAdmin):
     inlines = [UserLegalAddressInline, UserProfileInline]
 
 
+@admin.register(BlockList)
 class BlockListAdmin(admin.ModelAdmin):
     """Admin for BlockList"""
 
@@ -102,7 +103,3 @@ class BlockListAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
-
-
-admin.site.register(User, UserAdmin)
-admin.site.register(BlockList, BlockListAdmin)

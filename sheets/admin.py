@@ -6,41 +6,53 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 
 from mitxpro.admin import SingletonModelAdmin
-from sheets import models
+from sheets.models import (
+    CouponGenerationRequest,
+    RefundRequest,
+    DeferralRequest,
+    GoogleApiAuth,
+    GoogleFileWatch,
+    FileWatchRenewalAttempt,
+)
 
 
+@admin.register(CouponGenerationRequest)
 class CouponGenerationRequestAdmin(admin.ModelAdmin):
     """Admin for CouponGenerationRequest"""
 
-    model = models.CouponGenerationRequest
+    model = CouponGenerationRequest
     list_display = ("id", "purchase_order_id", "coupon_name", "date_completed")
 
 
+@admin.register(RefundRequest)
 class RefundRequestAdmin(admin.ModelAdmin):
     """Admin for RefundRequest"""
 
-    model = models.RefundRequest
+    model = RefundRequest
     list_display = ("id", "form_response_id", "date_completed")
 
 
+@admin.register(DeferralRequest)
 class DeferralRequestAdmin(admin.ModelAdmin):
     """Admin for DeferralRequest"""
 
-    model = models.DeferralRequest
+    model = DeferralRequest
     list_display = ("id", "form_response_id", "date_completed")
 
 
+@admin.register(GoogleApiAuth)
 class GoogleApiAuthAdmin(SingletonModelAdmin):
     """Admin for GoogleApiAuth"""
 
-    model = models.GoogleApiAuth
+    model = GoogleApiAuth
     list_display = ("id", "requesting_user")
 
 
+@admin.register(GoogleFileWatch)
 class GoogleFileWatchAdmin(admin.ModelAdmin):
     """Admin for GoogleFileWatch"""
 
-    model = models.GoogleFileWatch
+    model = GoogleFileWatch
     list_display = (
         "id",
         "file_id",
@@ -64,10 +76,11 @@ class GoogleFileWatchAdmin(admin.ModelAdmin):
         return super().save_form(request, form, change)
 
 
+@admin.register(FileWatchRenewalAttempt)
 class FileWatchRenewalAttemptAdmin(admin.ModelAdmin):
     """Admin for FileWatchRenewalAttempt"""
 
-    model = models.FileWatchRenewalAttempt
+    model = FileWatchRenewalAttempt
     list_display = (
         "id",
         "sheet_type",
@@ -80,11 +93,3 @@ class FileWatchRenewalAttemptAdmin(admin.ModelAdmin):
     list_filter = ("sheet_type", "result_status_code")
     readonly_fields = ("date_attempted",)
     ordering = ("-date_attempted",)
-
-
-admin.site.register(models.CouponGenerationRequest, CouponGenerationRequestAdmin)
-admin.site.register(models.RefundRequest, RefundRequestAdmin)
-admin.site.register(models.DeferralRequest, DeferralRequestAdmin)
-admin.site.register(models.GoogleApiAuth, GoogleApiAuthAdmin)
-admin.site.register(models.GoogleFileWatch, GoogleFileWatchAdmin)
-admin.site.register(models.FileWatchRenewalAttempt, FileWatchRenewalAttemptAdmin)

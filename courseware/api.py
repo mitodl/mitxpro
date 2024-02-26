@@ -798,3 +798,30 @@ def _is_valid_auth(auth, expires_after):
             updated OpenEdxApiAuth
     """
     return auth is not None and auth.access_token_expires_on > expires_after
+
+
+def create_oauth_application():
+    """Create oAuth application as part of the seed data command."""
+
+    return Application.objects.get_or_create(
+        name=settings.OPENEDX_OAUTH_APP_NAME,
+        defaults=dict(
+            redirect_uris=urljoin(
+                settings.OPENEDX_BASE_REDIRECT_URL,
+                "/auth/complete/{}/".format(settings.MITXPRO_OAUTH_PROVIDER),
+            ),
+            client_type="confidential",
+            authorization_grant_type="authorization-code",
+            skip_authorization=True,
+            user=None,
+        ),
+    )
+
+
+def delete_oauth_application():
+    """Delete oAuth application"""
+
+    _, deleted_applications_count = Application.objects.filter(
+        name=settings.OPENEDX_OAUTH_APP_NAME
+    ).delete()
+    return _, deleted_applications_count

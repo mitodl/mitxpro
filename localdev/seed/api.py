@@ -4,7 +4,6 @@ import os
 import json
 from types import SimpleNamespace
 from collections import defaultdict, namedtuple
-import pytz
 
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
@@ -24,6 +23,7 @@ from courses.models import (
     ProgramEnrollmentAudit,
     Platform,
 )
+from courseware.api import create_oauth_application, delete_oauth_application
 from localdev.seed.serializers import (
     ProgramSerializer,
     CourseSerializer,
@@ -187,7 +187,7 @@ def parse_datetime_from_string(dt_string):
         datetime.datetime: The parsed datetime
     """
     return datetime.datetime.strptime(dt_string, "%Y-%m-%dT%H:%M:%S").astimezone(
-        pytz.UTC
+        datetime.timezone.utc
     )
 
 
@@ -679,7 +679,14 @@ class SeedDataLoader:
         # First, make sure that Wagtail is properly set up. The seed data is only usable
         # if Wagtail is correctly configured
         configure_wagtail()
+
         self.seed_result = SeedResult()
+        application, application_created = create_oauth_application()
+        if application_created:
+            self.seed_result.add_created(application)
+        else:
+            self.seed_result.add_ignored(application)
+
         for seed_data_spec in self.iter_seed_data(raw_data):
             if seed_data_spec.model_cls in [Program, Course, CourseRun]:
                 serializer_cls = self.SEED_DATA_DESERIALIZER[seed_data_spec.model_cls]
@@ -731,7 +738,11 @@ class SeedDataLoader:
 
     def delete_seed_data(self, raw_data):
         """Iterate over all objects described in the seed data spec, delete them one-by-one, and return the results"""
+
         self.seed_result = SeedResult()
+        _, deleted_applications_count = delete_oauth_application()
+        self.seed_result.add_deleted(deleted_applications_count)
+
         # Traversing in reverse since we want to delete 'leaf' objects first (e.g.: we want to delete CourseRuns
         # before deleting Courses)
         for seed_data_spec in reversed(list(self.iter_seed_data(raw_data))):
@@ -744,4 +755,5 @@ class SeedDataLoader:
                 self.delete_courseware_obj(existing_qset.first())
             elif seed_data_spec.model_cls == ResourcePage:
                 self._delete_cms_resource_page(seed_data_spec.data)
+
         return self.seed_result

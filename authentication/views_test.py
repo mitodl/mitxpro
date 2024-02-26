@@ -770,7 +770,7 @@ def test_login_email_error(client, mocker):
 def test_login_email_hijacked(client, user, admin_user):
     """Test that a 403 response is returned for email login view if user is hijacked"""
     client.force_login(admin_user)
-    client.post("/hijack/{}/".format(user.id))
+    client.post("/hijack/acquire/", {"user_pk": user.id})
     response = client.post(
         reverse("psa-login-email"),
         {"flow": SocialAuthState.FLOW_LOGIN, "email": "anything@example.com"},
@@ -781,7 +781,7 @@ def test_login_email_hijacked(client, user, admin_user):
 def test_register_email_hijacked(client, user, admin_user):
     """Test that a 403 response is returned for email register view if user is hijacked"""
     client.force_login(admin_user)
-    client.post("/hijack/{}/".format(user.id))
+    client.post("/hijack/acquire/", {"user_pk": user.id})
     response = client.post(
         reverse("psa-register-email"),
         {"flow": SocialAuthState.FLOW_LOGIN, "email": "anything@example.com"},

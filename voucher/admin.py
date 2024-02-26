@@ -6,6 +6,7 @@ from django.contrib import admin
 from voucher.models import Voucher
 
 
+@admin.register(Voucher)
 class VoucherAdmin(admin.ModelAdmin):
     """Admin view for vouchers"""
 
@@ -25,6 +26,3 @@ class VoucherAdmin(admin.ModelAdmin):
         "course_title_input",
     )
     readonly_fields = ("coupon", "product", "enrollment")
-
-
-admin.site.register(Voucher, VoucherAdmin)
