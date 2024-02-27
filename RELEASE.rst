@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.140.0
+---------------
+
+- chore: Upgrade Django to 4.2 (#2867)
+- fix(deps): update dependency mitol-django-mail to v2023.12.19
+- fix(deps): update dependency mitol-django-hubspot-api to v2023.12.19
+- fix(deps): update dependency mitol-django-common to v2023.12.19
+- fix(deps): update dependency mitol-django-digital-credentials to v2023.12.19
+
 Version 0.139.0 (Released February 13, 2024)
 ---------------
 
