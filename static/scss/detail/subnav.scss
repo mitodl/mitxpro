@@ -173,8 +173,8 @@
       font-size: 16px;
       margin-left: 20px;
 
-      background: #FFFFFF;
-      border: 1px solid #A31F34;
+      background: $white;
+      border: 1px solid $primary;
       border-radius: 5px;
 
       &:hover {
@@ -199,9 +199,9 @@
 .modal-content-signup {
   position: relative;
   width: 500px;
-  background: #FFFFFF;
+  background: $white;
   border-radius: 4px;
-  color: #000;
+  color: $black;
 
   .container:first-child {
     display: block;
@@ -228,9 +228,9 @@
     align-items: center;
     text-transform: uppercase;
 
-    color: #A31F34;
-    background: #FFFFFF;
-    border: 1px solid #A31F34;
+    color: $primary;
+    background: $white;
+    border: 1px solid $primary;
     border-radius: 5px;
     &:hover {
         // underline is at different levels since we centered the text and checkmark vertically, so it looks strange
@@ -246,7 +246,7 @@
     font-size: 26px;
     line-height: 26px;
     text-align: center;
-    color: #A31F34;
+    color: $primary;
   }
 
   p {

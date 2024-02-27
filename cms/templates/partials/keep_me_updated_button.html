@@ -1,4 +1,4 @@
-{% if page.marketing_hubspot_form_id %}
+{% if page.marketing_hubspot_form_id and not enrolled %}
 <a data-toggle="modal" class="keep-me-updated  enroll-now" id="signup-modal-button-{{unique_identifier}}">
     Keep me updated
 </a>
@@ -58,7 +58,6 @@
         </div>
     </div>
 </div>
-{% endif %}
 
 <!--[if lte IE 8]>
 <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2-legacy.js"></script>
@@ -111,3 +110,4 @@
         });
     });
 </script>
+{% endif %}
