@@ -1,6 +1,5 @@
 """Wagtail admin views"""
-from django.urls import path
-from wagtail.admin.views.generic.models import IndexView, InspectView
+from wagtail.admin.views.generic.models import IndexView
 from wagtail.admin.viewsets.base import ViewSetGroup
 from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.permissions import ModelPermissionPolicy
@@ -26,9 +25,22 @@ class CreateOnlyModelPermissionPolicy(ModelPermissionPolicy):
         return super().user_has_permission(user, action)
 
 
+class ReadOnlyIndexView(IndexView):
+    """
+    IndexView to override the edit URL with read only inspect URL.
+    """
+
+    def get_edit_url(self, instance):
+        """
+        Returns inspect URL as we have disabled the edit permissions for the Product and ProductVersion.
+        """
+        return self.get_inspect_url(instance)
+
+
 class ProductViewSet(ModelViewSet):
     """Wagtail ModelViewSet for Product"""
 
+    index_view_class = ReadOnlyIndexView
     model = Product
     search_fields = (
         "courseruns__title",
@@ -62,6 +74,7 @@ class ProductViewSet(ModelViewSet):
 class ProductVersionViewSet(ModelViewSet):
     """Wagtail ModelViewSet for ProductVersion"""
 
+    index_view_class = ReadOnlyIndexView
     model = ProductVersion
     search_fields = (
         "text_id",
