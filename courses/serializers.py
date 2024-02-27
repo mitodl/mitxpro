@@ -195,7 +195,6 @@ class CourseSerializer(serializers.ModelSerializer):
         """Returns the platform name of the course"""
         return getattr(instance.platform, "name", None)
 
-
     class Meta:
         model = models.Course
         fields = [
