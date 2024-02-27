@@ -1,9 +1,9 @@
 {% if page.marketing_hubspot_form_id and not enrolled %}
-<a data-toggle="modal" class="keep-me-updated  enroll-now" id="signup-modal-button-{{unique_identifier}}">
+<a data-toggle="modal" class="keep-me-updated  enroll-now" href="#signup-modal-{{unique_identifier}}">
     Keep me updated
 </a>
 
-<div class="modal" id="signup-modal-{{unique_identifier}}" role="dialog" aria-hidden="true">
+<div class="modal fade" id="signup-modal-{{unique_identifier}}" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content modal-content-signup">
             <div class="modal-body">
@@ -25,16 +25,14 @@
                     </div>
                     <div class="container" id="marketing-hubspot-form-{{unique_identifier}}">
                     </div>
-                    <div><span class="close">Close</span></div>
+                    <div><span class="close" data-dismiss="modal">Close</span></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div id="overlay" class="overlay"></div>
-
-<div id="confirmationModal-{{unique_identifier}}" class="modal">
+<div class="modal fade"  id="confirmation-modal-{{unique_identifier}}" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content modal-content-signup">
             <div class="modal-body">
@@ -52,7 +50,7 @@
                     <div class="mb-5">
                         <p>Our Team will connect with you soon.</p>
                     </div>
-                    <div><span class="close">Close</span></div>
+                    <div><span class="close" data-dismiss="modal">Close</span></div>
                 </div>
             </div>
         </div>
@@ -72,42 +70,20 @@
                     formId: "{{ page.marketing_hubspot_form_id  | safe }}",
                     target: "#marketing-hubspot-form-{{unique_identifier}}",
                     onFormSubmitted: function($form) {
-                        $('#signup-modal-{{unique_identifier}}').fadeOut();
-                        $('#confirmationModal-{{unique_identifier}}').fadeIn();
+                        $('#signup-modal-{{unique_identifier}}').modal('hide');
+                        $('#confirmation-modal-{{unique_identifier}}').modal('show');
                         resetForm();
                     }
                 });
             }
         }
 
-        function closeModel() {
-            $('#signup-modal-{{unique_identifier}}, #confirmationModal-{{unique_identifier}}').fadeOut();
-            $('#overlay').fadeOut();
+        function resetForm() {
+            $('#marketing-hubspot-form-{{unique_identifier}}').html('');
+            renderForm();
         }
 
         renderForm();
-
-        $("#signup-modal-button-{{unique_identifier}}").on("click", function(event) {
-            $('#signup-modal-{{unique_identifier}}').fadeIn();
-            $('#overlay').fadeIn();
-
-        });
-
-        $('.close').click(function() {
-            closeModel()
-        });
-
-        function resetForm() {
-            $('#marketing-hubspot-form-{{unique_identifier}}').html(''); // Clear the form HTML
-            renderForm(); // Recreate the form
-        }
-
-        // Close modal when clicking outside the modal
-        $(document).on('click', '#overlay', function(event) {
-            if ($(event.target).is('#overlay')) {
-                closeModel();
-            }
-        });
     });
 </script>
 {% endif %}

@@ -177,24 +177,12 @@
       border: 1px solid $primary;
 
       &:hover {
-        // underline is at different levels since we centered the text and checkmark vertically, so it looks strange
         text-decoration: none;
         background: #f9f2f3;
 
       }
     }
   }
-}
-
-.overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999;
 }
 
 .modal-content-signup {
@@ -204,17 +192,12 @@
   border-radius: 4px;
   color: $black;
 
-  .container:first-child {
+  .container {
     display: block;
   }
 
   .close {
     opacity: 1;
-  }
-
-  .content-container {
-    max-height: 471px;
-    overflow: auto;
   }
 
   span.close {
@@ -235,8 +218,6 @@
     border-radius: 5px;
 
     &:hover {
-      // underline is at different levels since we centered the text and checkmark vertically, so it looks strange
-//       background-color:  transparent !important;
       background: #f9f2f3;
     }
   }
@@ -258,6 +239,11 @@
     line-height: 26px;
     text-align: center;
   }
+}
+
+.modal-backdrop {
+  // If set the z-index to 'a value > 1019' or it's default, it probably gets overlapped by another stacking context.
+  z-index: 1019;
 }
 
 a.active-block {
