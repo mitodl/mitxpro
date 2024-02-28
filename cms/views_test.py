@@ -18,11 +18,11 @@ from cms.constants import (
     WEBINAR_DEFAULT_IMAGES,
 )
 from cms.factories import (
-    EnterprisePageFactory,
     BlogIndexPageFactory,
     CatalogPageFactory,
     CourseIndexPageFactory,
     CoursePageFactory,
+    EnterprisePageFactory,
     HomePageFactory,
     ProgramIndexPageFactory,
     ProgramPageFactory,

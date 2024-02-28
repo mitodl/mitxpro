@@ -4,11 +4,11 @@ Django settings for mitxpro.
 import logging
 import os
 import platform
-from datetime import timedelta, timezone
+from datetime import timedelta
 from urllib.parse import urljoin, urlparse
+from zoneinfo import ZoneInfo
 
 import dj_database_url
-from zoneinfo import ZoneInfo
 from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 from mitol.common.envs import (
@@ -25,7 +25,6 @@ from redbeat import RedBeatScheduler
 
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
-
 
 VERSION = "0.139.0"
 

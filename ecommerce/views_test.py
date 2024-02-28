@@ -6,9 +6,9 @@ from urllib.parse import quote_plus, urljoin
 import factory
 import faker
 import pytest
-import rest_framework.status as status  # pylint: disable=useless-import-alias
 from django.db.models import Count, Q
 from django.urls import reverse
+from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.test import APIClient
 

@@ -3,7 +3,6 @@ import itertools
 import logging
 from datetime import MAXYEAR, datetime, timezone
 
-
 from django.contrib.contenttypes.models import ContentType
 from wagtail.models import Page, Site
 
@@ -203,7 +202,7 @@ def ensure_index_pages():  # noqa: C901
 
 def ensure_enterprise_page():
     """
-    Ensures that an enterprise page with the correct slug exists.
+    Ensure that an enterprise page with the correct slug exists.
     """
     enterprise_page = cms_models.EnterprisePage.objects.first()
 
@@ -213,7 +212,7 @@ def ensure_enterprise_page():
     enterprise_page_data = {
         "title": "Enterprise Page",
         "slug": ENTERPRISE_PAGE_SLUG,
-        "description": "Deepen your team’s career knowledge and expand their abilities with MIT xPRO’s online "
+        "description": "Deepen your team's career knowledge and expand their abilities with MIT xPRO's online "
         "courses for professionals.",
         "action_title": "Find out what MIT xPRO can do for your team.",
         "headings": [
