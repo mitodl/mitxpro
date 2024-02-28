@@ -179,6 +179,7 @@ ignore = [
     "D105",
     "D107",
     "PLR0912",
+    "ISC001",
 ]
 
 typing-modules = ["colour.hints"]
