@@ -7,7 +7,6 @@ import logging
 from enum import Flag, auto
 from urllib.parse import ParseResult, urlparse, urlunparse
 
-import pytz
 import requests
 from django.conf import settings
 from django.core.serializers import serialize

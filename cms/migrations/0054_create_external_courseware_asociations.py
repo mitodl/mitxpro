@@ -2,8 +2,9 @@
 
 
 from datetime import datetime, timezone
-from django.db import migrations, models
+
 import django.db.models.deletion
+from django.db import migrations, models
 
 # Importing here because we need to use methods from this model and replicating the functionality
 # would make the migrations complex since it would include replication of some of the Wagtail's Page model.

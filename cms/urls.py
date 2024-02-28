@@ -12,7 +12,6 @@ the "+" characters.
 The pattern(s) defined here serve the same Wagtail view that the library-defined pattern serves.
 """
 from django.urls import re_path
-
 from wagtail import views
 from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 

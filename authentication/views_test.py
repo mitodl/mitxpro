@@ -179,7 +179,7 @@ class AuthStateMachine(RuleBasedStateMachine):
         self.courseware_tasks_patcher.stop()
 
         # end the transaction with a rollback to cleanup any state
-        transaction.set_rollback(True)  # noqa: FBT003
+        transaction.set_rollback(True)  # noqa: FBT003, RUF100
         self.atomic.__exit__(None, None, None)
 
     def create_existing_user(self):

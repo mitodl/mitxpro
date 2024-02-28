@@ -32,6 +32,7 @@ from courses.models import (
     ProgramEnrollment,
     ProgramEnrollmentAudit,
 )
+from courseware.api import create_oauth_application, delete_oauth_application
 from ecommerce.api import create_coupons
 from ecommerce.models import (
     Basket,
@@ -51,7 +52,6 @@ from ecommerce.models import (
     ProductVersion,
     Receipt,
 )
-from courseware.api import create_oauth_application, delete_oauth_application
 from localdev.seed.serializers import (
     CompanySerializer,
     CourseRunSerializer,
@@ -670,7 +670,7 @@ class SeedDataLoader:
                 model_cls=CouponPayment, data=raw_coupon_data, parent=None
             )
 
-    def create_seed_data(self, raw_data):
+    def create_seed_data(self, raw_data):  # noqa: C901
         """
         Iterate over all objects described in the seed data spec, add/update them one-by-one, and return the results
         """

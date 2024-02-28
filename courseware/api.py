@@ -803,10 +803,10 @@ def create_oauth_application():
 
     return Application.objects.get_or_create(
         name=settings.OPENEDX_OAUTH_APP_NAME,
-        defaults=dict(
+        defaults=dict(  # noqa: C408
             redirect_uris=urljoin(
                 settings.OPENEDX_BASE_REDIRECT_URL,
-                "/auth/complete/{}/".format(settings.MITXPRO_OAUTH_PROVIDER),
+                "/auth/complete/{}/".format(settings.MITXPRO_OAUTH_PROVIDER),  # noqa: UP032
             ),
             client_type="confidential",
             authorization_grant_type="authorization-code",

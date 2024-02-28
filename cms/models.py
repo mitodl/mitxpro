@@ -92,7 +92,7 @@ from mitxpro.views import get_base_context
 class DisableSitemapURLMixin:
     """Mixin to Disable sitemap URLs"""
 
-    def get_sitemap_urls(self, request):
+    def get_sitemap_urls(self, request):  # noqa: ARG002
         """Disable sitemap urls for the page."""
         return []
 
@@ -2292,7 +2292,7 @@ class EnterpriseChildPage(DisableSitemapURLMixin, Page):
     @classmethod
     def can_create_at(cls, parent):
         """
-        Ensures that only one instance of this page type can be created
+        Ensure that only one instance of this page type can be created
         under each parent.
         """
         return (
@@ -2300,21 +2300,21 @@ class EnterpriseChildPage(DisableSitemapURLMixin, Page):
             and not parent.get_children().type(cls).exists()
         )
 
-    def save(self, clean=True, user=None, log_action=False, **kwargs):
+    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
         """
         Auto-generates a slug for this page if it doesn't already have one.
 
         The slug is generated from the page title and its ID to ensure uniqueness.
         """
         if not self.title:
-            self.title = self.__class__._meta.verbose_name.title()
+            self.title = self.__class__._meta.verbose_name.title()  # noqa: SLF001
 
         if not self.slug:
             self.slug = slugify(f"{self.title}-{self.id}")
 
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
-    def serve(self, request, *args, **kwargs):
+    def serve(self, request, *args, **kwargs):  # noqa: ARG002
         """
         Prevents direct access to this page type by raising a 404 error.
 
@@ -2373,7 +2373,7 @@ class LearningJourneySection(EnterpriseChildPage):
         default="View Full Diagram",
         help_text="Text for the call-to-action button.",
     )
-    action_url = models.URLField(
+    action_url = models.URLField(  # noqa: DJ001
         null=True,
         blank=True,
         help_text="URL for the call-to-action button, used if no PDF is linked.",
@@ -2413,11 +2413,11 @@ class LearningJourneySection(EnterpriseChildPage):
         return self.pdf_file.url if self.pdf_file else self.action_url
 
     def clean(self):
-        """Validates that either action_url or pdf_file must be added."""
+        """Validate that either action_url or pdf_file must be added."""
         super().clean()
         if not self.action_url and not self.pdf_file:
             raise ValidationError(
-                "Please enter an Action URL or select a PDF document."
+                "Please enter an Action URL or select a PDF document."  # noqa: EM101
             )
 
     class Meta:
@@ -2527,7 +2527,7 @@ class EnterprisePage(WagtailCachedPageMixin, Page):
         help_text="The text to show on the call to action button",
     )
 
-    content_panels = Page.content_panels + [
+    content_panels = Page.content_panels + [  # noqa: RUF005
         FieldPanel("headings"),
         FieldPanel("background_image"),
         FieldPanel("overlay_image"),
@@ -2540,7 +2540,7 @@ class EnterprisePage(WagtailCachedPageMixin, Page):
 
     def serve(self, request, *args, **kwargs):
         """
-        Serves the enterprise page.
+        Serve the enterprise page.
 
         This method is overridden to handle specific rendering needs for
         the enterprise template, especially during previews.
@@ -2577,7 +2577,7 @@ class EnterprisePage(WagtailCachedPageMixin, Page):
 
     def get_context(self, request, *args, **kwargs):
         """
-        Builds the context for rendering the enterprise page.
+        Build the context for rendering the enterprise page.
         """
         return {
             **super().get_context(request, *args, **kwargs),

@@ -1,7 +1,7 @@
 """Authentication middleware"""
-from django.shortcuts import redirect
 from urllib.parse import quote
 
+from django.shortcuts import redirect
 from social_core.exceptions import SocialAuthBaseException
 from social_django.middleware import SocialAuthExceptionMiddleware
 
@@ -28,7 +28,7 @@ class SocialAuthExceptionRedirectMiddleware(SocialAuthExceptionMiddleware):
             message = self.get_message(request, exception)
             url = self.get_redirect_uri(request, exception)
 
-            if url:
+            if url:  # noqa: RET503
                 url += ("?" in url and "&" or "?") + "message={0}&backend={1}".format(  # noqa: UP030
                     quote(message), backend_name
                 )

@@ -1599,7 +1599,7 @@ def test_enterprise_page_companies_logo_carousel():
     assert companies_logo_carousel.heading == "heading"
 
     for index, image in enumerate(companies_logo_carousel.images):
-        assert image.value.title == "image-title-{}".format(index)
+        assert image.value.title == f"image-title-{index}"
 
 
 def test_enterprise_page_learning_journey():

@@ -1,7 +1,8 @@
 """Tests for auth middleware"""
+from urllib.parse import quote
+
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.shortcuts import reverse
-from urllib.parse import quote
 from rest_framework import status
 from social_core.exceptions import AuthAlreadyAssociated
 from social_django.utils import load_backend, load_strategy

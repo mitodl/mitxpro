@@ -1,5 +1,6 @@
 """Factories for creating course data in tests"""
 from datetime import timezone
+
 import factory
 import faker
 from factory import SubFactory, Trait, fuzzy
