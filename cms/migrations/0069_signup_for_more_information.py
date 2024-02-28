@@ -6,28 +6,48 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0068_enterprisepage'),
+        ("cms", "0068_enterprisepage"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='coursepage',
-            name='marketing_hubspot_form_id',
-            field=models.CharField(blank=True, help_text='Enter the HubSpot form ID associated with program/course page (optional).', max_length=50, null=True),
+            model_name="coursepage",
+            name="marketing_hubspot_form_id",
+            field=models.CharField(
+                blank=True,
+                help_text="Enter the HubSpot form ID associated with program/course page (optional).",
+                max_length=50,
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='externalcoursepage',
-            name='marketing_hubspot_form_id',
-            field=models.CharField(blank=True, help_text='Enter the HubSpot form ID associated with program/course page (optional).', max_length=50, null=True),
+            model_name="externalcoursepage",
+            name="marketing_hubspot_form_id",
+            field=models.CharField(
+                blank=True,
+                help_text="Enter the HubSpot form ID associated with program/course page (optional).",
+                max_length=50,
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='externalprogrampage',
-            name='marketing_hubspot_form_id',
-            field=models.CharField(blank=True, help_text='Enter the HubSpot form ID associated with program/course page (optional).', max_length=50, null=True),
+            model_name="externalprogrampage",
+            name="marketing_hubspot_form_id",
+            field=models.CharField(
+                blank=True,
+                help_text="Enter the HubSpot form ID associated with program/course page (optional).",
+                max_length=50,
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='programpage',
-            name='marketing_hubspot_form_id',
-            field=models.CharField(blank=True, help_text='Enter the HubSpot form ID associated with program/course page (optional).', max_length=50, null=True),
+            model_name="programpage",
+            name="marketing_hubspot_form_id",
+            field=models.CharField(
+                blank=True,
+                help_text="Enter the HubSpot form ID associated with program/course page (optional).",
+                max_length=50,
+                null=True,
+            ),
         ),
     ]
