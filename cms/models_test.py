@@ -1626,7 +1626,7 @@ def test_enterprise_page_learning_journey():
     assert learning_journey.heading == "heading"
     assert learning_journey.description == "description"
 
-    for block in learning_journey.journey_items:  # pylint: disable=not-an-iterable
+    for block in learning_journey.journey_items:
         assert block.block_type == "journey"
         assert block.value == "value"
 

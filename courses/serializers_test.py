@@ -1,7 +1,6 @@
 """
 Tests for course serializers
 """
-# pylint: disable=unused-argument, redefined-outer-name
 from datetime import datetime, timedelta, timezone
 
 import factory
