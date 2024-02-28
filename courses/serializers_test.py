@@ -54,8 +54,8 @@ def test_base_program_serializer():
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_OTHER])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url",
-    "marketing_hubspot_form_id"[
+    "duration, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",
+    [
         (
             "2 Months",
             "2 Hours",
