@@ -10,7 +10,6 @@ import cms.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("wagtailcore", "0089_log_entry_data_json_null_to_object"),
         ("wagtailimages", "0025_alter_image_file_alter_rendition_file"),
