@@ -499,7 +499,7 @@ def test_coupon_view_invalid(client, mocker):
         B2BCoupon.objects, "get_unexpired_coupon", side_effect=B2BCoupon.DoesNotExist
     )
     params = {"code": "x", "product_id": 3}
-    response = client.get(f'{reverse("b2b-coupon-view")}?' f"{urlencode(params)}")  # noqa: ISC001
+    response = client.get(f'{reverse("b2b-coupon-view")}?' f"{urlencode(params)}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     patched.assert_called_once_with(
         coupon_code=params["code"], product_id=params["product_id"]
