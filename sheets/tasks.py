@@ -151,9 +151,9 @@ def schedule_coupon_assignment_sheet_handling(file_id):
 @app.task
 def update_incomplete_assignment_delivery_statuses():
     """
-    Fetche all BulkCouponAssignments that have assignments but have not yet finished delivery, then updates the
+    Fetch all BulkCouponAssignments that have assignments but have not yet finished delivery, then updates the
     delivery status for each depending on what has been sent.
-    """  # noqa: D401
+    """
     bulk_assignments = coupon_assign_api.fetch_update_eligible_bulk_assignments()
     updated_assignments = (
         coupon_assign_api.update_incomplete_assignment_message_statuses(
