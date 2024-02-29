@@ -5,7 +5,6 @@ from b2b_ecommerce.admin import B2BCouponAdmin, B2BOrderAdmin
 from b2b_ecommerce.factories import B2BCouponFactory, B2BOrderFactory
 from b2b_ecommerce.models import B2BCouponAudit, B2BOrderAudit
 
-
 pytestmark = pytest.mark.django_db
 
 

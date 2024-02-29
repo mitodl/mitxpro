@@ -1,7 +1,6 @@
 """
 Tests for hubspot_xpro serializers
 """
-# pylint: disable=unused-argument, redefined-outer-name
 
 from decimal import Decimal
 
@@ -35,16 +34,15 @@ from hubspot_xpro.serializers import (
     format_product_name,
 )
 
-
 pytestmark = [pytest.mark.django_db]
 
 
 @pytest.mark.parametrize(
-    "text_id, expected",
+    "text_id, expected",  # noqa: PT006
     [
-        ["course-v1:xPRO+SysEngxNAV+R1", "Run 1"],
-        ["course-v1:xPRO+SysEngxNAV+R10", "Run 10"],
-        ["course-v1:xPRO+SysEngxNAV", "course-v1:xPRO+SysEngxNAV"],
+        ["course-v1:xPRO+SysEngxNAV+R1", "Run 1"],  # noqa: PT007
+        ["course-v1:xPRO+SysEngxNAV+R10", "Run 10"],  # noqa: PT007
+        ["course-v1:xPRO+SysEngxNAV", "course-v1:xPRO+SysEngxNAV"],  # noqa: PT007
     ],
 )
 def test_serialize_product(text_id, expected):
@@ -111,10 +109,10 @@ def test_serialize_order(settings, hubspot_order, status):
 
 
 @pytest.mark.parametrize(
-    "discount_type, amount",
+    "discount_type, amount",  # noqa: PT006
     [
-        [DISCOUNT_TYPE_PERCENT_OFF, Decimal(0.75)],
-        [DISCOUNT_TYPE_DOLLARS_OFF, Decimal(75)],
+        [DISCOUNT_TYPE_PERCENT_OFF, Decimal(0.75)],  # noqa: PT007
+        [DISCOUNT_TYPE_DOLLARS_OFF, Decimal(75)],  # noqa: PT007
     ],
 )
 def test_serialize_order_with_coupon(settings, hubspot_order, discount_type, amount):
@@ -237,27 +235,30 @@ def test_serialize_b2b_order_with_coupon(settings, client, mocker):
     order = B2BOrder.objects.first()
     discount = round(Decimal(coupon.discount_percent) * 100, 2)
     serialized_data = B2BOrderToDealSerializer(instance=order).data
-    assert serialized_data == {
-        "dealname": f"{B2B_ORDER_PREFIX}-{order.id}",
-        "dealstage": ORDER_STATUS_MAPPING[order.status],
-        "discount_amount": discount.to_eng_string(),
-        "amount": order.total_price.to_eng_string(),
-        "closedate": (
-            int(order.updated_on.timestamp() * 1000)
-            if order.status == Order.FULFILLED
-            else None
-        ),
-        "coupon_code": coupon.coupon_code,
-        "company": coupon.company.name,
-        "payment_type": None,
-        "payment_transaction": None,
-        "num_seats": num_seats,
-        "discount_percent": round(
-            Decimal(coupon.discount_percent) * 100, 2
-        ).to_eng_string(),
-        "discount_type": DISCOUNT_TYPE_PERCENT_OFF,  # B2B Orders only support percent-off discounts
-        "status": order.status,
-        "order_type": ORDER_TYPE_B2B,
-        "pipeline": settings.HUBSPOT_PIPELINE_ID,
-        "unique_app_id": f"{settings.MITOL_HUBSPOT_API_ID_PREFIX}-{B2B_ORDER_PREFIX}-{order.id}",
-    }
+    assert (
+        serialized_data
+        == {
+            "dealname": f"{B2B_ORDER_PREFIX}-{order.id}",
+            "dealstage": ORDER_STATUS_MAPPING[order.status],
+            "discount_amount": discount.to_eng_string(),
+            "amount": order.total_price.to_eng_string(),
+            "closedate": (
+                int(order.updated_on.timestamp() * 1000)
+                if order.status == Order.FULFILLED
+                else None
+            ),
+            "coupon_code": coupon.coupon_code,
+            "company": coupon.company.name,
+            "payment_type": None,
+            "payment_transaction": None,
+            "num_seats": num_seats,
+            "discount_percent": round(
+                Decimal(coupon.discount_percent) * 100, 2
+            ).to_eng_string(),
+            "discount_type": DISCOUNT_TYPE_PERCENT_OFF,  # B2B Orders only support percent-off discounts
+            "status": order.status,
+            "order_type": ORDER_TYPE_B2B,
+            "pipeline": settings.HUBSPOT_PIPELINE_ID,
+            "unique_app_id": f"{settings.MITOL_HUBSPOT_API_ID_PREFIX}-{B2B_ORDER_PREFIX}-{order.id}",
+        }
+    )

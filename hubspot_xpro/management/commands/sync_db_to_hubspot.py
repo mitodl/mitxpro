@@ -13,7 +13,6 @@ from ecommerce.models import Line, Order, Product
 from hubspot_xpro.tasks import (
     batch_upsert_associations,
     batch_upsert_hubspot_b2b_deals,
-    batch_upsert_hubspot_deals,
     batch_upsert_hubspot_objects,
 )
 from users.models import User
@@ -39,7 +38,7 @@ class Command(BaseCommand):
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.CONTACTS.value,
             ContentType.objects.get_for_model(User).model,
-            User._meta.app_label,
+            User._meta.app_label,  # noqa: SLF001
             create=self.create,
         )
         start = now_in_utc()
@@ -59,14 +58,14 @@ class Command(BaseCommand):
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.PRODUCTS.value,
             ContentType.objects.get_for_model(Product).model,
-            Product._meta.app_label,
+            Product._meta.app_label,  # noqa: SLF001
             create=self.create,
         )
         start = now_in_utc()
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            "Syncing of products to hubspot finished, took {} seconds\n".format(
+            "Syncing of products to hubspot finished, took {} seconds\n".format(  # noqa: UP032
                 total_seconds
             )
         )
@@ -94,7 +93,7 @@ class Command(BaseCommand):
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.DEALS.value,
             ContentType.objects.get_for_model(Order).model,
-            Order._meta.app_label,
+            Order._meta.app_label,  # noqa: SLF001
             self.create,
             object_ids=self.object_ids,
         )
@@ -115,7 +114,7 @@ class Command(BaseCommand):
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.LINES.value,
             ContentType.objects.get_for_model(Line).model,
-            Line._meta.app_label,
+            Line._meta.app_label,  # noqa: SLF001
             self.create,
             object_ids=self.object_ids,
         )
@@ -214,7 +213,7 @@ class Command(BaseCommand):
             help="create or update",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002, D102
         if not options["mode"]:
             sys.stderr.write("You must specify mode ('create' or 'update')\n")
             sys.exit(1)

@@ -18,7 +18,7 @@ class CoursewareUserAdmin(admin.ModelAdmin):
     raw_id_fields = ["user"]
 
     def get_queryset(self, request):
-        """Overrides base queryset"""
+        """Overrides base queryset"""  # noqa: D401
         return super().get_queryset(request).select_related("user")
 
 
@@ -32,5 +32,5 @@ class OpenEdxApiAuthAdmin(admin.ModelAdmin):
     raw_id_fields = ["user"]
 
     def get_queryset(self, request):
-        """Overrides base queryset"""
+        """Overrides base queryset"""  # noqa: D401
         return super().get_queryset(request).select_related("user")

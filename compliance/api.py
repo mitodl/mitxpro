@@ -1,6 +1,6 @@
 """Compliance API"""
-from collections import namedtuple
 import logging
+from collections import namedtuple
 
 from django.conf import settings
 from lxml import etree
@@ -11,19 +11,18 @@ from zeep.plugins import HistoryPlugin
 from zeep.wsse.username import UsernameToken
 
 from compliance.constants import (
-    REASON_CODE_SUCCESS,
     EXPORTS_BLOCKED_REASON_CODES,
-    TEMPORARY_FAILURE_REASON_CODES,
+    REASON_CODE_SUCCESS,
     RESULT_DENIED,
     RESULT_SUCCESS,
     RESULT_UNKNOWN,
+    TEMPORARY_FAILURE_REASON_CODES,
 )
 from compliance.models import ExportsInquiryLog
 
-
 log = logging.getLogger()
 
-DecryptedLog = namedtuple("DecryptedLog", ["request", "response"])
+DecryptedLog = namedtuple("DecryptedLog", ["request", "response"])  # noqa: PYI024
 
 
 EXPORTS_REQUIRED_KEYS = [
@@ -35,7 +34,7 @@ EXPORTS_REQUIRED_KEYS = [
 
 
 def is_exports_verification_enabled():
-    """Returns True if the exports verification is configured"""
+    """Returns True if the exports verification is configured"""  # noqa: D401
     return all(getattr(settings, key) for key in EXPORTS_REQUIRED_KEYS)
 
 
@@ -46,7 +45,7 @@ def get_cybersource_client():
     Returns:
         (zeep.Client, zeep.plugins.HistoryPlugin):
             a tuple of the configured client and the history plugin instance
-    """
+    """  # noqa: D401
     wsse = UsernameToken(
         settings.CYBERSOURCE_MERCHANT_ID, settings.CYBERSOURCE_TRANSACTION_KEY
     )
@@ -66,7 +65,7 @@ def compute_result_from_codes(reason_code, info_code):
     Returns:
         str:
             the computed result
-    """
+    """  # noqa: D401
     # if there's either an explicit denial or any block list was triggered
     # NOTE: reason_code can indicate a success but a block list still be triggered and indicated in info_code
     if reason_code in EXPORTS_BLOCKED_REASON_CODES or info_code:
@@ -85,7 +84,7 @@ def compute_result_from_codes(reason_code, info_code):
 
 
 def get_encryption_public_key():
-    """Returns the public key for encryption of export requests/responses"""
+    """Returns the public key for encryption of export requests/responses"""  # noqa: D401
     return PublicKey(
         settings.CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY, encoder=Base64Encoder
     )
@@ -242,5 +241,5 @@ def get_latest_exports_inquiry(user):
     Returns:
         ExportsInquiryLog:
             the latest record sorted by created_on
-    """
+    """  # noqa: D401
     return user.exports_inquiries.order_by("-created_on").first()

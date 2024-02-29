@@ -15,12 +15,12 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def add_arguments(self, parser):  # pylint:disable=missing-docstring
+    def add_arguments(self, parser):  # noqa: D102
         parser.add_argument(
             "-r", "--row", type=int, help="Row number in the deferral request Sheet"
         )
 
-    def handle(self, *args, **options):  # pylint:disable=missing-docstring
+    def handle(self, *args, **options):  # noqa: ARG002, D102
         defer_request_handler = DeferralRequestHandler()
         self.stdout.write("Handling deferrals and updating spreadsheet...")
         results = defer_request_handler.process_sheet(
@@ -28,6 +28,6 @@ class Command(BaseCommand):
         )
         self.stdout.write(
             self.style.SUCCESS(
-                "Deferral sheet successfully processed.\n{}".format(results)
+                "Deferral sheet successfully processed.\n{}".format(results)  # noqa: UP032
             )
         )

@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("sheets", "0007_fill_in_gen_request_date_completed")]
 
     operations = [

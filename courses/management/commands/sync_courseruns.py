@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     help = "Sync dates and title for all or a specific course run from edX."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser):  # noqa: D102
         parser.add_argument(
             "--run",
             type=str,
@@ -25,15 +25,15 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # pylint: disable=too-many-locals
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
         runs = []
         if options["run"]:
             try:
                 runs = [CourseRun.objects.get(courseware_id=options["run"])]
             except CourseRun.DoesNotExist:
-                raise CommandError(
-                    "Could not find run with courseware_id={}".format(options["run"])
+                raise CommandError(  # noqa: B904, TRY200
+                    "Could not find run with courseware_id={}".format(options["run"])  # noqa: EM103
                 )
         else:
             # We pick up all the course runs that do not have an expiration date (implies not having

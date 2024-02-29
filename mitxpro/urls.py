@@ -14,10 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import include, path, re_path
 from django.views.decorators.cache import cache_control
 from mitol.common.decorators import cache_control_max_age_jitter
 from oauth2_provider.urls import base_urlpatterns
@@ -31,12 +30,15 @@ from wagtail.utils.urlpatterns import decorate_urlpatterns
 from mitxpro.views import (
     AppContextView,
     cms_signin_redirect_to_site_signin,
-    handler404 as not_found_handler,
-    handler500 as server_error_handler,
     index,
     restricted,
 )
-
+from mitxpro.views import (
+    handler404 as not_found_handler,
+)
+from mitxpro.views import (
+    handler500 as server_error_handler,
+)
 
 WAGTAIL_IMG_CACHE_AGE = 31_536_000  # 1 year
 

@@ -64,7 +64,7 @@ def _generate_b2b_cybersource_sa_payload(*, order, receipt_url, cancel_url):
         cancel_url (str): The URL to be used by Cybersource to redirect the user after they click cancel
     Returns:
         dict: the payload to send to CyberSource via Secure Acceptance
-    """
+    """  # noqa: D401
     # http://apps.cybersource.com/library/documentation/dev_guides/Secure_Acceptance_WM/Secure_Acceptance_WM.pdf
     # Section: API Fields
 
@@ -110,7 +110,7 @@ def generate_b2b_cybersource_sa_payload(*, order, receipt_url, cancel_url):
         cancel_url (str): The URL to be used by Cybersource to redirect the user after they click cancel
     Returns:
         dict: the payload to send to CyberSource via Secure Acceptance
-    """
+    """  # noqa: D401
     return sign_cybersource_payload(
         _generate_b2b_cybersource_sa_payload(
             order=order, receipt_url=receipt_url, cancel_url=cancel_url
@@ -167,7 +167,7 @@ def determine_price_and_discount(*, product_version, discount_code, num_seats):
                 coupon_code=discount_code, product_id=product_version.product.id
             )
         except B2BCoupon.DoesNotExist as exc:
-            raise ValidationError("Invalid coupon code") from exc
+            raise ValidationError("Invalid coupon code") from exc  # noqa: EM101
     else:
         coupon = None
 

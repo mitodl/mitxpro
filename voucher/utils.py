@@ -1,15 +1,14 @@
 """PDF Parsing functions for Vouchers"""
-# pylint: disable=R1702
+import difflib
 import json
 import logging
+import re
 from datetime import datetime
 from uuid import uuid4
-import difflib
-import re
 
+import pdftotext
 from django.conf import settings
 from django.db.models import Q
-import pdftotext
 
 from courses.models import CourseRun
 from ecommerce.api import get_valid_coupon_versions
@@ -28,7 +27,7 @@ def remove_extra_spaces(text):
     Returns:
         str: The text with extra spaces removed
     """
-    if text:
+    if text:  # noqa: RET503
         return re.sub(r"\s+", " ", text.strip())
 
 
@@ -129,7 +128,7 @@ def get_eligible_coupon_choices(voucher):
         )
         sorted_eligible_choices = []
         for match in close_matches:
-            sorted_eligible_choices.append(
+            sorted_eligible_choices.append(  # noqa: PERF401
                 eligible_choices[eligible_choices_titles.index(match)]
             )
         eligible_choices = sorted_eligible_choices
@@ -160,7 +159,7 @@ def get_valid_voucher_coupons_version(voucher, product):
     )
 
 
-def read_pdf_domestic(pdf):
+def read_pdf_domestic(pdf):  # noqa: C901
     """
     Process domestic vouchers and return parsed values
     """
@@ -236,7 +235,7 @@ def update_column_values(column_values, elements):
     """
     Update column values with the sliced elements
     """
-    if len(elements) == 5:
+    if len(elements) == 5:  # noqa: PLR2004
         for column, value in zip(column_values, elements):
             if value:
                 if column_values[column]:
@@ -305,7 +304,7 @@ def read_pdf(pdf_file):
     for key in domestic_settings_keys + international_settings_keys:
         if not getattr(settings, key):
             log.warning("Required setting %s missing for read_pdf", key)
-            return
+            return  # noqa: RET502
     try:
         pdf = pdftotext.PDF(pdf_file)
         if any("Entity Name:" in page for page in pdf):
@@ -322,12 +321,12 @@ def read_pdf(pdf_file):
                     settings.VOUCHER_INTERNATIONAL_EMPLOYEE_ID_KEY
                 ),
                 "voucher_id": None,
-                "course_start_date_input": datetime.strptime(
+                "course_start_date_input": datetime.strptime(  # noqa: DTZ007
                     values.get(settings.VOUCHER_INTERNATIONAL_DATES_KEY).split(" ")[0],
                     "%d-%b-%Y",
                 ).date(),
                 "course_id_input": remove_extra_spaces(course_id_input)
-                if len(course_id_input) >= 3
+                if len(course_id_input) >= 3  # noqa: PLR2004
                 else "",
                 "course_title_input": remove_extra_spaces(
                     values.get(settings.VOUCHER_INTERNATIONAL_COURSE_NAME_KEY)
@@ -348,12 +347,12 @@ def read_pdf(pdf_file):
                 "pdf": pdf_file,
                 "employee_id": values.get(settings.VOUCHER_DOMESTIC_EMPLOYEE_ID_KEY),
                 "voucher_id": values.get(settings.VOUCHER_DOMESTIC_KEY),
-                "course_start_date_input": datetime.strptime(
+                "course_start_date_input": datetime.strptime(  # noqa: DTZ007
                     values.get(settings.VOUCHER_DOMESTIC_DATES_KEY).split(" ")[0],
                     "%m/%d/%Y",
                 ).date(),
                 "course_id_input": remove_extra_spaces(course_id_input)
-                if len(course_id_input) >= 3
+                if len(course_id_input) >= 3  # noqa: PLR2004
                 else "",
                 "course_title_input": remove_extra_spaces(
                     " ".join(
@@ -362,12 +361,12 @@ def read_pdf(pdf_file):
                 ),
                 "employee_name": values.get(settings.VOUCHER_DOMESTIC_EMPLOYEE_KEY),
             }
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         log.exception("Could not parse PDF")
         return None
 
 
-def voucher_upload_path(instance, filename):  # pylint: disable=unused-argument
+def voucher_upload_path(instance, filename):  # noqa: ARG001
     """
     Make a unique path/name for an uploaded voucher
 
@@ -378,4 +377,4 @@ def voucher_upload_path(instance, filename):  # pylint: disable=unused-argument
     Returns:
         str: The unique filepath for the voucher
     """
-    return "vouchers/{}_{}".format(uuid4(), filename)
+    return f"vouchers/{uuid4()}_{filename}"

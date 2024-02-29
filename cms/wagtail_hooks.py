@@ -1,12 +1,14 @@
 """Custom hooks to configure wagtail behavior"""
-from wagtail.admin.api.views import PagesAdminAPIViewSet
 from wagtail import hooks
+from wagtail.admin.api.views import PagesAdminAPIViewSet
 
 
 @hooks.register("construct_explorer_page_queryset")
 def sort_pages_alphabetically(
-    parent_page, pages, request
-):  # pylint: disable=unused-argument
+    parent_page,  # noqa: ARG001
+    pages,
+    request,  # noqa: ARG001
+):
     """Sort all pages by title alphabetically"""
     return pages.order_by("title")
 

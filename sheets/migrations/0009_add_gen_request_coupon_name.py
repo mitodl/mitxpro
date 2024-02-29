@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("sheets", "0008_remove_coupongenerationrequest_completed")]
 
     operations = [

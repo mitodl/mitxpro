@@ -3,6 +3,6 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
-def disable_hubspot_api(settings):
+def disable_hubspot_api(settings):  # noqa: PT004
     """Disable Hubspot API by default for tests"""
     settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = None

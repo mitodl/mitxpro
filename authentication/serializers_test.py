@@ -2,7 +2,7 @@
 import pytest
 from rest_framework.serializers import ValidationError
 from social_core.backends.email import EmailAuth
-from social_core.exceptions import InvalidEmail, AuthException
+from social_core.exceptions import AuthException, InvalidEmail
 
 from authentication.serializers import RegisterEmailSerializer
 from authentication.utils import SocialAuthState
@@ -14,8 +14,8 @@ pytestmark = [pytest.mark.django_db]
 
 
 @pytest.mark.parametrize(
-    "side_effect,result",
-    (
+    "side_effect,result",  # noqa: PT006
+    (  # noqa: PT007
         (
             AuthException(None, "message"),
             SocialAuthState(SocialAuthState.STATE_ERROR, errors=["message"]),
@@ -41,16 +41,14 @@ def test_social_auth_serializer_error(mocker, side_effect, result):
             "request": mocker.Mock(),
         },
     )
-    assert serializer.is_valid() is True, "Received errors: {}".format(
-        serializer.errors
-    )
+    assert serializer.is_valid() is True, f"Received errors: {serializer.errors}"
     assert isinstance(serializer.save(), SocialAuthState)
     assert serializer.data == RegisterEmailSerializer(result).data
 
 
 @pytest.mark.parametrize(
-    "data,raises,message",
-    (
+    "data,raises,message",  # noqa: PT006
+    (  # noqa: PT007
         (
             {"email": None, "partial": None},
             ValidationError,

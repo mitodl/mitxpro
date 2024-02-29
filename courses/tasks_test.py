@@ -2,8 +2,8 @@
 
 import pytest
 
-from courses.tasks import sync_courseruns_data
 from courses.factories import CourseRunFactory
+from courses.tasks import sync_courseruns_data
 
 pytestmark = [pytest.mark.django_db]
 

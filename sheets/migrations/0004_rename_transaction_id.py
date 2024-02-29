@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("sheets", "0003_remove_coupongenerationrequest_spreadsheet_updated")
     ]

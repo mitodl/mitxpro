@@ -10,7 +10,7 @@ def test_strategy_init(mocker):
     drf_request = mocker.Mock()
     strategy = load_drf_strategy(request=drf_request)
     assert strategy.drf_request == drf_request
-    assert strategy.request == drf_request._request  # pylint: disable=protected-access
+    assert strategy.request == drf_request._request  # noqa: SLF001
 
 
 def test_strategy_request_data(mocker):

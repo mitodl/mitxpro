@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("courses", "0032_remove_external_marketing_url_field"),
     ]

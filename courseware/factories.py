@@ -1,11 +1,11 @@
 """Courseware factories"""
 from datetime import timedelta, timezone
 
-from factory import Faker, SubFactory, Trait, LazyAttribute
+from factory import Faker, LazyAttribute, SubFactory, Trait
 from factory.django import DjangoModelFactory
 
-from courseware.models import OpenEdxApiAuth, CoursewareUser
 from courseware.constants import PLATFORM_EDX
+from courseware.models import CoursewareUser, OpenEdxApiAuth
 from mitxpro.utils import now_in_utc
 
 

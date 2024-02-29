@@ -22,13 +22,13 @@ class Geoname(models.Model):
     continent_name = models.TextField()
     country_iso_code = models.CharField(max_length=2)
     country_name = models.TextField()
-    subdivision_1_iso_code = models.CharField(max_length=3, blank=True, null=True)
-    subdivision_1_name = models.TextField(blank=True, null=True)
-    subdivision_2_iso_code = models.CharField(max_length=3, blank=True, null=True)
-    subdivision_2_name = models.TextField(blank=True, null=True)
-    city_name = models.TextField(blank=True, null=True)
+    subdivision_1_iso_code = models.CharField(max_length=3, blank=True, null=True)  # noqa: DJ001
+    subdivision_1_name = models.TextField(blank=True, null=True)  # noqa: DJ001
+    subdivision_2_iso_code = models.CharField(max_length=3, blank=True, null=True)  # noqa: DJ001
+    subdivision_2_name = models.TextField(blank=True, null=True)  # noqa: DJ001
+    city_name = models.TextField(blank=True, null=True)  # noqa: DJ001
     metro_code = models.IntegerField(blank=True, null=True)
-    time_zone = models.TextField(blank=True, null=True)
+    time_zone = models.TextField(blank=True, null=True)  # noqa: DJ001
     is_in_european_union = models.BooleanField(blank=True, null=True, default=False)
 
     class Meta:
@@ -79,7 +79,7 @@ class NetBlock(models.Model):
     represented_country_geoname_id = models.BigIntegerField(blank=True, null=True)
     is_anonymous_proxy = models.BooleanField(default=False, null=True, blank=True)
     is_satellite_provider = models.BooleanField(default=False, null=True, blank=True)
-    postal_code = models.CharField(max_length=10, null=True, blank=True)
+    postal_code = models.CharField(max_length=10, null=True, blank=True)  # noqa: DJ001
     latitude = models.DecimalField(
         max_digits=16, decimal_places=6, blank=True, null=True
     )

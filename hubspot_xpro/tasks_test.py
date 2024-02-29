@@ -1,7 +1,6 @@
 """
 Tests for hubspot_xpro tasks
 """
-# pylint: disable=redefined-outer-name
 from decimal import Decimal
 from math import ceil
 
@@ -9,11 +8,11 @@ import pytest
 from django.contrib.contenttypes.models import ContentType
 from faker import Faker
 from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
-from hubspot.crm.objects import BatchInputSimplePublicObjectInput, ApiException
+from hubspot.crm.objects import ApiException, BatchInputSimplePublicObjectInput
 from mitol.hubspot_api.api import HubspotAssociationType, HubspotObjectType
+from mitol.hubspot_api.exceptions import TooManyRequestsException
 from mitol.hubspot_api.factories import HubspotObjectFactory, SimplePublicObjectFactory
 from mitol.hubspot_api.models import HubspotObject
-from mitol.hubspot_api.exceptions import TooManyRequestsException
 
 from b2b_ecommerce.factories import B2BOrderFactory
 from b2b_ecommerce.models import B2BOrder
@@ -28,7 +27,6 @@ from hubspot_xpro import tasks
 from hubspot_xpro.api import make_contact_sync_message
 from hubspot_xpro.tasks import task_obj_lock
 from users.factories import UserFactory
-
 
 pytestmark = [pytest.mark.django_db]
 
@@ -56,7 +54,8 @@ def test_task_functions(mocker, task_func):
 
 @pytest.mark.parametrize("task_func", SYNC_FUNCTIONS)
 @pytest.mark.parametrize(
-    "status, expected_error", [[429, TooManyRequestsException], [500, ApiException]]
+    "status, expected_error",  # noqa: PT006
+    [[429, TooManyRequestsException], [500, ApiException]],  # noqa: PT007
 )
 def test_task_functions_error(mocker, task_func, status, expected_error):
     """These task functions should return the expected exception class"""
@@ -205,11 +204,9 @@ def test_batch_update_hubspot_objects_chunked(mocker, id_count):
     """batch_update_hubspot_objects_chunked should make expected api calls and args"""
     contacts = UserFactory.create_batch(id_count)
     mock_ids = sorted(
-        list(
-            zip(
-                [contact.id for contact in contacts],
-                [f"10001{i}" for i in range(id_count)],
-            )
+        zip(
+            [contact.id for contact in contacts],
+            [f"10001{i}" for i in range(id_count)],
         )
     )
     mock_hubspot_api = mocker.patch("hubspot_xpro.tasks.HubspotApi")
@@ -241,7 +238,8 @@ def test_batch_update_hubspot_objects_chunked(mocker, id_count):
 
 
 @pytest.mark.parametrize(
-    "status, expected_error", [[429, TooManyRequestsException], [500, ApiException]]
+    "status, expected_error",  # noqa: PT006
+    [[429, TooManyRequestsException], [500, ApiException]],  # noqa: PT007
 )
 def test_batch_update_hubspot_objects_chunked_error(mocker, status, expected_error):
     """batch_update_hubspot_objects_chunked raise expected exception"""
@@ -295,7 +293,8 @@ def test_batch_create_hubspot_objects_chunked(mocker, id_count):
 
 
 @pytest.mark.parametrize(
-    "status, expected_error", [[429, TooManyRequestsException], [500, ApiException]]
+    "status, expected_error",  # noqa: PT006
+    [[429, TooManyRequestsException], [500, ApiException]],  # noqa: PT007
 )
 def test_batch_create_hubspot_objects_chunked_error(mocker, status, expected_error):
     """batch_create_hubspot_objects_chunked raise expected exception"""
@@ -318,9 +317,7 @@ def test_batch_create_hubspot_objects_chunked_error(mocker, status, expected_err
         mock_sync_contact.assert_any_call(item)
 
 
-def test_batch_upsert_associations(
-    settings, mocker, mocked_celery
-):  # pylint:disable=unused-argument
+def test_batch_upsert_associations(settings, mocker, mocked_celery):
     """
     batch_upsert_associations should call batch_upsert_associations_chunked w/correct lists of ids
     """
@@ -402,13 +399,13 @@ def test_batch_upsert_associations_chunked(mocker):
 
 
 @pytest.mark.parametrize(
-    "func_name,args,kwargs,result",
+    "func_name,args,kwargs,result",  # noqa: PT006
     [
-        ["func1", [2345], None, "func1_2345"],
-        ["func2", None, {"order_id": 5678}, "func2_5678"],
-        ["func2a", [], {"user_id": 5678}, "func2a_5678"],
-        ["func3", None, None, "func3"],
-        ["func3a", None, {}, "func3a"],
+        ["func1", [2345], None, "func1_2345"],  # noqa: PT007
+        ["func2", None, {"order_id": 5678}, "func2_5678"],  # noqa: PT007
+        ["func2a", [], {"user_id": 5678}, "func2a_5678"],  # noqa: PT007
+        ["func3", None, None, "func3"],  # noqa: PT007
+        ["func3a", None, {}, "func3a"],  # noqa: PT007
     ],
 )
 def test_task_obj_lock(func_name, args, kwargs, result):

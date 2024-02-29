@@ -36,7 +36,6 @@ def fill_in_date_completed(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("sheets", "0006_coupon_gen_request_err_handling_fields")]
 
     operations = [

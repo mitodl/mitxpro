@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 
 from voucher.utils import read_pdf
 
-
 VOUCHER_PARSE_ERROR = "Failed to parse PDF"
 
 

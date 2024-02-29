@@ -3,8 +3,8 @@ Management command to decrypts a user's ExportInquiryLog record
 """
 import sys
 
-from django.core.management import BaseCommand
 from django.contrib.auth import get_user_model
+from django.core.management import BaseCommand
 from nacl.encoding import Base64Encoder
 from nacl.public import PrivateKey
 
@@ -29,7 +29,7 @@ class Command(BaseCommand):
         group.add_argument("--email", help="the email of the user")
         group.add_argument("--username", help="the username of the user")
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Run the command"""
 
         if options["user_id"]:

@@ -9,7 +9,6 @@ from authentication.exceptions import (
 from authentication.pipeline import compliance
 from compliance.factories import ExportsInquiryLogFactory
 
-
 pytestmark = pytest.mark.django_db
 
 
@@ -22,17 +21,17 @@ def test_verify_exports_compliance_disabled(mocker):
 
 
 @pytest.mark.parametrize(
-    "is_active, inquiry_exists, should_verify",
+    "is_active, inquiry_exists, should_verify",  # noqa: PT006
     [
-        [True, True, False],
-        [True, False, True],
-        [False, True, True],
-        [False, False, True],
+        [True, True, False],  # noqa: PT007
+        [True, False, True],  # noqa: PT007
+        [False, True, True],  # noqa: PT007
+        [False, False, True],  # noqa: PT007
     ],
 )
-def test_verify_exports_compliance_user_active(
+def test_verify_exports_compliance_user_active(  # noqa: PLR0913
     mailoutbox, mocker, user, is_active, inquiry_exists, should_verify
-):  # pylint: disable=too-many-arguments
+):
     """Assert that the user is verified only if they already haven't been"""
     user.is_active = is_active
     if inquiry_exists:

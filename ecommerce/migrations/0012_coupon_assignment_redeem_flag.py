@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("ecommerce", "0011_rename_bulk_enrollment_delivery")]
 
     operations = [

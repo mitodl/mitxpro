@@ -1,6 +1,7 @@
 """Templatetags for rendering site notification"""
 
 from django import template
+
 from cms.models import SiteNotification
 
 register = template.Library()

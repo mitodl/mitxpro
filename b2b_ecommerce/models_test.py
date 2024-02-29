@@ -9,7 +9,6 @@ from b2b_ecommerce.factories import B2BOrderFactory
 from b2b_ecommerce.models import B2BCoupon, B2BOrder, B2BOrderAudit
 from mitxpro.utils import serialize_model_object
 
-
 pytestmark = pytest.mark.django_db
 
 
@@ -57,12 +56,12 @@ def test_reference_number(settings):
 
 
 @pytest.mark.parametrize(
-    "activation_date, expiration_date",
+    "activation_date, expiration_date",  # noqa: PT006
     [
-        [None, None],
-        [timezone.now() - timedelta(days=1), timezone.now() + timedelta(days=1)],
-        [None, timezone.now() + timedelta(days=1)],
-        [timezone.now() - timedelta(days=1), None],
+        [None, None],  # noqa: PT007
+        [timezone.now() - timedelta(days=1), timezone.now() + timedelta(days=1)],  # noqa: PT007
+        [None, timezone.now() + timedelta(days=1)],  # noqa: PT007
+        [timezone.now() - timedelta(days=1), None],  # noqa: PT007
     ],
 )
 def test_get_unexpired_coupon(order_with_coupon, activation_date, expiration_date):
@@ -80,11 +79,11 @@ def test_get_unexpired_coupon(order_with_coupon, activation_date, expiration_dat
 
 
 @pytest.mark.parametrize(
-    "attr_name, attr_value",
+    "attr_name, attr_value",  # noqa: PT006
     [
-        ["enabled", False],
-        ["activation_date", timezone.now() + timedelta(days=1)],
-        ["expiration_date", timezone.now() - timedelta(days=1)],
+        ["enabled", False],  # noqa: PT007
+        ["activation_date", timezone.now() + timedelta(days=1)],  # noqa: PT007
+        ["expiration_date", timezone.now() - timedelta(days=1)],  # noqa: PT007
     ],
 )
 def test_get_unexpired_coupon_not_found(order_with_coupon, attr_name, attr_value):

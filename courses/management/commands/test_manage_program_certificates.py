@@ -1,18 +1,20 @@
 """Tests for Program Certificates management command"""
 
-import pytest
 from itertools import product
-from courses.management.commands import manage_program_certificates
-from courses.models import ProgramCertificate
+
+import pytest
 from django.core.management.base import CommandError
+
 from courses.factories import (
     CourseFactory,
-    CourseRunFactory,
-    CourseRunGradeFactory,
     CourseRunCertificateFactory,
     CourseRunEnrollmentFactory,
+    CourseRunFactory,
+    CourseRunGradeFactory,
     ProgramFactory,
 )
+from courses.management.commands import manage_program_certificates
+from courses.models import ProgramCertificate
 from users.factories import UserFactory
 
 pytestmark = [pytest.mark.django_db]
@@ -40,7 +42,7 @@ def test_program_certificate_management_no_program_argument(user):
     """Test that command generates error when the program is not passed"""
     with pytest.raises(CommandError) as command_error:
         manage_program_certificates.Command().handle(user=user)
-    assert str(command_error.value) == f"Please provide a valid program readable_id."
+    assert str(command_error.value) == "Please provide a valid program readable_id."
 
 
 def test_program_certificate_creation_multiple_users():
@@ -51,9 +53,9 @@ def test_program_certificate_creation_multiple_users():
 
     def create_course_certificates(args):
         run, user = args
-        CourseRunEnrollmentFactory.create(user=user, run=run),
-        CourseRunGradeFactory.create(course_run=run, user=user, passed=True, grade=1),
-        CourseRunCertificateFactory.create(course_run=run, user=user),
+        (CourseRunEnrollmentFactory.create(user=user, run=run),)
+        (CourseRunGradeFactory.create(course_run=run, user=user, passed=True, grade=1),)
+        (CourseRunCertificateFactory.create(course_run=run, user=user),)
 
     program = ProgramFactory.create(readable_id="test")
     users = UserFactory.create_batch(size=3)

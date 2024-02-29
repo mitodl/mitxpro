@@ -2,12 +2,12 @@
 from django.core.management.base import BaseCommand, CommandError
 
 from courses.models import CourseRun, CourseRunEnrollment, Program, ProgramEnrollment
+from courseware.api import enroll_in_edx_course_runs
 from courseware.exceptions import (
     EdxApiEnrollErrorException,
-    UnknownEdxApiEnrollException,
     NoEdxApiAuthError,
+    UnknownEdxApiEnrollException,
 )
-from courseware.api import enroll_in_edx_course_runs
 from ecommerce import mail_api
 from mitxpro.utils import has_equal_properties
 
@@ -20,7 +20,7 @@ def enrollment_summary(enrollment):
         enrollment (ProgramEnrollment or CourseRunEnrollment): The enrollment
     Returns:
         str: A string representation of an enrollment
-    """
+    """  # noqa: D401
     if isinstance(enrollment, ProgramEnrollment):
         return "<ProgramEnrollment: id={}, program={}>".format(
             enrollment.id, enrollment.program.text_id
@@ -39,12 +39,12 @@ def enrollment_summaries(enrollments):
         enrollments (iterable of ProgramEnrollment or CourseRunEnrollment): The enrollments
     Returns:
         list of str: A list of string representations of enrollments
-    """
+    """  # noqa: D401
     return list(map(enrollment_summary, enrollments))
 
 
 def create_or_update_enrollment(model_cls, defaults=None, **kwargs):
-    """Creates or updates an enrollment record"""
+    """Creates or updates an enrollment record"""  # noqa: D401
     defaults = {**(defaults or {}), "active": True, "change_status": None}
     created = False
     enrollment = model_cls.all_objects.filter(**kwargs).order_by("-created_on").first()
@@ -61,7 +61,7 @@ def create_or_update_enrollment(model_cls, defaults=None, **kwargs):
 class EnrollmentChangeCommand(BaseCommand):
     """Base class for management commands that change enrollment status"""
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser):  # noqa: D102
         parser.add_argument(
             "-f",
             "--force",
@@ -70,7 +70,7 @@ class EnrollmentChangeCommand(BaseCommand):
             help="Ignores validation when performing the desired status change",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: D102
         pass
 
     @staticmethod
@@ -84,7 +84,7 @@ class EnrollmentChangeCommand(BaseCommand):
             command_options (dict): A dict of command parameters
         Returns:
             tuple: (ProgramEnrollment, Program) or (CourseRunEnrollment, CourseRun)
-        """
+        """  # noqa: D401
         program_property = command_options.get("program")
         run_property = command_options.get("run")
         order_property = command_options.get("order")
@@ -92,10 +92,10 @@ class EnrollmentChangeCommand(BaseCommand):
 
         if program_property and run_property:
             raise CommandError(
-                "Either 'program' or 'run' should be provided, not both."
+                "Either 'program' or 'run' should be provided, not both."  # noqa: EM101
             )
         if not program_property and not run_property:
-            raise CommandError("Either 'program' or 'run' must be provided.")
+            raise CommandError("Either 'program' or 'run' must be provided.")  # noqa: EM101
 
         query_params = {"user": user}
         if order_property:
@@ -113,10 +113,10 @@ class EnrollmentChangeCommand(BaseCommand):
             enrollment = CourseRunEnrollment.all_objects.filter(**query_params).first()
 
         if not enrollment:
-            raise CommandError("Enrollment not found for: {}".format(enrolled_obj))
+            raise CommandError("Enrollment not found for: {}".format(enrolled_obj))  # noqa: EM103, UP032
         if not enrollment.active and not force:
             raise CommandError(
-                "The given enrollment is not active ({}).\n"
+                "The given enrollment is not active ({}).\n"  # noqa: EM103, UP032, RUF100
                 "Add the -f/--force flag if you want to change the status anyway.".format(
                     enrollment.id
                 )
@@ -129,7 +129,7 @@ class EnrollmentChangeCommand(BaseCommand):
         existing_enrollment,
         to_program=None,
         to_user=None,
-        keep_failed_enrollments=False,
+        keep_failed_enrollments=False,  # noqa: FBT002
     ):
         """
         Helper method to create a new ProgramEnrollment based on an existing enrollment
@@ -144,11 +144,11 @@ class EnrollmentChangeCommand(BaseCommand):
                 in the database even if the enrollment fails in edX.
         Returns:
             tuple of (ProgramEnrollment, list(CourseRunEnrollment)): The newly created enrollments
-        """
+        """  # noqa: D401
         to_user = to_user or existing_enrollment.user
         to_program = to_program or existing_enrollment.program
-        enrollment_params = dict(user=to_user, program=to_program)
-        enrollment_defaults = dict(
+        enrollment_params = dict(user=to_user, program=to_program)  # noqa: C408
+        enrollment_defaults = dict(  # noqa: C408
             company=existing_enrollment.company, order=existing_enrollment.order
         )
         existing_run_enrollments = existing_enrollment.get_run_enrollments()
@@ -178,7 +178,7 @@ class EnrollmentChangeCommand(BaseCommand):
         existing_enrollment,
         to_run=None,
         to_user=None,
-        keep_failed_enrollments=False,
+        keep_failed_enrollments=False,  # noqa: FBT002
     ):
         """
         Helper method to create a CourseRunEnrollment based on an existing enrollment
@@ -193,11 +193,11 @@ class EnrollmentChangeCommand(BaseCommand):
                 in the database even if the enrollment fails in edX.
         Returns:
             CourseRunEnrollment: The newly created enrollment
-        """
+        """  # noqa: D401
         to_user = to_user or existing_enrollment.user
         to_run = to_run or existing_enrollment.run
-        enrollment_params = dict(user=to_user, run=to_run)
-        enrollment_defaults = dict(
+        enrollment_params = dict(user=to_user, run=to_run)  # noqa: C408
+        enrollment_defaults = dict(  # noqa: C408
             company=existing_enrollment.company, order=existing_enrollment.order
         )
         run_enrollment, created = create_or_update_enrollment(
@@ -236,7 +236,7 @@ class EnrollmentChangeCommand(BaseCommand):
         """
         try:
             enroll_in_edx_course_runs(user, course_runs)
-            return True
+            return True  # noqa: TRY300
         except (
             EdxApiEnrollErrorException,
             UnknownEdxApiEnrollException,

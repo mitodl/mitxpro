@@ -2,8 +2,9 @@
 
 
 from datetime import datetime, timezone
-from django.db import migrations, models
+
 import django.db.models.deletion
+from django.db import migrations, models
 
 # Importing here because we need to use methods from this model and replicating the functionality
 # would make the migrations complex since it would include replication of some of the Wagtail's Page model.
@@ -11,7 +12,7 @@ from cms.models import ExternalProgramPage
 
 
 def get_zone_aware_datetime(date):
-    """Takes a date object and returns a zone aware datetime"""
+    """Takes a date object and returns a zone aware datetime"""  # noqa: D401
     return datetime.combine(date, datetime.max.time(), timezone.utc) if date else None
 
 
@@ -163,7 +164,6 @@ def migrate_external_courseware(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("courses", "0030_add_courseware_external_fields"),
         ("cms", "0053_certificatepage_partner_logo"),
@@ -239,5 +239,5 @@ class Migration(migrations.Migration):
         ),
         # Commenting this, The fields in this data migration are being removed now as cleanup.
         # So the build fails on the fresh instance since it runs this migration
-        # migrations.RunPython(migrate_external_courseware, migrations.RunPython.noop),
+        # migrations.RunPython(migrate_external_courseware, migrations.RunPython.noop),  # noqa: ERA001
     ]

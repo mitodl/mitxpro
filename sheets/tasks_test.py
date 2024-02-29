@@ -2,8 +2,8 @@
 import pytest
 
 from sheets.tasks import (
-    handle_unprocessed_coupon_requests,
     _get_scheduled_assignment_task_ids,
+    handle_unprocessed_coupon_requests,
 )
 
 

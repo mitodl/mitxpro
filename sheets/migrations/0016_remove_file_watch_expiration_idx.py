@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("sheets", "0015_googlefilewatch_last_request_received")]
 
     operations = [

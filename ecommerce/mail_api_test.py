@@ -44,13 +44,12 @@ from mail.constants import (
 from mitxpro.utils import format_price
 from users.factories import UserFactory
 
-
 lazy = pytest.lazy_fixture
 
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture()
+@pytest.fixture
 def company():
     """Company object fixture"""
     return CompanyFactory.create(name="MIT")
@@ -164,7 +163,7 @@ def test_send_b2b_receipt_email(mocker, settings, has_discount):
     send_b2b_receipt_email(order)
 
     run = order.product_version.product.content_object
-    download_url = f'{urljoin(settings.SITE_BASE_URL, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'
+    download_url = f'{urljoin(settings.SITE_BASE_URL, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'  # noqa: RUF010
 
     patched_mail_api.context_for_user.assert_called_once_with(
         user=None,
@@ -247,7 +246,6 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data, settings):
         ),
         product_version__product__content_object__course__readable_id="course:/v7/choose-agency",
     )
-    # pylint: disable=expression-not-assigned
     (
         ReceiptFactory.create(order=line.order, data=receipt_data)
         if receipt_data
@@ -294,7 +292,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data, settings):
                 "bill_to_email": "doof@mit.edu",
             },
             "purchaser": {
-                "name": " ".join(["Test", "User"]),
+                "name": "Test User",
                 "email": "test@example.com",
                 "street_address": ["11 Main Street"],
                 "state_code": "CO",

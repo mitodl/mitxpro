@@ -30,7 +30,6 @@ from hubspot_xpro.task_helpers import sync_hubspot_b2b_deal
 from mitxpro.utils import make_csv_http_response
 from users.models import User
 
-
 log = logging.getLogger(__name__)
 
 
@@ -44,8 +43,11 @@ class B2BCheckoutView(APIView):
     permission_classes = ()
 
     def post(
-        self, request, *args, **kwargs
-    ):  # pylint: disable=too-many-locals,unused-argument
+        self,
+        request,
+        *args,  # noqa: ARG002
+        **kwargs,  # noqa: ARG002
+    ):
         """
         Create a new unfulfilled Order from the user's basket
         and return information used to submit to CyberSource.
@@ -58,17 +60,17 @@ class B2BCheckoutView(APIView):
             contract_number = request.data.get("contract_number")
             run_id = request.data.get("run_id")
         except KeyError as ex:
-            raise ValidationError(f"Missing parameter {ex.args[0]}")
+            raise ValidationError(f"Missing parameter {ex.args[0]}")  # noqa: B904, EM102, TRY200
 
         try:
             validate_email(email)
         except DjangoValidationError:
-            raise ValidationError({"email": "Invalid email"})
+            raise ValidationError({"email": "Invalid email"})  # noqa: B904, TRY200
 
         try:
             num_seats = int(num_seats)
         except ValueError:
-            raise ValidationError({"num_seats": "num_seats must be a number"})
+            raise ValidationError({"num_seats": "num_seats must be a number"})  # noqa: B904, TRY200
 
         if (
             contract_number
@@ -144,7 +146,7 @@ class B2BOrderStatusView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def get(self, request, *args, **kwargs):  # noqa: ARG002
         """Return B2B order status and other information about the order needed to display the receipt"""
         order_hash = kwargs["hash"]
         order = get_object_or_404(B2BOrder, unique_id=order_hash)
@@ -196,7 +198,7 @@ class B2BEnrollmentCodesView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def get(self, request, *args, **kwargs):  # noqa: ARG002
         """Create a CSV with enrollment codes"""
         order_hash = kwargs["hash"]
         order = get_object_or_404(
@@ -236,14 +238,14 @@ class B2BCouponView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def get(self, request, *args, **kwargs):  # noqa: ARG002
         """Get information about a coupon"""
         product = None
         try:
             coupon_code = request.GET["code"]
             product_id = request.GET["product_id"]
         except KeyError as ex:
-            raise ValidationError(f"Missing parameter {ex.args[0]}")
+            raise ValidationError(f"Missing parameter {ex.args[0]}")  # noqa: B904, EM102, TRY200
 
         try:
             # product_id can be an integer e.g. 1234 or
@@ -259,7 +261,7 @@ class B2BCouponView(APIView):
                 coupon_code=coupon_code, product_id=product_id
             )
         except B2BCoupon.DoesNotExist:
-            raise Http404
+            raise Http404  # noqa: B904
 
         return Response(
             data={

@@ -104,7 +104,7 @@ def test_format_datetime_for_filename():
     """
     Test that format_datetime_for_filename formats a datetime object to a string for use in a filename
     """
-    dt = datetime.datetime(
+    dt = datetime.datetime(  # noqa: DTZ001
         year=2019, month=1, day=1, hour=20, minute=21, second=22, microsecond=100
     )
     assert format_datetime_for_filename(dt) == "20190101"
@@ -158,10 +158,10 @@ def test_has_equal_properties():
     """
     obj = SimpleNamespace(a=1, b=2, c=3)
     assert has_equal_properties(obj, {}) is True
-    assert has_equal_properties(obj, dict(a=1, b=2)) is True
-    assert has_equal_properties(obj, dict(a=1, b=2, c=3)) is True
-    assert has_equal_properties(obj, dict(a=2)) is False
-    assert has_equal_properties(obj, dict(d=4)) is False
+    assert has_equal_properties(obj, dict(a=1, b=2)) is True  # noqa: C408
+    assert has_equal_properties(obj, dict(a=1, b=2, c=3)) is True  # noqa: C408
+    assert has_equal_properties(obj, dict(a=2)) is False  # noqa: C408
+    assert has_equal_properties(obj, dict(d=4)) is False  # noqa: C408
 
 
 def test_find_object_with_matching_attr():
@@ -211,11 +211,11 @@ def test_partition_to_lists():
 
 
 @pytest.mark.parametrize(
-    "url, expected",
+    "url, expected",  # noqa: PT006
     [
-        ["", ""],
-        ["http://url.com/url/here#other", "http://url.com/url/here#other"],
-        ["https://user:pass@sentry.io/12345", "https://user@sentry.io/12345"],
+        ["", ""],  # noqa: PT007
+        ["http://url.com/url/here#other", "http://url.com/url/here#other"],  # noqa: PT007
+        ["https://user:pass@sentry.io/12345", "https://user@sentry.io/12345"],  # noqa: PT007
     ],
 )
 def test_remove_password_from_url(url, expected):
@@ -329,7 +329,7 @@ def test_group_into_dict():
     grouped by generated keys
     """
 
-    class Car:  # pylint: disable=missing-docstring
+    class Car:
         def __init__(self, make, model):
             self.make = make
             self.model = model
@@ -355,8 +355,8 @@ def test_group_into_dict():
 
 
 @pytest.mark.parametrize(
-    "price,expected",
-    [[Decimal("0"), "$0.00"], [Decimal("1234567.89"), "$1,234,567.89"]],
+    "price,expected",  # noqa: PT006
+    [[Decimal("0"), "$0.00"], [Decimal("1234567.89"), "$1,234,567.89"]],  # noqa: PT007
 )
 def test_format_price(price, expected):
     """Format a decimal value into a price"""
@@ -364,11 +364,11 @@ def test_format_price(price, expected):
 
 
 @pytest.mark.parametrize(
-    "content,content_type,exp_summary_content,exp_url_in_summary",
+    "content,content_type,exp_summary_content,exp_url_in_summary",  # noqa: PT006
     [
-        ['{"bad": "response"}', "application/json", '{"bad": "response"}', False],
-        ["plain text", "text/plain", "plain text", False],
-        [
+        ['{"bad": "response"}', "application/json", '{"bad": "response"}', False],  # noqa: PT007
+        ["plain text", "text/plain", "plain text", False],  # noqa: PT007
+        [  # noqa: PT007
             "<div>HTML content</div>",
             "text/html; charset=utf-8",
             "(HTML body ignored)",
@@ -395,11 +395,11 @@ def test_get_error_response_summary(
 
 
 @pytest.mark.parametrize(
-    "content,content_type,expected",
+    "content,content_type,expected",  # noqa: PT006
     [
-        ['{"bad": "response"}', "application/json", True],
-        ["plain text", "text/plain", False],
-        ["<div>HTML content</div>", "text/html; charset=utf-8", False],
+        ['{"bad": "response"}', "application/json", True],  # noqa: PT007
+        ["plain text", "text/plain", False],  # noqa: PT007
+        ["<div>HTML content</div>", "text/html; charset=utf-8", False],  # noqa: PT007
     ],
 )
 def test_is_json_response(content, content_type, expected):

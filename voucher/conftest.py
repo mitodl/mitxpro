@@ -1,29 +1,27 @@
-# pylint: disable=redefined-outer-name
 """
 Fixtures for voucher tests
 """
 from datetime import datetime, timezone
 from types import SimpleNamespace
 
-import pytest
 import factory
+import pytest
 from django.http import HttpRequest
-
 from faker import Faker
+
 from courses.factories import CourseRunFactory
 from ecommerce.factories import (
+    CompanyFactory,
     CouponEligibilityFactory,
-    ProductFactory,
     CouponFactory,
+    CouponPaymentVersionFactory,
     CouponRedemptionFactory,
     CouponVersionFactory,
-    CouponPaymentVersionFactory,
-    CompanyFactory,
+    ProductFactory,
 )
 from voucher.factories import VoucherFactory
 from voucher.forms import VOUCHER_PARSE_ERROR
 from voucher.views import UploadVoucherFormView
-
 
 fake = Faker()
 
@@ -67,7 +65,7 @@ def upload_voucher_form_with_parse_error():
 @pytest.fixture
 def upload_voucher_form_view(user):
     """
-    Returns a mock instance of an UploadVoucherFormView with an attached User
+    Return a mock instance of an UploadVoucherFormView with an attached User
     """
     request = HttpRequest()
     request.user = user
@@ -77,7 +75,7 @@ def upload_voucher_form_view(user):
 @pytest.fixture
 def voucher_and_user(user):
     """
-    Returns a voucher and matching user object
+    Return a voucher and matching user object
     """
     voucher = VoucherFactory(user=user)
     return SimpleNamespace(voucher=voucher, user=user)
@@ -86,7 +84,7 @@ def voucher_and_user(user):
 @pytest.fixture
 def authenticated_client(client, user):
     """
-    Returns an authenticated client
+    Return an authenticated client
     """
     client.force_login(user)
     return client
@@ -95,7 +93,7 @@ def authenticated_client(client, user):
 @pytest.fixture
 def voucher_and_user_client(voucher_and_user, client):
     """
-    Returns a voucher, user, and authenticated client
+    Return a voucher, user, and authenticated client
     """
     user = voucher_and_user.user
     client.force_login(user)
@@ -105,7 +103,7 @@ def voucher_and_user_client(voucher_and_user, client):
 @pytest.fixture
 def redeemed_voucher_and_user_client(voucher_and_user, client):
     """
-    Returns a voucher, user, and authenticated client
+    Return a voucher, user, and authenticated client
     """
     user = voucher_and_user.user
     voucher = voucher_and_user.voucher
@@ -119,7 +117,7 @@ def redeemed_voucher_and_user_client(voucher_and_user, client):
 @pytest.fixture
 def voucher_and_partial_matches(voucher_and_user_client):
     """
-    Returns a voucher with partial matching CourseRuns
+    Return a voucher with partial matching CourseRuns
     """
     voucher = voucher_and_user_client.voucher
     company = CompanyFactory()
@@ -155,7 +153,7 @@ def voucher_and_partial_matches(voucher_and_user_client):
 @pytest.fixture
 def voucher_and_exact_match(voucher_and_user_client):
     """
-    Returns a voucher with and an exact matching and partial matching CourseRuns
+    Return a voucher with and an exact matching and partial matching CourseRuns
     """
     voucher = voucher_and_user_client.voucher
     exact_match = CourseRunFactory(
@@ -176,7 +174,7 @@ def voucher_and_exact_match(voucher_and_user_client):
 @pytest.fixture
 def voucher_and_partial_matches_with_coupons(voucher_and_partial_matches):
     """
-    Returns a voucher with partial matching CourseRuns and valid coupons
+    Return a voucher with partial matching CourseRuns and valid coupons
     """
     context = voucher_and_partial_matches
     products = [
@@ -210,7 +208,7 @@ def voucher_and_partial_matches_with_coupons(voucher_and_partial_matches):
 @pytest.fixture
 def voucher_and_exact_match_with_coupon(voucher_and_exact_match):
     """
-    Returns a voucher with exact matching and partial matching CourseRuns and valid coupons
+    Return a voucher with exact matching and partial matching CourseRuns and valid coupons
     """
     context = voucher_and_exact_match
     company = context.company
