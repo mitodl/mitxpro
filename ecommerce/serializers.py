@@ -27,8 +27,7 @@ from ecommerce.api import (
 )
 from ecommerce.constants import CYBERSOURCE_CARD_TYPES, DISCOUNT_TYPES
 from ecommerce.models import Basket, TaxRate
-from ecommerce.utils import validate_amount
-from ecommerce.filters import CouponUtils
+from ecommerce.utils import validate_amount, CouponUtils
 from mitxpro.serializers import WriteableSerializerMethodField
 from mitxpro.utils import now_in_utc
 from users.serializers import ExtendedLegalAddressSerializer
