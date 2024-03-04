@@ -1315,22 +1315,39 @@ def create_coupons(
         payment_transaction=payment_transaction,
     )
 
-    # The probability of duplicate UUID extremely low in practice, but there is still a non-zero
-    # probability of collision, especially when generating a large number of UUIDs.
-    unique_coupon_codes = set()
-    while len(unique_coupon_codes) < num_coupon_codes:
-        unique_coupon_codes.add(coupon_code or uuid.uuid4().hex)
-
     coupons = [
         Coupon(
-            coupon_code=coupon_code,
+            coupon_code=(coupon_code or uuid.uuid4().hex),
             payment=payment,
             include_future_runs=include_future_runs,
             is_global=is_global,
         )
-        for coupon_code in unique_coupon_codes
+        for _ in range(num_coupon_codes)
     ]
-    coupon_objs = Coupon.objects.bulk_create(coupons)
+
+    coupon_objs = []
+
+    try:
+        # Try to bulk create the coupons, assuming all coupons are new
+        with transaction.atomic():
+            coupon_objs = Coupon.objects.bulk_create(coupons)
+    except IntegrityError:
+        log.warning(
+            "Falling back to create Coupon one by one for coupon payment {} and company {}".format(
+                name, company_id
+            )
+        )
+
+        # Try to create coupons one by one and fix duplicate coupons by generating new UUIDs to give another try
+        for coupon_instance in coupons:
+            existing_coupon = Coupon.objects.filter(
+                coupon_code=coupon_instance.coupon_code
+            )
+            if existing_coupon.exists():
+                coupon_instance.coupon_code = uuid.uuid4().hex
+            coupon_instance.save()
+            coupon_objs.append(coupon_instance)
+
     versions = [
         CouponVersion(coupon=obj, payment_version=payment_version)
         for obj in coupon_objs

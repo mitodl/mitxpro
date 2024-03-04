@@ -3,6 +3,7 @@ import logging
 from urllib.parse import urljoin, urlencode
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 
 from courses.constants import ENROLLABLE_ITEM_ID_SEPARATOR
@@ -108,3 +109,26 @@ def validate_amount(discount_type, amount):
 def positive_or_zero(number):
     """Return 0 if a number is negative otherwise return number"""
     return 0 if number < 0 else number
+
+
+class CouponUtils:
+    @staticmethod
+    def validate_unique_coupon_code(value):
+        """
+        Validates the uniqueness of coupon codes in Coupon and B2BCoupon models.
+        """
+        if CouponUtils.is_existing_coupon_code(value):
+            raise ValidationError("Coupon code already exists in the plaform.")
+
+    @staticmethod
+    def is_existing_coupon_code(value):
+        """
+        Checks if the coupon code exists in either Coupon or B2BCoupon models.
+        """
+        from b2b_ecommerce.models import B2BCoupon
+        from ecommerce.models import Coupon
+
+        return (
+            Coupon.objects.filter(coupon_code=value).exists()
+            or B2BCoupon.objects.filter(coupon_code=value).exists()
+        )
