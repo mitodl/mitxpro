@@ -14,7 +14,7 @@ from typing import Iterable, NamedTuple, Optional
 from urllib.parse import quote_plus, urljoin
 
 from django.conf import settings
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Count, F, Max, Prefetch, Q, Subquery
 from django.http import HttpRequest
 from django.urls import reverse
