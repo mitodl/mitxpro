@@ -115,15 +115,15 @@ class CouponUtils:
     @staticmethod
     def validate_unique_coupon_code(value):
         """
-        Validates the uniqueness of coupon codes in Coupon and B2BCoupon models.
+        Validate the uniqueness of coupon codes in Coupon and B2BCoupon models.
         """
         if CouponUtils.is_existing_coupon_code(value):
-            raise ValidationError("Coupon code already exists in the plaform.")
+            raise ValidationError("Coupon code already exists in the platform.")
 
     @staticmethod
     def is_existing_coupon_code(value):
         """
-        Checks if the coupon code exists in either Coupon or B2BCoupon models.
+        Check if the coupon code exists in either Coupon or B2BCoupon models.
         """
         from b2b_ecommerce.models import B2BCoupon
         from ecommerce.models import Coupon

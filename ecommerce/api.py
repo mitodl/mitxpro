@@ -1325,28 +1325,25 @@ def create_coupons(
         for _ in range(num_coupon_codes)
     ]
 
-    coupon_objs = []
-
     try:
-        # Try to bulk create the coupons, assuming all coupons are new
         with transaction.atomic():
             coupon_objs = Coupon.objects.bulk_create(coupons)
     except IntegrityError:
         log.warning(
-            "Falling back to create Coupon one by one for coupon payment {} and company {}".format(
+            "Falling back to create Coupons for coupon payment {} and company {}".format(
                 name, company_id
             )
         )
 
-        # Try to create coupons one by one and fix duplicate coupons by generating new UUIDs to give another try
-        for coupon_instance in coupons:
-            existing_coupon = Coupon.objects.filter(
-                coupon_code=coupon_instance.coupon_code
-            )
-            if existing_coupon.exists():
-                coupon_instance.coupon_code = uuid.uuid4().hex
-            coupon_instance.save()
-            coupon_objs.append(coupon_instance)
+        new_coupon_codes = [coupon.coupon_code for coupon in coupons]
+        existing_coupon_codes = Coupon.objects.filter(
+            coupon_code__in=new_coupon_codes
+        ).values_list("coupon_code", flat=True)
+        if existing_coupon_codes:
+            for coupon in coupons:
+                if coupon.coupon_code in existing_coupon_codes:
+                    coupon.coupon_code = uuid.uuid4().hex
+        coupon_objs = Coupon.objects.bulk_create(coupons)
 
     versions = [
         CouponVersion(coupon=obj, payment_version=payment_version)
