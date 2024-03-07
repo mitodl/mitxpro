@@ -40,26 +40,25 @@
         <ul class="footer-nav">
           <li><a href="/about-us/">About Us</a></li>
         </ul>
-        <script
-          defer
-          charset="utf-8"
-          type="text/javascript"
-          src="//js.hsforms.net/forms/v2-legacy.js"
-        ></script>
-        <script
-          defer
-          charset="utf-8"
-          type="text/javascript"
-          src="//js.hsforms.net/forms/v2.js"
-        ></script>
         <script>
-          document.addEventListener('DOMContentLoaded', function() {
+          function loadHubspot(){
+            var v2_lagacy_script = document.createElement('script');
+            v2_lagacy_script.type = "text/javascript"
+            v2_lagacy_script.src = "//js.hsforms.net/forms/v2-legacy.js"
+
+            var v2_script = document.createElement('script');
+            v2_script.type = "text/javascript"
+            v2_script.src = "//js.hsforms.net/forms/v2.js"
+
             if (typeof hbspt !== "undefined") {
               hbspt.forms.create({
                 portalId: "{{ hubspot_portal_id }}",
                 formId: "{{ hubspot_footer_form_guid }}",
               });
             }
+          }
+          document.addEventListener('DOMContentLoaded', function() {
+                setTimeout("loadHubspot();", 3000)
           });
         </script>
       </div>
