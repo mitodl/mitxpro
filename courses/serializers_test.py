@@ -70,7 +70,7 @@ def test_base_program_serializer():
             None,
             None,
             None,
-            None,
+            "",
         ),
     ],
 )
@@ -199,7 +199,7 @@ def test_base_course_serializer():
             None,
             None,
             None,
-            None,
+            "",
         ),
     ],
 )
@@ -296,7 +296,7 @@ def test_serialize_course(
             "external_marketing_url": external_marketing_url if course_page else None,
             "marketing_hubspot_form_id": marketing_hubspot_form_id
             if course_page
-            else None,
+            else "",
             "platform": course.platform.name,
         },
     )
