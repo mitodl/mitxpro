@@ -178,7 +178,7 @@
 
       &:hover {
         text-decoration: none;
-        background: #f9f2f3;
+        background: $close-hover-background;
 
       }
     }
@@ -204,9 +204,7 @@
     padding: 19px 25px;
     width: 91px;
     height: 58px;
-    font-family: 'Rajdhani';
     font-style: normal;
-    font-weight: 700 !important;
     font-size: 16px !important;
     line-height: 20px !important;
     align-items: center;
@@ -218,26 +216,25 @@
     border-radius: 5px;
 
     &:hover {
-      background: #f9f2f3;
+      background: $close-hover-background;
     }
   }
 
 }
 
 .signup-dialog {
+  text-align: center;
+  line-height: 26px;
+
   h2 {
     font-weight: 700;
     font-size: 26px;
-    line-height: 26px;
-    text-align: center;
     color: $primary;
   }
 
   p {
     font-weight: 500;
     font-size: 20px;
-    line-height: 26px;
-    text-align: center;
   }
 }
 

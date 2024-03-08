@@ -1,59 +1,59 @@
 {% if page.marketing_hubspot_form_id and not enrolled %}
-<a data-toggle="modal" class="keep-me-updated  enroll-now" href="#signup-modal-{{unique_identifier}}">
-    Keep me updated
+<a data-toggle="modal" class="keep-me-updated enroll-now" href="#signup-modal-{{unique_identifier}}">
+  Keep me updated
 </a>
 
 <div class="modal fade" id="signup-modal-{{unique_identifier}}" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content modal-content-signup">
-            <div class="modal-body">
-                <div class="container no-gutters px-0">
-                    <div class="d-flex flex-row-reverse">
-                        <a class="text-dark close"
-                           data-dismiss="modal"><span class="material-icons" data-icon="cancel"
-                                                      aria-hidden="true"></span></a>
-                    </div>
-                </div>
-                <div class="content-container">
-                    <div class="container px-4 signup-dialog">
-                        <div class="py-2">
-                            <h2 class="modal-title text-uppercase">Keep me updated</h2>
-                        </div>
-                        <div>
-                            <p>Not ready yet? No worries, get emailed on course updates, course schedules and more!</p>
-                        </div>
-                    </div>
-                    <div class="container" id="marketing-hubspot-form-{{unique_identifier}}">
-                    </div>
-                </div>
-            </div>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-content-signup">
+      <div class="modal-body">
+        <div class="container no-gutters px-0">
+          <div class="d-flex flex-row-reverse">
+            <a class="text-dark close" data-dismiss="modal">
+              <span class="material-icons" data-icon="cancel" aria-hidden="true"></span>
+            </a>
+          </div>
         </div>
+        <div class="content-container">
+          <div class="container px-4 signup-dialog">
+            <div class="py-2">
+              <h2 class="modal-title text-uppercase">Keep me updated</h2>
+            </div>
+            <div>
+              <p>Not ready yet? No worries, get emailed on course updates, course schedules and more!</p>
+            </div>
+          </div>
+          <div class="container" id="marketing-hubspot-form-{{unique_identifier}}">
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
-<div class="modal fade"  id="confirmation-modal-{{unique_identifier}}" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content modal-content-signup">
-            <div class="modal-body">
-                <div class="container no-gutters px-0">
-                    <div class="d-flex flex-row-reverse">
-                        <a class="text-dark close"
-                           data-dismiss="modal"><span class="material-icons" data-icon="cancel"
-                                                      aria-hidden="true"></span></a>
-                    </div>
-                </div>
-                <div class="container px-2 signup-dialog">
-                    <div class="mb-5">
-                        <h2 class="modal-title text-uppercase">Got it! thanks</h2>
-                    </div>
-                    <div class="mb-5">
-                        <p>Our Team will connect with you soon.</p>
-                    </div>
-                    <div><span class="close" data-dismiss="modal">Close</span></div>
-                </div>
-            </div>
+<div class="modal fade" id="confirmation-modal-{{unique_identifier}}" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-content-signup">
+      <div class="modal-body">
+        <div class="container no-gutters px-0">
+          <div class="d-flex flex-row-reverse">
+            <a class="text-dark close" data-dismiss="modal">
+              <span class="material-icons" data-icon="cancel" aria-hidden="true"></span>
+            </a>
+          </div>
         </div>
+        <div class="container px-2 signup-dialog">
+          <div class="mb-5">
+            <h2 class="modal-title text-uppercase">Got it! thanks.</h2>
+          </div>
+          <div class="mb-5">
+            <p>Our Team will connect with you soon.</p>
+          </div>
+          <div><span class="close" data-dismiss="modal">Close</span></div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!--[if lte IE 8]>
@@ -61,34 +61,34 @@
 <![endif]-->
 <script defer charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2.js"></script>
 <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        function renderForm() {
-            if (typeof hbspt !== 'undefined') {
-                hbspt.forms.create({
-                    portalId: "{{ hubspot_portal_id | safe }}",
-                    formId: "{{ page.marketing_hubspot_form_id  | safe }}",
-                    target: "#marketing-hubspot-form-{{unique_identifier}}",
-                    onFormSubmitted: function($form, data) {
-                        if (!data.redirectUrl) {
-                            if ('firstname' in data.submissionValues) {
-                                $('#confirmation-modal-{{unique_identifier}} .modal-title')
-                                    .text('Got it! Thanks, ' + data.submissionValues.firstname);
-                            }
-                            $('#signup-modal-{{unique_identifier}}').modal('hide');
-                            $('#confirmation-modal-{{unique_identifier}}').modal('show');
-                            resetForm();
-                        }
-                    }
-                });
+  document.addEventListener('DOMContentLoaded', function() {
+    function renderForm() {
+      if (typeof hbspt !== 'undefined') {
+        hbspt.forms.create({
+          portalId: "{{ hubspot_portal_id | safe }}",
+          formId: "{{ page.marketing_hubspot_form_id  | safe }}",
+          target: "#marketing-hubspot-form-{{unique_identifier}}",
+          onFormSubmitted: function($form, data) {
+            if (!data.redirectUrl) {
+              if ('firstname' in data.submissionValues) {
+                $('#confirmation-modal-{{unique_identifier}} .modal-title')
+                    .text('Got it! Thanks, ' + data.submissionValues.firstname + '.');
+              }
+              $('#signup-modal-{{unique_identifier}}').modal('hide');
+              $('#confirmation-modal-{{unique_identifier}}').modal('show');
+              resetForm();
             }
-        }
+          }
+        });
+      }
+    }
 
-        function resetForm() {
-            $('#marketing-hubspot-form-{{unique_identifier}}').html('');
-            renderForm();
-        }
+    function resetForm() {
+      $('#marketing-hubspot-form-{{unique_identifier}}').html('');
+      renderForm();
+    }
 
-        renderForm();
-    });
+    renderForm();
+  });
 </script>
 {% endif %}

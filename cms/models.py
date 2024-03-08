@@ -875,9 +875,8 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     )
     marketing_hubspot_form_id = models.CharField(
         max_length=50,
-        null=True,
         blank=True,
-        help_text="Enter the HubSpot form ID associated with program/course page (optional).",
+        help_text="The HubSpot form ID associated with the program/course page.",
     )
     catalog_details = RichTextField(
         blank=True,
