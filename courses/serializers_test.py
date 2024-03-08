@@ -296,7 +296,7 @@ def test_serialize_course(
             "external_marketing_url": external_marketing_url if course_page else None,
             "marketing_hubspot_form_id": marketing_hubspot_form_id
             if course_page
-            else "",
+            else None,
             "platform": course.platform.name,
         },
     )
