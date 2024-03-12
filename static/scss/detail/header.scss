@@ -239,27 +239,6 @@
   .close {
     opacity: 1;
   }
-
-  span.close {
-    padding: 19px 25px;
-    width: 91px;
-    height: 58px;
-    font-style: normal;
-    font-size: 16px !important;
-    line-height: 20px !important;
-    align-items: center;
-    text-transform: uppercase;
-
-    color: $primary;
-    background: $white;
-    border: 1px solid $primary;
-    border-radius: 5px;
-
-    &:hover {
-      background: $close-hover-background;
-      }
-  }
-
 }
 
 .signup-dialog {
