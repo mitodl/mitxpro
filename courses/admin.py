@@ -74,15 +74,19 @@ class CourseRunAdminForm(forms.ModelForm):
 
     class Meta:
         model = CourseRun
-        fields = '__all__'
+        fields = "__all__"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.instance.pk:
             start_date = now_in_utc()
             end_date = start_date + timedelta(days=1)
-            self.initial['start_date'] = start_date.replace(hour=23, minute=59, second=0, microsecond=0)
-            self.initial['end_date'] = end_date.replace(hour=23, minute=59, second=0, microsecond=0)
+            self.initial["start_date"] = start_date.replace(
+                hour=23, minute=59, second=0, microsecond=0
+            )
+            self.initial["end_date"] = end_date.replace(
+                hour=23, minute=59, second=0, microsecond=0
+            )
 
 
 @admin.register(CourseRun)
