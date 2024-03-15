@@ -6,8 +6,6 @@ import { Modal, ModalHeader, ModalBody } from "reactstrap"
 
 import Markdown from "../Markdown"
 
-import { ZendeskAPI } from "react-zendesk"
-
 import { formatErrors, formatSuccessMessage } from "../../lib/form"
 import {
   calculateDiscount,
