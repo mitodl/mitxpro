@@ -1631,6 +1631,13 @@ def test_get_product_from_querystring_id(mocker, qs_product_id, exp_text_id):
         patched_get_product.assert_called_once_with(exp_text_id)
 
 
+class FakeRequest:
+    """Simple class to fake a request for testing - don't need much"""
+
+    user = AnonymousUser
+    META = {"REMOTE_ADDR": ""}
+
+
 @pytest.mark.parametrize(
     "is_client_ip_taxable,is_client_location_taxable",
     [
@@ -1651,12 +1658,6 @@ def test_tax_calc_from_ip(user, is_client_ip_taxable, is_client_location_taxable
     """
 
     settings.ECOMMERCE_FORCE_PROFILE_COUNTRY = False
-
-    class FakeRequest:
-        """Simple class to fake a request for testing - don't need much"""
-
-        user = AnonymousUser
-        META = {"REMOTE_ADDR": ""}
 
     request = FakeRequest()
     request.user = user
@@ -1715,3 +1716,44 @@ def test_tax_calc_from_ip(user, is_client_ip_taxable, is_client_location_taxable
     else:
         assert applicable_tax[0] == taxrate.tax_rate
         assert applicable_tax[2] == 1000 + (1000 * Decimal(taxrate.tax_rate / 100))
+
+
+def test_tax_country_and_ip_mismatch(user):
+    """
+    Test the result when the learner's country and the IP tax rates don't match.
+
+    If both the country the learner's profile is set to and the country
+    identified by the IP address the learner is using charge tax, but _are not_
+    the _same_ country, we should use the tax rate for the IP address.
+    """
+
+    settings.ECOMMERCE_FORCE_PROFILE_COUNTRY = False
+
+    request = FakeRequest()
+    request.user = user
+
+    taxable_geoname = GeonameFactory.create()
+    taxable_netblock = NetBlockIPv4Factory.create()
+    taxable_netblock.geoname_id = taxable_geoname.geoname_id
+    taxable_netblock.save()
+
+    TaxRateFactory.create(country_code=user.legal_address.country)
+    ip_tax_rate = TaxRateFactory.create(country_code=taxable_geoname.country_iso_code)
+
+    request.META["REMOTE_ADDR"] = str(
+        ipaddress.ip_address(
+            taxable_netblock.decimal_ip_end
+            - int(
+                (taxable_netblock.decimal_ip_end - taxable_netblock.decimal_ip_start)
+                / 2
+            )
+        )
+    )
+
+    applicable_tax = calculate_tax(request, 1000)
+
+    assert applicable_tax == (
+        ip_tax_rate.tax_rate,
+        ip_tax_rate.country_code,
+        1000 + (1000 * Decimal(ip_tax_rate.tax_rate / 100)),
+    )
