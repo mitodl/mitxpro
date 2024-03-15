@@ -93,11 +93,7 @@ def determine_visitor_country(request: HttpRequest or None) -> str or None:
         The resolved country, or None
     """
 
-    if (
-        not request
-        or not request.user.is_authenticated
-        or request.user.legal_address.country is None
-    ):
+    if not request or not request.user.is_authenticated:
         return None
 
     profile_country_code = (
@@ -110,14 +106,9 @@ def determine_visitor_country(request: HttpRequest or None) -> str or None:
     try:
         client_ip, _ = get_client_ip(request)
     except TypeError:
-        return None
+        return profile_country_code
 
-    ip_country_code = ip_to_country_code(client_ip)
-
-    if ip_country_code == profile_country_code:
-        return ip_country_code
-
-    return None
+    return ip_to_country_code(client_ip) or profile_country_code
 
 
 def calculate_tax(
