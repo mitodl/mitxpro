@@ -1631,13 +1631,21 @@ def test_get_product_from_querystring_id(mocker, qs_product_id, exp_text_id):
         patched_get_product.assert_called_once_with(exp_text_id)
 
 
-@pytest.mark.parametrize("applicable_rate_and_user_country_match", [True, False])
-def test_tax_calc_from_ip(user, applicable_rate_and_user_country_match):
+@pytest.mark.parametrize(
+    "is_client_ip_taxable,is_client_location_taxable",
+    [
+        [True, True],
+        [True, False],
+        [False, True],
+        [False, False],
+    ],
+)
+def test_tax_calc_from_ip(user, is_client_ip_taxable, is_client_location_taxable):
     """
     Tests calculation of the tax rate. Here's the truth table for this:
 
                                         IP in country       IP not in country
-    Tax rate country = user's country   Tax assessed        No tax assessed
+    Tax rate country = user's country   Tax assessed        Tax assessed
     Tax rate country != user's country  Tax assessed        No tax assessed
 
     """
@@ -1653,49 +1661,57 @@ def test_tax_calc_from_ip(user, applicable_rate_and_user_country_match):
     request = FakeRequest()
     request.user = user
 
-    if applicable_rate_and_user_country_match:
-        country_code = user.legal_address.country
-    else:
-        country_code = FAKE.country_code()
+    second_country_code = user.legal_address.country
 
-        while country_code != user.legal_address.country:
-            country_code = FAKE.country_code()
+    if not (is_client_ip_taxable or is_client_location_taxable):
+        second_country_code = FAKE.country_code()
 
-    taxrate = TaxRateFactory.create(country_code=country_code)
+        while second_country_code == user.legal_address.country:
+            second_country_code = FAKE.country_code()
 
-    applicable_geoname = GeonameFactory.create(country_iso_code=taxrate.country_code)
-    applicable_netblock = NetBlockIPv4Factory.create()
-    applicable_netblock.geoname_id = applicable_geoname.geoname_id
-    applicable_netblock.save()
+    taxrate = TaxRateFactory(
+        country_code=user.legal_address.country
+        if is_client_location_taxable
+        else second_country_code
+    )
 
-    applicable_ip = str(
-        ipaddress.ip_address(
-            applicable_netblock.decimal_ip_end
-            - int(
-                (
-                    applicable_netblock.decimal_ip_end
-                    - applicable_netblock.decimal_ip_start
+    taxable_geoname = GeonameFactory.create(
+        country_iso_code=user.legal_address.country
+        if is_client_ip_taxable
+        else second_country_code
+    )
+    taxable_netblock = NetBlockIPv4Factory.create()
+    taxable_netblock.geoname_id = taxable_geoname.geoname_id
+    taxable_netblock.save()
+
+    if is_client_ip_taxable:
+        request.META["REMOTE_ADDR"] = str(
+            ipaddress.ip_address(
+                taxable_netblock.decimal_ip_end
+                - int(
+                    (
+                        taxable_netblock.decimal_ip_end
+                        - taxable_netblock.decimal_ip_start
+                    )
+                    / 2
                 )
-                / 2
             )
         )
-    )
+    else:
+        request.META["REMOTE_ADDR"] = str(
+            ipaddress.ip_address(
+                taxable_netblock.decimal_ip_start - 35
+                if taxable_netblock.decimal_ip_start > 35
+                else taxable_netblock.decimal_ip_end + 35
+            )
+        )
 
-    request.META["REMOTE_ADDR"] = applicable_ip
+    # User is within a taxable IP block, so we should have taxes regardless
     applicable_tax = calculate_tax(request, 1000)
 
-    assert applicable_tax[0] == taxrate.tax_rate
-    assert applicable_tax[2] == 1000 + (1000 * Decimal(taxrate.tax_rate / 100))
-
-    nonapplicable_ip = str(
-        ipaddress.ip_address(
-            applicable_netblock.decimal_ip_start - 35
-            if applicable_netblock.decimal_ip_start > 35
-            else applicable_netblock.decimal_ip_end + 35
-        )
-    )
-
-    request.META["REMOTE_ADDR"] = nonapplicable_ip
-    nonapplicable_tax = calculate_tax(request, 1000)
-
-    assert nonapplicable_tax == (0, "", 1000)
+    if not is_client_ip_taxable and not is_client_location_taxable:
+        assert applicable_tax[0] == 0
+        assert applicable_tax[2] == 1000
+    else:
+        assert applicable_tax[0] == taxrate.tax_rate
+        assert applicable_tax[2] == 1000 + (1000 * Decimal(taxrate.tax_rate / 100))
