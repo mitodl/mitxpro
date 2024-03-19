@@ -1631,71 +1631,172 @@ def test_get_product_from_querystring_id(mocker, qs_product_id, exp_text_id):
         patched_get_product.assert_called_once_with(exp_text_id)
 
 
-@pytest.mark.parametrize("applicable_rate_and_user_country_match", [True, False])
-def test_tax_calc_from_ip(user, applicable_rate_and_user_country_match):
+class FakeRequest:
+    """Simple class to fake a request for testing - don't need much"""
+
+    user = AnonymousUser
+    META = {"REMOTE_ADDR": ""}
+
+
+@pytest.mark.parametrize(
+    "is_client_ip_taxable,is_client_location_taxable",
+    [
+        [True, True],
+        [True, False],
+        [False, True],
+        [False, False],
+    ],
+)
+def test_tax_calc_from_ip(user, is_client_ip_taxable, is_client_location_taxable):
     """
     Tests calculation of the tax rate. Here's the truth table for this:
 
                                         IP in country       IP not in country
-    Tax rate country = user's country   Tax assessed        No tax assessed
+    Tax rate country = user's country   Tax assessed        Tax assessed
     Tax rate country != user's country  Tax assessed        No tax assessed
 
     """
 
     settings.ECOMMERCE_FORCE_PROFILE_COUNTRY = False
 
-    class FakeRequest:
-        """Simple class to fake a request for testing - don't need much"""
+    request = FakeRequest()
+    request.user = user
 
-        user = AnonymousUser
-        META = {"REMOTE_ADDR": ""}
+    second_country_code = user.legal_address.country
+
+    if not (is_client_ip_taxable or is_client_location_taxable):
+        second_country_code = FAKE.country_code()
+
+        while second_country_code == user.legal_address.country:
+            second_country_code = FAKE.country_code()
+
+    taxrate = TaxRateFactory(
+        country_code=user.legal_address.country
+        if is_client_location_taxable
+        else second_country_code
+    )
+
+    taxable_geoname = GeonameFactory.create(
+        country_iso_code=user.legal_address.country
+        if is_client_ip_taxable
+        else second_country_code
+    )
+    taxable_netblock = NetBlockIPv4Factory.create()
+    taxable_netblock.geoname_id = taxable_geoname.geoname_id
+    taxable_netblock.save()
+
+    if is_client_ip_taxable:
+        request.META["REMOTE_ADDR"] = str(
+            ipaddress.ip_address(
+                taxable_netblock.decimal_ip_end
+                - int(
+                    (
+                        taxable_netblock.decimal_ip_end
+                        - taxable_netblock.decimal_ip_start
+                    )
+                    / 2
+                )
+            )
+        )
+    else:
+        request.META["REMOTE_ADDR"] = str(
+            ipaddress.ip_address(
+                taxable_netblock.decimal_ip_start - 35
+                if taxable_netblock.decimal_ip_start > 35
+                else taxable_netblock.decimal_ip_end + 35
+            )
+        )
+
+    # User is within a taxable IP block, so we should have taxes regardless
+    applicable_tax = calculate_tax(request, 1000)
+
+    if not is_client_ip_taxable and not is_client_location_taxable:
+        assert applicable_tax[0] == 0
+        assert applicable_tax[2] == 1000
+    else:
+        assert applicable_tax[0] == taxrate.tax_rate
+        assert applicable_tax[2] == 1000 + (1000 * Decimal(taxrate.tax_rate / 100))
+
+
+def test_tax_country_and_ip_mismatch(user):
+    """
+    Test the result when the learner's country and the IP tax rates don't match.
+
+    If both the country the learner's profile is set to and the country
+    identified by the IP address the learner is using charge tax, but _are not_
+    the _same_ country, we should use the tax rate for the IP address.
+    """
+
+    settings.ECOMMERCE_FORCE_PROFILE_COUNTRY = False
 
     request = FakeRequest()
     request.user = user
 
-    if applicable_rate_and_user_country_match:
-        country_code = user.legal_address.country
-    else:
-        country_code = FAKE.country_code()
+    taxable_geoname = GeonameFactory.create()
+    taxable_netblock = NetBlockIPv4Factory.create()
+    taxable_netblock.geoname_id = taxable_geoname.geoname_id
+    taxable_netblock.save()
 
-        while country_code != user.legal_address.country:
-            country_code = FAKE.country_code()
+    TaxRateFactory.create(country_code=user.legal_address.country)
+    ip_tax_rate = TaxRateFactory.create(country_code=taxable_geoname.country_iso_code)
 
-    taxrate = TaxRateFactory.create(country_code=country_code)
-
-    applicable_geoname = GeonameFactory.create(country_iso_code=taxrate.country_code)
-    applicable_netblock = NetBlockIPv4Factory.create()
-    applicable_netblock.geoname_id = applicable_geoname.geoname_id
-    applicable_netblock.save()
-
-    applicable_ip = str(
+    request.META["REMOTE_ADDR"] = str(
         ipaddress.ip_address(
-            applicable_netblock.decimal_ip_end
+            taxable_netblock.decimal_ip_end
             - int(
-                (
-                    applicable_netblock.decimal_ip_end
-                    - applicable_netblock.decimal_ip_start
-                )
+                (taxable_netblock.decimal_ip_end - taxable_netblock.decimal_ip_start)
                 / 2
             )
         )
     )
 
-    request.META["REMOTE_ADDR"] = applicable_ip
     applicable_tax = calculate_tax(request, 1000)
 
-    assert applicable_tax[0] == taxrate.tax_rate
-    assert applicable_tax[2] == 1000 + (1000 * Decimal(taxrate.tax_rate / 100))
+    assert applicable_tax == (
+        ip_tax_rate.tax_rate,
+        ip_tax_rate.country_code,
+        1000 + (1000 * Decimal(ip_tax_rate.tax_rate / 100)),
+    )
 
-    nonapplicable_ip = str(
+
+def test_tax_country_and_no_ip_tax(user):
+    """
+    Test the result when the learner's country has tax assessed, but their IP
+    does not.
+
+    In this case, we should charge based on the learner's profile-specified
+    country. (In practice, the MaxMind DB has mappings for all non-private IP
+    ranges, so there will be a lot of valid country matches that don't have
+    corresponding TaxRate records.)
+    """
+
+    settings.ECOMMERCE_FORCE_PROFILE_COUNTRY = False
+
+    request = FakeRequest()
+    request.user = user
+    location_tax_rate = TaxRateFactory.create(country_code=user.legal_address.country)
+
+    ip_country_code = user.legal_address.country
+
+    while ip_country_code == user.legal_address.country:
+        ip_country_code = FAKE.country_code()
+
+    ip_geoname = GeonameFactory.create(country_iso_code=ip_country_code)
+    ip_netblock = NetBlockIPv4Factory.create()
+    ip_netblock.geoname_id = ip_geoname.geoname_id
+    ip_netblock.save()
+
+    request.META["REMOTE_ADDR"] = str(
         ipaddress.ip_address(
-            applicable_netblock.decimal_ip_start - 35
-            if applicable_netblock.decimal_ip_start > 35
-            else applicable_netblock.decimal_ip_end + 35
+            ip_netblock.decimal_ip_end
+            - int((ip_netblock.decimal_ip_end - ip_netblock.decimal_ip_start) / 2)
         )
     )
 
-    request.META["REMOTE_ADDR"] = nonapplicable_ip
-    nonapplicable_tax = calculate_tax(request, 1000)
+    applicable_tax = calculate_tax(request, 1000)
 
-    assert nonapplicable_tax == (0, "", 1000)
+    assert applicable_tax == (
+        location_tax_rate.tax_rate,
+        location_tax_rate.country_code,
+        1000 + (1000 * Decimal(location_tax_rate.tax_rate / 100)),
+    )
