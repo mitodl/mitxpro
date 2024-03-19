@@ -1757,3 +1757,46 @@ def test_tax_country_and_ip_mismatch(user):
         ip_tax_rate.country_code,
         1000 + (1000 * Decimal(ip_tax_rate.tax_rate / 100)),
     )
+
+
+def test_tax_country_and_no_ip_tax(user):
+    """
+    Test the result when the learner's country has tax assessed, but their IP
+    does not.
+
+    In this case, we should charge based on the learner's profile-specified
+    country. (In practice, the MaxMind DB has mappings for all non-private IP
+    ranges, so there will be a lot of valid country matches that don't have
+    corresponding TaxRate records.)
+    """
+
+    settings.ECOMMERCE_FORCE_PROFILE_COUNTRY = False
+
+    request = FakeRequest()
+    request.user = user
+    location_tax_rate = TaxRateFactory.create(country_code=user.legal_address.country)
+
+    ip_country_code = user.legal_address.country
+
+    while ip_country_code == user.legal_address.country:
+        ip_country_code = FAKE.country_code()
+
+    ip_geoname = GeonameFactory.create(country_iso_code=ip_country_code)
+    ip_netblock = NetBlockIPv4Factory.create()
+    ip_netblock.geoname_id = ip_geoname.geoname_id
+    ip_netblock.save()
+
+    request.META["REMOTE_ADDR"] = str(
+        ipaddress.ip_address(
+            ip_netblock.decimal_ip_end
+            - int((ip_netblock.decimal_ip_end - ip_netblock.decimal_ip_start) / 2)
+        )
+    )
+
+    applicable_tax = calculate_tax(request, 1000)
+
+    assert applicable_tax == (
+        location_tax_rate.tax_rate,
+        location_tax_rate.country_code,
+        1000 + (1000 * Decimal(location_tax_rate.tax_rate / 100)),
+    )

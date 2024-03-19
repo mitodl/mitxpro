@@ -105,10 +105,14 @@ def determine_visitor_country(request: HttpRequest or None) -> str or None:
 
     try:
         client_ip, _ = get_client_ip(request)
+        ip_country_code = ip_to_country_code(client_ip)
+
+        if TaxRate.objects.filter(country_code=ip_country_code).exists():
+            return ip_country_code
+
+        return profile_country_code
     except TypeError:
         return profile_country_code
-
-    return ip_to_country_code(client_ip) or profile_country_code
 
 
 def calculate_tax(
