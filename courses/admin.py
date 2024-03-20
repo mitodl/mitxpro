@@ -4,7 +4,6 @@ Admin site bindings for profiles
 
 from datetime import timedelta
 
-from django import forms
 from django.contrib import admin
 from django.db import models
 from django.forms import TextInput
@@ -69,31 +68,11 @@ class CourseAdmin(admin.ModelAdmin):
         return obj.program.readable_id if obj.program is not None else None
 
 
-class CourseRunAdminForm(forms.ModelForm):
-    """Admin form for CourseRun"""
-
-    class Meta:
-        model = CourseRun
-        fields = "__all__"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if not self.instance.pk:
-            start_date = now_in_utc()
-            end_date = start_date + timedelta(days=1)
-            self.initial["start_date"] = start_date.replace(
-                hour=23, minute=59, second=0, microsecond=0
-            )
-            self.initial["end_date"] = end_date.replace(
-                hour=23, minute=59, second=0, microsecond=0
-            )
-
-
 @admin.register(CourseRun)
 class CourseRunAdmin(TimestampedModelAdmin):
     """Admin for CourseRun"""
 
-    form = CourseRunAdminForm
+    model = CourseRun
     search_fields = ["title", "courseware_id"]
     list_display = (
         "id",
@@ -109,6 +88,15 @@ class CourseRunAdmin(TimestampedModelAdmin):
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
     }
+
+    def get_changeform_initial_data(self, request):
+        initial = super().get_changeform_initial_data(request)
+        start_date = now_in_utc().replace(
+            hour=23, minute=59, second=0, microsecond=0
+        )
+        initial["start_date"] = start_date
+        initial["end_date"] = start_date + timedelta(days=1)
+        return initial
 
 
 @admin.register(ProgramEnrollment)
