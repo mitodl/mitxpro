@@ -91,9 +91,7 @@ class CourseRunAdmin(TimestampedModelAdmin):
 
     def get_changeform_initial_data(self, request):
         initial = super().get_changeform_initial_data(request)
-        start_date = now_in_utc().replace(
-            hour=23, minute=59, second=0, microsecond=0
-        )
+        start_date = now_in_utc().replace(hour=23, minute=59, second=0, microsecond=0)
         initial["start_date"] = start_date
         initial["end_date"] = start_date + timedelta(days=1)
         return initial
