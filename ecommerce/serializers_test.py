@@ -231,6 +231,8 @@ def test_serialize_basket(basket_and_agreement, mock_context, is_live, mocker):
             "tax_rate": 0,
             "tax_rate_name": "VAT",
             "active": True,
+            "tax_identifier": "",
+            "tax_identifier_name": "GSTIN",
         },
     }
 
