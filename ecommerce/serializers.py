@@ -27,7 +27,7 @@ from ecommerce.api import (
 )
 from ecommerce.constants import CYBERSOURCE_CARD_TYPES, DISCOUNT_TYPES
 from ecommerce.models import Basket, TaxRate
-from ecommerce.utils import validate_amount
+from ecommerce.utils import validate_amount, CouponUtils
 from mitxpro.serializers import WriteableSerializerMethodField
 from mitxpro.utils import now_in_utc
 from users.serializers import ExtendedLegalAddressSerializer
@@ -875,7 +875,7 @@ class PromoCouponSerializer(BaseCouponSerializer):
     num_coupon_codes = serializers.IntegerField(default=1, required=False)
     coupon_code = serializers.CharField(
         max_length=50,
-        validators=[UniqueValidator(queryset=models.Coupon.objects.all())],
+        validators=[CouponUtils.validate_unique_coupon_code],
     )
     payment_transaction = serializers.CharField(
         max_length=256, allow_null=True, required=False, allow_blank=True

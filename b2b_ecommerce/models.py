@@ -16,6 +16,7 @@ from ecommerce.models import (
     Product,
     ProductVersion,
 )
+from ecommerce.utils import CouponUtils
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 
@@ -66,7 +67,11 @@ class B2BCoupon(TimestampedModel, AuditableModel):
     """
 
     name = models.TextField()
-    coupon_code = models.CharField(max_length=50)
+    coupon_code = models.CharField(
+        max_length=50,
+        unique=True,
+        validators=[CouponUtils.validate_unique_coupon_code],
+    )
     discount_percent = models.DecimalField(
         decimal_places=5,
         max_digits=20,

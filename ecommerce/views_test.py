@@ -1150,7 +1150,7 @@ def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
             "At least one product must be selected or coupon should be global.",
         ],
         ["name", "AlreadyExists", "This field must be unique."],
-        ["coupon_code", "AlreadyExists", "This field must be unique."],
+        ["coupon_code", "AlreadyExists", "Coupon code already exists in the platform."],
     ],
 )
 @pytest.mark.parametrize(

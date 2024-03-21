@@ -14,7 +14,7 @@ from typing import Iterable, NamedTuple, Optional
 from urllib.parse import quote_plus, urljoin
 
 from django.conf import settings
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Count, F, Max, Prefetch, Q, Subquery
 from django.http import HttpRequest
 from django.urls import reverse
@@ -1322,7 +1322,27 @@ def create_coupons(
         )
         for _ in range(num_coupon_codes)
     ]
-    coupon_objs = Coupon.objects.bulk_create(coupons)
+
+    try:
+        with transaction.atomic():
+            coupon_objs = Coupon.objects.bulk_create(coupons)
+    except IntegrityError:
+        log.warning(
+            "Falling back to create Coupons for coupon payment {} and company {}".format(
+                name, company_id
+            )
+        )
+
+        new_coupon_codes = [coupon.coupon_code for coupon in coupons]
+        existing_coupon_codes = Coupon.objects.filter(
+            coupon_code__in=new_coupon_codes
+        ).values_list("coupon_code", flat=True)
+        if existing_coupon_codes:
+            for coupon in coupons:
+                if coupon.coupon_code in existing_coupon_codes:
+                    coupon.coupon_code = uuid.uuid4().hex
+        coupon_objs = Coupon.objects.bulk_create(coupons)
+
     versions = [
         CouponVersion(coupon=obj, payment_version=payment_version)
         for obj in coupon_objs

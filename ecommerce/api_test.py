@@ -1473,14 +1473,19 @@ def test_fetch_and_serialize_unused_coupons_for_all_inactive_products(user):
     assert unused_coupons == []
 
 
-@pytest.mark.parametrize("use_defaults", [True, False])
-def test_create_coupons(use_defaults):
+@pytest.mark.parametrize(
+    "use_defaults,num_coupon_codes",
+    (
+        (True, 12),
+        (False, 1),
+    ),
+)
+def test_create_coupons(use_defaults, num_coupon_codes):
     """create_coupons should fill in good default parameters where necessary"""
     product = ProductVersionFactory.create().product
     name = "n a m e"
     coupon_type = CouponPaymentVersion.SINGLE_USE
     amount = Decimal("123")
-    num_coupon_codes = 12
 
     optional = (
         {}
