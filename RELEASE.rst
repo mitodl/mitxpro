@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.140.1
+---------------
+
+- Update the tax calculation rules to charge more aggressively (#2914)
+- fix(deps): update dependency django to v4.2.11 [security]
+
 Version 0.140.0 (Released March 26, 2024)
 ---------------
 
