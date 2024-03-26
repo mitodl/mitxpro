@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.140.0
+Version 0.140.0 (Released March 26, 2024)
 ---------------
 
 - chore: Upgrade Django to 4.2 (#2867)
