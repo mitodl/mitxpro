@@ -155,6 +155,71 @@
       font-weight: 400;
     }
   }
+
+  .sub-nav-signup-button-block {
+    position: relative;
+    @include media-breakpoint-up(md) {
+      order: 3;
+    }
+
+    .keep-me-updated {
+      display: inline-flex;
+      margin: 0;
+      border-radius: 5px;
+      padding: 15px 25px;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      margin-left: 20px;
+
+      background: $white;
+      border: 1px solid $primary;
+
+      &:hover {
+        text-decoration: none;
+        background: $close-hover-background;
+
+      }
+    }
+  }
+}
+
+.modal-content-signup {
+  position: relative;
+  width: 500px;
+  background: $white;
+  border-radius: 4px;
+  color: $black;
+
+  .container {
+    display: block;
+  }
+
+  .close {
+    opacity: 1;
+  }
+}
+
+.signup-dialog {
+  text-align: center;
+  line-height: 26px;
+
+  h2 {
+    font-weight: 700;
+    font-size: 26px;
+    color: $primary;
+  }
+
+  p {
+    font-weight: 500;
+    font-size: 20px;
+  }
+}
+
+.modal-backdrop {
+  // If set the z-index to 'a value > 1019' or it's default, it probably gets overlapped by another stacking context.
+  z-index: 1019;
 }
 
 a.active-block {

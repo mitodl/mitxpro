@@ -84,20 +84,19 @@ def determine_visitor_country(request: HttpRequest or None) -> str or None:
     """
     Determines the country the user is in for tax purposes.
 
-    For this, we require that the user has a country specified and that the IP
-    they're connecting from is assigned to the same country.
+    If the learner's IP geolocates to a location that we assess tax for, this
+    returns that location code. Otherwise, it will return the country code from
+    the learner's profile. (The set of locations that we assess tax for is
+    relatively small so we want to prefer the user's self-reported location,
+    unless they're physically somewhere else that also charges tax.)
 
     Args:
         request (HttpRequest): the current request object
     Returns:
-        The resolved country, or None
+        The resolved country, or the learner's profile country code
     """
 
-    if (
-        not request
-        or not request.user.is_authenticated
-        or request.user.legal_address.country is None
-    ):
+    if not request or not request.user.is_authenticated:
         return None
 
     profile_country_code = (
@@ -109,15 +108,14 @@ def determine_visitor_country(request: HttpRequest or None) -> str or None:
 
     try:
         client_ip, _ = get_client_ip(request)
+        ip_country_code = ip_to_country_code(client_ip)
+
+        if TaxRate.objects.filter(active=True, country_code=ip_country_code).exists():
+            return ip_country_code
+
+        return profile_country_code
     except TypeError:
-        return None
-
-    ip_country_code = ip_to_country_code(client_ip)
-
-    if ip_country_code == profile_country_code:
-        return ip_country_code
-
-    return None
+        return profile_country_code
 
 
 def calculate_tax(

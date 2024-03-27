@@ -35,8 +35,13 @@
           <h1>{{ page.title }}</h1>
           <h2>{{ page.subhead }}</h2>
         </div>
-        <div class="mt-5 mb-5">
-          {% include "partials/enroll_button.html" %}
+        <div class="mt-5 mb-5 navbar navbar-expand-md header-button">
+          <div>
+            {% include "partials/enroll_button.html" %}
+          </div>
+          <div>
+            {% include "partials/keep_me_updated_button.html" with unique_identifier="hero" %}
+          </div>
         </div>
       </div>
       <div class="col-lg-5">

@@ -26,3 +26,4 @@ class VoucherAdmin(admin.ModelAdmin):
         "course_title_input",
     )
     readonly_fields = ("coupon", "product", "enrollment")
+    raw_id_fields = ("user",)

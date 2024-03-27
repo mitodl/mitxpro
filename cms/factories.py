@@ -133,6 +133,7 @@ class ExternalCoursePageFactory(wagtail_factories.PageFactory):
 
     title = factory.Sequence("Test page - External Course {0}".format)
     external_marketing_url = factory.Faker("uri")
+    marketing_hubspot_form_id = factory.Faker("bothify", text="??????????")
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
@@ -161,6 +162,7 @@ class ExternalProgramPageFactory(wagtail_factories.PageFactory):
 
     title = factory.Sequence("Test page - External Program {0}".format)
     external_marketing_url = factory.Faker("uri")
+    marketing_hubspot_form_id = factory.Faker("bothify", text="??????????")
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
