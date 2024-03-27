@@ -78,6 +78,10 @@
     }
   }
 
+  .header-button {
+    padding: 0;
+  }
+
   .action-button {
     font-size: x-large;
     font-weight: 400;
@@ -194,6 +198,27 @@
     text-align: center;
     font-size: 18px;
   }
+
+  .keep-me-updated {
+    display: inline-flex;
+    margin: 0;
+    border-radius: 5px;
+    padding: 20px 40px;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-weight: 700;
+    margin-left: 20px;
+
+    background: $white;
+    border: 1px solid $primary;
+
+    &:hover {
+      // underline is at different levels since we centered the text and checkmark vertically, so it looks strange
+      text-decoration: none;
+      background: $close-hover-background;
+    }
+  }
+
 }
 
 .notifications {
@@ -201,5 +226,33 @@
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
+  }
+}
+
+.modal-content-signup {
+  position: relative;
+  width: 500px;
+  background: $white;
+  border-radius: 4px;
+  color: $black;
+
+  .close {
+    opacity: 1;
+  }
+}
+
+.signup-dialog {
+  text-align: center;
+  line-height: 26px;
+
+  h2 {
+    font-weight: 700;
+    font-size: 26px;
+    color: $primary;
+  }
+
+  p {
+    font-weight: 500;
+    font-size: 20px;
   }
 }

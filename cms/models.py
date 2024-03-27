@@ -873,6 +873,11 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     external_marketing_url = models.URLField(
         null=True, blank=True, help_text="The URL of the external course web page."
     )
+    marketing_hubspot_form_id = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="The HubSpot form ID associated with the program/course page.",
+    )
     catalog_details = RichTextField(
         blank=True,
         help_text="The description shown on the catalog page for this product",
@@ -950,6 +955,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     )
     content_panels = Page.content_panels + [
         FieldPanel("external_marketing_url"),
+        FieldPanel("marketing_hubspot_form_id"),
         FieldPanel("subhead"),
         FieldPanel("video_title"),
         FieldPanel("video_url"),

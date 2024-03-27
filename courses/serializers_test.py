@@ -54,7 +54,7 @@ def test_base_program_serializer():
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_OTHER])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url",
+    "duration, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",
     [
         (
             "2 Months",
@@ -62,6 +62,7 @@ def test_base_program_serializer():
             "http://www.testvideourl.com",
             "2 Test CEUs",
             "https://www.testexternalcourse1.com",
+            "fb4f5b79-test-4972-92c3-test",
         ),
         (
             None,
@@ -69,6 +70,7 @@ def test_base_program_serializer():
             None,
             None,
             None,
+            "",
         ),
     ],
 )
@@ -82,6 +84,7 @@ def test_serialize_program(
     video_url,
     ceus,
     external_marketing_url,
+    marketing_hubspot_form_id,
 ):  # pylint: disable=too-many-arguments,too-many-locals
     """Test Program serialization"""
 
@@ -93,6 +96,7 @@ def test_serialize_program(
         page__time_commitment=time_commitment,
         page__video_url=video_url,
         page__external_marketing_url=external_marketing_url,
+        page__marketing_hubspot_form_id=marketing_hubspot_form_id,
     )
     run1 = CourseRunFactory.create(course__program=program)
     course1 = run1.course
@@ -154,6 +158,7 @@ def test_serialize_program(
             "credits": ceus,
             "is_external": is_external,
             "external_marketing_url": external_marketing_url,
+            "marketing_hubspot_form_id": marketing_hubspot_form_id,
             "platform": program.platform.name,
         },
     )
@@ -178,7 +183,7 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("course_page", [True, False])
 @pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_OTHER])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url",
+    "duration, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",
     [
         (
             "2 Months",
@@ -186,6 +191,7 @@ def test_base_course_serializer():
             "http://www.testvideourl.com",
             "2 Test CEUs",
             "http://www.testexternalmarketingurl.com",
+            "fb4f5b79-test-4972-92c3-test",
         ),
         (
             None,
@@ -193,6 +199,7 @@ def test_base_course_serializer():
             None,
             None,
             None,
+            "",
         ),
     ],
 )
@@ -208,6 +215,7 @@ def test_serialize_course(
     video_url,
     ceus,
     external_marketing_url,
+    marketing_hubspot_form_id,
 ):  # pylint: disable=too-many-arguments,too-many-locals
     """Test Course serialization"""
     now = datetime.now(tz=timezone.utc)
@@ -227,6 +235,7 @@ def test_serialize_course(
             page__video_url=video_url,
             page__certificate_page__CEUs=ceus,
             page__external_marketing_url=external_marketing_url,
+            page__marketing_hubspot_form_id=marketing_hubspot_form_id,
         )
     else:
         course = CourseFactory.create(page=None, is_external=is_external)
@@ -285,6 +294,9 @@ def test_serialize_course(
             "credits": ceus if course_page else None,
             "is_external": is_external,
             "external_marketing_url": external_marketing_url if course_page else None,
+            "marketing_hubspot_form_id": marketing_hubspot_form_id
+            if course_page
+            else None,
             "platform": course.platform.name,
         },
     )
