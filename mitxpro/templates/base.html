@@ -78,21 +78,5 @@
         });
         </script>
     {% endblock %}
-    {% if zendesk_config.help_widget_enabled and not request.path|startswith:'/certificate/' %}
-    <script type="text/javascript">
-      document.addEventListener('DOMContentLoaded', function() {
-        if (typeof zE !== 'undefined') {
-          zE('webWidget', 'prefill', {
-            name: {
-                value: '{{user.name}}',
-            },
-            email: {
-                value: '{{user.email}}',
-            }
-          });
-        }
-      });
-    </script>
-    {% endif %}
   </body>
 </html>

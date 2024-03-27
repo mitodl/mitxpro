@@ -6,8 +6,6 @@ import { Modal, ModalHeader, ModalBody } from "reactstrap"
 
 import Markdown from "../Markdown"
 
-import { ZendeskAPI } from "react-zendesk"
-
 import { formatErrors, formatSuccessMessage } from "../../lib/form"
 import {
   calculateDiscount,
@@ -249,12 +247,6 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
     }
 
     const dataConsent = basket.data_consents[0]
-    if (SETTINGS.zendesk_config.help_widget_enabled) {
-      ZendeskAPI("webWidget", "helpCenter:setSuggestions", {
-        search: item.content_title
-      })
-    }
-
     return (
       <React.Fragment>
         <Form className="checkout-page container">
