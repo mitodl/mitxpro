@@ -75,7 +75,7 @@ from cms.constants import (
     WEBINAR_HEADER_BANNER,
     WEBINAR_INDEX_SLUG,
 )
-from cms.forms import CertificatePageForm
+from cms.forms import CertificatePageForm, CoursePageForm, ProgramPageForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
 from courses.models import (
     Course,
@@ -1171,7 +1171,10 @@ class ProgramProductPage(ProductPage):
     objects = ProgramProductPageManager()
     parent_page_types = ["ProgramIndexPage"]
 
-    content_panels = [FieldPanel("program")] + ProductPage.content_panels
+    content_panels = (
+        [FieldPanel("program")] + ProductPage.content_panels + [FieldPanel("price")]
+    )
+    base_form_class = ProgramPageForm
 
     program = models.OneToOneField(
         "courses.Program",
@@ -1303,10 +1306,23 @@ class CourseProductPage(ProductPage):
 
     parent_page_types = ["CourseIndexPage"]
 
-    content_panels = [
-        FieldPanel("course"),
-        FieldPanel("topics"),
-    ] + ProductPage.content_panels
+    content_panels = (
+        [
+            FieldPanel("course"),
+            FieldPanel("topics"),
+        ]
+        + ProductPage.content_panels
+        + [
+            MultiFieldPanel(
+                [
+                    FieldPanel("course_run", widget=forms.Select),
+                    FieldPanel("price"),
+                ],
+                heading="Change Price",
+            ),
+        ]
+    )
+    base_form_class = CoursePageForm
 
     @cached_property
     def course_with_related_objects(self):
