@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.141.0
+---------------
+
+- feat: Add "sign up for more information" on the xPRO product pages (#2906)
+- fix: use raw id for voucher admin to avoid timeout (#2917)
+- feat: remove legacy zendesk snippets (#2913)
+- chore(deps): update nginx docker tag to v1.25.4
+- Update the tax calculation rules to charge more aggressively (#2914)
+- fix(deps): update dependency django to v4.2.11 [security]
+
 Version 0.140.0 (Released March 26, 2024)
 ---------------
 
