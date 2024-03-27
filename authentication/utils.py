@@ -69,7 +69,7 @@ def load_drf_strategy(request=None):
 
 def get_md5_hash(value):
     """Returns the md5 hash object for the given value"""
-    return hashlib.md5(value.lower().encode("utf-8"))
+    return hashlib.md5(value.lower().encode("utf-8"), usedforsecurity=False)
 
 
 def is_user_email_blocked(email):
