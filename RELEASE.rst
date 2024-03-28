@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.141.0
+Version 0.141.0 (Released March 28, 2024)
 ---------------
 
 - feat: Add "sign up for more information" on the xPRO product pages (#2906)
