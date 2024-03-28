@@ -119,11 +119,11 @@ class CourseSerializer(serializers.ModelSerializer):
         return page.get_full_url() if page else None
 
     def get_external_marketing_url(self, instance):
-        """Returns the external marketing URL for the course that's set in CMS page"""  # noqa: D401
+        """Return the external marketing URL for the course that's set in CMS page"""
         return instance.page.external_marketing_url if instance.page else None
 
     def get_marketing_hubspot_form_id(self, instance):
-        """Returns the marketing HubSpot form ID associated with the course that's set in CMS page"""
+        """Return the marketing HubSpot form ID associated with the course that's set in CMS page"""
         return instance.page.marketing_hubspot_form_id if instance.page else None
 
     def get_thumbnail_url(self, instance):
@@ -341,11 +341,11 @@ class ProgramSerializer(serializers.ModelSerializer):
         return page.get_full_url() if page else None
 
     def get_external_marketing_url(self, instance):
-        """Returns the external marketing URL for this program that's set in CMS page"""  # noqa: D401
+        """Return the external marketing URL for this program that's set in CMS page"""
         return instance.page.external_marketing_url if instance.page else None
 
     def get_marketing_hubspot_form_id(self, instance):
-        """Returns the marketing HubSpot form ID associated with the program that's set in CMS page"""
+        """Return the marketing HubSpot form ID associated with the program that's set in CMS page"""
         return instance.page.marketing_hubspot_form_id if instance.page else None
 
     def get_instructors(self, instance):

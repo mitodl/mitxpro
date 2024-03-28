@@ -112,7 +112,7 @@ def determine_visitor_country(request: HttpRequest or None) -> str or None:
         if TaxRate.objects.filter(active=True, country_code=ip_country_code).exists():
             return ip_country_code
 
-        return profile_country_code
+        return profile_country_code  # noqa: TRY300
     except TypeError:
         return profile_country_code
 

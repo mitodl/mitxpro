@@ -1641,12 +1641,12 @@ class FakeRequest:
 
 
 @pytest.mark.parametrize(
-    "is_client_ip_taxable,is_client_location_taxable",
+    "is_client_ip_taxable,is_client_location_taxable",  # noqa: PT006
     [
-        [True, True],
-        [True, False],
-        [False, True],
-        [False, False],
+        [True, True],  # noqa: PT007
+        [True, False],  # noqa: PT007
+        [False, True],  # noqa: PT007
+        [False, False],  # noqa: PT007
     ],
 )
 def test_tax_calc_from_ip(user, is_client_ip_taxable, is_client_location_taxable):
