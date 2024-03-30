@@ -3888,13 +3888,13 @@ files = [
 
 [[package]]
 name = "wagtail"
-version = "5.2.2"
+version = "5.2.3"
 description = "A Django content management system."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "wagtail-5.2.2-py3-none-any.whl", hash = "sha256:b469a1b3cb3ab3e0c6a2c6f56b4a7890427609c0c12ca32322e26ab534547211"},
-    {file = "wagtail-5.2.2.tar.gz", hash = "sha256:48e4c29b72b0e53eb47a3178d6b0f2c699aa284d3f3a2abfd2f04f578f44b55a"},
+    {file = "wagtail-5.2.3-py3-none-any.whl", hash = "sha256:7b186b37ba044fd68c1a3c584ac0d913daa4ea95b95aa4c80412e4a0cb04e563"},
+    {file = "wagtail-5.2.3.tar.gz", hash = "sha256:ad64595124c84c4b00b73b863029a7722e06b4dba17b76177d2f4944f579bca7"},
 ]
 
 [package.dependencies]
@@ -3913,7 +3913,7 @@ l18n = ">=2018.5"
 openpyxl = ">=3.0.10,<4.0"
 Pillow = ">=9.1.0,<11.0.0"
 requests = ">=2.11.1,<3.0"
-telepath = ">=0.1.1,<1"
+telepath = ">=0.3.1,<1"
 Willow = {version = ">=1.6.2,<1.7", extras = ["heif"]}
 
 [package.extras]
@@ -4067,4 +4067,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.14"
-content-hash = "60f0f85def891e1bc827835244f69c64745388c4a8af27d1712d10f59075cb90"
+content-hash = "fd593bf239cfe8c5dd180c24b9048670eb6cc98a28161c879d76adae2296686a"
