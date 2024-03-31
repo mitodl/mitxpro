@@ -1010,13 +1010,13 @@ taggit = ["django-taggit (>=3.1)"]
 
 [[package]]
 name = "django-oauth-toolkit"
-version = "1.6.3"
+version = "1.7.1"
 description = "OAuth2 Provider for Django"
 optional = false
 python-versions = "*"
 files = [
-    {file = "django-oauth-toolkit-1.6.3.tar.gz", hash = "sha256:c3a0acd10a9c8442aedd298f8cb835d242c114ce0b8894c7e9290991bee667ca"},
-    {file = "django_oauth_toolkit-1.6.3-py3-none-any.whl", hash = "sha256:d9acbe8ef193bf31d192d90ea2e2df5e7be8adab391cec4acf55f0c048a35274"},
+    {file = "django-oauth-toolkit-1.7.1.tar.gz", hash = "sha256:37b690fa53f340c7391bdbc0fdbb32fd9ef8a7c012e72ee8754c331a2d7b4adb"},
+    {file = "django_oauth_toolkit-1.7.1-py3-none-any.whl", hash = "sha256:756e44421d0993f27705736b6c33a3d89018393859a31ac926296950f76e4433"},
 ]
 
 [package.dependencies]
@@ -4067,4 +4067,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.14"
-content-hash = "28ae9be5e4ee53a271e9473ceefa0d81c4d1d0f50d6bbf8c03c3871633bfdf4c"
+content-hash = "87840b9ad467211e8cff45335cf41950140e043af67ca7227ff87fb2524a9279"
