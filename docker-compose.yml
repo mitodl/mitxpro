@@ -28,7 +28,7 @@ services:
   db:
     image: postgres:12.17
     environment:
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: postgres  # pragma: allowlist secret
     ports:
       - "5432"
 
