@@ -1,4 +1,4 @@
-// sass-lint:disable mixins-before-declarations
+// sass-lint:disable mixins-before-declarations placeholder-in-extend
 #header {
   background-color: white;
   position: relative;
@@ -356,9 +356,7 @@
       text-align: right;
 
       input[type="submit"] {
-        // sass-lint:disable-next-line no-placeholder-in-extend
         @extend .btn;
-        // sass-lint:disable-next-line no-placeholder-in-extend
         @extend .btn-primary;
         border-radius: 5px;
         background: $primary;
