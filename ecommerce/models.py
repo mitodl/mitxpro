@@ -19,7 +19,11 @@ from ecommerce.constants import (
     ORDERED_VERSIONS_QSET_ATTR,
     REFERENCE_NUMBER_PREFIX,
 )
-from ecommerce.utils import get_order_id_by_reference_number, validate_amount
+from ecommerce.utils import (
+    get_order_id_by_reference_number,
+    validate_amount,
+    CouponUtils,
+)
 from mail.constants import MAILGUN_EVENT_CHOICES
 from mitxpro.models import (
     AuditableModel,
@@ -636,7 +640,11 @@ class Coupon(TimestampedModel):
     coupon information. Since the coupon_code is the identifier for the coupon, this should never be changed.
     """
 
-    coupon_code = models.CharField(max_length=50)
+    coupon_code = models.CharField(
+        max_length=50,
+        unique=True,
+        validators=[CouponUtils.validate_unique_coupon_code],
+    )
     payment = models.ForeignKey(CouponPayment, on_delete=models.PROTECT)
     is_global = models.BooleanField(default=False)
     enabled = models.BooleanField(default=True)
