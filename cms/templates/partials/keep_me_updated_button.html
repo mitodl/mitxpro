@@ -67,6 +67,7 @@
           portalId: "{{ hubspot_portal_id | safe }}",
           formId: "{{ page.marketing_hubspot_form_id  | safe }}",
           target: "#marketing-hubspot-form-{{unique_identifier}}",
+          formInstanceId: "{{unique_identifier}}",
           onFormSubmitted: function($form, data) {
             if (!data.redirectUrl) {
               if ('firstname' in data.submissionValues) {
