@@ -224,7 +224,10 @@
     height: auto;
 
     .hs-form-field {
-      padding-bottom: 16px;
+      > label:first-child > span {
+        padding-top: 16px;
+        display: inline-block;
+      }
 
       label {
         color: #495057;
@@ -279,76 +282,37 @@
         align-items: center;
 
         .hs-form-radio {
-
           label {
-            position: relative;
-
             input {
               height: 22px;
-              left: 0;
-              opacity: 0;
               position: absolute;
-              top: 0;
               width: 22px;
             }
 
             span {
-              display: inline-block;
               margin-left: 28px;
               margin-right: 32px;
-
-              &::before {
-                color: $hs-form-field-radio-gray;
-                border: 2px solid;
-                content: "";
-                height: 22px;
-                left: 0;
-                position: absolute;
-                top: 0;
-                width: 22px;
-                border-radius: 50%;
-              }
-
-              &::after {
-                color: $primary;
-                content: "";
-                opacity: 0;
-                border: 6px solid;
-                border-radius: 50%;
-                position: absolute;
-                left: 5px;
-                top: 5px;
-                transition: opacity 0.2s ease-in-out;
-              }
-            }
-
-            input:checked + span::after {
-              opacity: 1;
-            }
-
-            input:checked + span::before {
-              color: $primary;
-            }
-
-            input:not(:checked):hover + span::before {
-              background: $close-hover-background;
-              color: $primary;
-            }
-
-            input:not(:checked):hover + span {
-              cursor: pointer;
             }
           }
         }
 
         .hs-form-checkbox {
           span {
-            display: inline-block;
             margin-left: 8px;
             margin-right: 32px;
           }
         }
+
+        .hs-form-radio,.hs-form-checkbox {
+          input, span {
+            cursor: pointer;
+          }
+        }
       }
+    }
+
+    .hs-recaptcha, .hs-submit {
+        padding-top: 16px;
     }
 
     .hs-submit {
