@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.142.0
+---------------
+
+- Don't allow duplicate coupon codes (#2888)
+- fix(deps): update dependency django-oauth-toolkit to v1.7.1
+- fix(deps): update dependency django-anymail to v8.6
+- chore(deps): update postgres docker tag to v12.18
+- chore(deps): update dependency safety to v3.1.0
+- chore(deps): update dependency pytest-mock to v3.14.0
+- fix(deps): update dependency wagtail to v5.2.3
+- fix(deps): update dependency uwsgi to v2.0.24
+- fix(deps): update dependency boto3 to v1.34.74
+- chore: set time fields for start/end date in Django with a default time (#2912)
+- style: replace PNG logo high quality (#2927)
+
 Version 0.141.0 (Released March 28, 2024)
 ---------------
 

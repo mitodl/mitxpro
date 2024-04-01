@@ -28,7 +28,7 @@ from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
 
-VERSION = "0.141.0"
+VERSION = "0.142.0"
 
 ENVIRONMENT = get_string(
     name="MITXPRO_ENVIRONMENT",
