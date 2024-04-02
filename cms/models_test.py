@@ -1730,7 +1730,7 @@ def test_enterprise_page_learning_strategy_form():
 
 def test_course_page_price_change_fields_are_visible(superuser_client):
     """
-    Test that the custom form fields are visible for a CoursePage.
+    Test that the custom form price fields are visible in a CoursePage.
     """
     course_run = CourseRunFactory.create(
         course__page__thumbnail_image=None, course__page__background_image=None
@@ -1751,7 +1751,7 @@ def test_course_page_price_change_fields_are_visible(superuser_client):
 
 def test_course_page_price_is_updated(superuser_client):
     """
-    Test that the course price can be changed in the CoursePage.
+    Test that the course price can be set in the CoursePage.
     """
     course_run = CourseRunFactory.create(
         course__page__thumbnail_image=None, course__page__background_image=None

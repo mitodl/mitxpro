@@ -24,7 +24,7 @@ def staff_user(db):
 
 @pytest.fixture
 def super_user(db):
-    """Staff user fixture"""
+    """Super user fixture"""
     return UserFactory.create(is_staff=True, is_superuser=True)
 
 

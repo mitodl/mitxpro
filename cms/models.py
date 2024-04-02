@@ -1318,7 +1318,7 @@ class CourseProductPage(ProductPage):
                     FieldPanel("course_run", widget=forms.Select),
                     FieldPanel("price"),
                 ],
-                heading="Change Price",
+                heading="Set Price",
             ),
         ]
     )

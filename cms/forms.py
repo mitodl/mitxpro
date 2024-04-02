@@ -27,11 +27,11 @@ class CoursePageForm(WagtailAdminPageForm):
     """
     Admin form for CoursePage and ExternalCoursePage.
 
-    This form introduces price and course_run fields to manage pricing in cms.
+    This form introduces price and course_run fields to manage product pricing in CMS.
     """
 
-    price = forms.DecimalField(required=False)
-    course_run = forms.ChoiceField(required=False)
+    course_run = forms.ChoiceField(required=False, help_text="Select a course run to change the price")
+    price = forms.DecimalField(required=False, min_value=0, help_text="Set price for the selected course run")
 
     def __init__(self, data=None, files=None, parent_page=None, *args, **kwargs):
         """
@@ -70,17 +70,15 @@ class ProgramPageForm(WagtailAdminPageForm):
     """
     Admin form for ProgramPage and ExternalProgramPage.
 
-    This form introduces price field to manage pricing in cms.
+    This form introduces price field to manage product pricing in cms.
     """
 
-    price = forms.DecimalField(required=False)
+    price = forms.DecimalField(required=False, min_value=0, help_text="Set price for the program")
 
     def __init__(self, data=None, files=None, parent_page=None, *args, **kwargs):
         """
         Initialize the price field with the existing program price.
         """
-        from cms.models import ProgramPage, ExternalProgramPage
-
         super().__init__(data, files, parent_page, *args, **kwargs)
         instance = kwargs.get("instance", None)
         if instance and instance.id:
