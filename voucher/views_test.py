@@ -137,7 +137,7 @@ def test_get_enroll_view_with_redeemed_voucher(redeemed_voucher_and_user_client)
     assert response.url == reverse("voucher:redeemed")
 
 
-def test_get_enroll_view_with_no_matches(voucher_and_user_client):
+def test_get_enroll_view_with_no_exact_match(voucher_and_user_client):
     """
     Test the EnrollView GET method when there are no course run matches
     """
@@ -147,49 +147,46 @@ def test_get_enroll_view_with_no_matches(voucher_and_user_client):
     assert response.url == reverse("voucher:resubmit")
 
 
-def test_get_enroll_view_with_matches(
-    voucher_and_partial_matches_with_coupons, settings
+def test_get_enroll_view_with_exact_match(
+    voucher_and_exact_match_with_coupon, settings
 ):
     """
-    Test the EnrollView GET method when there are course run matches
+    Test the EnrollView GET method when there is a course run match
     """
-    context = voucher_and_partial_matches_with_coupons
+    context = voucher_and_exact_match_with_coupon
     client = context.client
     settings.VOUCHER_COMPANY_ID = context.company.id
     response = client.get(reverse("voucher:enroll"))
     assert response.status_code == 200
-
-    product_ids = [product.id for product in context.products]
-    coupon_ids = [
-        coupon_version.coupon.id for coupon_version in context.coupon_versions
-    ]
-    titles = [
-        "{title} - starts {start_date}".format(
-            title=match.title, start_date=match.start_date.strftime("%b %d, %Y")
-        )
-        for match in context.partial_matches
-    ]
-    for coupon_choice in response.context[0]["eligible_choices"]:
-        product_id, coupon_id = json.loads(coupon_choice[0])
-        assert product_id in product_ids
-        assert coupon_id in coupon_ids
-        assert coupon_choice[1] in titles
+    product_id = response.context[0]["product_id"]
+    coupon_id = response.context[0]["coupon_id"]
+    course_run_display_title = response.context[0]["course_run_display_title"]
+    assert product_id == context.product.id
+    assert coupon_id == context.coupon_version.coupon.id
+    assert course_run_display_title == "{title} - starts {start_date}".format(
+        title=context.exact_match.title,
+        start_date=context.exact_match.start_date.strftime("%b %d, %Y"),
+    )
 
 
-def test_post_enroll_view_with_coupon_choice(
+def test_post_enroll_view_with_product_id_and_coupon_id(
     voucher_and_exact_match_with_coupon, settings
 ):
     """
-    Test the EnrollView POST method with a valid coupon choice
+    Test the EnrollView POST method with a valid product_id and coupon_id
     """
     context = voucher_and_exact_match_with_coupon
     client = context.client
     voucher = context.voucher
+    settings.VOUCHER_COMPANY_ID = context.company.id
     coupon_version = context.coupon_version
     product = context.product
     response = client.post(
         reverse("voucher:enroll"),
-        {"coupon_version": json.dumps((product.id, coupon_version.coupon.id))},
+        {
+            "product_id": product.id,
+            "coupon_id": coupon_version.coupon.id,
+        },
     )
     assert response.status_code == 302
     assert response.url == (
@@ -199,30 +196,16 @@ def test_post_enroll_view_with_coupon_choice(
     assert Voucher.objects.get(id=voucher.id).coupon == coupon_version.coupon
 
 
-def test_post_enroll_view_without_coupon_choice(
+def test_post_enroll_view_without_product_id_and_coupon_id(
     voucher_and_exact_match_with_coupon, settings
 ):
     """
-    Test the EnrollView POST method with a valid coupon choice
+    Test the EnrollView POST method without product_id and coupon_id
     """
     context = voucher_and_exact_match_with_coupon
     client = context.client
     settings.VOUCHER_COMPANY_ID = context.company.id
-    response = client.post(reverse("voucher:enroll"), {"coupon_version": ""})
-    assert response.status_code == 200
-    assert b"Coupon Version is required." in response.content
-
-
-def test_post_enroll_view_with_empty_coupon_choice(
-    voucher_and_exact_match_with_coupon, settings
-):
-    """
-    Test the EnrollView POST method with a valid coupon choice
-    """
-    context = voucher_and_exact_match_with_coupon
-    client = context.client
-    settings.VOUCHER_COMPANY_ID = context.company.id
-    response = client.post(reverse("voucher:enroll"), {"coupon_version": ("", "")})
+    response = client.post(reverse("voucher:enroll"), {})
     assert response.status_code == 200
     assert b"Coupon Version is required." in response.content
 
@@ -231,7 +214,7 @@ def test_post_enroll_view_with_stolen_only_coupon(
     mock_logger, voucher_and_exact_match_with_coupon, settings
 ):
     """
-    Test the EnrollView POST logs an error if the coupon is stolen and there aren't any more
+    Test the EnrollView POST logs an error if the coupon is stolen and there aren't anymore
     """
     context = voucher_and_exact_match_with_coupon
     settings.VOUCHER_COMPANY_ID = context.company.id
@@ -243,12 +226,15 @@ def test_post_enroll_view_with_stolen_only_coupon(
     product = context.product
     response = client.post(
         reverse("voucher:enroll"),
-        {"coupon_version": json.dumps((product.id, coupon_version.coupon.id))},
+        {
+            "product_id": product.id,
+            "coupon_id": coupon_version.coupon.id,
+        },
     )
     assert response.status_code == 302
     assert response.url == reverse("voucher:resubmit")
     mock_logger.error.assert_called_once_with(
-        "Found no valid coupons for matches for voucher %s", context.voucher.id
+        "Found no valid coupons for course run match for voucher %s", context.voucher.id
     )
 
 
@@ -275,7 +261,10 @@ def test_post_enroll_view_with_stolen_coupon(
     product = context.product
     response = client.post(
         reverse("voucher:enroll"),
-        {"coupon_version": json.dumps((product.id, coupon_version1.coupon.id))},
+        {
+            "product_id": product.id,
+            "coupon_id": coupon_version1.coupon.id,
+        },
     )
     assert response.status_code == 302
     assert response.url == (

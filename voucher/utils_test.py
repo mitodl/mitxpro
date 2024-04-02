@@ -9,7 +9,7 @@ import pytest
 from voucher.factories import VoucherFactory
 from voucher.utils import (
     get_current_voucher,
-    get_eligible_coupon_choices,
+    get_eligible_product_detail,
     read_pdf,
     remove_extra_spaces,
     voucher_upload_path,
@@ -137,27 +137,18 @@ def test_get_current_voucher(user):
 
 def test_no_course_matches(mock_logger, voucher_and_user):
     """
-    Test match_courses_to_voucher return an empty queryset on no course matches
+    Test get_eligible_product_detail does not return any product_id, coupon_id, or course_run_display_title
+    when no course matches
     """
     voucher = voucher_and_user.voucher
-    assert len(get_eligible_coupon_choices(voucher)) == 0
+    product_id, coupon_id, course_run_display_title = get_eligible_product_detail(
+        voucher
+    )
+    assert product_id is None
+    assert coupon_id is None
+    assert course_run_display_title is None
     mock_logger.error.assert_called_once_with(
         "Found no matching course runs for voucher %s", voucher.id
-    )
-
-
-def test_partial_course_matches_without_coupons(
-    mock_logger, voucher_and_partial_matches, settings
-):
-    """
-    Test match_courses_to_voucher logs an error if there are partial matches with no coupons
-    """
-    context = voucher_and_partial_matches
-    voucher = context.voucher
-    settings.VOUCHER_COMPANY_ID = context.company.id
-    assert len(get_eligible_coupon_choices(voucher)) == 0
-    mock_logger.error.assert_called_once_with(
-        "Found no valid coupons for matches for voucher %s", voucher.id
     )
 
 
@@ -165,14 +156,20 @@ def test_exact_course_match_without_coupon(
     mock_logger, voucher_and_exact_match, settings
 ):
     """
-    Test match_courses_to_voucher logs an error if there is an exact match with no coupons
+    Test get_eligible_product_detail logs an error if there is an exact match with no coupons
     """
     context = voucher_and_exact_match
     voucher = context.voucher
     settings.VOUCHER_COMPANY_ID = context.company.id
-    assert len(get_eligible_coupon_choices(voucher)) == 0
+
+    product_id, coupon_id, course_run_display_title = get_eligible_product_detail(
+        voucher
+    )
+    assert product_id is None
+    assert coupon_id is None
+    assert course_run_display_title is None
     mock_logger.error.assert_called_once_with(
-        "Found no valid coupons for matches for voucher %s", voucher.id
+        "Found no valid coupons for course run match for voucher %s", voucher.id
     )
 
 
@@ -197,70 +194,24 @@ def _test_eligible_coupon_version(eligible_coupons, context):
         assert eligible_coupon[1] in titles
 
 
-def test_partial_course_matches(voucher_and_partial_matches_with_coupons, settings):
-    """
-    Test match_courses_to_voucher returns correct eligible choices when there are partial matches
-    """
-    context = voucher_and_partial_matches_with_coupons
-    voucher = context.voucher
-    settings.VOUCHER_COMPANY_ID = context.company.id
-    eligible_coupons = get_eligible_coupon_choices(voucher)
-    eligible_coupons_titles = [
-        eligible_coupon[1] for eligible_coupon in eligible_coupons
-    ]
-    coupon_eligibility_list = [
-        "{} - starts {}".format(
-            coupon_eligibility.product.content_object.title,
-            coupon_eligibility.product.content_object.start_date.strftime("%b %d, %Y"),
-        )
-        for coupon_eligibility in context.coupon_eligibility_list
-    ]
-
-    close_matches = difflib.get_close_matches(
-        voucher.course_title_input,
-        coupon_eligibility_list,
-        len(coupon_eligibility_list),
-        cutoff=0,
-    )
-
-    assert len(eligible_coupons) == len(context.coupon_eligibility_list)
-    assert eligible_coupons_titles == close_matches
-
-    _test_eligible_coupon_version(eligible_coupons, context)
-
-
-@pytest.mark.parametrize("empty_field", ["course_id_input", "course_title_input"])
-def test_partial_course_matches_with_missing_inputs(
-    voucher_and_partial_matches_with_coupons, settings, empty_field
-):
-    """
-    Test match_courses_to_voucher returns correct eligible choices when there are partial matches
-    """
-    context = voucher_and_partial_matches_with_coupons
-    voucher = context.voucher
-    setattr(voucher, empty_field, "")
-    settings.VOUCHER_COMPANY_ID = context.company.id
-    eligible_coupons = get_eligible_coupon_choices(voucher)
-    # reduce number of expected matches by the number of matches that depend on the empty search field
-    assert len(eligible_coupons) == len(context.coupon_eligibility_list) - 2
-    _test_eligible_coupon_version(eligible_coupons, context)
-
-
 def test_exact_course_match(voucher_and_exact_match_with_coupon, settings):
     """
-    Test match_courses_to_voucher returns correct eligible choices when there is an exact match
+    Test get_eligible_product_detail returns correct product_id, coupon_id, and course_run_display_title
+    when there is an exact match
     """
     context = voucher_and_exact_match_with_coupon
     voucher = context.voucher
     settings.VOUCHER_COMPANY_ID = context.company.id
-    eligible_coupons = get_eligible_coupon_choices(voucher)
-    assert len(eligible_coupons) == 1
-    eligible_coupon = eligible_coupons[0]
-    assert eligible_coupon[1] == "{title} - starts {start_date}".format(
+    product_id, coupon_id, course_run_display_title = get_eligible_product_detail(
+        voucher
+    )
+    assert product_id is not None
+    assert coupon_id is not None
+    assert course_run_display_title is not None
+    assert course_run_display_title == "{title} - starts {start_date}".format(
         title=context.exact_match.title,
         start_date=context.exact_match.start_date.strftime("%b %d, %Y"),
     )
-    product_id, coupon_id = json.loads(eligible_coupon[0])
     assert product_id == context.product.id
     assert coupon_id == context.coupon_version.coupon.id
 

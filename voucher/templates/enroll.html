@@ -18,15 +18,11 @@
             <form method="post" enctype="multipart/form-data" class="voucher-form ">
                 {% csrf_token %}
                 <div class="flex">
-                    <select name="coupon_version" id="coupon_version" classname="form-control">
-                        <option value="">Choose Course</option>
-                        {% for choice in eligible_choices %}
-                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
-                        {% endfor %}
-                    </select>
-                    <div id="voucher-error" class="form-error d-none">
-                        Please select a course from the list.
-                        If your expected course isn't in the list, please contact
+                    <input type="hidden" id="product_id" name="product_id" value={{ product_id }}>
+                    <input type="hidden" id="coupon_id" name="coupon_id" value={{ coupon_id }}>
+                    <b class="course-run-display-title">{{ course_run_display_title }}</b>
+                    <div class="help-text">
+                        If this is not the course you are trying to enroll in, please contact
                         <a href="https://xpro.zendesk.com/hc/en-us/requests/new" target="_blank" rel="noopener noreferrer">Customer Support</a>.
                     </div>
                 </div>
@@ -37,23 +33,4 @@
             </form>
         </div>
     </div>
-
-    <script type="text/javascript">
-      document.querySelector(".voucher-form").addEventListener("change", function(e) {
-        if (!$("#coupon_version").val()) {
-          $("#voucher-error").removeClass("d-none");
-        }
-        else
-          $("#voucher-error").addClass("d-none");
-      });
-
-      document.querySelector(".voucher-form").addEventListener("submit", function(e){
-        if (!$("#coupon_version").val()) {
-          $("#voucher-error").removeClass("d-none");
-          e.preventDefault();    //stop form from submitting
-        }
-        else
-          $("#voucher-error").addClass("d-none");
-      });
-    </script>
 {% endblock content %}
