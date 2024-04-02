@@ -188,7 +188,7 @@
       height: auto;
 
       .hs-form-field {
-        > label:first-child > span {
+        > label:first-child > span:first-child {
           padding-top: 16px;
           display: inline-block;
         }
@@ -237,6 +237,7 @@
           }
         }
 
+        .inputs-list,
         .multi-container {
           padding: 0;
           margin: 0;
@@ -258,17 +259,20 @@
                 margin-left: 28px;
                 margin-right: 32px;
               }
+
+              input, span {
+                cursor: pointer;
+              }
             }
           }
 
-          .hs-form-checkbox {
+          .hs-form-checkbox,
+          .hs-form-booleancheckbox {
             span {
               margin-left: 8px;
               margin-right: 32px;
             }
-          }
 
-          .hs-form-radio,.hs-form-checkbox {
             input, span {
               cursor: pointer;
             }
