@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.142.0
+Version 0.142.0 (Released April 02, 2024)
 ---------------
 
 - Don't allow duplicate coupon codes (#2888)
