@@ -23,15 +23,19 @@ class CertificatePageForm(WagtailAdminPageForm):
             ].parent_readable_id = parent_page.specific.course.readable_id
 
 
-class CoursePageForm(WagtailAdminPageForm):
+class CoursewareForm(WagtailAdminPageForm):
     """
-    Admin form for CoursePage and ExternalCoursePage.
+    Admin form for the Courseware Pages.
 
     This form introduces price and course_run fields to manage product pricing in CMS.
     """
 
-    course_run = forms.ChoiceField(required=False, help_text="Select a course run to change the price")
-    price = forms.DecimalField(required=False, min_value=0, help_text="Set price for the selected course run")
+    course_run = forms.ChoiceField(
+        required=False, help_text="Select a course run to change the price"
+    )
+    price = forms.DecimalField(
+        required=False, min_value=0, help_text="Set price for the courseware"
+    )
 
     def __init__(self, data=None, files=None, parent_page=None, *args, **kwargs):
         """
@@ -41,9 +45,13 @@ class CoursePageForm(WagtailAdminPageForm):
 
         instance = kwargs.get("instance", None)
         if instance and instance.id:
-            course_runs = instance.course.courseruns.all()
-            course_run_choices = [("", "")] + [(run.id, run) for run in course_runs]
-            self.fields["course_run"].choices = course_run_choices
+            if instance.is_internal_or_external_course_page:
+                course_runs = instance.course.courseruns.all()
+                course_run_choices = [("", "")] + [(run.id, run) for run in course_runs]
+                self.fields["course_run"].choices = course_run_choices
+
+            elif instance.is_internal_or_external_program_page:
+                self.fields["price"].initial = instance.program.current_price
 
     def save(self, commit=True):
         """
@@ -53,7 +61,7 @@ class CoursePageForm(WagtailAdminPageForm):
 
         course_run_id = self.cleaned_data["course_run"]
         price = self.cleaned_data["price"]
-        if course_run_id and price:
+        if page.is_internal_or_external_course_page and course_run_id and price:
             course_run = CourseRun.objects.get(id=course_run_id)
             product, _ = Product.objects.get_or_create(
                 content_type=ContentType.objects.get_for_model(CourseRun),
@@ -61,37 +69,10 @@ class CoursePageForm(WagtailAdminPageForm):
             )
             ProductVersion.objects.create(product=product, price=price)
 
-        if commit:
-            page.save()
-        return page
-
-
-class ProgramPageForm(WagtailAdminPageForm):
-    """
-    Admin form for ProgramPage and ExternalProgramPage.
-
-    This form introduces price field to manage product pricing in cms.
-    """
-
-    price = forms.DecimalField(required=False, min_value=0, help_text="Set price for the program")
-
-    def __init__(self, data=None, files=None, parent_page=None, *args, **kwargs):
-        """
-        Initialize the price field with the existing program price.
-        """
-        super().__init__(data, files, parent_page, *args, **kwargs)
-        instance = kwargs.get("instance", None)
-        if instance and instance.id:
-            self.fields["price"].initial = instance.program.current_price
-
-    def save(self, commit=True):
-        """
-        Handles pricing update and creates product and product versions for a program.
-        """
-        page = super().save(commit=False)
-
-        price = self.cleaned_data["price"]
-        if price != page.program.current_price:
+        elif (
+            page.is_internal_or_external_program_page
+            and price != page.program.current_price
+        ):
             product, _ = Product.objects.get_or_create(
                 content_type=ContentType.objects.get_for_model(Program),
                 object_id=page.program.id,
