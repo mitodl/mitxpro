@@ -1,4 +1,4 @@
-// sass-lint:disable mixins-before-declarations placeholder-in-extend
+// sass-lint:disable mixins-before-declarations
 .sub-nav-bar {
   background: $gray-bg;
   display: flex;
@@ -32,6 +32,14 @@
 
     span.fa-chevron-up {
       display: block;
+    }
+
+    @include media-breakpoint-down (sm) {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 10px;
     }
   }
 
@@ -175,6 +183,7 @@
 
       background: $white;
       border: 1px solid $primary;
+      white-space: nowrap;
 
       &:hover {
         text-decoration: none;
@@ -182,168 +191,6 @@
 
       }
     }
-
-    form {
-      width: 100%;
-      height: auto;
-
-      .hs-form-field {
-        > label:first-child > span:first-child {
-          padding-top: 16px;
-          display: inline-block;
-        }
-
-        label {
-          color: $hs-form-field-label;
-          font-family: Rajdhani;
-          font-size: 18px;
-          font-style: normal;
-          font-weight: 500;
-          line-height: normal;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="tel"],
-        select {
-          height: 50px;
-          width: 100%;
-          align-self: stretch;
-          border-radius: 4px;
-          border: 1px solid $hs-form-field-border;
-          background: $white;
-          box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.05);
-          padding: 12px;
-          font-family: Rajdhani;
-          font-size: 18px;
-          font-style: normal;
-          font-weight: 500;
-          line-height: normal;
-          outline: none;
-
-          &:focus {
-            border: 2px solid $hs-form-field-border;
-          }
-        }
-
-        .hs-error-msgs {
-          padding: 0;
-          margin: 0;
-          list-style: none;
-
-          label {
-            color: $primary;
-            display: block;
-          }
-        }
-
-        .inputs-list,
-        .multi-container {
-          padding: 0;
-          margin: 0;
-          list-style: none;
-
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-
-          .hs-form-radio {
-            label {
-              input {
-                height: 22px;
-                position: absolute;
-                width: 22px;
-              }
-
-              span {
-                margin-left: 28px;
-                margin-right: 32px;
-              }
-
-              input, span {
-                cursor: pointer;
-              }
-            }
-          }
-
-          .hs-form-checkbox,
-          .hs-form-booleancheckbox {
-            span {
-              margin-left: 8px;
-              margin-right: 32px;
-            }
-
-            input, span {
-              cursor: pointer;
-            }
-          }
-        }
-      }
-
-      .hs-recaptcha, .hs-submit {
-        padding-top: 16px;
-      }
-
-      .hs-submit {
-        padding-bottom: 10px;
-        text-align: right;
-
-        input[type="submit"] {
-          @extend .btn;
-          @extend .btn-primary;
-          border-radius: 5px;
-          background: $primary;
-          padding: 19px 25px;
-          font-family: Rajdhani;
-          font-size: 16px;
-          font-style: normal;
-          font-weight: 700;
-          line-height: normal;
-          text-transform: uppercase;
-
-          &:hover {
-            text-decoration: none;
-            transition: all .2s ease-in;
-          }
-        }
-      }
-
-      .hs_error_rollup {
-        display: none;
-      }
-    }
-  }
-}
-
-.modal-content-signup {
-  position: relative;
-  width: 500px;
-  background: $white;
-  border-radius: 4px;
-  color: $black;
-
-  .container {
-    display: block;
-  }
-
-  .close {
-    opacity: 1;
-  }
-}
-
-.signup-dialog {
-  text-align: center;
-  line-height: 26px;
-
-  h2 {
-    font-weight: 700;
-    font-size: 26px;
-    color: $primary;
-  }
-
-  p {
-    font-weight: 500;
-    font-size: 20px;
   }
 }
 
