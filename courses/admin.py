@@ -91,7 +91,7 @@ class CourseRunAdmin(TimestampedModelAdmin):
 
     def get_changeform_initial_data(self, request):
         """
-        Returns initial data for the change form.
+        Return initial data for the change form.
 
         Sets the initial values for start_date and end_date fields
         to the current date with a time of 23:59:00 for start_date,

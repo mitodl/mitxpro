@@ -20,9 +20,9 @@ from ecommerce.constants import (
     REFERENCE_NUMBER_PREFIX,
 )
 from ecommerce.utils import (
+    CouponUtils,
     get_order_id_by_reference_number,
     validate_amount,
-    CouponUtils,
 )
 from mail.constants import MAILGUN_EVENT_CHOICES
 from mitxpro.models import (

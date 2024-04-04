@@ -1471,8 +1471,8 @@ def test_fetch_and_serialize_unused_coupons_for_all_inactive_products(user):
 
 
 @pytest.mark.parametrize(
-    "use_defaults,num_coupon_codes",
-    (
+    "use_defaults,num_coupon_codes",  # noqa: PT006
+    (  # noqa: PT007
         (True, 12),
         (False, 1),
     ),

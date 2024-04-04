@@ -61,7 +61,6 @@ wagtail-metadata = "5.0.0"
 zeep = "3.4.0"
 flaky = "3.7.0"
 xmltodict = "^0.13.0"
-ruff = "^0.1.11"
 
 [tool.poetry.group.dev.dependencies]
 astroid = "2.6.6"
@@ -84,6 +83,7 @@ responses = "*"
 safety = "*"
 semantic-version = "*"
 wagtail-factories = "*"
+ruff = "^0.1.11"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

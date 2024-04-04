@@ -1326,7 +1326,7 @@ def create_coupons(  # noqa: PLR0913
             coupon_objs = Coupon.objects.bulk_create(coupons)
     except IntegrityError:
         log.warning(
-            "Falling back to create Coupons for coupon payment {} and company {}".format(
+            "Falling back to create Coupons for coupon payment {} and company {}".format(  # noqa: G001, UP032
                 name, company_id
             )
         )

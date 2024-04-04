@@ -112,13 +112,17 @@ def positive_or_zero(number):
 
 
 class CouponUtils:
+    """
+    Common Utils for Coupon and B2BCoupon
+    """
+
     @staticmethod
     def validate_unique_coupon_code(value):
         """
         Validate the uniqueness of coupon codes in Coupon and B2BCoupon models.
         """
         if CouponUtils.is_existing_coupon_code(value):
-            raise ValidationError("Coupon code already exists in the platform.")
+            raise ValidationError("Coupon code already exists in the platform.")  # noqa: EM101
 
     @staticmethod
     def is_existing_coupon_code(value):
