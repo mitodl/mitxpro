@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.143.0
+---------------
+
+- Styling for the hubspot forms fields available in the list provided (#2939)
+- chore(deps): bump ip from 1.1.5 to 1.1.9 (#2902)
+- chore(deps-dev): bump jwcrypto from 1.5.4 to 1.5.6 (#2916)
+- chore(deps): bump es5-ext from 0.10.53 to 0.10.64 (#2918)
+- fix: ignore git guardian secret on local docker compsoe (#2938)
+
 Version 0.142.0 (Released April 02, 2024)
 ---------------
 
