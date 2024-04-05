@@ -49,6 +49,7 @@ class ProductReadOnlyIndexView(AbstractReadOnlyIndexView):
     """
     ReadOnly IndexView for Product. Overrides the default queryset to list in-active products.
     """
+
     model = Product
     queryset = Product.all_objects
 
@@ -57,6 +58,7 @@ class ProductInspectView(InspectView):
     """
     InspectView for Product.
     """
+
     def get_object(self, queryset=None):
         """
         Get the object using the custom Product manager. By default, `get_object` uses the default manager.
