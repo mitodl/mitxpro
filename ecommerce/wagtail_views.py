@@ -57,8 +57,8 @@ class ProductViewSet(ModelViewSet):
     )
     list_display = ("id", "content_object", "is_active", "price")
     list_filter = (
-        "content_type",
         "is_active",
+        "content_type",
     )
     inspect_view_enabled = True
     icon = "pilcrow"
@@ -66,7 +66,7 @@ class ProductViewSet(ModelViewSet):
     @property
     def permission_policy(self):
         """
-        Custom permission policy is used to disable `change` and `delete` permissions.
+        Custom permission policy disables `change` and `delete` permissions.
         """
         return CreateOnlyModelPermissionPolicy(self.model)
 
@@ -95,8 +95,8 @@ class ProductVersionViewSet(ModelViewSet):
     list_display = (
         "id",
         "product_id",
-        "price",
         "text_id",
+        "price",
         "description",
     )
     inspect_view_enabled = True
@@ -105,7 +105,7 @@ class ProductVersionViewSet(ModelViewSet):
     @property
     def permission_policy(self):
         """
-        Custom permission policy is used to disable `change` and `delete` permissions.
+        Custom permission policy disables `change` and `delete` permissions.
         """
         return CreateOnlyModelPermissionPolicy(self.model)
 
