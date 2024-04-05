@@ -27,7 +27,7 @@ def image_version_url(
 
     Returns:
         str or None: The image URL, or None if the image doesn't exist
-    """  # noqa: D401
+    """
     if not image:
         return ""
     generated_image_url = image_url(image, filter_spec, viewname=viewname)

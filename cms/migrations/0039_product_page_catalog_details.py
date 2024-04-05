@@ -20,7 +20,7 @@ def dummy_reverse(apps, schema_editor):
     """
     Dummy reverse placeholder for Django to be able to reverse this
     migration.
-    """  # noqa: D401
+    """
     pass  # noqa: PIE790
 
 

@@ -34,7 +34,7 @@ EXPORTS_REQUIRED_KEYS = [
 
 
 def is_exports_verification_enabled():
-    """Returns True if the exports verification is configured"""  # noqa: D401
+    """Returns True if the exports verification is configured"""
     return all(getattr(settings, key) for key in EXPORTS_REQUIRED_KEYS)
 
 
@@ -45,7 +45,7 @@ def get_cybersource_client():
     Returns:
         (zeep.Client, zeep.plugins.HistoryPlugin):
             a tuple of the configured client and the history plugin instance
-    """  # noqa: D401
+    """
     wsse = UsernameToken(
         settings.CYBERSOURCE_MERCHANT_ID, settings.CYBERSOURCE_TRANSACTION_KEY
     )
@@ -65,7 +65,7 @@ def compute_result_from_codes(reason_code, info_code):
     Returns:
         str:
             the computed result
-    """  # noqa: D401
+    """
     # if there's either an explicit denial or any block list was triggered
     # NOTE: reason_code can indicate a success but a block list still be triggered and indicated in info_code
     if reason_code in EXPORTS_BLOCKED_REASON_CODES or info_code:
@@ -84,7 +84,7 @@ def compute_result_from_codes(reason_code, info_code):
 
 
 def get_encryption_public_key():
-    """Returns the public key for encryption of export requests/responses"""  # noqa: D401
+    """Returns the public key for encryption of export requests/responses"""
     return PublicKey(
         settings.CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY, encoder=Base64Encoder
     )
@@ -241,5 +241,5 @@ def get_latest_exports_inquiry(user):
     Returns:
         ExportsInquiryLog:
             the latest record sorted by created_on
-    """  # noqa: D401
+    """
     return user.exports_inquiries.order_by("-created_on").first()

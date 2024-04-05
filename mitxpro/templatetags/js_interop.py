@@ -11,7 +11,7 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def js_settings(context):
-    """Renders the JS settings object to a script tag"""  # noqa: D401
+    """Renders the JS settings object to a script tag"""
     request = context["request"]
     js_settings_json = json.dumps(get_js_settings(request))
 

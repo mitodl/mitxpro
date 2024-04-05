@@ -20,7 +20,7 @@ def enrollment_summary(enrollment):
         enrollment (ProgramEnrollment or CourseRunEnrollment): The enrollment
     Returns:
         str: A string representation of an enrollment
-    """  # noqa: D401
+    """
     if isinstance(enrollment, ProgramEnrollment):
         return "<ProgramEnrollment: id={}, program={}>".format(
             enrollment.id, enrollment.program.text_id
@@ -39,12 +39,12 @@ def enrollment_summaries(enrollments):
         enrollments (iterable of ProgramEnrollment or CourseRunEnrollment): The enrollments
     Returns:
         list of str: A list of string representations of enrollments
-    """  # noqa: D401
+    """
     return list(map(enrollment_summary, enrollments))
 
 
 def create_or_update_enrollment(model_cls, defaults=None, **kwargs):
-    """Creates or updates an enrollment record"""  # noqa: D401
+    """Creates or updates an enrollment record"""
     defaults = {**(defaults or {}), "active": True, "change_status": None}
     created = False
     enrollment = model_cls.all_objects.filter(**kwargs).order_by("-created_on").first()
@@ -84,7 +84,7 @@ class EnrollmentChangeCommand(BaseCommand):
             command_options (dict): A dict of command parameters
         Returns:
             tuple: (ProgramEnrollment, Program) or (CourseRunEnrollment, CourseRun)
-        """  # noqa: D401
+        """
         program_property = command_options.get("program")
         run_property = command_options.get("run")
         order_property = command_options.get("order")
@@ -144,7 +144,7 @@ class EnrollmentChangeCommand(BaseCommand):
                 in the database even if the enrollment fails in edX.
         Returns:
             tuple of (ProgramEnrollment, list(CourseRunEnrollment)): The newly created enrollments
-        """  # noqa: D401
+        """
         to_user = to_user or existing_enrollment.user
         to_program = to_program or existing_enrollment.program
         enrollment_params = dict(user=to_user, program=to_program)  # noqa: C408
@@ -193,7 +193,7 @@ class EnrollmentChangeCommand(BaseCommand):
                 in the database even if the enrollment fails in edX.
         Returns:
             CourseRunEnrollment: The newly created enrollment
-        """  # noqa: D401
+        """
         to_user = to_user or existing_enrollment.user
         to_run = to_run or existing_enrollment.run
         enrollment_params = dict(user=to_user, run=to_run)  # noqa: C408

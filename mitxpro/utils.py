@@ -70,7 +70,7 @@ def is_near_now(time):
     Returns:
         bool:
             True if near now, false otherwise
-    """  # noqa: D401
+    """
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     five_seconds = datetime.timedelta(0, 5)
     return now - five_seconds < time < now + five_seconds
@@ -96,7 +96,7 @@ def format_datetime_for_filename(datetime_object, include_time=False, include_ms
 
     Returns:
         str: Formatted datetime
-    """  # noqa: D401
+    """
     format_parts = ["%Y%m%d"]
     if include_time or include_ms:
         format_parts.append("%H%M%S")
@@ -115,7 +115,7 @@ def case_insensitive_equal(str1, str2):
 
     Returns:
         bool: True if the strings are equal, ignoring case
-    """  # noqa: D401
+    """
     return str1.lower() == str2.lower()
 
 
@@ -129,12 +129,12 @@ def dict_without_keys(d, *omitkeys):
 
     Returns:
         dict: A dict with omitted keys
-    """  # noqa: D401
+    """
     return {key: d[key] for key in d.keys() if key not in omitkeys}  # noqa: SIM118
 
 
 def filter_dict_by_key_set(dict_to_filter, key_set):
-    """Takes a dictionary and returns a copy with only the keys that exist in the given set"""  # noqa: D401
+    """Takes a dictionary and returns a copy with only the keys that exist in the given set"""
     return {key: dict_to_filter[key] for key in dict_to_filter.keys() if key in key_set}  # noqa: SIM118
 
 
@@ -178,7 +178,7 @@ def first_matching_item(iterable, predicate):
 
     Returns:
         Matching item or None
-    """  # noqa: D401
+    """
     return next(filter(predicate, iterable), None)
 
 
@@ -195,7 +195,7 @@ def matching_item_index(iterable, value_to_match):
 
     Raises:
         StopIteration: Raised if the value is not found in the iterable
-    """  # noqa: D401
+    """
     return next(i for i, value in enumerate(iterable) if value == value_to_match)
 
 
@@ -206,7 +206,7 @@ def find_object_with_matching_attr(iterable, attr_name, value):
 
     Returns:
         Matching item or None
-    """  # noqa: D401
+    """
     for item in iterable:
         try:
             if getattr(item, attr_name) == value:
@@ -220,7 +220,7 @@ def has_equal_properties(obj, property_dict):
     """
     Returns True if the given object has the properties indicated by the keys of the given dict, and the values
     of those properties match the values of the dict
-    """  # noqa: D401
+    """
     for field, value in property_dict.items():
         try:
             if getattr(obj, field) != value:
@@ -238,7 +238,7 @@ def first_or_none(iterable):
         iterable (iterable): Some iterable
     Returns:
         first item or None
-    """  # noqa: D401
+    """
     return next((x for x in iterable), None)
 
 
@@ -250,7 +250,7 @@ def max_or_none(iterable):
         iterable (iterable): Some iterable
     Returns:
         max item or None
-    """  # noqa: D401
+    """
     try:
         return max(iterable)
     except ValueError:
@@ -295,7 +295,7 @@ def unique(iterable):
         iterable (iterable): An iterable of any hashable items
     Returns:
         generator: Unique items in the given iterable
-    """  # noqa: D401
+    """
     seen = set()
     return (x for x in iterable if x not in seen and not seen.add(x))
 
@@ -308,7 +308,7 @@ def unique_ignore_case(strings):
         strings (iterable of str): An iterable of strings
     Returns:
         generator: Unique lowercase strings in the given iterable
-    """  # noqa: D401
+    """
     seen = set()
     return (s for s in map(str.lower, strings) if s not in seen and not seen.add(s))
 
@@ -323,7 +323,7 @@ def item_at_index_or_none(indexable, index):
 
     Returns:
         The item at the given index, or None
-    """  # noqa: D401
+    """
     try:
         return indexable[index]
     except IndexError:
@@ -340,7 +340,7 @@ def item_at_index_or_blank(indexable, index):
 
     Returns:
         str: The item at the given index, or a blank string
-    """  # noqa: D401
+    """
     return item_at_index_or_none(indexable, index) or ""
 
 
@@ -353,7 +353,7 @@ def all_equal(*args):
 
     Returns:
         bool: True if all of the provided args are equal, or if the args are empty
-    """  # noqa: D401
+    """
     return len(set(args)) <= 1
 
 
@@ -366,7 +366,7 @@ def all_unique(iterable):
 
     Returns:
         bool: True if all of the provided args are equal
-    """  # noqa: D401
+    """
     return len(set(iterable)) == len(iterable)
 
 
@@ -380,7 +380,7 @@ def has_all_keys(dict_to_scan, keys):
 
     Returns:
         bool: True if the given dict has all of the given keys
-    """  # noqa: D401
+    """
     return all(key in dict_to_scan for key in keys)
 
 
@@ -407,7 +407,7 @@ def group_into_dict(items, key_fn):
     Returns:
         Dict[Any, T]: A dictionary with keys produced by the key function paired with a list of all the given
             items that produced that key.
-    """  # noqa: D401
+    """
     sorted_items = sorted(items, key=key_fn)
     return {
         key: list(values_iter)
@@ -424,7 +424,7 @@ def get_error_response_summary(response):
 
     Returns:
         str: A summary of the error response
-    """  # noqa: D401
+    """
     # If the response is an HTML document, include the URL in the summary but not the raw HTML
     if "text/html" in response.headers.get("Content-Type", ""):
         summary_dict = {"url": response.url, "content": "(HTML body ignored)"}
@@ -443,7 +443,7 @@ def is_json_response(response):
 
     Returns:
         bool: True if this response is JSON-parseable
-    """  # noqa: D401
+    """
     return response.headers.get("Content-Type") == "application/json"
 
 
@@ -556,7 +556,7 @@ def request_get_with_timeout_retry(url, retries):
 
     Raises:
         requests.exceptions.HTTPError: Raised if the response has a status code indicating an error
-    """  # noqa: D401
+    """
     resp = requests.get(url)  # noqa: S113
     # If there was a timeout (504), retry before giving up
     tries = 1

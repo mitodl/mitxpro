@@ -20,7 +20,7 @@ def api_keys(request):  # noqa: ARG001
 def configuration_context(request):  # noqa: ARG001
     """
     Configuration context for django templates.
-    """  # noqa: D401
+    """
     return {
         "hubspot_portal_id": settings.HUBSPOT_CONFIG.get("HUBSPOT_PORTAL_ID"),
         "hubspot_new_courses_form_guid": settings.HUBSPOT_CONFIG.get(

@@ -58,7 +58,7 @@ class SocialAuthSerializer(serializers.Serializer):
         return {}
 
     def _save_next(self, data):
-        """Persists the next url to the session"""  # noqa: D401
+        """Persists the next url to the session"""
         if "next" in data:
             backend = self.context["backend"]
             # Check and sanitize a user-defined GET/POST next field value

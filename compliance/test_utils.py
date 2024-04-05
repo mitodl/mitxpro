@@ -11,7 +11,7 @@ DATA_DIR = "compliance/test_data/cybersource"
 def get_cybersource_test_settings(private_key=None):
     """
     Generates a valid set of settings for CyberSource
-    """  # noqa: D401
+    """
     if private_key is None:
         private_key = PrivateKey.generate()
 
@@ -30,7 +30,7 @@ def get_cybersource_test_settings(private_key=None):
 def mock_cybersource_wsdl(mocked_responses, settings, service_version=SERVICE_VERSION):
     """
     Mocks the responses to achieve a functional WSDL
-    """  # noqa: D401
+    """
     # in order for zeep to load the wsdl, it will load the wsdl and the accompanying xsd definitions
     with open(f"{DATA_DIR}/CyberSourceTransaction_{service_version}.wsdl", "r") as wsdl:  # noqa: PTH123, UP015
         mocked_responses.add(

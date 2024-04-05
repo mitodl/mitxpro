@@ -20,7 +20,7 @@ def create_user_session(user):
 
     Returns:
         SessionBase: the created session
-    """  # noqa: D401
+    """
     SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 
     session = SessionStore()
@@ -45,7 +45,7 @@ def create_user_with_generated_username(serializer, initial_username):
     Returns:
         User or None: The created User (or None if the User could not be created in the
             number of retries allowed)
-    """  # noqa: D401
+    """
     created_user = None
     username = initial_username
     attempts = 0

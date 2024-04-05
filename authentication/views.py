@@ -40,7 +40,7 @@ class SocialAuthAPIView(APIView):
         raise NotImplementedError("get_serializer_cls must be implemented")  # noqa: EM101
 
     def post(self, request):
-        """Processes a request"""  # noqa: D401
+        """Processes a request"""
         if bool(request.session.get("hijack_history")):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -135,7 +135,7 @@ def get_social_auth_types(request):
 
 
 def confirmation_sent(request, **kwargs):  # noqa: ARG001
-    """The confirmation of an email being sent"""  # noqa: D401
+    """The confirmation of an email being sent"""
     return render(request, "confirmation_sent.html")
 
 

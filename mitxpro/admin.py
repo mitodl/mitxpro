@@ -37,7 +37,7 @@ class TimestampedModelAdmin(admin.ModelAdmin):
         Returns:
             Tuple[str]: The combined field names without any duplicates, unless there were any duplicates in the
                 tuple of existing field names
-        """  # noqa: D401
+        """
         return existing_field_names + tuple(
             field for field in field_names_to_add if field not in existing_field_names
         )

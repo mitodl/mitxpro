@@ -63,19 +63,19 @@ class SocialAuthState:
 
 
 def load_drf_strategy(request=None):
-    """Returns the DRF strategy"""  # noqa: D401
+    """Returns the DRF strategy"""
     return get_strategy(
         "authentication.strategy.DjangoRestFrameworkStrategy", STORAGE, request
     )
 
 
 def get_md5_hash(value):
-    """Returns the md5 hash object for the given value"""  # noqa: D401
+    """Returns the md5 hash object for the given value"""
     return hashlib.md5(value.lower().encode("utf-8"))  # noqa: S324
 
 
 def is_user_email_blocked(email):
-    """Returns the user's email blocked status"""  # noqa: D401
+    """Returns the user's email blocked status"""
     hash_object = get_md5_hash(email)
     return BlockList.objects.filter(hashed_email=hash_object.hexdigest()).exists()
 

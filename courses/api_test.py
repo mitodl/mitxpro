@@ -84,7 +84,7 @@ def test_get_user_enrollments(user):
     CourseRunEnrollmentFactory.create(user=user, active=False)
 
     def key_func(enrollment):
-        """Function for sorting runs by start_date"""  # noqa: D401
+        """Function for sorting runs by start_date"""
         return enrollment.run.start_date
 
     user_enrollments = get_user_enrollments(user)

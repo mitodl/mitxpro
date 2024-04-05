@@ -23,7 +23,7 @@ def any_instance_of(*cls):
 
     Returns:
         AnyInstanceOf: dynamic class type with the desired equality
-    """  # noqa: D401
+    """
 
     class AnyInstanceOf(metaclass=abc.ABCMeta):  # noqa: B024
         """Dynamic class type for __eq__ in terms of isinstance"""
@@ -38,7 +38,7 @@ def any_instance_of(*cls):
 
 @contextmanager
 def assert_not_raises():
-    """Used to assert that the context does not raise an exception"""  # noqa: D401
+    """Used to assert that the context does not raise an exception"""
     try:
         yield
     except AssertionError:
@@ -55,7 +55,7 @@ def assert_drf_json_equal(obj1, obj2):
     Args:
         obj1 (object): the first object
         obj2 (object): the second object
-    """  # noqa: D401
+    """
     json_renderer = JSONRenderer()
     converted1 = json.loads(json_renderer.render(obj1))
     converted2 = json.loads(json_renderer.render(obj2))
@@ -102,7 +102,7 @@ def drf_datetime(dt):
 
     Returns:
         str: ISO 8601 formatted datetime
-    """  # noqa: D401
+    """
     return dt.isoformat().replace("+00:00", "Z")
 
 
@@ -114,7 +114,7 @@ class PickleableMock(Mock):
     """
 
     def __reduce__(self):
-        """Required method for being pickleable"""  # noqa: D401
+        """Required method for being pickleable"""
         return (Mock, ())
 
 
@@ -128,7 +128,7 @@ def create_tempfile_csv(rows_iter):
 
     Returns:
         SimpleUploadedFile: A temporary CSV file with the given contents
-    """  # noqa: D401
+    """
     f = tempfile.NamedTemporaryFile(suffix=".csv", delete=False)
     with open(f.name, "w", encoding="utf8", newline="") as f:  # noqa: PTH123
         writer = csv.writer(f, delimiter=",")
@@ -141,7 +141,7 @@ def create_tempfile_csv(rows_iter):
 
 
 def format_as_iso8601(time):
-    """Helper function to format datetime with the Z at the end"""  # noqa: D401
+    """Helper function to format datetime with the Z at the end"""
     # Can't use datetime.isoformat() because format is slightly different from this
     iso_format = "%Y-%m-%dT%H:%M:%S"
     formatted_time = time.strftime(iso_format)
@@ -161,7 +161,7 @@ def list_of_dicts(specialty_dict_iter):
 
     Returns:
         list of dict: A list of dicts
-    """  # noqa: D401
+    """
     return list(map(dict, specialty_dict_iter))
 
 
@@ -174,7 +174,7 @@ def set_request_session(request, session_dict, mocker):
 
     Returns:
         RequestFactory: The same request object with session variables set
-    """  # noqa: D401
+    """
     middleware = SessionMiddleware(get_response=mocker.Mock())
     middleware.process_request(request)
     for key, value in session_dict.items():
@@ -194,7 +194,7 @@ def update_namespace(tuple_to_update, **updates):
 
     Returns:
         Union([types.namedtuple, typing.NamedTuple]): The updated namespace
-    """  # noqa: D401
+    """
     return tuple_to_update.__class__(
         **{
             **tuple_to_update._asdict(),

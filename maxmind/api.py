@@ -30,7 +30,7 @@ def import_maxmind_database(import_type: str, import_filename: str) -> None:
         - import_filename (str): The CSV format file to import.
     Returns:
         - None
-    """  # noqa: D401
+    """
 
     if import_type not in MAXMIND_CSV_TYPES:
         raise Exception(f"Invalid database type {import_type}")  # noqa: EM102, TRY002
@@ -163,7 +163,7 @@ def ip_to_country_code(ip_address: str, locale: str = "en") -> str:
         - locale (str): The locale to use (default 'en').
     Returns:
         - None or ISO 3166 alpha2 code of the assigned country.
-    """  # noqa: D401
+    """
 
     netaddr = ipaddress.ip_address(ip_address)
 

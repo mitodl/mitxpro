@@ -143,7 +143,7 @@ class FullProductVersionSerializer(ProductVersionSerializer):
             return content_object.run_tag
 
     def get_start_date(self, instance):
-        """Returns the start date of the program or course run"""  # noqa: D401
+        """Returns the start date of the program or course run"""
         content_object = instance.product.content_object
         if isinstance(content_object, CourseRun) and content_object.start_date:
             return content_object.start_date.isoformat()
@@ -397,7 +397,7 @@ class BasketSerializer(serializers.ModelSerializer):
         Returns:
             CouponVersion: CouponVersion object to assign to basket, if any.
 
-        """  # noqa: D401
+        """
         product_version = product.latest_version
         if coupons:
             coupon_code = coupons[0].get("code")
@@ -509,7 +509,7 @@ class BasketSerializer(serializers.ModelSerializer):
         Returns:
             (models.Product, courses.models.ProgramRun): The Product paired with an associated ProgramRun
                 if one exists (or None if one does not exist)
-        """  # noqa: D401
+        """
         item = items[0]
         request_product_id = item.get("product_id")
         try:
@@ -568,7 +568,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
         Returns:
             set of int: A set of updated course run id selections (or None if they were not changed)
-        """  # noqa: D401
+        """
         item = items[0]
         run_ids = set(item.get("run_ids", []))
         self._validate_runs(run_ids, product)
@@ -649,7 +649,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
         Raises:
             ValidationError: Raised if the coupon data is in the wrong format
-        """  # noqa: D401
+        """
         if coupons:
             if len(coupons) > 1:
                 raise ValidationError(
@@ -674,7 +674,7 @@ class BasketSerializer(serializers.ModelSerializer):
             product (models.Product): The Product referred to in the request
         Raises:
             ValidationError: Raised if the run ids provided are invalid
-        """  # noqa: D401
+        """
         if run_ids is not None and len(run_ids) > 0:
             if None in run_ids:
                 raise ValidationError(

@@ -50,7 +50,7 @@ def create_coupons_for_request_row(row, company_id):
     Returns:
         CouponPaymentVersion:
             A CouponPaymentVersion. Other instances will be created at the same time and linked via foreign keys.
-    """  # noqa: D401
+    """
     product_program_run_map = (
         {row.product.id: row.program_run.id} if row.program_run else None
     )
@@ -122,7 +122,7 @@ class CouponRequestRow:
 
         Raises:
             SheetRowParsingException: Raised if the row could not be parsed
-        """  # noqa: D401
+        """
         try:
             return cls(
                 row_index=row_index,
@@ -170,7 +170,7 @@ def is_row_ignored_or_complete(raw_row_data):
 
     Returns:
         bool: True if the data in the given row indicates that it is complete (processed) or should be ignored
-    """  # noqa: D401
+    """
     return item_at_index_or_blank(
         raw_row_data, request_sheet_metadata.SKIP_ROW_COL
     ).strip() == GOOGLE_API_TRUE_VAL or bool(
@@ -207,7 +207,7 @@ class CouponRequestHandler(SheetHandler):
 
         Returns:
             dict: The response body from the Google Sheets API batch update request
-        """  # noqa: D401
+        """
         header_range_req = build_protected_range_request_body(
             worksheet_id=worksheet_id,
             start_row_index=0,
@@ -249,7 +249,7 @@ class CouponRequestHandler(SheetHandler):
 
         Returns:
             pygsheets.Spreadsheet: The Spreadsheet object representing the newly-created sheet
-        """  # noqa: D401
+        """
         # Get coupon codes created by the request
         coupon_codes = Coupon.objects.filter(
             payment__name=coupon_req_row.coupon_name

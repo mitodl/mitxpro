@@ -14,22 +14,22 @@ log = logging.getLogger(__name__)
 
 
 def create_delete_rule(table_name):
-    """Helper function to make SQL to create a rule to prevent deleting from the ecommerce table"""  # noqa: D401
+    """Helper function to make SQL to create a rule to prevent deleting from the ecommerce table"""
     return f"CREATE RULE delete_protect AS ON DELETE TO ecommerce_{table_name} DO INSTEAD NOTHING"
 
 
 def create_update_rule(table_name):
-    """Helper function to make SQL to create a rule to prevent updating a row in the ecommerce table"""  # noqa: D401
+    """Helper function to make SQL to create a rule to prevent updating a row in the ecommerce table"""
     return f"CREATE RULE update_protect AS ON UPDATE TO ecommerce_{table_name} DO INSTEAD NOTHING"
 
 
 def rollback_delete_rule(table_name):
-    """Helper function to make SQL to create a rule to allow deleting from the ecommerce table"""  # noqa: D401
+    """Helper function to make SQL to create a rule to allow deleting from the ecommerce table"""
     return f"DROP RULE delete_protect ON ecommerce_{table_name}"
 
 
 def rollback_update_rule(table_name):
-    """Helper function to make SQL to create a rule to allow updating from the ecommerce table"""  # noqa: D401
+    """Helper function to make SQL to create a rule to allow updating from the ecommerce table"""
     return f"DROP RULE update_protect ON ecommerce_{table_name}"
 
 
@@ -74,7 +74,7 @@ def make_checkout_url(*, product_id=None, code=None, run_tag=None):
 
     Returns:
         str: The URL for the checkout page, including product and coupon code if available
-    """  # noqa: D401
+    """
     base_checkout_url = urljoin(settings.SITE_BASE_URL, reverse("checkout-page"))
     if product_id is None and code is None:
         return base_checkout_url

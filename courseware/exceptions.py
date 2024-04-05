@@ -30,7 +30,7 @@ class EdxApiEnrollErrorException(Exception):  # noqa: N818
             course_run (courses.models.CourseRun): The course run for which the enrollment failed
             http_error (requests.exceptions.HTTPError): The exception from the API call which contains
                 request and response data.
-        """  # noqa: D401
+        """
         self.user = user
         self.course_run = course_run
         self.http_error = http_error
@@ -56,7 +56,7 @@ class UnknownEdxApiEnrollException(Exception):  # noqa: N818
             user (users.models.User): The user for which the enrollment failed
             course_run (courses.models.CourseRun): The course run for which the enrollment failed
             base_exc (Exception): The unexpected exception
-        """  # noqa: D401
+        """
         self.user = user
         self.course_run = course_run
         self.base_exc = base_exc

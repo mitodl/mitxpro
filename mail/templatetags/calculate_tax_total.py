@@ -19,7 +19,7 @@ def calculate_tax_total(total_paid, tax_rate):
 
     Returns:
         Decimal: the total plus tax assessed, quantized to .01
-    """  # noqa: D401
+    """
     return Decimal(calculate_tax(total_paid, tax_rate) + total_paid).quantize(
         Decimal("0.01")
     )

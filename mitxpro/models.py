@@ -44,13 +44,13 @@ class TimestampedModelManager(Manager):
     def update(self, **kwargs):
         """
         Allows access to TimestampedModelQuerySet's update method on the manager
-        """  # noqa: D401
+        """
         return self.get_queryset().update(**kwargs)
 
     def get_queryset(self):
         """
         Returns custom queryset
-        """  # noqa: D401
+        """
         return TimestampedModelQuerySet(self.model, using=self._db)
 
 
@@ -82,7 +82,7 @@ class AuditModel(TimestampedModel):
         """
         Returns:
             str: A field name which links the Auditable model to this model
-        """  # noqa: D401
+        """
         raise NotImplementedError
 
 
@@ -97,7 +97,7 @@ class AuditableModel(Model):
         Returns:
             dict:
                 A serialized representation of the model object
-        """  # noqa: D401
+        """
         raise NotImplementedError
 
     @classmethod
@@ -109,7 +109,7 @@ class AuditableModel(Model):
 
         Returns:
              django.db.models.manager.Manager: The correct model manager for the auditable model
-        """  # noqa: D401
+        """
         return cls.objects
 
     @classmethod
@@ -118,7 +118,7 @@ class AuditableModel(Model):
         Returns:
             class of Model:
                 A class of a Django model used as the audit table
-        """  # noqa: D401
+        """
         raise NotImplementedError
 
     @transaction.atomic
@@ -129,7 +129,7 @@ class AuditableModel(Model):
         Args:
             acting_user (User):
                 The user who made the change to the model. May be None if inapplicable.
-        """  # noqa: D401
+        """
         before_obj = self.objects_for_audit().filter(id=self.id).first()
         self.save(*args, **kwargs)
         self.refresh_from_db()
@@ -172,7 +172,7 @@ class SingletonModel(Model):
 
 
 def _items_for_class(content_type_field, items, model_cls):
-    """Returns a list of items that matches a class by content_type"""  # noqa: D401
+    """Returns a list of items that matches a class by content_type"""
     return [
         item
         for item in items
@@ -229,7 +229,7 @@ class PrefetchGenericQuerySet(QuerySet):
         self._prefetch_generic_done = True
 
     def _fetch_all(self):
-        """Called when a query is evaluated"""  # noqa: D401
+        """Called when a query is evaluated"""
         # first fetch non-generic data, this avoid N+1 issues on the generic items themselves
         super()._fetch_all()
 

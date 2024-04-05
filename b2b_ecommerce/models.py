@@ -39,7 +39,7 @@ class B2BCouponManager(models.Manager):
         Returns:
             B2BCoupon:
                 The coupon instance. If no coupon is found a B2BCoupon.DoesNotExist error is raised
-        """  # noqa: D401
+        """
         coupon = (
             self.filter(
                 Q(coupon_code=coupon_code),
@@ -161,11 +161,11 @@ class B2BOrder(OrderAbstract, AuditableModel):
 
     @staticmethod
     def get_reference_number_prefix():
-        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""  # noqa: D401
+        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""
         return f"{REFERENCE_NUMBER_PREFIX}{settings.ENVIRONMENT}"
 
     def __str__(self):
-        """Description for CouponOrder"""  # noqa: D401
+        """Description for CouponOrder"""
         return f"B2BOrder #{self.id}, status={self.status}"
 
     @classmethod
@@ -238,7 +238,7 @@ class B2BReceipt(TimestampedModel):
     data = models.JSONField()
 
     def __str__(self):
-        """Description of B2BReceipt"""  # noqa: D401
+        """Description of B2BReceipt"""
         if self.order:
             return f"B2BReceipt for order {self.order.id}"
         else:

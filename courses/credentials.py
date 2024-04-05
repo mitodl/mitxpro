@@ -83,7 +83,7 @@ def build_digital_credential(
     certificate: Union[ProgramCertificate, CourseRunCertificate],  # noqa: FA100
     learner_did: LearnerDID,
 ) -> dict:
-    """Function for building certificate digital credentials"""  # noqa: D401
+    """Function for building certificate digital credentials"""
     if isinstance(certificate, ProgramCertificate):
         has_credential = build_program_credential(certificate)
     elif isinstance(certificate, CourseRunCertificate):

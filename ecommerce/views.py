@@ -253,7 +253,7 @@ class OrderFulfillmentView(APIView):
     def post(self, request, *args, **kwargs):  # noqa: ARG002
         """
         Confirmation from CyberSource which fulfills an existing Order.
-        """  # noqa: D401
+        """
         try:
             reference_number = request.data.get("req_reference_number", "")
             if reference_number.startswith(B2BOrder.get_reference_number_prefix()):

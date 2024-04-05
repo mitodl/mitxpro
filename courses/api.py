@@ -43,7 +43,7 @@ def get_user_enrollments(user):
         user (User): A user
     Returns:
         UserEnrollments: An object representing a user's program and course run enrollments
-    """  # noqa: D401
+    """
     program_enrollments = (
         ProgramEnrollment.objects.select_related("program__programpage")
         .prefetch_related("program__courses")
@@ -111,7 +111,7 @@ def create_run_enrollments(
         (list of CourseRunEnrollment, bool): A list of enrollment objects that were successfully
             created, paired with a boolean indicating whether or not edX enrollment was successful
             for all of the given course runs
-    """  # noqa: D401
+    """
     successful_enrollments = []
     try:
         enroll_in_edx_course_runs(user, runs)
@@ -177,7 +177,7 @@ def create_program_enrollments(user, programs, order=None, company=None):
 
     Returns:
         list of ProgramEnrollment: A list of enrollment objects that were successfully created
-    """  # noqa: D401
+    """
     successful_enrollments = []
     for program in programs:
         try:
@@ -220,7 +220,7 @@ def deactivate_run_enrollment(
 
     Returns:
         CourseRunEnrollment: The deactivated enrollment
-    """  # noqa: D401
+    """
     try:
         unenroll_edx_course_run(run_enrollment)
     except Exception:
@@ -260,7 +260,7 @@ def deactivate_program_enrollment(
 
     Returns:
         tuple of ProgramEnrollment, list(CourseRunEnrollment): The deactivated enrollments
-    """  # noqa: D401
+    """
     run_enrollment_params = (
         dict(order_id=program_enrollment.order_id)  # noqa: C408
         if limit_to_order and program_enrollment.order_id

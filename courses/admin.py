@@ -64,7 +64,7 @@ class CourseAdmin(admin.ModelAdmin):
         ordering="program__readable_id",
     )
     def get_program(self, obj):
-        """Returns the related User email"""  # noqa: D401
+        """Returns the related User email"""
         return obj.program.readable_id if obj.program is not None else None
 
 
@@ -130,7 +130,7 @@ class ProgramEnrollmentAdmin(AuditableModelAdmin):
         """
         Overrides base method. A filter was applied to the default queryset, so
         this method ensures that Django admin uses an unfiltered queryset.
-        """  # noqa: D401
+        """
         qs = self.model.all_objects.get_queryset()
         # Code below was copied/pasted from the base method
         ordering = self.get_ordering(request)
@@ -143,7 +143,7 @@ class ProgramEnrollmentAdmin(AuditableModelAdmin):
         ordering="user__email",
     )
     def get_user_email(self, obj):
-        """Returns the related User email"""  # noqa: D401
+        """Returns the related User email"""
         return obj.user.email
 
     @admin.display(
@@ -151,7 +151,7 @@ class ProgramEnrollmentAdmin(AuditableModelAdmin):
         ordering="program__readable_id",
     )
     def get_program_readable_id(self, obj):
-        """Returns the related Program readable_id"""  # noqa: D401
+        """Returns the related Program readable_id"""
         return obj.program.readable_id
 
 
@@ -169,7 +169,7 @@ class ProgramEnrollmentAuditAdmin(TimestampedModelAdmin):
         ordering="enrollment__program__readable_id",
     )
     def get_program_readable_id(self, obj):
-        """Returns the related Program readable_id"""  # noqa: D401
+        """Returns the related Program readable_id"""
         return obj.enrollment.program.readable_id
 
     @admin.display(
@@ -177,7 +177,7 @@ class ProgramEnrollmentAuditAdmin(TimestampedModelAdmin):
         ordering="enrollment__user__email",
     )
     def get_user(self, obj):
-        """Returns the related User's email"""  # noqa: D401
+        """Returns the related User's email"""
         return obj.enrollment.user.email
 
     def has_add_permission(self, request):  # noqa: ARG002, D102
@@ -207,7 +207,7 @@ class CourseRunEnrollmentAdmin(AuditableModelAdmin):
         """
         Overrides base method. A filter was applied to the default queryset, so
         this method ensures that Django admin uses an unfiltered queryset.
-        """  # noqa: D401
+        """
         qs = self.model.all_objects.get_queryset()
         # Code below was copied/pasted from the base method
         ordering = self.get_ordering(request)
@@ -220,7 +220,7 @@ class CourseRunEnrollmentAdmin(AuditableModelAdmin):
         ordering="user__email",
     )
     def get_user_email(self, obj):
-        """Returns the related User email"""  # noqa: D401
+        """Returns the related User email"""
         return obj.user.email
 
     @admin.display(
@@ -228,7 +228,7 @@ class CourseRunEnrollmentAdmin(AuditableModelAdmin):
         ordering="run__courseware_id",
     )
     def get_run_courseware_id(self, obj):
-        """Returns the related CourseRun courseware_id"""  # noqa: D401
+        """Returns the related CourseRun courseware_id"""
         return obj.run.courseware_id
 
 
@@ -246,7 +246,7 @@ class CourseRunEnrollmentAuditAdmin(TimestampedModelAdmin):
         ordering="enrollment__run__courseware_id",
     )
     def get_run_courseware_id(self, obj):
-        """Returns the related CourseRun courseware_id"""  # noqa: D401
+        """Returns the related CourseRun courseware_id"""
         return obj.enrollment.run.courseware_id
 
     @admin.display(
@@ -254,7 +254,7 @@ class CourseRunEnrollmentAuditAdmin(TimestampedModelAdmin):
         ordering="enrollment__user__email",
     )
     def get_user(self, obj):
-        """Returns the related User's email"""  # noqa: D401
+        """Returns the related User's email"""
         return obj.enrollment.user.email
 
     def has_add_permission(self, request):  # noqa: ARG002, D102
@@ -282,7 +282,7 @@ class CourseRunGradeAdmin(admin.ModelAdmin):
         ordering="user__email",
     )
     def get_user_email(self, obj):
-        """Returns the related User email"""  # noqa: D401
+        """Returns the related User email"""
         return obj.user.email
 
     @admin.display(
@@ -290,7 +290,7 @@ class CourseRunGradeAdmin(admin.ModelAdmin):
         ordering="course_run__courseware_id",
     )
     def get_run_courseware_id(self, obj):
-        """Returns the related CourseRun courseware_id"""  # noqa: D401
+        """Returns the related CourseRun courseware_id"""
         return obj.course_run.courseware_id
 
 
@@ -313,7 +313,7 @@ class CourseRunGradeAuditAdmin(TimestampedModelAdmin):
         ordering="course_run_grade__user__email",
     )
     def get_user_email(self, obj):
-        """Returns the related User email"""  # noqa: D401
+        """Returns the related User email"""
         return obj.course_run_grade.user.email
 
     @admin.display(
@@ -321,7 +321,7 @@ class CourseRunGradeAuditAdmin(TimestampedModelAdmin):
         ordering="course_run_grade__course_run__courseware_id",
     )
     def get_run_courseware_id(self, obj):
-        """Returns the related CourseRun courseware_id"""  # noqa: D401
+        """Returns the related CourseRun courseware_id"""
         return obj.course_run_grade.course_run.courseware_id
 
     def has_add_permission(self, request):  # noqa: ARG002, D102

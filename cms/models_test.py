@@ -496,7 +496,7 @@ def test_external_course_page_faculty_subpage():
 
 
 def _get_faculty_members():
-    """Provides a `faculty` property instantiation data"""  # noqa: D401
+    """Provides a `faculty` property instantiation data"""
     return [
         {
             "type": "member",
@@ -510,7 +510,7 @@ def _get_faculty_members():
 
 
 def _assert_faculty_members(obj):
-    """Verifies `faculty` property returns expected value"""  # noqa: D401
+    """Verifies `faculty` property returns expected value"""
     # invalidate cached property
     del obj.child_pages
 

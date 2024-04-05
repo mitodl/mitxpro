@@ -324,7 +324,7 @@ def is_program_text_id(item_text_id):
 def get_catalog_course_filter(relative_filter=""):
     """
     Generates course filter for the catalog visible course pages.
-    """  # noqa: D401
+    """
     courseware_live_filter = {
         f"{relative_filter}course__live": True,
         f"{relative_filter}course__courseruns__live": True,

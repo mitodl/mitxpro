@@ -57,7 +57,7 @@ def get_google_creds_from_pickled_token_file(token_file_path):
     """
     Helper method to get valid credentials from a local token file (and refresh as necessary).
     For dev use only.
-    """  # noqa: D401
+    """
     with open(token_file_path, "rb") as f:  # noqa: PTH123
         creds = pickle.loads(f.read())  # noqa: S301
     if creds and creds.expired and creds.refresh_token:
@@ -80,7 +80,7 @@ def get_credentials():
 
     Raises:
         ImproperlyConfigured: Raised if no credentials have been configured
-    """  # noqa: D401
+    """
     if settings.DRIVE_SERVICE_ACCOUNT_CREDS:
         is_sharing_to_service_account = any(
             email
@@ -140,7 +140,7 @@ def get_authorized_pygsheets_client():
 
     Returns:
         pygsheets.client.Client: The authorized Client object
-    """  # noqa: D401
+    """
     credentials = get_credentials()
     pygsheets_client = pygsheets.authorize(custom_credentials=credentials)
     if settings.DRIVE_SHARED_ID:
@@ -171,7 +171,7 @@ class ExpandedSheetsClient:
 
         Returns:
             list of dict: A dict of metadata for each file that matched the given query
-        """  # noqa: D401
+        """
         extra_list_params = {}
         if self.supports_team_drives:
             extra_list_params.update(
@@ -199,7 +199,7 @@ class ExpandedSheetsClient:
 
         Returns:
             dict: Google Drive API response to the files.update request
-        """  # noqa: D401
+        """
         return (
             self.pygsheets_client.drive.service.files()
             .update(
@@ -221,7 +221,7 @@ class ExpandedSheetsClient:
 
         Returns:
            dict: The file metadata, which includes the specified fields.
-        """  # noqa: D401
+        """
         return (
             self.pygsheets_client.drive.service.files()
             .get(
@@ -243,7 +243,7 @@ class ExpandedSheetsClient:
 
         Returns:
             dict: appProperties (if any) for the given sheet according to Drive
-        """  # noqa: D401
+        """
         result = self.get_drive_file_metadata(file_id=file_id, fields="appProperties")
         if result and "appProperties" in result:
             return result["appProperties"]
@@ -260,7 +260,7 @@ class ExpandedSheetsClient:
 
         Returns:
             dict: Google API response to the spreadsheets.values.batchUpdate request
-        """  # noqa: D401
+        """
         return (
             self.pygsheets_client.sheet.service.spreadsheets()
             .batchUpdate(spreadsheetId=sheet_id, body={"requests": request_objects})
@@ -280,7 +280,7 @@ def build_drive_service(credentials=None):
     Returns:
         googleapiclient.discovery.Resource: The Drive API service. The methods available on this resource are
             defined dynamically (ref: http://googleapis.github.io/google-api-python-client/docs/dyn/drive_v3.html)
-    """  # noqa: D401
+    """
     credentials = credentials or get_credentials()
     return build("drive", "v3", credentials=credentials, cache_discovery=False)
 
@@ -302,7 +302,7 @@ def batch_share_callback(
         request_id (str): The id of the individual batch request
         response (dict): The API response body if no error occurred
         exception (googleapiclient.errors.HttpError): The error, if one occurred
-    """  # noqa: D401
+    """
     if exception:
         raise FailedBatchRequestException from exception
 
@@ -376,7 +376,7 @@ def request_file_watch(
 
     Returns:
         dict: The Google file watch API response
-    """  # noqa: D401
+    """
     drive_service = build_drive_service(credentials=credentials)
     extra_body_params = {}
     if expiration:
@@ -414,7 +414,7 @@ def _generate_channel_id(sheet_metadata, sheet_file_id=None, dt=None):
 
     Returns:
         str: The channel id to be used in the Google file watch API
-    """  # noqa: D401
+    """
     dt = dt or now_in_utc()
     new_channel_id_segments = [
         settings.DRIVE_WEBHOOK_CHANNEL_ID,
@@ -435,7 +435,7 @@ def _track_file_watch_renewal(sheet_type, sheet_file_id, exception=None):
         sheet_type (str): The type of spreadsheet
         sheet_file_id (str): The file id of the spreadsheet
         exception (Optional[Exception]): The exception raised when trying to renew the file watch
-    """  # noqa: D401
+    """
     result = None
     result_status_code = None
     if exception is None:
@@ -482,7 +482,7 @@ def create_or_renew_sheet_file_watch(sheet_metadata, force=False, sheet_file_id=
         (Optional[GoogleFileWatch], bool, bool): The GoogleFileWatch object (or None), a flag indicating
             whether or not it was newly created during execution, and a flag indicating
             whether or not it was updated during execution.
-    """  # noqa: D401
+    """
     now = now_in_utc()
     sheet_file_id = sheet_file_id or sheet_metadata.sheet_file_id
     new_channel_id = _generate_channel_id(
@@ -562,7 +562,7 @@ def get_sheet_metadata_from_type(sheet_type):
 
     Raises:
          ValueError: Raised if there is no metadata class associated with the given sheet type
-    """  # noqa: D401
+    """
     if sheet_type == SHEET_TYPE_COUPON_REQUEST:
         return CouponRequestSheetMetadata()
     elif sheet_type == SHEET_TYPE_COUPON_ASSIGN:

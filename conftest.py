@@ -78,7 +78,7 @@ def clean_up_files():  # noqa: PT004
 def django_db_setup(django_db_setup, django_db_blocker):  # noqa: ARG001, PT004
     """
     Creates all the index pages during the tests setup as index pages are required by the factories.
-    """  # noqa: D401
+    """
     with django_db_blocker.unblock():
         site = Site.objects.filter(is_default_site=True).first()
         home_page = Page.objects.get(id=site.root_page.id)

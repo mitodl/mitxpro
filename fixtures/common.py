@@ -11,7 +11,7 @@ from users.factories import UserFactory
 
 @pytest.fixture
 def user(db):  # noqa: ARG001
-    """Creates a user"""  # noqa: D401
+    """Creates a user"""
     return UserFactory.create()
 
 
@@ -69,14 +69,14 @@ def admin_drf_client(admin_user):
 
 @pytest.fixture
 def mocked_responses():
-    """Mocked responses for requests library"""  # noqa: D401
+    """Mocked responses for requests library"""
     with responses.RequestsMock() as rsps:
         yield rsps
 
 
 @pytest.fixture
 def mock_context(mocker, user):
-    """Mocked context for serializers"""  # noqa: D401
+    """Mocked context for serializers"""
     return {"request": mocker.Mock(user=user)}
 
 
@@ -94,7 +94,7 @@ def home_page(wagtail_site):
 
 @pytest.fixture
 def valid_address_dict():
-    """Yields a dict that will deserialize into a valid legal address"""  # noqa: D401
+    """Yields a dict that will deserialize into a valid legal address"""
     return dict(  # noqa: C408
         first_name="Test",
         last_name="User",
@@ -108,5 +108,5 @@ def valid_address_dict():
 
 @pytest.fixture
 def nplusone_fail(settings):  # noqa: PT004
-    """Configures the nplusone app to raise errors"""  # noqa: D401
+    """Configures the nplusone app to raise errors"""
     settings.NPLUSONE_RAISE = True

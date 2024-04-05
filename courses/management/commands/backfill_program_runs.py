@@ -47,7 +47,7 @@ class Command(BaseCommand):
         Returns:
             dict: A dictionary mapping a run suffix to a two-item tuple containing the overall
                 start and end dates for the course runs matching that suffix.
-        """  # noqa: D401
+        """
         course_ids = program.courses.values_list("id", flat=True)
         num_program_courses = len(course_ids)
         all_program_runs = (
@@ -101,7 +101,7 @@ class Command(BaseCommand):
 
         Returns:
             list of ProgramRun: The created ProgramRun objects
-        """  # noqa: D401
+        """
         existing_program_run_tags = set(
             program.programruns.values_list("run_tag", flat=True)
         )

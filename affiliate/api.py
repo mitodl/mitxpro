@@ -13,7 +13,7 @@ def get_affiliate_code_from_qstring(request):
 
     Returns:
         Optional[str]: The affiliate code (or None)
-    """  # noqa: D401
+    """
     return request.GET.get(AFFILIATE_QS_PARAM) if request.method == "GET" else None
 
 
@@ -26,7 +26,7 @@ def get_affiliate_code_from_request(request):
 
     Returns:
         Optional[str]: The affiliate code (or None)
-    """  # noqa: D401
+    """
     return getattr(request, "affiliate_code", None)
 
 
@@ -39,7 +39,7 @@ def get_affiliate_id_from_code(affiliate_code):
 
     Returns:
         Optional[Affiliate]: The id of the Affiliate that matches the given code (if it exists)
-    """  # noqa: D401
+    """
     return first_or_none(
         Affiliate.objects.filter(code=affiliate_code).values_list("id", flat=True)
     )
@@ -54,7 +54,7 @@ def get_affiliate_id_from_request(request):
 
     Returns:
         Optional[Affiliate]: The Affiliate object that matches the affiliate code in the request (or None)
-    """  # noqa: D401
+    """
     affiliate_code = get_affiliate_code_from_request(request)
     return (
         get_affiliate_id_from_code(affiliate_code)

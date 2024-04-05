@@ -35,7 +35,7 @@ def get_bulk_assignment_messages(event=None, begin=None, end=None):
 
     Raises:
         requests.exceptions.HTTPError: Raised if the response has a status code indicating an error
-    """  # noqa: D401
+    """
     added_params = {}
     if event:
         added_params["event"] = event

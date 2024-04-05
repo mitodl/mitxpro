@@ -67,7 +67,7 @@ class DeferralRequestRow:
 
         Raises:
             SheetRowParsingException: Raised if the row could not be parsed
-        """  # noqa: D401
+        """
         raw_row_data = list(map(clean_sheet_value, raw_row_data))
         try:
             return cls(
@@ -121,7 +121,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
         Returns:
             RowResult or None: An object representing the results of processing the row, or None if
                 nothing needs to be done with this row.
-        """  # noqa: D401
+        """
         deferral_request, request_created, request_updated = self.get_or_create_request(
             row_data
         )

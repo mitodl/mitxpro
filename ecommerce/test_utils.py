@@ -18,7 +18,7 @@ FAKE = faker.Factory.create()
 def gen_fake_receipt_data(order=None):
     """
     Helper function to generate a fake signed piece of data
-    """  # noqa: D401
+    """
     data = {}
     for _ in range(10):
         data[FAKE.text()] = FAKE.text()

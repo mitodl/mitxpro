@@ -44,13 +44,13 @@ class Company(TimestampedModel):
     name = models.CharField(max_length=512, unique=True)
 
     def __str__(self):
-        """Description for Company"""  # noqa: D401
+        """Description for Company"""
         return f"Company {self.name}"
 
 
 class ProductQuerySet(PrefetchGenericQuerySet):  # noqa: D101
     def active(self):
-        """Filters for active products only"""  # noqa: D401
+        """Filters for active products only"""
         return self.filter(is_active=True)
 
     def with_ordered_versions(self):
@@ -112,7 +112,7 @@ class Product(TimestampedModel):
 
     @cached_property
     def latest_version(self):
-        """Gets the most recently created ProductVersion associated with this Product"""  # noqa: D401
+        """Gets the most recently created ProductVersion associated with this Product"""
         return first_or_none(self.ordered_versions)
 
     @property
@@ -202,7 +202,7 @@ class Product(TimestampedModel):
             return self.latest_version.price
 
     def __str__(self):
-        """Description of a product"""  # noqa: D401
+        """Description of a product"""
         return f"Product for {self.content_object}"
 
 
@@ -237,7 +237,7 @@ class ProductVersion(TimestampedModel):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        """Description of a ProductVersion"""  # noqa: D401
+        """Description of a ProductVersion"""
         return f"ProductVersion for {self.description}, ${self.price}"
 
 
@@ -250,7 +250,7 @@ class Basket(TimestampedModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
 
     def __str__(self):
-        """Description of Basket"""  # noqa: D401
+        """Description of Basket"""
         return f"Basket for {self.user}"
 
 
@@ -269,7 +269,7 @@ class BasketItem(TimestampedModel):
     )
 
     def __str__(self):
-        """Description of BasketItem"""  # noqa: D401
+        """Description of BasketItem"""
         return f"BasketItem of product {self.product} (qty: {self.quantity})"
 
 
@@ -342,11 +342,11 @@ class Order(OrderAbstract, AuditableModel):
 
     @staticmethod
     def get_reference_number_prefix():
-        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""  # noqa: D401
+        """The reference number prefix used to match a CyberSource order fulfillment HTTP request with an order"""
         return f"{REFERENCE_NUMBER_PREFIX}{settings.ENVIRONMENT}"
 
     def __str__(self):
-        """Description for Order"""  # noqa: D401
+        """Description for Order"""
         return f"Order #{self.id}, status={self.status}"
 
     @classmethod
@@ -444,7 +444,7 @@ class Line(TimestampedModel):
     quantity = models.PositiveIntegerField()
 
     def __str__(self):
-        """Description for Line"""  # noqa: D401
+        """Description for Line"""
         return f"Line for order #{self.order.id}, {self.product_version} (qty: {self.quantity})"
 
 
@@ -494,7 +494,7 @@ class CouponPaymentQueryset(models.QuerySet):  # noqa: D101
 
 class CouponPaymentManager(models.Manager):  # noqa: D101
     def get_queryset(self):
-        """Sets the custom queryset"""  # noqa: D401
+        """Sets the custom queryset"""
         return CouponPaymentQueryset(self.model, using=self._db)
 
     def with_ordered_versions(self):
@@ -522,7 +522,7 @@ class CouponPayment(TimestampedModel):
         return self.versions.order_by("-created_on").first()
 
     def __str__(self):
-        """Description for CouponPayment"""  # noqa: D401
+        """Description for CouponPayment"""
         return f"CouponPayment {self.name}"
 
 
@@ -596,7 +596,7 @@ class CouponPaymentVersion(TimestampedModel):
             raise ValidationError({"amount": error_message})
 
     def __str__(self):
-        """Description for CouponPaymentVersion"""  # noqa: D401
+        """Description for CouponPaymentVersion"""
         return f"CouponPaymentVersion for {self.num_coupon_codes} of type {self.coupon_type}"
 
     def calculate_discount_amount(self, product_version=None, price=None):
@@ -657,7 +657,7 @@ class Coupon(TimestampedModel):
     include_future_runs = models.BooleanField(default=False)
 
     def __str__(self):
-        """Description for Coupon"""  # noqa: D401
+        """Description for Coupon"""
         return f"Coupon {self.coupon_code} for {self.payment}"
 
 
@@ -673,7 +673,7 @@ class CouponVersion(TimestampedModel):
     payment_version = models.ForeignKey(CouponPaymentVersion, on_delete=models.PROTECT)
 
     def __str__(self):
-        """Description for CouponVersion"""  # noqa: D401
+        """Description for CouponVersion"""
         return f"CouponVersion {self.coupon.coupon_code} for {self.payment_version}"
 
 
@@ -693,7 +693,7 @@ class CouponEligibility(TimestampedModel):
         unique_together = ("coupon", "product")
 
     def __str__(self):
-        """Description of CouponProduct"""  # noqa: D401
+        """Description of CouponProduct"""
         return f"CouponProduct for product {self.product}, coupon {self.coupon}"
 
 
@@ -710,7 +710,7 @@ class CouponSelection(TimestampedModel):
         unique_together = ("coupon", "basket")
 
     def __str__(self):
-        """Description of CouponSelection"""  # noqa: D401
+        """Description of CouponSelection"""
         return f"CouponSelection for basket {self.basket}, coupon {self.coupon}"
 
 
@@ -727,7 +727,7 @@ class CouponRedemption(TimestampedModel):
         unique_together = ("coupon_version", "order")
 
     def __str__(self):
-        """Description of CouponRedemption"""  # noqa: D401
+        """Description of CouponRedemption"""
         return f"CouponRedemption for order {self.order}, coupon version {self.coupon_version}"
 
 
@@ -741,7 +741,7 @@ class Receipt(TimestampedModel):
     data = models.JSONField()
 
     def __str__(self):
-        """Description of Receipt"""  # noqa: D401
+        """Description of Receipt"""
         if self.order:
             return f"Receipt for order {self.order.id}"
         else:
@@ -854,7 +854,7 @@ class TaxRate(TimestampedModel):
     active = models.BooleanField(default=True)
 
     def to_dict(self):
-        """Returns object data as dict"""  # noqa: D401
+        """Returns object data as dict"""
         return {
             "country_code": self.country_code,
             "tax_rate": self.tax_rate,

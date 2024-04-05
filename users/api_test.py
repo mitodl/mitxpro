@@ -128,7 +128,7 @@ def test_find_available_username(
     mocker.patch("users.api.USERNAME_MAX_LEN", temp_username_max_len)
 
     def suffixed_username_generator():
-        """Generator for usernames with suffixes that will not exceed the username character limit"""  # noqa: D401
+        """Generator for usernames with suffixes that will not exceed the username character limit"""
         for suffix_int in range(1, suffixed_to_create + 1):
             suffix = str(suffix_int)
             username = f"{username_base}{suffix}"

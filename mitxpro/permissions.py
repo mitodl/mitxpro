@@ -9,7 +9,7 @@ class UserIsOwnerPermission(permissions.BasePermission):
         """
         Returns True if the requesting user is the owner of the object as
         determined by the "owner_field" property on the view (defaults to "user")
-        """  # noqa: D401
+        """
         owner_field = getattr(view, "owner_field", None)
 
         # if no owner_field is specified, the object itself is compared

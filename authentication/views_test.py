@@ -98,7 +98,7 @@ def mock_email_send(mocker):
 
 @contextmanager
 def noop():
-    """A no-op context manager"""  # noqa: D401
+    """A no-op context manager"""
     yield
 
 
@@ -146,7 +146,7 @@ class AuthStateMachine(RuleBasedStateMachine):
     courseware_tasks_patcher = patch("authentication.pipeline.user.courseware_tasks")
 
     def __init__(self):
-        """Setup the machine"""  # noqa: D401
+        """Setup the machine"""
         super().__init__()
         # wrap the execution in a django transaction, similar to django's TestCase
         self.atomic = transaction.atomic()

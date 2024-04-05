@@ -64,7 +64,7 @@ def safe_format_recipients(recipients):
 
     Returns:
         list of User: list of users to send to
-    """  # noqa: D401
+    """
     if not recipients:
         return []
 
@@ -88,12 +88,12 @@ def can_email_user(user):
 
     Returns:
         bool: True if we can email this user
-    """  # noqa: D401
+    """
     return bool(user.email)
 
 
 def get_base_context():
-    """Returns a dict of context variables that are needed in all emails"""  # noqa: D401
+    """Returns a dict of context variables that are needed in all emails"""
     return {"base_url": settings.SITE_BASE_URL, "site_name": settings.SITE_NAME}
 
 
@@ -107,7 +107,7 @@ def context_for_user(*, user=None, extra_context=None):
 
     Returns:
         dict: the context for this user
-    """  # noqa: D401
+    """
     context = get_base_context()
 
     if user:
@@ -129,7 +129,7 @@ def render_email_templates(template_name, context):
 
     Returns:
         (str, str, str): tuple of the templates for subject, text_body, html_body
-    """  # noqa: D401
+    """
     subject_text = render_to_string(f"{template_name}/subject.txt", context).rstrip()
 
     context.update({"subject": subject_text})
@@ -166,7 +166,7 @@ def messages_for_recipients(recipients_and_contexts, template_name):
 
     Yields:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
-    """  # noqa: D401
+    """
     with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
         for recipient, context in recipients_and_contexts:
             yield build_message(
@@ -188,7 +188,7 @@ def message_for_recipient(recipient, context, template_name):
 
     Returns:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
-    """  # noqa: D401
+    """
     return list(messages_for_recipients([(recipient, context)], template_name))[0]  # noqa: RUF015
 
 
@@ -205,7 +205,7 @@ def build_messages(template_name, recipients, extra_context, metadata=None):
 
     Yields:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
-    """  # noqa: D401
+    """
     context = {**get_base_context(), **(extra_context or {})}
     with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
         for recipient in recipients:
@@ -228,7 +228,7 @@ def build_user_specific_messages(template_name, user_message_props_iter):
 
     Yields:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
-    """  # noqa: D401
+    """
     with mail.get_connection(settings.NOTIFICATION_EMAIL_BACKEND) as connection:
         for user_message_props in user_message_props_iter:
             yield build_message(
@@ -253,7 +253,7 @@ def build_message(connection, template_name, recipient, context, metadata=None):
 
     Returns:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
-    """  # noqa: D401
+    """
     subject, text_body, html_body = render_email_templates(template_name, context or {})
     msg = AnymailMessage(
         subject=subject,
@@ -281,7 +281,7 @@ def send_messages(messages):
 
     Args:
         messages (list of django.core.mail.EmailMultiAlternatives): list of messages to send
-    """  # noqa: D401
+    """
     for msg in messages:
         try:
             msg.send()
@@ -295,7 +295,7 @@ def send_message(message):
 
     Args:
         message (django.core.mail.EmailMultiAlternatives): message to send
-    """  # noqa: D401
+    """
     send_messages([message])
 
 
@@ -309,7 +309,7 @@ def validate_email_addresses(email_addresses):
 
     Raises:
         MultiEmailValidationError: Raised if any of the emails fail validation
-    """  # noqa: D401
+    """
     invalid_emails = set()
     for email in email_addresses:
         try:

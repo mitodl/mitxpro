@@ -52,7 +52,7 @@ def validate_email_auth_request(
         strategy (social_django.strategy.DjangoStrategy): the strategy used to authenticate
         backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
         user (User): the current user
-    """  # noqa: D401
+    """
     if backend.name != EmailAuth.name:
         return {}
 
@@ -77,7 +77,7 @@ def get_username(
         strategy (social_django.strategy.DjangoStrategy): the strategy used to authenticate
         backend (social_core.backends.base.BaseAuth): the backend being used to authenticate
         user (User): the current user
-    """  # noqa: D401
+    """
     return {"username": None if not user else strategy.storage.user.get_username(user)}
 
 
@@ -103,7 +103,7 @@ def create_user_via_email(
 
     Raises:
         RequirePasswordAndPersonalInfoException: if the user hasn't set password or name
-    """  # noqa: D401
+    """
     if backend.name != EmailAuth.name or flow != SocialAuthState.FLOW_REGISTER:
         return {}
 
@@ -173,7 +173,7 @@ def create_profile(
 
     Raises:
         RequireProfileException: if the profile data is missing or invalid
-    """  # noqa: D401
+    """
     if backend.name != EmailAuth.name or user.profile.is_complete:
         return {}
 
@@ -211,7 +211,7 @@ def validate_email(
 
     Raises:
         EmailBlockedException: if the user email is blocked
-    """  # noqa: D401
+    """
     data = strategy.request_data()
     authentication_flow = data.get("flow")
     if authentication_flow == SocialAuthState.FLOW_REGISTER and "email" in data:  # noqa: SIM102
@@ -242,7 +242,7 @@ def validate_password(
 
     Raises:
         RequirePasswordException: if the user password is invalid
-    """  # noqa: D401
+    """
     if backend.name != EmailAuth.name or flow != SocialAuthState.FLOW_LOGIN:
         return {}
 

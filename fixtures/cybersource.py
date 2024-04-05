@@ -12,13 +12,13 @@ from compliance.test_utils import (
 
 @pytest.fixture
 def cybersource_private_key():
-    """Creates a new NaCl private key"""  # noqa: D401
+    """Creates a new NaCl private key"""
     return PrivateKey.generate()
 
 
 @pytest.fixture
 def cybersource_settings(settings, cybersource_private_key):
-    """Configured CyberSource settings"""  # noqa: D401
+    """Configured CyberSource settings"""
     for attr_name, value in get_cybersource_test_settings(
         cybersource_private_key
     ).items():

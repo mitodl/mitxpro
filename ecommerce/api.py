@@ -93,7 +93,7 @@ def determine_visitor_country(request: HttpRequest or None) -> str or None:
         request (HttpRequest): the current request object
     Returns:
         The resolved country, or the learner's profile country code
-    """  # noqa: D401
+    """
 
     if not request or not request.user.is_authenticated:
         return None
@@ -237,7 +237,7 @@ def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addre
         ip_address (str): The user's IP address
     Returns:
         dict: the payload to send to CyberSource via Secure Acceptance
-    """  # noqa: D401
+    """
     # http://apps.cybersource.com/library/documentation/dev_guides/Secure_Acceptance_WM/Secure_Acceptance_WM.pdf
     # Section: API Fields
 
@@ -338,7 +338,7 @@ def generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addres
         ip_address (str): The user's IP address
     Returns:
         dict: the payload to send to CyberSource via Secure Acceptance
-    """  # noqa: D401
+    """
     return sign_cybersource_payload(
         _generate_cybersource_sa_payload(
             order=order,
@@ -639,7 +639,7 @@ def get_product_version_price_with_discount_tax(
         dict:
         - price (Decimal): discounted price for the Product
         - tax_assessed (Decimal): tax assessed for the discounted price
-    """  # noqa: D401
+    """
 
     product_version_price = get_product_version_price_with_discount(
         coupon_version=coupon_version, product_version=product_version
@@ -682,7 +682,7 @@ def set_coupons_to_redeemed(redeemed_email, coupon_ids):
     Args:
         redeemed_email (str): The email address that was used to redeem the given coupons
         coupon_ids (iterable of int): ecommerce.models.Coupon id values for the Coupons that were redeemed
-    """  # noqa: D401
+    """
     updated_assignments = []
     with transaction.atomic():
         assignments = (
@@ -823,7 +823,7 @@ def get_order_programs(order):
 
     Returns:
         list of Program: A list of Programs that were purchased in the order
-    """  # noqa: D401
+    """
     return [
         line.product_version.product.content_object
         for line in order.lines.select_related("product_version__product").all()
@@ -969,7 +969,7 @@ def _validate_basket_contents(basket):
     Returns:
         (BasketItem, Product, ProductVersion): The basket item, product, and product version associated with
             the basket
-    """  # noqa: D401
+    """
     # A basket is expected to have a one item (which in turn will create one Line)
     basket_items = basket.basketitems.all()
     if len(basket_items) == 0:
@@ -1013,7 +1013,7 @@ def _validate_basket_run_selections(basket, product_object):
 
     Returns:
         set of int: The course run IDs of the selected course runs
-    """  # noqa: D401
+    """
     course_run_selections = basket.courserunselection_set.all()
     if len(course_run_selections) == 0:
         raise ValidationError({"runs": "You must select a date for each course."})
@@ -1063,7 +1063,7 @@ def _validate_coupon_selection(basket, product):
     Returns:
         Optional(CouponVersion): The coupon version associated with the applied coupon code (or None if no code was
             applied to the basket)
-    """  # noqa: D401
+    """
     coupon_selections = basket.couponselection_set
     if coupon_selections.count() > 1:
         log.error(
@@ -1145,7 +1145,7 @@ def fetch_and_serialize_unused_coupons(user):
                 "product_id": 123,
                 "expiration_date": "2050-01-01T00:00:00.000000Z"
             }
-    """  # noqa: D401
+    """
     unused_product_coupon_ids = ProductCouponAssignment.objects.filter(
         email__iexact=user.email, redeemed=False
     ).values_list("product_coupon", flat=True)
@@ -1438,7 +1438,7 @@ def get_product_from_text_id(text_id):
         (Product, Program or CourseRun, ProgramRun): A tuple containing the Product for the CourseRun/Program,
             the Program/CourseRun associated with the text id, and a matching ProgramRun if the text id
             indicated one
-    """  # noqa: D401
+    """
     program_run_id_match = re.match(PROGRAM_RUN_ID_PATTERN, text_id)
     # This text id matches the pattern of a program text id with a program run attached
     if program_run_id_match:
@@ -1512,7 +1512,7 @@ def get_product_from_querystring_id(qs_product_id):
         (Product, Program or CourseRun, ProgramRun): A tuple containing the Product that matches the id,
             the Program/CourseRun associated with that product, and a matching ProgramRun if the product id
             indicated one
-    """  # noqa: D401
+    """
     if isinstance(qs_product_id, int) or qs_product_id.isdigit():
         product = Product.objects.get(id=int(qs_product_id))
         return product, product.content_object, None

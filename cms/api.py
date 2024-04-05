@@ -30,7 +30,7 @@ def filter_and_sort_catalog_pages(
     Returns:
         tuple of (list of Pages): A tuple containing a list of combined ProgramPages, CoursePages, ExternalCoursePages and ExternalProgramPages, a list of
             ProgramPages and ExternalProgramPages, and a list of CoursePages and ExternalCoursePages, all sorted by the next course/program run date and title
-    """  # noqa: D401
+    """
     valid_program_pages = [
         page for page in program_pages if page.product.is_catalog_visible
     ]
@@ -82,7 +82,7 @@ def get_home_page():
 
     Returns:
         Page: The home page object
-    """  # noqa: D401
+    """
     return Page.objects.get(
         content_type=ContentType.objects.get_for_model(cms_models.HomePage)
     )
@@ -92,7 +92,7 @@ def ensure_home_page_and_site():
     """
     Ensures that Wagtail is configured with a home page of the right type, and that
     the home page is configured as the default site.
-    """  # noqa: D401
+    """
     site = Site.objects.filter(is_default_site=True).first()
     valid_home_page = Page.objects.filter(
         content_type=ContentType.objects.get_for_model(cms_models.HomePage)
@@ -121,7 +121,7 @@ def ensure_catalog_page():
     """
     Ensures that a catalog page with the correct slug exists. If this page doesn't
     exist with the correct slug, the course catalog cannot be accessed.
-    """  # noqa: D401
+    """
     catalog_page = Page.objects.filter(
         content_type=ContentType.objects.get_for_model(cms_models.CatalogPage)
     ).first()
@@ -139,7 +139,7 @@ def ensure_index_pages():  # noqa: C901
     """
     Ensures that the proper index pages exist as children of the home page, and that
     any pages that should belong to those index pages are set as children.
-    """  # noqa: D401
+    """
     home_page = get_home_page()
     course_index = cms_models.CourseIndexPage.objects.first()
     program_index = cms_models.ProgramIndexPage.objects.first()
@@ -235,7 +235,7 @@ def configure_wagtail():
     """
     Ensures that all appropriate changes have been made to Wagtail that will
     make the site navigable.
-    """  # noqa: D401
+    """
     ensure_home_page_and_site()
     ensure_catalog_page()
     ensure_index_pages()

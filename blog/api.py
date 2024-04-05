@@ -18,7 +18,7 @@ def parse_blog(item: dict):
 
     Args:
         item (dict): Dict of blog post data
-    """  # noqa: D401
+    """
     if not isinstance(item, dict):
         log.error(
             "Could not parse blog post. Expecting a dict type but got: %s", type(item)

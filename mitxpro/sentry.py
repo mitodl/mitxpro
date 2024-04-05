@@ -38,7 +38,7 @@ def init_sentry(*, dsn, environment, version, log_level, heroku_app_name):
         version (str): the version of the application
         log_level (str): the sentry log level
         heroku_app_name (str or None): the name of the heroku review app
-    """  # noqa: D401
+    """
     sentry_sdk.init(
         dsn=dsn,
         environment=environment,

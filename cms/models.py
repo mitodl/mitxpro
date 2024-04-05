@@ -372,7 +372,7 @@ class WebinarPage(MetadataPageMixin, Page):
         return self.date.strftime("%A, %B %-d, %Y")
 
     def clean(self):
-        """Validates date and time for upcoming webinars."""  # noqa: D401
+        """Validates date and time for upcoming webinars."""
         super().clean()
         if self.category and self.category == UPCOMING_WEBINAR:
             errors = {}
@@ -405,7 +405,7 @@ class WebinarPage(MetadataPageMixin, Page):
         return self.category == UPCOMING_WEBINAR
 
     def detail_page_url(self, request):
-        """Returns the detail page url for the webinar"""  # noqa: D401
+        """Returns the detail page url for the webinar"""
         if self.is_upcoming_webinar:
             return self.action_url if self.action_url else ""
 
@@ -716,7 +716,7 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
     def index_route(self, request, *args, **kwargs):  # noqa: ARG002
         """
         The index page is not meant to be served/viewed directly
-        """  # noqa: D401
+        """
         raise Http404
 
 
@@ -725,11 +725,11 @@ class WagtailCachedPageMixin:
 
     @cached_property
     def child_pages(self):
-        """Gets child pages for the wagtail page"""  # noqa: D401
+        """Gets child pages for the wagtail page"""
         return self.get_children().select_related("content_type").live()
 
     def _get_child_page_of_type(self, cls):
-        """Gets the first child page of the given type if it exists"""  # noqa: D401
+        """Gets the first child page of the given type if it exists"""
 
         child = next(
             (
@@ -1340,7 +1340,7 @@ class CourseProductPage(ProductPage):
     def course_with_related_objects(self):
         """
         Gets the course with related objects.
-        """  # noqa: D401
+        """
         return (
             Course.objects.filter(id=self.course_id)
             .select_related(

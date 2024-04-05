@@ -123,13 +123,13 @@ REQUIRED_VOUCHER_SETTINGS = [
 
 
 def get_raw_seed_data_from_file():
-    """Loads raw seed data from our seed data file"""  # noqa: D401
+    """Loads raw seed data from our seed data file"""
     with open(SEED_DATA_FILE_PATH) as f:  # noqa: PTH123
         return json.loads(f.read())
 
 
 def get_courseware_page_parent(courseware_page_obj):
-    """Gets an instance of the parent index/listing page for a CoursePage/ProgramPage"""  # noqa: D401
+    """Gets an instance of the parent index/listing page for a CoursePage/ProgramPage"""
     if isinstance(courseware_page_obj, Course):
         index_page_cls = CourseIndexPage
     elif isinstance(courseware_page_obj, Program):
@@ -159,7 +159,7 @@ def delete_wagtail_pages(page_cls, filter_dict):
 
 
 def filter_for_model_fields(model_cls, dict_to_filter):
-    """Filters a dict to return only the keys that match fields in a model class"""  # noqa: D401
+    """Filters a dict to return only the keys that match fields in a model class"""
     model_field_names = get_field_names(model_cls)
     return filter_dict_by_key_set(dict_to_filter, model_field_names)
 
@@ -168,7 +168,7 @@ def set_model_properties_from_dict(model_obj, property_dict):
     """
     Takes a model object and a dict property names mapped to desired values, then sets all of the relevant
     property values on the model object and saves it
-    """  # noqa: D401
+    """
     for field, value in property_dict.items():
         setattr(model_obj, field, value)
     model_obj.save()
@@ -184,7 +184,7 @@ def parse_datetime_from_string(dt_string):
 
     Returns:
         datetime.datetime: The parsed datetime
-    """  # noqa: D401
+    """
     return datetime.datetime.strptime(dt_string, "%Y-%m-%dT%H:%M:%S").astimezone(
         datetime.timezone.utc
     )
@@ -196,7 +196,7 @@ def check_settings():
 
     Raises:
         ImproperlyConfigured: Raised if required settings are missing
-    """  # noqa: D401
+    """
     missing = []
     for variable in REQUIRED_VOUCHER_SETTINGS:
         try:
@@ -225,19 +225,19 @@ class SeedResult:
         self.invalid = defaultdict(dict)
 
     def add_created(self, obj):
-        """Adds to the count of created object types"""  # noqa: D401
+        """Adds to the count of created object types"""
         self.created[obj.__class__.__name__] += 1
 
     def add_updated(self, obj):
-        """Adds to the count of updated object types"""  # noqa: D401
+        """Adds to the count of updated object types"""
         self.updated[obj.__class__.__name__] += 1
 
     def add_ignored(self, obj):
-        """Adds to the count of ignored object types"""  # noqa: D401
+        """Adds to the count of ignored object types"""
         self.ignored[obj.__class__.__name__] += 1
 
     def add_deleted(self, deleted_type_dict):
-        """Adds to the count of deleted object types"""  # noqa: D401
+        """Adds to the count of deleted object types"""
         for deleted_type, deleted_count in deleted_type_dict.items():
             if deleted_count:
                 self.deleted[deleted_type] += deleted_count
@@ -250,7 +250,7 @@ class SeedResult:
             model_cls (Type(django.db.models.base.Model)): The model class
             field_value (any): The seeded field value
             exc (Exception): The exception encountered while trying to save
-        """  # noqa: D401
+        """
         if isinstance(exc, ValidationError):
             first_error_field = list(exc.detail.keys())[0]  # noqa: RUF015
             exc_message = str(exc.detail[first_error_field][0])
@@ -311,12 +311,12 @@ class SeedDataLoader:
 
     @classmethod
     def seed_prefixed(cls, value):
-        """Returns the same value with a prefix that indicates seed data"""  # noqa: D401
+        """Returns the same value with a prefix that indicates seed data"""
         return " ".join([cls.SEED_DATA_PREFIX, value])  # noqa: FLY002
 
     @classmethod
     def is_seed_value(cls, value):
-        """Returns True of the given value matches the seeded value format"""  # noqa: D401
+        """Returns True of the given value matches the seeded value format"""
         return value.startswith(f"{cls.SEED_DATA_PREFIX} ")
 
     def _seeded_field_and_value(self, model_cls, data):
@@ -324,13 +324,13 @@ class SeedDataLoader:
         Returns the field name and seed-adjusted value for some data that is being deserialized on some model
 
         Example return value: ("title", "SEED My Course Title")
-        """  # noqa: D401
+        """
         field_name = self.SEED_DATA_FIELD_MAP[model_cls]
         seeded_value = self.seed_prefixed(data[field_name])
         return field_name, seeded_value
 
     def _get_existing_seeded_qset(self, model_cls, data):
-        """Returns a qset of seed data objects for some model class"""  # noqa: D401
+        """Returns a qset of seed data objects for some model class"""
         field_name, seeded_value = self._seeded_field_and_value(model_cls, data)
         if model_cls == CouponPaymentVersion:
             field_name = f"payment__{field_name}"
@@ -340,7 +340,7 @@ class SeedDataLoader:
         """
         Attempts to deserialize and save a courseware object (Program/Course/CourseRun),
         and creates it if it doesn't exist.
-        """  # noqa: D401
+        """
         model_cls = serializer_cls.Meta.model
         seeded_field_name, seeded_value = self._seeded_field_and_value(model_cls, data)
 
@@ -378,7 +378,7 @@ class SeedDataLoader:
     def _deserialize_product(self, courseware_obj, product_data):
         """
         Attempts to deserialize and save Product/ProductVersion data, and creates those objects if they don't exist.
-        """  # noqa: D401
+        """
         product, created = Product.objects.get_or_create(
             content_type=ContentType.objects.get_for_model(courseware_obj.__class__),
             object_id=courseware_obj.id,
@@ -398,7 +398,7 @@ class SeedDataLoader:
         """
         Attempts to deserialize and save CouponPayment data, and creates that and many other related
         objects if it doesn't exist
-        """  # noqa: D401
+        """
         model_cls = CouponPayment
         seeded_field_name = self.SEED_DATA_FIELD_MAP[model_cls]
         seeded_value = self.seed_prefixed(data[seeded_field_name])
@@ -454,7 +454,7 @@ class SeedDataLoader:
         """
         Attempts to deserialize and save a Wagtail CMS page for some Program/Course,
         and creates one if one doesn't exist
-        """  # noqa: D401
+        """
         model_cls = courseware_obj.__class__
         cms_page_props = self.COURSE_MODEL_PAGE_PROPS[model_cls]
         cms_page_cls = cms_page_props.page_cls
@@ -519,7 +519,7 @@ class SeedDataLoader:
             return added_obj
 
     def _delete_courseware_cms_page(self, courseware_obj, cms_page_props):
-        """Deletes a Wagtail page associated with a given Program/Course"""  # noqa: D401
+        """Deletes a Wagtail page associated with a given Program/Course"""
         cms_page_cls = cms_page_props.page_cls
         cms_page_field_name = cms_page_props.page_field_name
         deleted_count, deleted_type_counts = delete_wagtail_pages(
@@ -532,7 +532,7 @@ class SeedDataLoader:
         """
         Deletes all relevant ecommerce objects associated with a given Program/CourseRun. This specialized, ordered
         deletion is necessary because our ecommerce tables have delete protection.
-        """  # noqa: D401
+        """
         # First, delete enrollments
         if courseware_obj.__class__ == CourseRun:
             enrollment_audit_qset = CourseRunEnrollmentAudit.objects.filter(
@@ -721,7 +721,7 @@ class SeedDataLoader:
     def delete_courseware_obj(self, courseware_obj):
         """
         Attempts to delete a seeded Program/Course/CourseRun and associated objects
-        """  # noqa: D401
+        """
         # If there are any Wagtail pages associated with this Program/Course, delete them.
         cms_page_props = self.COURSE_MODEL_PAGE_PROPS.get(courseware_obj.__class__)
         if cms_page_props:

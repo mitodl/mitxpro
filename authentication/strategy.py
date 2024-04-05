@@ -12,7 +12,7 @@ class DjangoRestFrameworkStrategy(DjangoStrategy):
         super().__init__(storage, request=request, tpl=tpl)
 
     def request_data(self, merge=True):  # noqa: ARG002, FBT002
-        """Returns the request data"""  # noqa: D401
+        """Returns the request data"""
         if not self.drf_request:
             return {}
 

@@ -79,7 +79,7 @@ def generate_course_certificates():
 
 
 def exception_logging_generator(generator):
-    """Returns a new generator that logs exceptions from the given generator and continues with iteration"""  # noqa: D401
+    """Returns a new generator that logs exceptions from the given generator and continues with iteration"""
     while True:
         try:
             yield next(generator)

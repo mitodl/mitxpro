@@ -26,7 +26,7 @@ from sheets.constants import (
 
 
 def generate_google_client_config():
-    """Helper method to generate Google client config based on app settings"""  # noqa: D401
+    """Helper method to generate Google client config based on app settings"""
     return {
         "web": {
             "client_id": settings.DRIVE_CLIENT_ID,

@@ -12,7 +12,7 @@ from cms.models import ExternalProgramPage
 
 
 def get_zone_aware_datetime(date):
-    """Takes a date object and returns a zone aware datetime"""  # noqa: D401
+    """Takes a date object and returns a zone aware datetime"""
     return datetime.combine(date, datetime.max.time(), timezone.utc) if date else None
 
 

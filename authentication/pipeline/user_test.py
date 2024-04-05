@@ -26,7 +26,7 @@ from users.factories import UserFactory
 
 @pytest.fixture
 def backend_settings(settings):
-    """A dictionary of settings for the backend"""  # noqa: D401
+    """A dictionary of settings for the backend"""
     return {"USER_FIELDS": settings.SOCIAL_AUTH_EMAIL_USER_FIELDS}
 
 
@@ -76,7 +76,7 @@ def mock_create_profile_strategy(mocker):
 
 
 def validate_email_auth_request_not_email_backend(mocker):
-    """Tests that validate_email_auth_request return if not using the email backend"""  # noqa: D401
+    """Tests that validate_email_auth_request return if not using the email backend"""
     mock_strategy = mocker.Mock()
     mock_backend = mocker.Mock()
     mock_backend.name = "notemail"

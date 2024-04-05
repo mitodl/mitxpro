@@ -56,7 +56,7 @@ class EmailDebuggerView(View):
     def post(self, request):
         """
         Renders a test email
-        """  # noqa: D401
+        """
         form = self.form_cls(request.POST)
 
         if not form.is_valid():

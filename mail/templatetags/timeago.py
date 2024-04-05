@@ -15,5 +15,5 @@ def parse_iso(value):
 
     Returns:
         datetime: the parsed datetime
-    """  # noqa: D401
+    """
     return parse(value)

@@ -81,7 +81,7 @@ class RefundRequestRow:
 
         Raises:
             SheetRowParsingException: Raised if the row could not be parsed
-        """  # noqa: D401
+        """
         raw_row_data = list(map(clean_sheet_value, raw_row_data))
         try:
             return cls(
@@ -135,7 +135,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
         Returns:
             (Order, ProgramEnrollment or CourseRunEnrollment): The order and enrollment associated
                 with this refund request.
-        """  # noqa: D401
+        """
         user = User.objects.get(email__iexact=refund_req_row.learner_email)
         order = Order.objects.get(id=refund_req_row.order_id, purchaser=user)
         if is_program_text_id(refund_req_row.product_id):
@@ -157,7 +157,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
         Args:
             order (Order):
             enrollment (ProgramEnrollment or CourseRunEnrollment):
-        """  # noqa: D401
+        """
         if isinstance(enrollment, ProgramEnrollment):
             deactivated_enrollment, _ = deactivate_program_enrollment(
                 enrollment, change_status=ENROLL_CHANGE_STATUS_REFUNDED
@@ -183,7 +183,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
 
         Returns:
             bool: True if the order/enrollments associated with this row can be reversed
-        """  # noqa: D401
+        """
         if refund_req_row.refund_complete_date is not None:
             return False
         return (
@@ -213,7 +213,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
         Returns:
             RowResult or None: An object representing the results of processing the row, or None if
                 nothing needs to be done with this row.
-        """  # noqa: D401
+        """
         refund_request, request_created, request_updated = self.get_or_create_request(
             row_data
         )

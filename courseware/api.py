@@ -96,7 +96,7 @@ def create_user(user):
 
     Args:
         user (user.models.User): the application user
-    """  # noqa: D401
+    """
     create_edx_user(user)
     create_edx_auth_token(user)
 
@@ -121,7 +121,7 @@ def get_existing_openedx_user(user):
     Note:
         This function requires an Open edX service worker API token and API key to be set
         in the settings module.
-    """  # noqa: D401
+    """
     if settings.OPENEDX_SERVICE_WORKER_API_TOKEN is None:
         raise ImproperlyConfigured("OPENEDX_SERVICE_WORKER_API_TOKEN is not set")  # noqa: EM101
     req_session = requests.Session()
@@ -170,7 +170,7 @@ def create_edx_user(user):
 
     Args:
         user (user.models.User): the application user
-    """  # noqa: D401
+    """
     application = Application.objects.get(name=settings.OPENEDX_OAUTH_APP_NAME)
     expiry_date = now_in_utc() + timedelta(hours=settings.OPENEDX_TOKEN_EXPIRES_HOURS)
     access_token = AccessToken.objects.create(
@@ -228,7 +228,7 @@ def create_edx_auth_token(user):
 
     Returns:
         courseware.models.OpenEdXAuth: auth model with refresh_token populated
-    """  # noqa: D401
+    """
 
     # In order to acquire auth tokens from Open edX we need to perform the following steps:
     #
@@ -308,7 +308,7 @@ def update_edx_user_email(user):
 
     Args:
         user(user.models.User): the user to update the record for
-    """  # noqa: D401
+    """
     with requests.Session() as req_session:
         django_session = auth_api.create_user_session(user)
         session_cookie = requests.cookies.create_cookie(
@@ -348,7 +348,7 @@ def _create_tokens_and_update_auth(auth, params):
     Returns:
         courseware.models.OpenEdxApiAuth:
             the updated auth records
-    """  # noqa: D401
+    """
     resp = requests.post(edx_url(OPENEDX_OAUTH2_ACCESS_TOKEN_PATH), data=params)  # noqa: S113
     if resp.status_code != 200:  # noqa: PLR2004
         # The auth is likely broken for reasons unknown, delete and return None
@@ -445,7 +445,7 @@ def get_valid_edx_api_auth(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECO
     Returns:
         auth:
             updated OpenEdxApiAuth
-    """  # noqa: D401
+    """
     assert (  # noqa: S101
         ttl_in_seconds < OPENEDX_AUTH_MAX_TTL_IN_SECONDS
     ), f"ttl_in_seconds must be less than {OPENEDX_AUTH_MAX_TTL_IN_SECONDS}"
@@ -485,7 +485,7 @@ def _refresh_edx_api_auth(auth):
     Returns:
         auth:
             updated OpenEdxApiAuth
-    """  # noqa: D401
+    """
     # Note: this is subject to thundering herd problems, we should address this at some point
     return _create_tokens_and_update_auth(
         auth,
@@ -508,7 +508,7 @@ def get_edx_api_client(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS)
 
     Returns:
          EdxApi: edx api client instance
-    """  # noqa: D401
+    """
     try:
         auth = get_valid_edx_api_auth(user, ttl_in_seconds=ttl_in_seconds)
     except OpenEdxApiAuth.DoesNotExist:
@@ -528,7 +528,7 @@ def get_edx_api_service_client():
 
     Returns:
          EdxApi: edx api service worker client instance
-    """  # noqa: D401
+    """
     if settings.OPENEDX_SERVICE_WORKER_API_TOKEN is None:
         raise ImproperlyConfigured("OPENEDX_SERVICE_WORKER_API_TOKEN is not set")  # noqa: EM101
 
@@ -548,7 +548,7 @@ def get_edx_api_course_detail_client():
 
     Returns:
         CourseDetails: edx api course client instance
-    """  # noqa: D401
+    """
     edx_client = get_edx_api_service_client()
     return edx_client.course_detail
 
@@ -559,7 +559,7 @@ def get_edx_api_grades_client():
 
     Returns:
         UserCurrentGrades: edx api grades client instance
-    """  # noqa: D401
+    """
     edx_client = get_edx_api_service_client()
     return edx_client.current_grades
 
@@ -771,7 +771,7 @@ def update_edx_user_name(user):
 
     Raises:
         UserNameUpdateFailedException: Raised if underlying edX API request fails due to any reason
-    """  # noqa: D401
+    """
 
     edx_client = get_edx_api_client(user)
     try:
@@ -794,7 +794,7 @@ def _is_valid_auth(auth, expires_after):
     Returns:
         auth:
             updated OpenEdxApiAuth
-    """  # noqa: D401
+    """
     return auth is not None and auth.access_token_expires_on > expires_after
 
 

@@ -12,7 +12,7 @@ def protection_rules(table_name):
     """
     Helper function to create protection rules for a table,
     to prevent updates and deletes (but creates are still allowed)
-    """  # noqa: D401
+    """
     return [
         migrations.RunSQL(
             sql=create_delete_rule(table_name),

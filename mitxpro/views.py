@@ -20,7 +20,7 @@ from mitxpro.serializers import AppContextSerializer
 def get_base_context(request):  # noqa: ARG001
     """
     Returns the template context key/values needed for the base template and all templates that extend it
-    """  # noqa: D401
+    """
     context = {}
     if settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE:
         context[
@@ -33,7 +33,7 @@ def get_base_context(request):  # noqa: ARG001
 def index(request, **kwargs):  # noqa: ARG001
     """
     The index view
-    """  # noqa: D401
+    """
     context = get_base_context(request)
 
     if request.method == "POST" and (
@@ -85,7 +85,7 @@ def cms_signin_redirect_to_site_signin(request):  # noqa: ARG001
 def restricted(request):
     """
     Views restricted to admins
-    """  # noqa: D401
+    """
     if not (request.user and request.user.is_staff):
         raise PermissionDenied
     return render(request, "index.html", context=get_base_context(request))

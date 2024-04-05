@@ -13,7 +13,7 @@ def html_to_plain_text(html_str):
         html_str (str): A string containing HTML tags
     Returns:
         str: Plain text
-    """  # noqa: D401
+    """
     soup = BeautifulSoup(html_str, features="html.parser")
     return soup.get_text().replace("\n", " ")
 

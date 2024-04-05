@@ -12,14 +12,14 @@ OBJECT_TYPE_CHOICES = {"courserun": CourseRun, "course": Course, "program": Prog
 
 
 def get_program_objects_for_deletion(program):
-    """Generator that yield all objects that should be deleted as part of a program deletion"""  # noqa: D401
+    """Generator that yield all objects that should be deleted as part of a program deletion"""
     for course in program.courses.all():
         yield from get_course_objects_for_deletion(course)
     yield program
 
 
 def get_course_objects_for_deletion(course):
-    """Generator that yield all objects that should be deleted as part of a course deletion"""  # noqa: D401
+    """Generator that yield all objects that should be deleted as part of a course deletion"""
     yield from course.courseruns.all()
     yield course
 

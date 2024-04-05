@@ -16,7 +16,7 @@ def get_assignment_spreadsheet_by_title(pygsheets_client, title):
 
     Returns:
         pygsheets.spreadsheet.Spreadsheet: A pygsheets spreadsheet object
-    """  # noqa: D401
+    """
     matching_spreadsheets = pygsheets_client.open_all(
         "{base_query} and name contains '{title}'".format(  # noqa: UP032
             base_query=CouponAssignmentHandler.ASSIGNMENT_SHEETS_QUERY, title=title
