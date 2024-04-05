@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.143.0
+Version 0.143.0 (Released April 05, 2024)
 ---------------
 
 - Styling for the hubspot forms fields available in the list provided (#2939)
