@@ -1,5 +1,5 @@
 """Wagtail admin views"""
-from wagtail.admin.views.generic.models import IndexView
+from wagtail.admin.views.generic.models import IndexView, InspectView
 from wagtail.admin.viewsets.base import ViewSetGroup
 from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.permissions import ModelPermissionPolicy
@@ -25,9 +25,9 @@ class CreateOnlyModelPermissionPolicy(ModelPermissionPolicy):
         return super().user_has_permission(user, action)
 
 
-class ReadOnlyIndexView(IndexView):
+class AbstractReadOnlyIndexView(IndexView):
     """
-    IndexView to override the edit URL with read only inspect URL.
+    Abstract IndexView to override the edit URL with read only inspect URL.
     """
 
     def get_edit_url(self, instance):
@@ -37,10 +37,38 @@ class ReadOnlyIndexView(IndexView):
         return self.get_inspect_url(instance)
 
 
+class ProductVersionReadOnlyIndexView(AbstractReadOnlyIndexView):
+    """
+    ReadOnly IndexView for ProductVersion.
+    """
+
+    model = ProductVersion
+
+
+class ProductReadOnlyIndexView(AbstractReadOnlyIndexView):
+    """
+    ReadOnly IndexView for Product. Overrides the default queryset to list in-active products.
+    """
+    model = Product
+    queryset = Product.all_objects
+
+
+class ProductInspectView(InspectView):
+    """
+    InspectView for Product.
+    """
+    def get_object(self, queryset=None):
+        """
+        Get the object using the custom Product manager. By default, `get_object` uses the default manager.
+        """
+        return Product.all_objects.get(id=self.pk)
+
+
 class ProductViewSet(ModelViewSet):
     """Wagtail ModelViewSet for Product"""
 
-    index_view_class = ReadOnlyIndexView
+    index_view_class = ProductReadOnlyIndexView
+    inspect_view_class = ProductInspectView
     model = Product
     search_fields = (
         "courseruns__title",
@@ -74,7 +102,7 @@ class ProductViewSet(ModelViewSet):
 class ProductVersionViewSet(ModelViewSet):
     """Wagtail ModelViewSet for ProductVersion"""
 
-    index_view_class = ReadOnlyIndexView
+    index_view_class = ProductVersionReadOnlyIndexView
     model = ProductVersion
     search_fields = (
         "text_id",
