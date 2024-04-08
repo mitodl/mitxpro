@@ -23,6 +23,12 @@ def staff_user(db):
 
 
 @pytest.fixture
+def super_user(db):
+    """Super user fixture"""
+    return UserFactory.create(is_staff=True, is_superuser=True)
+
+
+@pytest.fixture
 def user_client(user):
     """Django test client that is authenticated with the user"""
     client = Client()
@@ -35,6 +41,14 @@ def staff_client(staff_user):
     """Django test client that is authenticated with the staff user"""
     client = Client()
     client.force_login(staff_user)
+    return client
+
+
+@pytest.fixture
+def superuser_client(super_user):
+    """Django test client that is authenticated with the superuser"""
+    client = Client()
+    client.force_login(super_user)
     return client
 
 

@@ -75,7 +75,7 @@ from cms.constants import (
     WEBINAR_HEADER_BANNER,
     WEBINAR_INDEX_SLUG,
 )
-from cms.forms import CertificatePageForm
+from cms.forms import CertificatePageForm, CoursewareForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
 from courses.models import (
     Course,
@@ -1117,6 +1117,11 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         return isinstance(self, ProgramPage)
 
     @property
+    def is_internal_or_external_program_page(self):
+        """Check whether the page is an internal or external program page."""
+        return isinstance(self, (ProgramPage, ExternalProgramPage))
+
+    @property
     def is_external_page(self):
         """Checks whether the page in question is for an external course/program page or not."""
         return self.is_external_program_page or self.is_external_course_page
@@ -1171,7 +1176,10 @@ class ProgramProductPage(ProductPage):
     objects = ProgramProductPageManager()
     parent_page_types = ["ProgramIndexPage"]
 
-    content_panels = [FieldPanel("program")] + ProductPage.content_panels
+    content_panels = (
+        [FieldPanel("program")] + ProductPage.content_panels + [FieldPanel("price")]
+    )
+    base_form_class = CoursewareForm
 
     program = models.OneToOneField(
         "courses.Program",
@@ -1303,10 +1311,23 @@ class CourseProductPage(ProductPage):
 
     parent_page_types = ["CourseIndexPage"]
 
-    content_panels = [
-        FieldPanel("course"),
-        FieldPanel("topics"),
-    ] + ProductPage.content_panels
+    content_panels = (
+        [
+            FieldPanel("course"),
+            FieldPanel("topics"),
+        ]
+        + ProductPage.content_panels
+        + [
+            MultiFieldPanel(
+                [
+                    FieldPanel("course_run", widget=forms.Select),
+                    FieldPanel("price"),
+                ],
+                heading="Set Price",
+            ),
+        ]
+    )
+    base_form_class = CoursewareForm
 
     @cached_property
     def course_with_related_objects(self):

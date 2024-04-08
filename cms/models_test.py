@@ -7,8 +7,9 @@ import factory
 import pytest
 from django.core.exceptions import ValidationError
 from django.test.client import RequestFactory
-from django.urls import resolve
+from django.urls import resolve, reverse
 from wagtail.coreutils import WAGTAIL_APPEND_SLASH
+from wagtail.test.utils.form_data import querydict_from_html
 
 from cms.constants import (
     FORMAT_ONLINE,
@@ -39,6 +40,7 @@ from cms.factories import (
     LearningTechniquesPageFactory,
     NewsAndEventsPageFactory,
     ProgramFactory,
+    ProgramIndexPageFactory,
     ProgramPageFactory,
     ResourcePageFactory,
     SignatoryPageFactory,
@@ -63,7 +65,7 @@ from cms.models import (
     UserTestimonialsPage,
     WhoShouldEnrollPage,
 )
-from courses.factories import CourseFactory
+from courses.factories import CourseFactory, CourseRunFactory
 
 
 pytestmark = [pytest.mark.django_db]
@@ -1724,3 +1726,86 @@ def test_enterprise_page_learning_strategy_form():
     assert learning_strategy_form.heading == "heading"
     assert learning_strategy_form.subhead == "subhead"
     assert learning_strategy_form.consent == "consent"
+
+
+def test_course_page_price_change_fields_are_visible(superuser_client):
+    """
+    Test that the custom form price fields are visible in a CoursePage.
+    """
+    course_run = CourseRunFactory.create(
+        course__page__thumbnail_image=None, course__page__background_image=None
+    )
+    assert course_run.current_price is None
+
+    path = reverse(
+        "wagtailadmin_pages:edit", kwargs={"page_id": course_run.course.page.id}
+    )
+    resp = superuser_client.get(path)
+    assert resp.status_code == 200
+    assert "course_run" in resp.context_data["form"].fields
+    assert "price" in resp.context_data["form"].fields
+    assert (course_run.id, course_run) in resp.context_data["form"].fields[
+        "course_run"
+    ].choices
+
+
+def test_course_page_price_is_updated(superuser_client):
+    """
+    Test that the course price can be set in the CoursePage.
+    """
+    course_run = CourseRunFactory.create(
+        course__page__thumbnail_image=None, course__page__background_image=None
+    )
+
+    path = reverse(
+        "wagtailadmin_pages:edit", kwargs={"page_id": course_run.course.page.id}
+    )
+    response = superuser_client.get(path)
+
+    data_to_post = querydict_from_html(
+        response.content.decode(), form_id="page-edit-form"
+    )
+    data_to_post["action-publish"] = ""
+    data_to_post["content-count"] = 0
+    data_to_post["price"] = 1234
+    data_to_post["course_run"] = course_run.id
+    resp = superuser_client.post(path, data_to_post)
+    assert resp.status_code == 302
+    assert course_run.current_price == 1234
+
+
+def test_program_page_price_change_field_is_visible(superuser_client):
+    """
+    Test that the custom form fields are visible for a ProgramPage.
+    """
+    program = ProgramFactory.create(
+        page__thumbnail_image=None, page__background_image=None
+    )
+    assert program.current_price is None
+
+    path = reverse("wagtailadmin_pages:edit", kwargs={"page_id": program.page.id})
+    resp = superuser_client.get(path)
+    assert resp.status_code == 200
+    assert "price" in resp.context_data["form"].fields
+
+
+def test_program_page_price_is_updated(superuser_client):
+    """
+    Test that the course price can be changed in the ProgramPage.
+    """
+    program = ProgramFactory.create(
+        page__thumbnail_image=None, page__background_image=None
+    )
+
+    path = reverse("wagtailadmin_pages:edit", kwargs={"page_id": program.page.id})
+    response = superuser_client.get(path)
+
+    data_to_post = querydict_from_html(
+        response.content.decode(), form_id="page-edit-form"
+    )
+    data_to_post["action-publish"] = ""
+    data_to_post["content-count"] = 0
+    data_to_post["price"] = 999
+    resp = superuser_client.post(path, data_to_post)
+    assert resp.status_code == 302
+    assert program.current_price == 999
