@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.144.0
+Version 0.144.0 (Released April 09, 2024)
 ---------------
 
 - feat: change courseware pricing in CMS (#2828)
