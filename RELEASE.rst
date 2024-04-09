@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.144.0 (Released April 09, 2024)
+---------------
+
+- feat: change courseware pricing in CMS (#2828)
+- chore(deps): bump webpack-dev-middleware from 3.7.3 to 5.3.4 (#2921)
+
 Version 0.143.0 (Released April 05, 2024)
 ---------------
 
