@@ -52,7 +52,7 @@ class CoursewareForm(WagtailAdminPageForm):
             elif instance.is_internal_or_external_program_page:
                 self.fields["price"].initial = instance.program.current_price
 
-    def save(self, commit=True):
+    def save(self, commit=True):  # noqa: FBT002
         """
         Handles pricing update and creates product(if required) and product version for a course run.
         """

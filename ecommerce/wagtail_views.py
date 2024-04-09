@@ -59,7 +59,7 @@ class ProductInspectView(InspectView):
     InspectView for Product.
     """
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=None):  # noqa: ARG002
         """
         Get the object using the custom Product manager. By default, `get_object` uses the default manager.
         """

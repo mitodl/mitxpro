@@ -1319,7 +1319,7 @@ class CourseProductPage(ProductPage):
     parent_page_types = ["CourseIndexPage"]
 
     content_panels = (
-        [
+        [  # noqa: RUF005
             FieldPanel("course"),
             FieldPanel("topics"),
         ]

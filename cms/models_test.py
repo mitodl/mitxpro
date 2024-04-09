@@ -39,7 +39,6 @@ from cms.factories import (
     LearningTechniquesPageFactory,
     NewsAndEventsPageFactory,
     ProgramFactory,
-    ProgramIndexPageFactory,
     ProgramPageFactory,
     ResourcePageFactory,
     SignatoryPageFactory,

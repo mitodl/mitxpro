@@ -198,8 +198,7 @@ class Product(TimestampedModel):
     @property
     def price(self):
         """Return the price"""
-        if self.latest_version:
-            return self.latest_version.price
+        return self.latest_version.price if self.latest_version else None
 
     def __str__(self):
         """Description of a product"""

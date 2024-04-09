@@ -505,7 +505,7 @@ class ProductAdmin(admin.ModelAdmin):
         if obj.latest_version:  # noqa: RET503
             return obj.latest_version.text_id
 
-    def get_queryset(self, request):
+    def get_queryset(self, request):  # noqa: ARG002
         """Return all active and in_active products"""
         return Product.all_objects
 

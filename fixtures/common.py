@@ -22,7 +22,7 @@ def staff_user(db):  # noqa: ARG001
 
 
 @pytest.fixture
-def super_user(db):
+def super_user(db):  # noqa: ARG001
     """Super user fixture"""
     return UserFactory.create(is_staff=True, is_superuser=True)
 
