@@ -3889,13 +3889,13 @@ files = [
 
 [[package]]
 name = "wagtail"
-version = "5.2.3"
+version = "5.2.4"
 description = "A Django content management system."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "wagtail-5.2.3-py3-none-any.whl", hash = "sha256:7b186b37ba044fd68c1a3c584ac0d913daa4ea95b95aa4c80412e4a0cb04e563"},
-    {file = "wagtail-5.2.3.tar.gz", hash = "sha256:ad64595124c84c4b00b73b863029a7722e06b4dba17b76177d2f4944f579bca7"},
+    {file = "wagtail-5.2.4-py3-none-any.whl", hash = "sha256:c1a319693a18a52227e7284d3eda349da0ce7df11c74602d9588112583c9bea9"},
+    {file = "wagtail-5.2.4.tar.gz", hash = "sha256:824090ed4bb3f42af92faf150383acfb5a844808c5508f247a743a23d8a5a24b"},
 ]
 
 [package.dependencies]
@@ -4068,4 +4068,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.14"
-content-hash = "de08a5a7367917cab18beb52f83e32c1c4be8e60c874047f7f080d618b2b2945"
+content-hash = "8537d7c6725da4e235d28d4df08267ae17f507f517b67c8ccd280ea82bf38f38"
