@@ -1236,12 +1236,12 @@ testing = ["beautifulsoup4 (>=4.4.1,<5)", "coverage (>=4.1.0)", "flake8 (>=3.2.0
 
 [[package]]
 name = "drf-flex-fields"
-version = "0.8.5"
+version = "0.9.9"
 description = "Flexible, dynamic fields and nested resources for Django REST Framework serializers."
 optional = false
 python-versions = "*"
 files = [
-    {file = "drf-flex-fields-0.8.5.tar.gz", hash = "sha256:04b11ad443d819717041afd29ea4c962592cbcc780fe975be4ed1a0ab617b402"},
+    {file = "drf-flex-fields-0.9.9.tar.gz", hash = "sha256:dbbfbdbdc17da79dd10fdf7a4e493913699d2c08321d331afc3fca67522f4334"},
 ]
 
 [[package]]
@@ -3930,4 +3930,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.14"
-content-hash = "b1390499629a1ad3c4917bff40c6e26a2e7b4d9c8cbdefb2159bb188f411927c"
+content-hash = "f21b07c1e9512997bcd7817655a357254f27765fbbc37938da05557d00c8288e"
