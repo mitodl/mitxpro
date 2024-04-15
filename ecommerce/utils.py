@@ -117,12 +117,26 @@ class CouponUtils:
     """
 
     @staticmethod
-    def validate_unique_coupon_code(value):
+    def validate_unique_coupon_code(value, instance=None):
         """
         Validate the uniqueness of coupon codes in Coupon and B2BCoupon models.
         """
-        if CouponUtils.is_existing_coupon_code(value):
-            raise ValidationError("Coupon code already exists in the platform.")  # noqa: EM101
+        if instance and instance.pk:
+            existing_instance = instance.__class__.objects.get(pk=instance.pk)
+            if (
+                existing_instance.coupon_code != value
+                and CouponUtils.is_existing_coupon_code(value)
+            ):
+                raise ValidationError(
+                    {"coupon_code": "Coupon code already exists in the platform."}
+                )
+        elif CouponUtils.is_existing_coupon_code(value):
+            if instance:
+                raise ValidationError(
+                    {"coupon_code": "Coupon code already exists in the platform."}
+                )
+            else:
+                raise ValidationError("Coupon code already exists in the platform.")  # noqa: EM101
 
     @staticmethod
     def is_existing_coupon_code(value):
