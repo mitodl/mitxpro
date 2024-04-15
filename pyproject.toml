@@ -63,7 +63,7 @@ flaky = "3.7.0"
 xmltodict = "^0.13.0"
 
 [tool.poetry.group.dev.dependencies]
-astroid = "2.6.6"
+astroid = "2.15.8"
 bpython = "*"
 django-debug-toolbar = "*"
 factory-boy = "3.3.0"
