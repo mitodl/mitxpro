@@ -27,7 +27,6 @@ def remove_incomplete_profiles(apps, schema):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("users", "0007_validate_country_and_state")]
 
     operations = [

@@ -6,7 +6,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("cms", "0030_catalog_page_model")]
 
     operations = [

@@ -5,14 +5,14 @@ from django.contrib import admin
 class AuditableModelAdmin(admin.ModelAdmin):
     """A ModelAdmin which will save and log"""
 
-    def save_model(self, request, obj, form, change):
+    def save_model(self, request, obj, form, change):  # noqa: ARG002, D102
         obj.save_and_log(request.user)
 
 
 class SingletonModelAdmin(admin.ModelAdmin):
     """A ModelAdmin which enforces a singleton model"""
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002
         """Overridden method - prevent adding an object if one already exists"""
         return self.model.objects.count() == 0
 
@@ -42,7 +42,7 @@ class TimestampedModelAdmin(admin.ModelAdmin):
             field for field in field_names_to_add if field not in existing_field_names
         )
 
-    def get_list_display(self, request):
+    def get_list_display(self, request):  # noqa: D102
         list_display = tuple(super().get_list_display(request) or ())
         added_fields = ()
         if self.include_timestamps_in_list:
@@ -51,12 +51,12 @@ class TimestampedModelAdmin(admin.ModelAdmin):
             added_fields += ("created_on",)
         return self._join_and_dedupe(list_display, added_fields)
 
-    def get_readonly_fields(self, request, obj=None):
+    def get_readonly_fields(self, request, obj=None):  # noqa: D102
         readonly_fields = tuple(super().get_readonly_fields(request, obj=obj) or ())
         if obj is None:
             return readonly_fields
         return self._join_and_dedupe(readonly_fields, ("created_on", "updated_on"))
 
-    def get_exclude(self, request, obj=None):
+    def get_exclude(self, request, obj=None):  # noqa: D102
         exclude = tuple(super().get_exclude(request, obj=obj) or ())
         return self._join_and_dedupe(exclude, ("created_on", "updated_on"))

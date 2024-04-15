@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("sheets", "0016_remove_file_watch_expiration_idx")]
 
     operations = [

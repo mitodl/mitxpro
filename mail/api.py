@@ -18,10 +18,10 @@ messages = messages_for_recipients([
 # send the emails
 send_messages(messages)
 """
-from email.utils import formataddr
 import logging
 import re
 from collections import namedtuple
+from email.utils import formataddr
 
 from anymail.message import AnymailMessage
 from bs4 import BeautifulSoup
@@ -36,7 +36,7 @@ from mail.exceptions import MultiEmailValidationError
 log = logging.getLogger()
 
 
-EmailMetadata = namedtuple("EmailMetadata", ["tags", "user_variables"])
+EmailMetadata = namedtuple("EmailMetadata", ["tags", "user_variables"])  # noqa: PYI024
 
 
 class UserMessageProps:
@@ -130,12 +130,10 @@ def render_email_templates(template_name, context):
     Returns:
         (str, str, str): tuple of the templates for subject, text_body, html_body
     """
-    subject_text = render_to_string(
-        "{}/subject.txt".format(template_name), context
-    ).rstrip()
+    subject_text = render_to_string(f"{template_name}/subject.txt", context).rstrip()
 
     context.update({"subject": subject_text})
-    html_text = render_to_string("{}/body.html".format(template_name), context)
+    html_text = render_to_string(f"{template_name}/body.html", context)
 
     # pynliner internally uses bs4, which we can now modify the inlined version into a plaintext version
     # this avoids parsing the body twice in bs4
@@ -191,7 +189,7 @@ def message_for_recipient(recipient, context, template_name):
     Returns:
         django.core.mail.EmailMultiAlternatives: email message with rendered content
     """
-    return list(messages_for_recipients([(recipient, context)], template_name))[0]
+    return list(messages_for_recipients([(recipient, context)], template_name))[0]  # noqa: RUF015
 
 
 def build_messages(template_name, recipients, extra_context, metadata=None):
@@ -270,9 +268,7 @@ def build_message(connection, template_name, recipient, context, metadata=None):
         if metadata.tags:
             esp_extra.update({"o:tag": metadata.tags})
         if metadata.user_variables:
-            esp_extra.update(
-                {"v:{}".format(k): v for k, v in metadata.user_variables.items()}
-            )
+            esp_extra.update({f"v:{k}": v for k, v in metadata.user_variables.items()})
     if esp_extra:
         msg.esp_extra = esp_extra
     msg.attach_alternative(html_body, "text/html")
@@ -289,7 +285,7 @@ def send_messages(messages):
     for msg in messages:
         try:
             msg.send()
-        except:  # pylint: disable=bare-except
+        except:  # noqa: E722, PERF203
             log.exception("Error sending email '%s' to %s", msg.subject, msg.to)
 
 
@@ -318,7 +314,7 @@ def validate_email_addresses(email_addresses):
     for email in email_addresses:
         try:
             validate_email(email)
-        except ValidationError:
+        except ValidationError:  # noqa: PERF203
             invalid_emails.add(email)
     if invalid_emails:
         raise MultiEmailValidationError(invalid_emails)

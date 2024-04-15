@@ -1,6 +1,5 @@
 """Tests for sheets models"""
 import pytest
-
 from django.core.exceptions import ValidationError
 
 from sheets.factories import GoogleApiAuthFactory

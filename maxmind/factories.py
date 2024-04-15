@@ -9,7 +9,6 @@ from factory.django import DjangoModelFactory
 
 from maxmind import models
 
-
 fake = faker.Faker()
 
 

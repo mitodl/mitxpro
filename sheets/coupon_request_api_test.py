@@ -1,11 +1,10 @@
-# pylint: disable=redefined-outer-name,unused-argument
 """Coupon request API tests"""
 
 import os
 from types import SimpleNamespace
 
 import pytest
-from pygsheets import Worksheet, Spreadsheet
+from pygsheets import Spreadsheet, Worksheet
 from pygsheets.client import Client as PygsheetsClient
 from pygsheets.drive import DriveAPIWrapper
 from pygsheets.sheet import SheetAPIWrapper
@@ -20,7 +19,7 @@ from sheets.utils import ResultType
 
 
 @pytest.fixture
-def courseware_objects():
+def courseware_objects():  # noqa: PT004
     """Database objects that CSV data depends on"""
     run = CourseRunFactory.create(courseware_id="course-v1:edX+DemoX+Demo_Course")
     ProductVersionFactory.create(product__content_object=run)
@@ -29,10 +28,10 @@ def courseware_objects():
 @pytest.fixture
 def request_csv_rows(settings, courseware_objects):
     """Fake coupon request spreadsheet data rows (loaded from CSV)"""
-    fake_request_csv_filepath = os.path.join(
+    fake_request_csv_filepath = os.path.join(  # noqa: PTH118
         settings.BASE_DIR, "sheets/resources/coupon_requests.csv"
     )
-    with open(fake_request_csv_filepath) as f:
+    with open(fake_request_csv_filepath) as f:  # noqa: PTH123
         # Return all rows except for the header
         return [line.split(",") for i, line in enumerate(f.readlines()) if i > 0]
 
@@ -97,16 +96,14 @@ def test_full_sheet_process(
     expected_processed_rows = {6, 8}
     expected_failed_rows = {5, 7}
     assert ResultType.PROCESSED.value in result
-    assert (
-        set(result[ResultType.PROCESSED.value]) == expected_processed_rows
-    ), "Rows %s as defined in coupon_requests.csv should be processed" % str(
-        expected_processed_rows
+    assert set(result[ResultType.PROCESSED.value]) == expected_processed_rows, (
+        "Rows %s as defined in coupon_requests.csv should be processed"
+        % str(expected_processed_rows)
     )
     assert ResultType.FAILED.value in result
-    assert (
-        set(result[ResultType.FAILED.value]) == expected_failed_rows
-    ), "Rows %s as defined in coupon_requests.csv should fail" % str(
-        expected_failed_rows
+    assert set(result[ResultType.FAILED.value]) == expected_failed_rows, (
+        "Rows %s as defined in coupon_requests.csv should fail"
+        % str(expected_failed_rows)
     )
     # A CouponGenerationRequest should be created for each row that wasn't ignored and did not fail full sheet
     # validation (CSV has 1 row that should fail validation, hence the 1)
@@ -119,7 +116,7 @@ def test_full_sheet_process(
         for i, row_data in enumerate(request_csv_rows, start=2)
         if i in expected_processed_rows
     ]
-    expected_coupons = sum((row.num_codes for row in processed_rows))
+    expected_coupons = sum(row.num_codes for row in processed_rows)
     assert Coupon.objects.all().count() == expected_coupons
     # Sheets API should have been used to create an assignment sheet and share it
     assert patched_sheets_api.create_file_watch.call_count == len(

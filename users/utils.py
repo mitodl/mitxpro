@@ -9,7 +9,6 @@ from requests.exceptions import HTTPError
 from mitxpro.utils import get_error_response_summary
 from users.constants import USERNAME_MAX_LEN
 
-
 User = get_user_model()
 log = logging.getLogger(__name__)
 
@@ -53,7 +52,7 @@ def _reformat_for_username(string):
 
 def usernameify(full_name, email=""):
     """
-    Generates a username based on a full name, or an email address as a fallback.
+    Generate a username based on a full name, or an email address as a fallback.
 
     Args:
         full_name (str): A full name (i.e.: User.name)
@@ -76,7 +75,7 @@ def usernameify(full_name, email=""):
         username = _reformat_for_username(email.split("@")[0])
     if not username:
         raise ValueError(
-            "Username could not be generated (full_name: '{}', email: '{}')".format(
+            "Username could not be generated (full_name: '{}', email: '{}')".format(  # noqa: EM103, UP032
                 full_name, email
             )
         )
@@ -85,7 +84,7 @@ def usernameify(full_name, email=""):
 
 def is_duplicate_username_error(exc):
     """
-    Returns True if the given exception indicates that there was an attempt to save a User record with an
+    Return True if the given exception indicates that there was an attempt to save a User record with an
     already-existing username.
 
     Args:
@@ -122,13 +121,13 @@ def ensure_active_user(user):
             if created_auth_token:
                 log.info("Created edX auth token for %s", user.email)
         except HTTPError as exc:
-            log.error(
+            log.error(  # noqa: TRY400
                 "%s (%s): Failed to repair (%s)",
                 user.username,
                 user.email,
                 get_error_response_summary(exc.response),
             )
-        except Exception:  # pylint: disable=broad-except
+        except Exception:
             log.exception("%s (%s): Failed to repair", user.username, user.email)
 
 

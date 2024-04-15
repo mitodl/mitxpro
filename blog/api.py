@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 from django.utils.dateformat import DateFormat
 from django.utils.dateparse import parse_datetime
 
-
 log = logging.getLogger()
 
 RSS_FEED_URL = "https://curve.mit.edu/rss.xml"

@@ -77,5 +77,5 @@ class Migration(migrations.Migration):
         ),
         # Commenting this because we won't need to run data migration after the data has been migrated
         # The data migration was done in https://github.com/mitodl/mitxpro/pull/2628/
-        # migrations.RunPython(migrate_external_marketing_url, migrations.RunPython.noop),
+        # migrations.RunPython(migrate_external_marketing_url, migrations.RunPython.noop),  # noqa: ERA001
     ]

@@ -20,7 +20,6 @@ from mail.constants import (
 )
 from mitxpro.utils import format_price
 
-
 log = logging.getLogger()
 ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
 EMAIL_DATE_FORMAT = "%b %-d, %Y"
@@ -165,7 +164,7 @@ def send_course_run_enrollment_email(enrollment):
                 EMAIL_COURSE_RUN_ENROLLMENT,
             )
         )
-    except:  # pylint: disable=bare-except
+    except:  # noqa: E722
         log.exception("Error sending enrollment success email")
 
 
@@ -187,8 +186,8 @@ def send_course_run_unenrollment_email(enrollment):
                 EMAIL_COURSE_RUN_UNENROLLMENT,
             )
         )
-    except Exception as exp:  # pylint: disable=broad-except
-        log.exception("Error sending unenrollment success email: %s", exp)
+    except Exception as exp:
+        log.exception("Error sending unenrollment success email: %s", exp)  # noqa: TRY401
 
 
 def send_b2b_receipt_email(order):
@@ -247,7 +246,7 @@ def send_b2b_receipt_email(order):
                 EMAIL_B2B_RECEIPT,
             )
         )
-    except:  # pylint: disable=bare-except
+    except:  # noqa: E722
         log.exception("Error sending receipt email")
 
 
@@ -331,7 +330,7 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
         )
         api.send_messages(messages)
 
-    except:  # pylint: disable=bare-except
+    except:  # noqa: E722
         log.exception("Error sending order receipt email.")
 
 
@@ -352,7 +351,7 @@ def send_support_email(subject, message):
                 [settings.EMAIL_SUPPORT],
                 connection=connection,
             )
-    except:  # pylint: disable=bare-except
+    except:  # noqa: E722
         log.exception("Exception sending email to admins")
 
 

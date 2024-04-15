@@ -1,5 +1,6 @@
 """retire user test"""
 import hashlib
+
 import pytest
 from django.contrib.auth import get_user_model
 from social_django.models import UserSocialAuth
@@ -15,7 +16,7 @@ COMMAND = retire_users.Command()
 
 @pytest.mark.django_db
 def test_single_success():
-    """test retire_users command success with one user"""
+    """Test retire_users command success with one user"""
     test_username = "test_user"
 
     user = UserFactory.create(username=test_username, is_active=True)
@@ -35,7 +36,7 @@ def test_single_success():
 
 @pytest.mark.django_db
 def test_multiple_success():
-    """test retire_users command success with more than one user"""
+    """Test retire_users command success with more than one user"""
     test_usernames = ["foo", "bar", "baz"]
 
     for username in test_usernames:
@@ -57,7 +58,7 @@ def test_multiple_success():
 
 @pytest.mark.django_db
 def test_retire_user_with_email():
-    """test retire_users command success with user email"""
+    """Test retire_users command success with user email"""
     test_email = "test@email.com"
 
     user = UserFactory.create(email=test_email, is_active=True)
@@ -77,13 +78,13 @@ def test_retire_user_with_email():
 
 @pytest.mark.django_db
 def test_retire_user_blocking_with_email():
-    """test retire_users command success with user email"""
+    """Test retire_users command success with user email"""
     test_email = "test@email.com"
 
     user = UserFactory.create(email=test_email, is_active=True)
     UserSocialAuthFactory.create(user=user, provider="edX")
     email = user.email
-    hashed_email = hashlib.md5(email.lower().encode("utf-8")).hexdigest()
+    hashed_email = hashlib.md5(email.lower().encode("utf-8")).hexdigest()  # noqa: S324
     assert user.is_active is True
     assert "retired_email" not in user.email
     assert UserSocialAuth.objects.filter(user=user).count() == 1
@@ -101,7 +102,7 @@ def test_retire_user_blocking_with_email():
 
 @pytest.mark.django_db
 def test_multiple_success_blocking_user():
-    """test retire_users command blocking emails success with more than one user"""
+    """Test retire_users command blocking emails success with more than one user"""
     test_usernames = ["foo", "bar", "baz"]
 
     for username in test_usernames:
@@ -126,13 +127,13 @@ def test_multiple_success_blocking_user():
 
 @pytest.mark.django_db
 def test_user_blocking_if_not_requested():
-    """test retire_users command success but it should not block user(s) if not requested"""
+    """Test retire_users command success but it should not block user(s) if not requested"""
     test_email = "test@email.com"
 
     user = UserFactory.create(email=test_email, is_active=True)
     UserSocialAuthFactory.create(user=user, provider="edX")
     email = user.email
-    hashed_email = hashlib.md5(email.lower().encode("utf-8")).hexdigest()
+    hashlib.md5(email.lower().encode("utf-8")).hexdigest()  # noqa: S324
     assert user.is_active is True
     assert "retired_email" not in user.email
     assert UserSocialAuth.objects.filter(user=user).count() == 1

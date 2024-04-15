@@ -8,10 +8,10 @@ class DjangoRestFrameworkStrategy(DjangoStrategy):
     def __init__(self, storage, drf_request=None, tpl=None):
         self.drf_request = drf_request
         # pass the original django request to DjangoStrategy
-        request = drf_request._request  # pylint: disable=protected-access
+        request = drf_request._request  # noqa: SLF001
         super().__init__(storage, request=request, tpl=tpl)
 
-    def request_data(self, merge=True):
+    def request_data(self, merge=True):  # noqa: ARG002, FBT002
         """Returns the request data"""
         if not self.drf_request:
             return {}

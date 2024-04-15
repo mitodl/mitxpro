@@ -2,8 +2,8 @@
 import pytest
 
 from courses.factories import CourseFactory
-from ecommerce.admin import OrderAdmin, DataConsentAgreementForm
-from ecommerce.factories import OrderFactory, DataConsentAgreementFactory
+from ecommerce.admin import DataConsentAgreementForm, OrderAdmin
+from ecommerce.factories import DataConsentAgreementFactory, OrderFactory
 from ecommerce.models import OrderAudit
 from users.factories import UserFactory
 

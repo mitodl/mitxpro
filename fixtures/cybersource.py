@@ -1,8 +1,7 @@
 """Fxitures for CyberSource tests"""
-# pylint: disable=redefined-outer-name
 
-from nacl.public import PrivateKey
 import pytest
+from nacl.public import PrivateKey
 
 from compliance.test_utils import (
     get_cybersource_test_settings,

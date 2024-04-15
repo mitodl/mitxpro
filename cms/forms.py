@@ -14,7 +14,6 @@ class CertificatePageForm(WagtailAdminPageForm):
     Custom form for CertificatePage in order to filter course run IDs
     """
 
-    # pylint: disable=keyword-arg-before-vararg
     def __init__(self, data=None, files=None, parent_page=None, *args, **kwargs):
         super().__init__(data, files, parent_page, *args, **kwargs)
         if parent_page.specific.is_course_page:
@@ -53,7 +52,7 @@ class CoursewareForm(WagtailAdminPageForm):
             elif instance.is_internal_or_external_program_page:
                 self.fields["price"].initial = instance.program.current_price
 
-    def save(self, commit=True):
+    def save(self, commit=True):  # noqa: FBT002
         """
         Handles pricing update and creates product(if required) and product version for a course run.
         """

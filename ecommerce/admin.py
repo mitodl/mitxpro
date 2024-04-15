@@ -39,7 +39,7 @@ class ProductContentTypeListFilter(admin.SimpleListFilter):
     title = "content type"
     parameter_name = "content_type"
 
-    def lookups(self, request, model_admin):
+    def lookups(self, request, model_admin):  # noqa: ARG002
         """
         Returns a list of tuples. The first element in each tuple is the coded value for the option that will
         appear in the URL query. The second element is the human-readable name for the option that will appear
@@ -50,7 +50,7 @@ class ProductContentTypeListFilter(admin.SimpleListFilter):
         ).values_list("model", flat=True)
         return zip(valid_content_types, valid_content_types)
 
-    def queryset(self, request, queryset):
+    def queryset(self, request, queryset):  # noqa: ARG002
         """
         Returns the filtered queryset based on the value provided in the query string and retrievable via
         `self.value()`.
@@ -69,10 +69,10 @@ class LineAdmin(admin.ModelAdmin):
 
     readonly_fields = get_field_names(Line)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     @admin.display(
@@ -92,10 +92,10 @@ class LineRunSelectionAdmin(admin.ModelAdmin):
     list_display = ("id", "line", "get_order", "get_run_courseware_id")
     readonly_fields = get_field_names(LineRunSelection)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     @admin.display(
@@ -124,10 +124,10 @@ class ProgramRunLineAdmin(admin.ModelAdmin):
 
     readonly_fields = get_field_names(ProgramRunLine)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     @admin.display(
@@ -151,10 +151,10 @@ class OrderAdmin(AuditableModelAdmin, TimestampedModelAdmin):
 
     readonly_fields = [name for name in get_field_names(Order) if name != "status"]
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     def save_model(self, request, obj, form, change):
@@ -182,10 +182,10 @@ class OrderAuditAdmin(TimestampedModelAdmin):
         """Returns the related Order's user email"""
         return obj.order.purchaser.email
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
 
@@ -207,10 +207,10 @@ class ReceiptAdmin(TimestampedModelAdmin):
         """Returns the related Order's user email"""
         return obj.order.purchaser.email if obj.order is not None else None
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
 
@@ -297,7 +297,7 @@ class CouponPaymentVersionAdmin(admin.ModelAdmin):
     )
     raw_id_fields = ("payment",)
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     @admin.display(
@@ -328,7 +328,7 @@ class CouponVersionAdmin(admin.ModelAdmin):
     list_display = ("id", "get_coupon_code", "get_payment_name")
     raw_id_fields = ("coupon", "payment_version")
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     @admin.display(
@@ -418,7 +418,7 @@ class CouponRedemptionAdmin(admin.ModelAdmin):
     )
     raw_id_fields = ("coupon_version", "order")
 
-    def get_queryset(self, request):
+    def get_queryset(self, request):  # noqa: ARG002
         """Return all active and in_active products"""
         return self.model.objects.get_queryset().select_related(
             "coupon_version__coupon"
@@ -461,11 +461,11 @@ class ProductVersionAdmin(admin.ModelAdmin):
         "product__programs__readable_id",
     )
 
-    def get_queryset(self, request):
+    def get_queryset(self, request):  # noqa: ARG002
         """Return all active and in_active products"""
         return self.model.objects.get_queryset().select_related("product")
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
     class Media:
@@ -502,10 +502,10 @@ class ProductAdmin(admin.ModelAdmin):
     @admin.display(description="Text ID")
     def get_text_id(self, obj):
         """Return the text id"""
-        if obj.latest_version:
+        if obj.latest_version:  # noqa: RET503
             return obj.latest_version.text_id
 
-    def get_queryset(self, request):
+    def get_queryset(self, request):  # noqa: ARG002
         """Return all active and in_active products"""
         return Product.all_objects
 
@@ -527,9 +527,9 @@ class DataConsentAgreementForm(forms.ModelForm):
 
     class Meta:
         model = DataConsentAgreement
-        fields = "__all__"
+        fields = "__all__"  # noqa: DJ007
 
-    def clean(self):
+    def clean(self):  # noqa: D102
         is_global = self.cleaned_data.get("is_global", False)
         courses = self.cleaned_data.get("courses", Course.objects.none())
         company = self.cleaned_data.get("company", None)
@@ -542,12 +542,12 @@ class DataConsentAgreementForm(forms.ModelForm):
             .exists()
         ):
             raise ValidationError(
-                "You already have a global consent agreement for this company"
+                "You already have a global consent agreement for this company"  # noqa: EM101
             )
         # Check that is_global flag is enabled or at least one course is associated with the agreement
         if not is_global and not courses.all():
             raise ValidationError(
-                "You must either check All Courses box or select courses for the agreement"
+                "You must either check All Courses box or select courses for the agreement"  # noqa: EM101
             )
         # If is_global flag is true, we will just clean the associated course list
         if is_global:

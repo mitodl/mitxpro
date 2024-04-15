@@ -91,7 +91,7 @@ class CourseRunAdmin(TimestampedModelAdmin):
 
     def get_changeform_initial_data(self, request):
         """
-        Returns initial data for the change form.
+        Return initial data for the change form.
 
         Sets the initial values for start_date and end_date fields
         to the current date with a time of 23:59:00 for start_date,
@@ -180,10 +180,10 @@ class ProgramEnrollmentAuditAdmin(TimestampedModelAdmin):
         """Returns the related User's email"""
         return obj.enrollment.user.email
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
 
@@ -257,10 +257,10 @@ class CourseRunEnrollmentAuditAdmin(TimestampedModelAdmin):
         """Returns the related User's email"""
         return obj.enrollment.user.email
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
 
@@ -274,7 +274,7 @@ class CourseRunGradeAdmin(admin.ModelAdmin):
     raw_id_fields = ("user",)
     search_fields = ["user__email", "user__username"]
 
-    def get_queryset(self, request):
+    def get_queryset(self, request):  # noqa: ARG002, D102
         return self.model.objects.get_queryset().select_related("user", "course_run")
 
     @admin.display(
@@ -324,10 +324,10 @@ class CourseRunGradeAuditAdmin(TimestampedModelAdmin):
         """Returns the related CourseRun courseware_id"""
         return obj.course_run_grade.course_run.courseware_id
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # noqa: ARG002, D102
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
         return False
 
 
@@ -357,10 +357,10 @@ class CourseRunCertificateAdmin(TimestampedModelAdmin):
         boolean=True,
     )
     def get_revoked_state(self, obj):
-        """return the revoked state"""
+        """Return the revoked state"""
         return obj.is_revoked is not True
 
-    def get_queryset(self, request):
+    def get_queryset(self, request):  # noqa: ARG002, D102
         return self.model.all_objects.get_queryset().select_related(
             "user", "course_run"
         )
@@ -392,10 +392,10 @@ class ProgramCertificateAdmin(TimestampedModelAdmin):
         boolean=True,
     )
     def get_revoked_state(self, obj):
-        """return the revoked state"""
+        """Return the revoked state"""
         return obj.is_revoked is not True
 
-    def get_queryset(self, request):
+    def get_queryset(self, request):  # noqa: ARG002, D102
         return self.model.all_objects.get_queryset().select_related("user", "program")
 
 

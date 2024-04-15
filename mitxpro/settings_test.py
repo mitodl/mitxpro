@@ -11,9 +11,6 @@ from django.core.exceptions import ImproperlyConfigured
 from mitol.common import envs
 
 
-# pylint: disable=redefined-outer-name, unused-argument
-
-
 # NOTE: this is temporarily inlined here until I can stabilize the test upstream in the library
 def test_app_json_modified():
     """
@@ -26,7 +23,7 @@ def test_app_json_modified():
     import json
     import logging
 
-    with open("app.json") as app_json_file:
+    with open("app.json") as app_json_file:  # noqa: PTH123
         app_json = json.load(app_json_file)
 
     generated_app_json = envs.generate_app_json()
@@ -56,7 +53,6 @@ def settings_sandbox(monkeypatch):
         return vars(sys.modules["mitxpro.settings"])
 
     def _patch(overrides):
-
         for key, value in overrides.items():
             monkeypatch.setenv(key, value)
 

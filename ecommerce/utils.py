@@ -1,6 +1,6 @@
 """Utility functions for ecommerce"""
 import logging
-from urllib.parse import urljoin, urlencode
+from urllib.parse import urlencode, urljoin
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -54,11 +54,11 @@ def get_order_id_by_reference_number(*, reference_number, prefix):
             prefix_with_dash,
             reference_number,
         )
-        raise ParseException(f"Reference number must start with {prefix_with_dash}")
+        raise ParseException(f"Reference number must start with {prefix_with_dash}")  # noqa: EM102
     try:
         order_id = int(reference_number[len(prefix_with_dash) :])
     except ValueError:
-        raise ParseException("Unable to parse order number")
+        raise ParseException("Unable to parse order number")  # noqa: B904, EM101, TRY200
 
     return order_id
 
@@ -102,7 +102,7 @@ def validate_amount(discount_type, amount):
     if amount <= 0:
         return "The amount is invalid, please specify a value greater than 0."
 
-    if discount_type == DISCOUNT_TYPE_PERCENT_OFF and amount > 1:
+    if discount_type == DISCOUNT_TYPE_PERCENT_OFF and amount > 1:  # noqa: RET503
         return "The amount should be between (0 - 1) when discount type is percent-off."
 
 
@@ -112,13 +112,17 @@ def positive_or_zero(number):
 
 
 class CouponUtils:
+    """
+    Common Utils for Coupon and B2BCoupon
+    """
+
     @staticmethod
     def validate_unique_coupon_code(value):
         """
         Validate the uniqueness of coupon codes in Coupon and B2BCoupon models.
         """
         if CouponUtils.is_existing_coupon_code(value):
-            raise ValidationError("Coupon code already exists in the platform.")
+            raise ValidationError("Coupon code already exists in the platform.")  # noqa: EM101
 
     @staticmethod
     def is_existing_coupon_code(value):

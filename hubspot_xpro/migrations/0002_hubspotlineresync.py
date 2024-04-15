@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("ecommerce", "0013_coupon_assignment_email_index"),
         ("hubspot_xpro", "0001_initial"),

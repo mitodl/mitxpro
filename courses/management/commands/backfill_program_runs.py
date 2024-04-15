@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
 
 from courses.constants import TEXT_ID_RUN_TAG_PATTERN
-from courses.models import Program, ProgramRun, CourseRun
+from courses.models import CourseRun, Program, ProgramRun
 
 User = get_user_model()
 
@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser):  # noqa: D102
         parser.add_argument(
             "-p",
             "--program",
@@ -119,7 +119,7 @@ class Command(BaseCommand):
             for run_tag in run_tags_to_create
         ]
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
         programs = Program.objects.prefetch_related("programruns", "courses")
         if options["program"]:

@@ -10,7 +10,7 @@ import uuid
 from base64 import b64encode
 from collections import defaultdict
 from datetime import timedelta
-from typing import Iterable, NamedTuple, Optional
+from typing import Iterable, NamedTuple, Optional  # noqa: UP035
 from urllib.parse import quote_plus, urljoin
 
 from django.conf import settings
@@ -70,7 +70,6 @@ from hubspot_xpro.task_helpers import sync_hubspot_deal
 from maxmind.api import ip_to_country_code
 from mitxpro.utils import case_insensitive_equal, first_or_none, now_in_utc
 
-
 log = logging.getLogger(__name__)
 
 ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -113,7 +112,7 @@ def determine_visitor_country(request: HttpRequest or None) -> str or None:
         if TaxRate.objects.filter(active=True, country_code=ip_country_code).exists():
             return ip_country_code
 
-        return profile_country_code
+        return profile_country_code  # noqa: TRY300
     except TypeError:
         return profile_country_code
 
@@ -150,14 +149,13 @@ def calculate_tax(
             decimal.Decimal(item_price) * (tax_rate.tax_rate / 100)
         )
 
-        return (tax_rate.tax_rate, resolved_country_code, tax_inclusive_amt)
+        return (tax_rate.tax_rate, resolved_country_code, tax_inclusive_amt)  # noqa: TRY300
     except TaxRate.DoesNotExist:
         pass
 
     return (0, "", item_price)
 
 
-# pylint: disable=too-many-lines
 def generate_cybersource_sa_signature(payload):
     """
     Generate an HMAC SHA256 signature for the CyberSource Secure Acceptance payload
@@ -210,7 +208,7 @@ def get_readable_id(run_or_program):
     elif isinstance(run_or_program, Program):
         return run_or_program.readable_id
     else:
-        raise Exception(f"Unexpected object {run_or_program}")
+        raise Exception(f"Unexpected object {run_or_program}")  # noqa: EM102, TRY002, TRY004
 
 
 def sign_cybersource_payload(payload):
@@ -224,12 +222,11 @@ def sign_cybersource_payload(payload):
         dict:
             A signed payload to be sent to CyberSource
     """
-    field_names = sorted(list(payload.keys()) + ["signed_field_names"])
+    field_names = sorted(list(payload.keys()) + ["signed_field_names"])  # noqa: RUF005
     payload = {**payload, "signed_field_names": ",".join(field_names)}
     return {**payload, "signature": generate_cybersource_sa_signature(payload)}
 
 
-# pylint: disable=too-many-locals
 def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_address):
     """
     Generates a payload dict to send to CyberSource for Secure Acceptance
@@ -365,9 +362,14 @@ def latest_coupon_version(coupon):
     return coupon.versions.order_by("-created_on").first()
 
 
-def get_valid_coupon_versions(
-    product, user, auto_only=False, code=None, full_discount=False, company=None
-):  # pylint:disable=too-many-arguments
+def get_valid_coupon_versions(  # noqa: PLR0913
+    product,
+    user,
+    auto_only=False,  # noqa: FBT002
+    code=None,
+    full_discount=False,  # noqa: FBT002
+    company=None,
+):
     """
     Given a list of coupon ids, determine which of them are valid based on payment version dates and redemptions.
 
@@ -525,7 +527,7 @@ def get_valid_coupon_versions(
     return query.order_by("-payment_version__amount")
 
 
-def best_coupon_for_product(product, user, auto_only=False, code=None):
+def best_coupon_for_product(product, user, auto_only=False, code=None):  # noqa: FBT002
     """
     Get the best eligible coupon for a product and user.
 
@@ -788,7 +790,7 @@ def enroll_user_in_order_items(order):
     ):
         voucher_target = voucher.product.content_object
     voucher_enrollment = first_or_none(
-        (
+        (  # noqa: UP034
             enrollment
             for enrollment in successful_run_enrollments
             if enrollment.run == voucher_target
@@ -907,7 +909,7 @@ def get_product_courses(product):
         list of Course: list of Courses associated with the Product
 
     """
-    if product.content_type.model == CONTENT_TYPE_MODEL_COURSERUN:
+    if product.content_type.model == CONTENT_TYPE_MODEL_COURSERUN:  # noqa: RET503
         return [product.content_object.course]
     elif product.content_type.model == CONTENT_TYPE_MODEL_COURSE:
         return [product.content_object]
@@ -951,9 +953,9 @@ class ValidatedBasket(NamedTuple):
     basket: Basket
     basket_item: BasketItem
     product_version: ProductVersion
-    coupon_version: Optional[CouponVersion]
-    run_selection_ids: Optional[Iterable[int]]
-    data_consent_users: Optional[Iterable[DataConsentUser]]
+    coupon_version: Optional[CouponVersion]  # noqa: FA100
+    run_selection_ids: Optional[Iterable[int]]  # noqa: FA100
+    data_consent_users: Optional[Iterable[DataConsentUser]]  # noqa: FA100
 
 
 def _validate_basket_contents(basket):
@@ -1086,7 +1088,6 @@ def _validate_coupon_selection(basket, product):
     return coupon_version
 
 
-# pylint: disable=too-many-branches
 def validate_basket_for_checkout(user):
     """
     Validate basket for checkout
@@ -1239,7 +1240,7 @@ def get_or_create_data_consent_users(basket):
     return data_consents
 
 
-def create_coupons(
+def create_coupons(  # noqa: PLR0913
     *,
     name,
     product_ids,
@@ -1291,10 +1292,7 @@ def create_coupons(
         A CouponPaymentVersion. Other instances will be created at the same time and linked via foreign keys.
 
     """
-    if company_id:
-        company = Company.objects.get(id=company_id)
-    else:
-        company = None
+    company = Company.objects.get(id=company_id) if company_id else None
     payment = CouponPayment.objects.create(name=name)
     payment_version = CouponPaymentVersion.objects.create(
         payment=payment,
@@ -1328,7 +1326,7 @@ def create_coupons(
             coupon_objs = Coupon.objects.bulk_create(coupons)
     except IntegrityError:
         log.warning(
-            "Falling back to create Coupons for coupon payment {} and company {}".format(
+            "Falling back to create Coupons for coupon payment {} and company {}".format(  # noqa: G001, UP032
                 name, company_id
             )
         )
@@ -1379,7 +1377,7 @@ def determine_order_status_change(order, decision):
         return None
 
     if order.status != Order.CREATED:
-        raise EcommerceException(f"{order} is expected to have status 'created'")
+        raise EcommerceException(f"{order} is expected to have status 'created'")  # noqa: EM102
 
     if decision != CYBERSOURCE_DECISION_ACCEPT:
         log.warning(
@@ -1472,22 +1470,22 @@ def get_product_from_text_id(text_id):
         )
         if not program:
             raise Program.DoesNotExist(
-                f"Could not find Program with readable_id={text_id} "
+                f"Could not find Program with readable_id={text_id} "  # noqa: EM102
                 "or readable_id={potential_text_id_base} with program run {potential_prog_run_id}"
             )
         program_run = first_or_none(program.matching_program_runs)
         product = first_or_none(program.products.all())
         if not product:
-            raise Product.DoesNotExist(f"Product for {program} does not exist")
+            raise Product.DoesNotExist(f"Product for {program} does not exist")  # noqa: EM102
         return product, program, program_run
     # This is a "normal" text id that should match a CourseRun/Program
     else:
         if is_program_text_id(text_id):
             content_object_model = Program
-            content_object_filter = dict(readable_id=text_id)
+            content_object_filter = dict(readable_id=text_id)  # noqa: C408
         else:
             content_object_model = CourseRun
-            content_object_filter = dict(courseware_id=text_id)
+            content_object_filter = dict(courseware_id=text_id)  # noqa: C408
         content_object = (
             content_object_model.objects.filter(**content_object_filter)
             .prefetch_related("products")
@@ -1495,11 +1493,11 @@ def get_product_from_text_id(text_id):
         )
         if not content_object:
             raise content_object_model.DoesNotExist(
-                f"{content_object_model._meta.model} matching filter {content_object_filter} does not exist"
+                f"{content_object_model._meta.model} matching filter {content_object_filter} does not exist"  # noqa: EM102, SLF001
             )
         product = first_or_none(content_object.products.all())
         if not product:
-            raise Product.DoesNotExist(f"Product for {content_object} does not exist")
+            raise Product.DoesNotExist(f"Product for {content_object} does not exist")  # noqa: EM102
         return product, content_object, None
 
 

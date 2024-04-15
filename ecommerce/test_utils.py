@@ -1,15 +1,15 @@
 """Functions used in testing ecommerce"""
 from contextlib import contextmanager
 
-from django.db import connection
 import faker
+from django.db import connection
 
 from ecommerce.api import generate_cybersource_sa_signature
 from ecommerce.utils import (
-    create_update_rule,
     create_delete_rule,
-    rollback_update_rule,
+    create_update_rule,
     rollback_delete_rule,
+    rollback_update_rule,
 )
 
 FAKE = faker.Factory.create()

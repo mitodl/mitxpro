@@ -2,8 +2,8 @@
 from django.contrib.auth import get_user_model
 
 from courses.api import deactivate_program_enrollment, deactivate_run_enrollment
-from courses.management.utils import EnrollmentChangeCommand, enrollment_summaries
 from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
+from courses.management.utils import EnrollmentChangeCommand, enrollment_summaries
 from ecommerce.models import Order
 from users.api import fetch_user
 
@@ -15,7 +15,7 @@ class Command(EnrollmentChangeCommand):
 
     help = "Sets a user's enrollment to 'refunded' and deactivates it"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser):  # noqa: D102
         parser.add_argument(
             "--user",
             type=str,
@@ -46,7 +46,7 @@ class Command(EnrollmentChangeCommand):
 
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
         user = fetch_user(options["user"])
         keep_failed_enrollments = options["keep_failed_enrollments"]
@@ -74,7 +74,7 @@ class Command(EnrollmentChangeCommand):
                 enrollment.user.username,
                 enrollment.user.email,
                 enrollment_summaries(
-                    filter(bool, [program_enrollment] + run_enrollments)
+                    filter(bool, [program_enrollment] + run_enrollments)  # noqa: RUF005
                 ),
             )
 
@@ -95,7 +95,7 @@ class Command(EnrollmentChangeCommand):
         else:
             self.stdout.write(
                 self.style.ERROR(
-                    "Failed to refund the enrollment – 'for' user: {} ({}) from course / program ({})\n".format(
+                    "Failed to refund the enrollment – 'for' user: {} ({}) from course / program ({})\n".format(  # noqa: RUF001
                         user.username, user.email, options["run"] or options["program"]
                     )
                 )

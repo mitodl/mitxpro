@@ -8,11 +8,11 @@ VALID_PRODUCT_TYPE_CHOICES = list(zip(VALID_PRODUCT_TYPES, VALID_PRODUCT_TYPES))
 
 PROGRAM_TEXT_ID_PREFIX = "program-"
 ENROLLABLE_ITEM_ID_SEPARATOR = "+"
-TEXT_ID_RUN_TAG_PATTERN = r"\{separator}(?P<run_tag>R\d+)$".format(
+TEXT_ID_RUN_TAG_PATTERN = r"\{separator}(?P<run_tag>R\d+)$".format(  # noqa: UP032
     separator=ENROLLABLE_ITEM_ID_SEPARATOR
 )
 PROGRAM_RUN_ID_PATTERN = (
-    r"^(?P<text_id_base>{program_prefix}.*){run_tag_pattern}".format(
+    r"^(?P<text_id_base>{program_prefix}.*){run_tag_pattern}".format(  # noqa: UP032
         program_prefix=PROGRAM_TEXT_ID_PREFIX, run_tag_pattern=TEXT_ID_RUN_TAG_PATTERN
     )
 )

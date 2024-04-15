@@ -13,7 +13,7 @@ class IsSignedByCyberSource(BasePermission):
     Confirms that the message is signed by CyberSource
     """
 
-    def has_permission(self, request, view):
+    def has_permission(self, request, view):  # noqa: ARG002
         """
         Returns true if request params are signed by CyberSource
         """

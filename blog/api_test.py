@@ -16,8 +16,8 @@ def valid_blog_post():
         'src="https://curve.mit.edu/hubfs/Screenshot%202023-10-05%20at%203.55.25%20PM.png" alt="Ask '
         'an MIT Professor: The Science Behind Oppenheimer" class="hs-featured-image" '
         'style="width:auto !important; max-width:50%; float:left; margin:0 15px 15px 0;"> </a> '
-        "\n</div> \n<p>It’s not every day you see a topic like quantum physics represented in a hit "
-        'summer movie. Yet Christopher Nolan’s <span style="font-style: italic;">Oppenheimer</span> '
+        "\n</div> \n<p>It’s not every day you see a topic like quantum physics represented in a hit "  # noqa: RUF001
+        'summer movie. Yet Christopher Nolan’s <span style="font-style: italic;">Oppenheimer</span> '  # noqa: RUF001
         "has dazzled audiences everywhere and is on track to earn nearly <a "
         'href="https://www.forbes.com/sites/markhughes/2023/09/23/can-oppenheimer-top-1-billion-box'
         '-office-the-clock-is-ticking/?sh=164424195cfe">$1 billion at the global box '
@@ -28,8 +28,8 @@ def valid_blog_post():
         'src="https://curve.mit.edu/hubfs/Screenshot%202023-10-05%20at%203.55.25%20PM.png" alt="Ask '
         'an MIT Professor: The Science Behind Oppenheimer" class="hs-featured-image" '
         'style="width:auto !important; max-width:50%; float:left; margin:0 15px 15px 0;"> </a> '
-        "\n</div> \n<p>It’s not every day you see a topic like quantum physics represented in a hit "
-        'summer movie. Yet Christopher Nolan’s <span style="font-style: italic;">Oppenheimer</span> '
+        "\n</div> \n<p>It’s not every day you see a topic like quantum physics represented in a hit "  # noqa: RUF001
+        'summer movie. Yet Christopher Nolan’s <span style="font-style: italic;">Oppenheimer</span> '  # noqa: RUF001
         "has dazzled audiences everywhere and is on track to earn nearly <a "
         'href="https://www.forbes.com/sites/markhughes/2023/09/23/can-oppenheimer-top-1-billion-box'
         '-office-the-clock-is-ticking/?sh=164424195cfe">$1 billion at the global box '
@@ -43,18 +43,16 @@ def valid_blog_post():
 
 
 @pytest.mark.parametrize(
-    "category, expected_category",
+    "category, expected_category",  # noqa: PT006
     [
-        ["Quantum Computing", ["Quantum Computing"]],
-        [
+        ["Quantum Computing", ["Quantum Computing"]],  # noqa: PT007
+        [  # noqa: PT007
             ["Quantum Computing", "Online Education"],
             ["Quantum Computing", "Online Education"],
         ],
     ],
 )
-def test_parse_blog(
-    category, expected_category, valid_blog_post
-):  # pylint: disable=redefined-outer-name
+def test_parse_blog(category, expected_category, valid_blog_post):
     """
     Tests that `parse_blog` parses a blog post as required.
     """
@@ -93,8 +91,8 @@ def test_parse_blog(
     )
     assert (
         valid_blog_post["description"]
-        == "It’s not every day you see a topic like quantum physics represented in a hit "
-        "summer movie. Yet Christopher Nolan’s Oppenheimer has dazzled audiences everywhere"
+        == "It’s not every day you see a topic like quantum physics represented in a hit "  # noqa: RUF001
+        "summer movie. Yet Christopher Nolan’s Oppenheimer has dazzled audiences everywhere"  # noqa: RUF001
         " and is on track to earn nearly $1 billion at the global box office."
     )
     assert valid_blog_post["categories"] == expected_category
@@ -124,9 +122,7 @@ def test_fetch_blog():
     )
 
 
-def test_parse_blog_invalid_type_and_data(
-    mocker, valid_blog_post
-):  # pylint: disable=redefined-outer-name
+def test_parse_blog_invalid_type_and_data(mocker, valid_blog_post):
     """
     Test that `parse_blog` logs error when post item type or data is not valid.
     """

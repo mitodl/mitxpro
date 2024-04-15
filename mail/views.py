@@ -8,13 +8,12 @@ from django.views.decorators.csrf import csrf_exempt
 
 from mail import api
 from mail.constants import (
-    EMAIL_VERIFICATION,
-    EMAIL_PW_RESET,
-    EMAIL_BULK_ENROLL,
     EMAIL_B2B_RECEIPT,
+    EMAIL_BULK_ENROLL,
+    EMAIL_PW_RESET,
+    EMAIL_VERIFICATION,
 )
 from mail.forms import EmailDebuggerForm
-
 
 EMAIL_DEBUG_EXTRA_CONTEXT = {
     EMAIL_PW_RESET: {"uid": "abc-def", "token": "abc-def"},

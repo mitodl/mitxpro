@@ -1,11 +1,11 @@
-""" ecommerce serializers """
-# pylint: disable=too-many-lines
+"""ecommerce serializers"""
 import logging
 from decimal import Decimal
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models as dj_models, transaction
+from django.db import models as dj_models
+from django.db import transaction
 from django.templatetags.static import static
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -27,11 +27,10 @@ from ecommerce.api import (
 )
 from ecommerce.constants import CYBERSOURCE_CARD_TYPES, DISCOUNT_TYPES
 from ecommerce.models import Basket, TaxRate
-from ecommerce.utils import validate_amount, CouponUtils
+from ecommerce.utils import CouponUtils, validate_amount
 from mitxpro.serializers import WriteableSerializerMethodField
 from mitxpro.utils import now_in_utc
 from users.serializers import ExtendedLegalAddressSerializer
-
 
 log = logging.getLogger(__name__)
 
@@ -80,7 +79,7 @@ class ProductVersionSerializer(BaseProductVersionSerializer):
         return instance.product.content_type.model
 
     class Meta:
-        fields = BaseProductVersionSerializer.Meta.fields + [
+        fields = BaseProductVersionSerializer.Meta.fields + [  # noqa: RUF005
             "id",
             "object_id",
             "product_id",
@@ -121,7 +120,7 @@ class FullProductVersionSerializer(ProductVersionSerializer):
                 courses, many=True, context={**self.context, "filter_products": False}
             ).data
         else:
-            raise ValueError(f"Unexpected product for {model_class}")
+            raise ValueError(f"Unexpected product for {model_class}")  # noqa: EM102
 
     def get_thumbnail_url(self, instance):
         """Return the thumbnail for the courserun or program"""
@@ -131,7 +130,7 @@ class FullProductVersionSerializer(ProductVersionSerializer):
         elif isinstance(content_object, CourseRun):
             catalog_image_url = content_object.course.catalog_image_url
         else:
-            raise ValueError(f"Unexpected product {content_object}")
+            raise ValueError(f"Unexpected product {content_object}")  # noqa: EM102, TRY004
         return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
     def get_run_tag(self, instance):
@@ -157,7 +156,7 @@ class FullProductVersionSerializer(ProductVersionSerializer):
         return None
 
     class Meta:
-        fields = ProductVersionSerializer.Meta.fields + [
+        fields = ProductVersionSerializer.Meta.fields + [  # noqa: RUF005
             "start_date",
             "thumbnail_url",
             "run_tag",
@@ -211,8 +210,9 @@ class ProductContentObjectField(serializers.RelatedField):
             return ProgramProductContentObjectSerializer(instance=value).data
         elif isinstance(value, CourseRun):
             return CourseRunProductContentObjectSerializer(instance=value).data
-        raise Exception(
-            "Unexpected to find type for Product.content_object:", value.__class__
+        raise Exception(  # noqa: TRY002
+            "Unexpected to find type for Product.content_object:",  # noqa: EM101
+            value.__class__,
         )
 
 
@@ -435,17 +435,17 @@ class BasketSerializer(serializers.ModelSerializer):
         return coupon_version
 
     @classmethod
-    def _update_basket_data(
+    def _update_basket_data(  # noqa: PLR0913
         cls,
         basket,
         updated_product=None,
         updated_run_ids=None,
         program_run=None,
-        should_update_program_run=False,
+        should_update_program_run=False,  # noqa: FBT002
         coupon_version=None,
         data_consents=None,
-        clear_all=False,
-    ):  # pylint: disable=too-many-arguments
+        clear_all=False,  # noqa: FBT002
+    ):
         """
         Creates/updates/deletes Basket-related data
 
@@ -476,7 +476,7 @@ class BasketSerializer(serializers.ModelSerializer):
                 basket.couponselection_set.all().delete()
 
             if updated_product is not None or should_update_program_run is True:
-                update_dict = dict(quantity=1)
+                update_dict = dict(quantity=1)  # noqa: C408
                 if updated_product is not None:
                     update_dict["product"] = updated_product
                 if should_update_program_run is True:
@@ -518,18 +518,18 @@ class BasketSerializer(serializers.ModelSerializer):
             )
             self._validate_internal_product(product_content_obj)
 
-            if isinstance(product_content_obj, CourseRun):
+            if isinstance(product_content_obj, CourseRun):  # noqa: SIM102
                 if (
                     product_content_obj.end_date
                     and product_content_obj.end_date < now_in_utc()
                 ):
                     raise ValidationError(
-                        "We're sorry, this course or program is no longer available for enrollment."
+                        "We're sorry, this course or program is no longer available for enrollment."  # noqa: EM101
                     )
 
         except (ObjectDoesNotExist, MultipleObjectsReturned) as exc:
             if isinstance(exc, MultipleObjectsReturned):
-                log.error(
+                log.error(  # noqa: TRY400
                     "Multiple Products found with identical ids: %s", request_product_id
                 )
             raise ValidationError(
@@ -553,7 +553,7 @@ class BasketSerializer(serializers.ModelSerializer):
         )
         if course_or_program.is_external:
             raise ValidationError(
-                "We're sorry, This product cannot be purchased on this web site."
+                "We're sorry, This product cannot be purchased on this web site."  # noqa: EM101
             )
 
     def _validate_and_compare_runs(self, basket, items, product):
@@ -577,7 +577,7 @@ class BasketSerializer(serializers.ModelSerializer):
         )
         return run_ids if run_ids != existing_run_ids else None
 
-    def update(self, instance, validated_data):  # pylint: disable=too-many-locals
+    def update(self, instance, validated_data):  # noqa: D102
         items = validated_data.get("items")
         coupons = validated_data.get("coupons")
         data_consents = validated_data.get("data_consents")
@@ -586,7 +586,7 @@ class BasketSerializer(serializers.ModelSerializer):
         self._validate_coupons(coupons)
 
         if items is None and coupons is None and data_consents is None:
-            raise ValidationError("Invalid request")
+            raise ValidationError("Invalid request")  # noqa: EM101
 
         if items == []:
             self._update_basket_data(
@@ -700,11 +700,11 @@ class BasketSerializer(serializers.ModelSerializer):
         """Validate some basic things about items"""
         if items:
             if len(items) > 1:
-                raise ValidationError("Basket cannot contain more than one item")
+                raise ValidationError("Basket cannot contain more than one item")  # noqa: EM101
             item = items[0]
             product_id = item.get("product_id")
             if product_id is None:
-                raise ValidationError("Invalid request")
+                raise ValidationError("Invalid request")  # noqa: EM101
         return {"items": items}
 
     def validate_coupons(self, coupons):
@@ -722,7 +722,7 @@ class BasketSerializer(serializers.ModelSerializer):
             invalid_consent_ids = set(data_consents) - valid_consent_ids
             if invalid_consent_ids:
                 raise ValidationError(
-                    f"Invalid data consent id {','.join([str(consent_id) for consent_id in invalid_consent_ids])}"
+                    f"Invalid data consent id {','.join([str(consent_id) for consent_id in invalid_consent_ids])}"  # noqa: EM102
                 )
         return {"data_consents": data_consents}
 
@@ -831,7 +831,7 @@ class BaseCouponSerializer(serializers.Serializer):
                 )
         return attrs
 
-    def create(self, validated_data):
+    def create(self, validated_data):  # noqa: D102
         return create_coupons(
             company_id=validated_data.get("company"),
             tag=validated_data.get("tag"),
@@ -968,7 +968,6 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
 
     def get_lines(self, instance):
         """Get product information along with applied discounts"""
-        # pylint: disable=too-many-locals
         coupon_redemption = instance.couponredemption_set.first()
         lines = []
         for line in instance.lines.all():
@@ -1009,9 +1008,7 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
 
             if certificate_page:
                 CEUs = certificate_page.CEUs
-                for (
-                    override
-                ) in certificate_page.overrides:  # pylint: disable=not-an-iterable
+                for override in certificate_page.overrides:
                     if (
                         override.value.get("readable_id")
                         == line.product_version.text_id
@@ -1035,7 +1032,7 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
 
     def get_order(self, instance):
         """Get order-specific information"""
-        return dict(
+        return dict(  # noqa: C408
             id=instance.id,
             created_on=instance.created_on,
             reference_number=instance.reference_number,

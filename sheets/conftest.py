@@ -1,10 +1,9 @@
 """Fixtures relevant to the sheets app test suite"""
-# pylint: disable=redefined-outer-name
 import pytest
 
 
 @pytest.fixture(autouse=True)
-def sheets_settings(settings):
+def sheets_settings(settings):  # noqa: PT004
     """Default settings for sheets tests"""
     settings.FEATURES["COUPON_SHEETS"] = True
     settings.SHEETS_REQ_EMAIL_COL = 7

@@ -18,7 +18,6 @@ from courses.factories import (
     ProgramFactory,
 )
 
-
 pytestmark = pytest.mark.django_db
 
 
@@ -47,7 +46,7 @@ def test_build_program_credential(user):
 
 
 @pytest.mark.parametrize(
-    "kwargs, error_message",
+    "kwargs, error_message",  # noqa: PT006
     [
         ({"page": None}, "Program has no CMS program page"),
         (
@@ -62,7 +61,7 @@ def test_build_program_credential_error(user, kwargs, error_message):
     program = ProgramFactory.create(**kwargs)
     certificate = ProgramCertificateFactory.create(user=user, program=program)
     CourseRunCertificateFactory.create(user=user, course_run__course__program=program)
-    with pytest.raises(Exception) as exc_info:
+    with pytest.raises(Exception) as exc_info:  # noqa: PT011
         build_program_credential(certificate)
 
     assert exc_info.value.args[0] == error_message
@@ -71,7 +70,7 @@ def test_build_program_credential_error(user, kwargs, error_message):
 def test_build_program_credential_no_start_end_dates_error():
     """Verify build_program_credential errors with no start or end dates"""
     certificate = ProgramCertificateFactory.create()
-    with pytest.raises(Exception) as exc_info:
+    with pytest.raises(Exception) as exc_info:  # noqa: PT011
         build_program_credential(certificate)
 
     assert exc_info.value.args[0] == "Program has no start or end date"
@@ -100,7 +99,7 @@ def test_build_course_run_credential():
 
 
 @pytest.mark.parametrize(
-    "kwargs, error_message",
+    "kwargs, error_message",  # noqa: PT006
     [
         ({"course__page": None}, "Course has no CMS course page"),
         (
@@ -117,14 +116,14 @@ def test_build_course_run_credential_error(kwargs, error_message):
     course_run = CourseRunFactory.create(**kwargs)
     certificate = CourseRunCertificateFactory.create(course_run=course_run)
 
-    with pytest.raises(Exception) as exc_info:
+    with pytest.raises(Exception) as exc_info:  # noqa: PT011
         build_course_run_credential(certificate)
 
     assert exc_info.value.args[0] == error_message
 
 
 def test_build_digital_credential_course_run(settings, mocker):
-    "Verify build_digital_credential works correctly for a course run"
+    """Verify build_digital_credential works correctly for a course run"""
     mock_build_course_run_credential = mocker.patch(
         "courses.credentials.build_course_run_credential", autospec=True
     )
@@ -166,7 +165,7 @@ def test_build_digital_credential_course_run(settings, mocker):
 
 
 def test_build_digital_credential_program_run(settings, mocker):
-    "Verify build_digital_credential works correctly for a program run"
+    """Verify build_digital_credential works correctly for a program run"""
     mock_build_program_credential = mocker.patch(
         "courses.credentials.build_program_credential", autospec=True
     )
@@ -209,5 +208,5 @@ def test_build_digital_credential_program_run(settings, mocker):
 def test_test_build_digital_credential_invalid_certified_object(mocker):
     """Verify an exception is raised for an invalid courseware object"""
     invalid_courseware = CourseFactory.create()
-    with pytest.raises(Exception):
+    with pytest.raises(Exception):  # noqa: B017, PT011
         build_digital_credential(invalid_courseware, mocker.Mock())

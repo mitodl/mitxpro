@@ -6,29 +6,29 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from courses.api import defer_enrollment
-from courses.models import CourseRunEnrollment, CourseRun
+from courses.models import CourseRun, CourseRunEnrollment
 from courseware.exceptions import EdxEnrollmentCreateError
 from mitxpro.utils import now_in_utc
 from sheets.constants import GOOGLE_API_TRUE_VAL
-from sheets.sheet_handler_api import EnrollmentChangeRequestHandler
 from sheets.exceptions import SheetRowParsingException
 from sheets.models import DeferralRequest
+from sheets.sheet_handler_api import EnrollmentChangeRequestHandler
 from sheets.utils import (
     ResultType,
     RowResult,
     clean_sheet_value,
-    parse_sheet_date_only_str,
     deferral_sheet_metadata,
+    parse_sheet_date_only_str,
 )
 
 log = logging.getLogger(__name__)
 User = get_user_model()
 
 
-class DeferralRequestRow:  # pylint: disable=too-many-instance-attributes
+class DeferralRequestRow:
     """Represents a row of the deferral request sheet"""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         row_index,
         response_id,
@@ -42,7 +42,7 @@ class DeferralRequestRow:  # pylint: disable=too-many-instance-attributes
         deferral_complete_date,
         errors,
         skip_row,
-    ):  # pylint: disable=too-many-arguments,too-many-locals
+    ):
         self.row_index = row_index
         self.response_id = response_id
         self.request_date = request_date
@@ -91,7 +91,7 @@ class DeferralRequestRow:  # pylint: disable=too-many-instance-attributes
                     == GOOGLE_API_TRUE_VAL
                 ),
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             raise SheetRowParsingException(str(exc)) from exc
 
 
@@ -106,9 +106,9 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
             request_model_cls=DeferralRequest,
         )
 
-    def process_row(
+    def process_row(  # noqa: C901, PLR0911
         self, row_index, row_data
-    ):  # pylint: disable=too-many-return-statements
+    ):
         """
         Ensures that the given spreadsheet row is correctly represented in the database,
         attempts to parse it, defers the given enrollment if appropriate, and returns the
@@ -133,7 +133,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
                 row_db_record=deferral_request,
                 row_object=None,
                 result_type=ResultType.FAILED,
-                message="Parsing failure: {}".format(str(exc)),
+                message="Parsing failure: {}".format(str(exc)),  # noqa: UP032
             )
         is_unchanged_error_row = (
             deferral_req_row.errors and not request_created and not request_updated
@@ -176,7 +176,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
             )
             # When #1838 is completed, this logic can be removed
             if not from_enrollment and not to_enrollment:
-                raise Exception("edX enrollment change failed")
+                raise Exception("edX enrollment change failed")  # noqa: EM101, TRY002
         except ObjectDoesNotExist as exc:
             if isinstance(exc, CourseRunEnrollment.DoesNotExist):
                 message = "'from' course run enrollment does not exist ({})".format(
@@ -187,7 +187,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
                     deferral_req_row.to_courseware_id
                 )
             elif isinstance(exc, User.DoesNotExist):
-                message = "User '{}' does not exist".format(
+                message = "User '{}' does not exist".format(  # noqa: UP032
                     deferral_req_row.learner_email
                 )
             else:
@@ -205,7 +205,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
                 row_db_record=deferral_request,
                 row_object=None,
                 result_type=ResultType.FAILED,
-                message="Invalid deferral: {}".format(exc),
+                message="Invalid deferral: {}".format(exc),  # noqa: UP032
             )
         except EdxEnrollmentCreateError as exc:
             return RowResult(
@@ -213,7 +213,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
                 row_db_record=deferral_request,
                 row_object=None,
                 result_type=ResultType.FAILED,
-                message="Unable to defer enrollment: {}".format(exc),
+                message="Unable to defer enrollment: {}".format(exc),  # noqa: UP032
             )
 
         deferral_request.date_completed = now_in_utc()

@@ -1,12 +1,13 @@
 """mitxpro utilities"""
 import csv
 import datetime
-from enum import auto, Flag
+import itertools
 import json
 import logging
-import itertools
-from urllib.parse import urlparse, urlunparse, ParseResult
+from enum import Flag, auto
+from urllib.parse import ParseResult, urlparse, urlunparse
 
+import requests
 from django.conf import settings
 from django.core.serializers import serialize
 from django.db import models
@@ -14,7 +15,6 @@ from django.http import HttpRequest
 from django.http.response import HttpResponse
 from django.templatetags.static import static
 from rest_framework import status
-import requests
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class FeatureFlag(Flag):
 
 
 def ensure_trailing_slash(url):
-    """ensure a url has a trailing slash"""
+    """Ensure a url has a trailing slash"""
     return url if url.endswith("/") else url + "/"
 
 
@@ -85,7 +85,7 @@ def now_in_utc():
     return datetime.datetime.now(tz=datetime.timezone.utc)
 
 
-def format_datetime_for_filename(datetime_object, include_time=False, include_ms=False):
+def format_datetime_for_filename(datetime_object, include_time=False, include_ms=False):  # noqa: FBT002
     """
     Formats a datetime object for use as part of a filename
 
@@ -130,12 +130,12 @@ def dict_without_keys(d, *omitkeys):
     Returns:
         dict: A dict with omitted keys
     """
-    return {key: d[key] for key in d.keys() if key not in omitkeys}
+    return {key: d[key] for key in d.keys() if key not in omitkeys}  # noqa: SIM118
 
 
 def filter_dict_by_key_set(dict_to_filter, key_set):
     """Takes a dictionary and returns a copy with only the keys that exist in the given set"""
-    return {key: dict_to_filter[key] for key in dict_to_filter.keys() if key in key_set}
+    return {key: dict_to_filter[key] for key in dict_to_filter.keys() if key in key_set}  # noqa: SIM118
 
 
 def serialize_model_object(obj):
@@ -148,7 +148,7 @@ def serialize_model_object(obj):
             A representation of the model
     """
     # serialize works on iterables so we need to wrap object in a list, then unwrap it
-    if obj:
+    if obj:  # noqa: RET503
         data = json.loads(serialize("json", [obj]))[0]
         serialized = data["fields"]
         serialized["id"] = data["pk"]
@@ -167,8 +167,8 @@ def get_field_names(model):
     """
     return [
         field.name
-        for field in model._meta.get_fields()
-        if not field.auto_created  # pylint: disable=protected-access
+        for field in model._meta.get_fields()  # noqa: SLF001
+        if not field.auto_created
     ]
 
 
@@ -211,7 +211,7 @@ def find_object_with_matching_attr(iterable, attr_name, value):
         try:
             if getattr(item, attr_name) == value:
                 return item
-        except AttributeError:
+        except AttributeError:  # noqa: PERF203
             pass
     return None
 
@@ -225,7 +225,7 @@ def has_equal_properties(obj, property_dict):
         try:
             if getattr(obj, field) != value:
                 return False
-        except AttributeError:
+        except AttributeError:  # noqa: PERF203
             return False
     return True
 
@@ -453,9 +453,12 @@ class ValidateOnSaveMixin(models.Model):
     class Meta:
         abstract = True
 
-    def save(
-        self, force_insert=False, force_update=False, **kwargs
-    ):  # pylint: disable=arguments-differ
+    def save(  # noqa: D102
+        self,
+        force_insert=False,  # noqa: FBT002
+        force_update=False,  # noqa: FBT002
+        **kwargs,
+    ):
         if not (force_insert or force_update):
             self.full_clean()
         super().save(force_insert=force_insert, force_update=force_update, **kwargs)
@@ -554,7 +557,7 @@ def request_get_with_timeout_retry(url, retries):
     Raises:
         requests.exceptions.HTTPError: Raised if the response has a status code indicating an error
     """
-    resp = requests.get(url)
+    resp = requests.get(url)  # noqa: S113
     # If there was a timeout (504), retry before giving up
     tries = 1
     while resp.status_code == status.HTTP_504_GATEWAY_TIMEOUT and tries < retries:
@@ -562,7 +565,7 @@ def request_get_with_timeout_retry(url, retries):
         log.warning(
             "GET request timed out (%s). Retrying for attempt %d...", url, tries
         )
-        resp = requests.get(url)
+        resp = requests.get(url)  # noqa: S113
     resp.raise_for_status()
     return resp
 

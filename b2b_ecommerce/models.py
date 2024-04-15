@@ -20,7 +20,6 @@ from ecommerce.utils import CouponUtils
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
 from mitxpro.utils import serialize_model_object
 
-
 B2B_INTEGRATION_PREFIX = "B2B-"
 
 
@@ -106,7 +105,7 @@ class B2BCoupon(TimestampedModel, AuditableModel):
     objects = B2BCouponManager()
 
     @classmethod
-    def get_audit_class(cls):
+    def get_audit_class(cls):  # noqa: D102
         return B2BCouponAudit
 
     def to_dict(self):
@@ -123,7 +122,7 @@ class B2BCouponAudit(AuditModel):
     coupon = models.ForeignKey(B2BCoupon, null=True, on_delete=models.PROTECT)
 
     @classmethod
-    def get_related_field_name(cls):
+    def get_related_field_name(cls):  # noqa: D102
         return "coupon"
 
 
@@ -149,7 +148,7 @@ class B2BOrder(OrderAbstract, AuditableModel):
     discount = models.DecimalField(
         decimal_places=2, max_digits=20, null=True, blank=True
     )
-    contract_number = models.CharField(max_length=50, null=True, blank=True)
+    contract_number = models.CharField(max_length=50, null=True, blank=True)  # noqa: DJ001
     program_run = models.ForeignKey(
         "courses.ProgramRun",
         blank=True,
@@ -170,7 +169,7 @@ class B2BOrder(OrderAbstract, AuditableModel):
         return f"B2BOrder #{self.id}, status={self.status}"
 
     @classmethod
-    def get_audit_class(cls):
+    def get_audit_class(cls):  # noqa: D102
         return B2BOrderAudit
 
     def to_dict(self):
@@ -225,7 +224,7 @@ class B2BOrderAudit(AuditModel):
     order = models.ForeignKey(B2BOrder, null=True, on_delete=models.PROTECT)
 
     @classmethod
-    def get_related_field_name(cls):
+    def get_related_field_name(cls):  # noqa: D102
         return "order"
 
 

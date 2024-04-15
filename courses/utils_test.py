@@ -1,13 +1,12 @@
-# pylint:disable=redefined-outer-name
 """
 Tests for signals
 """
 from unittest.mock import Mock
 
+import pytest
 from edx_api.course_detail import CourseDetail, CourseDetails
 from requests.exceptions import HTTPError
 
-import pytest
 from courses.factories import (
     CourseFactory,
     CourseRunCertificateFactory,
@@ -27,34 +26,33 @@ from courses.utils import (
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture()
+@pytest.fixture
 def user():
     """User object fixture"""
     return UserFactory.create()
 
 
-@pytest.fixture()
+@pytest.fixture
 def program():
     """User object fixture"""
     return ProgramFactory.create()
 
 
-@pytest.fixture()
+@pytest.fixture
 def course():
     """Course object fixture"""
     return CourseFactory.create()
 
 
-# pylint: disable=too-many-arguments
 @pytest.mark.parametrize(
-    "grade, passed, exp_certificate, exp_created, exp_deleted",
+    "grade, passed, exp_certificate, exp_created, exp_deleted",  # noqa: PT006
     [
-        [0.25, True, True, True, False],
-        [0.0, True, False, False, False],
-        [1.0, False, False, False, False],
+        [0.25, True, True, True, False],  # noqa: PT007
+        [0.0, True, False, False, False],  # noqa: PT007
+        [1.0, False, False, False, False],  # noqa: PT007
     ],
 )
-def test_course_run_certificate(
+def test_course_run_certificate(  # noqa: PLR0913
     user, course, grade, passed, exp_certificate, exp_created, exp_deleted
 ):
     """
@@ -153,9 +151,9 @@ def test_generate_program_certificate_success(user, program):
 
 
 @pytest.mark.parametrize(
-    "mocked_api_response, expect_success",
+    "mocked_api_response, expect_success",  # noqa: PT006
     [
-        [
+        [  # noqa: PT007
             CourseDetail(
                 {
                     "id": "course-v1:edX+DemoX+2020_T1",
@@ -168,7 +166,7 @@ def test_generate_program_certificate_success(user, program):
             ),
             True,
         ],
-        [
+        [  # noqa: PT007
             CourseDetail(
                 {
                     "id": "course-v1:edX+DemoX+2020_T1",
@@ -181,9 +179,9 @@ def test_generate_program_certificate_success(user, program):
             ),
             False,
         ],
-        [HTTPError(response=Mock(status_code=404)), False],
-        [HTTPError(response=Mock(status_code=400)), False],
-        [ConnectionError(), False],
+        [HTTPError(response=Mock(status_code=404)), False],  # noqa: PT007
+        [HTTPError(response=Mock(status_code=400)), False],  # noqa: PT007
+        [ConnectionError(), False],  # noqa: PT007
     ],
 )
 def test_sync_course_runs(settings, mocker, mocked_api_response, expect_success):
@@ -191,7 +189,7 @@ def test_sync_course_runs(settings, mocker, mocked_api_response, expect_success)
     Test that sync_course_runs fetches data from edX API. Should fail on API responding with
     an error, as well as trying to set the course run title to None
     """
-    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"
+    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
     mocker.patch.object(CourseDetails, "get_detail", side_effect=[mocked_api_response])
     course_run = CourseRunFactory.create()
 

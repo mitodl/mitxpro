@@ -9,7 +9,6 @@ from django.db.models import Q
 
 from maxmind import models
 
-
 MAXMIND_CSV_COUNTRY_LOCATIONS_LITE = "geolite2-country-locations"
 MAXMIND_CSV_COUNTRY_BLOCKS_IPV4_LITE = "geolite2-country-ipv4"
 MAXMIND_CSV_COUNTRY_BLOCKS_IPV6_LITE = "geolite2-country-ipv6"
@@ -34,11 +33,11 @@ def import_maxmind_database(import_type: str, import_filename: str) -> None:
     """
 
     if import_type not in MAXMIND_CSV_TYPES:
-        raise Exception(f"Invalid database type {import_type}")
+        raise Exception(f"Invalid database type {import_type}")  # noqa: EM102, TRY002
 
     rows = []
 
-    with open(import_filename) as import_raw:
+    with open(import_filename) as import_raw:  # noqa: PTH123
         dr = csv.DictReader(import_raw)
 
         for row in dr:
@@ -131,15 +130,16 @@ def import_maxmind_database(import_type: str, import_filename: str) -> None:
                 )
 
     if len(rows) == 0:
-        raise Exception("No rows to process - file format invalid?")
+        raise Exception("No rows to process - file format invalid?")  # noqa: EM101, TRY002
 
     with transaction.atomic():
         if import_type == MAXMIND_CSV_COUNTRY_LOCATIONS_LITE:
             models.Geoname.objects.all().delete()
             models.Geoname.objects.bulk_create(rows)
-        elif import_type == MAXMIND_CSV_COUNTRY_BLOCKS_IPV4_LITE:
-            models.NetBlock.objects.filter(is_ipv6=False).delete()
-        elif import_type == MAXMIND_CSV_COUNTRY_BLOCKS_IPV6_LITE:
+        elif import_type in (
+            MAXMIND_CSV_COUNTRY_BLOCKS_IPV4_LITE,
+            MAXMIND_CSV_COUNTRY_BLOCKS_IPV6_LITE,
+        ):
             models.NetBlock.objects.filter(is_ipv6=False).delete()
 
         if import_type in [

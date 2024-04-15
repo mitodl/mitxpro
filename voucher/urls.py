@@ -2,6 +2,7 @@
 Voucher URL patterns
 """
 from django.urls import path
+
 from voucher import views
 
 urlpatterns = [

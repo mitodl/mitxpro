@@ -1,17 +1,17 @@
 """Testing utils"""
 import abc
-import json
-from contextlib import contextmanager
-import traceback
-from unittest.mock import Mock
 import csv
+import json
 import tempfile
+import traceback
+from contextlib import contextmanager
+from unittest.mock import Mock
 
 import pytest
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.files.uploadedfile import SimpleUploadedFile
-from rest_framework.renderers import JSONRenderer
 from requests.exceptions import HTTPError
+from rest_framework.renderers import JSONRenderer
 
 
 def any_instance_of(*cls):
@@ -25,7 +25,7 @@ def any_instance_of(*cls):
         AnyInstanceOf: dynamic class type with the desired equality
     """
 
-    class AnyInstanceOf(metaclass=abc.ABCMeta):
+    class AnyInstanceOf(metaclass=abc.ABCMeta):  # noqa: B024
         """Dynamic class type for __eq__ in terms of isinstance"""
 
         def __eq__(self, other):
@@ -43,7 +43,7 @@ def assert_not_raises():
         yield
     except AssertionError:
         raise
-    except Exception:  # pylint: disable=broad-except
+    except Exception:  # noqa: BLE001
         pytest.fail(f"An exception was not raised: {traceback.format_exc()}")
 
 
@@ -90,7 +90,7 @@ class MockHttpError(HTTPError):
 
     def __init__(self, *args, **kwargs):
         response = MockResponse(content={"bad": "response"}, status_code=400)
-        super().__init__(*args, **{**kwargs, **{"response": response}})
+        super().__init__(*args, **{**kwargs, **{"response": response}})  # noqa: PIE800
 
 
 def drf_datetime(dt):
@@ -130,11 +130,11 @@ def create_tempfile_csv(rows_iter):
         SimpleUploadedFile: A temporary CSV file with the given contents
     """
     f = tempfile.NamedTemporaryFile(suffix=".csv", delete=False)
-    with open(f.name, "w", encoding="utf8", newline="") as f:
+    with open(f.name, "w", encoding="utf8", newline="") as f:  # noqa: PTH123
         writer = csv.writer(f, delimiter=",")
         for row in rows_iter:
             writer.writerow(row)
-    with open(f.name, "r") as user_csv:
+    with open(f.name, "r") as user_csv:  # noqa: PTH123, UP015
         return SimpleUploadedFile(
             f.name, user_csv.read().encode("utf8"), content_type="application/csv"
         )
@@ -196,8 +196,8 @@ def update_namespace(tuple_to_update, **updates):
         Union([types.namedtuple, typing.NamedTuple]): The updated namespace
     """
     return tuple_to_update.__class__(
-        **{  # pylint: disable=protected-access
-            **tuple_to_update._asdict(),  # pylint: disable=protected-access
+        **{
+            **tuple_to_update._asdict(),
             **updates,
         }
     )

@@ -1,15 +1,14 @@
 """
 Tests for course serializers
 """
-# pylint: disable=unused-argument, redefined-outer-name
 from datetime import datetime, timedelta, timezone
 
 import factory
 import pytest
 from django.contrib.auth.models import AnonymousUser
 
-from cms.factories import FacultyMembersPageFactory
 from cms.constants import FORMAT_ONLINE, FORMAT_OTHER
+from cms.factories import FacultyMembersPageFactory
 from courses.factories import (
     CourseFactory,
     CourseRunEnrollmentFactory,
@@ -54,7 +53,7 @@ def test_base_program_serializer():
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_OTHER])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",
+    "duration, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
     [
         (
             "2 Months",
@@ -74,7 +73,7 @@ def test_base_program_serializer():
         ),
     ],
 )
-def test_serialize_program(
+def test_serialize_program(  # noqa: PLR0913
     mock_context,
     has_product,
     is_external,
@@ -85,7 +84,7 @@ def test_serialize_program(
     ceus,
     external_marketing_url,
     marketing_hubspot_form_id,
-):  # pylint: disable=too-many-arguments,too-many-locals
+):
     """Test Program serialization"""
 
     program = ProgramFactory.create(
@@ -183,7 +182,7 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("course_page", [True, False])
 @pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_OTHER])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",
+    "duration, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
     [
         (
             "2 Months",
@@ -203,7 +202,7 @@ def test_base_course_serializer():
         ),
     ],
 )
-def test_serialize_course(
+def test_serialize_course(  # noqa: PLR0913
     mock_context,
     is_anonymous,
     all_runs,
@@ -216,7 +215,7 @@ def test_serialize_course(
     ceus,
     external_marketing_url,
     marketing_hubspot_form_id,
-):  # pylint: disable=too-many-arguments,too-many-locals
+):
     """Test Course serialization"""
     now = datetime.now(tz=timezone.utc)
     if is_anonymous:
@@ -266,11 +265,7 @@ def test_serialize_course(
         ProductVersionFactory.create(product__content_object=run)
 
     data = CourseSerializer(instance=course, context=mock_context).data
-
-    if all_runs or is_anonymous:
-        expected_runs = unexpired_runs
-    else:
-        expected_runs = [course_run]
+    expected_runs = unexpired_runs if all_runs or is_anonymous else [course_run]
 
     assert_drf_json_equal(
         data,
@@ -362,8 +357,8 @@ def test_serialize_course_run_detail():
 
 
 @pytest.mark.parametrize(
-    "has_company, receipts_enabled",
-    [[True, False], [False, False], [False, True], [True, True]],
+    "has_company, receipts_enabled",  # noqa: PT006
+    [[True, False], [False, False], [False, True], [True, True]],  # noqa: PT007
 )
 def test_serialize_course_run_enrollments(settings, has_company, receipts_enabled):
     """Test that CourseRunEnrollmentSerializer has correct data"""
@@ -394,8 +389,8 @@ def test_serialize_program_enrollments_assert():
 
 
 @pytest.mark.parametrize(
-    "has_company, receipts_enabled",
-    [[True, False], [False, False], [False, True], [True, True]],
+    "has_company, receipts_enabled",  # noqa: PT006
+    [[True, False], [False, False], [False, True], [True, True]],  # noqa: PT007
 )
 def test_serialize_program_enrollments(settings, has_company, receipts_enabled):
     """Test that ProgramEnrollmentSerializer has correct data"""

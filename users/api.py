@@ -1,14 +1,14 @@
 """Users api"""
+import operator
 import re
 from functools import reduce
-import operator
 
-from django.db.models import Q
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.contrib.auth import get_user_model
+from django.db.models import Q
 
-from mitxpro.utils import first_or_none, unique, unique_ignore_case, max_or_none
+from mitxpro.utils import first_or_none, max_or_none, unique, unique_ignore_case
 from users.constants import USERNAME_MAX_LEN
 
 User = get_user_model()
@@ -18,7 +18,7 @@ CASE_INSENSITIVE_SEARCHABLE_FIELDS = {"email"}
 
 def get_user_by_id(user_id):
     """
-    Gets a User by id
+    Get a User by id
 
     Args:
         user_id (int): the user id to fetch
@@ -31,7 +31,7 @@ def get_user_by_id(user_id):
 
 def _is_case_insensitive_searchable(field_name):
     """
-    Indicates whether or not a given field in the User model is a string field
+    Indicate whether or not a given field in the User model is a string field
 
     Args:
         field_name (str): The name of the User field
@@ -56,14 +56,14 @@ def _determine_filter_field(user_property):
     else:
         try:
             validate_email(user_property)
-            return "email"
+            return "email"  # noqa: TRY300
         except ValidationError:
             return "username"
 
 
-def fetch_user(filter_value, ignore_case=True):
+def fetch_user(filter_value, ignore_case=True):  # noqa: FBT002
     """
-    Attempts to fetch a user based on several properties
+    Attempt to fetch a user based on several properties
 
     Args:
         filter_value (Union[str, int]): The id, email, or username of some User
@@ -74,14 +74,14 @@ def fetch_user(filter_value, ignore_case=True):
     filter_field = _determine_filter_field(filter_value)
 
     if _is_case_insensitive_searchable(filter_field) and ignore_case:
-        query = {"{}__iexact".format(filter_field): filter_value}
+        query = {"{}__iexact".format(filter_field): filter_value}  # noqa: UP032
     else:
         query = {filter_field: filter_value}
     try:
         return User.objects.get(**query)
     except User.DoesNotExist as e:
         raise User.DoesNotExist(
-            "Could not find User with {}={} ({})".format(
+            "Could not find User with {}={} ({})".format(  # noqa: EM103
                 filter_field,
                 filter_value,
                 "case-insensitive" if ignore_case else "case-sensitive",
@@ -89,9 +89,9 @@ def fetch_user(filter_value, ignore_case=True):
         ) from e
 
 
-def fetch_users(filter_values, ignore_case=True):
+def fetch_users(filter_values, ignore_case=True):  # noqa: FBT002
     """
-    Attempts to fetch a set of users based on several properties. The property being searched
+    Attempt to fetch a set of users based on several properties. The property being searched
     (i.e.: id, email, or username) is assumed to be the same for all of the given values, so the
     property type is determined for the first element, then used for all of the values provided.
 
@@ -115,7 +115,7 @@ def fetch_users(filter_values, ignore_case=True):
     )
     if len(filter_values) > len(unique_filter_values):
         raise ValidationError(
-            "Duplicate values provided ({})".format(
+            "Duplicate values provided ({})".format(  # noqa: EM103
                 set(filter_values).intersection(unique_filter_values)
             )
         )
@@ -124,23 +124,23 @@ def fetch_users(filter_values, ignore_case=True):
         query = reduce(
             operator.or_,
             (
-                Q(**{"{}__iexact".format(filter_field): filter_value})
+                Q(**{"{}__iexact".format(filter_field): filter_value})  # noqa: UP032
                 for filter_value in filter_values
             ),
         )
         user_qset = User.objects.filter(query)
     else:
         user_qset = User.objects.filter(
-            **{"{}__in".format(filter_field): filter_values}
+            **{"{}__in".format(filter_field): filter_values}  # noqa: UP032
         )
-    if not user_qset.count() == len(filter_values):
+    if user_qset.count() != len(filter_values):
         valid_values = user_qset.values_list(filter_field, flat=True)
         invalid_values = set(filter_values) - set(valid_values)
         raise User.DoesNotExist(
-            "Could not find Users with these '{}' values ({}): {}".format(
+            "Could not find Users with these '{}' values ({}): {}".format(  # noqa: EM103
                 filter_field,
                 "case-insensitive" if ignore_case else "case-sensitive",
-                sorted(list(invalid_values)),
+                sorted(invalid_values),
             )
         )
     return user_qset
@@ -148,7 +148,7 @@ def fetch_users(filter_values, ignore_case=True):
 
 def find_available_username(initial_username_base):
     """
-    Returns a username with the lowest possible suffix given some base username. If the applied suffix
+    Return a username with the lowest possible suffix given some base username. If the applied suffix
     makes the username longer than the username max length, characters are removed from the
     right of the username to make room.
 
@@ -177,13 +177,13 @@ def find_available_username(initial_username_base):
     # Any query for suffixed usernames could come up empty. The minimum suffix will be added to
     # the username in that case.
     current_min_suffix = 1
-    while letters_to_truncate < len(initial_username_base):
+    while letters_to_truncate < len(initial_username_base):  # noqa: RET503
         username_base = initial_username_base[
             0 : len(initial_username_base) - letters_to_truncate
         ]
         # Find usernames that match the username base and have a numerical suffix, then find the max suffix
         existing_usernames = User.objects.filter(
-            username__regex=r"{username_base}[0-9]+".format(username_base=username_base)
+            username__regex=r"{username_base}[0-9]+".format(username_base=username_base)  # noqa: UP032
         ).values_list("username", flat=True)
         max_suffix = max_or_none(
             int(re.search(r"\d+$", username).group()) for username in existing_usernames

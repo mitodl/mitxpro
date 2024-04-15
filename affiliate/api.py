@@ -14,10 +14,7 @@ def get_affiliate_code_from_qstring(request):
     Returns:
         Optional[str]: The affiliate code (or None)
     """
-    if request.method != "GET":
-        return None
-    affiliate_code = request.GET.get(AFFILIATE_QS_PARAM)
-    return affiliate_code
+    return request.GET.get(AFFILIATE_QS_PARAM) if request.method == "GET" else None
 
 
 def get_affiliate_code_from_request(request):

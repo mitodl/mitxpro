@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("sheets", "0014_file_watch_for_assignment_sheets")]
 
     operations = [

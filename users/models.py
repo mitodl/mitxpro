@@ -15,7 +15,6 @@ from affiliate.models import AffiliateReferralAction
 from mitxpro.models import TimestampedModel
 from mitxpro.utils import now_in_utc
 
-
 # Defined in edX Profile model
 MALE = "m"
 FEMALE = "f"
@@ -112,9 +111,9 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_active", True)
 
         if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser must have is_staff=True.")
+            raise ValueError("Superuser must have is_staff=True.")  # noqa: EM101
         if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser must have is_superuser=True.")
+            raise ValueError("Superuser must have is_superuser=True.")  # noqa: EM101
 
         return self._create_user(username, email, password, **extra_fields)
 
@@ -122,7 +121,7 @@ class UserManager(BaseUserManager):
 class FaultyCoursewareUserManager(BaseUserManager):
     """User manager that defines a queryset of Users that are incorrectly configured in the courseware"""
 
-    def get_queryset(self):  # pylint: disable=missing-docstring
+    def get_queryset(self):  # noqa: D102
         return (
             super()
             .get_queryset()
@@ -162,7 +161,7 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
     faulty_courseware_users = FaultyCoursewareUserManager()
 
     def get_full_name(self):
-        """Returns the user's fullname"""
+        """Return the user's fullname"""
         return self.name
 
     def __str__(self):
@@ -171,12 +170,12 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
 
 
 def generate_change_email_code():
-    """Generates a new change email code"""
+    """Generate a new change email code"""
     return uuid.uuid4().hex
 
 
 def generate_change_email_expires():
-    """Generates the expiry datetime for a change email request"""
+    """Generate the expiry datetime for a change email request"""
     return now_in_utc() + timedelta(minutes=settings.AUTH_CHANGE_EMAIL_TTL_IN_MINUTES)
 
 

@@ -2,7 +2,7 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
-from courses.models import Program, Course, CourseRun
+from courses.models import Course, CourseRun, Program
 from localdev.seed.api import SeedDataLoader, get_raw_seed_data_from_file
 
 User = get_user_model()
@@ -29,7 +29,7 @@ class Command(BaseCommand):
 
     help = "Deletes seeded data based on raw seed data file or specific properties"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser):  # noqa: D102
         parser.add_argument(
             "--type",
             type=str,
@@ -42,15 +42,15 @@ class Command(BaseCommand):
             help="The title of the seeded object you want to delete",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
         seed_data_loader = SeedDataLoader()
         if options["type"]:
             if not options["title"]:
-                raise CommandError("'title' must be specified with 'type'")
+                raise CommandError("'title' must be specified with 'type'")  # noqa: EM101
             if not seed_data_loader.is_seed_value(options["title"]):
                 raise CommandError(
-                    "This command should only be run to delete seeded objects. Seeded objects are indicated "
+                    "This command should only be run to delete seeded objects. Seeded objects are indicated "  # noqa: EM103
                     "by a prefixed title (example: {})".format(
                         seed_data_loader.seed_prefixed("Some Title")
                     )
@@ -78,4 +78,4 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.SUCCESS("RESULTS"))
             for k, v in results.report.items():
-                self.stdout.write("{}: {}".format(k, v))
+                self.stdout.write("{}: {}".format(k, v))  # noqa: UP032

@@ -1,6 +1,5 @@
 """URLs for ecommerce"""
-from django.urls import path
-from django.urls import include, re_path
+from django.urls import include, path, re_path
 from rest_framework.routers import SimpleRouter
 
 from ecommerce.views import (
@@ -15,7 +14,6 @@ from ecommerce.views import (
     bulk_assignment_csv_view,
     coupon_code_csv_view,
 )
-
 
 router = SimpleRouter()
 router.register(r"products", ProductViewSet, basename="products_api")

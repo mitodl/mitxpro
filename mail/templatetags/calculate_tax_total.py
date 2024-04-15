@@ -5,7 +5,6 @@ from django import template
 
 from mail.templatetags.calculate_tax import calculate_tax
 
-
 register = template.Library()
 
 

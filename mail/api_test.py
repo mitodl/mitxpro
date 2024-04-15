@@ -1,18 +1,19 @@
 """API tests"""
 from email.utils import formataddr
+
 import pytest
 
 from mail.api import (
-    context_for_user,
-    safe_format_recipients,
-    render_email_templates,
-    send_messages,
-    messages_for_recipients,
+    EmailMetadata,
+    UserMessageProps,
+    build_message,
     build_messages,
     build_user_specific_messages,
-    build_message,
-    UserMessageProps,
-    EmailMetadata,
+    context_for_user,
+    messages_for_recipients,
+    render_email_templates,
+    safe_format_recipients,
+    send_messages,
 )
 from mitxpro.test_utils import any_instance_of
 from users.factories import UserFactory
@@ -22,7 +23,7 @@ lazy = pytest.lazy_fixture
 
 
 @pytest.fixture
-def email_settings(settings):
+def email_settings(settings):  # noqa: PT004
     """Default settings for email tests"""
     settings.MAILGUN_RECIPIENT_OVERRIDE = None
 
@@ -99,7 +100,7 @@ def test_messages_for_recipients():
 
     for user, msg in zip(users, messages):
         assert user.email in str(msg.to[0])
-        assert msg.subject == "Welcome {}".format(user.name)
+        assert msg.subject == f"Welcome {user.name}"
 
 
 def test_build_messages(mocker):

@@ -167,7 +167,7 @@ def determine_price_and_discount(*, product_version, discount_code, num_seats):
                 coupon_code=discount_code, product_id=product_version.product.id
             )
         except B2BCoupon.DoesNotExist as exc:
-            raise ValidationError("Invalid coupon code") from exc
+            raise ValidationError("Invalid coupon code") from exc  # noqa: EM101
     else:
         coupon = None
 

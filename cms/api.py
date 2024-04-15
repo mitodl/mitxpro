@@ -3,16 +3,15 @@ import itertools
 import logging
 from datetime import MAXYEAR, datetime, timezone
 
-
 from django.contrib.contenttypes.models import ContentType
 from wagtail.models import Page, Site
+
 from cms import models as cms_models
 from cms.constants import CERTIFICATE_INDEX_SLUG, ENTERPRISE_PAGE_SLUG
 
-
 log = logging.getLogger(__name__)
-DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")
-DEFAULT_SITE_PROPS = dict(hostname="localhost", port=80)
+DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")  # noqa: C408
+DEFAULT_SITE_PROPS = dict(hostname="localhost", port=80)  # noqa: C408
 
 
 def filter_and_sort_catalog_pages(
@@ -136,7 +135,7 @@ def ensure_catalog_page():
         catalog_page.refresh_from_db()
 
 
-def ensure_index_pages():  # pylint: disable=too-many-branches
+def ensure_index_pages():  # noqa: C901
     """
     Ensures that the proper index pages exist as children of the home page, and that
     any pages that should belong to those index pages are set as children.
@@ -203,7 +202,7 @@ def ensure_index_pages():  # pylint: disable=too-many-branches
 
 def ensure_enterprise_page():
     """
-    Ensures that an enterprise page with the correct slug exists.
+    Ensure that an enterprise page with the correct slug exists.
     """
     enterprise_page = cms_models.EnterprisePage.objects.first()
 
@@ -213,7 +212,7 @@ def ensure_enterprise_page():
     enterprise_page_data = {
         "title": "Enterprise Page",
         "slug": ENTERPRISE_PAGE_SLUG,
-        "description": "Deepen your team’s career knowledge and expand their abilities with MIT xPRO’s online "
+        "description": "Deepen your team's career knowledge and expand their abilities with MIT xPRO's online "
         "courses for professionals.",
         "action_title": "Find out what MIT xPRO can do for your team.",
         "headings": [

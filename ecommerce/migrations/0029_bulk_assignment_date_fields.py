@@ -21,7 +21,6 @@ def backfill_last_assignment_date(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("ecommerce", "0028_include_future_runs_default")]
 
     operations = [

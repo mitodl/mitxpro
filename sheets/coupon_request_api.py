@@ -1,8 +1,8 @@
 """Coupon request API"""
 import itertools
 import json
-from decimal import Decimal
 import logging
+from decimal import Decimal
 
 from django.conf import settings
 from django.db import transaction
@@ -10,33 +10,33 @@ from django.utils.functional import cached_property
 
 import ecommerce.api
 from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
-from ecommerce.models import Company, Coupon, CouponPaymentVersion, BulkCouponAssignment
+from ecommerce.models import BulkCouponAssignment, Company, Coupon, CouponPaymentVersion
 from ecommerce.utils import make_checkout_url
-from mitxpro.utils import now_in_utc, item_at_index_or_none, item_at_index_or_blank
+from mitxpro.utils import item_at_index_or_blank, item_at_index_or_none, now_in_utc
 from sheets.api import (
+    create_or_renew_sheet_file_watch,
     get_authorized_pygsheets_client,
     share_drive_file_with_emails,
-    create_or_renew_sheet_file_watch,
 )
 from sheets.constants import GOOGLE_API_TRUE_VAL
 from sheets.exceptions import SheetRowParsingException
 from sheets.models import CouponGenerationRequest
 from sheets.sheet_handler_api import SheetHandler
 from sheets.utils import (
+    ResultType,
     RowResult,
-    format_datetime_for_sheet_formula,
-    build_protected_range_request_body,
+    assign_sheet_metadata,
     assignment_sheet_file_name,
+    build_protected_range_request_body,
+    format_datetime_for_sheet_formula,
+    get_column_letter,
     parse_sheet_datetime_str,
     request_sheet_metadata,
-    assign_sheet_metadata,
-    ResultType,
-    get_column_letter,
 )
 
 log = logging.getLogger(__name__)
 
-BULK_PURCHASE_DEFAULTS = dict(amount=Decimal("1.0"), automatic=False)
+BULK_PURCHASE_DEFAULTS = dict(amount=Decimal("1.0"), automatic=False)  # noqa: C408
 
 
 def create_coupons_for_request_row(row, company_id):
@@ -71,10 +71,10 @@ def create_coupons_for_request_row(row, company_id):
     )
 
 
-class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
+class CouponRequestRow:
     """Represents a row of a coupon request sheet"""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         row_index,
         purchase_order_id,
@@ -88,7 +88,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
         errors,
         skip_row,
         requester,
-    ):  # pylint: disable=too-many-arguments,too-many-locals
+    ):
         self.row_index = row_index
         self.purchase_order_id = purchase_order_id
         self.coupon_name = coupon_name
@@ -157,7 +157,7 @@ class CouponRequestRow:  # pylint: disable=too-many-instance-attributes
                 )
                 == GOOGLE_API_TRUE_VAL,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             raise SheetRowParsingException(str(exc)) from exc
 
 
@@ -190,7 +190,7 @@ class CouponRequestHandler(SheetHandler):
         self.sheet_metadata = request_sheet_metadata
 
     @cached_property
-    def worksheet(self):
+    def worksheet(self):  # noqa: D102
         return self.spreadsheet.sheet1
 
     def protect_coupon_assignment_ranges(
@@ -259,11 +259,11 @@ class CouponRequestHandler(SheetHandler):
                 "Cannot create bulk coupon sheet - No coupon codes found matching the name '%s'",
                 coupon_req_row.coupon_name,
             )
-            return
+            return  # noqa: RET502
         # Create sheet
         spreadsheet_title = assignment_sheet_file_name(coupon_req_row)
         create_kwargs = (
-            dict(folder=settings.DRIVE_OUTPUT_FOLDER_ID)
+            dict(folder=settings.DRIVE_OUTPUT_FOLDER_ID)  # noqa: C408
             if settings.DRIVE_OUTPUT_FOLDER_ID
             else {}
         )
@@ -273,7 +273,7 @@ class CouponRequestHandler(SheetHandler):
         worksheet = bulk_coupon_sheet.sheet1
         # Add headers
         worksheet.update_values(
-            crange="A1:{}1".format(assign_sheet_metadata.LAST_COL_LETTER),
+            crange="A1:{}1".format(assign_sheet_metadata.LAST_COL_LETTER),  # noqa: UP032
             values=[assign_sheet_metadata.column_headers],
         )
         # Write enrollment codes to the appropriate column of the worksheet
@@ -311,11 +311,11 @@ class CouponRequestHandler(SheetHandler):
         # Format header cells with bold text
         header_range = worksheet.get_values(
             start="A1",
-            end="{}1".format(assign_sheet_metadata.LAST_COL_LETTER),
+            end="{}1".format(assign_sheet_metadata.LAST_COL_LETTER),  # noqa: UP032
             returnas="range",
         )
         first_cell = header_range.cells[0][0]
-        first_cell.set_text_format("bold", True)
+        first_cell.set_text_format("bold", True)  # noqa: FBT003
         header_range.apply_format(first_cell)
         # Protect ranges of cells that should not be edited (everything besides the email column)
         self.protect_coupon_assignment_ranges(
@@ -339,7 +339,7 @@ class CouponRequestHandler(SheetHandler):
         )
         return bulk_coupon_sheet
 
-    def update_completed_rows(self, success_row_results):
+    def update_completed_rows(self, success_row_results):  # noqa: D102
         for row_result in success_row_results:
             self.worksheet.update_values(
                 crange="{date_processed_col}{row_index}:{error_col}{row_index}".format(
@@ -359,13 +359,13 @@ class CouponRequestHandler(SheetHandler):
                 ],
             )
 
-    def post_process_results(self, grouped_row_results):
+    def post_process_results(self, grouped_row_results):  # noqa: D102
         # Create assignment sheets for all newly-processed rows
         processed_row_results = grouped_row_results.get(ResultType.PROCESSED, [])
         for row_result in processed_row_results:
             self.create_assignment_sheet(row_result.row_object)
 
-    def get_or_create_request(self, row_data):
+    def get_or_create_request(self, row_data):  # noqa: D102
         coupon_name = row_data[self.sheet_metadata.COUPON_NAME_COL_INDEX].strip()
         purchase_order_id = row_data[
             self.sheet_metadata.PURCHASE_ORDER_COL_INDEX
@@ -379,7 +379,7 @@ class CouponRequestHandler(SheetHandler):
                 created,
             ) = CouponGenerationRequest.objects.select_for_update().get_or_create(
                 coupon_name=coupon_name,
-                defaults=dict(
+                defaults=dict(  # noqa: C408
                     purchase_order_id=purchase_order_id, raw_data=user_input_json
                 ),
             )
@@ -390,7 +390,7 @@ class CouponRequestHandler(SheetHandler):
         return coupon_gen_request, created, raw_data_changed
 
     @staticmethod
-    def validate_sheet(enumerated_rows):
+    def validate_sheet(enumerated_rows):  # noqa: D102
         enumerated_data_rows_1, enumerated_data_rows_2 = itertools.tee(enumerated_rows)
         invalid_rows = []
         observed_coupon_names = set()
@@ -420,13 +420,13 @@ class CouponRequestHandler(SheetHandler):
             )
 
         valid_data_rows = filter(
-            lambda data_row_tuple: data_row_tuple[0]
+            lambda data_row_tuple: data_row_tuple[0]  # noqa: SIM118
             not in invalid_coupon_name_row_dict.keys(),
             enumerated_data_rows_2,
         )
         return valid_data_rows, invalid_rows
 
-    def filter_ignored_rows(self, enumerated_rows):
+    def filter_ignored_rows(self, enumerated_rows):  # noqa: D102
         return filter(
             # If the "ignore" column is set to TRUE for this row, or it has already been processed,
             # it should be skipped
@@ -434,9 +434,9 @@ class CouponRequestHandler(SheetHandler):
             enumerated_rows,
         )
 
-    def process_row(
+    def process_row(  # noqa: D102
         self, row_index, row_data
-    ):  # pylint: disable=too-many-return-statements
+    ):
         (
             coupon_gen_request,
             request_created,
@@ -450,7 +450,7 @@ class CouponRequestHandler(SheetHandler):
                 row_db_record=coupon_gen_request,
                 row_object=None,
                 result_type=ResultType.FAILED,
-                message="Parsing failure: {}".format(str(exc)),
+                message="Parsing failure: {}".format(str(exc)),  # noqa: UP032
             )
         is_unchanged_error_row = (
             coupon_req_row.errors and not request_created and not request_updated
@@ -476,7 +476,7 @@ class CouponRequestHandler(SheetHandler):
 
         company, created = Company.objects.get_or_create(
             name__iexact=coupon_req_row.company_name,
-            defaults=dict(name=coupon_req_row.company_name),
+            defaults=dict(name=coupon_req_row.company_name),  # noqa: C408
         )
         if created:
             log.info("Created new Company '%s'...", coupon_req_row.company_name)

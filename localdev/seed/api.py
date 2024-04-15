@@ -1,108 +1,108 @@
 """Functions/classes for adding and removing seed data"""
 import datetime
-import os
 import json
-from types import SimpleNamespace
+import os
 from collections import defaultdict, namedtuple
+from types import SimpleNamespace
 
-from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from wagtail.models import Page
+from django.core.exceptions import ImproperlyConfigured
 from rest_framework.exceptions import ValidationError
+from wagtail.models import Page
 
+from cms.api import configure_wagtail, get_home_page
+from cms.models import (
+    CourseIndexPage,
+    CoursePage,
+    ProgramIndexPage,
+    ProgramPage,
+    ProgramProductPage,
+    ResourcePage,
+)
 from courses.constants import CONTENT_TYPE_MODEL_COURSERUN, DEFAULT_PLATFORM_NAME
 from courses.models import (
-    Program,
     Course,
     CourseRun,
     CourseRunEnrollment,
     CourseRunEnrollmentAudit,
     CourseTopic,
+    Platform,
+    Program,
     ProgramEnrollment,
     ProgramEnrollmentAudit,
-    Platform,
 )
 from courseware.api import create_oauth_application, delete_oauth_application
+from ecommerce.api import create_coupons
+from ecommerce.models import (
+    Basket,
+    BasketItem,
+    Company,
+    CouponEligibility,
+    CouponPayment,
+    CouponPaymentVersion,
+    CouponRedemption,
+    CouponSelection,
+    CourseRunSelection,
+    Line,
+    Order,
+    OrderAudit,
+    Product,
+    ProductCouponAssignment,
+    ProductVersion,
+    Receipt,
+)
 from localdev.seed.serializers import (
-    ProgramSerializer,
-    CourseSerializer,
-    CourseRunSerializer,
     CompanySerializer,
+    CourseRunSerializer,
+    CourseSerializer,
+    ProgramSerializer,
 )
 from mitxpro.utils import (
     dict_without_keys,
     filter_dict_by_key_set,
-    get_field_names,
     first_or_none,
+    get_field_names,
     has_equal_properties,
-)
-from cms.models import (
-    ProgramPage,
-    CoursePage,
-    ProgramProductPage,
-    ResourcePage,
-    CourseIndexPage,
-    ProgramIndexPage,
-)
-from cms.api import get_home_page, configure_wagtail
-from ecommerce.api import create_coupons
-from ecommerce.models import (
-    Product,
-    ProductVersion,
-    CouponEligibility,
-    CouponSelection,
-    CouponRedemption,
-    Order,
-    OrderAudit,
-    Line,
-    Receipt,
-    Basket,
-    BasketItem,
-    CourseRunSelection,
-    ProductCouponAssignment,
-    Company,
-    CouponPaymentVersion,
-    CouponPayment,
 )
 
 # ROUGH EXPECTED FORMAT FOR SEED DATA FILE:
-# {
+# {  # noqa: ERA001, RUF100
 #     "programs": [
-#         {
+#         {  # noqa: ERA001, RUF100
 #             ...mixed Program and ProgramPage properties...
 #             ...optional "_product" key pointing to dict of ProductVersion properties...
-#         }
+#         }  # noqa: ERA001, RUF100
 #     ],
 #     "courses": [
-#         {
+#         {  # noqa: ERA001, RUF100
 #             ...mixed Course and CoursePage properties...
 #             ...optional "program" key pointing to a parent Program title...
 #             ...optional "topics" key pointing to CourseTopics that should be set for the Course...
 #             "course_runs": [
 #                 ...CourseRun properties...
 #                 ...optional "_product" key pointing to dict of ProductVersion properties...
-#             ]
-#         }
+#             ]  # noqa: ERA001, RUF100
+#         }  # noqa: ERA001, RUF100
 #     ],
 #     "resource_pages": [
-#         {
+#         {  # noqa: ERA001, RUF100
 #             ...ResourcePage properties...
-#         }
+#         }  # noqa: ERA001, RUF100
 #     ],
-#     "companies": [ ...Company properties... ],
+#     "companies": [ ...Company properties... ],  # noqa: ERA001
 #     "coupons": [
-#         {
-#             "name": ...CouponPayment name...,
+#         {  # noqa: ERA001, RUF100
+#             "name": ...CouponPayment name...,  # noqa: ERA001, RUF100
 #             ...parameters for the "create_coupon" ecommerce method...
 #             ...optional "_courseruns" key pointing to course runs to make product coupons for...
 #             ...optional "_company" key pointing to a company name...
-#         }
-#     ]
-# }
+#         }  # noqa: ERA001, RUF100
+#     ]  # noqa: ERA001, RUF100
+# }  # noqa: ERA001, RUF100
 
 
-SEED_DATA_FILE_PATH = os.path.join(
+SEED_DATA_FILE_PATH = os.path.join(  # noqa: PTH118
     settings.BASE_DIR, "localdev/seed/resources/seed_data.json"
 )
 REQUIRED_VOUCHER_SETTINGS = [
@@ -124,7 +124,7 @@ REQUIRED_VOUCHER_SETTINGS = [
 
 def get_raw_seed_data_from_file():
     """Loads raw seed data from our seed data file"""
-    with open(SEED_DATA_FILE_PATH) as f:
+    with open(SEED_DATA_FILE_PATH) as f:  # noqa: PTH123
         return json.loads(f.read())
 
 
@@ -136,8 +136,7 @@ def get_courseware_page_parent(courseware_page_obj):
         index_page_cls = ProgramIndexPage
     else:
         return None
-    page_specific = Page.objects.get(id=index_page_cls.objects.first().id).specific
-    return page_specific
+    return Page.objects.get(id=index_page_cls.objects.first().id).specific
 
 
 def delete_wagtail_pages(page_cls, filter_dict):
@@ -155,7 +154,7 @@ def delete_wagtail_pages(page_cls, filter_dict):
     base_pages_qset.delete()
     return (
         num_pages,
-        {page_cls._meta.label: num_pages},  # pylint: disable=protected-access
+        {page_cls._meta.label: num_pages},  # noqa: SLF001
     )
 
 
@@ -204,15 +203,15 @@ def check_settings():
             # check in settings
             if not getattr(settings, variable):
                 missing.append(variable)
-        except AttributeError:
+        except AttributeError:  # noqa: PERF203
             missing.append(variable)
     if missing:
         raise ImproperlyConfigured(
-            "Missing required voucher settings: {}".format(missing)
+            "Missing required voucher settings: {}".format(missing)  # noqa: EM103, UP032
         )
 
 
-SeedDataSpec = namedtuple("SeedDataSpec", ["model_cls", "data", "parent"])
+SeedDataSpec = namedtuple("SeedDataSpec", ["model_cls", "data", "parent"])  # noqa: PYI024
 
 
 class SeedResult:
@@ -253,7 +252,7 @@ class SeedResult:
             exc (Exception): The exception encountered while trying to save
         """
         if isinstance(exc, ValidationError):
-            first_error_field = list(exc.detail.keys())[0]
+            first_error_field = list(exc.detail.keys())[0]  # noqa: RUF015
             exc_message = str(exc.detail[first_error_field][0])
         else:
             exc_message = str(exc)
@@ -313,12 +312,12 @@ class SeedDataLoader:
     @classmethod
     def seed_prefixed(cls, value):
         """Returns the same value with a prefix that indicates seed data"""
-        return " ".join([cls.SEED_DATA_PREFIX, value])
+        return " ".join([cls.SEED_DATA_PREFIX, value])  # noqa: FLY002
 
     @classmethod
     def is_seed_value(cls, value):
         """Returns True of the given value matches the seeded value format"""
-        return value.startswith("{} ".format(cls.SEED_DATA_PREFIX))
+        return value.startswith(f"{cls.SEED_DATA_PREFIX} ")
 
     def _seeded_field_and_value(self, model_cls, data):
         """
@@ -334,7 +333,7 @@ class SeedDataLoader:
         """Returns a qset of seed data objects for some model class"""
         field_name, seeded_value = self._seeded_field_and_value(model_cls, data)
         if model_cls == CouponPaymentVersion:
-            field_name = "payment__{}".format(field_name)
+            field_name = f"payment__{field_name}"
         return model_cls.objects.filter(**{field_name: seeded_value})
 
     def _deserialize_courseware_object(self, serializer_cls, data):
@@ -350,7 +349,7 @@ class SeedDataLoader:
             "live": True,
             # Use every property in 'data' that corresponds to a model property
             **filter_for_model_fields(model_cls, data),
-            **{seeded_field_name: seeded_value},
+            **{seeded_field_name: seeded_value},  # noqa: PIE800
         }
 
         existing_qset = model_cls.objects.filter(**{seeded_field_name: seeded_value})
@@ -372,10 +371,9 @@ class SeedDataLoader:
         return courseware_obj
 
     def _get_topic_objects(self, topics):
-        topic_objs = [
+        return [
             CourseTopic.objects.get_or_create(name=topic["name"])[0] for topic in topics
         ]
-        return topic_objs
 
     def _deserialize_product(self, courseware_obj, product_data):
         """
@@ -438,14 +436,14 @@ class SeedDataLoader:
                 **{
                     **dict_without_keys(data, "_company", "_courseruns"),
                     **dates,
-                    **{
+                    **{  # noqa: PIE800
                         seeded_field_name: seeded_value,
                         "product_ids": course_run_product_ids,
                         "company_id": company_id,
                     },
                 }
             )
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:  # noqa: BLE001
             self.seed_result.add_invalid(model_cls, seeded_value, exc)
             return None
         else:
@@ -598,7 +596,7 @@ class SeedDataLoader:
         __, deleted_type_counts = delete_wagtail_pages(
             ResourcePage, {"id": existing_obj.id}
         )
-        self.seed_result.add_deleted(deleted_type_counts)
+        self.seed_result.add_deleted(deleted_type_counts)  # noqa: RET503
 
     def iter_seed_data(self, raw_data):
         """
@@ -672,7 +670,7 @@ class SeedDataLoader:
                 model_cls=CouponPayment, data=raw_coupon_data, parent=None
             )
 
-    def create_seed_data(self, raw_data):
+    def create_seed_data(self, raw_data):  # noqa: C901
         """
         Iterate over all objects described in the seed data spec, add/update them one-by-one, and return the results
         """

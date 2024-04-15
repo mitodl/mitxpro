@@ -18,7 +18,6 @@ def backpopulate_expiration_date(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("courses", "0017_courserun_expiration_date")]
 
     operations = [

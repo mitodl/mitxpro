@@ -3,7 +3,7 @@ from factory import Faker, SubFactory, Trait
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyChoice
 
-from compliance.constants import RESULT_DENIED, RESULT_SUCCESS, RESULT_CHOICES
+from compliance.constants import RESULT_CHOICES, RESULT_DENIED, RESULT_SUCCESS
 from compliance.models import ExportsInquiryLog
 
 

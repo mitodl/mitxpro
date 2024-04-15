@@ -12,13 +12,13 @@ from courses.utils import is_program_text_id
 from ecommerce.models import Order
 from mitxpro.utils import now_in_utc
 from sheets.constants import (
-    REFUND_SHEET_ORDER_TYPE_PAID,
-    REFUND_SHEET_ORDER_TYPE_FULL_COUPON,
     GOOGLE_API_TRUE_VAL,
+    REFUND_SHEET_ORDER_TYPE_FULL_COUPON,
+    REFUND_SHEET_ORDER_TYPE_PAID,
 )
-from sheets.sheet_handler_api import EnrollmentChangeRequestHandler
 from sheets.exceptions import SheetRowParsingException
 from sheets.models import RefundRequest
+from sheets.sheet_handler_api import EnrollmentChangeRequestHandler
 from sheets.utils import (
     ResultType,
     RowResult,
@@ -31,10 +31,10 @@ log = logging.getLogger(__name__)
 User = get_user_model()
 
 
-class RefundRequestRow:  # pylint: disable=too-many-instance-attributes
+class RefundRequestRow:
     """Represents a row of the refund request sheet"""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         row_index,
         response_id,
@@ -52,7 +52,7 @@ class RefundRequestRow:  # pylint: disable=too-many-instance-attributes
         refund_complete_date,
         errors,
         skip_row,
-    ):  # pylint: disable=too-many-arguments,too-many-locals
+    ):
         self.row_index = row_index
         self.response_id = response_id
         self.request_date = request_date
@@ -109,7 +109,7 @@ class RefundRequestRow:  # pylint: disable=too-many-instance-attributes
                     == GOOGLE_API_TRUE_VAL
                 ),
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             raise SheetRowParsingException(str(exc)) from exc
 
 
@@ -168,7 +168,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
             )
         # When #1838 is completed, this logic can be removed
         if deactivated_enrollment is None:
-            raise Exception("Enrollment change failed in edX")
+            raise Exception("Enrollment change failed in edX")  # noqa: EM101, TRY002
         order.status = Order.REFUNDED
         order.save_and_log(acting_user=None)
 
@@ -200,9 +200,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
             )
         )
 
-    def process_row(
-        self, row_index, row_data
-    ):  # pylint: disable=too-many-return-statements
+    def process_row(self, row_index, row_data):
         """
         Ensures that the given spreadsheet row is correctly represented in the database,
         attempts to parse it, reverses/refunds the given enrollment if appropriate, and returns the
@@ -227,7 +225,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
                 row_db_record=refund_request,
                 row_object=None,
                 result_type=ResultType.FAILED,
-                message="Parsing failure: {}".format(str(exc)),
+                message="Parsing failure: {}".format(str(exc)),  # noqa: UP032
             )
         is_unchanged_error_row = (
             refund_req_row.errors and not request_created and not request_updated
@@ -253,13 +251,13 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
             )
 
         if not self.is_ready_for_reversal(refund_req_row):
-            return
+            return  # noqa: RET502
 
         try:
             order, enrollment = self.get_order_objects(refund_req_row)
         except ObjectDoesNotExist as exc:
             if isinstance(exc, User.DoesNotExist):
-                message = "User with email '{}' not found".format(
+                message = "User with email '{}' not found".format(  # noqa: UP032
                     refund_req_row.learner_email
                 )
             elif isinstance(exc, Order.DoesNotExist):

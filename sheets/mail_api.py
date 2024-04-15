@@ -1,19 +1,19 @@
 """Mail API for sheets app"""
 import logging
-from urllib.parse import urlencode
 from collections import namedtuple
+from urllib.parse import urlencode
 
 from django.conf import settings
 
 from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG
 from mail.constants import MAILGUN_API_DOMAIN
+from mitxpro.utils import has_all_keys, request_get_with_timeout_retry
 from sheets.constants import MAILGUN_API_TIMEOUT_RETRIES
 from sheets.utils import format_datetime_for_mailgun
-from mitxpro.utils import has_all_keys, request_get_with_timeout_retry
 
 log = logging.getLogger(__name__)
 
-BulkAssignmentMessage = namedtuple(
+BulkAssignmentMessage = namedtuple(  # noqa: PYI024
     "BulkAssignmentMessage",
     ["bulk_assignment_id", "coupon_code", "email", "event", "timestamp"],
 )
@@ -73,8 +73,8 @@ def get_bulk_assignment_messages(event=None, begin=None, end=None):
             raw_next_url = resp_data["paging"]["next"]
             # The "next" url in the paging section does not contain necessary auth. Fill it in here.
             url = raw_next_url.replace(
-                "/{}/".format(MAILGUN_API_DOMAIN),
-                "/api:{}@{}/".format(settings.MAILGUN_KEY, MAILGUN_API_DOMAIN),
+                "/{}/".format(MAILGUN_API_DOMAIN),  # noqa: UP032
+                "/api:{}@{}/".format(settings.MAILGUN_KEY, MAILGUN_API_DOMAIN),  # noqa: UP032
             )
             resp = request_get_with_timeout_retry(
                 url, retries=MAILGUN_API_TIMEOUT_RETRIES

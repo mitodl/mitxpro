@@ -4,33 +4,26 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
-from django.views.decorators.http import require_http_methods
 from django.db import transaction
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, Http404
-from django.shortcuts import render, redirect
+from django.http import Http404, HttpResponse
+from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from google.auth.exceptions import GoogleAuthError
+from google_auth_oauthlib.flow import Flow
 from rest_framework import status
 
-# NOTE: Due to an unresolved bug (https://github.com/PyCQA/pylint/issues/2108), the
-# `google` package (and other packages without an __init__.py file) will break pylint.
-# The `disable-all` rules are here until that bug is fixed.
-from google_auth_oauthlib.flow import Flow  # pylint: disable-all
-from google.auth.exceptions import GoogleAuthError  # pylint: disable-all
-
 from mitxpro.utils import now_in_utc
+from sheets import tasks
 from sheets.api import get_sheet_metadata_from_type
-from sheets.models import GoogleApiAuth, GoogleFileWatch
 from sheets.constants import (
     REQUIRED_GOOGLE_API_SCOPES,
+    SHEET_TYPE_COUPON_ASSIGN,
     SHEET_TYPE_COUPON_REQUEST,
     SHEET_TYPE_ENROLL_CHANGE,
-    SHEET_TYPE_COUPON_ASSIGN,
 )
+from sheets.models import GoogleApiAuth, GoogleFileWatch
 from sheets.utils import generate_google_client_config
-from sheets import tasks
-from sheets.coupon_assign_api import CouponAssignmentHandler
-from sheets.coupon_request_api import CouponRequestHandler
 
 log = logging.getLogger(__name__)
 
@@ -77,7 +70,7 @@ def complete_google_auth(request):
     state = request.session.get("state")
     if not state:
         raise GoogleAuthError(
-            "Could not complete Google auth - 'state' was not found in the session"
+            "Could not complete Google auth - 'state' was not found in the session"  # noqa: EM101
         )
     flow = Flow.from_client_config(
         generate_google_client_config(), scopes=REQUIRED_GOOGLE_API_SCOPES, state=state
@@ -117,8 +110,8 @@ def handle_watched_sheet_update(request):
     sheet_type = request.GET.get("sheet", SHEET_TYPE_COUPON_REQUEST)
     try:
         sheet_metadata = get_sheet_metadata_from_type(sheet_type)
-    except:
-        log.error(
+    except:  # noqa: E722
+        log.error(  # noqa: TRY400
             "Unknown sheet type '%s' (passed via 'sheet' query parameter)", sheet_type
         )
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
@@ -139,7 +132,7 @@ def handle_watched_sheet_update(request):
             req_sheet_file_watch.last_request_received = now_in_utc()
             req_sheet_file_watch.save()
     except GoogleFileWatch.DoesNotExist:
-        log.error(
+        log.error(  # noqa: TRY400
             "Google file watch request for %s received (%s), but no local file watch record exists "
             "in the database.",
             sheet_metadata.sheet_name,

@@ -1,15 +1,14 @@
-# pylint: disable=too-many-lines
 """
 Django settings for mitxpro.
 """
 import logging
 import os
 import platform
-from datetime import timedelta, timezone
+from datetime import timedelta
 from urllib.parse import urljoin, urlparse
+from zoneinfo import ZoneInfo
 
 import dj_database_url
-from zoneinfo import ZoneInfo
 from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 from mitol.common.envs import (
@@ -20,13 +19,12 @@ from mitol.common.envs import (
     get_string,
     import_settings_modules,
 )
-from mitol.common.settings.webpack import *  # pylint: disable=wildcard-import,unused-wildcard-import
-from mitol.digitalcredentials.settings import *  # pylint: disable=wildcard-import,unused-wildcard-import
+from mitol.common.settings.webpack import *  # noqa: F403
+from mitol.digitalcredentials.settings import *  # noqa: F403
 from redbeat import RedBeatScheduler
 
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
-
 
 VERSION = "0.144.0"
 
@@ -57,7 +55,7 @@ init_sentry(
 )
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # noqa: PTH100, PTH120
 
 SITE_BASE_URL = get_string(
     name="MITXPRO_BASE_URL",
@@ -118,7 +116,7 @@ WEBPACK_LOADER = {
     "DEFAULT": {
         "CACHE": not DEBUG,
         "BUNDLE_DIR_NAME": "bundles/",
-        "STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),
+        "STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),  # noqa: PTH118
         "POLL_INTERVAL": 0.1,
         "TIMEOUT": None,
         "IGNORE": [r".+\.hot-update\.+", r".+\.js\.map"],
@@ -202,7 +200,7 @@ if ENVIRONMENT not in ("production", "prod"):
     INSTALLED_APPS += ("localdev.seed",)
 
 
-if not WEBPACK_DISABLE_LOADER_STATS:
+if not WEBPACK_DISABLE_LOADER_STATS:  # noqa: F405
     INSTALLED_APPS += ("webpack_loader",)
 
 MIDDLEWARE = (
@@ -248,7 +246,7 @@ ROOT_URLCONF = "mitxpro.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],  # noqa: PTH118
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -273,7 +271,7 @@ WSGI_APPLICATION = "mitxpro.wsgi.application"
 DEFAULT_DATABASE_CONFIG = dj_database_url.parse(
     get_string(
         name="DATABASE_URL",
-        default="sqlite:///{0}".format(os.path.join(BASE_DIR, "db.sqlite3")),
+        default="sqlite:///{0}".format(os.path.join(BASE_DIR, "db.sqlite3")),  # noqa: PTH118, UP030
         description="The connection url to the Postgres database",
         required=True,
         write_app_json=False,
@@ -427,7 +425,8 @@ CLOUDFRONT_DIST = get_string(
 )
 if CLOUDFRONT_DIST:
     STATIC_URL = urljoin(
-        "https://{dist}.cloudfront.net".format(dist=CLOUDFRONT_DIST), STATIC_URL
+        "https://{dist}.cloudfront.net".format(dist=CLOUDFRONT_DIST),  # noqa: UP032
+        STATIC_URL,
     )
 
 STATICFILES_FINDERS = [
@@ -436,7 +435,7 @@ STATICFILES_FINDERS = [
 ]
 
 STATIC_ROOT = "staticfiles"
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)  # noqa: PTH118
 
 
 # Important to define this so DEBUG works properly
@@ -538,10 +537,7 @@ ADMIN_EMAIL = get_string(
     description="E-mail to send 500 reports to.",
     required=True,
 )
-if ADMIN_EMAIL != "":
-    ADMINS = (("Admins", ADMIN_EMAIL),)
-else:
-    ADMINS = ()
+ADMINS = (("Admins", ADMIN_EMAIL),) if ADMIN_EMAIL != "" else ()
 
 # Logging configuration
 LOG_LEVEL = get_string(
@@ -573,7 +569,7 @@ LOGGING = {
     "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
     "formatters": {
         "verbose": {
-            "format": (
+            "format": (  # noqa: UP032
                 "[%(asctime)s] %(levelname)s %(process)d [%(name)s] "
                 "%(filename)s:%(lineno)d - "
                 "[{hostname}] - %(message)s"
@@ -679,13 +675,13 @@ if MITXPRO_USE_S3 and (
     not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_STORAGE_BUCKET_NAME
 ):
     raise ImproperlyConfigured(
-        "You have enabled S3 support, but are missing one of "
+        "You have enabled S3 support, but are missing one of "  # noqa: EM101
         "AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, or "
         "AWS_STORAGE_BUCKET_NAME"
     )
 if MITXPRO_USE_S3:
     if CLOUDFRONT_DIST:
-        AWS_S3_CUSTOM_DOMAIN = "{dist}.cloudfront.net".format(dist=CLOUDFRONT_DIST)
+        AWS_S3_CUSTOM_DOMAIN = "{dist}.cloudfront.net".format(dist=CLOUDFRONT_DIST)  # noqa: UP032
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 FEATURES = get_features()
@@ -944,9 +940,9 @@ AUTHENTICATION_BACKENDS = (
 
 
 # required for migrations
-OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "oauth2_provider.AccessToken"
+OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "oauth2_provider.AccessToken"  # noqa: S105
 OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
-OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "oauth2_provider.RefreshToken"
+OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "oauth2_provider.RefreshToken"  # noqa: S105
 
 OAUTH2_PROVIDER = {
     # this is the list of available scopes
@@ -980,7 +976,7 @@ REST_FRAMEWORK = {
 
 # Relative URL to be used by Djoser for the link in the password reset email
 # (see: http://djoser.readthedocs.io/en/stable/settings.html#password-reset-confirm-url)
-PASSWORD_RESET_CONFIRM_URL = "password_reset/confirm/{uid}/{token}/"
+PASSWORD_RESET_CONFIRM_URL = "password_reset/confirm/{uid}/{token}/"  # noqa: S105
 
 # mitol-django-common
 MITOL_COMMON_USER_FACTORY = "users.factories.UserFactory"
@@ -1078,7 +1074,7 @@ EDX_API_CLIENT_TIMEOUT = get_int(
 if DEBUG:
     INSTALLED_APPS += ("debug_toolbar",)
     # it needs to be enabled before other middlewares
-    MIDDLEWARE = ("debug_toolbar.middleware.DebugToolbarMiddleware",) + MIDDLEWARE
+    MIDDLEWARE = ("debug_toolbar.middleware.DebugToolbarMiddleware",) + MIDDLEWARE  # noqa: RUF005
 
 # Cybersource
 CYBERSOURCE_ACCESS_KEY = get_string(
@@ -1435,8 +1431,7 @@ DIGITAL_CREDENTIALS_VERIFICATION_METHOD = get_string(
     default=None,
     description="Verification method for digital credentials",
 )
-# pylint:disable=fixme
-# FIXME: This setting is meant to be temporary and it should be removed once we decide to support digital credentials
+# TODO: This setting is meant to be temporary and it should be removed once we decide to support digital credentials  # noqa: FIX002, TD002, TD003
 #  for all courses/programs.
 DIGITAL_CREDENTIALS_SUPPORTED_RUNS = get_delimited_list(
     name="DIGITAL_CREDENTIALS_SUPPORTED_RUNS",

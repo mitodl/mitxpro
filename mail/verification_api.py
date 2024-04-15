@@ -6,12 +6,15 @@ from django.urls import reverse
 from affiliate.api import get_affiliate_code_from_request
 from affiliate.constants import AFFILIATE_QS_PARAM
 from mail import api
-from mail.constants import EMAIL_VERIFICATION, EMAIL_CHANGE_EMAIL
+from mail.constants import EMAIL_CHANGE_EMAIL, EMAIL_VERIFICATION
 
 
 def send_verification_email(
-    strategy, backend, code, partial_token
-):  # pylint: disable=unused-argument
+    strategy,
+    backend,  # noqa: ARG001
+    code,
+    partial_token,
+):
     """
     Sends a verification email for python-social-auth
 

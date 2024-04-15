@@ -1,6 +1,6 @@
 """Compliance API"""
-from collections import namedtuple
 import logging
+from collections import namedtuple
 
 from django.conf import settings
 from lxml import etree
@@ -11,19 +11,18 @@ from zeep.plugins import HistoryPlugin
 from zeep.wsse.username import UsernameToken
 
 from compliance.constants import (
-    REASON_CODE_SUCCESS,
     EXPORTS_BLOCKED_REASON_CODES,
-    TEMPORARY_FAILURE_REASON_CODES,
+    REASON_CODE_SUCCESS,
     RESULT_DENIED,
     RESULT_SUCCESS,
     RESULT_UNKNOWN,
+    TEMPORARY_FAILURE_REASON_CODES,
 )
 from compliance.models import ExportsInquiryLog
 
-
 log = logging.getLogger()
 
-DecryptedLog = namedtuple("DecryptedLog", ["request", "response"])
+DecryptedLog = namedtuple("DecryptedLog", ["request", "response"])  # noqa: PYI024
 
 
 EXPORTS_REQUIRED_KEYS = [

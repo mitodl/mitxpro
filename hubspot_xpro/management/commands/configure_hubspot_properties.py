@@ -16,7 +16,6 @@ from mitol.hubspot_api.api import (
 from ecommerce import models
 from hubspot_xpro.serializers import ORDER_TYPE_B2B, ORDER_TYPE_B2C
 
-
 CUSTOM_ECOMMERCE_PROPERTIES = {
     # defines which hubspot properties are mapped with which local properties when objects are synced.
     # See https://developers.hubspot.com/docs/methods/ecomm-bridge/ecomm-bridge-overview for more details
@@ -314,13 +313,13 @@ class Command(BaseCommand):
             help="Delete custom hubspot properties/groups",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002, D102
         if options["delete"]:
-            print("Uninstalling custom groups and properties...")
+            print("Uninstalling custom groups and properties...")  # noqa: T201
             delete_custom_properties()
-            print("Uninstall successful")
+            print("Uninstall successful")  # noqa: T201
             return
         else:
-            print("Configuring custom groups and properties...")
+            print("Configuring custom groups and properties...")  # noqa: T201
             upsert_custom_properties()
-            print("Custom properties configured")
+            print("Custom properties configured")  # noqa: T201

@@ -12,11 +12,6 @@ class UserIsOwnerPermission(permissions.BasePermission):
         """
         owner_field = getattr(view, "owner_field", None)
 
-        if owner_field is None:
-            # if no owner_field is specified, the object itself is compared
-            owner = obj
-        else:
-            # otherwise we lookup the owner by the specified field
-            owner = getattr(obj, owner_field)
-
+        # if no owner_field is specified, the object itself is compared
+        owner = obj if owner_field is None else getattr(obj, owner_field)
         return owner == request.user

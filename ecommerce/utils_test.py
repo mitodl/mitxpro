@@ -1,13 +1,13 @@
 """Tests for utility functions for ecommerce"""
 import pytest
 
-from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF, DISCOUNT_TYPE_DOLLARS_OFF
+from ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.exceptions import ParseException
 from ecommerce.utils import get_order_id_by_reference_number, validate_amount
 
 
 @pytest.mark.parametrize(
-    "reference_number, error",
+    "reference_number, error",  # noqa: PT006
     [
         ("XYZ-1-3", "Reference number must start with MITXPRO-cyb-prefix-"),
         ("MITXPRO-cyb-prefix-NaN", "Unable to parse order number"),
@@ -25,7 +25,7 @@ def test_get_order_id_by_reference_number_parse_error(reference_number, error):
 
 
 @pytest.mark.parametrize(
-    "discount_type, amount, error",
+    "discount_type, amount, error",  # noqa: PT006
     [
         (
             DISCOUNT_TYPE_PERCENT_OFF,

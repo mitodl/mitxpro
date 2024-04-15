@@ -10,7 +10,6 @@ def reset_existing_include_future_runs(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("ecommerce", "0027_coupon_code_is_global")]
 
     operations = [

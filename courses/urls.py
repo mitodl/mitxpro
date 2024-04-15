@@ -1,10 +1,8 @@
 """Course API URL routes"""
-from django.urls import path
-from django.urls import include, re_path
+from django.urls import include, path, re_path
 from rest_framework import routers
 
 from courses.views import v1
-
 
 router = routers.SimpleRouter()
 router.register(r"programs", v1.ProgramViewSet, basename="programs_api")

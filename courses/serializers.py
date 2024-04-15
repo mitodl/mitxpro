@@ -88,7 +88,7 @@ class CourseRunSerializer(BaseCourseRunSerializer):
 
     class Meta:
         model = models.CourseRun
-        fields = BaseCourseRunSerializer.Meta.fields + [
+        fields = BaseCourseRunSerializer.Meta.fields + [  # noqa: RUF005
             "product_id",
             "instructors",
             "current_price",
@@ -119,11 +119,11 @@ class CourseSerializer(serializers.ModelSerializer):
         return page.get_full_url() if page else None
 
     def get_external_marketing_url(self, instance):
-        """Returns the external marketing URL for the course that's set in CMS page"""
+        """Return the external marketing URL for the course that's set in CMS page"""
         return instance.page.external_marketing_url if instance.page else None
 
     def get_marketing_hubspot_form_id(self, instance):
-        """Returns the marketing HubSpot form ID associated with the course that's set in CMS page"""
+        """Return the marketing HubSpot form ID associated with the course that's set in CMS page"""
         return instance.page.marketing_hubspot_form_id if instance.page else None
 
     def get_thumbnail_url(self, instance):
@@ -187,7 +187,7 @@ class CourseSerializer(serializers.ModelSerializer):
             else None
         )
 
-    def get_format(self, instance):  # pylint: disable=unused-argument
+    def get_format(self, instance):
         """Returns the format of the course"""
         return instance.page.format if instance.page and instance.page.format else None
 
@@ -341,11 +341,11 @@ class ProgramSerializer(serializers.ModelSerializer):
         return page.get_full_url() if page else None
 
     def get_external_marketing_url(self, instance):
-        """Returns the external marketing URL for this program that's set in CMS page"""
+        """Return the external marketing URL for this program that's set in CMS page"""
         return instance.page.external_marketing_url if instance.page else None
 
     def get_marketing_hubspot_form_id(self, instance):
-        """Returns the marketing HubSpot form ID associated with the program that's set in CMS page"""
+        """Return the marketing HubSpot form ID associated with the program that's set in CMS page"""
         return instance.page.marketing_hubspot_form_id if instance.page else None
 
     def get_instructors(self, instance):
@@ -354,7 +354,7 @@ class ProgramSerializer(serializers.ModelSerializer):
 
     def get_topics(self, instance):
         """List all topics in all courses in the program"""
-        topics = set(
+        topics = set(  # noqa: C401
             topic.name
             for course in instance.courses.all()
             if course.page
@@ -382,7 +382,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             else None
         )
 
-    def get_format(self, instance):  # pylint: disable=unused-argument
+    def get_format(self, instance):
         """Returns the format of the program"""
         return instance.page.format if instance.page and instance.page.format else None
 
@@ -517,7 +517,7 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
         """
         Resolve a receipt for this enrollment
         """
-        if enrollment.order:
+        if enrollment.order:  # noqa: RET503
             return (
                 enrollment.order_id
                 if enrollment.order
@@ -527,7 +527,7 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
             )
 
     def __init__(self, *args, **kwargs):
-        assert (
+        assert (  # noqa: PT018, S101
             "context" in kwargs and "course_run_enrollments" in kwargs["context"]
         ), "An iterable of course run enrollments must be passed in the context (key: course_run_enrollments)"
         super().__init__(*args, **kwargs)

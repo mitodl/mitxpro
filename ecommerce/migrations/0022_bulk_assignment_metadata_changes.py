@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("ecommerce", "0021_coupon_assignment_statuses_and_flags")]
 
     operations = [

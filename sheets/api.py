@@ -1,54 +1,53 @@
 """API for the Sheets app"""
-import os
-import json
 import datetime
-import pickle
+import json
 import logging
+import os
+import pickle
 from collections import namedtuple
 from urllib.parse import urljoin
 
-from django.conf import settings
-from django.db import transaction
-from django.core.exceptions import ImproperlyConfigured
 import pygsheets
-
-from google.oauth2.credentials import Credentials  # pylint:disable=no-name-in-module
-from google.oauth2.service_account import (  # pylint:disable=no-name-in-module
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+from django.db import transaction
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google.oauth2.service_account import (
     Credentials as ServiceAccountCredentials,
 )
-from google.auth.transport.requests import Request  # pylint:disable=no-name-in-module
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from mitxpro.utils import now_in_utc
-from sheets.models import GoogleApiAuth, GoogleFileWatch, FileWatchRenewalAttempt
 from sheets.constants import (
-    GOOGLE_TOKEN_URI,
-    REQUIRED_GOOGLE_API_SCOPES,
-    GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN,
+    DEFAULT_GOOGLE_EXPIRE_TIMEDELTA,
     GOOGLE_API_FILE_WATCH_KIND,
     GOOGLE_API_NOTIFICATION_TYPE,
-    DEFAULT_GOOGLE_EXPIRE_TIMEDELTA,
+    GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN,
+    GOOGLE_TOKEN_URI,
+    REQUIRED_GOOGLE_API_SCOPES,
+    SHEET_RENEWAL_RECORD_LIMIT,
+    SHEET_TYPE_COUPON_ASSIGN,
     SHEET_TYPE_COUPON_REQUEST,
     SHEET_TYPE_ENROLL_CHANGE,
     WORKSHEET_TYPE_REFUND,
-    SHEET_TYPE_COUPON_ASSIGN,
-    SHEET_RENEWAL_RECORD_LIMIT,
-)
-from sheets.utils import (
-    format_datetime_for_google_timestamp,
-    google_timestamp_to_datetime,
-    build_drive_file_email_share_request,
-    CouponRequestSheetMetadata,
-    RefundRequestSheetMetadata,
-    CouponAssignSheetMetadata,
 )
 from sheets.exceptions import FailedBatchRequestException
+from sheets.models import FileWatchRenewalAttempt, GoogleApiAuth, GoogleFileWatch
+from sheets.utils import (
+    CouponAssignSheetMetadata,
+    CouponRequestSheetMetadata,
+    RefundRequestSheetMetadata,
+    build_drive_file_email_share_request,
+    format_datetime_for_google_timestamp,
+    google_timestamp_to_datetime,
+)
 
 log = logging.getLogger(__name__)
 
-DEV_TOKEN_PATH = "localdev/google.token"
-FileWatchSpec = namedtuple(
+DEV_TOKEN_PATH = "localdev/google.token"  # noqa: S105
+FileWatchSpec = namedtuple(  # noqa: PYI024
     "FileWatchSpec",
     ["sheet_metadata", "sheet_file_id", "channel_id", "handler_url", "force"],
 )
@@ -59,16 +58,16 @@ def get_google_creds_from_pickled_token_file(token_file_path):
     Helper method to get valid credentials from a local token file (and refresh as necessary).
     For dev use only.
     """
-    with open(token_file_path, "rb") as f:
-        creds = pickle.loads(f.read())
+    with open(token_file_path, "rb") as f:  # noqa: PTH123
+        creds = pickle.loads(f.read())  # noqa: S301
     if creds and creds.expired and creds.refresh_token:
         creds.refresh(Request())
-        with open(token_file_path, "wb") as token:
+        with open(token_file_path, "wb") as token:  # noqa: PTH123
             pickle.dump(creds, token)
     if not creds:
-        raise ImproperlyConfigured("Local token file credentials are empty")
+        raise ImproperlyConfigured("Local token file credentials are empty")  # noqa: EM101
     if not creds.valid:
-        raise ImproperlyConfigured("Local token file credentials are invalid")
+        raise ImproperlyConfigured("Local token file credentials are invalid")  # noqa: EM101
     return creds
 
 
@@ -90,7 +89,7 @@ def get_credentials():
         )
         if not is_sharing_to_service_account:
             raise ImproperlyConfigured(
-                "If Service Account auth is being used, the SHEETS_ADMIN_EMAILS setting must "
+                "If Service Account auth is being used, the SHEETS_ADMIN_EMAILS setting must "  # noqa: EM101
                 "include a Service Account email for spreadsheet updates/creation to work. "
                 "Add the Service Account email to that setting, or remove the DRIVE_SERVICE_ACCOUNT_CREDS "
                 "setting and use a different auth method."
@@ -129,10 +128,10 @@ def get_credentials():
     # A script with more helpful options than the one in that guide can be found here:
     # https://gist.github.com/gsidebo/b87abaafda3e79186c1e5f7f964074ab
     if settings.ENVIRONMENT == "dev":
-        token_file_path = os.path.join(settings.BASE_DIR, DEV_TOKEN_PATH)
-        if os.path.exists(token_file_path):
+        token_file_path = os.path.join(settings.BASE_DIR, DEV_TOKEN_PATH)  # noqa: PTH118
+        if os.path.exists(token_file_path):  # noqa: PTH110
             return get_google_creds_from_pickled_token_file(token_file_path)
-    raise ImproperlyConfigured("Authorization with Google has not been completed.")
+    raise ImproperlyConfigured("Authorization with Google has not been completed.")  # noqa: EM101
 
 
 def get_authorized_pygsheets_client():
@@ -176,7 +175,7 @@ class ExpandedSheetsClient:
         extra_list_params = {}
         if self.supports_team_drives:
             extra_list_params.update(
-                dict(
+                dict(  # noqa: C408
                     corpora="teamDrive",
                     teamDriveId=settings.DRIVE_SHARED_ID,
                     supportsTeamDrives=True,
@@ -184,7 +183,9 @@ class ExpandedSheetsClient:
                 )
             )
         return self.pygsheets_client.drive.list(
-            **extra_list_params, fields="files({})".format(file_fields), q=query
+            **extra_list_params,
+            fields="files({})".format(file_fields),  # noqa: UP032
+            q=query,
         )
 
     def update_spreadsheet_properties(self, file_id, property_dict):
@@ -285,8 +286,10 @@ def build_drive_service(credentials=None):
 
 
 def batch_share_callback(
-    request_id, response, exception
-):  # pylint: disable=unused-argument
+    request_id,  # noqa: ARG001
+    response,  # noqa: ARG001
+    exception,
+):
     """
     A callback function given to the Google API client's new_batch_http_request(). Called for the result
     of each individual request executed in a batch API call.
@@ -317,9 +320,6 @@ def share_drive_file_with_emails(file_id, emails_to_share, credentials=None):
         emails_to_share (list of str): Email addresses that will be added as shared users for the given file
         credentials (google.oauth2.credentials.Credentials or None): Credentials to be used by the
             Google Drive client
-
-    Returns:
-
     """
     if not emails_to_share:
         return
@@ -347,7 +347,7 @@ def share_drive_file_with_emails(file_id, emails_to_share, credentials=None):
             )
             try:
                 perm_request.execute()
-            except:  # pylint: disable=bare-except
+            except:  # noqa: E722
                 log.exception(
                     "Failed to share the file with id '%s' with email '%s'",
                     file_id,
@@ -465,7 +465,7 @@ def _track_file_watch_renewal(sheet_type, sheet_file_id, exception=None):
         FileWatchRenewalAttempt.objects.filter(id__lte=id_to_delete).delete()
 
 
-def create_or_renew_sheet_file_watch(sheet_metadata, force=False, sheet_file_id=None):
+def create_or_renew_sheet_file_watch(sheet_metadata, force=False, sheet_file_id=None):  # noqa: FBT002
     """
     Creates or renews a file watch on a spreadsheet depending on the existence
     of other file watches and their expiration.
@@ -499,7 +499,7 @@ def create_or_renew_sheet_file_watch(sheet_metadata, force=False, sheet_file_id=
     with transaction.atomic():
         file_watch, created = GoogleFileWatch.objects.select_for_update().get_or_create(
             file_id=sheet_file_id,
-            defaults=dict(
+            defaults=dict(  # noqa: C408
                 version=1,
                 channel_id=new_channel_id,
                 activation_date=now,
@@ -569,4 +569,4 @@ def get_sheet_metadata_from_type(sheet_type):
         return CouponAssignSheetMetadata()
     elif sheet_type in {SHEET_TYPE_ENROLL_CHANGE, WORKSHEET_TYPE_REFUND}:
         return RefundRequestSheetMetadata()
-    raise ValueError(f"No sheet metadata exists matching the type '{sheet_type}'")
+    raise ValueError(f"No sheet metadata exists matching the type '{sheet_type}'")  # noqa: EM102

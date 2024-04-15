@@ -9,9 +9,9 @@ class AffiliateMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
-    def __call__(self, request):
+    def __call__(self, request):  # noqa: D102
         request.affiliate_code = None
-        session = getattr(request, "session")
+        session = getattr(request, "session")  # noqa: B009
         if session is None:
             return self.get_response(request)
         qs_affiliate_code = get_affiliate_code_from_qstring(request)

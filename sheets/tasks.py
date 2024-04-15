@@ -3,25 +3,27 @@ import logging
 from datetime import datetime, timedelta
 from itertools import chain, repeat
 
-from googleapiclient.errors import HttpError
-from django.conf import settings
 import celery
+from django.conf import settings
+from googleapiclient.errors import HttpError
 
 from ecommerce.models import BulkCouponAssignment
 from mitxpro.celery import app
-from mitxpro.utils import now_in_utc, case_insensitive_equal
+from mitxpro.utils import case_insensitive_equal, now_in_utc
 from sheets import (
     api as sheets_api,
+)
+from sheets import (
     coupon_assign_api,
     coupon_request_api,
-    refund_request_api,
     deferral_request_api,
+    refund_request_api,
 )
 from sheets.constants import (
     ASSIGNMENT_SHEET_ENROLLED_STATUS,
+    SHEET_TYPE_COUPON_ASSIGN,
     SHEET_TYPE_COUPON_REQUEST,
     SHEET_TYPE_ENROLL_CHANGE,
-    SHEET_TYPE_COUPON_ASSIGN,
 )
 from sheets.utils import AssignmentRowUpdate
 
@@ -36,8 +38,7 @@ def handle_unprocessed_coupon_requests():
     the necessary coupon assignment sheets.
     """
     coupon_request_handler = coupon_request_api.CouponRequestHandler()
-    results = coupon_request_handler.process_sheet()
-    return results
+    return coupon_request_handler.process_sheet()
 
 
 @app.task
@@ -48,8 +49,7 @@ def handle_unprocessed_refund_requests():
     made, and returns a summary of those changes.
     """
     refund_request_handler = refund_request_api.RefundRequestHandler()
-    results = refund_request_handler.process_sheet()
-    return results
+    return refund_request_handler.process_sheet()
 
 
 @app.task
@@ -60,8 +60,7 @@ def handle_unprocessed_deferral_requests():
     made, and returns a summary of those changes.
     """
     deferral_request_handler = deferral_request_api.DeferralRequestHandler()
-    results = deferral_request_handler.process_sheet()
-    return results
+    return deferral_request_handler.process_sheet()
 
 
 @app.task
@@ -76,7 +75,8 @@ def process_coupon_assignment_sheet(*, file_id, change_date=None):
     """
     change_dt = datetime.fromisoformat(change_date) if change_date else now_in_utc()
     bulk_assignment, _ = BulkCouponAssignment.objects.update_or_create(
-        assignment_sheet_id=file_id, defaults=dict(sheet_last_modified_date=change_dt)
+        assignment_sheet_id=file_id,
+        defaults=dict(sheet_last_modified_date=change_dt),  # noqa: C408
     )
     coupon_assignment_handler = coupon_assign_api.CouponAssignmentHandler(
         spreadsheet_id=file_id, bulk_assignment=bulk_assignment
@@ -151,7 +151,7 @@ def schedule_coupon_assignment_sheet_handling(file_id):
 @app.task
 def update_incomplete_assignment_delivery_statuses():
     """
-    Fetches all BulkCouponAssignments that have assignments but have not yet finished delivery, then updates the
+    Fetch all BulkCouponAssignments that have assignments but have not yet finished delivery, then updates the
     delivery status for each depending on what has been sent.
     """
     bulk_assignments = coupon_assign_api.fetch_update_eligible_bulk_assignments()
@@ -235,8 +235,8 @@ def renew_file_watch(*, sheet_type, file_id):
     )
     return {
         "type": sheet_metadata.sheet_type,
-        "file_watch_channel_id": getattr(file_watch, "channel_id"),
-        "file_watch_file_id": getattr(file_watch, "file_id"),
+        "file_watch_channel_id": getattr(file_watch, "channel_id"),  # noqa: B009
+        "file_watch_file_id": getattr(file_watch, "file_id"),  # noqa: B009
         "created": created,
     }
 

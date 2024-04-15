@@ -2,16 +2,17 @@
 from datetime import timedelta
 
 import pytest
+
+from cms.api import filter_and_sort_catalog_pages
 from cms.factories import ExternalCoursePageFactory, ExternalProgramPageFactory
 from cms.models import ExternalCoursePage
-from cms.api import filter_and_sort_catalog_pages
 from courses.factories import CourseRunFactory, ProgramRunFactory
 from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
 
 
-def test_filter_and_sort_catalog_pages():  # pylint:disable=too-many-locals
+def test_filter_and_sort_catalog_pages():
     """
     Test that filter_and_sort_catalog_pages removes program/course/external course pages that do not have a future start date
     or enrollment end date, and returns appropriately sorted lists of pages

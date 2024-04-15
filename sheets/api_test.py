@@ -1,9 +1,7 @@
-# pylint: disable=redefined-outer-name,unused-argument
 """Sheets API tests"""
 import pytest
-
 from django.core.exceptions import ImproperlyConfigured
-from google.oauth2.credentials import Credentials  # pylint: disable-all
+from google.oauth2.credentials import Credentials
 
 from sheets.api import get_credentials
 from sheets.constants import (
@@ -27,7 +25,7 @@ def test_get_credentials_service_account(mocker, settings):
         get_credentials()
 
     settings.SHEETS_ADMIN_EMAILS.append(
-        "service-account@mitxpro.{}".format(GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN)
+        "service-account@mitxpro.{}".format(GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN)  # noqa: UP032
     )
     creds = get_credentials()
 
@@ -45,7 +43,7 @@ def test_get_credentials_personal_auth(settings):
     """
     settings.DRIVE_SERVICE_ACCOUNT_CREDS = None
     settings.DRIVE_CLIENT_ID = "client-id"
-    settings.DRIVE_CLIENT_SECRET = "client-secret"
+    settings.DRIVE_CLIENT_SECRET = "client-secret"  # noqa: S105
     settings.ENVIRONMENT = "prod"
     with pytest.raises(ImproperlyConfigured):
         get_credentials()

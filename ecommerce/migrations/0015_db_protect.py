@@ -1,10 +1,10 @@
 from django.db import migrations
 
 from ecommerce.utils import (
-    create_update_rule,
     create_delete_rule,
-    rollback_update_rule,
+    create_update_rule,
     rollback_delete_rule,
+    rollback_update_rule,
 )
 
 
@@ -26,7 +26,6 @@ def protection_rules(table_name):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("ecommerce", "0014_productversion_text_id")]
 
     operations = [

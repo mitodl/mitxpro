@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("b2b_ecommerce", "0008_b2b_order_program_run")]
 
     operations = [

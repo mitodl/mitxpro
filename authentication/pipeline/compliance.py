@@ -12,13 +12,15 @@ from authentication.exceptions import (
 )
 from compliance import api
 
-
 log = logging.getLogger()
 
 
 def verify_exports_compliance(
-    strategy, backend, user=None, **kwargs
-):  # pylint: disable=unused-argument
+    strategy,  # noqa: ARG001
+    backend,
+    user=None,
+    **kwargs,  # noqa: ARG001
+):
     """
     Verify that the user is allowed by exports compliance
 
@@ -37,7 +39,7 @@ def verify_exports_compliance(
 
     try:
         export_inquiry = api.verify_user_with_exports(user)
-    except Exception as exc:  # pylint: disable=broad-except
+    except Exception as exc:
         # hard failure to request the exports API, log an error but don't let the user proceed
         log.exception("Unable to verify exports compliance")
         raise UserTryAgainLaterException(backend) from exc
@@ -78,12 +80,12 @@ def verify_exports_compliance(
                     [settings.ADMIN_EMAIL],
                     connection=connection,
                 )
-        except Exception:  # pylint: disable=broad-except
+        except Exception:
             log.exception(
                 "Exception sending email to support regarding export compliance check failure"
             )
         raise UserExportBlockedException(backend, export_inquiry.reason_code)
     if export_inquiry.is_unknown:
-        raise AuthException("Unable to authenticate, please contact support")
+        raise AuthException("Unable to authenticate, please contact support")  # noqa: EM101
 
     return {}

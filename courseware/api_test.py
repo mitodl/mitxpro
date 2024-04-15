@@ -1,5 +1,4 @@
 """Courseware API tests"""
-# pylint: disable=redefined-outer-name
 import itertools
 from datetime import timedelta
 from types import SimpleNamespace
@@ -24,8 +23,8 @@ from courseware.api import (
     OpenEdxUser,
     create_edx_auth_token,
     create_edx_user,
-    create_user,
     create_oauth_application,
+    create_user,
     enroll_in_edx_course_runs,
     get_edx_api_client,
     get_valid_edx_api_auth,
@@ -56,18 +55,17 @@ from mitxpro.test_utils import MockHttpError, MockResponse
 from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
 
-
 User = get_user_model()
 pytestmark = [pytest.mark.django_db]
 
 
-@pytest.fixture()
+@pytest.fixture
 def application(settings):
     """Test data and settings needed for create_edx_user tests"""
     settings.OPENEDX_OAUTH_APP_NAME = "test_app_name"
     settings.OPENEDX_API_BASE_URL = "http://example.com"
     settings.MITXPRO_OAUTH_PROVIDER = "test_provider"
-    settings.MITXPRO_REGISTRATION_ACCESS_TOKEN = "access_token"
+    settings.MITXPRO_REGISTRATION_ACCESS_TOKEN = "access_token"  # noqa: S105
     return Application.objects.create(
         name=settings.OPENEDX_OAUTH_APP_NAME,
         user=None,
@@ -77,16 +75,16 @@ def application(settings):
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def update_token_response(settings):
-    """mock response for updating an auth token"""
-    refresh_token = "abc123"
-    access_token = "def456"
+    """Mock response for updating an auth token"""
+    refresh_token = "abc123"  # noqa: S105
+    access_token = "def456"  # noqa: S105
 
     responses.add(
         responses.POST,
         f"{settings.OPENEDX_API_BASE_URL}/oauth2/access_token",
-        json=dict(
+        json=dict(  # noqa: C408
             refresh_token=refresh_token, access_token=access_token, expires_in=3600
         ),
         status=status.HTTP_200_OK,
@@ -94,16 +92,16 @@ def update_token_response(settings):
     return SimpleNamespace(refresh_token=refresh_token, access_token=access_token)
 
 
-@pytest.fixture()
+@pytest.fixture
 def update_token_response_error(settings):
-    """mock response for updating an auth token"""
-    refresh_token = "abc123"
-    access_token = "def456"
+    """Mock response for updating an auth token"""
+    refresh_token = "abc123"  # noqa: S105
+    access_token = "def456"  # noqa: S105
 
     responses.add(
         responses.POST,
         f"{settings.OPENEDX_API_BASE_URL}/oauth2/access_token",
-        json=dict(
+        json=dict(  # noqa: C408
             refresh_token=refresh_token, access_token=access_token, expires_in=3600
         ),
         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -111,11 +109,11 @@ def update_token_response_error(settings):
     return SimpleNamespace(refresh_token=refresh_token, access_token=access_token)
 
 
-@pytest.fixture()
+@pytest.fixture
 def create_token_responses(settings):
     """Mock responses for creating an auth token"""
-    refresh_token = "abc123"
-    access_token = "def456"
+    refresh_token = "abc123"  # noqa: S105
+    access_token = "def456"  # noqa: S105
     code = "ghi789"
     responses.add(
         responses.GET,
@@ -138,7 +136,7 @@ def create_token_responses(settings):
     responses.add(
         responses.POST,
         f"{settings.OPENEDX_API_BASE_URL}/oauth2/access_token",
-        json=dict(
+        json=dict(  # noqa: C408
             refresh_token=refresh_token, access_token=access_token, expires_in=3600
         ),
         status=status.HTTP_200_OK,
@@ -164,7 +162,7 @@ def test_create_edx_user(user, settings, application, access_token_count):
     responses.add(
         responses.POST,
         f"{settings.OPENEDX_API_BASE_URL}/user_api/v1/account/registration/",
-        json=dict(success=True),
+        json=dict(success=True),  # noqa: C408
         status=status.HTTP_200_OK,
     )
 
@@ -208,7 +206,7 @@ def test_create_edx_user_conflict(settings, user):
     responses.add(
         responses.POST,
         f"{settings.OPENEDX_API_BASE_URL}/user_api/v1/account/registration/",
-        json=dict(username="exists"),
+        json=dict(username="exists"),  # noqa: C408
         status=status.HTTP_409_CONFLICT,
     )
     responses.add(
@@ -230,7 +228,7 @@ def test_create_edx_auth_token(settings, user, create_token_responses):
     create_edx_auth_token(user)
 
     assert len(responses.calls) == 4
-    assert dict(parse_qsl(responses.calls[3].request.body)) == dict(
+    assert dict(parse_qsl(responses.calls[3].request.body)) == dict(  # noqa: C408
         code=create_token_responses.code,
         grant_type="authorization_code",
         client_id=settings.OPENEDX_API_CLIENT_ID,
@@ -279,7 +277,7 @@ def test_update_edx_user_email(settings, user):
     responses.add(
         responses.POST,
         f"{settings.OPENEDX_API_BASE_URL}/user_api/v1/account/registration/",
-        json=dict(success=True),
+        json=dict(success=True),  # noqa: C408
         status=status.HTTP_200_OK,
     )
 
@@ -342,7 +340,7 @@ def test_get_valid_edx_api_auth_expired(settings, update_token_response):
 
     assert updated_auth is not None
     assert len(responses.calls) == 1
-    assert dict(parse_qsl(responses.calls[0].request.body)) == dict(
+    assert dict(parse_qsl(responses.calls[0].request.body)) == dict(  # noqa: C408
         refresh_token=auth.refresh_token,
         grant_type="refresh_token",
         client_id=settings.OPENEDX_API_CLIENT_ID,
@@ -361,7 +359,7 @@ def test_get_valid_edx_api_auth_expired(settings, update_token_response):
 @freeze_time("2019-03-24 11:50:36")
 def test_get_valid_edx_api_auth_expired_and_broken(
     settings,
-    update_token_response_error,  # pylint:disable=unused-argument
+    update_token_response_error,
     create_token_responses,
 ):
     """Tests get_valid_edx_api_auth fetches and creates new auth credentials if expired/broken"""
@@ -371,7 +369,7 @@ def test_get_valid_edx_api_auth_expired_and_broken(
 
     assert updated_auth is not None
     assert len(responses.calls) == 5
-    assert dict(parse_qsl(responses.calls[0].request.body)) == dict(
+    assert dict(parse_qsl(responses.calls[0].request.body)) == dict(  # noqa: C408
         refresh_token=auth.refresh_token,
         grant_type="refresh_token",
         client_id=settings.OPENEDX_API_CLIENT_ID,
@@ -507,7 +505,7 @@ def test_enroll_pro_unknown_fail(mocker, user, settings):
     )
     mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
     course_run = CourseRunFactory.build()
-    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"
+    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
 
     with pytest.raises(UnknownEdxApiEnrollException):
         enroll_in_edx_course_runs(user, [course_run])
@@ -552,7 +550,8 @@ def test_retry_failed_edx_enrollments(mocker, exception_raised):
     "mode", [EDX_ENROLLMENT_PRO_MODE, EDX_ENROLLMENT_AUDIT_MODE, "other"]
 )
 @pytest.mark.parametrize(
-    "edx_enrollment_exists, is_active", [[False, False], [True, True], [True, False]]
+    "edx_enrollment_exists, is_active",  # noqa: PT006
+    [[False, False], [True, True], [True, False]],  # noqa: PT007
 )
 def test_retry_failed_edx_enrollments_exists(
     mocker, edx_enrollment_exists, is_active, mode
@@ -627,7 +626,8 @@ def test_retry_failed_enroll_grace_period(mocker):
 
 
 @pytest.mark.parametrize(
-    "no_courseware_user,no_edx_auth", itertools.product([True, False], [True, False])
+    "no_courseware_user,no_edx_auth",  # noqa: PT006
+    itertools.product([True, False], [True, False]),
 )
 def test_repair_faulty_edx_user(mocker, user, no_courseware_user, no_edx_auth):
     """
@@ -727,11 +727,11 @@ def test_unenroll_edx_course_run(mocker):
 
 
 @pytest.mark.parametrize(
-    "client_exception_raised,expected_exception",
+    "client_exception_raised,expected_exception",  # noqa: PT006
     [
-        [MockHttpError, EdxApiEnrollErrorException],
-        [ValueError, UnknownEdxApiEnrollException],
-        [Exception, UnknownEdxApiEnrollException],
+        [MockHttpError, EdxApiEnrollErrorException],  # noqa: PT007
+        [ValueError, UnknownEdxApiEnrollException],  # noqa: PT007
+        [Exception, UnknownEdxApiEnrollException],  # noqa: PT007
     ],
 )
 def test_unenroll_edx_course_run_failure(
@@ -767,11 +767,11 @@ def test_update_user_edx_name(mocker, user):
 
 
 @pytest.mark.parametrize(
-    "client_exception_raised,expected_exception",
+    "client_exception_raised,expected_exception",  # noqa: PT006
     [
-        [MockHttpError, UserNameUpdateFailedException],
-        [ValueError, UserNameUpdateFailedException],
-        [Exception, UserNameUpdateFailedException],
+        [MockHttpError, UserNameUpdateFailedException],  # noqa: PT007
+        [ValueError, UserNameUpdateFailedException],  # noqa: PT007
+        [Exception, UserNameUpdateFailedException],  # noqa: PT007
     ],
 )
 def test_update_edx_user_name_failure(
