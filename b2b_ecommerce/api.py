@@ -33,7 +33,7 @@ def complete_b2b_order(order):
     elif order.contract_number:
         name = order.contract_number
     elif order.coupon:
-        name = order.coupon.coupon_code
+        name = f"order_{order.id} {order.coupon.coupon_code}"
     else:
         name = f"CouponPayment for order #{order.id}"
 

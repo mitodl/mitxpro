@@ -69,7 +69,6 @@ class B2BCoupon(TimestampedModel, AuditableModel):
     coupon_code = models.CharField(
         max_length=50,
         unique=True,
-        validators=[CouponUtils.validate_unique_coupon_code],
     )
     discount_percent = models.DecimalField(
         decimal_places=5,
@@ -114,6 +113,12 @@ class B2BCoupon(TimestampedModel, AuditableModel):
 
     def __str__(self):
         return f"B2BCoupon {self.coupon_code}"
+
+    def clean(self):
+        """Validate the uniqueness of the coupon code within the system."""
+        super().clean()
+        if self.coupon_code:
+            CouponUtils.validate_unique_coupon_code(self.coupon_code, instance=self)
 
 
 class B2BCouponAudit(AuditModel):

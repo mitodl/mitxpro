@@ -2,11 +2,13 @@
 from datetime import timedelta
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from b2b_ecommerce.constants import REFERENCE_NUMBER_PREFIX
-from b2b_ecommerce.factories import B2BOrderFactory
+from b2b_ecommerce.factories import B2BCouponFactory, B2BOrderFactory
 from b2b_ecommerce.models import B2BCoupon, B2BOrder, B2BOrderAudit
+from ecommerce.factories import CouponFactory
 from mitxpro.utils import serialize_model_object
 
 pytestmark = pytest.mark.django_db
@@ -121,3 +123,29 @@ def test_get_unexpired_coupon_order_fulfilled(
         assert coupon == B2BCoupon.objects.get_unexpired_coupon(
             coupon_code=coupon.coupon_code, product_id=coupon.product_id
         )
+
+
+@pytest.mark.parametrize("factory", [B2BCouponFactory, CouponFactory])
+def test_duplicate_b2b_coupon_not_allowed(factory):
+    """Verify that duplicate b2b coupons are not allowed."""
+    coupon = factory.create()
+
+    with pytest.raises(ValidationError) as cm:  # noqa: PT012
+        new_coupon = B2BCouponFactory.build(coupon_code=coupon.coupon_code)
+        new_coupon.clean()
+    assert (
+        cm.value.message_dict["coupon_code"][0]
+        == "Coupon code already exists in the platform."
+    )
+
+
+def test_edit_b2b_coupon():
+    """Verify that a B2B coupon can be successfully edited"""
+    b2b_coupon = B2BCouponFactory.create()
+    b2b_coupon.coupon_code = "b2b_coupon"
+    b2b_coupon.enabled = False
+    b2b_coupon.save()
+
+    updated_b2b_coupon = B2BCoupon.objects.get(pk=b2b_coupon.pk)
+    assert updated_b2b_coupon.coupon_code == "b2b_coupon"
+    assert not updated_b2b_coupon.enabled

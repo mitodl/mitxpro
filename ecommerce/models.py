@@ -648,7 +648,6 @@ class Coupon(TimestampedModel):
     coupon_code = models.CharField(
         max_length=50,
         unique=True,
-        validators=[CouponUtils.validate_unique_coupon_code],
     )
     payment = models.ForeignKey(CouponPayment, on_delete=models.PROTECT)
     is_global = models.BooleanField(default=False)
@@ -658,6 +657,12 @@ class Coupon(TimestampedModel):
     def __str__(self):
         """Description for Coupon"""
         return f"Coupon {self.coupon_code} for {self.payment}"
+
+    def clean(self):
+        """Validate the uniqueness of the coupon code within the system."""
+        super().clean()
+        if self.coupon_code:
+            CouponUtils.validate_unique_coupon_code(self.coupon_code, instance=self)
 
 
 class CouponVersion(TimestampedModel):
