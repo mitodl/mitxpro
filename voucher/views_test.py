@@ -1,7 +1,6 @@
 """
 Test voucher views.py
 """
-import json
 from urllib.parse import urljoin
 
 import pytest

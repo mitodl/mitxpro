@@ -1,5 +1,4 @@
 """Tests for utils.py"""
-import difflib
 import json
 import re
 from datetime import datetime, timezone
