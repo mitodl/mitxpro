@@ -128,10 +128,10 @@ def test_get_unexpired_coupon_order_fulfilled(
 @pytest.mark.parametrize("factory", [B2BCouponFactory, CouponFactory])
 def test_duplicate_b2b_coupon_not_allowed(factory):
     """Verify that duplicate b2b coupons are not allowed."""
-    coupon1 = factory.create()
+    coupon = factory.create()
 
     with pytest.raises(ValidationError) as cm:  # noqa: PT012
-        new_coupon = B2BCouponFactory.build(coupon_code=coupon1.coupon_code)
+        new_coupon = B2BCouponFactory.build(coupon_code=coupon.coupon_code)
         new_coupon.clean()
     assert (
         cm.value.message_dict["coupon_code"][0]

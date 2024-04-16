@@ -299,10 +299,10 @@ def test_reference_number(settings):
 @pytest.mark.parametrize("factory", [CouponFactory, B2BCouponFactory])
 def test_duplicate_coupon_not_allowed(factory):
     """Verify that duplicate coupons are not allowed."""
-    coupon1 = factory.create()
+    coupon = factory.create()
 
     with pytest.raises(ValidationError) as cm:  # noqa: PT012
-        new_coupon = CouponFactory.build(coupon_code=coupon1.coupon_code)
+        new_coupon = CouponFactory.build(coupon_code=coupon.coupon_code)
         new_coupon.clean()
     assert (
         cm.value.message_dict["coupon_code"][0]
