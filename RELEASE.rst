@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.145.0 (Released April 16, 2024)
+---------------
+
+- feat: add ruff (#2865)
+- fix(deps): update dependency djangorestframework to v3.15.1
+- fix(deps): update dependency django-storages to v1.14.2
+- fix(deps): update dependency wagtail to v5.2.4
+- fix(deps): update dependency boto3 to v1.34.84
+- chore(deps): bump browserify-sign from 4.2.1 to 4.2.3 (#2944)
+
 Version 0.144.0 (Released April 09, 2024)
 ---------------
 
