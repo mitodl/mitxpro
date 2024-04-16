@@ -7,8 +7,8 @@ from django.utils import timezone
 
 from b2b_ecommerce.constants import REFERENCE_NUMBER_PREFIX
 from b2b_ecommerce.factories import B2BOrderFactory, B2BCouponFactory
-from ecommerce.factories import CouponFactory
 from b2b_ecommerce.models import B2BCoupon, B2BOrder, B2BOrderAudit
+from ecommerce.factories import CouponFactory
 from mitxpro.utils import serialize_model_object
 
 pytestmark = pytest.mark.django_db
@@ -130,7 +130,7 @@ def test_duplicate_b2b_coupon_not_allowed(factory):
     """Verify that duplicate b2b coupons are not allowed."""
     coupon1 = factory.create()
 
-    with pytest.raises(ValidationError) as cm:
+    with pytest.raises(ValidationError) as cm:  # noqa: PT011
         new_coupon = B2BCouponFactory.build(coupon_code=coupon1.coupon_code)
         new_coupon.clean()
     assert (
