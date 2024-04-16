@@ -1,7 +1,9 @@
 """Tests for ecommerce models"""
 import pytest
+from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 
+from b2b_ecommerce.factories import B2BCouponFactory
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
 from courses.factories import CourseFactory, CourseRunFactory, ProgramFactory
 from ecommerce.api import (
@@ -10,6 +12,7 @@ from ecommerce.api import (
 )
 from ecommerce.constants import REFERENCE_NUMBER_PREFIX
 from ecommerce.factories import (
+    CouponFactory,
     CouponPaymentVersionFactory,
     CouponRedemptionFactory,
     CouponVersionFactory,
@@ -18,7 +21,7 @@ from ecommerce.factories import (
     ProductFactory,
     ProductVersionFactory,
 )
-from ecommerce.models import OrderAudit
+from ecommerce.models import Coupon, OrderAudit
 from mitxpro.utils import serialize_model_object
 from users.factories import UserFactory
 
@@ -291,3 +294,27 @@ def test_reference_number(settings):
         f"{REFERENCE_NUMBER_PREFIX}{settings.ENVIRONMENT}-{order.id}"
         == order.reference_number
     )
+
+
+@pytest.mark.parametrize("factory", [CouponFactory, B2BCouponFactory])
+def test_duplicate_coupon_not_allowed(factory):
+    """Verify that duplicate coupons are not allowed."""
+    coupon1 = factory.create()
+
+    with pytest.raises(ValidationError) as cm:
+        new_coupon = CouponFactory.build(coupon_code=coupon1.coupon_code)
+        new_coupon.clean()
+    assert (
+        cm.value.message_dict["coupon_code"][0]
+        == "Coupon code already exists in the platform."
+    )
+
+
+def test_edit_coupon():
+    """Verify that a coupon can be successfully edited"""
+    coupon = CouponFactory.create()
+
+    coupon.enabled = False
+    coupon.save()
+    updated_coupon = Coupon.objects.get(pk=coupon.pk)
+    assert not updated_coupon.enabled
