@@ -733,6 +733,7 @@ CRON_COURSE_CERTIFICATES_HOURS = get_string(
     default=0,
     description="'hours' value for the 'generate-course-certificate' scheduled task (defaults to midnight)",
 )
+
 CRON_COURSE_CERTIFICATES_DAYS = get_string(
     name="CRON_COURSE_CERTIFICATES_DAYS",
     default=None,
@@ -754,6 +755,8 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TIMEZONE = "UTC"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_SEND_SENT_EVENT = True
 RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY = get_int(
     name="RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY",
     default=60 * 30,
