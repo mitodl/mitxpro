@@ -313,8 +313,10 @@ def test_duplicate_coupon_not_allowed(factory):
 def test_edit_coupon():
     """Verify that a coupon can be successfully edited"""
     coupon = CouponFactory.create()
-
+    coupon.coupon_code = "new_coupon"
     coupon.enabled = False
     coupon.save()
+
     updated_coupon = Coupon.objects.get(pk=coupon.pk)
+    assert updated_coupon.coupon_code == "new_coupon"
     assert not updated_coupon.enabled

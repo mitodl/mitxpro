@@ -142,8 +142,10 @@ def test_duplicate_b2b_coupon_not_allowed(factory):
 def test_edit_b2b_coupon():
     """Verify that a B2B coupon can be successfully edited"""
     b2b_coupon = B2BCouponFactory.create()
-
+    b2b_coupon.coupon_code = "b2b_coupon"
     b2b_coupon.enabled = False
     b2b_coupon.save()
+
     updated_b2b_coupon = B2BCoupon.objects.get(pk=b2b_coupon.pk)
+    assert updated_b2b_coupon.coupon_code == "b2b_coupon"
     assert not updated_b2b_coupon.enabled
