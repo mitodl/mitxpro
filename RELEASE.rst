@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.145.1
+---------------
+
+- Enable fields for coupon and b2bcoupon to be editable (#2951)
+- chore(deps): bump express from 4.18.2 to 4.19.2 (#2926)
+- fix(deps): update dependency pillow to v10 [security] (#2748)
+- fix(deps): update dependency drf-flex-fields to v0.9.9
+- chore(deps): update dependency astroid to v2.15.8
+
 Version 0.145.0 (Released April 16, 2024)
 ---------------
 
