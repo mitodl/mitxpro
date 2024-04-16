@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.145.0
+Version 0.145.0 (Released April 16, 2024)
 ---------------
 
 - feat: add ruff (#2865)
